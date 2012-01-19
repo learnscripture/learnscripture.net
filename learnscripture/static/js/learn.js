@@ -3,27 +3,18 @@ var learnscripture =
          var WORD_TOGGLE_SHOW = 0;
          var WORD_TOGGLE_HIDE_END = 1;
          var WORD_TOGGLE_HIDE_ALL = 2;
+         var TEST_FRACTION = 0.2;
 
          var stage = 'read';
+         var wordList = null; // list of integers
+         var untestedWords = null;
+         var testedWords = null;
 
-         // stages: {name: [setupFunc, next stage, previous stage, word toggle mode]
-         //
-         var stages = {'read':    {setup: readStage,
-                                   next: 'recall1',
-                                   previous:  null,
-                                   toggleMode: WORD_TOGGLE_SHOW},
-                       'recall1': {setup: recall1Stage,
-                                   next: 'recall2',
-                                   previous: 'read',
-                                   toggleMode: WORD_TOGGLE_HIDE_END},
-                       'recall2': {setup: recall2Stage,
-                                   next: null,
-                                   previous: 'recall1',
-                                   toggleMode: WORD_TOGGLE_HIDE_ALL}
-                       };
-
-         var markupverse = function() {
+         var markupVerse = function() {
              var words = $('#verse').text().split(/ |\n/);
+             wordList = $.map(words, function(word, i) {
+                                  return i;
+                              });
              var replace = $.map(words, function(word, i) {
                                      var start = word.slice(0,1);
                                      var end = word.slice(1);
@@ -41,6 +32,8 @@ var learnscripture =
 
          var toggleWord = function(word) {
              moveSelection(word);
+             var wordNumber = $('.word').index(word);
+
              var wordEnd = word.find('.wordend');
              var wordStart = word.find('.wordstart');
              var toggleMode = stages[stage].toggleMode;
@@ -48,14 +41,17 @@ var learnscripture =
                  return;
              } else if (toggleMode == WORD_TOGGLE_HIDE_END) {
                  if (isHidden(wordEnd)) {
+                     markRevealed(wordNumber);
                      showWord(wordEnd);
                  } else {
                      hideWord(wordEnd);
                  }
              } else if (toggleMode == WORD_TOGGLE_HIDE_ALL) {
                  if (isHidden(wordStart)) {
+                     markRevealed(wordNumber);
                      showWord(wordStart);
                  } else if (isHidden(wordEnd)) {
+                     markRevealed(wordNumber);
                      showWord(wordEnd);
                  } else {
                      hideWord(wordStart);
@@ -85,12 +81,56 @@ var learnscripture =
              showWord($('.wordstart, .wordend'));
          };
 
-         var recall1Stage = function() {
-             hideWord($('.wordend'));
-             showWord($('.wordstart'));
+         var recall1Start = function() {
+             untestedWords = wordList.slice(0);
+             testedWords = [];
+             recall1Continue();
          };
 
-         var recall2Stage = function() {
+         var setProgress = function(stage, fraction) {
+             $('#id-progress-row-' + stage + ' progress').val(fraction * 100);
+         };
+
+         var markRevealed = function(wordNumber) {
+             var p = testedWords.indexOf(wordNumber);
+             if (p != -1) {
+                 testedWords.splice(p, 1);
+             }
+             if (untestedWords.indexOf(wordNumber) == -1) {
+                 untestedWords.push(wordNumber);
+             }
+         };
+
+         var recall1Continue = function() {
+             var i;
+             if (untestedWords.length == 0) {
+                 return false;
+             }
+
+             setProgress(stage, testedWords.length / wordList.length);
+             // Pick some words to test from untestedWords
+             var toTest = [];
+             var candidates = untestedWords.slice(0);
+             for (i=0; i < wordList.length * TEST_FRACTION; i++) {
+                 if (candidates.length == 0) {
+                     break;
+                 }
+                 var pos = Math.floor(Math.random()*candidates.length);
+                 var item = candidates[pos];
+                 toTest.push(item);
+                 testedWords.push(item);
+                 candidates.splice(pos,1);
+                 untestedWords.splice(pos,1);
+             }
+             var selector = $.map(toTest, function(elem, idx) {
+                                      return '.word:eq(' + elem.toString() + ')';
+                                      }).join(', ');
+             showWord($('.wordstart, .wordend'));
+             hideWord($(selector).find('.wordend'));
+             return true;
+         };
+
+         var recall2Start = function() {
              hideWord($('.wordstart, .wordend'));
          };
 
@@ -113,16 +153,19 @@ var learnscripture =
              $('#id-typing').val('').focus();
              $('th.currenttask').removeClass('currenttask');
              $('#id-progress-row-' + stage + ' th').addClass('currenttask');
-             $('#id-progress-row-' + stage + ' progress').val(0);
+             setProgress(stage, 0);
          };
 
          var next = function(ev) {
              var thisStage = stages[stage];
+             if (thisStage.continueStage()) {
+                 return;
+             }
              var nextStage = thisStage.next;
              if (nextStage == null) {
                  return;
              }
-             $('#id-progress-row-' + stage + ' progress').val(100);
+             setProgress(stage, 1);
              stage = nextStage;
              var stageInfo = stages[stage];
              stageInfo.setup();
@@ -196,8 +239,24 @@ var learnscripture =
              }
          };
 
+         var stages = {'read':    {setup: readStage,
+                                   continueStage: function() { return false; },
+                                   next: 'recall1',
+                                   previous:  null,
+                                   toggleMode: WORD_TOGGLE_SHOW},
+                       'recall1': {setup: recall1Start,
+                                   continueStage: recall1Continue,
+                                   next: 'recall2',
+                                   previous: 'read',
+                                   toggleMode: WORD_TOGGLE_HIDE_END},
+                       'recall2': {setup: recall2Start,
+                                   next: null,
+                                   previous: 'recall1',
+                                   toggleMode: WORD_TOGGLE_HIDE_ALL}
+                       };
+
          var start = function() {
-             markupverse();
+             markupVerse();
              $('#id-next-btn').show().click(next);
              $('#id-back-btn').show().click(back);
              $('#id-typing').keydown(keypress);
