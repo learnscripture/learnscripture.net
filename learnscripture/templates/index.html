@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>1 Peter 2:9</h2>
+
+<div id="id-instructions">
+<div class="instructions-read">
+Read the verse through (preferably aloud), and click 'Next'.
+</div>
+<div class="instructions-recall1" style="display:none;">
+Read the verse through, filling in the gaps from your memory. Click
+a word to reveal it if you can't remember.
+</div>
+</div>
+
+<div class="verse">But you are a chosen race, a royal priesthood, a holy nation,
+a people for his own possession, that you may proclaim the excellencies of him
+who called you out of darkness into his marvelous light.</div>
+
+<br/>
+
+<input type="submit" value="Back" class="btn" id="id-back-btn" style="display:none;" disabled>
+
+<input type="submit" value="Next" class="primary btn" id="id-next-btn" style="display:none;">
+
+{% endblock %}
+
+
+{% block rightcolumn %}
+<h3>Verse status</h3>
+
+<p>First view</p>
+<br/>
+<br/>
+
+<h3>Session status</h3>
+
+<p><b>Guest</b></p>
+
+<p>Your data will be safe for one week (assuming you don't clear your
+cookies)</p>
+
+<p><a href="">Create an account</a> to save progress permanently</p>
+
+{% endblock %}
