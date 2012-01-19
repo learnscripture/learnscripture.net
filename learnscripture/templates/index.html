@@ -1,21 +1,28 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>1 Peter 2:9</h2>
+<h2>Jeremiah 1:5</h2>
 
 <div id="id-instructions">
 <div class="instructions-read">
 Read the verse through (preferably aloud), and click 'Next'.
 </div>
-<div class="instructions-recall1 instructions-recall2" style="display:none;">
+<div class="instructions-recall1 instructions-recall2 instructions-recall3 instructions-recall4
+            instructions-recall5" style="display:none;">
 Read the verse through, filling in the gaps from your memory. Click
-a word to reveal it if you can't remember.
+a word to reveal it if you can't remember. 'Next' when done.
 </div>
+<div class="instructions-recall6" style="display:none;">
+No clues now! Can you still do it?
 </div>
 
-<div id="verse">But you are a chosen race, a royal priesthood, a holy nation,
-a people for his own possession, that you may proclaim the excellencies of him
-who called you out of darkness into his marvelous light.</div>
+</div>
+
+<div id="verse">
+Before I formed you in the womb I knew you,
+and before you were born I consecrated you;
+I appointed you a prophet to the nations.
+</div>
 
 <table class="condensed">
   <tr>
@@ -37,30 +44,6 @@ who called you out of darkness into his marvelous light.</div>
 
 <div class="progress">
   <table>
-    <tr id="id-progress-row-recall2" style="display:none">
-      <th>Recall 2</th>
-      <td>
-        <progress id="id-progress-recall2" value="0" max="100">
-          60%
-        </progress>
-      </td>
-    </tr>
-    <tr id="id-progress-row-recall1" style="display:none">
-      <th>Recall 1</th>
-      <td>
-        <progress id="id-progress-recall1" value="60" max="100">
-          60%
-        </progress>
-      </td>
-    </tr>
-    <tr id="id-progress-row-read">
-      <th class="currenttask">Read</th>
-      <td>
-        <progress id="id-progress-read" value="0" max="100">
-          100%
-        </progress>
-      </td>
-    </tr>
   </table>
 </div>
 

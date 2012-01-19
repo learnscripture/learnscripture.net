@@ -1,33 +1,42 @@
 var learnscripture =
     (function(pub, $) {
+         // -- Constants and globals --
          var WORD_TOGGLE_SHOW = 0;
          var WORD_TOGGLE_HIDE_END = 1;
          var WORD_TOGGLE_HIDE_ALL = 2;
-         var TEST_FRACTION = 0.2;
 
          var stage = 'read';
          var wordList = null; // list of integers
          var untestedWords = null;
          var testedWords = null;
 
-         var markupVerse = function() {
-             var words = $('#verse').text().split(/ |\n/);
-             wordList = $.map(words, function(word, i) {
-                                  return i;
-                              });
-             var replace = $.map(words, function(word, i) {
-                                     var start = word.slice(0,1);
-                                     var end = word.slice(1);
-                                     return ('<span class=\"word\">' +
-                                             '<span class="wordstart">' + start +
-                                             '</span><span class="wordend">' + end +
-                                             '</span></span>');
-                                     }).join(' ');
-             $('#verse').html(replace);
-             $('.word').click(function(ev) {
-                 toggleWord($(this));
-                 $('#id-typing').focus();
-             });
+         // word toggling and selection
+
+         var moveSelection = function(word) {
+             $('.word.selected').removeClass('selected');
+             word.addClass('selected');
+         };
+
+         var moveSelectionRelative = function(distance) {
+             var i = $('.word').index($('.word.selected'));
+             var pos = Math.min(Math.max(0, i + distance),
+                                $('.word').length - 1);
+             var word = $('.word').get(pos);
+             if (word != null) {
+                 moveSelection($(word));
+             }
+         };
+
+         var isHidden = function(word) {
+             return word.css('opacity') == '0';
+         };
+
+         var hideWord = function(word) {
+             word.animate({'opacity': '0'}, 300);
+         };
+
+         var showWord = function(word) {
+             word.animate({'opacity': '1'}, 300);
          };
 
          var toggleWord = function(word) {
@@ -60,33 +69,71 @@ var learnscripture =
              }
          };
 
-         var moveSelection = function(word) {
-             $('.word.selected').removeClass('selected');
-             word.addClass('selected');
-         };
 
-         var isHidden = function(word) {
-             return word.css('opacity') == '0';
-         };
+         // ---- Stages ----
 
-         var hideWord = function(word) {
-             word.animate({'opacity': '0'}, 300);
-         };
-
-         var showWord = function(word) {
-             word.animate({'opacity': '1'}, 300);
-         };
-
+         // -- reading stage --
          var readStage = function() {
              showWord($('.wordstart, .wordend'));
          };
 
-         var recall1Start = function() {
-             untestedWords = wordList.slice(0);
-             testedWords = [];
-             recall1Continue();
+         // recall type 1 - FullAndInitial
+         //    Some full words, some initial letters only
+
+         var makeFullAndInitialContinue = function(initialFraction) {
+             // Factory function that generates a function for
+             // FullAndInitial stage continue function
+
+             var recallContinue = function() {
+                 if (untestedWords.length == 0) {
+                     return false;
+                 }
+                 setProgress(stage, testedWords.length / wordList.length);
+                 moveSelection($('.word').first());
+                 var testWords = getTestWords(initialFraction);
+                 showWord($('.wordstart, .wordend'));
+                 hideWord(testWords.find('.wordend'));
+                 return true;
+             };
+
+             return recallContinue;
          };
 
+         // recall type 2 - InitialAndMissing
+         //    Some initial words, some missing
+
+         var makeInitialAndMissingContinue = function(missingFraction) {
+             // Factory function that generates a function for
+             // InitialAndMissing stage continue function
+
+             var recallContinue = function() {
+                 if (untestedWords.length == 0) {
+                     return false;
+                 }
+                 setProgress(stage, testedWords.length / wordList.length);
+                 moveSelection($('.word').first());
+                 var testWords = getTestWords(missingFraction);
+                 hideWord($('.wordend'));
+                 showWord($('.wordstart'));
+                 hideWord(testWords.find('.wordstart'));
+                 return true;
+             };
+
+             return recallContinue;
+         };
+
+         var makeRecallStart = function(continueFunc) {
+             // Factory function that returns a stage starter
+             // function for recall stages
+             return function() {
+                 untestedWords = wordList.slice(0);
+                 testedWords = [];
+                 continueFunc();
+             };
+
+         };
+
+         // Utilities for stages
          var setProgress = function(stage, fraction) {
              $('#id-progress-row-' + stage + ' progress').val(fraction * 100);
          };
@@ -101,60 +148,104 @@ var learnscripture =
              }
          };
 
-         var recall1Continue = function() {
+         var chooseN = function(aList, n) {
+             aList = aList.slice(0);
              var i;
-             if (untestedWords.length == 0) {
-                 return false;
-             }
-
-             setProgress(stage, testedWords.length / wordList.length);
-             // Pick some words to test from untestedWords
-             var toTest = [];
-             var candidates = untestedWords.slice(0);
-             for (i=0; i < wordList.length * TEST_FRACTION; i++) {
-                 if (candidates.length == 0) {
+             var chosen = [];
+             for(i = 0; i < n; i++) {
+                 if (aList.length == 0) {
                      break;
                  }
-                 var pos = Math.floor(Math.random()*candidates.length);
-                 var item = candidates[pos];
-                 toTest.push(item);
-                 testedWords.push(item);
-                 candidates.splice(pos,1);
-                 untestedWords.splice(pos,1);
+                 var pos = Math.floor(Math.random()*aList.length);
+                 var item = aList[pos];
+                 aList.splice(pos, 1);
+                 chosen.push(item);
              }
+             return chosen;
+         };
+
+         var setUnion = function(list1, list2) {
+             var output = list1.slice(0);
+             for (var i = 0; i < list2.length; i++) {
+                 var item = list2[i];
+                 if (output.indexOf(item) == -1) {
+                     output.push(item);
+                 }
+             }
+             return output;
+         };
+
+         var setRemove = function(list1, list2) {
+             // Return a new list which is a copy of list1 with the items
+             // of list2 removed
+             var output = list1.slice(0);
+             for (var i = 0; i < list2.length; i++) {
+                 var p = output.indexOf(list2[i]);
+                 if (p != -1) {
+                     output.splice(p, 1);
+                 }
+             }
+             return output;
+         };
+
+         var getTestWords = function(testFraction) {
+             // Moves testFraction fraction of words from
+             // untestedWords for next test, for the next test
+             // and return a jQuery objects for the words
+             // that are to be tested.
+             // Pick some words to test from untestedWords
+             var i;
+             var toTest = [];
+             var testCount = Math.floor(wordList.length * testFraction);
+             // Try to test the ones in untestedWords first.
+             toTest = chooseN(untestedWords, testCount);
+             if (toTest.length < testCount) {
+                 // But if these are fewer than the fraction we are
+                 // supposed to be testing, use others that
+                 // have already been tested.
+                 var reTest = chooseN(testedWords, testCount - toTest.length);
+                 toTest = setUnion(reTest, toTest);
+             }
+             untestedWords = setRemove(untestedWords, toTest);
+             // NB this must come after the chooseN(testedWords) above.
+             testedWords = setUnion(testedWords, toTest);
              var selector = $.map(toTest, function(elem, idx) {
                                       return '.word:eq(' + elem.toString() + ')';
                                       }).join(', ');
-             showWord($('.wordstart, .wordend'));
-             hideWord($(selector).find('.wordend'));
-             return true;
-         };
-
-         var recall2Start = function() {
-             hideWord($('.wordstart, .wordend'));
-         };
-
-         var enableBtn = function(btn, state) {
-             if (state) {
-                 btn.removeAttr('disabled');
-             } else {
-                 btn.attr('disabled', 'disabled');
-             }
+             return $(selector);
          };
 
          var setStageState = function() { var stageInfo = stages[stage];
              enableBtn($('#id-next-btn'), stageInfo.next != null);
              enableBtn($('#id-back-btn'), stageInfo.previous != null);
-             $('#id-instructions div').animate({opacity: 0}, {duration: 150,
-             complete: function() { $('#id-instructions div').hide();
-             $('#id-instructions .instructions-' +
-             stage).show().animate({opacity: 1}, 150); }});
+             // Fade out old instructions, fade in the new
+             $('#id-instructions div').animate(
+                 {opacity: 0},
+                 {duration: 150,
+                  complete: function() {
+                      $('#id-instructions div').hide();
+                      $('#id-instructions .instructions-' + stage).show().animate({opacity: 1}, 150); }});
+             // reset selected word
              moveSelection($('.word').first());
              $('#id-typing').val('').focus();
-             $('th.currenttask').removeClass('currenttask');
-             $('#id-progress-row-' + stage + ' th').addClass('currenttask');
+
+             // Create progress bar for this stage.
+             var progressRowId = 'id-progress-row-' + stage;
+             if (!document.getElementById(progressRowId)) {
+                 var progressRow = (
+                     '<tr id="id-progress-row-' + stage + '">' +
+                     '<th>' + stageInfo.caption + '</th>' +
+                     '<td><progress value="0" max="100">0%</progress>' +
+                     '</td></tr>');
+                 $('.progress table').prepend(progressRow);
+
+             }
              setProgress(stage, 0);
+             $('th.currenttask').removeClass('currenttask');
+             $('#' + progressRowId + ' th').addClass('currenttask');
          };
+
+         // -- Moving between stages --
 
          var next = function(ev) {
              var thisStage = stages[stage];
@@ -169,7 +260,6 @@ var learnscripture =
              stage = nextStage;
              var stageInfo = stages[stage];
              stageInfo.setup();
-             $('#id-progress-row-' + stage).show(300);
              setStageState();
          };
 
@@ -179,22 +269,22 @@ var learnscripture =
              if (previousStage == null) {
                  return;
              }
-             $('#id-progress-row-' + stage).hide();
+             $('#id-progress-row-' + stage).remove();
              stage = previousStage;
              var stageInfo = stages[stage];
              stageInfo.setup();
              setStageState();
          };
 
-         var moveSelectionRelative = function(distance) {
-             var i = $('.word').index($('.word.selected'));
-             var pos = Math.min(Math.max(0, i + distance),
-                                $('.word').length - 1);
-             var word = $('.word').get(pos);
-             if (word != null) {
-                 moveSelection($(word));
+         var enableBtn = function(btn, state) {
+             if (state) {
+                 btn.removeAttr('disabled');
+             } else {
+                 btn.attr('disabled', 'disabled');
              }
          };
+
+         // -- event handlers --
 
          var keypress = function(ev) {
              if (ev.ctrlKey && ev.which == 37) {
@@ -239,21 +329,75 @@ var learnscripture =
              }
          };
 
+         // Stages definition
+
+         // Full and initial
+         var recall1Continue = makeFullAndInitialContinue(0.25);
+         var recall1Start = makeRecallStart(recall1Continue);
+
+         var recall2Continue = makeFullAndInitialContinue(0.5);
+         var recall2Start = makeRecallStart(recall2Continue);
+
+         var recall3Continue = makeFullAndInitialContinue(0.75);
+         var recall3Start = makeRecallStart(recall3Continue);
+
+         // initial and missing
+         var recall4Continue = makeInitialAndMissingContinue(0.33);
+         var recall4Start = makeRecallStart(recall4Continue);
+
+         var recall5Continue = makeInitialAndMissingContinue(0.66);
+         var recall5Start = makeRecallStart(recall5Continue);
+
+         var recall6Continue = makeInitialAndMissingContinue(1);
+         var recall6Start = makeRecallStart(recall6Continue);
+
+
          var stages = {'read':    {setup: readStage,
                                    continueStage: function() { return false; },
                                    next: 'recall1',
                                    previous:  null,
+                                   caption: 'Read',
                                    toggleMode: WORD_TOGGLE_SHOW},
                        'recall1': {setup: recall1Start,
                                    continueStage: recall1Continue,
                                    next: 'recall2',
                                    previous: 'read',
+                                   caption: 'Recall 1 - 25% initial',
                                    toggleMode: WORD_TOGGLE_HIDE_END},
                        'recall2': {setup: recall2Start,
-                                   next: null,
+                                   continueStage: recall2Continue,
+                                   next: 'recall3',
                                    previous: 'recall1',
+                                   caption: 'Recall 2 - 50% initial',
+                                   toggleMode: WORD_TOGGLE_HIDE_END},
+                       'recall3': {setup: recall3Start,
+                                   continueStage: recall3Continue,
+                                   next: 'recall4',
+                                   previous: 'recall2',
+                                   caption: 'Recall 3 - 75% initial',
+                                   toggleMode: WORD_TOGGLE_HIDE_END},
+                       'recall4': {setup: recall4Start,
+                                   continueStage: recall4Continue,
+                                   next: 'recall5',
+                                   previous: 'recall3',
+                                   caption: 'Recall 4 - 33% missing',
+                                   toggleMode: WORD_TOGGLE_HIDE_ALL},
+                       'recall5': {setup: recall5Start,
+                                   continueStage: recall5Continue,
+                                   next: 'recall6',
+                                   previous: 'recall4',
+                                   caption: 'Recall 5 - 66% missing',
+                                   toggleMode: WORD_TOGGLE_HIDE_ALL},
+                       'recall6': {setup: recall6Start,
+                                   continueStage: recall6Continue,
+                                   next: null,
+                                   previous: 'recall5',
+                                   caption: 'Recall 6 - 100% missing',
                                    toggleMode: WORD_TOGGLE_HIDE_ALL}
                        };
+
+
+         // setup and wiring
 
          var start = function() {
              markupVerse();
@@ -262,6 +406,27 @@ var learnscripture =
              $('#id-typing').keydown(keypress);
              setStageState();
          };
+
+         var markupVerse = function() {
+             var words = $('#verse').text().trim().split(/ |\n/);
+             wordList = $.map(words, function(word, i) {
+                                  return i;
+                              });
+             var replace = $.map(words, function(word, i) {
+                                     var start = word.slice(0,1);
+                                     var end = word.slice(1);
+                                     return ('<span class=\"word\">' +
+                                             '<span class="wordstart">' + start +
+                                             '</span><span class="wordend">' + end +
+                                             '</span></span>');
+                                     }).join(' ');
+             $('#verse').html(replace);
+             $('.word').click(function(ev) {
+                 toggleWord($(this));
+                 $('#id-typing').focus();
+             });
+         };
+
          pub.start = start;
          return pub;
 
