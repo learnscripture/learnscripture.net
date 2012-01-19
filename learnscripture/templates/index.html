@@ -17,7 +17,16 @@ a word to reveal it if you can't remember.
 a people for his own possession, that you may proclaim the excellencies of him
 who called you out of darkness into his marvelous light.</div>
 
-<p>Input: <input type="text" value="" id="id-typing" size="10" style="width:10em;"> Arrows move word. Enter toggles word. Esc clears input</p>
+<table class="condensed">
+  <tr>
+    <td>
+      Input: <input type="text" value="" id="id-typing" size="10" style="width:10em;">
+    </td>
+    <td><b>Arrows</b> move word. <b>Enter</b> toggles word. <b>Esc</b> clears input.<br/>
+    <b>Ctrl+Right</b> - Next stage. <b>Ctrl+Left</b> - Back</td>
+  </tr>
+</table>
+
 <br/>
 <input type="submit" value="Back" class="btn" id="id-back-btn" style="display:none;" disabled>
 
@@ -28,27 +37,27 @@ who called you out of darkness into his marvelous light.</div>
 
 <div class="progress">
   <table>
-    <tr>
-      <th>Read</th>
+    <tr id="id-progress-row-recall2" style="display:none">
+      <th>Recall 2</th>
       <td>
-        <progress id="id-progress-read" value="1" max="1">
-          100%
+        <progress id="id-progress-recall2" value="0" max="100">
+          60%
         </progress>
       </td>
     </tr>
-    <tr>
-      <th class="currenttask">Recall 1</th>
+    <tr id="id-progress-row-recall1" style="display:none">
+      <th>Recall 1</th>
       <td>
         <progress id="id-progress-recall1" value="60" max="100">
           60%
         </progress>
       </td>
     </tr>
-    <tr>
-      <th>Recall 2</th>
+    <tr id="id-progress-row-read">
+      <th class="currenttask">Read</th>
       <td>
-        <progress id="id-progress-recall2" value="0" max="100">
-          60%
+        <progress id="id-progress-read" value="0" max="100">
+          100%
         </progress>
       </td>
     </tr>

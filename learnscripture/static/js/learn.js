@@ -4,6 +4,24 @@ var learnscripture =
          var WORD_TOGGLE_HIDE_END = 1;
          var WORD_TOGGLE_HIDE_ALL = 2;
 
+         var stage = 'read';
+
+         // stages: {name: [setupFunc, next stage, previous stage, word toggle mode]
+         //
+         var stages = {'read':    {setup: readStage,
+                                   next: 'recall1',
+                                   previous:  null,
+                                   toggleMode: WORD_TOGGLE_SHOW},
+                       'recall1': {setup: recall1Stage,
+                                   next: 'recall2',
+                                   previous: 'read',
+                                   toggleMode: WORD_TOGGLE_HIDE_END},
+                       'recall2': {setup: recall2Stage,
+                                   next: null,
+                                   previous: 'recall1',
+                                   toggleMode: WORD_TOGGLE_HIDE_ALL}
+                       };
+
          var markupverse = function() {
              var words = $('#verse').text().split(/ |\n/);
              var replace = $.map(words, function(word, i) {
@@ -67,8 +85,6 @@ var learnscripture =
              showWord($('.wordstart, .wordend'));
          };
 
-         var testedWords = [];
-
          var recall1Stage = function() {
              hideWord($('.wordend'));
              showWord($('.wordstart'));
@@ -78,26 +94,6 @@ var learnscripture =
              hideWord($('.wordstart, .wordend'));
          };
 
-         var stage = 'read';
-
-         // stages: {name: [setupFunc, next stage, previous stage, word toggle mode]
-         //
-         var stages = {'read':    {setup: readStage,
-                                   next: 'recall1',
-                                   previous:  null,
-                                   toggleMode: WORD_TOGGLE_SHOW},
-                       'recall1': {setup: recall1Stage,
-                                   next: 'recall2',
-                                   previous: 'read',
-                                   toggleMode: WORD_TOGGLE_HIDE_END},
-                       'recall2': {setup: recall2Stage,
-                                   next: null,
-                                   previous: 'recall1',
-                                   toggleMode: WORD_TOGGLE_HIDE_ALL}
-                       };
-
-         var revealClicks = 0;
-
          var enableBtn = function(btn, state) {
              if (state) {
                  btn.removeAttr('disabled');
@@ -106,31 +102,44 @@ var learnscripture =
              }
          };
 
-         var setStageState = function() {
-             var stageInfo = stages[stage];
+         var setStageState = function() { var stageInfo = stages[stage];
              enableBtn($('#id-next-btn'), stageInfo.next != null);
              enableBtn($('#id-back-btn'), stageInfo.previous != null);
-             $('#id-instructions div').animate({opacity: 0}, {duration: 300, complete: function() {
-                 $('#id-instructions div').hide();
-                 $('#id-instructions .instructions-' + stage).show().animate({opacity: 1}, 300);
-             }});
+             $('#id-instructions div').animate({opacity: 0}, {duration: 150,
+             complete: function() { $('#id-instructions div').hide();
+             $('#id-instructions .instructions-' +
+             stage).show().animate({opacity: 1}, 150); }});
              moveSelection($('.word').first());
              $('#id-typing').val('').focus();
+             $('th.currenttask').removeClass('currenttask');
+             $('#id-progress-row-' + stage + ' th').addClass('currenttask');
+             $('#id-progress-row-' + stage + ' progress').val(0);
          };
 
          var next = function(ev) {
              var thisStage = stages[stage];
-             stage = thisStage.next;
-             var nextStage = stages[stage];
-             nextStage.setup();
+             var nextStage = thisStage.next;
+             if (nextStage == null) {
+                 return;
+             }
+             $('#id-progress-row-' + stage + ' progress').val(100);
+             stage = nextStage;
+             var stageInfo = stages[stage];
+             stageInfo.setup();
+             $('#id-progress-row-' + stage).show(300);
              setStageState();
          };
 
          var back = function(ev) {
              var thisStage = stages[stage];
-             stage = thisStage.previous;
-             var previousStage = stages[stage];
-             previousStage.setup();
+             var previousStage = thisStage.previous;
+             if (previousStage == null) {
+                 return;
+             }
+             $('#id-progress-row-' + stage).hide();
+             stage = previousStage;
+             var stageInfo = stages[stage];
+             stageInfo.setup();
              setStageState();
          };
 
@@ -145,8 +154,14 @@ var learnscripture =
          };
 
          var keypress = function(ev) {
-             if (ev.which == 20) {
+             if (ev.ctrlKey && ev.which == 37) {
                  ev.preventDefault();
+                 back();
+                 return;
+             }
+             if (ev.ctrlKey && ev.which == 39) {
+                 ev.preventDefault();
+                 next();
                  return;
              }
              if (ev.which == 27) {
@@ -164,7 +179,7 @@ var learnscripture =
                  moveSelectionRelative(-1);
                  return;
              }
-             if (ev.which == 39) {
+             if (ev.which == 39 || ev.which == 32) {
                  ev.preventDefault();
                  moveSelectionRelative(1);
                  return;
