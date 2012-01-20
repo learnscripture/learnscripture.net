@@ -408,19 +408,31 @@ var learnscripture =
          };
 
          var markupVerse = function() {
-             var words = $('#verse').text().trim().split(/ |\n/);
-             wordList = $.map(words, function(word, i) {
-                                  return i;
-                              });
-             var replace = $.map(words, function(word, i) {
-                                     var start = word.slice(0,1);
-                                     var end = word.slice(1);
-                                     return ('<span class=\"word\">' +
-                                             '<span class="wordstart">' + start +
-                                             '</span><span class="wordend">' + end +
-                                             '</span></span>');
-                                     }).join(' ');
-             $('#verse').html(replace);
+             var wordGroups = [];
+
+             $('#verse .line').each(function(idx, elem) {
+                                                   wordGroups.push($(elem).text().trim().split(/ |\n/));
+                                           });
+             wordList = [];
+             var replacement = [];
+             var wordNumber = 0;
+             for(var i = 0; i < wordGroups.length; i++) {
+                 var group = wordGroups[i];
+                 $.each(group, function(j, word) {
+                            wordList.push(wordNumber);
+                            wordNumber++;
+                        });
+                 var replace = $.map(group, function(word, j) {
+                                         var start = word.slice(0,1);
+                                         var end = word.slice(1);
+                                         return ('<span class=\"word\">' +
+                                                 '<span class="wordstart">' + start +
+                                                 '</span><span class="wordend">' + end +
+                                                 '</span></span>');
+                                         }).join(' ');
+                 replacement.push(replace);
+             }
+             $('#verse').html(replacement.join('<br/>'));
              $('.word').click(function(ev) {
                  toggleWord($(this));
                  $('#id-typing').focus();
