@@ -33,12 +33,19 @@ class Account(models.Model):
         return self.email
 
 
+class IdentityManager(models.Manager):
+    def get_query_set(self):
+        return super(IdentityManager, self).get_query_set().select_related('default_bible_version')
+
+
 class Identity(models.Model):
     account = models.OneToOneField(Account, null=True, blank=True, default=None)
     date_created = models.DateTimeField(default=timezone.now)
 
     # Preferences
     default_bible_version = models.ForeignKey(BibleVersion, null=True, blank=True)
+
+    objects = IdentityManager()
 
     class Meta:
         verbose_name_plural = 'identities'
