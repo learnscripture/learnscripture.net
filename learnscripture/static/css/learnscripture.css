@@ -93,7 +93,7 @@ footer {
 }
 
 .word {
-    border: 1px solid #c0c0c0;
+    border: 2px solid #c0c0c0;
     border-radius: 3px;
     padding: 3px 4px;
     margin: 2px;
@@ -136,6 +136,23 @@ footer {
     );
 }
 
+.word.correct {
+    border-color: #00D000;
+}
+
+.word.incorrect {
+    border-color: red;
+}
+
+#id-testing-status.correct {
+    color: #00A113;
+    font-weight: bold;
+}
+
+#id-testing-status.incorrect {
+    color: #A10000;
+    font-weight: bold;
+}
 
 .progress progress {
     width: 200px;
