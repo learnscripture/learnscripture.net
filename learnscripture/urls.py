@@ -5,7 +5,10 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
+                       url(r'^start/$', 'learnscripture.views.start', name='start'),
+                       url(r'^choose/$', 'learnscripture.views.choose', name='choose'),
                        url(r'^learn/$', 'learnscripture.views.learn', name='learn'),
+                       url(r'^preferences/$', 'learnscripture.views.preferences', name='preferences'),
                        (r'^admin/fiber/', include('fiber.admin_urls')),
                        (r'^api/v1/', include('fiber.api.urls')),
                        (r'^jsi18n/$', 'django.views.i18n.javascript_catalog', {'packages': ('fiber',),}),
