@@ -1,3 +1,5 @@
+// Learning and testing functionality for learnscripture.net
+
 var learnscripture =
     (function(pub, $) {
          // Controls
@@ -9,6 +11,7 @@ var learnscripture =
          var WORD_TOGGLE_HIDE_ALL = 2;
          var TESTING_MAX_ATTEMPTS = 3;
 
+         // Initial state
          var stage = 'read';
          var wordList = null; // list of integers
          var untestedWords = null;
@@ -119,8 +122,13 @@ var learnscripture =
 
          var matchWord = function(target, typed) {
              typed = stripPunctuation(typed);
-             // First approx - no spell correction:
-             return typed == target;
+             if (typed == "") return false;
+             // for 1 letter words, don't allow any mistakes
+             if (target.length == 1) {
+                 return typed == target;
+             }
+             // After that, allow N/3 mistakes, rounded up.
+             return levenshteinDistance(target, typed) <= Math.ceil(target.length / 3);
          };
 
          var checkCurrentWord = function() {
@@ -503,8 +511,9 @@ var learnscripture =
                        'testFull': {setup: testFullStart,
                                     continueStage: testFullContinue,
                                     next: null,
+                                    previous: 'recall6',
                                     caption: 'Full test',
-                                    toggleMode: WORD_TOGGLE_HIDE_ALL}
+                                    toggleMode: null}
                        };
 
 
@@ -559,8 +568,62 @@ var learnscripture =
 })(learnscripture || {}, $);
 
 
+
+/*
+
+Copyright (c) 2006. All Rights reserved.
+If you use this script, please email me and let me know, thanks!
+
+Andrew Hedges
+andrew (at) hedges (dot) name
+
+If you want to hire me to write JavaScript for you, see my resume.
+http://andrew.hedges.name/resume/
+
+*/
+
+// calculate the Levenshtein distance between a and b
+var levenshteinDistance = function(a, b) {
+    var cost;
+
+    var m = a.length;
+    var n = b.length;
+
+    // make sure a.length >= b.length to use O(min(n,m)) space, whatever that is
+    if (m < n) {
+        var c=a;a=b;b=c;
+        var o=m;m=n;n=o;
+    }
+
+    var r = new Array();
+    r[0] = new Array();
+    for (var c = 0; c < n+1; c++) {
+        r[0][c] = c;
+    }
+
+    for (var i = 1; i < m+1; i++) {
+        r[i] = new Array();
+        r[i][0] = i;
+        for (var j = 1; j < n+1; j++) {
+            cost = (a.charAt(i-1) == b.charAt(j-1))? 0: 1;
+            r[i][j] = min3(r[i-1][j]+1,r[i][j-1]+1,r[i-1][j-1]+cost);
+        }
+    }
+
+    return r[m][n];
+};
+
+// return the smallest of the three values passed in
+var min3 = function(x,y,z) {
+	if (x < y && x < z) return x;
+	if (y < x && y < z) return y;
+	return z;
+};
+
+
 $(document).ready(function() {
     learnscripture.start();
 });
+
 
 
