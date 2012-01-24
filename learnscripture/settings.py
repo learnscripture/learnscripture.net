@@ -14,17 +14,9 @@ SRC_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # ../
 PROJECT_DIR = os.path.dirname(SRC_DIR)
 WEBAPP_DIR = os.path.dirname(PROJECT_DIR)
 
+from .settings_priv import SECRET_KEY
 if LIVEBOX:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'cciw_learnscripture',
-            'USER': 'cciw_learnscripture',
-            'PASSWORD': '?',
-            'HOST': '',
-            'PORT': '',
-        }
-    }
+    from .settings_priv import DATABASES, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
 else:
     DATABASES = {
         'default': {
@@ -37,11 +29,14 @@ else:
         }
     }
 
-ADMINS = (
-    # ('Your Name', 'your_email@example.com'),
-)
+ADMINS = [
+    ('', 'admin@learnscripture.net')
+]
 
 MANAGERS = ADMINS
+
+SERVER_EMAIL = 'website@learnscripture.net'
+DEFAULT_FROM_EMAIL = SERVER_EMAIL
 
 TIME_ZONE = 'Europe/London'
 LANGUAGE_CODE = 'en-gb'
@@ -64,29 +59,19 @@ STATIC_URL = '/static/'
 ADMIN_MEDIA_PREFIX = '/static/admin/'
 
 
-# Additional locations of static files
-STATICFILES_DIRS = (
-    # Put strings here, like "/home/html/static" or "C:/www/django/static".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-)
+STATICFILES_DIRS = []
 
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
-
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = '_#slsx+fe6o6&amp;9v*1r@hl43l0r%n#88m-kqy28h&amp;x#uvwo%u&amp;&amp;'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -103,11 +88,7 @@ ROOT_URLCONF = 'learnscripture.urls'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'learnscripture.wsgi.application'
 
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-)
+TEMPLATE_DIRS = []
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -121,11 +102,6 @@ INSTALLED_APPS = (
     'learnscripture',
 )
 
-# A sample logging configuration. The only tangible logging
-# performed by this configuration is to send an email to
-# the site admins on every HTTP 500 error when DEBUG=False.
-# See http://docs.djangoproject.com/en/dev/topics/logging for
-# more details on how to customize your logging configuration.
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
