@@ -1,3 +1,4 @@
 psycopg2==2.4.2
 south
+-e hg+https://bitbucket.org/spookylukey/django/@ef12db277c22#egg=django
 
