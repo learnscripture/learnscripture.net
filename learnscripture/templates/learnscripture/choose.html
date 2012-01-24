@@ -1,0 +1,45 @@
+{% extends "base_twocol.html" %}
+
+{% load pagination_tags %}
+
+{% block title %}
+Choose verses
+{% endblock %}
+
+{% block page_title %}
+Choose verses
+{% endblock %}
+
+{% block leftcolumn %}
+<p>Choose a set of verses to start learning:</p>
+
+
+<h2>Verse sets</h2>
+{% autopaginate verse_sets 10 %}
+
+{% paginate %}
+
+{% for vs in verse_sets %}
+<div class="verseset">
+  <form action="" method="POST">
+  {% csrf_token %}
+  <input type="hidden" name="verseset_id" value="{{ vs.id }}">
+  <input type="submit" class="btn primary" value="Learn">
+  </form>
+  <h3>{{ vs.name }}</h3>
+  {% if vs.description %}
+  <p>{{ vs.description }}</p>
+  {% endif %}
+  {% if vs.verse_choices.all %}
+    <p>Includes the following verses:
+    {% for v in vs.verse_choices.all %}
+      {{ v.reference }}{% if not forloop.last %}, {% endif %}
+    {% endfor %}
+    </p>
+  {% endif %}
+</div>
+
+{% endfor %}
+
+
+{% endblock %}

@@ -5,6 +5,8 @@ from django.shortcuts import render
 from django.utils.http import urlparse
 
 from accounts.forms import PreferencesForm
+from bibleverses.models import VerseSet
+from learnscripture import session
 
 from .decorators import require_identity, require_preferences
 
@@ -45,6 +47,32 @@ def get_next(request, default_url):
     return HttpResponseRedirect(default_url)
 
 
+@require_identity
+def start(request):
+    if not request.identity.verse_statuses.exists():
+        # The only possible thing is to choose some verses
+        return HttpResponseRedirect(reverse('choose'))
 
-start = lambda: None
-choose = lambda: None
+    # TODO
+
+@require_preferences
+def choose(request):
+    """
+    Choose a verse or verse set
+    """
+    if request.method == "POST":
+        vs_id = request.POST.get('verseset_id', None)
+        if vs_id is not None:
+            try:
+                vs = VerseSet.objects.prefetch_related('verse_choices').get(id=vs_id)
+            except VerseSet.DoesNotExist:
+                # Shouldn't be possible by clicking on buttons.
+                pass
+            if vs is not None:
+                user_verse_statuses = request.identity.add_verse_set(vs)
+                session.prepend_verse_set(request, user_verse_statuses)
+                return HttpResponseRedirect(reverse('learn'))
+
+    c = {}
+    c['verse_sets'] = VerseSet.objects.all().order_by('name').prefetch_related('verse_choices')
+    return render(request, 'learnscripture/choose.html', c)

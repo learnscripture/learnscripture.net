@@ -328,7 +328,7 @@ var learnscripture =
 
          var setStageState = function() {
              // Common clearing, and stage specific setup
-             $('#verse .correct, #verse .incorrect').removeClass('correct').removeClass('incorrect');
+             $('#id-verse .correct, #id-verse .incorrect').removeClass('correct').removeClass('incorrect');
              var stageInfo = stages[stage];
              stageInfo.setup();
              enableBtn($('#id-next-btn'), stageInfo.next != null);
@@ -531,17 +531,38 @@ var learnscripture =
 
          var start = function() {
              inputBox = $('#id-typing');
-             markupVerse();
              $('#id-next-btn').show().click(next);
              $('#id-back-btn').show().click(back);
              inputBox.keydown(keypress);
              setStageState();
+
+             loadVerse();
+         };
+
+         var loadVerse = function() {
+             $.ajax({url: '/api/learnscripture/v1/nextverse/?format=json',
+                     dataType: 'json',
+                     success: function(data) {
+                         $('#id-verse-title').text(data.verse_reference);
+                         // convert newlines to divs
+                         var text = data.verse_text + '\n' + data.verse_reference;
+                         $.each(text.split(/\n/), function(idx, line) {
+                                    if (line.trim() != '') {
+                                        $('#id-verse').append('<div class="line">' +
+                                                             line + '</div>');
+                                    }
+                                });
+                         markupVerse();
+
+                         $('#id-loading').hide();
+                         $('#id-controls').show();
+                     }});
          };
 
          var markupVerse = function() {
              var wordGroups = [];
 
-             $('#verse .line').each(function(idx, elem) {
+             $('#id-verse .line').each(function(idx, elem) {
                                                    wordGroups.push($(elem).text().trim().split(/ |\n/));
                                            });
              wordList = [];
@@ -563,7 +584,7 @@ var learnscripture =
                                          }).join(' ');
                  replacement.push(replace);
              }
-             $('#verse').html(replacement.join('<br/>'));
+             $('#id-verse').html(replacement.join('<br/>'));
              $('.word').click(function(ev) {
                  if (!testMode) {
                      toggleWord($(this));

@@ -55,14 +55,23 @@ class VerseSet(models.Model):
         return self.name
 
 
+class VerseChoiceManager(models.Manager):
+    use_for_related_fields = True
+
+    def get_query_set(self):
+        return super(VerseChoiceManager, self).get_query_set().order_by('set_order')
+
+
 
 # Note that VerseChoice and Verse are not related, since we want a VerseChoice
 # to be independent of Bible version.
 class VerseChoice(models.Model):
     reference = models.CharField(max_length=100)
     verse_set = models.ForeignKey(VerseSet, null=True, blank=True,
-                                  related_name='verses')
+                                  related_name='verse_choices')
     set_order = models.PositiveSmallIntegerField()
+
+    objects = VerseChoiceManager()
 
     class Meta:
         unique_together = [('verse_set', 'reference')]
