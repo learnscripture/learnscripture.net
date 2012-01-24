@@ -35,19 +35,19 @@ footer {
   width: 860px; /* downsize our container to make the content feel a bit tighter and more cohesive. NOTE: this removes two full columns from the grid, meaning you only go to 14 columns and not 16. */
 }
 
-.content {
+.maincontent {
   padding-top: 20px;
   padding-bottom: 20px;
 }
 
-.topbarinner, .content {
+.topbarinner, .maincontent {
     padding-left: 20px;
     padding-right: 20px;
 }
 
 
 /* The white background content wrapper */
-.content {
+.maincontent {
   background-color: #fff;
 
 
@@ -67,8 +67,8 @@ footer {
 }
 
 /* Styles you shouldn't keep as they are for displaying this base example only */
-.content .span10,
-.content .span4 {
+.maincontent .span10,
+.maincontent .span4 {
   min-height: 500px;
 }
 

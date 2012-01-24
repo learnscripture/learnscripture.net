@@ -6,7 +6,11 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
                        url(r'^learn/$', 'learnscripture.views.learn', name='learn'),
+                       (r'^admin/fiber/', include('fiber.admin_urls')),
+                       (r'^api/v1/', include('fiber.api.urls')),
+                       (r'^jsi18n/$', 'django.views.i18n.javascript_catalog', {'packages': ('fiber',),}),
                        url(r'^admin/', include(admin.site.urls)),
+                       (r'', 'fiber.views.page'),
 )
 
 
