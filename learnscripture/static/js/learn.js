@@ -1,14 +1,20 @@
 var learnscripture =
     (function(pub, $) {
+         // Controls
+         var inputBox = null;
+
          // -- Constants and globals --
          var WORD_TOGGLE_SHOW = 0;
          var WORD_TOGGLE_HIDE_END = 1;
          var WORD_TOGGLE_HIDE_ALL = 2;
+         var TESTING_MAX_ATTEMPTS = 3;
 
          var stage = 'read';
          var wordList = null; // list of integers
          var untestedWords = null;
          var testedWords = null;
+         var testMode = false;
+         var testingMistakes = {};
 
          // word toggling and selection
 
@@ -17,13 +23,29 @@ var learnscripture =
              word.addClass('selected');
          };
 
+         var getSelectedWordIndex = function() {
+             return $('.word').index($('.word.selected'));
+         };
+
+         var getWordCount = function() {
+             return $('.word').length;
+         };
+
+         var getWordAt = function(index) {
+             return $($('.word').get(index));
+         };
+
+         var getWordNumber = function(word) {
+             return $('.word').index(word);
+         };
+
          var moveSelectionRelative = function(distance) {
-             var i = $('.word').index($('.word.selected'));
+             var i = getSelectedWordIndex();
              var pos = Math.min(Math.max(0, i + distance),
-                                $('.word').length - 1);
-             var word = $('.word').get(pos);
-             if (word != null) {
-                 moveSelection($(word));
+                                getWordCount() - 1);
+             var word = getWordAt(pos);
+             if (word.length != 0) {
+                 moveSelection(word);
              }
          };
 
@@ -41,7 +63,7 @@ var learnscripture =
 
          var toggleWord = function(word) {
              moveSelection(word);
-             var wordNumber = $('.word').index(word);
+             var wordNumber = getWordNumber(word);
 
              var wordEnd = word.find('.wordend');
              var wordStart = word.find('.wordstart');
@@ -69,12 +91,68 @@ var learnscripture =
              }
          };
 
+         var flashMsg = function(elements) {
+             elements.css({opacity:1}).animate({opacity: 0},
+                                               {duration: 1000, queue: false});
+         };
+
+         var indicateSuccess = function() {
+             var word = getWordAt(getSelectedWordIndex());
+             word.addClass('correct');
+             flashMsg($('#id-testing-status').attr({'class': 'correct'}).text("Correct!"));
+         };
+
+         var indicateMistake = function(mistakes, maxMistakes) {
+             var msg = "Try again! (" + mistakes.toString() + " out of " + maxMistakes.toString() + ")";
+             flashMsg($('#id-testing-status').attr({'class': 'incorrect'}).text(msg));
+         };
+
+         var indicateFail = function() {
+             var word = getWordAt(getSelectedWordIndex());
+             word.addClass('incorrect');
+             flashMsg($('#id-testing-status').attr({'class': 'incorrect'}).text("Incorrect"));
+         };
+
+         var stripPunctuation = function(str) {
+             return str.replace(/[\.,;!?:\/#!$%\^&\*{}=\-_`~()]/g,"");
+         };
+
+         var matchWord = function(target, typed) {
+             typed = stripPunctuation(typed);
+             // First approx - no spell correction:
+             return typed == target;
+         };
+
+         var checkCurrentWord = function() {
+             var wordIdx = getSelectedWordIndex();
+             var word = getWordAt(wordIdx);
+             var wordStr = stripPunctuation(word.text().toLowerCase());
+             var typed = inputBox.val().toLowerCase();
+             var moveOn = function() {
+                 showWord(word.find('*'));
+                 inputBox.val('');
+                 moveSelectionRelative(1);
+             };
+             if (matchWord(wordStr, typed)) {
+                 indicateSuccess();
+                 moveOn();
+             } else {
+                 testingMistakes[wordIdx] += 1;
+                 if (testingMistakes[wordIdx] == TESTING_MAX_ATTEMPTS) {
+                     indicateFail();
+                     moveOn();
+                 } else {
+                     indicateMistake(testingMistakes[wordIdx], TESTING_MAX_ATTEMPTS);
+                 }
+             }
+         };
 
          // ---- Stages ----
 
          // -- reading stage --
          var readStage = function() {
-             showWord($('.wordstart, .wordend'));
+             showWord($('.word *'));
+             testMode = false;
          };
 
          // recall type 1 - FullAndInitial
@@ -91,7 +169,7 @@ var learnscripture =
                  setProgress(stage, testedWords.length / wordList.length);
                  moveSelection($('.word').first());
                  var testWords = getTestWords(initialFraction);
-                 showWord($('.wordstart, .wordend'));
+                 showWord($('.word *'));
                  hideWord(testWords.find('.wordend'));
                  return true;
              };
@@ -126,11 +204,30 @@ var learnscripture =
              // Factory function that returns a stage starter
              // function for recall stages
              return function() {
+                 testMode = false;
                  untestedWords = wordList.slice(0);
                  testedWords = [];
                  continueFunc();
              };
 
+         };
+
+         // Testing stages
+
+         var resetTestingMistakes = function() {
+             for (var i = 0; i < wordList.length; i++) {
+                 testingMistakes[i] = 0;
+             }
+         };
+
+         var testFullStart = function() {
+             hideWord($('.word span'));
+             resetTestingMistakes();
+             testMode = true;
+         };
+
+         var testFullContinue = function() {
+             return true;
          };
 
          // Utilities for stages
@@ -215,7 +312,9 @@ var learnscripture =
              return $(selector);
          };
 
-         var setStageState = function() { var stageInfo = stages[stage];
+         var setStageState = function() {
+             var stageInfo = stages[stage];
+             stageInfo.setup();
              enableBtn($('#id-next-btn'), stageInfo.next != null);
              enableBtn($('#id-back-btn'), stageInfo.previous != null);
              // Fade out old instructions, fade in the new
@@ -227,7 +326,7 @@ var learnscripture =
                       $('#id-instructions .instructions-' + stage).show().animate({opacity: 1}, 150); }});
              // reset selected word
              moveSelection($('.word').first());
-             $('#id-typing').val('').focus();
+             inputBox.val('').focus();
 
              // Create progress bar for this stage.
              var progressRowId = 'id-progress-row-' + stage;
@@ -258,8 +357,6 @@ var learnscripture =
              }
              setProgress(stage, 1);
              stage = nextStage;
-             var stageInfo = stages[stage];
-             stageInfo.setup();
              setStageState();
          };
 
@@ -271,8 +368,6 @@ var learnscripture =
              }
              $('#id-progress-row-' + stage).remove();
              stage = previousStage;
-             var stageInfo = stages[stage];
-             stageInfo.setup();
              setStageState();
          };
 
@@ -299,7 +394,7 @@ var learnscripture =
              }
              if (ev.which == 27) {
                  ev.preventDefault();
-                 $('#id-typing').val('');
+                 inputBox.val('');
                  return;
              }
              if (ev.which == 13) {
@@ -307,26 +402,37 @@ var learnscripture =
                  toggleWord($('.word.selected'));
                  return;
              }
-             if (ev.which == 37) {
-                 ev.preventDefault();
-                 moveSelectionRelative(-1);
-                 return;
+             if (!testMode) {
+                 if (ev.which == 37) {
+                     ev.preventDefault();
+                     moveSelectionRelative(-1);
+                     return;
+                 }
+                 if (ev.which == 39) {
+                     ev.preventDefault();
+                     moveSelectionRelative(1);
+                     return;
+                 }
+                 if (ev.which == 38) {
+                     ev.preventDefault();
+                     moveSelectionRelative(-1000);
+                     return;
+                 }
+                 if (ev.which == 40) {
+                     ev.preventDefault();
+                     moveSelectionRelative(1000);
+                     return;
+                 }
              }
-             if (ev.which == 39 || ev.which == 32) {
+             if (ev.which == 32) {
                  ev.preventDefault();
-                 moveSelectionRelative(1);
-                 return;
+                 if (testMode) {
+                     checkCurrentWord();
+                 } else {
+                     moveSelectionRelative(1);
+                 }
              }
-             if (ev.which == 38) {
-                 ev.preventDefault();
-                 moveSelectionRelative(-1000);
-                 return;
-             }
-             if (ev.which == 40) {
-                 ev.preventDefault();
-                 moveSelectionRelative(1000);
-                 return;
-             }
+
          };
 
          // Stages definition
@@ -390,20 +496,26 @@ var learnscripture =
                                    toggleMode: WORD_TOGGLE_HIDE_ALL},
                        'recall6': {setup: recall6Start,
                                    continueStage: recall6Continue,
-                                   next: null,
+                                   next: 'testFull',
                                    previous: 'recall5',
                                    caption: 'Recall 6 - 100% missing',
-                                   toggleMode: WORD_TOGGLE_HIDE_ALL}
+                                   toggleMode: WORD_TOGGLE_HIDE_ALL},
+                       'testFull': {setup: testFullStart,
+                                    continueStage: testFullContinue,
+                                    next: null,
+                                    caption: 'Full test',
+                                    toggleMode: WORD_TOGGLE_HIDE_ALL}
                        };
 
 
          // setup and wiring
 
          var start = function() {
+             inputBox = $('#id-typing');
              markupVerse();
              $('#id-next-btn').show().click(next);
              $('#id-back-btn').show().click(back);
-             $('#id-typing').keydown(keypress);
+             inputBox.keydown(keypress);
              setStageState();
          };
 
@@ -434,8 +546,10 @@ var learnscripture =
              }
              $('#verse').html(replacement.join('<br/>'));
              $('.word').click(function(ev) {
-                 toggleWord($(this));
-                 $('#id-typing').focus();
+                 if (!testMode) {
+                     toggleWord($(this));
+                 }
+                 inputBox.focus();
              });
          };
 

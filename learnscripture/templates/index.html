@@ -5,15 +5,20 @@
 
 <div id="id-instructions">
 <div class="instructions-read">
-Read the verse through (preferably aloud), and click 'Next'.
+<b>READ:</b> Read the verse through (preferably aloud), and click 'Next'.
 </div>
 <div class="instructions-recall1 instructions-recall2 instructions-recall3 instructions-recall4
             instructions-recall5" style="display:none;">
+<b>RECALL:</b>
 Read the verse through, filling in the gaps from your memory. Click
 a word to reveal it if you can't remember. 'Next' when done.
 </div>
 <div class="instructions-recall6" style="display:none;">
-No clues now! Can you still do it?
+<b>RECALL:</b> No clues now! Can you still remember it?
+</div>
+
+<div class="instructions-testFull" style="display:none;">
+<b>TEST:</b> Testing time! Type the verse, using space to check each word as you go.
 </div>
 
 </div>
@@ -31,15 +36,14 @@ I appointed you a prophet to the nations.
 <div class="line">Jeremiah 1:5</div>
 </div>
 
-<table class="condensed">
-  <tr>
-    <td>
-      Input: <input type="text" value="" id="id-typing" size="10" style="width:10em;">
-    </td>
-    <td><b>Arrows</b> move word. <b>Enter</b> shows word. <b>Esc</b> clears input.<br/>
-    <b>Ctrl+Right</b> - Next stage. <b>Ctrl+Left</b> - Back</td>
-  </tr>
-</table>
+<div> Input:
+   <input type="text" value="" id="id-typing" size="10" style="width:10em;">
+   <span id="id-testing-status"></span>
+</div>
+<div><b>Arrows</b> move word. <b>Enter</b> shows word. <b>Esc</b> clears input.<br/>
+  <b>Ctrl+Right</b> - Next stage. <b>Ctrl+Left</b> - Back
+</div>
+
 
 <br/>
 <input type="submit" value="Back" class="btn" id="id-back-btn" style="display:none;" disabled>
