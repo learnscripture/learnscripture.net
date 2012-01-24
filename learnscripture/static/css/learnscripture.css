@@ -194,3 +194,8 @@ table.condensed td, table.condensed th {
     padding: 0px;
     text-align: left;
 }
+
+#id-typing {
+    font-size: 18px;
+    height: 22px;
+}
