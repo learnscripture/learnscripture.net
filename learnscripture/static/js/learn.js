@@ -12,7 +12,7 @@ var learnscripture =
          var TESTING_MAX_ATTEMPTS = 3;
 
          // Initial state
-         var stage = 'testFull';
+         var stage = 'read';
 
          // tracking of words is done using a list
          // of integers, where the value is the index
