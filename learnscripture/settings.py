@@ -117,6 +117,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'south',
     'learnscripture',
+    'bibleverses',
     'accounts',
     'piston',
     'mptt',
