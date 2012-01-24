@@ -99,6 +99,8 @@ def push_sources():
                ))
     with cd(src_dir):
         run("hg update")
+    # Also need to sync files that are not in main sources VCS repo.
+    local("rsync learnscripture/settings_priv.py cciw@cciw.co.uk:%s/learnscripture/settings_priv.py" % src_dir)
 
 
 @task
