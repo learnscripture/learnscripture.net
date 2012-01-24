@@ -3,3 +3,5 @@ south
 -e hg+https://bitbucket.org/spookylukey/django/@d834ef768f04#egg=django
 django-fiber==0.9.6.2
 -e git+git://github.com/tzangms/django-bootstrap-form.git#egg=django-bootstrap-form
+django-pagination==1.0.7
+django-piston==0.2.3rc1

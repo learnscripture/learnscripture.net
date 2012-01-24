@@ -3,23 +3,16 @@ from django.core.urlresolvers import reverse
 from django.utils.functional import wraps
 from django.utils.http import urlquote
 
-from accounts.models import Identity
+from learnscripture import session
 
 def require_identity(view_func):
     @wraps(view_func)
     def view(request, *args, **kwargs):
-        identity = None
-        identity_id = request.session.get('identity_id', None)
-        if identity_id is not None:
-            try:
-                identity = Identity.objects.get(id=identity_id)
-            except Identity.DoesNotExist:
-                pass
+        identity = session.get_identity(request)
         if identity is None:
-            identity = Identity.objects.create()
-        request.identity = identity
-        if identity_id is None or identity.id != identity_id:
+            identity = session.start_identity(request)
             request.session['identity_id'] = identity.id
+        request.identity = identity
         return view_func(request, *args, **kwargs)
     return view
 

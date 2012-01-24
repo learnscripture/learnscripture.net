@@ -87,7 +87,7 @@ footer {
     margin-bottom: 10px;
 }
 
-#verse {
+#id-verse {
     font-size: 20px;
     line-height: 40px;
     border-radius: 5px;
@@ -225,4 +225,30 @@ ul.messagelist li.warning {
 
 ul.messagelist li.error {
     background-image: url(/static/admin/img/icon_error.gif);
+}
+
+p.verselist {
+    margin-left: 2em;
+}
+
+.verseset {
+    padding: 15px;
+    background-color: #CCE6FF;
+    border-radius: 7px;
+    border: 1px solid #BAD1E8;
+    margin-bottom: 15px;
+}
+
+.verseset h3 {
+    margin-top: 0px;
+    padding-top: 0px;
+    line-height: 20px;
+
+}
+
+.verseset form {
+    float: right;
+    text-align: right;
+    margin: 0;
+    padding: 0;
 }

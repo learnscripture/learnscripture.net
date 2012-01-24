@@ -48,3 +48,20 @@ class Identity(models.Model):
             return '<Identity %s>' % self.id
         else:
             return '<Identity %s>' % self.account
+
+    def add_verse_set(self, verse_set):
+        """
+        Adds the verses in a VerseSet to the users UserVerseStatus objects,
+        and returns the UserVerseStatus objects.
+        """
+        out = []
+        for v in verse_set.verse_choices.all():
+            # If there is one already, we don't want to change the
+            # version. Otherwise we set the version to the default
+            l = list(self.verse_statuses.filter(verse=v))
+            if len(l) == 0:
+                out.append(self.verse_statuses.create(verse=v,
+                                                      version=self.default_bible_version))
+            else:
+                out.append(l[0])
+        return out

@@ -85,6 +85,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'fiber.middleware.AdminPageMiddleware',
+    'pagination.middleware.PaginationMiddleware',
 )
 
 
@@ -124,6 +125,7 @@ INSTALLED_APPS = (
     'compressor',
     'fiber',
     'bootstrapform',
+    'pagination',
 )
 
 LOGGING = {
@@ -152,3 +154,7 @@ LOGGING = {
 
 FIBER_DEFAULT_TEMPLATE = 'fiber_singlecol.html'
 FIBER_TEMPLATE_CHOICES = [(FIBER_DEFAULT_TEMPLATE, 'Single column')]
+
+
+
+PISTON_DISPLAY_ERRORS = False
