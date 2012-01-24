@@ -35,6 +35,9 @@ ADMINS = [
 
 MANAGERS = ADMINS
 
+if DEBUG:
+    INTERNAL_IPS = ('127.0.0.1',)
+
 SERVER_EMAIL = 'website@learnscripture.net'
 DEFAULT_FROM_EMAIL = SERVER_EMAIL
 
@@ -77,16 +80,21 @@ TEMPLATE_LOADERS = (
     'django.template.loaders.app_directories.Loader',
 )
 
-MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'fiber.middleware.AdminPageMiddleware',
-    'pagination.middleware.PaginationMiddleware',
-)
+MIDDLEWARE_CLASSES = [
+    m for b, m in
+    [
+        (True, 'django.middleware.common.CommonMiddleware'),
+        (True, 'django.contrib.sessions.middleware.SessionMiddleware'),
+        (True, 'django.middleware.csrf.CsrfViewMiddleware'),
+        (True, 'django.contrib.auth.middleware.AuthenticationMiddleware'),
+        (True, 'django.contrib.messages.middleware.MessageMiddleware'),
+        (True, 'django.middleware.clickjacking.XFrameOptionsMiddleware'),
+        (True, 'fiber.middleware.AdminPageMiddleware'),
+        (True, 'pagination.middleware.PaginationMiddleware'),
+        (DEBUG, 'debug_toolbar.middleware.DebugToolbarMiddleware'),
+    ]
+    if b
+]
 
 
 TEMPLATE_CONTEXT_PROCESSORS = [
@@ -108,7 +116,7 @@ WSGI_APPLICATION = 'learnscripture.wsgi.application'
 
 TEMPLATE_DIRS = []
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -126,7 +134,11 @@ INSTALLED_APPS = (
     'fiber',
     'bootstrapform',
     'pagination',
-)
+]
+
+if DEBUG:
+    INSTALLED_APPS.append('debug_toolbar')
+
 
 LOGGING = {
     'version': 1,
@@ -158,3 +170,8 @@ FIBER_TEMPLATE_CHOICES = [(FIBER_DEFAULT_TEMPLATE, 'Single column')]
 
 
 PISTON_DISPLAY_ERRORS = False
+
+
+DEBUG_TOOLBAR_CONFIG = {
+    'INTERCEPT_REDIRECTS': False,
+    }
