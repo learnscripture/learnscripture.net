@@ -176,3 +176,11 @@ def deploy():
     build_static()
 
     webserver_start()
+
+
+@task
+def manage_py_command(*commands):
+    with virtualenv(venv_dir):
+        with cd(src_dir):
+            run_venv("./manage.py %s" % ' '.join(commands))
+
