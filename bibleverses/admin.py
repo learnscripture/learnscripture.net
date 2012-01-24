@@ -1,10 +1,23 @@
 from django.contrib import admin
+from django import forms
 
 from .models import BibleVersion, Verse, VerseSet, VerseChoice
 
 
+class VerseChoiceAdminForm(forms.ModelForm):
+    def clean_reference(self):
+        ref = self.cleaned_data['reference']
+        if not Verse.objects.filter(reference=ref).exists():
+            raise forms.ValidationError("'%s' is not a valid verse." % ref)
+        return ref
+
+    class Meta:
+        model = VerseChoice
+
+
 class VerseChoiceInline(admin.TabularInline):
     model = VerseChoice
+    form = VerseChoiceAdminForm
 
 
 class VerseSetAdmin(admin.ModelAdmin):
