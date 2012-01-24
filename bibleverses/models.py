@@ -48,6 +48,7 @@ class Verse(models.Model):
 
 class VerseSet(models.Model):
     name = models.CharField(max_length=255, unique=True)
+    description = models.TextField(blank=True)
     set_type = models.PositiveSmallIntegerField(choices=VerseSetType.choice_list)
 
     def __unicode__(self):
@@ -77,8 +78,8 @@ class UserVerseStatus(models.Model):
     memory_stage = models.PositiveSmallIntegerField(choices=MemoryStage.choice_list,
                                                     default=MemoryStage.ZERO)
     strength = models.DecimalField(default=Decimal('0.00'), decimal_places=2, max_digits=3)
-    first_seen = models.DateTimeField()
-    last_seen = models.DateTimeField()
+    first_seen = models.DateTimeField(null=True, blank=True)
+    last_seen = models.DateTimeField(null=True, blank=True)
 
 
 # Storing this is probably only useful for doing stats on progress and
