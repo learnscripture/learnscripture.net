@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base_twocol.html" %}
 
 {% block title %}
 Learn
@@ -8,7 +8,7 @@ Learn
 Learn!
 {% endblock %}
 
-{% block content %}
+{% block leftcolumn %}
 <h2>Isaiah 40:28</h2>
 
 <div id="id-instructions">
@@ -71,24 +71,5 @@ Isaiah 40:28
   <table>
   </table>
 </div>
-
-{% endblock %}
-
-
-{% block rightcolumn %}
-<h3>Session status</h3>
-
-<p><b>Guest User</b></p>
-
-<div class="stats">
-<p>Words seen: 0</p>
-
-<p>Words learnt: 0</p>
-</div>
-
-<p>As a guest, your data will be safe for two weeks (assuming you don't clear
-your browser cookies).</p>
-
-<p><a href="">Create an account</a> to save progress permanently.</p>
 
 {% endblock %}
