@@ -307,7 +307,7 @@ var learnscripture =
              // Pick some words to test from untestedWords
              var i;
              var toTest = [];
-             var testCount = Math.floor(wordList.length * testFraction);
+             var testCount = Math.ceil(wordList.length * testFraction);
              // Try to test the ones in untestedWords first.
              toTest = chooseN(untestedWords, testCount);
              if (toTest.length < testCount) {
@@ -456,13 +456,13 @@ var learnscripture =
          // Stages definition
 
          // Full and initial
-         var recall1Continue = makeFullAndInitialContinue(0.25);
+         var recall1Continue = makeFullAndInitialContinue(0.33);
          var recall1Start = makeRecallStart(recall1Continue);
 
-         var recall2Continue = makeFullAndInitialContinue(0.5);
+         var recall2Continue = makeFullAndInitialContinue(0.66);
          var recall2Start = makeRecallStart(recall2Continue);
 
-         var recall3Continue = makeFullAndInitialContinue(0.75);
+         var recall3Continue = makeFullAndInitialContinue(1);
          var recall3Start = makeRecallStart(recall3Continue);
 
          // initial and missing
@@ -486,19 +486,19 @@ var learnscripture =
                                    continueStage: recall1Continue,
                                    next: 'recall2',
                                    previous: 'read',
-                                   caption: 'Recall 1 - 25% initial',
+                                   caption: 'Recall 1 - 33% initial',
                                    toggleMode: WORD_TOGGLE_HIDE_END},
                        'recall2': {setup: recall2Start,
                                    continueStage: recall2Continue,
                                    next: 'recall3',
                                    previous: 'recall1',
-                                   caption: 'Recall 2 - 50% initial',
+                                   caption: 'Recall 2 - 66% initial',
                                    toggleMode: WORD_TOGGLE_HIDE_END},
                        'recall3': {setup: recall3Start,
                                    continueStage: recall3Continue,
                                    next: 'recall4',
                                    previous: 'recall2',
-                                   caption: 'Recall 3 - 75% initial',
+                                   caption: 'Recall 3 - 100% initial',
                                    toggleMode: WORD_TOGGLE_HIDE_END},
                        'recall4': {setup: recall4Start,
                                    continueStage: recall4Continue,
