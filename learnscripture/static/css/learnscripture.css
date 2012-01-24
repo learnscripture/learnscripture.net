@@ -63,7 +63,10 @@ footer {
 .page-header {
   background-color: #f5f5f5;
   padding: 20px 20px 10px;
-  margin: -20px -20px 20px;
+  margin: -20px -20px 20px -20px;
+}
+.message-container {
+  margin: -20px -20px 20px -20px;
 }
 
 /* Styles you shouldn't keep as they are for displaying this base example only */
@@ -198,4 +201,28 @@ table.condensed td, table.condensed th {
 #id-typing {
     font-size: 18px;
     height: 22px;
+}
+
+
+ul.messagelist {
+    padding: 0 0 5px 0;
+    margin: 0;
+}
+
+ul.messagelist li {
+    font-size: 12px;
+    display: block;
+    padding: 4px 5px 4px 25px;
+    margin: 0 0 3px 0;
+    border-bottom: 1px solid #ddd;
+    color: #666;
+    background: #ffc url(/static/admin/img/icon_success.gif) 5px .3em no-repeat;
+}
+
+ul.messagelist li.warning {
+    background-image: url(/static/admin/img/icon_alert.gif);
+}
+
+ul.messagelist li.error {
+    background-image: url(/static/admin/img/icon_error.gif);
 }

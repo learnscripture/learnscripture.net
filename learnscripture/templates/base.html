@@ -51,6 +51,15 @@
         <div class="page-header">
           <h1>{% block page_title %}{% endblock %}</h1>
         </div>
+        {% if messages %}
+        <div class="message-container">
+          <ul class="messagelist">
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
         <div class="row">
           <div class="span10">
             {% block content %}
