@@ -363,6 +363,7 @@ var learnscripture =
          // -- Moving between stages --
 
          var next = function(ev) {
+             inputBox.val('').focus();
              var thisStage = stages[stage];
              if (thisStage.continueStage()) {
                  return;
@@ -377,6 +378,7 @@ var learnscripture =
          };
 
          var back = function(ev) {
+             inputBox.val('').focus();
              var thisStage = stages[stage];
              var previousStage = thisStage.previous;
              if (previousStage == null) {
