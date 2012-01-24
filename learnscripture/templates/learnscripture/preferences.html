@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load bootstrap %}
+
+{% block title %}
+Preferences
+{% endblock %}
+
+{% block page_title %}
+Preferences
+{% endblock %}
+
+{% block content %}
+
+<p>Enter your preferences and press 'Save' to continue.</p>
+<form action="" method="POST">
+{% csrf_token %}
+{{ form|bootstrap }}
+
+<p>All preferences can be changed later, and the Bible version can be chosen on
+a verse-by-verse basis</p>
+
+<input type="submit" value="Save" class="btn primary">
+</form>
+{% endblock %}

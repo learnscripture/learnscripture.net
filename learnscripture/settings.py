@@ -123,6 +123,7 @@ INSTALLED_APPS = (
     'mptt',
     'compressor',
     'fiber',
+    'bootstrapform',
 )
 
 LOGGING = {
