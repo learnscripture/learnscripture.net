@@ -535,7 +535,6 @@ var learnscripture =
              $('#id-back-btn').show().click(back);
              inputBox.keydown(keypress);
              setStageState();
-
              loadVerse();
          };
 
@@ -553,9 +552,9 @@ var learnscripture =
                                     }
                                 });
                          markupVerse();
-
                          $('#id-loading').hide();
                          $('#id-controls').show();
+                         inputBox.focus();
                      }});
          };
 
