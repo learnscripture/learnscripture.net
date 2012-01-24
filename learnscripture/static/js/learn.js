@@ -12,10 +12,15 @@ var learnscripture =
          var TESTING_MAX_ATTEMPTS = 3;
 
          // Initial state
-         var stage = 'read';
-         var wordList = null; // list of integers
+         var stage = 'testFull';
+
+         // tracking of words is done using a list
+         // of integers, where the value is the index
+         // into the div of the word.
+         var wordList = null;
          var untestedWords = null;
          var testedWords = null;
+
          var testMode = false;
          var testingMistakes = {};
 
@@ -140,6 +145,7 @@ var learnscripture =
                  showWord(word.find('*'));
                  inputBox.val('');
                  moveSelectionRelative(1);
+                 setProgress(stage, wordIdx / wordList.length);
              };
              if (matchWord(wordStr, typed)) {
                  indicateSuccess();
@@ -321,6 +327,8 @@ var learnscripture =
          };
 
          var setStageState = function() {
+             // Common clearing, and stage specific setup
+             $('#verse .correct, #verse .incorrect').removeClass('correct').removeClass('incorrect');
              var stageInfo = stages[stage];
              stageInfo.setup();
              enableBtn($('#id-next-btn'), stageInfo.next != null);
