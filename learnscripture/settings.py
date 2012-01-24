@@ -66,6 +66,7 @@ STATICFILES_DIRS = []
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
 )
 
 LOGIN_URL = '/admin/'
@@ -83,7 +84,21 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'fiber.middleware.AdminPageMiddleware',
 )
+
+
+TEMPLATE_CONTEXT_PROCESSORS = [
+    'django.contrib.auth.context_processors.auth',
+    'django.core.context_processors.debug',
+    'django.core.context_processors.i18n',
+    'django.core.context_processors.media',
+    'django.core.context_processors.static',
+    'django.core.context_processors.tz',
+    'django.contrib.messages.context_processors.messages',
+    'django.core.context_processors.request',
+    'fiber.context_processors.page_info',
+]
 
 ROOT_URLCONF = 'learnscripture.urls'
 
@@ -102,6 +117,10 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'south',
     'learnscripture',
+    'piston',
+    'mptt',
+    'compressor',
+    'fiber',
 )
 
 LOGGING = {
@@ -127,3 +146,6 @@ LOGGING = {
         },
     }
 }
+
+FIBER_DEFAULT_TEMPLATE = 'fiber_singlecol.html'
+FIBER_TEMPLATE_CHOICES = [(FIBER_DEFAULT_TEMPLATE, 'Single column')]
