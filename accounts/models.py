@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone
 
+from bibleverses.models import BibleVersion
+
 from learnscripture.datastructures import make_choices
 
 
@@ -34,6 +36,9 @@ class Account(models.Model):
 class Identity(models.Model):
     account = models.OneToOneField(Account, null=True, blank=True, default=None)
     date_created = models.DateTimeField(default=timezone.now)
+
+    # Preferences
+    default_bible_version = models.ForeignKey(BibleVersion, null=True, blank=True)
 
     class Meta:
         verbose_name_plural = 'identities'
