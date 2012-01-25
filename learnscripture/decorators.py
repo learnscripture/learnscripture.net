@@ -11,7 +11,6 @@ def require_identity(view_func):
         identity = session.get_identity(request)
         if identity is None:
             identity = session.start_identity(request)
-            request.session['identity_id'] = identity.id
         request.identity = identity
         return view_func(request, *args, **kwargs)
     return view
