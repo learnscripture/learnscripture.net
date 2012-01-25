@@ -12,7 +12,13 @@ var learnscripture =
          var TESTING_MAX_ATTEMPTS = 3;
 
          // Initial state
-         var stage = 'read';
+         var currentStage = null;
+         var currentStageIdx = null;
+         var currentStageList = null;
+
+         // this is changed only when a whole
+         // set of stages is completed
+         var spentStagesCount = 0;
 
          // tracking of words is done using a list
          // of integers, where the value is the index
@@ -21,7 +27,6 @@ var learnscripture =
          var untestedWords = null;
          var testedWords = null;
 
-         var testMode = false;
          var testingMistakes = {};
 
          // word toggling and selection
@@ -75,7 +80,7 @@ var learnscripture =
 
              var wordEnd = word.find('.wordend');
              var wordStart = word.find('.wordstart');
-             var toggleMode = stages[stage].toggleMode;
+             var toggleMode = currentStage.toggleMode;
              if (toggleMode == WORD_TOGGLE_SHOW) {
                  return;
              } else if (toggleMode == WORD_TOGGLE_HIDE_END) {
@@ -145,7 +150,7 @@ var learnscripture =
                  showWord(word.find('*'));
                  inputBox.val('');
                  moveSelectionRelative(1);
-                 setProgress(stage, wordIdx / wordList.length);
+                 setProgress(currentStageIdx, (wordIdx + 1)/ wordList.length);
              };
              if (matchWord(wordStr, typed)) {
                  indicateSuccess();
@@ -166,7 +171,6 @@ var learnscripture =
          // -- reading stage --
          var readStage = function() {
              showWord($('.word *'));
-             testMode = false;
          };
 
          // recall type 1 - FullAndInitial
@@ -180,7 +184,7 @@ var learnscripture =
                  if (untestedWords.length == 0) {
                      return false;
                  }
-                 setProgress(stage, testedWords.length / wordList.length);
+                 setProgress(currentStageIdx, testedWords.length / wordList.length);
                  moveSelection($('.word').first());
                  var testWords = getTestWords(initialFraction);
                  showWord($('.word *'));
@@ -202,7 +206,7 @@ var learnscripture =
                  if (untestedWords.length == 0) {
                      return false;
                  }
-                 setProgress(stage, testedWords.length / wordList.length);
+                 setProgress(currentStageIdx, testedWords.length / wordList.length);
                  moveSelection($('.word').first());
                  var testWords = getTestWords(missingFraction);
                  hideWord($('.wordend'));
@@ -218,7 +222,6 @@ var learnscripture =
              // Factory function that returns a stage starter
              // function for recall stages
              return function() {
-                 testMode = false;
                  untestedWords = wordList.slice(0);
                  testedWords = [];
                  continueFunc();
@@ -237,7 +240,6 @@ var learnscripture =
          var testFullStart = function() {
              hideWord($('.word span'));
              resetTestingMistakes();
-             testMode = true;
          };
 
          var testFullContinue = function() {
@@ -245,8 +247,8 @@ var learnscripture =
          };
 
          // Utilities for stages
-         var setProgress = function(stage, fraction) {
-             $('#id-progress-row-' + stage + ' progress').val(fraction * 100);
+         var setProgress = function(stageIdx, fraction) {
+             $('#' + progressRowId(stageIdx) + ' progress').val(fraction * 100);
          };
 
          var markRevealed = function(wordNumber) {
@@ -326,67 +328,68 @@ var learnscripture =
              return $(selector);
          };
 
-         var setStageState = function() {
+
+         var setupStage = function(idx) {
+             // set the globals
+             var currentStageName = currentStageList[idx];
+             currentStageIdx = idx;
+             currentStage = stageDefs[currentStageName];
+
              // Common clearing, and stage specific setup
              $('#id-verse .correct, #id-verse .incorrect').removeClass('correct').removeClass('incorrect');
-             var stageInfo = stages[stage];
-             stageInfo.setup();
-             enableBtn($('#id-next-btn'), stageInfo.next != null);
-             enableBtn($('#id-back-btn'), stageInfo.previous != null);
+             currentStage.setup();
+             enableBtn($('#id-next-btn'), currentStageIdx < currentStageList.length - 1);
+             enableBtn($('#id-back-btn'), currentStageIdx > 0);
              // Fade out old instructions, fade in the new
              $('#id-instructions div').animate(
                  {opacity: 0},
                  {duration: 150,
                   complete: function() {
                       $('#id-instructions div').hide();
-                      $('#id-instructions .instructions-' + stage).show().animate({opacity: 1}, 150); }});
+                      $('#id-instructions .instructions-' + currentStageName).show().animate({opacity: 1}, 150); }});
              // reset selected word
              moveSelection($('.word').first());
              inputBox.val('').focus();
 
              // Create progress bar for this stage.
-             var progressRowId = 'id-progress-row-' + stage;
-             if (!document.getElementById(progressRowId)) {
+             var pRowId = progressRowId(currentStageIdx);
+             if (!document.getElementById(pRowId)) {
                  var progressRow = (
-                     '<tr id="id-progress-row-' + stage + '">' +
-                     '<th>' + stageInfo.caption + '</th>' +
+                     '<tr id="' + pRowId + '">' +
+                     '<th>' + currentStage.caption + '</th>' +
                      '<td><progress value="0" max="100">0%</progress>' +
                      '</td></tr>');
                  $('.progress table').prepend(progressRow);
 
              }
-             setProgress(stage, 0);
+             setProgress(currentStageIdx, 0);
              $('th.currenttask').removeClass('currenttask');
-             $('#' + progressRowId + ' th').addClass('currenttask');
+             $('#' + pRowId + ' th').addClass('currenttask');
          };
 
+         var progressRowId = function(stageIdx) {
+             return 'id-progress-row-' + (currentStageIdx + spentStagesCount).toString();
+         };
          // -- Moving between stages --
 
          var next = function(ev) {
              inputBox.val('').focus();
-             var thisStage = stages[stage];
-             if (thisStage.continueStage()) {
+             if (currentStage.continueStage()) {
                  return;
              }
-             var nextStage = thisStage.next;
-             if (nextStage == null) {
-                 return;
+             if (currentStageIdx < currentStageList.length - 1) {
+                 setProgress(currentStageIdx, 1);
+                 setupStage(currentStageIdx + 1);
              }
-             setProgress(stage, 1);
-             stage = nextStage;
-             setStageState();
          };
 
          var back = function(ev) {
              inputBox.val('').focus();
-             var thisStage = stages[stage];
-             var previousStage = thisStage.previous;
-             if (previousStage == null) {
+             if (currentStageIdx == 0) {
                  return;
              }
-             $('#id-progress-row-' + stage).remove();
-             stage = previousStage;
-             setStageState();
+             $('#' + progressRowId(currentStageIdx)).remove();
+             setupStage(currentStageIdx - 1);
          };
 
          var enableBtn = function(btn, state) {
@@ -420,7 +423,7 @@ var learnscripture =
                  toggleWord($('.word.selected'));
                  return;
              }
-             if (!testMode) {
+             if (!currentStage.testMode) {
                  if (ev.which == 37) {
                      ev.preventDefault();
                      moveSelectionRelative(-1);
@@ -444,7 +447,7 @@ var learnscripture =
              }
              if (ev.which == 32) {
                  ev.preventDefault();
-                 if (testMode) {
+                 if (currentStage.testMode) {
                      checkCurrentWord();
                  } else {
                      moveSelectionRelative(1);
@@ -475,66 +478,79 @@ var learnscripture =
          var recall6Continue = makeInitialAndMissingContinue(1);
          var recall6Start = makeRecallStart(recall6Continue);
 
+         // Each stage definition contains:
+         //
+         // setup: Function to do stage specific setup
+         //
+         // continueStage: function that is run when
+         //  the user clicks 'Next' and moves the stage on.
+         //  It returns true if the stage should be continued.
+         //  false is the stage is over.
+         //
+         // caption: Caption to put next to the progress bar
+         //
+         // testMode: boolean that is true if in testing
+         //
+         // toggleMode: contstant defining how clicking on words should react
 
-         var stages = {'read':    {setup: readStage,
+         var stageDefs = {'read': {setup: readStage,
                                    continueStage: function() { return false; },
-                                   next: 'recall1',
-                                   previous:  null,
                                    caption: 'Read',
+                                   testMode: false,
                                    toggleMode: WORD_TOGGLE_SHOW},
-                       'recall1': {setup: recall1Start,
-                                   continueStage: recall1Continue,
-                                   next: 'recall2',
-                                   previous: 'read',
-                                   caption: 'Recall 1 - 33% initial',
-                                   toggleMode: WORD_TOGGLE_HIDE_END},
-                       'recall2': {setup: recall2Start,
-                                   continueStage: recall2Continue,
-                                   next: 'recall3',
-                                   previous: 'recall1',
-                                   caption: 'Recall 2 - 66% initial',
-                                   toggleMode: WORD_TOGGLE_HIDE_END},
-                       'recall3': {setup: recall3Start,
-                                   continueStage: recall3Continue,
-                                   next: 'recall4',
-                                   previous: 'recall2',
-                                   caption: 'Recall 3 - 100% initial',
-                                   toggleMode: WORD_TOGGLE_HIDE_END},
-                       'recall4': {setup: recall4Start,
-                                   continueStage: recall4Continue,
-                                   next: 'recall5',
-                                   previous: 'recall3',
-                                   caption: 'Recall 4 - 33% missing',
-                                   toggleMode: WORD_TOGGLE_HIDE_ALL},
-                       'recall5': {setup: recall5Start,
-                                   continueStage: recall5Continue,
-                                   next: 'recall6',
-                                   previous: 'recall4',
-                                   caption: 'Recall 5 - 66% missing',
-                                   toggleMode: WORD_TOGGLE_HIDE_ALL},
-                       'recall6': {setup: recall6Start,
-                                   continueStage: recall6Continue,
-                                   next: 'testFull',
-                                   previous: 'recall5',
-                                   caption: 'Recall 6 - 100% missing',
-                                   toggleMode: WORD_TOGGLE_HIDE_ALL},
-                       'testFull': {setup: testFullStart,
-                                    continueStage: testFullContinue,
-                                    next: null,
-                                    previous: 'recall6',
-                                    caption: 'Full test',
-                                    toggleMode: null}
-                       };
+                          'recall1': {setup: recall1Start,
+                                      continueStage: recall1Continue,
+                                      caption: 'Recall 1 - 33% initial',
+                                      testMode: false,
+                                      toggleMode: WORD_TOGGLE_HIDE_END},
+                          'recall2': {setup: recall2Start,
+                                      continueStage: recall2Continue,
+                                      caption: 'Recall 2 - 66% initial',
+                                      testMode: false,
+                                      toggleMode: WORD_TOGGLE_HIDE_END},
+                          'recall3': {setup: recall3Start,
+                                      continueStage: recall3Continue,
+                                      caption: 'Recall 3 - 100% initial',
+                                      testMode: false,
+                                      toggleMode: WORD_TOGGLE_HIDE_END},
+                          'recall4': {setup: recall4Start,
+                                      continueStage: recall4Continue,
+                                      caption: 'Recall 4 - 33% missing',
+                                      testMode: false,
+                                      toggleMode: WORD_TOGGLE_HIDE_ALL},
+                          'recall5': {setup: recall5Start,
+                                      continueStage: recall5Continue,
+                                      caption: 'Recall 5 - 66% missing',
+                                      testMode: false,
+                                      toggleMode: WORD_TOGGLE_HIDE_ALL},
+                          'recall6': {setup: recall6Start,
+                                      continueStage: recall6Continue,
+                                      caption: 'Recall 6 - 100% missing',
+                                      testMode: false,
+                                      toggleMode: WORD_TOGGLE_HIDE_ALL},
+                          'testFull': {setup: testFullStart,
+                                       continueStage: testFullContinue,
+                                       caption: 'Full test',
+                                       testMode: true,
+                                       toggleMode: null}
+                         };
+
+
+         // stageLists defines which stages should be used for different modes
+         var stageLists = {
+             'initial':['read', 'recall1', 'recall2', 'recall3',
+                        'recall4', 'recall5', 'recall6', 'testFull']
+         };
 
 
          // setup and wiring
-
          var start = function() {
              inputBox = $('#id-typing');
              $('#id-next-btn').show().click(next);
              $('#id-back-btn').show().click(back);
              inputBox.keydown(keypress);
-             setStageState();
+             currentStageList = stageLists['initial'];
+             setupStage(0);
              loadVerse();
          };
 
@@ -585,7 +601,7 @@ var learnscripture =
              }
              $('#id-verse').html(replacement.join('<br/>'));
              $('.word').click(function(ev) {
-                 if (!testMode) {
+                 if (!currentStage.testMode) {
                      toggleWord($(this));
                  }
                  inputBox.focus();
