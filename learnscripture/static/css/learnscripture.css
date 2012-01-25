@@ -252,3 +252,7 @@ p.verselist {
     margin: 0;
     padding: 0;
 }
+
+#id-rightcolumn h3:first-child {
+    margin-top: -9px;
+}
