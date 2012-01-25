@@ -7,6 +7,10 @@ from django.db import models
 
 class Migration(SchemaMigration):
 
+    depends_on = [
+        ("bibleverses", "0001_initial"),
+        ]
+
     def forwards(self, orm):
         # Adding field 'Identity.default_bible_version'
         db.add_column('accounts_identity', 'default_bible_version',
