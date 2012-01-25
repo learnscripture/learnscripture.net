@@ -1,5 +1,7 @@
 {% extends "base_twocol.html" %}
 
+{% load url from future %}
+
 {% block title %}
 Learn
 {% endblock %}
@@ -12,6 +14,14 @@ Learn!
 
 <div id="id-loading">
 <h2>Loading...</h2>
+</div>
+
+<div id="id-no-verse-queue" style="display:none;">
+<p>There are no verses queued for learning. You can either:</p>
+<ul>
+  <li><a href="{% url 'choose' %}">Choose some new verses to learn</a></li>
+  <li><a href="{% url 'start' %}">Go to the dashboard to see other options</a></li>
+</ul>
 </div>
 
 <div id="id-controls" style="display:none;">

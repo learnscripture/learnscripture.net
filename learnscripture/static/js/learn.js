@@ -571,7 +571,16 @@ var learnscripture =
                          $('#id-loading').hide();
                          $('#id-controls').show();
                          inputBox.focus();
-                     }});
+                     },
+                     error: function(jqXHR, textStatus, errorThrown) {
+                         if (jqXHR.status == 404) {
+                             $('#id-loading').hide();
+                             $('#id-no-verse-queue').show(300);
+                         } else {
+                             handlerAjaxError(jqXHR, textStatus, errorThrown);
+                         }
+                     }
+                     });
          };
 
          var markupVerse = function() {
@@ -608,6 +617,11 @@ var learnscripture =
              });
          };
 
+         // TODO - implement retrying and a queue and UI for manual
+         // retrying.
+         // Also handle case of user being logged out.
+         var handlerAjaxError = null;
+         
          pub.start = start;
          return pub;
 
