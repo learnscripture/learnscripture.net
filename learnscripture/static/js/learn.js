@@ -69,11 +69,11 @@ var learnscripture =
          };
 
          var hideWord = function(word) {
-             word.animate({'opacity': '0'}, 300);
+             word.animate({'opacity': '0'}, {duration: 300, queue: false});
          };
 
          var showWord = function(word) {
-             word.animate({'opacity': '1'}, 300);
+             word.animate({'opacity': '1'}, {duration: 300, queue: false});
          };
 
          var toggleWord = function(word) {
@@ -368,6 +368,7 @@ var learnscripture =
              $('#id-instructions div').animate(
                  {opacity: 0},
                  {duration: 150,
+                  queue: false,
                   complete: function() {
                       $('#id-instructions div').hide();
                       $('#id-instructions .instructions-' + stageName).show().animate({opacity: 1}, 150); }});
