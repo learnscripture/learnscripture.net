@@ -40,6 +40,9 @@ def import_bible(version):
     for b in BIBLE_BOOKS:
         verses = get_book(version, b)
         for ref, text in sorted(verses.items()):
+            # Fixes:
+            ref = ref.replace('Psalms', 'Psalm')
+            text = text.replace('.', '. ').replace('.  ', '. ')
             v, x = Verse.objects.get_or_create(version=version_obj,
                                                reference=ref)
             v.text = text
