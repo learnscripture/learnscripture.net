@@ -23,8 +23,9 @@ StageType = make_choices('StageType',
 
 MemoryStage = make_choices('MemoryStage',
                            [(1, 'ZERO', 'nothing'),
-                            (2, 'SHORTTERM', 'short term memory'),
-                            (3, 'LONGTERM', 'long term memory'),
+                            (2, 'SEEN', 'seen'),
+                            (3, 'TESTED', 'tested'),
+                            (4, 'LONGTERM', 'long term memory'),
                             ])
 
 
