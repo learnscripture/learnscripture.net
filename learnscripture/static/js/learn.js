@@ -29,6 +29,8 @@ var learnscripture =
 
          var testingMistakes = {};
 
+         var currentVerseStatus = null;
+
          // word toggling and selection
 
          var moveSelection = function(word) {
@@ -141,6 +143,34 @@ var learnscripture =
              return levenshteinDistance(target, typed) <= Math.ceil(target.length / 3);
          };
 
+         var testComplete = function() {
+             var score = 0;
+             var mistakes = 0;
+             $.each(testingMistakes, function(key, val) {
+                        mistakes += val;
+                    });
+             score = 1 - (mistakes / (TESTING_MAX_ATTEMPTS * wordList.length));
+             $.ajax({url: '/api/learnscripture/v1/actioncomplete/',
+                     dataType: 'json',
+                     type: 'POST',
+                     data: {
+                         user_verse_status_id: currentVerseStatus.id,
+                         stage: 'test',
+                         score: score
+                     }});
+             $('#id-score').text(Math.floor(score * 100).toString() + "%");
+             completeStageGroup();
+             showInstructions("results");
+         };
+
+         var completeStageGroup = function() {
+             spentStagesCount += currentStageList.length;
+             currentStage = stageDefs['results'];
+             currentStageList = [currentStage];
+             currentStageIdx = 0;
+             setNextPreviousBtns();
+         };
+
          var checkCurrentWord = function() {
              var wordIdx = getSelectedWordIndex();
              var word = getWordAt(wordIdx);
@@ -149,8 +179,12 @@ var learnscripture =
              var moveOn = function() {
                  showWord(word.find('*'));
                  inputBox.val('');
-                 moveSelectionRelative(1);
                  setProgress(currentStageIdx, (wordIdx + 1)/ wordList.length);
+                 if (getSelectedWordIndex() + 1 == getWordCount()) {
+                     testComplete();
+                 } else {
+                     moveSelectionRelative(1);
+                 }
              };
              if (matchWord(wordStr, typed)) {
                  indicateSuccess();
@@ -328,6 +362,20 @@ var learnscripture =
              return $(selector);
          };
 
+         var showInstructions = function(stageName) {
+             // Fade out old instructions, fade in the new
+             $('#id-instructions div').animate(
+                 {opacity: 0},
+                 {duration: 150,
+                  complete: function() {
+                      $('#id-instructions div').hide();
+                      $('#id-instructions .instructions-' + stageName).show().animate({opacity: 1}, 150); }});
+         };
+
+         var setNextPreviousBtns = function() {
+             enableBtn($('#id-next-btn'), currentStageIdx < currentStageList.length - 1);
+             enableBtn($('#id-back-btn'), currentStageIdx > 0);
+         };
 
          var setupStage = function(idx) {
              // set the globals
@@ -338,15 +386,9 @@ var learnscripture =
              // Common clearing, and stage specific setup
              $('#id-verse .correct, #id-verse .incorrect').removeClass('correct').removeClass('incorrect');
              currentStage.setup();
-             enableBtn($('#id-next-btn'), currentStageIdx < currentStageList.length - 1);
-             enableBtn($('#id-back-btn'), currentStageIdx > 0);
-             // Fade out old instructions, fade in the new
-             $('#id-instructions div').animate(
-                 {opacity: 0},
-                 {duration: 150,
-                  complete: function() {
-                      $('#id-instructions div').hide();
-                      $('#id-instructions .instructions-' + currentStageName).show().animate({opacity: 1}, 150); }});
+             setNextPreviousBtns();
+
+             showInstructions(currentStageName);
              // reset selected word
              moveSelection($('.word').first());
              inputBox.val('').focus();
@@ -533,7 +575,12 @@ var learnscripture =
                                        continueStage: testFullContinue,
                                        caption: 'Full test',
                                        testMode: true,
-                                       toggleMode: null}
+                                       toggleMode: null},
+                          'results': {setup: function() {},
+                                      continueStage: function() { return true;},
+                                      caption: 'Results',
+                                      testMode: false,
+                                      toggleMode: null}
                          };
 
 
@@ -559,6 +606,7 @@ var learnscripture =
              $.ajax({url: '/api/learnscripture/v1/nextverse/?format=json',
                      dataType: 'json',
                      success: function(data) {
+                         currentVerseStatus = data;
                          $('#id-verse-title').text(data.verse.reference);
                          // convert newlines to divs
                          var text = data.verse.text + '\n' + data.verse.reference;
@@ -622,7 +670,7 @@ var learnscripture =
          // retrying.
          // Also handle case of user being logged out.
          var handlerAjaxError = null;
-         
+
          pub.start = start;
          return pub;
 
@@ -681,6 +729,42 @@ var min3 = function(x,y,z) {
 	return z;
 };
 
+$(document).ajaxSend(function(event, xhr, settings) {
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    function sameOrigin(url) {
+        // url could be relative or scheme relative or absolute
+        var host = document.location.host; // host + port
+        var protocol = document.location.protocol;
+        var sr_origin = '//' + host;
+        var origin = protocol + sr_origin;
+        // Allow absolute or scheme relative URLs to same origin
+        return (url == origin || url.slice(0, origin.length + 1) == origin + '/') ||
+            (url == sr_origin || url.slice(0, sr_origin.length + 1) == sr_origin + '/') ||
+            // or any other URL that isn't scheme relative or absolute i.e relative.
+            !(/^(\/\/|http:|https:).*/.test(url));
+    }
+    function safeMethod(method) {
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+    if (!safeMethod(settings.type) && sameOrigin(settings.url)) {
+        xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+    }
+});
 
 $(document).ready(function() {
     learnscripture.start();

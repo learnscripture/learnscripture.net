@@ -256,3 +256,7 @@ p.verselist {
 #id-rightcolumn h3:first-child {
     margin-top: -9px;
 }
+
+#id-result-buttons {
+    float: right;
+}

@@ -2,11 +2,10 @@
 from django.conf.urls import url, patterns
 from piston.resource import Resource
 
-from learnscripture.api.handlers import NextVerseHandler
-
-next_verse_handler = Resource(NextVerseHandler)
+from learnscripture.api.handlers import NextVerseHandler, ActionCompleteHandler
 
 urlpatterns = patterns('',
-                       url(r'^nextverse/$', next_verse_handler),
+                       url(r'^nextverse/$', Resource(NextVerseHandler)),
+                       url(r'^actioncomplete/$', Resource(ActionCompleteHandler)),
                        )
 
