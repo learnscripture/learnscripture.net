@@ -27,7 +27,7 @@ var learnscripture =
          var untestedWords = null;
          var testedWords = null;
 
-         var testingMistakes = {};
+         var testingMistakes = null;
 
          var currentVerseStatus = null;
 
@@ -266,6 +266,7 @@ var learnscripture =
          // Testing stages
 
          var resetTestingMistakes = function() {
+             testingMistakes = {};
              for (var i = 0; i < wordList.length; i++) {
                  testingMistakes[i] = 0;
              }
