@@ -62,13 +62,16 @@ class Identity(models.Model):
         and returns the UserVerseStatus objects.
         """
         out = []
-        for v in verse_set.verse_choices.all():
-            # If there is one already, we don't want to change the
-            # version. Otherwise we set the version to the default
-            l = list(self.verse_statuses.filter(verse=v))
-            if len(l) == 0:
-                out.append(self.verse_statuses.create(verse=v,
+        vc_ids = [vc.id for vc in verse_set.verse_choices.all()]
+        uvcs = dict([(uvc.verse_choice_id, uvc) for uvc in self.verse_statuses.filter(verse_choice__in=vc_ids)])
+        # Want to preserve order of verse_set
+        for vc_id in vc_ids:
+            uvc = uvcs.get(vc_id, None)
+            # If the user already has this verse choice, we don't want to change
+            # the version. Otherwise we set the version to the default
+            if uvc is None:
+                out.append(self.verse_statuses.create(verse_choice_id=vc_id,
                                                       version=self.default_bible_version))
             else:
-                out.append(l[0])
+                out.append(uvc)
         return out
