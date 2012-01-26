@@ -7,6 +7,12 @@ def prepend_verse_set(request, user_verse_statuses):
     request.session['verses_to_learn'] = s
 
 
+def remove_user_verse_status(request, uvs_id):
+    s = request.session.get('verses_to_learn', [])
+    s = [u for u in s if u != uvs_id]
+    request.session['verses_to_learn'] = s
+
+
 def get_identity(request):
     identity = None
     identity_id = request.session.get('identity_id', None)
