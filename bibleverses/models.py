@@ -82,7 +82,7 @@ class VerseChoice(models.Model):
 
 class UserVerseStatus(models.Model):
     for_identity = models.ForeignKey('accounts.Identity', related_name='verse_statuses')
-    verse = models.ForeignKey(VerseChoice)
+    verse_choice = models.ForeignKey(VerseChoice)
     version = models.ForeignKey(BibleVersion)
     memory_stage = models.PositiveSmallIntegerField(choices=MemoryStage.choice_list,
                                                     default=MemoryStage.ZERO)
@@ -90,6 +90,9 @@ class UserVerseStatus(models.Model):
     first_seen = models.DateTimeField(null=True, blank=True)
     last_seen = models.DateTimeField(null=True, blank=True)
 
+    @property
+    def verse(self):
+        return Verse.objects.get(version=self.version, reference=self.verse_choice.reference)
 
 # Storing this is probably only useful for doing stats on progress and
 # attempting to tune things.

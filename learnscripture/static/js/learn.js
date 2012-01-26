@@ -558,9 +558,9 @@ var learnscripture =
              $.ajax({url: '/api/learnscripture/v1/nextverse/?format=json',
                      dataType: 'json',
                      success: function(data) {
-                         $('#id-verse-title').text(data.verse_reference);
+                         $('#id-verse-title').text(data.verse.reference);
                          // convert newlines to divs
-                         var text = data.verse_text + '\n' + data.verse_reference;
+                         var text = data.verse.text + '\n' + data.verse.reference;
                          $.each(text.split(/\n/), function(idx, line) {
                                     if (line.trim() != '') {
                                         $('#id-verse').append('<div class="line">' +
