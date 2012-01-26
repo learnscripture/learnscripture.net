@@ -596,10 +596,16 @@ var learnscripture =
          // setup and wiring
          var start = function() {
              inputBox = $('#id-typing');
+             inputBox.keydown(keypress);
              $('#id-next-btn').show().click(next);
              $('#id-back-btn').show().click(back);
-             inputBox.keydown(keypress);
+             $('#id-next-verse-btn').click(nextVerse);
+             nextVerse();
+         };
+
+         var nextVerse = function() {
              currentStageList = stageLists['initial'];
+             $('.progress table tr').remove();
              setupStage(0);
              loadVerse();
          };
@@ -626,6 +632,7 @@ var learnscripture =
                      error: function(jqXHR, textStatus, errorThrown) {
                          if (jqXHR.status == 404) {
                              $('#id-loading').hide();
+                             $('#id-controls').hide();
                              $('#id-no-verse-queue').show(300);
                          } else {
                              handlerAjaxError(jqXHR, textStatus, errorThrown);
