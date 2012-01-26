@@ -648,8 +648,8 @@ var learnscripture =
                             wordNumber++;
                         });
                  var replace = $.map(group, function(word, j) {
-                                         var start = word.slice(0,1);
-                                         var end = word.slice(1);
+                                         var start = word.match(/\W*./)[0];
+                                         var end = word.slice(start.length);
                                          return ('<span class=\"word\">' +
                                                  '<span class="wordstart">' + start +
                                                  '</span><span class="wordend">' + end +
