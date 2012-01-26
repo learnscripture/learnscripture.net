@@ -354,12 +354,13 @@ var learnscripture =
              // Create progress bar for this stage.
              var pRowId = progressRowId(currentStageIdx);
              if (!document.getElementById(pRowId)) {
-                 var progressRow = (
-                     '<tr id="' + pRowId + '">' +
+                 var progressRow = $(
+                     '<tr id="' + pRowId + '" style="display:none;">' +
                      '<th>' + currentStage.caption + '</th>' +
                      '<td><progress value="0" max="100">0%</progress>' +
                      '</td></tr>');
                  $('.progress table').prepend(progressRow);
+                 progressRow.show('200');
 
              }
              setProgress(currentStageIdx, 0);
