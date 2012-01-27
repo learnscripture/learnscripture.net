@@ -87,12 +87,20 @@ footer {
     margin-bottom: 10px;
 }
 
-#id-verse {
-    font-size: 20px;
-    line-height: 40px;
+#id-verse-wrapper {
     border-radius: 5px;
     padding: 10px;
     background-color: #f0f0f0;
+}
+
+#id-verse {
+    font-size: 20px;
+    line-height: 40px;
+}
+
+#id-version {
+    border-top: 1px solid #ccc;
+    text-align: right;
 }
 
 .word {

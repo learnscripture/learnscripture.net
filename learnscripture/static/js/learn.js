@@ -624,6 +624,15 @@ var learnscripture =
                                                              line + '</div>');
                                     }
                                 });
+                         var versionHtml = "Version: " + data.version.full_name +
+                             " (" + data.version.short_name + ")";
+
+                         if (data.version.url != "") {
+                             var url = data.version.url.replace('%s', escape(data.verse.reference))
+                             versionHtml += (" | <a target=\"_blank\" href=\"" + url +
+                                            "\">browse</a>")
+                         }
+                         $('#id-version').html(versionHtml);
                          markupVerse();
                          $('#id-loading').hide();
                          $('#id-controls').show();

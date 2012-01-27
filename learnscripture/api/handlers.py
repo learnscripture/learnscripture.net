@@ -22,7 +22,7 @@ class NextVerseHandler(BaseHandler):
     model = UserVerseStatus
     fields = ('id', 'memory_stage', 'strength', 'first_seen', 'last_seen',
               ('verse', ('reference', 'text')),
-              ('version', ('short_name', 'slug')))
+              ('version', ('full_name', 'short_name', 'slug', 'url')))
 
     @require_identity
     def read(self, request):
