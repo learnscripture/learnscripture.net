@@ -628,7 +628,7 @@ var learnscripture =
                              " (" + data.version.short_name + ")";
 
                          if (data.version.url != "") {
-                             var url = data.version.url.replace('%s', escape(data.verse.reference))
+                             var url = data.version.url.replace('%s', encodeURI(data.verse.reference)).replace('%20', '+');
                              versionHtml += (" | <a target=\"_blank\" href=\"" + url +
                                             "\">browse</a>")
                          }
