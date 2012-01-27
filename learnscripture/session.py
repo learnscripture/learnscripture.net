@@ -1,7 +1,7 @@
 from accounts.models import Identity
 
 
-def prepend_verse_set(request, user_verse_statuses):
+def prepend_verse_statuses(request, user_verse_statuses):
     s = request.session.get('verses_to_learn', [])
     s = [uvs.id for uvs in user_verse_statuses] + s
     request.session['verses_to_learn'] = s

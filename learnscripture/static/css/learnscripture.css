@@ -268,3 +268,7 @@ p.verselist {
 #id-result-buttons {
     float: right;
 }
+
+#id-version select {
+    width: auto;
+}

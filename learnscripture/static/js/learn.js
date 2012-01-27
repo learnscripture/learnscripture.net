@@ -500,6 +500,22 @@ var learnscripture =
              }
 
          };
+         var versionSelectChanged = function(ev) {
+             $.ajax({url: '/api/learnscripture/v1/changeversion/',
+                     dataType: 'json',
+                     type: 'POST',
+                     data: {
+                         reference: currentVerseStatus.verse.reference,
+                         version_slug: $('#id-version-select').val(),
+                         verse_set_id: currentVerseStatus.verse_choice.verse_set.id,
+                         user_verse_status_id: currentVerseStatus.id
+                         },
+                     success: function() {
+                         nextVerse();
+                     },
+                     error: handlerAjaxError
+                     });
+         };
 
          // Stages definition
 
@@ -600,6 +616,7 @@ var learnscripture =
              $('#id-next-btn').show().click(next);
              $('#id-back-btn').show().click(back);
              $('#id-next-verse-btn').click(nextVerse);
+             $('#id-version-select').change(versionSelectChanged);
              nextVerse();
          };
 
@@ -634,6 +651,7 @@ var learnscripture =
                          } else {
                              $('#id-browse-link').hide();
                          }
+                         $('#id-version-select').val(data.version.slug);
                          markupVerse();
                          $('#id-loading').hide();
                          $('#id-controls').show();
@@ -688,7 +706,9 @@ var learnscripture =
          // TODO - implement retrying and a queue and UI for manual
          // retrying.
          // Also handle case of user being logged out.
-         var handlerAjaxError = null;
+         var handlerAjaxError = function(jqXHR, textStatus, errorThrown) {
+             alert(textStatus, errorThrown);
+         };
 
          pub.start = start;
          return pub;

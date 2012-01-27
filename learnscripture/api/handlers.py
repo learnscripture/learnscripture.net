@@ -21,6 +21,7 @@ class NextVerseHandler(BaseHandler):
     allowed_methods = ('GET',)
     model = UserVerseStatus
     fields = ('id', 'memory_stage', 'strength', 'first_seen', 'last_seen',
+              ('verse_choice', (('verse_set', ('id',)),)),
               ('verse', ('reference', 'text')),
               ('version', ('full_name', 'short_name', 'slug', 'url')))
 
@@ -52,4 +53,30 @@ class ActionCompleteHandler(BaseHandler):
         if request.data['stage'] == 'test':
             session.remove_user_verse_status(request, uvs_id)
 
-        return rc.CREATED
+        return {}
+
+
+class ChangeVersionHandler(BaseHandler):
+    allowed_methods = ('POST',)
+
+    @require_identity
+    def create(self, request):
+        verse_set_id = request.data['verse_set_id']
+        if verse_set_id == '' or verse_set_id == 'null':
+            verse_set_id = None
+        else:
+            verse_set_id = int(verse_set_id)
+
+        reference = request.data['reference']
+        version_slug = request.data['version_slug']
+        request.identity.change_version(reference,
+                                        version_slug,
+                                        verse_set_id)
+        session.remove_user_verse_status(request, int(request.data['user_verse_status_id']))
+        uvs = request.identity.verse_statuses.get(verse_choice__verse_set=verse_set_id,
+                                                  verse_choice__reference=reference,
+                                                  version__slug=version_slug)
+        session.prepend_verse_statuses(request, [uvs])
+
+        return {}
+
