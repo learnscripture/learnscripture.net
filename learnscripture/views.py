@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.utils.http import urlparse
 
 from accounts.forms import PreferencesForm
-from bibleverses.models import VerseSet
+from bibleverses.models import VerseSet, BibleVersion
 from learnscripture import session
 
 from .decorators import require_identity, require_preferences
@@ -13,7 +13,8 @@ from .decorators import require_identity, require_preferences
 
 @require_preferences
 def learn(request):
-    return render(request, 'learnscripture/learn.html')
+    c = {'bible_versions': BibleVersion.objects.all()}
+    return render(request, 'learnscripture/learn.html', c)
 
 
 @require_identity
@@ -70,7 +71,7 @@ def choose(request):
                 pass
             if vs is not None:
                 user_verse_statuses = request.identity.add_verse_set(vs)
-                session.prepend_verse_set(request, user_verse_statuses)
+                session.prepend_verse_statuses(request, user_verse_statuses)
                 return HttpResponseRedirect(reverse('learn'))
 
     c = {}
