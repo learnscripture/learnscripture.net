@@ -15,9 +15,8 @@ StageType = make_choices('StageType',
                          [(1, 'READ', 'read'),
                           (2, 'RECALL_INITIAL', 'recall from initials'),
                           (3, 'RECALL_MISSING', 'recall when missing'),
-                          (4, 'TEST_TYPE_INITIAL', 'test, typing initial'),
-                          (5, 'TEST_TYPE_COMPLETE', 'test, typing completing word from initial'),
-                          (6, 'TEST_TYPE_FULL', 'test, typing full word'),
+                          (4, 'TEST_TYPE_FULL', 'test, typing full word'),
+                          (5, 'TEST_TYPE_QUICK', 'test, typing initial'),
                           ])
 
 
@@ -82,6 +81,16 @@ class VerseChoice(models.Model):
 
 
 class UserVerseStatus(models.Model):
+    """
+    Tracks the user's progress for a verse.
+    """
+    # It actually tracks the progress for a VerseChoice and Version.  This
+    # implicitly allows it to track progress separately for different versions
+    # and for the same verse in different verse sets.  In some cases this is
+    # useful (for learning a passage, you might be learning a different version
+    # to normal), but usually it is confusing, so business logic limits how much
+    # this can happen
+
     for_identity = models.ForeignKey('accounts.Identity', related_name='verse_statuses')
     verse_choice = models.ForeignKey(VerseChoice)
     version = models.ForeignKey(BibleVersion)
@@ -91,9 +100,15 @@ class UserVerseStatus(models.Model):
     first_seen = models.DateTimeField(null=True, blank=True)
     last_seen = models.DateTimeField(null=True, blank=True)
 
+    # See Identity.change_version for explanation of ignored
+    ignored = models.BooleanField(default=False)
+
     @property
     def verse(self):
         return Verse.objects.get(version=self.version, reference=self.verse_choice.reference)
+
+    class Meta:
+        unique_together = [('for_identity', 'verse_choice', 'version')]
 
 # Storing this is probably only useful for doing stats on progress and
 # attempting to tune things.
