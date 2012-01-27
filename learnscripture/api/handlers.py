@@ -32,7 +32,7 @@ class NextVerseHandler(BaseHandler):
             return rc.NOT_FOUND
 
         try:
-            return request.identity.verse_statuses.select_related('version', 'verse_choice').get(id=uvs_ids[0])
+            return request.identity.verse_statuses.select_related('version', 'verse_choice', 'verse_choice__verse_set').get(id=uvs_ids[0])
         except UserVerseStatus.DoesNotExist:
             return rc.NOT_FOUND
 
