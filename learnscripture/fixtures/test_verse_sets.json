@@ -1,0 +1,110 @@
+[
+{
+    "pk": 1,
+    "model": "bibleverses.verseset",
+    "fields": {
+        "set_type": 3,
+        "name": "Bible 101",
+        "description": "Some famous verses that everyone ought to know, to get you started."
+    }
+},
+{
+    "pk": 2,
+    "model": "bibleverses.verseset",
+    "fields": {
+        "set_type": 1,
+        "name": "Temptation",
+        "description": "Some help in dealing with common temptations."
+    }
+},
+{
+    "pk": 3,
+    "model": "bibleverses.verseset",
+    "fields": {
+        "set_type": 1,
+        "name": "Basic Gospel",
+        "description": "Great gospel texts"
+    }
+},
+{
+    "pk": 1,
+    "model": "bibleverses.versechoice",
+    "fields": {
+        "verse_set": 1,
+        "set_order": 1,
+        "reference": "John 3:16"
+    }
+},
+{
+    "pk": 2,
+    "model": "bibleverses.versechoice",
+    "fields": {
+        "verse_set": 1,
+        "set_order": 2,
+        "reference": "John 14:6"
+    }
+},
+{
+    "pk": 3,
+    "model": "bibleverses.versechoice",
+    "fields": {
+        "verse_set": 2,
+        "set_order": 10,
+        "reference": "Job 31:1"
+    }
+},
+{
+    "pk": 4,
+    "model": "bibleverses.versechoice",
+    "fields": {
+        "verse_set": 2,
+        "set_order": 1,
+        "reference": "Ephesians 5:3"
+    }
+},
+{
+    "pk": 5,
+    "model": "bibleverses.versechoice",
+    "fields": {
+        "verse_set": 2,
+        "set_order": 2,
+        "reference": "James 4:7"
+    }
+},
+{
+    "pk": 6,
+    "model": "bibleverses.versechoice",
+    "fields": {
+        "verse_set": 3,
+        "set_order": 1,
+        "reference": "John 3:16"
+    }
+},
+{
+    "pk": 7,
+    "model": "bibleverses.versechoice",
+    "fields": {
+        "verse_set": 3,
+        "set_order": 1,
+        "reference": "Ephesians 2:8"
+    }
+},
+{
+    "pk": 1,
+    "model": "bibleverses.bibleversion",
+    "fields": {
+        "full_name": "King James Version",
+        "slug": "KJV",
+        "short_name": "KJV"
+    }
+},
+{
+    "pk": 2,
+    "model": "bibleverses.bibleversion",
+    "fields": {
+        "full_name": "New English Translation",
+        "slug": "NET",
+        "short_name": "NET"
+    }
+}
+]
