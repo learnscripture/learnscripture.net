@@ -624,15 +624,16 @@ var learnscripture =
                                                              line + '</div>');
                                     }
                                 });
-                         var versionHtml = "Version: " + data.version.full_name +
+                         var versionText = "Version: " + data.version.full_name +
                              " (" + data.version.short_name + ")";
+                         $('#id-version-name').text(versionText);
 
                          if (data.version.url != "") {
                              var url = data.version.url.replace('%s', encodeURI(data.verse.reference)).replace('%20', '+');
-                             versionHtml += (" | <a target=\"_blank\" href=\"" + url +
-                                            "\">browse</a>")
+                             $('#id-browse-link').show().find('a').attr('href', url);
+                         } else {
+                             $('#id-browse-link').hide();
                          }
-                         $('#id-version').html(versionHtml);
                          markupVerse();
                          $('#id-loading').hide();
                          $('#id-controls').show();
