@@ -175,3 +175,12 @@ PISTON_DISPLAY_ERRORS = False
 DEBUG_TOOLBAR_CONFIG = {
     'INTERCEPT_REDIRECTS': False,
     }
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': 'unix:/home/cciw/memcached.sock',
+        'KEY_PREFIX': 'learnscripture.net',
+    }
+}
+
