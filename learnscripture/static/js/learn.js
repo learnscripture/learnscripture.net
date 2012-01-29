@@ -379,6 +379,39 @@ var learnscripture =
              enableBtn($('#id-back-btn'), currentStageIdx > 0);
          };
 
+         var isScrolledIntoView = function(div) {
+             var docViewTop = $(window).scrollTop();
+             var docViewBottom = docViewTop + $(window).height();
+
+             var elemTop = div.offset().top;
+             var elemBottom = elemTop + div.height();
+
+             return ((elemBottom >= docViewTop) && (elemTop <= docViewBottom)
+                     && (elemBottom <= docViewBottom) &&  (elemTop >= docViewTop) );
+         };
+
+         var focusTypingInputCarefully = function() {
+             var instructions = $('#id-instructions');
+             var instructionsWereVisible = isScrolledIntoView(instructions);
+             var wasAtTop = ($('body').scrollTop() == 0);
+             inputBox.focus();
+
+             // If focusing has moved the instructions out of view, or if we are
+             // at the top of the document since this the page has just loaded,
+             // scroll the instructions to top.
+
+             if (wasAtTop || (instructionsWereVisible && !isScrolledIntoView(instructions))) {
+                 var pos = instructions.position().top;
+                 var topbar = $('.topbar');
+                 if (topbar.css('position') == 'fixed') {
+                     // If the topbar is position:fixed, we need to take into account
+                     // its height.
+                     pos -= topbar.height();
+                 }
+                 $('body').scrollTop(pos);
+             };
+         };
+
          var setupStage = function(idx) {
              // set the globals
              var currentStageName = currentStageList[idx];
@@ -664,7 +697,7 @@ var learnscripture =
                          markupVerse();
                          $('#id-loading').hide();
                          $('#id-controls').show();
-                         inputBox.focus();
+                         focusTypingInputCarefully();
                      },
                      error: function(jqXHR, textStatus, errorThrown) {
                          if (jqXHR.status == 404) {
