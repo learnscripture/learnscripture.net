@@ -819,7 +819,9 @@ $(document).ajaxSend(function(event, xhr, settings) {
 });
 
 $(document).ready(function() {
-    learnscripture.start();
+    if ($('#id-verse').length > 0) {
+        learnscripture.start();
+    }
 });
 
 
