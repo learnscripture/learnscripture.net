@@ -269,3 +269,85 @@ p.verselist {
 li {
     color: inherit;
 }
+
+
+/* Handhelds and narrow browsers */
+
+@media screen and (max-width: 859px) {
+
+    /* fluid width */
+    .container {
+        width: auto;
+    }
+    /* no columns */
+    #id-leftcolumn {
+        width: auto;
+        float: none;
+    }
+    #id-rightcolumn {
+        width: auto;
+        float: none;
+    }
+    .row {
+        margin:auto;
+    }
+
+    /* squeeze spacings */
+    .topbarinner, .maincontent {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+}
+
+@media screen and (max-height: 500px) {
+    /* squeeze paddings */
+    .page-header {
+        padding-top: 5px;
+        padding-bottom: 3px;
+/*        margin-top: -5px;*/
+        margin-bottom: 3px;
+    }
+
+    /* no top bar */
+    .page-header h1 {
+        margin-bottom: 3px;
+    }
+
+    .topbar {
+        position: static;
+    }
+
+    body {
+        padding-top: 0px;
+        }
+
+
+    /* smaller fonts */
+    #id-verse {
+        font-size: 13px;
+        line-height: 28px;
+    }
+
+    #id-typing {
+        font-size: inherit;
+        height: inherit;
+    }
+    .word {
+        padding: 3px 2px;
+        margin: 0px;
+    }
+
+    #id-instructions {
+        font-size: inherit;
+        margin-bottom: 1px;
+        padding: 3px;
+        border-radius: 2px;
+    }
+
+
+    #id-verse-wrapper {
+        border-radius: 3px;
+        padding: 5px;
+    }
+}

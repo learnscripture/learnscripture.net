@@ -449,44 +449,40 @@ var learnscripture =
 
          var keypress = function(ev) {
              if (ev.ctrlKey && ev.which == 37) {
+                 // Ctrl-Left
                  ev.preventDefault();
                  back();
                  return;
              }
              if (ev.ctrlKey && ev.which == 39) {
+                 // Ctrl-Right
                  ev.preventDefault();
                  next();
                  return;
              }
              if (ev.which == 27) {
+                 // ESC
                  ev.preventDefault();
                  inputBox.val('');
                  return;
              }
              if (ev.which == 13) {
+                 // Enter
                  ev.preventDefault();
                  toggleWord($('.word.selected'));
                  return;
              }
              if (!currentStage.testMode) {
                  if (ev.which == 37) {
+                     // Left
                      ev.preventDefault();
                      moveSelectionRelative(-1);
                      return;
                  }
                  if (ev.which == 39) {
+                     // Right
                      ev.preventDefault();
                      moveSelectionRelative(1);
-                     return;
-                 }
-                 if (ev.which == 38) {
-                     ev.preventDefault();
-                     moveSelectionRelative(-1000);
-                     return;
-                 }
-                 if (ev.which == 40) {
-                     ev.preventDefault();
-                     moveSelectionRelative(1000);
                      return;
                  }
              }
