@@ -69,13 +69,6 @@ footer {
   margin: -20px -20px 20px -20px;
 }
 
-/* Styles you shouldn't keep as they are for displaying this base example only */
-.maincontent .span10,
-.maincontent .span4 {
-  min-height: 500px;
-}
-
-
 
 #id-instructions {
     font-size: 15px;
