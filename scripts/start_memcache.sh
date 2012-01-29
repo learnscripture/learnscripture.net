@@ -1,5 +1,6 @@
 #!/bin/bash
 
+PATH=/usr/local/bin:$PATH
 PID=$(ps -u luke -o pid,command | grep 'memcached'  | grep -v grep | cut -f1 -d ' ')
 
 if [ "x$PID" == "x" ]
