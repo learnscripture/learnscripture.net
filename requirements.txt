@@ -6,3 +6,4 @@ django-fiber==0.9.6.2
 django-pagination==1.0.7
 django-piston==0.2.3rc1
 django-debug-toolbar
+python-memcached==1.48
