@@ -162,6 +162,11 @@ footer {
     font-weight: bold;
 }
 
+#id-progress-summary {
+    padding: 2px;
+    float: right;
+}
+
 .progress progress {
     width: 200px;
 }

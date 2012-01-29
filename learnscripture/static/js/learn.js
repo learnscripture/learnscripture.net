@@ -420,6 +420,7 @@ var learnscripture =
 
              // Common clearing, and stage specific setup
              $('#id-verse .correct, #id-verse .incorrect').removeClass('correct').removeClass('incorrect');
+             $('#id-progress-summary').text("Stage " + (currentStageIdx + 1).toString() + "/" + currentStageList.length.toString());
              currentStage.setup();
              setNextPreviousBtns();
 
