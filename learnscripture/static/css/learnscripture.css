@@ -265,3 +265,7 @@ p.verselist {
 #id-result-buttons {
     float: right;
 }
+
+li {
+    color: inherit;
+}
