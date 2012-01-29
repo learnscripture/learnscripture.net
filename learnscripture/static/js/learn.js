@@ -499,6 +499,19 @@ var learnscripture =
                  }
              }
 
+             // Fall through for all other keys
+             if (!currentStage.testMode) {
+                 // do not allow other typing, since it confuses user to be able
+                 // to type. We are conservative in what we catch, to avoid
+                 // catching tab and function keys etc.
+                 if ((!ev.ctrlKey && !ev.altKey && (
+                     (ev.which >= 65 && ev.which <= 90) ||
+                     (ev.which >= 48 && ev.which <= 57)
+                     ))) {
+                     ev.preventDefault();
+                 }
+             }
+
          };
          var versionSelectChanged = function(ev) {
              $.ajax({url: '/api/learnscripture/v1/changeversion/',
