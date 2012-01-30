@@ -110,9 +110,10 @@ class UserVerseStatus(models.Model):
     version = models.ForeignKey(BibleVersion)
     memory_stage = models.PositiveSmallIntegerField(choices=MemoryStage.choice_list,
                                                     default=MemoryStage.ZERO)
-    strength = models.DecimalField(default=Decimal('0.00'), decimal_places=2, max_digits=3)
+    strength = models.FloatField(default=0.00)
     first_seen = models.DateTimeField(null=True, blank=True)
     last_seen = models.DateTimeField(null=True, blank=True)
+    last_tested = models.DateTimeField(null=True, blank=True)
 
     # See Identity.change_version for explanation of ignored
     ignored = models.BooleanField(default=False)
