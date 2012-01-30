@@ -18,7 +18,9 @@ def get_identity(request):
     identity_id = request.session.get('identity_id', None)
     if identity_id is not None:
         try:
-            return Identity.objects.get(id=identity_id)
+            identity = Identity.objects.get(id=identity_id)
+            if identity.expired:
+                return None
         except Identity.DoesNotExist:
             return None
     else:

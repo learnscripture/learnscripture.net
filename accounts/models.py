@@ -69,6 +69,10 @@ class Identity(models.Model):
         from django.conf import settings
         return self.date_created + timedelta(settings.IDENTITY_EXPIRES_DAYS)
 
+    @property
+    def expired(self):
+        return self.account_id is None and self.expires_on < timezone.now()
+
     class Meta:
         verbose_name_plural = 'identities'
 
@@ -77,6 +81,9 @@ class Identity(models.Model):
             return '<Identity %s>' % self.id
         else:
             return '<Identity %s>' % self.account
+
+    def __repr__(self):
+        return unicode(self)
 
     def add_verse_set(self, verse_set):
         """
