@@ -13,7 +13,8 @@ def get_book(version, book):
     verse = []
     verse_ref = None
     for line in out.decode('utf-8').split('\n'):
-        match = re.match('(((\d )?[a-z]+ \d+:\d+): (.*))', line, re.IGNORECASE)
+
+        match = re.match('(((I+ )?[a-z]+ \d+:\d+): (.*))', line, re.IGNORECASE)
         if match:
             # deal with old
             if verse and verse_ref :
@@ -42,6 +43,8 @@ def import_bible(version):
         for ref, text in sorted(verses.items()):
             # Fixes:
             ref = ref.replace('Psalms', 'Psalm')
+            ref = re.sub('^I ', '1 ', ref)
+            ref = re.sub('^II ', '2 ', ref)
             text = text.replace('.', '. ').replace('.  ', '. ')
             v, x = Verse.objects.get_or_create(version=version_obj,
                                                reference=ref)
