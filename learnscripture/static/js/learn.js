@@ -396,11 +396,10 @@ var learnscripture =
              var wasAtTop = ($('body').scrollTop() == 0);
              inputBox.focus();
 
-             // If focusing has moved the instructions out of view, or if we are
-             // at the top of the document since this the page has just loaded,
-             // scroll the instructions to top.
+             // If the instructions are out of view, and they were visible
+             // before we focussed, move back.
 
-             if (wasAtTop || (instructionsWereVisible && !isScrolledIntoView(instructions))) {
+             if (instructionsWereVisible && !isScrolledIntoView(instructions)) {
                  var pos = instructions.position().top;
                  var topbar = $('.topbar');
                  if (topbar.css('position') == 'fixed') {
