@@ -50,6 +50,12 @@ def fix_ref(ref):
     return ref
 
 
+def fix_text(text):
+    text = text.replace('.', '. ').replace('.  ', '. ')
+    # Some stray " at end of verses.
+    text = re.sub(' "(\b|$)', '"', text)
+    return text
+
 def parse_ref(ref):
     r = ref.rsplit(' ', 1)
     c, v = map(int, r[1].split(':'))
@@ -65,7 +71,7 @@ def import_bible(version):
         for ref, text in verses:
             # Fixes:
             ref = fix_ref(ref)
-            text = text.replace('.', '. ').replace('.  ', '. ')
+            text = fix_text(text)
             parsed_book, ch_num, v_num = parse_ref(ref)
             assert parsed_book == book
             v, x = Verse.objects.get_or_create(version=version_obj,
