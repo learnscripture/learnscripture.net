@@ -34,14 +34,18 @@ footer {
   width: 860px; /* downsize our container to make the content feel a bit tighter and more cohesive. NOTE: this removes two full columns from the grid, meaning you only go to 14 columns and not 16. */
 }
 
+
+@mainSidePadding:      20px;
+@mainTopPadding:       20px;
+
 .maincontent {
-  padding-top: 20px;
-  padding-bottom: 20px;
+  padding-top: @mainTopPadding;
+  padding-bottom: @mainTopPadding;
 }
 
 .topbarinner, .maincontent {
-    padding-left: 20px;
-    padding-right: 20px;
+    padding-left: @mainSidePadding;
+    padding-right: @mainSidePadding;
 }
 
 
@@ -61,11 +65,14 @@ footer {
 /* Page header tweaks */
 .page-header {
   background-color: #f5f5f5;
-  padding: 20px 20px 10px;
-  margin: -20px -20px 20px -20px;
+  padding: 20px @mainSidePadding 10px;
 }
-.message-container {
-  margin: -20px -20px 20px -20px;
+
+.page-header, .message-container {
+  margin-left: -@mainSidePadding;
+  margin-right: -@mainSidePadding;
+  margin-bottom: @mainTopPadding;
+  margin-top: -@mainTopPadding;
 }
 
 
@@ -235,6 +242,9 @@ li {
 
 /* Handhelds and narrow browsers */
 
+@smallerMainSidePadding:   10px;
+@smallerMainTopPadding:    5px;
+
 @media screen and (max-width: 859px) {
 
     /* fluid width */
@@ -256,18 +266,42 @@ li {
 
     /* squeeze spacings */
     .topbarinner, .maincontent {
-        padding-left: 10px;
-        padding-right: 10px;
+        padding-left: @smallerMainSidePadding;
+        padding-right: @smallerMainSidePadding;
+    }
+
+    .page-header {
+        padding-left: @smallerMainSidePadding;
+        padding-right: @smallerMainSidePadding;
+    }
+
+    .page-header, .message-container {
+        margin-left: -@smallerMainSidePadding;
+        margin-right: -@smallerMainSidePadding;
     }
 
 }
 
+// If there is not much room (either vertically or horizontally),
+// we squeeze fonts and paddings
+
 @media screen and (max-height: 500px) {
     /* squeeze paddings */
+
+
+    .maincontent {
+        padding-top: @smallerMainTopPadding;
+        padding-bottom: @smallerMainTopPadding;
+    }
+
     .page-header {
         padding-top: 5px;
         padding-bottom: 3px;
-        margin-bottom: 3px;
+    }
+
+    .page-header, .message-container {
+        margin-bottom: @smallerMainTopPadding;
+        margin-top: -@smallerMainTopPadding;
     }
 
     /* no top bar */
@@ -281,7 +315,7 @@ li {
 
     body {
         padding-top: 0px;
-        }
+    }
 
 
     /* smaller fonts */
