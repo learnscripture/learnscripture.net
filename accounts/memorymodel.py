@@ -55,9 +55,9 @@ def t(s):
 MAX_TESTS = 20
 
 # For the initial test, we don't have a previous strength recorded. We
-# arbitrarily set the initial strength to be 0.5 test strength
+# arbitrarily set the initial strength to be 0.1 test strength
 
-INITIAL_STRENGTH_FACTOR = 0.5
+INITIAL_STRENGTH_FACTOR = 0.1
 
 # Assuming the user scores 100% initially, we then want to fit in MAX_TESTS
 # between this initial strength and the final of one. Each test should therefore
@@ -68,15 +68,18 @@ DELTA_S_IDEAL = (1 - INITIAL_STRENGTH_FACTOR) / MAX_TESTS
 # We now need a fixed point to calculate alpha
 
 # In the Charlotte Mason system, the user is tested every day for a week.
-# We aim for N (=7) testings in N time periods (=days)
+# If we aim to get 7 tests in first week, the initial ones will be crammed
+# together, and the user will miss them. Also, experimentally, we want
+# a value of alpha that will still test the user after about a year.
+# So we go for 7 tests in 14 days.
 
-TP = 24 * 60 * 60 # a day
+TP = 7 * 24 * 60 * 60
 N = 7
 
 # We have s_initial = INITIAL_STRENGTH_FACTOR:
 s_initial = INITIAL_STRENGTH_FACTOR
 
-# We need to fit: (s_later - s_initial) corresponds to 7 tests
+# We need to fit: (s_later - s_initial) corresponds to N tests
 # s_later - s_initial ==  N * DELTA_S_IDEAL
 
 s_later = s_initial + N * DELTA_S_IDEAL
@@ -86,21 +89,21 @@ s_later = s_initial + N * DELTA_S_IDEAL
 
 # - alpha * t_initial  = ln (1 - s_initial)      [1]
 # - alpha * t_later    = ln (1 - s_later)        [2]
-#           t_later    = t_initial + N * TP      [3]
+#           t_later    = t_initial +  TP         [3]
 #
 # Eliminating t_later from [2] using [3]:
-# - alpha * (t_initial + N*TP) = ln(1 - s_later)
+# - alpha * (t_initial + TP) = ln(1 - s_later)
 #
 # Rearrange [1] and eliminating t_initial:
 #
-#  - alpha( -1/alpha * ln(1 - s_initial) + N * TP) = ln(1 - s_later)
-#  alpha = - ln(1 - s_later) / (-1/alpha * ln(1 - s1) + N * TP)
+#  - alpha( -1/alpha * ln(1 - s_initial) + TP) = ln(1 - s_later)
+#  alpha = - ln(1 - s_later) / (-1/alpha * ln(1 - s1) + TP)
 #
 # giving an iterative method for finding alpha, which happens to converge fairly
 # quickly:
 
 def refine_alpha(alpha):
-    return - math.log(1.0 - s_later) / (-1.0/alpha * math.log(1.0 - s_initial) + N * TP)
+    return - math.log(1.0 - s_later) / (-1.0/alpha * math.log(1.0 - s_initial) + TP)
 
 def repeat(func, init, times):
     val = init
@@ -167,4 +170,38 @@ def strength_estimate(old_strength, test_strength, time_elapsed):
 
     return min(BEST_STRENGTH, new_strength)
 
+
+def needs_testing(strength, time_elapsed):
+    if time_elapsed is None or strength is None:
+        return True
+    # For the initial stages, DELTA_S_IDEAL works well.  For later stages,
+    # however, the exponential behaviour works against us, and the memory falls
+    # off a cliff and is dropped a bit too quickly.
+
+    TOP_PHASE = 0.05
+    if strength > (1.0 - TOP_PHASE):
+        # Keep adjusting it so we don't hit the ceiling
+        delta_s_ideal = DELTA_S_IDEAL * (1.0 - strength)/TOP_PHASE
+    else:
+        delta_s_ideal = DELTA_S_IDEAL
+
+    t_0 = t(strength)
+    t_1 = t(min(strength + delta_s_ideal, BEST_STRENGTH))
+    if time_elapsed > t_1 - t_0:
+        return True
+
+
+
+def test_run():
+    interval = 0
+    x = None
+    day = 24*3600
+    test = 0
+    for i in range(0, 200):
+        interval += 1
+        if needs_testing(x, day * interval):
+            x = strength_estimate(x, 1.0, interval * day)
+            test += 1
+            print "Day %d, test %d, interval %d, strength %s" % (i, test, interval, x)
+            interval = 0
 
