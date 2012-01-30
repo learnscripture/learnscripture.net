@@ -852,6 +852,7 @@ $(document).ready(function() {
     if ($('#id-verse').length > 0) {
         learnscripture.start();
     }
+    $('.topbar').dropdown();
 });
 
 

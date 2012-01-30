@@ -20,6 +20,7 @@
 
     {% compress js %}
     <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-dropdown.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/learn.js"></script>
     {% endcompress %}
 
@@ -37,9 +38,17 @@
             <li><a href="#about">About</a></li>
             <li><a href="#contact">Contact</a></li>
           </ul>
-          <form action="" class="pull-right">
-            <button class="btn" type="submit">Guest</button>
-          </form>
+          <div class="nav secondary-nav">
+            <ul>
+              <li class="dropdown" data-dropdown="dropdown">
+                <a href="#" class="dropdown-toggle">Guest</a>
+                <ul class="dropdown-menu">
+                  <li><a href="#">Log in</a></li>
+                  <li><a href="#">Create account</a></li>
+                </ul>
+              </li>
+            </ul>
+          </div>
           </div>
         </div>
       </div>

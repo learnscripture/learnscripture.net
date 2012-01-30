@@ -25,10 +25,9 @@ footer {
 }
 
 .topbar-inner, .topbar .fill {
-  .gradientBar(@blue, @blueDark);
-  -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
-  -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+//  .gradientBar(@blue, @blueDark);
+  @shadow: 0 1px 3px rgba(0, 0, 0, 0.25), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  .box-shadow(@shadow);
 }
 .container {
   width: 860px; /* downsize our container to make the content feel a bit tighter and more cohesive. NOTE: this removes two full columns from the grid, meaning you only go to 14 columns and not 16. */
@@ -207,9 +206,9 @@ p.verselist {
 
 .verseset {
     padding: 15px;
-    background-color: #CCE6FF;
+    background-color: whiteSmoke;
     border-radius: 7px;
-    border: 1px solid #BAD1E8;
+    border: 1px solid #E0E0E0;
     margin-bottom: 15px;
 }
 
