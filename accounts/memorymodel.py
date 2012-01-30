@@ -5,22 +5,33 @@ import math
 
 # We try to fit the progress of a memory to a idealised exponential curve:
 #
-#
-# s = 1 - exp(-alpha × t)
+# s = 1 - exp(-alpha × t^exponent)
+
+# A strength of 1 is perfect, but we assume that a person never reaches this.
+# We attempt to move a memory along this curve by testing at ever increasing
+# intervals. This idea is taken from the Charlotte Mason Scripture Memory system.
+
+# We fix alpha and expponent by trial and error to
+# give us:
+
+# 1) the right initial testing sequence (lots of times initially,
+#    preferably about a week where they are tested every day.
+# 2) a tail that remains for over a year, so it doesn't
+#    drop the memory too quickly.
+
+EXPONENT = 0.2
+ALPHA = 5e-2
+
 
 def s(t):
-    return 1 - math.exp(-ALPHA * t)
+    return 1 - math.exp(-ALPHA * t**EXPONENT)
 
 # where 's' is the strength of the memory and t is the time elapsed,
 # and alpha is a constant. We will also need the inverse:
 
 def t(s):
-    return - math.log(1 - s) / ALPHA
+    return (- math.log(1 - s) / ALPHA)**(1.0/EXPONENT)
 
-# A strength of 1 is perfect, but we assume that a person never reaches this.
-# We attempt to move a memory along this curve by testing at ever increasing
-# intervals. This idea is taken from the Charlotte Mason Scripture Memory system.
-#
 # These increasing intervals on the time axis can correspond to even size
 # intervals on the strength axis since we have an exponential as above.
 #
@@ -49,71 +60,19 @@ def t(s):
 #
 # delta_t_ideal corresponds to an interval delta_s_ideal from the current
 # strength.  We aim to fit delta_s_ideal to a constant that will produce a fixed
-# number of tests to move the memory from strength zero to 'one'. In the Charlotte
-# Mason system, a verse is tested about 15 - 20 times, so we use this:
-
-MAX_TESTS = 20
+# number of tests to move the memory from strength zero to 'one'. In the
+# Charlotte Mason system, a verse is tested about 15 - 20 times, so we aim for
+# 20 tests in 2 years.
 
 # For the initial test, we don't have a previous strength recorded. We
 # arbitrarily set the initial strength to be 0.1 test strength
 
 INITIAL_STRENGTH_FACTOR = 0.1
 
-# Assuming the user scores 100% initially, we then want to fit in MAX_TESTS
-# between this initial strength and the final of one. Each test should therefore
-# come after:
+# Trial and error - this gives us approx 20 tests in 2 years,
+# and doesn't get us too close to strength=1 after 100 years.
+DELTA_S_IDEAL = 0.02
 
-DELTA_S_IDEAL = (1 - INITIAL_STRENGTH_FACTOR) / MAX_TESTS
-
-# We now need a fixed point to calculate alpha
-
-# In the Charlotte Mason system, the user is tested every day for a week.
-# If we aim to get 7 tests in first week, the initial ones will be crammed
-# together, and the user will miss them. Also, experimentally, we want
-# a value of alpha that will still test the user after about a year.
-# So we go for 7 tests in 14 days.
-
-TP = 7 * 24 * 60 * 60
-N = 7
-
-# We have s_initial = INITIAL_STRENGTH_FACTOR:
-s_initial = INITIAL_STRENGTH_FACTOR
-
-# We need to fit: (s_later - s_initial) corresponds to N tests
-# s_later - s_initial ==  N * DELTA_S_IDEAL
-
-s_later = s_initial + N * DELTA_S_IDEAL
-
-# Re-arranging s:
-# ln(1 - s) = - alpha * t
-
-# - alpha * t_initial  = ln (1 - s_initial)      [1]
-# - alpha * t_later    = ln (1 - s_later)        [2]
-#           t_later    = t_initial +  TP         [3]
-#
-# Eliminating t_later from [2] using [3]:
-# - alpha * (t_initial + TP) = ln(1 - s_later)
-#
-# Rearrange [1] and eliminating t_initial:
-#
-#  - alpha( -1/alpha * ln(1 - s_initial) + TP) = ln(1 - s_later)
-#  alpha = - ln(1 - s_later) / (-1/alpha * ln(1 - s1) + TP)
-#
-# giving an iterative method for finding alpha, which happens to converge fairly
-# quickly:
-
-def refine_alpha(alpha):
-    return - math.log(1.0 - s_later) / (-1.0/alpha * math.log(1.0 - s_initial) + TP)
-
-def repeat(func, init, times):
-    val = init
-    for i in range(0, times):
-        val = func(val)
-    return val
-
-ALPHA = repeat(refine_alpha, 1, 50) # approx 7e-7
-
-# (Feeding this value back into the formulae confirms it is correct).
 
 # If we have a strength of 1 it will stop the memory from ever being tested, and
 # break our maths below.
@@ -174,21 +133,9 @@ def strength_estimate(old_strength, test_strength, time_elapsed):
 def needs_testing(strength, time_elapsed):
     if time_elapsed is None or strength is None:
         return True
-    # For the initial stages, DELTA_S_IDEAL works well.  For later stages,
-    # however, the exponential behaviour works against us, and the memory falls
-    # off a cliff and is dropped a bit too quickly.
-
-    TOP_PHASE = 0.05
-    if strength > (1.0 - TOP_PHASE):
-        # Keep adjusting it so we don't hit the ceiling
-        delta_s_ideal = DELTA_S_IDEAL * (1.0 - strength)/TOP_PHASE
-    else:
-        delta_s_ideal = DELTA_S_IDEAL
-
     t_0 = t(strength)
-    t_1 = t(min(strength + delta_s_ideal, BEST_STRENGTH))
-    if time_elapsed > t_1 - t_0:
-        return True
+    t_1 = t(min(strength + DELTA_S_IDEAL, BEST_STRENGTH))
+    return time_elapsed > t_1 - t_0
 
 
 
@@ -197,10 +144,10 @@ def test_run():
     x = None
     day = 24*3600
     test = 0
-    for i in range(0, 200):
+    for i in range(0, 2*365):
         interval += 1
         if needs_testing(x, day * interval):
-            x = strength_estimate(x, 1.0, interval * day)
+            x = strength_estimate(x, 0.95, interval * day)
             test += 1
             print "Day %d, test %d, interval %d, strength %s" % (i, test, interval, x)
             interval = 0
