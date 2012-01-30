@@ -8,20 +8,7 @@
           </div>
           <div class="span4" id="id-rightcolumn">
             {% block rightcolumn %}
-            <h3>Session status</h3>
-
-            <p><b>Guest User</b></p>
-
-            <div class="stats">
-              <p>Words seen: 0</p>
-
-              <p>Words learnt: 0</p>
-            </div>
-
-            <p>As a guest, your data will be safe for two weeks (assuming you don't clear
-              your browser cookies).</p>
-
-            <p><a href="">Create an account</a> to save progress permanently.</p>
+            {% include 'learnscripture/session.html' %}
 
             {% endblock %}
           </div>

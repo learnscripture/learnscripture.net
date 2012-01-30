@@ -189,3 +189,8 @@ COMPRESS_PRECOMPILERS = (
     ('text/less', 'lessc {infile} {outfile}'),
 )
 COMPRESS_ENABLED = True
+
+### LearnScripture.net specific settings ###
+
+IDENTITY_EXPIRES_DAYS = 21
+
