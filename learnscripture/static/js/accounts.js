@@ -41,7 +41,7 @@ var learnscripture = (function(learnscripture, $) {
     var setSignedIn = function(accountData) {
         hideSignupLinks();
         signedInAccountData = accountData;
-        $('#id-session-menu').text(accountData.username);
+        $('.holds-username').text(accountData.username);
     };
 
     var signupBtnClick = function(ev) {
@@ -72,6 +72,7 @@ var learnscripture = (function(learnscripture, $) {
 
     // Export:
     learnscripture.wireSignup = wireSignup;
+    learnscripture.setSignedIn = setSignedIn;
     return learnscripture;
 })(learnscripture || {}, $);
 

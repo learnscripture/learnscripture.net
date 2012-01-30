@@ -3,10 +3,10 @@
 <h3>Session status</h3>
 
 {% if request.identity.account %}
-<p>Logged in as: <b>{{ request.identity.account.username }}</b></p>
+<p>Logged in as: <b class="holds-username">{{ request.identity.account.username }}</b></p>
 
 {% else %}
-<p>Logged in as: <b>Guest User</b></p>
+<p>Logged in as: <b class="holds-username">Guest User</b></p>
 
 <hr/>
 <div class="warning">
