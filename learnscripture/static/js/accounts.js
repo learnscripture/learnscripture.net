@@ -2,8 +2,8 @@
 var learnscripture = (function(learnscripture, $) {
     var signedInAccountData = null;
 
-    var hideSignupLinks = function() {
-        $('.signup-link, .signin-link').each(function(idx, elem) {
+    var hideSignUpLinks = function() {
+        $('.signup-link, .login-link').each(function(idx, elem) {
             var a = $(elem);
             a.hide();
             if (a.parent().find(":visible").length == 0) {
@@ -14,7 +14,7 @@ var learnscripture = (function(learnscripture, $) {
     };
 
     var setSignedIn = function(accountData) {
-        hideSignupLinks();
+        hideSignUpLinks();
         signedInAccountData = accountData;
         $('.holds-username').text(accountData.username);
     };
@@ -58,48 +58,50 @@ var learnscripture = (function(learnscripture, $) {
                 });
     };
 
-    var showSignup = function(ev) {
+    var showSignUp = function(ev) {
         ev.preventDefault();
         $('#id-signup-form').modal({backdrop:true, keyboard:true, show:true});
     };
 
-    var signinError = function(jqXHR, textStatus, errorThrown) {
+    var loginError = function(jqXHR, textStatus, errorThrown) {
         if (jqXHR.status == 400) {
-            handleFormValidationErrors($('#id-signin-form'), 'signin', jqXHR);
+            handleFormValidationErrors($('#id-login-form'), 'login', jqXHR);
         } else {
             learnscripture.handlerAjaxError(jqXHR, textStatus, errorThrown);
         }
     };
 
-    var signinBtnClick = function(ev) {
-        $.ajax({url: '/api/learnscripture/v1/signin/',
+    var loginBtnClick = function(ev) {
+        $.ajax({url: '/api/learnscripture/v1/login/',
                 dataType: 'json',
                 type: 'POST',
-                data: $('#id-signin-form form').serialize(),
-                error: signinError,
+                data: $('#id-login-form form').serialize(),
+                error: loginError,
                 success: function(data) {
                     setSignedIn(data);
-                    $('#id-signin-form').modal('hide');
+                    $('#id-login-form').modal('hide');
                 }
                 });
     };
 
-    var showSignin = function(ev) {
+    var showLogIn = function(ev) {
         ev.preventDefault();
-        $('#id-signin-form').modal({backdrop:true, keyboard:true, show:true});
+        $('#id-login-form').modal({backdrop:true, keyboard:true, show:true});
     };
 
     var setupAccountControls = function(ev) {
-        $('.signup-link').click(showSignup);
+        $('.signup-link').click(showSignUp);
         $('#id-create-account-btn').click(signupBtnClick);
         $('#id-create-account-cancel-btn').click(function(ev) {
+            ev.preventDefault();
             $('#id-signup-form').modal('hide');
         });
 
-        $('.signin-link').click(showSignin);
-        $('#id-sign-in-btn').click(signinBtnClick);
-        $('#id-sign-in-canncel-btn').click(function(ev) {
-            $('#id-signin-form').modal('hide');
+        $('.login-link').click(showLogIn);
+        $('#id-sign-in-btn').click(loginBtnClick);
+        $('#id-sign-in-cancel-btn').click(function(ev) {
+            ev.preventDefault();
+            $('#id-login-form').modal('hide');
         });
     };
 

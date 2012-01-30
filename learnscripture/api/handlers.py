@@ -15,7 +15,7 @@ from piston.utils import rc
 from accounts.models import Account
 from bibleverses.models import UserVerseStatus, Verse
 from learnscripture import session
-from learnscripture.forms import SignupForm, SigninForm
+from learnscripture.forms import SignUpForm, LogInForm
 
 
 def require_identity(method):
@@ -116,11 +116,11 @@ class AccountCommon(object):
     fields = ('id', 'username', 'email')
 
 
-class SignupHandler(AccountCommon, BaseHandler):
+class SignUpHandler(AccountCommon, BaseHandler):
     allowed_methods = ('POST',)
 
     @require_identity
-    @validate(SignupForm, prefix="signup")
+    @validate(SignUpForm, prefix="signup")
     def create(self, request):
         identity = request.identity
         if identity.account_id is not None:
@@ -132,10 +132,10 @@ class SignupHandler(AccountCommon, BaseHandler):
         return account
 
 
-class SigninHandler(AccountCommon, BaseHandler):
+class LogInHandler(AccountCommon, BaseHandler):
     allowed_methods = ('POST',)
 
-    @validate(SigninForm, prefix="signin")
+    @validate(LogInForm, prefix="login")
     def create(self, request):
         # The form has validated the password already.
         account = Account.objects.get(email=request.form.cleaned_data['email'].strip())

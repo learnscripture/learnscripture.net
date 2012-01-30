@@ -4,7 +4,7 @@ from django.conf import settings
 from accounts.models import Account, SubscriptionType
 
 
-class SignupForm(forms.ModelForm):
+class SignUpForm(forms.ModelForm):
 
     password = forms.CharField(max_length=100, widget=forms.PasswordInput)
 
@@ -19,7 +19,7 @@ class SignupForm(forms.ModelForm):
         """
         Saves the new password.
         """
-        account = super(SignupForm, self).save(commit=False)
+        account = super(SignUpForm, self).save(commit=False)
         account.set_password(self.cleaned_data["password"])
         account.subscription = SubscriptionType.FREE_TRIAL
 
@@ -38,7 +38,7 @@ class SignupForm(forms.ModelForm):
             ]
 
 
-class SigninForm(forms.Form):
+class LogInForm(forms.Form):
     email = forms.EmailField()
     password = forms.CharField(max_length=100, widget=forms.PasswordInput)
 
