@@ -1,5 +1,7 @@
 {% load url from future %}
 {% load compress %}
+{% load bootstrap %}
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -86,6 +88,47 @@
       </footer>
 
     </div> <!-- /container -->
+
+
+<!-- popup forms -->
+<div id="id-signup-form" class="modal hide">
+  <div class="modal-header">
+    <a href="#" class="close">&times;</a>
+    <h3>Create account</h3>
+  </div>
+
+  <div class="modal-body">
+    <form action="" method="POST">
+      {% csrf_token %}
+      {{ signup_form|bootstrap }}
+    </form>
+  </div>
+  <div class="modal-footer">
+    <a href="#" id="id-create-account-btn" class="btn primary">Create account</a>
+    <a href="#" id="id-create-account-cancel-btn" class="btn secondary">Cancel</a>
+  </div>
+</div>
+
+
+
+<div id="id-login-form" class="modal hide">
+  <div class="modal-header">
+    <a href="#" class="close">&times;</a>
+    <h3>Sign in</h3>
+  </div>
+
+  <div class="modal-body">
+    <form action="" method="POST">
+      {% csrf_token %}
+      {{ login_form|bootstrap }}
+    </form>
+  </div>
+  <div class="modal-footer">
+    <a href="#" id="id-sign-in-btn" class="btn primary">Sign in</a>
+    <a href="#" id="id-sign-in-cancel-btn" class="btn secondary">Cancel</a>
+  </div>
+</div>
+
 
   </body>
 </html>
