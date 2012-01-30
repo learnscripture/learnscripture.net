@@ -107,6 +107,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     'django.contrib.messages.context_processors.messages',
     'django.core.context_processors.request',
     'fiber.context_processors.page_info',
+    'learnscripture.context_processors.session_forms',
 ]
 
 ROOT_URLCONF = 'learnscripture.urls'
@@ -194,3 +195,4 @@ COMPRESS_ENABLED = True
 
 IDENTITY_EXPIRES_DAYS = 21
 
+MINIMUM_PASSWORD_LENGTH = 6

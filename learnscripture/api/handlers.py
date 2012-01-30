@@ -1,10 +1,22 @@
+"""
+Handlers for AJAX requests.
+
+This isn't really a REST API in the normal sense, and would probably need a lot
+of cleaning up if clients other than the web app were to use it - we are just
+using Piston for the convenience it provides.
+
+"""
 from django.utils.functional import wraps
+from django.utils import simplejson
 
 from piston.handler import BaseHandler
 from piston.utils import rc
 
+from accounts.models import Account
 from bibleverses.models import UserVerseStatus, Verse
 from learnscripture import session
+from learnscripture.forms import SignupForm
+
 
 def require_identity(method):
     @wraps(method)
@@ -15,6 +27,25 @@ def require_identity(method):
         request.identity = identity
         return method(self, request, *args, **kwargs)
     return wrapper
+
+
+# We need a more capable 'validate' than the one provided by
+# piston, so that we get errors return nicely.
+
+def validate(form_class, **formkwargs):
+    def dec(method):
+        @wraps(method)
+        def wrapper(self, request, *args, **kwargs):
+            form = form_class(request.POST, **formkwargs)
+            if form.is_valid():
+                request.form = form
+                return method(self, request, *args, **kwargs)
+            else:
+                resp = rc.BAD_REQUEST
+                resp.write("\n" + simplejson.dumps(form.errors))
+                return resp
+        return wrapper
+    return dec
 
 
 class NextVerseHandler(BaseHandler):
@@ -80,3 +111,19 @@ class ChangeVersionHandler(BaseHandler):
 
         return {}
 
+
+class SignupHandler(BaseHandler):
+    allowed_methods = ('POST',)
+    fields = ('id', 'username', 'email')
+
+    @require_identity
+    @validate(SignupForm, prefix="signup")
+    def create(self, request):
+        identity = request.identity
+        if identity.account_id is not None:
+            # UI should stop this happening.
+            resp = rc.BAD_REQUEST
+        account = request.form.save()
+        identity.account = account
+        identity.save()
+        return account
