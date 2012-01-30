@@ -4,6 +4,7 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.auth.hashers import check_password, make_password
 
+from accounts import memorymodel
 from bibleverses.models import BibleVersion, MemoryStage, StageType, BibleVersion, VerseChoice, VerseSet, VerseSetType
 
 from learnscripture.datastructures import make_choices
@@ -121,7 +122,21 @@ class Identity(models.Model):
             StageType.TEST_TYPE_QUICK: MemoryStage.TESTED,
             }[stage_type]
 
+        # It's possible that they have already been tested, so don't move them
+        # down to MemoryStage.SEEN
         s.filter(memory_stage__lt=mem_stage).update(memory_stage=mem_stage)
+
+        if mem_stage == MemoryStage.TESTED:
+            s0 = s[0] # Any should do, they should be all the same
+            old_strength = s0.strength
+            now = timezone.now()
+            if s0.last_tested is None:
+                time_elapsed = None
+            else:
+                time_elapsed = (now - s0.last_tested).total_seconds()
+            new_strength = memorymodel.strength_estimate(old_strength, accuracy, time_elapsed)
+            s.update(strength=new_strength,
+                     last_tested=now)
 
     def change_version(self, reference, version_slug, verse_set_id):
         """
