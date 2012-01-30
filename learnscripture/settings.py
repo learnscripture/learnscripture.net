@@ -108,6 +108,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     'django.core.context_processors.request',
     'fiber.context_processors.page_info',
     'learnscripture.context_processors.session_forms',
+    'learnscripture.context_processors.menu',
 ]
 
 ROOT_URLCONF = 'learnscripture.urls'
