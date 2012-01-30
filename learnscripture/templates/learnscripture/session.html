@@ -36,4 +36,23 @@
   </div>
 </div>
 
+
+
+<div id="id-signin-form" class="modal hide">
+  <div class="modal-header">
+    <a href="#" class="close">&times;</a>
+    <h3>Sign in</h3>
+  </div>
+
+  <div class="modal-body">
+    <form action="" method="POST">
+      {{ signin_form|bootstrap }}
+    </form>
+  </div>
+  <div class="modal-footer">
+    <a href="#" id="id-sign-in-btn" class="btn primary">Sign in</a>
+    <a href="#" id="id-sign-in-cancel-btn" class="btn secondary">Cancel</a>
+  </div>
+</div>
+
 {% endif %}

@@ -2,7 +2,7 @@
 from django.conf.urls import url, patterns
 from piston.resource import Resource as BaseResource
 
-from learnscripture.api.handlers import NextVerseHandler, ActionCompleteHandler, ChangeVersionHandler, SignupHandler
+from learnscripture.api.handlers import NextVerseHandler, ActionCompleteHandler, ChangeVersionHandler, SignupHandler, SigninHandler
 
 
 class Resource(BaseResource):
@@ -17,5 +17,6 @@ urlpatterns = patterns('',
                        url(r'^actioncomplete/$', Resource(ActionCompleteHandler)),
                        url(r'^changeversion/$', Resource(ChangeVersionHandler)),
                        url(r'^signup/$', Resource(SignupHandler)),
+                       url(r'^signin/$', Resource(SigninHandler)),
                        )
 

@@ -31,8 +31,12 @@ def get_identity(request):
 
 def start_identity(request):
     identity = Identity.objects.create()
-    request.session['identity_id'] = identity.id
+    set_identity(request, identity)
     return identity
+
+
+def set_identity(request, identity):
+    request.session['identity_id'] = identity.id
 
 
 def get_verses_to_learn(request):

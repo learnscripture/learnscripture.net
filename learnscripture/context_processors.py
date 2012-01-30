@@ -1,4 +1,4 @@
-from .forms import SignupForm
+from .forms import SignupForm, SigninForm
 
 def session_forms(request):
     # Use callables here to avoid overhead when not needed.  The template will
@@ -10,4 +10,8 @@ def session_forms(request):
     def signup_form():
         return SignupForm(prefix="signup")
 
-    return {'signup_form': signup_form}
+    def signin_form():
+        return SigninForm(prefix="signin")
+
+    return {'signup_form': signup_form,
+            'signin_form': signin_form}

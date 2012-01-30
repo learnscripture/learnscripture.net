@@ -15,7 +15,7 @@ from piston.utils import rc
 from accounts.models import Account
 from bibleverses.models import UserVerseStatus, Verse
 from learnscripture import session
-from learnscripture.forms import SignupForm
+from learnscripture.forms import SignupForm, SigninForm
 
 
 def require_identity(method):
@@ -29,8 +29,8 @@ def require_identity(method):
     return wrapper
 
 
-# We need a more capable 'validate' than the one provided by
-# piston, so that we get errors return nicely.
+# We need a more capable 'validate' than the one provided by piston to get
+# validation errors returned as JSON.
 
 def validate(form_class, **formkwargs):
     def dec(method):
@@ -112,9 +112,12 @@ class ChangeVersionHandler(BaseHandler):
         return {}
 
 
-class SignupHandler(BaseHandler):
-    allowed_methods = ('POST',)
+class AccountCommon(object):
     fields = ('id', 'username', 'email')
+
+
+class SignupHandler(AccountCommon, BaseHandler):
+    allowed_methods = ('POST',)
 
     @require_identity
     @validate(SignupForm, prefix="signup")
@@ -126,4 +129,15 @@ class SignupHandler(BaseHandler):
         account = request.form.save()
         identity.account = account
         identity.save()
+        return account
+
+
+class SigninHandler(AccountCommon, BaseHandler):
+    allowed_methods = ('POST',)
+
+    @validate(SigninForm, prefix="signin")
+    def create(self, request):
+        # The form has validated the password already.
+        account = Account.objects.get(email=request.form.cleaned_data['email'].strip())
+        session.set_identity(request, account.identity)
         return account

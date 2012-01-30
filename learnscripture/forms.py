@@ -38,3 +38,19 @@ class SignupForm(forms.ModelForm):
             ]
 
 
+class SigninForm(forms.Form):
+    email = forms.EmailField()
+    password = forms.CharField(max_length=100, widget=forms.PasswordInput)
+
+    def clean_password(self):
+        def fail():
+            raise forms.ValidationError("Can't find an account matching that email address and password");
+        try:
+            account = Account.objects.get(email=self.cleaned_data.get('email', '').strip())
+        except Account.DoesNotExist:
+            fail()
+
+        p = self.cleaned_data.get('password', '')
+        if not account.check_password(p):
+            fail()
+        return p
