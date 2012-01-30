@@ -21,6 +21,8 @@ def get_identity(request):
             identity = Identity.objects.get(id=identity_id)
             if identity.expired:
                 return None
+            else:
+                return identity
         except Identity.DoesNotExist:
             return None
     else:
