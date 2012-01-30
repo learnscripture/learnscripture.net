@@ -282,12 +282,10 @@ li {
 
 }
 
-// If there is not much room (either vertically or horizontally),
-// we squeeze fonts and paddings
+// If there is not much room vertical we squeeze paddings
 
-@media screen and (max-height: 500px) {
+@media screen and (max-height: 600px) {
     /* squeeze paddings */
-
 
     .maincontent {
         padding-top: @smallerMainTopPadding;
@@ -304,7 +302,7 @@ li {
         margin-top: -@smallerMainTopPadding;
     }
 
-    /* no top bar */
+    /* no fixed top bar */
     .page-header h1 {
         margin-bottom: 3px;
     }
@@ -317,6 +315,12 @@ li {
         padding-top: 0px;
     }
 
+}
+
+// If not much room in either direction, shrink the fonts
+// of the verse words to make more room
+
+@media screen and (max-width: 600px), screen and (max-height: 500px) {
 
     /* smaller fonts */
     #id-verse {
@@ -339,7 +343,6 @@ li {
         padding: 3px;
         border-radius: 2px;
     }
-
 
     #id-verse-wrapper {
         border-radius: 3px;
