@@ -563,24 +563,21 @@ var learnscripture =
          // Stages definition
 
          // Full and initial
-         var recall1Continue = makeFullAndInitialContinue(0.33);
+         var recall1Continue = makeFullAndInitialContinue(0.50);
          var recall1Start = makeRecallStart(recall1Continue);
 
-         var recall2Continue = makeFullAndInitialContinue(0.66);
+         var recall2Continue = makeFullAndInitialContinue(1);
          var recall2Start = makeRecallStart(recall2Continue);
 
-         var recall3Continue = makeFullAndInitialContinue(1);
+         // initial and missing
+         var recall3Continue = makeInitialAndMissingContinue(0.33);
          var recall3Start = makeRecallStart(recall3Continue);
 
-         // initial and missing
-         var recall4Continue = makeInitialAndMissingContinue(0.33);
+         var recall4Continue = makeInitialAndMissingContinue(0.66);
          var recall4Start = makeRecallStart(recall4Continue);
 
-         var recall5Continue = makeInitialAndMissingContinue(0.66);
+         var recall5Continue = makeInitialAndMissingContinue(1);
          var recall5Start = makeRecallStart(recall5Continue);
-
-         var recall6Continue = makeInitialAndMissingContinue(1);
-         var recall6Start = makeRecallStart(recall6Continue);
 
          // Each stage definition contains:
          //
@@ -604,32 +601,27 @@ var learnscripture =
                                    toggleMode: WORD_TOGGLE_SHOW},
                           'recall1': {setup: recall1Start,
                                       continueStage: recall1Continue,
-                                      caption: 'Recall 1 - 33% initial',
+                                      caption: 'Recall 1 - 50% initial',
                                       testMode: false,
                                       toggleMode: WORD_TOGGLE_HIDE_END},
                           'recall2': {setup: recall2Start,
                                       continueStage: recall2Continue,
-                                      caption: 'Recall 2 - 66% initial',
+                                      caption: 'Recall 2 - 100% initial',
                                       testMode: false,
                                       toggleMode: WORD_TOGGLE_HIDE_END},
                           'recall3': {setup: recall3Start,
                                       continueStage: recall3Continue,
-                                      caption: 'Recall 3 - 100% initial',
+                                      caption: 'Recall 3 - 33% missing',
                                       testMode: false,
-                                      toggleMode: WORD_TOGGLE_HIDE_END},
+                                      toggleMode: WORD_TOGGLE_HIDE_ALL},
                           'recall4': {setup: recall4Start,
                                       continueStage: recall4Continue,
-                                      caption: 'Recall 4 - 33% missing',
+                                      caption: 'Recall 4 - 66% missing',
                                       testMode: false,
                                       toggleMode: WORD_TOGGLE_HIDE_ALL},
                           'recall5': {setup: recall5Start,
                                       continueStage: recall5Continue,
-                                      caption: 'Recall 5 - 66% missing',
-                                      testMode: false,
-                                      toggleMode: WORD_TOGGLE_HIDE_ALL},
-                          'recall6': {setup: recall6Start,
-                                      continueStage: recall6Continue,
-                                      caption: 'Recall 6 - 100% missing',
+                                      caption: 'Recall 5 - 100% missing',
                                       testMode: false,
                                       toggleMode: WORD_TOGGLE_HIDE_ALL},
                           'testFull': {setup: testFullStart,
@@ -648,7 +640,7 @@ var learnscripture =
          // stageLists defines which stages should be used for different modes
          var stageLists = {
              'initial':['read', 'recall1', 'recall2', 'recall3',
-                        'recall4', 'recall5', 'recall6', 'testFull']
+                        'recall4', 'recall5', 'testFull']
          };
 
 
