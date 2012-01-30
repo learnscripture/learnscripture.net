@@ -1,7 +1,7 @@
 // Learning and testing functionality for learnscripture.net
 
 var learnscripture =
-    (function(pub, $) {
+    (function(learnscripture, $) {
          // Controls
          var inputBox = null;
 
@@ -744,8 +744,9 @@ var learnscripture =
              alert(textStatus, errorThrown);
          };
 
-         pub.start = start;
-         return pub;
+         learnscripture.handlerAjaxError = handlerAjaxError;
+         learnscripture.start = start;
+         return learnscripture;
 
 })(learnscripture || {}, $);
 

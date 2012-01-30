@@ -1,3 +1,4 @@
+{% load url from future %}
 {% load compress %}
 <!DOCTYPE html>
 <html lang="en">
@@ -21,7 +22,9 @@
     {% compress js %}
     <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-1.7.1.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-dropdown.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-modal.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/learn.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/accounts.js"></script>
     {% endcompress %}
 
   </head>
@@ -41,10 +44,13 @@
           <div class="nav secondary-nav">
             <ul>
               <li class="dropdown" data-dropdown="dropdown">
-                <a href="#" class="dropdown-toggle">Guest</a>
+                <a href="#" id="id-session-menu" class="dropdown-toggle">{% if request.identity.account %}{{ request.identity.account.username }}{% else %}Guest{% endif %}</a>
                 <ul class="dropdown-menu">
-                  <li><a href="#">Log in</a></li>
-                  <li><a href="#">Create account</a></li>
+                  {% if not request.identity.account %}
+                  <li><a href="#" class="signin-link">Sign in</a></li>
+                  <li><a href="#" class="signup-link">Create account</a></li>
+                  {% endif %}
+                  <li><a href="{% url 'preferences' %}?next={{ request.path_info }}">Preferences</a></li>
                 </ul>
               </li>
             </ul>
