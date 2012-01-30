@@ -44,7 +44,7 @@
           <div class="nav secondary-nav">
             <ul>
               <li class="dropdown" data-dropdown="dropdown">
-                <a href="#" id="id-session-menu" class="dropdown-toggle">{% if request.identity.account %}{{ request.identity.account.username }}{% else %}Guest{% endif %}</a>
+                <a href="#" id="id-session-menu" class="dropdown-toggle holds-username">{% if request.identity.account %}{{ request.identity.account.username }}{% else %}Guest{% endif %}</a>
                 <ul class="dropdown-menu">
                   {% if not request.identity.account %}
                   <li><a href="#" class="signin-link">Sign in</a></li>
