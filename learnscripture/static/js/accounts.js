@@ -61,7 +61,7 @@ var learnscripture = (function(learnscripture, $) {
 
     var showSignUp = function(ev) {
         ev.preventDefault();
-        $('#id-signup-form').modal({backdrop:true, keyboard:true, show:true});
+        $('#id-signup-form').modal({backdrop:'static', keyboard:true, show:true});
     };
 
     var loginError = function(jqXHR, textStatus, errorThrown) {
@@ -87,7 +87,7 @@ var learnscripture = (function(learnscripture, $) {
 
     var showLogIn = function(ev) {
         ev.preventDefault();
-        $('#id-login-form').modal({backdrop:true, keyboard:true, show:true});
+        $('#id-login-form').modal({backdrop:'static', keyboard:true, show:true});
     };
 
     var setupAccountControls = function(ev) {
