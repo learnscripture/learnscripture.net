@@ -43,8 +43,20 @@ class Verse(models.Model):
     reference = models.CharField(max_length=100)
     text = models.TextField()
 
+    # De-normalised fields
+    # Public facing fields are 1-indexed, others are 0-indexed.
+    book_number = models.PositiveSmallIntegerField() # 0-indexed
+    chapter_number = models.PositiveSmallIntegerField() # 1-indexed
+    verse_number = models.PositiveSmallIntegerField()   # 1-indexed
+    bible_verse_number = models.PositiveSmallIntegerField() # 0-indexed
+
     def __unicode__(self):
         return "%s (%s)" % (self.reference, self.version.short_name)
+
+    class Meta:
+        unique_together = [
+            ('bible_verse_number', 'version'),
+            ]
 
 
 class VerseSet(models.Model):
