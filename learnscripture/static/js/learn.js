@@ -576,9 +576,6 @@ var learnscripture =
          var recall4Continue = makeInitialAndMissingContinue(0.66);
          var recall4Start = makeRecallStart(recall4Continue);
 
-         var recall5Continue = makeInitialAndMissingContinue(1);
-         var recall5Start = makeRecallStart(recall5Continue);
-
          // Each stage definition contains:
          //
          // setup: Function to do stage specific setup
@@ -619,11 +616,6 @@ var learnscripture =
                                       caption: 'Recall 4 - 66% missing',
                                       testMode: false,
                                       toggleMode: WORD_TOGGLE_HIDE_ALL},
-                          'recall5': {setup: recall5Start,
-                                      continueStage: recall5Continue,
-                                      caption: 'Recall 5 - 100% missing',
-                                      testMode: false,
-                                      toggleMode: WORD_TOGGLE_HIDE_ALL},
                           'testFull': {setup: testFullStart,
                                        continueStage: testFullContinue,
                                        caption: 'Full test',
@@ -640,7 +632,7 @@ var learnscripture =
          // stageLists defines which stages should be used for different modes
          var stageLists = {
              'initial':['read', 'recall1', 'recall2', 'recall3',
-                        'recall4', 'recall5', 'testFull']
+                        'recall4', 'testFull']
          };
 
 
