@@ -56,6 +56,7 @@ class Verse(models.Model):
     class Meta:
         unique_together = [
             ('bible_verse_number', 'version'),
+            ('reference', 'version'),
             ]
 
 
