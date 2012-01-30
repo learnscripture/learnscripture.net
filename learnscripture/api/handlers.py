@@ -15,18 +15,8 @@ from piston.utils import rc
 from accounts.models import Account
 from bibleverses.models import UserVerseStatus, Verse
 from learnscripture import session
+from learnscripture.decorators import require_identity_method
 from learnscripture.forms import SignUpForm, LogInForm
-
-
-def require_identity(method):
-    @wraps(method)
-    def wrapper(self, request, *args, **kwargs):
-        identity = session.get_identity(request)
-        if identity is None:
-            return rc.FORBIDDEN
-        request.identity = identity
-        return method(self, request, *args, **kwargs)
-    return wrapper
 
 
 # We need a more capable 'validate' than the one provided by piston to get
@@ -50,13 +40,12 @@ def validate(form_class, **formkwargs):
 
 class NextVerseHandler(BaseHandler):
     allowed_methods = ('GET',)
-    model = UserVerseStatus
     fields = ('id', 'memory_stage', 'strength', 'first_seen', 'last_seen',
               ('verse_choice', (('verse_set', ('id',)),)),
               ('verse', ('reference', 'text')),
               ('version', ('full_name', 'short_name', 'slug', 'url')))
 
-    @require_identity
+    @require_identity_method
     def read(self, request):
         uvs_ids = session.get_verses_to_learn(request)
         if len(uvs_ids) == 0:
@@ -71,7 +60,7 @@ class NextVerseHandler(BaseHandler):
 class ActionCompleteHandler(BaseHandler):
     allowed_methods = ('POST',)
 
-    @require_identity
+    @require_identity_method
     def create(self, request):
         uvs_id = int(request.data['user_verse_status_id'])
         try:
@@ -90,7 +79,7 @@ class ActionCompleteHandler(BaseHandler):
 class ChangeVersionHandler(BaseHandler):
     allowed_methods = ('POST',)
 
-    @require_identity
+    @require_identity_method
     def create(self, request):
         verse_set_id = request.data['verse_set_id']
         if verse_set_id == '' or verse_set_id == 'null':
@@ -119,7 +108,7 @@ class AccountCommon(object):
 class SignUpHandler(AccountCommon, BaseHandler):
     allowed_methods = ('POST',)
 
-    @require_identity
+    @require_identity_method
     @validate(SignUpForm, prefix="signup")
     def create(self, request):
         identity = request.identity
