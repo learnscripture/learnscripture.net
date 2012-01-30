@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.hashers import check_password, make_password
@@ -61,6 +63,11 @@ class Identity(models.Model):
     default_bible_version = models.ForeignKey(BibleVersion, null=True, blank=True)
 
     objects = IdentityManager()
+
+    @property
+    def expires_on(self):
+        from django.conf import settings
+        return self.date_created + timedelta(settings.IDENTITY_EXPIRES_DAYS)
 
     class Meta:
         verbose_name_plural = 'identities'
