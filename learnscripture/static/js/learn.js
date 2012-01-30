@@ -129,7 +129,7 @@ var learnscripture =
          };
 
          var stripPunctuation = function(str) {
-             return str.replace(/[\.,;!?:\/#!$%\^&\*{}=\-_`~()]/g,"");
+             return str.replace(/["'\.,;!?:\/#!$%\^&\*{}=\-_`~()]/g,"");
          };
 
          var matchWord = function(target, typed) {
@@ -715,6 +715,13 @@ var learnscripture =
              var wordNumber = 0;
              for(var i = 0; i < wordGroups.length; i++) {
                  var group = wordGroups[i];
+                 group = $.map(group, function(word, j) {
+                                   if (stripPunctuation(word) == "") {
+                                       return null;
+                                   } else {
+                                       return word;
+                                   }
+                               });
                  $.each(group, function(j, word) {
                             wordList.push(wordNumber);
                             wordNumber++;
