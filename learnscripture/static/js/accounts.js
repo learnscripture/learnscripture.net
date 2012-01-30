@@ -17,6 +17,7 @@ var learnscripture = (function(learnscripture, $) {
         hideSignUpLinks();
         signedInAccountData = accountData;
         $('.holds-username').text(accountData.username);
+        $('.guest-only').hide();
     };
 
     var handleFormValidationErrors = function(form, formPrefix, errorResponse) {
