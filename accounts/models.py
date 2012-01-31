@@ -152,7 +152,7 @@ class Identity(models.Model):
         # they have it memorised in another version.
         # So changing versions implies creating a new UserVerseStatus.
         # However, if they change back again, we don't want to lose the history.
-        # Therefore we have a 'disabled' flag to track which version is the
+        # Therefore we have an 'ignored' flag to track which version is the
         # one they want.
 
         # 2) If they change the version for a verse that is part of a passage,
@@ -177,12 +177,15 @@ class Identity(models.Model):
             # Other versions
             old = old.exclude(version__slug=version_slug)
 
+            # If they had no test data, it is safe to delete, and this
+            # keeps things trim:
+            old.filter(last_tested__isnull=True).delete()
+            # Otherwise just set ignored
             old.update(ignored=True)
 
             # Find the UserVerseStatus with correct bible version
             correct = self.verse_statuses.filter(verse_choice__reference=reference)
             correct = correct.exclude(verse_choice__verse_set__set_type=VerseSetType.PASSAGE)
-
             correct = correct.filter(version__slug=version_slug)
 
             # For each VerseChoice, we need to create a new UserVerseStatus if

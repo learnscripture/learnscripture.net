@@ -127,7 +127,7 @@ class IdentityTests(TestCase):
         vs1 = VerseSet.objects.get(name='Bible 101')
         i.add_verse_set(vs1)
 
-        i.record_verse_action('John 3:16', 'NET', StageType.READ, 1)
+        i.record_verse_action('John 3:16', 'NET', StageType.TEST_TYPE_FULL, 1.0)
         i.change_version('John 3:16', 'KJV', vs1.id)
         i.change_version('John 3:16', 'NET', vs1.id)
 
@@ -135,7 +135,7 @@ class IdentityTests(TestCase):
         self.assertEqual(i.verse_statuses.get(verse_choice__reference='John 3:16',
                                               ignored=False,
                                               verse_choice__verse_set=vs1).memory_stage,
-                         MemoryStage.SEEN)
+                         MemoryStage.TESTED)
 
     def test_change_version_and_choose_again(self):
         """
