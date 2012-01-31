@@ -191,6 +191,10 @@ COMPRESS_PRECOMPILERS = (
     ('text/less', 'lessc {infile} {outfile}'),
 )
 
+# We don't want CssAbsoluteFilter because it adds ?randomdigits to URLs, and
+# some browsers (e.g. mine) decide not to cache the result.
+COMPRESS_CSS_FILTERS = []
+
 ### LearnScripture.net specific settings ###
 
 IDENTITY_EXPIRES_DAYS = 21
