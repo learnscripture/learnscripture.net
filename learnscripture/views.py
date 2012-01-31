@@ -59,8 +59,12 @@ def start(request):
         if 'learnqueue' in request.POST:
             session.set_verse_statuses(request, identity.verse_statuses_for_learning())
             return HttpResponseRedirect(reverse('learn'))
+        if 'revisequeue' in request.POST:
+            session.set_verse_statuses(request, identity.verse_statuses_for_revising())
+            return HttpResponseRedirect(reverse('learn'))
 
     c = {'new_verses_queue': identity.verse_statuses_for_learning(),
+         'revise_verses_queue': identity.verse_statuses_for_revising(),
          }
     return render(request, 'learnscripture/start.html', c)
 
