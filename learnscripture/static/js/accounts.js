@@ -19,11 +19,10 @@ var learnscripture = (function(learnscripture, $) {
         $('.holds-username').text(accountData.username);
         $('.guest-only').hide();
 
-        // Hack: if we are on the preferences page, we don't want the user to
-        // press 'save' and overwrite their preferences with blank data.
-        if (document.location.pathname.match(/\/preferences\//) != null) {
-            window.location.reload();
-        }
+        // Almost every page needs to be refreshed if we
+        // have just logged in, because the identity will have
+        // changed. So we redirect to the dashboard.
+        window.location = '/start/';
     };
 
     var handleFormValidationErrors = function(form, formPrefix, errorResponse) {
