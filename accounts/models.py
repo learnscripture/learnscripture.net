@@ -56,6 +56,11 @@ class IdentityManager(models.Manager):
         return super(IdentityManager, self).get_query_set().select_related('default_bible_version')
 
 
+# Most of business logic regarding verses is tied to Identity, for the sake of
+# having somewhere to put it, and because most queries need to start
+# 'identity.verse_statuses' so this may as well be 'self.verse_statuses'
+
+
 class Identity(models.Model):
     account = models.OneToOneField(Account, null=True, blank=True, default=None)
     date_created = models.DateTimeField(default=timezone.now)
@@ -203,12 +208,21 @@ class Identity(models.Model):
 
         same_verse = self.verse_statuses.filter(verse_choice__reference=verse_choice.reference,
                                                 version=version).exclude(id=uvs.id)
+
+        # NB: we are exploiting the fact that multiple calls to
+        # create_verse_status will get slightly increasing values of 'added',
+        # allowing us to preserve order.
+        if new:
+            uvs.added = timezone.now()
+
         if same_verse and new:
             # Use existing data:
             same_verse = same_verse[0]
             uvs.memory_stage = same_verse.memory_stage
             uvs.strength = same_verse.strength
+            uvs.added = same_verse.added
             uvs.first_seen = same_verse.first_seen
+            uvs.last_tested = same_verse.last_tested
 
         return uvs
 
@@ -220,3 +234,4 @@ class Identity(models.Model):
         now_seconds = time.time()
         qs = self.verse_statuses.filter(ignored=False, memory_stage=MemoryStage.TESTED)
         return memorymodel.filter_qs(qs, now_seconds)
+
