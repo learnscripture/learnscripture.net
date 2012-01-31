@@ -47,7 +47,7 @@ class NextVerseHandler(BaseHandler):
 
     @require_identity_method
     def read(self, request):
-        uvs_ids = session.get_verses_to_learn(request)
+        uvs_ids = session.get_verse_status_ids(request)
         if len(uvs_ids) == 0:
             return rc.NOT_FOUND
 
@@ -73,7 +73,7 @@ class ActionCompleteHandler(BaseHandler):
         if  stage in [StageType.TEST_TYPE_FULL, StageType.TEST_TYPE_QUICK]:
             request.identity.record_verse_action(uvs.verse_choice.reference, uvs.version.slug,
                                                  stage, float(request.data['score']));
-            session.remove_user_verse_status(request, uvs_id)
+            session.remove_user_verse_status_id(request, uvs_id)
 
         return {}
 
@@ -94,7 +94,7 @@ class ChangeVersionHandler(BaseHandler):
         request.identity.change_version(reference,
                                         version_slug,
                                         verse_set_id)
-        session.remove_user_verse_status(request, int(request.data['user_verse_status_id']))
+        session.remove_user_verse_status_id(request, int(request.data['user_verse_status_id']))
         uvs = request.identity.verse_statuses.get(verse_choice__verse_set=verse_set_id,
                                                   verse_choice__reference=reference,
                                                   version__slug=version_slug)

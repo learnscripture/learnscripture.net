@@ -739,7 +739,7 @@ var learnscripture =
          // retrying.
          // Also handle case of user being logged out.
          var handlerAjaxError = function(jqXHR, textStatus, errorThrown) {
-             alert(textStatus, errorThrown);
+             console.log("AJAX error: %s, %s, %o", textStatus, errorThrown, jqXHR);
          };
 
          learnscripture.handlerAjaxError = handlerAjaxError;

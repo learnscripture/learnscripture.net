@@ -20,6 +20,8 @@ StageType = make_choices('StageType',
                           ])
 
 
+# Various queries make use of the ordering in this enum, e.g. select everything
+# less than 'TESTED'
 MemoryStage = make_choices('MemoryStage',
                            [(1, 'ZERO', 'nothing'),
                             (2, 'SEEN', 'seen'),

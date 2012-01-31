@@ -226,7 +226,7 @@ class Identity(models.Model):
 
         return uvs
 
-    def verse_status_for_revising(self):
+    def verse_statuses_for_revising(self):
         """
         Returns a query set of UserVerseStatuses that need revising.
         """
@@ -235,3 +235,24 @@ class Identity(models.Model):
         qs = self.verse_statuses.filter(ignored=False, memory_stage=MemoryStage.TESTED)
         return memorymodel.filter_qs(qs, now_seconds)
 
+    def verse_statuses_for_learning(self):
+        q = self.verse_statuses.filter(ignored=False, memory_stage__lt=MemoryStage.TESTED)
+        # Don't include passages - we do those separately
+        q = q.exclude(verse_choice__verse_set__set_type=VerseSetType.PASSAGE)
+        # Optimise for accessing 'reference'
+        q = q.select_related('verse_choice')
+        # 'added' should have enough precision to distinguish, otherwise 'id'
+        # should be according to order of creation.
+        q = q.order_by('added', 'id')
+
+        # Need to dedupe (due to VerseChoice objects that belong to different
+        # VerseSets). Also need to iterate over the result multiple times and
+        # get length etc., so use list instead of generator.
+        retval = []
+        seen_refs = set()
+        for uvs in q:
+            if uvs.verse_choice.reference in seen_refs:
+                continue
+            seen_refs.add(uvs.verse_choice.reference)
+            retval.append(uvs)
+        return retval

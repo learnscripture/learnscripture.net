@@ -11,6 +11,11 @@ class Resource(BaseResource):
         super(Resource, self).__init__(*args, **kwargs)
         self.csrf_exempt = getattr(self.handler, 'csrf_exempt', False)
 
+    def error_handler(self, e, request, meth, em_format):
+        if isinstance(e, TypeError):
+            raise
+        else:
+            return super(Resource, self).error_handler(e, request, meth, em_format)
 
 urlpatterns = patterns('',
                        url(r'^nextverse/$', Resource(NextVerseHandler)),
