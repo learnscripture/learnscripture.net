@@ -11,13 +11,14 @@ import math
 # We attempt to move a memory along this curve by testing at ever increasing
 # intervals. This idea is taken from the Charlotte Mason Scripture Memory system.
 
-# We fix alpha and expponent by trial and error to
+# We fix alpha and exponent by trial and error to
 # give us:
 
 # 1) the right initial testing sequence (lots of times initially,
 #    preferably about a week where they are tested every day.
 # 2) a tail that remains for over a year, so it doesn't
 #    drop the memory too quickly.
+
 
 EXPONENT = 0.2
 ALPHA = 5e-2
@@ -134,9 +135,25 @@ def needs_testing(strength, time_elapsed):
     if time_elapsed is None or strength is None:
         return True
     t_0 = t(strength)
+    # clip at BEST_STRENGTH here to stop log of a negative
     t_1 = t(min(strength + DELTA_S_IDEAL, BEST_STRENGTH))
     return time_elapsed > t_1 - t_0
 
+
+def filter_qs(qs, now_seconds):
+    # SQL equivalent of needs_testing
+    clause = ('last_tested IS NOT NULL AND '
+              '(%(now_seconds)s - EXTRACT(EPOCH FROM last_tested))' # time elapsed
+              ' > ('
+              '  ((- ln(1 - LEAST(strength + %(delta_s_ideal)s, %(best_strength)s)) / %(alpha)s) ^ (1.0/%(exponent)s)) '
+              ' -((- ln(1 - strength) / %(alpha)s) ^ (1.0/%(exponent)s))'
+              ' )' %
+              {'now_seconds': now_seconds,
+               'delta_s_ideal': DELTA_S_IDEAL,
+               'best_strength': BEST_STRENGTH,
+               'alpha': ALPHA,
+               'exponent': EXPONENT});
+    return qs.extra(where=[clause])
 
 
 def test_run():

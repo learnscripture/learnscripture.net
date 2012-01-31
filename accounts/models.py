@@ -212,3 +212,12 @@ class Identity(models.Model):
             uvs.last_seen = same_verse.last_seen
 
         return uvs
+
+    def verse_status_for_revising(self):
+        """
+        Returns a query set of UserVerseStatuses that need revising.
+        """
+        import time
+        now_seconds = time.time()
+        qs = self.verse_statuses.filter(ignored=False, memory_stage=MemoryStage.TESTED)
+        return memorymodel.filter_qs(qs, now_seconds)
