@@ -3,6 +3,8 @@
 {% if request.identity.account %}
 <p>Logged in as: <b class="holds-username">{{ request.identity.account.username }}</b></p>
 
+<p>Member since: <b>{{ request.identity.account.date_joined|date:"F Y" }}</b>
+
 {% else %}
 <p>Logged in as: <b class="holds-username">Guest User</b></p>
 
