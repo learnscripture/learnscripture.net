@@ -2473,7 +2473,7 @@ button.btn::-moz-focus-inner, input[type=submit].btn::-moz-focus-inner {
 /* Override some defaults */
 html, body {
   background-color: #444;
-  background-image: url('/static/img/bg.png?9835b1640976');
+  background-image: url('/static/img/bg.png');
   background-attachment: fixed;
 }
 body {
@@ -2645,13 +2645,13 @@ ul.messagelist li {
   margin: 0 0 3px 0;
   border-bottom: 1px solid #ddd;
   color: #666;
-  background: #ffffcc url('/static/admin/img/icon_success.gif?273febf3c25a') 5px 0.3em no-repeat;
+  background: #ffffcc url('/static/admin/img/icon_success.gif') 5px 0.3em no-repeat;
 }
 ul.messagelist li.warning {
-  background-image: url('/static/admin/img/icon_alert.gif?273febf3c25a');
+  background-image: url('/static/admin/img/icon_alert.gif');
 }
 ul.messagelist li.error {
-  background-image: url('/static/admin/img/icon_error.gif?273febf3c25a');
+  background-image: url('/static/admin/img/icon_error.gif');
 }
 p.verselist {
   margin-left: 2em;
