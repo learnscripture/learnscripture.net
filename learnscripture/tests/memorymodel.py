@@ -7,9 +7,10 @@ from accounts.memorymodel import strength_estimate
 class StrengthEstimate(unittest.TestCase):
 
     def test_strength_estimate_repeat(self):
-        # If we test N times after interval I at a certain score, it should return the same
-        # as if we test at the end of a single N*I interval
-
+        # If we test N times after interval I at a certain score, it should
+        # return the same as if we test at the end of a single N*I interval - at
+        # least for the case where the test score = 100%, which should keep us
+        # to the ideal curve
 
         def repeat(func, init, times):
             val = init
@@ -17,7 +18,7 @@ class StrengthEstimate(unittest.TestCase):
                 val = func(val)
             return val
 
-        score = 0.8
+        score = 1.0
         init = 0.5
         one_day = 24 * 3600
         after_one_week = strength_estimate(init, score, 7 * one_day)
@@ -29,4 +30,4 @@ class StrengthEstimate(unittest.TestCase):
 
 
     def test_strength_estimate_null_previous(self):
-        self.assertEqual(strength_estimate(None, 1.0, None), 0.5)
+        self.assertEqual(strength_estimate(None, 1.0, None), 0.1)
