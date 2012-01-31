@@ -11,6 +11,8 @@ var learnscripture =
         var WORD_TOGGLE_HIDE_ALL = 2;
         var TESTING_MAX_ATTEMPTS = 3;
 
+        var INITIAL_STRENGTH_FACTOR = 0.1;
+
         // Initial state
         var currentStage = null;
         var currentStageIdx = null;
@@ -627,13 +629,6 @@ var learnscripture =
                         };
 
 
-        // stageLists defines which stages should be used for different modes
-        var stageLists = {
-            'initial':['read', 'recall1', 'recall2', 'recall3',
-                       'recall4', 'testFull']
-        };
-
-
         // setup and wiring
         var start = function() {
             inputBox = $('#id-typing');
@@ -646,11 +641,35 @@ var learnscripture =
         };
 
         var nextVerse = function() {
-            currentStageList = stageLists['initial'];
             $('.progress table tr').remove();
-            setupStage(0);
             loadVerse();
         };
+
+        var chooseStageListForStrength = function(strength) {
+            // This function is tuned to give read/recall stages only for the
+            // early stages, or when the verse has been completely forgotten.
+            // Although it doesn't use it, it's tuned to the value of
+            // INITIAL_STRENGTH_FACTOR
+            if (strength < 0.02) {
+                // either first test, or first test after initial test score
+                // of 20% or less. Do everything:
+                return ['read', 'recall1', 'recall2', 'recall3', 'recall4', 'testFull'];
+            }
+            if (strength < 0.07) {
+                // e.g. first test was 70% or less, this is second test
+                return ['recall2', 'testFull']
+            }
+            return ['testFull']
+        }
+
+        var setupStageList = function(verseData) {
+            var strength = 0;
+            if (verseData.strength != null) {
+                strength = verseData.strength;
+            }
+            currentStageList = chooseStageListForStrength(strength);
+            setupStage(0);
+        }
 
         var loadVerse = function() {
             $.ajax({url: '/api/learnscripture/v1/nextverse/?format=json',
@@ -680,6 +699,7 @@ var learnscripture =
                         markupVerse();
                         $('#id-loading').hide();
                         $('#id-controls').show();
+                        setupStageList(data);
                         focusTypingInputCarefully();
                     },
                     error: function(jqXHR, textStatus, errorThrown) {

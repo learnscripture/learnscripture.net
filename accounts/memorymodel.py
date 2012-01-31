@@ -68,7 +68,7 @@ def t(s):
 # For the initial test, we don't have a previous strength recorded. We
 # arbitrarily set the initial strength to be 0.1 test strength
 
-INITIAL_STRENGTH_FACTOR = 0.1
+INITIAL_STRENGTH_FACTOR = 0.1  # This is also used in learn.js
 
 # Trial and error - this gives us approx 20 tests in 2 years,
 # and doesn't get us too close to strength=1 after 100 years.

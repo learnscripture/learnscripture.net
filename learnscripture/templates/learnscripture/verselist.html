@@ -1,0 +1,5 @@
+    {% for v in verselist %}
+      {% if forloop.counter0 < 11 %}
+        <span class="verseref">{{ v.verse_choice.reference }}</span>{% if not forloop.last and forloop.counter0 != 10 %}, {% endif %}
+      {% elif forloop.counter0 == 11 %}...{% endif %}
+    {% endfor %}
