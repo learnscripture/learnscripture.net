@@ -281,6 +281,27 @@ ul.validation-error {
         margin-right: -@smallerMainSidePadding;
     }
 
+  .modal {
+    width: 400px;
+    margin: 0 -200px;
+    top: 10px;
+      .modal-header {
+        padding: 0px;
+      .close {
+        margin-top: 0px;
+        padding-top: 10px;
+        text-align: right;
+        padding-right: 10px;
+        padding-bottom: 10px;
+        padding-left: 30px;
+        }
+      h3 {
+        padding-left: 10px;
+        }
+      }
+    }
+
+
 }
 
 // If there is not much room vertical we squeeze paddings
@@ -314,6 +335,11 @@ ul.validation-error {
 
     body {
         padding-top: 0px;
+    }
+
+  .modal {
+    top: 10px;
+    margin-top: 0px;
     }
 
 }
@@ -350,3 +376,33 @@ ul.validation-error {
         padding: 5px;
     }
 }
+
+
+// Squeeze the primary nav if horizontal space is limited
+@media screen and (max-width: 650px) {
+  ul.primary-nav li:nth-child(5) {
+    display:none;
+    }
+
+}
+
+@media screen and (max-width: 600px) {
+  ul.primary-nav li:nth-child(4) {
+    display:none;
+    }
+
+}
+
+@media screen and (max-width: 550px) {
+  ul.primary-nav li:nth-child(3) {
+    display:none;
+    }
+}
+
+@media screen and (max-width: 500px) {
+  ul.primary-nav li:nth-child(2) {
+    display:none;
+    }
+
+}
+

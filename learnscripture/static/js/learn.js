@@ -392,23 +392,21 @@ var learnscripture =
 
          var focusTypingInputCarefully = function() {
              var instructions = $('#id-instructions');
-             var instructionsWereVisible = isScrolledIntoView(instructions);
-             var wasAtTop = ($('body').scrollTop() == 0);
              inputBox.focus();
-
              // If the instructions are out of view, and they were visible
              // before we focussed, move back.
-
-             if (instructionsWereVisible && !isScrolledIntoView(instructions)) {
-                 var pos = instructions.position().top;
-                 var topbar = $('.topbar');
-                 if (topbar.css('position') == 'fixed') {
-                     // If the topbar is position:fixed, we need to take into account
-                     // its height.
-                     pos -= topbar.height();
-                 }
-                 $('body').scrollTop(pos);
-             };
+             setTimeout(function() {
+                 if (!isScrolledIntoView(instructions)) {
+                     var pos = instructions.position().top;
+                     var topbar = $('.topbar');
+                     if (topbar.css('position') == 'fixed') {
+                         // If the topbar is position:fixed, we need to take into account
+                         // its height.
+                         pos -= topbar.height();
+                     }
+                     $('body').scrollTop(pos);
+                 };
+             }, 1000);
          };
 
          var setupStage = function(idx) {
