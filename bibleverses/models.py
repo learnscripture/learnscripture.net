@@ -53,7 +53,10 @@ class Verse(models.Model):
     bible_verse_number = models.PositiveSmallIntegerField() # 0-indexed
 
     def __unicode__(self):
-        return "%s (%s)" % (self.reference, self.version.short_name)
+        return u"%s (%s)" % (self.reference, self.version.short_name)
+
+    def __repr__(self):
+        return u'<Verse %s>' % self
 
     class Meta:
         unique_together = [
@@ -95,6 +98,9 @@ class VerseChoice(models.Model):
     def __unicode__(self):
         return self.reference
 
+    def __repr__(self):
+        return u'<VerseChoice %s>' % self
+
 
 class UserVerseStatus(models.Model):
     """
@@ -124,8 +130,15 @@ class UserVerseStatus(models.Model):
     def verse(self):
         return Verse.objects.get(version=self.version, reference=self.verse_choice.reference)
 
+    def __unicode__(self):
+        return u"%s, %s" % (self.verse_choice.reference, self.version.slug)
+
+    def __repr__(self):
+        return u'<UserVerseStatus %s>' % self
+
     class Meta:
         unique_together = [('for_identity', 'verse_choice', 'version')]
+
 
 # Storing this is probably only useful for doing stats on progress and
 # attempting to tune things.
