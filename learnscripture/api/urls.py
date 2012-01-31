@@ -13,6 +13,9 @@ class Resource(BaseResource):
 
     def error_handler(self, e, request, meth, em_format):
         if isinstance(e, TypeError):
+            # the masking of TypeError by the base class, on the assumption of
+            # bad signature is extremely annoying for debugging, whether
+            # in development or in production.
             raise
         else:
             return super(Resource, self).error_handler(e, request, meth, em_format)
