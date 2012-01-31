@@ -50,11 +50,20 @@ def get_next(request, default_url):
 
 @require_identity
 def start(request):
-    if not request.identity.verse_statuses.exists():
+    identity = request.identity
+    if not identity.verse_statuses.exists():
         # The only possible thing is to choose some verses
         return HttpResponseRedirect(reverse('choose'))
 
-    # TODO
+    if request.method == 'POST':
+        if 'learnqueue' in request.POST:
+            session.set_verse_statuses(request, identity.verse_statuses_for_learning())
+            return HttpResponseRedirect(reverse('learn'))
+
+    c = {'new_verses_queue': identity.verse_statuses_for_learning(),
+         }
+    return render(request, 'learnscripture/start.html', c)
+
 
 @require_preferences
 def choose(request):

@@ -1,0 +1,39 @@
+{% extends "base_twocol.html" %}
+{% load url from future %}
+
+{% block title %}
+Dashboard
+{% endblock %}
+
+{% block page_title %}
+Dashboard
+{% endblock %}
+
+
+{% block leftcolumn %}
+<h2>Learn</h2>
+
+<div class="actionset">
+  {% if new_verses_queue %}
+  <form action="" method="POST">
+    {% csrf_token %}
+    <input type="submit" name="learnqueue" class="btn primary" value="Start learning" />
+  </form>
+
+  <p>You've got {{ new_verses_queue|length }} new verses in your queue for learning.</p>
+
+  <p>Verses coming up:
+    {% for v in new_verses_queue %}
+      {% if forloop.counter0 < 11 %}
+        <span class="verseref">{{ v.verse_choice.reference }}</span>
+        {% if not forloop.last and forloop.counter0 != 10 %}, {% endif %}
+      {% elif forloop.counter0 == 11 %}...{% endif %}
+    {% endfor %}
+  </p>
+
+  {% else %}
+    <p>Nothing currently in your queue for learning — <a href="{% url 'choose' %}">choose</a> some verses or passage to learn.</p>
+
+  {% endif %}
+</div>
+{% endblock %}
