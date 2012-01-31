@@ -155,7 +155,7 @@ var learnscripture =
                      type: 'POST',
                      data: {
                          user_verse_status_id: currentVerseStatus.id,
-                         stage: 'test',
+                         stage: currentStage.testType,
                          score: score
                      }});
              $('#id-score').text(Math.floor(score * 100).toString() + "%");
@@ -619,6 +619,7 @@ var learnscripture =
                                        continueStage: testFullContinue,
                                        caption: 'Full test',
                                        testMode: true,
+                                       testType: 'TEST_TYPE_FULL',
                                        toggleMode: null},
                           'results': {setup: function() {},
                                       continueStage: function() { return true;},

@@ -18,6 +18,12 @@ def make_choices(name, choice_list):
         titles = {}
         choice_list = []
 
+        @classmethod
+        def get_value_for_name(cls, name):
+            for v, n in zip(cls.values, cls.names):
+                if n == name:
+                    return v
+
     Choices.__name__ = name
 
     for (v, name, title) in choice_list:

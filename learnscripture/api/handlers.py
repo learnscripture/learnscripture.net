@@ -13,7 +13,7 @@ from piston.handler import BaseHandler
 from piston.utils import rc
 
 from accounts.models import Account
-from bibleverses.models import UserVerseStatus, Verse
+from bibleverses.models import UserVerseStatus, Verse, StageType
 from learnscripture import session
 from learnscripture.decorators import require_identity_method
 from learnscripture.forms import SignUpForm, LogInForm
@@ -64,13 +64,15 @@ class ActionCompleteHandler(BaseHandler):
     def create(self, request):
         uvs_id = int(request.data['user_verse_status_id'])
         try:
-            uvs = request.identity.verse_statuses.get(id=uvs_id)
+            uvs = request.identity.verse_statuses.select_related('version', 'verse_choice').get(id=uvs_id)
         except UserVerseStatus.DoesNotExist:
             return rc.NOT_FOUND
 
         # TODO: store StageComplete
-        # TODO: update UserVerseStatus
-        if request.data['stage'] == 'test':
+        stage = StageType.get_value_for_name(request.data['stage'])
+        if  stage in [StageType.TEST_TYPE_FULL, StageType.TEST_TYPE_QUICK]:
+            request.identity.record_verse_action(uvs.verse_choice.reference, uvs.version.slug,
+                                                 stage, float(request.data['score']));
             session.remove_user_verse_status(request, uvs_id)
 
         return {}
