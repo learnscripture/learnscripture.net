@@ -52,8 +52,15 @@ Dashboard
   </p>
 
   {% else %}
-    <p>Nothing currently in your queue for learning — <a href="{% url 'choose' %}">choose</a> some verses or passage to learn.</p>
+  <p>Nothing currently in your queue for learning.</p>
 
   {% endif %}
+</div>
+
+<h2>Choose</h2>
+
+<div class="actionset">
+  <p>When you're done with the above — <a href="{% url 'choose' %}">choose some verses or a passage to learn.</a></p>
+
 </div>
 {% endblock %}
