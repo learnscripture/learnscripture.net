@@ -43,6 +43,7 @@
             <li {% if m.active %}class="active"{% endif %}><a href="{{ m.path }}">{{ m.caption }}</a></li>
             {% endfor %}
           </ul>
+          {% if request.identity %}
           <div class="nav secondary-nav">
             <ul>
               <li class="dropdown" data-dropdown="dropdown">
@@ -57,6 +58,7 @@
               </li>
             </ul>
           </div>
+          {% endif %}
           </div>
         </div>
       </div>
