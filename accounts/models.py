@@ -209,7 +209,6 @@ class Identity(models.Model):
             uvs.memory_stage = same_verse.memory_stage
             uvs.strength = same_verse.strength
             uvs.first_seen = same_verse.first_seen
-            uvs.last_seen = same_verse.last_seen
 
         return uvs
 

@@ -112,7 +112,6 @@ class UserVerseStatus(models.Model):
                                                     default=MemoryStage.ZERO)
     strength = models.FloatField(default=0.00)
     first_seen = models.DateTimeField(null=True, blank=True)
-    last_seen = models.DateTimeField(null=True, blank=True)
     last_tested = models.DateTimeField(null=True, blank=True)
 
     # See Identity.change_version for explanation of ignored

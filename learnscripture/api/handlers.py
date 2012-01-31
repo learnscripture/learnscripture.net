@@ -40,7 +40,7 @@ def validate(form_class, **formkwargs):
 
 class NextVerseHandler(BaseHandler):
     allowed_methods = ('GET',)
-    fields = ('id', 'memory_stage', 'strength', 'first_seen', 'last_seen',
+    fields = ('id', 'memory_stage', 'strength', 'first_seen',
               ('verse_choice', (('verse_set', ('id',)),)),
               ('verse', ('reference', 'text')),
               ('version', ('full_name', 'short_name', 'slug', 'url')))
