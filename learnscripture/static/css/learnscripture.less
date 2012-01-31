@@ -260,10 +260,23 @@ ul.validation-error {
     #id-rightcolumn {
         width: auto;
         float: none;
+        border-top: 1px solid #ccc;
+        padding-top: 5px;
+    }
+    .row > [class*="span"] {
+        display: block;
+        margin: auto;
     }
     .row {
-        margin:auto;
+        margin: auto;
     }
+
+
+    // Fix some hacks we added for rightcolumn
+    #id-rightcolumn h3:first-child {
+        margin-top: 0px;
+    }
+
 
     /* squeeze spacings */
     .topbarinner, .maincontent {
