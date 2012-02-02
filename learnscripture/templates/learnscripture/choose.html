@@ -11,35 +11,67 @@ Choose verses
 {% endblock %}
 
 {% block leftcolumn %}
-<p>Choose a set of verses to start learning:</p>
 
 
-<h2>Verse sets</h2>
-{% autopaginate verse_sets 10 %}
+<ul class="tabs" data-tabs="tabs">
+  <li class="active"><a href="#id-tab-verseset">Verse sets</a></li>
+  <li><a href="#id-tab-individual">Individual verses</a></li>
+  <li><a href="#id-tab-create">Create a set</a></li>
+</ul>
 
-{% paginate %}
+<div class="pill-content">
+  <div class="active" id="id-tab-verseset">
+    <p>Choose a set of verses to start learning:</p>
 
-{% for vs in verse_sets %}
-<div class="verseset">
-  <form action="" method="POST">
-  {% csrf_token %}
-  <input type="hidden" name="verseset_id" value="{{ vs.id }}">
-  <input type="submit" class="btn primary" value="Learn">
-  </form>
-  <h3>{{ vs.name }}</h3>
-  {% if vs.description %}
-  <p>{{ vs.description }}</p>
-  {% endif %}
-  {% if vs.verse_choices.all %}
-    <p>Includes the following verses:
-    {% for v in vs.verse_choices.all %}
-      {{ v.reference }}{% if not forloop.last %}, {% endif %}
+    <table>
+      <tr>
+        <th>Order:</th>
+        <td>
+          <ul class="pills">
+            <li
+               {% if 'new' not in request.GET %}
+               class="active"
+               {% endif %}
+               ><a href="?popular">Most popular first</a></li>
+            <li
+               {% if 'new' in request.GET %}
+               class="active"
+               {% endif %}
+               ><a href="?new">Newest first</a></li>
+          </ul>
+        </td>
+      </tr>
+    </table>
+    {% autopaginate verse_sets 10 %}
+
+    {% paginate %}
+
+    {% for vs in verse_sets %}
+    <div class="verseset">
+      <form action="" method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="verseset_id" value="{{ vs.id }}">
+        <input type="submit" class="btn primary" value="Learn">
+      </form>
+      <h3>{{ vs.name }}</h3>
+      {% if vs.description %}
+      <p>{{ vs.description }}</p>
+      {% endif %}
+      {% if vs.verse_choices.all %}
+      <p>Includes the following verses:
+        {% for v in vs.verse_choices.all %}
+        {{ v.reference }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+      </p>
+      {% endif %}
+    </div>
     {% endfor %}
-    </p>
-  {% endif %}
+
+  </div>
+
+  <div id="id-tab-individual">
+  </div>
+  <div id="id-tab-create">
+  </div>
 </div>
-
-{% endfor %}
-
-
 {% endblock %}

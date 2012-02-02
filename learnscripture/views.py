@@ -92,5 +92,10 @@ def choose(request):
                 return HttpResponseRedirect(reverse('learn'))
 
     c = {}
-    c['verse_sets'] = VerseSet.objects.all().order_by('name').prefetch_related('verse_choices')
+    verse_sets = VerseSet.objects.all().order_by('name').prefetch_related('verse_choices')
+    if 'new' in request.GET:
+        verse_sets = verse_sets.order_by('-date_added')
+    else: # popular, the default
+        verse_sets = verse_sets.order_by('-popularity')
+    c['verse_sets'] = verse_sets
     return render(request, 'learnscripture/choose.html', c)
