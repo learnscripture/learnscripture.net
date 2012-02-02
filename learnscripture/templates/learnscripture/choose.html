@@ -44,8 +44,6 @@ Choose verses
     </table>
     {% autopaginate verse_sets 10 %}
 
-    {% paginate %}
-
     {% for vs in verse_sets %}
     <div class="verseset">
       <form action="" method="POST">
@@ -66,6 +64,8 @@ Choose verses
       {% endif %}
     </div>
     {% endfor %}
+
+    {% paginate %}
 
   </div>
 
