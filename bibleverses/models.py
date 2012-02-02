@@ -70,6 +70,9 @@ class VerseSet(models.Model):
     description = models.TextField(blank=True)
     set_type = models.PositiveSmallIntegerField(choices=VerseSetType.choice_list)
 
+    popularity = models.PositiveIntegerField(default=0)
+    date_added = models.DateTimeField()
+
     def __unicode__(self):
         return self.name
 
