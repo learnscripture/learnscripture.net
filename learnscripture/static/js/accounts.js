@@ -67,6 +67,7 @@ var learnscripture = (function(learnscripture, $) {
     var showSignUp = function(ev) {
         ev.preventDefault();
         $('#id-signup-form').modal({backdrop:'static', keyboard:true, show:true});
+        $('#id_signup-email').focus();
     };
 
     var loginError = function(jqXHR, textStatus, errorThrown) {
@@ -93,6 +94,7 @@ var learnscripture = (function(learnscripture, $) {
     var showLogIn = function(ev) {
         ev.preventDefault();
         $('#id-login-form').modal({backdrop:'static', keyboard:true, show:true});
+        $('#id_login-email').focus();
     };
 
     var setupAccountControls = function(ev) {
@@ -109,6 +111,25 @@ var learnscripture = (function(learnscripture, $) {
             ev.preventDefault();
             $('#id-login-form').modal('hide');
         });
+
+        $("#id-login-form form input[type=\"text\"], " +
+          "#id-login-form form input[type=\"password\"], " +
+          "#id-signup-form form input[type=\"text\"], " +
+          "#id-signup-form form input[type=\"password\"]").keypress(function (ev) {
+
+              if ((ev.which && ev.which == 13) || (ev.keyCode && ev.keyCode == 13)) {
+                  // Stop IE from submitting:
+                  ev.preventDefault();
+
+                  // Last input in list should cause submit
+                  var input = $(ev.target);
+                  var form = input.closest('form');
+                  var lastInput = form.find('input[type="text"],input[type="password"]').last();
+                  if (input.attr('id') == lastInput.attr('id')) {
+                      form.closest('.modal').find('a.btn.default').first().click();
+                  }
+              }
+          });
     };
 
     // Export:
