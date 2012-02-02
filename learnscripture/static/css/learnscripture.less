@@ -278,8 +278,9 @@ p.large {
     #id-rightcolumn {
         width: auto;
         float: none;
-        border-top: 1px solid #ccc;
+        border-top: 1px solid #eee;
         padding-top: 5px;
+        margin-top: 5px;
     }
     .row > [class*="span"] {
         display: block;
@@ -311,6 +312,12 @@ p.large {
         margin-left: -@smallerMainSidePadding;
         margin-right: -@smallerMainSidePadding;
     }
+
+
+  // Don't display progress section, because it takes up room between the main
+  // controls and the 'session' panel which is now below.
+
+  div.progress { display: none;}
 
   .modal {
     width: 400px;
