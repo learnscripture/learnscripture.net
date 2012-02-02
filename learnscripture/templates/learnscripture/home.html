@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load fiber_tags %}
+
+{% block title %}Home{% endblock %}
+
+
+{% block page_title %}
+<div class="homepagetitle">
+<img src="{{ STATIC_URL }}img/homepagetitle.png" />
+</div>
+{% endblock %}
+
+
+{% block content %}
+
+
+<p class="large" style="text-align: center">LearnScripture.net is an online service that helps you to memorise the Bible. <br>It combines tried and tested techniques with a very easy-to-use interface and&nbsp;an online database that tracks your progress for you.</p>
+
+
+<hr/>
+<h2><strong>Site under construction!</strong></h2>
+<p>Things are far from ready yet. However, the basic learning mechanism has been created, so feel free to&nbsp;<a href="/choose/">try it out.</a></p>
+<hr />
+
+
+
+
+<div class="row">
+  <div class="span5">
+    <h3>Proven system</h3>
+    <p>Based on principles from the Charlotte Mason Scripture Memory System and other proven techniques for memory strengthening, we&#39;ve added some 21st century refinements to produce an extremely efficient method.</p>
+  </div>
+  <div class="span4">
+    <h3>Easy to use</h3>
+    <p>Our system makes sure that your effort is spent memorising the Bible, and not figuring out what to do next or doing the busy work of tracking your progress.</p>
+  </div>
+  <div class="span5">
+    <h3>Online service</h3>
+    <p>Use from any modern, internet capable device, including most recent smart-phones.</p>
+    <p>You can fully try out the service for 3 months for free.</p>
+  </div>
+</div>
+<p>&nbsp;</p>
+
+
+<h3>Interested?</h3>
+<p>You can <a href="/about/">find out more</a>&nbsp;or just <a href="/choose/">jump in.</a></p>
+<p>&nbsp;</p>
+
+{% endblock %}

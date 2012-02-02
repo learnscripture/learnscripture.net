@@ -11,6 +11,10 @@ from learnscripture import session
 from .decorators import require_identity, require_preferences
 
 
+def home(request):
+    return render(request, 'learnscripture/home.html')
+
+
 @require_preferences
 def learn(request):
     c = {'bible_versions': BibleVersion.objects.all()}
