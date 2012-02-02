@@ -6,6 +6,7 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
                        url(r'^$', 'learnscripture.views.home', name='home'),
+                       (r'^favicon\.ico/?$', 'django.views.generic.simple.redirect_to', {'url': '/static/img/favicon.png'}),
                        url(r'^start/$', 'learnscripture.views.start', name='start'),
                        url(r'^choose/$', 'learnscripture.views.choose', name='choose'),
                        url(r'^learn/$', 'learnscripture.views.learn', name='learn'),
