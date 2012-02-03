@@ -42,7 +42,8 @@ class NextVerseHandler(BaseHandler):
     allowed_methods = ('GET',)
     fields = ('id', 'memory_stage', 'strength', 'first_seen',
               ('verse_choice', (('verse_set', ('id',)),)),
-              ('verse', ('reference', 'text')),
+              'reference',
+              'text',
               ('version', ('full_name', 'short_name', 'slug', 'url')))
 
     @require_identity_method
@@ -84,7 +85,7 @@ class ChangeVersionHandler(BaseHandler):
     @require_identity_method
     def create(self, request):
         verse_set_id = request.data['verse_set_id']
-        if verse_set_id == '' or verse_set_id == 'null':
+        if verse_set_id == '' or verse_set_id == 'null' or verse_set_id is None:
             verse_set_id = None
         else:
             verse_set_id = int(verse_set_id)
