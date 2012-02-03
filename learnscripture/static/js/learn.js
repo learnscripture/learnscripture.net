@@ -9,7 +9,9 @@ var learnscripture =
         var WORD_TOGGLE_SHOW = 0;
         var WORD_TOGGLE_HIDE_END = 1;
         var WORD_TOGGLE_HIDE_ALL = 2;
-        var TESTING_MAX_ATTEMPTS = 3;
+
+        var TEST_TYPE_FULL = 'TEST_TYPE_FULL';
+        var TEST_TYPE_QUICK = 'TEST_TYPE_QUICK';
 
         var INITIAL_STRENGTH_FACTOR = 0.1;
 
@@ -70,8 +72,11 @@ var learnscripture =
             return word.css('opacity') == '0';
         };
 
-        var hideWord = function(word) {
-            word.animate({'opacity': '0'}, {duration: 300, queue: false});
+        var hideWord = function(word, options) {
+            if (options == undefined) {
+                options = {duration: 300, queue: false};
+            }
+            word.animate({'opacity': '0'}, options);
         };
 
         var showWord = function(word) {
@@ -135,14 +140,19 @@ var learnscripture =
         };
 
         var matchWord = function(target, typed) {
-            typed = stripPunctuation(typed);
-            if (typed == "") return false;
-            // for 1 letter words, don't allow any mistakes
-            if (target.length == 1) {
-                return typed == target;
+            // inputs are already lowercased with punctuation stripped
+            if (currentStage.testType == TEST_TYPE_FULL) {
+                if (typed == "") return false;
+                // for 1 letter words, don't allow any mistakes
+                if (target.length == 1) {
+                    return typed == target;
+                }
+                // After that, allow N/3 mistakes, rounded up.
+                return levenshteinDistance(target, typed) <= Math.ceil(target.length / 3);
+            } else {
+                // TEST_TYPE_QUICK:
+                return (typed == target.slice(0, 1));
             }
-            // After that, allow N/3 mistakes, rounded up.
-            return levenshteinDistance(target, typed) <= Math.ceil(target.length / 3);
         };
 
         var testComplete = function() {
@@ -151,7 +161,7 @@ var learnscripture =
             $.each(testingMistakes, function(key, val) {
                 mistakes += val;
             });
-            score = 1 - (mistakes / (TESTING_MAX_ATTEMPTS * wordList.length));
+            score = 1 - (mistakes / (currentStage.testMaxAttempts * wordList.length));
             $.ajax({url: '/api/learnscripture/v1/actioncomplete/',
                     dataType: 'json',
                     type: 'POST',
@@ -177,7 +187,7 @@ var learnscripture =
             var wordIdx = getSelectedWordIndex();
             var word = getWordAt(wordIdx);
             var wordStr = stripPunctuation(word.text().toLowerCase());
-            var typed = inputBox.val().toLowerCase();
+            var typed = stripPunctuation(inputBox.val().toLowerCase());
             var moveOn = function() {
                 showWord(word.find('*'));
                 inputBox.val('');
@@ -193,11 +203,11 @@ var learnscripture =
                 moveOn();
             } else {
                 testingMistakes[wordIdx] += 1;
-                if (testingMistakes[wordIdx] == TESTING_MAX_ATTEMPTS) {
+                if (testingMistakes[wordIdx] == currentStage.testMaxAttempts) {
                     indicateFail();
                     moveOn();
                 } else {
-                    indicateMistake(testingMistakes[wordIdx], TESTING_MAX_ATTEMPTS);
+                    indicateMistake(testingMistakes[wordIdx], currentStage.testMaxAttempts);
                 }
             }
         };
@@ -275,13 +285,18 @@ var learnscripture =
         };
 
         var testFullStart = function() {
-            hideWord($('.word span'));
+            // Don't want to see a flash of words at the beginning,
+            // so hide quickly
+            hideWord($('.word span'), {'duration': 0, queue:false});
             resetTestingMistakes();
         };
 
         var testFullContinue = function() {
             return true;
         };
+
+        var testQuickStart = testFullStart;
+        var testQuickContinue = testFullContinue;
 
         // Utilities for stages
         var setProgress = function(stageIdx, fraction) {
@@ -472,8 +487,16 @@ var learnscripture =
                                       continueStage: testFullContinue,
                                       caption: 'Full test',
                                       testMode: true,
-                                      testType: 'TEST_TYPE_FULL',
+                                      testType: TEST_TYPE_FULL,
+                                      testMaxAttempts: 3,
                                       toggleMode: null},
+                         'testQuick': {setup: testQuickStart,
+                                       continueStage: testQuickContinue,
+                                       caption: 'Quick test',
+                                       testMode: true,
+                                       testType: TEST_TYPE_QUICK,
+                                       testMaxAttempts: 2,
+                                       toggleMode: null},
                          'results': {setup: function() {},
                                      continueStage: function() { return true;},
                                      caption: 'Results',
@@ -551,6 +574,12 @@ var learnscripture =
         };
 
         // -- event handlers --
+        var alphanumeric = function(ev) {
+            return ((!ev.ctrlKey && !ev.altKey && (
+                (ev.which >= 65 && ev.which <= 90) ||
+                    (ev.which >= 48 && ev.which <= 57)
+            )));
+        }
 
         var keypress = function(ev) {
             if (ev.ctrlKey && ev.which == 37) {
@@ -594,9 +623,20 @@ var learnscripture =
             if (ev.which == 32) {
                 ev.preventDefault();
                 if (currentStage.testMode) {
-                    checkCurrentWord();
+                    if (currentStage.testType == TEST_TYPE_FULL) {
+                        checkCurrentWord();
+                    }
                 } else {
                     moveSelectionRelative(1);
+                }
+            }
+            // Any character in TEST_TYPE_QUICK
+            if (currentStage.testMode && currentStage.testType == TEST_TYPE_QUICK) {
+                if (alphanumeric(ev)) {
+                    ev.preventDefault()
+                    // Put it there ourselves, so it is ready for checkCurrentWord()
+                    inputBox.val(String.fromCharCode(ev.which));
+                    checkCurrentWord();
                 }
             }
 
@@ -605,10 +645,7 @@ var learnscripture =
                 // do not allow other typing, since it confuses user to be able
                 // to type. We are conservative in what we catch, to avoid
                 // catching tab and function keys etc.
-                if ((!ev.ctrlKey && !ev.altKey && (
-                    (ev.which >= 65 && ev.which <= 90) ||
-                        (ev.which >= 48 && ev.which <= 57)
-                ))) {
+                if (alphanumeric(ev)) {
                     ev.preventDefault();
                 }
             }
@@ -663,7 +700,17 @@ var learnscripture =
                 // e.g. first test was 70% or less, this is second test
                 return ['recall2', 'testFull']
             }
-            return ['testFull']
+            if (strength < 0.4) {
+                return ['testFull'];
+            }
+            // Choice between testQuick and testFull
+            var choices = ['testFull', 'testQuick'];
+            if (strength < 0.5) {
+                // 50% chance
+                return [choices[Math.floor(Math.random() * choices.length)]]
+            }
+            // 1 in 5 chance of testFull
+            return [choices[Math.min(1, Math.floor(Math.random() * choices.length * 5))]]
         }
 
         var setupStageList = function(verseData) {
@@ -680,6 +727,7 @@ var learnscripture =
                     dataType: 'json',
                     success: function(data) {
                         currentVerseStatus = data;
+                        $('#id-verse-wrapper').hide(); // Hide until set up
                         $('#id-verse-title').text(data.reference);
                         // convert newlines to divs
                         var text = data.text + '\n' + data.reference;
@@ -704,6 +752,8 @@ var learnscripture =
                         $('#id-loading').hide();
                         $('#id-controls').show();
                         setupStageList(data);
+                        $('#id-verse-wrapper').show();
+
                         focusTypingInputCarefully();
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
