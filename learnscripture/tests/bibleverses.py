@@ -41,7 +41,3 @@ class ParseRefTests(TestCase):
                 version.verse_set.get(reference="Genesis 1:4"),
                 ],
             parse_ref("Genesis 1:2-4", version))
-
-
-    def test_verse_proxy(self):
-        vc = 
