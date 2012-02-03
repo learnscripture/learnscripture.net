@@ -7,9 +7,8 @@ from learnscripture.datastructures import make_choices
 
 
 VerseSetType = make_choices('VerseSetType',
-                            [(1, 'TOPIC', 'Topic'),
+                            [(1, 'SELECTION', 'Selection'),
                              (2, 'PASSAGE', 'Passage'),
-                             (3, 'GENERAL', 'General'),
                             ])
 
 StageType = make_choices('StageType',
