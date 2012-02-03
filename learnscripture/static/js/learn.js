@@ -170,8 +170,41 @@ var learnscripture =
                         stage: currentStage.testType,
                         score: score
                     }});
-            $('#id-score').text(Math.floor(score * 100).toString() + "%");
+            var scorePercent = Math.floor(score * 100).toString()
+            $('#id-score').text(scorePercent + "%");
+            var comment =
+                scorePercent > 95 ? 'awesome!' :
+                scorePercent > 90 ? 'excellent!' :
+                scorePercent > 80 ? 'very good.' :
+                scorePercent > 70 ? 'good.' :
+                scorePercent > 50 ? 'OK.' :
+                scorePercent > 30 ? 'could do better!' :
+                "more practice needed!";
+
+            $('#id-result-comment').text(comment);
             completeStageGroup();
+            if (scorePercent < 60) {
+                $('#id-result-suggestion').text("We recommend a bit a more practice " +
+                                                "with this before continuing");
+                $('#id-more-practice-btn').addClass('primary').show();
+                $('#id-next-verse-btn').removeClass('primary');
+                $('#id-more-practice-btn').unbind().click(function() {
+                    if (scorePercent < 10) {
+                        currentStageList = chooseStageListForStrength(0);
+                    } else if (scorePercent < 30) {
+                        currentStageList = ['read', 'recall2', 'recall4', 'testFull'];
+                    } else {
+                        currentStageList = ['recall2', 'recall4', 'testFull'];
+                    }
+                    setupStage(0);
+                });
+            } else {
+                $('#id-result-suggestion').text("");
+                $('#id-more-practice-btn').removeClass('primary').hide();
+                $('#id-next-verse-btn').addClass('primary');
+            }
+
+
             showInstructions("results");
         };
 
