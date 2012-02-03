@@ -118,6 +118,13 @@ class Identity(models.Model):
                 out.append(new_uvs)
         return out
 
+    def add_verse_choice(self, verse_choice):
+        existing = list(self.verse_statuses.filter(verse_choice=verse_choice, ignored=False))
+        if existing:
+            return existing[0]
+        else:
+            return self.create_verse_status(verse_choice, self.default_bible_version)
+
     def record_verse_action(self, reference, version_slug, stage_type, accuracy):
         s = self.verse_statuses.filter(verse_choice__reference=reference,
                                        version__slug=version_slug)
@@ -164,9 +171,12 @@ class Identity(models.Model):
         # verse. If these are not in 'passage' type sets, we want them all
         # to be updated.
 
-        verse_set = VerseSet.objects.get(id=verse_set_id)
+        if verse_set_id is None:
+            verse_set = None
+        else:
+            verse_set = VerseSet.objects.get(id=verse_set_id)
 
-        if verse_set.set_type == VerseSetType.PASSAGE:
+        if verse_set is not None and verse_set.set_type == VerseSetType.PASSAGE:
             pass # TODO
 
         else:

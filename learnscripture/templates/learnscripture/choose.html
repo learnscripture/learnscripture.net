@@ -14,13 +14,13 @@ Choose verses
 
 
 <ul class="tabs" data-tabs="tabs">
-  <li class="active"><a href="#id-tab-verseset">Verse sets</a></li>
-  <li><a href="#id-tab-individual">Individual verses</a></li>
-  <li><a href="#id-tab-create">Create a set</a></li>
+  <li {% if active_tab == 'verseset' %}class="active"{% endif %}><a href="#id-tab-verseset">Verse sets</a></li>
+  <li {% if active_tab == 'individual' %}class="active"{% endif %}><a href="#id-tab-individual">Individual verses</a></li>
+  <li {% if active_tab == 'create' %}class="active"{% endif %}><a href="#id-tab-create">Create a set</a></li>
 </ul>
 
 <div class="pill-content">
-  <div class="active" id="id-tab-verseset">
+  <div {% if active_tab == 'verseset' %}class="active"{% endif %} id="id-tab-verseset">
     <p>Choose a set of verses to start learning:</p>
 
     <table>
@@ -69,9 +69,62 @@ Choose verses
 
   </div>
 
-  <div id="id-tab-individual">
+  <div {% if active_tab == 'individual' %}class="active"{% endif %} id="id-tab-individual">
+    <p>Choose a book and enter a verse reference in the form
+      <b>&lt;CHAPTER&gt;:&lt;VERSE&gt;</b>.</p>
+
+    <p>You can also learn a few verses together as a single verse using a range
+      e.g. "2 Timothy 3:16-17", but for longer chunks you should create a
+      'passage' verse set.</p>
+    <form action="" method="GET">
+      <div class="clearfix">
+        <label for="id-biblebook">Book</label>
+        <div class="input">
+          <select id="id-biblebook" name="biblebook">
+            {% for b in BIBLE_BOOKS %}
+            <option value="{{ b }}" {% if b == biblebook %}selected{% endif %}>{{ b }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="clearfix">
+        <label for="id-reference_pt2">Reference</label>
+        <div class="input">
+          <input id="id-reference_pt2" name="reference_pt2" value="{{ reference_pt2 }}" placeholder="1:1">
+          <input type="submit" name="lookup_reference" value="Lookup verse" class="btn primary">
+        </div>
+      </div>
+      <div>
+      </div>
+    </form>
+
+    {% if individual_search_msg %}
+    <div class="alert-message warning"p>{{ individual_search_msg }}</div>
+    {% endif %}
+
+    {% if individual_search_results %}
+    <div class="actionset">
+      <form action="" method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="reference" value="{{ reference }}">
+        <input type="submit" class="btn primary" value="Learn">
+      </form>
+      <h3>{{ individual_search_results.0.book_name }}</h3>
+      <div class="verselist">
+      {% for v in individual_search_results %}
+      <div class="verse">
+        <span class="versenumber">{{ v.chapter_number }}:{{ v.verse_number }}</span> {{ v.text }}
+      </div>
+      {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
   </div>
+
+
   <div id="id-tab-create">
   </div>
+
 </div>
 {% endblock %}

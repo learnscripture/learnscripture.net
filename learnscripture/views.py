@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.utils.http import urlparse
 
 from accounts.forms import PreferencesForm
-from bibleverses.models import VerseSet, BibleVersion
+from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerseReference, parse_ref, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice
 from learnscripture import session
 
 from .decorators import require_identity, require_preferences
@@ -78,7 +78,12 @@ def choose(request):
     """
     Choose a verse or verse set
     """
+    def learn_set(l):
+        session.prepend_verse_statuses(request, l)
+        return HttpResponseRedirect(reverse('learn'))
+
     if request.method == "POST":
+        # Handle choose set
         vs_id = request.POST.get('verseset_id', None)
         if vs_id is not None:
             try:
@@ -87,9 +92,20 @@ def choose(request):
                 # Shouldn't be possible by clicking on buttons.
                 pass
             if vs is not None:
-                user_verse_statuses = request.identity.add_verse_set(vs)
-                session.prepend_verse_statuses(request, user_verse_statuses)
-                return HttpResponseRedirect(reverse('learn'))
+                return learn_set(request.identity.add_verse_set(vs))
+
+        ref = request.POST.get('reference', None)
+        if ref is not None:
+            # First ensure it is valid
+            try:
+                verselist = parse_ref(ref, request.identity.default_bible_version,
+                                      max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
+            except InvalidVerseReference:
+                pass # Ignore the post.
+            else:
+                vc, n = VerseChoice.objects.get_or_create(reference=ref,
+                                                          verse_set=None)
+                return learn_set([request.identity.add_verse_choice(vc)])
 
     c = {}
     verse_sets = VerseSet.objects.all().order_by('name').prefetch_related('verse_choices')
@@ -98,4 +114,27 @@ def choose(request):
     else: # popular, the default
         verse_sets = verse_sets.order_by('-popularity')
     c['verse_sets'] = verse_sets
+
+    c['BIBLE_BOOKS'] = BIBLE_BOOKS
+
+    if 'lookup_reference' in request.GET:
+        c['active_tab'] = 'individual'
+        book = request.GET.get('biblebook', '')
+        reference_pt2 = request.GET.get('reference_pt2', '').strip()
+        reference = book + ' ' + reference_pt2
+        c['reference_pt2'] = reference_pt2
+        c['reference'] = reference
+        c['biblebook'] = request.GET.get('biblebook', '')
+        try:
+            verse_list = parse_ref(reference, request.identity.default_bible_version,
+                                   max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
+        except InvalidVerseReference as e:
+            c['individual_search_msg'] = u"The reference was not recognised: %s" % (e.message)
+        else:
+            c['individual_search_results'] = verse_list
+
+
+    else:
+        c['active_tab'] = 'verseset'
+
     return render(request, 'learnscripture/choose.html', c)

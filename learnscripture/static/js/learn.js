@@ -547,9 +547,11 @@ var learnscripture =
                     dataType: 'json',
                     type: 'POST',
                     data: {
-                        reference: currentVerseStatus.verse.reference,
+                        reference: currentVerseStatus.reference,
                         version_slug: $('#id-version-select').val(),
-                        verse_set_id: currentVerseStatus.verse_choice.verse_set.id,
+                        verse_set_id: currentVerseStatus.verse_choice.verse_set != undefined
+                            ? currentVerseStatus.verse_choice.verse_set.id
+                            : null,
                         user_verse_status_id: currentVerseStatus.id
                     },
                     success: function() {
@@ -676,9 +678,9 @@ var learnscripture =
                     dataType: 'json',
                     success: function(data) {
                         currentVerseStatus = data;
-                        $('#id-verse-title').text(data.verse.reference);
+                        $('#id-verse-title').text(data.reference);
                         // convert newlines to divs
-                        var text = data.verse.text + '\n' + data.verse.reference;
+                        var text = data.text + '\n' + data.reference;
                         $.each(text.split(/\n/), function(idx, line) {
                             if (line.trim() != '') {
                                 $('#id-verse').append('<div class="line">' +
@@ -690,7 +692,7 @@ var learnscripture =
                         $('#id-version-name').text(versionText);
 
                         if (data.version.url != "") {
-                            var url = data.version.url.replace('%s', encodeURI(data.verse.reference)).replace('%20', '+');
+                            var url = data.version.url.replace('%s', encodeURI(data.reference)).replace('%20', '+');
                             $('#id-browse-link').show().find('a').attr('href', url);
                         } else {
                             $('#id-browse-link').hide();
