@@ -411,6 +411,81 @@ var learnscripture =
             }, 1000);
         };
 
+
+        // Stages definition
+
+        // Full and initial
+        var recall1Continue = makeFullAndInitialContinue(0.50);
+        var recall1Start = makeRecallStart(recall1Continue);
+
+        var recall2Continue = makeFullAndInitialContinue(1);
+        var recall2Start = makeRecallStart(recall2Continue);
+
+        // initial and missing
+        var recall3Continue = makeInitialAndMissingContinue(0.33);
+        var recall3Start = makeRecallStart(recall3Continue);
+
+        var recall4Continue = makeInitialAndMissingContinue(0.66);
+        var recall4Start = makeRecallStart(recall4Continue);
+
+        // Each stage definition contains:
+        //
+        // setup: Function to do stage specific setup
+        //
+        // continueStage: function that is run when
+        //  the user clicks 'Next' and moves the stage on.
+        //  It returns true if the stage should be continued.
+        //  false is the stage is over.
+        //
+        // caption: Caption to put next to the progress bar
+        //
+        // testMode: boolean that is true if in testing
+        //
+        // toggleMode: contstant defining how clicking on words should react
+
+        var stageDefs = {'read': {setup: readStage,
+                                  continueStage: function() { return false; },
+                                  caption: 'Read',
+                                  testMode: false,
+                                  toggleMode: WORD_TOGGLE_SHOW},
+                         'recall1': {setup: recall1Start,
+                                     continueStage: recall1Continue,
+                                     caption: 'Recall 1 - 50% initial',
+                                     testMode: false,
+                                     toggleMode: WORD_TOGGLE_HIDE_END},
+                         'recall2': {setup: recall2Start,
+                                     continueStage: recall2Continue,
+                                     caption: 'Recall 2 - 100% initial',
+                                     testMode: false,
+                                     toggleMode: WORD_TOGGLE_HIDE_END},
+                         'recall3': {setup: recall3Start,
+                                     continueStage: recall3Continue,
+                                     caption: 'Recall 3 - 33% missing',
+                                     testMode: false,
+                                     toggleMode: WORD_TOGGLE_HIDE_ALL},
+                         'recall4': {setup: recall4Start,
+                                     continueStage: recall4Continue,
+                                     caption: 'Recall 4 - 66% missing',
+                                     testMode: false,
+                                     toggleMode: WORD_TOGGLE_HIDE_ALL},
+                         'testFull': {setup: testFullStart,
+                                      continueStage: testFullContinue,
+                                      caption: 'Full test',
+                                      testMode: true,
+                                      testType: 'TEST_TYPE_FULL',
+                                      toggleMode: null},
+                         'results': {setup: function() {},
+                                     continueStage: function() { return true;},
+                                     caption: 'Results',
+                                     testMode: false,
+                                     toggleMode: null}
+                        };
+
+
+        var progressRowId = function(stageIdx) {
+            return 'id-progress-row-' + (currentStageIdx + spentStagesCount).toString();
+        };
+
         var setupStage = function(idx) {
             // set the globals
             var currentStageName = currentStageList[idx];
@@ -445,9 +520,6 @@ var learnscripture =
             $('#' + pRowId + ' th').addClass('currenttask');
         };
 
-        var progressRowId = function(stageIdx) {
-            return 'id-progress-row-' + (currentStageIdx + spentStagesCount).toString();
-        };
         // -- Moving between stages --
 
         var next = function(ev) {
@@ -560,76 +632,6 @@ var learnscripture =
                     error: handlerAjaxError
                    });
         };
-
-        // Stages definition
-
-        // Full and initial
-        var recall1Continue = makeFullAndInitialContinue(0.50);
-        var recall1Start = makeRecallStart(recall1Continue);
-
-        var recall2Continue = makeFullAndInitialContinue(1);
-        var recall2Start = makeRecallStart(recall2Continue);
-
-        // initial and missing
-        var recall3Continue = makeInitialAndMissingContinue(0.33);
-        var recall3Start = makeRecallStart(recall3Continue);
-
-        var recall4Continue = makeInitialAndMissingContinue(0.66);
-        var recall4Start = makeRecallStart(recall4Continue);
-
-        // Each stage definition contains:
-        //
-        // setup: Function to do stage specific setup
-        //
-        // continueStage: function that is run when
-        //  the user clicks 'Next' and moves the stage on.
-        //  It returns true if the stage should be continued.
-        //  false is the stage is over.
-        //
-        // caption: Caption to put next to the progress bar
-        //
-        // testMode: boolean that is true if in testing
-        //
-        // toggleMode: contstant defining how clicking on words should react
-
-        var stageDefs = {'read': {setup: readStage,
-                                  continueStage: function() { return false; },
-                                  caption: 'Read',
-                                  testMode: false,
-                                  toggleMode: WORD_TOGGLE_SHOW},
-                         'recall1': {setup: recall1Start,
-                                     continueStage: recall1Continue,
-                                     caption: 'Recall 1 - 50% initial',
-                                     testMode: false,
-                                     toggleMode: WORD_TOGGLE_HIDE_END},
-                         'recall2': {setup: recall2Start,
-                                     continueStage: recall2Continue,
-                                     caption: 'Recall 2 - 100% initial',
-                                     testMode: false,
-                                     toggleMode: WORD_TOGGLE_HIDE_END},
-                         'recall3': {setup: recall3Start,
-                                     continueStage: recall3Continue,
-                                     caption: 'Recall 3 - 33% missing',
-                                     testMode: false,
-                                     toggleMode: WORD_TOGGLE_HIDE_ALL},
-                         'recall4': {setup: recall4Start,
-                                     continueStage: recall4Continue,
-                                     caption: 'Recall 4 - 66% missing',
-                                     testMode: false,
-                                     toggleMode: WORD_TOGGLE_HIDE_ALL},
-                         'testFull': {setup: testFullStart,
-                                      continueStage: testFullContinue,
-                                      caption: 'Full test',
-                                      testMode: true,
-                                      testType: 'TEST_TYPE_FULL',
-                                      toggleMode: null},
-                         'results': {setup: function() {},
-                                     continueStage: function() { return true;},
-                                     caption: 'Results',
-                                     testMode: false,
-                                     toggleMode: null}
-                        };
-
 
         // setup and wiring
         var start = function() {
