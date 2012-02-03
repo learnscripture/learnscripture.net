@@ -171,10 +171,9 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE):
     """
     # This function is strict, and expects reference in normalised format.
     # Frontend function should deal with tolerance, to ensure that VerseChoice
-    # only every stores a canonical form.
+    # only ever stores a canonical form.
 
-    # This function will InvalidVerseReference, or will return an empty list in
-    # some cases if verses are not found.
+    # This function will InvalidVerseReference if a verse is not matched.
 
     if ':' not in reference:
         # chapter only
@@ -189,65 +188,64 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE):
             chapter_number = int(chapter)
         except ValueError:
             raise InvalidVerseReference(u"Expecting '%s' to be a chapter number" % chapter)
-        return list(version.verse_set.filter(book_number=book_number, chapter_number=chapter_number))
-    parts = reference.rsplit(u'-', 1)
-    if len(parts) == 1:
-        return list(version.verse_set.filter(reference=reference))
-
+        retval = list(version.verse_set.filter(book_number=book_number, chapter_number=chapter_number))
     else:
-        book, start = parts[0].rsplit(u' ', 1)
-        end = parts[1]
-        if u':' not in start:
-            raise InvalidVerseReference(u"Expecting to find ':' in part '%s'" % start)
-
-        # TODO - InvalidVerseReference where we have int
-        start_chapter, start_verse = start.split(u':')
-        try:
-            start_chapter = int(start_chapter)
-        except ValueError:
-            raise InvalidVerseReference(u"Expecting '%s' to be a chapter number" % start_chapter)
-
-        try:
-            start_verse = int(start_verse)
-        except ValueError:
-            raise InvalidVerseReference(u"Expecting '%s' to be a verse number" % start_verse)
-
-        if u':' in end:
-            end_chapter, end_verse = end.split(':')
-            try:
-                end_chapter = int(end_chapter)
-            except ValueError:
-                raise InvalidVerseReference(u"Expecting '%s' to be a chapter number" % end_chapter)
-            try:
-                end_verse = int(end_verse)
-            except ValueError:
-                raise InvalidVerseReference(u"Expecting '%s' to be a verse number" % end_verse)
+        parts = reference.rsplit(u'-', 1)
+        if len(parts) == 1:
+            retval = list(version.verse_set.filter(reference=reference))
 
         else:
-            end_chapter = start_chapter
+            book, start = parts[0].rsplit(u' ', 1)
+            end = parts[1]
+            if u':' not in start:
+                raise InvalidVerseReference(u"Expecting to find ':' in part '%s'" % start)
+
+            start_chapter, start_verse = start.split(u':')
             try:
-                end_verse = int(end)
+                start_chapter = int(start_chapter)
             except ValueError:
-                raise InvalidVerseReference(u"Expecting '%s' to be a verse number" % end)
+                raise InvalidVerseReference(u"Expecting '%s' to be a chapter number" % start_chapter)
 
-        ref_start = u"%s %d:%d" % (book, start_chapter, start_verse)
-        ref_end = u"%s %d:%d" % (book, end_chapter, end_verse)
+            try:
+                start_verse = int(start_verse)
+            except ValueError:
+                raise InvalidVerseReference(u"Expecting '%s' to be a verse number" % start_verse)
+            if u':' in end:
+                end_chapter, end_verse = end.split(':')
+                try:
+                    end_chapter = int(end_chapter)
+                except ValueError:
+                    raise InvalidVerseReference(u"Expecting '%s' to be a chapter number" % end_chapter)
+                try:
+                    end_verse = int(end_verse)
+                except ValueError:
+                    raise InvalidVerseReference(u"Expecting '%s' to be a verse number" % end_verse)
 
-        # Try to get results in just two queries
-        vs = version.verse_set.filter(reference__in=[ref_start, ref_end])
-        try:
-            verse_start, verse_end = tuple(vs)
-        except ValueError:
-            raise InvalidVerseReference("Can't find one '%s' or '%s'" % (ref_start, ref_end))
+            else:
+                end_chapter = start_chapter
+                try:
+                    end_verse = int(end)
+                except ValueError:
+                    raise InvalidVerseReference(u"Expecting '%s' to be a verse number" % end)
 
-        if verse_end.bible_verse_number - verse_start.bible_verse_number > max_length:
-            raise InvalidVerseReference("Not allowed a reference that spans more than %d verses." % max_length)
+            ref_start = u"%s %d:%d" % (book, start_chapter, start_verse)
+            ref_end = u"%s %d:%d" % (book, end_chapter, end_verse)
 
-        retval = list(version.verse_set.filter(bible_verse_number__gte=verse_start.bible_verse_number,
-                                               bible_verse_number__lte=verse_end.bible_verse_number))
-        if len(retval) == 0:
-            raise InvalidVerseReference(u"No verses matched.")
-        return retval
+            # Try to get results in just two queries
+            vs = version.verse_set.filter(reference__in=[ref_start, ref_end])
+            try:
+                verse_start, verse_end = tuple(vs)
+            except ValueError:
+                raise InvalidVerseReference("Can't find one '%s' or '%s'" % (ref_start, ref_end))
+
+            if verse_end.bible_verse_number - verse_start.bible_verse_number > max_length:
+                raise InvalidVerseReference("Not allowed a reference that spans more than %d verses." % max_length)
+
+            retval = list(version.verse_set.filter(bible_verse_number__gte=verse_start.bible_verse_number,
+                                                   bible_verse_number__lte=verse_end.bible_verse_number))
+    if len(retval) == 0:
+        raise InvalidVerseReference(u"No verses matched.")
+    return retval
 
 
 # Storing this is probably only useful for doing stats on progress and
