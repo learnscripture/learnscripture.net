@@ -429,37 +429,6 @@ var learnscripture =
             enableBtn($('#id-back-btn'), currentStageIdx > 0);
         };
 
-        var isScrolledIntoView = function(div) {
-            var docViewTop = $(window).scrollTop();
-            var docViewBottom = docViewTop + $(window).height();
-
-            var elemTop = div.offset().top;
-            var elemBottom = elemTop + div.height();
-
-            return ((elemBottom >= docViewTop) && (elemTop <= docViewBottom)
-                    && (elemBottom <= docViewBottom) &&  (elemTop >= docViewTop) );
-        };
-
-        var focusTypingInputCarefully = function() {
-            var instructions = $('#id-instructions');
-            inputBox.focus();
-            // If the instructions are out of view, and they were visible
-            // before we focussed, move back.
-            setTimeout(function() {
-                if (!isScrolledIntoView(instructions)) {
-                    var pos = instructions.position().top;
-                    var topbar = $('.topbar');
-                    if (topbar.css('position') == 'fixed') {
-                        // If the topbar is position:fixed, we need to take into account
-                        // its height.
-                        pos -= topbar.height();
-                    }
-                    $('body').scrollTop(pos);
-                };
-            }, 1000);
-        };
-
-
         // Stages definition
 
         // Full and initial
@@ -553,11 +522,17 @@ var learnscripture =
             $('#id-progress-summary').text("Stage " + (currentStageIdx + 1).toString() + "/" + currentStageList.length.toString());
             currentStage.setup();
             setNextPreviousBtns();
+            if (currentStage.testMode) {
+                $('#id-test-bar').show();
+                inputBox.focus();
+            } else {
+                inputBox.blur();
+                $('#id-test-bar').hide();
+            }
 
             showInstructions(currentStageName);
             // reset selected word
             moveSelection($('.word').first());
-            inputBox.val('').focus();
 
             // Create progress bar for this stage.
             var pRowId = progressRowId(currentStageIdx);
@@ -579,7 +554,6 @@ var learnscripture =
         // -- Moving between stages --
 
         var next = function(ev) {
-            inputBox.val('').focus();
             if (currentStage.continueStage()) {
                 return;
             }
@@ -590,7 +564,6 @@ var learnscripture =
         };
 
         var back = function(ev) {
-            inputBox.val('').focus();
             if (currentStageIdx == 0) {
                 return;
             }
@@ -615,43 +588,11 @@ var learnscripture =
         }
 
         var keypress = function(ev) {
-            if (ev.ctrlKey && ev.which == 37) {
-                // Ctrl-Left
-                ev.preventDefault();
-                back();
-                return;
-            }
-            if (ev.ctrlKey && ev.which == 39) {
-                // Ctrl-Right
-                ev.preventDefault();
-                next();
-                return;
-            }
             if (ev.which == 27) {
                 // ESC
                 ev.preventDefault();
                 inputBox.val('');
                 return;
-            }
-            if (ev.which == 13) {
-                // Enter
-                ev.preventDefault();
-                toggleWord($('.word.selected'));
-                return;
-            }
-            if (!currentStage.testMode) {
-                if (ev.which == 37) {
-                    // Left
-                    ev.preventDefault();
-                    moveSelectionRelative(-1);
-                    return;
-                }
-                if (ev.which == 39) {
-                    // Right
-                    ev.preventDefault();
-                    moveSelectionRelative(1);
-                    return;
-                }
             }
             if (ev.which == 32) {
                 ev.preventDefault();
@@ -659,8 +600,6 @@ var learnscripture =
                     if (currentStage.testType == TEST_TYPE_FULL) {
                         checkCurrentWord();
                     }
-                } else {
-                    moveSelectionRelative(1);
                 }
             }
             // Any character in TEST_TYPE_QUICK
@@ -670,16 +609,6 @@ var learnscripture =
                     // Put it there ourselves, so it is ready for checkCurrentWord()
                     inputBox.val(String.fromCharCode(ev.which));
                     checkCurrentWord();
-                }
-            }
-
-            // Fall through for all other keys
-            if (!currentStage.testMode) {
-                // do not allow other typing, since it confuses user to be able
-                // to type. We are conservative in what we catch, to avoid
-                // catching tab and function keys etc.
-                if (alphanumeric(ev)) {
-                    ev.preventDefault();
                 }
             }
 
@@ -787,7 +716,6 @@ var learnscripture =
                         setupStageList(data);
                         $('#id-verse-wrapper').show();
 
-                        focusTypingInputCarefully();
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
                         if (jqXHR.status == 404) {
@@ -838,7 +766,6 @@ var learnscripture =
                 if (!currentStage.testMode) {
                     toggleWord($(this));
                 }
-                inputBox.focus();
             });
         };
 
