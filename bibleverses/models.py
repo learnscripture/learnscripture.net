@@ -180,7 +180,7 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE):
         try:
             book, chapter = reference.rsplit(u' ')
         except ValueError:
-            raise InvalidVerseReference(u"Reference provide at least book name and chapter number")
+            raise InvalidVerseReference(u"Reference should provide at least book name and chapter number")
         if book not in BIBLE_BOOKS_DICT:
             raise InvalidVerseReference(u"Book '%s' not known" % book)
         book_number = BIBLE_BOOKS_DICT.get(book)
@@ -239,7 +239,7 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE):
                 raise InvalidVerseReference("Can't find one '%s' or '%s'" % (ref_start, ref_end))
 
             if verse_end.bible_verse_number - verse_start.bible_verse_number > max_length:
-                raise InvalidVerseReference("Not allowed a reference that spans more than %d verses." % max_length)
+                raise InvalidVerseReference("References are that span more than %d verses are not allowed in this context." % max_length)
 
             retval = list(version.verse_set.filter(bible_verse_number__gte=verse_start.bible_verse_number,
                                                    bible_verse_number__lte=verse_end.bible_verse_number))
