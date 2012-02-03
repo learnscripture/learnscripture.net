@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from django.db import models
+from django.utils import timezone
 
 from learnscripture.datastructures import make_choices
 
@@ -71,7 +72,7 @@ class VerseSet(models.Model):
     set_type = models.PositiveSmallIntegerField(choices=VerseSetType.choice_list)
 
     popularity = models.PositiveIntegerField(default=0)
-    date_added = models.DateTimeField()
+    date_added = models.DateTimeField(default=timezone.now)
 
     def __unicode__(self):
         return self.name
