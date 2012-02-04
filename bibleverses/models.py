@@ -245,6 +245,10 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE):
                                                    bible_verse_number__lte=verse_end.bible_verse_number))
     if len(retval) == 0:
         raise InvalidVerseReference(u"No verses matched.")
+
+    if len(retval) > max_length:
+        raise InvalidVerseReference("References are that span more than %d verses are not allowed in this context." % max_length)
+
     return retval
 
 
