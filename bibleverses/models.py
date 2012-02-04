@@ -236,10 +236,10 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE):
             try:
                 verse_start, verse_end = tuple(vs)
             except ValueError:
-                raise InvalidVerseReference("Can't find one '%s' or '%s'" % (ref_start, ref_end))
+                raise InvalidVerseReference(u"Can't find one '%s' or '%s'" % (ref_start, ref_end))
 
             if verse_end.bible_verse_number - verse_start.bible_verse_number > max_length:
-                raise InvalidVerseReference("References are that span more than %d verses are not allowed in this context." % max_length)
+                raise InvalidVerseReference(u"References that span more than %d verses are not allowed in this context." % max_length)
 
             retval = list(version.verse_set.filter(bible_verse_number__gte=verse_start.bible_verse_number,
                                                    bible_verse_number__lte=verse_end.bible_verse_number))
@@ -247,7 +247,7 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE):
         raise InvalidVerseReference(u"No verses matched.")
 
     if len(retval) > max_length:
-        raise InvalidVerseReference("References are that span more than %d verses are not allowed in this context." % max_length)
+        raise InvalidVerseReference(u"References that span more than %d verses are not allowed in this context." % max_length)
 
     return retval
 
