@@ -60,33 +60,57 @@ class MemoryModel(object):
     # delta_t_ideal corresponds to an interval delta_s_ideal from the current
     # strength.  We aim to fit delta_s_ideal to a constant that will produce a fixed
     # number of tests to move the memory from strength zero to 'one'. In the
-    # Charlotte Mason system, a verse is tested about 15 - 20 times, so we aim for
-    # 20 tests in 2 years.
+    # Charlotte Mason system, a verse is tested about 15 - 20 times before being
+    # retired, so we aim for that (with a bit of tuning)
+
+    VERSE_TESTS = 18
+
+    # We want to avoid the number of verses needing testing increasing forever,
+    # and so put a hard limit, after which a verse is considered 'learnt'.
+
+    LEARNT = 0.9
+
+    # A person's score for a verse will never exceed what they consistently
+    # score for that verse. So this means that if a person is scoring 90% or
+    # less for a verse, it will never be considered learnt. 90% is quite
+    # achievable with our testing method (100% is common), so this is a
+    # sensible figure.
 
 
+    # We want to reach this stage after 1 year on our idealised curve.
 
-    def __init__(self):
+    # This will mean that if we learn X new verses every day,
+    # there will be X*VERSE_TESTS verses to revise each day.
 
-        self.EXPONENT = 0.2
-        self.ALPHA = 5e-2
+    # Some maths below needs a limit to stop us getting logs of
+    # negative numbers:
+    BEST_STRENGTH = 0.999
 
 
-        # For the initial test, we don't have a previous strength recorded. We
-        # arbitrarily set the initial strength to be 0.1 test strength
+    # We allow one of these parameters to be tuned - pick EXPONENT
+    def __init__(self, EXPONENT):
 
-        self.INITIAL_STRENGTH_FACTOR = 0.1  # This is also used in learn.js
+        # The other can be set using the above constants:
 
-        # Trial and error - this gives us approx 20 tests in 2 years,
-        # and doesn't get us too close to strength=1 after 100 years.
-        self.DELTA_S_IDEAL = 0.02
+        # s  = 1 - exp(-alpha * t^n)
+        # LEARNT = 1 - exp(-alpha * ONE_YEAR^n)
+        # Rearranging:
+        # ALPHA = - ln(1 - LEARNT) / (ONE_YEAR^n)
+        ONE_YEAR = 365*24*3600*1.0
 
-        # If we have a strength of 1 it will stop the memory from ever being tested, and
-        # break our maths below.
-        self.BEST_STRENGTH = 0.999999999999999
+        self.EXPONENT = EXPONENT
+        self.ALPHA = - math.log(1.0 - self.LEARNT) / (ONE_YEAR ** EXPONENT)
+
+        self.DELTA_S_IDEAL = (self.LEARNT - self.INITIAL_STRENGTH_FACTOR) / self.VERSE_TESTS
 
 
     # Given an old strength, a new test score, and the number of seconds elapsed,
     # we need to calculate the new strength estimate.
+
+    # For the initial test, we don't have a previous strength recorded. We
+    # arbitrarily set the initial strength to be 0.1 test strength
+
+    INITIAL_STRENGTH_FACTOR = 0.1  # This is also used in learn.js
 
     def strength_estimate(self, old_strength, test_strength, time_elapsed):
         if old_strength is None or time_elapsed is None:
@@ -140,6 +164,8 @@ class MemoryModel(object):
     def needs_testing(self, strength, time_elapsed):
         if time_elapsed is None or strength is None:
             return True
+        if strength > self.LEARNT:
+            return False
         t_0 = self.t(strength)
         # clip at BEST_STRENGTH here to stop log of a negative
         t_1 = self.t(min(strength + self.DELTA_S_IDEAL, self.BEST_STRENGTH))
@@ -149,6 +175,7 @@ class MemoryModel(object):
     def filter_qs(self, qs, now_seconds):
         # SQL equivalent of needs_testing
         clause = ('last_tested IS NOT NULL AND '
+                  'strength < %(learnt)s AND '
                   '(%(now_seconds)s - EXTRACT(EPOCH FROM last_tested))' # time elapsed
                   ' > ('
                   '  ((- ln(1 - LEAST(strength + %(delta_s_ideal)s, %(best_strength)s)) / %(alpha)s) ^ (1.0/%(exponent)s)) '
@@ -157,26 +184,36 @@ class MemoryModel(object):
                   {'now_seconds': now_seconds,
                    'delta_s_ideal': self.DELTA_S_IDEAL,
                    'best_strength': self.BEST_STRENGTH,
+                   'learnt': self.LEARNT,
                    'alpha': self.ALPHA,
                    'exponent': self.EXPONENT});
         return qs.extra(where=[clause])
 
 
 
-def test_run():
+def test_run(exponent, accuracy):
+    m = MemoryModel(exponent)
     interval = 0
     x = None
     day = 24*3600
     test = 0
-    for i in range(0, 2*365):
+    for i in range(0, 10*365):
         interval += 1
-        if needs_testing(x, day * interval):
-            x = strength_estimate(x, 0.95, interval * day)
+        if m.needs_testing(x, day * interval):
+            x = m.strength_estimate(x, accuracy, interval * day)
             test += 1
             print "Day %d, test %d, interval %d, strength %s" % (i, test, interval, x)
             interval = 0
 
-m = MemoryModel()
+
+# Trial and error with test_run, with the aim of getting
+# a verse tested at least 3 or 4 times in the first week
+# after learning, and then a sensible sequence of intervals,
+# prdocuces EXPONENT = 0.3.
+# This was tried for accuracy = 1.0 and accuracy = 0.95, both
+# giving sensible results
+
+m = MemoryModel(0.3)
 filter_qs = m.filter_qs
 needs_testing = m.needs_testing
 strength_estimate = m.strength_estimate

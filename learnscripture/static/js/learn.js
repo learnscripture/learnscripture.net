@@ -697,7 +697,9 @@ var learnscripture =
             // This function is tuned to give read/recall stages only for the
             // early stages, or when the verse has been completely forgotten.
             // Although it doesn't use it, it's tuned to the value of
-            // INITIAL_STRENGTH_FACTOR
+            // INITIAL_STRENGTH_FACTOR.
+            // The other constants are picked by looking at the
+            // output of accounts.memorymodel.test_run()
             if (strength < 0.02) {
                 // either first test, or first test after initial test score
                 // of 20% or less. Do everything:
