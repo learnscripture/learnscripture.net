@@ -226,7 +226,7 @@ p.large {
   }
 
 #id-progress-summary {
-  padding: 2px;
+  padding: 5px;
   float: right;
   }
 
@@ -249,15 +249,9 @@ p.large {
   .gradientBar(@blue, @blueDark);
   }
 
-table.condensed {
-  margin: 0px;
-  }
-
-table.condensed td, table.condensed th {
-  border: none;
-  padding: 0px;
-  text-align: left;
-  }
+#id-help-btn {
+  float: right;
+}
 
 #id-typing {
   font-size: 18px;
@@ -286,6 +280,10 @@ table.condensed td, table.condensed th {
     }
   }
 
+
+.one-column-only {
+  display: none;
+}
 
 ////////////  Response to smaller screen /////////////
 
@@ -344,10 +342,13 @@ table.condensed td, table.condensed th {
     }
 
 
-  // Don't display progress section, because it takes up room between the main
-  // controls and the 'session' panel which is now below.
+  .two-column-only {
+    display: none;
+    }
 
-  div.progress { display: none;}
+  .one-column-only {
+    display:inherit;
+    }
 
   .modal {
     width: 400px;
