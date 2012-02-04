@@ -644,6 +644,7 @@ var learnscripture =
                 return;
             case 32: // Space
                 toggleWord($('.word.selected'));
+                ev.preventDefault(); // scroll in some browsers.
                 return;
             case 13: // Enter
                 if (target.is("a")) {
