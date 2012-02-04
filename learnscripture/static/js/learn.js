@@ -587,7 +587,7 @@ var learnscripture =
             )));
         }
 
-        var keypress = function(ev) {
+        var inputKeyDown = function(ev) {
             if (ev.which == 27) {
                 // ESC
                 ev.preventDefault();
@@ -602,6 +602,9 @@ var learnscripture =
                     }
                 }
             }
+            if (ev.which == 13) {
+                pressPrimaryButton();
+            }
             // Any character in TEST_TYPE_QUICK
             if (currentStage.testMode && currentStage.testType == TEST_TYPE_QUICK) {
                 if (alphanumeric(ev)) {
@@ -613,6 +616,43 @@ var learnscripture =
             }
 
         };
+
+        var pressPrimaryButton = function() {
+            $('input.primary:visible:not([disabled])').click();
+        };
+
+        var docKeyPress = function(ev) {
+            if (currentStage.testMode) {
+                return;
+            }
+            var target = $(ev.target);
+            if (target.is(":input")) {
+                return;
+            }
+            switch (ev.which) {
+            case 98: // 'b'
+                back();
+                return;
+            case 110: // 'n'
+                next();
+                return;
+            case 106: // 'j'
+                moveSelectionRelative(-1);
+                return;
+            case 107: // 'k'
+                moveSelectionRelative(1);
+                return;
+            case 32: // Space
+                toggleWord($('.word.selected'));
+                return;
+            case 13: // Enter
+                if (target.is("a")) {
+                    return;
+                }
+                pressPrimaryButton();
+            }
+        };
+
         var versionSelectChanged = function(ev) {
             $.ajax({url: '/api/learnscripture/v1/changeversion/',
                     dataType: 'json',
@@ -635,11 +675,16 @@ var learnscripture =
         // setup and wiring
         var start = function() {
             inputBox = $('#id-typing');
-            inputBox.keydown(keypress);
+            inputBox.keydown(inputKeyDown);
+            $(document).keypress(docKeyPress);
             $('#id-next-btn').show().click(next);
             $('#id-back-btn').show().click(back);
             $('#id-next-verse-btn').click(nextVerse);
             $('#id-version-select').change(versionSelectChanged);
+            $('#id-help-btn').click(function(ev) {
+                $('#id-help').toggle('fast');
+                $('#id-help-btn').button('toggle');
+            });
             nextVerse();
         };
 
