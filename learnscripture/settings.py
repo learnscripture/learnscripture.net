@@ -90,7 +90,7 @@ MIDDLEWARE_CLASSES = [
         (True, 'django.contrib.messages.middleware.MessageMiddleware'),
         (True, 'django.middleware.clickjacking.XFrameOptionsMiddleware'),
         (True, 'pagination.middleware.PaginationMiddleware'),
-        (DEBUG, 'debug_toolbar.middleware.DebugToolbarMiddleware'),
+#        (DEBUG, 'debug_toolbar.middleware.DebugToolbarMiddleware'),
     ]
     if b
 ]
