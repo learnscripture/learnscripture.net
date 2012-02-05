@@ -125,7 +125,7 @@ var learnscripture =
         };
 
         var indicateMistake = function(mistakes, maxMistakes) {
-            var msg = "Try again! (" + mistakes.toString() + " out of " + maxMistakes.toString() + ")";
+            var msg = "Try again! (" + mistakes.toString() + "/" + maxMistakes.toString() + ")";
             flashMsg($('#id-testing-status').attr({'class': 'incorrect'}).text(msg));
         };
 
@@ -748,7 +748,7 @@ var learnscripture =
                             }
                         });
                         var versionText = "Version: " + data.version.full_name +
-                            " (" + data.version.short_name + ")";
+                            " (" + data.version.short_name + ") |";
                         $('#id-version-name').text(versionText);
 
                         if (data.version.url != "") {

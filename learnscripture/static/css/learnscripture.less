@@ -257,7 +257,7 @@ p.large {
   font-size: 18px;
   height: 22px;
   width:15em;
-  max-width:100%;
+  max-width:50%;
   }
 
 #id-result-buttons {
@@ -487,4 +487,13 @@ p.large {
     }
 
   }
+
+// Really narrow - remove long version info
+@media screen and (max-width: 500px) {
+  #id-version-name {
+    display:none;
+    }
+
+  }
+
 
