@@ -108,8 +108,6 @@ var learnscripture =
                 if (isHidden(wordEnd)) {
                     markRevealed(wordNumber);
                     showWord(wordEnd);
-                } else {
-                    hideWord(wordEnd);
                 }
             } else if (toggleMode == WORD_TOGGLE_HIDE_ALL) {
                 if (isHidden(wordStart)) {
@@ -118,9 +116,6 @@ var learnscripture =
                 } else if (isHidden(wordEnd)) {
                     markRevealed(wordNumber);
                     showWord(wordEnd);
-                } else {
-                    hideWord(wordStart);
-                    hideWord(wordEnd);
                 }
             }
         };
