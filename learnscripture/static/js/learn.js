@@ -235,7 +235,7 @@ var learnscripture =
             var moveOn = function() {
                 showWord(word.find('*'));
                 inputBox.val('');
-                //setProgress(currentStageIdx, (wordIdx + 1)/ wordList.length);
+                setProgress(currentStageIdx, (wordIdx + 1)/ wordList.length);
                 if (wordIdx + 1 == wordList.length) {
                     testComplete();
                 } else {
@@ -333,6 +333,7 @@ var learnscripture =
             // so hide quickly
             hideWord($('.word span'), {'duration': 0, queue:false});
             resetTestingMistakes();
+            testingStatus.text('');
         };
 
         var testFullContinue = function() {
