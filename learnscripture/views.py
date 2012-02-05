@@ -7,6 +7,7 @@ from django.utils.http import urlparse
 from accounts.forms import PreferencesForm
 from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerseReference, parse_ref, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice
 from learnscripture import session
+from bibleverses.forms import VerseSelector
 
 from .decorators import require_identity, require_preferences
 
@@ -117,24 +118,30 @@ def choose(request):
 
     c['BIBLE_BOOKS'] = BIBLE_BOOKS
 
-    if 'lookup_reference' in request.GET:
+    if 'lookup' in request.GET:
         c['active_tab'] = 'individual'
-        book = request.GET.get('biblebook', '')
-        reference_pt2 = request.GET.get('reference_pt2', '').strip()
-        reference = book + ' ' + reference_pt2
-        c['reference_pt2'] = reference_pt2
-        c['reference'] = reference
-        c['biblebook'] = request.GET.get('biblebook', '')
-        try:
-            verse_list = parse_ref(reference, request.identity.default_bible_version,
-                                   max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
-        except InvalidVerseReference as e:
-            c['individual_search_msg'] = u"The reference was not recognised: %s" % (e.message)
-        else:
-            c['individual_search_results'] = verse_list
-
-
+        verse_form = VerseSelector(request.GET)
+        if verse_form.is_valid():
+            reference = u"%s %s" % (verse_form.cleaned_data['book'],
+                                    verse_form.cleaned_data['chapter'])
+            start_verse = verse_form.cleaned_data['start_verse']
+            if start_verse is not None:
+                reference = u"%s:%s" % (reference, start_verse)
+                end_verse = verse_form.cleaned_data['end_verse']
+                if end_verse is not None:
+                    reference =  u"%s-%s" % (reference, end_verse)
+            c['reference'] = reference
+            try:
+                verse_list = parse_ref(reference, request.identity.default_bible_version,
+                                       max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
+            except InvalidVerseReference as e:
+                c['individual_search_msg'] = u"The reference was not recognised: %s" % (e.message)
+            else:
+                c['individual_search_results'] = verse_list
     else:
+        verse_form = VerseSelector()
         c['active_tab'] = 'verseset'
+
+    c['verse_form'] = verse_form
 
     return render(request, 'learnscripture/choose.html', c)

@@ -1,6 +1,7 @@
 {% extends "base_twocol.html" %}
 
 {% load pagination_tags %}
+{% load bootstrap %}
 
 {% block title %}
 Choose verses
@@ -70,31 +71,13 @@ Choose verses
   </div>
 
   <div {% if active_tab == 'individual' %}class="active"{% endif %} id="id-tab-individual">
-    <p>Choose a book and enter a verse reference in the form
-      <b>&lt;CHAPTER&gt;:&lt;VERSE&gt;</b>.</p>
+    <p>Choose a verse. You can combine a few verses together by entering
+      a value in the 'End verse' box.</p>
 
-    <p>You can also learn a few verses together as a single verse using a range
-      e.g. "2 Timothy 3:16-17", but for longer chunks you should create a
-      'passage' verse set.</p>
     <form action="" method="GET">
-      <div class="clearfix">
-        <label for="id-biblebook">Book</label>
-        <div class="input">
-          <select id="id-biblebook" name="biblebook">
-            {% for b in BIBLE_BOOKS %}
-            <option value="{{ b }}" {% if b == biblebook %}selected{% endif %}>{{ b }}</option>
-            {% endfor %}
-          </select>
-        </div>
-      </div>
-      <div class="clearfix">
-        <label for="id-reference_pt2">Reference</label>
-        <div class="input">
-          <input id="id-reference_pt2" name="reference_pt2" value="{{ reference_pt2 }}" placeholder="1:1">
-          <input type="submit" name="lookup_reference" value="Lookup verse" class="btn primary">
-        </div>
-      </div>
-      <div>
+      {{ verse_form|bootstrap }}
+      <div class="input">
+        <input type="submit" name="lookup" value="Lookup verse" class="btn primary">
       </div>
     </form>
 
