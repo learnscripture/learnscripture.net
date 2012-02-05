@@ -2,6 +2,9 @@
 
 var learnscripture =
     (function(learnscripture, $) {
+        // User prefs
+        var preferences = null;
+
         // Controls
         var inputBox = null;
 
@@ -73,14 +76,22 @@ var learnscripture =
         };
 
         var hideWord = function(word, options) {
-            if (options == undefined) {
-                options = {duration: 300, queue: false};
+            if (preferences.animations) {
+                if (options == undefined) {
+                    options = {duration: 300, queue: false};
+                }
+                word.animate({'opacity': '0'}, options);
+            } else {
+                word.css({'opacity':'0'});
             }
-            word.animate({'opacity': '0'}, options);
         };
 
         var showWord = function(word) {
-            word.animate({'opacity': '1'}, {duration: 300, queue: false});
+            if (preferences.animations) {
+                word.animate({'opacity': '1'}, {duration: 300, queue: false});
+            } else {
+                word.css({'opacity': '1'});
+            }
         };
 
         var toggleWord = function(word) {
@@ -114,8 +125,12 @@ var learnscripture =
         };
 
         var flashMsg = function(elements) {
-            elements.css({opacity:1}).animate({opacity: 0},
-                                              {duration: 1000, queue: false});
+            if (preferences.animations) {
+                elements.css({opacity:1}).animate({opacity: 0},
+                                                  {duration: 1000, queue: false});
+            } else {
+                elements.css({opacity:1});
+            }
         };
 
         var indicateSuccess = function() {
@@ -414,14 +429,20 @@ var learnscripture =
         };
 
         var showInstructions = function(stageName) {
-            // Fade out old instructions, fade in the new
-            $('#id-instructions div').animate(
-                {opacity: 0},
-                {duration: 150,
-                 queue: false,
-                 complete: function() {
-                     $('#id-instructions div').hide();
-                     $('#id-instructions .instructions-' + stageName).show().animate({opacity: 1}, 150); }});
+            if (preferences.animations) {
+                // Fade out old instructions, fade in the new
+                $('#id-instructions div').animate(
+                    {opacity: 0},
+                    {duration: 150,
+                     queue: false,
+                     complete: function() {
+                         $('#id-instructions div').hide();
+                         $('#id-instructions .instructions-' + stageName).show().animate({opacity: 1}, 150); }});
+            } else {
+                $('#id-instructions div').css({opacity: 0});
+                $('#id-instructions div').hide();
+                $('#id-instructions .instructions-' + stageName).show().css({opacity: 1});
+            }
         };
 
         var setNextPreviousBtns = function() {
@@ -543,7 +564,11 @@ var learnscripture =
                         '<td><progress value="0" max="100">0%</progress>' +
                         '</td></tr>');
                 $('.progress table').prepend(progressRow);
-                progressRow.show('200');
+                if (preferences.animations) {
+                    progressRow.show('200');
+                } else {
+                    progressRow.show();
+                }
 
             }
             setProgress(currentStageIdx, 0);
@@ -674,7 +699,8 @@ var learnscripture =
         };
 
         // setup and wiring
-        var start = function() {
+        var start = function(prefs) {
+            preferences = prefs;
             inputBox = $('#id-typing');
             inputBox.keydown(inputKeyDown);
             $(document).keypress(docKeyPress);
@@ -769,7 +795,7 @@ var learnscripture =
                         if (jqXHR.status == 404) {
                             $('#id-loading').hide();
                             $('#id-controls').hide();
-                            $('#id-no-verse-queue').show(300);
+                            $('#id-no-verse-queue').show();
                         } else {
                             handlerAjaxError(jqXHR, textStatus, errorThrown);
                         }
@@ -922,7 +948,7 @@ $(document).ajaxSend(function(event, xhr, settings) {
 
 $(document).ready(function() {
     if ($('#id-verse').length > 0) {
-        learnscripture.start();
+        learnscripture.start($('#id-preferences-data').data());
     }
     $('.topbar').dropdown();
 });
