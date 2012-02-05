@@ -7,6 +7,7 @@ var learnscripture =
 
         // Controls
         var inputBox = null;
+        var testingStatus = null;
 
         // -- Constants and globals --
         var WORD_TOGGLE_SHOW = 0;
@@ -40,21 +41,24 @@ var learnscripture =
 
         // word toggling and selection
 
-        var moveSelection = function(word) {
-            $('.word.selected').removeClass('selected');
-            word.addClass('selected');
-        };
+        // For speed in test mode, where we have to keep up with typing,
+        // we tag all the words with ids, and keep track of the selected id
+        // and word number
+        var selectedWordIndex = null;
 
-        var getSelectedWordIndex = function() {
-            return $('.word').index($('.word.selected'));
-        };
-
-        var getWordCount = function() {
-            return $('.word').length;
+        var moveSelection = function(pos) {
+            if (pos == selectedWordIndex) {
+                return;
+            }
+            if (selectedWordIndex != null) {
+                getWordAt(selectedWordIndex).removeClass('selected');
+            }
+            selectedWordIndex = pos;
+            getWordAt(selectedWordIndex).addClass('selected');
         };
 
         var getWordAt = function(index) {
-            return $($('.word').get(index));
+            return $('#id-word-' + index.toString());
         };
 
         var getWordNumber = function(word) {
@@ -62,13 +66,10 @@ var learnscripture =
         };
 
         var moveSelectionRelative = function(distance) {
-            var i = getSelectedWordIndex();
+            var i = selectedWordIndex;
             var pos = Math.min(Math.max(0, i + distance),
-                               getWordCount() - 1);
-            var word = getWordAt(pos);
-            if (word.length != 0) {
-                moveSelection(word);
-            }
+                               wordList.length - 1);
+            moveSelection(pos);
         };
 
         var isHidden = function(word) {
@@ -95,8 +96,8 @@ var learnscripture =
         };
 
         var toggleWord = function(word) {
-            moveSelection(word);
             var wordNumber = getWordNumber(word);
+            moveSelection(wordNumber);
 
             var wordEnd = word.find('.wordend');
             var wordStart = word.find('.wordstart');
@@ -134,20 +135,20 @@ var learnscripture =
         };
 
         var indicateSuccess = function() {
-            var word = getWordAt(getSelectedWordIndex());
+            var word = getWordAt(selectedWordIndex);
             word.addClass('correct');
-            flashMsg($('#id-testing-status').attr({'class': 'correct'}).text("Correct!"));
+            flashMsg(testingStatus.attr({'class': 'correct'}).text("Correct!"));
         };
 
         var indicateMistake = function(mistakes, maxMistakes) {
             var msg = "Try again! (" + mistakes.toString() + "/" + maxMistakes.toString() + ")";
-            flashMsg($('#id-testing-status').attr({'class': 'incorrect'}).text(msg));
+            flashMsg(testingStatus.attr({'class': 'incorrect'}).text(msg));
         };
 
         var indicateFail = function() {
-            var word = getWordAt(getSelectedWordIndex());
+            var word = getWordAt(selectedWordIndex);
             word.addClass('incorrect');
-            flashMsg($('#id-testing-status').attr({'class': 'incorrect'}).text("Incorrect"));
+            flashMsg(testingStatus.attr({'class': 'incorrect'}).text("Incorrect"));
         };
 
         var stripPunctuation = function(str) {
@@ -232,15 +233,15 @@ var learnscripture =
         };
 
         var checkCurrentWord = function() {
-            var wordIdx = getSelectedWordIndex();
+            var wordIdx = selectedWordIndex;
             var word = getWordAt(wordIdx);
             var wordStr = stripPunctuation(word.text().toLowerCase());
             var typed = stripPunctuation(inputBox.val().toLowerCase());
             var moveOn = function() {
                 showWord(word.find('*'));
                 inputBox.val('');
-                setProgress(currentStageIdx, (wordIdx + 1)/ wordList.length);
-                if (getSelectedWordIndex() + 1 == getWordCount()) {
+                //setProgress(currentStageIdx, (wordIdx + 1)/ wordList.length);
+                if (wordIdx + 1 == wordList.length) {
                     testComplete();
                 } else {
                     moveSelectionRelative(1);
@@ -279,7 +280,7 @@ var learnscripture =
                     return false;
                 }
                 setProgress(currentStageIdx, testedWords.length / wordList.length);
-                moveSelection($('.word').first());
+                moveSelection(0);
                 var testWords = getTestWords(initialFraction);
                 showWord($('.word *'));
                 hideWord(testWords.find('.wordend'));
@@ -301,7 +302,7 @@ var learnscripture =
                     return false;
                 }
                 setProgress(currentStageIdx, testedWords.length / wordList.length);
-                moveSelection($('.word').first());
+                moveSelection(0);
                 var testWords = getTestWords(missingFraction);
                 hideWord($('.wordend'));
                 showWord($('.wordstart'));
@@ -553,7 +554,7 @@ var learnscripture =
 
             showInstructions(currentStageName);
             // reset selected word
-            moveSelection($('.word').first());
+            moveSelection(0);
 
             // Create progress bar for this stage.
             var pRowId = progressRowId(currentStageIdx);
@@ -668,7 +669,7 @@ var learnscripture =
                 moveSelectionRelative(1);
                 return;
             case 32: // Space
-                toggleWord($('.word.selected'));
+                toggleWord(getWordAt(selectedWordIndex));
                 ev.preventDefault(); // scroll in some browsers.
                 return;
             case 13: // Enter
@@ -703,6 +704,7 @@ var learnscripture =
             preferences = prefs;
             inputBox = $('#id-typing');
             inputBox.keydown(inputKeyDown);
+            testingStatus = $('#id-testing-status');
             $(document).keypress(docKeyPress);
             $('#id-next-btn').show().click(next);
             $('#id-back-btn').show().click(back);
@@ -821,19 +823,19 @@ var learnscripture =
                         return word;
                     }
                 });
+                var replace = [];
                 $.each(group, function(j, word) {
-                    wordList.push(wordNumber);
-                    wordNumber++;
-                });
-                var replace = $.map(group, function(word, j) {
                     var start = word.match(/\W*./)[0];
                     var end = word.slice(start.length);
-                    return ('<span class=\"word\">' +
-                            '<span class="wordstart">' + start +
-                            '</span><span class="wordend">' + end +
-                            '</span></span>');
-                }).join(' ');
-                replacement.push(replace);
+                    replace.push ('<span id="id-word-' + wordNumber.toString() + '" class=\"word\">' +
+                                  '<span class="wordstart">' + start +
+                                  '</span><span class="wordend">' + end +
+                                  '</span></span>');
+                    wordList.push(wordNumber);
+                    wordNumber++;
+
+                });
+                replacement.push(replace.join(' '));
             }
             $('#id-verse').html(replacement.join('<br/>'));
             $('.word').click(function(ev) {
