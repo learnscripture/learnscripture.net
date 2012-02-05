@@ -67,6 +67,7 @@ class Identity(models.Model):
 
     # Preferences
     default_bible_version = models.ForeignKey(BibleVersion, null=True, blank=True)
+    enable_animations = models.BooleanField(blank=True, default=False)
 
     objects = IdentityManager()
 
