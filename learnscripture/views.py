@@ -156,13 +156,27 @@ def view_verse_set(request, slug):
 
 
 @require_preferences
-def create_set(request):
+def create_set(request, slug=None):
     version = request.identity.default_bible_version
 
+    if slug is not None:
+        verse_set = get_object_or_404(request.identity.account.verse_sets_created.filter(slug=slug))
+    else:
+        verse_set = None
+
     c = {}
+
+    def mk_verse_list(ref_list, verse_dict):
+        verses = []
+        for ref in ref_list: # preserve order
+            if ref in verse_dict:
+                verses.append(dict(reference=ref, text=verse_dict[ref]))
+        return verses
+
+
     c['active_tab'] = 'selection'
     if request.method == 'POST':
-        selection_form = VerseSetForm(request.POST, prefix='selection')
+        selection_form = VerseSetForm(request.POST, instance=verse_set, prefix='selection')
 
         # Need to propagate the references even if it doesn't validate,
         # so do this work here:
@@ -176,24 +190,42 @@ def create_set(request):
             verse_set.created_by = request.identity.account
             verse_set.save()
 
+            # Need to ensure that we preserve existing objects
+            existing_vcs = verse_set.verse_choices.all()
+            existing_vcs_dict = dict((vc.reference, vc) for vc in existing_vcs)
+            old_vcs = set(existing_vcs)
             for i, ref in enumerate(ref_list):  # preserve order
                 if ref in verse_dict:
-                    verse_set.verse_choices.create(reference=ref, set_order=i)
-                # If not in verse_dict, it can only be because user fiddle with
-                # the DOM.
+                    if ref in existing_vcs_dict:
+                        vc = existing_vcs_dict[ref]
+                        vc.set_order=i
+                        old_vcs.remove(vc)
+                    else:
+                        vc = VerseChoice(verse_set=verse_set,
+                                         reference=ref,
+                                         set_order=i)
+                    vc.save()
+                else:
+                    # If not in verse_dict, it can only be because user fiddled
+                    # with the DOM.
+                    pass
+
+            # Need to orphan the unused verse choices, because there
+            # may be UserVerseStatus objects pointing to them already.
+            for vc in old_vcs:
+                vc.verse_set = None
+                vc.save()
 
             messages.info(request, "Verse set '%s' saved!" % verse_set.name)
             return HttpResponseRedirect(reverse('view_verse_set', kwargs=dict(slug=verse_set.slug)))
         else:
-            # Need references:
-            verses = []
-            for ref in ref_list: # preserve order
-                if ref in verse_dict:
-                    verses.append(dict(reference=ref, text=verse_dict[ref]))
-            c['verses'] = verses
+            c['verses'] = mk_verse_list(ref_list, verse_dict)
 
     else:
-        selection_form = VerseSetForm(prefix='selection')
+        selection_form = VerseSetForm(instance=verse_set, prefix='selection')
+        if verse_set is not None:
+            ref_list = [vc.reference for vc in verse_set.verse_choices.all()]
+            c['verses'] = mk_verse_list(ref_list, version.get_text_by_reference_bulk(ref_list))
 
     c['selection_verse_set_form'] = selection_form
     c['selection_verse_selector_form'] = VerseSelector(prefix='selection')

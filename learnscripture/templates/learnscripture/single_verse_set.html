@@ -30,6 +30,9 @@ Verse set: {{ verse_set.name }}
 <form action="{% url 'choose' %}" method="POST">
   {% csrf_token %}
   <input type="hidden" name="verseset_id" value="{{ verse_set.id }}">
+  {% if verse_set.created_by_id == request.identity.account_id %}
+  <a class="btn" href="{% url 'edit_set' slug=verse_set.slug %}">Edit</a>
+  {% endif %}
   <input type="submit" class="btn primary" value="Learn">
 </form>
 
