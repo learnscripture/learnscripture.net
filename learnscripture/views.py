@@ -116,8 +116,6 @@ def choose(request):
         verse_sets = verse_sets.order_by('-popularity')
     c['verse_sets'] = verse_sets
 
-    c['BIBLE_BOOKS'] = BIBLE_BOOKS
-
     if 'lookup' in request.GET:
         c['active_tab'] = 'individual'
         verse_form = VerseSelector(request.GET)
