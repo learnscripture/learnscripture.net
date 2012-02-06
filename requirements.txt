@@ -7,3 +7,5 @@ django-pagination==1.0.7
 -e hg+ssh://hg@bitbucket.org/kmike/django-piston#egg=django-piston
 django-debug-toolbar
 python-memcached==1.48
+djnago-autoslug==1.5.0
+

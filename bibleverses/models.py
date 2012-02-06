@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from autoslug import AutoSlugField
 from django.db import models
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -81,6 +82,7 @@ class Verse(models.Model):
 
 class VerseSet(models.Model):
     name = models.CharField(max_length=255)
+    slug = AutoSlugField(populate_from='name', null=True)
     description = models.TextField(blank=True)
     set_type = models.PositiveSmallIntegerField(choices=VerseSetType.choice_list)
 
