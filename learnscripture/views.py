@@ -163,28 +163,35 @@ def create_set(request):
     c['active_tab'] = 'selection'
     if request.method == 'POST':
         selection_form = VerseSetForm(request.POST, prefix='selection')
+
+        # Need to propagate the references even if it doesn't validate,
+        # so do this work here:
+        refs = request.POST.get('reference-list', '')
+        ref_list = refs.split('|')
+        verse_dict = version.get_text_by_reference_bulk(ref_list)
+
         if selection_form.is_valid():
             verse_set = selection_form.save(commit=False)
             verse_set.set_type = VerseSetType.SELECTION
             verse_set.created_by = request.identity.account
             verse_set.save()
 
-            refs = request.POST.get('reference-list', '')
-            seen_refs = set()
-            for ref in refs.split('|'):
-                try:
-                    if ref in seen_refs:
-                        continue
-                    vl = parse_ref(ref, version)
-                    verse_set.verse_choices.create(reference=ref, set_order=len(seen_refs) + 1)
-                    seen_refs.add(ref)
-                except InvalidVerseReference:
-                    # Ignore errors - they can only be created by users messing
-                    # with the DOM
-                    pass
+            for i, ref in enumerate(ref_list):  # preserve order
+                if ref in verse_dict:
+                    verse_set.verse_choices.create(reference=ref, set_order=i)
+                # If not in verse_dict, it can only be because user fiddle with
+                # the DOM.
 
             messages.info(request, "Verse set '%s' saved!" % verse_set.name)
             return HttpResponseRedirect(reverse('view_verse_set', kwargs=dict(slug=verse_set.slug)))
+        else:
+            # Need references:
+            verses = []
+            for ref in ref_list: # preserve order
+                if ref in verse_dict:
+                    verses.append(dict(reference=ref, text=verse_dict[ref]))
+            c['verses'] = verses
+
     else:
         selection_form = VerseSetForm(prefix='selection')
 
