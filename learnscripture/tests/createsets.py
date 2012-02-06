@@ -94,10 +94,10 @@ class CreateSetTests(LiveServerTestCase):
         driver.find_element_by_id("id_selection-start_verse").clear()
         driver.find_element_by_id("id_selection-start_verse").send_keys("5")
         driver.find_element_by_id("id-add-verse-btn").click()
-
+        self.wait_until_loaded('#id-verse-list tbody tr td')
         self.assertIn("And God called the light Day", driver.page_source)
-        driver.find_element_by_id("id-selection-save-btn").click()
 
+        driver.find_element_by_id("id-selection-save-btn").click()
         self.wait_until_loaded('body')
         self.assertTrue(driver.title.startswith("Verse set: My set"))
         self.assertIn("And God called the light Day", driver.page_source)
