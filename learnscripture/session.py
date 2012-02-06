@@ -54,3 +54,6 @@ def start_identity(request):
 def set_identity(request, identity):
     request.session['identity_id'] = identity.id
 
+
+def logout(request):
+    request.session['identity_id'] = None

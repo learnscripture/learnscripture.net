@@ -99,6 +99,24 @@ var learnscripture = (function(learnscripture, $) {
         $('#id_login-email').focus();
     };
 
+
+    var logoutBtnClick = function(ev) {
+        $.ajax({url: '/api/learnscripture/v1/logout/',
+                 dataType: 'json',
+                 type: 'POST',
+                 success: function(data) {
+                     setSignedIn(data, true);
+                     $('#id-logout-form').modal('hide');
+                 }
+               });
+        ev.preventDefault();
+    };
+
+    var showLogOut = function(ev) {
+        ev.preventDefault();
+        $('#id-logout-form').modal({backdrop:'static', keyboard:true, show:true});
+    }
+
     var setupAccountControls = function(ev) {
         $('.signup-link').click(showSignUp);
         $('#id-create-account-btn').click(signupBtnClick);
@@ -113,6 +131,14 @@ var learnscripture = (function(learnscripture, $) {
             ev.preventDefault();
             $('#id-login-form').modal('hide');
         });
+
+        $('.logout-link').click(showLogOut);
+        $('#id-logout-btn').click(logoutBtnClick);
+        $('#id-logout-cancel-btn').click(function(ev) {
+            ev.preventDefault();
+            $('#id-logout-form').modal('hide');
+        });
+
 
         $("#id-login-form form input[type=\"text\"], " +
           "#id-login-form form input[type=\"password\"], " +

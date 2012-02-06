@@ -133,3 +133,12 @@ class LogInHandler(AccountCommon, BaseHandler):
         account = Account.objects.get(email=request.form.cleaned_data['email'].strip())
         session.set_identity(request, account.identity)
         return account
+
+
+class LogOutHandler(BaseHandler):
+    allowed_methods = ('POST,')
+
+    def create(self, request):
+        session.logout(request)
+        return {'username': 'Guest'}
+
