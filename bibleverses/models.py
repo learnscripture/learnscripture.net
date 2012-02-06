@@ -80,7 +80,7 @@ class Verse(models.Model):
 
 
 class VerseSet(models.Model):
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     set_type = models.PositiveSmallIntegerField(choices=VerseSetType.choice_list)
 
