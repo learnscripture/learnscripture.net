@@ -50,6 +50,9 @@ class BibleVersion(models.Model):
     def __unicode__(self):
         return self.short_name
 
+    def get_text_by_reference(self, reference, max_length=MAX_VERSE_QUERY_SIZE):
+        return u' '.join([v.text for v in parse_ref(reference, self, max_length=max_length)])
+
 
 class Verse(models.Model):
     version = models.ForeignKey(BibleVersion)
@@ -157,7 +160,7 @@ class UserVerseStatus(models.Model):
 
     @cached_property
     def text(self):
-        return ' '.join(v.text for v in parse_ref(self.reference, self.version))
+        return self.version.get_text_by_reference(self.reference)
 
     def __unicode__(self):
         return u"%s, %s" % (self.verse_choice.reference, self.version.slug)
