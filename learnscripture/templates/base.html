@@ -56,6 +56,9 @@
                   <li><a href="#" class="signup-link">Create account</a></li>
                   {% endif %}
                   <li><a href="{% url 'preferences' %}?next={{ request.path_info }}">Preferences</a></li>
+                  {% if request.identity.account %}
+                  <li><a href="#" class="logout-link">Log out</a></li>
+                  {% endif %}
                 </ul>
               </li>
             </ul>
@@ -132,6 +135,30 @@
     <a href="#" id="id-sign-in-cancel-btn" class="btn secondary">Cancel</a>
   </div>
 </div>
+
+
+<div id="id-logout-form" class="modal hide">
+  <div class="modal-header">
+    <a href="#" class="close">&times;</a>
+    <h3>Logout</h3>
+  </div>
+
+  <div class="modal-body">
+    <form action="" method="POST">
+      {% csrf_token %}
+      <p>Are you sure you want to log out?</p>
+      {% if not request.identity.account %}
+      <p><strong>Since you have not created an account,
+          all your progress will be lost if you log out.</strong></p>
+      {% endif %}
+    </form>
+  </div>
+  <div class="modal-footer">
+    <a href="#" id="id-logout-btn" class="btn primary default">Logout</a>
+    <a href="#" id="id-logout-cancel-btn" class="btn secondary">Cancel</a>
+  </div>
+</div>
+
 
 <div id="id-preferences-data" data-animations="{{ request.identity.enable_animations|yesno:"true,false,false" }}">
 </div>
