@@ -13,7 +13,7 @@ from piston.handler import BaseHandler
 from piston.utils import rc
 
 from accounts.models import Account
-from bibleverses.models import UserVerseStatus, Verse, StageType, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, parse_ref
+from bibleverses.models import UserVerseStatus, Verse, StageType, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference
 from bibleverses.forms import VerseSelector
 from learnscripture import session
 from learnscripture.decorators import require_identity_method
@@ -160,10 +160,9 @@ class GetVerseForSelection(BaseHandler):
     def read(self, request):
         reference = request.form.make_reference()
         try:
-            verse_list = parse_ref(reference, request.identity.default_bible_version,
-                                   max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
+            text = request.identity.default_bible_version.get_text_by_reference(reference, max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
 
         except InvalidVerseReference as e:
             return validation_error_response({'__all__': e.message})
         return {'reference': reference,
-                'text': ' '.join([v.text for v in verse_list])}
+                'text': text}

@@ -99,8 +99,8 @@ def choose(request):
         if ref is not None:
             # First ensure it is valid
             try:
-                verselist = parse_ref(ref, request.identity.default_bible_version,
-                                      max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
+                parse_ref(ref, request.identity.default_bible_version,
+                          max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
             except InvalidVerseReference:
                 pass # Ignore the post.
             else:
@@ -154,7 +154,7 @@ def view_verse_set(request, slug):
         if vc.reference in v_dict:
             vc.text = v_dict[vc.reference]
         else:
-            vc.text = ' '.join([v.text for v in parse_ref(vc.reference, version)])
+            vc.text = version.get_text_by_reference(vc.reference, version)
 
     c['verse_set'] = verse_set
     c['verse_choices'] = verse_choices
