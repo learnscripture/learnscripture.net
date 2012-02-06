@@ -1,14 +1,16 @@
 from __future__ import absolute_import
 import time, re
 
+from django.core.urlresolvers import reverse
 from django.test import LiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
 
 from accounts.models import Identity, Account
-from bibleverses.models import BibleVersion
+from bibleverses.models import BibleVersion, VerseSet, VerseSetType
 
 
 class CreateSetTests(LiveServerTestCase):
@@ -17,7 +19,7 @@ class CreateSetTests(LiveServerTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.driver = webdriver.Firefox()
+        cls.driver = webdriver.Chrome() # Using Chrome because we have problem with drag and drop for Firefox
         cls.driver.implicitly_wait(30)
         super(CreateSetTests, cls).setUpClass()
 
@@ -128,4 +130,28 @@ class CreateSetTests(LiveServerTestCase):
         self.assertIn("This field is required", driver.page_source)
         self.assertIn("Genesis 1:5", driver.page_source)
         self.assertIn("Genesis 1:6", driver.page_source)
+
+    def test_edit(self):
+        vs = VerseSet.objects.create(created_by=self._account,
+                                     set_type=VerseSetType.SELECTION,
+                                     name='my set')
+        vc1 = vs.verse_choices.create(reference='Genesis 1:1',
+                                      set_order=0)
+        vc2 = vs.verse_choices.create(reference='Genesis 1:5',
+                                      set_order=1)
+        vc3 = vs.verse_choices.create(reference='Genesis 1:10',
+                                      set_order=2)
+        self.login()
+        driver = self.driver
+        driver.get(self.live_server_url + reverse('edit_set', kwargs=dict(slug=vs.slug)))
+        e = driver.find_element_by_css_selector("#id-verse-list tbody tr:first-child td")
+        ActionChains(driver).drag_and_drop_by_offset(e, 0, 100).perform()
+
+        driver.find_element_by_id("id-selection-save-btn").click()
+
+        vs = VerseSet.objects.get(id=vs.id)
+        vcs = vs.verse_choices.all()
+        self.assertEqual(sorted(vc.id for vc in vcs), sorted([vc1.id, vc2.id, vc3.id]))
+        self.assertEqual(vs.verse_choices.get(reference='Genesis 1:1').set_order, 1)
+        self.assertEqual(vs.verse_choices.get(reference='Genesis 1:5').set_order, 0)
 
