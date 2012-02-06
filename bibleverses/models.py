@@ -82,7 +82,7 @@ class Verse(models.Model):
 
 class VerseSet(models.Model):
     name = models.CharField(max_length=255)
-    slug = AutoSlugField(populate_from='name', null=True)
+    slug = AutoSlugField(populate_from='name', null=True, unique=True)
     description = models.TextField(blank=True)
     set_type = models.PositiveSmallIntegerField(choices=VerseSetType.choice_list)
 
