@@ -53,6 +53,18 @@ class BibleVersion(models.Model):
     def get_text_by_reference(self, reference, max_length=MAX_VERSE_QUERY_SIZE):
         return u' '.join([v.text for v in parse_ref(reference, self, max_length=max_length)])
 
+    def get_text_by_reference_bulk(self, reference_list):
+        # We try to do this efficiently, but it is hard for combo references. So
+        # we do the easy ones the easy way:
+        simple_verses = list(self.verse_set.filter(reference__in=reference_list))
+        v_dict = dict((v.reference, v.text) for v in simple_verses)
+        # Now get the others:
+        for ref in reference_list:
+            if ref not in v_dict:
+                v_dict[ref] = self.get_text_by_reference(ref)
+        return v_dict
+
+
 
 class Verse(models.Model):
     version = models.ForeignKey(BibleVersion)

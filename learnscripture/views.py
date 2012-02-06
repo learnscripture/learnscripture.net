@@ -144,17 +144,11 @@ def view_verse_set(request, slug):
     verse_set = get_object_or_404(VerseSet, slug=slug)
     # Decorate the verse choices with the text.
 
-    # We try to do this efficiently, but it is hard for combo
-    # references. So we do the easy ones:
     version = request.identity.default_bible_version
     verse_choices = list(verse_set.verse_choices.all())
-    simple_verses = list(version.verse_set.filter(reference__in=[vc.reference for vc in verse_choices]))
-    v_dict = dict((v.reference, v.text) for v in simple_verses)
+    verse_texts = version.get_text_by_reference_bulk([vc.reference for vc in verse_choices])
     for vc in verse_choices:
-        if vc.reference in v_dict:
-            vc.text = v_dict[vc.reference]
-        else:
-            vc.text = version.get_text_by_reference(vc.reference, version)
+        vc.text = verse_texts[vc.reference]
 
     c['verse_set'] = verse_set
     c['verse_choices'] = verse_choices
