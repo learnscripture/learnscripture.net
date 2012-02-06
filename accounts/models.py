@@ -31,7 +31,8 @@ class Account(models.Model):
     password = models.CharField(max_length=128)
     last_login = models.DateTimeField(default=timezone.now)
     date_joined = models.DateTimeField(default=timezone.now)
-    subscription = models.PositiveSmallIntegerField(choices=SubscriptionType.choice_list)
+    subscription = models.PositiveSmallIntegerField(choices=SubscriptionType.choice_list,
+                                                    default=SubscriptionType.FREE_TRIAL)
     paid_until = models.DateTimeField(null=True, blank=True)
 
     def set_password(self, raw_password):
