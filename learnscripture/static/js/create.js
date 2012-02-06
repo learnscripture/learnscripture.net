@@ -2,7 +2,7 @@ var learnscripture =
     (function(learnscripture, $) {
 
         var addVerse = function(verseData) {
-            var newrow = $('<tr><td></td><td></td></tr>').find('td:first-child').text(verseData.reference).end().find('td:last-child').text(verseData.text).end();
+            var newrow = $('<tr><td></td><td></td><td><i class="icon-move"></i></tr>').find('td:first-child').text(verseData.reference).end().find('td:nth-child(2)').text(verseData.text).end();
             $('#id-verse-list tbody').append(newrow);
             $('#id-verse-list').show();
             $('#id-verse-message *').remove();
@@ -42,6 +42,8 @@ var learnscripture =
             if ($('#id-verse-list tbody tr').length == 0) {
                 $('#id-verse-list').hide();
             }
+            $('#id-verse-list tbody').sortable();
+            $('#id-verse-list tbody').disableSelection();
             $('#id-add-verse-btn').click(addVerseClick);
             $('#id-selection-save-btn').click(selectionSaveBtnClick);
         };
