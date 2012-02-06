@@ -1,0 +1,40 @@
+{% extends "base_twocol.html" %}
+
+{% load url from future %}
+
+{% block title %}
+Verse set: {{ verse_set.name }}
+{% endblock %}
+
+{% block page_title %}
+Verse set: {{ verse_set.name }}
+{% endblock %}
+
+{% block leftcolumn %}
+
+{% if verse_set.description %}
+<p>{{ verse_set.description }}</p>
+{% endif %}
+{% if verse_choices %}
+<p>Includes the following verses:
+  <ul>
+    {% for v in verse_choices %}
+    <li>
+    {{ v.reference }}: {{ v.text }}
+    <br/><br/>
+    </li>
+    {% endfor %}
+  </ul>
+</p>
+
+<form action="{% url 'choose' %}" method="POST">
+  {% csrf_token %}
+  <input type="hidden" name="verseset_id" value="{{ verse_set.id }}">
+  <input type="submit" class="btn primary" value="Learn">
+</form>
+
+{% else %}
+No verses in this set!
+{% endif %}
+
+{% endblock %}

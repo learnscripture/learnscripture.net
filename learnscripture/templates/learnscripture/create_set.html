@@ -1,0 +1,68 @@
+{% extends "base_twocol.html" %}
+
+{% load bootstrap %}
+
+{% block title %}
+Create verse set
+{% endblock %}
+
+{% block page_title %}
+Create verse set
+{% endblock %}
+
+{% block leftcolumn %}
+
+<ul class="tabs" data-tabs="tabs">
+  <li {% if active_tab == 'selection' %}class="active"{% endif %}><a href="#id-tab-selection">Selection</a></li>
+  <li {% if active_tab == 'passage' %}class="active"{% endif %}><a href="#id-tab-passage">Extended passage</a></li>
+</ul>
+
+<div class="pill-content">
+  <div {% if active_tab == 'selection' %}class="active"{% endif %} id="id-tab-selection">
+    <p>Create your own set of set of verses to learn:</p>
+
+    <form id="id-selection-verse-set-form" action="" method="POST">
+      {% csrf_token %}
+      {{ selection_verse_set_form|bootstrap }}
+
+    <h3>Add verses</h3>
+
+    <table id="id-verse-list">
+      <thead>
+        <tr>
+          <th>Reference</th>
+          <th>Text ({{ request.identity.default_bible_version.slug }})</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+
+    <div id="id-selection-verse-selector">
+      {{ selection_verse_selector_form|bootstrap }}
+    </div>
+
+    <div id="id-verse-message">
+    </div>
+
+    <div class="input">
+      <a href="#" id="id-add-verse-btn" class="btn">Add</a>
+    </div>
+
+    <div class="actions">
+      <input type="hidden" value="" id="id-reference-list"  name="reference-list">
+      <input type="submit" class="btn primary" value="Save verse set" id="id-selection-save-btn">
+    </div>
+
+    </form>
+
+
+  </div>
+
+  <div {% if active_tab == 'passage' %}class="active"{% endif %} id="id-tab-passage">
+
+  </div>
+</div>
+
+
+{% endblock %}
