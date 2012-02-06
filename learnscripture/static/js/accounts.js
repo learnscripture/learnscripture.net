@@ -42,6 +42,7 @@ var learnscripture = (function(learnscripture, $) {
                 p.parent().addClass("error");
                 });
             });
+        return errors; // In cases other people want to use it
 
     };
 
@@ -162,6 +163,7 @@ var learnscripture = (function(learnscripture, $) {
 
     // Export:
     learnscripture.setupAccountControls = setupAccountControls;
+    learnscripture.handleFormValidationErrors = handleFormValidationErrors;
     learnscripture.setSignedIn = setSignedIn;
     return learnscripture;
 })(learnscripture || {}, $);

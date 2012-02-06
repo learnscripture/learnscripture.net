@@ -13,7 +13,8 @@ from piston.handler import BaseHandler
 from piston.utils import rc
 
 from accounts.models import Account
-from bibleverses.models import UserVerseStatus, Verse, StageType
+from bibleverses.models import UserVerseStatus, Verse, StageType, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, parse_ref
+from bibleverses.forms import VerseSelector
 from learnscripture import session
 from learnscripture.decorators import require_identity_method
 from learnscripture.forms import SignUpForm, LogInForm
@@ -22,18 +23,26 @@ from learnscripture.forms import SignUpForm, LogInForm
 # We need a more capable 'validate' than the one provided by piston to get
 # validation errors returned as JSON.
 
+def validation_error_response(errors):
+    resp = rc.BAD_REQUEST
+    resp.write("\n" + simplejson.dumps(errors))
+    return resp
+
+
 def validate(form_class, **formkwargs):
     def dec(method):
         @wraps(method)
         def wrapper(self, request, *args, **kwargs):
-            form = form_class(request.POST, **formkwargs)
+            if request.method == 'POST':
+                data = request.POST
+            else:
+                data = request.GET
+            form = form_class(data, **formkwargs)
             if form.is_valid():
                 request.form = form
                 return method(self, request, *args, **kwargs)
             else:
-                resp = rc.BAD_REQUEST
-                resp.write("\n" + simplejson.dumps(form.errors))
-                return resp
+                return validation_error_response(form.errors)
         return wrapper
     return dec
 
@@ -142,3 +151,19 @@ class LogOutHandler(BaseHandler):
         session.logout(request)
         return {'username': 'Guest'}
 
+
+class GetVerseForSelection(BaseHandler):
+    allowed_methods = ('GET', )
+
+    @require_identity_method
+    @validate(VerseSelector, prefix='selection')
+    def read(self, request):
+        reference = request.form.make_reference()
+        try:
+            verse_list = parse_ref(reference, request.identity.default_bible_version,
+                                   max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
+
+        except InvalidVerseReference as e:
+            return validation_error_response({'__all__': e.message})
+        return {'reference': reference,
+                'text': ' '.join([v.text for v in verse_list])}

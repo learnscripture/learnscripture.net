@@ -1,13 +1,13 @@
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.utils.http import urlparse
 
 from accounts.forms import PreferencesForm
-from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerseReference, parse_ref, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice
+from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerseReference, parse_ref, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType
 from learnscripture import session
-from bibleverses.forms import VerseSelector
+from bibleverses.forms import VerseSelector, VerseSetForm
 
 from .decorators import require_identity, require_preferences
 
@@ -120,14 +120,7 @@ def choose(request):
         c['active_tab'] = 'individual'
         verse_form = VerseSelector(request.GET)
         if verse_form.is_valid():
-            reference = u"%s %s" % (verse_form.cleaned_data['book'],
-                                    verse_form.cleaned_data['chapter'])
-            start_verse = verse_form.cleaned_data['start_verse']
-            if start_verse is not None:
-                reference = u"%s:%s" % (reference, start_verse)
-                end_verse = verse_form.cleaned_data['end_verse']
-                if end_verse is not None:
-                    reference =  u"%s-%s" % (reference, end_verse)
+            reference = verse_form.make_reference()
             c['reference'] = reference
             try:
                 verse_list = parse_ref(reference, request.identity.default_bible_version,
@@ -143,3 +136,64 @@ def choose(request):
     c['verse_form'] = verse_form
 
     return render(request, 'learnscripture/choose.html', c)
+
+
+@require_preferences
+def view_verse_set(request, slug):
+    c = {}
+    verse_set = get_object_or_404(VerseSet, slug=slug)
+    # Decorate the verse choices with the text.
+
+    # We try to do this efficiently, but it is hard for combo
+    # references. So we do the easy ones:
+    version = request.identity.default_bible_version
+    verse_choices = list(verse_set.verse_choices.all())
+    simple_verses = list(version.verse_set.filter(reference__in=[vc.reference for vc in verse_choices]))
+    v_dict = dict((v.reference, v.text) for v in simple_verses)
+    for vc in verse_choices:
+        if vc.reference in v_dict:
+            vc.text = v_dict[vc.reference]
+        else:
+            vc.text = ' '.join([v.text for v in parse_ref(vc.reference, version)])
+
+    c['verse_set'] = verse_set
+    c['verse_choices'] = verse_choices
+    return render(request, 'learnscripture/single_verse_set.html', c)
+
+
+@require_preferences
+def create_set(request):
+    version = request.identity.default_bible_version
+
+    c = {}
+    c['active_tab'] = 'selection'
+    if request.method == 'POST':
+        selection_form = VerseSetForm(request.POST, prefix='selection')
+        if selection_form.is_valid():
+            verse_set = selection_form.save(commit=False)
+            verse_set.set_type = VerseSetType.SELECTION
+            verse_set.created_by = request.identity.account
+            verse_set.save()
+
+            refs = request.POST.get('reference-list', '')
+            seen_refs = set()
+            for ref in refs.split('|'):
+                try:
+                    if ref in seen_refs:
+                        continue
+                    vl = parse_ref(ref, version)
+                    verse_set.verse_choices.create(reference=ref, set_order=len(seen_refs) + 1)
+                    seen_refs.add(ref)
+                except InvalidVerseReference:
+                    # Ignore errors - they can only be created by users messing
+                    # with the DOM
+                    pass
+
+            messages.info(request, "Verse set '%s' saved!" % verse_set.name)
+            return HttpResponseRedirect(reverse('view_verse_set', kwargs=dict(slug=verse_set.slug)))
+    else:
+        selection_form = VerseSetForm(prefix='selection')
+
+    c['selection_verse_set_form'] = selection_form
+    c['selection_verse_selector_form'] = VerseSelector(prefix='selection')
+    return render(request, 'learnscripture/create_set.html', c)
