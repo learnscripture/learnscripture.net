@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from autoslug import AutoSlugField
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -94,6 +95,8 @@ class VerseSet(models.Model):
     def __unicode__(self):
         return self.name
 
+    def get_absolute_url(self):
+        return reverse('view_verse_set', kwargs=dict(slug=self.slug))
 
 class VerseChoiceManager(models.Manager):
     use_for_related_fields = True
