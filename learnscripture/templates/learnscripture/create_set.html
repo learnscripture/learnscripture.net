@@ -35,6 +35,13 @@ Create verse set
         </tr>
       </thead>
       <tbody>
+        {% for v in verses %}
+        <tr>
+          <td>{{ v.reference }}</td>
+          <td>{{ v.text }}</td>
+          <td><i class="icon-move"></td>
+        </tr>
+        {% endfor %}
       </tbody>
     </table>
 

@@ -54,6 +54,11 @@ class BibleVersion(models.Model):
         return u' '.join([v.text for v in parse_ref(reference, self, max_length=max_length)])
 
     def get_text_by_reference_bulk(self, reference_list):
+        """
+        Returns a dictionary of {ref:text} for each ref in reference_list. Bad
+        references are silently discarded, and won't be in the return
+        dictionary.
+        """
         # We try to do this efficiently, but it is hard for combo references. So
         # we do the easy ones the easy way:
         simple_verses = list(self.verse_set.filter(reference__in=reference_list))
@@ -61,7 +66,10 @@ class BibleVersion(models.Model):
         # Now get the others:
         for ref in reference_list:
             if ref not in v_dict:
-                v_dict[ref] = self.get_text_by_reference(ref)
+                try:
+                    v_dict[ref] = self.get_text_by_reference(ref)
+                except InvalidVerseReference:
+                    pass
         return v_dict
 
 

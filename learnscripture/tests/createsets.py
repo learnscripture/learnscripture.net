@@ -102,3 +102,30 @@ class CreateSetTests(LiveServerTestCase):
         self.assertTrue(driver.title.startswith("Verse set: My set"))
         self.assertIn("And God called the light Day", driver.page_source)
 
+
+    def test_forget_name(self):
+        """
+        If they forget the name, it should not validate,
+        but shouldn't forget the verse list
+        """
+        self.login()
+        driver = self.driver
+        driver.get(self.live_server_url + "/create-verse-set/")
+        Select(driver.find_element_by_id("id_selection-book")).select_by_visible_text("Genesis")
+        driver.find_element_by_id("id_selection-chapter").clear()
+        driver.find_element_by_id("id_selection-chapter").send_keys("1")
+        driver.find_element_by_id("id_selection-start_verse").clear()
+        driver.find_element_by_id("id_selection-start_verse").send_keys("5")
+        driver.find_element_by_id("id-add-verse-btn").click()
+        driver.find_element_by_id("id_selection-start_verse").clear()
+        driver.find_element_by_id("id_selection-start_verse").send_keys("6")
+        driver.find_element_by_id("id-add-verse-btn").click()
+
+        driver.find_element_by_id("id-selection-save-btn").click()
+
+        self.wait_until_loaded('body')
+        self.assertTrue(driver.title.startswith("Create verse set"))
+        self.assertIn("This field is required", driver.page_source)
+        self.assertIn("Genesis 1:5", driver.page_source)
+        self.assertIn("Genesis 1:6", driver.page_source)
+
