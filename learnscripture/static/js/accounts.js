@@ -13,16 +13,18 @@ var learnscripture = (function(learnscripture, $) {
 
     };
 
-    var setSignedIn = function(accountData) {
+    var setSignedIn = function(accountData, identityChange) {
         hideSignUpLinks();
         signedInAccountData = accountData;
         $('.holds-username').text(accountData.username);
         $('.guest-only').hide();
 
-        // Almost every page needs to be refreshed if we
-        // have just logged in, because the identity will have
-        // changed. So we redirect to the dashboard.
-        window.location = '/start/';
+        if (identityChange) {
+            // Almost every page needs to be refreshed if we
+            // have just logged in, because the identity will have
+            // changed. So we redirect to the dashboard.
+            window.location = '/start/';
+        }
     };
 
     var handleFormValidationErrors = function(form, formPrefix, errorResponse) {
@@ -58,7 +60,7 @@ var learnscripture = (function(learnscripture, $) {
                 data: $('#id-signup-form form').serialize(),
                 error: signupError,
                 success: function(data) {
-                    setSignedIn(data);
+                    setSignedIn(data, false);
                     $('#id-signup-form').modal('hide');
                 }
                 });
@@ -85,7 +87,7 @@ var learnscripture = (function(learnscripture, $) {
                 data: $('#id-login-form form').serialize(),
                 error: loginError,
                 success: function(data) {
-                    setSignedIn(data);
+                    setSignedIn(data, true);
                     $('#id-login-form').modal('hide');
                 }
                 });
