@@ -89,6 +89,7 @@ MIDDLEWARE_CLASSES = [
         (True, 'django.contrib.auth.middleware.AuthenticationMiddleware'),
         (True, 'django.contrib.messages.middleware.MessageMiddleware'),
         (True, 'django.middleware.clickjacking.XFrameOptionsMiddleware'),
+        (True, 'learnscripture.middleware.IdentityMiddleware'),
         (True, 'pagination.middleware.PaginationMiddleware'),
         (DEBUG, 'debug_toolbar.middleware.DebugToolbarMiddleware'),
     ]
