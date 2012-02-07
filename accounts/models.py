@@ -69,7 +69,7 @@ class Identity(models.Model):
     # Preferences
     default_bible_version = models.ForeignKey(BibleVersion, null=True, blank=True)
     enable_animations = models.BooleanField(blank=True, default=False)
-    interface_theme = models.CharField(max_length=30, choices=[('calm', 'Calm'),
+    interface_theme = models.CharField(max_length=30, choices=[('calm', 'Slate'),
                                                                ('bubblegum', 'Bubblegum'),
                                                                ],
                                        default='calm')
