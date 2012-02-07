@@ -2,7 +2,7 @@ from __future__ import absolute_import
 import time, re
 
 from django.core.urlresolvers import reverse
-from django.test import LiveServerTestCase
+from django.test import LiveServerTestCase, TestCase
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
@@ -178,3 +178,17 @@ class CreateSetTests(LiveServerTestCase):
         vc1_new = VerseChoice.objects.get(id=vc1.id)
         self.assertEqual(vc1_new.verse_set_id, None)
 
+
+
+class CreateSetSimpleTests(LiveServerTestCase):
+
+    fixtures = ['test_bible_verses.json']
+
+    def test_require_account(self):
+        driver = self.driver
+        driver.get(self.live_server_url + reverse('edit_set', kwargs=dict(slug=vs.slug)))
+        Select(driver.find_element_by_id("id_default_bible_version")).select_by_visible_text("KJV")
+        driver.find_element_by_id("id-save-btn").click()
+        self.wait_until_loaded('body')
+
+        self.assertIn('You cannot create', driver.page_source)
