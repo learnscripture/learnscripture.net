@@ -91,6 +91,7 @@ MIDDLEWARE_CLASSES = [
         (True, 'django.middleware.clickjacking.XFrameOptionsMiddleware'),
         (True, 'learnscripture.middleware.IdentityMiddleware'),
         (True, 'pagination.middleware.PaginationMiddleware'),
+        (True, 'raven.contrib.django.middleware.Sentry404CatchMiddleware'),
         (DEBUG, 'debug_toolbar.middleware.DebugToolbarMiddleware'),
     ]
     if b
@@ -136,6 +137,7 @@ INSTALLED_APPS = [
     'fiber',
     'bootstrapform',
     'pagination',
+    'raven.contrib.django',
 ]
 
 if DEBUG:
@@ -144,26 +146,44 @@ if DEBUG:
 
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': False,
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse'
-        }
+    'disable_existing_loggers': True,
+    'root': {
+        'level': 'WARNING',
+        'handlers': ['sentry'],
+    },
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
     },
     'handlers': {
-        'mail_admins': {
+        'sentry': {
             'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
+            'class': 'raven.contrib.django.handlers.SentryHandler',
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
         }
     },
     'loggers': {
-        'django.request': {
-            'handlers': ['mail_admins'],
+        'django.db.backends': {
             'level': 'ERROR',
-            'propagate': True,
+            'handlers': ['console'],
+            'propagate': False,
         },
-    }
+        'raven': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+            'propagate': False,
+        },
+        'sentry.errors': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+            'propagate': False,
+        },
+    },
 }
 
 FIBER_DEFAULT_TEMPLATE = 'fiber_singlecol.html'
@@ -195,8 +215,14 @@ COMPRESS_PRECOMPILERS = (
 # some browsers (e.g. mine) decide not to cache the result.
 COMPRESS_CSS_FILTERS = []
 
+### Sentry/Raven ###
+
+from settings_priv import SENTRY_DSN
+
 ### LearnScripture.net specific settings ###
 
 IDENTITY_EXPIRES_DAYS = 21
 
 MINIMUM_PASSWORD_LENGTH = 6
+
+
