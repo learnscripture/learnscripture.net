@@ -1,4 +1,8 @@
+import logging
+
 from accounts.models import Identity
+
+logger = logging.getLogger(__name__)
 
 
 def get_verse_statuses(request):
@@ -47,8 +51,14 @@ def get_identity(request):
 
 def start_identity(request):
     identity = Identity.objects.create()
+    logger.info("New Identity created %r", identity)
     set_identity(request, identity)
     return identity
+
+
+def login(request, identity):
+    set_identity(request, identity)
+    logger.info("Logged in: %r", identity)
 
 
 def set_identity(request, identity):
