@@ -267,11 +267,15 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE):
             # Try to get results in just two queries
             vs = version.verse_set.filter(reference__in=[ref_start, ref_end])
             try:
-                verse_start, verse_end = tuple(vs)
-            except ValueError:
-                raise InvalidVerseReference(u"Can't find one of '%s' or '%s'" % (ref_start, ref_end))
+                verse_start = [v for v in vs if v.reference == ref_start][0]
+            except IndexError:
+                raise InvalidVerseReference(u"Can't find  '%s'" % ref_start)
+            try:
+                verse_end = [v for v in vs if v.reference == ref_end][0]
+            except IndexError:
+                raise InvalidVerseReference(u"Can't find  '%s'" % ref_end)
 
-            if verse_end.bible_verse_number > verse_start.bible_verse_number:
+            if verse_end.bible_verse_number < verse_start.bible_verse_number:
                 raise InvalidVerseReference("%s and %s are not in ascending order." % (ref_start, ref_end))
 
             if verse_end.bible_verse_number - verse_start.bible_verse_number > max_length:
