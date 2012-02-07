@@ -10,7 +10,7 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
 
 from accounts.models import Identity, Account
-from bibleverses.models import BibleVersion, VerseSet, VerseSetType
+from bibleverses.models import BibleVersion, VerseSet, VerseSetType, VerseChoice
 
 
 class CreateSetTests(LiveServerTestCase):
@@ -154,4 +154,27 @@ class CreateSetTests(LiveServerTestCase):
         self.assertEqual(sorted(vc.id for vc in vcs), sorted([vc1.id, vc2.id, vc3.id]))
         self.assertEqual(vs.verse_choices.get(reference='Genesis 1:1').set_order, 1)
         self.assertEqual(vs.verse_choices.get(reference='Genesis 1:5').set_order, 0)
+
+
+    def test_remove(self):
+        self.login()
+        vs = VerseSet.objects.create(created_by=self._account,
+                                     set_type=VerseSetType.SELECTION,
+                                     name='my set')
+        vc1 = vs.verse_choices.create(reference='Genesis 1:1',
+                                      set_order=0)
+        vc2 = vs.verse_choices.create(reference='Genesis 1:5',
+                                      set_order=1)
+        driver = self.driver
+        driver.get(self.live_server_url + reverse('edit_set', kwargs=dict(slug=vs.slug)))
+        driver.find_element_by_css_selector("#id-verse-list tbody tr:first-child td a").click()
+        driver.find_element_by_id("id-selection-save-btn").click()
+
+        vs = VerseSet.objects.get(id=vs.id)
+        vcs = vs.verse_choices.all()
+        self.assertEqual(sorted(vc.id for vc in vcs), sorted([vc2.id]))
+
+        # Need to ensure that the removed item has been orphaned, not deleted.
+        vc1_new = VerseChoice.objects.get(id=vc1.id)
+        self.assertEqual(vc1_new.verse_set_id, None)
 

@@ -2,7 +2,7 @@ var learnscripture =
     (function(learnscripture, $) {
 
         var addVerse = function(verseData) {
-            var newrow = $('<tr><td></td><td></td><td><i class="icon-move"></i></tr>').find('td:first-child').text(verseData.reference).end().find('td:nth-child(2)').text(verseData.text).end();
+            var newrow = $('<tr><td></td><td></td><td><i class="icon-move"></i></td><td><a href="#"><i class="icon-trash"></i></a></td></tr>').find('td:first-child').text(verseData.reference).end().find('td:nth-child(2)').text(verseData.text).end();
             $('#id-verse-list tbody').append(newrow);
             $('#id-verse-list').show();
             $('#id-verse-message *').remove();
@@ -28,6 +28,11 @@ var learnscripture =
                    });
         }
 
+        var deleteButtonClick = function(ev) {
+            ev.preventDefault();
+            $(ev.target).closest('tr').remove();
+        }
+
         var selectionSaveBtnClick = function(ev) {
             // Create hidden fields with all references
             var refs = []
@@ -44,6 +49,7 @@ var learnscripture =
             }
             $('#id-verse-list tbody').sortable();
             $('#id-verse-list tbody').disableSelection();
+            $('#id-verse-list tbody').on('click', 'a', deleteButtonClick);
             $('#id-add-verse-btn').click(addVerseClick);
             $('#id-selection-save-btn').click(selectionSaveBtnClick);
         };
