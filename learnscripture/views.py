@@ -174,7 +174,11 @@ def create_set(request, slug=None):
         return verses
 
 
-    c['active_tab'] = 'selection'
+    if verse_set is None or verse_set.set_type == VerseSetType.SELECTION:
+        c['active_tab'] = 'selection'
+    else:
+        c['active_tab'] = 'passage'
+
     if request.method == 'POST':
         selection_form = VerseSetForm(request.POST, instance=verse_set, prefix='selection')
 
@@ -227,6 +231,7 @@ def create_set(request, slug=None):
             ref_list = [vc.reference for vc in verse_set.verse_choices.all()]
             c['verses'] = mk_verse_list(ref_list, version.get_text_by_reference_bulk(ref_list))
 
+    c['new_verse_set'] = verse_set == None
     c['selection_verse_set_form'] = selection_form
     c['selection_verse_selector_form'] = VerseSelector(prefix='selection')
     return render(request, 'learnscripture/create_set.html', c)

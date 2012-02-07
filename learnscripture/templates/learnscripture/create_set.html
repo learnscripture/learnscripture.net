@@ -3,23 +3,31 @@
 {% load bootstrap %}
 
 {% block title %}
-Create verse set
+{% if new_verse_set %}Create verse set{% else %}Edit verse set{% endif %}
 {% endblock %}
 
 {% block page_title %}
-Create verse set
+{% if new_verse_set %}Create verse set{% else %}Edit verse set{% endif %}
 {% endblock %}
 
 {% block leftcolumn %}
+
+
+{% if new_verse_set %} {# Allow choice of type and show tabs #}
 
 <ul class="tabs" data-tabs="tabs">
   <li {% if active_tab == 'selection' %}class="active"{% endif %}><a href="#id-tab-selection">Selection</a></li>
   <li {% if active_tab == 'passage' %}class="active"{% endif %}><a href="#id-tab-passage">Extended passage</a></li>
 </ul>
 
+{% endif %}
+
 <div class="pill-content">
   <div {% if active_tab == 'selection' %}class="active"{% endif %} id="id-tab-selection">
+
+    {% if new_verse_set %}
     <p>Create your own set of set of verses to learn:</p>
+    {% endif %}
 
     <form id="id-selection-verse-set-form" action="" method="POST">
       {% csrf_token %}
@@ -68,7 +76,7 @@ Create verse set
   </div>
 
   <div {% if active_tab == 'passage' %}class="active"{% endif %} id="id-tab-passage">
-
+    <p>TODO!</p>
   </div>
 </div>
 
