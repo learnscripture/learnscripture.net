@@ -219,6 +219,8 @@ COMPRESS_CSS_FILTERS = []
 
 from settings_priv import SENTRY_DSN
 
+SENTRY_CLIENT = 'ravenclient.AsyncDjangoClient'
+
 ### LearnScripture.net specific settings ###
 
 IDENTITY_EXPIRES_DAYS = 21
