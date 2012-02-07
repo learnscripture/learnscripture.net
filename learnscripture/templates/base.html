@@ -16,11 +16,16 @@
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
+
+    {% if request.identity.interface_theme == 'bubblegum' %}
+    <link href='http://fonts.googleapis.com/css?family=Short+Stack' rel='stylesheet' type='text/css' />
+    {% endif %}
+
+
     {% compress css %}
     <link type="text/less" rel="stylesheet" href="{{ STATIC_URL }}css/learnscripture.less" charset="utf-8" />
 
     {% endcompress %}
-
     {% comment %}
     We put javascript for *all* pages in the base template, with maximum expiry
     set up. This results in a bigger initial hit, but much better performace
@@ -39,7 +44,6 @@
     <script type="text/javascript" src="{{ STATIC_URL }}js/accounts.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/create.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/preferences.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/theme.js"></script>
     {% endcompress %}
 
   </head>
