@@ -1,6 +1,7 @@
 import logging
 
 from accounts.models import Identity
+from learnscripture.utils.logging import extra
 
 logger = logging.getLogger(__name__)
 
@@ -51,14 +52,14 @@ def get_identity(request):
 
 def start_identity(request):
     identity = Identity.objects.create()
-    logger.info("New Identity created %r", identity)
+    logger.info("New Identity created", extra=extra(identity=identity))
     set_identity(request, identity)
     return identity
 
 
 def login(request, identity):
     set_identity(request, identity)
-    logger.info("Logged in: %r", identity)
+    logger.info("Login", extra=extra(identity=identity))
 
 
 def set_identity(request, identity):

@@ -20,6 +20,7 @@ from bibleverses.forms import VerseSelector
 from learnscripture import session
 from learnscripture.decorators import require_identity_method
 from learnscripture.forms import SignUpForm, LogInForm
+from learnscripture.utils.logging import extra
 
 
 logger = logging.getLogger(__name__)
@@ -79,7 +80,8 @@ class ActionCompleteHandler(BaseHandler):
 
     @require_identity_method
     def create(self, request):
-        learningLogger.info("Action complete: identity %r, action %r", request.identity, request.data)
+        learningLogger.info("Action %s complete", request.data.get('stage','[None]'), extra=extra(identity=request.identity, data=request.data))
+
         uvs_id = int(request.data['user_verse_status_id'])
         try:
             uvs = request.identity.verse_statuses.select_related('version', 'verse_choice').get(id=uvs_id)
@@ -136,7 +138,7 @@ class SignUpHandler(AccountCommon, BaseHandler):
             # UI should stop this happening.
             resp = rc.BAD_REQUEST
         account = request.form.save()
-        accountLogger.info("New Account created: %r", account)
+        accountLogger.info("New Account created", extra=extra(account=account))
         identity.account = account
         identity.save()
         return account
