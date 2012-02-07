@@ -12,6 +12,11 @@
 
 {% block leftcolumn %}
 
+{% if barred %}
+<p>{{ reason }}</p>
+{% else %}
+
+
 
 {% if new_verse_set %} {# Allow choice of type and show tabs #}
 
@@ -80,5 +85,7 @@
   </div>
 </div>
 
+
+{% endif %}
 
 {% endblock %}

@@ -6,7 +6,7 @@ from django.utils.http import urlparse
 
 from accounts.forms import PreferencesForm
 from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerseReference, parse_ref, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType
-from learnscripture import session
+from learnscripture import session, auth
 from bibleverses.forms import VerseSelector, VerseSetForm
 
 from .decorators import require_identity, require_preferences
@@ -163,6 +163,14 @@ def create_set(request, slug=None):
         verse_set = get_object_or_404(request.identity.account.verse_sets_created.filter(slug=slug))
     else:
         verse_set = None
+
+    allowed, reason = auth.check_allowed(request, auth.Feature.CREATE_VERSE_SET)
+    if not allowed:
+        return render(request, 'learnscripture/create_set.html',
+                      {'barred': True,
+                       'reason': reason,
+                       'new_verse_set': verse_set == None})
+
 
     c = {}
 
