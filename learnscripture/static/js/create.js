@@ -52,6 +52,15 @@ var learnscripture =
             $('#id-verse-list tbody').on('click', 'a', deleteButtonClick);
             $('#id-add-verse-btn').click(addVerseClick);
             $('#id-selection-save-btn').click(selectionSaveBtnClick);
+
+            $("#id-tab-selection input[type=\"text\"], " +
+              "#id-tab passage input[type=\"text\"]").keypress(function (ev) {
+              if ((ev.which && ev.which == 13) || (ev.keyCode && ev.keyCode == 13)) {
+                  // Stop browsers from submitting:
+                  ev.preventDefault();
+              }
+              });
+
         };
 
         // Public interface:
