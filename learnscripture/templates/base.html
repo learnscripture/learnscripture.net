@@ -39,6 +39,7 @@
     <script type="text/javascript" src="{{ STATIC_URL }}js/accounts.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/create.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/preferences.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/theme.js"></script>
     {% endcompress %}
 
   </head>
@@ -170,7 +171,10 @@
 </div>
 
 
-<div id="id-preferences-data" data-animations="{{ request.identity.enable_animations|yesno:"true,false,false" }}">
+<div id="id-preferences-data"
+     data-animations="{{ request.identity.enable_animations|yesno:"true,false,false" }}"
+     data-theme="{{ request.identity.interface_theme }}"
+>
 </div>
 
 
