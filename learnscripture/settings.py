@@ -158,7 +158,7 @@ LOGGING = {
     },
     'handlers': {
         'sentry': {
-            'level': 'ERROR',
+            'level': 'INFO',
             'class': 'raven.contrib.django.handlers.SentryHandler',
         },
         'console': {
@@ -168,6 +168,11 @@ LOGGING = {
         }
     },
     'loggers': {
+        'learnscripture': {
+            'level': 'INFO',
+            'handlers': ['sentry'],
+            'propagate': False,
+            },
         'django.db.backends': {
             'level': 'ERROR',
             'handlers': ['console'],

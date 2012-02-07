@@ -6,6 +6,8 @@ of cleaning up if clients other than the web app were to use it - we are just
 using Piston for the convenience it provides.
 
 """
+import logging
+
 from django.utils.functional import wraps
 from django.utils import simplejson
 
@@ -18,6 +20,11 @@ from bibleverses.forms import VerseSelector
 from learnscripture import session
 from learnscripture.decorators import require_identity_method
 from learnscripture.forms import SignUpForm, LogInForm
+
+
+logger = logging.getLogger(__name__)
+accountLogger = logging.getLogger('learnscripture.accounts')
+learningLogger = logging.getLogger('learnscripture.learning')
 
 
 # We need a more capable 'validate' than the one provided by piston to get
@@ -72,6 +79,7 @@ class ActionCompleteHandler(BaseHandler):
 
     @require_identity_method
     def create(self, request):
+        learningLogger.info("Action complete: identity %r, action %r", request.identity, request.data)
         uvs_id = int(request.data['user_verse_status_id'])
         try:
             uvs = request.identity.verse_statuses.select_related('version', 'verse_choice').get(id=uvs_id)
@@ -128,6 +136,7 @@ class SignUpHandler(AccountCommon, BaseHandler):
             # UI should stop this happening.
             resp = rc.BAD_REQUEST
         account = request.form.save()
+        accountLogger.info("New Account created: %r", account)
         identity.account = account
         identity.save()
         return account
@@ -140,7 +149,7 @@ class LogInHandler(AccountCommon, BaseHandler):
     def create(self, request):
         # The form has validated the password already.
         account = Account.objects.get(email=request.form.cleaned_data['email'].strip())
-        session.set_identity(request, account.identity)
+        session.login(request, account.identity)
         return account
 
 
