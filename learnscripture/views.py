@@ -126,7 +126,7 @@ def choose(request):
                 verse_list = parse_ref(reference, request.identity.default_bible_version,
                                        max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
             except InvalidVerseReference as e:
-                c['individual_search_msg'] = u"The reference was not recognised: %s" % (e.message)
+                c['individual_search_msg'] = e.message
             else:
                 c['individual_search_results'] = verse_list
     else:

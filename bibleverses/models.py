@@ -271,6 +271,9 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE):
             except ValueError:
                 raise InvalidVerseReference(u"Can't find one of '%s' or '%s'" % (ref_start, ref_end))
 
+            if verse_end.bible_verse_number > verse_start.bible_verse_number:
+                raise InvalidVerseReference("%s and %s are not in ascending order." % (ref_start, ref_end))
+
             if verse_end.bible_verse_number - verse_start.bible_verse_number > max_length:
                 raise InvalidVerseReference(u"References that span more than %d verses are not allowed in this context." % max_length)
 
