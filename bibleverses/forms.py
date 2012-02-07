@@ -28,3 +28,7 @@ class VerseSetForm(forms.ModelForm):
     class Meta:
         model = VerseSet
         fields = ('name', 'description')
+
+a = VerseSetForm.base_fields['description'].widget.attrs
+del a['cols']
+a['rows'] = 3
