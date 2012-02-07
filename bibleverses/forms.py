@@ -7,7 +7,7 @@ class VerseSelector(forms.Form):
     book = forms.ChoiceField(choices=[(b,b) for b in BIBLE_BOOKS])
     chapter = forms.IntegerField()
     start_verse = forms.IntegerField(required=False)
-    end_verse = forms.IntegerField(required=False)
+    end_verse = forms.IntegerField(label=u"End verse (optional)", required=False)
 
     def make_reference(self):
         """
