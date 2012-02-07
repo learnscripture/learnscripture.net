@@ -112,8 +112,7 @@ class VerseSet(models.Model):
 
     popularity = models.PositiveIntegerField(default=0)
     date_added = models.DateTimeField(default=timezone.now)
-    created_by = models.ForeignKey('accounts.Account', related_name='verse_sets_created',
-                                   null=True)
+    created_by = models.ForeignKey('accounts.Account', related_name='verse_sets_created')
 
     def __unicode__(self):
         return self.name
