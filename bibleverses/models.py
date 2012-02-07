@@ -261,12 +261,15 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE):
             ref_start = u"%s %d:%d" % (book, start_chapter, start_verse)
             ref_end = u"%s %d:%d" % (book, end_chapter, end_verse)
 
+            if ref_end == ref_start:
+                raise InvalidVerseReference("Start and end verse are the same.")
+
             # Try to get results in just two queries
             vs = version.verse_set.filter(reference__in=[ref_start, ref_end])
             try:
                 verse_start, verse_end = tuple(vs)
             except ValueError:
-                raise InvalidVerseReference(u"Can't find one '%s' or '%s'" % (ref_start, ref_end))
+                raise InvalidVerseReference(u"Can't find one of '%s' or '%s'" % (ref_start, ref_end))
 
             if verse_end.bible_verse_number - verse_start.bible_verse_number > max_length:
                 raise InvalidVerseReference(u"References that span more than %d verses are not allowed in this context." % max_length)
