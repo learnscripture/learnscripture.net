@@ -16,11 +16,6 @@
   z-index: 10000;
   overflow: visible;
 
-  // Links get text shadow
-  a {
-    color: @grayLight;
-    text-shadow: 0 -1px 0 rgba(0,0,0,.25);
-  }
 
   // Hover and active states
   // h3 for backwards compatibility
@@ -115,8 +110,6 @@
 // For backwards compatibility, include .topbar .fill
 .topbar-inner,
 .topbar .fill {
-  background-color: @topbarEnd;
-  #gradient > .vertical(@topbarStart, @topbarEnd);
   @shadow: 0 1px 3px rgba(0,0,0,.25), inset 0 -1px 0 rgba(0,0,0,.1);
   .box-shadow(@shadow);
 }
@@ -150,10 +143,6 @@
       text-decoration: none;
     }
   }
-  .active > a {
-    background-color: @topbarEnd;
-    background: rgba(0,0,0,.2);
-  }
 
   // Secondary (floated right) nav in topbar
   &.secondary-nav {
@@ -167,44 +156,7 @@
       border: 0;
     }
   }
-  // Dropdowns within the .nav
-  // a.menu:hover and li.open .menu for backwards compatibility
-  a.menu:hover,
-  li.open .menu,
-  .dropdown-toggle:hover,
-  .dropdown.open .dropdown-toggle {
-    background: @topbarStart;
-    background: rgba(255,255,255,.05);
-  }
-  // .menu-dropdown for backwards compatibility
-  .menu-dropdown,
-  .dropdown-menu {
-    background-color: @topbarEnd;
-    // a.menu for backwards compatibility
-    a.menu,
-    .dropdown-toggle {
-      color: @white;
-      &.open {
-        background: @topbarStart;
-        background: rgba(255,255,255,.05);
-      }
-    }
-    li a {
-      color: #999;
-      text-shadow: 0 1px 0 rgba(0,0,0,.5);
-      &:hover {
-        #gradient > .vertical(@topbarStart, @topbarEnd);
-        color: @white;
-      }
-    }
-    .active a {
-      color: @white;
-    }
-    .divider {
-      background-color: #222;
-      border-color: #444;
-    }
-  }
+
 }
 
 // For backwards compatibility with new dropdowns, redeclare dropdown link padding
@@ -568,12 +520,6 @@ footer {
   // Focus state for keyboard and accessibility
   &:focus {
     outline: 1px dotted #666;
-  }
-
-  // Primary Button Type
-  &.primary {
-    color: @white;
-    .gradientBar(@blue, @blueDark)
   }
 
    // Transitions

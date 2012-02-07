@@ -1,18 +1,117 @@
 // Mostly this file appends to and therefor overrides bootstrap.less styles,
-// rather than modiyfing bootstrap itself. However, we have modified
-// some of variables.less
+// rather than modiyfing bootstrap itself. However, we have pulled out
+// various bits in order to do colour themes in this file
 
 @import "../bootstrap/lib/bootstrap.less";
 @import "sprites.less";
 
-/* Override some defaults */
-html, body {
+/* Themes */
+
+.dotheme(@topcolour1, @topcolour2, @toplinkcolour, @btncolour1, @btncolour2) {
+
+  .topbar div > ul,
+  .nav {
+    // Dropdowns within the .nav
+    // a.menu:hover and li.open .menu for backwards compatibility
+    a.menu:hover,
+    li.open .menu,
+    .dropdown-toggle:hover,
+    .dropdown.open .dropdown-toggle {
+      background: @topcolour1;
+      background: rgba(255,255,255,.05);
+    }
+
+    // .menu-dropdown for backwards compatibility
+    .menu-dropdown,
+    .dropdown-menu {
+      background-color: @topcolour2;
+      // a.menu for backwards compatibility
+      a.menu,
+      .dropdown-toggle {
+        color: @white;
+        &.open {
+          background: @topcolour1;
+          background: rgba(255,255,255,.05);
+        }
+      }
+      li a {
+        color: @toplinkcolour;
+        &:hover {
+          #gradient > .vertical(@topcolour1, @topcolour2);
+          color: @white;
+        }
+      }
+      .active a {
+        color: @white;
+      }
+      .divider {
+        background-color: #222;
+        border-color: #444;
+      }
+    }
+
+    .active > a {
+      background-color: @topcolour2;
+      background: rgba(0,0,0,.2);
+    }
+  }
+
+  .topbar {
+    // Links get text shadow
+    a {
+      color: @toplinkcolour;
+      text-shadow: 0 -1px 0 rgba(0,0,0,.25);
+      }
+    }
+
+
+  .topbar-inner,
+  .topbar .fill {
+    background-color: @topcolour2;
+    #gradient > .vertical(@topcolour1, @topcolour2);
+  }
+
+  .btn {
+    // Primary Button Type
+    &.primary {
+      color: @white;
+      .gradientBar(@btncolour1, @btncolour2)
+    }
+  }
+
+  .progress th.currenttask {
+    color: @white;
+    .gradientBar(@btncolour1, @btncolour2);
+  }
+
+
+}
+
+
+
+// CALM
+
+body.calm {
   background-color: #1A1A1A;
   background-image: url(/static/img/bg.jpg);
-  background-attachment:fixed;
-  }
+  .dotheme(@blue, @blueDark, @grayLight, @blue, @blueDark);
+
+}
+
+body.bubblegum {
+  background-color: #e0cfb1;
+  background-image: url(/static/img/bubblegum_background.jpg);
+  .dotheme(#f56c26, #f00901, black, #cc3a92,  #a12667);
+
+//  .dotheme(#cc3a92,  #a12667, #f56c26, #f00901);
+//  .dotheme(#f56c26, #f00901, #00c014, #027103);
+}
+
+/* Override some defaults */
+
 body {
   padding-top: 40px; /* 40px to make the container go all the way to the bottom of the topbar */
+  background-attachment:fixed;
   }
 .container > footer p {
   text-align: center; /* center align it with the container */
@@ -242,11 +341,6 @@ p.large {
 .progress th {
   padding: 6px;
   vertical-align: middle;
-  }
-
-.progress th.currenttask {
-  color: #ffffff;
-  .gradientBar(@blue, @blueDark);
   }
 
 #id-help-btn {
