@@ -38,11 +38,12 @@
     <script type="text/javascript" src="{{ STATIC_URL }}js/learn.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/accounts.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/create.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/preferences.js"></script>
     {% endcompress %}
 
   </head>
 
-  <body>
+  <body class="{% if request.identity %}{{ request.identity.interface_theme }}{% else %}calm{% endif %}">
 
     <div class="topbar">
       <div class="fill">
