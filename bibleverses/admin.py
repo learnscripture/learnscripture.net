@@ -15,18 +15,9 @@ class VerseChoiceAdminForm(forms.ModelForm):
         model = VerseChoice
 
 
-class VerseChoiceInline(admin.TabularInline):
-    model = VerseChoice
-    form = VerseChoiceAdminForm
-
-
 class VerseSetAdmin(admin.ModelAdmin):
     list_display = ['name', 'set_type']
     list_filter = ['set_type']
-
-    inlines = [
-        VerseChoiceInline
-        ]
 
 
 class VerseAdmin(admin.ModelAdmin):

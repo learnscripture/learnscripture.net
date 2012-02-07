@@ -133,7 +133,8 @@ class VerseChoiceManager(models.Manager):
 class VerseChoice(models.Model):
     reference = models.CharField(max_length=100)
     verse_set = models.ForeignKey(VerseSet, null=True, blank=True,
-                                  related_name='verse_choices')
+                                  related_name='verse_choices',
+                                  on_delete=models.SET_NULL)
     set_order = models.PositiveSmallIntegerField(default=0)
 
     objects = VerseChoiceManager()
