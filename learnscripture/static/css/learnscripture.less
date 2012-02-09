@@ -7,7 +7,17 @@
 
 /* Themes */
 
-.dotheme(@topcolour1, @topcolour2, @toplinkcolour, @btncolour1, @btncolour2) {
+.dotheme(@topColor1, @topColor2, @topLinkColour, @btnColor1, @btnColor2, @bgColor1, @linkColor) {
+
+  @linkColorHover: darken(@linkColor, 15);
+
+  
+  a {
+    color: @linkColor;
+    &:hover {
+      color: @linkColorHover;
+    }
+  }
 
   .topbar div > ul,
   .nav {
@@ -17,27 +27,27 @@
     li.open .menu,
     .dropdown-toggle:hover,
     .dropdown.open .dropdown-toggle {
-      background: @topcolour1;
+      background: @topColor1;
       background: rgba(255,255,255,.05);
     }
 
     // .menu-dropdown for backwards compatibility
     .menu-dropdown,
     .dropdown-menu {
-      background-color: @topcolour2;
+      background-color: @topColor2;
       // a.menu for backwards compatibility
       a.menu,
       .dropdown-toggle {
         color: @white;
         &.open {
-          background: @topcolour1;
+          background: @topColor1;
           background: rgba(255,255,255,.05);
         }
       }
       li a {
-        color: @toplinkcolour;
+        color: @topLinkColour;
         &:hover {
-          #gradient > .vertical(@topcolour1, @topcolour2);
+          #gradient > .vertical(@topColor1, @topColor2);
           color: @white;
         }
       }
@@ -51,7 +61,7 @@
     }
 
     .active > a {
-      background-color: @topcolour2;
+      background-color: @topColor2;
       background: rgba(0,0,0,.2);
     }
   }
@@ -59,7 +69,7 @@
   .topbar {
     // Links get text shadow
     a {
-      color: @toplinkcolour;
+      color: @topLinkColour;
       text-shadow: 0 -1px 0 rgba(0,0,0,.25);
       }
     }
@@ -67,26 +77,79 @@
 
   .topbar-inner,
   .topbar .fill {
-    background-color: @topcolour2;
-    #gradient > .vertical(@topcolour1, @topcolour2);
+    background-color: @topColor2;
+    #gradient > .vertical(@topColor1, @topColor2);
   }
 
   .btn {
     // Primary Button Type
     &.primary {
       color: @white;
-      .gradientBar(@btncolour1, @btncolour2)
+      .gradientBar(@btnColor1, @btnColor2)
     }
+  }
+
+  @tabborder: darken(@bgColor1, 20%);
+  @tabhighlight: @bgColor1;
+
+  .tabs {
+    border-color: @tabborder;
+    > li {
+      > a {
+         &:hover {
+          background-color: @tabhighlight;
+          border-color: @tabhighlight @tabhighlight @tabborder;
+         }
+      }
+    }
+    // Active state, and it's :hover to override normal :hover
+    .active > a,
+    .active > a:hover {
+      color: @gray;
+      background-color: @white;
+      border: 1px solid @tabborder;
+      border-bottom-color: transparent;
+      cursor: default;
+    }
+  }
+
+ 
+  .pills {
+
+    a:hover {
+      color: @white;
+      background-color: @linkColorHover;
+    }
+    .active a {
+      color: @white;
+      background-color: @linkColor;
+    }
+  }
+
+  .media-grid {
+    a {
+      border-color: @tabborder;
+      &:hover {
+        border-color: @linkColor;
+      }
+    }
+  }
+
+  .verseset, .actionset {
+    background-color: @bgColor1;
+    border-color: darken(@bgColor1, 10%);
   }
 
   .progress th.currenttask {
     color: @white;
-    .gradientBar(@btncolour1, @btncolour2);
+    .gradientBar(@btnColor1, @btnColor2);
   }
 
-
+  .page-header {
+    background-color: @bgColor1;
+    border-color: darken(@bgColor1, 10%);
+  }
 }
-
 
 
 // CALM
@@ -94,18 +157,21 @@
 body.calm {
   background-color: #1A1A1A;
   background-image: url(/static/img/bg.jpg);
-  .dotheme(@blue, @blueDark, @grayLight, @blue, @blueDark);
+  .dotheme(@blue, @blueDark, @grayLight, @blue, @blueDark, #f5f5f5, #0069d6);
 
 }
 
 body.bubblegum {
   background-color: #e0cfb1;
   background-image: url(/static/img/bubblegum_background.jpg);
-  .dotheme(#f56c26, #f00901, black, #cc3a92,  #a12667);
+  .dotheme(#f56c26, #f00901, black, #cc3a92,  #a12667, #ffe0f1, #f00901);
   h1, h2, h3, h4, h5, .word {
     font-family: "Short Stack", "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
 }
+
+/* Theme overrides: */
+
 
 /* Override some defaults */
 
@@ -159,7 +225,6 @@ footer {
 
 /* Page header tweaks */
 .page-header {
-  background-color: #f5f5f5;
   padding: 20px @mainSidePadding 10px;
   }
 
@@ -212,9 +277,8 @@ p.verselist {
 .verseset,
 .actionset {
   padding: 15px;
-  background-color: whiteSmoke;
   border-radius: 7px;
-  border: 1px solid #E0E0E0;
+  border: 1px solid;
   margin-bottom: 15px;
   }
 

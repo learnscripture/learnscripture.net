@@ -292,7 +292,6 @@ a.menu:after,
 
 // Tabs
 .tabs {
-  border-color: #ddd;
   border-style: solid;
   border-width: 0 0 1px;
   > li {
@@ -306,19 +305,8 @@ a.menu:after,
       .border-radius(4px 4px 0 0);
       &:hover {
         text-decoration: none;
-        background-color: #eee;
-        border-color: #eee #eee #ddd;
       }
     }
-  }
-  // Active state, and it's :hover to override normal :hover
-  .active > a,
-  .active > a:hover {
-    color: @gray;
-    background-color: @white;
-    border: 1px solid #ddd;
-    border-bottom-color: transparent;
-    cursor: default;
   }
 }
 
@@ -359,16 +347,12 @@ a.menu:after,
     text-shadow: 0 1px 1px @white;
     .border-radius(15px);
     &:hover {
-      color: @white;
       text-decoration: none;
       text-shadow: 0 1px 1px rgba(0,0,0,.25);
-      background-color: @linkColorHover;
     }
   }
   .active a {
-    color: @white;
     text-shadow: 0 1px 1px rgba(0,0,0,.25);
-    background-color: @linkColor;
   }
 }
 
@@ -1002,7 +986,6 @@ input[type=submit].btn {
       display: block;
     }
     &:hover {
-      border-color: @linkColor;
       .box-shadow(0 1px 4px rgba(0,105,214,.25));
     }
   }
