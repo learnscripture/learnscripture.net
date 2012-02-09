@@ -54,7 +54,7 @@ class Account(models.Model):
 
 class IdentityManager(models.Manager):
     def get_query_set(self):
-        return super(IdentityManager, self).get_query_set().select_related('default_bible_version')
+        return super(IdentityManager, self).get_query_set().select_related('default_bible_version', 'account')
 
 
 # Most of business logic regarding verses is tied to Identity, for the sake of

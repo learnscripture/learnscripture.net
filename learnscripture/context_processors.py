@@ -1,7 +1,11 @@
 from collections import namedtuple
 
 from django.core.urlresolvers import reverse
+from fiber.context_processors import page_info
+
+from learnscripture.utils.context import lazy_dict
 from .forms import SignUpForm, LogInForm
+
 
 def session_forms(request):
     # Use callables here to avoid overhead when not needed.  The template will
@@ -35,3 +39,7 @@ def menu(request):
     for m in items:
         m.active = request.path_info.startswith(m.path)
     return {'menuitems': items}
+
+
+
+lazy_page_info = lazy_dict(page_info, ['fiber_page', 'fiber_current_pages'])
