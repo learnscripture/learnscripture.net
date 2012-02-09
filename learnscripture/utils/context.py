@@ -31,16 +31,15 @@ def lazy_dict(func, expected_keys):
     """
     Given a function that returns a dictionary containing at most the keys in
     expected_keys, returns a dictionary that will lazily evaluate the function
-    to get the values of the keys, only when the specific key is asked for.
+    to get the values of the keys, but only when a key in expected_keys is asked
+    for.
 
-    Use for turning a context processor into a lazy context processor.
+    Useful for turning a context processor into a lazy context processor.
 
-    It can only work because of that fact that RequestContext/Context
-    act as a stack of dictionaries.
+    (This works because of that fact that RequestContext/Context act as a stack
+    of dictionaries, so we don't need to actually combine the contents of the
+    dictionary with another dictionary).
     """
     def inner(*args, **kwargs):
         return LazyDict(func, args, kwargs, expected_keys)
     return inner
-
-
-
