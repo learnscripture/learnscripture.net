@@ -55,6 +55,7 @@ var learnscripture = (function(learnscripture, $) {
     };
 
     var signupBtnClick = function(ev) {
+        ev.preventDefault();
         $.ajax({url: '/api/learnscripture/v1/signup/',
                 dataType: 'json',
                 type: 'POST',
@@ -82,6 +83,7 @@ var learnscripture = (function(learnscripture, $) {
     };
 
     var loginBtnClick = function(ev) {
+        ev.preventDefault();
         $.ajax({url: '/api/learnscripture/v1/login/',
                 dataType: 'json',
                 type: 'POST',
