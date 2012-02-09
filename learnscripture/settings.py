@@ -83,6 +83,7 @@ TEMPLATE_LOADERS = (
 MIDDLEWARE_CLASSES = [
     m for b, m in
     [
+        (DEBUG, 'debug_toolbar.middleware.DebugToolbarMiddleware'),
         (True, 'django.middleware.common.CommonMiddleware'),
         (True, 'django.contrib.sessions.middleware.SessionMiddleware'),
         (True, 'django.middleware.csrf.CsrfViewMiddleware'),
@@ -92,7 +93,6 @@ MIDDLEWARE_CLASSES = [
         (True, 'learnscripture.middleware.IdentityMiddleware'),
         (True, 'pagination.middleware.PaginationMiddleware'),
         (True, 'raven.contrib.django.middleware.Sentry404CatchMiddleware'),
-        (DEBUG, 'debug_toolbar.middleware.DebugToolbarMiddleware'),
     ]
     if b
 ]
@@ -107,7 +107,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     'django.core.context_processors.tz',
     'django.contrib.messages.context_processors.messages',
     'django.core.context_processors.request',
-    'fiber.context_processors.page_info',
+    'learnscripture.context_processors.lazy_page_info',
     'learnscripture.context_processors.session_forms',
     'learnscripture.context_processors.menu',
 ]
