@@ -23,7 +23,7 @@ var learnscripture = (function(learnscripture, $) {
             // Almost every page needs to be refreshed if we
             // have just logged in, because the identity will have
             // changed. So we redirect to the dashboard.
-            window.location = '/start/';
+            window.location = '/dashboard/';
         }
     };
 
