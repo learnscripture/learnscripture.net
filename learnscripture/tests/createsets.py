@@ -112,7 +112,7 @@ class CreateSetTests(LiveServerTestCase):
         """
         self.login()
         driver = self.driver
-        driver.get(self.live_server_url + "/create-verse-set/")
+        driver.get(self.live_server_url + reverse('create_set'))
         Select(driver.find_element_by_id("id_selection-book")).select_by_visible_text("Genesis")
         driver.find_element_by_id("id_selection-chapter").clear()
         driver.find_element_by_id("id_selection-chapter").send_keys("1")
@@ -179,16 +179,12 @@ class CreateSetTests(LiveServerTestCase):
         self.assertEqual(vc1_new.verse_set_id, None)
 
 
-
-class CreateSetSimpleTests(LiveServerTestCase):
-
-    fixtures = ['test_bible_verses.json']
-
     def test_require_account(self):
         driver = self.driver
-        driver.get(self.live_server_url + reverse('edit_set', kwargs=dict(slug=vs.slug)))
+        driver.get(self.live_server_url + reverse('create_set'))
+        # Set preferences
         Select(driver.find_element_by_id("id_default_bible_version")).select_by_visible_text("KJV")
         driver.find_element_by_id("id-save-btn").click()
         self.wait_until_loaded('body')
 
-        self.assertIn('You cannot create', driver.page_source)
+        self.assertIn('You need to create an account first', driver.page_source)
