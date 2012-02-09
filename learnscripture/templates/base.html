@@ -113,6 +113,8 @@
 
 
 <!-- popup forms -->
+{% if request.identity %}
+
 <div id="id-signup-form" class="modal hide">
   <div class="modal-header">
     <a href="#" class="close">&times;</a>
@@ -181,6 +183,8 @@
 >
 </div>
 
+
+{% endif %}
 
   </body>
 </html>
