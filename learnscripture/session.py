@@ -52,14 +52,14 @@ def get_identity(request):
 
 def start_identity(request):
     identity = Identity.objects.create()
-    logger.info("New Identity created", extra=extra(identity=identity))
+    logger.info("New Identity created", extra=extra(identity=identity, request=request))
     set_identity(request, identity)
     return identity
 
 
 def login(request, identity):
     set_identity(request, identity)
-    logger.info("Login", extra=extra(identity=identity))
+    logger.info("Login", extra=extra(identity=identity, request=request))
 
 
 def set_identity(request, identity):

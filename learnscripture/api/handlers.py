@@ -80,7 +80,7 @@ class ActionCompleteHandler(BaseHandler):
 
     @require_identity_method
     def create(self, request):
-        learningLogger.info("Action %s complete", request.data.get('stage','[None]'), extra=extra(identity=request.identity, data=request.data))
+        learningLogger.info("Action %s complete", request.data.get('stage','[None]'), extra=extra(identity=request.identity, data=request.data, request=request))
 
         uvs_id = int(request.data['user_verse_status_id'])
         try:
