@@ -71,6 +71,7 @@ class Identity(models.Model):
     enable_animations = models.BooleanField(blank=True, default=False)
     interface_theme = models.CharField(max_length=30, choices=[('calm', 'Slate'),
                                                                ('bubblegum', 'Bubblegum'),
+                                                               ('bubblegum2', 'Bubblegum 2'),
                                                                ],
                                        default='calm')
 
