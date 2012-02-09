@@ -138,7 +138,7 @@ class SignUpHandler(AccountCommon, BaseHandler):
             # UI should stop this happening.
             resp = rc.BAD_REQUEST
         account = request.form.save()
-        accountLogger.info("New Account created", extra=extra(account=account))
+        accountLogger.info("New Account created", extra=extra(account=account, request=request))
         identity.account = account
         identity.save()
         return account
