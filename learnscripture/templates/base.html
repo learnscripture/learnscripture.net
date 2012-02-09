@@ -26,25 +26,6 @@
     <link type="text/less" rel="stylesheet" href="{{ STATIC_URL }}css/learnscripture.less" charset="utf-8" />
 
     {% endcompress %}
-    {% comment %}
-    We put javascript for *all* pages in the base template, with maximum expiry
-    set up. This results in a bigger initial hit, but much better performace
-    after that since the client only needs to ask for one js file (due to
-    compressor) and never needs to request any js again
-    {% endcomment %}
-
-    {% compress js %}
-    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-1.7.1.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui-1.8.17.custom.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-dropdown.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-modal.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-tabs.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-buttons.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/learn.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/accounts.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/create.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/preferences.js"></script>
-    {% endcompress %}
 
   </head>
 
@@ -185,6 +166,28 @@
 
 
 {% endif %}
+
+    {% comment %}
+    We put javascript for *all* pages in the base template, with maximum expiry
+    set up. This results in a bigger initial hit, but much better performace
+    after that since the client only needs to ask for one js file (due to
+    compressor) and never needs to request any js again
+
+    We also put them at the bottom for speed.
+    {% endcomment %}
+
+    {% compress js %}
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui-1.8.17.custom.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-dropdown.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-modal.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-tabs.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-buttons.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/learn.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/accounts.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/create.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/preferences.js"></script>
+    {% endcompress %}
 
   </body>
 </html>
