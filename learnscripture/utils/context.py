@@ -20,7 +20,11 @@ class LazyDict(object):
             raise KeyError()
 
     def __contains__(self, key):
-        return key in self.expected_keys
+        if key not in self.expected_keys:
+            return False
+        if self.data is None:
+            self._evaluate()
+        return key in self.data
 
 
 def lazy_dict(func, expected_keys):
