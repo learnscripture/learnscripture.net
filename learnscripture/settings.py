@@ -93,6 +93,7 @@ MIDDLEWARE_CLASSES = [
         (True, 'learnscripture.middleware.IdentityMiddleware'),
         (True, 'pagination.middleware.PaginationMiddleware'),
         (True, 'raven.contrib.django.middleware.Sentry404CatchMiddleware'),
+        (True, 'fiber.middleware.AdminPageMiddleware'),
     ]
     if b
 ]
@@ -103,6 +104,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     'django.core.context_processors.media',
     'django.core.context_processors.static',
     'django.core.context_processors.tz',
+    'django.core.context_processors.i18n',
     'django.contrib.messages.context_processors.messages',
     'django.core.context_processors.request',
     'learnscripture.context_processors.lazy_page_info',
