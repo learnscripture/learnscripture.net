@@ -17,6 +17,11 @@ SubscriptionType = make_choices('SubscriptionType',
                                  (3, 'LIFETIME_FREE', 'Lifetime free')]
                                 )
 
+TestingMethod = make_choices('TestingMethod',
+                             [(0, 'FULL_WORDS', 'Full words - recommended for full keyboards and normal typing skills'),
+                              (1, 'FIRST_LETTER', 'First letter - recommended for handheld devices and slower typers')]
+                             )
+
 # Account is separate from Identity to allow guest users to use the site fully
 # without signing up.
 # Everything related to learning verses is related to Identity.
@@ -68,6 +73,8 @@ class Identity(models.Model):
 
     # Preferences
     default_bible_version = models.ForeignKey(BibleVersion, null=True, blank=True)
+    testing_method = models.PositiveSmallIntegerField(choices=TestingMethod.choice_list,
+                                                      null=True, default=None)
     enable_animations = models.BooleanField(blank=True, default=False)
     interface_theme = models.CharField(max_length=30, choices=[('calm', 'Slate'),
                                                                ('bubblegum', 'Bubblegum'),
