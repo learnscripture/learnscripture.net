@@ -26,8 +26,7 @@ StageType = make_choices('StageType',
                          [(1, 'READ', 'read'),
                           (2, 'RECALL_INITIAL', 'recall from initials'),
                           (3, 'RECALL_MISSING', 'recall when missing'),
-                          (4, 'TEST_TYPE_FULL', 'test, typing full word'),
-                          (5, 'TEST_TYPE_QUICK', 'test, typing initial'),
+                          (4, 'TEST', 'test'), # Also used in learn.js
                           ])
 
 

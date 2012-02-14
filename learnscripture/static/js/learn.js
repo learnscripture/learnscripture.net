@@ -14,8 +14,12 @@ var learnscripture =
         var WORD_TOGGLE_HIDE_END = 1;
         var WORD_TOGGLE_HIDE_ALL = 2;
 
-        var TEST_TYPE_FULL = 'TEST_TYPE_FULL';
-        var TEST_TYPE_QUICK = 'TEST_TYPE_QUICK';
+
+        // Defined in StageType:
+        var STAGE_TYPE_TEST = 'TEST';
+        // Defined in TestingMethod:
+        var TEST_FULL_WORDS = 0;
+        var TEST_FIRST_LETTER = 1;
 
         var INITIAL_STRENGTH_FACTOR = 0.1;
 
@@ -152,7 +156,7 @@ var learnscripture =
 
         var matchWord = function(target, typed) {
             // inputs are already lowercased with punctuation stripped
-            if (currentStage.testType == TEST_TYPE_FULL) {
+            if (preferences.testingMethod == TEST_FULL_WORDS) {
                 if (typed == "") return false;
                 // for 1 letter words, don't allow any mistakes
                 if (target.length == 1) {
@@ -161,7 +165,7 @@ var learnscripture =
                 // After that, allow N/3 mistakes, rounded up.
                 return levenshteinDistance(target, typed) <= Math.ceil(target.length / 3);
             } else {
-                // TEST_TYPE_QUICK:
+                // TEST_FIRST_LETTER
                 return (typed == target.slice(0, 1));
             }
         };
@@ -178,7 +182,7 @@ var learnscripture =
                     type: 'POST',
                     data: {
                         user_verse_status_id: currentVerseStatus.id,
-                        stage: currentStage.testType,
+                        stage: STAGE_TYPE_TEST,
                         score: score
                     }});
             var scorePercent = Math.floor(score * 100).toString()
@@ -328,7 +332,7 @@ var learnscripture =
             }
         };
 
-        var testFullStart = function() {
+        var testStart = function() {
             // Don't want to see a flash of words at the beginning,
             // so hide quickly
             hideWord($('.word span'), {'duration': 0, queue:false});
@@ -336,12 +340,9 @@ var learnscripture =
             testingStatus.text('');
         };
 
-        var testFullContinue = function() {
+        var testContinue = function() {
             return true;
         };
-
-        var testQuickStart = testFullStart;
-        var testQuickContinue = testFullContinue;
 
         // Utilities for stages
         var setProgress = function(stageIdx, fraction) {
@@ -503,20 +504,21 @@ var learnscripture =
                                      caption: 'Recall 4 - 66% missing',
                                      testMode: false,
                                      toggleMode: WORD_TOGGLE_HIDE_ALL},
-                         'testFull': {setup: testFullStart,
-                                      continueStage: testFullContinue,
-                                      caption: 'Full test',
+                         'testFull': {setup: testStart,
+                                      continueStage: testContinue,
+                                      caption: 'Test',
                                       testMode: true,
-                                      testType: TEST_TYPE_FULL,
                                       testMaxAttempts: 3,
                                       toggleMode: null},
-                         'testQuick': {setup: testQuickStart,
-                                       continueStage: testQuickContinue,
-                                       caption: 'Quick test',
-                                       testMode: true,
-                                       testType: TEST_TYPE_QUICK,
-                                       testMaxAttempts: 2,
-                                       toggleMode: null},
+                         // We use a separate stage for this for the sake of
+                         // showing the right instructions and having a
+                         // different testMaxAttempts
+                         'testFirstLetter': {setup: testStart,
+                                             continueStage: testContinue,
+                                             caption: 'Test',
+                                             testMode: true,
+                                             testMaxAttempts: 2,
+                                             toggleMode: null},
                          'results': {setup: function() {},
                                      continueStage: function() { return true;},
                                      caption: 'Results',
@@ -532,6 +534,10 @@ var learnscripture =
         var setupStage = function(idx) {
             // set the globals
             var currentStageName = currentStageList[idx];
+            if (preferences.testingMethod == TEST_FIRST_LETTER &&
+                currentStageName == 'testFull') {
+                currentStageName = 'testFirstLetter';
+            }
             currentStageIdx = idx;
             currentStage = stageDefs[currentStageName];
 
@@ -619,7 +625,7 @@ var learnscripture =
             if (ev.which == 32) {
                 ev.preventDefault();
                 if (currentStage.testMode) {
-                    if (currentStage.testType == TEST_TYPE_FULL) {
+                    if (preferences.testingMethod == TEST_FULL_WORDS) {
                         checkCurrentWord();
                     }
                 }
@@ -627,8 +633,8 @@ var learnscripture =
             if (ev.which == 13) {
                 pressPrimaryButton();
             }
-            // Any character in TEST_TYPE_QUICK
-            if (currentStage.testMode && currentStage.testType == TEST_TYPE_QUICK) {
+            // Any character
+            if (currentStage.testMode && preferences.testingMethod == TEST_FIRST_LETTER) {
                 if (alphanumeric(ev)) {
                     ev.preventDefault()
                     // Put it there ourselves, so it is ready for checkCurrentWord()
@@ -729,23 +735,13 @@ var learnscripture =
                 // either first test, or first test after initial test score
                 // of 20% or less. Do everything:
                 return ['read', 'recall1', 'recall2', 'recall3', 'recall4', 'testFull'];
-            }
-            if (strength < 0.07) {
+            } else if (strength < 0.07) {
                 // e.g. first test was 70% or less, this is second test
-                return ['recall2', 'testFull']
-            }
-            if (strength < 0.4) {
+                return ['recall2', 'testFull'];
+            } else {
                 return ['testFull'];
             }
-            // Choice between testQuick and testFull
-            var choices = ['testFull', 'testQuick'];
-            if (strength < 0.5) {
-                // 50% chance
-                return [choices[Math.floor(Math.random() * choices.length)]]
-            }
-            // 1 in 5 chance of testFull
-            return [choices[Math.min(1, Math.floor(Math.random() * choices.length * 5))]]
-        }
+        };
 
         var setupStageList = function(verseData) {
             var strength = 0;
@@ -754,7 +750,7 @@ var learnscripture =
             }
             currentStageList = chooseStageListForStrength(strength);
             setupStage(0);
-        }
+        };
 
         var loadVerse = function() {
             $.ajax({url: '/api/learnscripture/v1/nextverse/?format=json',

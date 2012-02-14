@@ -62,7 +62,7 @@ class IdentityTests(TestCase):
         vs1 = VerseSet.objects.get(name='Bible 101')
         i.add_verse_set(vs1)
         i.record_verse_action('John 3:16', 'NET', StageType.READ, 1)
-        i.record_verse_action('John 3:16', 'NET', StageType.TEST_TYPE_FULL, 1)
+        i.record_verse_action('John 3:16', 'NET', StageType.TEST, 1)
         self.assertEqual(i.verse_statuses.get(verse_choice__reference='John 3:16',
                                               version__slug='NET').memory_stage,
                          MemoryStage.TESTED)
@@ -127,7 +127,7 @@ class IdentityTests(TestCase):
         vs1 = VerseSet.objects.get(name='Bible 101')
         i.add_verse_set(vs1)
 
-        i.record_verse_action('John 3:16', 'NET', StageType.TEST_TYPE_FULL, 1.0)
+        i.record_verse_action('John 3:16', 'NET', StageType.TEST, 1.0)
         i.change_version('John 3:16', 'KJV', vs1.id)
         i.change_version('John 3:16', 'NET', vs1.id)
 
