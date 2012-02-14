@@ -26,7 +26,7 @@ def require_preferences(view_func):
     @require_identity
     def view(request, *args, **kwargs):
         identity = request.identity
-        if identity.default_bible_version is None:
+        if identity.default_bible_version is None or identity.testing_method is None:
             return HttpResponseRedirect(reverse('preferences') + "?next=%s" % urlquote(request.get_full_path()))
         return view_func(request, *args, **kwargs)
     return view
