@@ -48,7 +48,7 @@
         </tr>
       </thead>
       <tbody>
-        {% for v in verses %}
+        {% for v in selection_verses %}
         <tr>
           <td>{{ v.reference }}</td>
           <td>{{ v.text }}</td>
@@ -71,8 +71,8 @@
     </div>
 
     <div class="actions">
-      <input type="hidden" value="" id="id-reference-list"  name="reference-list">
-      <input type="submit" class="btn primary" value="Save verse set" id="id-selection-save-btn">
+      <input type="hidden" value="" id="id-selection-reference-list"  name="selection-reference-list">
+      <input name="selection-save" type="submit" class="btn primary" value="Save verse set" id="id-selection-save-btn">
     </div>
 
     </form>
@@ -81,7 +81,59 @@
   </div>
 
   <div {% if active_tab == 'passage' %}class="active"{% endif %} id="id-tab-passage">
-    <p>TODO!</p>
+
+
+    {% if new_verse_set %}
+    <p>Select an extended passage to learn:</p>
+    {% endif %}
+
+    <form id="id-passage-verse-set-form" action="" method="POST">
+      {% csrf_token %}
+
+      <h3>Choose passage</h3>
+
+      <div id="id-passage-verse-selector">
+        {{ passage_verse_selector_form|bootstrap }}
+      </div>
+
+
+      <div class="input">
+        <a href="#" id="id-lookup-passage-btn" class="btn">Lookup</a>
+      </div>
+
+      <br/>
+      <div id="id-passage-verse-message">
+      </div>
+
+
+      <table id="id-passage-verse-list">
+        <thead>
+          <tr>
+            <th>Reference</th>
+            <th>Text ({{ request.identity.default_bible_version.slug }})</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for v in passage_verses %}
+          <tr>
+            <td>{{ v.reference }}</td>
+            <td>{{ v.text }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <h3>Optional extra info:</h3>
+
+      {{ passage_verse_set_form|bootstrap }}
+
+      <div class="actions">
+        <input type="hidden" value="" id="id-passage-reference-list"  name="passage-reference-list">
+        <input name="passage-save" type="submit" class="btn primary" value="Save verse set" id="id-passage-save-btn">
+      </div>
+
+    </form>
+
   </div>
 </div>
 

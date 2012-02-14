@@ -190,3 +190,33 @@ class CreateSetTests(LiveServerTestCase):
         self.wait_until_loaded('body')
 
         self.assertIn('You need to create an account first', driver.page_source)
+
+
+    def test_create_passage_set(self):
+        self.login()
+        driver = self.driver
+        driver.get(self.live_server_url + "/create-verse-set/")
+        driver.find_element(By.CSS_SELECTOR, "a[href='#id-tab-passage']").click()
+        driver.find_element_by_id("id_passage-name").clear()
+        driver.find_element_by_id("id_passage-name").send_keys("Genesis 1")
+        driver.find_element_by_id("id_passage-description").clear()
+        driver.find_element_by_id("id_passage-description").send_keys("My description")
+        Select(driver.find_element_by_id("id_passage-book")).select_by_visible_text("Genesis")
+        driver.find_element_by_id("id_passage-start_chapter").clear()
+        driver.find_element_by_id("id_passage-start_chapter").send_keys("1")
+        driver.find_element_by_id("id_passage-start_verse").clear()
+        driver.find_element_by_id("id_passage-start_verse").send_keys("1")
+        driver.find_element_by_id("id_passage-end_verse").clear()
+        driver.find_element_by_id("id_passage-end_verse").send_keys("10")
+        driver.find_element_by_id("id-lookup-passage-btn").click()
+        self.wait_until_loaded('#id-passage-verse-list tbody tr td')
+        self.assertIn("And God called the light Day", driver.page_source)
+
+        driver.find_element_by_id("id-passage-save-btn").click()
+        self.wait_until_loaded('body')
+        self.assertTrue(driver.title.startswith("Verse set: Genesis 1"))
+        self.assertIn("And God called the light Day", driver.page_source)
+
+        vs = VerseSet.objects.get(name='Genesis 1',
+                                  set_type=VerseSetType.PASSAGE)
+        self.assertTrue(len(vs.verse_choices.all()), 10)

@@ -33,6 +33,7 @@ var learnscripture = (function(learnscripture, $) {
         form.find(".error").removeClass("error");
         $.each(errors, function(key, val) {
             $.each(val, function(idx, msg) {
+                if (key == '__all__') { return; }
                 var formElem = $('#id_' + formPrefix + "-" + key);
                 var p = formElem.parent();
                 if (p.find("ul").length == 0) {
