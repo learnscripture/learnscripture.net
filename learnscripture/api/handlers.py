@@ -90,7 +90,7 @@ class ActionCompleteHandler(BaseHandler):
 
         # TODO: store StageComplete
         stage = StageType.get_value_for_name(request.data['stage'])
-        if  stage in [StageType.TEST_TYPE_FULL, StageType.TEST_TYPE_QUICK]:
+        if  stage == StageType.TEST:
             request.identity.record_verse_action(uvs.verse_choice.reference, uvs.version.slug,
                                                  stage, float(request.data['score']));
             session.remove_user_verse_status_id(request, uvs_id)

@@ -144,8 +144,7 @@ class Identity(models.Model):
                                        version__slug=version_slug)
         mem_stage = {
             StageType.READ: MemoryStage.SEEN,
-            StageType.TEST_TYPE_FULL: MemoryStage.TESTED,
-            StageType.TEST_TYPE_QUICK: MemoryStage.TESTED,
+            StageType.TEST: MemoryStage.TESTED,
             }[stage_type]
 
         # It's possible that they have already been tested, so don't move them
