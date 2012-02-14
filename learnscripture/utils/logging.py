@@ -19,7 +19,6 @@ def sanitise_request_data(data):
                 for k in params.keys():
                     if SENSITIVE_RE.search(k):
                         params.pop(k)
-                    print params
                 http_data['data'] = urllib.urlencode(params.items(), doseq=True)
     return data
 
