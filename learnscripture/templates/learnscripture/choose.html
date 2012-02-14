@@ -73,7 +73,9 @@ Choose verses
 
   <div {% if active_tab == 'individual' %}class="active"{% endif %} id="id-tab-individual">
     <p>Choose a verse. You can combine a few verses together by entering
-      a value in the 'End verse' box.</p>
+      a value in the 'End verse' box. For long passages, you should
+      <a href="{% url 'create_set' %}?passage">create an 'extended passage' verse set</a>.
+    </p>
 
     <form action="" method="GET">
       {{ verse_form|bootstrap }}

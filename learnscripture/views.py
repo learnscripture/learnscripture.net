@@ -182,10 +182,16 @@ def create_set(request, slug=None):
         return verses
 
 
-    if verse_set is None or verse_set.set_type == VerseSetType.SELECTION:
-        c['active_tab'] = 'selection'
+    if verse_set is None:
+        if 'passage' in request.GET:
+            c['active_tab'] = 'passage'
+        else:
+            c['active_tab'] = 'selection' # The default.
     else:
-        c['active_tab'] = 'passage'
+        if verse_set.set_type == VerseSetType.SELECTION:
+            c['active_tab'] = 'selection'
+        else:
+            c['active_tab'] = 'passage'
 
     if request.method == 'POST':
         verse_set_type = None

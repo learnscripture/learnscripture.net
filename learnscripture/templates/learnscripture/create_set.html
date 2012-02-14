@@ -82,11 +82,6 @@
 
   <div {% if active_tab == 'passage' %}class="active"{% endif %} id="id-tab-passage">
 
-
-    {% if new_verse_set %}
-    <p>Select an extended passage to learn:</p>
-    {% endif %}
-
     <form id="id-passage-verse-set-form" action="" method="POST">
       {% csrf_token %}
 
@@ -123,7 +118,7 @@
         </tbody>
       </table>
 
-      <h3>Optional extra info:</h3>
+      <h3>Optional extra info</h3>
 
       {{ passage_verse_set_form|bootstrap }}
 
