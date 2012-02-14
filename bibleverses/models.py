@@ -58,19 +58,50 @@ class BibleVersion(models.Model):
         references are silently discarded, and won't be in the return
         dictionary.
         """
+        verse_dict = self.get_verses_by_reference_bulk(reference_list)
+        return dict((ref, v.text) for (ref, v) in verse_dict.items())
+
+    def get_verses_by_reference_bulk(self, reference_list):
+        """
+        Returns a dictionary of {ref:verse} for each ref in reference_list. Bad
+        references are silently discarded, and won't be in the return
+        dictionary.
+        """
         # We try to do this efficiently, but it is hard for combo references. So
         # we do the easy ones the easy way:
         simple_verses = list(self.verse_set.filter(reference__in=reference_list))
-        v_dict = dict((v.reference, v.text) for v in simple_verses)
+        v_dict = dict((v.reference, v) for v in simple_verses)
         # Now get the others:
         for ref in reference_list:
             if ref not in v_dict:
                 try:
-                    v_dict[ref] = self.get_text_by_reference(ref)
+                    verse_list = parse_ref(ref, self)
+                    # ComboVerses need a chapter and verse number for some
+                    # presentational situations.
+                    if len(verse_list) == 0:
+                        verse = verse_list[0]
+                    else:
+                        verse = ComboVerse(reference=ref,
+                                           book_name=verse_list[0].book_name,
+                                           chapter_number=verse_list[0].chapter_number,
+                                           verse_number=verse_list[0].verse_number,
+                                           bible_verse_number=verse_list[0].bible_verse_number,
+                                           text=' '.join(v.text for v in verse_list))
+                    v_dict[ref] = verse
                 except InvalidVerseReference:
                     pass
         return v_dict
 
+class ComboVerse(object):
+    """
+    Wrapper needed when we want a combination of verses to appear as a single
+    verse.
+    """
+    def __init__(self, reference=None, book_name=None, chapter_number=None,
+                 verse_number=None, bible_verse_number=None, text=None):
+        self.reference, self.book_name = reference, book_name
+        self.chapter_number, self.verse_number = chapter_number, verse_number
+        self.bible_verse_number, self.text = bible_verse_number, text
 
 
 class Verse(models.Model):
@@ -118,6 +149,11 @@ class VerseSet(models.Model):
 
     def get_absolute_url(self):
         return reverse('view_verse_set', kwargs=dict(slug=self.slug))
+
+    @property
+    def is_passage(self):
+        return self.set_type == VerseSetType.PASSAGE
+
 
 class VerseChoiceManager(models.Manager):
     use_for_related_fields = True
