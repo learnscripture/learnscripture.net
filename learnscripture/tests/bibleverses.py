@@ -45,3 +45,21 @@ class ParseRefTests(TestCase):
     def test_empty(self):
         version = BibleVersion.objects.get(slug='KJV')
         self.assertRaises(InvalidVerseReference, lambda: parse_ref('Genesis 300:1', version))
+
+    def test_reference_bulk(self):
+        version = BibleVersion.objects.get(slug='KJV')
+        with self.assertNumQueries(1):
+            # Only need one query if all are single verses.
+            l1 = version.get_verses_by_reference_bulk(['Genesis 1:1', 'Genesis 1:2', 'Genesis 1:3'])
+
+        with self.assertNumQueries(3):
+            # 1 query for single verses,
+            # 2 for each combo
+            l2 = version.get_verses_by_reference_bulk(['Genesis 1:1', 'Genesis 1:2-3'])
+
+        self.assertEqual(l1['Genesis 1:1'].text, "In the beginning God created the heaven and the earth. ")
+
+        self.assertEqual(l2['Genesis 1:2-3'].text, l1['Genesis 1:2'].text + ' ' + l1['Genesis 1:3'].text)
+
+        self.assertEqual(l2['Genesis 1:2-3'].chapter_number, l1['Genesis 1:2'].chapter_number)
+

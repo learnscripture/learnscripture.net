@@ -56,7 +56,7 @@ Choose verses
       {% if vs.description %}
       <p>{{ vs.description }}</p>
       {% endif %}
-      {% if vs.verse_choices.all %}
+      {% if not vs.is_passage and vs.verse_choices.all %}
       <p>Includes the following verses:
         {% for v in vs.verse_choices.all %}
         {{ v.reference }}{% if not forloop.last %}, {% endif %}

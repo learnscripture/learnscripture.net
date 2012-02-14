@@ -146,9 +146,9 @@ def view_verse_set(request, slug):
 
     version = request.identity.default_bible_version
     verse_choices = list(verse_set.verse_choices.all())
-    verse_texts = version.get_text_by_reference_bulk([vc.reference for vc in verse_choices])
+    verses = version.get_verses_by_reference_bulk([vc.reference for vc in verse_choices])
     for vc in verse_choices:
-        vc.text = verse_texts[vc.reference]
+        vc.verse = verses[vc.reference]
 
     c['verse_set'] = verse_set
     c['verse_choices'] = verse_choices
