@@ -9,7 +9,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
 
-from accounts.models import Identity, Account
+from accounts.models import Identity, Account, TestingMethod
 from bibleverses.models import BibleVersion, VerseSet, VerseSetType, VerseChoice
 
 
@@ -49,7 +49,8 @@ class CreateSetTests(LiveServerTestCase):
 
     def setUp(self):
         KJV = BibleVersion.objects.get(slug='KJV')
-        self._identity = Identity.objects.create(default_bible_version=KJV)
+        self._identity = Identity.objects.create(default_bible_version=KJV,
+                                                 testing_method=TestingMethod.FULL_WORDS)
         self.verificationErrors = []
         self._account = Account.objects.create(email="test1@test.com",
                                                username="test1",
@@ -184,6 +185,7 @@ class CreateSetTests(LiveServerTestCase):
         driver.get(self.live_server_url + reverse('create_set'))
         # Set preferences
         Select(driver.find_element_by_id("id_default_bible_version")).select_by_visible_text("KJV")
+        driver.find_element_by_id("id_testing_method_0").click()
         driver.find_element_by_id("id-save-btn").click()
         self.wait_until_loaded('body')
 
