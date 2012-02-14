@@ -3,9 +3,9 @@ var learnscripture =
 
         var addVerse = function(verseData) {
             var newrow = $('<tr><td></td><td></td><td><i class="icon-move"></i></td><td><a href="#"><i class="icon-trash"></i></a></td></tr>').find('td:first-child').text(verseData.reference).end().find('td:nth-child(2)').text(verseData.text).end();
-            $('#id-verse-list tbody').append(newrow);
-            $('#id-verse-list').show();
-            $('#id-verse-message *').remove();
+            $('#id-selection-verse-list tbody').append(newrow);
+            $('#id-selection-verse-list').show();
+            $('#id-selection-verse-message *').remove();
         }
 
         var addVerseClick = function(ev) {
@@ -22,7 +22,7 @@ var learnscripture =
                         if (errors['__all__']) {
                             var msg = $('<div class="alert-message warning"></div>')
                             msg.text(errors['__all__']);
-                            $('#id-verse-message').html(msg);
+                            $('#id-selection-verse-message').html(msg);
                         }
                     }
                    });
@@ -36,7 +36,7 @@ var learnscripture =
         var selectionSaveBtnClick = function(ev) {
             // Create hidden fields with all references
             var refs = []
-            $('#id-verse-list td:first-child').each(function(idx, elem) {
+            $('#id-selection-verse-list td:first-child').each(function(idx, elem) {
                 refs.push($(elem).text());
             });
             $('#id-reference-list').val(refs.join('|'));
@@ -44,12 +44,12 @@ var learnscripture =
         }
 
         var setupCreateVerseSetControls = function() {
-            if ($('#id-verse-list tbody tr').length == 0) {
-                $('#id-verse-list').hide();
+            if ($('#id-selection-verse-list tbody tr').length == 0) {
+                $('#id-selection-verse-list').hide();
             }
-            $('#id-verse-list tbody').sortable();
-            $('#id-verse-list tbody').disableSelection();
-            $('#id-verse-list tbody').on('click', 'a', deleteButtonClick);
+            $('#id-selection-verse-list tbody').sortable();
+            $('#id-selection-verse-list tbody').disableSelection();
+            $('#id-selection-verse-list tbody').on('click', 'a', deleteButtonClick);
             $('#id-add-verse-btn').click(addVerseClick);
             $('#id-selection-save-btn').click(selectionSaveBtnClick);
 

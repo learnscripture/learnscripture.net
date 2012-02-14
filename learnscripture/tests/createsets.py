@@ -97,7 +97,7 @@ class CreateSetTests(LiveServerTestCase):
         driver.find_element_by_id("id_selection-start_verse").clear()
         driver.find_element_by_id("id_selection-start_verse").send_keys("5")
         driver.find_element_by_id("id-add-verse-btn").click()
-        self.wait_until_loaded('#id-verse-list tbody tr td')
+        self.wait_until_loaded('#id-selection-verse-list tbody tr td')
         self.assertIn("And God called the light Day", driver.page_source)
 
         driver.find_element_by_id("id-selection-save-btn").click()
@@ -145,7 +145,7 @@ class CreateSetTests(LiveServerTestCase):
         self.login()
         driver = self.driver
         driver.get(self.live_server_url + reverse('edit_set', kwargs=dict(slug=vs.slug)))
-        e = driver.find_element_by_css_selector("#id-verse-list tbody tr:first-child td")
+        e = driver.find_element_by_css_selector("#id-selection-verse-list tbody tr:first-child td")
         ActionChains(driver).drag_and_drop_by_offset(e, 0, 100).perform()
 
         driver.find_element_by_id("id-selection-save-btn").click()
@@ -168,7 +168,7 @@ class CreateSetTests(LiveServerTestCase):
                                       set_order=1)
         driver = self.driver
         driver.get(self.live_server_url + reverse('edit_set', kwargs=dict(slug=vs.slug)))
-        driver.find_element_by_css_selector("#id-verse-list tbody tr:first-child td a").click()
+        driver.find_element_by_css_selector("#id-selection-verse-list tbody tr:first-child td a").click()
         driver.find_element_by_id("id-selection-save-btn").click()
 
         vs = VerseSet.objects.get(id=vs.id)
