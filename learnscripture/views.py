@@ -7,7 +7,7 @@ from django.utils.http import urlparse
 from accounts.forms import PreferencesForm
 from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerseReference, parse_ref, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType
 from learnscripture import session, auth
-from bibleverses.forms import VerseSelector, VerseSetForm
+from bibleverses.forms import VerseSelector, VerseSetForm, PassageVerseSelector
 
 from .decorators import require_identity, require_preferences
 
@@ -188,17 +188,36 @@ def create_set(request, slug=None):
         c['active_tab'] = 'passage'
 
     if request.method == 'POST':
-        selection_form = VerseSetForm(request.POST, instance=verse_set, prefix='selection')
+        verse_set_type = None
+        if verse_set is not None:
+            verse_set_type = verse_set.set_type
 
-        # Need to propagate the references even if it doesn't validate,
-        # so do this work here:
-        refs = request.POST.get('reference-list', '')
+        if verse_set_type is None:
+            if 'selection-save' in request.POST:
+                verse_set_type = VerseSetType.SELECTION
+            else:
+                verse_set_type = VerseSetType.PASSAGE
+
+        assert verse_set_type is not None
+
+        selection_form = VerseSetForm(request.POST, instance=verse_set, prefix='selection')
+        passage_form = VerseSetForm(request.POST, instance=verse_set, prefix='passage')
+
+        if verse_set_type == VerseSetType.SELECTION:
+            form = selection_form
+            # Need to propagate the references even if it doesn't validate,
+            # so do this work here:
+            refs = request.POST.get('selection-reference-list', '')
+        else:
+            form = passage_form
+            refs = request.POST.get('passage-reference-list', '')
+
         ref_list = refs.split('|')
         verse_dict = version.get_text_by_reference_bulk(ref_list)
 
-        if selection_form.is_valid():
-            verse_set = selection_form.save(commit=False)
-            verse_set.set_type = VerseSetType.SELECTION
+        if form.is_valid():
+            verse_set = form.save(commit=False)
+            verse_set.set_type = verse_set_type
             verse_set.created_by = request.identity.account
             verse_set.save()
 
@@ -231,15 +250,34 @@ def create_set(request, slug=None):
             messages.info(request, "Verse set '%s' saved!" % verse_set.name)
             return HttpResponseRedirect(reverse('view_verse_set', kwargs=dict(slug=verse_set.slug)))
         else:
-            c['verses'] = mk_verse_list(ref_list, verse_dict)
+            verse_list =  mk_verse_list(ref_list, verse_dict)
+            if verse_set_type == VerseSetType.SELECTION:
+                c['selection_verses'] = verse_list
+            else:
+                c['passage_verses'] = verse_list
 
     else:
-        selection_form = VerseSetForm(instance=verse_set, prefix='selection')
+        if verse_set is not None:
+            if verse_set.set_type == VerseSetType.SELECTION:
+                selection_form = VerseSetForm(instance=verse_set, prefix='selection')
+                passage_form = None
+            else:
+                selection_form = None
+                passage_form = VerseSetForm(instance=verse_set, prefix='passage')
+        else:
+            selection_form = VerseSetForm(instance=None, prefix='selection')
+            passage_form = VerseSetForm(instance=None, prefix='passage')
         if verse_set is not None:
             ref_list = [vc.reference for vc in verse_set.verse_choices.all()]
-            c['verses'] = mk_verse_list(ref_list, version.get_text_by_reference_bulk(ref_list))
+            verse_list = mk_verse_list(ref_list, version.get_text_by_reference_bulk(ref_list))
+            if verse_set.set_type == VerseSetType.SELECTION:
+                c['selection_verses'] = verse_list
+            else:
+                c['passage_verses'] = verse_list
 
     c['new_verse_set'] = verse_set == None
     c['selection_verse_set_form'] = selection_form
+    c['passage_verse_set_form'] = passage_form
     c['selection_verse_selector_form'] = VerseSelector(prefix='selection')
+    c['passage_verse_selector_form'] = PassageVerseSelector(prefix='passage')
     return render(request, 'learnscripture/create_set.html', c)
