@@ -72,7 +72,7 @@ var learnscripture =
         };
 
         var getWordNumber = function(word) {
-            return $('.word').index(word);
+            return $('.current-verse .word').index(word);
         };
 
         var moveSelectionRelative = function(distance) {
@@ -284,7 +284,7 @@ var learnscripture =
 
         // -- reading stage --
         var readStage = function() {
-            showWord($('.word *'));
+            showWord($('.current-verse .word *'));
         };
 
         // recall type 1 - FullAndInitial
@@ -301,7 +301,7 @@ var learnscripture =
                 setProgress(currentStageIdx, testedWords.length / wordList.length);
                 moveSelection(0);
                 var testWords = getTestWords(initialFraction);
-                showWord($('.word *'));
+                showWord($('.current-verse .word *'));
                 hideWord(testWords.find('.wordend'));
                 return true;
             };
@@ -323,8 +323,8 @@ var learnscripture =
                 setProgress(currentStageIdx, testedWords.length / wordList.length);
                 moveSelection(0);
                 var testWords = getTestWords(missingFraction);
-                hideWord($('.wordend'));
-                showWord($('.wordstart'));
+                hideWord($('.current-verse .wordend'));
+                showWord($('.current-verse .wordstart'));
                 hideWord(testWords.find('.wordstart'));
                 return true;
             };
@@ -355,7 +355,7 @@ var learnscripture =
         var testStart = function() {
             // Don't want to see a flash of words at the beginning,
             // so hide quickly
-            hideWord($('.word span'), {'duration': 0, queue:false});
+            hideWord($('.current-verse .word span'), {'duration': 0, queue:false});
             resetTestingMistakes();
             testingStatus.text('');
         };
@@ -441,7 +441,7 @@ var learnscripture =
             // NB this must come after the chooseN(testedWords) above.
             testedWords = setUnion(testedWords, toTest);
             var selector = $.map(toTest, function(elem, idx) {
-                return '.word:eq(' + elem.toString() + ')';
+                return '.current-verse .word:eq(' + elem.toString() + ')';
             }).join(', ');
             return $(selector);
         };
@@ -567,7 +567,7 @@ var learnscripture =
             currentStage = stageDefs[currentStageName];
 
             // Common clearing, and stage specific setup
-            $('#id-verse .correct, #id-verse .incorrect').removeClass('correct').removeClass('incorrect');
+            $('.current-verse .correct, .current-verse .incorrect').removeClass('correct').removeClass('incorrect');
             $('#id-progress-summary').text("Stage " + (currentStageIdx + 1).toString() + "/" + currentStageList.length.toString());
             currentStage.setup();
             setNextPreviousBtns();
@@ -782,12 +782,69 @@ var learnscripture =
             setupStage(0);
         };
 
+        var scrollOutPreviousVerse = function() {
+            var words = {}; // offset:node list of word spans
+            var maxOffset = null;
+            $('.previous-verse .word, .previous-verse .testedword').each(function(idx, elem) {
+                var offset = $(elem).offset().top;
+                if (maxOffset == null || offset > maxOffset) {
+                    maxOffset = offset;
+                }
+                // Build up elements for the words in groups
+                if (words[offset] == undefined) {
+                    words[offset] = [];
+                }
+                words[offset].push(elem);
+            });
+
+            // First fix the height
+            if (preferences.animations) {
+                $('.previous-verse').css({'height': $('.previous-verse').height().toString()});
+            }
+
+            // Now mark the other words disappear
+            $.each(words, function(offset, elems) {
+                if (offset != maxOffset) {
+                        $(elems).remove();
+                }
+            });
+
+            // Now shrink the area
+            var wordHeight = $('.previous-verse .word, .previous-verse .testedword').css('line-height');
+            if (preferences.animations) {
+                $('.previous-verse')
+                    .css({display: 'table-cell'})
+                    .animate({height: wordHeight},
+                             {duration: 500});
+            }
+            $('.previous-verse .word, .previous-verse .testedword')
+                .removeClass('word').addClass('testedword')
+                .find('span')
+                .removeClass('wordstart').removeClass('wordend');
+        }
+
+        var moveOldWords = function() {
+            $('.previous-verse-wrapper').remove();
+            $('.current-verse').removeClass('current-verse').addClass('previous-verse');
+            $('.current-verse-wrapper').removeClass('current-verse-wrapper')
+                .addClass('previous-verse-wrapper')
+                .after('<div class="current-verse-wrapper"><div class="current-verse"></div></div>');
+            $('.previous-verse .word, .previous-verse .testedword').each(function(idx, elem) {
+                $(elem).removeAttr('id');
+            });
+        };
+
         var loadVerse = function() {
             $.ajax({url: '/api/learnscripture/v1/nextverse/?format=json',
                     dataType: 'json',
                     success: function(data) {
+                        var oldVerseStatus = currentVerseStatus;
                         currentVerseStatus = data;
-                        $('#id-verse-wrapper').hide(); // Hide until set up
+                        if (oldVerseStatus) {
+                            moveOldWords();
+                        }
+
+                        $('.current-verse').hide(); // Hide until set up
                         $('#id-verse-title').text(data.reference);
                         // convert newlines to divs
                         var text = data.text;
@@ -796,7 +853,7 @@ var learnscripture =
                         }
                         $.each(text.split(/\n/), function(idx, line) {
                             if (line.trim() != '') {
-                                $('#id-verse').append('<div class="line">' +
+                                $('.current-verse').append('<div class="line">' +
                                                       line + '</div>');
                             }
                         });
@@ -815,7 +872,17 @@ var learnscripture =
                         $('#id-loading').hide();
                         $('#id-controls').show();
                         setupStageList(data);
-                        $('#id-verse-wrapper').show();
+
+                        if (oldVerseStatus &&
+                            oldVerseStatus.verse_choice.verse_set &&
+                            oldVerseStatus.verse_choice.verse_set.set_type ==
+                            SET_TYPE_PASSAGE) {
+                            scrollOutPreviousVerse();
+                            $('.current-verse').show();
+                        } else {
+                            $('.previous-verse').remove()
+                            $('.current-verse').show();
+                        }
 
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
@@ -834,7 +901,7 @@ var learnscripture =
             var wordClass = currentVerseStatus.needs_testing ? 'word' : 'testedword';
             var wordGroups = [];
 
-            $('#id-verse .line').each(function(idx, elem) {
+            $('.current-verse .line').each(function(idx, elem) {
                 wordGroups.push($(elem).text().trim().split(/ |\n/));
             });
             wordList = [];
@@ -864,8 +931,8 @@ var learnscripture =
                 });
                 replacement.push(replace.join(' '));
             }
-            $('#id-verse').html(replacement.join('<br/>'));
-            $('.word').click(function(ev) {
+            $('.current-verse').html(replacement.join('<br/>'));
+            $('.current-verse .word').click(function(ev) {
                 if (!currentStage.testMode) {
                     toggleWord($(this));
                 }
@@ -976,7 +1043,7 @@ $(document).ajaxSend(function(event, xhr, settings) {
 });
 
 $(document).ready(function() {
-    if ($('#id-verse').length > 0) {
+    if ($('#id-verse-wrapper').length > 0) {
         learnscripture.start($('#id-preferences-data').data());
     }
     $('.topbar').dropdown();
