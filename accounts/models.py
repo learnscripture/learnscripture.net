@@ -190,43 +190,45 @@ class Identity(models.Model):
             verse_set = VerseSet.objects.get(id=verse_set_id)
 
         if verse_set is not None and verse_set.set_type == VerseSetType.PASSAGE:
-            pass # TODO
+            # Look for verse choices in this VerseSet, but not any others.
+            start_qs = self.verse_statuses.filter(verse_choice__verse_set=verse_set)
+            verse_choices = verse_set.verse_choices.all()
 
         else:
-            # Same reference
-            old = self.verse_statuses.filter(verse_choice__reference=reference)
-            # Not in 'passage' types
-            old = old.exclude(verse_choice__verse_set__set_type=VerseSetType.PASSAGE)
-            # Other versions
-            old = old.exclude(version__slug=version_slug)
-
-            # If they had no test data, it is safe to delete, and this
-            # keeps things trim:
-            old.filter(last_tested__isnull=True).delete()
-            # Otherwise just set ignored
-            old.update(ignored=True)
-
-            # Find the UserVerseStatus with correct bible version
-            correct = self.verse_statuses.filter(verse_choice__reference=reference)
-            correct = correct.exclude(verse_choice__verse_set__set_type=VerseSetType.PASSAGE)
-            correct = correct.filter(version__slug=version_slug)
-
-            # For each VerseChoice, we need to create a new UserVerseStatus if
-            # one with new version doesn't exist, or update 'ignored' if it
-            # does.
-            correct_l = list(correct.select_related('verse_choice'))
-            correct.update(ignored=False)
-
-            # Now we need to see if we need to create any new UserVerseStatuses.
+            # Look for verse choices for same reference, but not for 'passage' set types
+            start_qs = self.verse_statuses.filter(verse_choice__reference=reference)
+            start_qs = start_qs.exclude(verse_choice__verse_set__set_type=VerseSetType.PASSAGE)
             verse_choices = VerseChoice.objects.filter(reference=reference)
-            verse_choices = list(verse_choices.exclude(verse_set__set_type=VerseSetType.PASSAGE))
+            verse_choices = verse_choices.exclude(verse_set__set_type=VerseSetType.PASSAGE)
 
-            missing = set(verse_choices) - set([vs.verse_choice for vs in correct_l])
-            if missing:
-                version = BibleVersion.objects.get(slug=version_slug)
-                for verse_choice in missing:
-                    self.create_verse_status(verse_choice=verse_choice,
-                                             version=version)
+
+        # 'old' = ones with old, incorrect version
+        old = start_qs.exclude(version__slug=version_slug)
+        # 'correct' = ones with newly selected, correct version
+        correct = start_qs.filter(version__slug=version_slug)
+
+        # If they had no test data, it is safe to delete, and this keeps things
+        # trim:
+        old.filter(last_tested__isnull=True).delete()
+        # Otherwise just set ignored
+        old.update(ignored=True)
+
+        # For each VerseChoice, we need to create a new UserVerseStatus if
+        # one with new version doesn't exist, or update 'ignored' if it
+        # does.
+        correct_l = list(correct.select_related('verse_choice'))
+        correct.update(ignored=False)
+
+        # Now we need to see if we need to create any new UserVerseStatuses.
+        verse_choices = list(verse_choices)
+
+        missing = set(verse_choices) - set([vs.verse_choice for vs in correct_l])
+        if missing:
+            version = BibleVersion.objects.get(slug=version_slug)
+            for verse_choice in missing:
+                self.create_verse_status(verse_choice=verse_choice,
+                                         version=version)
+
 
     def create_verse_status(self, verse_choice, version):
         uvs, new = self.verse_statuses.get_or_create(verse_choice=verse_choice,

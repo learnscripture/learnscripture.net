@@ -155,4 +155,8 @@ class IdentityTests(TestCase):
                          'KJV')
 
     def test_change_version_passage_set(self):
-        pass # TODO
+        i = self._create_identity()
+        vs1 = VerseSet.objects.get(name='Psalm 23')
+        i.add_verse_set(vs1)
+        i.change_version('Psalm 23:1', 'KJV', vs1.id)
+        self.assertEqual([u'KJV'] * 6, [uvs.version.slug for uvs in i.verse_statuses.filter(verse_choice__verse_set=vs1)])
