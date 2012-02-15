@@ -38,6 +38,25 @@ Dashboard
 
 <h2>Learn</h2>
 
+{% if passages_for_learning %}
+<div class="actionset">
+  {% for vs in passages_for_learning %}
+  <form action="" method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="verse_set_id" value="{{ vs.id }}" />
+    <input type="submit" name="learnpassage" class="btn primary" value="Continue learning"
+           id="id-learnpassage-btn-{{ vs.id }}" />
+  </form>
+  <h3>{{ vs.name }}</h3>
+  <p>Continue learning this passage. You've seen {{ vs.tested_total }} verse(s) so far,
+    with {{ vs.untested_total }} to go.</p>
+
+
+  {% endfor %}
+
+</div>
+{% endif %}
+
 <div class="actionset">
   {% if new_verses_queue %}
   <form action="" method="POST">
@@ -45,7 +64,7 @@ Dashboard
     <input type="submit" name="learnqueue" class="btn primary" value="Start learning" />
   </form>
 
-  <p>You've got {{ new_verses_queue|length }} new verse{{ new_verses_queue|length|pluralize }} in your queue for learning.</p>
+  <p>You've got {{ new_verses_queue|length }} new verse{{ new_verses_queue|length|pluralize }} in your general queue for learning.</p>
 
   <p>Verses coming up:
     {% include 'learnscripture/verselist.html' with verselist=new_verses_queue %}

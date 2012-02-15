@@ -1,6 +1,9 @@
 from __future__ import absolute_import
 
+from datetime import timedelta
+
 from django.test import TestCase
+from django.utils import timezone
 
 from accounts.models import Identity
 from bibleverses.models import VerseSet, BibleVersion, StageType, MemoryStage
@@ -160,3 +163,22 @@ class IdentityTests(TestCase):
         i.add_verse_set(vs1)
         i.change_version('Psalm 23:1', 'KJV', vs1.id)
         self.assertEqual([u'KJV'] * 6, [uvs.version.slug for uvs in i.verse_statuses.filter(verse_choice__verse_set=vs1)])
+
+
+    def test_passages_for_learning(self):
+        i = self._create_identity()
+        vs1 = VerseSet.objects.get(name='Psalm 23')
+        i.add_verse_set(vs1)
+
+        i.record_verse_action('Psalm 23:1', 'NET', StageType.TEST, 1.0)
+        verse_sets = i.passages_for_learning()
+        self.assertEqual(verse_sets[0].id, vs1.id)
+        self.assertEqual(verse_sets[0].tested_total, 1)
+        self.assertEqual(verse_sets[0].untested_total, 5)
+
+
+        # Put it back so that it ought to be up for testing.
+        i.verse_statuses.update(last_tested=timezone.now() - timedelta(10))
+        # Shouldn't be in general revision queue
+        self.assertEqual([], list(i.verse_statuses_for_revising()))
+
