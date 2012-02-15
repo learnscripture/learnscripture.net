@@ -834,16 +834,25 @@ var learnscripture =
             });
         };
 
+        var isPassageType = function(verseData) {
+            return (verseData &&
+                    verseData.verse_choice.verse_set &&
+                    verseData.verse_choice.verse_set.set_type ==
+                    SET_TYPE_PASSAGE)
+        };
+
+
         var loadVerse = function() {
             $.ajax({url: '/api/learnscripture/v1/nextverse/?format=json',
                     dataType: 'json',
                     success: function(data) {
                         var oldVerseStatus = currentVerseStatus;
                         currentVerseStatus = data;
-                        if (oldVerseStatus) {
+                        if (isPassageType(oldVerseStatus)) {
                             moveOldWords();
+                        } else {
+                            $('.current-verse').children().remove();
                         }
-
                         $('.current-verse').hide(); // Hide until set up
                         $('#id-verse-title').text(data.reference);
                         // convert newlines to divs
@@ -873,10 +882,7 @@ var learnscripture =
                         $('#id-controls').show();
                         setupStageList(data);
 
-                        if (oldVerseStatus &&
-                            oldVerseStatus.verse_choice.verse_set &&
-                            oldVerseStatus.verse_choice.verse_set.set_type ==
-                            SET_TYPE_PASSAGE) {
+                        if (isPassageType(oldVerseStatus)) {
                             scrollOutPreviousVerse();
                             $('.current-verse').show();
                         } else {
