@@ -57,7 +57,7 @@ def validate(form_class, **formkwargs):
 
 class NextVerseHandler(BaseHandler):
     allowed_methods = ('GET',)
-    fields = ('id', 'memory_stage', 'strength', 'first_seen',
+    fields = ('memory_stage', 'strength', 'first_seen',
               ('verse_choice', (('verse_set', ('id',)),)),
               'reference',
               'text',
@@ -65,14 +65,26 @@ class NextVerseHandler(BaseHandler):
 
     @require_identity_method
     def read(self, request):
-        uvs_ids = session.get_verse_status_ids(request)
-        if len(uvs_ids) == 0:
+        uvs = session.get_next_verse_status(request)
+        if uvs is None:
             return rc.NOT_FOUND
+        return uvs
 
-        try:
-            return request.identity.verse_statuses.select_related('version', 'verse_choice', 'verse_choice__verse_set').get(id=uvs_ids[0])
-        except UserVerseStatus.DoesNotExist:
-            return rc.NOT_FOUND
+
+def get_verse_status(data):
+    return simplejson.loads(data['verse_status'])
+
+
+def get_verse_set_id(verse_status):
+    """
+    Returns the verse set ID for a verse status dictionary (sent by client) or
+    None if there is none
+    """
+    verse_choice = verse_status['verse_choice']
+    verse_set = verse_choice.get('verse_set', None)
+    if verse_set is None:
+        return None
+    return verse_set.get('id', None)
 
 
 class ActionCompleteHandler(BaseHandler):
@@ -82,18 +94,18 @@ class ActionCompleteHandler(BaseHandler):
     def create(self, request):
         learningLogger.info("Action %s complete", request.data.get('stage','[None]'), extra=extra(identity=request.identity, data=request.data, request=request))
 
-        uvs_id = int(request.data['user_verse_status_id'])
-        try:
-            uvs = request.identity.verse_statuses.select_related('version', 'verse_choice').get(id=uvs_id)
-        except UserVerseStatus.DoesNotExist:
-            return rc.NOT_FOUND
+        verse_status = get_verse_status(request.data)
+        reference = verse_status['reference']
+        version_slug = verse_status['version']['slug']
+        verse_set_id = get_verse_set_id(verse_status)
+        score = float(request.data['score'])
 
         # TODO: store StageComplete
         stage = StageType.get_value_for_name(request.data['stage'])
         if  stage == StageType.TEST:
-            request.identity.record_verse_action(uvs.verse_choice.reference, uvs.version.slug,
-                                                 stage, float(request.data['score']));
-            session.remove_user_verse_status_id(request, uvs_id)
+            request.identity.record_verse_action(reference, version_slug,
+                                                 stage, score);
+            session.remove_user_verse_status(request, reference, verse_set_id)
 
         return {}
 
@@ -103,23 +115,13 @@ class ChangeVersionHandler(BaseHandler):
 
     @require_identity_method
     def create(self, request):
-        verse_set_id = request.data['verse_set_id']
-        if verse_set_id == '' or verse_set_id == 'null' or verse_set_id is None:
-            verse_set_id = None
-        else:
-            verse_set_id = int(verse_set_id)
-
-        reference = request.data['reference']
-        version_slug = request.data['version_slug']
+        verse_status = get_verse_status(request.data)
+        verse_set_id = get_verse_set_id(verse_status)
+        reference = verse_status['reference']
+        new_version_slug = request.data['new_version_slug']
         request.identity.change_version(reference,
-                                        version_slug,
+                                        new_version_slug,
                                         verse_set_id)
-        session.remove_user_verse_status_id(request, int(request.data['user_verse_status_id']))
-        uvs = request.identity.verse_statuses.get(verse_choice__verse_set=verse_set_id,
-                                                  verse_choice__reference=reference,
-                                                  version__slug=version_slug)
-        session.prepend_verse_statuses(request, [uvs])
-
         return {}
 
 

@@ -229,6 +229,22 @@ class Identity(models.Model):
                 self.create_verse_status(verse_choice=verse_choice,
                                          version=version)
 
+    def get_verse_status_for_ref(self, reference, verse_set_id):
+        l = self.verse_statuses.filter(ignored=False, verse_choice__reference=reference)
+        # This is used by 'get next verse' handler, when we need the following
+        l = l.select_related('version', 'verse_choice', 'verse_choice__verse_set')
+        if verse_set_id is None:
+            l = l.filter(verse_choice__verse_set__isnull=True)
+        else:
+            l = l.filter(verse_choice__verse_set=verse_set_id)
+        l = list(l)
+        if len(l) == 0:
+            return None
+
+        # There is the possibility of multiple here, but they should all be the
+        # same, so we return any.
+        return l[0]
+
 
     def create_verse_status(self, verse_choice, version):
         uvs, new = self.verse_statuses.get_or_create(verse_choice=verse_choice,

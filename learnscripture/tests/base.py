@@ -33,6 +33,9 @@ class LiveServerTests(LiveServerTestCase):
         """
         WebDriverWait(self.driver, timeout).until(callback)
 
+    def wait_for_ajax(self):
+        WebDriverWait(self.driver, 10).until(lambda driver: driver.execute_script('return jQuery.active == 0'))
+
     def wait_until_loaded(self, selector, timeout=10):
         """
         Helper function that blocks until the element with the given tag name
