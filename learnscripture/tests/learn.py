@@ -64,18 +64,32 @@ class LearnTests(LiveServerTests):
         uvs = identity.verse_statuses.get(verse_choice__reference='John 3:16')
         self.assertEqual(uvs.strength, memorymodel.INITIAL_STRENGTH_FACTOR)
 
+    def test_choose_individual_verse(self):
+        driver = self.driver
+        driver.get(self.live_server_url + reverse('choose'))
+        driver.find_element_by_css_selector("a[href='#id-tab-individual']").click()
+        driver.find_element_by_id("id_chapter").send_keys("1")
+        driver.find_element_by_id("id_start_verse").send_keys("1")
+        driver.find_element_by_css_selector("input[name=lookup]").click()
+        self.wait_until_loaded('body')
+        driver.find_element_by_css_selector("input[name=lookup]").click()
+        driver.find_element_by_css_selector("#id-tab-individual input[value=Learn]").click()
+        self.wait_until_loaded('body')
+        self.wait_for_ajax()
+        self.assertEqual(driver.find_element_by_id("id-verse-title").text, u"Genesis 1:1")
 
     def test_change_version_passage(self):
         verse_set = self.choose_verse_set('Psalm 23')
         driver = self.driver
 
         self.assertEqual(u"Psalm 23:1", driver.find_element_by_id('id-verse-title').text)
-        self.assertIn(u"I shall not want", driver.find_element_by_id('id-verse').text)
+        self.assertIn(u"I shall not want", driver.find_element_by_css_selector('.current-verse').text)
 
         Select(driver.find_element_by_id("id-version-select")).select_by_visible_text("NET")
 
         self.wait_for_ajax()
-        self.assertIn(u"I lack nothing", driver.find_element_by_id('id-verse').text)
+        self.assertIn(u"I lack nothing",
+                      driver.find_element_by_css_selector('.current-verse').text)
 
         # This section can be replaced by a 'skip' button click once we've implemented that.
         for i in range(0, 9):
@@ -87,4 +101,5 @@ class LearnTests(LiveServerTests):
         # Now check that the next verse is present and is also NET, which is the
         # main point of this test.
         self.wait_for_ajax()
-        self.assertIn(u"He takes me to lush pastures", driver.find_element_by_id('id-verse').text)
+        self.assertIn(u"He takes me to lush pastures",
+                      driver.find_element_by_css_selector('.current-verse').text)

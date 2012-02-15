@@ -861,7 +861,8 @@ var learnscripture =
                         $('#id-verse-title').text(data.reference);
                         // convert newlines to divs
                         var text = data.text;
-                        if (data.verse_choice.verse_set.set_type == SET_TYPE_SELECTION) {
+                        if (data.verse_choice.verse_set == null ||
+                            data.verse_choice.verse_set.set_type == SET_TYPE_SELECTION) {
                             text = text + '\n' + data.reference;
                         }
                         $.each(text.split(/\n/), function(idx, line) {
