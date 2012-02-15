@@ -1,0 +1,20 @@
+[
+{
+    "pk": 1,
+    "model": "bibleverses.bibleversion",
+    "fields": {
+        "full_name": "King James Version",
+        "slug": "KJV",
+        "short_name": "KJV"
+    }
+},
+{
+    "pk": 2,
+    "model": "bibleverses.bibleversion",
+    "fields": {
+        "full_name": "New English Translation",
+        "slug": "NET",
+        "short_name": "NET"
+    }
+}
+]

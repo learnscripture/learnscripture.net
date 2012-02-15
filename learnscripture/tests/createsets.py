@@ -15,7 +15,7 @@ from bibleverses.models import BibleVersion, VerseSet, VerseSetType, VerseChoice
 
 class CreateSetTests(LiveServerTestCase):
 
-    fixtures = ['test_bible_verses.json']
+    fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
 
     @classmethod
     def setUpClass(cls):
