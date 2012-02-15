@@ -678,8 +678,10 @@ var learnscripture =
             if (currentStage.testMode) {
                 return;
             }
-            var target = $(ev.target);
-            if (target.is(":input")) {
+            var tagName = ev.target.tagName.toLowerCase();
+            if (tagName == 'input' ||
+                tagName == 'select' ||
+                tagName == 'textarea') {
                 return;
             }
             switch (ev.which) {
@@ -700,7 +702,7 @@ var learnscripture =
                 ev.preventDefault(); // scroll in some browsers.
                 return;
             case 13: // Enter
-                if (target.is("a")) {
+                if (tagName == 'a') {
                     return;
                 }
                 pressPrimaryButton();
