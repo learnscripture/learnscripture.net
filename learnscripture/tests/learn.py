@@ -39,6 +39,7 @@ class LearnTests(LiveServerTests):
         driver = self.driver
 
         identity = Identity.objects.get() # should only be one at this point
+        # Preconditions - should have been set up by choose_verse_set
         self.assertEqual(verse_set.verse_choices.count(), identity.verse_statuses.count())
         self.assertTrue(all(uvs.strength == Decimal('0.0') and
                             uvs.last_tested == None and
@@ -46,13 +47,20 @@ class LearnTests(LiveServerTests):
                             for uvs in identity.verse_statuses.all()))
 
         self.assertEqual(u"John 3:16", driver.find_element_by_id('id-verse-title').text)
+
         text = "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life. John 3:16"
+
+        # Do the reading:
         for i in range(0, 9):
             driver.find_element_by_id('id-next-btn').click()
+
+        # Do the typing:
         for word in text.strip().split():
             driver.find_element_by_id('id-typing').send_keys(word + ' ')
 
         self.wait_for_ajax()
+
+        # Check the score
         uvs = identity.verse_statuses.get(verse_choice__reference='John 3:16')
         self.assertEqual(uvs.strength, memorymodel.INITIAL_STRENGTH_FACTOR)
 
