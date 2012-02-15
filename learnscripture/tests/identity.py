@@ -7,7 +7,7 @@ from bibleverses.models import VerseSet, BibleVersion, StageType, MemoryStage
 
 class IdentityTests(TestCase):
 
-    fixtures = ['test_verse_sets.json']
+    fixtures = ['test_bible_versions.json', 'test_verse_sets.json']
 
     def _create_identity(self):
         NET = BibleVersion.objects.get(slug='NET')

@@ -7,7 +7,7 @@ from bibleverses.models import InvalidVerseReference, parse_ref, Verse, BibleVer
 
 class ParseRefTests(TestCase):
 
-    fixtures = ['test_bible_verses.json']
+    fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
 
     def test_no_chapter(self):
         version = BibleVersion.objects.get(slug='KJV')
