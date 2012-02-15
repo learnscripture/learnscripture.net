@@ -716,6 +716,10 @@ var learnscripture =
                         new_version_slug: $('#id-version-select').val()
                     },
                     success: function() {
+                        // We pretend there is no 'old verse' if we changed
+                        // version, to avoid the complications with moving the
+                        // old verse.
+                        currentVerseStatus = null;
                         nextVerse();
                     },
                     error: handlerAjaxError
