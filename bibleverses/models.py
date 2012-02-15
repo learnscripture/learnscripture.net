@@ -49,8 +49,11 @@ class BibleVersion(models.Model):
     def __unicode__(self):
         return self.short_name
 
+    def get_verse_list(self, reference, max_length=MAX_VERSE_QUERY_SIZE):
+        return parse_ref(reference, self, max_length=max_length)
+
     def get_text_by_reference(self, reference, max_length=MAX_VERSE_QUERY_SIZE):
-        return u' '.join([v.text for v in parse_ref(reference, self, max_length=max_length)])
+        return u' '.join([v.text for v in self.get_verse_list(reference, max_length=max_length)])
 
     def get_text_by_reference_bulk(self, reference_list):
         """
@@ -75,7 +78,7 @@ class BibleVersion(models.Model):
         for ref in reference_list:
             if ref not in v_dict:
                 try:
-                    verse_list = parse_ref(ref, self)
+                    verse_list = self.get_verse_list(ref)
                     # ComboVerses need a chapter and verse number for some
                     # presentational situations.
                     if len(verse_list) == 0:
