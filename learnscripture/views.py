@@ -129,7 +129,7 @@ def choose(request):
             c['reference'] = reference
             try:
                 verse_list = request.identity.default_bible_version.get_verse_list(
-                    ref, max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
+                    reference, max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
             except InvalidVerseReference as e:
                 c['individual_search_msg'] = e.message
             else:
