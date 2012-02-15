@@ -80,7 +80,7 @@ def choose(request):
     Choose a verse or verse set
     """
     def learn_set(l):
-        session.prepend_verse_statuses(request, l)
+        session.set_verse_statuses(request, l)
         return HttpResponseRedirect(reverse('learn'))
 
     if request.method == "POST":

@@ -6,11 +6,25 @@ from learnscripture.utils.logging import extra
 logger = logging.getLogger(__name__)
 
 
-def get_verse_statuses(request):
-    return request.identity.verse_statuses.filter(id__in=get_verse_status_ids(request))
+# In the session we store a list of verses to look at.  We use the tuple
+# (reference, verse_set_id) as an ID.  We need to VerseSet ID because we treat
+# verses differently if they are part of a passage. By avoiding the specific
+# UserVerseStatus id, we can cope with a change of version more easily.
 
 
-def get_verse_status_ids(request):
+def _verse_status_info(uvs):
+    return (uvs.reference, uvs.verse_choice.verse_set_id)
+
+
+def get_next_verse_status(request):
+    ids = _get_verse_status_ids(request)
+    if len(ids) == 0:
+        return None
+    ref, verse_set_id = ids[0]
+    return request.identity.get_verse_status_for_ref(ref, verse_set_id)
+
+
+def _get_verse_status_ids(request):
     return request.session.get('verses_to_learn', [])
 
 
@@ -19,19 +33,13 @@ def _save_verse_status_ids(request, ids):
 
 
 def set_verse_statuses(request, user_verse_statuses):
-    _save_verse_status_ids(request, [u.id for u  in user_verse_statuses])
+    _save_verse_status_ids(request, map(_verse_status_info, user_verse_statuses))
 
 
-def prepend_verse_statuses(request, user_verse_statuses):
-    _save_verse_status_ids(request,
-                           [uvs.id for uvs in user_verse_statuses] +
-                           get_verse_status_ids(request))
-
-
-def remove_user_verse_status_id(request, uvs_id):
-    s = get_verse_status_ids(request)
-    s = [u for u in s if u != uvs_id]
-    _save_verse_status_ids(request, s)
+def remove_user_verse_status(request, reference, verse_set_id):
+    ids = _get_verse_status_ids(request)
+    ids = [i for i in ids if i != (reference, verse_set_id)]
+    _save_verse_status_ids(request, ids)
 
 
 def get_identity(request):

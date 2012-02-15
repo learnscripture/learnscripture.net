@@ -181,7 +181,7 @@ var learnscripture =
                     dataType: 'json',
                     type: 'POST',
                     data: {
-                        user_verse_status_id: currentVerseStatus.id,
+                        verse_status: JSON.stringify(currentVerseStatus, null, 2),
                         stage: STAGE_TYPE_TEST,
                         score: score
                     }});
@@ -687,12 +687,8 @@ var learnscripture =
                     dataType: 'json',
                     type: 'POST',
                     data: {
-                        reference: currentVerseStatus.reference,
-                        version_slug: $('#id-version-select').val(),
-                        verse_set_id: currentVerseStatus.verse_choice.verse_set != undefined
-                            ? currentVerseStatus.verse_choice.verse_set.id
-                            : null,
-                        user_verse_status_id: currentVerseStatus.id
+                        verse_status: JSON.stringify(currentVerseStatus, null, 2),
+                        new_version_slug: $('#id-version-select').val()
                     },
                     success: function() {
                         nextVerse();

@@ -6,3 +6,4 @@ from .bibleverses import *
 from .memorymodel import *
 from .createsets import *
 from .utils import *
+from .learn import *
