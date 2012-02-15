@@ -2,56 +2,27 @@ from __future__ import absolute_import
 import time, re
 
 from django.core.urlresolvers import reverse
-from django.test import LiveServerTestCase, TestCase
+from django.test import TestCase
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.support.ui import Select, WebDriverWait
-from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support.ui import Select
 
 from accounts.models import Identity, Account, TestingMethod
 from bibleverses.models import BibleVersion, VerseSet, VerseSetType, VerseChoice
 
+from .base import LiveServerTests
 
-class CreateSetTests(LiveServerTestCase):
+
+class CreateSetTests(LiveServerTests):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
 
-    @classmethod
-    def setUpClass(cls):
-        cls.driver = webdriver.Chrome() # Using Chrome because we have problem with drag and drop for Firefox
-        cls.driver.implicitly_wait(30)
-        super(CreateSetTests, cls).setUpClass()
-
-    @classmethod
-    def tearDownClass(cls):
-        super(CreateSetTests, cls).tearDownClass()
-        cls.driver.quit()
-
-    def wait_until(self, callback, timeout=10):
-        """
-        Helper function that blocks the execution of the tests until the
-        specified callback returns a value that is not falsy. This function can
-        be called, for example, after clicking a link or submitting a form.
-        See the other public methods that call this function for more details.
-        """
-        WebDriverWait(self.driver, timeout).until(callback)
-
-    def wait_until_loaded(self, selector, timeout=10):
-        """
-        Helper function that blocks until the element with the given tag name
-        is found on the page.
-        """
-        self.wait_until(
-            lambda driver: driver.find_element(By.CSS_SELECTOR, selector),
-            timeout
-        )
-
     def setUp(self):
+        super(CreateSetTests, self).setUp()
         KJV = BibleVersion.objects.get(slug='KJV')
         self._identity = Identity.objects.create(default_bible_version=KJV,
                                                  testing_method=TestingMethod.FULL_WORDS)
-        self.verificationErrors = []
         self._account = Account.objects.create(email="test1@test.com",
                                                username="test1",
                                                )
@@ -59,10 +30,6 @@ class CreateSetTests(LiveServerTestCase):
         self._account.save()
         self._identity.account = self._account
         self._identity.save()
-
-    def tearDown(self):
-        self.assertEqual([], self.verificationErrors)
-
 
     def login(self):
         driver = self.driver
@@ -77,11 +44,6 @@ class CreateSetTests(LiveServerTestCase):
         self.wait_until_loaded('.logout-link')
         elem = driver.find_element_by_id('id-session-menu')
         self.assertEqual(elem.text, 'test1')
-
-    def is_element_present(self, how, what):
-        try: self.driver.find_element(by=how, value=what)
-        except NoSuchElementException, e: return False
-        return True
 
     def test_create_set(self):
         self.login()
@@ -179,18 +141,11 @@ class CreateSetTests(LiveServerTestCase):
         vc1_new = VerseChoice.objects.get(id=vc1.id)
         self.assertEqual(vc1_new.verse_set_id, None)
 
-
     def test_require_account(self):
         driver = self.driver
         driver.get(self.live_server_url + reverse('create_set'))
-        # Set preferences
-        Select(driver.find_element_by_id("id_default_bible_version")).select_by_visible_text("KJV")
-        driver.find_element_by_id("id_testing_method_0").click()
-        driver.find_element_by_id("id-save-btn").click()
-        self.wait_until_loaded('body')
-
+        self.set_preferences()
         self.assertIn('You need to create an account first', driver.page_source)
-
 
     def test_create_passage_set(self):
         self.login()
