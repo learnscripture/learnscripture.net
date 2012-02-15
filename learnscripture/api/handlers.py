@@ -15,7 +15,7 @@ from piston.handler import BaseHandler
 from piston.utils import rc
 
 from accounts.models import Account
-from bibleverses.models import UserVerseStatus, Verse, StageType, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, parse_ref, MAX_VERSE_QUERY_SIZE
+from bibleverses.models import UserVerseStatus, Verse, StageType, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, MAX_VERSE_QUERY_SIZE
 from bibleverses.forms import VerseSelector, PassageVerseSelector
 from learnscripture import session
 from learnscripture.decorators import require_identity_method
@@ -188,7 +188,8 @@ class GetPassage(BaseHandler):
     def read(self, request):
         reference = request.form.make_reference()
         try:
-            verse_list = parse_ref(reference, request.identity.default_bible_version, max_length=MAX_VERSE_QUERY_SIZE)
+            verse_list = request.identity.default_bible_version.get_verse_list(reference,
+                                                                               max_length=MAX_VERSE_QUERY_SIZE)
 
         except InvalidVerseReference as e:
             return validation_error_response({'__all__': [e.message]})

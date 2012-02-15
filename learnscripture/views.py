@@ -5,7 +5,7 @@ from django.shortcuts import render, get_object_or_404
 from django.utils.http import urlparse
 
 from accounts.forms import PreferencesForm
-from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerseReference, parse_ref, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType
+from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType
 from learnscripture import session, auth
 from bibleverses.forms import VerseSelector, VerseSetForm, PassageVerseSelector
 
@@ -99,8 +99,8 @@ def choose(request):
         if ref is not None:
             # First ensure it is valid
             try:
-                parse_ref(ref, request.identity.default_bible_version,
-                          max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
+                request.identity.default_bible_version.get_verse_list(
+                    ref, max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
             except InvalidVerseReference:
                 pass # Ignore the post.
             else:
@@ -123,8 +123,8 @@ def choose(request):
             reference = verse_form.make_reference()
             c['reference'] = reference
             try:
-                verse_list = parse_ref(reference, request.identity.default_bible_version,
-                                       max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
+                verse_list = request.identity.default_bible_version.get_verse_list(
+                    ref, max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
             except InvalidVerseReference as e:
                 c['individual_search_msg'] = e.message
             else:
