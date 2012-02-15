@@ -122,6 +122,14 @@ var learnscripture = (function(learnscripture, $) {
     }
 
     var setupAccountControls = function(ev) {
+        $('#id-signup-form, #id-login-form').bind('shown', function(ev) {
+            // For performance on handhelds especially
+            learnscripture.unbindDocKeyPress();
+        });
+        $('#id-signup-form, #id-login-form').bind('hidden', function(ev) {
+            learnscripture.bindDocKeyPress();
+        });
+
         $('.signup-link').click(showSignUp);
         $('#id-create-account-btn').click(signupBtnClick);
         $('#id-create-account-cancel-btn').click(function(ev) {

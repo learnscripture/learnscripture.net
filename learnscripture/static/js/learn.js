@@ -728,13 +728,20 @@ var learnscripture =
                    });
         };
 
+        var bindDocKeyPress = function() {
+            $(document).bind('keypress', docKeyPress);
+        }
+        var unbindDocKeyPress = function() {
+            $(document).unbind('keypress');
+        }
+
         // setup and wiring
         var start = function(prefs) {
             preferences = prefs;
             inputBox = $('#id-typing');
             inputBox.keydown(inputKeyDown);
             testingStatus = $('#id-testing-status');
-            $(document).keypress(docKeyPress);
+            bindDocKeyPress();
             $('#id-next-btn').show().click(next);
             $('#id-back-btn').show().click(back);
             $('#id-next-verse-btn').click(nextVerse);
@@ -961,6 +968,8 @@ var learnscripture =
 
         learnscripture.handlerAjaxError = handlerAjaxError;
         learnscripture.start = start;
+        learnscripture.unbindDocKeyPress = unbindDocKeyPress;
+        learnscripture.bindDocKeyPress = bindDocKeyPress;
         return learnscripture;
 
     })(learnscripture || {}, $);
