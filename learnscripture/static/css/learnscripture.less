@@ -389,10 +389,21 @@ p.large {
   background-color: #f0f0f0;
   }
 
-#id-verse {
+.current-verse, .previous-verse {
   font-size: 20px;
   line-height: 40px;
   }
+
+.previous-verse {
+  display: table-cell;
+  vertical-align: bottom;
+  color: #909090;
+}
+
+.previous-verse-wrapper {
+  border-bottom: 1px solid #c0c0c0;
+  margin-bottom: 0.5em;
+}
 
 #id-version {
   border-top: 1px solid #ccc;
@@ -650,7 +661,7 @@ p.large {
 @media screen and (max-width: 600px), screen and (max-height: 500px) {
 
   /* smaller fonts */
-  #id-verse {
+  .current-verse, .previous-verse {
     font-size: 13px;
     line-height: 28px;
     }
