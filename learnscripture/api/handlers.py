@@ -58,9 +58,10 @@ def validate(form_class, **formkwargs):
 class NextVerseHandler(BaseHandler):
     allowed_methods = ('GET',)
     fields = ('memory_stage', 'strength', 'first_seen',
-              ('verse_choice', (('verse_set', ('id',)),)),
+              ('verse_choice', (('verse_set', ('id', 'set_type')),)),
               'reference',
               'text',
+              'needs_testing',
               ('version', ('full_name', 'short_name', 'slug', 'url')))
 
     @require_identity_method
@@ -98,13 +99,18 @@ class ActionCompleteHandler(BaseHandler):
         reference = verse_status['reference']
         version_slug = verse_status['version']['slug']
         verse_set_id = get_verse_set_id(verse_status)
-        score = float(request.data['score'])
 
         # TODO: store StageComplete
         stage = StageType.get_value_for_name(request.data['stage'])
-        if  stage == StageType.TEST:
-            request.identity.record_verse_action(reference, version_slug,
-                                                 stage, score);
+        if stage == StageType.TEST:
+            score = float(request.data['score'])
+        else:
+            score = None
+
+        request.identity.record_verse_action(reference, version_slug,
+                                             stage, score);
+        if (stage == StageType.TEST or
+            (stage == StageType.READ and not verse_status['needs_testing'])):
             session.remove_user_verse_status(request, reference, verse_set_id)
 
         return {}

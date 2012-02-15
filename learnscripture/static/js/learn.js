@@ -17,9 +17,15 @@ var learnscripture =
 
         // Defined in StageType:
         var STAGE_TYPE_TEST = 'TEST';
+        var STAGE_TYPE_READ = 'READ';
+
         // Defined in TestingMethod:
         var TEST_FULL_WORDS = 0;
         var TEST_FIRST_LETTER = 1;
+
+        // Defined in VerseSetType
+        var SET_TYPE_SELECTION = 1;
+        var SET_TYPE_PASSAGE = 2;
 
         var INITIAL_STRENGTH_FACTOR = 0.1;
 
@@ -169,6 +175,20 @@ var learnscripture =
                 return (typed == target.slice(0, 1));
             }
         };
+
+        var readingComplete = function(callbackAfter) {
+            $.ajax({url: '/api/learnscripture/v1/actioncomplete/',
+                    dataType: 'json',
+                    type: 'POST',
+                    data: {
+                        verse_status: JSON.stringify(currentVerseStatus, null, 2),
+                        stage: STAGE_TYPE_READ,
+                    },
+                    success: function() {
+                        callbackAfter();
+                    }
+                   });
+        }
 
         var testComplete = function() {
             var score = 0;
@@ -523,7 +543,12 @@ var learnscripture =
                                      continueStage: function() { return true;},
                                      caption: 'Results',
                                      testMode: false,
-                                     toggleMode: null}
+                                     toggleMode: null},
+                         'readForContext': {setup: function() {},
+                                            continueStage: function() { return true;},
+                                            caption: 'Read',
+                                            testMode: false,
+                                            toggleMode: null}
                         };
 
 
@@ -707,6 +732,7 @@ var learnscripture =
             $('#id-next-btn').show().click(next);
             $('#id-back-btn').show().click(back);
             $('#id-next-verse-btn').click(nextVerse);
+            $('#id-context-next-verse-btn').click(markReadAndNextVerse);
             $('#id-version-select').change(versionSelectChanged);
             $('#id-help-btn').click(function(ev) {
                 $('#id-help').toggle('fast');
@@ -718,6 +744,10 @@ var learnscripture =
         var nextVerse = function() {
             $('.progress table tr').remove();
             loadVerse();
+        };
+
+        var markReadAndNextVerse = function() {
+            readingComplete(nextVerse);
         };
 
         var chooseStageListForStrength = function(strength) {
@@ -744,7 +774,11 @@ var learnscripture =
             if (verseData.strength != null) {
                 strength = verseData.strength;
             }
-            currentStageList = chooseStageListForStrength(strength);
+            if (verseData.needs_testing) {
+                currentStageList = chooseStageListForStrength(strength);
+            } else {
+                currentStageList = ['readForContext'];
+            }
             setupStage(0);
         };
 
@@ -756,7 +790,10 @@ var learnscripture =
                         $('#id-verse-wrapper').hide(); // Hide until set up
                         $('#id-verse-title').text(data.reference);
                         // convert newlines to divs
-                        var text = data.text + '\n' + data.reference;
+                        var text = data.text;
+                        if (data.verse_choice.verse_set.set_type == SET_TYPE_SELECTION) {
+                            text = text + '\n' + data.reference;
+                        }
                         $.each(text.split(/\n/), function(idx, line) {
                             if (line.trim() != '') {
                                 $('#id-verse').append('<div class="line">' +
@@ -794,6 +831,7 @@ var learnscripture =
         };
 
         var markupVerse = function() {
+            var wordClass = currentVerseStatus.needs_testing ? 'word' : 'testedword';
             var wordGroups = [];
 
             $('#id-verse .line').each(function(idx, elem) {
@@ -815,7 +853,8 @@ var learnscripture =
                 $.each(group, function(j, word) {
                     var start = word.match(/\W*./)[0];
                     var end = word.slice(start.length);
-                    replace.push ('<span id="id-word-' + wordNumber.toString() + '" class=\"word\">' +
+                    replace.push ('<span id="id-word-' + wordNumber.toString() +
+                                  '" class=\"' + wordClass + '\">' +
                                   '<span class="wordstart">' + start +
                                   '</span><span class="wordend">' + end +
                                   '</span></span>');

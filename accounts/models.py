@@ -139,7 +139,7 @@ class Identity(models.Model):
         else:
             return self.create_verse_status(verse_choice, self.default_bible_version)
 
-    def record_verse_action(self, reference, version_slug, stage_type, accuracy):
+    def record_verse_action(self, reference, version_slug, stage_type, accuracy=None):
         s = self.verse_statuses.filter(verse_choice__reference=reference,
                                        version__slug=version_slug)
         mem_stage = {
@@ -276,7 +276,8 @@ class Identity(models.Model):
         """
         import time
         now_seconds = time.time()
-        qs = self.verse_statuses.filter(ignored=False, memory_stage=MemoryStage.TESTED)
+        qs = self.verse_statuses.filter(ignored=False, memory_stage=MemoryStage.TESTED)\
+            .exclude(verse_choice__verse_set__set_type=VerseSetType.PASSAGE)
         return memorymodel.filter_qs(qs, now_seconds)
 
     def verse_statuses_for_learning(self):
@@ -300,3 +301,32 @@ class Identity(models.Model):
             seen_refs.add(uvs.verse_choice.reference)
             retval.append(uvs)
         return retval
+
+    def passages_for_learning(self):
+        # Passages for self
+        statuses = self.verse_statuses.filter(verse_choice__verse_set__set_type=VerseSetType.PASSAGE,
+                                              ignored=False,
+                                              memory_stage__lt=MemoryStage.TESTED)\
+                                              .select_related('verse_choice',
+                                                              'verse_choice__verse_set')
+        verse_sets = {}
+        for s in statuses:
+            vs_id = s.verse_choice.verse_set.id
+            if vs_id not in verse_sets:
+                vs = s.verse_choice.verse_set
+                verse_sets[vs_id] = vs
+                vs.untested_total = 0
+            else:
+                vs = verse_sets[vs_id]
+
+            vs.untested_total += 1
+
+        for vs in verse_sets.values():
+            vs.tested_total = self.verse_statuses.filter(verse_choice__verse_set=vs,
+                                                         ignored=False,
+                                                         memory_stage__gte=MemoryStage.TESTED).count()
+        return verse_sets.values()
+
+    def verse_statuses_for_passage(self, verse_set_id):
+        return self.verse_statuses.filter(verse_choice__verse_set=verse_set_id,
+                                          ignored=False).order_by('added', 'id')

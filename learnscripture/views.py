@@ -53,8 +53,15 @@ def get_next(request, default_url):
     return HttpResponseRedirect(default_url)
 
 
+
+def learn_set(request, l):
+    session.set_verse_statuses(request, l)
+    return HttpResponseRedirect(reverse('learn'))
+
+
 @require_identity
 def start(request):
+
     identity = request.identity
     if not identity.verse_statuses.exists():
         # The only possible thing is to choose some verses
@@ -62,14 +69,16 @@ def start(request):
 
     if request.method == 'POST':
         if 'learnqueue' in request.POST:
-            session.set_verse_statuses(request, identity.verse_statuses_for_learning())
-            return HttpResponseRedirect(reverse('learn'))
+            return learn_set(request, identity.verse_statuses_for_learning())
         if 'revisequeue' in request.POST:
-            session.set_verse_statuses(request, identity.verse_statuses_for_revising())
-            return HttpResponseRedirect(reverse('learn'))
+            return learn_set(request, identity.verse_statuses_for_revising())
+        if 'learnpassage' in request.POST:
+            vs_id = int(request.POST['verse_set_id'])
+            return learn_set(request, identity.verse_statuses_for_passage(vs_id))
 
     c = {'new_verses_queue': identity.verse_statuses_for_learning(),
          'revise_verses_queue': identity.verse_statuses_for_revising(),
+         'passages_for_learning': identity.passages_for_learning(),
          }
     return render(request, 'learnscripture/start.html', c)
 
@@ -79,10 +88,6 @@ def choose(request):
     """
     Choose a verse or verse set
     """
-    def learn_set(l):
-        session.set_verse_statuses(request, l)
-        return HttpResponseRedirect(reverse('learn'))
-
     if request.method == "POST":
         # Handle choose set
         vs_id = request.POST.get('verseset_id', None)
@@ -93,7 +98,7 @@ def choose(request):
                 # Shouldn't be possible by clicking on buttons.
                 pass
             if vs is not None:
-                return learn_set(request.identity.add_verse_set(vs))
+                return learn_set(request, request.identity.add_verse_set(vs))
 
         ref = request.POST.get('reference', None)
         if ref is not None:
@@ -106,7 +111,7 @@ def choose(request):
             else:
                 vc, n = VerseChoice.objects.get_or_create(reference=ref,
                                                           verse_set=None)
-                return learn_set([request.identity.add_verse_choice(vc)])
+                return learn_set(request, [request.identity.add_verse_choice(vc)])
 
     c = {}
     verse_sets = VerseSet.objects.all().order_by('name').prefetch_related('verse_choices')

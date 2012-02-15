@@ -17,6 +17,7 @@ MAX_VERSE_QUERY_SIZE = 200
 MAX_VERSES_FOR_SINGLE_CHOICE = 4
 
 
+# Also defined in learn.js
 VerseSetType = make_choices('VerseSetType',
                             [(1, 'SELECTION', 'Selection'),
                              (2, 'PASSAGE', 'Passage'),
@@ -219,6 +220,13 @@ class UserVerseStatus(models.Model):
     @cached_property
     def text(self):
         return self.version.get_text_by_reference(self.reference)
+
+    @cached_property
+    def needs_testing(self):
+        from accounts.memorymodel import needs_testing
+        if self.last_tested is None:
+            return True
+        return needs_testing(self.strength, (timezone.now() - self.last_tested).total_seconds())
 
     def __unicode__(self):
         return u"%s, %s" % (self.verse_choice.reference, self.version.slug)
