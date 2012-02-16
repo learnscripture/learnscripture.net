@@ -336,13 +336,3 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE):
         raise InvalidVerseReference(u"References that span more than %d verses are not allowed in this context." % max_length)
 
     return retval
-
-
-# Storing this is probably only useful for doing stats on progress and
-# attempting to tune things.
-class StageComplete(models.Model):
-    verse_status = models.ForeignKey(UserVerseStatus)
-    stage_type = models.PositiveSmallIntegerField(choices=StageType.choice_list)
-    level = models.DecimalField(decimal_places=2, max_digits=3) # scale 0 to 1
-    accuracy = models.DecimalField(decimal_places=2, max_digits=3) # scale 0 to 1
-    date_completed = models.DateTimeField()
