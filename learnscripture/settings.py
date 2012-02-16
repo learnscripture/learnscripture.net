@@ -93,7 +93,7 @@ MIDDLEWARE_CLASSES = [
         (True, 'learnscripture.middleware.IdentityMiddleware'),
         (True, 'pagination.middleware.PaginationMiddleware'),
         (True, 'raven.contrib.django.middleware.Sentry404CatchMiddleware'),
-        (True, 'fiber.middleware.AdminPageMiddleware'),
+        (not DEBUG, 'fiber.middleware.AdminPageMiddleware'),
     ]
     if b
 ]
