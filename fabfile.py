@@ -104,6 +104,15 @@ def push_sources():
 
 
 @task
+def no_restarts():
+    """
+    Call this first to ensure that no services are restarted by
+    the following deploy actions.
+    """
+    env.no_restarts = True
+
+
+@task
 def webserver_stop():
     """
     Stop the webserver that is running the Django instance
@@ -173,9 +182,10 @@ def deploy():
     update_database()
     build_static()
 
-    with settings(warn_only=True):
-        webserver_stop()
-    webserver_start()
+    if not getattr(env, 'no_restarts', False):
+        with settings(warn_only=True):
+            webserver_stop()
+        webserver_start()
 
 
 @task
