@@ -1,3 +1,5 @@
+from django.utils.safestring import mark_safe
+
 from accounts.models import SubscriptionType
 from learnscripture.datastructures import make_choices
 
@@ -8,7 +10,7 @@ Feature = make_choices('Feature',
 def check_allowed(request, feature):
     if feature == Feature.CREATE_VERSE_SET:
         if request.identity.account_id is None:
-            return (False, u"You need to create an account first to create verse sets.")
+            return (False, mark_safe(u'You need to <a href="#" class="signup-link">create an account</a> first to create verse sets.'))
 
         if request.identity.account.subscription in [SubscriptionType.FREE_TRIAL,
                                                      SubscriptionType.PAID_UP,
