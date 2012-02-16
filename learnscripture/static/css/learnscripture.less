@@ -7,7 +7,8 @@
 
 /* Themes */
 
-.dotheme(@topColor1, @topColor2, @topLinkColour, @btnColor1, @btnColor2, @bgColor1, @linkColor) {
+.dotheme(@topColor1, @topColor2, @topLinkColour, @btnColor1, @btnColor2, @bgColor1,
+         @linkColor, @footerColor) {
 
   @linkColorHover: darken(@linkColor, 15);
 
@@ -16,6 +17,17 @@
     color: @linkColor;
     &:hover {
       color: @linkColorHover;
+    }
+  }
+
+  footer {
+    color: @footerColor;
+    a {
+      text-decoration: underline;
+      color: @footerColor;
+      &:hover {
+        color: @footerColor;
+      }
     }
   }
 
@@ -190,14 +202,19 @@
 body.calm {
   background-color: #1A1A1A;
   background-image: url(/static/img/bg.jpg);
-  .dotheme(@blue, @blueDark, @grayLight, @blue, @blueDark, #f5f5f5, #0069d6);
+  .dotheme(@blue, @blueDark, @grayLight, @blue, @blueDark, #f5f5f5, #0069d6, white);
 
 }
 
 body.bubblegum {
-  background-color: #e0cfb1;
+  @bgcolor: #e0cfb1;
+  background-color: @bgcolor;
+  footer {
+    background-color: @bgcolor;
+    border: 1px solid darken(@bgcolor, 10%);
+  }
   background-image: url(/static/img/bubblegum_background.jpg);
-  .dotheme(#f56c26, #f00901, black, #cc3a92,  #a12667, #ffe0f1, #f00901);
+  .dotheme(#f56c26, #f00901, black, #cc3a92,  #a12667, #ffe0f1, #f00901, black);
   h1, h2, h3, h4, h5, .word {
     font-family: "Short Stack", "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
@@ -205,9 +222,14 @@ body.bubblegum {
 
 
 body.bubblegum2 {
-  background-color: #e0cfb1;
+  @bgcolor:  #a294a5;
+  background-color: @bgcolor;
+  footer {
+    background-color: @bgcolor;
+    border: 1px solid darken(@bgcolor, 10%);
+  }
   background-image: url(/static/img/bubblegum2_background.jpg);
-  .dotheme(lighten(#CD0074, 5%), lighten(#85004B, 5%), #e0e0e0, #679B00, darken(#679B00, 20%), #C9F76F, #CD0074);
+  .dotheme(lighten(#CD0074, 5%), lighten(#85004B, 5%), #e0e0e0, #679B00, darken(#679B00, 20%), #C9F76F, #CD0074, black);
   h1, h2, h3, h4, h5, .word {
     font-family: "Short Stack", "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
@@ -252,8 +274,9 @@ li {
 
 footer {
   border: none;
-  color: white;
-  }
+  border-radius: 6px;
+  padding-bottom: 5px;
+}
 
 .topbar-inner, .topbar .fill {
   @shadow: 0 1px 3px rgba(0, 0, 0, 0.25), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
