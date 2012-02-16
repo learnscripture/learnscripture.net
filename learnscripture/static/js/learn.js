@@ -684,6 +684,9 @@ var learnscripture =
                 tagName == 'textarea') {
                 return;
             }
+            // Some android phones will bring up box for searching or something on almost
+            // any key press, and many devices will scroll on space bar:
+            ev.preventDefault();
             switch (ev.which) {
             case 98: // 'b'
                 back();
@@ -699,7 +702,6 @@ var learnscripture =
                 return;
             case 32: // Space
                 toggleWord(getWordAt(selectedWordIndex));
-                ev.preventDefault(); // scroll in some browsers.
                 return;
             case 13: // Enter
                 if (tagName == 'a') {
