@@ -3,7 +3,7 @@ var learnscripture = (function(learnscripture, $) {
     var signedInAccountData = null;
 
     var hideSignUpLinks = function() {
-        $('.signup-link, .login-link').each(function(idx, elem) {
+        $('.dropdown-menu .signup-link, .dropdown-menu .login-link').each(function(idx, elem) {
             var a = $(elem);
             a.hide();
             if (a.parent().find(":visible").length == 0) {
@@ -13,17 +13,27 @@ var learnscripture = (function(learnscripture, $) {
 
     };
 
-    var setSignedIn = function(accountData, identityChange) {
+    var setSignedIn = function(accountData, signinType) {
         hideSignUpLinks();
         signedInAccountData = accountData;
         $('.holds-username').text(accountData.username);
         $('.guest-only').hide();
 
-        if (identityChange) {
-            // Almost every page needs to be refreshed if we
-            // have just logged in, because the identity will have
-            // changed. So we redirect to the dashboard.
+        if (signinType == 'logout') {
+            // Need to refresh page
+            window.location.reload();
+        } else if (signinType == 'login') {
+            // Almost every page needs to be refreshed if we have just logged
+            // in, because the identity will have changed. So we redirect to the
+            // dashboard.
             window.location = '/dashboard/';
+        } else if (signinType == 'signup') {
+            // If they are in the middle of reading/testing,
+            // we don't want to force them back to the beginning.
+            // However, on some pages we do want to force a refresh.
+            if ($(".reload-after-signup").length > 0) {
+                window.location.reload();
+            }
         }
     };
 
@@ -63,7 +73,7 @@ var learnscripture = (function(learnscripture, $) {
                 data: $('#id-signup-form form').serialize(),
                 error: signupError,
                 success: function(data) {
-                    setSignedIn(data, false);
+                    setSignedIn(data, 'signup');
                     $('#id-signup-form').modal('hide');
                 }
                 });
@@ -91,7 +101,7 @@ var learnscripture = (function(learnscripture, $) {
                 data: $('#id-login-form form').serialize(),
                 error: loginError,
                 success: function(data) {
-                    setSignedIn(data, true);
+                    setSignedIn(data, 'login');
                     $('#id-login-form').modal('hide');
                 }
                 });
@@ -109,7 +119,7 @@ var learnscripture = (function(learnscripture, $) {
                  dataType: 'json',
                  type: 'POST',
                  success: function(data) {
-                     setSignedIn(data, true);
+                     setSignedIn(data, 'logout');
                      $('#id-logout-form').modal('hide');
                  }
                });
