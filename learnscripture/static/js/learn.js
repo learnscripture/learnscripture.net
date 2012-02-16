@@ -750,7 +750,11 @@ var learnscripture =
             $('#id-context-next-verse-btn').click(markReadAndNextVerse);
             $('#id-version-select').change(versionSelectChanged);
             $('#id-help-btn').click(function(ev) {
-                $('#id-help').toggle('fast');
+                if (preferences.animations) {
+                    $('#id-help').toggle('fast');
+                } else {
+                    $('#id-help').toggle();
+                }
                 $('#id-help-btn').button('toggle');
             });
             nextVerse();
