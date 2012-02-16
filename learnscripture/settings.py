@@ -224,7 +224,7 @@ SENTRY_CLIENT = 'ravenclient.AsyncDjangoClient'
 
 ### LearnScripture.net specific settings ###
 
-IDENTITY_EXPIRES_DAYS = 21
+IDENTITY_EXPIRES_DAYS = 22
 
 MINIMUM_PASSWORD_LENGTH = 6
 
