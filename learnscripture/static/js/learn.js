@@ -858,8 +858,10 @@ var learnscripture =
 
 
         var loadVerse = function() {
-            $.ajax({url: '/api/learnscripture/v1/nextverse/?format=json',
+            $.ajax({url: '/api/learnscripture/v1/nextverse/?format=json&r=' +
+                    Math.floor(Math.random()*1000000000).toString(),
                     dataType: 'json',
+                    type: 'GET',
                     success: function(data) {
                         var oldVerseStatus = currentVerseStatus;
                         currentVerseStatus = data;
