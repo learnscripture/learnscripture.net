@@ -328,5 +328,14 @@ class Identity(models.Model):
         return verse_sets.values()
 
     def verse_statuses_for_passage(self, verse_set_id):
-        return self.verse_statuses.filter(verse_choice__verse_set=verse_set_id,
-                                          ignored=False).order_by('added', 'id')
+        # Must be strictly in the bible order, so don't rely on ('added', id') for
+        # ordering. We must get the verses and compare bible_verse_number.
+        l = list(self.verse_statuses.filter(verse_choice__verse_set=verse_set_id,
+                                            ignored=False).select_related('verse_choice'))
+        refs = [uvs.reference for uvs in l]
+        verse_list = self.default_bible_version.get_verses_by_reference_bulk(refs)
+        for uvs in l:
+            v = verse_list[uvs.reference]
+            uvs.bible_verse_number = v.bible_verse_number
+        l.sort(key=lambda uvs: uvs.bible_verse_number)
+        return l

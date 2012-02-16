@@ -10,7 +10,7 @@ from bibleverses.models import VerseSet, BibleVersion, StageType, MemoryStage
 
 class IdentityTests(TestCase):
 
-    fixtures = ['test_bible_versions.json', 'test_verse_sets.json']
+    fixtures = ['test_bible_versions.json', 'test_verse_sets.json', 'test_bible_verses.json']
 
     def _create_identity(self):
         NET = BibleVersion.objects.get(slug='NET')
@@ -182,3 +182,18 @@ class IdentityTests(TestCase):
         # Shouldn't be in general revision queue
         self.assertEqual([], list(i.verse_statuses_for_revising()))
 
+
+    def test_verse_statuses_for_passage(self):
+        i = self._create_identity()
+        vs1 = VerseSet.objects.get(name='Psalm 23')
+        i.add_verse_set(vs1)
+
+        l = i.verse_statuses_for_passage(vs1.id)
+
+        self.assertEqual([uvs.reference for uvs in l],
+                         [u"Psalm 23:1",
+                          u"Psalm 23:2",
+                          u"Psalm 23:3",
+                          u"Psalm 23:4",
+                          u"Psalm 23:5",
+                          u"Psalm 23:6"])
