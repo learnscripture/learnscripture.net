@@ -42,6 +42,12 @@ Verse set: {{ verse_set.name }}
 </p>
 {% endif %}
 
+
+<div class="versioninfo">
+{{ version.full_name }} ({{ version.short_name }})
+</div>
+
+
 <form action="{% url 'choose' %}" method="POST">
   {% csrf_token %}
   <input type="hidden" name="verseset_id" value="{{ verse_set.id }}">

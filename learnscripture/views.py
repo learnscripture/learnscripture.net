@@ -157,6 +157,7 @@ def view_verse_set(request, slug):
 
     c['verse_set'] = verse_set
     c['verse_choices'] = verse_choices
+    c['version'] = version
     return render(request, 'learnscripture/single_verse_set.html', c)
 
 
