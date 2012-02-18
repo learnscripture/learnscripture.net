@@ -41,6 +41,11 @@ MemoryStage = make_choices('MemoryStage',
                             ])
 
 
+class BibleVersionManager(models.Manager):
+    def get_by_natural_key(self, slug):
+        return self.get(slug=slug)
+
+
 class BibleVersion(models.Model):
     short_name = models.CharField(max_length=20, unique=True)
     slug = models.CharField(max_length=20, unique=True)
@@ -49,8 +54,13 @@ class BibleVersion(models.Model):
 
     public = models.BooleanField(default=True)
 
+    objects = BibleVersionManager()
+
     def __unicode__(self):
         return self.short_name
+
+    def natural_key(self):
+        return (self.slug,)
 
     def get_verse_list(self, reference, max_length=MAX_VERSE_QUERY_SIZE):
         return parse_ref(reference, self, max_length=max_length)
