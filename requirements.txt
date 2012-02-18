@@ -2,7 +2,7 @@ psycopg2==2.4.2
 south
 -e hg+https://bitbucket.org/spookylukey/django/@d834ef768f04#egg=django
 django-fiber==0.9.6.2
--e git+git://github.com/tzangms/django-bootstrap-form.git#egg=django-bootstrap-form
+-e git+git://github.com/tzangms/django-bootstrap-form.git@5518ac1c2e3fc64b549621d4f558256123c71382#egg=django-bootstrap-form
 django-pagination==1.0.7
 -e hg+ssh://hg@bitbucket.org/kmike/django-piston#egg=django-piston
 django-debug-toolbar
