@@ -41,6 +41,7 @@ Dashboard
 {% if passages_for_learning %}
 <div class="actionset">
   {% for vs in passages_for_learning %}
+  {% if not forloop.first %}<hr>{% endif %}
   <form action="" method="POST">
     {% csrf_token %}
     <input type="hidden" name="verse_set_id" value="{{ vs.id }}" />
