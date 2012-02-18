@@ -56,6 +56,9 @@ class BibleVersion(models.Model):
 
     objects = BibleVersionManager()
 
+    class Meta:
+        ordering = ('short_name',)
+
     def __unicode__(self):
         return self.short_name
 
