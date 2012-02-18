@@ -18,7 +18,12 @@ def home(request):
 
 @require_preferences
 def learn(request):
-    c = {'bible_versions': BibleVersion.objects.filter(public=True)}
+    c = {}
+    if request.user.is_superuser:
+        c['bible_versions'] = BibleVersion.objects.all()
+    else:
+        c['bible_versions'] = BibleVersion.objects.filter(public=True)
+
     return render(request, 'learnscripture/learn.html', c)
 
 
