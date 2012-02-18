@@ -72,7 +72,8 @@ class Identity(models.Model):
     date_created = models.DateTimeField(default=timezone.now)
 
     # Preferences
-    default_bible_version = models.ForeignKey(BibleVersion, null=True, blank=True)
+    default_bible_version = models.ForeignKey(BibleVersion, null=True, blank=True,
+                                              limit_choices_to={'public':True})
     testing_method = models.PositiveSmallIntegerField(choices=TestingMethod.choice_list,
                                                       null=True, default=None)
     enable_animations = models.BooleanField(blank=True, default=False)
