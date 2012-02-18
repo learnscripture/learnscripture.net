@@ -47,6 +47,8 @@ class BibleVersion(models.Model):
     full_name = models.CharField(max_length=255, unique=True)
     url = models.URLField(default="", blank=True)
 
+    public = models.BooleanField(default=True)
+
     def __unicode__(self):
         return self.short_name
 
