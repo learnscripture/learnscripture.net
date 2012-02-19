@@ -821,12 +821,13 @@ var learnscripture =
                 $('.previous-verse').css({'height': $('.previous-verse').height().toString()});
             }
 
-            // Now mark the other words disappear
+            // Now make the other words disappear
             $.each(words, function(offset, elems) {
                 if (offset != maxOffset) {
                         $(elems).remove();
                 }
             });
+            $('.previous-verse br').remove();
 
             // Now shrink the area
             var wordHeight = $('.previous-verse .word, .previous-verse .testedword').css('line-height');
