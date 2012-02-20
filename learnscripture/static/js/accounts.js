@@ -22,11 +22,6 @@ var learnscripture = (function(learnscripture, $) {
         if (signinType == 'logout') {
             // Need to refresh page
             window.location.reload();
-        } else if (signinType == 'login') {
-            // Almost every page needs to be refreshed if we have just logged
-            // in, because the identity will have changed. So we redirect to the
-            // dashboard.
-            window.location = '/dashboard/';
         } else if (signinType == 'signup') {
             // If they are in the middle of reading/testing,
             // we don't want to force them back to the beginning.
@@ -65,24 +60,26 @@ var learnscripture = (function(learnscripture, $) {
         $('#id_signup-email').focus();
     };
 
-    var loginError = function(jqXHR, textStatus, errorThrown) {
-        if (jqXHR.status == 400) {
-            learnscripture.handleFormValidationErrors($('#id-login-form'), 'login', jqXHR);
-        } else {
-            learnscripture.handlerAjaxError(jqXHR, textStatus, errorThrown);
-        }
-    };
-
     var loginBtnClick = function(ev) {
-        ev.preventDefault();
+        // Chrome will only remember passwords if the login form is submitted in
+        // the normal way.  Therefore we do synchronous XHR to check login
+        // details (and actually log them in), then allow form submission to
+        // continue if it is correct.
         $.ajax({url: '/api/learnscripture/v1/login/',
                 dataType: 'json',
+                async: false,
                 type: 'POST',
                 data: $('#id-login-form form').serialize(),
-                error: loginError,
+                error: function(jqXHR, textStatus, errorThrown) {
+                    ev.preventDefault();
+                    if (jqXHR.status == 400) {
+                        learnscripture.handleFormValidationErrors($('#id-login-form'), 'login', jqXHR);
+                    } else {
+                        learnscripture.handlerAjaxError(jqXHR, textStatus, errorThrown);
+                    }
+                },
                 success: function(data) {
-                    setSignedIn(data, 'login');
-                    $('#id-login-form').modal('hide');
+                    // No ev.preventDefault, form will submit
                 }
                 });
     };

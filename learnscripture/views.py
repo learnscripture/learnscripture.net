@@ -35,6 +35,15 @@ def home(request):
     return render(request, 'learnscripture/home.html')
 
 
+# See comment in accounts.js for why this required (and doesn't do any logging
+# in).
+def login(request):
+    # Redirect to dashboard because just about everything you might want to do
+    # will change after sign in, and we want to encourage people to do their
+    # revision first.
+    return HttpResponseRedirect(reverse('start'))
+
+
 def bible_versions_for_request(request):
     if request.user.is_superuser:
         return BibleVersion.objects.all()

@@ -25,7 +25,7 @@ $(document).ready(function() {
               var form = input.closest('form');
               var lastInput = form.find('input[type="text"],input[type="password"]').last();
               if (input.attr('id') == lastInput.attr('id')) {
-                  form.closest('.modal').find('a.btn.default').first().click();
+                  form.closest('.modal').find('.btn.default').first().click();
               }
           }
       });
