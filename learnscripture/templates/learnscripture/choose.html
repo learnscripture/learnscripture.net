@@ -50,7 +50,7 @@ Choose verses
       <form action="" method="POST">
         {% csrf_token %}
         <input type="hidden" name="verseset_id" value="{{ vs.id }}">
-        <input type="submit" class="btn primary" value="Learn" id="id-learn-verseset-btn-{{ vs.id }}">
+        <input type="submit" class="btn primary needs-preferences" value="Learn" id="id-learn-verseset-btn-{{ vs.id }}">
       </form>
       <h3>{{ vs.name }}</h3>
       {% if vs.description %}
@@ -93,7 +93,7 @@ Choose verses
       <form action="" method="POST">
         {% csrf_token %}
         <input type="hidden" name="reference" value="{{ reference }}">
-        <input type="submit" class="btn primary" value="Learn">
+        <input type="submit" class="btn primary needs-preferences" value="Learn">
       </form>
       <h3>{{ individual_search_results.0.book_name }}</h3>
       <div class="verselist">

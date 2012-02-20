@@ -37,29 +37,9 @@ var learnscripture = (function(learnscripture, $) {
         }
     };
 
-    var handleFormValidationErrors = function(form, formPrefix, errorResponse) {
-        var errors = $.parseJSON(errorResponse.responseText.split(/\n/)[1]);
-        form.find(".validation-error").remove();
-        form.find(".error").removeClass("error");
-        $.each(errors, function(key, val) {
-            $.each(val, function(idx, msg) {
-                if (key == '__all__') { return; }
-                var formElem = $('#id_' + formPrefix + "-" + key);
-                var p = formElem.parent();
-                if (p.find("ul").length == 0) {
-                    p.append("<ul class='validation-error'></ul>");
-                }
-                p.find("ul").append($('<li class="help-inline"></li>').text(msg));
-                p.parent().addClass("error");
-                });
-            });
-        return errors; // In cases other people want to use it
-
-    };
-
     var signupError = function(jqXHR, textStatus, errorThrown) {
         if (jqXHR.status == 400) {
-            handleFormValidationErrors($('#id-signup-form'), 'signup', jqXHR);
+            learnscripture.handleFormValidationErrors($('#id-signup-form'), 'signup', jqXHR);
         } else {
             learnscripture.handlerAjaxError(jqXHR, textStatus, errorThrown);
         }
@@ -87,7 +67,7 @@ var learnscripture = (function(learnscripture, $) {
 
     var loginError = function(jqXHR, textStatus, errorThrown) {
         if (jqXHR.status == 400) {
-            handleFormValidationErrors($('#id-login-form'), 'login', jqXHR);
+            learnscripture.handleFormValidationErrors($('#id-login-form'), 'login', jqXHR);
         } else {
             learnscripture.handlerAjaxError(jqXHR, textStatus, errorThrown);
         }
@@ -132,14 +112,6 @@ var learnscripture = (function(learnscripture, $) {
     }
 
     var setupAccountControls = function(ev) {
-        $('#id-signup-form, #id-login-form').bind('shown', function(ev) {
-            // For performance on handhelds especially
-            learnscripture.unbindDocKeyPress();
-        });
-        $('#id-signup-form, #id-login-form').bind('hidden', function(ev) {
-            learnscripture.bindDocKeyPress();
-        });
-
         $('.signup-link').click(showSignUp);
         $('#id-create-account-btn').click(signupBtnClick);
         $('#id-create-account-cancel-btn').click(function(ev) {
@@ -160,31 +132,10 @@ var learnscripture = (function(learnscripture, $) {
             ev.preventDefault();
             $('#id-logout-form').modal('hide');
         });
-
-
-        $("#id-login-form form input[type=\"text\"], " +
-          "#id-login-form form input[type=\"password\"], " +
-          "#id-signup-form form input[type=\"text\"], " +
-          "#id-signup-form form input[type=\"password\"]").keypress(function (ev) {
-
-              if ((ev.which && ev.which == 13) || (ev.keyCode && ev.keyCode == 13)) {
-                  // Stop IE from submitting:
-                  ev.preventDefault();
-
-                  // Last input in list should cause submit
-                  var input = $(ev.target);
-                  var form = input.closest('form');
-                  var lastInput = form.find('input[type="text"],input[type="password"]').last();
-                  if (input.attr('id') == lastInput.attr('id')) {
-                      form.closest('.modal').find('a.btn.default').first().click();
-                  }
-              }
-          });
     };
 
     // Export:
     learnscripture.setupAccountControls = setupAccountControls;
-    learnscripture.handleFormValidationErrors = handleFormValidationErrors;
     learnscripture.setSignedIn = setSignedIn;
     return learnscripture;
 })(learnscripture || {}, $);

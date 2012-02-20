@@ -42,7 +42,6 @@
             <li {% if m.active %}class="active"{% endif %}><a href="{{ m.path }}">{{ m.caption }}</a></li>
             {% endfor %}
           </ul>
-          {% if request.identity %}
           <div class="nav secondary-nav">
             <ul>
               <li class="dropdown" data-dropdown="dropdown">
@@ -52,7 +51,7 @@
                   <li><a href="#" class="login-link">Sign in</a></li>
                   <li><a href="#" class="signup-link">Create account</a></li>
                   {% endif %}
-                  <li><a href="{% url 'preferences' %}?next={{ request.path_info }}">Preferences</a></li>
+                  <li><a class="preferences-link" href="{% url 'preferences' %}?next={{ request.path_info }}">Preferences</a></li>
                   {% if request.identity.account %}
                   <li><a href="#" class="logout-link">Log out</a></li>
                   {% endif %}
@@ -60,7 +59,6 @@
               </li>
             </ul>
           </div>
-          {% endif %}
           </div>
         </div>
       </div>
@@ -96,7 +94,7 @@
 
 
 <!-- popup forms -->
-{% if request.identity and not request.identity.account %}
+{% if not request.identity.account %}
 
 <div id="id-signup-form" class="modal hide">
   <div class="modal-header">
@@ -150,10 +148,6 @@
     <form action="" method="POST">
       {% csrf_token %}
       <p>Are you sure you want to log out?</p>
-      {% if not request.identity.account %}
-      <p><strong>Since you have not created an account,
-          all your progress will be lost if you log out.</strong></p>
-      {% endif %}
     </form>
   </div>
   <div class="modal-footer">
@@ -164,16 +158,38 @@
 
 {% endif %}
 
-{% if request.identity %}
-<div id="id-preferences-data"
-     data-animations="{{ request.identity.enable_animations|yesno:"true,false,false" }}"
-     data-theme="{{ request.identity.interface_theme }}"
-     data-testing-method="{{ request.identity.testing_method }}"
->
+{% if not hide_preferences_popup %}
+
+<div id="id-preferences-form" class="modal hide">
+  <div class="modal-header">
+    <a href="#" class="close">&times;</a>
+    <h3>Preferences</h3>
+  </div>
+
+  <div class="modal-body">
+    <form action="" method="POST">
+      {% csrf_token %}
+
+      {{ preferences_form|bootstrap }}
+
+    </form>
+  </div>
+  <div class="modal-footer">
+    <a href="#" id="id-preferences-save-btn" class="btn primary default">Save</a>
+    <a href="#" id="id-preferences-cancel-btn" class="btn secondary">Cancel</a>
+  </div>
 </div>
 
-
 {% endif %}
+
+<div id="id-preferences-data"
+     {# NB these names are translated to preferencesSetup, enableAnimations, interfaceTheme, testingMethod #}
+     data-preferences-setup="{{ request.identity.preferences_setup|yesno:"true,false,false" }}"
+     data-enable-animations="{{ request.identity.enable_animations|yesno:"true,false,false" }}"
+     data-interface-theme="{{ request.identity.interface_theme }}"
+     data-testing-method="{{ request.identity.testing_method }}"
+</div>
+
 
     {% comment %}
     We put javascript for *all* pages in the base template, with maximum expiry
@@ -198,6 +214,7 @@
     <script type="text/javascript" src="{{ STATIC_URL }}js/create.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/preferences.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/viewset.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/modals.js"></script>
     {% endcompress %}
 
   </body>

@@ -14,6 +14,7 @@ from django.utils import simplejson
 from piston.handler import BaseHandler
 from piston.utils import rc
 
+from accounts.forms import PreferencesForm
 from accounts.models import Account
 from bibleverses.models import UserVerseStatus, Verse, StageType, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, MAX_VERSE_QUERY_SIZE
 from bibleverses.forms import VerseSelector, PassageVerseSelector
@@ -201,3 +202,23 @@ class GetPassage(BaseHandler):
             return validation_error_response({'__all__': [e.message]})
         return {'reference': reference,
                 'verse_list': [{'reference': v.reference, 'text': v.text} for v in verse_list]}
+
+
+class SetPreferences(BaseHandler):
+    allowed_methods = ('POST',)
+    fields = (
+        ('default_bible_version', ('slug',)),
+        'testing_method',
+        'enable_animations',
+        'interface_theme',
+        'preferences_setup',
+        )
+
+    @require_identity_method
+    def create(self, request):
+        form = PreferencesForm(request.POST, instance=request.identity)
+        if form.is_valid():
+            identity = form.save()
+            return identity
+        else:
+            return validation_error_response(form.errors)

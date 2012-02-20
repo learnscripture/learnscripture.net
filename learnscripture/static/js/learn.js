@@ -5,6 +5,8 @@ var learnscripture =
         // User prefs
         var preferences = null;
 
+        var isLearningPage = null;
+
         // Controls
         var inputBox = null;
         var testingStatus = null;
@@ -87,7 +89,7 @@ var learnscripture =
         };
 
         var hideWord = function(word, options) {
-            if (preferences.animations) {
+            if (preferences.enableAnimations) {
                 if (options == undefined) {
                     options = {duration: 300, queue: false};
                 }
@@ -98,7 +100,7 @@ var learnscripture =
         };
 
         var showWord = function(word) {
-            if (preferences.animations) {
+            if (preferences.enableAnimations) {
                 word.animate({'opacity': '1'}, {duration: 300, queue: false});
             } else {
                 word.css({'opacity': '1'});
@@ -131,7 +133,7 @@ var learnscripture =
         };
 
         var flashMsg = function(elements) {
-            if (preferences.animations) {
+            if (preferences.enableAnimations) {
                 elements.css({opacity:1}).animate({opacity: 0},
                                                   {duration: 1000, queue: false});
             } else {
@@ -447,7 +449,7 @@ var learnscripture =
         };
 
         var showInstructions = function(stageName) {
-            if (preferences.animations) {
+            if (preferences.enableAnimations) {
                 // Fade out old instructions, fade in the new
                 $('#id-instructions div').animate(
                     {opacity: 0},
@@ -592,7 +594,7 @@ var learnscripture =
                         '<td><progress value="0" max="100">0%</progress>' +
                         '</td></tr>');
                 $('.progress table').prepend(progressRow);
-                if (preferences.animations) {
+                if (preferences.enableAnimations) {
                     progressRow.show('200');
                 } else {
                     progressRow.show();
@@ -731,34 +733,15 @@ var learnscripture =
         };
 
         var bindDocKeyPress = function() {
-            $(document).bind('keypress', docKeyPress);
+            if (isLearningPage) {
+                $(document).bind('keypress', docKeyPress);
+            }
         }
         var unbindDocKeyPress = function() {
-            $(document).unbind('keypress');
+            if (isLearningPage) {
+                $(document).unbind('keypress');
+            }
         }
-
-        // setup and wiring
-        var start = function(prefs) {
-            preferences = prefs;
-            inputBox = $('#id-typing');
-            inputBox.keydown(inputKeyDown);
-            testingStatus = $('#id-testing-status');
-            bindDocKeyPress();
-            $('#id-next-btn').show().click(next);
-            $('#id-back-btn').show().click(back);
-            $('#id-next-verse-btn').click(nextVerse);
-            $('#id-context-next-verse-btn').click(markReadAndNextVerse);
-            $('#id-version-select').change(versionSelectChanged);
-            $('#id-help-btn').click(function(ev) {
-                if (preferences.animations) {
-                    $('#id-help').toggle('fast');
-                } else {
-                    $('#id-help').toggle();
-                }
-                $('#id-help-btn').button('toggle');
-            });
-            nextVerse();
-        };
 
         var nextVerse = function() {
             $('.progress table tr').remove();
@@ -817,7 +800,7 @@ var learnscripture =
             });
 
             // First fix the height
-            if (preferences.animations) {
+            if (preferences.enableAnimations) {
                 $('.previous-verse').css({'height': $('.previous-verse').height().toString()});
             }
 
@@ -831,7 +814,7 @@ var learnscripture =
 
             // Now shrink the area
             var wordHeight = $('.previous-verse .word, .previous-verse .testedword').css('line-height');
-            if (preferences.animations) {
+            if (preferences.enableAnimations) {
                 $('.previous-verse')
                     .css({display: 'table-cell'})
                     .animate({height: wordHeight},
@@ -975,8 +958,45 @@ var learnscripture =
             console.log("AJAX error: %s, %s, %o", textStatus, errorThrown, jqXHR);
         };
 
+
+
+        // setup and wiring
+        var setupLearningControls = function(prefs) {
+            isLearningPage = ($('#id-verse-wrapper').length > 0);
+            if (!isLearningPage) {
+                return;
+            }
+
+            preferences = learnscripture.getPreferences();
+            // Listen for changes to preferences
+            $('#id-preferences-data').bind('preferencesSet', function(ev, prefs) {
+                console.log('preferences received:');
+                console.log(prefs);
+                preferences = prefs;
+            });
+
+            inputBox = $('#id-typing');
+            inputBox.keydown(inputKeyDown);
+            testingStatus = $('#id-testing-status');
+            bindDocKeyPress();
+            $('#id-next-btn').show().click(next);
+            $('#id-back-btn').show().click(back);
+            $('#id-next-verse-btn').click(nextVerse);
+            $('#id-context-next-verse-btn').click(markReadAndNextVerse);
+            $('#id-version-select').change(versionSelectChanged);
+            $('#id-help-btn').click(function(ev) {
+                if (preferences.enableAnimations) {
+                    $('#id-help').toggle('fast');
+                } else {
+                    $('#id-help').toggle();
+                }
+                $('#id-help-btn').button('toggle');
+            });
+            nextVerse();
+        };
+
         learnscripture.handlerAjaxError = handlerAjaxError;
-        learnscripture.start = start;
+        learnscripture.setupLearningControls = setupLearningControls;
         learnscripture.unbindDocKeyPress = unbindDocKeyPress;
         learnscripture.bindDocKeyPress = bindDocKeyPress;
         return learnscripture;
@@ -1036,46 +1056,6 @@ var min3 = function(x,y,z) {
     return z;
 };
 
-$(document).ajaxSend(function(event, xhr, settings) {
-    function getCookie(name) {
-        var cookieValue = null;
-        if (document.cookie && document.cookie != '') {
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-                var cookie = jQuery.trim(cookies[i]);
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-    function sameOrigin(url) {
-        // url could be relative or scheme relative or absolute
-        var host = document.location.host; // host + port
-        var protocol = document.location.protocol;
-        var sr_origin = '//' + host;
-        var origin = protocol + sr_origin;
-        // Allow absolute or scheme relative URLs to same origin
-        return (url == origin || url.slice(0, origin.length + 1) == origin + '/') ||
-            (url == sr_origin || url.slice(0, sr_origin.length + 1) == sr_origin + '/') ||
-            // or any other URL that isn't scheme relative or absolute i.e relative.
-            !(/^(\/\/|http:|https:).*/.test(url));
-    }
-    function safeMethod(method) {
-        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-    }
-
-    if (!safeMethod(settings.type) && sameOrigin(settings.url)) {
-        xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-    }
-});
-
 $(document).ready(function() {
-    if ($('#id-verse-wrapper').length > 0) {
-        learnscripture.start($('#id-preferences-data').data());
-    }
-    $('.topbar').dropdown();
+    learnscripture.setupLearningControls();
 });

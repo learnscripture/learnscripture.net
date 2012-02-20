@@ -106,6 +106,11 @@ class Identity(models.Model):
     def __repr__(self):
         return unicode(self)
 
+    @property
+    def preferences_setup(self):
+        return self.default_bible_version is not None and self.testing_method is not None
+
+
     def add_verse_set(self, verse_set, version=None):
         """
         Adds the verses in a VerseSet to the user's UserVerseStatus objects,

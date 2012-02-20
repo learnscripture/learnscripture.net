@@ -62,8 +62,13 @@ class LiveServerTests(LiveServerTestCase):
         driver = self.driver
         Select(driver.find_element_by_id("id_default_bible_version")).select_by_visible_text("KJV")
         driver.find_element_by_id("id_testing_method_0").click()
-        driver.find_element_by_id("id-save-btn").click()
-        self.wait_until_loaded('body')
+        if 'id-preferences-save-btn' in driver.page_source:
+            # popup
+            driver.find_element_by_id("id-preferences-save-btn").click()
+            self.wait_for_ajax()
+        else:
+            driver.find_element_by_id("id-save-btn").click()
+            self.wait_until_loaded('body')
 
     def create_account(self):
         KJV = BibleVersion.objects.get(slug='KJV')
