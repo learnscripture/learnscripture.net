@@ -97,6 +97,12 @@ def choose(request):
     Choose a verse or verse set
     """
     if request.method == "POST":
+        version = None
+        try:
+            version = BibleVersion.objects.get(slug=request.POST['version_slug'])
+        except KeyError, BibleVersion.DoesNotExist:
+            version = request.identity.default_bible_version
+
         # Handle choose set
         vs_id = request.POST.get('verseset_id', None)
         if vs_id is not None:
@@ -106,20 +112,19 @@ def choose(request):
                 # Shouldn't be possible by clicking on buttons.
                 pass
             if vs is not None:
-                return learn_set(request, request.identity.add_verse_set(vs))
+                return learn_set(request, request.identity.add_verse_set(vs, version=version))
 
         ref = request.POST.get('reference', None)
         if ref is not None:
             # First ensure it is valid
             try:
-                request.identity.default_bible_version.get_verse_list(
-                    ref, max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
+                version.get_verse_list(ref, max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
             except InvalidVerseReference:
                 pass # Ignore the post.
             else:
                 vc, n = VerseChoice.objects.get_or_create(reference=ref,
                                                           verse_set=None)
-                return learn_set(request, [request.identity.add_verse_choice(vc)])
+                return learn_set(request, [request.identity.add_verse_choice(vc, version=version)])
 
     c = {}
     verse_sets = VerseSet.objects.all().order_by('name').prefetch_related('verse_choices')
