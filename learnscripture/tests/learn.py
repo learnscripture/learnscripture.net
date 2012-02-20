@@ -23,7 +23,6 @@ class LearnTests(LiveServerTests):
         driver.get(self.live_server_url + reverse('start'))
         self.set_preferences()
 
-
     def choose_verse_set(self, name):
         verse_set = VerseSet.objects.get(name=name)
         driver = self.driver

@@ -162,7 +162,9 @@
   </div>
 </div>
 
+{% endif %}
 
+{% if request.identity %}
 <div id="id-preferences-data"
      data-animations="{{ request.identity.enable_animations|yesno:"true,false,false" }}"
      data-theme="{{ request.identity.interface_theme }}"
