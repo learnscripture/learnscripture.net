@@ -122,16 +122,17 @@
     <h3>Sign in</h3>
   </div>
 
+  <form action="{% url 'login' %}" method="POST">
+    {% csrf_token %}
+
   <div class="modal-body">
-    <form action="" method="POST">
-      {% csrf_token %}
       {{ login_form|bootstrap }}
-    </form>
   </div>
   <div class="modal-footer">
-    <a href="#" id="id-sign-in-btn" class="btn primary default">Sign in</a>
+    <input type="submit" id="id-sign-in-btn" class="btn primary default" value="Sign in" />
     <a href="#" id="id-sign-in-cancel-btn" class="btn secondary">Cancel</a>
   </div>
+  </form>
 </div>
 
 {% endif %}
