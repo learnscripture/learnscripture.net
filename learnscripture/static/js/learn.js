@@ -970,8 +970,6 @@ var learnscripture =
             preferences = learnscripture.getPreferences();
             // Listen for changes to preferences
             $('#id-preferences-data').bind('preferencesSet', function(ev, prefs) {
-                console.log('preferences received:');
-                console.log(prefs);
                 preferences = prefs;
             });
 
