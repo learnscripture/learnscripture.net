@@ -31,3 +31,19 @@ class ViewSetTests(LiveServerTests):
 
         self.wait_until_loaded('body')
         self.assertIn("replied", driver.page_source)
+
+    def test_learn_selected_version(self):
+        driver = self.driver
+        self.login(self._account)
+        vs = VerseSet.objects.get(slug='bible-101')
+
+        self.assertEqual(self._identity.verse_statuses.all().count(), 0)
+
+        driver.get(self.live_server_url + reverse('view_verse_set', kwargs=dict(slug=vs.slug))
+                   + "?version=NET")
+        driver.find_element_by_css_selector("input[value='Learn']").click()
+
+        # Can use 'all' here because this is the first time we've chosen anything
+        verse_statuses = self._identity.verse_statuses.all()
+        self.assertTrue(len(verse_statuses) > 0)
+        self.assertTrue(all(uvs.version.slug == 'NET' for uvs in verse_statuses))

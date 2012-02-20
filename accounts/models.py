@@ -106,11 +106,14 @@ class Identity(models.Model):
     def __repr__(self):
         return unicode(self)
 
-    def add_verse_set(self, verse_set):
+    def add_verse_set(self, verse_set, version=None):
         """
         Adds the verses in a VerseSet to the user's UserVerseStatus objects,
         and returns the UserVerseStatus objects.
         """
+        if version is None:
+            version = self.default_bible_version
+
         out = []
         vcs = list(verse_set.verse_choices.all())
         vc_ids = [vc.id for vc in vcs]
@@ -125,20 +128,23 @@ class Identity(models.Model):
                 # the version, so use the existing UVS.
                 out.append(uvss_dict[vc.id])
             else:
-                # Otherwise we set the version to the default
-                new_uvs = self.create_verse_status(vc, self.default_bible_version)
+                # Otherwise we set the version to the chosen one
+                new_uvs = self.create_verse_status(vc, version)
                 new_uvs.ignored = False
                 new_uvs.save()
 
                 out.append(new_uvs)
         return out
 
-    def add_verse_choice(self, verse_choice):
+    def add_verse_choice(self, verse_choice, version=None):
+        if version is None:
+            version = self.default_bible_version
+
         existing = list(self.verse_statuses.filter(verse_choice=verse_choice, ignored=False))
         if existing:
             return existing[0]
         else:
-            return self.create_verse_status(verse_choice, self.default_bible_version)
+            return self.create_verse_status(verse_choice, version)
 
     def record_verse_action(self, reference, version_slug, stage_type, accuracy=None):
         s = self.verse_statuses.filter(verse_choice__reference=reference,
