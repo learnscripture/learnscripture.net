@@ -16,14 +16,17 @@ def home(request):
     return render(request, 'learnscripture/home.html')
 
 
+
+def bible_versions_for_request(request):
+    if request.user.is_superuser:
+        return BibleVersion.objects.all()
+    else:
+        return BibleVersion.objects.filter(public=True)
+
+
 @require_preferences
 def learn(request):
-    c = {}
-    if request.user.is_superuser:
-        c['bible_versions'] = BibleVersion.objects.all()
-    else:
-        c['bible_versions'] = BibleVersion.objects.filter(public=True)
-
+    c = {'bible_versions': bible_versions_for_request(request)}
     return render(request, 'learnscripture/learn.html', c)
 
 
@@ -152,9 +155,16 @@ def choose(request):
 def view_verse_set(request, slug):
     c = {}
     verse_set = get_object_or_404(VerseSet, slug=slug)
-    # Decorate the verse choices with the text.
 
-    version = request.identity.default_bible_version
+    version = None
+    try:
+        version = BibleVersion.objects.get(slug=request.GET['version'])
+    except KeyError, BibleVersion.DoesNotExist:
+        pass
+    if version is None:
+        version = request.identity.default_bible_version
+
+    # Decorate the verse choices with the text.
     verse_choices = list(verse_set.verse_choices.all())
     verses = version.get_verses_by_reference_bulk([vc.reference for vc in verse_choices])
     for vc in verse_choices:
@@ -163,6 +173,7 @@ def view_verse_set(request, slug):
     c['verse_set'] = verse_set
     c['verse_choices'] = verse_choices
     c['version'] = version
+    c['bible_versions'] = bible_versions_for_request(request)
     return render(request, 'learnscripture/single_verse_set.html', c)
 
 
