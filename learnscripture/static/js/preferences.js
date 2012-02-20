@@ -55,7 +55,7 @@ var learnscripture =
         }
 
         var setupPreferencesControls = function() {
-            $('.preferences-link').click(function(ev) {
+            $(".preferences-link,a[href='/preferences/']").click(function(ev) {
                 ev.preventDefault();
                 showPreferences();
             });
