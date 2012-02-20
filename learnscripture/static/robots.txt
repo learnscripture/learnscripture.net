@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /preferences/
+Disallow: /learn/
+Disallow: /dashboard/
+Disallow: /create-verse-set/
