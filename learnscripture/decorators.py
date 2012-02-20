@@ -21,12 +21,23 @@ def require_identity(view_func):
 require_identity_method = method_decorator(require_identity)
 
 
+def has_preferences(request):
+    identity = getattr(request, 'identity', None)
+    if identity is None:
+        return False
+    return identity.preferences_setup
+
+
+def redirect_via_prefs(request):
+    return HttpResponseRedirect(reverse('preferences') + "?next=%s" % urlquote(request.get_full_path()))
+
+
 def require_preferences(view_func):
     @wraps(view_func)
     @require_identity
     def view(request, *args, **kwargs):
         identity = request.identity
-        if identity.default_bible_version is None or identity.testing_method is None:
-            return HttpResponseRedirect(reverse('preferences') + "?next=%s" % urlquote(request.get_full_path()))
+        if not has_preferences(request):
+            return redirect_via_prefs(request)
         return view_func(request, *args, **kwargs)
     return view

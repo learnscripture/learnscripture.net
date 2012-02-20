@@ -17,17 +17,12 @@ class LearnTests(LiveServerTests):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json']
 
-    def setUp(self):
-        super(LearnTests, self).setUp()
-        driver = self.driver
-        driver.get(self.live_server_url + reverse('start'))
-        self.set_preferences()
-
     def choose_verse_set(self, name):
         verse_set = VerseSet.objects.get(name=name)
         driver = self.driver
         driver.get(self.live_server_url + reverse('choose'))
         driver.find_element_by_id("id-learn-verseset-btn-%d" % verse_set.id).click()
+        self.set_preferences()
         self.wait_until_loaded('body')
         self.assertTrue(driver.current_url.endswith('/learn/'))
         self.wait_for_ajax()
@@ -67,15 +62,19 @@ class LearnTests(LiveServerTests):
         driver = self.driver
         driver.get(self.live_server_url + reverse('choose'))
         driver.find_element_by_css_selector("a[href='#id-tab-individual']").click()
-        driver.find_element_by_id("id_chapter").send_keys("1")
-        driver.find_element_by_id("id_start_verse").send_keys("1")
+        Select(driver.find_element_by_id("id_book")).select_by_visible_text("John")
+        driver.find_element_by_id("id_chapter").send_keys("3")
+        driver.find_element_by_id("id_start_verse").send_keys("16")
         driver.find_element_by_css_selector("input[name=lookup]").click()
         self.wait_until_loaded('body')
-        driver.find_element_by_css_selector("input[name=lookup]").click()
+
+        self.assertIn("For this is the way God loved the world", driver.page_source)
+
         driver.find_element_by_css_selector("#id-tab-individual input[value=Learn]").click()
+        self.set_preferences()
         self.wait_until_loaded('body')
         self.wait_for_ajax()
-        self.assertEqual(driver.find_element_by_id("id-verse-title").text, u"Genesis 1:1")
+        self.assertEqual(driver.find_element_by_id("id-verse-title").text, u"John 3:16")
 
     def test_change_version_passage(self):
         verse_set = self.choose_verse_set('Psalm 23')

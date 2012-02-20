@@ -3,6 +3,7 @@ from collections import namedtuple
 from django.core.urlresolvers import reverse
 from fiber.context_processors import page_info
 
+from accounts.forms import PreferencesForm
 from learnscripture.utils.context import lazy_dict
 from .forms import SignUpForm, LogInForm
 
@@ -20,8 +21,18 @@ def session_forms(request):
     def login_form():
         return LogInForm(prefix="login")
 
+    def preferences_form():
+        if hasattr(request, 'identity'):
+            instance = request.identity
+        else:
+            instance = None
+
+        return PreferencesForm(instance=instance)
+
     return {'signup_form': signup_form,
-            'login_form': login_form}
+            'login_form': login_form,
+            'preferences_form': preferences_form,
+            }
 
 class MenuItem(object):
     def __init__(self, caption=None, path=None, active=None):

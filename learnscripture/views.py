@@ -9,12 +9,30 @@ from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerse
 from learnscripture import session, auth
 from bibleverses.forms import VerseSelector, VerseSetForm, PassageVerseSelector
 
-from .decorators import require_identity, require_preferences
+from .decorators import require_identity, require_preferences, has_preferences, redirect_via_prefs
+
+#
+# === Notes ===
+#
+# Care is needed with identity/account:
+#
+# - see notes in accounts/models.py for the distinction
+#
+# - we try to avoid creating Identity objects until we need to, so that
+#   bots like web crawlers don't cause database inserts
+#
+# - if there is no current 'Identity' the user will appear
+#   as 'Guest user' (session.html template, and menu in base.html)
+# - if there is an Identity, but no Account, they will still
+#   appear as 'Guest user', but now have the possibility of stored
+#   data and preferences.
+#
+# - We do need Identity and preferences to be set for some actions,
+#   so we create it as needed, typically by the popup preferences form
 
 
 def home(request):
     return render(request, 'learnscripture/home.html')
-
 
 
 def bible_versions_for_request(request):
@@ -36,11 +54,11 @@ def preferences(request):
         form = PreferencesForm(request.POST, instance=request.identity)
         if form.is_valid():
             form.save()
-            messages.info(request, "Prefences updated, thank you.")
             return get_next(request, reverse('start'))
     else:
         form = PreferencesForm(instance=request.identity)
-    c = {'form':form}
+    c = {'form':form,
+         'hide_preferences_popup': True}
     return render(request, 'learnscripture/preferences.html', c)
 
 
@@ -59,7 +77,6 @@ def get_next(request, default_url):
             return HttpResponseRedirect(next)
 
     return HttpResponseRedirect(default_url)
-
 
 
 def learn_set(request, l):
@@ -91,12 +108,18 @@ def start(request):
     return render(request, 'learnscripture/start.html', c)
 
 
-@require_preferences
+# No 'require_preferences' or 'require_identity' so that bots can browse this
+# page and the linked pages unhindered, for SEO.
+
 def choose(request):
     """
     Choose a verse or verse set
     """
     if request.method == "POST":
+        if not has_preferences(request):
+            # Shouldn't get here if UI preferences javascript is working right.
+            return redirect_via_prefs(request)
+
         version = None
         try:
             version = BibleVersion.objects.get(slug=request.POST['version_slug'])
@@ -140,9 +163,15 @@ def choose(request):
         if verse_form.is_valid():
             reference = verse_form.make_reference()
             c['reference'] = reference
+
+            if has_preferences(request):
+                version = request.identity.default_bible_version
+            else:
+                version = get_default_bible_version()
+
             try:
-                verse_list = request.identity.default_bible_version.get_verse_list(
-                    reference, max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
+                verse_list = version.get_verse_list(reference,
+                                                    max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
             except InvalidVerseReference as e:
                 c['individual_search_msg'] = e.message
             else:
@@ -156,7 +185,13 @@ def choose(request):
     return render(request, 'learnscripture/choose.html', c)
 
 
-@require_preferences
+def get_default_bible_version():
+    # Use NET as default version because:
+    # - they let us use their version without royalties
+    # - it is a modern readable version.
+    return BibleVersion.objects.get(slug='NET')
+
+
 def view_verse_set(request, slug):
     c = {}
     verse_set = get_object_or_404(VerseSet, slug=slug)
@@ -166,8 +201,12 @@ def view_verse_set(request, slug):
         version = BibleVersion.objects.get(slug=request.GET['version'])
     except KeyError, BibleVersion.DoesNotExist:
         pass
+
     if version is None:
-        version = request.identity.default_bible_version
+        if hasattr(request, 'identity') and request.identity.default_bible_version is not None:
+            version = request.identity.default_bible_version
+        else:
+            version = get_default_bible_version()
 
     # Decorate the verse choices with the text.
     verse_choices = list(verse_set.verse_choices.all())

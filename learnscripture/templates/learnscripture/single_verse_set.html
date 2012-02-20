@@ -62,7 +62,7 @@ Verse set: {{ verse_set.name }}
   {% if verse_set.created_by_id == request.identity.account_id %}
   <a class="btn" href="{% url 'edit_set' slug=verse_set.slug %}">Edit</a>
   {% endif %}
-  <input type="submit" class="btn primary" value="Learn">
+  <input type="submit" class="btn primary needs-preferences" value="Learn">
 </form>
 
 {% else %}
