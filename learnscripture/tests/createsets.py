@@ -145,7 +145,8 @@ class CreateSetTests(LiveServerTests):
         driver = self.driver
         driver.get(self.live_server_url + reverse('create_set'))
         self.set_preferences()
-        self.assertIn('You need to create an account first', driver.page_source)
+        self.assertIn('You need to', driver.page_source)
+        self.assertIn('create an account', driver.page_source)
 
     def test_create_passage_set(self):
         self.login()
