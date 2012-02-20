@@ -34,9 +34,7 @@ def redirect_via_prefs(request):
 
 def require_preferences(view_func):
     @wraps(view_func)
-    @require_identity
     def view(request, *args, **kwargs):
-        identity = request.identity
         if not has_preferences(request):
             return redirect_via_prefs(request)
         return view_func(request, *args, **kwargs)

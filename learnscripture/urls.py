@@ -20,6 +20,7 @@ urlpatterns = patterns('',
                        (r'^api/learnscripture/v1/', include('learnscripture.api.urls')),
                        (r'^jsi18n/$', 'django.views.i18n.javascript_catalog', {'packages': ('fiber',),}),
                        url(r'^admin/', include(admin.site.urls)),
+                       url(r'^robots.txt$',  'django.views.generic.simple.redirect_to', {'url': '/static/robots.txt'}),
                        (r'', 'fiber.views.page'),
 )
 
