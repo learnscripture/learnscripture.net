@@ -33,7 +33,7 @@ class LearnTests(LiveServerTests):
         self.wait_for_ajax()
         return verse_set
 
-    def test_save_score(self):
+    def test_save_strength(self):
         verse_set = self.choose_verse_set('Bible 101')
         driver = self.driver
 
@@ -59,7 +59,7 @@ class LearnTests(LiveServerTests):
 
         self.wait_for_ajax()
 
-        # Check the score
+        # Check the strength
         uvs = identity.verse_statuses.get(verse_choice__reference='John 3:16')
         self.assertEqual(uvs.strength, memorymodel.INITIAL_STRENGTH_FACTOR)
 
