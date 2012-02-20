@@ -96,7 +96,7 @@
 
 
 <!-- popup forms -->
-{% if request.identity %}
+{% if request.identity and not request.identity.account %}
 
 <div id="id-signup-form" class="modal hide">
   <div class="modal-header">
@@ -136,6 +136,9 @@
   </div>
 </div>
 
+{% endif %}
+
+{% if request.identity.account %}
 
 <div id="id-logout-form" class="modal hide">
   <div class="modal-header">
