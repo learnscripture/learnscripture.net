@@ -108,7 +108,7 @@ class CreateSetTests(LiveServerTests):
         driver = self.driver
         driver.get(self.live_server_url + reverse('edit_set', kwargs=dict(slug=vs.slug)))
         e = driver.find_element_by_css_selector("#id-selection-verse-list tbody tr:first-child td")
-        ActionChains(driver).drag_and_drop_by_offset(e, 0, 100).perform()
+        ActionChains(driver).drag_and_drop_by_offset(e, 0, 110).perform()
 
         driver.find_element_by_id("id-selection-save-btn").click()
 
