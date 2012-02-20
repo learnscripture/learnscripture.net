@@ -1,8 +1,14 @@
+from __future__ import absolute_import
+
+from django.core.urlresolvers import reverse
 from django.test import LiveServerTestCase
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select, WebDriverWait
+
+from accounts.models import Identity, Account, TestingMethod
+from bibleverses.models import BibleVersion
 
 
 class LiveServerTests(LiveServerTestCase):
@@ -58,3 +64,30 @@ class LiveServerTests(LiveServerTestCase):
         driver.find_element_by_id("id_testing_method_0").click()
         driver.find_element_by_id("id-save-btn").click()
         self.wait_until_loaded('body')
+
+    def create_account(self):
+        KJV = BibleVersion.objects.get(slug='KJV')
+        identity = Identity.objects.create(default_bible_version=KJV,
+                                            testing_method=TestingMethod.FULL_WORDS)
+        account = Account.objects.create(email="test1@test.com",
+                                          username="test1",
+                                         )
+        account.set_password('password')
+        account.save()
+        identity.account = account
+        identity.save()
+        return (identity, account)
+
+    def login(self, account):
+        driver = self.driver
+        driver.get(self.live_server_url + reverse('start'))
+        driver.find_element_by_id("id-session-menu").click()
+        driver.find_element_by_link_text("Sign in").click()
+        driver.find_element_by_id("id_login-email").clear()
+        driver.find_element_by_id("id_login-email").send_keys(account.email)
+        driver.find_element_by_id("id_login-password").clear()
+        driver.find_element_by_id("id_login-password").send_keys("password")
+        driver.find_element_by_id("id-sign-in-btn").click()
+        self.wait_until_loaded('.logout-link')
+        elem = driver.find_element_by_id('id-session-menu')
+        self.assertEqual(elem.text, account.username)
