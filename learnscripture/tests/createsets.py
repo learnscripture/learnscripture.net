@@ -8,8 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import Select
 
-from accounts.models import Identity, Account, TestingMethod
-from bibleverses.models import BibleVersion, VerseSet, VerseSetType, VerseChoice
+from bibleverses.models import VerseSet, VerseSetType, VerseChoice
 
 from .base import LiveServerTests
 
@@ -20,33 +19,10 @@ class CreateSetTests(LiveServerTests):
 
     def setUp(self):
         super(CreateSetTests, self).setUp()
-        KJV = BibleVersion.objects.get(slug='KJV')
-        self._identity = Identity.objects.create(default_bible_version=KJV,
-                                                 testing_method=TestingMethod.FULL_WORDS)
-        self._account = Account.objects.create(email="test1@test.com",
-                                               username="test1",
-                                               )
-        self._account.set_password('password')
-        self._account.save()
-        self._identity.account = self._account
-        self._identity.save()
-
-    def login(self):
-        driver = self.driver
-        driver.get(self.live_server_url + reverse('start'))
-        driver.find_element_by_id("id-session-menu").click()
-        driver.find_element_by_link_text("Sign in").click()
-        driver.find_element_by_id("id_login-email").clear()
-        driver.find_element_by_id("id_login-email").send_keys("test1@test.com")
-        driver.find_element_by_id("id_login-password").clear()
-        driver.find_element_by_id("id_login-password").send_keys("password")
-        driver.find_element_by_id("id-sign-in-btn").click()
-        self.wait_until_loaded('.logout-link')
-        elem = driver.find_element_by_id('id-session-menu')
-        self.assertEqual(elem.text, 'test1')
+        self._identity, self._account = self.create_account()
 
     def test_create_set(self):
-        self.login()
+        self.login(self._account)
         driver = self.driver
         driver.get(self.live_server_url + "/create-verse-set/")
         driver.find_element_by_id("id_selection-name").clear()
@@ -73,7 +49,7 @@ class CreateSetTests(LiveServerTests):
         If they forget the name, it should not validate,
         but shouldn't forget the verse list
         """
-        self.login()
+        self.login(self._account)
         driver = self.driver
         driver.get(self.live_server_url + reverse('create_set'))
         Select(driver.find_element_by_id("id_selection-book")).select_by_visible_text("Genesis")
@@ -104,7 +80,7 @@ class CreateSetTests(LiveServerTests):
                                       set_order=1)
         vc3 = vs.verse_choices.create(reference='Genesis 1:10',
                                       set_order=2)
-        self.login()
+        self.login(self._account)
         driver = self.driver
         driver.get(self.live_server_url + reverse('edit_set', kwargs=dict(slug=vs.slug)))
         e = driver.find_element_by_css_selector("#id-selection-verse-list tbody tr:first-child td")
@@ -118,9 +94,8 @@ class CreateSetTests(LiveServerTests):
         self.assertEqual(vs.verse_choices.get(reference='Genesis 1:1').set_order, 1)
         self.assertEqual(vs.verse_choices.get(reference='Genesis 1:5').set_order, 0)
 
-
     def test_remove(self):
-        self.login()
+        self.login(self._account)
         vs = VerseSet.objects.create(created_by=self._account,
                                      set_type=VerseSetType.SELECTION,
                                      name='my set')
@@ -149,7 +124,7 @@ class CreateSetTests(LiveServerTests):
         self.assertIn('create an account', driver.page_source)
 
     def test_create_passage_set(self):
-        self.login()
+        self.login(self._account)
         driver = self.driver
         driver.get(self.live_server_url + "/create-verse-set/")
         driver.find_element(By.CSS_SELECTOR, "a[href='#id-tab-passage']").click()
@@ -176,3 +151,4 @@ class CreateSetTests(LiveServerTests):
         vs = VerseSet.objects.get(name='Genesis 1',
                                   set_type=VerseSetType.PASSAGE)
         self.assertTrue(len(vs.verse_choices.all()), 10)
+
