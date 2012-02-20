@@ -290,5 +290,31 @@
         "verse_number": 16,
         "bible_verse_number": 26136
     }
+},
+{
+    "pk": null,
+    "model": "bibleverses.verse",
+    "fields": {
+        "reference": "John 14:6",
+        "chapter_number": 14,
+        "text": "Jesus saith unto him, I am the way, the truth, and the life: no man cometh unto the Father, but by me. ",
+        "book_number": 42,
+        "version": 1,
+        "verse_number": 6,
+        "bible_verse_number": 26674
+    }
+},
+{
+    "pk": null,
+    "model": "bibleverses.verse",
+    "fields": {
+        "reference": "John 14:6",
+        "chapter_number": 14,
+        "text": "Jesus replied, \"I am the way, and the truth, and the life. No one comes to the Father except through me.\"",
+        "book_number": 42,
+        "version": 2,
+        "verse_number": 6,
+        "bible_verse_number": 26674
+    }
 }
 ]

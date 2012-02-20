@@ -42,11 +42,18 @@ Verse set: {{ verse_set.name }}
 </p>
 {% endif %}
 
-
-<div class="versioninfo">
-{{ version.full_name }} ({{ version.short_name }})
+<form action="" method="GET">
+<div id="id-version">
+  {{ version.full_name }} ({{ version.short_name }}) | Change
+  <select id="id-version-select" name="version">
+    {% for v in bible_versions %}
+    <option value="{{ v.slug }}"
+            {% if v.slug == version.slug %}selected{% endif %}
+            >{{ v.short_name }}</option>
+    {% endfor %}
+  </select>
 </div>
-
+</form>
 
 <form action="{% url 'choose' %}" method="POST">
   {% csrf_token %}
