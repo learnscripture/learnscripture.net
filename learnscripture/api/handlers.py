@@ -103,12 +103,12 @@ class ActionCompleteHandler(BaseHandler):
         # TODO: store StageComplete
         stage = StageType.get_value_for_name(request.data['stage'])
         if stage == StageType.TEST:
-            score = float(request.data['score'])
+            accuracy = float(request.data['accuracy'])
         else:
-            score = None
+            accuracy = None
 
         request.identity.record_verse_action(reference, version_slug,
-                                             stage, score);
+                                             stage, accuracy);
         if (stage == StageType.TEST or
             (stage == StageType.READ and not verse_status['needs_testing'])):
             session.remove_user_verse_status(request, reference, verse_set_id)

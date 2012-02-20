@@ -191,42 +191,42 @@ var learnscripture =
         }
 
         var testComplete = function() {
-            var score = 0;
+            var accuracy = 0;
             var mistakes = 0;
             $.each(testingMistakes, function(key, val) {
                 mistakes += val;
             });
-            score = 1 - (mistakes / (currentStage.testMaxAttempts * wordList.length));
+            accuracy = 1 - (mistakes / (currentStage.testMaxAttempts * wordList.length));
             $.ajax({url: '/api/learnscripture/v1/actioncomplete/',
                     dataType: 'json',
                     type: 'POST',
                     data: {
                         verse_status: JSON.stringify(currentVerseStatus, null, 2),
                         stage: STAGE_TYPE_TEST,
-                        score: score
+                        accuracy: accuracy
                     }});
-            var scorePercent = Math.floor(score * 100).toString()
-            $('#id-score').text(scorePercent + "%");
+            var accuracyPercent = Math.floor(accuracy * 100).toString()
+            $('#id-accuracy').text(accuracyPercent + "%");
             var comment =
-                scorePercent > 95 ? 'awesome!' :
-                scorePercent > 90 ? 'excellent!' :
-                scorePercent > 80 ? 'very good.' :
-                scorePercent > 70 ? 'good.' :
-                scorePercent > 50 ? 'OK.' :
-                scorePercent > 30 ? 'could do better!' :
+                accuracyPercent > 95 ? 'awesome!' :
+                accuracyPercent > 90 ? 'excellent!' :
+                accuracyPercent > 80 ? 'very good.' :
+                accuracyPercent > 70 ? 'good.' :
+                accuracyPercent > 50 ? 'OK.' :
+                accuracyPercent > 30 ? 'could do better!' :
                 "more practice needed!";
 
             $('#id-result-comment').text(comment);
             completeStageGroup();
-            if (scorePercent < 60) {
+            if (accuracyPercent < 60) {
                 $('#id-result-suggestion').text("We recommend a bit a more practice " +
                                                 "with this before continuing");
                 $('#id-more-practice-btn').addClass('primary').show();
                 $('#id-next-verse-btn').removeClass('primary');
                 $('#id-more-practice-btn').unbind().click(function() {
-                    if (scorePercent < 10) {
+                    if (accuracyPercent < 10) {
                         currentStageList = chooseStageListForStrength(0);
-                    } else if (scorePercent < 30) {
+                    } else if (accuracyPercent < 30) {
                         currentStageList = ['read', 'recall2', 'recall4', 'testFull'];
                     } else {
                         currentStageList = ['recall2', 'recall4', 'testFull'];
@@ -777,7 +777,7 @@ var learnscripture =
             // The other constants are picked by looking at the
             // output of accounts.memorymodel.test_run()
             if (strength < 0.02) {
-                // either first test, or first test after initial test score
+                // either first test, or first test after initial test accuracy
                 // of 20% or less. Do everything:
                 return ['read', 'recall1', 'recall2', 'recall3', 'recall4', 'testFull'];
             } else if (strength < 0.07) {
