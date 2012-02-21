@@ -121,12 +121,26 @@ Learn!
     <p>See the 'session' panel <span class="two-column-only">(right)</span><span class="one-column-only">(below)</span> for more controls.</p>
   </div>
 
-  <div class="progress two-column-only">
-    <hr>
-    <h3>Progress</h3>
-    <table>
-    </table>
+</div>
+
+{% endblock %}
+
+{% block rightcolumn %}
+
+<h3>Current verse</h3>
+
+
+<div>
+  <div>Stage: <span id="id-stage-caption"></span><br/>
+    <div class="progress two-column-only">
+    Progress: <br/>
+      <progress id="id-progress-bar" value="0" max="100">0%</progress>
+    </div>
   </div>
 </div>
+
+<hr>
+
+{% include 'learnscripture/session.html' %}
 
 {% endblock %}
