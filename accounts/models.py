@@ -318,13 +318,19 @@ class Identity(models.Model):
         return retval
 
     def passages_for_learning(self):
-        # Passages for self
+        """
+        Retrieves a list of VerseSet objects of 'passage' type that need
+        more initial learning.
+        They are decorated with 'untested_total' and 'tested_total' attributes.
+        """
         statuses = self.verse_statuses.filter(verse_choice__verse_set__set_type=VerseSetType.PASSAGE,
                                               ignored=False,
                                               memory_stage__lt=MemoryStage.TESTED)\
                                               .select_related('verse_choice',
                                                               'verse_choice__verse_set')
         verse_sets = {}
+
+        # We already have info needed for untested_total
         for s in statuses:
             vs_id = s.verse_choice.verse_set.id
             if vs_id not in verse_sets:
@@ -336,6 +342,7 @@ class Identity(models.Model):
 
             vs.untested_total += 1
 
+        # We need one additional query per VerseSet for untested_total
         for vs in verse_sets.values():
             vs.tested_total = self.verse_statuses.filter(verse_choice__verse_set=vs,
                                                          ignored=False,
