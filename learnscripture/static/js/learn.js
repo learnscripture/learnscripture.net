@@ -671,9 +671,15 @@ var learnscripture =
                 tagName == 'textarea') {
                 return;
             }
-            // Some android phones will bring up box for searching or something on almost
-            // any key press, and many devices will scroll on space bar:
-            ev.preventDefault();
+            // Some android phones will bring up box for searching or something
+            // on almost any key press. But we don't want to disable other
+            // keyboard shortcuts on desktop browsers.
+            if (!ev.altKey && !ev.ctrlKey && !ev.metaKey &&
+                !(ev.which >= 112 && ev.which <= 123) && // F1 - F12
+                !(ev.which == 0) // special characters
+               ) {
+                ev.preventDefault();
+            }
             switch (ev.which) {
             case 98: // 'b'
                 back();
@@ -688,6 +694,7 @@ var learnscripture =
                 moveSelectionRelative(1);
                 return;
             case 32: // Space
+                ev.preventDefault(); // Many devices scroll on space bar
                 toggleWord(getWordAt(selectedWordIndex));
                 return;
             case 13: // Enter
