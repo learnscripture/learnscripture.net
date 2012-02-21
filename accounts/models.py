@@ -291,7 +291,8 @@ class Identity(models.Model):
         import time
         now_seconds = time.time()
         qs = self.verse_statuses.filter(ignored=False, memory_stage=MemoryStage.TESTED)\
-            .exclude(verse_choice__verse_set__set_type=VerseSetType.PASSAGE)
+            .exclude(verse_choice__verse_set__set_type=VerseSetType.PASSAGE)\
+            .select_related('verse_choice')
         return memorymodel.filter_qs(qs, now_seconds)
 
     def verse_statuses_for_learning(self):
