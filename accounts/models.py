@@ -22,6 +22,11 @@ TestingMethod = make_choices('TestingMethod',
                               (1, 'FIRST_LETTER', 'First letter - recommended for handheld devices and slower typers')]
                              )
 
+THEMES = [('calm', 'Slate'),
+          ('bubblegum', 'Bubblegum pink'),
+          ('bubblegum2', 'Bubblegum green'),
+          ]
+
 # Account is separate from Identity to allow guest users to use the site fully
 # without signing up.
 # Everything related to learning verses is related to Identity.
@@ -77,10 +82,7 @@ class Identity(models.Model):
     testing_method = models.PositiveSmallIntegerField(choices=TestingMethod.choice_list,
                                                       null=True, default=None)
     enable_animations = models.BooleanField(blank=True, default=False)
-    interface_theme = models.CharField(max_length=30, choices=[('calm', 'Slate'),
-                                                               ('bubblegum', 'Bubblegum'),
-                                                               ('bubblegum2', 'Bubblegum 2'),
-                                                               ],
+    interface_theme = models.CharField(max_length=30, choices=THEMES,
                                        default='calm')
 
     objects = IdentityManager()
