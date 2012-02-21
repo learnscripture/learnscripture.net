@@ -159,7 +159,7 @@ class LogInHandler(AccountCommon, BaseHandler):
     @validate(LogInForm, prefix="login")
     def create(self, request):
         # The form has validated the password already.
-        account = Account.objects.get(email=request.form.cleaned_data['email'].strip())
+        account = Account.objects.get(email__iexact=request.form.cleaned_data['email'].strip())
         session.login(request, account.identity)
         return account
 

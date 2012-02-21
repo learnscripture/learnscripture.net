@@ -46,7 +46,7 @@ class LogInForm(forms.Form):
         def fail():
             raise forms.ValidationError("Can't find an account matching that email address and password");
         try:
-            account = Account.objects.get(email=self.cleaned_data.get('email', '').strip())
+            account = Account.objects.get(email__iexact=self.cleaned_data.get('email', '').strip())
         except Account.DoesNotExist:
             fail()
 
