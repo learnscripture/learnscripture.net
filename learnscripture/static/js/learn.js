@@ -368,7 +368,15 @@ var learnscripture =
 
         // Utilities for stages
         var setProgress = function(stageIdx, fraction) {
-            $('#' + progressRowId(stageIdx) + ' progress').val(fraction * 100);
+            var progress = (stageIdx + fraction)/currentStageList.length * 100;
+            var bar = $('#id-progress-bar');
+            if (preferences.enableAnimations &&
+                Math.abs(parseInt(bar.val(), 10) - progress) > 5) {
+                bar.animate({value: progress,
+                             duration: 'fast'});
+            } else {
+                bar.val(progress);
+            }
         };
 
         var markRevealed = function(wordNumber) {
@@ -554,10 +562,6 @@ var learnscripture =
                         };
 
 
-        var progressRowId = function(stageIdx) {
-            return 'id-progress-row-' + (currentStageIdx + spentStagesCount).toString();
-        };
-
         var setupStage = function(idx) {
             // set the globals
             var currentStageName = currentStageList[idx];
@@ -582,28 +586,11 @@ var learnscripture =
             }
 
             showInstructions(currentStageName);
+            $('#id-stage-caption').text(currentStage.caption);
             // reset selected word
             moveSelection(0);
 
-            // Create progress bar for this stage.
-            var pRowId = progressRowId(currentStageIdx);
-            if (!document.getElementById(pRowId)) {
-                var progressRow = $(
-                    '<tr id="' + pRowId + '" style="display:none;">' +
-                        '<th>' + currentStage.caption + '</th>' +
-                        '<td><progress value="0" max="100">0%</progress>' +
-                        '</td></tr>');
-                $('.progress table').prepend(progressRow);
-                if (preferences.enableAnimations) {
-                    progressRow.show('200');
-                } else {
-                    progressRow.show();
-                }
-
-            }
             setProgress(currentStageIdx, 0);
-            $('th.currenttask').removeClass('currenttask');
-            $('#' + pRowId + ' th').addClass('currenttask');
         };
 
         // -- Moving between stages --
@@ -613,7 +600,6 @@ var learnscripture =
                 return;
             }
             if (currentStageIdx < currentStageList.length - 1) {
-                setProgress(currentStageIdx, 1);
                 setupStage(currentStageIdx + 1);
             }
         };
@@ -622,7 +608,6 @@ var learnscripture =
             if (currentStageIdx == 0) {
                 return;
             }
-            $('#' + progressRowId(currentStageIdx)).remove();
             setupStage(currentStageIdx - 1);
         };
 

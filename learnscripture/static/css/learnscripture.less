@@ -185,11 +185,6 @@
     border-color: darken(@bgColor1, 10%);
   }
 
-  .progress th.currenttask {
-    color: @white;
-    .gradientBar(@btnColor1, @btnColor2);
-  }
-
   .page-header {
     background-color: @bgColor1;
     border-color: darken(@bgColor1, 10%);
@@ -502,18 +497,12 @@ p.large {
   }
 
 .progress progress {
-  width: 200px;
+  width: 100%;
   }
 
-.progress table {
-  width: auto;
-  }
-
-.progress td,
-.progress th {
-  padding: 6px;
-  vertical-align: middle;
-  }
+#id-stage-caption {
+  font-weight: bold;
+}
 
 #id-help-btn {
   float: right;
