@@ -15,22 +15,37 @@ Dashboard
 <h2>Revise</h2>
 
 <div class="actionset">
+  {% for vs in passages_for_revising %}
+  <form action="" method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="verse_set_id" value="{{ vs.id }}" />
+    <input type="submit" name="revisepassage" class="btn primary" value="Revise"
+           id="id-revisepassage-btn-{{ vs.id }}" />
+  </form>
+  <h3>{{ vs.name }}</h3>
+  <p>Part or all of this passage is due for revising today.</p>
+  <hr>
+
+  {% endfor %}
+
+
   {% if revise_verses_queue %}
   <form action="" method="POST">
     {% csrf_token %}
-    <input type="submit" name="revisequeue" class="btn primary" value="Start revising" />
+    <input type="submit" name="revisequeue" class="btn primary" value="Revise" />
   </form>
 
   <p>You've got {{ revise_verses_queue|length }}
-    verse{{revise_verses_queue|length|pluralize }} due for revisiting today.
+    verse{{revise_verses_queue|length|pluralize }} due for revising today.
 
-    <br/>We select these according to the stage of memorising each verse is at.</p>
+    <br/>These are selected according to the stage of memorising each verse is
+    at.</p>
 
   <p>Verses coming up:
     {% include 'learnscripture/verselist.html' with verselist=revise_verses_queue %}
   </p>
   {% else %}
-  <p>Nothing that needs revisiting at this point in time.
+  <p>Nothing that needs revising at this point in time.
 
   {% endif %}
 </div>
@@ -38,10 +53,8 @@ Dashboard
 
 <h2>Learn</h2>
 
-{% if passages_for_learning %}
 <div class="actionset">
   {% for vs in passages_for_learning %}
-  {% if not forloop.first %}<hr>{% endif %}
   <form action="" method="POST">
     {% csrf_token %}
     <input type="hidden" name="verse_set_id" value="{{ vs.id }}" />
@@ -52,13 +65,9 @@ Dashboard
   <p>Continue learning this passage. You've seen {{ vs.tested_total }} verse(s) so far,
     with {{ vs.untested_total }} to go.</p>
 
-
+  <hr>
   {% endfor %}
 
-</div>
-{% endif %}
-
-<div class="actionset">
   {% if new_verses_queue %}
   <form action="" method="POST">
     {% csrf_token %}
@@ -72,7 +81,7 @@ Dashboard
   </p>
 
   {% else %}
-  <p>Nothing currently in your queue for learning.</p>
+  <p>Nothing currently in your general queue for learning.</p>
 
   {% endif %}
 </div>

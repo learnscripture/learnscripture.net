@@ -349,6 +349,35 @@ class Identity(models.Model):
                                                          memory_stage__gte=MemoryStage.TESTED).count()
         return verse_sets.values()
 
+    def passages_for_revising(self):
+        import time
+        now_seconds = time.time()
+        statuses = self.verse_statuses.filter(verse_choice__verse_set__set_type=VerseSetType.PASSAGE,
+                                              ignored=False,
+                                              memory_stage__gte=MemoryStage.TESTED)\
+                                              .select_related('verse_choice',
+                                                              'verse_choice__verse_set')
+
+        # If any of them need revising, we want to know about it:
+        statuses = memorymodel.filter_qs(statuses, now_seconds)
+
+        # However, we want to exclude those which have any verses in the set
+        # still untested. This is tricky to do in SQL/Django's ORM, so we hope
+        # that 'statuses' gives a fairly small set of VerseSets and do
+        # additional filtering in Python.
+
+        verse_sets = set(uvs.verse_choice.verse_set for uvs in statuses)
+        all_statuses = self.verse_statuses.filter(verse_choice__verse_set__in=verse_sets)\
+            .select_related('verse_choice',
+                            'verse_choice__verse_set')
+
+        for uvs in all_statuses:
+            if uvs.memory_stage < MemoryStage.TESTED:
+                verse_sets.discard(uvs.verse_choice.verse_set)
+
+        return sorted(list(verse_sets), key=lambda vs: vs.name)
+
+
     def verse_statuses_for_passage(self, verse_set_id):
         # Must be strictly in the bible order, so don't rely on ('added', id') for
         # ordering. We must get the verses and compare bible_verse_number.

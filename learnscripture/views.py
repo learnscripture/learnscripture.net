@@ -109,10 +109,14 @@ def start(request):
         if 'learnpassage' in request.POST:
             vs_id = int(request.POST['verse_set_id'])
             return learn_set(request, identity.verse_statuses_for_passage(vs_id))
+        if 'revisepassage' in request.POST:
+            vs_id = int(request.POST['verse_set_id'])
+            return learn_set(request, identity.verse_statuses_for_passage(vs_id))
 
     c = {'new_verses_queue': identity.verse_statuses_for_learning(),
          'revise_verses_queue': identity.verse_statuses_for_revising(),
          'passages_for_learning': identity.passages_for_learning(),
+         'passages_for_revising': identity.passages_for_revising(),
          }
     return render(request, 'learnscripture/start.html', c)
 

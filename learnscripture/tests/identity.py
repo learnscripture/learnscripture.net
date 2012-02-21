@@ -179,8 +179,36 @@ class IdentityTests(TestCase):
 
         # Put it back so that it ought to be up for testing.
         i.verse_statuses.update(last_tested=timezone.now() - timedelta(10))
+
+        # Shouldn't be in general revision queue -
+        # sneak a test for verse_statuses_for_revising() here
+        self.assertEqual([], list(i.verse_statuses_for_revising()))
+
+        # Sneak a test for passages_for_revising() here:
+        self.assertEqual([], list(i.passages_for_revising()))
+
+    def test_passages_for_revising(self):
+        i = self._create_identity()
+        vs1 = VerseSet.objects.get(name='Psalm 23')
+        i.add_verse_set(vs1)
+
+        for vn in range(1, 7):
+            ref = 'Psalm 23:%d' % vn
+            i.record_verse_action(ref, 'NET', StageType.TEST, 1.0)
+            # Put each one back by n days i.e. as if running over
+            # multiple days
+            i.verse_statuses.filter(verse_choice__reference=ref).update(
+                last_tested=timezone.now() - timedelta(7 - vn))
+
+            # Now test again, for all but the first
+            if vn != 1:
+                i.record_verse_action(ref, 'NET', StageType.TEST, 1.0)
+
         # Shouldn't be in general revision queue
         self.assertEqual([], list(i.verse_statuses_for_revising()))
+
+        verse_sets = i.passages_for_revising()
+        self.assertEqual(verse_sets[0].id, vs1.id)
 
 
     def test_verse_statuses_for_passage(self):
