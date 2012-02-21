@@ -220,11 +220,24 @@ var learnscripture =
 
             $('#id-result-comment').text(comment);
             completeStageGroup();
-            if (accuracyPercent < 60) {
-                $('#id-result-suggestion').text("We recommend a bit a more practice " +
-                                                "with this before continuing");
-                $('#id-more-practice-btn').addClass('primary').show();
-                $('#id-next-verse-btn').removeClass('primary');
+
+            if (accuracyPercent < 85) {
+                $('#id-more-practice-btn').show();
+
+                if (accuracyPercent < 60) {
+                    // 'More practice' the default
+                    $('#id-more-practice-btn').addClass('primary');
+                    $('#id-result-suggestion').text("We recommend a bit a more practice " +
+                                                    "with this before continuing");
+                    $('#id-next-verse-btn').removeClass('primary');
+
+                } else {
+                    // 'More practice' available but not default
+                    $('#id-more-practice-btn').removeClass('primary');
+                    $('#id-result-suggestion').text("");
+                    $('#id-next-verse-btn').addClass('primary');
+                }
+
                 $('#id-more-practice-btn').unbind().click(function() {
                     if (accuracyPercent < 10) {
                         currentStageList = chooseStageListForStrength(0);
