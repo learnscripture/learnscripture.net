@@ -209,11 +209,11 @@ def test_run(exponent, accuracy):
 # Trial and error with test_run, with the aim of getting
 # a verse tested at least 3 or 4 times in the first week
 # after learning, and then a sensible sequence of intervals,
-# prdocuces EXPONENT = 0.3.
+# prdocuces EXPONENT = 0.25.
 # This was tried for accuracy = 1.0 and accuracy = 0.95, both
 # giving sensible results
 
-m = MemoryModel(0.3)
+m = MemoryModel(0.25)
 filter_qs = m.filter_qs
 needs_testing = m.needs_testing
 strength_estimate = m.strength_estimate
