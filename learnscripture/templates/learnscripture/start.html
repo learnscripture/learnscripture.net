@@ -93,3 +93,19 @@ Dashboard
 
 </div>
 {% endblock %}
+
+
+
+{% block rightcolumn %}
+
+{% include 'learnscripture/session.html' %}
+
+<hr>
+
+<h3>Session stats</h3>
+
+<div id="id-stats-block">
+{% include 'learnscripture/sessionstats.html' %}
+</div>
+
+{% endblock %}

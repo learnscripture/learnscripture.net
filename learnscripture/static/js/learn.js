@@ -756,6 +756,7 @@ var learnscripture =
 
         var nextVerse = function() {
             loadVerse();
+            loadStats();
         };
 
         var markReadAndNextVerse = function() {
@@ -917,6 +918,16 @@ var learnscripture =
                         }
                     }
                    });
+        };
+
+        var loadStats = function() {
+            $.ajax({url: '/api/learnscripture/v1/sessionstats/?format=json&r=' +
+                    Math.floor(Math.random()*1000000000).toString(),
+                    dataType: 'json',
+                    type: 'GET',
+                    success: function(data) {
+                        $('#id-stats-block').html(data.stats_html);
+                    }});
         };
 
         var markupVerse = function() {

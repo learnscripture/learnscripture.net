@@ -127,8 +127,12 @@ Learn!
 
 {% block rightcolumn %}
 
-<h3>Current verse</h3>
 
+{% include 'learnscripture/session.html' %}
+
+<hr>
+
+<h3>Current verse</h3>
 
 <div>
   <div>Stage: <span id="id-stage-caption"></span><br/>
@@ -141,6 +145,10 @@ Learn!
 
 <hr>
 
-{% include 'learnscripture/session.html' %}
+<h3>Session stats</h3>
+
+<div id="id-stats-block">
+</div>
+
 
 {% endblock %}

@@ -1,8 +1,12 @@
+
+from datetime import timedelta
+
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.utils.http import urlparse
+from django.utils import timezone
 
 from accounts.forms import PreferencesForm
 from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType
@@ -88,11 +92,31 @@ def get_next(request, default_url):
     return HttpResponseRedirect(default_url)
 
 
+# Arbitrarily set 4 hours as max length of 'session' of learning
+SESSION_LENGTH_HOURS = 4
+
+def session_stats(identity):
+    stats = {}
+    now = timezone.now()
+    session_start = now - timedelta(hours=SESSION_LENGTH_HOURS)
+    all_verses_tested = identity.verse_statuses.filter(last_tested__gte=session_start,
+                                                       ignored=False)
+    # Need to dedupe for case of multiple UserVerseStatus for same verse
+    # (due to different versions and different VerseChoice objects)
+    all_verses_tested = list(all_verses_tested.select_related('verse_choice'))
+    stats['new_verses_tested'] = set(uvs.verse_choice.reference for uvs in all_verses_tested
+                                     if uvs.first_seen is not None
+                                     and uvs.first_seen > session_start)
+    stats['total_verses_tested'] = set(uvs.verse_choice.reference for uvs in all_verses_tested)
+    return stats
+
+
 def learn_set(request, l):
     session.set_verse_statuses(request, l)
     return HttpResponseRedirect(reverse('learn'))
 
 
+# Dashboard:
 @require_identity
 def start(request):
 
@@ -118,6 +142,7 @@ def start(request):
          'passages_for_learning': identity.passages_for_learning(),
          'passages_for_revising': identity.passages_for_revising(),
          }
+    c.update(session_stats(identity))
     return render(request, 'learnscripture/start.html', c)
 
 
