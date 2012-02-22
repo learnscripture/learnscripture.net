@@ -389,8 +389,11 @@ var learnscripture =
         var setProgress = function(stageIdx, fraction) {
             var progress = (stageIdx + fraction)/currentStageList.length * 100;
             var bar = $('#id-progress-bar');
+            var oldVal = parseInt(bar.val(), 10);
             if (preferences.enableAnimations &&
-                Math.abs(parseInt(bar.val(), 10) - progress) > 5) {
+                Math.abs(oldVal - progress) > 5 && // animation pointless
+                !(oldVal > 99 && progress == 0) // new verse - animation confusing
+               ) {
                 bar.animate({value: progress,
                              duration: 'fast'});
             } else {
