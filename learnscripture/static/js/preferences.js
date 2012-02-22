@@ -103,7 +103,6 @@ var learnscripture =
         return learnscripture;
     })(learnscripture || {}, $);
 
-// This needs to be before anything that might call getPreferences()
 $(document).ready(function() {
     learnscripture.setupPreferencesControls();
     learnscripture.setPreferences($('#id-preferences-data').data());
