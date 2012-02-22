@@ -407,3 +407,11 @@ class Identity(models.Model):
             uvs.bible_verse_number = v.bible_verse_number
         l.sort(key=lambda uvs: uvs.bible_verse_number)
         return l
+
+    def cancel_passage(self, verse_set_id):
+        # For passages, the UserVerseStatuses may be already tested.
+        # We don't want to lose that info, therefore set to 'ignored',
+        # rather than delete() (unlike clear_learning_queue)
+        self.verse_statuses\
+            .filter(verse_choice__verse_set=verse_set_id, ignored=False)\
+            .update(ignored=True)

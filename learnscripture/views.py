@@ -139,6 +139,10 @@ def start(request):
         if 'clearqueue' in request.POST:
             identity.clear_learning_queue()
             return HttpResponseRedirect(reverse('start'))
+        if 'cancelpassage' in request.POST:
+            vs_id = int(request.POST['verse_set_id'])
+            identity.cancel_passage(vs_id)
+            return HttpResponseRedirect(reverse('start'))
 
     c = {'new_verses_queue': identity.verse_statuses_for_learning(),
          'revise_verses_queue': identity.verse_statuses_for_revising(),

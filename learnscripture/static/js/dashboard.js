@@ -17,6 +17,13 @@ var learnscripture =
                     ev.preventDefault();
                 }
             });
+            $("input[name=cancelpassage]").click(function(ev) {
+                if (!confirm("This will cancel learning this passage. " +
+                             "Any test scores will be saved. " +
+                             "Continue?")) {
+                    ev.preventDefault();
+                }
+            });
 
         }
 
