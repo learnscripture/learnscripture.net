@@ -187,7 +187,9 @@ var learnscripture =
                         stage: STAGE_TYPE_READ,
                     },
                     success: function() {
-                        callbackAfter();
+                        if (callbackAfter != undefined) {
+                            callbackAfter();
+                        }
                     }
                    });
         }
@@ -298,10 +300,14 @@ var learnscripture =
         // ---- Stages ----
 
         // -- reading stage --
-        var readStage = function() {
+        var readStageStart = function() {
             showWord($('.current-verse .word *'));
         };
 
+        var readStageContinue = function() {
+            readingComplete();
+            return false;
+        };
         // recall type 1 - FullAndInitial
         //    Some full words, some initial letters only
 
@@ -522,8 +528,8 @@ var learnscripture =
         //
         // toggleMode: contstant defining how clicking on words should react
 
-        var stageDefs = {'read': {setup: readStage,
-                                  continueStage: function() { return false; },
+        var stageDefs = {'read': {setup: readStageStart,
+                                  continueStage: readStageContinue,
                                   caption: 'Read',
                                   testMode: false,
                                   toggleMode: WORD_TOGGLE_SHOW},
