@@ -16,10 +16,7 @@ class DashboardTests(LiveServerTests):
         driver.get(self.live_server_url + reverse('start'))
         self.assertTrue(driver.current_url.endswith(reverse('choose')))
 
-    def test_learn_queue(self):
-        # This combines a bunch of tests, it's easier to avoid a lot of
-        # repetition that way.
-
+    def setup_identity(self):
         driver = self.driver
         driver.get(self.live_server_url + reverse('start'))
         self.wait_until_loaded('body')
@@ -28,6 +25,14 @@ class DashboardTests(LiveServerTests):
         i.default_bible_version = BibleVersion.objects.get(slug='NET')
         i.testing_method = TestingMethod.FULL_WORDS
         i.save()
+        return i
+
+    def test_learn_queue(self):
+        # This combines a bunch of tests, it's easier to avoid a lot of
+        # repetition that way.
+
+        driver = self.driver
+        i = self.setup_identity()
         vs = VerseSet.objects.get(slug='bible-101')
         i.add_verse_set(vs)
 
@@ -58,3 +63,34 @@ class DashboardTests(LiveServerTests):
         self.assertTrue(driver.current_url.endswith(reverse('start')))
         self.assertNotIn('John 14:6', driver.page_source)
 
+    def test_learn_passage(self):
+        # As above, combine several tests as a story, for simplicity
+        i = self.setup_identity()
+
+        # This is to stop redirecting behaviour due to an empty dashboard
+        i.add_verse_set(VerseSet.objects.get(slug='bible-101'))
+
+        # Add a passage
+        vs = VerseSet.objects.get(slug='psalm-23')
+        i.add_verse_set(vs)
+
+        driver = self.driver
+
+        # Test dashboard text
+        driver.get(self.live_server_url + reverse('start'))
+        self.assertIn('Psalm 23', driver.page_source)
+
+        # Test 'Continue learning' button
+        driver.find_element_by_id('id-learnpassage-btn-%d' % vs.id).click()
+        self.wait_until_loaded('body')
+        self.assertTrue(driver.current_url.endswith(reverse('learn')))
+        self.wait_for_ajax()
+        self.assertEqual(u"Psalm 23:1", driver.find_element_by_id('id-verse-title').text)
+
+        # Test 'Cancel learning' button
+        driver.get(self.live_server_url + reverse('start'))
+        driver.find_element_by_id('id-cancelpassage-btn-%d' % vs.id).click()
+        alert = driver.switch_to_alert()
+        alert.accept()
+        self.wait_until_loaded('body')
+        self.assertNotIn('Psalm 23', driver.page_source)
