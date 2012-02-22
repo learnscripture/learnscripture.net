@@ -287,38 +287,53 @@ class Identity(models.Model):
 
         return uvs
 
+    def _dedupe_uvs_set(self, uvs_set):
+        # Need to dedupe (due to VerseChoice objects that belong to different
+        # VerseSets). Also need to iterate over the result multiple times and
+        # get length etc., so use list instead of generator.
+        retval = []
+        seen_refs = set()
+        for uvs in uvs_set:
+            if uvs.verse_choice.reference in seen_refs:
+                continue
+            seen_refs.add(uvs.verse_choice.reference)
+            retval.append(uvs)
+        return retval
+
     def verse_statuses_for_revising(self):
         """
         Returns a query set of UserVerseStatuses that need revising.
         """
         import time
         now_seconds = time.time()
-        qs = self.verse_statuses.filter(ignored=False, memory_stage=MemoryStage.TESTED)\
-            .exclude(verse_choice__verse_set__set_type=VerseSetType.PASSAGE)\
-            .select_related('verse_choice')
-        return memorymodel.filter_qs(qs, now_seconds)
+        qs = (self.verse_statuses
+              .filter(ignored=False,
+                      memory_stage=MemoryStage.TESTED)
+              .exclude(verse_choice__verse_set__set_type=VerseSetType.PASSAGE)
+              .select_related('verse_choice'))
+        qs = memorymodel.filter_qs(qs, now_seconds)
+        return self._dedupe_uvs_set(qs)
+
+    def verse_statuses_for_learning_qs(self):
+        qs = self.verse_statuses.filter(ignored=False, memory_stage__lt=MemoryStage.TESTED)
+        # Don't include passages - we do those separately
+        qs = qs.exclude(verse_choice__verse_set__set_type=VerseSetType.PASSAGE)
+        return qs
 
     def verse_statuses_for_learning(self):
-        q = self.verse_statuses.filter(ignored=False, memory_stage__lt=MemoryStage.TESTED)
-        # Don't include passages - we do those separately
-        q = q.exclude(verse_choice__verse_set__set_type=VerseSetType.PASSAGE)
+        """
+        Returns a list of UserVerseStatuses that need learning.
+        """
+        qs = self.verse_statuses_for_learning_qs()
         # Optimise for accessing 'reference'
-        q = q.select_related('verse_choice')
+        qs = qs.select_related('verse_choice')
         # 'added' should have enough precision to distinguish, otherwise 'id'
         # should be according to order of creation.
-        q = q.order_by('added', 'id')
+        qs = qs.order_by('added', 'id')
+        return self._dedupe_uvs_set(qs)
 
-        # Need to dedupe (due to VerseChoice objects that belong to different
-        # VerseSets). Also need to iterate over the result multiple times and
-        # get length etc., so use list instead of generator.
-        retval = []
-        seen_refs = set()
-        for uvs in q:
-            if uvs.verse_choice.reference in seen_refs:
-                continue
-            seen_refs.add(uvs.verse_choice.reference)
-            retval.append(uvs)
-        return retval
+    def clear_learning_queue(self):
+        self.verse_statuses_for_learning_qs().delete()
 
     def passages_for_learning(self):
         """
@@ -379,7 +394,6 @@ class Identity(models.Model):
                 verse_sets.discard(uvs.verse_choice.verse_set)
 
         return sorted(list(verse_sets), key=lambda vs: vs.name)
-
 
     def verse_statuses_for_passage(self, verse_set_id):
         # Must be strictly in the bible order, so don't rely on ('added', id') for
