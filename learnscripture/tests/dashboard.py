@@ -50,6 +50,8 @@ class DashboardTests(LiveServerTests):
         # Test clicking 'Clear queue'
         driver.get(self.live_server_url + reverse('start'))
         driver.find_element_by_css_selector('input[name=clearqueue]').click()
+        alert = driver.switch_to_alert()
+        alert.accept()
         self.wait_until_loaded('body')
 
         # Since we cleared the queue, shouldn't have John 14:6 now
