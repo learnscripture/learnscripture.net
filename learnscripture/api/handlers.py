@@ -8,6 +8,7 @@ using Piston for the convenience it provides.
 """
 import logging
 
+from django.template.loader import render_to_string
 from django.utils.functional import wraps
 from django.utils import simplejson
 
@@ -22,6 +23,7 @@ from learnscripture import session
 from learnscripture.decorators import require_identity_method
 from learnscripture.forms import SignUpForm, LogInForm
 from learnscripture.utils.logging import extra
+from learnscripture.views import session_stats
 
 
 logger = logging.getLogger(__name__)
@@ -222,3 +224,21 @@ class SetPreferences(BaseHandler):
             return identity
         else:
             return validation_error_response(form.errors)
+
+
+class SessionStats(BaseHandler):
+    allowed_methods = ('GET',)
+
+    def read(self, request):
+        if not hasattr(request, 'identity'):
+            return {}
+
+        identity = request.identity
+        retval = {}
+
+        # Render template
+        c = {}
+        c['identity'] = identity
+        c.update(session_stats(identity))
+        retval['stats_html'] = render_to_string('learnscripture/sessionstats.html', c)
+        return retval
