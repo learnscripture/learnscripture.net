@@ -165,10 +165,10 @@ class Identity(models.Model):
         # down to MemoryStage.SEEN
         s.filter(memory_stage__lt=mem_stage).update(memory_stage=mem_stage)
 
+        now = timezone.now()
         if mem_stage == MemoryStage.TESTED:
             s0 = s[0] # Any should do, they should be all the same
             old_strength = s0.strength
-            now = timezone.now()
             if s0.last_tested is None:
                 time_elapsed = None
             else:
@@ -176,6 +176,9 @@ class Identity(models.Model):
             new_strength = memorymodel.strength_estimate(old_strength, accuracy, time_elapsed)
             s.update(strength=new_strength,
                      last_tested=now)
+
+        if mem_stage == MemoryStage.SEEN:
+            s.filter(first_seen__isnull=True).update(first_seen=now)
 
     def change_version(self, reference, version_slug, verse_set_id):
         """

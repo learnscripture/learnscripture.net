@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 from datetime import timedelta
+import time
 
 from django.test import TestCase
 from django.utils import timezone
@@ -38,9 +39,19 @@ class IdentityTests(TestCase):
                          MemoryStage.ZERO)
 
         i.record_verse_action('John 3:16', 'NET', StageType.READ, 1)
-        self.assertEqual(i.verse_statuses.get(verse_choice__reference='John 3:16',
-                                              version__slug='NET').memory_stage,
-                         MemoryStage.SEEN)
+        uvs = i.verse_statuses.get(verse_choice__reference='John 3:16',
+                                   version__slug='NET')
+        self.assertEqual(uvs.memory_stage, MemoryStage.SEEN)
+        self.assertTrue(uvs.first_seen is not None)
+
+        first_seen = uvs.first_seen
+        time.sleep(1)
+        i.record_verse_action('John 3:16', 'NET', StageType.READ, 1)
+        uvs = i.verse_statuses.get(verse_choice__reference='John 3:16',
+                                   version__slug='NET')
+        # first_seen field should not have changed
+        self.assertEqual(uvs.first_seen, first_seen)
+
 
     def test_add_verse_set_progress_and_choose_again(self):
         """
