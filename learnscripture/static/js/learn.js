@@ -749,7 +749,6 @@ var learnscripture =
         }
 
         var nextVerse = function() {
-            $('.progress table tr').remove();
             loadVerse();
         };
 
