@@ -71,7 +71,8 @@ Dashboard
   {% if new_verses_queue %}
   <form action="" method="POST">
     {% csrf_token %}
-    <input type="submit" name="learnqueue" class="btn primary" value="Start learning" />
+    <input type="submit" name="learnqueue" class="btn primary" value="Start learning" /><br />
+    <input type="submit" name="clearqueue" class="btn" value="Clear queue" />
   </form>
 
   <p>You've got {{ new_verses_queue|length }} new verse{{ new_verses_queue|length|pluralize }} in your general queue for learning.</p>
