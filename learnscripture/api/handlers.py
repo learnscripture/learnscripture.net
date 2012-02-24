@@ -69,7 +69,8 @@ class NextVerseHandler(BaseHandler):
 
     @require_identity_method
     def read(self, request):
-        uvs = session.get_next_verse_status(request)
+        ignore_verse = request.GET.get('ignoreVerse', None)
+        uvs = session.get_next_verse_status(request, ignore_verse=ignore_verse)
         if uvs is None:
             return rc.NOT_FOUND
         return uvs

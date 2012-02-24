@@ -16,13 +16,13 @@ def _verse_status_info(uvs):
     return (uvs.reference, uvs.verse_choice.verse_set_id)
 
 
-def get_next_verse_status(request):
+def get_next_verse_status(request, ignore_verse=None):
     ids = _get_verse_status_ids(request)
-    if len(ids) == 0:
-        return None
-    ref, verse_set_id = ids[0]
-    return request.identity.get_verse_status_for_ref(ref, verse_set_id)
-
+    for ref, verse_set_id in ids:
+        if ignore_verse is not None and ref == ignore_verse:
+            continue
+        return request.identity.get_verse_status_for_ref(ref, verse_set_id)
+    return None
 
 def _get_verse_status_ids(request):
     return request.session.get('verses_to_learn', [])

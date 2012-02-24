@@ -740,7 +740,7 @@ var learnscripture =
                         // version, to avoid the complications with moving the
                         // old verse.
                         currentVerseStatus = null;
-                        nextVerse();
+                        loadVerse(false);
                     },
                     error: handlerAjaxError
                    });
@@ -758,7 +758,7 @@ var learnscripture =
         }
 
         var nextVerse = function() {
-            loadVerse();
+            loadVerse(true);
             loadStats();
         };
 
@@ -858,10 +858,15 @@ var learnscripture =
                     SET_TYPE_PASSAGE)
         };
 
-
-        var loadVerse = function() {
-            $.ajax({url: '/api/learnscripture/v1/nextverse/?format=json&r=' +
-                    Math.floor(Math.random()*1000000000).toString(),
+        var loadVerse = function(forceNext) {
+            // forceNext should be true if we need to ensure that we don't get
+            // the same verse again. Sometimes the order that requests are dealt
+            // with at a multithreaded server means we need to enforce this.
+            var url = '/api/learnscripture/v1/nextverse/?format=json&r=' + Math.floor(Math.random()*1000000000).toString();
+            if (forceNext && currentVerseStatus) {
+                url = url + "&ignoreVerse=" + encodeURIComponent(currentVerseStatus.reference);
+            }
+            $.ajax({url: url,
                     dataType: 'json',
                     type: 'GET',
                     success: function(data) {
@@ -1014,7 +1019,7 @@ var learnscripture =
                 }
                 $('#id-help-btn').button('toggle');
             });
-            nextVerse();
+            loadVerse(false);
         };
 
         learnscripture.handlerAjaxError = handlerAjaxError;
