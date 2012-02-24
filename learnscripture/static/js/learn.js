@@ -759,7 +759,6 @@ var learnscripture =
 
         var nextVerse = function() {
             loadVerse(true);
-            loadStats();
         };
 
         var markReadAndNextVerse = function() {
@@ -914,6 +913,8 @@ var learnscripture =
                             $('.previous-verse').remove()
                             $('.current-verse').show();
                         }
+
+                        loadStats();
 
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
