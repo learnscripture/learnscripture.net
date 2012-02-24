@@ -406,6 +406,14 @@ class Identity(models.Model):
             v = verse_list[uvs.reference]
             uvs.bible_verse_number = v.bible_verse_number
         l.sort(key=lambda uvs: uvs.bible_verse_number)
+
+        # For passages, we adjust 'needs_testing' to get the passage to be
+        # tested together. See explanation in memorymodel
+        min_strength = min(uvs.strength for uvs in l)
+        if min_strength > 0.5:
+            for uvs in l:
+                uvs.needs_testing_override = True
+
         return l
 
     def cancel_passage(self, verse_set_id):
