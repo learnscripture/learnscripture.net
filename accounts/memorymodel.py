@@ -12,13 +12,12 @@ class MemoryModel(object):
     # We attempt to move a memory along this curve by testing at ever increasing
     # intervals. This idea is taken from the Charlotte Mason Scripture Memory system.
 
-    # We fix alpha and exponent by trial and error to
-    # give us:
+    # We fix alpha and exponent by trial and error to give us:
 
-    # 1) the right initial testing sequence (lots of times initially,
-    #    preferably about a week where they are tested every day.
-    # 2) a tail that remains for over a year, so it doesn't
-    #    drop the memory too quickly.
+    # 1) the right initial testing sequence (lots of times initially, preferably
+    #    about a week where they are tested every day.
+    # 2) a tail that remains for over a year, so it doesn't drop the memory too
+    #    quickly.
 
     # We need s:
 
@@ -133,7 +132,7 @@ class MemoryModel(object):
         s1 = old_strength
         delta_t = time_elapsed
 
-        # We assume old strength was accoding to our formula
+        # We assume old strength was according to our formula
         t1 = self.t(s1)
 
         t2 = t1 + time_elapsed
@@ -204,6 +203,84 @@ def test_run(exponent, accuracy):
             test += 1
             print "Day %d, test %d, interval %d, strength %s" % (i, test, interval, x)
             interval = 0
+
+def test_run_passage(passage_length, days):
+    # Test function for experimenting with methods of getting testing of verses
+    # in a passage to converge to tests on the same day, instead of diverging in
+    # testing schedule
+
+    import random
+    # We learn 1 verse a day in passage.
+    learnt = {}
+    verses_learnt = 0
+    day = 24*3600
+    accuracy = 0.95
+    tests_for_verse = {}
+    for i in range(0, days):
+        if verses_learnt < passage_length:
+            # Learn new:
+            learnt[verses_learnt] = (i*day, m.strength_estimate(None, accuracy, None))
+            verses_learnt += 1
+
+        need_testing = 0
+        for j in range(0, verses_learnt):
+            t, s = learnt[j]
+            time_elapsed = i * day - t
+            if m.needs_testing(s, time_elapsed):
+                need_testing += 1
+
+        number_tested = 0
+        if need_testing > 0 and verses_learnt == passage_length:
+            # We want to do testing together.  The simplest way is just to do
+            # testing if any verse requires testing. This doesn't actually result in
+            # much more testing - it just means that some verses are tested before
+            # their ideal time.
+
+            # However, we don't want to do this immediately - only after 'a while'
+            # of treating the verses more individually.
+
+            # From user testing, a sensible period seems to be when 3 days after all
+            # the verses have been learnt. This corresponds to a strength of 0.5.
+
+            test_all = False
+            min_strength = min(s for t,s in learnt.values())
+            if min_strength > 0.5:
+                test_all = True
+
+
+            for j in range(0, verses_learnt):
+                t, s = learnt[j]
+                time_elapsed = i * day - t
+
+                if test_all:
+                    needs_testing = True
+                else:
+                    needs_testing = m.needs_testing(s, time_elapsed)
+
+
+                print "%02d: %6f %s" % (j+1, s,
+                                        "Test" if needs_testing else "No test")
+
+                if needs_testing:
+                    acc = 0.95 + (random.random()/20.0)
+                    acc = min(acc, 1)
+                    tests_for_verse[j] = tests_for_verse.setdefault(j, 0) + 1
+
+                    # if min_strength is not None:
+                    #     s = min_strength
+                    # if min_time_elapsed is not None:
+                    #     time_elapsed = min_time_elapsed
+
+                    new_strength = m.strength_estimate(s, acc, time_elapsed)
+                    new_time_tested = i * day
+                    learnt[j] = new_time_tested, new_strength
+                    number_tested += 1
+        if number_tested > 0:
+            print
+            print "Day %d" % i
+            print "%02d/%02d" % (number_tested, passage_length)
+    return sorted(tests_for_verse.items())
+
 
 
 # Trial and error with test_run, with the aim of getting

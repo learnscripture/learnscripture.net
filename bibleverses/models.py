@@ -236,8 +236,15 @@ class UserVerseStatus(models.Model):
     def text(self):
         return self.version.get_text_by_reference(self.reference)
 
-    @cached_property
+    @property
     def needs_testing(self):
+        if hasattr(self, 'needs_testing_override'):
+            return self.needs_testing_override
+        else:
+            return self.needs_testing_by_strength
+
+    @cached_property
+    def needs_testing_by_strength(self):
         from accounts.memorymodel import needs_testing
         if self.last_tested is None:
             return True

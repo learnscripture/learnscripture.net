@@ -221,7 +221,6 @@ class IdentityTests(TestCase):
         verse_sets = i.passages_for_revising()
         self.assertEqual(verse_sets[0].id, vs1.id)
 
-
     def test_verse_statuses_for_passage(self):
         i = self._create_identity()
         vs1 = VerseSet.objects.get(name='Psalm 23')
@@ -236,3 +235,20 @@ class IdentityTests(TestCase):
                           u"Psalm 23:4",
                           u"Psalm 23:5",
                           u"Psalm 23:6"])
+
+        # Now test and age them:
+        for uvs in l:
+            i.record_verse_action(uvs.reference, 'NET', StageType.TEST, 1.0)
+
+        now = timezone.now()
+        i.verse_statuses.filter(verse_choice__reference__startswith="Psalm 23")\
+            .update(strength=0.7, last_tested=now)
+
+        # Move one of them back to needing testing
+        i.verse_statuses.filter(verse_choice__reference="Psalm 23:3")\
+            .update(last_tested=now - timedelta(1000))
+
+        l = i.verse_statuses_for_passage(vs1.id)
+        for uvs in l:
+            self.assertEqual(uvs.needs_testing_by_strength, uvs.reference == "Psalm 23:3")
+            self.assertEqual(uvs.needs_testing, True)
