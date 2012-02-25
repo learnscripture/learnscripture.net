@@ -770,7 +770,9 @@ var learnscripture =
         }
 
         var finish = function() {
-            window.location = '/dashboard/';
+            $('body').ajaxStop(function() {
+                window.location = '/dashboard/';
+            });
         }
 
         var nextVerse = function() {
