@@ -49,6 +49,11 @@ var learnscripture =
 
         var testingMistakes = null;
 
+        // Verse list
+        var versesToLearn = null; // eventually a dictionary of index:verse
+        var currentVerseIndex = null;
+        var minVerseIndex = null;
+        var maxVerseIndex = null;
         var currentVerseStatus = null;
 
         // word toggling and selection
@@ -208,7 +213,12 @@ var learnscripture =
                         verse_status: JSON.stringify(currentVerseStatus, null, 2),
                         stage: STAGE_TYPE_TEST,
                         accuracy: accuracy
-                    }});
+                    },
+                    success: function(data) {
+                        loadStats();
+                    }
+                   });
+
             var accuracyPercent = Math.floor(accuracy * 100).toString()
             $('#id-accuracy').text(accuracyPercent + "%");
             var comment =
@@ -255,7 +265,6 @@ var learnscripture =
                 $('#id-more-practice-btn').removeClass('primary').hide();
                 $('#id-next-verse-btn').addClass('primary');
             }
-
 
             showInstructions("results");
         };
@@ -740,7 +749,9 @@ var learnscripture =
                         // version, to avoid the complications with moving the
                         // old verse.
                         currentVerseStatus = null;
-                        loadVerse(false);
+                        // Any number of verses could have changed (if it was
+                        // part of a passage), so we must reload everything.
+                        loadVerses(loadCurrentVerse);
                     },
                     error: handlerAjaxError
                    });
@@ -757,12 +768,28 @@ var learnscripture =
             }
         }
 
+        var finish = function() {
+            window.location = '/dashboard/';
+        }
+
         var nextVerse = function() {
-            loadVerse(true);
+            if (nextVersePossible()) {
+                currentVerseIndex++;
+                loadCurrentVerse();
+            } else {
+                finish();
+            }
         };
 
+        var nextVersePossible = function() {
+            return (currentVerseIndex < maxVerseIndex);
+        }
+
         var markReadAndNextVerse = function() {
-            readingComplete(nextVerse);
+            readingComplete(function() {
+                loadStats();
+            });
+            nextVerse();
         };
 
         var chooseStageListForStrength = function(strength) {
@@ -857,76 +884,102 @@ var learnscripture =
                     SET_TYPE_PASSAGE)
         };
 
-        var loadVerse = function(forceNext) {
-            // forceNext should be true if we need to ensure that we don't get
-            // the same verse again. Sometimes the order that requests are dealt
-            // with at a multithreaded server means we need to enforce this.
-            var url = '/api/learnscripture/v1/nextverse/?format=json&r=' + Math.floor(Math.random()*1000000000).toString();
-            if (forceNext && currentVerseStatus) {
-                url = url + "&ignoreVerse=" + encodeURIComponent(currentVerseStatus.reference);
-            }
+        var loadVerses = function(callbackAfter) {
+            var url = '/api/learnscripture/v1/versestolearn/?format=json&r=' + Math.floor(Math.random()*1000000000).toString();
             $.ajax({url: url,
                     dataType: 'json',
                     type: 'GET',
                     success: function(data) {
-                        var oldVerseStatus = currentVerseStatus;
-                        currentVerseStatus = data;
-                        if (isPassageType(oldVerseStatus)) {
-                            moveOldWords();
-                        } else {
-                            $('.current-verse').children().remove();
+                        // This function can be called when we have already
+                        // loaded the verses e.g. if the user changed the
+                        // version.  Also, once some verses have been
+                        // read/learnt, they will be missing.
+
+                        // We use the 'learn_order' as an index to work out
+                        // which verse we are on, and to merge the incoming
+                        // verses with any existing.
+
+                        if (versesToLearn === null) {
+                            versesToLearn = {}
                         }
-                        $('.current-verse').hide(); // Hide until set up
-                        $('#id-verse-title').text(data.reference);
-                        // convert newlines to divs
-                        var text = data.text;
-                        if (data.verse_choice.verse_set == null ||
-                            data.verse_choice.verse_set.set_type == SET_TYPE_SELECTION) {
-                            text = text + '\n' + data.reference;
-                        }
-                        $.each(text.split(/\n/), function(idx, line) {
-                            if (line.trim() != '') {
-                                $('.current-verse').append('<div class="line">' +
-                                                      line + '</div>');
+                        for (var i = 0; i < data.length; i++) {
+                            verse = data[i]
+                            versesToLearn[verse.learn_order] = verse;
+                            if (maxVerseIndex === null ||
+                                verse.learn_order > maxVerseIndex) {
+                                maxVerseIndex = verse.learn_order;
                             }
-                        });
-                        var versionText = "Version: " + data.version.full_name +
-                            " (" + data.version.short_name + ") |";
-                        $('#id-version-name').text(versionText);
-
-                        if (data.version.url != "") {
-                            var url = data.version.url.replace('%s', encodeURI(data.reference)).replace('%20', '+');
-                            $('#id-browse-link').show().find('a').attr('href', url);
-                        } else {
-                            $('#id-browse-link').hide();
+                            if (minVerseIndex === null ||
+                                verse.learn_order < minVerseIndex) {
+                                minVerseIndex = verse.learn_order;
+                            }
                         }
-                        $('#id-version-select').val(data.version.slug);
-                        markupVerse();
-                        $('#id-loading').hide();
-                        $('#id-controls').show();
-                        setupStageList(data);
-
-                        if (isPassageType(oldVerseStatus)) {
-                            scrollOutPreviousVerse();
-                            $('.current-verse').show();
-                        } else {
-                            $('.previous-verse').remove()
-                            $('.current-verse').show();
+                        if (callbackAfter !== undefined) {
+                            callbackAfter()
                         }
-
-                        loadStats();
-
                     },
-                    error: function(jqXHR, textStatus, errorThrown) {
-                        if (jqXHR.status == 404) {
-                            $('#id-loading').hide();
-                            $('#id-controls').hide();
-                            $('#id-no-verse-queue').show();
-                        } else {
-                            handlerAjaxError(jqXHR, textStatus, errorThrown);
-                        }
-                    }
+                    error: handlerAjaxError,
                    });
+        }
+
+
+        var loadCurrentVerse = function() {
+            var oldVerseStatus = currentVerseStatus;
+            currentVerseStatus = versesToLearn[currentVerseIndex];
+            verse = currentVerseStatus;
+            if (isPassageType(oldVerseStatus)) {
+                moveOldWords();
+            } else {
+                $('.current-verse').children().remove();
+            }
+
+            $('.current-verse').hide(); // Hide until set up
+            $('#id-verse-title').text(currentVerseStatus.reference);
+            // convert newlines to divs
+            var text = verse.text;
+            if (verse.verse_choice.verse_set == null ||
+                verse.verse_choice.verse_set.set_type == SET_TYPE_SELECTION) {
+                // Reference is part of what should be learnt
+                text = text + '\n' + verse.reference;
+            }
+            $.each(text.split(/\n/), function(idx, line) {
+                if (line.trim() != '') {
+                    $('.current-verse').append('<div class="line">' +
+                                          line + '</div>');
+                }
+            });
+            var versionText = "Version: " + verse.version.full_name +
+                " (" + verse.version.short_name + ") |";
+            $('#id-version-name').text(versionText);
+
+            if (verse.version.url != "") {
+                var url = verse.version.url.replace('%s', encodeURI(verse.reference)).replace('%20', '+');
+                $('#id-browse-link').show().find('a').attr('href', url);
+            } else {
+                $('#id-browse-link').hide();
+            }
+            $('#id-version-select').val(verse.version.slug);
+            markupVerse();
+            $('#id-loading').hide();
+            $('#id-controls').show();
+            setupStageList(verse);
+
+            if (isPassageType(oldVerseStatus)) {
+                scrollOutPreviousVerse();
+                $('.current-verse').show();
+            } else {
+                $('.previous-verse').remove()
+                $('.current-verse').show();
+            }
+            var nextBtns = $('#id-next-verse-btn, #id-context-next-verse-btn');
+            var finishBtn = $('#id-finish-btn');
+            if (nextVersePossible()) {
+                nextBtns.val('Next');
+                finishBtn.show();
+            } else {
+                nextBtns.val('Done');
+                finishBtn.hide();
+            }
         };
 
         var loadStats = function() {
@@ -988,8 +1041,6 @@ var learnscripture =
             console.log("AJAX error: %s, %s, %o", textStatus, errorThrown, jqXHR);
         };
 
-
-
         // setup and wiring
         var setupLearningControls = function(prefs) {
             isLearningPage = ($('#id-verse-wrapper').length > 0);
@@ -1020,7 +1071,16 @@ var learnscripture =
                 }
                 $('#id-help-btn').button('toggle');
             });
-            loadVerse(false);
+            loadVerses(function() {
+                if (maxVerseIndex === null) {
+                    $('#id-loading').hide();
+                    $('#id-controls').hide();
+                    $('#id-no-verse-queue').show();
+                } else {
+                    currentVerseIndex = minVerseIndex;
+                    loadCurrentVerse();
+                }
+            });
         };
 
         learnscripture.handlerAjaxError = handlerAjaxError;

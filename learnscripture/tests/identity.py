@@ -252,3 +252,22 @@ class IdentityTests(TestCase):
         for uvs in l:
             self.assertEqual(uvs.needs_testing_by_strength, uvs.reference == "Psalm 23:3")
             self.assertEqual(uvs.needs_testing, True)
+
+    def test_get_verse_statuses(self):
+        i = self._create_identity()
+        vs1 = VerseSet.objects.get(name='Psalm 23')
+        i.add_verse_set(vs1)
+
+        with self.assertNumQueries(2):
+            d = i.get_verse_statuses_bulk([(vs1.id, 'Psalm 23:1'),
+                                           (vs1.id, 'Psalm 23:2'),
+                                           (vs1.id, 'Psalm 23:3'),
+                                           (vs1.id, 'Psalm 23:4'),
+                                           (vs1.id, 'Psalm 23:5'),
+                                           (vs1.id, 'Psalm 23:6')])
+
+            self.assertEqual(d[vs1.id, 'Psalm 23:1'].reference, 'Psalm 23:1')
+            texts = [uvs.text for uvs in d.values()]
+
+        vs2 = VerseSet.objects.get(name='Bible 101')
+        i.add_verse_set(vs2)

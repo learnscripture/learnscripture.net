@@ -50,12 +50,12 @@ Learn!
     </div>
 
     <div class="instructions-results" style="display:none;">
-      <span class="result-buttons"><input id="id-more-practice-btn" type="submit" class="btn" value="More practice" style="display:none;" /> <input id="id-next-verse-btn" type="submit" class="btn primary" value="Next verse" /> <a href="{% url 'start' %}" class="btn">Finish</a></span>
+      <span class="result-buttons"><input id="id-more-practice-btn" type="submit" class="btn" value="More practice" style="display:none;" /> <input id="id-next-verse-btn" type="submit" class="btn primary" value="Next" /> <a id="id-finish-btn" href="{% url 'start' %}" class="btn">Finish</a></span>
       <b>RESULTS:</b> You scored <span id="id-accuracy"></span> - <span id="id-result-comment"></span> <span id="id-result-suggestion"></span>
     </div>
 
     <div class="instructions-readForContext" style="display:none;">
-      <span class="result-buttons"><input id="id-context-next-verse-btn" type="submit" class="btn primary" value="Next verse" /></span>
+      <span class="result-buttons"><input id="id-context-next-verse-btn" type="submit" class="btn primary" value="Next" /></span>
       <b>READ:</b> Read this verse to get the context and flow of passage.
     </div>
 
