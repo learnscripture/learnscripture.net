@@ -2,7 +2,7 @@
 from django.conf.urls import url, patterns
 from piston.resource import Resource as BaseResource
 
-from learnscripture.api.handlers import NextVerseHandler, ActionCompleteHandler, ChangeVersionHandler, SignUpHandler, LogInHandler, LogOutHandler, GetVerseForSelection, GetPassage, SetPreferences, SessionStats
+from learnscripture.api.handlers import VersesToLearnHandler, ActionCompleteHandler, ChangeVersionHandler, SignUpHandler, LogInHandler, LogOutHandler, GetVerseForSelection, GetPassage, SetPreferences, SessionStats
 
 
 class Resource(BaseResource):
@@ -26,7 +26,7 @@ class Resource(BaseResource):
 # browser, and then only remove the old one when you are sure no javascript will
 # try to use it.
 urlpatterns = patterns('',
-                       url(r'^nextverse/$', Resource(NextVerseHandler)),
+                       url(r'^versestolearn/$', Resource(VersesToLearnHandler)),
                        url(r'^actioncomplete/$', Resource(ActionCompleteHandler)),
                        url(r'^changeversion/$', Resource(ChangeVersionHandler)),
                        url(r'^signup/$', Resource(SignUpHandler)),

@@ -6,23 +6,29 @@ from learnscripture.utils.logging import extra
 logger = logging.getLogger(__name__)
 
 
-# In the session we store a list of verses to look at.  We use the tuple
-# (reference, verse_set_id) as an ID.  We need to VerseSet ID because we treat
-# verses differently if they are part of a passage. By avoiding the specific
-# UserVerseStatus id, we can cope with a change of version more easily.
+# In the session we store a list of verses to look at.
+#
+# We store the order the verses should be looked at (which allows us to remove
+# items from the list without confusion).
+#
+# We use the tuple (reference, verse_set_id) as an ID.  We need VerseSet ID
+# because we treat verses differently if they are part of a passage. By avoiding
+# the specific UserVerseStatus id, we can cope with a change of version more
+# easily.
 
-
-def _verse_status_info(uvs):
-    return (uvs.reference, uvs.verse_choice.verse_set_id)
-
-
-def get_next_verse_status(request, ignore_verse=None):
+def get_verse_statuses(request):
     ids = _get_verse_status_ids(request)
-    for ref, verse_set_id in ids:
-        if ignore_verse is not None and ref == ignore_verse:
+    bulk_refs = list((verse_set_id, ref) for order, ref, verse_set_id in ids)
+    uvs_dict = request.identity.get_verse_statuses_bulk(bulk_refs)
+    retval = []
+    for order, ref, verse_set_id in ids:
+        try:
+            uvs = uvs_dict[verse_set_id, ref]
+        except KeyError:
             continue
-        return request.identity.get_verse_status_for_ref(ref, verse_set_id)
-    return None
+        uvs.learn_order = order
+        retval.append(uvs)
+    return retval
 
 def _get_verse_status_ids(request):
     return request.session.get('verses_to_learn', [])
@@ -33,12 +39,18 @@ def _save_verse_status_ids(request, ids):
 
 
 def set_verse_statuses(request, user_verse_statuses):
-    _save_verse_status_ids(request, map(_verse_status_info, user_verse_statuses))
+    _save_verse_status_ids(request,
+                           [(order, uvs.reference, uvs.verse_choice.verse_set_id)
+                            for order, uvs in enumerate(user_verse_statuses)])
 
 
 def remove_user_verse_status(request, reference, verse_set_id):
+    # TODO: Race condition possible here. Therefore should remove all that
+    # appear before reference, since we know that they will be processed in
+    # order client side.
     ids = _get_verse_status_ids(request)
-    ids = [i for i in ids if i != (reference, verse_set_id)]
+    ids = [(order, ref, vs_id) for order, ref, vs_id in ids
+           if (ref, vs_id) != (reference, verse_set_id)]
     _save_verse_status_ids(request, ids)
 
 

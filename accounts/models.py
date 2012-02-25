@@ -1,4 +1,5 @@
 from datetime import timedelta
+import itertools
 
 from django.db import models
 from django.utils import timezone
@@ -246,21 +247,54 @@ class Identity(models.Model):
                 self.create_verse_status(verse_choice=verse_choice,
                                          version=version)
 
-    def get_verse_status_for_ref(self, reference, verse_set_id):
-        l = self.verse_statuses.filter(ignored=False, verse_choice__reference=reference)
-        # This is used by 'get next verse' handler, when we need the following
-        l = l.select_related('version', 'verse_choice', 'verse_choice__verse_set')
-        if verse_set_id is None:
-            l = l.filter(verse_choice__verse_set__isnull=True)
-        else:
-            l = l.filter(verse_choice__verse_set=verse_set_id)
-        l = list(l)
-        if len(l) == 0:
-            return None
+    def get_verse_statuses_bulk(self, references):
+        # refs is a list of (verse_set_id, ref) tuples
+        # Returns a dictionary of (verse_set_id, ref): UVS
+        # The UVS objects have 'text' attributes retrieved efficiently.
 
-        # There is the possibility of multiple here, but they should all be the
-        # same, so we return any.
-        return l[0]
+        # For efficiency, we group by verse_set_id to minimize queries
+        references = sorted(references)
+        groups = []
+        for verse_set_id, g in itertools.groupby(references,
+                                                 lambda (verse_set_id, ref): verse_set_id):
+            groups.append((verse_set_id, [ref for verse_set_id, ref in g]))
+
+
+        retval = {}
+        for verse_set_id, references in groups:
+
+            l = self.verse_statuses.filter(ignored=False, verse_choice__reference__in=references)
+            # This is used by VersesToLearnHandler, where we need the following:
+            l = l.select_related('version', 'verse_choice', 'verse_choice__verse_set')
+            if verse_set_id is None:
+                l = l.filter(verse_choice__verse_set__isnull=True)
+            else:
+                l = l.filter(verse_choice__verse_set=verse_set_id)
+            l = list(l)
+
+
+            # There is the possibility of multiple here, but they should all be the
+            # same, so the dictionary will eliminate duplicates.
+            retval.update(dict(((verse_set_id, uvs.reference), uvs) for uvs in l))
+
+        # We need to get 'text' efficiently too. Group into versions:
+        by_version = {}
+        for uvs in retval.values():
+            by_version.setdefault(uvs.version_id, []).append(uvs)
+
+        # Get the texts in bulk
+        texts = {}
+        for version_id, uvs_list in by_version.items():
+            version = uvs_list[0].version
+            refs = [uvs.reference for uvs in uvs_list]
+            for ref, text in version.get_text_by_reference_bulk(refs).items():
+                texts[version_id, ref] = text
+
+        # Assign texts back to uvs:
+        for uvs in retval.values():
+            uvs.text = texts[uvs.version_id, uvs.reference]
+
+        return retval
 
 
     def create_verse_status(self, verse_choice, version):

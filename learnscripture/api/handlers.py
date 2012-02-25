@@ -58,22 +58,19 @@ def validate(form_class, **formkwargs):
     return dec
 
 
-class NextVerseHandler(BaseHandler):
+class VersesToLearnHandler(BaseHandler):
     allowed_methods = ('GET',)
     fields = ('memory_stage', 'strength', 'first_seen',
               ('verse_choice', (('verse_set', ('id', 'set_type')),)),
               'reference',
               'text',
               'needs_testing',
+              'learn_order',
               ('version', ('full_name', 'short_name', 'slug', 'url')))
 
     @require_identity_method
     def read(self, request):
-        ignore_verse = request.GET.get('ignoreVerse', None)
-        uvs = session.get_next_verse_status(request, ignore_verse=ignore_verse)
-        if uvs is None:
-            return rc.NOT_FOUND
-        return uvs
+        return session.get_verse_statuses(request)
 
 
 def get_verse_status(data):
