@@ -770,9 +770,15 @@ var learnscripture =
         }
 
         var finish = function() {
-            $('body').ajaxStop(function() {
-                window.location = '/dashboard/';
-            });
+            var go = function() {
+                    window.location = '/dashboard/';
+            };
+            if ($.active) {
+                $('body').ajaxStop(go);
+            } else {
+                go();
+            }
+
         }
 
         var nextVerse = function() {
