@@ -400,6 +400,7 @@ var learnscripture =
             var bar = $('#id-progress-bar');
             var oldVal = parseInt(bar.val(), 10);
             if (preferences.enableAnimations &&
+                !currentStage.testMode &&
                 Math.abs(oldVal - progress) > 5 && // animation pointless
                 !(oldVal > 99 && progress == 0) // new verse - animation confusing
                ) {
