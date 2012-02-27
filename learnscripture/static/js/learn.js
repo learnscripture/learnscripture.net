@@ -990,7 +990,7 @@ var learnscripture =
 
         var bindDocKeyPress = function() {
             if (isLearningPage) {
-                if (!docKeyPressBound) {
+                if (!docKeyPressBound && !currentStage.testMode) {
                     $(document).bind('keypress', docKeyPress);
                     docKeyPressBound = true;
                 }
@@ -1158,7 +1158,6 @@ var learnscripture =
             inputBox = $('#id-typing');
             inputBox.keydown(inputKeyDown);
             testingStatus = $('#id-testing-status');
-            bindDocKeyPress();
             $('#id-next-btn').show().click(next);
             $('#id-back-btn').show().click(back);
             $('#id-next-verse-btn').click(nextVerse);
