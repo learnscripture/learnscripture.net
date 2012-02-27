@@ -15,6 +15,7 @@
         "name": "Bible 101",
         "slug": "bible-101",
         "description": "Some famous verses that everyone ought to know, to get you started.",
+        "public": true,
         "created_by": 1
     }
 },
@@ -26,6 +27,7 @@
         "name": "Temptation",
         "slug": "temptation",
         "description": "Some help in dealing with common temptations.",
+        "public": true,
         "created_by": 1
     }
 },
@@ -37,6 +39,7 @@
         "name": "Basic Gospel",
         "slug": "basic-gospel",
         "description": "Great gospel texts",
+        "public": true,
         "created_by": 1
     }
 },
@@ -48,6 +51,7 @@
         "name": "Psalm 23",
         "slug": "psalm-23",
         "description": "",
+        "public": true,
         "created_by": 1
     }
 },

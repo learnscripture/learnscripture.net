@@ -117,6 +117,12 @@ var learnscripture =
                   ev.preventDefault();
               }
               });
+            $('#id_selection-public, #id_passage-public').each(function(idx, elem) {
+                var input = $(elem);
+                if (input.attr('checked')) {
+                    input.attr('disabled', 'disabled');
+                }
+            });
 
         };
 

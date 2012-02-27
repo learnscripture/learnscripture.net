@@ -153,15 +153,24 @@ class Verse(models.Model):
         ordering = ('bible_verse_number',)
 
 
+class VerseSetManager(models.Manager):
+    def public(self):
+        return self.get_query_set().filter(public=True)
+
+
 class VerseSet(models.Model):
     name = models.CharField(max_length=255)
     slug = AutoSlugField(populate_from='name', unique=True)
     description = models.TextField(blank=True)
     set_type = models.PositiveSmallIntegerField(choices=VerseSetType.choice_list)
 
+    public = models.BooleanField(default=False)
+
     popularity = models.PositiveIntegerField(default=0)
     date_added = models.DateTimeField(default=timezone.now)
     created_by = models.ForeignKey('accounts.Account', related_name='verse_sets_created')
+
+    objects = VerseSetManager()
 
     def __unicode__(self):
         return self.name
