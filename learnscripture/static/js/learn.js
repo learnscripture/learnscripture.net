@@ -56,7 +56,74 @@ var learnscripture =
         var maxVerseIndex = null;
         var currentVerseStatus = null;
 
-        // word toggling and selection
+        // ======== Generic utilities =========
+
+        // === Randomising ===
+
+        var chooseN = function(aList, n) {
+            aList = aList.slice(0);
+            var i;
+            var chosen = [];
+            for(i = 0; i < n; i++) {
+                if (aList.length == 0) {
+                    break;
+                }
+                var pos = Math.floor(Math.random()*aList.length);
+                var item = aList[pos];
+                aList.splice(pos, 1);
+                chosen.push(item);
+            }
+            return chosen;
+        };
+
+        // === Sets ===
+
+        var setUnion = function(list1, list2) {
+            var output = list1.slice(0);
+            for (var i = 0; i < list2.length; i++) {
+                var item = list2[i];
+                if (output.indexOf(item) == -1) {
+                    output.push(item);
+                }
+            }
+            return output;
+        };
+
+        var setRemove = function(list1, list2) {
+            // Return a new list which is a copy of list1 with the items
+            // of list2 removed
+            var output = list1.slice(0);
+            for (var i = 0; i < list2.length; i++) {
+                var p = output.indexOf(list2[i]);
+                if (p != -1) {
+                    output.splice(p, 1);
+                }
+            }
+            return output;
+        };
+
+        // === HTML ===
+
+        var enableBtn = function(btn, state) {
+            if (state) {
+                btn.removeAttr('disabled');
+            } else {
+                btn.attr('disabled', 'disabled');
+            }
+        };
+
+
+        // === Events ===
+
+        var alphanumeric = function(ev) {
+            return ((!ev.ctrlKey && !ev.altKey && (
+                (ev.which >= 65 && ev.which <= 90) ||
+                    (ev.which >= 48 && ev.which <= 57)
+            )));
+        }
+
+
+        // ========== Word toggling and selection =============
 
         // For speed in test mode, where we have to keep up with typing,
         // we tag all the words with ids, and keep track of the selected id
@@ -137,6 +204,8 @@ var learnscripture =
             }
         };
 
+        // ========== Messages ===========
+
         var flashMsg = function(elements) {
             if (preferences.enableAnimations) {
                 elements.css({opacity:1}).animate({opacity: 0},
@@ -163,25 +232,7 @@ var learnscripture =
             flashMsg(testingStatus.attr({'class': 'incorrect'}).text("Incorrect"));
         };
 
-        var stripPunctuation = function(str) {
-            return str.replace(/["'\.,;!?:\/#!$%\^&\*{}=\-_`~()]/g,"");
-        };
-
-        var matchWord = function(target, typed) {
-            // inputs are already lowercased with punctuation stripped
-            if (preferences.testingMethod == TEST_FULL_WORDS) {
-                if (typed == "") return false;
-                // for 1 letter words, don't allow any mistakes
-                if (target.length == 1) {
-                    return typed == target;
-                }
-                // After that, allow N/3 mistakes, rounded up.
-                return levenshteinDistance(target, typed) <= Math.ceil(target.length / 3);
-            } else {
-                // TEST_FIRST_LETTER
-                return (typed == target.slice(0, 1));
-            }
-        };
+        // ========== Actions completed =============
 
         var readingComplete = function(callbackAfter) {
             $.ajax({url: '/api/learnscripture/v1/actioncomplete/',
@@ -269,6 +320,24 @@ var learnscripture =
             showInstructions("results");
         };
 
+        // =========== Stage handling ==========
+
+        var setProgress = function(stageIdx, fraction) {
+            var progress = (stageIdx + fraction)/currentStageList.length * 100;
+            var bar = $('#id-progress-bar');
+            var oldVal = parseInt(bar.val(), 10);
+            if (preferences.enableAnimations &&
+                !currentStage.testMode &&
+                Math.abs(oldVal - progress) > 5 && // animation pointless
+                !(oldVal > 99 && progress == 0) // new verse - animation confusing
+               ) {
+                bar.animate({value: progress,
+                             duration: 'fast'});
+            } else {
+                bar.val(progress);
+            }
+        };
+
         var completeStageGroup = function() {
             spentStagesCount += currentStageList.length;
             currentStage = stageDefs['results'];
@@ -277,38 +346,120 @@ var learnscripture =
             setNextPreviousBtns();
         };
 
-        var checkCurrentWord = function() {
-            var wordIdx = selectedWordIndex;
-            var word = getWordAt(wordIdx);
-            var wordStr = stripPunctuation(word.text().toLowerCase());
-            var typed = stripPunctuation(inputBox.val().toLowerCase());
-            var moveOn = function() {
-                showWord(word.find('*'));
-                inputBox.val('');
-                setProgress(currentStageIdx, (wordIdx + 1)/ wordList.length);
-                if (wordIdx + 1 == wordList.length) {
-                    testComplete();
-                } else {
-                    moveSelectionRelative(1);
-                }
-            };
-            if (matchWord(wordStr, typed)) {
-                indicateSuccess();
-                moveOn();
+        var showInstructions = function(stageName) {
+            if (preferences.enableAnimations) {
+                // Fade out old instructions, fade in the new
+                $('#id-instructions div').animate(
+                    {opacity: 0},
+                    {duration: 150,
+                     queue: false,
+                     complete: function() {
+                         $('#id-instructions div').hide();
+                         $('#id-instructions .instructions-' + stageName).show().animate({opacity: 1}, 150); }});
             } else {
-                testingMistakes[wordIdx] += 1;
-                if (testingMistakes[wordIdx] == currentStage.testMaxAttempts) {
-                    indicateFail();
-                    moveOn();
-                } else {
-                    indicateMistake(testingMistakes[wordIdx], currentStage.testMaxAttempts);
-                }
+                $('#id-instructions div').css({opacity: 0});
+                $('#id-instructions div').hide();
+                $('#id-instructions .instructions-' + stageName).show().css({opacity: 1});
             }
         };
 
-        // ---- Stages ----
+        var setNextPreviousBtns = function() {
+            enableBtn($('#id-next-btn'), currentStageIdx < currentStageList.length - 1);
+            enableBtn($('#id-back-btn'), currentStageIdx > 0);
+        };
 
-        // -- reading stage --
+        var setupStage = function(idx) {
+            // set the globals
+            var currentStageName = currentStageList[idx];
+            if (preferences.testingMethod == TEST_FIRST_LETTER &&
+                currentStageName == 'testFull') {
+                currentStageName = 'testFirstLetter';
+            }
+            currentStageIdx = idx;
+            currentStage = stageDefs[currentStageName];
+
+            // Common clearing, and stage specific setup
+            $('.current-verse .correct, .current-verse .incorrect').removeClass('correct').removeClass('incorrect');
+            $('#id-progress-summary').text("Stage " + (currentStageIdx + 1).toString() + "/" + currentStageList.length.toString());
+            currentStage.setup();
+            setNextPreviousBtns();
+            if (currentStage.testMode) {
+                unbindDocKeyPress();
+                $('#id-test-bar').show();
+                inputBox.focus();
+            } else {
+                inputBox.blur();
+                $('#id-test-bar').hide();
+                bindDocKeyPress();
+            }
+
+            showInstructions(currentStageName);
+            $('#id-stage-caption').text(currentStage.caption);
+            // reset selected word
+            moveSelection(0);
+
+            setProgress(currentStageIdx, 0);
+        };
+
+        // === Moving between stages and verses ===
+
+        // next stage within verse
+        var next = function(ev) {
+            if (currentStage.continueStage()) {
+                return;
+            }
+            if (currentStageIdx < currentStageList.length - 1) {
+                setupStage(currentStageIdx + 1);
+            }
+        };
+
+        var back = function(ev) {
+            if (currentStageIdx == 0) {
+                return;
+            }
+            setupStage(currentStageIdx - 1);
+        };
+
+        var nextVerse = function() {
+            if (nextVersePossible()) {
+                currentVerseIndex++;
+                loadCurrentVerse();
+            } else {
+                finish();
+            }
+        };
+
+        var nextVersePossible = function() {
+            return (currentVerseIndex < maxVerseIndex);
+        }
+
+        var markReadAndNextVerse = function() {
+            readingComplete(function() {
+                loadStats();
+            });
+            nextVerse();
+        };
+
+
+        var finish = function() {
+            var go = function() {
+                    window.location = '/dashboard/';
+            };
+            if ($.active) {
+                $('body').ajaxStop(go);
+            } else {
+                go();
+            }
+        }
+
+        var pressPrimaryButton = function() {
+            $('input.primary:visible:not([disabled])').click();
+        };
+
+        // =========== Different stages =========
+
+        // === Reading stage ===
+
         var readStageStart = function() {
             showWord($('.current-verse .word *'));
         };
@@ -317,6 +468,8 @@ var learnscripture =
             readingComplete();
             return false;
         };
+
+        // === Read/recall stages ===
         // recall type 1 - FullAndInitial
         //    Some full words, some initial letters only
 
@@ -373,94 +526,6 @@ var learnscripture =
 
         };
 
-        // Testing stages
-
-        var resetTestingMistakes = function() {
-            testingMistakes = {};
-            for (var i = 0; i < wordList.length; i++) {
-                testingMistakes[i] = 0;
-            }
-        };
-
-        var testStart = function() {
-            // Don't want to see a flash of words at the beginning,
-            // so hide quickly
-            hideWord($('.current-verse .word span'), {'duration': 0, queue:false});
-            resetTestingMistakes();
-            testingStatus.text('');
-        };
-
-        var testContinue = function() {
-            return true;
-        };
-
-        // Utilities for stages
-        var setProgress = function(stageIdx, fraction) {
-            var progress = (stageIdx + fraction)/currentStageList.length * 100;
-            var bar = $('#id-progress-bar');
-            var oldVal = parseInt(bar.val(), 10);
-            if (preferences.enableAnimations &&
-                !currentStage.testMode &&
-                Math.abs(oldVal - progress) > 5 && // animation pointless
-                !(oldVal > 99 && progress == 0) // new verse - animation confusing
-               ) {
-                bar.animate({value: progress,
-                             duration: 'fast'});
-            } else {
-                bar.val(progress);
-            }
-        };
-
-        var markRevealed = function(wordNumber) {
-            var p = testedWords.indexOf(wordNumber);
-            if (p != -1) {
-                testedWords.splice(p, 1);
-            }
-            if (untestedWords.indexOf(wordNumber) == -1) {
-                untestedWords.push(wordNumber);
-            }
-        };
-
-        var chooseN = function(aList, n) {
-            aList = aList.slice(0);
-            var i;
-            var chosen = [];
-            for(i = 0; i < n; i++) {
-                if (aList.length == 0) {
-                    break;
-                }
-                var pos = Math.floor(Math.random()*aList.length);
-                var item = aList[pos];
-                aList.splice(pos, 1);
-                chosen.push(item);
-            }
-            return chosen;
-        };
-
-        var setUnion = function(list1, list2) {
-            var output = list1.slice(0);
-            for (var i = 0; i < list2.length; i++) {
-                var item = list2[i];
-                if (output.indexOf(item) == -1) {
-                    output.push(item);
-                }
-            }
-            return output;
-        };
-
-        var setRemove = function(list1, list2) {
-            // Return a new list which is a copy of list1 with the items
-            // of list2 removed
-            var output = list1.slice(0);
-            for (var i = 0; i < list2.length; i++) {
-                var p = output.indexOf(list2[i]);
-                if (p != -1) {
-                    output.splice(p, 1);
-                }
-            }
-            return output;
-        };
-
         var getTestWords = function(testFraction) {
             // Moves testFraction fraction of words from
             // untestedWords for next test, for the next test
@@ -488,29 +553,90 @@ var learnscripture =
             return $(selector);
         };
 
-        var showInstructions = function(stageName) {
-            if (preferences.enableAnimations) {
-                // Fade out old instructions, fade in the new
-                $('#id-instructions div').animate(
-                    {opacity: 0},
-                    {duration: 150,
-                     queue: false,
-                     complete: function() {
-                         $('#id-instructions div').hide();
-                         $('#id-instructions .instructions-' + stageName).show().animate({opacity: 1}, 150); }});
-            } else {
-                $('#id-instructions div').css({opacity: 0});
-                $('#id-instructions div').hide();
-                $('#id-instructions .instructions-' + stageName).show().css({opacity: 1});
+        var markRevealed = function(wordNumber) {
+            var p = testedWords.indexOf(wordNumber);
+            if (p != -1) {
+                testedWords.splice(p, 1);
+            }
+            if (untestedWords.indexOf(wordNumber) == -1) {
+                untestedWords.push(wordNumber);
             }
         };
 
-        var setNextPreviousBtns = function() {
-            enableBtn($('#id-next-btn'), currentStageIdx < currentStageList.length - 1);
-            enableBtn($('#id-back-btn'), currentStageIdx > 0);
+        // === Testing stages ===
+
+        var resetTestingMistakes = function() {
+            testingMistakes = {};
+            for (var i = 0; i < wordList.length; i++) {
+                testingMistakes[i] = 0;
+            }
         };
 
-        // Stages definition
+        var testStart = function() {
+            // Don't want to see a flash of words at the beginning,
+            // so hide quickly
+            hideWord($('.current-verse .word span'), {'duration': 0, queue:false});
+            resetTestingMistakes();
+            testingStatus.text('');
+        };
+
+        var testContinue = function() {
+            return true;
+        };
+
+
+        // === Testing logic ===
+
+        var stripPunctuation = function(str) {
+            return str.replace(/["'\.,;!?:\/#!$%\^&\*{}=\-_`~()]/g,"");
+        };
+
+        var matchWord = function(target, typed) {
+            // inputs are already lowercased with punctuation stripped
+            if (preferences.testingMethod == TEST_FULL_WORDS) {
+                if (typed == "") return false;
+                // for 1 letter words, don't allow any mistakes
+                if (target.length == 1) {
+                    return typed == target;
+                }
+                // After that, allow N/3 mistakes, rounded up.
+                return levenshteinDistance(target, typed) <= Math.ceil(target.length / 3);
+            } else {
+                // TEST_FIRST_LETTER
+                return (typed == target.slice(0, 1));
+            }
+        };
+
+        var checkCurrentWord = function() {
+            var wordIdx = selectedWordIndex;
+            var word = getWordAt(wordIdx);
+            var wordStr = stripPunctuation(word.text().toLowerCase());
+            var typed = stripPunctuation(inputBox.val().toLowerCase());
+            var moveOn = function() {
+                showWord(word.find('*'));
+                inputBox.val('');
+                setProgress(currentStageIdx, (wordIdx + 1)/ wordList.length);
+                if (wordIdx + 1 == wordList.length) {
+                    testComplete();
+                } else {
+                    moveSelectionRelative(1);
+                }
+            };
+            if (matchWord(wordStr, typed)) {
+                indicateSuccess();
+                moveOn();
+            } else {
+                testingMistakes[wordIdx] += 1;
+                if (testingMistakes[wordIdx] == currentStage.testMaxAttempts) {
+                    indicateFail();
+                    moveOn();
+                } else {
+                    indicateMistake(testingMistakes[wordIdx], currentStage.testMaxAttempts);
+                }
+            }
+        };
+
+        // === Stages definition ===
 
         // Full and initial
         var recall1Continue = makeFullAndInitialContinue(0.50);
@@ -593,79 +719,256 @@ var learnscripture =
                                             toggleMode: null}
                         };
 
+        // === Handling stage lists ===
 
-        var setupStage = function(idx) {
-            // set the globals
-            var currentStageName = currentStageList[idx];
-            if (preferences.testingMethod == TEST_FIRST_LETTER &&
-                currentStageName == 'testFull') {
-                currentStageName = 'testFirstLetter';
+
+        var setupStageList = function(verseData) {
+            var strength = 0;
+            if (verseData.strength != null) {
+                strength = verseData.strength;
             }
-            currentStageIdx = idx;
-            currentStage = stageDefs[currentStageName];
-
-            // Common clearing, and stage specific setup
-            $('.current-verse .correct, .current-verse .incorrect').removeClass('correct').removeClass('incorrect');
-            $('#id-progress-summary').text("Stage " + (currentStageIdx + 1).toString() + "/" + currentStageList.length.toString());
-            currentStage.setup();
-            setNextPreviousBtns();
-            if (currentStage.testMode) {
-                unbindDocKeyPress();
-                $('#id-test-bar').show();
-                inputBox.focus();
+            if (verseData.needs_testing) {
+                currentStageList = chooseStageListForStrength(strength);
             } else {
-                inputBox.blur();
-                $('#id-test-bar').hide();
-                bindDocKeyPress();
+                currentStageList = ['readForContext'];
             }
-
-            showInstructions(currentStageName);
-            $('#id-stage-caption').text(currentStage.caption);
-            // reset selected word
-            moveSelection(0);
-
-            setProgress(currentStageIdx, 0);
+            setupStage(0);
         };
 
-        // -- Moving between stages --
-
-        var next = function(ev) {
-            if (currentStage.continueStage()) {
-                return;
-            }
-            if (currentStageIdx < currentStageList.length - 1) {
-                setupStage(currentStageIdx + 1);
-            }
-        };
-
-        var back = function(ev) {
-            if (currentStageIdx == 0) {
-                return;
-            }
-            setupStage(currentStageIdx - 1);
-        };
-
-        var enableBtn = function(btn, state) {
-            if (state) {
-                btn.removeAttr('disabled');
+        var chooseStageListForStrength = function(strength) {
+            // This function is tuned to give read/recall stages only for the
+            // early stages, or when the verse has been completely forgotten.
+            // Although it doesn't use it, it's tuned to the value of
+            // INITIAL_STRENGTH_FACTOR.
+            // The other constants are picked by looking at the
+            // output of accounts.memorymodel.test_run()
+            if (strength < 0.02) {
+                // either first test, or first test after initial test accuracy
+                // of 20% or less. Do everything:
+                return ['read', 'recall1', 'recall2', 'recall3', 'recall4', 'testFull'];
+            } else if (strength < 0.07) {
+                // e.g. first test was 70% or less, this is second test
+                return ['recall2', 'testFull'];
             } else {
-                btn.attr('disabled', 'disabled');
+                return ['testFull'];
             }
         };
 
-        // -- event handlers --
-        var alphanumeric = function(ev) {
-            return ((!ev.ctrlKey && !ev.altKey && (
-                (ev.which >= 65 && ev.which <= 90) ||
-                    (ev.which >= 48 && ev.which <= 57)
-            )));
+
+        // ========= Handling verse loading =======
+
+        var loadVerses = function(callbackAfter) {
+            var url = '/api/learnscripture/v1/versestolearn/?format=json&r=' + Math.floor(Math.random()*1000000000).toString();
+            $.ajax({url: url,
+                    dataType: 'json',
+                    type: 'GET',
+                    success: function(data) {
+                        // This function can be called when we have already
+                        // loaded the verses e.g. if the user changed the
+                        // version.  Also, once some verses have been
+                        // read/learnt, they will be missing.
+
+                        // We use the 'learn_order' as an index to work out
+                        // which verse we are on, and to merge the incoming
+                        // verses with any existing.
+
+                        if (versesToLearn === null) {
+                            versesToLearn = {}
+                        }
+                        for (var i = 0; i < data.length; i++) {
+                            verse = data[i]
+                            versesToLearn[verse.learn_order] = verse;
+                            if (maxVerseIndex === null ||
+                                verse.learn_order > maxVerseIndex) {
+                                maxVerseIndex = verse.learn_order;
+                            }
+                            if (minVerseIndex === null ||
+                                verse.learn_order < minVerseIndex) {
+                                minVerseIndex = verse.learn_order;
+                            }
+                        }
+                        if (callbackAfter !== undefined) {
+                            callbackAfter()
+                        }
+                    },
+                    error: handlerAjaxError,
+                   });
         }
 
 
-        var pressPrimaryButton = function() {
-            $('input.primary:visible:not([disabled])').click();
+        var loadCurrentVerse = function() {
+            var oldVerseStatus = currentVerseStatus;
+            currentVerseStatus = versesToLearn[currentVerseIndex];
+            verse = currentVerseStatus;
+            if (isPassageType(oldVerseStatus)) {
+                moveOldWords();
+            } else {
+                $('.current-verse').children().remove();
+            }
+
+            $('.current-verse').hide(); // Hide until set up
+            $('#id-verse-title').text(currentVerseStatus.reference);
+            // convert newlines to divs
+            var text = verse.text;
+            if (verse.verse_choice.verse_set == null ||
+                verse.verse_choice.verse_set.set_type == SET_TYPE_SELECTION) {
+                // Reference is part of what should be learnt
+                text = text + '\n' + verse.reference;
+            }
+            $.each(text.split(/\n/), function(idx, line) {
+                if (line.trim() != '') {
+                    $('.current-verse').append('<div class="line">' +
+                                          line + '</div>');
+                }
+            });
+            var versionText = "Version: " + verse.version.full_name +
+                " (" + verse.version.short_name + ") |";
+            $('#id-version-name').text(versionText);
+
+            if (verse.version.url != "") {
+                var url = verse.version.url.replace('%s', encodeURI(verse.reference)).replace('%20', '+');
+                $('#id-browse-link').show().find('a').attr('href', url);
+            } else {
+                $('#id-browse-link').hide();
+            }
+            $('#id-version-select').val(verse.version.slug);
+            markupVerse();
+            $('#id-loading').hide();
+            $('#id-controls').show();
+            setupStageList(verse);
+
+            if (isPassageType(oldVerseStatus)) {
+                scrollOutPreviousVerse();
+                $('.current-verse').show();
+            } else {
+                $('.previous-verse').remove()
+                $('.current-verse').show();
+            }
+            var nextBtns = $('#id-next-verse-btn, #id-context-next-verse-btn');
+            var finishBtn = $('#id-finish-btn');
+            if (nextVersePossible()) {
+                nextBtns.val('Next');
+                finishBtn.show();
+            } else {
+                nextBtns.val('Done');
+                finishBtn.hide();
+            }
         };
 
+        var isPassageType = function(verseData) {
+            return (verseData &&
+                    verseData.verse_choice.verse_set &&
+                    verseData.verse_choice.verse_set.set_type ==
+                    SET_TYPE_PASSAGE)
+        };
+
+        var moveOldWords = function() {
+            $('.previous-verse-wrapper').remove();
+            $('.current-verse').removeClass('current-verse').addClass('previous-verse');
+            $('.current-verse-wrapper').removeClass('current-verse-wrapper')
+                .addClass('previous-verse-wrapper')
+                .after('<div class="current-verse-wrapper"><div class="current-verse"></div></div>');
+            $('.previous-verse .word, .previous-verse .testedword').each(function(idx, elem) {
+                $(elem).removeAttr('id');
+            });
+        };
+
+        var scrollOutPreviousVerse = function() {
+            var words = {}; // offset:node list of word spans
+            var maxOffset = null;
+            $('.previous-verse .word, .previous-verse .testedword').each(function(idx, elem) {
+                var offset = $(elem).offset().top;
+                if (maxOffset == null || offset > maxOffset) {
+                    maxOffset = offset;
+                }
+                // Build up elements for the words in groups
+                if (words[offset] == undefined) {
+                    words[offset] = [];
+                }
+                words[offset].push(elem);
+            });
+
+            // First fix the height
+            if (preferences.enableAnimations) {
+                $('.previous-verse').css({'height': $('.previous-verse').height().toString()});
+            }
+
+            // Now make the other words disappear
+            $.each(words, function(offset, elems) {
+                if (offset != maxOffset) {
+                        $(elems).remove();
+                }
+            });
+            $('.previous-verse br').remove();
+
+            // Now shrink the area
+            var wordHeight = $('.previous-verse .word, .previous-verse .testedword').css('line-height');
+            if (preferences.enableAnimations) {
+                $('.previous-verse')
+                    .css({display: 'table-cell'})
+                    .animate({height: wordHeight},
+                             {duration: 500});
+            }
+            $('.previous-verse .word, .previous-verse .testedword')
+                .removeClass('word').addClass('testedword')
+                .find('span')
+                .removeClass('wordstart').removeClass('wordend');
+        }
+
+        var markupVerse = function() {
+            var wordClass = currentVerseStatus.needs_testing ? 'word' : 'testedword';
+            var wordGroups = [];
+
+            $('.current-verse .line').each(function(idx, elem) {
+                wordGroups.push($(elem).text().trim().split(/ |\n/));
+            });
+            wordList = [];
+            var replacement = [];
+            var wordNumber = 0;
+            for(var i = 0; i < wordGroups.length; i++) {
+                var group = wordGroups[i];
+                group = $.map(group, function(word, j) {
+                    if (stripPunctuation(word) == "") {
+                        return null;
+                    } else {
+                        return word;
+                    }
+                });
+                var replace = [];
+                $.each(group, function(j, word) {
+                    var start = word.match(/\W*./)[0];
+                    var end = word.slice(start.length);
+                    replace.push ('<span id="id-word-' + wordNumber.toString() +
+                                  '" class=\"' + wordClass + '\">' +
+                                  '<span class="wordstart">' + start +
+                                  '</span><span class="wordend">' + end +
+                                  '</span></span>');
+                    wordList.push(wordNumber);
+                    wordNumber++;
+
+                });
+                replacement.push(replace.join(' '));
+            }
+            $('.current-verse').html(replacement.join('<br/>'));
+            $('.current-verse .word').click(function(ev) {
+                if (!currentStage.testMode) {
+                    toggleWord($(this));
+                }
+            });
+        };
+
+
+        var loadStats = function() {
+            $.ajax({url: '/api/learnscripture/v1/sessionstats/?format=json&r=' +
+                    Math.floor(Math.random()*1000000000).toString(),
+                    dataType: 'json',
+                    type: 'GET',
+                    success: function(data) {
+                        $('#id-stats-block').html(data.stats_html);
+                    }});
+        };
+
+        // =========== Event handlers ==========
 
         // We need to be careful with docKeyPress:
         // - it must be disabled when modals are active
@@ -793,280 +1096,6 @@ var learnscripture =
                    });
         };
 
-        var finish = function() {
-            var go = function() {
-                    window.location = '/dashboard/';
-            };
-            if ($.active) {
-                $('body').ajaxStop(go);
-            } else {
-                go();
-            }
-
-        }
-
-        var nextVerse = function() {
-            if (nextVersePossible()) {
-                currentVerseIndex++;
-                loadCurrentVerse();
-            } else {
-                finish();
-            }
-        };
-
-        var nextVersePossible = function() {
-            return (currentVerseIndex < maxVerseIndex);
-        }
-
-        var markReadAndNextVerse = function() {
-            readingComplete(function() {
-                loadStats();
-            });
-            nextVerse();
-        };
-
-        var chooseStageListForStrength = function(strength) {
-            // This function is tuned to give read/recall stages only for the
-            // early stages, or when the verse has been completely forgotten.
-            // Although it doesn't use it, it's tuned to the value of
-            // INITIAL_STRENGTH_FACTOR.
-            // The other constants are picked by looking at the
-            // output of accounts.memorymodel.test_run()
-            if (strength < 0.02) {
-                // either first test, or first test after initial test accuracy
-                // of 20% or less. Do everything:
-                return ['read', 'recall1', 'recall2', 'recall3', 'recall4', 'testFull'];
-            } else if (strength < 0.07) {
-                // e.g. first test was 70% or less, this is second test
-                return ['recall2', 'testFull'];
-            } else {
-                return ['testFull'];
-            }
-        };
-
-        var setupStageList = function(verseData) {
-            var strength = 0;
-            if (verseData.strength != null) {
-                strength = verseData.strength;
-            }
-            if (verseData.needs_testing) {
-                currentStageList = chooseStageListForStrength(strength);
-            } else {
-                currentStageList = ['readForContext'];
-            }
-            setupStage(0);
-        };
-
-        var scrollOutPreviousVerse = function() {
-            var words = {}; // offset:node list of word spans
-            var maxOffset = null;
-            $('.previous-verse .word, .previous-verse .testedword').each(function(idx, elem) {
-                var offset = $(elem).offset().top;
-                if (maxOffset == null || offset > maxOffset) {
-                    maxOffset = offset;
-                }
-                // Build up elements for the words in groups
-                if (words[offset] == undefined) {
-                    words[offset] = [];
-                }
-                words[offset].push(elem);
-            });
-
-            // First fix the height
-            if (preferences.enableAnimations) {
-                $('.previous-verse').css({'height': $('.previous-verse').height().toString()});
-            }
-
-            // Now make the other words disappear
-            $.each(words, function(offset, elems) {
-                if (offset != maxOffset) {
-                        $(elems).remove();
-                }
-            });
-            $('.previous-verse br').remove();
-
-            // Now shrink the area
-            var wordHeight = $('.previous-verse .word, .previous-verse .testedword').css('line-height');
-            if (preferences.enableAnimations) {
-                $('.previous-verse')
-                    .css({display: 'table-cell'})
-                    .animate({height: wordHeight},
-                             {duration: 500});
-            }
-            $('.previous-verse .word, .previous-verse .testedword')
-                .removeClass('word').addClass('testedword')
-                .find('span')
-                .removeClass('wordstart').removeClass('wordend');
-        }
-
-        var moveOldWords = function() {
-            $('.previous-verse-wrapper').remove();
-            $('.current-verse').removeClass('current-verse').addClass('previous-verse');
-            $('.current-verse-wrapper').removeClass('current-verse-wrapper')
-                .addClass('previous-verse-wrapper')
-                .after('<div class="current-verse-wrapper"><div class="current-verse"></div></div>');
-            $('.previous-verse .word, .previous-verse .testedword').each(function(idx, elem) {
-                $(elem).removeAttr('id');
-            });
-        };
-
-        var isPassageType = function(verseData) {
-            return (verseData &&
-                    verseData.verse_choice.verse_set &&
-                    verseData.verse_choice.verse_set.set_type ==
-                    SET_TYPE_PASSAGE)
-        };
-
-        var loadVerses = function(callbackAfter) {
-            var url = '/api/learnscripture/v1/versestolearn/?format=json&r=' + Math.floor(Math.random()*1000000000).toString();
-            $.ajax({url: url,
-                    dataType: 'json',
-                    type: 'GET',
-                    success: function(data) {
-                        // This function can be called when we have already
-                        // loaded the verses e.g. if the user changed the
-                        // version.  Also, once some verses have been
-                        // read/learnt, they will be missing.
-
-                        // We use the 'learn_order' as an index to work out
-                        // which verse we are on, and to merge the incoming
-                        // verses with any existing.
-
-                        if (versesToLearn === null) {
-                            versesToLearn = {}
-                        }
-                        for (var i = 0; i < data.length; i++) {
-                            verse = data[i]
-                            versesToLearn[verse.learn_order] = verse;
-                            if (maxVerseIndex === null ||
-                                verse.learn_order > maxVerseIndex) {
-                                maxVerseIndex = verse.learn_order;
-                            }
-                            if (minVerseIndex === null ||
-                                verse.learn_order < minVerseIndex) {
-                                minVerseIndex = verse.learn_order;
-                            }
-                        }
-                        if (callbackAfter !== undefined) {
-                            callbackAfter()
-                        }
-                    },
-                    error: handlerAjaxError,
-                   });
-        }
-
-
-        var loadCurrentVerse = function() {
-            var oldVerseStatus = currentVerseStatus;
-            currentVerseStatus = versesToLearn[currentVerseIndex];
-            verse = currentVerseStatus;
-            if (isPassageType(oldVerseStatus)) {
-                moveOldWords();
-            } else {
-                $('.current-verse').children().remove();
-            }
-
-            $('.current-verse').hide(); // Hide until set up
-            $('#id-verse-title').text(currentVerseStatus.reference);
-            // convert newlines to divs
-            var text = verse.text;
-            if (verse.verse_choice.verse_set == null ||
-                verse.verse_choice.verse_set.set_type == SET_TYPE_SELECTION) {
-                // Reference is part of what should be learnt
-                text = text + '\n' + verse.reference;
-            }
-            $.each(text.split(/\n/), function(idx, line) {
-                if (line.trim() != '') {
-                    $('.current-verse').append('<div class="line">' +
-                                          line + '</div>');
-                }
-            });
-            var versionText = "Version: " + verse.version.full_name +
-                " (" + verse.version.short_name + ") |";
-            $('#id-version-name').text(versionText);
-
-            if (verse.version.url != "") {
-                var url = verse.version.url.replace('%s', encodeURI(verse.reference)).replace('%20', '+');
-                $('#id-browse-link').show().find('a').attr('href', url);
-            } else {
-                $('#id-browse-link').hide();
-            }
-            $('#id-version-select').val(verse.version.slug);
-            markupVerse();
-            $('#id-loading').hide();
-            $('#id-controls').show();
-            setupStageList(verse);
-
-            if (isPassageType(oldVerseStatus)) {
-                scrollOutPreviousVerse();
-                $('.current-verse').show();
-            } else {
-                $('.previous-verse').remove()
-                $('.current-verse').show();
-            }
-            var nextBtns = $('#id-next-verse-btn, #id-context-next-verse-btn');
-            var finishBtn = $('#id-finish-btn');
-            if (nextVersePossible()) {
-                nextBtns.val('Next');
-                finishBtn.show();
-            } else {
-                nextBtns.val('Done');
-                finishBtn.hide();
-            }
-        };
-
-        var loadStats = function() {
-            $.ajax({url: '/api/learnscripture/v1/sessionstats/?format=json&r=' +
-                    Math.floor(Math.random()*1000000000).toString(),
-                    dataType: 'json',
-                    type: 'GET',
-                    success: function(data) {
-                        $('#id-stats-block').html(data.stats_html);
-                    }});
-        };
-
-        var markupVerse = function() {
-            var wordClass = currentVerseStatus.needs_testing ? 'word' : 'testedword';
-            var wordGroups = [];
-
-            $('.current-verse .line').each(function(idx, elem) {
-                wordGroups.push($(elem).text().trim().split(/ |\n/));
-            });
-            wordList = [];
-            var replacement = [];
-            var wordNumber = 0;
-            for(var i = 0; i < wordGroups.length; i++) {
-                var group = wordGroups[i];
-                group = $.map(group, function(word, j) {
-                    if (stripPunctuation(word) == "") {
-                        return null;
-                    } else {
-                        return word;
-                    }
-                });
-                var replace = [];
-                $.each(group, function(j, word) {
-                    var start = word.match(/\W*./)[0];
-                    var end = word.slice(start.length);
-                    replace.push ('<span id="id-word-' + wordNumber.toString() +
-                                  '" class=\"' + wordClass + '\">' +
-                                  '<span class="wordstart">' + start +
-                                  '</span><span class="wordend">' + end +
-                                  '</span></span>');
-                    wordList.push(wordNumber);
-                    wordNumber++;
-
-                });
-                replacement.push(replace.join(' '));
-            }
-            $('.current-verse').html(replacement.join('<br/>'));
-            $('.current-verse .word').click(function(ev) {
-                if (!currentStage.testMode) {
-                    toggleWord($(this));
-                }
-            });
-        };
-
         // TODO - implement retrying and a queue and UI for manual
         // retrying.
         // Also handle case of user being logged out.
@@ -1074,7 +1103,7 @@ var learnscripture =
             console.log("AJAX error: %s, %s, %o", textStatus, errorThrown, jqXHR);
         };
 
-        // setup and wiring
+        // === Setup and wiring ===
         var setupLearningControls = function(prefs) {
             isLearningPage = ($('#id-verse-wrapper').length > 0);
             if (!isLearningPage) {
@@ -1115,6 +1144,8 @@ var learnscripture =
                 }
             });
         };
+
+        // === Exports ===
 
         learnscripture.handlerAjaxError = handlerAjaxError;
         learnscripture.setupLearningControls = setupLearningControls;
