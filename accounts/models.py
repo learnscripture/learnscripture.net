@@ -128,7 +128,7 @@ class Identity(models.Model):
 
         # session.set_verse_statuses needs verse_choice and verse_set
         uvss = set(self.verse_statuses.filter(verse_choice__in=vc_ids, ignored=False)\
-                       .select_related('verse_choice', 'verse_choice__verse_set'))
+                       .select_related('verse_choice'))
 
         uvss_dict = dict([(uvs.verse_choice_id, uvs) for uvs in uvss])
 
