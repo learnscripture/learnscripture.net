@@ -9,4 +9,5 @@ from .utils import *
 from .learn import *
 from .viewset import *
 from .dashboard import *
+from .choose import *
 

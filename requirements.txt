@@ -11,3 +11,5 @@ django-autoslug==1.5.0
 selenium
 raven==1.4.2
 -e git+https://github.com/jezdez/django_compressor.git#egg=django-compressor
+django-spurl==0.6
+urlobject==2.0.0
