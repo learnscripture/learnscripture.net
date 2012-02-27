@@ -721,7 +721,12 @@ var learnscripture =
                                             continueStage: function() { return true;},
                                             caption: 'Read',
                                             testMode: false,
-                                            toggleMode: null}
+                                            toggleMode: null},
+                         'readAnyway': {setup: function() {},
+                                        continueStage: function() { return true;},
+                                        caption: 'Read',
+                                        testMode: false,
+                                        toggleMode: null}
                         };
 
         // === Handling stage lists ===
@@ -735,7 +740,13 @@ var learnscripture =
             if (verseData.needs_testing) {
                 currentStageList = chooseStageListForStrength(strength);
             } else {
-                currentStageList = ['readForContext'];
+                if (isPassageType(verseData)) {
+                    currentStageList = ['readForContext'];
+                } else {
+                    // This can happen if the user chooses a verse set to learn
+                    // and they already know the verses in it.
+                    currentStageList = ['readAnyway'];
+                }
             }
             setupStage(0);
         };
@@ -851,7 +862,7 @@ var learnscripture =
             }
             $('.selection-set-only').toggle(!isPassageType(currentVerseStatus));
 
-            var nextBtns = $('#id-next-verse-btn, #id-context-next-verse-btn');
+            var nextBtns = $('#id-next-verse-btn, #id-context-next-verse-btn, #id-read-anyway-vext-verse-btn');
             var finishBtn = $('#id-finish-btn');
             if (nextVersePossible()) {
                 nextBtns.val('Next');
@@ -1161,7 +1172,7 @@ var learnscripture =
             $('#id-next-btn').show().click(next);
             $('#id-back-btn').show().click(back);
             $('#id-next-verse-btn').click(nextVerse);
-            $('#id-context-next-verse-btn').click(markReadAndNextVerse);
+            $('#id-context-next-verse-btn, #id-read-anyway-next-verse-btn').click(markReadAndNextVerse);
             $('#id-version-select').change(versionSelectChanged);
             $('#id-help-btn').click(function(ev) {
                 if (preferences.enableAnimations) {
