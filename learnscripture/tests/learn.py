@@ -94,7 +94,7 @@ class LearnTests(LiveServerTests):
         # This section can be replaced by a 'skip' button click once we've implemented that.
         for i in range(0, 9):
             driver.find_element_by_id('id-next-btn').click()
-        for word in "A psalm of David. The LORD is my shepherd, I lack nothing.".split():
+        for word in "The LORD is my shepherd, I lack nothing.".split():
             driver.find_element_by_id('id-typing').send_keys(word + ' ')
         driver.find_element_by_id('id-next-verse-btn').click()
 
