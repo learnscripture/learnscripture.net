@@ -1,6 +1,9 @@
 
 from django.conf.urls import url, patterns
+from django.http import Http404
 from piston.resource import Resource as BaseResource
+from piston.utils import HttpStatusCode
+
 
 from learnscripture.api.handlers import VersesToLearnHandler, ActionCompleteHandler, ChangeVersionHandler, SignUpHandler, LogInHandler, LogOutHandler, GetVerseForSelection, GetPassage, SetPreferences, SessionStats, SkipVerseHandler, CancelLearningVerseHandler
 
@@ -12,13 +15,12 @@ class Resource(BaseResource):
         self.csrf_exempt = getattr(self.handler, 'csrf_exempt', False)
 
     def error_handler(self, e, request, meth, em_format):
-        if isinstance(e, TypeError):
-            # the masking of TypeError by the base class, on the assumption of
-            # bad signature is extremely annoying for debugging, whether
-            # in development or in production.
-            raise
-        else:
+        # the masking of errors by the base class is extremely annoying for
+        # debugging, whether in development or in production.
+        if isinstance(e, (Http404, HttpStatusCode)):
             return super(Resource, self).error_handler(e, request, meth, em_format)
+        else:
+            raise
 
 # These URLs are hardcoded into Javascript instead of using URL reversing
 # somehow. That's OK, because if you want to change them, you should be adding
