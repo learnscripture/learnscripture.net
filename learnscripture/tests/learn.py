@@ -30,6 +30,13 @@ class LearnTests(LiveServerTests):
         self.wait_for_ajax()
         return verse_set
 
+    def _type_john_3_16_kjv(self):
+
+        text = "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life. John 3:16"
+        for word in text.strip().split():
+            self.driver.find_element_by_id('id-typing').send_keys(word + ' ')
+
+
     def test_save_strength(self):
         verse_set = self.choose_verse_set('Bible 101')
         driver = self.driver
@@ -43,16 +50,12 @@ class LearnTests(LiveServerTests):
                             for uvs in identity.verse_statuses.all()))
 
         self.assertEqual(u"John 3:16", driver.find_element_by_id('id-verse-title').text)
-
-        text = "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life. John 3:16"
-
         # Do the reading:
         for i in range(0, 9):
             driver.find_element_by_id('id-next-btn').click()
 
         # Do the typing:
-        for word in text.strip().split():
-            driver.find_element_by_id('id-typing').send_keys(word + ' ')
+        self._type_john_3_16_kjv()
 
         self.wait_for_ajax()
 
@@ -184,3 +187,36 @@ class LearnTests(LiveServerTests):
         self.wait_for_ajax()
 
         self.assertEqual(u"John 14:6", driver.find_element_by_id('id-verse-title').text)
+
+    def test_finish_button(self):
+        verse_set = self.choose_verse_set('Bible 101')
+        driver = self.driver
+
+        identity = Identity.objects.get() # should only be one at this point
+        # Ensure that we have seen some verses
+        identity.record_verse_action('John 3:16', 'KJV', StageType.TEST, 1.0)
+        identity.record_verse_action('John 14:6', 'KJV', StageType.TEST, 1.0)
+
+        # Make them due for testing:
+        identity.verse_statuses.update(last_tested=timezone.now() - timedelta(100))
+
+        # Go to dashboard
+        driver.get(self.live_server_url + reverse('start'))
+        # and click 'Revise'
+        driver.find_element_by_css_selector("input[name='revisequeue']").click()
+
+        self.wait_until_loaded('body')
+        self.wait_for_ajax()
+
+        self._type_john_3_16_kjv()
+
+        driver.find_element_by_id('id-finish-btn').click()
+
+        # Reload, should have nothing more to revise
+
+        driver.get(self.live_server_url + reverse('learn'))
+
+        self.wait_until_loaded('body')
+        self.wait_for_ajax()
+
+        self.assertTrue(driver.find_element_by_id('id-no-verse-queue').is_displayed())
