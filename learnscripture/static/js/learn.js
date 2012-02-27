@@ -219,7 +219,7 @@ var learnscripture =
                     }
                    });
 
-            var accuracyPercent = Math.floor(accuracy * 100).toString()
+            var accuracyPercent = Math.floor(accuracy * 100).toString();
             $('#id-accuracy').text(accuracyPercent + "%");
             var comment =
                 accuracyPercent > 95 ? 'awesome!' :
@@ -610,11 +610,13 @@ var learnscripture =
             currentStage.setup();
             setNextPreviousBtns();
             if (currentStage.testMode) {
+                unbindDocKeyPress();
                 $('#id-test-bar').show();
                 inputBox.focus();
             } else {
                 inputBox.blur();
                 $('#id-test-bar').hide();
+                bindDocKeyPress();
             }
 
             showInstructions(currentStageName);
@@ -659,6 +661,40 @@ var learnscripture =
             )));
         }
 
+
+        var pressPrimaryButton = function() {
+            $('input.primary:visible:not([disabled])').click();
+        };
+
+
+        // We need to be careful with docKeyPress:
+        // - it must be disabled when modals are active
+        // - it must be disabled when test mode is active,
+        //   to avoid handling of 'b' and 'n' etc, and
+        //   to avoid double handling of 'Enter' key press
+        //
+        // Unbind docKeyPress may also help with performance
+        // on handhelds which can be laggy when typing
+
+        var docKeyPressBound = false;
+
+        var bindDocKeyPress = function() {
+            if (isLearningPage) {
+                if (!docKeyPressBound) {
+                    $(document).bind('keypress', docKeyPress);
+                    docKeyPressBound = true;
+                }
+            }
+        }
+        var unbindDocKeyPress = function() {
+            if (isLearningPage) {
+                if (docKeyPressBound) {
+                    $(document).unbind('keypress');
+                    docKeyPressBound = false;
+                }
+            }
+        }
+
         var inputKeyDown = function(ev) {
             if (ev.which == 27) {
                 // ESC
@@ -673,9 +709,15 @@ var learnscripture =
                         checkCurrentWord();
                     }
                 }
+                return;
             }
             if (ev.which == 13) {
-                pressPrimaryButton();
+                // Pressing the primary button can cause docKeyPress to be
+                // bound, so we need to stop docKeyPress receiving this event.
+                // ev.stopPropagation() doesn't seem to work.  So we put this in
+                // the queue that will execute after this event handler.
+                setTimeout(pressPrimaryButton, 10);
+                return;
             }
             // Any character
             if (currentStage.testMode && preferences.testingMethod == TEST_FIRST_LETTER) {
@@ -689,14 +731,7 @@ var learnscripture =
 
         };
 
-        var pressPrimaryButton = function() {
-            $('input.primary:visible:not([disabled])').click();
-        };
-
         var docKeyPress = function(ev) {
-            if (currentStage.testMode) {
-                return;
-            }
             var tagName = ev.target.tagName.toLowerCase();
             if (tagName == 'input' ||
                 tagName == 'select' ||
@@ -757,17 +792,6 @@ var learnscripture =
                     error: handlerAjaxError
                    });
         };
-
-        var bindDocKeyPress = function() {
-            if (isLearningPage) {
-                $(document).bind('keypress', docKeyPress);
-            }
-        }
-        var unbindDocKeyPress = function() {
-            if (isLearningPage) {
-                $(document).unbind('keypress');
-            }
-        }
 
         var finish = function() {
             var go = function() {
