@@ -262,7 +262,6 @@ class Identity(models.Model):
 
         retval = {}
         for verse_set_id, references in groups:
-
             l = self.verse_statuses.filter(ignored=False, verse_choice__reference__in=references)
             # This is used by VersesToLearnHandler, where we need the following:
             l = l.select_related('version', 'verse_choice', 'verse_choice__verse_set')
@@ -272,9 +271,22 @@ class Identity(models.Model):
                 l = l.filter(verse_choice__verse_set=verse_set_id)
             l = list(l)
 
+            # HACK. The needs_testing_override fix applied in passages_for_revising
+            # doesn't get saved to the session. So we have to reapply it at this
+            # point.
 
-            # There is the possibility of multiple here, but they should all be the
-            # same, so the dictionary will eliminate duplicates.
+            # The 'better' fix would be to fix UserVerseStatus.needs_testing, but
+            # that involves UserVerseStatus doing queries on the VerseChoice
+            # collection it belongs to.
+
+            # An alternative is to save complete UserVerseStatus objects to
+            # session, but this gets tricky when it comes to changing versions.
+
+            if len(l) > 0:
+                vs = l[0].verse_choice.verse_set
+                if vs is not None and vs.set_type == VerseSetType.PASSAGE:
+                    self._add_needs_testing_override(l)
+
             retval.update(dict(((verse_set_id, uvs.reference), uvs) for uvs in l))
 
         # We need to get 'text' efficiently too. Group into versions:
@@ -295,7 +307,6 @@ class Identity(models.Model):
             uvs.text = texts[uvs.version_id, uvs.reference]
 
         return retval
-
 
     def create_verse_status(self, verse_choice, version):
         uvs, new = self.verse_statuses.get_or_create(verse_choice=verse_choice,
@@ -429,6 +440,14 @@ class Identity(models.Model):
 
         return sorted(list(verse_sets), key=lambda vs: vs.name)
 
+    def _add_needs_testing_override(self, uvs_list):
+        # For passages, we adjust 'needs_testing' to get the passage to be
+        # tested together. See explanation in memorymodel
+        min_strength = min(uvs.strength for uvs in uvs_list)
+        if min_strength > 0.5:
+            for uvs in uvs_list:
+                uvs.needs_testing_override = True
+
     def verse_statuses_for_passage(self, verse_set_id):
         # Must be strictly in the bible order, so don't rely on ('added', id') for
         # ordering. We must get the verses and compare bible_verse_number.
@@ -441,12 +460,7 @@ class Identity(models.Model):
             uvs.bible_verse_number = v.bible_verse_number
         l.sort(key=lambda uvs: uvs.bible_verse_number)
 
-        # For passages, we adjust 'needs_testing' to get the passage to be
-        # tested together. See explanation in memorymodel
-        min_strength = min(uvs.strength for uvs in l)
-        if min_strength > 0.5:
-            for uvs in l:
-                uvs.needs_testing_override = True
+        self._add_needs_testing_override(l)
 
         return l
 
