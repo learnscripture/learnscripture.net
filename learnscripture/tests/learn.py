@@ -1,15 +1,17 @@
 from __future__ import absolute_import
 
+from datetime import timedelta
 from decimal import Decimal
 import re
 
 from django.core.urlresolvers import reverse
+from django.utils import timezone
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 
 from accounts.models import Identity
 from accounts.memorymodel import m as memorymodel
-from bibleverses.models import BibleVersion, VerseSet, VerseSetType, VerseChoice, MemoryStage
+from bibleverses.models import BibleVersion, VerseSet, VerseSetType, VerseChoice, MemoryStage, StageType
 from .base import LiveServerTests
 
 
@@ -100,4 +102,30 @@ class LearnTests(LiveServerTests):
         # main point of this test.
         self.wait_for_ajax()
         self.assertIn(u"He takes me to lush pastures",
+                      driver.find_element_by_css_selector('.current-verse').text)
+
+    def test_learn_passage_mixed(self):
+        import time
+        # Test learning a passage when some verses are to be tested and others
+        # are just being read.
+        verse_set = self.choose_verse_set('Psalm 23')
+
+        driver = self.driver
+        identity = Identity.objects.get() # should only be one at this point
+
+        for i in range(1, 7):
+            identity.record_verse_action('Psalm 23:%d' % i, 'KJV', StageType.TEST,
+                                         1.0)
+        # Make some due for testing:
+        identity.verse_statuses.filter(verse_choice__reference='Psalm 23:1')\
+            .update(last_tested=timezone.now() - timedelta(100))
+
+        driver.get(self.live_server_url + reverse('learn'))
+        for word in "The LORD is my shepherd, I shall not want.".split():
+            driver.find_element_by_id('id-typing').send_keys(word + ' ')
+
+        # Test keyboard shortcut
+        driver.find_element_by_id('id-typing').send_keys('\n')
+        self.wait_for_ajax()
+        self.assertIn(u"He maketh me to lie down in green pastures",
                       driver.find_element_by_css_selector('.current-verse').text)
