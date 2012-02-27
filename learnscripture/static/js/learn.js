@@ -102,6 +102,12 @@ var learnscripture =
             return output;
         };
 
+        // === Maths ===
+
+        approximatelyEqual = function (a, b, epsilon) {
+            return Math.abs(Math.abs(a) - Math.abs(b)) <= epsilon;
+        };
+
         // === HTML ===
 
         var enableBtn = function(btn, state) {
@@ -256,7 +262,12 @@ var learnscripture =
             $.each(testingMistakes, function(key, val) {
                 mistakes += val;
             });
-            accuracy = 1 - (mistakes / (currentStage.testMaxAttempts * wordList.length));
+            accuracy = 1 - (mistakes/wordList.length);
+            accuracy = Math.max(0, accuracy);
+
+            // Do some rounding  to avoid '99.9' and retain 3 s.f.
+            accuracy = Math.round(accuracy * 1000) / 1000;
+
             $.ajax({url: '/api/learnscripture/v1/actioncomplete/',
                     dataType: 'json',
                     type: 'POST',
@@ -305,9 +316,9 @@ var learnscripture =
                     if (accuracyPercent < 10) {
                         currentStageList = chooseStageListForStrength(0);
                     } else if (accuracyPercent < 30) {
-                        currentStageList = ['read', 'recall2', 'recall4', 'testFull'];
+                        currentStageList = ['read', 'recall2', 'recall4', 'test'];
                     } else {
-                        currentStageList = ['recall2', 'recall4', 'testFull'];
+                        currentStageList = ['recall2', 'recall4', 'test'];
                     }
                     setupStage(0);
                 });
@@ -349,12 +360,12 @@ var learnscripture =
         var showInstructions = function(stageName) {
             if (preferences.enableAnimations) {
                 // Fade out old instructions, fade in the new
-                $('#id-instructions div').animate(
+                $('#id-instructions > div').animate(
                     {opacity: 0},
                     {duration: 150,
                      queue: false,
                      complete: function() {
-                         $('#id-instructions div').hide();
+                         $('#id-instructions > div').hide();
                          $('#id-instructions .instructions-' + stageName).show().animate({opacity: 1}, 150); }});
             } else {
                 $('#id-instructions div').css({opacity: 0});
@@ -371,10 +382,6 @@ var learnscripture =
         var setupStage = function(idx) {
             // set the globals
             var currentStageName = currentStageList[idx];
-            if (preferences.testingMethod == TEST_FIRST_LETTER &&
-                currentStageName == 'testFull') {
-                currentStageName = 'testFirstLetter';
-            }
             currentStageIdx = idx;
             currentStage = stageDefs[currentStageName];
 
@@ -626,12 +633,20 @@ var learnscripture =
                 indicateSuccess();
                 moveOn();
             } else {
-                testingMistakes[wordIdx] += 1;
-                if (testingMistakes[wordIdx] == currentStage.testMaxAttempts) {
+                // For first letter testing, we are stricter because it is easier.
+                var testMaxAttempts = (preferences.testingMethod == TEST_FIRST_LETTER
+                                       ? 2
+                                       : 3);
+                var mistakeVal = 1/testMaxAttempts;
+                testingMistakes[wordIdx] += mistakeVal;
+                if (approximatelyEqual(testingMistakes[wordIdx], 1.0, 0.001)
+                    || testingMistakes[wordIdx] > 1) // can happen if switched test method in middle
+                {
                     indicateFail();
                     moveOn();
                 } else {
-                    indicateMistake(testingMistakes[wordIdx], currentStage.testMaxAttempts);
+                    indicateMistake(Math.round(testingMistakes[wordIdx] / mistakeVal),
+                                    testMaxAttempts);
                 }
             }
         };
@@ -692,21 +707,11 @@ var learnscripture =
                                      caption: 'Recall 4 - 66% missing',
                                      testMode: false,
                                      toggleMode: WORD_TOGGLE_HIDE_ALL},
-                         'testFull': {setup: testStart,
-                                      continueStage: testContinue,
-                                      caption: 'Test',
-                                      testMode: true,
-                                      testMaxAttempts: 3,
-                                      toggleMode: null},
-                         // We use a separate stage for this for the sake of
-                         // showing the right instructions and having a
-                         // different testMaxAttempts
-                         'testFirstLetter': {setup: testStart,
-                                             continueStage: testContinue,
-                                             caption: 'Test',
-                                             testMode: true,
-                                             testMaxAttempts: 2,
-                                             toggleMode: null},
+                         'test': {setup: testStart,
+                                  continueStage: testContinue,
+                                  caption: 'Test',
+                                  testMode: true,
+                                  toggleMode: null},
                          'results': {setup: function() {},
                                      continueStage: function() { return true;},
                                      caption: 'Results',
@@ -745,12 +750,12 @@ var learnscripture =
             if (strength < 0.02) {
                 // either first test, or first test after initial test accuracy
                 // of 20% or less. Do everything:
-                return ['read', 'recall1', 'recall2', 'recall3', 'recall4', 'testFull'];
+                return ['read', 'recall1', 'recall2', 'recall3', 'recall4', 'test'];
             } else if (strength < 0.07) {
                 // e.g. first test was 70% or less, this is second test
-                return ['recall2', 'testFull'];
+                return ['recall2', 'test'];
             } else {
-                return ['testFull'];
+                return ['test'];
             }
         };
 
@@ -1104,16 +1109,16 @@ var learnscripture =
         };
 
         // === Setup and wiring ===
-        var setupLearningControls = function(prefs) {
+        var setupLearningControls = function() {
             isLearningPage = ($('#id-verse-wrapper').length > 0);
             if (!isLearningPage) {
                 return;
             }
 
-            preferences = learnscripture.getPreferences();
-            // Listen for changes to preferences
+            receivePreferences(learnscripture.getPreferences());
+            // Listen for changes to preferences.
             $('#id-preferences-data').bind('preferencesSet', function(ev, prefs) {
-                preferences = prefs;
+                receivePreferences(prefs);
             });
 
             inputBox = $('#id-typing');
@@ -1144,6 +1149,22 @@ var learnscripture =
                 }
             });
         };
+
+        var receivePreferences = function(prefs) {
+            if (prefs == null) {
+                // If preferences have not yet been loaded
+                return;
+            }
+            preferences = prefs;
+            if (preferences.testingMethod == TEST_FIRST_LETTER) {
+                $('.test-full').hide();
+                $('.test-first-letter').show();
+            } else {
+                $('.test-full').show();
+                $('.test-first-letter').hide();
+            }
+        }
+
 
         // === Exports ===
 
