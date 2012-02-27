@@ -29,6 +29,19 @@ class IdentityTests(TestCase):
                          set(["John 3:16", "John 14:6"]))
 
 
+        vs1 = VerseSet.objects.get(name='Bible 101') # fresh
+        # Having already created the UserVerseStatuses, this should be an
+        # efficient operation:
+        with self.assertNumQueries(3):
+            # 1 for verse_choices.all()
+            # 1 for verse_statuses
+            # 1 for VerseSet.objects.mark_chosen
+            uvss = i.add_verse_set(vs1)
+            # session.set_verse_statuses will use all these:
+            l = [(uvs.reference, uvs.verse_choice.verse_set_id)
+                 for uvs in uvss]
+
+
     def test_record_read(self):
         i = self._create_identity()
         vs1 = VerseSet.objects.get(name='Bible 101')
