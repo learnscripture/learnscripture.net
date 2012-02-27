@@ -368,8 +368,8 @@ var learnscripture =
                          $('#id-instructions > div').hide();
                          $('#id-instructions .instructions-' + stageName).show().animate({opacity: 1}, 150); }});
             } else {
-                $('#id-instructions div').css({opacity: 0});
-                $('#id-instructions div').hide();
+                $('#id-instructions > div').css({opacity: 0});
+                $('#id-instructions > div').hide();
                 $('#id-instructions .instructions-' + stageName).show().css({opacity: 1});
             }
         };
