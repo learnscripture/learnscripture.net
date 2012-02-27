@@ -1123,6 +1123,18 @@ var learnscripture =
             nextVerse();
         }
 
+        var finishBtnClick = function(ev) {
+            // Skip to end, which skips everything in between
+            verse = versesToLearn[maxVerseIndex];
+            $.ajax({url: '/api/learnscripture/v1/skipverse/',
+                    dataType: 'json',
+                    type: 'POST',
+                    data: {
+                        verse_status: JSON.stringify(verse, null, 2)
+                    }});
+            finish();
+        }
+
         // TODO - implement retrying and a queue and UI for manual
         // retrying.
         // Also handle case of user being logged out.
@@ -1162,6 +1174,7 @@ var learnscripture =
             });
             $('#id-skip-verse-btn').click(skipVerse);
             $('#id-cancel-learning-btn').click(cancelLearning);
+            $('#id-finish-btn').click(finishBtnClick);
             loadVerses(function() {
                 if (maxVerseIndex === null) {
                     $('#id-loading').hide();
