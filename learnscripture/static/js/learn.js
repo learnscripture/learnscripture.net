@@ -849,6 +849,8 @@ var learnscripture =
                 $('.previous-verse').remove()
                 $('.current-verse').show();
             }
+            $('.selection-set-only').toggle(!isPassageType(currentVerseStatus));
+
             var nextBtns = $('#id-next-verse-btn, #id-context-next-verse-btn');
             var finishBtn = $('#id-finish-btn');
             if (nextVersePossible()) {
