@@ -126,7 +126,10 @@ class Identity(models.Model):
         vcs = list(verse_set.verse_choices.all())
         vc_ids = [vc.id for vc in vcs]
 
-        uvss = set(self.verse_statuses.filter(verse_choice__in=vc_ids, ignored=False))
+        # session.set_verse_statuses needs verse_choice and verse_set
+        uvss = set(self.verse_statuses.filter(verse_choice__in=vc_ids, ignored=False)\
+                       .select_related('verse_choice', 'verse_choice__verse_set'))
+
         uvss_dict = dict([(uvs.verse_choice_id, uvs) for uvs in uvss])
 
         # Want to preserve order of verse_set, so iterate like this:
