@@ -142,6 +142,9 @@ class Identity(models.Model):
                 new_uvs.save()
 
                 out.append(new_uvs)
+
+        VerseSet.objects.mark_chosen(verse_set.id)
+
         return out
 
     def add_verse_choice(self, verse_choice, version=None):
