@@ -129,3 +129,19 @@ class LearnTests(LiveServerTests):
         self.wait_for_ajax()
         self.assertIn(u"He maketh me to lie down in green pastures",
                       driver.find_element_by_css_selector('.current-verse').text)
+
+    def test_skip_verse(self):
+        verse_set = self.choose_verse_set('Bible 101')
+        driver = self.driver
+
+        self.assertEqual(u"John 3:16", driver.find_element_by_id('id-verse-title').text)
+
+        driver.find_element_by_id('id-skip-verse-btn').click()
+
+        self.assertEqual(u"John 14:6", driver.find_element_by_id('id-verse-title').text)
+
+        # Should be removed from session too
+        driver.get(self.live_server_url + reverse('learn'))
+        self.wait_for_ajax()
+
+        self.assertEqual(u"John 14:6", driver.find_element_by_id('id-verse-title').text)
