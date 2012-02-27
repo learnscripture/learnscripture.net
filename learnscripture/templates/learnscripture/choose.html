@@ -3,6 +3,7 @@
 {% load url from future %}
 {% load pagination_tags %}
 {% load bootstrap %}
+{% load spurl %}
 
 {% block title %}
 Choose verses
@@ -33,17 +34,33 @@ Choose verses
                {% if 'new' not in request.GET %}
                class="active"
                {% endif %}
-               ><a href="?popular">Most popular first</a></li>
+               ><a href="{% spurl base=request.get_full_path add_query='popular' remove_query_param='new' %}">Most popular first</a></li>
             <li
                {% if 'new' in request.GET %}
                class="active"
                {% endif %}
-               ><a href="?new">Newest first</a></li>
+               ><a href="{% spurl base=request.get_full_path add_query='new' remove_query_param='popular' %}">Newest first</a></li>
           </ul>
         </td>
       </tr>
+      <tr>
+        <th>Search:</th>
+        <td>
+          <form action="" method="GET">
+            <input type="text" name="q"  id="id-search-input" value="{{ request.GET.q }}"/>
+            <input type="submit" class="btn primary" value="Search" id="id-search-btn" />
+          </form>
+        </td>
     </table>
     {% autopaginate verse_sets 10 %}
+
+    {% if request.GET.q %}
+    <h2>Search results:</h2>
+    {% endif %}
+
+    {% if not verse_sets %}
+    <p>No verse sets found that match your query.</p>
+    {% endif %}
 
     {% for vs in verse_sets %}
     <div class="verseset">

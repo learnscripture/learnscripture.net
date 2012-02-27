@@ -197,6 +197,10 @@ def choose(request):
 
     c = {}
     verse_sets = verse_sets_visible_for_request(request).order_by('name').prefetch_related('verse_choices')
+
+    if 'q' in request.GET:
+        verse_sets = verse_sets.filter(name__icontains=request.GET['q'])
+
     if 'new' in request.GET:
         verse_sets = verse_sets.order_by('-date_added')
     else: # popular, the default

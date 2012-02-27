@@ -138,6 +138,7 @@ INSTALLED_APPS = [
     'bootstrapform',
     'pagination',
     'raven.contrib.django',
+    'spurl',
 ]
 
 if DEBUG:
