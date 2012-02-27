@@ -329,7 +329,12 @@ def create_set(request, slug=None):
             form = passage_form
             refs = request.POST.get('passage-reference-list', '')
 
-        ref_list = refs.split('|')
+        ref_list_raw = refs.split('|')
+        # Dedupe ref_list while preserving order:
+        ref_list = []
+        for ref in ref_list_raw:
+            if ref not in ref_list:
+                ref_list.append(ref)
         verse_dict = version.get_text_by_reference_bulk(ref_list)
 
         if form.is_valid():
