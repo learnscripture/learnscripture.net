@@ -3,6 +3,7 @@ from decimal import Decimal
 from autoslug import AutoSlugField
 from django.core.urlresolvers import reverse
 from django.db import models
+from django.db.models import F
 from django.utils import timezone
 from django.utils.functional import cached_property
 
@@ -156,6 +157,10 @@ class Verse(models.Model):
 class VerseSetManager(models.Manager):
     def public(self):
         return self.get_query_set().filter(public=True)
+
+    def mark_chosen(self, verse_set_id):
+        self.get_query_set().filter(id=verse_set_id)\
+            .update(popularity=F('popularity') + 1)
 
 
 class VerseSet(models.Model):
