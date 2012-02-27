@@ -2,7 +2,7 @@
 from django.conf.urls import url, patterns
 from piston.resource import Resource as BaseResource
 
-from learnscripture.api.handlers import VersesToLearnHandler, ActionCompleteHandler, ChangeVersionHandler, SignUpHandler, LogInHandler, LogOutHandler, GetVerseForSelection, GetPassage, SetPreferences, SessionStats, SkipVerseHandler
+from learnscripture.api.handlers import VersesToLearnHandler, ActionCompleteHandler, ChangeVersionHandler, SignUpHandler, LogInHandler, LogOutHandler, GetVerseForSelection, GetPassage, SetPreferences, SessionStats, SkipVerseHandler, CancelLearningVerseHandler
 
 
 class Resource(BaseResource):
@@ -37,5 +37,6 @@ urlpatterns = patterns('',
                        url(r'^setpreferences/$', Resource(SetPreferences)),
                        url(r'^sessionstats/$', Resource(SessionStats)),
                        url(r'^skipverse/$', Resource(SkipVerseHandler)),
+                       url(r'^cancellearningverse/$', Resource(CancelLearningVerseHandler)),
                        )
 

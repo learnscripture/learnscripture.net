@@ -124,7 +124,18 @@ class SkipVerseHandler(BaseHandler):
     def create(self, request):
         verse_status = get_verse_status(request.data)
         verse_set_id = get_verse_set_id(verse_status)
-        reference = verse_status['reference']
+        session.remove_user_verse_status(request, verse_status['reference'], verse_set_id)
+        return {}
+
+
+class CancelLearningVerseHandler(BaseHandler):
+    allowed_methods = ('POST',)
+
+    @require_identity_method
+    def create(self, request):
+        verse_status = get_verse_status(request.data)
+        verse_set_id = get_verse_set_id(verse_status)
+        request.identity.cancel_learning(verse_status['reference'])
         session.remove_user_verse_status(request, reference, verse_set_id)
         return {}
 
