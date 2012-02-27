@@ -145,3 +145,42 @@ class LearnTests(LiveServerTests):
         self.wait_for_ajax()
 
         self.assertEqual(u"John 14:6", driver.find_element_by_id('id-verse-title').text)
+
+    def test_cancel_learning(self):
+        verse_set = self.choose_verse_set('Bible 101') 
+        driver = self.driver
+
+        identity = Identity.objects.get() # should only be one at this point
+        # Ensure that we have seen some verses
+        identity.record_verse_action('John 3:16', 'KJV', StageType.TEST, 1.0)
+        identity.record_verse_action('John 14:6', 'KJV', StageType.TEST, 1.0)
+
+        # Make it due for testing:
+        identity.verse_statuses.update(last_tested=timezone.now() - timedelta(100))
+
+        # Go to dashboard
+        driver.get(self.live_server_url + reverse('start'))
+        # and click 'Revise'
+        driver.find_element_by_css_selector("input[name='revisequeue']").click()
+
+        self.wait_until_loaded('body')
+        self.wait_for_ajax()
+
+        self.assertEqual(u"John 3:16", driver.find_element_by_id('id-verse-title').text)
+
+        driver.find_element_by_id('id-cancel-learning-btn').click()
+        self.wait_for_ajax()
+
+        # Should skip.
+        self.assertEqual(u"John 14:6", driver.find_element_by_id('id-verse-title').text)
+
+        # If we go back to dashboard and choose again, it should not appear
+        # Go to dashboard
+        driver.get(self.live_server_url + reverse('start'))
+        # and click 'Revise'
+        driver.find_element_by_css_selector("input[name='revisequeue']").click()
+
+        self.wait_until_loaded('body')
+        self.wait_for_ajax()
+
+        self.assertEqual(u"John 14:6", driver.find_element_by_id('id-verse-title').text)

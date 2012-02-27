@@ -332,6 +332,17 @@ class Identity(models.Model):
 
         return uvs
 
+    def cancel_learning(self, reference):
+        """
+        Cancel learning an individual verse.
+
+        Ignores VerseChoices that belong to passage sets.
+        """
+        # Not used for passages verse sets.
+        self.verse_statuses.filter(verse_choice__reference=reference,
+                                   verse_choice__verse_set__set_type=VerseSetType.SELECTION)\
+                                   .update(ignored=True)
+
     def _dedupe_uvs_set(self, uvs_set):
         # Need to dedupe (due to VerseChoice objects that belong to different
         # VerseSets). Also need to iterate over the result multiple times and

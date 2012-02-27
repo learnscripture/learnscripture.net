@@ -1101,7 +1101,6 @@ var learnscripture =
                    });
         };
 
-
         var skipVerse = function(ev) {
             $.ajax({url: '/api/learnscripture/v1/skipverse/',
                     dataType: 'json',
@@ -1111,6 +1110,16 @@ var learnscripture =
                     }});
             nextVerse();
         };
+
+        var cancelLearning = function(ev) {
+            $.ajax({url: '/api/learnscripture/v1/cancellearningverse/',
+                    dataType: 'json',
+                    type: 'POST',
+                    data: {
+                        verse_status: JSON.stringify(currentVerseStatus, null, 2)
+                    }});
+            nextVerse();
+        }
 
         // TODO - implement retrying and a queue and UI for manual
         // retrying.
@@ -1150,6 +1159,7 @@ var learnscripture =
                 $('#id-help-btn').button('toggle');
             });
             $('#id-skip-verse-btn').click(skipVerse);
+            $('#id-cancel-learning-btn').click(cancelLearning);
             loadVerses(function() {
                 if (maxVerseIndex === null) {
                     $('#id-loading').hide();
