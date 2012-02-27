@@ -135,7 +135,8 @@ class CancelLearningVerseHandler(BaseHandler):
     def create(self, request):
         verse_status = get_verse_status(request.data)
         verse_set_id = get_verse_set_id(verse_status)
-        request.identity.cancel_learning(verse_status['reference'])
+        reference = verse_status['reference']
+        request.identity.cancel_learning(reference)
         session.remove_user_verse_status(request, reference, verse_set_id)
         return {}
 
