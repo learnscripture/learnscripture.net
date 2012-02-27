@@ -45,13 +45,23 @@ def set_verse_statuses(request, user_verse_statuses):
 
 
 def remove_user_verse_status(request, reference, verse_set_id):
-    # TODO: Race condition possible here. Therefore should remove all that
-    # appear before reference, since we know that they will be processed in
-    # order client side.
+    # We remove all that appear before reference, since we know that they will
+    # be processed in order client side, and otherwise we potentially have race
+    # conditions if the user presses 'next' or 'skip' multiple times quickly.
     ids = _get_verse_status_ids(request)
-    ids = [(order, ref, vs_id) for order, ref, vs_id in ids
-           if (ref, vs_id) != (reference, verse_set_id)]
-    _save_verse_status_ids(request, ids)
+    new_ids = []
+    found_ref = False
+    for (order, ref, vs_id) in ids:
+        if found_ref:
+            new_ids.append((order, ref, vs_id))
+        if (ref, vs_id) == (reference, verse_set_id):
+            found_ref = True
+
+    if not found_ref:
+        # Presumably an error, or an old request arriving very late, so ignore
+        new_ids = ids
+
+    _save_verse_status_ids(request, new_ids)
 
 
 def get_identity(request):

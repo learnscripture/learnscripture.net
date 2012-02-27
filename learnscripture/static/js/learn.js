@@ -1101,6 +1101,17 @@ var learnscripture =
                    });
         };
 
+
+        var skipVerse = function(ev) {
+            $.ajax({url: '/api/learnscripture/v1/skipverse/',
+                    dataType: 'json',
+                    type: 'POST',
+                    data: {
+                        verse_status: JSON.stringify(currentVerseStatus, null, 2)
+                    }});
+            nextVerse();
+        };
+
         // TODO - implement retrying and a queue and UI for manual
         // retrying.
         // Also handle case of user being logged out.
@@ -1138,6 +1149,7 @@ var learnscripture =
                 }
                 $('#id-help-btn').button('toggle');
             });
+            $('#id-skip-verse-btn').click(skipVerse);
             loadVerses(function() {
                 if (maxVerseIndex === null) {
                     $('#id-loading').hide();

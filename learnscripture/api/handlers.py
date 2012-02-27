@@ -117,6 +117,18 @@ class ActionCompleteHandler(BaseHandler):
         return {}
 
 
+class SkipVerseHandler(BaseHandler):
+    allowed_methods = ('POST',)
+
+    @require_identity_method
+    def create(self, request):
+        verse_status = get_verse_status(request.data)
+        verse_set_id = get_verse_set_id(verse_status)
+        reference = verse_status['reference']
+        session.remove_user_verse_status(request, reference, verse_set_id)
+        return {}
+
+
 class ChangeVersionHandler(BaseHandler):
     allowed_methods = ('POST',)
 
