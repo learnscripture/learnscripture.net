@@ -482,3 +482,12 @@ class Identity(models.Model):
         self.verse_statuses\
             .filter(verse_choice__verse_set=verse_set_id, ignored=False)\
             .update(ignored=True)
+
+    def verse_sets_visible(self):
+        """
+        Gets a QuerySet of all VerseSets that are visible for this identity
+        """
+        qs = VerseSet.objects.public()
+        if self.account_id is not None:
+            qs = qs | self.account.verse_sets_created.all()
+        return qs

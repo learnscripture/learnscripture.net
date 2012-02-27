@@ -62,8 +62,10 @@ class PassageVerseSelector(forms.Form):
 class VerseSetForm(forms.ModelForm):
     class Meta:
         model = VerseSet
-        fields = ('name', 'description')
+        fields = ('name', 'description', 'public')
+
 
 a = VerseSetForm.base_fields['description'].widget.attrs
 del a['cols']
 a['rows'] = 3
+VerseSetForm.base_fields['public'].label="Make public (can't be undone)"

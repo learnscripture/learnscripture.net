@@ -165,22 +165,23 @@ def choose(request):
             # Shouldn't get here if UI preferences javascript is working right.
             return redirect_via_prefs(request)
 
+        identity = request.identity
         version = None
         try:
             version = BibleVersion.objects.get(slug=request.POST['version_slug'])
         except KeyError, BibleVersion.DoesNotExist:
-            version = request.identity.default_bible_version
+            version = identity.default_bible_version
 
         # Handle choose set
         vs_id = request.POST.get('verseset_id', None)
         if vs_id is not None:
             try:
-                vs = VerseSet.objects.prefetch_related('verse_choices').get(id=vs_id)
+                vs = identity.verse_sets_visible().prefetch_related('verse_choices').get(id=vs_id)
             except VerseSet.DoesNotExist:
                 # Shouldn't be possible by clicking on buttons.
                 pass
             if vs is not None:
-                return learn_set(request, request.identity.add_verse_set(vs, version=version))
+                return learn_set(request, identity.add_verse_set(vs, version=version))
 
         ref = request.POST.get('reference', None)
         if ref is not None:
@@ -192,10 +193,10 @@ def choose(request):
             else:
                 vc, n = VerseChoice.objects.get_or_create(reference=ref,
                                                           verse_set=None)
-                return learn_set(request, [request.identity.add_verse_choice(vc, version=version)])
+                return learn_set(request, [identity.add_verse_choice(vc, version=version)])
 
     c = {}
-    verse_sets = VerseSet.objects.all().order_by('name').prefetch_related('verse_choices')
+    verse_sets = verse_sets_visible_for_request(request).order_by('name').prefetch_related('verse_choices')
     if 'new' in request.GET:
         verse_sets = verse_sets.order_by('-date_added')
     else: # popular, the default
@@ -237,9 +238,16 @@ def get_default_bible_version():
     return BibleVersion.objects.get(slug='NET')
 
 
+def verse_sets_visible_for_request(request):
+    if hasattr(request, 'identity'):
+        return request.identity.verse_sets_visible()
+    else:
+        return VerseSet.objects.public()
+
+
 def view_verse_set(request, slug):
     c = {}
-    verse_set = get_object_or_404(VerseSet, slug=slug)
+    verse_set = get_object_or_404(verse_sets_visible_for_request(request), slug=slug)
 
     version = None
     try:
@@ -317,6 +325,8 @@ def create_set(request, slug=None):
 
         assert verse_set_type is not None
 
+        orig_verse_set_public = False if verse_set is None else verse_set.public
+
         selection_form = VerseSetForm(request.POST, instance=verse_set, prefix='selection')
         passage_form = VerseSetForm(request.POST, instance=verse_set, prefix='passage')
 
@@ -341,6 +351,10 @@ def create_set(request, slug=None):
             verse_set = form.save(commit=False)
             verse_set.set_type = verse_set_type
             verse_set.created_by = request.identity.account
+
+            if orig_verse_set_public:
+                # Can't undo:
+                verse_set.public = True
             verse_set.save()
 
             # Need to ensure that we preserve existing objects
