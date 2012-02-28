@@ -131,6 +131,7 @@ INSTALLED_APPS = [
     'learnscripture',
     'bibleverses',
     'accounts',
+    'scores',
     'piston',
     'mptt',
     'compressor',

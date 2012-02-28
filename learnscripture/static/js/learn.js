@@ -29,6 +29,9 @@ var learnscripture =
         var SET_TYPE_SELECTION = 1;
         var SET_TYPE_PASSAGE = 2;
 
+        // Defined in MemoryStage:
+        var MEMORY_STAGE_TESTED = 3;
+
         var INITIAL_STRENGTH_FACTOR = 0.1;
 
         // Initial state
@@ -278,6 +281,7 @@ var learnscripture =
                     },
                     success: function(data) {
                         loadStats();
+                        loadScoreLogs();
                     }
                    });
 
@@ -388,6 +392,8 @@ var learnscripture =
             // Common clearing, and stage specific setup
             $('.current-verse .correct, .current-verse .incorrect').removeClass('correct').removeClass('incorrect');
             $('#id-progress-summary').text("Stage " + (currentStageIdx + 1).toString() + "/" + currentStageList.length.toString());
+            $('#id-stage-caption').text(currentStage.caption);
+            $('#id-stage-caption2').html('');
             currentStage.setup();
             setNextPreviousBtns();
             if (currentStage.testMode) {
@@ -401,7 +407,6 @@ var learnscripture =
             }
 
             showInstructions(currentStageName);
-            $('#id-stage-caption').text(currentStage.caption);
             // reset selected word
             moveSelection(0);
 
@@ -579,6 +584,18 @@ var learnscripture =
             }
         };
 
+        var getPointsTarget = function() {
+            // Constants from scores/models.py
+            var POINTS_PER_WORD = 10;
+            var REVISION_BONUS_FACTOR = 2;
+            // Duplication of logic in Account.award_action_points
+            var points = wordList.length * POINTS_PER_WORD;
+            if (currentVerseStatus.memory_stage >= MEMORY_STAGE_TESTED) {
+                points = points * REVISION_BONUS_FACTOR;
+            }
+            return points;
+        }
+
         var testStart = function() {
             // Don't want to see a flash of words at the beginning,
             // so hide quickly
@@ -588,6 +605,7 @@ var learnscripture =
             // After an certain point, we make things a bit harder.
             // Strength == 0.6 corresponds to about 10 days learning.
             $('.current-verse').toggleClass('hard-mode', currentVerseStatus.strength > 0.6);
+            $('#id-stage-caption2').html(' Points target: <b>' + getPointsTarget().toString() + '</b>');
         };
 
         var testContinue = function() {
@@ -978,6 +996,7 @@ var learnscripture =
             });
         };
 
+        // ========== Stats/scores loading ==========
 
         var loadStats = function() {
             $.ajax({url: '/api/learnscripture/v1/sessionstats/?format=json&r=' +
@@ -988,6 +1007,40 @@ var learnscripture =
                         $('#id-stats-block').html(data.stats_html);
                     }});
         };
+
+        var loadScoreLogs = function() {
+            if ($('#id-points-block').length == 0) {
+                return;
+            }
+            $.ajax({url: '/api/learnscripture/v1/scorelogs/?format=json&r=' +
+                    Math.floor(Math.random()*1000000000).toString(),
+                    dataType: 'json',
+                    type: 'GET',
+                    success: handleScoreLogs
+                   });
+        };
+
+        var handleScoreLogs = function(scoreLogs) {
+            var container = $('#id-points-block');
+            for (var i = 0; i < scoreLogs.length; i++) {
+                var scoreLog = scoreLogs[i];
+                var divId = 'id-score-log-' + scoreLog.id.toString();
+                if ($('#' + divId).length == 0) {
+                    // Put new ones at top
+                    var newSL = $('<div id="' + divId +
+                                  '" class="score-log score-log-type-' + scoreLog.reason + '"' +
+                                  '>' + scoreLog.points + '</div>');
+                    newSL.css({opacity: 0});
+                    container.prepend(newSL);
+                    if (preferences.enableAnimations) {
+                        newSL.animate({opacity: 1},
+                                      {duration: 500});
+                    } else {
+                        newSL.css({opacity: 1});
+                    }
+                }
+            }
+        }
 
         // =========== Event handlers ==========
 
@@ -1196,6 +1249,8 @@ var learnscripture =
                 } else {
                     currentVerseIndex = minVerseIndex;
                     loadCurrentVerse();
+                    loadStats();
+                    loadScoreLogs();
                 }
             });
         };
