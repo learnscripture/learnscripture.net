@@ -223,7 +223,7 @@ var learnscripture =
 
         var indicateSuccess = function() {
             var word = getWordAt(selectedWordIndex);
-            word.addClass('correct');
+            word.addClass('correct').removeClass('selected');
             flashMsg(testingStatus.attr({'class': 'correct'}).text("Correct!"));
         };
 
