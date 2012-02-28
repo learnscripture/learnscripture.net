@@ -471,27 +471,47 @@ p.large {
   width: auto;
   }
 
+.normalWordBorder() {
+  border-color: #C0C0C0;
+  border-top-color: #D8D8D8;
+  border-bottom-color: #9A9A9A;
+}
+
 .word {
-  border: 2px solid #C0C0C0;
+  border: 2px solid;
   border-radius: 3px;
   padding: 3px 4px;
   margin: 2px;
   .gradientBar(#e8e8e8, #C0C0C0);
-  border-top: 2px solid #D8D8D8;
+  .normalWordBorder();
   cursor: pointer;
+
+  &.selected {
+    border-color: blue;
   }
 
-.word.selected {
-  border-color: blue;
+  &.correct {
+    border-color: #00D000;
   }
 
-.word.correct {
-  border-color: #00D000;
+  &.incorrect {
+    border-color: red;
   }
+}
 
-.word.incorrect {
-  border-color: red;
+// Hard mode - hide the clues that show word size
+.hard-mode .word {
+  border-left: 0px;
+  border-right: 0px;
+  padding: 3px 8px;
+  margin: 2px -5px;
+  border-radius: 0px;
+
+  &.selected {
+    // The color gives a clue to word size
+    .normalWordBorder();
   }
+}
 
 #id-testing-status.correct {
   color: #00A113;

@@ -585,6 +585,9 @@ var learnscripture =
             hideWord($('.current-verse .word span'), {'duration': 0, queue:false});
             resetTestingMistakes();
             testingStatus.text('');
+            // After an certain point, we make things a bit harder.
+            // Strength == 0.6 corresponds to about 10 days learning.
+            $('.current-verse').toggleClass('hard-mode', currentVerseStatus.strength > 0.6);
         };
 
         var testContinue = function() {
