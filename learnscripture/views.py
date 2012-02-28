@@ -57,6 +57,7 @@ def bible_versions_for_request(request):
 
 @require_preferences
 def learn(request):
+    request.identity.prepare_for_learning()
     c = {'bible_versions': bible_versions_for_request(request)}
     return render(request, 'learnscripture/learn.html', c)
 
@@ -112,7 +113,7 @@ def session_stats(identity):
 
 
 def learn_set(request, l):
-    session.set_verse_statuses(request, l)
+    session.start_learning_session(request, l)
     return HttpResponseRedirect(reverse('learn'))
 
 

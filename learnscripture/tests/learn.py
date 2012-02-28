@@ -12,12 +12,16 @@ from selenium.webdriver.support.ui import Select
 from accounts.models import Identity
 from accounts.memorymodel import m as memorymodel
 from bibleverses.models import BibleVersion, VerseSet, VerseSetType, VerseChoice, MemoryStage, StageType
+from scores.models import Scores
+
 from .base import LiveServerTests
 
 
 class LearnTests(LiveServerTests):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json']
+
+    kjv_john_3_16 = "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life. John 3:16"
 
     def choose_verse_set(self, name):
         verse_set = VerseSet.objects.get(name=name)
@@ -31,9 +35,7 @@ class LearnTests(LiveServerTests):
         return verse_set
 
     def _type_john_3_16_kjv(self):
-
-        text = "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life. John 3:16"
-        for word in text.strip().split():
+        for word in self.kjv_john_3_16.strip().split():
             self.driver.find_element_by_id('id-typing').send_keys(word + ' ')
 
 
@@ -62,6 +64,31 @@ class LearnTests(LiveServerTests):
         # Check the strength
         uvs = identity.verse_statuses.get(verse_choice__reference='John 3:16')
         self.assertEqual(uvs.strength, memorymodel.INITIAL_STRENGTH_FACTOR)
+
+    def test_points(self):
+        identity, account = self.create_account()
+        self.login(account)
+        verse_set = self.choose_verse_set('Bible 101')
+        self.wait_until_loaded('body')
+        self.wait_for_ajax()
+        driver = self.driver
+
+        # Do the reading:
+        for i in range(0, 9):
+            driver.find_element_by_id('id-next-btn').click()
+
+        # Do the typing:
+        self._type_john_3_16_kjv()
+
+        self.wait_for_ajax()
+
+        # Check scores
+
+        word_count = len(self.kjv_john_3_16.strip().split())
+        word_count -= 2 # Don't get points for the reference
+        self.assertEqual(account.total_score.points,
+                         (Scores.POINTS_PER_WORD * word_count) * (1 + Scores.PERFECT_BONUS_FACTOR))
+        self.assertEqual(account.score_logs.count(), 2)
 
     def test_choose_individual_verse(self):
         driver = self.driver

@@ -58,8 +58,12 @@ class LiveServerTests(LiveServerTestCase):
         return True
 
     def set_preferences(self):
-        # Set preferences
+        # Set preferences if visible
         driver = self.driver
+
+        if not driver.find_element_by_id("id_testing_method_0").is_displayed():
+            return
+
         Select(driver.find_element_by_id("id_default_bible_version")).select_by_visible_text("KJV")
         driver.find_element_by_id("id_testing_method_0").click()
         if 'id-preferences-save-btn' in driver.page_source:

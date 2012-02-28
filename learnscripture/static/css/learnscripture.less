@@ -192,6 +192,12 @@
     background-color: @bgColor1;
     border-color: darken(@bgColor1, 10%);
   }
+
+  .score-log {
+    background-color: @btnColor2;
+    .gradientBar(@btnColor1, @btnColor2);
+    color: @white;
+  }
 }
 
 
@@ -535,6 +541,9 @@ p.large {
 #id-stage-caption {
   font-weight: bold;
 }
+#id-stage-caption2 {
+  height: 1.3em;
+}
 
 #id-help-btn {
   float: right;
@@ -551,7 +560,43 @@ p.large {
   float: right;
   }
 
+.score-log {
+  text-align: center;
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 2px;
+  font-weight: bold;
+}
 
+.score-log-type-0:before {
+  content: "Verse tested: ";
+}
+.score-log-type-1:before {
+  content: "Verse revised: ";
+}
+.score-log-type-2:before {
+  content: "Revision completed point doubler BONUS: ";
+}
+.score-log-type-3:before {
+  content: "Perfect score BONUS: ";
+}
+.score-log-type-4:before {
+  content: "Verse learnt BONUS: ";
+}
+
+body .score-log {
+  &.score-log-type-2,
+  &.score-log-type-3,
+  &.score-log-type-4
+  {
+    border: 2px solid red;
+  }
+}
+
+#id-points-block {
+  height: 92px;
+  overflow: hidden;
+}
 // 'choose' page
 
 #id-tab-verseset {

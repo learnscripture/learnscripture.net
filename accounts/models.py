@@ -7,6 +7,7 @@ from django.contrib.auth.hashers import check_password, make_password
 
 from accounts import memorymodel
 from bibleverses.models import BibleVersion, MemoryStage, StageType, BibleVersion, VerseChoice, VerseSet, VerseSetType
+from scores.models import TotalScore, ScoreReason, Scores
 
 from learnscripture.datastructures import make_choices
 
@@ -28,11 +29,14 @@ THEMES = [('calm', 'Slate'),
           ('bubblegum2', 'Bubblegum green'),
           ]
 
+
 # Account is separate from Identity to allow guest users to use the site fully
 # without signing up.
+#
 # Everything related to learning verses is related to Identity.
 # Social aspects and payment aspects are related to Account.
-
+# Identity methods are the main interface for most business logic,
+# and so sometimes they just delegate to Account methods.
 
 class Account(models.Model):
     username = models.CharField(max_length=100, blank=False, unique=True)
@@ -61,6 +65,43 @@ class Account(models.Model):
 
     def __unicode__(self):
         return self.email
+
+    def award_action_points(self, reference, text,
+                            old_memory_stage, action_change,
+                            action_stage, accuracy):
+        if action_stage != StageType.TEST:
+            return
+
+        # This logic is reproduced client side in order to display target
+        max_points = len(text.strip().split(' ')) * Scores.POINTS_PER_WORD
+        if old_memory_stage >= MemoryStage.TESTED:
+            # Revision:
+            max_points *= Scores.REVISION_BONUS_FACTOR
+            reason = ScoreReason.VERSE_REVISED
+        else:
+            reason = ScoreReason.VERSE_TESTED
+        points = max_points * accuracy
+        self.add_points(points, reason)
+
+        if accuracy == 1:
+            self.add_points(points * Scores.PERFECT_BONUS_FACTOR,
+                            ScoreReason.PERFECT_TEST_BONUS)
+
+    def add_points(self, points, reason):
+        self.score_logs.create(points=points,
+                               reason=reason)
+
+    def get_score_logs(self, from_datetime):
+        return self.score_logs.filter(created__gte=from_datetime).order_by('created')
+
+    def scoring_enabled(self):
+        # TODO - limit for basic account
+        return True
+
+
+class ActionChange(object):
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
 
 
 class IdentityManager(models.Manager):
@@ -113,6 +154,9 @@ class Identity(models.Model):
     def preferences_setup(self):
         return self.default_bible_version is not None and self.testing_method is not None
 
+    def prepare_for_learning(self):
+        if self.account_id is not None:
+            TotalScore.objects.get_or_create(account=self.account)
 
     def add_verse_set(self, verse_set, version=None):
         """
@@ -161,6 +205,13 @@ class Identity(models.Model):
             return self.create_verse_status(verse_choice, version)
 
     def record_verse_action(self, reference, version_slug, stage_type, accuracy=None):
+        """
+        Records an action such as 'READ' or 'TESTED' against a verse.
+        Returns an ActionChange object.
+        """
+        # We keep this separate from award_action_points because it needs
+        # different info, and it is easier to test with its current API.
+
         s = self.verse_statuses.filter(verse_choice__reference=reference,
                                        version__slug=version_slug)
         mem_stage = {
@@ -183,9 +234,19 @@ class Identity(models.Model):
             new_strength = memorymodel.strength_estimate(old_strength, accuracy, time_elapsed)
             s.update(strength=new_strength,
                      last_tested=now)
+            return ActionChange(old_strength=old_strength, new_strength=new_strength)
 
         if mem_stage == MemoryStage.SEEN:
             s.filter(first_seen__isnull=True).update(first_seen=now)
+            return ActionChange()
+
+    def award_action_points(self, reference, text, old_memory_stage, action_change,
+                            action_stage, accuracy):
+        if self.account_id is None:
+            return
+
+        return self.account.award_action_points(reference, text, old_memory_stage, action_change,
+                                                action_stage, accuracy)
 
     def change_version(self, reference, version_slug, verse_set_id):
         """
@@ -497,3 +558,14 @@ class Identity(models.Model):
         if self.account_id is not None:
             qs = qs | self.account.verse_sets_created.all()
         return qs
+
+    def get_score_logs(self, from_datetime):
+        if self.account_id is None:
+            return []
+        else:
+            return self.account.get_score_logs(from_datetime)
+
+    def scoring_enabled(self):
+        if self.account_id is None:
+            return False
+        return self.account.scoring_enabled()

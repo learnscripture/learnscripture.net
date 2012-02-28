@@ -5,7 +5,7 @@ from piston.resource import Resource as BaseResource
 from piston.utils import HttpStatusCode
 
 
-from learnscripture.api.handlers import VersesToLearnHandler, ActionCompleteHandler, ChangeVersionHandler, SignUpHandler, LogInHandler, LogOutHandler, GetVerseForSelection, GetPassage, SetPreferences, SessionStats, SkipVerseHandler, CancelLearningVerseHandler
+from learnscripture.api.handlers import VersesToLearnHandler, ActionCompleteHandler, ChangeVersionHandler, SignUpHandler, LogInHandler, LogOutHandler, GetVerseForSelection, GetPassage, SetPreferences, SessionStats, SkipVerseHandler, CancelLearningVerseHandler, ScoreLogs
 
 
 class Resource(BaseResource):
@@ -40,5 +40,6 @@ urlpatterns = patterns('',
                        url(r'^sessionstats/$', Resource(SessionStats)),
                        url(r'^skipverse/$', Resource(SkipVerseHandler)),
                        url(r'^cancellearningverse/$', Resource(CancelLearningVerseHandler)),
+                       url(r'^scorelogs/$', Resource(ScoreLogs)),
                        )
 

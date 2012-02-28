@@ -1,5 +1,9 @@
 import logging
 
+from datetime import datetime
+
+from django.utils import timezone
+
 from accounts.models import Identity
 from learnscripture.utils.logging import extra
 
@@ -38,10 +42,24 @@ def _save_verse_status_ids(request, ids):
     request.session['verses_to_learn'] = ids
 
 
-def set_verse_statuses(request, user_verse_statuses):
+def _set_learning_session_start(request, dt):
+    request.session['learning_start'] = dt.strftime("%s")
+
+
+def get_learning_session_start(request):
+    return timezone.make_aware(datetime.fromtimestamp(int(request.session['learning_start'])),
+                               timezone.utc)
+
+
+def _set_verse_statuses(request, user_verse_statuses):
     _save_verse_status_ids(request,
                            [(order, uvs.reference, uvs.verse_choice.verse_set_id)
                             for order, uvs in enumerate(user_verse_statuses)])
+
+
+def start_learning_session(request, user_verse_statuses):
+    _set_verse_statuses(request, user_verse_statuses)
+    _set_learning_session_start(request, timezone.now())
 
 
 def remove_user_verse_status(request, reference, verse_set_id):

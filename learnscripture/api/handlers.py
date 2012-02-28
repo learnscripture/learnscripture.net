@@ -60,6 +60,7 @@ def validate(form_class, **formkwargs):
 
 class VersesToLearnHandler(BaseHandler):
     allowed_methods = ('GET',)
+    # NB: all of these fields get posted back to ActionCompleteHandler
     fields = ('memory_stage', 'strength', 'first_seen',
               ('verse_choice', (('verse_set', ('id', 'set_type')),)),
               'reference',
@@ -94,7 +95,8 @@ class ActionCompleteHandler(BaseHandler):
 
     @require_identity_method
     def create(self, request):
-        learningLogger.info("Action %s complete", request.data.get('stage','[None]'), extra=extra(identity=request.identity, data=request.data, request=request))
+        identity = request.identity
+        learningLogger.info("Action %s complete", request.data.get('stage','[None]'), extra=extra(identity=identity, data=request.data, request=request))
 
         verse_status = get_verse_status(request.data)
         reference = verse_status['reference']
@@ -108,8 +110,11 @@ class ActionCompleteHandler(BaseHandler):
         else:
             accuracy = None
 
-        request.identity.record_verse_action(reference, version_slug,
-                                             stage, accuracy);
+        action_change = identity.record_verse_action(reference, version_slug,
+                                                     stage, accuracy);
+        identity.award_action_points(reference, verse_status['text'],
+                                     verse_status['memory_stage'],
+                                     action_change, stage, accuracy)
         if (stage == StageType.TEST or
             (stage == StageType.READ and not verse_status['needs_testing'])):
             session.remove_user_verse_status(request, reference, verse_set_id)
@@ -264,3 +269,18 @@ class SessionStats(BaseHandler):
         c.update(session_stats(identity))
         retval['stats_html'] = render_to_string('learnscripture/sessionstats.html', c)
         return retval
+
+
+class ScoreLogs(BaseHandler):
+    allowed_methods = ('GET',)
+
+    fields = (
+        'id', # used for uniqueness tests
+        'points',
+        'reason',
+        'created',
+        )
+
+    def read(self, request):
+        return request.identity.get_score_logs(session.get_learning_session_start(request))
+
