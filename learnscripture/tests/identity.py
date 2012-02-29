@@ -286,18 +286,3 @@ class IdentityTests(TestCase):
 
         vs2 = VerseSet.objects.get(name='Bible 101')
         i.add_verse_set(vs2)
-
-
-class AccountTests(TestCase):
-    def test_award_action_points_revision(self):
-        a = Account.objects.create(username='test',
-                                   email='test@test.com',
-                                   subscription=SubscriptionType.PAID_UP)
-
-        a.award_action_points("John 3:16", "This is John 3:16",
-                              MemoryStage.TESTED,
-                              ActionChange(old_strength=0.5, new_strength=0.6),
-                              StageType.TEST, 0.75)
-        self.assertEqual(a.account.total_score.points,
-                         (4 * Scores.POINTS_PER_WORD * Scores.REVISION_BONUS_FACTOR * 0.75))
-

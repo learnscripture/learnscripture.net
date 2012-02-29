@@ -10,7 +10,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 
 from accounts.models import Identity
-from accounts.memorymodel import m as memorymodel
+from accounts.memorymodel import MM
 from bibleverses.models import BibleVersion, VerseSet, VerseSetType, VerseChoice, MemoryStage, StageType
 from scores.models import Scores, ScoreReason
 
@@ -63,7 +63,7 @@ class LearnTests(LiveServerTests):
 
         # Check the strength
         uvs = identity.verse_statuses.get(verse_choice__reference='John 3:16')
-        self.assertEqual(uvs.strength, memorymodel.INITIAL_STRENGTH_FACTOR)
+        self.assertEqual(uvs.strength, MM.INITIAL_STRENGTH_FACTOR)
 
     def test_points(self):
         identity, account = self.create_account()
