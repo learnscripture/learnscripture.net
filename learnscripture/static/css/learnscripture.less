@@ -577,21 +577,31 @@ p.large {
   font-weight: bold;
 }
 
-.score-log-type-0:before {
-  content: "Verse tested: ";
+.score-log-type-0:after {
+  content: " - initial test";
 }
-.score-log-type-1:before {
-  content: "Verse revised: ";
+.score-log-type-1:after {
+  content: " - revision test";
 }
 .score-log-type-2:before {
-  content: "Revision completed point doubler BONUS: ";
+  content: "Super BONUS: ";
+}
+.score-log-type-2:after {
+  content: " - all revision completed";
 }
 .score-log-type-3:before {
-  content: "Perfect score BONUS: ";
+  content: "BONUS: ";
+}
+.score-log-type-3:after {
+  content: " - perfect!";
 }
 .score-log-type-4:before {
-  content: "Verse learnt BONUS: ";
+  content: "BONUS: ";
 }
+.score-log-type-4:after {
+  content: " - verse fully learnt";
+}
+
 
 body .score-log {
   &.score-log-type-2,
