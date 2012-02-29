@@ -193,42 +193,53 @@ class Identity(models.Model):
             version = self.default_bible_version
 
         out = []
-        vcs = list(verse_set.verse_choices.all())
-        vc_ids = [vc.id for vc in vcs]
 
-        # session.set_verse_statuses needs verse_choice and verse_set
-        uvss = set(self.verse_statuses.filter(verse_choice__in=vc_ids, ignored=False)\
-                       .select_related('verse_choice'))
+        vc_list = verse_set.verse_choices.all()
+        existing_uvss = set(self.verse_statuses.filter(verse_set=verse_set, version=version,
+                                                  ignored=False))
 
-        uvss_dict = dict([(uvs.verse_choice_id, uvs) for uvs in uvss])
+        uvss_dict = dict([(uvs.reference, uvs) for uvs in existing_uvss])
+
+        if verse_set.set_type == VerseSetType.SELECTION:
+            # Prefer existing UVSs of different versions if they are used.
+            other_versions = self.verse_statuses.filter(
+                verse_set__set_type=VerseSetType.SELECTION,
+                ignored=False,
+                reference__in=[vc.reference for vc in vc_list])\
+                .select_related('version')
+            other_version_dict = dict([(uvs.reference, uvs) for uvs in other_versions])
+        else:
+            other_version_dict = {}
 
         # Want to preserve order of verse_set, so iterate like this:
-        for vc in vcs:
-            if vc.id in uvss_dict:
-                # If the user already has this verse choice, we don't want to change
-                # the version, so use the existing UVS.
-                out.append(uvss_dict[vc.id])
+        for vc in vc_list:
+            if vc.reference in uvss_dict:
+                # Save work - create_verse_status is expensive
+                out.append(uvss_dict[vc.reference])
             else:
+                if vc.reference in other_version_dict:
+                    use_version = other_version_dict[vc.reference].version
+                else:
+                    use_version = version
                 # Otherwise we set the version to the chosen one
-                new_uvs = self.create_verse_status(vc, version)
+                new_uvs = self.create_verse_status(vc.reference, verse_set, use_version)
                 new_uvs.ignored = False
                 new_uvs.save()
-
                 out.append(new_uvs)
 
         VerseSet.objects.mark_chosen(verse_set.id)
 
         return out
 
-    def add_verse_choice(self, verse_choice, version=None):
+    def add_verse_choice(self, reference, version=None):
         if version is None:
             version = self.default_bible_version
 
-        existing = list(self.verse_statuses.filter(verse_choice=verse_choice, ignored=False))
+        existing = list(self.verse_statuses.filter(reference=reference, ignored=False))
         if existing:
             return existing[0]
         else:
-            return self.create_verse_status(verse_choice, version)
+            return self.create_verse_status(reference, None, version)
 
     def record_verse_action(self, reference, version_slug, stage_type, accuracy=None):
         """
@@ -238,7 +249,7 @@ class Identity(models.Model):
         # We keep this separate from award_action_points because it needs
         # different info, and it is easier to test with its current API.
 
-        s = self.verse_statuses.filter(verse_choice__reference=reference,
+        s = self.verse_statuses.filter(reference=reference,
                                        version__slug=version_slug)
         mem_stage = {
             StageType.READ: MemoryStage.SEEN,
@@ -302,21 +313,22 @@ class Identity(models.Model):
 
         if verse_set is not None and verse_set.set_type == VerseSetType.PASSAGE:
             # Look for verse choices in this VerseSet, but not any others.
-            start_qs = self.verse_statuses.filter(verse_choice__verse_set=verse_set)
+            start_qs = self.verse_statuses.filter(verse_set=verse_set)
             verse_choices = verse_set.verse_choices.all()
+            needed_uvss = [(verse_set, vc.reference) for vc in verse_choices]
 
         else:
             # Look for verse choices for same reference, but not for 'passage' set types
-            start_qs = self.verse_statuses.filter(verse_choice__reference=reference)
-            start_qs = start_qs.exclude(verse_choice__verse_set__set_type=VerseSetType.PASSAGE)
-            verse_choices = VerseChoice.objects.filter(reference=reference)
-            verse_choices = verse_choices.exclude(verse_set__set_type=VerseSetType.PASSAGE)
+            start_qs = self.verse_statuses.filter(reference=reference).select_related('verse_set')
+            start_qs = start_qs.exclude(verse_set__set_type=VerseSetType.PASSAGE)
+            # Need a UVS for each set the user already has a UVS for.
+            needed_uvss = [(uvs.verse_set, reference) for uvs in start_qs]
 
 
         # 'old' = ones with old, incorrect version
         old = start_qs.exclude(version__slug=version_slug)
         # 'correct' = ones with newly selected, correct version
-        correct = start_qs.filter(version__slug=version_slug)
+        correct_version = start_qs.filter(version__slug=version_slug)
 
         # If they had no test data, it is safe to delete, and this keeps things
         # trim:
@@ -327,17 +339,17 @@ class Identity(models.Model):
         # For each VerseChoice, we need to create a new UserVerseStatus if
         # one with new version doesn't exist, or update 'ignored' if it
         # does.
-        correct_l = list(correct.select_related('verse_choice'))
-        correct.update(ignored=False)
+        correct_version_l = list(correct_version.all())
+        correct_version.update(ignored=False)
 
         # Now we need to see if we need to create any new UserVerseStatuses.
-        verse_choices = list(verse_choices)
-
-        missing = set(verse_choices) - set([vs.verse_choice for vs in correct_l])
+        missing = set(needed_uvss) - set([(uvs.verse_set,  uvs.reference)
+                                          for uvs in correct_version_l])
         if missing:
             version = BibleVersion.objects.get(slug=version_slug)
-            for verse_choice in missing:
-                self.create_verse_status(verse_choice=verse_choice,
+            for (vs, ref) in missing:
+                self.create_verse_status(reference=ref,
+                                         verse_set=vs,
                                          version=version)
 
     def get_verse_statuses_bulk(self, references):
@@ -355,13 +367,13 @@ class Identity(models.Model):
 
         retval = {}
         for verse_set_id, references in groups:
-            l = self.verse_statuses.filter(ignored=False, verse_choice__reference__in=references)
+            l = self.verse_statuses.filter(ignored=False, reference__in=references)
             # This is used by VersesToLearnHandler, where we need the following:
-            l = l.select_related('version', 'verse_choice', 'verse_choice__verse_set')
+            l = l.select_related('version', 'verse_set')
             if verse_set_id is None:
-                l = l.filter(verse_choice__verse_set__isnull=True)
+                l = l.filter(verse_set__isnull=True)
             else:
-                l = l.filter(verse_choice__verse_set=verse_set_id)
+                l = l.filter(verse_set=verse_set_id)
             l = list(l)
 
             # HACK. The needs_testing_override fix applied in passages_for_revising
@@ -369,14 +381,14 @@ class Identity(models.Model):
             # point.
 
             # The 'better' fix would be to fix UserVerseStatus.needs_testing, but
-            # that involves UserVerseStatus doing queries on the VerseChoice
+            # that involves UserVerseStatus doing queries on the VerseSet
             # collection it belongs to.
 
             # An alternative is to save complete UserVerseStatus objects to
             # session, but this gets tricky when it comes to changing versions.
 
             if len(l) > 0:
-                vs = l[0].verse_choice.verse_set
+                vs = l[0].verse_set
                 if vs is not None and vs.set_type == VerseSetType.PASSAGE:
                     self._add_needs_testing_override(l)
 
@@ -401,11 +413,15 @@ class Identity(models.Model):
 
         return retval
 
-    def create_verse_status(self, verse_choice, version):
-        uvs, new = self.verse_statuses.get_or_create(verse_choice=verse_choice,
+    def create_verse_status(self, reference, verse_set, version):
+        # bible_verse_number has to be specified here since it is non-nullable
+        bible_verse_number = version.get_verse_list(reference)[0].bible_verse_number
+        uvs, new = self.verse_statuses.get_or_create(verse_set=verse_set,
+                                                     reference=reference,
+                                                     bible_verse_number=bible_verse_number,
                                                      version=version)
 
-        same_verse = self.verse_statuses.filter(verse_choice__reference=verse_choice.reference,
+        same_verse = self.verse_statuses.filter(reference=reference,
                                                 version=version).exclude(id=uvs.id)
 
         # NB: we are exploiting the fact that multiple calls to
@@ -432,21 +448,20 @@ class Identity(models.Model):
         Ignores VerseChoices that belong to passage sets.
         """
         # Not used for passages verse sets.
-        qs = self.verse_statuses.filter(verse_choice__reference=reference)
-        qs = (qs.filter(verse_choice__verse_set__isnull=True) |
-              qs.filter(verse_choice__verse_set__set_type=VerseSetType.SELECTION))
+        qs = self.verse_statuses.filter(reference=reference)
+        qs = (qs.filter(verse_set__isnull=True) |
+              qs.filter(verse_set__set_type=VerseSetType.SELECTION))
         qs.update(ignored=True)
 
     def _dedupe_uvs_set(self, uvs_set):
-        # Need to dedupe (due to VerseChoice objects that belong to different
-        # VerseSets). Also need to iterate over the result multiple times and
-        # get length etc., so use list instead of generator.
+        # Need to dedupe (due to nullable verse_set which allows
+        # multiple (reference=ref, verse_set=NULL) pairs
         retval = []
         seen_refs = set()
         for uvs in uvs_set:
-            if uvs.verse_choice.reference in seen_refs:
+            if uvs.reference in seen_refs:
                 continue
-            seen_refs.add(uvs.verse_choice.reference)
+            seen_refs.add(uvs.reference)
             retval.append(uvs)
         return retval
 
@@ -459,15 +474,16 @@ class Identity(models.Model):
         qs = (self.verse_statuses
               .filter(ignored=False,
                       memory_stage=MemoryStage.TESTED)
-              .exclude(verse_choice__verse_set__set_type=VerseSetType.PASSAGE)
-              .select_related('verse_choice'))
+              .exclude(verse_set__set_type=VerseSetType.PASSAGE)
+              .order_by('added', 'id')
+              )
         qs = memorymodel.filter_qs(qs, now_seconds)
         return self._dedupe_uvs_set(qs)
 
     def verse_statuses_for_learning_qs(self):
         qs = self.verse_statuses.filter(ignored=False, memory_stage__lt=MemoryStage.TESTED)
         # Don't include passages - we do those separately
-        qs = qs.exclude(verse_choice__verse_set__set_type=VerseSetType.PASSAGE)
+        qs = qs.exclude(verse_set__set_type=VerseSetType.PASSAGE)
         return qs
 
     def verse_statuses_for_learning(self):
@@ -475,8 +491,6 @@ class Identity(models.Model):
         Returns a list of UserVerseStatuses that need learning.
         """
         qs = self.verse_statuses_for_learning_qs()
-        # Optimise for accessing 'reference'
-        qs = qs.select_related('verse_choice')
         # 'added' should have enough precision to distinguish, otherwise 'id'
         # should be according to order of creation.
         qs = qs.order_by('added', 'id')
@@ -491,18 +505,17 @@ class Identity(models.Model):
         more initial learning.
         They are decorated with 'untested_total' and 'tested_total' attributes.
         """
-        statuses = self.verse_statuses.filter(verse_choice__verse_set__set_type=VerseSetType.PASSAGE,
+        statuses = self.verse_statuses.filter(verse_set__set_type=VerseSetType.PASSAGE,
                                               ignored=False,
                                               memory_stage__lt=MemoryStage.TESTED)\
-                                              .select_related('verse_choice',
-                                                              'verse_choice__verse_set')
+                                              .select_related('verse_set')
         verse_sets = {}
 
         # We already have info needed for untested_total
         for s in statuses:
-            vs_id = s.verse_choice.verse_set.id
+            vs_id = s.verse_set.id
             if vs_id not in verse_sets:
-                vs = s.verse_choice.verse_set
+                vs = s.verse_set
                 verse_sets[vs_id] = vs
                 vs.untested_total = 0
             else:
@@ -512,7 +525,7 @@ class Identity(models.Model):
 
         # We need one additional query per VerseSet for untested_total
         for vs in verse_sets.values():
-            vs.tested_total = self.verse_statuses.filter(verse_choice__verse_set=vs,
+            vs.tested_total = self.verse_statuses.filter(verse_set=vs,
                                                          ignored=False,
                                                          memory_stage__gte=MemoryStage.TESTED).count()
         return verse_sets.values()
@@ -520,11 +533,10 @@ class Identity(models.Model):
     def passages_for_revising(self):
         import time
         now_seconds = time.time()
-        statuses = self.verse_statuses.filter(verse_choice__verse_set__set_type=VerseSetType.PASSAGE,
+        statuses = self.verse_statuses.filter(verse_set__set_type=VerseSetType.PASSAGE,
                                               ignored=False,
                                               memory_stage__gte=MemoryStage.TESTED)\
-                                              .select_related('verse_choice',
-                                                              'verse_choice__verse_set')
+                                              .select_related('verse_set')
 
         # If any of them need revising, we want to know about it:
         statuses = memorymodel.filter_qs(statuses, now_seconds)
@@ -534,14 +546,13 @@ class Identity(models.Model):
         # that 'statuses' gives a fairly small set of VerseSets and do
         # additional filtering in Python.
 
-        verse_sets = set(uvs.verse_choice.verse_set for uvs in statuses)
-        all_statuses = self.verse_statuses.filter(verse_choice__verse_set__in=verse_sets)\
-            .select_related('verse_choice',
-                            'verse_choice__verse_set')
+        verse_sets = set(uvs.verse_set for uvs in statuses)
+        all_statuses = self.verse_statuses.filter(verse_set__in=verse_sets)\
+            .select_related('verse_set')
 
         for uvs in all_statuses:
             if uvs.memory_stage < MemoryStage.TESTED:
-                verse_sets.discard(uvs.verse_choice.verse_set)
+                verse_sets.discard(uvs.verse_set)
 
         return sorted(list(verse_sets), key=lambda vs: vs.name)
 
@@ -554,17 +565,9 @@ class Identity(models.Model):
                 uvs.needs_testing_override = True
 
     def verse_statuses_for_passage(self, verse_set_id):
-        # Must be strictly in the bible order, so don't rely on ('added', id') for
-        # ordering. We must get the verses and compare bible_verse_number.
-        l = list(self.verse_statuses.filter(verse_choice__verse_set=verse_set_id,
-                                            ignored=False).select_related('verse_choice'))
-        refs = [uvs.reference for uvs in l]
-        verse_list = self.default_bible_version.get_verses_by_reference_bulk(refs)
-        for uvs in l:
-            v = verse_list[uvs.reference]
-            uvs.bible_verse_number = v.bible_verse_number
-        l.sort(key=lambda uvs: uvs.bible_verse_number)
-
+        # Must be strictly in the bible order
+        l = list(self.verse_statuses.filter(verse_set=verse_set_id,
+                                            ignored=False).order_by('bible_verse_number'))
         self._add_needs_testing_override(l)
 
         return l
@@ -574,7 +577,7 @@ class Identity(models.Model):
         # We don't want to lose that info, therefore set to 'ignored',
         # rather than delete() (unlike clear_learning_queue)
         self.verse_statuses\
-            .filter(verse_choice__verse_set=verse_set_id, ignored=False)\
+            .filter(verse_set=verse_set_id, ignored=False)\
             .update(ignored=True)
 
     def verse_sets_visible(self):

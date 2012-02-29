@@ -104,11 +104,11 @@ def session_stats(identity):
                                                        ignored=False)
     # Need to dedupe for case of multiple UserVerseStatus for same verse
     # (due to different versions and different VerseChoice objects)
-    all_verses_tested = list(all_verses_tested.select_related('verse_choice'))
-    stats['new_verses_tested'] = set(uvs.verse_choice.reference for uvs in all_verses_tested
+    all_verses_tested = list(all_verses_tested)
+    stats['new_verses_tested'] = set(uvs.reference for uvs in all_verses_tested
                                      if uvs.first_seen is not None
                                      and uvs.first_seen > session_start)
-    stats['total_verses_tested'] = set(uvs.verse_choice.reference for uvs in all_verses_tested)
+    stats['total_verses_tested'] = set(uvs.reference for uvs in all_verses_tested)
     return stats
 
 
@@ -193,9 +193,7 @@ def choose(request):
             except InvalidVerseReference:
                 pass # Ignore the post.
             else:
-                vc, n = VerseChoice.objects.get_or_create(reference=ref,
-                                                          verse_set=None)
-                return learn_set(request, [identity.add_verse_choice(vc, version=version)], False)
+                return learn_set(request, [identity.add_verse_choice(ref, version=version)], False)
 
     c = {}
     verse_sets = verse_sets_visible_for_request(request).order_by('name').prefetch_related('verse_choices')

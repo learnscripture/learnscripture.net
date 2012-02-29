@@ -850,8 +850,8 @@ var learnscripture =
             $('#id-verse-title').text(currentVerseStatus.reference);
             // convert newlines to divs
             var text = verse.text;
-            if (verse.verse_choice.verse_set == null ||
-                verse.verse_choice.verse_set.set_type == SET_TYPE_SELECTION) {
+            if (verse.verse_set == null ||
+                verse.verse_set.set_type == SET_TYPE_SELECTION) {
                 // Reference is part of what should be learnt
                 text = text + '\n' + verse.reference;
             }
@@ -899,8 +899,8 @@ var learnscripture =
 
         var isPassageType = function(verseData) {
             return (verseData &&
-                    verseData.verse_choice.verse_set &&
-                    verseData.verse_choice.verse_set.set_type ==
+                    verseData.verse_set &&
+                    verseData.verse_set.set_type ==
                     SET_TYPE_PASSAGE)
         };
 
