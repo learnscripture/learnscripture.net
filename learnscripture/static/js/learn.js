@@ -1241,6 +1241,7 @@ var learnscripture =
             $('#id-skip-verse-btn').click(skipVerse);
             $('#id-cancel-learning-btn').click(cancelLearning);
             $('#id-finish-btn').click(finishBtnClick);
+            $('.verse-dropdown').dropdown();
             loadVerses(function() {
                 if (maxVerseIndex === null) {
                     $('#id-loading').hide();
