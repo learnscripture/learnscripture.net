@@ -1025,8 +1025,14 @@ var learnscripture =
 
         var handleScoreLogs = function(scoreLogs) {
             var container = $('#id-points-block');
-            for (var i = 0; i < scoreLogs.length; i++) {
-                var scoreLog = scoreLogs[i];
+            var addScoreLog = function(scoreLogs) {
+                // This is defined recursively to get the animation to work
+                // nicely for multiple score logs appearing one after the other.
+                if (scoreLogs.length == 0) {
+                    return;
+                }
+                var scoreLog = scoreLogs[0];
+                var doRest = function() { addScoreLog(scoreLogs.slice(1))};
                 var divId = 'id-score-log-' + scoreLog.id.toString();
                 if ($('#' + divId).length == 0) {
                     // Put new ones at top
@@ -1047,12 +1053,18 @@ var learnscripture =
                                     height: h.toString() + "px"}
                     if (preferences.enableAnimations) {
                         newSL.animate(newProps,
-                                      {duration: 300});
+                                      {duration: 300,
+                                       complete: doRest}
+                                     );
                     } else {
                         newSL.css(newProps);
+                        doRest();
                     }
+                } else {
+                    doRest();
                 }
             }
+            addScoreLog(scoreLogs);
         }
 
         // =========== Event handlers ==========
