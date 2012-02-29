@@ -1174,6 +1174,7 @@ var learnscripture =
         };
 
         var skipVerse = function(ev) {
+            ev.preventDefault()
             $.ajax({url: '/api/learnscripture/v1/skipverse/',
                     dataType: 'json',
                     type: 'POST',
@@ -1184,6 +1185,7 @@ var learnscripture =
         };
 
         var cancelLearning = function(ev) {
+            ev.preventDefault()
             $.ajax({url: '/api/learnscripture/v1/cancellearningverse/',
                     dataType: 'json',
                     type: 'POST',
