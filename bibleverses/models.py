@@ -228,7 +228,8 @@ class UserVerseStatus(models.Model):
 
     for_identity = models.ForeignKey('accounts.Identity', related_name='verse_statuses')
     reference = models.CharField(max_length=100)
-    verse_set = models.ForeignKey(VerseSet, null=True)
+    verse_set = models.ForeignKey(VerseSet, null=True,
+                                  on_delete=models.SET_NULL)
     bible_verse_number = models.PositiveSmallIntegerField()
     version = models.ForeignKey(BibleVersion)
     memory_stage = models.PositiveSmallIntegerField(choices=MemoryStage.choice_list,
