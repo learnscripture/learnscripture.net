@@ -1033,13 +1033,23 @@ var learnscripture =
                     var newSL = $('<div id="' + divId +
                                   '" class="score-log score-log-type-' + scoreLog.reason + '"' +
                                   '>' + scoreLog.points + '</div>');
-                    newSL.css({opacity: 0});
+                    // Need some tricks to get height of new element without
+                    // showing.
+                    newSL.css({'position':'absolute','visibility':'hidden','display':'block',
+                               'width': container.width().toString() + "px"});
                     container.prepend(newSL);
+                    var h = newSL.height();
+                    newSL.removeAttr('style');
+
+                    newSL.css({opacity: 0,
+                               height: 0});
+                    var newProps = {opacity: 1,
+                                    height: h.toString() + "px"}
                     if (preferences.enableAnimations) {
-                        newSL.animate({opacity: 1},
-                                      {duration: 500});
+                        newSL.animate(newProps,
+                                      {duration: 300});
                     } else {
-                        newSL.css({opacity: 1});
+                        newSL.css(newProps);
                     }
                 }
             }
