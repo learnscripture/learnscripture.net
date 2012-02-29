@@ -229,7 +229,10 @@ class UserVerseStatus(models.Model):
     # this can happen
 
     for_identity = models.ForeignKey('accounts.Identity', related_name='verse_statuses')
-    verse_choice = models.ForeignKey(VerseChoice)
+    verse_choice = models.ForeignKey(VerseChoice, null=True, default=None)
+    reference = models.CharField(max_length=100)
+    verse_set = models.ForeignKey(VerseSet, null=True)
+    bible_verse_number = models.PositiveSmallIntegerField()
     version = models.ForeignKey(BibleVersion)
     memory_stage = models.PositiveSmallIntegerField(choices=MemoryStage.choice_list,
                                                     default=MemoryStage.ZERO)
@@ -241,10 +244,6 @@ class UserVerseStatus(models.Model):
     # See Identity.change_version for explanation of ignored
     ignored = models.BooleanField(default=False)
 
-
-    @cached_property
-    def reference(self):
-        return self.verse_choice.reference
 
     @cached_property
     def text(self):
@@ -265,13 +264,13 @@ class UserVerseStatus(models.Model):
         return needs_testing(self.strength, (timezone.now() - self.last_tested).total_seconds())
 
     def __unicode__(self):
-        return u"%s, %s" % (self.verse_choice.reference, self.version.slug)
+        return u"%s, %s" % (self.reference, self.version.slug)
 
     def __repr__(self):
         return u'<UserVerseStatus %s>' % self
 
     class Meta:
-        unique_together = [('for_identity', 'verse_choice', 'version')]
+        unique_together = []
 
 
 class InvalidVerseReference(ValueError):
@@ -366,7 +365,7 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE):
             retval = list(version.verse_set.filter(bible_verse_number__gte=verse_start.bible_verse_number,
                                                    bible_verse_number__lte=verse_end.bible_verse_number))
     if len(retval) == 0:
-        raise InvalidVerseReference(u"No verses matched.")
+        raise InvalidVerseReference(u"No verses matched '%s'." % reference)
 
     if len(retval) > max_length:
         raise InvalidVerseReference(u"References that span more than %d verses are not allowed in this context." % max_length)

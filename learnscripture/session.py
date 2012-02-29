@@ -53,7 +53,7 @@ def get_learning_session_start(request):
 
 def _set_verse_statuses(request, user_verse_statuses):
     _save_verse_status_ids(request,
-                           [(order, uvs.reference, uvs.verse_choice.verse_set_id)
+                           [(order, uvs.reference, uvs.verse_set_id)
                             for order, uvs in enumerate(user_verse_statuses)])
 
 

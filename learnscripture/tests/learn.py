@@ -62,7 +62,7 @@ class LearnTests(LiveServerTests):
         self.wait_for_ajax()
 
         # Check the strength
-        uvs = identity.verse_statuses.get(verse_choice__reference='John 3:16')
+        uvs = identity.verse_statuses.get(reference='John 3:16')
         self.assertEqual(uvs.strength, MM.INITIAL_STRENGTH_FACTOR)
 
     def test_points(self):
@@ -182,7 +182,7 @@ class LearnTests(LiveServerTests):
             identity.record_verse_action('Psalm 23:%d' % i, 'KJV', StageType.TEST,
                                          1.0)
         # Make some due for testing:
-        identity.verse_statuses.filter(verse_choice__reference='Psalm 23:1')\
+        identity.verse_statuses.filter(reference='Psalm 23:1')\
             .update(last_tested=timezone.now() - timedelta(100))
 
         driver.get(self.live_server_url + reverse('learn'))

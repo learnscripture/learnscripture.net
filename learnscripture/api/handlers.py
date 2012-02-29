@@ -62,7 +62,7 @@ class VersesToLearnHandler(BaseHandler):
     allowed_methods = ('GET',)
     # NB: all of these fields get posted back to ActionCompleteHandler
     fields = ('memory_stage', 'strength', 'first_seen',
-              ('verse_choice', (('verse_set', ('id', 'set_type')),)),
+              ('verse_set', ('id', 'set_type')),
               'reference',
               'text',
               'needs_testing',
@@ -83,8 +83,7 @@ def get_verse_set_id(verse_status):
     Returns the verse set ID for a verse status dictionary (sent by client) or
     None if there is none
     """
-    verse_choice = verse_status['verse_choice']
-    verse_set = verse_choice.get('verse_set', None)
+    verse_set = verse_status.get('verse_set', None)
     if verse_set is None:
         return None
     return verse_set.get('id', None)
