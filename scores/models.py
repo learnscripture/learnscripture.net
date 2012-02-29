@@ -19,6 +19,7 @@ class Scores(object):
     POINTS_PER_WORD = 10
     REVISION_BONUS_FACTOR = 2
     PERFECT_BONUS_FACTOR = 1
+    REVISION_COMPLETE_BONUS_FACTOR = 2
 
 
 class ScoreLog(models.Model):

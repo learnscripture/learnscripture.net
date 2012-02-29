@@ -12,7 +12,7 @@ from selenium.webdriver.support.ui import Select
 from accounts.models import Identity
 from accounts.memorymodel import m as memorymodel
 from bibleverses.models import BibleVersion, VerseSet, VerseSetType, VerseChoice, MemoryStage, StageType
-from scores.models import Scores
+from scores.models import Scores, ScoreReason
 
 from .base import LiveServerTests
 
@@ -84,11 +84,46 @@ class LearnTests(LiveServerTests):
 
         # Check scores
 
+        j316_score = self._score_for_j316()
+        self.assertEqual(account.total_score.points,
+                         j316_score * (1 + Scores.PERFECT_BONUS_FACTOR))
+        self.assertEqual(account.score_logs.count(), 2)
+
+    def _score_for_j316(self):
         word_count = len(self.kjv_john_3_16.strip().split())
         word_count -= 2 # Don't get points for the reference
+        return Scores.POINTS_PER_WORD * word_count
+
+    def test_revision_complete_points(self):
+        driver = self.driver
+        identity, account = self.create_account()
+        self.login(account)
+        verse_set = self.choose_verse_set('Bible 101')
+
+        # Learn one
+        identity.record_verse_action('John 3:16', 'KJV', StageType.TEST, 1.0)
+        # Make it due for testing:
+        identity.verse_statuses.filter(memory_stage=MemoryStage.TESTED)\
+            .update(last_tested=timezone.now() - timedelta(100))
+
+        driver.get(self.live_server_url + reverse('start'))
+        driver.find_element_by_css_selector('input[name=revisequeue]').click()
+
+        self.wait_until_loaded('body')
+        self.wait_for_ajax()
+
+        self._type_john_3_16_kjv()
+
+        self.wait_for_ajax()
+
+        j316_score = self._score_for_j316()
         self.assertEqual(account.total_score.points,
-                         (Scores.POINTS_PER_WORD * word_count) * (1 + Scores.PERFECT_BONUS_FACTOR))
-        self.assertEqual(account.score_logs.count(), 2)
+                         (j316_score * (1 + Scores.PERFECT_BONUS_FACTOR)) * Scores.REVISION_BONUS_FACTOR
+                         * (1 + Scores.REVISION_COMPLETE_BONUS_FACTOR))
+
+        self.assertEqual(account.score_logs.count(), 3)
+        self.assertEqual(account.score_logs.filter(reason=ScoreReason.REVISION_COMPLETED).count(), 1)
+
 
     def test_choose_individual_verse(self):
         driver = self.driver
