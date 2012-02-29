@@ -85,7 +85,7 @@ class Account(models.Model):
 
         score_logs = []
         # This logic is reproduced client side in order to display target
-        word_count = len(text.strip().split(''))
+        word_count = len(text.strip().split())
         max_points = word_count * Scores.POINTS_PER_WORD
         if old_memory_stage >= MemoryStage.TESTED:
             # Revision:
