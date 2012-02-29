@@ -74,33 +74,6 @@
     }
 },
 {
-    "pk": 3,
-    "model": "bibleverses.versechoice",
-    "fields": {
-        "verse_set": 2,
-        "set_order": 10,
-        "reference": "Job 31:1"
-    }
-},
-{
-    "pk": 4,
-    "model": "bibleverses.versechoice",
-    "fields": {
-        "verse_set": 2,
-        "set_order": 1,
-        "reference": "Ephesians 5:3"
-    }
-},
-{
-    "pk": 5,
-    "model": "bibleverses.versechoice",
-    "fields": {
-        "verse_set": 2,
-        "set_order": 2,
-        "reference": "James 4:7"
-    }
-},
-{
     "pk": 6,
     "model": "bibleverses.versechoice",
     "fields": {
