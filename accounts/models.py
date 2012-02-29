@@ -432,9 +432,10 @@ class Identity(models.Model):
         Ignores VerseChoices that belong to passage sets.
         """
         # Not used for passages verse sets.
-        self.verse_statuses.filter(verse_choice__reference=reference,
-                                   verse_choice__verse_set__set_type=VerseSetType.SELECTION)\
-                                   .update(ignored=True)
+        qs = self.verse_statuses.filter(verse_choice__reference=reference)
+        qs = (qs.filter(verse_choice__verse_set__isnull=True) |
+              qs.filter(verse_choice__verse_set__set_type=VerseSetType.SELECTION))
+        qs.update(ignored=True)
 
     def _dedupe_uvs_set(self, uvs_set):
         # Need to dedupe (due to VerseChoice objects that belong to different
