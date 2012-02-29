@@ -201,6 +201,7 @@ class LearnTests(LiveServerTests):
 
         self.assertEqual(u"John 3:16", driver.find_element_by_id('id-verse-title').text)
 
+        driver.find_element_by_id('id-verse-dropdown').click()
         driver.find_element_by_id('id-skip-verse-btn').click()
 
         self.assertEqual(u"John 14:6", driver.find_element_by_id('id-verse-title').text)
@@ -233,6 +234,7 @@ class LearnTests(LiveServerTests):
 
         self.assertEqual(u"John 3:16", driver.find_element_by_id('id-verse-title').text)
 
+        driver.find_element_by_id('id-verse-dropdown').click()
         driver.find_element_by_id('id-cancel-learning-btn').click()
         self.wait_for_ajax()
 
