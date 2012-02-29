@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import Select
 
-from bibleverses.models import VerseSet, VerseSetType, VerseChoice
+from bibleverses.models import VerseSet, VerseSetType, VerseChoice, StageType
 
 from .base import LiveServerTests
 
@@ -103,6 +103,12 @@ class CreateSetTests(LiveServerTests):
                                       set_order=0)
         vc2 = vs.verse_choices.create(reference='Genesis 1:5',
                                       set_order=1)
+
+        identity = self._identity
+        # Record some learning against the verse we will remove
+        identity.add_verse_set(vs)
+        identity.record_verse_action('Genesis 1:1', 'KJV', StageType.TEST, 1.0)
+
         driver = self.driver
         driver.get(self.live_server_url + reverse('edit_set', kwargs=dict(slug=vs.slug)))
         driver.find_element_by_css_selector("#id-selection-verse-list tbody tr:first-child td a").click()
@@ -112,9 +118,8 @@ class CreateSetTests(LiveServerTests):
         vcs = vs.verse_choices.all()
         self.assertEqual(sorted(vc.id for vc in vcs), sorted([vc2.id]))
 
-        # Need to ensure that the removed item has been orphaned, not deleted.
-        vc1_new = VerseChoice.objects.get(id=vc1.id)
-        self.assertEqual(vc1_new.verse_set_id, None)
+        # Need to ensure that the UVS has not been deleted
+        uvs = identity.verse_statuses.get(version__slug='KJV', reference='Genesis 1:1')
 
     def test_require_account(self):
         driver = self.driver

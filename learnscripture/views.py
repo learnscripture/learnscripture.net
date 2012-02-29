@@ -381,11 +381,9 @@ def create_set(request, slug=None):
                     # with the DOM.
                     pass
 
-            # Need to orphan the unused verse choices, because there
-            # may be UserVerseStatus objects pointing to them already.
+            # Delete unused VerseChoice objects.
             for vc in old_vcs:
-                vc.verse_set = None
-                vc.save()
+                vc.delete()
 
             messages.info(request, "Verse set '%s' saved!" % verse_set.name)
             return HttpResponseRedirect(reverse('view_verse_set', kwargs=dict(slug=verse_set.slug)))
