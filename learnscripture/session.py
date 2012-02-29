@@ -57,12 +57,34 @@ def _set_verse_statuses(request, user_verse_statuses):
                             for order, uvs in enumerate(user_verse_statuses)])
 
 
-def start_learning_session(request, user_verse_statuses):
+def start_learning_session(request, user_verse_statuses, revision):
     _set_verse_statuses(request, user_verse_statuses)
     _set_learning_session_start(request, timezone.now())
+    request.session['revision'] = revision
+    request.session['score_logs'] = []
+    request.session['verses_skipped'] = False
 
 
-def remove_user_verse_status(request, reference, verse_set_id):
+def verse_status_finished(request, reference, verse_set_id, score_logs):
+    if request.session['revision']:
+        request.session['score_logs'] = (request.session['score_logs'] +
+                                         [sl.id for sl in score_logs])
+    _remove_user_verse_status(request, reference, verse_set_id)
+    if len(_get_verse_status_ids(request)) == 0:
+        if not request.session['verses_skipped']:
+            request.identity.award_revision_complete_bonus(request.session['score_logs'])
+
+
+def verse_status_skipped(request, reference, verse_set_id):
+    request.session['verses_skipped'] = True
+    return _remove_user_verse_status(request, reference, verse_set_id)
+
+
+def verse_status_cancelled(request, reference, verse_set_id):
+    return _remove_user_verse_status(request, reference, verse_set_id)
+
+
+def _remove_user_verse_status(request, reference, verse_set_id):
     # We remove all that appear before reference, since we know that they will
     # be processed in order client side, and otherwise we potentially have race
     # conditions if the user presses 'next' or 'skip' multiple times quickly.

@@ -69,9 +69,13 @@ class Account(models.Model):
     def award_action_points(self, reference, text,
                             old_memory_stage, action_change,
                             action_stage, accuracy):
-        if action_stage != StageType.TEST:
-            return
+        if not self.scoring_enabled():
+            return []
 
+        if action_stage != StageType.TEST:
+            return []
+
+        score_logs = []
         # This logic is reproduced client side in order to display target
         max_points = len(text.strip().split(' ')) * Scores.POINTS_PER_WORD
         if old_memory_stage >= MemoryStage.TESTED:
@@ -81,15 +85,23 @@ class Account(models.Model):
         else:
             reason = ScoreReason.VERSE_TESTED
         points = max_points * accuracy
-        self.add_points(points, reason)
+        score_logs.append(self.add_points(points, reason))
 
         if accuracy == 1:
-            self.add_points(points * Scores.PERFECT_BONUS_FACTOR,
-                            ScoreReason.PERFECT_TEST_BONUS)
+            score_logs.append(self.add_points(points * Scores.PERFECT_BONUS_FACTOR,
+                                              ScoreReason.PERFECT_TEST_BONUS))
+        return score_logs
+
+    def award_revision_complete_bonus(self, score_log_ids):
+        if not self.scoring_enabled():
+            return []
+
+        points = self.score_logs.filter(id__in=score_log_ids).aggregate(models.Sum('points'))['points__sum'] * Scores.REVISION_COMPLETE_BONUS_FACTOR
+        return [self.add_points(points, ScoreReason.REVISION_COMPLETED)]
 
     def add_points(self, points, reason):
-        self.score_logs.create(points=points,
-                               reason=reason)
+        return self.score_logs.create(points=points,
+                                      reason=reason)
 
     def get_score_logs(self, from_datetime):
         return self.score_logs.filter(created__gte=from_datetime).order_by('created')
@@ -243,7 +255,7 @@ class Identity(models.Model):
     def award_action_points(self, reference, text, old_memory_stage, action_change,
                             action_stage, accuracy):
         if self.account_id is None:
-            return
+            return []
 
         return self.account.award_action_points(reference, text, old_memory_stage, action_change,
                                                 action_stage, accuracy)
@@ -569,3 +581,9 @@ class Identity(models.Model):
         if self.account_id is None:
             return False
         return self.account.scoring_enabled()
+
+    def award_revision_complete_bonus(self, score_log_ids):
+        if self.account_id is None:
+            return []
+        else:
+            return self.account.award_revision_complete_bonus(score_log_ids)

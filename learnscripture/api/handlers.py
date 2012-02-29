@@ -112,12 +112,12 @@ class ActionCompleteHandler(BaseHandler):
 
         action_change = identity.record_verse_action(reference, version_slug,
                                                      stage, accuracy);
-        identity.award_action_points(reference, verse_status['text'],
-                                     verse_status['memory_stage'],
-                                     action_change, stage, accuracy)
+        score_logs = identity.award_action_points(reference, verse_status['text'],
+                                                  verse_status['memory_stage'],
+                                                  action_change, stage, accuracy)
         if (stage == StageType.TEST or
             (stage == StageType.READ and not verse_status['needs_testing'])):
-            session.remove_user_verse_status(request, reference, verse_set_id)
+            session.verse_status_finished(request, reference, verse_set_id, score_logs)
 
         return {}
 
@@ -129,7 +129,7 @@ class SkipVerseHandler(BaseHandler):
     def create(self, request):
         verse_status = get_verse_status(request.data)
         verse_set_id = get_verse_set_id(verse_status)
-        session.remove_user_verse_status(request, verse_status['reference'], verse_set_id)
+        session.verse_status_skipped(request, verse_status['reference'], verse_set_id)
         return {}
 
 
@@ -142,7 +142,7 @@ class CancelLearningVerseHandler(BaseHandler):
         verse_set_id = get_verse_set_id(verse_status)
         reference = verse_status['reference']
         request.identity.cancel_learning(reference)
-        session.remove_user_verse_status(request, reference, verse_set_id)
+        session.verse_status_cancelled(request, reference, verse_set_id)
         return {}
 
 

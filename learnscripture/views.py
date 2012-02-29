@@ -112,8 +112,8 @@ def session_stats(identity):
     return stats
 
 
-def learn_set(request, l):
-    session.start_learning_session(request, l)
+def learn_set(request, uvs_list, revision):
+    session.start_learning_session(request, uvs_list, revision)
     return HttpResponseRedirect(reverse('learn'))
 
 
@@ -128,15 +128,15 @@ def start(request):
 
     if request.method == 'POST':
         if 'learnqueue' in request.POST:
-            return learn_set(request, identity.verse_statuses_for_learning())
+            return learn_set(request, identity.verse_statuses_for_learning(), False)
         if 'revisequeue' in request.POST:
-            return learn_set(request, identity.verse_statuses_for_revising())
+            return learn_set(request, identity.verse_statuses_for_revising(), True)
         if 'learnpassage' in request.POST:
             vs_id = int(request.POST['verse_set_id'])
-            return learn_set(request, identity.verse_statuses_for_passage(vs_id))
+            return learn_set(request, identity.verse_statuses_for_passage(vs_id), False)
         if 'revisepassage' in request.POST:
             vs_id = int(request.POST['verse_set_id'])
-            return learn_set(request, identity.verse_statuses_for_passage(vs_id))
+            return learn_set(request, identity.verse_statuses_for_passage(vs_id), True)
         if 'clearqueue' in request.POST:
             identity.clear_learning_queue()
             return HttpResponseRedirect(reverse('start'))
@@ -182,8 +182,9 @@ def choose(request):
                 # Shouldn't be possible by clicking on buttons.
                 pass
             if vs is not None:
-                return learn_set(request, identity.add_verse_set(vs, version=version))
+                return learn_set(request, identity.add_verse_set(vs, version=version), False)
 
+        # Handle choose individual verse
         ref = request.POST.get('reference', None)
         if ref is not None:
             # First ensure it is valid
@@ -194,7 +195,7 @@ def choose(request):
             else:
                 vc, n = VerseChoice.objects.get_or_create(reference=ref,
                                                           verse_set=None)
-                return learn_set(request, [identity.add_verse_choice(vc, version=version)])
+                return learn_set(request, [identity.add_verse_choice(vc, version=version)], False)
 
     c = {}
     verse_sets = verse_sets_visible_for_request(request).order_by('name').prefetch_related('verse_choices')
