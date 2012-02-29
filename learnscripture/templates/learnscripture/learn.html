@@ -136,9 +136,22 @@ Learn!
 
 {% include 'learnscripture/session.html' %}
 
-<hr>
 
 <h3>Current verse</h3>
+
+<div class="verse-dropdown dropdown">
+  <ul> {# Needed for bootstrap-dropdown #}
+    <li>
+      <a href="#" class="btn dropdown-toggle2" id="id-verse-dropdown">Change <span class="caret"></span></a>
+      <ul class="dropdown-menu">
+        <li><a href="#" id="id-skip-verse-btn">Skip verse</a></li>
+        <span class="selection-set-only">
+        <li><a href="#" id="id-cancel-learning-btn">Stop learning verse</a></li>
+        </span>
+      </ul>
+    </li>
+  </ul>
+</div>
 
 <div>Stage: <span id="id-stage-caption"></span>
   <div id="id-stage-caption2"></div>
@@ -148,21 +161,11 @@ Learn!
   </div>
 </div>
 
-<div>
-  <input type="submit" id="id-skip-verse-btn" class="btn" value="Skip verse" />
-  <span class="selection-set-only"><br/>
-    <input type="submit" id="id-cancel-learning-btn" class="btn" value="Stop learning this verse" />
-  </span>
-</div>
-
-<hr>
 
 <h3>Session stats</h3>
 
 <div id="id-stats-block">
 </div>
-
-<hr>
 
 <h3>Points</h3>
 

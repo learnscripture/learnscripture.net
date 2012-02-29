@@ -41,7 +41,7 @@
   /* APPLY TO STANDARD DROPDOWN ELEMENTS
    * =================================== */
 
-  var d = 'a.menu, .dropdown-toggle';
+  var d = 'a.menu, .dropdown-toggle, .dropdown-toggle2';
 
   function clearMenus() {
     $(d).parent('li').removeClass('open');

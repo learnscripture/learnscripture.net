@@ -332,10 +332,18 @@ footer {
 
 // Right column tweaks
 
-#id-rightcolumn h3:first-child {
-  margin-top: -9px;
-  }
+#id-rightcolumn {
+  h3 {
+    margin-top: 18px;
+    line-height: 20px;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 6px;
 
+    &:first-child {
+      margin-top: -9px;
+    }
+  }
+}
 
 /* Messages */
 
@@ -597,6 +605,39 @@ body .score-log {
   height: 92px;
   overflow: hidden;
 }
+
+
+.verse-dropdown ul {
+  list-style: none;
+  margin: 0px;
+  .border-radius(4px);
+  .dropdown-menu {
+    border: 1px solid #eee;
+    top: 30px;
+  }
+}
+
+// From Twitter Bootstrap 2
+.caret {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  text-indent: -99999px;
+  *text-indent: 0;
+  vertical-align: top;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid #000000;
+  opacity: 0.3;
+  filter: alpha(opacity=30);
+  content: "\2193";
+}
+.dropdown .caret {
+  margin-top: 8px;
+  margin-left: 2px;
+}
+
+
 // 'choose' page
 
 #id-tab-verseset {
@@ -650,7 +691,7 @@ body .score-log {
     border-top: 1px solid #eee;
     padding-top: 5px;
     margin-top: 5px;
-    }
+  }
   .row > [class*="span"] {
     display: block;
     margin: auto;

@@ -9,7 +9,6 @@
 {% if request.identity %}
 {# If no request.identity, then there is no data that could be lost, so no need for warning #}
 <div class="warning guest-only">
-<hr/>
   <p><span class="label warning">Warning:</span> As a guest, your data will expire in {{ request.identity.expires_on|timeuntil }}</span>
    (assuming you don't clear your browser cookies).</p>
 
