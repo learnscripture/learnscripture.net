@@ -290,7 +290,8 @@ def test_run_passage(passage_length, days):
 # This was tried for accuracy = 1.0 and accuracy = 0.95, both
 # giving sensible results
 
-m = MemoryModel(0.25)
-filter_qs = m.filter_qs
-needs_testing = m.needs_testing
-strength_estimate = m.strength_estimate
+MM = MemoryModel(0.25)
+filter_qs = MM.filter_qs
+needs_testing = MM.needs_testing
+strength_estimate = MM.strength_estimate
+LEARNT = MM.LEARNT

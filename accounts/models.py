@@ -38,6 +38,12 @@ THEMES = [('calm', 'Slate'),
 # Identity methods are the main interface for most business logic,
 # and so sometimes they just delegate to Account methods.
 
+class AccountManager(models.Manager):
+    def create(self, *args, **kwargs):
+        obj = super(AccountManager, self).create(*args, **kwargs)
+        TotalScore.objects.create(account=obj)
+        return obj
+
 class Account(models.Model):
     username = models.CharField(max_length=100, blank=False, unique=True)
     first_name = models.CharField(max_length=100, blank=True)
@@ -49,6 +55,8 @@ class Account(models.Model):
     subscription = models.PositiveSmallIntegerField(choices=SubscriptionType.choice_list,
                                                     default=SubscriptionType.FREE_TRIAL)
     paid_until = models.DateTimeField(null=True, blank=True)
+
+    objects = AccountManager()
 
     def set_password(self, raw_password):
         self.password = make_password(raw_password)
@@ -77,7 +85,8 @@ class Account(models.Model):
 
         score_logs = []
         # This logic is reproduced client side in order to display target
-        max_points = len(text.strip().split(' ')) * Scores.POINTS_PER_WORD
+        word_count = len(text.strip().split(' '))
+        max_points = word_count * Scores.POINTS_PER_WORD
         if old_memory_stage >= MemoryStage.TESTED:
             # Revision:
             max_points *= Scores.REVISION_BONUS_FACTOR
@@ -90,6 +99,11 @@ class Account(models.Model):
         if accuracy == 1:
             score_logs.append(self.add_points(points * Scores.PERFECT_BONUS_FACTOR,
                                               ScoreReason.PERFECT_TEST_BONUS))
+
+        if (action_change.old_strength < memorymodel.LEARNT <= action_change.new_strength):
+            score_logs.append(self.add_points(word_count * Scores.POINTS_PER_WORD *
+                                              Scores.VERSE_LEARNT_BONUS,
+                                              ScoreReason.VERSE_LEARNT))
         return score_logs
 
     def award_revision_complete_bonus(self, score_log_ids):

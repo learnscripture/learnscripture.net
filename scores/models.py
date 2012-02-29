@@ -20,6 +20,7 @@ class Scores(object):
     REVISION_BONUS_FACTOR = 2
     PERFECT_BONUS_FACTOR = 1
     REVISION_COMPLETE_BONUS_FACTOR = 2
+    VERSE_LEARNT_BONUS = 5
 
 
 class ScoreLog(models.Model):
