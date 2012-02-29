@@ -229,7 +229,6 @@ class UserVerseStatus(models.Model):
     # this can happen
 
     for_identity = models.ForeignKey('accounts.Identity', related_name='verse_statuses')
-    verse_choice = models.ForeignKey(VerseChoice, null=True, default=None)
     reference = models.CharField(max_length=100)
     verse_set = models.ForeignKey(VerseSet, null=True)
     bible_verse_number = models.PositiveSmallIntegerField()
@@ -270,7 +269,7 @@ class UserVerseStatus(models.Model):
         return u'<UserVerseStatus %s>' % self
 
     class Meta:
-        unique_together = []
+        unique_together = [('for_identity', 'verse_set', 'reference', 'version')]
 
 
 class InvalidVerseReference(ValueError):
