@@ -11,7 +11,19 @@ Leaderboard
 {% endblock %}
 
 {% block leftcolumn %}
-<p>All time stats:</p>
+
+<ul class="pills">
+  <li {% if not thisweek %}
+      class="active"
+      {% endif %}
+      ><a href=".">All time</a>
+  </li>
+  <li {% if thisweek %}
+      class="active"
+      {% endif %}
+      ><a href="?thisweek">This week</a>
+  </li>
+</ul>
 
 {% if accounts %}
 
@@ -35,7 +47,7 @@ Leaderboard
 </table>
 {% else %}
 
-  <p>No more users found!</p>
+  <p>No more data found!</p>
 
 {% endif %}
 
