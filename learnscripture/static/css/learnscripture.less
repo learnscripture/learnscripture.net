@@ -195,7 +195,8 @@
 
   .score-log {
     background-color: @btnColor2;
-    .gradientBar(@btnColor1, @btnColor2);
+    .gradientBar(@btnColor2, @btnColor1);
+    border: 2px solid #888;
     color: @white;
   }
 }
@@ -615,8 +616,7 @@ body .score-log {
 #id-points-block {
   height: 120px;
   overflow: hidden;
-  -webkit-mask-image: -webkit-linear-gradient(rgba(0,0,0,1) 0px, rgba(0,0,0,1) 100px, rgba(0,0,0,0))
-
+  -webkit-mask-image: -webkit-linear-gradient(rgba(0,0,0,1) 0px, rgba(0,0,0,1) 100px, rgba(0,0,0,0));
 }
 
 
