@@ -163,6 +163,10 @@ class MemoryModel(object):
     def needs_testing(self, strength, time_elapsed):
         if time_elapsed is None or strength is None:
             return True
+        if time_elapsed < 3600:
+            # It is confusing to have a verse up for revision within an hour of
+            # it being first learnt, so we special case that here.
+            return False
         if strength > self.LEARNT:
             return False
         t_0 = self.t(strength)
@@ -176,10 +180,10 @@ class MemoryModel(object):
         clause = ('last_tested IS NOT NULL AND '
                   'strength < %(learnt)s AND '
                   '(%(now_seconds)s - EXTRACT(EPOCH FROM last_tested))' # time elapsed
-                  ' > ('
+                  ' > (GREATEST(3600, '
                   '  ((- ln(1 - LEAST(strength + %(delta_s_ideal)s, %(best_strength)s)) / %(alpha)s) ^ (1.0/%(exponent)s)) '
                   ' -((- ln(1 - strength) / %(alpha)s) ^ (1.0/%(exponent)s))'
-                  ' )' %
+                  ' ))' %
                   {'now_seconds': now_seconds,
                    'delta_s_ideal': self.DELTA_S_IDEAL,
                    'best_strength': self.BEST_STRENGTH,
