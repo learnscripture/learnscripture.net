@@ -7,6 +7,12 @@ from accounts.models import Account, SubscriptionType
 class SignUpForm(forms.ModelForm):
 
     password = forms.CharField(max_length=100, widget=forms.PasswordInput)
+    username = forms.RegexField(label="Username", max_length=40,
+                                regex=r'^[\w.+-]+$',
+                                error_messages=
+                                {'invalid': "This value may contain only letters, numbers and "
+                                 "these characters: . + - _"})
+
 
     def clean_password(self):
         p = self.cleaned_data.get('password', '')
