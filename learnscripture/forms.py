@@ -37,6 +37,8 @@ class SignUpForm(forms.ModelForm):
             'password',
             ]
 
+SignUpForm.base_fields['first_name'].label = "First name (optional)"
+SignUpForm.base_fields['last_name'].label = "Last name (optional)"
 
 class LogInForm(forms.Form):
     email = forms.EmailField()
