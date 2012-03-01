@@ -191,6 +191,22 @@ class IdentityTests(TestCase):
         i.change_version('Psalm 23:1', 'KJV', vs1.id)
         self.assertEqual([u'KJV'] * 6, [uvs.version.slug for uvs in i.verse_statuses.filter(verse_set=vs1)])
 
+    def test_verse_statuses_for_revising(self):
+        i = self._create_identity()
+        vs1 = VerseSet.objects.get(name='Bible 101')
+        i.add_verse_set(vs1)
+        i.record_verse_action('John 3:16', 'NET', StageType.TEST, 1.0)
+
+        # It should be set for revising yet
+        self.assertEqual([], list(i.verse_statuses_for_revising()))
+
+        # It is confusing if it is ever ready within an hour, so we special case
+        # that.
+
+        # Fix data:
+        i.verse_statuses.all().update(last_tested = timezone.now() - timedelta(0.99/24))
+
+        self.assertEqual([], list(i.verse_statuses_for_revising()))
 
     def test_passages_for_learning(self):
         i = self._create_identity()
