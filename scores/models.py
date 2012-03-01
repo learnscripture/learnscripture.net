@@ -52,18 +52,15 @@ class TotalScore(models.Model):
 
 def get_all_time_leaderboard(page, page_size):
     # page is zero indexed
-    sql ="""
+
+    sql = """
 SELECT
   accounts_account.username,
-  ts1.points,
-  COUNT(ts2.account_id) as rank
+  points,
+  rank() OVER (ORDER BY points DESC)
 FROM
-  (scores_totalscore ts1 CROSS JOIN scores_totalscore ts2)
-  INNER JOIN accounts_account on ts1.account_id = accounts_account.id
-WHERE
-  ts2.points >= ts1.points
-GROUP BY ts1.account_id, ts1.points, accounts_account.username
-ORDER BY rank
+  scores_totalscore INNER JOIN accounts_account
+  ON scores_totalscore.account_id = accounts_account.id
 LIMIT %s
 OFFSET %s
 """
