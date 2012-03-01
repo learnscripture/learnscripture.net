@@ -48,3 +48,41 @@ class TotalScore(models.Model):
     account = models.OneToOneField('accounts.Account', related_name='total_score')
     points = models.PositiveIntegerField(default=0)
     visible = models.BooleanField(default=True)
+
+
+def get_all_time_leaderboard(page, page_size):
+    # page is zero indexed
+    sql ="""
+SELECT
+  accounts_account.username,
+  ts1.points,
+  COUNT(ts2.account_id) as rank
+FROM
+  (scores_totalscore ts1 CROSS JOIN scores_totalscore ts2)
+  INNER JOIN accounts_account on ts1.account_id = accounts_account.id
+WHERE
+  ts2.points >= ts1.points
+GROUP BY ts1.account_id, ts1.points, accounts_account.username
+ORDER BY rank
+LIMIT %s
+OFFSET %s
+"""
+    from django.db import connection
+    cursor = connection.cursor()
+
+
+    offset = page * page_size
+    print page_size, offset
+
+    cursor.execute(sql, [page_size, offset])
+
+    return dictfetchall(cursor)
+
+
+def dictfetchall(cursor):
+    "Returns all rows from a cursor as a dict"
+    desc = cursor.description
+    return [
+        dict(zip([col[0] for col in desc], row))
+        for row in cursor.fetchall()
+    ]
