@@ -12,7 +12,7 @@ from accounts.forms import PreferencesForm
 from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType
 from learnscripture import session, auth
 from bibleverses.forms import VerseSelector, VerseSetForm, PassageVerseSelector
-from scores.models import get_all_time_leaderboard
+from scores.models import get_all_time_leaderboard, get_leaderboard_since
 
 from .decorators import require_identity, require_preferences, has_preferences, redirect_via_prefs
 
@@ -429,11 +429,19 @@ def leaderboard(request):
     except KeyError, ValueError:
         page_num = 1
 
+    thisweek = 'thisweek' in request.GET
+
     page_num = max(1, page_num)
-    accounts = get_all_time_leaderboard(page_num - 1, 30)
+
+    if thisweek:
+        accounts = get_leaderboard_since(timezone.now() - timedelta(7), page_num - 1, 30)
+        print accounts
+    else:
+        accounts = get_all_time_leaderboard(page_num - 1, 30)
 
     c = {}
     c['accounts'] = accounts
+    c['thisweek'] = thisweek
     c['page_num'] = page_num
     c['previous_page_num'] = page_num - 1
     c['next_page_num'] = page_num + 1

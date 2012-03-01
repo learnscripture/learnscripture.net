@@ -1,4 +1,5 @@
 
+from django.db import connection
 from django.db import models
 from django.db.models import F
 from django.utils import timezone
@@ -64,15 +65,40 @@ FROM
 LIMIT %s
 OFFSET %s
 """
-    from django.db import connection
     cursor = connection.cursor()
-
-
     offset = page * page_size
-    print page_size, offset
-
     cursor.execute(sql, [page_size, offset])
+    return dictfetchall(cursor)
 
+
+def get_leaderboard_since(since, page, page_size):
+    # page is zero indexed
+
+    # This uses a completely different strategy to get_all_time_leaderboard, and
+    # only works if ScoreLogs haven't been cleared out for the relevant period.
+    sql = """
+SELECT
+  accounts_account.username,
+  sum_points as points,
+  rank() OVER (ORDER BY sum_points DESC)
+FROM
+   (SELECT
+      account_id,
+      SUM(points) as sum_points
+    FROM
+      scores_scorelog
+    WHERE
+      created > %s
+    GROUP BY
+      account_id) AS sp
+INNER JOIN
+  accounts_account on sp.account_id = accounts_account.id
+LIMIT %s
+OFFSET %s;
+"""
+    cursor = connection.cursor()
+    offset = page * page_size
+    cursor.execute(sql, [since, page_size, offset])
     return dictfetchall(cursor)
 
 
