@@ -12,6 +12,7 @@ from accounts.forms import PreferencesForm
 from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType
 from learnscripture import session, auth
 from bibleverses.forms import VerseSelector, VerseSetForm, PassageVerseSelector
+from scores.models import get_all_time_leaderboard
 
 from .decorators import require_identity, require_preferences, has_preferences, redirect_via_prefs
 
@@ -422,36 +423,14 @@ def create_set(request, slug=None):
 
 
 def leaderboard(request):
-    sql ="""
-SELECT
-  accounts_account.username,
-  ts1.points,
-  COUNT(ts2.account_id) as rank
-FROM
-  (scores_totalscore ts1 CROSS JOIN scores_totalscore ts2)
-  INNER JOIN accounts_account on ts1.account_id = accounts_account.id
-WHERE
-  ts2.points >= ts1.points
-GROUP BY ts1.account_id, ts1.points, accounts_account.username
-ORDER BY rank
-LIMIT %s
-OFFSET %s
-"""
-    from django.db import connection
-    cursor = connection.cursor()
-
     page_num = None # 1-indexed page page
     try:
         page_num = int(request.GET['p'])
     except KeyError, ValueError:
         page_num = 1
 
-    PAGE_SIZE = 30
-    offset = max(0, page_num - 1) * PAGE_SIZE
-
-    cursor.execute(sql, [PAGE_SIZE, offset])
-
-    accounts = dictfetchall(cursor)
+    page_num = max(1, page_num)
+    accounts = get_all_time_leaderboard(page_num - 1, 30)
 
     c = {}
     c['accounts'] = accounts
@@ -459,12 +438,3 @@ OFFSET %s
     c['previous_page_num'] = page_num - 1
     c['next_page_num'] = page_num + 1
     return render(request, 'learnscripture/leaderboard.html', c)
-    row = cursor.fetchone()
-
-def dictfetchall(cursor):
-    "Returns all rows from a cursor as a dict"
-    desc = cursor.description
-    return [
-        dict(zip([col[0] for col in desc], row))
-        for row in cursor.fetchall()
-    ]
