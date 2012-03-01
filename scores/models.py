@@ -18,8 +18,8 @@ class Scores(object):
     # Constants for scores. Duplicated in learn.js
     POINTS_PER_WORD = 10
     REVISION_BONUS_FACTOR = 2
-    PERFECT_BONUS_FACTOR = 1
-    REVISION_COMPLETE_BONUS_FACTOR = 2
+    PERFECT_BONUS_FACTOR = 0.5
+    REVISION_COMPLETE_BONUS_FACTOR = 1
     VERSE_LEARNT_BONUS = 5
 
 
