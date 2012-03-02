@@ -56,13 +56,16 @@ def get_all_time_leaderboard(page, page_size):
     # page is zero indexed
 
     sql = """
+CREATE TEMPORARY SEQUENCE rank_seq;
 SELECT
   accounts_account.username,
   points,
-  rank() OVER (ORDER BY points DESC)
+  nextval('rank_seq') AS rank
 FROM
-  scores_totalscore INNER JOIN accounts_account
-  ON scores_totalscore.account_id = accounts_account.id
+  (SELECT * FROM scores_totalscore
+   ORDER BY points DESC) as ts1
+  INNER JOIN accounts_account
+    ON ts1.account_id = accounts_account.id
 LIMIT %s
 OFFSET %s
 """
@@ -78,10 +81,11 @@ def get_leaderboard_since(since, page, page_size):
     # This uses a completely different strategy to get_all_time_leaderboard, and
     # only works if ScoreLogs haven't been cleared out for the relevant period.
     sql = """
+CREATE TEMPORARY SEQUENCE rank_seq;
 SELECT
   accounts_account.username,
   sum_points as points,
-  rank() OVER (ORDER BY sum_points DESC)
+  nextval('rank_seq') AS rank
 FROM
    (SELECT
       account_id,
@@ -91,7 +95,9 @@ FROM
     WHERE
       created > %s
     GROUP BY
-      account_id) AS sp
+      account_id
+    ORDER BY sum_points DESC
+   ) AS sp
 INNER JOIN
   accounts_account on sp.account_id = accounts_account.id
 LIMIT %s
