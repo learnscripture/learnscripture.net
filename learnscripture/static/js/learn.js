@@ -861,16 +861,14 @@ var learnscripture =
                                           line + '</div>');
                 }
             });
-            var versionText = "Version: " + verse.version.full_name +
-                " (" + verse.version.short_name + ") |";
+            var versionText = verse.version.full_name +
+                " (" + verse.version.short_name + ")";
             $('#id-version-name').text(versionText);
 
             if (verse.version.url != "") {
-                var url = verse.version.url.replace('%s', encodeURI(verse.reference)).replace('%20', '+');
-                $('#id-browse-link').show().find('a').attr('href', url);
-            } else {
-                $('#id-browse-link').hide();
+                $('#id-version-name').html('<a  target="_blank" href="' + verse.version.url +'">' + versionText + '</a>');
             }
+
             $('#id-version-select').val(verse.version.slug);
             markupVerse();
             $('#id-loading').hide();
