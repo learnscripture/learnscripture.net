@@ -13,6 +13,7 @@ TEMPLATE_DEBUG = DEBUG
 SRC_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # ../
 PROJECT_DIR = os.path.dirname(SRC_DIR)
 WEBAPP_DIR = os.path.dirname(PROJECT_DIR)
+HOME_DIR = os.environ['HOME']
 
 from .settings_priv import SECRET_KEY
 if LIVEBOX:
@@ -207,11 +208,13 @@ DEBUG_TOOLBAR_CONFIG = {
 
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': 'unix:/home/cciw/memcached.sock',
+        'BACKEND': 'caching.backends.memcached.CacheClass',
+        'LOCATION': 'unix:%s/memcached.sock' % HOME_DIR,
         'KEY_PREFIX': 'learnscripture.net',
     }
 }
+
+CACHE_PREFIX = 'ls1'
 
 
 COMPRESS_PRECOMPILERS = (
