@@ -469,8 +469,7 @@ class Identity(models.Model):
         """
         # Not used for passages verse sets.
         qs = self.verse_statuses.filter(reference=reference)
-        qs = (qs.filter(verse_set__isnull=True) |
-              qs.filter(verse_set__set_type=VerseSetType.SELECTION))
+        qs = qs.exclude(verse_set__set_type=VerseSetType.PASSAGE)
         qs.update(ignored=True)
 
     def _dedupe_uvs_set(self, uvs_set):
