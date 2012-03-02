@@ -17,7 +17,7 @@ HOME_DIR = os.environ['HOME']
 
 from .settings_priv import SECRET_KEY
 if LIVEBOX:
-    from .settings_priv import DATABASES, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
+    from .settings_priv import DATABASES, EMAIL_HOST, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
 else:
     DATABASES = {
         'default': {
