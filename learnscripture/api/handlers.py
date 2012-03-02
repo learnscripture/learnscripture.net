@@ -8,6 +8,7 @@ using Piston for the convenience it provides.
 """
 import logging
 
+from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
 from django.utils.functional import wraps
 from django.utils import simplejson
@@ -22,7 +23,7 @@ from bibleverses.models import UserVerseStatus, Verse, StageType, MAX_VERSES_FOR
 from bibleverses.forms import VerseSelector, PassageVerseSelector
 from learnscripture import session
 from learnscripture.decorators import require_identity_method
-from learnscripture.forms import SignUpForm, LogInForm
+from learnscripture.forms import SignUpForm, LogInForm, AccountPasswordResetForm
 from learnscripture.utils.logging import extra
 from learnscripture.views import session_stats
 
@@ -193,6 +194,23 @@ class LogInHandler(AccountCommon, BaseHandler):
         account.save()
         session.login(request, account.identity)
         return account
+
+
+class ResetPasswordHandler(AccountCommon, BaseHandler):
+    allowed_methods = ('POST',)
+
+    # Uses same form as login.
+    @validate(AccountPasswordResetForm, prefix="login")
+    def create(self, request):
+        from django.contrib.auth.views import password_reset
+        # This will validate the form again, but it doesn't matter.
+        resp = password_reset(request,
+                              password_reset_form=lambda *args: AccountPasswordResetForm(*args, prefix="login"),
+                              post_reset_redirect=reverse('password_reset_done'), # not needed really
+                              email_template_name='learnscripture/password_reset_email.txt',
+                              )
+        # resp will be a redirect, which could confuse things, so we just:
+        return {}
 
 
 class LogOutHandler(BaseHandler):

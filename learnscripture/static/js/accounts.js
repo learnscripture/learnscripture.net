@@ -65,6 +65,12 @@ var learnscripture = (function(learnscripture, $) {
         // the normal way.  Therefore we do synchronous XHR to check login
         // details (and actually log them in), then allow form submission to
         // continue if it is correct.
+
+
+        // This form is 'shared' between login and forgot password, so ensure
+        // form action is correct.
+        $('#id-login-form form').attr('action', '/login/');
+
         $.ajax({url: '/api/learnscripture/v1/login/',
                 dataType: 'json',
                 async: false,
@@ -83,6 +89,30 @@ var learnscripture = (function(learnscripture, $) {
                 }
                 });
     };
+
+    var forgotPasswordClick = function(ev) {
+        // This form is 'shared' between login and forgot password, so ensure
+        // form action is correct.
+        $('#id-login-form form').attr('action', '/password-reset/');
+
+        $.ajax({url: '/api/learnscripture/v1/resetpassword/',
+                dataType: 'json',
+                async: false,
+                type: 'POST',
+                data: $('#id-login-form form').serialize(),
+                error: function(jqXHR, textStatus, errorThrown) {
+                    ev.preventDefault();
+                    if (jqXHR.status == 400) {
+                        learnscripture.handleFormValidationErrors($('#id-login-form'), 'login', jqXHR);
+                    } else {
+                        learnscripture.handlerAjaxError(jqXHR, textStatus, errorThrown);
+                    }
+                },
+                success: function(data) {
+                    // No ev.preventDefault, form will submit
+                }
+                });
+    }
 
     var showLogIn = function(ev) {
         ev.preventDefault();
@@ -123,12 +153,15 @@ var learnscripture = (function(learnscripture, $) {
             $('#id-login-form').modal('hide');
         });
 
+        $('#id-forgot-password-btn').click(forgotPasswordClick);
+
         $('.logout-link').click(showLogOut);
         $('#id-logout-btn').click(logoutBtnClick);
         $('#id-logout-cancel-btn').click(function(ev) {
             ev.preventDefault();
             $('#id-logout-form').modal('hide');
         });
+
     };
 
     // Export:
