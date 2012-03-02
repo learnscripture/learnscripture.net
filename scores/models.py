@@ -54,6 +54,7 @@ class TotalScore(models.Model):
 
 def get_all_time_leaderboard(page, page_size):
     # page is zero indexed
+    from accounts.models import SubscriptionType
 
     sql = """
 CREATE TEMPORARY SEQUENCE rank_seq;
@@ -63,21 +64,24 @@ SELECT
   nextval('rank_seq') AS rank
 FROM
   (SELECT * FROM scores_totalscore
-   ORDER BY points DESC) as ts1
+   ORDER BY points DESC
+) as ts1
   INNER JOIN accounts_account
     ON ts1.account_id = accounts_account.id
+WHERE accounts_account.subscription != %s
 LIMIT %s
 OFFSET %s
 """
     cursor = connection.cursor()
     offset = page * page_size
-    cursor.execute(sql, [page_size, offset])
+    cursor.execute(sql, [SubscriptionType.BASIC, page_size, offset])
     return dictfetchall(cursor)
 
 
 def get_leaderboard_since(since, page, page_size):
     # page is zero indexed
 
+    from accounts.models import SubscriptionType
     # This uses a completely different strategy to get_all_time_leaderboard, and
     # only works if ScoreLogs haven't been cleared out for the relevant period.
     sql = """
@@ -100,12 +104,13 @@ FROM
    ) AS sp
 INNER JOIN
   accounts_account on sp.account_id = accounts_account.id
+WHERE accounts_account.subscription != %s
 LIMIT %s
 OFFSET %s;
 """
     cursor = connection.cursor()
     offset = page * page_size
-    cursor.execute(sql, [since, page_size, offset])
+    cursor.execute(sql, [since, SubscriptionType.BASIC, page_size, offset])
     return dictfetchall(cursor)
 
 
