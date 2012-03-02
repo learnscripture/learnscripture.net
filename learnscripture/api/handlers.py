@@ -11,6 +11,7 @@ import logging
 from django.template.loader import render_to_string
 from django.utils.functional import wraps
 from django.utils import simplejson
+from django.utils import timezone
 
 from piston.handler import BaseHandler
 from piston.utils import rc
@@ -188,6 +189,8 @@ class LogInHandler(AccountCommon, BaseHandler):
     def create(self, request):
         # The form has validated the password already.
         account = Account.objects.get(email__iexact=request.form.cleaned_data['email'].strip())
+        account.last_login = timezone.now()
+        account.save()
         session.login(request, account.identity)
         return account
 
