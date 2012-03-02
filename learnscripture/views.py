@@ -120,11 +120,10 @@ def learn_set(request, uvs_list, revision):
 
 
 # Dashboard:
-@require_identity
 def start(request):
 
-    identity = request.identity
-    if not identity.verse_statuses.exists():
+    identity = getattr(request, 'identity', None)
+    if identity is None or not identity.verse_statuses.exists():
         # The only possible thing is to choose some verses
         return HttpResponseRedirect(reverse('choose'))
 

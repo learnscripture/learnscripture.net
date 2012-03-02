@@ -18,7 +18,7 @@ class DashboardTests(LiveServerTests):
 
     def setup_identity(self):
         driver = self.driver
-        driver.get(self.live_server_url + reverse('start'))
+        driver.get(self.live_server_url + reverse('learn'))
         self.wait_until_loaded('body')
         # This should have created an Identity
         i = Identity.objects.get()
@@ -94,3 +94,13 @@ class DashboardTests(LiveServerTests):
         alert.accept()
         self.wait_until_loaded('body')
         self.assertNotIn('Psalm 23', driver.page_source)
+
+    def test_home_dashboard_routing(self):
+        driver = self.driver
+        driver.get(self.live_server_url + "/")
+        e = driver.find_element_by_css_selector('a.btn.large')
+        self.assertTrue(e.get_attribute('href').endswith(reverse('start')))
+        e.click()
+        self.assertTrue(driver.current_url.endswith(reverse('choose')))
+        self.assertEqual(Identity.objects.count(), 0)
+
