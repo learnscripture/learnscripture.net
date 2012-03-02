@@ -7,6 +7,12 @@ from django.db.models import F
 from django.utils import timezone
 from django.utils.functional import cached_property
 
+# BibleVersion and Verse are pseudo static, so make extensive use of caching.
+# VerseSets and VerseChoices also rarely change, and it doesn't matter too much
+# if they do, so make liberal use of caching.  Other models won't benefit so
+# much due to lots of writes and an increased risk if things go wrong.
+import caching.base
+
 from learnscripture.datastructures import make_choices
 
 
@@ -42,12 +48,12 @@ MemoryStage = make_choices('MemoryStage',
                             ])
 
 
-class BibleVersionManager(models.Manager):
+class BibleVersionManager(caching.base.CachingManager):
     def get_by_natural_key(self, slug):
         return self.get(slug=slug)
 
 
-class BibleVersion(models.Model):
+class BibleVersion(caching.base.CachingMixin, models.Model):
     short_name = models.CharField(max_length=20, unique=True)
     slug = models.CharField(max_length=20, unique=True)
     full_name = models.CharField(max_length=255, unique=True)
@@ -124,7 +130,7 @@ class ComboVerse(object):
         self.bible_verse_number, self.text = bible_verse_number, text
 
 
-class Verse(models.Model):
+class Verse(caching.base.CachingMixin, models.Model):
     version = models.ForeignKey(BibleVersion)
     reference = models.CharField(max_length=100)
     text = models.TextField()
@@ -135,6 +141,8 @@ class Verse(models.Model):
     chapter_number = models.PositiveSmallIntegerField() # 1-indexed
     verse_number = models.PositiveSmallIntegerField()   # 1-indexed
     bible_verse_number = models.PositiveSmallIntegerField() # 0-indexed
+
+    objects = caching.base.CachingManager()
 
     @property
     def book_name(self):
@@ -154,7 +162,7 @@ class Verse(models.Model):
         ordering = ('bible_verse_number',)
 
 
-class VerseSetManager(models.Manager):
+class VerseSetManager(caching.base.CachingManager):
     def public(self):
         return self.get_query_set().filter(public=True)
 
@@ -163,7 +171,7 @@ class VerseSetManager(models.Manager):
             .update(popularity=F('popularity') + 1)
 
 
-class VerseSet(models.Model):
+class VerseSet(caching.base.CachingMixin, models.Model):
     name = models.CharField(max_length=255)
     slug = AutoSlugField(populate_from='name', unique=True)
     description = models.TextField(blank=True)
@@ -188,7 +196,7 @@ class VerseSet(models.Model):
         return self.set_type == VerseSetType.PASSAGE
 
 
-class VerseChoiceManager(models.Manager):
+class VerseChoiceManager(caching.base.CachingManager):
     use_for_related_fields = True
 
     def get_query_set(self):
@@ -198,7 +206,7 @@ class VerseChoiceManager(models.Manager):
 
 # Note that VerseChoice and Verse are not related, since we want a VerseChoice
 # to be independent of Bible version.
-class VerseChoice(models.Model):
+class VerseChoice(caching.base.CachingMixin, models.Model):
     reference = models.CharField(max_length=100)
     verse_set = models.ForeignKey(VerseSet, related_name='verse_choices')
     set_order = models.PositiveSmallIntegerField(default=0)
