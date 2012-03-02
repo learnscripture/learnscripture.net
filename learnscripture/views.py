@@ -8,6 +8,7 @@ from django.shortcuts import render, get_object_or_404
 from django.utils.http import urlparse
 from django.utils import timezone
 
+from accounts.models import Account
 from accounts.forms import PreferencesForm
 from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType
 from learnscripture import session, auth
@@ -446,3 +447,10 @@ def leaderboard(request):
     c['previous_page_num'] = page_num - 1
     c['next_page_num'] = page_num + 1
     return render(request, 'learnscripture/leaderboard.html', c)
+
+
+def user_stats(request, username):
+    account = get_object_or_404(Account.objects.select_related('total_score'),
+                                username=username)
+    c = {'account': account}
+    return render(request, 'learnscripture/user_stats.html', c)

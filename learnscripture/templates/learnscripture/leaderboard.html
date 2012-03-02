@@ -38,7 +38,7 @@ Leaderboard
   <tbody>
     {% for account in accounts %}
     <tr>
-      <td>{{ account.username }}</td>
+      <td><a href="{% url 'user_stats' account.username %}">{{ account.username }}</a></td>
       <td>{{ account.points }}</td>
       <td>{{ account.rank }}</td>
     </tr>

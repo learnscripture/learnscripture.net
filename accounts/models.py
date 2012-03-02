@@ -4,10 +4,12 @@ import itertools
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.hashers import check_password, make_password
+from django.utils.functional import cached_property
+from django.utils import timezone
 
 from accounts import memorymodel
 from bibleverses.models import BibleVersion, MemoryStage, StageType, BibleVersion, VerseChoice, VerseSet, VerseSetType
-from scores.models import TotalScore, ScoreReason, Scores
+from scores.models import TotalScore, ScoreReason, Scores, get_rank_all_time, get_rank_this_week
 
 from learnscripture.datastructures import make_choices
 
@@ -15,7 +17,7 @@ from learnscripture.datastructures import make_choices
 SubscriptionType = make_choices('SubscriptionType',
                                 [(0, 'FREE_TRIAL', 'Free trial'),
                                  (1, 'PAID_UP', 'Paid up'),
-                                 (2, 'EXPIRED', 'Expired'),
+                                 (2, 'BASIC', 'Basic account (free)'),
                                  (3, 'LIFETIME_FREE', 'Lifetime free')]
                                 )
 
@@ -43,6 +45,7 @@ class AccountManager(models.Manager):
         obj = super(AccountManager, self).create(*args, **kwargs)
         TotalScore.objects.create(account=obj)
         return obj
+
 
 class Account(models.Model):
     username = models.CharField(max_length=100, blank=False, unique=True)
@@ -121,8 +124,25 @@ class Account(models.Model):
         return self.score_logs.filter(created__gte=from_datetime).order_by('created')
 
     def scoring_enabled(self):
-        # TODO - limit for basic account
-        return True
+        return self.subscription != SubscriptionType.BASIC
+
+    @cached_property
+    def points_all_time(self):
+        return self.total_score.points
+
+    @cached_property
+    def rank_all_time(self):
+        return get_rank_all_time(self.total_score)
+
+    @cached_property
+    def points_this_week(self):
+        n = timezone.now()
+        return self.score_logs.filter(created__gt=n - timedelta(7))\
+            .aggregate(models.Sum('points'))['points__sum']
+
+    @cached_property
+    def rank_this_week(self):
+        return get_rank_this_week(self.points_this_week)
 
 
 class ActionChange(object):

@@ -1,3 +1,4 @@
+from datetime import timedelta
 
 from django.db import connection
 from django.db import models
@@ -102,6 +103,17 @@ OFFSET %s;
     return dictfetchall(cursor)
 
 
+def get_rank_all_time(total_score_obj):
+    return TotalScore.objects.filter(points__gt=total_score_obj.points).count() + 1
+
+
+def get_rank_this_week(points_this_week):
+    n = timezone.now()
+    return ScoreLog.objects.filter(created__gt=n - timedelta(7))\
+        .values('account_id').annotate(sum_points=models.Sum('points'))\
+        .filter(sum_points__gt=points_this_week).count() + 1
+
+
 def dictfetchall(cursor):
     "Returns all rows from a cursor as a dict"
     desc = cursor.description
@@ -109,3 +121,4 @@ def dictfetchall(cursor):
         dict(zip([col[0] for col in desc], row))
         for row in cursor.fetchall()
     ]
+
