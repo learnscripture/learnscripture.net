@@ -169,7 +169,7 @@ class Identity(models.Model):
                                               limit_choices_to={'public':True})
     testing_method = models.PositiveSmallIntegerField(choices=TestingMethod.choice_list,
                                                       null=True, default=None)
-    enable_animations = models.BooleanField(blank=True, default=False)
+    enable_animations = models.BooleanField(blank=True, default=True)
     interface_theme = models.CharField(max_length=30, choices=THEMES,
                                        default='calm')
 
