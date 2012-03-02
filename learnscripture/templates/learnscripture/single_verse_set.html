@@ -44,7 +44,10 @@ Verse set: {{ verse_set.name }}
 
 <form action="" method="GET">
 <div id="id-version">
-  {{ version.full_name }} ({{ version.short_name }}) | Change
+  {% if version.url %}<a href="{{ version.url }}">{% endif %}
+  {{ version.full_name }} ({{ version.short_name }})
+  {% if version.url %}</a>{% endif %}
+ | Change
   <select id="id-version-select" name="version">
     {% for v in bible_versions %}
     <option value="{{ v.slug }}"
