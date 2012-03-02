@@ -18,6 +18,11 @@ urlpatterns = patterns('',
                        url(r'^leaderboard/$', 'learnscripture.views.leaderboard', name='leaderboard'),
                        url(r'^user/(.*)/$', 'learnscripture.views.user_stats', name='user_stats'),
                        url(r'^login/$', 'learnscripture.views.login', name='login'),
+
+                       url(r'^password-reset/$', 'learnscripture.views.password_reset_done', name='password_reset_done'),
+                       url(r'^reset/(?P<uidb36>[0-9A-Za-z]{1,13})-(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$', 'learnscripture.views.password_reset_confirm', name='password_reset_confirm'),
+                      url(r'^reset/complete/$', 'learnscripture.views.password_reset_complete', name='password_reset_complete'),
+
                        (r'^admin/fiber/', include('fiber.admin_urls')),
                        (r'^api/v1/', include('fiber.api.urls')),
                        (r'^api/learnscripture/v1/', include('learnscripture.api.urls')),

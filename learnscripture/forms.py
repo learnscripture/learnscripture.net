@@ -1,5 +1,6 @@
 from django import forms
 from django.conf import settings
+from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
 
 from accounts.models import Account, SubscriptionType
 
@@ -62,3 +63,17 @@ class LogInForm(forms.Form):
         if not account.check_password(p):
             fail()
         return p
+
+
+class AccountPasswordResetForm(PasswordResetForm):
+
+    def clean_email(self):
+        email = self.cleaned_data["email"]
+        self.users_cache = Account.objects.filter(email__iexact=email)
+        if not len(self.users_cache):
+            raise forms.ValidationError(self.error_messages['unknown'])
+        return email
+
+
+class AccountSetPasswordForm(SetPasswordForm):
+    pass

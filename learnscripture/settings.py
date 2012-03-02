@@ -30,6 +30,13 @@ else:
         }
     }
 
+    # For e-mail testing, run:
+    #  fakemail.py --path=/home/luke/devel/learnscripture.net/tests/mail --background
+    EMAIL_HOST = 'localhost'
+    EMAIL_HOST_USER = None
+    EMAIL_HOST_PASSWORD = None
+    EMAIL_PORT = 8025
+
 ADMINS = [
     ('', 'admin@learnscripture.net')
 ]

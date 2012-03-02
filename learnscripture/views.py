@@ -2,14 +2,19 @@
 from datetime import timedelta
 
 from django.contrib import messages
+from django.contrib.auth.tokens import default_token_generator
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
-from django.utils.http import urlparse
 from django.utils import timezone
+from django.utils.http import urlparse, base36_to_int
+from django.views.decorators.cache import never_cache
+from django.views.decorators.debug import sensitive_post_parameters
+
 
 from accounts.models import Account
 from accounts.forms import PreferencesForm
+from learnscripture.forms import AccountSetPasswordForm
 from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType
 from learnscripture import session, auth
 from bibleverses.forms import VerseSelector, VerseSetForm, PassageVerseSelector
@@ -453,3 +458,57 @@ def user_stats(request, username):
                                 username=username)
     c = {'account': account}
     return render(request, 'learnscripture/user_stats.html', c)
+
+
+# Password reset for Accounts:
+#
+# We can re-use a large amount of django.contrib.auth functionality
+# due to same interface between Account and User. Some things need
+# customising replacing.
+#
+# Also, we do the main password_reset via AJAX,
+# from the the same form as the login form.
+
+def password_reset_done(request):
+    return render(request, 'learnscripture/password_reset_done.html', {})
+
+def password_reset_complete(request):
+    return render(request, 'learnscripture/password_reset_complete.html', {})
+
+
+
+# Large copy and paste from django.contrib.auth.views, followed by customisations.
+@sensitive_post_parameters()
+@never_cache
+def password_reset_confirm(request, uidb36=None, token=None):
+    """
+    View that checks the hash in a password reset link and presents a
+    form for entering a new password.
+    """
+    token_generator = default_token_generator
+    set_password_form = AccountSetPasswordForm
+    assert uidb36 is not None and token is not None # checked by URLconf
+    post_reset_redirect = reverse('password_reset_complete')
+    try:
+        uid_int = base36_to_int(uidb36)
+        user = Account.objects.get(id=uid_int)
+    except (ValueError, Account.DoesNotExist):
+        user = None
+
+    if user is not None and token_generator.check_token(user, token):
+        validlink = True
+        if request.method == 'POST':
+            form = set_password_form(user, request.POST)
+            if form.is_valid():
+                form.save()
+                return HttpResponseRedirect(post_reset_redirect)
+        else:
+            form = set_password_form(None)
+    else:
+        validlink = False
+        form = None
+    context = {
+        'form': form,
+        'validlink': validlink,
+    }
+    return render(request, 'learnscripture/password_reset_confirm.html', context)
