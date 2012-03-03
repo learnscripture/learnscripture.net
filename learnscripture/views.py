@@ -138,14 +138,17 @@ def start(request):
             return learn_set(request, identity.verse_statuses_for_learning(), False)
         if 'revisequeue' in request.POST:
             return learn_set(request, identity.verse_statuses_for_revising(), True)
-        if 'learnpassage' in request.POST:
-            vs_id = int(request.POST['verse_set_id'])
-            return learn_set(request, identity.verse_statuses_for_passage(vs_id), False)
+        if ('learnpassage' in request.POST or
+            'revisepassage' in request.POST or
+            'revisepassagesection' in request.POST):
 
-        if 'revisepassage' in request.POST or 'revisepassagesection' in request.POST:
             vs_id = int(request.POST['verse_set_id'])
             verse_set = VerseSet.objects.get(id=vs_id)
             uvss = identity.verse_statuses_for_passage(vs_id)
+
+            if 'learnpassage' in request.POST:
+                uvss = identity.slim_passage_for_revising(uvss, verse_set)
+                return learn_set(request, uvss, False)
             if 'revisepassage' in request.POST:
                 uvss = identity.slim_passage_for_revising(uvss, verse_set)
                 return learn_set(request, uvss, True)
