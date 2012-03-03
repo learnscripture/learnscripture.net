@@ -64,7 +64,7 @@ class LiveServerTests(LiveServerTestCase):
         if not driver.find_element_by_id("id_testing_method_0").is_displayed():
             return
 
-        Select(driver.find_element_by_id("id_default_bible_version")).select_by_visible_text("KJV")
+        Select(driver.find_element_by_id("id_default_bible_version")).select_by_visible_text("KJV (King James Version)")
         driver.find_element_by_id("id_testing_method_0").click()
 
         # Turn animations off, as they can complicate testing.
