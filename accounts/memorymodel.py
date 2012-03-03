@@ -235,6 +235,7 @@ def test_run_passage(passage_length, days):
 
         number_tested = 0
         if need_testing > 0 and verses_learnt == passage_length:
+            # STRENGTH_FOR_GROUP_TESTING:
             # We want to do testing together.  The simplest way is just to do
             # testing if any verse requires testing. This doesn't actually result in
             # much more testing - it just means that some verses are tested before
@@ -245,10 +246,9 @@ def test_run_passage(passage_length, days):
 
             # From user testing, a sensible period seems to be when 3 days after all
             # the verses have been learnt. This corresponds to a strength of 0.5.
-
             test_all = False
             min_strength = min(s for t,s in learnt.values())
-            if min_strength > 0.5:
+            if min_strength > STRENGTH_FOR_PASSAGE_COMBINING:
                 test_all = True
 
 
@@ -299,3 +299,4 @@ filter_qs = MM.filter_qs
 needs_testing = MM.needs_testing
 strength_estimate = MM.strength_estimate
 LEARNT = MM.LEARNT
+STRENGTH_FOR_GROUP_TESTING = 0.5

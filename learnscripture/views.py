@@ -143,6 +143,12 @@ def start(request):
         if 'revisepassage' in request.POST:
             vs_id = int(request.POST['verse_set_id'])
             return learn_set(request, identity.verse_statuses_for_passage(vs_id), True)
+        if 'revisepassagesection' in request.POST:
+            vs_id = int(request.POST['verse_set_id'])
+            verse_set = VerseSet.objects.get(id=vs_id)
+            uvss = identity.verse_statuses_for_passage(vs_id)
+            uvss = identity.get_next_section(uvss, verse_set)
+            return learn_set(request, uvss, True)
         if 'clearqueue' in request.POST:
             identity.clear_learning_queue()
             return HttpResponseRedirect(reverse('start'))

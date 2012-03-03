@@ -8,7 +8,7 @@ from django.utils.functional import cached_property
 from django.utils import timezone
 
 from accounts import memorymodel
-from bibleverses.models import BibleVersion, MemoryStage, StageType, BibleVersion, VerseChoice, VerseSet, VerseSetType
+from bibleverses.models import BibleVersion, MemoryStage, StageType, BibleVersion, VerseChoice, VerseSet, VerseSetType, get_passage_sections
 from scores.models import TotalScore, ScoreReason, Scores, get_rank_all_time, get_rank_this_week
 
 from learnscripture.datastructures import make_choices
@@ -565,21 +565,33 @@ class Identity(models.Model):
         # that 'statuses' gives a fairly small set of VerseSets and do
         # additional filtering in Python.
 
+        # We also need to know if group testing is on the cards, since that
+        # allows for the possibility of splitting into sections for section
+        # learning.
+
         verse_sets = set(uvs.verse_set for uvs in statuses)
+        group_testing = dict((vs.id, True) for vs in verse_sets)
         all_statuses = self.verse_statuses.filter(verse_set__in=verse_sets)\
             .select_related('verse_set')
 
         for uvs in all_statuses:
             if uvs.memory_stage < MemoryStage.TESTED:
                 verse_sets.discard(uvs.verse_set)
+            if uvs.strength <= memorymodel.STRENGTH_FOR_GROUP_TESTING:
+                group_testing[uvs.verse_set_id] = False
 
-        return sorted(list(verse_sets), key=lambda vs: vs.name)
+        # Decorate with info about possibility of combining
+        vss = list(verse_sets)
+        for vs in vss:
+            vs.splittable = vs.breaks != "" and group_testing[vs.id]
+
+        return sorted(vss, key=lambda vs: vs.name)
 
     def _add_needs_testing_override(self, uvs_list):
         # For passages, we adjust 'needs_testing' to get the passage to be
         # tested together. See explanation in memorymodel
         min_strength = min(uvs.strength for uvs in uvs_list)
-        if min_strength > 0.5:
+        if min_strength > memorymodel.STRENGTH_FOR_GROUP_TESTING:
             for uvs in uvs_list:
                 uvs.needs_testing_override = True
 
@@ -590,6 +602,60 @@ class Identity(models.Model):
         self._add_needs_testing_override(l)
 
         return l
+
+    def get_next_section(self, uvs_list, verse_set):
+        """
+        Given a UVS list and a VerseSet, get the items in uvs_list
+        which are the next section to revise.
+        """
+        # We don't track which was the last 'section' learnt, and we can't,
+        # since the user can give up at any point.  We therefore use heuristics
+        # to work out which should be the next section.
+
+        if verse_set.breaks == '' or len(uvs_list) == 0:
+            return uvs_list
+
+        # First split into sections according to the specified breaks
+        sections = get_passage_sections(uvs_list, verse_set.breaks)
+
+        # For each section, work out if it has been tested 'together'
+        section_info = {} # section idx: info dict
+        for i, section in enumerate(sections):
+            max_last_tested = max(uvs.last_tested for uvs in section)
+            min_last_tested = min(uvs.last_tested for uvs in section)
+            # It should take no more than 2 minutes to test a single verse,
+            # being conservative
+            tested_together = ((max_last_tested - min_last_tested).total_seconds() <
+                                  2 * 60 * len(section))
+            section_info[i] = {'tested_together': tested_together,
+                               'last_tested': min_last_tested}
+
+
+        # Find which section was tested together last.
+        last_section_tested = None
+        overall_max_last_tested = None
+        for i, info in section_info.items():
+            if info['tested_together']:
+                if (overall_max_last_tested is None or
+                    info['last_tested'] > overall_max_last_tested):
+                    overall_max_last_tested = info['last_tested']
+                    last_section_tested = i
+
+        if last_section_tested is None:
+            # Implies no section has been tested before as a group. So test the
+            # first section.
+            return sections[0]
+
+        # Go for the section after the last section that was tested together
+        # (wrapping round if necessary)
+        section_num = (last_section_tested + 1) % len(sections)
+
+        # Ideally, we would return a verse of context with
+        # 'needs_testing_override' being set to False.  However, that doesn't
+        # currently survive being saved to the session. See 'HACK' and
+        # _add_needs_testing_override().
+
+        return sections[section_num]
 
     def cancel_passage(self, verse_set_id):
         # For passages, the UserVerseStatuses may be already tested.
