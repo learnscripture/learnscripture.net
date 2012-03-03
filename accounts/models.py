@@ -657,6 +657,26 @@ class Identity(models.Model):
 
         return sections[section_num]
 
+    def slim_passage_for_revising(self, uvs_list, verse_set):
+        """
+        Uses breaks defined for the verse set to slim a passage
+        down if not all verses need testing.
+        """
+
+        if verse_set.breaks == '' or len(uvs_list) == 0:
+            return uvs_list
+
+        # First split into sections according to the specified breaks
+        sections = get_passage_sections(uvs_list, verse_set.breaks)
+
+        to_test = []
+        for section in sections:
+            if (any(uvs.needs_testing for uvs in section)):
+                to_test.extend(section)
+
+        return to_test
+
+
     def cancel_passage(self, verse_set_id):
         # For passages, the UserVerseStatuses may be already tested.
         # We don't want to lose that info, therefore set to 'ignored',
