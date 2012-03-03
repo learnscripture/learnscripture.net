@@ -222,7 +222,7 @@ CACHES = {
 }
 
 CACHE_PREFIX = 'ls1'
-
+CACHE_COUNT_TIMEOUT = 60
 
 COMPRESS_PRECOMPILERS = (
     ('text/less', 'lessc {infile} {outfile}'),
