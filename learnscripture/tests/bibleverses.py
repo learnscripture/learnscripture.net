@@ -6,6 +6,17 @@ from django.test import TestCase
 from bibleverses.models import InvalidVerseReference, Verse, BibleVersion, get_passage_sections
 
 
+class VerseTests(TestCase):
+
+    fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
+
+    def test_last_verse(self):
+        v = Verse.objects.get(reference='Psalm 23:6', version__slug='KJV')
+        self.assertTrue(v.is_last_verse_in_chapter())
+
+        v2 = Verse.objects.get(reference='Psalm 23:5', version__slug='KJV')
+        self.assertFalse(v2.is_last_verse_in_chapter())
+
 class ParseRefTests(TestCase):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json']

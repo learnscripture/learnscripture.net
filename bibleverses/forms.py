@@ -1,6 +1,6 @@
 from django import forms
 
-from bibleverses.models import BIBLE_BOOKS, VerseSet
+from bibleverses.models import BIBLE_BOOKS, VerseSet, parse_ref
 
 
 class VerseSelector(forms.Form):
@@ -30,6 +30,40 @@ class PassageVerseSelector(forms.Form):
     start_verse = forms.IntegerField(label="Start verse (optional)", required=False)
     end_chapter = forms.IntegerField(label=u"End chapter (optional)", required=False)
     end_verse = forms.IntegerField(label=u"End verse (optional)", required=False)
+
+    def __init__(self, data=None, **kwargs):
+        if 'verse_list' in kwargs:
+            verse_list = kwargs.pop('verse_list')
+            if data is None:
+                data = {}
+
+            ref_start = parse_ref(verse_list[0].reference, None, return_verses=False)
+            ref_end = parse_ref(verse_list[-1].reference, None, return_verses=False)
+            if isinstance(ref_start, tuple):
+                ref_start = ref_start[0]
+            if isinstance(ref_end, tuple):
+                ref_end = ref_end[1]
+            data['book'] = ref_start.book
+            data['start_chapter'] = ref_start.chapter_number
+
+            # Special case complete chapters - just put chapter number
+            if (ref_end.chapter_number != ref_start.chapter_number or
+                ref_start.verse_number != 1 or
+                not verse_list[-1].is_last_verse_in_chapter()):
+
+                data['start_verse'] = ref_start.verse_number
+                data['end_chapter'] = ref_end.chapter_number
+                data['end_verse'] = ref_end.verse_number
+
+            if 'prefix' in kwargs:
+                data2 = {}
+                prefix = kwargs['prefix']
+                for k, v in data.items():
+                    data2['%s-%s' % (prefix, k)] = v
+                data = data2
+
+        super(PassageVerseSelector, self).__init__(data=data, **kwargs)
+
 
     def clean(self):
          cleaned_data = super(PassageVerseSelector, self).clean()
