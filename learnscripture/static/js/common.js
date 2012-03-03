@@ -7,6 +7,17 @@ if (String.prototype.trim == undefined) {
     String.prototype.trim=function(){return this.replace(/^\s\s*/, '').replace(/\s\s*$/, '');};
 }
 
+// IE8 and earlier need this
+if (Array.prototype.indexOf == undefined) {
+    Array.prototype.indexOf = function(obj, start) {
+        for (var i = (start || 0), j = this.length; i < j; i++) {
+            if (this[i] === obj) { return i; }
+        }
+        return -1;
+    };
+}
+
+
 // Django CSRF requirements
 $(document).ajaxSend(function(event, xhr, settings) {
     function getCookie(name) {

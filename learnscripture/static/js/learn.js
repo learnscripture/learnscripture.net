@@ -249,7 +249,7 @@ var learnscripture =
                     type: 'POST',
                     data: {
                         verse_status: JSON.stringify(currentVerseStatus, null, 2),
-                        stage: STAGE_TYPE_READ,
+                        stage: STAGE_TYPE_READ
                     },
                     success: function() {
                         if (callbackAfter != undefined) {
@@ -831,7 +831,7 @@ var learnscripture =
                             callbackAfter()
                         }
                     },
-                    error: handlerAjaxError,
+                    error: handlerAjaxError
                    });
         }
 
