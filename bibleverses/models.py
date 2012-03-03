@@ -67,7 +67,7 @@ class BibleVersion(caching.base.CachingMixin, models.Model):
         ordering = ('short_name',)
 
     def __unicode__(self):
-        return self.short_name
+        return "%s (%s)" % (self.short_name, self.full_name)
 
     def natural_key(self):
         return (self.slug,)
