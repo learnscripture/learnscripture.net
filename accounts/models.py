@@ -29,6 +29,7 @@ TestingMethod = make_choices('TestingMethod',
 THEMES = [('calm', 'Slate'),
           ('bubblegum', 'Bubblegum pink'),
           ('bubblegum2', 'Bubblegum green'),
+          ('space', 'Space'),
           ]
 
 
