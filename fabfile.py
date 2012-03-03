@@ -122,6 +122,13 @@ def no_installs():
     env.no_installs = True
 
 @task
+def no_db():
+    """
+    Call first to skip upgrading DB
+    """
+    env.no_db = True
+
+@task
 def webserver_stop():
     """
     Stop the webserver that is running the Django instance
@@ -171,6 +178,8 @@ def first_deployment_mode():
 
 
 def update_database():
+    if getattr(env, 'no_db', False):
+        return
     with virtualenv(venv_dir):
         with cd(src_dir):
             if getattr(env, 'initial_deploy', False):
