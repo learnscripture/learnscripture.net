@@ -300,6 +300,3 @@ class IdentityTests(TestCase):
 
             self.assertEqual(d[vs1.id, 'Psalm 23:1'].reference, 'Psalm 23:1')
             texts = [uvs.text for uvs in d.values()]
-
-        vs2 = VerseSet.objects.get(name='Bible 101')
-        i.add_verse_set(vs2)
