@@ -253,6 +253,93 @@ class IdentityTests(TestCase):
         verse_sets = i.passages_for_revising()
         self.assertEqual(verse_sets[0].id, vs1.id)
 
+    def test_passages_for_revising_with_breaks(self):
+        i = self._create_identity()
+        vs1 = VerseSet.objects.get(name='Psalm 23')
+        vs1.breaks = "3,5" # break at v3 and v5 - unrealistic!
+        vs1.save()
+        i.add_verse_set(vs1)
+
+        for vn in range(1, 7):
+            ref = 'Psalm 23:%d' % vn
+            i.record_verse_action(ref, 'NET', StageType.TEST, 1.0)
+            i.verse_statuses.filter(reference=ref).update(
+                last_tested=timezone.now() - timedelta(10)
+                )
+
+        # Shouldn't be splittable yet, since strength will be below threshold
+        vss = i.passages_for_revising()
+        self.assertEqual(len(vss), 1)
+        self.assertEqual(vss[0].name, "Psalm 23")
+        self.assertEqual(vss[0].splittable, False)
+
+        for vn in range(1, 7):
+            ref = 'Psalm 23:%d' % vn
+            # Now, move each to beyond the threshold which triggers
+            # group testing.
+            # Put each 1 minute apart, to simulate having tested the whole
+            # group together.
+            i.verse_statuses.filter(reference=ref).update(
+                strength = 0.55,
+                last_tested=timezone.now() - timedelta(200 - (vn * 60.0)/(3600.0*24))
+                )
+
+        vss = i.passages_for_revising()
+        self.assertEqual(len(vss), 1)
+        self.assertEqual(vss[0].name, "Psalm 23")
+        self.assertEqual(vss[0].splittable, True)
+
+        # Now test verse_statuses_for_passage/get_next_section in this context:
+
+        uvss1 = i.verse_statuses_for_passage(vs1.id)
+        uvss1 = i.get_next_section(uvss1, vs1)
+
+        # uvss should be first two verses only:
+        self.assertEqual(["Psalm 23:1", "Psalm 23:2"],
+                          [uvs.reference for uvs in uvss1])
+
+        # Now if we learn these two...
+        for uvs in uvss1:
+            i.record_verse_action(uvs.reference, 'NET', StageType.TEST, 0.95)
+
+        # ...then we should get the next two.
+
+        uvss2 = i.verse_statuses_for_passage(vs1.id)
+        uvss2 = i.get_next_section(uvss2, vs1)
+
+        self.assertEqual(["Psalm 23:3", "Psalm 23:4"],
+                         [uvs.reference for uvs in uvss2])
+
+        # A sleep of one second will ensure our algo can distinguish
+        # between groups of testing.
+        time.sleep(1)
+
+        # Learn next two.
+
+        for uvs in uvss2:
+            i.record_verse_action(uvs.reference, 'NET', StageType.TEST, 0.95)
+
+        uvss3 = i.verse_statuses_for_passage(vs1.id)
+        uvss3 = i.get_next_section(uvss3, vs1)
+
+        self.assertEqual(["Psalm 23:5", "Psalm 23:6"],
+                         [uvs.reference for uvs in uvss3])
+
+
+        # Learn next two.
+        time.sleep(1)
+        for uvs in uvss3:
+            i.record_verse_action(uvs.reference, 'NET', StageType.TEST, 0.95)
+
+        # Should wrap around now:
+        uvss4 = i.verse_statuses_for_passage(vs1.id)
+        uvss4 = i.get_next_section(uvss4, vs1)
+
+        self.assertEqual(["Psalm 23:1", "Psalm 23:2"],
+                          [uvs.reference for uvs in uvss4])
+
+
+
     def test_verse_statuses_for_passage(self):
         i = self._create_identity()
         vs1 = VerseSet.objects.get(name='Psalm 23')

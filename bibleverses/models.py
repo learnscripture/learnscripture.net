@@ -283,9 +283,30 @@ class UserVerseStatus(models.Model):
 class InvalidVerseReference(ValueError):
     pass
 
-def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE):
+
+class Reference(object):
+    def __init__(self, book, chapter_number, verse_number):
+        self.book = book
+        self.chapter_number = chapter_number
+        self.verse_number = verse_number
+
+    def __eq__(self, other):
+        return (self.book == other.book and
+                self.chapter_number == other.chapter_number and
+                self.verse_number == other.verse_number)
+
+    def __repr__(self):
+        return "<Reference %s %d:%d>" % (self.book, self.chapter_number, self.verse_number)
+
+
+def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE,
+              return_verses=True):
     """
     Takes a reference and returns the verses referred to in a list.
+
+    If return_verses is False, then the version is not needed, more lenient
+    checking is done (the input is trusted), and a Reference object is returned
+    instead, or a two tuple (start Reference, end Reference)
     """
     # This function is strict, and expects reference in normalised format.
     # Frontend function should deal with tolerance, to ensure that VerseChoice
@@ -306,13 +327,22 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE):
             chapter_number = int(chapter)
         except ValueError:
             raise InvalidVerseReference(u"Expecting '%s' to be a chapter number" % chapter)
-        retval = list(version.verse_set.filter(book_number=book_number, chapter_number=chapter_number))
+        if return_verses:
+            retval = list(version.verse_set.filter(book_number=book_number, chapter_number=chapter_number))
+        else:
+            retval = Reference(book, chapter_number, None)
     else:
         parts = reference.rsplit(u'-', 1)
         if len(parts) == 1:
-            retval = list(version.verse_set.filter(reference=reference))
-
+            # e.g. Genesis 1:1
+            if return_verses:
+                retval = list(version.verse_set.filter(reference=reference))
+            else:
+                book, rest = reference.rsplit(' ', 1)
+                ch_num, v_num = rest.split(':', 1)
+                retval = Reference(book, int(ch_num), int(v_num))
         else:
+            # e.g. Genesis 1:1-2
             book, start = parts[0].rsplit(u' ', 1)
             end = parts[1]
             if u':' not in start:
@@ -352,29 +382,80 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE):
             if ref_end == ref_start:
                 raise InvalidVerseReference("Start and end verse are the same.")
 
-            # Try to get results in just two queries
-            vs = version.verse_set.filter(reference__in=[ref_start, ref_end])
-            try:
-                verse_start = [v for v in vs if v.reference == ref_start][0]
-            except IndexError:
-                raise InvalidVerseReference(u"Can't find  '%s'" % ref_start)
-            try:
-                verse_end = [v for v in vs if v.reference == ref_end][0]
-            except IndexError:
-                raise InvalidVerseReference(u"Can't find  '%s'" % ref_end)
+            if return_verses:
+                # Try to get results in just two queries
+                vs = version.verse_set.filter(reference__in=[ref_start, ref_end])
+                try:
+                    verse_start = [v for v in vs if v.reference == ref_start][0]
+                except IndexError:
+                    raise InvalidVerseReference(u"Can't find  '%s'" % ref_start)
+                try:
+                    verse_end = [v for v in vs if v.reference == ref_end][0]
+                except IndexError:
+                    raise InvalidVerseReference(u"Can't find  '%s'" % ref_end)
 
-            if verse_end.bible_verse_number < verse_start.bible_verse_number:
-                raise InvalidVerseReference("%s and %s are not in ascending order." % (ref_start, ref_end))
+                if verse_end.bible_verse_number < verse_start.bible_verse_number:
+                    raise InvalidVerseReference("%s and %s are not in ascending order." % (ref_start, ref_end))
 
-            if verse_end.bible_verse_number - verse_start.bible_verse_number > max_length:
-                raise InvalidVerseReference(u"References that span more than %d verses are not allowed in this context." % max_length)
+                if verse_end.bible_verse_number - verse_start.bible_verse_number > max_length:
+                    raise InvalidVerseReference(u"References that span more than %d verses are not allowed in this context." % max_length)
 
-            retval = list(version.verse_set.filter(bible_verse_number__gte=verse_start.bible_verse_number,
-                                                   bible_verse_number__lte=verse_end.bible_verse_number))
-    if len(retval) == 0:
-        raise InvalidVerseReference(u"No verses matched '%s'." % reference)
+                retval = list(version.verse_set.filter(bible_verse_number__gte=verse_start.bible_verse_number,
+                                                       bible_verse_number__lte=verse_end.bible_verse_number))
+            else:
+                retval = (Reference(book, start_chapter, start_verse),
+                          Reference(book, end_chapter, end_verse))
 
-    if len(retval) > max_length:
-        raise InvalidVerseReference(u"References that span more than %d verses are not allowed in this context." % max_length)
+    if return_verses:
+        if len(retval) == 0:
+            raise InvalidVerseReference(u"No verses matched '%s'." % reference)
+
+        if len(retval) > max_length:
+            raise InvalidVerseReference(u"References that span more than %d verses are not allowed in this context." % max_length)
 
     return retval
+
+def get_passage_sections(uvs_list, breaks):
+    """
+    Given a list of UVSs, and a comman separated list of 'break definitions',
+    each of which could be <verse_number> or <chapter_number>:<verse_number>,
+    return the list in sections.
+    """
+    # Since the input has been sanitised, we can do parsing without needing DB
+    # queries.
+
+    # First need to parse 'breaks' into a list of References.
+
+    break_list = []
+
+    # First reference provides the context for the breaks.
+    first_ref = parse_ref(uvs_list[0].reference, None, return_verses=False)
+    if isinstance(first_ref, tuple):
+        first_ref = first_ref[0]
+
+    verse_number = first_ref.verse_number
+    chapter_number = first_ref.chapter_number
+    book = first_ref.book
+    for b in breaks.split(','):
+        b = b.strip()
+        if ':' in b:
+            chapter_number, verse_number = b.split(':', 1)
+            chapter_number = int(chapter_number)
+            verse_number = int(verse_number)
+        else:
+            verse_number = int(b)
+        break_list.append(Reference(book, chapter_number, verse_number))
+
+    sections = []
+    current_section = []
+    for uvs in uvs_list:
+        ref = parse_ref(uvs.reference, None, return_verses=False)
+        if isinstance(ref, tuple):
+            ref = ref[0]
+        if ref in break_list and len(current_section) > 0:
+            # Start new section
+            sections.append(current_section)
+            current_section = []
+        current_section.append(uvs)
+    sections.append(current_section)
+    return sections

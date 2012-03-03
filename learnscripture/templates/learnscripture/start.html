@@ -21,8 +21,16 @@ Dashboard
   <form action="" method="POST">
     {% csrf_token %}
     <input type="hidden" name="verse_set_id" value="{{ vs.id }}" />
+    {% if vs.splittable %}
+    <input type="submit" name="revisepassage" class="btn primary" value="Revise whole passage"
+           id="id-revisepassage-btn-{{ vs.id }}" /><br/>
+    <input type="submit" name="revisepassagesection" class="btn primary" value="Revise one section"
+           id="id-revisepassage-sections-btn-{{ vs.id }}" />
+    {% else %}
     <input type="submit" name="revisepassage" class="btn primary" value="Revise"
            id="id-revisepassage-btn-{{ vs.id }}" />
+
+    {% endif %}
   </form>
   <h3>{{ vs.name }}</h3>
   <p>Part or all of this passage is due for revising today.</p>
