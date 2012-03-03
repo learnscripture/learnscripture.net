@@ -148,6 +148,12 @@ class Verse(caching.base.CachingMixin, models.Model):
     def book_name(self):
         return BIBLE_BOOKS[self.book_number]
 
+    def is_last_verse_in_chapter(self):
+        return not self.version.verse_set.filter(
+            book_number=self.book_number,
+            chapter_number=self.chapter_number,
+            verse_number__gt=self.verse_number).exists()
+
     def __unicode__(self):
         return u"%s (%s)" % (self.reference, self.version.short_name)
 

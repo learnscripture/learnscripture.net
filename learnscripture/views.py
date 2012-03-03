@@ -309,12 +309,6 @@ def add_passage_breaks(verse_list, breaks):
     return retval
 
 
-# Quick struct for holding verses.
-class VerseObj(object):
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
-
-
 @require_preferences
 def create_set(request, slug=None):
     # This view handles a lot (too much):
@@ -347,7 +341,7 @@ def create_set(request, slug=None):
         verses = []
         for ref in ref_list: # preserve order
             if ref in verse_dict:
-                verses.append(VerseObj(reference=ref, text=verse_dict[ref]))
+                verses.append(verse_dict[ref])
         return verses
 
 
@@ -395,7 +389,7 @@ def create_set(request, slug=None):
         for ref in ref_list_raw:
             if ref not in ref_list:
                 ref_list.append(ref)
-        verse_dict = version.get_text_by_reference_bulk(ref_list)
+        verse_dict = version.get_verses_by_reference_bulk(ref_list)
 
         breaks = request.POST.get('passage-break-list', '')
         # Basic sanitising of 'breaks'
@@ -446,6 +440,9 @@ def create_set(request, slug=None):
                 c['selection_verses'] = verse_list
             else:
                 c['passage_verses'] = add_passage_breaks(verse_list, breaks)
+                c['passage_verse_selector_form'] = PassageVerseSelector(verse_list=verse_list,
+                                                                        prefix='passage',
+                                                                        )
 
     else:
         # GET - either editing existing objects (one form)...
@@ -460,19 +457,26 @@ def create_set(request, slug=None):
             #  or two empty forms
             selection_form = VerseSetForm(instance=None, prefix='selection')
             passage_form = VerseSetForm(instance=None, prefix='passage')
+
+            c['passage_verse_selector_form'] = PassageVerseSelector(prefix='passage')
+
         if verse_set is not None:
             ref_list = [vc.reference for vc in verse_set.verse_choices.all()]
-            verse_list = mk_verse_list(ref_list, version.get_text_by_reference_bulk(ref_list))
+            verse_dict = version.get_verses_by_reference_bulk(ref_list)
+            verse_list = mk_verse_list(ref_list, verse_dict)
             if verse_set.set_type == VerseSetType.SELECTION:
                 c['selection_verses'] = verse_list
             else:
                 c['passage_verses'] = add_passage_breaks(verse_list, verse_set.breaks)
+                c['passage_verse_selector_form'] = PassageVerseSelector(verse_list=verse_list,
+                                                                        prefix='passage',
+                                                                        )
+
 
     c['new_verse_set'] = verse_set == None
     c['selection_verse_set_form'] = selection_form
     c['passage_verse_set_form'] = passage_form
     c['selection_verse_selector_form'] = VerseSelector(prefix='selection')
-    c['passage_verse_selector_form'] = PassageVerseSelector(prefix='passage')
     return render(request, 'learnscripture/create_set.html', c)
 
 
