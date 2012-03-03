@@ -166,10 +166,6 @@ class VerseSetManager(caching.base.CachingManager):
     def public(self):
         return self.get_query_set().filter(public=True)
 
-    def mark_chosen(self, verse_set_id):
-        self.get_query_set().filter(id=verse_set_id)\
-            .update(popularity=F('popularity') + 1)
-
 
 class VerseSet(caching.base.CachingMixin, models.Model):
     name = models.CharField(max_length=255)
@@ -195,6 +191,10 @@ class VerseSet(caching.base.CachingMixin, models.Model):
     @property
     def is_passage(self):
         return self.set_type == VerseSetType.PASSAGE
+
+    def mark_chosen(self):
+        self.popularity += 1
+        self.save()
 
 
 class VerseChoiceManager(caching.base.CachingManager):

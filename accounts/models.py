@@ -216,7 +216,7 @@ class Identity(models.Model):
 
         vc_list = verse_set.verse_choices.all()
         existing_uvss = set(self.verse_statuses.filter(verse_set=verse_set, version=version,
-                                                  ignored=False))
+                                                       ignored=False))
 
         uvss_dict = dict([(uvs.reference, uvs) for uvs in existing_uvss])
 
@@ -246,8 +246,7 @@ class Identity(models.Model):
                 new_uvs.ignored = False
                 new_uvs.save()
                 out.append(new_uvs)
-
-        VerseSet.objects.mark_chosen(verse_set.id)
+        verse_set.mark_chosen()
 
         return out
 
