@@ -19,6 +19,7 @@ Verse set: {{ verse_set.name }}
 {% if verse_set.is_passage %}
 <h3>{{ verse_choices.0.verse.book_name }}</h3>
 {% for v in verse_choices %}
+{% if v.verse.break_here %}<br/>{% endif %}
 <div>
   {% ifchanged v.verse.chapter_number %}
   <span class="chapternumber">{{ v.verse.chapter_number }}</span>

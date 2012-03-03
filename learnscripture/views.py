@@ -287,6 +287,11 @@ def view_verse_set(request, slug):
     # Decorate the verse choices with the text.
     verse_choices = list(verse_set.verse_choices.all())
     verses = version.get_verses_by_reference_bulk([vc.reference for vc in verse_choices])
+
+    # Decorate verses with break information.
+    verse_list = sorted(verses.values(), key=lambda v: v.bible_verse_number)
+    verse_list = add_passage_breaks(verse_list, verse_set.breaks)
+
     for vc in verse_choices:
         vc.verse = verses[vc.reference]
 
