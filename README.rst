@@ -16,3 +16,12 @@ code can (roughly) obey the Law of Demeter
 This means that a lot of business logic is driven off the Identity (which in
 turn delegates to Account for some things). A middleware attaches identity to
 the request object where it is available.
+
+Tests
+=====
+
+Tests use a mixture of Selenium for front end and lower level unit tests, which
+combine to give a reasonable level of coverage.
+
+Many of the detailed lower-level tests are in the 'identity.py' tests, since
+most business logic runs off Identity.
