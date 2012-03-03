@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+from django.utils import unittest
 from django.test import TestCase
 
 from bibleverses.models import InvalidVerseReference, Verse, BibleVersion, get_passage_sections
@@ -69,7 +70,16 @@ class MockUVS(object):
         self.reference = reference
 
 
-class GetPassageSectionsTests(TestCase):
+class GetPassageSectionsTests(unittest.TestCase):
+
+    def test_empty(self):
+        uvs_list = [MockUVS('Genesis 1:1'),
+                    MockUVS('Genesis 1:2')]
+        sections = get_passage_sections(uvs_list, '')
+        self.assertEqual([[uvs.reference for uvs in section]
+                          for section in sections],
+                         [["Genesis 1:1", "Genesis 1:2"]])
+
 
     def test_simple_verse_list(self):
         uvs_list = [MockUVS('Genesis 1:1'),

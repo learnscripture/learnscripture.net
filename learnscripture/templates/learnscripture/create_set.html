@@ -104,6 +104,7 @@
       <table id="id-passage-verse-list">
         <thead>
           <tr>
+            <th>Break</th>
             <th>Reference</th>
             <th>Text ({{ request.identity.default_bible_version.slug }})</th>
           </tr>
@@ -111,6 +112,7 @@
         <tbody>
           {% for v in passage_verses %}
           <tr>
+            <td><input type="checkbox" {% if v.break_here %}checked{% endif %}/></td>
             <td>{{ v.reference }}</td>
             <td>{{ v.text }}</td>
           </tr>
@@ -124,6 +126,7 @@
 
       <div class="actions">
         <input type="hidden" value="" id="id-passage-reference-list"  name="passage-reference-list">
+        <input type="hidden" value="" id="id-passage-break-list"  name="passage-break-list">
         <input name="passage-save" type="submit" class="btn primary" value="Save verse set" id="id-passage-save-btn">
       </div>
 

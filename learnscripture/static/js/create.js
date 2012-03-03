@@ -34,7 +34,7 @@ var learnscripture =
         var addPassage = function(passageData) {
             $('#id-passage-verse-list tbody tr').remove();
             $.each(passageData.verse_list, function(idx, verseData) {
-                var newrow = $('<tr><td></td><td></td></tr>').find('td:first-child').text(verseData.reference).end().find('td:nth-child(2)').text(verseData.text).end();
+                var newrow = $('<tr><td><input type="checkbox" /></td><td></td><td></td></tr>').find('td:nth-child(2)').text(verseData.reference).end().find('td:nth-child(3)').text(verseData.text).end();
                 $('#id-passage-verse-list tbody').append(newrow);
             });
             $('#id-passage-verse-list').show();
@@ -85,11 +85,18 @@ var learnscripture =
 
         var passageSaveBtnClick =  function(ev) {
             // Create hidden fields with all references
-            var refs = []
-            $('#id-passage-verse-list td:first-child').each(function(idx, elem) {
-                refs.push($(elem).text());
+            var refs = [];
+            var breaks = [];
+            $('#id-passage-verse-list tbody tr').each(function(idx, elem) {
+                var row = $(elem);
+                var ref = $(row.find('td').get(1)).text();
+                refs.push(ref);
+                if (row.find('input').attr('checked') == 'checked') {
+                    breaks.push(ref.split(" ").slice(-1)[0]);
+                }
             });
             $('#id-passage-reference-list').val(refs.join('|'));
+            $('#id-passage-break-list').val(breaks.join(','));
             // continue with submit
         }
 

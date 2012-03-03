@@ -415,21 +415,27 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE,
 
     return retval
 
-def get_passage_sections(uvs_list, breaks):
+def get_passage_sections(verse_list, breaks):
     """
-    Given a list of UVSs, and a comman separated list of 'break definitions',
-    each of which could be <verse_number> or <chapter_number>:<verse_number>,
-    return the list in sections.
+    Given a list of UVS or Verses, and a comma separated list of 'break
+    definitions', each of which could be <verse_number> or
+    <chapter_number>:<verse_number>, return the list in sections.
     """
     # Since the input has been sanitised, we can do parsing without needing DB
     # queries.
 
     # First need to parse 'breaks' into a list of References.
 
+    if len(verse_list) == 0:
+        return []
+
+    if breaks == '':
+        return [verse_list]
+
     break_list = []
 
     # First reference provides the context for the breaks.
-    first_ref = parse_ref(uvs_list[0].reference, None, return_verses=False)
+    first_ref = parse_ref(verse_list[0].reference, None, return_verses=False)
     if isinstance(first_ref, tuple):
         first_ref = first_ref[0]
 
@@ -448,14 +454,14 @@ def get_passage_sections(uvs_list, breaks):
 
     sections = []
     current_section = []
-    for uvs in uvs_list:
-        ref = parse_ref(uvs.reference, None, return_verses=False)
+    for v in verse_list:
+        ref = parse_ref(v.reference, None, return_verses=False)
         if isinstance(ref, tuple):
             ref = ref[0]
         if ref in break_list and len(current_section) > 0:
             # Start new section
             sections.append(current_section)
             current_section = []
-        current_section.append(uvs)
+        current_section.append(v)
     sections.append(current_section)
     return sections
