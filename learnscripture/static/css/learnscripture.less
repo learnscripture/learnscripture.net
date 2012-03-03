@@ -483,7 +483,6 @@ p.large {
 
 .current-verse, .previous-verse {
   font-size: 20px;
-  line-height: 40px;
   }
 
 .previous-verse {
@@ -521,8 +520,8 @@ p.large {
 .word {
   border: 2px solid;
   border-radius: 3px;
-  padding: 3px 4px;
-  margin: 2px;
+  padding: 4px 4px;
+  margin: 3px 1px;
   .gradientBar(#e8e8e8, #C0C0C0);
   .normalWordBorder();
   cursor: pointer;
@@ -538,6 +537,12 @@ p.large {
   &.incorrect {
     border-color: red;
   }
+
+}
+
+// Fix issue with IE8 not hiding words:
+.wordend, .wordstart, .word {
+  display: inline-block;
 }
 
 // Hard mode - hide the clues that show word size
@@ -856,7 +861,6 @@ body .score-log {
   /* smaller fonts */
   .current-verse, .previous-verse {
     font-size: 15px;
-    line-height: 30px;
     }
 
   #id-typing {
@@ -864,8 +868,8 @@ body .score-log {
     height: inherit;
     }
   .word {
-    padding: 3px 2px;
-    margin: 0px;
+    padding: 1px 2px;
+    margin: 1px;
     }
 
   #id-instructions {
