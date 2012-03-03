@@ -40,21 +40,37 @@
   <thead>
     <tr>
       <th></th>
-      <th>Points</th>
-      <th>Rank</th>
+      <th>All time</th>
+      <th>This week</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>All time</th>
-      <td>{{ account.points_all_time }}</td>
+      <th>Rank</th>
       <td>{{ account.rank_all_time }}</td>
-    </tr>
-    <tr>
-      <th>This week</th>
-      <td>{{ account.points_this_week }}</td>
       <td>{{ account.rank_this_week }}</td>
     </tr>
+    <tr>
+      <th>Points</th>
+      <td>{{ account.points_all_time }}</td>
+      <td>{{ account.points_this_week }}</td>
+    </tr>
+    <tr>
+      <th>Verses started</th>
+      <td>{{ verses_started_all_time }}</td>
+      <td>{{ verses_started_this_week }}</td>
+    </tr>
+    <tr>
+      <th>Verses fully learnt</th>
+      <td>{{ verses_finished_all_time }}</td>
+      <td>{{ verses_finished_this_week }}</td>
+    </tr>
+    <tr>
+      <th>Verse sets created</th>
+      <td>{{ verse_sets_created_all_time }}</td>
+      <td>{{ verse_sets_created_this_week }}</td>
+    </tr>
+
   </tbody>
 </table>
 

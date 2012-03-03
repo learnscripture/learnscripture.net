@@ -13,6 +13,7 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.debug import sensitive_post_parameters
 
 
+from accounts import memorymodel
 from accounts.models import Account
 from accounts.forms import PreferencesForm
 from learnscripture.forms import AccountSetPasswordForm
@@ -515,6 +516,16 @@ def user_stats(request, username):
     account = get_object_or_404(Account.objects.select_related('total_score'),
                                 username=username)
     c = {'account': account}
+    one_week_ago = timezone.now() - timedelta(7)
+    verses_started =  account.identity.verse_statuses.filter(ignored=False,
+                                                             last_tested__isnull=False)
+    c['verses_started_all_time'] = verses_started.count()
+    c['verses_started_this_week'] = verses_started.filter(first_seen__gte=one_week_ago).count()
+    verses_finished =  verses_started.filter(strength__gte=memorymodel.LEARNT)
+    c['verses_finished_all_time'] = verses_finished.count()
+    c['verses_finished_this_week'] = verses_finished.filter(last_tested__gte=one_week_ago).count()
+    c['verse_sets_created_all_time'] = account.verse_sets_created.count()
+    c['verse_sets_created_this_week'] = account.verse_sets_created.filter(date_added__gte=one_week_ago).count()
     return render(request, 'learnscripture/user_stats.html', c)
 
 
