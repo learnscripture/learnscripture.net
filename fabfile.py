@@ -62,6 +62,8 @@ def run_venv(command, **kwargs):
 
 
 def install_dependencies():
+    if getattr(env, 'no_installs', False):
+        return
     ensure_virtualenv()
     with virtualenv(venv_dir):
         with cd(src_dir):
@@ -111,6 +113,13 @@ def no_restarts():
     """
     env.no_restarts = True
 
+
+@task
+def no_installs():
+    """
+    Call first to skip installing anything.
+    """
+    env.no_installs = True
 
 @task
 def webserver_stop():
