@@ -537,11 +537,12 @@ p.large {
   &.incorrect {
     border-color: red;
   }
-
 }
-
+.testedword {
+  margin: 3px 1px;
+}
 // Fix issue with IE8 not hiding words:
-.wordend, .wordstart, .word {
+.wordend, .wordstart, .word, .testedword {
   display: inline-block;
 }
 
@@ -869,8 +870,10 @@ body .score-log {
     }
   .word {
     padding: 1px 2px;
+  }
+  .testedword {
     margin: 1px;
-    }
+  }
 
   #id-instructions {
     font-size: inherit;
