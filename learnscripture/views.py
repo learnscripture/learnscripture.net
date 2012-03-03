@@ -1,5 +1,6 @@
 
 from datetime import timedelta
+import re
 
 from django.contrib import messages
 from django.contrib.auth.tokens import default_token_generator
@@ -15,7 +16,7 @@ from django.views.decorators.debug import sensitive_post_parameters
 from accounts.models import Account
 from accounts.forms import PreferencesForm
 from learnscripture.forms import AccountSetPasswordForm
-from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType
+from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType, get_passage_sections
 from learnscripture import session, auth
 from bibleverses.forms import VerseSelector, VerseSetForm, PassageVerseSelector
 from scores.models import get_all_time_leaderboard, get_leaderboard_since
@@ -293,8 +294,35 @@ def view_verse_set(request, slug):
     return render(request, 'learnscripture/single_verse_set.html', c)
 
 
+
+def add_passage_breaks(verse_list, breaks):
+    retval = []
+    sections = get_passage_sections(verse_list, breaks)
+    for i, section in enumerate(sections):
+        for j, v in enumerate(section):
+            # need break at beginning of every section except first
+            v.break_here = j == 0 and i != 0
+            retval.append(v)
+    return retval
+
+
+# Quick struct for holding verses.
+class VerseObj(object):
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+
 @require_preferences
 def create_set(request, slug=None):
+    # This view handles a lot (too much):
+    #
+    # In 'create mode', it has two tabs, one for creating selection sets, one
+    # for passage sets. So it has to accept POST requests from either
+    # and handle appropriately.
+    #
+    # It also handles editing of the same verse sets, but in edit mode there
+    # will only be the one tab.
+
     version = request.identity.default_bible_version
 
     if slug is not None:
@@ -316,7 +344,7 @@ def create_set(request, slug=None):
         verses = []
         for ref in ref_list: # preserve order
             if ref in verse_dict:
-                verses.append(dict(reference=ref, text=verse_dict[ref]))
+                verses.append(VerseObj(reference=ref, text=verse_dict[ref]))
         return verses
 
 
@@ -366,10 +394,16 @@ def create_set(request, slug=None):
                 ref_list.append(ref)
         verse_dict = version.get_text_by_reference_bulk(ref_list)
 
+        breaks = request.POST.get('passage-break-list', '')
+        # Basic sanitising of 'breaks'
+        if not re.match('^((\d+|\d+:\d+),)*(\d+|\d+:\d+)?$', breaks):
+            breaks = ""
+
         if form.is_valid():
             verse_set = form.save(commit=False)
             verse_set.set_type = verse_set_type
             verse_set.created_by = request.identity.account
+            verse_set.breaks = breaks
 
             if orig_verse_set_public:
                 # Can't undo:
@@ -403,13 +437,15 @@ def create_set(request, slug=None):
             messages.info(request, "Verse set '%s' saved!" % verse_set.name)
             return HttpResponseRedirect(reverse('view_verse_set', kwargs=dict(slug=verse_set.slug)))
         else:
+            # Invalid forms
             verse_list =  mk_verse_list(ref_list, verse_dict)
             if verse_set_type == VerseSetType.SELECTION:
                 c['selection_verses'] = verse_list
             else:
-                c['passage_verses'] = verse_list
+                c['passage_verses'] = add_passage_breaks(verse_list, breaks)
 
     else:
+        # GET - either editing existing objects (one form)...
         if verse_set is not None:
             if verse_set.set_type == VerseSetType.SELECTION:
                 selection_form = VerseSetForm(instance=verse_set, prefix='selection')
@@ -418,6 +454,7 @@ def create_set(request, slug=None):
                 selection_form = None
                 passage_form = VerseSetForm(instance=verse_set, prefix='passage')
         else:
+            #  or two empty forms
             selection_form = VerseSetForm(instance=None, prefix='selection')
             passage_form = VerseSetForm(instance=None, prefix='passage')
         if verse_set is not None:
@@ -426,7 +463,7 @@ def create_set(request, slug=None):
             if verse_set.set_type == VerseSetType.SELECTION:
                 c['selection_verses'] = verse_list
             else:
-                c['passage_verses'] = verse_list
+                c['passage_verses'] = add_passage_breaks(verse_list, verse_set.breaks)
 
     c['new_verse_set'] = verse_set == None
     c['selection_verse_set_form'] = selection_form

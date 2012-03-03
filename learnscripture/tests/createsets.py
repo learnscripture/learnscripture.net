@@ -148,6 +148,10 @@ class CreateSetTests(LiveServerTests):
         self.wait_until_loaded('#id-passage-verse-list tbody tr td')
         self.assertIn("And God called the light Day", driver.page_source)
 
+        # Check boxes for Genesis 1:3, 1:9
+        driver.find_element_by_css_selector('#id-passage-verse-list tbody tr:nth-child(3) input').click()
+        driver.find_element_by_css_selector('#id-passage-verse-list tbody tr:nth-child(9) input').click()
+
         driver.find_element_by_id("id-passage-save-btn").click()
         self.wait_until_loaded('body')
         self.assertTrue(driver.title.startswith("Verse set: Genesis 1"))
@@ -156,4 +160,5 @@ class CreateSetTests(LiveServerTests):
         vs = VerseSet.objects.get(name='Genesis 1',
                                   set_type=VerseSetType.PASSAGE)
         self.assertTrue(len(vs.verse_choices.all()), 10)
+        self.assertEqual(vs.breaks, "1:3,1:9")
 
