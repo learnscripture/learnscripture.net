@@ -40,7 +40,10 @@
 
     <h3>Add verses</h3>
 
-    <table id="id-selection-verse-list">
+    <div id="id-selection-verse-list">
+    <p>Drag/drop or use the arrows to re-order.</p>
+
+    <table>
       <thead>
         <tr>
           <th>Reference</th>
@@ -52,12 +55,14 @@
         <tr>
           <td>{{ v.reference }}</td>
           <td>{{ v.text }}</td>
-          <td><i class="icon-move"></i></td>
+          <td><i class="icon-arrow-up"></i></td>
+          <td><i class="icon-arrow-down"></i></td>
           <td><a href="#"><i class="icon-trash"></i></a></td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
+    </div>
 
     <div id="id-selection-verse-selector">
       {{ selection_verse_selector_form|bootstrap }}

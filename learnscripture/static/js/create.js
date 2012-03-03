@@ -2,7 +2,7 @@ var learnscripture =
     (function(learnscripture, $) {
 
         var addVerse = function(verseData) {
-            var newrow = $('<tr><td></td><td></td><td><i class="icon-move"></i></td><td><a href="#"><i class="icon-trash"></i></a></td></tr>').find('td:first-child').text(verseData.reference).end().find('td:nth-child(2)').text(verseData.text).end();
+            var newrow = $('<tr><td></td><td></td><td><i class="icon-arrow-up"></i></td><td><i class="icon-arrow-down"></i></td><td><i class="icon-trash"></i></td></tr>').find('td:first-child').text(verseData.reference).end().find('td:nth-child(2)').text(verseData.text).end();
             $('#id-selection-verse-list tbody').append(newrow);
             $('#id-selection-verse-list').show();
             $('#id-selection-verse-message *').remove();
@@ -66,12 +66,12 @@ var learnscripture =
                         }
                     }
                    });
-        }
+        };
 
         var deleteButtonClick = function(ev) {
             ev.preventDefault();
             $(ev.target).closest('tr').remove();
-        }
+        };
 
         var selectionSaveBtnClick = function(ev) {
             // Create hidden fields with all references
@@ -81,7 +81,7 @@ var learnscripture =
             });
             $('#id-selection-reference-list').val(refs.join('|'));
             // continue with submit
-        }
+        };
 
         var passageSaveBtnClick =  function(ev) {
             // Create hidden fields with all references
@@ -98,8 +98,7 @@ var learnscripture =
             $('#id-passage-reference-list').val(refs.join('|'));
             $('#id-passage-break-list').val(breaks.join(','));
             // continue with submit
-        }
-
+        };
 
         var setupCreateVerseSetControls = function() {
             if ($('#id-selection-verse-list tbody tr').length == 0) {
@@ -108,9 +107,18 @@ var learnscripture =
             if ($('#id-passage-verse-list tbody tr').length == 0) {
                 $('#id-passage-verse-list').hide();
             }
+            $('#id-selection-verse-list').on('click', 'i.icon-arrow-up,i.icon-arrow-down',
+                function(ev) {
+                    var row = $(this).parents("tr:first");
+                    if ($(this).is(".icon-arrow-up")) {
+                        row.insertBefore(row.prev());
+                    } else {
+                        row.insertAfter(row.next());
+                    }
+                });
             $('#id-selection-verse-list tbody').sortable();
             $('#id-selection-verse-list tbody').disableSelection();
-            $('#id-selection-verse-list tbody').on('click', 'a', deleteButtonClick);
+            $('#id-selection-verse-list tbody').on('click', '.icon-trash', deleteButtonClick);
             $('#id-add-verse-btn').click(addVerseClick);
             $('#id-selection-save-btn').click(selectionSaveBtnClick);
 
@@ -130,7 +138,6 @@ var learnscripture =
                     input.attr('disabled', 'disabled');
                 }
             });
-
         };
 
         // Public interface:
