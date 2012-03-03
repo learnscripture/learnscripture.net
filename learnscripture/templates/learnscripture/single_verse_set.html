@@ -61,6 +61,12 @@ Verse set: {{ verse_set.name }}
 <p>When learning a set, you can opt out of any individual verse by pressing
  ‘Stop learning this verse’ on the learning page.</p>
 
+{% else %}
+No verses in this set!
+{% endif %}
+
+
+
 <form action="{% url 'choose' %}" method="POST">
   {% csrf_token %}
   <input type="hidden" name="verseset_id" value="{{ verse_set.id }}">
@@ -68,11 +74,10 @@ Verse set: {{ verse_set.name }}
   {% if verse_set.created_by_id == request.identity.account_id %}
   <a class="btn" href="{% url 'edit_set' slug=verse_set.slug %}">Edit</a>
   {% endif %}
+  {% if verse_choices %}
   <input type="submit" class="btn primary needs-preferences" value="Learn">
+  {% endif %}
 </form>
 
-{% else %}
-No verses in this set!
-{% endif %}
 
 {% endblock %}
