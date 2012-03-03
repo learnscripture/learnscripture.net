@@ -59,16 +59,16 @@ def get_all_time_leaderboard(page, page_size):
     sql = """
 CREATE TEMPORARY SEQUENCE rank_seq;
 SELECT
-  accounts_account.username,
+  username,
   points,
   nextval('rank_seq') AS rank
 FROM
-  (SELECT * FROM scores_totalscore
-   ORDER BY points DESC
-) as ts1
-  INNER JOIN accounts_account
-    ON ts1.account_id = accounts_account.id
-WHERE accounts_account.subscription != %s
+  (SELECT * FROM scores_totalscore as ts1
+   INNER JOIN accounts_account
+     ON ts1.account_id = accounts_account.id
+   WHERE accounts_account.subscription != %s
+  ORDER BY points DESC
+  ) as subquery
 LIMIT %s
 OFFSET %s
 """
@@ -87,24 +87,24 @@ def get_leaderboard_since(since, page, page_size):
     sql = """
 CREATE TEMPORARY SEQUENCE rank_seq;
 SELECT
-  accounts_account.username,
+  username,
   sum_points as points,
   nextval('rank_seq') AS rank
 FROM
    (SELECT
-      account_id,
+      username,
       SUM(points) as sum_points
     FROM
       scores_scorelog
-    WHERE
-      created > %s
+    INNER JOIN
+      accounts_account
+      ON scores_scorelog.account_id = accounts_account.id
+    WHERE created > %s
+      AND accounts_account.subscription != %s
     GROUP BY
-      account_id
+      username
     ORDER BY sum_points DESC
    ) AS sp
-INNER JOIN
-  accounts_account on sp.account_id = accounts_account.id
-WHERE accounts_account.subscription != %s
 LIMIT %s
 OFFSET %s;
 """
