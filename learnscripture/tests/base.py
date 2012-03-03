@@ -66,6 +66,12 @@ class LiveServerTests(LiveServerTestCase):
 
         Select(driver.find_element_by_id("id_default_bible_version")).select_by_visible_text("KJV")
         driver.find_element_by_id("id_testing_method_0").click()
+
+        # Turn animations off, as they can complicate testing.
+        e = driver.find_element_by_id('id_enable_animations')
+        if e.get_attribute('checked'):
+            e.click()
+
         if 'id-preferences-save-btn' in driver.page_source:
             # popup
             driver.find_element_by_id("id-preferences-save-btn").click()
@@ -77,7 +83,8 @@ class LiveServerTests(LiveServerTestCase):
     def create_account(self):
         KJV = BibleVersion.objects.get(slug='KJV')
         identity = Identity.objects.create(default_bible_version=KJV,
-                                            testing_method=TestingMethod.FULL_WORDS)
+                                           testing_method=TestingMethod.FULL_WORDS,
+                                           enable_animations=False)
         account = Account.objects.create(email="test1@test.com",
                                           username="test1",
                                          )

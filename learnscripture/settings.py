@@ -219,7 +219,7 @@ CACHES = {
         'LOCATION': 'unix:%s/memcached.sock' % HOME_DIR,
         'KEY_PREFIX': 'learnscripture.net',
     }
-}
+} if LIVEBOX else {}
 
 CACHE_PREFIX = 'ls1'
 CACHE_COUNT_TIMEOUT = 60
