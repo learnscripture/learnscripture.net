@@ -370,6 +370,32 @@ class IdentityTests(TestCase):
         self.assertEqual(["Psalm 23:1", "Psalm 23:2"],
                           [uvs.reference for uvs in uvss4])
 
+
+    def test_slim_passage_for_revising(self):
+        i = self._create_identity()
+        vs1 = VerseSet.objects.get(name='Psalm 23')
+        vs1.breaks = "3,5" # break at v3 and v5
+        vs1.save()
+        i.add_verse_set(vs1)
+
+        for vn in range(1, 7):
+            ref = 'Psalm 23:%d' % vn
+            i.record_verse_action(ref, 'NET', StageType.TEST, 1.0)
+
+            # Make one of them needing testing
+        i.verse_statuses.filter(reference="Psalm 23:5").update(
+                last_tested=timezone.now() - timedelta(10)
+                )
+
+        uvss = i.verse_statuses_for_passage(vs1.id)
+        self.assertEqual(len(uvss), 6)
+
+        uvss = i.slim_passage_for_revising(uvss, vs1)
+        self.assertEqual([uvs.reference for uvs in uvss],
+                         ["Psalm 23:5", "Psalm 23:6"])
+
+
+
     def test_get_verse_statuses(self):
         i = self._create_identity()
         vs1 = VerseSet.objects.get(name='Psalm 23')
