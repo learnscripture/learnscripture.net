@@ -668,9 +668,18 @@ class Identity(models.Model):
         sections = get_passage_sections(uvs_list, verse_set.breaks)
 
         to_test = []
-        for section in sections:
+        tested_sections = set()
+        for i, section in enumerate(sections):
             if (any(uvs.needs_testing for uvs in section)):
+                # Need this section.  If we didn't put last section in, and the
+                # first verse in this section needs testing, we add the last verse
+                # of the previous section (which by this logic does not need testing)
+                # to provide some context and flow between the sections.
+                if i > 0:
+                    if i - 1 not in tested_sections and section[0].needs_testing:
+                        to_test.append(sections[i - 1][-1])
                 to_test.extend(section)
+                tested_sections.add(i)
 
         return to_test
 
