@@ -1075,19 +1075,15 @@ var learnscripture =
         var docKeyPressBound = false;
 
         var bindDocKeyPress = function() {
-            if (isLearningPage) {
-                if (!docKeyPressBound && !currentStage.testMode) {
-                    $(document).bind('keypress', docKeyPress);
-                    docKeyPressBound = true;
-                }
+            if (!docKeyPressBound && !currentStage.testMode) {
+                $(document).bind('keypress', docKeyPress);
+                docKeyPressBound = true;
             }
         }
         var unbindDocKeyPress = function() {
-            if (isLearningPage) {
-                if (docKeyPressBound) {
-                    $(document).unbind('keypress');
-                    docKeyPressBound = false;
-                }
+            if (docKeyPressBound) {
+                $(document).unbind('keypress');
+                docKeyPressBound = false;
             }
         }
 
@@ -1275,6 +1271,17 @@ var learnscripture =
                     loadScoreLogs();
                 }
             });
+
+            // For performance on handhelds especially, we disable docKeyPress
+            // handling when a modal is active.
+
+            $('div.modal').bind('shown', function(ev) {
+                unbindDocKeyPress();
+            }).bind('hidden', function(ev) {
+                bindDocKeyPress();
+            });
+
+
         };
 
         var receivePreferences = function(prefs) {
@@ -1297,8 +1304,6 @@ var learnscripture =
 
         learnscripture.handlerAjaxError = handlerAjaxError;
         learnscripture.setupLearningControls = setupLearningControls;
-        learnscripture.unbindDocKeyPress = unbindDocKeyPress;
-        learnscripture.bindDocKeyPress = bindDocKeyPress;
         return learnscripture;
 
     })(learnscripture || {}, $);
