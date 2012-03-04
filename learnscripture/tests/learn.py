@@ -118,7 +118,7 @@ class LearnTests(LiveServerTests):
 
         j316_score = self._score_for_j316()
         self.assertEqual(account.total_score.points,
-                         (j316_score * (1 + Scores.PERFECT_BONUS_FACTOR)) * Scores.REVISION_BONUS_FACTOR
+                         (j316_score * (1 + Scores.PERFECT_BONUS_FACTOR))
                          * (1 + Scores.REVISION_COMPLETE_BONUS_FACTOR))
 
         self.assertEqual(account.score_logs.count(), 3)
