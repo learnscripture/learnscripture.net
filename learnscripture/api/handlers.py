@@ -69,6 +69,7 @@ class VersesToLearnHandler(BaseHandler):
               'text',
               'needs_testing',
               'learn_order',
+              'bible_verse_number',
               ('version', ('full_name', 'short_name', 'slug', 'url')))
 
     @require_identity_method

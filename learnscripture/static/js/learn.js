@@ -836,7 +836,12 @@ var learnscripture =
             var oldVerseStatus = currentVerseStatus;
             currentVerseStatus = versesToLearn[currentVerseIndex];
             verse = currentVerseStatus;
-            if (isPassageType(oldVerseStatus)) {
+            var moveOld = (oldVerseStatus != null &&
+                           isPassageType(oldVerseStatus) &&
+                           // Need to cope with possibility of a gap
+                           // in the passage, caused by slim_passage_for_revising()
+                           (currentVerseStatus.bible_verse_number == oldVerseStatus.bible_verse_number + 1))
+            if (moveOld) {
                 moveOldWords();
             } else {
                 $('.current-verse').children().remove();
@@ -871,7 +876,7 @@ var learnscripture =
             $('#id-controls').show();
             setupStageList(verse);
 
-            if (isPassageType(oldVerseStatus)) {
+            if (moveOld) {
                 scrollOutPreviousVerse();
                 $('.current-verse').show();
             } else {
