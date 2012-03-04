@@ -1,16 +1,7 @@
 
 // Functionality for all modals
 
-// This needs to go at end, because it uses learnscripture functions on document
-// load.
 $(document).ready(function() {
-    $('div.modal').bind('shown', function(ev) {
-        // For performance on handhelds especially
-        learnscripture.unbindDocKeyPress();
-    }).bind('hidden', function(ev) {
-        learnscripture.bindDocKeyPress();
-    });
-
     // Modal forms:
     // * shouldn't submit when user presses Enter
     // * should click the 'primary' button if they press Enter on last input
