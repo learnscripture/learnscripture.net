@@ -92,8 +92,6 @@ class Account(models.Model):
         word_count = len(text.strip().split())
         max_points = word_count * Scores.POINTS_PER_WORD
         if old_memory_stage >= MemoryStage.TESTED:
-            # Revision:
-            max_points *= Scores.REVISION_BONUS_FACTOR
             reason = ScoreReason.VERSE_REVISED
         else:
             reason = ScoreReason.VERSE_TESTED

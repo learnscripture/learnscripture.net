@@ -25,7 +25,7 @@ class AccountTests(TestCase):
                               ActionChange(old_strength=0.5, new_strength=0.6),
                               StageType.TEST, 0.75)
         self.assertEqual(a.total_score.points,
-                         (4 * Scores.POINTS_PER_WORD * Scores.REVISION_BONUS_FACTOR * 0.75))
+                         (4 * Scores.POINTS_PER_WORD * 0.75))
 
 
     def test_award_action_points_fully_learnt(self):
@@ -38,6 +38,6 @@ class AccountTests(TestCase):
                               ActionChange(old_strength=0.8, new_strength=0.99),
                               StageType.TEST, 0.9)
         self.assertEqual(a.total_score.points,
-                         (4 * Scores.POINTS_PER_WORD * 0.9) * Scores.REVISION_BONUS_FACTOR
+                         (4 * Scores.POINTS_PER_WORD * 0.9)
                          + (4 * Scores.POINTS_PER_WORD * Scores.VERSE_LEARNT_BONUS))
 

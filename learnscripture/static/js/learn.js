@@ -587,15 +587,11 @@ var learnscripture =
         var getPointsTarget = function() {
             // Constants from scores/models.py
             var POINTS_PER_WORD = 10;
-            var REVISION_BONUS_FACTOR = 2;
             // Duplication of logic in Account.award_action_points.  NB word
             // count excludes reference for this purpose, so we don't use
             // wordList.count
             var wordCount = stripPunctuation(currentVerseStatus.text.trim()).split(/\W/).length;
             var points = wordCount * POINTS_PER_WORD;
-            if (currentVerseStatus.memory_stage >= MEMORY_STAGE_TESTED) {
-                points = points * REVISION_BONUS_FACTOR;
-            }
             return points;
         }
 
