@@ -93,6 +93,7 @@ MIDDLEWARE_CLASSES = [
     [
         (DEBUG, 'debug_toolbar.middleware.DebugToolbarMiddleware'),
         (True, 'django.middleware.common.CommonMiddleware'),
+        (True, 'django.middleware.transaction.TransactionMiddleware'),
         (True, 'django.contrib.sessions.middleware.SessionMiddleware'),
         (True, 'django.middleware.csrf.CsrfViewMiddleware'),
         (True, 'django.contrib.auth.middleware.AuthenticationMiddleware'),
