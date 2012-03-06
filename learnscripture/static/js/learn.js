@@ -1265,9 +1265,9 @@ var learnscripture =
             $('#id-finish-btn').click(finishBtnClick);
             if (typeof operamini != "undefined") {
                 // Opera Mini is a thin client browser and doesn't support
-                // responding to key presses. Therefore we add a button for
-                // explicit checking.
-                $('#id-check-word-btn').show().click(function(ev) {
+                // responding to key presses. It does, however, support
+                // input onchange events, which fires when the user preses 'Done'
+                $('#id-typing').change(function(ev) {
                     ev.preventDefault();
                     checkCurrentWord();
                     $('#id-typing').focus();
