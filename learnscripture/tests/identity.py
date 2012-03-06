@@ -392,7 +392,7 @@ class IdentityTests(TestCase):
 
         uvss = i.slim_passage_for_revising(uvss, vs1)
         self.assertEqual([uvs.reference for uvs in uvss],
-                         ["Psalm 23:5", "Psalm 23:6"])
+                         ["Psalm 23:4", "Psalm 23:5", "Psalm 23:6"])
 
 
 
