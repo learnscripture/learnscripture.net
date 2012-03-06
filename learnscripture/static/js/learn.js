@@ -627,7 +627,7 @@ var learnscripture =
                     return typed == target;
                 }
                 // After that, allow N/3 mistakes, rounded up.
-                return levenshteinDistance(target, typed) <= Math.ceil(target.length / 3);
+                return damerauLevenshteinDistance(target, typed) <= Math.ceil(target.length / 3);
             } else {
                 // TEST_FIRST_LETTER
                 return (typed == target.slice(0, 1));
