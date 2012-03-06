@@ -1324,57 +1324,45 @@ var learnscripture =
     })(learnscripture || {}, $);
 
 
-
-/*
-
-  Copyright (c) 2006. All Rights reserved.
-  If you use this script, please email me and let me know, thanks!
-
-  Andrew Hedges
-  andrew (at) hedges (dot) name
-
-  If you want to hire me to write JavaScript for you, see my resume.
-  http://andrew.hedges.name/resume/
-
-*/
-
-// calculate the Levenshtein distance between a and b
-var levenshteinDistance = function(a, b) {
-    var cost;
-
-    var m = a.length;
-    var n = b.length;
-
-    // make sure a.length >= b.length to use O(min(n,m)) space, whatever that is
-    if (m < n) {
-        var c=a;a=b;b=c;
-        var o=m;m=n;n=o;
+function damerauLevenshteinDistance(a, b) {
+    var INF = a.length + b.length;
+    var H = [];
+    // Make matrix of dimensions a.length + 2, b.length + 2
+    for (var i = 0; i < a.length + 2; i++) {
+        H.push(new Array(b.length + 2));
     }
-
-    var r = new Array();
-    r[0] = new Array();
-    for (var c = 0; c < n+1; c++) {
-        r[0][c] = c;
+    // Fill matrix
+    H[0][0] = INF;
+    for (var i = 0; i<=a.length; ++i) {
+        H[i+1][1] = i;
+        H[i+1][0] = INF;
     }
-
-    for (var i = 1; i < m+1; i++) {
-        r[i] = new Array();
-        r[i][0] = i;
-        for (var j = 1; j < n+1; j++) {
-            cost = (a.charAt(i-1) == b.charAt(j-1))? 0: 1;
-            r[i][j] = min3(r[i-1][j]+1,r[i][j-1]+1,r[i-1][j-1]+cost);
+    for (var j = 0; j<=b.length; ++j) {
+        H[1][j+1] = j;
+        H[0][j+1] = INF;
+    }
+    var DA = {};
+    for (var d = 0; d < (a + b).length; d++) {
+        DA[(a + b)[d]] = 0;
+    }
+    for (var i = 1; i<=a.length; ++i) {
+        var DB = 0;
+        for (var j = 1; j<=b.length; ++j) {
+            var i1 = DA[b[j-1]];
+            var j1 = DB;
+            var d = ((a[i-1]==b[j-1]) ? 0 : 1);
+            if (d==0) {
+                DB = j;
+            }
+            H[i+1][j+1] = Math.min(H[i][j]+d,
+                                   H[i+1][j] + 1,
+                                   H[i][j+1]+1,
+                                   H[i1][j1] + (i-i1-1) + 1 + (j-j1-1));
         }
+        DA[a[i-1]] = i;
     }
-
-    return r[m][n];
-};
-
-// return the smallest of the three values passed in
-var min3 = function(x,y,z) {
-    if (x < y && x < z) return x;
-    if (y < x && y < z) return y;
-    return z;
-};
+    return H[a.length+1][b.length+1];
+}
 
 $(document).ready(function() {
     learnscripture.setupLearningControls();
