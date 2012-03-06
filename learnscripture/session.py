@@ -65,14 +65,15 @@ def start_learning_session(request, user_verse_statuses, revision):
     request.session['verses_skipped'] = False
 
 
-def verse_status_finished(request, reference, verse_set_id, score_logs):
-    if request.session['revision']:
-        request.session['score_logs'] = (request.session['score_logs'] +
-                                         [sl.id for sl in score_logs])
+def verse_status_finished(request, reference, verse_set_id, new_score_logs):
     _remove_user_verse_status(request, reference, verse_set_id)
-    if len(_get_verse_status_ids(request)) == 0:
-        if not request.session['verses_skipped']:
-            request.identity.award_revision_complete_bonus(request.session['score_logs'])
+    if request.session['revision']:
+        score_log_ids = list(request.session['score_logs'])
+        score_log_ids.extend([sl.id for sl in new_score_logs])
+        request.session['score_logs'] = score_log_ids
+        if len(_get_verse_status_ids(request)) == 0:
+            if not request.session['verses_skipped']:
+                request.identity.award_revision_complete_bonus(score_log_ids)
 
 
 def verse_status_skipped(request, reference, verse_set_id):
