@@ -25,3 +25,10 @@ combine to give a reasonable level of coverage.
 
 Many of the detailed lower-level tests are in the 'identity.py' tests, since
 most business logic runs off Identity.
+
+
+Server config
+=============
+
+Passwords and private server config is stored in settings_priv.py that is not in
+source control.
