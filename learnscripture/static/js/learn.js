@@ -1263,6 +1263,16 @@ var learnscripture =
             $('#id-skip-verse-btn').click(skipVerse);
             $('#id-cancel-learning-btn').click(cancelLearning);
             $('#id-finish-btn').click(finishBtnClick);
+            if (typeof operamini != "undefined") {
+                // Opera Mini is a thin client browser and doesn't support
+                // responding to key presses. Therefore we add a button for
+                // explicit checking.
+                $('#id-check-word-btn').show().click(function(ev) {
+                    ev.preventDefault();
+                    checkCurrentWord();
+                    $('#id-typing').focus();
+                });
+            }
             $('.verse-dropdown').dropdown();
             loadVerses(function() {
                 if (maxVerseIndex === null) {
