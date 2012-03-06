@@ -9,7 +9,7 @@ from django.utils import timezone
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 
-from accounts.models import Identity
+from accounts.models import Identity, Account
 from accounts.memorymodel import MM
 from bibleverses.models import BibleVersion, VerseSet, VerseSetType, VerseChoice, MemoryStage, StageType
 from scores.models import Scores, ScoreReason
@@ -117,6 +117,7 @@ class LearnTests(LiveServerTests):
         self.wait_for_ajax()
 
         j316_score = self._score_for_j316()
+        account = Account.objects.get(id=account.id) # refresh
         self.assertEqual(account.total_score.points,
                          (j316_score * (1 + Scores.PERFECT_BONUS_FACTOR))
                          * (1 + Scores.REVISION_COMPLETE_BONUS_FACTOR))
