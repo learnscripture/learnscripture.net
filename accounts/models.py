@@ -228,6 +228,13 @@ class Identity(models.Model):
                 .select_related('version')
             other_version_dict = dict([(uvs.reference, uvs) for uvs in other_versions])
         else:
+            # If they are already learning this passage in a different version,
+            # just use that.
+            verse_statuses = self.verse_statuses.filter(verse_set=verse_set,
+                                                        ignored=False)
+            if len(verse_statuses) > 0:
+                return list(verse_statuses)
+
             other_version_dict = {}
 
         # Want to preserve order of verse_set, so iterate like this:

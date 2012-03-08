@@ -1,7 +1,9 @@
 from __future__ import absolute_import
 
 from django.core.urlresolvers import reverse
+from selenium.webdriver.support.ui import Select
 
+from accounts.models import Identity
 from bibleverses.models import VerseSet
 
 from .base import LiveServerTests
@@ -31,3 +33,29 @@ class ChooseTests(LiveServerTests):
         self.wait_until_loaded('body')
         self.assertEqual(VerseSet.objects.get(id=vs_id).popularity, 1)
 
+    def test_double_choose(self):
+        driver = self.driver
+        driver.get(self.live_server_url + reverse('choose'))
+
+        vs = VerseSet.objects.get(name="Psalm 23")
+        driver.find_element_by_id("id-learn-verseset-btn-%d" % vs.id).click()
+
+        self.set_preferences()
+        self.wait_until_loaded('body')
+
+        # Change version:
+        Select(driver.find_element_by_id("id-version-select")).select_by_visible_text("NET")
+
+        self.wait_for_ajax()
+
+        identity = Identity.objects.get()
+
+        self.assertEqual(vs.verse_choices.count(),
+                         identity.verse_statuses.filter(ignored=False).count())
+
+        # Choose again
+        driver.get(self.live_server_url + reverse('choose'))
+        driver.find_element_by_id("id-learn-verseset-btn-%d" % vs.id).click()
+
+        self.assertEqual(vs.verse_choices.count(),
+                         identity.verse_statuses.filter(ignored=False).count())
