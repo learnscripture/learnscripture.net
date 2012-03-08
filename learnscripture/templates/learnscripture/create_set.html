@@ -19,10 +19,13 @@
 
 
 {% if new_verse_set %} {# Allow choice of type and show tabs #}
-
+<p>Create your own set of set of verses to learn. You can either create a
+'selection' set, where each item will be learnt individually, or a 'passage' for
+learning a continuous set of verses.
+</p>
 <ul class="tabs" data-tabs="tabs">
   <li {% if active_tab == 'selection' %}class="active"{% endif %}><a href="#id-tab-selection">Selection</a></li>
-  <li {% if active_tab == 'passage' %}class="active"{% endif %}><a href="#id-tab-passage">Extended passage</a></li>
+  <li {% if active_tab == 'passage' %}class="active"{% endif %}><a href="#id-tab-passage">Passage</a></li>
 </ul>
 
 {% endif %}
@@ -31,7 +34,6 @@
   <div {% if active_tab == 'selection' %}class="active"{% endif %} id="id-tab-selection">
 
     {% if new_verse_set %}
-    <p>Create your own set of set of verses to learn:</p>
     {% endif %}
 
     <form id="id-selection-verse-set-form" action="" method="POST">
