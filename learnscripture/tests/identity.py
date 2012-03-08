@@ -334,13 +334,16 @@ class IdentityTests(TestCase):
         for uvs in uvss1:
             i.record_verse_action(uvs.reference, 'NET', StageType.TEST, 0.95)
 
-        # ...then we should get the next two.
+        # ...then we should get the next two. But we also get a verse
+        # of context.
 
         uvss2 = i.verse_statuses_for_passage(vs1.id)
         uvss2 = i.get_next_section(uvss2, vs1)
 
-        self.assertEqual(["Psalm 23:3", "Psalm 23:4"],
+        self.assertEqual(["Psalm 23:2", "Psalm 23:3", "Psalm 23:4"],
                          [uvs.reference for uvs in uvss2])
+        self.assertEqual([False, True, True],
+                         [uvs.needs_testing for uvs in uvss2])
 
         # A sleep of one second will ensure our algo can distinguish
         # between groups of testing.
@@ -354,8 +357,10 @@ class IdentityTests(TestCase):
         uvss3 = i.verse_statuses_for_passage(vs1.id)
         uvss3 = i.get_next_section(uvss3, vs1)
 
-        self.assertEqual(["Psalm 23:5", "Psalm 23:6"],
+        self.assertEqual(["Psalm 23:4", "Psalm 23:5", "Psalm 23:6"],
                          [uvs.reference for uvs in uvss3])
+        self.assertEqual([False, True, True],
+                         [uvs.needs_testing for uvs in uvss3])
 
 
         # Learn next two.

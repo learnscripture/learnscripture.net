@@ -394,22 +394,6 @@ class Identity(models.Model):
                 l = l.filter(verse_set=verse_set_id)
             l = list(l)
 
-            # HACK. The needs_testing_override fix applied in passages_for_revising
-            # doesn't get saved to the session. So we have to reapply it at this
-            # point.
-
-            # The 'better' fix would be to fix UserVerseStatus.needs_testing, but
-            # that involves UserVerseStatus doing queries on the VerseSet
-            # collection it belongs to.
-
-            # An alternative is to save complete UserVerseStatus objects to
-            # session, but this gets tricky when it comes to changing versions.
-
-            if len(l) > 0:
-                vs = l[0].verse_set
-                if vs is not None and vs.set_type == VerseSetType.PASSAGE:
-                    self._add_needs_testing_override(l)
-
             retval.update(dict(((verse_set_id, uvs.reference), uvs) for uvs in l))
 
         # We need to get 'text' efficiently too. Group into versions:
@@ -585,21 +569,15 @@ class Identity(models.Model):
 
         return sorted(vss, key=lambda vs: vs.name)
 
-    def _add_needs_testing_override(self, uvs_list):
-        # For passages, we adjust 'needs_testing' to get the passage to be
-        # tested together. See explanation in memorymodel
+    def verse_statuses_for_passage(self, verse_set_id):
+        # Must be strictly in the bible order
+        uvs_list = list(self.verse_statuses.filter(verse_set=verse_set_id,
+                                                   ignored=False).order_by('bible_verse_number'))
         min_strength = min(uvs.strength for uvs in uvs_list)
         if min_strength > memorymodel.STRENGTH_FOR_GROUP_TESTING:
             for uvs in uvs_list:
                 uvs.needs_testing_override = True
-
-    def verse_statuses_for_passage(self, verse_set_id):
-        # Must be strictly in the bible order
-        l = list(self.verse_statuses.filter(verse_set=verse_set_id,
-                                            ignored=False).order_by('bible_verse_number'))
-        self._add_needs_testing_override(l)
-
-        return l
+        return uvs_list
 
     def get_next_section(self, uvs_list, verse_set):
         """
@@ -648,12 +626,17 @@ class Identity(models.Model):
         # (wrapping round if necessary)
         section_num = (last_section_tested + 1) % len(sections)
 
-        # Ideally, we would return a verse of context with
-        # 'needs_testing_override' being set to False.  However, that doesn't
-        # currently survive being saved to the session. See 'HACK' and
-        # _add_needs_testing_override().
+        retval = []
+        if section_num > 0:
+            # Return a verse of context with 'needs_testing_override' being set
+            # to False.
+            context = sections[section_num - 1][-1]
+            context.needs_testing_override = False
+            retval.append(context)
 
-        return sections[section_num]
+        retval.extend(sections[section_num])
+
+        return retval
 
     def slim_passage_for_revising(self, uvs_list, verse_set):
         """

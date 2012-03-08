@@ -22,17 +22,21 @@ logger = logging.getLogger(__name__)
 
 def get_verse_statuses(request):
     ids = _get_verse_status_ids(request)
-    bulk_refs = list((verse_set_id, ref) for order, ref, verse_set_id in ids)
+    bulk_refs = list((verse_set_id, ref)
+                     for order, ref, needs_testing_override, verse_set_id in ids)
     uvs_dict = request.identity.get_verse_statuses_bulk(bulk_refs)
     retval = []
-    for order, ref, verse_set_id in ids:
+    for order, ref, needs_testing_override, verse_set_id in ids:
         try:
             uvs = uvs_dict[verse_set_id, ref]
         except KeyError:
             continue
         uvs.learn_order = order
+        if needs_testing_override is not None:
+            uvs.needs_testing_override = needs_testing_override
         retval.append(uvs)
     return retval
+
 
 def _get_verse_status_ids(request):
     return request.session.get('verses_to_learn', [])
@@ -53,7 +57,7 @@ def get_learning_session_start(request):
 
 def _set_verse_statuses(request, user_verse_statuses):
     _save_verse_status_ids(request,
-                           [(order, uvs.reference, uvs.verse_set_id)
+                           [(order, uvs.reference, getattr(uvs, 'needs_testing_override', None), uvs.verse_set_id)
                             for order, uvs in enumerate(user_verse_statuses)])
 
 
@@ -92,9 +96,9 @@ def _remove_user_verse_status(request, reference, verse_set_id):
     ids = _get_verse_status_ids(request)
     new_ids = []
     found_ref = False
-    for (order, ref, vs_id) in ids:
+    for (order, ref, needs_testing_override, vs_id) in ids:
         if found_ref:
-            new_ids.append((order, ref, vs_id))
+            new_ids.append((order, ref, needs_testing_override, vs_id))
         if (ref, vs_id) == (reference, verse_set_id):
             found_ref = True
 
