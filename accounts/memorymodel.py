@@ -175,6 +175,10 @@ class MemoryModel(object):
         return time_elapsed > t_1 - t_0
 
 
+    # If necessary, we could add a denormalised UserVerseStatus.testing_due
+    # DateTimeField (which would have to be updated after testing) which would
+    # turn this into a trivial query.
+
     def filter_qs(self, qs, now_seconds):
         # SQL equivalent of needs_testing
         clause = ('last_tested IS NOT NULL AND '
