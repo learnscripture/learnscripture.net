@@ -17,7 +17,7 @@ Dashboard
 <div class="actionset">
 
   {% for vs in passages_for_revising %}
-  <div class="clearfix">
+  <div class="addclearfix">
   <form action="" method="POST">
     {% csrf_token %}
     <input type="hidden" name="verse_set_id" value="{{ vs.id }}" />
@@ -72,7 +72,7 @@ Dashboard
 
 <div class="actionset">
   {% for vs in passages_for_learning %}
-  <div class="clearfix">
+  <div class="addclearfix">
   <form action="" method="POST">
     {% csrf_token %}
     <input type="hidden" name="verse_set_id" value="{{ vs.id }}" />
