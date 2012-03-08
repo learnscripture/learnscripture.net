@@ -1,0 +1,45 @@
+{% extends "base_twocol.html" %}
+
+{% load url from future %}
+{% load pagination_tags %}
+
+{% block title %}
+Progress
+{% endblock %}
+
+{% block page_title %}
+Progress
+{% endblock %}
+
+{% block leftcolumn %}
+<h2>Verses you are learning</h2>
+
+{% autopaginate verses 20 %}
+
+{% paginate %}
+{% if not verses %}
+<p>No verses learnt yet</p>
+
+{% else %}
+<table class="bordered-table condensed">
+  <thead>
+    <tr>
+      <th>Verse</th>
+      <th>Version</th>
+      <th>Strength</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for verse in verses %}
+    <tr>
+      <td>{{ verse.reference }}</td>
+      <td>{{ verse.version.slug }}</td>
+      <td><img src="{{ STATIC_URL }}img/strength_{{ verse.simple_strength }}.png"></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% paginate %}
+{% endif %}
+
+{% endblock %}

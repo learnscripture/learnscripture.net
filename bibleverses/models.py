@@ -1,4 +1,5 @@
 from decimal import Decimal
+import math
 
 from autoslug import AutoSlugField
 from django.core.urlresolvers import reverse
@@ -13,6 +14,7 @@ from django.utils.functional import cached_property
 # much due to lots of writes and an increased risk if things go wrong.
 import caching.base
 
+from accounts import memorymodel
 from learnscripture.datastructures import make_choices
 
 
@@ -271,10 +273,15 @@ class UserVerseStatus(models.Model):
 
     @cached_property
     def needs_testing_by_strength(self):
-        from accounts.memorymodel import needs_testing
         if self.last_tested is None:
             return True
-        return needs_testing(self.strength, (timezone.now() - self.last_tested).total_seconds())
+        return memorymodel.needs_testing(self.strength, (timezone.now() - self.last_tested).total_seconds())
+
+    def simple_strength(self):
+        """
+        Returns the strength normalised to a 0 to 10 scale for presentation in UI.
+        """
+        return min(10, int(math.floor((self.strength / memorymodel.LEARNT) * 10)))
 
     def __unicode__(self):
         return u"%s, %s" % (self.reference, self.version.slug)

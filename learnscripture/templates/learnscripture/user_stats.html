@@ -86,4 +86,8 @@
 
 <p><a href="{% url 'leaderboard' %}">See all rankings</a></p>
 
+{% if request.identity.account.username == account.username %}
+<p><a href="{% url 'user_verses' %}">See detailed progress on verse learning</a></p>
+{% endif %}
+
 {% endblock %}
