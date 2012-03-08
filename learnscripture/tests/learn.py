@@ -285,3 +285,42 @@ class LearnTests(LiveServerTests):
         self.wait_for_ajax()
 
         self.assertTrue(driver.find_element_by_id('id-no-verse-queue').is_displayed())
+
+    def test_points_after_create_account(self):
+        """
+        Test that you get points if you click 'create account' while
+        part way through learning a verse.
+        """
+        verse_set = self.choose_verse_set('Bible 101')
+        driver = self.driver
+
+        identity = Identity.objects.get() # should only be one at this point
+
+        self.assertEqual(u"John 3:16", driver.find_element_by_id('id-verse-title').text)
+        # Do the reading:
+        for i in range(0, 9):
+            driver.find_element_by_id('id-next-btn').click()
+
+        # Now set up account.
+        driver.find_element_by_link_text('Create an account').click()
+        self.wait_for_ajax()
+        driver.find_element_by_id('id_signup-email').send_keys("test@test.com")
+        driver.find_element_by_id('id_signup-username').send_keys("testusername")
+        driver.find_element_by_id('id_signup-password').send_keys("testpassword")
+        driver.find_element_by_id('id-create-account-btn').click()
+
+        self.wait_for_ajax()
+
+        # Do the typing:
+        self._type_john_3_16_kjv()
+
+        self.wait_for_ajax()
+
+        # Should show score logs
+        driver.find_element_by_css_selector('#id-points-block .score-log')
+
+        account = Account.objects.get(username='testusername')
+        j316_score = self._score_for_j316()
+        self.assertEqual(account.total_score.points,
+                         j316_score * (1 + Scores.PERFECT_BONUS_FACTOR))
+        self.assertEqual(account.score_logs.count(), 2)
