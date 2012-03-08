@@ -610,7 +610,7 @@ class Identity(models.Model):
         # Find which section was tested together last.
         last_section_tested = None
         overall_max_last_tested = None
-        for i, info in section_info.items():
+        for i, info in sorted(section_info.items()):
             if info['tested_together']:
                 if (overall_max_last_tested is None or
                     info['last_tested'] > overall_max_last_tested):
