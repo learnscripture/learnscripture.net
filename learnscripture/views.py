@@ -513,12 +513,13 @@ def leaderboard(request):
 
 
 def user_stats(request, username):
-    account = get_object_or_404(Account.objects.select_related('total_score'),
+    account = get_object_or_404(Account.objects.select_related('total_score', 'identity'),
                                 username=username)
     c = {'account': account}
     one_week_ago = timezone.now() - timedelta(7)
     verses_started =  account.identity.verse_statuses.filter(ignored=False,
                                                              last_tested__isnull=False)
+
     c['verses_started_all_time'] = verses_started.count()
     c['verses_started_this_week'] = verses_started.filter(first_seen__gte=one_week_ago).count()
     verses_finished =  verses_started.filter(strength__gte=memorymodel.LEARNT)
