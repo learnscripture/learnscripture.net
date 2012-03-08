@@ -170,12 +170,8 @@ Learn!
 
 <h3>Points</h3>
 
-{% if request.identity.scoring_enabled %}
 <div id="id-points-block">
-
-</div>
-{% else %}
-
+{% if not request.identity.scoring_enabled %}
   {% if not request.identity.account %}
   <p>Points are only enabled once you
     <a href="#" class="signup-link">create an account</a>.
@@ -184,7 +180,10 @@ Learn!
   {% else %}
   <p>Points not enabled for this account</p>
   {% endif %}
-
+{% endif %}
+</div>
+{% if request.identity.scoring_enabled %}
+<div id="id-points-enabled"></div>
 {% endif %}
 
 {% endblock %}

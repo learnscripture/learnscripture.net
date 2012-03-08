@@ -180,6 +180,7 @@ class SignUpHandler(AccountCommon, BaseHandler):
         account = request.form.save()
         accountLogger.info("New Account created", extra=extra(account=account, request=request))
         identity.account = account
+        identity.prepare_for_learning()
         identity.save()
         return account
 

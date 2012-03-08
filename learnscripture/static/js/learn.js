@@ -1011,7 +1011,7 @@ var learnscripture =
         };
 
         var loadScoreLogs = function() {
-            if ($('#id-points-block').length == 0) {
+            if ($('#id-points-enabled').length == 0) {
                 return;
             }
             $.ajax({url: '/api/learnscripture/v1/scorelogs/?format=json&r=' +

@@ -50,6 +50,9 @@ var learnscripture = (function(learnscripture, $) {
                 success: function(data) {
                     setSignedIn(data, 'signup');
                     $('#id-signup-form').modal('hide');
+                    // Little hack to get learn page to show points
+                    $('body').append('<div id="id-points-enabled"></div>');
+                    $('#id-points-block *').remove();
                 }
                 });
     };
