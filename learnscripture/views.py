@@ -530,6 +530,19 @@ def user_stats(request, username):
     return render(request, 'learnscripture/user_stats.html', c)
 
 
+@require_identity
+def user_verses(request):
+    identity = request.identity
+    verses = identity.verse_statuses.filter(ignored=False,
+                                            strength__gt=0,
+                                            last_tested__isnull=False)\
+        .select_related('version').order_by('strength')
+
+    c = {}
+    c['verses'] = verses
+    return render(request, 'learnscripture/user_verses.html', c)
+
+
 # Password reset for Accounts:
 #
 # We can re-use a large amount of django.contrib.auth functionality
