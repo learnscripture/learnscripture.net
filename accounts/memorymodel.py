@@ -155,6 +155,16 @@ class MemoryModel(object):
         #   delta_s_actual == 1 for test_strength == 1.
 
         delta_s_actual = delta_s_max * (test_strength - old_strength) / (1.0 - old_strength)
+
+        # If someone had a large gap from using the system, but still got good
+        # scores, we don't want to progress them all the way to 'learnt'. So we
+        # limit the amount of progress that can be done in one jump to 3 *
+        # DELTA_S_IDEAL. This also has the benefit of slowing down progress
+        # during the few days (where the delta S for one day is greater than 3 *
+        # DELTA_S_IDEAL), so they will see the verse more in that week.
+
+        delta_s_actual = min(self.DELTA_S_IDEAL * 3, delta_s_actual)
+
         new_strength = old_strength + delta_s_actual
 
         return min(self.BEST_STRENGTH, new_strength)
