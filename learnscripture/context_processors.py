@@ -15,23 +15,11 @@ def session_forms(request):
     # We need different prefices on each form to avoid clashes with ids of
     # fields. Same prefix must be set in handlers.py
 
-    def signup_form():
-        return SignUpForm(prefix="signup")
-
-    def login_form():
-        return LogInForm(prefix="login")
-
-    def preferences_form():
-        if hasattr(request, 'identity'):
-            instance = request.identity
-        else:
-            instance = None
-
-        return PreferencesForm(instance=instance)
-
-    return {'signup_form': signup_form,
-            'login_form': login_form,
-            'preferences_form': preferences_form,
+    return {'signup_form': lambda: SignUpForm(prefix="signup"),
+            'login_form': lambda: LogInForm(prefix="login"),
+            'preferences_form': lambda: PreferencesForm(instance=request.identity
+                                                        if hasattr(request, 'identity')
+                                                        else None),
             }
 
 class MenuItem(object):
