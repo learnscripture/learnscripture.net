@@ -12,6 +12,16 @@ Dashboard
 
 {% block leftcolumn %}
 
+{% if request.identity.scoring_enabled %}
+
+<h2>Points</h2>
+
+<div class="actionset">
+  <p>Points this week: <b>{{ request.identity.account.points_this_week }}</b>. See also: <a href="{% url 'user_stats' request.identity.account.username %}">your stats</a>, <a href="{% url 'user_verses' %}">your progress</a> or <a href="{% url 'leaderboard' %}?thisweek">the leaderboard</a>.</p>
+</div>
+
+{% endif %}
+
 <h2>Revise</h2>
 
 <div class="actionset">
