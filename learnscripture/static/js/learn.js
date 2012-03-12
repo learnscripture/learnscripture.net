@@ -592,8 +592,8 @@ var learnscripture =
                                    top: pos.top.toString() + "px",
                                   })
             // 4 = 2 * size of #id-typing border
-            $('#id-typing').css({height: (wordBox.outerHeight() - 4).toString() + "px",
-                                 width: (wordBox.outerWidth() - 4).toString() + "px"});
+            inputBox.css({height: (wordBox.outerHeight() - 4).toString() + "px",
+                          width: (wordBox.outerWidth() - 4).toString() + "px"});
         }
 
         var testStart = function() {
@@ -646,7 +646,7 @@ var learnscripture =
                 setProgress(currentStageIdx, (wordIdx + 1)/ wordList.length);
                 if (wordIdx + 1 == wordList.length) {
                     testComplete();
-                    $('#id-typing').blur();
+                    inputBox.blur();
                     $('#id-test-bar').hide();
                 } else {
                     moveSelectionRelative(1);
@@ -948,10 +948,16 @@ var learnscripture =
             // Now shrink the area
             var wordHeight = $('.previous-verse .word, .previous-verse .testedword').css('line-height');
             if (preferences.enableAnimations) {
+                inputBox.hide();
                 $('.previous-verse')
                     .css({display: 'table-cell'})
                     .animate({height: wordHeight},
-                             {duration: 500});
+                             {duration: 500,
+                              complete: function() {
+                                  inputBox.show().focus();
+                                  adjustTypingBox()
+                              }
+                              });
             }
             $('.previous-verse .word, .previous-verse .testedword')
                 .removeClass('word').addClass('testedword')
@@ -1276,10 +1282,10 @@ var learnscripture =
                 // Opera Mini is a thin client browser and doesn't support
                 // responding to key presses. It does, however, support
                 // input onchange events, which fires when the user preses 'Done'
-                $('#id-typing').change(function(ev) {
+                inputBox.change(function(ev) {
                     ev.preventDefault();
                     checkCurrentWord();
-                    $('#id-typing').focus();
+                    inputBox.focus();
                 });
             }
             $('.verse-dropdown').dropdown();
