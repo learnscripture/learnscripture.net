@@ -136,8 +136,9 @@ class Account(models.Model):
     @cached_property
     def points_this_week(self):
         n = timezone.now()
-        return self.score_logs.filter(created__gt=n - timedelta(7))\
+        val = self.score_logs.filter(created__gt=n - timedelta(7))\
             .aggregate(models.Sum('points'))['points__sum']
+        return val if val is not None else 0
 
     @cached_property
     def rank_this_week(self):
