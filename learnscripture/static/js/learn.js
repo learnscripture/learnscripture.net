@@ -218,7 +218,7 @@ var learnscripture =
         var flashMsg = function(elements, wordBox) {
             var pos = wordBox.position();
             elements.css({'top': (pos.top + wordBox.outerHeight() + 4).toString() + "px",
-                          'left': pos.left.toString() + "px"});
+                          'left': pos.left.toString() + "px"}).show();
 
             if (preferences.enableAnimations) {
                 elements.css({opacity:1}).animate({opacity: 0},
@@ -654,6 +654,7 @@ var learnscripture =
                     testComplete();
                     inputBox.blur();
                     $('#id-test-bar').hide();
+                    testingStatus.hide();
                 } else {
                     moveSelectionRelative(1);
                     adjustTypingBox();
