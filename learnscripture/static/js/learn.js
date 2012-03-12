@@ -409,6 +409,7 @@ var learnscripture =
             showInstructions(currentStageName);
             // reset selected word
             moveSelection(0);
+            adjustTypingBox();
 
             setProgress(currentStageIdx, 0);
         };
@@ -595,6 +596,17 @@ var learnscripture =
             return points;
         }
 
+        var adjustTypingBox = function() {
+            var wordBox = getWordAt(selectedWordIndex);
+            var pos = wordBox.position();
+            $('#id-test-bar').css({left:pos.left.toString() + "px",
+                                   top: pos.top.toString() + "px",
+                                  })
+            // 4 = 2 * size of #id-typing border
+            $('#id-typing').css({height: (wordBox.outerHeight() - 4).toString() + "px",
+                                 width: (wordBox.outerWidth() - 4).toString() + "px"});
+        }
+
         var testStart = function() {
             // Don't want to see a flash of words at the beginning,
             // so hide quickly
@@ -645,8 +657,11 @@ var learnscripture =
                 setProgress(currentStageIdx, (wordIdx + 1)/ wordList.length);
                 if (wordIdx + 1 == wordList.length) {
                     testComplete();
+                    $('#id-typing').blur();
+                    $('#id-test-bar').hide();
                 } else {
                     moveSelectionRelative(1);
+                    adjustTypingBox();
                 }
             };
             if (matchWord(wordStr, typed)) {
@@ -874,8 +889,6 @@ var learnscripture =
             markupVerse();
             $('#id-loading').hide();
             $('#id-controls').show();
-            setupStageList(verse);
-
             if (moveOld) {
                 scrollOutPreviousVerse();
                 $('.current-verse').show();
@@ -883,6 +896,7 @@ var learnscripture =
                 $('.previous-verse').remove()
                 $('.current-verse').show();
             }
+            setupStageList(verse);
             $('.selection-set-only').toggle(!isPassageType(currentVerseStatus));
 
             var nextBtns = $('#id-next-verse-btn, #id-context-next-verse-btn, #id-read-anyway-vext-verse-btn');
@@ -1263,6 +1277,12 @@ var learnscripture =
             $('#id-skip-verse-btn').click(skipVerse);
             $('#id-cancel-learning-btn').click(cancelLearning);
             $('#id-finish-btn').click(finishBtnClick);
+            $(window).resize(function() {
+                if (currentStage != null &&
+                    currentStage.testMode) {
+                    adjustTypingBox();
+                }
+            });
             if (typeof operamini != "undefined") {
                 // Opera Mini is a thin client browser and doesn't support
                 // responding to key presses. It does, however, support
