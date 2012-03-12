@@ -362,20 +362,9 @@ var learnscripture =
         };
 
         var showInstructions = function(stageName) {
-            if (preferences.enableAnimations) {
-                // Fade out old instructions, fade in the new
-                $('#id-instructions > div').animate(
-                    {opacity: 0},
-                    {duration: 150,
-                     queue: false,
-                     complete: function() {
-                         $('#id-instructions > div').hide();
-                         $('#id-instructions .instructions-' + stageName).show().animate({opacity: 1}, 150); }});
-            } else {
-                $('#id-instructions > div').css({opacity: 0});
-                $('#id-instructions > div').hide();
-                $('#id-instructions .instructions-' + stageName).show().css({opacity: 1});
-            }
+            $('#id-instructions > div').css({opacity: 0});
+            $('#id-instructions > div').hide();
+            $('#id-instructions .instructions-' + stageName).show().css({opacity: 1});
         };
 
         var setNextPreviousBtns = function() {
