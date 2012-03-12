@@ -489,7 +489,7 @@ p.large {
   background-color: #f0f0f0;
   }
 
-.current-verse, .previous-verse {
+.current-verse, .previous-verse, #id-typing {
   font-size: 20px;
   }
 
@@ -523,6 +523,20 @@ p.large {
   border-color: #C0C0C0;
   border-top-color: #D8D8D8;
   border-bottom-color: #9A9A9A;
+}
+
+
+#id-test-bar {
+  display: none;
+  position: absolute;
+  padding: 3px 1px; // Same as .word margin
+}
+
+#id-typing {
+  // These values are important for matching size of .word
+  padding: 0;
+  margin: 0;
+  border: 2px solid; // same as .word. See also adjustTypingBox() in learn.js
 }
 
 .word {
@@ -597,13 +611,6 @@ p.large {
 #id-help-btn {
   float: right;
 }
-
-#id-typing {
-  font-size: 18px;
-  height: 22px;
-  width:15em;
-  max-width:50%;
-  }
 
 .result-buttons {
   float: right;
@@ -868,7 +875,7 @@ body .score-log {
 @media screen and (max-width: 600px), screen and (max-height: 500px) {
 
   /* smaller fonts */
-  .current-verse, .previous-verse {
+  .current-verse, .previous-verse, #id-typing {
     font-size: 15px;
     }
 
@@ -881,6 +888,9 @@ body .score-log {
   }
   .word, .testedword {
     margin: 1px 0;
+  }
+  #id-test-bar {
+    padding: 1px 0; // same as .word margin
   }
 
   #id-instructions {
