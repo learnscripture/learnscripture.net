@@ -51,6 +51,7 @@ var learnscripture =
         var testedWords = null;
 
         var testingMistakes = null;
+        var hardMode = null;
 
         // Verse list
         var versesToLearn = null; // eventually a dictionary of index:verse
@@ -596,11 +597,26 @@ var learnscripture =
             $('#id-test-bar').css({left:pos.left.toString() + "px",
                                    top: pos.top.toString() + "px",
                                   })
+            var width;
+            if (isHardMode()) {
+                width = "6em";
+            } else {
+                width = (wordBox.outerWidth() - 4).toString() + "px";
+            }
             // 4 = 2 * size of #id-typing border
             inputBox.css({height: (wordBox.outerHeight() - 4).toString() + "px",
-                          width: (wordBox.outerWidth() - 4).toString() + "px"});
+                          width: width});
 
         }
+
+        var setHardMode = function(hard) {
+            hardMode = hard;
+            $('.current-verse').toggleClass('hard-mode', hard);
+        };
+
+        var isHardMode = function() {
+            return hardMode;
+        };
 
         var testStart = function() {
             // Don't want to see a flash of words at the beginning,
@@ -610,7 +626,7 @@ var learnscripture =
             testingStatus.text('');
             // After an certain point, we make things a bit harder.
             // Strength == 0.6 corresponds to about 10 days learning.
-            $('.current-verse').toggleClass('hard-mode', currentVerseStatus.strength > 0.6);
+            setHardMode(currentVerseStatus.strength > 0.6)
             $('#id-stage-caption2').html(' Points target: <b>' + getPointsTarget().toString() + '</b>');
         };
 
