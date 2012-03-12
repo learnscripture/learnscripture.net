@@ -13,6 +13,7 @@ from fabric.api import run, local, abort, env, put, settings, cd, task
 from fabric.decorators import runs_once
 from fabric.contrib.files import exists
 from fabric.context_managers import cd, lcd, settings, hide
+from fabric.operations import get
 
 # Host and login username:
 env.hosts = ['cciw@cciw.co.uk']
@@ -44,6 +45,8 @@ DJANGO_SERVER_RESTART = None
 
 src_dir = posixpath.join(DJANGO_APP_ROOT, SRC_SUBDIR)
 venv_dir = posixpath.join(DJANGO_APP_ROOT, VENV_SUBDIR)
+
+DB_USER, DB_NAME = "cciw_learnscripture", "cciw_learnscripture"
 
 
 def virtualenv(venv_dir):
@@ -211,4 +214,16 @@ def manage_py_command(*commands):
     with virtualenv(venv_dir):
         with cd(src_dir):
             run_venv("./manage.py %s" % ' '.join(commands))
+
+
+@task
+def get_live_db():
+    filename = "dump_%s.db" % DB_NAME
+    run("pg_dump -Fc -U %s -O -o -f ~/%s %s" % (DB_USER, filename, DB_NAME))
+    get("~/%s" % filename)
+
+
+@task
+def local_restore_from_dump(filename):
+    local("sudo -u postgres pg_restore -O -U learnscripture -c -d learnscripture < %s" % filename)
 
