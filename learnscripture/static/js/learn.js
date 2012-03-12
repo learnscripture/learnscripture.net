@@ -338,6 +338,10 @@ var learnscripture =
                 $('#id-next-verse-btn').addClass('primary');
             }
 
+            inputBox.blur();
+            $('#id-test-bar').hide();
+            testingStatus.hide();
+            bindDocKeyPress();
             showInstructions("results");
         };
 
@@ -668,9 +672,6 @@ var learnscripture =
                 setProgress(currentStageIdx, (wordIdx + 1)/ wordList.length);
                 if (wordIdx + 1 == wordList.length) {
                     testComplete();
-                    inputBox.blur();
-                    $('#id-test-bar').hide();
-                    testingStatus.hide();
                 } else {
                     moveSelectionRelative(1);
                     adjustTypingBox();
