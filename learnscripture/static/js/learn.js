@@ -215,7 +215,11 @@ var learnscripture =
 
         // ========== Messages ===========
 
-        var flashMsg = function(elements) {
+        var flashMsg = function(elements, wordBox) {
+            var pos = wordBox.position();
+            elements.css({'top': (pos.top + wordBox.outerHeight() + 4).toString() + "px",
+                          'left': pos.left.toString() + "px"});
+
             if (preferences.enableAnimations) {
                 elements.css({opacity:1}).animate({opacity: 0},
                                                   {duration: 1000, queue: false});
@@ -227,18 +231,19 @@ var learnscripture =
         var indicateSuccess = function() {
             var word = getWordAt(selectedWordIndex);
             word.addClass('correct').removeClass('selected');
-            flashMsg(testingStatus.attr({'class': 'correct'}).text("Correct!"));
+            flashMsg(testingStatus.attr({'class': 'correct'}).text("Correct!"), word);
         };
 
         var indicateMistake = function(mistakes, maxMistakes) {
             var msg = "Try again! (" + mistakes.toString() + "/" + maxMistakes.toString() + ")";
-            flashMsg(testingStatus.attr({'class': 'incorrect'}).text(msg));
+            flashMsg(testingStatus.attr({'class': 'incorrect'}).text(msg),
+                     getWordAt(selectedWordIndex));
         };
 
         var indicateFail = function() {
             var word = getWordAt(selectedWordIndex);
             word.addClass('incorrect');
-            flashMsg(testingStatus.attr({'class': 'incorrect'}).text("Incorrect"));
+            flashMsg(testingStatus.attr({'class': 'incorrect'}).text("Incorrect"), word);
         };
 
         // ========== Actions completed =============
@@ -594,6 +599,7 @@ var learnscripture =
             // 4 = 2 * size of #id-typing border
             inputBox.css({height: (wordBox.outerHeight() - 4).toString() + "px",
                           width: (wordBox.outerWidth() - 4).toString() + "px"});
+
         }
 
         var testStart = function() {
