@@ -269,9 +269,16 @@ def verse_sets_visible_for_request(request):
         return VerseSet.objects.public()
 
 
+def is_continuous_set(verse_list):
+    bvns = [v.bible_verse_number for v in verse_list]
+    return bvns == list(range(verse_list[0].bible_verse_number,
+                              verse_list[-1].bible_verse_number + 1))
+
+
 def view_verse_set(request, slug):
     c = {}
     verse_set = get_object_or_404(verse_sets_visible_for_request(request), slug=slug)
+
 
     version = None
     try:
@@ -296,6 +303,22 @@ def view_verse_set(request, slug):
     for vc in verse_choices:
         vc.verse = verses[vc.reference]
 
+    if (verse_set.set_type == VerseSetType.SELECTION and
+        len(verse_list) > 1 and is_continuous_set(verse_list)):
+        c['show_convert_to_passage'] = True
+
+        if request.method == 'POST':
+            if 'convert_to_passage_set' in request.POST:
+                verse_set.set_type = VerseSetType.PASSAGE
+                verse_set.save()
+                messages.info(request, "Verse set converted to 'passage' type")
+                c['show_convert_to_passage'] = False
+
+
+    if hasattr(request, 'identity'):
+        c['can_edit'] = verse_set.created_by_id == request.identity.account_id
+    else:
+        c['can_edit'] = False
     c['verse_set'] = verse_set
     c['verse_choices'] = verse_choices
     c['version'] = version
