@@ -13,7 +13,7 @@ Verse set: {{ verse_set.name }}
 {% block leftcolumn %}
 
 {% if verse_set.description %}
-<p>{{ verse_set.description }}</p>
+<p>{{ verse_set.description|linebreaksbr }}</p>
 {% endif %}
 {% if verse_choices %}
 {% if verse_set.is_passage %}
