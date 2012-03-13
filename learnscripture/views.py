@@ -595,3 +595,14 @@ def password_reset_confirm(request, uidb36=None, token=None):
         'validlink': validlink,
     }
     return render(request, 'learnscripture/password_reset_confirm.html', context)
+
+
+def csrf_failure(request, reason=""):
+    """
+    Default view used when request fails CSRF protection
+    """
+    from django.middleware.csrf import REASON_NO_CSRF_COOKIE
+    resp = render(request, "csrf_failure.html",
+                  {'no_csrf_cookie': reason == REASON_NO_CSRF_COOKIE})
+    resp.status_code = 403
+    return resp

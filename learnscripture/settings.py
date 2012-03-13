@@ -82,6 +82,8 @@ STATICFILES_FINDERS = (
 
 LOGIN_URL = '/admin/'
 
+CSRF_FAILURE_VIEW = 'learnscripture.views.csrf_failure'
+
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
