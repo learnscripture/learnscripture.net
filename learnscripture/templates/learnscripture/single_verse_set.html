@@ -68,13 +68,25 @@ Verse set: {{ verse_set.name }}
 No verses in this set!
 {% endif %}
 
+{% if can_edit and show_convert_to_passage %}
+<hr>
+<p>This looks like a continuous set of verses. These are much better learnt
+  using a 'passage' set, rather than a 'selection' set. You can convert using
+  the button below:
+<form action="" method="POST">
+{% csrf_token %}
+<input type="submit" name="convert_to_passage_set" value="Convert to passage set"
+       class="btn"/>
+</form>
+<hr>
 
+{% endif %}
 
 <form action="{% url 'choose' %}" method="POST">
   {% csrf_token %}
   <input type="hidden" name="verseset_id" value="{{ verse_set.id }}">
   <input type="hidden" name="version_slug" value="{{ version.slug }}">
-  {% if verse_set.created_by_id == request.identity.account_id %}
+  {% if can_edit %}
   <a class="btn" href="{% url 'edit_set' slug=verse_set.slug %}">Edit</a>
   {% endif %}
   {% if verse_choices %}
