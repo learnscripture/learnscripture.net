@@ -71,7 +71,7 @@ Choose verses
       </form>
       <h3>{{ vs.name }}</h3>
       {% if vs.description %}
-      <p>{{ vs.description }}</p>
+      <p>{{ vs.description|linebreaksbr }}<br/><br/></p>
       {% endif %}
       {% if not vs.is_passage and vs.verse_choices.all %}
       <p>Includes the following verses:
