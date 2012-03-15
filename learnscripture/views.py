@@ -190,7 +190,7 @@ def choose(request):
         version = None
         try:
             version = BibleVersion.objects.get(slug=request.POST['version_slug'])
-        except KeyError, BibleVersion.DoesNotExist:
+        except (KeyError, BibleVersion.DoesNotExist):
             version = identity.default_bible_version
 
         # Handle choose set
@@ -283,7 +283,7 @@ def view_verse_set(request, slug):
     version = None
     try:
         version = BibleVersion.objects.get(slug=request.GET['version'])
-    except KeyError, BibleVersion.DoesNotExist:
+    except (KeyError, BibleVersion.DoesNotExist):
         pass
 
     if version is None:
@@ -513,7 +513,7 @@ def leaderboard(request):
     page_num = None # 1-indexed page page
     try:
         page_num = int(request.GET['p'])
-    except KeyError, ValueError:
+    except (KeyError, ValueError):
         page_num = 1
 
     thisweek = 'thisweek' in request.GET
