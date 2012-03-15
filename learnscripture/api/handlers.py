@@ -98,7 +98,6 @@ class ActionCompleteHandler(BaseHandler):
     @require_identity_method
     def create(self, request):
         identity = request.identity
-        learningLogger.info("Action %s complete", request.data.get('stage','[None]'), extra=extra(identity=identity, data=request.data, request=request))
 
         verse_status = get_verse_status(request.data)
         reference = verse_status['reference']
