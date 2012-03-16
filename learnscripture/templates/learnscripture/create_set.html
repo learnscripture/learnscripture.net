@@ -3,11 +3,11 @@
 {% load bootstrap %}
 
 {% block title %}
-{% if new_verse_set %}Create verse set{% else %}Edit verse set{% endif %}
+{{ title }}
 {% endblock %}
 
 {% block page_title %}
-{% if new_verse_set %}Create verse set{% else %}Edit verse set{% endif %}
+{{ title }}
 {% endblock %}
 
 {% block leftcolumn %}
@@ -16,33 +16,16 @@
 <p>{{ reason }}</p>
 {% else %}
 
+{% if set_type == 'SELECTION' %}
 
+<form id="id-selection-verse-set-form" action="" method="POST">
+  <h3>About this set</h3>
+  {% csrf_token %}
+  {{ verse_set_form|bootstrap }}
 
-{% if new_verse_set %} {# Allow choice of type and show tabs #}
-<p>Create your own set of set of verses to learn. You can either create a
-'selection' set, where each item will be learnt individually, or a 'passage' for
-learning a continuous set of verses.
-</p>
-<ul class="tabs" data-tabs="tabs">
-  <li {% if active_tab == 'selection' %}class="active"{% endif %}><a href="#id-tab-selection">Selection</a></li>
-  <li {% if active_tab == 'passage' %}class="active"{% endif %}><a href="#id-tab-passage">Passage</a></li>
-</ul>
+  <h3>Add verses</h3>
 
-{% endif %}
-
-<div class="pill-content">
-  <div {% if active_tab == 'selection' %}class="active"{% endif %} id="id-tab-selection">
-
-    {% if new_verse_set %}
-    {% endif %}
-
-    <form id="id-selection-verse-set-form" action="" method="POST">
-      {% csrf_token %}
-      {{ selection_verse_set_form|bootstrap }}
-
-    <h3>Add verses</h3>
-
-    <div id="id-selection-verse-list">
+  <div id="id-selection-verse-list">
     <p>Drag/drop or use the arrows to re-order.</p>
 
     <table>
@@ -64,90 +47,88 @@ learning a continuous set of verses.
         {% endfor %}
       </tbody>
     </table>
-    </div>
+  </div>
 
-    <div id="id-selection-verse-selector">
-      {{ selection_verse_selector_form|bootstrap }}
-    </div>
+  <div id="id-selection-verse-selector">
+    {{ selection_verse_selector_form|bootstrap }}
+  </div>
 
-    <div id="id-selection-verse-message">
-    </div>
+  <div id="id-selection-verse-message">
+  </div>
 
-    <div class="input">
-      <a href="#" id="id-add-verse-btn" class="btn">Add</a>
-    </div>
+  <div class="input">
+    <a href="#" id="id-add-verse-btn" class="btn">Add</a>
+  </div>
 
-    <div class="actions">
-      <input type="hidden" value="" id="id-selection-reference-list"  name="selection-reference-list">
-      <input name="selection-save" type="submit" class="btn primary" value="Save verse set" id="id-selection-save-btn">
-    </div>
+  <div class="actions">
+    <input type="hidden" value="" id="id-selection-reference-list"  name="selection-reference-list">
+    <input name="selection-save" type="submit" class="btn primary" value="Save verse set" id="id-selection-save-btn">
+  </div>
 
-    </form>
+</form>
 
+{% endif %}
+
+{% if set_type == 'PASSAGE' %}
+
+<form id="id-passage-verse-set-form" action="" method="POST">
+  {% csrf_token %}
+
+  <h3>Choose passage</h3>
+
+  <div id="id-passage-verse-selector">
+    {{ passage_verse_selector_form|bootstrap }}
+  </div>
+
+
+  <div class="input">
+    <a href="#" id="id-lookup-passage-btn" class="btn">Lookup</a>
+  </div>
+
+  <br/>
+  <div id="id-passage-verse-message">
+  </div>
+
+  <div id="id-passage-verse-list">
+    <p>For passages more than about 10 verses, it helps if you can add
+      'breaks' at the natural breaks in the passage, to split it up into
+      sections.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Break</th>
+          <th>Reference</th>
+          <th>Text ({{ request.identity.default_bible_version.slug }})</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for v in passage_verses %}
+        <tr>
+          <td><input type="checkbox" {% if v.break_here %}checked{% endif %}/></td>
+          <td>{{ v.reference }}</td>
+          <td>{{ v.text }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
 
   </div>
 
-  <div {% if active_tab == 'passage' %}class="active"{% endif %} id="id-tab-passage">
+  <h3>Optional extra info</h3>
 
-    <form id="id-passage-verse-set-form" action="" method="POST">
-      {% csrf_token %}
+  {{ verse_set_form|bootstrap }}
 
-      <h3>Choose passage</h3>
-
-      <div id="id-passage-verse-selector">
-        {{ passage_verse_selector_form|bootstrap }}
-      </div>
-
-
-      <div class="input">
-        <a href="#" id="id-lookup-passage-btn" class="btn">Lookup</a>
-      </div>
-
-      <br/>
-      <div id="id-passage-verse-message">
-      </div>
-
-      <div id="id-passage-verse-list">
-        <p>For passages more than about 10 verses, it helps if you can add
-        'breaks' at the natural breaks in the passage, to split it up into
-        sections.</p>
-
-      <table>
-        <thead>
-          <tr>
-            <th>Break</th>
-            <th>Reference</th>
-            <th>Text ({{ request.identity.default_bible_version.slug }})</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for v in passage_verses %}
-          <tr>
-            <td><input type="checkbox" {% if v.break_here %}checked{% endif %}/></td>
-            <td>{{ v.reference }}</td>
-            <td>{{ v.text }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-
-      </div>
-
-      <h3>Optional extra info</h3>
-
-      {{ passage_verse_set_form|bootstrap }}
-
-      <div class="actions">
-        <input type="hidden" value="" id="id-passage-reference-list"  name="passage-reference-list">
-        <input type="hidden" value="" id="id-passage-break-list"  name="passage-break-list">
-        <input name="passage-save" type="submit" class="btn primary" value="Save verse set" id="id-passage-save-btn">
-      </div>
-
-    </form>
-
+  <div class="actions">
+    <input type="hidden" value="" id="id-passage-reference-list"  name="passage-reference-list">
+    <input type="hidden" value="" id="id-passage-break-list"  name="passage-break-list">
+    <input name="passage-save" type="submit" class="btn primary" value="Save verse set" id="id-passage-save-btn">
   </div>
-</div>
 
+</form>
+
+
+{% endif %}
 
 {% endif %}
 

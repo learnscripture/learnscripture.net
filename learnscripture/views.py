@@ -343,26 +343,40 @@ def add_passage_breaks(verse_list, breaks):
 
 
 @require_preferences
-def create_set(request, slug=None):
-    # This view handles a lot (too much):
-    #
-    # In 'create mode', it has two tabs, one for creating selection sets, one
-    # for passage sets. So it has to accept POST requests from either
-    # and handle appropriately.
-    #
-    # It also handles editing of the same verse sets, but in edit mode there
-    # will only be the one tab.
+def create_set_menu(request):
+    return render(request, 'learnscripture/create_set_menu.html', {})
+
+
+@require_preferences
+def create_selection_set(request, slug=None):
+    return create_or_edit_set(request, set_type=VerseSetType.SELECTION, slug=slug)
+
+
+@require_preferences
+def create_passage_set(request, slug=None):
+    return create_or_edit_set(request, set_type=VerseSetType.PASSAGE, slug=slug)
+
+
+@require_preferences
+def edit_set(request, slug=None):
+    return create_or_edit_set(request, slug=slug)
+
+
+def create_or_edit_set(request, set_type=None, slug=None):
+
+    # This view handles a lot (too much)!
 
     version = request.identity.default_bible_version
 
     if slug is not None:
         verse_set = get_object_or_404(request.identity.account.verse_sets_created.filter(slug=slug))
+        set_type = verse_set.set_type
     else:
         verse_set = None
 
     allowed, reason = auth.check_allowed(request, auth.Feature.CREATE_VERSE_SET)
     if not allowed:
-        return render(request, 'learnscripture/create_set.html',
+        return render(request, 'learnscripture/create_set_menu.html',
                       {'barred': True,
                        'reason': reason,
                        'new_verse_set': verse_set == None})
@@ -378,42 +392,18 @@ def create_set(request, slug=None):
         return verses
 
 
-    if verse_set is None:
-        if 'passage' in request.GET:
-            c['active_tab'] = 'passage'
-        else:
-            c['active_tab'] = 'selection' # The default.
-    else:
-        if verse_set.set_type == VerseSetType.SELECTION:
-            c['active_tab'] = 'selection'
-        else:
-            c['active_tab'] = 'passage'
+    c['set_type'] = VerseSetType.name_for_value[set_type]
 
     if request.method == 'POST':
-        verse_set_type = None
-        if verse_set is not None:
-            verse_set_type = verse_set.set_type
-
-        if verse_set_type is None:
-            if 'selection-save' in request.POST:
-                verse_set_type = VerseSetType.SELECTION
-            else:
-                verse_set_type = VerseSetType.PASSAGE
-
-        assert verse_set_type is not None
-
         orig_verse_set_public = False if verse_set is None else verse_set.public
 
-        selection_form = VerseSetForm(request.POST, instance=verse_set, prefix='selection')
-        passage_form = VerseSetForm(request.POST, instance=verse_set, prefix='passage')
-
-        if verse_set_type == VerseSetType.SELECTION:
-            form = selection_form
+        if set_type == VerseSetType.SELECTION:
+            form = VerseSetForm(request.POST, instance=verse_set, prefix='selection')
             # Need to propagate the references even if it doesn't validate,
             # so do this work here:
             refs = request.POST.get('selection-reference-list', '')
         else:
-            form = passage_form
+            form = VerseSetForm(request.POST, instance=verse_set, prefix='passage')
             refs = request.POST.get('passage-reference-list', '')
 
         ref_list_raw = refs.split('|')
@@ -431,7 +421,7 @@ def create_set(request, slug=None):
 
         if form.is_valid():
             verse_set = form.save(commit=False)
-            verse_set.set_type = verse_set_type
+            verse_set.set_type = set_type
             verse_set.created_by = request.identity.account
             verse_set.breaks = breaks
 
@@ -469,7 +459,7 @@ def create_set(request, slug=None):
         else:
             # Invalid forms
             verse_list =  mk_verse_list(ref_list, verse_dict)
-            if verse_set_type == VerseSetType.SELECTION:
+            if set_type == VerseSetType.SELECTION:
                 c['selection_verses'] = verse_list
             else:
                 c['passage_verses'] = add_passage_breaks(verse_list, breaks)
@@ -478,18 +468,16 @@ def create_set(request, slug=None):
                                                                         )
 
     else:
-        # GET - either editing existing objects (one form)...
         if verse_set is not None:
-            if verse_set.set_type == VerseSetType.SELECTION:
-                selection_form = VerseSetForm(instance=verse_set, prefix='selection')
-                passage_form = None
+            if set_type == VerseSetType.SELECTION:
+                form = VerseSetForm(instance=verse_set, prefix='selection')
             else:
-                selection_form = None
-                passage_form = VerseSetForm(instance=verse_set, prefix='passage')
+                form = VerseSetForm(instance=verse_set, prefix='passage')
         else:
-            #  or two empty forms
-            selection_form = VerseSetForm(instance=None, prefix='selection')
-            passage_form = VerseSetForm(instance=None, prefix='passage')
+            if set_type == VerseSetType.SELECTION:
+                form = VerseSetForm(instance=None, prefix='selection')
+            else:
+                form = VerseSetForm(instance=None, prefix='passage')
 
             c['passage_verse_selector_form'] = PassageVerseSelector(prefix='passage')
 
@@ -505,10 +493,12 @@ def create_set(request, slug=None):
                                                                         prefix='passage',
                                                                         )
 
-
     c['new_verse_set'] = verse_set == None
-    c['selection_verse_set_form'] = selection_form
-    c['passage_verse_set_form'] = passage_form
+    c['verse_set_form'] = form
+    c['title'] = ('Edit verse set' if verse_set is not None
+                  else 'Create selection set' if set_type == VerseSetType.SELECTION
+                  else 'Create passage set')
+
     c['selection_verse_selector_form'] = VerseSelector(prefix='selection')
     return render(request, 'learnscripture/create_set.html', c)
 

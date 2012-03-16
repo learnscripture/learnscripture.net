@@ -17,6 +17,7 @@ def make_choices(name, choice_list):
         values = []
         titles = {}
         choice_list = []
+        name_for_value = {}
 
         @classmethod
         def get_value_for_name(cls, name):
@@ -33,5 +34,6 @@ def make_choices(name, choice_list):
         Choices.names.append(name)
         Choices.titles[v] = title
         Choices.choice_list.append((v, title))
+        Choices.name_for_value[v] = name
 
     return Choices

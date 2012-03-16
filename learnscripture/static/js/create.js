@@ -147,7 +147,7 @@ var learnscripture =
     })(learnscripture || {}, $);
 
 $(document).ready(function() {
-    if ($('#id-add-verse-btn').length > 0) {
+    if ($('#id-selection-verse-set-form, #id-passage-verse-set-form').length > 0) {
         learnscripture.setupCreateVerseSetControls();
     }
 });
