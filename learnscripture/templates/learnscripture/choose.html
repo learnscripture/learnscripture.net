@@ -93,7 +93,7 @@ Choose verses
       <a href="{% url 'create_set' %}?passage">create a 'passage' verse set</a>.
     </p>
 
-    <form action="" method="GET" class="quickfind">
+    <form action="" method="GET" class="quickfind" id="id-verse-find-form">
       <div class="clearfix">
         <label for="id_quick_find">Quick find</label>
         <div class="input">
@@ -112,15 +112,17 @@ Choose verses
             <option value="{{ b }}">{{ b }}</option>
             {% endfor %}
           </select>
+          <nobr>
           ch
           <select name="chapter_start">
           </select>
-          :
+          v
           <select name="verse_start">
           </select>
           -
           <select name="verse_end">
           </select>
+          </nobr>
         </div>
       </div>
 
@@ -135,7 +137,10 @@ Choose verses
 
      <div class="input">
         <input id="id_lookup" type="submit" name="lookup" value="Lookup verse" class="btn primary">
-      </div>
+     </div>
+     <div class="clearfix error">
+       <p id="id_form_all_errors"></p>
+     </div>
     </form>
 
     {% if individual_search_msg %}

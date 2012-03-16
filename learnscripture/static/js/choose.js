@@ -132,11 +132,19 @@ var learnscripture =
                         'quick_find': $(ev.target).closest('form').find('input[name=quick_find]').val(),
                         'version_slug': $('#id-version-select').val()
                     },
-                    success: loadResults
+                    success: loadResults,
+                    error:  function(jqXHR, textStatus, errorThrown) {
+                        if (jqXHR.status == 400) {
+                            learnscripture.handleFormValidationErrors($('#id-verse-find-form'), '', jqXHR);
+                        } else {
+                            learnscripture.handlerAjaxError(jqXHR, textStatus, errorThrown);
+                        }
+                    }
                    });
         };
 
         var loadResults = function(results) {
+            $('#id-verse-find-form .validation-error').remove();
             var d = $('#id_individual_search_results');
             d.html($('#id_search_result_template').render(results));
             learnscripture.setupNeedsPreferencesControls(d);

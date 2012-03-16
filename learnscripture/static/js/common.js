@@ -68,9 +68,13 @@ var learnscripture = (function(learnscripture, $) {
         form.find(".error").removeClass("error");
         $.each(errors, function(key, val) {
             $.each(val, function(idx, msg) {
-                if (key == '__all__') { return; }
-                var formElem = $('#id_' + prefix + key);
-                var p = formElem.parent();
+                var p;
+                if (key == '__all__') {
+                    p = $('#id_' + prefix + 'form_all_errors')
+                } else {
+                    var formElem = $('#id_' + prefix + key);
+                    p = formElem.parent();
+                }
                 if (p.find("ul.validation-error").length == 0) {
                     p.append("<ul class='validation-error'></ul>");
                 }
