@@ -9,6 +9,7 @@ from django.db import models
 from django.db.models import F
 from django.utils import timezone
 from django.utils.functional import cached_property
+from django.utils.html import escape, mark_safe
 
 # BibleVersion and Verse are pseudo static, so make extensive use of caching.
 # VerseSets and VerseChoices also rarely change, and it doesn't matter too much
@@ -197,8 +198,10 @@ class VerseManager(caching.base.CachingManager):
         # Do an 'AND' on all terms
         word_params = list(intersperse(words, ' & '))
         search_clause = ' || ' .join(['%s'] * len(word_params))
-        return models.Manager.raw(self, """
-          SELECT id, version_id, reference, text, book_number, chapter_number, verse_number,
+        l = list(models.Manager.raw(self, """
+          SELECT id, version_id, reference, text,
+                 ts_headline(text, query, 'StartSel = **, StopSel = **') as highlighted_text,
+                 book_number, chapter_number, verse_number,
                  bible_verse_number, ts_rank(text_tsv, query) as rank
           FROM bibleverses_verse, to_tsquery(""" + search_clause + """) query
           WHERE
@@ -206,7 +209,22 @@ class VerseManager(caching.base.CachingManager):
              AND version_id = %s
           ORDER BY rank DESC
           LIMIT %s;
-""", word_params + [version.id, limit])
+""", word_params + [version.id, limit]))
+
+
+        # Convert highlighted_text to HTML
+        for v in l:
+            bits = v.highlighted_text.split('**')
+            out = []
+            in_bold = False
+            for b in bits:
+                html = escape(b)
+                if in_bold:
+                    html = u'<b>' + html + u'</b>'
+                out.append(html)
+                in_bold = not in_bold
+            v.highlighted_text = mark_safe(u''.join(out))
+        return l
 
 
 class Verse(caching.base.CachingMixin, models.Model):
