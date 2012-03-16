@@ -174,6 +174,28 @@ def start(request):
     return render(request, 'learnscripture/start.html', c)
 
 
+def context_for_version_select(request):
+    return {'bible_versions': bible_versions_for_request(request)}
+
+
+def context_for_quick_find(request):
+    """
+    Returns the context data needed to render a version select box
+    """
+    d = {'BIBLE_BOOKS': BIBLE_BOOKS,
+         'default_bible_version': default_bible_version_for_request(request)
+         }
+    d.update(context_for_version_select(request))
+    return d
+
+
+def default_bible_version_for_request(request):
+    if has_preferences(request):
+        return request.identity.default_bible_version
+    else:
+        return get_default_bible_version()
+
+
 # No 'require_preferences' or 'require_identity' so that bots can browse this
 # page and the linked pages unhindered, for SEO.
 
@@ -181,12 +203,7 @@ def choose(request):
     """
     Choose a verse or verse set
     """
-
-
-    if has_preferences(request):
-        default_bible_version = request.identity.default_bible_version
-    else:
-        default_bible_version = get_default_bible_version()
+    default_bible_version = default_bible_version_for_request(request)
 
     if request.method == "POST":
         if not has_preferences(request):
@@ -237,24 +254,9 @@ def choose(request):
     else: # popular, the default
         verse_sets = verse_sets.order_by('-popularity')
     c['verse_sets'] = verse_sets
+    c['active_tab'] = 'verseset'
 
-    if 'lookup' in request.GET:
-        c['active_tab'] = 'individual'
-        query = request.GET.get('quick_find')
-
-        try:
-            verse_list = default_bible_version.get_verse_list(query,
-                                                max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
-        except InvalidVerseReference as e:
-            c['individual_search_msg'] = e.message
-        else:
-            c['individual_search_results'] = verse_list
-    else:
-        c['active_tab'] = 'verseset'
-
-    c['BIBLE_BOOKS'] = BIBLE_BOOKS
-    c['bible_versions'] = bible_versions_for_request(request)
-    c['default_bible_version'] = default_bible_version
+    c.update(context_for_quick_find(request))
 
     return render(request, 'learnscripture/choose.html', c)
 
@@ -326,7 +328,7 @@ def view_verse_set(request, slug):
     c['verse_set'] = verse_set
     c['verse_choices'] = verse_choices
     c['version'] = version
-    c['bible_versions'] = bible_versions_for_request(request)
+    c.update(context_for_version_select(request))
     return render(request, 'learnscripture/single_verse_set.html', c)
 
 
