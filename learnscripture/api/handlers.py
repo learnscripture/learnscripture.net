@@ -19,13 +19,13 @@ from piston.utils import rc
 
 from accounts.forms import PreferencesForm
 from accounts.models import Account
-from bibleverses.models import UserVerseStatus, Verse, StageType, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, MAX_VERSE_QUERY_SIZE
+from bibleverses.models import UserVerseStatus, Verse, StageType, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, MAX_VERSE_QUERY_SIZE, BibleVersion, quick_find
 from bibleverses.forms import VerseSelector, PassageVerseSelector
 from learnscripture import session
 from learnscripture.decorators import require_identity_method
 from learnscripture.forms import SignUpForm, LogInForm, AccountPasswordResetForm
 from learnscripture.utils.logging import extra
-from learnscripture.views import session_stats
+from learnscripture.views import session_stats, bible_versions_for_request
 
 
 logger = logging.getLogger(__name__)
@@ -305,3 +305,32 @@ class ScoreLogs(BaseHandler):
     def read(self, request):
         return request.identity.get_score_logs(session.get_learning_session_start(request))
 
+
+class VerseFind(BaseHandler):
+    allowed_methods = ('GET',)
+
+    def read(self, request):
+        try:
+            q = request.GET['quick_find']
+            version_slug = request.GET['version_slug']
+        except KeyError:
+            return rc.BAD_REQUEST
+
+        try:
+            version = bible_versions_for_request(request).get(slug=version_slug)
+        except BibleVersion.DoesNotExist:
+            return rc.BAD_REQUEST
+
+        # Can't get 'fields' to work properly for this case, so pack into
+        # dictionaries.
+        results = quick_find(q, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
+        l = []
+        for r in results:
+            l.append(dict(reference=r['reference'],
+                          book_name=r['verses'][0].book_name,
+                          version_slug=version_slug,
+                          verses=[dict(text=v.text,
+                                       chapter_number=v.chapter_number,
+                                       verse_number=v.verse_number)
+                                  for v in r['verses']]))
+        return l

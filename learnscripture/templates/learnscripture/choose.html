@@ -89,15 +89,52 @@ Choose verses
   </div>
 
   <div {% if active_tab == 'individual' %}class="active"{% endif %} id="id-tab-individual">
-    <p>Choose a verse. You can combine a few verses together by entering
-      a value in the 'End verse' box. For long passages, you should
-      <a href="{% url 'create_set' %}?passage">create an 'extended passage' verse set</a>.
+    <p>Choose a verse (or a few verses). For long passages, you should
+      <a href="{% url 'create_set' %}?passage">create a 'passage' verse set</a>.
     </p>
 
-    <form action="" method="GET">
-      {{ verse_form|bootstrap }}
-      <div class="input">
-        <input type="submit" name="lookup" value="Lookup verse" class="btn primary">
+    <form action="" method="GET" class="quickfind">
+      <div class="clearfix">
+        <label for="id_quick_find">Quick find</label>
+        <div class="input">
+          <input id="id_quick_find" type="text" value="" name="quick_find">
+          <br/>
+          example: <b>Matt 28:19</b> or <b>make disciples</b>
+        </div>
+      </div>
+
+      <div class="clearfix">
+        <label for="id_book">Select</label>
+        <div class="input">
+          <select name="book" id="id_book">
+            <option value="">----</option>
+            {% for b in BIBLE_BOOKS %}
+            <option value="{{ b }}">{{ b }}</option>
+            {% endfor %}
+          </select>
+          ch
+          <select name="chapter_start">
+          </select>
+          :
+          <select name="verse_start">
+          </select>
+          -
+          <select name="verse_end">
+          </select>
+        </div>
+      </div>
+
+      <div class="clearfix">
+        <label for="id-version-select">Version</label>
+        <div class="input">
+          {% with current_version=default_bible_version %}
+          {% include "learnscripture/version_select.html" %}
+          {% endwith %}
+        </div>
+      </div>
+
+     <div class="input">
+        <input id="id_lookup" type="submit" name="lookup" value="Lookup verse" class="btn primary">
       </div>
     </form>
 
@@ -105,23 +142,28 @@ Choose verses
     <div class="alert-message warning">{{ individual_search_msg }}</div>
     {% endif %}
 
-    {% if individual_search_results %}
-    <div class="actionset">
-      <form action="" method="POST">
-        {% csrf_token %}
-        <input type="hidden" name="reference" value="{{ reference }}">
-        <input type="submit" class="btn primary needs-preferences" value="Learn">
-      </form>
-      <h3>{{ individual_search_results.0.book_name }}</h3>
-      <div class="verselist">
-      {% for v in individual_search_results %}
-      <div class="verse">
-        <span class="versenumber">{{ v.chapter_number }}:{{ v.verse_number }}</span> {{ v.text }}
-      </div>
-      {% endfor %}
-      </div>
+    <div id="id_individual_search_results">
     </div>
-    {% endif %}
+
+    <script id="id_search_result_template" type="text/x-jsrender">
+      {# template for id_individual_search_results #}
+      <div class="actionset">
+        <form action="" method="POST">
+          {% csrf_token %}
+          <input type="hidden" name="reference" value="[[>reference]]">
+          <input type="hidden" name="version_slug" value="[[>version_slug]]">
+          <input type="submit" class="btn primary needs-preferences" value="Learn">
+        </form>
+        <h3>[[>book_name]]</h3>
+        <div class="verselist">
+          [[for verses]]
+          <div class="verse">
+            <span class="versenumber">[[>chapter_number]]:[[>verse_number]]</span> [[>text]]
+          </div>
+          [[/for]]
+        </div>
+      </div>
+    </script>
 
   </div>
 

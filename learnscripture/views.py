@@ -181,6 +181,13 @@ def choose(request):
     """
     Choose a verse or verse set
     """
+
+
+    if has_preferences(request):
+        default_bible_version = request.identity.default_bible_version
+    else:
+        default_bible_version = get_default_bible_version()
+
     if request.method == "POST":
         if not has_preferences(request):
             # Shouldn't get here if UI preferences javascript is working right.
@@ -191,7 +198,7 @@ def choose(request):
         try:
             version = BibleVersion.objects.get(slug=request.POST['version_slug'])
         except (KeyError, BibleVersion.DoesNotExist):
-            version = identity.default_bible_version
+            version = default_bible_version
 
         # Handle choose set
         vs_id = request.POST.get('verseset_id', None)
@@ -218,6 +225,10 @@ def choose(request):
     c = {}
     verse_sets = verse_sets_visible_for_request(request).order_by('name').prefetch_related('verse_choices')
 
+    # Searching for verse sets is done via this view.
+    # But looking up individual verses is done by AJAX,
+    # so is missing here.
+
     if 'q' in request.GET:
         verse_sets = verse_sets.filter(name__icontains=request.GET['q'])
 
@@ -229,28 +240,21 @@ def choose(request):
 
     if 'lookup' in request.GET:
         c['active_tab'] = 'individual'
-        verse_form = VerseSelector(request.GET)
-        if verse_form.is_valid():
-            reference = verse_form.make_reference()
-            c['reference'] = reference
+        query = request.GET.get('quick_find')
 
-            if has_preferences(request):
-                version = request.identity.default_bible_version
-            else:
-                version = get_default_bible_version()
-
-            try:
-                verse_list = version.get_verse_list(reference,
-                                                    max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
-            except InvalidVerseReference as e:
-                c['individual_search_msg'] = e.message
-            else:
-                c['individual_search_results'] = verse_list
+        try:
+            verse_list = default_bible_version.get_verse_list(query,
+                                                max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
+        except InvalidVerseReference as e:
+            c['individual_search_msg'] = e.message
+        else:
+            c['individual_search_results'] = verse_list
     else:
-        verse_form = VerseSelector()
         c['active_tab'] = 'verseset'
 
-    c['verse_form'] = verse_form
+    c['BIBLE_BOOKS'] = BIBLE_BOOKS
+    c['bible_versions'] = bible_versions_for_request(request)
+    c['default_bible_version'] = default_bible_version
 
     return render(request, 'learnscripture/choose.html', c)
 
