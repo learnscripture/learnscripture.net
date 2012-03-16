@@ -323,7 +323,11 @@ class VerseFind(BaseHandler):
 
         # Can't get 'fields' to work properly for this case, so pack into
         # dictionaries.
-        results = quick_find(q, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
+        try:
+            results = quick_find(q, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
+        except InvalidVerseReference as e:
+            return validation_error_response({'__all__': [e.message]})
+
         l = []
         for r in results:
             l.append(dict(reference=r['reference'],
