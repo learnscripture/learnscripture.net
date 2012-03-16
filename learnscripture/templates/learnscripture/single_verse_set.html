@@ -49,13 +49,9 @@ Verse set: {{ verse_set.name }}
   {{ version.full_name }} ({{ version.short_name }})
   {% if version.url %}</a>{% endif %}
  | Change
-  <select id="id-version-select" name="version">
-    {% for v in bible_versions %}
-    <option value="{{ v.slug }}"
-            {% if v.slug == version.slug %}selected{% endif %}
-            >{{ v.short_name }}</option>
-    {% endfor %}
-  </select>
+  {% with current_version=version %}
+  {% include "learnscripture/version_select.html" %}
+  {% endwith %}
 </div>
 </form>
 
