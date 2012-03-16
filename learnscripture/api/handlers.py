@@ -13,6 +13,7 @@ from django.template.loader import render_to_string
 from django.utils.functional import wraps
 from django.utils import simplejson
 from django.utils import timezone
+from django.utils.html import escape, mark_safe
 
 from piston.handler import BaseHandler
 from piston.utils import rc
@@ -306,6 +307,25 @@ class ScoreLogs(BaseHandler):
         return request.identity.get_score_logs(session.get_learning_session_start(request))
 
 
+
+def html_format_text(verse):
+    # Convert highlighted_text to HTML
+    if hasattr(verse, 'highlighted_text'):
+        t = verse.highlighted_text
+    else:
+        t = verse.text
+    bits = t.split('**')
+    out = []
+    in_bold = False
+    for b in bits:
+        html = escape(b)
+        if in_bold:
+            html = u'<b>' + html + u'</b>'
+        out.append(html)
+        in_bold = not in_bold
+    return mark_safe(u''.join(out))
+
+
 class VerseFind(BaseHandler):
     allowed_methods = ('GET',)
 
@@ -334,7 +354,7 @@ class VerseFind(BaseHandler):
                           book_name=r.verses[0].book_name,
                           version_slug=version_slug,
                           verses=[dict(text=v.text,
-                                       highlighted_text=v.highlighted_text,
+                                       html_text=html_format_text(v),
                                        chapter_number=v.chapter_number,
                                        verse_number=v.verse_number)
                                   for v in r.verses]))
