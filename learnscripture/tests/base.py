@@ -15,8 +15,9 @@ class LiveServerTests(LiveServerTestCase):
     @classmethod
     def setUpClass(cls):
         cls.driver = webdriver.Chrome() # Using Chrome because we have problem with drag and drop for Firefox
-        cls.driver.implicitly_wait(30)
+        cls.driver.implicitly_wait(1)
         super(LiveServerTests, cls).setUpClass()
+
 
     @classmethod
     def tearDownClass(cls):
