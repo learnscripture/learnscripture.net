@@ -21,7 +21,7 @@ class LearnTests(LiveServerTests):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json']
 
-    kjv_john_3_16 = "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life. John 3:16"
+    kjv_john_3_16 = "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life. John 3 16"
 
     def choose_verse_set(self, name):
         verse_set = VerseSet.objects.get(name=name)
