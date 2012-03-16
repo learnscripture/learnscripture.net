@@ -334,6 +334,7 @@ class VerseFind(BaseHandler):
                           book_name=r.verses[0].book_name,
                           version_slug=version_slug,
                           verses=[dict(text=v.text,
+                                       highlighted_text=v.highlighted_text,
                                        chapter_number=v.chapter_number,
                                        verse_number=v.verse_number)
                                   for v in r.verses]))
