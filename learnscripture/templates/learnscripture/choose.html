@@ -15,6 +15,10 @@ Choose verses
 
 {% block leftcolumn %}
 
+<p>Choose a pre-made set of verses to start learning, or choose some individual
+ verses.
+
+<p>(You can also <a href="{% url 'create_set' %}">create your own verse sets</a>)</p>
 
 <ul class="tabs" data-tabs="tabs">
   <li {% if active_tab == 'verseset' %}class="active"{% endif %}><a href="#id-tab-verseset">Verse sets</a></li>
@@ -23,7 +27,6 @@ Choose verses
 
 <div class="pill-content">
   <div {% if active_tab == 'verseset' %}class="active"{% endif %} id="id-tab-verseset">
-    <p>Choose a set of verses to start learning (or <a href="{% url 'create_set' %}">create your own set</a>):</p>
 
     <table>
       <tr>
