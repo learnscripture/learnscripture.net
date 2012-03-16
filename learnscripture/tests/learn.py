@@ -126,24 +126,6 @@ class LearnTests(LiveServerTests):
         self.assertEqual(account.score_logs.filter(reason=ScoreReason.REVISION_COMPLETED).count(), 1)
 
 
-    def test_choose_individual_verse(self):
-        driver = self.driver
-        driver.get(self.live_server_url + reverse('choose'))
-        driver.find_element_by_css_selector("a[href='#id-tab-individual']").click()
-        Select(driver.find_element_by_id("id_book")).select_by_visible_text("John")
-        driver.find_element_by_id("id_chapter").send_keys("3")
-        driver.find_element_by_id("id_start_verse").send_keys("16")
-        driver.find_element_by_css_selector("input[name=lookup]").click()
-        self.wait_until_loaded('body')
-
-        self.assertIn("For this is the way God loved the world", driver.page_source)
-
-        driver.find_element_by_css_selector("#id-tab-individual input[value=Learn]").click()
-        self.set_preferences()
-        self.wait_until_loaded('body')
-        self.wait_for_ajax()
-        self.assertEqual(driver.find_element_by_id("id-verse-title").text, u"John 3:16")
-
     def test_change_version_passage(self):
         verse_set = self.choose_verse_set('Psalm 23')
         driver = self.driver
