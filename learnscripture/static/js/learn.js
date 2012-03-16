@@ -1010,15 +1010,33 @@ var learnscripture =
                 });
                 var replace = [];
                 $.each(group, function(j, word) {
-                    var start = word.match(/\W*./)[0];
-                    var end = word.slice(start.length);
-                    replace.push ('<span id="id-word-' + wordNumber.toString() +
-                                  '" class=\"' + wordClass + '\">' +
-                                  '<span class="wordstart">' + start +
-                                  '</span><span class="wordend">' + end +
-                                  '</span></span>');
-                    wordList.push(wordNumber);
-                    wordNumber++;
+                    if (currentVerseStatus.needs_testing && word.match(/^\d+:\d+(-\d+)?$/)) {
+                        // Split Bible references into two bits
+                        var parts = word.split(/:/);
+                        replace.push('<span id="id-word-' + wordNumber.toString() +
+                                     '" class=\"word\">' +
+                                     '<span class="wordstart">' + parts[0] + '</span>' +
+                                     '</span>' +
+                                     '<span class="colon">:</span>');
+                        wordList.push(wordNumber);
+                        wordNumber++;
+                        replace.push('<span id="id-word-' + wordNumber.toString() +
+                                     '" class=\"word\">' +
+                                     '<span class="wordstart">' + parts[1] + '</span>' +
+                                     '</span>');
+                        wordList.push(wordNumber);
+                        wordNumber++;
+                    } else {
+                        var start = word.match(/\W*./)[0];
+                        var end = word.slice(start.length);
+                        replace.push('<span id="id-word-' + wordNumber.toString() +
+                                     '" class=\"' + wordClass + '\">' +
+                                     '<span class="wordstart">' + start +
+                                     '</span><span class="wordend">' + end +
+                                     '</span></span>');
+                        wordList.push(wordNumber);
+                        wordNumber++;
+                    }
 
                 });
                 replacement.push(replace.join(' '));
