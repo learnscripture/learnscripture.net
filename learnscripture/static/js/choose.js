@@ -110,9 +110,9 @@ var learnscripture =
         };
 
         var setQuickFind = function(form, book, chapterStart, verseStart, verseEnd) {
-            var text = book;
+            var text = book + " ";
             if (chapterStart != undefined) {
-                text = text + " " + chapterStart.toString();
+                text = text + chapterStart.toString();
             }
             if (verseStart != undefined) {
                 text = text + ":" + verseStart.toString();
