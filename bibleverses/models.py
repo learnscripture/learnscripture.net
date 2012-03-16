@@ -1,5 +1,7 @@
+from collections import defaultdict
 from decimal import Decimal
 import math
+import re
 
 from autoslug import AutoSlugField
 from django.core.urlresolvers import reverse
@@ -20,6 +22,55 @@ from learnscripture.datastructures import make_choices
 
 BIBLE_BOOKS = ['Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy', 'Joshua', 'Judges', 'Ruth', '1 Samuel', '2 Samuel', '1 Kings', '2 Kings', '1 Chronicles', '2 Chronicles', 'Ezra', 'Nehemiah', 'Esther', 'Job', 'Psalm', 'Proverbs', 'Ecclesiastes', 'Song of Solomon', 'Isaiah', 'Jeremiah', 'Lamentations', 'Ezekiel', 'Daniel', 'Hosea', 'Joel', 'Amos', 'Obadiah', 'Jonah', 'Micah', 'Nahum', 'Habakkuk', 'Zephaniah', 'Haggai', 'Zechariah', 'Malachi', 'Matthew', 'Mark', 'Luke', 'John', 'Acts', 'Romans', '1 Corinthians', '2 Corinthians', 'Galatians', 'Ephesians', 'Philippians', 'Colossians', '1 Thessalonians', '2 Thessalonians', '1 Timothy', '2 Timothy', 'Titus', 'Philemon', 'Hebrews', 'James', '1 Peter', '2 Peter', '1 John', '2 John', '3 John', 'Jude', 'Revelation']
 BIBLE_BOOKS_DICT = dict((n, i) for (i, n) in enumerate(BIBLE_BOOKS))
+
+
+# All possible bible book names, lower case, matched to canonical name
+BIBLE_BOOK_ABBREVIATIONS = {}
+
+def make_bible_book_abbreviations():
+    global BIBLE_BOOK_ABBREVIATIONS
+
+    nums = {'1 ':['1', 'I ', 'I'],
+            '2 ':['2', 'II ', 'II'],
+            '3 ':['3', 'III ', 'III']
+            }
+
+    def get_abbrevs(book_name):
+        # Get alternatives like '1Peter', 'I Peter' etc.
+        for k, v in nums.items():
+            if book_name.startswith(k):
+                for prefix in v:
+                    book_name2 = prefix + book_name[len(k):]
+                    for n in get_abbrevs(book_name2):
+                        yield n
+
+        # We don't allow abbreviations less than 3 letters
+        for i in range(3, len(book_name) + 1):
+            yield book_name[0:i]
+
+
+    # Get all abbreviations
+    d = {}
+    for b in BIBLE_BOOKS:
+        d[b] = list(get_abbrevs(b.lower()))
+
+    # Now need to make unique. Create a reverse dictionary.
+    d2 = defaultdict(set)
+    for book_name, abbrev_list in d.items():
+        for abbrev in abbrev_list:
+            d2[abbrev].add(book_name)
+
+    # Now, if any value in d2 has more than one item,
+    # it is ambiguous and should be removed altogether,
+    # otherwise replaced with the single value.
+    d3 = {}
+    for abbrev, book_names in d2.items():
+        if len(book_names) == 1:
+            d3[abbrev] = book_names.pop()
+
+    BIBLE_BOOK_ABBREVIATIONS.update(d3)
+
+make_bible_book_abbreviations()
 
 # Psalm 119 is 176 verses
 MAX_VERSE_QUERY_SIZE = 200
@@ -480,7 +531,63 @@ def get_passage_sections(verse_list, breaks):
     return sections
 
 
+class QuickFindResult(object):
+    def __init__(self, reference, verses):
+        self.reference, self.verses = reference, verses
+
+
 def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE):
-    return [{'reference':query,
-             'verses': parse_ref(query, version, max_length=max_length)
-             }]
+    """
+    Does a verse search based on reference or contents.
+
+    It returns a list of QuickFindResult objects.
+    """
+    # Unlike parse_ref, this is tolerant with input. It can still throw
+    # InvalidVerseReference for things that are obviously incorrect e.g. Psalm
+    # 151, or asking for too many verses.
+
+    query = query.strip().lower()
+
+    if query == u'':
+        raise InvalidVerseReference("Please enter a query term or reference")
+
+    bible_ref_re = (
+        '^.*'                # book name
+        '\d+'                # chapter
+        '\s*((v|:|\.)'        # optionally: v or : or .
+        '\s*\d+'             #             and start verse number
+        '(\s*-\s*\d+)?)?$'   #             and optionally end verse
+        )
+
+
+    # Need to work out if this is probably a reference
+    if re.match(bible_ref_re, query) or query in BIBLE_BOOK_ABBREVIATIONS:
+        query = normalise_reference(query)
+        if query is not None:
+            return [QuickFindResult(query, parse_ref(query, version, max_length=max_length))]
+
+    raise InvalidVerseReference("Bible reference not recognised")
+
+
+def normalise_reference(query):
+    # Replace 'v' or '.' with ':'
+    query = re.sub(u'(?<![A-Za-z])(v|\.)(?![A-Za-z])', ':', query)
+    # Remove spaces around ':'
+    query = re.sub(u'\s*:\s*', ':', query)
+    # Remove spaces around '-'
+    query = re.sub(u'\s*-\s*', '-', query)
+
+    # Remove multiple spaces
+    query = re.sub(u' +', u' ', query)
+
+    # Normalise book names if possible.
+    parts = query.split(u' ')
+    book_name = parts[0]
+    if len(parts) > 1 and not re.search(u'\d', parts[1]):
+        book_name = book_name + u" " + parts[1]
+
+    if book_name in BIBLE_BOOK_ABBREVIATIONS:
+        remainder = query[len(book_name):]
+        return BIBLE_BOOK_ABBREVIATIONS[book_name] + remainder
+    else:
+        return None

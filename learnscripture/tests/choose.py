@@ -64,6 +64,8 @@ class ChooseTests(LiveServerTests):
         driver = self.driver
         driver.get(self.live_server_url + reverse('choose'))
         driver.find_element_by_css_selector("a[href='#id-tab-individual']").click()
+
+        # Test clicking on the drop downs.
         Select(driver.find_element_by_css_selector("form.quickfind select[name=book]")).select_by_visible_text("John")
         Select(driver.find_element_by_css_selector("form.quickfind select[name=chapter_start]")).select_by_visible_text("3")
         Select(driver.find_element_by_css_selector("form.quickfind select[name=verse_start]")).select_by_visible_text("16")
@@ -72,8 +74,40 @@ class ChooseTests(LiveServerTests):
 
         self.assertIn("For this is the way God loved the world", driver.page_source)
 
+        # Check we can actually click on 'Learn' and it works.
         driver.find_element_by_css_selector("#id-tab-individual input[value=Learn]").click()
         self.set_preferences()
         self.wait_until_loaded('body')
         self.wait_for_ajax()
         self.assertEqual(driver.find_element_by_id("id-verse-title").text, u"John 3:16")
+
+
+    def test_choose_individual_verse_fuzzy(self):
+        # Test entering into quick find, and being lazy
+        driver = self.driver
+        driver.get(self.live_server_url + reverse('choose'))
+        driver.find_element_by_css_selector("a[href='#id-tab-individual']").click()
+
+        driver.find_element_by_css_selector('form.quickfind input[name=quick_find]')\
+            .send_keys('Gen 1:1')
+        Select(driver.find_element_by_css_selector("form.quickfind select[name=version]")).select_by_visible_text("KJV")
+        driver.find_element_by_css_selector("input[name=lookup]").click()
+        self.wait_for_ajax()
+
+        self.assertIn("In the beginning God", driver.page_source)
+
+
+    def test_choose_individual_verse_bad_ref(self):
+        # Test entering into quick find, and being lazy
+        driver = self.driver
+        driver.get(self.live_server_url + reverse('choose'))
+        driver.find_element_by_css_selector("a[href='#id-tab-individual']").click()
+
+        driver.find_element_by_css_selector('form.quickfind input[name=quick_find]')\
+            .send_keys('Gen 100:1')
+        Select(driver.find_element_by_css_selector("form.quickfind select[name=version]")).select_by_visible_text("KJV")
+        driver.find_element_by_css_selector("input[name=lookup]").click()
+        self.wait_for_ajax()
+
+        self.assertNotIn("In the beginning God", driver.page_source)
+        self.assertIn("No verses matched 'Genesis 100:1'", driver.page_source)
