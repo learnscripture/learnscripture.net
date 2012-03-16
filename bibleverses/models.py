@@ -614,7 +614,7 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE):
     if re.match(bible_ref_re, query) or query in BIBLE_BOOK_ABBREVIATIONS:
         reference = normalise_reference(query)
         if reference is not None:
-            return [QuickFindResult(query, parse_ref(reference, version, max_length=max_length))]
+            return [QuickFindResult(reference, parse_ref(reference, version, max_length=max_length))]
 
     # Do a search:
 
