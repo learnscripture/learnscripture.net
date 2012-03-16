@@ -381,7 +381,12 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE,
     if ':' not in reference:
         # chapter only
         try:
-            book, chapter = reference.rsplit(u' ')
+            # If there is a space in name, we need this:
+            if reference in BIBLE_BOOKS_DICT:
+                # no chapter.
+                raise ValueError()
+            # If no, space, the following will weed out references without a chapter
+            book, chapter = reference.rsplit(u' ', 1)
         except ValueError:
             raise InvalidVerseReference(u"Reference should provide at least book name and chapter number")
         if book not in BIBLE_BOOKS_DICT:
