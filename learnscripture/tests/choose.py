@@ -64,11 +64,11 @@ class ChooseTests(LiveServerTests):
         driver = self.driver
         driver.get(self.live_server_url + reverse('choose'))
         driver.find_element_by_css_selector("a[href='#id-tab-individual']").click()
-        Select(driver.find_element_by_id("id_book")).select_by_visible_text("John")
-        driver.find_element_by_id("id_chapter").send_keys("3")
-        driver.find_element_by_id("id_start_verse").send_keys("16")
+        Select(driver.find_element_by_css_selector("form.quickfind select[name=book]")).select_by_visible_text("John")
+        Select(driver.find_element_by_css_selector("form.quickfind select[name=chapter_start]")).select_by_visible_text("3")
+        Select(driver.find_element_by_css_selector("form.quickfind select[name=verse_start]")).select_by_visible_text("16")
         driver.find_element_by_css_selector("input[name=lookup]").click()
-        self.wait_until_loaded('body')
+        self.wait_for_ajax()
 
         self.assertIn("For this is the way God loved the world", driver.page_source)
 

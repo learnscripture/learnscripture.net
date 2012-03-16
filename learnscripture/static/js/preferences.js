@@ -54,6 +54,29 @@ var learnscripture =
                    });
         }
 
+        var needsPreferencesButtonClick = function(ev) {
+            prefs = getPreferences();
+            if (prefs == null || !prefs.preferencesSetup) {
+                // Need to intercept, and first get user to set preferences.
+                ev.preventDefault();
+
+                // If they save their preferences correctly, then do the
+                // click again. It will succeed this time
+                afterPreferencesSave = function() {
+                    $(ev.target).click();
+                }
+
+                // We need to remove the afterPreferencesSave callback so
+                // that it doesn't get invoked if they press cancel and then
+                // open the form manually later.
+                $('#id-preferences-form').bind('hidden', function(ev) {
+                    afterPreferencesSave = null;
+                });
+
+                showPreferences();
+            }
+        };
+
         var setupPreferencesControls = function() {
             $(".preferences-link,a[href='/preferences/']").click(function(ev) {
                 ev.preventDefault();
@@ -70,33 +93,16 @@ var learnscripture =
                 $('body').attr('class', $(this).val());
             });
 
-            $('.needs-preferences').click(function(ev) {
-                prefs = getPreferences();
-                if (prefs == null || !prefs.preferencesSetup) {
-                    // Need to intercept, and first get user to set preferences.
-                    ev.preventDefault();
+            setupNeedsPreferencesControls($('body'));
+        }
 
-                    // If they save their preferences correctly, then do the
-                    // click again. It will succeed this time
-                    afterPreferencesSave = function() {
-                        $(ev.target).click();
-                    }
-
-                    // We need to remove the afterPreferencesSave callback so
-                    // that it doesn't get invoked if they press cancel and then
-                    // open the form manually later.
-                    $('#id-preferences-form').bind('hidden', function(ev) {
-                        afterPreferencesSave = null;
-                    });
-
-                    showPreferences();
-                }
-
-            });
+        var setupNeedsPreferencesControls = function(section) {
+            section.find('.needs-preferences').click(needsPreferencesButtonClick);
         }
 
         // Public interface:
         learnscripture.setupPreferencesControls = setupPreferencesControls;
+        learnscripture.setupNeedsPreferencesControls = setupNeedsPreferencesControls;
         learnscripture.setPreferences = setPreferences;
         learnscripture.getPreferences = getPreferences;
 

@@ -23,7 +23,7 @@ BIBLE_BOOKS_DICT = dict((n, i) for (i, n) in enumerate(BIBLE_BOOKS))
 
 # Psalm 119 is 176 verses
 MAX_VERSE_QUERY_SIZE = 200
-MAX_VERSES_FOR_SINGLE_CHOICE = 4
+MAX_VERSES_FOR_SINGLE_CHOICE = 4 # See also choose.js
 
 
 # Also defined in learn.js
@@ -478,3 +478,9 @@ def get_passage_sections(verse_list, breaks):
         current_section.append(v)
     sections.append(current_section)
     return sections
+
+
+def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE):
+    return [{'reference':query,
+             'verses': parse_ref(query, version, max_length=max_length)
+             }]
