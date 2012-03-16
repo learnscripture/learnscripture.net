@@ -123,4 +123,4 @@ class ChooseTests(LiveServerTests):
         driver.find_element_by_css_selector("input[name=lookup]").click()
         self.wait_for_ajax()
 
-        self.assertIn("And God called the firmament Heaven. And the evening", driver.page_source)
+        self.assertIn("And God called the <b>firmament</b> Heaven. And the <b>evening</b>", driver.page_source)
