@@ -91,7 +91,7 @@ class LearnTests(LiveServerTests):
 
     def _score_for_j316(self):
         word_count = len(self.kjv_john_3_16.strip().split())
-        word_count -= 2 # Don't get points for the reference
+        word_count -= 3 # Don't get points for the reference
         return Scores.POINTS_PER_WORD * word_count
 
     def test_revision_complete_points(self):
@@ -173,7 +173,7 @@ class LearnTests(LiveServerTests):
             driver.find_element_by_id('id-typing').send_keys(word + ' ')
 
         # Test keyboard shortcut
-        driver.find_element_by_id('id-typing').send_keys('\n')
+        driver.find_element_by_css_selector('body').send_keys('\n')
         self.wait_for_ajax()
         self.assertIn(u"He maketh me to lie down in green pastures",
                       driver.find_element_by_css_selector('.current-verse').text)
