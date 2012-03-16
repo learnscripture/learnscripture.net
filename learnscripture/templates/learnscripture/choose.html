@@ -18,7 +18,7 @@ Choose verses
 <p>Choose a pre-made set of verses to start learning, or choose some individual
  verses.
 
-<p>(You can also <a href="{% url 'create_set' %}">create your own verse sets</a>)</p>
+<p>(You can also <a href="{% url 'create_set_menu' %}">create your own verse sets</a>)</p>
 
 <ul class="tabs" data-tabs="tabs">
   <li {% if active_tab == 'verseset' %}class="active"{% endif %}><a href="#id-tab-verseset">Verse sets</a></li>
@@ -93,7 +93,7 @@ Choose verses
 
   <div {% if active_tab == 'individual' %}class="active"{% endif %} id="id-tab-individual">
     <p>Choose a verse (or a few verses). For long passages, you should
-      <a href="{% url 'create_set' %}?passage">create a 'passage' verse set</a>.
+      <a href="{% url 'create_passage_set' %}">create a 'passage' verse set</a>.
     </p>
 
     <form action="" method="GET" class="quickfind" id="id-verse-find-form">

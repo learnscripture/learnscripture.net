@@ -21,10 +21,10 @@ class CreateSetTests(LiveServerTests):
         super(CreateSetTests, self).setUp()
         self._identity, self._account = self.create_account()
 
-    def test_create_set(self):
+    def test_create_selection_set(self):
         self.login(self._account)
         driver = self.driver
-        driver.get(self.live_server_url + "/create-verse-set/")
+        driver.get(self.live_server_url + "/create-selection-set/")
         driver.find_element_by_id("id_selection-name").clear()
         driver.find_element_by_id("id_selection-name").send_keys("My set")
         driver.find_element_by_id("id_selection-description").clear()
@@ -51,7 +51,7 @@ class CreateSetTests(LiveServerTests):
         """
         self.login(self._account)
         driver = self.driver
-        driver.get(self.live_server_url + reverse('create_set'))
+        driver.get(self.live_server_url + reverse('create_selection_set'))
         Select(driver.find_element_by_id("id_selection-book")).select_by_visible_text("Genesis")
         driver.find_element_by_id("id_selection-chapter").clear()
         driver.find_element_by_id("id_selection-chapter").send_keys("1")
@@ -65,7 +65,7 @@ class CreateSetTests(LiveServerTests):
         driver.find_element_by_id("id-selection-save-btn").click()
 
         self.wait_until_loaded('body')
-        self.assertTrue(driver.title.startswith("Create verse set"))
+        self.assertTrue(driver.title.startswith("Create selection set"))
         self.assertIn("This field is required", driver.page_source)
         self.assertIn("Genesis 1:5", driver.page_source)
         self.assertIn("Genesis 1:6", driver.page_source)
@@ -123,7 +123,7 @@ class CreateSetTests(LiveServerTests):
 
     def test_require_account(self):
         driver = self.driver
-        driver.get(self.live_server_url + reverse('create_set'))
+        driver.get(self.live_server_url + reverse('create_selection_set'))
         self.set_preferences()
         self.assertIn('You need to', driver.page_source)
         self.assertIn('create an account', driver.page_source)
@@ -131,8 +131,7 @@ class CreateSetTests(LiveServerTests):
     def test_create_passage_set(self):
         self.login(self._account)
         driver = self.driver
-        driver.get(self.live_server_url + "/create-verse-set/")
-        driver.find_element(By.CSS_SELECTOR, "a[href='#id-tab-passage']").click()
+        driver.get(self.live_server_url + "/create-passage-set/")
         driver.find_element_by_id("id_passage-name").clear()
         driver.find_element_by_id("id_passage-name").send_keys("Genesis 1")
         driver.find_element_by_id("id_passage-description").clear()
