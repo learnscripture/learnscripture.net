@@ -330,11 +330,11 @@ class VerseFind(BaseHandler):
 
         l = []
         for r in results:
-            l.append(dict(reference=r['reference'],
-                          book_name=r['verses'][0].book_name,
+            l.append(dict(reference=r.reference,
+                          book_name=r.verses[0].book_name,
                           version_slug=version_slug,
                           verses=[dict(text=v.text,
                                        chapter_number=v.chapter_number,
                                        verse_number=v.verse_number)
-                                  for v in r['verses']]))
+                                  for v in r.verses]))
         return l
