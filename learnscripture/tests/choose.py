@@ -4,7 +4,7 @@ from django.core.urlresolvers import reverse
 from selenium.webdriver.support.ui import Select
 
 from accounts.models import Identity
-from bibleverses.models import VerseSet
+from bibleverses.models import VerseSet, Verse, BibleVersion
 
 from .base import LiveServerTests
 
@@ -111,3 +111,16 @@ class ChooseTests(LiveServerTests):
 
         self.assertNotIn("In the beginning God", driver.page_source)
         self.assertIn("No verses matched 'Genesis 100:1'", driver.page_source)
+
+    def test_choose_individual_by_search(self):
+        driver = self.driver
+        driver.get(self.live_server_url + reverse('choose'))
+        driver.find_element_by_css_selector("a[href='#id-tab-individual']").click()
+
+        driver.find_element_by_css_selector('form.quickfind input[name=quick_find]')\
+            .send_keys('firmament evening')
+        Select(driver.find_element_by_css_selector("form.quickfind select[name=version]")).select_by_visible_text("KJV")
+        driver.find_element_by_css_selector("input[name=lookup]").click()
+        self.wait_for_ajax()
+
+        self.assertIn("And God called the firmament Heaven. And the evening", driver.page_source)

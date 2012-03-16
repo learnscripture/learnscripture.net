@@ -17,6 +17,7 @@ from django.utils.functional import cached_property
 import caching.base
 
 from accounts import memorymodel
+from bibleverses.fields import VectorField
 from learnscripture.datastructures import make_choices
 
 
@@ -182,11 +183,37 @@ class ComboVerse(object):
         self.chapter_number, self.verse_number = chapter_number, verse_number
         self.bible_verse_number, self.text = bible_verse_number, text
 
+def intersperse(iterable, delimiter):
+    it = iter(iterable)
+    yield next(it)
+    for x in it:
+        yield delimiter
+        yield x
+
+class VerseManager(caching.base.CachingManager):
+
+    def text_search(self, query, version, limit=10):
+        words = query.split(u' ')
+        # Do an 'AND' on all terms
+        word_params = list(intersperse(words, ' & '))
+        search_clause = ' || ' .join(['%s'] * len(word_params))
+        return models.Manager.raw(self, """
+          SELECT id, version_id, reference, text, book_number, chapter_number, verse_number,
+                 bible_verse_number, ts_rank(text_tsv, query) as rank
+          FROM bibleverses_verse, to_tsquery(""" + search_clause + """) query
+          WHERE
+             query @@ text_tsv
+             AND version_id = %s
+          ORDER BY rank DESC
+          LIMIT %s;
+""", word_params + [version.id, limit])
+
 
 class Verse(caching.base.CachingMixin, models.Model):
     version = models.ForeignKey(BibleVersion)
     reference = models.CharField(max_length=100)
     text = models.TextField()
+    text_tsv = VectorField()
 
     # De-normalised fields
     # Public facing fields are 1-indexed, others are 0-indexed.
@@ -195,7 +222,7 @@ class Verse(caching.base.CachingMixin, models.Model):
     verse_number = models.PositiveSmallIntegerField()   # 1-indexed
     bible_verse_number = models.PositiveSmallIntegerField() # 0-indexed
 
-    objects = caching.base.CachingManager()
+    objects = VerseManager()
 
     @property
     def book_name(self):
@@ -571,7 +598,10 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE):
         if query is not None:
             return [QuickFindResult(query, parse_ref(query, version, max_length=max_length))]
 
-    raise InvalidVerseReference("Bible reference not recognised")
+    # Do a search:
+
+    results = Verse.objects.text_search(query, version, limit=11)
+    return [QuickFindResult(r.reference, [r]) for r in results]
 
 
 def normalise_reference(query):
