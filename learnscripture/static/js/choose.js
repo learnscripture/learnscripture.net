@@ -16,17 +16,18 @@ var learnscripture =
                 setChapterStartSelect(form, []);
             } else {
                 setChapterStartSelect(form, range(1, BIBLE_BOOK_INFO[book]['chapter_count'] + 1));
-                setQuickFind(form, book)
+                setQuickFind(form, book);
             }
         };
 
         var chapterStartChange = function(ev) {
             var form = $(this).closest('form');
+            var book = getBook(form);
             var chapterStart = getChapterStart(form);
             if (chapterStart == null) {
                 setVerseStartSelect(form, []);
+                setQuickFind(form, book);
             } else {
-                var book = getBook(form);
                 setVerseStartSelect(form, range(1, BIBLE_BOOK_INFO[book]['verse_counts'][chapterStart] + 1))
                 setQuickFind(form, book, chapterStart);
             }
@@ -35,12 +36,13 @@ var learnscripture =
 
         var verseStartChange = function(ev) {
             var form = $(this).closest('form');
+            var book = getBook(form);
             var verseStart = getVerseStart(form);
+            var chapterStart = getChapterStart(form);
             if (verseStart == null) {
                 setVerseEndSelect(form, []);
+                setQuickFind(form, book, chapterStart);
             } else {
-                var book = getBook(form);
-                var chapterStart = getChapterStart(form);
                 var lastVerse = BIBLE_BOOK_INFO[book]['verse_counts'][chapterStart];
                 lastVerse = Math.min(lastVerse, verseStart -1 + MAX_VERSES_FOR_SINGLE_CHOICE);
                 setVerseEndSelect(form, range(verseStart + 1, lastVerse + 1))
