@@ -98,6 +98,7 @@ Dashboard
   <hr>
   {% endfor %}
 
+  <div class="addclearfix">
   {% if new_verses_queue %}
   <form action="" method="POST">
     {% csrf_token %}
@@ -114,6 +115,7 @@ Dashboard
   <p>Nothing currently in your general queue for learning.</p>
 
   {% endif %}
+  </div>
 </div>
 
 <h2>Choose</h2>
