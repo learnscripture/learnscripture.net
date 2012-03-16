@@ -1,0 +1,70 @@
+    <form action="" method="GET" class="quickfind" id="id-verse-find-form">
+      <div class="clearfix">
+        <label for="id_quick_find">Quick find</label>
+        <div class="input">
+          <input id="id_quick_find" type="text" value="" name="quick_find">
+          <br/>
+          example: <b>Matt 28:19</b> or <b>make disciples</b>
+        </div>
+      </div>
+
+      <div class="clearfix">
+        <label for="id_book">Select</label>
+        <div class="input">
+          <select name="book" id="id_book">
+            <option value="">----</option>
+            {% for b in BIBLE_BOOKS %}
+            <option value="{{ b }}">{{ b }}</option>
+            {% endfor %}
+          </select>
+          <nobr>
+          ch
+          <select name="chapter_start">
+          </select>
+          v
+          <select name="verse_start">
+          </select>
+          -
+          <select name="verse_end">
+          </select>
+          </nobr>
+        </div>
+      </div>
+
+      <div class="clearfix">
+        <label for="id-version-select">Version</label>
+        <div class="input">
+          {% with current_version=default_bible_version %}
+          {% include "learnscripture/version_select.html" %}
+          {% endwith %}
+        </div>
+      </div>
+
+     <div class="input">
+        <input id="id_lookup" type="submit" name="lookup" value="Lookup verse" class="btn primary">
+     </div>
+     <div class="clearfix error">
+       <p id="id_form_all_errors" class="form-all-errors"></p>
+     </div>
+    </form>
+
+
+    <script id="id_search_result_template" type="text/x-jsrender">
+      {# template for id_individual_search_results #}
+      <div class="actionset">
+        <form action="" method="POST">
+          {% csrf_token %}
+          <input type="hidden" name="reference" value="[[>reference]]">
+          <input type="hidden" name="version_slug" value="[[>version_slug]]">
+          <input type="submit" class="btn primary needs-preferences" value="Learn">
+        </form>
+        <h3>[[>book_name]]</h3>
+        <div class="verselist">
+          [[for verses]]
+          <div class="verse">
+            <span class="versenumber">[[>chapter_number]]:[[>verse_number]]</span> [[:html_text]]
+          </div>
+          [[/for]]
+        </div>
+      </div>
+    </script>
