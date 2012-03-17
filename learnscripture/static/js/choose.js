@@ -2,7 +2,7 @@ var learnscripture =
     (function(learnscripture, $) {
 
         var loadResults = function(results) {
-            $('#id-verse-find-form .validation-error').remove();
+            $('#id-quick-find-form .validation-error').remove();
             var d = $('.quickfind_search_results');
             if (results.length > 0) {
                 var html = '';
