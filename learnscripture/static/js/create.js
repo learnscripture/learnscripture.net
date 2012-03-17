@@ -3,8 +3,8 @@ var learnscripture =
 
         var addVerse = function(verseData) {
             var newrow = $('<tr><td></td><td></td><td><i class="icon-arrow-up"></i></td><td><i class="icon-arrow-down"></i></td><td><i class="icon-trash"></i></td></tr>').find('td:first-child').text(verseData.reference).end().find('td:nth-child(2)').text(verseData.text).end();
-            $('#id-selection-verse-list tbody').append(newrow);
-            $('#id-selection-verse-list').show();
+            $('#id-verse-list tbody').append(newrow);
+            $('#id-verse-list').show();
         }
 
         var addVerseClick = function(ev) {
@@ -23,17 +23,16 @@ var learnscripture =
         var previousPassageRef = null;
 
         var addPassage = function(passageData) {
-            $('#id-passage-verse-list tbody tr').remove();
+            $('#id-verse-list tbody tr').remove();
             $.each(passageData.verses, function(idx, verseData) {
                 var newrow = $('<tr><td><input type="checkbox" /></td><td></td><td></td></tr>').find('td:nth-child(2)').text(verseData.reference).end().find('td:nth-child(3)').text(verseData.text).end();
-                $('#id-passage-verse-list tbody').append(newrow);
+                $('#id-verse-list tbody').append(newrow);
             });
-            $('#id-passage-verse-list').show();
-            $('#id-passage-verse-message *').remove();
+            $('#id-verse-list').show();
             var ref = passageData.reference;
-            var currentName = $('#id_passage-name').val().trim();
+            var currentName = $('#id_name').val().trim();
             if (currentName == "" || currentName == previousPassageRef) {
-                $('#id_passage-name').val(ref);
+                $('#id_name').val(ref);
             }
             previousPassageRef = ref;
         }
@@ -46,18 +45,18 @@ var learnscripture =
         var selectionSaveBtnClick = function(ev) {
             // Create hidden fields with all references
             var refs = [];
-            $('#id-selection-verse-list td:first-child').each(function(idx, elem) {
+            $('#id-verse-list td:first-child').each(function(idx, elem) {
                 refs.push($(elem).text());
             });
-            $('#id-selection-reference-list').val(refs.join('|'));
-            $('#id-selection-verse-set-form').submit();
+            $('#id-reference-list').val(refs.join('|'));
+            $('#id-verse-set-form').submit();
         };
 
         var passageSaveBtnClick =  function(ev) {
             // Create hidden fields with all references
             var refs = [];
             var breaks = [];
-            $('#id-passage-verse-list tbody tr').each(function(idx, elem) {
+            $('#id-verse-list tbody tr').each(function(idx, elem) {
                 var row = $(elem);
                 var ref = $(row.find('td').get(1)).text();
                 refs.push(ref);
@@ -65,13 +64,13 @@ var learnscripture =
                     breaks.push(ref.split(" ").slice(-1)[0]);
                 }
             });
-            $('#id-passage-reference-list').val(refs.join('|'));
-            $('#id-passage-break-list').val(breaks.join(','));
+            $('#id-reference-list').val(refs.join('|'));
+            $('#id-break-list').val(breaks.join(','));
             // continue with submit
         };
 
         var selectionLoadResults = function(results) {
-            $('#id-verse-find-form .validation-error').remove();
+            $('#id-quick-find-form .validation-error').remove();
             var d = $('.quickfind_search_results');
             if (results.length > 0) {
                 var html = '';
@@ -87,20 +86,17 @@ var learnscripture =
         };
 
         var passageLoadResults = function(results) {
-            $('#id-verse-find-form .validation-error').remove();
+            $('#id-quick-find-form .validation-error').remove();
             if (results.length > 0) {
                 addPassage(results[0]);
             }
         };
 
         var setupCreateVerseSetControls = function() {
-            if ($('#id-selection-verse-list tbody tr').length == 0) {
-                $('#id-selection-verse-list').hide();
+            if ($('#id-verse-list tbody tr').length == 0) {
+                $('#id-verse-list').hide();
             }
-            if ($('#id-passage-verse-list tbody tr').length == 0) {
-                $('#id-passage-verse-list').hide();
-            }
-            $('#id-selection-verse-list').on('click', 'i.icon-arrow-up,i.icon-arrow-down',
+            $('#id-verse-list').on('click', 'i.icon-arrow-up,i.icon-arrow-down',
                 function(ev) {
                     var row = $(this).parents("tr:first");
                     if ($(this).is(".icon-arrow-up")) {
@@ -109,28 +105,28 @@ var learnscripture =
                         row.insertAfter(row.next());
                     }
                 });
-            $('#id-selection-verse-list tbody').sortable();
-            $('#id-selection-verse-list tbody').disableSelection();
-            $('#id-selection-verse-list tbody').on('click', '.icon-trash', deleteButtonClick);
-            $('#id-selection-save-btn').click(selectionSaveBtnClick);
+            $('#id-create-selection-set #id-verse-list tbody').sortable();
+            $('#id-create-selection-set #id-verse-list tbody').disableSelection();
+            $('#id-create-selection-set #id-verse-list tbody').on('click', '.icon-trash', deleteButtonClick);
+            $('#id-create-selection-set #id-save-btn').click(selectionSaveBtnClick);
 
-            $('#id-passage-save-btn').click(passageSaveBtnClick);
+            $('#id-create-passage-set #id-save-btn').click(passageSaveBtnClick);
 
-            $("#id-tab-selection input[type=\"text\"], " +
-              "#id-tab passage input[type=\"text\"]").keypress(function (ev) {
+            $("#id-create-selection-set input[type=\"text\"], " +
+              "#id-create-passage-set input[type=\"text\"]").keypress(function (ev) {
               if ((ev.which && ev.which == 13) || (ev.keyCode && ev.keyCode == 13)) {
                   // Stop browsers from submitting:
                   ev.preventDefault();
               }
               });
-            $('#id_selection-public, #id_passage-public').each(function(idx, elem) {
+            $('#id_public').each(function(idx, elem) {
                 var input = $(elem);
                 if (input.attr('checked')) {
                     input.attr('disabled', 'disabled');
                 }
             });
-            $('#id-selection-quick-find-form #id_lookup').click(learnscripture.quickFindAndHandleResults(selectionLoadResults, false));
-            $('#id-passage-quick-find-form #id_lookup').click(learnscripture.quickFindAndHandleResults(passageLoadResults, true));
+            $('#id-create-selection-set #id_lookup').click(learnscripture.quickFindAndHandleResults(selectionLoadResults, false));
+            $('#id-create-passage-set #id_lookup').click(learnscripture.quickFindAndHandleResults(passageLoadResults, true));
 
         };
 
@@ -141,7 +137,7 @@ var learnscripture =
     })(learnscripture || {}, $);
 
 $(document).ready(function() {
-    if ($('#id-selection-verse-set-form, #id-passage-verse-set-form').length > 0) {
+    if ($('#id-create-selection-set, #id-create-passage-set').length > 0) {
         learnscripture.setupCreateVerseSetControls();
     }
 });

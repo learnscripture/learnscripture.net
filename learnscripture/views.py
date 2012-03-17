@@ -402,14 +402,10 @@ def create_or_edit_set(request, set_type=None, slug=None):
     if request.method == 'POST':
         orig_verse_set_public = False if verse_set is None else verse_set.public
 
-        if set_type == VerseSetType.SELECTION:
-            form = VerseSetForm(request.POST, instance=verse_set, prefix='selection')
-            # Need to propagate the references even if it doesn't validate,
-            # so do this work here:
-            refs = request.POST.get('selection-reference-list', '')
-        else:
-            form = VerseSetForm(request.POST, instance=verse_set, prefix='passage')
-            refs = request.POST.get('passage-reference-list', '')
+        form = VerseSetForm(request.POST, instance=verse_set)
+        # Need to propagate the references even if it doesn't validate,
+        # so do this work here:
+        refs = request.POST.get('reference-list', '')
 
         ref_list_raw = refs.split('|')
         # Dedupe ref_list while preserving order:
@@ -419,7 +415,7 @@ def create_or_edit_set(request, set_type=None, slug=None):
                 ref_list.append(ref)
         verse_dict = version.get_verses_by_reference_bulk(ref_list)
 
-        breaks = request.POST.get('passage-break-list', '')
+        breaks = request.POST.get('break-list', '')
         # Basic sanitising of 'breaks'
         if not re.match('^((\d+|\d+:\d+),)*(\d+|\d+:\d+)?$', breaks):
             breaks = ""
@@ -464,31 +460,20 @@ def create_or_edit_set(request, set_type=None, slug=None):
         else:
             # Invalid forms
             verse_list =  mk_verse_list(ref_list, verse_dict)
-            if set_type == VerseSetType.SELECTION:
-                c['selection_verses'] = verse_list
-            else:
-                c['passage_verses'] = add_passage_breaks(verse_list, breaks)
+            if set_type == VerseSetType.PASSAGE:
+                verse_list = add_passage_breaks(verse_list, breaks)
+            c['verses'] = verse_list
 
     else:
-        if verse_set is not None:
-            if set_type == VerseSetType.SELECTION:
-                form = VerseSetForm(instance=verse_set, prefix='selection')
-            else:
-                form = VerseSetForm(instance=verse_set, prefix='passage')
-        else:
-            if set_type == VerseSetType.SELECTION:
-                form = VerseSetForm(instance=None, prefix='selection')
-            else:
-                form = VerseSetForm(instance=None, prefix='passage')
+        form = VerseSetForm(instance=verse_set)
 
         if verse_set is not None:
             ref_list = [vc.reference for vc in verse_set.verse_choices.all()]
             verse_dict = version.get_verses_by_reference_bulk(ref_list)
             verse_list = mk_verse_list(ref_list, verse_dict)
-            if verse_set.set_type == VerseSetType.SELECTION:
-                c['selection_verses'] = verse_list
-            else:
-                c['passage_verses'] = add_passage_breaks(verse_list, verse_set.breaks)
+            if verse_set.set_type == VerseSetType.PASSAGE:
+                verse_list = add_passage_breaks(verse_list, verse_set.breaks)
+            c['verses'] = verse_list
 
     c['new_verse_set'] = verse_set == None
     c['verse_set_form'] = form
