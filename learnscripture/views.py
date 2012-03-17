@@ -19,7 +19,7 @@ from accounts.forms import PreferencesForm
 from learnscripture.forms import AccountSetPasswordForm
 from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType, get_passage_sections
 from learnscripture import session, auth
-from bibleverses.forms import VerseSelector, VerseSetForm, PassageVerseSelector
+from bibleverses.forms import VerseSetForm
 from scores.models import get_all_time_leaderboard, get_leaderboard_since
 
 from .decorators import require_identity, require_preferences, has_preferences, redirect_via_prefs
@@ -366,7 +366,10 @@ def edit_set(request, slug=None):
 
 def create_or_edit_set(request, set_type=None, slug=None):
 
-    # This view handles a lot (too much)!
+    # This view handles a lot (too much)!  It could be simplified by removing
+    # the form prefixes that distinguish between passage and selection sets,
+    # which are no longer needed. But various bits of CSS and javascript would
+    # need updating.
 
     version = request.identity.default_bible_version
 
@@ -465,9 +468,6 @@ def create_or_edit_set(request, set_type=None, slug=None):
                 c['selection_verses'] = verse_list
             else:
                 c['passage_verses'] = add_passage_breaks(verse_list, breaks)
-                c['passage_verse_selector_form'] = PassageVerseSelector(verse_list=verse_list,
-                                                                        prefix='passage',
-                                                                        )
 
     else:
         if verse_set is not None:
@@ -481,8 +481,6 @@ def create_or_edit_set(request, set_type=None, slug=None):
             else:
                 form = VerseSetForm(instance=None, prefix='passage')
 
-            c['passage_verse_selector_form'] = PassageVerseSelector(prefix='passage')
-
         if verse_set is not None:
             ref_list = [vc.reference for vc in verse_set.verse_choices.all()]
             verse_dict = version.get_verses_by_reference_bulk(ref_list)
@@ -491,17 +489,12 @@ def create_or_edit_set(request, set_type=None, slug=None):
                 c['selection_verses'] = verse_list
             else:
                 c['passage_verses'] = add_passage_breaks(verse_list, verse_set.breaks)
-                c['passage_verse_selector_form'] = PassageVerseSelector(verse_list=verse_list,
-                                                                        prefix='passage',
-                                                                        )
 
     c['new_verse_set'] = verse_set == None
     c['verse_set_form'] = form
     c['title'] = ('Edit verse set' if verse_set is not None
                   else 'Create selection set' if set_type == VerseSetType.SELECTION
                   else 'Create passage set')
-
-    c['selection_verse_selector_form'] = VerseSelector(prefix='selection')
 
     c.update(context_for_quick_find(request))
 

@@ -29,7 +29,6 @@ var learnscripture =
             var book = getBook(form);
             var chapterStart = getChapterStart(form);
             var chapterEnd = getChapterStart(form);
-            var verseStart
             if (chapterStart == null) {
                 setChapterEndSelect(form, []);
                 setVerseStartSelect(form, []);
