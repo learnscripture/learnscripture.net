@@ -152,7 +152,7 @@ class MemoryModel(object):
         #
         # We also need to fit:
         #
-        #   delta_s_actual == 1 for test_strength == 1.
+        #   delta_s_actual == delta_s_max for test_strength == 1.
 
         delta_s_actual = delta_s_max * (test_strength - old_strength) / (1.0 - old_strength)
 
