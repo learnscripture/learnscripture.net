@@ -98,7 +98,7 @@ Choose verses
 
     {% include "learnscripture/quick_find_controls.html" %}
 
-    <script id="id_quickfind_result_template" type="text/x-jsrender">
+    <script id="id_individual_choose_result_template" type="text/x-jsrender">
       {# template for .quickfind_search_results #}
       <div class="actionset">
         <form action="" method="POST">
@@ -117,10 +117,6 @@ Choose verses
         </div>
       </div>
     </script>
-
-    {% if individual_search_msg %}
-    <div class="alert-message warning">{{ individual_search_msg }}</div>
-    {% endif %}
 
   </div>
 

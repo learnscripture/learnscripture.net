@@ -161,27 +161,27 @@ class BibleVersion(caching.base.CachingMixin, models.Model):
                     if len(verse_list) == 0:
                         verse = verse_list[0]
                     else:
-                        verse = ComboVerse(reference=ref,
-                                           book_name=verse_list[0].book_name,
-                                           chapter_number=verse_list[0].chapter_number,
-                                           verse_number=verse_list[0].verse_number,
-                                           bible_verse_number=verse_list[0].bible_verse_number,
-                                           text=' '.join(v.text for v in verse_list))
+                        verse = ComboVerse(ref, verse_list)
                     v_dict[ref] = verse
                 except InvalidVerseReference:
                     pass
         return v_dict
+
 
 class ComboVerse(object):
     """
     Wrapper needed when we want a combination of verses to appear as a single
     verse.
     """
-    def __init__(self, reference=None, book_name=None, chapter_number=None,
-                 verse_number=None, bible_verse_number=None, text=None):
-        self.reference, self.book_name = reference, book_name
-        self.chapter_number, self.verse_number = chapter_number, verse_number
-        self.bible_verse_number, self.text = bible_verse_number, text
+    def __init__(self, reference, verse_list):
+        self.reference = reference
+        self.book_name = verse_list[0].book_name
+        self.chapter_number = verse_list[0].chapter_number
+        self.verse_number = verse_list[0].verse_number
+        self.bible_verse_number = verse_list[0].bible_verse_number
+        self.verses = verse_list
+        self.text = ' '.join(v.text for v in verse_list)
+
 
 def intersperse(iterable, delimiter):
     it = iter(iterable)
@@ -565,16 +565,11 @@ def get_passage_sections(verse_list, breaks):
     return sections
 
 
-class QuickFindResult(object):
-    def __init__(self, reference, verses):
-        self.reference, self.verses = reference, verses
-
-
 def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE):
     """
     Does a verse search based on reference or contents.
 
-    It returns a list of QuickFindResult objects.
+    It returns a list of ComboVerse objects.
     """
     # Unlike parse_ref, this is tolerant with input. It can still throw
     # InvalidVerseReference for things that are obviously incorrect e.g. Psalm
@@ -598,12 +593,11 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE):
     if re.match(bible_ref_re, query) or query in BIBLE_BOOK_ABBREVIATIONS:
         reference = normalise_reference(query)
         if reference is not None:
-            return [QuickFindResult(reference, parse_ref(reference, version, max_length=max_length))]
+            return [ComboVerse(reference, parse_ref(reference, version, max_length=max_length))]
 
     # Do a search:
-
     results = Verse.objects.text_search(query, version, limit=11)
-    return [QuickFindResult(r.reference, [r]) for r in results]
+    return [ComboVerse(r.reference, [r]) for r in results]
 
 
 def normalise_reference(query):

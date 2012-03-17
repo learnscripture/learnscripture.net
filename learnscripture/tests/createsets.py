@@ -29,12 +29,12 @@ class CreateSetTests(LiveServerTests):
         driver.find_element_by_id("id_selection-name").send_keys("My set")
         driver.find_element_by_id("id_selection-description").clear()
         driver.find_element_by_id("id_selection-description").send_keys("My description")
-        Select(driver.find_element_by_id("id_selection-book")).select_by_visible_text("Genesis")
-        driver.find_element_by_id("id_selection-chapter").clear()
-        driver.find_element_by_id("id_selection-chapter").send_keys("1")
-        driver.find_element_by_id("id_selection-start_verse").clear()
-        driver.find_element_by_id("id_selection-start_verse").send_keys("5")
-        driver.find_element_by_id("id-add-verse-btn").click()
+        driver.find_element_by_id("id_quick_find").clear()
+        driver.find_element_by_id("id_quick_find").send_keys("Gen 1:5")
+        driver.find_element_by_id("id_lookup").click()
+        self.wait_for_ajax()
+        driver.find_element_by_css_selector("input.add-to-set").click()
+
         self.wait_until_loaded('#id-selection-verse-list tbody tr td')
         self.assertIn("And God called the light Day", driver.page_source)
 
@@ -52,15 +52,18 @@ class CreateSetTests(LiveServerTests):
         self.login(self._account)
         driver = self.driver
         driver.get(self.live_server_url + reverse('create_selection_set'))
-        Select(driver.find_element_by_id("id_selection-book")).select_by_visible_text("Genesis")
-        driver.find_element_by_id("id_selection-chapter").clear()
-        driver.find_element_by_id("id_selection-chapter").send_keys("1")
-        driver.find_element_by_id("id_selection-start_verse").clear()
-        driver.find_element_by_id("id_selection-start_verse").send_keys("5")
-        driver.find_element_by_id("id-add-verse-btn").click()
-        driver.find_element_by_id("id_selection-start_verse").clear()
-        driver.find_element_by_id("id_selection-start_verse").send_keys("6")
-        driver.find_element_by_id("id-add-verse-btn").click()
+
+        driver.find_element_by_id("id_quick_find").clear()
+        driver.find_element_by_id("id_quick_find").send_keys("Gen 1:5")
+        driver.find_element_by_id("id_lookup").click()
+        self.wait_for_ajax()
+        driver.find_element_by_css_selector("input.add-to-set").click()
+
+        driver.find_element_by_id("id_quick_find").clear()
+        driver.find_element_by_id("id_quick_find").send_keys("Gen 1:6")
+        driver.find_element_by_id("id_lookup").click()
+        self.wait_for_ajax()
+        driver.find_element_by_css_selector("input.add-to-set").click()
 
         driver.find_element_by_id("id-selection-save-btn").click()
 

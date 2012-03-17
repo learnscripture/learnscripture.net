@@ -19,6 +19,7 @@
 {% if set_type == 'SELECTION' %}
 
 <form id="id-selection-verse-set-form" action="" method="POST">
+  <input type="hidden" value="" id="id-selection-reference-list"  name="selection-reference-list">
   <h3>About this set</h3>
   {% csrf_token %}
   {{ verse_set_form|bootstrap }}
@@ -32,7 +33,7 @@
       <thead>
         <tr>
           <th>Reference</th>
-          <th>Text ({{ request.identity.default_bible_version.slug }})</th>
+          <th>Text</th>
         </tr>
       </thead>
       <tbody>
@@ -48,24 +49,35 @@
       </tbody>
     </table>
   </div>
-
-  <div id="id-selection-verse-selector">
-    {{ selection_verse_selector_form|bootstrap }}
-  </div>
-
-  <div id="id-selection-verse-message">
-  </div>
-
-  <div class="input">
-    <a href="#" id="id-add-verse-btn" class="btn">Add</a>
-  </div>
-
-  <div class="actions">
-    <input type="hidden" value="" id="id-selection-reference-list"  name="selection-reference-list">
-    <input name="selection-save" type="submit" class="btn primary" value="Save verse set" id="id-selection-save-btn">
-  </div>
-
 </form>
+
+<hr>
+
+{% include "learnscripture/quick_find_controls.html" %}
+
+<script id="id_create_selection_result_template" type="text/x-jsrender">
+  {# template for .quickfind_search_results #}
+  <div class="actionset">
+    <form action="" method="GET">
+      <input type="hidden" name="quick_find" value="[[>reference]]">
+      <input type="hidden" name="version_slug" value="[[>version_slug]]">
+      <input type="submit" class="btn primary add-to-set" value="Add to set">
+    </form>
+    <h3>[[>book_name]]</h3>
+    <div class="verselist">
+      [[for verses]]
+      <div class="verse">
+        <span class="versenumber">[[>chapter_number]]:[[>verse_number]]</span> [[:html_text]]
+      </div>
+      [[/for]]
+    </div>
+  </div>
+</script>
+
+
+<div class="actions">
+  <input name="selection-save" type="submit" class="btn primary" value="Save verse set" id="id-selection-save-btn">
+</div>
 
 {% endif %}
 

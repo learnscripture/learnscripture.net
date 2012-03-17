@@ -9,7 +9,7 @@ var learnscripture =
                 if (results.length > 10) {
                     html = html + "<p>The first 10 results matching your search are below:</p>";
                 }
-                html = html + $('#id_quickfind_result_template').render(results);
+                html = html + $('#id_individual_choose_result_template').render(results);
                 d.html(html);
                 learnscripture.setupNeedsPreferencesControls(d);
             } else {
@@ -29,5 +29,7 @@ var learnscripture =
     })(learnscripture || {}, $);
 
 $(document).ready(function() {
-    learnscripture.setupChooseControls();
+    if ($('#id-tab-individual').length > 0) {
+        learnscripture.setupChooseControls();
+    }
 });
