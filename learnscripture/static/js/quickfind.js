@@ -125,6 +125,33 @@ var learnscripture =
             form.find('input[name=quick_find]').val(text);
         };
 
+        var quickFindAndHandleResults = function(resultHandler) {
+
+            var handler = function(ev) {
+                var form = $(ev.target).closest('form');
+                ev.preventDefault();
+                $.ajax({url: '/api/learnscripture/v1/versefind/',
+                        dataType: 'json',
+                        type: 'GET',
+                        data: {
+                            'quick_find': form.find('input[name=quick_find]').val(),
+                            'version_slug': $('#id-version-select').val()
+                        },
+                        success: resultHandler,
+                        error:  function(jqXHR, textStatus, errorThrown) {
+                            if (jqXHR.status == 400) {
+                                form.parent().find('.quickfind_search_results *').remove();
+                                learnscripture.handleFormValidationErrors(form, '', jqXHR);
+                            } else {
+                                learnscripture.handlerAjaxError(jqXHR, textStatus, errorThrown);
+                            }
+                        }
+                       });
+            };
+            return handler;
+        };
+
+
         var setupQuickFindControls = function() {
             $('form.quickfind select[name=book]').change(bookChange);
             $('form.quickfind select[name=chapter_start]').change(chapterStartChange);
@@ -134,6 +161,7 @@ var learnscripture =
 
         // Exports:
         learnscripture.setupQuickFindControls = setupQuickFindControls;
+        learnscripture.quickFindAndHandleResults = quickFindAndHandleResults;
 
         return learnscripture;
 
