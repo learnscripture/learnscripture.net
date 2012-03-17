@@ -502,6 +502,9 @@ def create_or_edit_set(request, set_type=None, slug=None):
                   else 'Create passage set')
 
     c['selection_verse_selector_form'] = VerseSelector(prefix='selection')
+
+    c.update(context_for_quick_find(request))
+
     return render(request, 'learnscripture/create_set.html', c)
 
 

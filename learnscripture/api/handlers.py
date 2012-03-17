@@ -348,14 +348,20 @@ class VerseFind(BaseHandler):
         except InvalidVerseReference as e:
             return validation_error_response({'__all__': [e.message]})
 
-        l = []
-        for r in results:
-            l.append(dict(reference=r.reference,
-                          book_name=r.verses[0].book_name,
-                          version_slug=version_slug,
-                          verses=[dict(text=v.text,
-                                       html_text=html_format_text(v),
-                                       chapter_number=v.chapter_number,
-                                       verse_number=v.verse_number)
-                                  for v in r.verses]))
-        return l
+        retval = [r.__dict__ for r in results]
+        for item in retval:
+            # Change 'verse' objects:
+            verses2 = []
+            for v in item['verses']:
+                verses2.append(dict(
+                        reference=v.reference,
+                        text=v.text,
+                        html_text=html_format_text(v),
+                        book_number=v.book_number,
+                        chapter_number=v.chapter_number,
+                        verse_number=v.verse_number,
+                        bible_verse_number=v.bible_verse_number
+                        ))
+            item['verses'] = verses2
+            item['version_slug'] = version_slug
+        return retval
