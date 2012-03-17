@@ -24,7 +24,7 @@ var learnscripture =
 
         var addPassage = function(passageData) {
             $('#id-passage-verse-list tbody tr').remove();
-            $.each(passageData.verse_list, function(idx, verseData) {
+            $.each(passageData.verses, function(idx, verseData) {
                 var newrow = $('<tr><td><input type="checkbox" /></td><td></td><td></td></tr>').find('td:nth-child(2)').text(verseData.reference).end().find('td:nth-child(3)').text(verseData.text).end();
                 $('#id-passage-verse-list tbody').append(newrow);
             });
@@ -37,27 +37,6 @@ var learnscripture =
             }
             previousPassageRef = ref;
         }
-
-        var lookupPassageClick = function(ev) {
-            ev.preventDefault();
-            $.ajax({url: '/api/learnscripture/v1/getpassage/',
-                    // This is the wrong form, but it includes the form we want,
-                    // and otherwise we can't get this to work
-                    data: $('#id-passage-verse-set-form').serialize(),
-                    dataType: 'json',
-                    success: addPassage,
-                    error: function(jqXHR, textStatus, errorThrown) {
-                        // TODO - handle other errors apart from validation
-                        var errors = learnscripture.handleFormValidationErrors($('#id-passage-verse-selector'),
-                                                                               'passage', jqXHR);
-                        if (errors['__all__']) {
-                            var msg = $('<div class="alert-message warning"></div>')
-                            msg.text(errors['__all__'].join(' '));
-                            $('#id-passage-verse-message').html(msg);
-                        }
-                    }
-                   });
-        };
 
         var deleteButtonClick = function(ev) {
             ev.preventDefault();
@@ -91,7 +70,7 @@ var learnscripture =
             // continue with submit
         };
 
-        var loadResults = function(results) {
+        var selectionLoadResults = function(results) {
             $('#id-verse-find-form .validation-error').remove();
             var d = $('.quickfind_search_results');
             if (results.length > 0) {
@@ -104,6 +83,13 @@ var learnscripture =
                 d.find('input[type=submit]').click(addVerseClick);
             } else {
                 d.html("<p><span class='error'>No verses were found matching your search</span></p>");
+            }
+        };
+
+        var passageLoadResults = function(results) {
+            $('#id-verse-find-form .validation-error').remove();
+            if (results.length > 0) {
+                addPassage(results[0]);
             }
         };
 
@@ -126,10 +112,8 @@ var learnscripture =
             $('#id-selection-verse-list tbody').sortable();
             $('#id-selection-verse-list tbody').disableSelection();
             $('#id-selection-verse-list tbody').on('click', '.icon-trash', deleteButtonClick);
-            $('#id-add-verse-btn').click(addVerseClick);
             $('#id-selection-save-btn').click(selectionSaveBtnClick);
 
-            $('#id-lookup-passage-btn').click(lookupPassageClick);
             $('#id-passage-save-btn').click(passageSaveBtnClick);
 
             $("#id-tab-selection input[type=\"text\"], " +
@@ -145,7 +129,8 @@ var learnscripture =
                     input.attr('disabled', 'disabled');
                 }
             });
-            $('#id_lookup').click(learnscripture.quickFindAndHandleResults(loadResults));
+            $('#id-selection-quick-find-form #id_lookup').click(learnscripture.quickFindAndHandleResults(selectionLoadResults, false));
+            $('#id-passage-quick-find-form #id_lookup').click(learnscripture.quickFindAndHandleResults(passageLoadResults, true));
 
         };
 

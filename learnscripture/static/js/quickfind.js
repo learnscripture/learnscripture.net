@@ -9,6 +9,10 @@ var learnscripture =
             return foo;
         };
 
+        var isInPassageMode = function(form) {
+            return form.find('select[name=chapter_end]').length > 0;
+        };
+
         var bookChange = function(ev) {
             var form = $(this).closest('form');
             var book = $(ev.target).val();
@@ -24,13 +28,28 @@ var learnscripture =
             var form = $(this).closest('form');
             var book = getBook(form);
             var chapterStart = getChapterStart(form);
+            var chapterEnd = getChapterStart(form);
+            var verseStart
             if (chapterStart == null) {
+                setChapterEndSelect(form, []);
                 setVerseStartSelect(form, []);
                 setQuickFind(form, book);
             } else {
+                setChapterEndSelect(form, range(chapterStart, BIBLE_BOOK_INFO[book]['chapter_count'] + 1));
                 setVerseStartSelect(form, range(1, BIBLE_BOOK_INFO[book]['verse_counts'][chapterStart] + 1))
-                setQuickFind(form, book, chapterStart);
+                setQuickFind(form, book, chapterStart, chapterStart);
             }
+
+        };
+
+        var chapterEndChange = function(ev) {
+            var form = $(this).closest('form');
+            var book = getBook(form);
+            var chapterStart = getChapterStart(form);
+            var chapterEnd = getChapterEnd(form);
+            // chapterEnd doesn't have an empty option, so don't need to deal with that.
+            setVerseEndSelect(form, range(1, BIBLE_BOOK_INFO[book]['verse_counts'][chapterEnd] + 1))
+            setQuickFind(form, book, chapterStart, chapterEnd);
 
         };
 
@@ -38,15 +57,45 @@ var learnscripture =
             var form = $(this).closest('form');
             var book = getBook(form);
             var verseStart = getVerseStart(form);
+            var verseEnd = getVerseEnd(form);
             var chapterStart = getChapterStart(form);
+            var chapterEnd = getChapterEnd(form);
+            var passageMode = isInPassageMode(form);
             if (verseStart == null) {
+                if (passageMode) {
+                    setChapterEndSelect(form, [])
+                }
                 setVerseEndSelect(form, []);
                 setQuickFind(form, book, chapterStart);
             } else {
-                var lastVerse = BIBLE_BOOK_INFO[book]['verse_counts'][chapterStart];
-                lastVerse = Math.min(lastVerse, verseStart -1 + MAX_VERSES_FOR_SINGLE_CHOICE);
-                setVerseEndSelect(form, range(verseStart + 1, lastVerse + 1))
-                setQuickFind(form, book, chapterStart, verseStart);
+                if (passageMode && chapterEnd == null) {
+                    setChapterEndSelect(form, range(chapterStart, BIBLE_BOOK_INFO[book]['chapter_count'] + 1));
+                    setChapterEndSelectValue(form, chapterStart);
+                    chapterEnd = chapterStart;
+                }
+
+                var lastVerse;
+                if (passageMode) {
+                    lastVerse = BIBLE_BOOK_INFO[book]['verse_counts'][chapterEnd];
+                } else {
+                    lastVerse = BIBLE_BOOK_INFO[book]['verse_counts'][chapterStart];
+                    lastVerse = Math.min(lastVerse, verseStart -1 + MAX_VERSES_FOR_SINGLE_CHOICE);
+                }
+                if (passageMode && chapterStart != chapterEnd) {
+                    setVerseEndSelect(form, range(1, lastVerse + 1));
+                    if (verseEnd < lastVerse + 1) {
+                        // restore
+                        setVerseEndSelectValue(form, verseEnd);
+                    }
+                } else {
+                    setVerseEndSelect(form, range(verseStart + 1, lastVerse + 1));
+                    if (verseEnd >= verseStart + 1 &&
+                        verseEnd < lastVerse + 1) {
+                        // restore
+                        setVerseEndSelectValue(form, verseEnd);
+                    }
+                }
+                setQuickFind(form, book, chapterStart, chapterEnd, verseStart, getVerseEnd(form));
             }
         };
 
@@ -54,9 +103,10 @@ var learnscripture =
             var form = $(this).closest('form');
             var book = getBook(form);
             var chapterStart = getChapterStart(form);
+            var chapterEnd = getChapterEnd(form);
             var verseStart = getVerseStart(form);
             var verseEnd = getVerseEnd(form);
-            setQuickFind(form, book, chapterStart, verseStart, verseEnd);
+            setQuickFind(form, book, chapterStart, chapterEnd, verseStart, verseEnd);
         };
 
 
@@ -68,6 +118,10 @@ var learnscripture =
             return getSelectNumber(form, 'select[name=chapter_start]');
         };
 
+        var getChapterEnd = function(form) {
+            return getSelectNumber(form, 'select[name=chapter_end]');
+        };
+
         var getVerseStart = function(form) {
             return getSelectNumber(form, 'select[name=verse_start]');
         };
@@ -77,19 +131,27 @@ var learnscripture =
         };
 
         var getSelectNumber = function(form, selector) {
-            var num = form.find(selector).val();
-            if (num == '') {
+            var s = form.find(selector);
+            if (s.length == 0) {
+                return null;
+            }
+            var num = s.val();
+            if (num == '' || num == null) {
                 return null;
             } else {
                 return parseInt(num, 10)
             }
         };
 
-
-        var fillNumberSelect = function(select, numbers) {
+        var fillNumberSelect = function(select, numbers, addEmpty) {
+            if (select.length == 0) {
+                return;
+            }
             select.children().remove();
             if (numbers.length > 0) {
-                select.append('<option value="">-</option>');
+                if (addEmpty) {
+                    select.append('<option value="">-</option>');
+                }
                 for (var i = 0; i < numbers.length; i++) {
                     var n = numbers[i].toString()
                     select.append('<option value="' + n + '">' + n + '</option>');
@@ -98,20 +160,50 @@ var learnscripture =
         };
 
         var setChapterStartSelect = function(form, chapters) {
-            fillNumberSelect(form.find('select[name=chapter_start]'), chapters);
+            fillNumberSelect(form.find('select[name=chapter_start]'), chapters, true);
+            setChapterEndSelect(form, []);
             setVerseStartSelect(form, []);
         };
 
+        var setChapterEndSelect = function(form, chapters) {
+            fillNumberSelect(form.find('select[name=chapter_end]'), chapters, false);
+        };
+
+        var setChapterEndSelectValue = function(form, value) {
+            form.find('select[name=chapter_end]').val(value);
+        };
+
         var setVerseStartSelect = function(form, verses) {
-            fillNumberSelect(form.find('select[name=verse_start]'), verses);
+            fillNumberSelect(form.find('select[name=verse_start]'), verses, true);
             setVerseEndSelect(form, []);
         };
 
         var setVerseEndSelect = function(form, verses) {
-            fillNumberSelect(form.find('select[name=verse_end]'), verses);
+            fillNumberSelect(form.find('select[name=verse_end]'), verses, true);
         };
 
-        var setQuickFind = function(form, book, chapterStart, verseStart, verseEnd) {
+        var setVerseEndSelectValue = function(form, value) {
+            form.find('select[name=verse_end]').val(value);
+        };
+
+        var setQuickFind = function(form, book, chapterStart, chapterEnd, verseStart, verseEnd) {
+            if (chapterStart != undefined && chapterEnd != undefined
+                && chapterStart != chapterEnd
+                && verseStart != undefined
+                && verseEnd == undefined) {
+                // This can't be turned into a reference
+                return
+            }
+
+            if (chapterStart != undefined && chapterEnd != undefined
+                && chapterStart != chapterEnd
+                && verseStart == undefined
+                && verseEnd == undefined) {
+                // This can be turned into a meaningful reference,
+                // but our backend can't handle it
+                return
+            }
+
             var text = book + " ";
             if (chapterStart != undefined) {
                 text = text + chapterStart.toString();
@@ -119,13 +211,20 @@ var learnscripture =
             if (verseStart != undefined) {
                 text = text + ":" + verseStart.toString();
             }
-            if (verseEnd != undefined) {
-                text = text + "-" + verseEnd.toString();
+            if (chapterEnd != undefined && chapterEnd != chapterStart) {
+                text = text + "-" + chapterEnd.toString();
+                if (verseEnd != undefined) {
+                    text = text + ":" + verseEnd.toString();
+                }
+            } else {
+                if (verseEnd != undefined) {
+                    text = text + "-" + verseEnd.toString();
+                }
             }
             form.find('input[name=quick_find]').val(text);
         };
 
-        var quickFindAndHandleResults = function(resultHandler) {
+        var quickFindAndHandleResults = function(resultHandler, passageMode) {
 
             var handler = function(ev) {
                 var form = $(ev.target).closest('form');
@@ -135,7 +234,8 @@ var learnscripture =
                         type: 'GET',
                         data: {
                             'quick_find': form.find('input[name=quick_find]').val(),
-                            'version_slug': $('#id-version-select').val()
+                            'version_slug': $('#id-version-select').val(),
+                            'passage_mode': passageMode ? '1' : '0'
                         },
                         success: resultHandler,
                         error:  function(jqXHR, textStatus, errorThrown) {
@@ -155,6 +255,7 @@ var learnscripture =
         var setupQuickFindControls = function() {
             $('form.quickfind select[name=book]').change(bookChange);
             $('form.quickfind select[name=chapter_start]').change(chapterStartChange);
+            $('form.quickfind select[name=chapter_end]').change(chapterEndChange);
             $('form.quickfind select[name=verse_start]').change(verseStartChange);
             $('form.quickfind select[name=verse_end]').change(verseEndChange);
         };

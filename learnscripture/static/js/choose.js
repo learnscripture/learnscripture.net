@@ -18,7 +18,7 @@ var learnscripture =
         };
 
         var setupChooseControls = function() {
-            $('#id_lookup').click(learnscripture.quickFindAndHandleResults(loadResults));
+            $('#id_lookup').click(learnscripture.quickFindAndHandleResults(loadResults, false));
         };
 
         // Exports:

@@ -53,7 +53,9 @@
 
 <hr>
 
-{% include "learnscripture/quick_find_controls.html" %}
+<div id="id-selection-quick-find-form">
+  {% include "learnscripture/quick_find_controls.html" %}
+</div>
 
 <script id="id_create_selection_result_template" type="text/x-jsrender">
   {# template for .quickfind_search_results #}
@@ -83,23 +85,16 @@
 
 {% if set_type == 'PASSAGE' %}
 
-<form id="id-passage-verse-set-form" action="" method="POST">
-  {% csrf_token %}
-
+<div>
   <h3>Choose passage</h3>
 
-  <div id="id-passage-verse-selector">
-    {{ passage_verse_selector_form|bootstrap }}
-  </div>
-
-
-  <div class="input">
-    <a href="#" id="id-lookup-passage-btn" class="btn">Lookup</a>
+  <div id="id-passage-quick-find-form">
+    {% with quick_find_mode='PASSAGE' %}
+    {% include "learnscripture/quick_find_controls.html" %}
+    {% endwith %}
   </div>
 
   <br/>
-  <div id="id-passage-verse-message">
-  </div>
 
   <div id="id-passage-verse-list">
     <p>For passages more than about 10 verses, it helps if you can add
@@ -111,7 +106,7 @@
         <tr>
           <th>Break</th>
           <th>Reference</th>
-          <th>Text ({{ request.identity.default_bible_version.slug }})</th>
+          <th>Text</th>
         </tr>
       </thead>
       <tbody>
@@ -126,6 +121,10 @@
     </table>
 
   </div>
+</div>
+
+<form id="id-passage-verse-set-form" action="" method="POST">
+  {% csrf_token %}
 
   <h3>Optional extra info</h3>
 

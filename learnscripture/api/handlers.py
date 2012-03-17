@@ -333,6 +333,7 @@ class VerseFind(BaseHandler):
         try:
             q = request.GET['quick_find']
             version_slug = request.GET['version_slug']
+            passage_mode = request.GET.get('passage_mode', '') == '1'
         except KeyError:
             return rc.BAD_REQUEST
 
@@ -344,7 +345,12 @@ class VerseFind(BaseHandler):
         # Can't get 'fields' to work properly for this case, so pack into
         # dictionaries.
         try:
-            results = quick_find(q, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
+            results = quick_find(q, version,
+                                 max_length=MAX_VERSES_FOR_SINGLE_CHOICE
+                                 if not passage_mode
+                                 else MAX_VERSE_QUERY_SIZE,
+                                 allow_searches=not passage_mode
+                                 )
         except InvalidVerseReference as e:
             return validation_error_response({'__all__': [e.message]})
 

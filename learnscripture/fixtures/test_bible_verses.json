@@ -110,6 +110,29 @@
     "model" : "bibleverses.verse",
     "pk" : 104664
   },
+  { "fields" : { "bible_verse_number" : 10,
+        "book_number" : 0,
+        "chapter_number" : 2,
+        "reference" : "Genesis 2:1",
+        "text" : "Thus the heavens and the earth were finished, and all the host of them.",
+        "verse_number" : 1,
+        "version" : 1
+      },
+    "model" : "bibleverses.verse",
+    "pk" : 104665
+  },
+  { "fields" : { "bible_verse_number" : 11,
+        "book_number" : 0,
+        "chapter_number" : 2,
+        "reference" : "Genesis 2:2",
+        "text" : "And on the seventh day God ended his work which he had made; and he rested on the seventh day from all his work which he had made.",
+        "verse_number" : 2,
+        "version" : 1
+      },
+    "model" : "bibleverses.verse",
+    "pk" : 104666
+  },
+
 {
     "pk": 118891,
     "model": "bibleverses.verse",
