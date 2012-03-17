@@ -135,18 +135,18 @@ class CreateSetTests(LiveServerTests):
         self.login(self._account)
         driver = self.driver
         driver.get(self.live_server_url + "/create-passage-set/")
+
         driver.find_element_by_id("id_passage-name").clear()
         driver.find_element_by_id("id_passage-name").send_keys("Genesis 1")
         driver.find_element_by_id("id_passage-description").clear()
         driver.find_element_by_id("id_passage-description").send_keys("My description")
-        Select(driver.find_element_by_id("id_passage-book")).select_by_visible_text("Genesis")
-        driver.find_element_by_id("id_passage-start_chapter").clear()
-        driver.find_element_by_id("id_passage-start_chapter").send_keys("1")
-        driver.find_element_by_id("id_passage-start_verse").clear()
-        driver.find_element_by_id("id_passage-start_verse").send_keys("1")
-        driver.find_element_by_id("id_passage-end_verse").clear()
-        driver.find_element_by_id("id_passage-end_verse").send_keys("10")
-        driver.find_element_by_id("id-lookup-passage-btn").click()
+
+        driver.find_element_by_id("id_quick_find").clear()
+        driver.find_element_by_id("id_quick_find").send_keys("Gen 1:1-10")
+        driver.find_element_by_id("id_lookup").click()
+        self.wait_for_ajax()
+
+        driver.find_element_by_id("id_lookup").click()
         self.wait_until_loaded('#id-passage-verse-list tbody tr td')
         self.assertIn("And God called the light Day", driver.page_source)
 

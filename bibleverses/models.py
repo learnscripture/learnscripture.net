@@ -565,7 +565,8 @@ def get_passage_sections(verse_list, breaks):
     return sections
 
 
-def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE):
+def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
+               allow_searches=True):
     """
     Does a verse search based on reference or contents.
 
@@ -583,7 +584,7 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE):
     bible_ref_re = (
         '^.*'                # book name
         '\d+'                # chapter
-        '\s*((v|:|\.)'        # optionally: v or : or .
+        '\s*((v|:|\.)'       # optionally: v or : or .
         '\s*\d+'             #             and start verse number
         '(\s*-\s*\d+)?)?$'   #             and optionally end verse
         )
@@ -594,6 +595,9 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE):
         reference = normalise_reference(query)
         if reference is not None:
             return [ComboVerse(reference, parse_ref(reference, version, max_length=max_length))]
+
+    if not allow_searches:
+        raise InvalidVerseReference("Verse reference not recognised")
 
     # Do a search:
     results = Verse.objects.text_search(query, version, limit=11)
