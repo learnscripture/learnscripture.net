@@ -20,15 +20,14 @@
 
 <div id="id-create-selection-set">
 
- <form id="id-verse-set-form" action="" method="POST">
+  <form id="id-verse-set-form" action="" method="POST">
     <input type="hidden" value="" id="id-reference-list"  name="reference-list">
     <h3>About this set</h3>
     {% csrf_token %}
     {{ verse_set_form|bootstrap }}
 
-    <h3>Add verses</h3>
-
     <div id="id-verse-list">
+      <h3>Verse list</h3>
       <p>Drag/drop or use the arrows to re-order.</p>
 
       <table>
@@ -53,7 +52,8 @@
     </div>
   </form>
 
- <hr>
+  <h3>Add verses</h3>
+
 
   {% include "learnscripture/quick_find_controls.html" %}
 
