@@ -21,7 +21,6 @@ from piston.utils import rc
 from accounts.forms import PreferencesForm
 from accounts.models import Account
 from bibleverses.models import UserVerseStatus, Verse, StageType, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, MAX_VERSE_QUERY_SIZE, BibleVersion, quick_find
-from bibleverses.forms import VerseSelector, PassageVerseSelector
 from learnscripture import session
 from learnscripture.decorators import require_identity_method
 from learnscripture.forms import SignUpForm, LogInForm, AccountPasswordResetForm
@@ -221,38 +220,6 @@ class LogOutHandler(BaseHandler):
     def create(self, request):
         session.logout(request)
         return {'username': 'Guest'}
-
-
-class GetVerseForSelection(BaseHandler):
-    allowed_methods = ('GET', )
-
-    @require_identity_method
-    @validate(VerseSelector, prefix='selection')
-    def read(self, request):
-        reference = request.form.make_reference()
-        try:
-            text = request.identity.default_bible_version.get_text_by_reference(reference, max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
-
-        except InvalidVerseReference as e:
-            return validation_error_response({'__all__': [e.message]})
-        return {'reference': reference,
-                'text': text}
-
-class GetPassage(BaseHandler):
-    allowed_methods = ('GET', )
-
-    @require_identity_method
-    @validate(PassageVerseSelector, prefix='passage')
-    def read(self, request):
-        reference = request.form.make_reference()
-        try:
-            verse_list = request.identity.default_bible_version.get_verse_list(reference,
-                                                                               max_length=MAX_VERSE_QUERY_SIZE)
-
-        except InvalidVerseReference as e:
-            return validation_error_response({'__all__': [e.message]})
-        return {'reference': reference,
-                'verse_list': [{'reference': v.reference, 'text': v.text} for v in verse_list]}
 
 
 class SetPreferences(BaseHandler):
