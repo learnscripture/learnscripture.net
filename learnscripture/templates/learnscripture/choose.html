@@ -98,13 +98,29 @@ Choose verses
 
     {% include "learnscripture/quick_find_controls.html" %}
 
+    <script id="id_quickfind_result_template" type="text/x-jsrender">
+      {# template for .quickfind_search_results #}
+      <div class="actionset">
+        <form action="" method="POST">
+          {% csrf_token %}
+          <input type="hidden" name="reference" value="[[>reference]]">
+          <input type="hidden" name="version_slug" value="[[>version_slug]]">
+          <input type="submit" class="btn primary needs-preferences" value="Learn">
+        </form>
+        <h3>[[>book_name]]</h3>
+        <div class="verselist">
+          [[for verses]]
+          <div class="verse">
+            <span class="versenumber">[[>chapter_number]]:[[>verse_number]]</span> [[:html_text]]
+          </div>
+          [[/for]]
+        </div>
+      </div>
+    </script>
+
     {% if individual_search_msg %}
     <div class="alert-message warning">{{ individual_search_msg }}</div>
     {% endif %}
-
-    <div id="id_individual_search_results">
-    </div>
-
 
   </div>
 
