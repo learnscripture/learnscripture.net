@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 from datetime import timedelta
 from decimal import Decimal
+import math
 import re
 
 from django.core.urlresolvers import reverse
@@ -34,10 +35,26 @@ class LearnTests(LiveServerTests):
         self.wait_for_ajax()
         return verse_set
 
-    def _type_john_3_16_kjv(self):
+    def _type_john_3_16_kjv(self, accuracy=1.0):
+        accumulator = 0
         for word in self.kjv_john_3_16.strip().split():
-            self.driver.find_element_by_id('id-typing').send_keys(word + ' ')
+            accumulator += accuracy
+            if accumulator >= 1.0:
+                self.driver.find_element_by_id('id-typing').send_keys(word + ' ')
+                accumulator -= 1.0
+            else:
+                # Type the wrong thing - 3 times to make it fail
+                for i in range(0, 3):
+                    self.driver.find_element_by_id('id-typing').send_keys(' ')
 
+    def _score_for_j316(self, accuracy=1.0):
+        word_count = len(self.kjv_john_3_16.strip().split())
+        # This is the accuracy that will be recorded, given the
+        # algo in _type_john_3_16_kjv and learn.js
+        actual_accuracy = math.floor(word_count * accuracy)/word_count
+
+        points_word_count = word_count - 3 # Don't get points for the reference
+        return math.floor(Scores.POINTS_PER_WORD * points_word_count * actual_accuracy)
 
     def test_save_strength(self):
         verse_set = self.choose_verse_set('Bible 101')
@@ -88,11 +105,6 @@ class LearnTests(LiveServerTests):
         self.assertEqual(account.total_score.points,
                          j316_score * (1 + Scores.PERFECT_BONUS_FACTOR))
         self.assertEqual(account.score_logs.count(), 2)
-
-    def _score_for_j316(self):
-        word_count = len(self.kjv_john_3_16.strip().split())
-        word_count -= 3 # Don't get points for the reference
-        return Scores.POINTS_PER_WORD * word_count
 
     def test_revision_complete_points(self):
         driver = self.driver
@@ -306,3 +318,59 @@ class LearnTests(LiveServerTests):
         self.assertEqual(account.total_score.points,
                          j316_score * (1 + Scores.PERFECT_BONUS_FACTOR))
         self.assertEqual(account.score_logs.count(), 2)
+
+    def test_super_bonus_after_more_practice(self):
+        # Regression test for issue #1
+
+        # Also tests that the 'more practice' button appears, and works
+
+        driver = self.driver
+        identity, account = self.create_account()
+        self.login(account)
+        verse_set = self.choose_verse_set('Bible 101')
+
+        # Learn one
+        identity.record_verse_action('John 3:16', 'KJV', StageType.TEST, 1.0)
+        # Make it due for testing:
+        identity.verse_statuses.filter(memory_stage=MemoryStage.TESTED)\
+            .update(last_tested=timezone.now() - timedelta(100))
+
+        driver.get(self.live_server_url + reverse('start'))
+        driver.find_element_by_css_selector('input[name=revisequeue]').click()
+
+        self.wait_until_loaded('body')
+        self.wait_for_ajax()
+
+        self._type_john_3_16_kjv(accuracy=0.5)
+
+        self.wait_for_ajax()
+
+        # Now the 'more practice' button will appear, and be primary
+        btn = driver.find_element_by_id('id-more-practice-btn')
+        self.assertTrue('primary' in btn.get_attribute('class'))
+
+        btn.click()
+
+        # Now go through 3 stages:
+        for i in range(0, 3):
+            next_btn = driver.find_element_by_id('id-next-btn')
+            self.assertNotEqual(next_btn.get_attribute('disabled'), 'true')
+            next_btn.click()
+
+        self._type_john_3_16_kjv(accuracy=0.95)
+        self.wait_for_ajax()
+
+        # We should get super bonus applied just once
+        j316_score_1 = self._score_for_j316(accuracy=0.5)
+        j316_score_2 = self._score_for_j316(accuracy=0.95)
+        account = Account.objects.get(id=account.id) # refresh
+        self.assertEqual(account.total_score.points,
+                         (j316_score_1
+                          * (1 + Scores.REVISION_COMPLETE_BONUS_FACTOR)
+                          + j316_score_2)
+                         )
+
+        # One for each revision, 1 for revision complete:
+        self.assertEqual(account.score_logs.count(), 3)
+        self.assertEqual(account.score_logs.filter(reason=ScoreReason.REVISION_COMPLETED).count(), 1)
+

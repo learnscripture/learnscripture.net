@@ -78,6 +78,9 @@ def verse_status_finished(request, reference, verse_set_id, new_score_logs):
         if len(_get_verse_status_ids(request)) == 0:
             if not request.session['verses_skipped']:
                 request.identity.award_revision_complete_bonus(score_log_ids)
+                # Ensure we switch to 'not revision', so that we can't get super
+                # bonus more than once.
+                request.session['revision'] = False
 
 
 def verse_status_skipped(request, reference, verse_set_id):
