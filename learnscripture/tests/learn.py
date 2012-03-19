@@ -164,14 +164,15 @@ class LearnTests(LiveServerTests):
         self.assertIn(u"He takes me to lush pastures",
                       driver.find_element_by_css_selector('.current-verse').text)
 
-    def test_learn_passage_mixed(self):
-        import time
-        # Test learning a passage when some verses are to be tested and others
+    def test_revise_passage_mixed(self):
+        # Test revising a passage when some verses are to be tested and others
         # are just being read.
-        verse_set = self.choose_verse_set('Psalm 23')
-
+        import time
         driver = self.driver
-        identity = Identity.objects.get() # should only be one at this point
+        identity, account = self.create_account()
+        self.login(account)
+
+        verse_set = self.choose_verse_set('Psalm 23')
 
         for i in range(1, 7):
             identity.record_verse_action('Psalm 23:%d' % i, 'KJV', StageType.TEST,
@@ -180,7 +181,9 @@ class LearnTests(LiveServerTests):
         identity.verse_statuses.filter(reference='Psalm 23:1')\
             .update(last_tested=timezone.now() - timedelta(100))
 
-        driver.get(self.live_server_url + reverse('learn'))
+        driver.get(self.live_server_url + reverse('start'))
+        driver.find_element_by_css_selector('input[name=revisepassage]').click()
+
         for word in "The LORD is my shepherd, I shall not want.".split():
             driver.find_element_by_id('id-typing').send_keys(word + ' ')
 
@@ -189,6 +192,32 @@ class LearnTests(LiveServerTests):
         self.wait_for_ajax()
         self.assertIn(u"He maketh me to lie down in green pastures",
                       driver.find_element_by_css_selector('.current-verse').text)
+
+        btn = driver.find_element_by_id('id-context-next-verse-btn')
+        for i in range(0, 5):
+            btn.click()
+
+        # This is a tricky corner case:
+        # - we are in revision mode, so need 'revision complete bonus'
+        #   - and we want it to appear
+        # - the last verse is not going to be tested
+        # - normally, the 'Done' button takes you straight back
+        #   to dashboard. But in this case, we wait for a second
+        #   to allow the bonus to appear.
+
+        self.wait_for_ajax()
+        self.assertEqual(account.score_logs.filter(reason=ScoreReason.REVISION_COMPLETED).count(), 1)
+
+        # Super bonus should be present
+        self.assertFalse(driver.find_element_by_css_selector('.score-log-type-2') is None)
+
+        # And still there 0.5 seconds later
+        time.sleep(0.5)
+        self.assertFalse(driver.find_element_by_css_selector('.score-log-type-2') is None)
+
+        # But it does move on to dashboard eventually
+        time.sleep(3)
+        self.assertTrue(driver.current_url.endswith('/dashboard/'))
 
     def test_skip_verse(self):
         verse_set = self.choose_verse_set('Bible 101')
