@@ -198,26 +198,9 @@ class MemoryModel(object):
         t_1 = self.t(min(strength + self.DELTA_S_IDEAL, self.BEST_STRENGTH))
         return last_test + timedelta(seconds=max(t_1 - t_0, self.MIN_TIME_BETWEEN_TESTS))
 
-    # If necessary, we could add a denormalised UserVerseStatus.testing_due
-    # DateTimeField (which would have to be updated after testing) which would
-    # turn this into a trivial query.
-
-    def filter_qs(self, qs, now_seconds):
-        # SQL equivalent of needs_testing
-        clause = ('last_tested IS NOT NULL AND '
-                  'strength < %(learnt)s AND '
-                  '(%(now_seconds)s - EXTRACT(EPOCH FROM last_tested))' # time elapsed
-                  ' > (GREATEST(3600, '
-                  '  ((- ln(1 - LEAST(strength + %(delta_s_ideal)s, %(best_strength)s)) / %(alpha)s) ^ (1.0/%(exponent)s)) '
-                  ' -((- ln(1 - strength) / %(alpha)s) ^ (1.0/%(exponent)s))'
-                  ' ))' %
-                  {'now_seconds': now_seconds,
-                   'delta_s_ideal': self.DELTA_S_IDEAL,
-                   'best_strength': self.BEST_STRENGTH,
-                   'learnt': self.LEARNT,
-                   'alpha': self.ALPHA,
-                   'exponent': self.EXPONENT});
-        return qs.extra(where=[clause])
+    def filter_qs(self, qs, now):
+        return qs.filter(next_test_due__lte=now,
+                         strength__lt=self.LEARNT)
 
 
 # test_run and test_run_using_next_test_due should be essentially identical.
