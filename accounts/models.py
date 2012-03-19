@@ -261,7 +261,9 @@ class Identity(models.Model):
         if version is None:
             version = self.default_bible_version
 
-        existing = list(self.verse_statuses.filter(reference=reference, ignored=False))
+        existing = list(self.verse_statuses.filter(reference=reference,
+                                                   verse_set__isnull=True,
+                                                   ignored=False))
         if existing:
             return existing[0]
         else:
@@ -448,6 +450,7 @@ class Identity(models.Model):
             uvs.added = same_verse.added
             uvs.first_seen = same_verse.first_seen
             uvs.last_tested = same_verse.last_tested
+            uvs.save()
 
         return uvs
 

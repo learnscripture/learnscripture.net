@@ -416,3 +416,22 @@ class IdentityTests(TestCase):
 
             self.assertEqual(d[vs1.id, 'Psalm 23:1'].reference, 'Psalm 23:1')
             texts = [uvs.text for uvs in d.values()]
+
+    def test_add_verse_choice_copies_strength(self):
+        i = self._create_identity()
+        vs1 = VerseSet.objects.get(name='Psalm 23')
+        i.add_verse_set(vs1)
+
+        i.record_verse_action('Psalm 23:1', 'NET', StageType.TEST, 1)
+        self.assertNotEqual(i.verse_statuses.get(reference='Psalm 23:1').strength, 0)
+
+        # Now use add_verse_choice
+        i.add_verse_choice('Psalm 23:1')
+
+        # We need two UserVerseStatuses, because the user wants to learn this
+        # verse outside the context of the passage.
+        self.assertEqual(i.verse_statuses.filter(reference='Psalm 23:1').count(), 2)
+
+        self.assertFalse(0.0 in [uvs.strength for uvs in i.verse_statuses.filter(reference='Psalm 23:1')])
+
+
