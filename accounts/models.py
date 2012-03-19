@@ -578,6 +578,16 @@ class Identity(models.Model):
 
         return sorted(vss, key=lambda vs: vs.name)
 
+    def next_verse_due(self):
+        try:
+            return (self.verse_statuses.filter(ignored=False,
+                                              next_test_due__isnull=False,
+                                              next_test_due__gte=timezone.now(),
+                                              strength__lt=memorymodel.LEARNT)
+                    .order_by('next_test_due'))[0]
+        except IndexError:
+            return None
+
     def verse_statuses_for_passage(self, verse_set_id):
         # Must be strictly in the bible order
         uvs_list = list(self.verse_statuses.filter(verse_set=verse_set_id,
