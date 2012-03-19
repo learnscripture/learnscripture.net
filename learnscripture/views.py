@@ -168,6 +168,7 @@ def start(request):
          'revise_verses_queue': identity.verse_statuses_for_revising(),
          'passages_for_learning': identity.passages_for_learning(),
          'passages_for_revising': identity.passages_for_revising(),
+         'next_verse_due': identity.next_verse_due(),
          }
     c.update(session_stats(identity))
     return render(request, 'learnscripture/start.html', c)
