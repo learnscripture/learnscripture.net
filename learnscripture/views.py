@@ -58,10 +58,9 @@ def login(request):
 
 
 def bible_versions_for_request(request):
-    if request.user.is_superuser:
-        return BibleVersion.objects.all()
-    else:
-        return BibleVersion.objects.filter(public=True)
+    if hasattr(request, 'identity'):
+        return request.identity.available_bible_versions()
+    return BibleVersion.objects.filter(public=True)
 
 
 @require_preferences
