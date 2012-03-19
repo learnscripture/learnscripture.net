@@ -497,6 +497,7 @@ var learnscripture =
         // === Reading stage ===
 
         var readStageStart = function() {
+            setHardMode(false);
             showWord($('.current-verse .word *'));
         };
 
@@ -555,6 +556,7 @@ var learnscripture =
             // Factory function that returns a stage starter
             // function for recall stages
             return function() {
+                setHardMode(false);
                 untestedWords = wordList.slice(0);
                 testedWords = [];
                 continueFunc();
