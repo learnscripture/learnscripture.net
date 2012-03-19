@@ -219,6 +219,12 @@ def deploy():
 
 
 @task
+def run_migrations():
+    push_sources()
+    update_database()
+
+
+@task
 def manage_py_command(*commands):
     with virtualenv(venv_dir):
         with cd(src_dir):
