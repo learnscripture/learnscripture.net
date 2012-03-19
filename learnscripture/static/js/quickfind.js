@@ -241,6 +241,8 @@ var learnscripture =
                             if (jqXHR.status == 400) {
                                 form.parent().find('.quickfind_search_results *').remove();
                                 learnscripture.handleFormValidationErrors(form, '', jqXHR);
+                            } else if (jqXHR.status == 500) {
+                                form.parent().find('.quickfind_search_results').html('Your search terms were not understood.');
                             } else {
                                 learnscripture.handlerAjaxError(jqXHR, textStatus, errorThrown);
                             }
