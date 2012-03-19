@@ -44,7 +44,7 @@ class ChooseTests(LiveServerTests):
         self.wait_until_loaded('body')
 
         # Change version:
-        Select(driver.find_element_by_id("id-version-select")).select_by_visible_text("NET")
+        Select(driver.find_element_by_id("id-version-select")).select_by_visible_text("NET (New English Translation)")
 
         self.wait_for_ajax()
 
@@ -90,7 +90,7 @@ class ChooseTests(LiveServerTests):
 
         driver.find_element_by_css_selector('form.quickfind input[name=quick_find]')\
             .send_keys('Gen 1:1')
-        Select(driver.find_element_by_css_selector("form.quickfind select[name=version]")).select_by_visible_text("KJV")
+        Select(driver.find_element_by_css_selector("form.quickfind select[name=version]")).select_by_visible_text("KJV (King James Version)")
         driver.find_element_by_css_selector("input[name=lookup]").click()
         self.wait_for_ajax()
 
@@ -105,7 +105,7 @@ class ChooseTests(LiveServerTests):
 
         driver.find_element_by_css_selector('form.quickfind input[name=quick_find]')\
             .send_keys('Gen 100:1')
-        Select(driver.find_element_by_css_selector("form.quickfind select[name=version]")).select_by_visible_text("KJV")
+        Select(driver.find_element_by_css_selector("form.quickfind select[name=version]")).select_by_visible_text("KJV (King James Version)")
         driver.find_element_by_css_selector("input[name=lookup]").click()
         self.wait_for_ajax()
 
@@ -115,11 +115,12 @@ class ChooseTests(LiveServerTests):
     def test_choose_individual_by_search(self):
         driver = self.driver
         driver.get(self.live_server_url + reverse('choose'))
+
         driver.find_element_by_css_selector("a[href='#id-tab-individual']").click()
 
         driver.find_element_by_css_selector('form.quickfind input[name=quick_find]')\
             .send_keys('firmament evening')
-        Select(driver.find_element_by_css_selector("form.quickfind select[name=version]")).select_by_visible_text("KJV")
+        Select(driver.find_element_by_css_selector("form.quickfind select[name=version]")).select_by_visible_text("KJV (King James Version)")
         driver.find_element_by_css_selector("input[name=lookup]").click()
         self.wait_for_ajax()
 

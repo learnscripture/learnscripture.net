@@ -33,7 +33,8 @@ class PreferencesForm(forms.ModelForm):
         available_bible_versions = BibleVersion.objects.filter(public=True)
         if 'instance' in kwargs:
             identity = kwargs['instance']
-            available_bible_versions = identity.available_bible_versions()
+            if identity is not None:
+                available_bible_versions = identity.available_bible_versions()
 
         self.fields['default_bible_version'].queryset = available_bible_versions
 
