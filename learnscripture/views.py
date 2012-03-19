@@ -533,13 +533,18 @@ def user_stats(request, username):
 @require_identity
 def user_verses(request):
     identity = request.identity
+    c = {}
     verses = (identity.verse_statuses.filter(ignored=False,
                                              strength__gt=0,
                                              last_tested__isnull=False)
-              .select_related('version').order_by('strength', 'reference')
+              .select_related('version')
               )
 
-    c = {}
+    if 'bibleorder' in request.GET:
+        c['bibleorder'] = True
+        verses = verses.order_by('bible_verse_number', 'strength')
+    else:
+        verses = verses.order_by('strength', 'reference')
     c['verses'] = verses
     return render(request, 'learnscripture/user_verses.html', c)
 
