@@ -25,6 +25,18 @@ class PreferencesForm(forms.ModelForm):
     testing_method = forms.ChoiceField(widget=BootstrapRadioSelect,
                                        choices=TestingMethod.choice_list,
                                        )
+
+    def __init__(self, *args, **kwargs):
+        super(PreferencesForm, self).__init__(*args, **kwargs)
+
+        from bibleverses.models import BibleVersion
+        available_bible_versions = BibleVersion.objects.filter(public=True)
+        if 'instance' in kwargs:
+            identity = kwargs['instance']
+            available_bible_versions = identity.available_bible_versions()
+
+        self.fields['default_bible_version'].queryset = available_bible_versions
+
     class Meta:
         model = Identity
         fields = ['default_bible_version', 'testing_method',

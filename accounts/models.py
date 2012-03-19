@@ -166,8 +166,7 @@ class Identity(models.Model):
     date_created = models.DateTimeField(default=timezone.now)
 
     # Preferences
-    default_bible_version = models.ForeignKey(BibleVersion, null=True, blank=True,
-                                              limit_choices_to={'public':True})
+    default_bible_version = models.ForeignKey(BibleVersion, null=True, blank=True)
     testing_method = models.PositiveSmallIntegerField(choices=TestingMethod.choice_list,
                                                       null=True, default=None)
     enable_animations = models.BooleanField(blank=True, default=True)
@@ -712,3 +711,9 @@ class Identity(models.Model):
             return []
         else:
             return self.account.award_revision_complete_bonus(score_log_ids)
+
+    def available_bible_versions(self):
+        if self.account_id is not None:
+            if self.account.is_tester:
+                return BibleVersion.objects.all()
+        return BibleVersion.objects.filter(public=True)
