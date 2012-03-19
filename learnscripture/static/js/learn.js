@@ -53,6 +53,9 @@ var learnscripture =
         var testingMistakes = null;
         var hardMode = null;
 
+        // Score logs
+        var waitingForScoreLogs = false;
+
         // Verse list
         var versesToLearn = null; // eventually a dictionary of index:verse
         var currentVerseIndex = null;
@@ -446,17 +449,38 @@ var learnscripture =
         }
 
         var markReadAndNextVerse = function() {
+
+            if (!nextVersePossible()) {
+                // May need to do some waiting for score logs to appear if in
+                // revision mode.
+                waitingForScoreLogs = true;
+            }
             readingComplete(function() {
                 loadStats();
+                if (waitingForScoreLogs) {
+                    loadScoreLogs();
+                }
             });
             nextVerse();
         };
 
 
-        var finish = function() {
+        var finish = function(depth) {
+            // depth is infinite recursion protection
+            if (depth == undefined) {
+                depth = 0;
+            }
             var go = function() {
                     window.location = '/dashboard/';
             };
+
+            // Don't do redirect if we are waiting for score logs to show.
+            // But don't wait forever.
+            if (waitingForScoreLogs && depth < 2) {
+                setTimeout(function() { finish(depth + 1); }, 1500)
+                return;
+            }
+
             if ($.active) {
                 $('body').ajaxStop(go);
             } else {
@@ -1063,6 +1087,7 @@ var learnscripture =
 
         var loadScoreLogs = function() {
             if ($('#id-points-enabled').length == 0) {
+                waitingForScoreLogs = false;
                 return;
             }
             $.ajax({url: '/api/learnscripture/v1/scorelogs/?format=json&r=' +
@@ -1079,6 +1104,7 @@ var learnscripture =
                 // This is defined recursively to get the animation to work
                 // nicely for multiple score logs appearing one after the other.
                 if (scoreLogs.length == 0) {
+                    waitingForScoreLogs = false;
                     return;
                 }
                 var scoreLog = scoreLogs[0];
