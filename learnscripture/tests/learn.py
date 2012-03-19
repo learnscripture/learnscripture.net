@@ -5,6 +5,7 @@ from decimal import Decimal
 import math
 import re
 
+from django.db.models import F
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 from selenium.webdriver.common.by import By
@@ -114,9 +115,8 @@ class LearnTests(LiveServerTests):
 
         # Learn one
         identity.record_verse_action('John 3:16', 'KJV', StageType.TEST, 1.0)
-        # Make it due for testing:
-        identity.verse_statuses.filter(memory_stage=MemoryStage.TESTED)\
-            .update(last_tested=timezone.now() - timedelta(100))
+
+        self._make_verses_due_for_testing(identity.verse_statuses.filter(memory_stage=MemoryStage.TESTED))
 
         driver.get(self.live_server_url + reverse('start'))
         driver.find_element_by_css_selector('input[name=revisequeue]').click()
@@ -177,9 +177,8 @@ class LearnTests(LiveServerTests):
         for i in range(1, 7):
             identity.record_verse_action('Psalm 23:%d' % i, 'KJV', StageType.TEST,
                                          1.0)
-        # Make some due for testing:
-        identity.verse_statuses.filter(reference='Psalm 23:1')\
-            .update(last_tested=timezone.now() - timedelta(100))
+
+        self._make_verses_due_for_testing(identity.verse_statuses.filter(reference='Psalm 23:1'))
 
         driver.get(self.live_server_url + reverse('start'))
         driver.find_element_by_css_selector('input[name=revisepassage]').click()
@@ -245,8 +244,7 @@ class LearnTests(LiveServerTests):
         identity.record_verse_action('John 3:16', 'KJV', StageType.TEST, 1.0)
         identity.record_verse_action('John 14:6', 'KJV', StageType.TEST, 1.0)
 
-        # Make it due for testing:
-        identity.verse_statuses.update(last_tested=timezone.now() - timedelta(100))
+        self._make_verses_due_for_testing(identity.verse_statuses)
 
         # Go to dashboard
         driver.get(self.live_server_url + reverse('start'))
@@ -276,6 +274,13 @@ class LearnTests(LiveServerTests):
 
         self.assertEqual(u"John 14:6", driver.find_element_by_id('id-verse-title').text)
 
+    def _make_verses_due_for_testing(self, uvs_queryset):
+        uvs_queryset.update(
+            last_tested=F('last_tested') - timedelta(100),
+            next_test_due=F('next_test_due') - timedelta(100),
+            )
+
+
     def test_finish_button(self):
         verse_set = self.choose_verse_set('Bible 101')
         driver = self.driver
@@ -285,8 +290,7 @@ class LearnTests(LiveServerTests):
         identity.record_verse_action('John 3:16', 'KJV', StageType.TEST, 1.0)
         identity.record_verse_action('John 14:6', 'KJV', StageType.TEST, 1.0)
 
-        # Make them due for testing:
-        identity.verse_statuses.update(last_tested=timezone.now() - timedelta(100))
+        self._make_verses_due_for_testing(identity.verse_statuses)
 
         # Go to dashboard
         driver.get(self.live_server_url + reverse('start'))
@@ -299,6 +303,7 @@ class LearnTests(LiveServerTests):
         self._type_john_3_16_kjv()
 
         driver.find_element_by_id('id-finish-btn').click()
+        self.wait_for_ajax()
 
         # Reload, should have nothing more to revise
 
@@ -360,9 +365,8 @@ class LearnTests(LiveServerTests):
 
         # Learn one
         identity.record_verse_action('John 3:16', 'KJV', StageType.TEST, 1.0)
-        # Make it due for testing:
-        identity.verse_statuses.filter(memory_stage=MemoryStage.TESTED)\
-            .update(last_tested=timezone.now() - timedelta(100))
+
+        self._make_verses_due_for_testing(identity.verse_statuses.filter(memory_stage=MemoryStage.TESTED))
 
         driver.get(self.live_server_url + reverse('start'))
         driver.find_element_by_css_selector('input[name=revisequeue]').click()

@@ -3,9 +3,11 @@ from __future__ import absolute_import
 from datetime import timedelta
 import time
 
+from django.db.models import F
 from django.test import TestCase
 from django.utils import timezone
 
+from accounts import memorymodel
 from accounts.models import Identity, ActionChange, Account
 from bibleverses.models import VerseSet, BibleVersion, StageType, MemoryStage
 from scores.models import Scores
@@ -241,7 +243,9 @@ class IdentityTests(TestCase):
             # Put each one back by n days i.e. as if running over
             # multiple days
             i.verse_statuses.filter(reference=ref).update(
-                last_tested=timezone.now() - timedelta(7 - vn))
+                last_tested=F('last_tested') - timedelta(7 - vn),
+                next_test_due=F('next_test_due') - timedelta(7 - vn)
+                )
 
             # Now test again, for all but the first
             if vn != 1:
@@ -296,7 +300,8 @@ class IdentityTests(TestCase):
             ref = 'Psalm 23:%d' % vn
             i.record_verse_action(ref, 'NET', StageType.TEST, 1.0)
             i.verse_statuses.filter(reference=ref).update(
-                last_tested=timezone.now() - timedelta(10)
+                last_tested=F('last_tested') - timedelta(10),
+                next_test_due=F('next_test_due') - timedelta(10),
                 )
 
         # Shouldn't be splittable yet, since strength will be below threshold
@@ -311,10 +316,11 @@ class IdentityTests(TestCase):
             # group testing.
             # Put each 1 minute apart, to simulate having tested the whole
             # group together.
-            i.verse_statuses.filter(reference=ref).update(
-                strength = 0.55,
-                last_tested=timezone.now() - timedelta(200 - (vn * 60.0)/(3600.0*24))
-                )
+            for uvs in i.verse_statuses.filter(reference=ref):
+                uvs.last_tested = timezone.now() - timedelta(200 - (vn * 60.0)/(3600.0*24))
+                uvs.strength = 0.55
+                uvs.next_test_due = memorymodel.next_test_due(uvs.last_tested, uvs.strength)
+                uvs.save()
 
         vss = i.passages_for_revising()
         self.assertEqual(len(vss), 1)
