@@ -16,11 +16,26 @@ Progress
 
 {% autopaginate verses 20 %}
 
-{% paginate %}
 {% if not verses %}
 <p>No verses learnt yet</p>
 
 {% else %}
+
+<ul class="pills">
+  <li {% if not bibleorder %}
+      class="active"
+      {% endif %}
+      ><a href=".">Strength order</a>
+  </li>
+  <li {% if bibleorder %}
+      class="active"
+      {% endif %}
+      ><a href="?bibleorder">Bible order</a>
+  </li>
+</ul>
+
+{% paginate %}
+
 <table class="bordered-table condensed">
   <thead>
     <tr>
