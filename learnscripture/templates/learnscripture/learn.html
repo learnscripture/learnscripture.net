@@ -77,12 +77,8 @@ Learn!
       </div>
     </div>
     <div id="id-version">
-      <span id="id-version-name"></span> | Change
-      <select id="id-version-select">
-        {% for v in bible_versions %}
-        <option value="{{ v.slug }}">{{ v.short_name }}</option>
-        {% endfor %}
-      </select>
+      Version:
+      {% include "learnscripture/version_select.html" %}
     </div>
   </div>
 

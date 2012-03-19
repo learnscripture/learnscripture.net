@@ -45,10 +45,7 @@ Verse set: {{ verse_set.name }}
 
 <form action="" method="GET">
 <div id="id-version">
-  {% if version.url %}<a href="{{ version.url }}">{% endif %}
-  {{ version.full_name }} ({{ version.short_name }})
-  {% if version.url %}</a>{% endif %}
- | Change
+  Version:
   {% with current_version=version %}
   {% include "learnscripture/version_select.html" %}
   {% endwith %}

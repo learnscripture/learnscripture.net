@@ -2,6 +2,6 @@
     {% for v in bible_versions %}
     <option value="{{ v.slug }}"
             {% if v.slug == current_version.slug %}selected{% endif %}
-            >{{ v.short_name }}</option>
+            >{{ v.short_name }} ({{ v.full_name }})</option>
     {% endfor %}
   </select>
