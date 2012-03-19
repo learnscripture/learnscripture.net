@@ -59,6 +59,7 @@ class Account(models.Model):
     subscription = models.PositiveSmallIntegerField(choices=SubscriptionType.choice_list,
                                                     default=SubscriptionType.FREE_TRIAL)
     paid_until = models.DateTimeField(null=True, blank=True)
+    is_tester = models.BooleanField(default=False, blank=True)
 
     objects = AccountManager()
 
