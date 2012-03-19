@@ -31,11 +31,13 @@ Progress
   </thead>
   <tbody>
     {% for verse in verses %}
+    {% ifchanged verse.reference verse.version.slug %}
     <tr>
       <td>{{ verse.reference }}</td>
       <td>{{ verse.version.slug }}</td>
       <td><img src="{{ STATIC_URL }}img/strength_{{ verse.simple_strength }}.png"></td>
     </tr>
+    {% endifchanged %}
     {% endfor %}
   </tbody>
 </table>
