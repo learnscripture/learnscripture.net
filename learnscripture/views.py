@@ -533,10 +533,11 @@ def user_stats(request, username):
 @require_identity
 def user_verses(request):
     identity = request.identity
-    verses = identity.verse_statuses.filter(ignored=False,
-                                            strength__gt=0,
-                                            last_tested__isnull=False)\
-        .select_related('version').order_by('strength')
+    verses = (identity.verse_statuses.filter(ignored=False,
+                                             strength__gt=0,
+                                             last_tested__isnull=False)
+              .select_related('version').order_by('strength', 'reference')
+              )
 
     c = {}
     c['verses'] = verses
