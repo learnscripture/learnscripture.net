@@ -483,15 +483,13 @@ class Identity(models.Model):
         """
         Returns a query set of UserVerseStatuses that need revising.
         """
-        import time
-        now_seconds = time.time()
         qs = (self.verse_statuses
               .filter(ignored=False,
                       memory_stage=MemoryStage.TESTED)
               .exclude(verse_set__set_type=VerseSetType.PASSAGE)
               .order_by('added', 'id')
               )
-        qs = memorymodel.filter_qs(qs, now_seconds)
+        qs = memorymodel.filter_qs(qs, timezone.now())
         return self._dedupe_uvs_set(qs)
 
     def verse_statuses_for_learning_qs(self):
@@ -545,15 +543,13 @@ class Identity(models.Model):
         return verse_sets.values()
 
     def passages_for_revising(self):
-        import time
-        now_seconds = time.time()
         statuses = self.verse_statuses.filter(verse_set__set_type=VerseSetType.PASSAGE,
                                               ignored=False,
                                               memory_stage__gte=MemoryStage.TESTED)\
                                               .select_related('verse_set')
 
         # If any of them need revising, we want to know about it:
-        statuses = memorymodel.filter_qs(statuses, now_seconds)
+        statuses = memorymodel.filter_qs(statuses, timezone.now())
 
         # However, we want to exclude those which have any verses in the set
         # still untested. This is tricky to do in SQL/Django's ORM, so we hope
