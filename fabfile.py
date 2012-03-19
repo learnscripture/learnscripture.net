@@ -92,18 +92,27 @@ def ensure_src_dir():
             run("hg init")
 
 
+@task
+def push_rev(rev):
+    env.push_rev = rev
+
+
 def push_sources():
     """
     Push source code to server
     """
     ensure_src_dir()
-    local("hg push -f ssh://%(user)s@%(host)s/%(path)s" %
+    push_rev = getattr(env, 'push_rev', None)
+    if push_rev is None:
+        push_rev = local("hg parents --template '{node}'", capture=True)
+    local("hg push -f -r %(rev)s ssh://%(user)s@%(host)s/%(path)s" %
           dict(host=env.host,
                user=env.user,
                path=src_dir,
+               rev=push_rev,
                ))
     with cd(src_dir):
-        run("hg update")
+        run("hg update %s" % push_rev)
     # Also need to sync files that are not in main sources VCS repo.
     local("rsync learnscripture/settings_priv.py cciw@cciw.co.uk:%s/learnscripture/settings_priv.py" % src_dir)
 
