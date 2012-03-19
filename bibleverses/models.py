@@ -335,6 +335,7 @@ class UserVerseStatus(models.Model):
     added = models.DateTimeField(null=True, blank=True)
     first_seen = models.DateTimeField(null=True, blank=True)
     last_tested = models.DateTimeField(null=True, blank=True)
+    next_test_due = models.DateTimeField(null=True, blank=True)
 
     # See Identity.change_version for explanation of ignored
     ignored = models.BooleanField(default=False)
