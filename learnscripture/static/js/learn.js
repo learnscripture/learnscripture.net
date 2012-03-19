@@ -914,14 +914,6 @@ var learnscripture =
                                           line + '</div>');
                 }
             });
-            var versionText = verse.version.full_name +
-                " (" + verse.version.short_name + ")";
-            $('#id-version-name').text(versionText);
-
-            if (verse.version.url != "") {
-                $('#id-version-name').html('<a  target="_blank" href="' + verse.version.url +'">' + versionText + '</a>');
-            }
-
             $('#id-version-select').val(verse.version.slug);
             markupVerse();
             $('#id-loading').hide();
