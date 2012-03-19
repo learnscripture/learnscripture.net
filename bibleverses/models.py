@@ -46,7 +46,7 @@ def make_bible_book_abbreviations():
                         yield n
 
         # We don't allow abbreviations less than 3 letters
-        for i in range(3, len(book_name) + 1):
+        for i in range(2, len(book_name) + 1):
             yield book_name[0:i]
 
 
