@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from datetime import timedelta
 import math
 
 class MemoryModel(object):
@@ -170,10 +171,17 @@ class MemoryModel(object):
         return min(self.BEST_STRENGTH, new_strength)
 
 
+    MIN_TIME_BETWEEN_TESTS = 3600
+
+
+    # needs_testing and next_test_due contain almost equivalent information.
+    # next_test_due is stored in UserVerseStatus.next_test_due, allowing easier
+    # queries
+
     def needs_testing(self, strength, time_elapsed):
         if time_elapsed is None or strength is None:
             return True
-        if time_elapsed < 3600:
+        if time_elapsed < self.MIN_TIME_BETWEEN_TESTS:
             # It is confusing to have a verse up for revision within an hour of
             # it being first learnt, so we special case that here.
             return False
@@ -184,6 +192,11 @@ class MemoryModel(object):
         t_1 = self.t(min(strength + self.DELTA_S_IDEAL, self.BEST_STRENGTH))
         return time_elapsed > t_1 - t_0
 
+
+    def next_test_due(self, last_test, strength):
+        t_0 = self.t(strength)
+        t_1 = self.t(min(strength + self.DELTA_S_IDEAL, self.BEST_STRENGTH))
+        return last_test + timedelta(seconds=max(t_1 - t_0, self.MIN_TIME_BETWEEN_TESTS))
 
     # If necessary, we could add a denormalised UserVerseStatus.testing_due
     # DateTimeField (which would have to be updated after testing) which would
@@ -207,6 +220,8 @@ class MemoryModel(object):
         return qs.extra(where=[clause])
 
 
+# test_run and test_run_using_next_test_due should be essentially identical.
+
 
 def test_run(exponent, accuracy):
     m = MemoryModel(exponent)
@@ -221,6 +236,32 @@ def test_run(exponent, accuracy):
             test += 1
             print "Day %d, test %d, interval %d, strength %s" % (i, test, interval, x)
             interval = 0
+
+def test_run_using_next_test_due(exponent, accuracy):
+    from datetime import datetime
+    m = MemoryModel(exponent)
+    interval = 0
+    s = None
+    start = datetime.now()
+    last_test = None
+    next_test = None
+    test = 0
+    for i in range(0, 10*365):
+        current_time = start + timedelta(i)
+        interval += 1
+        if next_test is None or (current_time > next_test and s < m.LEARNT):
+            if last_test is None:
+                time_elapsed = None
+            else:
+                time_elapsed = (current_time - last_test).total_seconds()
+            s = m.strength_estimate(s, accuracy, time_elapsed)
+            last_test = current_time
+            next_test = m.next_test_due(last_test, s)
+            test += 1
+            print "Day %d, test %d, interval %d, strength %s" % (i, test, interval, s)
+            interval = 0
+
+
 
 def test_run_passage(passage_length, days):
     # Test function for experimenting with methods of getting testing of verses
@@ -312,5 +353,6 @@ MM = MemoryModel(0.25)
 filter_qs = MM.filter_qs
 needs_testing = MM.needs_testing
 strength_estimate = MM.strength_estimate
+next_test_due = MM.next_test_due
 LEARNT = MM.LEARNT
 STRENGTH_FOR_GROUP_TESTING = 0.5

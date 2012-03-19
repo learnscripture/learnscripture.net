@@ -297,8 +297,10 @@ class Identity(models.Model):
             else:
                 time_elapsed = (now - s0.last_tested).total_seconds()
             new_strength = memorymodel.strength_estimate(old_strength, accuracy, time_elapsed)
+            next_due = memorymodel.next_test_due(now, new_strength)
             s.update(strength=new_strength,
-                     last_tested=now)
+                     last_tested=now,
+                     next_test_due=next_due)
             return ActionChange(old_strength=old_strength, new_strength=new_strength)
 
         if mem_stage == MemoryStage.SEEN:
