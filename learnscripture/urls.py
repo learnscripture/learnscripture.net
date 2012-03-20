@@ -7,7 +7,7 @@ admin.autodiscover()
 urlpatterns = patterns('',
                        url(r'^$', 'learnscripture.views.home', name='home'),
                        (r'^favicon\.ico/?$', 'django.views.generic.simple.redirect_to', {'url': '/static/img/favicon.png'}),
-                       url(r'^dashboard/$', 'learnscripture.views.start', name='start'),
+                       url(r'^dashboard/$', 'learnscripture.views.dashboard', name='dashboard'),
                        url(r'^choose/$', 'learnscripture.views.choose', name='choose'),
                        url(r'^verse-set/(?P<slug>[^/]+)/$', 'learnscripture.views.view_verse_set',
                            name='view_verse_set'),

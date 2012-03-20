@@ -118,7 +118,7 @@ class LearnTests(LiveServerTests):
 
         self._make_verses_due_for_testing(identity.verse_statuses.filter(memory_stage=MemoryStage.TESTED))
 
-        driver.get(self.live_server_url + reverse('start'))
+        driver.get(self.live_server_url + reverse('dashboard'))
         driver.find_element_by_css_selector('input[name=revisequeue]').click()
 
         self.wait_until_loaded('body')
@@ -180,7 +180,7 @@ class LearnTests(LiveServerTests):
 
         self._make_verses_due_for_testing(identity.verse_statuses.filter(reference='Psalm 23:1'))
 
-        driver.get(self.live_server_url + reverse('start'))
+        driver.get(self.live_server_url + reverse('dashboard'))
         driver.find_element_by_css_selector('input[name=revisepassage]').click()
 
         for word in "The LORD is my shepherd, I shall not want.".split():
@@ -247,7 +247,7 @@ class LearnTests(LiveServerTests):
         self._make_verses_due_for_testing(identity.verse_statuses)
 
         # Go to dashboard
-        driver.get(self.live_server_url + reverse('start'))
+        driver.get(self.live_server_url + reverse('dashboard'))
         # and click 'Revise'
         driver.find_element_by_css_selector("input[name='revisequeue']").click()
 
@@ -265,7 +265,7 @@ class LearnTests(LiveServerTests):
 
         # If we go back to dashboard and choose again, it should not appear
         # Go to dashboard
-        driver.get(self.live_server_url + reverse('start'))
+        driver.get(self.live_server_url + reverse('dashboard'))
         # and click 'Revise'
         driver.find_element_by_css_selector("input[name='revisequeue']").click()
 
@@ -293,7 +293,7 @@ class LearnTests(LiveServerTests):
         self._make_verses_due_for_testing(identity.verse_statuses)
 
         # Go to dashboard
-        driver.get(self.live_server_url + reverse('start'))
+        driver.get(self.live_server_url + reverse('dashboard'))
         # and click 'Revise'
         driver.find_element_by_css_selector("input[name='revisequeue']").click()
 
@@ -368,7 +368,7 @@ class LearnTests(LiveServerTests):
 
         self._make_verses_due_for_testing(identity.verse_statuses.filter(memory_stage=MemoryStage.TESTED))
 
-        driver.get(self.live_server_url + reverse('start'))
+        driver.get(self.live_server_url + reverse('dashboard'))
         driver.find_element_by_css_selector('input[name=revisequeue]').click()
 
         self.wait_until_loaded('body')

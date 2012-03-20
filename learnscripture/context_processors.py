@@ -30,7 +30,7 @@ class MenuItem(object):
 
 def menu(request):
     items = [
-        MenuItem('Dashboard', reverse('start')),
+        MenuItem('Dashboard', reverse('dashboard')),
         MenuItem('Learn', reverse('learn')),
         MenuItem('About', '/about/'),
         MenuItem('Contact', '/contact/'),
