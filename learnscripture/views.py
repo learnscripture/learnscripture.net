@@ -497,11 +497,13 @@ def leaderboard(request):
 
     page_num = max(1, page_num)
 
+    PAGE_SIZE = 30
+
     if thisweek:
-        accounts = get_leaderboard_since(timezone.now() - timedelta(7), page_num - 1, 30)
+        accounts = get_leaderboard_since(timezone.now() - timedelta(7), page_num - 1, PAGE_SIZE)
         print accounts
     else:
-        accounts = get_all_time_leaderboard(page_num - 1, 30)
+        accounts = get_all_time_leaderboard(page_num - 1, PAGE_SIZE)
 
     c = {}
     c['accounts'] = accounts
@@ -509,6 +511,7 @@ def leaderboard(request):
     c['page_num'] = page_num
     c['previous_page_num'] = page_num - 1
     c['next_page_num'] = page_num + 1
+    c['PAGE_SIZE'] = PAGE_SIZE
     return render(request, 'learnscripture/leaderboard.html', c)
 
 

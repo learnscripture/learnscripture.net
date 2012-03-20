@@ -51,14 +51,17 @@ Leaderboard
 
 {% endif %}
 
-<div>
-{% if page_num > 1 %}
-<a href="?p={{ previous_page_num }}">« Previous</a>
-{% else %}
-<span class="disabled">« Previous</span>
-{% endif %}
-{% if accounts %}
- | <a href="?p={{ next_page_num }}">Next »</a>
-{% endif %}
+<div class="pagination">
+<ul>
+  {% if page_num == 1 %}
+  <li class="disabled prev"><a>Previous</a></li>
+  {% else %}
+  <li class="prev"><a href="?p={{ previous_page_num }}">Previous</a></li>
+  {% endif %}
+  {% if accounts and accounts|length == PAGE_SIZE %}
+  <li class="next{% if not accounts %} disabled{% endif %}"><a href="?p={{ next_page_num }}">Next</a></li>
+  {% else %}
+  <li class="disabled next"><a>Next</a></li>
+  {% endif %}
 </div>
 {% endblock %}
