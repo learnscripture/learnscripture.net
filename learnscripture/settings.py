@@ -59,8 +59,7 @@ USE_L10N = False
 USE_TZ = True
 
 if LIVEBOX:
-    MEDIA_ROOT = os.path.join(WEBAPP_DIR, 'learnscripture_usermedia')
-    STATIC_ROOT = os.path.join(WEBAPP_DIR, 'learnscripture_static')
+    from .settings_priv import MEDIA_ROOT, STATIC_ROOT
 else:
     MEDIA_ROOT = os.path.join(PROJECT_DIR, 'usermedia')
     STATIC_ROOT = os.path.join(PROJECT_DIR, 'static')
