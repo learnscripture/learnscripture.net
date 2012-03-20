@@ -17,7 +17,15 @@ Dashboard
 <h2>Points</h2>
 
 <div class="actionset">
-  <p>Points this week: <b>{{ request.identity.account.points_this_week }}</b>. See also: <a href="{% url 'user_stats' request.identity.account.username %}">your stats</a>, <a href="{% url 'user_verses' %}">your progress</a> or <a href="{% url 'leaderboard' %}?thisweek">the leaderboard</a>.</p>
+  <div style="float: right;">
+    <a href="{% url 'user_stats' request.identity.account.username %}" title="Your stats"><i class="icon-signal"></i></a>
+    <a href="{% url 'user_verses' %}" title="Your progress"><i class="icon-star"></i></a>
+    <a href="{% url 'leaderboard' %}?thisweek" title="Leaderboard"><i class="icon-list-alt"></i></a>
+  </div>
+  <p>Points:
+    <b>{{ request.identity.account.points_this_week }}</b> this week,
+    <b>{{ request.identity.account.points_all_time }}</b> all time
+  </p>
 </div>
 
 {% endif %}
