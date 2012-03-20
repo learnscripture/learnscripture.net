@@ -542,6 +542,16 @@ class Identity(models.Model):
                                                          memory_stage__gte=MemoryStage.TESTED).count()
         return verse_sets.values()
 
+    def verse_sets_being_learnt(self):
+        """
+        Returns a list of ids of VerseSets that are still being learnt
+        """
+        return (self.verse_statuses
+                .filter(verse_set__set_type=VerseSetType.PASSAGE,
+                        ignored=False,
+                        memory_stage__lt=MemoryStage.TESTED)
+                .values_list('verse_set_id', flat=True).distinct())
+
     def passages_for_revising(self):
         statuses = self.verse_statuses.filter(verse_set__set_type=VerseSetType.PASSAGE,
                                               ignored=False,
@@ -552,9 +562,8 @@ class Identity(models.Model):
         statuses = memorymodel.filter_qs(statuses, timezone.now())
 
         # However, we want to exclude those which have any verses in the set
-        # still untested. This is tricky to do in SQL/Django's ORM, so we hope
-        # that 'statuses' gives a fairly small set of VerseSets and do
-        # additional filtering in Python.
+        # still untested.
+        statuses = statuses.exclude(verse_set__in=self.verse_sets_being_learnt())
 
         # We also need to know if group testing is on the cards, since that
         # allows for the possibility of splitting into sections for section
@@ -566,8 +575,6 @@ class Identity(models.Model):
             .select_related('verse_set')
 
         for uvs in all_statuses:
-            if uvs.memory_stage < MemoryStage.TESTED:
-                verse_sets.discard(uvs.verse_set)
             if uvs.strength <= memorymodel.STRENGTH_FOR_GROUP_TESTING:
                 group_testing[uvs.verse_set_id] = False
 
@@ -580,10 +587,16 @@ class Identity(models.Model):
 
     def next_verse_due(self):
         try:
-            return (self.verse_statuses.filter(ignored=False,
-                                              next_test_due__isnull=False,
-                                              next_test_due__gte=timezone.now(),
-                                              strength__lt=memorymodel.LEARNT)
+            # We need to exlude verses that are part of passage sets that are
+            # still being learnt
+            learning_sets_ids = self.verse_sets_being_learnt()
+
+            return (self.verse_statuses
+                    .filter(ignored=False,
+                            next_test_due__isnull=False,
+                            next_test_due__gte=timezone.now(),
+                            strength__lt=memorymodel.LEARNT)
+                    .exclude(verse_set__in=learning_sets_ids)
                     .order_by('next_test_due'))[0]
         except IndexError:
             return None
