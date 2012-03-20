@@ -2,4 +2,4 @@ syntax:glob
 *.pyc
 *~
 *.orig
-
+config/pgbouncer_users.txt
