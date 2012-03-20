@@ -54,7 +54,7 @@ def login(request):
     # Redirect to dashboard because just about everything you might want to do
     # will change after sign in, and we want to encourage people to do their
     # revision first.
-    return HttpResponseRedirect(reverse('start'))
+    return HttpResponseRedirect(reverse('dashboard'))
 
 
 def bible_versions_for_request(request):
@@ -76,7 +76,7 @@ def preferences(request):
         form = PreferencesForm(request.POST, instance=request.identity)
         if form.is_valid():
             form.save()
-            return get_next(request, reverse('start'))
+            return get_next(request, reverse('dashboard'))
     else:
         form = PreferencesForm(instance=request.identity)
     c = {'form':form,
@@ -126,7 +126,7 @@ def learn_set(request, uvs_list, revision):
 
 
 # Dashboard:
-def start(request):
+def dashboard(request):
 
     identity = getattr(request, 'identity', None)
     if identity is None or not identity.verse_statuses.exists():
@@ -158,11 +158,11 @@ def start(request):
 
         if 'clearqueue' in request.POST:
             identity.clear_learning_queue()
-            return HttpResponseRedirect(reverse('start'))
+            return HttpResponseRedirect(reverse('dashboard'))
         if 'cancelpassage' in request.POST:
             vs_id = int(request.POST['verse_set_id'])
             identity.cancel_passage(vs_id)
-            return HttpResponseRedirect(reverse('start'))
+            return HttpResponseRedirect(reverse('dashboard'))
 
     c = {'new_verses_queue': identity.verse_statuses_for_learning(),
          'revise_verses_queue': identity.verse_statuses_for_revising(),
@@ -171,7 +171,7 @@ def start(request):
          'next_verse_due': identity.next_verse_due(),
          }
     c.update(session_stats(identity))
-    return render(request, 'learnscripture/start.html', c)
+    return render(request, 'learnscripture/dashboard.html', c)
 
 
 def context_for_version_select(request):

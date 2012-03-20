@@ -97,7 +97,7 @@ class LiveServerTests(LiveServerTestCase):
 
     def login(self, account):
         driver = self.driver
-        driver.get(self.live_server_url + reverse('start'))
+        driver.get(self.live_server_url + reverse('dashboard'))
         driver.find_element_by_id("id-session-menu").click()
         driver.find_element_by_link_text("Sign in").click()
         driver.find_element_by_id("id_login-email").clear()

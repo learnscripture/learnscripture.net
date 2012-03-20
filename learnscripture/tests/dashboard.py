@@ -13,7 +13,7 @@ class DashboardTests(LiveServerTests):
 
     def test_redirect(self):
         driver = self.driver
-        driver.get(self.live_server_url + reverse('start'))
+        driver.get(self.live_server_url + reverse('dashboard'))
         self.assertTrue(driver.current_url.endswith(reverse('choose')))
 
     def setup_identity(self):
@@ -37,7 +37,7 @@ class DashboardTests(LiveServerTests):
         i.add_verse_set(vs)
 
         # Test verses appear on dashboard
-        driver.get(self.live_server_url + reverse('start'))
+        driver.get(self.live_server_url + reverse('dashboard'))
         self.assertIn('John 3:16', driver.page_source)
         self.assertIn('John 14:6', driver.page_source)
 
@@ -53,14 +53,14 @@ class DashboardTests(LiveServerTests):
         i.record_verse_action('John 3:16', 'NET', StageType.TEST, accuracy=1.0)
 
         # Test clicking 'Clear queue'
-        driver.get(self.live_server_url + reverse('start'))
+        driver.get(self.live_server_url + reverse('dashboard'))
         driver.find_element_by_css_selector('input[name=clearqueue]').click()
         alert = driver.switch_to_alert()
         alert.accept()
         self.wait_until_loaded('body')
 
         # Since we cleared the queue, shouldn't have John 14:6 now
-        self.assertTrue(driver.current_url.endswith(reverse('start')))
+        self.assertTrue(driver.current_url.endswith(reverse('dashboard')))
         self.assertNotIn('John 14:6', driver.page_source)
 
     def test_learn_passage(self):
@@ -77,7 +77,7 @@ class DashboardTests(LiveServerTests):
         driver = self.driver
 
         # Test dashboard text
-        driver.get(self.live_server_url + reverse('start'))
+        driver.get(self.live_server_url + reverse('dashboard'))
         self.assertIn('Psalm 23', driver.page_source)
 
         # Test 'Continue learning' button
@@ -88,7 +88,7 @@ class DashboardTests(LiveServerTests):
         self.assertEqual(u"Psalm 23:1", driver.find_element_by_id('id-verse-title').text)
 
         # Test 'Cancel learning' button
-        driver.get(self.live_server_url + reverse('start'))
+        driver.get(self.live_server_url + reverse('dashboard'))
         driver.find_element_by_id('id-cancelpassage-btn-%d' % vs.id).click()
         alert = driver.switch_to_alert()
         alert.accept()
@@ -99,7 +99,7 @@ class DashboardTests(LiveServerTests):
         driver = self.driver
         driver.get(self.live_server_url + "/")
         e = driver.find_element_by_css_selector('a.btn.large')
-        self.assertTrue(e.get_attribute('href').endswith(reverse('start')))
+        self.assertTrue(e.get_attribute('href').endswith(reverse('dashboard')))
         e.click()
         self.assertTrue(driver.current_url.endswith(reverse('choose')))
         self.assertEqual(Identity.objects.count(), 0)
