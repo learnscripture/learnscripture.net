@@ -501,7 +501,6 @@ def leaderboard(request):
 
     if thisweek:
         accounts = get_leaderboard_since(timezone.now() - timedelta(7), page_num - 1, PAGE_SIZE)
-        print accounts
     else:
         accounts = get_all_time_leaderboard(page_num - 1, PAGE_SIZE)
 
