@@ -17,7 +17,7 @@ HOME_DIR = os.environ['HOME']
 
 from .settings_priv import SECRET_KEY
 if LIVEBOX:
-    from .settings_priv import DATABASES, EMAIL_HOST, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
+    from .settings_priv import DATABASES, EMAIL_HOST, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, PRODUCTION, STAGING
 else:
     DATABASES = {
         'default': {
@@ -59,7 +59,13 @@ USE_L10N = False
 USE_TZ = True
 
 if LIVEBOX:
-    from .settings_priv import MEDIA_ROOT, STATIC_ROOT
+    if PRODUCTION:
+        MEDIA_ROOT = os.path.join(WEBAPP_DIR, 'learnscripture_usermedia')
+        STATIC_ROOT = os.path.join(WEBAPP_DIR, 'learnscripture_static')
+    elif STAGING:
+        MEDIA_ROOT = os.path.join(WEBAPP_DIR, 'learnscripture_staging_usermedia')
+        STATIC_ROOT = os.path.join(WEBAPP_DIR, 'learnscripture_staging_static')
+
 else:
     MEDIA_ROOT = os.path.join(PROJECT_DIR, 'usermedia')
     STATIC_ROOT = os.path.join(PROJECT_DIR, 'static')
@@ -219,7 +225,7 @@ CACHES = {
     'default': {
         'BACKEND': 'caching.backends.memcached.CacheClass',
         'LOCATION': 'unix:%s/memcached.sock' % HOME_DIR,
-        'KEY_PREFIX': 'learnscripture.net',
+        'KEY_PREFIX': 'learnscripture.net' if PRODUCTION else 'staging.learnscripture.net'
     }
 } if LIVEBOX else {}
 
