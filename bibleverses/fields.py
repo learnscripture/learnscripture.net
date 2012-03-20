@@ -12,5 +12,5 @@ class VectorField(models.Field):
         kwargs['serialize'] = False
         super(VectorField, self).__init__(*args, **kwargs)
 
-    def db_type( self ):
+    def db_type(self, **kwargs):
         return 'tsvector'
