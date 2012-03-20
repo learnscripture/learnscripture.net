@@ -18,12 +18,6 @@ from fabric.operations import get
 # Host and login username:
 env.hosts = ['cciw@cciw.co.uk']
 
-# Directory where everything to do with this app will be stored on the server.
-DJANGO_APP_ROOT = '/home/cciw/webapps/learnscripture_django'
-
-# Directory where static sources should be collected.  This must equal the value
-# of STATIC_ROOT in the settings.py that is used on the server.
-STATIC_ROOT = '/home/cciw/webapps/learnscripture_static'
 
 # Subdirectory of DJANGO_APP_ROOT in which project sources will be stored
 SRC_SUBDIR = 'src'
@@ -37,16 +31,52 @@ PYTHON_PREFIX = "" # e.g. /usr/local  Use "" for automatic
 PYTHON_FULL_PATH = "%s/bin/%s" % (PYTHON_PREFIX, PYTHON_BIN) if PYTHON_PREFIX else PYTHON_BIN
 
 
-# Commands to stop and start the webserver that is serving the Django app.
-# CHANGEME!  These defaults work for Webfaction
-DJANGO_SERVER_STOP = posixpath.join(DJANGO_APP_ROOT, 'apache2', 'bin', 'stop')
-DJANGO_SERVER_START = posixpath.join(DJANGO_APP_ROOT, 'apache2', 'bin', 'start')
-DJANGO_SERVER_RESTART = None
+class Target(object):
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+        # Commands to stop and start the webserver that is serving the Django app.
+        self.DJANGO_SERVER_STOP = posixpath.join(self.DJANGO_APP_ROOT, 'apache2', 'bin', 'stop')
+        self.DJANGO_SERVER_START = posixpath.join(self.DJANGO_APP_ROOT, 'apache2', 'bin', 'start')
+        self.DJANGO_SERVER_RESTART = None
+        self.src_dir = posixpath.join(self.DJANGO_APP_ROOT, SRC_SUBDIR)
+        self.venv_dir = posixpath.join(self.DJANGO_APP_ROOT, VENV_SUBDIR)
+        self.conf_dir = posixpath.join(self.src_dir, self.CONF_SUBDIR)
 
-src_dir = posixpath.join(DJANGO_APP_ROOT, SRC_SUBDIR)
-venv_dir = posixpath.join(DJANGO_APP_ROOT, VENV_SUBDIR)
 
-DB_USER, DB_NAME = "cciw_learnscripture", "cciw_learnscripture"
+PRODUCTION = Target(
+    # Directory where everything to do with this app will be stored on the server.
+    DJANGO_APP_ROOT = '/home/cciw/webapps/learnscripture_django',
+    # Directory where static sources should be collected.  This must equal the value
+    # of STATIC_ROOT in the settings.py that is used on the server.
+    STATIC_ROOT = '/home/cciw/webapps/learnscripture_static',
+    DB_USER = "cciw_learnscripture",
+    DB_NAME = "cciw_learnscripture",
+    CONF_SUBDIR = "config/production",
+)
+
+STAGING = Target(
+    # Directory where everything to do with this app will be stored on the server.
+    DJANGO_APP_ROOT = '/home/cciw/webapps/learnscripture_staging_django',
+    # Directory where static sources should be collected.  This must equal the value
+    # of STATIC_ROOT in the settings.py that is used on the server.
+    STATIC_ROOT = '/home/cciw/webapps/learnscripture_staging_static',
+    DB_USER = "cciw_staging_learnscripture",
+    DB_NAME = "cciw_staging_learnscripture",
+    CONF_SUBDIR = "config/staging",
+)
+
+target = None
+
+@task
+def production():
+    global target
+    target = PRODUCTION
+
+@task
+def staging():
+    global target
+    target = STAGING
+
 
 
 def virtualenv(venv_dir):
@@ -68,27 +98,27 @@ def install_dependencies():
     if getattr(env, 'no_installs', False):
         return
     ensure_virtualenv()
-    with virtualenv(venv_dir):
-        with cd(src_dir):
+    with virtualenv(target.venv_dir):
+        with cd(target.src_dir):
             run_venv("pip install -r requirements.txt")
 
 
 def ensure_virtualenv():
-    if exists(venv_dir):
+    if exists(target.venv_dir):
         return
 
-    with cd(DJANGO_APP_ROOT):
+    with cd(target.DJANGO_APP_ROOT):
         run("virtualenv --no-site-packages --python=%s %s" %
             (PYTHON_BIN, VENV_SUBDIR))
         run("echo %s > %s/lib/%s/site-packages/projectsource.pth" %
-            (src_dir, VENV_SUBDIR, PYTHON_BIN))
+            (target.src_dir, VENV_SUBDIR, PYTHON_BIN))
 
 
 def ensure_src_dir():
-    if not exists(src_dir):
-        run("mkdir -p %s" % src_dir)
-    with cd(src_dir):
-        if not exists(posixpath.join(src_dir, '.hg')):
+    if not exists(target.src_dir):
+        run("mkdir -p %s" % target.src_dir)
+    with cd(target.src_dir):
+        if not exists(posixpath.join(target.src_dir, '.hg')):
             run("hg init")
 
 
@@ -108,13 +138,22 @@ def push_sources():
     local("hg push -f -r %(rev)s ssh://%(user)s@%(host)s/%(path)s" %
           dict(host=env.host,
                user=env.user,
-               path=src_dir,
+               path=target.src_dir,
                rev=push_rev,
                ))
-    with cd(src_dir):
+    with cd(target.src_dir):
         run("hg update %s" % push_rev)
     # Also need to sync files that are not in main sources VCS repo.
-    local("rsync learnscripture/settings_priv.py cciw@cciw.co.uk:%s/learnscripture/settings_priv.py" % src_dir)
+    local("rsync learnscripture/settings_priv.py cciw@cciw.co.uk:%s/learnscripture/settings_priv.py" % target.src_dir)
+
+    # This config is shared, and rarely updates, so we push to
+    # PRODUCTION. pgbouncer_users.txt is not in source control
+    local("rsync config/pgbouncer_users.txt cciw@cciw.co.uk:%s/config/" % PRODUCTION.src_dir)
+    local("rsync config/pgbouncer.ini cciw@cciw.co.uk:%s/config/" % PRODUCTION.src_dir)
+
+    # And copy other config and binary files from repo to destinations
+    run("cp %s/httpd.conf %s" % (target.conf_dir, posixpath.join(target.DJANGO_APP_ROOT, 'apache2', 'conf')))
+    run("cp %s/start %s" % (target.conf_dir, posixpath.join(target.DJANGO_APP_ROOT, 'apache2', 'bin')))
 
 
 @task
@@ -145,7 +184,7 @@ def webserver_stop():
     """
     Stop the webserver that is running the Django instance
     """
-    run(DJANGO_SERVER_STOP)
+    run(target.DJANGO_SERVER_STOP)
 
 
 @task
@@ -153,7 +192,7 @@ def webserver_start():
     """
     Startsp the webserver that is running the Django instance
     """
-    run(DJANGO_SERVER_START)
+    run(target.DJANGO_SERVER_START)
 
 
 @task
@@ -161,8 +200,8 @@ def webserver_restart():
     """
     Restarts the webserver that is running the Django instance
     """
-    if DJANGO_SERVER_RESTART:
-        run(DJANGO_SERVER_RESTART)
+    if target.DJANGO_SERVER_RESTART:
+        run(target.DJANGO_SERVER_RESTART)
     else:
         with settings(warn_only=True):
             webserver_stop()
@@ -170,15 +209,12 @@ def webserver_restart():
 
 
 def build_static():
-    assert STATIC_ROOT.strip() != '' and STATIC_ROOT.strip() != '/'
-    # Before Django 1.4 we don't have the --clear option to collectstatic
-    run("rm -rf %s/*" % STATIC_ROOT)
+    assert target.STATIC_ROOT.strip() != '' and target.STATIC_ROOT.strip() != '/'
+    with virtualenv(target.venv_dir):
+        with cd(target.src_dir):
+            run_venv("./manage.py collectstatic -v 0 --noinput --clear")
 
-    with virtualenv(venv_dir):
-        with cd(src_dir):
-            run_venv("./manage.py collectstatic -v 0 --noinput")
-
-    run("chmod -R ugo+r %s" % STATIC_ROOT)
+    run("chmod -R ugo+r %s" % target.STATIC_ROOT)
 
 
 @task
@@ -192,8 +228,8 @@ def first_deployment_mode():
 def update_database():
     if getattr(env, 'no_db', False):
         return
-    with virtualenv(venv_dir):
-        with cd(src_dir):
+    with virtualenv(target.venv_dir):
+        with cd(target.src_dir):
             if getattr(env, 'initial_deploy', False):
                 run_venv("./manage.py syncdb --all")
                 run_venv("./manage.py migrate --fake --noinput")
@@ -226,15 +262,15 @@ def run_migrations():
 
 @task
 def manage_py_command(*commands):
-    with virtualenv(venv_dir):
-        with cd(src_dir):
+    with virtualenv(target.venv_dir):
+        with cd(target.src_dir):
             run_venv("./manage.py %s" % ' '.join(commands))
 
 
 @task
 def get_live_db():
-    filename = "dump_%s.db" % DB_NAME
-    run("pg_dump -Fc -U %s -O -o -f ~/%s %s" % (DB_USER, filename, DB_NAME))
+    filename = "dump_%s.db" % target.DB_NAME
+    run("pg_dump -Fc -U %s -O -o -f ~/%s %s" % (target.DB_USER, filename, target.DB_NAME))
     get("~/%s" % filename)
 
 
