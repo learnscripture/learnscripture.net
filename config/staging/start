@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# We start pgbouncer here if it is not started already.
+PIDFILE=~/webapps/learnscripture_django/pgbouncer.pid
+if [ -f $PIDFILE ]
+then
+    PID=$(cat $PIDFILE)
+else
+    PID=xxxxxxx
+fi
+ps -ef | grep pgbouncer | grep cciw | grep $PID | egrep -v grep > /dev/null || pgbouncer -d /home/cciw/webapps/learnscripture_django/src/config/pgbouncer.ini
+
 . /home/cciw/webapps/learnscripture_staging_django/venv/bin/activate
 
 LD_LIBRARY_PATH=/home2/cciw/webapps/learnscripture_staging_django/apache2/lib /home2/cciw/webapps/learnscripture_staging_django/apache2/bin/httpd.worker -f /home2/cciw/webapps/learnscripture_staging_django/apache2/conf/httpd.conf -k start
