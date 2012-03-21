@@ -82,9 +82,23 @@ Learn!
     </div>
   </div>
 
-  <div>
-    <nobr><input type="submit" value="Back" class="btn" id="id-back-btn" style="display:none;" disabled> <input type="submit" value="Next" class="primary btn" id="id-next-btn" style="display:none;"></nobr>
-    <button class="btn" id="id-help-btn">Tips</button>  <span id="id-progress-summary"></span>&nbsp;
+
+  <div id="id-stage-controls">
+    <div>
+      <div>
+        <nobr>
+          <input type="submit" value="Back" class="btn" id="id-back-btn" style="display:none;" disabled>
+          <input type="submit" value="Next" class="primary btn" id="id-next-btn" style="display:none;">
+        </nobr>
+      </div>
+      <div>Progress</div>
+      <div class="progress">
+        <progress id="id-progress-bar" value="0" max="100">0%</progress>
+      </div>
+      <div>
+        <button class="btn" id="id-help-btn">Tips</button>
+      </div>
+    </div>
   </div>
 
   <div id="id-help" style="display:none;" class="alert-message block-message info">
@@ -160,13 +174,7 @@ Learn!
   </ul>
 </div>
 
-<div>Stage: <span id="id-stage-caption"></span>
-  <div id="id-stage-caption2"></div>
-  <div class="progress two-column-only">
-    Progress: <br/>
-    <progress id="id-progress-bar" value="0" max="100">0%</progress>
-  </div>
-</div>
+<div id="id-points-target"></div>
 
 
 <h3>Session stats</h3>

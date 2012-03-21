@@ -394,8 +394,7 @@ var learnscripture =
             // Common clearing, and stage specific setup
             $('.current-verse .correct, .current-verse .incorrect').removeClass('correct').removeClass('incorrect');
             $('#id-progress-summary').text("Stage " + (currentStageIdx + 1).toString() + "/" + currentStageList.length.toString());
-            $('#id-stage-caption').text(currentStage.caption);
-            $('#id-stage-caption2').html('');
+            $('#id-points-target').html('');
             currentStage.setup();
             setNextPreviousBtns();
             if (currentStage.testMode) {
@@ -657,7 +656,7 @@ var learnscripture =
             // After an certain point, we make things a bit harder.
             // Strength == 0.6 corresponds to about 10 days learning.
             setHardMode(currentVerseStatus.strength > 0.6)
-            $('#id-stage-caption2').html(' Points target: <b>' + getPointsTarget().toString() + '</b>');
+            $('#id-points-target').html(' Points target: <b>' + getPointsTarget().toString() + '</b>');
         };
 
         var testContinue = function() {
@@ -750,7 +749,7 @@ var learnscripture =
         //  It returns true if the stage should be continued.
         //  false is the stage is over.
         //
-        // caption: Caption to put next to the progress bar
+        // caption: currently unused
         //
         // testMode: boolean that is true if in testing
         //
