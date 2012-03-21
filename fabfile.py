@@ -179,6 +179,13 @@ def no_db():
     """
     env.no_db = True
 
+
+@task
+def quick():
+    no_restarts()
+    no_installs()
+    no_db()
+
 @task
 def webserver_stop():
     """
