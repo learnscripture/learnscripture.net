@@ -364,6 +364,7 @@ var learnscripture =
             } else {
                 bar.val(progress);
             }
+            bar.html(Math.floor(progress).toString() + "%");
         };
 
         var completeStageGroup = function() {
