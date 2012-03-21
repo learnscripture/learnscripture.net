@@ -259,6 +259,13 @@ var learnscripture =
             $('form.quickfind select[name=chapter_end]').change(chapterEndChange);
             $('form.quickfind select[name=verse_start]').change(verseStartChange);
             $('form.quickfind select[name=verse_end]').change(verseEndChange);
+            $('form.quickfind input[name=quick_find]')
+            $('form.quickfind input[type=text]').bind('keypress', function(ev){
+                if (ev.keyCode == 13) {
+                    ev.preventDefault();
+                    $(this).closest('form').find('input[type=submit].primary:first').click();
+                }
+            });
         };
 
         // Exports:
