@@ -612,24 +612,30 @@ p.large {
   font-weight: bold;
   }
 
-#id-progress-summary {
-  padding: 5px;
-  float: right;
-  }
-
 .progress progress {
   width: 100%;
+}
+
+#id-stage-controls {
+  display: table;
+  width: 100%;
+  border-collapse: collapse;
+  > div {
+    display: table-row;
+    > div {
+      display: table-cell;
+      padding: 2px;
+    }
   }
-
-#id-stage-caption {
-  font-weight: bold;
+  .progress {
+    text-align: left;
+    width: 100%;
+  }
 }
-#id-stage-caption2 {
+
+
+#id-points-target {
   height: 1.3em;
-}
-
-#id-help-btn {
-  float: right;
 }
 
 .result-buttons {
