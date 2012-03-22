@@ -6,7 +6,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>{% block title %}{% endblock %} - LearnScripture.net</title>
+    <title>{% block title %}{{ title }}{% endblock %} - LearnScripture.net</title>
     <meta name="description" content="">
     <meta name="author" content="">
     <meta name="viewport" content="initial-scale=1.0,maximum-scale=1.0" />
@@ -72,7 +72,7 @@
 
       <div class="maincontent">
         <div class="page-header">
-          <h1>{% block page_title %}{% endblock %}</h1>
+          <h1>{% block page_title %}{{ title }}{% endblock %}</h1>
         </div>
         {% if messages %}
         <div class="message-container">

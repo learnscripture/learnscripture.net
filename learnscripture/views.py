@@ -66,7 +66,9 @@ def bible_versions_for_request(request):
 @require_preferences
 def learn(request):
     request.identity.prepare_for_learning()
-    c = {'bible_versions': bible_versions_for_request(request)}
+    c = {'bible_versions': bible_versions_for_request(request),
+         'title': u"Learn",
+         }
     return render(request, 'learnscripture/learn.html', c)
 
 
@@ -80,6 +82,7 @@ def preferences(request):
     else:
         form = PreferencesForm(instance=request.identity)
     c = {'form':form,
+         'title': u'Preferences',
          'hide_preferences_popup': True}
     return render(request, 'learnscripture/preferences.html', c)
 
@@ -169,6 +172,7 @@ def dashboard(request):
          'passages_for_learning': identity.passages_for_learning(),
          'passages_for_revising': identity.passages_for_revising(),
          'next_verse_due': identity.next_verse_due(),
+         'title': 'Dashboard',
          }
     c.update(session_stats(identity))
     return render(request, 'learnscripture/dashboard.html', c)
@@ -239,7 +243,7 @@ def choose(request):
             else:
                 return learn_set(request, [identity.add_verse_choice(ref, version=version)], False)
 
-    c = {}
+    c = {'title': u'Choose verses'}
     verse_sets = verse_sets_visible_for_request(request).order_by('name').prefetch_related('verse_choices')
 
     # Searching for verse sets is done via this view.
@@ -328,6 +332,7 @@ def view_verse_set(request, slug):
     c['verse_set'] = verse_set
     c['verse_choices'] = verse_choices
     c['version'] = version
+    c['title'] = u"Verse set: %s" % verse_set.name
     c.update(context_for_version_select(request))
     return render(request, 'learnscripture/single_verse_set.html', c)
 
@@ -346,7 +351,7 @@ def add_passage_breaks(verse_list, breaks):
 
 @require_preferences
 def create_set_menu(request):
-    return render(request, 'learnscripture/create_set_menu.html', {})
+    return render(request, 'learnscripture/create_set_menu.html', {'title': "Create verse set"})
 
 
 @require_preferences
@@ -506,6 +511,7 @@ def leaderboard(request):
 
     c = {}
     c['accounts'] = accounts
+    c['title'] = u"Leaderboard"
     c['thisweek'] = thisweek
     c['page_num'] = page_num
     c['previous_page_num'] = page_num - 1
@@ -517,7 +523,9 @@ def leaderboard(request):
 def user_stats(request, username):
     account = get_object_or_404(Account.objects.select_related('total_score', 'identity'),
                                 username=username)
-    c = {'account': account}
+    c = {'account': account,
+         'title': account.username,
+         }
     one_week_ago = timezone.now() - timedelta(7)
     verses_started =  account.identity.verse_statuses.filter(ignored=False,
                                                              last_tested__isnull=False)
@@ -561,10 +569,12 @@ def user_verses(request):
 # from the the same form as the login form.
 
 def password_reset_done(request):
-    return render(request, 'learnscripture/password_reset_done.html', {})
+    return render(request, 'learnscripture/password_reset_done.html',
+                  {'title': u'Password reset started'})
 
 def password_reset_complete(request):
-    return render(request, 'learnscripture/password_reset_complete.html', {})
+    return render(request, 'learnscripture/password_reset_complete.html',
+                  {'title': u'Password reset complete'})
 
 
 
@@ -601,6 +611,7 @@ def password_reset_confirm(request, uidb36=None, token=None):
     context = {
         'form': form,
         'validlink': validlink,
+        'title': 'Password reset',
     }
     return render(request, 'learnscripture/password_reset_confirm.html', context)
 
@@ -628,4 +639,5 @@ def account_details(request):
         form = AccountDetailsForm(instance=request.identity.account)
 
     return render(request, 'learnscripture/account_details.html',
-                  {'form':form})
+                  {'form':form,
+                   'title': u"Account details"})
