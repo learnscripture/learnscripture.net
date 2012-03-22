@@ -672,7 +672,6 @@ def stats(request):
     start = (timezone.now() - timedelta(31)).date()
     verses_tested_per_day = [[date_to_js_ts(row['day']), row['c']]
                              for row in get_tests_since(start)]
-    print verses_tested_per_day
     return render(request, 'learnscripture/stats.html',
                   {'title': 'Stats',
                    'verses_tested_per_day': verses_tested_per_day,
