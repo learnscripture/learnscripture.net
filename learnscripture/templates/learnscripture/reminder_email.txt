@@ -1,0 +1,19 @@
+{% load url from future %}{% autoescape off %}Hi {{ account.email_name }},
+
+You've got some Bible verses due for revision on LearnScripture.net!
+
+At least one is overdue by {{ overdue_by }} day{{ overdue_by|pluralize }}.
+
+You can do the revision here:
+
+  http://{{ domain }}{% url 'dashboard' %}
+
+If you want to opt out of these emails or limit the frequency,
+you can do so here:
+
+  http://{{ domain }}{% url 'account_details' %}
+
+Thanks,
+
+The {{ site_name }} team.
+{% endautoescape %}

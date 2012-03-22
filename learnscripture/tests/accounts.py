@@ -40,4 +40,3 @@ class AccountTests(TestCase):
         self.assertEqual(a.total_score.points,
                          (4 * Scores.POINTS_PER_WORD * 0.9)
                          + (4 * Scores.POINTS_PER_WORD * Scores.VERSE_LEARNT_BONUS))
-

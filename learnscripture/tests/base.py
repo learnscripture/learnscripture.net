@@ -11,7 +11,25 @@ from accounts.models import Identity, Account, TestingMethod
 from bibleverses.models import BibleVersion
 
 
-class LiveServerTests(LiveServerTestCase):
+class AccountTestMixin(object):
+
+    def create_account(self):
+        KJV = BibleVersion.objects.get(slug='KJV')
+        identity = Identity.objects.create(default_bible_version=KJV,
+                                           testing_method=TestingMethod.FULL_WORDS,
+                                           enable_animations=False)
+        account = Account.objects.create(email="test1@test.com",
+                                          username="test1",
+                                         )
+        account.set_password('password')
+        account.save()
+        identity.account = account
+        identity.save()
+        return (identity, account)
+
+
+
+class LiveServerTests(AccountTestMixin, LiveServerTestCase):
     @classmethod
     def setUpClass(cls):
         cls.driver = webdriver.Chrome() # Using Chrome because we have problem with drag and drop for Firefox
@@ -80,20 +98,6 @@ class LiveServerTests(LiveServerTestCase):
         else:
             driver.find_element_by_id("id-save-btn").click()
             self.wait_until_loaded('body')
-
-    def create_account(self):
-        KJV = BibleVersion.objects.get(slug='KJV')
-        identity = Identity.objects.create(default_bible_version=KJV,
-                                           testing_method=TestingMethod.FULL_WORDS,
-                                           enable_animations=False)
-        account = Account.objects.create(email="test1@test.com",
-                                          username="test1",
-                                         )
-        account.set_password('password')
-        account.save()
-        identity.account = account
-        identity.save()
-        return (identity, account)
 
     def login(self, account):
         driver = self.driver
