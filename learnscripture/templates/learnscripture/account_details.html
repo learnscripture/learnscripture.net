@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load bootstrap %}
+
+{% block title %}
+Account details
+{% endblock %}
+
+{% block page_title %}
+Account details
+{% endblock %}
+
+{% block content %}
+
+<form action="" method="POST">
+{% csrf_token %}
+
+<h2>Personal information</h2>
+
+<h3>Private</h3>
+
+{{ form.email|bootstrap }}
+
+<h3>Public</h3>
+
+{{ form.first_name|bootstrap }}
+{{ form.last_name|bootstrap }}
+
+<h2>Email reminders</h2>
+
+<p>We can remind you if you have revision due:</p>
+
+{{ form.remind_after|bootstrap }}
+{{ form.remind_every|bootstrap }}
+
+<div class="actions">
+<input id="id-save-btn" type="submit" value="Save" class="btn primary">
+</div>
+
+</form>
+
+{% endblock %}

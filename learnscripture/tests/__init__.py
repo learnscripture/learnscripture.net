@@ -10,4 +10,4 @@ from .learn import *
 from .viewset import *
 from .dashboard import *
 from .choose import *
-
+from .account_details import *

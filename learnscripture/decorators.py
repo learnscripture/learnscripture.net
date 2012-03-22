@@ -39,3 +39,13 @@ def require_preferences(view_func):
             return redirect_via_prefs(request)
         return view_func(request, *args, **kwargs)
     return view
+
+
+def require_account(view_func):
+    @wraps(view_func)
+    def view(request, *args, **kwargs):
+        if not hasattr(request, 'identity') or request.identity.account_id is None:
+            return HttpResponseRedirect('/')
+        return view_func(request, *args, **kwargs)
+    return view
+

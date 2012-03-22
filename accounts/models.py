@@ -61,6 +61,13 @@ class Account(models.Model):
     paid_until = models.DateTimeField(null=True, blank=True)
     is_tester = models.BooleanField(default=False, blank=True)
 
+    # Email reminder preferences and meta data
+    remind_after = models.PositiveSmallIntegerField(
+        "Send email reminders after (days)", default=2)
+    remind_every = models.PositiveSmallIntegerField(
+        "Send email reminders every (days)", default=3)
+
+
     objects = AccountManager()
 
     def set_password(self, raw_password):

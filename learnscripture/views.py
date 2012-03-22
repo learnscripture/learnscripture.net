@@ -15,14 +15,14 @@ from django.views.decorators.debug import sensitive_post_parameters
 
 from accounts import memorymodel
 from accounts.models import Account
-from accounts.forms import PreferencesForm
+from accounts.forms import PreferencesForm, AccountDetailsForm
 from learnscripture.forms import AccountSetPasswordForm
 from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType, get_passage_sections
 from learnscripture import session, auth
 from bibleverses.forms import VerseSetForm
 from scores.models import get_all_time_leaderboard, get_leaderboard_since
 
-from .decorators import require_identity, require_preferences, has_preferences, redirect_via_prefs
+from .decorators import require_identity, require_preferences, has_preferences, redirect_via_prefs, require_account
 
 #
 # === Notes ===
@@ -614,3 +614,18 @@ def csrf_failure(request, reason=""):
                   {'no_csrf_cookie': reason == REASON_NO_CSRF_COOKIE})
     resp.status_code = 403
     return resp
+
+
+@require_account
+def account_details(request):
+    if request.method == 'POST':
+        form = AccountDetailsForm(request.POST, instance=request.identity.account)
+        if form.is_valid():
+            form.save()
+            messages.info(request, "Account details updated, thank you")
+            return HttpResponseRedirect(reverse('account_details'))
+    else:
+        form = AccountDetailsForm(instance=request.identity.account)
+
+    return render(request, 'learnscripture/account_details.html',
+                  {'form':form})
