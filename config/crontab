@@ -1,0 +1,8 @@
+LS_PYTHON=/home/cciw/webapps/learnscripture_django/venv/bin/python
+LS_MANAGE=/home/cciw/webapps/learnscripture_django/src/manage.py
+
+
+*/5 * * * * /home/cciw/webapps/learnscripture_django/apache2/bin/start > /dev/null
+*/5 * * * * /home/cciw/webapps/learnscripture_django/src/scripts/start_memcache.sh
+16,36,56 * * * * /home/cciw/webapps/learnscripture_staging_django/apache2/bin/start
+0 1,13 * * *  $LS_PYTHON $LS_MANAGE send_daily_account_emails
