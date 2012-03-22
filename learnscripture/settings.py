@@ -1,6 +1,7 @@
 # Django settings for learnscripture project.
 
 import socket
+import sys
 import os
 
 
@@ -230,7 +231,12 @@ CACHES = {
 } if LIVEBOX else {}
 
 CACHE_PREFIX = 'ls1'
-CACHE_COUNT_TIMEOUT = 60
+
+if 'test' in sys.argv:
+    # Caching count() seems to cause errors in test suite
+    CACHE_COUNT_TIMEOUT = 0
+else:
+    CACHE_COUNT_TIMEOUT = 60
 
 COMPRESS_PRECOMPILERS = (
     ('text/less', 'lessc {infile} {outfile}'),
