@@ -24,7 +24,8 @@ urlpatterns = patterns('',
 
                        url(r'^password-reset/$', 'learnscripture.views.password_reset_done', name='password_reset_done'),
                        url(r'^reset/(?P<uidb36>[0-9A-Za-z]{1,13})-(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$', 'learnscripture.views.password_reset_confirm', name='password_reset_confirm'),
-                      url(r'^reset/complete/$', 'learnscripture.views.password_reset_complete', name='password_reset_complete'),
+                       url(r'^reset/complete/$', 'learnscripture.views.password_reset_complete', name='password_reset_complete'),
+                       url(r'^account/$', 'learnscripture.views.account_details', name='account_details'),
 
                        (r'^admin/fiber/', include('fiber.admin_urls')),
                        (r'^api/v1/', include('fiber.api.urls')),
