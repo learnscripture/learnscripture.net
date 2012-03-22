@@ -66,9 +66,14 @@ class Account(models.Model):
         "Send email reminders after (days)", default=2)
     remind_every = models.PositiveSmallIntegerField(
         "Send email reminders every (days)", default=3)
+    last_reminder_sent = models.DateTimeField(null=True, blank=True)
 
 
     objects = AccountManager()
+
+    @property
+    def email_name(self):
+        return self.first_name if self.first_name.strip() != "" else self.username
 
     def set_password(self, raw_password):
         self.password = make_password(raw_password)
@@ -607,6 +612,19 @@ class Identity(models.Model):
                     .order_by('next_test_due'))[0]
         except IndexError:
             return None
+
+
+    def first_overdue_verse(self, now):
+        try:
+            return (self.verse_statuses
+                    .filter(ignored=False,
+                            next_test_due__isnull=False,
+                            next_test_due__lt=now,
+                            strength__lt=memorymodel.LEARNT)
+                    .order_by('next_test_due'))[0]
+        except IndexError:
+            return None
+
 
     def verse_statuses_for_passage(self, verse_set_id):
         # Must be strictly in the bible order
