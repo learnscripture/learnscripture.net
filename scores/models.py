@@ -6,6 +6,7 @@ from django.db.models import F
 from django.utils import timezone
 
 from learnscripture.datastructures import make_choices
+from learnscripture.utils.db import dictfetchall
 
 ScoreReason = make_choices('ScoreReason',
                            [(0, 'VERSE_TESTED', 'Verse tested'),
@@ -122,13 +123,3 @@ def get_rank_this_week(points_this_week):
     return ScoreLog.objects.filter(created__gt=n - timedelta(7))\
         .values('account_id').annotate(sum_points=models.Sum('points'))\
         .filter(sum_points__gt=points_this_week).count() + 1
-
-
-def dictfetchall(cursor):
-    "Returns all rows from a cursor as a dict"
-    desc = cursor.description
-    return [
-        dict(zip([col[0] for col in desc], row))
-        for row in cursor.fetchall()
-    ]
-

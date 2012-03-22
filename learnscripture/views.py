@@ -641,3 +641,39 @@ def account_details(request):
     return render(request, 'learnscripture/account_details.html',
                   {'form':form,
                    'title': u"Account details"})
+
+
+def date_to_js_ts(d):
+    """
+    Converts a date object to the timestamp required by the flot library
+    """
+    return int(d.strftime('%s'))*1000
+
+
+def get_tests_since(start):
+    from learnscripture.utils.db import dictfetchall
+    from django.db import connection
+    from scores.models import ScoreReason
+
+    sql = """
+SELECT date_trunc('day', created) as day, COUNT(id) as c FROM scores_scorelog
+WHERE created > %s
+AND reason IN %s
+GROUP BY day
+ORDER BY day ASC
+"""
+    cursor = connection.cursor()
+    cursor.execute(sql, [start,
+                         (ScoreReason.VERSE_TESTED, ScoreReason.VERSE_REVISED)])
+    return dictfetchall(cursor)
+
+
+def stats(request):
+    start = (timezone.now() - timedelta(31)).date()
+    verses_tested_per_day = [[date_to_js_ts(row['day']), row['c']]
+                             for row in get_tests_since(start)]
+    print verses_tested_per_day
+    return render(request, 'learnscripture/stats.html',
+                  {'title': 'Stats',
+                   'verses_tested_per_day': verses_tested_per_day,
+                   })
