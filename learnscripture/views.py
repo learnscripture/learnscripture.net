@@ -650,7 +650,7 @@ def date_to_js_ts(d):
     return int(d.strftime('%s'))*1000
 
 
-def get_tests_since(start):
+def get_tests_since(start, include_initial_tests=False, include_revision_tests=False):
     from learnscripture.utils.db import dictfetchall
     from django.db import connection
     from scores.models import ScoreReason
@@ -662,17 +662,29 @@ AND reason IN %s
 GROUP BY day
 ORDER BY day ASC
 """
+    reasons = []
+    if include_revision_tests:
+        reasons.append(ScoreReason.VERSE_REVISED)
+    if include_initial_tests:
+        reasons.append(ScoreReason.VERSE_TESTED)
     cursor = connection.cursor()
     cursor.execute(sql, [start,
-                         (ScoreReason.VERSE_TESTED, ScoreReason.VERSE_REVISED)])
+                         tuple(reasons)])
     return dictfetchall(cursor)
 
 
 def stats(request):
     start = (timezone.now() - timedelta(31)).date()
-    verses_tested_per_day = [[date_to_js_ts(row['day']), row['c']]
-                             for row in get_tests_since(start)]
+    verses_initial_tests_per_day = [[date_to_js_ts(row['day']), row['c']]
+                                    for row in get_tests_since(start,
+                                                               include_initial_tests=True
+                                                               )]
+    verses_revision_tests_per_day = [[date_to_js_ts(row['day']), row['c']]
+                                     for row in get_tests_since(start,
+                                                                include_revision_tests=True,
+                                                                )]
     return render(request, 'learnscripture/stats.html',
                   {'title': 'Stats',
-                   'verses_tested_per_day': verses_tested_per_day,
+                   'verses_initial_tests_per_day': verses_initial_tests_per_day,
+                   'verses_revision_tests_per_day': verses_revision_tests_per_day,
                    })
