@@ -164,3 +164,27 @@ class CreateSetTests(LiveServerTests):
         self.assertTrue(len(vs.verse_choices.all()), 10)
         self.assertEqual(vs.breaks, "1:3,1:9")
 
+    def test_edit_passage_set(self):
+        self.login(self._account)
+        driver = self.driver
+        vs = VerseSet.objects.create(created_by=self._account,
+                                     set_type=VerseSetType.PASSAGE,
+                                     name='Psalm 23',
+                                     breaks="23:5")
+        references = []
+        for i in range(1, 7):
+            ref = 'Psalm 23:%d' % i
+            references.append(ref)
+            vs.verse_choices.create(reference=ref,
+                                    set_order=i - 1)
+
+        # Simple test - editing and pressing save should leave
+        # everything the same.
+        driver.get(self.live_server_url + reverse('edit_set', kwargs=dict(slug=vs.slug)))
+        driver.find_element_by_id("id-save-btn").click()
+
+        vs = VerseSet.objects.get(id=vs.id)
+        vcs = vs.verse_choices.all().order_by('set_order')
+        self.assertEqual([vc.reference for vc in vcs],
+                         references)
+        self.assertEqual(vs.breaks, "23:5")
