@@ -76,10 +76,10 @@
 
 {% endif %}
 
-<p><a href="{% url 'leaderboard' %}"> <i class="icon-list-alt"></i> See all rankings</a></p>
+<p><a href="{% url 'leaderboard' %}" class="icon-leaderboard">See all rankings</a></p>
 
 {% if request.identity.account.username == account.username %}
-<p><a href="{% url 'user_verses' %}"><i class="icon-star"></i> See detailed progress on verse learning</a></p>
+<p><a href="{% url 'user_verses' %}" class="icon-progress">See detailed progress on verse learning</a></p>
 {% endif %}
 
 {% endblock %}

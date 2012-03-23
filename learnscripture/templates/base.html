@@ -26,6 +26,7 @@
     <link rel="apple-touch-icon" href="{{ STATIC_URL }}img/touch-icon.png" />
 
     {% compress css %}
+    <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/heydings.css" charset="utf-8" />
     <link type="text/less" rel="stylesheet" href="{{ STATIC_URL }}css/learnscripture.less" charset="utf-8" />
 
     {% endcompress %}
@@ -50,14 +51,14 @@
                 <a href="#" id="id-session-menu" class="dropdown-toggle holds-username">{% if request.identity.account %}{{ request.identity.account.username }}{% else %}Guest{% endif %}</a>
                 <ul class="dropdown-menu">
                   {% if not request.identity.account %}
-                  <li><a href="#" class="login-link">Sign in</a></li>
-                  <li><a href="#" class="signup-link">Create account</a></li>
+                  <li><a href="#" class="icon-login login-link">Sign in</a></li>
+                  <li><a href="#" class="icon-account signup-link">Create account</a></li>
                   {% endif %}
-                  <li><a class="preferences-link" href="{% url 'preferences' %}?next={{ request.path_info }}">Preferences</a></li>
+                  <li><a class="icon-preferences preferences-link" href="{% url 'preferences' %}?next={{ request.path_info }}">Preferences</a></li>
                   {% if request.identity.account %}
-                  <li><a href="{% url 'account_details' %}">Account details</i></a></li>
-                  <li><a href="{% url 'user_stats' request.identity.account.username %}">Stats <i class="icon-signal"></i></a></li>
-                  <li><a href="#" class="logout-link">Log out</a></li>
+                  <li><a class="icon-account" href="{% url 'account_details' %}">Account details</i></a></li>
+                  <li><a class="icon-stats" href="{% url 'user_stats' request.identity.account.username %}">Stats <i class="icon-signal"></i></a></li>
+                  <li><a href="#" class="icon-logout logout-link">Log out</a></li>
                   {% endif %}
                 </ul>
               </li>

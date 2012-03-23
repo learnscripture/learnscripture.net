@@ -2,7 +2,7 @@ var learnscripture =
     (function(learnscripture, $) {
 
         var addVerse = function(verseData) {
-            var newrow = $('<tr><td></td><td></td><td><i class="icon-arrow-up"></i></td><td><i class="icon-arrow-down"></i></td><td><i class="icon-trash"></i></td></tr>').find('td:first-child').text(verseData.reference).end().find('td:nth-child(2)').text(verseData.text).end();
+            var newrow = $('<tr><td></td><td></td><td><span class="icon-arrow-up icon-replace" title="move up">up</span></td><td><span class="icon-arrow-down icon-replace" title="move down">down</span></td><td><span class="icon-trash icon-replace" title="remove">remove</span></td></tr>').find('td:first-child').text(verseData.reference).end().find('td:nth-child(2)').text(verseData.text).end();
             $('#id-verse-list tbody').append(newrow);
             $('#id-verse-list').show();
         }
@@ -96,7 +96,7 @@ var learnscripture =
             if ($('#id-verse-list tbody tr').length == 0) {
                 $('#id-verse-list').hide();
             }
-            $('#id-verse-list').on('click', 'i.icon-arrow-up,i.icon-arrow-down',
+            $('#id-verse-list').on('click', '.icon-arrow-up, .icon-arrow-down',
                 function(ev) {
                     var row = $(this).parents("tr:first");
                     if ($(this).is(".icon-arrow-up")) {
