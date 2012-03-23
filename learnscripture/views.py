@@ -20,7 +20,7 @@ from learnscripture.forms import AccountSetPasswordForm
 from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType, get_passage_sections
 from learnscripture import session, auth
 from bibleverses.forms import VerseSetForm
-from scores.models import get_all_time_leaderboard, get_leaderboard_since
+from scores.models import get_all_time_leaderboard, get_leaderboard_since, ScoreReason
 
 from .decorators import require_identity, require_preferences, has_preferences, redirect_via_prefs, require_account
 
@@ -650,41 +650,49 @@ def date_to_js_ts(d):
     return int(d.strftime('%s'))*1000
 
 
-def get_tests_since(start, include_initial_tests=False, include_revision_tests=False):
+def get_scores_since(start, reasons):
     from learnscripture.utils.db import dictfetchall
     from django.db import connection
-    from scores.models import ScoreReason
 
     sql = """
-SELECT date_trunc('day', created) as day, COUNT(id) as c FROM scores_scorelog
+SELECT date_trunc('day', created) as day, reason, COUNT(id) as c FROM scores_scorelog
 WHERE created > %s
 AND reason IN %s
-GROUP BY day
+GROUP BY day, reason
 ORDER BY day ASC
 """
-    reasons = []
-    if include_revision_tests:
-        reasons.append(ScoreReason.VERSE_REVISED)
-    if include_initial_tests:
-        reasons.append(ScoreReason.VERSE_TESTED)
     cursor = connection.cursor()
-    cursor.execute(sql, [start,
-                         tuple(reasons)])
+    cursor.execute(sql, [start, reasons])
     return dictfetchall(cursor)
 
 
 def stats(request):
+    # We can use score logs to get stats we want.
     start = (timezone.now() - timedelta(31)).date()
-    verses_initial_tests_per_day = [[date_to_js_ts(row['day']), row['c']]
-                                    for row in get_tests_since(start,
-                                                               include_initial_tests=True
-                                                               )]
-    verses_revision_tests_per_day = [[date_to_js_ts(row['day']), row['c']]
-                                     for row in get_tests_since(start,
-                                                                include_revision_tests=True,
-                                                                )]
+    reasons = (ScoreReason.VERSE_TESTED, ScoreReason.VERSE_REVISED)
+    d = get_scores_since(start, reasons)
+
+    # Some rows might be missing some days, so need to fill in with zeros,
+    # otherwise charting fails. Get dict of vals we do have:
+    rows_by_reason = dict((reason, dict((r['day'], r['c']) for r in d if r['reason'] == reason))
+                          for reason in reasons)
+    # empty dict waiting to be filled:
+    complete_rows_by_reason = dict((reason, []) for reason in reasons)
+    old_dt = None
+    for row in d:
+        dt = row['day']
+        if dt == old_dt and old_dt is not None:
+            continue
+        for reason in reasons:
+            row_dict = rows_by_reason[reason]
+            output_row = complete_rows_by_reason[reason]
+            val = row_dict.get(dt, 0) # get zero if SQL query returned no row.
+            ts = date_to_js_ts(dt)
+            output_row.append((ts, val))
+        old_dt = dt
+
     return render(request, 'learnscripture/stats.html',
                   {'title': 'Stats',
-                   'verses_initial_tests_per_day': verses_initial_tests_per_day,
-                   'verses_revision_tests_per_day': verses_revision_tests_per_day,
+                   'verses_initial_tests_per_day': complete_rows_by_reason[ScoreReason.VERSE_TESTED],
+                   'verses_revision_tests_per_day': complete_rows_by_reason[ScoreReason.VERSE_REVISED]
                    })
