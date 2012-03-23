@@ -7,7 +7,7 @@
 
 <h2>Verses tested per day</h2>
 
-<div id="id-verses-tested-graph" style="width:600px;height:300px;">
+<div id="id-verses-tested-graph" style="width:820px;height:300px;">
 </div>
 
 
@@ -15,21 +15,30 @@
 
 {% block extrajs %}
 <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.flot.min.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.flot.stack.min.js"></script>
 <script type="text/javascript">
 $(function() {
 
     var placeholder_id = "#id-verses-tested-graph";
-    var verses_tested_per_day = {{ verses_tested_per_day|jsonify }};
+    var verses_initial_tests_per_day = {{ verses_initial_tests_per_day|jsonify }};
+    var verses_revision_tests_per_day = {{ verses_revision_tests_per_day|jsonify }};
 
     $.plot(placeholder_id,
            [
-            {label: "Tests",
-             data: verses_tested_per_day}
+            {label: "Initial",
+             data: verses_initial_tests_per_day},
+            {label: "Revision",
+             data: verses_revision_tests_per_day}
            ],
            { xaxis: { mode: "time",
                       ticks: 5 },
              yaxis: { min: 0 },
              legend: { position: "nw" },
+             series: {
+                stack: true,
+                lines: { show: true, fill: true },
+             }
+
            });
 });
 </script>
