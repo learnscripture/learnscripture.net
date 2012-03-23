@@ -8,10 +8,10 @@
 <h2>Points</h2>
 
 <div class="actionset">
-  <div style="float: right;">
-    <a href="{% url 'user_stats' request.identity.account.username %}" title="Your stats"><i class="icon-signal"></i></a>
-    <a href="{% url 'user_verses' %}" title="Your progress"><i class="icon-star"></i></a>
-    <a href="{% url 'leaderboard' %}?thisweek" title="Leaderboard"><i class="icon-list-alt"></i></a>
+  <div style="float: right; font-size: 120%;">
+    <a class="icon-stats icon-replace" href="{% url 'user_stats' request.identity.account.username %}" title="Your stats">Stats</a>
+    <a class="icon-progress icon-replace" href="{% url 'user_verses' %}" title="Your progress">Progress</a>
+    <a class="icon-leaderboard icon-replace" href="{% url 'leaderboard' %}?thisweek" title="Leaderboard">Leaderboard</a>
   </div>
   <p>Points:
     <b>{{ request.identity.account.points_this_week }}</b> this week,
