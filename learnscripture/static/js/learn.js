@@ -306,6 +306,8 @@ var learnscripture =
                 "more practice needed!";
 
             $('#id-result-comment').text(comment);
+            fadeVerseTitle(false);
+
             completeStageGroup();
 
             if (accuracyPercent < 85) {
@@ -384,6 +386,10 @@ var learnscripture =
         var setNextPreviousBtns = function() {
             enableBtn($('#id-next-btn'), currentStageIdx < currentStageList.length - 1);
             enableBtn($('#id-back-btn'), currentStageIdx > 0);
+        };
+
+        var fadeVerseTitle = function(fade) {
+            $('#id-verse-title').toggleClass('blurry', fade);
         };
 
         var setupStage = function(idx) {
@@ -701,6 +707,11 @@ var learnscripture =
                 } else {
                     moveSelectionRelative(1);
                     adjustTypingBox();
+                    var isReference = getWordAt(selectedWordIndex).hasClass('reference');
+                    if (isReference) {
+                        fadeVerseTitle(true);
+                    }
+
                 }
             };
             if (matchWord(wordStr, typed)) {
@@ -903,21 +914,13 @@ var learnscripture =
 
             $('.current-verse').hide(); // Hide until set up
             $('#id-verse-title').text(currentVerseStatus.reference);
+            $('#id-version-select').val(verse.version.slug);
             // convert newlines to divs
             var text = verse.text;
-            if (verse.verse_set == null ||
-                verse.verse_set.set_type == SET_TYPE_SELECTION) {
-                // Reference is part of what should be learnt
-                text = text + '\n' + verse.reference;
-            }
-            $.each(text.split(/\n/), function(idx, line) {
-                if (line.trim() != '') {
-                    $('.current-verse').append('<div class="line">' +
-                                          line + '</div>');
-                }
-            });
-            $('#id-version-select').val(verse.version.slug);
-            markupVerse();
+            markupVerse(text,
+                        verse.verse_set == null || verse.verse_set.set_type == SET_TYPE_SELECTION
+                        ? verse.reference
+                        : null );
             $('#id-loading').hide();
             $('#id-controls').show();
             if (moveOld) {
@@ -1007,7 +1010,15 @@ var learnscripture =
                 .removeClass('wordstart').removeClass('wordend');
         }
 
-        var markupVerse = function() {
+        var markupVerse = function(text, reference) {
+            // First split lines into divs.
+            $.each(text.split(/\n/), function(idx, line) {
+                if (line.trim() != '') {
+                    $('.current-verse').append('<div class="line">' +
+                                               line + '</div>');
+                }
+            });
+            // Then split up into words
             var wordClass = currentVerseStatus.needs_testing ? 'word' : 'testedword';
             var wordGroups = [];
 
@@ -1017,6 +1028,19 @@ var learnscripture =
             wordList = [];
             var replacement = [];
             var wordNumber = 0;
+
+            var makeNormalWord = function(word, wordClass) {
+                var start = word.match(/\W*./)[0];
+                var end = word.slice(start.length);
+                return ('<span id="id-word-' + wordNumber.toString() +
+                        '" class=\"' + wordClass + '\">' +
+                        '<span class="wordstart">' + start +
+                        '</span><span class="wordend">' + end +
+                        '</span></span>');
+
+            };
+
+
             for(var i = 0; i < wordGroups.length; i++) {
                 var group = wordGroups[i];
                 group = $.map(group, function(word, j) {
@@ -1028,38 +1052,35 @@ var learnscripture =
                 });
                 var replace = [];
                 $.each(group, function(j, word) {
-                    if (currentVerseStatus.needs_testing && word.match(/^\d+:\d+(-\d+)?$/)) {
-                        // Split Bible references into two bits
-                        var parts = word.split(/:/);
-                        replace.push('<span id="id-word-' + wordNumber.toString() +
-                                     '" class=\"word\">' +
-                                     '<span class="wordstart">' + parts[0] + '</span>' +
-                                     '</span>' +
-                                     '<span class="colon">:</span>');
-                        wordList.push(wordNumber);
-                        wordNumber++;
-                        replace.push('<span id="id-word-' + wordNumber.toString() +
-                                     '" class=\"word\">' +
-                                     '<span class="wordstart">' + parts[1] + '</span>' +
-                                     '</span>');
-                        wordList.push(wordNumber);
-                        wordNumber++;
-                    } else {
-                        var start = word.match(/\W*./)[0];
-                        var end = word.slice(start.length);
-                        replace.push('<span id="id-word-' + wordNumber.toString() +
-                                     '" class=\"' + wordClass + '\">' +
-                                     '<span class="wordstart">' + start +
-                                     '</span><span class="wordend">' + end +
-                                     '</span></span>');
-                        wordList.push(wordNumber);
-                        wordNumber++;
-                    }
-
+                    replace.push(makeNormalWord(word, wordClass));
+                    wordList.push(wordNumber);
+                    wordNumber++;
                 });
                 replacement.push(replace.join(' '));
             }
+
             $('.current-verse').html(replacement.join('<br/>'));
+
+            // Add reference
+            if (currentVerseStatus.needs_testing && reference != null) {
+                parts = reference.split(/\b/);
+                var replace = [];
+                $.each(parts, function(j, word) {
+                    if (word.trim() == "") {
+                        return;
+                    }
+                    if (word == ":") {
+                        replace.push('<span class="colon">:</span>');
+                        return;
+                    }
+                    replace.push(makeNormalWord(word, "word reference"));
+                    wordList.push(wordNumber);
+                    wordNumber++;
+                });
+                $('.current-verse').append('<br/>' + replace.join(' '));
+
+            }
+
             $('.current-verse .word').click(function(ev) {
                 if (!currentStage.testMode) {
                     toggleWord($(this));
