@@ -847,9 +847,6 @@ form.quickfind {
     }
 
   .modal {
-    width: 400px;
-    margin: 0 -200px;
-    top: 10px;
     .modal-header {
       padding: 0px;
       .close {
@@ -989,6 +986,16 @@ form.quickfind {
     }
   }
 
+// Use variable width modal if less than the fixed 560px (defined in
+// patterns.less) + 10px padding either side
+@media screen and (max-width: 580px) {
+  .modal {
+    width: auto;
+    left: 0px;
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+}
 
 // Really narrow - remove long version info
 @media screen and (max-width: 500px) {

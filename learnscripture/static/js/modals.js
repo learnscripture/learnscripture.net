@@ -45,11 +45,22 @@ $(document).ready(function() {
                 modal.css('top', (bestScrollTop + modalMargin).toString() + "px")
             }
         }
+
+
+        // For narrow screens, use 'form-stacked'
+        if (modal.width() < 500) {
+            modal.find('form').addClass('form-stacked');
+        }
+
     }).bind('hidden', function(ev) {
+        var modal = $(this);
         // Remove any 'top' set above (for the case where browser window gets
         // resized and we switch between absolute and fixed positioning for the
-        // modal.
-        $(this).css('top', '');
+        // modal).
+        modal.css('top', '');
+
+        // Remove the 'form-stacked' we added.
+        modal.find('form').removeClass('form-stacked');
     });
 
 });
