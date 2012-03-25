@@ -20,5 +20,37 @@ $(document).ready(function() {
               }
           }
       });
+    $('div.modal').bind('shown', function(ev) {
+        var modal = $(this);
+        // if we have a small screen, then .modal divs are set to have
+        // 'position:absolute' instead of 'position:fixed' (using CSS media
+        // queries), so that they can scroll.  But this means the modal can be
+        // at the top of the screen, where it can't be seen if we are way down
+        // the screen.  We move the modal, being careful not to move it off
+        // bottom of screen.
+        if (modal.css('position') == 'absolute') {
+            var bestScrollTop;
+            var modalMargin = 10;  // allow 10px margin top and bottom, see CSS
+            var modalHeight = modal.height() + modalMargin * 2;
+            if ($(window).height() > modalHeight) {
+                // we have enough room for the whole modal
+                bestScrollTop = $(window).scrollTop();
+            } else {
+                // not enough room for modal, so be careful not to put it so
+                // that it would stick off the bottom of the page.
+                bestScrollTop = Math.min($(window).scrollTop(),
+                                         $(document).height() - modalHeight);
+            }
+            if (modal.position().top != bestScrollTop) {
+                modal.css('top', (bestScrollTop + modalMargin).toString() + "px")
+            }
+        }
+    }).bind('hidden', function(ev) {
+        // Remove any 'top' set above (for the case where browser window gets
+        // resized and we switch between absolute and fixed positioning for the
+        // modal.
+        $(this).css('top', '');
+    });
+
 });
 
