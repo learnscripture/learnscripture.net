@@ -114,7 +114,7 @@ class CreateSetTests(LiveServerTests):
 
         driver = self.driver
         driver.get(self.live_server_url + reverse('edit_set', kwargs=dict(slug=vs.slug)))
-        driver.find_element_by_css_selector("#id-verse-list tbody tr:first-child td a").click()
+        driver.find_element_by_css_selector("#id-verse-list tbody tr:first-child td .icon-trash").click()
         driver.find_element_by_id("id-save-btn").click()
 
         vs = VerseSet.objects.get(id=vs.id)
