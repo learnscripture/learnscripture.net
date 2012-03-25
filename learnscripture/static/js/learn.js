@@ -1170,21 +1170,13 @@ var learnscripture =
                 inputBox.val('');
                 return;
             }
-            if (ev.which == 32) {
+            if (ev.which == 32 || ev.which == 13) {
                 ev.preventDefault();
                 if (currentStage.testMode) {
                     if (preferences.testingMethod == TEST_FULL_WORDS) {
                         checkCurrentWord();
                     }
                 }
-                return;
-            }
-            if (ev.which == 13) {
-                // Pressing the primary button can cause docKeyPress to be
-                // bound, so we need to stop docKeyPress receiving this event.
-                // ev.stopPropagation() doesn't seem to work.  So we put this in
-                // the queue that will execute after this event handler.
-                setTimeout(pressPrimaryButton, 10);
                 return;
             }
             // Any character
