@@ -51,8 +51,8 @@ def _set_learning_session_start(request, dt):
 
 
 def get_learning_session_start(request):
-    return timezone.make_aware(datetime.fromtimestamp(int(request.session['learning_start'])),
-                               timezone.utc)
+    return datetime.utcfromtimestamp(int(request.session['learning_start']))\
+        .replace(tzinfo=timezone.utc)
 
 
 def _set_verse_statuses(request, user_verse_statuses):
