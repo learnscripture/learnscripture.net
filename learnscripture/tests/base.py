@@ -30,6 +30,9 @@ class AccountTestMixin(object):
 
 
 class LiveServerTests(AccountTestMixin, LiveServerTestCase):
+
+    fixtures = ['test_bible_versions.json']
+
     @classmethod
     def setUpClass(cls):
         cls.driver = webdriver.Chrome() # Using Chrome because we have problem with drag and drop for Firefox

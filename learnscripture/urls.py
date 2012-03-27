@@ -27,6 +27,8 @@ urlpatterns = patterns('',
                        url(r'^reset/complete/$', 'learnscripture.views.password_reset_complete', name='password_reset_complete'),
                        url(r'^account/$', 'learnscripture.views.account_details', name='account_details'),
                        url(r'^stats/$', 'learnscripture.views.stats', name='stats'),
+                       url(r'^subscribe/$', 'learnscripture.views.subscribe', name='subscribe'),
+
 
                        (r'^admin/fiber/', include('fiber.admin_urls')),
                        (r'^api/v1/', include('fiber.api.urls')),

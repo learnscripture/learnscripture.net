@@ -8,6 +8,9 @@ from learnscripture import session
 
 
 def require_identity(view_func):
+    """
+    Creates an identity if there is no identity active
+    """
     @wraps(view_func)
     def view(request, *args, **kwargs):
         if not hasattr(request, 'identity'):
@@ -42,6 +45,10 @@ def require_preferences(view_func):
 
 
 def require_account(view_func):
+    """
+    Redirects to / if there is no account active
+    """
+    # NB this doesn't create an account.
     @wraps(view_func)
     def view(request, *args, **kwargs):
         if not hasattr(request, 'identity') or request.identity.account_id is None:

@@ -14,12 +14,13 @@ from django.views.decorators.debug import sensitive_post_parameters
 
 
 from accounts import memorymodel
-from accounts.models import Account
+from accounts.models import Account, SubscriptionType
 from accounts.forms import PreferencesForm, AccountDetailsForm
 from learnscripture.forms import AccountSetPasswordForm
 from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType, get_passage_sections
 from learnscripture import session, auth
 from bibleverses.forms import VerseSetForm
+from payments.models import Price
 from scores.models import get_all_time_leaderboard, get_leaderboard_since, ScoreReason
 
 from .decorators import require_identity, require_preferences, has_preferences, redirect_via_prefs, require_account
@@ -696,3 +697,28 @@ def stats(request):
                    'verses_initial_tests_per_day': complete_rows_by_reason[ScoreReason.VERSE_TESTED],
                    'verses_revision_tests_per_day': complete_rows_by_reason[ScoreReason.VERSE_REVISED]
                    })
+
+
+@require_account
+def subscribe(request):
+    account = request.identity.account
+    c = {'title': 'Subscribe'}
+    if not account.payment_possible() and False:
+        # Shortcut, to avoid any processing
+        return render(request, 'learnscripture/subscribe.html', c)
+
+    c['payment_possible'] = True
+
+    c['free_trial'] = account.subscription == SubscriptionType.FREE_TRIAL
+
+    if account.payment_due_date() < timezone.now():
+        c['payment_overdue'] = True
+
+    price_groups = Price.objects.current_prices()
+    currencies = sorted([currency for currency, prices in price_groups],
+                         key=lambda currency: currency.name)
+    c['currencies'] = currencies
+    c['all_prices'] = price_groups
+
+    return render(request, 'learnscripture/subscribe.html', c)
+

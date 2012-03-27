@@ -17,6 +17,13 @@ This means that a lot of business logic is driven off the Identity (which in
 turn delegates to Account for some things). A middleware attaches identity to
 the request object where it is available.
 
+Views
+=====
+
+Although models are split between 'accounts', 'bibleverses', 'scores', and
+'payments', views are mainly under learnscripture/views.py, because the views
+almost always contain things from multiple apps.
+
 Tests
 =====
 
