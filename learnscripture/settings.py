@@ -149,6 +149,7 @@ INSTALLED_APPS = [
     'bibleverses',
     'accounts',
     'scores',
+    'payments',
     'piston',
     'mptt',
     'compressor',

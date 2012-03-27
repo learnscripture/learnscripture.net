@@ -32,6 +32,10 @@ THEMES = [('calm', 'Slate'),
           ('space', 'Space'),
           ]
 
+# Number of days payment is allowed to be made early
+PAYMENT_ALLOWED_EARLY_DAYS = 31
+
+FREE_TRIAL_LENGTH_DAYS = 62 # 2 months
 
 # Account is separate from Identity to allow guest users to use the site fully
 # without signing up.
@@ -156,6 +160,21 @@ class Account(models.Model):
     @cached_property
     def rank_this_week(self):
         return get_rank_this_week(self.points_this_week)
+
+    def payment_due_date(self):
+        if self.subscription == SubscriptionType.FREE_TRIAL:
+            return self.date_joined + timedelta(FREE_TRIAL_LENGTH_DAYS)
+        elif self.subscription == SubscriptionType.LIFETIME_FREE:
+            return None
+        else:
+            return self.paid_until
+
+    def payment_possible(self):
+        payment_due = self.payment_due_date()
+        if payment_due is None:
+            return False
+        else:
+            return (payment_due - timedelta(PAYMENT_ALLOWED_EARLY_DAYS)) < timezone.now()
 
 
 class ActionChange(object):

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% load json_filters %}
+
+{% block content %}
+{% if not payment_possible %}
+  <p>Your subscription is not due for renewal</p>
+{% else %}
+
+  {% if payment_overdue %}
+  <p>Payment is due.</p>
+  {% else %}
+  <p>Payment is due soon, and you can choose to pay early if you would like,
+    at your convenience - you won't lose the
+    {% if free_trial %} free days
+    {% else %} paid days
+    {% endif %}
+    you still have on account.
+  </p>
+  {% endif %}
+
+  <p>Choose your currency and payment period:</p>
+
+  <form action="" method="POST">
+    {% csrf_token %}
+    <div class="clearfix">
+      <label>Currency</label>
+      <div class="input">
+        <ul class="inputs-list" id="id_currency_list">
+          {% for currency in currencies %}
+          <li>
+            <label for="id_currency_{{ forloop.counter0 }}">
+              <input type="radio" name="currency"
+                     id="id_currency_{{ forloop.counter0 }}"
+                     {% if forloop.counter0 == 0 %}checked{% endif %}
+                     value="{{ currency.name }}">
+              {{ currency.symbol }} {{ currency.name }}
+            </label>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <div class="clearfix">
+      <label>Period</label>
+      <div class="input">
+        <ul class="inputs-list" id="id_prices_list">
+          {% for currency, prices in all_prices %}
+          {% for price in prices %}
+          <li {% if forloop.parentloop.counter0 > 0 %}style="display: none;"{% endif %}>
+            <label for="id_price_{{ currency.name }}_{{ price.id }}">
+              <input type="radio" name="price"
+                     id="id_price_{{ currency.name }}_{{ price.id }}"
+                     value="{{ price.id }}">
+              {{ price.description }} - {{ currency.symbol }}{{ price.amount }}
+            </label>
+          </li>
+          {% endfor %}
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </form>
+
+{% endif %}
+
+{% endblock %}
