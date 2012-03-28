@@ -64,7 +64,7 @@
 
 
   {% for label, form in price_forms %}
-    <div id="id_price_form_{{ label }}" style="display: none;" class="price-form">
+    <div id="id_price_form_{{ label }}" style="display: none;" class="price-form actions">
       {% if PRODUCTION %}
         {{ form.render }}
       {% else %}
