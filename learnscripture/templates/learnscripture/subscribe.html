@@ -32,7 +32,6 @@
             <label for="id_currency_{{ forloop.counter0 }}">
               <input type="radio" name="currency"
                      id="id_currency_{{ forloop.counter0 }}"
-                     {% if forloop.counter0 == 0 %}checked{% endif %}
                      value="{{ currency.name }}">
               {{ currency.symbol }} {{ currency.name }}
             </label>
@@ -42,13 +41,13 @@
       </div>
     </div>
 
-    <div class="clearfix">
+    <div class="clearfix" style="display: none;">
       <label>Period</label>
       <div class="input">
         <ul class="inputs-list" id="id_prices_list">
-          {% for currency, prices in all_prices %}
+          {% for currency, prices in price_groups %}
           {% for price in prices %}
-          <li {% if forloop.parentloop.counter0 > 0 %}style="display: none;"{% endif %}>
+          <li style="display: none;">
             <label for="id_price_{{ currency.name }}_{{ price.id }}">
               <input type="radio" name="price"
                      id="id_price_{{ currency.name }}_{{ price.id }}"
@@ -63,6 +62,16 @@
     </div>
   </form>
 
+
+  {% for label, form in price_forms %}
+    <div id="id_price_form_{{ label }}" style="display: none;" class="price-form">
+      {% if PRODUCTION %}
+        {{ form.render }}
+      {% else %}
+        {{ form.sandbox }}
+      {% endif %}
+    </div>
+  {% endfor %}
 {% endif %}
 
 {% endblock %}

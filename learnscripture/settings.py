@@ -50,6 +50,11 @@ if DEBUG:
 SERVER_EMAIL = 'website@learnscripture.net'
 DEFAULT_FROM_EMAIL = SERVER_EMAIL
 
+
+PAYPAL_RECEIVER_EMAIL = "paypal@learnscripture.net"
+PAYPAL_TEST = DEVBOX or STAGING
+
+
 TIME_ZONE = 'Europe/London'
 LANGUAGE_CODE = 'en-gb'
 
