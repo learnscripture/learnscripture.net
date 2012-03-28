@@ -2,8 +2,10 @@
 from datetime import timedelta
 import re
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.tokens import default_token_generator
+from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
@@ -12,6 +14,7 @@ from django.utils.http import urlparse, base36_to_int
 from django.views.decorators.cache import never_cache
 from django.views.decorators.debug import sensitive_post_parameters
 
+from paypal.standard.forms import PayPalPaymentsForm
 
 from accounts import memorymodel
 from accounts.models import Account, SubscriptionType
@@ -718,7 +721,37 @@ def subscribe(request):
     currencies = sorted([currency for currency, prices in price_groups],
                          key=lambda currency: currency.name)
     c['currencies'] = currencies
-    c['all_prices'] = price_groups
+    c['price_groups'] = price_groups
+    price_forms = []
+    for currency, prices in price_groups:
+        for price in prices:
+            domain = Site.objects.get_current().domain
+            protocol = 'https' if request.is_secure() else 'http'
+            paypal_dict = {
+                "business": settings.PAYPAL_RECEIVER_EMAIL,
+                "amount": str(price.amount),
+                "item_name": u"%s subscription on LearnScripture.net" % price.description,
+                "invoice": "%s-%s" % (account.id,
+                                      timezone.now()), # We don't need this, but must be unique
+                "notify_url":  "%s://%s%s" % (protocol, domain, reverse('paypal-ipn')),
+                "return_url": "%s://%s%s" % (protocol, domain, reverse('pay_done')),
+                "cancel_return": "%s://%s%s" % (protocol, domain, reverse('pay_cancelled')),
+                "custom": "account:%s;price:%s;" % (account.id, price.id),
+                "currency_code": price.currency.name,
+                "no_note": "1",
+                "no_shipping": "1",
+                }
+            form = PayPalPaymentsForm(initial=paypal_dict)
+            price_forms.append(("%s_%s" % (currency.name, price.id), form))
+    c['PRODUCTION'] = settings.LIVEBOX and settings.PRODUCTION
+    c['price_forms'] = price_forms
 
     return render(request, 'learnscripture/subscribe.html', c)
 
+
+def pay_done(request):
+    return render(request, 'learnscripture/pay_done.html')
+
+
+def pay_cancelled(request):
+    return render(request, 'learnscripture/pay_cancelled.html')

@@ -28,6 +28,8 @@ urlpatterns = patterns('',
                        url(r'^account/$', 'learnscripture.views.account_details', name='account_details'),
                        url(r'^stats/$', 'learnscripture.views.stats', name='stats'),
                        url(r'^subscribe/$', 'learnscripture.views.subscribe', name='subscribe'),
+                       url(r'^payment-complete/$', 'learnscripture.views.pay_done', name='pay_done'),
+                       url(r'^payment-cancelled/$', 'learnscripture.views.pay_cancelled', name='pay_cancelled'),
 
 
                        (r'^admin/fiber/', include('fiber.admin_urls')),
@@ -36,6 +38,9 @@ urlpatterns = patterns('',
                        (r'^jsi18n/$', 'django.views.i18n.javascript_catalog', {'packages': ('fiber',),}),
                        url(r'^admin/', include(admin.site.urls)),
                        url(r'^robots.txt$',  'django.views.generic.simple.redirect_to', {'url': '/static/robots.txt'}),
+
+                       (r'^paypal/ipn/', include('paypal.standard.ipn.urls')),
+
                        (r'', 'fiber.views.page'),
 )
 
