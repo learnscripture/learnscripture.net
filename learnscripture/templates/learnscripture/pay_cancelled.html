@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% load url from future %}
+
+{% block content %}
+
+<p>You cancelled paying. You can <a href="{% url 'subscribe' %}">return to the
+payment page</a>.</p>
+
+{% endblock %}
