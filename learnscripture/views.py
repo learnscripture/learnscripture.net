@@ -750,8 +750,8 @@ def subscribe(request):
 
 
 def pay_done(request):
-    return render(request, 'learnscripture/pay_done.html')
+    return render(request, 'learnscripture/pay_done.html', {'title': "Payment complete"})
 
 
 def pay_cancelled(request):
-    return render(request, 'learnscripture/pay_cancelled.html')
+    return render(request, 'learnscripture/pay_cancelled.html', {'title': "Payment cancelled"})
