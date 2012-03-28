@@ -1,9 +1,12 @@
 from datetime import timedelta
 import itertools
 
+from django.core import mail
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.hashers import check_password, make_password
+from django.contrib.sites.models import get_current_site
+from django.template import loader
 from django.utils.functional import cached_property
 from django.utils import timezone
 
@@ -74,6 +77,18 @@ class Account(models.Model):
 
 
     objects = AccountManager()
+
+    def save(self, **kwargs):
+        # We avoid updating 'subscription' and 'paid_until' to avoid race conditions
+        # that could overwrite these fields and effectively cancel an incoming payment
+        if self.id is None:
+            return super(Account, self).save(**kwargs)
+        else:
+            update_fields = [f for f in self._meta.fields if
+                             f.name not in ('id', 'paid_until', 'subscription')]
+            update_kwargs = dict((f.attname, getattr(self, f.attname)) for
+                                 f in update_fields)
+            Account.objects.filter(id=self.id).update(**update_kwargs)
 
     @property
     def email_name(self):
@@ -175,6 +190,51 @@ class Account(models.Model):
             return False
         else:
             return (payment_due - timedelta(PAYMENT_ALLOWED_EARLY_DAYS)) < timezone.now()
+
+    def receive_payment(self, price, ipn_obj):
+        self.payments.create(amount=ipn_obj.mc_gross,
+                             paypal_ipn=ipn_obj,
+                             created=timezone.now())
+        if self.payment_possible():
+            if self.paid_until is None:
+                old_paid_until = self.date_joined + timedelta(FREE_TRIAL_LENGTH_DAYS)
+            else:
+                old_paid_until = self.paid_until
+            new_paid_until = old_paid_until + timedelta(price.days)
+
+            Account.objects.filter(id=self.id).update(subscription=SubscriptionType.PAID_UP,
+                                                      paid_until=new_paid_until)
+            self.subscription = SubscriptionType.PAID_UP
+            self.paid_until = new_paid_until
+            send_payment_received_email(self, price, ipn_obj)
+        else:
+            send_payment_not_accepted_email(self, price, ipn_obj)
+
+
+def send_payment_received_email(account, price, payment):
+    from django.conf import settings
+    c = {
+        'site': get_current_site(None),
+        'payment': payment,
+        'account': account,
+        }
+
+    body = loader.render_to_string("learnscripture/payment_received_email.txt", c)
+    subject = u"LearnScripture.net - payment received"
+    mail.send_mail(subject, body, settings.SERVER_EMAIL, [account.email])
+
+
+def send_payment_not_accepted_email(account, price, payment):
+    from django.conf import settings
+    c = {
+        'site': get_current_site(None),
+        'payment': payment,
+        'account': account,
+        }
+
+    body = loader.render_to_string("learnscripture/payment_not_accepted_email.txt", c)
+    subject = u"LearnScripture.net - payment problem"
+    mail.send_mail(subject, body, settings.SERVER_EMAIL, [account.email])
 
 
 class ActionChange(object):

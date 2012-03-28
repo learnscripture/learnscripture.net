@@ -1,9 +1,20 @@
 from django.db import models
+from django.utils import timezone
+from paypal.standard.ipn.models import PayPalIPN
+
+from accounts.models import Account
+
+
+class CurrencyManager(models.Manager):
+    def get_by_natural_key(self, name):
+        return self.get_query_set().get(name=name)
 
 
 class Currency(models.Model):
     name = models.CharField(max_length=10, unique=True)
     symbol = models.CharField(max_length=10)
+
+    objects = CurrencyManager()
 
     def __repr__(self):
         return u"<Currency %s>" % self.name
@@ -12,7 +23,7 @@ class Currency(models.Model):
         return self.name
 
     def natural_key(self):
-        return self.name
+        return (self.name,)
 
     class Meta:
         verbose_name_plural = 'Currencies'
@@ -38,6 +49,9 @@ class PriceManager(models.Manager):
 
         return d2.items()
 
+    def usable(self):
+        return self.get_query_set().filter(valid_until__gte=timezone.now())
+
 
 class Price(models.Model):
     currency = models.ForeignKey(Currency)
@@ -58,3 +72,25 @@ class Price(models.Model):
 
     def __unicode__(self):
         return u"%s%s for %s" % (self.currency.symbol, self.amount, self.description)
+
+
+class PaymentManager(models.Manager):
+    use_for_related_fields = True
+
+    def get_query_set(self):
+        return super(PaymentManager, self).get_query_set().select_related('account')
+
+
+class Payment(models.Model):
+    amount = models.DecimalField(decimal_places=2, max_digits=10)
+    account = models.ForeignKey(Account, related_name='payments')
+    paypal_ipn = models.ForeignKey(PayPalIPN)
+    created = models.DateTimeField()
+
+    objects = PaymentManager()
+
+    def __unicode__(self):
+        return u"<Payment: %s to %s>" % (self.amount, self.account)
+
+
+import payments.hooks

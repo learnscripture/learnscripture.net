@@ -163,6 +163,7 @@ INSTALLED_APPS = [
     'pagination',
     'raven.contrib.django',
     'spurl',
+    'paypal.standard.ipn',
 ]
 
 if DEBUG:

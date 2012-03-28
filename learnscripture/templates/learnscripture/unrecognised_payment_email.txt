@@ -1,0 +1,8 @@
+{% load url from future %}{% autoescape off %}
+An unrecognised or flagged payment was received from Paypal. Please
+check it at:
+
+{{ url_start }}{% url 'admin:ipn_paypalipn_change' ipn_obj.id %}
+
+{% endautoescape %}
+

@@ -1,0 +1,13 @@
+{% load url from future %}{% autoescape off %}
+Hi {{ account.email_name }},
+
+Thank you for your payment of {{ payment.mc_gross }} {{ payment.mc_currency }}!
+
+Your account is now paid up until {{ account.paid_until|date:"j F o" }}.
+
+Hope you continue to enjoy and benefit from your use of the site!
+
+The {{ site.display_name }} team.
+
+{% endautoescape %}
+

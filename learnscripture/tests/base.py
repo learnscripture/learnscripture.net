@@ -13,6 +13,8 @@ from bibleverses.models import BibleVersion
 
 class AccountTestMixin(object):
 
+    fixtures = ['test_bible_versions.json']
+
     def create_account(self):
         KJV = BibleVersion.objects.get(slug='KJV')
         identity = Identity.objects.create(default_bible_version=KJV,
@@ -30,8 +32,6 @@ class AccountTestMixin(object):
 
 
 class LiveServerTests(AccountTestMixin, LiveServerTestCase):
-
-    fixtures = ['test_bible_versions.json']
 
     @classmethod
     def setUpClass(cls):
