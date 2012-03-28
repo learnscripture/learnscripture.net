@@ -51,8 +51,12 @@ SERVER_EMAIL = 'website@learnscripture.net'
 DEFAULT_FROM_EMAIL = SERVER_EMAIL
 
 
-PAYPAL_RECEIVER_EMAIL = "paypal@learnscripture.net"
-PAYPAL_TEST = DEVBOX or STAGING
+if DEVBOX or STAGING:
+    PAYPAL_RECEIVER_EMAIL = 'paypal_1314646057_biz@cciw.co.uk'
+    PAYPAL_TEST = True
+else:
+    PAYPAL_RECEIVER_EMAIL = "paypal@learnscripture.net"
+    PAYPAL_TEST = False
 
 
 TIME_ZONE = 'Europe/London'
