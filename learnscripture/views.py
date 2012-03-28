@@ -12,6 +12,7 @@ from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.utils.http import urlparse, base36_to_int
 from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.debug import sensitive_post_parameters
 
 from paypal.standard.forms import PayPalPaymentsForm
@@ -749,9 +750,11 @@ def subscribe(request):
     return render(request, 'learnscripture/subscribe.html', c)
 
 
+@csrf_exempt
 def pay_done(request):
     return render(request, 'learnscripture/pay_done.html', {'title': "Payment complete"})
 
 
+@csrf_exempt
 def pay_cancelled(request):
     return render(request, 'learnscripture/pay_cancelled.html', {'title': "Payment cancelled"})
