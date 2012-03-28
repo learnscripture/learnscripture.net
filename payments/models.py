@@ -2,13 +2,16 @@ from django.db import models
 
 
 class Currency(models.Model):
-    name = models.CharField(max_length=10)
+    name = models.CharField(max_length=10, unique=True)
     symbol = models.CharField(max_length=10)
 
     def __repr__(self):
         return u"<Currency %s>" % self.name
 
     def __unicode__(self):
+        return self.name
+
+    def natural_key(self):
         return self.name
 
     class Meta:
@@ -34,6 +37,7 @@ class PriceManager(models.Manager):
             d2[key].sort(key=lambda p: p.days)
 
         return d2.items()
+
 
 class Price(models.Model):
     currency = models.ForeignKey(Currency)
