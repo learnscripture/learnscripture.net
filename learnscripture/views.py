@@ -706,7 +706,7 @@ def stats(request):
 def subscribe(request):
     account = request.identity.account
     c = {'title': 'Subscribe'}
-    if not account.payment_possible() and False:
+    if not account.payment_possible():
         # Shortcut, to avoid any processing
         return render(request, 'learnscripture/subscribe.html', c)
 
