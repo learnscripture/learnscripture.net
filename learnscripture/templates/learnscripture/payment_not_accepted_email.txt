@@ -8,7 +8,7 @@ and you cannot pre-pay for service beyond that point.
 
 Please contact us to organise a refund.
 
-The {{ site.display_name }} team.
+The {{ site.name }} team.
 
 {% endautoescape %}
 

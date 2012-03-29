@@ -7,7 +7,7 @@ Your account is now paid up until {{ account.paid_until|date:"j F o" }}.
 
 Hope you continue to enjoy and benefit from your use of the site!
 
-The {{ site.display_name }} team.
+The {{ site.name }} team.
 
 {% endautoescape %}
 
