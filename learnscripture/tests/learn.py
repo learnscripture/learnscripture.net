@@ -25,6 +25,8 @@ class LearnTests(LiveServerTests):
 
     kjv_john_3_16 = "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life. John 3 16"
 
+    psalm_23_1_2 = "The LORD is my shepherd; I shall not want. He maketh me to lie down in green pastures: he leadeth me beside the still waters. Psalm 23 1 2"
+
     def choose_verse_set(self, name):
         verse_set = VerseSet.objects.get(name=name)
         driver = self.driver
@@ -82,6 +84,33 @@ class LearnTests(LiveServerTests):
         # Check the strength
         uvs = identity.verse_statuses.get(reference='John 3:16')
         self.assertEqual(uvs.strength, MM.INITIAL_STRENGTH_FACTOR)
+
+    def test_typing_verse_combo(self):
+        identity, account = self.create_account()
+        driver = self.driver
+        self.login(account)
+
+        identity.add_verse_choice('Psalm 23:1-2')
+        driver.get(self.live_server_url + reverse('dashboard'))
+        driver.find_element_by_css_selector('input[name=learnqueue]').click()
+
+        driver.get(self.live_server_url + reverse('learn'))
+        self.assertEqual(u"Psalm 23:1-2", driver.find_element_by_id('id-verse-title').text)
+
+        # Do the reading:
+        for i in range(0, 9):
+            driver.find_element_by_id('id-next-btn').click()
+
+        # Do the typing:
+        for word in self.psalm_23_1_2.strip().split():
+            self.driver.find_element_by_id('id-typing').send_keys(word + ' ')
+
+        self.wait_for_ajax()
+
+        # Check the strength
+        uvs = identity.verse_statuses.get(reference='Psalm 23:1-2')
+        self.assertEqual(uvs.strength, MM.INITIAL_STRENGTH_FACTOR)
+
 
     def test_points(self):
         identity, account = self.create_account()
