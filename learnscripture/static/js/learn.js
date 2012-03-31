@@ -1069,8 +1069,8 @@ var learnscripture =
                     if (word.trim() == "") {
                         return;
                     }
-                    if (word == ":") {
-                        replace.push('<span class="colon">:</span>');
+                    if (word == ":" || word == "-") {
+                        replace.push('<span class="colon">' + word + '</span>');
                         return;
                     }
                     replace.push(makeNormalWord(word, "word reference"));
