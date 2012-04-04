@@ -191,6 +191,12 @@ class Account(models.Model):
         else:
             return (payment_due - timedelta(PAYMENT_ALLOWED_EARLY_DAYS)) < timezone.now()
 
+    def require_subscribe(self):
+        d = self.payment_due_date()
+        if d is None:
+            return False
+        return d < timezone.now()
+
     def receive_payment(self, price, ipn_obj):
         self.payments.create(amount=ipn_obj.mc_gross,
                              paypal_ipn=ipn_obj,
@@ -290,6 +296,11 @@ class Identity(models.Model):
     @property
     def preferences_setup(self):
         return self.default_bible_version is not None and self.testing_method is not None
+
+    def require_subscribe(self):
+        if self.account is None:
+            return False
+        return self.account.require_subscribe()
 
     def prepare_for_learning(self):
         if self.account_id is not None:
