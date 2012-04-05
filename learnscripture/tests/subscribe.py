@@ -13,6 +13,8 @@ SUBSCRIPTION_NOT_DUE = "Your subscription is not due for renewal"
 
 class SubscribeTests(LiveServerTests):
 
+    fixtures = ['test_bible_versions.json', 'test_currencies.json', 'test_prices.json']
+
     def test_no_payment_allowed_until_close_to_end_of_free_trial(self):
         identity, account = self.create_account()
         self.login(account)
@@ -67,3 +69,31 @@ class SubscribeTests(LiveServerTests):
         driver.get(self.live_server_url + reverse('subscribe'))
         self.assertIn(SUBSCRIPTION_NOT_DUE, driver.page_source)
 
+    def test_downgrade(self):
+        identity, account = self.create_account()
+        account.date_joined = timezone.now() - timedelta(100)
+        account.save()
+
+        self.login(account)
+        driver = self.driver
+        driver.get(self.live_server_url + reverse('subscribe'))
+
+        driver.find_element_by_css_selector('#id_currency_0').click()
+        driver.find_element_by_css_selector('#id_price_GBP_cant_afford').click()
+        driver.find_element_by_css_selector('input[name=downgrade]').click()
+
+        account = Account.objects.get(id=account.id)
+        self.assertEqual(account.subscription, SubscriptionType.BASIC)
+
+    def test_upgrade(self):
+        identity, account = self.create_account()
+        Account.objects.filter(id=account.id).update(
+            subscription=SubscriptionType.BASIC,
+            )
+
+        self.login(account)
+        driver = self.driver
+        driver.get(self.live_server_url + reverse('subscribe'))
+        self.assertNotIn(SUBSCRIPTION_NOT_DUE, driver.page_source)
+        driver.find_element_by_css_selector('#id_currency_0').click()
+        driver.find_element_by_css_selector('#id_price_GBP_3').click()

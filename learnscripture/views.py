@@ -728,8 +728,10 @@ def subscribe(request):
     c['payment_possible'] = True
 
     c['free_trial'] = account.subscription == SubscriptionType.FREE_TRIAL
+    c['basic_account'] = account.subscription == SubscriptionType.BASIC
 
-    if account.payment_due_date() < timezone.now():
+    payment_due_date = account.payment_due_date()
+    if (payment_due_date is not None and payment_due_date < timezone.now()):
         c['payment_overdue'] = True
         if account.subscription == SubscriptionType.FREE_TRIAL:
             c['was_on_free_trial'] = True
@@ -743,6 +745,12 @@ def subscribe(request):
                            .filter(strength__gt=Decimal('0.65')).order_by('strength'))[0:3]
 
             c['well_learnt_verses'] = natural_list([uvs.reference for uvs in well_learnt])
+
+        if request.method == 'POST' and 'downgrade' in request.POST:
+            if account.subscription != SubscriptionType.BASIC:
+                Account.objects.filter(id=account.id).update(subscription=SubscriptionType.BASIC)
+                messages.info(request, "Account downgraded to 'Basic'")
+            return HttpResponseRedirect(reverse('dashboard'))
 
 
     price_groups = Price.objects.current_prices()
