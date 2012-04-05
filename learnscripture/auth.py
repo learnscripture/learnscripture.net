@@ -1,3 +1,4 @@
+from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
 
 from accounts.models import SubscriptionType
@@ -16,6 +17,7 @@ def check_allowed(request, feature):
                                                      SubscriptionType.PAID_UP,
                                                      SubscriptionType.LIFETIME_FREE]:
             return (True, u'')
-        return (False, u"Your free trial or paid subscription has finished, so you cannot create or edit verse sets.")
+        return (False, mark_safe(u"Your free trial or paid subscription has finished, so you cannot create or edit verse sets. You can <a href='%s'>subscribe</a> to enable this feature."
+                                 % reverse('subscribe')))
     return (True, '')
 
