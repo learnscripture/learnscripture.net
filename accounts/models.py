@@ -177,6 +177,8 @@ class Account(models.Model):
         return get_rank_this_week(self.points_this_week)
 
     def payment_due_date(self):
+        if self.subscription == SubscriptionType.BASIC:
+            return None
         if self.subscription == SubscriptionType.FREE_TRIAL:
             return self.date_joined + timedelta(FREE_TRIAL_LENGTH_DAYS)
         elif self.subscription == SubscriptionType.LIFETIME_FREE:
@@ -185,6 +187,8 @@ class Account(models.Model):
             return self.paid_until
 
     def payment_possible(self):
+        if self.subscription == SubscriptionType.BASIC:
+            return True
         payment_due = self.payment_due_date()
         if payment_due is None:
             return False

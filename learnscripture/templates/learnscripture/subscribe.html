@@ -10,32 +10,34 @@
   {% if payment_overdue %}
   <p>Payment is now due.</p>
 
-  {% if was_on_free_trial %}
-    {% if started_verses_count %}
-    <p>On your free trial, you've started learning {{ started_verses_count }} bible verses.
-      {% if well_learnt_verses %}
-      You could probably recite {{ well_learnt_verses }} right now.
-      {% endif %}
-    </p>
+    {% if was_on_free_trial %}
+      {% if started_verses_count %}
+      <p>On your free trial, you've started learning {{ started_verses_count }} bible verses.
+        {% if well_learnt_verses %}
+        You could probably recite {{ well_learnt_verses }} right now.
+        {% endif %}
+      </p>
 
-    <p>We hope that is valuable to you! Of course, this service costs money to
-      run, and you've reached the end of your free trial, so we are asking you
-      to pay our modest subscription fees to continue with the service.
-    </p>
+      <p>We hope that is valuable to you! Of course, this service costs money to
+        run, and you've reached the end of your free trial, so we are asking you
+        to pay our modest subscription fees to continue with the service.
+      </p>
+
+      {% endif %}
 
     {% endif %}
-
-
-  {% endif %}
 
   {% else %}
-  <p>Payment is due soon, and you can choose to pay early if you would like,
-    at your convenience - you won't lose the
-    {% if free_trial %} free days
-    {% else %} paid days
+
+    {% if not basic_account %}
+      <p>Payment is due soon, and you can choose to pay early if you would like,
+        at your convenience - you won't lose the
+        {% if free_trial %} free days
+        {% else %} paid days
+        {% endif %}
+        you still have on account.
+      </p>
     {% endif %}
-    you still have on account.
-  </p>
   {% endif %}
 
   <p>Choose your currency and payment period:</p>
@@ -60,7 +62,7 @@
       </div>
     </div>
 
-    <div class="clearfix" style="display: none;">
+    <div class="clearfix" style="display: none;" id="id_prices_list_container">
       <label>Period</label>
       <div class="input">
         <ul class="inputs-list" id="id_prices_list">
@@ -75,6 +77,16 @@
             </label>
           </li>
           {% endfor %}
+          {% if payment_overdue %}
+          <li>
+            <label for="id_price_{{ currency.name }}_cant_afford">
+              <input type="radio" name="price"
+                     id="id_price_{{ currency.name }}_cant_afford"
+                     value="">
+              I can't afford this
+            </label>
+          </li>
+          {% endif %}
           {% endfor %}
         </ul>
       </div>
@@ -91,6 +103,38 @@
       {% endif %}
     </div>
   {% endfor %}
+
+  <div id="id_cant_afford_form" style="display: none;">
+    <h2>Basic account</h2>
+    <p>We realise that some people will really benefit from this service, but
+      will not be able to afford the fees above, so we do have a free
+      service.</p>
+
+    <p>In order to minimize the costs, the free service has some significant
+      limitations, including:</p>
+
+    <ul>
+      <li>No points are awarded.</li>
+      <li>You are removed from the leaderboards.</li>
+      <li>You will not be able to create public verse sets.</li>
+      <li>There are limitations on the number of verses you can learn
+        in a given period</li>
+    </ul>
+
+    <p>Since this service does not generate any revenue for us at all, we cannot
+      guarantee that we will be able to continue it, but it is currently
+      available as an option.
+    </p>
+
+    <form action="" method="POST">
+      {% csrf_token %}
+      <div class="actions">
+        <input type="submit" name="downgrade" class="btn" value="Downgrade to basic account">
+      </div>
+    </form>
+  </div>
+
+
 {% endif %}
 
 {% endblock %}

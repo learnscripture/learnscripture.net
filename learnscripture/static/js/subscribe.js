@@ -12,16 +12,16 @@ var learnscripture =
                         i.closest('li').hide()
                     } else {
                         i.closest('li').show();
-                        i.closest('div.clearfix').show();
+                        $('#id_prices_list_container').show();
                     }
                 });
             });
             $('#id_prices_list input').change(function(ev) {
                 var id = ev.target.id.replace("id_price_", "");
                 $('.price-form').hide();
-                $('#id_price_form_' + id).show()
+                $('#id_price_form_' + id).show();
+                $('#id_cant_afford_form').toggle(id.match('cant_afford') != null);
             });
-
         };
 
         // === Exports ===
