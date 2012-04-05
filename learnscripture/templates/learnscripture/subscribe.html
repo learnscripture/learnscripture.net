@@ -8,7 +8,26 @@
 {% else %}
 
   {% if payment_overdue %}
-  <p>Payment is due.</p>
+  <p>Payment is now due.</p>
+
+  {% if was_on_free_trial %}
+    {% if started_verses_count %}
+    <p>On your free trial, you've started learning {{ started_verses_count }} bible verses.
+      {% if well_learnt_verses %}
+      You could probably recite {{ well_learnt_verses }} right now.
+      {% endif %}
+    </p>
+
+    <p>We hope that is valuable to you! Of course, this service costs money to
+      run, and you've reached the end of your free trial, so we are asking you
+      to pay our modest subscription fees to continue with the service.
+    </p>
+
+    {% endif %}
+
+
+  {% endif %}
+
   {% else %}
   <p>Payment is due soon, and you can choose to pay early if you would like,
     at your convenience - you won't lose the
