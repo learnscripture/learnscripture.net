@@ -71,6 +71,32 @@ def make_bible_book_abbreviations():
 
     BIBLE_BOOK_ABBREVIATIONS.update(d3)
 
+    # Some special cases that don't fit above pattern
+    BIBLE_BOOK_ABBREVIATIONS.update({
+            'dt': 'Deuteronomy',
+            'gn': 'Genesis',
+            'hg': 'Haggai',
+            'jb': 'Job',
+            'jl': 'Joel',
+            'jgs': 'Judges',
+            'jas': 'James',
+            'jm': 'James',
+            'jn': 'John',
+            'jnh': 'Jonah',
+            'jsh': 'Joshua',
+            'lev': 'Leviticus',
+            'mk': 'Mark',
+            'mrk': 'Mark',
+            'mt': 'Matthew',
+            'nm': 'Numbers',
+            'prv': 'Proverbs',
+            'phm': 'Philemon',
+            'phil': 'Philippians',
+            'php': 'Philippians',
+            'rm': 'Romans',
+            'sg': 'Song of Solomon',
+            })
+
 make_bible_book_abbreviations()
 
 # Psalm 119 is 176 verses
