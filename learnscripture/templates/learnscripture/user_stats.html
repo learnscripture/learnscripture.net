@@ -72,7 +72,11 @@
 
 {% else %}
 
-<p>Stats disabled for free accounts.</p>
+<p>Stats disabled for free accounts.
+{% if request.identity.account.username == account.username %}
+  <a href="{% url 'subscribe' %}">Subscribe to enable.</a>
+  {% endif %}
+</p>
 
 {% endif %}
 
