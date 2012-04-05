@@ -1,5 +1,6 @@
 
 from datetime import timedelta
+from decimal import Decimal
 import re
 
 from django.conf import settings
@@ -707,9 +708,18 @@ def stats(request):
                    })
 
 
+def natural_list(l):
+    if len(l) == 0:
+        return u''
+    if len(l) == 1:
+        return l[0]
+    return u"%s and %s" % (u", ".join(l[0:-1]), l[-1])
+
+
 @require_account
 def subscribe(request):
-    account = request.identity.account
+    identity = request.identity
+    account = identity.account
     c = {'title': 'Subscribe'}
     if not account.payment_possible():
         # Shortcut, to avoid any processing
@@ -721,6 +731,19 @@ def subscribe(request):
 
     if account.payment_due_date() < timezone.now():
         c['payment_overdue'] = True
+        if account.subscription == SubscriptionType.FREE_TRIAL:
+            c['was_on_free_trial'] = True
+            # Add info about how many verses they have learned.
+
+            # Some of this logic should probably be in the model layer
+            learning_verses = verse_count = identity.verse_statuses.filter(ignored=False)
+            c['started_verses_count'] = learning_verses.filter(strength__gt=Decimal('0.0')).count()
+            well_learnt = (learning_verses
+                           .exclude(verse_set__set_type=VerseSetType.PASSAGE)
+                           .filter(strength__gt=Decimal('0.65')).order_by('strength'))[0:3]
+
+            c['well_learnt_verses'] = natural_list([uvs.reference for uvs in well_learnt])
+
 
     price_groups = Price.objects.current_prices()
     currencies = sorted([currency for currency, prices in price_groups],
