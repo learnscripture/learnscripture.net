@@ -554,7 +554,7 @@ def user_stats(request, username):
 @require_identity
 def user_verses(request):
     identity = request.identity
-    c = {}
+    c = {'title': 'Progress'}
     verses = (identity.verse_statuses.filter(ignored=False,
                                              strength__gt=0,
                                              last_tested__isnull=False)
