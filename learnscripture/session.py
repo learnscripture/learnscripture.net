@@ -4,7 +4,7 @@ from datetime import datetime
 
 from django.utils import timezone
 
-from accounts.models import Identity
+from accounts.models import Identity, Account
 from learnscripture.utils.logging import extra
 
 logger = logging.getLogger(__name__)
@@ -129,7 +129,14 @@ def get_identity(request):
 
 
 def start_identity(request):
-    identity = Identity.objects.create()
+    referrer = None
+    referrer_username = request.session.get('referrer_username', None)
+    if referrer_username is not None:
+        try:
+            referrer = Account.objects.get(username=referrer_username)
+        except Account.DoesNotExist:
+            pass
+    identity = Identity.objects.create(referred_by=referrer)
     logger.info("New Identity created", extra=extra(identity=identity, request=request))
     set_identity(request, identity)
     return identity
@@ -146,3 +153,11 @@ def set_identity(request, identity):
 
 def logout(request):
     request.session['identity_id'] = None
+
+
+def save_referrer(request):
+    """
+    Save referrer username from request (if any) to sesssion.
+    """
+    if 'from' in request.GET:
+        request.session['referrer_username'] = request.GET['from']

@@ -221,6 +221,17 @@ class Account(models.Model):
         else:
             send_payment_not_accepted_email(self, price, ipn_obj)
 
+    def make_referral_link(self, url):
+        if '?' in url:
+            url = url + '&'
+        else:
+            url = url + '?'
+        url = url + 'from=' + self.username
+        return url
+
+    def referred_identities_count(self):
+        return self.referrals.count()
+
 
 def send_payment_received_email(account, price, payment):
     from django.conf import settings
@@ -274,6 +285,8 @@ class Identity(models.Model):
     enable_animations = models.BooleanField(blank=True, default=True)
     interface_theme = models.CharField(max_length=30, choices=THEMES,
                                        default='calm')
+    referred_by = models.ForeignKey(Account, null=True, default=None,
+                                    related_name='referrals')
 
     objects = IdentityManager()
 
