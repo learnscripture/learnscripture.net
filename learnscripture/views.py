@@ -1,6 +1,6 @@
 
 from datetime import timedelta
-from decimal import Decimal
+from decimal import Decimal, ROUND_DOWN
 import re
 
 from django.conf import settings
@@ -755,17 +755,29 @@ def subscribe(request):
             return HttpResponseRedirect(reverse('dashboard'))
 
 
+    discount = account.subscription_discount()
+
     price_groups = Price.objects.current_prices()
     currencies = sorted([currency for currency, prices in price_groups],
                          key=lambda currency: currency.name)
     c['currencies'] = currencies
     c['price_groups'] = price_groups
+
+
+    def decorate_with_discount(price):
+        a = price.amount
+        if discount != Decimal('0.00'):
+            a = (a - discount * a).quantize(Decimal('0.1'), rounding=ROUND_DOWN).quantize(Decimal('0.01'))
+            price.discounted = True
+        price.amount_with_discount = a
+
     price_forms = []
     for currency, prices in price_groups:
         for price in prices:
+            decorate_with_discount(price)
             domain = Site.objects.get_current().domain
             protocol = 'https' if request.is_secure() else 'http'
-            amount = str(price.amount)
+            amount = str(price.amount_with_discount)
             paypal_dict = {
                 "business": settings.PAYPAL_RECEIVER_EMAIL,
                 "amount": amount,
@@ -786,6 +798,9 @@ def subscribe(request):
             price_forms.append(("%s_%s" % (currency.name, price.id), form))
     c['PRODUCTION'] = settings.LIVEBOX and settings.PRODUCTION
     c['price_forms'] = price_forms
+
+    if discount != Decimal('0.00'):
+        c['discount'] = (discount * 100).quantize(Decimal('1'))
 
     return render(request, 'learnscripture/subscribe.html', c)
 
