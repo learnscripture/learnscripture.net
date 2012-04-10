@@ -5,6 +5,11 @@ Thank you for your payment of {{ payment.mc_gross }} {{ payment.mc_currency }}!
 
 Your account is now paid up until {{ account.paid_until|date:"j F o" }}.
 
+To get *discounts* in the future, please have a look at our
+referrals program:
+
+  http://{{ site.domain }}{% url 'referral_program' %}
+
 Hope you continue to enjoy and benefit from your use of the site!
 
 The {{ site.name }} team.
