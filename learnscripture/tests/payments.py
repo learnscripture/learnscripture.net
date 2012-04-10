@@ -57,7 +57,9 @@ class PaymentTests(AccountTestMixin, TestCase):
         ipn_1.id = 123
         ipn_1.mc_gross = price.amount
         ipn_1.mc_currency = price.currency.name
-        ipn_1.custom = sign_payment_info(dict(account=self.account.id, price=price.id)) + "xxx"
+        ipn_1.custom = sign_payment_info(dict(account=self.account.id,
+                                              price=price.id,
+                                              amount=str(price.amount))) + "xxx"
 
         self.assertEqual(len(mail.outbox), 0)
         paypal_payment_received(ipn_1)
@@ -75,7 +77,9 @@ class PaymentTests(AccountTestMixin, TestCase):
         ipn_1.id = 123
         ipn_1.mc_gross = price.amount
         ipn_1.mc_currency = price.currency.name
-        ipn_1.custom = sign_payment_info(dict(account=self.account.id, price=price.id))
+        ipn_1.custom = sign_payment_info(dict(account=self.account.id,
+                                              price=price.id,
+                                              amount=str(price.amount)))
 
         self.assertEqual(len(mail.outbox), 0)
         paypal_payment_received(ipn_1)
@@ -90,7 +94,9 @@ class PaymentTests(AccountTestMixin, TestCase):
         ipn_1 = PayPalIPN.objects.create(mc_gross=price.amount,
                                          mc_currency=price.currency.name,
                                          custom=sign_payment_info(dict(account=self.account.id,
-                                                                       price=price.id)),
+                                                                       price=price.id,
+                                                                       amount=str(price.amount),
+                                                                       )),
                                          ipaddress="127.0.0.1",
                                          )
 
@@ -118,7 +124,8 @@ class PaymentTests(AccountTestMixin, TestCase):
         ipn_1 = PayPalIPN.objects.create(mc_gross=price.amount,
                                          mc_currency=price.currency.name,
                                          custom=sign_payment_info(dict(account=self.account.id,
-                                                                       price=price.id)),
+                                                                       price=price.id,
+                                                                       amount=str(price.amount))),
                                          ipaddress="127.0.0.1",
                                          )
 
@@ -149,7 +156,8 @@ class PaymentTests(AccountTestMixin, TestCase):
         ipn_1 = PayPalIPN.objects.create(mc_gross=price.amount,
                                          mc_currency=price.currency.name,
                                          custom=sign_payment_info(dict(account=self.account.id,
-                                                                       price=price.id)),
+                                                                       price=price.id,
+                                                                       amount=str(price.amount))),
                                          ipaddress="127.0.0.1",
                                          )
 

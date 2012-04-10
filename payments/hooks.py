@@ -41,7 +41,10 @@ def paypal_payment_received(sender, **kwargs):
     try:
         account = Account.objects.get(id=d['account'])
         price = Price.objects.usable().get(id=d['price'])
-        if price.amount != ipn_obj.mc_gross:
+        # We don't check price.amount, because discounts mean that it could be
+        # different, and we cover this by signing the the amount in the 'custom'
+        # field.
+        if d['amount'] != str(ipn_obj.mc_gross):
             unrecognised_payment(ipn_obj)
             return
         if price.currency.name != ipn_obj.mc_currency:

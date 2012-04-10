@@ -765,16 +765,19 @@ def subscribe(request):
         for price in prices:
             domain = Site.objects.get_current().domain
             protocol = 'https' if request.is_secure() else 'http'
+            amount = str(price.amount)
             paypal_dict = {
                 "business": settings.PAYPAL_RECEIVER_EMAIL,
-                "amount": str(price.amount),
+                "amount": amount,
                 "item_name": u"%s subscription on LearnScripture.net" % price.description,
                 "invoice": "%s-%s" % (account.id,
                                       timezone.now()), # We don't need this, but must be unique
                 "notify_url":  "%s://%s%s" % (protocol, domain, reverse('paypal-ipn')),
                 "return_url": "%s://%s%s" % (protocol, domain, reverse('pay_done')),
                 "cancel_return": "%s://%s%s" % (protocol, domain, reverse('pay_cancelled')),
-                "custom": sign_payment_info(dict(account=account.id, price=price.id)),
+                "custom": sign_payment_info(dict(account=account.id,
+                                                 amount=amount,
+                                                 price=price.id)),
                 "currency_code": price.currency.name,
                 "no_note": "1",
                 "no_shipping": "1",
