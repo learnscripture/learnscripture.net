@@ -139,8 +139,9 @@ def dashboard(request):
 
     identity = getattr(request, 'identity', None)
 
-    if identity is not None and identity.require_subscribe():
-        return HttpResponseRedirect(reverse('subscribe'))
+    if settings.REQUIRE_SUBSCRIPTION:
+        if identity is not None and identity.require_subscribe():
+            return HttpResponseRedirect(reverse('subscribe'))
 
     if identity is None or not identity.verse_statuses.exists():
         # The only possible thing is to choose some verses
