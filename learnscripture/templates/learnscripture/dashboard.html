@@ -71,7 +71,8 @@
   {% if not passages_for_revising and not revise_verses_queue %}
   <p>Nothing needs revising at this point in time.
     {% if next_verse_due %}
-    Next verse due for revision: {{ next_verse_due.reference }} in {{ next_verse_due.next_test_due|timeuntil }}
+    <br/>
+    Next verse due for revision: <b>{{ next_verse_due.reference }}</b> in {{ next_verse_due.next_test_due|timeuntil }}
     {% endif %}
   </p>
   {% endif %}
