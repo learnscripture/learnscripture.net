@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% load json_filters %}
+{% load url from future %}
 
 {% block content %}
 {% if not payment_possible %}
@@ -62,7 +63,8 @@
       </div>
     </div>
 
-    <div class="clearfix" style="display: none;" id="id_prices_list_container">
+    <div id="id_prices_list_container" style="display: none;">
+    <div class="clearfix">
       <label>Period</label>
       <div class="input">
         <ul class="inputs-list" id="id_prices_list">
@@ -73,7 +75,13 @@
               <input type="radio" name="price"
                      id="id_price_{{ currency.name }}_{{ price.id }}"
                      value="{{ price.id }}">
-              {{ price.description }} - {{ currency.symbol }}{{ price.amount }}
+              {{ price.description }} -
+              {% if price.discounted %}
+              <s>{{ currency.symbol }}{{ price.amount }}</s>
+                 {{ currency.symbol }}{{ price.amount_with_discount }}
+              {% else %}
+                 {{ currency.symbol }}{{ price.amount }}
+              {% endif %}
             </label>
           </li>
           {% endfor %}
@@ -90,6 +98,10 @@
           {% endfor %}
         </ul>
       </div>
+    </div>
+    {% if discount %}
+    <p>You have a {{ discount }}% discount applied, through our <a href="{% url 'referral_program' %}">referral program</a>. Thanks for your advertising!</p>
+    {% endif %}
     </div>
   </form>
 

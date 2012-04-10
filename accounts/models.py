@@ -1,4 +1,5 @@
 from datetime import timedelta
+from decimal import Decimal
 import itertools
 
 from django.core import mail
@@ -231,6 +232,16 @@ class Account(models.Model):
 
     def referred_identities_count(self):
         return self.referrals.count()
+
+    def subscription_discount(self):
+        count = self.referrals.filter(account__isnull=False,
+                                      account__subscription=SubscriptionType.PAID_UP,
+                                      account__paid_until__gte=timezone.now()).count()
+        if count >= 3:
+            return Decimal('0.20')
+        if count >= 1:
+            return Decimal('0.10')
+        return Decimal('0.0')
 
 
 def send_payment_received_email(account, price, payment):
