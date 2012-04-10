@@ -798,9 +798,7 @@ def pay_cancelled(request):
 
 def referral_program(request):
     if hasattr(request, 'identity') and request.identity.account is not None:
-
-        referral_link = 'http://%s/?from=%s' % (Site.objects.get_current().domain,
-                                                request.identity.account.username)
+        referral_link = request.identity.account.make_referral_link('http://%s/' % Site.objects.get_current().domain)
     else:
         referral_link = None
 

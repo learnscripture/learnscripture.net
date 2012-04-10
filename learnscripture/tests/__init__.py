@@ -14,3 +14,4 @@ from .account_details import *
 from .email_reminders import *
 from .subscribe import *
 from .payments import *
+from .referrals import *

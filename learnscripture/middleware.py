@@ -5,3 +5,5 @@ class IdentityMiddleware(object):
         identity = session.get_identity(request)
         if identity is not None:
             request.identity = identity
+
+        session.save_referrer(request)

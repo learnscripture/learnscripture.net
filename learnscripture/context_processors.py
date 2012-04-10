@@ -29,14 +29,8 @@ def referral_links(request):
         identity = request.identity
         if identity.account is None:
             return None
+        return identity.account.make_referral_link(request.build_absolute_uri())
 
-        url = request.build_absolute_uri()
-        if '?' in url:
-            url = url + '&'
-        else:
-            url = url + '?'
-        url = url + 'from=' + identity.account.username
-        return url
     return {'referral_link': mk_referral_link}
 
 
