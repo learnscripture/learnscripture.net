@@ -21,7 +21,7 @@
     }
   }
 
-  footer {
+  footer, .footer {
     color: @footerColor;
     a {
       text-decoration: underline;
@@ -215,7 +215,7 @@ body.calm {
 body.bubblegum {
   @bgcolor: #e0cfb1;
   background-color: @bgcolor;
-  footer {
+  footer, .footer {
     background-color: @bgcolor;
     border: 1px solid darken(@bgcolor, 10%);
   }
@@ -230,7 +230,7 @@ body.bubblegum {
 body.bubblegum2 {
   @bgcolor:  #a294a5;
   background-color: @bgcolor;
-  footer {
+  footer, .footer {
     background-color: @bgcolor;
     border: 1px solid darken(@bgcolor, 10%);
   }
@@ -331,6 +331,15 @@ footer {
   width: 860px; /* downsize our container to make the content feel a bit tighter and more cohesive. NOTE: this removes two full columns from the grid, meaning you only go to 14 columns and not 16. */
   }
 
+.footer {
+  margin: 5px 0px;
+  padding: 5px;
+  border-radius: 6px;
+}
+
+.footer div {
+  float: right;
+}
 
 @mainSidePadding:      20px;
 @mainTopPadding:       20px;
@@ -475,6 +484,7 @@ span.versenumber {
 .modal form {
   margin-bottom: 0px;
 }
+
 
 /* Home page */
 
@@ -791,6 +801,14 @@ form.quickfind {
     border: 0px;
     line-height: inherit;
   }
+}
+
+
+// Referral program page
+
+p.referral-link {
+  text-align: center;
+  font-weight: bold;
 }
 
 ////////////  Response to smaller screen /////////////

@@ -297,7 +297,7 @@ def is_continuous_set(verse_list):
 
 
 def view_verse_set(request, slug):
-    c = {}
+    c = {'include_referral_links': True}
     verse_set = get_object_or_404(verse_sets_visible_for_request(request), slug=slug)
 
 
@@ -794,3 +794,18 @@ def pay_done(request):
 @csrf_exempt
 def pay_cancelled(request):
     return render(request, 'learnscripture/pay_cancelled.html', {'title': "Payment cancelled"})
+
+
+def referral_program(request):
+    if hasattr(request, 'identity') and request.identity.account is not None:
+
+        referral_link = 'http://%s/?from=%s' % (Site.objects.get_current().domain,
+                                                request.identity.account.username)
+    else:
+        referral_link = None
+
+    return render(request, 'learnscripture/referral_program.html',
+                  {'title': 'Referral program',
+                   'referral_link': referral_link,
+                   'include_referral_links': True,
+                   })

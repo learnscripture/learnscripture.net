@@ -30,6 +30,7 @@ urlpatterns = patterns('',
                        url(r'^subscribe/$', 'learnscripture.views.subscribe', name='subscribe'),
                        url(r'^payment-complete/$', 'learnscripture.views.pay_done', name='pay_done'),
                        url(r'^payment-cancelled/$', 'learnscripture.views.pay_cancelled', name='pay_cancelled'),
+                       url(r'^referral-program/$', 'learnscripture.views.referral_program', name='referral_program'),
 
 
                        (r'^admin/fiber/', include('fiber.admin_urls')),
