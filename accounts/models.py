@@ -194,6 +194,7 @@ class Account(models.Model):
             return False
         else:
             return (payment_due - timedelta(PAYMENT_ALLOWED_EARLY_DAYS)) < timezone.now()
+    payment_possible.boolean = True
 
     def require_subscribe(self):
         d = self.payment_due_date()
