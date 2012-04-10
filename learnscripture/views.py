@@ -26,6 +26,7 @@ from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerse
 from learnscripture import session, auth
 from bibleverses.forms import VerseSetForm
 from payments.models import Price
+from payments.sign import sign_payment_info
 from scores.models import get_all_time_leaderboard, get_leaderboard_since, ScoreReason
 
 from .decorators import require_identity, require_preferences, has_preferences, redirect_via_prefs, require_account
@@ -773,7 +774,7 @@ def subscribe(request):
                 "notify_url":  "%s://%s%s" % (protocol, domain, reverse('paypal-ipn')),
                 "return_url": "%s://%s%s" % (protocol, domain, reverse('pay_done')),
                 "cancel_return": "%s://%s%s" % (protocol, domain, reverse('pay_cancelled')),
-                "custom": "account:%s;price:%s;" % (account.id, price.id),
+                "custom": sign_payment_info(dict(account=account.id, price=price.id)),
                 "currency_code": price.currency.name,
                 "no_note": "1",
                 "no_shipping": "1",

@@ -1,5 +1,3 @@
-import re
-
 from django.conf import settings
 from django.core import mail
 from django.contrib.sites.models import get_current_site
@@ -8,7 +6,7 @@ from paypal.standard.ipn.signals import payment_was_successful, payment_was_flag
 
 from accounts.models import Account
 from payments.models import Price
-
+from payments.sign import unsign_payment_string
 
 def site_address_url_start():
     """
@@ -35,14 +33,14 @@ def unrecognised_payment(ipn_obj, **kwargs):
 
 def paypal_payment_received(sender, **kwargs):
     ipn_obj = sender
-    m = re.match("account:(\d+);price:(\d+);", ipn_obj.custom)
-    if m is None:
+    d = unsign_payment_string(ipn_obj.custom)
+    if d is None:
         unrecognised_payment(ipn_obj)
         return
 
     try:
-        account = Account.objects.get(id=int(m.groups()[0]))
-        price = Price.objects.usable().get(id=int(m.groups()[1]))
+        account = Account.objects.get(id=d['account'])
+        price = Price.objects.usable().get(id=d['price'])
         if price.amount != ipn_obj.mc_gross:
             unrecognised_payment(ipn_obj)
             return

@@ -12,6 +12,7 @@ from .base import AccountTestMixin
 from accounts.models import SubscriptionType, Account
 from payments.hooks import paypal_payment_received
 from payments.models import Price
+from payments.sign import sign_payment_info
 
 class IpnMock(object):
     pass
@@ -48,15 +49,15 @@ class PaymentTests(AccountTestMixin, TestCase):
 
     def test_send_bad_payment_2(self):
         """
-        Price doesn't match
+        Bad signature
         """
         price = Price.objects.get(description="One year", currency__name="GBP")
 
         ipn_1 = IpnMock()
         ipn_1.id = 123
-        ipn_1.mc_gross = Decimal('4.99')
+        ipn_1.mc_gross = price.amount
         ipn_1.mc_currency = price.currency.name
-        ipn_1.custom = "account:%d;price:%d;" % (self.account.id, price.id)
+        ipn_1.custom = sign_payment_info(dict(account=self.account.id, price=price.id)) + "xxx"
 
         self.assertEqual(len(mail.outbox), 0)
         paypal_payment_received(ipn_1)
@@ -74,7 +75,7 @@ class PaymentTests(AccountTestMixin, TestCase):
         ipn_1.id = 123
         ipn_1.mc_gross = price.amount
         ipn_1.mc_currency = price.currency.name
-        ipn_1.custom = "account:%d;price:%d;" % (self.account.id, price.id)
+        ipn_1.custom = sign_payment_info(dict(account=self.account.id, price=price.id))
 
         self.assertEqual(len(mail.outbox), 0)
         paypal_payment_received(ipn_1)
@@ -88,7 +89,8 @@ class PaymentTests(AccountTestMixin, TestCase):
 
         ipn_1 = PayPalIPN.objects.create(mc_gross=price.amount,
                                          mc_currency=price.currency.name,
-                                         custom="account:%d;price:%d;" % (self.account.id, price.id),
+                                         custom=sign_payment_info(dict(account=self.account.id,
+                                                                       price=price.id)),
                                          ipaddress="127.0.0.1",
                                          )
 
@@ -115,7 +117,8 @@ class PaymentTests(AccountTestMixin, TestCase):
 
         ipn_1 = PayPalIPN.objects.create(mc_gross=price.amount,
                                          mc_currency=price.currency.name,
-                                         custom="account:%d;price:%d;" % (self.account.id, price.id),
+                                         custom=sign_payment_info(dict(account=self.account.id,
+                                                                       price=price.id)),
                                          ipaddress="127.0.0.1",
                                          )
 
@@ -145,7 +148,8 @@ class PaymentTests(AccountTestMixin, TestCase):
 
         ipn_1 = PayPalIPN.objects.create(mc_gross=price.amount,
                                          mc_currency=price.currency.name,
-                                         custom="account:%d;price:%d;" % (self.account.id, price.id),
+                                         custom=sign_payment_info(dict(account=self.account.id,
+                                                                       price=price.id)),
                                          ipaddress="127.0.0.1",
                                          )
 
