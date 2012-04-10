@@ -22,6 +22,24 @@ def session_forms(request):
                                                         else None),
             }
 
+def referral_links(request):
+    def mk_referral_link():
+        if not hasattr(request, 'identity'):
+            return None
+        identity = request.identity
+        if identity.account is None:
+            return None
+
+        url = request.build_absolute_uri()
+        if '?' in url:
+            url = url + '&'
+        else:
+            url = url + '?'
+        url = url + 'from=' + identity.account.username
+        return url
+    return {'referral_link': mk_referral_link}
+
+
 class MenuItem(object):
     def __init__(self, caption=None, path=None, active=None):
         self.caption = caption

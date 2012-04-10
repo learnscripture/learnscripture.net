@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% load url from future %}
+
+{% block content %}
+
+<p>If you like LearnScripture.net and want to spread the word about it, our
+referral program will help you get <strong>discounts</strong> on the
+subscription fees.</p>
+
+<h2>What you get</h2>
+
+<p>If you get <b>one person</b> to sign up to LearnScripture.net and become a
+paid member, you get a <b>10%</b> discount on your subscription fees.</p>
+
+<p>If you get <b>three people</b> to sign up to LearnScripture.net and become
+paid members, you get a <b>20%</b> discount on your subscription fees.</p>
+
+<p>The discount will apply if the referrals have become paying members when you
+next have to pay your subscription fees, and the discount will remain <b>every
+time after that</b> if the referrals are still paying members.</p>
+
+<h2>How it works</h2>
+
+{% if referral_link %}
+
+<p>For us to recognise that you were the source of the referral, you <b>must</b>
+use the following link to refer people to LearnScripture.net:</p>
+
+<p class="referral-link">{{ referral_link }}</p>
+
+<p>Copy-and-paste this link and pass it on to a friend, and if they use it to
+get to the site, and then start learning verses, we'll track it and know that
+you referred them.</p>
+
+{% else %}
+
+<p>You first need an account, and need to <a href="#" class="login-link">sign in</a> to get the full instructions and the referral link.</p>
+
+{% endif %}
+
+
+<h2>Please don't:</h2>
+
+<ul class="dont">
+  <li>Send bulk emails to friends about this. Many of them may consider this to
+  be spam, or even think it came from us, and you may give LearnScripture.net a
+  bad name!
+  </li>
+  <li>Nag people to sign up just so that you can get a discount. Remember
+  that you won't get a discount unless they actually become <b>paying</b>
+  members themselves.
+</ul>
+
+<h2>Please do:</h2>
+
+<ul class="do">
+  <li>Post this link to social sites like Facebook, Twitter or Pinterest (as long as you don't post it repeatedly and annoy people!)
+  <li>Include some personal comment about why you like LearnScripture.net or how it has helped you.</li>
+</ul>
+
+<h2>Shortcuts</h2>
+
+<p>Use the following to get started quickly (you don't have to add an app or anything!):</p>
+
+<p>Twitter:</p>
+
+<p> <a href="https://twitter.com/share?url={{ referral_link|urlencode }}&text=LearnScripture.net%20rocks!" class="twitter-share-button" data-lang="en">Tweet</a>
+</p>
+
+<p>Facebook: <div class="fb-like" data-href="{{ referral_link }}" data-send="true" data-layout="button_count" data-width="450" data-show-faces="true" data-action="recommend"></div></p>
+
+<h2>Specific pages</h2>
+
+<p>You can also get a referral link for specific pages. At the bottom of most
+pages that make good starting points, you'll see Twitter and Facebook links, and
+a 'referral link' that you should click on to get the link to use (see the bottom of this page for an example).</p>
+
+<p>This can be especially useful to get a group of friends all learning
+a <a href="{% url 'choose' %}">verse set</a>.</p>
+
+{% endblock %}
+

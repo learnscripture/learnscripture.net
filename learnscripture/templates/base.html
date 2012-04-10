@@ -90,6 +90,16 @@
 
       </div>
 
+      {% block referral_links %}
+      {% if request.identity.account and include_referral_links %}
+      <div class="footer clearfix">
+        <div class="referral-link"><a href="{{ referral_link }}">referral link</a> | <a href="/referral-program/">What's this?</a></div>
+        <div class="fb-like" data-send="true" data-layout="button_count" data-show-faces="true" data-action="recommend"></div>
+        <div><a href="https://twitter.com/share?url={{ referral_link|urlencode }}&text=" class="twitter-share-button" data-lang="en">Tweet</a>
+        </div>
+      </div>
+      {% endif %}
+      {% endblock %}
       <footer>
         <p><a href="/help/">Help</a> | <a href="/about/">About</a> | <a href="/contact/">Contact</a></p>
         <p>&copy; LearnScripture.net 2012</p>
@@ -229,6 +239,19 @@
     <script type="text/javascript" src="{{ STATIC_URL }}js/dashboard.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/subscribe.js"></script>
     {% endcompress %}
+
+    {% if request.identity.account and include_referral_links %}
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+    {% endif %}
 
     {% block extrajs %}
     {% endblock %}

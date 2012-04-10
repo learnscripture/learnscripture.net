@@ -135,6 +135,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     'django.core.context_processors.request',
     'learnscripture.context_processors.lazy_page_info',
     'learnscripture.context_processors.session_forms',
+    'learnscripture.context_processors.referral_links',
     'learnscripture.context_processors.menu',
 ]
 
