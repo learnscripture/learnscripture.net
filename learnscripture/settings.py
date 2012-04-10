@@ -57,6 +57,7 @@ if DEVBOX or STAGING:
 else:
     PAYPAL_RECEIVER_EMAIL = "paypal@learnscripture.net"
     PAYPAL_TEST = False
+PAYPAL_IMAGE = "https://www.paypalobjects.com/en_US/GB/i/btn/btn_buynowCC_LG.gif"
 
 
 TIME_ZONE = 'Europe/London'
