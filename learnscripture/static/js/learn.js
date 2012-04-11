@@ -892,7 +892,7 @@ var learnscripture =
                             callbackAfter()
                         }
                     },
-                    error: handlerAjaxError
+                    error: learnscripture.handleAjaxError
                    });
         }
 
@@ -1270,7 +1270,7 @@ var learnscripture =
                         // part of a passage), so we must reload everything.
                         loadVerses(loadCurrentVerse);
                     },
-                    error: handlerAjaxError
+                    error: learnscripture.handleAjaxError
                    });
         };
 
@@ -1307,13 +1307,6 @@ var learnscripture =
                     }});
             finish();
         }
-
-        // TODO - implement retrying and a queue and UI for manual
-        // retrying.
-        // Also handle case of user being logged out.
-        var handlerAjaxError = function(jqXHR, textStatus, errorThrown) {
-            console.log("AJAX error: %s, %s, %o", textStatus, errorThrown, jqXHR);
-        };
 
         // === Setup and wiring ===
         var setupLearningControls = function() {
@@ -1407,7 +1400,6 @@ var learnscripture =
 
         // === Exports ===
 
-        learnscripture.handlerAjaxError = handlerAjaxError;
         learnscripture.setupLearningControls = setupLearningControls;
         return learnscripture;
 

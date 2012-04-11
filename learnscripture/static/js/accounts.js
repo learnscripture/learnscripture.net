@@ -36,7 +36,7 @@ var learnscripture = (function(learnscripture, $) {
         if (jqXHR.status == 400) {
             learnscripture.handleFormValidationErrors($('#id-signup-form'), 'signup', jqXHR);
         } else {
-            learnscripture.handlerAjaxError(jqXHR, textStatus, errorThrown);
+            learnscripture.handleAjaxError(jqXHR, textStatus, errorThrown);
         }
     };
 
@@ -84,7 +84,7 @@ var learnscripture = (function(learnscripture, $) {
                     if (jqXHR.status == 400) {
                         learnscripture.handleFormValidationErrors($('#id-login-form'), 'login', jqXHR);
                     } else {
-                        learnscripture.handlerAjaxError(jqXHR, textStatus, errorThrown);
+                        learnscripture.handleAjaxError(jqXHR, textStatus, errorThrown);
                     }
                 },
                 success: function(data) {
@@ -108,7 +108,7 @@ var learnscripture = (function(learnscripture, $) {
                     if (jqXHR.status == 400) {
                         learnscripture.handleFormValidationErrors($('#id-login-form'), 'login', jqXHR);
                     } else {
-                        learnscripture.handlerAjaxError(jqXHR, textStatus, errorThrown);
+                        learnscripture.handleAjaxError(jqXHR, textStatus, errorThrown);
                     }
                 },
                 success: function(data) {

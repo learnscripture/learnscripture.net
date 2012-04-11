@@ -48,7 +48,7 @@ var learnscripture =
                         if (jqXHR.status == 400) {
                             learnscripture.handleFormValidationErrors($('#id-preferences-form'), '', jqXHR);
                         } else {
-                            learnscripture.handlerAjaxError(jqXHR, textStatus, errorThrown);
+                            learnscripture.handleAjaxError(jqXHR, textStatus, errorThrown);
                         }
                     }
                    });
