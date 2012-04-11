@@ -246,7 +246,7 @@ var learnscripture =
 
         var indicateFail = function() {
             var word = getWordAt(selectedWordIndex);
-            word.addClass('incorrect');
+            word.addClass('incorrect').removeClass('selected');
             flashMsg(testingStatus.attr({'class': 'incorrect'}).text("Incorrect"), word);
         };
 
