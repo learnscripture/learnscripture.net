@@ -264,7 +264,9 @@ var learnscripture =
                         if (callbackAfter != undefined) {
                             callbackAfter();
                         }
-                    }
+                    },
+                    retry: true,
+                    error: learnscripture.handleAjaxError
                    });
         }
 
@@ -291,7 +293,9 @@ var learnscripture =
                     success: function(data) {
                         loadStats();
                         loadScoreLogs();
-                    }
+                    },
+                    retry: true,
+                    error: learnscripture.handleAjaxError
                    });
 
             var accuracyPercent = Math.floor(accuracy * 100).toString();
@@ -1281,7 +1285,9 @@ var learnscripture =
                     type: 'POST',
                     data: {
                         verse_status: JSON.stringify(currentVerseStatus, null, 2)
-                    }});
+                    },
+                    retry: true
+                   });
             nextVerse();
         };
 
@@ -1292,7 +1298,9 @@ var learnscripture =
                     type: 'POST',
                     data: {
                         verse_status: JSON.stringify(currentVerseStatus, null, 2)
-                    }});
+                    },
+                    retry: true
+                   });
             nextVerse();
         }
 
@@ -1304,7 +1312,9 @@ var learnscripture =
                     type: 'POST',
                     data: {
                         verse_status: JSON.stringify(verse, null, 2)
-                    }});
+                    },
+                    retry: true
+                   });
             finish();
         }
 
