@@ -85,8 +85,17 @@ var learnscripture = (function(learnscripture, $) {
         return errors; // In cases other people want to use it
 
     };
+
+    // TODO - implement retrying and a queue and UI for manual retrying. Also
+    // handle case of user being logged out.
+    var handleAjaxError = function(jqXHR, textStatus, errorThrown) {
+        console.log("AJAX error: %s, %s, %o", textStatus, errorThrown, jqXHR);
+    };
+
+
     // Export:
     learnscripture.handleFormValidationErrors = handleFormValidationErrors;
+    learnscripture.handleAjaxError = handleAjaxError;
     return learnscripture;
 
 })(learnscripture || {}, $);
