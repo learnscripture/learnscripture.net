@@ -771,10 +771,24 @@ def subscribe(request):
             price.discounted = True
         price.amount_with_discount = a
 
+    def decorate_with_savings(price, relative_to):
+        if price.days == relative_to.days:
+            price.savings = None
+            return
+        expected = relative_to.amount_with_discount * Decimal(1.0 * price.days / relative_to.days)
+        price.savings = (expected - price.amount_with_discount).quantize(Decimal('0.01'), rounding=ROUND_DOWN)
+
+
     price_forms = []
     for currency, prices in price_groups:
+
+        # Find the shortest period, so that we can calculate the relative
+        # savings for longer periods.
+        shortest = sorted(prices, key=lambda p:p.days)[0]
+
         for price in prices:
             decorate_with_discount(price)
+            decorate_with_savings(price, shortest)
             domain = Site.objects.get_current().domain
             protocol = 'https' if request.is_secure() else 'http'
             amount = str(price.amount_with_discount)
