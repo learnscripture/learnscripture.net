@@ -16,7 +16,8 @@ var learnscripture =
                     success: function(results) {
                         addVerse(results[0]);
                         btn.closest('.actionset').remove();
-                    }
+                    },
+                    error: learnscripture.ajaxFailed
                    });
         };
 

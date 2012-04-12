@@ -898,7 +898,7 @@ var learnscripture =
                             callbackAfter()
                         }
                     },
-                    error: learnscripture.handleAjaxError
+                    error: learnscripture.ajaxFailed
                    });
         }
 
@@ -1276,7 +1276,7 @@ var learnscripture =
                         // part of a passage), so we must reload everything.
                         loadVerses(loadCurrentVerse);
                     },
-                    error: learnscripture.handleAjaxError
+                    error: learnscripture.ajaxFailed
                    });
         };
 

@@ -36,7 +36,7 @@ var learnscripture = (function(learnscripture, $) {
         if (jqXHR.status == 400) {
             learnscripture.handleFormValidationErrors($('#id-signup-form'), 'signup', jqXHR);
         } else {
-            learnscripture.handleAjaxError(jqXHR, textStatus, errorThrown);
+            learnscripture.ajaxFailed(jqXHR, textStatus, errorThrown);
         }
     };
 
@@ -84,7 +84,7 @@ var learnscripture = (function(learnscripture, $) {
                     if (jqXHR.status == 400) {
                         learnscripture.handleFormValidationErrors($('#id-login-form'), 'login', jqXHR);
                     } else {
-                        learnscripture.handleAjaxError(jqXHR, textStatus, errorThrown);
+                        learnscripture.ajaxFailed(jqXHR, textStatus, errorThrown);
                     }
                 },
                 success: function(data) {
@@ -108,7 +108,7 @@ var learnscripture = (function(learnscripture, $) {
                     if (jqXHR.status == 400) {
                         learnscripture.handleFormValidationErrors($('#id-login-form'), 'login', jqXHR);
                     } else {
-                        learnscripture.handleAjaxError(jqXHR, textStatus, errorThrown);
+                        learnscripture.ajaxFailed(jqXHR, textStatus, errorThrown);
                     }
                 },
                 success: function(data) {
@@ -126,12 +126,13 @@ var learnscripture = (function(learnscripture, $) {
 
     var logoutBtnClick = function(ev) {
         $.ajax({url: '/api/learnscripture/v1/logout/',
-                 dataType: 'json',
-                 type: 'POST',
-                 success: function(data) {
-                     setSignedIn(data, 'logout');
-                     $('#id-logout-form').modal('hide');
-                 }
+                dataType: 'json',
+                type: 'POST',
+                success: function(data) {
+                    setSignedIn(data, 'logout');
+                    $('#id-logout-form').modal('hide');
+                },
+                error: learnscripture.ajaxFailed,
                });
         ev.preventDefault();
     };
