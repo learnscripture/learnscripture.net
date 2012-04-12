@@ -244,7 +244,7 @@ var learnscripture =
                             } else if (jqXHR.status == 500) {
                                 form.parent().find('.quickfind_search_results').html('Your search terms were not understood.');
                             } else {
-                                learnscripture.handleAjaxError(jqXHR, textStatus, errorThrown);
+                                learnscripture.ajaxFailed(jqXHR, textStatus, errorThrown);
                             }
                         }
                        });

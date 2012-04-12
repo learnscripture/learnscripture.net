@@ -86,9 +86,18 @@ var learnscripture = (function(learnscripture, $) {
 
     };
 
-    // TODO - implement retrying and a queue and UI for manual retrying. Also
-    // handle case of user being logged out.
-    var handleAjaxError = function(jqXHR, textStatus, errorThrown) {
+    // * if the user needs immediate feedback if the ajax failed,
+    //   use ajaxFailed
+    // * for non-essential things (e.g. GET requests for score logs)
+    //   just silently fail
+    // * for essential things (e.g. POST requests that save test scores to server)
+    //   use:
+    //       retry: ajaxRetryOptions,
+    //       error: ajaxRetryFailed,
+    //       success: ajaxRetrySucceeded
+    //       (or call ajaxRetrySucceeded at beginning of success callback)
+    var ajaxFailed = function(jqXHR, textStatus, errorThrown) {
+        alert("The server could not be contacted. Please try again.");
         console.log("AJAX error: %s, %s, %o", textStatus, errorThrown, jqXHR);
     };
 
@@ -111,7 +120,7 @@ var learnscripture = (function(learnscripture, $) {
 
     // Export:
     learnscripture.handleFormValidationErrors = handleFormValidationErrors;
-    learnscripture.handleAjaxError = handleAjaxError;
+    learnscripture.ajaxFailed = ajaxFailed;
     learnscripture.ajaxRetryOptions = {tick: ajaxRetryTick,
                                        attempts: 11
                                       };
