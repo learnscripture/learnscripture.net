@@ -88,6 +88,9 @@
               {% else %}
                  {{ currency.symbol }}{{ price.amount }}
               {% endif %}
+              {% if price.savings %}
+               (save {{ currency.symbol }}{{ price.savings }})
+              {% endif %}
             </label>
           </li>
           {% endfor %}
