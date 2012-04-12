@@ -261,12 +261,13 @@ var learnscripture =
                         stage: STAGE_TYPE_READ
                     },
                     success: function() {
+                        learnscripture.ajaxRetrySucceeded();
                         if (callbackAfter != undefined) {
                             callbackAfter();
                         }
                     },
-                    retry: true,
-                    error: learnscripture.handleAjaxError
+                    retry: learnscripture.ajaxRetryOptions,
+                    error: learnscripture.ajaxRetryFailed
                    });
         }
 
@@ -291,11 +292,12 @@ var learnscripture =
                         accuracy: accuracy
                     },
                     success: function(data) {
+                        learnscripture.ajaxRetrySucceeded();
                         loadStats();
                         loadScoreLogs();
                     },
-                    retry: true,
-                    error: learnscripture.handleAjaxError
+                    retry: learnscripture.ajaxRetryOptions,
+                    error: learnscripture.ajaxRetryFailed
                    });
 
             var accuracyPercent = Math.floor(accuracy * 100).toString();
@@ -1286,7 +1288,9 @@ var learnscripture =
                     data: {
                         verse_status: JSON.stringify(currentVerseStatus, null, 2)
                     },
-                    retry: true
+                    success: learnscripture.ajaxRetrySucceeded,
+                    retry: learnscripture.ajaxRetryOptions,
+                    error: learnscripture.ajaxRetryFailed
                    });
             nextVerse();
         };
@@ -1299,7 +1303,9 @@ var learnscripture =
                     data: {
                         verse_status: JSON.stringify(currentVerseStatus, null, 2)
                     },
-                    retry: true
+                    success: learnscripture.ajaxRetrySucceeded,
+                    retry: learnscripture.ajaxRetryOptions,
+                    error: learnscripture.ajaxRetryFailed
                    });
             nextVerse();
         }
@@ -1313,7 +1319,9 @@ var learnscripture =
                     data: {
                         verse_status: JSON.stringify(verse, null, 2)
                     },
-                    retry: true
+                    success: learnscripture.ajaxRetrySucceeded,
+                    retry: learnscripture.ajaxRetryOptions,
+                    error: learnscripture.ajaxRetryFailed
                    });
             finish();
         }
