@@ -107,6 +107,9 @@
     </div>
     {% if discount %}
     <p>You have a {{ discount }}% discount applied, through our <a href="{% url 'referral_program' %}">referral program</a>. Thanks for your advertising!</p>
+    {% else %}
+    <p>For future payments, you can get discounts on these prices through
+    our <a href="{% url 'referral_program' %}">referral program</a>.</p>
     {% endif %}
     </div>
   </form>
