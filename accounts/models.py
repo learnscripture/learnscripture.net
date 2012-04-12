@@ -297,6 +297,7 @@ class Identity(models.Model):
     interface_theme = models.CharField(max_length=30, choices=THEMES,
                                        default='calm')
     referred_by = models.ForeignKey(Account, null=True, default=None,
+                                    blank=True,
                                     related_name='referrals')
 
     objects = IdentityManager()
