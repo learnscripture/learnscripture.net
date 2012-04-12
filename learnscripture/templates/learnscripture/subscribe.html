@@ -41,6 +41,12 @@
     {% endif %}
   {% endif %}
 
+  <p>You can pay by credit card, debit card, or Paypal. Our payment and refund
+    policy is described in our <a href="/terms-of-service/">terms of
+      service</a>, which you are agreeing to by continuing.
+  </p>
+
+
   <p>Choose your currency and payment period:</p>
 
   <form action="" method="POST">
@@ -104,7 +110,6 @@
     {% endif %}
     </div>
   </form>
-
 
   {% for label, form in price_forms %}
     <div id="id_price_form_{{ label }}" style="display: none;" class="price-form actions">
