@@ -92,10 +92,31 @@ var learnscripture = (function(learnscripture, $) {
         console.log("AJAX error: %s, %s, %o", textStatus, errorThrown, jqXHR);
     };
 
+    var ajaxRetryTick = function(info) {
+        var text = "Data not saved. Retrying "
+            + info.failures.toString() + " of "
+            + (info.attempts - 1).toString() + // -1 because we are want to display '1 of 10' the first time we get an error.
+            "...";
+        $('#id-ajax-errors').html('<span>' + text + '</span>');
+    };
+
+    var ajaxRetryFailed = function(jqXHR, textStatus, errorThrown) {
+        $('#id-ajax-errors').html('<span>Data not saved. Please check internet connection</span>');
+    };
+
+    var ajaxRetrySucceeded = function() {
+        $('#id-ajax-errors').html('');
+    };
+
 
     // Export:
     learnscripture.handleFormValidationErrors = handleFormValidationErrors;
     learnscripture.handleAjaxError = handleAjaxError;
+    learnscripture.ajaxRetryOptions = {tick: ajaxRetryTick,
+                                       attempts: 11
+                                      };
+    learnscripture.ajaxRetryFailed = ajaxRetryFailed;
+    learnscripture.ajaxRetrySucceeded = ajaxRetrySucceeded;
     return learnscripture;
 
 })(learnscripture || {}, $);
