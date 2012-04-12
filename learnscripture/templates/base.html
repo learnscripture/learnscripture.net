@@ -101,7 +101,10 @@
       {% endif %}
       {% endblock %}
       <footer>
-        <p><a href="/help/">Help</a> | <a href="/about/">About</a> | <a href="/contact/">Contact</a></p>
+        <p><a href="/help/">Help</a> |
+          <a href="/about/">About</a> |
+          <a href="/terms-of-service/">Terms of service</a> |
+          <a href="/contact/">Contact us</a></p>
         <p>&copy; LearnScripture.net 2012</p>
       </footer>
 
@@ -122,6 +125,12 @@
       {% csrf_token %}
       {{ signup_form|bootstrap }}
     </form>
+    <p>By creating an account, you are agreeing to our
+      <a href="/terms-of-service/" target="_blank">terms of service</a> and
+      <a href="/privacy-policy/" target="_blank">privacy policy</a>.
+      Please note that children under the age of 13 may not create
+      an account.
+    </p>
   </div>
   <div class="modal-footer">
     <a href="#" id="id-create-account-btn" class="btn primary default">Create account</a>
