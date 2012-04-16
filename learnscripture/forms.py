@@ -8,7 +8,7 @@ from accounts.models import Account, SubscriptionType
 class SignUpForm(forms.ModelForm):
 
     password = forms.CharField(max_length=100, widget=forms.PasswordInput)
-    username = forms.RegexField(label="Username", max_length=40,
+    username = forms.RegexField(max_length=40,
                                 regex=r'^[\w.+-]+$',
                                 error_messages=
                                 {'invalid': "This value may contain only letters, numbers and "
@@ -21,6 +21,12 @@ class SignUpForm(forms.ModelForm):
             raise forms.ValidationError("The password must be at least %d characters" %
                                         settings.MINIMUM_PASSWORD_LENGTH)
         return p
+
+    def clean_username(self):
+        u = self.cleaned_data.get('username', '').strip()
+        if Account.objects.filter(username__iexact=u).exists():
+            raise forms.ValidationError("Account with this username already exists")
+        return u
 
     def save(self, commit=True):
         """
