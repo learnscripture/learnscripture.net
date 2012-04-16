@@ -82,6 +82,13 @@ var learnscripture = (function(learnscripture, $) {
                 p.parent().addClass("error");
                 });
             });
+
+        // form validation may have changed size of modal
+        var modal = form.closest('div.modal');
+        if (modal.length > 0) {
+            learnscripture.adjustModal(modal);
+        }
+
         return errors; // In cases other people want to use it
 
     };
