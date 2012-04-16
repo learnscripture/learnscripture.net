@@ -50,8 +50,11 @@ class SignUpForm(forms.ModelForm):
             'password',
             ]
 
-SignUpForm.base_fields['first_name'].label = "First name (optional)"
-SignUpForm.base_fields['last_name'].label = "Last name (optional)"
+SignUpForm.base_fields['email'].help_text = "Private. Needed for notifications and password reset"
+SignUpForm.base_fields['username'].help_text = "Public"
+SignUpForm.base_fields['first_name'].help_text = "Optional, public"
+SignUpForm.base_fields['last_name'].help_text = "Optional, public"
+
 
 class LogInForm(forms.Form):
     email = forms.CharField(max_length=255, label="Email or username")
