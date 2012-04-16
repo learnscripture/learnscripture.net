@@ -48,14 +48,18 @@ SignUpForm.base_fields['first_name'].label = "First name (optional)"
 SignUpForm.base_fields['last_name'].label = "Last name (optional)"
 
 class LogInForm(forms.Form):
-    email = forms.EmailField()
+    email = forms.CharField(max_length=255, label="Email or username")
     password = forms.CharField(max_length=100, widget=forms.PasswordInput)
 
     def clean_password(self):
         def fail():
             raise forms.ValidationError("Can't find an account matching that email address and password");
         try:
-            account = Account.objects.get(email__iexact=self.cleaned_data.get('email', '').strip())
+            email = self.cleaned_data.get('email', '').strip()
+            if u'@' in email:
+                account = Account.objects.get(email__iexact=email)
+            else:
+                account = Account.objects.get(username__iexact=email)
         except Account.DoesNotExist:
             fail()
 
