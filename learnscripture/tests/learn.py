@@ -93,8 +93,7 @@ class LearnTests(LiveServerTests):
         identity.add_verse_choice('Psalm 23:1-2')
         driver.get(self.live_server_url + reverse('dashboard'))
         driver.find_element_by_css_selector('input[name=learnqueue]').click()
-
-        driver.get(self.live_server_url + reverse('learn'))
+        self.wait_for_ajax()
         self.assertEqual(u"Psalm 23:1-2", driver.find_element_by_id('id-verse-title').text)
 
         # Do the reading:
@@ -239,8 +238,8 @@ class LearnTests(LiveServerTests):
         # Super bonus should be present
         self.assertFalse(driver.find_element_by_css_selector('.score-log-type-2') is None)
 
-        # And still there 0.5 seconds later
-        time.sleep(0.5)
+        # And still there 0.2 seconds later
+        time.sleep(0.2)
         self.assertFalse(driver.find_element_by_css_selector('.score-log-type-2') is None)
 
         # But it does move on to dashboard eventually
