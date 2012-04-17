@@ -26,7 +26,7 @@ else:
             'NAME': 'learnscripture',
             'USER': 'learnscripture',
             'PASSWORD': 'foo',
-            'HOST': '',
+            'HOST': 'localhost',
             'PORT': '',
         }
     }
