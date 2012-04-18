@@ -1,7 +1,10 @@
-var learnscripture =
-    (function(learnscripture, $) {
+/*jslint browser: true, vars: true, plusplus: true */
+/*globals $, jQuery, alert, confirm */
 
-        var loadResults = function(results) {
+var learnscripture =
+    (function (learnscripture, $) {
+        "use strict";
+        var loadResults = function (results) {
             $('#id-quick-find-form .validation-error').remove();
             var d = $('.quickfind_search_results');
             if (results.length > 0) {
@@ -17,7 +20,7 @@ var learnscripture =
             }
         };
 
-        var setupChooseControls = function() {
+        var setupChooseControls = function () {
             $('#id_lookup').click(learnscripture.quickFindAndHandleResults(loadResults, false));
         };
 
@@ -26,9 +29,9 @@ var learnscripture =
 
         return learnscripture;
 
-    })(learnscripture || {}, $);
+    }(learnscripture || {}, $));
 
-$(document).ready(function() {
+$(document).ready(function () {
     if ($('#id-tab-individual').length > 0) {
         learnscripture.setupChooseControls();
     }
