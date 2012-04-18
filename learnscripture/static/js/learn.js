@@ -991,12 +991,12 @@ var learnscripture =
 
             // First fix the height
             if (preferences.enableAnimations) {
-                $('.previous-verse').css({'height': $('.previous-verse').height().toString()});
+                $('.previous-verse').css({'height': $('.previous-verse').height().toString() + 'px'});
             }
 
             // Now make the other words disappear
             $.each(words, function (offset, elems) {
-                if (offset !== maxOffset) {
+                if (offset.toString() !== maxOffset.toString()) {
                     $(elems).remove();
                 }
             });
