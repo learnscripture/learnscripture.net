@@ -1,28 +1,30 @@
-
-var learnscripture = (function(learnscripture, $) {
+/*jslint browser: true, vars: true */
+/*globals $ */
+var learnscripture = (function (learnscripture, $) {
+    "use strict";
     var signedInAccountData = null;
 
-    var hideSignUpLinks = function() {
-        $('.dropdown-menu .signup-link, .dropdown-menu .login-link').each(function(idx, elem) {
+    var hideSignUpLinks = function () {
+        $('.dropdown-menu .signup-link, .dropdown-menu .login-link').each(function (idx, elem) {
             var a = $(elem);
             a.hide();
-            if (a.parent().find(":visible").length == 0) {
+            if (a.parent().find(":visible").length === 0) {
                 a.parent().hide();
             }
         });
 
     };
 
-    var setSignedIn = function(accountData, signinType) {
+    var setSignedIn = function (accountData, signinType) {
         hideSignUpLinks();
         signedInAccountData = accountData;
         $('.holds-username').text(accountData.username);
         $('.guest-only').hide();
 
-        if (signinType == 'logout') {
+        if (signinType === 'logout') {
             // Need to refresh page
             window.location.reload();
-        } else if (signinType == 'signup') {
+        } else if (signinType === 'signup') {
             // If they are in the middle of reading/testing,
             // we don't want to force them back to the beginning.
             // However, on some pages we do want to force a refresh.
@@ -32,22 +34,22 @@ var learnscripture = (function(learnscripture, $) {
         }
     };
 
-    var signupError = function(jqXHR, textStatus, errorThrown) {
-        if (jqXHR.status == 400) {
+    var signupError = function (jqXHR, textStatus, errorThrown) {
+        if (jqXHR.status === 400) {
             learnscripture.handleFormValidationErrors($('#id-signup-form'), 'signup', jqXHR);
         } else {
             learnscripture.ajaxFailed(jqXHR, textStatus, errorThrown);
         }
     };
 
-    var signupBtnClick = function(ev) {
+    var signupBtnClick = function (ev) {
         ev.preventDefault();
         $.ajax({url: '/api/learnscripture/v1/signup/',
                 dataType: 'json',
                 type: 'POST',
                 data: $('#id-signup-form form').serialize(),
                 error: signupError,
-                success: function(data) {
+                success: function (data) {
                     setSignedIn(data, 'signup');
                     $('#id-signup-form').modal('hide');
                     // Little hack to get learn page to show points
@@ -57,13 +59,13 @@ var learnscripture = (function(learnscripture, $) {
                 });
     };
 
-    var showSignUp = function(ev) {
+    var showSignUp = function (ev) {
         ev.preventDefault();
-        $('#id-signup-form').modal({backdrop:'static', keyboard:true, show:true});
+        $('#id-signup-form').modal({backdrop: 'static', keyboard: true, show: true});
         $('#id_signup-email').focus();
     };
 
-    var loginBtnClick = function(ev) {
+    var loginBtnClick = function (ev) {
         // Chrome will only remember passwords if the login form is submitted in
         // the normal way.  Therefore we do synchronous XHR to check login
         // details (and actually log them in), then allow form submission to
@@ -79,21 +81,21 @@ var learnscripture = (function(learnscripture, $) {
                 async: false,
                 type: 'POST',
                 data: $('#id-login-form form').serialize(),
-                error: function(jqXHR, textStatus, errorThrown) {
+                error: function (jqXHR, textStatus, errorThrown) {
                     ev.preventDefault();
-                    if (jqXHR.status == 400) {
+                    if (jqXHR.status === 400) {
                         learnscripture.handleFormValidationErrors($('#id-login-form'), 'login', jqXHR);
                     } else {
                         learnscripture.ajaxFailed(jqXHR, textStatus, errorThrown);
                     }
                 },
-                success: function(data) {
+                success: function (data) {
                     // No ev.preventDefault, form will submit
                 }
                 });
     };
 
-    var forgotPasswordClick = function(ev) {
+    var forgotPasswordClick = function (ev) {
         // This form is 'shared' between login and forgot password, so ensure
         // form action is correct.
         $('#id-login-form form').attr('action', '/password-reset/');
@@ -103,32 +105,32 @@ var learnscripture = (function(learnscripture, $) {
                 async: false,
                 type: 'POST',
                 data: $('#id-login-form form').serialize(),
-                error: function(jqXHR, textStatus, errorThrown) {
+                error: function (jqXHR, textStatus, errorThrown) {
                     ev.preventDefault();
-                    if (jqXHR.status == 400) {
+                    if (jqXHR.status === 400) {
                         learnscripture.handleFormValidationErrors($('#id-login-form'), 'login', jqXHR);
                     } else {
                         learnscripture.ajaxFailed(jqXHR, textStatus, errorThrown);
                     }
                 },
-                success: function(data) {
+                success: function (data) {
                     // No ev.preventDefault, form will submit
                 }
                 });
-    }
+    };
 
-    var showLogIn = function(ev) {
+    var showLogIn = function (ev) {
         ev.preventDefault();
-        $('#id-login-form').modal({backdrop:'static', keyboard:true, show:true});
+        $('#id-login-form').modal({backdrop: 'static', keyboard: true, show: true});
         $('#id_login-email').focus();
     };
 
 
-    var logoutBtnClick = function(ev) {
+    var logoutBtnClick = function (ev) {
         $.ajax({url: '/api/learnscripture/v1/logout/',
                 dataType: 'json',
                 type: 'POST',
-                success: function(data) {
+                success: function (data) {
                     setSignedIn(data, 'logout');
                     $('#id-logout-form').modal('hide');
                 },
@@ -137,22 +139,22 @@ var learnscripture = (function(learnscripture, $) {
         ev.preventDefault();
     };
 
-    var showLogOut = function(ev) {
+    var showLogOut = function (ev) {
         ev.preventDefault();
-        $('#id-logout-form').modal({backdrop:'static', keyboard:true, show:true});
-    }
+        $('#id-logout-form').modal({backdrop: 'static', keyboard: true, show: true});
+    };
 
-    var setupAccountControls = function(ev) {
+    var setupAccountControls = function (ev) {
         $('.signup-link').click(showSignUp);
         $('#id-create-account-btn').click(signupBtnClick);
-        $('#id-create-account-cancel-btn').click(function(ev) {
+        $('#id-create-account-cancel-btn').click(function (ev) {
             ev.preventDefault();
             $('#id-signup-form').modal('hide');
         });
 
         $('.login-link').click(showLogIn);
         $('#id-sign-in-btn').click(loginBtnClick);
-        $('#id-sign-in-cancel-btn').click(function(ev) {
+        $('#id-sign-in-cancel-btn').click(function (ev) {
             ev.preventDefault();
             $('#id-login-form').modal('hide');
         });
@@ -161,7 +163,7 @@ var learnscripture = (function(learnscripture, $) {
 
         $('.logout-link').click(showLogOut);
         $('#id-logout-btn').click(logoutBtnClick);
-        $('#id-logout-cancel-btn').click(function(ev) {
+        $('#id-logout-cancel-btn').click(function (ev) {
             ev.preventDefault();
             $('#id-logout-form').modal('hide');
         });
@@ -172,8 +174,8 @@ var learnscripture = (function(learnscripture, $) {
     learnscripture.setupAccountControls = setupAccountControls;
     learnscripture.setSignedIn = setSignedIn;
     return learnscripture;
-})(learnscripture || {}, $);
+}(learnscripture || {}, $));
 
-$(document).ready(function() {
-                      learnscripture.setupAccountControls();
-                  });
+$(document).ready(function () {
+    learnscripture.setupAccountControls();
+});
