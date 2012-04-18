@@ -25,6 +25,9 @@
       <th>User</th>
       <th>Points</th>
       <th>Rank</th>
+      {% if not thisweek %}
+      <th>Verses started</th>
+      {% endif %}
     </tr>
   </thead>
   <tbody>
@@ -33,6 +36,9 @@
       <td><a href="{% url 'user_stats' account.username %}">{{ account.username }}</a></td>
       <td>{{ account.points }}</td>
       <td>{{ account.rank }}</td>
+      {% if not thisweek %}
+      <td>{{ account.num_verses }}</td>
+      {% endif %}
     </tr>
     {% endfor %}
   </tbody>
