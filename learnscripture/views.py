@@ -454,15 +454,20 @@ def create_or_edit_set(request, set_type=None, slug=None):
             old_vcs = set(existing_vcs)
             for i, ref in enumerate(ref_list):  # preserve order
                 if ref in verse_dict:
+                    dirty = False
                     if ref in existing_vcs_dict:
                         vc = existing_vcs_dict[ref]
-                        vc.set_order=i
+                        if vc.set_order != i:
+                            vc.set_order = i
+                            dirty = True
                         old_vcs.remove(vc)
                     else:
                         vc = VerseChoice(verse_set=verse_set,
                                          reference=ref,
                                          set_order=i)
-                    vc.save()
+                        dirty = True
+                    if dirty:
+                        vc.save()
                 else:
                     # If not in verse_dict, it can only be because user fiddled
                     # with the DOM.
