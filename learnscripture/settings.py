@@ -171,6 +171,7 @@ INSTALLED_APPS = [
     'raven.contrib.django',
     'spurl',
     'paypal.standard.ipn',
+    'campaign',
 ]
 
 if DEBUG:
@@ -260,6 +261,10 @@ RESTRUCTUREDTEXT_FILTER_SETTINGS = {
     'raw_enabled': False,
     'file_insertion_enabled': False,
 }
+
+CAMPAIGN_CONTEXT_PROCESSORS = [
+    'learnscripture.context_processors.campaign_context_processor'
+]
 
 ### Sentry/Raven ###
 

@@ -55,3 +55,7 @@ def menu(request):
 
 
 lazy_page_info = lazy_dict(page_info, ['fiber_page', 'fiber_current_pages'])
+
+
+def campaign_context_processor(account):
+    return {'account': account}
