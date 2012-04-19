@@ -6,8 +6,14 @@
 {% block leftcolumn %}
 
 {% if verse_set.description %}
-<p>{{ verse_set.description|restructuredtext }}</p>
+<h2>Description</h2>
+{{ verse_set.description|restructuredtext }}
 {% endif %}
+
+{% if verse_set.additional_info %}
+{{ verse_set.additional_info|restructuredtext }}
+{% endif %}
+
 {% if verse_choices %}
 {% if verse_set.is_passage %}
 <h3>{{ verse_choices.0.verse.book_name }}</h3>
@@ -24,7 +30,7 @@
 <br/>
 {% else %}
 
-<p>Includes the following verses:
+  <h2>Verses</h2>
   <ul>
     {% for v in verse_choices %}
     <li>
@@ -33,7 +39,6 @@
     </li>
     {% endfor %}
   </ul>
-</p>
 {% endif %}
 
 <form action="" method="GET">
