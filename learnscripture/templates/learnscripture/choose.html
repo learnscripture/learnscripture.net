@@ -70,10 +70,11 @@
       <p>{{ vs.description|restructuredtext }}</p>
       {% endif %}
       {% if not vs.is_passage and vs.verse_choices.all %}
-      <p>Includes the following verses:
-        {% for v in vs.verse_choices.all %}
+      <p>Includes the following verses, {{ vs.verse_choices.all|length }} in total:<br/>
+        {% for v in vs.verse_choices.all|slice:"0:10" %}
         {{ v.reference }}{% if not forloop.last %}, {% endif %}
         {% endfor %}
+        {% if vs.verse_choices.all|length > 10 %}…and more.{% endif %}
       </p>
       {% endif %}
       <div><a href="{{ vs.get_absolute_url }}">See more</a></div>
