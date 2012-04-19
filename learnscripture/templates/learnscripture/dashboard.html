@@ -13,10 +13,10 @@
     <a class="icon-progress icon-replace" href="{% url 'user_verses' %}" title="Your progress">Progress</a>
     <a class="icon-leaderboard icon-replace" href="{% url 'leaderboard' %}?thisweek" title="Leaderboard">Leaderboard</a>
   </div>
-  <p>Points:
+  <div>Points:
     <b>{{ request.identity.account.points_this_week }}</b> this week,
     <b>{{ request.identity.account.points_all_time }}</b> total.
-  </p>
+  </div>
 </div>
 
 {% endif %}
@@ -42,7 +42,7 @@
     {% endif %}
   </form>
   <h3>{{ vs.name }}</h3>
-  <p>Part or all of this passage is due for revising today.</p>
+  <div>Part or all of this passage is due for revising today.</div>
   </div>
   {% if not forloop.last %}<hr>{% endif %}
 
