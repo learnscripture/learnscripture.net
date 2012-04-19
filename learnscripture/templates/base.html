@@ -57,7 +57,8 @@
                   <li><a class="icon-preferences preferences-link" href="{% url 'preferences' %}?next={{ request.path_info }}">Preferences</a></li>
                   {% if request.identity.account %}
                   <li><a class="icon-account" href="{% url 'account_details' %}">Account details</i></a></li>
-                  <li><a class="icon-stats" href="{% url 'user_stats' request.identity.account.username %}">Stats <i class="icon-signal"></i></a></li>
+                  <li><a class="icon-progress" href="{% url 'user_verses' %}">Verses</a>
+                  <li><a class="icon-stats" href="{% url 'user_stats' request.identity.account.username %}">Stats</a></li>
                   <li><a href="#" class="icon-logout logout-link">Log out</a></li>
                   {% endif %}
                 </ul>
