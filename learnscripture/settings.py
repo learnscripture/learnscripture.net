@@ -48,7 +48,7 @@ if DEBUG:
     INTERNAL_IPS = ('127.0.0.1',)
 
 SERVER_EMAIL = 'website@learnscripture.net'
-DEFAULT_FROM_EMAIL = SERVER_EMAIL
+DEFAULT_FROM_EMAIL = 'luke@learnscripture.net'
 
 
 if DEVBOX or STAGING:
