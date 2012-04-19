@@ -93,6 +93,10 @@ No verses in this set!
 >{{ verse_set.created_by.username }}</a>
 
 <div>Created: {{ verse_set.date_added|timesince }} ago</div>
+
+{% if not verse_set.public %}
+<div><strong>Private</strong> - this verse set can only be accessed by you.</div>
+{% endif %}
 </div>
 
 {% endblock %}
