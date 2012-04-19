@@ -91,11 +91,12 @@ No verses in this set!
 <div>Put together by:
 <a href="{% url 'user_stats' verse_set.created_by.username %}"
 >{{ verse_set.created_by.username }}</a>
-
-<div>Created: {{ verse_set.date_added|timesince }} ago</div>
+<br/>
+Created: {{ verse_set.date_added|timesince }} ago
 
 {% if not verse_set.public %}
-<div><strong>Private</strong> - this verse set can only be accessed by you.</div>
+<br/><br/>
+<strong>Private</strong> - this verse set can only be accessed by you.
 {% endif %}
 </div>
 
