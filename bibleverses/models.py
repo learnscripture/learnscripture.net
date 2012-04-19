@@ -285,6 +285,7 @@ class VerseSet(caching.base.CachingMixin, models.Model):
     name = models.CharField(max_length=255)
     slug = AutoSlugField(populate_from='name', unique=True)
     description = models.TextField(blank=True)
+    additional_info = models.TextField(blank=True)
     set_type = models.PositiveSmallIntegerField(choices=VerseSetType.choice_list)
 
     public = models.BooleanField(default=False)
