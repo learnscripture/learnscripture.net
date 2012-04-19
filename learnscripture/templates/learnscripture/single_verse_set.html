@@ -1,11 +1,12 @@
 {% extends "base_twocol.html" %}
 
 {% load url from future %}
+{% load markup %}
 
 {% block leftcolumn %}
 
 {% if verse_set.description %}
-<p>{{ verse_set.description|linebreaksbr }}</p>
+<p>{{ verse_set.description|restructuredtext }}</p>
 {% endif %}
 {% if verse_choices %}
 {% if verse_set.is_passage %}

@@ -155,6 +155,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
+    'django.contrib.markup',
     'south',
     'learnscripture',
     'bibleverses',
@@ -254,6 +255,11 @@ else:
 COMPRESS_PRECOMPILERS = (
     ('text/less', 'lessc {infile} {outfile}'),
 )
+
+RESTRUCTUREDTEXT_FILTER_SETTINGS = {
+    'raw_enabled': False,
+    'file_insertion_enabled': False,
+}
 
 ### Sentry/Raven ###
 
