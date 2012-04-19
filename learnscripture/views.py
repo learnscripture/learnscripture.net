@@ -298,8 +298,8 @@ def is_continuous_set(verse_list):
 
 
 def view_verse_set(request, slug):
-    c = {'include_referral_links': True}
     verse_set = get_object_or_404(verse_sets_visible_for_request(request), slug=slug)
+    c = {'include_referral_links': verse_set.public}
 
 
     version = None
