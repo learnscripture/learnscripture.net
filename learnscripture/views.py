@@ -826,6 +826,16 @@ def subscribe(request):
 
 @csrf_exempt
 def pay_done(request):
+    identity = getattr(request, 'identity')
+    if identity is not None:
+        # This doesn't actually check if a payment was just received,
+        # but it is good enough.
+        if (identity.account is not None
+            and identity.account.subscription == SubscriptionType.PAID_UP
+            and identity.account.paid_until > timezone.now()):
+            messages.info(request, 'Payment received, thank you!')
+            return HttpResponseRedirect(reverse('dashboard'))
+
     return render(request, 'learnscripture/pay_done.html', {'title': "Payment complete"})
 
 
