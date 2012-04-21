@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.admin import SimpleListFilter
 
 from .models import Identity, Account, SubscriptionType
 
@@ -10,6 +11,33 @@ def change_subscription_func(subscription_type, name, description):
     change_subscription.__name__ = name
     return change_subscription
 
+
+
+class HasAccountListFilter(SimpleListFilter):
+    title = "has account"
+    parameter_name = 'has_account'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('1', 'No'),
+            ('2', 'Yes'),
+        )
+
+    def queryset(self, request, queryset):
+        val = self.value()
+        if val == '1':
+            return queryset.filter(account__isnull=True)
+        if val == '2':
+            return queryset.filter(account__isnull=False)
+
+
+class IdentityAdmin(admin.ModelAdmin):
+    list_display = ['id', 'account', 'date_created', 'default_bible_version',
+                    'testing_method', 'interface_theme', 'referred_by']
+    list_filter = (HasAccountListFilter,)
+
+    def queryset(self, request):
+        return super(IdentityAdmin, self).queryset(request).select_related('account', 'referred_by')
 
 class AccountAdmin(admin.ModelAdmin):
     list_display = ['email', 'username', 'first_name', 'last_name',
@@ -25,6 +53,6 @@ class AccountAdmin(admin.ModelAdmin):
                                  "lifetime_free", "Change to lifetime free"),
         ]
 
-admin.site.register(Identity)
+admin.site.register(Identity, IdentityAdmin)
 admin.site.register(Account, AccountAdmin)
 
