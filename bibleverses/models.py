@@ -359,7 +359,7 @@ class UserVerseStatus(models.Model):
     memory_stage = models.PositiveSmallIntegerField(choices=MemoryStage.choice_list,
                                                     default=MemoryStage.ZERO)
     strength = models.FloatField(default=0.00)
-    added = models.DateTimeField(null=True, blank=True)
+    added = models.DateTimeField()
     first_seen = models.DateTimeField(null=True, blank=True)
     last_tested = models.DateTimeField(null=True, blank=True)
     next_test_due = models.DateTimeField(null=True, blank=True)
