@@ -109,7 +109,7 @@ class Account(models.Model):
         return check_password(raw_password, self.password, setter)
 
     def __unicode__(self):
-        return self.email
+        return self.username
 
     def award_action_points(self, reference, text,
                             old_memory_stage, action_change,
