@@ -441,3 +441,21 @@ class IdentityTests(TestCase):
         self.assertFalse(0.0 in [uvs.strength for uvs in i.verse_statuses.filter(reference='Psalm 23:1')])
 
 
+    def test_order_after_cancelling_and_re_adding_verse(self):
+        """
+        If a verse is added, then cancelled, then added again as part of a set,
+        the order of learning should be the order defined in the set.
+        """
+        i = self._create_identity()
+        i.add_verse_choice('John 14:6')
+        self.assertEqual([uvs.reference for uvs in i.verse_statuses_for_learning()],
+                         ['John 14:6'])
+        i.record_verse_action('John 14:6', 'NET', StageType.READ, 1)
+        i.cancel_learning('John 14:6')
+        time.sleep(1)
+
+        vs1 = VerseSet.objects.get(name='Bible 101')
+        i.add_verse_set(vs1)
+
+        self.assertEqual([uvs.reference for uvs in i.verse_statuses_for_learning()],
+                         ['John 3:16', 'John 14:6'])
