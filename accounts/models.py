@@ -382,8 +382,6 @@ class Identity(models.Model):
                     use_version = version
                 # Otherwise we set the version to the chosen one
                 new_uvs = self.create_verse_status(vc.reference, verse_set, use_version)
-                new_uvs.ignored = False
-                new_uvs.save()
                 out.append(new_uvs)
         verse_set.mark_chosen()
 
@@ -566,24 +564,36 @@ class Identity(models.Model):
                                                      reference=reference,
                                                      bible_verse_number=bible_verse_number,
                                                      version=version)
-
-        same_verse = self.verse_statuses.filter(reference=reference,
-                                                version=version).exclude(id=uvs.id)
+        dirty = False
+        same_verse_set = self.verse_statuses.filter(reference=reference,
+                                                    version=version).exclude(id=uvs.id)
 
         # NB: we are exploiting the fact that multiple calls to
         # create_verse_status will get slightly increasing values of 'added',
         # allowing us to preserve order.
         if new:
             uvs.added = timezone.now()
+            dirty = True
 
-        if same_verse and new:
+        if same_verse_set and new:
             # Use existing data:
-            same_verse = same_verse[0]
+            same_verse = same_verse_set[0]
             uvs.memory_stage = same_verse.memory_stage
             uvs.strength = same_verse.strength
-            uvs.added = same_verse.added
+            # If previous record was ignored, it may have been cancelled, so we
+            # ignore 'added' since otherwise it will interfere with ordering if
+            # this is added to learning queue.
+            if not same_verse.ignored:
+                uvs.added = same_verse.added
             uvs.first_seen = same_verse.first_seen
             uvs.last_tested = same_verse.last_tested
+            dirty = True
+
+        if uvs.ignored:
+            uvs.ignored = False
+            dirty = True
+
+        if dirty:
             uvs.save()
 
         return uvs
