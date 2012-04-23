@@ -685,7 +685,7 @@ ORDER BY day ASC
 
 def stats(request):
     # We can use score logs to get stats we want.
-    start = (timezone.now() - timedelta(31)).date()
+    start = (timezone.now() - timedelta(62)).date()
     reasons = (ScoreReason.VERSE_TESTED, ScoreReason.VERSE_REVISED)
     d = get_scores_since(start, reasons)
 
