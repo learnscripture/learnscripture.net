@@ -298,8 +298,8 @@ def is_continuous_set(verse_list):
 
 
 def view_verse_set(request, slug):
-    c = {'include_referral_links': True}
     verse_set = get_object_or_404(verse_sets_visible_for_request(request), slug=slug)
+    c = {'include_referral_links': verse_set.public}
 
 
     version = None
@@ -454,15 +454,20 @@ def create_or_edit_set(request, set_type=None, slug=None):
             old_vcs = set(existing_vcs)
             for i, ref in enumerate(ref_list):  # preserve order
                 if ref in verse_dict:
+                    dirty = False
                     if ref in existing_vcs_dict:
                         vc = existing_vcs_dict[ref]
-                        vc.set_order=i
+                        if vc.set_order != i:
+                            vc.set_order = i
+                            dirty = True
                         old_vcs.remove(vc)
                     else:
                         vc = VerseChoice(verse_set=verse_set,
                                          reference=ref,
                                          set_order=i)
-                    vc.save()
+                        dirty = True
+                    if dirty:
+                        vc.save()
                 else:
                     # If not in verse_dict, it can only be because user fiddled
                     # with the DOM.
@@ -680,7 +685,7 @@ ORDER BY day ASC
 
 def stats(request):
     # We can use score logs to get stats we want.
-    start = (timezone.now() - timedelta(31)).date()
+    start = (timezone.now() - timedelta(62)).date()
     reasons = (ScoreReason.VERSE_TESTED, ScoreReason.VERSE_REVISED)
     d = get_scores_since(start, reasons)
 
@@ -821,6 +826,16 @@ def subscribe(request):
 
 @csrf_exempt
 def pay_done(request):
+    identity = getattr(request, 'identity')
+    if identity is not None:
+        # This doesn't actually check if a payment was just received,
+        # but it is good enough.
+        if (identity.account is not None
+            and identity.account.subscription == SubscriptionType.PAID_UP
+            and identity.account.paid_until > timezone.now()):
+            messages.info(request, 'Payment received, thank you!')
+            return HttpResponseRedirect(reverse('dashboard'))
+
     return render(request, 'learnscripture/pay_done.html', {'title': "Payment complete"})
 
 

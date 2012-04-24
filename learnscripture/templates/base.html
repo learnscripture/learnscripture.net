@@ -57,7 +57,8 @@
                   <li><a class="icon-preferences preferences-link" href="{% url 'preferences' %}?next={{ request.path_info }}">Preferences</a></li>
                   {% if request.identity.account %}
                   <li><a class="icon-account" href="{% url 'account_details' %}">Account details</i></a></li>
-                  <li><a class="icon-stats" href="{% url 'user_stats' request.identity.account.username %}">Stats <i class="icon-signal"></i></a></li>
+                  <li><a class="icon-progress" href="{% url 'user_verses' %}">Verses</a>
+                  <li><a class="icon-stats" href="{% url 'user_stats' request.identity.account.username %}">Stats</a></li>
                   <li><a href="#" class="icon-logout logout-link">Log out</a></li>
                   {% endif %}
                 </ul>
@@ -237,6 +238,8 @@
     <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-modal.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-tabs.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-buttons.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-twipsy.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-popover.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/common.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/bible_book_info.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/quickfind.js"></script>
@@ -249,6 +252,7 @@
     <script type="text/javascript" src="{{ STATIC_URL }}js/modals.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/dashboard.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/subscribe.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/versepopup.js"></script>
     {% endcompress %}
 
     {% if request.identity.account and include_referral_links %}

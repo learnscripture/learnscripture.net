@@ -38,6 +38,10 @@ def paypal_payment_received(sender, **kwargs):
         unrecognised_payment(ipn_obj)
         return
 
+    if ipn_obj.payment_status.lower().strip() != 'completed':
+        unrecognised_payment(ipn_obj)
+        return
+
     try:
         account = Account.objects.get(id=d['account'])
         price = Price.objects.usable().get(id=d['price'])

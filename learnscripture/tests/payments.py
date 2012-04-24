@@ -15,7 +15,7 @@ from payments.models import Price
 from payments.sign import sign_payment_info
 
 class IpnMock(object):
-    pass
+    payment_status = 'Completed'
 
 
 class PaymentTests(AccountTestMixin, TestCase):
@@ -98,6 +98,7 @@ class PaymentTests(AccountTestMixin, TestCase):
                                                                        amount=str(price.amount),
                                                                        )),
                                          ipaddress="127.0.0.1",
+                                         payment_status='Completed',
                                          )
 
         self.assertEqual(len(mail.outbox), 0)
@@ -127,6 +128,7 @@ class PaymentTests(AccountTestMixin, TestCase):
                                                                        price=price.id,
                                                                        amount=str(price.amount))),
                                          ipaddress="127.0.0.1",
+                                         payment_status='Completed',
                                          )
 
         self.assertEqual(len(mail.outbox), 0)
@@ -159,6 +161,7 @@ class PaymentTests(AccountTestMixin, TestCase):
                                                                        price=price.id,
                                                                        amount=str(price.amount))),
                                          ipaddress="127.0.0.1",
+                                         payment_status='Completed',
                                          )
 
         self.assertEqual(len(mail.outbox), 0)

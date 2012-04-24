@@ -48,7 +48,7 @@ if DEBUG:
     INTERNAL_IPS = ('127.0.0.1',)
 
 SERVER_EMAIL = 'website@learnscripture.net'
-DEFAULT_FROM_EMAIL = SERVER_EMAIL
+DEFAULT_FROM_EMAIL = 'luke@learnscripture.net'
 
 
 if DEVBOX or STAGING:
@@ -155,6 +155,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
+    'django.contrib.markup',
     'south',
     'learnscripture',
     'bibleverses',
@@ -170,6 +171,7 @@ INSTALLED_APPS = [
     'raven.contrib.django',
     'spurl',
     'paypal.standard.ipn',
+    'campaign',
 ]
 
 if DEBUG:
@@ -255,6 +257,15 @@ COMPRESS_PRECOMPILERS = (
     ('text/less', 'lessc {infile} {outfile}'),
 )
 
+RESTRUCTUREDTEXT_FILTER_SETTINGS = {
+    'raw_enabled': False,
+    'file_insertion_enabled': False,
+}
+
+CAMPAIGN_CONTEXT_PROCESSORS = [
+    'learnscripture.context_processors.campaign_context_processor'
+]
+
 ### Sentry/Raven ###
 
 from settings_priv import SENTRY_DSN
@@ -267,5 +278,5 @@ IDENTITY_EXPIRES_DAYS = 22
 
 MINIMUM_PASSWORD_LENGTH = 6
 
-REQUIRE_SUBSCRIPTION = DEVBOX
+REQUIRE_SUBSCRIPTION = True
 

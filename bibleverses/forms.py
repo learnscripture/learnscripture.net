@@ -6,7 +6,7 @@ from bibleverses.models import VerseSet
 class VerseSetForm(forms.ModelForm):
     class Meta:
         model = VerseSet
-        fields = ('name', 'description', 'public')
+        fields = ('name', 'description', 'additional_info', 'public')
 
     def clean_name(self):
         name = self.cleaned_data['name']
@@ -15,7 +15,8 @@ class VerseSetForm(forms.ModelForm):
             raise forms.ValidationError("This field is required")
         return name
 
-a = VerseSetForm.base_fields['description'].widget.attrs
-del a['cols']
-a['rows'] = 3
+for n in ['description', 'additional_info']:
+    f = VerseSetForm.base_fields[n].widget.attrs
+    del f['cols']
+    f['rows'] = 3
 VerseSetForm.base_fields['public'].label="Make public (can't be undone)"

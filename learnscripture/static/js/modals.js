@@ -1,13 +1,15 @@
+/*jslint browser: true, vars: true, plusplus: true, maxerr: 1000 */
+/*globals $, jQuery, alert, confirm */
 
 // Functionality for all modals
 
-$(document).ready(function() {
+$(document).ready(function () {
     // Modal forms:
     // * shouldn't submit when user presses Enter
     // * should click the 'primary' button if they press Enter on last input
     $("div.modal form input[type=\"text\"], " +
       "div.modal form input[type=\"password\"]").keypress(function (ev) {
-          if ((ev.which && ev.which == 13) || (ev.keyCode && ev.keyCode == 13)) {
+          if ((ev.which && ev.which === 13) || (ev.keyCode && ev.keyCode === 13)) {
               // Stop IE from submitting:
               ev.preventDefault();
 
@@ -15,7 +17,7 @@ $(document).ready(function() {
               var input = $(ev.target);
               var form = input.closest('form');
               var lastInput = form.find('input[type="text"],input[type="password"]').last();
-              if (input.attr('id') == lastInput.attr('id')) {
+              if (input.attr('id') === lastInput.attr('id')) {
                   form.closest('.modal').find('.btn.default').first().click();
               }
           }
@@ -23,9 +25,9 @@ $(document).ready(function() {
 });
 
 
-var learnscripture = (function(learnscripture, $) {
-
-    var adjustModal = function(modal) {
+var learnscripture = (function (learnscripture, $) {
+    "use strict";
+    var adjustModal = function (modal) {
         // if we have a small screen, then .modal divs are set to have
         // 'position:absolute' instead of 'position:fixed', so that they can
         // scroll.  But this means the modal can be at the top of the screen,
@@ -46,8 +48,8 @@ var learnscripture = (function(learnscripture, $) {
             bestScrollTop = Math.min($(window).scrollTop(),
                                      $(document).height() - modalHeight);
 
-            if (modal.position().top != bestScrollTop) {
-                modal.css('top', (bestScrollTop + modalMargin).toString() + "px")
+            if (modal.position().top !== bestScrollTop) {
+                modal.css('top', (bestScrollTop + modalMargin).toString() + "px");
             }
 
         } else {
@@ -58,23 +60,23 @@ var learnscripture = (function(learnscripture, $) {
             // we have enough room for the whole modal
         }
 
-        modal.find('form').toggleClass('form-stacked', modal.width() < 500)
+        modal.find('form').toggleClass('form-stacked', modal.width() < 500);
     };
 
 
-    $('div.modal').bind('shown', function(ev) {
+    $('div.modal').bind('shown', function (ev) {
         var modal = $(this);
         adjustModal(modal);
     });
 
-    $(window).bind('resize', function(ev) {
-        $('div.modal:visible').each(function(idx, elem) {
+    $(window).bind('resize', function (ev) {
+        $('div.modal:visible').each(function (idx, elem) {
             adjustModal($(elem));
-        })
+        });
     });
 
     // Export:
     learnscripture.adjustModal = adjustModal;
     return learnscripture;
 
-})(learnscripture || {}, $);
+}(learnscripture || {}, $));

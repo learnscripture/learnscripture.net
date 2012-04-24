@@ -61,12 +61,25 @@ CREATE TEMPORARY SEQUENCE rank_seq;
 SELECT
   username,
   points,
-  nextval('rank_seq') AS rank
+  nextval('rank_seq') AS rank,
+  num_verses
 FROM
-  (SELECT * FROM scores_totalscore as ts1
+  (SELECT ts1.account_id, ts1.points, accounts_account.username,
+          COUNT(bibleverses_userversestatus.id) as num_verses
+   FROM scores_totalscore as ts1
    INNER JOIN accounts_account
      ON ts1.account_id = accounts_account.id
+   INNER JOIN accounts_identity
+     ON ts1.account_id = accounts_identity.account_id
+   INNER JOIN bibleverses_userversestatus
+     ON accounts_identity.id = bibleverses_userversestatus.for_identity_id
    WHERE accounts_account.subscription != %s
+     AND bibleverses_userversestatus.ignored = false
+     AND bibleverses_userversestatus.last_tested IS NOT NULL
+   GROUP BY
+     ts1.account_id,
+     ts1.points,
+     accounts_account.username
   ORDER BY points DESC
   ) as subquery
 LIMIT %s
