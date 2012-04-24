@@ -1,19 +1,21 @@
+/*jslint browser: true, vars: true, plusplus: true */
+/*globals $, jQuery, alert */
 var learnscripture =
-    (function(learnscripture, $) {
-
-        var addVerse = function(verseData) {
+    (function (learnscripture, $) {
+        "use strict";
+        var addVerse = function (verseData) {
             var newrow = $('<tr><td></td><td></td><td><span class="icon-arrow-up icon-replace" title="move up">up</span></td><td><span class="icon-arrow-down icon-replace" title="move down">down</span></td><td><span class="icon-trash icon-replace" title="remove">remove</span></td></tr>').find('td:first-child').text(verseData.reference).end().find('td:nth-child(2)').text(verseData.text).end();
             $('#id-verse-list tbody').append(newrow);
             $('#id-verse-list').show();
-        }
+        };
 
-        var addVerseClick = function(ev) {
+        var addVerseClick = function (ev) {
             ev.preventDefault();
             var btn = $(ev.target);
             $.ajax({url: '/api/learnscripture/v1/versefind/',
                     data: btn.closest('form').serialize(),
                     dataType: 'json',
-                    success: function(results) {
+                    success: function (results) {
                         addVerse(results[0]);
                         btn.closest('.actionset').remove();
                     },
@@ -23,45 +25,45 @@ var learnscripture =
 
         var previousPassageRef = null;
 
-        var addPassage = function(passageData) {
+        var addPassage = function (passageData) {
             $('#id-verse-list tbody tr').remove();
-            $.each(passageData.verses, function(idx, verseData) {
+            $.each(passageData.verses, function (idx, verseData) {
                 var newrow = $('<tr><td><input type="checkbox" /></td><td></td><td></td></tr>').find('td:nth-child(2)').text(verseData.reference).end().find('td:nth-child(3)').text(verseData.text).end();
                 $('#id-verse-list tbody').append(newrow);
             });
             $('#id-verse-list').show();
             var ref = passageData.reference;
             var currentName = $('#id_name').val().trim();
-            if (currentName == "" || currentName == previousPassageRef) {
+            if (currentName === "" || currentName === previousPassageRef) {
                 $('#id_name').val(ref);
             }
             previousPassageRef = ref;
-        }
+        };
 
-        var deleteButtonClick = function(ev) {
+        var deleteButtonClick = function (ev) {
             ev.preventDefault();
             $(ev.target).closest('tr').remove();
         };
 
-        var selectionSaveBtnClick = function(ev) {
+        var selectionSaveBtnClick = function (ev) {
             // Create hidden fields with all references
             var refs = [];
-            $('#id-verse-list td:first-child').each(function(idx, elem) {
+            $('#id-verse-list td:first-child').each(function (idx, elem) {
                 refs.push($(elem).text());
             });
             $('#id-reference-list').val(refs.join('|'));
             $('#id-verse-set-form').submit();
         };
 
-        var passageSaveBtnClick =  function(ev) {
+        var passageSaveBtnClick = function (ev) {
             // Create hidden fields with all references
             var refs = [];
             var breaks = [];
-            $('#id-verse-list tbody tr').each(function(idx, elem) {
+            $('#id-verse-list tbody tr').each(function (idx, elem) {
                 var row = $(elem);
                 var ref = $(row.find('td').get(1)).text();
                 refs.push(ref);
-                if (row.find('input').attr('checked') == 'checked') {
+                if (row.find('input').attr('checked') === 'checked') {
                     breaks.push(ref.split(" ").slice(-1)[0]);
                 }
             });
@@ -70,7 +72,7 @@ var learnscripture =
             // continue with submit
         };
 
-        var selectionLoadResults = function(results) {
+        var selectionLoadResults = function (results) {
             $('#id-quick-find-form .validation-error').remove();
             var d = $('.quickfind_search_results');
             if (results.length > 0) {
@@ -86,19 +88,19 @@ var learnscripture =
             }
         };
 
-        var passageLoadResults = function(results) {
+        var passageLoadResults = function (results) {
             $('#id-quick-find-form .validation-error').remove();
             if (results.length > 0) {
                 addPassage(results[0]);
             }
         };
 
-        var setupCreateVerseSetControls = function() {
-            if ($('#id-verse-list tbody tr').length == 0) {
+        var setupCreateVerseSetControls = function () {
+            if ($('#id-verse-list tbody tr').length === 0) {
                 $('#id-verse-list').hide();
             }
             $('#id-verse-list').on('click', '.icon-arrow-up, .icon-arrow-down',
-                function(ev) {
+                function (ev) {
                     var row = $(this).parents("tr:first");
                     if ($(this).is(".icon-arrow-up")) {
                         row.insertBefore(row.prev());
@@ -115,12 +117,12 @@ var learnscripture =
 
             $("#id-create-selection-set input[type=\"text\"], " +
               "#id-create-passage-set input[type=\"text\"]").keypress(function (ev) {
-              if ((ev.which && ev.which == 13) || (ev.keyCode && ev.keyCode == 13)) {
+                  if ((ev.which && ev.which === 13) || (ev.keyCode && ev.keyCode === 13)) {
                   // Stop browsers from submitting:
                   ev.preventDefault();
               }
               });
-            $('#id_public').each(function(idx, elem) {
+            $('#id_public').each(function (idx, elem) {
                 var input = $(elem);
                 if (input.attr('checked')) {
                     input.attr('disabled', 'disabled');
@@ -135,9 +137,9 @@ var learnscripture =
         learnscripture.setupCreateVerseSetControls = setupCreateVerseSetControls;
 
         return learnscripture;
-    })(learnscripture || {}, $);
+    }(learnscripture || {}, $));
 
-$(document).ready(function() {
+$(document).ready(function () {
     if ($('#id-create-selection-set, #id-create-passage-set').length > 0) {
         learnscripture.setupCreateVerseSetControls();
     }

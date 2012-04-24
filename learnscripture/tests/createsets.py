@@ -145,8 +145,6 @@ class CreateSetTests(LiveServerTests):
         driver.find_element_by_id("id_quick_find").send_keys("Gen 1:1-10")
         driver.find_element_by_id("id_lookup").click()
         self.wait_for_ajax()
-
-        driver.find_element_by_id("id_lookup").click()
         self.wait_until_loaded('#id-verse-list tbody tr td')
         self.assertIn("And God called the light Day", driver.page_source)
 

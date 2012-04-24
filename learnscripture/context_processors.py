@@ -44,6 +44,7 @@ def menu(request):
     items = [
         MenuItem('Dashboard', reverse('dashboard')),
         MenuItem('Learn', reverse('learn')),
+        MenuItem('Choose', reverse('choose')),
         MenuItem('About', '/about/'),
         MenuItem('Contact', '/contact/'),
         ]
@@ -54,3 +55,7 @@ def menu(request):
 
 
 lazy_page_info = lazy_dict(page_info, ['fiber_page', 'fiber_current_pages'])
+
+
+def campaign_context_processor(account):
+    return {'account': account}

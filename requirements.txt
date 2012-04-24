@@ -16,3 +16,5 @@ urlobject==2.0.0
 django-cache-machine==0.6
 pytz
 -e git+https://github.com/dcramer/django-paypal#egg=paypal
+docutils
+-e git+git://github.com/spookylukey/django-campaign.git#egg=django-campaign

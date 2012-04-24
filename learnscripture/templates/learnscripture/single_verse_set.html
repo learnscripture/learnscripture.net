@@ -1,12 +1,19 @@
 {% extends "base_twocol.html" %}
 
 {% load url from future %}
+{% load markup %}
 
 {% block leftcolumn %}
 
 {% if verse_set.description %}
-<p>{{ verse_set.description|linebreaksbr }}</p>
+<h2>Description</h2>
+{{ verse_set.description|restructuredtext }}
 {% endif %}
+
+{% if verse_set.additional_info %}
+{{ verse_set.additional_info|restructuredtext }}
+{% endif %}
+
 {% if verse_choices %}
 {% if verse_set.is_passage %}
 <h3>{{ verse_choices.0.verse.book_name }}</h3>
@@ -23,7 +30,7 @@
 <br/>
 {% else %}
 
-<p>Includes the following verses:
+  <h2>Verses</h2>
   <ul>
     {% for v in verse_choices %}
     <li>
@@ -32,7 +39,6 @@
     </li>
     {% endfor %}
   </ul>
-</p>
 {% endif %}
 
 <form action="" method="GET">
@@ -90,8 +96,13 @@ No verses in this set!
 <div>Put together by:
 <a href="{% url 'user_stats' verse_set.created_by.username %}"
 >{{ verse_set.created_by.username }}</a>
+<br/>
+Created: {{ verse_set.date_added|timesince }} ago
 
-<div>Created: {{ verse_set.date_added|timesince }} ago</div>
+{% if not verse_set.public %}
+<br/><br/>
+<strong>Private</strong> - this verse set can only be accessed by you.
+{% endif %}
 </div>
 
 {% endblock %}
