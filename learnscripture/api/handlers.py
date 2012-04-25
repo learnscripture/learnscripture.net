@@ -20,7 +20,7 @@ from piston.utils import rc
 
 from accounts.forms import PreferencesForm
 from accounts.models import Account
-from bibleverses.models import UserVerseStatus, Verse, StageType, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, MAX_VERSE_QUERY_SIZE, BibleVersion, quick_find
+from bibleverses.models import UserVerseStatus, Verse, StageType, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, MAX_VERSE_QUERY_SIZE, BibleVersion, quick_find, VerseSetType
 from learnscripture import session
 from learnscripture.decorators import require_identity_method
 from learnscripture.forms import SignUpForm, LogInForm, AccountPasswordResetForm
@@ -349,14 +349,20 @@ class CheckDuplicatePassageSet(BaseHandler):
 
     def read(self, request):
         try:
-            ref = request.GET['reference']
+            start = request.GET['bible_verse_number_start']
+            end = request.GET['bible_verse_number_end']
         except KeyError:
             return rc.BAD_REQUEST
 
         verse_sets = verse_sets_visible_for_request(request)
         # This works if they have accepted default name.  If it doesn't have the
         # default name, it might not be considered a true 'duplicate' anyway.
-        verse_sets = verse_sets.filter(name=ref).select_related('created_by')
+        verse_sets = (verse_sets.filter(set_type=VerseSetType.PASSAGE,
+                                       bible_verse_number_start=start,
+                                       bible_verse_number_end=end
+                                       )
+                      .select_related('created_by')
+                      )
         return [dict(name=vs.name,
                      url=reverse('view_verse_set', args=[vs.slug]),
                      by=vs.created_by.username)
