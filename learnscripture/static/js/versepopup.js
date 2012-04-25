@@ -1,14 +1,15 @@
 var learnscripture = (function (learnscripture, $) {
     "use strict";
     var setupVersePopups = function () {
-        $('.verse-popup-ref').popover(
-            {
+        $('.verse-popup-ref')
+            .popover({
                 title: function () {
-                    return this.dataset.reference + " (" + this.dataset.version + ")";
+                    return this.attributes['data-reference'].value +
+                        " (" + this.attributes['data-version'].value + ")";
                 },
                 content: function () {
-                    var ref = this.dataset.reference;
-                    var version = this.dataset.version;
+                    var ref = this.attributes['data-reference'].value;
+                    var version = this.attributes['data-version'].value;
                     var content;
                     $.ajax({url: '/api/learnscripture/v1/versefind/',
                             dataType: 'json',
@@ -23,8 +24,14 @@ var learnscripture = (function (learnscripture, $) {
                             }
                            });
                     return content;
-                }
-            });
+                },
+                trigger: 'manual',
+            })
+            .bind('mouseenter', function(ev) { $(this).popover('show');})
+            .bind('mouseleave', function(ev) { $(this).popover('hide');})
+            .bind('focus', function(ev) { $(this).popover('show');})
+            .bind('blur', function(ev) { $(this).popover('hide');})
+        ;
     };
     // Exports
     learnscripture.setupVersePopups = setupVersePopups;
