@@ -25,7 +25,7 @@ from learnscripture import session
 from learnscripture.decorators import require_identity_method
 from learnscripture.forms import SignUpForm, LogInForm, AccountPasswordResetForm
 from learnscripture.utils.logging import extra
-from learnscripture.views import session_stats, bible_versions_for_request
+from learnscripture.views import session_stats, bible_versions_for_request, verse_sets_visible_for_request
 
 
 logger = logging.getLogger(__name__)
@@ -342,3 +342,23 @@ class VerseFind(BaseHandler):
             item['verses'] = verses2
             item['version_slug'] = version_slug
         return retval
+
+
+class CheckDuplicatePassageSet(BaseHandler):
+    allowed_methods = ('GET',)
+
+    def read(self, request):
+        try:
+            ref = request.GET['reference']
+        except KeyError:
+            return rc.BAD_REQUEST
+
+        verse_sets = verse_sets_visible_for_request(request)
+        # This works if they have accepted default name.  If it doesn't have the
+        # default name, it might not be considered a true 'duplicate' anyway.
+        verse_sets = verse_sets.filter(name=ref).select_related('created_by')
+        return [dict(name=vs.name,
+                     url=reverse('view_verse_set', args=[vs.slug]),
+                     by=vs.created_by.username)
+                for vs in verse_sets]
+

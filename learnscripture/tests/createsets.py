@@ -137,7 +137,7 @@ class CreateSetTests(LiveServerTests):
         driver.get(self.live_server_url + "/create-passage-set/")
 
         driver.find_element_by_id("id_name").clear()
-        driver.find_element_by_id("id_name").send_keys("Genesis 1")
+        driver.find_element_by_id("id_name").send_keys("Genesis 1:1-10")
         driver.find_element_by_id("id_description").clear()
         driver.find_element_by_id("id_description").send_keys("My description")
 
@@ -157,10 +157,24 @@ class CreateSetTests(LiveServerTests):
         self.assertTrue(driver.title.startswith("Verse set: Genesis 1"))
         self.assertIn("And God called the light Day", driver.page_source)
 
-        vs = VerseSet.objects.get(name='Genesis 1',
+        vs = VerseSet.objects.get(name='Genesis 1:1-10',
                                   set_type=VerseSetType.PASSAGE)
         self.assertTrue(len(vs.verse_choices.all()), 10)
         self.assertEqual(vs.breaks, "1:3,1:9")
+
+    def test_create_duplicate_passage_set(self):
+        self.test_create_passage_set()
+        driver = self.driver
+
+        driver.get(self.live_server_url + "/create-passage-set/")
+        driver.find_element_by_id("id_quick_find").clear()
+        driver.find_element_by_id("id_quick_find").send_keys("Gen 1:1-10")
+
+        driver.find_element_by_id("id_lookup").click()
+        self.wait_for_ajax()
+        self.wait_until_loaded('#id-verse-list tbody tr td')
+        self.assertIn("There are already", driver.page_source)
+
 
     def test_edit_passage_set(self):
         self.login(self._account)
