@@ -483,6 +483,12 @@ def create_or_edit_set(request, set_type=None, slug=None):
             for vc in old_vcs:
                 vc.delete()
 
+            if verse_set.set_type == VerseSetType.PASSAGE:
+                verse_choices = list(verse_set.verse_choices.order_by('set_order'))
+                verse_set.bible_verse_number_start = verse_dict[verse_choices[0].reference].bible_verse_number
+                verse_set.bible_verse_number_end = verse_dict[verse_choices[-1].reference].bible_verse_number
+                verse_set.save()
+
             messages.info(request, "Verse set '%s' saved!" % verse_set.name)
             return HttpResponseRedirect(reverse('view_verse_set', kwargs=dict(slug=verse_set.slug)))
         else:
