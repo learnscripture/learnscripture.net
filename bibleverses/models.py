@@ -314,6 +314,10 @@ class VerseSet(caching.base.CachingMixin, models.Model):
         self.popularity += 1
         self.save()
 
+    @property
+    def breaks_formatted(self):
+        return self.breaks.replace(",", ", ")
+
 
 class VerseChoiceManager(caching.base.CachingManager):
     use_for_related_fields = True
