@@ -40,6 +40,28 @@
         </td>
       </tr>
       <tr>
+        <th>Type:</th>
+        <td>
+          <ul class="pills">
+            <li
+               {% if 'selections' not in request.GET and 'passages' not in request.GET %}
+               class="active"
+               {% endif %}
+               ><a href="{% spurl base=request.get_full_path remove_query_param='selections' remove_query_param='passages' %}">All</a></li>
+            <li
+               {% if 'selections' in request.GET %}
+               class="active"
+               {% endif %}
+               ><a href="{% spurl base=request.get_full_path add_query='selections' remove_query_param='passages' %}">Selections</a></li>
+            <li
+               {% if 'passages' in request.GET %}
+               class="active"
+               {% endif %}
+               ><a href="{% spurl base=request.get_full_path add_query='passages' remove_query_param='selections' %}">Passages</a></li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
         <th>Search:</th>
         <td>
           <form action="" method="GET">
