@@ -99,6 +99,9 @@
         {% if vs.verse_choices.all|length > 10 %}…and more.{% endif %}
       </p>
       {% endif %}
+      {% if vs.is_passage and vs.breaks %}
+      <p>Section breaks at: {{ vs.breaks_formatted }}</p>
+      {% endif %}
       <div><a href="{{ vs.get_absolute_url }}">See more</a></div>
     </div>
     {% endfor %}
