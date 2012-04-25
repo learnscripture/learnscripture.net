@@ -95,8 +95,12 @@ var learnscripture =
                 addPassage(results[0]);
                 // If creating, not editing:
                 if (window.location.pathname.match(/\/create-passage-set\//) != null) {
+                    var verses = results[0].verses;
                     $.ajax({url: '/api/learnscripture/v1/checkduplicatepassageset/',
-                            data: {reference: results[0].reference},
+                            data: {
+                                bible_verse_number_start: verses[0].bible_verse_number,
+                                bible_verse_number_end: verses[verses.length-1].bible_verse_number
+                            },
                             dataType: 'json',
                             success: function(results) {
                                 if (results.length > 0) {
