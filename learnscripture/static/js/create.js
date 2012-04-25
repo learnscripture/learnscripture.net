@@ -90,8 +90,27 @@ var learnscripture =
 
         var passageLoadResults = function (results) {
             $('#id-quick-find-form .validation-error').remove();
+            $('#id-duplicate-warning').html('');
             if (results.length > 0) {
                 addPassage(results[0]);
+                // If creating, not editing:
+                if (window.location.pathname.match(/\/create-passage-set\//) != null) {
+                    $.ajax({url: '/api/learnscripture/v1/checkduplicatepassageset/',
+                            data: {reference: results[0].reference},
+                            dataType: 'json',
+                            success: function(results) {
+                                if (results.length > 0) {
+                                    var html = '<p>There are already some passage sets for this passage:</p>'
+                                    html = html +
+                                        '<ul>' +
+                                        $('#id-duplicate-warning-template').render(results) +
+                                        '</ul>';
+
+                                    $('#id-duplicate-warning').html(html);
+                                }
+                            }
+                           })
+                }
             }
         };
 
