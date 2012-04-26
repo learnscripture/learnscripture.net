@@ -3,7 +3,7 @@
 import socket
 import sys
 import os
-
+import simplejson
 
 hostname = socket.gethostname()
 DEVBOX = ('webfaction' not in hostname)
@@ -16,9 +16,47 @@ PROJECT_DIR = os.path.dirname(SRC_DIR)
 WEBAPP_DIR = os.path.dirname(PROJECT_DIR)
 HOME_DIR = os.environ['HOME']
 
-from .settings_priv import SECRET_KEY
+secrets = simplejson.load(open(os.path.join(SRC_DIR, "config", "secrets.json")))
+
+
 if LIVEBOX:
-    from .settings_priv import DATABASES, EMAIL_HOST, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, PRODUCTION, STAGING
+    p = os.path.dirname(os.path.abspath(__file__))
+    PRODUCTION = "webapps/learnscripture_django/" in p
+    STAGING = "webapps/learnscripture_staging_django/" in p
+
+    assert not (PRODUCTION and STAGING)
+
+    EMAIL_HOST = secrets['EMAIL_HOST']
+    EMAIL_HOST_USER = secrets['EMAIL_HOST_USER']
+    EMAIL_HOST_PASSWORD = secrets['EMAIL_HOST_PASSWORD']
+
+    if PRODUCTION:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql_psycopg2',
+                'NAME': secrets["LEARNSCRIPTURE_DB_NAME"],
+                'USER': secrets["LEARNSCRIPTURE_DB_USER"],
+                'PASSWORD': secrets["LEARNSCRIPTURE_DB_PASSWORD"],
+                'HOST': 'localhost',
+                'PORT': secrets["LEARNSCRIPTURE_DB_PORT"],
+                }
+            }
+        SECRET_KEY = secrets["PRODUCTION_SECRET_KEY"]
+        SENTRY_DSN = secrets["PRODUCTION_SENTRY_DSN"]
+
+    elif STAGING:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql_psycopg2',
+                'NAME': secrets["LEARNSCRIPTURE_STAGING_DB_NAME"],
+                'USER': secrets["LEARNSCRIPTURE_STAGING_DB_USER"],
+                'PASSWORD': secrets["LEARNSCRIPTURE_STAGING_DB_PASSWORD"],
+                'HOST': 'localhost',
+                'PORT': secrets["LEARNSCRIPTURE_STAGING_DB_PORT"],
+                }
+            }
+        SECRET_KEY = secrets["STAGING_SECRET_KEY"]
+        SENTRY_DSN = secrets["STAGING_SENTRY_DSN"]
 else:
     DATABASES = {
         'default': {
@@ -37,6 +75,11 @@ else:
     EMAIL_HOST_USER = None
     EMAIL_HOST_PASSWORD = None
     EMAIL_PORT = 8025
+
+    SECRET_KEY = secrets['DEVELOPMENT_SECRET_KEY']
+    SENTRY_DSN = secrets["DEVELOPMENT_SENTRY_DSN"]
+
+
 
 ADMINS = [
     ('', 'admin@learnscripture.net')
@@ -267,8 +310,6 @@ CAMPAIGN_CONTEXT_PROCESSORS = [
 ]
 
 ### Sentry/Raven ###
-
-from settings_priv import SENTRY_DSN
 
 SENTRY_CLIENT = 'ravenclient.AsyncDjangoClient'
 

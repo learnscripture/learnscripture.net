@@ -7,11 +7,13 @@ Change all the things marked CHANGEME. Other things can be left at their
 defaults if you are happy with the default layout.
 """
 
+import os
 import posixpath
+import simplejson
 
 from fabric.api import run, local, abort, env, put, settings, cd, task
 from fabric.decorators import runs_once
-from fabric.contrib.files import exists
+from fabric.contrib.files import exists, upload_template
 from fabric.context_managers import cd, lcd, settings, hide
 from fabric.operations import get
 
@@ -127,6 +129,11 @@ def push_rev(rev):
     env.push_rev = rev
 
 
+def secrets():
+    thisdir = os.path.dirname(os.path.abspath(__file__))
+    return simplejson.load(open(os.path.join(thisdir, "config", "secrets.json")))
+
+
 def push_sources():
     """
     Push source code to server
@@ -147,8 +154,8 @@ def push_sources():
     local("rsync learnscripture/settings_priv.py cciw@cciw.co.uk:%s/learnscripture/settings_priv.py" % target.src_dir)
 
     # This config is shared, and rarely updates, so we push to
-    # PRODUCTION. pgbouncer_users.txt is not in source control
-    local("rsync config/pgbouncer_users.txt cciw@cciw.co.uk:%s/config/" % PRODUCTION.src_dir)
+    # PRODUCTION.
+    upload_template("config/pgbouncer_users.txt", "%s/config/pgbouncer_users.txt" % PRODUCTION.src_dir, context=secrets())
     local("rsync config/pgbouncer.ini cciw@cciw.co.uk:%s/config/" % PRODUCTION.src_dir)
 
     # And copy other config and binary files from repo to destinations
