@@ -158,9 +158,19 @@ def push_sources():
     upload_template("config/pgbouncer_users.txt", "%s/config/pgbouncer_users.txt" % PRODUCTION.src_dir, context=secrets())
     local("rsync config/pgbouncer.ini cciw@cciw.co.uk:%s/config/" % PRODUCTION.src_dir)
 
+
     # And copy other config and binary files from repo to destinations
     run("cp %s/httpd.conf %s" % (target.conf_dir, posixpath.join(target.DJANGO_APP_ROOT, 'apache2', 'conf')))
     run("cp %s/start %s" % (target.conf_dir, posixpath.join(target.DJANGO_APP_ROOT, 'apache2', 'bin')))
+
+    setup_supervisor()
+
+
+def setup_supervisor():
+    # One instance of supervisor, shared
+    run("cp %s/start_supervisor.sh %s/bin" % (target.conf_dir, PRODUCTION.venv_dir))
+    run("mkdir -p %s/etc" % PRODUCTION.venv_dir)
+    run("cp %s/supervisor.conf %s/etc" % (target.conf_dir, PRODUCTION.venv_dir))
 
 
 @task
