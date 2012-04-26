@@ -151,7 +151,7 @@ def push_sources():
     with cd(target.src_dir):
         run("hg update %s" % push_rev)
     # Also need to sync files that are not in main sources VCS repo.
-    local("rsync learnscripture/settings_priv.py cciw@cciw.co.uk:%s/learnscripture/settings_priv.py" % target.src_dir)
+    local("rsync config/secrets.json cciw@cciw.co.uk:%s/config/secrets.json" % target.src_dir)
 
     # This config is shared, and rarely updates, so we push to
     # PRODUCTION.

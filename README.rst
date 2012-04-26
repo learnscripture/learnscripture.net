@@ -37,5 +37,5 @@ most business logic runs off Identity.
 Server config
 =============
 
-Passwords and private server config is stored in settings_priv.py that is not in
+Passwords and private server config is stored in secrets.json that is not in
 source control.
