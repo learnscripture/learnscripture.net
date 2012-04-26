@@ -155,9 +155,8 @@ def push_sources():
 
     # This config is shared, and rarely updates, so we push to
     # PRODUCTION.
-    upload_template("config/pgbouncer_users.txt", "%s/config/pgbouncer_users.txt" % PRODUCTION.src_dir, context=secrets())
-    local("rsync config/pgbouncer.ini cciw@cciw.co.uk:%s/config/" % PRODUCTION.src_dir)
-
+    run("mkdir -p %s/etc" % PRODUCTION.venv_dir)
+    upload_template("config/pgbouncer_users.txt", "%s/etc/pgbouncer_users.txt" % PRODUCTION.venv_dir, context=secrets())
 
     # And copy other config and binary files from repo to destinations
     run("cp %s/httpd.conf %s" % (target.conf_dir, posixpath.join(target.DJANGO_APP_ROOT, 'apache2', 'conf')))
