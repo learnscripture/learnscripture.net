@@ -167,9 +167,10 @@ def push_sources():
 
 def setup_supervisor():
     # One instance of supervisor, shared
-    run("cp %s/start_supervisor.sh %s/bin" % (target.conf_dir, PRODUCTION.venv_dir))
+    run("cp %s/config/start_supervisor.sh %s/bin" % (target.src_dir, PRODUCTION.venv_dir))
     run("mkdir -p %s/etc" % PRODUCTION.venv_dir)
-    run("cp %s/supervisor.conf %s/etc" % (target.conf_dir, PRODUCTION.venv_dir))
+    upload_template("config/supervisord.conf", "%s/etc/supervisord.conf" % PRODUCTION.venv_dir,
+                    context=secrets())
 
 
 @task
