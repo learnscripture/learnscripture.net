@@ -13,6 +13,7 @@ from django.utils import timezone
 
 from accounts import memorymodel
 from bibleverses.models import BibleVersion, MemoryStage, StageType, BibleVersion, VerseChoice, VerseSet, VerseSetType, get_passage_sections
+from bibleverses.signals import verse_set_chosen
 from scores.models import TotalScore, ScoreReason, Scores, get_rank_all_time, get_rank_this_week
 
 from learnscripture.datastructures import make_choices
@@ -383,8 +384,8 @@ class Identity(models.Model):
                 # Otherwise we set the version to the chosen one
                 new_uvs = self.create_verse_status(vc.reference, verse_set, use_version)
                 out.append(new_uvs)
-        verse_set.mark_chosen()
 
+        verse_set_chosen.send(sender=verse_set)
         return out
 
     def add_verse_choice(self, reference, version=None):
