@@ -32,10 +32,21 @@ PYTHON_BIN = "python2.7"
 PYTHON_PREFIX = "" # e.g. /usr/local  Use "" for automatic
 PYTHON_FULL_PATH = "%s/bin/%s" % (PYTHON_PREFIX, PYTHON_BIN) if PYTHON_PREFIX else PYTHON_BIN
 
+RABBITMQ_SRC = "http://www.rabbitmq.com/releases/rabbitmq-server/v2.8.1/rabbitmq-server-generic-unix-2.8.1.tar.gz"
+RABBITMQ_DIR = "rabbitmq_server-2.8.1"
+ERLANG_SRC = "http://www.erlang.org/download/otp_src_R15B01.tar.gz"
+
 
 class Target(object):
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
+
+        # Directory where everything to do with this app will be stored on the server.
+        self.DJANGO_APP_ROOT = '/home/cciw/webapps/%s_django' % self.APP_BASE_NAME
+        # Directory where static sources should be collected.  This must equal the value
+        # of STATIC_ROOT in the settings.py that is used on the server.
+        self.STATIC_ROOT = '/home/cciw/webapps/%s_static' % self.APP_BASE_NAME
+
         # Commands to stop and start the webserver that is serving the Django app.
         self.DJANGO_SERVER_STOP = posixpath.join(self.DJANGO_APP_ROOT, 'apache2', 'bin', 'stop')
         self.DJANGO_SERVER_START = posixpath.join(self.DJANGO_APP_ROOT, 'apache2', 'bin', 'start')
@@ -46,24 +57,18 @@ class Target(object):
 
 
 PRODUCTION = Target(
-    # Directory where everything to do with this app will be stored on the server.
-    DJANGO_APP_ROOT = '/home/cciw/webapps/learnscripture_django',
-    # Directory where static sources should be collected.  This must equal the value
-    # of STATIC_ROOT in the settings.py that is used on the server.
-    STATIC_ROOT = '/home/cciw/webapps/learnscripture_static',
+    NAME = "PRODUCTION",
+    APP_BASE_NAME = "learnscripture",
     DB_USER = "cciw_learnscripture",
     DB_NAME = "cciw_learnscripture",
     CONF_SUBDIR = "config/production",
 )
 
 STAGING = Target(
-    # Directory where everything to do with this app will be stored on the server.
-    DJANGO_APP_ROOT = '/home/cciw/webapps/learnscripture_staging_django',
-    # Directory where static sources should be collected.  This must equal the value
-    # of STATIC_ROOT in the settings.py that is used on the server.
-    STATIC_ROOT = '/home/cciw/webapps/learnscripture_staging_static',
-    DB_USER = "cciw_staging_learnscripture",
-    DB_NAME = "cciw_staging_learnscripture",
+    NAME = "STAGING",
+    APP_BASE_NAME = "learnscripture_staging",
+    DB_USER = "cciw_learnscripture_staging",
+    DB_NAME = "cciw_learnscripture_staging",
     CONF_SUBDIR = "config/staging",
 )
 
@@ -79,6 +84,80 @@ def staging():
     global target
     target = STAGING
 
+
+def _download(src):
+    run("wget --progress=dot -c %s" % src)
+
+
+def _tarball_stem_name(fname):
+    for s in ('.tar', '.bz2', '.gz', '.tgz'):
+        fname = fname.replace(s, '')
+    return fname
+
+
+def _download_and_unpack(tarball_src):
+    """
+    Downloads and unpacks a tarball, and returns the directory name it was
+    unpacked into.
+    """
+    _download(tarball_src)
+    fname = tarball_src.split('/')[-1]
+    run("tar -xzf %s" % fname)
+    # Big assumption here, but holds for all our sources:
+    dirname = _tarball_stem_name(fname)
+    return dirname
+
+
+@task
+def install_erlang():
+    # install into $HOME/.local, since we only need it once.
+    with cd('/home/cciw/tmpstore/build'):
+        dirname = _download_and_unpack(ERLANG_SRC)
+        with cd(dirname):
+            run("./configure --prefix=$HOME/.local"
+                "&& make"
+                "&& make install")
+
+
+def install_rabbitmq():
+    # install into venv dir, different instance for STAGING and PRODUCTION
+    rabbitmq_base = "%s/lib/" % target.venv_dir
+    with cd(rabbitmq_base):
+        rabbitmq_dirname = _download_and_unpack(RABBITMQ_SRC)
+    rabbitmq_full = "%s/%s" % (rabbitmq_base, rabbitmq_dirname)
+
+    # Need to fix as per these instructions:
+    # http://community.webfaction.com/questions/2366/can-i-use-rabbit-mq-on-the-shared-servers
+
+    run("cp %s/config/erl_inetrc $HOME" % target.src_dir)
+    run("mkdir -p $HOME/.local/etc")
+    run("cp %s/config/hosts $HOME/.local/etc/" % target.src_dir)
+
+    # Custom rabbitmq-env file
+    run("cp %s/rabbitmq-env %s/sbin" % (target.conf_dir, target.venv_dir, rabbitmq_full))
+
+
+def setup_rabbitmq():
+    rabbitmq_full = "%s/lib/%s" % (target.venv_dir, RABBITMQ_DIR)
+    rabbitmq_user = target.APP_BASE_NAME
+    rabbitmq_vhost = rabbitmq_user
+    run("%s/sbin/rabbitmqctl add_user %s %s" % (
+            rabbitmq_full,
+            rabbitmq_user,
+            secrets()["%s_RABBITMQ_PASSWORD" % target.NAME]
+            )
+        )
+    run("%s/sbin/rabbitmqctl add_vhost %s" % (
+            rabbitmq_full,
+            rabbitmq_vhost,
+            )
+        )
+    run("%s/sbin/rabbitmqctl set_permissions %s %s '.*' '.*' '.*'" % (
+            rabbitmq_full,
+            rabbitmq_vhost,
+            rabbitmq_user,
+            )
+        )
 
 
 def virtualenv(venv_dir):
@@ -172,6 +251,14 @@ def setup_supervisor():
     run("mkdir -p %s/etc" % PRODUCTION.venv_dir)
     upload_template("config/supervisord.conf", "%s/etc/supervisord.conf" % PRODUCTION.venv_dir,
                     context=secrets())
+
+
+@task
+def restart_supervisor():
+    if getattr(env, 'no_restarts', False):
+        return
+
+    run("%s/bin/start_supervisor.sh restart" % PRODUCTION.venv_dir)
 
 
 @task
