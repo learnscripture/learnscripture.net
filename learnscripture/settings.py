@@ -269,6 +269,11 @@ LOGGING = {
             'handlers': ['console'],
             'propagate': False,
         },
+        'celery': {
+            'level': 'WARNING',
+            'handlers': ['sentry'],
+            'propagate': False,
+        },
     },
 }
 
