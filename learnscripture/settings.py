@@ -215,6 +215,7 @@ INSTALLED_APPS = [
     'spurl',
     'paypal.standard.ipn',
     'campaign',
+    'djcelery',
 ]
 
 if DEBUG:
@@ -308,6 +309,28 @@ RESTRUCTUREDTEXT_FILTER_SETTINGS = {
 CAMPAIGN_CONTEXT_PROCESSORS = [
     'learnscripture.context_processors.campaign_context_processor'
 ]
+
+### Celery and RabbitMQ ###
+
+import djcelery
+djcelery.setup_loader()
+
+if LIVEBOX:
+    if PRODUCTION:
+        rabbitmq_user = "learnscripture"
+        rabbitmq_pass = secrets["PRODUCTION_RABBITMQ_PASSWORD"]
+        rabbitmq_port = 32048 # see also rabbitmq-env
+    if STAGING:
+        rabbitmq_user = "learnscripture_staging"
+        rabbitmq_pass = secrets["STAGING_RABBITMQ_PASSWORD"]
+        rabbitmq_port = 47292
+
+if DEVBOX:
+    rabbitmq_user = "learnscripture"
+    rabbitmq_pass = "foo"
+    rabbitmq_port = 32048
+
+BROKER_URL = "amqp://%s:%s@localhost:%s/" % (rabbitmq_user, rabbitmq_pass, rabbitmq_port)
 
 ### Sentry/Raven ###
 
