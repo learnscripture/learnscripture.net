@@ -366,6 +366,10 @@ def deploy():
             webserver_stop()
         webserver_start()
 
+        # Need to restart celeryd, as it will have old code.
+        with virtualenv(PRODUCTION.venv_dir):
+            run_venv("supervisorctl celeryd_%s restart" % target.APP_BASE_NAME.lower())
+
 
 @task
 def run_migrations():

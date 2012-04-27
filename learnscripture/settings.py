@@ -11,6 +11,9 @@ LIVEBOX = not DEVBOX
 DEBUG = DEVBOX
 TEMPLATE_DEBUG = DEBUG
 
+# A kitten gets killed every time you use this:
+TESTING = 'manage.py test' in ' '.join(sys.argv)
+
 SRC_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # ../
 PROJECT_DIR = os.path.dirname(SRC_DIR)
 WEBAPP_DIR = os.path.dirname(PROJECT_DIR)
@@ -329,8 +332,12 @@ if DEVBOX:
     rabbitmq_user = "learnscripture"
     rabbitmq_pass = "foo"
     rabbitmq_port = 32048
+rabbitmq_vhost = rabbitmq_user
 
-BROKER_URL = "amqp://%s:%s@localhost:%s/" % (rabbitmq_user, rabbitmq_pass, rabbitmq_port)
+BROKER_URL = "amqp://%s:%s@localhost:%s/%s" % (rabbitmq_user, rabbitmq_pass, rabbitmq_port, rabbitmq_vhost)
+
+if TESTING:
+    CELERY_ALWAYS_EAGER = True
 
 ### Sentry/Raven ###
 
