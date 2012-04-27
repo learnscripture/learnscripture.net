@@ -276,12 +276,12 @@ class Verse(caching.base.CachingMixin, models.Model):
         ordering = ('bible_verse_number',)
 
 
-class VerseSetManager(caching.base.CachingManager):
+class VerseSetManager(models.Manager):
     def public(self):
         return self.get_query_set().filter(public=True)
 
 
-class VerseSet(caching.base.CachingMixin, models.Model):
+class VerseSet(models.Model):
     name = models.CharField(max_length=255)
     slug = AutoSlugField(populate_from='name', unique=True)
     description = models.TextField(blank=True)
