@@ -114,29 +114,31 @@ def install_erlang():
     with cd('/home/cciw/tmpstore/build'):
         dirname = _download_and_unpack(ERLANG_SRC)
         with cd(dirname):
-            run("./configure --prefix=$HOME/.local"
+            run("./configure --prefix=/home/cciw/.local"
                 "&& make"
                 "&& make install")
 
 
+@task
 def install_rabbitmq():
     # install into venv dir, different instance for STAGING and PRODUCTION
     rabbitmq_base = "%s/lib/" % target.venv_dir
     with cd(rabbitmq_base):
-        rabbitmq_dirname = _download_and_unpack(RABBITMQ_SRC)
-    rabbitmq_full = "%s/%s" % (rabbitmq_base, rabbitmq_dirname)
+        _download_and_unpack(RABBITMQ_SRC)
+    rabbitmq_full = "%s/lib/%s" % (target.venv_dir, RABBITMQ_DIR)
 
     # Need to fix as per these instructions:
     # http://community.webfaction.com/questions/2366/can-i-use-rabbit-mq-on-the-shared-servers
 
-    run("cp %s/config/erl_inetrc $HOME" % target.src_dir)
-    run("mkdir -p $HOME/.local/etc")
-    run("cp %s/config/hosts $HOME/.local/etc/" % target.src_dir)
+    run("cp %s/config/erl_inetrc /home/cciw/.erl_inetrc" % target.src_dir)
+    run("mkdir -p /home/cciw/.local/etc")
+    run("cp %s/config/hosts /home/cciw/.local/etc/" % target.src_dir)
 
     # Custom rabbitmq-env file
-    run("cp %s/rabbitmq-env %s/sbin" % (target.conf_dir, target.venv_dir, rabbitmq_full))
+    run("cp %s/rabbitmq-env %s/sbin" % (target.conf_dir, rabbitmq_full))
 
 
+@task
 def setup_rabbitmq():
     rabbitmq_full = "%s/lib/%s" % (target.venv_dir, RABBITMQ_DIR)
     rabbitmq_user = target.APP_BASE_NAME
@@ -152,7 +154,7 @@ def setup_rabbitmq():
             rabbitmq_vhost,
             )
         )
-    run("%s/sbin/rabbitmqctl set_permissions %s %s '.*' '.*' '.*'" % (
+    run("%s/sbin/rabbitmqctl set_permissions -p %s %s '.*' '.*' '.*'" % (
             rabbitmq_full,
             rabbitmq_vhost,
             rabbitmq_user,
@@ -241,9 +243,8 @@ def push_sources():
     run("cp %s/httpd.conf %s" % (target.conf_dir, posixpath.join(target.DJANGO_APP_ROOT, 'apache2', 'conf')))
     run("cp %s/start %s" % (target.conf_dir, posixpath.join(target.DJANGO_APP_ROOT, 'apache2', 'bin')))
 
-    setup_supervisor()
 
-
+@task
 def setup_supervisor():
     # One instance of supervisor, shared
     run("cp %s/config/start_supervisor.sh %s/bin" % (target.src_dir, PRODUCTION.venv_dir))
