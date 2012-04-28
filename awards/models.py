@@ -41,6 +41,14 @@ class CountBasedAward(object):
         return self.COUNTS[level]
 
 
+    def give_to(self, account):
+        if self.level == 0:
+            return
+        Award.objects.get_or_create(account=account,
+                                    award_type=self.award_type,
+                                    level=self.level)
+
+
 class LearningAward(CountBasedAward):
     COUNTS = {1: 1,
               2: 10,
