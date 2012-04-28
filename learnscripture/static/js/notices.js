@@ -3,10 +3,18 @@ var learnscripture = (function (learnscripture, $) {
 
     var setupNoticesControls = function () {
         $('.notice a').click(function(ev) {
-            var n = $(this);
-            n.closest('div.notice').
-                animate({height: '0px', opacity: '0'},
-                        function() { $(this).remove(); });
+            var a = $(this);
+            var n = a.closest('div.notice');
+            n.animate({height: '0px', opacity: '0'},
+                      function() {
+                          var msgdiv = n.closest('.message-container');
+                          if (msgdiv.find('div.notice').length == 1) {
+                              // Must be the only notice
+                              msgdiv.remove();
+                          } else {
+                              n.remove();
+                          }
+                      });
             var id = this.attributes['data-notice-id'].value;
             $.ajax({url: '/api/learnscripture/v1/deletenotice/',
                     dataType: 'json',
