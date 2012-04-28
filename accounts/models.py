@@ -2,6 +2,7 @@ from datetime import timedelta
 from decimal import Decimal
 import itertools
 
+from app_metrics.utils import metric
 from django.core import mail
 from django.db import models
 from django.utils import timezone
@@ -421,6 +422,7 @@ class Identity(models.Model):
 
         now = timezone.now()
         if mem_stage == MemoryStage.TESTED:
+            metric('verse_tested')
             s0 = s[0] # Any should do, they should be all the same
             old_strength = s0.strength
             if s0.last_tested is None:
@@ -435,6 +437,7 @@ class Identity(models.Model):
             return ActionChange(old_strength=old_strength, new_strength=new_strength)
 
         if mem_stage == MemoryStage.SEEN:
+            metric('verse_started')
             s.filter(first_seen__isnull=True).update(first_seen=now)
             return ActionChange()
 
