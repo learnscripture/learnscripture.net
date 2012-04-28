@@ -4,6 +4,7 @@ from django.core.urlresolvers import reverse
 from selenium.webdriver.support.ui import Select
 
 from accounts.models import Identity
+from awards.models import AwardType, TrendSetterAward
 from bibleverses.models import VerseSet, Verse, BibleVersion
 
 from .base import LiveServerTests
@@ -23,6 +24,13 @@ class ChooseTests(LiveServerTests):
         self.assertNotIn("Bible 101", driver.page_source)
 
     def test_popularity_tracking(self):
+        # Frig a quantity to make test easier
+        TrendSetterAward.COUNTS = {1: 1, 2: 10}
+
+        # Need to be logged in for actions to count towards award
+        identity, account = self.create_account()
+        self.login(account)
+
         driver = self.driver
         driver.get(self.live_server_url + reverse('choose'))
 
@@ -32,6 +40,11 @@ class ChooseTests(LiveServerTests):
         self.set_preferences()
         self.wait_until_loaded('body')
         self.assertEqual(VerseSet.objects.get(id=vs_id).popularity, 1)
+
+        # Test awards
+        vs = VerseSet.objects.get(id=vs_id)
+        self.assertEqual(vs.created_by.awards.filter(award_type=AwardType.TREND_SETTER).count(),
+                         1)
 
     def test_double_choose(self):
         driver = self.driver
