@@ -51,6 +51,8 @@ class StudentAward(LearningAward):
     def full_description(self):
         if self.level == 1:
             return u"Learning at least one verse"
+        elif self.level == 9:
+            return u"Learning the whole bible!"
         else:
             return u"Learning at least %s verses" % self.count
 
@@ -58,6 +60,8 @@ class MasterAward(LearningAward):
     def full_description(self):
         if self.level == 1:
             return u"Finished learning at least one verse"
+        elif self.level == 9:
+            return u"Finished learning the whole bible!"
         else:
             return u"Finished learning at least %s verses" % self.count
 
