@@ -5,7 +5,7 @@ import re
 
 from autoslug import AutoSlugField
 from django.core.urlresolvers import reverse
-from django.db import models
+from django.db import models, connection
 from django.db.models import F
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -279,6 +279,32 @@ class Verse(caching.base.CachingMixin, models.Model):
 class VerseSetManager(models.Manager):
     def public(self):
         return self.get_query_set().filter(public=True)
+
+    def popularity_for_sets(self, ids, ignoring_account_ids):
+        """
+        Gets the 'popularity' for a group of sets, using actual usage.
+        """
+        sql = """
+SELECT COUNT(*) FROM
+
+  (SELECT uvs.for_identity_id
+   FROM
+      bibleverses_userversestatus as uvs
+      INNER JOIN accounts_identity
+      ON accounts_identity.id = uvs.for_identity_id
+
+   WHERE
+         uvs.ignored = FALSE
+     AND accounts_identity.account_id IS NOT NULL
+     AND accounts_identity.account_id NOT in %s
+     AND uvs.verse_set_id IN %s
+
+   GROUP BY uvs.for_identity_id
+ ) as q
+"""
+        cursor = connection.cursor()
+        cursor.execute(sql, [tuple(ignoring_account_ids), tuple(ids)])
+        return cursor.fetchall()[0][0]
 
 
 class VerseSet(models.Model):

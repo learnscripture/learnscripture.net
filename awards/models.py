@@ -9,6 +9,7 @@ AwardType = make_choices('AwardType',
                          [(0, 'STUDENT', 'Student'),
                           (1, 'MASTER', 'Master'),
                           (2, 'SHARER', 'Sharer'),
+                          (3, 'TREND_SETTER', 'Trend setter'),
                           ])
 
 class CountBasedAward(object):
@@ -88,10 +89,24 @@ class SharerAward(CountBasedAward):
             return u"Created %d public selection verse sets" % self.count
 
 
+class TrendSetterAward(CountBasedAward):
+    COUNTS = {1: 5,
+              2: 10,
+              3: 30,
+              4: 100,
+              5: 300,
+              6: 1000,
+              }
+
+    def full_description(self):
+        return u"Verse sets created by this user have been used by others at least %d times" % self.count
+
+
 AWARD_CLASSES = {
     AwardType.STUDENT: StudentAward,
     AwardType.MASTER: MasterAward,
     AwardType.SHARER: SharerAward,
+    AwardType.TREND_SETTER: TrendSetterAward,
 }
 
 for t, c in AWARD_CLASSES.items():
