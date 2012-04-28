@@ -65,4 +65,7 @@ class Migration(SchemaMigration):
         }
     }
 
-    complete_apps = ['scores']
+    complete_apps = ['scores', 'accounts']
+    depends_on = [
+        ('accounts', '0011_auto__add_field_identity_referred_by'),
+        ]

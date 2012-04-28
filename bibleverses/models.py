@@ -276,12 +276,12 @@ class Verse(caching.base.CachingMixin, models.Model):
         ordering = ('bible_verse_number',)
 
 
-class VerseSetManager(caching.base.CachingManager):
+class VerseSetManager(models.Manager):
     def public(self):
         return self.get_query_set().filter(public=True)
 
 
-class VerseSet(caching.base.CachingMixin, models.Model):
+class VerseSet(models.Model):
     name = models.CharField(max_length=255)
     slug = AutoSlugField(populate_from='name', unique=True)
     description = models.TextField(blank=True)
@@ -294,6 +294,9 @@ class VerseSet(caching.base.CachingMixin, models.Model):
     popularity = models.PositiveIntegerField(default=0)
     date_added = models.DateTimeField(default=timezone.now)
     created_by = models.ForeignKey('accounts.Account', related_name='verse_sets_created')
+
+    bible_verse_number_start = models.PositiveSmallIntegerField(null=True)
+    bible_verse_number_end = models.PositiveSmallIntegerField(null=True)
 
     objects = VerseSetManager()
 
@@ -310,6 +313,10 @@ class VerseSet(caching.base.CachingMixin, models.Model):
     def mark_chosen(self):
         self.popularity += 1
         self.save()
+
+    @property
+    def breaks_formatted(self):
+        return self.breaks.replace(",", ", ")
 
 
 class VerseChoiceManager(caching.base.CachingManager):
@@ -654,3 +661,6 @@ def normalise_reference(query):
         return BIBLE_BOOK_ABBREVIATIONS[book_name] + remainder
     else:
         return None
+
+
+import bibleverses.hooks
