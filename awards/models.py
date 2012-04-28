@@ -92,7 +92,7 @@ class SharerAward(CountBasedAward):
               }
 
     def full_description(self):
-        if self.level == 1:
+        if self.count == 1:
             return u"Created a public selection verse set"
         else:
             return u"Created %d public selection verse sets" % self.count
@@ -120,14 +120,14 @@ class AceAward(CountBasedAward):
               6: 32,
               7: 64,
               8: 128,
-              9: 250,
+              9: 256,
               }
 
     def full_description(self):
         if self.level == 1:
             return u"Achieved 100% in a test"
         else:
-            return u"Achieved 100% in a test %d times in a row"
+            return u"Achieved 100%% in a test %d times in a row" % self.level
 
 
 AWARD_CLASSES = {
