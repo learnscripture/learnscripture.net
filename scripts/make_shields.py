@@ -21,17 +21,17 @@ thisdir = os.path.dirname(os.path.abspath(__file__))
 updir = os.path.normpath(os.path.join(thisdir, '..'))
 
 if __name__ == '__main__':
-    shield_types = [('LEARNER', 'shield_green.svg'),
-                    ('RECRUITER', 'shield_blue.svg'),
-                    ('TREND_SETTER', 'shield_red.svg'),
-                    ('MASTER', 'shield_gold.svg')]
+    award_types = [('STUDENT', 'shield_green.svg'),
+                   ('RECRUITER', 'shield_blue.svg'),
+                   ('TREND_SETTER', 'shield_red.svg'),
+                   ('MASTER', 'shield_gold.svg')]
 
-    for name, shield_file in shield_types:
+    for name, award_file in award_types:
         for level in [1, 2, 3]:
             for size in [50, 100]:
-                s1 = os.path.join(updir, 'resources', shield_file)
+                s1 = os.path.join(updir, 'resources', award_file)
                 s2 = os.path.join(updir, 'resources', 'shield_level_%d.svg' % level)
-                fname = os.path.join(updir, 'learnscripture', 'static', 'img',
-                                     'shield_%s_level_%d_%d.png' %
+                fname = os.path.join(updir, 'learnscripture', 'static', 'img', 'awards',
+                                     'award_%s_level_%d_%d.png' %
                                      (name, level, size))
                 combine([s1, s2], fname, size)

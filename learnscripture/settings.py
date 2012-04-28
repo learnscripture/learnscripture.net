@@ -204,11 +204,14 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.markup',
     'south',
+    # This project
     'learnscripture',
     'bibleverses',
     'accounts',
     'scores',
     'payments',
+    'awards',
+    # Third party
     'piston',
     'mptt',
     'compressor',
