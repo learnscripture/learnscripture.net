@@ -8,25 +8,18 @@ from learnscripture.datastructures import make_choices
 AwardType = make_choices('AwardType',
                          [(0, 'STUDENT', 'Student'),
                           (1, 'MASTER', 'Master'),
+                          (2, 'SHARER', 'Sharer'),
                           ])
 
-class LearningAward(object):
-    COUNTS = {1: 1,
-              2: 10,
-              3: 30,
-              4: 100,
-              5: 300,
-              6: 1000,
-              7: 3000,
-              8: 10000,
-              9: 31102, # every verse
-              }
-    _LEVELS_DESC = sorted([(a,b) for b, a in COUNTS.items()], reverse=True)
+class CountBasedAward(object):
+
+    # Subclass must define COUNTS
 
     def __init__(self, level=None, count=None):
         """
         Must pass at least one of level or count
         """
+        self._LEVELS_DESC = sorted([(a,b) for b, a in self.COUNTS.items()], reverse=True)
         if count is None:
             self.count = self.count_for_level(level)
         else:
@@ -47,6 +40,19 @@ class LearningAward(object):
         return self.COUNTS[level]
 
 
+class LearningAward(CountBasedAward):
+    COUNTS = {1: 1,
+              2: 10,
+              3: 30,
+              4: 100,
+              5: 300,
+              6: 1000,
+              7: 3000,
+              8: 10000,
+              9: 31102, # every verse
+              }
+
+
 class StudentAward(LearningAward):
     def full_description(self):
         if self.level == 1:
@@ -55,6 +61,7 @@ class StudentAward(LearningAward):
             return u"Learning the whole bible!"
         else:
             return u"Learning at least %s verses" % self.count
+
 
 class MasterAward(LearningAward):
     def full_description(self):
@@ -66,9 +73,25 @@ class MasterAward(LearningAward):
             return u"Finished learning at least %s verses" % self.count
 
 
+class SharerAward(CountBasedAward):
+    COUNTS = {1: 1,
+              2: 2,
+              3: 5,
+              4: 10,
+              5: 20,
+              }
+
+    def full_description(self):
+        if self.level == 1:
+            return u"Created a public selection verse set"
+        else:
+            return u"Created %d public selection verse sets" % self.count
+
+
 AWARD_CLASSES = {
     AwardType.STUDENT: StudentAward,
-    AwardType.MASTER: MasterAward
+    AwardType.MASTER: MasterAward,
+    AwardType.SHARER: SharerAward,
 }
 
 for t, c in AWARD_CLASSES.items():

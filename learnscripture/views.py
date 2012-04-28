@@ -21,6 +21,7 @@ from paypal.standard.forms import PayPalPaymentsForm
 from accounts import memorymodel
 from accounts.models import Account, SubscriptionType
 from accounts.forms import PreferencesForm, AccountDetailsForm
+import awards.tasks
 from learnscripture.forms import AccountSetPasswordForm
 from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType, get_passage_sections
 from learnscripture import session, auth
@@ -453,6 +454,8 @@ def create_or_edit_set(request, set_type=None, slug=None):
                 # Can't undo:
                 verse_set.public = True
             verse_set.save()
+            awards.tasks.give_sharer_awards.apply_async([verse_set.created_by_id],
+                                                        countdown=2)
 
             # Need to ensure that we preserve existing objects
             existing_vcs = verse_set.verse_choices.all()

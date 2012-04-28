@@ -22,7 +22,9 @@ updir = os.path.normpath(os.path.join(thisdir, '..'))
 
 if __name__ == '__main__':
     award_types = [('STUDENT', 'shield_green.svg'),
-                   ('MASTER', 'shield_red.svg')]
+                   ('MASTER', 'shield_red.svg'),
+                   ('SHARER', 'shield_blue.svg'),
+                   ]
 
     for name, award_file in award_types:
         for level in [1, 2, 3, 4, 5, 6, 7, 8, 9]:
