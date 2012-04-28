@@ -9,6 +9,7 @@ from django.utils import timezone
 
 from accounts import memorymodel
 from accounts.models import Identity, ActionChange, Account
+from awards.models import AwardType
 from bibleverses.models import VerseSet, BibleVersion, StageType, MemoryStage
 from scores.models import Scores
 
@@ -20,6 +21,13 @@ class IdentityTests(TestCase):
     def _create_identity(self):
         NET = BibleVersion.objects.get(slug='NET')
         return Identity.objects.create(default_bible_version=NET)
+
+    def _create_account(self):
+        identity = self._create_identity()
+        account = Account.objects.create(username='testaccount')
+        identity.account = account
+        identity.save()
+        return account
 
     def test_add_verse_set(self):
         i = self._create_identity()
@@ -118,6 +126,24 @@ class IdentityTests(TestCase):
         self.assertEqual(i.verse_statuses.get(reference='John 3:16',
                                               verse_set=vs2).memory_stage,
                          MemoryStage.SEEN)
+
+    def test_record_creates_awards(self):
+        account = self._create_account()
+        i = account.identity
+        vs1 = VerseSet.objects.get(name='Bible 101')
+        i.add_verse_set(vs1)
+        i.record_verse_action('John 3:16', 'NET', StageType.TEST, 1)
+        # Checl 'STUDENT'
+        self.assertEqual(account.awards.filter(award_type=AwardType.STUDENT, level=1).count(),
+                         1)
+        # Check 'MASTER'
+        # frig the data:
+        i.verse_statuses.update(strength=memorymodel.MM.LEARNT - 0.001,
+                                last_tested=timezone.now() - timedelta(100))
+        # Now do test to move above LEARNT
+        i.record_verse_action('John 3:16', 'NET', StageType.TEST, 1)
+        self.assertEqual(account.awards.filter(award_type=AwardType.MASTER, level=1).count(),
+                         1)
 
     def test_change_version(self):
         # Setup
