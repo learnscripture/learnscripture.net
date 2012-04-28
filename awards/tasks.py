@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.core.urlresolvers import reverse
 from celery.task import task
 
 from awards.models import StudentAward, Award, AwardType
@@ -20,3 +22,12 @@ def give_learning_awards(account_id):
             award_type=AwardType.STUDENT,
             level=award_detail.level,
             )
+        if new:
+            account.identity.notices.create(message_html="""
+<img src="%s%s"> You've got a new award: <a href="%s">%s</a>""" %
+                                            (settings.STATIC_URL,
+                                             award.image_small(),
+                                             reverse('user_stats', args=(account.username,)),
+                                             award.short_description())
+                                            )
+
