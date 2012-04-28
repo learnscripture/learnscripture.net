@@ -36,11 +36,11 @@ class IdentityTests(TestCase):
         vs1 = VerseSet.objects.get(name='Bible 101') # fresh
         # Having already created the UserVerseStatuses, this should be an
         # efficient operation:
-        with self.assertNumQueries(6):
+        with self.assertNumQueries(4):
             # 1 for existing uvs, same version
             # 1 for other versions.
             # 1 for verse_choices.all()
-            # 3 for VerseSet.mark_chosen (for some unknown reason to do with CachingManager)
+            # 1 for VerseSet.popularity update
             uvss = i.add_verse_set(vs1)
             # session.set_verse_statuses will use all these:
             l = [(uvs.reference, uvs.verse_set_id)

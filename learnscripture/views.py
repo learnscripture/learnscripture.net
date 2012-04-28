@@ -265,6 +265,12 @@ def choose(request):
     if 'q' in request.GET:
         verse_sets = verse_sets.filter(name__icontains=request.GET['q'])
 
+    if 'passages' in request.GET:
+        verse_sets = verse_sets.filter(set_type=VerseSetType.PASSAGE)
+    if 'selections' in request.GET:
+        verse_sets = verse_sets.filter(set_type=VerseSetType.SELECTION)
+
+
     if 'new' in request.GET:
         verse_sets = verse_sets.order_by('-date_added')
     else: # popular, the default
@@ -477,6 +483,12 @@ def create_or_edit_set(request, set_type=None, slug=None):
             for vc in old_vcs:
                 vc.delete()
 
+            if verse_set.set_type == VerseSetType.PASSAGE:
+                verse_choices = list(verse_set.verse_choices.order_by('set_order'))
+                verse_set.bible_verse_number_start = verse_dict[verse_choices[0].reference].bible_verse_number
+                verse_set.bible_verse_number_end = verse_dict[verse_choices[-1].reference].bible_verse_number
+                verse_set.save()
+
             messages.info(request, "Verse set '%s' saved!" % verse_set.name)
             return HttpResponseRedirect(reverse('view_verse_set', kwargs=dict(slug=verse_set.slug)))
         else:
@@ -667,51 +679,44 @@ def date_to_js_ts(d):
     return int(d.strftime('%s'))*1000
 
 
-def get_scores_since(start, reasons):
-    from learnscripture.utils.db import dictfetchall
-    from django.db import connection
-
-    sql = """
-SELECT date_trunc('day', created) as day, reason, COUNT(id) as c FROM scores_scorelog
-WHERE created > %s
-AND reason IN %s
-GROUP BY day, reason
-ORDER BY day ASC
-"""
-    cursor = connection.cursor()
-    cursor.execute(sql, [start, reasons])
-    return dictfetchall(cursor)
-
-
 def stats(request):
-    # We can use score logs to get stats we want.
+    from app_metrics.models import MetricDay
     start = (timezone.now() - timedelta(62)).date()
-    reasons = (ScoreReason.VERSE_TESTED, ScoreReason.VERSE_REVISED)
-    d = get_scores_since(start, reasons)
 
-    # Some rows might be missing some days, so need to fill in with zeros,
-    # otherwise charting fails. Get dict of vals we do have:
-    rows_by_reason = dict((reason, dict((r['day'], r['c']) for r in d if r['reason'] == reason))
-                          for reason in reasons)
-    # empty dict waiting to be filled:
-    complete_rows_by_reason = dict((reason, []) for reason in reasons)
-    old_dt = None
-    for row in d:
-        dt = row['day']
-        if dt == old_dt and old_dt is not None:
-            continue
-        for reason in reasons:
-            row_dict = rows_by_reason[reason]
-            output_row = complete_rows_by_reason[reason]
-            val = row_dict.get(dt, 0) # get zero if SQL query returned no row.
-            ts = date_to_js_ts(dt)
-            output_row.append((ts, val))
-        old_dt = dt
+    metric_slugs = ['verse_started', 'verse_tested']
+    metrics = (MetricDay.objects.filter(metric__slug__in=metric_slugs)
+               .filter(created__gte=start)
+               .select_related('metric'))
+
+
+    # Missing metrics => zero. However, if we omit a value for a day, then the
+    # plotting library interpolates, when we want it to say zero.  So we have to
+    # build a dictionary of all values and loop through by day.
+
+    min_date = None
+    max_date = None
+
+    grouped = {}
+    for m in metrics:
+        if min_date is None or m.created < min_date:
+            min_date = m.created
+        if max_date is None or m.created > max_date:
+            max_date = m.created
+        grouped[(m.metric.slug, m.created)] = m.num
+
+    output_rows = dict((s, []) for s in metric_slugs)
+    cur_date = min_date
+    while cur_date <= max_date:
+        for s in metric_slugs:
+            val = grouped.get((s, cur_date), 0)
+            ts = date_to_js_ts(cur_date)
+            output_rows[s].append((ts, val))
+        cur_date += timedelta(1)
 
     return render(request, 'learnscripture/stats.html',
                   {'title': 'Stats',
-                   'verses_initial_tests_per_day': complete_rows_by_reason[ScoreReason.VERSE_TESTED],
-                   'verses_revision_tests_per_day': complete_rows_by_reason[ScoreReason.VERSE_REVISED]
+                   'verses_initial_tests_per_day': output_rows['verse_started'],
+                   'verses_revision_tests_per_day': output_rows['verse_tested']
                    })
 
 

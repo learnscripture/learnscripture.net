@@ -3,7 +3,7 @@
 import socket
 import sys
 import os
-
+import simplejson
 
 hostname = socket.gethostname()
 DEVBOX = ('webfaction' not in hostname)
@@ -11,14 +11,55 @@ LIVEBOX = not DEVBOX
 DEBUG = DEVBOX
 TEMPLATE_DEBUG = DEBUG
 
+# A kitten gets killed every time you use this:
+TESTING = 'manage.py test' in ' '.join(sys.argv)
+
 SRC_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # ../
 PROJECT_DIR = os.path.dirname(SRC_DIR)
 WEBAPP_DIR = os.path.dirname(PROJECT_DIR)
 HOME_DIR = os.environ['HOME']
 
-from .settings_priv import SECRET_KEY
+secrets = simplejson.load(open(os.path.join(SRC_DIR, "config", "secrets.json")))
+
+
 if LIVEBOX:
-    from .settings_priv import DATABASES, EMAIL_HOST, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, PRODUCTION, STAGING
+    p = os.path.dirname(os.path.abspath(__file__))
+    PRODUCTION = "webapps/learnscripture_django/" in p
+    STAGING = "webapps/learnscripture_staging_django/" in p
+
+    assert not (PRODUCTION and STAGING)
+
+    EMAIL_HOST = secrets['EMAIL_HOST']
+    EMAIL_HOST_USER = secrets['EMAIL_HOST_USER']
+    EMAIL_HOST_PASSWORD = secrets['EMAIL_HOST_PASSWORD']
+
+    if PRODUCTION:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql_psycopg2',
+                'NAME': secrets["LEARNSCRIPTURE_DB_NAME"],
+                'USER': secrets["LEARNSCRIPTURE_DB_USER"],
+                'PASSWORD': secrets["LEARNSCRIPTURE_DB_PASSWORD"],
+                'HOST': 'localhost',
+                'PORT': secrets["LEARNSCRIPTURE_DB_PORT"],
+                }
+            }
+        SECRET_KEY = secrets["PRODUCTION_SECRET_KEY"]
+        SENTRY_DSN = secrets["PRODUCTION_SENTRY_DSN"]
+
+    elif STAGING:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql_psycopg2',
+                'NAME': secrets["LEARNSCRIPTURE_STAGING_DB_NAME"],
+                'USER': secrets["LEARNSCRIPTURE_STAGING_DB_USER"],
+                'PASSWORD': secrets["LEARNSCRIPTURE_STAGING_DB_PASSWORD"],
+                'HOST': 'localhost',
+                'PORT': secrets["LEARNSCRIPTURE_STAGING_DB_PORT"],
+                }
+            }
+        SECRET_KEY = secrets["STAGING_SECRET_KEY"]
+        SENTRY_DSN = secrets["STAGING_SENTRY_DSN"]
 else:
     DATABASES = {
         'default': {
@@ -37,6 +78,11 @@ else:
     EMAIL_HOST_USER = None
     EMAIL_HOST_PASSWORD = None
     EMAIL_PORT = 8025
+
+    SECRET_KEY = secrets['DEVELOPMENT_SECRET_KEY']
+    SENTRY_DSN = secrets["DEVELOPMENT_SENTRY_DSN"]
+
+
 
 ADMINS = [
     ('', 'admin@learnscripture.net')
@@ -110,6 +156,7 @@ MIDDLEWARE_CLASSES = [
     m for b, m in
     [
         (DEBUG, 'debug_toolbar.middleware.DebugToolbarMiddleware'),
+        (True, 'learnscripture.middleware.StatsMiddleware'),
         (True, 'django.middleware.common.CommonMiddleware'),
         (True, 'django.middleware.transaction.TransactionMiddleware'),
         (True, 'django.contrib.sessions.middleware.SessionMiddleware'),
@@ -172,6 +219,8 @@ INSTALLED_APPS = [
     'spurl',
     'paypal.standard.ipn',
     'campaign',
+    'djcelery',
+    'app_metrics',
 ]
 
 if DEBUG:
@@ -222,6 +271,11 @@ LOGGING = {
             'handlers': ['console'],
             'propagate': False,
         },
+        'celery': {
+            'level': 'WARNING',
+            'handlers': ['sentry'],
+            'propagate': False,
+        },
     },
 }
 
@@ -266,9 +320,33 @@ CAMPAIGN_CONTEXT_PROCESSORS = [
     'learnscripture.context_processors.campaign_context_processor'
 ]
 
-### Sentry/Raven ###
+### Celery and RabbitMQ ###
 
-from settings_priv import SENTRY_DSN
+import djcelery
+djcelery.setup_loader()
+
+if LIVEBOX:
+    if PRODUCTION:
+        rabbitmq_user = "learnscripture"
+        rabbitmq_pass = secrets["PRODUCTION_RABBITMQ_PASSWORD"]
+        rabbitmq_port = 32048 # see also rabbitmq-env
+    if STAGING:
+        rabbitmq_user = "learnscripture_staging"
+        rabbitmq_pass = secrets["STAGING_RABBITMQ_PASSWORD"]
+        rabbitmq_port = 47292
+
+if DEVBOX:
+    rabbitmq_user = "learnscripture"
+    rabbitmq_pass = "foo"
+    rabbitmq_port = 32048
+rabbitmq_vhost = rabbitmq_user
+
+BROKER_URL = "amqp://%s:%s@localhost:%s/%s" % (rabbitmq_user, rabbitmq_pass, rabbitmq_port, rabbitmq_vhost)
+
+if TESTING:
+    CELERY_ALWAYS_EAGER = True
+
+### Sentry/Raven ###
 
 SENTRY_CLIENT = 'ravenclient.AsyncDjangoClient'
 

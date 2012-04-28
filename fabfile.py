@@ -7,11 +7,13 @@ Change all the things marked CHANGEME. Other things can be left at their
 defaults if you are happy with the default layout.
 """
 
+import os
 import posixpath
+import simplejson
 
 from fabric.api import run, local, abort, env, put, settings, cd, task
 from fabric.decorators import runs_once
-from fabric.contrib.files import exists
+from fabric.contrib.files import exists, upload_template
 from fabric.context_managers import cd, lcd, settings, hide
 from fabric.operations import get
 
@@ -30,10 +32,21 @@ PYTHON_BIN = "python2.7"
 PYTHON_PREFIX = "" # e.g. /usr/local  Use "" for automatic
 PYTHON_FULL_PATH = "%s/bin/%s" % (PYTHON_PREFIX, PYTHON_BIN) if PYTHON_PREFIX else PYTHON_BIN
 
+RABBITMQ_SRC = "http://www.rabbitmq.com/releases/rabbitmq-server/v2.8.1/rabbitmq-server-generic-unix-2.8.1.tar.gz"
+RABBITMQ_DIR = "rabbitmq_server-2.8.1"
+ERLANG_SRC = "http://www.erlang.org/download/otp_src_R15B01.tar.gz"
+
 
 class Target(object):
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
+
+        # Directory where everything to do with this app will be stored on the server.
+        self.DJANGO_APP_ROOT = '/home/cciw/webapps/%s_django' % self.APP_BASE_NAME
+        # Directory where static sources should be collected.  This must equal the value
+        # of STATIC_ROOT in the settings.py that is used on the server.
+        self.STATIC_ROOT = '/home/cciw/webapps/%s_static' % self.APP_BASE_NAME
+
         # Commands to stop and start the webserver that is serving the Django app.
         self.DJANGO_SERVER_STOP = posixpath.join(self.DJANGO_APP_ROOT, 'apache2', 'bin', 'stop')
         self.DJANGO_SERVER_START = posixpath.join(self.DJANGO_APP_ROOT, 'apache2', 'bin', 'start')
@@ -44,24 +57,18 @@ class Target(object):
 
 
 PRODUCTION = Target(
-    # Directory where everything to do with this app will be stored on the server.
-    DJANGO_APP_ROOT = '/home/cciw/webapps/learnscripture_django',
-    # Directory where static sources should be collected.  This must equal the value
-    # of STATIC_ROOT in the settings.py that is used on the server.
-    STATIC_ROOT = '/home/cciw/webapps/learnscripture_static',
+    NAME = "PRODUCTION",
+    APP_BASE_NAME = "learnscripture",
     DB_USER = "cciw_learnscripture",
     DB_NAME = "cciw_learnscripture",
     CONF_SUBDIR = "config/production",
 )
 
 STAGING = Target(
-    # Directory where everything to do with this app will be stored on the server.
-    DJANGO_APP_ROOT = '/home/cciw/webapps/learnscripture_staging_django',
-    # Directory where static sources should be collected.  This must equal the value
-    # of STATIC_ROOT in the settings.py that is used on the server.
-    STATIC_ROOT = '/home/cciw/webapps/learnscripture_staging_static',
-    DB_USER = "cciw_staging_learnscripture",
-    DB_NAME = "cciw_staging_learnscripture",
+    NAME = "STAGING",
+    APP_BASE_NAME = "learnscripture_staging",
+    DB_USER = "cciw_learnscripture_staging",
+    DB_NAME = "cciw_learnscripture_staging",
     CONF_SUBDIR = "config/staging",
 )
 
@@ -77,6 +84,82 @@ def staging():
     global target
     target = STAGING
 
+
+def _download(src):
+    run("wget --progress=dot -c %s" % src)
+
+
+def _tarball_stem_name(fname):
+    for s in ('.tar', '.bz2', '.gz', '.tgz'):
+        fname = fname.replace(s, '')
+    return fname
+
+
+def _download_and_unpack(tarball_src):
+    """
+    Downloads and unpacks a tarball, and returns the directory name it was
+    unpacked into.
+    """
+    _download(tarball_src)
+    fname = tarball_src.split('/')[-1]
+    run("tar -xzf %s" % fname)
+    # Big assumption here, but holds for all our sources:
+    dirname = _tarball_stem_name(fname)
+    return dirname
+
+
+@task
+def install_erlang():
+    # install into $HOME/.local, since we only need it once.
+    with cd('/home/cciw/tmpstore/build'):
+        dirname = _download_and_unpack(ERLANG_SRC)
+        with cd(dirname):
+            run("./configure --prefix=/home/cciw/.local"
+                "&& make"
+                "&& make install")
+
+
+@task
+def install_rabbitmq():
+    # install into venv dir, different instance for STAGING and PRODUCTION
+    rabbitmq_base = "%s/lib/" % target.venv_dir
+    with cd(rabbitmq_base):
+        _download_and_unpack(RABBITMQ_SRC)
+    rabbitmq_full = "%s/lib/%s" % (target.venv_dir, RABBITMQ_DIR)
+
+    # Need to fix as per these instructions:
+    # http://community.webfaction.com/questions/2366/can-i-use-rabbit-mq-on-the-shared-servers
+
+    run("cp %s/config/erl_inetrc /home/cciw/.erl_inetrc" % target.src_dir)
+    run("mkdir -p /home/cciw/.local/etc")
+    run("cp %s/config/hosts /home/cciw/.local/etc/" % target.src_dir)
+
+    # Custom rabbitmq-env file
+    run("cp %s/rabbitmq-env %s/sbin" % (target.conf_dir, rabbitmq_full))
+
+
+@task
+def setup_rabbitmq():
+    rabbitmq_full = "%s/lib/%s" % (target.venv_dir, RABBITMQ_DIR)
+    rabbitmq_user = target.APP_BASE_NAME
+    rabbitmq_vhost = rabbitmq_user
+    run("%s/sbin/rabbitmqctl add_user %s %s" % (
+            rabbitmq_full,
+            rabbitmq_user,
+            secrets()["%s_RABBITMQ_PASSWORD" % target.NAME]
+            )
+        )
+    run("%s/sbin/rabbitmqctl add_vhost %s" % (
+            rabbitmq_full,
+            rabbitmq_vhost,
+            )
+        )
+    run("%s/sbin/rabbitmqctl set_permissions -p %s %s '.*' '.*' '.*'" % (
+            rabbitmq_full,
+            rabbitmq_vhost,
+            rabbitmq_user,
+            )
+        )
 
 
 def virtualenv(venv_dir):
@@ -127,6 +210,11 @@ def push_rev(rev):
     env.push_rev = rev
 
 
+def secrets():
+    thisdir = os.path.dirname(os.path.abspath(__file__))
+    return simplejson.load(open(os.path.join(thisdir, "config", "secrets.json")))
+
+
 def push_sources():
     """
     Push source code to server
@@ -144,16 +232,34 @@ def push_sources():
     with cd(target.src_dir):
         run("hg update %s" % push_rev)
     # Also need to sync files that are not in main sources VCS repo.
-    local("rsync learnscripture/settings_priv.py cciw@cciw.co.uk:%s/learnscripture/settings_priv.py" % target.src_dir)
+    local("rsync config/secrets.json cciw@cciw.co.uk:%s/config/secrets.json" % target.src_dir)
 
     # This config is shared, and rarely updates, so we push to
-    # PRODUCTION. pgbouncer_users.txt is not in source control
-    local("rsync config/pgbouncer_users.txt cciw@cciw.co.uk:%s/config/" % PRODUCTION.src_dir)
-    local("rsync config/pgbouncer.ini cciw@cciw.co.uk:%s/config/" % PRODUCTION.src_dir)
+    # PRODUCTION.
+    run("mkdir -p %s/etc" % PRODUCTION.venv_dir)
+    upload_template("config/pgbouncer_users.txt", "%s/etc/pgbouncer_users.txt" % PRODUCTION.venv_dir, context=secrets())
 
     # And copy other config and binary files from repo to destinations
     run("cp %s/httpd.conf %s" % (target.conf_dir, posixpath.join(target.DJANGO_APP_ROOT, 'apache2', 'conf')))
     run("cp %s/start %s" % (target.conf_dir, posixpath.join(target.DJANGO_APP_ROOT, 'apache2', 'bin')))
+
+
+@task
+def setup_supervisor():
+    # One instance of supervisor, shared
+    run("cp %s/config/start_supervisor.sh %s/bin" % (target.src_dir, PRODUCTION.venv_dir))
+    run("chmod +x %s/bin/start_supervisor.sh" % PRODUCTION.venv_dir)
+    run("mkdir -p %s/etc" % PRODUCTION.venv_dir)
+    upload_template("config/supervisord.conf", "%s/etc/supervisord.conf" % PRODUCTION.venv_dir,
+                    context=secrets())
+
+
+@task
+def restart_supervisor():
+    if getattr(env, 'no_restarts', False):
+        return
+
+    run("%s/bin/start_supervisor.sh restart" % PRODUCTION.venv_dir)
 
 
 @task
@@ -259,6 +365,10 @@ def deploy():
         with settings(warn_only=True):
             webserver_stop()
         webserver_start()
+
+        # Need to restart celeryd, as it will have old code.
+        with virtualenv(PRODUCTION.venv_dir):
+            run_venv("supervisorctl celeryd_%s restart" % target.APP_BASE_NAME.lower())
 
 
 @task

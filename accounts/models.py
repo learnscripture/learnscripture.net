@@ -2,6 +2,7 @@ from datetime import timedelta
 from decimal import Decimal
 import itertools
 
+from app_metrics.utils import metric
 from django.core import mail
 from django.db import models
 from django.utils import timezone
@@ -13,6 +14,7 @@ from django.utils import timezone
 
 from accounts import memorymodel
 from bibleverses.models import BibleVersion, MemoryStage, StageType, BibleVersion, VerseChoice, VerseSet, VerseSetType, get_passage_sections
+from bibleverses.signals import verse_set_chosen
 from scores.models import TotalScore, ScoreReason, Scores, get_rank_all_time, get_rank_this_week
 
 from learnscripture.datastructures import make_choices
@@ -383,8 +385,8 @@ class Identity(models.Model):
                 # Otherwise we set the version to the chosen one
                 new_uvs = self.create_verse_status(vc.reference, verse_set, use_version)
                 out.append(new_uvs)
-        verse_set.mark_chosen()
 
+        verse_set_chosen.send(sender=verse_set)
         return out
 
     def add_verse_choice(self, reference, version=None):
@@ -420,6 +422,7 @@ class Identity(models.Model):
 
         now = timezone.now()
         if mem_stage == MemoryStage.TESTED:
+            metric('verse_tested')
             s0 = s[0] # Any should do, they should be all the same
             old_strength = s0.strength
             if s0.last_tested is None:
@@ -434,6 +437,7 @@ class Identity(models.Model):
             return ActionChange(old_strength=old_strength, new_strength=new_strength)
 
         if mem_stage == MemoryStage.SEEN:
+            metric('verse_started')
             s.filter(first_seen__isnull=True).update(first_seen=now)
             return ActionChange()
 

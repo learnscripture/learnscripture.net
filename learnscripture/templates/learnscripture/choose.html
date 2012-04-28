@@ -26,16 +26,38 @@
         <th>Order:</th>
         <td>
           <ul class="pills">
-            <li
-               {% if 'new' not in request.GET %}
-               class="active"
-               {% endif %}
-               ><a href="{% spurl base=request.get_full_path add_query='popular' remove_query_param='new' %}">Most popular first</a></li>
-            <li
-               {% if 'new' in request.GET %}
-               class="active"
-               {% endif %}
-               ><a href="{% spurl base=request.get_full_path add_query='new' remove_query_param='popular' %}">Newest first</a></li>
+            {% if 'new' not in request.GET %}
+            <li class="active"><a href="">Most popular first</a></li>
+            {% else %}
+            <li><a href="{% spurl base=request.get_full_path add_query='popular' remove_query_param='new' %}">Most popular first</a></li>
+            {% endif %}
+            {% if 'new' in request.GET %}
+            <li class="active"><a href="">Newest first</a></li>
+            {% else %}
+            <li><a href="{% spurl base=request.get_full_path add_query='new' remove_query_param='popular' %}">Newest first</a></li>
+            {% endif %}
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <th>Type:</th>
+        <td>
+          <ul class="pills">
+            {% if 'selections' not in request.GET and 'passages' not in request.GET %}
+            <li class="active"><a href="">All</a></li>
+            {% else %}
+            <li><a href="{% spurl base=request.get_full_path remove_query_param='selections' remove_query_param='passages' %}">All</a></li>
+            {% endif %}
+            {% if 'selections' in request.GET %}
+            <li class="active"><a href="">Selections</a></li>
+            {% else %}
+            <li><a href="{% spurl base=request.get_full_path add_query='selections' remove_query_param='passages' %}">Selections</a></li>
+            {% endif %}
+            {% if 'passages' in request.GET %}
+            <li class="active"><a href="">Passages</a></li>
+            {% else %}
+            <li><a href="{% spurl base=request.get_full_path add_query='passages' remove_query_param='selections' %}">Passages</a></li>
+            {% endif %}
           </ul>
         </td>
       </tr>
@@ -76,6 +98,9 @@
         {% endfor %}
         {% if vs.verse_choices.all|length > 10 %}…and more.{% endif %}
       </p>
+      {% endif %}
+      {% if vs.is_passage and vs.breaks %}
+      <p>Section breaks at: {{ vs.breaks_formatted }}</p>
       {% endif %}
       <div><a href="{{ vs.get_absolute_url }}">See more</a></div>
     </div>
