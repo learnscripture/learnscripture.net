@@ -688,6 +688,11 @@ def stats(request):
                .filter(created__gte=start)
                .select_related('metric'))
 
+
+    # Missing metrics => zero. However, if we omit a value for a day, then the
+    # plotting library interpolates, when we want it to say zero.  So we have to
+    # build a dictionary of all values and loop through by day.
+
     min_date = None
     max_date = None
 
@@ -703,8 +708,6 @@ def stats(request):
     cur_date = min_date
     while cur_date <= max_date:
         for s in metric_slugs:
-            # Missing metrics => zero. Without these fillers graphing can fail
-            # to work correctly if we are plotting two stats on same graph
             val = grouped.get((s, cur_date), 0)
             ts = date_to_js_ts(cur_date)
             output_rows[s].append((ts, val))
