@@ -185,6 +185,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     'learnscripture.context_processors.session_forms',
     'learnscripture.context_processors.referral_links',
     'learnscripture.context_processors.menu',
+    'learnscripture.context_processors.notices',
 ]
 
 ROOT_URLCONF = 'learnscripture.urls'

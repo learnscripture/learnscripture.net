@@ -56,6 +56,10 @@ def menu(request):
 
 lazy_page_info = lazy_dict(page_info, ['fiber_page', 'fiber_current_pages'])
 
+def notices(request):
+    if hasattr(request, 'identity'):
+        return {'notices': request.identity.notices.all()}
+
 
 def campaign_context_processor(account):
     return {'account': account}
