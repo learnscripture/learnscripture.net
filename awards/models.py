@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 
-from accounts.models import Account
+from accounts.models import Account, SubscriptionType
 from awards.signals import new_award
 from learnscripture.datastructures import make_choices
 
@@ -44,6 +44,8 @@ class CountBasedAward(object):
 
     def give_to(self, account):
         if self.level == 0:
+            return
+        if account.subscription == SubscriptionType.BASIC:
             return
         Award.objects.get_or_create(account=account,
                                     award_type=self.award_type,
