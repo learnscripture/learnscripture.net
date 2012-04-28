@@ -284,6 +284,8 @@ class VerseSetManager(models.Manager):
         """
         Gets the 'popularity' for a group of sets, using actual usage.
         """
+        if len(ids) == 0:
+            return 0
         sql = """
 SELECT COUNT(*) FROM
 
