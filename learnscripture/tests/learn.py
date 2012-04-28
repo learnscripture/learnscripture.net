@@ -4,6 +4,7 @@ from datetime import timedelta
 from decimal import Decimal
 import math
 import re
+import time
 
 from django.db.models import F
 from django.core.urlresolvers import reverse
@@ -13,6 +14,7 @@ from selenium.webdriver.support.ui import Select
 
 from accounts.models import Identity, Account
 from accounts.memorymodel import MM
+from awards.models import AwardType
 from bibleverses.models import BibleVersion, VerseSet, VerseSetType, VerseChoice, MemoryStage, StageType
 from scores.models import Scores, ScoreReason
 
@@ -111,7 +113,7 @@ class LearnTests(LiveServerTests):
         self.assertEqual(uvs.strength, MM.INITIAL_STRENGTH_FACTOR)
 
 
-    def test_points(self):
+    def test_points_and_student_award(self):
         identity, account = self.create_account()
         self.login(account)
         verse_set = self.choose_verse_set('Bible 101')
@@ -134,6 +136,11 @@ class LearnTests(LiveServerTests):
         self.assertEqual(account.total_score.points,
                          j316_score * (1 + Scores.PERFECT_BONUS_FACTOR))
         self.assertEqual(account.score_logs.count(), 2)
+
+        # Check awards
+        time.sleep(4)
+        self.assertEqual(account.awards.filter(award_type=AwardType.STUDENT,
+                                               level=1).count(), 1)
 
     def test_revision_complete_points(self):
         driver = self.driver
