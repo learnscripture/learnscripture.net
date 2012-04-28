@@ -13,10 +13,10 @@ def give_learning_awards(account_id):
     started = account.identity.verse_statuses.filter(ignored=False,
                                                      memory_stage__gte=MemoryStage.TESTED)
     c = started.count()
-    level = StudentAward.level_for_count(c)
-    if level > 0:
+    award_detail = StudentAward(count=c)
+    if award_detail.level > 0:
         award, new = Award.objects.get_or_create(
             account=account,
             award_type=AwardType.STUDENT,
-            level=level,
+            level=award_detail.level,
             )
