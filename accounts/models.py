@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.sites.models import get_current_site
 from django.template import loader
+from django.utils.datastructures import SortedDict
 from django.utils.functional import cached_property
 from django.utils import timezone
 
@@ -244,6 +245,14 @@ class Account(models.Model):
         if count >= 1:
             return Decimal('0.10')
         return Decimal('0.0')
+
+    def visible_awards(self):
+        all_awards = self.awards.order_by('award_type', 'level')
+        visible = SortedDict()
+        # Ignore all but the highest
+        for a in all_awards:
+            visible[a.award_type] = a
+        return visible.values()
 
 
 def send_payment_received_email(account, price, payment):

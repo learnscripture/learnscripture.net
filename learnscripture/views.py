@@ -554,7 +554,7 @@ def user_stats(request, username):
                                 username=username)
     c = {'account': account,
          'title': account.username,
-         'awards': account.awards.all(),
+         'awards': account.visible_awards(),
          }
     one_week_ago = timezone.now() - timedelta(7)
     verses_started =  account.identity.verse_statuses.filter(ignored=False,
