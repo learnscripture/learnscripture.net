@@ -2,12 +2,11 @@ import logging
 
 from datetime import datetime
 
+from app_metrics.utils import metric
 from django.utils import timezone
 
 from accounts.models import Identity, Account
 from learnscripture.utils.logging import extra
-
-logger = logging.getLogger(__name__)
 
 
 # In the session we store a list of verses to look at.
@@ -137,14 +136,14 @@ def start_identity(request):
         except Account.DoesNotExist:
             pass
     identity = Identity.objects.create(referred_by=referrer)
-    logger.info("New Identity created", extra=extra(identity=identity, request=request))
     set_identity(request, identity)
+    metric('new_identity')
     return identity
 
 
 def login(request, identity):
     set_identity(request, identity)
-    logger.info("Login", extra=extra(identity=identity, request=request))
+    metric('login')
 
 
 def set_identity(request, identity):
