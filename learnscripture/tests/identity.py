@@ -44,10 +44,9 @@ class IdentityTests(TestCase):
         vs1 = VerseSet.objects.get(name='Bible 101') # fresh
         # Having already created the UserVerseStatuses, this should be an
         # efficient operation:
-        with self.assertNumQueries(4):
+        with self.assertNumQueries(3):
             # 1 for existing uvs, same version
             # 1 for other versions.
-            # 1 for verse_choices.all()
             # 1 for VerseSet.popularity update
             uvss = i.add_verse_set(vs1)
             # session.set_verse_statuses will use all these:
@@ -304,11 +303,16 @@ class IdentityTests(TestCase):
 
         now = timezone.now()
         i.verse_statuses.filter(reference__startswith="Psalm 23")\
-            .update(strength=0.7, last_tested=now)
+            .update(strength=0.7,
+                    last_tested=now,
+                    next_test_due=now + timedelta(10)
+                    )
 
         # Move one of them back to needing testing
-        i.verse_statuses.filter(reference="Psalm 23:3")\
-            .update(last_tested=now - timedelta(1000))
+        i.verse_statuses.filter(reference="Psalm 23:3").update(
+            last_tested=now - timedelta(1000),
+            next_test_due=now - timedelta(500)
+            )
 
         l = i.verse_statuses_for_passage(vs1.id)
         for uvs in l:
@@ -421,7 +425,7 @@ class IdentityTests(TestCase):
 
             # Make one of them needing testing
         i.verse_statuses.filter(reference="Psalm 23:5").update(
-                last_tested=timezone.now() - timedelta(10)
+                next_test_due=timezone.now() - timedelta(1)
                 )
 
         uvss = i.verse_statuses_for_passage(vs1.id)
@@ -430,7 +434,6 @@ class IdentityTests(TestCase):
         uvss = i.slim_passage_for_revising(uvss, vs1)
         self.assertEqual([uvs.reference for uvs in uvss],
                          ["Psalm 23:4", "Psalm 23:5", "Psalm 23:6"])
-
 
 
     def test_get_verse_statuses(self):
