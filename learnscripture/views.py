@@ -683,7 +683,7 @@ def stats(request):
     from app_metrics.models import MetricDay
     start = (timezone.now() - timedelta(62)).date()
 
-    metric_slugs = ['verse_started', 'verse_revised']
+    metric_slugs = ['verse_started', 'verse_tested']
     metrics = (MetricDay.objects.filter(metric__slug__in=metric_slugs)
                .filter(created__gte=start)
                .select_related('metric'))
@@ -713,7 +713,7 @@ def stats(request):
     return render(request, 'learnscripture/stats.html',
                   {'title': 'Stats',
                    'verses_initial_tests_per_day': output_rows['verse_started'],
-                   'verses_revision_tests_per_day': output_rows['verse_revised']
+                   'verses_revision_tests_per_day': output_rows['verse_tested']
                    })
 
 

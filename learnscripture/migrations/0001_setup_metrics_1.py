@@ -17,7 +17,7 @@ class Migration(DataMigration):
         create_metric(name='New Identity', slug='new_identity')
         create_metric(name='Login', slug='login')
         verse_started_m = create_metric(name='Verse started', slug='verse_started')
-        verse_revised_m = create_metric(name='Verse revised', slug='verse_revised')
+        verse_tested_m = create_metric(name='Verse tested', slug='verse_tested')
         create_metric(name='Verse completed', slug='verse_completed')
 
         # Fill up old data
@@ -28,16 +28,14 @@ class Migration(DataMigration):
 
         for scorelog in ScoreLog.objects.all():
             if scorelog.reason == ScoreReason.VERSE_TESTED:
-                m = verse_started_m
-            elif scorelog.reason == ScoreReason.VERSE_REVISED:
-                m = verse_revised_m
-            else:
-                m = None
-
-            if m is not None:
-                MetricItem.objects.create(metric=m, num=1,
+                MetricItem.objects.create(metric=verse_started_m, num=1,
+                                          created=scorelog.created.date())
+                MetricItem.objects.create(metric=verse_tested_m, num=1,
                                           created=scorelog.created.date())
 
+            elif scorelog.reason == ScoreReason.VERSE_REVISED:
+                MetricItem.objects.create(metric=verse_tested_m, num=1,
+                                          created=scorelog.created.date())
         # No verses complete at time of migration, don't need to fix that
 
     def backwards(self, orm):
