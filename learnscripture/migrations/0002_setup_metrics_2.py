@@ -6,9 +6,6 @@ from south.db import db
 from south.v2 import DataMigration
 from django.db import models
 
-from accounts.models import Account
-from scores.models import ScoreLog, ScoreReason
-
 class Migration(DataMigration):
 
     def forwards(self, orm):
