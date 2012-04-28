@@ -914,5 +914,13 @@ class Identity(models.Model):
         return BibleVersion.objects.filter(public=True)
 
 
+class Notice(models.Model):
+    for_identity = models.ForeignKey(Identity, related_name='notices')
+    message_html = models.TextField()
+    created = models.DateTimeField(default=timezone.now)
+
+    def __unicode__(self):
+        return u"Notice %d for %r" % (self.id, self.for_identity)
+
 # At bottom to avoid cyclic imports
 import awards.tasks

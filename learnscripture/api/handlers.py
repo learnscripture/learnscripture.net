@@ -366,3 +366,9 @@ class CheckDuplicatePassageSet(BaseHandler):
                      by=vs.created_by.username)
                 for vs in verse_sets]
 
+
+class DeleteNotice(BaseHandler):
+    allowed_methods = ('POST',)
+
+    def create(self, request):
+        request.identity.notices.filter(id=int(request.data['id'])).delete()
