@@ -134,7 +134,7 @@ class IdentityTests(TestCase):
         vs1 = VerseSet.objects.get(name='Bible 101')
         i.add_verse_set(vs1)
         i.record_verse_action('John 3:16', 'NET', StageType.TEST, 1)
-        # Checl 'STUDENT'
+        # Check 'STUDENT'
         self.assertEqual(account.awards.filter(award_type=AwardType.STUDENT, level=1).count(),
                          1)
         # Check 'MASTER'
