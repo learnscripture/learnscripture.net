@@ -66,6 +66,10 @@ class Award(models.Model):
     def __unicode__(self):
         return u'%s level %d award for %s' % (self.get_award_type_display(), self.level, self.account.username)
 
+    def image_small(self):
+        n = AwardType.name_for_value[self.award_type]
+        return u'img/awards/award_%s_level_%d_50.png' % (n, self.level)
+
     def image_medium(self):
         n = AwardType.name_for_value[self.award_type]
         return u'img/awards/award_%s_level_%d_100.png' % (n, self.level)
