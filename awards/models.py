@@ -7,10 +7,10 @@ from learnscripture.datastructures import make_choices
 
 AwardType = make_choices('AwardType',
                          [(0, 'STUDENT', 'Student'),
+                          (1, 'MASTER', 'Master'),
                           ])
 
-
-class StudentAward(object):
+class LearningAward(object):
     COUNTS = {1: 1,
               2: 10,
               3: 30,
@@ -46,16 +46,29 @@ class StudentAward(object):
     def count_for_level(self, level):
         return self.COUNTS[level]
 
+
+class StudentAward(LearningAward):
     def full_description(self):
         if self.level == 1:
             return u"Learning at least one verse"
         else:
             return u"Learning at least %s verses" % self.count
 
+class MasterAward(LearningAward):
+    def full_description(self):
+        if self.level == 1:
+            return u"Finished learning at least one verse"
+        else:
+            return u"Finished learning at least %s verses" % self.count
+
 
 AWARD_CLASSES = {
     AwardType.STUDENT: StudentAward,
+    AwardType.MASTER: MasterAward
 }
+
+for t, c in AWARD_CLASSES.items():
+    c.award_type = t
 
 
 class AwardManager(models.Manager):
