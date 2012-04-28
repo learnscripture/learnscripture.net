@@ -25,6 +25,10 @@ def give_learning_awards(account_id):
 
 @task(ignore_result=True)
 def give_sharer_awards(account_id):
+    return give_sharer_awards_func(account_id)
+
+
+def give_sharer_awards_func(account_id):
     if account_id is None:
         return
     account = Account.objects.get(id=account_id)
