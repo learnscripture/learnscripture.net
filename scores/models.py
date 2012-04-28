@@ -29,6 +29,7 @@ class ScoreLog(models.Model):
     account = models.ForeignKey('accounts.Account', related_name='score_logs')
     points = models.PositiveIntegerField()
     reason = models.PositiveSmallIntegerField(choices=ScoreReason.choice_list)
+    accuracy = models.FloatField(null=True, blank=True)
     created = models.DateTimeField()
 
     def save(self, *args, **kwargs):
