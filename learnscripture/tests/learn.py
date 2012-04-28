@@ -143,7 +143,7 @@ class LearnTests(LiveServerTests):
 
         # Go back to dashboard, and should see message
         driver.get(self.live_server_url + reverse('dashboard'))
-        self.assertIn("You've got a new award", driver.page_source)
+        self.assertIn("You've earned a new badge", driver.page_source)
 
     def test_revision_complete_points(self):
         driver = self.driver

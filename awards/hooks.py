@@ -10,10 +10,10 @@ def notify_about_new_award(sender, **kwargs):
     award = sender
     account = award.account
     account.identity.notices.create(message_html="""
-<img src="%s%s"> You've got a new award: <a href="%s">%s</a>""" %
-                                          (settings.STATIC_URL,
-                                           award.image_small(),
-                                           reverse('user_stats', args=(account.username,)),
-                                           award.short_description())
-                                          )
+<img src="%s%s"> You've earned a new badge: <a href="%s">%s</a>""" %
+                                    (settings.STATIC_URL,
+                                     award.image_small(),
+                                     reverse('user_stats', args=(account.username,)),
+                                     award.short_description())
+                                    )
 
