@@ -384,13 +384,14 @@ class UserVerseStatus(models.Model):
         if hasattr(self, 'needs_testing_override'):
             return self.needs_testing_override
         else:
-            return self.needs_testing_by_strength
+            return self.needs_testing_by_db
 
     @cached_property
-    def needs_testing_by_strength(self):
+    def needs_testing_by_db(self):
+        # We go by 'next_test_due', since that is how we do filtering.
         if self.last_tested is None:
             return True
-        return memorymodel.needs_testing(self.strength, (timezone.now() - self.last_tested).total_seconds())
+        return timezone.now() >= self.next_test_due
 
     def simple_strength(self):
         """
