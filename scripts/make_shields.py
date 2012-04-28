@@ -27,7 +27,7 @@ if __name__ == '__main__':
                    ('MASTER', 'shield_gold.svg')]
 
     for name, award_file in award_types:
-        for level in [1, 2, 3]:
+        for level in [1, 2, 3, 4, 5, 6, 7, 8, 9]:
             for size in [50, 100]:
                 s1 = os.path.join(updir, 'resources', award_file)
                 s2 = os.path.join(updir, 'resources', 'shield_level_%d.svg' % level)
