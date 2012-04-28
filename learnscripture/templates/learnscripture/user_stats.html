@@ -26,14 +26,22 @@
 
 {% if awards and account.scoring_enabled %}
 <h2>Badges</h2>
-{% for award in awards %}
-<div class="award">
-  <img src="{{ STATIC_URL }}{{ award.image_medium }}">
-  <h3>{{ award.short_description }}</h3>
-  <p>{{ award.full_description }}</p>
-</div>
-<br/>
-{% endfor %}
+
+<table class="bordered-table">
+  <tbody>
+  {% for award in awards %}
+  <tr class="award">
+    <td>
+      <img src="{{ STATIC_URL }}{{ award.image_medium }}">
+    </td>
+    <td>
+      <h3>{{ award.short_description }}</h3>
+      <p>{{ award.full_description }}</p>
+    </td>
+  </tr>
+  {% endfor %}
+  <tbody>
+</table>
 
 {% endif %}
 
