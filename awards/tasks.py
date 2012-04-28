@@ -19,13 +19,7 @@ def give_learning_awards(account_id):
     for cls, count in [(StudentAward, started_c),
                        (MasterAward, finished_c)]:
 
-        award_detail = cls(count=count)
-        if award_detail.level > 0:
-            award, new = Award.objects.get_or_create(
-                account=account,
-                award_type=award_detail.award_type,
-                level=award_detail.level,
-                )
+        cls(count=count).give_to(account)
 
 
 @task(ignore_result=True)
@@ -34,11 +28,7 @@ def give_sharer_awards(account_id):
         return
     account = Account.objects.get(id=account_id)
     c = account.verse_sets_created.filter(public=True, set_type=VerseSetType.SELECTION).count()
-    award_detail = SharerAward(count=c)
-    if award_detail.level > 0:
-        Award.objects.get_or_create(account=account,
-                                    award_type=award_detail.award_type,
-                                    level=award_detail.level)
+    SharerAward(count=c).give_to(account)
 
 
 @task(ignore_result=True)
@@ -50,8 +40,4 @@ def give_verse_set_used_awards(account_id):
     verse_set_ids = list(account.verse_sets_created.filter(public=True).values_list('id', flat=True))
 
     c = VerseSet.objects.popularity_for_sets(verse_set_ids, [account_id])
-    award_detail = TrendSetterAward(count=c)
-    if award_detail.level > 0:
-        Award.objects.get_or_create(account=account,
-                                    award_type=award_detail.award_type,
-                                    level=award_detail.level)
+    TrendSetterAward(count=c).give_to(account)
