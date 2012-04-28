@@ -138,7 +138,6 @@ class LearnTests(LiveServerTests):
         self.assertEqual(account.score_logs.count(), 2)
 
         # Check awards
-        time.sleep(4)
         self.assertEqual(account.awards.filter(award_type=AwardType.STUDENT,
                                                level=1).count(), 1)
 

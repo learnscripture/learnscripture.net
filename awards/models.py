@@ -22,13 +22,39 @@ class StudentAward(object):
               }
     _LEVELS_DESC = sorted([(a,b) for b, a in COUNTS.items()], reverse=True)
 
-    @classmethod
-    def level_for_count(cls, count):
-        for c, level in cls._LEVELS_DESC:
+    def __init__(self, level=None, count=None):
+        """
+        Must pass at least one of level or count
+        """
+        if count is None:
+            self.count = self.count_for_level(level)
+        else:
+            self.count = count
+
+        if level is None:
+            self.level = self.level_for_count(count)
+        else:
+            self.level = level
+
+    def level_for_count(self, count):
+        for c, level in self._LEVELS_DESC:
             if count >= c:
                 return level
-
         return 0
+
+    def count_for_level(self, level):
+        return self.COUNTS[level]
+
+    def full_description(self):
+        if self.level == 1:
+            return u"Learning at least one verse"
+        else:
+            return u"Learning at least %s verses" % self.count
+
+
+AWARD_CLASSES = {
+    AwardType.STUDENT: StudentAward,
+}
 
 class Award(models.Model):
     award_type = models.PositiveSmallIntegerField(choices=AwardType.choice_list)
@@ -47,9 +73,8 @@ class Award(models.Model):
     def short_description(self):
         return u'%s level %d' % (self.get_award_type_display(), self.level)
 
+    def get_award_detail(self):
+        return AWARD_CLASSES[self.award_type](level=self.level)
+
     def full_description(self):
-        if self.award_type == AwardType.STUDENT:
-            if self.level == 1:
-                return u"Learning at least one verse"
-            else:
-                return u"Learning at least %s verses" % StudentAward.COUNTS[self.level]
+        return self.get_award_detail().full_description()
