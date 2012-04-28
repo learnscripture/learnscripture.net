@@ -51,9 +51,11 @@ class ViewSetTests(LiveServerTests):
         self.assertTrue(all(uvs.version.slug == 'NET' for uvs in verse_statuses))
 
     def test_view_without_identity(self):
+        ids = list(Identity.objects.all())
+
         driver = self.driver
         vs = VerseSet.objects.get(slug='bible-101')
-        self.assertEqual(Identity.objects.all().count(), 0)
+        self.assertEqual(Identity.objects.exclude(id__in=[i.id for i in ids]).all().count(), 0)
         driver.get(self.live_server_url + reverse('view_verse_set', kwargs=dict(slug=vs.slug)))
         self.wait_until_loaded('body')
         # Default version is NET:
@@ -61,4 +63,4 @@ class ViewSetTests(LiveServerTests):
 
         # Shouldn't have created an Identity
 
-        self.assertEqual(Identity.objects.all().count(), 0)
+        self.assertEqual(Identity.objects.exclude(id__in=[i.id for i in ids]).all().count(), 0)

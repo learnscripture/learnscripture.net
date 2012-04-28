@@ -47,6 +47,8 @@ class ChooseTests(LiveServerTests):
                          1)
 
     def test_double_choose(self):
+        ids = list(Identity.objects.all())
+
         driver = self.driver
         driver.get(self.live_server_url + reverse('choose'))
 
@@ -61,7 +63,7 @@ class ChooseTests(LiveServerTests):
 
         self.wait_for_ajax()
 
-        identity = Identity.objects.get()
+        identity = Identity.objects.exclude(id__in=[i.id for i in ids]).get()
 
         self.assertEqual(vs.verse_choices.count(),
                          identity.verse_statuses.filter(ignored=False).count())
