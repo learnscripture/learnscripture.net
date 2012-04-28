@@ -286,7 +286,7 @@ class IdentityTests(TestCase):
 
         l = i.verse_statuses_for_passage(vs1.id)
         for uvs in l:
-            self.assertEqual(uvs.needs_testing_by_strength, uvs.reference == "Psalm 23:3")
+            self.assertEqual(uvs.needs_testing_by_db, uvs.reference == "Psalm 23:3")
             self.assertEqual(uvs.needs_testing, True)
 
     def test_get_next_section(self):
