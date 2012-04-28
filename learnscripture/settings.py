@@ -156,6 +156,7 @@ MIDDLEWARE_CLASSES = [
     m for b, m in
     [
         (DEBUG, 'debug_toolbar.middleware.DebugToolbarMiddleware'),
+        (True, 'learnscripture.middleware.StatsMiddleware'),
         (True, 'django.middleware.common.CommonMiddleware'),
         (True, 'django.middleware.transaction.TransactionMiddleware'),
         (True, 'django.contrib.sessions.middleware.SessionMiddleware'),
