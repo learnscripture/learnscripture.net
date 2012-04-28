@@ -443,6 +443,12 @@ class Identity(models.Model):
             s.update(strength=new_strength,
                      last_tested=now,
                      next_test_due=next_due)
+
+            # Delay to allow this request's transaction to finish count to be
+            # updated.
+            awards.tasks.give_learning_awards.apply_async([self.account_id],
+                                                          countdown=2)
+
             return ActionChange(old_strength=old_strength, new_strength=new_strength)
 
         if mem_stage == MemoryStage.SEEN:
@@ -906,3 +912,7 @@ class Identity(models.Model):
             if self.account.is_tester:
                 return BibleVersion.objects.all()
         return BibleVersion.objects.filter(public=True)
+
+
+# At bottom to avoid cyclic imports
+import awards.tasks

@@ -9,6 +9,27 @@ AwardType = make_choices('AwardType',
                           ])
 
 
+class StudentAward(object):
+    COUNTS = {1: 1,
+              2: 10,
+              3: 30,
+              4: 100,
+              5: 300,
+              6: 1000,
+              7: 3000,
+              8: 10000,
+              9: 31102, # every verse
+              }
+    _LEVELS_DESC = sorted([(a,b) for b, a in COUNTS.items()], reverse=True)
+
+    @classmethod
+    def level_for_count(cls, count):
+        for c, level in cls._LEVELS_DESC:
+            if count >= c:
+                return level
+
+        return 0
+
 class Award(models.Model):
     award_type = models.PositiveSmallIntegerField(choices=AwardType.choice_list)
     level = models.PositiveSmallIntegerField()
@@ -28,17 +49,7 @@ class Award(models.Model):
 
     def full_description(self):
         if self.award_type == AwardType.STUDENT:
-            counts = {1: 1,
-                      2: 10,
-                      3: 30,
-                      4: 100,
-                      5: 300,
-                      6: 1000,
-                      7: 3000,
-                      8: 10000,
-                      9: 31102, # every verse
-                      }
             if self.level == 1:
                 return u"Learning at least one verse"
             else:
-                return u"Learning at least %s verses" % counts[self.level]
+                return u"Learning at least %s verses" % StudentAward.COUNTS[self.level]
