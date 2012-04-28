@@ -13,6 +13,7 @@ from awards.models import AwardType
 from bibleverses.models import VerseSet, BibleVersion, StageType, MemoryStage
 from scores.models import Scores
 
+from .base import FuzzyInt
 
 class IdentityTests(TestCase):
 
@@ -44,9 +45,10 @@ class IdentityTests(TestCase):
         vs1 = VerseSet.objects.get(name='Bible 101') # fresh
         # Having already created the UserVerseStatuses, this should be an
         # efficient operation:
-        with self.assertNumQueries(3):
+        with self.assertNumQueries(FuzzyInt(3, 4)):
             # 1 for existing uvs, same version
             # 1 for other versions.
+            # possibly one for verse_choices_all(), depending on caching
             # 1 for VerseSet.popularity update
             uvss = i.add_verse_set(vs1)
             # session.set_verse_statuses will use all these:

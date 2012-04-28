@@ -39,7 +39,7 @@ class AccountTests(TestCase):
 
         a.award_action_points("John 3:16", "This is John 3:16",
                               MemoryStage.TESTED,
-                              ActionChange(old_strength=0.8, new_strength=0.99),
+                              ActionChange(old_strength=0.7, new_strength=0.99),
                               StageType.TEST, 0.9)
         self.assertEqual(a.total_score.points,
                          (4 * Scores.POINTS_PER_WORD * 0.9)
