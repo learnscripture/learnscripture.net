@@ -126,10 +126,10 @@ class AceAward(CountBasedAward):
               }
 
     def full_description(self):
-        if self.level == 1:
+        if self.count == 1:
             return u"Achieved 100% in a test"
         else:
-            return u"Achieved 100%% in a test %d times in a row" % self.level
+            return u"Achieved 100%% in a test %d times in a row" % self.count
 
 
 AWARD_CLASSES = {
