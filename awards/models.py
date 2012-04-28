@@ -173,7 +173,7 @@ class Award(models.Model):
         return u'img/awards/award_%s_level_%d_100.png' % (n, self.level)
 
     def short_description(self):
-        return u'%s level %d' % (self.get_award_type_display(), self.level)
+        return u'%s - level %d' % (self.get_award_type_display(), self.level)
 
     def get_award_detail(self):
         return AWARD_CLASSES[self.award_type](level=self.level)
