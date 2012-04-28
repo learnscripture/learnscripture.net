@@ -62,10 +62,11 @@ class LearnTests(LiveServerTests):
         return math.floor(Scores.POINTS_PER_WORD * points_word_count * actual_accuracy)
 
     def test_save_strength(self):
+        ids = list(Identity.objects.all())
         verse_set = self.choose_verse_set('Bible 101')
         driver = self.driver
 
-        identity = Identity.objects.get() # should only be one at this point
+        identity = Identity.objects.exclude(id__in=[i.id for i in ids]).get() # should only be one at this point
         # Preconditions - should have been set up by choose_verse_set
         self.assertEqual(verse_set.verse_choices.count(), identity.verse_statuses.count())
         self.assertTrue(all(uvs.strength == Decimal('0.0') and
@@ -274,10 +275,11 @@ class LearnTests(LiveServerTests):
         self.assertEqual(u"John 14:6", driver.find_element_by_id('id-verse-title').text)
 
     def test_cancel_learning(self):
+        ids = list(Identity.objects.all())
         verse_set = self.choose_verse_set('Bible 101') 
         driver = self.driver
 
-        identity = Identity.objects.get() # should only be one at this point
+        identity = Identity.objects.exclude(id__in=[i.id for i in ids]).get() # should only be one at this point
         # Ensure that we have seen some verses
         identity.record_verse_action('John 3:16', 'KJV', StageType.TEST, 1.0)
         identity.record_verse_action('John 14:6', 'KJV', StageType.TEST, 1.0)
@@ -320,10 +322,11 @@ class LearnTests(LiveServerTests):
 
 
     def test_finish_button(self):
+        ids = list(Identity.objects.all())
         verse_set = self.choose_verse_set('Bible 101')
         driver = self.driver
 
-        identity = Identity.objects.get() # should only be one at this point
+        identity = Identity.objects.exclude(id__in=[i.id for i in ids]).get() # should only be one at this point
         # Ensure that we have seen some verses
         identity.record_verse_action('John 3:16', 'KJV', StageType.TEST, 1.0)
         identity.record_verse_action('John 14:6', 'KJV', StageType.TEST, 1.0)
@@ -357,10 +360,12 @@ class LearnTests(LiveServerTests):
         Test that you get points if you click 'create account' while
         part way through learning a verse.
         """
+        ids = list(Identity.objects.all())
+
         verse_set = self.choose_verse_set('Bible 101')
         driver = self.driver
 
-        identity = Identity.objects.get() # should only be one at this point
+        identity = Identity.objects.exclude(id__in=[i.id for i in ids]).get() # should only be one at this point
 
         self.assertEqual(u"John 3:16", driver.find_element_by_id('id-verse-title').text)
         # Do the reading:
