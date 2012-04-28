@@ -59,7 +59,7 @@ class MemoryModel(object):
     #
     # delta_t_ideal corresponds to an interval delta_s_ideal from the current
     # strength.  We aim to fit delta_s_ideal to a constant that will produce a fixed
-    # number of tests to move the memory from strength zero to 'one'. In the
+    # number of tests to move the memory from strength zero to 'learnt'. In the
     # Charlotte Mason system, a verse is tested about 15 - 20 times before being
     # retired, so we aim for that (with a bit of tuning)
 
@@ -68,13 +68,10 @@ class MemoryModel(object):
     # We want to avoid the number of verses needing testing increasing forever,
     # and so put a hard limit, after which a verse is considered 'learnt'.
 
-    LEARNT = 0.9
-
-    # A person's score for a verse will never exceed what they consistently
-    # score for that verse. So this means that if a person is scoring 90% or
-    # less for a verse, it will never be considered learnt. 90% is quite
-    # achievable with our testing method (100% is common), so this is a
-    # sensible figure.
+    # We need a value that is attainable using reasonable test accuracy.  Test
+    # accuracy of 95 - 100% is achievable for most people, but scaling means 95%
+    # accuracy goes to a strength of 0.9025, and we need to go under that.
+    LEARNT = 0.80
 
 
     # We want to reach this stage after 1 year on our idealised curve.
@@ -112,7 +109,17 @@ class MemoryModel(object):
 
     INITIAL_STRENGTH_FACTOR = 0.1  # This is also used in learn.js
 
-    def strength_estimate(self, old_strength, test_strength, time_elapsed):
+    def strength_estimate(self, old_strength, test_accuracy, time_elapsed):
+        # We first have to convert between 'test accuracy' and some notion of
+        # 'test strength'. It was found that achieving 100% is actually pretty
+        # easy, and a score as high as 60% shows pretty low knowledge in reality
+        # - contextual clues given on a word-by-word basis give a lot of help
+        # and it is easy to guess. So we invent a somewhat arbitrary scale here
+        # that has fixed points at zero and one reduces the score for everything
+        # in between.
+
+        test_strength = test_accuracy ** 2
+
         if old_strength is None or time_elapsed is None:
             return self.INITIAL_STRENGTH_FACTOR * test_strength
 
@@ -154,6 +161,8 @@ class MemoryModel(object):
         # We also need to fit:
         #
         #   delta_s_actual == delta_s_max for test_strength == 1.
+        #
+        # Linear interpolation between these two constraints gives:
 
         delta_s_actual = delta_s_max * (test_strength - old_strength) / (1.0 - old_strength)
 
@@ -261,14 +270,14 @@ def test_run_passage(passage_length, days):
     for i in range(0, days):
         if verses_learnt < passage_length:
             # Learn new:
-            learnt[verses_learnt] = (i*day, m.strength_estimate(None, accuracy, None))
+            learnt[verses_learnt] = (i*day, MM.strength_estimate(None, accuracy, None))
             verses_learnt += 1
 
         need_testing = 0
         for j in range(0, verses_learnt):
             t, s = learnt[j]
             time_elapsed = i * day - t
-            if m.needs_testing(s, time_elapsed):
+            if MM.needs_testing(s, time_elapsed):
                 need_testing += 1
 
         number_tested = 0
@@ -286,7 +295,7 @@ def test_run_passage(passage_length, days):
             # the verses have been learnt. This corresponds to a strength of 0.5.
             test_all = False
             min_strength = min(s for t,s in learnt.values())
-            if min_strength > STRENGTH_FOR_PASSAGE_COMBINING:
+            if min_strength > STRENGTH_FOR_GROUP_TESTING:
                 test_all = True
 
 
@@ -297,7 +306,7 @@ def test_run_passage(passage_length, days):
                 if test_all:
                     needs_testing = True
                 else:
-                    needs_testing = m.needs_testing(s, time_elapsed)
+                    needs_testing = MM.needs_testing(s, time_elapsed)
 
 
                 print "%02d: %6f %s" % (j+1, s,
@@ -313,7 +322,7 @@ def test_run_passage(passage_length, days):
                     # if min_time_elapsed is not None:
                     #     time_elapsed = min_time_elapsed
 
-                    new_strength = m.strength_estimate(s, acc, time_elapsed)
+                    new_strength = MM.strength_estimate(s, acc, time_elapsed)
                     new_time_tested = i * day
                     learnt[j] = new_time_tested, new_strength
                     number_tested += 1
