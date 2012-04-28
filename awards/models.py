@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 
 from accounts.models import Account
+from awards.signals import new_award
 from learnscripture.datastructures import make_choices
 
 AwardType = make_choices('AwardType',
@@ -56,12 +57,23 @@ AWARD_CLASSES = {
     AwardType.STUDENT: StudentAward,
 }
 
+
+class AwardManager(models.Manager):
+
+    def get_or_create(self, *args, **kwargs):
+        award, new = super(AwardManager, self).get_or_create(*args, **kwargs)
+        if new:
+            new_award.send(sender=award)
+        return (award, new)
+
+
 class Award(models.Model):
     award_type = models.PositiveSmallIntegerField(choices=AwardType.choice_list)
     level = models.PositiveSmallIntegerField()
     account = models.ForeignKey(Account, related_name='awards')
     created = models.DateTimeField(default=timezone.now)
 
+    objects = AwardManager()
 
     def __unicode__(self):
         return u'%s level %d award for %s' % (self.get_award_type_display(), self.level, self.account.username)
@@ -82,3 +94,6 @@ class Award(models.Model):
 
     def full_description(self):
         return self.get_award_detail().full_description()
+
+
+import awards.hooks
