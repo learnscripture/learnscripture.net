@@ -347,8 +347,9 @@ rabbitmq_vhost = rabbitmq_user
 
 BROKER_URL = "amqp://%s:%s@localhost:%s/%s" % (rabbitmq_user, rabbitmq_pass, rabbitmq_port, rabbitmq_vhost)
 
-if TESTING:
+if TESTING or DEVBOX:
     CELERY_ALWAYS_EAGER = True
+    CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
 
 ### Sentry/Raven ###
 
