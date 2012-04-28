@@ -219,6 +219,7 @@ INSTALLED_APPS = [
     'paypal.standard.ipn',
     'campaign',
     'djcelery',
+    'app_metrics',
 ]
 
 if DEBUG:

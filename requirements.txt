@@ -21,3 +21,4 @@ docutils
 supervisor
 Celery
 django-celery
+django-app-metrics==0.4.0
