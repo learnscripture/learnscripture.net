@@ -7,6 +7,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from accounts.models import Account, SubscriptionType, ActionChange, Identity
+from awards.models import AwardType
 from bibleverses.models import MemoryStage, StageType
 from scores.models import Scores, ScoreReason
 
@@ -30,6 +31,55 @@ class AccountTests(TestCase):
                               StageType.TEST, 0.75)
         self.assertEqual(a.total_score.points,
                          (4 * Scores.POINTS_PER_WORD * 0.75))
+
+
+    def test_ace_awards(self):
+        account = Account.objects.create(username='test',
+                                         email='test@test.com',
+                                         subscription=SubscriptionType.PAID_UP)
+        identity = Identity.objects.create(account=account)
+
+        self.assertEqual(account.awards.filter(award_type=AwardType.ACE).count(),
+                         0)
+
+        def score(accuracy):
+            account.award_action_points("John 3:16", "This is John 3:16",
+                                        MemoryStage.TESTED,
+                                        ActionChange(old_strength=0.5, new_strength=0.6),
+                                        StageType.TEST, accuracy)
+
+        score(0.75)
+        # Check no 'ACE' award
+        self.assertEqual(account.awards.filter(award_type=AwardType.ACE).count(),
+                         0)
+
+        score(1.0)
+
+        # Check level 1
+        self.assertEqual(account.awards.filter(award_type=AwardType.ACE, level=1).count(),
+                         1)
+
+        score(1.0)
+
+        # Check level 2
+        self.assertEqual(account.awards.filter(award_type=AwardType.ACE, level=2).count(),
+                         1)
+
+        # Negative check: record one at less than 100% to break streak
+        score(0.9)
+        # 3 more
+        score(1)
+        score(1)
+        score(1)
+
+        # Negative check level 3
+        self.assertEqual(account.awards.filter(award_type=AwardType.ACE, level=3).count(),
+                         0)
+        # 4th one:
+        score(1)
+        self.assertEqual(account.awards.filter(award_type=AwardType.ACE, level=3).count(),
+                         1)
+
 
 
     def test_award_action_points_fully_learnt(self):

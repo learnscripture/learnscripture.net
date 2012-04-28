@@ -25,6 +25,7 @@ if __name__ == '__main__':
                    ('MASTER', 'shield_red.svg'),
                    ('SHARER', 'shield_blue.svg'),
                    ('TREND_SETTER', 'shield_orange.svg'),
+                   ('ACE', 'shield_silver.svg'),
                    ]
 
     for name, award_file in award_types:

@@ -132,16 +132,21 @@ class Account(models.Model):
         else:
             reason = ScoreReason.VERSE_TESTED
         points = max_points * accuracy
-        score_logs.append(self.add_points(points, reason))
+        score_logs.append(self.add_points(points, reason, accuracy=accuracy))
 
         if accuracy == 1:
             score_logs.append(self.add_points(points * Scores.PERFECT_BONUS_FACTOR,
-                                              ScoreReason.PERFECT_TEST_BONUS))
+                                              ScoreReason.PERFECT_TEST_BONUS,
+                                              accuracy=accuracy))
 
         if (action_change.old_strength < memorymodel.LEARNT <= action_change.new_strength):
             score_logs.append(self.add_points(word_count * Scores.POINTS_PER_WORD *
                                               Scores.VERSE_LEARNT_BONUS,
-                                              ScoreReason.VERSE_LEARNT))
+                                              ScoreReason.VERSE_LEARNT,
+                                              accuracy=accuracy))
+        awards.tasks.give_ace_awards.apply_async([self.id],
+                                                 countdown=2)
+
         return score_logs
 
     def award_revision_complete_bonus(self, score_log_ids):
@@ -151,9 +156,10 @@ class Account(models.Model):
         points = self.score_logs.filter(id__in=score_log_ids).aggregate(models.Sum('points'))['points__sum'] * Scores.REVISION_COMPLETE_BONUS_FACTOR
         return [self.add_points(points, ScoreReason.REVISION_COMPLETED)]
 
-    def add_points(self, points, reason):
+    def add_points(self, points, reason, accuracy=None):
         return self.score_logs.create(points=points,
-                                      reason=reason)
+                                      reason=reason,
+                                      accuracy=accuracy)
 
     def get_score_logs(self, from_datetime):
         return self.score_logs.filter(created__gte=from_datetime).order_by('created')
