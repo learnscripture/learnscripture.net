@@ -9,8 +9,12 @@ from awards.signals import new_award
 def notify_about_new_award(sender, **kwargs):
     award = sender
     account = award.account
-    account.identity.notices.create(message_html="""
-<img src="%s%s"> You've earned a new badge: <a href="%s">%s</a>""" %
+    if award.level > 1:
+        msg = """<img src="%s%s"> You've levelled up on one of your badges: <a href="%s">%s</a>"""
+    else:
+        msg = """<img src="%s%s"> You've earned a new badge: <a href="%s">%s</a>"""
+
+    account.identity.notices.create(message_html=msg %
                                     (settings.STATIC_URL,
                                      award.image_small(),
                                      reverse('user_stats', args=(account.username,)),
