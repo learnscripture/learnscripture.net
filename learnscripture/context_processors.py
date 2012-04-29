@@ -58,7 +58,7 @@ lazy_page_info = lazy_dict(page_info, ['fiber_page', 'fiber_current_pages'])
 
 def notices(request):
     if hasattr(request, 'identity'):
-        return {'notices': request.identity.notices.all()}
+        return {'notices': request.identity.notices.all().order_by('created')}
     else:
         return {}
 
