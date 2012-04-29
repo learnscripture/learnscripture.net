@@ -14,6 +14,7 @@ ScoreReason = make_choices('ScoreReason',
                             (2, 'REVISION_COMPLETED', 'Revision completed'),
                             (3, 'PERFECT_TEST_BONUS', 'Perfect!'),
                             (4, 'VERSE_LEARNT', 'Verse fully learnt'),
+                            (5, 'EARNED_AWARD', 'Earned award'),
                             ])
 
 

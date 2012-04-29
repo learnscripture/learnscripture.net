@@ -3,6 +3,7 @@ from django.utils import timezone
 
 from accounts.models import Account, SubscriptionType
 from awards.signals import new_award
+from scores.models import ScoreReason
 from learnscripture.datastructures import make_choices
 
 AwardType = make_choices('AwardType',
@@ -16,6 +17,10 @@ AwardType = make_choices('AwardType',
 class AwardLogic(object):
     # Abstract base class for all classes that define behaviour for the types of
     # awards listed in AwardType
+
+    # All subclasses need to define an __init__ that takes at least a 'level'
+    # keyword argument.
+
     def give_to(self, account):
         if self.level == 0:
             return
@@ -37,12 +42,20 @@ class AwardLogic(object):
                                                          award_type=self.award_type,
                                                          level=lev)
                 if new:
-                    new_award.send(sender=award)
+                    # Use a fresh instance in order to get the points
+                    # calculation correct.
+                    points = self.__class__(level=lev).points()
+                    if points > 0:
+                        account.add_points(points, ScoreReason.EARNED_AWARD)
+                    new_award.send(sender=award, points=points)
+
+    def points(self):
+        return 0
 
 
 class CountBasedAward(AwardLogic):
 
-    # Subclass must define COUNTS
+    # Subclass must define COUNTS, and optionally POINTS
 
     def __init__(self, level=None, count=None):
         """
@@ -68,6 +81,12 @@ class CountBasedAward(AwardLogic):
     def count_for_level(self, level):
         return self.COUNTS[level]
 
+    def points(self):
+        if hasattr(self, 'POINTS'):
+            return self.POINTS[self.level]
+        else:
+            return 0
+
 
 class LearningAward(CountBasedAward):
     COUNTS = {1: 1,
@@ -83,6 +102,17 @@ class LearningAward(CountBasedAward):
 
 
 class StudentAward(LearningAward):
+    POINTS = {1: 1000,
+              2: 4000,
+              3: 8000,
+              4: 16000,
+              5: 32000,
+              6: 64000,
+              7: 125000,
+              8: 250000,
+              9: 500000,
+              }
+
     def full_description(self):
         if self.level == 1:
             return u"Learning at least one verse"
@@ -93,6 +123,8 @@ class StudentAward(LearningAward):
 
 
 class MasterAward(LearningAward):
+    POINTS = dict((k, v*10) for k, v in StudentAward.POINTS.items())
+
     def full_description(self):
         if self.level == 1:
             return u"Finished learning at least one verse"
@@ -110,6 +142,8 @@ class SharerAward(CountBasedAward):
               5: 20,
               }
 
+    POINTS = dict((k, v*500) for k, v in COUNTS.items())
+
     def full_description(self):
         if self.count == 1:
             return u"Created a public selection verse set"
@@ -126,21 +160,19 @@ class TrendSetterAward(CountBasedAward):
               6: 1000,
               }
 
+    POINTS = dict((k, v*500) for k, v in COUNTS.items())
+
+
     def full_description(self):
         return u"Verse sets created by this user have been used by others at least %d times" % self.count
 
 
 class AceAward(CountBasedAward):
-    COUNTS = {1: 1,
-              2: 2,
-              3: 4,
-              4: 8,
-              5: 16,
-              6: 32,
-              7: 64,
-              8: 128,
-              9: 256,
-              }
+    COUNTS = dict((k, 2**(k-1)) for k in range(1, 10))
+
+    # counts are powers of 2, points are powers of 3, because achieving level n
+    # + 1 is more than twice as hard as level n.
+    POINTS = dict((k, 3**(k-1)*1000) for k in COUNTS.keys())
 
     def full_description(self):
         if self.count == 1:
