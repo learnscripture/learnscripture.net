@@ -542,6 +542,7 @@ def leaderboard(request):
         accounts = get_all_time_leaderboard(page_num - 1, PAGE_SIZE)
 
     c = {}
+    c['include_referral_links'] = True
     c['accounts'] = accounts
     c['title'] = u"Leaderboard"
     c['thisweek'] = thisweek
@@ -558,6 +559,7 @@ def user_stats(request, username):
     c = {'account': account,
          'title': account.username,
          'awards': account.visible_awards(),
+         'include_referral_links': True,
          }
     one_week_ago = timezone.now() - timedelta(7)
     verses_started =  account.identity.verse_statuses.filter(ignored=False,
