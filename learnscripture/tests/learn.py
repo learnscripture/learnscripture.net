@@ -14,7 +14,7 @@ from selenium.webdriver.support.ui import Select
 
 from accounts.models import Identity, Account
 from accounts.memorymodel import MM
-from awards.models import AwardType
+from awards.models import AwardType, StudentAward, AceAward
 from bibleverses.models import BibleVersion, VerseSet, VerseSetType, VerseChoice, MemoryStage, StageType
 from scores.models import Scores, ScoreReason
 
@@ -135,8 +135,12 @@ class LearnTests(LiveServerTests):
 
         j316_score = self._score_for_j316()
         self.assertEqual(account.total_score.points,
-                         j316_score * (1 + Scores.PERFECT_BONUS_FACTOR))
-        self.assertEqual(account.score_logs.count(), 2)
+                         j316_score +
+                         (j316_score * Scores.PERFECT_BONUS_FACTOR) +
+                         StudentAward(count=1).points() +
+                         AceAward(count=1).points()
+                         )
+        self.assertEqual(account.score_logs.count(), 4)
 
         # Check awards
         self.assertEqual(account.awards.filter(award_type=AwardType.STUDENT,
@@ -171,9 +175,12 @@ class LearnTests(LiveServerTests):
         account = Account.objects.get(id=account.id) # refresh
         self.assertEqual(account.total_score.points,
                          (j316_score * (1 + Scores.PERFECT_BONUS_FACTOR))
-                         * (1 + Scores.REVISION_COMPLETE_BONUS_FACTOR))
+                         * (1 + Scores.REVISION_COMPLETE_BONUS_FACTOR)
+                         + StudentAward(count=1).points()
+                         + AceAward(count=1).points()
+                         )
 
-        self.assertEqual(account.score_logs.count(), 3)
+        self.assertEqual(account.score_logs.count(), 5)
         self.assertEqual(account.score_logs.filter(reason=ScoreReason.REVISION_COMPLETED).count(), 1)
 
 
@@ -391,10 +398,7 @@ class LearnTests(LiveServerTests):
         driver.find_element_by_css_selector('#id-points-block .score-log')
 
         account = Account.objects.get(username='testusername')
-        j316_score = self._score_for_j316()
-        self.assertEqual(account.total_score.points,
-                         j316_score * (1 + Scores.PERFECT_BONUS_FACTOR))
-        self.assertEqual(account.score_logs.count(), 2)
+        self.assertTrue(account.score_logs.count() > 0)
 
     def test_super_bonus_after_more_practice(self):
         # Regression test for issue #1
@@ -444,9 +448,10 @@ class LearnTests(LiveServerTests):
                          (j316_score_1
                           * (1 + Scores.REVISION_COMPLETE_BONUS_FACTOR)
                           + j316_score_2)
+                         + StudentAward(count=1).points()
                          )
 
         # One for each revision, 1 for revision complete:
-        self.assertEqual(account.score_logs.count(), 3)
+        self.assertEqual(account.score_logs.count(), 4)
         self.assertEqual(account.score_logs.filter(reason=ScoreReason.REVISION_COMPLETED).count(), 1)
 
