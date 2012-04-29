@@ -13,7 +13,34 @@ AwardType = make_choices('AwardType',
                           (4, 'ACE', 'Ace'),
                           ])
 
-class CountBasedAward(object):
+class AwardLogic(object):
+    # Abstract base class for all classes that define behaviour for the types of
+    # awards listed in AwardType
+    def give_to(self, account):
+        if self.level == 0:
+            return
+        if account.subscription == SubscriptionType.BASIC:
+            return
+
+        # Create lower levels if they don't exist because a higher level always
+        # implies a lower level.
+
+        existing_levels = (Award.objects.filter(account=account, award_type=self.award_type)
+                           .values_list('level', flat=True))
+        if len(existing_levels) < self.level:
+            # Missing at least one
+            missing_levels = set(range(1, self.level + 1)) - set(existing_levels)
+            # Do lower levels first so notices are in right order
+            missing_levels = sorted(list(missing_levels))
+            for lev in missing_levels:
+                award, new = Award.objects.get_or_create(account=account,
+                                                         award_type=self.award_type,
+                                                         level=lev)
+                if new:
+                    new_award.send(sender=award)
+
+
+class CountBasedAward(AwardLogic):
 
     # Subclass must define COUNTS
 
@@ -40,16 +67,6 @@ class CountBasedAward(object):
 
     def count_for_level(self, level):
         return self.COUNTS[level]
-
-
-    def give_to(self, account):
-        if self.level == 0:
-            return
-        if account.subscription == SubscriptionType.BASIC:
-            return
-        Award.objects.get_or_create(account=account,
-                                    award_type=self.award_type,
-                                    level=self.level)
 
 
 class LearningAward(CountBasedAward):
@@ -144,22 +161,11 @@ for t, c in AWARD_CLASSES.items():
     c.award_type = t
 
 
-class AwardManager(models.Manager):
-
-    def get_or_create(self, *args, **kwargs):
-        award, new = super(AwardManager, self).get_or_create(*args, **kwargs)
-        if new:
-            new_award.send(sender=award)
-        return (award, new)
-
-
 class Award(models.Model):
     award_type = models.PositiveSmallIntegerField(choices=AwardType.choice_list)
     level = models.PositiveSmallIntegerField()
     account = models.ForeignKey(Account, related_name='awards')
     created = models.DateTimeField(default=timezone.now)
-
-    objects = AwardManager()
 
     def __unicode__(self):
         return u'%s level %d award for %s' % (self.get_award_type_display(), self.level, self.account.username)
