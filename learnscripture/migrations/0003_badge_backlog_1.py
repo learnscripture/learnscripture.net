@@ -5,13 +5,15 @@ from south.db import db
 from south.v2 import DataMigration
 from django.db import models
 
-from awards.tasks import give_sharer_awards_func
+from awards.tasks import give_learning_awards_func, give_sharer_awards_func, give_verse_set_used_awards_func
 
 class Migration(DataMigration):
 
     def forwards(self, orm):
         for account_id in orm['bibleverses.VerseSet'].objects.filter(public=True).values_list('created_by_id', flat=True).distinct():
+            give_learning_awards_func(account_id)
             give_sharer_awards_func(account_id)
+            give_verse_set_used_awards_func(account_id)
 
     def backwards(self, orm):
         pass

@@ -6,9 +6,15 @@ from accounts.memorymodel import MM
 from bibleverses.models import MemoryStage, VerseSetType, VerseSet
 from scores.models import ScoreReason
 
+# We have separate functions for the actual body, so it can be called separately
+# without invoking celery, especially for use in migrations when RabbitMQ might
+# not be available.
 
 @task(ignore_result=True)
 def give_learning_awards(account_id):
+    give_learning_awards_func(account_id)
+
+def give_learning_awards_func(account_id):
     if account_id is None:
         return
     account = Account.objects.get(id=account_id)
@@ -27,7 +33,6 @@ def give_learning_awards(account_id):
 def give_sharer_awards(account_id):
     return give_sharer_awards_func(account_id)
 
-
 def give_sharer_awards_func(account_id):
     if account_id is None:
         return
@@ -38,6 +43,9 @@ def give_sharer_awards_func(account_id):
 
 @task(ignore_result=True)
 def give_verse_set_used_awards(account_id):
+    give_verse_set_used_awards_func(account_id)
+
+def give_verse_set_used_awards_func(account_id):
     if account_id is None:
         return
     account = Account.objects.get(id=account_id)
