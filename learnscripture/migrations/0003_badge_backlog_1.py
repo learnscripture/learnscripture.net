@@ -117,4 +117,9 @@ class Migration(DataMigration):
         },
     }
 
-    complete_apps = ['awards']
+    complete_apps = ['awards', 'bibleverses']
+
+    depends_on = [
+        ('accounts', '0011_auto__add_field_identity_referred_by'),
+        ('bibleverses', '0043_adjust_strength.py')
+        ]
