@@ -3,4 +3,3 @@ syntax:glob
 *~
 *.orig
 secrets.json
-awards/award_*.png
