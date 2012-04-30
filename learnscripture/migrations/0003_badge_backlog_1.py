@@ -121,5 +121,6 @@ class Migration(DataMigration):
 
     depends_on = [
         ('accounts', '0011_auto__add_field_identity_referred_by'),
-        ('bibleverses', '0043_adjust_strength.py')
+        ('bibleverses', '0043_adjust_strength.py'),
+        ('awards', '0001_initial.py'),
         ]
