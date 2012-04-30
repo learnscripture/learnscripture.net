@@ -119,10 +119,11 @@ def install_erlang():
                 "&& make install")
 
 
+@task
 def full_rabbitmq_setup():
     install_rabbitmq()
     setup_rabbitmq_conf()
-    supervisor("restart rabbitmq_%s" % target.NAME.lower())
+    supervisorctl("restart rabbitmq_%s" % target.NAME.lower())
     setup_rabbitmq_users()
 
 @task
@@ -137,9 +138,6 @@ def setup_rabbitmq_conf():
     rabbitmq_full = "%s/lib/%s" % (target.venv_dir, RABBITMQ_DIR)
     # Need to fix as per these instructions:
     # http://community.webfaction.com/questions/2366/can-i-use-rabbit-mq-on-the-shared-servers
-
-    local("rsync config/secrets.json cciw@cciw.co.uk:%s/config/secrets.json" % target.src_dir)
-
     local("rsync config/erl_inetrc cciw@cciw.co.uk:/home/cciw/.erl_inetrc")
     run("mkdir -p /home/cciw/.local/etc")
     local("rsync config/hosts cciw@cciw.co.uk:/home/cciw/.local/etc/")
