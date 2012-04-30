@@ -78,6 +78,9 @@ class AwardLogic(object):
     def points(self):
         return 0
 
+    def highest_level(self):
+        return Award.objects.filter(award_type=self.award_type).aggregate(models.Max('level'))['level__max']
+
 
 class CountBasedAward(AwardLogic):
 
