@@ -1,15 +1,6 @@
 {% extends "base_twocol.html" %}
 {% load url from future %}
 
-{% block messages %}
-{{ block.super }}
-<div class="message-container">
-  <ul class="messagelist">
-    <li class="warning"><b>Notice:</b> LearnScripture.net will be down for a server migration on <b>Monday 30th April</b>, from <b>9am - 12 noon UTC</b></li>
-  </ul>
-</div>
-{% endblock %}
-
 {% block leftcolumn %}
 
 {% if request.identity.scoring_enabled %}
