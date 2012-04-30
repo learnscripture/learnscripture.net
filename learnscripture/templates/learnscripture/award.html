@@ -4,16 +4,10 @@
 
 {% block leftcolumn %}
 
-<table class="award noborders">
-  <tr>
-    <td>
-      <img src="{{ STATIC_URL }}{{ award.image_medium }}">
-    </td>
-    <td>
-      <p>{{ award.full_description }}</p>
-    </td>
-  </tr>
-</table>
+<p>{{ award.full_description }}</p>
+<p style="text-align:center"> <img src="{{ STATIC_URL }}{{ award.image_medium }}"></p>
+
+<hr>
 
 <p>This badge has been earned by {{ receivers_count }}
   {% if receivers_count == 1 %} person:
@@ -37,8 +31,9 @@
 {% if account_top_award %}
 <p>You have this award, at level {{ account_top_award.level }}</p>
 
+<p style="text-align: center">
 <img src="{{ STATIC_URL }}{{ account_top_award.image_medium }}">
-
+</p>
 
 {% endif %}
 
