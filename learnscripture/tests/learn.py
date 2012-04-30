@@ -4,6 +4,7 @@ from datetime import timedelta
 from decimal import Decimal
 import math
 import re
+import time
 
 from django.db.models import F
 from django.core.urlresolvers import reverse
@@ -13,6 +14,7 @@ from selenium.webdriver.support.ui import Select
 
 from accounts.models import Identity, Account
 from accounts.memorymodel import MM
+from awards.models import AwardType, StudentAward, AceAward
 from bibleverses.models import BibleVersion, VerseSet, VerseSetType, VerseChoice, MemoryStage, StageType
 from scores.models import Scores, ScoreReason
 
@@ -60,10 +62,11 @@ class LearnTests(LiveServerTests):
         return math.floor(Scores.POINTS_PER_WORD * points_word_count * actual_accuracy)
 
     def test_save_strength(self):
+        ids = list(Identity.objects.all())
         verse_set = self.choose_verse_set('Bible 101')
         driver = self.driver
 
-        identity = Identity.objects.get() # should only be one at this point
+        identity = Identity.objects.exclude(id__in=[i.id for i in ids]).get() # should only be one at this point
         # Preconditions - should have been set up by choose_verse_set
         self.assertEqual(verse_set.verse_choices.count(), identity.verse_statuses.count())
         self.assertTrue(all(uvs.strength == Decimal('0.0') and
@@ -111,7 +114,7 @@ class LearnTests(LiveServerTests):
         self.assertEqual(uvs.strength, MM.INITIAL_STRENGTH_FACTOR)
 
 
-    def test_points(self):
+    def test_points_and_student_award(self):
         identity, account = self.create_account()
         self.login(account)
         verse_set = self.choose_verse_set('Bible 101')
@@ -132,8 +135,20 @@ class LearnTests(LiveServerTests):
 
         j316_score = self._score_for_j316()
         self.assertEqual(account.total_score.points,
-                         j316_score * (1 + Scores.PERFECT_BONUS_FACTOR))
-        self.assertEqual(account.score_logs.count(), 2)
+                         j316_score +
+                         (j316_score * Scores.PERFECT_BONUS_FACTOR) +
+                         StudentAward(count=1).points() +
+                         AceAward(count=1).points()
+                         )
+        self.assertEqual(account.score_logs.count(), 4)
+
+        # Check awards
+        self.assertEqual(account.awards.filter(award_type=AwardType.STUDENT,
+                                               level=1).count(), 1)
+
+        # Go back to dashboard, and should see message
+        driver.get(self.live_server_url + reverse('dashboard'))
+        self.assertIn("You've earned a new badge", driver.page_source)
 
     def test_revision_complete_points(self):
         driver = self.driver
@@ -160,9 +175,12 @@ class LearnTests(LiveServerTests):
         account = Account.objects.get(id=account.id) # refresh
         self.assertEqual(account.total_score.points,
                          (j316_score * (1 + Scores.PERFECT_BONUS_FACTOR))
-                         * (1 + Scores.REVISION_COMPLETE_BONUS_FACTOR))
+                         * (1 + Scores.REVISION_COMPLETE_BONUS_FACTOR)
+                         + StudentAward(count=1).points()
+                         + AceAward(count=1).points()
+                         )
 
-        self.assertEqual(account.score_logs.count(), 3)
+        self.assertEqual(account.score_logs.count(), 5)
         self.assertEqual(account.score_logs.filter(reason=ScoreReason.REVISION_COMPLETED).count(), 1)
 
 
@@ -264,10 +282,11 @@ class LearnTests(LiveServerTests):
         self.assertEqual(u"John 14:6", driver.find_element_by_id('id-verse-title').text)
 
     def test_cancel_learning(self):
+        ids = list(Identity.objects.all())
         verse_set = self.choose_verse_set('Bible 101') 
         driver = self.driver
 
-        identity = Identity.objects.get() # should only be one at this point
+        identity = Identity.objects.exclude(id__in=[i.id for i in ids]).get() # should only be one at this point
         # Ensure that we have seen some verses
         identity.record_verse_action('John 3:16', 'KJV', StageType.TEST, 1.0)
         identity.record_verse_action('John 14:6', 'KJV', StageType.TEST, 1.0)
@@ -310,10 +329,11 @@ class LearnTests(LiveServerTests):
 
 
     def test_finish_button(self):
+        ids = list(Identity.objects.all())
         verse_set = self.choose_verse_set('Bible 101')
         driver = self.driver
 
-        identity = Identity.objects.get() # should only be one at this point
+        identity = Identity.objects.exclude(id__in=[i.id for i in ids]).get() # should only be one at this point
         # Ensure that we have seen some verses
         identity.record_verse_action('John 3:16', 'KJV', StageType.TEST, 1.0)
         identity.record_verse_action('John 14:6', 'KJV', StageType.TEST, 1.0)
@@ -347,10 +367,12 @@ class LearnTests(LiveServerTests):
         Test that you get points if you click 'create account' while
         part way through learning a verse.
         """
+        ids = list(Identity.objects.all())
+
         verse_set = self.choose_verse_set('Bible 101')
         driver = self.driver
 
-        identity = Identity.objects.get() # should only be one at this point
+        identity = Identity.objects.exclude(id__in=[i.id for i in ids]).get() # should only be one at this point
 
         self.assertEqual(u"John 3:16", driver.find_element_by_id('id-verse-title').text)
         # Do the reading:
@@ -376,10 +398,7 @@ class LearnTests(LiveServerTests):
         driver.find_element_by_css_selector('#id-points-block .score-log')
 
         account = Account.objects.get(username='testusername')
-        j316_score = self._score_for_j316()
-        self.assertEqual(account.total_score.points,
-                         j316_score * (1 + Scores.PERFECT_BONUS_FACTOR))
-        self.assertEqual(account.score_logs.count(), 2)
+        self.assertTrue(account.score_logs.count() > 0)
 
     def test_super_bonus_after_more_practice(self):
         # Regression test for issue #1
@@ -429,9 +448,10 @@ class LearnTests(LiveServerTests):
                          (j316_score_1
                           * (1 + Scores.REVISION_COMPLETE_BONUS_FACTOR)
                           + j316_score_2)
+                         + StudentAward(count=1).points()
                          )
 
         # One for each revision, 1 for revision complete:
-        self.assertEqual(account.score_logs.count(), 3)
+        self.assertEqual(account.score_logs.count(), 4)
         self.assertEqual(account.score_logs.filter(reason=ScoreReason.REVISION_COMPLETED).count(), 1)
 

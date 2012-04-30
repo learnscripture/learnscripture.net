@@ -9,9 +9,11 @@ from django.utils import timezone
 
 from accounts import memorymodel
 from accounts.models import Identity, ActionChange, Account
+from awards.models import AwardType
 from bibleverses.models import VerseSet, BibleVersion, StageType, MemoryStage
 from scores.models import Scores
 
+from .base import FuzzyInt
 
 class IdentityTests(TestCase):
 
@@ -20,6 +22,13 @@ class IdentityTests(TestCase):
     def _create_identity(self):
         NET = BibleVersion.objects.get(slug='NET')
         return Identity.objects.create(default_bible_version=NET)
+
+    def _create_account(self):
+        identity = self._create_identity()
+        account = Account.objects.create(username='testaccount')
+        identity.account = account
+        identity.save()
+        return account
 
     def test_add_verse_set(self):
         i = self._create_identity()
@@ -36,11 +45,12 @@ class IdentityTests(TestCase):
         vs1 = VerseSet.objects.get(name='Bible 101') # fresh
         # Having already created the UserVerseStatuses, this should be an
         # efficient operation:
-        with self.assertNumQueries(6):
+        with self.assertNumQueries(FuzzyInt(3, 7)):
             # 1 for existing uvs, same version
             # 1 for other versions.
-            # 1 for verse_choices.all()
-            # 3 for VerseSet.mark_chosen (for some unknown reason to do with CachingManager)
+            # possibly one for verse_choices_all(), depending on caching
+            # 1 for VerseSet.popularity update
+            # 3 for awards
             uvss = i.add_verse_set(vs1)
             # session.set_verse_statuses will use all these:
             l = [(uvs.reference, uvs.verse_set_id)
@@ -118,6 +128,24 @@ class IdentityTests(TestCase):
         self.assertEqual(i.verse_statuses.get(reference='John 3:16',
                                               verse_set=vs2).memory_stage,
                          MemoryStage.SEEN)
+
+    def test_record_creates_awards(self):
+        account = self._create_account()
+        i = account.identity
+        vs1 = VerseSet.objects.get(name='Bible 101')
+        i.add_verse_set(vs1)
+        i.record_verse_action('John 3:16', 'NET', StageType.TEST, 1)
+        # Check 'STUDENT'
+        self.assertEqual(account.awards.filter(award_type=AwardType.STUDENT, level=1).count(),
+                         1)
+        # Check 'MASTER'
+        # frig the data:
+        i.verse_statuses.update(strength=memorymodel.MM.LEARNT - 0.001,
+                                last_tested=timezone.now() - timedelta(100))
+        # Now do test to move above LEARNT
+        i.record_verse_action('John 3:16', 'NET', StageType.TEST, 1)
+        self.assertEqual(account.awards.filter(award_type=AwardType.MASTER, level=1).count(),
+                         1)
 
     def test_change_version(self):
         # Setup
@@ -278,11 +306,16 @@ class IdentityTests(TestCase):
 
         now = timezone.now()
         i.verse_statuses.filter(reference__startswith="Psalm 23")\
-            .update(strength=0.7, last_tested=now)
+            .update(strength=0.7,
+                    last_tested=now,
+                    next_test_due=now + timedelta(10)
+                    )
 
         # Move one of them back to needing testing
-        i.verse_statuses.filter(reference="Psalm 23:3")\
-            .update(last_tested=now - timedelta(1000))
+        i.verse_statuses.filter(reference="Psalm 23:3").update(
+            last_tested=now - timedelta(1000),
+            next_test_due=now - timedelta(500)
+            )
 
         l = i.verse_statuses_for_passage(vs1.id)
         for uvs in l:
@@ -395,7 +428,7 @@ class IdentityTests(TestCase):
 
             # Make one of them needing testing
         i.verse_statuses.filter(reference="Psalm 23:5").update(
-                last_tested=timezone.now() - timedelta(10)
+                next_test_due=timezone.now() - timedelta(1)
                 )
 
         uvss = i.verse_statuses_for_passage(vs1.id)
@@ -404,7 +437,6 @@ class IdentityTests(TestCase):
         uvss = i.slim_passage_for_revising(uvss, vs1)
         self.assertEqual([uvs.reference for uvs in uvss],
                          ["Psalm 23:4", "Psalm 23:5", "Psalm 23:6"])
-
 
 
     def test_get_verse_statuses(self):

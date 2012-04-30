@@ -5,7 +5,7 @@
 {% block content %}
 <script type="text/javascript" src="/static/js/jquery.flot.min.js"></script>
 
-<h2>Verses tested per day</h2>
+<h2>Verses per day</h2>
 
 <div id="id-verses-tested-graph" style="width:820px;height:300px;">
 </div>
@@ -25,9 +25,9 @@ $(function() {
 
     $.plot(placeholder_id,
            [
-            {label: "Initial",
+            {label: "Started",
              data: verses_initial_tests_per_day},
-            {label: "Revision",
+            {label: "Tested",
              data: verses_revision_tests_per_day}
            ],
            { xaxis: { mode: "time",
@@ -35,8 +35,7 @@ $(function() {
              yaxis: { min: 0 },
              legend: { position: "nw" },
              series: {
-                stack: true,
-                lines: { show: true, fill: true },
+                lines: { show: true, fill: false },
              }
 
            });

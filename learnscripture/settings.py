@@ -11,6 +11,9 @@ LIVEBOX = not DEVBOX
 DEBUG = DEVBOX
 TEMPLATE_DEBUG = DEBUG
 
+# A kitten gets killed every time you use this:
+TESTING = 'manage.py test' in ' '.join(sys.argv)
+
 SRC_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # ../
 PROJECT_DIR = os.path.dirname(SRC_DIR)
 WEBAPP_DIR = os.path.dirname(PROJECT_DIR)
@@ -153,6 +156,7 @@ MIDDLEWARE_CLASSES = [
     m for b, m in
     [
         (DEBUG, 'debug_toolbar.middleware.DebugToolbarMiddleware'),
+        (True, 'learnscripture.middleware.StatsMiddleware'),
         (True, 'django.middleware.common.CommonMiddleware'),
         (True, 'django.middleware.transaction.TransactionMiddleware'),
         (True, 'django.contrib.sessions.middleware.SessionMiddleware'),
@@ -181,6 +185,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     'learnscripture.context_processors.session_forms',
     'learnscripture.context_processors.referral_links',
     'learnscripture.context_processors.menu',
+    'learnscripture.context_processors.notices',
 ]
 
 ROOT_URLCONF = 'learnscripture.urls'
@@ -200,11 +205,14 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.markup',
     'south',
+    # This project
     'learnscripture',
     'bibleverses',
     'accounts',
     'scores',
     'payments',
+    'awards',
+    # Third party
     'piston',
     'mptt',
     'compressor',
@@ -215,6 +223,8 @@ INSTALLED_APPS = [
     'spurl',
     'paypal.standard.ipn',
     'campaign',
+    'djcelery',
+    'app_metrics',
 ]
 
 if DEBUG:
@@ -265,6 +275,11 @@ LOGGING = {
             'handlers': ['console'],
             'propagate': False,
         },
+        'celery': {
+            'level': 'WARNING',
+            'handlers': ['sentry'],
+            'propagate': False,
+        },
     },
 }
 
@@ -308,6 +323,33 @@ RESTRUCTUREDTEXT_FILTER_SETTINGS = {
 CAMPAIGN_CONTEXT_PROCESSORS = [
     'learnscripture.context_processors.campaign_context_processor'
 ]
+
+### Celery and RabbitMQ ###
+
+import djcelery
+djcelery.setup_loader()
+
+if LIVEBOX:
+    if PRODUCTION:
+        rabbitmq_user = "learnscripture"
+        rabbitmq_pass = secrets["PRODUCTION_RABBITMQ_PASSWORD"]
+        rabbitmq_port = 32048 # see also rabbitmq-env
+    if STAGING:
+        rabbitmq_user = "learnscripture_staging"
+        rabbitmq_pass = secrets["STAGING_RABBITMQ_PASSWORD"]
+        rabbitmq_port = 47292
+
+if DEVBOX:
+    rabbitmq_user = "learnscripture"
+    rabbitmq_pass = "foo"
+    rabbitmq_port = 32048
+rabbitmq_vhost = rabbitmq_user
+
+BROKER_URL = "amqp://%s:%s@localhost:%s/%s" % (rabbitmq_user, rabbitmq_pass, rabbitmq_port, rabbitmq_vhost)
+
+if TESTING or DEVBOX:
+    CELERY_ALWAYS_EAGER = True
+    CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
 
 ### Sentry/Raven ###
 

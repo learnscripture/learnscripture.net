@@ -14,6 +14,7 @@ ScoreReason = make_choices('ScoreReason',
                             (2, 'REVISION_COMPLETED', 'Revision completed'),
                             (3, 'PERFECT_TEST_BONUS', 'Perfect!'),
                             (4, 'VERSE_LEARNT', 'Verse fully learnt'),
+                            (5, 'EARNED_AWARD', 'Earned award'),
                             ])
 
 
@@ -29,6 +30,7 @@ class ScoreLog(models.Model):
     account = models.ForeignKey('accounts.Account', related_name='score_logs')
     points = models.PositiveIntegerField()
     reason = models.PositiveSmallIntegerField(choices=ScoreReason.choice_list)
+    accuracy = models.FloatField(null=True, blank=True)
     created = models.DateTimeField()
 
     def save(self, *args, **kwargs):

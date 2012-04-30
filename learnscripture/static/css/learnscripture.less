@@ -420,10 +420,29 @@ input[type=image] {
   }
 }
 
-/* Messages */
+/* Messages and notices */
+
+// messages are from django.contrib.messages
+
+// notices are custom, and permament until dismissed
+
+.notice {
+  color: #666;
+  background: #ffc;
+  border-bottom: 1px solid #ddd;
+  padding: 4px 10px;
+  .close {
+    font-size: 18px;
+    line-height: 20px;
+  }
+
+  img {
+    vertical-align: middle;
+  }
+}
 
 ul.messagelist {
-  padding: 0 0 5px 0;
+  padding: 0;
   margin: 0;
   }
 
@@ -721,6 +740,9 @@ p.large {
 .score-log-type-4:after {
   content: " - verse fully learnt";
 }
+.score-log-type-5:after {
+  content: " - award bonus";
+}
 
 
 body .score-log {
@@ -810,7 +832,8 @@ form.quickfind {
   display: none;
 }
 
-// Stats
+
+// -- Stats page --
 
 // flot fixes for table styling
 
