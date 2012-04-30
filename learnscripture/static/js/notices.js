@@ -3,6 +3,7 @@ var learnscripture = (function (learnscripture, $) {
 
     var setupNoticesControls = function () {
         $('.notice a.close').click(function(ev) {
+            ev.preventDefault();
             var a = $(this);
             var n = a.closest('div.notice');
             n.animate({height: '0px', opacity: '0'},
