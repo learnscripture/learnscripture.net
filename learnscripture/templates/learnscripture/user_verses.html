@@ -1,9 +1,9 @@
-{% extends "base_twocol.html" %}
+{% extends "base.html" %}
 
 {% load url from future %}
 {% load pagination_tags %}
 
-{% block leftcolumn %}
+{% block content %}
 <h2>Verses you are learning</h2>
 
 {% autopaginate verses 20 %}
