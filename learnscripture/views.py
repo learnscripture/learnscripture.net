@@ -3,6 +3,7 @@ from datetime import timedelta
 from decimal import Decimal, ROUND_DOWN
 import re
 
+from django.db import models
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.tokens import default_token_generator
@@ -21,7 +22,7 @@ from paypal.standard.forms import PayPalPaymentsForm
 from accounts import memorymodel
 from accounts.models import Account, SubscriptionType
 from accounts.forms import PreferencesForm, AccountDetailsForm
-from awards.models import AwardType, AWARD_CLASSES, AnyLevel
+from awards.models import AwardType, AWARD_CLASSES, AnyLevel, Award
 import awards.tasks
 from learnscripture.forms import AccountSetPasswordForm
 from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType, get_passage_sections
@@ -870,7 +871,19 @@ def referral_program(request):
 
 
 def awards(request):
+    awards = [AWARD_CLASSES[t](level=AnyLevel) for t in AwardType.values]
+    discovered_awards = []
+    hidden_awards = []
+    for award in awards:
+        m = Award.objects.filter(award_type=award.award_type).aggregate(models.Max('level'))
+        if m['level__max'] is None:
+            hidden_awards.append(award)
+        else:
+            award.max_level_achieved = m['level__max']
+            discovered_awards.append(award)
+
     return render(request, 'learnscripture/awards.html',
                   {'title': 'Badges',
-                   'awards': [AWARD_CLASSES[t](level=AnyLevel) for t in AwardType.values]
+                   'discovered_awards': discovered_awards,
+                   'hidden_awards': hidden_awards,
                    })

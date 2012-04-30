@@ -11,7 +11,7 @@
       <th>Description</th>
   </thead>
   <tbody>
-    {% for award in awards %}
+    {% for award in discovered_awards %}
     <tr>
       <td><img src="{{ STATIC_URL}}{{ award.image_medium }}" /></td>
       <td>
@@ -22,5 +22,21 @@
     {% endfor %}
   </tbody>
 </table>
+
+{% if hidden_awards %}
+  {% if hidden_awards|length == 1 %}
+
+   There is also <b>one award</b> that has not been discovered yet.  It will be
+   unveiled when at least one person has achieved it.
+
+  {% else %}
+
+   There are also <b>{{ hidden_awards|length }} awards</b> that have not been
+   discovered yet.  They will be unveiled as soon as they are achieved by at
+   least one person.
+
+  {% endif %}
+
+{% endif %}
 
 {% endblock %}
