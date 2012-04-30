@@ -4,10 +4,11 @@
 
 {% block leftcolumn %}
 
+<h2>Description</h2>
 <p>{{ award.full_description }}</p>
 <p style="text-align:center"> <img src="{{ STATIC_URL }}{{ award.image_medium }}"></p>
 
-<hr>
+<h2>Achievers</h2>
 <p>Highest level achieved so far: <b>Level {{ award.highest_level }}</b></p>
 
 <p>Earned by {{ receivers_count }}
