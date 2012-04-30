@@ -54,7 +54,7 @@ def send_email_reminders():
         email = loader.render_to_string("learnscripture/reminder_email.txt", c)
 
         send_mail('Revision reminder for LearnScripture.net', email,
-                  settings.DEFAULT_FROM_EMAIL,
+                  settings.SERVER_EMAIL,
                   [account.email],
                   fail_silently=False)
         Account.objects.filter(id=account.id).update(last_reminder_sent=n)
