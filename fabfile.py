@@ -265,8 +265,8 @@ def setup_supervisor():
 
 @task
 def reload_supervisor():
-    run("%s/bin/start_supervisor.sh reread" % PRODUCTION.venv_dir)
-    run("%s/bin/start_supervisor.sh update" % PRODUCTION.venv_dir)
+    run("supervisorctl reread" % PRODUCTION.venv_dir)
+    run("supervisorctl update" % PRODUCTION.venv_dir)
 
 
 @task
