@@ -351,6 +351,8 @@ if TESTING or DEVBOX:
     CELERY_ALWAYS_EAGER = True
     CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
 
+CELERYD_CONCURRENCY = 3
+
 ### Sentry/Raven ###
 
 SENTRY_CLIENT = 'ravenclient.AsyncDjangoClient'
