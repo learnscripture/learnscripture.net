@@ -120,7 +120,7 @@ class Migration(DataMigration):
     complete_apps = ['awards', 'bibleverses']
 
     depends_on = [
-        ('accounts', '0011_auto__add_field_identity_referred_by'),
+        ('accounts', '0012_auto__add_notice'),
         ('bibleverses', '0043_adjust_strength.py'),
         ('awards', '0001_initial.py'),
         ('scores', '0002_auto__add_field_scorelog_accuracy'),
