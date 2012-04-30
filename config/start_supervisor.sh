@@ -4,7 +4,6 @@ NAME=supervisord
 SUPERVISORD=/home/cciw/webapps/learnscripture_django/venv/bin/supervisord
 SUPERVISORCTL=/home/cciw/webapps/learnscripture_django/venv/bin/supervisorctl
 PIDFILE=/home/cciw/webapps/learnscripture_django/venv/etc/supervisord.pid
-OPTS="-c /home/cciw/webapps/learnscripture_django/venv/etc/supervisord.conf"
 PS=$NAME
 TRUE=1
 FALSE=0
