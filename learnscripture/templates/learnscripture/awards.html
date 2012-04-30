@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% load url from future %}
+
 {% block content %}
 
 <p>The following badges are available.</p>
@@ -17,7 +19,8 @@
       <td>
         <h3>{{ award.short_description }}</h3>
         <p>{{ award.full_description }}</p>
-        <p>Highest level achieved so far: {{ award.max_level_achieved }}</p>
+        <p>Highest level achieved so far: <b>{{ award.max_level_achieved }}</b></p>
+        <p><a href="{% url 'award' award.slug %}">People with {{ award.short_description }} award</a></p>
       </td>
     </tr>
     {% endfor %}
