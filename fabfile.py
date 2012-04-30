@@ -134,6 +134,11 @@ def secrets():
     return simplejson.load(open(os.path.join(thisdir, "config", "secrets.json")))
 
 
+@task
+def push_secrets():
+    local("rsync config/secrets.json cciw@cciw.co.uk:%s/config/secrets.json" % target.src_dir)
+
+
 def push_sources():
     """
     Push source code to server
@@ -150,8 +155,9 @@ def push_sources():
                ))
     with cd(target.src_dir):
         run("hg update %s" % push_rev)
+
     # Also need to sync files that are not in main sources VCS repo.
-    local("rsync config/secrets.json cciw@cciw.co.uk:%s/config/secrets.json" % target.src_dir)
+    push_secrets()
 
     # This config is shared, and rarely updates, so we push to
     # PRODUCTION.
