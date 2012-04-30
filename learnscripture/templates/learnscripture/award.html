@@ -1,0 +1,46 @@
+{% extends "base_twocol.html" %}
+
+{% load url from future %}
+
+{% block leftcolumn %}
+
+<table class="award noborders">
+  <tr>
+    <td>
+      <img src="{{ STATIC_URL }}{{ award.image_medium }}">
+    </td>
+    <td>
+      <p>{{ award.full_description }}</p>
+    </td>
+  </tr>
+</table>
+
+<p>This badge has been earned by {{ receivers_count }}
+  {% if receivers_count == 1 %} person:
+  {% else %} people,  including:{% endif %}
+</p>
+
+<ul>
+  {% for username in sample_usernames %}
+  <li><a href="{% url 'user_stats' username %}">{{ username }}</a></li>
+  {% endfor %}
+</ul>
+
+{% endblock %}
+
+
+{% block rightcolumn %}
+{{ block.super }}
+
+<h3>Your awards</h3>
+
+{% if account_top_award %}
+<p>You have this award, at level {{ account_top_award.level }}</p>
+
+<img src="{{ STATIC_URL }}{{ account_top_award.image_medium }}">
+
+
+{% endif %}
+
+
+{% endblock %}
