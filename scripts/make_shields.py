@@ -29,11 +29,13 @@ if __name__ == '__main__':
                    ]
 
     for name, award_file in award_types:
-        for level in [1, 2, 3, 4, 5, 6, 7, 8, 9]:
+        for level in ['any', 1, 2, 3, 4, 5, 6, 7, 8, 9]:
             for size in [50, 100]:
-                s1 = os.path.join(updir, 'resources', award_file)
-                s2 = os.path.join(updir, 'resources', 'shield_level_%d.svg' % level)
+                svgs = [os.path.join(updir, 'resources', award_file)]
+                if level != 'any':
+                    svgs.append(os.path.join(updir, 'resources', 'shield_level_%s.svg' % level))
                 fname = os.path.join(updir, 'learnscripture', 'static', 'img', 'awards',
-                                     'award_%s_level_%d_%d.png' %
+                                     'award_%s_level_%s_%d.png' %
                                      (name, level, size))
-                combine([s1, s2], fname, size)
+
+                combine(svgs, fname, size)

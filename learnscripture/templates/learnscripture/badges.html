@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<p>The following badges are available.</p>
+
+<table class="bordered-table award">
+  <thead>
+    <tr>
+      <th>Icon</th>
+      <th>Description</th>
+  </thead>
+  <tbody>
+    {% for badge in badges %}
+    <tr>
+      <td><img src="{{ STATIC_URL}}{{ badge.image_medium }}" /></td>
+      <td>
+        <h3>{{ badge.short_description }}</h3>
+        <p>{{ badge.full_description }}</p>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}
