@@ -27,7 +27,7 @@
 {% if awards and account.scoring_enabled %}
 <h2>Badges</h2>
 
-<table class="bordered-table">
+<table class="bordered-table award">
   <thead>
     <th>Badge</th>
     <th>Description</th>
@@ -37,7 +37,7 @@
 
   <tbody>
   {% for award in awards %}
-  <tr class="award">
+  <tr>
     <td>
       <img src="{{ STATIC_URL }}{{ award.image_medium }}">
     </td>
