@@ -1,9 +1,9 @@
 from app_metrics.utils import metric
 
-from learnscripture import session
-
 class IdentityMiddleware(object):
     def process_request(self, request):
+        from learnscripture import session
+
         identity = session.get_identity(request)
         if identity is not None:
             request.identity = identity
