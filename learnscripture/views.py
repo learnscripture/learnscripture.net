@@ -21,6 +21,7 @@ from paypal.standard.forms import PayPalPaymentsForm
 from accounts import memorymodel
 from accounts.models import Account, SubscriptionType
 from accounts.forms import PreferencesForm, AccountDetailsForm
+from awards.models import AwardType, AWARD_CLASSES, AnyLevel
 import awards.tasks
 from learnscripture.forms import AccountSetPasswordForm
 from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType, get_passage_sections
@@ -865,4 +866,11 @@ def referral_program(request):
                   {'title': 'Referral program',
                    'referral_link': referral_link,
                    'include_referral_links': True,
+                   })
+
+
+def badges(request):
+    return render(request, 'learnscripture/badges.html',
+                  {'title': 'Badges',
+                   'badges': [AWARD_CLASSES[t](level=AnyLevel) for t in AwardType.values]
                    })
