@@ -123,4 +123,5 @@ class Migration(DataMigration):
         ('accounts', '0011_auto__add_field_identity_referred_by'),
         ('bibleverses', '0043_adjust_strength.py'),
         ('awards', '0001_initial.py'),
+        ('scores', '0002_auto__add_field_scorelog_accuracy'),
         ]
