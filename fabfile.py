@@ -147,7 +147,8 @@ def push_sources():
     push_rev = getattr(env, 'push_rev', None)
     if push_rev is None:
         push_rev = local("hg parents --template '{node}'", capture=True)
-    local("hg push -f -r %(rev)s ssh://%(user)s@%(host)s/%(path)s" %
+    # if hg finds no changes it returns an error, which we want to ignore
+    local("hg push -f -r %(rev)s ssh://%(user)s@%(host)s/%(path)s || true" %
           dict(host=env.host,
                user=env.user,
                path=target.src_dir,
@@ -155,6 +156,8 @@ def push_sources():
                ))
     with cd(target.src_dir):
         run("hg update %s" % push_rev)
+
+        assert run("hg parents --template '{node}'").strip() == push_rev
 
     # Also need to sync files that are not in main sources VCS repo.
     push_secrets()
