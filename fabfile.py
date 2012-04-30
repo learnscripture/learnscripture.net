@@ -175,6 +175,12 @@ def setup_supervisor():
 
 
 @task
+def reload_supervisor():
+    run("%s/bin/start_supervisor.sh reread" % PRODUCTION.venv_dir)
+    run("%s/bin/start_supervisor.sh update" % PRODUCTION.venv_dir)
+
+
+@task
 def no_restarts():
     """
     Call this first to ensure that no services are restarted by
@@ -215,7 +221,7 @@ def webserver_stop():
 @task
 def webserver_start():
     """
-    Startsp the webserver that is running the Django instance
+    Starts the webserver that is running the Django instance
     """
     run(target.DJANGO_SERVER_START)
 
