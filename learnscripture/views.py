@@ -875,11 +875,9 @@ def awards(request):
     discovered_awards = []
     hidden_awards = []
     for award in awards:
-        m = Award.objects.filter(award_type=award.award_type).aggregate(models.Max('level'))
-        if m['level__max'] is None:
+        if award.highest_level() is None:
             hidden_awards.append(award)
         else:
-            award.max_level_achieved = m['level__max']
             discovered_awards.append(award)
 
     return render(request, 'learnscripture/awards.html',

@@ -8,6 +8,7 @@
 <p style="text-align:center"> <img src="{{ STATIC_URL }}{{ award.image_medium }}"></p>
 
 <hr>
+<p>Highest level achieved so far: <b>Level {{ award.highest_level }}</b></p>
 
 <p>This badge has been earned by {{ receivers_count }}
   {% if receivers_count == 1 %} person:
