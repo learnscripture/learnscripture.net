@@ -29,6 +29,9 @@ class AwardLogic(object):
     # All subclasses need to define an __init__ that takes at least a 'level'
     # keyword argument.
 
+    def slug(self):
+        return AwardType.name_for_value[self.award_type].lower().replace('_', '-')
+
     def short_description(self):
         title = AwardType.titles[self.award_type]
         if self.level is AnyLevel:

@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.utils.http import urlparse, base36_to_int
@@ -887,3 +887,42 @@ def awards(request):
                    'discovered_awards': discovered_awards,
                    'hidden_awards': hidden_awards,
                    })
+
+
+def award(request, award_slug):
+    award_name = award_slug.replace('-', '_').upper()
+    award_type = AwardType.get_value_for_name(award_name)
+    if award_type is None:
+        raise Http404
+    if not Award.objects.filter(award_type=award_type).exists():
+        raise Http404
+    award = AWARD_CLASSES[award_type](level=AnyLevel)
+
+    receivers = Account.objects.filter(awards__award_type=award_type).distinct()
+    receivers_count = receivers.count()
+
+    # We may get duplicates this way, so get more than we need (20) and
+    # hopefully end up with at least 10 after de-duplicating
+    sample_usernames = set(Award.objects.filter(award_type=award_type)
+                           .order_by('-created').values_list('account__username', flat=True)
+                           [0:20])
+    sample_usernames = list(sample_usernames)[0:10]
+
+    account_top_award = None
+    if hasattr(request, 'identity'):
+        identity = request.identity
+        account = identity.account
+        if account is not None:
+            try:
+                account_top_award = account.awards.filter(award_type=award_type).order_by('-level')[0]
+            except IndexError:
+                pass
+
+    return render(request, 'learnscripture/award.html',
+                  {'title': 'Badge - %s' % award.short_description(),
+                   'award': award,
+                   'receivers_count': receivers_count,
+                   'sample_usernames': sample_usernames,
+                   'account_top_award': account_top_award,
+                   })
+
