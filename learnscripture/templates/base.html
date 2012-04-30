@@ -59,6 +59,7 @@
                   <li><a class="icon-account" href="{% url 'account_details' %}">Account details</i></a></li>
                   <li><a class="icon-progress" href="{% url 'user_verses' %}">Verses</a>
                   <li><a class="icon-stats" href="{% url 'user_stats' request.identity.account.username %}">Stats</a></li>
+                  <li><a class="icon-leaderboard" href="{% url 'leaderboard' %}?thisweek">Leaderboard</a></li>
                   <li><a href="#" class="icon-logout logout-link">Log out</a></li>
                   {% endif %}
                 </ul>
