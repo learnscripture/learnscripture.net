@@ -119,28 +119,39 @@ def install_erlang():
                 "&& make install")
 
 
+def full_rabbitmq_setup():
+    install_rabbitmq()
+    setup_rabbitmq_conf()
+    supervisor("restart rabbitmq_%s" % target.NAME.lower())
+    setup_rabbitmq_users()
+
 @task
 def install_rabbitmq():
     # install into venv dir, different instance for STAGING and PRODUCTION
     rabbitmq_base = "%s/lib/" % target.venv_dir
     with cd(rabbitmq_base):
         _download_and_unpack(RABBITMQ_SRC)
-    rabbitmq_full = "%s/lib/%s" % (target.venv_dir, RABBITMQ_DIR)
 
+@task
+def setup_rabbitmq_conf():
+    rabbitmq_full = "%s/lib/%s" % (target.venv_dir, RABBITMQ_DIR)
     # Need to fix as per these instructions:
     # http://community.webfaction.com/questions/2366/can-i-use-rabbit-mq-on-the-shared-servers
 
-    run("cp %s/config/erl_inetrc /home/cciw/.erl_inetrc" % target.src_dir)
+    local("rsync config/secrets.json cciw@cciw.co.uk:%s/config/secrets.json" % target.src_dir)
+
+    local("rsync config/erl_inetrc cciw@cciw.co.uk:/home/cciw/.erl_inetrc")
     run("mkdir -p /home/cciw/.local/etc")
-    run("cp %s/config/hosts /home/cciw/.local/etc/" % target.src_dir)
+    local("rsync config/hosts cciw@cciw.co.uk:/home/cciw/.local/etc/")
 
     # Custom rabbitmq-env file
-    run("cp %s/rabbitmq-env %s/sbin" % (target.conf_dir, rabbitmq_full))
+    local("rsync config/%s/rabbitmq-env cciw@cciw.co.uk:%s/sbin" % (target.NAME.lower(), rabbitmq_full))
 
 
 @task
-def setup_rabbitmq():
+def setup_rabbitmq_users():
     rabbitmq_full = "%s/lib/%s" % (target.venv_dir, RABBITMQ_DIR)
+
     rabbitmq_user = target.APP_BASE_NAME
     rabbitmq_vhost = rabbitmq_user
     run("%s/sbin/rabbitmqctl add_user %s %s" % (
@@ -384,8 +395,17 @@ def deploy():
         webserver_start()
 
         # Need to restart celeryd, as it will have old code.
-        with virtualenv(PRODUCTION.venv_dir):
-            run_venv("supervisorctl celeryd_%s restart" % target.APP_BASE_NAME.lower())
+        restart_celeryd()
+
+@task
+def restart_celeryd():
+    with virtualenv(PRODUCTION.venv_dir):
+        run_venv("supervisorctl restart celeryd_%s" % target.NAME.lower())
+
+@task
+def supervisorctl(*commands):
+    with virtualenv(PRODUCTION.venv_dir):
+        run_venv("supervisorctl %s" % " ".join(commands))
 
 
 @task
