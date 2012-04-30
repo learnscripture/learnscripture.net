@@ -15,7 +15,11 @@
   <tbody>
     {% for award in discovered_awards %}
     <tr>
-      <td><img src="{{ STATIC_URL}}{{ award.image_medium }}" /></td>
+      <td>
+        <a href="{% url 'award' award.slug %}">
+          <img src="{{ STATIC_URL }}{{ award.image_medium }}">
+        </a>
+      </td>
       <td>
         <h3>{{ award.short_description }}</h3>
         <p>{{ award.full_description }}</p>

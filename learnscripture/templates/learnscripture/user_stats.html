@@ -41,7 +41,9 @@
   {% for award in awards %}
   <tr>
     <td>
+      <a href="{% url 'award' award.award_detail.slug %}">
       <img src="{{ STATIC_URL }}{{ award.image_medium }}">
+      </a>
     </td>
     <td>
       <h3>{{ award.short_description }}</h3>
@@ -57,6 +59,8 @@
   {% endfor %}
   </tbody>
 </table>
+
+<p>See <a href="{% url 'awards' %}">all badge information</a>.</p>
 
 {% endif %}
 
