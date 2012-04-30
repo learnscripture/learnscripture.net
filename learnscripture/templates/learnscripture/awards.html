@@ -11,12 +11,12 @@
       <th>Description</th>
   </thead>
   <tbody>
-    {% for badge in badges %}
+    {% for award in awards %}
     <tr>
-      <td><img src="{{ STATIC_URL}}{{ badge.image_medium }}" /></td>
+      <td><img src="{{ STATIC_URL}}{{ award.image_medium }}" /></td>
       <td>
-        <h3>{{ badge.short_description }}</h3>
-        <p>{{ badge.full_description }}</p>
+        <h3>{{ award.short_description }}</h3>
+        <p>{{ award.full_description }}</p>
       </td>
     </tr>
     {% endfor %}

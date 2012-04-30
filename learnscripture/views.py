@@ -869,8 +869,8 @@ def referral_program(request):
                    })
 
 
-def badges(request):
-    return render(request, 'learnscripture/badges.html',
+def awards(request):
+    return render(request, 'learnscripture/awards.html',
                   {'title': 'Badges',
-                   'badges': [AWARD_CLASSES[t](level=AnyLevel) for t in AwardType.values]
+                   'awards': [AWARD_CLASSES[t](level=AnyLevel) for t in AwardType.values]
                    })

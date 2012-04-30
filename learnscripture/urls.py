@@ -31,7 +31,7 @@ urlpatterns = patterns('',
                        url(r'^payment-complete/$', 'learnscripture.views.pay_done', name='pay_done'),
                        url(r'^payment-cancelled/$', 'learnscripture.views.pay_cancelled', name='pay_cancelled'),
                        url(r'^referral-program/$', 'learnscripture.views.referral_program', name='referral_program'),
-                       url(r'^badges/$', 'learnscripture.views.badges', name='badges'),
+                       url(r'^badges/$', 'learnscripture.views.awards', name='awards'),
 
 
                        (r'^admin/fiber/', include('fiber.admin_urls')),
