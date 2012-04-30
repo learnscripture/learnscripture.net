@@ -319,7 +319,7 @@ def quick():
     no_db()
 
 @task
-def webserver_stop():
+def stop_webserver():
     """
     Stop the webserver that is running the Django instance
     """
@@ -327,7 +327,7 @@ def webserver_stop():
 
 
 @task
-def webserver_start():
+def start_webserver():
     """
     Starts the webserver that is running the Django instance
     """
@@ -335,7 +335,7 @@ def webserver_start():
 
 
 @task
-def webserver_restart():
+def restart_webserver():
     """
     Restarts the webserver that is running the Django instance
     """
@@ -343,8 +343,8 @@ def webserver_restart():
         run(target.DJANGO_SERVER_RESTART)
     else:
         with settings(warn_only=True):
-            webserver_stop()
-        webserver_start()
+            stop_webserver()
+        start_webserver()
 
 
 def build_static():
@@ -389,8 +389,8 @@ def deploy():
 
     if not getattr(env, 'no_restarts', False):
         with settings(warn_only=True):
-            webserver_stop()
-        webserver_start()
+            stop_webserver()
+        start_webserver()
 
         # Need to restart celeryd, as it will have old code.
         restart_celeryd()
