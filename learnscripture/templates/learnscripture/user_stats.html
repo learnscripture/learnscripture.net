@@ -28,6 +28,13 @@
 <h2>Badges</h2>
 
 <table class="bordered-table">
+  <thead>
+    <th>Badge</th>
+    <th>Description</th>
+    <th>Points</th>
+    <th>Received</th>
+  </thead>
+
   <tbody>
   {% for award in awards %}
   <tr class="award">
@@ -37,6 +44,12 @@
     <td>
       <h3>{{ award.short_description }}</h3>
       <p>{{ award.full_description }}</p>
+    </td>
+    <td>
+      {{ award.get_award_detail.points }}
+    </td>
+    <td>
+      {{ award.created }}
     </td>
   </tr>
   {% endfor %}
