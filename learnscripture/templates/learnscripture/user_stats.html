@@ -24,6 +24,27 @@
   </tbody>
 </table>
 
+{% if awards and account.scoring_enabled %}
+<h2>Badges</h2>
+
+<table class="bordered-table">
+  <tbody>
+  {% for award in awards %}
+  <tr class="award">
+    <td>
+      <img src="{{ STATIC_URL }}{{ award.image_medium }}">
+    </td>
+    <td>
+      <h3>{{ award.short_description }}</h3>
+      <p>{{ award.full_description }}</p>
+    </td>
+  </tr>
+  {% endfor %}
+  <tbody>
+</table>
+
+{% endif %}
+
 <h2>Stats</h2>
 
 {% if account.total_score and account.scoring_enabled %}
@@ -72,7 +93,7 @@
 
 {% else %}
 
-<p>Stats disabled for free accounts.
+<p>Stats and badges disabled for free accounts.
 {% if request.identity.account.username == account.username %}
   <a href="{% url 'subscribe' %}">Subscribe to enable.</a>
   {% endif %}

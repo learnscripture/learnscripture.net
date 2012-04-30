@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
 
-from .models import Identity, Account, SubscriptionType
+from .models import Identity, Account, SubscriptionType, Notice
 
 
 def change_subscription_func(subscription_type, name, description):
@@ -55,4 +55,5 @@ class AccountAdmin(admin.ModelAdmin):
 
 admin.site.register(Identity, IdentityAdmin)
 admin.site.register(Account, AccountAdmin)
+admin.site.register(Notice)
 

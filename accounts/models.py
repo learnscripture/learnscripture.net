@@ -2,17 +2,20 @@ from datetime import timedelta
 from decimal import Decimal
 import itertools
 
+from app_metrics.utils import metric
 from django.core import mail
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.sites.models import get_current_site
 from django.template import loader
+from django.utils.datastructures import SortedDict
 from django.utils.functional import cached_property
 from django.utils import timezone
 
 from accounts import memorymodel
 from bibleverses.models import BibleVersion, MemoryStage, StageType, BibleVersion, VerseChoice, VerseSet, VerseSetType, get_passage_sections
+from bibleverses.signals import verse_set_chosen
 from scores.models import TotalScore, ScoreReason, Scores, get_rank_all_time, get_rank_this_week
 
 from learnscripture.datastructures import make_choices
@@ -129,16 +132,21 @@ class Account(models.Model):
         else:
             reason = ScoreReason.VERSE_TESTED
         points = max_points * accuracy
-        score_logs.append(self.add_points(points, reason))
+        score_logs.append(self.add_points(points, reason, accuracy=accuracy))
 
         if accuracy == 1:
             score_logs.append(self.add_points(points * Scores.PERFECT_BONUS_FACTOR,
-                                              ScoreReason.PERFECT_TEST_BONUS))
+                                              ScoreReason.PERFECT_TEST_BONUS,
+                                              accuracy=accuracy))
 
         if (action_change.old_strength < memorymodel.LEARNT <= action_change.new_strength):
             score_logs.append(self.add_points(word_count * Scores.POINTS_PER_WORD *
                                               Scores.VERSE_LEARNT_BONUS,
-                                              ScoreReason.VERSE_LEARNT))
+                                              ScoreReason.VERSE_LEARNT,
+                                              accuracy=accuracy))
+        awards.tasks.give_ace_awards.apply_async([self.id],
+                                                 countdown=2)
+
         return score_logs
 
     def award_revision_complete_bonus(self, score_log_ids):
@@ -148,9 +156,10 @@ class Account(models.Model):
         points = self.score_logs.filter(id__in=score_log_ids).aggregate(models.Sum('points'))['points__sum'] * Scores.REVISION_COMPLETE_BONUS_FACTOR
         return [self.add_points(points, ScoreReason.REVISION_COMPLETED)]
 
-    def add_points(self, points, reason):
+    def add_points(self, points, reason, accuracy=None):
         return self.score_logs.create(points=points,
-                                      reason=reason)
+                                      reason=reason,
+                                      accuracy=accuracy)
 
     def get_score_logs(self, from_datetime):
         return self.score_logs.filter(created__gte=from_datetime).order_by('created')
@@ -242,6 +251,14 @@ class Account(models.Model):
         if count >= 1:
             return Decimal('0.10')
         return Decimal('0.0')
+
+    def visible_awards(self):
+        all_awards = self.awards.order_by('award_type', 'level')
+        visible = SortedDict()
+        # Ignore all but the highest
+        for a in all_awards:
+            visible[a.award_type] = a
+        return visible.values()
 
 
 def send_payment_received_email(account, price, payment):
@@ -383,8 +400,8 @@ class Identity(models.Model):
                 # Otherwise we set the version to the chosen one
                 new_uvs = self.create_verse_status(vc.reference, verse_set, use_version)
                 out.append(new_uvs)
-        verse_set.mark_chosen()
 
+        verse_set_chosen.send(sender=verse_set)
         return out
 
     def add_verse_choice(self, reference, version=None):
@@ -420,6 +437,7 @@ class Identity(models.Model):
 
         now = timezone.now()
         if mem_stage == MemoryStage.TESTED:
+            metric('verse_tested')
             s0 = s[0] # Any should do, they should be all the same
             old_strength = s0.strength
             if s0.last_tested is None:
@@ -431,9 +449,16 @@ class Identity(models.Model):
             s.update(strength=new_strength,
                      last_tested=now,
                      next_test_due=next_due)
+
+            # Delay to allow this request's transaction to finish count to be
+            # updated.
+            awards.tasks.give_learning_awards.apply_async([self.account_id],
+                                                          countdown=2)
+
             return ActionChange(old_strength=old_strength, new_strength=new_strength)
 
         if mem_stage == MemoryStage.SEEN:
+            metric('verse_started')
             s.filter(first_seen__isnull=True).update(first_seen=now)
             return ActionChange()
 
@@ -893,3 +918,15 @@ class Identity(models.Model):
             if self.account.is_tester:
                 return BibleVersion.objects.all()
         return BibleVersion.objects.filter(public=True)
+
+
+class Notice(models.Model):
+    for_identity = models.ForeignKey(Identity, related_name='notices')
+    message_html = models.TextField()
+    created = models.DateTimeField(default=timezone.now)
+
+    def __unicode__(self):
+        return u"Notice %d for %r" % (self.id, self.for_identity)
+
+# At bottom to avoid cyclic imports
+import awards.tasks

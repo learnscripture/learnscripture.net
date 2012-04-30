@@ -1,0 +1,2 @@
+{hosts_file, "/home/cciw/.local/etc/hosts"}.
+{lookup, [file,native]}.

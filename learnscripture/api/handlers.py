@@ -8,6 +8,8 @@ using Piston for the convenience it provides.
 """
 import logging
 
+from app_metrics.utils import metric
+
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
 from django.utils.functional import wraps
@@ -27,10 +29,6 @@ from learnscripture.forms import SignUpForm, LogInForm, AccountPasswordResetForm
 from learnscripture.utils.logging import extra
 from learnscripture.views import session_stats, bible_versions_for_request, verse_sets_visible_for_request
 
-
-logger = logging.getLogger(__name__)
-accountLogger = logging.getLogger('learnscripture.accounts')
-learningLogger = logging.getLogger('learnscripture.learning')
 
 
 # We need a more capable 'validate' than the one provided by piston to get
@@ -177,7 +175,7 @@ class SignUpHandler(AccountCommon, BaseHandler):
             # UI should stop this happening.
             resp = rc.BAD_REQUEST
         account = request.form.save()
-        accountLogger.info("New Account created", extra=extra(account=account, request=request))
+        metric('new_account')
         identity.account = account
         identity.prepare_for_learning()
         identity.save()
@@ -368,3 +366,9 @@ class CheckDuplicatePassageSet(BaseHandler):
                      by=vs.created_by.username)
                 for vs in verse_sets]
 
+
+class DeleteNotice(BaseHandler):
+    allowed_methods = ('POST',)
+
+    def create(self, request):
+        request.identity.notices.filter(id=int(request.data['id'])).delete()

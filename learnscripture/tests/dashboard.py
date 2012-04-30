@@ -19,11 +19,12 @@ class DashboardTests(LiveServerTests):
         self.assertTrue(driver.current_url.endswith(reverse('choose')))
 
     def setup_identity(self):
+        ids = list(Identity.objects.all())
         driver = self.driver
         driver.get(self.live_server_url + reverse('learn'))
         self.wait_until_loaded('body')
         # This should have created an Identity
-        i = Identity.objects.get()
+        i = Identity.objects.exclude(id__in=[i.id for i in ids]).get()
         i.default_bible_version = BibleVersion.objects.get(slug='NET')
         i.testing_method = TestingMethod.FULL_WORDS
         i.save()
@@ -98,13 +99,14 @@ class DashboardTests(LiveServerTests):
         self.assertNotIn('Psalm 23', driver.page_source)
 
     def test_home_dashboard_routing(self):
+        ids = list(Identity.objects.all())
         driver = self.driver
         driver.get(self.live_server_url + "/")
         e = driver.find_element_by_css_selector('a.btn.large')
         self.assertTrue(e.get_attribute('href').endswith(reverse('dashboard')))
         e.click()
         self.assertTrue(driver.current_url.endswith(reverse('choose')))
-        self.assertEqual(Identity.objects.count(), 0)
+        self.assertEqual(Identity.objects.exclude(id__in=[i.id for i in ids]).count(), 0)
 
     def test_force_subscribe_if_expired(self):
         identity, account = self.create_account()

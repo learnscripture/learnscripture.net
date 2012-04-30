@@ -1,3 +1,5 @@
+from app_metrics.utils import metric
+
 from learnscripture import session
 
 class IdentityMiddleware(object):
@@ -7,3 +9,13 @@ class IdentityMiddleware(object):
             request.identity = identity
 
         session.save_referrer(request)
+
+
+class StatsMiddleware(object):
+    def process_request(self, request):
+        metric('request_all')
+        accept = request.environ.get('HTTP_ACCEPT', '')
+        if accept.startswith('application/json'):
+            metric('request_json')
+        elif accept.startswith('text/html'):
+            metric('request_html')

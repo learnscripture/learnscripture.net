@@ -9,6 +9,14 @@
 },
 {
     "pk": 1,
+    "model": "accounts.Identity",
+    "fields": {
+        "account": 1,
+        "default_bible_version": null
+    }
+},
+{
+    "pk": 1,
     "model": "bibleverses.verseset",
     "fields": {
         "set_type": 1,

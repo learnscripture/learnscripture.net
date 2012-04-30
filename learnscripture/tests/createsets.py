@@ -8,6 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import Select
 
+from awards.models import AwardType
 from bibleverses.models import VerseSet, VerseSetType, VerseChoice, StageType
 
 from .base import LiveServerTests
@@ -38,11 +39,14 @@ class CreateSetTests(LiveServerTests):
         self.wait_until_loaded('#id-verse-list tbody tr td')
         self.assertIn("And God called the light Day", driver.page_source)
 
+        driver.find_element_by_id("id_public").click()
         driver.find_element_by_id("id-save-btn").click()
         self.wait_until_loaded('body')
         self.assertTrue(driver.title.startswith("Verse set: My set"))
         self.assertIn("And God called the light Day", driver.page_source)
 
+        self.assertEqual(self._account.awards.filter(award_type=AwardType.SHARER).count(),
+                         1)
 
     def test_forget_name(self):
         """

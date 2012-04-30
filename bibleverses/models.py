@@ -5,7 +5,7 @@ import re
 
 from autoslug import AutoSlugField
 from django.core.urlresolvers import reverse
-from django.db import models
+from django.db import models, connection
 from django.db.models import F
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -276,12 +276,40 @@ class Verse(caching.base.CachingMixin, models.Model):
         ordering = ('bible_verse_number',)
 
 
-class VerseSetManager(caching.base.CachingManager):
+class VerseSetManager(models.Manager):
     def public(self):
         return self.get_query_set().filter(public=True)
 
+    def popularity_for_sets(self, ids, ignoring_account_ids):
+        """
+        Gets the 'popularity' for a group of sets, using actual usage.
+        """
+        if len(ids) == 0:
+            return 0
+        sql = """
+SELECT COUNT(*) FROM
 
-class VerseSet(caching.base.CachingMixin, models.Model):
+  (SELECT uvs.for_identity_id
+   FROM
+      bibleverses_userversestatus as uvs
+      INNER JOIN accounts_identity
+      ON accounts_identity.id = uvs.for_identity_id
+
+   WHERE
+         uvs.ignored = FALSE
+     AND accounts_identity.account_id IS NOT NULL
+     AND accounts_identity.account_id NOT in %s
+     AND uvs.verse_set_id IN %s
+
+   GROUP BY uvs.for_identity_id
+ ) as q
+"""
+        cursor = connection.cursor()
+        cursor.execute(sql, [tuple(ignoring_account_ids), tuple(ids)])
+        return cursor.fetchall()[0][0]
+
+
+class VerseSet(models.Model):
     name = models.CharField(max_length=255)
     slug = AutoSlugField(populate_from='name', unique=True)
     description = models.TextField(blank=True)
@@ -662,3 +690,6 @@ def normalise_reference(query):
         return BIBLE_BOOK_ABBREVIATIONS[book_name] + remainder
     else:
         return None
+
+
+import bibleverses.hooks
