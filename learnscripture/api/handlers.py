@@ -8,8 +8,6 @@ using Piston for the convenience it provides.
 """
 import logging
 
-from app_metrics.utils import metric
-
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
 from django.utils.functional import wraps
@@ -170,15 +168,17 @@ class SignUpHandler(AccountCommon, BaseHandler):
     @require_identity_method
     @validate(SignUpForm, prefix="signup")
     def create(self, request):
+        from accounts.signals import new_account
         identity = request.identity
         if identity.account_id is not None:
             # UI should stop this happening.
             resp = rc.BAD_REQUEST
         account = request.form.save()
-        metric('new_account')
+        account.identity = identity
         identity.account = account
         identity.prepare_for_learning()
         identity.save()
+        new_account.send(sender=account)
         return account
 
 

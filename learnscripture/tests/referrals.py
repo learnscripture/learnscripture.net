@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 from accounts.models import Account
+from awards.models import AwardType
 from bibleverses.models import VerseSet
 
 from .base import LiveServerTests
@@ -36,3 +37,6 @@ class ReferralsTests(LiveServerTests):
 
         self.assertEqual(account.referred_identities_count(), 1)
 
+        # If they create an account, referree gets a badge
+        self.create_account_interactive()
+        self.assertEqual(account.awards.filter(award_type=AwardType.RECRUITER).count(), 1)

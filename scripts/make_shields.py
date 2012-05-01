@@ -26,6 +26,7 @@ if __name__ == '__main__':
                    ('SHARER', 'shield_blue.svg'),
                    ('TREND_SETTER', 'shield_orange.svg'),
                    ('ACE', 'shield_silver.svg'),
+                   ('RECRUITER', 'shield_recruit.svg'),
                    ]
 
     for name, award_file in award_types:
@@ -33,7 +34,11 @@ if __name__ == '__main__':
             for size in [50, 100]:
                 svgs = [os.path.join(updir, 'resources', award_file)]
                 if level != 'any':
-                    svgs.append(os.path.join(updir, 'resources', 'shield_level_%s.svg' % level))
+                    if name in ['RECRUITER']:
+                        number_file = 'shield_level_%s_t2.svg'
+                    else:
+                        number_file = 'shield_level_%s.svg'
+                    svgs.append(os.path.join(updir, 'resources', number_file % level))
                 fname = os.path.join(updir, 'learnscripture', 'static', 'img', 'awards',
                                      'award_%s_level_%s_%d.png' %
                                      (name, level, size))

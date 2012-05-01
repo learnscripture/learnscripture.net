@@ -43,6 +43,18 @@ class AccountTestMixin(object):
         identity.save()
         return (identity, account)
 
+    def create_account_interactive(self,
+                                   email="test2@test.com",
+                                   username="test2",
+                                   password="testpassword2"):
+        driver = self.driver
+        driver.find_element_by_link_text('Create an account').click()
+        self.wait_for_ajax()
+        driver.find_element_by_id('id_signup-email').send_keys(email)
+        driver.find_element_by_id('id_signup-username').send_keys(username)
+        driver.find_element_by_id('id_signup-password').send_keys(password)
+        driver.find_element_by_id('id-create-account-btn').click()
+        self.wait_for_ajax()
 
 
 class LiveServerTests(AccountTestMixin, LiveServerTestCase):
