@@ -701,6 +701,7 @@ SELECT for_identity_id, COUNT(id)
 FROM bibleverses_userversestatus
 WHERE
     ignored = False
+AND memory_stage >= %s
 AND for_identity_id IN %s
 AND first_seen > %s
 GROUP BY for_identity_id
@@ -709,7 +710,7 @@ GROUP BY for_identity_id
         started_since = datetime(1970, 1, 1)
 
     cursor = connection.cursor()
-    cursor.execute(sql, [tuple(identity_ids), started_since])
+    cursor.execute(sql, [MemoryStage.TESTED, tuple(identity_ids), started_since])
     return dict((r[0], r[1]) for r in cursor.fetchall())
 
 
