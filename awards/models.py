@@ -226,7 +226,7 @@ class AceAward(CountBasedAward):
         if self.level is AnyLevel:
             return "Awarded for getting 100% in a test. Level 1 is for getting it once, "\
                 "level 2 if you do it twice in a row, level 3 for 4 times in a row, "\
-                "level 5 for 8 times in a row etc."
+                "level 4 for 8 times in a row etc."
 
         if self.count == 1:
             return u"Achieved 100% in a test"
