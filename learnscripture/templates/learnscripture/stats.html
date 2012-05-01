@@ -10,6 +10,14 @@
 <div id="id-verses-tested-graph" style="width:820px;height:300px;">
 </div>
 
+{% if 'requests' in request.GET %}
+
+<h2>Requests</h2>
+
+<div id="id-request-stats-graph" style="width:820px;height:300px;">
+</div>
+
+{% endif %}
 
 {% endblock %}
 
@@ -19,19 +27,15 @@
 <script type="text/javascript">
 $(function() {
 
-    var placeholder_id = "#id-verses-tested-graph";
-    var verses_initial_tests_per_day = {{ verses_initial_tests_per_day|jsonify }};
-    var verses_revision_tests_per_day = {{ verses_revision_tests_per_day|jsonify }};
-
-    $.plot(placeholder_id,
+    $.plot("#id-verses-tested-graph",
            [
             {label: "Started",
-             data: verses_initial_tests_per_day},
+             data: {{ verses_data.verse_started|jsonify }} },
             {label: "Tested",
-             data: verses_revision_tests_per_day}
+             data: {{ verses_data.verse_tested|jsonify }} }
            ],
            { xaxis: { mode: "time",
-                      ticks: 5 },
+                      ticks: 10 },
              yaxis: { min: 0 },
              legend: { position: "nw" },
              series: {
@@ -39,6 +43,32 @@ $(function() {
              }
 
            });
+
+{% if 'requests' in request.GET %}
+
+    $.plot("#id-request-stats-graph" ,
+           [
+            {label: "HTML requests",
+             data: {{ request_data.request_html|jsonify }} },
+            {label: "JSON requests",
+             data: {{ request_data.request_json|jsonify }} },
+            {label: "Other",
+             data: {{ request_data.request_other|jsonify }} }
+           ],
+           { xaxis: { mode: "time",
+                      ticks: 10 },
+             yaxis: { min: 0 },
+             legend: { position: "nw" },
+             series: {
+                stack: true,
+                lines: { show: true, fill: true },
+             }
+
+           });
+
+
+{% endif %}
+
 });
 </script>
 {% endblock %}

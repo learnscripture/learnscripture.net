@@ -710,42 +710,52 @@ def date_to_js_ts(d):
 
 def stats(request):
     from app_metrics.models import MetricDay
-    start = (timezone.now() - timedelta(62)).date()
 
-    metric_slugs = ['verse_started', 'verse_tested']
-    metrics = (MetricDay.objects.filter(metric__slug__in=metric_slugs)
-               .filter(created__gte=start)
-               .select_related('metric'))
+    def build_data(metric_slugs):
+        metrics = (MetricDay.objects.filter(metric__slug__in=metric_slugs)
+                   .select_related('metric'))
 
+        # Missing metrics => zero. However, if we omit a value for a day, then the
+        # plotting library interpolates, when we want it to say zero.  So we have to
+        # build a dictionary of all values and loop through by day.
 
-    # Missing metrics => zero. However, if we omit a value for a day, then the
-    # plotting library interpolates, when we want it to say zero.  So we have to
-    # build a dictionary of all values and loop through by day.
+        min_date = None
+        max_date = None
 
-    min_date = None
-    max_date = None
+        grouped = {}
+        for m in metrics:
+            if min_date is None or m.created < min_date:
+                min_date = m.created
+            if max_date is None or m.created > max_date:
+                max_date = m.created
+            grouped[(m.metric.slug, m.created)] = m.num
 
-    grouped = {}
-    for m in metrics:
-        if min_date is None or m.created < min_date:
-            min_date = m.created
-        if max_date is None or m.created > max_date:
-            max_date = m.created
-        grouped[(m.metric.slug, m.created)] = m.num
+        output_rows = dict((s, []) for s in metric_slugs)
+        cur_date = min_date
+        while cur_date <= max_date:
+            for s in metric_slugs:
+                val = grouped.get((s, cur_date), 0)
+                ts = date_to_js_ts(cur_date)
+                output_rows[s].append((ts, val))
+            cur_date += timedelta(1)
+        return output_rows
 
-    output_rows = dict((s, []) for s in metric_slugs)
-    cur_date = min_date
-    while cur_date <= max_date:
-        for s in metric_slugs:
-            val = grouped.get((s, cur_date), 0)
-            ts = date_to_js_ts(cur_date)
-            output_rows[s].append((ts, val))
-        cur_date += timedelta(1)
+    verses_data = build_data(['verse_started', 'verse_tested'])
+
+    if 'requests' in request.GET:
+        request_data = build_data(['request_all', 'request_html', 'request_json'])
+        # request_other = request_total - request_html - request_json
+        request_data['request_other'] = [(r_a[0] - r_h[0] - r_j[0], r_a[1]) for r_a, r_h, r_j in
+                                         zip(request_data['request_all'],
+                                             request_data['request_html'],
+                                             request_data['request_json'])]
+    else:
+        request_data = None
 
     return render(request, 'learnscripture/stats.html',
                   {'title': 'Stats',
-                   'verses_initial_tests_per_day': output_rows['verse_started'],
-                   'verses_revision_tests_per_day': output_rows['verse_tested']
+                   'verses_data': verses_data,
+                   'request_data': request_data,
                    })
 
 
