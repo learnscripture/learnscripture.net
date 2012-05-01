@@ -229,6 +229,9 @@ class LearnTests(LiveServerTests):
         driver.get(self.live_server_url + reverse('dashboard'))
         driver.find_element_by_css_selector('input[name=revisepassage]').click()
 
+        self.wait_until_loaded('body')
+        self.wait_for_ajax()
+
         for word in "The LORD is my shepherd, I shall not want.".split():
             driver.find_element_by_id('id-typing').send_keys(word + ' ')
 
@@ -391,7 +394,7 @@ class LearnTests(LiveServerTests):
         # Should show score logs
         driver.find_element_by_css_selector('#id-points-block .score-log')
 
-        account = Account.objects.get(username='testusername')
+        account = Account.objects.get(username='test2')
         self.assertTrue(account.score_logs.count() > 0)
 
     def test_super_bonus_after_more_practice(self):
