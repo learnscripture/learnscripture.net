@@ -61,27 +61,18 @@ def get_all_time_leaderboard(page, page_size):
     sql = """
 CREATE TEMPORARY SEQUENCE rank_seq;
 SELECT
-  username,
+  account_id,
   points,
-  nextval('rank_seq') AS rank,
-  num_verses
+  nextval('rank_seq') AS rank
 FROM
-  (SELECT ts1.account_id, ts1.points, accounts_account.username,
-          COUNT(bibleverses_userversestatus.id) as num_verses
+  (SELECT ts1.account_id, ts1.points
    FROM scores_totalscore as ts1
    INNER JOIN accounts_account
      ON ts1.account_id = accounts_account.id
-   INNER JOIN accounts_identity
-     ON ts1.account_id = accounts_identity.account_id
-   INNER JOIN bibleverses_userversestatus
-     ON accounts_identity.id = bibleverses_userversestatus.for_identity_id
    WHERE accounts_account.subscription != %s
-     AND bibleverses_userversestatus.ignored = false
-     AND bibleverses_userversestatus.last_tested IS NOT NULL
    GROUP BY
      ts1.account_id,
-     ts1.points,
-     accounts_account.username
+     ts1.points
   ORDER BY points DESC
   ) as subquery
 LIMIT %s
@@ -102,12 +93,12 @@ def get_leaderboard_since(since, page, page_size):
     sql = """
 CREATE TEMPORARY SEQUENCE rank_seq;
 SELECT
-  username,
+  account_id,
   sum_points as points,
   nextval('rank_seq') AS rank
 FROM
    (SELECT
-      username,
+      account_id,
       SUM(points) as sum_points
     FROM
       scores_scorelog
@@ -117,7 +108,7 @@ FROM
     WHERE created > %s
       AND accounts_account.subscription != %s
     GROUP BY
-      username
+      account_id
     ORDER BY sum_points DESC
    ) AS sp
 LIMIT %s
