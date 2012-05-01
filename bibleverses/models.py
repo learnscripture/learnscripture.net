@@ -420,6 +420,8 @@ class UserVerseStatus(models.Model):
         # We go by 'next_test_due', since that is how we do filtering.
         if self.last_tested is None:
             return True
+        if self.next_test_due is None:
+            return True
         return timezone.now() >= self.next_test_due
 
     def simple_strength(self):
