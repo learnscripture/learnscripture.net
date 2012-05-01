@@ -745,7 +745,7 @@ def stats(request):
     if 'requests' in request.GET:
         request_data = build_data(['request_all', 'request_html', 'request_json'])
         # request_other = request_total - request_html - request_json
-        request_data['request_other'] = [(r_a[0] - r_h[0] - r_j[0], r_a[1]) for r_a, r_h, r_j in
+        request_data['request_other'] = [(r_a[0], r_a[1] - r_h[1] - r_j[1]) for r_a, r_h, r_j in
                                          zip(request_data['request_all'],
                                              request_data['request_html'],
                                              request_data['request_json'])]
