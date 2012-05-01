@@ -1,4 +1,5 @@
 from collections import defaultdict
+from datetime import datetime
 from decimal import Decimal
 import math
 import re
@@ -690,6 +691,24 @@ def normalise_reference(query):
         return BIBLE_BOOK_ABBREVIATIONS[book_name] + remainder
     else:
         return None
+
+
+def get_verses_started_counts(identity_ids, started_since=None):
+    sql = """
+SELECT for_identity_id, COUNT(id)
+FROM bibleverses_userversestatus
+WHERE
+    ignored = False
+AND for_identity_id IN %s
+AND first_seen > %s
+GROUP BY for_identity_id
+"""
+    if started_since is None:
+        started_since = datetime(1970, 1, 1)
+
+    cursor = connection.cursor()
+    cursor.execute(sql, [tuple(identity_ids), started_since])
+    return dict((r[0], r[1]) for r in cursor.fetchall())
 
 
 import bibleverses.hooks

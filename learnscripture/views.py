@@ -20,12 +20,12 @@ from django.views.decorators.debug import sensitive_post_parameters
 from paypal.standard.forms import PayPalPaymentsForm
 
 from accounts import memorymodel
-from accounts.models import Account, SubscriptionType
+from accounts.models import Account, SubscriptionType, Identity
 from accounts.forms import PreferencesForm, AccountDetailsForm
 from awards.models import AwardType, AWARD_CLASSES, AnyLevel, Award
 import awards.tasks
 from learnscripture.forms import AccountSetPasswordForm
-from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType, get_passage_sections
+from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType, get_passage_sections, get_verses_started_counts
 from learnscripture import session, auth
 from bibleverses.forms import VerseSetForm
 from payments.models import Price
@@ -539,9 +539,30 @@ def leaderboard(request):
     PAGE_SIZE = 30
 
     if thisweek:
-        accounts = get_leaderboard_since(timezone.now() - timedelta(7), page_num - 1, PAGE_SIZE)
+        cutoff = timezone.now() - timedelta(7)
+    else:
+        cutoff = None
+
+    if thisweek:
+        accounts = get_leaderboard_since(cutoff, page_num - 1, PAGE_SIZE)
     else:
         accounts = get_all_time_leaderboard(page_num - 1, PAGE_SIZE)
+
+
+    # Now decorate these accounts with additional info from additional queries
+    account_ids = [a['account_id'] for a in accounts]
+    # identities and account info
+    identities = Identity.objects.filter(account__id__in=account_ids).select_related('account')
+    identity_ids = [i.id for i in identities]
+    identity_dict = dict((i.account_id, i) for i in identities)
+
+    # Counts of verses learnt
+    verse_counts = get_verses_started_counts(identity_ids, cutoff)
+
+    for account_dict in accounts:
+        identity = identity_dict[account_dict['account_id']]
+        account_dict['num_verses'] = verse_counts.get(identity.id, 0)
+        account_dict['username'] = identity.account.username
 
     c = {}
     c['include_referral_links'] = True
