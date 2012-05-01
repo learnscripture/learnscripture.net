@@ -362,6 +362,7 @@ class LearnTests(LiveServerTests):
 
         self.assertTrue(driver.find_element_by_id('id-no-verse-queue').is_displayed())
 
+
     def test_points_after_create_account(self):
         """
         Test that you get points if you click 'create account' while
@@ -380,14 +381,7 @@ class LearnTests(LiveServerTests):
             driver.find_element_by_id('id-next-btn').click()
 
         # Now set up account.
-        driver.find_element_by_link_text('Create an account').click()
-        self.wait_for_ajax()
-        driver.find_element_by_id('id_signup-email').send_keys("test@test.com")
-        driver.find_element_by_id('id_signup-username').send_keys("testusername")
-        driver.find_element_by_id('id_signup-password').send_keys("testpassword")
-        driver.find_element_by_id('id-create-account-btn').click()
-
-        self.wait_for_ajax()
+        self.create_account_interactive()
 
         # Do the typing:
         self._type_john_3_16_kjv()

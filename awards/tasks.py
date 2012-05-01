@@ -1,7 +1,7 @@
 from celery.task import task
 
-from awards.models import StudentAward, MasterAward, SharerAward, TrendSetterAward, AceAward
-from accounts.models import Account
+from awards.models import StudentAward, MasterAward, SharerAward, TrendSetterAward, AceAward, RecruiterAward
+from accounts.models import Account, Identity
 from accounts.memorymodel import MM
 from bibleverses.models import MemoryStage, VerseSetType, VerseSet
 from scores.models import ScoreReason
@@ -86,3 +86,14 @@ def give_ace_awards(account_id):
         count = scores.filter(created__gt=breaker.created).count()
 
     AceAward(count=count).give_to(account)
+
+
+@task(ignore_result=True)
+def give_recruiter_award(account_id):
+    if account_id is None:
+        return
+    account = Account.objects.get(id=account_id)
+
+    count = Identity.objects.filter(account__isnull=False,
+                                    referred_by=account).count()
+    RecruiterAward(count=count).give_to(account)

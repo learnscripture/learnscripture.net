@@ -13,6 +13,7 @@ AwardType = make_choices('AwardType',
                           (2, 'SHARER', 'Sharer'),
                           (3, 'TREND_SETTER', 'Trend setter'),
                           (4, 'ACE', 'Ace'),
+                          (5, 'RECRUITER', 'Recruiter'),
                           ])
 
 # AnyLevel is used when displaying badges on the 'badges' page which describes
@@ -233,12 +234,36 @@ class AceAward(CountBasedAward):
             return u"Achieved 100%% in a test %d times in a row" % self.count
 
 
+class RecruiterAward(CountBasedAward):
+    COUNTS = {1: 1,
+              2: 3,
+              3: 5,
+              4: 10,
+              5: 15,
+              6: 20,
+              7: 25,
+              8: 30,
+              9: 50,
+              }
+    POINTS = dict((k, v*10000) for (k,v) in COUNTS.items())
+
+    def full_description(self):
+        if self.level is AnyLevel:
+            return "Awarded for getting other people to sign up using our referral programme. "\
+                "This award is actually worth money! (If referrals become paying members, that is). "\
+                "Level 1 is for one referral, and is with 10,000 points."
+        elif self.count == 1:
+            return "Got one person to sign up to LearnScripture.net through our referral programme"
+        else:
+            return "Got %d people to sign up to LearnScripture.net through our referral programme" % self.count
+
 AWARD_CLASSES = {
     AwardType.STUDENT: StudentAward,
     AwardType.MASTER: MasterAward,
     AwardType.SHARER: SharerAward,
     AwardType.TREND_SETTER: TrendSetterAward,
     AwardType.ACE: AceAward,
+    AwardType.RECRUITER: RecruiterAward,
 }
 
 for t, c in AWARD_CLASSES.items():
