@@ -450,6 +450,10 @@ class Identity(models.Model):
                      last_tested=now,
                      next_test_due=next_due)
 
+            # Sometimes we get to here with 'first_seen' still null,
+            # so we fix it to keep our data making sense.
+            s.filter(strength__gt=0, first_seen__isnull=True).update(first_seen=now)
+
             # Delay to allow this request's transaction to finish count to be
             # updated.
             awards.tasks.give_learning_awards.apply_async([self.account_id],
