@@ -741,6 +741,16 @@ def stats(request):
         return output_rows
 
     verses_data = build_data(['verse_started', 'verse_tested'])
+    account_data = build_data(['new_account'])
+
+    # Build cumulative stats from 'account_data'
+    all_accounts = []
+    new_accounts = account_data['new_account']
+    total = 0
+    for ts, c in new_accounts:
+        total += c
+        all_accounts.append((ts, total))
+    account_data['all_accounts'] = all_accounts
 
     if 'requests' in request.GET:
         request_data = build_data(['request_all', 'request_html', 'request_json'])
@@ -756,6 +766,7 @@ def stats(request):
                   {'title': 'Stats',
                    'verses_data': verses_data,
                    'request_data': request_data,
+                   'account_data': account_data,
                    })
 
 

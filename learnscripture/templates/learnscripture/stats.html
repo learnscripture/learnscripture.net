@@ -10,6 +10,11 @@
 <div id="id-verses-tested-graph" style="width:820px;height:300px;">
 </div>
 
+<h2>Accounts</h2>
+
+<div id="id-accounts-graph" style="width:820px;height:300px;">
+</div>
+
 {% if 'requests' in request.GET %}
 
 <h2>Requests</h2>
@@ -42,6 +47,29 @@ $(function() {
                 lines: { show: true, fill: false },
              }
 
+           });
+
+    $.plot("#id-accounts-graph",
+           [
+            {label: "New accounts",
+             data: {{ account_data.new_account|jsonify }},
+             yaxis: 1
+            },
+            {label: "All accounts",
+             data: {{ account_data.all_accounts|jsonify }},
+             yaxis: 2
+            }
+           ],
+           { xaxis: { mode: "time",
+                      ticks: 10 },
+             yaxes: [{ min: 0,
+                       position: 'left'},
+                     { min: 0,
+                       position: 'right'}],
+             legend: { position: "nw" },
+             series: {
+                lines: { show: true, fill: false },
+             }
            });
 
 {% if 'requests' in request.GET %}
