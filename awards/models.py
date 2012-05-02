@@ -249,13 +249,13 @@ class RecruiterAward(CountBasedAward):
 
     def full_description(self):
         if self.level is AnyLevel:
-            return "Awarded for getting other people to sign up using our referral programme. "\
+            return "Awarded for getting other people to sign up using our referral program. "\
                 "This award is actually worth money! (If referrals become paying members, that is). "\
                 "Level 1 is for one referral, and is with 10,000 points."
         elif self.count == 1:
-            return "Got one person to sign up to LearnScripture.net through our referral programme"
+            return "Got one person to sign up to LearnScripture.net through our referral program"
         else:
-            return "Got %d people to sign up to LearnScripture.net through our referral programme" % self.count
+            return "Got %d people to sign up to LearnScripture.net through our referral program" % self.count
 
 AWARD_CLASSES = {
     AwardType.STUDENT: StudentAward,
