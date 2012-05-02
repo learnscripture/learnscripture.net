@@ -110,14 +110,16 @@
       {% block referral_links %}
       {% if request.identity.account and include_referral_links %}
       <div class="footer addclearfix">
-        <div class="referral-link"><a href="{{ referral_link }}">referral link</a> | <a href="/referral-program/">What's this?</a></div>
-        <div>
-          <iframe src="//www.facebook.com/plugins/like.php?href={{ referral_link|urlencode:"" }}&amp;send=false&amp;layout=button_count&amp;width=450&amp;show_faces=true&amp;action=recommend&amp;colorscheme=light&amp;font&amp;height=21" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:130px; height:21px;" allowTransparency="true"></iframe>
-        </div>
-        <div>
-          <iframe allowtransparency="true" frameborder="0" scrolling="no"
-                  src="//platform.twitter.com/widgets/tweet_button.html?url={{ referral_link|urlencode }}&amp;text="
-                  style="width:110px; height:20px;"></iframe>
+        <div class="addthis_toolbox addthis_default_style"
+             addthis:url="{{ referral_link }}">
+          <a class="addthis_button_preferred_1"></a>
+          <a class="addthis_button_preferred_2"></a>
+          <a class="addthis_button_preferred_3"></a>
+          <a class="addthis_button_preferred_4"></a>
+          <a class="addthis_button_compact"></a>
+          <a class="addthis_counter addthis_bubble_style"></a>
+          <span class="addthis_separator">|</span>
+          <a href="{{ referral_link }}">referral link</a> | <a href="/referral-program/">What's this?</a>
         </div>
       </div>
       {% endif %}
@@ -275,6 +277,10 @@
     <script type="text/javascript" src="{{ STATIC_URL }}js/subscribe.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/versepopup.js"></script>
     {% endcompress %}
+
+    {% if request.identity.account and include_referral_links %}
+    <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid=ra-4fa0736b6ee964ea"></script>
+    {% endif %}
 
     {% block extrajs %}
     {% endblock %}
