@@ -7,6 +7,28 @@ from awards.signals import new_award
 from scores.models import ScoreReason
 from learnscripture.datastructures import make_choices
 
+# In this module we have:
+#
+# = AwardType =
+#
+# Class storing enumeration of the different award types
+#
+# = AwardLogic and subclasses =
+#
+# Classes holding details about individual types of awards, and the
+# levels/counts/points they have. It contains some utility methd
+#
+# The queries needed to calculate counts are not contained in the AwardLogic
+# classes, but in awards.tasks and other places.
+#
+# This is mapped to AwardType using a simple dictionary AWARD_CLASSES
+#
+# = Award model =
+#
+# Stores info in DB, including 'level' and 'award_type'. It has a number of
+# methods/properties that proxy to an instance of the relevant AwardLogic
+# subclass.
+
 AwardType = make_choices('AwardType',
                          [(0, 'STUDENT', 'Student'),
                           (1, 'MASTER', 'Master'),
@@ -14,6 +36,7 @@ AwardType = make_choices('AwardType',
                           (3, 'TREND_SETTER', 'Trend setter'),
                           (4, 'ACE', 'Ace'),
                           (5, 'RECRUITER', 'Recruiter'),
+                          (6, 'HACKER', 'Hacker'),
                           ])
 
 # AnyLevel is used when displaying badges on the 'badges' page which describes
@@ -30,6 +53,8 @@ class AwardLogic(object):
     # All subclasses need to define an __init__ that takes at least a 'level'
     # keyword argument.
 
+    # Subclasses must also define 'has_levels' class attribute
+
     def slug(self):
         return AwardType.name_for_value[self.award_type].lower().replace('_', '-')
 
@@ -38,7 +63,10 @@ class AwardLogic(object):
         if self.level is AnyLevel:
             return title
         else:
-            return u'%s - level %d' % (title, self.level)
+            if self.has_levels:
+                return u'%s - level %d' % (title, self.level)
+            else:
+                return title
 
     def image_small(self):
         n = AwardType.name_for_value[self.award_type]
@@ -84,6 +112,12 @@ class AwardLogic(object):
 
 
 class CountBasedAward(AwardLogic):
+    """
+    Base class for awards that have different levels that are based on
+    a 'count' of some kind.
+    """
+    has_levels = True
+
 
     # Subclass must define COUNTS, and optionally POINTS
 
@@ -119,6 +153,27 @@ class CountBasedAward(AwardLogic):
             return self.POINTS[self.level]
         else:
             return 0
+
+
+class SingleLevelAward(AwardLogic):
+    """
+    Base class for awards that do not have multiple levels
+    """
+
+    # Subclasses should define:
+    #  FULL_DESCRIPTION (string)
+    #  POINTS (integer)
+
+    has_levels = False
+
+    def __init__(self, level=None):
+        self.level = AnyLevel
+
+    def full_description(self):
+        return self.FULL_DESCRIPTION
+
+    def points(self):
+        return self.POINTS
 
 
 class LearningAward(CountBasedAward):
@@ -257,6 +312,13 @@ class RecruiterAward(CountBasedAward):
         else:
             return "Got %d people to sign up to LearnScripture.net through our referral program" % self.count
 
+
+class HackerAward(SingleLevelAward):
+    POINTS = 0
+    FULL_DESCRIPTION = u"Awarded to leet hackers who find some bug in the site that allows you to cheat. "\
+        "Do this too many times and you'll get kicked out :-)"
+
+
 AWARD_CLASSES = {
     AwardType.STUDENT: StudentAward,
     AwardType.MASTER: MasterAward,
@@ -264,6 +326,7 @@ AWARD_CLASSES = {
     AwardType.TREND_SETTER: TrendSetterAward,
     AwardType.ACE: AceAward,
     AwardType.RECRUITER: RecruiterAward,
+    AwardType.HACKER: HackerAward,
 }
 
 for t, c in AWARD_CLASSES.items():
@@ -295,5 +358,7 @@ class Award(models.Model):
     def full_description(self):
         return self.award_detail.full_description()
 
+    def has_levels(self):
+        return self.award_detail.has_levels
 
 import awards.hooks
