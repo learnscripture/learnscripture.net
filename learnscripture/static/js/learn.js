@@ -666,6 +666,7 @@ var learnscripture =
         };
 
         var testStart = function () {
+            $('.current-verse .word *').stop(true, true);
             // Don't want to see a flash of words at the beginning,
             // so hide quickly
             hideWord($('.current-verse .word span'), {'duration': 0, queue: false});
