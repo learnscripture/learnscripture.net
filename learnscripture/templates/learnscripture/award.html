@@ -9,7 +9,9 @@
 <p style="text-align:center"> <img src="{{ STATIC_URL }}{{ award.image_medium }}"></p>
 
 <h2>Achievers</h2>
+{% if award.has_levels %}
 <p>Highest level achieved so far: <b>Level {{ award.highest_level }}</b></p>
+{% endif %}
 
 <p>Earned by {{ receivers_count }}
   {% if receivers_count == 1 %} person:
@@ -34,7 +36,11 @@
 <h3>Your awards</h3>
 
 {% if account_top_award %}
+{% if account_top_award.has_levels %}
 <p>You have this award, at level {{ account_top_award.level }}</p>
+{% else %}
+<p>You have this award.</p>
+{% endif %}
 
 <p style="text-align: center">
 <img src="{{ STATIC_URL }}{{ account_top_award.image_medium }}">
