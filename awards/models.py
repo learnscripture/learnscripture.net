@@ -316,7 +316,7 @@ class RecruiterAward(CountBasedAward):
 class HackerAward(SingleLevelAward):
     POINTS = 0
     FULL_DESCRIPTION = u"Awarded to leet hackers who find some bug in the site that allows you to cheat. "\
-        "Do this too many times and you'll get kicked out :-)"
+        "This award comes with the risk of getting your points reset to zero and/or being kicked out :-)"
 
 
 AWARD_CLASSES = {
