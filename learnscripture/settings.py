@@ -213,6 +213,7 @@ INSTALLED_APPS = [
     'scores',
     'payments',
     'awards',
+    'events',
     # Third party
     'piston',
     'mptt',
