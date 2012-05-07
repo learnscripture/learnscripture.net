@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from django.db import connection
 from django.db import models
-from django.db.models import F
+from django.db.models import F, Sum
 from django.utils import timezone
 
 from learnscripture.datastructures import make_choices
@@ -52,6 +52,16 @@ class TotalScore(models.Model):
     account = models.OneToOneField('accounts.Account', related_name='total_score')
     points = models.PositiveIntegerField(default=0)
     visible = models.BooleanField(default=True)
+
+    def get_previous_points(self, score_log_ids):
+        """
+        Given some ScoreLog ids, gets the total score before
+        those ScoreLogs were made.
+        """
+        last_score_jump = self.account.score_logs.filter(id__in=score_log_ids).aggregate(Sum('points'))['points__sum']
+        if last_score_jump is None:
+            last_score_jump = 0
+        return self.points - last_score_jump
 
 
 def get_all_time_leaderboard(page, page_size):

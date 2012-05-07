@@ -148,7 +148,9 @@ class Account(models.Model):
                                               accuracy=accuracy))
         awards.tasks.give_ace_awards.apply_async([self.id],
                                                  countdown=2)
-        events.tasks.create_points_milestone_event.apply_async([self.id],
+        events.tasks.create_points_milestone_event.apply_async([self.id,
+                                                                [sl.id for sl in score_logs]
+                                                                ],
                                                                countdown=5)
 
         return score_logs
