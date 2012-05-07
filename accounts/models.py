@@ -16,7 +16,6 @@ from django.utils import timezone
 from accounts import memorymodel
 from bibleverses.models import BibleVersion, MemoryStage, StageType, BibleVersion, VerseChoice, VerseSet, VerseSetType, get_passage_sections
 from bibleverses.signals import verse_set_chosen
-from events.models import Event
 from scores.models import TotalScore, ScoreReason, Scores, get_rank_all_time, get_rank_this_week
 
 from learnscripture.datastructures import make_choices
@@ -925,6 +924,7 @@ class Identity(models.Model):
         return BibleVersion.objects.filter(public=True)
 
     def get_dashboard_events(self, now=None):
+        from events.models import Event
         return Event.objects.for_dashboard(now=now)
 
 
