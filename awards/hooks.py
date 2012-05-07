@@ -3,6 +3,7 @@ from django.core.urlresolvers import reverse
 from django.dispatch import receiver
 
 from awards.signals import new_award
+from bibleverses.signals import verse_set_chosen
 
 
 @receiver(new_award)
@@ -24,4 +25,11 @@ def notify_about_new_award(sender, **kwargs):
             msg = msg + ' Points bonus: %d' % points
 
     account.identity.notices.create(message_html=msg)
+
+
+@receiver(verse_set_chosen)
+def verse_set_chosen_receiver(sender, **kwargs):
+    verse_set = sender
+    from awards.tasks import give_verse_set_used_awards
+    give_verse_set_used_awards.delay(verse_set.created_by_id)
 
