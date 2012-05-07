@@ -41,7 +41,7 @@ var learnscripture = (function (learnscripture, $) {
         if (modalHeight > $(window).height()) {
             modal.css({'position': 'absolute',
                        'top': modalMargin.toString() + 'px',
-                       'margin-top': '0px',
+                       'margin-top': '0px'
                       });
             // not enough room for modal, so be careful not to put it so
             // that it would stick off the bottom of the page.
@@ -55,7 +55,7 @@ var learnscripture = (function (learnscripture, $) {
         } else {
             modal.css({'position': 'fixed',
                        'top': '50%',
-                       'margin-top': "-" + (modalHeight / 2).toString() + "px",
+                       'margin-top': "-" + (modalHeight / 2).toString() + "px"
                       });
             // we have enough room for the whole modal
         }

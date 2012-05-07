@@ -25,7 +25,7 @@ var learnscripture = (function (learnscripture, $) {
                            });
                     return content;
                 },
-                trigger: 'manual',
+                trigger: 'manual'
             })
             .bind('mouseenter', function(ev) { $(this).popover('show');})
             .bind('mouseleave', function(ev) { $(this).popover('hide');})

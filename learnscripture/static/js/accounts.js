@@ -134,7 +134,7 @@ var learnscripture = (function (learnscripture, $) {
                     setSignedIn(data, 'logout');
                     $('#id-logout-form').modal('hide');
                 },
-                error: learnscripture.ajaxFailed,
+                error: learnscripture.ajaxFailed
                });
         ev.preventDefault();
     };
