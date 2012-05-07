@@ -151,4 +151,12 @@ class Event(models.Model):
         return self.weight * recency
 
 
+    def created_display(self):
+        from django.utils.timesince import timesince
+        now = timezone.now()
+        diff = now - self.created
+        if diff.total_seconds() < 60:
+            return u"Just now"
+        return timesince(self.created, now=now) + " ago"
+
 import events.hooks
