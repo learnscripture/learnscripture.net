@@ -164,6 +164,7 @@ MIDDLEWARE_CLASSES = [
         (True, 'django.contrib.auth.middleware.AuthenticationMiddleware'),
         (True, 'django.contrib.messages.middleware.MessageMiddleware'),
         (True, 'django.middleware.clickjacking.XFrameOptionsMiddleware'),
+        (DEVBOX, 'learnscripture.middleware.DebugMiddleware'),
         (True, 'learnscripture.middleware.IdentityMiddleware'),
         (True, 'pagination.middleware.PaginationMiddleware'),
         (True, 'raven.contrib.django.middleware.Sentry404CatchMiddleware'),
