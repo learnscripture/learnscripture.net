@@ -138,7 +138,7 @@ class StartedLearningVerseSetEvent(EventLogic):
 
 class PointsMilestoneEvent(EventLogic):
     def __init__(self, account=None, points=None):
-        super(PointsMilestoneEvent, self).__init__(acount_id=account.id,
+        super(PointsMilestoneEvent, self).__init__(account_id=account.id,
                                                    points=points)
         self.event.message_html = (
             '<a href="%s">%s</a> reached %s points' %
