@@ -188,6 +188,7 @@ def dashboard(request):
          'passages_for_revising': identity.passages_for_revising(),
          'next_verse_due': identity.next_verse_due(),
          'title': 'Dashboard',
+         'events': identity.get_dashboard_events(),
          }
     c.update(session_stats(identity))
     return render(request, 'learnscripture/dashboard.html', c)
