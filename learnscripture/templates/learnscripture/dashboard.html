@@ -131,7 +131,9 @@
 
 {% block rightcolumn %}
 
+{% if not request.identity.account %}
 {% include 'learnscripture/session.html' %}
+{% endif %}
 
 <h3>Session stats</h3>
 
