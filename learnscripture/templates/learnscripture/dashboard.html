@@ -139,4 +139,16 @@
 {% include 'learnscripture/sessionstats.html' %}
 </div>
 
+<h3>News</h3>
+
+<div class="eventstream">
+<ul>
+{% for event in events %}
+<li>{{ event.message_html|safe }}
+<br/><i>({{ event.created|timesince }} ago)</i>
+</li>
+{% endfor %}
+</ul>
+</div>
+
 {% endblock %}
