@@ -12,7 +12,7 @@ from learnscripture.datastructures import make_choices
 
 
 EVENTSTREAM_CUTOFF_DAYS = 3 # just 3 days of events
-EVENTSTREAM_CUTOFF_NUMBER = 20
+EVENTSTREAM_CUTOFF_NUMBER = 8
 
 # Arbitrarily say stuff is 50% less interesting when it is one day old.
 EVENTSTREAM_TIME_DECAY_FACTOR = 3600*24
