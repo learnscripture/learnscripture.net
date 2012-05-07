@@ -401,7 +401,7 @@ class Identity(models.Model):
                 new_uvs = self.create_verse_status(vc.reference, verse_set, use_version)
                 out.append(new_uvs)
 
-        verse_set_chosen.send(sender=verse_set)
+        verse_set_chosen.send(sender=verse_set, chosen_by=self.account)
         return out
 
     def add_verse_choice(self, reference, version=None):

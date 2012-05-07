@@ -30,7 +30,7 @@ EventType = make_choices('EventType',
                           (5, 'VERSES_STARTED_MILESTONE', 'Verses started milestone'),
                           (6, 'VERSES_FINISHED_MILESTONE', 'Verses finished milestone'),
                           (7, 'VERSE_SET_CREATED', 'Verse set created'),
-                          (8, 'VERSE_SET_STARTED', 'Verse set started'),
+                          (8, 'STARTED_LEARNING_VERSE_SET', 'Started learning a verse set'),
                           ])
 
 
@@ -120,10 +120,26 @@ class VerseSetCreatedEvent(EventLogic):
             )
 
 
+class StartedLearningVerseSetEvent(EventLogic):
+    def __init__(self, verse_set=None, chosen_by=None):
+        super(StartedLearningVerseSetEvent, self).__init__(verse_set_id=verse_set.id,
+                                                           chosen_by_id=chosen_by.id)
+        self.event.message_html = (
+            '<a href="%s">%s</a> started learning <a href="%s">%s</a>' %
+            tuple(map(escape,
+                      [account_url(chosen_by),
+                       chosen_by.username,
+                       reverse('view_verse_set', args=(verse_set.slug,)),
+                       verse_set.name,
+                       ]))
+            )
+
+
 EVENT_CLASSES = {
     EventType.NEW_ACCOUNT: NewAccountEvent,
     EventType.AWARD_RECEIVED: AwardReceivedEvent,
     EventType.VERSE_SET_CREATED: VerseSetCreatedEvent,
+    EventType.STARTED_LEARNING_VERSE_SET: StartedLearningVerseSetEvent,
 }
 
 

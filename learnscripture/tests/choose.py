@@ -6,6 +6,7 @@ from selenium.webdriver.support.ui import Select
 from accounts.models import Identity
 from awards.models import AwardType, TrendSetterAward
 from bibleverses.models import VerseSet, Verse, BibleVersion
+from events.models import Event, EventType
 
 from .base import LiveServerTests
 
@@ -23,7 +24,7 @@ class ChooseTests(LiveServerTests):
         self.assertIn("Basic Gospel", driver.page_source)
         self.assertNotIn("Bible 101", driver.page_source)
 
-    def test_popularity_tracking(self):
+    def test_verse_set_popularity_tracking(self):
         # Frig a quantity to make test easier
         TrendSetterAward.COUNTS = {1: 1, 2: 10}
 
@@ -45,6 +46,11 @@ class ChooseTests(LiveServerTests):
         vs = VerseSet.objects.get(id=vs_id)
         self.assertEqual(vs.created_by.awards.filter(award_type=AwardType.TREND_SETTER).count(),
                          1)
+
+        # Test events
+        self.assertEqual(Event.objects.filter(event_type=EventType.STARTED_LEARNING_VERSE_SET).count(),
+                         1)
+
 
     def test_double_choose(self):
         ids = list(Identity.objects.all())
