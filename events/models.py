@@ -2,6 +2,7 @@ from datetime import timedelta
 import math
 
 from django.db import models
+from django.contrib.humanize.templatetags.humanize import intcomma
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 from django.utils.html import escape
@@ -144,7 +145,7 @@ class PointsMilestoneEvent(EventLogic):
             tuple(map(escape,
                       [account_url(account),
                        account.username,
-                       points]))
+                       intcomma(points)]))
             )
 
 
