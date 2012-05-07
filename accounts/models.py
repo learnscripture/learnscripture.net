@@ -464,6 +464,8 @@ class Identity(models.Model):
             # updated.
             awards.tasks.give_learning_awards.apply_async([self.account_id],
                                                           countdown=2)
+            events.tasks.create_verses_started_milestone_event.apply_async([self.account_id],
+                                                                           countdown=2)
 
             return ActionChange(old_strength=old_strength, new_strength=new_strength)
 
@@ -950,3 +952,4 @@ class Notice(models.Model):
 # At bottom to avoid cyclic imports
 import awards.tasks
 import accounts.hooks
+import events.tasks

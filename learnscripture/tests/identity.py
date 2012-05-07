@@ -11,6 +11,7 @@ from accounts import memorymodel
 from accounts.models import Identity, ActionChange, Account
 from awards.models import AwardType
 from bibleverses.models import VerseSet, BibleVersion, StageType, MemoryStage
+from events.models import Event, EventType
 from scores.models import Scores
 
 from .base import FuzzyInt
@@ -19,12 +20,12 @@ class IdentityTests(TestCase):
 
     fixtures = ['test_bible_versions.json', 'test_verse_sets.json', 'test_bible_verses.json']
 
-    def _create_identity(self):
-        NET = BibleVersion.objects.get(slug='NET')
-        return Identity.objects.create(default_bible_version=NET)
+    def _create_identity(self, version_slug='NET'):
+        version = BibleVersion.objects.get(slug=version_slug)
+        return Identity.objects.create(default_bible_version=version)
 
-    def _create_account(self):
-        identity = self._create_identity()
+    def _create_account(self, **kwargs):
+        identity = self._create_identity(**kwargs)
         account = Account.objects.create(username='testaccount')
         identity.account = account
         identity.save()
@@ -471,6 +472,21 @@ class IdentityTests(TestCase):
         self.assertEqual(i.verse_statuses.filter(reference='Psalm 23:1').count(), 2)
 
         self.assertFalse(0.0 in [uvs.strength for uvs in i.verse_statuses.filter(reference='Psalm 23:1')])
+
+
+    def test_verses_started_milestone_event(self):
+        i = self._create_account(version_slug='KJV').identity
+
+
+        refs = \
+            ['Genesis 1:%d' % j for j in range(1, 11)] + \
+            ['Genesis 2:%d' % j for j in range(1, 3)]
+
+        for j, ref in enumerate(refs):
+            i.add_verse_choice(ref)
+            i.record_verse_action(ref, 'KJV', StageType.TEST, 1)
+            self.assertEqual(Event.objects.filter(event_type=EventType.VERSES_STARTED_MILESTONE).count(),
+                             0 if j < 9 else 1)
 
 
     def test_order_after_cancelling_and_re_adding_verse(self):

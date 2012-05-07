@@ -3,7 +3,7 @@ from celery.task import task
 from accounts.models import Account
 from awards.models import Award
 from bibleverses.models import VerseSet
-from events.models import NewAccountEvent, AwardReceivedEvent, VerseSetCreatedEvent, StartedLearningVerseSetEvent, PointsMilestoneEvent
+from events.models import NewAccountEvent, AwardReceivedEvent, VerseSetCreatedEvent, StartedLearningVerseSetEvent, PointsMilestoneEvent, VersesStartedMilestoneEvent
 from scores.models import TotalScore
 
 
@@ -63,3 +63,22 @@ def create_points_milestone_event(account_id, score_log_ids):
     m, points = crosses_milestone(previous_points, current_points)
     if m:
         PointsMilestoneEvent(account=account, points=points).save()
+
+
+def is_milestone(c):
+    c_s = str(c)
+    return c_s.count('0') == len(c_s) - 1
+
+
+@task(ignore_result=True)
+def create_verses_started_milestone_event(account_id):
+    account = Account.objects.get(id=account_id)
+
+    # This could fail if the task gets delayed past the point where another
+    # verse has been learnt. But we don't mind that much if some Events get
+    # missed.
+    c = account.identity.verse_statuses_started().count()
+
+    if c > 9 and is_milestone(c):
+        VersesStartedMilestoneEvent(account=account, verses_started=c).save()
+
