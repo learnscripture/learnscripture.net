@@ -10,6 +10,7 @@ from selenium.webdriver.support.ui import Select
 
 from awards.models import AwardType
 from bibleverses.models import VerseSet, VerseSetType, VerseChoice, StageType
+from events.models import Event, EventType
 
 from .base import LiveServerTests
 
@@ -46,6 +47,8 @@ class CreateSetTests(LiveServerTests):
         self.assertIn("And God called the light Day", driver.page_source)
 
         self.assertEqual(self._account.awards.filter(award_type=AwardType.SHARER).count(),
+                         1)
+        self.assertEqual(Event.objects.filter(event_type=EventType.VERSE_SET_CREATED).count(),
                          1)
 
     def test_forget_name(self):
