@@ -62,7 +62,11 @@ class NoticeEvent(EventLogic):
     """
     Events used to broadcast notices to all users.
     """
-    weight = 30
+    weight = EventLogic.weight * 3
+
+
+def account_url(account):
+    return reverse('user_stats', args=(account.username,))
 
 
 class NewAccountEvent(EventLogic):
@@ -79,15 +83,33 @@ class NewAccountEvent(EventLogic):
             extra_name = "(%s)" % extra_name
         self.event.message_html = ("<a href='%s'>%s</a> %s signed up to LearnScripture.net" %
                                    tuple(map(escape,
-                                             [reverse('user_stats', args=(account.username,)),
+                                             [account_url(account),
                                               account.username,
                                               extra_name]))
                                    )
 
 
+class AwardReceivedEvent(EventLogic):
+
+    # Awards are quite interesting
+    weight = EventLogic.weight * 2
+
+    def __init__(self, award=None):
+        super(AwardReceivedEvent, self).__init__(award_id=award.id)
+        self.event.message_html = (
+            "<a href='%s'>%s</a> received <b>%s</b> award"
+            % tuple(map(escape,
+                        [account_url(award.account),
+                         award.account.username,
+                         award.short_description()]))
+            )
+
+
 EVENT_CLASSES = {
-    EventType.NEW_ACCOUNT: NewAccountEvent
+    EventType.NEW_ACCOUNT: NewAccountEvent,
+    EventType.AWARD_RECEIVED: AwardReceivedEvent,
 }
+
 
 for event_type, c in EVENT_CLASSES.items():
     c.event_type = event_type
@@ -127,3 +149,6 @@ class Event(models.Model):
 
         recency = 2 ** (-seconds/EVENTSTREAM_TIME_DECAY_FACTOR)
         return self.weight * recency
+
+
+import events.hooks

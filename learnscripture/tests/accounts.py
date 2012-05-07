@@ -9,6 +9,7 @@ from django.utils import timezone
 from accounts.models import Account, SubscriptionType, ActionChange, Identity
 from awards.models import AwardType
 from bibleverses.models import MemoryStage, StageType
+from events.models import Event, EventType
 from scores.models import Scores, ScoreReason
 
 
@@ -80,6 +81,9 @@ class AccountTests(TestCase):
         self.assertEqual(account.awards.filter(award_type=AwardType.ACE, level=3).count(),
                          1)
 
+
+        # Check 'Event' created
+        self.assertTrue(Event.objects.filter(event_type=EventType.AWARD_RECEIVED).count() > 1)
 
 
     def test_award_action_points_fully_learnt(self):
