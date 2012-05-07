@@ -31,6 +31,19 @@ def create_started_verse_set_event(verse_set_id, chosen_by_id):
                                  chosen_by=Account.objects.get(id=chosen_by_id)).save()
 
 
+
+def crosses_milestone(previous_points, current_points):
+    c_s = str(current_points)
+    p_s = str(previous_points)
+
+    if (len(p_s) < len(c_s) or p_s[0] != c_s[0]):
+        # find most recent milestone crossed:
+        points = int(c_s[0]) * 10 ** (len(c_s) - 1)
+        return True, points
+    else:
+        return False, None
+
+
 @task(ignore_result=True)
 def create_points_milestone_event(account_id, score_log_ids):
     account = Account.objects.get(id=account_id)
@@ -47,10 +60,6 @@ def create_points_milestone_event(account_id, score_log_ids):
         return
 
     previous_points = total_score.get_previous_points(score_log_ids)
-    c_s = str(current_points)
-    p_s = str(previous_points)
-
-    if (len(p_s) < len(c_s) or p_s[0] != c_s[0]):
-        # find most recent milestone crossed:
-        points = int(c_s[0]) * 10 ** (len(c_s) - 1)
+    m, points = crosses_milestone(previous_points, current_points)
+    if m:
         PointsMilestoneEvent(account=account, points=points).save()
