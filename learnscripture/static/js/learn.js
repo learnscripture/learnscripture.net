@@ -643,7 +643,7 @@ var learnscripture =
             var pos = wordBox.position();
             var width;
             $('#id-test-bar').css({left: pos.left.toString() + "px",
-                                   top: pos.top.toString() + "px",
+                                   top: pos.top.toString() + "px"
                                   });
             if (isHardMode()) {
                 width = "6em";
