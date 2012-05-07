@@ -596,8 +596,7 @@ def user_stats(request, username):
          'include_referral_links': True,
          }
     one_week_ago = timezone.now() - timedelta(7)
-    verses_started =  account.identity.verse_statuses.filter(ignored=False,
-                                                             last_tested__isnull=False)
+    verses_started =  account.identity.verse_statuses_started()
 
     c['verses_started_all_time'] = verses_started.count()
     c['verses_started_this_week'] = verses_started.filter(first_seen__gte=one_week_ago).count()
@@ -613,11 +612,7 @@ def user_stats(request, username):
 def user_verses(request):
     identity = request.identity
     c = {'title': 'Progress'}
-    verses = (identity.verse_statuses.filter(ignored=False,
-                                             strength__gt=0,
-                                             last_tested__isnull=False)
-              .select_related('version')
-              )
+    verses = identity.verse_statuses_started().select_related('version')
 
     if 'bibleorder' in request.GET:
         c['bibleorder'] = True
@@ -811,8 +806,8 @@ def subscribe(request):
             # Add info about how many verses they have learned.
 
             # Some of this logic should probably be in the model layer
-            learning_verses = verse_count = identity.verse_statuses.filter(ignored=False)
-            c['started_verses_count'] = learning_verses.filter(strength__gt=Decimal('0.0')).count()
+            learning_verses = identity.verse_statuses_started()
+            c['started_verses_count'] = learning_verses.count()
             well_learnt = (learning_verses
                            .exclude(verse_set__set_type=VerseSetType.PASSAGE)
                            .filter(strength__gt=Decimal('0.65')).order_by('strength'))[0:3]
