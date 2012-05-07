@@ -145,7 +145,7 @@
 <ul>
 {% for event in events %}
 <li>{{ event.message_html|safe }}
-<br/><i>({{ event.created|timesince }} ago)</i>
+<br/><span class="timestamp">{{ event.created_display }}</span>
 </li>
 {% endfor %}
 </ul>
