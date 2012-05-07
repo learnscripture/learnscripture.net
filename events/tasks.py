@@ -27,7 +27,10 @@ def create_started_verse_set_event(verse_set_id, chosen_by_id):
     if chosen_by_id is None:
         # Not very interesting, don't bother with an event
         return
-    StartedLearningVerseSetEvent(verse_set=VerseSet.objects.get(id=verse_set_id),
+    verse_set = VerseSet.objects.get(id=verse_set_id)
+    if not verse_set.public:
+        return
+    StartedLearningVerseSetEvent(verse_set=verse_set,
                                  chosen_by=Account.objects.get(id=chosen_by_id)).save()
 
 
