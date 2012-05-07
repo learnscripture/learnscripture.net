@@ -117,6 +117,8 @@ class Account(models.Model):
     def award_action_points(self, reference, text,
                             old_memory_stage, action_change,
                             action_stage, accuracy):
+        import events.tasks
+
         if not self.scoring_enabled():
             return []
 
@@ -146,6 +148,8 @@ class Account(models.Model):
                                               accuracy=accuracy))
         awards.tasks.give_ace_awards.apply_async([self.id],
                                                  countdown=2)
+        events.tasks.create_points_milestone_event.apply_async([self.id],
+                                                               countdown=5)
 
         return score_logs
 

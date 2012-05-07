@@ -33,6 +33,25 @@ class AccountTests(TestCase):
         self.assertEqual(a.total_score.points,
                          (4 * Scores.POINTS_PER_WORD * 0.75))
 
+    def test_points_events(self):
+        a = Account.objects.create(username='test',
+                                   email='test@test.com',
+                                   subscription=SubscriptionType.PAID_UP)
+        def score():
+            a.award_action_points("John 3:16", "This is John 3:16",
+                                  MemoryStage.TESTED,
+                                  ActionChange(old_strength=0.5, new_strength=0.6),
+                                  StageType.TEST, 0.75)
+
+        # One rep of score() gives 30 points.
+        # When we cross over 1000 (repetition 34) we should get an event
+        for i in range(1, 40):
+            score()
+            self.assertEqual(Event.objects.filter(event_type=EventType.POINTS_MILESTONE).count(),
+                             0 if i < 34 else 1)
+
+
+
 
     def test_ace_awards(self):
         account = Account.objects.create(username='test',

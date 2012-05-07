@@ -135,9 +135,23 @@ class StartedLearningVerseSetEvent(EventLogic):
             )
 
 
+class PointsMilestoneEvent(EventLogic):
+    def __init__(self, account=None, points=None):
+        super(PointsMilestoneEvent, self).__init__(acount_id=account.id,
+                                                   points=points)
+        self.event.message_html = (
+            '<a href="%s">%s</a> reached %s points' %
+            tuple(map(escape,
+                      [account_url(account),
+                       account.username,
+                       points]))
+            )
+
+
 EVENT_CLASSES = {
     EventType.NEW_ACCOUNT: NewAccountEvent,
     EventType.AWARD_RECEIVED: AwardReceivedEvent,
+    EventType.POINTS_MILESTONE: PointsMilestoneEvent,
     EventType.VERSE_SET_CREATED: VerseSetCreatedEvent,
     EventType.STARTED_LEARNING_VERSE_SET: StartedLearningVerseSetEvent,
 }
