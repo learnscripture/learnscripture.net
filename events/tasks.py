@@ -32,26 +32,25 @@ def create_started_verse_set_event(verse_set_id, chosen_by_id):
 
 
 @task(ignore_result=True)
-def create_points_milestone_event(account_id):
+def create_points_milestone_event(account_id, score_log_ids):
     account = Account.objects.get(id=account_id)
     try:
-        total_score = account.total_score.points
-        last_score = account.score_logs.order_by('-created')[0]
-    except (TotalScore.DoesNotExist, AttributeError, IndexError):
+        total_score = account.total_score
+    except (TotalScore.DoesNotExist, AttributeError):
         return
-
-    previous_score = total_score - last_score.points
 
     # milestones are things like 1000, 2000 etc.  We can find these by
     # converting to strings and measuring different lengths or initial
     # characters.
-    if total_score < 1000:
+    current_points = total_score.points
+    if current_points < 1000:
         return
 
-    p_s = str(previous_score)
-    t_s = str(total_score)
+    previous_points = total_score.get_previous_points(score_log_ids)
+    c_s = str(current_points)
+    p_s = str(previous_points)
 
-    if (len(p_s) < len(t_s) or p_s[0] != t_s[0]):
+    if (len(p_s) < len(c_s) or p_s[0] != c_s[0]):
         # find most recent milestone crossed:
-        points = int(t_s[0]) * 10 ** (len(t_s) - 1)
+        points = int(c_s[0]) * 10 ** (len(c_s) - 1)
         PointsMilestoneEvent(account=account, points=points).save()
