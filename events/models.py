@@ -105,9 +105,25 @@ class AwardReceivedEvent(EventLogic):
             )
 
 
+class VerseSetCreatedEvent(EventLogic):
+
+    def __init__(self, verse_set=None):
+        super(VerseSetCreatedEvent, self).__init__(verse_set_id=verse_set.id)
+        self.event.message_html = (
+            'New verse set <a href="%s">%s</a> created by <a href="%s">%s</a>' %
+            tuple(map(escape,
+                      [reverse('view_verse_set', args=(verse_set.slug,)),
+                       verse_set.name,
+                       account_url(verse_set.created_by),
+                       verse_set.created_by.username,
+                       ]))
+            )
+
+
 EVENT_CLASSES = {
     EventType.NEW_ACCOUNT: NewAccountEvent,
     EventType.AWARD_RECEIVED: AwardReceivedEvent,
+    EventType.VERSE_SET_CREATED: VerseSetCreatedEvent,
 }
 
 

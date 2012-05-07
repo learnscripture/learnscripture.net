@@ -26,6 +26,7 @@ from awards.models import AwardType, AWARD_CLASSES, AnyLevel, Award
 import awards.tasks as award_tasks
 from learnscripture.forms import AccountSetPasswordForm
 from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType, get_passage_sections, get_verses_started_counts
+import events.tasks as event_tasks
 from learnscripture import session, auth
 from bibleverses.forms import VerseSetForm
 from payments.models import Price
@@ -403,8 +404,10 @@ def create_or_edit_set(request, set_type=None, slug=None):
     if slug is not None:
         verse_set = get_object_or_404(request.identity.account.verse_sets_created.filter(slug=slug))
         set_type = verse_set.set_type
+        mode = 'edit'
     else:
         verse_set = None
+        mode = 'create'
 
     allowed, reason = auth.check_allowed(request, auth.Feature.CREATE_VERSE_SET)
     if not allowed:
@@ -459,6 +462,13 @@ def create_or_edit_set(request, set_type=None, slug=None):
             verse_set.save()
             award_tasks.give_sharer_awards.apply_async([verse_set.created_by_id],
                                                         countdown=2)
+
+            # if user just made it public or it is a new public verse set
+            if (verse_set.public and (orig_verse_set_public == False
+                                      or mode == 'create'
+                                      )):
+                event_tasks.create_new_verse_set_event.apply_async([verse_set.id],
+                                                                   countdown=5)
 
             # Need to ensure that we preserve existing objects
             existing_vcs = verse_set.verse_choices.all()
