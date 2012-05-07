@@ -656,6 +656,11 @@ class Identity(models.Model):
             retval.append(uvs)
         return retval
 
+    def verse_statuses_started(self):
+        return self.verse_statuses.filter(ignored=False,
+                                          strength__gt=0,
+                                          last_tested__isnull=False)
+
     def verse_statuses_for_revising(self):
         """
         Returns a query set of UserVerseStatuses that need revising.
