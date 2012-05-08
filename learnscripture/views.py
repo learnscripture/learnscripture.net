@@ -76,7 +76,6 @@ def bible_versions_for_request(request):
 
 @require_preferences
 def learn(request):
-    request.identity.prepare_for_learning()
     c = {'bible_versions': bible_versions_for_request(request),
          'title': u"Learn",
          }

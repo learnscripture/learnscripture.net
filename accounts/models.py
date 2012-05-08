@@ -52,12 +52,6 @@ FREE_TRIAL_LENGTH_DAYS = 62 # 2 months
 # Identity methods are the main interface for most business logic,
 # and so sometimes they just delegate to Account methods.
 
-class AccountManager(models.Manager):
-    def create(self, *args, **kwargs):
-        obj = super(AccountManager, self).create(*args, **kwargs)
-        TotalScore.objects.create(account=obj)
-        return obj
-
 
 class Account(models.Model):
     username = models.CharField(max_length=100, blank=False, unique=True)
@@ -79,14 +73,15 @@ class Account(models.Model):
         "Send email reminders every (days)", default=3)
     last_reminder_sent = models.DateTimeField(null=True, blank=True)
 
-
-    objects = AccountManager()
-
     def save(self, **kwargs):
         # We avoid updating 'subscription' and 'paid_until' to avoid race conditions
         # that could overwrite these fields and effectively cancel an incoming payment
+
+        # We also need to ensure that there is a TotalScore object
         if self.id is None:
-            return super(Account, self).save(**kwargs)
+            retval = super(Account, self).save(**kwargs)
+            TotalScore.objects.create(account=self)
+            return retval
         else:
             update_fields = [f for f in self._meta.fields if
                              f.name not in ('id', 'paid_until', 'subscription')]
@@ -363,10 +358,6 @@ class Identity(models.Model):
         if self.account is None:
             return False
         return self.account.require_subscribe()
-
-    def prepare_for_learning(self):
-        if self.account_id is not None:
-            TotalScore.objects.get_or_create(account=self.account)
 
     def add_verse_set(self, verse_set, version=None):
         """

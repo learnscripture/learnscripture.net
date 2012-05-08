@@ -178,7 +178,6 @@ class SignUpHandler(AccountCommon, BaseHandler):
         account = request.form.save()
         account.identity = identity
         identity.account = account
-        identity.prepare_for_learning()
         identity.save()
         new_account.send(sender=account)
         return account
