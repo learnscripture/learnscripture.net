@@ -35,15 +35,20 @@ if __name__ == '__main__':
             for size in [50, 100]:
                 svgs = [os.path.join(updir, 'resources', award_file)]
                 if level != 'any':
-                    if name in ['HACKER']:
-                        continue
-
                     if name in ['RECRUITER']:
                         number_file = 'shield_level_%s_t2.svg'
                     else:
-                        number_file = 'shield_level_%s.svg'
+                        # Single level awards
+                        if name in ['HACKER']:
+                            if level > 1:
+                                continue
+                            else:
+                                number_file = None
+                        else:
+                            number_file = 'shield_level_%s.svg'
 
-                    svgs.append(os.path.join(updir, 'resources', number_file % level))
+                    if number_file is not None:
+                        svgs.append(os.path.join(updir, 'resources', number_file % level))
                 fname = os.path.join(updir, 'learnscripture', 'static', 'img', 'awards',
                                      'award_%s_level_%s_%d.png' %
                                      (name, level, size))

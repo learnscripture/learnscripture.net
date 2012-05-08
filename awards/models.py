@@ -159,18 +159,13 @@ class SingleLevelAward(AwardLogic):
     """
     Base class for awards that do not have multiple levels
     """
-
     # Subclasses should define:
-    #  FULL_DESCRIPTION (string)
     #  POINTS (integer)
 
     has_levels = False
 
-    def __init__(self, level=None):
-        self.level = AnyLevel
-
-    def full_description(self):
-        return self.FULL_DESCRIPTION
+    def __init__(self, level=1):
+        self.level = level
 
     def points(self):
         return self.POINTS
@@ -315,7 +310,9 @@ class RecruiterAward(CountBasedAward):
 
 class HackerAward(SingleLevelAward):
     POINTS = 0
-    FULL_DESCRIPTION = u"Awarded to leet hackers who find some bug in the site that allows you to cheat. "\
+
+    def full_description(self):
+        return u"Awarded to leet hackers who find some bug in the site that allows you to cheat. "\
         "This award comes with the risk of getting your points reset to zero and/or being kicked out :-)"
 
 
