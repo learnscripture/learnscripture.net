@@ -800,18 +800,18 @@ body .score-log {
 
 .eventstream {
 
-  ul {
+  > ul {
     margin-left: 0px;
-  }
-  li {
-    list-style-type: none;
-    border: 1px solid #ddd;
-    border-bottom: 0px;
-    padding: 5px 8px;
-    border-radius: 5px;
+    > li {
+      list-style-type: none;
+      border: 1px solid #ddd;
+      border-bottom: 0px;
+      padding: 5px 8px;
+      border-radius: 5px;
 
-    &:last-child {
-      border-bottom: 1px solid #ddd;
+      &:last-child {
+        border-bottom: 1px solid #ddd;
+      }
     }
   }
   .timestamp {
