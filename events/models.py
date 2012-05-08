@@ -14,8 +14,8 @@ from learnscripture.datastructures import make_choices
 EVENTSTREAM_CUTOFF_DAYS = 3 # just 3 days of events
 EVENTSTREAM_CUTOFF_NUMBER = 8
 
-# Arbitrarily say stuff is 50% less interesting when it is one day old.
-EVENTSTREAM_TIME_DECAY_FACTOR = 3600*24
+# Arbitrarily say stuff is 50% less interesting when it is half a day old.
+EVENTSTREAM_TIME_DECAY_FACTOR = 3600*12.0
 
 # This means that with EVENTSTREAM_CUTOFF_DAYS = 3, there is a factor of 8 to
 # play with: if an event has a weight more than 8 times higher than the rest of
@@ -64,7 +64,7 @@ class NoticeEvent(EventLogic):
     """
     Events used to broadcast notices to all users.
     """
-    weight = EventLogic.weight * 3
+    weight = EventLogic.weight * 2
 
 
 def account_url(account):
@@ -94,7 +94,7 @@ class NewAccountEvent(EventLogic):
 class AwardReceivedEvent(EventLogic):
 
     # Awards are quite interesting
-    weight = EventLogic.weight * 2
+    weight = 12
 
     def __init__(self, award=None):
         super(AwardReceivedEvent, self).__init__(award_id=award.id)
@@ -139,6 +139,9 @@ class VerseSetCreatedEvent(EventLogic):
 
 
 class StartedLearningVerseSetEvent(EventLogic):
+
+    weight = 13
+
     def __init__(self, verse_set=None, chosen_by=None):
         super(StartedLearningVerseSetEvent, self).__init__(verse_set_id=verse_set.id,
                                                            chosen_by_id=chosen_by.id)
