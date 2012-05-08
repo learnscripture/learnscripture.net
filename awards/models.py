@@ -379,7 +379,7 @@ class WeeklyChampion(AwardLogic):
         if self.level is AnyLevel:
             return mark_safe(u'Awarded to all user who have reached the top of the <a href="%s">weekly leaderboard</a>.  Higher levels are achieved by staying there longer.' % url)
         else:
-            d = u'Reached the top of the <a href="%s">weekly leaderboard</a>'
+            d = u'Reached the top of the <a href="%s">weekly leaderboard</a>' % url
             if self.level > 1:
                 d = d + ", and stayed there for at least %s" % self.FRIENDLY_DAYS[self.level]
             return mark_safe(d)
