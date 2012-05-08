@@ -48,22 +48,17 @@ def crosses_milestone(previous_points, current_points):
 
 
 @task(ignore_result=True)
-def create_points_milestone_event(account_id, score_log_ids):
+def create_points_milestone_event(account_id, previous_points, additional_points):
     account = Account.objects.get(id=account_id)
-    try:
-        total_score = account.total_score
-    except (TotalScore.DoesNotExist, AttributeError):
-        return
 
     # milestones are things like 1000, 2000 etc.  We can find these by
     # converting to strings and measuring different lengths or initial
     # characters.
-    current_points = total_score.points
+    current_points = previous_points + additional_points
     if current_points < 1000:
         return
 
-    previous_points = total_score.get_previous_points(score_log_ids)
-    m, points = crosses_milestone(previous_points, current_points)
+    m, points = crosses_milestone(int(previous_points), int(current_points))
     if m:
         PointsMilestoneEvent(account=account, points=points).save()
 

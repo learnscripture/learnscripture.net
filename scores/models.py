@@ -53,16 +53,6 @@ class TotalScore(models.Model):
     points = models.PositiveIntegerField(default=0)
     visible = models.BooleanField(default=True)
 
-    def get_previous_points(self, score_log_ids):
-        """
-        Given some ScoreLog ids, gets the total score before
-        those ScoreLogs were made.
-        """
-        last_score_jump = self.account.score_logs.filter(id__in=score_log_ids).aggregate(Sum('points'))['points__sum']
-        if last_score_jump is None:
-            last_score_jump = 0
-        return self.points - last_score_jump
-
 
 def get_all_time_leaderboard(page, page_size):
     # page is zero indexed

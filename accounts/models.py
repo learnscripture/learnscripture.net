@@ -148,10 +148,6 @@ class Account(models.Model):
                                               accuracy=accuracy))
         awards.tasks.give_ace_awards.apply_async([self.id],
                                                  countdown=2)
-        events.tasks.create_points_milestone_event.apply_async([self.id,
-                                                                [sl.id for sl in score_logs]
-                                                                ],
-                                                               countdown=5)
 
         if action_stage == StageType.TEST and old_memory_stage < MemoryStage.TESTED:
             events.tasks.create_verses_started_milestone_event.apply_async([self.id],
@@ -168,9 +164,17 @@ class Account(models.Model):
         return [self.add_points(points, ScoreReason.REVISION_COMPLETED)]
 
     def add_points(self, points, reason, accuracy=None):
-        return self.score_logs.create(points=points,
-                                      reason=reason,
-                                      accuracy=accuracy)
+        import events.tasks
+        # Need to refresh 'total_score' each time
+        current_points = TotalScore.objects.get(account_id=self.id).points
+        score_log = self.score_logs.create(points=points,
+                                           reason=reason,
+                                           accuracy=accuracy)
+        events.tasks.create_points_milestone_event.apply_async([self.id,
+                                                                current_points,
+                                                                score_log.points],
+                                                               countdown=5)
+        return score_log
 
     def get_score_logs(self, from_datetime):
         return self.score_logs.filter(created__gte=from_datetime).order_by('created')
