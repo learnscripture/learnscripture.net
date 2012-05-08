@@ -377,7 +377,7 @@ class WeeklyChampion(AwardLogic):
     def full_description(self):
         url = reverse('leaderboard') + "?thisweek"
         if self.level is AnyLevel:
-            return mark_safe(u'Awarded to all user who have reached the top of the <a href="%s">weekly leaderboard</a>.  Higher levels are achieved by staying there longer.' % url)
+            return mark_safe(u'Awarded to all users who have reached the top of the <a href="%s">weekly leaderboard</a>.  Higher levels are achieved by staying there longer, up to level 9 if you stay there for a year.' % url)
         else:
             d = u'Reached the top of the <a href="%s">weekly leaderboard</a>' % url
             if self.level > 1:
