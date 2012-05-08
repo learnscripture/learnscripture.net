@@ -99,7 +99,7 @@ class AwardReceivedEvent(EventLogic):
     def __init__(self, award=None):
         super(AwardReceivedEvent, self).__init__(award_id=award.id)
         self.event.message_html = (
-            "<a href='%s'>%s</a> received <b>%s</b> award"
+            "<a href='%s'>%s</a> received <b>%s</b> badge"
             % tuple(map(escape,
                         [account_url(award.account),
                          award.account.username,
