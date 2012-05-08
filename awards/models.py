@@ -1,6 +1,8 @@
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils import timezone
 from django.utils.functional import cached_property
+from django.utils.safestring import mark_safe
 
 from accounts.models import Account, SubscriptionType
 from awards.signals import new_award
@@ -37,6 +39,8 @@ AwardType = make_choices('AwardType',
                           (4, 'ACE', 'Ace'),
                           (5, 'RECRUITER', 'Recruiter'),
                           (6, 'HACKER', 'Hacker'),
+                          (7, 'WEEKLY_CHAMPION', 'Weekly champion'),
+                          (8, 'REIGNING_WEEKLY_CHAMPION', 'Reigning weekly champion'),
                           ])
 
 # AnyLevel is used when displaying badges on the 'badges' page which describes
@@ -316,6 +320,70 @@ class HackerAward(SingleLevelAward):
         "This award comes with the risk of getting your points reset to zero and/or being kicked out :-)"
 
 
+class ReigningWeeklyChampion(SingleLevelAward):
+    POINTS = 0
+
+    def full_description(self):
+        url = reverse('leaderboard') + "?thisweek"
+        if self.level is AnyLevel:
+            return mark_safe(u'Awarded to the user who is currently at the top of the <a href="%s">weekly leaderboard</a>.' % url)
+        else:
+            return mark_safe(u'Currently at the top of the <a href="%s">weekly leaderboard</a>.' % url)
+
+
+class WeeklyChampion(AwardLogic):
+
+    has_levels = True
+
+
+    DAYS = {
+        1: 0, # less than a day
+        2: 1, # 1 day
+        3: 7,
+        4: 14,
+        5: 30,
+        6: 91,
+        7: 182,
+        8: 274,
+        9: 365,
+        }
+    FRIENDLY_DAYS = {
+        1: '',
+        2: '1 day',
+        3: '1 week',
+        4: '2 weeks',
+        5: '1 month',
+        6: '3 months',
+        7: '6 months',
+        8: '9 months',
+        9: '1 year',
+        }
+
+    def __init__(self, level=None, time_period=None):
+        if level is None:
+            self.level = self.level_for_time_period(time_period)
+        else:
+            self.level = level
+
+    def level_for_time_period(self, time_period):
+        # period is a timedelta object
+        _DAYS_DESC = sorted([(a,b) for b, a in self.DAYS.items()], reverse=True)
+
+        for d, level in _DAYS_DESC:
+            if time_period.days >= d:
+                return level
+        return 0
+
+    def full_description(self):
+        url = reverse('leaderboard') + "?thisweek"
+        if self.level is AnyLevel:
+            return mark_safe(u'Awarded to all user who have reached the top of the <a href="%s">weekly leaderboard</a>.  Higher levels are achieved by staying there longer.' % url)
+        else:
+            d = u'Reached the top of the <a href="%s">weekly leaderboard</a>'
+            if self.level > 1:
+                d = d + ", and stayed there for at least %s" % self.FRIENDLY_DAYS[self.level]
+            return mark_safe(d)
+
 AWARD_CLASSES = {
     AwardType.STUDENT: StudentAward,
     AwardType.MASTER: MasterAward,
@@ -324,6 +392,8 @@ AWARD_CLASSES = {
     AwardType.ACE: AceAward,
     AwardType.RECRUITER: RecruiterAward,
     AwardType.HACKER: HackerAward,
+    AwardType.REIGNING_WEEKLY_CHAMPION: ReigningWeeklyChampion,
+    AwardType.WEEKLY_CHAMPION: WeeklyChampion,
 }
 
 for t, c in AWARD_CLASSES.items():
@@ -357,5 +427,10 @@ class Award(models.Model):
 
     def has_levels(self):
         return self.award_detail.has_levels
+
+    def delete(self, **kwargs):
+        from awards.signals import lost_award
+        lost_award.send(sender=self)
+        return super(Award, self).delete(**kwargs)
 
 import awards.hooks

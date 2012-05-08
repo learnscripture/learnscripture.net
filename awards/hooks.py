@@ -2,7 +2,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.dispatch import receiver
 
-from awards.signals import new_award
+from awards.signals import new_award, lost_award
 from bibleverses.signals import verse_set_chosen
 
 
@@ -25,6 +25,21 @@ def notify_about_new_award(sender, **kwargs):
             msg = msg + ' Points bonus: %d' % points
 
     account.identity.notices.create(message_html=msg)
+
+
+@receiver(lost_award)
+def notify_about_lost_award(sender, **kwargs):
+    award = sender
+    account = award.account
+    msg = """<img src="%s%s"> You've lost <a href="%s">%s</a>."""
+
+    msg = msg % (settings.STATIC_URL,
+                 award.image_small(),
+                 reverse('award', args=(award.award_detail.slug(),)),
+                 award.short_description())
+
+    account.identity.notices.create(message_html=msg)
+
 
 
 @receiver(verse_set_chosen)

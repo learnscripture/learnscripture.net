@@ -1,10 +1,13 @@
-from celery.task import task
+from datetime import timedelta
 
-from awards.models import StudentAward, MasterAward, SharerAward, TrendSetterAward, AceAward, RecruiterAward
+from celery.task import task
+from django.utils import timezone
+
+from awards.models import AwardType, Award, StudentAward, MasterAward, SharerAward, TrendSetterAward, AceAward, RecruiterAward, ReigningWeeklyChampion, WeeklyChampion
 from accounts.models import Account, Identity
 from accounts.memorymodel import MM
 from bibleverses.models import MemoryStage, VerseSetType, VerseSet
-from scores.models import ScoreReason
+from scores.models import ScoreReason, get_leaderboard_since
 
 # We have separate functions for the actual body, so it can be called separately
 # without invoking celery, especially for use in migrations when RabbitMQ might
@@ -97,3 +100,36 @@ def give_recruiter_award(account_id):
     count = Identity.objects.filter(account__isnull=False,
                                     referred_by=account).count()
     RecruiterAward(count=count).give_to(account)
+
+
+@task(ignore_result=True)
+def give_champion_awards():
+    now = timezone.now()
+    # Reigning weekly champion:
+    champion_id = get_leaderboard_since(now - timedelta(days=7), 0, 1)[0]['account_id']
+    champion = Account.objects.get(id=champion_id)
+    old_champions = [a.account for a in Award.objects.filter(award_type=AwardType.REIGNING_WEEKLY_CHAMPION).select_related('account')]
+    old_champions = set(old_champions)
+
+    # old_champions should only contain 1 item, but DB doesn't guarantee that,
+    # so we cope with errors here by assuming multiple old champions
+
+    champions_to_remove = set(old_champions)
+    champions_to_remove.discard(champion)
+
+    continuing_champions = old_champions & set([champion])
+
+    if champion not in old_champions:
+        # New champion
+        ReigningWeeklyChampion().give_to(champion)
+        WeeklyChampion(level=1).give_to(champion)
+
+    for account in champions_to_remove:
+        for award in account.awards.filter(award_type=AwardType.REIGNING_WEEKLY_CHAMPION):
+            award.delete()
+
+    for account in continuing_champions:
+        # We can calculate how long they've had it using Award.created for the
+        # 'reigning' award, and level them up if necessary
+        existing_award = account.awards.get(award_type=AwardType.REIGNING_WEEKLY_CHAMPION)
+        WeeklyChampion(time_period=now - existing_award.created).give_to(account)

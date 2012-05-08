@@ -3,7 +3,7 @@ from celery.task import task
 from accounts.models import Account
 from awards.models import Award
 from bibleverses.models import VerseSet
-from events.models import NewAccountEvent, AwardReceivedEvent, VerseSetCreatedEvent, StartedLearningVerseSetEvent, PointsMilestoneEvent, VersesStartedMilestoneEvent
+from events.models import NewAccountEvent, AwardReceivedEvent, VerseSetCreatedEvent, StartedLearningVerseSetEvent, PointsMilestoneEvent, VersesStartedMilestoneEvent, AwardLostEvent
 from scores.models import TotalScore
 
 
@@ -80,3 +80,7 @@ def create_verses_started_milestone_event(account_id):
     if c > 9 and is_milestone(c):
         VersesStartedMilestoneEvent(account=account, verses_started=c).save()
 
+
+# NB this is called synchronously, not as a task
+def create_award_lost_event(award):
+    AwardLostEvent(award=award).save()
