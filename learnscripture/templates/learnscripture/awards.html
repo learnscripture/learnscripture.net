@@ -26,7 +26,7 @@
         {% if award.has_levels %}
         <p>Highest level achieved so far: <b>Level {{ award.highest_level }}</b></p>
         {% endif %}
-        <p><a href="{% url 'award' award.slug %}">People with {{ award.short_description }} award</a></p>
+        <p><a href="{% url 'award' award.slug %}">People with {{ award.short_description }} badge</a></p>
       </td>
     </tr>
     {% endfor %}
@@ -36,12 +36,12 @@
 {% if hidden_awards %}
   {% if hidden_awards|length == 1 %}
 
-   There is also <b>one award</b> that has not been discovered yet.  It will be
+   There is also <b>one badge</b> that has not been discovered yet.  It will be
    unveiled when at least one person has achieved it.
 
   {% else %}
 
-   There are also <b>{{ hidden_awards|length }} awards</b> that have not been
+   There are also <b>{{ hidden_awards|length }} badges</b> that have not been
    discovered yet.  They will be unveiled as soon as they are achieved by at
    least one person.
 
