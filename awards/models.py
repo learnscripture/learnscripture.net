@@ -2,6 +2,7 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils import timezone
 from django.utils.functional import cached_property
+from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
 from accounts.models import Account, SubscriptionType
@@ -32,15 +33,15 @@ from learnscripture.datastructures import make_choices
 # subclass.
 
 AwardType = make_choices('AwardType',
-                         [(0, 'STUDENT', 'Student'),
-                          (1, 'MASTER', 'Master'),
-                          (2, 'SHARER', 'Sharer'),
-                          (3, 'TREND_SETTER', 'Trend setter'),
-                          (4, 'ACE', 'Ace'),
-                          (5, 'RECRUITER', 'Recruiter'),
-                          (6, 'HACKER', 'Hacker'),
-                          (7, 'WEEKLY_CHAMPION', 'Weekly champion'),
-                          (8, 'REIGNING_WEEKLY_CHAMPION', 'Reigning weekly champion'),
+                         [(0, 'STUDENT', u'Student'),
+                          (1, 'MASTER', u'Master'),
+                          (2, 'SHARER', u'Sharer'),
+                          (3, 'TREND_SETTER', u'Trend setter'),
+                          (4, 'ACE', u'Ace'),
+                          (5, 'RECRUITER', u'Recruiter'),
+                          (6, 'HACKER', u'Hacker'),
+                          (7, 'WEEKLY_CHAMPION', u'Weekly champion'),
+                          (8, 'REIGNING_WEEKLY_CHAMPION', u'Reigning weekly champion'),
                           ])
 
 # AnyLevel is used when displaying badges on the 'badges' page which describes
@@ -60,7 +61,7 @@ class AwardLogic(object):
     # Subclasses must also define 'has_levels' class attribute
 
     def slug(self):
-        return AwardType.name_for_value[self.award_type].lower().replace('_', '-')
+        return AwardType.name_for_value[self.award_type].lower().replace(u'_', u'-')
 
     def short_description(self):
         title = AwardType.titles[self.award_type]
@@ -302,14 +303,16 @@ class RecruiterAward(CountBasedAward):
     POINTS = dict((k, v*10000) for (k,v) in COUNTS.items())
 
     def full_description(self):
+        url = reverse('referral_program')
         if self.level is AnyLevel:
-            return "Awarded for getting other people to sign up using our referral program. "\
-                "This award is actually worth money! (If referrals become paying members, that is). "\
-                "Level 1 is for one referral, and is with 10,000 points."
+            return mark_safe("Awarded for getting other people to sign up using our <a href='%s'>referral program</a>. "\
+                                 "This award is actually worth money! (If referrals become paying members, that is). "\
+                                 "Level 1 is for one referral, and is worth 10,000 points." %
+                             escape(url))
         elif self.count == 1:
-            return "Got one person to sign up to LearnScripture.net through our referral program"
+            return mark_safe("Got one person to sign up to LearnScripture.net through our <a href='%s'>referral program</a>" % escape(url))
         else:
-            return "Got %d people to sign up to LearnScripture.net through our referral program" % self.count
+            return mark_safe("Got %d people to sign up to LearnScripture.net through our <a href='%s'>referral program</a>" % (self.count, escape(url)))
 
 
 class HackerAward(SingleLevelAward):
