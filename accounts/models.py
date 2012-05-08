@@ -943,6 +943,9 @@ class Notice(models.Model):
     message_html = models.TextField()
     created = models.DateTimeField(default=timezone.now)
 
+    def is_old(self):
+        return (timezone.now() - self.created).days >= 2
+
     def __unicode__(self):
         return u"Notice %d for %r" % (self.id, self.for_identity)
 

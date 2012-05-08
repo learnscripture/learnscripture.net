@@ -426,7 +426,7 @@ input[type=image] {
 
 // notices are custom, and permament until dismissed
 
-.notice {
+.notice, .clearnotices {
   color: #666;
   background: #ffc;
   border-bottom: 1px solid #ddd;
@@ -439,6 +439,10 @@ input[type=image] {
   img {
     vertical-align: middle;
   }
+}
+
+.clearnotices {
+  text-align: right;
 }
 
 ul.messagelist {

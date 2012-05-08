@@ -88,6 +88,11 @@
             {{ notice.message_html|safe }}
           </div>
         {% endfor %}
+        {% if notices|length > 2 and notices.0.is_old %}
+          <div class="clearnotices">
+            You can clear these notices with the cross here ↑
+          </div>
+        {% endif %}
         </div>
         {% endif %}
 
