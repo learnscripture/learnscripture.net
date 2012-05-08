@@ -116,7 +116,7 @@ class AccountTests(TestCase):
                          1)
 
         # Should be a 'lost award' notice
-        self.assertEqual(Event.objects.filter(message_html__contains=" lost").count(),
+        self.assertEqual(Event.objects.filter(message_html__contains="lost <").count(),
                          1)
 
 

@@ -1,4 +1,5 @@
 from datetime import timedelta
+import itertools
 import math
 
 from django.db import models
@@ -6,8 +7,10 @@ from django.contrib.humanize.templatetags.humanize import intcomma
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 from django.utils.html import escape
+from django.utils.safestring import mark_safe
 from jsonfield import JSONField
 
+from accounts.models import Account
 from learnscripture.datastructures import make_choices
 
 
@@ -45,15 +48,18 @@ class EventLogic(object):
         Initialises EventLogic and an Event instance.
 
         kwargs can be:
+         - account - passed on to Event()
          - message_html - passed on to Event()
          - anything else - stored in Event.event_data,
            so must be simple types that can be serialised to JSON.
         """
-        self.event_data = kwargs
+        account = kwargs.pop('account', None)
         message_html = kwargs.pop('message_html', '')
+        self.event_data = kwargs
         self.event = Event(weight=self.weight,
                            event_type=self.event_type,
-                           message_html=message_html)
+                           message_html=message_html,
+                           account=account)
 
     def save(self):
         self.event.event_data = self.event_data
@@ -71,10 +77,14 @@ def account_url(account):
     return reverse('user_stats', args=(account.username,))
 
 
+def account_link(account):
+    return "<a href='%s'>%s</a>" % (account_url(account), account.username)
+
+
 class NewAccountEvent(EventLogic):
 
     def __init__(self, account=None):
-        super(NewAccountEvent, self).__init__(account_id=account.id)
+        super(NewAccountEvent, self).__init__(account=account)
         extra_name = ""
         if account.first_name.strip() != "":
             extra_name = account.first_name.strip()
@@ -83,12 +93,8 @@ class NewAccountEvent(EventLogic):
         extra_name = extra_name.strip()
         if extra_name != "":
             extra_name = "(%s)" % extra_name
-        self.event.message_html = ("<a href='%s'>%s</a> %s signed up to LearnScripture.net" %
-                                   tuple(map(escape,
-                                             [account_url(account),
-                                              account.username,
-                                              extra_name]))
-                                   )
+        self.event.message_html = ("%s signed up to LearnScripture.net" %
+                                   escape(extra_name))
 
 
 class AwardReceivedEvent(EventLogic):
@@ -97,13 +103,10 @@ class AwardReceivedEvent(EventLogic):
     weight = 12
 
     def __init__(self, award=None):
-        super(AwardReceivedEvent, self).__init__(award_id=award.id)
+        super(AwardReceivedEvent, self).__init__(award_id=award.id,
+                                                 account=award.account)
         self.event.message_html = (
-            "<a href='%s'>%s</a> received <b>%s</b> badge"
-            % tuple(map(escape,
-                        [account_url(award.account),
-                         award.account.username,
-                         award.short_description()]))
+            "received <b>%s</b> badge" % escape(award.short_description())
             )
 
 
@@ -112,28 +115,27 @@ class AwardLostEvent(EventLogic):
     weight = AwardReceivedEvent.weight
 
     def __init__(self, award=None):
-        super(AwardLostEvent, self).__init__(award_id=award.id)
+        super(AwardLostEvent, self).__init__(award_id=award.id,
+                                             account=award.account)
         self.event.message_html = (
-            "<a href='%s'>%s</a> lost <a href='%s'>%s</a>"
-            % tuple(map(escape,
-                        [account_url(award.account),
-                         award.account.username,
-                         reverse('award', args=(award.award_detail.slug(),)),
-                         award.short_description()]))
+            "lost <a href='%s'>%s</a>" %
+            tuple(map(escape,
+                      [reverse('award', args=(award.award_detail.slug(),)),
+                       award.short_description()
+                       ]))
             )
 
 
 class VerseSetCreatedEvent(EventLogic):
 
     def __init__(self, verse_set=None):
-        super(VerseSetCreatedEvent, self).__init__(verse_set_id=verse_set.id)
+        super(VerseSetCreatedEvent, self).__init__(verse_set_id=verse_set.id,
+                                                   account=verse_set.created_by)
         self.event.message_html = (
-            'New verse set <a href="%s">%s</a> created by <a href="%s">%s</a>' %
+            'created new verse set <a href="%s">%s</a>' %
             tuple(map(escape,
                       [reverse('view_verse_set', args=(verse_set.slug,)),
                        verse_set.name,
-                       account_url(verse_set.created_by),
-                       verse_set.created_by.username,
                        ]))
             )
 
@@ -144,13 +146,11 @@ class StartedLearningVerseSetEvent(EventLogic):
 
     def __init__(self, verse_set=None, chosen_by=None):
         super(StartedLearningVerseSetEvent, self).__init__(verse_set_id=verse_set.id,
-                                                           chosen_by_id=chosen_by.id)
+                                                           account=chosen_by)
         self.event.message_html = (
-            '<a href="%s">%s</a> started learning <a href="%s">%s</a>' %
+            'started learning <a href="%s">%s</a>' %
             tuple(map(escape,
-                      [account_url(chosen_by),
-                       chosen_by.username,
-                       reverse('view_verse_set', args=(verse_set.slug,)),
+                      [reverse('view_verse_set', args=(verse_set.slug,)),
                        verse_set.name,
                        ]))
             )
@@ -158,27 +158,19 @@ class StartedLearningVerseSetEvent(EventLogic):
 
 class PointsMilestoneEvent(EventLogic):
     def __init__(self, account=None, points=None):
-        super(PointsMilestoneEvent, self).__init__(account_id=account.id,
+        super(PointsMilestoneEvent, self).__init__(account=account,
                                                    points=points)
         self.event.message_html = (
-            '<a href="%s">%s</a> reached %s points' %
-            tuple(map(escape,
-                      [account_url(account),
-                       account.username,
-                       intcomma(points)]))
+            'reached %s points' % escape(intcomma(points))
             )
 
 
 class VersesStartedMilestoneEvent(EventLogic):
     def __init__(self, account=None, verses_started=None):
-        super(VersesStartedMilestoneEvent, self).__init__(account_id=account.id,
+        super(VersesStartedMilestoneEvent, self).__init__(account=account,
                                                           verses_started=verses_started)
         self.event.message_html = (
-            '<a href="%s">%s</a> reached %s verses started' %
-            tuple(map(escape,
-                      [account_url(account),
-                       account.username,
-                       intcomma(verses_started)]))
+            'reached %s verses started' % escape(intcomma(verses_started))
             )
 
 
@@ -197,6 +189,22 @@ for event_type, c in EVENT_CLASSES.items():
     c.event_type = event_type
 
 
+class EventGroup(object):
+    """
+    A group of Events all about the same Account.
+    """
+    def __init__(self, account, events):
+        self.account = account
+        self.events = events
+        self.created = None
+
+    def render_html(self):
+        return mark_safe(account_link(self.account) + ":<ul>" +
+                         u''.join(["<li>%s</li>" % event.message_html
+                                   for event in self.events])
+                         + "</ul>")
+
+
 class EventManager(models.Manager):
     def for_dashboard(self, now=None):
         if now is None:
@@ -205,7 +213,20 @@ class EventManager(models.Manager):
         start = now - timedelta(EVENTSTREAM_CUTOFF_DAYS)
         events = list(self.filter(created__gte=start))
         events.sort(key=lambda e: e.get_rank(), reverse=True)
-        return events[0:EVENTSTREAM_CUTOFF_NUMBER]
+
+        # Now group
+        grouped_events = []
+        for k, g in itertools.groupby(events, lambda e: e.account):
+            g = list(g)
+            if len(g) == 1:
+                grouped_events.append(g[0])
+            else:
+                if k is None:
+                    grouped_events.extend(g)
+                else:
+                    grouped_events.append(EventGroup(k, g))
+
+        return grouped_events[0:EVENTSTREAM_CUTOFF_NUMBER]
 
 
 class Event(models.Model):
@@ -214,6 +235,7 @@ class Event(models.Model):
     weight = models.PositiveSmallIntegerField(default=10)
     event_data = JSONField(blank=True)
     created = models.DateTimeField(default=timezone.now, db_index=True)
+    account = models.ForeignKey(Account, null=True, blank=True)
 
     objects = EventManager()
 
@@ -240,5 +262,12 @@ class Event(models.Model):
         if diff.total_seconds() < 60:
             return u"Just now"
         return timesince(self.created, now=now) + " ago"
+
+    def render_html(self):
+        if self.account is not None:
+            return mark_safe(account_link(self.account) + u" " + self.message_html)
+        else:
+            return mark_safe(self.message_html)
+
 
 import events.hooks
