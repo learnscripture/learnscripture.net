@@ -117,7 +117,12 @@ OFFSET %s;
     cursor = connection.cursor()
     offset = page * page_size
     cursor.execute(sql, [since, SubscriptionType.BASIC, page_size, offset])
-    return dictfetchall(cursor)
+    retval = dictfetchall(cursor)
+
+    cursor = connection.cursor()
+    cursor.execute("DROP SEQUENCE rank_seq;")
+    cursor.close()
+    return retval
 
 
 def get_rank_all_time(total_score_obj):

@@ -32,6 +32,7 @@ EventType = make_choices('EventType',
                           (6, 'VERSES_FINISHED_MILESTONE', 'Verses finished milestone'),
                           (7, 'VERSE_SET_CREATED', 'Verse set created'),
                           (8, 'STARTED_LEARNING_VERSE_SET', 'Started learning a verse set'),
+                          (9, 'AWARD_LOST', 'Award lost'),
                           ])
 
 
@@ -106,6 +107,22 @@ class AwardReceivedEvent(EventLogic):
             )
 
 
+class AwardLostEvent(EventLogic):
+
+    weight = AwardReceivedEvent.weight
+
+    def __init__(self, award=None):
+        super(AwardLostEvent, self).__init__(award_id=award.id)
+        self.event.message_html = (
+            "<a href='%s'>%s</a> lost <a href='%s'>%s</a>"
+            % tuple(map(escape,
+                        [account_url(award.account),
+                         award.account.username,
+                         reverse('award', args=(award.award_detail.slug(),)),
+                         award.short_description()]))
+            )
+
+
 class VerseSetCreatedEvent(EventLogic):
 
     def __init__(self, verse_set=None):
@@ -169,6 +186,7 @@ EVENT_CLASSES = {
     EventType.VERSES_STARTED_MILESTONE: VersesStartedMilestoneEvent,
     EventType.VERSE_SET_CREATED: VerseSetCreatedEvent,
     EventType.STARTED_LEARNING_VERSE_SET: StartedLearningVerseSetEvent,
+    EventType.AWARD_LOST: AwardLostEvent,
 }
 
 
