@@ -10,7 +10,7 @@ from django.utils import timezone
 from accounts import memorymodel
 from accounts.models import Identity, ActionChange, Account
 from awards.models import AwardType
-from bibleverses.models import VerseSet, BibleVersion, StageType, MemoryStage
+from bibleverses.models import VerseSet, BibleVersion, StageType, MemoryStage, Verse
 from events.models import Event, EventType
 from scores.models import Scores
 
@@ -475,8 +475,10 @@ class IdentityTests(TestCase):
 
 
     def test_verses_started_milestone_event(self):
-        i = self._create_account(version_slug='KJV').identity
+        # This reproduces a bit of the logic from ActionCompleteHandler in order
+        # to test Identity.award_action_points
 
+        i = self._create_account(version_slug='KJV').identity
 
         refs = \
             ['Genesis 1:%d' % j for j in range(1, 11)] + \
@@ -484,7 +486,11 @@ class IdentityTests(TestCase):
 
         for j, ref in enumerate(refs):
             i.add_verse_choice(ref)
-            i.record_verse_action(ref, 'KJV', StageType.TEST, 1)
+            action_change = i.record_verse_action(ref, 'KJV', StageType.TEST, 1)
+            score_logs = i.award_action_points(ref,
+                                               Verse.objects.get(reference=ref, version__slug='KJV').text,
+                                               MemoryStage.SEEN, action_change, StageType.TEST, 1)
+
             self.assertEqual(Event.objects.filter(event_type=EventType.VERSES_STARTED_MILESTONE).count(),
                              0 if j < 9 else 1)
 

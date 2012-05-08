@@ -153,6 +153,11 @@ class Account(models.Model):
                                                                 ],
                                                                countdown=5)
 
+        if action_stage == StageType.TEST and old_memory_stage < MemoryStage.TESTED:
+            events.tasks.create_verses_started_milestone_event.apply_async([self.id],
+                                                                           countdown=2)
+
+
         return score_logs
 
     def award_revision_complete_bonus(self, score_log_ids):
@@ -464,9 +469,6 @@ class Identity(models.Model):
             # updated.
             awards.tasks.give_learning_awards.apply_async([self.account_id],
                                                           countdown=2)
-            events.tasks.create_verses_started_milestone_event.apply_async([self.account_id],
-                                                                           countdown=2)
-
             return ActionChange(old_strength=old_strength, new_strength=new_strength)
 
         if mem_stage == MemoryStage.SEEN:
@@ -952,4 +954,3 @@ class Notice(models.Model):
 # At bottom to avoid cyclic imports
 import awards.tasks
 import accounts.hooks
-import events.tasks

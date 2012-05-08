@@ -99,6 +99,7 @@ class ActionCompleteHandler(BaseHandler):
         reference = verse_status['reference']
         version_slug = verse_status['version']['slug']
         verse_set_id = get_verse_set_id(verse_status)
+        old_memory_stage = verse_status['memory_stage']
 
         # TODO: store StageComplete
         stage = StageType.get_value_for_name(request.data['stage'])
@@ -110,8 +111,9 @@ class ActionCompleteHandler(BaseHandler):
         action_change = identity.record_verse_action(reference, version_slug,
                                                      stage, accuracy);
         score_logs = identity.award_action_points(reference, verse_status['text'],
-                                                  verse_status['memory_stage'],
+                                                  old_memory_stage,
                                                   action_change, stage, accuracy)
+
         if (stage == StageType.TEST or
             (stage == StageType.READ and not verse_status['needs_testing'])):
             session.verse_status_finished(request, reference, verse_set_id, score_logs)
