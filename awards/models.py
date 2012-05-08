@@ -300,19 +300,25 @@ class RecruiterAward(CountBasedAward):
               8: 30,
               9: 50,
               }
-    POINTS = dict((k, v*10000) for (k,v) in COUNTS.items())
+    POINTS = dict((k, v*20000) for (k,v) in COUNTS.items())
 
     def full_description(self):
         url = reverse('referral_program')
         if self.level is AnyLevel:
-            return mark_safe("Awarded for getting other people to sign up using our <a href='%s'>referral program</a>. "\
-                                 "This award is actually worth money! (If referrals become paying members, that is). "\
-                                 "Level 1 is for one referral, and is worth 10,000 points." %
+            return mark_safe(u"Awarded for getting other people to sign up using our "
+                             "<a href='%s'>referral program</a>. "
+                             "This award is actually worth money! (If referrals become "
+                             "paying members, that is). "
+                             "Level 1 is for one referral, and is worth 20,000 points." %
                              escape(url))
         elif self.count == 1:
-            return mark_safe("Got one person to sign up to LearnScripture.net through our <a href='%s'>referral program</a>" % escape(url))
+            return mark_safe(u"Got one person to sign up to LearnScripture.net "
+                             "through our <a href='%s'>referral program</a>" %
+                             escape(url))
         else:
-            return mark_safe("Got %d people to sign up to LearnScripture.net through our <a href='%s'>referral program</a>" % (self.count, escape(url)))
+            return mark_safe(u"Got %d people to sign up to LearnScripture.net "
+                             "through our <a href='%s'>referral program</a>" %
+                             (self.count, escape(url)))
 
 
 class HackerAward(SingleLevelAward):
