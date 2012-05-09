@@ -106,7 +106,7 @@ class AwardReceivedEvent(EventLogic):
         super(AwardReceivedEvent, self).__init__(award_id=award.id,
                                                  account=award.account)
         self.event.message_html = (
-            "received <b>%s</b> badge" % escape(award.short_description())
+            "earned <b>%s</b>" % escape(award.short_description())
             )
 
 
