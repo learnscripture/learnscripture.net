@@ -39,13 +39,13 @@
 
 {{ block.super }}
 
-<h3>Your awards</h3>
+<h3>Your level</h3>
 
 {% if account_top_award %}
 {% if account_top_award.has_levels %}
-<p>You have this award, at level {{ account_top_award.level }}</p>
+<p>You have this badge, at level {{ account_top_award.level }}</p>
 {% else %}
-<p>You have this award.</p>
+<p>You have this badge.</p>
 {% endif %}
 
 <p style="text-align: center">
@@ -53,7 +53,7 @@
 </p>
 {% else %}
 
-<p>You don't have this award yet.</p>
+<p>You don't have this badge yet.</p>
 
 {% endif %}
 
