@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% load url from future %}
+{% load humanize %}
 
 {% block content %}
 
@@ -32,9 +33,9 @@
     {% for account in accounts %}
     <tr>
       <td><a href="{% url 'user_stats' account.username %}">{{ account.username }}</a></td>
-      <td>{{ account.points }}</td>
-      <td>{{ account.rank }}</td>
-      <td>{{ account.num_verses }}</td>
+      <td>{{ account.points|intcomma }}</td>
+      <td>{{ account.rank|intcomma }}</td>
+      <td>{{ account.num_verses|intcomma }}</td>
     </tr>
     {% endfor %}
   </tbody>

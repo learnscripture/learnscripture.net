@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% load url from future %}
+{% load humanize %}
 
 {% block content %}
 
@@ -50,7 +51,7 @@
       <p>{{ award.full_description }}</p>
     </td>
     <td>
-      {{ award.award_detail.points }}
+      {{ award.award_detail.points|intcomma }}
     </td>
     <td>
       {{ award.created }}
@@ -79,28 +80,28 @@
   <tbody>
     <tr>
       <th>Rank</th>
-      <td>{{ account.rank_all_time }}</td>
-      <td>{{ account.rank_this_week }}</td>
+      <td>{{ account.rank_all_time|intcomma }}</td>
+      <td>{{ account.rank_this_week|intcomma }}</td>
     </tr>
     <tr>
       <th>Points</th>
-      <td>{{ account.points_all_time }}</td>
-      <td>{{ account.points_this_week }}</td>
+      <td>{{ account.points_all_time|intcomma }}</td>
+      <td>{{ account.points_this_week|intcomma }}</td>
     </tr>
     <tr>
       <th>Verses started</th>
-      <td>{{ verses_started_all_time }}</td>
-      <td>{{ verses_started_this_week }}</td>
+      <td>{{ verses_started_all_time|intcomma }}</td>
+      <td>{{ verses_started_this_week|intcomma }}</td>
     </tr>
     <tr>
       <th>Verses fully learnt</th>
-      <td>{{ verses_finished_all_time }}</td>
-      <td>{{ verses_finished_this_week }}</td>
+      <td>{{ verses_finished_all_time|intcomma }}</td>
+      <td>{{ verses_finished_this_week|intcomma }}</td>
     </tr>
     <tr>
       <th>Verse sets created</th>
-      <td>{{ verse_sets_created_all_time }}</td>
-      <td>{{ verse_sets_created_this_week }}</td>
+      <td>{{ verse_sets_created_all_time|intcomma }}</td>
+      <td>{{ verse_sets_created_this_week|intcomma }}</td>
     </tr>
 
   </tbody>
