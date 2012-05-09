@@ -222,6 +222,7 @@ class EventManager(models.Manager):
 
         start = now - timedelta(EVENTSTREAM_CUTOFF_DAYS)
         events = list(self.filter(created__gte=start).select_related('account'))
+        events = list(dedupe_iterable(events, lambda e:(e.account_id, e.message_html)))
         events.sort(key=lambda e: e.get_rank(), reverse=True)
 
         # Now group
@@ -234,7 +235,7 @@ class EventManager(models.Manager):
                 if k is None:
                     grouped_events.extend(g)
                 else:
-                    grouped_events.append(EventGroup(k, dedupe_iterable(g, lambda e:e.message_html)))
+                    grouped_events.append(EventGroup(k, g))
 
         return grouped_events[0:EVENTSTREAM_CUTOFF_NUMBER]
 
