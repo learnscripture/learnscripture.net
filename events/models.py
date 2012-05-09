@@ -205,6 +205,16 @@ class EventGroup(object):
                          + "</ul>")
 
 
+def dedupe_iterable(iterable, keyfunc):
+    seen = set()
+    for i in iterable:
+        key = keyfunc(i)
+        if key in seen:
+            continue
+        seen.add(key)
+        yield i
+
+
 class EventManager(models.Manager):
     def for_dashboard(self, now=None):
         if now is None:
@@ -224,7 +234,7 @@ class EventManager(models.Manager):
                 if k is None:
                     grouped_events.extend(g)
                 else:
-                    grouped_events.append(EventGroup(k, g))
+                    grouped_events.append(EventGroup(k, dedupe_iterable(g, lambda e:e.message_html)))
 
         return grouped_events[0:EVENTSTREAM_CUTOFF_NUMBER]
 
