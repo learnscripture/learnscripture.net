@@ -145,6 +145,7 @@ class Account(models.Model):
                                                  countdown=2)
 
         if action_stage == StageType.TEST and old_memory_stage < MemoryStage.TESTED:
+            metric('verse_started')
             events.tasks.create_verses_started_milestone_event.apply_async([self.id],
                                                                            countdown=2)
 
@@ -467,7 +468,6 @@ class Identity(models.Model):
             return ActionChange(old_strength=old_strength, new_strength=new_strength)
 
         if mem_stage == MemoryStage.SEEN:
-            metric('verse_started')
             s.filter(first_seen__isnull=True).update(first_seen=now)
             return ActionChange()
 
