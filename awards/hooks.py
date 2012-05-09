@@ -2,7 +2,9 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.dispatch import receiver
 
+from accounts.signals import new_account
 from awards.signals import new_award, lost_award
+import awards.tasks
 from bibleverses.signals import verse_set_chosen
 
 
@@ -45,6 +47,12 @@ def notify_about_lost_award(sender, **kwargs):
 @receiver(verse_set_chosen)
 def verse_set_chosen_receiver(sender, **kwargs):
     verse_set = sender
-    from awards.tasks import give_verse_set_used_awards
-    give_verse_set_used_awards.delay(verse_set.created_by_id)
+    awards.tasks.give_verse_set_used_awards.delay(verse_set.created_by_id)
 
+
+@receiver(new_account)
+def new_account_receiver(sender, **kwargs):
+    account = sender
+    referrer_id = account.identity.referred_by_id
+    if referrer_id is not None:
+        awards.tasks.give_recruiter_award.apply_async([referrer_id], countdown=5)
