@@ -221,7 +221,7 @@ class EventManager(models.Manager):
             now = timezone.now()
 
         start = now - timedelta(EVENTSTREAM_CUTOFF_DAYS)
-        events = list(self.filter(created__gte=start))
+        events = list(self.filter(created__gte=start).select_related('account'))
         events.sort(key=lambda e: e.get_rank(), reverse=True)
 
         # Now group
