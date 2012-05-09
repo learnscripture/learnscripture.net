@@ -1,5 +1,6 @@
 from django.dispatch import receiver
 
+from accounts.signals import new_account
 from awards.signals import new_award, lost_award
 from bibleverses.signals import verse_set_chosen
 import events.tasks
@@ -25,3 +26,8 @@ def verse_set_chosen_receiver(sender=None, chosen_by=None, **kwargs):
     events.tasks.create_started_verse_set_event.apply_async([verse_set.id, chosen_by_id],
                                                             countdown=5)
 
+
+@receiver(new_account)
+def new_account_receiver(sender, **kwargs):
+    account = sender
+    events.tasks.create_new_account_event.apply_async([account.id], countdown=5)
