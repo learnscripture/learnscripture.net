@@ -243,7 +243,7 @@ class SharerAward(CountBasedAward):
     def full_description(self):
         if self.level is AnyLevel:
             return "Awarded for creating public verse sets (selections)."\
-                " Levels go from 1 for 1 verse set, level 5 for 20 verse sets."
+                " Levels go from 1 for 1 verse set, to level 5 for 20 verse sets."
         elif self.count == 1:
             return u"Created a public selection verse set"
         else:
