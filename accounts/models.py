@@ -13,7 +13,7 @@ from django.utils.functional import cached_property
 from django.utils import timezone
 
 from accounts import memorymodel
-from accounts.signals import verse_started, verse_tested, points_increase
+from accounts.signals import verse_started, verse_tested, points_increase, scored_100_percent
 from bibleverses.models import BibleVersion, MemoryStage, StageType, BibleVersion, VerseChoice, VerseSet, VerseSetType, get_passage_sections
 from bibleverses.signals import verse_set_chosen
 from scores.models import TotalScore, ScoreReason, Scores, get_rank_all_time, get_rank_this_week
@@ -133,14 +133,16 @@ class Account(models.Model):
             score_logs.append(self.add_points(points * Scores.PERFECT_BONUS_FACTOR,
                                               ScoreReason.PERFECT_TEST_BONUS,
                                               accuracy=accuracy))
+            # At least one subscriber to scored_100_percent relies on score_logs
+            # to be created in order to do job. In context of tests, this means
+            # we have to send this signal after creating ScoreLog
+            scored_100_percent.send(sender=self)
 
         if (action_change.old_strength < memorymodel.LEARNT <= action_change.new_strength):
             score_logs.append(self.add_points(word_count * Scores.POINTS_PER_WORD *
                                               Scores.VERSE_LEARNT_BONUS,
                                               ScoreReason.VERSE_LEARNT,
                                               accuracy=accuracy))
-        awards.tasks.give_ace_awards.apply_async([self.id],
-                                                 countdown=2)
 
         if action_stage == StageType.TEST and old_memory_stage < MemoryStage.TESTED:
             verse_started.send(sender=self)
@@ -938,6 +940,3 @@ class Notice(models.Model):
 
     def __unicode__(self):
         return u"Notice %d for %r" % (self.id, self.for_identity)
-
-# At bottom to avoid cyclic imports
-import awards.tasks
