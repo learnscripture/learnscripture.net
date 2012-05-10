@@ -2,7 +2,6 @@ from datetime import timedelta
 from decimal import Decimal
 import itertools
 
-from app_metrics.utils import metric
 from django.core import mail
 from django.db import models
 from django.utils import timezone
@@ -14,6 +13,7 @@ from django.utils.functional import cached_property
 from django.utils import timezone
 
 from accounts import memorymodel
+from accounts.signals import verse_started, verse_tested
 from bibleverses.models import BibleVersion, MemoryStage, StageType, BibleVersion, VerseChoice, VerseSet, VerseSetType, get_passage_sections
 from bibleverses.signals import verse_set_chosen
 from scores.models import TotalScore, ScoreReason, Scores, get_rank_all_time, get_rank_this_week
@@ -145,10 +145,7 @@ class Account(models.Model):
                                                  countdown=2)
 
         if action_stage == StageType.TEST and old_memory_stage < MemoryStage.TESTED:
-            metric('verse_started')
-            events.tasks.create_verses_started_milestone_event.apply_async([self.id],
-                                                                           countdown=2)
-
+            verse_started.send(sender=self)
 
         return score_logs
 
@@ -444,7 +441,6 @@ class Identity(models.Model):
 
         now = timezone.now()
         if mem_stage == MemoryStage.TESTED:
-            metric('verse_tested')
             s0 = s[0] # Any should do, they should be all the same
             old_strength = s0.strength
             if s0.last_tested is None:
@@ -461,10 +457,8 @@ class Identity(models.Model):
             # so we fix it to keep our data making sense.
             s.filter(strength__gt=0, first_seen__isnull=True).update(first_seen=now)
 
-            # Delay to allow this request's transaction to finish count to be
-            # updated.
-            awards.tasks.give_learning_awards.apply_async([self.account_id],
-                                                          countdown=2)
+            verse_tested.send(sender=self)
+
             return ActionChange(old_strength=old_strength, new_strength=new_strength)
 
         if mem_stage == MemoryStage.SEEN:
