@@ -945,4 +945,3 @@ class Notice(models.Model):
 
 # At bottom to avoid cyclic imports
 import awards.tasks
-import accounts.hooks
