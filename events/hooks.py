@@ -1,6 +1,6 @@
 from django.dispatch import receiver
 
-from accounts.signals import new_account, verse_started
+from accounts.signals import new_account, verse_started, points_increase
 from awards.signals import new_award, lost_award
 from bibleverses.signals import verse_set_chosen
 import events.tasks
@@ -40,3 +40,10 @@ def verse_started_receiver(sender, **kwargs):
                                                                    countdown=2)
 
 
+@receiver(points_increase)
+def points_increase_receiver(sender=None, previous_points=None, points_added=None, **kwargs):
+    account = sender
+    events.tasks.create_points_milestone_event.apply_async([account.id,
+                                                           previous_points,
+                                                           points_added],
+                                                          countdown=5)
