@@ -13,7 +13,7 @@ from django.utils.functional import cached_property
 from django.utils import timezone
 
 from accounts import memorymodel
-from accounts.signals import verse_started, verse_tested
+from accounts.signals import verse_started, verse_tested, points_increase
 from bibleverses.models import BibleVersion, MemoryStage, StageType, BibleVersion, VerseChoice, VerseSet, VerseSetType, get_passage_sections
 from bibleverses.signals import verse_set_chosen
 from scores.models import TotalScore, ScoreReason, Scores, get_rank_all_time, get_rank_this_week
@@ -112,8 +112,6 @@ class Account(models.Model):
     def award_action_points(self, reference, text,
                             old_memory_stage, action_change,
                             action_stage, accuracy):
-        import events.tasks
-
         if not self.scoring_enabled():
             return []
 
@@ -157,16 +155,14 @@ class Account(models.Model):
         return [self.add_points(points, ScoreReason.REVISION_COMPLETED)]
 
     def add_points(self, points, reason, accuracy=None):
-        import events.tasks
         # Need to refresh 'total_score' each time
         current_points = TotalScore.objects.get(account_id=self.id).points
         score_log = self.score_logs.create(points=points,
                                            reason=reason,
                                            accuracy=accuracy)
-        events.tasks.create_points_milestone_event.apply_async([self.id,
-                                                                current_points,
-                                                                score_log.points],
-                                                               countdown=5)
+        points_increase.send(sender=self,
+                             previous_points=current_points,
+                             points_added=score_log.points)
         return score_log
 
     def get_score_logs(self, from_datetime):
