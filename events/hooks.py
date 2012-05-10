@@ -2,7 +2,7 @@ from django.dispatch import receiver
 
 from accounts.signals import new_account, verse_started, points_increase
 from awards.signals import new_award, lost_award
-from bibleverses.signals import verse_set_chosen
+from bibleverses.signals import verse_set_chosen, public_verse_set_created
 import events.tasks
 
 @receiver(new_award)
@@ -47,3 +47,10 @@ def points_increase_receiver(sender=None, previous_points=None, points_added=Non
                                                            previous_points,
                                                            points_added],
                                                           countdown=5)
+
+
+@receiver(public_verse_set_created)
+def public_verse_set_created_receiver(sender, **kwargs):
+    verse_set = sender
+    events.tasks.create_new_verse_set_event.apply_async([verse_set.id],
+                                                        countdown=5)

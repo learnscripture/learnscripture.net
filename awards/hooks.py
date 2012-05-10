@@ -5,7 +5,7 @@ from django.dispatch import receiver
 from accounts.signals import new_account, verse_tested
 from awards.signals import new_award, lost_award
 import awards.tasks
-from bibleverses.signals import verse_set_chosen
+from bibleverses.signals import verse_set_chosen, public_verse_set_created
 
 
 @receiver(new_award)
@@ -63,3 +63,10 @@ def verse_tested_receiver(sender, **kwargs):
     # Delay to allow this request's transaction to finish count to be updated.
     awards.tasks.give_learning_awards.apply_async([identity.account_id],
                                                   countdown=2)
+
+
+@receiver(public_verse_set_created)
+def public_verse_set_created_receiver(sender, **kwargs):
+    verse_set = sender
+    awards.tasks.give_sharer_awards.apply_async([verse_set.created_by_id],
+                                               countdown=2)
