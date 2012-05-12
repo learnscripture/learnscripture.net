@@ -253,6 +253,8 @@ class Account(models.Model):
                                       account__subscription=SubscriptionType.PAID_UP,
                                       account__paid_until__gte=timezone.now()).count()
         if count >= 3:
+            return Decimal('0.30')
+        if count >= 2:
             return Decimal('0.20')
         if count >= 1:
             return Decimal('0.10')
