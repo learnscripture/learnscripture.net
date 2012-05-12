@@ -6,15 +6,33 @@ import sys
 import cairo
 import rsvg
 
+def scale_img(img, size):
+    factor = float(img.get_width()) / float(size)
+    scaler = cairo.Matrix()
+    scaler.scale(factor, factor)
+    imgpat = cairo.SurfacePattern(img)
+    imgpat.set_matrix(scaler)
+    imgpat.set_filter(cairo.FILTER_BEST)
+    canvas = cairo.ImageSurface(cairo.FORMAT_ARGB32, size, size)
+    ctx = cairo.Context(canvas)
+    ctx.set_source(imgpat)
+    ctx.paint()
+
+    return canvas
 
 def combine(svg_files, out_file, size):
-    img =  cairo.ImageSurface(cairo.FORMAT_ARGB32, size, size)
+    # First create on a larger than necessary surface, later scale back. This
+    # gives better results
+    SCALE = 5
+    img1_size = int(size * SCALE)
+    img = cairo.ImageSurface(cairo.FORMAT_ARGB32, img1_size, img1_size)
     ctx = cairo.Context(img)
-    ctx.scale(size/500.0, size/500.0)
+    ctx.scale(img1_size/500.0, img1_size/500.0) # 500 is the nominal width of SVG images
     for f in svg_files:
         handler = rsvg.Handle(f)
         handler.render_cairo(ctx)
-    img.write_to_png(out_file)
+    img2 = scale_img(img, size)
+    img2.write_to_png(out_file)
 
 
 thisdir = os.path.dirname(os.path.abspath(__file__))
