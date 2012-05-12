@@ -291,12 +291,12 @@ class AceAward(CountBasedAward):
 
 class RecruiterAward(CountBasedAward):
     COUNTS = {1: 1,
-              2: 3,
-              3: 5,
-              4: 10,
-              5: 15,
-              6: 20,
-              7: 25,
+              2: 2,
+              3: 3,
+              4: 5,
+              5: 10,
+              6: 15,
+              7: 20,
               8: 30,
               9: 50,
               }
