@@ -65,12 +65,14 @@ class CreateSetTests(LiveServerTests):
         driver.find_element_by_id("id_lookup").click()
         self.wait_for_ajax()
         driver.find_element_by_css_selector("input.add-to-set").click()
+        self.wait_until_loaded('body')
 
         driver.find_element_by_id("id_quick_find").clear()
         driver.find_element_by_id("id_quick_find").send_keys("Gen 1:6")
         driver.find_element_by_id("id_lookup").click()
         self.wait_for_ajax()
         driver.find_element_by_css_selector("input.add-to-set").click()
+        self.wait_until_loaded('body')
 
         driver.find_element_by_id("id-save-btn").click()
 
