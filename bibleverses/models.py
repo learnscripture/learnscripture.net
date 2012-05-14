@@ -324,8 +324,8 @@ class VerseSet(models.Model):
     date_added = models.DateTimeField(default=timezone.now)
     created_by = models.ForeignKey('accounts.Account', related_name='verse_sets_created')
 
-    bible_verse_number_start = models.PositiveSmallIntegerField(null=True)
-    bible_verse_number_end = models.PositiveSmallIntegerField(null=True)
+    bible_verse_number_start = models.PositiveSmallIntegerField(null=True, blank=True)
+    bible_verse_number_end = models.PositiveSmallIntegerField(null=True, blank=True)
 
     objects = VerseSetManager()
 
