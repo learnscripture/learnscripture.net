@@ -360,7 +360,10 @@ class WeeklyChampion(AwardLogic):
 
     has_levels = True
 
-    max_level = 1
+    @classproperty
+    @classmethod
+    def max_level(cls):
+        return max(cls.DAYS.keys())
 
     DAYS = {
         1: 0, # less than a day
