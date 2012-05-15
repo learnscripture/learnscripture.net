@@ -13,16 +13,17 @@
 <p>Highest level achieved so far: <b>Level {{ award.highest_level }}</b></p>
 {% endif %}
 
-<p>Held by {{ receivers_count }}
-  {% if receivers_count == 1 %} person:
-  {% else %} people,  including:{% endif %}
-</p>
-
-<ul>
-  {% for username in sample_usernames %}
-  <li><a href="{% url 'user_stats' username %}">{{ username }}</a></li>
-  {% endfor %}
-</ul>
+{% for level, receivers_count, sample_usernames in levels %}
+  {% if award.has_levels %}
+  <h3>Level {{ level }}</h3>
+  {% endif %}
+  <p>Total {{ receivers_count }} user(s), including:</p>
+  <ul>
+    {% for username in sample_usernames %}
+    <li><a href="{% url 'user_stats' username %}">{{ username }}</a></li>
+    {% endfor %}
+  </ul>
+{% endfor %}
 
 {% endblock %}
 

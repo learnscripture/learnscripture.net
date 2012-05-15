@@ -58,7 +58,8 @@ class AwardLogic(object):
     # All subclasses need to define an __init__ that takes at least a 'level'
     # keyword argument.
 
-    # Subclasses must also define 'has_levels' class attribute
+    # Subclasses must also define 'has_levels' class attribute and 'max_level'
+    # attribute
 
     def slug(self):
         return AwardType.name_for_value[self.award_type].lower().replace(u'_', u'-')
@@ -113,16 +114,29 @@ class AwardLogic(object):
         return 0
 
     def highest_level(self):
+        """
+        The highest level that has been achieved
+        """
         return Award.objects.filter(award_type=self.award_type).aggregate(models.Max('level'))['level__max']
 
+class classproperty(property):
+    def __get__(self, cls, owner):
+        return self.fget.__get__(None, owner)()
 
 class CountBasedAward(AwardLogic):
     """
     Base class for awards that have different levels that are based on
     a 'count' of some kind.
     """
+    # Subclasses must define COUNTS and POINTS as class attributes, as
+    # dictionaries mapping level to count and level to points respectively.
+
     has_levels = True
 
+    @classproperty
+    @classmethod
+    def max_level(cls):
+        return max(cls.COUNTS.keys())
 
     # Subclass must define COUNTS, and optionally POINTS
 
@@ -168,6 +182,8 @@ class SingleLevelAward(AwardLogic):
     #  POINTS (integer)
 
     has_levels = False
+
+    max_level = 1
 
     def __init__(self, level=1):
         self.level = level
@@ -344,6 +360,7 @@ class WeeklyChampion(AwardLogic):
 
     has_levels = True
 
+    max_level = 1
 
     DAYS = {
         1: 0, # less than a day
