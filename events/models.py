@@ -27,8 +27,7 @@ EVENTSTREAM_TIME_DECAY_FACTOR = 3600*12.0
 
 
 EventType = make_choices('EventType',
-                         [(1, 'NOTICE', 'Notice'),
-                          (2, 'NEW_ACCOUNT', 'New account'),
+                         [(2, 'NEW_ACCOUNT', 'New account'),
                           (3, 'AWARD_RECEIVED', 'Award received'),
                           (4, 'POINTS_MILESTONE', 'Points milestone'),
                           (5, 'VERSES_STARTED_MILESTONE', 'Verses started milestone'),
@@ -64,13 +63,6 @@ class EventLogic(object):
     def save(self):
         self.event.event_data = self.event_data
         self.event.save()
-
-
-class NoticeEvent(EventLogic):
-    """
-    Events used to broadcast notices to all users.
-    """
-    weight = EventLogic.weight * 2
 
 
 def account_url(account):
@@ -246,7 +238,7 @@ class Event(models.Model):
     weight = models.PositiveSmallIntegerField(default=10)
     event_data = JSONField(blank=True)
     created = models.DateTimeField(default=timezone.now, db_index=True)
-    account = models.ForeignKey(Account, null=True, blank=True)
+    account = models.ForeignKey(Account)
 
     objects = EventManager()
 
