@@ -939,15 +939,17 @@ def award(request, award_slug):
         raise Http404
     award = AWARD_CLASSES[award_type](level=AnyLevel)
 
-    receivers = Account.objects.filter(awards__award_type=award_type).distinct()
-    receivers_count = receivers.count()
-
-    # We may get duplicates this way, so get more than we need (20) and
-    # hopefully end up with at least 10 after de-duplicating
-    sample_usernames = set(Award.objects.filter(award_type=award_type)
-                           .order_by('-created').values_list('account__username', flat=True)
-                           [0:20])
-    sample_usernames = list(sample_usernames)[0:10]
+    levels = []
+    for level in range(award.max_level, 0, -1):
+        awards = Award.objects.filter(award_type=award_type,
+                                      level=level)
+        receivers_count = awards.count()
+        if receivers_count > 0:
+            sample_usernames = list(awards.order_by('-created')
+                                    .values_list('account__username', flat=True)
+                                    [0:5]
+                                    )
+            levels.append((level, receivers_count, sample_usernames))
 
     account_top_award = None
     if hasattr(request, 'identity'):
@@ -962,8 +964,7 @@ def award(request, award_slug):
     return render(request, 'learnscripture/award.html',
                   {'title': 'Badge - %s' % award.short_description(),
                    'award': award,
-                   'receivers_count': receivers_count,
-                   'sample_usernames': sample_usernames,
+                   'levels': levels,
                    'account_top_award': account_top_award,
                    })
 
