@@ -108,15 +108,15 @@ def give_champion_awards():
     # Reigning weekly champion:
     champion_id = get_leaderboard_since(now - timedelta(days=7), 0, 1)[0]['account_id']
     champion = Account.objects.get(id=champion_id)
-    old_champions = [a.account for a in Award.objects.filter(award_type=AwardType.REIGNING_WEEKLY_CHAMPION).select_related('account')]
-    old_champions = set(old_champions)
+    old_champions = set([a.account for a in (Award.objects
+                                             .filter(award_type=AwardType.REIGNING_WEEKLY_CHAMPION)
+                                             .select_related('account'))
+                         ])
 
     # old_champions should only contain 1 item, but DB doesn't guarantee that,
     # so we cope with errors here by assuming multiple old champions
 
-    champions_to_remove = set(old_champions)
-    champions_to_remove.discard(champion)
-
+    champions_to_remove = set(old_champions) - set([champion])
     continuing_champions = old_champions & set([champion])
 
     if champion not in old_champions:
