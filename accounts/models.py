@@ -215,6 +215,8 @@ class Account(models.Model):
     payment_possible.boolean = True
 
     def require_subscribe(self):
+        if self.is_under_13:
+            return False
         d = self.payment_due_date()
         if d is None:
             return False
