@@ -65,6 +65,8 @@ class Account(models.Model):
                                                     default=SubscriptionType.FREE_TRIAL)
     paid_until = models.DateTimeField(null=True, blank=True)
     is_tester = models.BooleanField(default=False, blank=True)
+    is_under_13 = models.BooleanField("Under 13 years old",
+        default=False, blank=True)
 
     # Email reminder preferences and meta data
     remind_after = models.PositiveSmallIntegerField(
