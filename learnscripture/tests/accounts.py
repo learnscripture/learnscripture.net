@@ -246,3 +246,16 @@ class AccountTests(TestCase):
         i4.referred_by = a1
         i4.save()
         self.assertEqual(a1.subscription_discount(), Decimal('0.10'))
+
+    def test_free_for_children(self):
+        a1 = Account.objects.create(username='test1',
+                                    email='test1@test.com',
+                                    subscription=SubscriptionType.FREE_TRIAL,
+                                    paid_until=None,
+                                    date_joined=timezone.now() - timedelta(100),
+                                    )
+        self.assertEqual(a1.require_subscribe(), True)
+
+        a1.is_under_13 = True
+
+        self.assertEqual(a1.require_subscribe(), False)
