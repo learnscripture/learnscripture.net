@@ -66,5 +66,6 @@ class AccountDetailsForm(forms.ModelForm):
         fields = ["first_name",
                   "last_name",
                   "email",
+                  "is_under_13",
                   "remind_after",
                   "remind_every"]

@@ -48,6 +48,7 @@ class SignUpForm(forms.ModelForm):
             'first_name',
             'last_name',
             'password',
+            'is_under_13',
             ]
 
 SignUpForm.base_fields['email'].help_text = "Private. Needed for notifications and password reset"
