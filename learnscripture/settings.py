@@ -68,7 +68,7 @@ else:
             'USER': 'learnscripture',
             'PASSWORD': 'foo',
             'HOST': 'localhost',
-            'PORT': '',
+            'PORT': '5432',
         }
     }
 
