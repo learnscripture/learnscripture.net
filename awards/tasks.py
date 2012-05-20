@@ -3,11 +3,11 @@ from datetime import timedelta
 from celery.task import task
 from django.utils import timezone
 
-from awards.models import AwardType, Award, StudentAward, MasterAward, SharerAward, TrendSetterAward, AceAward, RecruiterAward, ReigningWeeklyChampion, WeeklyChampion
+from awards.models import AwardType, Award, StudentAward, MasterAward, SharerAward, TrendSetterAward, AceAward, RecruiterAward, ReigningWeeklyChampion, WeeklyChampion, AddictAward
 from accounts.models import Account, Identity
 from accounts.memorymodel import MM
 from bibleverses.models import MemoryStage, VerseSetType, VerseSet
-from scores.models import ScoreReason, get_leaderboard_since
+from scores.models import ScoreReason, get_leaderboard_since, get_number_of_distinct_hours_for_account_id
 
 @task(ignore_result=True)
 def give_learning_awards(account_id):
@@ -120,3 +120,15 @@ def give_champion_awards():
         # 'reigning' award, and level them up if necessary
         existing_award = account.awards.get(award_type=AwardType.REIGNING_WEEKLY_CHAMPION)
         WeeklyChampion(time_period=now - existing_award.created).give_to(account)
+
+
+def give_all_addict_awards():
+    for account in Account.objects.all():
+        give_addict_award.delay(account.id)
+
+
+@task(ignore_result=True)
+def give_addict_award(account_id):
+    if get_number_of_distinct_hours_for_account_id(account_id) == 24:
+        AddictAward().give_to(Account.objects.get(id=account_id))
+
