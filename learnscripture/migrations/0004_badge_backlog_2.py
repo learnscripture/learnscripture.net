@@ -5,16 +5,16 @@ from south.db import db
 from south.v2 import DataMigration
 from django.db import models
 
-from awards.tasks import give_learning_awards_func, give_sharer_awards_func, give_verse_set_used_awards_func
+from awards.tasks import give_learning_awards, give_sharer_awards, give_verse_set_used_awards
 
 class Migration(DataMigration):
 
     def forwards(self, orm):
         for account in orm['accounts.Account'].objects.all():
             account_id = account.id
-            give_learning_awards_func(account_id)
-            give_sharer_awards_func(account_id)
-            give_verse_set_used_awards_func(account_id)
+            give_learning_awards(account_id)
+            give_sharer_awards(account_id)
+            give_verse_set_used_awards(account_id)
 
     def backwards(self, orm):
         pass
