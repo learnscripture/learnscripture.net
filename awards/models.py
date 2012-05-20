@@ -42,6 +42,7 @@ AwardType = make_choices('AwardType',
                           (6, 'HACKER', u'Hacker'),
                           (7, 'WEEKLY_CHAMPION', u'Weekly champion'),
                           (8, 'REIGNING_WEEKLY_CHAMPION', u'Reigning weekly champion'),
+                          (9, 'ADDICT', u'Addict'),
                           ])
 
 # AnyLevel is used when displaying badges on the 'badges' page which describes
@@ -413,6 +414,17 @@ class WeeklyChampion(AwardLogic):
                 d = d + ", and stayed there for at least %s" % self.FRIENDLY_DAYS[self.level]
             return mark_safe(d)
 
+
+class AddictAward(SingleLevelAward):
+    POINTS = 10000
+
+    def full_description(self):
+        if self.level is AnyLevel:
+            return u"Awarded to users who've done verse tests during every hour on the clock."
+        else:
+            return u"Done verse tests during every hour on the clock"
+
+
 AWARD_CLASSES = {
     AwardType.STUDENT: StudentAward,
     AwardType.MASTER: MasterAward,
@@ -423,6 +435,7 @@ AWARD_CLASSES = {
     AwardType.HACKER: HackerAward,
     AwardType.REIGNING_WEEKLY_CHAMPION: ReigningWeeklyChampion,
     AwardType.WEEKLY_CHAMPION: WeeklyChampion,
+    AwardType.ADDICT: AddictAward,
 }
 
 for t, c in AWARD_CLASSES.items():

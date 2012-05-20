@@ -4,7 +4,7 @@ from datetime import timedelta
 from decimal import Decimal
 
 from django.db.models import F
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 from django.utils import timezone
 
 from accounts.models import Account, SubscriptionType, ActionChange, Identity
@@ -259,3 +259,41 @@ class AccountTests(TestCase):
         a1.is_under_13 = True
 
         self.assertEqual(a1.require_subscribe(), False)
+
+
+class UsesSQLAlchemyBase(TransactionTestCase):
+
+    def tearDown(self):
+        super(UsesSQLAlchemyBase, self).tearDown()
+        from learnscripture.utils import sqla
+        sqla.default_engine.pool.dispose()
+
+
+class AccountTests2(UsesSQLAlchemyBase):
+
+    def test_addict_award(self):
+        import awards.tasks
+        account = Account.objects.create(username='test',
+                                         email='test@test.com',
+                                         subscription=SubscriptionType.PAID_UP)
+        identity = Identity.objects.create(account=account)
+
+        def score():
+            # We simulate testing over time by moving previous data back an hour
+            account.score_logs.update(created=F('created') - timedelta(hours=1))
+            account.award_action_points("John 3:16", "This is John 3:16",
+                                        MemoryStage.TESTED,
+                                        ActionChange(old_strength=0.5, new_strength=0.6),
+                                        StageType.TEST, 0.5)
+
+        for i in range(0, 24):
+            score()
+
+            # Simulate the cronjob that runs
+            awards.tasks.give_all_addict_awards()
+
+            self.assertEqual(account.awards.filter(award_type=AwardType.ADDICT).count(),
+                             0 if i < 23 else 1)
+
+
+

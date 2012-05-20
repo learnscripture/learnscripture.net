@@ -134,3 +134,19 @@ def get_rank_this_week(points_this_week):
     return ScoreLog.objects.filter(created__gt=n - timedelta(7))\
         .values('account_id').annotate(sum_points=models.Sum('points'))\
         .filter(sum_points__gt=points_this_week).count() + 1
+
+
+def get_number_of_distinct_hours_for_account_id(account_id):
+    from learnscripture.utils.sqla import scores_scorelog, default_engine
+    from sqlalchemy.sql import select, distinct, extract
+    from sqlalchemy import func
+
+    sq1 = select(
+        [distinct(extract('hour', scores_scorelog.c.created)).label('hours')],
+        scores_scorelog.c.account_id == account_id,
+        from_obj=[scores_scorelog]
+        ).alias()
+    q1 = select([func.count(sq1.c.hours)],
+                from_obj=sq1)
+
+    return default_engine.execute(q1).fetchall()[0][0]
