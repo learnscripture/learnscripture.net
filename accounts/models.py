@@ -244,6 +244,8 @@ class Account(models.Model):
             send_payment_not_accepted_email(self, price, ipn_obj)
 
     def make_referral_link(self, url):
+        if '?from=' in url or '&from=' in url:
+            return url
         if '?' in url:
             url = url + '&'
         else:
