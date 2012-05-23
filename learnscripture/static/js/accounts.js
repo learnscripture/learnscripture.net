@@ -15,9 +15,19 @@ var learnscripture = (function (learnscripture, $) {
 
     };
 
+    var setAccountData = function (accountData) {
+        signedInAccountData = accountData;
+
+        $('#id-account-data').trigger('accountDataSet', accountData);
+    };
+
+    var getAccountData = function () {
+        return signedInAccountData;
+    };
+
     var setSignedIn = function (accountData, signinType) {
         hideSignUpLinks();
-        signedInAccountData = accountData;
+        setAccountData(accountData);
         $('.holds-username').text(accountData.username);
         $('.guest-only').hide();
 
@@ -50,11 +60,10 @@ var learnscripture = (function (learnscripture, $) {
                 data: $('#id-signup-form form').serialize(),
                 error: signupError,
                 success: function (data) {
+                    // Translate from Python attributes where needed
+                    data.scoringEnabled = data.scoring_enabled;
                     setSignedIn(data, 'signup');
                     $('#id-signup-form').modal('hide');
-                    // Little hack to get learn page to show points
-                    $('body').append('<div id="id-points-enabled"></div>');
-                    $('#id-points-block *').remove();
                 }
                 });
     };
@@ -172,10 +181,16 @@ var learnscripture = (function (learnscripture, $) {
 
     // Export:
     learnscripture.setupAccountControls = setupAccountControls;
-    learnscripture.setSignedIn = setSignedIn;
+    learnscripture.setAccountData = setAccountData;
+    learnscripture.getAccountData = getAccountData;
     return learnscripture;
 }(learnscripture || {}, $));
 
 $(document).ready(function () {
     learnscripture.setupAccountControls();
+    if ($('#id-account-data').length > 0) {
+        learnscripture.setAccountData($('#id-account-data').data());
+    } else {
+        learnscripture.setAccountData(null);
+    }
 });

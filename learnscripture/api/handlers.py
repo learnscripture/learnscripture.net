@@ -167,6 +167,12 @@ class AccountCommon(object):
 class SignUpHandler(AccountCommon, BaseHandler):
     allowed_methods = ('POST',)
 
+    fields = ('id',
+              'username',
+              'first_name',
+              'last_name',
+              'scoring_enabled')
+
     @require_identity_method
     @validate(SignUpForm, prefix="signup")
     def create(self, request):
