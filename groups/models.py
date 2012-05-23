@@ -39,6 +39,16 @@ class Group(models.Model):
                                      related_name='groups')
 
 
+    def can_join(self, account):
+        if self.open:
+            return True
+        if self.created_by == account:
+            return True
+        if self.invitations.filter(account=account).exists():
+            return True
+        return False
+
+
     objects = GroupManager()
 
     def __unicode__(self):
@@ -47,7 +57,7 @@ class Group(models.Model):
 
 class Membership(models.Model):
     account = models.ForeignKey(Account, related_name='memberships')
-    group = models.ForeignKey(Group, related_name='account_set')
+    group = models.ForeignKey(Group, related_name='memberships')
 
     created = models.DateTimeField(default=timezone.now)
 

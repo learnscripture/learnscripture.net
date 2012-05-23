@@ -991,5 +991,33 @@ def groups(request):
                                                           'groups': groups,
                                                           })
 
-def group(request):
-    pass
+
+def group(request, slug):
+    groups = groups_visible_for_request(request).filter(slug=slug)
+    group = get_object_or_404(groups)
+    account = account_from_request(request)
+
+    if account is not None and request.method == 'POST':
+        if 'leave' in request.POST:
+            group.memberships.filter(account=account).delete()
+            messages.info(request, "Removed you from group %s" % group.name)
+            return HttpResponseRedirect(request.get_full_path())
+        if 'join' in request.POST:
+            if group.can_join(account):
+                group.memberships.create(account=account)
+                messages.info(request, "Added you to group %s" % group.name)
+            return HttpResponseRedirect(request.get_full_path())
+
+    if account is not None:
+        in_group = group.members.filter(id=account.id).exists()
+        can_join = group.can_join(account)
+    else:
+        in_group = False
+        can_join = False
+
+    return render(request, 'learnscripture/group.html',
+                  {'title': 'Group: %s' % group.name,
+                   'group': group,
+                   'in_group': in_group,
+                   'can_join': can_join,
+                   })
