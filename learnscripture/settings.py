@@ -215,6 +215,7 @@ INSTALLED_APPS = [
     'payments',
     'awards',
     'events',
+    'groups',
     # Third party
     'piston',
     'mptt',
