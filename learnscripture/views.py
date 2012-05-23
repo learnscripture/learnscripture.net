@@ -978,6 +978,7 @@ def groups_visible_for_request(request):
         account = None
     return Group.objects.visible_for_account(account)
 
+
 def groups(request):
     groups = groups_visible_for_request(request).order_by('name')
     if 'q' in request.GET:

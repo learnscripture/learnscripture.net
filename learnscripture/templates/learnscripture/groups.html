@@ -40,8 +40,6 @@ you know or are associated with. Browse or search for groups below.</p>
     <h3>{{ group.name }}</h3>
     {{ group.description|restructuredtext }}
 
-    <p>{{ group.members__count }} members.</p>
-
     <p><a href="{% url 'group' group.slug %}">See more</a></p>
   </div>
   {% endfor %}
