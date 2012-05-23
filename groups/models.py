@@ -24,7 +24,7 @@ class GroupManager(models.Manager):
             created_groups = groups.filter(created_by=account)
             visible_groups = visible_groups | created_groups
 
-        return visible_groups
+        return visible_groups.distinct()
 
 
 class Group(models.Model):
