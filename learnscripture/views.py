@@ -97,6 +97,13 @@ def preferences(request):
     return render(request, 'learnscripture/preferences.html', c)
 
 
+def account_from_request(request):
+    if hasattr(request, 'identity'):
+        return request.identity.account
+    else:
+        return None
+
+
 def local_redirect(url):
     """
     Returns the URL if it is local, otherwise None
@@ -902,8 +909,9 @@ def pay_cancelled(request):
 
 
 def referral_program(request):
-    if hasattr(request, 'identity') and request.identity.account is not None:
-        referral_link = request.identity.account.make_referral_link('http://%s/' % Site.objects.get_current().domain)
+    account = account_from_request(request)
+    if account is not None:
+        referral_link = account.make_referral_link('http://%s/' % Site.objects.get_current().domain)
     else:
         referral_link = None
 
@@ -953,14 +961,12 @@ def award(request, award_slug):
             levels.append((level, receivers_count, sample_usernames))
 
     account_top_award = None
-    if hasattr(request, 'identity'):
-        identity = request.identity
-        account = identity.account
-        if account is not None:
-            try:
-                account_top_award = account.awards.filter(award_type=award_type).order_by('-level')[0]
-            except IndexError:
-                pass
+    account = account_from_request(request)
+    if account is not None:
+        try:
+            account_top_award = account.awards.filter(award_type=award_type).order_by('-level')[0]
+        except IndexError:
+            pass
 
     return render(request, 'learnscripture/award.html',
                   {'title': 'Badge - %s' % award.short_description(),
@@ -971,12 +977,7 @@ def award(request, award_slug):
 
 
 def groups_visible_for_request(request):
-    if hasattr(request, 'identity'):
-        identity = request.identity
-        account = identity.account
-    else:
-        account = None
-    return Group.objects.visible_for_account(account)
+    return Group.objects.visible_for_account(account_from_request(request))
 
 
 def groups(request):
