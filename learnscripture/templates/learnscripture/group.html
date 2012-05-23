@@ -1,0 +1,92 @@
+{% extends "base_twocol.html" %}
+
+{% load url from future %}
+{% load markup %}
+{% load account_utils %}
+
+{% block leftcolumn %}
+
+{% if group.description %}
+<h2>Description</h2>
+
+{{ group.description|restructuredtext }}
+{% endif %}
+
+<h2>Group info</h2>
+
+{% if group.public %}
+<p>Group is <b>public</b>: the group and its member list is visible to
+everyone.</p>
+{% else %}
+<p>Group is <b>private</b>: the group and its member list is visible only to
+  members and invited users.</p>
+{% endif %}
+
+{% if group.open %}
+<p>Group is <b>open</b>: anyone may join.</p>
+{% else %}
+<p>Group is <b>closed</b>: only invited users can join.</p>
+{% endif %}
+
+
+{% if request.identity.account %}
+<h2>Your status</h2>
+
+<div class="actionset addclearfix">
+  {% if in_group %}
+
+  <form action="" method="POST">
+    {% csrf_token %}
+    <input type="submit" name="leave" class="btn" value="Leave group" />
+  </form>
+  <p>You are a member of this group.</p>
+
+  {% else %}
+  {% if can_join %}
+  <form action="" method="POST">
+    {% csrf_token %}
+    <input type="submit" name="join" class="primary btn" value="Join group" />
+  </form>
+
+  {% endif %}
+
+  <p>You are not a member of this group.</p>
+
+  {% if can_join %}
+  <p>Note: joining groups is a public action, unless the group is private and
+    remains private.</p>
+  {% endif %}
+
+  {% endif %}
+</div>
+
+{% endif %}
+
+<h2>Members</h2>
+
+{% with members=group.members.all %}
+{% if members %}
+  <ul>
+  {% for account in members %}
+    <li>{{ account|account_link }}</li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p>No members in this group</p>
+{% endif %}
+{% endwith %}
+{% endblock %}
+
+{% block rightcolumn %}
+<h3>See also:</h3>
+<ul>
+  <li><a href="{% url 'groups' %}">All groups</a></li>
+</ul>
+
+<h3>Group stats</h3>
+
+<p>Created by {{ group.created_by|account_link }}, on {{ group.created|date:"d M Y" }}.</p>
+
+
+{{ block.super }}
+{% endblock %}
