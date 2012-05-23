@@ -8,12 +8,9 @@ from learnscripture.datastructures import make_choices
 
 
 class GroupManager(models.Manager):
-    def with_membership_count(self):
-        return self.get_query_set().annotate(Count('members'))
-
 
     def visible_for_account(self, account):
-        groups = Group.objects.with_membership_count()
+        groups = Group.objects.all()
         public_groups = groups.filter(public=True)
         visible_groups = public_groups
 
