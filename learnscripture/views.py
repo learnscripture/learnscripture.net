@@ -28,6 +28,7 @@ from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerse
 from bibleverses.signals import public_verse_set_created
 from learnscripture import session, auth
 from bibleverses.forms import VerseSetForm
+from groups.models import Group
 from payments.models import Price
 from payments.sign import sign_payment_info
 from scores.models import get_all_time_leaderboard, get_leaderboard_since, ScoreReason
@@ -968,3 +969,25 @@ def award(request, award_slug):
                    'account_top_award': account_top_award,
                    })
 
+
+def groups_visible_for_request(request):
+    if hasattr(request, 'identity'):
+        identity = request.identity
+        account = identity.account
+    else:
+        account = None
+    return Group.objects.visible_for_account(account)
+
+def groups(request):
+    groups = groups_visible_for_request(request).order_by('name')
+    if 'q' in request.GET:
+        q = request.GET['q']
+        groups = (groups.filter(name__icontains=q) |
+                  groups.filter(description__icontains=q)
+                  )
+    return render(request, 'learnscripture/groups.html', {'title': 'Groups',
+                                                          'groups': groups,
+                                                          })
+
+def group(request):
+    pass

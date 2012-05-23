@@ -33,7 +33,8 @@ urlpatterns = patterns('',
                        url(r'^referral-program/$', 'learnscripture.views.referral_program', name='referral_program'),
                        url(r'^badges/$', 'learnscripture.views.awards', name='awards'),
                        url(r'^badges/(.*)/$', 'learnscripture.views.award', name='award'),
-
+                       url(r'^groups/$', 'learnscripture.views.groups', name='groups'),
+                       url(r'^groups/(.*)/$', 'learnscripture.views.group', name='group'),
 
                        (r'^admin/fiber/', include('fiber.admin_urls')),
                        (r'^api/v1/', include('fiber.api.urls')),
