@@ -1019,4 +1019,5 @@ def group(request, slug):
                    'group': group,
                    'in_group': in_group,
                    'can_join': can_join,
+                   'include_referral_links': True,
                    })
