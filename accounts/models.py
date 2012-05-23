@@ -115,7 +115,7 @@ class Account(models.Model):
     def award_action_points(self, reference, text,
                             old_memory_stage, action_change,
                             action_stage, accuracy):
-        if not self.scoring_enabled():
+        if not self.scoring_enabled:
             return []
 
         if action_stage != StageType.TEST:
@@ -153,7 +153,7 @@ class Account(models.Model):
         return score_logs
 
     def award_revision_complete_bonus(self, score_log_ids):
-        if not self.scoring_enabled():
+        if not self.scoring_enabled:
             return []
 
         points = self.score_logs.filter(id__in=score_log_ids).aggregate(models.Sum('points'))['points__sum'] * Scores.REVISION_COMPLETE_BONUS_FACTOR
@@ -173,6 +173,7 @@ class Account(models.Model):
     def get_score_logs(self, from_datetime):
         return self.score_logs.filter(created__gte=from_datetime).order_by('created')
 
+    @property
     def scoring_enabled(self):
         return self.subscription != SubscriptionType.BASIC
 
@@ -915,10 +916,11 @@ class Identity(models.Model):
         else:
             return self.account.get_score_logs(from_datetime)
 
+    @property
     def scoring_enabled(self):
         if self.account_id is None:
             return False
-        return self.account.scoring_enabled()
+        return self.account.scoring_enabled
 
     def award_revision_complete_bonus(self, score_log_ids):
         if self.account_id is None:

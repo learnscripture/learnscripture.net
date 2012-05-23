@@ -246,7 +246,13 @@
      data-interface-theme="{{ request.identity.interface_theme }}"
      data-testing-method="{{ request.identity.testing_method }}">
 </div>
-
+<div id="id-account-data"
+     data-username="{{ request.identity.account.username }}"
+     data-id="{{ request.identity.account.id }}"
+     {# NB this is translated to scoringEnabled #}
+     data-scoring-enabled="{{ request.identity.account.scoring_enabled|yesno:"true,false,false" }}"
+     >
+</div>
 
     {% comment %}
     We put javascript for *all* pages in the base template, with maximum expiry

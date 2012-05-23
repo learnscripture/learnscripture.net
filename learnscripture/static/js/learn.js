@@ -8,6 +8,8 @@ var learnscripture =
         "use strict";
         // User prefs
         var preferences = null;
+        var userAccountData = null;
+        var scoringEnabled = false;
 
         var isLearningPage = null;
 
@@ -1115,7 +1117,7 @@ var learnscripture =
         };
 
         var loadScoreLogs = function () {
-            if ($('#id-points-enabled').length === 0) {
+            if (!scoringEnabled) {
                 waitingForScoreLogs = false;
                 return;
             }
@@ -1343,9 +1345,15 @@ var learnscripture =
             }
 
             receivePreferences(learnscripture.getPreferences());
+            receiveAccountData(learnscripture.getAccountData());
+
             // Listen for changes to preferences.
             $('#id-preferences-data').bind('preferencesSet', function (ev, prefs) {
                 receivePreferences(prefs);
+            });
+
+            $('#id-account-data').bind('accountDataSet', function (ev, accountData) {
+                receiveAccountData(accountData);
             });
 
             inputBox = $('#id-typing');
@@ -1421,6 +1429,14 @@ var learnscripture =
             } else {
                 $('.test-full').show();
                 $('.test-first-letter').hide();
+            }
+        };
+
+        var receiveAccountData = function (accountData) {
+            userAccountData = accountData;
+            scoringEnabled = (userAccountData !== null && userAccountData.scoringEnabled);
+            if (scoringEnabled) {
+                $('#id-points-block *').remove();
             }
         };
 
