@@ -50,6 +50,13 @@ class AccountTestMixin(object):
         driver = self.driver
         driver.find_element_by_link_text('Create an account').click()
         self.wait_for_ajax()
+        self.fill_in_account_form(email=email, username=username, password=password)
+
+    def fill_in_account_form(self,
+                             email="test2@test.com",
+                             username="test2",
+                             password="testpassword2"):
+        driver = self.driver
         driver.find_element_by_id('id_signup-email').send_keys(email)
         driver.find_element_by_id('id_signup-username').send_keys(username)
         driver.find_element_by_id('id_signup-password').send_keys(password)

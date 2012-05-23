@@ -4,6 +4,8 @@ var learnscripture = (function (learnscripture, $) {
     "use strict";
     var signedInAccountData = null;
 
+    var afterCreateAccount = null;
+
     var hideSignUpLinks = function () {
         $('.dropdown-menu .signup-link, .dropdown-menu .login-link').each(function (idx, elem) {
             var a = $(elem);
@@ -63,13 +65,15 @@ var learnscripture = (function (learnscripture, $) {
                     // Translate from Python attributes where needed
                     data.scoringEnabled = data.scoring_enabled;
                     setSignedIn(data, 'signup');
+                    if (afterCreateAccount !== null) {
+                        afterCreateAccount();
+                    }
                     $('#id-signup-form').modal('hide');
                 }
                 });
     };
 
-    var showSignUp = function (ev) {
-        ev.preventDefault();
+    var showSignUp = function () {
         $('#id-signup-form').modal({backdrop: 'static', keyboard: true, show: true});
         $('#id_signup-email').focus();
     };
@@ -153,8 +157,30 @@ var learnscripture = (function (learnscripture, $) {
         $('#id-logout-form').modal({backdrop: 'static', keyboard: true, show: true});
     };
 
+    var needsAccountButtonClick = function (ev) {
+        var account = getAccountData();
+        if (account === null || account.username === "") {
+            // first get user to create an account
+            ev.preventDefault();
+
+            // Setup function to run after creating account
+            afterCreateAccount = function() {
+                $(ev.target).click();
+            }
+
+            $('#id-signup-function').bind('hidden', function (ev) {
+                afterCreateAccount = null;
+            });
+
+            showSignUp();
+        }
+    };
+
     var setupAccountControls = function (ev) {
-        $('.signup-link').click(showSignUp);
+        $('.signup-link').click(function (ev) {
+            ev.preventDefault();
+            showSignUp();
+        });
         $('#id-create-account-btn').click(signupBtnClick);
         $('#id-create-account-cancel-btn').click(function (ev) {
             ev.preventDefault();
@@ -176,6 +202,12 @@ var learnscripture = (function (learnscripture, $) {
             ev.preventDefault();
             $('#id-logout-form').modal('hide');
         });
+
+        // Attach this class to buttons that require an account, but might be
+        // presented when the user isn't logged in. This functionality is used
+        // to streamline some entry points where it makes sense to invite people
+        // to create accounts.
+        $('.needs-account').click(needsAccountButtonClick);
 
     };
 
