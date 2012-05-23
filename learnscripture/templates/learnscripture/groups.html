@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% load markup %}
+{% load url from future %}
+{% load pagination_tags %}
+
+{% block content %}
+
+<p>By joining groups, you can more easily compare your progress to people that
+you know or are associated with. Browse or search for groups below.</p>
+<br>
+
+<form action="" method="GET">
+  <div class="clearfix">
+    <label for="id-search-input">Search</label>
+    <div class="input">
+      <input type="text" name="q"  id="id-search-input" value="{{ request.GET.q }}"/>
+      <input type="submit" class="btn primary" value="Search" id="id-search-btn" />
+    </div>
+  </div>
+</form>
+
+
+{% autopaginate groups 10 %}
+
+
+{% if request.GET.q %}
+<h2>Search results:</h2>
+{% else %}
+<h2>All groups:</h2>
+{% endif %}
+
+{% if groups %}
+
+  {% paginate %}
+
+  {% for group in groups %}
+  <div class="actionset">
+
+    <h3>{{ group.name }}</h3>
+    {{ group.description|restructuredtext }}
+
+    <p>{{ group.members__count }} members.</p>
+
+    <p><a href="{% url 'group' group.slug %}">See more</a></p>
+  </div>
+  {% endfor %}
+
+  {% paginate %}
+
+{% else %}
+
+  <p>Sorry, no groups found!</p>
+
+{% endif %}
+
+
+{% endblock %}
