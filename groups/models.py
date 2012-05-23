@@ -78,3 +78,6 @@ class Invitation(models.Model):
 
     def __unicode__(self):
         return u'Invitation to %s for %s from %s' % (self.group, self.account, self.created_by)
+
+
+import groups.hooks

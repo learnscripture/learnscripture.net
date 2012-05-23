@@ -3,7 +3,8 @@ from celery.task import task
 from accounts.models import Account
 from awards.models import Award
 from bibleverses.models import VerseSet
-from events.models import NewAccountEvent, AwardReceivedEvent, VerseSetCreatedEvent, StartedLearningVerseSetEvent, PointsMilestoneEvent, VersesStartedMilestoneEvent, AwardLostEvent
+from events.models import NewAccountEvent, AwardReceivedEvent, VerseSetCreatedEvent, StartedLearningVerseSetEvent, PointsMilestoneEvent, VersesStartedMilestoneEvent, AwardLostEvent, GroupJoinedEvent
+from groups.models import Group
 from scores.models import TotalScore
 
 
@@ -84,3 +85,14 @@ def create_verses_started_milestone_event(account_id):
 # NB this is called synchronously, not as a task
 def create_award_lost_event(award):
     AwardLostEvent(award=award).save()
+
+
+@task(ignore_result=True)
+def create_group_joined_event(group_id, account_id):
+    account = Account.objects.get(id=account_id)
+    group = Group.objects.get(id=group_id)
+
+    if not group.public:
+        return
+
+    GroupJoinedEvent(account=account, group=group).save()
