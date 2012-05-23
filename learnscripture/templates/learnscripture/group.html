@@ -31,7 +31,6 @@
 </ul>
 
 
-{% if request.identity.account %}
 <h2>Your status</h2>
 
 <div class="actionset addclearfix">
@@ -47,7 +46,7 @@
   {% if can_join %}
   <form action="" method="POST">
     {% csrf_token %}
-    <input type="submit" name="join" class="primary btn" value="Join group" />
+    <input type="submit" name="join" class="primary btn join-group-btn needs-account" value="Join group" />
   </form>
 
   {% endif %}
@@ -62,7 +61,6 @@
   {% endif %}
 </div>
 
-{% endif %}
 
 <h2>Members</h2>
 

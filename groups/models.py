@@ -42,6 +42,8 @@ class Group(models.Model):
     def can_join(self, account):
         if self.open:
             return True
+        if account is None:
+            return False
         if self.created_by == account:
             return True
         if self.invitations.filter(account=account).exists():

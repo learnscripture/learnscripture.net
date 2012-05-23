@@ -1010,10 +1010,9 @@ def group(request, slug):
 
     if account is not None:
         in_group = group.members.filter(id=account.id).exists()
-        can_join = group.can_join(account)
     else:
         in_group = False
-        can_join = False
+    can_join = group.can_join(account)
 
     return render(request, 'learnscripture/group.html',
                   {'title': 'Group: %s' % group.name,

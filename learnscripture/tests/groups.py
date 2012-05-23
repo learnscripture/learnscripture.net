@@ -49,3 +49,22 @@ class GroupPageTests(LiveServerTests):
         driver.find_element_by_css_selector('input[name="join"]').click()
         self.wait_until_loaded('body')
         self.assertTrue(public_group.members.filter(id=account.id).exists())
+
+    def test_join_from_no_account(self):
+        creator_account = Account.objects.get(username='account')
+        g = Group.objects.create(name='My group',
+                                 slug='my-group',
+                                 created_by=creator_account,
+                                 public=True,
+                                 open=True)
+        driver = self.driver
+        driver.get(self.live_server_url + reverse('group', args=(g.slug,)))
+
+        self.assertIn("You are not a member of this group", driver.page_source)
+
+        driver.find_element_by_css_selector('input[name="join"]').click()
+
+        self.fill_in_account_form()
+        self.wait_until_loaded('body')
+
+        self.assertIn("You are a member of this group", driver.page_source)
