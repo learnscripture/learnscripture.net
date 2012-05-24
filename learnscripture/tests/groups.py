@@ -49,6 +49,9 @@ class GroupPageTests(LiveServerTests):
         self.wait_until_loaded('body')
         self.assertTrue(public_group.members.filter(id=account.id).exists())
 
+        self.assertEqual(Event.objects.filter(event_type=EventType.GROUP_JOINED).count(),
+                         1)
+
     def test_join_from_no_account(self):
         creator_account = Account.objects.get(username='account')
         g = Group.objects.create(name='My group',
