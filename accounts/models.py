@@ -940,6 +940,9 @@ class Identity(models.Model):
         from events.models import Event
         return Event.objects.for_dashboard(now=now)
 
+    def add_html_notice(self, notice):
+        self.notices.create(message_html=notice)
+
 
 class Notice(models.Model):
     for_identity = models.ForeignKey(Identity, related_name='notices')

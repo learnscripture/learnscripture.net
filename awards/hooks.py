@@ -27,7 +27,7 @@ def notify_about_new_award(sender, **kwargs):
         if points > 0:
             msg = msg + ' Points bonus: %d' % points
 
-    account.identity.notices.create(message_html=msg)
+    account.identity.add_html_notice(msg)
 
 
 @receiver(lost_award)
@@ -41,7 +41,7 @@ def notify_about_lost_award(sender, **kwargs):
                  reverse('award', args=(award.award_detail.slug(),)),
                  award.short_description())
 
-    account.identity.notices.create(message_html=msg)
+    account.identity.add_html_notice(msg)
 
 
 @receiver(verse_set_chosen)
