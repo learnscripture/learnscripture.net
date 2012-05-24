@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import timedelta
 from decimal import Decimal
 import itertools
@@ -19,6 +20,7 @@ from bibleverses.signals import verse_set_chosen
 from scores.models import TotalScore, ScoreReason, Scores, get_rank_all_time, get_rank_this_week
 
 from learnscripture.datastructures import make_choices
+from learnscripture.utils.cache import cache_results
 
 
 SubscriptionType = make_choices('SubscriptionType',
@@ -287,6 +289,46 @@ class Account(models.Model):
 
     def get_public_groups(self):
         return [m.group for m in self._memberships_with_group().filter(group__public=True)]
+
+    def get_friendship_weights(self):
+        """
+        Returns a dictionary of {account_id: friendship_level} for this account.
+        Friendship weight goes from value 0 to 1.
+        """
+        return account_get_friendship_weights(self.id)
+
+
+@cache_results(seconds=1200)
+def account_get_friendship_weights(account_id):
+    # We use groups to define possible friendships.
+    from groups.models import Membership
+    weights = defaultdict(int)
+    for m in Membership.objects.filter(account=account_id).select_related('group').prefetch_related('group__members'):
+        group = m.group
+        members = list(group.members.all())
+        # Smaller groups are better evidence of friendship.
+        w = 1.0/len(members)
+        for m in members:
+            weights[m.id] += w
+
+    # It's nice to see yourself in the event stream, but not that
+    # important, so we first remove self.id, so it doesn't affect
+    # normalisation, then add it back at level 0.5
+
+    try:
+        del weights[account_id]
+    except KeyError:
+        pass
+
+    if len(weights) > 0:
+        # Normalise to 1
+        max_weight = max(weights.values())
+        for k, v in weights.items():
+            weights[k] = v/max_weight
+
+    weights[account_id] = 0.5
+
+    return weights
 
 
 def send_payment_received_email(account, price, payment):
@@ -950,7 +992,7 @@ class Identity(models.Model):
 
     def get_dashboard_events(self, now=None):
         from events.models import Event
-        return Event.objects.for_dashboard(now=now)
+        return Event.objects.for_dashboard(now=now, account=self.account)
 
     def add_html_notice(self, notice):
         self.notices.create(message_html=notice)
