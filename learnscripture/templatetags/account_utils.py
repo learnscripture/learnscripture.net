@@ -13,10 +13,4 @@ def account_link(account):
             escape(account.username),
             ))
 
-def group_link(group):
-    return mark_safe("""<a href="%s">%s</a>""" % (
-            escape(reverse('group', args=(group.slug,))),
-            escape(group.name),
-            ))
-
 register.filter('account_link', account_link)

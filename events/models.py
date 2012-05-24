@@ -11,7 +11,9 @@ from django.utils.safestring import mark_safe
 from jsonfield import JSONField
 
 from accounts.models import Account
+from groups.utils import group_link
 from learnscripture.datastructures import make_choices
+from learnscripture.templatetags.account_utils import account_link
 
 
 EVENTSTREAM_CUTOFF_DAYS = 3 # just 3 days of events
@@ -64,14 +66,6 @@ class EventLogic(object):
     def save(self):
         self.event.event_data = self.event_data
         self.event.save()
-
-
-def account_url(account):
-    return reverse('user_stats', args=(account.username,))
-
-
-def account_link(account):
-    return "<a href='%s'>%s</a>" % (account_url(account), account.username)
 
 
 class NewAccountEvent(EventLogic):
@@ -165,14 +159,6 @@ class VersesStartedMilestoneEvent(EventLogic):
         self.event.message_html = (
             'reached %s verses started' % escape(intcomma(verses_started))
             )
-
-
-def group_url(group):
-    return reverse('group', args=(group.slug,))
-
-
-def group_link(group):
-    return "<a href='%s'>%s</a>" % (group_url(group), group.name)
 
 
 class GroupJoinedEvent(EventLogic):
