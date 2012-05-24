@@ -999,12 +999,12 @@ def group(request, slug):
 
     if account is not None and request.method == 'POST':
         if 'leave' in request.POST:
-            group.memberships.filter(account=account).delete()
+            group.remove_user(account)
             messages.info(request, "Removed you from group %s" % group.name)
             return HttpResponseRedirect(request.get_full_path())
         if 'join' in request.POST:
             if group.can_join(account):
-                group.memberships.create(account=account)
+                group.add_user(account)
                 messages.info(request, "Added you to group %s" % group.name)
             return HttpResponseRedirect(request.get_full_path())
 

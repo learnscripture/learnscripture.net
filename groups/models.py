@@ -50,6 +50,12 @@ class Group(models.Model):
             return True
         return False
 
+    def add_user(self, account):
+        self.memberships.get_or_create(account=account)
+
+    def remove_user(self, account):
+        self.memberships.filter(account=account).delete()
+
 
     objects = GroupManager()
 
