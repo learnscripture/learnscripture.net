@@ -68,6 +68,13 @@ def login(request):
     return HttpResponseRedirect(reverse('dashboard'))
 
 
+def feature_disallowed(request, title, reason):
+    return render(request, 'learnscripture/feature_disallowed.html',
+                  {'title': title,
+                   'reason': reason,
+                   })
+
+
 def bible_versions_for_request(request):
     if hasattr(request, 'identity'):
         return request.identity.available_bible_versions()
@@ -415,13 +422,13 @@ def create_or_edit_set(request, set_type=None, slug=None):
         verse_set = None
         mode = 'create'
 
+    title = ('Edit verse set' if verse_set is not None
+             else 'Create selection set' if set_type == VerseSetType.SELECTION
+             else 'Create passage set')
+
     allowed, reason = auth.check_allowed(request, auth.Feature.CREATE_VERSE_SET)
     if not allowed:
-        return render(request, 'learnscripture/create_set_menu.html',
-                      {'barred': True,
-                       'reason': reason,
-                       'new_verse_set': verse_set == None})
-
+        return feature_disallowed(request, title, reason)
 
     c = {}
 
@@ -530,9 +537,7 @@ def create_or_edit_set(request, set_type=None, slug=None):
 
     c['new_verse_set'] = verse_set == None
     c['verse_set_form'] = form
-    c['title'] = ('Edit verse set' if verse_set is not None
-                  else 'Create selection set' if set_type == VerseSetType.SELECTION
-                  else 'Create passage set')
+    c['title'] = title
 
     c.update(context_for_quick_find(request))
 
