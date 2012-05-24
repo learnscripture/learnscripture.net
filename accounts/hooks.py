@@ -1,7 +1,8 @@
 from django.dispatch import receiver
 
 from groups.signals import invitation_created
-from learnscripture.templatetags.account_utils import account_link, group_link
+from learnscripture.templatetags.account_utils import account_link
+from groups.utils import group_link
 
 
 @receiver(invitation_created)
