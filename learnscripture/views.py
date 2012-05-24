@@ -28,6 +28,7 @@ from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerse
 from bibleverses.signals import public_verse_set_created
 from learnscripture import session, auth
 from bibleverses.forms import VerseSetForm
+from groups.forms import EditGroupForm
 from groups.models import Group
 from payments.models import Price
 from payments.sign import sign_payment_info
@@ -985,6 +986,10 @@ def groups_visible_for_request(request):
     return Group.objects.visible_for_account(account_from_request(request))
 
 
+def groups_editable_for_request(request):
+    return Group.objects.editable_for_account(account_from_request(request))
+
+
 def groups(request):
     groups = groups_visible_for_request(request).order_by('name')
     if 'q' in request.GET:
@@ -1017,12 +1022,58 @@ def group(request, slug):
         in_group = group.members.filter(id=account.id).exists()
     else:
         in_group = False
-    can_join = group.can_join(account)
 
     return render(request, 'learnscripture/group.html',
                   {'title': 'Group: %s' % group.name,
                    'group': group,
                    'in_group': in_group,
-                   'can_join': can_join,
+                   'can_join': group.can_join(account),
+                   'can_edit': group.can_edit(account),
                    'include_referral_links': True,
+                   })
+
+
+def create_group(request):
+    return create_or_edit_group(request)
+
+
+def edit_group(request, slug):
+    return create_or_edit_group(request, slug=slug)
+
+
+def create_or_edit_group(request, slug=None):
+    if slug is not None:
+        groups = groups_editable_for_request(request).filter(slug=slug)
+        group = get_object_or_404(groups)
+        mode = 'edit'
+        title = u'Edit group: %s' % group.name
+    else:
+        group = None
+        mode = 'create'
+        title = u"Create group"
+
+    allowed, reason = auth.check_allowed(request, auth.Feature.CREATE_GROUP)
+    if not allowed:
+        return feature_disallowed(request, title, reason)
+
+
+    was_public = group.public if group is not None else False
+
+    if request.method == 'POST':
+        form = EditGroupForm(request.POST, instance=group)
+        if form.is_valid():
+            group = form.save(commit=False)
+            group.created_by = request.identity.account
+            if was_public:
+                group.public = True
+            group.save()
+            messages.info(request, u"Group details saved.")
+            return HttpResponseRedirect(reverse('group', args=(group.slug,)))
+    else:
+        form = EditGroupForm(instance=group)
+
+    return render(request, 'learnscripture/edit_group.html',
+                  {'title': title,
+                   'group': group,
+                   'form': form,
                    })

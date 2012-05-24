@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% load bootstrap %}
+
+{% block content %}
+
+<h2>Group details</h2>
+
+<form action="" method="POST" id="id-form-edit-group">
+{% csrf_token %}
+{{ form|bootstrap }}
+
+<div class="actions">
+  <input type="submit" name="save" value="Save" class="btn primary" />
+</div>
+</form>
+
+
+{% endblock %}

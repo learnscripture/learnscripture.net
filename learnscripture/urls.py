@@ -35,6 +35,8 @@ urlpatterns = patterns('',
                        url(r'^badges/(.*)/$', 'learnscripture.views.award', name='award'),
                        url(r'^groups/$', 'learnscripture.views.groups', name='groups'),
                        url(r'^groups/(.*)/$', 'learnscripture.views.group', name='group'),
+                       url(r'^create-group/$', 'learnscripture.views.create_group', name='create_group'),
+                       url(r'^edit-group/(.*)/$', 'learnscripture.views.edit_group', name='edit_group'),
 
                        (r'^admin/fiber/', include('fiber.admin_urls')),
                        (r'^api/v1/', include('fiber.api.urls')),

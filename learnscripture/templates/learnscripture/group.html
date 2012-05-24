@@ -59,6 +59,7 @@
   {% endif %}
 
   {% endif %}
+
 </div>
 
 
@@ -81,6 +82,9 @@
 <h3>See also:</h3>
 <ul>
   <li><a href="{% url 'groups' %}">All groups</a></li>
+  {% if can_edit %}
+  <li><a href="{% url 'edit_group' group.slug %}">Edit this group</a></li>
+  {% endif %}
 </ul>
 
 <h3>Group stats</h3>
