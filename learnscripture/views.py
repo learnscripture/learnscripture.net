@@ -625,6 +625,11 @@ def user_stats(request, username):
     c['verses_finished_this_week'] = verses_finished.filter(last_tested__gte=one_week_ago).count()
     c['verse_sets_created_all_time'] = account.verse_sets_created.count()
     c['verse_sets_created_this_week'] = account.verse_sets_created.filter(date_added__gte=one_week_ago).count()
+    current_account = account_from_request(request)
+    if current_account is not None and current_account == account:
+        c['groups'] = account.get_groups()
+    else:
+        c['groups'] = account.get_public_groups()
     return render(request, 'learnscripture/user_stats.html', c)
 
 

@@ -45,6 +45,9 @@ class Group(models.Model):
 
     objects = GroupManager()
 
+    class Meta:
+        ordering = ['name']
+
     def can_join(self, account):
         if self.open:
             return True

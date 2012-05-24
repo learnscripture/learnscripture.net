@@ -279,9 +279,14 @@ class Account(models.Model):
     def add_html_notice(self, notice):
         self.identity.add_html_notice(notice)
 
+    def _memberships_with_group(self):
+        return self.memberships.select_related('group').order_by('group__name')
 
     def get_groups(self):
-        return [m.group for m in self.memberships.select_related('group')]
+        return [m.group for m in self._memberships_with_group()]
+
+    def get_public_groups(self):
+        return [m.group for m in self._memberships_with_group().filter(group__public=True)]
 
 
 def send_payment_received_email(account, price, payment):

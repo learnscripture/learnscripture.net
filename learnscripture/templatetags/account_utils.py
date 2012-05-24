@@ -13,4 +13,7 @@ def account_link(account):
             escape(account.username),
             ))
 
+from groups.utils import group_link
+
 register.filter('account_link', account_link)
+register.filter('group_link', group_link)
