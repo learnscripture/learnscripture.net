@@ -10,7 +10,7 @@ from learnscripture.datastructures import make_choices
 class GroupManager(models.Manager):
 
     def visible_for_account(self, account):
-        groups = Group.objects.all()
+        groups = self.all()
         public_groups = groups.filter(public=True)
         visible_groups = public_groups
 
@@ -25,6 +25,11 @@ class GroupManager(models.Manager):
             visible_groups = visible_groups | created_groups
 
         return visible_groups.distinct()
+
+    def editable_for_account(self, account):
+        if account is None:
+            return self.none()
+        return self.filter(created_by=account)
 
 
 class Group(models.Model):
@@ -50,6 +55,9 @@ class Group(models.Model):
         if self.invitations.filter(account=account).exists():
             return True
         return False
+
+    def can_edit(self, account):
+        return account == self.created_by
 
     def add_user(self, account):
         self.memberships.get_or_create(account=account)
