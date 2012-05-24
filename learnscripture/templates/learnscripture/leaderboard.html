@@ -45,6 +45,11 @@
   </tr>
 </table>
 
+{% if group %}
+<h2>Group: {{ group.name }}</h2>
+<p><a href="{% url 'group' group.slug %}">See group information</a></p>
+{% endif %}
+
 {% if accounts %}
 
 <table>
