@@ -8,5 +8,5 @@ def group_url(group):
 
 
 def group_link(group):
-    return "<a href='%s'>%s</a>" % (escape(group_url(group)),
-                                    escape(group.name))
+    return mark_safe(u"<a href='%s'>%s</a>" % (escape(group_url(group)),
+                                               escape(group.name)))

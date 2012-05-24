@@ -2,6 +2,7 @@
 
 {% load url from future %}
 {% load humanize %}
+{% load account_utils %}
 
 {% block content %}
 
@@ -125,6 +126,24 @@
 
 {% if request.identity.account.username == account.username %}
 <p><a href="{% url 'user_verses' %}" class="icon-progress">See detailed progress on verse learning</a></p>
+{% endif %}
+
+
+<h2>Groups</h2>
+{% if groups %}
+<ul>
+  {% for group in groups %}
+  <li>{{ group|group_link }}</li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>No groups.
+
+  {% if request.identity.account.username == account.username %}
+  <a href="{% url 'groups' %}">Find groups to join</a>
+  {% endif %}
+</p>
+
 {% endif %}
 
 {% endblock %}
