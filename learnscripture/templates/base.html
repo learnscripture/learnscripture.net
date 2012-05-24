@@ -31,6 +31,9 @@
 
     {% endcompress %}
 
+    {% block extracss %}
+    {% endblock %}
+
   </head>
 
   <body class="{% if request.identity %}{{ request.identity.interface_theme }}{% else %}calm{% endif %}">

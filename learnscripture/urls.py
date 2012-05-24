@@ -46,6 +46,7 @@ urlpatterns = patterns('',
                        url(r'^robots.txt$',  'django.views.generic.simple.redirect_to', {'url': '/static/robots.txt'}),
 
                        (r'^paypal/ipn/', include('paypal.standard.ipn.urls')),
+                       (r'^selectable/', include('selectable.urls')),
 
                        (r'', 'fiber.views.page'),
 )

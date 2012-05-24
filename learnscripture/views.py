@@ -1042,15 +1042,18 @@ def edit_group(request, slug):
 
 
 def create_or_edit_group(request, slug=None):
+    account = account_from_request(request)
     if slug is not None:
         groups = groups_editable_for_request(request).filter(slug=slug)
         group = get_object_or_404(groups)
         mode = 'edit'
         title = u'Edit group: %s' % group.name
+        initial = {'invited_users': group.invited_users()}
     else:
         group = None
         mode = 'create'
         title = u"Create group"
+        initial = {}
 
     allowed, reason = auth.check_allowed(request, auth.Feature.CREATE_GROUP)
     if not allowed:
@@ -1060,17 +1063,29 @@ def create_or_edit_group(request, slug=None):
     was_public = group.public if group is not None else False
 
     if request.method == 'POST':
-        form = EditGroupForm(request.POST, instance=group)
+        form = EditGroupForm(request.POST, instance=group, initial=initial)
         if form.is_valid():
             group = form.save(commit=False)
-            group.created_by = request.identity.account
+            group.created_by = account
             if was_public:
                 group.public = True
             group.save()
+
+            # Handle invitations
+            orig_invited_users = set(group.invited_users())
+            invited_users = set(form.cleaned_data['invited_users'])
+            new_users = invited_users - orig_invited_users
+            removed_users = orig_invited_users - invited_users
+
+            group.invitations.filter(account__in=removed_users).delete()
+            for u in new_users:
+                group.invitations.create(account=u,
+                                         created_by=account)
+
             messages.info(request, u"Group details saved.")
             return HttpResponseRedirect(reverse('group', args=(group.slug,)))
     else:
-        form = EditGroupForm(instance=group)
+        form = EditGroupForm(instance=group, initial=initial)
 
     return render(request, 'learnscripture/edit_group.html',
                   {'title': title,
