@@ -86,4 +86,16 @@ class Invitation(models.Model):
         return u'Invitation to %s for %s from %s' % (self.group, self.account, self.created_by)
 
 
+
+def combined_membership_count_for_creator(account_id):
+    val = Group.objects.filter(created_by=account_id).aggregate(Count('memberships'))['memberships__count']
+    val = val if not None else 0
+
+    # Need to subtract all the places where a user has joined their own group
+    own_groups = Membership.objects.filter(group__created_by=account_id,
+                                           account=account_id).aggregate(Count('id'))['id__count']
+    own_groups = own_groups if not None else 0
+    return val - own_groups
+
+
 import groups.hooks

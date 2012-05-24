@@ -3,10 +3,11 @@ from datetime import timedelta
 from celery.task import task
 from django.utils import timezone
 
-from awards.models import AwardType, Award, StudentAward, MasterAward, SharerAward, TrendSetterAward, AceAward, RecruiterAward, ReigningWeeklyChampion, WeeklyChampion, AddictAward
+from awards.models import AwardType, Award, StudentAward, MasterAward, SharerAward, TrendSetterAward, AceAward, RecruiterAward, ReigningWeeklyChampion, WeeklyChampion, AddictAward, OrganizerAward
 from accounts.models import Account, Identity
 from accounts.memorymodel import MM
 from bibleverses.models import MemoryStage, VerseSetType, VerseSet
+from groups.models import combined_membership_count_for_creator
 from scores.models import ScoreReason, get_leaderboard_since, get_number_of_distinct_hours_for_account_id
 
 @task(ignore_result=True)
@@ -132,3 +133,8 @@ def give_addict_award(account_id):
     if get_number_of_distinct_hours_for_account_id(account_id) == 24:
         AddictAward().give_to(Account.objects.get(id=account_id))
 
+
+@task(ignore_result=True)
+def give_organizer_awards(account_id):
+    count = combined_membership_count_for_creator(account_id)
+    OrganizerAward(count=count).give_to(Account.objects.get(id=account_id))

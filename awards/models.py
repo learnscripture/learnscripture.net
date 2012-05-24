@@ -43,6 +43,7 @@ AwardType = make_choices('AwardType',
                           (7, 'WEEKLY_CHAMPION', u'Weekly champion'),
                           (8, 'REIGNING_WEEKLY_CHAMPION', u'Reigning weekly champion'),
                           (9, 'ADDICT', u'Addict'),
+                          (10, 'ORGANIZER', u'Organizer'),
                           ])
 
 # AnyLevel is used when displaying badges on the 'badges' page which describes
@@ -425,6 +426,24 @@ class AddictAward(SingleLevelAward):
             return u"Done verse tests during every hour on the clock"
 
 
+class OrganizerAward(CountBasedAward):
+    COUNTS = {1: 5,
+              2: 10,
+              3: 20,
+              4: 50,
+              5: 100,
+              }
+
+    POINTS = dict((k, v*500) for k, v in COUNTS.items())
+
+    def full_description(self):
+        if self.level is AnyLevel:
+            return "Awarded for getting people to together in groups. First level "\
+                "requires 5 people to join one of your groups."
+        else:
+            return u"Created groups that are used by at least %d people" % self.count
+
+
 AWARD_CLASSES = {
     AwardType.STUDENT: StudentAward,
     AwardType.MASTER: MasterAward,
@@ -436,6 +455,7 @@ AWARD_CLASSES = {
     AwardType.REIGNING_WEEKLY_CHAMPION: ReigningWeeklyChampion,
     AwardType.WEEKLY_CHAMPION: WeeklyChampion,
     AwardType.ADDICT: AddictAward,
+    AwardType.ORGANIZER: OrganizerAward,
 }
 
 for t, c in AWARD_CLASSES.items():
