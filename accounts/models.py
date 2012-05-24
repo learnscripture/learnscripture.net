@@ -280,6 +280,10 @@ class Account(models.Model):
         self.identity.add_html_notice(notice)
 
 
+    def get_groups(self):
+        return [m.group for m in self.memberships.select_related('group')]
+
+
 def send_payment_received_email(account, price, payment):
     from django.conf import settings
     c = {

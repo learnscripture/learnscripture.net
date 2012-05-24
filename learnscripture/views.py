@@ -564,10 +564,19 @@ def leaderboard(request):
     else:
         cutoff = None
 
+
+    group = None
+    if 'group' in request.GET:
+        try:
+            group = Group.objects.get(id=int(request.GET['group']))
+        except (Group.DoesNotExist, ValueError):
+            pass
+
+
     if thisweek:
-        accounts = get_leaderboard_since(cutoff, page_num - 1, PAGE_SIZE)
+        accounts = get_leaderboard_since(cutoff, page_num - 1, PAGE_SIZE, group=group)
     else:
-        accounts = get_all_time_leaderboard(page_num - 1, PAGE_SIZE)
+        accounts = get_all_time_leaderboard(page_num - 1, PAGE_SIZE, group=group)
 
 
     # Now decorate these accounts with additional info from additional queries
@@ -594,6 +603,7 @@ def leaderboard(request):
     c['previous_page_num'] = page_num - 1
     c['next_page_num'] = page_num + 1
     c['PAGE_SIZE'] = PAGE_SIZE
+    c['group'] = group
     return render(request, 'learnscripture/leaderboard.html', c)
 
 
@@ -1096,3 +1106,16 @@ def create_or_edit_group(request, slug=None):
                    'group': group,
                    'form': form,
                    })
+
+
+def group_select_list(request):
+    groups = list(groups_visible_for_request(request))
+    account = account_from_request(request)
+    if account is not None:
+        own_groups = set(account.get_groups())
+        for g in groups:
+            g.is_member = g in own_groups
+        groups.sort(key=lambda g: not g.is_member)
+    return render(request, 'learnscripture/group_select_list.html',
+                  {'groups': groups})
+
