@@ -38,6 +38,7 @@ class Group(models.Model):
     members = models.ManyToManyField(Account, through='Membership',
                                      related_name='groups')
 
+    objects = GroupManager()
 
     def can_join(self, account):
         if self.open:
@@ -55,9 +56,6 @@ class Group(models.Model):
 
     def remove_user(self, account):
         self.memberships.filter(account=account).delete()
-
-
-    objects = GroupManager()
 
     def __unicode__(self):
         return self.name
