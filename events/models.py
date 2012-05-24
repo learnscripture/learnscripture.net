@@ -38,6 +38,7 @@ EventType = make_choices('EventType',
                           (8, 'STARTED_LEARNING_VERSE_SET', 'Started learning a verse set'),
                           (9, 'AWARD_LOST', 'Award lost'),
                           (10, 'GROUP_JOINED', 'Group joined'),
+                          (11, 'GROUP_CREATED', 'Group created'),
                           ])
 
 
@@ -167,7 +168,15 @@ class GroupJoinedEvent(EventLogic):
         super(GroupJoinedEvent, self).__init__(account=account,
                                                group_id=group.id)
 
-        self.event.message_html = "joined group %s" % group_link(group)
+        self.event.message_html = u"joined group %s" % group_link(group)
+
+
+class GroupCreatedEvent(EventLogic):
+
+    def __init__(self, account=None, group=None):
+        super(GroupCreatedEvent, self).__init__(account=account,
+                                                group_id=group.id)
+        self.event.message_html = u"created group %s" % group_link(group)
 
 
 EVENT_CLASSES = {
@@ -179,6 +188,7 @@ EVENT_CLASSES = {
     EventType.STARTED_LEARNING_VERSE_SET: StartedLearningVerseSetEvent,
     EventType.AWARD_LOST: AwardLostEvent,
     EventType.GROUP_JOINED: GroupJoinedEvent,
+    EventType.GROUP_CREATED: GroupCreatedEvent,
 }
 
 

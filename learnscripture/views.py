@@ -30,6 +30,7 @@ from learnscripture import session, auth
 from bibleverses.forms import VerseSetForm
 from groups.forms import EditGroupForm
 from groups.models import Group
+from groups.signals import public_group_created
 from payments.models import Price
 from payments.sign import sign_payment_info
 from scores.models import get_all_time_leaderboard, get_leaderboard_since, ScoreReason
@@ -1070,6 +1071,9 @@ def create_or_edit_group(request, slug=None):
             if was_public:
                 group.public = True
             group.save()
+
+            if not was_public and group.public:
+                public_group_created.send(sender=group)
 
             # Handle invitations
             orig_invited_users = set(group.invited_users())

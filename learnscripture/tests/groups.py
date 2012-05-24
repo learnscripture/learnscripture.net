@@ -109,6 +109,7 @@ class GroupCreatePageTests(LiveServerTests):
         driver = self.driver
         driver.get(self.live_server_url + reverse('create_group'))
         driver.find_element_by_id('id_name').send_keys('My group')
+        driver.find_element_by_id('id_public').click()
 
         driver.find_element_by_id('id_invited_users_0').send_keys('invit')
         self.wait_for_ajax()
@@ -122,3 +123,6 @@ class GroupCreatePageTests(LiveServerTests):
         self.assertEqual(list(g.invited_users()), [invited_account])
 
         self.assertIn('invited you to join', invited_account.identity.notices.all()[0].message_html)
+
+        self.assertEqual(Event.objects.filter(event_type=EventType.GROUP_CREATED).count(),
+                         1)

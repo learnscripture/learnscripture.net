@@ -4,7 +4,7 @@ from accounts.signals import new_account, verse_started, points_increase
 from awards.signals import new_award, lost_award
 from bibleverses.signals import verse_set_chosen, public_verse_set_created
 import events.tasks
-from groups.signals import group_joined
+from groups.signals import group_joined, public_group_created
 
 
 @receiver(new_award)
@@ -63,3 +63,10 @@ def group_joined_receiver(sender, account=None, **kwargs):
     group = sender
     events.tasks.create_group_joined_event.apply_async([group.id, account.id],
                                                        countdown=5)
+
+
+@receiver(public_group_created)
+def public_group_created_receiver(sender, **kwargs):
+    group = sender
+    events.tasks.create_group_created_event.apply_async([group.id],
+                                                        countdown=5)
