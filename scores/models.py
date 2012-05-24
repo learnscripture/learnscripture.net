@@ -54,75 +54,101 @@ class TotalScore(models.Model):
     visible = models.BooleanField(default=True)
 
 
-def get_all_time_leaderboard(page, page_size):
+def get_all_time_leaderboard(page, page_size, group=None):
     # page is zero indexed
     from accounts.models import SubscriptionType
 
-    sql = """
-CREATE TEMPORARY SEQUENCE rank_seq;
-SELECT
-  account_id,
-  points,
-  nextval('rank_seq') AS rank
-FROM
-  (SELECT ts1.account_id, ts1.points
-   FROM scores_totalscore as ts1
-   INNER JOIN accounts_account
-     ON ts1.account_id = accounts_account.id
-   WHERE accounts_account.subscription != %s
-   GROUP BY
-     ts1.account_id,
-     ts1.points
-  ORDER BY points DESC
-  ) as subquery
-LIMIT %s
-OFFSET %s
-"""
-    cursor = connection.cursor()
-    offset = page * page_size
-    cursor.execute(sql, [SubscriptionType.BASIC, page_size, offset])
-    return dictfetchall(cursor)
+    from learnscripture.utils.sqla import default_engine, accounts_account, scores_totalscore
+    from sqlalchemy.sql import select
+    from sqlalchemy.sql.functions import next_value
+    from sqlalchemy.schema import Sequence
+
+    account = accounts_account
+    totalscore = scores_totalscore
+
+    sq = Sequence('rank_seq')
+
+    subq1 = (
+        select([totalscore.c.account_id, totalscore.c.points],
+               from_obj=totalscore.join(account))
+        .where(account.c.subscription != SubscriptionType.BASIC)
+        .group_by(totalscore.c.account_id,
+                  totalscore.c.points)
+        .order_by(totalscore.c.points.desc())
+        )
+
+    if group is not None:
+        account_ids = [a.id for a in group.members.all()]
+        subq1 = subq1.where(account.c.id.in_(account_ids))
+
+    subq1 = subq1.alias()
+
+    q1 = (select([subq1.c.account_id,
+                 subq1.c.points,
+                 next_value(sq).label('rank')],
+                 from_obj=subq1
+                 )
+          .limit(page_size)
+          .offset(page * page_size)
+          )
+
+    default_engine.execute("CREATE TEMPORARY SEQUENCE rank_seq;")
+    results = default_engine.execute(q1).fetchall()
+    default_engine.execute("DROP SEQUENCE rank_seq;")
+    return [{'account_id': r[0], 'points': r[1], 'rank': r[2]}
+            for r in results]
 
 
-def get_leaderboard_since(since, page, page_size):
+def get_leaderboard_since(since, page, page_size, group=None):
     # page is zero indexed
 
     from accounts.models import SubscriptionType
     # This uses a completely different strategy to get_all_time_leaderboard, and
     # only works if ScoreLogs haven't been cleared out for the relevant period.
-    sql = """
-CREATE TEMPORARY SEQUENCE rank_seq;
-SELECT
-  account_id,
-  sum_points as points,
-  nextval('rank_seq') AS rank
-FROM
-   (SELECT
-      account_id,
-      SUM(points) as sum_points
-    FROM
-      scores_scorelog
-    INNER JOIN
-      accounts_account
-      ON scores_scorelog.account_id = accounts_account.id
-    WHERE created > %s
-      AND accounts_account.subscription != %s
-    GROUP BY
-      account_id
-    ORDER BY sum_points DESC
-   ) AS sp
-LIMIT %s
-OFFSET %s;
-"""
-    cursor = connection.cursor()
-    offset = page * page_size
-    cursor.execute(sql, [since, SubscriptionType.BASIC, page_size, offset])
-    retval = dictfetchall(cursor)
 
-    cursor = connection.cursor()
-    cursor.execute("DROP SEQUENCE rank_seq;")
-    cursor.close()
-    return retval
+    from learnscripture.utils.sqla import default_engine, accounts_account, scores_scorelog
+    from sqlalchemy.sql import select
+    from sqlalchemy.sql.functions import next_value
+    from sqlalchemy.schema import Sequence
+    from sqlalchemy.sql import func
+
+    account = accounts_account
+    scorelog = scores_scorelog
+
+    sq = Sequence('rank_seq')
+
+    subq1 = (
+        select([scorelog.c.account_id,
+                func.sum(scorelog.c.points).label('sum_points')],
+               from_obj=scorelog.join(account))
+        .where(scorelog.c.created > since)
+        .where(account.c.subscription != SubscriptionType.BASIC)
+        .group_by(scorelog.c.account_id)
+        )
+
+    if group is not None:
+        account_ids = [a.id for a in group.members.all()]
+        subq1 = subq1.where(account.c.id.in_(account_ids))
+
+
+    subq1 = subq1.order_by(subq1.c.sum_points.desc())
+    subq1 = subq1.alias()
+
+    q1 = (
+        select([subq1.c.account_id,
+                subq1.c.sum_points.label('points'),
+                next_value(sq).label('rank'),
+                ],
+               from_obj=subq1)
+        .limit(page_size)
+        .offset(page * page_size)
+        )
+
+    default_engine.execute("CREATE TEMPORARY SEQUENCE rank_seq;")
+    results = default_engine.execute(q1).fetchall()
+    default_engine.execute("DROP SEQUENCE rank_seq;")
+    return [{'account_id': r[0], 'points': r[1], 'rank': r[2]}
+            for r in results]
 
 
 def get_rank_all_time(total_score_obj):

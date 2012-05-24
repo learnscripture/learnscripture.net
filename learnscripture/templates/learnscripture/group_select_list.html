@@ -1,0 +1,11 @@
+{% for group in groups %}
+{% ifchanged group.is_member %}
+{% if not group.is_member %}
+<hr>
+{% endif %}
+{% endifchanged %}
+<div class="groupitem">
+  <input type="radio" name="group" id="id_group_{{ group.id }}" value="{{ group.id }}">
+  <label for="id_group_{{ group.id }}">{{ group.name }}</label>
+</div>
+{% endfor %}

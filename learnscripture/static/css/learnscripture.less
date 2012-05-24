@@ -534,6 +534,19 @@ span.versenumber {
   margin-bottom: 0px;
 }
 
+table.filters {
+  // This table has side headers
+  tbody td, tbody th {
+    border-top: 0px;
+  }
+  tbody th {
+    vertical-align: middle;
+  }
+  ul.pills {
+    margin-bottom: 0px;
+  }
+}
+
 
 //// SPECIFIC PAGES ////
 
@@ -827,21 +840,6 @@ body .score-log {
 
 // 'choose' page
 
-#id-tab-verseset {
-  table {
-    // This table has side headers
-    tbody td, tbody th {
-      border-top: 0px;
-    }
-    tbody th {
-      vertical-align: middle;
-    }
-    ul.pills {
-      margin-bottom: 0px;
-    }
-  }
-}
-
 
 form.quickfind {
   select[name=book],
@@ -888,6 +886,17 @@ table.noborders {
 p.referral-link {
   text-align: center;
   font-weight: bold;
+}
+
+
+// Leaderboard
+
+.groupitem {
+  margin-bottom: 0.4em;
+  label,input {
+    cursor: pointer;
+    float: none;
+  }
 }
 
 ////////////  Response to smaller screen /////////////

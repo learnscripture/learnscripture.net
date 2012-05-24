@@ -2,21 +2,48 @@
 
 {% load url from future %}
 {% load humanize %}
+{% load spurl %}
 
 {% block content %}
 
-<ul class="pills">
-  <li {% if not thisweek %}
-      class="active"
-      {% endif %}
-      ><a href=".">All time</a>
-  </li>
-  <li {% if thisweek %}
-      class="active"
-      {% endif %}
-      ><a href="?thisweek">This week</a>
-  </li>
-</ul>
+<table class="filters">
+  <tr>
+    <th>Time period:</th>
+    <td>
+      <ul class="pills">
+        {% if 'thisweek' in request.GET %}
+        <li><a href="{% spurl base=request.get_full_path remove_query_param='thisweek' %}">All time</a></li>
+        {% else %}
+        <li class="active"><a href="">All time</a></li>
+        {% endif %}
+
+        {% if 'thisweek' not in request.GET %}
+        <li><a href="{% spurl base=request.get_full_path add_query='thisweek' %}">This week</a></li>
+        {% else %}
+        <li class="active"><a href="">This week</a></li>
+        {% endif %}
+
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <th>Who:</th>
+    <td>
+      <ul class="pills">
+        {% if 'group' in request.GET %}
+        <li><a href="{% spurl base=request.get_full_path remove_query_param='group' %}">Everyone</a></li>
+        {% else %}
+        <li class="active"><a href="">Everyone</a></li>
+        {% endif %}
+
+        {% if group %}
+        <li class="active"><a href="">{{ group.name }}</a></li>
+        {% endif %}
+        <li><a id="id-leaderboard-select-group-btn" href="#" class="btn">Select group</a></li>
+      </ul>
+    </td>
+  </tr>
+</table>
 
 {% if accounts %}
 
