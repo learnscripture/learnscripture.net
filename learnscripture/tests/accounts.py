@@ -51,87 +51,6 @@ class AccountTests(TestCase):
             self.assertEqual(Event.objects.filter(event_type=EventType.POINTS_MILESTONE).count(),
                              0 if i < 34 else 1)
 
-    def test_champion_awards(self):
-        a1 = Account.objects.create(username='test1',
-                                    email='test1@test.com',
-                                    subscription=SubscriptionType.PAID_UP)
-        a2 = Account.objects.create(username='test2',
-                                    email='test2@test.com',
-                                    subscription=SubscriptionType.PAID_UP)
-
-        Identity.objects.create(account=a1)
-        Identity.objects.create(account=a2)
-
-        a1.add_points(200, ScoreReason.VERSE_TESTED, accuracy=1.0)
-        a2.add_points(100, ScoreReason.VERSE_TESTED, accuracy=1.0)
-
-        # Simulate the cronjob that runs
-        import awards.tasks
-        awards.tasks.give_champion_awards.delay()
-
-        self.assertEqual(a1.awards
-                         .filter(award_type=AwardType.REIGNING_WEEKLY_CHAMPION)
-                         .count(),
-                         1)
-        self.assertEqual(a2.awards
-                         .filter(award_type=AwardType.REIGNING_WEEKLY_CHAMPION)
-                         .count(),
-                         0)
-        self.assertEqual(a1.awards
-                         .filter(award_type=AwardType.WEEKLY_CHAMPION)
-                         .count(),
-                         1)
-        self.assertEqual(a2.awards
-                         .filter(award_type=AwardType.WEEKLY_CHAMPION)
-                         .count(),
-                         0)
-
-        # Make a2 the leader
-        a2.add_points(200, ScoreReason.VERSE_TESTED, accuracy=1.0)
-
-        # Simulate the cronjob that runs
-        awards.tasks.give_champion_awards.delay()
-
-        # a1 should have lost 'REIGNING_WEEKLY_CHAMPION', but kept 'WEEKLY_CHAMPION'
-        self.assertEqual(a1.awards
-                         .filter(award_type=AwardType.REIGNING_WEEKLY_CHAMPION)
-                         .count(),
-                         0)
-        self.assertEqual(a2.awards
-                         .filter(award_type=AwardType.REIGNING_WEEKLY_CHAMPION)
-                         .count(),
-                         1)
-        self.assertEqual(a1.awards
-                         .filter(award_type=AwardType.WEEKLY_CHAMPION)
-                         .count(),
-                         1)
-        self.assertEqual(a2.awards
-                         .filter(award_type=AwardType.WEEKLY_CHAMPION)
-                         .count(),
-                         1)
-
-
-        # Should have a 'lost award' notice
-        self.assertEqual(a1.identity.notices.filter(message_html__contains="You've lost").count(),
-                         1)
-
-        # Should be a 'lost award' notice
-        self.assertEqual(Event.objects.filter(message_html__contains="lost <").count(),
-                         1)
-
-
-        # Some time passes:
-        Award.objects.update(created=F('created') - timedelta(days=10))
-
-        awards.tasks.give_champion_awards.delay()
-
-        # Should have level 2
-        self.assertEqual([a.level for a in a2.awards
-                          .filter(award_type=AwardType.WEEKLY_CHAMPION)
-                          .order_by('level')],
-                         [1, 2, 3])
-
-
     def test_ace_awards(self):
         account = Account.objects.create(username='test',
                                          email='test@test.com',
@@ -296,4 +215,83 @@ class AccountTests2(UsesSQLAlchemyBase):
                              0 if i < 23 else 1)
 
 
+    def test_champion_awards(self):
+        a1 = Account.objects.create(username='test1',
+                                    email='test1@test.com',
+                                    subscription=SubscriptionType.PAID_UP)
+        a2 = Account.objects.create(username='test2',
+                                    email='test2@test.com',
+                                    subscription=SubscriptionType.PAID_UP)
+
+        Identity.objects.create(account=a1)
+        Identity.objects.create(account=a2)
+
+        a1.add_points(200, ScoreReason.VERSE_TESTED, accuracy=1.0)
+        a2.add_points(100, ScoreReason.VERSE_TESTED, accuracy=1.0)
+
+        # Simulate the cronjob that runs
+        import awards.tasks
+        awards.tasks.give_champion_awards.delay()
+
+        self.assertEqual(a1.awards
+                         .filter(award_type=AwardType.REIGNING_WEEKLY_CHAMPION)
+                         .count(),
+                         1)
+        self.assertEqual(a2.awards
+                         .filter(award_type=AwardType.REIGNING_WEEKLY_CHAMPION)
+                         .count(),
+                         0)
+        self.assertEqual(a1.awards
+                         .filter(award_type=AwardType.WEEKLY_CHAMPION)
+                         .count(),
+                         1)
+        self.assertEqual(a2.awards
+                         .filter(award_type=AwardType.WEEKLY_CHAMPION)
+                         .count(),
+                         0)
+
+        # Make a2 the leader
+        a2.add_points(200, ScoreReason.VERSE_TESTED, accuracy=1.0)
+
+        # Simulate the cronjob that runs
+        awards.tasks.give_champion_awards.delay()
+
+        # a1 should have lost 'REIGNING_WEEKLY_CHAMPION', but kept 'WEEKLY_CHAMPION'
+        self.assertEqual(a1.awards
+                         .filter(award_type=AwardType.REIGNING_WEEKLY_CHAMPION)
+                         .count(),
+                         0)
+        self.assertEqual(a2.awards
+                         .filter(award_type=AwardType.REIGNING_WEEKLY_CHAMPION)
+                         .count(),
+                         1)
+        self.assertEqual(a1.awards
+                         .filter(award_type=AwardType.WEEKLY_CHAMPION)
+                         .count(),
+                         1)
+        self.assertEqual(a2.awards
+                         .filter(award_type=AwardType.WEEKLY_CHAMPION)
+                         .count(),
+                         1)
+
+
+        # Should have a 'lost award' notice
+        self.assertEqual(a1.identity.notices.filter(message_html__contains="You've lost").count(),
+                         1)
+
+        # Should be a 'lost award' notice
+        self.assertEqual(Event.objects.filter(message_html__contains="lost <").count(),
+                         1)
+
+
+        # Some time passes:
+        Award.objects.update(created=F('created') - timedelta(days=10))
+
+        awards.tasks.give_champion_awards.delay()
+
+        # Should have level 2
+        self.assertEqual([a.level for a in a2.awards
+                          .filter(award_type=AwardType.WEEKLY_CHAMPION)
+                          .order_by('level')],
+                         [1, 2, 3])
 
