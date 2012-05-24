@@ -30,7 +30,8 @@ if __name__ == '__main__':
                    ('HACKER', 'shield_hacker.svg'),
                    ('WEEKLY_CHAMPION', 'shield_gold.svg'),
                    ('REIGNING_WEEKLY_CHAMPION', 'shield_gold_crown.svg'),
-                   ('ADDICT', 'shield_addict.svg')
+                   ('ADDICT', 'shield_addict.svg'),
+                   ('ORGANIZER', 'shield_organizer.svg'),
                    ]
 
     for name, award_file in award_types:
@@ -38,7 +39,7 @@ if __name__ == '__main__':
             for size in [50, 100]:
                 svgs = [os.path.join(updir, 'resources', award_file)]
                 if level != 'any':
-                    if name in ['RECRUITER']:
+                    if name in ['RECRUITER', 'ORGANIZER']:
                         number_file = 'shield_level_%s_t2.svg'
                     else:
                         # Single level awards
