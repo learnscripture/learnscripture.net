@@ -1,4 +1,6 @@
 from django.core.urlresolvers import reverse
+from django.utils.html import escape
+from django.utils.safestring import mark_safe
 
 
 def group_url(group):
@@ -6,4 +8,5 @@ def group_url(group):
 
 
 def group_link(group):
-    return "<a href='%s'>%s</a>" % (group_url(group), group.name)
+    return "<a href='%s'>%s</a>" % (escape(group_url(group)),
+                                    escape(group.name))
