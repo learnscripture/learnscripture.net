@@ -229,6 +229,7 @@ INSTALLED_APPS = [
     'campaign',
     'djcelery',
     'app_metrics',
+    'selectable',
 ]
 
 if DEBUG:

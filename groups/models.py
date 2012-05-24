@@ -65,6 +65,9 @@ class Group(models.Model):
     def remove_user(self, account):
         self.memberships.filter(account=account).delete()
 
+    def invited_users(self):
+        return [i.account for i in self.invitations.select_related('account')]
+
     def __unicode__(self):
         return self.name
 
