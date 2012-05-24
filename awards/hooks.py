@@ -6,6 +6,7 @@ from accounts.signals import new_account, verse_tested, scored_100_percent
 from awards.signals import new_award, lost_award
 import awards.tasks
 from bibleverses.signals import verse_set_chosen, public_verse_set_created
+from groups.signals import group_joined
 
 
 @receiver(new_award)
@@ -78,3 +79,9 @@ def scored_100_percent_receiver(sender, **kwargs):
     awards.tasks.give_ace_awards.apply_async([account.id],
                                              countdown=2)
 
+
+@receiver(group_joined)
+def group_joined_receiver(sender, **kwargs):
+    group = sender
+    awards.tasks.give_organizer_awards.apply_async([group.created_by_id],
+                                                   countdown=2)

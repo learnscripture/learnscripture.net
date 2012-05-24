@@ -1,8 +1,10 @@
 from __future__ import absolute_import
 
 from django.core.urlresolvers import reverse
+from django.test import TestCase
 
-from accounts.models import Account
+from accounts.models import Account, Identity
+from awards.models import Award, AwardType
 from groups.models import Group
 from events.models import Event, EventType
 
@@ -68,3 +70,25 @@ class GroupPageTests(LiveServerTests):
         self.wait_until_loaded('body')
 
         self.assertIn("You are a member of this group", driver.page_source)
+
+
+class GroupTests(TestCase):
+
+    def test_organizer_award(self):
+        creator_account = Account.objects.create(username='creator',
+                                                 email='c@example.com')
+        Identity.objects.create(account=creator_account)
+        g = Group.objects.create(name='My group',
+                                 slug='my-group',
+                                 created_by=creator_account,
+                                 public=True,
+                                 open=True)
+        g.add_user(creator_account)
+
+        for i in range(1, 7):
+            account = Account.objects.create(username='joiner%d' % i,
+                                             email='j%d@example.com' % i)
+            g.add_user(account)
+            self.assertEqual(Award.objects.filter(account=creator_account,
+                                                  award_type=AwardType.ORGANIZER).count(),
+                             0 if i < 5 else 1)
