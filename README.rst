@@ -24,6 +24,25 @@ Although models are split between 'accounts', 'bibleverses', 'scores', and
 'payments', views are mainly under learnscripture/views.py, because the views
 almost always contain things from multiple apps.
 
+hooks.py
+========
+
+In each app, hooks.py is used by that app to subscribe to events (usually in
+other apps). It is usually imported from the bottom of the corresponding
+models.py file.
+
+signals.py
+==========
+
+This is where each app defines the signals that it sends. No logic for actually
+sending this signal is contained here.
+
+Often these signals can be simplified signals from other apps e.g. django's
+post_save signals might be used to create a 'group_joined' signal which is
+isolated from the fact that a group being joined corresponds to a Membership
+object being created.
+
+
 Tests
 =====
 

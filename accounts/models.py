@@ -276,6 +276,9 @@ class Account(models.Model):
             visible[a.award_type] = a
         return visible.values()
 
+    def add_html_notice(self, notice):
+        self.identity.add_html_notice(notice)
+
 
 def send_payment_received_email(account, price, payment):
     from django.conf import settings
@@ -954,3 +957,6 @@ class Notice(models.Model):
 
     def __unicode__(self):
         return u"Notice %d for %r" % (self.id, self.for_identity)
+
+
+import accounts.hooks

@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save
 
-from .signals import group_joined
-from .models import Membership
+from .signals import group_joined, invitation_created
+from .models import Membership, Invitation
 
 def membership_post_save_handler(sender, **kwargs):
     if kwargs.get('raw', False):
@@ -13,5 +13,12 @@ def membership_post_save_handler(sender, **kwargs):
         group_joined.send(sender=instance.group,
                           account=instance.account)
 
-post_save.connect(membership_post_save_handler, sender=Membership)
+def invitation_post_save_handler(sender, **kwargs):
+    if kwargs.get('raw', False):
+        return
 
+    if kwargs['created']:
+        invitation_created.send(sender=kwargs['instance'])
+
+post_save.connect(membership_post_save_handler, sender=Membership)
+post_save.connect(invitation_post_save_handler, sender=Invitation)
