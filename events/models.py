@@ -22,6 +22,10 @@ EVENTSTREAM_CUTOFF_NUMBER = 8
 # Arbitrarily say stuff is 50% less interesting when it is half a day old.
 EVENTSTREAM_TIME_DECAY_FACTOR = 3600*12.0
 
+# Events have an affinity of 1.0 normally, and this can be boosted by the amount
+# below for a maximum friendship level
+EVENTSTREAM_MAX_EXTRA_AFFINITY_FOR_FRIEND = 1.0
+
 # This means that with EVENTSTREAM_CUTOFF_DAYS = 3, there is a factor of 8 to
 # play with: if an event has a weight more than 8 times higher than the rest of
 # the stream, it will stay at the top of the event stream until it disappears
@@ -223,14 +227,18 @@ def dedupe_iterable(iterable, keyfunc):
 
 
 class EventManager(models.Manager):
-    def for_dashboard(self, now=None):
+    def for_dashboard(self, now=None, account=None):
         if now is None:
             now = timezone.now()
 
         start = now - timedelta(EVENTSTREAM_CUTOFF_DAYS)
         events = list(self.filter(created__gte=start).select_related('account'))
         events = list(dedupe_iterable(events, lambda e:(e.account_id, e.message_html)))
-        events.sort(key=lambda e: e.get_rank(), reverse=True)
+        if account is None:
+            friendship_weights = None
+        else:
+            friendship_weights = account.get_friendship_weights()
+        events.sort(key=lambda e: e.get_rank(friendship_weights), reverse=True)
 
         # Now group
         grouped_events = []
@@ -260,9 +268,10 @@ class Event(models.Model):
     def __unicode__(self):
         return "Event %d" % self.id
 
-    def get_rank(self, now=None):
-        # In the future, we will want to include affinities in ranking, and will
-        # need UserEvent or something, but for now just use weight and recency.
+    def get_rank(self, friendship_weights, now=None):
+        affinity = 1.0
+        if friendship_weights is not None:
+            affinity += friendship_weights.get(self.account_id, 0) * EVENTSTREAM_MAX_EXTRA_AFFINITY_FOR_FRIEND
 
         if now is None:
             now = timezone.now()
@@ -270,7 +279,7 @@ class Event(models.Model):
         seconds = (now - self.created).total_seconds()
 
         recency = 2 ** (-seconds/EVENTSTREAM_TIME_DECAY_FACTOR)
-        return self.weight * recency
+        return self.weight * recency * affinity
 
 
     def created_display(self):
