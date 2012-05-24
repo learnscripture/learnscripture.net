@@ -15,9 +15,6 @@ class GroupPageTests(LiveServerTests):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json']
 
-    def setUp(self):
-        super(GroupPageTests, self).setUp()
-
     def test_join(self):
         identity, account = self.create_account()
         self.login(account)
@@ -92,3 +89,33 @@ class GroupTests(TestCase):
             self.assertEqual(Award.objects.filter(account=creator_account,
                                                   award_type=AwardType.ORGANIZER).count(),
                              0 if i < 5 else 1)
+
+
+class GroupCreatePageTests(LiveServerTests):
+
+    fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json']
+
+    def test_create(self):
+        identity, account = self.create_account()
+        self.login(account)
+
+        invited_account = Account.objects.create(username='invitee',
+                                                 email='i@example.com')
+        Identity.objects.create(account=invited_account)
+
+        driver = self.driver
+        driver.get(self.live_server_url + reverse('create_group'))
+        driver.find_element_by_id('id_name').send_keys('My group')
+
+        driver.find_element_by_id('id_invited_users_0').send_keys('invit')
+        self.wait_for_ajax()
+        driver.find_element_by_css_selector('ul.ui-autocomplete li.ui-menu-item:first-child').click()
+        driver.find_element_by_css_selector('input[name="save"]').click()
+        self.wait_until_loaded('body')
+
+        self.assertTrue(driver.current_url.endswith('/my-group/'))
+
+        g = Group.objects.get(slug='my-group')
+        self.assertEqual(list(g.invited_users()), [invited_account])
+
+        self.assertIn('invited you to join', invited_account.identity.notices.all()[0].message_html)
