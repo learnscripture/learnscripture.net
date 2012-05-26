@@ -428,5 +428,5 @@ def get_live_db():
 
 @task
 def local_restore_from_dump(filename):
-    local("sudo -u postgres pg_restore -O -U learnscripture -c -d learnscripture < %s" % filename)
+    local("pg_restore -O -U learnscripture -c -d learnscripture < %s" % filename)
 
