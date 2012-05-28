@@ -386,7 +386,7 @@ var learnscripture =
             currentStage = stageDefs['results'];
             currentStageList = [currentStage];
             currentStageIdx = 0;
-            setNextPreviousBtns();
+            enableBtn($('#id-next-btn, #id-back-btn'), false);
         };
 
         var showInstructions = function (stageName) {
@@ -396,8 +396,13 @@ var learnscripture =
         };
 
         var setNextPreviousBtns = function () {
-            enableBtn($('#id-next-btn'), currentStageIdx < currentStageList.length - 1);
-            enableBtn($('#id-back-btn'), currentStageIdx > 0);
+            if (currentStageIdx == 0 && currentStageList.length == 1) {
+                $('#id-next-btn, #id-back-btn').hide();
+            } else {
+                $('#id-next-btn, #id-back-btn').show();
+                enableBtn($('#id-next-btn'), currentStageIdx < currentStageList.length - 1);
+                enableBtn($('#id-back-btn'), currentStageIdx > 0);
+            }
         };
 
         var fadeVerseTitle = function (fade) {
