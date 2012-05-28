@@ -395,7 +395,7 @@ var learnscripture =
             $('#id-instructions .instructions-' + stageName).show().css({opacity: 1});
         };
 
-        var setNextPreviousBtns = function () {
+        var setStageControlBtns = function () {
             if (currentStageIdx == 0 && currentStageList.length == 1) {
                 $('#id-next-btn, #id-back-btn').hide();
             } else {
@@ -420,7 +420,7 @@ var learnscripture =
             $('#id-progress-summary').text("Stage " + (currentStageIdx + 1).toString() + "/" + currentStageList.length.toString());
             $('#id-points-target').html('');
             currentStage.setup();
-            setNextPreviousBtns();
+            setStageControlBtns();
             if (currentStage.testMode) {
                 unbindDocKeyPress();
                 $('#id-test-bar').show();
