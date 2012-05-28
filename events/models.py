@@ -238,10 +238,7 @@ class EventManager(models.Manager):
             if len(g) == 1:
                 grouped_events.append(g[0])
             else:
-                if k is None:
-                    grouped_events.extend(g)
-                else:
-                    grouped_events.append(EventGroup(k, g))
+                grouped_events.append(EventGroup(k, g))
 
         return grouped_events[0:EVENTSTREAM_CUTOFF_NUMBER]
 
