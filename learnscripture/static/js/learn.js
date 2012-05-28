@@ -40,6 +40,10 @@ var learnscripture =
 
         var INITIAL_STRENGTH_FACTOR = 0.1;
 
+        // Thresholds for different testings modes:
+        // Strength == 0.6 corresponds to about 10 days learning.
+        var HARD_MODE_THRESHOLD = 0.6
+
         // Initial state
         var currentStage = null;
         var currentStageIdx = null;
@@ -680,8 +684,7 @@ var learnscripture =
             resetTestingMistakes();
             testingStatus.text('');
             // After an certain point, we make things a bit harder.
-            // Strength == 0.6 corresponds to about 10 days learning.
-            setHardMode(currentVerseStatus.strength > 0.6);
+            setHardMode(currentVerseStatus.strength > HARD_MODE_THRESHOLD);
             $('#id-points-target').html(' Points target: <b>' + getPointsTarget().toString() + '</b>');
         };
 
