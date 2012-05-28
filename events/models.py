@@ -77,16 +77,7 @@ class NewAccountEvent(EventLogic):
 
     def __init__(self, account=None):
         super(NewAccountEvent, self).__init__(account=account)
-        extra_name = ""
-        if account.first_name.strip() != "":
-            extra_name = account.first_name.strip()
-        if account.last_name.strip() != "":
-            extra_name += " " + account.last_name.strip()
-        extra_name = extra_name.strip()
-        if extra_name != "":
-            extra_name = "(%s)" % extra_name
-        self.event.message_html = ("%s signed up to LearnScripture.net" %
-                                   escape(extra_name))
+        self.event.message_html = "signed up to LearnScripture.net"
 
 
 class AwardReceivedEvent(EventLogic):
