@@ -43,6 +43,8 @@ var learnscripture =
         // Thresholds for different testings modes:
         // Strength == 0.6 corresponds to about 10 days learning.
         var HARD_MODE_THRESHOLD = 0.6
+        // Strength == 0.4 corresponds to about 3 days learning.
+        var ALLOW_HINTS_THRESHOLD = 0.4
 
         // Initial state
         var currentStage = null;
@@ -62,6 +64,8 @@ var learnscripture =
 
         var testingMistakes = null;
         var hardMode = null;
+        var hintsShown = 0;
+        var maxHintsToShow = 0;
 
         // Score logs
         var waitingForScoreLogs = false;
@@ -407,6 +411,13 @@ var learnscripture =
                 enableBtn($('#id-next-btn'), currentStageIdx < currentStageList.length - 1);
                 enableBtn($('#id-back-btn'), currentStageIdx > 0);
             }
+            if (currentStageList[currentStageIdx] == 'test' && currentStageList.length == 1) {
+                if (currentVerseStatus.strength < ALLOW_HINTS_THRESHOLD) {
+                    enableBtn($('#id-hint-btn').show(), true);
+                }
+            } else {
+                $('#id-hint-btn').hide();
+            }
         };
 
         var fadeVerseTitle = function (fade) {
@@ -644,9 +655,7 @@ var learnscripture =
             // Duplication of logic in Account.award_action_points.  NB word
             // count excludes reference for this purpose, so we don't use
             // wordList.count
-            var wordCount = stripPunctuation(currentVerseStatus.text.trim()).split(/\W/).length;
-            var points = wordCount * POINTS_PER_WORD;
-            return points;
+            return currentVerseStatus.wordCount * POINTS_PER_WORD;
         };
 
         var adjustTypingBox = function () {
@@ -686,12 +695,41 @@ var learnscripture =
             // After an certain point, we make things a bit harder.
             setHardMode(currentVerseStatus.strength > HARD_MODE_THRESHOLD);
             $('#id-points-target').html(' Points target: <b>' + getPointsTarget().toString() + '</b>');
+            hintsShown = 0;
+            if (currentVerseStatus.strength < ALLOW_HINTS_THRESHOLD) {
+                // For very short verses, allow fewer hints e.g.  2 or 3 word
+                // verses should get just 1 hint, with a maximum of 4 hints
+                maxHintsToShow = Math.min(Math.floor(currentVerseStatus.wordCount/2), 4);
+            } else {
+                maxHintsToShow = 0;
+            }
         };
 
         var testContinue = function () {
             return true;
         };
 
+
+        var getHint = function () {
+            var word = getWordAt(selectedWordIndex);
+            var wordStr = stripPunctuation(word.text());
+            var typed = stripPunctuation(inputBox.val().toLowerCase());
+
+            if (typed == "" || typed.slice(0, 1) != wordStr.toLowerCase().slice(0,1)) {
+                // show first letter hint
+                inputBox.val(wordStr.slice(0, 1));
+            } else {
+                // show full word hint, and move on.
+                inputBox.val(wordStr);
+                checkCurrentWord();
+            }
+
+            inputBox.focus();
+            hintsShown++;
+            if (hintsShown >= maxHintsToShow) {
+                enableBtn($('#id-hint-btn'), false);
+            }
+        };
 
         // === Testing logic ===
 
@@ -922,6 +960,7 @@ var learnscripture =
         var loadCurrentVerse = function () {
             var oldVerseStatus = currentVerseStatus;
             currentVerseStatus = versesToLearn[currentVerseIndex];
+            currentVerseStatus.wordCount = stripPunctuation(currentVerseStatus.text.trim()).split(/\W/).length;
             var verse = currentVerseStatus;
             var moveOld = (oldVerseStatus !== null &&
                            isPassageType(oldVerseStatus) &&
@@ -1369,6 +1408,7 @@ var learnscripture =
             testingStatus = $('#id-testing-status');
             $('#id-next-btn').show().click(next);
             $('#id-back-btn').show().click(back);
+            $('#id-hint-btn').click(getHint);
             $('#id-next-verse-btn').click(nextVerse);
             $('#id-context-next-verse-btn, #id-read-anyway-next-verse-btn').click(markReadAndNextVerse);
             $('#id-version-select').change(versionSelectChanged);
