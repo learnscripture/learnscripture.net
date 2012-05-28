@@ -452,3 +452,31 @@ class LearnTests(LiveServerTests):
         self.assertEqual(account.score_logs.count(), 4)
         self.assertEqual(account.score_logs.filter(reason=ScoreReason.REVISION_COMPLETED).count(), 1)
 
+    def test_hint_button(self):
+        driver = self.driver
+        identity, account = self.create_account()
+        self.login(account)
+        verse_set = self.choose_verse_set('Bible 101')
+
+        # Learn one
+        identity.record_verse_action('John 3:16', 'KJV', StageType.TEST, 1.0)
+
+        self._make_verses_due_for_testing(identity.verse_statuses.filter(memory_stage=MemoryStage.TESTED))
+
+        driver.get(self.live_server_url + reverse('dashboard'))
+        driver.find_element_by_css_selector('input[name=revisequeue]').click()
+        self.wait_until_loaded('body')
+        self.wait_for_ajax()
+        for i in range(0, 4):
+            hint_btn = driver.find_element_by_id('id-hint-btn')
+            self.assertEqual(hint_btn.get_attribute('disabled'),
+                             'false')
+            hint_btn.click()
+
+        # First two words should be marked correct
+        for i in range(0, 2):
+            self.assertIn('correct', driver.find_element_by_id('id-word-%d' % i).get_attribute('class'))
+
+        # Hint button should be disabled after 4 clicks
+        self.assertEqual(driver.find_element_by_id('id-hint-btn').get_attribute('disabled'),
+                         'true')
