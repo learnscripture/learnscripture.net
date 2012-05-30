@@ -12,7 +12,7 @@ from jsonfield import JSONField
 
 from accounts.models import Account
 from groups.utils import group_link
-from learnscripture.datastructures import make_choices
+from learnscripture.datastructures import make_class_enum
 from learnscripture.templatetags.account_utils import account_link
 
 
@@ -32,23 +32,13 @@ EVENTSTREAM_MAX_EXTRA_AFFINITY_FOR_FRIEND = 1.0
 # altogether.
 
 
-EventType = make_choices('EventType',
-                         [(2, 'NEW_ACCOUNT', 'New account'),
-                          (3, 'AWARD_RECEIVED', 'Award received'),
-                          (4, 'POINTS_MILESTONE', 'Points milestone'),
-                          (5, 'VERSES_STARTED_MILESTONE', 'Verses started milestone'),
-                          (6, 'VERSES_FINISHED_MILESTONE', 'Verses finished milestone'),
-                          (7, 'VERSE_SET_CREATED', 'Verse set created'),
-                          (8, 'STARTED_LEARNING_VERSE_SET', 'Started learning a verse set'),
-                          (9, 'AWARD_LOST', 'Award lost'),
-                          (10, 'GROUP_JOINED', 'Group joined'),
-                          (11, 'GROUP_CREATED', 'Group created'),
-                          ])
-
-
 class EventLogic(object):
 
     weight = 10
+
+    @property
+    def event_type(self):
+        return self.enum_val
 
     def __init__(self, **kwargs):
         """
@@ -174,21 +164,24 @@ class GroupCreatedEvent(EventLogic):
         self.event.message_html = u"created group %s" % group_link(group)
 
 
-EVENT_CLASSES = {
-    EventType.NEW_ACCOUNT: NewAccountEvent,
-    EventType.AWARD_RECEIVED: AwardReceivedEvent,
-    EventType.POINTS_MILESTONE: PointsMilestoneEvent,
-    EventType.VERSES_STARTED_MILESTONE: VersesStartedMilestoneEvent,
-    EventType.VERSE_SET_CREATED: VerseSetCreatedEvent,
-    EventType.STARTED_LEARNING_VERSE_SET: StartedLearningVerseSetEvent,
-    EventType.AWARD_LOST: AwardLostEvent,
-    EventType.GROUP_JOINED: GroupJoinedEvent,
-    EventType.GROUP_CREATED: GroupCreatedEvent,
-}
+
+class VersesFinishedMilestoneEvent(EventLogic):
+    pass # TODO
 
 
-for event_type, c in EVENT_CLASSES.items():
-    c.event_type = event_type
+EventType = make_class_enum(
+    'EventType',
+    [(2, 'NEW_ACCOUNT', 'New account', NewAccountEvent),
+     (3, 'AWARD_RECEIVED', 'Award received', AwardReceivedEvent),
+     (4, 'POINTS_MILESTONE', 'Points milestone', PointsMilestoneEvent),
+     (5, 'VERSES_STARTED_MILESTONE', 'Verses started milestone', VersesStartedMilestoneEvent),
+     (6, 'VERSES_FINISHED_MILESTONE', 'Verses finished milestone', VersesFinishedMilestoneEvent),
+     (7, 'VERSE_SET_CREATED', 'Verse set created', VerseSetCreatedEvent),
+     (8, 'STARTED_LEARNING_VERSE_SET', 'Started learning a verse set', StartedLearningVerseSetEvent),
+     (9, 'AWARD_LOST', 'Award lost', AwardLostEvent),
+     (10, 'GROUP_JOINED', 'Group joined', GroupJoinedEvent),
+     (11, 'GROUP_CREATED', 'Group created', GroupCreatedEvent),
+     ])
 
 
 class EventGroup(object):
@@ -268,7 +261,6 @@ class Event(models.Model):
 
         recency = 2 ** (-seconds/EVENTSTREAM_TIME_DECAY_FACTOR)
         return self.weight * recency * affinity
-
 
     def created_display(self):
         from django.utils.timesince import timesince
