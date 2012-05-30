@@ -22,7 +22,7 @@ from paypal.standard.forms import PayPalPaymentsForm
 from accounts import memorymodel
 from accounts.models import Account, SubscriptionType, Identity
 from accounts.forms import PreferencesForm, AccountDetailsForm
-from awards.models import AwardType, AWARD_CLASSES, AnyLevel, Award
+from awards.models import AwardType, AnyLevel, Award
 from learnscripture.forms import AccountSetPasswordForm
 from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType, get_passage_sections, get_verses_started_counts
 from bibleverses.signals import public_verse_set_created
@@ -945,7 +945,7 @@ def referral_program(request):
 
 
 def awards(request):
-    awards = [AWARD_CLASSES[t](level=AnyLevel) for t in AwardType.values]
+    awards = [AwardType.classes[t](level=AnyLevel) for t in AwardType.values]
     discovered_awards = []
     hidden_awards = []
     for award in awards:
@@ -968,7 +968,7 @@ def award(request, award_slug):
         raise Http404
     if not Award.objects.filter(award_type=award_type).exists():
         raise Http404
-    award = AWARD_CLASSES[award_type](level=AnyLevel)
+    award = AwardType.classes[award_type](level=AnyLevel)
 
     levels = []
     for level in range(award.max_level, 0, -1):

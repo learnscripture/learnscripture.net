@@ -8,43 +8,28 @@ from django.utils.safestring import mark_safe
 from accounts.models import Account, SubscriptionType
 from awards.signals import new_award
 from scores.models import ScoreReason
-from learnscripture.datastructures import make_choices
+from learnscripture.datastructures import make_class_enum
 
 # In this module we have:
 #
 # = AwardType =
 #
-# Class storing enumeration of the different award types
+# Class storing enumeration of the different award types,
+# including a mapping of enumeration value to an AwardLogic subclass
 #
 # = AwardLogic and subclasses =
 #
 # Classes holding details about individual types of awards, and the
-# levels/counts/points they have. It contains some utility methd
+# levels/counts/points they have. It contains some utility methods.
 #
 # The queries needed to calculate counts are not contained in the AwardLogic
 # classes, but in awards.tasks and other places.
-#
-# This is mapped to AwardType using a simple dictionary AWARD_CLASSES
 #
 # = Award model =
 #
 # Stores info in DB, including 'level' and 'award_type'. It has a number of
 # methods/properties that proxy to an instance of the relevant AwardLogic
 # subclass.
-
-AwardType = make_choices('AwardType',
-                         [(0, 'STUDENT', u'Student'),
-                          (1, 'MASTER', u'Master'),
-                          (2, 'SHARER', u'Sharer'),
-                          (3, 'TREND_SETTER', u'Trend setter'),
-                          (4, 'ACE', u'Ace'),
-                          (5, 'RECRUITER', u'Recruiter'),
-                          (6, 'HACKER', u'Hacker'),
-                          (7, 'WEEKLY_CHAMPION', u'Weekly champion'),
-                          (8, 'REIGNING_WEEKLY_CHAMPION', u'Reigning weekly champion'),
-                          (9, 'ADDICT', u'Addict'),
-                          (10, 'ORGANIZER', u'Organizer'),
-                          ])
 
 # AnyLevel is used when displaying badges on the 'badges' page which describes
 # badges in generic terms.
@@ -62,6 +47,10 @@ class AwardLogic(object):
 
     # Subclasses must also define 'has_levels' class attribute and 'max_level'
     # attribute
+
+    @property
+    def award_type(self):
+        return self.enum_val # set by make_class_enum
 
     def slug(self):
         return AwardType.name_for_value[self.award_type].lower().replace(u'_', u'-')
@@ -444,22 +433,20 @@ class OrganizerAward(CountBasedAward):
             return u"Created groups that are used by at least %d people" % self.count
 
 
-AWARD_CLASSES = {
-    AwardType.STUDENT: StudentAward,
-    AwardType.MASTER: MasterAward,
-    AwardType.SHARER: SharerAward,
-    AwardType.TREND_SETTER: TrendSetterAward,
-    AwardType.ACE: AceAward,
-    AwardType.RECRUITER: RecruiterAward,
-    AwardType.HACKER: HackerAward,
-    AwardType.REIGNING_WEEKLY_CHAMPION: ReigningWeeklyChampion,
-    AwardType.WEEKLY_CHAMPION: WeeklyChampion,
-    AwardType.ADDICT: AddictAward,
-    AwardType.ORGANIZER: OrganizerAward,
-}
-
-for t, c in AWARD_CLASSES.items():
-    c.award_type = t
+AwardType = make_class_enum(
+    'AwardType',
+    [(0, 'STUDENT', u'Student', StudentAward),
+     (1, 'MASTER', u'Master', MasterAward),
+     (2, 'SHARER', u'Sharer', SharerAward),
+     (3, 'TREND_SETTER', u'Trend setter', TrendSetterAward),
+     (4, 'ACE', u'Ace', AceAward),
+     (5, 'RECRUITER', u'Recruiter', RecruiterAward),
+     (6, 'HACKER', u'Hacker', HackerAward),
+     (7, 'WEEKLY_CHAMPION', u'Weekly champion', WeeklyChampion),
+     (8, 'REIGNING_WEEKLY_CHAMPION', u'Reigning weekly champion', ReigningWeeklyChampion),
+     (9, 'ADDICT', u'Addict', AddictAward),
+     (10, 'ORGANIZER', u'Organizer', OrganizerAward),
+     ])
 
 
 class Award(models.Model):
@@ -473,7 +460,7 @@ class Award(models.Model):
 
     @cached_property
     def award_detail(self):
-        return AWARD_CLASSES[self.award_type](level=self.level)
+        return AwardType.classes[self.award_type](level=self.level)
 
     def image_small(self):
         return self.award_detail.image_small()
