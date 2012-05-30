@@ -37,3 +37,20 @@ def make_choices(name, choice_list):
         Choices.name_for_value[v] = name
 
     return Choices
+
+def make_class_enum(name, choice_list):
+    """
+    Given a name of a class and a list of (val, constant name, title, class),
+    returns an enum class representing the choices, and a dictionary mapping
+    choices to classes.
+
+    Also adds the choice number to the class as attribute 'enum_val'
+    """
+
+    enum = make_choices(name,
+                        [(val, name, title)
+                         for (val, name, title, cls) in choice_list])
+    enum.classes = dict((val, cls) for (val, name, title, cls) in choice_list)
+    for val, cls in enum.classes.items():
+        cls.enum_val = val
+    return enum
