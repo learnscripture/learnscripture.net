@@ -114,7 +114,15 @@ class classproperty(property):
     def __get__(self, cls, owner):
         return self.fget.__get__(None, owner)()
 
-class CountBasedAward(AwardLogic):
+
+class MultiLevelPointsMixin(object):
+    def points(self):
+        if hasattr(self, 'POINTS'):
+            return self.POINTS[self.level]
+        else:
+            return 0
+
+class CountBasedAward(MultiLevelPointsMixin, AwardLogic):
     """
     Base class for awards that have different levels that are based on
     a 'count' of some kind.
@@ -157,12 +165,6 @@ class CountBasedAward(AwardLogic):
 
     def count_for_level(self, level):
         return self.COUNTS[level]
-
-    def points(self):
-        if hasattr(self, 'POINTS'):
-            return self.POINTS[self.level]
-        else:
-            return 0
 
 
 class SingleLevelAward(AwardLogic):
@@ -347,7 +349,7 @@ class ReigningWeeklyChampion(SingleLevelAward):
             return mark_safe(u'Currently at the top of the <a href="%s">weekly leaderboard</a>.' % url)
 
 
-class TimeBasedAward(AwardLogic):
+class TimeBasedAward(MultiLevelPointsMixin, AwardLogic):
     """
     Subclasses must define:
     DAYS: dictionary mapping level to number of days
@@ -444,6 +446,8 @@ class OrganizerAward(CountBasedAward):
 
 
 class ConsistentLearnerAward(TimeBasedAward):
+
+    POINTS = dict((l, v*4) for l, v in StudentAward.POINTS.items())
 
     DAYS = {
         1: 7,
