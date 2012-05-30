@@ -4,7 +4,7 @@ from datetime import timedelta
 from decimal import Decimal
 
 from django.db.models import F
-from django.test import TestCase, TransactionTestCase
+from django.test import TestCase
 from django.utils import timezone
 
 from accounts.models import Account, SubscriptionType, ActionChange, Identity
@@ -13,6 +13,7 @@ from bibleverses.models import MemoryStage, StageType
 from events.models import Event, EventType
 from scores.models import Scores, ScoreReason
 
+from .base import UsesSQLAlchemyBase
 
 class AccountTests(TestCase):
     def test_password(self):
@@ -178,14 +179,6 @@ class AccountTests(TestCase):
         a1.is_under_13 = True
 
         self.assertEqual(a1.require_subscribe(), False)
-
-
-class UsesSQLAlchemyBase(TransactionTestCase):
-
-    def tearDown(self):
-        super(UsesSQLAlchemyBase, self).tearDown()
-        from learnscripture.utils import sqla
-        sqla.default_engine.pool.dispose()
 
 
 class AccountTests2(UsesSQLAlchemyBase):
