@@ -10,7 +10,8 @@ logger = logging.getLogger(__name__)
 class Command(BaseCommand):
     def handle(self, *args, **options):
         try:
-            from awards.tasks import give_all_addict_awards
-            give_all_addict_awards()
+            import awards.tasks
+            awards.tasks.give_all_addict_awards()
+            awards.tasks.give_all_consistent_learner_awards()
         except Exception as e:
             logger.error("Couldn't create awards", exc_info=sys.exc_info())

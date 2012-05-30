@@ -3,8 +3,8 @@ from datetime import timedelta
 from celery.task import task
 from django.utils import timezone
 
-from awards.models import AwardType, Award, StudentAward, MasterAward, SharerAward, TrendSetterAward, AceAward, RecruiterAward, ReigningWeeklyChampion, WeeklyChampion, AddictAward, OrganizerAward
-from accounts.models import Account, Identity
+from awards.models import AwardType, Award, StudentAward, MasterAward, SharerAward, TrendSetterAward, AceAward, RecruiterAward, ReigningWeeklyChampion, WeeklyChampion, AddictAward, OrganizerAward, ConsistentLearnerAward
+from accounts.models import Account, Identity, get_verse_started_running_streaks
 from accounts.memorymodel import MM
 from bibleverses.models import MemoryStage, VerseSetType, VerseSet
 from groups.models import combined_membership_count_for_creator
@@ -138,3 +138,14 @@ def give_addict_award(account_id):
 def give_organizer_awards(account_id):
     count = combined_membership_count_for_creator(account_id)
     OrganizerAward(count=count).give_to(Account.objects.get(id=account_id))
+
+
+def give_all_consistent_learner_awards():
+    min_days = min(ConsistentLearnerAward.DAYS.values())
+    for account_id, streak in get_verse_started_running_streaks().items():
+        if streak >= min_days:
+            give_consistent_learner_award.delay(account_id, streak)
+
+@task(ignore_result=True)
+def give_consistent_learner_award(account_id, streak):
+    ConsistentLearnerAward(time_period=timedelta(days=streak)).give_to(Account.objects.get(id=account_id))

@@ -1010,4 +1010,59 @@ class Notice(models.Model):
         return u"Notice %d for %r" % (self.id, self.for_identity)
 
 
+def get_verse_started_running_streaks():
+    """
+    Returns a dictionary of {account_id: largest learning streak}
+    """
+    from learnscripture.utils.sqla import default_engine
+
+    # We can get the beginning of running streaks like this -
+    # all rows that have a row one day before them chronologically
+
+    sql1 = """
+SELECT
+    DISTINCT accounts_identity.account_id, t1.d1 FROM
+    (SELECT for_identity_id, date_trunc('day', first_seen AT TIME ZONE 'UTC') as d1
+     FROM bibleverses_userversestatus
+     WHERE first_seen is not NULL) t1
+LEFT OUTER JOIN
+    (SELECT for_identity_id, date_trunc('day', first_seen AT TIME ZONE 'UTC') as d2
+     FROM bibleverses_userversestatus WHERE first_seen is not NULL) t2
+  ON t1.d1 = t2.d2 + interval '1 day'
+     AND t1.for_identity_id = t2.for_identity_id
+INNER JOIN accounts_identity
+  ON accounts_identity.id = t1.for_identity_id
+     AND accounts_identity.account_id IS NOT NULL
+
+WHERE t2.d2 IS NULL;
+
+"""
+
+    # Similarly, get end of running streaks like this:
+    sql2 = sql1.replace(" + interval '1 day'",
+                        " - interval '1 day'")
+
+    starts = default_engine.execute(sql1).fetchall()
+    ends = default_engine.execute(sql2).fetchall()
+
+    # We've got results for all accounts, so need to split:
+    def split(results):
+        out = defaultdict(list)
+        for i, d in results:
+            out[i].append(d)
+        for v in out.values():
+            v.sort()
+        return out
+
+    start_dict = split(starts)
+    end_dict = split(ends)
+    interval_dict = defaultdict(list)
+
+    # Now get can intervals by zipping starts and ends:
+    for i in start_dict.keys():
+        for start, end in zip(start_dict[i], end_dict[i]):
+            interval_dict[i].append((end - start).days)
+
+    return dict((i, max(intervals) + 1) for i, intervals in interval_dict.items())
+
 import accounts.hooks

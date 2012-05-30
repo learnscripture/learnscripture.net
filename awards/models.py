@@ -347,7 +347,14 @@ class ReigningWeeklyChampion(SingleLevelAward):
             return mark_safe(u'Currently at the top of the <a href="%s">weekly leaderboard</a>.' % url)
 
 
-class WeeklyChampion(AwardLogic):
+class TimeBasedAward(AwardLogic):
+    """
+    Subclasses must define:
+    DAYS: dictionary mapping level to number of days
+
+    Also useful:
+    FRIENDLY_DAYS: dictionary mapping level to string indicating number of days.
+    """
 
     has_levels = True
 
@@ -355,6 +362,24 @@ class WeeklyChampion(AwardLogic):
     @classmethod
     def max_level(cls):
         return max(cls.DAYS.keys())
+
+    def __init__(self, level=None, time_period=None):
+        if level is None:
+            self.level = self.level_for_time_period(time_period)
+        else:
+            self.level = level
+
+    def level_for_time_period(self, time_period):
+        # period is a timedelta object
+        _DAYS_DESC = sorted([(a,b) for b, a in self.DAYS.items()], reverse=True)
+
+        for d, level in _DAYS_DESC:
+            if time_period.days >= d:
+                return level
+        return 0
+
+
+class WeeklyChampion(TimeBasedAward):
 
     DAYS = {
         1: 0, # less than a day
@@ -378,21 +403,6 @@ class WeeklyChampion(AwardLogic):
         8: '9 months',
         9: '1 year',
         }
-
-    def __init__(self, level=None, time_period=None):
-        if level is None:
-            self.level = self.level_for_time_period(time_period)
-        else:
-            self.level = level
-
-    def level_for_time_period(self, time_period):
-        # period is a timedelta object
-        _DAYS_DESC = sorted([(a,b) for b, a in self.DAYS.items()], reverse=True)
-
-        for d, level in _DAYS_DESC:
-            if time_period.days >= d:
-                return level
-        return 0
 
     def full_description(self):
         url = reverse('leaderboard') + "?thisweek"
@@ -433,6 +443,41 @@ class OrganizerAward(CountBasedAward):
             return u"Created groups that are used by at least %d people" % self.count
 
 
+class ConsistentLearnerAward(TimeBasedAward):
+
+    DAYS = {
+        1: 7,
+        2: 14,
+        3: 31,
+        4: 91,
+        5: 182,
+        6: 274,
+        7: 365,
+        8: 547,
+        9: 730,
+        }
+
+
+    FRIENDLY_DAYS = {
+        1: '1 week',
+        2: '2 weeks',
+        3: '1 month',
+        4: '3 months',
+        5: '6 months',
+        6: '9 months',
+        7: '1 year',
+        8: '18 months',
+        9: '2 years'
+        }
+
+    def full_description(self):
+        if self.level is AnyLevel:
+            return (u"Awarded for starting to learn a new verse every day without gaps, "
+                    "over a period of time.")
+        else:
+            return u"Started learning a new verse every day for %s" % self.FRIENDLY_DAYS[self.level]
+
+
 AwardType = make_class_enum(
     'AwardType',
     [(0, 'STUDENT', u'Student', StudentAward),
@@ -446,6 +491,7 @@ AwardType = make_class_enum(
      (8, 'REIGNING_WEEKLY_CHAMPION', u'Reigning weekly champion', ReigningWeeklyChampion),
      (9, 'ADDICT', u'Addict', AddictAward),
      (10, 'ORGANIZER', u'Organizer', OrganizerAward),
+     (11, 'CONSISTENT_LEARNER', u'Consistent learner', ConsistentLearnerAward),
      ])
 
 

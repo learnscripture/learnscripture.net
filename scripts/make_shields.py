@@ -32,6 +32,7 @@ if __name__ == '__main__':
                    ('REIGNING_WEEKLY_CHAMPION', 'shield_gold_crown.svg'),
                    ('ADDICT', 'shield_addict.svg'),
                    ('ORGANIZER', 'shield_organizer.svg'),
+                   ('CONSISTENT_LEARNER', 'shield_consistent.svg'),
                    ]
 
     for name, award_file in award_types:

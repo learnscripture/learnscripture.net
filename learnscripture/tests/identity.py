@@ -14,9 +14,10 @@ from bibleverses.models import VerseSet, BibleVersion, StageType, MemoryStage, V
 from events.models import Event, EventType
 from scores.models import Scores
 
-from .base import FuzzyInt
+from .base import FuzzyInt, UsesSQLAlchemyBase
 
-class IdentityTests(TestCase):
+
+class IdentityBase(object):
 
     fixtures = ['test_bible_versions.json', 'test_verse_sets.json', 'test_bible_verses.json']
 
@@ -30,6 +31,8 @@ class IdentityTests(TestCase):
         identity.account = account
         identity.save()
         return account
+
+class IdentityTests(IdentityBase, TestCase):
 
     def test_add_verse_set(self):
         i = self._create_identity()
@@ -513,3 +516,26 @@ class IdentityTests(TestCase):
 
         self.assertEqual([uvs.reference for uvs in i.verse_statuses_for_learning()],
                          ['John 3:16', 'John 14:6'])
+
+
+class IdentityTests2(IdentityBase, UsesSQLAlchemyBase):
+
+    def test_consistent_learner_award(self):
+        import awards.tasks
+        account = self._create_account(version_slug='KJV')
+        identity = account.identity
+
+        def learn(i):
+            # We simulate testing over time by moving previous data back a day
+            identity.verse_statuses.update(first_seen=F('first_seen') - timedelta(days=1))
+            ref = "Genesis 1:%d" % i
+            identity.add_verse_choice(ref)
+            identity.record_verse_action(ref, 'KJV', StageType.TEST, 1.0)
+
+        for i in range(1, 10):
+            learn(i)
+            # Simulate the cronjob that runs
+            awards.tasks.give_all_consistent_learner_awards()
+
+            self.assertEqual(account.awards.filter(award_type=AwardType.CONSISTENT_LEARNER).count(),
+                             0 if i < 7 else 1)

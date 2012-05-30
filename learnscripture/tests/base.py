@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 from django.core.urlresolvers import reverse
-from django.test import LiveServerTestCase
+from django.test import LiveServerTestCase, TransactionTestCase
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
@@ -148,3 +148,12 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
         self.wait_until_loaded('.logout-link')
         elem = driver.find_element_by_id('id-session-menu')
         self.assertEqual(elem.text, account.username)
+
+
+class UsesSQLAlchemyBase(TransactionTestCase):
+
+    def tearDown(self):
+        super(UsesSQLAlchemyBase, self).tearDown()
+        from learnscripture.utils import sqla
+        sqla.default_engine.pool.dispose()
+
