@@ -1024,10 +1024,16 @@ SELECT
     DISTINCT accounts_identity.account_id, t1.d1 FROM
     (SELECT for_identity_id, date_trunc('day', first_seen AT TIME ZONE 'UTC') as d1
      FROM bibleverses_userversestatus
-     WHERE first_seen is not NULL) t1
+     WHERE first_seen is not NULL
+           AND ignored = false
+    ) t1
 LEFT OUTER JOIN
     (SELECT for_identity_id, date_trunc('day', first_seen AT TIME ZONE 'UTC') as d2
-     FROM bibleverses_userversestatus WHERE first_seen is not NULL) t2
+     FROM bibleverses_userversestatus
+     WHERE first_seen is not NULL
+           AND ignored = false
+    ) t2
+
   ON t1.d1 = t2.d2 + interval '1 day'
      AND t1.for_identity_id = t2.for_identity_id
 INNER JOIN accounts_identity
