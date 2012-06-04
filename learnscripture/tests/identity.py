@@ -508,7 +508,7 @@ class IdentityTests(IdentityBase, TestCase):
         self.assertEqual([uvs.reference for uvs in i.verse_statuses_for_learning()],
                          ['John 14:6'])
         i.record_verse_action('John 14:6', 'NET', StageType.READ, 1)
-        i.cancel_learning('John 14:6')
+        i.cancel_learning(['John 14:6'])
         time.sleep(1)
 
         vs1 = VerseSet.objects.get(name='Bible 101')
