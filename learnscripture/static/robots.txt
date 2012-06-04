@@ -5,3 +5,5 @@ Disallow: /create-verse-set/
 Disallow: /create-selection-set/
 Disallow: /create-passage-set/
 Disallow: /dashboard/
+Disallow: /progress/
+Disallow: /my-verse-sets/
