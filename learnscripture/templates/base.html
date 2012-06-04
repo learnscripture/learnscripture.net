@@ -60,7 +60,8 @@
                   <li><a class="icon-preferences preferences-link" href="{% url 'preferences' %}?next={{ request.path_info }}">Preferences</a></li>
                   {% if request.identity.account %}
                   <li><a class="icon-account" href="{% url 'account_details' %}">Account details</i></a></li>
-                  <li><a class="icon-progress" href="{% url 'user_verses' %}">Verses</a>
+                  <li><a class="icon-progress" href="{% url 'user_verses' %}">Verse progress</a>
+                  <li><a class="icon-verse-sets" href="{% url 'user_verse_sets' %}">Verse sets</a>
                   <li><a class="icon-stats" href="{% url 'user_stats' request.identity.account.username %}">Stats</a></li>
                   <li><a class="icon-leaderboard" href="{% url 'leaderboard' %}?thisweek">Leaderboard</a></li>
                   <li><a href="#" class="icon-logout logout-link">Log out</a></li>
