@@ -140,7 +140,7 @@ class CancelLearningVerseHandler(BaseHandler):
         verse_status = get_verse_status(request.data)
         verse_set_id = get_verse_set_id(verse_status)
         reference = verse_status['reference']
-        request.identity.cancel_learning(reference)
+        request.identity.cancel_learning([reference])
         session.verse_status_cancelled(request, reference, verse_set_id)
         return {}
 

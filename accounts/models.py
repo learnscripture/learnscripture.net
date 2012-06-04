@@ -688,14 +688,14 @@ class Identity(models.Model):
 
         return uvs
 
-    def cancel_learning(self, reference):
+    def cancel_learning(self, references):
         """
-        Cancel learning an individual verse.
+        Cancel learning some verses.
 
         Ignores VerseChoices that belong to passage sets.
         """
         # Not used for passages verse sets.
-        qs = self.verse_statuses.filter(reference=reference)
+        qs = self.verse_statuses.filter(reference__in=references)
         qs = qs.exclude(verse_set__set_type=VerseSetType.PASSAGE)
         qs.update(ignored=True)
 
@@ -799,6 +799,25 @@ class Identity(models.Model):
                 .values_list('verse_set_id', flat=True).distinct())
 
         return VerseSet.objects.filter(id__in=ids).order_by('name')
+
+    def which_verses_started(self, references):
+        """
+        Given a list of references, returns the ones that the user has started
+        to learn.
+        """
+        return set(uvs.reference
+                   for uvs in self.verse_statuses.filter(reference__in=references,
+                                                         ignored=False,
+                                                         memory_stage__gte=MemoryStage.TESTED))
+
+    def which_in_learning_queue(self, references):
+        """
+        Given a list of references, returns the ones that are in the user's
+        queue for learning.
+        """
+        return set(uvs.reference
+                   for uvs in (self.verse_statuses_for_learning_qs()
+                               .filter(reference__in=references)))
 
     def passages_for_revising(self):
         statuses = self.verse_statuses.filter(verse_set__set_type=VerseSetType.PASSAGE,

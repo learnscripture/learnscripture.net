@@ -342,7 +342,8 @@ def view_verse_set(request, slug):
 
     # Decorate the verse choices with the text.
     verse_choices = list(verse_set.verse_choices.all())
-    verses = version.get_verses_by_reference_bulk([vc.reference for vc in verse_choices])
+    all_references = [vc.reference for vc in verse_choices]
+    verses = version.get_verses_by_reference_bulk(all_references)
 
     # Decorate verses with break information.
     verse_list = sorted(verses.values(), key=lambda v: v.bible_verse_number)
@@ -362,11 +363,27 @@ def view_verse_set(request, slug):
                 messages.info(request, "Verse set converted to 'passage' type")
                 c['show_convert_to_passage'] = False
 
+    if request.method == 'POST':
+        if "drop" in request.POST and hasattr(request, 'identity'):
+            refs_to_drop = request.identity.which_in_learning_queue(all_references)
+            request.identity.cancel_learning(refs_to_drop)
+            messages.info(request, "Dropped %d verse(s) from learning queue." % len(refs_to_drop))
 
     if hasattr(request, 'identity'):
         c['can_edit'] = verse_set.created_by_id == request.identity.account_id
+        verses_started = request.identity.which_verses_started(all_references)
+        c['started_count'] = len(verses_started)
+
+        if verse_set.set_type == VerseSetType.SELECTION:
+            c['in_queue'] = len(request.identity.which_in_learning_queue(all_references))
+        else:
+            c['in_queue'] = 0
     else:
         c['can_edit'] = False
+        c['started_none'] = True
+        c['started_all'] = False
+        c['in_queue'] = 0
+
     c['verse_set'] = verse_set
     c['verse_choices'] = verse_choices
     c['version'] = version
