@@ -26,6 +26,11 @@ class DebugMiddleware(object):
         from learnscripture import session
         from accounts.models import Account
 
+        if 'sleep' in request.GET:
+            import time
+            time.sleep(int(request.GET['sleep']))
+
+
         if 'as' in request.GET:
             session.set_identity(request, Account.objects.get(username=request.GET['as']).identity)
 
