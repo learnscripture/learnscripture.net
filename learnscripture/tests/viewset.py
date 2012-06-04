@@ -50,6 +50,26 @@ class ViewSetTests(LiveServerTests):
         self.assertTrue(len(verse_statuses) > 0)
         self.assertTrue(all(uvs.version.slug == 'NET' for uvs in verse_statuses))
 
+    def test_drop_from_queue(self):
+        driver = self.driver
+        identity, account = self.create_account()
+        self.login(account)
+        vs = VerseSet.objects.get(slug='bible-101')
+        identity.add_verse_set(vs)
+        self.assertEqual(len(identity.verse_statuses_for_learning()), vs.verse_choices.count())
+
+        driver.get(self.live_server_url + reverse('view_verse_set', kwargs=dict(slug=vs.slug)))
+        self.wait_until_loaded('body')
+
+        self.assertIn("You have %d verse(s) from this set in your queue" % vs.verse_choices.count(),
+                      driver.page_source)
+
+        driver.find_element_by_css_selector("input[name='drop']").click()
+        self.wait_until_loaded('body')
+
+        self.assertEqual(len(identity.verse_statuses_for_learning()), 0)
+
+
     def test_view_without_identity(self):
         ids = list(Identity.objects.all())
 
