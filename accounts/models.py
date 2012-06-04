@@ -781,13 +781,24 @@ class Identity(models.Model):
 
     def passage_verse_sets_being_learnt_ids(self):
         """
-        Returns a list of ids of VerseSets that are still being learnt
+        Returns a list of ids of passage VerseSets that are still being learnt
+        (i.e. haven't all been tested yet).
         """
         return (self.verse_statuses
                 .filter(verse_set__set_type=VerseSetType.PASSAGE,
                         ignored=False,
                         memory_stage__lt=MemoryStage.TESTED)
                 .values_list('verse_set_id', flat=True).distinct())
+
+    def verse_sets_chosen(self):
+        """
+        Returns a QuerySet of VerseSets that have been/are being learnt
+        """
+        ids = (self.verse_statuses
+               .filter(ignored=False)
+                .values_list('verse_set_id', flat=True).distinct())
+
+        return VerseSet.objects.filter(id__in=ids).order_by('name')
 
     def passages_for_revising(self):
         statuses = self.verse_statuses.filter(verse_set__set_type=VerseSetType.PASSAGE,

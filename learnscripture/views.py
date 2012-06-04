@@ -648,6 +648,14 @@ def user_verses(request):
     return render(request, 'learnscripture/user_verses.html', c)
 
 
+@require_identity
+def user_verse_sets(request):
+    identity = request.identity
+    c = {'title': u'Verse sets',
+         'verse_sets': identity.verse_sets_chosen()
+         }
+    return render(request, 'learnscripture/user_verse_sets.html', c)
+
 # Password reset for Accounts:
 #
 # We can re-use a large amount of django.contrib.auth functionality
