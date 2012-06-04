@@ -68,6 +68,9 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
 
     @classmethod
     def setUpClass(cls):
+        from pyvirtualdisplay import Display
+        cls.display = Display(visible=0, size=(1024, 768))
+        cls.display.start()
         cls.driver = webdriver.Chrome() # Using Chrome because we have problem with drag and drop for Firefox
         cls.driver.implicitly_wait(1)
         super(LiveServerTests, cls).setUpClass()
@@ -77,6 +80,7 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
     def tearDownClass(cls):
         super(LiveServerTests, cls).tearDownClass()
         cls.driver.quit()
+        cls.display.stop()
 
     def setUp(self):
         self.verificationErrors = []
