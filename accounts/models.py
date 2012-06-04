@@ -779,7 +779,7 @@ class Identity(models.Model):
                                                          memory_stage__gte=MemoryStage.TESTED).count()
         return verse_sets.values()
 
-    def verse_sets_being_learnt(self):
+    def passage_verse_sets_being_learnt_ids(self):
         """
         Returns a list of ids of VerseSets that are still being learnt
         """
@@ -800,7 +800,7 @@ class Identity(models.Model):
 
         # However, we want to exclude those which have any verses in the set
         # still untested.
-        statuses = statuses.exclude(verse_set__in=self.verse_sets_being_learnt())
+        statuses = statuses.exclude(verse_set__in=self.passage_verse_sets_being_learnt_ids())
 
         # We also need to know if group testing is on the cards, since that
         # allows for the possibility of splitting into sections for section
@@ -826,7 +826,7 @@ class Identity(models.Model):
         try:
             # We need to exlude verses that are part of passage sets that are
             # still being learnt
-            learning_sets_ids = self.verse_sets_being_learnt()
+            learning_sets_ids = self.passage_verse_sets_being_learnt_ids()
 
             return (self.verse_statuses
                     .filter(ignored=False,
