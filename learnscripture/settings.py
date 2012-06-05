@@ -83,6 +83,7 @@ else:
     SENTRY_DSN = secrets["DEVELOPMENT_SENTRY_DSN"]
 
 
+SESSION_COOKIE_AGE = 3600 * 24 * 31 * 4 # 4 months
 
 ADMINS = [
     ('', 'admin@learnscripture.net')
