@@ -868,9 +868,13 @@ def subscribe(request):
             c['started_verses_count'] = learning_verses.count()
             well_learnt = (learning_verses
                            .exclude(verse_set__set_type=VerseSetType.PASSAGE)
-                           .filter(strength__gt=Decimal(str(strength_cutoff))).order_by('strength'))[0:3]
+                           .filter(strength__gt=Decimal(str(strength_cutoff)))
+                           .order_by('strength')
+                           .values_list('reference', flat=True)
+                           .distinct()
+                           )[0:3]
 
-            c['well_learnt_verses'] = natural_list([uvs.reference for uvs in well_learnt])
+            c['well_learnt_verses'] = natural_list(list(well_learnt))
 
         if request.method == 'POST' and 'downgrade' in request.POST:
             if account.subscription != SubscriptionType.BASIC:
