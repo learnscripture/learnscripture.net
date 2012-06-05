@@ -11,6 +11,7 @@ from django.utils.safestring import mark_safe
 from jsonfield import JSONField
 
 from accounts.models import Account
+from awards.utils import award_link
 from groups.utils import group_link
 from learnscripture.datastructures import make_class_enum
 from learnscripture.templatetags.account_utils import account_link
@@ -78,9 +79,7 @@ class AwardReceivedEvent(EventLogic):
     def __init__(self, award=None):
         super(AwardReceivedEvent, self).__init__(award_id=award.id,
                                                  account=award.account)
-        self.event.message_html = (
-            "earned <b>%s</b>" % escape(award.short_description())
-            )
+        self.event.message_html = u"earned " + award_link(award)
 
 
 class AwardLostEvent(EventLogic):
@@ -90,13 +89,7 @@ class AwardLostEvent(EventLogic):
     def __init__(self, award=None):
         super(AwardLostEvent, self).__init__(award_id=award.id,
                                              account=award.account)
-        self.event.message_html = (
-            "lost <a href='%s'>%s</a>" %
-            tuple(map(escape,
-                      [reverse('award', args=(award.award_detail.slug(),)),
-                       award.short_description()
-                       ]))
-            )
+        self.event.message_html = u"lost " + award_link(award)
 
 
 class VerseSetCreatedEvent(EventLogic):
