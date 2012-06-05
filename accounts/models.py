@@ -1101,4 +1101,29 @@ WHERE t2.d2 IS NULL;
 
     return dict((i, max(intervals) + 1) for i, intervals in interval_dict.items())
 
+
+def get_active_account_count(since_when, until_when):
+    """
+    Returns the number of accounts that have used the site in the time period.
+    """
+    # This isn't accurate is until_when is not now(), since UserVerseStatus is
+    # overwritten. However, it doesn't matter too much, since we run this daily
+    # and only had a small backlog of initial data to cope with.
+    from bibleverses.models import UserVerseStatus
+    return (UserVerseStatus.objects.
+            filter(for_identity__account__isnull=False,
+                   last_tested__lte=until_when,
+                   last_tested__gt=since_when)
+            .values('for_identity_id').distinct().count()
+            )
+
+def get_active_identity_count(since_when, until_when):
+    # As above, but for all identities, not just those with accounts.
+    from bibleverses.models import UserVerseStatus
+    return (UserVerseStatus.objects.
+            filter(last_tested__lte=until_when,
+                   last_tested__gt=since_when)
+            .values('for_identity_id').distinct().count()
+            )
+
 import accounts.hooks
