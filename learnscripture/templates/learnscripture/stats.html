@@ -58,6 +58,14 @@ $(function() {
             {label: "All accounts",
              data: {{ account_data.all_accounts|jsonify }},
              yaxis: 2
+            },
+            {label: "Active accounts",
+             data: {{ account_data.accounts_active|jsonify }},
+             yaxis: 2
+            },
+            {label: "Active identities",
+             data: {{ account_data.identities_active|jsonify }},
+             yaxis: 2
             }
            ],
            { xaxis: { mode: "time",
