@@ -863,10 +863,12 @@ def subscribe(request):
 
             # Some of this logic should probably be in the model layer
             learning_verses = identity.verse_statuses_started()
+            # Look for verses that have been going at least two weeks
+            strength_cutoff = memorymodel.MM.s(14* 24 * 3600)
             c['started_verses_count'] = learning_verses.count()
             well_learnt = (learning_verses
                            .exclude(verse_set__set_type=VerseSetType.PASSAGE)
-                           .filter(strength__gt=Decimal('0.65')).order_by('strength'))[0:3]
+                           .filter(strength__gt=Decimal(str(strength_cutoff))).order_by('strength'))[0:3]
 
             c['well_learnt_verses'] = natural_list([uvs.reference for uvs in well_learnt])
 
