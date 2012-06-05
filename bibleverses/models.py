@@ -182,14 +182,7 @@ class BibleVersion(caching.base.CachingMixin, models.Model):
         for ref in reference_list:
             if ref not in v_dict:
                 try:
-                    verse_list = self.get_verse_list(ref)
-                    # ComboVerses need a chapter and verse number for some
-                    # presentational situations.
-                    if len(verse_list) == 0:
-                        verse = verse_list[0]
-                    else:
-                        verse = ComboVerse(ref, verse_list)
-                    v_dict[ref] = verse
+                    v_dict[ref] = ComboVerse(ref, self.get_verse_list(ref))
                 except InvalidVerseReference:
                     pass
         return v_dict
@@ -338,10 +331,6 @@ class VerseSet(models.Model):
     @property
     def is_passage(self):
         return self.set_type == VerseSetType.PASSAGE
-
-    def mark_chosen(self):
-        self.popularity += 1
-        self.save()
 
     @property
     def breaks_formatted(self):
