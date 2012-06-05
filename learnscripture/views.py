@@ -800,7 +800,10 @@ def stats(request):
         return output_rows
 
     verses_data = build_data(['verse_started', 'verse_tested'])
-    account_data = build_data(['new_account', 'accounts_active', 'identities_active'])
+    account_data = build_data(['new_account'] +
+                              (['accounts_active',
+                                'identities_active',
+                                'accounts_paying'] if 'full_accounts' in request.GET else []))
 
     # Build cumulative stats from 'account_data'
     all_accounts = []

@@ -58,7 +58,10 @@ $(function() {
             {label: "All accounts",
              data: {{ account_data.all_accounts|jsonify }},
              yaxis: 2
-            },
+            }
+
+{% if 'full_accounts' in request.GET %}
+            ,
             {label: "Active accounts",
              data: {{ account_data.accounts_active|jsonify }},
              yaxis: 2
@@ -66,7 +69,12 @@ $(function() {
             {label: "Active identities",
              data: {{ account_data.identities_active|jsonify }},
              yaxis: 2
+            },
+            {label: "Paying accounts",
+             data: {{ account_data.accounts_paying|jsonify }},
+             yaxis: 2
             }
+{% endif %}
            ],
            { xaxis: { mode: "time",
                       ticks: 10 },

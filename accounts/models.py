@@ -1126,4 +1126,8 @@ def get_active_identity_count(since_when, until_when):
             .values('for_identity_id').distinct().count()
             )
 
+
+def get_paying_account_count():
+    return Account.objects.filter(subscription=SubscriptionType.PAID_UP, paid_until__gte=timezone.now()).count()
+
 import accounts.hooks
