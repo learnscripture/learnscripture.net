@@ -21,8 +21,9 @@ class DashboardTests(LiveServerTests):
     def setup_identity(self):
         ids = list(Identity.objects.all())
         driver = self.driver
-        driver.get(self.live_server_url + reverse('learn'))
+        driver.get(self.live_server_url + reverse('preferences'))
         self.wait_until_loaded('body')
+        self.set_preferences()
         # This should have created an Identity
         i = Identity.objects.exclude(id__in=[i.id for i in ids]).get()
         i.default_bible_version = BibleVersion.objects.get(slug='NET')
