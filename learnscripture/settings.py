@@ -37,11 +37,11 @@ if LIVEBOX:
         DATABASES = {
             'default': {
                 'ENGINE': 'django.db.backends.postgresql_psycopg2',
-                'NAME': secrets["LEARNSCRIPTURE_DB_NAME"],
-                'USER': secrets["LEARNSCRIPTURE_DB_USER"],
-                'PASSWORD': secrets["LEARNSCRIPTURE_DB_PASSWORD"],
+                'NAME': secrets["PRODUCTION_DB_NAME"],
+                'USER': secrets["PRODUCTION_DB_USER"],
+                'PASSWORD': secrets["PRODUCTION_DB_PASSWORD"],
                 'HOST': 'localhost',
-                'PORT': secrets["LEARNSCRIPTURE_DB_PORT"],
+                'PORT': secrets["PRODUCTION_DB_PORT"],
                 }
             }
         SECRET_KEY = secrets["PRODUCTION_SECRET_KEY"]
@@ -51,11 +51,11 @@ if LIVEBOX:
         DATABASES = {
             'default': {
                 'ENGINE': 'django.db.backends.postgresql_psycopg2',
-                'NAME': secrets["LEARNSCRIPTURE_STAGING_DB_NAME"],
-                'USER': secrets["LEARNSCRIPTURE_STAGING_DB_USER"],
-                'PASSWORD': secrets["LEARNSCRIPTURE_STAGING_DB_PASSWORD"],
+                'NAME': secrets["STAGING_DB_NAME"],
+                'USER': secrets["STAGING_DB_USER"],
+                'PASSWORD': secrets["STAGING_DB_PASSWORD"],
                 'HOST': 'localhost',
-                'PORT': secrets["LEARNSCRIPTURE_STAGING_DB_PORT"],
+                'PORT': secrets["STAGING_DB_PORT"],
                 }
             }
         SECRET_KEY = secrets["STAGING_SECRET_KEY"]
