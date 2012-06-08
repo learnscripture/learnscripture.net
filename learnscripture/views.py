@@ -91,15 +91,23 @@ def learn(request):
     return render(request, 'learnscripture/learn.html', c)
 
 
-@require_identity
 def preferences(request):
+    identity = getattr(request, 'identity', None)
     if request.method == "POST":
-        form = PreferencesForm(request.POST, instance=request.identity)
+        form = PreferencesForm(request.POST, instance=identity)
         if form.is_valid():
+            if identity is None:
+                # This little routine is needed so that
+                # we can start the identity in the standard
+                # way, yet, don't create an identity until
+                # they press the 'save' button.
+                identity = session.start_identity(request)
+                form = PreferencesForm(request.POST, instance=identity)
+
             form.save()
             return get_next(request, reverse('dashboard'))
     else:
-        form = PreferencesForm(instance=request.identity)
+        form = PreferencesForm(instance=identity)
     c = {'form':form,
          'title': u'Preferences',
          'hide_preferences_popup': True}
