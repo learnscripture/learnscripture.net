@@ -57,4 +57,4 @@ class PaypalDebugMiddleware(object):
             open(os.path.join(os.environ['HOME'],
                               'learnscripture-paypal-request-%s' %
                               datetime.now().isoformat()),
-                 'wb').write(request.body)
+                 'wb').write(request.META.get('CONTENT_TYPE', '') + '\n\n' + request.body)
