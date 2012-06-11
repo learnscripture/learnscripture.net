@@ -308,7 +308,11 @@ CACHES = {
         'LOCATION': 'unix:%s/memcached.sock' % HOME_DIR,
         'KEY_PREFIX': 'learnscripture.net' if PRODUCTION else 'staging.learnscripture.net'
     }
-} if LIVEBOX else {}
+} if LIVEBOX else {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        }
+}
 
 CACHE_PREFIX = 'ls1'
 
