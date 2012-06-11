@@ -21,6 +21,8 @@ HOME_DIR = os.environ['HOME']
 
 secrets = json.load(open(os.path.join(SRC_DIR, "config", "secrets.json")))
 
+# At least some passwords need to be bytes, not unicode objects
+secrets = dict([(k, s if not isinstance(s, unicode) else s.encode('ascii')) for k, s in secrets.items()])
 
 if LIVEBOX:
     p = os.path.dirname(os.path.abspath(__file__))
