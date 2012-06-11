@@ -3,7 +3,7 @@
 import socket
 import sys
 import os
-import simplejson
+import json
 
 hostname = socket.gethostname()
 DEVBOX = ('webfaction' not in hostname)
@@ -19,7 +19,7 @@ PROJECT_DIR = os.path.dirname(SRC_DIR)
 WEBAPP_DIR = os.path.dirname(PROJECT_DIR)
 HOME_DIR = os.environ['HOME']
 
-secrets = simplejson.load(open(os.path.join(SRC_DIR, "config", "secrets.json")))
+secrets = json.load(open(os.path.join(SRC_DIR, "config", "secrets.json")))
 
 
 if LIVEBOX:
