@@ -166,6 +166,7 @@ MIDDLEWARE_CLASSES = [
         (True, 'django.contrib.messages.middleware.MessageMiddleware'),
         (True, 'django.middleware.clickjacking.XFrameOptionsMiddleware'),
         (DEVBOX, 'learnscripture.middleware.DebugMiddleware'),
+        (DEBUG or STAGING, 'learnscripture.middleware.PaypalDebugMiddleware'),
         (True, 'learnscripture.middleware.IdentityMiddleware'),
         (True, 'pagination.middleware.PaginationMiddleware'),
         (True, 'raven.contrib.django.middleware.Sentry404CatchMiddleware'),

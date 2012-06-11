@@ -1,3 +1,9 @@
+from datetime import datetime
+import os
+import time
+
+from django.utils import timezone
+
 from app_metrics.utils import metric
 
 class IdentityMiddleware(object):
@@ -35,9 +41,6 @@ class DebugMiddleware(object):
             session.set_identity(request, Account.objects.get(username=request.GET['as']).identity)
 
         if 'now' in request.GET:
-            import time
-            from datetime import datetime
-            from django.utils import timezone
             now = time.strptime(request.GET['now'], "%Y-%m-%d %H:%M:%S")
             now_ts = time.mktime(now)
             now_dt = datetime.fromtimestamp(now_ts).replace(tzinfo=timezone.utc)
@@ -46,3 +49,12 @@ class DebugMiddleware(object):
             # We can't monkeypatch datetime, but we always use timezone.now so
             # monkeypatch that instead
             timezone.now = lambda: now_dt
+
+
+class PaypalDebugMiddleware(object):
+    def process_request(self, request):
+        if 'paypal/ipn/' in request.path:
+            open(os.path.join(os.environ['HOME'],
+                              'learnscripture-paypal-request-%s' %
+                              datetime.now().isoformat()),
+                 'wb').write(request.body)
