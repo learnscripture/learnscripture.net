@@ -1,12 +1,13 @@
 from django.conf.urls import patterns, include, url
 from django.conf import settings
 from django.contrib import admin
+from django.views.generic import RedirectView
 
 admin.autodiscover()
 
 urlpatterns = patterns('',
                        url(r'^$', 'learnscripture.views.home', name='home'),
-                       (r'^favicon\.ico/?$', 'django.views.generic.simple.redirect_to', {'url': '/static/img/favicon.png'}),
+                       (r'^favicon\.ico/?$', RedirectView.as_view(url='/static/img/favicon.png')),
                        url(r'^dashboard/$', 'learnscripture.views.dashboard', name='dashboard'),
                        url(r'^choose/$', 'learnscripture.views.choose', name='choose'),
                        url(r'^verse-set/(?P<slug>[^/]+)/$', 'learnscripture.views.view_verse_set',
@@ -45,7 +46,7 @@ urlpatterns = patterns('',
                        (r'^api/learnscripture/v1/', include('learnscripture.api.urls')),
                        (r'^jsi18n/$', 'django.views.i18n.javascript_catalog', {'packages': ('fiber',),}),
                        url(r'^admin/', include(admin.site.urls)),
-                       url(r'^robots.txt$',  'django.views.generic.simple.redirect_to', {'url': '/static/robots.txt'}),
+                       url(r'^robots.txt$', RedirectView.as_view(url='/static/robots.txt')),
 
                        (r'^paypal/ipn/', include('paypal.standard.ipn.urls')),
                        (r'^selectable/', include('selectable.urls')),
