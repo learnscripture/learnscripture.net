@@ -915,6 +915,14 @@ def subscribe(request):
         price.savings = (expected - price.amount_with_discount).quantize(Decimal('0.01'), rounding=ROUND_DOWN)
 
 
+    domain = Site.objects.get_current().domain
+    protocol = 'https' if request.is_secure() else 'http'
+
+    if getattr(settings, 'STAGING', False):
+        # Sometimes for staging site, we have a DB that has been dumped from production,
+        # but needs Site object updated. Stop here, or payment testing won't work.
+        assert domain.startswith('staging.')
+
     price_forms = []
     for currency, prices in price_groups:
 
@@ -925,8 +933,6 @@ def subscribe(request):
         for price in prices:
             decorate_with_discount(price)
             decorate_with_savings(price, shortest)
-            domain = Site.objects.get_current().domain
-            protocol = 'https' if request.is_secure() else 'http'
             amount = str(price.amount_with_discount)
             paypal_dict = {
                 "business": settings.PAYPAL_RECEIVER_EMAIL,
