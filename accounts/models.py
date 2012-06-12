@@ -167,6 +167,9 @@ class Account(models.Model):
         score_log = self.score_logs.create(points=points,
                                            reason=reason,
                                            accuracy=accuracy)
+        # Change cached object to reflect DB, which has been
+        # updated via a SQL UPDATE for max correctness.
+        self.total_score.points += points
         points_increase.send(sender=self,
                              previous_points=current_points,
                              points_added=score_log.points)
