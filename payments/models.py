@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import models
 from django.utils import timezone
 from paypal.standard.ipn.models import PayPalIPN
@@ -74,6 +76,15 @@ class Price(models.Model):
         return u"%s%s for %s" % (self.currency.symbol, self.amount, self.description)
 
 
+class Fund(models.Model):
+    name = models.CharField(max_length=255, help_text="e.g. 'church' or 'family'")
+    manager = models.ForeignKey(Account, related_name='funds_managed')
+    balance = models.DecimalField(decimal_places=2, max_digits=10, default=Decimal('0.00'))
+    members = models.ManyToManyField(Account, related_name='funds_available', blank=True)
+
+    def __unicode__(self):
+        return u"%s (%s)" % (self.name, self.manager.username)
+
 class PaymentManager(models.Manager):
     use_for_related_fields = True
 
@@ -83,14 +94,15 @@ class PaymentManager(models.Manager):
 
 class Payment(models.Model):
     amount = models.DecimalField(decimal_places=2, max_digits=10)
-    account = models.ForeignKey(Account, related_name='payments')
+    # A payment can go against a Fund or an Account, but not both.
+    account = models.ForeignKey(Account, null=True, blank=True, related_name='payments')
+    fund = models.ForeignKey(Fund, null=True, blank=True, related_name='payments')
     paypal_ipn = models.ForeignKey(PayPalIPN)
     created = models.DateTimeField()
 
     objects = PaymentManager()
 
     def __unicode__(self):
-        return u"<Payment: %s to %s>" % (self.amount, self.account)
-
+        return u"Payment: %s to %s" % (self.amount, self.account if self.account else u"fund '%s'" % self.fund)
 
 import payments.hooks
