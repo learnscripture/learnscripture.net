@@ -8,7 +8,7 @@ from django.views.decorators.vary import vary_on_headers
 from piston.emitters import Emitter
 from piston.resource import CHALLENGE
 from piston.resource import Resource as BaseResource
-from piston.utils import HttpStatusCode, MimerDataException, translate_mime
+from piston.utils import HttpStatusCode, MimerDataException, translate_mime, rc
 from piston.handler import typemapper
 
 class Resource(BaseResource):
