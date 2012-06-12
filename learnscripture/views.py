@@ -1175,3 +1175,22 @@ def group_select_list(request):
     return render(request, 'learnscripture/group_select_list.html',
                   {'groups': groups})
 
+
+@require_account
+def account_funds(request):
+    account = request.identity.account
+
+    funds = account.funds_managed.all()
+    return render(request, 'learnscripture/account_funds.html',
+                  {'title': 'Payment funds',
+                   'funds': funds
+                   })
+
+@require_account
+def add_account_fund(request):
+    pass
+
+@require_account
+def edit_account_fund(request, fund_id):
+    pass
+

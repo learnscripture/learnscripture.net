@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% load url from future %}
+
+{% block content %}
+
+<p>Payment funds allow you to pay for a group of people more easily. Anyone who
+belongs to the fund can use money put into the fund to pay their subscription
+fees when the time comes, without having to individually go through the payment
+process.
+</p>
+
+<h3>Your funds</h3>
+
+{% if funds %}
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Balance</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for fund in funds %}
+    <tr>
+      <td><a href="{% url 'edit_account_fund' fund.id %}">{{ fund.name }}</a></td>
+      <td>{{ fund.currency.symbol }}{{ fund.balance }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<p><a href="{% url 'add_account_fund' %}">Add another payment fund</a>.</p>
+
+{% else %}
+
+<p>You haven't created any payment funds. <a href="{% url 'add_account_fund' %}">Create a payment fund</a>.</p>
+
+{% endif %}
+
+
+<h3>Notes</h3>
+
+<ul>
+  <li>When using money from a payment fund, members only have the option to
+  renew for a whole year, not less.</li>
+  <li>Any money paid into the fund can be refunded on request, but this may take
+    up to one month to process.</li>
+</ul>
+
+{% endblock %}
