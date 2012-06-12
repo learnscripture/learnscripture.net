@@ -328,7 +328,7 @@ class VerseFind(BaseHandler):
                                  allow_searches=not passage_mode
                                  )
         except InvalidVerseReference as e:
-            return validation_error_response({'__all__': [e.message]})
+            return validation_error_response({'__all__': [e.args[0]]})
 
         retval = [r.__dict__ for r in results]
         for item in retval:
