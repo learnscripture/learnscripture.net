@@ -19,6 +19,7 @@ process.
     <tr>
       <th>Name</th>
       <th>Balance</th>
+      <th>Members</th>
     </tr>
   </thead>
   <tbody>
@@ -26,6 +27,9 @@ process.
     <tr>
       <td><a href="{% url 'edit_account_fund' fund.id %}">{{ fund.name }}</a></td>
       <td>{{ fund.currency.symbol }}{{ fund.balance }}</td>
+      <td>{% for m in fund.members.all %}{{ m.username }}{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      </td>
     </tr>
     {% endfor %}
   </tbody>
