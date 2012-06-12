@@ -5,7 +5,7 @@ var learnscripture = (function (learnscripture, $) {
 
     var fetchGroupListContent = function () {
         if (groupListContent === null) {
-            $.ajax({url: '/group-select-list/',
+            $.ajax({url: '/group-select-list/?format=json',
                     dataType: 'html',
                     type: 'GET',
                     async: false,

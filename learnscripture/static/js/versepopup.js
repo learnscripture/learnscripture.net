@@ -11,7 +11,7 @@ var learnscripture = (function (learnscripture, $) {
                     var ref = this.attributes['data-reference'].value;
                     var version = this.attributes['data-version'].value;
                     var content;
-                    $.ajax({url: '/api/learnscripture/v1/versefind/',
+                    $.ajax({url: '/api/learnscripture/v1/versefind/?format=json',
                             dataType: 'json',
                             type: 'GET',
                             async: false,

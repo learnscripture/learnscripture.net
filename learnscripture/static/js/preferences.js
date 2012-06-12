@@ -25,7 +25,7 @@ var learnscripture =
 
         var savePrefsClick = function (ev) {
             ev.preventDefault();
-            $.ajax({url: '/api/learnscripture/v1/setpreferences/',
+            $.ajax({url: '/api/learnscripture/v1/setpreferences/?format=json',
                     dataType: 'json',
                     type: 'POST',
                     data: $('#id-preferences-form form').serialize(),

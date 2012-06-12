@@ -17,7 +17,7 @@ var learnscripture = (function (learnscripture, $) {
                           }
                       });
             var id = this.attributes['data-notice-id'].value;
-            $.ajax({url: '/api/learnscripture/v1/deletenotice/',
+            $.ajax({url: '/api/learnscripture/v1/deletenotice/?format=json',
                     dataType: 'json',
                     type: 'POST',
                     data: {'id': id}

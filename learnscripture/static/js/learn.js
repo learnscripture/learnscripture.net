@@ -267,7 +267,7 @@ var learnscripture =
         // ========== Actions completed =============
 
         var readingComplete = function (callbackAfter) {
-            $.ajax({url: '/api/learnscripture/v1/actioncomplete/',
+            $.ajax({url: '/api/learnscripture/v1/actioncomplete/?format=json',
                     dataType: 'json',
                     type: 'POST',
                     data: {
@@ -297,7 +297,7 @@ var learnscripture =
             // Do some rounding  to avoid '99.9' and retain 3 s.f.
             accuracy = Math.round(accuracy * 1000) / 1000;
 
-            $.ajax({url: '/api/learnscripture/v1/actioncomplete/',
+            $.ajax({url: '/api/learnscripture/v1/actioncomplete/?format=json',
                     dataType: 'json',
                     type: 'POST',
                     data: {
@@ -1318,7 +1318,7 @@ var learnscripture =
         };
 
         var versionSelectChanged = function (ev) {
-            $.ajax({url: '/api/learnscripture/v1/changeversion/',
+            $.ajax({url: '/api/learnscripture/v1/changeversion/?format=json',
                     dataType: 'json',
                     type: 'POST',
                     data: {
@@ -1340,7 +1340,7 @@ var learnscripture =
 
         var skipVerse = function (ev) {
             ev.preventDefault();
-            $.ajax({url: '/api/learnscripture/v1/skipverse/',
+            $.ajax({url: '/api/learnscripture/v1/skipverse/?format=json',
                     dataType: 'json',
                     type: 'POST',
                     data: {
@@ -1355,7 +1355,7 @@ var learnscripture =
 
         var cancelLearning = function (ev) {
             ev.preventDefault();
-            $.ajax({url: '/api/learnscripture/v1/cancellearningverse/',
+            $.ajax({url: '/api/learnscripture/v1/cancellearningverse/?format=json',
                     dataType: 'json',
                     type: 'POST',
                     data: {
@@ -1371,7 +1371,7 @@ var learnscripture =
         var finishBtnClick = function (ev) {
             // Skip to end, which skips everything in between
             var verse = versesToLearn[maxVerseIndex];
-            $.ajax({url: '/api/learnscripture/v1/skipverse/',
+            $.ajax({url: '/api/learnscripture/v1/skipverse/?format=json',
                     dataType: 'json',
                     type: 'POST',
                     data: {
