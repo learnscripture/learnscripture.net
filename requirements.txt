@@ -5,6 +5,7 @@ django-fiber==0.9.6.2
 -e git+git://github.com/spookylukey/django-bootstrap-form.git@cee9d102c152240e4af07551b13755b53689dd36#egg=django-bootstrap-form
 django-pagination==1.0.7
 -e hg+ssh://hg@bitbucket.org/kmike/django-piston#egg=django-piston
+-e hg+ssh://hg@bitbucket.org/spookylukey/django-piston#egg=django-piston
 django-debug-toolbar
 python-memcached==1.48
 django-autoslug==1.5.0
