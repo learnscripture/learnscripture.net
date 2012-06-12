@@ -27,8 +27,8 @@ def send_unrecognised_payment_email(ipn_obj):
     mail.send_mail(subject, body, settings.SERVER_EMAIL, [settings.DEFAULT_FROM_EMAIL])
 
 
-def unrecognised_payment(ipn_obj, **kwargs):
-    send_unrecognised_payment_email(ipn_obj)
+def unrecognised_payment(sender, **kwargs):
+    send_unrecognised_payment_email(sender)
 
 
 def paypal_payment_received(sender, **kwargs):
