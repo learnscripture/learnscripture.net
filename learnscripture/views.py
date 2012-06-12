@@ -31,6 +31,7 @@ from bibleverses.forms import VerseSetForm
 from groups.forms import EditGroupForm
 from groups.models import Group
 from groups.signals import public_group_created
+from payments.forms import EditFundForm
 from payments.models import Price
 from payments.sign import sign_payment_info
 from scores.models import get_all_time_leaderboard, get_leaderboard_since, ScoreReason
@@ -1188,9 +1189,38 @@ def account_funds(request):
 
 @require_account
 def add_account_fund(request):
-    pass
+    return add_or_edit_account_fund(request)
+
 
 @require_account
 def edit_account_fund(request, fund_id):
-    pass
+    account = request.identity.account
+    fund = get_object_or_404(account.funds_managed.all(), id=fund_id)
+    return add_or_edit_account_fund(request, fund)
+
+
+def add_or_edit_account_fund(request, fund=None):
+    new_fund = fund is None
+    if request.method == 'POST':
+        form = EditFundForm(request.POST, instance=fund)
+        if form.is_valid():
+            fund = form.save(commit=False)
+            if new_fund:
+                fund.manager = request.identity.account
+            fund.save()
+            form.save_m2m()
+
+            if new_fund:
+                messages.info(request, u"Fund created, thanks.")
+            else:
+                messages.info(request, u"Fund details updated.")
+            return HttpResponseRedirect(reverse('account_funds'))
+    else:
+        form = EditFundForm(instance=fund)
+
+    return render(request, 'learnscripture/edit_account_fund.html',
+                  {'fund': fund,
+                   'form': form,
+                   'title': 'Add payment fund' if new_fund else 'Edit payment fund'
+                   })
 

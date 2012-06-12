@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% load url from future %}
+{% load bootstrap %}
+
+{% block content %}
+
+{% if fund %}
+<h2>Edit fund {{ fund.name }}</h2>
+{% endif %}
+
+<form action="" method="POST" id="id-form-edit-account-fund">
+{% csrf_token %}
+{{ form|bootstrap }}
+
+<div class="actions">
+  <input type="submit" name="save" value="Save" class="btn primary" />
+  <a href="{% url 'account_funds' %}" class="btn">Cancel</a>
+</div>
+</form>
+
+{% endblock %}
+
+{% block extracss %}
+<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/themes/ui-lightness/jquery-ui.css" type="text/css" />
+{{ form.media.css }}
+{% endblock %}
+
+{% block extrajs %}
+<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/jquery-ui.min.js"></script>
+{{ form.media.js }}
+{% if fund %}
+<script type="text/javascript">
+  $(document).ready(function() {
+    $('#id_currency').attr('disabled', 'disabled');
+  });
+</script>
+{% endif %}
+{% endblock %}
