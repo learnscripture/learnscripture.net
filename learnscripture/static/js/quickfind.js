@@ -234,7 +234,7 @@ var learnscripture =
             var handler = function (ev) {
                 var form = $(ev.target).closest('form');
                 ev.preventDefault();
-                $.ajax({url: '/api/learnscripture/v1/versefind/',
+                $.ajax({url: '/api/learnscripture/v1/versefind/?format=json',
                         dataType: 'json',
                         type: 'GET',
                         data: {

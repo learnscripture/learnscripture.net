@@ -56,7 +56,7 @@ var learnscripture = (function (learnscripture, $) {
 
     var signupBtnClick = function (ev) {
         ev.preventDefault();
-        $.ajax({url: '/api/learnscripture/v1/signup/',
+        $.ajax({url: '/api/learnscripture/v1/signup/?format=json',
                 dataType: 'json',
                 type: 'POST',
                 data: $('#id-signup-form form').serialize(),
@@ -89,7 +89,7 @@ var learnscripture = (function (learnscripture, $) {
         // form action is correct.
         $('#id-login-form form').attr('action', '/login/');
 
-        $.ajax({url: '/api/learnscripture/v1/login/',
+        $.ajax({url: '/api/learnscripture/v1/login/?format=json',
                 dataType: 'json',
                 async: false,
                 type: 'POST',
@@ -113,7 +113,7 @@ var learnscripture = (function (learnscripture, $) {
         // form action is correct.
         $('#id-login-form form').attr('action', '/password-reset/');
 
-        $.ajax({url: '/api/learnscripture/v1/resetpassword/',
+        $.ajax({url: '/api/learnscripture/v1/resetpassword/?format=json',
                 dataType: 'json',
                 async: false,
                 type: 'POST',
@@ -140,7 +140,7 @@ var learnscripture = (function (learnscripture, $) {
 
 
     var logoutBtnClick = function (ev) {
-        $.ajax({url: '/api/learnscripture/v1/logout/',
+        $.ajax({url: '/api/learnscripture/v1/logout/?format=json',
                 dataType: 'json',
                 type: 'POST',
                 success: function (data) {
