@@ -80,6 +80,7 @@ class Fund(models.Model):
     name = models.CharField(max_length=255, help_text="e.g. 'church' or 'family'")
     manager = models.ForeignKey(Account, related_name='funds_managed')
     balance = models.DecimalField(decimal_places=2, max_digits=10, default=Decimal('0.00'))
+    currency = models.ForeignKey(Currency)
     members = models.ManyToManyField(Account, related_name='funds_available', blank=True)
 
     def __unicode__(self):
