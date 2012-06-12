@@ -1181,7 +1181,7 @@ def group_select_list(request):
 def account_funds(request):
     account = request.identity.account
 
-    funds = account.funds_managed.all()
+    funds = account.funds_managed.all().order_by('name')
     return render(request, 'learnscripture/account_funds.html',
                   {'title': 'Payment funds',
                    'funds': funds
