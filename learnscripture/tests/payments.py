@@ -171,3 +171,22 @@ class PaymentTests(AccountTestMixin, TestCase):
 
         self.assertEqual(len(mail.outbox), 1)
         self.assertTrue('account is already paid up' in mail.outbox[0].body)
+
+
+class PriceTests(AccountTestMixin, TestCase):
+
+    fixtures = ['test_bible_versions.json', 'test_currencies.json', 'test_prices.json']
+
+    def test_current_prices(self):
+        prices_groups = Price.objects.current_prices(with_discount=Decimal('0.10'))
+        self.assertEqual(
+            [(currency.name, [(p.days, p.amount, p.amount_with_discount)
+                              for p in prices])
+             for currency, prices in prices_groups],
+            [(u'GBP',
+              [(93, Decimal('1.50'), Decimal('1.30')),
+               (366, Decimal('5.00'), Decimal('4.50'))]),
+             (u'USD',
+              [(93, Decimal('2.50'), Decimal('2.20')),
+               (366, Decimal('8.00'), Decimal('7.20'))])]
+            )
