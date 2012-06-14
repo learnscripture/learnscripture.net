@@ -5,7 +5,7 @@ from payments.models import Fund
 from accounts.lookups import AccountLookup
 
 
-class EditFundForm(forms.ModelForm):
+class AddFundForm(forms.ModelForm):
 
     members = selectable.forms.fields.AutoCompleteSelectMultipleField(
         lookup_class=AccountLookup,
@@ -28,4 +28,11 @@ class EditFundForm(forms.ModelForm):
         if self.instance.id is not None:
             # can't change currency after creating.
             self.instance.currency = Fund.objects.get(id=self.instance.id).currency
-        return super(EditFundForm, self).save(**kwargs)
+        return super(AddFundForm, self).save(**kwargs)
+
+
+class EditFundForm(AddFundForm):
+
+    class Meta:
+        model = Fund
+        fields = ('name', 'members')

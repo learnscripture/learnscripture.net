@@ -31,7 +31,7 @@ from bibleverses.forms import VerseSetForm
 from groups.forms import EditGroupForm
 from groups.models import Group
 from groups.signals import public_group_created
-from payments.forms import EditFundForm
+from payments.forms import EditFundForm, AddFundForm
 from payments.models import Price
 from payments.sign import sign_payment_info
 from scores.models import get_all_time_leaderboard, get_leaderboard_since, ScoreReason
@@ -1205,8 +1205,9 @@ def edit_account_fund(request, fund_id):
 
 def add_or_edit_account_fund(request, fund=None):
     new_fund = fund is None
+    form_class = AddFundForm if new_fund else EditFundForm
     if request.method == 'POST':
-        form = EditFundForm(request.POST, instance=fund)
+        form = form_class(request.POST, instance=fund)
         if form.is_valid():
             fund = form.save(commit=False)
             if new_fund:
@@ -1220,7 +1221,7 @@ def add_or_edit_account_fund(request, fund=None):
                 messages.info(request, u"Fund details updated.")
             return HttpResponseRedirect(reverse('account_funds'))
     else:
-        form = EditFundForm(instance=fund)
+        form = form_class(instance=fund)
 
     return render(request, 'learnscripture/edit_account_fund.html',
                   {'fund': fund,

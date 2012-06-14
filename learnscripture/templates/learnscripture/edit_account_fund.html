@@ -29,11 +29,4 @@
 {% block extrajs %}
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/jquery-ui.min.js"></script>
 {{ form.media.js }}
-{% if fund %}
-<script type="text/javascript">
-  $(document).ready(function() {
-    $('#id_currency').attr('disabled', 'disabled');
-  });
-</script>
-{% endif %}
 {% endblock %}
