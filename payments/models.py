@@ -86,6 +86,17 @@ class Price(models.Model):
     def __unicode__(self):
         return u"%s%s for %s" % (self.currency.symbol, self.amount, self.description)
 
+    def get_savings(self, relative_to):
+        """
+        Returns the savings this price has relative to another price
+        (assuming same currency). Works of 'amount_with_discount', not 'amount'
+        """
+        if self.days == relative_to.days:
+            return None
+        expected = relative_to.amount_with_discount * Decimal(1.0 * self.days / relative_to.days)
+        return (expected - self.amount_with_discount).quantize(Decimal('0.01'),
+                                                                rounding=ROUND_DOWN)
+
 
 class Fund(models.Model):
     name = models.CharField(max_length=255, help_text="e.g. 'church' or 'family'")
