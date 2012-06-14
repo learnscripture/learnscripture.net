@@ -905,19 +905,12 @@ def subscribe(request):
 
     discount = account.subscription_discount()
 
-    price_groups = Price.objects.current_prices()
+    price_groups = Price.objects.current_prices(with_discount=discount)
     currencies = sorted([currency for currency, prices in price_groups],
                          key=lambda currency: currency.name)
     c['currencies'] = currencies
     c['price_groups'] = price_groups
 
-
-    def decorate_with_discount(price):
-        a = price.amount
-        if discount != Decimal('0.00'):
-            a = (a - discount * a).quantize(Decimal('0.1'), rounding=ROUND_DOWN).quantize(Decimal('0.01'))
-            price.discounted = True
-        price.amount_with_discount = a
 
     def decorate_with_savings(price, relative_to):
         if price.days == relative_to.days:
@@ -943,7 +936,6 @@ def subscribe(request):
         shortest = sorted(prices, key=lambda p:p.days)[0]
 
         for price in prices:
-            decorate_with_discount(price)
             decorate_with_savings(price, shortest)
             amount = str(price.amount_with_discount)
             paypal_dict = {

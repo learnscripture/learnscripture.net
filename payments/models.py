@@ -1,4 +1,4 @@
-from decimal import Decimal
+from decimal import Decimal, ROUND_DOWN
 
 from django.db import models
 from django.utils import timezone
@@ -32,14 +32,25 @@ class Currency(models.Model):
 
 
 class PriceManager(models.Manager):
-    def current_prices(self):
+    def current_prices(self, with_discount=None):
         """
         Get a list of prices, as a list of (currency, [list of Price objects]) tuples
+
+        If 'with_discount' is provided (a fraction as a Decimal), each price object will have
+        an attribute 'amount_with_discount'. If 'with_discount' is not 0, the price
+        object will have price.discounted == True
         """
         qs = self.get_query_set().filter(active=True).order_by('valid_until').select_related('currency')
         d = {}
-        # Ordering means that most recent prices overwrite older ones
         for price in qs:
+            a = price.amount
+            if with_discount is not None and with_discount != Decimal('0.00'):
+                a = (a - with_discount * a).quantize(Decimal('0.1'), rounding=ROUND_DOWN).quantize(Decimal('0.01'))
+                price.discounted = True
+            price.amount_with_discount = a
+
+            # Ordering of queryset means that most recent prices overwrite older
+            # ones for the same currency/days combination.
             d[(price.currency.name, price.days)] = price
 
         d2 = {}
