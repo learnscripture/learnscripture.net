@@ -892,6 +892,19 @@ def subscription_paypal_dict(amount, account, price, url_start):
         }
 
 
+def paypal_url_start_for_request(request):
+    """
+    Returns the start of the URLs to be passed to PayPal
+    """
+    domain = Site.objects.get_current().domain
+    if getattr(settings, 'STAGING', False):
+        # Sometimes for staging site, we have a DB that has been dumped from production,
+        # but needs Site object updated. Stop here, or payment testing won't work.
+        assert domain.startswith('staging.')
+    protocol = 'https' if request.is_secure() else 'http'
+    return "%s://%s" % (protocol, domain)
+
+
 @require_account
 def subscribe(request):
     identity = request.identity
@@ -929,14 +942,7 @@ def subscribe(request):
                              key=lambda currency: currency.name)
     c['price_groups'] = price_groups
 
-    domain = Site.objects.get_current().domain
-    protocol = 'https' if request.is_secure() else 'http'
-    url_start = "%s://%s" % (protocol, domain)
-
-    if getattr(settings, 'STAGING', False):
-        # Sometimes for staging site, we have a DB that has been dumped from production,
-        # but needs Site object updated. Stop here, or payment testing won't work.
-        assert domain.startswith('staging.')
+    url_start = paypal_url_start_for_request(request)
 
     price_forms = []
     for currency, prices in price_groups:
