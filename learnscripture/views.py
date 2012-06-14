@@ -873,6 +873,25 @@ def get_well_learnt_verses(identity):
     return list(well_learnt)
 
 
+def subscription_paypal_dict(amount, account, price, url_start):
+    paypal_dict = {
+        "business": settings.PAYPAL_RECEIVER_EMAIL,
+        "amount": amount,
+        "item_name": u"%s subscription on LearnScripture.net" % price.description,
+        "invoice": "%s-%s" % (account.id,
+                              timezone.now()), # We don't need this, but must be unique
+        "notify_url": "%s%s" % (url_start, reverse('paypal-ipn')),
+        "return_url": "%s%s" % (url_start, reverse('pay_done')),
+        "cancel_return": "%s%s" % (url_start, reverse('pay_cancelled')),
+        "custom": sign_payment_info(dict(account=account.id,
+                                         amount=amount,
+                                         price=price.id)),
+        "currency_code": price.currency.name,
+        "no_note": "1",
+        "no_shipping": "1",
+        }
+
+
 @require_account
 def subscribe(request):
     identity = request.identity
@@ -912,6 +931,7 @@ def subscribe(request):
 
     domain = Site.objects.get_current().domain
     protocol = 'https' if request.is_secure() else 'http'
+    url_start = "%s://%s" % (protocol, domain)
 
     if getattr(settings, 'STAGING', False):
         # Sometimes for staging site, we have a DB that has been dumped from production,
@@ -927,23 +947,8 @@ def subscribe(request):
 
         for price in prices:
             price.savings = price.get_savings(shortest)
-            amount = str(price.amount_with_discount)
-            paypal_dict = {
-                "business": settings.PAYPAL_RECEIVER_EMAIL,
-                "amount": amount,
-                "item_name": u"%s subscription on LearnScripture.net" % price.description,
-                "invoice": "%s-%s" % (account.id,
-                                      timezone.now()), # We don't need this, but must be unique
-                "notify_url":  "%s://%s%s" % (protocol, domain, reverse('paypal-ipn')),
-                "return_url": "%s://%s%s" % (protocol, domain, reverse('pay_done')),
-                "cancel_return": "%s://%s%s" % (protocol, domain, reverse('pay_cancelled')),
-                "custom": sign_payment_info(dict(account=account.id,
-                                                 amount=amount,
-                                                 price=price.id)),
-                "currency_code": price.currency.name,
-                "no_note": "1",
-                "no_shipping": "1",
-                }
+            paypal_dict = subscription_paypal_dict(str(price.amount_with_discount),
+                                                   account, price, url_start)
             form = PayPalPaymentsForm(initial=paypal_dict)
             price_forms.append(("%s_%s" % (currency.name, price.id), form))
     c['PRODUCTION'] = settings.LIVEBOX and settings.PRODUCTION
