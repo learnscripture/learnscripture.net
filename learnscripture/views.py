@@ -1,6 +1,6 @@
 
 from datetime import timedelta
-from decimal import Decimal, ROUND_DOWN
+from decimal import Decimal
 import re
 
 from django.db import models
@@ -906,19 +906,9 @@ def subscribe(request):
     discount = account.subscription_discount()
 
     price_groups = Price.objects.current_prices(with_discount=discount)
-    currencies = sorted([currency for currency, prices in price_groups],
-                         key=lambda currency: currency.name)
-    c['currencies'] = currencies
+    c['currencies'] = sorted([currency for currency, prices in price_groups],
+                             key=lambda currency: currency.name)
     c['price_groups'] = price_groups
-
-
-    def decorate_with_savings(price, relative_to):
-        if price.days == relative_to.days:
-            price.savings = None
-            return
-        expected = relative_to.amount_with_discount * Decimal(1.0 * price.days / relative_to.days)
-        price.savings = (expected - price.amount_with_discount).quantize(Decimal('0.01'), rounding=ROUND_DOWN)
-
 
     domain = Site.objects.get_current().domain
     protocol = 'https' if request.is_secure() else 'http'
@@ -936,7 +926,7 @@ def subscribe(request):
         shortest = sorted(prices, key=lambda p:p.days)[0]
 
         for price in prices:
-            decorate_with_savings(price, shortest)
+            price.savings = price.get_savings(shortest)
             amount = str(price.amount_with_discount)
             paypal_dict = {
                 "business": settings.PAYPAL_RECEIVER_EMAIL,
