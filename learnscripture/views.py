@@ -1301,3 +1301,8 @@ def fund_pay_done(request):
 def fund_pay_cancelled(request):
     messages.warning(request, 'Payment cancelled.')
     return HttpResponseRedirect(reverse('account_funds'))
+
+
+def terms_of_service(request):
+    return render(request, 'learnscripture/terms_of_service.html',
+                  {'title': 'Terms of service'})

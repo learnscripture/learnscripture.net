@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% load rstify_tags %}
+
+{% block content %}
+
+{% filter rstify:"2" %}
+{% include "learnscripture/terms_of_service.rst" %}
+{% endfilter %}
+
+{% endblock %}
+
