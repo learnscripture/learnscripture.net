@@ -257,3 +257,7 @@ class FundTests(AccountTestMixin, TestCase):
         # Can't pay if we're out of funds.
         self.assertFalse(fund.can_pay_for(account))
 
+
+        # An email should be sent when the fund drops to this level
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn('dropped below', mail.outbox[0].body)
