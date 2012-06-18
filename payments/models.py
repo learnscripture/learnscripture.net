@@ -140,7 +140,8 @@ class Fund(models.Model):
                              created=timezone.now())
         # Avoid race conditions by only using UPDATE for this field
         Fund.objects.filter(id=self.id).update(balance=models.F('balance') + ipn_obj.mc_gross)
-        payments.tasks.send_fund_payment_received_email.apply_async([self.id, ipn_obj.id])
+        payments.tasks.send_fund_payment_received_email.apply_async([self.id, ipn_obj.id],
+                                                                    countdown=5)
 
     def get_price_object(self):
         return Price.objects.get_current(days=ONE_YEAR, currency=self.currency)
