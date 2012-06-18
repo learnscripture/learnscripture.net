@@ -874,7 +874,7 @@ def get_well_learnt_verses(identity):
 
 
 def subscription_paypal_dict(amount, account, price, url_start):
-    paypal_dict = {
+    return {
         "business": settings.PAYPAL_RECEIVER_EMAIL,
         "amount": amount,
         "item_name": u"%s subscription on LearnScripture.net" % price.description,
