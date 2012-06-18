@@ -25,3 +25,4 @@ django-app-metrics==0.4.0
 django-jsonfield==0.8.5
 sqlalchemy==0.7.7
 django-selectable==0.4.1
+django-rstify
