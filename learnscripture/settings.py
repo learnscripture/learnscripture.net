@@ -234,6 +234,7 @@ INSTALLED_APPS = [
     'djcelery',
     'app_metrics',
     'selectable',
+    'rstify',
 ]
 
 if DEBUG:

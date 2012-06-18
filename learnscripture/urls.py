@@ -48,6 +48,8 @@ urlpatterns = patterns('',
                        url(r'^edit-group/(.*)/$', 'learnscripture.views.edit_group', name='edit_group'),
                        url(r'^group-select-list/$', 'learnscripture.views.group_select_list', name='group_select_list'),
 
+                       url(r'terms-of-service/$', 'learnscripture.views.terms_of_service', name='terms_of_service'),
+
                        (r'^admin/fiber/', include('fiber.admin_urls')),
                        (r'^api/v1/', include('fiber.api.urls')),
                        (r'^api/learnscripture/v1/', include('learnscripture.api.urls')),
