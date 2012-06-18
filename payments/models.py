@@ -177,6 +177,7 @@ class Fund(models.Model):
         account.update_subscription_for_price(price)
         self.fundusedlog_set.create(account=account,
                                     amount=amount)
+        payments.tasks.check_fund_balance.apply_async([self.id], countdown=5)
 
 
 class FundUsedLog(models.Model):
