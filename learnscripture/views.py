@@ -902,7 +902,7 @@ def fund_paypal_dict(fund, url_start):
         "return_url": "%s%s" % (url_start, reverse('fund_pay_done')),
         "cancel_return": "%s%s" % (url_start, reverse('fund_pay_cancelled')),
         "custom": sign_payment_info(dict(fund=fund.id,
-                                         currency=fund.currency.id
+                                         currency=fund.currency.name
                                          )),
         "currency_code": fund.currency.name,
         "no_note": "1",
