@@ -244,6 +244,9 @@ class FundTests(AccountTestMixin, TestCase):
         # Test 'pay_for' updates account.paid_until
         fund.pay_for(account)
 
+        # Test we created a 'FundUsedLog'
+        self.assertEqual(fund.fundusedlog_set.count(), 1)
+
         # refresh
         fund = Fund.objects.get(id=fund.id)
         account = Account.objects.get(id=account.id)
