@@ -1,7 +1,10 @@
 from decimal import Decimal, ROUND_DOWN
 
+from django.contrib.sites.models import get_current_site
+from django.core import mail
 from django.db import models
 from django.utils import timezone
+from django.template import loader
 from paypal.standard.ipn.models import PayPalIPN
 
 from accounts.models import Account
@@ -108,6 +111,29 @@ class Fund(models.Model):
     def __unicode__(self):
         return u"%s (%s)" % (self.name, self.manager.username)
 
+    def save(self, **kwargs):
+        # We avoid updating 'balance' to avoid race conditions that could
+        # overwrite this field and effectively cancel an incoming payment
+
+        if self.id is None:
+            return super(Fund, self).save(**kwargs)
+        else:
+            update_fields = [f for f in self._meta.fields if
+                             f.name not in ('id', 'balance')]
+            update_kwargs = dict((f.attname, getattr(self, f.attname)) for
+                                 f in update_fields)
+            Fund.objects.filter(id=self.id).update(**update_kwargs)
+
+
+    def receive_payment(self, ipn_obj):
+        self.payments.create(amount=ipn_obj.mc_gross,
+                             paypal_ipn=ipn_obj,
+                             created=timezone.now())
+        # Avoid race conditions by only using UPDATE for this field
+        Fund.objects.filter(id=self.id).update(balance=models.F('balance') + ipn_obj.mc_gross)
+        send_fund_payment_received_email(self, ipn_obj)
+
+
 class PaymentManager(models.Manager):
     use_for_related_fields = True
 
@@ -127,5 +153,21 @@ class Payment(models.Model):
 
     def __unicode__(self):
         return u"Payment: %s to %s" % (self.amount, self.account if self.account else u"fund '%s'" % self.fund)
+
+
+def send_fund_payment_received_email(fund, payment):
+    from django.conf import settings
+    account = fund.manager
+    c = {
+        'site': get_current_site(None),
+        'payment': payment,
+        'account': account,
+        'fund': fund,
+        }
+
+    body = loader.render_to_string("learnscripture/fund_payment_received_email.txt", c)
+    subject = u"LearnScripture.net - payment received"
+    mail.send_mail(subject, body, settings.SERVER_EMAIL, [account.email])
+
 
 import payments.hooks
