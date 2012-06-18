@@ -26,7 +26,7 @@ process.
     {% for fund in funds %}
     <tr>
       <td><a href="{% url 'edit_account_fund' fund.id %}">{{ fund.name }}</a></td>
-      <td>{{ fund.currency.symbol }}{{ fund.balance }}</td>
+      <td>{{ fund.currency.symbol }}{{ fund.balance }} <a href="{% url 'topup_fund' fund.id %}">[add funds]</a></td>
       <td>{% for m in fund.members.all %}{{ m.username }}{% if not forloop.last %},{% endif %}
         {% endfor %}
       </td>
