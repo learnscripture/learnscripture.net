@@ -10,7 +10,6 @@
 {% else %}
   {% for fund in funds %}
   <div class="actionset">
-    <h3>Pay using ‘{{ fund.name }}’ fund</h3>
     <form action="" method="POST">
       {% csrf_token %}
       {% if fund.can_use %}
@@ -20,6 +19,7 @@
       <input type="submit" class="btn primary disabled" disabled name="usefund" value="Pay from fund">
       {% endif %}
     </form>
+    <h3>Pay using ‘{{ fund.name }}’ fund</h3>
     <p>
     {% if payment_overdue %}<b>Payment is due.</b>
     {% else %}Payment is due soon.
