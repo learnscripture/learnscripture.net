@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 from datetime import timedelta
+from decimal import Decimal
 
 from django.core.urlresolvers import reverse
 from django.test import TestCase
@@ -8,6 +9,7 @@ from django.utils import timezone
 
 from accounts.models import SubscriptionType, Account
 from bibleverses.models import VerseSet
+from payments.models import Currency
 from .base import LiveServerTests
 
 SUBSCRIPTION_NOT_DUE = "Your subscription is not due for renewal"
@@ -126,3 +128,36 @@ class SubscribeTests(LiveServerTests):
         self.assertNotIn(SUBSCRIPTION_NOT_DUE, driver.page_source)
         driver.find_element_by_css_selector('#id_currency_0').click()
         driver.find_element_by_css_selector('#id_price_GBP_3').click()
+
+    def test_pay_from_fund(self):
+        identity, account = self.create_account()
+
+        # Add some verses, to stop redirect to 'choose' page
+        vs1 = VerseSet.objects.get(name='Bible 101')
+        identity.add_verse_set(vs1)
+
+        # Create the fund
+        currency = Currency.objects.get(name='GBP')
+        fund = account.funds_managed.create(name='church',
+                                            currency=currency,
+                                            balance=Decimal('6.00'),
+                                            )
+        fund.members.add(account)
+
+        # Payment overdue:
+        # 100 > FREE_TRIAL_LENGTH_DAYS
+        account.date_joined = timezone.now() - timedelta(100)
+        account.save()
+        self.login(account)
+
+        driver = self.driver
+        driver.get(self.live_server_url + reverse('dashboard'))
+        self.wait_until_loaded('body')
+        self.assertTrue(driver.current_url.endswith(reverse('subscribe')))
+
+        self.assertIn("you can use that fund", driver.page_source)
+
+        driver.find_element_by_css_selector("[name=usefund]").click()
+        self.wait_until_loaded('body')
+        self.assertTrue(driver.current_url.endswith(reverse('dashboard')))
+

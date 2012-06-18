@@ -229,21 +229,30 @@ class Account(models.Model):
             return False
         return d < timezone.now()
 
+    def update_subscription_for_price(self, price):
+        if self.paid_until is None:
+            old_paid_until = self.date_joined + timedelta(FREE_TRIAL_LENGTH_DAYS)
+        else:
+            old_paid_until = self.paid_until
+
+        # We don't make people pay for the past if they take a gap from
+        # using the site, or downgraded to basic.
+        old_paid_until = max(old_paid_until, timezone.now())
+        new_paid_until = old_paid_until + timedelta(price.days)
+
+        # Update DB, avoiding race conditions
+        Account.objects.filter(id=self.id).update(subscription=SubscriptionType.PAID_UP,
+                                                  paid_until=new_paid_until)
+        # Also update this object to reflect changes
+        self.subscription = SubscriptionType.PAID_UP
+        self.paid_until = new_paid_until
+
     def receive_payment(self, price, ipn_obj):
         self.payments.create(amount=ipn_obj.mc_gross,
                              paypal_ipn=ipn_obj,
                              created=timezone.now())
         if self.payment_possible():
-            if self.paid_until is None:
-                old_paid_until = self.date_joined + timedelta(FREE_TRIAL_LENGTH_DAYS)
-            else:
-                old_paid_until = self.paid_until
-            new_paid_until = old_paid_until + timedelta(price.days)
-
-            Account.objects.filter(id=self.id).update(subscription=SubscriptionType.PAID_UP,
-                                                      paid_until=new_paid_until)
-            self.subscription = SubscriptionType.PAID_UP
-            self.paid_until = new_paid_until
+            self.update_subscription_for_price(price)
             send_payment_received_email(self, price, ipn_obj)
         else:
             send_payment_not_accepted_email(self, price, ipn_obj)

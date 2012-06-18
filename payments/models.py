@@ -1,4 +1,5 @@
 from decimal import Decimal, ROUND_DOWN
+import operator
 
 from django.contrib.sites.models import get_current_site
 from django.core import mail
@@ -8,6 +9,9 @@ from django.template import loader
 from paypal.standard.ipn.models import PayPalIPN
 
 from accounts.models import Account
+
+
+ONE_YEAR = 366 # cover leap years.
 
 
 class CurrencyManager(models.Manager):
@@ -46,12 +50,7 @@ class PriceManager(models.Manager):
         qs = self.get_query_set().filter(active=True).order_by('valid_until').select_related('currency')
         d = {}
         for price in qs:
-            a = price.amount
-            if with_discount is not None and with_discount != Decimal('0.00'):
-                a = (a - with_discount * a).quantize(Decimal('0.1'), rounding=ROUND_DOWN).quantize(Decimal('0.01'))
-                price.discounted = True
-            price.amount_with_discount = a
-
+            price.apply_discount(with_discount)
             # Ordering of queryset means that most recent prices overwrite older
             # ones for the same currency/days combination.
             d[(price.currency.name, price.days)] = price
@@ -67,6 +66,9 @@ class PriceManager(models.Manager):
 
     def usable(self):
         return self.get_query_set().filter(valid_until__gte=timezone.now())
+
+    def get_current(self, **kwargs):
+        return self.get_query_set().filter(**kwargs).order_by('-valid_until')[0]
 
 
 class Price(models.Model):
@@ -100,6 +102,16 @@ class Price(models.Model):
         return (expected - self.amount_with_discount).quantize(Decimal('0.01'),
                                                                 rounding=ROUND_DOWN)
 
+    def apply_discount(self, discount):
+        """
+        Adds 'amount_with_discount' attribute.
+        """
+        a = self.amount
+        if discount is not None and discount != Decimal('0.00'):
+            a = (a - discount * a).quantize(Decimal('0.1'), rounding=ROUND_DOWN).quantize(Decimal('0.01'))
+            self.discounted = True
+        self.amount_with_discount = a
+
 
 class Fund(models.Model):
     name = models.CharField(max_length=255, help_text="e.g. 'church' or 'family'")
@@ -132,6 +144,42 @@ class Fund(models.Model):
         # Avoid race conditions by only using UPDATE for this field
         Fund.objects.filter(id=self.id).update(balance=models.F('balance') + ipn_obj.mc_gross)
         send_fund_payment_received_email(self, ipn_obj)
+
+    def get_price_object(self):
+        return Price.objects.get_current(days=ONE_YEAR, currency=self.currency)
+
+    def price_for(self, account):
+        price = self.get_price_object()
+        price.apply_discount(self.overall_discount(account))
+        return price
+
+    def fund_discount(self):
+        member_count = self.members.count()
+        if member_count >= 10:
+            return Decimal('0.10')
+        elif member_count >= 50:
+            return Decimal('0.20')
+        else:
+            return Decimal('0.00')
+
+    def overall_discount(self, account):
+        return chain_discounts(account.subscription_discount(), self.fund_discount())
+
+    def can_pay_for(self, account):
+        if not self.members.filter(id=account.id).exists():
+            return False
+        return self.balance >= self.price_for(account).amount_with_discount
+
+    def pay_for(self, account):
+        assert self.can_pay_for(account)
+        price = self.price_for(account)
+        Fund.objects.filter(id=self.id).update(
+            balance=models.F('balance') - price.amount_with_discount)
+        account.update_subscription_for_price(price)
+
+
+def chain_discounts(*discounts):
+    return Decimal('1.00') - reduce(operator.mul, [Decimal('1.00') - d for d in discounts])
 
 
 class PaymentManager(models.Manager):
