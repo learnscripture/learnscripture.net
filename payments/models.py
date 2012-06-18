@@ -120,7 +120,7 @@ class Fund(models.Model):
         else:
             update_fields = [f for f in self._meta.fields if
                              f.name not in ('id', 'balance')]
-            update_kwargs = dict((f.attname, getattr(self, f.attname)) for
+            update_kwargs = dict((f.name, getattr(self, f.attname)) for
                                  f in update_fields)
             Fund.objects.filter(id=self.id).update(**update_kwargs)
 
