@@ -173,9 +173,22 @@ class Fund(models.Model):
     def pay_for(self, account):
         assert self.can_pay_for(account)
         price = self.price_for(account)
+        amount = price.amount_with_discount
         Fund.objects.filter(id=self.id).update(
-            balance=models.F('balance') - price.amount_with_discount)
+            balance=models.F('balance') - amount)
         account.update_subscription_for_price(price)
+        self.fundusedlog_set.create(account=account,
+                                    amount=amount)
+
+
+class FundUsedLog(models.Model):
+    fund = models.ForeignKey(Fund)
+    account = models.ForeignKey(Account)
+    amount = models.DecimalField(decimal_places=2, max_digits=10)
+    created = models.DateTimeField(default=timezone.now)
+
+    def __unicode__(self):
+        return u"%s used by %s from %s" % (self.amount, self.account.username, self.fund)
 
 
 def chain_discounts(*discounts):
