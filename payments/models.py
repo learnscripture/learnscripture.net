@@ -1,15 +1,12 @@
 from decimal import Decimal, ROUND_DOWN
 import operator
 
-from django.contrib.sites.models import get_current_site
-from django.core import mail
 from django.db import models
 from django.utils import timezone
-from django.template import loader
 from paypal.standard.ipn.models import PayPalIPN
 
 from accounts.models import Account
-
+import payments.tasks
 
 ONE_YEAR = 366 # cover leap years.
 
@@ -143,7 +140,7 @@ class Fund(models.Model):
                              created=timezone.now())
         # Avoid race conditions by only using UPDATE for this field
         Fund.objects.filter(id=self.id).update(balance=models.F('balance') + ipn_obj.mc_gross)
-        send_fund_payment_received_email(self, ipn_obj)
+        payments.tasks.send_fund_payment_received_email.apply_async([self.id, ipn_obj.id])
 
     def get_price_object(self):
         return Price.objects.get_current(days=ONE_YEAR, currency=self.currency)
@@ -214,21 +211,6 @@ class Payment(models.Model):
 
     def __unicode__(self):
         return u"Payment: %s to %s" % (self.amount, self.account if self.account else u"fund '%s'" % self.fund)
-
-
-def send_fund_payment_received_email(fund, payment):
-    from django.conf import settings
-    account = fund.manager
-    c = {
-        'site': get_current_site(None),
-        'payment': payment,
-        'account': account,
-        'fund': fund,
-        }
-
-    body = loader.render_to_string("learnscripture/fund_payment_received_email.txt", c)
-    subject = u"LearnScripture.net - payment received"
-    mail.send_mail(subject, body, settings.SERVER_EMAIL, [account.email])
 
 
 import payments.hooks
