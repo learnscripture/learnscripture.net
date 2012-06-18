@@ -217,3 +217,40 @@ class PriceTests(AccountTestMixin, TestCase):
               [(93, Decimal('2.50'), Decimal('2.20')),
                (366, Decimal('8.00'), Decimal('7.20'))])]
             )
+
+
+class FundTests(AccountTestMixin, TestCase):
+
+    fixtures = ['test_bible_versions.json', 'test_currencies.json', 'test_prices.json']
+
+    def test_pay_for(self):
+        identity, account = self.create_account()
+        account.date_joined = timezone.now() - timedelta(1000)
+        account.save()
+
+        self.assertTrue(account.payment_possible())
+
+        currency = Currency.objects.get(name='GBP')
+        fund = account.funds_managed.create(name='church',
+                                            currency=currency,
+                                            balance=Decimal('6.00'))
+
+        # Can't pay for account if account is not a member
+        self.assertFalse(fund.can_pay_for(account))
+
+        fund.members.add(account)
+        self.assertTrue(fund.can_pay_for(account))
+
+        # Test 'pay_for' updates account.paid_until
+        fund.pay_for(account)
+
+        # refresh
+        fund = Fund.objects.get(id=fund.id)
+        account = Account.objects.get(id=account.id)
+
+        self.assertEqual(fund.balance, Decimal('1.00'))
+        self.assertFalse(account.payment_possible())
+
+        # Can't pay if we're out of funds.
+        self.assertFalse(fund.can_pay_for(account))
+

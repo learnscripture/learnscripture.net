@@ -32,7 +32,7 @@ from groups.forms import EditGroupForm
 from groups.models import Group
 from groups.signals import public_group_created
 from payments.forms import EditFundForm, AddFundForm
-from payments.models import Price
+from payments.models import Price, Fund
 from payments.sign import sign_payment_info
 from scores.models import get_all_time_leaderboard, get_leaderboard_since, ScoreReason
 
@@ -946,15 +946,37 @@ def subscribe(request):
             c['started_verses_count'] = get_started_verses_count(identity)
             c['well_learnt_verses'] = natural_list(get_well_learnt_verses(identity))
 
+        # Process 'downgrade'
         if request.method == 'POST' and 'downgrade' in request.POST:
             if account.subscription != SubscriptionType.BASIC:
                 Account.objects.filter(id=account.id).update(subscription=SubscriptionType.BASIC)
                 messages.info(request, "Account downgraded to 'Basic'")
             return HttpResponseRedirect(reverse('dashboard'))
 
+    ## Process 'use fund'
+    if request.method == 'POST' and 'usefund' in request.POST:
+        try:
+            fund = account.funds_available.get(id=int(request.POST['fund']))
+        except (Fund.DoesNotExist, ValueError, KeyError):
+            pass # ignore request
+        else:
+            if fund.can_pay_for(account):
+                fund.pay_for(account)
+                messages.info(request, "Paid for subscription from fund, thanks.")
+                return HttpResponseRedirect(reverse('dashboard'))
+            else:
+                pass # Can't pay for, ignore request.
+
+    # Funds
+    funds = account.funds_available.all()
+    for fund in funds:
+        fund.can_use = fund.can_pay_for(account)
+    c['funds'] = funds
 
     discount = account.subscription_discount()
 
+
+    # Currencies and prices available
     price_groups = Price.objects.current_prices(with_discount=discount)
     c['currencies'] = sorted([currency for currency, prices in price_groups],
                              key=lambda currency: currency.name)
