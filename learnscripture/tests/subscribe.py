@@ -76,7 +76,7 @@ class SubscribeTests(LiveServerTests):
         self.assertTrue(driver.current_url.endswith(reverse('subscribe')))
 
         # Check for text saying 'you've learned....'
-        self.assertIn(u'You could probably recite John 3:16 and John 14:6 right now', driver.page_source)
+        self.assertIn(u'You could probably recite <strong>John 3:16 and John 14:6</strong> right now', driver.page_source)
 
     def test_payment_allowed_if_close_to_end_of_paid_period(self):
         identity, account = self.create_account()
