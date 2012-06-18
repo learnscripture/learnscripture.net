@@ -1,7 +1,9 @@
-{% extends "base.html" %}
-{% load bootstrap %}
+{% extends "base_twocol.html" %}
 
-{% block content %}
+{% load bootstrap %}
+{% load url from future %}
+
+{% block leftcolumn %}
 
 <form action="" method="POST">
 {% csrf_token %}
@@ -30,5 +32,15 @@
 </div>
 
 </form>
+
+{% endblock %}
+
+{% block rightcolumn %}
+<h3>See also</h3>
+
+<ul>
+  <li><a href="{% url 'preferences' %}" class="preferences-link">Preferences</a></li>
+  <li><a href="{% url 'account_funds' %}">Payment funds</a></li>
+</ul>
 
 {% endblock %}
