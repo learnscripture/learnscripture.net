@@ -878,8 +878,8 @@ def subscription_paypal_dict(amount, account, price, url_start):
         "business": settings.PAYPAL_RECEIVER_EMAIL,
         "amount": amount,
         "item_name": u"%s subscription on LearnScripture.net" % price.description,
-        "invoice": "%s-%s" % (account.id,
-                              timezone.now()), # We don't need this, but must be unique
+        "invoice": "account-%s-%s" % (account.id,
+                                      timezone.now()), # We don't need this, but must be unique
         "notify_url": "%s%s" % (url_start, reverse('paypal-ipn')),
         "return_url": "%s%s" % (url_start, reverse('pay_done')),
         "cancel_return": "%s%s" % (url_start, reverse('pay_cancelled')),
@@ -887,6 +887,24 @@ def subscription_paypal_dict(amount, account, price, url_start):
                                          amount=amount,
                                          price=price.id)),
         "currency_code": price.currency.name,
+        "no_note": "1",
+        "no_shipping": "1",
+        }
+
+
+def fund_paypal_dict(fund, url_start):
+    return {
+        "business": settings.PAYPAL_RECEIVER_EMAIL,
+        "item_name": u"%s fund topup on LearnScripture.net" % fund.name,
+        "invoice": "fund-%s-%s" % (fund.id,
+                                   timezone.now()), # We don't need this, but must be unique
+        "notify_url": "%s%s" % (url_start, reverse('paypal-ipn')),
+        "return_url": "%s%s" % (url_start, reverse('fund_pay_done')),
+        "cancel_return": "%s%s" % (url_start, reverse('fund_pay_cancelled')),
+        "custom": sign_payment_info(dict(fund=fund.id,
+                                         currency=fund.currency.id
+                                         )),
+        "currency_code": fund.currency.name,
         "no_note": "1",
         "no_shipping": "1",
         }
@@ -1229,3 +1247,35 @@ def add_or_edit_account_fund(request, fund=None):
                    'title': 'Add payment fund' if new_fund else 'Edit payment fund'
                    })
 
+
+@require_account
+def topup_fund(request, fund_id=None):
+    from paypal.standard.conf import POSTBACK_ENDPOINT, SANDBOX_POSTBACK_ENDPOINT
+    account = request.identity.account
+    fund = get_object_or_404(account.funds_managed.all(), id=fund_id)
+    form = PayPalPaymentsForm(initial=fund_paypal_dict(fund,
+                                                       paypal_url_start_for_request(request)))
+    PRODUCTION = settings.LIVEBOX and settings.PRODUCTION
+
+    c = {
+        'title': 'Add money to fund',
+        'fund': fund,
+        # Minimum is price for 1 year
+        'minimum': Price.objects.filter(currency=fund.currency,
+                                        days__gte=365).order_by('amount')[0].amount,
+        'form': form,
+        'POSTBACK_ENDPOINT': POSTBACK_ENDPOINT if PRODUCTION else SANDBOX_POSTBACK_ENDPOINT,
+        }
+    return render(request, 'learnscripture/topup_fund.html', c)
+
+
+@csrf_exempt
+def fund_pay_done(request):
+    messages.info(request, 'Payment received, thank you! It may take a moment for our records to update.')
+    return HttpResponseRedirect(reverse('account_funds'))
+
+
+@csrf_exempt
+def fund_pay_cancelled(request):
+    messages.warning(request, 'Payment cancelled.')
+    return HttpResponseRedirect(reverse('account_funds'))
