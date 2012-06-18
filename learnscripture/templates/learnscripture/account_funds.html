@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% load url from future %}
+{% load math_utils %}
 
 {% block content %}
 
@@ -9,6 +10,10 @@ belongs to the fund can use money put into the fund to pay their subscription
 fees when the time comes, without having to individually go through the payment
 process.
 </p>
+
+<p>Funds with 10 or more members receive a 10% discount. Funds with 50 or more
+members receive a 20% discount. (These discounts are on top of any individual
+discounts the members may have).</p>
 
 <h3>Your funds</h3>
 
@@ -20,6 +25,7 @@ process.
       <th>Name</th>
       <th>Balance</th>
       <th>Members</th>
+      <th>Discount</th>
     </tr>
   </thead>
   <tbody>
@@ -30,6 +36,9 @@ process.
       <td>{% for m in fund.members.all %}{{ m.username }}{% if not forloop.last %},{% endif %}
         {% endfor %}
       </td>
+      <td>{% if fund.fund_discount > 0 %}{{ fund.fund_discount|percent }}
+        {% else %}None
+        {% endif %}</td>
     </tr>
     {% endfor %}
   </tbody>
