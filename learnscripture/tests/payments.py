@@ -11,7 +11,7 @@ from paypal.standard.ipn.models import PayPalIPN
 from .base import AccountTestMixin
 from accounts.models import SubscriptionType, Account
 from payments.hooks import paypal_payment_received
-from payments.models import Price
+from payments.models import Price, Currency, Fund
 from payments.sign import sign_payment_info
 
 class IpnMock(object):
@@ -171,6 +171,33 @@ class PaymentTests(AccountTestMixin, TestCase):
 
         self.assertEqual(len(mail.outbox), 1)
         self.assertTrue('account is already paid up' in mail.outbox[0].body)
+
+    def test_add_to_payment_fund(self):
+        currency = Currency.objects.get(name='GBP')
+        fund = self.account.funds_managed.create(name='my church',
+                                                 currency=currency)
+        ipn_1 = PayPalIPN.objects.create(mc_gross=Decimal('20.00'),
+                                         mc_currency=currency.name,
+                                         custom=sign_payment_info(dict(fund=fund.id,
+                                                                       currency=fund.currency.name)),
+                                         ipaddress="127.0.0.1",
+                                         payment_status='Completed',
+                                         )
+
+        self.assertEqual(len(mail.outbox), 0)
+
+        paypal_payment_received(ipn_1)
+
+        # refresh
+        fund = Fund.objects.get(id=fund.id)
+        # Check payments
+        self.assertEqual(fund.payments.count(), 1)
+        self.assertEqual(fund.balance, Decimal('20.00'))
+        # Check emails
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn('Thank you for your payment', mail.outbox[0].body)
+        self.assertIn(fund.name, mail.outbox[0].body)
+        self.assertIn('20.00', mail.outbox[0].body)
 
 
 class PriceTests(AccountTestMixin, TestCase):
