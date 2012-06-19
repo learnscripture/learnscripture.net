@@ -158,6 +158,9 @@ class Account(models.Model):
         if not self.scoring_enabled:
             return []
 
+        if len(score_log_ids) == 0:
+            return []
+
         points = self.score_logs.filter(id__in=score_log_ids).aggregate(models.Sum('points'))['points__sum'] * Scores.REVISION_COMPLETE_BONUS_FACTOR
         return [self.add_points(points, ScoreReason.REVISION_COMPLETED)]
 
