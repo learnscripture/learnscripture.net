@@ -6,7 +6,6 @@ from django.db import models
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.core.urlresolvers import reverse
 from django.utils import timezone
-from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from jsonfield import JSONField
 
@@ -15,6 +14,7 @@ from awards.utils import award_link
 from groups.utils import group_link
 from learnscripture.datastructures import make_class_enum
 from learnscripture.templatetags.account_utils import account_link
+from learnscripture.utils.html import html_fragment
 
 
 EVENTSTREAM_CUTOFF_DAYS = 3 # just 3 days of events
@@ -97,12 +97,10 @@ class VerseSetCreatedEvent(EventLogic):
     def __init__(self, verse_set=None):
         super(VerseSetCreatedEvent, self).__init__(verse_set_id=verse_set.id,
                                                    account=verse_set.created_by)
-        self.event.message_html = (
-            'created new verse set <a href="%s">%s</a>' %
-            tuple(map(escape,
-                      [reverse('view_verse_set', args=(verse_set.slug,)),
-                       verse_set.name,
-                       ]))
+        self.event.message_html = html_fragment(
+            'created new verse set <a href="%s">%s</a>',
+            reverse('view_verse_set', args=(verse_set.slug,)),
+            verse_set.name
             )
 
 
@@ -113,12 +111,10 @@ class StartedLearningVerseSetEvent(EventLogic):
     def __init__(self, verse_set=None, chosen_by=None):
         super(StartedLearningVerseSetEvent, self).__init__(verse_set_id=verse_set.id,
                                                            account=chosen_by)
-        self.event.message_html = (
-            'started learning <a href="%s">%s</a>' %
-            tuple(map(escape,
-                      [reverse('view_verse_set', args=(verse_set.slug,)),
-                       verse_set.name,
-                       ]))
+        self.event.message_html = html_fragment(
+            'started learning <a href="%s">%s</a>',
+            reverse('view_verse_set', args=(verse_set.slug,)),
+            verse_set.name
             )
 
 
@@ -126,8 +122,8 @@ class PointsMilestoneEvent(EventLogic):
     def __init__(self, account=None, points=None):
         super(PointsMilestoneEvent, self).__init__(account=account,
                                                    points=points)
-        self.event.message_html = (
-            'reached %s points' % escape(intcomma(points))
+        self.event.message_html = html_fragment(
+            'reached %s points', intcomma(points)
             )
 
 
@@ -135,8 +131,8 @@ class VersesStartedMilestoneEvent(EventLogic):
     def __init__(self, account=None, verses_started=None):
         super(VersesStartedMilestoneEvent, self).__init__(account=account,
                                                           verses_started=verses_started)
-        self.event.message_html = (
-            'reached %s verses started' % escape(intcomma(verses_started))
+        self.event.message_html = html_fragment(
+            'reached %s verses started', intcomma(verses_started)
             )
 
 
@@ -146,7 +142,9 @@ class GroupJoinedEvent(EventLogic):
         super(GroupJoinedEvent, self).__init__(account=account,
                                                group_id=group.id)
 
-        self.event.message_html = u"joined group %s" % group_link(group)
+        self.event.message_html = html_fragment(
+            "joined group %s", group_link(group)
+            )
 
 
 class GroupCreatedEvent(EventLogic):
@@ -154,7 +152,9 @@ class GroupCreatedEvent(EventLogic):
     def __init__(self, account=None, group=None):
         super(GroupCreatedEvent, self).__init__(account=account,
                                                 group_id=group.id)
-        self.event.message_html = u"created group %s" % group_link(group)
+        self.event.message_html = html_fragment(
+            u"created group %s", group_link(group)
+            )
 
 
 
