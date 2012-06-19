@@ -1,19 +1,19 @@
 from django.core.urlresolvers import reverse
 from django.template import Library
-from django.utils.html import escape
-from django.utils.safestring import mark_safe
+
+from learnscripture.utils.html import html_fragment
 
 register = Library()
 
+@register.filter
 def account_link(account):
-    return mark_safe("""<a href="%s" title="%s %s">%s</a>""" % (
-            escape(reverse('user_stats', args=(account.username,))),
-            escape(account.first_name),
-            escape(account.last_name),
-            escape(account.username),
-            ))
+    return html_fragment('<a href="%s" title="%s %s">%s</a>',
+                         reverse('user_stats', args=(account.username,)),
+                         account.first_name,
+                         account.last_name,
+                         account.username,
+                         )
 
 from groups.utils import group_link
 
-register.filter('account_link', account_link)
 register.filter('group_link', group_link)

@@ -2,13 +2,12 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils import timezone
 from django.utils.functional import cached_property
-from django.utils.html import escape
-from django.utils.safestring import mark_safe
 
 from accounts.models import Account, SubscriptionType
 from awards.signals import new_award
 from scores.models import ScoreReason
 from learnscripture.datastructures import make_class_enum
+from learnscripture.utils.html import html_fragment
 
 # In this module we have:
 #
@@ -314,20 +313,20 @@ class RecruiterAward(CountBasedAward):
     def full_description(self):
         url = reverse('referral_program')
         if self.level is AnyLevel:
-            return mark_safe(u"Awarded for getting other people to sign up using our "
-                             "<a href='%s'>referral program</a>. "
-                             "This award is actually worth money! (If referrals become "
-                             "paying members, that is). "
-                             "Level 1 is for one referral, and is worth 20,000 points." %
-                             escape(url))
+            return html_fragment(u"Awarded for getting other people to sign up using our "
+                                 "<a href='%s'>referral program</a>. "
+                                 "This award is actually worth money! (If referrals become "
+                                 "paying members, that is). "
+                                 "Level 1 is for one referral, and is worth 20,000 points.",
+                                 url)
         elif self.count == 1:
-            return mark_safe(u"Got one person to sign up to LearnScripture.net "
-                             "through our <a href='%s'>referral program</a>" %
-                             escape(url))
+            return html_fragment(u"Got one person to sign up to LearnScripture.net "
+                                 "through our <a href='%s'>referral program</a>",
+                                 url)
         else:
-            return mark_safe(u"Got %d people to sign up to LearnScripture.net "
-                             "through our <a href='%s'>referral program</a>" %
-                             (self.count, escape(url)))
+            return html_fragment(u"Got %d people to sign up to LearnScripture.net "
+                                 "through our <a href='%s'>referral program</a>",
+                                 self.count, url)
 
 
 class HackerAward(SingleLevelAward):
@@ -344,9 +343,9 @@ class ReigningWeeklyChampion(SingleLevelAward):
     def full_description(self):
         url = reverse('leaderboard') + "?thisweek"
         if self.level is AnyLevel:
-            return mark_safe(u'Awarded to the user who is currently at the top of the <a href="%s">weekly leaderboard</a>.' % url)
+            return html_fragment(u'Awarded to the user who is currently at the top of the <a href="%s">weekly leaderboard</a>.', url)
         else:
-            return mark_safe(u'Currently at the top of the <a href="%s">weekly leaderboard</a>.' % url)
+            return html_fragment(u'Currently at the top of the <a href="%s">weekly leaderboard</a>.', url)
 
 
 class TimeBasedAward(MultiLevelPointsMixin, AwardLogic):
@@ -409,12 +408,13 @@ class WeeklyChampion(TimeBasedAward):
     def full_description(self):
         url = reverse('leaderboard') + "?thisweek"
         if self.level is AnyLevel:
-            return mark_safe(u'Awarded to all users who have reached the top of the <a href="%s">weekly leaderboard</a>.  Higher levels are achieved by staying there longer, up to level 9 if you stay there for a year.' % url)
+            return html_fragment(u'Awarded to all users who have reached the top of the <a href="%s">weekly leaderboard</a>.  Higher levels are achieved by staying there longer, up to level 9 if you stay there for a year.', url)
         else:
-            d = u'Reached the top of the <a href="%s">weekly leaderboard</a>' % url
+            d = html_fragment('Reached the top of the <a href="%s">weekly leaderboard</a>', url)
             if self.level > 1:
-                d = d + ", and stayed there for at least %s" % self.FRIENDLY_DAYS[self.level]
-            return mark_safe(d)
+                d = d + html_fragment(", and stayed there for at least %s",
+                                      self.FRIENDLY_DAYS[self.level])
+            return d
 
 
 class AddictAward(SingleLevelAward):
