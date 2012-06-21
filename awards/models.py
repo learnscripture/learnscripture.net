@@ -37,6 +37,7 @@ class AnyLevel(object):
         return 'any'
 AnyLevel = AnyLevel()
 
+
 class AwardLogic(object):
     # Abstract base class for all classes that define behaviour for the types of
     # awards listed in AwardType
@@ -109,6 +110,7 @@ class AwardLogic(object):
         """
         return Award.objects.filter(award_type=self.award_type).aggregate(models.Max('level'))['level__max']
 
+
 class classproperty(property):
     def __get__(self, cls, owner):
         return self.fget.__get__(None, owner)()
@@ -120,6 +122,7 @@ class MultiLevelPointsMixin(object):
             return self.POINTS[self.level]
         else:
             return 0
+
 
 class CountBasedAward(MultiLevelPointsMixin, AwardLogic):
     """
@@ -211,7 +214,7 @@ class StudentAward(LearningAward):
 
     def full_description(self):
         if self.level is AnyLevel:
-            return "Awarded for starting to learn verses. Level 1 is for 1 verse, "\
+            return u"Awarded for starting to learn verses. Level 1 is for 1 verse, "\
                 "going up to level 9 for the whole Bible."
         elif self.level == 1:
             return u"Learning at least one verse"
@@ -226,7 +229,7 @@ class MasterAward(LearningAward):
 
     def full_description(self):
         if self.level is AnyLevel:
-            return "Awarded for fully learning verses (5 stars). This takes about "\
+            return u"Awarded for fully learning verses (5 stars). This takes about "\
                 "a year, to make sure verses are really in there for good! "\
                 "Level 1 is for 1 verse, "\
                 "going up to level 9 for the whole Bible."
@@ -250,7 +253,7 @@ class SharerAward(CountBasedAward):
 
     def full_description(self):
         if self.level is AnyLevel:
-            return "Awarded for creating public verse sets (selections)."\
+            return u"Awarded for creating public verse sets (selections)."\
                 " Levels go from 1 for 1 verse set, to level 5 for 20 verse sets."
         elif self.count == 1:
             return u"Created a public selection verse set"
@@ -269,10 +272,9 @@ class TrendSetterAward(CountBasedAward):
 
     POINTS = dict((k, v*500) for k, v in COUNTS.items())
 
-
     def full_description(self):
         if self.level is AnyLevel:
-            return "Awarded for creating verse sets that other people actually use."\
+            return u"Awarded for creating verse sets that other people actually use."\
                 " Level 1 is given when 5 other people are using one of your verse sets."
 
         return u"Verse sets created by this user have been used by others at least %d times" % self.count
@@ -287,7 +289,7 @@ class AceAward(CountBasedAward):
 
     def full_description(self):
         if self.level is AnyLevel:
-            return "Awarded for getting 100% in a test. Level 1 is for getting it once, "\
+            return u"Awarded for getting 100% in a test. Level 1 is for getting it once, "\
                 "level 2 if you do it twice in a row, level 3 for 4 times in a row, "\
                 "level 4 for 8 times in a row etc."
 
@@ -406,13 +408,13 @@ class WeeklyChampion(TimeBasedAward):
         }
 
     def full_description(self):
-        url = reverse('leaderboard') + "?thisweek"
+        url = reverse('leaderboard') + u"?thisweek"
         if self.level is AnyLevel:
             return html_fragment(u'Awarded to all users who have reached the top of the <a href="%s">weekly leaderboard</a>.  Higher levels are achieved by staying there longer, up to level 9 if you stay there for a year.', url)
         else:
-            d = html_fragment('Reached the top of the <a href="%s">weekly leaderboard</a>', url)
+            d = html_fragment(u'Reached the top of the <a href="%s">weekly leaderboard</a>', url)
             if self.level > 1:
-                d = d + html_fragment(", and stayed there for at least %s",
+                d = d + html_fragment(u", and stayed there for at least %s",
                                       self.FRIENDLY_DAYS[self.level])
             return d
 
@@ -439,7 +441,7 @@ class OrganizerAward(CountBasedAward):
 
     def full_description(self):
         if self.level is AnyLevel:
-            return "Awarded for getting people to together in groups. First level "\
+            return u"Awarded for getting people to together in groups. First level "\
                 "requires 5 people to join one of your groups."
         else:
             return u"Created groups that are used by at least %d people" % self.count
