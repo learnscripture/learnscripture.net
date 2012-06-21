@@ -68,7 +68,7 @@ class NewAccountEvent(EventLogic):
 
     def __init__(self, account=None):
         super(NewAccountEvent, self).__init__(account=account)
-        self.event.message_html = "signed up to LearnScripture.net"
+        self.event.message_html = u"signed up to LearnScripture.net"
 
 
 class AwardReceivedEvent(EventLogic):
@@ -98,7 +98,7 @@ class VerseSetCreatedEvent(EventLogic):
         super(VerseSetCreatedEvent, self).__init__(verse_set_id=verse_set.id,
                                                    account=verse_set.created_by)
         self.event.message_html = html_fragment(
-            'created new verse set <a href="%s">%s</a>',
+            u'created new verse set <a href="%s">%s</a>',
             reverse('view_verse_set', args=(verse_set.slug,)),
             verse_set.name
             )
@@ -123,7 +123,7 @@ class PointsMilestoneEvent(EventLogic):
         super(PointsMilestoneEvent, self).__init__(account=account,
                                                    points=points)
         self.event.message_html = html_fragment(
-            'reached %s points', intcomma(points)
+            u'reached %s points', intcomma(points)
             )
 
 
@@ -132,7 +132,7 @@ class VersesStartedMilestoneEvent(EventLogic):
         super(VersesStartedMilestoneEvent, self).__init__(account=account,
                                                           verses_started=verses_started)
         self.event.message_html = html_fragment(
-            'reached %s verses started', intcomma(verses_started)
+            u'reached %s verses started', intcomma(verses_started)
             )
 
 
@@ -143,7 +143,7 @@ class GroupJoinedEvent(EventLogic):
                                                group_id=group.id)
 
         self.event.message_html = html_fragment(
-            "joined group %s", group_link(group)
+            u"joined group %s", group_link(group)
             )
 
 
@@ -187,10 +187,10 @@ class EventGroup(object):
         self.created = None
 
     def render_html(self):
-        return mark_safe(account_link(self.account) + ":<ul>" +
-                         u''.join(["<li>%s</li>" % event.message_html
+        return mark_safe(account_link(self.account) + u":<ul>" +
+                         u''.join([u"<li>%s</li>" % event.message_html
                                    for event in self.events])
-                         + "</ul>")
+                         + u"</ul>")
 
 
 def dedupe_iterable(iterable, keyfunc):
@@ -240,7 +240,7 @@ class Event(models.Model):
     objects = EventManager()
 
     def __unicode__(self):
-        return "Event %d" % self.id
+        return u"Event %d" % self.id
 
     def get_rank(self, friendship_weights, now=None):
         affinity = 1.0
@@ -261,7 +261,7 @@ class Event(models.Model):
         diff = now - self.created
         if diff.total_seconds() < 60:
             return u"Just now"
-        return timesince(self.created, now=now) + " ago"
+        return timesince(self.created, now=now) + u" ago"
 
     def render_html(self):
         if self.account is not None:

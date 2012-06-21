@@ -7,7 +7,7 @@ register = Library()
 
 @register.filter
 def account_link(account):
-    return html_fragment('<a href="%s" title="%s %s">%s</a>',
+    return html_fragment(u'<a href="%s" title="%s %s">%s</a>',
                          reverse('user_stats', args=(account.username,)),
                          account.first_name,
                          account.last_name,
