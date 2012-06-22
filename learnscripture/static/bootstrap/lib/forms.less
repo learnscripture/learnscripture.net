@@ -196,8 +196,11 @@ select:focus {
   }
 }
 // Error
+
+@errorColor: #b94a48;
+
 form .clearfix.error {
-  .formFieldState(#b94a48, #ee5f5b, lighten(#ee5f5b, 30%));
+  .formFieldState(@errorColor, #ee5f5b, lighten(#ee5f5b, 30%));
 }
 // Warning
 form .clearfix.warning {

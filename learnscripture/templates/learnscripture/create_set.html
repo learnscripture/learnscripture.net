@@ -121,6 +121,10 @@
 
     <h3>Optional extra info</h3>
 
+    {% if verse_set_form.non_field_errors %}
+       <p>The verse set could not be saved:</p>
+    {% endif %}
+
     {{ verse_set_form|bootstrap }}
 
     <div class="actions">

@@ -186,6 +186,15 @@ class CreateSetTests(LiveServerTests):
         self.wait_until_loaded('#id-verse-list tbody tr td')
         self.assertIn("There are already", driver.page_source)
 
+    def test_empty_passage_set(self):
+        self.login(self._account)
+        driver = self.driver
+        driver.get(self.live_server_url + "/create-passage-set/")
+        self.wait_until_loaded('body')
+        driver.find_element_by_id("id_name").send_keys("xxx")
+        driver.find_element_by_id("id-save-btn").click()
+        self.wait_until_loaded('body')
+        self.assertIn("No passage selected", driver.page_source)
 
     def test_edit_passage_set(self):
         self.login(self._account)
