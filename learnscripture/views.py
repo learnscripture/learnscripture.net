@@ -493,7 +493,7 @@ def create_or_edit_set(request, set_type=None, slug=None):
 
         form_is_valid = form.is_valid()
         if len(verse_dict) == 0:
-            form.errors.setdefault('__all__', form.error_class()).append("No passage selected")
+            form.errors.setdefault('__all__', form.error_class()).append("No verses in set")
             form_is_valid = False
 
         if form_is_valid:

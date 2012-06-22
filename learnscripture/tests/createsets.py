@@ -194,7 +194,7 @@ class CreateSetTests(LiveServerTests):
         driver.find_element_by_id("id_name").send_keys("xxx")
         driver.find_element_by_id("id-save-btn").click()
         self.wait_until_loaded('body')
-        self.assertIn("No passage selected", driver.page_source)
+        self.assertIn("No verses in set", driver.page_source)
 
     def test_edit_passage_set(self):
         self.login(self._account)
