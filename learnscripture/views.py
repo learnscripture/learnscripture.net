@@ -491,7 +491,12 @@ def create_or_edit_set(request, set_type=None, slug=None):
         if not re.match('^((\d+|\d+:\d+),)*(\d+|\d+:\d+)?$', breaks):
             breaks = ""
 
-        if form.is_valid():
+        form_is_valid = form.is_valid()
+        if len(verse_dict) == 0:
+            form.errors.setdefault('__all__', form.error_class()).append("No passage selected")
+            form_is_valid = False
+
+        if form_is_valid:
             verse_set = form.save(commit=False)
             verse_set.set_type = set_type
             verse_set.created_by = request.identity.account
