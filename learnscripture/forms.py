@@ -63,11 +63,17 @@ class LogInForm(forms.Form):
 
     def clean_password(self):
         def fail():
-            raise forms.ValidationError("Can't find an account matching that email address and password");
+            raise forms.ValidationError(u"Can't find an account matching that username/email and password");
         try:
             email = self.cleaned_data.get('email', '').strip()
             if u'@' in email:
-                account = Account.objects.get(email__iexact=email)
+                accounts = Account.objects.filter(email__iexact=email)
+                if len(accounts) == 0:
+                    raise Account.DoesNotExist()
+                elif len(accounts) > 1:
+                    raise forms.ValidationError(u"Multiple accounts for this email address - please enter your username instead")
+                else:
+                    account = accounts[0]
             else:
                 account = Account.objects.get(username__iexact=email)
         except Account.DoesNotExist:
