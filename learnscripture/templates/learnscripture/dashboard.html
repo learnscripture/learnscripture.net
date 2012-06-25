@@ -3,6 +3,13 @@
 
 {% block leftcolumn %}
 
+{% if create_account_warning %}
+<div class="actionset">
+<p><b>Remember to <a href="#" class="signup-link">create an account</a>!</b> It
+only takes a few seconds. Otherwise your progress won't be saved permanently.
+</div>
+{% endif %}
+
 {% if request.identity.scoring_enabled %}
 
 <h2>Points</h2>

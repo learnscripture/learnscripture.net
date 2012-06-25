@@ -214,6 +214,9 @@ def dashboard(request):
          'next_verse_due': identity.next_verse_due(),
          'title': 'Dashboard',
          'events': identity.get_dashboard_events(),
+         'create_account_warning':
+             identity.account is None and
+         (timezone.now() - identity.date_created) > timedelta(days=3),
          }
     c.update(session_stats(identity))
     return render(request, 'learnscripture/dashboard.html', c)
