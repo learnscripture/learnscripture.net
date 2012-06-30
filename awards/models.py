@@ -326,7 +326,7 @@ class RecruiterAward(CountBasedAward):
                                  "through our <a href='%s'>referral program</a>",
                                  url)
         else:
-            return html_fragment(u"Got %d people to sign up to LearnScripture.net "
+            return html_fragment(u"Got %s people to sign up to LearnScripture.net "
                                  "through our <a href='%s'>referral program</a>",
                                  self.count, url)
 
