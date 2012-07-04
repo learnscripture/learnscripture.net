@@ -1,4 +1,5 @@
 from django import forms
+from django.forms import widgets
 from django.conf import settings
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
 
@@ -97,3 +98,9 @@ class AccountPasswordResetForm(PasswordResetForm):
 
 class AccountSetPasswordForm(SetPasswordForm):
     pass
+
+
+class ContactForm(forms.Form):
+    name = forms.CharField(help_text=u"Optional", max_length=255, required=False)
+    email = forms.EmailField(help_text=u"Optional", required=False)
+    message = forms.CharField(max_length=10000, required=True, widget=widgets.Textarea)
