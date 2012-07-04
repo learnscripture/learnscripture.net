@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
+from django.core import mail
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
@@ -23,7 +24,7 @@ from accounts import memorymodel
 from accounts.models import Account, SubscriptionType, Identity
 from accounts.forms import PreferencesForm, AccountDetailsForm
 from awards.models import AwardType, AnyLevel, Award
-from learnscripture.forms import AccountSetPasswordForm
+from learnscripture.forms import AccountSetPasswordForm, ContactForm
 from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType, get_passage_sections, get_verses_started_counts
 from bibleverses.signals import public_verse_set_created
 from learnscripture import session, auth
@@ -1314,3 +1315,45 @@ def fund_pay_cancelled(request):
 def terms_of_service(request):
     return render(request, 'learnscripture/terms_of_service.html',
                   {'title': 'Terms of service'})
+
+
+def contact(request):
+    account = account_from_request(request)
+    if account is not None:
+        initial = {'name': account.first_name + u' ' + account.last_name,
+                   'email': account.email }
+    else:
+        initial = {}
+    if request.method == 'POST':
+        form = ContactForm(request.POST, initial=initial)
+        if form.is_valid():
+            send_contact_email(form, account)
+            return HttpResponseRedirect('/contact/thanks/')
+    else:
+        form = ContactForm(initial=initial)
+    return render(request, 'learnscripture/contact.html',
+                  {'title': 'Contact us',
+                   'form': form,
+                   })
+
+def send_contact_email(contact_form, account):
+    email = contact_form.cleaned_data['email']
+    mail.EmailMessage(subject="LearnScripture feedback",
+                      body=\
+"""
+From: %(name)s
+Email: %(email)s
+Account: %(account)s
+Message:
+
+%(message)s
+""" % {
+            'name': contact_form.cleaned_data['name'],
+            'email': email,
+            'account': account.username if account is not None else '',
+            'message': contact_form.cleaned_data['message'],
+},
+                      from_email=settings.SERVER_EMAIL,
+                      to=[settings.DEFAULT_FROM_EMAIL],
+                      headers={'Reply-To': email} if email else {},
+).send()
