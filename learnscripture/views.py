@@ -1354,6 +1354,6 @@ Message:
             'message': contact_form.cleaned_data['message'],
 },
                       from_email=settings.SERVER_EMAIL,
-                      to=[settings.DEFAULT_FROM_EMAIL],
+                      to=[settings.CONTACT_EMAIL],
                       headers={'Reply-To': email} if email else {},
 ).send()
