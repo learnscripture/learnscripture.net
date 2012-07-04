@@ -59,21 +59,37 @@ var learnscripture = (function (learnscripture, $) {
                       });
             // we have enough room for the whole modal
         }
-
-        modal.find('form').toggleClass('form-stacked', modal.width() < 500);
     };
 
+    var adjustForm = function (form) {
+        form.toggleClass('form-stacked', form.width() < 500);
+    };
+
+    var adjustAllForms = function () {
+        $('form').each(function (idx, elem) {
+            adjustForm($(elem));
+        });
+    };
+
+    var adjustVisibleModals = function () {
+        $('div.modal:visible').each(function (idx, elem) {
+            adjustModal($(elem));
+        });
+    };
 
     $('div.modal').bind('shown', function (ev) {
         var modal = $(this);
         adjustModal(modal);
+        adjustForm(modal.find('form'));
     });
 
+
     $(window).bind('resize', function (ev) {
-        $('div.modal:visible').each(function (idx, elem) {
-            adjustModal($(elem));
-        });
+        adjustVisibleModals();
+        adjustAllForms();
     });
+
+    $(document).ready(adjustAllForms);
 
     // Export:
     learnscripture.adjustModal = adjustModal;
