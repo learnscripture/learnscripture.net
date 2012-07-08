@@ -62,11 +62,21 @@ var learnscripture = (function (learnscripture, $) {
     };
 
     var adjustForm = function (form) {
-        form.toggleClass('form-stacked', form.width() < 500);
+        var width;
+        if (form.is(':visible')) {
+            width = form.width();
+        } else {
+            width = form.actual('width'); // slower, so only use when necessary
+        }
+        form.toggleClass('form-stacked', width < 500);
     };
 
     var adjustAllForms = function () {
-        $('form').each(function (idx, elem) {
+        // Normally we ony need visible forms to be adjusted, since invisible
+        // one will have another trigger to adjust them.  Some forms are
+        // trickier e.g. forms in a hidden tab, which we want to be adjusted
+        // *before* the tab is selected.
+        $('form:visible, form.always-adjust-size').each(function (idx, elem) {
             adjustForm($(elem));
         });
     };
