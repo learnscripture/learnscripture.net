@@ -319,7 +319,13 @@ CACHES = {
         }
 }
 
-CACHE_PREFIX = 'ls1'
+if DEVBOX:
+    CACHE_PREFIX = 'ls1'
+else:
+    if PRODUCTION:
+        CACHE_PREFIX = 'ls1'
+    else:
+        CACHE_PREFIX = 'ls2'
 
 if 'test' in sys.argv:
     # Caching count() seems to cause errors in test suite
