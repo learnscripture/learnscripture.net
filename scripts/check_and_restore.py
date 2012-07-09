@@ -57,7 +57,7 @@ def site_is_up():
         # We choose a URL that definitely needs the DB, to check the database is
         # working. We add a query param so that we can filter out in analytics,
         # and check this script is running
-        connection.request("GET", "/about/?health_check=1", headers={'Host':'learnscripture.net'})
+        connection.request("GET", "/about/?health_check=1", headers={'Host': TARGET['DOMAIN']})
         response = connection.getresponse()
         if response.status in [500, 502, 408]:
             print_message("Bad status: %d" % response.status)
