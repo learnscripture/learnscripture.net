@@ -4,12 +4,12 @@ LS_STAGING_PYTHON=/home/cciw/webapps/learnscripture_staging_django/venv/bin/pyth
 LS_STAGING_MANAGE=/home/cciw/webapps/learnscripture_staging_django/src/manage.py
 
 
-*/5 * * * * /home/cciw/webapps/learnscripture_django/apache2/bin/start > /dev/null
-#16,36,56 * * * * /home/cciw/webapps/learnscripture_staging_django/apache2/bin/start > /dev/null
-0 1,13 * * *  $LS_PYTHON $LS_MANAGE send_daily_account_emails
-0 2,14 * * *  $LS_PYTHON $LS_MANAGE metrics_aggregate
-30 1,11 * * *  $LS_PYTHON $LS_MANAGE create_metrics_daily
-5,20,35,50   * * * *  $LS_PYTHON $LS_MANAGE create_awards_hourly
-20   3 * * *  $LS_PYTHON $LS_MANAGE create_awards_daily
-#0 2,14 * * *  $LS_STAGING_PYTHON $LS_STAGING_MANAGE metrics_aggregate
-*/10 * * * * /home/cciw/webapps/learnscripture_django/venv/bin/start_supervisor.sh start > /dev/null 2>&1
+*/5        *    * * * /home/cciw/webapps/learnscripture_django/apache2/bin/start > /dev/null
+0          1,13 * * *  $LS_PYTHON $LS_MANAGE send_daily_account_emails
+0          2,14 * * *  $LS_PYTHON $LS_MANAGE metrics_aggregate
+30         1,11 * * *  $LS_PYTHON $LS_MANAGE create_metrics_daily
+5,20,35,50 *    * * *  $LS_PYTHON $LS_MANAGE create_awards_hourly
+20         3    * * *  $LS_PYTHON $LS_MANAGE create_awards_daily
+#0          2,14 * * *  $LS_STAGING_PYTHON $LS_STAGING_MANAGE metrics_aggregate
+
+*/10       *    * * * /home/cciw/webapps/learnscripture_django/venv/bin/start_supervisor.sh start > /dev/null 2>&1
