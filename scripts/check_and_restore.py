@@ -35,7 +35,7 @@ TARGETS = {
                 'PORT': '80',
                 },
     'production': {'APPNAME': 'learnscripture',
-                   'DOMAIN':' learnscripture.net',
+                   'DOMAIN': 'learnscripture.net',
                    'PORT': '80',
                    },
     }
