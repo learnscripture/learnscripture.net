@@ -45,7 +45,7 @@ SUPERVISORCTL = "/home/cciw/webapps/learnscripture_django/venv/bin/supervisorctl
 SUPERVISORD_STARTER = "/home/cciw/webapps/learnscripture_django/venv/bin/start_supervisor.sh"
 
 def print_message(msg):
-    sys.stdout.write(datetime.now().isoformat() + "  " + str(msg) + "\n")
+    sys.stderr.write(datetime.now().isoformat() + "  " + str(msg) + "\n")
 
 def site_is_up():
     # we assume good, so that a bug in this code doesn't misdiagnose and cause
