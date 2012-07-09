@@ -339,12 +339,7 @@ def restart_webserver():
     """
     Restarts the webserver that is running the Django instance
     """
-    if target.DJANGO_SERVER_RESTART:
-        run(target.DJANGO_SERVER_RESTART)
-    else:
-        with settings(warn_only=True):
-            stop_webserver()
-        start_webserver()
+    supervisorctl("restart apache_%s" % target.NAME.lower())
 
 
 def build_static():
