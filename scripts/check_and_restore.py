@@ -100,6 +100,15 @@ def stop_supervisor():
 
 
 def restore():
+    if TARGET['APPNAME'] == 'learnscripture_staging':
+        # staging and production share a supervisord instance.  (Ideally they
+        # would have separate supervisord, memcached and pgbouncer, but the
+        # memory adds up).  We don't want testing of staging to take down
+        # production, so we use an alternative strategy, and exit early
+        print_message("Restarting using supervisorctl")
+        os.system("%s restart rabbitmq_staging celeryd_staging apache_staging" % SUPERVISORCTL)
+        return
+
     # Sometimes supervisord itself can get in a 'bad state' of some kind, so we
     # first shut it down, rather than assume it is in a good state.
     try:
