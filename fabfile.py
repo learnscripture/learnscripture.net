@@ -47,10 +47,6 @@ class Target(object):
         # of STATIC_ROOT in the settings.py that is used on the server.
         self.STATIC_ROOT = '/home/cciw/webapps/%s_static' % self.APP_BASE_NAME
 
-        # Commands to stop and start the webserver that is serving the Django app.
-        self.DJANGO_SERVER_STOP = posixpath.join(self.DJANGO_APP_ROOT, 'apache2', 'bin', 'stop')
-        self.DJANGO_SERVER_START = posixpath.join(self.DJANGO_APP_ROOT, 'apache2', 'bin', 'start')
-        self.DJANGO_SERVER_RESTART = None
         self.src_dir = posixpath.join(self.DJANGO_APP_ROOT, SRC_SUBDIR)
         self.venv_dir = posixpath.join(self.DJANGO_APP_ROOT, VENV_SUBDIR)
         self.conf_dir = posixpath.join(self.src_dir, self.CONF_SUBDIR)
@@ -259,7 +255,6 @@ def push_sources():
 
     # And copy other config and binary files from repo to destinations
     run("cp %s/httpd.conf %s" % (target.conf_dir, posixpath.join(target.DJANGO_APP_ROOT, 'apache2', 'conf')))
-    run("cp %s/start %s" % (target.conf_dir, posixpath.join(target.DJANGO_APP_ROOT, 'apache2', 'bin')))
 
 
 @task
@@ -323,7 +318,7 @@ def stop_webserver():
     """
     Stop the webserver that is running the Django instance
     """
-    run(target.DJANGO_SERVER_STOP)
+    supervisorctl("stop apache_%s" % target.NAME.lower())
 
 
 @task
@@ -331,7 +326,7 @@ def start_webserver():
     """
     Starts the webserver that is running the Django instance
     """
-    run(target.DJANGO_SERVER_START)
+    supervisorctl("start apache_%s" % target.NAME.lower())
 
 
 @task

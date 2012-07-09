@@ -1,3 +1,0 @@
-#!/bin/bash
-
-LD_LIBRARY_PATH=/home2/cciw/webapps/learnscripture_django/apache2/lib /home2/cciw/webapps/learnscripture_django/apache2/bin/httpd -f /home2/cciw/webapps/learnscripture_django/apache2/conf/httpd.conf -k start -D FOREGROUND
