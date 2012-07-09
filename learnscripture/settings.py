@@ -327,7 +327,7 @@ else:
     else:
         CACHE_PREFIX = 'ls2'
 
-if 'test' in sys.argv:
+if TESTING:
     # Caching count() seems to cause errors in test suite
     CACHE_COUNT_TIMEOUT = 0
 else:
