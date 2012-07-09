@@ -84,6 +84,7 @@ else:
     SECRET_KEY = secrets['DEVELOPMENT_SECRET_KEY']
     SENTRY_DSN = secrets["DEVELOPMENT_SENTRY_DSN"]
 
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 SESSION_COOKIE_AGE = 3600 * 24 * 31 * 4 # 4 months
 
