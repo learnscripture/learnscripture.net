@@ -275,8 +275,8 @@ def setup_supervisor():
 
 @task
 def reload_supervisor():
-    run("%s/bin/supervisorctl reread" % PRODUCTION.venv_dir)
-    run("%s/bin/supervisorctl update" % PRODUCTION.venv_dir)
+    supervisorctl("reread")
+    supervisorctl("update")
 
 
 @task
@@ -392,8 +392,7 @@ def deploy():
 
 @task
 def restart_celeryd():
-    with virtualenv(PRODUCTION.venv_dir):
-        run_venv("supervisorctl restart celeryd_%s" % target.NAME.lower())
+    supervisorctl("restart celeryd_%s" % target.NAME.lower())
 
 @task
 def supervisorctl(*commands):
