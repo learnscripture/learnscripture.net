@@ -52,6 +52,8 @@ class AccountAdmin(admin.ModelAdmin):
         change_subscription_func(SubscriptionType.LIFETIME_FREE,
                                  "lifetime_free", "Change to lifetime free"),
         ]
+    ordering = ['date_joined']
+    search_fields = ['username', 'email']
 
 admin.site.register(Identity, IdentityAdmin)
 admin.site.register(Account, AccountAdmin)
