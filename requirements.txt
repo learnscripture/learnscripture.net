@@ -27,3 +27,4 @@ sqlalchemy==0.7.7
 django-selectable==0.4.1
 django-rstify
 psutil==0.5.1
+twilio==3.3.9

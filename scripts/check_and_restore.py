@@ -175,9 +175,26 @@ def get_controllable_processes():
             l.append(ps)
     return l
 
+
+def secrets():
+    import json
+    thisdir = os.path.dirname(os.path.abspath(__file__))
+    return json.load(open(os.path.join(os.path.dirname(thisdir), "config", "secrets.json")))
+
+def notify(message):
+    from twilio.rest import TwilioRestClient
+    s = secrets()
+    client = TwilioRestClient(s['TWILIO_ACCOUNT'], s['TWILIO_TOKEN'])
+    message = client.sms.messages.create(to=s['TWILIO_TO'], from_=s['TWILIO_FROM'],
+                                         body=message)
+
 if __name__ == '__main__':
     TARGET = TARGETS[sys.argv[1]]
 
     if not check():
         print_message("Attempting restore")
+        try:
+            notify("Website down, attempting restore")
+        except:
+            pass
         restore()
