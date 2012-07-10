@@ -29,7 +29,7 @@
   <li><b>Closed</b>: only invited users can join.</li>
   {% endif %}
 
-  <li><a href="{% url 'leaderboard' %}?group={{ group.id }}">Leaderboard for {{ group.name }}</a></li>
+  <li><a class="iconafter-leaderboard" href="{% url 'leaderboard' %}?group={{ group.id }}">Leaderboard for {{ group.name }}</a></li>
 </ul>
 
 
@@ -95,7 +95,7 @@
   {% if can_edit %}
   <li><a href="{% url 'edit_group' group.slug %}">Edit this group</a></li>
   {% endif %}
-  <li><a href="{% url 'leaderboard' %}?group={{ group.id }}">Leaderboard</a></li>
+  <li><a class="iconafter-leaderboard" href="{% url 'leaderboard' %}?group={{ group.id }}">Leaderboard</a></li>
 </ul>
 
 <h3>Group stats</h3>
