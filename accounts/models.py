@@ -71,6 +71,9 @@ class Account(models.Model):
         default=False, blank=True)
     is_hellbanned = models.BooleanField(default=False)
 
+    class Meta:
+        ordering = ['username']
+
     # Email reminder preferences and meta data
     remind_after = models.PositiveSmallIntegerField(
         "Send email reminders after (days)", default=2)
