@@ -48,6 +48,10 @@
   {% if can_join %}
   <form action="" method="POST">
     {% csrf_token %}
+    {% if group.public %}
+    <span class="icon-public icon-replace" title="This action is public">&nbsp;</span>
+    {% endif %}
+
     <input type="submit" name="join" class="primary btn join-group-btn needs-account" value="Join group" />
   </form>
 
