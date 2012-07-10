@@ -74,6 +74,14 @@ access to and use of the Website to any individual or entity for any reason,
 in LearnScripture.net’s sole discretion. LearnScripture.net will have no
 obligation to provide a refund of any amounts previously paid.
 
+Reasonable use
+--------------
+
+You are required to make use of this service in a reasonable way that does not
+damage the experience of other users or the service itself. You are not allowed
+to use automated means, such as scripting or bots, to access the service or add
+Content. Failure to comply with this may result in being blocked or having your
+data removed from the site.
 
 Payment and Renewal
 -------------------
