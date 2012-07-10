@@ -164,6 +164,24 @@ def learn_set(request, uvs_list, revision):
     return HttpResponseRedirect(reverse('learn'))
 
 
+def get_user_groups(identity):
+    """
+    Returns a two tuple containing:
+       selection of the users groups,
+       boolean indicating if there are more
+    """
+    if identity.account is None:
+        return [], False
+
+    account = identity.account
+    groups = account.get_ordered_groups()
+    limit = 3
+    groups = groups[0:limit + 1] # + 1 so we can see if we got more
+    if len(groups) > limit:
+        return groups[0:3], True
+    else:
+        return groups, False
+
 # Dashboard:
 def dashboard(request):
 
@@ -208,6 +226,8 @@ def dashboard(request):
             identity.cancel_passage(vs_id)
             return HttpResponseRedirect(reverse('dashboard'))
 
+    groups, more_groups = get_user_groups(identity)
+
     c = {'new_verses_queue': identity.verse_statuses_for_learning(),
          'revise_verses_queue': identity.verse_statuses_for_revising(),
          'passages_for_learning': identity.passages_for_learning(),
@@ -218,6 +238,8 @@ def dashboard(request):
          'create_account_warning':
              identity.account is None and
          (timezone.now() - identity.date_created) > timedelta(days=3),
+         'groups': groups,
+         'more_groups': more_groups,
          }
     c.update(session_stats(identity))
     return render(request, 'learnscripture/dashboard.html', c)
