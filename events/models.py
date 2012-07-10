@@ -64,6 +64,13 @@ class EventLogic(object):
         self.event.save()
 
 
+class GeneralEvent(EventLogic):
+    """
+    Used for custom messages
+    """
+    pass
+
+
 class NewAccountEvent(EventLogic):
 
     def __init__(self, account=None):
@@ -166,7 +173,8 @@ class VersesFinishedMilestoneEvent(EventLogic):
 
 EventType = make_class_enum(
     'EventType',
-    [(2, 'NEW_ACCOUNT', 'New account', NewAccountEvent),
+    [(1, 'GENERAL', 'General', GeneralEvent),
+     (2, 'NEW_ACCOUNT', 'New account', NewAccountEvent),
      (3, 'AWARD_RECEIVED', 'Award received', AwardReceivedEvent),
      (4, 'POINTS_MILESTONE', 'Points milestone', PointsMilestoneEvent),
      (5, 'VERSES_STARTED_MILESTONE', 'Verses started milestone', VersesStartedMilestoneEvent),
