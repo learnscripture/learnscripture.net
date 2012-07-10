@@ -194,6 +194,9 @@ class EventGroup(object):
 
 
 def dedupe_iterable(iterable, keyfunc):
+    """
+    Removes duplicates from an iterable, while preserving order.
+    """
     seen = set()
     for i in iterable:
         key = keyfunc(i)
