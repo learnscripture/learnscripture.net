@@ -1,5 +1,6 @@
 {% extends "base_twocol.html" %}
 {% load url from future %}
+{% load account_utils %}
 
 {% block leftcolumn %}
 
@@ -147,6 +148,26 @@ only takes a few seconds. Otherwise your progress won't be saved permanently.
 <div id="id-stats-block">
 {% include 'learnscripture/sessionstats.html' %}
 </div>
+
+<h3>Your groups</h3>
+
+{% if groups %}
+<ul class="grouplist">
+  {% for group in groups %}
+  <li>{{ group|group_link }} »
+    <a class="icon-leaderboard icon-replace"
+       title="leaderboard"
+       href="{% url 'leaderboard' %}?thisweek&group={{ group.id }}">Leaderboard</a></li>
+  {% endfor %}
+  {% if more_groups %}
+  <li><a href="{% url 'user_stats' request.identity.account.username %}#groups">(see all)</a></li>
+  {% endif %}
+
+</ul>
+<div class="note"><a href="{% url 'groups' %}">View other groups</a></div>
+{% else %}
+<div>You're not in any groups yet. Why not <a href="{% url 'groups' %}">join a group?</a></div>
+{% endif %}
 
 <h3>News</h3>
 

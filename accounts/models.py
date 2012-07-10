@@ -305,6 +305,15 @@ class Account(models.Model):
     def get_public_groups(self):
         return [m.group for m in self._memberships_with_group().filter(group__public=True)]
 
+    def get_ordered_groups(self):
+        from groups.models import Group
+        # use Group directly so that we can do the annotation/ordering we need
+        return (Group.objects
+                .annotate(num_members=models.Count('members'))
+                .order_by('-num_members')
+                .filter(members=self)
+                )
+
     def get_friendship_weights(self):
         """
         Returns a dictionary of {account_id: friendship_level} for this account.
