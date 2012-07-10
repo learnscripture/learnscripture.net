@@ -18,7 +18,7 @@ from learnscripture.utils.html import html_fragment
 
 
 EVENTSTREAM_CUTOFF_DAYS = 3 # just 3 days of events
-EVENTSTREAM_CUTOFF_NUMBER = 8
+EVENTSTREAM_CUTOFF_NUMBER = 6
 
 # Arbitrarily say stuff is 50% less interesting when it is half a day old.
 EVENTSTREAM_TIME_DECAY_FACTOR = 3600*12.0
