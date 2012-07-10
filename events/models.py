@@ -138,6 +138,8 @@ class VersesStartedMilestoneEvent(EventLogic):
 
 class GroupJoinedEvent(EventLogic):
 
+    weight = 11
+
     def __init__(self, account=None, group=None):
         super(GroupJoinedEvent, self).__init__(account=account,
                                                group_id=group.id)
