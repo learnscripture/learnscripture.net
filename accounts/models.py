@@ -41,6 +41,7 @@ THEMES = [('calm', 'Slate'),
           ('space', 'Space'),
           ]
 THEME_FONTS = [
+    ('calm', ['http://fonts.googleapis.com/css?family=Belleza']),
     ('bubblegum', ['http://fonts.googleapis.com/css?family=Short+Stack']),
     ('bubblegum2', ['http://fonts.googleapis.com/css?family=Short+Stack']),
     ('space', ['http://fonts.googleapis.com/css?family=Prosto+One']),
