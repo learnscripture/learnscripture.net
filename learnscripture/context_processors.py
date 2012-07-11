@@ -4,6 +4,7 @@ from django.core.urlresolvers import reverse
 from fiber.context_processors import page_info
 
 from accounts.forms import PreferencesForm
+from accounts.models import DEFAULT_THEME, THEME_FONTS
 from learnscripture.utils.context import lazy_dict
 from .forms import SignUpForm, LogInForm
 
@@ -64,3 +65,12 @@ def notices(request):
 
 def campaign_context_processor(account):
     return {'account': account}
+
+
+def theme_fonts(request):
+    current_theme = DEFAULT_THEME
+    if hasattr(request, 'identity'):
+        current_theme = request.identity.interface_theme
+    return {'theme_fonts': THEME_FONTS,
+            'current_theme': current_theme,
+            }

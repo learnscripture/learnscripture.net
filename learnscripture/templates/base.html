@@ -16,13 +16,15 @@
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
+    {# We avoid the request for the CSS file if the theme is not active #}
+    {% for theme, fonts in theme_fonts %}
+      {% if current_theme == theme %}
+        {% for font in fonts %}
+    <link href="{{ font }}" rel="stylesheet" type="text/css" />
+        {% endfor %}
+     {% endif %}
+   {% endfor %}
 
-    {% if request.identity.interface_theme == 'bubblegum' or request.identity.interface_theme == 'bubblegum2' %}
-    <link href='http://fonts.googleapis.com/css?family=Short+Stack' rel='stylesheet' type='text/css' />
-    {% endif %}
-    {% if request.identity.interface_theme == 'space' %}
-    <link href='http://fonts.googleapis.com/css?family=Prosto+One' rel='stylesheet' type='text/css'>
-    {% endif %}
     <link rel="apple-touch-icon" href="{{ STATIC_URL }}img/touch-icon.png" />
 
     {% compress css %}

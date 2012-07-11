@@ -40,6 +40,14 @@ THEMES = [('calm', 'Slate'),
           ('bubblegum2', 'Bubblegum green'),
           ('space', 'Space'),
           ]
+THEME_FONTS = [
+    ('bubblegum', ['http://fonts.googleapis.com/css?family=Short+Stack']),
+    ('bubblegum2', ['http://fonts.googleapis.com/css?family=Short+Stack']),
+    ('space', ['http://fonts.googleapis.com/css?family=Prosto+One']),
+]
+DEFAULT_THEME = 'calm'
+
+
 
 # Number of days payment is allowed to be made early
 PAYMENT_ALLOWED_EARLY_DAYS = 31
@@ -409,7 +417,7 @@ class Identity(models.Model):
                                                       null=True, default=None)
     enable_animations = models.BooleanField(blank=True, default=True)
     interface_theme = models.CharField(max_length=30, choices=THEMES,
-                                       default='calm')
+                                       default=DEFAULT_THEME)
     referred_by = models.ForeignKey(Account, null=True, default=None,
                                     blank=True,
                                     related_name='referrals')
