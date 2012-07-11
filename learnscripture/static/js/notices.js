@@ -24,6 +24,24 @@ var learnscripture = (function (learnscripture, $) {
                    });
         });
 
+        // Turn broadcast data into links:
+        $('.notice .broadcast').prepend("&nbsp;&nbsp; Tell people: ");
+        $('.notice .broadcast .facebook').each(function (index, elem) {
+            var j = $(elem);
+            var d = j.data();
+            var loc = document.location;
+            var urlStart = loc.protocol + '//' + loc.host;
+            var redirectUri = loc.toString();
+            var caption = "I just earned badge " + d['awardName'];
+            var fbUrl = 'http://www.facebook.com/dialog/feed?app_id=175882602545382' +
+                '&link=' + encodeURIComponent(urlStart + d['fbLink']) +
+                '&redirect_uri=' + encodeURIComponent(redirectUri) +
+                '&caption=' + encodeURIComponent(caption) +
+                '&picture=' + encodeURIComponent(urlStart + d['fbPicture']);
+            var html = '<a href="' + fbUrl + '">Facebook</a>';
+            j.html(html);
+        });
+
     };
 
     // Exports:
