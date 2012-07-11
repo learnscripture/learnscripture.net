@@ -7,6 +7,7 @@ from awards.signals import new_award, lost_award
 import awards.tasks
 from bibleverses.signals import verse_set_chosen, public_verse_set_created
 from groups.signals import group_joined
+from learnscripture.utils.html import html_fragment
 
 
 @receiver(new_award)
@@ -14,18 +15,42 @@ def notify_about_new_award(sender, **kwargs):
     award = sender
     account = award.account
     if award.level > 1:
-        msg = """<img src="%s%s"> You've levelled up on one of your badges: <a href="%s">%s</a>."""
+        template = """<img src="%s%s"> You've levelled up on one of your badges: <a href="%s">%s</a>."""
     else:
-        msg = """<img src="%s%s"> You've earned a new badge: <a href="%s">%s</a>."""
+        template = """<img src="%s%s"> You've earned a new badge: <a href="%s">%s</a>."""
 
-    msg = msg % (settings.STATIC_URL,
-                 award.image_small(),
-                 reverse('user_stats', args=(account.username,)),
-                 award.short_description())
+    award_url = reverse('user_stats', args=(account.username,)) + "#badges"
+
+    msg = html_fragment(template,
+                        settings.STATIC_URL,
+                        award.image_small(),
+                        award_url,
+                        award.short_description())
     if 'points' in kwargs:
         points = kwargs['points']
         if points > 0:
-            msg = msg + ' Points bonus: %d' % points
+            msg = msg + html_fragment(' Points bonus: %s.', points)
+
+    # Facebook: this notice could be displayed on any page, and we want the
+    # 'redirect_uri' parameter to take them back to where they were.  So we
+    # render the link to facebook using javascript, embedding necessary data
+    # using data attributes.
+    msg = msg + html_fragment('<span class="broadcast">'
+                              '<span class="facebook"'
+                              ' data-fb-link="%s"'
+                              ' data-fb-picture="%s%s"'
+                              ' data-award-id="%s"'
+                              ' data-award-level="%s"'
+                              ' data-award-name="%s"'
+                              '></span>'
+                              '</span>',
+                              award_url,
+                              settings.STATIC_URL,
+                              award.image_medium(),
+                              award.id, # not needed at the moment
+                              award.level,
+                              award.short_description()
+                              )
 
     account.identity.add_html_notice(msg)
 
