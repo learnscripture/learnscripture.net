@@ -92,7 +92,18 @@ var learnscripture =
             });
 
             $('#id_interface_theme').change(function (ev) {
-                $('body').attr('class', $(this).val());
+                var theme = $(this).val();
+                $('body').attr('class', theme);
+                // Also need to load the webfont CSS
+                var themeFontPairs = learnscripture.themeFonts;
+                for (var i = 0; i < themeFontPairs.length; i++) {
+                    if (themeFontPairs[i][0] == theme) {
+                        var fonts = themeFontPairs[i][1];
+                        for (var j = 0; j < fonts.length; j++) {
+                            $('head').append('<link href="' + fonts[j] + '" rel="stylesheet" type="text/css" />');
+                        }
+                    }
+                }
             });
 
             setupNeedsPreferencesControls($('body'));
