@@ -25,3 +25,11 @@ class AccountDetailsTests(LiveServerTests):
         driver.find_element_by_id('id-save-btn').click()
 
         self.assertEqual(Account.objects.get(id=account.id).first_name, "Fred")
+
+    def test_redirect_if_not_logged_in(self):
+        identity, account = self.create_account()
+        driver = self.driver
+        driver.get(self.live_server_url + reverse('account_details'))
+        self.fill_in_login_form(account)
+        self.wait_until_loaded('body')
+        self.assertTrue(driver.current_url.endswith(reverse('account_details')))

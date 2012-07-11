@@ -1,5 +1,6 @@
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
+from django.shortcuts import render
 from django.utils.functional import wraps
 from django.utils.decorators import method_decorator
 from django.utils.http import urlquote
@@ -56,3 +57,27 @@ def require_account(view_func):
         return view_func(request, *args, **kwargs)
     return view
 
+
+def require_account_with_redirect(view_func):
+    """
+    If there is no current account, show a page with login form and reload
+    this page after login.
+
+    The view_func must return a TemplateResponse, or should set its own
+    'url_after_logout' in its context.
+    """
+    @wraps(view_func)
+    def view(request, *args, **kwargs):
+        if not hasattr(request, 'identity') or request.identity.account_id is None:
+            return render(request, 'learnscripture/login_and_redirect.html',
+                          {'redirect_url': request.get_full_path(),
+                           'title': 'Login',
+                           })
+        response = view_func(request, *args, **kwargs)
+        if hasattr(response, 'context_data'):
+            # response is a TemplateResponse that we can alter. We need to set a
+            # flag so that after logout we don't go back to the same page,
+            # because this page will show a login form.
+            response.context_data['url_after_logout'] = '/'
+        return response
+    return view

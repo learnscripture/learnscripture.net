@@ -12,6 +12,7 @@ from django.core.urlresolvers import reverse
 from django.core import mail
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
+from django.template.response import TemplateResponse
 from django.utils import timezone
 from django.utils.http import urlparse, base36_to_int
 from django.views.decorators.cache import never_cache
@@ -37,7 +38,7 @@ from payments.models import Price, Fund
 from payments.sign import sign_payment_info
 from scores.models import get_all_time_leaderboard, get_leaderboard_since, ScoreReason
 
-from .decorators import require_identity, require_preferences, has_preferences, redirect_via_prefs, require_account
+from .decorators import require_identity, require_preferences, has_preferences, redirect_via_prefs, require_account, require_account_with_redirect
 
 #
 # === Notes ===
@@ -69,7 +70,9 @@ def login(request):
     # Redirect to dashboard because just about everything you might want to do
     # will change after sign in, and we want to encourage people to do their
     # revision first.
-    return HttpResponseRedirect(reverse('dashboard'))
+    # Allow a url to be passed in the query string too.
+    url = request.GET.get('url', reverse('dashboard'))
+    return HttpResponseRedirect(url)
 
 
 def feature_disallowed(request, title, reason):
@@ -784,7 +787,7 @@ def csrf_failure(request, reason=""):
     return resp
 
 
-@require_account
+@require_account_with_redirect
 def account_details(request):
     if request.method == 'POST':
         form = AccountDetailsForm(request.POST, instance=request.identity.account)
@@ -795,9 +798,9 @@ def account_details(request):
     else:
         form = AccountDetailsForm(instance=request.identity.account)
 
-    return render(request, 'learnscripture/account_details.html',
-                  {'form':form,
-                   'title': u"Account details"})
+    return TemplateResponse(request, 'learnscripture/account_details.html',
+                            {'form':form,
+                             'title': u"Account details"})
 
 
 def date_to_js_ts(d):

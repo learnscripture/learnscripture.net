@@ -148,14 +148,18 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
         driver.get(self.live_server_url + reverse('dashboard'))
         driver.find_element_by_id("id-session-menu").click()
         driver.find_element_by_link_text("Sign in").click()
+        self.fill_in_login_form(account)
+        self.wait_until_loaded('.logout-link')
+        elem = driver.find_element_by_id('id-session-menu')
+        self.assertEqual(elem.text, account.username)
+
+    def fill_in_login_form(self, account):
+        driver = self.driver
         driver.find_element_by_id("id_login-email").clear()
         driver.find_element_by_id("id_login-email").send_keys(account.email)
         driver.find_element_by_id("id_login-password").clear()
         driver.find_element_by_id("id_login-password").send_keys("password")
         driver.find_element_by_id("id-sign-in-btn").click()
-        self.wait_until_loaded('.logout-link')
-        elem = driver.find_element_by_id('id-session-menu')
-        self.assertEqual(elem.text, account.username)
 
 
 class UsesSQLAlchemyBase(TransactionTestCase):
