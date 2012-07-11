@@ -1,6 +1,7 @@
 {% load url from future %}
 {% load compress %}
 {% load bootstrap %}
+{% load json_filters %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -325,6 +326,8 @@
   })();
 
 </script>
-
+<script type="text/javascript">
+learnscripture.themeFonts = {{ theme_fonts|jsonify|safe }};
+</script>
   </body>
 </html>
