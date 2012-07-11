@@ -306,6 +306,10 @@
     {% block extrajs %}
     {% endblock %}
 
+    {% if url_after_logout %}
+    <div id="url-after-logout">{{ url_after_logout }}</div>
+    {% endif %}
+
 <script type="text/javascript">
 
   var _gaq = _gaq || [];

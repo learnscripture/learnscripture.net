@@ -34,8 +34,12 @@ var learnscripture = (function (learnscripture, $) {
         $('.guest-only').hide();
 
         if (signinType === 'logout') {
-            // Need to refresh page
-            window.location.reload();
+            // Need to refresh page, unless page indicates differently
+            if ($('#url-after-logout').length > 0) {
+                window.location = $('#url-after-logout').text();
+            } else {
+                window.location.reload();
+            }
         } else if (signinType === 'signup') {
             // If they are in the middle of reading/testing,
             // we don't want to force them back to the beginning.
@@ -78,6 +82,17 @@ var learnscripture = (function (learnscripture, $) {
         $('#id_signup-email').focus();
     };
 
+
+    var loginEndpoint = '/login/';
+
+    var setLoginEndpoint = function (url) {
+        loginEndpoint = url;
+    }
+
+    var getLoginEndpoint = function (url) {
+        return loginEndpoint;
+    }
+
     var loginBtnClick = function (ev) {
         // Chrome will only remember passwords if the login form is submitted in
         // the normal way.  Therefore we do synchronous XHR to check login
@@ -87,7 +102,7 @@ var learnscripture = (function (learnscripture, $) {
 
         // This form is 'shared' between login and forgot password, so ensure
         // form action is correct.
-        $('#id-login-form form').attr('action', '/login/');
+        $('#id-login-form form').attr('action', getLoginEndpoint());
 
         $.ajax({url: '/api/learnscripture/v1/login/?format=json',
                 dataType: 'json',
@@ -133,7 +148,9 @@ var learnscripture = (function (learnscripture, $) {
     };
 
     var showLogIn = function (ev) {
-        ev.preventDefault();
+        if (ev !== undefined) {
+            ev.preventDefault();
+        }
         $('#id-login-form').modal({backdrop: 'static', keyboard: true, show: true});
         $('#id_login-email').focus();
     };
@@ -215,6 +232,8 @@ var learnscripture = (function (learnscripture, $) {
     learnscripture.setupAccountControls = setupAccountControls;
     learnscripture.setAccountData = setAccountData;
     learnscripture.getAccountData = getAccountData;
+    learnscripture.setLoginEndpoint = setLoginEndpoint;
+    learnscripture.showLogIn = showLogIn;
     return learnscripture;
 }(learnscripture || {}, $));
 

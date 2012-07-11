@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% load url from future %}
+
+{% block content %}
+<p>You need to <a href="#" class="login-link">log in</a> to access this page.</p>
+
+{% endblock %}
+
+{% block extrajs %}
+<script type="text/javascript">
+$(document).ready(function () {
+    learnscripture.setLoginEndpoint("{% filter escapejs %}{% url 'login' %}?url={{ redirect_url }}{% endfilter %}");
+    learnscripture.showLogIn();
+});
+</script>
+{% endblock %}
