@@ -94,12 +94,11 @@ var learnscripture = (function (learnscripture, $) {
     }
 
     var loginBtnClick = function (ev) {
+        ev.preventDefault();
         // Chrome will only remember passwords if the login form is submitted in
         // the normal way.  Therefore we do synchronous XHR to check login
-        // details (and actually log them in), then allow form submission to
+        // details (and actually log them in), then do form submission to
         // continue if it is correct.
-
-
         // This form is 'shared' between login and forgot password, so ensure
         // form action is correct.
         $('#id-login-form form').attr('action', getLoginEndpoint());
@@ -118,12 +117,13 @@ var learnscripture = (function (learnscripture, $) {
                     }
                 },
                 success: function (data) {
-                    // No ev.preventDefault, form will submit
+                    $('#id-login-form form').get(0).submit();
                 }
                 });
     };
 
     var forgotPasswordClick = function (ev) {
+        ev.preventDefault();
         // This form is 'shared' between login and forgot password, so ensure
         // form action is correct.
         $('#id-login-form form').attr('action', '/password-reset/');
@@ -142,7 +142,7 @@ var learnscripture = (function (learnscripture, $) {
                     }
                 },
                 success: function (data) {
-                    // No ev.preventDefault, form will submit
+                    $('#id-login-form form').get(0).submit();
                 }
                 });
     };
