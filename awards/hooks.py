@@ -19,7 +19,7 @@ def notify_about_new_award(sender, **kwargs):
     else:
         template = """<img src="%s%s"> You've earned a new badge: <a href="%s">%s</a>."""
 
-    award_url = reverse('user_stats', args=(account.username,)) + "#badges"
+    award_url = reverse('user_stats', args=(account.username,))
 
     msg = html_fragment(template,
                         settings.STATIC_URL,
@@ -35,21 +35,21 @@ def notify_about_new_award(sender, **kwargs):
     # 'redirect_uri' parameter to take them back to where they were.  So we
     # render the link to facebook using javascript, embedding necessary data
     # using data attributes.
-    msg = msg + html_fragment('<span class="broadcast">'
-                              '<span class="facebook"'
-                              ' data-fb-link="%s"'
-                              ' data-fb-picture="%s%s"'
+    msg = msg + html_fragment('<span class="broadcast"'
+                              ' data-link="%s"'
+                              ' data-picture="%s%s"'
                               ' data-award-id="%s"'
                               ' data-award-level="%s"'
                               ' data-award-name="%s"'
-                              '></span>'
-                              '</span>',
+                              ' data-account-username="%s"'
+                              '></span>',
                               award_url,
                               settings.STATIC_URL,
                               award.image_medium(),
                               award.id, # not needed at the moment
                               award.level,
-                              award.short_description()
+                              award.short_description(),
+                              account.username,
                               )
 
     account.identity.add_html_notice(msg)
