@@ -71,8 +71,7 @@ def login(request):
     # will change after sign in, and we want to encourage people to do their
     # revision first.
     # Allow a url to be passed in the query string too.
-    url = request.GET.get('url', reverse('dashboard'))
-    return HttpResponseRedirect(url)
+    return get_next(request, reverse('dashboard'))
 
 
 def feature_disallowed(request, title, reason):
