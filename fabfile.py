@@ -378,10 +378,7 @@ def deploy():
     build_static()
 
     if not getattr(env, 'no_restarts', False):
-        with settings(warn_only=True):
-            stop_webserver()
-        start_webserver()
-
+        restart_webserver()
         # Need to restart celeryd, as it will have old code.
         restart_celeryd()
 
