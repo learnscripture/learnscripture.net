@@ -6,10 +6,10 @@
 
 {% block content %}
 
-<table class="filters">
-  <tr>
-    <th>Who:</th>
-    <td>
+<form class="filters">
+  <div class="clearfix">
+    <label>Who:</label>
+    <div class="input">
       <ul class="pills">
         {% if 'group' in request.GET %}
         <li><a href="{% spurl base=request.get_full_path remove_query_param='group' %}">Everyone</a></li>
@@ -22,11 +22,11 @@
         {% endif %}
         <li><a id="id-leaderboard-select-group-btn" href="#" class="btn">Select group</a></li>
       </ul>
-    </td>
-  </tr>
-  <tr>
-    <th>When:</th>
-    <td>
+    </div>
+  </div>
+  <div class="clearfix">
+    <label>When:</label>
+    <div class="input">
       <ul class="pills">
         {% if 'thisweek' in request.GET %}
         <li><a href="{% spurl base=request.get_full_path remove_query_param='thisweek' %}">All time</a></li>
@@ -41,9 +41,9 @@
         {% endif %}
 
       </ul>
-    </td>
-  </tr>
-</table>
+    </div>
+  </div>
+</form>
 
 {% if group %}
 <h2>Group: {{ group.name }}</h2>
