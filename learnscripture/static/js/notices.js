@@ -38,7 +38,7 @@ var learnscripture = (function (learnscripture, $) {
                 '&redirect_uri=' + encodeURIComponent(redirectUri) +
                 '&caption=' + encodeURIComponent(caption) +
                 '&picture=' + encodeURIComponent(urlStart + d['fbPicture']);
-            var html = '<a href="' + fbUrl + '">Facebook</a>';
+            var html = '<a href="' + fbUrl + '" class="icon-facebook">Facebook</a>';
             j.html(html);
         });
 
