@@ -103,4 +103,5 @@ class AccountSetPasswordForm(SetPasswordForm):
 class ContactForm(forms.Form):
     name = forms.CharField(help_text=u"Optional", max_length=255, required=False)
     email = forms.EmailField(help_text=u"Optional", required=False)
-    message = forms.CharField(max_length=10000, required=True, widget=widgets.Textarea)
+    message = forms.CharField(max_length=10000, required=True,
+                              widget=widgets.Textarea(attrs={'rows':'10'}))
