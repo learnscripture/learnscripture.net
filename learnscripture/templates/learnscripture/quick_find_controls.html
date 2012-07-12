@@ -51,18 +51,21 @@
         </div>
       </div>
 
-     <div class="input">
-        <input id="id_lookup" type="submit" name="lookup"
-               {% if quick_find_mode == 'PASSAGE' %}
-               value="Lookup passage"
-               {% else %}
-               value="Lookup verse"
-               {% endif %}
-               class="btn primary">
-     </div>
-     <div class="clearfix error">
-       <p id="id_form_all_errors" class="form-all-errors"></p>
-     </div>
+      <div class="clearfix">
+        <div class="input">
+          <input id="id_lookup" type="submit" name="lookup"
+                 {% if quick_find_mode == 'PASSAGE' %}
+                 value="Lookup passage"
+                 {% else %}
+                 value="Lookup verse"
+                 {% endif %}
+                 class="btn primary">
+        </div>
+      </div>
+
+      <div class="clearfix error">
+        <p id="id_form_all_errors" class="form-all-errors"></p>
+      </div>
     </form>
 
     <div class="quickfind_search_results">
