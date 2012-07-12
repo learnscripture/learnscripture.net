@@ -25,20 +25,34 @@ var learnscripture = (function (learnscripture, $) {
         });
 
         // Turn broadcast data into links:
-        $('.notice .broadcast').prepend("&nbsp;&nbsp; Tell people: ");
-        $('.notice .broadcast .facebook').each(function (index, elem) {
+        $('.notice .broadcast').each(function (index, elem) {
+            var html = "&nbsp;&nbsp; Tell people: ";
             var j = $(elem);
             var d = j.data();
             var loc = document.location;
             var urlStart = loc.protocol + '//' + loc.host;
             var redirectUri = loc.toString();
-            var caption = "I just earned badge " + d['awardName'];
+            var link = urlStart + d['link'];
+            link += ((link.indexOf('?') == -1) ? "?" : "&");
+            link += "from=" + d['accountUsername'];
+
+            var caption = "I just earned a badge: " + d['awardName'];
+
+            // Facebook
             var fbUrl = 'http://www.facebook.com/dialog/feed?app_id=175882602545382' +
-                '&link=' + encodeURIComponent(urlStart + d['fbLink']) +
+                '&link=' + encodeURIComponent(link) +
                 '&redirect_uri=' + encodeURIComponent(redirectUri) +
                 '&caption=' + encodeURIComponent(caption) +
-                '&picture=' + encodeURIComponent(urlStart + d['fbPicture']);
-            var html = '<a href="' + fbUrl + '" class="icon-facebook">Facebook</a>';
+                '&picture=' + encodeURIComponent(urlStart + d['picture']);
+            html = html + '<a href="' + fbUrl + '" class="icon-facebook">Facebook</a>';
+
+            // Twitter
+            var twUrl = 'http://twitter.com/share' +
+                '?url=' + encodeURIComponent(link) +
+                '&text=' + encodeURIComponent(caption) +
+                '&hashtags=LearnScripture';
+            html = html + ' &nbsp; <a href="' + twUrl + '" class="icon-twitter">Twitter</a>';
+
             j.html(html);
         });
 
