@@ -12,7 +12,7 @@
     <div class="input">
       <ul class="pills">
         {% if 'group' in request.GET %}
-        <li><a href="{% spurl base=request.get_full_path remove_query_param='group' %}">Everyone</a></li>
+        <li><a href="{% spurl base=request.get_full_path remove_query_param='group' remove_query_param='p' %}">Everyone</a></li>
         {% else %}
         <li class="active"><a href="">Everyone</a></li>
         {% endif %}
@@ -29,13 +29,13 @@
     <div class="input">
       <ul class="pills">
         {% if 'thisweek' in request.GET %}
-        <li><a href="{% spurl base=request.get_full_path remove_query_param='thisweek' %}">All time</a></li>
+        <li><a href="{% spurl base=request.get_full_path remove_query_param='thisweek' remove_query_param='p' %}">All time</a></li>
         {% else %}
         <li class="active"><a href="">All time</a></li>
         {% endif %}
 
         {% if 'thisweek' not in request.GET %}
-        <li><a href="{% spurl base=request.get_full_path add_query='thisweek' %}">This week</a></li>
+        <li><a href="{% spurl base=request.get_full_path add_query='thisweek' remove_query_param='p' %}">This week</a></li>
         {% else %}
         <li class="active"><a href="">This week</a></li>
         {% endif %}
@@ -51,6 +51,8 @@
 {% endif %}
 
 {% if accounts %}
+
+{% include 'learnscripture/leaderboard_pagination.html' %}
 
 <table>
   <thead>
@@ -78,17 +80,6 @@
 
 {% endif %}
 
-<div class="pagination">
-<ul>
-  {% if page_num == 1 %}
-  <li class="disabled prev"><a>Previous</a></li>
-  {% else %}
-  <li class="prev"><a href="?p={{ previous_page_num }}">Previous</a></li>
-  {% endif %}
-  {% if accounts and accounts|length == PAGE_SIZE %}
-  <li class="next{% if not accounts %} disabled{% endif %}"><a href="?p={{ next_page_num }}">Next</a></li>
-  {% else %}
-  <li class="disabled next"><a>Next</a></li>
-  {% endif %}
-</div>
+{% include 'learnscripture/leaderboard_pagination.html' %}
+
 {% endblock %}
