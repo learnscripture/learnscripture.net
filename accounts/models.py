@@ -114,6 +114,10 @@ class Account(models.Model):
     def personal_name(self):
         return (self.first_name.strip() + u' ' + self.last_name.strip()).strip()
 
+    @property
+    def recruited_by(self):
+        return self.identity.referred_by
+
     def set_password(self, raw_password):
         self.password = make_password(raw_password)
 
