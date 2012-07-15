@@ -11,10 +11,12 @@
 
 <table class="bordered-table">
   <tbody>
+    {% if account.personal_name %}
     <tr>
       <th>Name</th>
-      <td>{{ account.first_name }} {{ account.last_name }}</td>
+      <td>{{ account.personal_name }}</td>
     </tr>
+    {% endif %}
     <tr>
       <th>Started using site</th>
       <td>{{ account.identity.date_created }}</td>
