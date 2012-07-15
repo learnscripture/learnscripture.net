@@ -110,6 +110,10 @@ class Account(models.Model):
     def email_name(self):
         return self.first_name if self.first_name.strip() != "" else self.username
 
+    @property
+    def personal_name(self):
+        return (self.first_name.strip() + u' ' + self.last_name.strip()).strip()
+
     def set_password(self, raw_password):
         self.password = make_password(raw_password)
 
