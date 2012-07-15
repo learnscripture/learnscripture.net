@@ -21,6 +21,12 @@
       <th>Started using site</th>
       <td>{{ account.identity.date_created }}</td>
     </tr>
+    {% if account.recruited_by %}
+    <tr>
+      <th>Recruited by</th>
+      <td>{{ account.recruited_by|account_link }}</td>
+    </tr>
+    {% endif %}
     <tr>
       <th>Subscription type</th>
       <td>{{ account.get_subscription_display }}</td>
