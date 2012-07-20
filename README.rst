@@ -61,3 +61,40 @@ Server config
 
 Passwords and private server config is stored in secrets.json that is not in
 source control.
+
+
+Deployment
+==========
+
+Deployment is done using fabric, typically:
+
+$  fab production deploy
+
+Python dependencies are managed using requirements.txt, which is used
+automatically in the deploy procedure.
+
+Initial setup of the project was done using:
+
+- WebFaction control panel to create apps
+  - apache apps
+  - rabbitmq apps (custom app listening on port)
+  - celeryd apps (custom app listening on port)
+  - pgbouncer app (custom app listening on port)
+  - supervisord app (custom app listening on port)
+
+- Some manual installation of software.
+  - pgbouncer
+  - lessc binary, using node/npm
+
+- Some scripted installation of software, using fabric
+  - rabbitmq
+
+Due to shared hosting with no root access, custom installation was often
+necessary, and chef/puppet would probably not provide easy shortcuts.
+
+Most config for these apps is stored in ./config (ideally all should be there)
+
+Some customisation of the apps provided by WebFaction was done e.g. apache
+start/stop scripts are disabled/changed, replaced with supervisord.
+
+See fabfile.py for more details on some of these things.
