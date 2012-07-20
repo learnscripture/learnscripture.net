@@ -53,6 +53,9 @@ Many of the detailed lower-level tests are in the 'identity.py' tests, since
 most business logic runs off Identity.
 
 
+$ ./manage.py test learnscripture
+
+
 Server config
 =============
 
