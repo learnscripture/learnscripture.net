@@ -68,9 +68,23 @@
       <div class="current-verse">
       </div>
     </div>
-    <div id="id-version">
-      Version:
+    <div id="id-verse-options">
+      <div class="verse-dropdown dropdown" style="display: inline-block;">
+        <ul> {# Needed for bootstrap-dropdown #}
+          <li>
+            <a href="#" class="btn dropdown-toggle2" id="id-verse-dropdown">Options <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="#" id="id-skip-verse-btn">Skip verse</a></li>
+              <span class="selection-set-only">
+              <li><a href="#" id="id-cancel-learning-btn">Stop learning verse</a></li>
+              </span>
+            </ul>
+          </li>
+        </ul>
+      </div>
+
       {% include "learnscripture/version_select.html" %}
+
     </div>
   </div>
 
@@ -153,19 +167,6 @@
 
 <h3>Current verse</h3>
 
-<div class="verse-dropdown dropdown">
-  <ul> {# Needed for bootstrap-dropdown #}
-    <li>
-      <a href="#" class="btn dropdown-toggle2" id="id-verse-dropdown">Options <span class="caret"></span></a>
-      <ul class="dropdown-menu">
-        <li><a href="#" id="id-skip-verse-btn">Skip verse</a></li>
-        <span class="selection-set-only">
-        <li><a href="#" id="id-cancel-learning-btn">Stop learning verse</a></li>
-        </span>
-      </ul>
-    </li>
-  </ul>
-</div>
 
 <div id="id-points-target"></div>
 
