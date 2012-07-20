@@ -327,6 +327,7 @@ var learnscripture =
 
             $('#id-result-comment').text(comment);
             fadeVerseTitle(false);
+            enableBtn($('#id-hint-btn'), false);
 
             completeStageGroup();
 
