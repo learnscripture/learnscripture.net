@@ -317,6 +317,10 @@ class VerseSet(models.Model):
     date_added = models.DateTimeField(default=timezone.now)
     created_by = models.ForeignKey('accounts.Account', related_name='verse_sets_created')
 
+    # Essentially denormalised fields, to make it quick to check for duplicate
+    # passage sets. FIXME - this could be better done by combining first and
+    # last references, since this wouldn't duplicate info from a completely
+    # difference model (Verse).
     bible_verse_number_start = models.PositiveSmallIntegerField(null=True, blank=True)
     bible_verse_number_end = models.PositiveSmallIntegerField(null=True, blank=True)
 
@@ -338,7 +342,7 @@ class VerseSet(models.Model):
 
     @property
     def uncached_verse_choices(self):
-        return VerseChoice.uncached_objects.filter(verse_set=self)
+        return VerseChoice.uncached_objects.filter(verse_set=self).order_by('set_order')
 
     def set_verse_choices(self, ref_list):
         # Need to ensure that we preserve existing objects and to do the
@@ -365,6 +369,14 @@ class VerseSet(models.Model):
         # Delete unused VerseChoice objects.
         for vc in old_vcs:
             vc.delete()
+
+    def update_start_end(self, verse_dict):
+        # Update bible_verse_number_start/end if needed
+        if self.set_type == VerseSetType.PASSAGE:
+            verse_choices = list(self.uncached_verse_choices.all())
+            self.bible_verse_number_start = verse_dict[verse_choices[0].reference].bible_verse_number
+            self.bible_verse_number_end = verse_dict[verse_choices[-1].reference].bible_verse_number
+            self.save()
 
 
 class VerseChoiceManager(caching.base.CachingManager):
