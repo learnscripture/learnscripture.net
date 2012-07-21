@@ -543,12 +543,6 @@ def create_or_edit_set(request, set_type=None, slug=None):
 
             messages.info(request, "Verse set '%s' saved!" % verse_set.name)
             return HttpResponseRedirect(reverse('view_verse_set', kwargs=dict(slug=verse_set.slug)))
-        else:
-            # Invalid forms
-            verse_list =  mk_verse_list(ref_list, verse_dict)
-            if set_type == VerseSetType.PASSAGE:
-                verse_list = add_passage_breaks(verse_list, breaks)
-            c['verses'] = verse_list
 
     else:
         form = VerseSetForm(instance=verse_set)
@@ -556,11 +550,15 @@ def create_or_edit_set(request, set_type=None, slug=None):
         if verse_set is not None:
             ref_list = [vc.reference for vc in verse_set.uncached_verse_choices.all()]
             verse_dict = version.get_verses_by_reference_bulk(ref_list)
-            verse_list = mk_verse_list(ref_list, verse_dict)
-            if verse_set.set_type == VerseSetType.PASSAGE:
-                verse_list = add_passage_breaks(verse_list, verse_set.breaks)
-            c['verses'] = verse_list
+            breaks = verse_set.breaks
+        else:
+            ref_list, verse_dict, breaks = [], {}, ''
 
+    verse_list = mk_verse_list(ref_list, verse_dict)
+    if set_type == VerseSetType.PASSAGE:
+        verse_list = add_passage_breaks(verse_list, breaks)
+
+    c['verses'] = verse_list
     c['new_verse_set'] = verse_set == None
     c['verse_set_form'] = form
     c['title'] = title
