@@ -397,6 +397,7 @@ def view_verse_set(request, slug):
             if 'convert_to_passage_set' in request.POST:
                 verse_set.set_type = VerseSetType.PASSAGE
                 verse_set.save()
+                verse_set.update_passage_id()
                 messages.info(request, "Verse set converted to 'passage' type")
                 c['show_convert_to_passage'] = False
 
