@@ -336,6 +336,10 @@ class VerseSet(models.Model):
     def breaks_formatted(self):
         return self.breaks.replace(",", ", ")
 
+    @property
+    def uncached_verse_choices(self):
+        return VerseChoice.uncached_objects.filter(verse_set=self)
+
 
 class VerseChoiceManager(caching.base.CachingManager):
     use_for_related_fields = True
@@ -353,6 +357,7 @@ class VerseChoice(caching.base.CachingMixin, models.Model):
     set_order = models.PositiveSmallIntegerField(default=0)
 
     objects = VerseChoiceManager()
+    uncached_objects = models.Manager()
 
     class Meta:
         unique_together = [('verse_set', 'reference')]

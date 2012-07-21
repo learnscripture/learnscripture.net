@@ -23,6 +23,16 @@ class CreateSetTests(LiveServerTests):
         super(CreateSetTests, self).setUp()
         self._identity, self._account = self.create_account()
 
+    def _add_ref(self, ref):
+        driver = self.driver
+        driver.find_element_by_id("id_quick_find").clear()
+        driver.find_element_by_id("id_quick_find").send_keys(ref)
+        driver.find_element_by_id("id_lookup").click()
+        self.wait_for_ajax()
+        driver.find_element_by_css_selector("input.add-to-set").click()
+        self.wait_until_loaded('#id-verse-list tbody tr td')
+        time.sleep(0.1)
+
     def test_create_selection_set(self):
         self.login(self._account)
         driver = self.driver
@@ -31,13 +41,7 @@ class CreateSetTests(LiveServerTests):
         driver.find_element_by_id("id_name").send_keys("My set")
         driver.find_element_by_id("id_description").clear()
         driver.find_element_by_id("id_description").send_keys("My description")
-        driver.find_element_by_id("id_quick_find").clear()
-        driver.find_element_by_id("id_quick_find").send_keys("Gen 1:5")
-        driver.find_element_by_id("id_lookup").click()
-        self.wait_for_ajax()
-        driver.find_element_by_css_selector("input.add-to-set").click()
-
-        self.wait_until_loaded('#id-verse-list tbody tr td')
+        self._add_ref("Gen 1:5")
         self.assertIn("And God called the light Day", driver.page_source)
 
         driver.find_element_by_id("id_public").click()
@@ -51,6 +55,47 @@ class CreateSetTests(LiveServerTests):
         self.assertEqual(Event.objects.filter(event_type=EventType.VERSE_SET_CREATED).count(),
                          1)
 
+    def test_dedupe_selection_sets(self):
+        self.login(self._account)
+        driver = self.driver
+        driver.get(self.live_server_url + "/create-selection-set/")
+        driver.find_element_by_id("id_name").send_keys("My set")
+
+        # Add Gen 1:5
+        self._add_ref("Genesis 1:5")
+
+        driver.find_element_by_id("id-save-btn").click()
+        self.wait_until_loaded('body')
+
+        vs = VerseSet.objects.get(name='My set')
+        self.assertEqual(len(vs.verse_choices.all()), 1)
+
+        current_ref_list = [("Genesis 1:5", 0)]
+
+        def _add_new_ref(ref):
+            # Edit again
+            driver.get(self.live_server_url + reverse('edit_set', kwargs=dict(slug=vs.slug)))
+            self._add_ref(ref)
+
+            driver.find_element_by_id("id-save-btn").click()
+            self.wait_until_loaded('body')
+
+            self.assertIn("Verse set 'My set' saved", driver.page_source) # Checks we didn't get 500
+
+            if ref not in [r for r, i in current_ref_list]:
+                current_ref_list.append((ref, len(current_ref_list)))
+
+            self.assertEqual(current_ref_list,
+                             sorted([(vc.reference, vc.set_order)
+                                     for vc in vs.uncached_verse_choices.all()]))
+
+        # Caching could cause these to fail
+        _add_new_ref("Genesis 1:6")
+        _add_new_ref("Genesis 1:6")
+        _add_new_ref("Genesis 1:7")
+        _add_new_ref("Genesis 1:7")
+
+
     def test_forget_name(self):
         """
         If they forget the name, it should not validate,
@@ -60,19 +105,8 @@ class CreateSetTests(LiveServerTests):
         driver = self.driver
         driver.get(self.live_server_url + reverse('create_selection_set'))
 
-        driver.find_element_by_id("id_quick_find").clear()
-        driver.find_element_by_id("id_quick_find").send_keys("Gen 1:5")
-        driver.find_element_by_id("id_lookup").click()
-        self.wait_for_ajax()
-        driver.find_element_by_css_selector("input.add-to-set").click()
-        self.wait_until_loaded('body')
-
-        driver.find_element_by_id("id_quick_find").clear()
-        driver.find_element_by_id("id_quick_find").send_keys("Gen 1:6")
-        driver.find_element_by_id("id_lookup").click()
-        self.wait_for_ajax()
-        driver.find_element_by_css_selector("input.add-to-set").click()
-        self.wait_until_loaded('body')
+        self._add_ref("Gen 1:5")
+        self._add_ref("Gen 1:6")
 
         driver.find_element_by_id("id-save-btn").click()
 
