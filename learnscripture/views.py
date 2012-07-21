@@ -533,19 +533,13 @@ def create_or_edit_set(request, set_type=None, slug=None):
                 verse_set.public = True
             verse_set.save()
             verse_set.set_verse_choices(ref_list)
+            verse_set.update_start_end(verse_dict)
 
             # if user just made it public or it is a new public verse set
             if (verse_set.public and (orig_verse_set_public == False
                                       or mode == 'create'
                                       )):
                 public_verse_set_created.send(sender=verse_set)
-
-
-            if verse_set.set_type == VerseSetType.PASSAGE:
-                verse_choices = list(verse_set.verse_choices.order_by('set_order'))
-                verse_set.bible_verse_number_start = verse_dict[verse_choices[0].reference].bible_verse_number
-                verse_set.bible_verse_number_end = verse_dict[verse_choices[-1].reference].bible_verse_number
-                verse_set.save()
 
             messages.info(request, "Verse set '%s' saved!" % verse_set.name)
             return HttpResponseRedirect(reverse('view_verse_set', kwargs=dict(slug=verse_set.slug)))
