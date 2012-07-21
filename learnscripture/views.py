@@ -541,8 +541,9 @@ def create_or_edit_set(request, set_type=None, slug=None):
                                       )):
                 public_verse_set_created.send(sender=verse_set)
 
-            # Need to ensure that we preserve existing objects
-            existing_vcs = verse_set.verse_choices.all()
+            # Need to ensure that we preserve existing objects and to do the
+            # query correctly we need to ignore caching.
+            existing_vcs = verse_set.uncached_verse_choices.all()
             existing_vcs_dict = dict((vc.reference, vc) for vc in existing_vcs)
             old_vcs = set(existing_vcs)
             for i, ref in enumerate(ref_list):  # preserve order
@@ -589,7 +590,7 @@ def create_or_edit_set(request, set_type=None, slug=None):
         form = VerseSetForm(instance=verse_set)
 
         if verse_set is not None:
-            ref_list = [vc.reference for vc in verse_set.verse_choices.all()]
+            ref_list = [vc.reference for vc in verse_set.uncached_verse_choices.all()]
             verse_dict = version.get_verses_by_reference_bulk(ref_list)
             verse_list = mk_verse_list(ref_list, verse_dict)
             if verse_set.set_type == VerseSetType.PASSAGE:
