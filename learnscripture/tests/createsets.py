@@ -204,8 +204,7 @@ class CreateSetTests(LiveServerTests):
                                   set_type=VerseSetType.PASSAGE)
         self.assertTrue(len(vs.verse_choices.all()), 10)
         self.assertEqual(vs.breaks, "1:3,1:9")
-        self.assertEqual(vs.bible_verse_number_start, 0)
-        self.assertEqual(vs.bible_verse_number_end, 9)
+        self.assertEqual(vs.passage_id, 'Genesis 1:1 - Genesis 1:10')
 
     def test_create_duplicate_passage_set(self):
         self.test_create_passage_set()

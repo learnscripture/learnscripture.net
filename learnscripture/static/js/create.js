@@ -98,8 +98,7 @@ var learnscripture =
                     var verses = results[0].verses;
                     $.ajax({url: '/api/learnscripture/v1/checkduplicatepassageset/?format=json',
                             data: {
-                                bible_verse_number_start: verses[0].bible_verse_number,
-                                bible_verse_number_end: verses[verses.length-1].bible_verse_number
+                                passage_id: verses[0].reference + ' - ' + verses[verses.length-1].reference
                             },
                             dataType: 'json',
                             success: function(results) {
