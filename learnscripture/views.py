@@ -533,7 +533,6 @@ def create_or_edit_set(request, set_type=None, slug=None):
                 verse_set.public = True
             verse_set.save()
             verse_set.set_verse_choices(ref_list)
-            verse_set.update_start_end(verse_dict)
 
             # if user just made it public or it is a new public verse set
             if (verse_set.public and (orig_verse_set_public == False

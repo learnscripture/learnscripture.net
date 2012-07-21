@@ -368,12 +368,12 @@ class VerseSet(models.Model):
         for vc in old_vcs:
             vc.delete()
 
-    def update_start_end(self, verse_dict):
-        # Update bible_verse_number_start/end if needed
+        self.update_passage_id()
+
+    def update_passage_id(self):
         if self.set_type == VerseSetType.PASSAGE:
             verse_choices = list(self.uncached_verse_choices.all())
-            self.bible_verse_number_start = verse_dict[verse_choices[0].reference].bible_verse_number
-            self.bible_verse_number_end = verse_dict[verse_choices[-1].reference].bible_verse_number
+            self.passage_id = verse_choices[0].reference + u' - ' + verse_choices[-1].reference
             self.save()
 
 

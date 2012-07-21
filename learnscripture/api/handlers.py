@@ -354,8 +354,7 @@ class CheckDuplicatePassageSet(BaseHandler):
 
     def read(self, request):
         try:
-            start = request.GET['bible_verse_number_start']
-            end = request.GET['bible_verse_number_end']
+            passage_id = request.GET['passage_id']
         except KeyError:
             return rc.BAD_REQUEST
 
@@ -363,9 +362,8 @@ class CheckDuplicatePassageSet(BaseHandler):
         # This works if they have accepted default name.  If it doesn't have the
         # default name, it might not be considered a true 'duplicate' anyway.
         verse_sets = (verse_sets.filter(set_type=VerseSetType.PASSAGE,
-                                       bible_verse_number_start=start,
-                                       bible_verse_number_end=end
-                                       )
+                                        passage_id=passage_id,
+                                        )
                       .select_related('created_by')
                       )
         return [dict(name=vs.name,
