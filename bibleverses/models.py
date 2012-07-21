@@ -340,6 +340,32 @@ class VerseSet(models.Model):
     def uncached_verse_choices(self):
         return VerseChoice.uncached_objects.filter(verse_set=self)
 
+    def set_verse_choices(self, ref_list):
+        # Need to ensure that we preserve existing objects and to do the
+        # query correctly we need to ignore caching.
+        existing_vcs = self.uncached_verse_choices.all()
+        existing_vcs_dict = dict((vc.reference, vc) for vc in existing_vcs)
+        old_vcs = set(existing_vcs)
+        for i, ref in enumerate(ref_list):  # preserve order
+            dirty = False
+            if ref in existing_vcs_dict:
+                vc = existing_vcs_dict[ref]
+                if vc.set_order != i:
+                    vc.set_order = i
+                    dirty = True
+                old_vcs.remove(vc)
+            else:
+                vc = VerseChoice(verse_set=self,
+                                 reference=ref,
+                                 set_order=i)
+                dirty = True
+            if dirty:
+                vc.save()
+
+        # Delete unused VerseChoice objects.
+        for vc in old_vcs:
+            vc.delete()
+
 
 class VerseChoiceManager(caching.base.CachingManager):
     use_for_related_fields = True
