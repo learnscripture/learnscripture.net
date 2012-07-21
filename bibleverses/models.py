@@ -317,12 +317,10 @@ class VerseSet(models.Model):
     date_added = models.DateTimeField(default=timezone.now)
     created_by = models.ForeignKey('accounts.Account', related_name='verse_sets_created')
 
-    # Essentially denormalised fields, to make it quick to check for duplicate
-    # passage sets. FIXME - this could be better done by combining first and
-    # last references, since this wouldn't duplicate info from a completely
-    # difference model (Verse).
-    bible_verse_number_start = models.PositiveSmallIntegerField(null=True, blank=True)
-    bible_verse_number_end = models.PositiveSmallIntegerField(null=True, blank=True)
+    # Essentially denormalised field, to make it quick to check for duplicate
+    # passage sets:
+    passage_id = models.CharField(max_length=203, # 100 for reference * 2 + 3 for ' - '
+                                  default="")
 
     objects = VerseSetManager()
 
