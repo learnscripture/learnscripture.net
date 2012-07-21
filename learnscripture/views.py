@@ -504,15 +504,13 @@ def create_or_edit_set(request, set_type=None, slug=None):
         form = VerseSetForm(request.POST, instance=verse_set)
         # Need to propagate the references even if it doesn't validate,
         # so do this work here:
-        refs = request.POST.get('reference-list', '')
-
-        ref_list_raw = refs.split('|')
-        # Dedupe ref_list while preserving order:
+        ref_list_raw = request.POST.get('reference-list', '').split('|')
+        verse_dict = version.get_verses_by_reference_bulk(ref_list_raw)
+        # Dedupe ref_list, and ensure correct references, while preserving order:
         ref_list = []
         for ref in ref_list_raw:
-            if ref not in ref_list:
+            if ref in verse_dict and ref not in ref_list:
                 ref_list.append(ref)
-        verse_dict = version.get_verses_by_reference_bulk(ref_list)
 
         breaks = request.POST.get('break-list', '')
         # Basic sanitising of 'breaks'
@@ -534,6 +532,7 @@ def create_or_edit_set(request, set_type=None, slug=None):
                 # Can't undo:
                 verse_set.public = True
             verse_set.save()
+            verse_set.set_verse_choices(ref_list)
 
             # if user just made it public or it is a new public verse set
             if (verse_set.public and (orig_verse_set_public == False
@@ -541,35 +540,6 @@ def create_or_edit_set(request, set_type=None, slug=None):
                                       )):
                 public_verse_set_created.send(sender=verse_set)
 
-            # Need to ensure that we preserve existing objects and to do the
-            # query correctly we need to ignore caching.
-            existing_vcs = verse_set.uncached_verse_choices.all()
-            existing_vcs_dict = dict((vc.reference, vc) for vc in existing_vcs)
-            old_vcs = set(existing_vcs)
-            for i, ref in enumerate(ref_list):  # preserve order
-                if ref in verse_dict:
-                    dirty = False
-                    if ref in existing_vcs_dict:
-                        vc = existing_vcs_dict[ref]
-                        if vc.set_order != i:
-                            vc.set_order = i
-                            dirty = True
-                        old_vcs.remove(vc)
-                    else:
-                        vc = VerseChoice(verse_set=verse_set,
-                                         reference=ref,
-                                         set_order=i)
-                        dirty = True
-                    if dirty:
-                        vc.save()
-                else:
-                    # If not in verse_dict, it can only be because user fiddled
-                    # with the DOM.
-                    pass
-
-            # Delete unused VerseChoice objects.
-            for vc in old_vcs:
-                vc.delete()
 
             if verse_set.set_type == VerseSetType.PASSAGE:
                 verse_choices = list(verse_set.verse_choices.order_by('set_order'))
