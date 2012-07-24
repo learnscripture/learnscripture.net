@@ -93,6 +93,10 @@ var learnscripture = (function (learnscripture, $) {
         return loginEndpoint;
     }
 
+    var setLoginRedirectToSelf = function () {
+        setLoginEndpoint('/login/?next=' + encodeURIComponent(window.location.pathname + window.location.search));
+    }
+
     var loginBtnClick = function (ev) {
         ev.preventDefault();
         // Chrome will only remember passwords if the login form is submitted in
@@ -232,7 +236,7 @@ var learnscripture = (function (learnscripture, $) {
     learnscripture.setupAccountControls = setupAccountControls;
     learnscripture.setAccountData = setAccountData;
     learnscripture.getAccountData = getAccountData;
-    learnscripture.setLoginEndpoint = setLoginEndpoint;
+    learnscripture.setLoginRedirectToSelf = setLoginRedirectToSelf;
     learnscripture.showLogIn = showLogIn;
     return learnscripture;
 }(learnscripture || {}, $));

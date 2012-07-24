@@ -70,8 +70,7 @@ def require_account_with_redirect(view_func):
     def view(request, *args, **kwargs):
         if not hasattr(request, 'identity') or request.identity.account_id is None:
             return render(request, 'learnscripture/login_and_redirect.html',
-                          {'redirect_url': request.get_full_path(),
-                           'title': 'Login',
+                          {'title': 'Login',
                            })
         response = view_func(request, *args, **kwargs)
         if hasattr(response, 'context_data'):
