@@ -55,7 +55,13 @@ class AccountAdmin(admin.ModelAdmin):
     ordering = ['date_joined']
     search_fields = ['username', 'email']
 
+
+class NoticeAdmin(admin.ModelAdmin):
+    def queryset(self, request):
+        return super(NoticeAdmin, self).queryset(request).select_related('for_identity', 'for_identity__account')
+
+
 admin.site.register(Identity, IdentityAdmin)
 admin.site.register(Account, AccountAdmin)
-admin.site.register(Notice)
+admin.site.register(Notice, NoticeAdmin)
 
