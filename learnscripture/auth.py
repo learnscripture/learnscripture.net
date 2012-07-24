@@ -11,7 +11,7 @@ Feature = make_choices('Feature',
                         ])
 
 def check_allowed(request, feature):
-    need_to_signup = mark_safe(u'You need to <a href="#" class="signup-link">create an account</a> to access this feature.<span class="reload-after-signup"></span>')
+    need_to_signup = mark_safe(u'You need to <a href="#" class="signup-link reload-after-signup">create an account</a> or <a href="#" class="login-link reload-after-login">log in</a> to access this feature.')
 
     need_to_subscribe = html_fragment(u"Your free trial or paid subscription has finished, so you cannot create perform this action. You can <a href='%s'>subscribe</a> to enable this feature.",
                                       reverse('subscribe'))

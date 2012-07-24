@@ -58,8 +58,10 @@ discounts the members may have).</p>
 
 {% else %} {# no account #}
 
-<p>You need to <a class="signup-link" href="#">create an account</a>
-  or <a class="login-link" href="#">log in</a> to create a payment fund.</p>
+<p>You need to
+  <a class="signup-link reload-after-signup" href="#">create an account</a> or
+  <a class="login-link reload-after-login" href="#">log in</a>
+  to create a payment fund.</p>
 
 {% endif %}
 
@@ -72,12 +74,4 @@ discounts the members may have).</p>
     may take up to one month to process.</li>
 </ul>
 
-{% endblock %}
-
-{% block extrajs %}
-<script type="text/javascript">
-$(document).ready(function () {
-    learnscripture.setLoginRedirectToSelf();
-});
-</script>
 {% endblock %}

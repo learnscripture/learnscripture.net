@@ -3,15 +3,8 @@
 {% load url from future %}
 
 {% block content %}
-<p>You need to <a href="#" class="login-link">log in</a> to access this page.</p>
+<p>You need to <a href="#" class="login-link reload-after-login">log in</a>
+(or <a href="#" class="signup-link reload-after-signup">create an account)</a>
+to access this page.</p>
 
-{% endblock %}
-
-{% block extrajs %}
-<script type="text/javascript">
-$(document).ready(function () {
-    learnscripture.setLoginRedirectToSelf();
-    learnscripture.showLogIn();
-});
-</script>
 {% endblock %}
