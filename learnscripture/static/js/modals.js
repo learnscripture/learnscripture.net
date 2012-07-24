@@ -62,6 +62,11 @@ var learnscripture = (function (learnscripture, $) {
     };
 
     var adjustForm = function (form) {
+        if (form.find('label').length == 0) {
+            // Don't adjust 'forms' that don't have controls, such as standalone
+            // buttons in a <form> element, to prevent uneeded indents.
+            return;
+        }
         var width;
         if (form.is(':visible')) {
             width = form.width();
