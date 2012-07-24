@@ -1217,14 +1217,16 @@ def group_select_list(request):
                   {'groups': groups})
 
 
-@require_account
 def account_funds(request):
-    account = request.identity.account
-
-    funds = account.funds_managed.all().order_by('name')
+    account = account_from_request(request)
+    if account:
+        funds = account.funds_managed.all().order_by('name')
+    else:
+        funds = None
     return render(request, 'learnscripture/account_funds.html',
                   {'title': 'Payment funds',
-                   'funds': funds
+                   'funds': funds,
+                   'account': account,
                    })
 
 @require_account

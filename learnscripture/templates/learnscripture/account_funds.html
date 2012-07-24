@@ -15,6 +15,8 @@ process.
 members receive a 20% discount. (These discounts are on top of any individual
 discounts the members may have).</p>
 
+{% if account %}
+
 <h3>Your funds</h3>
 
 {% if funds %}
@@ -54,6 +56,12 @@ discounts the members may have).</p>
 
 {% endif %}
 
+{% else %} {# no account #}
+
+<p>You need to <a class="signup-link" href="#">create an account</a>
+  or <a class="login-link" href="#">log in</a> to create a payment fund.</p>
+
+{% endif %}
 
 <h3>Notes</h3>
 
@@ -64,4 +72,12 @@ discounts the members may have).</p>
     may take up to one month to process.</li>
 </ul>
 
+{% endblock %}
+
+{% block extrajs %}
+<script type="text/javascript">
+$(document).ready(function () {
+    learnscripture.setLoginRedirectToSelf();
+});
+</script>
 {% endblock %}
