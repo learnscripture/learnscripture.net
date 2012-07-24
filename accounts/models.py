@@ -1076,6 +1076,7 @@ class Notice(models.Model):
     for_identity = models.ForeignKey(Identity, related_name='notices')
     message_html = models.TextField()
     created = models.DateTimeField(default=timezone.now)
+    seen = models.DateTimeField(default=None, null=True, blank=True)
 
     def is_old(self):
         return (timezone.now() - self.created).days >= 2
