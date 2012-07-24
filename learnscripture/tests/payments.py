@@ -4,6 +4,7 @@ from datetime import timedelta
 from decimal import Decimal
 
 from django.core import mail
+from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.utils import timezone
 from paypal.standard.ipn.models import PayPalIPN
@@ -261,3 +262,13 @@ class FundTests(AccountTestMixin, TestCase):
         # An email should be sent when the fund drops to this level
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn('dropped below', mail.outbox[0].body)
+
+
+class PaymentFundPageTests(TestCase):
+
+    def test_access_payment_fund_page_no_session(self):
+
+        resp = self.client.get(reverse('account_funds'), follow=True)
+        self.assertEqual(resp.status_code, 200)
+        self.assertNotContains(resp, "Your funds")
+        self.assertContains(resp, "You need to")
