@@ -105,6 +105,10 @@ var learnscripture = (function (learnscripture, $) {
         // continue if it is correct.
         // This form is 'shared' between login and forgot password, so ensure
         // form action is correct.
+        if ($(".reload-after-login").length > 0) {
+            setLoginRedirectToSelf();
+        }
+
         $('#id-login-form form').attr('action', getLoginEndpoint());
 
         $.ajax({url: '/api/learnscripture/v1/login/?format=json',
@@ -236,7 +240,6 @@ var learnscripture = (function (learnscripture, $) {
     learnscripture.setupAccountControls = setupAccountControls;
     learnscripture.setAccountData = setAccountData;
     learnscripture.getAccountData = getAccountData;
-    learnscripture.setLoginRedirectToSelf = setLoginRedirectToSelf;
     learnscripture.showLogIn = showLogIn;
     return learnscripture;
 }(learnscripture || {}, $));
