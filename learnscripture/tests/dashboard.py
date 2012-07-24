@@ -3,8 +3,9 @@ from __future__ import absolute_import
 from datetime import timedelta
 
 from django.core.urlresolvers import reverse
+from django.db.models import F
 
-from accounts.models import Identity, TestingMethod, FREE_TRIAL_LENGTH_DAYS
+from accounts.models import Identity, Notice, TestingMethod, FREE_TRIAL_LENGTH_DAYS
 from bibleverses.models import VerseSet, BibleVersion, StageType
 from .base import LiveServerTests
 
@@ -119,3 +120,24 @@ class DashboardTests(LiveServerTests):
         driver.get(self.live_server_url + reverse('dashboard'))
         self.wait_until_loaded('body')
         self.assertTrue(driver.current_url.endswith(reverse('subscribe')))
+
+    def test_notices_expire(self):
+        # This could be tested on any page, but this is an obvious example.
+        identity, account = self.create_account()
+        self.login(account)
+        account.add_html_notice("Hello you crazy guy!")
+
+        self.assertEqual(identity.notices.all()[0].seen, None)
+
+        driver = self.driver
+
+        driver.get(self.live_server_url + reverse('dashboard'))
+        self.assertIn("Hello you crazy guy!", driver.page_source)
+
+        self.assertNotEqual(identity.notices.all()[0].seen, None)
+
+        # Move database into 'past'
+        Notice.objects.update(seen = F('seen') - timedelta(days=10))
+
+        driver.get(self.live_server_url + reverse('dashboard'))
+        self.assertNotIn("Hello you crazy guy!", driver.page_source)
