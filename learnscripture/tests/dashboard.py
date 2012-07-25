@@ -4,9 +4,11 @@ from datetime import timedelta
 
 from django.core.urlresolvers import reverse
 from django.db.models import F
+from django.utils import timezone
 
+from accounts import memorymodel
 from accounts.models import Identity, Notice, TestingMethod, FREE_TRIAL_LENGTH_DAYS
-from bibleverses.models import VerseSet, BibleVersion, StageType
+from bibleverses.models import VerseSet, BibleVersion, StageType, MemoryStage
 from .base import LiveServerTests
 
 
@@ -99,6 +101,49 @@ class DashboardTests(LiveServerTests):
         alert.accept()
         self.wait_until_loaded('body')
         self.assertNotIn('Psalm 23', driver.page_source)
+
+    def test_revise_one_section(self):
+        i = self.setup_identity()
+
+        # Add a passage
+        vs = VerseSet.objects.get(slug='psalm-23')
+        vs.breaks = "23:4"
+        vs.save()
+        i.add_verse_set(vs)
+
+        # Get to 'group testing' stage
+        i.verse_statuses.update(strength=memorymodel.STRENGTH_FOR_GROUP_TESTING + 0.01,
+                                last_tested=timezone.now() - timedelta(days=10),
+                                next_test_due=timezone.now() - timedelta(days=1),
+                                memory_stage=MemoryStage.TESTED)
+
+        driver = self.driver
+
+        driver.get(self.live_server_url + reverse('dashboard'))
+        self.assertIn('Psalm 23', driver.page_source) # sanity check
+
+        btn = driver.find_element_by_css_selector('input[value="Revise one section"]')
+        self.assertEqual(btn.get_attribute('name'), 'revisepassagenextsection')
+        btn.click()
+
+        self.wait_until_loaded('body')
+        self.wait_for_ajax()
+        self.assertIn("Psalm 23:1", driver.page_source)
+
+        # Skip through
+        def skip():
+            driver.find_element_by_id("id-verse-dropdown").click()
+            driver.find_element_by_link_text("Skip verse").click()
+            self.wait_for_ajax()
+        skip()
+        self.assertIn("Psalm 23:2", driver.page_source)
+        skip()
+        self.assertIn("Psalm 23:3", driver.page_source)
+        skip()
+        self.wait_until_loaded('body')
+
+        # Should be back at dashboard
+        self.assertTrue(driver.current_url.endswith(reverse('dashboard')))
 
     def test_home_dashboard_routing(self):
         ids = list(Identity.objects.all())
