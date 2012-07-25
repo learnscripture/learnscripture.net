@@ -38,6 +38,9 @@ var learnscripture =
         // Defined in MemoryStage:
         var MEMORY_STAGE_TESTED = 3;
 
+        // Defined in LearningType:
+        var LEARNING_TYPE_PRACTICE = 'practice';
+
         var INITIAL_STRENGTH_FACTOR = 0.1;
 
         // Thresholds for different testings modes:
@@ -64,6 +67,7 @@ var learnscripture =
 
         var testingMistakes = null;
         var hardMode = null;
+        var practiceMode = null;
         var hintsShown = 0;
         var maxHintsToShow = 0;
 
@@ -297,22 +301,24 @@ var learnscripture =
             // Do some rounding  to avoid '99.9' and retain 3 s.f.
             accuracy = Math.round(accuracy * 1000) / 1000;
 
-            $.ajax({url: '/api/learnscripture/v1/actioncomplete/?format=json',
-                    dataType: 'json',
-                    type: 'POST',
-                    data: {
-                        verse_status: JSON.stringify(currentVerseStatus, null, 2),
-                        stage: STAGE_TYPE_TEST,
-                        accuracy: accuracy
-                    },
-                    success: function(data) {
-                        learnscripture.ajaxRetrySucceeded();
-                        loadStats();
-                        loadScoreLogs();
-                    },
-                    retry: learnscripture.ajaxRetryOptions,
-                    error: learnscripture.ajaxRetryFailed
-                   });
+            if (!isPracticeMode()) {
+                $.ajax({url: '/api/learnscripture/v1/actioncomplete/?format=json',
+                        dataType: 'json',
+                        type: 'POST',
+                        data: {
+                            verse_status: JSON.stringify(currentVerseStatus, null, 2),
+                            stage: STAGE_TYPE_TEST,
+                            accuracy: accuracy
+                        },
+                        success: function(data) {
+                            learnscripture.ajaxRetrySucceeded();
+                            loadStats();
+                            loadScoreLogs();
+                        },
+                        retry: learnscripture.ajaxRetryOptions,
+                        error: learnscripture.ajaxRetryFailed
+                       });
+            }
 
             var accuracyPercent = Math.floor(accuracy * 100).toString();
             $('#id-accuracy').text(accuracyPercent + "%");
@@ -686,6 +692,15 @@ var learnscripture =
             return hardMode;
         };
 
+
+        var setPracticeMode = function (practice) {
+            practiceMode = practice;
+        }
+
+        var isPracticeMode = function () {
+            return practiceMode;
+        }
+
         var testStart = function () {
             $('.current-verse .word *').stop(true, true);
             // Don't want to see a flash of words at the beginning,
@@ -695,7 +710,9 @@ var learnscripture =
             testingStatus.text('');
             // After an certain point, we make things a bit harder.
             setHardMode(currentVerseStatus.strength > HARD_MODE_THRESHOLD);
-            $('#id-points-target').html(' Points target: <b>' + getPointsTarget().toString() + '</b>');
+            if (!isPracticeMode()) {
+                $('#id-points-target').html(' Points target: <b>' + getPointsTarget().toString() + '</b>');
+            }
             hintsShown = 0;
             if (currentVerseStatus.strength < ALLOW_HINTS_THRESHOLD) {
                 // For very short verses, allow fewer hints e.g.  2 or 3 word
@@ -868,11 +885,11 @@ var learnscripture =
                                             caption: 'Read',
                                             testMode: false,
                                             toggleMode: null},
-                         'readAnyway': {setup: function () {},
-                                        continueStage: function () { return true; },
-                                        caption: 'Read',
-                                        testMode: false,
-                                        toggleMode: null}
+                         'practice': {setup: testStart,
+                                      continueStage: testContinue,
+                                      caption: 'Practice',
+                                      testMode: true,
+                                      toggleMode: null}
                         };
 
         // === Handling stage lists ===
@@ -883,15 +900,20 @@ var learnscripture =
             if (verseData.strength != null) {
                 strength = verseData.strength;
             }
-            if (verseData.needs_testing) {
-                currentStageList = chooseStageListForStrength(strength);
+            if (verseData.learning_type == LEARNING_TYPE_PRACTICE) {
+                currentStageList = ['practice'];
+                setPracticeMode(true);
             } else {
-                if (isPassageType(verseData)) {
-                    currentStageList = ['readForContext'];
+                if (verseData.needs_testing) {
+                    currentStageList = chooseStageListForStrength(strength);
                 } else {
-                    // This can happen if the user chooses a verse set to learn
-                    // and they already know the verses in it.
-                    currentStageList = ['readAnyway'];
+                    if (isPassageType(verseData)) {
+                        currentStageList = ['readForContext'];
+                    } else {
+                        // This can happen if the user chooses a verse set to learn
+                        // and they already know the verses in it.
+                        currentStageList = ['practice'];
+                    }
                 }
             }
             setupStage(0);
@@ -1081,8 +1103,10 @@ var learnscripture =
                                                line + '</div>');
                 }
             });
+            var doTest = (currentVerseStatus.needs_testing ||
+                          currentVerseStatus.learning_type == LEARNING_TYPE_PRACTICE)
             // Then split up into words
-            var wordClass = currentVerseStatus.needs_testing ? 'word' : 'testedword';
+            var wordClass = doTest ? 'word' : 'testedword';
             var wordGroups = [];
 
             $('.current-verse .line').each(function (idx, elem) {
@@ -1126,7 +1150,7 @@ var learnscripture =
             $('.current-verse').html(replacement.join('<br/>'));
 
             // Add reference
-            if (currentVerseStatus.needs_testing && reference !== null) {
+            if (doTest && reference !== null) {
                 parts = reference.split(/\b/);
                 replace = [];
                 $.each(parts, function(j, word) {

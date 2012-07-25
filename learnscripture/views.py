@@ -161,8 +161,8 @@ def session_stats(identity):
     return stats
 
 
-def learn_set(request, uvs_list, revision):
-    session.start_learning_session(request, uvs_list, revision)
+def learn_set(request, uvs_list, learning_type):
+    session.start_learning_session(request, uvs_list, learning_type)
     return HttpResponseRedirect(reverse('learn'))
 
 
@@ -199,9 +199,11 @@ def dashboard(request):
 
     if request.method == 'POST':
         if 'learnqueue' in request.POST:
-            return learn_set(request, identity.verse_statuses_for_learning(), False)
+            return learn_set(request, identity.verse_statuses_for_learning(),
+                             session.LearningType.LEARNING)
         if 'revisequeue' in request.POST:
-            return learn_set(request, identity.verse_statuses_for_revising(), True)
+            return learn_set(request, identity.verse_statuses_for_revising(),
+                             session.LearningType.REVISION)
         if ('learnpassage' in request.POST or
             'revisepassage' in request.POST or
             'revisepassagesection' in request.POST):
@@ -212,13 +214,19 @@ def dashboard(request):
 
             if 'learnpassage' in request.POST:
                 uvss = identity.slim_passage_for_revising(uvss, verse_set)
-                return learn_set(request, uvss, False)
+                return learn_set(request, uvss, session.LearningType.LEARNING)
             if 'revisepassage' in request.POST:
                 uvss = identity.slim_passage_for_revising(uvss, verse_set)
-                return learn_set(request, uvss, True)
+                return learn_set(request, uvss, session.LearningType.REVISION)
             if 'revisepassagesection' in request.POST:
                 uvss = identity.get_next_section(uvss, verse_set)
-                return learn_set(request, uvss, True)
+                return learn_set(request, uvss, session.LearningType.REVISION)
+
+        if 'reviseverse' in request.POST:
+            uvs = identity.verse_statuses.get(id=int(request.POST['uvs_id']))
+            return learn_set(request, [uvs],
+                             session.LearningType.REVISION if uvs.needs_testing
+                             else session.LearningType.PRACTICE)
 
         if 'clearqueue' in request.POST:
             identity.clear_learning_queue()
@@ -299,7 +307,8 @@ def choose(request):
                 # Shouldn't be possible by clicking on buttons.
                 pass
             if vs is not None:
-                return learn_set(request, identity.add_verse_set(vs, version=version), False)
+                return learn_set(request, identity.add_verse_set(vs, version=version),
+                                 session.LearningType.LEARNING)
 
         # Handle choose individual verse
         ref = request.POST.get('reference', None)
@@ -310,7 +319,8 @@ def choose(request):
             except InvalidVerseReference:
                 pass # Ignore the post.
             else:
-                return learn_set(request, [identity.add_verse_choice(ref, version=version)], False)
+                return learn_set(request, [identity.add_verse_choice(ref, version=version)],
+                                 session.LearningType.LEARNING)
 
     c = {'title': u'Choose verses'}
     verse_sets = verse_sets_visible_for_request(request).order_by('name').prefetch_related('verse_choices')
