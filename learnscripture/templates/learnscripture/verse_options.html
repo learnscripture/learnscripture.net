@@ -1,0 +1,61 @@
+{% load url from future %}
+
+<div style="text-align: center";>
+{% for uvs in uvs_list %}
+
+  {% if forloop.first %}  {# Avoid doing 'reviseverse' more than once #}
+    <form action="{% url 'dashboard' %}" method="POST">
+      {% csrf_token %}
+
+      <input type="hidden" name="uvs_id" value="{{ uvs.id }}" />
+      <input type="submit" name="reviseverse" class="btn primary"
+             {% if uvs.needs_testing %}
+             value="Revise verse"
+             {% else %}
+             value="Practise verse"
+             {% endif %}
+             />
+
+    </form>
+  {% endif %}
+
+  {% if uvs.is_in_passage %}
+    <form action="{% url 'dashboard' %}" method="POST">
+      {% csrf_token %}
+
+      <input type="hidden" name="verse_set_id" value="{{ uvs.verse_set.id }}" />
+      <input type="hidden" name="uvs_id" value="{{ uvs.id }}" />
+
+      {% if uvs.section_reference != uvs.passage_reference %}
+
+        {# revise/practise section #}
+
+        <p>
+          {% if uvs.needs_testing %}
+          <input type="submit" name="revisepassagesection" class="btn primary"
+                 value="Revise section: {{ uvs.section_reference }}"/>
+          {% else %}
+          <input type="submit" name="practisepassagesection" class="btn primary"
+                 value="Practise section: {{ uvs.section_reference }}"/>
+          {% endif %}
+        </p>
+        <br/>
+
+      {% endif %}
+
+      {# revise/practice passage #}
+
+      <p>
+        {% if uvs.needs_testing %}
+        <input type="submit" name="revisepassage" class="btn primary"
+               value="Revise passage: {{ uvs.passage_reference }}"/>
+        {% else %}
+        <input type="submit" name="practisepassage" class="btn primary"
+               value="Practise passage: {{ uvs.passage_reference }}"/>
+        {% endif %}
+      </p>
+    </form>
+  {% endif %}
+
+{% endfor %}
+</div>
