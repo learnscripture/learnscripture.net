@@ -137,10 +137,6 @@ def restore():
     print_message("Doing: supervisorctl start all")
     os.system("%s start all" % SUPERVISORCTL)
 
-    # There is also the apache process, which currently is not under the control
-    # of supervisord. It has its own cronjob to restart it, so we leave it
-    # alone.
-
     # If still not up, the next time this script is called may fix things,
     # otherwise we're out of options.
 
