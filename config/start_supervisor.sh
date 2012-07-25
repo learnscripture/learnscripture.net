@@ -10,7 +10,7 @@ FALSE=0
 
 test -x $SUPERVISORD || exit 0
 
-export PATH="${PATH:+$PATH:}/usr/local/bin:/usr/sbin:/sbin:/home/ptone/bin:/home/ptone/sbin:"
+export PATH="${PATH:+$PATH:}/usr/local/bin:/usr/sbin:/sbin:"
 
 isRunning(){
     pidof_daemon
