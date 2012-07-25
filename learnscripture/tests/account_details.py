@@ -30,6 +30,7 @@ class AccountDetailsTests(LiveServerTests):
         identity, account = self.create_account()
         driver = self.driver
         driver.get(self.live_server_url + reverse('account_details'))
+        driver.find_element_by_link_text("log in").click()
         self.fill_in_login_form(account)
         self.wait_until_loaded('body')
         self.assertTrue(driver.current_url.endswith(reverse('account_details')))
