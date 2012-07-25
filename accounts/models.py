@@ -792,6 +792,11 @@ class Identity(models.Model):
     def clear_learning_queue(self):
         self.verse_statuses_for_learning_qs().delete()
 
+    def verse_statuses_for_ref_and_version(self, reference, version_slug):
+        return self.verse_statuses.filter(reference=reference,
+                                          version__slug=version_slug,
+                                          ignored=False)
+
     def passages_for_learning(self):
         """
         Retrieves a list of VerseSet objects of 'passage' type that need

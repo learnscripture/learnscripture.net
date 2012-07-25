@@ -454,11 +454,54 @@ class UserVerseStatus(models.Model):
             return True
         return timezone.now() >= self.next_test_due
 
+    def is_in_passage(self):
+        return self.verse_set is not None and self.verse_set.is_passage
+
     def simple_strength(self):
         """
         Returns the strength normalised to a 0 to 10 scale for presentation in UI.
         """
         return min(10, int(math.floor((self.strength / memorymodel.LEARNT) * 10)))
+
+    @cached_property
+    def passage_reference(self):
+        """
+        Returns the reference for the whole passage this UVS belongs to.
+        """
+        if not self.is_in_passage():
+            return None
+        verse_choices = self.set_verse_choices
+        return pretty_passage_ref(verse_choices[0].reference,
+                                  verse_choices[-1].reference)
+
+    @cached_property
+    def set_verse_choices(self):
+        return list(self.verse_set.verse_choices.all())
+
+    @cached_property
+    def section_reference(self):
+        """
+        Returns the reference for the section in the passage this UVS belongs to.
+        """
+        if not self.is_in_passage():
+            return None
+
+        section = self.get_section_verse_choices()
+        if section is not None:
+            return pretty_passage_ref(section[0].reference,
+                                      section[-1].reference)
+        return None # Shouldn't get here
+
+    def get_section_verse_choices(self):
+        # Split verse set into sections
+        sections = get_passage_sections(self.set_verse_choices, self.verse_set.breaks)
+
+        # Now we've got to find which one we are in:
+        for section in sections:
+            for vc in section:
+                if vc.reference == self.reference:
+                    return section
+
 
     def __unicode__(self):
         return u"%s, %s" % (self.reference, self.version.slug)
@@ -610,11 +653,27 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE,
 
     return retval
 
+
+def pretty_passage_ref(start_ref, end_ref):
+    first = parse_ref(start_ref, None, return_verses=False)
+    last = parse_ref(end_ref, None, return_verses=False)
+
+    ref = u"%s %d:%d" % (first.book,
+                         first.chapter_number,
+                         first.verse_number,
+                         )
+    if last.chapter_number == first.chapter_number:
+        ref += u"-%d" % last.verse_number
+    else:
+        ref += u"-%d:%d" % (last.chapter_number, last.verse_number)
+    return ref
+
+
 def get_passage_sections(verse_list, breaks):
     """
-    Given a list of UVS or Verses, and a comma separated list of 'break
-    definitions', each of which could be <verse_number> or
-    <chapter_number>:<verse_number>, return the list in sections.
+    Given a list of objects with a correct 'reference' attribute, and a comma
+    separated list of 'break definitions', each of which could be <verse_number>
+    or <chapter_number>:<verse_number>, return the list in sections.
     """
     # Since the input has been sanitised, we can do parsing without needing DB
     # queries.

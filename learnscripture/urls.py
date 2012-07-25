@@ -20,6 +20,7 @@ urlpatterns = patterns('',
                        url(r'^preferences/$', 'learnscripture.views.preferences', name='preferences'),
                        url(r'^progress/$', 'learnscripture.views.user_verses', name='user_verses'),
                        url(r'^my-verse-sets/$', 'learnscripture.views.user_verse_sets', name='user_verse_sets'),
+                       url(r'^verse-options/$', 'learnscripture.views.verse_options', name='verse_options'),
 
                        # Payment
                        url(r'^subscribe/$', 'learnscripture.views.subscribe', name='subscribe'),

@@ -3,7 +3,8 @@ from __future__ import absolute_import
 from django.utils import unittest
 from django.test import TestCase
 
-from bibleverses.models import InvalidVerseReference, Verse, BibleVersion, get_passage_sections
+from bibleverses.models import InvalidVerseReference, Verse, BibleVersion, get_passage_sections, VerseSet, VerseChoice, UserVerseStatus
+from .base import AccountTestMixin
 
 
 class VerseTests(TestCase):
@@ -148,3 +149,21 @@ class GetPassageSectionsTests(unittest.TestCase):
                           for section in sections],
                          [["Genesis 1:1", "Genesis 1:2"],
                           ["Genesis 1:3-4", "Genesis 1:5"]])
+
+
+class UserVerseStatusTests(AccountTestMixin, TestCase):
+
+    fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json']
+
+    def test_passage_and_section_reference(self):
+        # Setup to create UVSs
+        identity, account = self.create_account()
+        vs = VerseSet.objects.get(name="Psalm 23")
+        vs.breaks = "23:4"
+        vs.save()
+        identity.add_verse_set(vs)
+
+        uvs = identity.verse_statuses.get(reference='Psalm 23:2')
+
+        self.assertEqual(uvs.passage_reference, 'Psalm 23:1-6')
+        self.assertEqual(uvs.section_reference, 'Psalm 23:1-3')
