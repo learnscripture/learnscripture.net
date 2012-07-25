@@ -16,4 +16,5 @@ from .subscribe import *
 from .payments import *
 from .referrals import *
 from .groups import *
+from .user_verses_page import *
 
