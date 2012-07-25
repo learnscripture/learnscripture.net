@@ -6,7 +6,7 @@ LS_RESTORE=/home/cciw/webapps/learnscripture_django/src/scripts/check_and_restor
 
 
 */10       *    * * * /home/cciw/webapps/learnscripture_django/venv/bin/start_supervisor.sh start > /dev/null 2>&1
-*/15       *    * * * $LS_PYTHON $LS_RESTORE production 2>> /home/cciw/.learnscripture_check_and_restore.log
+*/15       *    * * * $LS_PYTHON $LS_RESTORE production 1>> /home/cciw/.learnscripture_check_and_restore.log 2>&1
 
 0          1,13 * * *  $LS_PYTHON $LS_MANAGE send_daily_account_emails
 0          2,14 * * *  $LS_PYTHON $LS_MANAGE metrics_aggregate
