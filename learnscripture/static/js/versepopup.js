@@ -1,7 +1,7 @@
 var learnscripture = (function (learnscripture, $) {
     "use strict";
     var setupVersePopups = function () {
-        $('.verse-popup-ref')
+        $('.verse-popup-btn')
             .popover({
                 title: function () {
                     return this.attributes['data-reference'].value +
@@ -11,27 +11,27 @@ var learnscripture = (function (learnscripture, $) {
                     var ref = this.attributes['data-reference'].value;
                     var version = this.attributes['data-version'].value;
                     var content;
-                    $.ajax({url: '/api/learnscripture/v1/versefind/?format=json',
-                            dataType: 'json',
+                    $.ajax({url: '/verse-options/',
+                            dataType: 'html',
                             type: 'GET',
                             async: false,
                             data: {
-                                'quick_find': ref,
+                                'ref': ref,
                                 'version_slug': version
                             },
-                            success: function(results) {
-                                content = results[0].text
+                            success: function(html) {
+                                content = html;
                             }
                            });
                     return content;
                 },
+                html: true,
                 trigger: 'manual'
             })
-            .bind('mouseenter', function(ev) { $(this).popover('show');})
-            .bind('mouseleave', function(ev) { $(this).popover('hide');})
-            .bind('focus', function(ev) { $(this).popover('show');})
-            .bind('blur', function(ev) { $(this).popover('hide');})
-        ;
+            .toggle(
+                function(ev) { $(this).button('toggle').popover('show');},
+                function(ev) { $(this).button('toggle').popover('hide');}
+            );
     };
     // Exports
     learnscripture.setupVersePopups = setupVersePopups;

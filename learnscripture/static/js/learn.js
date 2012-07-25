@@ -1435,7 +1435,7 @@ var learnscripture =
             $('#id-back-btn').show().click(back);
             $('#id-hint-btn').click(getHint);
             $('#id-next-verse-btn').click(nextVerse);
-            $('#id-context-next-verse-btn, #id-read-anyway-next-verse-btn').click(markReadAndNextVerse);
+            $('#id-context-next-verse-btn').click(markReadAndNextVerse);
             $('#id-version-select').change(versionSelectChanged);
             $('#id-help-btn').click(function (ev) {
                 if (preferences.enableAnimations) {

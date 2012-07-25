@@ -10,7 +10,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.core import mail
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.template.response import TemplateResponse
 from django.utils import timezone
@@ -204,13 +204,27 @@ def dashboard(request):
         if 'revisequeue' in request.POST:
             return learn_set(request, identity.verse_statuses_for_revising(),
                              session.LearningType.REVISION)
-        if ('learnpassage' in request.POST or
-            'revisepassage' in request.POST or
-            'revisepassagesection' in request.POST):
+        if any(p in request.POST for p in
+               ['learnpassage',
+                'revisepassage', 'revisepassagenextsection', 'revisepassagesection',
+                'practisepassage', 'practisepassagesection']):
+
+            # Some of these are sent via the verse_options.html template,
+            # not from the dashboard.
 
             vs_id = int(request.POST['verse_set_id'])
             verse_set = VerseSet.objects.get(id=vs_id)
             uvss = identity.verse_statuses_for_passage(vs_id)
+
+            if 'uvs_id' in request.POST:
+                # Triggered from 'verse_options.html'
+                uvs_id = int(request.POST['uvs_id'])
+                main_uvs = [uvs for uvs in uvss if uvs.id == uvs_id][0]
+                if ('revisepassagesection' in request.POST or
+                    'practisepassagesection' in request.POST):
+                    # Revise/practise the specified section
+                    refs = set(vc.reference for vc in main_uvs.get_section_verse_choices())
+                    uvss = [uvs for uvs in uvss if uvs.reference in refs]
 
             if 'learnpassage' in request.POST:
                 uvss = identity.slim_passage_for_revising(uvss, verse_set)
@@ -218,9 +232,17 @@ def dashboard(request):
             if 'revisepassage' in request.POST:
                 uvss = identity.slim_passage_for_revising(uvss, verse_set)
                 return learn_set(request, uvss, session.LearningType.REVISION)
-            if 'revisepassagesection' in request.POST:
+            if 'revisepassagenextsection' in request.POST:
                 uvss = identity.get_next_section(uvss, verse_set)
                 return learn_set(request, uvss, session.LearningType.REVISION)
+            if 'revisepassagesection' in request.POST:
+                # Already filtered uvss above
+                return learn_set(request, uvss, session.LearningType.REVISION)
+            if 'practisepassage' in request.POST:
+                return learn_set(request, uvss, session.LearningType.PRACTICE)
+            if 'practisepassagesection' in request.POST:
+                # Already filtered uvss above
+                return learn_set(request, uvss, session.LearningType.PRACTICE)
 
         if 'reviseverse' in request.POST:
             uvs = identity.verse_statuses.get(id=int(request.POST['uvs_id']))
@@ -348,6 +370,53 @@ def choose(request):
     c.update(context_for_quick_find(request))
 
     return render(request, 'learnscripture/choose.html', c)
+
+
+def verse_options(request):
+    """
+    Returns a page fragment showing a list of learning options for
+    the verse in request.GET['ref']
+    """
+    # This view is called from the 'progress' page where the list of verses
+    # being learnt by a user is shown.
+    identity = request.identity
+    ref = request.GET['ref']
+    version_slug = request.GET['version_slug']
+    uvss = identity.verse_statuses_for_ref_and_version(ref, version_slug)
+    if len(uvss) == 0:
+        return HttpResponse("Error: not learning this verse")
+
+    # FIXME: move more of this logic into Identity model, ideally.
+
+    # Different options:
+    # - could *revise*
+    # - could *practice*, if revision not due
+    # - for verses in passage sets, could learn section or passage
+
+    # In this context, the different UserVerseStatus objects need to be treated
+    # differently, because there are different actions if the verse is part of a
+    # passage verse set. However, two different UVS not attached to a passage
+    # verse set are equivalent.
+    uvss = _reduce_uvs_set_for_verse(uvss)
+    # UVS not in passage goes first
+    uvss.sort(key=lambda uvs: uvs.is_in_passage())
+    return render(request,
+                  "learnscripture/verse_options.html",
+                  {'uvs_list': uvss}
+                  )
+
+def _reduce_uvs_set_for_verse(uvss):
+    # Filters out multiple instances of non-
+    l = []
+    non_passage_seen = False
+    for uvs in uvss:
+        if not uvs.is_in_passage():
+            if non_passage_seen:
+                continue
+            else:
+                non_passage_seen = True
+        l.append(uvs)
+    return l
 
 
 def get_default_bible_version():
