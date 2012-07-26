@@ -117,6 +117,9 @@ def restore():
     except (Exception,), e:
         print_message(str(e))
 
+    # Need to wait for it to actually stop, allow 10 seconds
+    time.sleep(10)
+
     # Sometimes the problem is or could be a deadlocked cronjob, or some process
     # that is triggering WebFaction's process killer due to high memory usage.
     # Let's first kill everything that could be causing a problem.
@@ -133,9 +136,6 @@ def restore():
         start_supervisor()
     except (Exception,), e:
         print_message(str(e))
-
-    print_message("Doing: supervisorctl start all")
-    os.system("%s start all" % SUPERVISORCTL)
 
     # If still not up, the next time this script is called may fix things,
     # otherwise we're out of options.

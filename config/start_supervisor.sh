@@ -1,5 +1,7 @@
 #! /bin/bash
 
+export PATH=/usr/kerberos/bin:/usr/local/bin:/bin:/usr/bin:/home/cciw/bin:/home/cciw/.local/bin:/home/cciw/bin:/home/cciw/.local/bin:/home/cciw/.cabal/bin
+
 NAME=supervisord
 SUPERVISORD=/home/cciw/webapps/learnscripture_django/venv/bin/supervisord
 SUPERVISORCTL=/home/cciw/webapps/learnscripture_django/venv/bin/supervisorctl
@@ -9,8 +11,6 @@ TRUE=1
 FALSE=0
 
 test -x $SUPERVISORD || exit 0
-
-export PATH="${PATH:+$PATH:}/usr/local/bin:/usr/sbin:/sbin:"
 
 isRunning(){
     pidof_daemon
