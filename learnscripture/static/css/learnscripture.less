@@ -1153,3 +1153,12 @@ p.referral-link {
     }
   }
 }
+
+// Override some things from django-fiber - we don't want the side bar at all
+#df-wpr-layer, #df-wpr-sidebar {
+  display: none;
+}
+
+body div#wpr-body {
+  position: static !important;
+}
