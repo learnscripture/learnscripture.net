@@ -86,6 +86,8 @@ else:
 
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
+    PRODUCTION = STAGING = False
+
 SESSION_COOKIE_AGE = 3600 * 24 * 31 * 4 # 4 months
 
 ADMINS = [
@@ -174,7 +176,7 @@ MIDDLEWARE_CLASSES = [
         (True, 'learnscripture.middleware.IdentityMiddleware'),
         (True, 'pagination.middleware.PaginationMiddleware'),
         (True, 'raven.contrib.django.middleware.Sentry404CatchMiddleware'),
-        (not DEBUG, 'fiber.middleware.AdminPageMiddleware'),
+        (True, 'fiber.middleware.AdminPageMiddleware'),
     ]
     if b
 ]
