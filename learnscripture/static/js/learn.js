@@ -81,6 +81,9 @@ var learnscripture =
         var maxVerseIndex = null;
         var currentVerseStatus = null;
 
+        // Finish
+        var redirect_to = '/dashboard/';
+
         // ======== Generic utilities =========
 
         // === Randomising ===
@@ -516,7 +519,7 @@ var learnscripture =
                 depth = 0;
             }
             var go = function () {
-                window.location = '/dashboard/';
+                window.location = redirect_to;
             };
 
             // Don't do redirect if we are waiting for score logs to show.
@@ -1027,6 +1030,9 @@ var learnscripture =
             } else {
                 nextBtns.val('Done');
                 finishBtn.hide();
+            }
+            if (verse.return_to) {
+                redirect_to = verse.return_to;
             }
         };
 

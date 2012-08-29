@@ -3,6 +3,7 @@ import logging
 from datetime import datetime
 
 from app_metrics.utils import metric
+from django.core.urlresolvers import reverse
 from django.utils import timezone
 
 from accounts.models import Identity, Account
@@ -50,9 +51,10 @@ def get_verse_statuses(request):
         if needs_testing_override is not None:
             uvs.needs_testing_override = needs_testing_override
 
-        # Decorate UVS with learning_type because we need it
-        # in UI (learn.js)
+        # Decorate UVS with learning_type and return_to because we need it in UI
+        # (learn.js), even though the latter doesn't really belong here
         uvs.learning_type = learning_type
+        uvs.return_to = request.session.get('return_to', reverse('dashboard'))
         retval.append(uvs)
     return retval
 
@@ -80,12 +82,13 @@ def _set_verse_statuses(request, user_verse_statuses):
                             for order, uvs in enumerate(user_verse_statuses)])
 
 
-def start_learning_session(request, user_verse_statuses, learning_type):
+def start_learning_session(request, user_verse_statuses, learning_type, return_to):
     _set_verse_statuses(request, user_verse_statuses)
     _set_learning_session_start(request, timezone.now())
     request.session['learning_type'] = learning_type
     request.session['score_logs'] = []
     request.session['verses_skipped'] = False
+    request.session['return_to'] = return_to
 
 
 def verse_status_finished(request, reference, verse_set_id, new_score_logs):

@@ -62,3 +62,17 @@ class UserVersesPageTests(LiveServerTests):
 
         # Should be in 'practise' mode
         self.assertTrue(driver.find_element_by_css_selector(".instructions-practice").is_displayed())
+
+        # Type the verse:
+        words = "The LORD is my shepherd I shall not want"
+        for word in words.split():
+            driver.find_element_by_id('id-typing').send_keys(word + ' ')
+
+        # Click finish
+        self.wait_for_ajax()
+        driver.find_element_by_id('id-finish-btn').click()
+        self.wait_for_ajax()
+        self.wait_until_loaded('body')
+
+        # Should have gone back to where we came from
+        self.assertTrue(driver.current_url.endswith(reverse('user_verses')))
