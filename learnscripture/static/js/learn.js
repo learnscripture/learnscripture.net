@@ -1285,7 +1285,12 @@ var learnscripture =
                 inputBox.val('');
                 return;
             }
-            if (ev.which === 32 || ev.which === 13) {
+            if (ev.which === 32 || ev.which === 13
+                || (ev.which == 186 // colon, at least for US/UK
+                    // allowed if in reference
+                    && getWordAt(selectedWordIndex).hasClass("reference")
+                   )
+               ) {
                 ev.preventDefault();
                 if (currentStage.testMode) {
                     if (preferences.testingMethod === TEST_FULL_WORDS) {
