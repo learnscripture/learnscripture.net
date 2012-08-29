@@ -162,7 +162,17 @@ def session_stats(identity):
 
 
 def learn_set(request, uvs_list, learning_type):
-    session.start_learning_session(request, uvs_list, learning_type)
+    return_to = reverse('dashboard')
+    referer = request.META.get('HTTP_REFERER')
+    if referer is not None:
+        url = urlparse.urlparse(referer)
+        allowed_return_to = [reverse('user_verses')]
+        if url.path in allowed_return_to:
+            # avoiding redirection security problems by making it relative:
+            url = ('', '', url.path, url.params, url.query, url.fragment)
+            return_to = urlparse.urlunparse(url)
+
+    session.start_learning_session(request, uvs_list, learning_type, return_to)
     return HttpResponseRedirect(reverse('learn'))
 
 

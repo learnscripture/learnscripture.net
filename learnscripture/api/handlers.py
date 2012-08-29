@@ -65,6 +65,7 @@ class VersesToLearnHandler(BaseHandler):
               'text',
               'needs_testing',
               'learning_type', # added in get_verse_statuses
+              'return_to', # added in get_verse_statuses
               'learn_order',
               'bible_verse_number',
               ('version', ('full_name', 'short_name', 'slug', 'url')))
