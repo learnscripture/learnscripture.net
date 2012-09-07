@@ -1093,7 +1093,7 @@ def subscribe(request):
 
 @csrf_exempt
 def pay_done(request):
-    identity = getattr(request, 'identity')
+    identity = getattr(request, 'identity', None)
     if identity is not None:
         # This doesn't actually check if a payment was just received,
         # but it is good enough.
