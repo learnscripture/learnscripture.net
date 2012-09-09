@@ -182,7 +182,7 @@ class SignUpHandler(AccountCommon, BaseHandler):
         identity = request.identity
         if identity.account_id is not None:
             # UI should stop this happening.
-            resp = rc.BAD_REQUEST
+            return rc.BAD_REQUEST
         account = request.form.save()
         account.identity = identity
         identity.account = account
