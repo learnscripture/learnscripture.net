@@ -181,8 +181,10 @@ class SignUpHandler(AccountCommon, BaseHandler):
         from accounts.signals import new_account
         identity = request.identity
         if identity.account_id is not None:
-            # UI should stop this happening.
-            return rc.BAD_REQUEST
+            # Don't want to move identity to new account. The UI should stop
+            # this happening in the normal case, because the 'sign up' screen
+            # isn't available once you are signed up, but that isn't reliable.
+            identity = session.start_identity(request)
         account = request.form.save()
         account.identity = identity
         identity.account = account
