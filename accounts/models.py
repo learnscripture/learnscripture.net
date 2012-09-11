@@ -458,6 +458,10 @@ class Identity(models.Model):
     def preferences_setup(self):
         return self.default_bible_version is not None and self.testing_method is not None
 
+    @property
+    def default_to_dashboard(self):
+        return self.preferences_setup
+
     def require_subscribe(self):
         if self.account is None:
             return False
