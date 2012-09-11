@@ -45,7 +45,6 @@ class MenuItem(object):
 
 def menu(request):
     items = [
-        MenuItem('Dashboard', reverse('dashboard')),
         MenuItem('Choose', reverse('choose')),
         MenuItem('About', '/about/'),
         MenuItem('Contact', '/contact/'),

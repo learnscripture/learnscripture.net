@@ -61,6 +61,9 @@ from .decorators import require_identity, require_preferences, has_preferences, 
 
 
 def home(request):
+    identity = getattr(request, 'identity', None)
+    if identity is not None and identity.default_to_dashboard:
+        return HttpResponseRedirect(reverse('dashboard'))
     return render(request, 'learnscripture/home.html')
 
 
