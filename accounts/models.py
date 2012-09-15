@@ -1185,3 +1185,8 @@ def get_paying_account_count():
     return Account.objects.filter(subscription=SubscriptionType.PAID_UP, paid_until__gte=timezone.now()).count()
 
 import accounts.hooks
+
+
+def notify_all_accounts(html_message):
+    for account in Account.objects.select_related('identity'):
+        account.add_html_notice(html_message)
