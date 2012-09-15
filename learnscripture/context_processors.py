@@ -44,9 +44,12 @@ class MenuItem(object):
         self.active = active
 
 def menu(request):
+    identity = getattr(request, 'identity', None)
     items = [
         MenuItem('Choose', reverse('choose')),
-        MenuItem('About', '/about/'),
+        MenuItem('Help', '/help/')
+        if identity is not None and identity.default_to_dashboard
+        else MenuItem('About', '/about/'),
         MenuItem('Contact', '/contact/'),
         ]
     for m in items:
