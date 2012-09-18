@@ -46,8 +46,6 @@ var learnscripture =
         // Thresholds for different testings modes:
         // Strength == 0.6 corresponds to about 10 days learning.
         var HARD_MODE_THRESHOLD = 0.6
-        // Strength == 0.4 corresponds to about 3 days learning.
-        var ALLOW_HINTS_THRESHOLD = 0.4
 
         // Initial state
         var currentStage = null;
@@ -422,9 +420,7 @@ var learnscripture =
                 enableBtn($('#id-back-btn'), currentStageIdx > 0);
             }
             if (currentStageList[currentStageIdx] == 'test' && currentStageList.length == 1) {
-                if (currentVerseStatus.strength < ALLOW_HINTS_THRESHOLD) {
-                    enableBtn($('#id-hint-btn').show(), true);
-                }
+                enableBtn($('#id-hint-btn').show(), true);
             } else {
                 $('#id-hint-btn').hide();
             }
@@ -717,13 +713,9 @@ var learnscripture =
                 $('#id-points-target').html(' Points target: <b>' + getPointsTarget().toString() + '</b>');
             }
             hintsShown = 0;
-            if (currentVerseStatus.strength < ALLOW_HINTS_THRESHOLD) {
-                // For very short verses, allow fewer hints e.g.  2 or 3 word
-                // verses should get just 1 hint, with a maximum of 4 hints
-                maxHintsToShow = Math.min(Math.floor(currentVerseStatus.wordCount/2), 4);
-            } else {
-                maxHintsToShow = 0;
-            }
+            // For very short verses, allow fewer hints e.g.  2 or 3 word
+            // verses should get just 1 hint, with a maximum of 4 hints
+            maxHintsToShow = Math.min(Math.floor(currentVerseStatus.wordCount/2), 4);
         };
 
         var testContinue = function () {
