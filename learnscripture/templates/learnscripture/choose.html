@@ -42,29 +42,6 @@
       </div>
 
       <div class="clearfix">
-        <label>Type:</label>
-        <div class="input">
-          <ul class="pills">
-            {% if 'selections' not in request.GET and 'passages' not in request.GET %}
-            <li class="active"><a href="">All</a></li>
-            {% else %}
-            <li><a href="{% spurl base=request.get_full_path remove_query_param='selections' remove_query_param='passages' remove_query_param='page' %}">All</a></li>
-            {% endif %}
-            {% if 'selections' in request.GET %}
-            <li class="active"><a href="">Selections</a></li>
-            {% else %}
-            <li><a href="{% spurl base=request.get_full_path add_query='selections' remove_query_param='passages'  remove_query_param='page' %}">Selections</a></li>
-            {% endif %}
-            {% if 'passages' in request.GET %}
-            <li class="active"><a href="">Passages</a></li>
-            {% else %}
-            <li><a href="{% spurl base=request.get_full_path add_query='passages' remove_query_param='selections'  remove_query_param='page' %}">Passages</a></li>
-            {% endif %}
-          </ul>
-        </div>
-      </div>
-
-      <div class="clearfix">
         <label>Search:</label>
         <div class="input">
           <input type="text" name="q"  id="id-search-input" value="{{ request.GET.q }}"/>
