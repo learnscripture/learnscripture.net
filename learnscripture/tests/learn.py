@@ -470,7 +470,7 @@ class LearnTests(LiveServerTests):
         for i in range(0, 4):
             hint_btn = driver.find_element_by_id('id-hint-btn')
             self.assertEqual(hint_btn.get_attribute('disabled'),
-                             'false')
+                             None)
             hint_btn.click()
 
         # First two words should be marked correct
