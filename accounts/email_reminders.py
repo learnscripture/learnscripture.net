@@ -4,7 +4,7 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.contrib.sites.models import get_current_site
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage
 from django.template import loader
 from django.utils import timezone
 
@@ -51,10 +51,12 @@ def send_email_reminders():
              'domain': current_site.domain,
              'site_name': current_site.name,
              }
-        email = loader.render_to_string("learnscripture/reminder_email.txt", c)
 
-        send_mail('Revision reminder for LearnScripture.net', email,
-                  settings.SERVER_EMAIL,
-                  [account.email],
-                  fail_silently=False)
+        EmailMessage(
+            subject='Revision reminder for LearnScripture.net',
+            body=loader.render_to_string("learnscripture/reminder_email.txt", c),
+            from_email=settings.SERVER_EMAIL,
+            to=[account.email],
+            headers={'Auto-Submitted': 'auto-generated'},
+            ).send()
         Account.objects.filter(id=account.id).update(last_reminder_sent=n)
