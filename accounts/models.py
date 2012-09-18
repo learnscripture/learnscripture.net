@@ -311,7 +311,7 @@ class Account(models.Model):
         # Ignore all but the highest
         for a in all_awards:
             visible[a.award_type] = a
-        return visible.values()
+        return sorted(visible.values(), key=lambda a: a.created, reverse=True)
 
     def add_html_notice(self, notice):
         self.identity.add_html_notice(notice)
