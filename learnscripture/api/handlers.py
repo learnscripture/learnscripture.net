@@ -284,6 +284,8 @@ class ScoreLogs(BaseHandler):
         )
 
     def read(self, request):
+        if not hasattr(request, 'identity'):
+            return []
         return request.identity.get_score_logs(session.get_learning_session_start(request))
 
 
