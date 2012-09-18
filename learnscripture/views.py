@@ -392,6 +392,8 @@ def verse_options(request):
     """
     # This view is called from the 'progress' page where the list of verses
     # being learnt by a user is shown.
+    if not hasattr(request, 'identity'):
+        return HttpResponse("Error: not logged in")
     identity = request.identity
     ref = request.GET['ref']
     version_slug = request.GET['version_slug']
