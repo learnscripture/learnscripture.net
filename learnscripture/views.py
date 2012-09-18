@@ -506,8 +506,7 @@ def view_verse_set(request, slug):
             c['in_queue'] = 0
     else:
         c['can_edit'] = False
-        c['started_none'] = True
-        c['started_all'] = False
+        c['started_count'] = 0
         c['in_queue'] = 0
 
     c['verse_set'] = verse_set
