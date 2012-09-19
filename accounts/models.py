@@ -1070,8 +1070,8 @@ class Identity(models.Model):
     def available_bible_versions(self):
         if self.account_id is not None:
             if self.account.is_tester:
-                return TextVersion.objects.all()
-        return TextVersion.objects.filter(public=True)
+                return TextVersion.objects.bibles()
+        return TextVersion.objects.bibles().filter(public=True)
 
     def get_dashboard_events(self, now=None):
         from events.models import Event

@@ -30,7 +30,7 @@ class PreferencesForm(forms.ModelForm):
         super(PreferencesForm, self).__init__(*args, **kwargs)
 
         from bibleverses.models import TextVersion
-        available_bible_versions = TextVersion.objects.filter(public=True)
+        available_bible_versions = TextVersion.objects.bibles().filter(public=True)
         if 'instance' in kwargs:
             identity = kwargs['instance']
             if identity is not None:
