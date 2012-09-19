@@ -625,18 +625,20 @@ span.versenumber {
   border-bottom-color: #9A9A9A;
 }
 
+@word-margin-top: 3px;
+@word-margin-left: 1px;
 
 #id-test-bar {
   display: none;
   position: absolute;
   z-index: 10;
-  padding: 3px 1px; // Same as .word margin
+  padding: @word-margin-top @word-margin-left;
 }
 
 #id-typing {
   color: black;
   // These values are important for matching size of .word
-  padding: 0;
+  padding: 0 1px;
   margin: 0;
   border: 2px solid; // same as .word. See also adjustTypingBox() in learn.js
 }
@@ -645,7 +647,7 @@ span.versenumber {
   border: 2px solid;
   border-radius: 3px;
   padding: 4px 4px;
-  margin: 3px 1px;
+  margin: @word-margin-top @word-margin-left;
   .gradientBar(#e8e8e8, #C0C0C0);
   .normalWordBorder();
   cursor: pointer;
@@ -1045,6 +1047,9 @@ p.referral-link {
 // If not much room in either direction, shrink the fonts
 // of the verse words to make more room
 
+@word-margin-top-small: 1px;
+@word-margin-left-small: 0px;
+
 @media screen and (max-width: 600px), screen and (max-height: 500px) {
 
   /* smaller fonts */
@@ -1060,10 +1065,10 @@ p.referral-link {
     padding: 1px 2px;
   }
   .word, .testedword {
-    margin: 1px 0;
+    margin: @word-margin-top-small @word-margin-left-small;
   }
   #id-test-bar {
-    padding: 1px 0; // same as .word margin
+    padding: @word-margin-top-small @word-margin-left-small;
   }
 
   #id-instructions {
