@@ -15,7 +15,7 @@ from django.utils import timezone
 
 from accounts import memorymodel
 from accounts.signals import verse_started, verse_tested, points_increase, scored_100_percent
-from bibleverses.models import BibleVersion, MemoryStage, StageType, BibleVersion, VerseChoice, VerseSet, VerseSetType, get_passage_sections
+from bibleverses.models import TextVersion, MemoryStage, StageType, TextVersion, VerseChoice, VerseSet, VerseSetType, get_passage_sections
 from bibleverses.signals import verse_set_chosen
 from scores.models import TotalScore, ScoreReason, Scores, get_rank_all_time, get_rank_this_week
 
@@ -421,7 +421,7 @@ class Identity(models.Model):
     date_created = models.DateTimeField(default=timezone.now)
 
     # Preferences
-    default_bible_version = models.ForeignKey(BibleVersion, null=True, blank=True)
+    default_bible_version = models.ForeignKey(TextVersion, null=True, blank=True)
     testing_method = models.PositiveSmallIntegerField(choices=TestingMethod.choice_list,
                                                       null=True, default=None)
     enable_animations = models.BooleanField(blank=True, default=True)
@@ -644,7 +644,7 @@ class Identity(models.Model):
         missing = set(needed_uvss) - set([(uvs.verse_set,  uvs.reference)
                                           for uvs in correct_version_l])
         if missing:
-            version = BibleVersion.objects.get(slug=version_slug)
+            version = TextVersion.objects.get(slug=version_slug)
             for (vs, ref) in missing:
                 self.create_verse_status(reference=ref,
                                          verse_set=vs,
@@ -1070,8 +1070,8 @@ class Identity(models.Model):
     def available_bible_versions(self):
         if self.account_id is not None:
             if self.account.is_tester:
-                return BibleVersion.objects.all()
-        return BibleVersion.objects.filter(public=True)
+                return TextVersion.objects.all()
+        return TextVersion.objects.filter(public=True)
 
     def get_dashboard_events(self, now=None):
         from events.models import Event

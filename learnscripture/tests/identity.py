@@ -10,7 +10,7 @@ from django.utils import timezone
 from accounts import memorymodel
 from accounts.models import Identity, ActionChange, Account
 from awards.models import AwardType
-from bibleverses.models import VerseSet, BibleVersion, StageType, MemoryStage, Verse
+from bibleverses.models import VerseSet, TextVersion, StageType, MemoryStage, Verse
 from events.models import Event, EventType
 from scores.models import Scores
 
@@ -22,7 +22,7 @@ class IdentityBase(object):
     fixtures = ['test_bible_versions.json', 'test_verse_sets.json', 'test_bible_verses.json']
 
     def _create_identity(self, version_slug='NET'):
-        version = BibleVersion.objects.get(slug=version_slug)
+        version = TextVersion.objects.get(slug=version_slug)
         return Identity.objects.create(default_bible_version=version)
 
     def _create_account(self, **kwargs):

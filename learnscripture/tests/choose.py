@@ -5,7 +5,7 @@ from selenium.webdriver.support.ui import Select
 
 from accounts.models import Identity
 from awards.models import AwardType, TrendSetterAward
-from bibleverses.models import VerseSet, Verse, BibleVersion
+from bibleverses.models import VerseSet, Verse, TextVersion
 from events.models import Event, EventType
 
 from .base import LiveServerTests

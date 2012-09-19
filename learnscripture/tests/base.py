@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
 from accounts.models import Identity, Account, TestingMethod
-from bibleverses.models import BibleVersion
+from bibleverses.models import TextVersion
 
 
 class FuzzyInt(int):
@@ -30,7 +30,7 @@ class AccountTestMixin(object):
     fixtures = ['test_bible_versions.json']
 
     def create_account(self):
-        KJV = BibleVersion.objects.get(slug='KJV')
+        KJV = TextVersion.objects.get(slug='KJV')
         identity = Identity.objects.create(default_bible_version=KJV,
                                            testing_method=TestingMethod.FULL_WORDS,
                                            enable_animations=False)

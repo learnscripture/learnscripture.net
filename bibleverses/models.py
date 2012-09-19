@@ -11,7 +11,7 @@ from django.db.models import F
 from django.utils import timezone
 from django.utils.functional import cached_property
 
-# BibleVersion and Verse are pseudo static, so make extensive use of caching.
+# TextVersion and Verse are pseudo static, so make extensive use of caching.
 # VerseSets and VerseChoices also rarely change, and it doesn't matter too much
 # if they do, so make liberal use of caching.  Other models won't benefit so
 # much due to lots of writes and an increased risk if things go wrong.
@@ -129,12 +129,12 @@ MemoryStage = make_choices('MemoryStage',
                             ])
 
 
-class BibleVersionManager(caching.base.CachingManager):
+class TextVersionManager(caching.base.CachingManager):
     def get_by_natural_key(self, slug):
         return self.get(slug=slug)
 
 
-class BibleVersion(caching.base.CachingMixin, models.Model):
+class TextVersion(caching.base.CachingMixin, models.Model):
     short_name = models.CharField(max_length=20, unique=True)
     slug = models.CharField(max_length=20, unique=True)
     full_name = models.CharField(max_length=255, unique=True)
@@ -142,7 +142,7 @@ class BibleVersion(caching.base.CachingMixin, models.Model):
 
     public = models.BooleanField(default=True)
 
-    objects = BibleVersionManager()
+    objects = TextVersionManager()
 
     class Meta:
         ordering = ('short_name',)
@@ -232,7 +232,7 @@ class VerseManager(caching.base.CachingManager):
 
 
 class Verse(caching.base.CachingMixin, models.Model):
-    version = models.ForeignKey(BibleVersion)
+    version = models.ForeignKey(TextVersion)
     reference = models.CharField(max_length=100)
     text = models.TextField()
     text_tsv = VectorField()
@@ -421,7 +421,7 @@ class UserVerseStatus(models.Model):
     verse_set = models.ForeignKey(VerseSet, null=True,
                                   on_delete=models.SET_NULL)
     bible_verse_number = models.PositiveSmallIntegerField()
-    version = models.ForeignKey(BibleVersion)
+    version = models.ForeignKey(TextVersion)
     memory_stage = models.PositiveSmallIntegerField(choices=MemoryStage.choice_list,
                                                     default=MemoryStage.ZERO)
     strength = models.FloatField(default=0.00)

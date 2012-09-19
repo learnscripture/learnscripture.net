@@ -1,7 +1,7 @@
 import re
 import subprocess
 
-from bibleverses.models import Verse, BibleVersion
+from bibleverses.models import Verse, TextVersion
 
 DIATHEKE = '/home/luke/tmpstore/build/sword-1.6.1/utilities/diatheke/diatheke'
 
@@ -63,7 +63,7 @@ def parse_ref(ref):
 
 
 def import_bible(version):
-    version_obj = BibleVersion.objects.get(short_name=version)
+    version_obj = TextVersion.objects.get(short_name=version)
     get_bible_verse_numbers()
 
     for b_num, book in enumerate(BIBLE_BOOKS):

@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from accounts import memorymodel
 from accounts.models import Identity, Notice, TestingMethod, FREE_TRIAL_LENGTH_DAYS
-from bibleverses.models import VerseSet, BibleVersion, StageType, MemoryStage
+from bibleverses.models import VerseSet, TextVersion, StageType, MemoryStage
 from .base import LiveServerTests
 
 
@@ -29,7 +29,7 @@ class DashboardTests(LiveServerTests):
         self.set_preferences()
         # This should have created an Identity
         i = Identity.objects.exclude(id__in=[i.id for i in ids]).get()
-        i.default_bible_version = BibleVersion.objects.get(slug='NET')
+        i.default_bible_version = TextVersion.objects.get(slug='NET')
         i.testing_method = TestingMethod.FULL_WORDS
         i.save()
         return i
