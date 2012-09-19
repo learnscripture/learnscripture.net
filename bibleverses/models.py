@@ -278,6 +278,26 @@ class Verse(caching.base.CachingMixin, models.Model):
         ordering = ('bible_verse_number',)
 
 
+class QAPair(models.Model):
+    """
+    A question/answer pair in a catechism.
+    """
+    catechism = models.ForeignKey(TextVersion)
+    reference = models.CharField(max_length=100)
+    question = models.TextField()
+    answer = models.TextField()
+    order = models.PositiveSmallIntegerField()
+
+    class Meta:
+        unique_together = [('catechism', 'order'),
+                           ('catechism', 'reference')]
+
+        verbose_name = "QA pair"
+
+    def __unicode__(self):
+        return self.reference + " " + self.question
+
+
 class VerseSetManager(models.Manager):
     def public(self):
         return self.get_query_set().filter(public=True)
