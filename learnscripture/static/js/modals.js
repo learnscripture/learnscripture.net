@@ -53,11 +53,12 @@ var learnscripture = (function (learnscripture, $) {
             }
 
         } else {
+            // we have enough room for the whole modal, so we just
+            // center it and make it fixed.
             modal.css({'position': 'fixed',
                        'top': '50%',
                        'margin-top': "-" + (modalHeight / 2).toString() + "px"
                       });
-            // we have enough room for the whole modal
         }
     };
 
