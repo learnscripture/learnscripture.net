@@ -26,7 +26,7 @@ from accounts.models import Account, SubscriptionType, Identity
 from accounts.forms import PreferencesForm, AccountDetailsForm
 from awards.models import AwardType, AnyLevel, Award
 from learnscripture.forms import AccountSetPasswordForm, ContactForm
-from bibleverses.models import VerseSet, BibleVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType, get_passage_sections, get_verses_started_counts
+from bibleverses.models import VerseSet, TextVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType, get_passage_sections, get_verses_started_counts
 from bibleverses.signals import public_verse_set_created
 from learnscripture import session, auth
 from bibleverses.forms import VerseSetForm
@@ -87,7 +87,7 @@ def feature_disallowed(request, title, reason):
 def bible_versions_for_request(request):
     if hasattr(request, 'identity'):
         return request.identity.available_bible_versions()
-    return BibleVersion.objects.filter(public=True)
+    return TextVersion.objects.filter(public=True)
 
 
 @require_preferences
@@ -329,8 +329,8 @@ def choose(request):
         identity = request.identity
         version = None
         try:
-            version = BibleVersion.objects.get(slug=request.POST['version_slug'])
-        except (KeyError, BibleVersion.DoesNotExist):
+            version = TextVersion.objects.get(slug=request.POST['version_slug'])
+        except (KeyError, TextVersion.DoesNotExist):
             version = default_bible_version
 
         # Handle choose set
@@ -432,7 +432,7 @@ def get_default_bible_version():
     # Use NET as default version because:
     # - they let us use their version without royalties
     # - it is a modern readable version.
-    return BibleVersion.objects.get(slug='NET')
+    return TextVersion.objects.get(slug='NET')
 
 
 def verse_sets_visible_for_request(request):
@@ -455,8 +455,8 @@ def view_verse_set(request, slug):
 
     version = None
     try:
-        version = BibleVersion.objects.get(slug=request.GET['version'])
-    except (KeyError, BibleVersion.DoesNotExist):
+        version = TextVersion.objects.get(slug=request.GET['version'])
+    except (KeyError, TextVersion.DoesNotExist):
         pass
 
     if version is None:

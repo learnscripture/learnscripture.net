@@ -15,7 +15,7 @@ from selenium.webdriver.support.ui import Select
 from accounts.models import Identity, Account
 from accounts.memorymodel import MM
 from awards.models import AwardType, StudentAward, AceAward
-from bibleverses.models import BibleVersion, VerseSet, VerseSetType, VerseChoice, MemoryStage, StageType
+from bibleverses.models import TextVersion, VerseSet, VerseSetType, VerseChoice, MemoryStage, StageType
 from scores.models import Scores, ScoreReason
 
 from .base import LiveServerTests

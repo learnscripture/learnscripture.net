@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django import forms
 
-from .models import BibleVersion, Verse, VerseSet, VerseChoice
+from .models import TextVersion, Verse, VerseSet, VerseChoice
 
 
 class VerseChoiceAdminForm(forms.ModelForm):
@@ -29,6 +29,6 @@ class VerseAdmin(admin.ModelAdmin):
         return super(VerseAdmin, self).queryset(request).select_related('version')
 
 
-admin.site.register(BibleVersion)
+admin.site.register(TextVersion)
 admin.site.register(VerseSet, VerseSetAdmin)
 admin.site.register(Verse, VerseAdmin)

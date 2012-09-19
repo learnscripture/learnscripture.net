@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from django.utils import unittest
 from django.test import TestCase
 
-from bibleverses.models import InvalidVerseReference, Verse, BibleVersion, get_passage_sections, VerseSet, VerseChoice, UserVerseStatus
+from bibleverses.models import InvalidVerseReference, Verse, TextVersion, get_passage_sections, VerseSet, VerseChoice, UserVerseStatus
 from .base import AccountTestMixin
 
 
@@ -23,30 +23,30 @@ class ParseRefTests(TestCase):
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
 
     def test_no_chapter(self):
-        version = BibleVersion.objects.get(slug='KJV')
+        version = TextVersion.objects.get(slug='KJV')
         self.assertRaises(InvalidVerseReference, lambda: version.get_verse_list('Genesis'))
 
     def test_bad_chapter(self):
-        version = BibleVersion.objects.get(slug='KJV')
+        version = TextVersion.objects.get(slug='KJV')
         self.assertRaises(InvalidVerseReference, lambda: version.get_verse_list('Genesis x'))
 
     def test_bad_book(self):
-        version = BibleVersion.objects.get(slug='KJV')
+        version = TextVersion.objects.get(slug='KJV')
         self.assertRaises(InvalidVerseReference, lambda: version.get_verse_list('Gospel of Barnabas'))
 
     def test_chapter(self):
-        version = BibleVersion.objects.get(slug='KJV')
+        version = TextVersion.objects.get(slug='KJV')
         self.assertEqual(list(version.verse_set.filter(reference__startswith='Genesis 1:')),
                          version.get_verse_list("Genesis 1"))
 
     def test_chapter_verse(self):
-        version = BibleVersion.objects.get(slug='KJV')
+        version = TextVersion.objects.get(slug='KJV')
         self.assertEqual([Verse.objects.get(reference="Genesis 1:2", version=version)],
                          version.get_verse_list("Genesis 1:2"))
 
 
     def test_verse_range(self):
-        version = BibleVersion.objects.get(slug='KJV')
+        version = TextVersion.objects.get(slug='KJV')
         self.assertEqual(
             [
                 version.verse_set.get(reference="Genesis 1:2"),
@@ -56,11 +56,11 @@ class ParseRefTests(TestCase):
             version.get_verse_list("Genesis 1:2-4"))
 
     def test_empty(self):
-        version = BibleVersion.objects.get(slug='KJV')
+        version = TextVersion.objects.get(slug='KJV')
         self.assertRaises(InvalidVerseReference, lambda: version.get_verse_list('Genesis 300:1'))
 
     def test_reference_bulk(self):
-        version = BibleVersion.objects.get(slug='KJV')
+        version = TextVersion.objects.get(slug='KJV')
         with self.assertNumQueries(1):
             # Only need one query if all are single verses.
             l1 = version.get_verses_by_reference_bulk(['Genesis 1:1', 'Genesis 1:2', 'Genesis 1:3'])

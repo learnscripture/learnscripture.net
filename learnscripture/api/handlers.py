@@ -20,7 +20,7 @@ from piston.utils import rc
 
 from accounts.forms import PreferencesForm
 from accounts.models import Account
-from bibleverses.models import UserVerseStatus, Verse, StageType, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, MAX_VERSE_QUERY_SIZE, BibleVersion, quick_find, VerseSetType
+from bibleverses.models import UserVerseStatus, Verse, StageType, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, MAX_VERSE_QUERY_SIZE, TextVersion, quick_find, VerseSetType
 from learnscripture import session
 from learnscripture.decorators import require_identity_method
 from learnscripture.forms import SignUpForm, LogInForm, AccountPasswordResetForm
@@ -321,7 +321,7 @@ class VerseFind(BaseHandler):
 
         try:
             version = bible_versions_for_request(request).get(slug=version_slug)
-        except BibleVersion.DoesNotExist:
+        except TextVersion.DoesNotExist:
             return rc.BAD_REQUEST
 
         # Can't get 'fields' to work properly for this case, so pack into
