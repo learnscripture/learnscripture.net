@@ -129,6 +129,11 @@ MemoryStage = make_choices('MemoryStage',
                             ])
 
 
+TextType = make_choices('TextType',
+                        [(1, 'BIBLE', 'Bible'),
+                         (2, 'CATECHISM', 'Catechism'),
+                         ])
+
 class TextVersionManager(caching.base.CachingManager):
     def get_by_natural_key(self, slug):
         return self.get(slug=slug)
@@ -139,6 +144,9 @@ class TextVersion(caching.base.CachingMixin, models.Model):
     slug = models.CharField(max_length=20, unique=True)
     full_name = models.CharField(max_length=255, unique=True)
     url = models.URLField(default="", blank=True)
+    text_type = models.PositiveSmallIntegerField(choices=TextType.choice_list,
+                                                 default=TextType.BIBLE)
+    description = models.TextField(blank=True)
 
     public = models.BooleanField(default=True)
 
