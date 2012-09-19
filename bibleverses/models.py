@@ -138,6 +138,12 @@ class TextVersionManager(caching.base.CachingManager):
     def get_by_natural_key(self, slug):
         return self.get(slug=slug)
 
+    def bibles(self):
+        return self.get_query_set().filter(text_type=TextType.BIBLE)
+
+    def catechisms(self):
+        return self.get_query_set().filter(text_type=TextType.CATECHISM)
+
 
 class TextVersion(caching.base.CachingMixin, models.Model):
     short_name = models.CharField(max_length=20, unique=True)

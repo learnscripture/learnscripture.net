@@ -87,7 +87,7 @@ def feature_disallowed(request, title, reason):
 def bible_versions_for_request(request):
     if hasattr(request, 'identity'):
         return request.identity.available_bible_versions()
-    return TextVersion.objects.filter(public=True)
+    return TextVersion.objects.bibles().filter(public=True)
 
 
 @require_preferences
@@ -455,7 +455,7 @@ def view_verse_set(request, slug):
 
     version = None
     try:
-        version = TextVersion.objects.get(slug=request.GET['version'])
+        version = bible_versions_for_request(request).get(slug=request.GET['version'])
     except (KeyError, TextVersion.DoesNotExist):
         pass
 
