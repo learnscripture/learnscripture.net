@@ -491,15 +491,23 @@ class Identity(models.Model):
                 reference__in=[vc.reference for vc in vc_list])\
                 .select_related('version')
             other_version_dict = dict([(uvs.reference, uvs) for uvs in other_versions])
-        else:
+        elif verse_set.set_type == VerseSetType.PASSAGE:
             # If they are already learning this passage in a different version,
-            # just use that.
-            verse_statuses = self.verse_statuses.filter(verse_set=verse_set,
-                                                        ignored=False)
+            # use that version.
+            verse_statuses = (self.verse_statuses
+                              .filter(verse_set=verse_set,
+                                      ignored=False)
+                              .exclude(version=version)
+                              )
             if len(verse_statuses) > 0:
-                return list(verse_statuses)
+                return self.add_verse_set(verse_set,
+                                          version=verse_statuses[0].version)
 
+            # Otherwise, we don't want a mixture of versions for learning a
+            # passage set.
             other_version_dict = {}
+        else:
+            assert False, "Not reached"
 
         # Want to preserve order of verse_set, so iterate like this:
         for vc in vc_list:

@@ -635,7 +635,7 @@ def create_or_edit_set(request, set_type=None, slug=None):
         form = VerseSetForm(instance=verse_set)
 
         if verse_set is not None:
-            ref_list = [vc.reference for vc in verse_set.uncached_verse_choices.all()]
+            ref_list = [vc.reference for vc in verse_set.verse_choices.all()]
             verse_dict = version.get_verses_by_reference_bulk(ref_list)
             breaks = verse_set.breaks
         else:

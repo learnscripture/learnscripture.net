@@ -87,7 +87,7 @@ class CreateSetTests(LiveServerTests):
 
             self.assertEqual(current_ref_list,
                              sorted([(vc.reference, vc.set_order)
-                                     for vc in vs.uncached_verse_choices.all()]))
+                                     for vc in vs.verse_choices.all()]))
 
         # Caching could cause these to fail
         _add_new_ref("Genesis 1:6")
