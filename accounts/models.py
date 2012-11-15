@@ -63,6 +63,10 @@ FREE_TRIAL_LENGTH_DAYS = 62 # 2 months
 # Identity methods are the main interface for most business logic,
 # and so sometimes they just delegate to Account methods.
 
+class AccountManager(models.Manager):
+    def active(self):
+        return self.get_query_set().filter(is_active=True)
+
 
 class Account(models.Model):
     username = models.CharField(max_length=100, blank=False, unique=True)
@@ -80,6 +84,9 @@ class Account(models.Model):
         default=False, blank=True)
     is_active = models.BooleanField(default=True)
     is_hellbanned = models.BooleanField(default=False)
+
+
+    objects = AccountManager()
 
     class Meta:
         ordering = ['username']
@@ -1197,5 +1204,5 @@ import accounts.hooks
 
 
 def notify_all_accounts(html_message):
-    for account in Account.objects.select_related('identity'):
+    for account in Account.objects.active().select_related('identity'):
         account.add_html_notice(html_message)

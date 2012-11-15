@@ -717,7 +717,8 @@ def leaderboard(request):
 
 
 def user_stats(request, username):
-    account = get_object_or_404(Account.objects.select_related('total_score', 'identity'),
+    account = get_object_or_404(Account.objects.active()
+                                .select_related('total_score', 'identity'),
                                 username=username)
     c = {'account': account,
          'title': account.username,
