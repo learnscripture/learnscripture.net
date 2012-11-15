@@ -68,7 +68,7 @@ class LogInForm(forms.Form):
         try:
             email = self.cleaned_data.get('email', '').strip()
             if u'@' in email:
-                accounts = Account.objects.filter(email__iexact=email)
+                accounts = Account.objects.active().filter(email__iexact=email)
                 if len(accounts) == 0:
                     raise Account.DoesNotExist()
                 elif len(accounts) > 1:
@@ -90,7 +90,7 @@ class AccountPasswordResetForm(PasswordResetForm):
 
     def clean_email(self):
         email = self.cleaned_data["email"]
-        self.users_cache = Account.objects.filter(email__iexact=email)
+        self.users_cache = Account.objects.active().filter(email__iexact=email)
         if not len(self.users_cache):
             raise forms.ValidationError(self.error_messages['unknown'])
         return email
