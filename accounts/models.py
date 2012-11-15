@@ -78,6 +78,7 @@ class Account(models.Model):
     is_tester = models.BooleanField(default=False, blank=True)
     is_under_13 = models.BooleanField("Under 13 years old",
         default=False, blank=True)
+    is_active = models.BooleanField(default=True)
     is_hellbanned = models.BooleanField(default=False)
 
     class Meta:
