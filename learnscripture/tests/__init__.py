@@ -17,4 +17,5 @@ from .payments import *
 from .referrals import *
 from .groups import *
 from .user_verses_page import *
-
+from .leaderboard import *
+from .user_stats import *

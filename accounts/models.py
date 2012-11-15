@@ -63,6 +63,10 @@ FREE_TRIAL_LENGTH_DAYS = 62 # 2 months
 # Identity methods are the main interface for most business logic,
 # and so sometimes they just delegate to Account methods.
 
+class AccountManager(models.Manager):
+    def active(self):
+        return self.get_query_set().filter(is_active=True)
+
 
 class Account(models.Model):
     username = models.CharField(max_length=100, blank=False, unique=True)
@@ -78,7 +82,11 @@ class Account(models.Model):
     is_tester = models.BooleanField(default=False, blank=True)
     is_under_13 = models.BooleanField("Under 13 years old",
         default=False, blank=True)
+    is_active = models.BooleanField(default=True)
     is_hellbanned = models.BooleanField(default=False)
+
+
+    objects = AccountManager()
 
     class Meta:
         ordering = ['username']
@@ -491,15 +499,23 @@ class Identity(models.Model):
                 reference__in=[vc.reference for vc in vc_list])\
                 .select_related('version')
             other_version_dict = dict([(uvs.reference, uvs) for uvs in other_versions])
-        else:
+        elif verse_set.set_type == VerseSetType.PASSAGE:
             # If they are already learning this passage in a different version,
-            # just use that.
-            verse_statuses = self.verse_statuses.filter(verse_set=verse_set,
-                                                        ignored=False)
+            # use that version.
+            verse_statuses = (self.verse_statuses
+                              .filter(verse_set=verse_set,
+                                      ignored=False)
+                              .exclude(version=version)
+                              )
             if len(verse_statuses) > 0:
-                return list(verse_statuses)
+                return self.add_verse_set(verse_set,
+                                          version=verse_statuses[0].version)
 
+            # Otherwise, we don't want a mixture of versions for learning a
+            # passage set.
             other_version_dict = {}
+        else:
+            assert False, "Not reached"
 
         # Want to preserve order of verse_set, so iterate like this:
         for vc in vc_list:
@@ -1188,5 +1204,5 @@ import accounts.hooks
 
 
 def notify_all_accounts(html_message):
-    for account in Account.objects.select_related('identity'):
+    for account in Account.objects.active().select_related('identity'):
         account.add_html_notice(html_message)

@@ -48,15 +48,24 @@ class ScoreLog(models.Model):
         return "<ScoreLog account=%s points=%s reason=%s created=%s>" % (
             self.account.email, self.points, self.get_reason_display(), self.created)
 
+
 class TotalScore(models.Model):
     account = models.OneToOneField('accounts.Account', related_name='total_score')
     points = models.PositiveIntegerField(default=0)
     visible = models.BooleanField(default=True)
 
 
+def active_user_query(q):
+    from accounts.models import SubscriptionType
+    from learnscripture.utils.sqla import accounts_account as account
+    return (q
+            .where(account.c.subscription != SubscriptionType.BASIC)
+            .where(account.c.is_active == True)
+            )
+
+
 def get_all_time_leaderboard(page, page_size, group=None):
     # page is zero indexed
-    from accounts.models import SubscriptionType
 
     from learnscripture.utils.sqla import default_engine, accounts_account, scores_totalscore
     from sqlalchemy.sql import select
@@ -69,9 +78,8 @@ def get_all_time_leaderboard(page, page_size, group=None):
     sq = Sequence('rank_seq')
 
     subq1 = (
-        select([totalscore.c.account_id, totalscore.c.points],
-               from_obj=totalscore.join(account))
-        .where(account.c.subscription != SubscriptionType.BASIC)
+        active_user_query(select([totalscore.c.account_id, totalscore.c.points],
+                                 from_obj=totalscore.join(account)))
         .group_by(totalscore.c.account_id,
                   totalscore.c.points)
         .order_by(totalscore.c.points.desc())
@@ -102,7 +110,6 @@ def get_all_time_leaderboard(page, page_size, group=None):
 def get_leaderboard_since(since, page, page_size, group=None):
     # page is zero indexed
 
-    from accounts.models import SubscriptionType
     # This uses a completely different strategy to get_all_time_leaderboard, and
     # only works if ScoreLogs haven't been cleared out for the relevant period.
 
@@ -118,11 +125,10 @@ def get_leaderboard_since(since, page, page_size, group=None):
     sq = Sequence('rank_seq')
 
     subq1 = (
-        select([scorelog.c.account_id,
-                func.sum(scorelog.c.points).label('sum_points')],
-               from_obj=scorelog.join(account))
+        active_user_query(select([scorelog.c.account_id,
+                                  func.sum(scorelog.c.points).label('sum_points')],
+                                 from_obj=scorelog.join(account)))
         .where(scorelog.c.created > since)
-        .where(account.c.subscription != SubscriptionType.BASIC)
         .group_by(scorelog.c.account_id)
         )
 
@@ -152,12 +158,16 @@ def get_leaderboard_since(since, page, page_size, group=None):
 
 
 def get_rank_all_time(total_score_obj):
-    return TotalScore.objects.filter(points__gt=total_score_obj.points).count() + 1
+    return TotalScore.objects.filter(
+        points__gt=total_score_obj.points,
+        account__is_active=True
+        ).count() + 1
 
 
 def get_rank_this_week(points_this_week):
     n = timezone.now()
     return ScoreLog.objects.filter(created__gt=n - timedelta(7))\
+        .filter(account__is_active=True)\
         .values('account_id').annotate(sum_points=models.Sum('points'))\
         .filter(sum_points__gt=points_this_week).count() + 1
 
