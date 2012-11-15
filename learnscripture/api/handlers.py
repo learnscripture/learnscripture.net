@@ -201,9 +201,9 @@ class LogInHandler(AccountCommon, BaseHandler):
         # The form has validated the password already.
         email = request.form.cleaned_data['email'].strip()
         if u'@' in email:
-            account = Account.objects.get(email__iexact=email)
+            account = Account.objects.active().get(email__iexact=email)
         else:
-            account = Account.objects.get(username__iexact=email)
+            account = Account.objects.active().get(username__iexact=email)
         account.last_login = timezone.now()
         account.save()
         session.login(request, account.identity)

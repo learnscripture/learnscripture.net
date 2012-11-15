@@ -10,7 +10,7 @@ from django.utils import timezone
 from accounts import memorymodel
 from accounts.models import Identity, ActionChange, Account
 from awards.models import AwardType
-from bibleverses.models import VerseSet, TextVersion, StageType, MemoryStage, Verse
+from bibleverses.models import VerseSet, TextVersion, StageType, MemoryStage, Verse, VerseChoice
 from events.models import Event, EventType
 from scores.models import Scores
 
@@ -517,6 +517,48 @@ class IdentityTests(IdentityBase, TestCase):
         self.assertEqual([uvs.reference for uvs in i.verse_statuses_for_learning()],
                          ['John 3:16', 'John 14:6'])
 
+    def test_issue_75(self):
+        i = self._create_identity()
+        vs1 = VerseSet.objects.get(name='Psalm 23')
+
+        # Change it so that it misses the last verse
+        vs1.set_verse_choices([u"Psalm 23:1",
+                               u"Psalm 23:2",
+                               u"Psalm 23:3",
+                               u"Psalm 23:4",
+                               u"Psalm 23:5"])
+
+        # Now add it
+        i.add_verse_set(vs1)
+
+        l = i.verse_statuses_for_passage(vs1.id)
+        self.assertEqual([uvs.reference for uvs in l],
+                         [u"Psalm 23:1",
+                          u"Psalm 23:2",
+                          u"Psalm 23:3",
+                          u"Psalm 23:4",
+                          u"Psalm 23:5"])
+
+        # Now learn a standalone verse choice
+        i.add_verse_choice('Psalm 23:6')
+
+        # Add the verse back to the set
+        VerseChoice.objects.create(reference="Psalm 23:6",
+                                   verse_set=vs1,
+                                   set_order=6)
+
+        # Now 'press' the learn button again
+        i.add_verse_set(vs1)
+
+        # Should have all verses this time
+        l = i.verse_statuses_for_passage(vs1.id)
+        self.assertEqual([uvs.reference for uvs in l],
+                         [u"Psalm 23:1",
+                          u"Psalm 23:2",
+                          u"Psalm 23:3",
+                          u"Psalm 23:4",
+                          u"Psalm 23:5",
+                          u"Psalm 23:6"])
 
 class IdentityTests2(IdentityBase, UsesSQLAlchemyBase):
 

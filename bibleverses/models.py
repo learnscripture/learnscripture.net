@@ -372,14 +372,8 @@ class VerseSet(models.Model):
     def breaks_formatted(self):
         return self.breaks.replace(",", ", ")
 
-    @property
-    def uncached_verse_choices(self):
-        return VerseChoice.uncached_objects.filter(verse_set=self).order_by('set_order')
-
     def set_verse_choices(self, ref_list):
-        # Need to ensure that we preserve existing objects and to do the
-        # query correctly we need to ignore caching.
-        existing_vcs = self.uncached_verse_choices.all()
+        existing_vcs = self.verse_choices.all()
         existing_vcs_dict = dict((vc.reference, vc) for vc in existing_vcs)
         old_vcs = set(existing_vcs)
         for i, ref in enumerate(ref_list):  # preserve order
@@ -406,28 +400,26 @@ class VerseSet(models.Model):
 
     def update_passage_id(self):
         if self.set_type == VerseSetType.PASSAGE:
-            verse_choices = list(self.uncached_verse_choices.all())
+            verse_choices = list(self.verse_choices.all())
             self.passage_id = verse_choices[0].reference + u' - ' + verse_choices[-1].reference
             self.save()
 
 
-class VerseChoiceManager(caching.base.CachingManager):
+class VerseChoiceManager(models.Manager):
     use_for_related_fields = True
 
     def get_query_set(self):
         return super(VerseChoiceManager, self).get_query_set().order_by('set_order')
 
 
-
 # Note that VerseChoice and Verse are not related, since we want a VerseChoice
 # to be independent of Bible version.
-class VerseChoice(caching.base.CachingMixin, models.Model):
+class VerseChoice(models.Model):
     reference = models.CharField(max_length=100)
     verse_set = models.ForeignKey(VerseSet, related_name='verse_choices')
     set_order = models.PositiveSmallIntegerField(default=0)
 
     objects = VerseChoiceManager()
-    uncached_objects = models.Manager()
 
     class Meta:
         unique_together = [('verse_set', 'reference')]

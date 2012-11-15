@@ -124,7 +124,7 @@ def give_champion_awards():
 
 
 def give_all_addict_awards():
-    for account in Account.objects.all():
+    for account in Account.objects.active().all():
         give_addict_award.delay(account.id)
 
 
