@@ -63,6 +63,7 @@ def search_esv(version, words):
               'include-footnotes=0',
               'include-subheadings=0',
               'include-headings=0',
+              'results-per-page=10',
               ]
 
 
