@@ -33,8 +33,7 @@ from bibleverses.forms import VerseSetForm
 from groups.forms import EditGroupForm
 from groups.models import Group
 from groups.signals import public_group_created
-from payments.forms import EditFundForm, AddFundForm
-from payments.models import Price, Fund
+from payments.models import Price
 from payments.sign import sign_payment_info
 from scores.models import get_all_time_leaderboard, get_leaderboard_since, ScoreReason
 
@@ -1037,25 +1036,6 @@ def subscribe(request):
                 messages.info(request, "Account downgraded to 'Basic'")
             return HttpResponseRedirect(reverse('dashboard'))
 
-    ## Process 'use fund'
-    if request.method == 'POST' and 'usefund' in request.POST:
-        try:
-            fund = account.funds_available.get(id=int(request.POST['fund']))
-        except (Fund.DoesNotExist, ValueError, KeyError):
-            pass # ignore request
-        else:
-            if fund.can_pay_for(account):
-                fund.pay_for(account)
-                messages.info(request, "Paid for subscription from fund, thanks.")
-                return HttpResponseRedirect(reverse('dashboard'))
-            else:
-                pass # Can't pay for, ignore request.
-
-    # Funds
-    funds = account.funds_available.all()
-    for fund in funds:
-        fund.can_use = fund.can_pay_for(account)
-    c['funds'] = funds
 
     discount = account.subscription_discount()
 

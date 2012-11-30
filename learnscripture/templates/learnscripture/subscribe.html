@@ -8,46 +8,6 @@
 {% if not payment_possible %}
   <p>Your subscription is not due for renewal</p>
 {% else %}
-  {% for fund in funds %}
-  <div class="actionset">
-    <form action="" method="POST">
-      {% csrf_token %}
-      {% if fund.can_use %}
-      <input type="hidden" name="fund" value="{{ fund.id }}">
-      <input type="submit" class="btn primary" name="usefund" value="Pay from fund">
-      {% else %}
-      <input type="submit" class="btn primary disabled" disabled name="usefund" value="Pay from fund">
-      {% endif %}
-    </form>
-    <h3>Pay using ‘{{ fund.name }}’ fund</h3>
-    <p>
-    {% if payment_overdue %}<b>Payment is due.</b>
-    {% else %}Payment is due soon.
-    {% endif %}
-    </p>
-
-    {% if fund.can_use %}
-    <p>
-    You belong to a payment fund <b>{{ fund.name }}</b> created by
-    {{ fund.manager|account_link }}, so you can use that fund to pay for
-    your subscription for one year.
-    </p>
-    <p>Alternatively, you could pay for yourself below.</p>
-    {% else %}
-    <p>
-    You belong to a payment fund <b>{{ fund.name }}</b> created by
-    {{ fund.manager|account_link }}, but there are <b>insufficient funds</b> to pay for
-    your subscription. You can pay below yourself.
-    <p>
-    {% endif %}
-
-  </div>
-
-  {% endfor %}
-
-  {% if funds %}
-  <hr>
-  {% endif %}
 
   {% if payment_overdue %}
   <p>Payment is now due.</p>

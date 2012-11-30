@@ -5,7 +5,7 @@ from django.template import loader
 from paypal.standard.ipn.signals import payment_was_successful, payment_was_flagged
 
 from accounts.models import Account
-from payments.models import Price, Fund
+from payments.models import Price
 from payments.sign import unsign_payment_string
 
 def site_address_url_start():
@@ -44,10 +44,6 @@ def paypal_payment_received(sender, **kwargs):
 
     if 'account' in info:
         paypal_account_payment_received(ipn_obj, info)
-
-    elif 'fund' in info:
-        paypal_fund_payment_received(ipn_obj, info)
-
     else:
         unrecognised_payment(ipn_obj)
 
@@ -69,16 +65,6 @@ def paypal_account_payment_received(ipn_obj, info):
     except (Account.DoesNotExist, Price.DoesNotExist):
         unrecognised_payment(ipn_obj)
 
-
-def paypal_fund_payment_received(ipn_obj, info):
-    try:
-        fund = Fund.objects.get(id=info['fund'])
-        if fund.currency.name != ipn_obj.mc_currency:
-            unrecognised_payment(ipn_obj)
-            return
-        fund.receive_payment(ipn_obj)
-    except (Fund.DoesNotExist):
-        unrecognised_payment(ipn_obj)
 
 
 payment_was_successful.connect(paypal_payment_received)
