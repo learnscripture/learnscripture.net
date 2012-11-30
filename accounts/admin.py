@@ -1,16 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
 
-from .models import Identity, Account, SubscriptionType, Notice
-
-
-def change_subscription_func(subscription_type, name, description):
-    def change_subscription(modeladmin, request, queryset):
-        queryset.update(subscription=subscription_type)
-    change_subscription.short_description = description
-    change_subscription.__name__ = name
-    return change_subscription
-
+from .models import Identity, Account, Notice
 
 
 class HasAccountListFilter(SimpleListFilter):
@@ -40,18 +31,7 @@ class IdentityAdmin(admin.ModelAdmin):
         return super(IdentityAdmin, self).queryset(request).select_related('account', 'referred_by')
 
 class AccountAdmin(admin.ModelAdmin):
-    list_display = ['username', 'email', 'first_name', 'last_name',
-                    'subscription', 'date_joined', 'paid_until',
-                    'payment_possible']
-    readonly_fields = ['subscription', 'paid_until']
-    actions = [
-        change_subscription_func(SubscriptionType.FREE_TRIAL,
-                                 "free_trial", "Change to free trial"),
-        change_subscription_func(SubscriptionType.BASIC,
-                                 "basic_account", "Change to basic account"),
-        change_subscription_func(SubscriptionType.LIFETIME_FREE,
-                                 "lifetime_free", "Change to lifetime free"),
-        ]
+    list_display = ['username', 'email', 'first_name', 'last_name', 'date_joined']
     ordering = ['date_joined']
     search_fields = ['username', 'email']
 

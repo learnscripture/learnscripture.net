@@ -3,7 +3,7 @@ from django.forms import widgets
 from django.conf import settings
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
 
-from accounts.models import Account, SubscriptionType
+from accounts.models import Account
 
 
 class SignUpForm(forms.ModelForm):
@@ -35,7 +35,6 @@ class SignUpForm(forms.ModelForm):
         """
         account = super(SignUpForm, self).save(commit=False)
         account.set_password(self.cleaned_data["password"])
-        account.subscription = SubscriptionType.FREE_TRIAL
 
         if commit:
             account.save()

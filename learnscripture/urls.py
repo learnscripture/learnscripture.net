@@ -23,9 +23,9 @@ urlpatterns = patterns('',
                        url(r'^verse-options/$', 'learnscripture.views.verse_options', name='verse_options'),
 
                        # Payment
-                       url(r'^subscribe/$', 'learnscripture.views.subscribe', name='subscribe'),
-                       url(r'^payment-complete/$', 'learnscripture.views.pay_done', name='pay_done'),
-                       url(r'^payment-cancelled/$', 'learnscripture.views.pay_cancelled', name='pay_cancelled'),
+                       url(r'^donate/$', 'learnscripture.views.donate', name='donate'),
+                       url(r'^donation-complete/$', 'learnscripture.views.pay_done', name='pay_done'),
+                       url(r'^donation-cancelled/$', 'learnscripture.views.pay_cancelled', name='pay_cancelled'),
 
                        # Account management
                        url(r'^login/$', 'learnscripture.views.login', name='login'),

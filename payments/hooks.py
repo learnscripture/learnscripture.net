@@ -51,20 +51,9 @@ def paypal_payment_received(sender, **kwargs):
 def paypal_account_payment_received(ipn_obj, info):
     try:
         account = Account.objects.get(id=info['account'])
-        price = Price.objects.usable().get(id=info['price'])
-        # We don't check price.amount, because discounts mean that it could be
-        # different, and we cover this by signing the the amount in the 'custom'
-        # field.
-        if info['amount'] != str(ipn_obj.mc_gross):
-            unrecognised_payment(ipn_obj)
-            return
-        if price.currency.name != ipn_obj.mc_currency:
-            unrecognised_payment(ipn_obj)
-            return
-        account.receive_payment(price, ipn_obj)
-    except (Account.DoesNotExist, Price.DoesNotExist):
+        account.receive_payment(ipn_obj)
+    except Account.DoesNotExist:
         unrecognised_payment(ipn_obj)
-
 
 
 payment_was_successful.connect(paypal_payment_received)

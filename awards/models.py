@@ -3,7 +3,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.functional import cached_property
 
-from accounts.models import Account, SubscriptionType
+from accounts.models import Account
 from awards.signals import new_award
 from scores.models import ScoreReason
 from learnscripture.datastructures import make_class_enum
@@ -75,8 +75,6 @@ class AwardLogic(object):
 
     def give_to(self, account):
         if self.level == 0:
-            return
-        if account.subscription == SubscriptionType.BASIC:
             return
 
         # Create lower levels if they don't exist because a higher level always
