@@ -23,13 +23,6 @@ from learnscripture.datastructures import make_choices
 from learnscripture.utils.cache import cache_results
 
 
-SubscriptionType = make_choices('SubscriptionType',
-                                [(0, 'FREE_TRIAL', 'Free trial'),
-                                 (1, 'PAID_UP', 'Paid up'),
-                                 (2, 'BASIC', 'Basic account (free)'),
-                                 (3, 'LIFETIME_FREE', 'Lifetime free')]
-                                )
-
 TestingMethod = make_choices('TestingMethod',
                              [(0, 'FULL_WORDS', 'Full words - recommended for full keyboards and normal typing skills'),
                               (1, 'FIRST_LETTER', 'First letter - recommended for handheld devices and slower typers')]
@@ -76,9 +69,6 @@ class Account(models.Model):
     password = models.CharField(max_length=128)
     last_login = models.DateTimeField(default=timezone.now)
     date_joined = models.DateTimeField(default=timezone.now)
-    subscription = models.PositiveSmallIntegerField(choices=SubscriptionType.choice_list,
-                                                    default=SubscriptionType.FREE_TRIAL)
-    paid_until = models.DateTimeField(null=True, blank=True)
     is_tester = models.BooleanField(default=False, blank=True)
     is_under_13 = models.BooleanField("Under 13 years old",
         default=False, blank=True)
@@ -99,20 +89,13 @@ class Account(models.Model):
     last_reminder_sent = models.DateTimeField(null=True, blank=True)
 
     def save(self, **kwargs):
-        # We avoid updating 'subscription' and 'paid_until' to avoid race conditions
-        # that could overwrite these fields and effectively cancel an incoming payment
-
-        # We also need to ensure that there is a TotalScore object
+        # We need to ensure that there is a TotalScore object
         if self.id is None:
             retval = super(Account, self).save(**kwargs)
             TotalScore.objects.create(account=self)
             return retval
         else:
-            update_fields = [f for f in self._meta.fields if
-                             f.name not in ('id', 'paid_until', 'subscription')]
-            update_kwargs = dict((f.attname, getattr(self, f.attname)) for
-                                 f in update_fields)
-            Account.objects.filter(id=self.id).update(**update_kwargs)
+            return super(Account, self).save(**kwargs)
 
     @property
     def email_name(self):
@@ -145,9 +128,6 @@ class Account(models.Model):
     def award_action_points(self, reference, text,
                             old_memory_stage, action_change,
                             action_stage, accuracy):
-        if not self.scoring_enabled:
-            return []
-
         if action_stage != StageType.TEST:
             return []
 
@@ -183,9 +163,6 @@ class Account(models.Model):
         return score_logs
 
     def award_revision_complete_bonus(self, score_log_ids):
-        if not self.scoring_enabled:
-            return []
-
         if len(score_log_ids) == 0:
             return []
 
@@ -209,10 +186,6 @@ class Account(models.Model):
     def get_score_logs(self, from_datetime):
         return self.score_logs.filter(created__gte=from_datetime).order_by('created')
 
-    @property
-    def scoring_enabled(self):
-        return self.subscription != SubscriptionType.BASIC
-
     @cached_property
     def points_all_time(self):
         return self.total_score.points
@@ -232,61 +205,11 @@ class Account(models.Model):
     def rank_this_week(self):
         return get_rank_this_week(self.points_this_week)
 
-    def payment_due_date(self):
-        if self.subscription == SubscriptionType.BASIC:
-            return None
-        if self.subscription == SubscriptionType.FREE_TRIAL:
-            return self.date_joined + timedelta(FREE_TRIAL_LENGTH_DAYS)
-        elif self.subscription == SubscriptionType.LIFETIME_FREE:
-            return None
-        else:
-            return self.paid_until
-
-    def payment_possible(self):
-        if self.subscription == SubscriptionType.BASIC:
-            return True
-        payment_due = self.payment_due_date()
-        if payment_due is None:
-            return False
-        else:
-            return (payment_due - timedelta(PAYMENT_ALLOWED_EARLY_DAYS)) < timezone.now()
-    payment_possible.boolean = True
-
-    def require_subscribe(self):
-        if self.is_under_13:
-            return False
-        d = self.payment_due_date()
-        if d is None:
-            return False
-        return d < timezone.now()
-
-    def update_subscription_for_price(self, price):
-        if self.paid_until is None:
-            old_paid_until = self.date_joined + timedelta(FREE_TRIAL_LENGTH_DAYS)
-        else:
-            old_paid_until = self.paid_until
-
-        # We don't make people pay for the past if they take a gap from
-        # using the site, or downgraded to basic.
-        old_paid_until = max(old_paid_until, timezone.now())
-        new_paid_until = old_paid_until + timedelta(price.days)
-
-        # Update DB, avoiding race conditions
-        Account.objects.filter(id=self.id).update(subscription=SubscriptionType.PAID_UP,
-                                                  paid_until=new_paid_until)
-        # Also update this object to reflect changes
-        self.subscription = SubscriptionType.PAID_UP
-        self.paid_until = new_paid_until
-
-    def receive_payment(self, price, ipn_obj):
+    def receive_payment(self, ipn_obj):
         self.payments.create(amount=ipn_obj.mc_gross,
                              paypal_ipn=ipn_obj,
                              created=timezone.now())
-        if self.payment_possible():
-            self.update_subscription_for_price(price)
-            send_payment_received_email(self, price, ipn_obj)
-        else:
-            send_payment_not_accepted_email(self, price, ipn_obj)
+        send_payment_received_email(self, ipn_obj)
 
     def make_referral_link(self, url):
         if '?from=' in url or '&from=' in url:
@@ -300,18 +223,6 @@ class Account(models.Model):
 
     def referred_identities_count(self):
         return self.referrals.count()
-
-    def subscription_discount(self):
-        count = self.referrals.filter(account__isnull=False,
-                                      account__subscription=SubscriptionType.PAID_UP,
-                                      account__paid_until__gte=timezone.now()).count()
-        if count >= 3:
-            return Decimal('0.30')
-        if count >= 2:
-            return Decimal('0.20')
-        if count >= 1:
-            return Decimal('0.10')
-        return Decimal('0.0')
 
     def visible_awards(self):
         all_awards = self.awards.order_by('award_type', 'level')
@@ -383,7 +294,7 @@ def account_get_friendship_weights(account_id):
     return weights
 
 
-def send_payment_received_email(account, price, payment):
+def send_payment_received_email(account, payment):
     from django.conf import settings
     c = {
         'site': get_current_site(None),
@@ -392,20 +303,7 @@ def send_payment_received_email(account, price, payment):
         }
 
     body = loader.render_to_string("learnscripture/payment_received_email.txt", c)
-    subject = u"LearnScripture.net - payment received"
-    mail.send_mail(subject, body, settings.SERVER_EMAIL, [account.email])
-
-
-def send_payment_not_accepted_email(account, price, payment):
-    from django.conf import settings
-    c = {
-        'site': get_current_site(None),
-        'payment': payment,
-        'account': account,
-        }
-
-    body = loader.render_to_string("learnscripture/payment_not_accepted_email.txt", c)
-    subject = u"LearnScripture.net - payment problem"
+    subject = u"LearnScripture.net - donation received"
     mail.send_mail(subject, body, settings.SERVER_EMAIL, [account.email])
 
 
@@ -469,11 +367,6 @@ class Identity(models.Model):
     @property
     def default_to_dashboard(self):
         return self.preferences_setup
-
-    def require_subscribe(self):
-        if self.account is None:
-            return False
-        return self.account.require_subscribe()
 
     def add_verse_set(self, verse_set, version=None):
         """
@@ -1075,7 +968,7 @@ class Identity(models.Model):
     def scoring_enabled(self):
         if self.account_id is None:
             return False
-        return self.account.scoring_enabled
+        return True
 
     def award_revision_complete_bonus(self, score_log_ids):
         if self.account_id is None:
@@ -1196,9 +1089,6 @@ def get_active_identity_count(since_when, until_when):
             .values('for_identity_id').distinct().count()
             )
 
-
-def get_paying_account_count():
-    return Account.objects.filter(subscription=SubscriptionType.PAID_UP, paid_until__gte=timezone.now()).count()
 
 import accounts.hooks
 

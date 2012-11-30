@@ -178,14 +178,9 @@
 
 <div id="id-points-block">
 {% if not request.identity.scoring_enabled %}
-  {% if not request.identity.account %}
   <p>Points are only enabled once you
     <a href="#" class="signup-link">create an account</a>.
   </p>
-
-  {% else %}
-  <p>Points not enabled for this account</p>
-  {% endif %}
 {% endif %}
 </div>
 

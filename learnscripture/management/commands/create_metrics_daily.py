@@ -12,6 +12,5 @@ class Command(BaseCommand):
         try:
             import learnscripture.metrics
             learnscripture.metrics.record_active_accounts()
-            learnscripture.metrics.record_paying_accounts()
         except Exception as e:
             logger.error("Couldn't create metrics", exc_info=sys.exc_info())

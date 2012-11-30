@@ -1,14 +1,10 @@
 {% load url from future %}{% autoescape off %}
 Hi {{ account.email_name }},
 
-Thank you for your payment of {{ payment.mc_gross }} {{ payment.mc_currency }}!
+Thank you for your donation of {{ payment.mc_gross }} {{ payment.mc_currency }}!
 
-Your account is now paid up until {{ account.paid_until|date:"j F o" }}.
-
-To get *discounts* in the future, please have a look at our
-referrals program:
-
-  http://{{ site.domain }}{% url 'referral_program' %}
+Donations like these really help to keep the site running, and
+allow us to make further improvements to the service.
 
 Hope you continue to enjoy and benefit from your use of the site!
 

@@ -1510,7 +1510,7 @@ var learnscripture =
 
         var receiveAccountData = function (accountData) {
             userAccountData = accountData;
-            scoringEnabled = (userAccountData !== null && userAccountData.scoringEnabled);
+            scoringEnabled = (userAccountData !== null);
             if (scoringEnabled) {
                 $('#id-points-block *').remove();
             }
