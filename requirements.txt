@@ -28,3 +28,4 @@ django-selectable==0.4.1
 django-rstify
 psutil==0.5.1
 twilio==3.3.9
+pyquery==1.2.4
