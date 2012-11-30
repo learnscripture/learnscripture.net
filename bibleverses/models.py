@@ -19,6 +19,7 @@ import caching.base
 
 from accounts import memorymodel
 from bibleverses.fields import VectorField
+from bibleverses.services import get_esv
 from learnscripture.datastructures import make_choices
 
 
@@ -134,6 +135,10 @@ class BibleVersionManager(caching.base.CachingManager):
         return self.get(slug=slug)
 
 
+retrieve_version_services = {
+    'ESV': get_esv,
+}
+
 def ensure_text(verses):
     refs_missing_text = defaultdict(list) # divided by version
     verse_dict = {}
@@ -143,17 +148,17 @@ def ensure_text(verses):
             verse_dict[v.version.short_name, v.reference] = v
 
     # Version specific stuff:
-    esv_missing = refs_missing_text['ESV']
-    if esv_missing:
-        from bibleverses.services import get_esv
-        verse_texts = get_esv(esv_missing)
-        for ref in esv_missing:
-            v = verse_dict['ESV', ref]
-            if ref in verse_texts:
-                v.text = verse_texts[ref]
-                v.save()
-            else:
-                v.text = u'[Text missing, please contact administrator]'
+    for short_name, service in retrieve_version_services.items():
+        missing = refs_missing_text[short_name]
+        if missing:
+            verse_texts = service(missing)
+            for ref in missing:
+                v = verse_dict[short_name, ref]
+                if ref in verse_texts:
+                    v.text = verse_texts[ref]
+                    v.save()
+                else:
+                    v.text = u'[Text missing, please contact administrator]'
 
 
 class BibleVersion(caching.base.CachingMixin, models.Model):
