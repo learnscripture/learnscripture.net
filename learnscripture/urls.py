@@ -34,14 +34,6 @@ urlpatterns = patterns('',
                        url(r'^reset/(?P<uidb36>[0-9A-Za-z]{1,13})-(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$', 'learnscripture.views.password_reset_confirm', name='password_reset_confirm'),
                        url(r'^reset/complete/$', 'learnscripture.views.password_reset_complete', name='password_reset_complete'),
 
-                       # Payment funds
-                       url(r'^payment-funds/$', 'learnscripture.views.account_funds', name='account_funds'),
-                       url(r'^payment-funds/new/$', 'learnscripture.views.add_account_fund', name='add_account_fund'),
-                       url(r'^payment-funds/(\d+)/$', 'learnscripture.views.edit_account_fund', name='edit_account_fund'),
-                       url(r'^topup-fund/(\d+)/$', 'learnscripture.views.topup_fund', name='topup_fund'),
-                       url(r'^fund-payment-complete/$', 'learnscripture.views.fund_pay_done', name='fund_pay_done'),
-                       url(r'^fund-payment-cancelled/$', 'learnscripture.views.fund_pay_cancelled', name='fund_pay_cancelled'),
-
                        # Verse sets
                        url(r'^verse-set/(?P<slug>[^/]+)/$', 'learnscripture.views.view_verse_set', name='view_verse_set'),
                        url(r'^create-verse-set/$', 'learnscripture.views.create_set_menu', name='create_set_menu'),
