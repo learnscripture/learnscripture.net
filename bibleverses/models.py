@@ -134,6 +134,28 @@ class BibleVersionManager(caching.base.CachingManager):
         return self.get(slug=slug)
 
 
+def ensure_text(verses):
+    refs_missing_text = defaultdict(list) # divided by version
+    verse_dict = {}
+    for v in verses:
+        if v.text == '':
+            refs_missing_text[v.version.short_name].append(v.reference)
+            verse_dict[v.version.short_name, v.reference] = v
+
+    # Version specific stuff:
+    esv_missing = refs_missing_text['ESV']
+    if esv_missing:
+        from bibleverses.services import get_esv
+        verse_texts = get_esv(esv_missing)
+        for ref in esv_missing:
+            v = verse_dict['ESV', ref]
+            if ref in verse_texts:
+                v.text = verse_texts[ref]
+                v.save()
+            else:
+                v.text = u'[Text missing, please contact administrator]'
+
+
 class BibleVersion(caching.base.CachingMixin, models.Model):
     short_name = models.CharField(max_length=20, unique=True)
     slug = models.CharField(max_length=20, unique=True)
@@ -154,7 +176,9 @@ class BibleVersion(caching.base.CachingMixin, models.Model):
         return (self.slug,)
 
     def get_verse_list(self, reference, max_length=MAX_VERSE_QUERY_SIZE):
-        return parse_ref(reference, self, max_length=max_length)
+        l = parse_ref(reference, self, max_length=max_length)
+        ensure_text(l)
+        return l
 
     def get_text_by_reference(self, reference, max_length=MAX_VERSE_QUERY_SIZE):
         return u' '.join([v.text for v in self.get_verse_list(reference, max_length=max_length)])
@@ -185,6 +209,7 @@ class BibleVersion(caching.base.CachingMixin, models.Model):
                     v_dict[ref] = ComboVerse(ref, self.get_verse_list(ref))
                 except InvalidVerseReference:
                     pass
+        ensure_text(v_dict.values())
         return v_dict
 
 
@@ -643,6 +668,9 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE,
         if len(retval) > max_length:
             raise InvalidVerseReference(u"References that span more than %d verses are not allowed in this context." % max_length)
 
+        # Ensure back references to version are set, so we don't need extra DB lookup
+        for v in retval:
+            v.version = version
     return retval
 
 
