@@ -263,12 +263,3 @@ class FundTests(AccountTestMixin, TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn('dropped below', mail.outbox[0].body)
 
-
-class PaymentFundPageTests(TestCase):
-
-    def test_access_payment_fund_page_no_session(self):
-
-        resp = self.client.get(reverse('account_funds'), follow=True)
-        self.assertEqual(resp.status_code, 200)
-        self.assertNotContains(resp, "Your funds")
-        self.assertContains(resp, "You need to")
