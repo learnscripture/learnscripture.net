@@ -2,7 +2,6 @@ from django.db import models
 from paypal.standard.ipn.models import PayPalIPN
 
 from accounts.models import Account
-import payments.tasks
 
 
 class PaymentManager(models.Manager):
