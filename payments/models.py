@@ -110,85 +110,6 @@ class Price(models.Model):
         self.amount_with_discount = a
 
 
-class Fund(models.Model):
-    name = models.CharField(max_length=255, help_text="e.g. 'church' or 'family'")
-    manager = models.ForeignKey(Account, related_name='funds_managed')
-    balance = models.DecimalField(decimal_places=2, max_digits=10, default=Decimal('0.00'))
-    currency = models.ForeignKey(Currency)
-    members = models.ManyToManyField(Account, related_name='funds_available', blank=True)
-
-    def __unicode__(self):
-        return u"%s (%s)" % (self.name, self.manager.username)
-
-    def save(self, **kwargs):
-        # We avoid updating 'balance' to avoid race conditions that could
-        # overwrite this field and effectively cancel an incoming payment
-
-        if self.id is None:
-            return super(Fund, self).save(**kwargs)
-        else:
-            update_fields = [f for f in self._meta.fields if
-                             f.name not in ('id', 'balance')]
-            update_kwargs = dict((f.name, getattr(self, f.attname)) for
-                                 f in update_fields)
-            Fund.objects.filter(id=self.id).update(**update_kwargs)
-
-
-    def receive_payment(self, ipn_obj):
-        self.payments.create(amount=ipn_obj.mc_gross,
-                             paypal_ipn=ipn_obj,
-                             created=timezone.now())
-        # Avoid race conditions by only using UPDATE for this field
-        Fund.objects.filter(id=self.id).update(balance=models.F('balance') + ipn_obj.mc_gross)
-        payments.tasks.send_fund_payment_received_email.apply_async([self.id, ipn_obj.id],
-                                                                    countdown=5)
-
-    def get_price_object(self):
-        return Price.objects.get_current(days=ONE_YEAR, currency=self.currency)
-
-    def price_for(self, account):
-        price = self.get_price_object()
-        price.apply_discount(self.overall_discount(account))
-        return price
-
-    def fund_discount(self):
-        member_count = self.members.count()
-        if member_count >= 10:
-            return Decimal('0.10')
-        elif member_count >= 50:
-            return Decimal('0.20')
-        else:
-            return Decimal('0.00')
-
-    def overall_discount(self, account):
-        return chain_discounts(account.subscription_discount(), self.fund_discount())
-
-    def can_pay_for(self, account):
-        if not self.members.filter(id=account.id).exists():
-            return False
-        return self.balance >= self.price_for(account).amount_with_discount
-
-    def pay_for(self, account):
-        assert self.can_pay_for(account)
-        price = self.price_for(account)
-        amount = price.amount_with_discount
-        Fund.objects.filter(id=self.id).update(
-            balance=models.F('balance') - amount)
-        account.update_subscription_for_price(price)
-        self.fundusedlog_set.create(account=account,
-                                    amount=amount)
-
-
-class FundUsedLog(models.Model):
-    fund = models.ForeignKey(Fund)
-    account = models.ForeignKey(Account)
-    amount = models.DecimalField(decimal_places=2, max_digits=10)
-    created = models.DateTimeField(default=timezone.now)
-
-    def __unicode__(self):
-        return u"%s used by %s from %s" % (self.amount, self.account.username, self.fund)
-
-
 def chain_discounts(*discounts):
     return Decimal('1.00') - reduce(operator.mul, [Decimal('1.00') - d for d in discounts])
 
@@ -202,9 +123,7 @@ class PaymentManager(models.Manager):
 
 class Payment(models.Model):
     amount = models.DecimalField(decimal_places=2, max_digits=10)
-    # A payment can go against a Fund or an Account, but not both.
     account = models.ForeignKey(Account, null=True, blank=True, related_name='payments')
-    fund = models.ForeignKey(Fund, null=True, blank=True, related_name='payments')
     paypal_ipn = models.ForeignKey(PayPalIPN)
     created = models.DateTimeField()
 

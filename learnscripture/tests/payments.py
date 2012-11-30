@@ -12,7 +12,7 @@ from paypal.standard.ipn.models import PayPalIPN
 from .base import AccountTestMixin
 from accounts.models import SubscriptionType, Account
 from payments.hooks import paypal_payment_received
-from payments.models import Price, Currency, Fund
+from payments.models import Price, Currency
 from payments.sign import sign_payment_info
 
 class IpnMock(object):
@@ -173,33 +173,6 @@ class PaymentTests(AccountTestMixin, TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertTrue('account is already paid up' in mail.outbox[0].body)
 
-    def test_add_to_payment_fund(self):
-        currency = Currency.objects.get(name='GBP')
-        fund = self.account.funds_managed.create(name='my church',
-                                                 currency=currency)
-        ipn_1 = PayPalIPN.objects.create(mc_gross=Decimal('20.00'),
-                                         mc_currency=currency.name,
-                                         custom=sign_payment_info(dict(fund=fund.id,
-                                                                       currency=fund.currency.name)),
-                                         ipaddress="127.0.0.1",
-                                         payment_status='Completed',
-                                         )
-
-        self.assertEqual(len(mail.outbox), 0)
-
-        paypal_payment_received(ipn_1)
-
-        # refresh
-        fund = Fund.objects.get(id=fund.id)
-        # Check payments
-        self.assertEqual(fund.payments.count(), 1)
-        self.assertEqual(fund.balance, Decimal('20.00'))
-        # Check emails
-        self.assertEqual(len(mail.outbox), 1)
-        self.assertIn('Thank you for your payment', mail.outbox[0].body)
-        self.assertIn(fund.name, mail.outbox[0].body)
-        self.assertIn('20.00', mail.outbox[0].body)
-
 
 class PriceTests(AccountTestMixin, TestCase):
 
@@ -218,48 +191,4 @@ class PriceTests(AccountTestMixin, TestCase):
               [(93, Decimal('2.50'), Decimal('2.20')),
                (366, Decimal('8.00'), Decimal('7.20'))])]
             )
-
-
-class FundTests(AccountTestMixin, TestCase):
-
-    fixtures = ['test_bible_versions.json', 'test_currencies.json', 'test_prices.json']
-
-    def test_pay_for(self):
-        identity, account = self.create_account()
-        account.date_joined = timezone.now() - timedelta(1000)
-        account.save()
-
-        self.assertTrue(account.payment_possible())
-
-        currency = Currency.objects.get(name='GBP')
-        fund = account.funds_managed.create(name='church',
-                                            currency=currency,
-                                            balance=Decimal('6.00'))
-
-        # Can't pay for account if account is not a member
-        self.assertFalse(fund.can_pay_for(account))
-
-        fund.members.add(account)
-        self.assertTrue(fund.can_pay_for(account))
-
-        # Test 'pay_for' updates account.paid_until
-        fund.pay_for(account)
-
-        # Test we created a 'FundUsedLog'
-        self.assertEqual(fund.fundusedlog_set.count(), 1)
-
-        # refresh
-        fund = Fund.objects.get(id=fund.id)
-        account = Account.objects.get(id=account.id)
-
-        self.assertEqual(fund.balance, Decimal('1.00'))
-        self.assertFalse(account.payment_possible())
-
-        # Can't pay if we're out of funds.
-        self.assertFalse(fund.can_pay_for(account))
-
-
-        # An email should be sent when the fund drops to this level
-        self.assertEqual(len(mail.outbox), 1)
-        self.assertIn('dropped below', mail.outbox[0].body)
 
