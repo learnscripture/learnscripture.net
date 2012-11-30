@@ -33,7 +33,6 @@ from bibleverses.forms import VerseSetForm
 from groups.forms import EditGroupForm
 from groups.models import Group
 from groups.signals import public_group_created
-from payments.models import Price
 from payments.sign import sign_payment_info
 from scores.models import get_all_time_leaderboard, get_leaderboard_since, ScoreReason
 

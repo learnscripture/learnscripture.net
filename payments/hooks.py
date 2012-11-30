@@ -5,7 +5,6 @@ from django.template import loader
 from paypal.standard.ipn.signals import payment_was_successful, payment_was_flagged
 
 from accounts.models import Account
-from payments.models import Price
 from payments.sign import unsign_payment_string
 
 def site_address_url_start():
