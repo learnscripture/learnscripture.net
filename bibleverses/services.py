@@ -44,6 +44,13 @@ def get_esv(reference_list):
 
     return sections
 
+def higlight_search_words(verse, words):
+    text = verse.text
+    for word in words.split(' '):
+        text = text.replace(word, '**%s**' % word)
+    verse.text = text
+    return verse
+
 def search_esv(version, words):
     from django.conf import settings
     from bibleverses.models import ComboVerse
@@ -73,4 +80,4 @@ def search_esv(version, words):
 
     # It's easier at this point to get the verse via 'get_esv'
     verses = version.get_verses_by_reference_bulk(refs)
-    return [ComboVerse(ref, [verses[ref]]) for ref in refs]
+    return [ComboVerse(ref, [higlight_search_words(verses[ref], words)]) for ref in refs]
