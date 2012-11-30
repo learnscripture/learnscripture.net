@@ -167,3 +167,27 @@ class UserVerseStatusTests(AccountTestMixin, TestCase):
 
         self.assertEqual(uvs.passage_reference, 'Psalm 23:1-6')
         self.assertEqual(uvs.section_reference, 'Psalm 23:1-3')
+
+
+class ESVTests(TestCase):
+    """
+    Tests to ensure we can transparently get the ESV text
+    """
+
+    def make_esv(self):
+        # ESV needs to be created with text empty, but verses existing
+        esv = BibleVersion.objects.get_or_create(short_name='ESV')[0]
+        esv.verse_set.create(reference='John 3:16',
+                             book_number=42,
+                             chapter_number=3,
+                             verse_number=16,
+                             bible_verse_number=26136)
+        return esv
+
+    def test_get_verse_list(self):
+        esv = self.make_esv()
+        l = esv.get_verse_list('John 3:16')
+        text = '"For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life.'
+        self.assertEqual(l[0].text, text)
+        # Now it should be cached in DB
+        self.assertEqual(esv.verse_set.get(reference='John 3:16').text, text)
