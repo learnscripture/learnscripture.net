@@ -902,13 +902,7 @@ var learnscripture =
                 if (verseData.needs_testing) {
                     currentStageList = chooseStageListForStrength(strength);
                 } else {
-                    if (isPassageType(verseData)) {
-                        currentStageList = ['readForContext'];
-                    } else {
-                        // This can happen if the user chooses a verse set to learn
-                        // and they already know the verses in it.
-                        currentStageList = ['practice'];
-                    }
+                    currentStageList = ['readForContext'];
                 }
             }
             setupStage(0);
@@ -975,11 +969,23 @@ var learnscripture =
         };
 
 
+        var normaliseLearningType = function (verseData) {
+            if (verseData.learning_type != LEARNING_TYPE_PRACTICE
+                && !verseData.needs_testing
+                && !isPassageType(verseData)
+               ) {
+                // This can happen if the user chooses a verse set to learn
+                // and they already know the verses in it.
+                verseData.learning_type = LEARNING_TYPE_PRACTICE;
+            }
+        };
+
         var loadCurrentVerse = function () {
             var oldVerseStatus = currentVerseStatus;
             currentVerseStatus = versesToLearn[currentVerseIndex];
             currentVerseStatus.wordCount = stripPunctuation(currentVerseStatus.text.trim()).split(/\W/).length;
             var verse = currentVerseStatus;
+            normaliseLearningType(verse);
             var moveOld = (oldVerseStatus !== null &&
                            isPassageType(oldVerseStatus) &&
                            // Need to cope with possibility of a gap
