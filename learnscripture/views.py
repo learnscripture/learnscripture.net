@@ -745,7 +745,7 @@ def user_verses(request):
 
     if 'bibleorder' in request.GET:
         c['bibleorder'] = True
-        verses = verses.order_by('bible_verse_number', 'strength')
+        verses = verses.order_by('text_order', 'strength')
     else:
         verses = verses.order_by('strength', 'reference')
     c['verses'] = verses

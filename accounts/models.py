@@ -605,15 +605,15 @@ class Identity(models.Model):
         return retval
 
     def create_verse_status(self, reference, verse_set, version):
-        # bible_verse_number has to be specified here since it is non-nullable
-        bible_verse_number = version.get_verse_list(reference)[0].bible_verse_number
+        # text_order has to be specified here since it is non-nullable
+        text_order = version.get_verse_list(reference)[0].bible_verse_number
         # NB: we are exploiting the fact that multiple calls to
         # create_verse_status will get slightly increasing values of 'added',
         # allowing us to preserve order.
         uvs, new = self.verse_statuses.get_or_create(verse_set=verse_set,
                                                      reference=reference,
                                                      version=version,
-                                                     defaults=dict(bible_verse_number=bible_verse_number,
+                                                     defaults=dict(text_order=text_order,
                                                                    added=timezone.now()
                                                                    )
                                                      )
@@ -846,7 +846,7 @@ class Identity(models.Model):
     def verse_statuses_for_passage(self, verse_set_id):
         # Must be strictly in the bible order
         uvs_list = list(self.verse_statuses.filter(verse_set=verse_set_id,
-                                                   ignored=False).order_by('bible_verse_number'))
+                                                   ignored=False).order_by('text_order'))
         min_strength = min(uvs.strength for uvs in uvs_list)
         if min_strength > memorymodel.STRENGTH_FOR_GROUP_TESTING:
             for uvs in uvs_list:
