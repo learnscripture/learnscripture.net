@@ -28,7 +28,7 @@ like added, please <a href="{% url 'contact' %}">contact us</a>.</p>
 
   <p>It includes {{ catechism.qapairs.count }} question/answer pairs.</p>
 
-  <p><a href="">See more</a></p>
+  <p><a href="{% url 'view_catechism' slug=catechism.slug %}">See more</a></p>
 </div>
 
 {% endfor %}
