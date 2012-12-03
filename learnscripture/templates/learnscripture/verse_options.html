@@ -10,9 +10,9 @@
       <input type="hidden" name="uvs_id" value="{{ uvs.id }}" />
       <input type="submit" name="reviseverse" class="btn primary"
              {% if uvs.needs_testing %}
-             value="Revise verse"
+             value="Revise {{ uvs.item_name }}"
              {% else %}
-             value="Practise verse"
+             value="Practise {{ uvs.item_name }}"
              {% endif %}
              />
 
@@ -54,6 +54,18 @@
                value="Practise passage: {{ uvs.passage_reference }}"/>
         {% endif %}
       </p>
+    </form>
+  {% endif %}
+
+  {% if uvs.version.is_catechism %}
+    <form action="{% url 'dashboard' %}" method="POST">
+      {% csrf_token %}
+      <input type="hidden" name="catechism_id" value="{{ uvs.version.id }}" />
+      <p>
+        <input type="submit" name="revisecatechism" class="btn primary"
+               value="Practice or revise all of {{ uvs.version.short_name }}"/>
+      </p>
+
     </form>
   {% endif %}
 

@@ -4,7 +4,7 @@ var learnscripture = (function (learnscripture, $) {
         $('.verse-popup-btn')
             .popover({
                 title: function () {
-                    return this.attributes['data-reference'].value +
+                    return this.attributes['data-title'].value +
                         " (" + this.attributes['data-version'].value + ")";
                 },
                 content: function () {

@@ -496,6 +496,15 @@ class UserVerseStatus(models.Model):
     def question(self):
         return self.version.get_qapair_by_reference(self.reference).question
 
+    @cached_property
+    def title(self):
+        return self.reference + \
+            ('' if self.version.is_bible else '. ' + self.question)
+
+    @cached_property
+    def item_name(self):
+        return 'verse' if self.version.is_bible else 'question'
+
     @property
     def needs_testing(self):
         if hasattr(self, 'needs_testing_override'):

@@ -69,9 +69,8 @@
     {% for verse in verses %}
     {% ifchanged verse.reference verse.version.slug %}
     <tr>
-      <td>{{ verse.reference }}
-        {% if catechism %} - {{ verse.question }}{% endif %}
-        <a class="btn verse-popup-btn" href="#" data-reference="{{ verse.reference }}" data-version="{{ verse.version.slug }}">Options</a></td>
+      <td>{{ verse.title }}
+        <a class="btn verse-popup-btn" href="#" data-reference="{{ verse.reference }}" data-version="{{ verse.version.slug }}" data-title="{{ verse.title }}">Options</a></td>
       <td>{{ verse.version.slug }}</td>
       <td><img src="{{ STATIC_URL }}img/strength_{{ verse.simple_strength }}.png"></td>
     </tr>

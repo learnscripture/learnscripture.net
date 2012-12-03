@@ -264,6 +264,13 @@ def dashboard(request):
                              session.LearningType.REVISION if uvs.needs_testing
                              else session.LearningType.PRACTICE)
 
+        if 'revisecatechism' in request.POST:
+            catechism_id = int(request.POST['catechism_id'])
+            catechism = TextVersion.objects.catechisms().get(id=catechism_id)
+            uvss = identity.get_all_tested_catechism_qas(catechism)
+            return learn_set(request, uvss,
+                             session.LearningType.REVISION)
+
         if 'clearbiblequeue' in request.POST:
             identity.clear_bible_learning_queue()
             return HttpResponseRedirect(reverse('dashboard'))
