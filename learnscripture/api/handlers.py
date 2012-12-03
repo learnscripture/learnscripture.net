@@ -172,8 +172,7 @@ class SignUpHandler(AccountCommon, BaseHandler):
     fields = ('id',
               'username',
               'first_name',
-              'last_name',
-              'scoring_enabled')
+              'last_name')
 
     @require_identity_method
     @validate(SignUpForm, prefix="signup")

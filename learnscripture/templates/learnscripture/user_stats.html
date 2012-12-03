@@ -27,14 +27,10 @@
       <td>{{ account.recruited_by|account_link }}</td>
     </tr>
     {% endif %}
-    <tr>
-      <th>Subscription type</th>
-      <td>{{ account.get_subscription_display }}</td>
-    </tr>
   </tbody>
 </table>
 
-{% if awards and account.scoring_enabled %}
+{% if awards %}
 <h2 id="badges">Badges</h2>
 
 <table class="bordered-table award">
@@ -76,7 +72,7 @@
 
 <h2>Stats</h2>
 
-{% if account.total_score and account.scoring_enabled %}
+{% if account.total_score %}
 
 <table class="bordered-table">
   <thead>
@@ -116,17 +112,9 @@
   </tbody>
 </table>
 
-{% elif account.scoring_enabled %}
-
-<p>No points earned yet.</p>
-
 {% else %}
 
-<p>Stats and badges disabled for free accounts.
-{% if request.identity.account.username == account.username %}
-  <a href="{% url 'subscribe' %}">Subscribe to enable.</a>
-  {% endif %}
-</p>
+<p>No points earned yet.</p>
 
 {% endif %}
 

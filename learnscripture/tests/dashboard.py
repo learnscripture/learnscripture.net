@@ -155,17 +155,6 @@ class DashboardTests(LiveServerTests):
         self.assertTrue(driver.current_url.endswith(reverse('choose')))
         self.assertEqual(Identity.objects.exclude(id__in=[i.id for i in ids]).count(), 0)
 
-    def test_force_subscribe_if_expired(self):
-        identity, account = self.create_account()
-        self.login(account)
-        account.date_joined = account.date_joined - timedelta(FREE_TRIAL_LENGTH_DAYS + 1)
-        account.save()
-
-        driver = self.driver
-        driver.get(self.live_server_url + reverse('dashboard'))
-        self.wait_until_loaded('body')
-        self.assertTrue(driver.current_url.endswith(reverse('subscribe')))
-
     def test_notices_expire(self):
         # This could be tested on any page, but this is an obvious example.
         identity, account = self.create_account()

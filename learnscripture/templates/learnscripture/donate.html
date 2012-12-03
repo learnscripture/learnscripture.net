@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% load json_filters %}
+{% load url from future %}
+{% load account_utils %}
+
+{% block content %}
+
+
+<p>LearnScripture.net is funded entirely by donations.  If you would like to
+  donate to support the ongoing costs of running this site, that would be much
+  appreciated!</p>
+
+
+{% if PRODUCTION %}
+{{ paypal_form.render }}
+{% else %}
+{{ paypal_form.sandbox }}
+{% endif %}
+
+{% endblock %}

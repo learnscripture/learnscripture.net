@@ -74,53 +74,6 @@ access to and use of the Website to any individual or entity for any reason,
 in LearnScripture.net’s sole discretion. LearnScripture.net will have no
 obligation to provide a refund of any amounts previously paid.
 
-Reasonable use
---------------
-
-You are required to make use of this service in a reasonable way that does not
-damage the experience of other users or the service itself. You are not allowed
-to use automated means, such as scripting or bots, to access the service or add
-Content. Failure to comply with this may result in being blocked or having your
-data removed from the site.
-
-Payment and Renewal
--------------------
-
-
-General Terms
-~~~~~~~~~~~~~
-
-Payments will be charged on a pre-pay basis on the day you choose to pay and
-will cover the use of the service for a 3-monthly or annual subscription
-period as indicated.
-
-In exchange for payment, the service that LearnScripture.net agrees to
-provide includes only i) a Bible verse learning and testing interface, ii) a
-system for prompting revision of Bible verses iii) the ability to find,
-create and share verse sets and iv) a leaderboard and points system.
-
-Other features of the Website are not included in the agreed service, and the
-exact nature of the above features may change. While every effort is made to
-ensure the quality of service, we do not guarantee that the service is
-without errors or down-time.
-
-In the event of LearnScripture.net shutting down or the service becoming
-completely unavailable, if service was available for less than 50% of the
-agreed subscription period you will be entitled, on request, to a refund on a
-pro-rata basis for each whole month where service not was provided. In all
-other cases payments are not refundable.
-
-
-Automatic Renewal
-~~~~~~~~~~~~~~~~~
-
-If you have agreed to Automatic Renewal your subscription will automatically
-renew and you authorize us to collect the then-applicable annual or 3-monthly
-subscription fee (as well as any taxes) using any credit card or other
-payment mechanism we have on record for you, unless you notify
-LearnScripture.net before the end of the applicable subscription period that
-you want to cancel your subscription. Automatic Renewal can be canceled at
-any time in the Automatic Renewal section of your account details.
 
 
 Responsibility of Website Users

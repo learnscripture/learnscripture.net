@@ -258,8 +258,6 @@
 <div id="id-account-data"
      data-username="{{ request.identity.account.username }}"
      data-id="{{ request.identity.account.id }}"
-     {# NB this is translated to scoringEnabled #}
-     data-scoring-enabled="{{ request.identity.account.scoring_enabled|yesno:"true,false,false" }}"
      >
 </div>
 
@@ -298,7 +296,6 @@
     <script type="text/javascript" src="{{ STATIC_URL }}js/viewset.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/modals.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/dashboard.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/subscribe.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/versepopup.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/groups.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/leaderboard.js"></script>

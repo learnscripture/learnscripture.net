@@ -7,7 +7,7 @@ from django.db.models import F
 from django.test import TestCase
 from django.utils import timezone
 
-from accounts.models import Account, SubscriptionType, ActionChange, Identity
+from accounts.models import Account, ActionChange, Identity
 from awards.models import AwardType, Award
 from bibleverses.models import MemoryStage, StageType
 from events.models import Event, EventType
@@ -25,8 +25,7 @@ class AccountTests(TestCase):
 
     def test_award_action_points_revision(self):
         a = Account.objects.create(username='test',
-                                   email='test@test.com',
-                                   subscription=SubscriptionType.PAID_UP)
+                                   email='test@test.com')
 
         a.award_action_points("John 3:16", "This is John 3:16",
                               MemoryStage.TESTED,
@@ -37,8 +36,7 @@ class AccountTests(TestCase):
 
     def test_points_events(self):
         a = Account.objects.create(username='test',
-                                   email='test@test.com',
-                                   subscription=SubscriptionType.PAID_UP)
+                                   email='test@test.com')
         def score():
             a.award_action_points("John 3:16", "This is John 3:16",
                                   MemoryStage.TESTED,
@@ -54,8 +52,7 @@ class AccountTests(TestCase):
 
     def test_ace_awards(self):
         account = Account.objects.create(username='test',
-                                         email='test@test.com',
-                                         subscription=SubscriptionType.PAID_UP)
+                                         email='test@test.com')
         identity = Identity.objects.create(account=account)
 
         self.assertEqual(account.awards.filter(award_type=AwardType.ACE).count(),
@@ -106,8 +103,7 @@ class AccountTests(TestCase):
 
     def test_award_action_points_fully_learnt(self):
         a = Account.objects.create(username='test',
-                                   email='test@test.com',
-                                   subscription=SubscriptionType.PAID_UP)
+                                   email='test@test.com')
 
         a.award_action_points("John 3:16", "This is John 3:16",
                               MemoryStage.TESTED,
@@ -118,67 +114,6 @@ class AccountTests(TestCase):
                          + (4 * Scores.POINTS_PER_WORD * Scores.VERSE_LEARNT_BONUS))
 
 
-    def test_subscription_discount(self):
-        # Main account
-        a1 = Account.objects.create(username='test1',
-                                    email='tes1t@test.com',
-                                    subscription=SubscriptionType.PAID_UP,
-                                    paid_until=timezone.now() - timedelta(1))
-        i1 = Identity.objects.create(account=a1)
-
-
-        # Free trial
-        a2 = Account.objects.create(username='test2',
-                                    email='test2@test.com',
-                                    subscription=SubscriptionType.FREE_TRIAL)
-        i2 = Identity.objects.create(account=a2)
-
-        # Paid up, expired
-        a3 = Account.objects.create(username='test3',
-                                    email='test3@test.com',
-                                    subscription=SubscriptionType.PAID_UP,
-                                    paid_until=timezone.now() - timedelta(100)
-                                    )
-        i3 = Identity.objects.create(account=a3)
-
-        # Paid up, current
-        a4 = Account.objects.create(username='test4',
-                                    email='test4@test.com',
-                                    subscription=SubscriptionType.PAID_UP,
-                                    paid_until=timezone.now() + timedelta(100)
-                                    )
-        i4 = Identity.objects.create(account=a4)
-
-        # 0 referrers
-        self.assertEqual(a1.subscription_discount(), Decimal('0.0'))
-
-        # 1 referrer, on free trial
-        i2.referred_by = a1
-        i2.save()
-        self.assertEqual(a1.subscription_discount(), Decimal('0.0'))
-
-        # 1 referrer, paid up but expired
-        i3.referred_by = a1
-        i3.save()
-        self.assertEqual(a1.subscription_discount(), Decimal('0.0'))
-
-        # 1 referrer, paid up and current
-        i4.referred_by = a1
-        i4.save()
-        self.assertEqual(a1.subscription_discount(), Decimal('0.10'))
-
-    def test_free_for_children(self):
-        a1 = Account.objects.create(username='test1',
-                                    email='test1@test.com',
-                                    subscription=SubscriptionType.FREE_TRIAL,
-                                    paid_until=None,
-                                    date_joined=timezone.now() - timedelta(100),
-                                    )
-        self.assertEqual(a1.require_subscribe(), True)
-
-        a1.is_under_13 = True
-
-        self.assertEqual(a1.require_subscribe(), False)
 
 
 class AccountTests2(UsesSQLAlchemyBase):
@@ -186,8 +121,7 @@ class AccountTests2(UsesSQLAlchemyBase):
     def test_addict_award(self):
         import awards.tasks
         account = Account.objects.create(username='test',
-                                         email='test@test.com',
-                                         subscription=SubscriptionType.PAID_UP)
+                                         email='test@test.com')
         identity = Identity.objects.create(account=account)
 
         def score():
@@ -210,11 +144,9 @@ class AccountTests2(UsesSQLAlchemyBase):
 
     def test_champion_awards(self):
         a1 = Account.objects.create(username='test1',
-                                    email='test1@test.com',
-                                    subscription=SubscriptionType.PAID_UP)
+                                    email='test1@test.com')
         a2 = Account.objects.create(username='test2',
-                                    email='test2@test.com',
-                                    subscription=SubscriptionType.PAID_UP)
+                                    email='test2@test.com')
 
         Identity.objects.create(account=a1)
         Identity.objects.create(account=a2)

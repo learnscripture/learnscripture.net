@@ -19,6 +19,7 @@ import caching.base
 
 from accounts import memorymodel
 from bibleverses.fields import VectorField
+from bibleverses.services import get_esv, search_esv
 from learnscripture.datastructures import make_choices
 
 
@@ -199,6 +200,7 @@ class TextVersion(caching.base.CachingMixin, models.Model):
                     v_dict[ref] = ComboVerse(ref, self.get_verse_list(ref))
                 except InvalidVerseReference:
                     pass
+        ensure_text(v_dict.values())
         return v_dict
 
 
@@ -677,7 +679,39 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE,
         if len(retval) > max_length:
             raise InvalidVerseReference(u"References that span more than %d verses are not allowed in this context." % max_length)
 
+        # Ensure back references to version are set, so we don't need extra DB lookup
+        for v in retval:
+            v.version = version
+        # Ensure verse.text is set
+        ensure_text(retval)
+
     return retval
+
+
+retrieve_version_services = {
+    'ESV': get_esv,
+}
+
+def ensure_text(verses):
+    refs_missing_text = defaultdict(list) # divided by version
+    verse_dict = {}
+    for v in verses:
+        if v.text == '':
+            refs_missing_text[v.version.short_name].append(v.reference)
+            verse_dict[v.version.short_name, v.reference] = v
+
+    # Version specific stuff:
+    for short_name, service in retrieve_version_services.items():
+        missing = refs_missing_text[short_name]
+        if missing:
+            verse_texts = service(missing)
+            for ref in missing:
+                v = verse_dict[short_name, ref]
+                if ref in verse_texts:
+                    v.text = verse_texts[ref]
+                    v.save()
+                else:
+                    v.text = u'[Text missing, please contact administrator]'
 
 
 def pretty_passage_ref(start_ref, end_ref):
@@ -747,6 +781,11 @@ def get_passage_sections(verse_list, breaks):
     return sections
 
 
+version_specific_searches = {
+    'ESV': search_esv,
+}
+
+
 def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
                allow_searches=True):
     """
@@ -782,6 +821,9 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
         raise InvalidVerseReference("Verse reference not recognised")
 
     # Do a search:
+    if version.short_name in version_specific_searches:
+        return version_specific_searches[version.short_name](version, query)
+
     results = Verse.objects.text_search(query, version, limit=11)
     return [ComboVerse(r.reference, [r]) for r in results]
 
