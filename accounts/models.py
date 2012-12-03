@@ -774,6 +774,12 @@ class Identity(models.Model):
     def clear_catechism_learning_queue(self):
         self.catechism_qas_for_learning_qs().delete()
 
+    def get_all_tested_catechism_qas(self, catechism):
+        return (self._catechism_qas_base_qs()
+                .filter(version=catechism,
+                        memory_stage__gte=MemoryStage.TESTED)
+                .order_by('text_order'))
+
     def verse_statuses_for_ref_and_version(self, reference, version_slug):
         return self.verse_statuses.filter(reference=reference,
                                           version__slug=version_slug,
