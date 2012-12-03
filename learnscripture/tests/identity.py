@@ -225,14 +225,14 @@ class IdentityTests(IdentityBase, TestCase):
         i.change_version('Psalm 23:1', 'KJV', vs1.id)
         self.assertEqual([u'KJV'] * 6, [uvs.version.slug for uvs in i.verse_statuses.filter(verse_set=vs1)])
 
-    def test_verse_statuses_for_revising(self):
+    def test_bible_verse_statuses_for_revising(self):
         i = self._create_identity()
         vs1 = VerseSet.objects.get(name='Bible 101')
         i.add_verse_set(vs1)
         i.record_verse_action('John 3:16', 'NET', StageType.TEST, 1.0)
 
         # It should be set for revising yet
-        self.assertEqual([], list(i.verse_statuses_for_revising()))
+        self.assertEqual([], list(i.bible_verse_statuses_for_revising()))
 
         # It is confusing if it is ever ready within an hour, so we special case
         # that.
@@ -240,7 +240,7 @@ class IdentityTests(IdentityBase, TestCase):
         # Fix data:
         i.verse_statuses.all().update(last_tested = timezone.now() - timedelta(0.99/24))
 
-        self.assertEqual([], list(i.verse_statuses_for_revising()))
+        self.assertEqual([], list(i.bible_verse_statuses_for_revising()))
 
     def test_passages_for_learning(self):
         i = self._create_identity()
@@ -258,8 +258,8 @@ class IdentityTests(IdentityBase, TestCase):
         i.verse_statuses.update(last_tested=timezone.now() - timedelta(10))
 
         # Shouldn't be in general revision queue -
-        # sneak a test for verse_statuses_for_revising() here
-        self.assertEqual([], list(i.verse_statuses_for_revising()))
+        # sneak a test for bible_verse_statuses_for_revising() here
+        self.assertEqual([], list(i.bible_verse_statuses_for_revising()))
 
         # Sneak a test for passages_for_revising() here:
         self.assertEqual([], list(i.passages_for_revising()))
@@ -284,7 +284,7 @@ class IdentityTests(IdentityBase, TestCase):
                 i.record_verse_action(ref, 'NET', StageType.TEST, 1.0)
 
         # Shouldn't be in general revision queue
-        self.assertEqual([], list(i.verse_statuses_for_revising()))
+        self.assertEqual([], list(i.bible_verse_statuses_for_revising()))
 
         verse_sets = i.passages_for_revising()
         self.assertEqual(verse_sets[0].id, vs1.id)
@@ -499,7 +499,7 @@ class IdentityTests(IdentityBase, TestCase):
         """
         i = self._create_identity()
         i.add_verse_choice('John 14:6')
-        self.assertEqual([uvs.reference for uvs in i.verse_statuses_for_learning()],
+        self.assertEqual([uvs.reference for uvs in i.bible_verse_statuses_for_learning()],
                          ['John 14:6'])
         i.record_verse_action('John 14:6', 'NET', StageType.READ, 1)
         i.cancel_learning(['John 14:6'])
@@ -508,7 +508,7 @@ class IdentityTests(IdentityBase, TestCase):
         vs1 = VerseSet.objects.get(name='Bible 101')
         i.add_verse_set(vs1)
 
-        self.assertEqual([uvs.reference for uvs in i.verse_statuses_for_learning()],
+        self.assertEqual([uvs.reference for uvs in i.bible_verse_statuses_for_learning()],
                          ['John 3:16', 'John 14:6'])
 
     def test_issue_75(self):

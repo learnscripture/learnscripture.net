@@ -207,10 +207,10 @@ def dashboard(request):
 
     if request.method == 'POST':
         if 'learnqueue' in request.POST:
-            return learn_set(request, identity.verse_statuses_for_learning(),
+            return learn_set(request, identity.bible_verse_statuses_for_learning(),
                              session.LearningType.LEARNING)
         if 'revisequeue' in request.POST:
-            return learn_set(request, identity.verse_statuses_for_revising(),
+            return learn_set(request, identity.bible_verse_statuses_for_revising(),
                              session.LearningType.REVISION)
         if any(p in request.POST for p in
                ['learnpassage',
@@ -268,8 +268,8 @@ def dashboard(request):
 
     groups, more_groups = get_user_groups(identity)
 
-    c = {'new_verses_queue': identity.verse_statuses_for_learning(),
-         'revise_verses_queue': identity.verse_statuses_for_revising(),
+    c = {'new_verses_queue': identity.bible_verse_statuses_for_learning(),
+         'revise_verses_queue': identity.bible_verse_statuses_for_revising(),
          'passages_for_learning': identity.passages_for_learning(),
          'passages_for_revising': identity.passages_for_revising(),
          'next_verse_due': identity.next_verse_due(),

@@ -15,7 +15,7 @@ from django.utils import timezone
 
 from accounts import memorymodel
 from accounts.signals import verse_started, verse_tested, points_increase, scored_100_percent
-from bibleverses.models import TextVersion, MemoryStage, StageType, TextVersion, VerseChoice, VerseSet, VerseSetType, UserVerseStatus, get_passage_sections
+from bibleverses.models import TextVersion, MemoryStage, StageType, TextVersion, VerseChoice, VerseSet, VerseSetType, UserVerseStatus, TextType, get_passage_sections
 from bibleverses.signals import verse_set_chosen
 from scores.models import TotalScore, ScoreReason, Scores, get_rank_all_time, get_rank_this_week
 
@@ -706,7 +706,7 @@ class Identity(models.Model):
                                           strength__gt=0,
                                           last_tested__isnull=False)
 
-    def verse_statuses_for_revising(self):
+    def bible_verse_statuses_for_revising(self):
         """
         Returns a query set of UserVerseStatuses that need revising.
         """
@@ -714,29 +714,31 @@ class Identity(models.Model):
               .filter(ignored=False,
                       memory_stage=MemoryStage.TESTED)
               .exclude(verse_set__set_type=VerseSetType.PASSAGE)
+              .exclude(version__text_type=TextType.CATECHISM)
               .order_by('added', 'id')
               )
         qs = memorymodel.filter_qs(qs, timezone.now())
         return self._dedupe_uvs_set(qs)
 
-    def verse_statuses_for_learning_qs(self):
+    def bible_verse_statuses_for_learning_qs(self):
         qs = self.verse_statuses.filter(ignored=False, memory_stage__lt=MemoryStage.TESTED)
         # Don't include passages - we do those separately
         qs = qs.exclude(verse_set__set_type=VerseSetType.PASSAGE)
+        qs = qs.exclude(version__text_type=TextType.CATECHISM)
         return qs
 
-    def verse_statuses_for_learning(self):
+    def bible_verse_statuses_for_learning(self):
         """
         Returns a list of UserVerseStatuses that need learning.
         """
-        qs = self.verse_statuses_for_learning_qs()
+        qs = self.bible_verse_statuses_for_learning_qs()
         # 'added' should have enough precision to distinguish, otherwise 'id'
         # should be according to order of creation.
         qs = qs.order_by('added', 'id')
         return self._dedupe_uvs_set(qs)
 
     def clear_learning_queue(self):
-        self.verse_statuses_for_learning_qs().delete()
+        self.bible_verse_statuses_for_learning_qs().delete()
 
     def verse_statuses_for_ref_and_version(self, reference, version_slug):
         return self.verse_statuses.filter(reference=reference,
@@ -811,7 +813,7 @@ class Identity(models.Model):
         queue for learning.
         """
         return set(uvs.reference
-                   for uvs in (self.verse_statuses_for_learning_qs()
+                   for uvs in (self.bible_verse_statuses_for_learning_qs()
                                .filter(reference__in=references)))
 
     def passages_for_revising(self):
