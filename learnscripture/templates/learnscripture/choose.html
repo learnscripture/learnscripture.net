@@ -8,10 +8,12 @@
 
 {% block content %}
 
-<p>Choose a pre-made set of verses to start learning, or choose some individual
- verses.
-
-<p>(You can also <a href="{% url 'create_set_menu' %}">create your own verse sets</a>)</p>
+<p>Choose a pre-made <b>set of verses</b> to start learning, or choose
+ some <b>individual verses.</b>  You could also:</p>
+<ul>
+  <li><a href="{% url 'create_set_menu' %}">create your own verse set</a></li>
+  <li>learn some <a href="{% url 'catechisms' %}">catechisms</a></li>
+</ul>
 
 <ul class="tabs" data-tabs="tabs">
   <li {% if active_tab == 'verseset' %}class="active"{% endif %}><a href="#id-tab-verseset">Verse sets</a></li>
