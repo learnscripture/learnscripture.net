@@ -61,7 +61,7 @@ class DashboardTests(LiveServerTests):
 
         # Test clicking 'Clear queue'
         self.get_url('dashboard')
-        driver.find_element_by_css_selector('input[name=clearqueue]').click()
+        driver.find_element_by_css_selector('input[name=clearbiblequeue]').click()
         alert = driver.switch_to_alert()
         alert.accept()
         self.wait_until_loaded('body')
