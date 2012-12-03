@@ -258,8 +258,8 @@ def dashboard(request):
                              session.LearningType.REVISION if uvs.needs_testing
                              else session.LearningType.PRACTICE)
 
-        if 'clearqueue' in request.POST:
-            identity.clear_learning_queue()
+        if 'clearbiblequeue' in request.POST:
+            identity.clear_bible_learning_queue()
             return HttpResponseRedirect(reverse('dashboard'))
         if 'cancelpassage' in request.POST:
             vs_id = int(request.POST['verse_set_id'])

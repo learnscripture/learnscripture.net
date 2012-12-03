@@ -737,7 +737,7 @@ class Identity(models.Model):
         qs = qs.order_by('added', 'id')
         return self._dedupe_uvs_set(qs)
 
-    def clear_learning_queue(self):
+    def clear_bible_learning_queue(self):
         self.bible_verse_statuses_for_learning_qs().delete()
 
     def verse_statuses_for_ref_and_version(self, reference, version_slug):
@@ -979,7 +979,7 @@ class Identity(models.Model):
     def cancel_passage(self, verse_set_id):
         # For passages, the UserVerseStatuses may be already tested.
         # We don't want to lose that info, therefore set to 'ignored',
-        # rather than delete() (unlike clear_learning_queue)
+        # rather than delete() (unlike clear_bible_learning_queue)
         self.verse_statuses\
             .filter(verse_set=verse_set_id, ignored=False)\
             .update(ignored=True)
