@@ -450,7 +450,7 @@ class Identity(models.Model):
         if any(uvs.ignored for uvs in existing_uvss):
             base_uvs_query.update(ignored=False)
 
-        qapairs = catechism.qapairs.all()
+        qapairs = catechism.qapairs.all().order_by('order')
 
         new_uvss = [
             UserVerseStatus(
@@ -743,6 +743,36 @@ class Identity(models.Model):
 
     def clear_bible_learning_queue(self):
         self.bible_verse_statuses_for_learning_qs().delete()
+
+    def _catechism_qas_base_qs(self):
+        return (self.verse_statuses
+                .filter(version__text_type=TextType.CATECHISM,
+                        ignored=False)
+                )
+
+    def catechism_qas_for_learning_qs(self):
+        return (self._catechism_qas_base_qs()
+                .filter(memory_stage__lt=MemoryStage.TESTED)
+                .order_by('added', 'id')
+                )
+
+    def catechism_qas_for_learning(self):
+        """
+        Returns catechism QAs that are queued for learning
+        """
+        return self.catechism_qas_for_learning_qs()
+
+    def catechism_qas_for_revising(self):
+        """
+        Returns catechism QAs that are due for revising
+        """
+        qs = (self._catechism_qas_base_qs()
+              .filter(memory_stage=MemoryStage.TESTED))
+        qs = memorymodel.filter_qs(qs, timezone.now())
+        return qs
+
+    def clear_catechism_learning_queue(self):
+        self.catechism_qas_for_learning_qs().delete()
 
     def verse_statuses_for_ref_and_version(self, reference, version_slug):
         return self.verse_statuses.filter(reference=reference,
