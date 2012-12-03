@@ -414,5 +414,13 @@ def get_live_db():
 
 @task
 def local_restore_from_dump(filename):
-    local("pg_restore -O -U learnscripture -c -d learnscripture %s" % filename)
+    # DB might not exist, allow error
+    local("""sudo -u postgres psql -U postgres -d template1 -c "DROP DATABASE learnscripture;" | true """)
+    local("""sudo -u postgres psql -U postgres -d template1 -c "CREATE DATABASE learnscripture;" """)
+    # User might already exist, allow error
+    local("""sudo -u postgres psql -U postgres -d template1 -c "CREATE USER learnscripture WITH PASSWORD 'foo';" | true """,)
+    local("""sudo -u postgres psql -U postgres -d template1 -c "GRANT ALL ON DATABASE learnscripture TO learnscripture;" """)
+    local("""sudo -u postgres psql -U postgres -d template1 -c "ALTER USER learnscripture CREATEDB;" """)
+
+    local("pg_restore -O -U learnscripture -d learnscripture %s" % filename)
 
