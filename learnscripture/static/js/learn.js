@@ -990,7 +990,7 @@ var learnscripture =
                            isPassageType(oldVerseStatus) &&
                            // Need to cope with possibility of a gap
                            // in the passage, caused by slim_passage_for_revising()
-                           (currentVerseStatus.bible_verse_number === oldVerseStatus.bible_verse_number + 1))
+                           (currentVerseStatus.text_order === oldVerseStatus.text_order + 1))
             if (moveOld) {
                 moveOldWords();
             } else {

@@ -452,7 +452,7 @@ class UserVerseStatus(models.Model):
     reference = models.CharField(max_length=100)
     verse_set = models.ForeignKey(VerseSet, null=True,
                                   on_delete=models.SET_NULL)
-    bible_verse_number = models.PositiveSmallIntegerField()
+    text_order = models.PositiveSmallIntegerField() # order of this item within associate TextVersion
     version = models.ForeignKey(TextVersion)
     memory_stage = models.PositiveSmallIntegerField(choices=MemoryStage.choice_list,
                                                     default=MemoryStage.ZERO)
