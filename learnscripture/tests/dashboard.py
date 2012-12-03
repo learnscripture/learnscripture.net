@@ -103,8 +103,6 @@ class DashboardTests(LiveServerTests):
         self.wait_until_loaded('body')
         self.assertNotIn('Psalm 23', driver.page_source)
 
-    hide_browser = False
-
     def test_learn_catechism(self):
         driver = self.driver
         i = self.setup_identity()
