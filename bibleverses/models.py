@@ -158,6 +158,14 @@ class TextVersion(caching.base.CachingMixin, models.Model):
 
     objects = TextVersionManager()
 
+    @property
+    def is_bible(self):
+        return self.text_type == TextType.BIBLE
+
+    @property
+    def is_catechism(self):
+        return self.text_type == TextType.CATECHISM
+
     class Meta:
         ordering = ('short_name',)
 
@@ -179,6 +187,7 @@ class TextVersion(caching.base.CachingMixin, models.Model):
         references are silently discarded, and won't be in the return
         dictionary.
         """
+        if self.is_catechism: return {}
         verse_dict = self.get_verses_by_reference_bulk(reference_list)
         return dict((ref, v.text) for (ref, v) in verse_dict.items())
 
@@ -188,6 +197,7 @@ class TextVersion(caching.base.CachingMixin, models.Model):
         references are silently discarded, and won't be in the return
         dictionary.
         """
+        if self.is_catechism: return {}
         # We try to do this efficiently, but it is hard for combo references. So
         # we do the easy ones the easy way:
         simple_verses = list(self.verse_set.filter(reference__in=reference_list))
@@ -201,6 +211,11 @@ class TextVersion(caching.base.CachingMixin, models.Model):
                     pass
         ensure_text(v_dict.values())
         return v_dict
+
+    def get_qapairs_by_reference_bulk(self, reference_list):
+        if self.is_bible: return {}
+        return {qapair.reference: qapair
+                for qapair in self.qapairs.filter(reference__in=reference_list)}
 
 
 class ComboVerse(object):
@@ -289,7 +304,10 @@ class QAPair(models.Model):
     """
     A question/answer pair in a catechism.
     """
-    catechism = models.ForeignKey(TextVersion)
+    catechism = models.ForeignKey(TextVersion, related_name='qapairs')
+    # Reference is always 'Qn' where 'n' == order.  This means we are guaranteed
+    # not to have clashes with Verse references, which is useful for the
+    # UserVerseStatus models which can reference both.
     reference = models.CharField(max_length=100)
     question = models.TextField()
     answer = models.TextField()

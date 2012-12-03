@@ -19,3 +19,4 @@ from .user_verses_page import *
 from .leaderboard import *
 from .user_stats import *
 from .bible_services import *
+from .catechisms import *

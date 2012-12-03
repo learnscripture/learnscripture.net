@@ -9,7 +9,7 @@
 </div>
 
 <div id="id-no-verse-queue" style="display:none;">
-<p>There are no more verses for learning or revising in this session.
+<p>There is nothing more queued for learning or revising in this session.
   <a href="{% url 'dashboard' %}">Go to the dashboard</a> to select some!
 </p>
 </div>
@@ -20,12 +20,12 @@
 
   <div id="id-instructions">
     <div class="instructions-read" style="display:none;">
-      <b>READ:</b> Read the verse through (preferably aloud), and click 'Next'.
+      <b>READ:</b> Read the text through (preferably aloud), and click 'Next'.
     </div>
     <div class="instructions-recall1 instructions-recall2 instructions-recall3
                 instructions-recall4 instructions-recall5" style="display:none;">
       <b>READ and RECALL:</b>
-      Read the verse through, filling in the gaps from your memory. Click
+      Read the text through, filling in the gaps from your memory. Click
       a word to reveal it if you can't remember. 'Next' when done.
     </div>
     <div class="instructions-recall6" style="display:none;">
@@ -34,7 +34,7 @@
 
     <div class="instructions-test" style="display:none;">
       <div class="test-full">
-        <b>TEST:</b> Testing time! Type the verse, using space to check each word as you go.
+        <b>TEST:</b> Testing time! Type the text, using space to check each word as you go.
         (hint: don't sweat the spelling, we should be able to work it out).
       </div>
       <div class="test-first-letter" style="display:none;">
@@ -49,11 +49,11 @@
 
     <div class="instructions-readForContext" style="display:none;">
       <span class="result-buttons"><input id="id-context-next-verse-btn" type="submit" class="btn primary" value="Next" /></span>
-      <b>READ:</b> Read this verse to get the context and flow of passage.
+      <b>READ:</b> Read this verse to get the context and flow of the passage.
     </div>
 
     <div class="instructions-practice" style="display:none;">
-      <b>PRACTICE:</b> This verse is not due for revision, but you can test yourself if you want
+      <b>PRACTICE:</b> This item is not due for revision, but you can test yourself if you want
       (test score will be ignored).
     </div>
 
@@ -74,9 +74,9 @@
           <li>
             <a href="#" class="btn dropdown-toggle2" id="id-verse-dropdown">Options <span class="caret"></span></a>
             <ul class="dropdown-menu">
-              <li><a href="#" id="id-skip-verse-btn">Skip verse</a></li>
+              <li><a href="#" id="id-skip-verse-btn">Skip this</a></li>
               <span class="selection-set-only">
-              <li><a href="#" id="id-cancel-learning-btn">Stop learning verse</a></li>
+              <li><a href="#" id="id-cancel-learning-btn">Stop learning this</a></li>
               </span>
             </ul>
           </li>

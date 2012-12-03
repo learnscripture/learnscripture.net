@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% load url from future %}
+{% load markup %}
+
+{% block content %}
+
+<p>Catechisms are a way to learn the Christian faith using a question/answer
+format. They have been popular in Christianity since the Reformation, but the
+format goes back much further.</p>
+
+<p>Choose from the catechisms to learn. If you have other catechisms that would
+like added, please <a href="{% url 'contact' %}">contact us</a>.</p>
+
+
+{% for catechism in catechisms %}
+<div class="verseset">
+  <form action="" method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="catechism_id" value="{{ catechism.id }}">
+    <span class="icon-public icon-replace" title="This action is public">&nbsp;</span>
+    <input type="submit" class="btn primary needs-preferences" value="Learn" id="id-learn-catechism-btn-{{ catechism.id }}">
+  </form>
+
+  <h3>{{ catechism.full_name }}</h3>
+
+  <p>{{ catechism.description|restructuredtext }}</p>
+
+  <p>It includes {{ catechism.qapairs.count }} question/answer pairs.</p>
+
+  <p><a href="">See more</a></p>
+</div>
+
+{% endfor %}
+
+{% endblock %}

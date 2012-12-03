@@ -36,15 +36,14 @@ def get_verse_statuses(request):
         else:
             learning_type = LearningType.REVISION
 
-
     ids = _get_verse_status_ids(request)
-    bulk_refs = list((verse_set_id, ref)
-                     for order, ref, needs_testing_override, verse_set_id in ids)
-    uvs_dict = request.identity.get_verse_statuses_bulk(bulk_refs)
+    bulk_ids = [uvs_id
+                for order, uvs_id, needs_testing_override in ids]
+    uvs_dict = request.identity.get_verse_statuses_bulk(bulk_ids)
     retval = []
-    for order, ref, needs_testing_override, verse_set_id in ids:
+    for order, uvs_id, needs_testing_override in ids:
         try:
-            uvs = uvs_dict[verse_set_id, ref]
+            uvs = uvs_dict[uvs_id]
         except KeyError:
             continue
         uvs.learn_order = order
@@ -60,7 +59,13 @@ def get_verse_statuses(request):
 
 
 def _get_verse_status_ids(request):
-    return request.session.get('verses_to_learn', [])
+    ret = request.session.get('verses_to_learn', [])
+    if len(ret) > 0:
+        if len(ret[0]) != 3:
+            # backwards compat for old format, ignore it
+            # rather than error out later.
+            return []
+    return ret
 
 
 def _save_verse_status_ids(request, ids):
@@ -77,8 +82,12 @@ def get_learning_session_start(request):
 
 
 def _set_verse_statuses(request, user_verse_statuses):
+    # We enumerate at this point and assign an order.  This order ends up being
+    # used as 'learn_order', and is used in the front end as an index into a
+    # dictionary (not an array), because items can be expelled from the list
+    # stored in the session.
     _save_verse_status_ids(request,
-                           [(order, uvs.reference, getattr(uvs, 'needs_testing_override', None), uvs.verse_set_id)
+                           [(order, uvs.id, getattr(uvs, 'needs_testing_override', None))
                             for order, uvs in enumerate(user_verse_statuses)])
 
 
@@ -91,8 +100,8 @@ def start_learning_session(request, user_verse_statuses, learning_type, return_t
     request.session['return_to'] = return_to
 
 
-def verse_status_finished(request, reference, verse_set_id, new_score_logs):
-    _remove_user_verse_status(request, reference, verse_set_id)
+def verse_status_finished(request, uvs_id, new_score_logs):
+    _remove_user_verse_status(request, uvs_id)
 
     if (request.session.get('revision', False)     # compat for sessions in progress
         or request.session.get('learning_type', LearningType.PRACTICE) == LearningType.REVISION):
@@ -108,29 +117,36 @@ def verse_status_finished(request, reference, verse_set_id, new_score_logs):
                 request.session['learning_type'] = LearningType.PRACTICE
 
 
-def verse_status_skipped(request, reference, verse_set_id):
+def verse_status_skipped(request, uvs_id):
     request.session['verses_skipped'] = True
-    return _remove_user_verse_status(request, reference, verse_set_id)
+    return _remove_user_verse_status(request, uvs_id)
 
 
-def verse_status_cancelled(request, reference, verse_set_id):
-    return _remove_user_verse_status(request, reference, verse_set_id)
+def verse_status_cancelled(request, uvs_id):
+    return _remove_user_verse_status(request, uvs_id)
 
 
-def _remove_user_verse_status(request, reference, verse_set_id):
+def replace_user_verse_statuses(request, uvs_id_map):
+    new_ids = []
+    for order, uvs_id, needs_testing_override in _get_verse_status_ids(request):
+        new_ids.append((order, uvs_id_map.get(uvs_id, uvs_id), needs_testing_override))
+    _save_verse_status_ids(request, new_ids)
+
+
+def _remove_user_verse_status(request, u_id):
     # We remove all that appear before reference, since we know that they will
     # be processed in order client side, and otherwise we potentially have race
     # conditions if the user presses 'next' or 'skip' multiple times quickly.
     ids = _get_verse_status_ids(request)
     new_ids = []
-    found_ref = False
-    for (order, ref, needs_testing_override, vs_id) in ids:
-        if found_ref:
-            new_ids.append((order, ref, needs_testing_override, vs_id))
-        if (ref, vs_id) == (reference, verse_set_id):
-            found_ref = True
+    found_id = False
+    for (order, uvs_id, needs_testing_override) in ids:
+        if found_id:
+            new_ids.append((order, uvs_id, needs_testing_override))
+        if u_id == uvs_id:
+            found_id = True
 
-    if not found_ref:
+    if not found_id:
         # Presumably an error, or an old request arriving very late, so ignore
         new_ids = ids
 
