@@ -29,7 +29,7 @@ class AccountDetailsTests(LiveServerTests):
     def test_redirect_if_not_logged_in(self):
         identity, account = self.create_account()
         driver = self.driver
-        driver.get(self.live_server_url + reverse('account_details'))
+        self.get_url('account_details')
         driver.find_element_by_link_text("log in").click()
         self.fill_in_login_form(account)
         self.wait_until_loaded('body')

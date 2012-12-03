@@ -93,6 +93,11 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
         self.assertEqual([], self.verificationErrors)
 
 
+    # Utilities:
+    def get_url(self, name, *args, **kwargs):
+        self.driver.get(self.live_server_url + reverse(name, *args, **kwargs))
+
+
     def wait_until(self, callback, timeout=10):
         """
         Helper function that blocks the execution of the tests until the
@@ -145,7 +150,7 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
 
     def login(self, account):
         driver = self.driver
-        driver.get(self.live_server_url + reverse('dashboard'))
+        self.get_url('dashboard')
         driver.find_element_by_id("id-session-menu").click()
         driver.find_element_by_link_text("Sign in").click()
         self.fill_in_login_form(account)

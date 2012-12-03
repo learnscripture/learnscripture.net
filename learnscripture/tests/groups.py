@@ -37,7 +37,7 @@ class GroupPageTests(LiveServerTests):
 
 
         driver = self.driver
-        driver.get(self.live_server_url + reverse('groups'))
+        self.get_url('groups')
 
         self.assertIn("Another group", driver.page_source)
         self.assertNotIn("My group", driver.page_source)
@@ -60,7 +60,7 @@ class GroupPageTests(LiveServerTests):
                                  public=True,
                                  open=True)
         driver = self.driver
-        driver.get(self.live_server_url + reverse('group', args=(g.slug,)))
+        self.get_url('group', args=(g.slug,))
 
         self.assertIn("You are not a member of this group", driver.page_source)
 
@@ -107,7 +107,7 @@ class GroupCreatePageTests(LiveServerTests):
         Identity.objects.create(account=invited_account)
 
         driver = self.driver
-        driver.get(self.live_server_url + reverse('create_group'))
+        self.get_url('create_group')
         driver.find_element_by_id('id_name').send_keys('My group')
         driver.find_element_by_id('id_public').click()
 

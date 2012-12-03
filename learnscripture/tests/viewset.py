@@ -24,7 +24,7 @@ class ViewSetTests(LiveServerTests):
         identity, account = self.create_account()
         self.login(account)
         vs = VerseSet.objects.get(slug='bible-101')
-        driver.get(self.live_server_url + reverse('view_verse_set', kwargs=dict(slug=vs.slug)))
+        self.get_url('view_verse_set', kwargs=dict(slug=vs.slug))
 
         self.assertIn("saith", driver.page_source)
 
@@ -58,7 +58,7 @@ class ViewSetTests(LiveServerTests):
         identity.add_verse_set(vs)
         self.assertEqual(len(identity.verse_statuses_for_learning()), vs.verse_choices.count())
 
-        driver.get(self.live_server_url + reverse('view_verse_set', kwargs=dict(slug=vs.slug)))
+        self.get_url('view_verse_set', kwargs=dict(slug=vs.slug))
         self.wait_until_loaded('body')
 
         self.assertIn("You have %d verse(s) from this set in your queue" % vs.verse_choices.count(),
@@ -76,7 +76,7 @@ class ViewSetTests(LiveServerTests):
         driver = self.driver
         vs = VerseSet.objects.get(slug='bible-101')
         self.assertEqual(Identity.objects.exclude(id__in=[i.id for i in ids]).all().count(), 0)
-        driver.get(self.live_server_url + reverse('view_verse_set', kwargs=dict(slug=vs.slug)))
+        self.get_url('view_verse_set', kwargs=dict(slug=vs.slug))
         self.wait_until_loaded('body')
         # Default version is NET:
         self.assertIn("Jesus replied", driver.page_source)

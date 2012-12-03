@@ -31,7 +31,7 @@ class UserVersesPageTests(LiveServerTests):
         self.login(account)
 
         driver = self.driver
-        driver.get(self.live_server_url + reverse('user_verses'))
+        self.get_url('user_verses')
         self.wait_until_loaded('body')
 
         for i in range(1, 7):

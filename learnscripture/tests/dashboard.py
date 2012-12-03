@@ -18,13 +18,13 @@ class DashboardTests(LiveServerTests):
 
     def test_redirect(self):
         driver = self.driver
-        driver.get(self.live_server_url + reverse('dashboard'))
+        self.get_url('dashboard')
         self.assertTrue(driver.current_url.endswith(reverse('choose')))
 
     def setup_identity(self):
         ids = list(Identity.objects.all())
         driver = self.driver
-        driver.get(self.live_server_url + reverse('preferences'))
+        self.get_url('preferences')
         self.wait_until_loaded('body')
         self.set_preferences()
         # This should have created an Identity
@@ -44,7 +44,7 @@ class DashboardTests(LiveServerTests):
         i.add_verse_set(vs)
 
         # Test verses appear on dashboard
-        driver.get(self.live_server_url + reverse('dashboard'))
+        self.get_url('dashboard')
         self.assertIn('John 3:16', driver.page_source)
         self.assertIn('John 14:6', driver.page_source)
 
@@ -60,7 +60,7 @@ class DashboardTests(LiveServerTests):
         i.record_verse_action('John 3:16', 'NET', StageType.TEST, accuracy=1.0)
 
         # Test clicking 'Clear queue'
-        driver.get(self.live_server_url + reverse('dashboard'))
+        self.get_url('dashboard')
         driver.find_element_by_css_selector('input[name=clearqueue]').click()
         alert = driver.switch_to_alert()
         alert.accept()
@@ -84,7 +84,7 @@ class DashboardTests(LiveServerTests):
         driver = self.driver
 
         # Test dashboard text
-        driver.get(self.live_server_url + reverse('dashboard'))
+        self.get_url('dashboard')
         self.assertIn('Psalm 23', driver.page_source)
 
         # Test 'Continue learning' button
@@ -95,7 +95,7 @@ class DashboardTests(LiveServerTests):
         self.assertEqual(u"Psalm 23:1", driver.find_element_by_id('id-verse-title').text)
 
         # Test 'Cancel learning' button
-        driver.get(self.live_server_url + reverse('dashboard'))
+        self.get_url('dashboard')
         driver.find_element_by_id('id-cancelpassage-btn-%d' % vs.id).click()
         alert = driver.switch_to_alert()
         alert.accept()
@@ -119,7 +119,7 @@ class DashboardTests(LiveServerTests):
 
         driver = self.driver
 
-        driver.get(self.live_server_url + reverse('dashboard'))
+        self.get_url('dashboard')
         self.assertIn('Psalm 23', driver.page_source) # sanity check
 
         btn = driver.find_element_by_css_selector('input[value="Revise one section"]')
@@ -165,7 +165,7 @@ class DashboardTests(LiveServerTests):
 
         driver = self.driver
 
-        driver.get(self.live_server_url + reverse('dashboard'))
+        self.get_url('dashboard')
         self.assertIn("Hello you crazy guy!", driver.page_source)
 
         self.assertNotEqual(identity.notices.all()[0].seen, None)
@@ -173,5 +173,5 @@ class DashboardTests(LiveServerTests):
         # Move database into 'past'
         Notice.objects.update(seen = F('seen') - timedelta(days=10))
 
-        driver.get(self.live_server_url + reverse('dashboard'))
+        self.get_url('dashboard')
         self.assertNotIn("Hello you crazy guy!", driver.page_source)
