@@ -95,7 +95,7 @@ class LearnTests(LiveServerTests):
 
         identity.add_verse_choice('Psalm 23:1-2')
         self.get_url('dashboard')
-        driver.find_element_by_css_selector('input[name=learnqueue]').click()
+        driver.find_element_by_css_selector('input[name=learnbiblequeue]').click()
         self.wait_for_ajax()
         self.assertEqual(u"Psalm 23:1-2", driver.find_element_by_id('id-verse-title').text)
 
@@ -162,7 +162,7 @@ class LearnTests(LiveServerTests):
         self._make_verses_due_for_testing(identity.verse_statuses.filter(memory_stage=MemoryStage.TESTED))
 
         self.get_url('dashboard')
-        driver.find_element_by_css_selector('input[name=revisequeue]').click()
+        driver.find_element_by_css_selector('input[name=revisebiblequeue]').click()
 
         self.wait_until_loaded('body')
         self.wait_for_ajax()
@@ -299,7 +299,7 @@ class LearnTests(LiveServerTests):
         # Go to dashboard
         self.get_url('dashboard')
         # and click 'Revise'
-        driver.find_element_by_css_selector("input[name='revisequeue']").click()
+        driver.find_element_by_css_selector("input[name='revisebiblequeue']").click()
 
         self.wait_until_loaded('body')
         self.wait_for_ajax()
@@ -317,7 +317,7 @@ class LearnTests(LiveServerTests):
         # Go to dashboard
         self.get_url('dashboard')
         # and click 'Revise'
-        driver.find_element_by_css_selector("input[name='revisequeue']").click()
+        driver.find_element_by_css_selector("input[name='revisebiblequeue']").click()
 
         self.wait_until_loaded('body')
         self.wait_for_ajax()
@@ -346,7 +346,7 @@ class LearnTests(LiveServerTests):
         # Go to dashboard
         self.get_url('dashboard')
         # and click 'Revise'
-        driver.find_element_by_css_selector("input[name='revisequeue']").click()
+        driver.find_element_by_css_selector("input[name='revisebiblequeue']").click()
 
         self.wait_until_loaded('body')
         self.wait_for_ajax()
@@ -413,7 +413,7 @@ class LearnTests(LiveServerTests):
         self._make_verses_due_for_testing(identity.verse_statuses.filter(memory_stage=MemoryStage.TESTED))
 
         self.get_url('dashboard')
-        driver.find_element_by_css_selector('input[name=revisequeue]').click()
+        driver.find_element_by_css_selector('input[name=revisebiblequeue]').click()
 
         self.wait_until_loaded('body')
         self.wait_for_ajax()
@@ -464,7 +464,7 @@ class LearnTests(LiveServerTests):
         self._make_verses_due_for_testing(identity.verse_statuses.filter(memory_stage=MemoryStage.TESTED))
 
         self.get_url('dashboard')
-        driver.find_element_by_css_selector('input[name=revisequeue]').click()
+        driver.find_element_by_css_selector('input[name=revisebiblequeue]').click()
         self.wait_until_loaded('body')
         self.wait_for_ajax()
         for i in range(0, 4):

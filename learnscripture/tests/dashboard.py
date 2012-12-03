@@ -14,7 +14,8 @@ from .base import LiveServerTests
 
 class DashboardTests(LiveServerTests):
 
-    fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json']
+    fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json',
+                'test_catechisms.json']
 
     def test_redirect(self):
         driver = self.driver
@@ -49,7 +50,7 @@ class DashboardTests(LiveServerTests):
         self.assertIn('John 14:6', driver.page_source)
 
         # Test clicking 'Start learning' for learn queue
-        driver.find_element_by_css_selector('input[name=learnqueue]').click()
+        driver.find_element_by_css_selector('input[name=learnbiblequeue]').click()
         self.wait_until_loaded('body')
         self.assertTrue(driver.current_url.endswith(reverse('learn')))
 
@@ -101,6 +102,37 @@ class DashboardTests(LiveServerTests):
         alert.accept()
         self.wait_until_loaded('body')
         self.assertNotIn('Psalm 23', driver.page_source)
+
+    hide_browser = False
+
+    def test_learn_catechism(self):
+        driver = self.driver
+        i = self.setup_identity()
+        i.add_catechism(TextVersion.objects.get(slug='WSC'))
+        self.get_url('dashboard')
+        self.assertIn("You've got 4 catechism questions in your queue for learning",
+                      driver.page_source)
+
+        driver.find_element_by_css_selector('input[name=learncatechismqueue]').click()
+        self.wait_until_loaded('body')
+        self.assertTrue(driver.current_url.endswith(reverse('learn')))
+
+        self.wait_for_ajax()
+        self.assertEqual(u"Q1. What is the chief end of man?", driver.find_element_by_id('id-verse-title').text)
+
+        i.record_verse_action('Q1', 'WSC', StageType.TEST, accuracy=1.0)
+
+        # Test clicking 'Clear queue'
+        self.get_url('dashboard')
+        driver.find_element_by_css_selector('input[name=clearcatechismqueue]').click()
+        alert = driver.switch_to_alert()
+        alert.accept()
+        self.wait_until_loaded('body')
+
+        # Since we cleared the queue, shouldn't have anything about catechisms now
+        self.assertTrue(driver.current_url.endswith(reverse('dashboard')))
+        self.assertNotIn('catechism', driver.page_source)
+
 
     def test_revise_one_section(self):
         i = self.setup_identity()

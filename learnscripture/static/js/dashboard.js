@@ -12,10 +12,18 @@ var learnscripture =
             if (document.location.pathname.match(/\/dashboard/) === null) {
                 return;
             }
-            $("input[name=clearqueue]").click(function (ev) {
+            $("input[name=clearbiblequeue]").click(function (ev) {
                 if (!confirm("This will remove chosen verses from your queue " +
                             "for learning. To learn them you will have to " +
                             "select the verses or verse sets again. " +
+                             "Continue?")) {
+                    ev.preventDefault();
+                }
+            });
+            $("input[name=clearcatechismqueue]").click(function (ev) {
+                if (!confirm("This will remove chosen catechism questions from " +
+                             "your queue for learning. To learn them you will have to " +
+                             "select the catechism again. " +
                              "Continue?")) {
                     ev.preventDefault();
                 }

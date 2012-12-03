@@ -206,11 +206,17 @@ def dashboard(request):
         return HttpResponseRedirect(reverse('choose'))
 
     if request.method == 'POST':
-        if 'learnqueue' in request.POST:
+        if 'learnbiblequeue' in request.POST:
             return learn_set(request, identity.bible_verse_statuses_for_learning(),
                              session.LearningType.LEARNING)
-        if 'revisequeue' in request.POST:
+        if 'revisebiblequeue' in request.POST:
             return learn_set(request, identity.bible_verse_statuses_for_revising(),
+                             session.LearningType.REVISION)
+        if 'learncatechismqueue' in request.POST:
+            return learn_set(request, identity.catechism_qas_for_learning(),
+                             session.LearningType.LEARNING)
+        if 'revisecatechismqueue' in request.POST:
+            return learn_set(request, identity.catechism_qas_for_revising(),
                              session.LearningType.REVISION)
         if any(p in request.POST for p in
                ['learnpassage',
@@ -261,6 +267,9 @@ def dashboard(request):
         if 'clearbiblequeue' in request.POST:
             identity.clear_bible_learning_queue()
             return HttpResponseRedirect(reverse('dashboard'))
+        if 'clearcatechismqueue' in request.POST:
+            identity.clear_catechism_learning_queue()
+            return HttpResponseRedirect(reverse('dashboard'))
         if 'cancelpassage' in request.POST:
             vs_id = int(request.POST['verse_set_id'])
             identity.cancel_passage(vs_id)
@@ -272,6 +281,8 @@ def dashboard(request):
          'revise_verses_queue': identity.bible_verse_statuses_for_revising(),
          'passages_for_learning': identity.passages_for_learning(),
          'passages_for_revising': identity.passages_for_revising(),
+         'new_qas_queue': identity.catechism_qas_for_learning(),
+         'revise_qas_queue': identity.catechism_qas_for_revising(),
          'next_verse_due': identity.next_verse_due(),
          'title': 'Dashboard',
          'events': identity.get_dashboard_events(),
