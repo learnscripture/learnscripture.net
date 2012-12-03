@@ -26,7 +26,7 @@ from accounts.models import Account, Identity
 from accounts.forms import PreferencesForm, AccountDetailsForm
 from awards.models import AwardType, AnyLevel, Award
 from learnscripture.forms import AccountSetPasswordForm, ContactForm
-from bibleverses.models import VerseSet, TextVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType, get_passage_sections, get_verses_started_counts
+from bibleverses.models import VerseSet, TextVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType, get_passage_sections, get_verses_started_counts, TextType
 from bibleverses.signals import public_verse_set_created
 from learnscripture import session, auth
 from bibleverses.forms import VerseSetForm
@@ -771,12 +771,25 @@ def user_verses(request):
     c = {'title': 'Progress'}
     verses = identity.verse_statuses_started().select_related('version')
 
-    if 'bibleorder' in request.GET:
-        c['bibleorder'] = True
-        verses = verses.order_by('text_order', 'strength')
+    if 'catechisms' in request.GET:
+        text_type = TextType.CATECHISM
     else:
-        verses = verses.order_by('strength', 'reference')
+        text_type = TextType.BIBLE
+
+    verses = verses.filter(version__text_type=text_type)
+
+    if text_type == TextType.CATECHISM:
+        verses = verses.order_by('version__slug', 'text_order')
+    else:
+        if 'bibleorder' in request.GET:
+            c['bibleorder'] = True
+            verses = verses.order_by('text_order', 'strength')
+        else:
+            verses = verses.order_by('strength', 'reference')
     c['verses'] = verses
+    c['bible'] = text_type == TextType.BIBLE
+    c['catechism'] = text_type == TextType.CATECHISM
+
     return render(request, 'learnscripture/user_verses.html', c)
 
 
