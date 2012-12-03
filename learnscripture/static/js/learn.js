@@ -41,6 +41,10 @@ var learnscripture =
         // Defined in LearningType:
         var LEARNING_TYPE_PRACTICE = 'practice';
 
+        // Defined in TextType
+        var TEXT_TYPE_BIBLE = 1;
+        var TEXT_TYPE_CATECHISM = 2;
+
         var INITIAL_STRENGTH_FACTOR = 0.1;
 
         // Thresholds for different testings modes:
@@ -983,7 +987,26 @@ var learnscripture =
         var loadCurrentVerse = function () {
             var oldVerseStatus = currentVerseStatus;
             currentVerseStatus = versesToLearn[currentVerseIndex];
-            currentVerseStatus.wordCount = stripPunctuation(currentVerseStatus.text.trim()).split(/\W/).length;
+            // TODO: Some of these attributes could be handled better by having
+            // different classes for Bible questions and Catechism questions.
+            currentVerseStatus.scoringText = (
+                currentVerseStatus.version.text_type == TEXT_TYPE_BIBLE
+                    ? currentVerseStatus.text
+                    : currentVerseStatus.answer)
+
+            currentVerseStatus.titleText = (
+                currentVerseStatus.version.text_type == TEXT_TYPE_BIBLE
+                    ? currentVerseStatus.reference
+                    : currentVerseStatus.reference + ". " + currentVerseStatus.question)
+
+            currentVerseStatus.showReference = (
+                currentVerseStatus.version.text_type == TEXT_TYPE_BIBLE
+                    ? (currentVerseStatus.verse_set === null ||
+                       currentVerseStatus.verse_set === undefined ||
+                       currentVerseStatus.verse_set.set_type === SET_TYPE_SELECTION)
+                    : false)
+
+            currentVerseStatus.wordCount = stripPunctuation(currentVerseStatus.scoringText.trim()).split(/\W/).length;
             var verse = currentVerseStatus;
             normaliseLearningType(verse);
             var moveOld = (oldVerseStatus !== null &&
@@ -998,14 +1021,16 @@ var learnscripture =
             }
 
             $('.current-verse').hide(); // Hide until set up
-            $('#id-verse-title').text(currentVerseStatus.reference);
-            $('#id-version-select').val(verse.version.slug);
+            $('#id-verse-title').text(currentVerseStatus.titleText);
+            if (currentVerseStatus.version.text_type == TEXT_TYPE_BIBLE) {
+                $('#id-version-select').show().val(verse.version.slug);
+            } else {
+                $('#id-version-select').hide();
+            }
             // convert newlines to divs
-            var text = verse.text;
+            var text = verse.scoringText;
             markupVerse(text,
-                        verse.verse_set === null ||
-                        verse.verse_set === undefined ||
-                        verse.verse_set.set_type === SET_TYPE_SELECTION
+                        verse.showReference
                         ? verse.reference
                         : null);
             $('#id-loading').hide();

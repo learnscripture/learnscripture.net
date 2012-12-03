@@ -133,7 +133,7 @@ class DashboardTests(LiveServerTests):
         # Skip through
         def skip():
             driver.find_element_by_id("id-verse-dropdown").click()
-            driver.find_element_by_link_text("Skip verse").click()
+            driver.find_element_by_link_text("Skip this").click()
             self.wait_for_ajax()
         skip()
         self.assertIn("Psalm 23:2", driver.page_source)

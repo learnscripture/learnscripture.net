@@ -163,11 +163,12 @@ def session_stats(identity):
 
 
 def learn_set(request, uvs_list, learning_type):
-    return_to = reverse('dashboard')
+    # Save where we should return to after learning:
+    return_to = reverse('dashboard') # by default, the dashboard
     referer = request.META.get('HTTP_REFERER')
     if referer is not None:
         url = urlparse.urlparse(referer)
-        allowed_return_to = [reverse('user_verses')]
+        allowed_return_to = [reverse('user_verses')] # places it is useful to return to
         if url.path in allowed_return_to:
             # avoiding redirection security problems by making it relative:
             url = ('', '', url.path, url.params, url.query, url.fragment)
@@ -371,6 +372,22 @@ def choose(request):
     c.update(context_for_quick_find(request))
 
     return render(request, 'learnscripture/choose.html', c)
+
+
+def catechisms(request):
+    if request.method == "POST":
+        if not has_preferences(request):
+            # Shouldn't get here if UI preferences javascript is working right.
+            return redirect_via_prefs(request)
+        catechism = TextVersion.objects.get(id=int(request.POST['catechism_id']))
+        return learn_set(request,
+                         request.identity.add_catechism(catechism),
+                         session.LearningType.LEARNING)
+
+    c = {'catechisms': TextVersion.objects.catechisms(),
+         'title': 'Catechisms',
+         }
+    return render(request, 'learnscripture/catechisms.html', c)
 
 
 def verse_options(request):

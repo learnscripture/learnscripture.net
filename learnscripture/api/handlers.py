@@ -20,7 +20,7 @@ from piston.utils import rc
 
 from accounts.forms import PreferencesForm
 from accounts.models import Account
-from bibleverses.models import UserVerseStatus, Verse, StageType, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, MAX_VERSE_QUERY_SIZE, TextVersion, quick_find, VerseSetType
+from bibleverses.models import UserVerseStatus, Verse, StageType, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, MAX_VERSE_QUERY_SIZE, TextVersion, quick_find, VerseSetType, TextType
 from learnscripture import session
 from learnscripture.decorators import require_identity_method
 from learnscripture.forms import SignUpForm, LogInForm, AccountPasswordResetForm
@@ -59,16 +59,22 @@ def validate(form_class, **formkwargs):
 class VersesToLearnHandler(BaseHandler):
     allowed_methods = ('GET',)
     # NB: all of these fields get posted back to ActionCompleteHandler
-    fields = ('memory_stage', 'strength', 'first_seen',
-              ('verse_set', ('id', 'set_type')),
-              'reference',
-              'text',
-              'needs_testing',
-              'learning_type', # added in get_verse_statuses
-              'return_to', # added in get_verse_statuses
-              'learn_order',
-              'text_order',
-              ('version', ('full_name', 'short_name', 'slug', 'url')))
+    fields = (
+        'id',
+        'memory_stage', 'strength', 'first_seen',
+        ('verse_set', ('id', 'set_type')),
+        'reference',
+        'needs_testing',
+        'text_order',
+        ('version', ('full_name', 'short_name', 'slug', 'url', 'text_type')),
+        # added in get_verse_statuses:
+        'text',
+        'question',
+        'answer',
+        'learn_order',
+        'learning_type',
+        'return_to',
+        )
 
     @require_identity_method
     def read(self, request):
@@ -110,15 +116,20 @@ class ActionCompleteHandler(BaseHandler):
         else:
             accuracy = None
 
+        # FIXME - this should probably be in the model layer somewhere
+        text = (verse_status['text']
+                if verse_status['version']['text_type'] == TextType.BIBLE
+                else verse_status['answer'])
+
         action_change = identity.record_verse_action(reference, version_slug,
                                                      stage, accuracy);
-        score_logs = identity.award_action_points(reference, verse_status['text'],
+        score_logs = identity.award_action_points(reference, text,
                                                   old_memory_stage,
                                                   action_change, stage, accuracy)
 
         if (stage == StageType.TEST or
             (stage == StageType.READ and not verse_status['needs_testing'])):
-            session.verse_status_finished(request, reference, verse_set_id, score_logs)
+            session.verse_status_finished(request, verse_status['id'], score_logs)
 
         return {}
 
@@ -129,8 +140,7 @@ class SkipVerseHandler(BaseHandler):
     @require_identity_method
     def create(self, request):
         verse_status = get_verse_status(request.data)
-        verse_set_id = get_verse_set_id(verse_status)
-        session.verse_status_skipped(request, verse_status['reference'], verse_set_id)
+        session.verse_status_skipped(request, verse_status['id'])
         return {}
 
 
@@ -140,10 +150,9 @@ class CancelLearningVerseHandler(BaseHandler):
     @require_identity_method
     def create(self, request):
         verse_status = get_verse_status(request.data)
-        verse_set_id = get_verse_set_id(verse_status)
         reference = verse_status['reference']
         request.identity.cancel_learning([reference])
-        session.verse_status_cancelled(request, reference, verse_set_id)
+        session.verse_status_cancelled(request, verse_status['id'])
         return {}
 
 
@@ -156,9 +165,10 @@ class ChangeVersionHandler(BaseHandler):
         verse_set_id = get_verse_set_id(verse_status)
         reference = verse_status['reference']
         new_version_slug = request.data['new_version_slug']
-        request.identity.change_version(reference,
-                                        new_version_slug,
-                                        verse_set_id)
+        replacements = request.identity.change_version(reference,
+                                                       new_version_slug,
+                                                       verse_set_id)
+        session.replace_user_verse_statuses(request, replacements)
         return {}
 
 

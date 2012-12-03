@@ -16,6 +16,7 @@ urlpatterns = patterns('',
                        # Main views, different for each user
                        url(r'^dashboard/$', 'learnscripture.views.dashboard', name='dashboard'),
                        url(r'^choose/$', 'learnscripture.views.choose', name='choose'),
+                       url(r'^catechisms/$', 'learnscripture.views.catechisms', name='catechisms'),
                        url(r'^learn/$', 'learnscripture.views.learn', name='learn'),
                        url(r'^preferences/$', 'learnscripture.views.preferences', name='preferences'),
                        url(r'^progress/$', 'learnscripture.views.user_verses', name='user_verses'),

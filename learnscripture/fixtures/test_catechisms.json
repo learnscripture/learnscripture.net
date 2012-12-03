@@ -1,0 +1,67 @@
+[
+    {
+        "pk": 4,
+        "model": "bibleverses.textversion",
+        "fields": {
+            "description": "The Westminster Shorter Catechism (also known simply as the Shorter Catechism) is a catechism that was written in the 1640s by English and Scottish divines. The same assembly also produced the Westminster Confession of Faith and the Westminster Larger Catechism. \r\n\r\nIt is used by many Christians and denominations, especially in the instruction of children.",
+            "short_name": "WSC",
+            "url": "",
+            "text_type": 2,
+            "public": true,
+            "full_name": "Westminster Shorter Catechism 1647",
+            "slug": "WSC"
+        }
+    },
+    {
+        "fields": {
+            "answer": "Man's chief end is to glorify God, and to enjoy Him forever.",
+            "order": 1,
+            "question": "What is the chief end of man?",
+            "reference": "Q1",
+            "catechism": [
+                "WSC"
+            ]
+        },
+        "model": "bibleverses.qapair",
+        "pk": null
+    },
+    {
+        "fields": {
+            "answer": "The Word of God, which is contained in the Scriptures of the Old and New Testaments, is the only rule to direct us how we may glorify and enjoy him.",
+            "order": 2,
+            "question": "What rule hath God given to direct us how we may glorify and enjoy him?",
+            "reference": "Q2",
+            "catechism": [
+                "WSC"
+            ]
+        },
+        "model": "bibleverses.qapair",
+        "pk": null
+    },
+    {
+        "fields": {
+            "answer": "The Scriptures principally teach what man is to believe concerning God, and what duty God requires of man.",
+            "order": 3,
+            "question": "What do the Scriptures principally teach?",
+            "reference": "Q3",
+            "catechism": [
+                "WSC"
+            ]
+        },
+        "model": "bibleverses.qapair",
+        "pk": null
+    },
+    {
+        "fields": {
+            "answer": "God is a Spirit, infinite, eternal, and unchangeable, in his being, wisdom, power, holiness, justice, goodness, and truth.",
+            "order": 4,
+            "question": "What is God?",
+            "reference": "Q4",
+            "catechism": [
+                "WSC"
+            ]
+        },
+        "model": "bibleverses.qapair",
+        "pk": null
+    }
+]

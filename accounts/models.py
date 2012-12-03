@@ -15,7 +15,7 @@ from django.utils import timezone
 
 from accounts import memorymodel
 from accounts.signals import verse_started, verse_tested, points_increase, scored_100_percent
-from bibleverses.models import TextVersion, MemoryStage, StageType, TextVersion, VerseChoice, VerseSet, VerseSetType, get_passage_sections
+from bibleverses.models import TextVersion, MemoryStage, StageType, TextVersion, VerseChoice, VerseSet, VerseSetType, UserVerseStatus, get_passage_sections
 from bibleverses.signals import verse_set_chosen
 from scores.models import TotalScore, ScoreReason, Scores, get_rank_all_time, get_rank_this_week
 
@@ -439,6 +439,31 @@ class Identity(models.Model):
         else:
             return self.create_verse_status(reference, None, version)
 
+    def add_catechism(self, catechism):
+        """
+        Add the QAPairs in a catechism to a user's UserVerseStatuses.
+        """
+        base_uvs_query = self.verse_statuses.filter(version=catechism)
+        existing_uvss = base_uvs_query
+        existing_refs = set(uvs.reference for uvs in existing_uvss)
+        # Some might be set to 'ignored'. Need to fix that.
+        if any(uvs.ignored for uvs in existing_uvss):
+            base_uvs_query.update(ignored=False)
+
+        qapairs = catechism.qapairs.all()
+
+        new_uvss = [
+            UserVerseStatus(
+                for_identity=self,
+                reference=qapair.reference,
+                text_order=qapair.order,
+                version=catechism,
+                added=timezone.now()
+                )
+            for qapair in qapairs if qapair.reference not in existing_refs]
+        UserVerseStatus.objects.bulk_create(new_uvss)
+        return base_uvs_query.all().order_by('text_order') # fresh QuerySet
+
     def record_verse_action(self, reference, version_slug, stage_type, accuracy=None):
         """
         Records an action such as 'READ' or 'TESTED' against a verse.
@@ -495,6 +520,8 @@ class Identity(models.Model):
     def change_version(self, reference, version_slug, verse_set_id):
         """
         Changes the version used for a choice in a certain verse set.
+
+        Returns a mapping: {old UVS id: new UVS id}
         """
         # Note:
         # 1) If someone has memorised a verse in one version, it doesn't mean
@@ -537,6 +564,8 @@ class Identity(models.Model):
         # 'correct' = ones with newly selected, correct version
         correct_version = start_qs.filter(version__slug=version_slug)
 
+        old_uvs_ids = [(uvs.reference, uvs.id) for uvs in old]
+
         # If they had no test data, it is safe to delete, and this keeps things
         # trim:
         old.filter(last_tested__isnull=True).delete()
@@ -559,48 +588,52 @@ class Identity(models.Model):
                                          verse_set=vs,
                                          version=version)
 
-    def get_verse_statuses_bulk(self, references):
-        # refs is a list of (verse_set_id, ref) tuples
-        # Returns a dictionary of (verse_set_id, ref): UVS
-        # The UVS objects have 'text' attributes retrieved efficiently.
-
-        # For efficiency, we group by verse_set_id to minimize queries
-        references = sorted(references)
-        groups = []
-        for verse_set_id, g in itertools.groupby(references,
-                                                 lambda (verse_set_id, ref): verse_set_id):
-            groups.append((verse_set_id, [ref for verse_set_id, ref in g]))
-
-
+        # Return value:
+        final_correct_uvss = {uvs.reference: uvs for uvs in correct_version.all()}
         retval = {}
-        for verse_set_id, references in groups:
-            l = self.verse_statuses.filter(ignored=False, reference__in=references)
-            # This is used by VersesToLearnHandler, where we need the following:
-            l = l.select_related('version', 'verse_set')
-            if verse_set_id is None:
-                l = l.filter(verse_set__isnull=True)
-            else:
-                l = l.filter(verse_set=verse_set_id)
-            l = list(l)
+        for reference, uvs_id in old_uvs_ids:
+            retval[uvs_id] = final_correct_uvss[reference].id
 
-            retval.update(dict(((verse_set_id, uvs.reference), uvs) for uvs in l))
+        return retval
+
+    def get_verse_statuses_bulk(self, ids):
+        # ids is a list of UserVerseStatus.id values
+        # Returns a dictionary of {uvs.id: uvs}
+        # The UVS objects have 'version', 'verse_set',
+        # 'text', 'question', and 'answer' attributes retrieved efficiently,
+        # as appropriate
+
+        retval = {uvs.id: uvs for uvs in (self.verse_statuses
+                                          .filter(id__in=ids)
+                                          .select_related('version', 'verse_set'))
+                  }
 
         # We need to get 'text' efficiently too. Group into versions:
         by_version = {}
         for uvs in retval.values():
             by_version.setdefault(uvs.version_id, []).append(uvs)
 
-        # Get the texts in bulk
+        # Get the texts/QAPairs in bulk
         texts = {}
+        qapairs = {}
         for version_id, uvs_list in by_version.items():
             version = uvs_list[0].version
             refs = [uvs.reference for uvs in uvs_list]
             for ref, text in version.get_text_by_reference_bulk(refs).items():
+                # Bibles only here
                 texts[version_id, ref] = text
+            for ref, qapair in version.get_qapairs_by_reference_bulk(refs).items():
+                # catechisms only here
+                qapairs[version_id, ref] = qapair
 
         # Assign texts back to uvs:
         for uvs in retval.values():
-            uvs.text = texts[uvs.version_id, uvs.reference]
+            uvs.text = texts.get((uvs.version_id, uvs.reference), None)
+            qapair = qapairs.get((uvs.version_id, uvs.reference), None)
+            if qapair is None:
+                uvs.question, uvs.answer = None, None
+            else:
+                uvs.question, uvs.answer = qapair.question, qapair.answer
 
         return retval
 
