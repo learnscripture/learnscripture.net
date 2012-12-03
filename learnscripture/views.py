@@ -304,12 +304,15 @@ def dashboard(request):
 
 
 def context_for_version_select(request):
+    """
+    Returns the context data needed to render a version select box
+    """
     return {'bible_versions': bible_versions_for_request(request)}
 
 
 def context_for_quick_find(request):
     """
-    Returns the context data needed to render a version select box
+    Returns the context data needed to render a quick find box
     """
     d = {'BIBLE_BOOKS': BIBLE_BOOKS,
          'default_bible_version': default_bible_version_for_request(request)
