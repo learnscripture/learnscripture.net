@@ -711,20 +711,24 @@ class Identity(models.Model):
         Returns a query set of UserVerseStatuses that need revising.
         """
         qs = (self.verse_statuses
-              .filter(ignored=False,
+              .filter(version__text_type=TextType.BIBLE,
+                      ignored=False,
                       memory_stage=MemoryStage.TESTED)
+              # Don't include passages - we do those separately:
               .exclude(verse_set__set_type=VerseSetType.PASSAGE)
-              .exclude(version__text_type=TextType.CATECHISM)
               .order_by('added', 'id')
               )
         qs = memorymodel.filter_qs(qs, timezone.now())
         return self._dedupe_uvs_set(qs)
 
     def bible_verse_statuses_for_learning_qs(self):
-        qs = self.verse_statuses.filter(ignored=False, memory_stage__lt=MemoryStage.TESTED)
-        # Don't include passages - we do those separately
-        qs = qs.exclude(verse_set__set_type=VerseSetType.PASSAGE)
-        qs = qs.exclude(version__text_type=TextType.CATECHISM)
+        qs = (self.verse_statuses
+              .filter(version__text_type=TextType.BIBLE,
+                      ignored=False,
+                      memory_stage__lt=MemoryStage.TESTED)
+              # Don't include passages - we do those separately:
+              .exclude(verse_set__set_type=VerseSetType.PASSAGE)
+              )
         return qs
 
     def bible_verse_statuses_for_learning(self):
