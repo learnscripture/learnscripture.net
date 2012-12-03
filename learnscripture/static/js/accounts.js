@@ -67,7 +67,6 @@ var learnscripture = (function (learnscripture, $) {
                 error: signupError,
                 success: function (data) {
                     // Translate from Python attributes where needed
-                    data.scoringEnabled = data.scoring_enabled;
                     setSignedIn(data, 'signup');
                     if (afterCreateAccount !== null) {
                         afterCreateAccount();

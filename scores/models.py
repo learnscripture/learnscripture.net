@@ -56,10 +56,8 @@ class TotalScore(models.Model):
 
 
 def active_user_query(q):
-    from accounts.models import SubscriptionType
     from learnscripture.utils.sqla import accounts_account as account
     return (q
-            .where(account.c.subscription != SubscriptionType.BASIC)
             .where(account.c.is_active == True)
             )
 

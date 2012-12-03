@@ -3,7 +3,7 @@ from django.utils import timezone
 
 from app_metrics.models import MetricDay, Metric
 
-from accounts.models import get_active_account_count, get_active_identity_count, get_paying_account_count
+from accounts.models import get_active_account_count, get_active_identity_count
 
 def record_active_accounts(now=None):
     if now is None:
@@ -23,10 +23,3 @@ def record_active_accounts(now=None):
     md2.num = get_active_identity_count(start, end)
     md2.save()
 
-def record_paying_accounts():
-    now = timezone.now()
-    today = now.astimezone(timezone.utc).date()
-    md, b = MetricDay.objects.get_or_create(metric=Metric.objects.get(slug='accounts_paying'),
-                                            created=today)
-    md.num = get_paying_account_count()
-    md.save()

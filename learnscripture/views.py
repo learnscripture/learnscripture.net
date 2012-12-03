@@ -22,7 +22,7 @@ from django.views.decorators.debug import sensitive_post_parameters
 from paypal.standard.forms import PayPalPaymentsForm
 
 from accounts import memorymodel
-from accounts.models import Account, SubscriptionType, Identity
+from accounts.models import Account, Identity
 from accounts.forms import PreferencesForm, AccountDetailsForm
 from awards.models import AwardType, AnyLevel, Award
 from learnscripture.forms import AccountSetPasswordForm, ContactForm
@@ -33,8 +33,6 @@ from bibleverses.forms import VerseSetForm
 from groups.forms import EditGroupForm
 from groups.models import Group
 from groups.signals import public_group_created
-from payments.forms import EditFundForm, AddFundForm
-from payments.models import Price, Fund
 from payments.sign import sign_payment_info
 from scores.models import get_all_time_leaderboard, get_leaderboard_since, ScoreReason
 
@@ -201,10 +199,6 @@ def get_user_groups(identity):
 def dashboard(request):
 
     identity = getattr(request, 'identity', None)
-
-    if settings.REQUIRE_SUBSCRIPTION:
-        if identity is not None and identity.require_subscribe():
-            return HttpResponseRedirect(reverse('subscribe'))
 
     if identity is None or not identity.verse_statuses.exists():
         # The only possible thing is to choose some verses
@@ -896,7 +890,7 @@ def stats(request):
     account_data = build_data(['new_account'] +
                               (['accounts_active',
                                 'identities_active',
-                                'accounts_paying'] if 'full_accounts' in request.GET else []))
+                                ] if 'full_accounts' in request.GET else []))
 
     # Build cumulative stats from 'account_data'
     all_accounts = []
@@ -957,38 +951,17 @@ def get_well_learnt_verses(identity):
     return list(well_learnt)
 
 
-def subscription_paypal_dict(amount, account, price, url_start):
+def donation_paypal_dict(account, url_start):
     return {
         "business": settings.PAYPAL_RECEIVER_EMAIL,
-        "amount": amount,
-        "item_name": u"%s subscription on LearnScripture.net" % price.description,
+        "item_name": u"Donation to LearnScripture.net",
         "invoice": "account-%s-%s" % (account.id,
                                       timezone.now()), # We don't need this, but must be unique
         "notify_url": "%s%s" % (url_start, reverse('paypal-ipn')),
         "return_url": "%s%s" % (url_start, reverse('pay_done')),
         "cancel_return": "%s%s" % (url_start, reverse('pay_cancelled')),
-        "custom": sign_payment_info(dict(account=account.id,
-                                         amount=amount,
-                                         price=price.id)),
-        "currency_code": price.currency.name,
-        "no_note": "1",
-        "no_shipping": "1",
-        }
-
-
-def fund_paypal_dict(fund, url_start):
-    return {
-        "business": settings.PAYPAL_RECEIVER_EMAIL,
-        "item_name": u"%s fund topup on LearnScripture.net" % fund.name,
-        "invoice": "fund-%s-%s" % (fund.id,
-                                   timezone.now()), # We don't need this, but must be unique
-        "notify_url": "%s%s" % (url_start, reverse('paypal-ipn')),
-        "return_url": "%s%s" % (url_start, reverse('fund_pay_done')),
-        "cancel_return": "%s%s" % (url_start, reverse('fund_pay_cancelled')),
-        "custom": sign_payment_info(dict(fund=fund.id,
-                                         currency=fund.currency.name
-                                         )),
-        "currency_code": fund.currency.name,
+        "custom": sign_payment_info(dict(account=account.id)),
+        "currency_code": "GBP",
         "no_note": "1",
         "no_shipping": "1",
         }
@@ -1008,106 +981,35 @@ def paypal_url_start_for_request(request):
 
 
 @require_account
-def subscribe(request):
+def donate(request):
     identity = request.identity
     account = identity.account
-    c = {'title': 'Subscribe'}
-    if not account.payment_possible():
-        # Shortcut, to avoid any processing
-        return render(request, 'learnscripture/subscribe.html', c)
-
-    c['payment_possible'] = True
-
-    c['free_trial'] = account.subscription == SubscriptionType.FREE_TRIAL
-    c['basic_account'] = account.subscription == SubscriptionType.BASIC
-
-    payment_due_date = account.payment_due_date()
-    if (payment_due_date is not None and payment_due_date < timezone.now()):
-        c['payment_overdue'] = True
-        if account.subscription == SubscriptionType.FREE_TRIAL:
-            c['was_on_free_trial'] = True
-            # Add info about how many verses they have learned.
-            c['started_verses_count'] = get_started_verses_count(identity)
-            c['well_learnt_verses'] = natural_list(get_well_learnt_verses(identity))
-
-        # Process 'downgrade'
-        if request.method == 'POST' and 'downgrade' in request.POST:
-            if account.subscription != SubscriptionType.BASIC:
-                Account.objects.filter(id=account.id).update(subscription=SubscriptionType.BASIC)
-                messages.info(request, "Account downgraded to 'Basic'")
-            return HttpResponseRedirect(reverse('dashboard'))
-
-    ## Process 'use fund'
-    if request.method == 'POST' and 'usefund' in request.POST:
-        try:
-            fund = account.funds_available.get(id=int(request.POST['fund']))
-        except (Fund.DoesNotExist, ValueError, KeyError):
-            pass # ignore request
-        else:
-            if fund.can_pay_for(account):
-                fund.pay_for(account)
-                messages.info(request, "Paid for subscription from fund, thanks.")
-                return HttpResponseRedirect(reverse('dashboard'))
-            else:
-                pass # Can't pay for, ignore request.
-
-    # Funds
-    funds = account.funds_available.all()
-    for fund in funds:
-        fund.can_use = fund.can_pay_for(account)
-    c['funds'] = funds
-
-    discount = account.subscription_discount()
-
-
-    # Currencies and prices available
-    price_groups = Price.objects.current_prices(with_discount=discount)
-    c['currencies'] = sorted([currency for currency, prices in price_groups],
-                             key=lambda currency: currency.name)
-    c['price_groups'] = price_groups
+    c = {'title': 'Donate'}
 
     url_start = paypal_url_start_for_request(request)
 
-    price_forms = []
-    for currency, prices in price_groups:
-
-        # Find the shortest period, so that we can calculate the relative
-        # savings for longer periods.
-        shortest = sorted(prices, key=lambda p:p.days)[0]
-
-        for price in prices:
-            price.savings = price.get_savings(shortest)
-            paypal_dict = subscription_paypal_dict(str(price.amount_with_discount),
-                                                   account, price, url_start)
-            form = PayPalPaymentsForm(initial=paypal_dict)
-            price_forms.append(("%s_%s" % (currency.name, price.id), form))
+    paypal_dict = donation_paypal_dict(account, url_start)
+    form = PayPalPaymentsForm(initial=paypal_dict)
+    # render 'amount' as visible widget
     c['PRODUCTION'] = settings.LIVEBOX and settings.PRODUCTION
-    c['price_forms'] = price_forms
+    c['paypal_form'] = form
 
-    if discount != Decimal('0.00'):
-        c['discount'] = (discount * 100).quantize(Decimal('1'))
-
-    return render(request, 'learnscripture/subscribe.html', c)
+    return render(request, 'learnscripture/donate.html', c)
 
 
 @csrf_exempt
 def pay_done(request):
     identity = getattr(request, 'identity', None)
     if identity is not None:
-        # This doesn't actually check if a payment was just received,
-        # but it is good enough.
-        if (identity.account is not None
-            and identity.account.subscription == SubscriptionType.PAID_UP
-            and identity.account.paid_until > timezone.now()):
-            messages.info(request, 'Payment received, thank you!')
+        if identity.account is not None:
             return HttpResponseRedirect(reverse('dashboard'))
 
-    return render(request, 'learnscripture/pay_done.html', {'title': "Payment complete"})
+    return render(request, 'learnscripture/pay_done.html', {'title': "Donation complete"})
 
 
 @csrf_exempt
 def pay_cancelled(request):
-    return render(request, 'learnscripture/pay_cancelled.html', {'title': "Payment cancelled"})
+    return render(request, 'learnscripture/pay_cancelled.html', {'title': "Donation cancelled"})
 
 
 def referral_program(request):
@@ -1303,90 +1205,6 @@ def group_select_list(request):
         groups.sort(key=lambda g: not g.is_member)
     return render(request, 'learnscripture/group_select_list.html',
                   {'groups': groups})
-
-
-def account_funds(request):
-    account = account_from_request(request)
-    if account:
-        funds = account.funds_managed.all().order_by('name')
-    else:
-        funds = None
-    return render(request, 'learnscripture/account_funds.html',
-                  {'title': 'Payment funds',
-                   'funds': funds,
-                   'account': account,
-                   })
-
-@require_account
-def add_account_fund(request):
-    return add_or_edit_account_fund(request)
-
-
-@require_account
-def edit_account_fund(request, fund_id):
-    account = request.identity.account
-    fund = get_object_or_404(account.funds_managed.all(), id=fund_id)
-    return add_or_edit_account_fund(request, fund)
-
-
-def add_or_edit_account_fund(request, fund=None):
-    new_fund = fund is None
-    form_class = AddFundForm if new_fund else EditFundForm
-    if request.method == 'POST':
-        form = form_class(request.POST, instance=fund)
-        if form.is_valid():
-            fund = form.save(commit=False)
-            if new_fund:
-                fund.manager = request.identity.account
-            fund.save()
-            form.save_m2m()
-
-            if new_fund:
-                messages.info(request, u"Fund created, thanks.")
-            else:
-                messages.info(request, u"Fund details updated.")
-            return HttpResponseRedirect(reverse('account_funds'))
-    else:
-        form = form_class(instance=fund)
-
-    return render(request, 'learnscripture/edit_account_fund.html',
-                  {'fund': fund,
-                   'form': form,
-                   'title': 'Add payment fund' if new_fund else 'Edit payment fund'
-                   })
-
-
-@require_account
-def topup_fund(request, fund_id=None):
-    from paypal.standard.conf import POSTBACK_ENDPOINT, SANDBOX_POSTBACK_ENDPOINT
-    account = request.identity.account
-    fund = get_object_or_404(account.funds_managed.all(), id=fund_id)
-    form = PayPalPaymentsForm(initial=fund_paypal_dict(fund,
-                                                       paypal_url_start_for_request(request)))
-    PRODUCTION = settings.LIVEBOX and settings.PRODUCTION
-
-    c = {
-        'title': 'Add money to fund',
-        'fund': fund,
-        # Minimum is price for 1 year
-        'minimum': Price.objects.filter(currency=fund.currency,
-                                        days__gte=365).order_by('amount')[0].amount,
-        'form': form,
-        'POSTBACK_ENDPOINT': POSTBACK_ENDPOINT if PRODUCTION else SANDBOX_POSTBACK_ENDPOINT,
-        }
-    return render(request, 'learnscripture/topup_fund.html', c)
-
-
-@csrf_exempt
-def fund_pay_done(request):
-    messages.info(request, 'Payment received, thank you! It may take a moment for our records to update.')
-    return HttpResponseRedirect(reverse('account_funds'))
-
-
-@csrf_exempt
-def fund_pay_cancelled(request):
-    messages.warning(request, 'Payment cancelled.')
-    return HttpResponseRedirect(reverse('account_funds'))
 
 
 def terms_of_service(request):

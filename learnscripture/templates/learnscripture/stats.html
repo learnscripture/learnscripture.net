@@ -69,10 +69,6 @@ $(function() {
             {label: "Active identities",
              data: {{ account_data.identities_active|jsonify }},
              yaxis: 2
-            },
-            {label: "Paying accounts",
-             data: {{ account_data.accounts_paying|jsonify }},
-             yaxis: 2
             }
 {% endif %}
            ],
