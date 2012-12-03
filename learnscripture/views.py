@@ -395,12 +395,15 @@ def choose(request):
     return render(request, 'learnscripture/choose.html', c)
 
 
-def catechisms(request):
+def view_catechism_list(request):
     if request.method == "POST":
         if not has_preferences(request):
             # Shouldn't get here if UI preferences javascript is working right.
             return redirect_via_prefs(request)
-        catechism = TextVersion.objects.get(id=int(request.POST['catechism_id']))
+        try:
+            catechism = TextVersion.objects.get(id=int(request.POST['catechism_id']))
+        except (KeyError, ValueError, TextVersion.DoesNotExist):
+            raise Http404
         return learn_set(request,
                          request.identity.add_catechism(catechism),
                          session.LearningType.LEARNING)
@@ -410,6 +413,18 @@ def catechisms(request):
          }
     return render(request, 'learnscripture/catechisms.html', c)
 
+
+def view_catechism(request, slug):
+    try:
+        catechism = TextVersion.objects.get(slug=slug)
+    except TextVersion.DoesNotExist:
+        raise Http404
+
+    c = {'title': catechism.full_name,
+         'catechism': catechism,
+         'questions': catechism.qapairs.order_by('order')}
+
+    return render(request, 'learnscripture/view_catechism.html', c)
 
 def verse_options(request):
     """
