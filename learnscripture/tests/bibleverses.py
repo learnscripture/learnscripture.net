@@ -176,7 +176,7 @@ class ESVTests(TestCase):
 
     def make_esv(self):
         # ESV needs to be created with text empty, but verses existing
-        esv = BibleVersion.objects.get_or_create(short_name='ESV')[0]
+        esv = TextVersion.objects.get_or_create(short_name='ESV')[0]
         esv.verse_set.create(reference='John 3:16',
                              book_number=42,
                              chapter_number=3,
