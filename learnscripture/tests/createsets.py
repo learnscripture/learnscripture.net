@@ -36,7 +36,7 @@ class CreateSetTests(LiveServerTests):
     def test_create_selection_set(self):
         self.login(self._account)
         driver = self.driver
-        driver.get(self.live_server_url + "/create-selection-set/")
+        self.get_url('create_selection_set')
         driver.find_element_by_id("id_name").clear()
         driver.find_element_by_id("id_name").send_keys("My set")
         driver.find_element_by_id("id_description").clear()
@@ -58,7 +58,7 @@ class CreateSetTests(LiveServerTests):
     def test_dedupe_selection_sets(self):
         self.login(self._account)
         driver = self.driver
-        driver.get(self.live_server_url + "/create-selection-set/")
+        self.get_url("create_selection_set")
         driver.find_element_by_id("id_name").send_keys("My set")
 
         # Add Gen 1:5
@@ -74,7 +74,7 @@ class CreateSetTests(LiveServerTests):
 
         def _add_new_ref(ref):
             # Edit again
-            driver.get(self.live_server_url + reverse('edit_set', kwargs=dict(slug=vs.slug)))
+            self.get_url('edit_set', kwargs=dict(slug=vs.slug))
             self._add_ref(ref)
 
             driver.find_element_by_id("id-save-btn").click()
@@ -103,7 +103,7 @@ class CreateSetTests(LiveServerTests):
         """
         self.login(self._account)
         driver = self.driver
-        driver.get(self.live_server_url + reverse('create_selection_set'))
+        self.get_url('create_selection_set')
 
         self._add_ref("Gen 1:5")
         self._add_ref("Gen 1:6")
@@ -128,7 +128,7 @@ class CreateSetTests(LiveServerTests):
                                       set_order=2)
         self.login(self._account)
         driver = self.driver
-        driver.get(self.live_server_url + reverse('edit_set', kwargs=dict(slug=vs.slug)))
+        self.get_url('edit_set', kwargs=dict(slug=vs.slug))
         e = driver.find_element_by_css_selector("#id-verse-list tbody tr:first-child td")
         ActionChains(driver).drag_and_drop_by_offset(e, 0, 110).perform()
 
@@ -156,7 +156,7 @@ class CreateSetTests(LiveServerTests):
         identity.record_verse_action('Genesis 1:1', 'KJV', StageType.TEST, 1.0)
 
         driver = self.driver
-        driver.get(self.live_server_url + reverse('edit_set', kwargs=dict(slug=vs.slug)))
+        self.get_url('edit_set', kwargs=dict(slug=vs.slug))
         driver.find_element_by_css_selector("#id-verse-list tbody tr:first-child td .icon-trash").click()
         driver.find_element_by_id("id-save-btn").click()
 
@@ -169,7 +169,7 @@ class CreateSetTests(LiveServerTests):
 
     def test_require_account(self):
         driver = self.driver
-        driver.get(self.live_server_url + reverse('create_selection_set'))
+        self.get_url('create_selection_set')
         self.set_preferences()
         self.assertIn('You need to', driver.page_source)
         self.assertIn('create an account', driver.page_source)
@@ -177,7 +177,7 @@ class CreateSetTests(LiveServerTests):
     def test_create_passage_set(self):
         self.login(self._account)
         driver = self.driver
-        driver.get(self.live_server_url + "/create-passage-set/")
+        self.get_url('create_passage_set')
 
         driver.find_element_by_id("id_name").clear()
         driver.find_element_by_id("id_name").send_keys("Genesis 1:1-10")
@@ -210,7 +210,7 @@ class CreateSetTests(LiveServerTests):
         self.test_create_passage_set()
         driver = self.driver
 
-        driver.get(self.live_server_url + "/create-passage-set/")
+        self.get_url("create_passage_set")
         driver.find_element_by_id("id_quick_find").clear()
         driver.find_element_by_id("id_quick_find").send_keys("Gen 1:1-10")
 
@@ -222,7 +222,7 @@ class CreateSetTests(LiveServerTests):
     def test_empty_passage_set(self):
         self.login(self._account)
         driver = self.driver
-        driver.get(self.live_server_url + "/create-passage-set/")
+        self.get_url("create_passage_set")
         self.wait_until_loaded('body')
         driver.find_element_by_id("id_name").send_keys("xxx")
         driver.find_element_by_id("id-save-btn").click()
@@ -245,7 +245,7 @@ class CreateSetTests(LiveServerTests):
 
         # Simple test - editing and pressing save should leave
         # everything the same.
-        driver.get(self.live_server_url + reverse('edit_set', kwargs=dict(slug=vs.slug)))
+        self.get_url('edit_set', kwargs=dict(slug=vs.slug))
         driver.find_element_by_id("id-save-btn").click()
 
         vs = VerseSet.objects.get(id=vs.id)

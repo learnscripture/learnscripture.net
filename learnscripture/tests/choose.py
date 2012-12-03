@@ -16,7 +16,7 @@ class ChooseTests(LiveServerTests):
 
     def test_search(self):
         driver = self.driver
-        driver.get(self.live_server_url + reverse('choose'))
+        self.get_url('choose')
         driver.find_element_by_id('id-search-input').send_keys('gospel')
         driver.find_element_by_id('id-search-btn').click()
 
@@ -33,7 +33,7 @@ class ChooseTests(LiveServerTests):
         self.login(account)
 
         driver = self.driver
-        driver.get(self.live_server_url + reverse('choose'))
+        self.get_url('choose')
 
         vs_id = 1
         self.assertEqual(VerseSet.objects.get(id=vs_id).popularity, 0)
@@ -56,7 +56,7 @@ class ChooseTests(LiveServerTests):
         ids = list(Identity.objects.all())
 
         driver = self.driver
-        driver.get(self.live_server_url + reverse('choose'))
+        self.get_url('choose')
 
         vs = VerseSet.objects.get(name="Psalm 23")
         driver.find_element_by_id("id-learn-verseset-btn-%d" % vs.id).click()
@@ -75,7 +75,7 @@ class ChooseTests(LiveServerTests):
                          identity.verse_statuses.filter(ignored=False).count())
 
         # Choose again
-        driver.get(self.live_server_url + reverse('choose'))
+        self.get_url('choose')
         driver.find_element_by_id("id-learn-verseset-btn-%d" % vs.id).click()
 
         self.assertEqual(vs.verse_choices.count(),
@@ -83,7 +83,7 @@ class ChooseTests(LiveServerTests):
 
     def test_choose_individual_verse(self):
         driver = self.driver
-        driver.get(self.live_server_url + reverse('choose'))
+        self.get_url('choose')
         driver.find_element_by_css_selector("a[href='#id-tab-individual']").click()
 
         # Test clicking on the drop downs.
@@ -106,7 +106,7 @@ class ChooseTests(LiveServerTests):
     def test_choose_individual_verse_fuzzy(self):
         # Test entering into quick find, and being lazy
         driver = self.driver
-        driver.get(self.live_server_url + reverse('choose'))
+        self.get_url('choose')
         driver.find_element_by_css_selector("a[href='#id-tab-individual']").click()
 
         driver.find_element_by_css_selector('form.quickfind input[name=quick_find]')\
@@ -121,7 +121,7 @@ class ChooseTests(LiveServerTests):
     def test_choose_individual_verse_bad_ref(self):
         # Test entering into quick find, and being lazy
         driver = self.driver
-        driver.get(self.live_server_url + reverse('choose'))
+        self.get_url('choose')
         driver.find_element_by_css_selector("a[href='#id-tab-individual']").click()
 
         driver.find_element_by_css_selector('form.quickfind input[name=quick_find]')\
@@ -135,7 +135,7 @@ class ChooseTests(LiveServerTests):
 
     def test_choose_individual_by_search(self):
         driver = self.driver
-        driver.get(self.live_server_url + reverse('choose'))
+        self.get_url('choose')
 
         driver.find_element_by_css_selector("a[href='#id-tab-individual']").click()
 
