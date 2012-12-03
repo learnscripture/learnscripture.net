@@ -12,9 +12,8 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 
 # TextVersion and Verse are pseudo static, so make extensive use of caching.
-# VerseSets and VerseChoices also rarely change, and it doesn't matter too much
-# if they do, so make liberal use of caching.  Other models won't benefit so
-# much due to lots of writes and an increased risk if things go wrong.
+# Other models won't benefit so much due to lots of writes and an increased
+# risk if things go wrong.
 import caching.base
 
 from accounts import memorymodel
@@ -435,14 +434,19 @@ class VerseChoice(models.Model):
 
 class UserVerseStatus(models.Model):
     """
-    Tracks the user's progress for a verse.
+    Tracks the user's progress for a verse or QAPair
     """
-    # It actually tracks the progress for a VerseChoice and Version.  This
+    # It actually tracks the progress for a reference and Version.  This
     # implicitly allows it to track progress separately for different versions
     # and for the same verse in different verse sets.  In some cases this is
     # useful (for learning a passage, you might be learning a different version
     # to normal), but usually it is confusing, so business logic limits how much
-    # this can happen
+    # this can happen.
+
+    # By making reference a CharField instead of a tighter DB constraint, we can
+    # handle the case of VerseChoices or VerseSets being deleted, and also
+    # handle QAPairs from the same model. Since references don't change,
+    # we can handle the denormalisation easily.
 
     for_identity = models.ForeignKey('accounts.Identity', related_name='verse_statuses')
     reference = models.CharField(max_length=100)
