@@ -4,14 +4,41 @@
 {% load pagination_tags %}
 
 {% block content %}
+{% if bible %}
 <h2>Verses you are learning</h2>
+{% endif %}
+{% if catechism %}
+<h2>Catechism questions you are learning</h2>
+
+{% endif %}
 
 {% autopaginate verses 20 %}
 
+<ul class="pills">
+  <li {% if bible %}
+      class="active"
+      {% endif %}
+      ><a href=".">Bible verses</a>
+  </li>
+  <li {% if catechism %}
+      class="active"
+      {% endif %}
+      ><a href="?catechisms">Catechism questions</a>
+  </li>
+</ul>
+
 {% if not verses %}
-<p>No verses learnt yet</p>
+  {% if bible %}
+  <p>No verses learnt yet</p>
+  {% endif %}
+  {% if catechism %}
+  <p>No catechism questions learnt yet - <a href="{% url 'catechisms' %}">choose some!</a></p>
+  {% endif %}
 
 {% else %}
+
+
+{% if bible %}
 
 <ul class="pills">
   <li {% if not bibleorder %}
@@ -26,13 +53,15 @@
   </li>
 </ul>
 
+{% endif %}
+
 {% paginate %}
 
 <table class="bordered-table condensed">
   <thead>
     <tr>
-      <th>Verse</th>
-      <th>Version</th>
+      <th>{% if bible %}Verse{% elif catechism %}Question{% endif %}</th>
+      <th>{% if bible %}Version{% elif catechism %}Catechism{% endif %}</th>
       <th>Strength</th>
     </tr>
   </thead>
@@ -40,7 +69,9 @@
     {% for verse in verses %}
     {% ifchanged verse.reference verse.version.slug %}
     <tr>
-      <td>{{ verse.reference }} <a class="btn verse-popup-btn" href="#" data-reference="{{ verse.reference }}" data-version="{{ verse.version.slug }}">Options</a></td>
+      <td>{{ verse.reference }}
+        {% if catechism %} - {{ verse.question }}{% endif %}
+        <a class="btn verse-popup-btn" href="#" data-reference="{{ verse.reference }}" data-version="{{ verse.version.slug }}">Options</a></td>
       <td>{{ verse.version.slug }}</td>
       <td><img src="{{ STATIC_URL }}img/strength_{{ verse.simple_strength }}.png"></td>
     </tr>

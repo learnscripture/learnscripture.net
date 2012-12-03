@@ -217,6 +217,10 @@ class TextVersion(caching.base.CachingMixin, models.Model):
         return {qapair.reference: qapair
                 for qapair in self.qapairs.filter(reference__in=reference_list)}
 
+    def get_qapair_by_reference(self, reference):
+        if self.is_bible: return None
+        return self.qapairs.get(reference=reference)
+
 
 class ComboVerse(object):
     """
@@ -487,6 +491,10 @@ class UserVerseStatus(models.Model):
     @cached_property
     def text(self):
         return self.version.get_text_by_reference(self.reference)
+
+    @cached_property
+    def question(self):
+        return self.version.get_qapair_by_reference(self.reference).question
 
     @property
     def needs_testing(self):
