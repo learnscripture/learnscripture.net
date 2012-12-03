@@ -931,26 +931,6 @@ def get_started_verses_count(identity):
     return identity.verse_statuses_started().count()
 
 
-def get_well_learnt_verses(identity):
-    """
-    Returns a tuple (count of verses started,
-                        selection of verses learnt)
-    """
-    # Some of this logic should probably be in the model layer
-    learning_verses = identity.verse_statuses_started()
-    # Look for verses that have been going at least two weeks
-    strength_cutoff = memorymodel.MM.s(14* 24 * 3600)
-    well_learnt = (learning_verses
-                   # Exclude passages - makes less sense as sample verses
-                   .exclude(verse_set__set_type=VerseSetType.PASSAGE)
-                   .filter(strength__gt=Decimal(str(strength_cutoff)))
-                   .order_by('strength')
-                   .values_list('reference', flat=True)
-                   .distinct()
-                   )[0:3]
-    return list(well_learnt)
-
-
 def donation_paypal_dict(account, url_start):
     return {
         "business": settings.PAYPAL_RECEIVER_EMAIL,
