@@ -905,6 +905,7 @@ var learnscripture =
             } else {
                 if (verseData.needs_testing) {
                     currentStageList = chooseStageListForStrength(strength);
+                    setPracticeMode(false);
                 } else {
                     currentStageList = ['readForContext'];
                 }

@@ -1,6 +1,6 @@
 from django.dispatch import receiver
 
-from accounts.signals import new_account, verse_started, points_increase
+from accounts.signals import new_account, verse_started, points_increase, catechism_started
 from awards.signals import new_award, lost_award
 from bibleverses.signals import verse_set_chosen, public_verse_set_created
 import events.tasks
@@ -41,6 +41,13 @@ def verse_started_receiver(sender, **kwargs):
     events.tasks.create_verses_started_milestone_event.apply_async([account.id],
                                                                    countdown=2)
 
+@receiver(catechism_started)
+def catechism_started_receiver(sender, **kwargs):
+    account = sender
+    catechism = kwargs['catechism']
+    events.tasks.create_started_catechism_event.apply_async([account.id,
+                                                             catechism.id],
+                                                            countdown=2)
 
 @receiver(points_increase)
 def points_increase_receiver(sender=None, previous_points=None, points_added=None, **kwargs):

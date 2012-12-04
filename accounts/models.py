@@ -14,7 +14,7 @@ from django.utils.functional import cached_property
 from django.utils import timezone
 
 from accounts import memorymodel
-from accounts.signals import verse_started, verse_tested, points_increase, scored_100_percent
+from accounts.signals import verse_started, verse_tested, points_increase, scored_100_percent, catechism_started
 from bibleverses.models import TextVersion, MemoryStage, StageType, TextVersion, VerseChoice, VerseSet, VerseSetType, UserVerseStatus, TextType, get_passage_sections
 from bibleverses.signals import verse_set_chosen
 from scores.models import TotalScore, ScoreReason, Scores, get_rank_all_time, get_rank_this_week
@@ -502,6 +502,8 @@ class Identity(models.Model):
             s.filter(strength__gt=0, first_seen__isnull=True).update(first_seen=now)
 
             verse_tested.send(sender=self, verse=s0)
+            if s0.version.is_catechism and s0.text_order == 1 and self.account_id is not None:
+                catechism_started.send(self.account, catechism=s0.version)
 
             return ActionChange(old_strength=old_strength, new_strength=new_strength)
 
