@@ -173,10 +173,7 @@ class LearnTests(LiveServerTests):
         self._make_verses_due_for_testing(identity.verse_statuses.filter(memory_stage=MemoryStage.TESTED))
 
         self.get_url('dashboard')
-        driver.find_element_by_css_selector('input[name=revisebiblequeue]').click()
-
-        self.wait_until_loaded('body')
-        self.wait_for_ajax()
+        self.click_revise_bible()
 
         self._type_john_3_16_kjv()
 
@@ -308,11 +305,7 @@ class LearnTests(LiveServerTests):
 
         # Go to dashboard
         self.get_url('dashboard')
-        # and click 'Revise'
-        driver.find_element_by_css_selector("input[name='revisebiblequeue']").click()
-
-        self.wait_until_loaded('body')
-        self.wait_for_ajax()
+        self.click_revise_bible()
 
         self.assertEqual(u"John 3:16", driver.find_element_by_id('id-verse-title').text)
 
@@ -326,13 +319,14 @@ class LearnTests(LiveServerTests):
         # If we go back to dashboard and choose again, it should not appear
         # Go to dashboard
         self.get_url('dashboard')
-        # and click 'Revise'
-        driver.find_element_by_css_selector("input[name='revisebiblequeue']").click()
-
-        self.wait_until_loaded('body')
-        self.wait_for_ajax()
+        self.click_revise_bible()
 
         self.assertEqual(u"John 14:6", driver.find_element_by_id('id-verse-title').text)
+
+    def click_revise_bible(self):
+        self.driver.find_element_by_css_selector("input[name='revisebiblequeue']").click()
+        self.wait_until_loaded('body')
+        self.wait_for_ajax()
 
     def _make_verses_due_for_testing(self, uvs_queryset):
         uvs_queryset.update(
@@ -352,13 +346,8 @@ class LearnTests(LiveServerTests):
 
         self._make_verses_due_for_testing(identity.verse_statuses)
 
-        # Go to dashboard
         self.get_url('dashboard')
-        # and click 'Revise'
-        driver.find_element_by_css_selector("input[name='revisebiblequeue']").click()
-
-        self.wait_until_loaded('body')
-        self.wait_for_ajax()
+        self.click_revise_bible()
 
         self._type_john_3_16_kjv()
 
@@ -420,10 +409,7 @@ class LearnTests(LiveServerTests):
         self._make_verses_due_for_testing(identity.verse_statuses.filter(memory_stage=MemoryStage.TESTED))
 
         self.get_url('dashboard')
-        driver.find_element_by_css_selector('input[name=revisebiblequeue]').click()
-
-        self.wait_until_loaded('body')
-        self.wait_for_ajax()
+        self.click_revise_bible()
 
         self._type_john_3_16_kjv(accuracy=0.5)
 
@@ -471,9 +457,7 @@ class LearnTests(LiveServerTests):
         self._make_verses_due_for_testing(identity.verse_statuses.filter(memory_stage=MemoryStage.TESTED))
 
         self.get_url('dashboard')
-        driver.find_element_by_css_selector('input[name=revisebiblequeue]').click()
-        self.wait_until_loaded('body')
-        self.wait_for_ajax()
+        self.click_revise_bible()
         for i in range(0, 4):
             hint_btn = driver.find_element_by_id('id-hint-btn')
             self.assertEqual(hint_btn.get_attribute('disabled'),
