@@ -473,7 +473,7 @@ class Identity(models.Model):
         # different info, and it is easier to test with its current API.
 
         s = self.verse_statuses.filter(reference=reference,
-                                       version__slug=version_slug)
+                                       version__slug=version_slug).select_related('version')
         mem_stage = {
             StageType.READ: MemoryStage.SEEN,
             StageType.TEST: MemoryStage.TESTED,
@@ -501,7 +501,7 @@ class Identity(models.Model):
             # so we fix it to keep our data making sense.
             s.filter(strength__gt=0, first_seen__isnull=True).update(first_seen=now)
 
-            verse_tested.send(sender=self)
+            verse_tested.send(sender=self, verse=s0)
 
             return ActionChange(old_strength=old_strength, new_strength=new_strength)
 
