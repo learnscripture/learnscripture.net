@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django import forms
 
-from .models import TextVersion, Verse, VerseSet, VerseChoice
+from .models import TextVersion, Verse, VerseSet, VerseChoice, QAPair
 
 
 class VerseChoiceAdminForm(forms.ModelForm):
@@ -29,6 +29,16 @@ class VerseAdmin(admin.ModelAdmin):
         return super(VerseAdmin, self).queryset(request).select_related('version')
 
 
+class QAPairAdmin(admin.ModelAdmin):
+    search_fields = ['reference', 'question']
+    list_display = ['reference', 'question', 'catechism']
+    list_filter = ['catechism']
+    ordering = ['catechism', 'order']
+
+    def queryset(self, request):
+        return super(QAPairAdmin, self).queryset(request).select_related('catechism')
+
 admin.site.register(TextVersion)
 admin.site.register(VerseSet, VerseSetAdmin)
 admin.site.register(Verse, VerseAdmin)
+admin.site.register(QAPair, QAPairAdmin)
