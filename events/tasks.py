@@ -2,8 +2,8 @@ from celery.task import task
 
 from accounts.models import Account
 from awards.models import Award
-from bibleverses.models import VerseSet
-from events.models import NewAccountEvent, AwardReceivedEvent, VerseSetCreatedEvent, StartedLearningVerseSetEvent, PointsMilestoneEvent, VersesStartedMilestoneEvent, AwardLostEvent, GroupJoinedEvent, GroupCreatedEvent
+from bibleverses.models import VerseSet, TextVersion
+from events.models import NewAccountEvent, AwardReceivedEvent, VerseSetCreatedEvent, StartedLearningVerseSetEvent, PointsMilestoneEvent, VersesStartedMilestoneEvent, AwardLostEvent, GroupJoinedEvent, GroupCreatedEvent, StartedLearningCatechismEvent
 from groups.models import Group
 from scores.models import TotalScore
 
@@ -35,6 +35,12 @@ def create_started_verse_set_event(verse_set_id, chosen_by_id):
                                  chosen_by=Account.objects.get(id=chosen_by_id)).save()
 
 
+@task(ignore_result=True)
+def create_started_catechism_event(account_id, catechism_id):
+    account = Account.objects.get(id=account_id)
+    catechism = TextVersion.objects.get(id=catechism_id)
+    StartedLearningCatechismEvent(account=account,
+                                  catechism=catechism).save()
 
 def crosses_milestone(previous_points, current_points):
     c_s = str(current_points)

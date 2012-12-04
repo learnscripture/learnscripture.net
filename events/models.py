@@ -166,9 +166,20 @@ class GroupCreatedEvent(EventLogic):
             )
 
 
-
 class VersesFinishedMilestoneEvent(EventLogic):
     pass # TODO
+
+
+class StartedLearningCatechismEvent(EventLogic):
+
+    def __init__(self, account=None, catechism=None):
+        super(StartedLearningCatechismEvent, self).__init__(account=account,
+                                                            catechism_id=catechism.id)
+        self.event.message_html = html_fragment(
+            u'started learning <a href="%s">%s</a>',
+            reverse('view_catechism', args=(catechism.slug,)),
+            catechism.full_name,
+            )
 
 
 EventType = make_class_enum(
@@ -184,6 +195,7 @@ EventType = make_class_enum(
      (9, 'AWARD_LOST', 'Award lost', AwardLostEvent),
      (10, 'GROUP_JOINED', 'Group joined', GroupJoinedEvent),
      (11, 'GROUP_CREATED', 'Group created', GroupCreatedEvent),
+     (12, 'STARTED_LEARNING_CATECHISM', 'Started learning catechism', StartedLearningCatechismEvent),
      ])
 
 
