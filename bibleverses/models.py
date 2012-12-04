@@ -512,6 +512,13 @@ class UserVerseStatus(models.Model):
             ('' if self.version.is_bible else '. ' + self.question)
 
     @cached_property
+    def short_title(self):
+        if self.version.is_bible:
+            return self.reference
+        else:
+            return self.version.short_name + " - " + self.reference
+
+    @cached_property
     def item_name(self):
         return 'verse' if self.version.is_bible else 'question'
 

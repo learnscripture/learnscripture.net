@@ -102,7 +102,7 @@ only takes a few seconds. Otherwise your progress won't be saved permanently.
   <p>Nothing needs revising at this point in time.
     {% if next_verse_due %}
     <br/>
-    Next verse due for revision: <b>{{ next_verse_due.reference }}</b> in {{ next_verse_due.next_test_due|timeuntil }}
+    Next item due for revision: <b>{{ next_verse_due.short_title }}</b> in {{ next_verse_due.next_test_due|timeuntil }}
     {% endif %}
   </p>
   {% endif %}
