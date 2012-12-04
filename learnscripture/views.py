@@ -422,7 +422,9 @@ def view_catechism(request, slug):
 
     c = {'title': catechism.full_name,
          'catechism': catechism,
-         'questions': catechism.qapairs.order_by('order')}
+         'questions': catechism.qapairs.order_by('order'),
+         'learners': catechism.get_learners(),
+         }
 
     return render(request, 'learnscripture/view_catechism.html', c)
 

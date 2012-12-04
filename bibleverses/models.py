@@ -221,6 +221,16 @@ class TextVersion(caching.base.CachingMixin, models.Model):
         if self.is_bible: return None
         return self.qapairs.get(reference=reference)
 
+    def get_learners(self):
+        # This doesn't have to be 100% accurate, so do an easier query - find
+        # people who have learnt the first item
+        return [uvs.for_identity.account
+                for uvs in
+                UserVerseStatus.objects
+                .select_related('for_identity', 'for_identity__account')
+                .filter(version=self,
+                        text_order=1,
+                        for_identity__account__isnull=False)]
 
 class ComboVerse(object):
     """
