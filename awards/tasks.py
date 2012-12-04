@@ -6,7 +6,7 @@ from django.utils import timezone
 from awards.models import AwardType, Award, StudentAward, MasterAward, SharerAward, TrendSetterAward, AceAward, RecruiterAward, ReigningWeeklyChampion, WeeklyChampion, AddictAward, OrganizerAward, ConsistentLearnerAward
 from accounts.models import Account, Identity, get_verse_started_running_streaks
 from accounts.memorymodel import MM
-from bibleverses.models import MemoryStage, VerseSetType, VerseSet
+from bibleverses.models import MemoryStage, VerseSetType, VerseSet, TextType
 from groups.models import combined_membership_count_for_creator
 from scores.models import ScoreReason, get_leaderboard_since, get_number_of_distinct_hours_for_account_id
 
@@ -16,6 +16,7 @@ def give_learning_awards(account_id):
         return
     account = Account.objects.get(id=account_id)
     started = account.identity.verse_statuses.filter(ignored=False,
+                                                     version__text_type=TextType.BIBLE,
                                                      memory_stage__gte=MemoryStage.TESTED)
     started_c = started.count()
     finished_c = started.filter(strength__gte=MM.LEARNT).count()
