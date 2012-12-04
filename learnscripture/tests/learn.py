@@ -43,6 +43,15 @@ class LearnTests(LiveServerTests):
         self.wait_for_ajax()
         return verse_set
 
+    def add_verse_set(self, name):
+        verse_set = VerseSet.objects.get(name=name)
+        driver = self.driver
+        self.get_url('preferences') # ensure we have an Identity
+        self.set_preferences()
+        identity = self._get_current_identity()
+        identity.add_verse_set(verse_set, identity.default_bible_version)
+        return verse_set
+
     def _type_john_3_16_kjv(self, accuracy=1.0):
         accumulator = 0
         for word in self.kjv_john_3_16.strip().split():
@@ -156,7 +165,7 @@ class LearnTests(LiveServerTests):
         driver = self.driver
         identity, account = self.create_account()
         self.login(account)
-        verse_set = self.choose_verse_set('Bible 101')
+        verse_set = self.add_verse_set('Bible 101')
 
         # Learn one
         identity.record_verse_action('John 3:16', 'KJV', StageType.TEST, 1.0)
@@ -220,7 +229,7 @@ class LearnTests(LiveServerTests):
         identity, account = self.create_account()
         self.login(account)
 
-        verse_set = self.choose_verse_set('Psalm 23')
+        verse_set = self.add_verse_set('Psalm 23')
 
         for i in range(1, 7):
             identity.record_verse_action('Psalm 23:%d' % i, 'KJV', StageType.TEST,
@@ -287,7 +296,7 @@ class LearnTests(LiveServerTests):
         self.assertEqual(u"John 14:6", driver.find_element_by_id('id-verse-title').text)
 
     def test_cancel_learning(self):
-        verse_set = self.choose_verse_set('Bible 101')
+        verse_set = self.add_verse_set('Bible 101')
         driver = self.driver
 
         identity = self._get_current_identity()
@@ -333,7 +342,7 @@ class LearnTests(LiveServerTests):
 
 
     def test_finish_button(self):
-        verse_set = self.choose_verse_set('Bible 101')
+        verse_set = self.add_verse_set('Bible 101')
         driver = self.driver
 
         identity = self._get_current_identity()
@@ -403,7 +412,7 @@ class LearnTests(LiveServerTests):
         driver = self.driver
         identity, account = self.create_account()
         self.login(account)
-        verse_set = self.choose_verse_set('Bible 101')
+        verse_set = self.add_verse_set('Bible 101')
 
         # Learn one
         identity.record_verse_action('John 3:16', 'KJV', StageType.TEST, 1.0)
@@ -454,7 +463,7 @@ class LearnTests(LiveServerTests):
         driver = self.driver
         identity, account = self.create_account()
         self.login(account)
-        verse_set = self.choose_verse_set('Bible 101')
+        verse_set = self.add_verse_set('Bible 101')
 
         # Learn one
         identity.record_verse_action('John 3:16', 'KJV', StageType.TEST, 1.0)
