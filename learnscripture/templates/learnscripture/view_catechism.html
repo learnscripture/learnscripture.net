@@ -1,9 +1,10 @@
-{% extends "base.html" %}
+{% extends "base_twocol.html" %}
 
 {% load markup %}
 {% load url from future %}
+{% load account_utils %}
 
-{% block content %}
+{% block leftcolumn %}
 
 <h2>Description</h2>
 
@@ -36,4 +37,21 @@
 
 {% endblock %}
 
+{% block rightcolumn %}
+<h3>See also</h3>
+<ul>
+  <li><a href="{% url 'catechisms' %}">All catechisms</a></li>
+  <li><a href="{% url 'contact' %}">Contact us</a> if you would like this
+    catechism's data files.</li>
+</ul>
 
+{% if learners %}
+<h3>People learning this</h3>
+<ul>
+  {% for account in learners %}
+  <li>{{ account|account_link }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+{% endblock %}
