@@ -244,7 +244,7 @@ var learnscripture =
 
         var flashMsg = function (elements, wordBox) {
             var pos = wordBox.position();
-            elements.css({'top': (pos.top + wordBox.outerHeight() + 4).toString() + "px",
+            elements.css({'top': (pos.top - elements.outerHeight()).toString() + "px",
                           'left': pos.left.toString() + "px"}).show();
 
             if (preferences.enableAnimations) {
