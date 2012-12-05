@@ -323,6 +323,33 @@ class LearnTests(LiveServerTests):
 
         self.assertEqual(u"John 14:6", driver.find_element_by_id('id-verse-title').text)
 
+    def test_reset_progress(self):
+        verse_set = self.add_verse_set('Bible 101')
+        driver = self.driver
+        identity = self._get_current_identity()
+        # Ensure that we have seen some verses
+        identity.record_verse_action('John 3:16', 'KJV', StageType.TEST, 1.0)
+        self._make_verses_due_for_testing(identity.verse_statuses)
+
+        self.get_url('dashboard')
+        self.click_revise_bible()
+
+        self.assertEqual(u"John 3:16", driver.find_element_by_id('id-verse-title').text)
+
+        driver.find_element_by_id('id-verse-dropdown').click()
+        driver.find_element_by_id('id-reset-progress-btn').click()
+
+        alert = driver.switch_to_alert()
+        alert.accept()
+        self.wait_until_loaded('body')
+        self.wait_for_ajax()
+
+        # Should reset strength to zero
+        self.assertEqual(identity.verse_statuses.get(reference='John 3:16').strength,
+                         0)
+        # Should revert to initial read mode
+        self.assertTrue(driver.find_element_by_css_selector('#id-instructions .instructions-read').is_displayed())
+
     def click_revise_bible(self):
         self.driver.find_element_by_css_selector("input[name='revisebiblequeue']").click()
         self.wait_until_loaded('body')

@@ -1428,6 +1428,27 @@ var learnscripture =
             nextVerse();
         };
 
+        var resetProgress = function (ev) {
+            ev.preventDefault();
+            if (confirm("This will reset your progress on this item to the zero. " +
+                        "Continue?")) {
+                $.ajax({url: '/api/learnscripture/v1/resetprogress/?format=json',
+                        dataType: 'json',
+                        type: 'POST',
+                        data: {
+                            verse_status: JSON.stringify(currentVerseStatus, null, 2)
+                        },
+                        success: learnscripture.ajaxRetrySucceeded,
+                        retry: learnscripture.ajaxRetryOptions,
+                        error: learnscripture.ajaxRetryFailed
+                       });
+                currentVerseStatus.strength = 0;
+                currentVerseStatus.needs_testing = true;
+                currentVerseStatus = null;
+                loadCurrentVerse();
+            }
+        }
+
         var finishBtnClick = function (ev) {
             // Skip to end, which skips everything in between
             var verse = versesToLearn[maxVerseIndex];
@@ -1482,6 +1503,7 @@ var learnscripture =
             });
             $('#id-skip-verse-btn').click(skipVerse);
             $('#id-cancel-learning-btn').click(cancelLearning);
+            $('#id-reset-progress-btn').click(resetProgress);
             $('#id-finish-btn').click(finishBtnClick);
             $(window).resize(function () {
                 if (currentStage !== null &&
