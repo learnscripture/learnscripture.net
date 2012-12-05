@@ -1,5 +1,6 @@
 from collections import namedtuple
 
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 from fiber.context_processors import page_info
@@ -92,3 +93,6 @@ def theme_fonts(request):
     return {'theme_fonts': THEME_FONTS,
             'current_theme': current_theme,
             }
+
+def settings_processor(request):
+    return {'settings': {'SENTRY_DSN': settings.SENTRY_DSN}}
