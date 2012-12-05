@@ -156,6 +156,17 @@ class CancelLearningVerseHandler(BaseHandler):
         return {}
 
 
+class ResetProgressHandler(BaseHandler):
+    allowed_methods = ('POST',)
+
+    @require_identity_method
+    def create(self, request):
+        verse_status = get_verse_status(request.data)
+        request.identity.reset_progress(verse_status['reference'],
+                                        get_verse_set_id(verse_status),
+                                        verse_status['version']['slug'])
+        return {}
+
 class ChangeVersionHandler(BaseHandler):
     allowed_methods = ('POST',)
 

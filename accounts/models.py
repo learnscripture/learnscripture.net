@@ -691,6 +691,19 @@ class Identity(models.Model):
         qs = qs.exclude(verse_set__set_type=VerseSetType.PASSAGE)
         qs.update(ignored=True)
 
+    def reset_progress(self, reference, verse_set_id, version_slug):
+        qs = self.verse_statuses.filter(reference=reference,
+                                        version__slug=version_slug)
+        if verse_set_id is None:
+            qs = qs.filter(verse_set__isnull=True)
+        else:
+            qs = qs.filter(verse_set=verse_set_id)
+
+        qs.update(strength=0,
+                  last_tested=None,
+                  next_test_due=None,
+                  memory_stage=MemoryStage.ZERO)
+
     def _dedupe_uvs_set(self, uvs_set):
         # Need to dedupe (due to nullable verse_set which allows
         # multiple (reference=ref, verse_set=NULL) pairs

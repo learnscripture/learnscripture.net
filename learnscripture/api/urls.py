@@ -1,6 +1,6 @@
 from django.conf.urls import url, patterns
 
-from learnscripture.api.handlers import VersesToLearnHandler, ActionCompleteHandler, ChangeVersionHandler, SignUpHandler, LogInHandler, LogOutHandler, SetPreferences, SessionStats, SkipVerseHandler, CancelLearningVerseHandler, ScoreLogs, ResetPasswordHandler, VerseFind, CheckDuplicatePassageSet, DeleteNotice
+from learnscripture.api.handlers import VersesToLearnHandler, ActionCompleteHandler, ChangeVersionHandler, SignUpHandler, LogInHandler, LogOutHandler, SetPreferences, SessionStats, SkipVerseHandler, CancelLearningVerseHandler, ScoreLogs, ResetPasswordHandler, VerseFind, CheckDuplicatePassageSet, DeleteNotice, ResetProgressHandler
 
 
 from django.http import HttpResponse, Http404, HttpResponseNotAllowed, HttpResponseForbidden, HttpResponseServerError
@@ -147,6 +147,7 @@ urlpatterns = patterns('',
                        url(r'^sessionstats/$', Resource(SessionStats)),
                        url(r'^skipverse/$', Resource(SkipVerseHandler)),
                        url(r'^cancellearningverse/$', Resource(CancelLearningVerseHandler)),
+                       url(r'^resetprogress/$', Resource(ResetProgressHandler)),
                        url(r'^scorelogs/$', Resource(ScoreLogs)),
                        url(r'^versefind/$', Resource(VerseFind)),
                        url(r'^checkduplicatepassageset/$', Resource(CheckDuplicatePassageSet)),
