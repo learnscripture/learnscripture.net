@@ -113,7 +113,7 @@ else:
 PAYPAL_IMAGE = "https://www.paypalobjects.com/en_US/GB/i/btn/btn_buynowCC_LG.gif"
 
 
-TIME_ZONE = 'Europe/London'
+TIME_ZONE = 'UTC'
 LANGUAGE_CODE = 'en-gb'
 
 SITE_ID = 1
