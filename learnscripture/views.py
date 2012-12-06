@@ -148,8 +148,7 @@ SESSION_LENGTH_HOURS = 4
 
 def session_stats(identity):
     stats = {}
-    now = timezone.now()
-    session_start = now - timedelta(hours=SESSION_LENGTH_HOURS)
+    session_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
     all_verses_tested = identity.verse_statuses.filter(last_tested__gte=session_start,
                                                        ignored=False)
     # Need to dedupe for case of multiple UserVerseStatus for same verse
