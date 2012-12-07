@@ -132,8 +132,7 @@ class Account(models.Model):
             return []
 
         score_logs = []
-        # This logic is reproduced client side in order to display target
-        word_count = len(text.strip().split())
+        word_count = count_words(text)
         max_points = word_count * Scores.POINTS_PER_WORD
         if old_memory_stage >= MemoryStage.TESTED:
             reason = ScoreReason.VERSE_REVISED
@@ -259,6 +258,12 @@ class Account(models.Model):
         Friendship weight goes from value 0 to 1.
         """
         return account_get_friendship_weights(self.id)
+
+
+def count_words(text):
+    # This logic is reproduced client side in order to display target
+    text = text.replace('--', '-- ')
+    return len(text.strip().split())
 
 
 @cache_results(seconds=1200)

@@ -158,6 +158,17 @@ var learnscripture =
             )));
         };
 
+        // === Strings ===
+
+        var adjustWordJoiningPunction = function (text) {
+            return text.replace('--', '-- '); // this can be used to join words in ESV
+        }
+
+        var countWords = function (text) {
+            // duplication of server side logic
+            return stripPunctuation(adjustWordJoiningPunction(text)).split(/\W/).length;
+        };
+
 
         // ========== Word toggling and selection =============
 
@@ -1007,7 +1018,7 @@ var learnscripture =
                        currentVerseStatus.verse_set.set_type === SET_TYPE_SELECTION)
                     : false)
 
-            currentVerseStatus.wordCount = stripPunctuation(currentVerseStatus.scoringText.trim()).split(/\W/).length;
+            currentVerseStatus.wordCount = countWords(currentVerseStatus.scoringText);
             var verse = currentVerseStatus;
             normaliseLearningType(verse);
             var moveOld = (oldVerseStatus !== null &&
@@ -1126,6 +1137,7 @@ var learnscripture =
         };
 
         var markupVerse = function (text, reference) {
+            text = adjustWordJoiningPunction(text);
             // First split lines into divs.
             $.each(text.split(/\n/), function (idx, line) {
                 if (line.trim() !== '') {
