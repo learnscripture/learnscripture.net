@@ -27,7 +27,7 @@ class LearnTests(LiveServerTests):
 
     kjv_john_3_16 = "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life. John 3 16"
 
-    psalm_23_1_2 = "The LORD is my shepherd; I shall not want. He maketh me to lie down in green pastures: he leadeth me beside the still waters. Psalm 23 1 2"
+    psalm_23_1_2 = "The LORD is my shepherd I shall not want He maketh me to lie down in green pastures he leadeth me beside the still waters Psalm 23 1 2"
 
     def _get_current_identity(self):
         return Identity.objects.order_by('-date_created')[0]
@@ -114,7 +114,8 @@ class LearnTests(LiveServerTests):
         for i in range(0, 9):
             driver.find_element_by_id('id-next-btn').click()
 
-        # Do the typing:
+        # Do the typing: The fixture has 'The Lord is my shepherd--I shall not
+        # want' in order to test an issue with word splitting
         for word in self.psalm_23_1_2.strip().split():
             self.driver.find_element_by_id('id-typing').send_keys(word + ' ')
 
@@ -124,6 +125,16 @@ class LearnTests(LiveServerTests):
         uvs = identity.verse_statuses.get(reference='Psalm 23:1-2')
         self.assertEqual(uvs.strength, MM.INITIAL_STRENGTH_FACTOR)
 
+        # Check the score
+        points_for_verse = (
+            (len(self.psalm_23_1_2.strip().split()) - 4) # don't count reference
+            * Scores.POINTS_PER_WORD)
+        self.assertEqual(account.total_score.points,
+                         points_for_verse +
+                         points_for_verse * Scores.PERFECT_BONUS_FACTOR +
+                         StudentAward(count=1).points() +
+                         AceAward(count=1).points()
+                         )
 
     def test_points_and_student_award(self):
         identity, account = self.create_account()
