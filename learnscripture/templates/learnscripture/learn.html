@@ -43,12 +43,9 @@
     </div>
 
     <div class="instructions-results" style="display:none;">
-      <span class="result-buttons"><input id="id-more-practice-btn" type="submit" class="btn" value="More practice" style="display:none;" /> <input id="id-next-verse-btn" type="submit" class="btn primary" value="Next" /> <input type="submit" id="id-finish-btn" class="btn" value="Finish"></span>
-      <b>RESULTS:</b> You scored <span id="id-accuracy"></span> - <span id="id-result-comment"></span> <span id="id-result-suggestion"></span>
     </div>
 
     <div class="instructions-readForContext" style="display:none;">
-      <span class="result-buttons"><input id="id-context-next-verse-btn" type="submit" class="btn primary" value="Next" /></span>
       <b>READ:</b> Read this verse to get the context and flow of the passage.
     </div>
 
@@ -90,23 +87,53 @@
   </div>
 
 
-  <div id="id-stage-controls">
-    <div>
+  <div id="id-bottom-controls">
+
+    <div class="instructions-readForContext buttonbar" style="display:none;">
       <div>
-        <nobr>
-          <input type="submit" value="Back" class="btn" id="id-back-btn" style="display:none;" disabled>
-          <input type="submit" value="Next" class="primary btn" id="id-next-btn" style="display:none;">
-          <input type="submit" value="Get hint" class="btn" id="id-hint-btn" style="display:none;">
-        </nobr>
-      </div>
-      <div>Progress</div>
-      <div class="progress">
-        <progress id="id-progress-bar" value="0" max="100">0%</progress>
-      </div>
-      <div>
-        <button class="btn" id="id-help-btn">Tips</button>
+        <div class="progress">
+          <progress value="0" max="100">0%</progress>
+        </div>
+        <div>
+          <input id="id-context-next-verse-btn" type="submit" class="btn primary" value="Next" />
+        </div>
       </div>
     </div>
+
+    <div class="instructions-results buttonbar" style="display:none;">
+      <div>
+        <div>
+          <b>RESULTS:</b> You scored <span id="id-accuracy"></span> - <span id="id-result-comment"></span> <span id="id-result-suggestion"></span>
+        </div>
+        <div>
+          <nobr>
+            <input id="id-more-practice-btn" type="submit" class="btn" value="More practice" style="display:none;" />
+            <input id="id-next-verse-btn" type="submit" class="btn primary" value="Next" />
+            <input type="submit" id="id-finish-btn" class="btn" value="Finish">
+          </nobr>
+        </div>
+      </div>
+    </div>
+
+    <div id="id-stage-controls" class="buttonbar">
+      <div>
+        <div>
+          <button class="btn" id="id-help-btn">Tips</button>
+        </div>
+        <div>Progress</div>
+        <div class="progress">
+          <progress id="id-progress-bar" value="0" max="100">0%</progress>
+        </div>
+        <div>
+          <nobr>
+            <input type="submit" value="Get hint" class="btn" id="id-hint-btn" style="display:none;">
+            <input type="submit" value="Back" class="btn" id="id-back-btn" style="display:none;" disabled>
+            <input type="submit" value="Next" class="primary btn" id="id-next-btn" style="display:none;">
+          </nobr>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <div id="id-help" style="display:none;" class="alert-message block-message info">
