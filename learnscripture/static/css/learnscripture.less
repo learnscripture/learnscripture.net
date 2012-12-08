@@ -565,14 +565,17 @@ span.versenumber {
    text-shadow: 0 0 15px rgba(0,0,0,0.6);
 }
 
-#id-instructions {
+#id-instructions, #id-bottom-controls {
   font-size: 15px;
   line-height: 20px;
-  min-height: 40px;
-  padding: 10px;
+  padding: 8px;
   border-radius: 5px;
   border: 1px solid #66a;
   }
+
+#id-instructions {
+  min-height: 40px;
+}
 
 #id-verse-wrapper {
   border-radius: 5px;
@@ -711,7 +714,9 @@ span.versenumber {
   width: 100%;
 }
 
-#id-stage-controls {
+.buttonbar
+{
+  text-align: right;
   display: table;
   width: 100%;
   border-collapse: collapse;
@@ -732,10 +737,6 @@ span.versenumber {
 #id-points-target {
   height: 1.3em;
 }
-
-.result-buttons {
-  float: right;
-  }
 
 .score-log {
   text-align: center;
@@ -1072,11 +1073,11 @@ p.referral-link {
     padding: @word-margin-top-small @word-margin-left-small;
   }
 
-  #id-instructions {
+  #id-instructions, #id-bottom-controls {
     font-size: inherit;
     margin-bottom: 1px;
     padding: 3px;
-    border-radius: 2px;
+    border-radius: 3px;
     }
 
   #id-verse-wrapper {

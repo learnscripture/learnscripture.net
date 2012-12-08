@@ -423,18 +423,21 @@ var learnscripture =
         var showInstructions = function (stageName) {
             $('#id-instructions > div').css({opacity: 0});
             $('#id-instructions > div').hide();
-            $('#id-instructions .instructions-' + stageName).show().css({opacity: 1});
+            $('#id-bottom-controls > div').hide();
+            $('.instructions-' + stageName).show().css({opacity: 1});
         };
 
         var setStageControlBtns = function () {
             if (currentStageIdx == 0 && currentStageList.length == 1) {
                 $('#id-next-btn, #id-back-btn').hide();
             } else {
+                $('#id-stage-controls').show();
                 $('#id-next-btn, #id-back-btn').show();
                 enableBtn($('#id-next-btn'), currentStageIdx < currentStageList.length - 1);
                 enableBtn($('#id-back-btn'), currentStageIdx > 0);
             }
             if (currentStageList[currentStageIdx] == 'test' && currentStageList.length == 1) {
+                $('#id-stage-controls').show();
                 enableBtn($('#id-hint-btn').show(), true);
             } else {
                 $('#id-hint-btn').hide();
@@ -455,6 +458,10 @@ var learnscripture =
             $('.current-verse .correct, .current-verse .incorrect').removeClass('correct').removeClass('incorrect');
             $('#id-progress-summary').text("Stage " + (currentStageIdx + 1).toString() + "/" + currentStageList.length.toString());
             $('#id-points-target').html('');
+
+            // showInstructions needs to come before others, because it hides
+            // everything in #id-bottom-controls
+            showInstructions(currentStageName);
             currentStage.setup();
             setStageControlBtns();
             if (currentStage.testMode) {
@@ -467,7 +474,6 @@ var learnscripture =
                 bindDocKeyPress();
             }
 
-            showInstructions(currentStageName);
             // reset selected word
             moveSelection(0);
             adjustTypingBox();
