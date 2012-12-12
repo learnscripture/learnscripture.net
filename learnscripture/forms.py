@@ -61,7 +61,7 @@ class LogInForm(forms.Form):
     email = forms.CharField(max_length=255, label="Email or username")
     password = forms.CharField(max_length=100, widget=forms.PasswordInput)
 
-    def clean_password(self):
+    def clean(self):
         def fail():
             raise forms.ValidationError(u"Can't find an account matching that username/email and password");
         try:
@@ -79,10 +79,11 @@ class LogInForm(forms.Form):
         except Account.DoesNotExist:
             fail()
 
-        p = self.cleaned_data.get('password', '')
-        if not account.check_password(p):
+        if not account.check_password(self.cleaned_data.get('password', '')):
             fail()
-        return p
+
+        self.cleaned_data['account'] = account
+        return self.cleaned_data
 
 
 class AccountPasswordResetForm(PasswordResetForm):

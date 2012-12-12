@@ -59,7 +59,7 @@
                 <a href="#" id="id-session-menu" class="dropdown-toggle holds-username">{% if request.identity.account %}{{ request.identity.account.username }}{% else %}Guest{% endif %}</a>
                 <ul class="dropdown-menu">
                   {% if not request.identity.account %}
-                  <li><a href="#" class="icon-login login-link">Sign in</a></li>
+                  <li><a href="{% url 'login' %}" class="icon-login login-link">Sign in</a></li>
                   <li><a href="#" class="icon-account signup-link">Create account</a></li>
                   {% endif %}
                   <li><a class="icon-preferences preferences-link" href="{% url 'preferences' %}?next={{ request.path_info }}">Preferences</a></li>
@@ -180,25 +180,6 @@
 </div>
 
 
-
-<div id="id-login-form" class="modal hide">
-  <div class="modal-header">
-    <a href="#" class="close">&times;</a>
-    <h3>Sign in</h3>
-  </div>
-
-  <div class="modal-body">
-    <form action="{% url 'login' %}" method="POST">
-    {% csrf_token %}
-    {{ login_form|bootstrap }}
-    </form>
-  </div>
-  <div class="modal-footer">
-    <a href="#" id="id-sign-in-btn" class="btn primary default">Sign in</a>
-    <a href="#" id="id-sign-in-cancel-btn" class="btn secondary">Cancel</a>
-    <a href="#" id="id-forgot-password-btn" class="btn">I forgot my password</a>
-  </div>
-</div>
 
 {% endif %}
 

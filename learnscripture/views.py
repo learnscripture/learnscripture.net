@@ -25,7 +25,7 @@ from accounts import memorymodel
 from accounts.models import Account, Identity
 from accounts.forms import PreferencesForm, AccountDetailsForm
 from awards.models import AwardType, AnyLevel, Award
-from learnscripture.forms import AccountSetPasswordForm, ContactForm
+from learnscripture.forms import AccountSetPasswordForm, ContactForm, LogInForm, AccountPasswordResetForm
 from bibleverses.models import VerseSet, TextVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType, get_passage_sections, get_verses_started_counts, TextType
 from bibleverses.signals import public_verse_set_created
 from learnscripture import session, auth
@@ -65,14 +65,42 @@ def home(request):
     return render(request, 'learnscripture/home.html')
 
 
-# See comment in accounts.js for why this required (and doesn't do any logging
-# in).
 def login(request):
-    # Redirect to dashboard because just about everything you might want to do
-    # will change after sign in, and we want to encourage people to do their
-    # revision first.
-    # Allow a url to be passed in the query string too.
-    return get_next(request, reverse('dashboard'))
+    def do_redirect():
+        return get_next(request, reverse('dashboard'))
+
+    if account_from_request(request) is not None:
+        return do_redirect()
+
+    if request.method == 'POST':
+        form = LogInForm(request.POST, prefix="login")
+        if 'signin' in request.POST:
+            if form.is_valid():
+                account = form.cleaned_data['account']
+                account.last_login = timezone.now()
+                account.save()
+                session.login(request, account.identity)
+                return do_redirect()
+        elif 'forgotpassword' in request.POST:
+            resetform = AccountPasswordResetForm(request.POST, prefix="login")
+            if resetform.is_valid():
+                from django.contrib.auth.views import password_reset
+                # This will validate the form again, but it doesn't matter.
+                return password_reset(
+                    request,
+                    password_reset_form=lambda *args: AccountPasswordResetForm(*args, prefix="login"),
+                    post_reset_redirect=reverse('password_reset_done'),
+                    email_template_name='learnscripture/password_reset_email.txt',
+                    )
+            else:
+                # Need errors from password reset for be used on main form - hack
+                form._errors = resetform.errors
+    else:
+        form = LogInForm(prefix="login")
+
+    return render(request, "learnscripture/login.html",
+                  {'title': 'Sign in',
+                   'login_form': form})
 
 
 def feature_disallowed(request, title, reason):
@@ -199,6 +227,11 @@ def get_user_groups(identity):
 def dashboard(request):
 
     identity = getattr(request, 'identity', None)
+
+    if identity is None:
+        # Probably got here from a 'revision reminder' email,
+        # so we are best redirecting them to log in.
+        return HttpResponseRedirect(reverse('login'))
 
     if identity is None or not identity.verse_statuses.exists():
         # The only possible thing is to choose some verses
