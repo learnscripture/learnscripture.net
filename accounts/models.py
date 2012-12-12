@@ -2,6 +2,7 @@ from collections import defaultdict
 from datetime import timedelta
 from decimal import Decimal
 import itertools
+import math
 
 from django.core import mail
 from django.db import models
@@ -170,6 +171,7 @@ class Account(models.Model):
 
     def add_points(self, points, reason, accuracy=None):
         # Need to refresh 'total_score' each time
+        points = math.floor(points)
         current_points = TotalScore.objects.get(account_id=self.id).points
         score_log = self.score_logs.create(points=points,
                                            reason=reason,
