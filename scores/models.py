@@ -11,7 +11,7 @@ from learnscripture.utils.db import dictfetchall
 ScoreReason = make_choices('ScoreReason',
                            [(0, 'VERSE_TESTED', 'Verse tested'),
                             (1, 'VERSE_REVISED', 'Verse revised'),
-                            (2, 'REVISION_COMPLETED', 'Revision completed'),
+                            (2, 'REVISION_COMPLETED', 'Revision completed'), # No longer used
                             (3, 'PERFECT_TEST_BONUS', 'Perfect!'),
                             (4, 'VERSE_LEARNT', 'Verse fully learnt'),
                             (5, 'EARNED_AWARD', 'Earned award'),
@@ -20,9 +20,8 @@ ScoreReason = make_choices('ScoreReason',
 
 class Scores(object):
     # Constants for scores. Duplicated in learn.js
-    POINTS_PER_WORD = 10
+    POINTS_PER_WORD = 20
     PERFECT_BONUS_FACTOR = 0.5
-    REVISION_COMPLETE_BONUS_FACTOR = 1
     VERSE_LEARNT_BONUS = 5
 
 
