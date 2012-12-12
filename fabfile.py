@@ -367,11 +367,15 @@ def update_database():
                 run_venv("./manage.py migrate --noinput")
 
 
+def _assert_target():
+    assert target is not None, "Use 'production' or 'staging' to set target"
+
 @task
 def deploy():
     """
     Deploy project.
     """
+    _assert_target()
     push_sources()
     install_dependencies()
     update_database()
