@@ -434,7 +434,9 @@ var learnscripture =
                 enableBtn($('#id-next-btn'), currentStageIdx < currentStageList.length - 1);
                 enableBtn($('#id-back-btn'), currentStageIdx > 0);
             }
-            if (currentStageList[currentStageIdx] == 'test' && currentStageList.length == 1) {
+            var currentStageName = currentStageList[currentStageIdx];
+            if ((currentStageName == 'test' || currentStageName == 'practice')
+                && currentStageList.length == 1) {
                 enableBtn($('#id-hint-btn').show(), true);
             } else {
                 $('#id-hint-btn').hide();
