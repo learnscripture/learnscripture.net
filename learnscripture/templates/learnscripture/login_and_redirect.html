@@ -3,7 +3,7 @@
 {% load url from future %}
 
 {% block content %}
-<p>You need to <a href="#" class="login-link reload-after-login">log in</a>
+<p>You need to <a href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}">log in</a>
 (or <a href="#" class="signup-link reload-after-signup">create an account)</a>
 to access this page.</p>
 

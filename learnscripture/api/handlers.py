@@ -23,7 +23,7 @@ from accounts.models import Account
 from bibleverses.models import UserVerseStatus, Verse, StageType, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, MAX_VERSE_QUERY_SIZE, TextVersion, quick_find, VerseSetType, TextType
 from learnscripture import session
 from learnscripture.decorators import require_identity_method
-from learnscripture.forms import SignUpForm, LogInForm, AccountPasswordResetForm
+from learnscripture.forms import SignUpForm
 from learnscripture.utils.logging import extra
 from learnscripture.views import session_stats, bible_versions_for_request, verse_sets_visible_for_request
 
@@ -211,40 +211,6 @@ class SignUpHandler(AccountCommon, BaseHandler):
         identity.save()
         new_account.send(sender=account)
         return account
-
-
-class LogInHandler(AccountCommon, BaseHandler):
-    allowed_methods = ('POST',)
-
-    @validate(LogInForm, prefix="login")
-    def create(self, request):
-        # The form has validated the password already.
-        email = request.form.cleaned_data['email'].strip()
-        if u'@' in email:
-            account = Account.objects.active().get(email__iexact=email)
-        else:
-            account = Account.objects.active().get(username__iexact=email)
-        account.last_login = timezone.now()
-        account.save()
-        session.login(request, account.identity)
-        return account
-
-
-class ResetPasswordHandler(AccountCommon, BaseHandler):
-    allowed_methods = ('POST',)
-
-    # Uses same form as login.
-    @validate(AccountPasswordResetForm, prefix="login")
-    def create(self, request):
-        from django.contrib.auth.views import password_reset
-        # This will validate the form again, but it doesn't matter.
-        resp = password_reset(request,
-                              password_reset_form=lambda *args: AccountPasswordResetForm(*args, prefix="login"),
-                              post_reset_redirect=reverse('password_reset_done'), # not needed really
-                              email_template_name='learnscripture/password_reset_email.txt',
-                              )
-        # resp will be a redirect, which could confuse things, so we just:
-        return {}
 
 
 class LogOutHandler(BaseHandler):
