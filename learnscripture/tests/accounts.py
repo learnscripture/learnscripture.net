@@ -43,12 +43,12 @@ class AccountTests(TestCase):
                                   ActionChange(old_strength=0.5, new_strength=0.6),
                                   StageType.TEST, 0.75)
 
-        # One rep of score() gives 30 points.
-        # When we cross over 1000 (repetition 34) we should get an event
-        for i in range(1, 40):
+        # One rep of score() gives 60 points.
+        # When we cross over 1000 (repetition 17) we should get an event
+        for i in range(1, 20):
             score()
             self.assertEqual(Event.objects.filter(event_type=EventType.POINTS_MILESTONE).count(),
-                             0 if i < 34 else 1)
+                             0 if i < 17 else 1)
 
     def test_ace_awards(self):
         account = Account.objects.create(username='test',

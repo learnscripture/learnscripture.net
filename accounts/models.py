@@ -2,6 +2,7 @@ from collections import defaultdict
 from datetime import timedelta
 from decimal import Decimal
 import itertools
+import math
 
 from django.core import mail
 from django.db import models
@@ -161,15 +162,9 @@ class Account(models.Model):
 
         return score_logs
 
-    def award_revision_complete_bonus(self, score_log_ids):
-        if len(score_log_ids) == 0:
-            return []
-
-        points = self.score_logs.filter(id__in=score_log_ids).aggregate(models.Sum('points'))['points__sum'] * Scores.REVISION_COMPLETE_BONUS_FACTOR
-        return [self.add_points(points, ScoreReason.REVISION_COMPLETED)]
-
     def add_points(self, points, reason, accuracy=None):
         # Need to refresh 'total_score' each time
+        points = math.floor(points)
         current_points = TotalScore.objects.get(account_id=self.id).points
         score_log = self.score_logs.create(points=points,
                                            reason=reason,
@@ -507,7 +502,9 @@ class Identity(models.Model):
             s.filter(strength__gt=0, first_seen__isnull=True).update(first_seen=now)
 
             verse_tested.send(sender=self, verse=s0)
-            if s0.version.is_catechism and s0.text_order == 1 and self.account_id is not None:
+            if (s0.version.is_catechism and s0.text_order == 1
+                and old_strength == 0.0
+                and self.account_id is not None):
                 catechism_started.send(self.account, catechism=s0.version)
 
             return ActionChange(old_strength=old_strength, new_strength=new_strength)
@@ -1064,12 +1061,6 @@ class Identity(models.Model):
         if self.account_id is None:
             return False
         return True
-
-    def award_revision_complete_bonus(self, score_log_ids):
-        if self.account_id is None:
-            return []
-        else:
-            return self.account.award_revision_complete_bonus(score_log_ids)
 
     def available_bible_versions(self):
         if self.account_id is not None:

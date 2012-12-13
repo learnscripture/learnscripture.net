@@ -81,88 +81,6 @@ var learnscripture = (function (learnscripture, $) {
         $('#id_signup-email').focus();
     };
 
-
-    var loginEndpoint = '/login/';
-
-    var setLoginEndpoint = function (url) {
-        loginEndpoint = url;
-    }
-
-    var getLoginEndpoint = function (url) {
-        return loginEndpoint;
-    }
-
-    var setLoginRedirectToSelf = function () {
-        setLoginEndpoint('/login/?next=' + encodeURIComponent(window.location.pathname + window.location.search));
-    }
-
-    var loginBtnClick = function (ev) {
-        ev.preventDefault();
-        // Chrome will only remember passwords if the login form is submitted in
-        // the normal way.  Therefore we do synchronous XHR to check login
-        // details (and actually log them in), then do form submission to
-        // continue if it is correct.
-        // This form is 'shared' between login and forgot password, so ensure
-        // form action is correct.
-        if ($(".reload-after-login").length > 0) {
-            setLoginRedirectToSelf();
-        }
-
-        $('#id-login-form form').attr('action', getLoginEndpoint());
-
-        $.ajax({url: '/api/learnscripture/v1/login/?format=json',
-                dataType: 'json',
-                async: false,
-                type: 'POST',
-                data: $('#id-login-form form').serialize(),
-                error: function (jqXHR, textStatus, errorThrown) {
-                    ev.preventDefault();
-                    if (jqXHR.status === 400) {
-                        learnscripture.handleFormValidationErrors($('#id-login-form'), 'login', jqXHR);
-                    } else {
-                        learnscripture.ajaxFailed(jqXHR, textStatus, errorThrown);
-                    }
-                },
-                success: function (data) {
-                    $('#id-login-form form').get(0).submit();
-                }
-                });
-    };
-
-    var forgotPasswordClick = function (ev) {
-        ev.preventDefault();
-        // This form is 'shared' between login and forgot password, so ensure
-        // form action is correct.
-        $('#id-login-form form').attr('action', '/password-reset/');
-
-        $.ajax({url: '/api/learnscripture/v1/resetpassword/?format=json',
-                dataType: 'json',
-                async: false,
-                type: 'POST',
-                data: $('#id-login-form form').serialize(),
-                error: function (jqXHR, textStatus, errorThrown) {
-                    ev.preventDefault();
-                    if (jqXHR.status === 400) {
-                        learnscripture.handleFormValidationErrors($('#id-login-form'), 'login', jqXHR);
-                    } else {
-                        learnscripture.ajaxFailed(jqXHR, textStatus, errorThrown);
-                    }
-                },
-                success: function (data) {
-                    $('#id-login-form form').get(0).submit();
-                }
-                });
-    };
-
-    var showLogIn = function (ev) {
-        if (ev !== undefined) {
-            ev.preventDefault();
-        }
-        $('#id-login-form').modal({backdrop: 'static', keyboard: true, show: true});
-        $('#id_login-email').focus();
-    };
-
-
     var logoutBtnClick = function (ev) {
         $.ajax({url: '/api/learnscripture/v1/logout/?format=json',
                 dataType: 'json',
@@ -211,15 +129,6 @@ var learnscripture = (function (learnscripture, $) {
             $('#id-signup-form').modal('hide');
         });
 
-        $('.login-link').click(showLogIn);
-        $('#id-sign-in-btn').click(loginBtnClick);
-        $('#id-sign-in-cancel-btn').click(function (ev) {
-            ev.preventDefault();
-            $('#id-login-form').modal('hide');
-        });
-
-        $('#id-forgot-password-btn').click(forgotPasswordClick);
-
         $('.logout-link').click(showLogOut);
         $('#id-logout-btn').click(logoutBtnClick);
         $('#id-logout-cancel-btn').click(function (ev) {
@@ -239,7 +148,6 @@ var learnscripture = (function (learnscripture, $) {
     learnscripture.setupAccountControls = setupAccountControls;
     learnscripture.setAccountData = setAccountData;
     learnscripture.getAccountData = getAccountData;
-    learnscripture.showLogIn = showLogIn;
     return learnscripture;
 }(learnscripture || {}, $));
 

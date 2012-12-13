@@ -172,36 +172,6 @@ class LearnTests(LiveServerTests):
         self.get_url('dashboard')
         self.assertIn("You've earned a new badge", driver.page_source)
 
-    def test_revision_complete_points(self):
-        driver = self.driver
-        identity, account = self.create_account()
-        self.login(account)
-        verse_set = self.add_verse_set('Bible 101')
-
-        # Learn one
-        identity.record_verse_action('John 3:16', 'KJV', StageType.TEST, 1.0)
-
-        self._make_verses_due_for_testing(identity.verse_statuses.filter(memory_stage=MemoryStage.TESTED))
-
-        self.get_url('dashboard')
-        self.click_revise_bible()
-
-        self._type_john_3_16_kjv()
-
-        self.wait_for_ajax()
-
-        j316_score = self._score_for_j316()
-        account = Account.objects.get(id=account.id) # refresh
-        self.assertEqual(account.total_score.points,
-                         (j316_score * (1 + Scores.PERFECT_BONUS_FACTOR))
-                         * (1 + Scores.REVISION_COMPLETE_BONUS_FACTOR)
-                         + StudentAward(count=1).points()
-                         + AceAward(count=1).points()
-                         )
-
-        self.assertEqual(account.score_logs.count(), 5)
-        self.assertEqual(account.score_logs.filter(reason=ScoreReason.REVISION_COMPLETED).count(), 1)
-
 
     def test_change_version_passage(self):
         verse_set = self.choose_verse_set('Psalm 23')
@@ -264,26 +234,8 @@ class LearnTests(LiveServerTests):
         for i in range(0, 5):
             btn.click()
 
-        # This is a tricky corner case:
-        # - we are in revision mode, so need 'revision complete bonus'
-        #   - and we want it to appear
-        # - the last verse is not going to be tested
-        # - normally, the 'Done' button takes you straight back
-        #   to dashboard. But in this case, we wait for a second
-        #   to allow the bonus to appear.
-
         self.wait_for_ajax()
-        self.assertEqual(account.score_logs.filter(reason=ScoreReason.REVISION_COMPLETED).count(), 1)
-
-        # Super bonus should be present
-        self.assertFalse(driver.find_element_by_css_selector('.score-log-type-2') is None)
-
-        # And still there 0.2 seconds later
-        time.sleep(0.2)
-        self.assertFalse(driver.find_element_by_css_selector('.score-log-type-2') is None)
-
-        # But it does move on to dashboard eventually
-        time.sleep(3)
+        self.wait_until_loaded('body')
         self.assertTrue(driver.current_url.endswith('/dashboard/'))
 
     def test_skip_verse(self):
@@ -431,10 +383,8 @@ class LearnTests(LiveServerTests):
         account = Account.objects.get(username='test2')
         self.assertTrue(account.score_logs.count() > 0)
 
-    def test_super_bonus_after_more_practice(self):
-        # Regression test for issue #1
-
-        # Also tests that the 'more practice' button appears, and works
+    def test_more_practice(self):
+        # tests that the 'more practice' button appears, and works
 
         driver = self.driver
         identity, account = self.create_account()
@@ -468,20 +418,16 @@ class LearnTests(LiveServerTests):
         self._type_john_3_16_kjv(accuracy=0.95)
         self.wait_for_ajax()
 
-        # We should get super bonus applied just once
+        # We should get points for each time revised (and award)
         j316_score_1 = self._score_for_j316(accuracy=0.5)
         j316_score_2 = self._score_for_j316(accuracy=0.95)
         account = Account.objects.get(id=account.id) # refresh
         self.assertEqual(account.total_score.points,
                          (j316_score_1
-                          * (1 + Scores.REVISION_COMPLETE_BONUS_FACTOR)
                           + j316_score_2)
                          + StudentAward(count=1).points()
                          )
-
-        # One for each revision, 1 for revision complete:
-        self.assertEqual(account.score_logs.count(), 4)
-        self.assertEqual(account.score_logs.filter(reason=ScoreReason.REVISION_COMPLETED).count(), 1)
+        self.assertEqual(account.score_logs.count(), 3)
 
     def test_hint_button(self):
         driver = self.driver

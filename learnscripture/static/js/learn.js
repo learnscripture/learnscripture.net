@@ -73,9 +73,6 @@ var learnscripture =
         var hintsShown = 0;
         var maxHintsToShow = 0;
 
-        // Score logs
-        var waitingForScoreLogs = false;
-
         // Verse list
         var versesToLearn = null; // eventually a dictionary of index:verse
         var currentVerseIndex = null;
@@ -514,37 +511,15 @@ var learnscripture =
         };
 
         var markReadAndNextVerse = function () {
-
-            if (!nextVersePossible()) {
-                // May need to do some waiting for score logs to appear if in
-                // revision mode.
-                waitingForScoreLogs = true;
-            }
-            readingComplete(function () {
-                loadStats();
-                if (waitingForScoreLogs) {
-                    loadScoreLogs();
-                }
-            });
+            readingComplete(loadStats);
             nextVerse();
         };
 
 
-        var finish = function (depth) {
-            // depth is infinite recursion protection
-            if (depth === undefined) {
-                depth = 0;
-            }
+        var finish = function () {
             var go = function () {
                 window.location = redirect_to;
             };
-
-            // Don't do redirect if we are waiting for score logs to show.
-            // But don't wait forever.
-            if (waitingForScoreLogs && depth < 2) {
-                setTimeout(function () { finish(depth + 1); }, 1500);
-                return;
-            }
 
             if ($.active) {
                 $('body').ajaxStop(go);
@@ -791,7 +766,7 @@ var learnscripture =
             var wordIdx = selectedWordIndex;
             var word = getWordAt(wordIdx);
             var wordStr = stripPunctuation(word.text().toLowerCase());
-            var typed = stripPunctuation(inputBox.val().toLowerCase());
+            var typed = stripPunctuation(inputBox.val().trim().toLowerCase());
             var moveOn = function () {
                 showWord(word.find('*'));
                 inputBox.val('');
@@ -1238,7 +1213,6 @@ var learnscripture =
 
         var loadScoreLogs = function () {
             if (!scoringEnabled) {
-                waitingForScoreLogs = false;
                 return;
             }
             $.ajax({url: '/api/learnscripture/v1/scorelogs/?format=json&r=' +
@@ -1255,7 +1229,6 @@ var learnscripture =
                 // This is defined recursively to get the animation to work
                 // nicely for multiple score logs appearing one after the other.
                 if (scoreLogs.length === 0) {
-                    waitingForScoreLogs = false;
                     return;
                 }
                 var scoreLog = scoreLogs[0];
@@ -1321,6 +1294,22 @@ var learnscripture =
         };
 
         var inputKeyDown = function (ev) {
+            var characterInserted = false;
+            var textSoFar = inputBox.val();
+            if (ev.which == 229) {
+                // keyboard composition code sent by Chrome on Android, which is
+                // totally useless. The only upside is that, apart from the
+                // first character in the text box, the keydown event gets sent
+                // *after* the character has already appeared in the text
+                // box. This means we can get the character just typed.
+                if (textSoFar.length > 0) {
+                    var character = textSoFar.substr(textSoFar.length - 1, 1);
+                    // overwrite ev.which
+                    ev.which = character.charCodeAt(0);
+                    characterInserted = true;
+                }
+            }
+
             if (ev.which === 27) {
                 // ESC
                 ev.preventDefault();
@@ -1337,6 +1326,13 @@ var learnscripture =
                 if (currentStage.testMode) {
                     if (preferences.testingMethod === TEST_FULL_WORDS) {
                         checkCurrentWord();
+                    } else if (
+                        preferences.testingMethod == TEST_FIRST_LETTER &&
+                        textSoFar.trim().length > 0) {
+                        // compat for Android on Chrome, which doesn't fire the
+                        // event for first letter in box, but will get here if
+                        // you press one letter and then space
+                        checkCurrentWord();
                     }
                 }
                 return;
@@ -1345,8 +1341,10 @@ var learnscripture =
             if (currentStage.testMode && preferences.testingMethod === TEST_FIRST_LETTER) {
                 if (alphanumeric(ev)) {
                     ev.preventDefault();
-                    // Put it there ourselves, so it is ready for checkCurrentWord()
-                    inputBox.val(String.fromCharCode(ev.which));
+                    if (!characterInserted) {
+                        // Put it there ourselves, so it is ready for checkCurrentWord()
+                        inputBox.val(String.fromCharCode(ev.which));
+                    }
                     checkCurrentWord();
                 }
             }
@@ -1503,7 +1501,10 @@ var learnscripture =
             });
 
             inputBox = $('#id-typing');
-            inputBox.keydown(inputKeyDown);
+            // Chrome on Android does not fire onkeypress, only keyup and keydown.
+            // It also fires onchange only after pressing 'Enter' and closing
+            // the on-screen keyboard.
+            inputBox.bind('keydown', inputKeyDown);
             testingStatus = $('#id-testing-status');
             $('#id-next-btn').show().click(next);
             $('#id-back-btn').show().click(back);

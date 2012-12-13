@@ -20,7 +20,7 @@ class DashboardTests(LiveServerTests):
     def test_redirect(self):
         driver = self.driver
         self.get_url('dashboard')
-        self.assertTrue(driver.current_url.endswith(reverse('choose')))
+        self.assertTrue(driver.current_url.endswith(reverse('login')))
 
     def setup_identity(self):
         ids = list(Identity.objects.all())
@@ -180,7 +180,7 @@ class DashboardTests(LiveServerTests):
         driver = self.driver
         driver.get(self.live_server_url + "/")
         e = driver.find_element_by_css_selector('a.btn.large')
-        self.assertTrue(e.get_attribute('href').endswith(reverse('dashboard')))
+        self.assertTrue(e.get_attribute('href').endswith(reverse('choose')))
         e.click()
         self.assertTrue(driver.current_url.endswith(reverse('choose')))
         self.assertEqual(Identity.objects.exclude(id__in=[i.id for i in ids]).count(), 0)

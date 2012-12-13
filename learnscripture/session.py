@@ -96,7 +96,6 @@ def start_learning_session(request, user_verse_statuses, learning_type, return_t
     _set_learning_session_start(request, timezone.now())
     request.session['learning_type'] = learning_type
     request.session['score_logs'] = []
-    request.session['verses_skipped'] = False
     request.session['return_to'] = return_to
 
 
@@ -108,17 +107,9 @@ def verse_status_finished(request, uvs_id, new_score_logs):
         score_log_ids = list(request.session['score_logs'])
         score_log_ids.extend([sl.id for sl in new_score_logs])
         request.session['score_logs'] = score_log_ids
-        if len(_get_verse_status_ids(request)) == 0:
-            if not request.session['verses_skipped']:
-                request.identity.award_revision_complete_bonus(score_log_ids)
-                # Ensure we switch to 'not revision', so that we can't get super
-                # bonus more than once.
-                request.session['revision'] = False # compat for existing sessions
-                request.session['learning_type'] = LearningType.PRACTICE
 
 
 def verse_status_skipped(request, uvs_id):
-    request.session['verses_skipped'] = True
     return _remove_user_verse_status(request, uvs_id)
 
 

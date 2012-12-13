@@ -160,11 +160,12 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
 
     def fill_in_login_form(self, account):
         driver = self.driver
+        self.wait_until_loaded('body')
         driver.find_element_by_id("id_login-email").clear()
         driver.find_element_by_id("id_login-email").send_keys(account.email)
         driver.find_element_by_id("id_login-password").clear()
         driver.find_element_by_id("id_login-password").send_keys("password")
-        driver.find_element_by_id("id-sign-in-btn").click()
+        driver.find_element_by_css_selector("input[name=signin]").click()
 
 
 class UsesSQLAlchemyBase(TransactionTestCase):
