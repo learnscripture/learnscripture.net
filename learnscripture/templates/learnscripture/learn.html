@@ -19,20 +19,23 @@
   <h2 id="id-verse-title"></h2>
 
   <div id="id-instructions">
-    <div class="instructions-read" style="display:none;">
+    <div class="stage-specific
+                stage-read"
+         style="display:none;">
       <b>READ:</b> Read the text through (preferably aloud), and click 'Next'.
     </div>
-    <div class="instructions-recall1 instructions-recall2 instructions-recall3
-                instructions-recall4 instructions-recall5" style="display:none;">
+    <div class="stage-specific
+                stage-recall1
+                stage-recall2
+                stage-recall3
+                stage-recall4"
+         style="display:none;">
       <b>READ and RECALL:</b>
       Read the text through, filling in the gaps from your memory. Click
       a word to reveal it if you can't remember. 'Next' when done.
     </div>
-    <div class="instructions-recall6" style="display:none;">
-      <b>READ and RECALL:</b> No clues now! Can you still remember it?
-    </div>
 
-    <div class="instructions-test" style="display:none;">
+    <div class="stage-specific stage-test" style="display:none;">
       <div class="test-full">
         <b>TEST:</b> Testing time! Type the text, using space to check each word as you go.
         (hint: don't sweat the spelling, we should be able to work it out).
@@ -42,14 +45,11 @@
       </div>
     </div>
 
-    <div class="instructions-results" style="display:none;">
-    </div>
-
-    <div class="instructions-readForContext" style="display:none;">
+    <div class="stage-specific stage-readForContext" style="display:none;">
       <b>READ:</b> Read this verse to get the context and flow of the passage.
     </div>
 
-    <div class="instructions-practice" style="display:none;">
+    <div class="stage-specific stage-practice" style="display:none;">
       <b>PRACTICE:</b> This item is not due for revision, but you can test yourself if you want
       (test score will be ignored).
     </div>
@@ -88,47 +88,108 @@
 
 
   <div id="id-bottom-controls">
-
-    <div class="instructions-readForContext buttonbar" style="display:none;">
+    <div class="buttonbar" style="display:none;">
       <div>
-        <div class="progress">
-          <progress value="0" max="100">0%</progress>
+        <div class="stage-specific
+                    stage-test
+                    stage-read
+                    stage-recall1
+                    stage-recall2
+                    stage-recall3
+                    stage-recall4
+                    stage-test
+                    ">
+          <button class="btn" id="id-help-btn">Tips</button>
         </div>
-        <div>
-          <input id="id-context-next-verse-btn" type="submit" class="btn primary" value="Next" />
+        <div class="progress
+                    stage-specific
+                    stage-read
+                    stage-recall1
+                    stage-recall2
+                    stage-recall3
+                    stage-recall4
+                    stage-test
+                    ">
+          <progress id="id-progress-bar" value="0" max="100">0%</progress>
         </div>
-      </div>
-    </div>
-
-    <div class="instructions-results buttonbar" style="display:none;">
-      <div>
-        <div>
+        <div id="id-results"
+             class="stage-specific
+                    stage-test-finished
+                    ">
           <b>RESULTS:</b> You scored <span id="id-accuracy"></span> - <span id="id-result-comment"></span> <span id="id-result-suggestion"></span>
         </div>
         <div>
           <nobr>
-            <input id="id-more-practice-btn" type="submit" class="btn" value="More practice" style="display:none;" />
-            <input id="id-next-verse-btn" type="submit" class="btn primary" value="Next" />
-            <input type="submit" id="id-finish-btn" class="btn" value="Finish">
-          </nobr>
-        </div>
-      </div>
-    </div>
 
-    <div id="id-stage-controls" class="buttonbar">
-      <div>
-        <div>
-          <button class="btn" id="id-help-btn">Tips</button>
-        </div>
-        <div>Progress</div>
-        <div class="progress">
-          <progress id="id-progress-bar" value="0" max="100">0%</progress>
-        </div>
-        <div>
-          <nobr>
-            <input type="submit" value="Get hint" class="btn" id="id-hint-btn" style="display:none;">
-            <input type="submit" value="Back" class="btn" id="id-back-btn" style="display:none;" disabled>
-            <input type="submit" value="Next" class="primary btn" id="id-next-btn" style="display:none;">
+            <input id="id-hint-btn"
+                   value="Get hint"
+                   type="submit"
+                   class="btn
+                          stage-specific
+                          stage-test
+                          "
+                   >
+
+            <input id="id-back-btn"
+                   value="Back"
+                   type="submit"
+                   class="btn
+                          stage-specific
+                          stage-read
+                          stage-recall1
+                          stage-recall2
+                          stage-recall3
+                          stage-recall4
+                          "
+                   disabled>
+
+            <input id="id-next-btn"
+                   value="Next"
+                   type="submit"
+                   class="primary btn
+                          stage-specific
+                          stage-read
+                          stage-recall1
+                          stage-recall2
+                          stage-recall3
+                          stage-recall4
+                          "
+                   >
+
+            <input id="id-more-practice-btn"
+                   value="More practice"
+                   type="submit"
+                   class="btn
+                          stage-specific
+                          "
+                   >
+
+            <input id="id-next-verse-btn"
+                   value="Next"
+                   type="submit"
+                   class="btn primary
+                          stage-specific
+                          stage-test-finished
+                          "
+                   >
+
+            <input id="id-context-next-verse-btn"
+                   value="Next"
+                   type="submit"
+                   class="btn primary
+                          stage-specific
+                          stage-readForContext
+                          "
+                   >
+
+            <input id="id-finish-btn"
+                   value="Finish"
+                   type="submit"
+                   class="btn
+                          stage-specific
+                          "
+                   >
+
           </nobr>
         </div>
       </div>

@@ -3,6 +3,32 @@
 
 // Learning and testing functionality for learnscripture.net
 
+// Refer to learn.html for UI definition.
+//
+// = Main concepts =
+//
+// == Stages ==
+//
+// For a specific verse, there are various stages that might be stepped
+// through. Often, the stage list is a single item (e.g. 'test'), but when
+// learning it will be set ['read', 'recall1', ....]
+//
+// The stage list will be set by default on the basis of the current stage of
+// the verse in the database. But further actions (e.g. 'More practice') can
+// replace it.
+//
+// Various controls are specific to certain stages. These are controlled
+// by giving them a 'stage-specific' class, and then, if they *always*
+// appear for their stage, a 'stage-$NAME' class.
+//
+// showStageControls is responsible for toggling the visibility of these
+// controls.
+//
+// Other controls only appear for certain stages under certain conditions,
+// and these are simply marked 'stage-specific' and then made visible
+// on an ad-hoc basis by code.
+
+
 var learnscripture =
     (function (learnscripture, $) {
         "use strict";
@@ -349,6 +375,13 @@ var learnscripture =
             enableBtn($('#id-hint-btn'), false);
 
             completeStageGroup();
+            showTestFinishedControls();
+
+            if (nextVersePossible()) {
+                $('#id-finish-btn').show();
+            } else {
+                $('#id-finish-btn').hide();
+            }
 
             if (accuracyPercent < 85) {
                 $('#id-more-practice-btn').show();
@@ -387,7 +420,6 @@ var learnscripture =
             $('#id-test-bar').hide();
             testingStatus.hide();
             bindDocKeyPress();
-            showInstructions("results");
         };
 
         // =========== Stage handling ==========
@@ -417,24 +449,15 @@ var learnscripture =
             enableBtn($('#id-next-btn, #id-back-btn'), false);
         };
 
-        var showInstructions = function (stageName) {
-            $('#id-instructions > div').css({opacity: 0});
-            $('#id-instructions > div').hide();
-            $('#id-bottom-controls > div').hide();
-            $('.instructions-' + stageName).show().css({opacity: 1});
-        };
-
         var setStageControlBtns = function () {
             if (currentStageIdx == 0 && currentStageList.length == 1) {
                 $('#id-next-btn, #id-back-btn').hide();
             } else {
-                $('#id-stage-controls').show();
                 $('#id-next-btn, #id-back-btn').show();
                 enableBtn($('#id-next-btn'), currentStageIdx < currentStageList.length - 1);
                 enableBtn($('#id-back-btn'), currentStageIdx > 0);
             }
             if (currentStageList[currentStageIdx] == 'test' && currentStageList.length == 1) {
-                $('#id-stage-controls').show();
                 enableBtn($('#id-hint-btn').show(), true);
             } else {
                 $('#id-hint-btn').hide();
@@ -443,6 +466,29 @@ var learnscripture =
 
         var fadeVerseTitle = function (fade) {
             $('#id-verse-title').toggleClass('blurry', fade);
+        };
+
+        var getStageSelector = function (stageName) {
+            return '.stage-' + stageName;
+        }
+
+        var showStageControls = function (stageName) {
+            var stageSelector = getStageSelector(stageName);
+            // Hide everything that is stage specific, except stuff for this
+            // stage.
+            $('.stage-specific:not(' + stageSelector + ')').hide()
+            $(stageSelector).show();
+            // Once we've set things up, show the container.
+            $('#id-bottom-controls .buttonbar').show()
+        }
+
+        var showTestFinishedControls = function () {
+            // We can't just use showStageControls, because we want to leave the
+            // instructions div alone, and only affect the id-bottom-controls
+            // bit.
+            var stageSelector = getStageSelector('test-finished');
+            $('#id-bottom-controls .stage-specific:not(' + stageSelector + ')').hide();
+            $('#id-bottom-controls ' + stageSelector).show();
         };
 
         var setupStage = function (idx) {
@@ -456,9 +502,7 @@ var learnscripture =
             $('#id-progress-summary').text("Stage " + (currentStageIdx + 1).toString() + "/" + currentStageList.length.toString());
             $('#id-points-target').html('');
 
-            // showInstructions needs to come before others, because it hides
-            // everything in #id-bottom-controls
-            showInstructions(currentStageName);
+            showStageControls(currentStageName)
             currentStage.setup();
             setStageControlBtns();
             if (currentStage.testMode) {
@@ -1039,13 +1083,10 @@ var learnscripture =
             $('.selection-set-only').toggle(!isPassageType(currentVerseStatus));
 
             var nextBtns = $('#id-next-verse-btn, #id-context-next-verse-btn, #id-read-anyway-vext-verse-btn');
-            var finishBtn = $('#id-finish-btn');
             if (nextVersePossible()) {
                 nextBtns.val('Next');
-                finishBtn.show();
             } else {
                 nextBtns.val('Done');
-                finishBtn.hide();
             }
             if (verse.return_to) {
                 redirect_to = verse.return_to;
