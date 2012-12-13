@@ -193,23 +193,12 @@ var learnscripture =
         };
 
 
-        // ========== Word toggling and selection =============
+        // ========== Word toggling =============
 
         // For speed in test mode, where we have to keep up with typing,
-        // we tag all the words with ids, and keep track of the selected id
+        // we tag all the words with ids, and keep track of the current id
         // and word number
-        var selectedWordIndex = null;
-
-        var moveSelection = function (pos) {
-            if (pos === selectedWordIndex) {
-                return;
-            }
-            if (selectedWordIndex !== null) {
-                getWordAt(selectedWordIndex).removeClass('selected');
-            }
-            selectedWordIndex = pos;
-            getWordAt(selectedWordIndex).addClass('selected');
-        };
+        var currentWordIndex = null;
 
         var getWordAt = function (index) {
             return $('#id-word-' + index.toString());
@@ -217,13 +206,6 @@ var learnscripture =
 
         var getWordNumber = function (word) {
             return $('.current-verse .word').index(word);
-        };
-
-        var moveSelectionRelative = function (distance) {
-            var i = selectedWordIndex;
-            var pos = Math.min(Math.max(0, i + distance),
-                               wordList.length - 1);
-            moveSelection(pos);
         };
 
         var isHidden = function (word) {
@@ -251,7 +233,6 @@ var learnscripture =
 
         var toggleWord = function (word) {
             var wordNumber = getWordNumber(word);
-            moveSelection(wordNumber);
 
             var wordEnd = word.find('.wordend');
             var wordStart = word.find('.wordstart');
@@ -290,20 +271,20 @@ var learnscripture =
         };
 
         var indicateSuccess = function () {
-            var word = getWordAt(selectedWordIndex);
-            word.addClass('correct').removeClass('selected');
+            var word = getWordAt(currentWordIndex);
+            word.addClass('correct');
             flashMsg(testingStatus.attr({'class': 'correct'}).text("Correct!"), word);
         };
 
         var indicateMistake = function (mistakes, maxMistakes) {
             var msg = "Try again! (" + mistakes.toString() + "/" + maxMistakes.toString() + ")";
             flashMsg(testingStatus.attr({'class': 'incorrect'}).text(msg),
-                     getWordAt(selectedWordIndex));
+                     getWordAt(currentWordIndex));
         };
 
         var indicateFail = function () {
-            var word = getWordAt(selectedWordIndex);
-            word.addClass('incorrect').removeClass('selected');
+            var word = getWordAt(currentWordIndex);
+            word.addClass('incorrect');
             flashMsg(testingStatus.attr({'class': 'incorrect'}).text("Incorrect"), word);
         };
 
@@ -511,8 +492,8 @@ var learnscripture =
                 bindDocKeyPress();
             }
 
-            // reset selected word
-            moveSelection(0);
+            // reset current word
+            currentWordIndex = 0;
             adjustTypingBox();
 
             setProgress(currentStageIdx, 0);
@@ -599,7 +580,6 @@ var learnscripture =
                     return false;
                 }
                 setProgress(currentStageIdx, testedWords.length / wordList.length);
-                moveSelection(0);
                 var testWords = getTestWords(initialFraction);
                 showWord($('.current-verse .word *'));
                 hideWord(testWords.find('.wordend'));
@@ -621,7 +601,6 @@ var learnscripture =
                     return false;
                 }
                 setProgress(currentStageIdx, testedWords.length / wordList.length);
-                moveSelection(0);
                 var testWords = getTestWords(missingFraction);
                 hideWord($('.current-verse .wordend'));
                 showWord($('.current-verse .wordstart'));
@@ -701,7 +680,7 @@ var learnscripture =
         };
 
         var adjustTypingBox = function () {
-            var wordBox = getWordAt(selectedWordIndex);
+            var wordBox = getWordAt(currentWordIndex);
             var pos = wordBox.position();
             var width;
             $('#id-test-bar').css({left: pos.left.toString() + "px",
@@ -760,7 +739,7 @@ var learnscripture =
 
 
         var getHint = function () {
-            var word = getWordAt(selectedWordIndex);
+            var word = getWordAt(currentWordIndex);
             var wordStr = stripPunctuation(word.text());
             var typed = stripPunctuation(inputBox.val().toLowerCase());
 
@@ -803,7 +782,7 @@ var learnscripture =
         };
 
         var checkCurrentWord = function () {
-            var wordIdx = selectedWordIndex;
+            var wordIdx = currentWordIndex;
             var word = getWordAt(wordIdx);
             var wordStr = stripPunctuation(word.text().toLowerCase());
             var typed = stripPunctuation(inputBox.val().trim().toLowerCase());
@@ -814,9 +793,9 @@ var learnscripture =
                 if (wordIdx + 1 === wordList.length) {
                     testComplete();
                 } else {
-                    moveSelectionRelative(1);
+                    currentWordIndex++;
                     adjustTypingBox();
-                    var isReference = getWordAt(selectedWordIndex).hasClass('reference');
+                    var isReference = getWordAt(currentWordIndex).hasClass('reference');
                     if (isReference) {
                         fadeVerseTitle(true);
                     }
@@ -1356,7 +1335,7 @@ var learnscripture =
             if (ev.which === 32 || ev.which === 13
                 || (ev.which == 186 // colon, at least for US/UK
                     // allowed if in reference
-                    && getWordAt(selectedWordIndex).hasClass("reference")
+                    && getWordAt(currentWordIndex).hasClass("reference")
                    )
                ) {
                 ev.preventDefault();
@@ -1405,22 +1384,6 @@ var learnscripture =
                 ev.preventDefault();
             }
             switch (ev.which) {
-            case 98: // 'b'
-                back();
-                return;
-            case 110: // 'n'
-                next();
-                return;
-            case 106: // 'j'
-                moveSelectionRelative(-1);
-                return;
-            case 107: // 'k'
-                moveSelectionRelative(1);
-                return;
-            case 32: // Space
-                ev.preventDefault(); // Many devices scroll on space bar
-                toggleWord(getWordAt(selectedWordIndex));
-                return;
             case 13: // Enter
                 if (tagName === 'a') {
                     return;
