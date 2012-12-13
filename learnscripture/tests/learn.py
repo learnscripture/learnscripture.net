@@ -180,7 +180,7 @@ class LearnTests(LiveServerTests):
         self.assertEqual(u"Psalm 23:1", driver.find_element_by_id('id-verse-title').text)
         self.assertIn(u"I shall not want", driver.find_element_by_css_selector('.current-verse').text)
 
-        Select(driver.find_element_by_id("id-version-select")).select_by_visible_text("NET (New English Translation)")
+        Select(driver.find_element_by_id("id-version-select")).select_by_visible_text("NET")
 
         self.wait_for_ajax()
         self.assertIn(u"I lack nothing",

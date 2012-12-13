@@ -61,7 +61,7 @@ class UserVersesPageTests(LiveServerTests):
         self.assertIn("Psalm 23:1", driver.page_source)
 
         # Should be in 'practise' mode
-        self.assertTrue(driver.find_element_by_css_selector(".instructions-practice").is_displayed())
+        self.assertTrue(driver.find_element_by_css_selector("#id-instructions .stage-practice").is_displayed())
 
         # Type the verse:
         words = "The LORD is my shepherd I shall not want"

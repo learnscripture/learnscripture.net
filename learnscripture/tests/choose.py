@@ -65,7 +65,7 @@ class ChooseTests(LiveServerTests):
         self.wait_until_loaded('body')
 
         # Change version:
-        Select(driver.find_element_by_id("id-version-select")).select_by_visible_text("NET (New English Translation)")
+        Select(driver.find_element_by_id("id-version-select")).select_by_visible_text("NET")
 
         self.wait_for_ajax()
 
