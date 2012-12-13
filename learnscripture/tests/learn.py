@@ -311,7 +311,7 @@ class LearnTests(LiveServerTests):
         self.assertEqual(identity.verse_statuses.get(reference='John 3:16').strength,
                          0)
         # Should revert to initial read mode
-        self.assertTrue(driver.find_element_by_css_selector('#id-instructions .instructions-read').is_displayed())
+        self.assertTrue(driver.find_element_by_css_selector('#id-instructions .stage-read').is_displayed())
 
     def click_revise_bible(self):
         self.driver.find_element_by_css_selector("input[name='revisebiblequeue']").click()
