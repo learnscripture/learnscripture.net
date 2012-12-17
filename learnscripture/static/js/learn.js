@@ -674,7 +674,7 @@ var learnscripture =
 
         var getPointsTarget = function () {
             // Constants from scores/models.py
-            var POINTS_PER_WORD = 10;
+            var POINTS_PER_WORD = 20;
             // Duplication of logic in Account.award_action_points.  NB word
             // count excludes reference for this purpose, so we don't use
             // wordList.count
