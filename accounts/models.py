@@ -256,7 +256,8 @@ class Account(models.Model):
 
 
 def count_words(text):
-    # This logic is reproduced client side in order to display target
+    # This logic is reproduced client side in learn.js :: countWords
+    # in order to display target
     text = text.replace('--', '-- ')
     return len(text.strip().split())
 

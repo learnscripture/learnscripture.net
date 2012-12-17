@@ -188,8 +188,8 @@ var learnscripture =
         }
 
         var countWords = function (text) {
-            // duplication of server side logic
-            return stripPunctuation(adjustWordJoiningPunction(text)).split(/\W/).length;
+            // duplication of server side logic, accounts.models.count_words
+            return stripPunctuation(adjustWordJoiningPunction(text)).trim().split(/\W/).length;
         };
 
 
