@@ -12,6 +12,7 @@ from django.core.urlresolvers import reverse
 from django.core import mail
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
+from django.template.defaultfilters import urlencode
 from django.template.response import TemplateResponse
 from django.utils import timezone
 from django.utils.http import urlparse, base36_to_int
@@ -968,8 +969,12 @@ def csrf_failure(request, reason=""):
     return resp
 
 
-@require_account_with_redirect
 def account_details(request):
+    if not hasattr(request, 'identity'):
+        # Probably got here from a 'revision reminder' email,
+        # so we are best redirecting them to log in.
+        return HttpResponseRedirect(reverse('login') + u"?next=" + urlencode(request.get_full_path()))
+
     if request.method == 'POST':
         form = AccountDetailsForm(request.POST, instance=request.identity.account)
         if form.is_valid():
