@@ -30,7 +30,7 @@ from learnscripture.forms import AccountSetPasswordForm, ContactForm, LogInForm,
 
 from bibleverses.models import VerseSet, TextVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType, get_passage_sections, get_verses_started_counts, TextType
 from bibleverses.signals import public_verse_set_created
-from learnscripture import session, auth
+from learnscripture import session
 from bibleverses.forms import VerseSetForm
 from groups.forms import EditGroupForm
 from groups.models import Group
@@ -669,6 +669,7 @@ def edit_set(request, slug=None):
     return create_or_edit_set(request, slug=slug)
 
 
+@require_account_with_redirect
 def create_or_edit_set(request, set_type=None, slug=None):
 
     # This view handles a lot (too much)!  It could be simplified by removing
@@ -689,10 +690,6 @@ def create_or_edit_set(request, set_type=None, slug=None):
     title = ('Edit verse set' if verse_set is not None
              else 'Create selection set' if set_type == VerseSetType.SELECTION
              else 'Create passage set')
-
-    allowed, reason = auth.check_allowed(request, auth.Feature.CREATE_VERSE_SET)
-    if not allowed:
-        return feature_disallowed(request, title, reason)
 
     c = {}
 
@@ -1264,6 +1261,7 @@ def edit_group(request, slug):
     return create_or_edit_group(request, slug=slug)
 
 
+@require_account_with_redirect
 def create_or_edit_group(request, slug=None):
     account = account_from_request(request)
     if slug is not None:
@@ -1277,11 +1275,6 @@ def create_or_edit_group(request, slug=None):
         mode = 'create'
         title = u"Create group"
         initial = {}
-
-    allowed, reason = auth.check_allowed(request, auth.Feature.CREATE_GROUP)
-    if not allowed:
-        return feature_disallowed(request, title, reason)
-
 
     was_public = group.public if group is not None else False
 

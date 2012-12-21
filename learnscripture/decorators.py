@@ -60,11 +60,8 @@ def require_account(view_func):
 
 def require_account_with_redirect(view_func):
     """
-    If there is no current account, show a page with login form and reload
-    this page after login.
-
-    The view_func must return a TemplateResponse, or should set its own
-    'url_after_logout' in its context.
+    If there is no current account, show a page with links
+    for logging in or creating an account.
     """
     @wraps(view_func)
     def view(request, *args, **kwargs):
@@ -72,11 +69,5 @@ def require_account_with_redirect(view_func):
             return render(request, 'learnscripture/login_and_redirect.html',
                           {'title': 'Login',
                            })
-        response = view_func(request, *args, **kwargs)
-        if hasattr(response, 'context_data'):
-            # response is a TemplateResponse that we can alter. We need to set a
-            # flag so that after logout we don't go back to the same page,
-            # because this page will show a login form.
-            response.context_data['url_after_logout'] = '/'
-        return response
+        return view_func(request, *args, **kwargs)
     return view
