@@ -66,7 +66,10 @@ class GroupPageTests(LiveServerTests):
 
         driver.find_element_by_css_selector('input[name="join"]').click()
 
+        self.wait_until_loaded('body')
         self.fill_in_account_form()
+        self.wait_until_loaded('body')
+        driver.find_element_by_css_selector('input[name="join"]').click()
         self.wait_until_loaded('body')
 
         self.assertIn("You are a member of this group", driver.page_source)

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% load bootstrap %}
+{% load url from future %}
+
+{% block content %}
+
+{% if already_signed_up %}
+
+<p>You are already signed in as <b>{{ request.identity.account.username }}</b>. You should <a href="#" class="logout-link">logout</a> if you want to create a new account.</p>
+
+{% else %}
+
+<form action="" method="POST">
+  {% csrf_token %}
+  {{ signup_form|bootstrap }}
+
+  <p>By creating an account, you are agreeing to our
+    <a href="/terms-of-service/" target="_blank">terms of service</a> and
+    <a href="/privacy-policy/" target="_blank">privacy policy</a>.
+    Please note that children under the age of 13 may not create
+    an account, but a parent may create an account for them,
+    and must tick the corresponding checkbox above.
+  </p>
+
+  <div class="actions">
+    <input type="submit" name="signup" value="Create account" class="btn primary default">
+  </div>
+</form>
+
+{% endif %}
+
+{% endblock %}

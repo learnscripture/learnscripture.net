@@ -354,35 +354,6 @@ class LearnTests(LiveServerTests):
         self.assertTrue(driver.find_element_by_id('id-no-verse-queue').is_displayed())
 
 
-    def test_points_after_create_account(self):
-        """
-        Test that you get points if you click 'create account' while
-        part way through learning a verse.
-        """
-        verse_set = self.choose_verse_set('Bible 101')
-        driver = self.driver
-
-        identity = self._get_current_identity()
-
-        self.assertEqual(u"John 3:16", driver.find_element_by_id('id-verse-title').text)
-        # Do the reading:
-        for i in range(0, 9):
-            driver.find_element_by_id('id-next-btn').click()
-
-        # Now set up account.
-        self.create_account_interactive()
-
-        # Do the typing:
-        self._type_john_3_16_kjv()
-
-        self.wait_for_ajax()
-
-        # Should show score logs
-        driver.find_element_by_css_selector('#id-points-block .score-log')
-
-        account = Account.objects.get(username='test2')
-        self.assertTrue(account.score_logs.count() > 0)
-
     def test_more_practice(self):
         # tests that the 'more practice' button appears, and works
 

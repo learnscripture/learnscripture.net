@@ -4,7 +4,7 @@
 
 {% block content %}
 <p>You need to <a href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}">log in</a>
-(or <a href="#" class="signup-link reload-after-signup">create an account)</a>
+(or <a href="{% url 'signup' %}?next={{ request.get_full_path|urlencode }}">create an account)</a>
 to access this page.</p>
 
 {% endblock %}

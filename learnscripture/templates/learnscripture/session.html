@@ -2,10 +2,10 @@
 <h3>Session</h3>
 
 {% if request.identity.account %}
-<p>Logged in as: <b class="holds-username">{{ request.identity.account.username }}</b></p>
+<p>Logged in as: <b>{{ request.identity.account.username }}</b></p>
 
 {% else %}
-<p>Logged in as: <b class="holds-username">Guest User</b></p>
+<p>Logged in as: <b>Guest User</b></p>
 
 {% if request.identity %}
 {# If no request.identity, then there is no data that could be lost, so no need for warning #}
@@ -13,7 +13,7 @@
   <p><span class="label warning">Warning:</span> As a guest, your data will expire in {{ request.identity.expires_on|timeuntil }}</span>
    (assuming you don't clear your browser cookies).</p>
 
-  <p><a href="" class="signup-link">Create an account</a> to save progress permanently,
+  <p><a href="{% url 'signup' %}?next={{ request.get_full_path|urlencode }}">Create an account</a> to save progress permanently,
   or <a href="{% url 'login' %}">sign in</a>.</p>
 </div>
 {% endif %}
