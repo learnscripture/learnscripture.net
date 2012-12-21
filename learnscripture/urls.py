@@ -31,6 +31,7 @@ urlpatterns = patterns('',
 
                        # Account management
                        url(r'^login/$', 'learnscripture.views.login', name='login'),
+                       url(r'^signup/$', 'learnscripture.views.signup', name='signup'),
                        url(r'^account/$', 'learnscripture.views.account_details', name='account_details'),
                        url(r'^password-reset/$', 'learnscripture.views.password_reset_done', name='password_reset_done'),
                        url(r'^reset/(?P<uidb36>[0-9A-Za-z]{1,13})-(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$', 'learnscripture.views.password_reset_confirm', name='password_reset_confirm'),

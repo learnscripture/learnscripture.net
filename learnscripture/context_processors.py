@@ -8,7 +8,6 @@ from fiber.context_processors import page_info
 from accounts.forms import PreferencesForm
 from accounts.models import DEFAULT_THEME, THEME_FONTS
 from learnscripture.utils.context import lazy_dict
-from .forms import SignUpForm
 
 NOTICES_EXPIRE_AFTER_DAYS = 3
 
@@ -19,11 +18,11 @@ def session_forms(request):
     # We need different prefices on each form to avoid clashes with ids of
     # fields. Same prefix must be set in handlers.py
 
-    return {'signup_form': lambda: SignUpForm(prefix="signup"),
-            'preferences_form': lambda: PreferencesForm(instance=request.identity
-                                                        if hasattr(request, 'identity')
-                                                        else None),
-            }
+    return {
+        'preferences_form': lambda: PreferencesForm(instance=request.identity
+                                                    if hasattr(request, 'identity')
+                                                    else None),
+        }
 
 def referral_links(request):
     def mk_referral_link():

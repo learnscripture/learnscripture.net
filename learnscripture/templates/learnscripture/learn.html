@@ -259,7 +259,7 @@
 <div id="id-points-block">
 {% if not request.identity.scoring_enabled %}
   <p>Points are only enabled once you
-    <a href="#" class="signup-link">create an account</a>.
+    <a href="{% url 'signup' %}?next={{ request.get_full_path|urlencode }}">create an account</a>.
   </p>
 {% endif %}
 </div>

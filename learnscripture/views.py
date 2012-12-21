@@ -25,7 +25,8 @@ from accounts import memorymodel
 from accounts.models import Account, Identity
 from accounts.forms import PreferencesForm, AccountDetailsForm
 from awards.models import AwardType, AnyLevel, Award
-from learnscripture.forms import AccountSetPasswordForm, ContactForm, LogInForm, AccountPasswordResetForm
+from learnscripture.forms import AccountSetPasswordForm, ContactForm, LogInForm, AccountPasswordResetForm, SignUpForm
+
 from bibleverses.models import VerseSet, TextVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType, get_passage_sections, get_verses_started_counts, TextType
 from bibleverses.signals import public_verse_set_created
 from learnscripture import session, auth
@@ -64,13 +65,13 @@ def home(request):
         return HttpResponseRedirect(reverse('dashboard'))
     return render(request, 'learnscripture/home.html')
 
+def _login_redirect(request):
+    return get_next(request, reverse('dashboard'))
+
 
 def login(request):
-    def do_redirect():
-        return get_next(request, reverse('dashboard'))
-
     if account_from_request(request) is not None:
-        return do_redirect()
+        return _login_redirect(request)
 
     if request.method == 'POST':
         form = LogInForm(request.POST, prefix="login")
@@ -80,7 +81,7 @@ def login(request):
                 account.last_login = timezone.now()
                 account.save()
                 session.login(request, account.identity)
-                return do_redirect()
+                return _login_redirect(request)
         elif 'forgotpassword' in request.POST:
             resetform = AccountPasswordResetForm(request.POST, prefix="login")
             if resetform.is_valid():
@@ -101,6 +102,42 @@ def login(request):
     return render(request, "learnscripture/login.html",
                   {'title': 'Sign in',
                    'login_form': form})
+
+
+def signup(request):
+    from accounts.signals import new_account
+
+    c = {}
+    if account_from_request(request) is not None:
+        c['already_signed_up'] = True
+
+    if request.method == 'POST':
+        form = SignUpForm(request.POST, prefix="signup")
+
+        if form.is_valid():
+            identity = getattr(request, 'identity', None)
+            if identity is None or identity.account_id is not None:
+                # Need to create a new identity if one doesn't exist,
+                # or the current one is assigned to an existing user.
+                identity = session.start_identity(request)
+            account = form.save(commit=False)
+            account.last_login = timezone.now()
+            account.save()
+            account.identity = identity
+            identity.account = account
+            identity.save()
+            session.login(request, account.identity)
+            messages.info(request, u"Account created - welcome %s!" % account.username)
+            new_account.send(sender=account)
+            return _login_redirect(request)
+
+    else:
+        form = SignUpForm(prefix="signup")
+
+    c['title'] = 'Create account'
+    c['signup_form'] = form
+
+    return render(request, "learnscripture/signup.html", c)
 
 
 def feature_disallowed(request, title, reason):

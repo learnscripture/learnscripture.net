@@ -10,7 +10,10 @@ Feature = make_choices('Feature',
                         ])
 
 def check_allowed(request, feature):
-    need_to_signup = html_fragment(u'You need to <a href="#" class="signup-link reload-after-signup">create an account</a> or <a href="%s?next=%s">log in</a> to access this feature.', reverse('login'), urlencode(request.get_full_path()))
+    need_to_signup = html_fragment(u'You need to <a href="%s?next=%s">create an account</a> or <a href="%s?next=%s">log in</a> to access this feature.',
+                                   reverse('signup'), urlencode(request.get_full_path()),
+                                   reverse('login'), urlencode(request.get_full_path()),
+                                   )
 
     if feature in [Feature.CREATE_VERSE_SET, Feature.CREATE_GROUP]:
         if not hasattr(request, 'identity') or request.identity.account_id is None:

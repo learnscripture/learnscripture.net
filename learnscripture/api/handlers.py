@@ -23,7 +23,6 @@ from accounts.models import Account
 from bibleverses.models import UserVerseStatus, Verse, StageType, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, MAX_VERSE_QUERY_SIZE, TextVersion, quick_find, VerseSetType, TextType
 from learnscripture import session
 from learnscripture.decorators import require_identity_method
-from learnscripture.forms import SignUpForm
 from learnscripture.utils.logging import extra
 from learnscripture.views import session_stats, bible_versions_for_request, verse_sets_visible_for_request
 
@@ -185,32 +184,6 @@ class ChangeVersionHandler(BaseHandler):
 
 class AccountCommon(object):
     fields = ('id', 'username', 'email')
-
-
-class SignUpHandler(AccountCommon, BaseHandler):
-    allowed_methods = ('POST',)
-
-    fields = ('id',
-              'username',
-              'first_name',
-              'last_name')
-
-    @require_identity_method
-    @validate(SignUpForm, prefix="signup")
-    def create(self, request):
-        from accounts.signals import new_account
-        identity = request.identity
-        if identity.account_id is not None:
-            # Don't want to move identity to new account. The UI should stop
-            # this happening in the normal case, because the 'sign up' screen
-            # isn't available once you are signed up, but that isn't reliable.
-            identity = session.start_identity(request)
-        account = request.form.save()
-        account.identity = identity
-        identity.account = account
-        identity.save()
-        new_account.send(sender=account)
-        return account
 
 
 class LogOutHandler(BaseHandler):
