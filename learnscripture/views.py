@@ -368,6 +368,7 @@ def dashboard(request):
          (timezone.now() - identity.date_created) > timedelta(days=3),
          'groups': groups,
          'more_groups': more_groups,
+         'url_after_logout': '/',
          }
     c.update(session_stats(identity))
     return render(request, 'learnscripture/dashboard.html', c)
@@ -986,7 +987,9 @@ def account_details(request):
 
     return TemplateResponse(request, 'learnscripture/account_details.html',
                             {'form':form,
-                             'title': u"Account details"})
+                             'title': u"Account details",
+                             'url_after_logout': '/',
+                             })
 
 
 def date_to_js_ts(d):
