@@ -4,8 +4,8 @@ var learnscripture =
     (function (learnscripture, $) {
         "use strict";
         var addVerse = function (verseData) {
-            var newrow = $('<tr><td></td><td></td><td><span class="icon-arrow-up icon-replace" title="move up">up</span></td><td><span class="icon-arrow-down icon-replace" title="move down">down</span></td><td><span class="icon-trash icon-replace" title="remove">remove</span></td></tr>').find('td:first-child').text(verseData.reference).end().find('td:nth-child(2)').text(verseData.text).end();
-            $('#id-verse-list tbody').append(newrow);
+            $('#id-verse-list tbody').append(
+                $('#id_verse_list_selection_row_template').render({'verseData': verseData}));
             $('#id-verse-list').show();
         };
 
@@ -28,8 +28,8 @@ var learnscripture =
         var addPassage = function (passageData) {
             $('#id-verse-list tbody tr').remove();
             $.each(passageData.verses, function (idx, verseData) {
-                var newrow = $('<tr><td><input type="checkbox" /></td><td></td><td></td></tr>').find('td:nth-child(2)').text(verseData.reference).end().find('td:nth-child(3)').text(verseData.text).end();
-                $('#id-verse-list tbody').append(newrow);
+                $('#id-verse-list tbody').append(
+                    $('#id_verse_list_passage_row_template').render({'verseData': verseData}));
             });
             $('#id-verse-list').show();
             var ref = passageData.reference;
