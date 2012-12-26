@@ -78,8 +78,6 @@ var learnscripture = (function (learnscripture, $) {
         adjustVisibleModals();
     });
 
-    $(document).ready(adjustAllForms);
-
     // Export:
     learnscripture.adjustModal = adjustModal;
     return learnscripture;
