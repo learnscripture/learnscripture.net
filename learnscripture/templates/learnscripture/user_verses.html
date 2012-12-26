@@ -72,7 +72,7 @@
       <td>{{ verse.title }}
         <a class="btn verse-popup-btn" href="#" data-reference="{{ verse.reference }}" data-version="{{ verse.version.slug }}" data-title="{{ verse.title }}">Options</a></td>
       <td>{{ verse.version.slug }}</td>
-      <td><img src="{{ STATIC_URL }}img/strength_{{ verse.simple_strength }}.png"></td>
+      <td><img class="stars" src="{{ STATIC_URL }}img/strength_{{ verse.simple_strength }}.png"></td>
     </tr>
     {% endifchanged %}
     {% endfor %}
