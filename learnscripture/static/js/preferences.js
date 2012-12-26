@@ -118,6 +118,7 @@ var learnscripture =
         learnscripture.setupNeedsPreferencesControls = setupNeedsPreferencesControls;
         learnscripture.setPreferences = setPreferences;
         learnscripture.getPreferences = getPreferences;
+        learnscripture.showPreferences = showPreferences;
 
         return learnscripture;
     }(learnscripture || {}, $));
