@@ -126,4 +126,7 @@ var learnscripture =
 $(document).ready(function () {
     learnscripture.setupPreferencesControls();
     learnscripture.setPreferences($('#id-preferences-data').data());
+    if (window.androidlearnscripture && window.androidlearnscripture.setEnablePreferencesMenu) {
+        window.androidlearnscripture.setEnablePreferencesMenu();
+    }
 });
