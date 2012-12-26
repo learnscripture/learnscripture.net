@@ -68,11 +68,28 @@ var learnscripture = (function (learnscripture, $) {
         });
     };
 
+    var hideModal = function () {
+        $('div.modal:visible').each(function (idx, elem) {
+            $(elem).modal('hide');
+        });
+    };
+
     $('div.modal').bind('shown', function (ev) {
         var modal = $(this);
         adjustModal(modal);
+        if (window.androidlearnscripture &&
+            window.androidlearnscripture.setModalIsVisible) {
+            window.androidlearnscripture.setModalIsVisible(true);
+        }
     });
 
+    $('div.modal').bind('hidden', function (ev) {
+        if (window.androidlearnscripture &&
+            window.androidlearnscripture.setModalIsVisible) {
+            window.androidlearnscripture.setModalIsVisible(false);
+        }
+
+    });
 
     $(window).bind('resize', function (ev) {
         adjustVisibleModals();
@@ -80,6 +97,7 @@ var learnscripture = (function (learnscripture, $) {
 
     // Export:
     learnscripture.adjustModal = adjustModal;
+    learnscripture.hideModal = hideModal;
     return learnscripture;
 
 }(learnscripture || {}, $));
