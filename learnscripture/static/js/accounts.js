@@ -14,26 +14,23 @@ var learnscripture = (function (learnscripture, $) {
         return signedInAccountData;
     };
 
-    var logoutBtnClick = function (ev) {
-        $.ajax({url: '/api/learnscripture/v1/logout/?format=json',
-                dataType: 'json',
-                type: 'POST',
-                success: function (data) {
-                    // Need to refresh page, unless page indicates differently
-                    if ($('#url-after-logout').length > 0) {
-                        window.location = $('#url-after-logout').text();
-                    } else {
-                        window.location.reload();
-                    }
-                },
-                error: learnscripture.ajaxFailed
-               });
+    var doLogout = function (ev) {
         ev.preventDefault();
-    };
-
-    var showLogOut = function (ev) {
-        ev.preventDefault();
-        $('#id-logout-form').modal({backdrop: 'static', keyboard: true, show: true});
+        if (confirm("Are you sure you want to log out?")) {
+            $.ajax({url: '/api/learnscripture/v1/logout/?format=json',
+                    dataType: 'json',
+                    type: 'POST',
+                    success: function (data) {
+                        // Need to refresh page, unless page indicates differently
+                        if ($('#url-after-logout').length > 0) {
+                            window.location = $('#url-after-logout').text();
+                        } else {
+                            window.location.reload();
+                        }
+                    },
+                    error: learnscripture.ajaxFailed
+                   });
+        }
     };
 
     var needsAccountButtonClick = function (ev) {
@@ -47,12 +44,7 @@ var learnscripture = (function (learnscripture, $) {
 
     var setupAccountControls = function (ev) {
 
-        $('.logout-link').click(showLogOut);
-        $('#id-logout-btn').click(logoutBtnClick);
-        $('#id-logout-cancel-btn').click(function (ev) {
-            ev.preventDefault();
-            $('#id-logout-form').modal('hide');
-        });
+        $('.logout-link').click(doLogout);
 
         // Attach this class to buttons that require an account, but might be
         // presented when the user isn't logged in. This functionality is used
