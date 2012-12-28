@@ -152,28 +152,6 @@
 
 <!-- popup forms -->
 
-{% if request.identity.account %}
-
-<div id="id-logout-form" class="modal hide">
-  <div class="modal-header">
-    <a href="#" class="close">&times;</a>
-    <h3>Logout</h3>
-  </div>
-
-  <div class="modal-body">
-    <form action="" method="POST">
-      {% csrf_token %}
-      <p>Are you sure you want to log out?</p>
-    </form>
-  </div>
-  <div class="modal-footer">
-    <a href="#" id="id-logout-btn" class="btn primary default">Logout</a>
-    <a href="#" id="id-logout-cancel-btn" class="btn secondary">Cancel</a>
-  </div>
-</div>
-
-{% endif %}
-
 {% if not hide_preferences_popup %}
 
 <div id="id-preferences-form" class="modal hide">
