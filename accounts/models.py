@@ -709,13 +709,17 @@ class Identity(models.Model):
 
     def _dedupe_uvs_set(self, uvs_set):
         # Need to dedupe (due to nullable verse_set which allows
-        # multiple (reference=ref, verse_set=NULL) pairs
+        # multiple (reference=ref, verse_set=NULL) pairs.
+        # We only dedupe things with verse_set==NULL, because
+        # there are use cases where we want to distinguish
+        # verse_set==NULL UVSs from verse_set!=NULL UVSs
         retval = []
         seen_refs = set()
         for uvs in uvs_set:
-            if uvs.reference in seen_refs:
-                continue
-            seen_refs.add(uvs.reference)
+            if uvs.verse_set_id is None:
+                if uvs.reference in seen_refs:
+                    continue
+                seen_refs.add(uvs.reference)
             retval.append(uvs)
         return retval
 
@@ -749,18 +753,39 @@ class Identity(models.Model):
               )
         return qs
 
-    def bible_verse_statuses_for_learning(self):
+    def bible_verse_statuses_for_learning(self, verse_set_id, get_all=False):
         """
         Returns a list of UserVerseStatuses that need learning.
+
+        If get_all=True, then all will be returned, otherwise the verse set
+        specified in verse_set_id will be returned (with 'None' meaning no verse set)
         """
         qs = self.bible_verse_statuses_for_learning_qs()
+        if not get_all:
+            if verse_set_id is None:
+                qs = qs.filter(verse_set__isnull=True)
+            else:
+                qs = qs.filter(verse_set=verse_set_id)
+
         # 'added' should have enough precision to distinguish, otherwise 'id'
         # should be according to order of creation.
-        qs = qs.order_by('added', 'id')
+        if get_all:
+            # Group by verse set, and eagerly load verse set, because we want to
+            # group this way in the UI.  Use prefetch_related instead of
+            # select_related because we are likely to have many UserVerseStatus
+            # objects and very few VerseSet objects.
+            qs = qs.order_by('verse_set', 'added', 'id').prefetch_related('verse_set')
+        else:
+            qs = qs.order_by('added', 'id')
         return self._dedupe_uvs_set(qs)
 
-    def clear_bible_learning_queue(self):
-        self.bible_verse_statuses_for_learning_qs().delete()
+    def clear_bible_learning_queue(self, verse_set_id):
+        qs = self.bible_verse_statuses_for_learning_qs()
+        if verse_set_id is None:
+            qs = qs.filter(verse_set__isnull=True)
+        else:
+            qs = qs.filter(verse_set=verse_set_id)
+        qs.delete()
 
     def _catechism_qas_base_qs(self):
         return (self.verse_statuses

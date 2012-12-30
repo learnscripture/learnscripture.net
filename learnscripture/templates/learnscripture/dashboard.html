@@ -136,24 +136,42 @@ only takes a few seconds. Otherwise your progress won't be saved permanently.
 
   {### Verses ###}
 
+  {% if learn_verses_queues %}
+  {% for verse_set, queue in learn_verses_queues %}
   <div class="addclearfix">
-  {% if new_verses_queue %}
-  <form action="" method="POST">
+  <form action="" method="POST"
+        {# for benefit of testing: #}
+        id="id-learning-queue-verse-set-{{ verse_set.id }}"
+        >
     {% csrf_token %}
     <input type="submit" name="learnbiblequeue" class="btn primary" value="Start learning" /><br /><input type="submit" name="clearbiblequeue" class="btn" value="Clear queue" />
+    <input type="hidden" name="verse_set_id" value="{{ verse_set.id }}" />
   </form>
 
-  <p>You've got {{ new_verses_queue|length }} new verse{{ new_verses_queue|length|pluralize }} in your general queue for learning.</p>
+  {% if verse_set %}
+  <h3><a href="{% url 'view_verse_set' verse_set.slug %}">{{ verse_set.name }}</a></h3>
+  {% else %}
+    {% if not forloop.first %}
+  <h3>Other verses</h3>
+    {% endif %}
+  {% endif %}
+
+  <p>You've queued {{ queue|length }} new verse{{ queue|length|pluralize }} for learning{% if verse_set %} in this set{% endif %}.</p>
 
   <p>Verses coming up:
-    {% include 'learnscripture/verselist.html' with verselist=new_verses_queue %}
+    {% include 'learnscripture/verselist.html' with verselist=queue %}
   </p>
-
-  {% else %}
-  <p>Nothing currently in your general queue for learning.</p>
-
+  {% if not forloop.last %}
+  <hr>
   {% endif %}
   </div>
+  {% endfor %}
+
+  {% else %}
+  <div class="addclearfix">
+    <p>Nothing currently in your queue for learning.</p>
+  </div>
+  {% endif %}
 
   {### Catechisms ###}
 

@@ -499,7 +499,7 @@ class IdentityTests(IdentityBase, TestCase):
         """
         i = self._create_identity()
         i.add_verse_choice('John 14:6')
-        self.assertEqual([uvs.reference for uvs in i.bible_verse_statuses_for_learning()],
+        self.assertEqual([uvs.reference for uvs in i.bible_verse_statuses_for_learning(None, get_all=True)],
                          ['John 14:6'])
         i.record_verse_action('John 14:6', 'NET', StageType.READ, 1)
         i.cancel_learning(['John 14:6'])
@@ -508,7 +508,7 @@ class IdentityTests(IdentityBase, TestCase):
         vs1 = VerseSet.objects.get(name='Bible 101')
         i.add_verse_set(vs1)
 
-        self.assertEqual([uvs.reference for uvs in i.bible_verse_statuses_for_learning()],
+        self.assertEqual([uvs.reference for uvs in i.bible_verse_statuses_for_learning(vs1.id)],
                          ['John 3:16', 'John 14:6'])
 
     def test_issue_75(self):
