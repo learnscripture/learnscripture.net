@@ -1,6 +1,7 @@
 
 from datetime import timedelta
 from decimal import Decimal
+import itertools
 import re
 
 from django.db import models
@@ -276,8 +277,15 @@ def dashboard(request):
         return HttpResponseRedirect(reverse('choose'))
 
     if request.method == 'POST':
+        # verse_set_id needed by a few branches
+        try:
+            vs_id = int(request.POST['verse_set_id'])
+        except (KeyError, ValueError):
+            vs_id = None
+
         if 'learnbiblequeue' in request.POST:
-            return learn_set(request, identity.bible_verse_statuses_for_learning(),
+            return learn_set(request,
+                             identity.bible_verse_statuses_for_learning(vs_id),
                              session.LearningType.LEARNING)
         if 'revisebiblequeue' in request.POST:
             return learn_set(request, identity.bible_verse_statuses_for_revising(),
@@ -296,7 +304,6 @@ def dashboard(request):
             # Some of these are sent via the verse_options.html template,
             # not from the dashboard.
 
-            vs_id = int(request.POST['verse_set_id'])
             verse_set = VerseSet.objects.get(id=vs_id)
             uvss = identity.verse_statuses_for_passage(vs_id)
 
@@ -342,7 +349,7 @@ def dashboard(request):
                              session.LearningType.REVISION)
 
         if 'clearbiblequeue' in request.POST:
-            identity.clear_bible_learning_queue()
+            identity.clear_bible_learning_queue(vs_id)
             return HttpResponseRedirect(reverse('dashboard'))
         if 'clearcatechismqueue' in request.POST:
             identity.clear_catechism_learning_queue()
@@ -354,7 +361,9 @@ def dashboard(request):
 
     groups, more_groups = get_user_groups(identity)
 
-    c = {'new_verses_queue': identity.bible_verse_statuses_for_learning(),
+    c = {'learn_verses_queues':
+             _group_learning_verse_statuses(
+            identity.bible_verse_statuses_for_learning(None, get_all=True)),
          'revise_verses_queue': identity.bible_verse_statuses_for_revising(),
          'passages_for_learning': identity.passages_for_learning(),
          'passages_for_revising': identity.passages_for_revising(),
@@ -372,6 +381,11 @@ def dashboard(request):
          }
     c.update(session_stats(identity))
     return render(request, 'learnscripture/dashboard.html', c)
+
+
+def _group_learning_verse_statuses(uvs_list):
+    return [(a, list(b)) for a, b in
+             itertools.groupby(uvs_list, lambda uvs: uvs.verse_set)]
 
 
 def context_for_version_select(request):

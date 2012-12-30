@@ -35,41 +35,70 @@ class DashboardTests(LiveServerTests):
         i.save()
         return i
 
+    def _assert_learning_reference(self, ref):
+        driver = self.driver
+        self.wait_until_loaded('body')
+        self.assertTrue(driver.current_url.endswith(reverse('learn')))
+        self.wait_for_ajax()
+        self.assertEqual(ref, driver.find_element_by_id('id-verse-title').text)
+
+    def _click_clear_learning_queue_btn(self, verse_set_id):
+        driver = self.driver
+        driver.find_element_by_css_selector('#id-learning-queue-verse-set-%s input[name=clearbiblequeue]' % (verse_set_id if verse_set_id else '')).click()
+        alert = driver.switch_to_alert()
+        alert.accept()
+        self.wait_until_loaded('body')
+
     def test_learn_queue(self):
         # This combines a bunch of tests, it's easier to avoid a lot of
         # repetition that way.
 
         driver = self.driver
         i = self.setup_identity()
+
+        # Add a verse set
         vs = VerseSet.objects.get(slug='bible-101')
         i.add_verse_set(vs)
+
+        # And an individual verse
+        i.add_verse_choice('Psalm 23:2')
 
         # Test verses appear on dashboard
         self.get_url('dashboard')
         self.assertIn('John 3:16', driver.page_source)
         self.assertIn('John 14:6', driver.page_source)
+        self.assertIn('Psalm 23:2', driver.page_source)
 
-        # Test clicking 'Start learning' for learn queue
-        driver.find_element_by_css_selector('input[name=learnbiblequeue]').click()
-        self.wait_until_loaded('body')
-        self.assertTrue(driver.current_url.endswith(reverse('learn')))
-
-        self.wait_for_ajax()
-        self.assertEqual(u"John 3:16", driver.find_element_by_id('id-verse-title').text)
+        # Test click 'Start learning' for 'Bible 101' verse set
+        self.assertIn('Bible 101', driver.page_source)
+        driver.find_element_by_css_selector('#id-learning-queue-verse-set-%s input[name=learnbiblequeue]' % vs.id).click()
+        self._assert_learning_reference(u"John 3:16")
 
         # Learn one verse (otherwise we are back to dashboard redirecting us)
         i.record_verse_action('John 3:16', 'NET', StageType.TEST, accuracy=1.0)
 
+
+        self.get_url('dashboard')
+        # Test clicking 'Start learning' for general queue
+        driver.find_element_by_css_selector('#id-learning-queue-verse-set- input[name=learnbiblequeue]').click()
+        self._assert_learning_reference(u"Psalm 23:2")
+
         # Test clicking 'Clear queue'
         self.get_url('dashboard')
-        driver.find_element_by_css_selector('input[name=clearbiblequeue]').click()
-        alert = driver.switch_to_alert()
-        alert.accept()
-        self.wait_until_loaded('body')
+        self._click_clear_learning_queue_btn(vs.id)
 
         # Since we cleared the queue, shouldn't have John 14:6 now
         self.assertTrue(driver.current_url.endswith(reverse('dashboard')))
         self.assertNotIn('John 14:6', driver.page_source)
+
+        # but should still have Psalm 23:2
+        self.assertIn('Psalm 23:2', driver.page_source)
+
+        # Click the other 'Clear queue' button
+        self._click_clear_learning_queue_btn(None)
+
+        self.assertNotIn('Psalm 23:2', driver.page_source)
+
 
     def test_learn_passage(self):
         # As above, combine several tests as a story, for simplicity
