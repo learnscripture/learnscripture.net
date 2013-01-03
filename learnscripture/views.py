@@ -229,6 +229,7 @@ def session_stats(identity):
 
 
 def learn_set(request, uvs_list, learning_type):
+    uvs_list = [u for u in uvs_list if u is not None]
     # Save where we should return to after learning:
     return_to = reverse('dashboard') # by default, the dashboard
     referer = request.META.get('HTTP_REFERER')
@@ -609,7 +610,9 @@ def view_verse_set(request, slug):
     verse_list = add_passage_breaks(verse_list, verse_set.breaks)
 
     for vc in verse_choices:
-        vc.verse = verses[vc.reference]
+        # vc.reference can be missing from verses if Verse.missing==True for
+        # this version.
+        vc.verse = verses.get(vc.reference, None)
 
     if (verse_set.set_type == VerseSetType.SELECTION and
         len(verse_list) > 1 and is_continuous_set(verse_list)):
@@ -644,7 +647,7 @@ def view_verse_set(request, slug):
         c['in_queue'] = 0
 
     c['verse_set'] = verse_set
-    c['verse_choices'] = verse_choices
+    c['verse_choices'] = [vc for vc in verse_choices if vc.verse is not None]
     c['version'] = version
     c['title'] = u"Verse set: %s" % verse_set.name
     c.update(context_for_version_select(request))

@@ -225,6 +225,27 @@ class IdentityTests(IdentityBase, TestCase):
         i.change_version('Psalm 23:1', 'KJV', vs1.id)
         self.assertEqual([u'KJV'] * 6, [uvs.version.slug for uvs in i.verse_statuses.filter(verse_set=vs1)])
 
+    def test_change_version_to_missing(self):
+        """
+        Attempts to change version when is missing in destination
+        version should fail.
+        """
+        i = self._create_identity()
+        version = i.default_bible_version # NET
+        KJV = TextVersion.objects.get(slug='KJV')
+        i.add_verse_choice('John 3:16')
+
+        uvs_list = list(i.verse_statuses.all())
+        self.assertTrue(all(u.version.slug == 'NET' for u in uvs_list))
+
+        KJV.verse_set.get(reference='John 3:16').mark_missing()
+        replacements = i.change_version('John 3:16', 'KJV', None)
+        self.assertEqual(replacements,
+                         {uvs_list[0].id: uvs_list[0].id})
+
+        self.assertEqual(list(i.verse_statuses.all()),
+                         uvs_list)
+
     def test_bible_verse_statuses_for_revising(self):
         i = self._create_identity()
         vs1 = VerseSet.objects.get(name='Bible 101')
@@ -553,6 +574,20 @@ class IdentityTests(IdentityBase, TestCase):
                           u"Psalm 23:4",
                           u"Psalm 23:5",
                           u"Psalm 23:6"])
+
+    def test_add_missing_verse(self):
+        """
+        Should be able to create a UVS against a missing verse.
+        """
+        i = self._create_identity()
+        version = i.default_bible_version
+        version.verse_set.get(reference='John 3:16').mark_missing()
+        i.add_verse_choice('John 3:16')
+        self.assertEqual(
+            i.verse_statuses.filter(reference='John 3:16',
+                                    version=version).count(),
+            0)
+
 
 class IdentityTests2(IdentityBase, UsesSQLAlchemyBase):
 
