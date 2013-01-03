@@ -144,7 +144,6 @@ STATICFILES_DIRS = []
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     'compressor.finders.CompressorFinder',
 )
@@ -155,7 +154,6 @@ CSRF_FAILURE_VIEW = 'learnscripture.views.csrf_failure'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
 )
 
@@ -203,8 +201,6 @@ ROOT_URLCONF = 'learnscripture.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'learnscripture.wsgi.application'
-
-TEMPLATE_DIRS = []
 
 INSTALLED_APPS = [
     'django.contrib.auth',
