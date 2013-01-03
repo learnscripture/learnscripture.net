@@ -175,6 +175,15 @@ class ChangeVersionHandler(BaseHandler):
         verse_set_id = get_verse_set_id(verse_status)
         reference = verse_status['reference']
         new_version_slug = request.data['new_version_slug']
+        # There is a bug here for the case where:
+        # - user is learning a passage set
+        # - user changes version to a version in which there are *more*
+        #   verses for the passage, due to Verse.missing=True for some verses
+        #   in the passage in the original version.
+        #
+        # This is not easy to fix, due to needing to replace a set of items
+        # in the session learn queue with a longer set of items.
+
         replacements = request.identity.change_version(reference,
                                                        new_version_slug,
                                                        verse_set_id)

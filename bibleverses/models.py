@@ -200,7 +200,9 @@ class TextVersion(caching.base.CachingMixin, models.Model):
         if self.is_catechism: return {}
         # We try to do this efficiently, but it is hard for combo references. So
         # we do the easy ones the easy way:
-        simple_verses = list(self.verse_set.filter(reference__in=reference_list))
+        simple_verses = list(self.verse_set.filter(reference__in=reference_list,
+                                                   missing=False,
+                                                   ))
         v_dict = dict((v.reference, v) for v in simple_verses)
         # Now get the others:
         for ref in reference_list:
@@ -231,6 +233,7 @@ class TextVersion(caching.base.CachingMixin, models.Model):
                 .filter(version=self,
                         text_order=1,
                         for_identity__account__isnull=False)]
+
 
 class ComboVerse(object):
     """
@@ -288,6 +291,10 @@ class Verse(caching.base.CachingMixin, models.Model):
     verse_number = models.PositiveSmallIntegerField()   # 1-indexed
     bible_verse_number = models.PositiveSmallIntegerField() # 0-indexed
 
+    # This field is to cope with versions where a specific verse is entirely
+    # empty e.g. John 5:4 in NET/ESV
+    missing = models.BooleanField(default=False)
+
     objects = VerseManager()
 
     @property
@@ -312,6 +319,12 @@ class Verse(caching.base.CachingMixin, models.Model):
             ('reference', 'version'),
             ]
         ordering = ('bible_verse_number',)
+
+    def mark_missing(self):
+        self.missing = True
+        self.save()
+        UserVerseStatus.objects.filter(version=self.version,
+                                       reference=self.reference).delete()
 
 
 class QAPair(models.Model):
@@ -650,7 +663,10 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE,
         except ValueError:
             raise InvalidVerseReference(u"Expecting '%s' to be a chapter number" % chapter)
         if return_verses:
-            retval = list(version.verse_set.filter(book_number=book_number, chapter_number=chapter_number))
+            retval = list(version.verse_set.filter(book_number=book_number,
+                                                   chapter_number=chapter_number,
+                                                   missing=False,
+                                                   ))
         else:
             retval = Reference(book, chapter_number, None)
     else:
@@ -658,7 +674,8 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE,
         if len(parts) == 1:
             # e.g. Genesis 1:1
             if return_verses:
-                retval = list(version.verse_set.filter(reference=reference))
+                retval = list(version.verse_set.filter(reference=reference,
+                                                       missing=False))
             else:
                 book, rest = reference.rsplit(' ', 1)
                 ch_num, v_num = rest.split(':', 1)
@@ -706,6 +723,11 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE,
 
             if return_verses:
                 # Try to get results in just two queries
+                #
+                # We don't do 'missing=False' filter here, because we want to be
+                # able to do things like 'John 5:3-4' even if 'John 5:4' is
+                # missing in the current version. We just miss out the missing
+                # verses when creating the list.
                 vs = version.verse_set.filter(reference__in=[ref_start, ref_end])
                 try:
                     verse_start = [v for v in vs if v.reference == ref_start][0]
@@ -723,7 +745,8 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE,
                     raise InvalidVerseReference(u"References that span more than %d verses are not allowed in this context." % max_length)
 
                 retval = list(version.verse_set.filter(bible_verse_number__gte=verse_start.bible_verse_number,
-                                                       bible_verse_number__lte=verse_end.bible_verse_number))
+                                                       bible_verse_number__lte=verse_end.bible_verse_number,
+                                                       missing=False))
             else:
                 retval = (Reference(book, start_chapter, start_verse),
                           Reference(book, end_chapter, end_verse))
@@ -752,7 +775,7 @@ def ensure_text(verses):
     refs_missing_text = defaultdict(list) # divided by version
     verse_dict = {}
     for v in verses:
-        if v.text == '':
+        if v.text == '' and not v.missing:
             refs_missing_text[v.version.short_name].append(v.reference)
             verse_dict[v.version.short_name, v.reference] = v
 

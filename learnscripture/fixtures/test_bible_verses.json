@@ -345,6 +345,32 @@
     "pk": null,
     "model": "bibleverses.verse",
     "fields": {
+        "reference": "John 5:3",
+        "chapter_number": 5,
+        "text": "A great number of sick, blind, lame, and paralyzed people were lying in these walkways.",
+        "book_number": 42,
+        "version": 2,
+        "verse_number": 3,
+        "bible_verse_number": 26213
+    }
+},
+{
+    "pk": null,
+    "model": "bibleverses.verse",
+    "fields": {
+        "reference": "John 5:4",
+        "chapter_number": 5,
+        "text": "",
+        "book_number": 42,
+        "version": 2,
+        "verse_number": 3,
+        "bible_verse_number": 26214
+    }
+},
+{
+    "pk": null,
+    "model": "bibleverses.verse",
+    "fields": {
         "reference": "Ephesians 2:8",
         "chapter_number": 2,
         "text": "For by grace you are saved through faith, and this is not from yourselves, it is the gift of",

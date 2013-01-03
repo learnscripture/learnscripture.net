@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from django.utils import unittest
 from django.test import TestCase
 
+from accounts.models import Identity
 from bibleverses.models import InvalidVerseReference, Verse, TextVersion, get_passage_sections, VerseSet, VerseChoice, UserVerseStatus
 from .base import AccountTestMixin
 
@@ -17,6 +18,33 @@ class VerseTests(TestCase):
 
         v2 = Verse.objects.get(reference='Psalm 23:5', version__slug='KJV')
         self.assertFalse(v2.is_last_verse_in_chapter())
+
+    def test_mark_missing(self):
+        version = TextVersion.objects.get(slug='NET')
+        # Sanity check:
+        self.assertEqual(
+            version.verse_set.get(reference="John 3:16").missing,
+            False)
+
+        i = Identity.objects.create()
+        i.create_verse_status("John 3:16", None, version)
+        self.assertEqual(
+            i.verse_statuses.filter(reference="John 3:16",
+                                    version=version).count(),
+            1)
+
+        # Now remove the verse
+        Verse.objects.get(reference='John 3:16', version=version).mark_missing()
+
+        # Should have change the Verse object
+        self.assertEqual(
+            version.verse_set.get(reference="John 3:16").missing,
+            True)
+        # ...and all UserVerseStatus objects
+        self.assertEqual(
+            i.verse_statuses.filter(reference="John 3:16",
+                                    version=version).count(),
+            0)
 
 class ParseRefTests(TestCase):
 

@@ -16,7 +16,7 @@ from django.utils import timezone
 
 from accounts import memorymodel
 from accounts.signals import verse_started, verse_tested, points_increase, scored_100_percent, catechism_started
-from bibleverses.models import TextVersion, MemoryStage, StageType, TextVersion, VerseChoice, VerseSet, VerseSetType, UserVerseStatus, TextType, get_passage_sections
+from bibleverses.models import TextVersion, MemoryStage, StageType, TextVersion, VerseChoice, VerseSet, VerseSetType, UserVerseStatus, TextType, get_passage_sections, InvalidVerseReference
 from bibleverses.signals import verse_set_chosen
 from scores.models import TotalScore, ScoreReason, Scores, get_rank_all_time, get_rank_this_week
 
@@ -423,7 +423,8 @@ class Identity(models.Model):
                     use_version = version
                 # Otherwise we set the version to the chosen one
                 new_uvs = self.create_verse_status(vc.reference, verse_set, use_version)
-                out.append(new_uvs)
+                if new_uvs is not None:
+                    out.append(new_uvs)
 
         verse_set_chosen.send(sender=verse_set, chosen_by=self.account)
         return out
@@ -571,12 +572,6 @@ class Identity(models.Model):
 
         old_uvs_ids = [(uvs.reference, uvs.id) for uvs in old]
 
-        # If they had no test data, it is safe to delete, and this keeps things
-        # trim:
-        old.filter(last_tested__isnull=True).delete()
-        # Otherwise just set ignored
-        old.update(ignored=True)
-
         # For each VerseChoice, we need to create a new UserVerseStatus if
         # one with new version doesn't exist, or update 'ignored' if it
         # does.
@@ -597,7 +592,25 @@ class Identity(models.Model):
         final_correct_uvss = {uvs.reference: uvs for uvs in correct_version.all()}
         retval = {}
         for reference, uvs_id in old_uvs_ids:
-            retval[uvs_id] = final_correct_uvss[reference].id
+            if reference in final_correct_uvss:
+                retval[uvs_id] = final_correct_uvss[reference].id
+            else:
+                # No corresponding UVS, due to Verse.missing=True
+                retval[uvs_id] = None
+
+        if all(uvs_id is None for uvs_id in retval.values()):
+            # There are no UVS objects for the destination version.  This
+            # implies Verse.missing==True for the verses in the destination
+            # version. In this case, we effectively cancel the 'change_version'
+            # request.
+            return {uvs_id: uvs_id for reference, uvs_id in old_uvs_ids}
+        else:
+            # creation of new UVS objects has succeeded, so 'remove' the old ones:
+            # If they had no test data, it is safe to delete, and this keeps things
+            # trim:
+            old.filter(last_tested__isnull=True).delete()
+            # Otherwise just set ignored
+            old.update(ignored=True)
 
         return retval
 
@@ -643,8 +656,14 @@ class Identity(models.Model):
         return retval
 
     def create_verse_status(self, reference, verse_set, version):
-        # text_order has to be specified here since it is non-nullable
-        text_order = version.get_verse_list(reference)[0].bible_verse_number
+        try:
+            verse_list = version.get_verse_list(reference)
+        except InvalidVerseReference:
+            # This can happen if Verse.missing==True for this version.
+            return
+
+        # text_order has to be specified in create since it is non-nullable
+        text_order = verse_list[0].bible_verse_number
         # NB: we are exploiting the fact that multiple calls to
         # create_verse_status will get slightly increasing values of 'added',
         # allowing us to preserve order.
