@@ -20,10 +20,17 @@ class VerseSetAdmin(admin.ModelAdmin):
     list_filter = ['set_type']
 
 
+def mark_missing(modeladmin, request, queryset):
+    for v in queryset:
+        v.mark_missing()
+mark_missing.short_description = "Mark selected verses as missing"
+
+
 class VerseAdmin(admin.ModelAdmin):
     search_fields = ['reference']
     list_display = ['reference', 'version']
     list_filter = ['version']
+    actions = [mark_missing]
 
     def queryset(self, request):
         return super(VerseAdmin, self).queryset(request).select_related('version')
