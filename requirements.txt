@@ -30,3 +30,4 @@ psutil==0.5.1
 twilio==3.3.9
 pyquery==1.2.4
 BeautifulSoup==3.2.1
+gunicorn
