@@ -253,9 +253,6 @@ def push_sources():
     run("mkdir -p %s/etc" % PRODUCTION.venv_dir)
     upload_template("config/pgbouncer_users.txt", "%s/etc/pgbouncer_users.txt" % PRODUCTION.venv_dir, context=secrets())
 
-    # And copy other config and binary files from repo to destinations
-    run("cp %s/httpd.conf %s" % (target.conf_dir, posixpath.join(target.DJANGO_APP_ROOT, 'apache2', 'conf')))
-
 
 @task
 def setup_supervisor():
@@ -318,7 +315,7 @@ def stop_webserver():
     """
     Stop the webserver that is running the Django instance
     """
-    supervisorctl("stop apache_%s" % target.NAME.lower())
+    supervisorctl("stop gunicorn_%s" % target.NAME.lower())
 
 
 @task
@@ -326,7 +323,7 @@ def start_webserver():
     """
     Starts the webserver that is running the Django instance
     """
-    supervisorctl("start apache_%s" % target.NAME.lower())
+    supervisorctl("start gunicorn_%s" % target.NAME.lower())
 
 
 @task
@@ -334,7 +331,7 @@ def restart_webserver():
     """
     Restarts the webserver that is running the Django instance
     """
-    supervisorctl("restart apache_%s" % target.NAME.lower())
+    supervisorctl("restart gunicorn_%s" % target.NAME.lower())
 
 
 def build_static():

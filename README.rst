@@ -76,7 +76,7 @@ automatically in the deploy procedure.
 Initial setup of the project was done using:
 
 - WebFaction control panel to create apps
-  - apache apps
+  - webserver apps (custom app listening on port)
   - rabbitmq apps (custom app listening on port)
   - celeryd apps (custom app listening on port)
   - pgbouncer app (custom app listening on port)
@@ -93,8 +93,5 @@ Due to shared hosting with no root access, custom installation was often
 necessary, and chef/puppet would probably not provide easy shortcuts.
 
 Most config for these apps is stored in ./config (ideally all should be there)
-
-Some customisation of the apps provided by WebFaction was done e.g. apache
-start/stop scripts are disabled/changed, replaced with supervisord.
 
 See fabfile.py for more details on some of these things.
