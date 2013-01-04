@@ -11,11 +11,20 @@
   donate to support the ongoing costs of running this site, that would be much
   appreciated!</p>
 
+{% if request.identity.account %}
 
 {% if PRODUCTION %}
 {{ paypal_form.render }}
 {% else %}
 {{ paypal_form.sandbox }}
+{% endif %}
+
+
+{% else %}
+
+<p>Please <a href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}">log in</a>
+(or <a href="{% url 'signup' %}?next={{ request.get_full_path|urlencode }}">create an account)</a> to donate, so that we track your donation.</p>
+
 {% endif %}
 
 {% endblock %}
