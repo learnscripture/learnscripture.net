@@ -3,7 +3,7 @@ from celery.task import task
 from accounts.models import Account
 from awards.models import Award
 from bibleverses.models import VerseSet, TextVersion
-from events.models import NewAccountEvent, AwardReceivedEvent, VerseSetCreatedEvent, StartedLearningVerseSetEvent, PointsMilestoneEvent, VersesStartedMilestoneEvent, AwardLostEvent, GroupJoinedEvent, GroupCreatedEvent, StartedLearningCatechismEvent
+from events.models import NewAccountEvent, AwardReceivedEvent, VerseSetCreatedEvent, StartedLearningVerseSetEvent, PointsMilestoneEvent, VersesStartedMilestoneEvent, VersesFinishedMilestoneEvent, AwardLostEvent, GroupJoinedEvent, GroupCreatedEvent, StartedLearningCatechismEvent
 from groups.models import Group
 from scores.models import TotalScore
 
@@ -41,6 +41,7 @@ def create_started_catechism_event(account_id, catechism_id):
     catechism = TextVersion.objects.get(id=catechism_id)
     StartedLearningCatechismEvent(account=account,
                                   catechism=catechism).save()
+
 
 def crosses_milestone(previous_points, current_points):
     c_s = str(current_points)
@@ -86,6 +87,14 @@ def create_verses_started_milestone_event(account_id):
 
     if c > 9 and is_milestone(c):
         VersesStartedMilestoneEvent(account=account, verses_started=c).save()
+
+
+@task(ignore_result=True)
+def create_verses_finished_milestone_event(account_id):
+    account = Account.objects.get(id=account_id)
+    c = account.identity.verse_statuses_finished().count()
+    if c > 9 and is_milestone(c):
+        VersesFinishedMilestoneEvent(account=account, verses_finished=c).save()
 
 
 # NB this is called synchronously, not as a task

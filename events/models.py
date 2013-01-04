@@ -167,7 +167,12 @@ class GroupCreatedEvent(EventLogic):
 
 
 class VersesFinishedMilestoneEvent(EventLogic):
-    pass # TODO
+    def __init__(self, account, verses_finished=None):
+        super(VersesFinishedMilestoneEvent, self).__init__(account=account,
+                                                           verses_finished=verses_finished)
+        self.event.message_html = html_fragment(
+            u"reached %s verses finished", intcomma(verses_finished)
+            )
 
 
 class StartedLearningCatechismEvent(EventLogic):
@@ -263,6 +268,9 @@ class Event(models.Model):
     account = models.ForeignKey(Account)
 
     objects = EventManager()
+
+    def __repr__(self):
+        return "<Event id=%s type=%s>" % (self.id, self.event_type)
 
     def __unicode__(self):
         return u"Event %d" % self.id

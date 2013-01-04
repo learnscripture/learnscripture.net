@@ -15,7 +15,7 @@ from django.utils.functional import cached_property
 from django.utils import timezone
 
 from accounts import memorymodel
-from accounts.signals import verse_started, verse_tested, points_increase, scored_100_percent, catechism_started
+from accounts.signals import verse_started, verse_tested, verse_finished, points_increase, scored_100_percent, catechism_started
 from bibleverses.models import TextVersion, MemoryStage, StageType, TextVersion, VerseChoice, VerseSet, VerseSetType, UserVerseStatus, TextType, get_passage_sections, InvalidVerseReference
 from bibleverses.signals import verse_set_chosen
 from scores.models import TotalScore, ScoreReason, Scores, get_rank_all_time, get_rank_this_week
@@ -156,6 +156,7 @@ class Account(models.Model):
                                               Scores.VERSE_LEARNT_BONUS,
                                               ScoreReason.VERSE_LEARNT,
                                               accuracy=accuracy))
+            verse_finished.send(sender=self)
 
         if action_stage == StageType.TEST and old_memory_stage < MemoryStage.TESTED:
             verse_started.send(sender=self)
@@ -746,6 +747,10 @@ class Identity(models.Model):
         return self.verse_statuses.filter(ignored=False,
                                           strength__gt=0,
                                           last_tested__isnull=False)
+
+    def verse_statuses_finished(self):
+        return self.verse_statuses.filter(ignored=False,
+                                          strength__gte=memorymodel.LEARNT)
 
     def bible_verse_statuses_for_revising(self):
         """

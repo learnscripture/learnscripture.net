@@ -512,6 +512,28 @@ class IdentityTests(IdentityBase, TestCase):
             self.assertEqual(Event.objects.filter(event_type=EventType.VERSES_STARTED_MILESTONE).count(),
                              0 if j < 9 else 1)
 
+    def test_verses_finished_milestone_event(self):
+        i = self._create_account(version_slug='KJV').identity
+
+        refs = \
+            ['Genesis 1:%d' % j for j in range(1, 11)] + \
+            ['Genesis 2:%d' % j for j in range(1, 3)]
+
+        for j, ref in enumerate(refs):
+            i.add_verse_choice(ref)
+            i.record_verse_action(ref, 'KJV', StageType.TEST, 1)
+            # Move to nearly learnt:
+            i.verse_statuses.filter(reference=ref).update(
+                strength=memorymodel.LEARNT - 0.001,
+                last_tested=timezone.now() - timedelta(100)
+                )
+            # Final test, moving to above LEARNT
+            action_change = i.record_verse_action(ref, 'KJV', StageType.TEST, 1)
+            score_logs = i.award_action_points(ref,
+                                               Verse.objects.get(reference=ref, version__slug='KJV').text,
+                                               MemoryStage.TESTED, action_change, StageType.TEST, 1)
+            self.assertEqual(Event.objects.filter(event_type=EventType.VERSES_FINISHED_MILESTONE).count(),
+                             0 if j < 9 else 1)
 
     def test_order_after_cancelling_and_re_adding_verse(self):
         """
