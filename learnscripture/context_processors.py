@@ -3,11 +3,9 @@ from collections import namedtuple
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils import timezone
-from fiber.context_processors import page_info
 
 from accounts.forms import PreferencesForm
 from accounts.models import DEFAULT_THEME, THEME_FONTS
-from learnscripture.utils.context import lazy_dict
 
 NOTICES_EXPIRE_AFTER_DAYS = 3
 
@@ -55,9 +53,6 @@ def menu(request):
         m.active = request.path_info.startswith(m.path)
     return {'menuitems': items}
 
-
-
-lazy_page_info = lazy_dict(page_info, ['fiber_page', 'fiber_current_pages'])
 
 def notices(request):
     # Layer of laziness to avoid expiring notices unless actually rendered
