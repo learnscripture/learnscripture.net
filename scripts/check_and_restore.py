@@ -106,7 +106,7 @@ def restore():
         # memory adds up).  We don't want testing of staging to take down
         # production, so we use an alternative strategy, and exit early
         print_message("Restarting using supervisorctl")
-        os.system("%s restart rabbitmq_staging celeryd_staging apache_staging" % SUPERVISORCTL)
+        os.system("%s restart rabbitmq_staging celeryd_staging gunicorn_staging" % SUPERVISORCTL)
         return
 
     # Sometimes supervisord itself can get in a 'bad state' of some kind, so we
