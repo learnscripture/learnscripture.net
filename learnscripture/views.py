@@ -1119,19 +1119,16 @@ def paypal_url_start_for_request(request):
     return "%s://%s" % (protocol, domain)
 
 
-@require_account
 def donate(request):
-    identity = request.identity
-    account = identity.account
     c = {'title': 'Donate'}
 
-    url_start = paypal_url_start_for_request(request)
-
-    paypal_dict = donation_paypal_dict(account, url_start)
-    form = PayPalPaymentsForm(initial=paypal_dict)
-    # render 'amount' as visible widget
-    c['PRODUCTION'] = settings.LIVEBOX and settings.PRODUCTION
-    c['paypal_form'] = form
+    account = account_from_request(request)
+    if account is not None:
+        url_start = paypal_url_start_for_request(request)
+        paypal_dict = donation_paypal_dict(account, url_start)
+        form = PayPalPaymentsForm(initial=paypal_dict)
+        c['PRODUCTION'] = settings.LIVEBOX and settings.PRODUCTION
+        c['paypal_form'] = form
 
     return render(request, 'learnscripture/donate.html', c)
 
