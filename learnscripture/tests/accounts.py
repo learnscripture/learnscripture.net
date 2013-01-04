@@ -104,6 +104,7 @@ class AccountTests(TestCase):
     def test_award_action_points_fully_learnt(self):
         a = Account.objects.create(username='test',
                                    email='test@test.com')
+        Identity.objects.create(account=a)
 
         a.award_action_points("John 3:16", "This is John 3:16",
                               MemoryStage.TESTED,
