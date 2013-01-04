@@ -1034,6 +1034,18 @@ var learnscripture =
                 $('.current-verse').children().remove();
             }
 
+            if (currentVerseStatus.verse_set &&
+                currentVerseStatus.verse_set.get_absolute_url) {
+                $('#id-verse-set-info')
+                    .find('a')
+                    .text(currentVerseStatus.verse_set.name)
+                    .attr('href', currentVerseStatus.verse_set.get_absolute_url)
+                    .end()
+                    .show();
+            } else {
+                $('#id-verse-set-info').hide();
+            }
+
             $('.current-verse').hide(); // Hide until set up
             $('#id-verse-title').text(currentVerseStatus.titleText);
             if (currentVerseStatus.version.text_type == TEXT_TYPE_BIBLE) {

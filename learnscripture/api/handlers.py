@@ -61,7 +61,7 @@ class VersesToLearnHandler(BaseHandler):
     fields = (
         'id',
         'memory_stage', 'strength', 'first_seen',
-        ('verse_set', ('id', 'set_type')),
+        ('verse_set', ('id', 'set_type', 'name', 'get_absolute_url')),
         'reference',
         'needs_testing',
         'text_order',
