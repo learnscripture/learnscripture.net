@@ -1,10 +1,7 @@
 {% load url from future %}
+
+{% if not request.identity.account %}
 <h3>Session</h3>
-
-{% if request.identity.account %}
-<p>Logged in as: <b>{{ request.identity.account.username }}</b></p>
-
-{% else %}
 <p>Logged in as: <b>Guest User</b></p>
 
 {% if request.identity %}
