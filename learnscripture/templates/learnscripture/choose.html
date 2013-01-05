@@ -67,7 +67,7 @@
         <span class="icon-public icon-replace" title="This action is public (unless the verse set is private and remains private)">&nbsp;</span>
         <input type="submit" class="btn primary needs-preferences" value="Learn" id="id-learn-verseset-btn-{{ vs.id }}">
       </form>
-      <h3>{{ vs.name }}</h3>
+      <h3><a href="{{ vs.get_absolute_url }}">{{ vs.name }}</a></h3>
       {% if vs.description %}
       <p>{{ vs.description|restructuredtext }}</p>
       {% endif %}
@@ -82,7 +82,6 @@
       {% if vs.is_passage and vs.breaks %}
       <p>Section breaks at: {{ vs.breaks_formatted }}</p>
       {% endif %}
-      <div><a href="{{ vs.get_absolute_url }}">See more</a></div>
     </div>
     {% endfor %}
 
