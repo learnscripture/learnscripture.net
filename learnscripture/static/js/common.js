@@ -143,7 +143,7 @@ var learnscripture = (function (learnscripture, $) {
 // Use [[ and ]] for templates to avoid clash with Django templates
 $.views.delimiters('[[', ']]');
 
-// Dropdown in topbar
 $(document).ready(function () {
+    // Dropdown in topbar
     $('.topbar').dropdown();
 });
