@@ -183,12 +183,13 @@
      data-interface-theme="{{ request.identity.interface_theme }}"
      data-testing-method="{{ request.identity.testing_method }}">
 </div>
+{% if request.identity.account %}
 <div id="id-account-data"
      data-username="{{ request.identity.account.username }}"
      data-id="{{ request.identity.account.id }}"
      >
 </div>
-
+{% endif %}
     {% comment %}
     We put javascript for *all* pages in the base template, with maximum expiry
     set up. This results in a bigger initial hit, but much better performace
