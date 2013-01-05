@@ -187,6 +187,7 @@
 <div id="id-account-data"
      data-username="{{ request.identity.account.username }}"
      data-id="{{ request.identity.account.id }}"
+     data-has-installed-android-app="{{ request.identity.account.has_installed_android_app|yesno:"true,false" }}"
      >
 </div>
 {% endif %}

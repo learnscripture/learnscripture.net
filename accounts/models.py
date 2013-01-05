@@ -75,6 +75,7 @@ class Account(models.Model):
         default=False, blank=True)
     is_active = models.BooleanField(default=True)
     is_hellbanned = models.BooleanField(default=False)
+    has_installed_android_app = models.BooleanField(default=False)
 
 
     objects = AccountManager()
@@ -254,6 +255,12 @@ class Account(models.Model):
         Friendship weight goes from value 0 to 1.
         """
         return account_get_friendship_weights(self.id)
+
+    def android_app_installed(self):
+        if not self.has_installed_android_app:
+            self.has_installed_android_app = True
+            self.save()
+            self.add_html_notice('Thanks for installing the Android app! Please remember to <a href="https://play.google.com/store/apps/details?id=net.learnscripture.webviewapp">rate it and leave any comments you have!</a>')
 
 
 def count_words(text):

@@ -351,3 +351,11 @@ class DeleteNotice(BaseHandler):
 
     def create(self, request):
         request.identity.notices.filter(id=int(request.data['id'])).delete()
+
+
+class AndroidAppInstalled(BaseHandler):
+    allowed_methods = ('POST',)
+
+    def create(self, request):
+        request.identity.account.android_app_installed()
+
