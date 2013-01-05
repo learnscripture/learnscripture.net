@@ -22,13 +22,11 @@ would like added, please <a href="{% url 'contact' %}">contact us</a>.</p>
     <input type="submit" class="btn primary needs-preferences" value="Learn" id="id-learn-catechism-btn-{{ catechism.id }}">
   </form>
 
-  <h3>{{ catechism.full_name }}</h3>
+  <h3><a href="{% url 'view_catechism' slug=catechism.slug %}">{{ catechism.full_name }}</a></h3>
 
   <p>{{ catechism.description|restructuredtext }}</p>
 
   <p>It includes {{ catechism.qapairs.count }} question/answer pairs.</p>
-
-  <p><a href="{% url 'view_catechism' slug=catechism.slug %}">See more</a></p>
 </div>
 
 {% endfor %}

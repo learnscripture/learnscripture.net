@@ -41,7 +41,7 @@ class GroupPageTests(LiveServerTests):
 
         self.assertIn("Another group", driver.page_source)
         self.assertNotIn("My group", driver.page_source)
-        driver.find_element_by_xpath('//a[text() = "See more"]').click()
+        driver.find_element_by_xpath('//a[text() = "Another group"]').click()
 
         self.assertTrue(driver.current_url.endswith('/groups/another-group/'))
 

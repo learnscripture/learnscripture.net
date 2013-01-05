@@ -39,10 +39,9 @@ or <a href="{% url 'create_group' %}">create your own</a>.
   {% for group in groups %}
   <div class="actionset">
 
-    <h3>{{ group.name }}</h3>
+    <h3><a href="{% url 'group' group.slug %}">{{ group.name }}</a></h3>
     {{ group.description|restructuredtext }}
 
-    <p><a href="{% url 'group' group.slug %}">See more</a></p>
   </div>
   {% endfor %}
 
