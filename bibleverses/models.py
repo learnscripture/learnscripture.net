@@ -391,7 +391,7 @@ class VerseSet(models.Model):
     set_type = models.PositiveSmallIntegerField(choices=VerseSetType.choice_list)
 
     public = models.BooleanField(default=False)
-    breaks = models.CharField(max_length=255, default='', blank=True)
+    breaks = models.TextField(default='', blank=True)
 
     popularity = models.PositiveIntegerField(default=0)
     date_added = models.DateTimeField(default=timezone.now)
