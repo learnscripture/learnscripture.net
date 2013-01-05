@@ -56,7 +56,11 @@ Stats for {{ account.username }} on LearnScripture.net - the fun, easy and socia
       </a>
     </td>
     <td>
-      <h3>{{ award.short_description }}</h3>
+      <h3><a href="{% url 'award' award.award_detail.slug %}">{{ award.award_detail.title }}</a>
+        {% if award.has_levels %}
+        - level {{ award.level }}
+        {% endif %}
+      </h3>
       <p>{{ award.full_description }}</p>
     </td>
     <td>
