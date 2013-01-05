@@ -55,15 +55,18 @@ class AwardLogic(object):
     def slug(self):
         return AwardType.name_for_value[self.award_type].lower().replace(u'_', u'-')
 
+    @cached_property
+    def title(self):
+        return AwardType.titles[self.award_type]
+
     def short_description(self):
-        title = AwardType.titles[self.award_type]
         if self.level is AnyLevel:
-            return title
+            return self.title
         else:
             if self.has_levels:
-                return u'%s - level %d' % (title, self.level)
+                return u'%s - level %d' % (self.title, self.level)
             else:
-                return title
+                return self.title
 
     def image_small(self):
         n = AwardType.name_for_value[self.award_type]
