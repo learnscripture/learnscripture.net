@@ -318,8 +318,6 @@ class RecruiterAward(CountBasedAward):
         if self.level is AnyLevel:
             return html_fragment(u"Awarded for getting other people to sign up using our "
                                  "<a href='%s'>referral program</a>. "
-                                 "This award is actually worth money! (If referrals become "
-                                 "paying members, that is). "
                                  "Level 1 is for one referral, and is worth 20,000 points.",
                                  url)
         elif self.count == 1:
