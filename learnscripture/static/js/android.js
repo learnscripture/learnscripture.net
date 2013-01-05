@@ -1,6 +1,6 @@
 $(document).ready(function () {
     "use strict";
-    var CURRENT_ANDROID_APP_VERSION = 11;
+    var CURRENT_ANDROID_APP_VERSION = 10;
     if (window.androidlearnscripture) {
         if (window.androidlearnscripture.getVersionCode == undefined ||
             window.androidlearnscripture.getVersionCode() < CURRENT_ANDROID_APP_VERSION) {
