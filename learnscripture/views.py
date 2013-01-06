@@ -1,4 +1,5 @@
 
+import csv
 from datetime import timedelta
 from decimal import Decimal
 import itertools
@@ -37,7 +38,7 @@ from groups.forms import EditGroupForm
 from groups.models import Group
 from groups.signals import public_group_created
 from payments.sign import sign_payment_info
-from scores.models import get_all_time_leaderboard, get_leaderboard_since, ScoreReason
+from scores.models import get_all_time_leaderboard, get_leaderboard_since, ScoreReason, get_verses_tested_per_day, get_verses_started_per_day
 
 from .decorators import require_identity, require_preferences, has_preferences, redirect_via_prefs, require_account, require_account_with_redirect
 
@@ -875,6 +876,51 @@ def user_stats(request, username):
     else:
         c['groups'] = account.get_public_groups()
     return render(request, 'learnscripture/user_stats.html', c)
+
+
+def combine_timeline_stats(*statslists):
+    # Each item in statslists is a sorted list containing a date object as first
+    # item, and some other number as a second item. We zip together, based on
+    # equality of dates, and supplying zero for missing items in any lists.
+    retval = []
+    num_lists = len(statslists)
+    positions = [0] * num_lists # current position in each of statslists
+    statslist_r = list(range(0, num_lists))
+    statslist_lengths = map(len, statslists)
+
+    # Modify statslists to make end condition easier to handler
+    for i in statslist_r:
+        statslists[i].append((None, None))
+
+    while any(positions[i] < statslist_lengths[i] for i in statslist_r):
+        next_rows = [statslists[i][positions[i]] for i in statslist_r]
+        next_dt_vals = [r[0] for r in next_rows if r[0] is not None]
+        next_dt = min(next_dt_vals)
+        rec = [0] * num_lists
+        for i in statslist_r:
+            dt, val = next_rows[i]
+            if dt == next_dt:
+                rec[i] = val
+                positions[i] += 1
+        rec.insert(0, next_dt)
+        retval.append(rec)
+    return retval
+
+def user_stats_verses_timeline_stats_csv(request, username):
+    account = get_object_or_404(Account.objects.active().filter(username=username))
+    identity = account.identity
+    started = get_verses_started_per_day(identity.id)
+    tested = get_verses_tested_per_day(account.id)
+
+    rows = combine_timeline_stats(started, tested)
+
+    resp = HttpResponse(content_type="text/plain")
+    writer = csv.writer(resp)
+    writer.writerow(["Date", "Verses started", "Verses tested"])
+    for d, c1, c2 in rows:
+        writer.writerow([d.strftime("%Y-%m-%d"), c1, c2])
+    return resp
+
 
 
 @require_identity

@@ -1,3 +1,11 @@
+"""
+Records of user scores.
+
+ScoreLog is used for recent scores, e.g. weekly leaderboard.
+TotalScore is a summary used for all time scores.
+
+ScoreLog is also used as a record of how many verse tests a user did.
+"""
 from datetime import timedelta
 
 from django.db import connection
@@ -8,6 +16,7 @@ from django.utils import timezone
 from learnscripture.datastructures import make_choices
 from learnscripture.utils.db import dictfetchall
 
+
 ScoreReason = make_choices('ScoreReason',
                            [(0, 'VERSE_TESTED', 'Verse tested'),
                             (1, 'VERSE_REVISED', 'Verse revised'),
@@ -16,7 +25,6 @@ ScoreReason = make_choices('ScoreReason',
                             (4, 'VERSE_LEARNT', 'Verse fully learnt'),
                             (5, 'EARNED_AWARD', 'Earned award'),
                             ])
-
 
 class Scores(object):
     # Constants for scores. Duplicated in learn.js
@@ -183,3 +191,56 @@ def get_number_of_distinct_hours_for_account_id(account_id):
                 from_obj=sq1)
 
     return default_engine.execute(q1).fetchall()[0][0]
+
+
+def _add_zeros(vals):
+    retval = []
+    old_date = None
+    for d, c in vals:
+        if old_date is not None:
+            for i in range(1, (d - old_date).days):
+                retval.append((old_date + timedelta(days=i), 0))
+        retval.append((d, c))
+        old_date = d
+    return retval
+
+
+def get_verses_started_per_day(identity_id):
+    from learnscripture.utils.sqla import bibleverses_userversestatus, default_engine
+    from sqlalchemy.sql import select, and_
+    from sqlalchemy import func
+
+    day_col = func.date_trunc('day', bibleverses_userversestatus.c.first_seen).label('day')
+    q1 = (select([day_col,
+                  func.count(day_col)],
+                 and_(bibleverses_userversestatus.c.for_identity_id == identity_id,
+                      bibleverses_userversestatus.c.first_seen != None)
+                 )
+          .order_by(day_col)
+          .group_by(day_col)
+          )
+
+    vals = [(d.date(), c) for (d, c) in default_engine.execute(q1).fetchall()]
+    # Now we need to add zeros for the missing dates
+    return _add_zeros(vals)
+
+
+def get_verses_tested_per_day(account_id):
+    from learnscripture.utils.sqla import scores_scorelog, default_engine
+    from sqlalchemy.sql import select, and_
+    from sqlalchemy import func
+
+    day_col = func.date_trunc('day', scores_scorelog.c.created).label('day')
+    q1 = (select([day_col,
+                  func.count(day_col)],
+                 and_(scores_scorelog.c.account_id == account_id,
+                      scores_scorelog.c.reason.in_([ScoreReason.VERSE_TESTED,
+                                                   ScoreReason.VERSE_REVISED])
+                      )
+                 )
+          .order_by(day_col)
+          .group_by(day_col)
+          )
+
+    vals = [(d.date(), c) for (d, c) in default_engine.execute(q1).fetchall()]
+    return _add_zeros(vals)
