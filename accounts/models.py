@@ -76,10 +76,37 @@ class Account(AbstractBaseUser):
     is_hellbanned = models.BooleanField(default=False)
     has_installed_android_app = models.BooleanField(default=False)
 
+    # Email reminder preferences and meta data
+    remind_after = models.PositiveSmallIntegerField(
+        "Send email reminders after (days)", default=2)
+    remind_every = models.PositiveSmallIntegerField(
+        "Send email reminders every (days)", default=3)
+    last_reminder_sent = models.DateTimeField(null=True, blank=True)
 
     # Attributes needed for admin login and auth.contrib compat
     is_superuser = models.BooleanField(default=False)
 
+    # Managers and meta
+    objects = AccountManager()
+
+    USERNAME_FIELD = 'username'
+
+    REQUIRED_FIELDS = ['email']
+
+    class Meta:
+        ordering = ['username']
+
+
+    def save(self, **kwargs):
+        # We need to ensure that there is a TotalScore object
+        if self.id is None:
+            retval = super(Account, self).save(**kwargs)
+            TotalScore.objects.create(account=self)
+            return retval
+        else:
+            return super(Account, self).save(**kwargs)
+
+    # admin login stuff
     @property
     def is_staff(self):
         return self.is_superuser
@@ -94,37 +121,13 @@ class Account(AbstractBaseUser):
         return self.first_name
 
     def get_full_name(self):
-        val = u"%s %s" % (self.first_name, self.last_name)
+        val = self.personal_name
         if val:
             return val
         else:
             return username
 
-    objects = AccountManager()
-
-    USERNAME_FIELD = 'username'
-
-    REQUIRED_FIELDS = ['email']
-
-    class Meta:
-        ordering = ['username']
-
-    # Email reminder preferences and meta data
-    remind_after = models.PositiveSmallIntegerField(
-        "Send email reminders after (days)", default=2)
-    remind_every = models.PositiveSmallIntegerField(
-        "Send email reminders every (days)", default=3)
-    last_reminder_sent = models.DateTimeField(null=True, blank=True)
-
-    def save(self, **kwargs):
-        # We need to ensure that there is a TotalScore object
-        if self.id is None:
-            retval = super(Account, self).save(**kwargs)
-            TotalScore.objects.create(account=self)
-            return retval
-        else:
-            return super(Account, self).save(**kwargs)
-
+    # Friendly wrappers
     @property
     def email_name(self):
         return self.first_name if self.first_name.strip() != "" else self.username
@@ -140,6 +143,8 @@ class Account(AbstractBaseUser):
     def __unicode__(self):
         return self.username
 
+
+    # Main business logic
     def award_action_points(self, reference, text,
                             old_memory_stage, action_change,
                             action_stage, accuracy):
