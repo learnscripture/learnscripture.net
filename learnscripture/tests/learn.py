@@ -129,7 +129,7 @@ class LearnTests(LiveServerTests):
         points_for_verse = (
             (len(self.psalm_23_1_2.strip().split()) - 4) # don't count reference
             * Scores.POINTS_PER_WORD)
-        self.assertEqual(account.total_score.points,
+        self.assertEqual(Account.objects.get(id=account.id).total_score.points,
                          points_for_verse +
                          points_for_verse * Scores.PERFECT_BONUS_FACTOR +
                          StudentAward(count=1).points() +
@@ -156,7 +156,7 @@ class LearnTests(LiveServerTests):
         # Check scores
 
         j316_score = self._score_for_j316()
-        self.assertEqual(account.total_score.points,
+        self.assertEqual(Account.objects.get(id=account.id).total_score.points,
                          j316_score +
                          (j316_score * Scores.PERFECT_BONUS_FACTOR) +
                          StudentAward(count=1).points() +
