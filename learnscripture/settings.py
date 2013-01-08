@@ -88,6 +88,9 @@ else:
 
     PRODUCTION = STAGING = False
 
+
+AUTH_USER_MODEL = 'accounts.Account'
+
 SESSION_COOKIE_AGE = 3600 * 24 * 31 * 4 # 4 months
 
 ADMINS = [
