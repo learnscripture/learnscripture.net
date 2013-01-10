@@ -21,7 +21,7 @@ docutils
 supervisor
 Celery
 django-celery
-django-app-metrics==0.4.0
+-e git+https://github.com/spookylukey/django-app-metrics.git#egg=django-app-metrics
 django-jsonfield==0.8.5
 sqlalchemy==0.7.7
 -e hg+ssh://hg@bitbucket.org/mlavin/django-selectable#egg=django-selectable
