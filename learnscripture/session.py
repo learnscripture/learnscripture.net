@@ -183,10 +183,6 @@ def set_identity(request, identity):
     request.session['identity_id'] = identity.id
 
 
-def logout(request):
-    request.session['identity_id'] = None
-
-
 def save_referrer(request):
     """
     Save referrer username from request (if any) to sesssion.
