@@ -24,7 +24,7 @@ django-celery
 django-app-metrics==0.4.0
 django-jsonfield==0.8.5
 sqlalchemy==0.7.7
--e hg+ssh://hg@bitbucket.org/spookylukey/django-selectable#egg=django-selectable
+-e hg+ssh://hg@bitbucket.org/mlavin/django-selectable#egg=django-selectable
 django-rstify
 psutil==0.5.1
 twilio==3.3.9
