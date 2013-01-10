@@ -5,6 +5,7 @@ from decimal import Decimal
 import itertools
 import re
 
+import django.contrib.auth
 from django.db import models
 from django.conf import settings
 from django.contrib import messages
@@ -83,6 +84,11 @@ def login(request):
                 account = form.cleaned_data['account']
                 account.last_login = timezone.now()
                 account.save()
+                # Make this login form work for admin:
+                user = django.contrib.auth.authenticate(username=account.username,
+                                                        password=form.cleaned_data['password'])
+                django.contrib.auth.login(request, user)
+
                 session.login(request, account.identity)
                 return _login_redirect(request)
         elif 'forgotpassword' in request.POST:

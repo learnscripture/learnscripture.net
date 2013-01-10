@@ -199,7 +199,8 @@ class LogOutHandler(BaseHandler):
     allowed_methods = ('POST,')
 
     def create(self, request):
-        session.logout(request)
+        import django.contrib.auth
+        django.contrib.auth.logout(request)
         return {'username': 'Guest'}
 
 
