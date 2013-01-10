@@ -2,7 +2,6 @@
 import csv
 from datetime import timedelta
 from decimal import Decimal
-import itertools
 import re
 
 import django.contrib.auth
@@ -369,9 +368,7 @@ def dashboard(request):
 
     groups, more_groups = get_user_groups(identity)
 
-    c = {'learn_verses_queues':
-             _group_learning_verse_statuses(
-            identity.bible_verse_statuses_for_learning(None, get_all=True)),
+    c = {'learn_verses_queues': identity.bible_verse_statuses_for_learning_grouped(),
          'revise_verses_queue': identity.bible_verse_statuses_for_revising(),
          'passages_for_learning': identity.passages_for_learning(),
          'passages_for_revising': identity.passages_for_revising(),
@@ -389,11 +386,6 @@ def dashboard(request):
          }
     c.update(session_stats(identity))
     return render(request, 'learnscripture/dashboard.html', c)
-
-
-def _group_learning_verse_statuses(uvs_list):
-    return [(a, list(b)) for a, b in
-             itertools.groupby(uvs_list, lambda uvs: uvs.verse_set)]
 
 
 def context_for_version_select(request):

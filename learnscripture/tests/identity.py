@@ -542,7 +542,7 @@ class IdentityTests(IdentityBase, TestCase):
         """
         i = self._create_identity()
         i.add_verse_choice('John 14:6')
-        self.assertEqual([uvs.reference for uvs in i.bible_verse_statuses_for_learning(None, get_all=True)],
+        self.assertEqual([uvs.reference for uvs in i.bible_verse_statuses_for_learning(None)],
                          ['John 14:6'])
         i.record_verse_action('John 14:6', 'NET', StageType.READ, 1)
         i.cancel_learning(['John 14:6'])

@@ -56,7 +56,7 @@ class ViewSetTests(LiveServerTests):
         self.login(account)
         vs = VerseSet.objects.get(slug='bible-101')
         identity.add_verse_set(vs)
-        self.assertEqual(len(identity.bible_verse_statuses_for_learning(None, get_all=True)),
+        self.assertEqual(len(identity.bible_verse_statuses_for_learning(vs.id)),
                          vs.verse_choices.count())
 
         self.get_url('view_verse_set', kwargs=dict(slug=vs.slug))
@@ -68,7 +68,7 @@ class ViewSetTests(LiveServerTests):
         driver.find_element_by_css_selector("input[name='drop']").click()
         self.wait_until_loaded('body')
 
-        self.assertEqual(len(identity.bible_verse_statuses_for_learning(None, get_all=True)),
+        self.assertEqual(len(identity.bible_verse_statuses_for_learning(vs.id)),
                          0)
 
 
