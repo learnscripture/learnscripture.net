@@ -334,6 +334,7 @@ def restart_webserver():
     supervisorctl("restart gunicorn_%s" % target.NAME.lower())
 
 
+@task
 def build_static():
     assert target.STATIC_ROOT.strip() != '' and target.STATIC_ROOT.strip() != '/'
     with virtualenv(target.venv_dir):
