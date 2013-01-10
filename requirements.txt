@@ -1,7 +1,7 @@
 psycopg2==2.4.2
 south==0.7.6
 https://www.djangoproject.com/download/1.5c1/tarball/
--e git+https://github.com/spookylukey/django-fiber.git#egg=django-fiber
+-e git+https://github.com/spookylukey/django-fiber.git@0149d86515e6bff17d52862bce542dbc202c347a#egg=django-fiber
 -e git+git://github.com/spookylukey/django-bootstrap-form.git@cee9d102c152240e4af07551b13755b53689dd36#egg=django-bootstrap-form
 django-pagination==1.0.7
 -e hg+ssh://hg@bitbucket.org/spookylukey/django-piston#egg=django-piston
