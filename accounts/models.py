@@ -753,11 +753,18 @@ class Identity(models.Model):
                   memory_stage=MemoryStage.ZERO)
 
     def _dedupe_uvs_set(self, uvs_set):
-        # Need to dedupe (due to nullable verse_set which allows
-        # multiple (reference=ref, verse_set=NULL) pairs.
-        # We only dedupe things with verse_set==NULL, because
-        # there are use cases where we want to distinguish
-        # verse_set==NULL UVSs from verse_set!=NULL UVSs
+        # dedupe instances with same ref
+        retval = []
+        seen_refs = set()
+        for uvs in uvs_set:
+            if uvs.reference in seen_refs:
+                continue
+            seen_refs.add(uvs.reference)
+            retval.append(uvs)
+        return retval
+
+    def _dedupe_uvs_set_distinguishing_verse_set(self, uvs_set):
+        # Only dedupe multiple instances with same ref and verse_set==None
         retval = []
         seen_refs = set()
         for uvs in uvs_set:
@@ -802,7 +809,7 @@ class Identity(models.Model):
               )
         return qs
 
-    def bible_verse_statuses_for_learning(self, verse_set_id, get_all=False):
+    def bible_verse_statuses_for_learning(self, verse_set_id):
         """
         Returns a list of UserVerseStatuses that need learning.
 
@@ -810,23 +817,29 @@ class Identity(models.Model):
         specified in verse_set_id will be returned (with 'None' meaning no verse set)
         """
         qs = self.bible_verse_statuses_for_learning_qs()
-        if not get_all:
-            if verse_set_id is None:
-                qs = qs.filter(verse_set__isnull=True)
-            else:
-                qs = qs.filter(verse_set=verse_set_id)
+        if verse_set_id is None:
+            qs = qs.filter(verse_set__isnull=True)
+        else:
+            qs = qs.filter(verse_set=verse_set_id)
 
         # 'added' should have enough precision to distinguish, otherwise 'id'
         # should be according to order of creation.
-        if get_all:
-            # Group by verse set, and eagerly load verse set, because we want to
-            # group this way in the UI.  Use prefetch_related instead of
-            # select_related because we are likely to have many UserVerseStatus
-            # objects and very few VerseSet objects.
-            qs = qs.order_by('verse_set', 'added', 'id').prefetch_related('verse_set')
-        else:
-            qs = qs.order_by('added', 'id')
+        qs = qs.order_by('added', 'id')
         return self._dedupe_uvs_set(qs)
+
+    def bible_verse_statuses_for_learning_grouped(self):
+        qs = self.bible_verse_statuses_for_learning_qs()
+        # Group by verse set, and eagerly load verse set, because we want to
+        # group this way in the UI.  Use prefetch_related instead of
+        # select_related because we are likely to have many UserVerseStatus
+        # objects and very few VerseSet objects.
+        qs = qs.order_by('verse_set', 'added', 'id').prefetch_related('verse_set')
+
+        # We don't fully dedupe, because we want to distinguish
+        # between UVSes with verse_set == None and verse_set != None
+        uvs_list = self._dedupe_uvs_set_distinguishing_verse_set(qs)
+        return [(a, list(b)) for a, b in
+                itertools.groupby(uvs_list, lambda uvs: uvs.verse_set)]
 
     def clear_bible_learning_queue(self, verse_set_id):
         qs = self.bible_verse_statuses_for_learning_qs()
