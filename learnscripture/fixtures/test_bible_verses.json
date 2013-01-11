@@ -392,5 +392,18 @@
         "verse_number": 8,
         "bible_verse_number": 29237
     }
+},
+{
+    "pk": null,
+    "model": "bibleverses.verse",
+    "fields": {
+        "reference": "Song of Solomon 1:1",
+        "chapter_number": 1,
+        "text": "The song of songs, which is Solomon's.",
+        "book_number": 21,
+        "version": 1,
+        "verse_number": 1,
+        "bible_verse_number": 17538
+    }
 }
 ]

@@ -4,7 +4,7 @@ from django.utils import unittest
 from django.test import TestCase
 
 from accounts.models import Identity
-from bibleverses.models import InvalidVerseReference, Verse, TextVersion, get_passage_sections, VerseSet, VerseChoice, UserVerseStatus
+from bibleverses.models import InvalidVerseReference, Verse, TextVersion, get_passage_sections, VerseSet, VerseChoice, UserVerseStatus, quick_find
 from .base import AccountTestMixin
 
 
@@ -103,6 +103,12 @@ class ParseRefTests(TestCase):
         self.assertEqual(l2['Genesis 1:2-3'].text, l1['Genesis 1:2'].text + ' ' + l1['Genesis 1:3'].text)
 
         self.assertEqual(l2['Genesis 1:2-3'].chapter_number, l1['Genesis 1:2'].chapter_number)
+
+    def test_quick_find_song_of_solomon(self):
+        version = TextVersion.objects.get(slug='KJV')
+        results = quick_find('Song of Solomon 1:1', version)
+        self.assertEqual(results[0].verses[0].reference,
+                         "Song of Solomon 1:1")
 
 
 class MockUVS(object):

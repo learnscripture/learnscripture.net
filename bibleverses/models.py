@@ -921,12 +921,18 @@ def normalise_reference(query):
     # Normalise book names if possible.
     parts = query.split(u' ')
     book_name = parts[0]
-    if len(parts) > 1 and not re.search(u'\d', parts[1]):
-        book_name = book_name + u" " + parts[1]
+    used_parts = 1
+    if len(parts) > 1:
+        for p in range(1, len(parts)):
+            if not re.search(u'\d', parts[p]):
+                book_name = book_name + u" " + parts[p]
+                used_parts += 1
+            else:
+                break
 
     if book_name in BIBLE_BOOK_ABBREVIATIONS:
-        remainder = query[len(book_name):]
-        return BIBLE_BOOK_ABBREVIATIONS[book_name] + remainder
+        remainder = u" ".join(parts[used_parts:])
+        return BIBLE_BOOK_ABBREVIATIONS[book_name] + u" " + remainder
     else:
         return None
 
