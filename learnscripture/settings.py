@@ -380,6 +380,8 @@ if TESTING or DEVBOX:
 
 CELERYD_CONCURRENCY = 1
 
+CELERY_RESULT_BACKEND = 'disabled'
+
 ### Sentry/Raven ###
 
 SENTRY_CLIENT = 'ravenclient.AsyncDjangoClient'
