@@ -13,5 +13,7 @@ LS_RESTORE=/home/cciw/webapps/learnscripture_django/src/scripts/check_and_restor
 30         1,11 * * *  $LS_PYTHON $LS_MANAGE create_metrics_daily
 5,20,35,50 *    * * *  $LS_PYTHON $LS_MANAGE create_awards_hourly
 20         3    * * *  $LS_PYTHON $LS_MANAGE create_awards_daily
+20         4    * * *  $LS_PYTHON $LS_MANAGE clearsessions
+20         5    * * *  $LS_PYTHON $LS_MANAGE clean_old_identities
 
 
