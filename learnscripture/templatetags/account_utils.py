@@ -12,8 +12,7 @@ logger = logging.getLogger(__name__)
 @register.filter
 def account_link(account):
     if not account.is_active:
-        logger.warning("Account link generated for inactive account %s", account,
-                       extra={'request', request})
+        logger.warning("Account link generated for inactive account %s", account)
     return html_fragment(u'<a href="%s" title="%s %s">%s</a>',
                          reverse('user_stats', args=(account.username,)),
                          account.first_name,
