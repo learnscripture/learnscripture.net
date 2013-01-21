@@ -232,7 +232,9 @@ class TextVersion(caching.base.CachingMixin, models.Model):
                 .select_related('for_identity', 'for_identity__account')
                 .filter(version=self,
                         text_order=1,
-                        for_identity__account__isnull=False)]
+                        for_identity__account__isnull=False,
+                        for_identity__account__is_active=True,
+                        )]
 
 
 class ComboVerse(object):
