@@ -59,7 +59,7 @@ Stats for {{ account.username }} on LearnScripture.net - the fun, easy and socia
       <th>Started using site</th>
       <td>{{ account.identity.date_created }}</td>
     </tr>
-    {% if account.recruited_by %}
+    {% if account.recruited_by and account.recruited_by.is_active %}
     <tr>
       <th>Recruited by</th>
       <td>{{ account.recruited_by|account_link }}</td>
