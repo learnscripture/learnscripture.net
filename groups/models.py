@@ -71,6 +71,10 @@ class Group(models.Model):
     def invited_users(self):
         return [i.account for i in self.invitations.select_related('account')]
 
+    @property
+    def active_members(self):
+        return self.members.filter(is_active=True)
+
     def __unicode__(self):
         return self.name
 

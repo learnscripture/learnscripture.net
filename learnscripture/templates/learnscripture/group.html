@@ -75,7 +75,7 @@
 
 <h2>Members</h2>
 
-{% with members=group.members.all %}
+{% with members=group.active_members %}
 {% if members %}
   <ul>
   {% for account in members %}
