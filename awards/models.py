@@ -109,7 +109,9 @@ class AwardLogic(object):
         """
         The highest level that has been achieved
         """
-        return Award.objects.filter(award_type=self.award_type).aggregate(models.Max('level'))['level__max']
+        return Award.objects.filter(award_type=self.award_type,
+                                    account__is_active=True)\
+            .aggregate(models.Max('level'))['level__max']
 
 
 class classproperty(property):

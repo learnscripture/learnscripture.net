@@ -1235,6 +1235,7 @@ def award(request, award_slug):
     levels = []
     for level in range(award.max_level, 0, -1):
         awards = Award.objects.filter(award_type=award_type,
+                                      account__is_active=True,
                                       level=level)
         receivers_count = awards.count()
         if receivers_count > 0:
