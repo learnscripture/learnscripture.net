@@ -284,11 +284,9 @@ class TrendSetterAward(CountBasedAward):
 
 
 class AceAward(CountBasedAward):
-    COUNTS = dict((k, 2**(k-1)) for k in range(1, 10))
+    COUNTS = {k: 2**(k-1) for k in range(1, 10)}
 
-    # counts are powers of 2, points are powers of 3, because achieving level n
-    # + 1 is more than twice as hard as level n.
-    POINTS = dict((k, 3**(k-1)*1000) for k in COUNTS.keys())
+    POINTS = {k: v * 1000 for k, v in COUNTS.items()}
 
     def full_description(self):
         if self.level is AnyLevel:
