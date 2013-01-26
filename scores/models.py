@@ -6,7 +6,7 @@ TotalScore is a summary used for all time scores.
 
 ScoreLog is also used as a record of how many verse tests a user did.
 """
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from django.db import connection
 from django.db import models
@@ -205,22 +205,55 @@ def _add_zeros(vals):
     return retval
 
 
+def get_verses_started_counts(identity_ids, started_since=None):
+    from bibleverses.models import MemoryStage
+    sql = """
+SELECT for_identity_id, COUNT(*) FROM (
+    SELECT for_identity_id
+    FROM bibleverses_userversestatus
+    WHERE
+        ignored = False
+    AND memory_stage >= %s
+    AND for_identity_id IN %s
+    AND first_seen > %s
+    GROUP BY for_identity_id, reference, version_id) subq
+GROUP BY for_identity_id;
+"""
+    if started_since is None:
+        started_since = datetime(1970, 1, 1)
+
+    if len(identity_ids) == 0:
+        return {}
+
+    cursor = connection.cursor()
+    cursor.execute(sql, [MemoryStage.TESTED, tuple(identity_ids), started_since])
+    return dict((r[0], r[1]) for r in cursor.fetchall())
+
+
 def get_verses_started_per_day(identity_id):
     from learnscripture.utils.sqla import bibleverses_userversestatus, default_engine
     from sqlalchemy.sql import select, and_
     from sqlalchemy import func
 
     day_col = func.date_trunc('day', bibleverses_userversestatus.c.first_seen).label('day')
-    q1 = (select([day_col,
-                  func.count(day_col)],
+
+    q1 = (select([day_col],
                  and_(bibleverses_userversestatus.c.for_identity_id == identity_id,
-                      bibleverses_userversestatus.c.first_seen != None)
+                      bibleverses_userversestatus.c.first_seen != None),
+                 from_obj=bibleverses_userversestatus
                  )
-          .order_by(day_col)
-          .group_by(day_col)
+          .group_by(day_col,
+                    bibleverses_userversestatus.c.reference,
+                    bibleverses_userversestatus.c.version_id)
+          ).alias()
+
+    q2 = (select([q1.c.day, func.count()],
+                 from_obj=q1)
+          .order_by(q1.c.day)
+          .group_by(q1.c.day)
           )
 
-    vals = [(d.date(), c) for (d, c) in default_engine.execute(q1).fetchall()]
+    vals = [(d.date(), c) for (d, c) in default_engine.execute(q2).fetchall()]
     # Now we need to add zeros for the missing dates
     return _add_zeros(vals)
 

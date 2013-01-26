@@ -30,7 +30,7 @@ from accounts.forms import PreferencesForm, AccountDetailsForm
 from awards.models import AwardType, AnyLevel, Award
 from learnscripture.forms import AccountSetPasswordForm, ContactForm, LogInForm, AccountPasswordResetForm, SignUpForm
 
-from bibleverses.models import VerseSet, TextVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType, get_passage_sections, get_verses_started_counts, TextType
+from bibleverses.models import VerseSet, TextVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType, get_passage_sections, TextType
 from bibleverses.signals import public_verse_set_created
 from learnscripture import session
 from bibleverses.forms import VerseSetForm
@@ -38,7 +38,7 @@ from groups.forms import EditGroupForm
 from groups.models import Group
 from groups.signals import public_group_created
 from payments.sign import sign_payment_info
-from scores.models import get_all_time_leaderboard, get_leaderboard_since, ScoreReason, get_verses_tested_per_day, get_verses_started_per_day
+from scores.models import get_all_time_leaderboard, get_leaderboard_since, ScoreReason, get_verses_tested_per_day, get_verses_started_per_day, get_verses_started_counts
 
 from .decorators import require_identity, require_preferences, has_preferences, redirect_via_prefs, require_account, require_account_with_redirect
 

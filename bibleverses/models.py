@@ -939,26 +939,4 @@ def normalise_reference(query):
         return None
 
 
-def get_verses_started_counts(identity_ids, started_since=None):
-    sql = """
-SELECT for_identity_id, COUNT(id)
-FROM bibleverses_userversestatus
-WHERE
-    ignored = False
-AND memory_stage >= %s
-AND for_identity_id IN %s
-AND first_seen > %s
-GROUP BY for_identity_id
-"""
-    if started_since is None:
-        started_since = datetime(1970, 1, 1)
-
-    if len(identity_ids) == 0:
-        return {}
-
-    cursor = connection.cursor()
-    cursor.execute(sql, [MemoryStage.TESTED, tuple(identity_ids), started_since])
-    return dict((r[0], r[1]) for r in cursor.fetchall())
-
-
 import bibleverses.hooks
