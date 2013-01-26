@@ -5,7 +5,7 @@ from awards.models import Award
 from bibleverses.models import VerseSet, TextVersion
 from events.models import NewAccountEvent, AwardReceivedEvent, VerseSetCreatedEvent, StartedLearningVerseSetEvent, PointsMilestoneEvent, VersesStartedMilestoneEvent, VersesFinishedMilestoneEvent, AwardLostEvent, GroupJoinedEvent, GroupCreatedEvent, StartedLearningCatechismEvent
 from groups.models import Group
-from scores.models import TotalScore
+from scores.models import TotalScore, get_verses_started_counts
 
 
 @task(ignore_result=True)
@@ -83,7 +83,8 @@ def create_verses_started_milestone_event(account_id):
     # This could fail if the task gets delayed past the point where another
     # verse has been learnt. But we don't mind that much if some Events get
     # missed.
-    c = account.identity.verse_statuses_started().count()
+    identity_id = account.identity.id
+    c = get_verses_started_counts([identity_id])[identity_id]
 
     if c > 9 and is_milestone(c):
         VersesStartedMilestoneEvent(account=account, verses_started=c).save()
