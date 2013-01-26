@@ -1326,6 +1326,7 @@ var learnscripture =
         var inputKeyDown = function (ev) {
             var characterInserted = false;
             var textSoFar = inputBox.val();
+            var textSoFarTrimmed = textSoFar.trim();
             if (ev.which == 229) {
                 // keyboard composition code sent by Chrome on Android, which is
                 // totally useless. The only upside is that, apart from the
@@ -1346,11 +1347,16 @@ var learnscripture =
                 inputBox.val('');
                 return;
             }
-            if (ev.which === 32 || ev.which === 13
-                || (ev.which == 186 // colon, at least for US/UK
-                    // allowed if in reference
-                    && getWordAt(currentWordIndex).hasClass("reference")
-                   )
+
+            if ((textSoFarTrimmed.length > 0) && // if only whitespace entered, don't trigger test
+                (
+                    ev.which === 32 ||  // space
+                    ev.which === 13 ||  // enter
+                    (ev.which == 186    // colon, at least for US/UK
+                                        // allowed if in reference
+                     && getWordAt(currentWordIndex).hasClass("reference")
+                    )
+                )
                ) {
                 ev.preventDefault();
                 if (currentStage.testMode) {
@@ -1358,7 +1364,7 @@ var learnscripture =
                         checkCurrentWord();
                     } else if (
                         preferences.testingMethod == TEST_FIRST_LETTER &&
-                        textSoFar.trim().length > 0) {
+                        textSoFarTrimmed.length > 0) {
                         // compat for Android on Chrome, which doesn't fire the
                         // event for first letter in box, but will get here if
                         // you press one letter and then space
