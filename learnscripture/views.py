@@ -216,9 +216,6 @@ def get_next(request, default_url):
     return HttpResponseRedirect(default_url)
 
 
-# Arbitrarily set 4 hours as max length of 'session' of learning
-SESSION_LENGTH_HOURS = 4
-
 def session_stats(identity):
     stats = {}
     session_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
