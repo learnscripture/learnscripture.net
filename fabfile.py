@@ -339,7 +339,7 @@ def build_static():
     assert target.STATIC_ROOT.strip() != '' and target.STATIC_ROOT.strip() != '/'
     with virtualenv(target.venv_dir):
         with cd(target.src_dir):
-            run_venv("./manage.py collectstatic -v 0 --noinput --clear")
+            run_venv("./manage.py collectstatic -v 0 --noinput")
 
     run("chmod -R ugo+r %s" % target.STATIC_ROOT)
 
