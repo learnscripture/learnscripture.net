@@ -25,6 +25,23 @@ class FuzzyInt(int):
         return "[%d..%d]" % (self.lowest, self.highest)
 
 
+
+class IdentityBase(object):
+
+    fixtures = ['test_bible_versions.json', 'test_verse_sets.json', 'test_bible_verses.json']
+
+    def _create_identity(self, version_slug='NET'):
+        version = TextVersion.objects.get(slug=version_slug)
+        return Identity.objects.create(default_bible_version=version)
+
+    def _create_account(self, **kwargs):
+        identity = self._create_identity(**kwargs)
+        account = Account.objects.create(username='testaccount')
+        identity.account = account
+        identity.save()
+        return account
+
+
 class AccountTestMixin(object):
 
     fixtures = ['test_bible_versions.json']

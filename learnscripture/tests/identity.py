@@ -14,23 +14,8 @@ from bibleverses.models import VerseSet, TextVersion, StageType, MemoryStage, Ve
 from events.models import Event, EventType
 from scores.models import Scores
 
-from .base import FuzzyInt, UsesSQLAlchemyBase
+from .base import FuzzyInt, UsesSQLAlchemyBase, IdentityBase
 
-
-class IdentityBase(object):
-
-    fixtures = ['test_bible_versions.json', 'test_verse_sets.json', 'test_bible_verses.json']
-
-    def _create_identity(self, version_slug='NET'):
-        version = TextVersion.objects.get(slug=version_slug)
-        return Identity.objects.create(default_bible_version=version)
-
-    def _create_account(self, **kwargs):
-        identity = self._create_identity(**kwargs)
-        account = Account.objects.create(username='testaccount')
-        identity.account = account
-        identity.save()
-        return account
 
 class IdentityTests(IdentityBase, TestCase):
 
