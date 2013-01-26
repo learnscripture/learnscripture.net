@@ -62,7 +62,7 @@ class LearnTests(LiveServerTests):
             else:
                 # Type the wrong thing - 3 times to make it fail
                 for i in range(0, 3):
-                    self.driver.find_element_by_id('id-typing').send_keys(' ')
+                    self.driver.find_element_by_id('id-typing').send_keys('xxx ')
 
     def _score_for_j316(self, accuracy=1.0):
         word_count = len(self.kjv_john_3_16.strip().split())
