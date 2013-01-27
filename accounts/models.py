@@ -780,6 +780,13 @@ class Identity(models.Model):
                                           strength__gt=0,
                                           last_tested__isnull=False)
 
+    def verses_started_count(self, started_since=None):
+        from scores.models import get_verses_started_counts
+        return get_verses_started_counts([self.id],
+                                         started_since=started_since
+                                         ).get(self.id, 0)
+
+
     def verse_statuses_finished(self):
         return self.verse_statuses.filter(ignored=False,
                                           strength__gte=memorymodel.LEARNT)

@@ -858,10 +858,8 @@ def user_stats(request, username):
     one_week_ago = timezone.now() - timedelta(7)
     verses_started =  account.identity.verse_statuses_started()
 
-    identity_id = account.identity.id
-    c['verses_started_all_time'] = get_verses_started_counts([identity_id])[identity_id]
-    c['verses_started_this_week'] = get_verses_started_counts([identity_id],
-                                                              started_since=one_week_ago)[identity_id]
+    c['verses_started_all_time'] = account.identity.verses_started_count()
+    c['verses_started_this_week'] = account.identity.verses_started_count(started_since=one_week_ago)
     verses_finished =  verses_started.filter(strength__gte=memorymodel.LEARNT)
     c['verses_finished_all_time'] = verses_finished.count()
     c['verses_finished_this_week'] = verses_finished.filter(last_tested__gte=one_week_ago).count()
