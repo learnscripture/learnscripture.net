@@ -126,7 +126,7 @@ only takes a few seconds. Otherwise your progress won't be saved permanently.
     <input type="submit" name="cancelpassage" class="btn" value="Cancel learning"
            id="id-cancelpassage-btn-{{ vs.id }}" />
   </form>
-  <h3>{{ vs.name }}</h3>
+  <h3><a href="{% url 'view_verse_set' vs.slug %}">{{ vs.name }}</a></h3>
   <p>Continue learning this passage. You've seen {{ vs.tested_total }} verse(s) so far,
     with {{ vs.untested_total }} to go.</p>
   </div>
