@@ -182,7 +182,7 @@ only takes a few seconds. Otherwise your progress won't be saved permanently.
 
   {% if new_qas_queue %}
 
-    {% if passages_for_learning or learn_verses_queue %}<hr>{% endif %}
+    {% if passages_for_learning or learn_verses_queues %}<hr>{% endif %}
   <div class="addclearfix">
   <form action="" method="POST">
     {% csrf_token %}
