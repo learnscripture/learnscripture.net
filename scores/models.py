@@ -207,27 +207,36 @@ def _add_zeros(vals):
 
 def get_verses_started_counts(identity_ids, started_since=None):
     from bibleverses.models import MemoryStage
-    sql = """
-SELECT for_identity_id, COUNT(*) FROM (
-    SELECT for_identity_id
-    FROM bibleverses_userversestatus
-    WHERE
-        ignored = False
-    AND memory_stage >= %s
-    AND for_identity_id IN %s
-    AND first_seen > %s
-    GROUP BY for_identity_id, reference, version_id) subq
-GROUP BY for_identity_id;
-"""
+    from learnscripture.utils.sqla import bibleverses_userversestatus, default_engine
+    from sqlalchemy.sql import select, and_
+    from sqlalchemy import func
+
+    # The important point about this complex query is that
+    # it groups 'duplicate' UserVerseStatus rows i.e. ones
+    # for the same reference and text.
+
+    # It returns results for all identities, because this is used sometimes.
+
     if started_since is None:
         started_since = datetime(1970, 1, 1)
 
     if len(identity_ids) == 0:
         return {}
 
-    cursor = connection.cursor()
-    cursor.execute(sql, [MemoryStage.TESTED, tuple(identity_ids), started_since])
-    return dict((r[0], r[1]) for r in cursor.fetchall())
+    uvs = bibleverses_userversestatus
+    q1 = (select([uvs.c.for_identity_id],
+                 and_(uvs.c.ignored == False,
+                      uvs.c.memory_stage >= MemoryStage.TESTED,
+                      uvs.c.for_identity_id.in_(identity_ids),
+                      uvs.c.first_seen > started_since))
+          .group_by(uvs.c.for_identity_id,
+                    uvs.c.reference,
+                    uvs.c.version_id)
+          ).alias()
+    q2 = (select([q1.c.for_identity_id, func.count()])
+          .group_by(q1.c.for_identity_id))
+
+    return {i: c for (i, c) in default_engine.execute(q2).fetchall()}
 
 
 def get_verses_started_per_day(identity_id):
