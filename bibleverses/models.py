@@ -125,7 +125,6 @@ MemoryStage = make_choices('MemoryStage',
                            [(1, 'ZERO', 'nothing'),
                             (2, 'SEEN', 'seen'),
                             (3, 'TESTED', 'tested'),
-                            (4, 'LONGTERM', 'long term memory'),
                             ])
 
 
