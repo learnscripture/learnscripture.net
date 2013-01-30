@@ -830,7 +830,7 @@ def leaderboard(request):
 
     for account_dict in accounts:
         identity = identity_dict[account_dict['account_id']]
-        account_dict['num_verses'] = verse_counts.get(identity.id, 0)
+        account_dict['num_verses'] = verse_counts[identity.id]
         account_dict['username'] = identity.account.username
 
     c = {}

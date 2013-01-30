@@ -784,8 +784,7 @@ class Identity(models.Model):
         from scores.models import get_verses_started_counts
         return get_verses_started_counts([self.id],
                                          started_since=started_since
-                                         ).get(self.id, 0)
-
+                                         )[self.id]
 
     def verse_statuses_finished(self):
         return self.verse_statuses.filter(ignored=False,

@@ -236,7 +236,8 @@ def get_verses_started_counts(identity_ids, started_since=None):
     q2 = (select([q1.c.for_identity_id, func.count()])
           .group_by(q1.c.for_identity_id))
 
-    return {i: c for (i, c) in default_engine.execute(q2).fetchall()}
+    vals = {i: c for (i, c) in default_engine.execute(q2).fetchall()}
+    return {i: vals.get(i, 0) for i in identity_ids}
 
 
 def get_verses_started_per_day(identity_id):
