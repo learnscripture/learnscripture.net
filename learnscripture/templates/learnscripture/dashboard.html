@@ -130,53 +130,50 @@ only takes a few seconds. Otherwise your progress won't be saved permanently.
   <p>Continue learning this passage. You've seen {{ vs.tested_total }} verse(s) so far,
     with {{ vs.untested_total }} to go.</p>
   </div>
-  <hr>
+  {% if not forloop.last %}<hr>{% endif %}
   {% endfor %}
 
 
   {### Verses ###}
 
   {% if learn_verses_queues %}
-  {% for verse_set, queue in learn_verses_queues %}
+
+    {% if passages_for_learning %}<hr>{% endif %}
+
+    {% for verse_set, queue in learn_verses_queues %}
   <div class="addclearfix">
   <form action="" method="POST"
         {# for benefit of testing: #}
         id="id-learning-queue-verse-set-{{ verse_set.id }}"
         >
-    {% csrf_token %}
+      {% csrf_token %}
     <input type="submit" name="learnbiblequeue" class="btn primary" value="Start learning" /><br /><input type="submit" name="clearbiblequeue" class="btn" value="Clear queue" />
     <input type="hidden" name="verse_set_id" value="{{ verse_set.id }}" />
   </form>
 
-  {% if verse_set %}
+      {% if verse_set %}
   <h3><a href="{% url 'view_verse_set' verse_set.slug %}">{{ verse_set.name }}</a></h3>
-  {% else %}
-    {% if not forloop.first %}
+      {% else %}
+        {% if not forloop.first %}
   <h3>Other verses</h3>
-    {% endif %}
-  {% endif %}
+        {% endif %}
+      {% endif %}
 
   <p>You've queued {{ queue|length }} new verse{{ queue|length|pluralize }} for learning{% if verse_set %} in this set{% endif %}.</p>
 
   <p>Verses coming up:
-    {% include 'learnscripture/verselist.html' with verselist=queue %}
+      {% include 'learnscripture/verselist.html' with verselist=queue %}
   </p>
-  {% if not forloop.last %}
-  <hr>
-  {% endif %}
+      {% if not forloop.last %}<hr>{% endif %}
   </div>
-  {% endfor %}
-
-  {% else %}
-  <div class="addclearfix">
-    <p>Nothing currently in your queue for learning.</p>
-  </div>
+    {% endfor %}
   {% endif %}
 
   {### Catechisms ###}
 
   {% if new_qas_queue %}
-  <hr>
+
+    {% if passages_for_learning or learn_verses_queue %}<hr>{% endif %}
   <div class="addclearfix">
   <form action="" method="POST">
     {% csrf_token %}
@@ -185,6 +182,13 @@ only takes a few seconds. Otherwise your progress won't be saved permanently.
 
   <p>You've got {{ new_qas_queue|length }} catechism question{{ new_qas_queue|length|pluralize }} in your queue for learning.</p>
 
+  </div>
+  {% endif %}
+
+  {#### Nothing ####}
+  {% if not passages_for_learning and not learn_verses_queue and not new_qas_queue %}
+  <div class="addclearfix">
+    <p>Nothing currently in your queue for learning.</p>
   </div>
   {% endif %}
 
