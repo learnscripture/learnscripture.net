@@ -217,9 +217,6 @@ def get_verses_started_counts(identity_ids, started_since=None):
 
     # It returns results for all identities, because this is used sometimes.
 
-    if started_since is None:
-        started_since = datetime(1970, 1, 1)
-
     if len(identity_ids) == 0:
         return {}
 
@@ -228,7 +225,9 @@ def get_verses_started_counts(identity_ids, started_since=None):
                  and_(uvs.c.ignored == False,
                       uvs.c.memory_stage >= MemoryStage.TESTED,
                       uvs.c.for_identity_id.in_(identity_ids),
-                      uvs.c.first_seen > started_since))
+                      *([uvs.c.first_seen > started_since]
+                         if started_since is not None else []))
+                 )
           .group_by(uvs.c.for_identity_id,
                     uvs.c.reference,
                     uvs.c.version_id)
