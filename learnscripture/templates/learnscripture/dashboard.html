@@ -156,7 +156,7 @@ only takes a few seconds. Otherwise your progress won't be saved permanently.
         id="id-learning-queue-verse-set-{{ verse_set.id }}"
         >
       {% csrf_token %}
-    <input type="submit" name="learnbiblequeue" class="btn primary" value="Start learning" /><br /><input type="submit" name="clearbiblequeue" class="btn" value="Clear queue" />
+    <input type="submit" name="learnbiblequeue" class="btn primary" value="Learn" /><br /><input type="submit" name="clearbiblequeue" class="btn" value="Clear queue" />
     <input type="hidden" name="verse_set_id" value="{{ verse_set.id }}" />
   </form>
 
@@ -186,7 +186,7 @@ only takes a few seconds. Otherwise your progress won't be saved permanently.
   <div class="addclearfix">
   <form action="" method="POST">
     {% csrf_token %}
-    <input type="submit" name="learncatechismqueue" class="btn primary" value="Start learning" /><br /><input type="submit" name="clearcatechismqueue" class="btn" value="Clear queue" />
+    <input type="submit" name="learncatechismqueue" class="btn primary" value="Learn" /><br /><input type="submit" name="clearcatechismqueue" class="btn" value="Clear queue" />
   </form>
 
   <p>You've got {{ new_qas_queue|length }} catechism question{{ new_qas_queue|length|pluralize }} in your queue for learning.</p>
