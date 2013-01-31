@@ -856,7 +856,6 @@ def user_stats(request, username):
          'include_referral_links': True,
          }
     one_week_ago = timezone.now() - timedelta(7)
-    verses_started =  account.identity.verse_statuses_started()
 
     c['verses_started_all_time'] = account.identity.verses_started_count()
     c['verses_started_this_week'] = account.identity.verses_started_count(started_since=one_week_ago)
@@ -921,6 +920,9 @@ def user_stats_verses_timeline_stats_csv(request, username):
 def user_verses(request):
     identity = request.identity
     c = {'title': 'Progress'}
+
+    # verse_statuses_started contains dupes, we do deduplication in the
+    # template.
     verses = identity.verse_statuses_started().select_related('version')
 
     if 'catechisms' in request.GET:
@@ -1124,10 +1126,6 @@ def natural_list(l):
     if len(l) == 1:
         return l[0]
     return u"%s and %s" % (u", ".join(l[0:-1]), l[-1])
-
-
-def get_started_verses_count(identity):
-    return identity.verse_statuses_started().count()
 
 
 def donation_paypal_dict(account, url_start):
