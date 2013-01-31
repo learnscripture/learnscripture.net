@@ -790,6 +790,10 @@ class Identity(models.Model):
         return self.verse_statuses.filter(ignored=False,
                                           strength__gte=memorymodel.LEARNT)
 
+    def verses_finished_count(self, finished_since=None):
+        from scores.models import get_verses_finished_count
+        return get_verses_finished_count(self.id)
+
     def bible_verse_statuses_for_revising(self):
         """
         Returns a query set of UserVerseStatuses that need revising.

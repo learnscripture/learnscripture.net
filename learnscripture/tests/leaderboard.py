@@ -6,7 +6,7 @@ from django.test import TestCase
 from accounts.models import Account, Identity
 from bibleverses.models import VerseSet, StageType, VerseSetType
 
-from scores.models import ScoreReason, get_verses_started_counts, get_verses_started_per_day
+from scores.models import ScoreReason, get_verses_started_counts, get_verses_started_per_day, get_verses_finished_count
 
 from .base import UsesSQLAlchemyBase, IdentityBase
 
@@ -41,15 +41,7 @@ class LeaderboardTests(UsesSQLAlchemyBase):
 
 class VerseCountTests(IdentityBase, UsesSQLAlchemyBase):
 
-    def test_verses_started_dedupe(self):
-        """
-        Test that counts for verses started deduplicate verses that have the
-        same reference.
-        """
-        account = self._create_account()
-        i = account.identity
-        version = i.default_bible_version
-
+    def _create_overlapping_verse_sets(self, account):
         vs1 = VerseSet.objects.create(name="Psalm 23:1-3",
                                       set_type=VerseSetType.PASSAGE,
                                       created_by=account)
@@ -61,6 +53,18 @@ class VerseCountTests(IdentityBase, UsesSQLAlchemyBase):
                                u"Psalm 23:3"])
         vs2.set_verse_choices([u"Psalm 23:1",
                                u"Psalm 23:2"])
+
+        return vs1, vs2
+
+    def test_verses_started_dedupe(self):
+        """
+        Test that counts for verses started deduplicate verses that have the
+        same reference.
+        """
+        account = self._create_account()
+        i = account.identity
+        version = i.default_bible_version
+        vs1, vs2 = self._create_overlapping_verse_sets(account)
 
         i.add_verse_set(vs1)
         i.add_verse_set(vs2)
@@ -74,3 +78,25 @@ class VerseCountTests(IdentityBase, UsesSQLAlchemyBase):
 
         self.assertEqual(get_verses_started_per_day(i.id),
                          [(dt, 1)])
+
+    def test_verses_finished_dedupe(self):
+        """
+        Test that counts for verses finished deduplicate verses that have the
+        same reference.
+        """
+        account = self._create_account()
+        i = account.identity
+        version = i.default_bible_version
+        vs1, vs2 = self._create_overlapping_verse_sets(account)
+
+        i.add_verse_set(vs1)
+        i.add_verse_set(vs2)
+
+        i.record_verse_action("Psalm 23:1", version.slug, StageType.TEST,
+                              accuracy=1.0)
+        # Sanity check the test
+        self.assertEqual(i.verse_statuses.filter(reference="Psalm 23:1").count(),
+                         2)
+        i.verse_statuses.filter(reference="Psalm 23:1").update(strength=0.9999)
+
+        self.assertEqual(get_verses_finished_count(i.id), 1)

@@ -860,9 +860,8 @@ def user_stats(request, username):
 
     c['verses_started_all_time'] = account.identity.verses_started_count()
     c['verses_started_this_week'] = account.identity.verses_started_count(started_since=one_week_ago)
-    verses_finished =  verses_started.filter(strength__gte=memorymodel.LEARNT)
-    c['verses_finished_all_time'] = verses_finished.count()
-    c['verses_finished_this_week'] = verses_finished.filter(last_tested__gte=one_week_ago).count()
+    c['verses_finished_all_time'] = account.identity.verses_finished_count()
+    c['verses_finished_this_week'] = account.identity.verses_finished_count(finished_since=one_week_ago)
     c['verse_sets_created_all_time'] = account.verse_sets_created.count()
     c['verse_sets_created_this_week'] = account.verse_sets_created.filter(date_added__gte=one_week_ago).count()
     current_account = account_from_request(request)
