@@ -92,7 +92,7 @@ def create_verses_started_milestone_event(account_id):
 @task(ignore_result=True)
 def create_verses_finished_milestone_event(account_id):
     account = Account.objects.get(id=account_id)
-    c = account.identity.verse_statuses_finished().count()
+    c = account.identity.verses_finished_count()
     if c > 9 and is_milestone(c):
         VersesFinishedMilestoneEvent(account=account, verses_finished=c).save()
 
