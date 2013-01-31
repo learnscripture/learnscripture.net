@@ -17,7 +17,7 @@ from scores.models import Scores
 from .base import FuzzyInt, UsesSQLAlchemyBase, IdentityBase
 
 
-class IdentityTests(IdentityBase, TestCase):
+class IdentityTests(IdentityBase, UsesSQLAlchemyBase):
 
     def test_add_verse_set(self):
         i = self._create_identity()

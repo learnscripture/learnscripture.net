@@ -15,11 +15,9 @@ def give_learning_awards(account_id):
     if account_id is None:
         return
     account = Account.objects.get(id=account_id)
-    started = account.identity.verse_statuses.filter(ignored=False,
-                                                     version__text_type=TextType.BIBLE,
-                                                     memory_stage__gte=MemoryStage.TESTED)
+
     started_c = account.identity.verses_started_count()
-    finished_c = started.filter(strength__gte=MM.LEARNT).count()
+    finished_c = account.identity.verses_finished_count()
 
     for cls, count in [(StudentAward, started_c),
                        (MasterAward, finished_c)]:
