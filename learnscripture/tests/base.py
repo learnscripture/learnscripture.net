@@ -81,6 +81,12 @@ class AccountTestMixin(object):
         self.wait_for_ajax()
 
 
+
+def sqla_tear_down():
+    from learnscripture.utils import sqla
+    sqla.default_engine.pool.dispose()
+
+
 class LiveServerTests(AccountTestMixin, LiveServerTestCase):
 
     hide_browser = True
@@ -108,6 +114,8 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
 
     def tearDown(self):
         self.assertEqual([], self.verificationErrors)
+        super(LiveServerTests, self).tearDown()
+        sqla_tear_down()
 
 
     # Utilities:
@@ -191,6 +199,5 @@ class UsesSQLAlchemyBase(TransactionTestCase):
 
     def tearDown(self):
         super(UsesSQLAlchemyBase, self).tearDown()
-        from learnscripture.utils import sqla
-        sqla.default_engine.pool.dispose()
+        sqla_tear_down()
 

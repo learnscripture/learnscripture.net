@@ -335,6 +335,15 @@ if TESTING:
     INSTALLED_APPS = [a for a in INSTALLED_APPS
                       if a != 'south']
 
+    # TransactionMiddleware stops SQLAlchemy from seeing updates done within the
+    # transaction. This is fine normally, because it is only used for advanced
+    # queries in read only views, or in tasks run by celery in a separate
+    # process, after the current transaction has completed. However, when
+    # testing, tasks are run eagerly, within the transaction. So we need to
+    # disable TransactionMiddleware to get tests to work
+    MIDDLEWARE_CLASSES = [m for m in MIDDLEWARE_CLASSES
+                          if m != 'django.middleware.transaction.TransactionMiddleware']
+
 else:
     CACHE_COUNT_TIMEOUT = 60
 
