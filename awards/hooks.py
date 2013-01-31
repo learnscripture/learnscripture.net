@@ -88,9 +88,8 @@ def verse_tested_receiver(sender, **kwargs):
     identity = sender
     verse = kwargs['verse']
     # Delay to allow this request's transaction to finish count to be updated.
-    if verse.version.is_bible:
-        awards.tasks.give_learning_awards.apply_async([identity.account_id],
-                                                      countdown=2)
+    awards.tasks.give_learning_awards.apply_async([identity.account_id],
+                                                  countdown=2)
 
 
 @receiver(public_verse_set_created)
