@@ -27,5 +27,16 @@ $(document).ready(function () {
             receiveAccountData(accountData);
         });
 
+        if (window.androidlearnscripture.setUrlForSharing) {
+            var rl = $("#id_referral_link");
+            var url;
+            if (rl.length > 0) {
+                url = rl.attr('href');
+                if (!url.match(/^http/)) {
+                    url = window.location.protocol + "//" + window.location.hostname + "/" + url;
+                }
+                window.androidlearnscripture.setUrlForSharing(url);
+            }
+        }
     }
 });
