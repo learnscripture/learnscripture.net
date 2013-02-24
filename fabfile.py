@@ -232,7 +232,7 @@ def push_sources():
     ensure_src_dir()
     push_rev = getattr(env, 'push_rev', None)
     if push_rev is None:
-        push_rev = local("hg parents --template '{node}'", capture=True)
+        push_rev = local("hg id", capture=True).split(" ")[0].strip().strip("+")
     # if hg finds no changes it returns an error, which we want to ignore
     local("hg push -f -r %(rev)s ssh://%(user)s@%(host)s/%(path)s || true" %
           dict(host=env.host,
