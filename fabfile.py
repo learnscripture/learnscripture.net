@@ -243,7 +243,7 @@ def push_sources():
     with cd(target.src_dir):
         run("hg update %s" % push_rev)
 
-        assert run("hg parents --template '{node}'").strip() == push_rev
+        assert run("hg id").split(" ")[0].strip().strip("+") == push_rev
 
     # Also need to sync files that are not in main sources VCS repo.
     push_secrets()
