@@ -7,6 +7,8 @@ from django.utils import timezone
 from accounts.forms import PreferencesForm
 from accounts.models import DEFAULT_THEME, THEME_FONTS
 
+from learnscripture.models import SiteNotice
+
 NOTICES_EXPIRE_AFTER_DAYS = 3
 
 def session_forms(request):
@@ -69,10 +71,12 @@ def notices(request):
                 l.append(notice)
         return l
 
+    retval = {'site_notices': SiteNotice.objects.current }
+
     if hasattr(request, 'identity'):
-        return {'notices': get_and_mark_notices}
-    else:
-        return {}
+        retval['notices'] = get_and_mark_notices
+
+    return retval
 
 
 def campaign_context_processor(account):
