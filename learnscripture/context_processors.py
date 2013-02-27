@@ -11,6 +11,18 @@ from learnscripture.models import SiteNotice
 
 NOTICES_EXPIRE_AFTER_DAYS = 3
 
+
+def memoize_nullary(f):
+    """
+    Memoizes a function that takes no arguments.  The memoization lasts only as
+    long as we hold a reference to the return value.
+    """
+    def func():
+        if not hasattr(func, 'retval'):
+            func.retval = f()
+        return func.retval
+    return func
+
 def session_forms(request):
     # Use callables here to avoid overhead when not needed.  The template will
     # call them when used
@@ -33,7 +45,7 @@ def referral_links(request):
             return None
         return identity.account.make_referral_link(request.build_absolute_uri())
 
-    return {'referral_link': mk_referral_link}
+    return {'referral_link': memoize_nullary(mk_referral_link)}
 
 
 class MenuItem(object):
@@ -71,10 +83,10 @@ def notices(request):
                 l.append(notice)
         return l
 
-    retval = {'site_notices': SiteNotice.objects.current }
+    retval = {'site_notices': memoize_nullary(SiteNotice.objects.current) }
 
     if hasattr(request, 'identity'):
-        retval['notices'] = get_and_mark_notices
+        retval['notices'] = memoize_nullary(get_and_mark_notices)
 
     return retval
 
