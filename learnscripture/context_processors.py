@@ -27,9 +27,6 @@ def session_forms(request):
     # Use callables here to avoid overhead when not needed.  The template will
     # call them when used
 
-    # We need different prefices on each form to avoid clashes with ids of
-    # fields. Same prefix must be set in handlers.py
-
     return {
         'preferences_form': lambda: PreferencesForm(instance=request.identity
                                                     if hasattr(request, 'identity')
@@ -53,6 +50,7 @@ class MenuItem(object):
         self.caption = caption
         self.path = path
         self.active = active
+
 
 def menu(request):
     identity = getattr(request, 'identity', None)
