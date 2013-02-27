@@ -18,3 +18,6 @@ class SiteNotice(models.Model):
     ends = models.DateTimeField()
 
     objects = SiteNoticeManager()
+
+    def __unicode__(self):
+        return self.message_html
