@@ -239,7 +239,7 @@ INSTALLED_APPS = [
     'rstify',
 ]
 
-ALLOWED_HOSTS = ["*.learnscripture.net", "learnscripture.net"]
+ALLOWED_HOSTS = [".learnscripture.net"]
 
 if DEBUG:
     INSTALLED_APPS.append('debug_toolbar')
