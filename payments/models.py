@@ -23,4 +23,13 @@ class Payment(models.Model):
         return u"Payment: %s to %s" % (self.amount, self.account if self.account else u"fund '%s'" % self.fund)
 
 
+class DonationDrive(models.Model):
+    start = models.DateTimeField()
+    finish = models.DateTimeField()
+    active = models.BooleanField()
+    message_html = models.TextField()
+    hide_if_donated_days = models.PositiveIntegerField(
+        help_text="The donation drive will be hidden for users who have donated within "
+        "this number of days")
+
 import payments.hooks
