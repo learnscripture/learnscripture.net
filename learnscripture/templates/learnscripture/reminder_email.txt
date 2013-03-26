@@ -13,7 +13,8 @@ you can do so here:
 
   http://{{ domain }}{% url 'account_details' %}
 
-Thanks,
+--
+This was an automated email from the learnscripture.net site,
+sent out according to your preferences.
 
-The {{ site_name }} team.
 {% endautoescape %}
