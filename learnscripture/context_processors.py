@@ -7,6 +7,8 @@ from django.utils import timezone
 from accounts.forms import PreferencesForm
 from accounts.models import DEFAULT_THEME, THEME_FONTS
 
+from payments.models import DonationDrive
+
 from learnscripture.models import SiteNotice
 
 NOTICES_EXPIRE_AFTER_DAYS = 3
@@ -85,6 +87,9 @@ def notices(request):
 
     if hasattr(request, 'identity'):
         retval['notices'] = memoize_nullary(get_and_mark_notices)
+
+        if request.identity.account is not None:
+            retval['donation_drives'] = DonationDrive.objects.current_for_account(request.identity.account)
 
     return retval
 

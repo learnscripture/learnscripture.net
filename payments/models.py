@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from paypal.standard.ipn.models import PayPalIPN
 
 from accounts.models import Account
@@ -23,6 +24,20 @@ class Payment(models.Model):
         return u"Payment: %s to %s" % (self.amount, self.account if self.account else u"fund '%s'" % self.fund)
 
 
+class DonationDriveManager(models.Manager):
+    def current(self):
+        now = timezone.now()
+        return self.filter(start__lte=now,
+                           finish__gte=now,
+                           active=True)
+
+    def current_for_account(self, account):
+        return [
+            d for d in self.current()
+            if d.active_for_account(account)
+            ]
+
+
 class DonationDrive(models.Model):
     start = models.DateTimeField()
     finish = models.DateTimeField()
@@ -31,5 +46,22 @@ class DonationDrive(models.Model):
     hide_if_donated_days = models.PositiveIntegerField(
         help_text="The donation drive will be hidden for users who have donated within "
         "this number of days")
+
+    objects = DonationDriveManager()
+
+    def active_for_account(self, account):
+        # We do this within a method on DonationDrive, rather than as part of
+        # the DonationDriveManager.current query, because it requires additional
+        # DB queries, and in general it will be faster to do a single query and
+        # discover that there are no current DonationDrives, than do the queries
+        # required to get last payment.
+        try:
+            last_payment = account.payments.order_by('-created')[0]
+        except IndexError:
+            # No payments:
+            return True
+        now = timezone.now()
+        return (now - last_payment.created).days > self.hide_if_donated_days
+
 
 import payments.hooks
