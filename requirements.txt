@@ -9,7 +9,7 @@ django-debug-toolbar
 python-memcached==1.48
 django-autoslug==1.5.0
 selenium
-raven==1.7.3
+raven==3.1.17
 -e git+https://github.com/jezdez/django_compressor.git@c9d5f43df839d44345965484dddfd7f034e207d2#egg=django-compressor
 django-spurl==0.6
 urlobject==2.0.0

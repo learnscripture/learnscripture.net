@@ -174,7 +174,6 @@ MIDDLEWARE_CLASSES = [
         (DEBUG or STAGING, 'learnscripture.middleware.PaypalDebugMiddleware'),
         (True, 'learnscripture.middleware.IdentityMiddleware'),
         (True, 'pagination.middleware.PaginationMiddleware'),
-        (True, 'raven.contrib.django.middleware.Sentry404CatchMiddleware'),
         (True, 'fiber.middleware.AdminPageMiddleware'),
     ]
     if b
@@ -229,7 +228,7 @@ INSTALLED_APPS = [
     'fiber',
     'bootstrapform',
     'pagination',
-    'raven.contrib.django',
+    'raven.contrib.django.raven_compat',
     'spurl',
     'paypal.standard.ipn',
     'campaign',
@@ -259,8 +258,8 @@ LOGGING = {
     },
     'handlers': {
         'sentry': {
-            'level': 'INFO',
-            'class': 'raven.contrib.django.handlers.SentryHandler',
+            'level': 'WARNING',
+            'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
         },
         'console': {
             'level': 'DEBUG',
@@ -362,6 +361,12 @@ CAMPAIGN_CONTEXT_PROCESSORS = [
     'learnscripture.context_processors.campaign_context_processor'
 ]
 
+### Raven
+
+RAVEN_CONFIG = {
+    'dsn': SENTRY_DSN,
+}
+
 ### Celery and RabbitMQ ###
 
 import djcelery
@@ -393,9 +398,6 @@ CELERYD_CONCURRENCY = 1
 
 CELERY_RESULT_BACKEND = 'disabled'
 
-### Sentry/Raven ###
-
-SENTRY_CLIENT = 'ravenclient.AsyncDjangoClient'
 
 ### LearnScripture.net specific settings ###
 
