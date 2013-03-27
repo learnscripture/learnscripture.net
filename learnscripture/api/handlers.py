@@ -23,7 +23,6 @@ from accounts.models import Account
 from bibleverses.models import UserVerseStatus, Verse, StageType, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, MAX_VERSE_QUERY_SIZE, TextVersion, quick_find, VerseSetType, TextType
 from learnscripture import session
 from learnscripture.decorators import require_identity_method
-from learnscripture.utils.logging import extra
 from learnscripture.views import session_stats, bible_versions_for_request, verse_sets_visible_for_request
 
 
