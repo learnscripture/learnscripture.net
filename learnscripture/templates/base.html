@@ -98,6 +98,7 @@
         </div>
         {% endif %}
 
+        {% block donation_drives %}
         {% if donation_drives %}
         <div class="message-container">
           {% for notice in donation_drives %}
@@ -107,6 +108,7 @@
           {% endfor %}
         </div>
         {% endif %}
+        {% endblock %}
 
         {% if notices %}
         <div class="message-container">

@@ -3,13 +3,14 @@
 {% load json_filters %}
 {% load url from future %}
 {% load account_utils %}
+{% load fiber_tags %}
+
+{% block donation_drives %}
+{% endblock %}
 
 {% block content %}
 
-
-<p>LearnScripture.net is funded entirely by donations.  If you would like to
-  donate to support the ongoing costs of running this site, that would be much
-  appreciated!</p>
+{% show_content "donation_page_top" %}
 
 {% if request.identity.account %}
 
