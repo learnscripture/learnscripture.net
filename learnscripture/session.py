@@ -8,7 +8,6 @@ from django.utils import timezone
 
 from accounts.models import Identity, Account
 from learnscripture.datastructures import make_choices
-from learnscripture.utils.logging import extra
 
 
 LearningType = make_choices('LearningType',
