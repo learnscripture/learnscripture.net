@@ -98,6 +98,16 @@
         </div>
         {% endif %}
 
+        {% if donation_drives %}
+        <div class="message-container">
+          {% for notice in donation_drives %}
+          <div class="notice donation-drive">
+            {{ notice.message_html|safe }}
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
         {% if notices %}
         <div class="message-container">
         {% for notice in notices %}
