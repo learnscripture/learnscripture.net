@@ -32,6 +32,8 @@ class DonationDriveManager(models.Manager):
                            active=True)
 
     def current_for_account(self, account):
+        if account.donations_disabled():
+            return []
         return [
             d for d in self.current()
             if d.active_for_account(account)
@@ -55,6 +57,8 @@ class DonationDrive(models.Model):
         # DB queries, and in general it will be faster to do a single query and
         # discover that there are no current DonationDrives, than do the queries
         # required to get last payment.
+        if account.donations_disabled():
+            return False
         try:
             last_payment = account.payments.order_by('-created')[0]
         except IndexError:

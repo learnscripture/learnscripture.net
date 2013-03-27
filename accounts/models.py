@@ -280,6 +280,9 @@ class Account(AbstractBaseUser):
             self.save()
             self.add_html_notice('Thanks for installing the Android app! Please remember to <a href="https://play.google.com/store/apps/details?id=net.learnscripture.webviewapp">rate it and leave any comments you have!</a>')
 
+    def donations_disabled(self):
+        return self.is_under_13
+
 
 def count_words(text):
     # This logic is reproduced client side in learn.js :: countWords
