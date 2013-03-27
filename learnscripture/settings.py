@@ -170,6 +170,7 @@ MIDDLEWARE_CLASSES = [
         (True, 'django.contrib.auth.middleware.AuthenticationMiddleware'),
         (True, 'django.contrib.messages.middleware.MessageMiddleware'),
         (True, 'django.middleware.clickjacking.XFrameOptionsMiddleware'),
+        (PRODUCTION, 'raven.contrib.django.raven_compat.middleware.Sentry404CatchMiddleware'),
         (DEVBOX, 'learnscripture.middleware.DebugMiddleware'),
         (DEBUG or STAGING, 'learnscripture.middleware.PaypalDebugMiddleware'),
         (True, 'learnscripture.middleware.IdentityMiddleware'),
