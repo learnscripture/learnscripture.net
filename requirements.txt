@@ -4,27 +4,27 @@ Django==1.5
 -e git+https://github.com/spookylukey/django-fiber.git@0149d86515e6bff17d52862bce542dbc202c347a#egg=django-fiber
 -e git+git://github.com/spookylukey/django-bootstrap-form.git@cee9d102c152240e4af07551b13755b53689dd36#egg=django-bootstrap-form
 django-pagination==1.0.7
--e hg+ssh://hg@bitbucket.org/spookylukey/django-piston#egg=django-piston
+-e hg+ssh://hg@bitbucket.org/spookylukey/django-piston@8fdaee2d8608#egg=django-piston
 django-debug-toolbar
 python-memcached==1.48
 django-autoslug==1.5.0
 selenium
 raven==1.7.3
--e git+https://github.com/jezdez/django_compressor.git#egg=django-compressor
+-e git+https://github.com/jezdez/django_compressor.git@c9d5f43df839d44345965484dddfd7f034e207d2#egg=django-compressor
 django-spurl==0.6
 urlobject==2.0.0
 django-cache-machine==0.6
 pytz
 -e git+https://github.com/spookylukey/django-paypal@94dae3d#egg=paypal
 docutils
--e git+git://github.com/spookylukey/django-campaign.git#egg=django-campaign
+-e git+git://github.com/spookylukey/django-campaign.git@e07ff64afbb35d86494779ad5143875dd13f43b3#egg=django-campaign
 supervisor
 Celery
 django-celery
--e git+https://github.com/spookylukey/django-app-metrics.git#egg=django-app-metrics
+-e git+https://github.com/spookylukey/django-app-metrics.git@896c58208da1057eebd0a6b1ea781152a8ad06c2#egg=django-app-metrics
 django-jsonfield==0.8.5
 sqlalchemy==0.7.7
--e hg+ssh://hg@bitbucket.org/mlavin/django-selectable#egg=django-selectable
+-e hg+ssh://hg@bitbucket.org/mlavin/django-selectable@1d5eedd99227#egg=django-selectable
 django-rstify
 psutil==0.5.1
 twilio==3.3.9
