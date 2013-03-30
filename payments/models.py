@@ -67,5 +67,9 @@ class DonationDrive(models.Model):
         now = timezone.now()
         return (now - last_payment.created).days > self.hide_if_donated_days
 
+    def __unicode__(self):
+        return "%s to %s" % (self.start.strftime("%Y-%m-%d"),
+                             self.finish.strftime("%Y-%m-%d")
+                             )
 
 import payments.hooks
