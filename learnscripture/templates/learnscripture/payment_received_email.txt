@@ -6,7 +6,7 @@ Thank you for your donation of {{ payment.mc_gross }} {{ payment.mc_currency }}!
 Donations like these really help to keep the site running, and
 allow us to make further improvements to the service.
 
-Hope you continue to enjoy and benefit from your use of the site!
+We hope you continue to enjoy and benefit from your use of the site!
 
 The {{ site.name }} team.
 
