@@ -68,6 +68,7 @@ def home(request):
         return HttpResponseRedirect(reverse('dashboard'))
     return render(request, 'learnscripture/home.html')
 
+
 def _login_redirect(request):
     return get_next(request, reverse('dashboard'))
 
@@ -266,7 +267,7 @@ def get_user_groups(identity):
     else:
         return groups, False
 
-# Dashboard:
+
 def dashboard(request):
 
     identity = getattr(request, 'identity', None)
@@ -510,6 +511,7 @@ def view_catechism(request, slug):
 
     return render(request, 'learnscripture/view_catechism.html', c)
 
+
 def verse_options(request):
     """
     Returns a page fragment showing a list of learning options for
@@ -544,6 +546,7 @@ def verse_options(request):
                   "learnscripture/verse_options.html",
                   {'uvs_list': uvss}
                   )
+
 
 def _reduce_uvs_set_for_verse(uvss):
     # Filters out multiple instances of non-
@@ -582,7 +585,6 @@ def is_continuous_set(verse_list):
 def view_verse_set(request, slug):
     verse_set = get_object_or_404(verse_sets_visible_for_request(request), slug=slug)
     c = {'include_referral_links': verse_set.public}
-
 
     version = None
     try:
@@ -650,7 +652,6 @@ def view_verse_set(request, slug):
     return render(request, 'learnscripture/single_verse_set.html', c)
 
 
-
 def add_passage_breaks(verse_list, breaks):
     retval = []
     sections = get_passage_sections(verse_list, breaks)
@@ -684,11 +685,6 @@ def edit_set(request, slug=None):
 
 @require_account_with_redirect
 def create_or_edit_set(request, set_type=None, slug=None):
-
-    # This view handles a lot (too much)!  It could be simplified by removing
-    # the form prefixes that distinguish between passage and selection sets,
-    # which are no longer needed. But various bits of CSS and javascript would
-    # need updating.
 
     version = request.identity.default_bible_version
 
@@ -803,7 +799,6 @@ def leaderboard(request):
     else:
         cutoff = None
 
-
     group = None
     if 'group' in request.GET:
         try:
@@ -811,12 +806,10 @@ def leaderboard(request):
         except (Group.DoesNotExist, ValueError):
             pass
 
-
     if thisweek:
         accounts = get_leaderboard_since(cutoff, page_num - 1, PAGE_SIZE, group=group)
     else:
         accounts = get_all_time_leaderboard(page_num - 1, PAGE_SIZE, group=group)
-
 
     # Now decorate these accounts with additional info from additional queries
     account_ids = [a['account_id'] for a in accounts]
@@ -899,6 +892,7 @@ def combine_timeline_stats(*statslists):
         retval.append(rec)
     return retval
 
+
 def user_stats_verses_timeline_stats_csv(request, username):
     account = get_object_or_404(Account.objects.active().filter(username=username))
     identity = account.identity
@@ -913,7 +907,6 @@ def user_stats_verses_timeline_stats_csv(request, username):
     for d, c1, c2 in rows:
         writer.writerow([d.strftime("%Y-%m-%d"), c1, c2])
     return resp
-
 
 
 @require_identity
@@ -971,10 +964,10 @@ def password_reset_done(request):
     return render(request, 'learnscripture/password_reset_done.html',
                   {'title': u'Password reset started'})
 
+
 def password_reset_complete(request):
     return render(request, 'learnscripture/password_reset_complete.html',
                   {'title': u'Password reset complete'})
-
 
 
 # Large copy and paste from django.contrib.auth.views, followed by customisations.
@@ -1401,6 +1394,7 @@ def contact(request):
                   {'title': 'Contact us',
                    'form': form,
                    })
+
 
 def send_contact_email(contact_form, account):
     email = contact_form.cleaned_data['email']
