@@ -57,7 +57,7 @@ Stats for {{ account.username }} on LearnScripture.net - the fun, easy and socia
     {% endif %}
     <tr>
       <th>Started using site</th>
-      <td>{{ account.identity.date_created }}</td>
+      <td>{{ account.identity.date_created|date:"j M Y" }}</td>
     </tr>
     {% if account.recruited_by and account.recruited_by.is_active %}
     <tr>
@@ -114,7 +114,7 @@ Stats for {{ account.username }} on LearnScripture.net - the fun, easy and socia
       {{ award.award_detail.points|intcomma }}
     </td>
     <td>
-      {{ award.created }}
+      {{ award.created|date:"j M Y" }}
     </td>
   </tr>
   {% endfor %}
