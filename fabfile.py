@@ -20,6 +20,7 @@ from fabric.operations import get
 # Host and login username:
 env.hosts = ['cciw@learnscripture.net']
 
+PUSH_HOST = env.hosts[0]
 
 # Subdirectory of DJANGO_APP_ROOT in which project sources will be stored
 SRC_SUBDIR = 'src'
@@ -134,12 +135,12 @@ def setup_rabbitmq_conf():
     rabbitmq_full = "%s/lib/%s" % (target.venv_dir, RABBITMQ_DIR)
     # Need to fix as per these instructions:
     # http://community.webfaction.com/questions/2366/can-i-use-rabbit-mq-on-the-shared-servers
-    local("rsync config/erl_inetrc cciw@cciw.co.uk:/home/cciw/.erl_inetrc")
+    local("rsync config/erl_inetrc %s:/home/cciw/.erl_inetrc" % PUSH_HOST)
     run("mkdir -p /home/cciw/.local/etc")
-    local("rsync config/hosts cciw@cciw.co.uk:/home/cciw/.local/etc/")
+    local("rsync config/hosts %s:/home/cciw/.local/etc/" % PUSH_HOST)
 
     # Custom rabbitmq-env file
-    local("rsync config/%s/rabbitmq-env cciw@cciw.co.uk:%s/sbin" % (target.NAME.lower(), rabbitmq_full))
+    local("rsync config/%s/rabbitmq-env %s:%s/sbin" % (target.NAME.lower(), PUSH_HOST, rabbitmq_full))
 
 
 @task
@@ -222,7 +223,7 @@ def secrets():
 
 @task
 def push_secrets():
-    local("rsync config/secrets.json cciw@cciw.co.uk:%s/config/secrets.json" % target.src_dir)
+    local("rsync config/secrets.json %s:%s/config/secrets.json" % (PUSH_HOST, target.src_dir))
 
 
 def push_sources():
@@ -257,7 +258,7 @@ def push_sources():
 @task
 def setup_supervisor():
     # One instance of supervisor, shared
-    local("rsync config/start_supervisor.sh cciw@cciw.co.uk:%s/bin" % PRODUCTION.venv_dir)
+    local("rsync config/start_supervisor.sh %s:%s/bin" % (PUSH_HOST, PRODUCTION.venv_dir))
     run("chmod +x %s/bin/start_supervisor.sh" % PRODUCTION.venv_dir)
     run("mkdir -p %s/etc" % PRODUCTION.venv_dir)
     upload_template("config/supervisord.conf", "%s/etc/supervisord.conf" % PRODUCTION.venv_dir,
