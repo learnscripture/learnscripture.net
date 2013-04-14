@@ -184,7 +184,7 @@ var learnscripture =
         // === Strings ===
 
         var adjustWordJoiningPunction = function (text) {
-            return text.replace('--', '-- '); // this can be used to join words in ESV
+            return text.replace(/--/g, '-- '); // this can be used to join words in ESV
         }
 
         var countWords = function (text) {
