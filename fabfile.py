@@ -18,7 +18,7 @@ from fabric.context_managers import cd, lcd, settings, hide
 from fabric.operations import get
 
 # Host and login username:
-env.hosts = ['cciw@cciw.co.uk']
+env.hosts = ['cciw@learnscripture.net']
 
 
 # Subdirectory of DJANGO_APP_ROOT in which project sources will be stored
