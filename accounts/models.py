@@ -505,6 +505,12 @@ class Identity(models.Model):
 
         s = self.verse_statuses.filter(reference=reference,
                                        version__slug=version_slug).select_related('version')
+
+        if len(s) == 0:
+            # Shouldn't be possible via UI. The client must be trying to record
+            # actions against verses they have never selected.
+            return None
+
         mem_stage = {
             StageType.READ: MemoryStage.SEEN,
             StageType.TEST: MemoryStage.TESTED,

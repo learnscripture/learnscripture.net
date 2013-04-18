@@ -121,6 +121,11 @@ class ActionCompleteHandler(BaseHandler):
 
         action_change = identity.record_verse_action(reference, version_slug,
                                                      stage, accuracy);
+
+        if action_change is None:
+            # implies client error
+            return rc.BAD_REQUEST
+
         score_logs = identity.award_action_points(reference, text,
                                                   old_memory_stage,
                                                   action_change, stage, accuracy)
