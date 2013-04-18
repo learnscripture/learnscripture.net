@@ -15,10 +15,8 @@ def require_identity(view_func):
     @wraps(view_func)
     def view(request, *args, **kwargs):
         if not hasattr(request, 'identity'):
-            identity = session.get_identity(request)
-            if identity is None:
-                identity = session.start_identity(request)
-                request.identity = identity
+            identity = session.start_identity(request)
+            request.identity = identity
         return view_func(request, *args, **kwargs)
     return view
 
