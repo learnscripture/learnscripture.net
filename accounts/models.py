@@ -361,6 +361,7 @@ class Identity(models.Model):
     testing_method = models.PositiveSmallIntegerField(choices=TestingMethod.choice_list,
                                                       null=True, default=None)
     enable_animations = models.BooleanField(blank=True, default=True)
+    enable_sounds = models.BooleanField(blank=True, default=False)
     interface_theme = models.CharField(max_length=30, choices=THEMES,
                                        default=DEFAULT_THEME)
     referred_by = models.ForeignKey(Account, null=True, default=None,
