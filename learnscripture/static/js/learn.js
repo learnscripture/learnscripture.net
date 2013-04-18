@@ -280,9 +280,35 @@ var learnscripture =
         };
 
         var beep = function(frequency, length) {
-            if (audioContext == null || !preferences.enableSounds) {
+            if (!preferences.enableSounds) {
                 return;
             }
+
+            if (audioContext == null) {
+                audioBeep(frequency, length);
+            } else {
+                webAudioBeep(frequency, length);
+            }
+        };
+
+        var audioBeep = function(frequency, length) {
+            var output = new Audio();
+            // Set up a mono channel at 44.1Khz
+            var sampleRate = 44100;
+            output.mozSetup(1, sampleRate);
+
+            // Create a sample buffer array
+            var samples = new Float32Array(Math.floor(sampleRate / 2 * length));
+            var g = 2* Math.PI * frequency / sampleRate;
+
+            // Fill the sample buffer array with values
+            for(var i=0; i<samples.length; i++){
+                samples[i] = Math.sin(g * i)
+            }
+            output.mozWriteAudio(samples);
+        }
+
+        var webAudioBeep = function(frequency, length) {
             var source = audioContext.createOscillator();
             source.frequency.value = frequency;
             source.connect(audioContext.destination);
