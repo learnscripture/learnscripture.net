@@ -13,6 +13,7 @@ from django.template.loader import render_to_string
 from django.utils.functional import wraps
 from django.utils import simplejson
 from django.utils import timezone
+from django.utils.decorators import method_decorator
 from django.utils.html import escape, mark_safe
 
 from piston.handler import BaseHandler
@@ -25,6 +26,21 @@ from learnscripture import session
 from learnscripture.decorators import require_identity_method
 from learnscripture.views import session_stats, bible_versions_for_request, verse_sets_visible_for_request
 
+
+
+def require_preexisting_identity(view_func):
+    """
+    Returns a 400 error if there isn't already an identity
+    """
+    @wraps(view_func)
+    def view(request, *args, **kwargs):
+        # Assumes IdentityMiddleware
+        if not hasattr(request, 'identity'):
+            return rc.BAD_REQUEST
+        return view_func(request, *args, **kwargs)
+    return view
+
+require_preexisting_identity_m = method_decorator(require_preexisting_identity)
 
 
 # We need a more capable 'validate' than the one provided by piston to get
@@ -97,7 +113,7 @@ def get_verse_set_id(verse_status):
 class ActionCompleteHandler(BaseHandler):
     allowed_methods = ('POST',)
 
-    @require_identity_method
+    @require_preexisting_identity_m
     def create(self, request):
         identity = request.identity
 
@@ -140,7 +156,7 @@ class ActionCompleteHandler(BaseHandler):
 class SkipVerseHandler(BaseHandler):
     allowed_methods = ('POST',)
 
-    @require_identity_method
+    @require_preexisting_identity_m
     def create(self, request):
         verse_status = get_verse_status(request.data)
         session.verse_status_skipped(request, verse_status['id'])
@@ -150,7 +166,7 @@ class SkipVerseHandler(BaseHandler):
 class CancelLearningVerseHandler(BaseHandler):
     allowed_methods = ('POST',)
 
-    @require_identity_method
+    @require_preexisting_identity_m
     def create(self, request):
         verse_status = get_verse_status(request.data)
         reference = verse_status['reference']
@@ -162,7 +178,7 @@ class CancelLearningVerseHandler(BaseHandler):
 class ResetProgressHandler(BaseHandler):
     allowed_methods = ('POST',)
 
-    @require_identity_method
+    @require_preexisting_identity_m
     def create(self, request):
         verse_status = get_verse_status(request.data)
         request.identity.reset_progress(verse_status['reference'],
@@ -173,7 +189,7 @@ class ResetProgressHandler(BaseHandler):
 class ChangeVersionHandler(BaseHandler):
     allowed_methods = ('POST',)
 
-    @require_identity_method
+    @require_preexisting_identity_m
     def create(self, request):
         verse_status = get_verse_status(request.data)
         verse_set_id = get_verse_set_id(verse_status)
@@ -354,6 +370,7 @@ class CheckDuplicatePassageSet(BaseHandler):
 class DeleteNotice(BaseHandler):
     allowed_methods = ('POST',)
 
+    @require_preexisting_identity_m
     def create(self, request):
         request.identity.notices.filter(id=int(request.data['id'])).delete()
 
