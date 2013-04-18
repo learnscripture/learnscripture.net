@@ -34,6 +34,7 @@ var learnscripture =
                         data.defaultBibleVersion = data.default_bible_version;
                         data.testingMethod = data.testing_method;
                         data.enableAnimations = data.enable_animations;
+                        data.enableSounds = data.enable_sounds;
                         data.interfaceTheme = data.interface_theme;
                         data.preferencesSetup = data.preferences_setup;
 

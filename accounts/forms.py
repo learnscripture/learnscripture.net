@@ -40,8 +40,11 @@ class PreferencesForm(forms.ModelForm):
 
     class Meta:
         model = Identity
-        fields = ['default_bible_version', 'testing_method',
-                  'enable_animations', 'interface_theme']
+        fields = ['default_bible_version',
+                  'testing_method',
+                  'enable_animations',
+                  'enable_sounds',
+                  'interface_theme']
 
 PreferencesForm.base_fields['default_bible_version'].required = True
 

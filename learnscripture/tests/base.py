@@ -50,7 +50,9 @@ class AccountTestMixin(object):
         KJV = TextVersion.objects.get(slug='KJV')
         identity = Identity.objects.create(default_bible_version=KJV,
                                            testing_method=TestingMethod.FULL_WORDS,
-                                           enable_animations=False)
+                                           enable_animations=False,
+                                           enable_sounds=False,
+                                           )
         account = Account.objects.create(email="test1@test.com",
                                           username="test1",
                                          )
