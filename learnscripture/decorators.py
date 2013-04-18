@@ -14,6 +14,7 @@ def require_identity(view_func):
     """
     @wraps(view_func)
     def view(request, *args, **kwargs):
+        # Assumes IdentityMiddleware
         if not hasattr(request, 'identity'):
             identity = session.start_identity(request)
             request.identity = identity
