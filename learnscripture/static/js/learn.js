@@ -109,6 +109,9 @@ var learnscripture =
         // Finish
         var redirect_to = '/dashboard/';
 
+
+        var audioContext = null;
+
         // ======== Generic utilities =========
 
         // === Randomising ===
@@ -276,16 +279,29 @@ var learnscripture =
             flashMsg(testingStatus.attr({'class': 'correct'}).text("Correct!"), word);
         };
 
+        var beep = function(frequency, length) {
+            if (audioContext == null || !preferences.enableSounds) {
+                return;
+            }
+            var source = audioContext.createOscillator();
+            source.frequency.value = frequency;
+            source.connect(audioContext.destination);
+            source.noteOn(0);
+            source.noteOff(audioContext.currentTime + length);
+        }
+
         var indicateMistake = function (mistakes, maxMistakes) {
             var msg = "Try again! (" + mistakes.toString() + "/" + maxMistakes.toString() + ")";
             flashMsg(testingStatus.attr({'class': 'incorrect'}).text(msg),
                      getWordAt(currentWordIndex));
+            beep(330, 0.05);
         };
 
         var indicateFail = function () {
             var word = getWordAt(currentWordIndex);
             word.addClass('incorrect');
             flashMsg(testingStatus.attr({'class': 'incorrect'}).text("Incorrect"), word);
+            beep(220, 0.05);
         };
 
         // ========== Actions completed =============
@@ -1506,6 +1522,12 @@ var learnscripture =
             isLearningPage = ($('#id-verse-wrapper').length > 0);
             if (!isLearningPage) {
                 return;
+            }
+
+            if (typeof AudioContext !== 'undefined') {
+                audioContext = new AudioContext();
+            } else if (typeof webkitAudioContext !== 'undefined') {
+                audioContext = new webkitAudioContext();
             }
 
             receivePreferences(learnscripture.getPreferences());

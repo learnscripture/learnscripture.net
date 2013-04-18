@@ -230,6 +230,7 @@ class SetPreferences(BaseHandler):
         ('default_bible_version', ('slug',)),
         'testing_method',
         'enable_animations',
+        'enable_sounds',
         'interface_theme',
         'preferences_setup',
         )
