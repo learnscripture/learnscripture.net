@@ -283,11 +283,14 @@ var learnscripture =
             if (!preferences.enableSounds) {
                 return;
             }
-
-            if (audioContext == null) {
-                audioBeep(frequency, length);
-            } else {
-                webAudioBeep(frequency, length);
+            try {
+                if (audioContext == null) {
+                    audioBeep(frequency, length);
+                } else {
+                    webAudioBeep(frequency, length);
+                }
+            } catch (e) {
+                console.log(e);
             }
         };
 
