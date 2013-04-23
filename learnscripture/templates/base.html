@@ -231,7 +231,6 @@
     <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.ajaxretry.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.ba-bbq.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.actual.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/raven-0.7.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-dropdown.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-modal.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-tabs.js"></script>
@@ -280,10 +279,10 @@
   })();
 
 </script>
+<script src="//d3nslu0hdya83q.cloudfront.net/dist/1.0/raven.min.js"></script>
 <script type="text/javascript">
 learnscripture.themeFonts = {{ theme_fonts|jsonify|safe }};
-Raven.config('{{ settings.SENTRY_DSN }}');
-window.onerror = Raven.process;
+Raven.config('{{ settings.SENTRY_DSN }}').install();
 </script>
   </body>
 </html>
