@@ -290,7 +290,7 @@ var learnscripture =
                     webAudioBeep(frequency, length);
                 }
             } catch (e) {
-                console.log(e);
+                Raven.captureException(e);
             }
         };
 
