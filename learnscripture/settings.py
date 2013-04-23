@@ -62,8 +62,6 @@ if LIVEBOX:
             }
         SECRET_KEY = secrets["STAGING_SECRET_KEY"]
         SENTRY_DSN = secrets["STAGING_SENTRY_DSN"]
-
-        COMPRESS_ENABLED = False
 else:
     DATABASES = {
         'default': {
