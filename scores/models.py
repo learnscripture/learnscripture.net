@@ -248,7 +248,9 @@ def get_verses_started_per_day(identity_id):
 
     q1 = (select([day_col],
                  and_(bibleverses_userversestatus.c.for_identity_id == identity_id,
-                      bibleverses_userversestatus.c.first_seen != None),
+                      bibleverses_userversestatus.c.first_seen != None,
+                      bibleverses_userversestatus.c.ignored == False,
+                      ),
                  from_obj=bibleverses_userversestatus
                  )
           .group_by(day_col,

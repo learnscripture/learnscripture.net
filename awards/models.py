@@ -478,7 +478,8 @@ class ConsistentLearnerAward(TimeBasedAward):
     def full_description(self):
         if self.level is AnyLevel:
             return (u"Awarded for starting to learn a new verse every day without gaps, "
-                    "over a period of time.")
+                    "over a period of time. Note that you have to keep learning the verses "
+                    "for them to be counted.")
         else:
             return u"Started learning a new verse every day for %s" % self.FRIENDLY_DAYS[self.level]
 
