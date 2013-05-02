@@ -1200,7 +1200,7 @@ def get_verse_started_running_streaks():
     from learnscripture.utils.sqla import default_engine
 
     # We can get the beginning of running streaks like this -
-    # all rows that have a row one day before them chronologically
+    # all rows that don't have a row one day before them chronologically
 
     sql1 = """
 SELECT
