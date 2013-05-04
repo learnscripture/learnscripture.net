@@ -226,11 +226,11 @@ def session_stats(identity):
                                            .filter(last_tested__gte=session_start,
                                                    ignored=False)
                                        )
-    stats['new_verses_tested'] = set(uvs.reference for uvs in
-                                     identity.verse_statuses\
-                                         .filter(first_seen__gte=session_start,
-                                                 ignored=False)
-                                     )
+    stats['new_verses_started'] = set(uvs.reference for uvs in
+                                      identity.verse_statuses\
+                                          .filter(first_seen__gte=session_start,
+                                                  ignored=False)
+                                      )
     return stats
 
 
