@@ -220,15 +220,17 @@ def get_next(request, default_url):
 def session_stats(identity):
     stats = {}
     session_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    all_verses_tested = identity.verse_statuses.filter(last_tested__gte=session_start,
-                                                       ignored=False)
-    # Need to dedupe for case of multiple UserVerseStatus for same verse
-    # (due to different versions and different VerseChoice objects)
-    all_verses_tested = list(all_verses_tested)
-    stats['new_verses_tested'] = set(uvs.reference for uvs in all_verses_tested
-                                     if uvs.first_seen is not None
-                                     and uvs.first_seen > session_start)
-    stats['total_verses_tested'] = set(uvs.reference for uvs in all_verses_tested)
+
+    stats['total_verses_tested'] = set(uvs.reference for uvs in
+                                       identity.verse_statuses\
+                                           .filter(last_tested__gte=session_start,
+                                                   ignored=False)
+                                       )
+    stats['new_verses_tested'] = set(uvs.reference for uvs in
+                                     identity.verse_statuses\
+                                         .filter(first_seen__gte=session_start,
+                                                 ignored=False)
+                                     )
     return stats
 
 
