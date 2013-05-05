@@ -20,7 +20,7 @@ from fabric.operations import get
 # Host and login username:
 env.hosts = ['cciw@learnscripture.net']
 
-PUSH_HOST = env.hosts[0]
+HOST = env.hosts[0]
 
 # Subdirectory of DJANGO_APP_ROOT in which project sources will be stored
 SRC_SUBDIR = 'src'
@@ -48,9 +48,9 @@ class Target(object):
         # of STATIC_ROOT in the settings.py that is used on the server.
         self.STATIC_ROOT = '/home/cciw/webapps/%s_static' % self.APP_BASE_NAME
 
-        self.src_dir = posixpath.join(self.DJANGO_APP_ROOT, SRC_SUBDIR)
-        self.venv_dir = posixpath.join(self.DJANGO_APP_ROOT, VENV_SUBDIR)
-        self.conf_dir = posixpath.join(self.src_dir, self.CONF_SUBDIR)
+        self.SRC_DIR = posixpath.join(self.DJANGO_APP_ROOT, SRC_SUBDIR)
+        self.VENV_DIR = posixpath.join(self.DJANGO_APP_ROOT, VENV_SUBDIR)
+        self.CONF_DIR = posixpath.join(self.SRC_DIR, self.CONF_SUBDIR)
 
 
 PRODUCTION = Target(
@@ -126,26 +126,26 @@ def full_rabbitmq_setup():
 @task
 def install_rabbitmq():
     # install into venv dir, different instance for STAGING and PRODUCTION
-    rabbitmq_base = "%s/lib/" % target.venv_dir
+    rabbitmq_base = "%s/lib/" % target.VENV_DIR
     with cd(rabbitmq_base):
         _download_and_unpack(RABBITMQ_SRC)
 
 @task
 def setup_rabbitmq_conf():
-    rabbitmq_full = "%s/lib/%s" % (target.venv_dir, RABBITMQ_DIR)
+    rabbitmq_full = "%s/lib/%s" % (target.VENV_DIR, RABBITMQ_DIR)
     # Need to fix as per these instructions:
     # http://community.webfaction.com/questions/2366/can-i-use-rabbit-mq-on-the-shared-servers
-    local("rsync config/erl_inetrc %s:/home/cciw/.erl_inetrc" % PUSH_HOST)
+    local("rsync config/erl_inetrc %s:/home/cciw/.erl_inetrc" % HOST)
     run("mkdir -p /home/cciw/.local/etc")
-    local("rsync config/hosts %s:/home/cciw/.local/etc/" % PUSH_HOST)
+    local("rsync config/hosts %s:/home/cciw/.local/etc/" % HOST)
 
     # Custom rabbitmq-env file
-    local("rsync config/%s/rabbitmq-env %s:%s/sbin" % (target.NAME.lower(), PUSH_HOST, rabbitmq_full))
+    local("rsync config/%s/rabbitmq-env %s:%s/sbin" % (target.NAME.lower(), HOST, rabbitmq_full))
 
 
 @task
 def setup_rabbitmq_users():
-    rabbitmq_full = "%s/lib/%s" % (target.venv_dir, RABBITMQ_DIR)
+    rabbitmq_full = "%s/lib/%s" % (target.VENV_DIR, RABBITMQ_DIR)
 
     rabbitmq_user = target.APP_BASE_NAME
     rabbitmq_vhost = rabbitmq_user
@@ -187,27 +187,27 @@ def install_dependencies():
     if getattr(env, 'no_installs', False):
         return
     ensure_virtualenv()
-    with virtualenv(target.venv_dir):
-        with cd(target.src_dir):
+    with virtualenv(target.VENV_DIR):
+        with cd(target.SRC_DIR):
             run_venv("pip install -r requirements.txt")
 
 
 def ensure_virtualenv():
-    if exists(target.venv_dir):
+    if exists(target.VENV_DIR):
         return
 
     with cd(target.DJANGO_APP_ROOT):
         run("virtualenv --no-site-packages --python=%s %s" %
             (PYTHON_BIN, VENV_SUBDIR))
         run("echo %s > %s/lib/%s/site-packages/projectsource.pth" %
-            (target.src_dir, VENV_SUBDIR, PYTHON_BIN))
+            (target.SRC_DIR, VENV_SUBDIR, PYTHON_BIN))
 
 
 def ensure_src_dir():
-    if not exists(target.src_dir):
-        run("mkdir -p %s" % target.src_dir)
-    with cd(target.src_dir):
-        if not exists(posixpath.join(target.src_dir, '.hg')):
+    if not exists(target.SRC_DIR):
+        run("mkdir -p %s" % target.SRC_DIR)
+    with cd(target.SRC_DIR):
+        if not exists(posixpath.join(target.SRC_DIR, '.hg')):
             run("hg init")
 
 
@@ -223,7 +223,7 @@ def secrets():
 
 @task
 def push_secrets():
-    local("rsync config/secrets.json %s:%s/config/secrets.json" % (PUSH_HOST, target.src_dir))
+    local("rsync config/secrets.json %s:%s/config/secrets.json" % (HOST, target.SRC_DIR))
 
 
 def push_sources():
@@ -238,10 +238,10 @@ def push_sources():
     local("hg push -f -r %(rev)s ssh://%(user)s@%(host)s/%(path)s || true" %
           dict(host=env.host,
                user=env.user,
-               path=target.src_dir,
+               path=target.SRC_DIR,
                rev=push_rev,
                ))
-    with cd(target.src_dir):
+    with cd(target.SRC_DIR):
         run("hg update %s" % push_rev)
 
         assert run("hg id").split(" ")[0].strip().strip("+") == push_rev
@@ -251,17 +251,17 @@ def push_sources():
 
     # This config is shared, and rarely updates, so we push to
     # PRODUCTION.
-    run("mkdir -p %s/etc" % PRODUCTION.venv_dir)
-    upload_template("config/pgbouncer_users.txt", "%s/etc/pgbouncer_users.txt" % PRODUCTION.venv_dir, context=secrets())
+    run("mkdir -p %s/etc" % PRODUCTION.VENV_DIR)
+    upload_template("config/pgbouncer_users.txt", "%s/etc/pgbouncer_users.txt" % PRODUCTION.VENV_DIR, context=secrets())
 
 
 @task
 def setup_supervisor():
     # One instance of supervisor, shared
-    local("rsync config/start_supervisor.sh %s:%s/bin" % (PUSH_HOST, PRODUCTION.venv_dir))
-    run("chmod +x %s/bin/start_supervisor.sh" % PRODUCTION.venv_dir)
-    run("mkdir -p %s/etc" % PRODUCTION.venv_dir)
-    upload_template("config/supervisord.conf", "%s/etc/supervisord.conf" % PRODUCTION.venv_dir,
+    local("rsync config/start_supervisor.sh %s:%s/bin" % (HOST, PRODUCTION.VENV_DIR))
+    run("chmod +x %s/bin/start_supervisor.sh" % PRODUCTION.VENV_DIR)
+    run("mkdir -p %s/etc" % PRODUCTION.VENV_DIR)
+    upload_template("config/supervisord.conf", "%s/etc/supervisord.conf" % PRODUCTION.VENV_DIR,
                     context=secrets())
     reload_supervisor()
 
@@ -278,7 +278,7 @@ def restart_supervisor():
     if getattr(env, 'no_restarts', False):
         return
 
-    run("%s/bin/start_supervisor.sh restart" % PRODUCTION.venv_dir)
+    run("%s/bin/start_supervisor.sh restart" % PRODUCTION.VENV_DIR)
 
 
 @task
@@ -338,8 +338,8 @@ def restart_webserver():
 @task
 def build_static():
     assert target.STATIC_ROOT.strip() != '' and target.STATIC_ROOT.strip() != '/'
-    with virtualenv(target.venv_dir):
-        with cd(target.src_dir):
+    with virtualenv(target.VENV_DIR):
+        with cd(target.SRC_DIR):
             run_venv("./manage.py collectstatic -v 0 --noinput")
 
     run("chmod -R ugo+r %s" % target.STATIC_ROOT)
@@ -356,8 +356,8 @@ def first_deployment_mode():
 def update_database():
     if getattr(env, 'no_db', False):
         return
-    with virtualenv(target.venv_dir):
-        with cd(target.src_dir):
+    with virtualenv(target.VENV_DIR):
+        with cd(target.SRC_DIR):
             if getattr(env, 'initial_deploy', False):
                 run_venv("./manage.py syncdb --all")
                 run_venv("./manage.py migrate --fake --noinput")
@@ -391,7 +391,7 @@ def restart_celeryd():
 
 @task
 def supervisorctl(*commands):
-    with virtualenv(PRODUCTION.venv_dir):
+    with virtualenv(PRODUCTION.VENV_DIR):
         run_venv("supervisorctl %s" % " ".join(commands))
 
 
@@ -403,8 +403,8 @@ def run_migrations():
 
 @task
 def manage_py_command(*commands):
-    with virtualenv(target.venv_dir):
-        with cd(target.src_dir):
+    with virtualenv(target.VENV_DIR):
+        with cd(target.SRC_DIR):
             run_venv("./manage.py %s" % ' '.join(commands))
 
 
