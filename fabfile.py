@@ -17,10 +17,12 @@ from fabric.contrib.files import exists, upload_template
 from fabric.context_managers import cd, lcd, settings, hide
 from fabric.operations import get
 
-# Host and login username:
-env.hosts = ['cciw@learnscripture.net']
 
-HOST = env.hosts[0]
+USER = 'cciw'
+HOST = 'learnscripture.net'
+
+# Host and login username:
+env.hosts = ['%s@%s' % (USER, HOST)]
 
 # Subdirectory of DJANGO_APP_ROOT in which project sources will be stored
 SRC_SUBDIR = 'src'
@@ -43,10 +45,10 @@ class Target(object):
         self.__dict__.update(kwargs)
 
         # Directory where everything to do with this app will be stored on the server.
-        self.DJANGO_APP_ROOT = '/home/cciw/webapps/%s_django' % self.APP_BASE_NAME
+        self.DJANGO_APP_ROOT = '/home/%s/webapps/%s_django' % (USER, self.APP_BASE_NAME)
         # Directory where static sources should be collected.  This must equal the value
         # of STATIC_ROOT in the settings.py that is used on the server.
-        self.STATIC_ROOT = '/home/cciw/webapps/%s_static' % self.APP_BASE_NAME
+        self.STATIC_ROOT = '/home/%s/webapps/%s_static' % (USER, self.APP_BASE_NAME)
 
         self.SRC_DIR = posixpath.join(self.DJANGO_APP_ROOT, SRC_SUBDIR)
         self.VENV_DIR = posixpath.join(self.DJANGO_APP_ROOT, VENV_SUBDIR)
@@ -105,12 +107,12 @@ def _download_and_unpack(tarball_src):
 @task
 def install_erlang():
     # install into $HOME/.local, since we only need it once.
-    with cd('/home/cciw/tmpstore/build'):
+    with cd('/home/%s/tmpstore/build' % USER):
         dirname = _download_and_unpack(ERLANG_SRC)
         with cd(dirname):
-            run("./configure --prefix=/home/cciw/.local"
+            run("./configure --prefix=/home/%s/.local"
                 "&& make"
-                "&& make install")
+                "&& make install" % USER)
 
 
 @task
@@ -132,9 +134,9 @@ def setup_rabbitmq_conf():
     rabbitmq_full = "%s/lib/%s" % (target.VENV_DIR, RABBITMQ_DIR)
     # Need to fix as per these instructions:
     # http://community.webfaction.com/questions/2366/can-i-use-rabbit-mq-on-the-shared-servers
-    local("rsync config/erl_inetrc %s:/home/cciw/.erl_inetrc" % HOST)
-    run("mkdir -p /home/cciw/.local/etc")
-    local("rsync config/hosts %s:/home/cciw/.local/etc/" % HOST)
+    local("rsync config/erl_inetrc %s:/home/%s/.erl_inetrc" % (HOST, USER))
+    run("mkdir -p /home/%s/.local/etc" % USER)
+    local("rsync config/hosts %s:/home/%s/.local/etc/" % (HOST, USER))
 
     # Custom rabbitmq-env file
     local("rsync config/%s/rabbitmq-env %s:%s/sbin" % (target.NAME.lower(), HOST, rabbitmq_full))
