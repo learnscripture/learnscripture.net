@@ -50,7 +50,6 @@ class Target(object):
 
         self.SRC_DIR = posixpath.join(self.DJANGO_APP_ROOT, SRC_SUBDIR)
         self.VENV_DIR = posixpath.join(self.DJANGO_APP_ROOT, VENV_SUBDIR)
-        self.CONF_DIR = posixpath.join(self.SRC_DIR, self.CONF_SUBDIR)
 
 
 PRODUCTION = Target(
@@ -58,7 +57,6 @@ PRODUCTION = Target(
     APP_BASE_NAME = "learnscripture",
     DB_USER = "cciw_learnscripture",
     DB_NAME = "cciw_learnscripture",
-    CONF_SUBDIR = "config/production",
 )
 
 STAGING = Target(
@@ -66,7 +64,6 @@ STAGING = Target(
     APP_BASE_NAME = "learnscripture_staging",
     DB_USER = "cciw_learnscripture_staging",
     DB_NAME = "cciw_learnscripture_staging",
-    CONF_SUBDIR = "config/staging",
 )
 
 target = None
