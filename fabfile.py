@@ -222,7 +222,7 @@ def secrets():
 
 @task
 def push_secrets():
-    local("rsync config/secrets.json %s:%s/config/secrets.json" % (HOST, target.SRC_DIR))
+    local("rsync config/secrets.json %s@%s:%s/config/secrets.json" % (USER, HOST, target.SRC_DIR))
 
 
 def push_sources():
