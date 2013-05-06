@@ -1,9 +1,9 @@
 from django.conf import settings
 from sqlalchemy.schema import MetaData, Table
-from sqlalchemy import create_engine
 
-default_engine = create_engine('postgresql://%(USER)s:%(PASSWORD)s@%(HOST)s:%(PORT)s/%(NAME)s'
-                               % settings.DATABASES['default'])
+from aldjemy.core import get_engine
+
+default_engine = get_engine()
 metadata = MetaData()
 
 def t(n):

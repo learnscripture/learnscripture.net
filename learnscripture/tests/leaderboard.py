@@ -8,10 +8,10 @@ from bibleverses.models import VerseSet, StageType, VerseSetType
 
 from scores.models import ScoreReason, get_verses_started_counts, get_verses_started_per_day, get_verses_finished_count
 
-from .base import UsesSQLAlchemyBase, IdentityBase
+from .base import IdentityBase
 
 
-class LeaderboardTests(UsesSQLAlchemyBase):
+class LeaderboardTests(TestCase):
 
     def setUp(self):
         a1 = Account.objects.create(username='testuser1',
@@ -39,7 +39,7 @@ class LeaderboardTests(UsesSQLAlchemyBase):
         self.assertNotContains(resp, self.a2.username)
 
 
-class VerseCountTests(IdentityBase, UsesSQLAlchemyBase):
+class VerseCountTests(IdentityBase, TestCase):
 
     def _create_overlapping_verse_sets(self, account):
         vs1 = VerseSet.objects.create(name="Psalm 23:1-3",

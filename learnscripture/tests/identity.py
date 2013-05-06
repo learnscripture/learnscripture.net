@@ -14,10 +14,10 @@ from bibleverses.models import VerseSet, TextVersion, StageType, MemoryStage, Ve
 from events.models import Event, EventType
 from scores.models import Scores
 
-from .base import FuzzyInt, UsesSQLAlchemyBase, IdentityBase
+from .base import FuzzyInt, IdentityBase
 
 
-class IdentityTests(IdentityBase, UsesSQLAlchemyBase):
+class IdentityTests(IdentityBase, TestCase):
 
     def test_add_verse_set(self):
         i = self._create_identity()
@@ -595,8 +595,6 @@ class IdentityTests(IdentityBase, UsesSQLAlchemyBase):
                                     version=version).count(),
             0)
 
-
-class IdentityTests2(IdentityBase, UsesSQLAlchemyBase):
 
     def test_consistent_learner_award(self):
         import awards.tasks

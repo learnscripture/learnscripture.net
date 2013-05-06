@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 from django.core.urlresolvers import reverse
-from django.test import LiveServerTestCase, TransactionTestCase
+from django.test import LiveServerTestCase
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
@@ -193,13 +193,4 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
         driver.find_element_by_id("id_login-password").clear()
         driver.find_element_by_id("id_login-password").send_keys("password")
         driver.find_element_by_css_selector("input[name=signin]").click()
-
-
-# This base class is required for tests that are not LiveServerTests and tests
-# code that uses sqlalchemy
-class UsesSQLAlchemyBase(TransactionTestCase):
-
-    def tearDown(self):
-        super(UsesSQLAlchemyBase, self).tearDown()
-        sqla_tear_down()
 
