@@ -385,7 +385,13 @@ SELECT COUNT(*) FROM
 
 
     def search(self, verse_sets, query):
-        return verse_sets.filter(name__icontains=query)
+        # Does the query look like a Bible reference?
+        reference = parse_as_bible_reference(query)
+        if reference is not None:
+            return verse_sets.filter(verse_choices__reference=reference)
+        else:
+            return verse_sets.filter(name__icontains=query)
+
 
 class VerseSet(models.Model):
     name = models.CharField(max_length=255)
@@ -869,6 +875,25 @@ version_specific_searches = {
 }
 
 
+def parse_as_bible_reference(query):
+    """
+    Returns a normalised Bible reference if the query looks like one,
+    or None otherwise.
+    """
+    query = query.lower()
+
+    bible_ref_re = (
+        '^.*'                # book name
+        '\d+'                # chapter
+        '\s*((v|:|\.)'       # optionally: v or : or .
+        '\s*\d+'             #             and start verse number
+        '(\s*-\s*\d+)?)?$'   #             and optionally end verse
+        )
+
+    if re.match(bible_ref_re, query) or query in BIBLE_BOOK_ABBREVIATIONS:
+        return normalise_reference(query)
+
+
 def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
                allow_searches=True):
     """
@@ -885,20 +910,9 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
     if query == u'':
         raise InvalidVerseReference("Please enter a query term or reference")
 
-    bible_ref_re = (
-        '^.*'                # book name
-        '\d+'                # chapter
-        '\s*((v|:|\.)'       # optionally: v or : or .
-        '\s*\d+'             #             and start verse number
-        '(\s*-\s*\d+)?)?$'   #             and optionally end verse
-        )
-
-
-    # Need to work out if this is probably a reference
-    if re.match(bible_ref_re, query) or query in BIBLE_BOOK_ABBREVIATIONS:
-        reference = normalise_reference(query)
-        if reference is not None:
-            return [ComboVerse(reference, parse_ref(reference, version, max_length=max_length))]
+    reference = parse_as_bible_reference(query)
+    if reference is not None:
+        return [ComboVerse(reference, parse_ref(reference, version, max_length=max_length))]
 
     if not allow_searches:
         raise InvalidVerseReference("Verse reference not recognised")
