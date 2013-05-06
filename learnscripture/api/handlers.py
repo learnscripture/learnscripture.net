@@ -314,8 +314,6 @@ class VerseFind(BaseHandler):
         except TextVersion.DoesNotExist:
             return rc.BAD_REQUEST
 
-        # Can't get 'fields' to work properly for this case, so pack into
-        # dictionaries.
         try:
             results = quick_find(q, version,
                                  max_length=MAX_VERSES_FOR_SINGLE_CHOICE
@@ -326,6 +324,8 @@ class VerseFind(BaseHandler):
         except InvalidVerseReference as e:
             return validation_error_response({'__all__': [e.args[0]]})
 
+        # Can't get 'fields' to work properly for this case, so pack into
+        # dictionaries.
         retval = [r.__dict__ for r in results]
         for item in retval:
             # Change 'verse' objects:

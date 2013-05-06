@@ -386,7 +386,9 @@ SELECT COUNT(*) FROM
 
     def search(self, verse_sets, query):
         # Does the query look like a Bible reference?
-        reference = parse_as_bible_reference(query)
+        reference = parse_as_bible_reference(query,
+                                             allow_whole_book=False,
+                                             allow_whole_chapter=False)
         if reference is not None:
             return verse_sets.filter(verse_choices__reference=reference)
         else:
@@ -875,23 +877,39 @@ version_specific_searches = {
 }
 
 
-def parse_as_bible_reference(query):
+def parse_as_bible_reference(query, allow_whole_book=True, allow_whole_chapter=True):
     """
     Returns a normalised Bible reference if the query looks like one,
     or None otherwise.
+
+    Pass allow_whole_book=False if queries that are just book names should be rejected.
+    Pass allow_whole_chapter=False if queries that are whole chapters should be rejected
     """
-    query = query.lower()
+    query = query.lower().strip()
 
     bible_ref_re = (
-        '^.*'                # book name
-        '\d+'                # chapter
-        '\s*((v|:|\.)'       # optionally: v or : or .
-        '\s*\d+'             #             and start verse number
-        '(\s*-\s*\d+)?)?$'   #             and optionally end verse
+        r'^[^\d]*'                   # book name
+        r'\s+'                       # space
+        r'(\d+)'                     # chapter
+        r'\s*('                      # optionally:
+            r'(v|:|\.)'              #    v or : or .
+            r'\s*\d+'                #    and start verse number
+            r'(\s*-\s*\d+)?)?'       #    and optionally end verse
+        r'$'
         )
 
-    if re.match(bible_ref_re, query) or query in BIBLE_BOOK_ABBREVIATIONS:
-        return normalise_reference(query)
+    m = re.match(bible_ref_re, query)
+    if m:
+        if not allow_whole_chapter and m.groups()[1] is None:
+            return None
+        else:
+            return normalise_reference(query)
+    else:
+        if allow_whole_book and query in BIBLE_BOOK_ABBREVIATIONS:
+            return normalise_reference(query)
+
+
+    return None
 
 
 def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
@@ -910,7 +928,7 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
     if query == u'':
         raise InvalidVerseReference("Please enter a query term or reference")
 
-    reference = parse_as_bible_reference(query)
+    reference = parse_as_bible_reference(query, allow_whole_book=not allow_searches)
     if reference is not None:
         return [ComboVerse(reference, parse_ref(reference, version, max_length=max_length))]
 

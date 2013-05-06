@@ -394,6 +394,19 @@
     }
 },
 {
+    "pk" : null,
+    "model" : "bibleverses.verse",
+    "fields" : {
+        "reference" : "Matthew 4:21",
+        "chapter_number" : 4,
+        "text" : "Going on from there he saw two other brothers, James the son of Zebedee and John his brother, in a boat with Zebedee their father, mending their nets. Then he called them. ",
+        "book_number" : 39,
+        "version" : 2,
+        "verse_number" : 21,
+        "bible_verse_number" : 23230
+     }
+},
+{
     "pk": null,
     "model": "bibleverses.verse",
     "fields": {
