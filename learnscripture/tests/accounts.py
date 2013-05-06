@@ -13,7 +13,6 @@ from bibleverses.models import MemoryStage, StageType
 from events.models import Event, EventType
 from scores.models import Scores, ScoreReason
 
-from .base import UsesSQLAlchemyBase
 
 class AccountTests(TestCase):
     def test_password(self):
@@ -114,10 +113,6 @@ class AccountTests(TestCase):
                          (4 * Scores.POINTS_PER_WORD * 0.9)
                          + (4 * Scores.POINTS_PER_WORD * Scores.VERSE_LEARNT_BONUS))
 
-
-
-
-class AccountTests2(UsesSQLAlchemyBase):
 
     def test_addict_award(self):
         import awards.tasks
