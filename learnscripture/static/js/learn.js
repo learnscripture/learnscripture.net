@@ -110,8 +110,6 @@ var learnscripture =
         var redirect_to = '/dashboard/';
 
 
-        var audioContext = null;
-
         // ======== Generic utilities =========
 
         // === Randomising ===
@@ -283,41 +281,8 @@ var learnscripture =
             if (!preferences.enableSounds) {
                 return;
             }
-            try {
-                if (audioContext == null) {
-                    audioBeep(frequency, length);
-                } else {
-                    webAudioBeep(frequency, length);
-                }
-            } catch (e) {
-                Raven.captureException(e);
-            }
+            learnscripture.doBeep(frequency, length);
         };
-
-        var audioBeep = function(frequency, length) {
-            var output = new Audio();
-            // Set up a mono channel at 44.1Khz
-            var sampleRate = 44100;
-            output.mozSetup(1, sampleRate);
-
-            // Create a sample buffer array
-            var samples = new Float32Array(Math.floor(sampleRate / 2 * length));
-            var g = 2* Math.PI * frequency / sampleRate;
-
-            // Fill the sample buffer array with values
-            for(var i=0; i<samples.length; i++){
-                samples[i] = Math.sin(g * i)
-            }
-            output.mozWriteAudio(samples);
-        }
-
-        var webAudioBeep = function(frequency, length) {
-            var source = audioContext.createOscillator();
-            source.frequency.value = frequency;
-            source.connect(audioContext.destination);
-            source.noteOn(0);
-            source.noteOff(audioContext.currentTime + length);
-        }
 
         var indicateMistake = function (mistakes, maxMistakes) {
             var msg = "Try again! (" + mistakes.toString() + "/" + maxMistakes.toString() + ")";
@@ -1552,13 +1517,7 @@ var learnscripture =
             if (!isLearningPage) {
                 return;
             }
-
-            if (typeof AudioContext !== 'undefined') {
-                audioContext = new AudioContext();
-            } else if (typeof webkitAudioContext !== 'undefined') {
-                audioContext = new webkitAudioContext();
-            }
-
+            learnscripture.setupAudio();
             receivePreferences(learnscripture.getPreferences());
             receiveAccountData(learnscripture.getAccountData());
 
