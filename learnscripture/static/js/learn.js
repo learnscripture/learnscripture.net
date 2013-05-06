@@ -742,7 +742,10 @@ var learnscripture =
             hintsShown = 0;
             // For very short verses, allow fewer hints e.g.  2 or 3 word
             // verses should get just 1 hint, with a maximum of 4 hints
-            maxHintsToShow = Math.min(Math.floor(currentVerseStatus.wordCount/2), 4);
+            // for normal testing, 2 hints for first letter testing.
+            maxHintsToShow = Math.min(Math.floor(currentVerseStatus.wordCount/2),
+                                      preferences.testingMethod == TEST_FULL_WORDS
+                                      ? 4 : 2);
         };
 
         var testContinue = function () {
@@ -755,13 +758,15 @@ var learnscripture =
             var wordStr = stripPunctuation(word.text());
             var typed = stripPunctuation(inputBox.val().toLowerCase());
 
-            if (typed == "" || typed.slice(0, 1) != wordStr.toLowerCase().slice(0,1)) {
+            if (preferences.testingMethod == TEST_FULL_WORDS &&
+                (typed == "" || typed.slice(0, 1) != wordStr.toLowerCase().slice(0,1))) {
                 // show first letter hint
                 inputBox.val(wordStr.slice(0, 1));
             } else {
                 // show full word hint, and move on.
                 inputBox.val(wordStr);
-                checkCurrentWord();
+                moveOn();
+                testingStatus.hide();
             }
 
             inputBox.focus();
@@ -793,27 +798,31 @@ var learnscripture =
             }
         };
 
+        var moveOn = function () {
+            var wordIdx = currentWordIndex;
+            var word = getWordAt(wordIdx);
+            showWord(word.find('*'));
+            inputBox.val('');
+            setProgress(currentStageIdx, (wordIdx + 1) / wordList.length);
+            if (wordIdx + 1 === wordList.length) {
+                testComplete();
+            } else {
+                currentWordIndex++;
+                adjustTypingBox();
+                var isReference = getWordAt(currentWordIndex).hasClass('reference');
+                if (isReference) {
+                    fadeVerseTitle(true);
+                }
+
+            }
+        };
+
         var checkCurrentWord = function () {
             var wordIdx = currentWordIndex;
             var word = getWordAt(wordIdx);
             var wordStr = stripPunctuation(word.text().toLowerCase());
             var typed = stripPunctuation(inputBox.val().trim().toLowerCase());
-            var moveOn = function () {
-                showWord(word.find('*'));
-                inputBox.val('');
-                setProgress(currentStageIdx, (wordIdx + 1) / wordList.length);
-                if (wordIdx + 1 === wordList.length) {
-                    testComplete();
-                } else {
-                    currentWordIndex++;
-                    adjustTypingBox();
-                    var isReference = getWordAt(currentWordIndex).hasClass('reference');
-                    if (isReference) {
-                        fadeVerseTitle(true);
-                    }
 
-                }
-            };
             if (matchWord(wordStr, typed)) {
                 indicateSuccess();
                 moveOn();
