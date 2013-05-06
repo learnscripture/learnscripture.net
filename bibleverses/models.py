@@ -384,6 +384,9 @@ SELECT COUNT(*) FROM
         return cursor.fetchall()[0][0]
 
 
+    def search(self, verse_sets, query):
+        return verse_sets.filter(name__icontains=query)
+
 class VerseSet(models.Model):
     name = models.CharField(max_length=255)
     slug = AutoSlugField(populate_from='name', unique=True)
