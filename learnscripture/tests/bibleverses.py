@@ -104,12 +104,6 @@ class ParseRefTests(TestCase):
 
         self.assertEqual(l2['Genesis 1:2-3'].chapter_number, l1['Genesis 1:2'].chapter_number)
 
-    def test_quick_find_song_of_solomon(self):
-        version = TextVersion.objects.get(slug='KJV')
-        results = quick_find('Song of Solomon 1:1', version)
-        self.assertEqual(results[0].verses[0].reference,
-                         "Song of Solomon 1:1")
-
 
 class MockUVS(object):
     def __init__(self, reference):

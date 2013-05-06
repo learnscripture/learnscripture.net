@@ -5,9 +5,11 @@ from django.test import TestCase
 from django.utils import timezone
 
 from accounts.models import Account
-from bibleverses.models import VerseSet, VerseSetType
+from bibleverses.models import VerseSet, VerseSetType, TextVersion, quick_find
 
 class SearchTests(TestCase):
+
+    fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
 
     def setUp(self):
         self.account = AutoFixture(Account).create(1)[0]
@@ -49,3 +51,9 @@ class SearchTests(TestCase):
                                           "Gen 1:1")
         self.assertEqual(len(results), 1)
         self.assertEqual(list(results), [vs1])
+
+    def test_quick_find_song_of_solomon(self):
+        version = TextVersion.objects.get(slug='KJV')
+        results = quick_find('Song of Solomon 1:1', version)
+        self.assertEqual(results[0].verses[0].reference,
+                         "Song of Solomon 1:1")
