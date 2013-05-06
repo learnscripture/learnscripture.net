@@ -466,7 +466,7 @@ def choose(request):
     # so is missing here.
 
     if 'q' in request.GET:
-        verse_sets = verse_sets.filter(name__icontains=request.GET['q'])
+        verse_sets = VerseSet.objects.search(verse_sets, request.GET['q'])
 
     if 'new' in request.GET:
         verse_sets = verse_sets.order_by('-date_added')
