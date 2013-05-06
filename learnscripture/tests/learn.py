@@ -419,9 +419,9 @@ class LearnTests(LiveServerTests):
                              None)
             hint_btn.click()
 
-        # First two words should be marked correct
+        # First two words should not be visually marked correct
         for i in range(0, 2):
-            self.assertIn('correct', driver.find_element_by_id('id-word-%d' % i).get_attribute('class'))
+            self.assertIn('', driver.find_element_by_id('id-word-%d' % i).get_attribute('class'))
 
         # Hint button should be disabled after 4 clicks
         self.assertEqual(driver.find_element_by_id('id-hint-btn').get_attribute('disabled'),
