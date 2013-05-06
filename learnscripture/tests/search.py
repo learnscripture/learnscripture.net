@@ -77,3 +77,9 @@ class SearchTests(TestCase):
         self.assertEqual(None, parse_as_bible_reference("Matthew 1", allow_whole_chapter=False))
         self.assertNotEqual(None, parse_as_bible_reference("Matthew 1", allow_whole_chapter=True))
 
+    def test_quick_find_passage_mode(self):
+        version = TextVersion.objects.get(slug='KJV')
+        self.assertNotEqual(None, quick_find("Genesis 1:1-2:2", version, allow_searches=False,
+                                             max_length=1000,
+                                             ))
+
