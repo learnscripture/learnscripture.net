@@ -21,6 +21,7 @@ var learnscripture = (function (learnscripture, $) {
         var val = $(ev.target).closest('div').find('input').val();
         var q = $.deparam(window.location.search.replace('?', ''));
         q['group'] = val;
+        q['p'] = '1';
         window.location = window.location.pathname + '?' + $.param(q);
     };
 
