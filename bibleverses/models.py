@@ -897,7 +897,7 @@ def parse_as_bible_reference(query, allow_whole_book=True, allow_whole_chapter=T
             r'('                     #    and optionally:
               r'\s*-\s*\d+'          #        end verse/next chapter num
               r'(\s*(v|:|\.)'        #        and optionally end verse
-               r'\s*\d+)'
+               r'\s*\d+)?'
             r')?'
         r')?'
         r'$'

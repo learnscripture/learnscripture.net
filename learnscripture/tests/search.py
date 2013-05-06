@@ -76,6 +76,9 @@ class SearchTests(TestCase):
         self.assertNotEqual(None, parse_as_bible_reference("Matthew", allow_whole_book=True))
         self.assertEqual(None, parse_as_bible_reference("Matthew 1", allow_whole_chapter=False))
         self.assertNotEqual(None, parse_as_bible_reference("Matthew 1", allow_whole_chapter=True))
+        self.assertNotEqual(None, parse_as_bible_reference("Matthew 1:1"))
+        self.assertNotEqual(None, parse_as_bible_reference("Matthew 1:1-2"))
+        self.assertNotEqual(None, parse_as_bible_reference("Matthew 1:1-2:3"))
 
     def test_quick_find_passage_mode(self):
         version = TextVersion.objects.get(slug='KJV')
