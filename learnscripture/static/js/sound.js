@@ -4,6 +4,7 @@ var learnscripture =
 
         var isSetup = false;
         var audioContext = null;
+        var useAudio = false;
         var useMozSetup = false;
 
         var setupAudio = function () {
@@ -15,12 +16,14 @@ var learnscripture =
                 audioContext = new AudioContext();
             } else if (typeof webkitAudioContext !== 'undefined') {
                 audioContext = new webkitAudioContext();
-            } else {
+            } else if (typeof Audio !== 'undefined') {
+                useAudio = true;
                 var test = new Audio();
                 if (test.mozSetup !== undefined) {
                     useMozSetup = true;
                 }
             }
+            isSetup = true;
         };
 
         var mozAudioBeep = function (frequency, length) {
@@ -130,13 +133,13 @@ var learnscripture =
 
         var doBeep = function (frequency, length) {
             try {
-                if (audioContext == null) {
+                if (useAudio) {
                     if (useMozSetup) {
                         mozAudioBeep(frequency, length);
                     } else {
                         dataUriAudioBeep(frequency, length);
                     }
-                } else {
+                } else if (audioContext != null) {
                     webAudioBeep(frequency, length);
                 }
             } catch (e) {
