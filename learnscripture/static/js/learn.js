@@ -742,10 +742,10 @@ var learnscripture =
             hintsShown = 0;
             // For very short verses, allow fewer hints e.g.  2 or 3 word
             // verses should get just 1 hint, with a maximum of 4 hints
-            // for normal testing, 2 hints for first letter testing.
+            // for normal testing, 3 hints for first letter testing.
             maxHintsToShow = Math.min(Math.floor(currentVerseStatus.wordCount/2),
                                       preferences.testingMethod == TEST_FULL_WORDS
-                                      ? 4 : 2);
+                                      ? 4 : 3);
         };
 
         var testContinue = function () {
