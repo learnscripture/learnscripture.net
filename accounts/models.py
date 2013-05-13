@@ -59,6 +59,13 @@ FREE_TRIAL_LENGTH_DAYS = 62 # 2 months
 # and so sometimes they just delegate to Account methods.
 
 class AccountManager(UserManager):
+    def visible_for_account(self, account):
+        qs = self.active()
+        if account is None or not account.is_hellbanned:
+            # Only hellbanned users see each other
+            qs = qs.exclude(is_hellbanned=True)
+        return qs
+
     def active(self):
         return self.get_query_set().filter(is_active=True)
 
