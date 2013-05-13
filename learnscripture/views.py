@@ -421,6 +421,7 @@ def choose(request):
     Choose a verse or verse set
     """
     default_bible_version = default_bible_version_for_request(request)
+    verse_sets = verse_sets_visible_for_request(request)
 
     if request.method == "POST":
         if not has_preferences(request):
@@ -438,7 +439,7 @@ def choose(request):
         vs_id = request.POST.get('verseset_id', None)
         if vs_id is not None:
             try:
-                vs = identity.verse_sets_visible().prefetch_related('verse_choices').get(id=vs_id)
+                vs = verse_sets.prefetch_related('verse_choices').get(id=vs_id)
             except VerseSet.DoesNotExist:
                 # Shouldn't be possible by clicking on buttons.
                 pass
@@ -459,7 +460,7 @@ def choose(request):
                                  session.LearningType.LEARNING)
 
     c = {'title': u'Choose verses'}
-    verse_sets = verse_sets_visible_for_request(request).order_by('name').prefetch_related('verse_choices')
+    verse_sets = verse_sets.order_by('name').prefetch_related('verse_choices')
 
     # Searching for verse sets is done via this view.
     # But looking up individual verses is done by AJAX,
@@ -572,10 +573,7 @@ def get_default_bible_version():
 
 
 def verse_sets_visible_for_request(request):
-    if hasattr(request, 'identity'):
-        return request.identity.verse_sets_visible()
-    else:
-        return VerseSet.objects.public()
+    return VerseSet.objects.visible_for_account(account_from_request(request))
 
 
 def is_continuous_set(verse_list):
