@@ -62,14 +62,31 @@ class TotalScore(models.Model):
     visible = models.BooleanField(default=True)
 
 
-def active_user_query(q):
+def active_user_query(q, hellbanned_mode):
     from learnscripture.utils.sqla import accounts_account as account
-    return (q
-            .where(account.c.is_active == True)
-            )
+    retval = (q
+              .where(account.c.is_active == True)
+              )
+    if not hellbanned_mode:
+        retval = (retval
+                  .where(account.c.is_hellbanned != True)
+                  )
+    return retval
 
 
-def get_all_time_leaderboard(page, page_size, group=None):
+def leaderboard_group_filter(q, hellbanned_mode, group):
+    from learnscripture.utils.sqla import accounts_account
+
+    if group is not None:
+        members = group.members.all()
+        if not hellbanned_mode:
+            members = members.exclude(is_hellbanned=True)
+        account_ids = [a.id for a in members]
+        q = q.where(accounts_account.c.id.in_(account_ids))
+    return q
+
+
+def get_all_time_leaderboard(hellbanned_mode, page, page_size, group=None):
     # page is zero indexed
 
     from learnscripture.utils.sqla import default_engine, accounts_account, scores_totalscore
@@ -84,16 +101,14 @@ def get_all_time_leaderboard(page, page_size, group=None):
 
     subq1 = (
         active_user_query(select([totalscore.c.account_id, totalscore.c.points],
-                                 from_obj=totalscore.join(account)))
+                                 from_obj=totalscore.join(account)),
+                          hellbanned_mode)
         .group_by(totalscore.c.account_id,
                   totalscore.c.points)
         .order_by(totalscore.c.points.desc())
         )
 
-    if group is not None:
-        account_ids = [a.id for a in group.members.all()]
-        subq1 = subq1.where(account.c.id.in_(account_ids))
-
+    subq1 = leaderboard_group_filter(subq1, hellbanned_mode, group)
     subq1 = subq1.alias()
 
     q1 = (select([subq1.c.account_id,
@@ -112,7 +127,7 @@ def get_all_time_leaderboard(page, page_size, group=None):
             for r in results]
 
 
-def get_leaderboard_since(since, page, page_size, group=None):
+def get_leaderboard_since(since, hellbanned_mode, page, page_size, group=None):
     # page is zero indexed
 
     # This uses a completely different strategy to get_all_time_leaderboard, and
@@ -132,15 +147,13 @@ def get_leaderboard_since(since, page, page_size, group=None):
     subq1 = (
         active_user_query(select([scorelog.c.account_id,
                                   func.sum(scorelog.c.points).label('sum_points')],
-                                 from_obj=scorelog.join(account)))
+                                 from_obj=scorelog.join(account)),
+                          hellbanned_mode)
         .where(scorelog.c.created > since)
         .group_by(scorelog.c.account_id)
         )
 
-    if group is not None:
-        account_ids = [a.id for a in group.members.all()]
-        subq1 = subq1.where(account.c.id.in_(account_ids))
-
+    subq1 = leaderboard_group_filter(subq1, hellbanned_mode, group)
 
     subq1 = subq1.order_by(subq1.c.sum_points.desc())
     subq1 = subq1.alias()
@@ -162,19 +175,28 @@ def get_leaderboard_since(since, page, page_size, group=None):
             for r in results]
 
 
-def get_rank_all_time(total_score_obj):
-    return TotalScore.objects.filter(
+def get_rank_all_time(total_score_obj, hellbanned_mode):
+    qs = TotalScore.objects.filter(
         points__gt=total_score_obj.points,
         account__is_active=True
-        ).count() + 1
+        )
+    if not hellbanned_mode:
+        qs = qs.exclude(account__is_hellbanned=True)
+
+    return qs.count() + 1
 
 
-def get_rank_this_week(points_this_week):
+def get_rank_this_week(points_this_week, hellbanned_mode):
     n = timezone.now()
-    return ScoreLog.objects.filter(created__gt=n - timedelta(7))\
+    qs = ScoreLog.objects.filter(created__gt=n - timedelta(7))\
         .filter(account__is_active=True)\
         .values('account_id').annotate(sum_points=models.Sum('points'))\
-        .filter(sum_points__gt=points_this_week).count() + 1
+        .filter(sum_points__gt=points_this_week)
+
+    if not hellbanned_mode:
+        qs = qs.exclude(account__is_hellbanned=True)
+
+    return qs.count() + 1
 
 
 def get_number_of_distinct_hours_for_account_id(account_id):

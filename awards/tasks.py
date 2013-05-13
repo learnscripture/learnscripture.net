@@ -90,15 +90,32 @@ def give_recruiter_award(account_id):
 
 
 @task(ignore_result=True)
-def give_champion_awards():
+def give_champion_awards(hellbanned=False):
     now = timezone.now()
+
     # Reigning weekly champion:
-    champion_id = get_leaderboard_since(now - timedelta(days=7), 0, 1)[0]['account_id']
+    champion_id = get_leaderboard_since(now - timedelta(days=7), hellbanned, 0, 1)[0]['account_id']
     champion = Account.objects.get(id=champion_id)
-    old_champions = set([a.account for a in (Award.objects
-                                             .filter(award_type=AwardType.REIGNING_WEEKLY_CHAMPION)
-                                             .select_related('account'))
-                         ])
+
+    old_awards = (Award.objects
+                  .filter(award_type=AwardType.REIGNING_WEEKLY_CHAMPION)
+                  .select_related('account'))
+
+    # Construction of alternate reality for hellbanned users is a bit tricky,
+    # and has holes in it when it comes to the champion awards, but this is good
+    # enough.
+
+    if hellbanned:
+        if champion.is_hellbanned:
+            # If in hellbanned mode, we only remove champion awards from
+            # hellbanned users.
+            old_awards = old_awards.filter(account__is_hellbanned=True)
+        else:
+            # champion wasn't a hellbanned user anyway, so awards
+            # will have been distributed by give_champion_awards(hellbanned=False)
+            return
+
+    old_champions = set([a.account for a in old_awards])
 
     # old_champions should only contain 1 item, but DB doesn't guarantee that,
     # so we cope with errors here by assuming multiple old champions

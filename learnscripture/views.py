@@ -782,6 +782,14 @@ def create_or_edit_set(request, set_type=None, slug=None):
 
     return render(request, 'learnscripture/create_set.html', c)
 
+def get_hellbanned_mode(request):
+    account = account_from_request(request)
+    if account is None:
+        # Guests see the site as normal users
+        return False
+    else:
+        # hellbanned users see the hellbanned version of reality
+        return account.is_hellbanned
 
 def leaderboard(request):
     page_num = None # 1-indexed page page
@@ -808,10 +816,13 @@ def leaderboard(request):
         except (Group.DoesNotExist, ValueError):
             pass
 
+    hellbanned_mode = get_hellbanned_mode(request)
     if thisweek:
-        accounts = get_leaderboard_since(cutoff, page_num - 1, PAGE_SIZE, group=group)
+        accounts = get_leaderboard_since(cutoff, hellbanned_mode,
+                                         page_num - 1, PAGE_SIZE, group=group)
     else:
-        accounts = get_all_time_leaderboard(page_num - 1, PAGE_SIZE, group=group)
+        accounts = get_all_time_leaderboard(hellbanned_mode, page_num - 1,
+                                            PAGE_SIZE, group=group)
 
     # Now decorate these accounts with additional info from additional queries
     account_ids = [a['account_id'] for a in accounts]
