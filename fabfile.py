@@ -257,7 +257,7 @@ def push_sources():
 @task
 def setup_supervisor():
     # One instance of supervisor, shared
-    local("rsync config/start_supervisor.sh %s:%s/bin" % (HOST, PRODUCTION.VENV_DIR))
+    local("rsync config/start_supervisor.sh %s@%s:%s/bin" % (USER, HOST, PRODUCTION.VENV_DIR))
     run("chmod +x %s/bin/start_supervisor.sh" % PRODUCTION.VENV_DIR)
     run("mkdir -p %s/etc" % PRODUCTION.VENV_DIR)
     upload_template("config/supervisord.conf", "%s/etc/supervisord.conf" % PRODUCTION.VENV_DIR,
