@@ -239,7 +239,10 @@ class EventManager(models.Manager):
             now = timezone.now()
 
         start = now - timedelta(EVENTSTREAM_CUTOFF_DAYS)
-        events = list(self.filter(created__gte=start).select_related('account'))
+        events = self.filter(created__gte=start).select_related('account')
+        if account is None or not account.is_hellbanned:
+            events = events.exclude(account__is_hellbanned=True)
+        events = list(events)
         events = list(dedupe_iterable(events, lambda e:(e.account_id, e.message_html)))
         if account is None:
             friendship_weights = None
