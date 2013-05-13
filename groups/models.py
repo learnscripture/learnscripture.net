@@ -11,6 +11,9 @@ class GroupManager(models.Manager):
 
     def visible_for_account(self, account):
         groups = self.all()
+        if account is None or not account.is_hellbanned:
+            groups = groups.exclude(created_by__is_hellbanned=True)
+
         public_groups = groups.filter(public=True)
         visible_groups = public_groups
 
@@ -77,6 +80,20 @@ class Group(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    def set_invitation_list(self, new_invited_users):
+        orig_invited_users = set(self.invited_users())
+        new_invited_users = set(new_invited_users)
+        new_users = new_invited_users - orig_invited_users
+        removed_users = orig_invited_users - new_invited_users
+
+        self.invitations.filter(account__in=removed_users).delete()
+        for u in new_users:
+            if not self.created_by.is_hellbanned or u.is_hellbanned:
+                # hellbanned users can't send invitations, except to
+                # other hellbanned users.
+                self.invitations.create(account=u,
+                                        created_by=self.created_by)
 
 
 class Membership(models.Model):

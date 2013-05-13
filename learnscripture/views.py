@@ -1350,16 +1350,7 @@ def create_or_edit_group(request, slug=None):
                 public_group_created.send(sender=group)
 
             # Handle invitations
-            orig_invited_users = set(group.invited_users())
-            invited_users = set(form.cleaned_data['invited_users'])
-            new_users = invited_users - orig_invited_users
-            removed_users = orig_invited_users - invited_users
-
-            group.invitations.filter(account__in=removed_users).delete()
-            for u in new_users:
-                group.invitations.create(account=u,
-                                         created_by=account)
-
+            group.set_invitation_list(form.cleaned_data['invited_users'])
             messages.info(request, u"Group details saved.")
             return HttpResponseRedirect(reverse('group', args=(group.slug,)))
     else:
