@@ -151,8 +151,7 @@ class AccountTests(TestCase):
         a2.add_points(100, ScoreReason.VERSE_TESTED, accuracy=1.0)
 
         # Simulate the cronjob that runs
-        import awards.tasks
-        awards.tasks.give_champion_awards.delay()
+        self.do_give_champion_awards()
 
         self.assertEqual(a1.awards
                          .filter(award_type=AwardType.REIGNING_WEEKLY_CHAMPION)
@@ -175,7 +174,7 @@ class AccountTests(TestCase):
         a2.add_points(200, ScoreReason.VERSE_TESTED, accuracy=1.0)
 
         # Simulate the cronjob that runs
-        awards.tasks.give_champion_awards.delay()
+        self.do_give_champion_awards()
 
         # a1 should have lost 'REIGNING_WEEKLY_CHAMPION', but kept 'WEEKLY_CHAMPION'
         self.assertEqual(a1.awards
@@ -208,7 +207,7 @@ class AccountTests(TestCase):
         # Some time passes:
         Award.objects.update(created=F('created') - timedelta(days=10))
 
-        awards.tasks.give_champion_awards.delay()
+        self.do_give_champion_awards()
 
         # Should have level 2
         self.assertEqual([a.level for a in a2.awards
@@ -216,3 +215,84 @@ class AccountTests(TestCase):
                           .order_by('level')],
                          [1, 2, 3])
 
+    def do_give_champion_awards(self):
+        import awards.tasks
+        awards.tasks.give_champion_awards.delay(hellbanned=False)
+        awards.tasks.give_champion_awards.delay(hellbanned=True)
+
+    def test_champion_awards_hellbanned(self):
+        """Test the logic of hellbanned champion awards."""
+        # hellbanned user inhabit their own private reality. So if they get to
+        # the top of a leaderboard it should appear to them that they have the
+        # champion award. But not to non-hellbanned users, who see the real
+        # champion, even if they have less points.
+
+        # And the non-hellbanned user 
+        a1 = Account.objects.create(username='test1',
+                                    email='test1@test.com')
+        a2 = Account.objects.create(username='test2',
+                                    email='test2@test.com')
+        a3 = Account.objects.create(username='test3',
+                                    email='test3@test.com',
+                                    is_hellbanned=True)
+
+        Identity.objects.create(account=a1)
+        Identity.objects.create(account=a2)
+        Identity.objects.create(account=a3)
+
+        a1.add_points(200, ScoreReason.VERSE_TESTED, accuracy=1.0)
+        a2.add_points(100, ScoreReason.VERSE_TESTED, accuracy=1.0)
+        a3.add_points(300, ScoreReason.VERSE_TESTED, accuracy=1.0)
+
+        # Simulate the cronjob that runs
+        self.do_give_champion_awards()
+
+        self.assertEqual(a1.awards
+                         .filter(award_type=AwardType.REIGNING_WEEKLY_CHAMPION)
+                         .count(),
+                         1)
+        self.assertEqual(a2.awards
+                         .filter(award_type=AwardType.REIGNING_WEEKLY_CHAMPION)
+                         .count(),
+                         0)
+        self.assertEqual(a3.awards
+                         .filter(award_type=AwardType.REIGNING_WEEKLY_CHAMPION)
+                         .count(),
+                         1)
+
+        self.assertEqual(a1.awards
+                         .filter(award_type=AwardType.WEEKLY_CHAMPION)
+                         .count(),
+                         1)
+        self.assertEqual(a2.awards
+                         .filter(award_type=AwardType.WEEKLY_CHAMPION)
+                         .count(),
+                         0)
+        self.assertEqual(a3.awards
+                         .filter(award_type=AwardType.WEEKLY_CHAMPION)
+                         .count(),
+                         1)
+
+        a1.add_points(200, ScoreReason.VERSE_TESTED, accuracy=1.0)
+
+        self.do_give_champion_awards()
+        # a3 is now behind, should have lost REIGNING_WEEKLY_CHAMPION
+        self.assertEqual(a3.awards
+                         .filter(award_type=AwardType.REIGNING_WEEKLY_CHAMPION)
+                         .count(),
+                         0)
+
+        a3.add_points(1000, ScoreReason.VERSE_TESTED, accuracy=1.0)
+
+        self.do_give_champion_awards()
+        # a3 is ahead (as far as a3 can see)
+        self.assertEqual(a3.awards
+                         .filter(award_type=AwardType.REIGNING_WEEKLY_CHAMPION)
+                         .count(),
+                         1)
+
+        # but a1 is ahead, as far as a1 can see
+        self.assertEqual(a1.awards
+                         .filter(award_type=AwardType.REIGNING_WEEKLY_CHAMPION)
+                         .count(),
+                         1)
