@@ -1,13 +1,13 @@
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.dispatch import receiver
+from django.utils.html import format_html
 
 from accounts.signals import new_account, verse_tested, scored_100_percent
 from awards.signals import new_award, lost_award
 import awards.tasks
 from bibleverses.signals import verse_set_chosen, public_verse_set_created
 from groups.signals import group_joined
-from learnscripture.utils.html import html_fragment
 
 
 @receiver(new_award)
@@ -15,42 +15,42 @@ def notify_about_new_award(sender, **kwargs):
     award = sender
     account = award.account
     if award.level > 1:
-        template = """<img src="%s%s"> You've levelled up on one of your badges: <a href="%s">%s</a>."""
+        template = """<img src="{0}{1}"> You've levelled up on one of your badges: <a href="{2}">{3}</a>."""
     else:
-        template = """<img src="%s%s"> You've earned a new badge: <a href="%s">%s</a>."""
+        template = """<img src="{0}{1}"> You've earned a new badge: <a href="{2}">{3}</a>."""
 
     award_url = reverse('user_stats', args=(account.username,))
 
-    msg = html_fragment(template,
-                        settings.STATIC_URL,
-                        award.image_small(),
-                        award_url,
-                        award.short_description())
+    msg = format_html(template,
+                      settings.STATIC_URL,
+                      award.image_small(),
+                      award_url,
+                      award.short_description())
     if 'points' in kwargs:
         points = kwargs['points']
         if points > 0:
-            msg = msg + html_fragment(' Points bonus: %s.', points)
+            msg = msg + format_html(' Points bonus: {0}.', points)
 
     # Facebook: this notice could be displayed on any page, and we want the
     # 'redirect_uri' parameter to take them back to where they were.  So we
     # render the link to facebook using javascript, embedding necessary data
     # using data attributes.
-    msg = msg + html_fragment('<span class="broadcast"'
-                              ' data-link="%s"'
-                              ' data-picture="%s%s"'
-                              ' data-award-id="%s"'
-                              ' data-award-level="%s"'
-                              ' data-award-name="%s"'
-                              ' data-account-username="%s"'
-                              '></span>',
-                              award_url,
-                              settings.STATIC_URL,
-                              award.image_medium(),
-                              award.id, # not needed at the moment
-                              award.level,
-                              award.short_description(),
-                              account.username,
-                              )
+    msg = msg + format_html('<span class="broadcast"'
+                            ' data-link="{0}"'
+                            ' data-picture="{1}{2}"'
+                            ' data-award-id="{3}"'
+                            ' data-award-level="{4}"'
+                            ' data-award-name="{5}"'
+                            ' data-account-username="{6}"'
+                            '></span>',
+                            award_url,
+                            settings.STATIC_URL,
+                            award.image_medium(),
+                            award.id, # not needed at the moment
+                            award.level,
+                            award.short_description(),
+                            account.username,
+                            )
 
     account.identity.add_html_notice(msg)
 

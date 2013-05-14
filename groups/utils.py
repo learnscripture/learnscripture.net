@@ -1,5 +1,5 @@
 from django.core.urlresolvers import reverse
-from learnscripture.utils.html import html_fragment
+from django.utils.html import format_html
 
 
 def group_url(group):
@@ -7,5 +7,5 @@ def group_url(group):
 
 
 def group_link(group):
-    return html_fragment(u"<a href='%s'>%s</a>",
-                         group_url(group), group.name)
+    return format_html(u"<a href='{0}'>{1}</a>",
+                       group_url(group), group.name)
