@@ -248,7 +248,8 @@ class EventManager(models.Manager):
             friendship_weights = None
         else:
             friendship_weights = account.get_friendship_weights()
-        events.sort(key=lambda e: e.get_rank(friendship_weights), reverse=True)
+        events.sort(key=lambda e: e.get_rank(friendship_weights, now=now),
+                    reverse=True)
 
         # Now group
         grouped_events = []
@@ -279,6 +280,10 @@ class Event(models.Model):
         return u"Event %d" % self.id
 
     def get_rank(self, friendship_weights, now=None):
+        """
+        Returns the overall weighting for this event, given the
+        friendship weights for the viewing account.
+        """
         affinity = 1.0
         if friendship_weights is not None:
             affinity += friendship_weights.get(self.account_id, 0) * EVENTSTREAM_MAX_EXTRA_AFFINITY_FOR_FRIEND
