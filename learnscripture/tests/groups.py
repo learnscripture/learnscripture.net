@@ -8,7 +8,7 @@ from awards.models import Award, AwardType
 from groups.models import Group
 from events.models import Event, EventType
 
-from .base import LiveServerTests
+from .base import LiveServerTests, AccountTestMixin
 
 
 class GroupPageTests(LiveServerTests):
@@ -19,7 +19,8 @@ class GroupPageTests(LiveServerTests):
         identity, account = self.create_account()
         self.login(account)
 
-        creator_account = Account.objects.get(username='account')
+        _, creator_account = self.create_account(username='creator',
+                                                 email='c@example.com')
 
         private_group = Group.objects.create(name='My group',
                                              slug='my-group',
@@ -53,7 +54,9 @@ class GroupPageTests(LiveServerTests):
                          1)
 
     def test_join_from_no_account(self):
-        creator_account = Account.objects.get(username='account')
+        _, creator_account = self.create_account(username='creator',
+                                                 email='c@example.com')
+
         g = Group.objects.create(name='My group',
                                  slug='my-group',
                                  created_by=creator_account,
@@ -75,12 +78,11 @@ class GroupPageTests(LiveServerTests):
         self.assertIn("You are a member of this group", driver.page_source)
 
 
-class GroupTests(TestCase):
+class GroupTests(AccountTestMixin, TestCase):
 
     def test_organizer_award(self):
-        creator_account = Account.objects.create(username='creator',
+        i, creator_account = self.create_account(username='creator',
                                                  email='c@example.com')
-        Identity.objects.create(account=creator_account)
         g = Group.objects.create(name='My group',
                                  slug='my-group',
                                  created_by=creator_account,
@@ -96,6 +98,100 @@ class GroupTests(TestCase):
                                                   award_type=AwardType.ORGANIZER).count(),
                              0 if i < 5 else 1)
 
+    def test_visibility(self):
+        i, creator_account = self.create_account(username='creator',
+                                                 email='c@example.com')
+        group = Group.objects.create(name='My group',
+                                     slug='my-group',
+                                     created_by=creator_account,
+                                     public=True,
+                                     open=True)
+        group.add_user(creator_account)
+
+        i, viewer_account = self.create_account(username='viewer',
+                                                email='v@example.com')
+
+        visible = lambda: Group.objects.visible_for_account(viewer_account)
+
+        self.assertEqual([g.name for g in visible()],
+                         ["My group"])
+
+        # Private groups should not be visible
+        group.public = False
+        group.save()
+        self.assertEqual(list(visible()),
+                         [])
+
+        # But should be visible if invited
+        group.set_invitation_list([viewer_account])
+        self.assertEqual([g.name for g in visible()],
+                         ["My group"])
+
+        # (Reset)
+        group.invitations.all().delete()
+        self.assertEqual(list(visible()),
+                         [])
+
+
+        # or if a member
+        group.add_user(viewer_account)
+        self.assertEqual([g.name for g in visible()],
+                         ["My group"])
+
+        # Reset
+        group.public = True
+        group.remove_user(viewer_account)
+        group.save()
+
+        # Shouldn't be visible if creator is hellbanned
+        creator_account.is_hellbanned = True
+        creator_account.save()
+        group.invitations.all().delete()
+        self.assertEqual(list(visible()),
+                         [])
+
+    def test_set_invitation_list(self):
+        i, creator_account = self.create_account(username='creator',
+                                                 email='c@example.com')
+        group = Group.objects.create(name='My group',
+                                     slug='my-group',
+                                     created_by=creator_account,
+                                     public=True,
+                                     open=True)
+
+        i, member1 = self.create_account(username='member1',
+                                         email='m1@example.com')
+        i, member2 = self.create_account(username='member2',
+                                         email='m2@example.com')
+
+        group.set_invitation_list([member1])
+
+        self.assertEqual([i.account.username for i in group.invitations.all()],
+                         ["member1"])
+
+        self.assertEqual([i.group.name for i in member1.invitations.all()],
+                         ["My group"])
+
+        group.set_invitation_list([member2])
+
+        self.assertEqual([i.account.username for i in group.invitations.all()],
+                         ["member2"])
+
+        self.assertEqual([i.group.name for i in member1.invitations.all()],
+                         [])
+
+        self.assertEqual([i.group.name for i in member2.invitations.all()],
+                         ["My group"])
+
+        # hellbanned users are ignored when they invite others:
+        creator_account.is_hellbanned = True
+        creator_account.save()
+        group = Group.objects.get(id=group.id)
+        group.set_invitation_list([member1])
+
+        self.assertEqual([i.group.name for i in member1.invitations.all()],
+                         [])
+
 
 class GroupCreatePageTests(LiveServerTests):
 
@@ -105,9 +201,8 @@ class GroupCreatePageTests(LiveServerTests):
         identity, account = self.create_account()
         self.login(account)
 
-        invited_account = Account.objects.create(username='invitee',
-                                                 email='i@example.com')
-        Identity.objects.create(account=invited_account)
+        _, invited_account = self.create_account(username='invitee',
+                                              email='i@example.com')
 
         driver = self.driver
         self.get_url('create_group')

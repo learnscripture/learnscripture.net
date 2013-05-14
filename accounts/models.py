@@ -59,6 +59,13 @@ FREE_TRIAL_LENGTH_DAYS = 62 # 2 months
 # and so sometimes they just delegate to Account methods.
 
 class AccountManager(UserManager):
+    def visible_for_account(self, account):
+        qs = self.active()
+        if account is None or not account.is_hellbanned:
+            # Only hellbanned users see each other
+            qs = qs.exclude(is_hellbanned=True)
+        return qs
+
     def active(self):
         return self.get_query_set().filter(is_active=True)
 
@@ -73,7 +80,17 @@ class Account(AbstractBaseUser):
     is_under_13 = models.BooleanField("Under 13 years old",
         default=False, blank=True)
     is_active = models.BooleanField(default=True)
+
+    # A hellbanned user is barred from interaction with other users, and any
+    # visibility by other users, but they not aware of that. They see an
+    # alternate reality, which includes normal user and other hellbanned users.
+    # This does not work perfectly with respect to things that are calculated
+    # globally e.g. leaderboard rank, and champion awards, but it works well
+    # enough. For example, they will get champion awards if they get to the top
+    # of the leaderboard, but the previous champion will not lose their champion
+    # award.
     is_hellbanned = models.BooleanField(default=False)
+
     has_installed_android_app = models.BooleanField(default=False)
 
     # Email reminder preferences and meta data
@@ -206,7 +223,7 @@ class Account(AbstractBaseUser):
 
     @cached_property
     def rank_all_time(self):
-        return get_rank_all_time(self.total_score)
+        return get_rank_all_time(self.total_score, self.is_hellbanned)
 
     @cached_property
     def points_this_week(self):
@@ -217,7 +234,7 @@ class Account(AbstractBaseUser):
 
     @cached_property
     def rank_this_week(self):
-        return get_rank_this_week(self.points_this_week)
+        return get_rank_this_week(self.points_this_week, self.is_hellbanned)
 
     def receive_payment(self, ipn_obj):
         self.payments.create(amount=ipn_obj.mc_gross,
@@ -1144,15 +1161,6 @@ class Identity(models.Model):
         self.verse_statuses\
             .filter(verse_set=verse_set_id, ignored=False)\
             .update(ignored=True)
-
-    def verse_sets_visible(self):
-        """
-        Gets a QuerySet of all VerseSets that are visible for this identity
-        """
-        qs = VerseSet.objects.public()
-        if self.account_id is not None:
-            qs = qs | self.account.verse_sets_created.all()
-        return qs
 
     def get_score_logs(self, from_datetime):
         if self.account_id is None:

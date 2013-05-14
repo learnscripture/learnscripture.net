@@ -14,13 +14,15 @@ from bibleverses.models import VerseSet, TextVersion, StageType, MemoryStage, Ve
 from events.models import Event, EventType
 from scores.models import Scores
 
-from .base import FuzzyInt, IdentityBase
+from .base import FuzzyInt, AccountTestMixin
 
 
-class IdentityTests(IdentityBase, TestCase):
+class IdentityTests(AccountTestMixin, TestCase):
+
+    fixtures = AccountTestMixin.fixtures + ['test_verse_sets.json', 'test_bible_verses.json']
 
     def test_add_verse_set(self):
-        i = self._create_identity()
+        i = self.create_identity()
         vs1 = VerseSet.objects.get(name='Bible 101')
         i.add_verse_set(vs1)
 
@@ -47,7 +49,7 @@ class IdentityTests(IdentityBase, TestCase):
 
 
     def test_record_read(self):
-        i = self._create_identity()
+        i = self.create_identity(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Bible 101')
         i.add_verse_set(vs1)
 
@@ -75,7 +77,7 @@ class IdentityTests(IdentityBase, TestCase):
         Tests that if we choose a verse a second time after making progress with
         it already, the progress is remembered.
         """
-        i = self._create_identity()
+        i = self.create_identity(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Bible 101')
         i.add_verse_set(vs1)
 
@@ -89,7 +91,7 @@ class IdentityTests(IdentityBase, TestCase):
                          MemoryStage.SEEN)
 
     def test_record_doesnt_decrease_stage(self):
-        i = self._create_identity()
+        i = self.create_identity(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Bible 101')
         i.add_verse_set(vs1)
         i.record_verse_action('John 3:16', 'NET', StageType.READ, 1)
@@ -100,7 +102,7 @@ class IdentityTests(IdentityBase, TestCase):
 
     def test_record_against_verse_in_multiple_sets(self):
         # Setup
-        i = self._create_identity()
+        i = self.create_identity(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Bible 101')
         i.add_verse_set(vs1)
         vs2 = VerseSet.objects.get(name='Basic Gospel')
@@ -119,8 +121,7 @@ class IdentityTests(IdentityBase, TestCase):
                          MemoryStage.SEEN)
 
     def test_record_creates_awards(self):
-        account = self._create_account()
-        i = account.identity
+        i, account = self.create_account(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Bible 101')
         i.add_verse_set(vs1)
         i.record_verse_action('John 3:16', 'NET', StageType.TEST, 1)
@@ -138,7 +139,7 @@ class IdentityTests(IdentityBase, TestCase):
 
     def test_change_version(self):
         # Setup
-        i = self._create_identity()
+        i = self.create_identity(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Bible 101')
         i.add_verse_set(vs1)
         vs2 = VerseSet.objects.get(name='Basic Gospel')
@@ -172,7 +173,7 @@ class IdentityTests(IdentityBase, TestCase):
 
     def test_change_version_and_back(self):
         # Setup
-        i = self._create_identity()
+        i = self.create_identity(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Bible 101')
         i.add_verse_set(vs1)
 
@@ -192,7 +193,7 @@ class IdentityTests(IdentityBase, TestCase):
         it via a different verse set, our change is remembered for new set.
         """
         # Setup
-        i = self._create_identity()
+        i = self.create_identity(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Bible 101')
         i.add_verse_set(vs1)
         i.change_version('John 3:16', 'KJV', vs1.id)
@@ -204,7 +205,7 @@ class IdentityTests(IdentityBase, TestCase):
                          'KJV')
 
     def test_change_version_passage_set(self):
-        i = self._create_identity()
+        i = self.create_identity(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Psalm 23')
         i.add_verse_set(vs1)
         i.change_version('Psalm 23:1', 'KJV', vs1.id)
@@ -215,7 +216,7 @@ class IdentityTests(IdentityBase, TestCase):
         Attempts to change version when is missing in destination
         version should fail.
         """
-        i = self._create_identity()
+        i = self.create_identity(version_slug='NET')
         version = i.default_bible_version # NET
         KJV = TextVersion.objects.get(slug='KJV')
         i.add_verse_choice('John 3:16')
@@ -232,7 +233,7 @@ class IdentityTests(IdentityBase, TestCase):
                          uvs_list)
 
     def test_bible_verse_statuses_for_revising(self):
-        i = self._create_identity()
+        i = self.create_identity(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Bible 101')
         i.add_verse_set(vs1)
         i.record_verse_action('John 3:16', 'NET', StageType.TEST, 1.0)
@@ -249,7 +250,7 @@ class IdentityTests(IdentityBase, TestCase):
         self.assertEqual([], list(i.bible_verse_statuses_for_revising()))
 
     def test_passages_for_learning(self):
-        i = self._create_identity()
+        i = self.create_identity(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Psalm 23')
         i.add_verse_set(vs1)
 
@@ -271,7 +272,7 @@ class IdentityTests(IdentityBase, TestCase):
         self.assertEqual([], list(i.passages_for_revising()))
 
     def test_passages_for_revising(self):
-        i = self._create_identity()
+        i = self.create_identity(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Psalm 23')
         i.add_verse_set(vs1)
 
@@ -296,7 +297,7 @@ class IdentityTests(IdentityBase, TestCase):
         self.assertEqual(verse_sets[0].id, vs1.id)
 
     def test_verse_statuses_for_passage(self):
-        i = self._create_identity()
+        i = self.create_identity(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Psalm 23')
         i.add_verse_set(vs1)
 
@@ -333,7 +334,7 @@ class IdentityTests(IdentityBase, TestCase):
             self.assertEqual(uvs.needs_testing, True)
 
     def test_get_next_section(self):
-        i = self._create_identity()
+        i = self.create_identity(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Psalm 23')
         vs1.breaks = "3,5" # break at v3 and v5 - unrealistic!
         vs1.save()
@@ -426,7 +427,7 @@ class IdentityTests(IdentityBase, TestCase):
 
 
     def test_slim_passage_for_revising(self):
-        i = self._create_identity()
+        i = self.create_identity(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Psalm 23')
         vs1.breaks = "3,5" # break at v3 and v5
         vs1.save()
@@ -450,7 +451,7 @@ class IdentityTests(IdentityBase, TestCase):
 
 
     def test_get_verse_statuses(self):
-        i = self._create_identity()
+        i = self.create_identity()
         vs1 = VerseSet.objects.get(name='Psalm 23')
         uvss = list(i.add_verse_set(vs1))
 
@@ -460,7 +461,7 @@ class IdentityTests(IdentityBase, TestCase):
             texts = [uvs.text for uvs in d.values()]
 
     def test_add_verse_choice_copies_strength(self):
-        i = self._create_identity()
+        i = self.create_identity(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Psalm 23')
         i.add_verse_set(vs1)
 
@@ -481,7 +482,7 @@ class IdentityTests(IdentityBase, TestCase):
         # This reproduces a bit of the logic from ActionCompleteHandler in order
         # to test Identity.award_action_points
 
-        i = self._create_account(version_slug='KJV').identity
+        i, account = self.create_account(version_slug='KJV')
 
         refs = \
             ['Genesis 1:%d' % j for j in range(1, 11)] + \
@@ -498,7 +499,7 @@ class IdentityTests(IdentityBase, TestCase):
                              0 if j < 9 else 1)
 
     def test_verses_finished_milestone_event(self):
-        i = self._create_account(version_slug='KJV').identity
+        i, account = self.create_account(version_slug='KJV')
 
         refs = \
             ['Genesis 1:%d' % j for j in range(1, 11)] + \
@@ -525,7 +526,7 @@ class IdentityTests(IdentityBase, TestCase):
         If a verse is added, then cancelled, then added again as part of a set,
         the order of learning should be the order defined in the set.
         """
-        i = self._create_identity()
+        i = self.create_identity(version_slug='NET')
         i.add_verse_choice('John 14:6')
         self.assertEqual([uvs.reference for uvs in i.bible_verse_statuses_for_learning(None)],
                          ['John 14:6'])
@@ -540,7 +541,7 @@ class IdentityTests(IdentityBase, TestCase):
                          ['John 3:16', 'John 14:6'])
 
     def test_issue_75(self):
-        i = self._create_identity()
+        i = self.create_identity(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Psalm 23')
 
         # Change it so that it misses the last verse
@@ -586,7 +587,7 @@ class IdentityTests(IdentityBase, TestCase):
         """
         Should be able to create a UVS against a missing verse.
         """
-        i = self._create_identity()
+        i = self.create_identity()
         version = i.default_bible_version
         version.verse_set.get(reference='John 3:16').mark_missing()
         i.add_verse_choice('John 3:16')
@@ -598,8 +599,7 @@ class IdentityTests(IdentityBase, TestCase):
 
     def test_consistent_learner_award(self):
         import awards.tasks
-        account = self._create_account(version_slug='KJV')
-        identity = account.identity
+        identity, account = self.create_account(version_slug='KJV')
 
         def learn(i):
             # We simulate testing over time by moving previous data back a day

@@ -352,6 +352,16 @@ class QAPair(models.Model):
 
 
 class VerseSetManager(models.Manager):
+    def visible_for_account(self, account):
+        qs = self.public()
+        if account is None or not account.is_hellbanned:
+            qs = qs.exclude(created_by__is_hellbanned=True)
+
+        if account is not None:
+            qs = qs | account.verse_sets_created.all()
+
+        return qs
+
     def public(self):
         return self.get_query_set().filter(public=True)
 

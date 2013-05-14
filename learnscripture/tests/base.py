@@ -26,40 +26,29 @@ class FuzzyInt(int):
 
 
 
-class IdentityBase(object):
-
-    fixtures = ['test_bible_versions.json', 'test_verse_sets.json', 'test_bible_verses.json']
-
-    def _create_identity(self, version_slug='NET'):
-        version = TextVersion.objects.get(slug=version_slug)
-        return Identity.objects.create(default_bible_version=version)
-
-    def _create_account(self, **kwargs):
-        identity = self._create_identity(**kwargs)
-        account = Account.objects.create(username='testaccount')
-        identity.account = account
-        identity.save()
-        return account
-
-
 class AccountTestMixin(object):
 
     fixtures = ['test_bible_versions.json']
 
-    def create_account(self):
-        KJV = TextVersion.objects.get(slug='KJV')
-        identity = Identity.objects.create(default_bible_version=KJV,
-                                           testing_method=TestingMethod.FULL_WORDS,
-                                           enable_animations=False,
-                                           enable_sounds=False,
-                                           )
-        account = Account.objects.create(email="test1@test.com",
-                                          username="test1",
+    def create_identity(self, version_slug='KJV', account=None):
+        version = TextVersion.objects.get(slug=version_slug)
+        return Identity.objects.create(default_bible_version=version,
+                                       testing_method=TestingMethod.FULL_WORDS,
+                                       enable_animations=False,
+                                       enable_sounds=False,
+                                       account=account,
+                                       )
+
+    def create_account(self,
+                       version_slug='KJV',
+                       email="test1@test.com",
+                       username="test1"):
+        account = Account.objects.create(email=email,
+                                         username=username,
                                          )
         account.set_password('password')
         account.save()
-        identity.account = account
-        identity.save()
+        identity = self.create_identity(version_slug=version_slug, account=account)
         return (identity, account)
 
     def create_account_interactive(self,

@@ -3,8 +3,8 @@
     "pk": 1,
     "model": "accounts.account",
     "fields": {
-        "email": "account@account.com",
-        "username": "account"
+        "email": "test@example.com",
+        "username": "versesetcreator"
     }
 },
 {

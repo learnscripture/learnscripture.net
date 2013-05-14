@@ -20,3 +20,5 @@ from .user_stats import *
 from .bible_services import *
 from .catechisms import *
 from .search import *
+from .versesets import *
+
