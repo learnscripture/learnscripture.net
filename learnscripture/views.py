@@ -1231,10 +1231,15 @@ def award(request, award_slug):
     award = AwardType.classes[award_type](level=AnyLevel)
 
     levels = []
+
+    hellbanned_mode = get_hellbanned_mode(request)
     for level in range(award.max_level, 0, -1):
         awards = Award.objects.filter(award_type=award_type,
                                       account__is_active=True,
                                       level=level)
+        if not hellbanned_mode:
+            awards = awards.exclude(account__is_hellbanned=True)
+
         receivers_count = awards.count()
         if receivers_count > 0:
             sample_usernames = list(awards.order_by('-created')
