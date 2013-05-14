@@ -11,6 +11,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         try:
             from awards.tasks import give_champion_awards
-            give_champion_awards.delay()
+            give_champion_awards.delay(hellbanned=False)
+            give_champion_awards.delay(hellbanned=True)
         except Exception as e:
             logger.error("Couldn't create awards", exc_info=sys.exc_info())

@@ -421,6 +421,7 @@ def choose(request):
     Choose a verse or verse set
     """
     default_bible_version = default_bible_version_for_request(request)
+    verse_sets = verse_sets_visible_for_request(request)
 
     if request.method == "POST":
         if not has_preferences(request):
@@ -438,7 +439,7 @@ def choose(request):
         vs_id = request.POST.get('verseset_id', None)
         if vs_id is not None:
             try:
-                vs = identity.verse_sets_visible().prefetch_related('verse_choices').get(id=vs_id)
+                vs = verse_sets.prefetch_related('verse_choices').get(id=vs_id)
             except VerseSet.DoesNotExist:
                 # Shouldn't be possible by clicking on buttons.
                 pass
@@ -459,7 +460,7 @@ def choose(request):
                                  session.LearningType.LEARNING)
 
     c = {'title': u'Choose verses'}
-    verse_sets = verse_sets_visible_for_request(request).order_by('name').prefetch_related('verse_choices')
+    verse_sets = verse_sets.order_by('name').prefetch_related('verse_choices')
 
     # Searching for verse sets is done via this view.
     # But looking up individual verses is done by AJAX,
@@ -572,10 +573,7 @@ def get_default_bible_version():
 
 
 def verse_sets_visible_for_request(request):
-    if hasattr(request, 'identity'):
-        return request.identity.verse_sets_visible()
-    else:
-        return VerseSet.objects.public()
+    return VerseSet.objects.visible_for_account(account_from_request(request))
 
 
 def is_continuous_set(verse_list):
@@ -782,6 +780,14 @@ def create_or_edit_set(request, set_type=None, slug=None):
 
     return render(request, 'learnscripture/create_set.html', c)
 
+def get_hellbanned_mode(request):
+    account = account_from_request(request)
+    if account is None:
+        # Guests see the site as normal users
+        return False
+    else:
+        # hellbanned users see the hellbanned version of reality
+        return account.is_hellbanned
 
 def leaderboard(request):
     page_num = None # 1-indexed page page
@@ -808,10 +814,13 @@ def leaderboard(request):
         except (Group.DoesNotExist, ValueError):
             pass
 
+    hellbanned_mode = get_hellbanned_mode(request)
     if thisweek:
-        accounts = get_leaderboard_since(cutoff, page_num - 1, PAGE_SIZE, group=group)
+        accounts = get_leaderboard_since(cutoff, hellbanned_mode,
+                                         page_num - 1, PAGE_SIZE, group=group)
     else:
-        accounts = get_all_time_leaderboard(page_num - 1, PAGE_SIZE, group=group)
+        accounts = get_all_time_leaderboard(hellbanned_mode, page_num - 1,
+                                            PAGE_SIZE, group=group)
 
     # Now decorate these accounts with additional info from additional queries
     account_ids = [a['account_id'] for a in accounts]
@@ -842,7 +851,7 @@ def leaderboard(request):
 
 
 def user_stats(request, username):
-    account = get_object_or_404(Account.objects.active()
+    account = get_object_or_404(Account.objects.visible_for_account(account_from_request(request))
                                 .select_related('total_score', 'identity'),
                                 username=username)
     c = {'account': account,
@@ -1339,16 +1348,7 @@ def create_or_edit_group(request, slug=None):
                 public_group_created.send(sender=group)
 
             # Handle invitations
-            orig_invited_users = set(group.invited_users())
-            invited_users = set(form.cleaned_data['invited_users'])
-            new_users = invited_users - orig_invited_users
-            removed_users = orig_invited_users - invited_users
-
-            group.invitations.filter(account__in=removed_users).delete()
-            for u in new_users:
-                group.invitations.create(account=u,
-                                         created_by=account)
-
+            group.set_invitation_list(form.cleaned_data['invited_users'])
             messages.info(request, u"Group details saved.")
             return HttpResponseRedirect(reverse('group', args=(group.slug,)))
     else:
