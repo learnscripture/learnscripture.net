@@ -2,12 +2,12 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils import timezone
 from django.utils.functional import cached_property
+from django.utils.html import format_html
 
 from accounts.models import Account
 from awards.signals import new_award
 from scores.models import ScoreReason
 from learnscripture.datastructures import make_class_enum
-from learnscripture.utils.html import html_fragment
 
 # In this module we have:
 #
@@ -318,18 +318,18 @@ class RecruiterAward(CountBasedAward):
     def full_description(self):
         url = reverse('referral_program')
         if self.level is AnyLevel:
-            return html_fragment(u"Awarded for getting other people to sign up using our "
-                                 "<a href='%s'>referral program</a>. "
-                                 "Level 1 is for one referral, and is worth 20,000 points.",
-                                 url)
+            return format_html(u"Awarded for getting other people to sign up using our "
+                               "<a href='{0}'>referral program</a>. "
+                               "Level 1 is for one referral, and is worth 20,000 points.",
+                               url)
         elif self.count == 1:
-            return html_fragment(u"Got one person to sign up to LearnScripture.net "
-                                 "through our <a href='%s'>referral program</a>",
-                                 url)
+            return format_html(u"Got one person to sign up to LearnScripture.net "
+                               "through our <a href='{0}'>referral program</a>",
+                               url)
         else:
-            return html_fragment(u"Got %s people to sign up to LearnScripture.net "
-                                 "through our <a href='%s'>referral program</a>",
-                                 self.count, url)
+            return format_html(u"Got {0} people to sign up to LearnScripture.net "
+                               "through our <a href='{1}'>referral program</a>",
+                               self.count, url)
 
 
 class HackerAward(SingleLevelAward):
@@ -346,9 +346,9 @@ class ReigningWeeklyChampion(SingleLevelAward):
     def full_description(self):
         url = reverse('leaderboard') + "?thisweek"
         if self.level is AnyLevel:
-            return html_fragment(u'Awarded to the user who is currently at the top of the <a href="%s">weekly leaderboard</a>.', url)
+            return format_html(u'Awarded to the user who is currently at the top of the <a href="{0}">weekly leaderboard</a>.', url)
         else:
-            return html_fragment(u'Currently at the top of the <a href="%s">weekly leaderboard</a>.', url)
+            return format_html(u'Currently at the top of the <a href="{0}">weekly leaderboard</a>.', url)
 
 
 class TimeBasedAward(MultiLevelPointsMixin, AwardLogic):
@@ -411,11 +411,11 @@ class WeeklyChampion(TimeBasedAward):
     def full_description(self):
         url = reverse('leaderboard') + u"?thisweek"
         if self.level is AnyLevel:
-            return html_fragment(u'Awarded to all users who have reached the top of the <a href="%s">weekly leaderboard</a>.  Higher levels are achieved by staying there longer, up to level 9 if you stay there for a year.', url)
+            return format_html(u'Awarded to all users who have reached the top of the <a href="{0}">weekly leaderboard</a>.  Higher levels are achieved by staying there longer, up to level 9 if you stay there for a year.', url)
         else:
-            d = html_fragment(u'Reached the top of the <a href="%s">weekly leaderboard</a>', url)
+            d = format_html(u'Reached the top of the <a href="{0}">weekly leaderboard</a>', url)
             if self.level > 1:
-                d = d + html_fragment(u", and stayed there for at least %s",
+                d = d + format_html(u", and stayed there for at least {0}",
                                       self.FRIENDLY_DAYS[self.level])
             return d
 

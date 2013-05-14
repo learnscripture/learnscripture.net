@@ -6,6 +6,7 @@ from django.db import models
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.core.urlresolvers import reverse
 from django.utils import timezone
+from django.utils.html import format_html, format_html_join
 from django.utils.safestring import mark_safe
 from jsonfield import JSONField
 
@@ -14,7 +15,6 @@ from awards.utils import award_link
 from groups.utils import group_link
 from learnscripture.datastructures import make_class_enum
 from learnscripture.templatetags.account_utils import account_link
-from learnscripture.utils.html import html_fragment
 
 
 EVENTSTREAM_CUTOFF_DAYS = 3 # just 3 days of events
@@ -104,8 +104,8 @@ class VerseSetCreatedEvent(EventLogic):
     def __init__(self, verse_set=None):
         super(VerseSetCreatedEvent, self).__init__(verse_set_id=verse_set.id,
                                                    account=verse_set.created_by)
-        self.event.message_html = html_fragment(
-            u'created new verse set <a href="%s">%s</a>',
+        self.event.message_html = format_html(
+            u'created new verse set <a href="{0}">{1}</a>',
             reverse('view_verse_set', args=(verse_set.slug,)),
             verse_set.name
             )
@@ -118,8 +118,8 @@ class StartedLearningVerseSetEvent(EventLogic):
     def __init__(self, verse_set=None, chosen_by=None):
         super(StartedLearningVerseSetEvent, self).__init__(verse_set_id=verse_set.id,
                                                            account=chosen_by)
-        self.event.message_html = html_fragment(
-            'started learning <a href="%s">%s</a>',
+        self.event.message_html = format_html(
+            'started learning <a href="{0}">{1}</a>',
             reverse('view_verse_set', args=(verse_set.slug,)),
             verse_set.name
             )
@@ -129,8 +129,8 @@ class PointsMilestoneEvent(EventLogic):
     def __init__(self, account=None, points=None):
         super(PointsMilestoneEvent, self).__init__(account=account,
                                                    points=points)
-        self.event.message_html = html_fragment(
-            u'reached %s points', intcomma(points)
+        self.event.message_html = format_html(
+            u'reached {0} points', intcomma(points)
             )
 
 
@@ -138,8 +138,8 @@ class VersesStartedMilestoneEvent(EventLogic):
     def __init__(self, account=None, verses_started=None):
         super(VersesStartedMilestoneEvent, self).__init__(account=account,
                                                           verses_started=verses_started)
-        self.event.message_html = html_fragment(
-            u'reached %s verses started', intcomma(verses_started)
+        self.event.message_html = format_html(
+            u'reached {0} verses started', intcomma(verses_started)
             )
 
 
@@ -151,8 +151,8 @@ class GroupJoinedEvent(EventLogic):
         super(GroupJoinedEvent, self).__init__(account=account,
                                                group_id=group.id)
 
-        self.event.message_html = html_fragment(
-            u"joined group %s", group_link(group)
+        self.event.message_html = format_html(
+            u"joined group {0}", group_link(group)
             )
 
 
@@ -161,8 +161,8 @@ class GroupCreatedEvent(EventLogic):
     def __init__(self, account=None, group=None):
         super(GroupCreatedEvent, self).__init__(account=account,
                                                 group_id=group.id)
-        self.event.message_html = html_fragment(
-            u"created group %s", group_link(group)
+        self.event.message_html = format_html(
+            u"created group {0}", group_link(group)
             )
 
 
@@ -170,8 +170,8 @@ class VersesFinishedMilestoneEvent(EventLogic):
     def __init__(self, account, verses_finished=None):
         super(VersesFinishedMilestoneEvent, self).__init__(account=account,
                                                            verses_finished=verses_finished)
-        self.event.message_html = html_fragment(
-            u"reached %s verses finished", intcomma(verses_finished)
+        self.event.message_html = format_html(
+            u"reached {0} verses finished", intcomma(verses_finished)
             )
 
 
@@ -180,8 +180,8 @@ class StartedLearningCatechismEvent(EventLogic):
     def __init__(self, account=None, catechism=None):
         super(StartedLearningCatechismEvent, self).__init__(account=account,
                                                             catechism_id=catechism.id)
-        self.event.message_html = html_fragment(
-            u'started learning <a href="%s">%s</a>',
+        self.event.message_html = format_html(
+            u'started learning <a href="{0}">{1}</a>',
             reverse('view_catechism', args=(catechism.slug,)),
             catechism.full_name,
             )
@@ -214,10 +214,13 @@ class EventGroup(object):
         self.created = None
 
     def render_html(self):
-        return mark_safe(account_link(self.account) + u":<ul>" +
-                         u''.join([u"<li>%s</li>" % event.message_html
-                                   for event in self.events])
-                         + u"</ul>")
+        return format_html(
+            "{0} <ul>{1}</ul>",
+            account_link(self.account),
+            format_html_join(u'', u"<li>{0}</li>",
+                             ((mark_safe(event.message_html),)
+                              for event in self.events))
+            )
 
 
 def dedupe_iterable(iterable, keyfunc):
@@ -306,7 +309,8 @@ class Event(models.Model):
 
     def render_html(self):
         if self.account is not None:
-            return mark_safe(account_link(self.account) + u" " + self.message_html)
+            return format_html("{0} {1}", account_link(self.account),
+                               mark_safe(self.message_html))
         else:
             return mark_safe(self.message_html)
 
