@@ -75,12 +75,11 @@ class GroupPageTests(LiveServerTests):
         self.assertIn("You are a member of this group", driver.page_source)
 
 
-class GroupTests(TestCase):
+class GroupTests(AccountTestMixin, TestCase):
 
     def test_organizer_award(self):
-        creator_account = Account.objects.create(username='creator',
+        i, creator_account = self.create_account(username='creator',
                                                  email='c@example.com')
-        Identity.objects.create(account=creator_account)
         g = Group.objects.create(name='My group',
                                  slug='my-group',
                                  created_by=creator_account,
@@ -97,9 +96,8 @@ class GroupTests(TestCase):
                              0 if i < 5 else 1)
 
     def test_visibility(self):
-        creator_account = Account.objects.create(username='creator',
+        i, creator_account = self.create_account(username='creator',
                                                  email='c@example.com')
-        Identity.objects.create(account=creator_account)
         group = Group.objects.create(name='My group',
                                      slug='my-group',
                                      created_by=creator_account,
@@ -107,10 +105,8 @@ class GroupTests(TestCase):
                                      open=True)
         group.add_user(creator_account)
 
-        viewer_account = Account.objects.create(username='viewer',
+        i, viewer_account = self.create_account(username='viewer',
                                                 email='v@example.com')
-
-        Identity.objects.create(account=viewer_account)
 
         visible = lambda: Group.objects.visible_for_account(viewer_account)
 
@@ -152,22 +148,18 @@ class GroupTests(TestCase):
                          [])
 
     def test_set_invitation_list(self):
-        creator_account = Account.objects.create(username='creator',
+        i, creator_account = self.create_account(username='creator',
                                                  email='c@example.com')
-        Identity.objects.create(account=creator_account)
         group = Group.objects.create(name='My group',
                                      slug='my-group',
                                      created_by=creator_account,
                                      public=True,
                                      open=True)
 
-        member1 = Account.objects.create(username='member1',
+        i, member1 = self.create_account(username='member1',
                                          email='m1@example.com')
-        Identity.objects.create(account=member1)
-
-        member2 = Account.objects.create(username='member2',
+        i, member2 = self.create_account(username='member2',
                                          email='m2@example.com')
-        Identity.objects.create(account=member2)
 
         group.set_invitation_list([member1])
 
@@ -206,9 +198,8 @@ class GroupCreatePageTests(LiveServerTests):
         identity, account = self.create_account()
         self.login(account)
 
-        invited_account = Account.objects.create(username='invitee',
-                                                 email='i@example.com')
-        Identity.objects.create(account=invited_account)
+        _, invited_account = self.create_account(username='invitee',
+                                              email='i@example.com')
 
         driver = self.driver
         self.get_url('create_group')

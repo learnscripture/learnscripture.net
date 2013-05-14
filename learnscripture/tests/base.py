@@ -39,10 +39,12 @@ class AccountTestMixin(object):
                                        account=account,
                                        )
 
-    def create_account(self, version_slug='KJV'):
-        KJV = TextVersion.objects.get(slug=version_slug)
-        account = Account.objects.create(email="test1@test.com",
-                                         username="test1",
+    def create_account(self,
+                       version_slug='KJV',
+                       email="test1@test.com",
+                       username="test1"):
+        account = Account.objects.create(email=email,
+                                         username=username,
                                          )
         account.set_password('password')
         account.save()
