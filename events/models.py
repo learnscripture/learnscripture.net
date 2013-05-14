@@ -67,9 +67,7 @@ class EventLogic(object):
 
 
 class GeneralEvent(EventLogic):
-    """
-    Used for custom messages
-    """
+    # No longer used.
     pass
 
 
@@ -191,7 +189,7 @@ class StartedLearningCatechismEvent(EventLogic):
 
 EventType = make_class_enum(
     'EventType',
-    [(1, 'GENERAL', 'General', GeneralEvent),
+    [(1, 'GENERAL', 'General', GeneralEvent), # No longer used
      (2, 'NEW_ACCOUNT', 'New account', NewAccountEvent),
      (3, 'AWARD_RECEIVED', 'Award received', AwardReceivedEvent),
      (4, 'POINTS_MILESTONE', 'Points milestone', PointsMilestoneEvent),
