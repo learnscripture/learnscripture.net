@@ -21,16 +21,18 @@ EVENTSTREAM_CUTOFF_DAYS = 3 # just 3 days of events
 EVENTSTREAM_CUTOFF_NUMBER = 6
 
 # Arbitrarily say stuff is 50% less interesting when it is half a day old.
-EVENTSTREAM_TIME_DECAY_FACTOR = 3600*12.0
+HALF_LIFE_DAYS = 0.5
+EVENTSTREAM_TIME_DECAY_FACTOR = 3600*24*HALF_LIFE_DAYS
 
 # Events have an affinity of 1.0 normally, and this can be boosted by the amount
 # below for a maximum friendship level
 EVENTSTREAM_MAX_EXTRA_AFFINITY_FOR_FRIEND = 1.0
 
-# This means that with EVENTSTREAM_CUTOFF_DAYS = 3, there is a factor of 8 to
-# play with: if an event has a weight more than 8 times higher than the rest of
-# the stream, it will stay at the top of the event stream until it disappears
-# altogether.
+# With EVENTSTREAM_CUTOFF_DAYS = 3, and HALF_LIFE_DAYS=0.5 there is a factor of
+# 64 (6 half lives) to play with: if an event has a weight more than 64 times
+# higher than the rest of the stream, it will stay at the top of the event
+# stream until it disappears altogether. But we want to be phasing things out
+# more quickly, so we avoid such extreme factors.
 
 
 class EventLogic(object):
