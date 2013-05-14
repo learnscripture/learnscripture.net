@@ -8,7 +8,7 @@ from awards.models import Award, AwardType
 from groups.models import Group
 from events.models import Event, EventType
 
-from .base import LiveServerTests
+from .base import LiveServerTests, AccountTestMixin
 
 
 class GroupPageTests(LiveServerTests):

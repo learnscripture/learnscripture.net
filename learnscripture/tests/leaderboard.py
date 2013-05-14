@@ -8,7 +8,7 @@ from bibleverses.models import VerseSet, StageType, VerseSetType
 
 from scores.models import ScoreReason, get_verses_started_counts, get_verses_started_per_day, get_verses_finished_count
 
-from .base import IdentityBase
+from .base import AccountTestMixin
 
 
 class LeaderboardTests(TestCase):
@@ -39,9 +39,9 @@ class LeaderboardTests(TestCase):
         self.assertNotContains(resp, self.a2.username)
 
 
-class VerseCountTests(IdentityBase, TestCase):
+class VerseCountTests(AccountTestMixin, TestCase):
 
-    fixtures = IdentityBase.fixtures + ['test_bible_verses.json']
+    fixtures = AccountTestMixin.fixtures + ['test_bible_verses.json']
 
     def _create_overlapping_verse_sets(self, account):
         vs1 = VerseSet.objects.create(name="Psalm 23:1-3",
@@ -63,8 +63,7 @@ class VerseCountTests(IdentityBase, TestCase):
         Test that counts for verses started deduplicate verses that have the
         same reference.
         """
-        account = self.create_account()
-        i = account.identity
+        i, account = self.create_account()
         version = i.default_bible_version
         vs1, vs2 = self._create_overlapping_verse_sets(account)
 
@@ -86,8 +85,7 @@ class VerseCountTests(IdentityBase, TestCase):
         Test that counts for verses finished deduplicate verses that have the
         same reference.
         """
-        account = self.create_account()
-        i = account.identity
+        i, account = self.create_account()
         version = i.default_bible_version
         vs1, vs2 = self._create_overlapping_verse_sets(account)
 
