@@ -19,7 +19,8 @@ class GroupPageTests(LiveServerTests):
         identity, account = self.create_account()
         self.login(account)
 
-        creator_account = Account.objects.get(username='account')
+        _, creator_account = self.create_account(username='creator',
+                                                 email='c@example.com')
 
         private_group = Group.objects.create(name='My group',
                                              slug='my-group',
@@ -53,7 +54,9 @@ class GroupPageTests(LiveServerTests):
                          1)
 
     def test_join_from_no_account(self):
-        creator_account = Account.objects.get(username='account')
+        _, creator_account = self.create_account(username='creator',
+                                                 email='c@example.com')
+
         g = Group.objects.create(name='My group',
                                  slug='my-group',
                                  created_by=creator_account,
