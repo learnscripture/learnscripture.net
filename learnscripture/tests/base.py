@@ -28,7 +28,7 @@ class FuzzyInt(int):
 
 class IdentityBase(object):
 
-    fixtures = ['test_bible_versions.json', 'test_verse_sets.json', 'test_bible_verses.json']
+    fixtures = ['test_bible_versions.json']
 
     def _create_identity(self, version_slug='NET'):
         version = TextVersion.objects.get(slug=version_slug)

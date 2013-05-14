@@ -19,6 +19,8 @@ from .base import FuzzyInt, IdentityBase
 
 class IdentityTests(IdentityBase, TestCase):
 
+    fixtures = IdentityBase.fixtures + ['test_verse_sets.json', 'test_bible_verses.json']
+
     def test_add_verse_set(self):
         i = self._create_identity()
         vs1 = VerseSet.objects.get(name='Bible 101')
