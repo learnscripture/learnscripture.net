@@ -37,3 +37,13 @@ class VerseSetTests(AccountTestMixin, TestCase):
         self.assertIn(vs,
                       VerseSet.objects.visible_for_account(viewer)
                       )
+
+
+        # hellbanned users
+        creator.is_hellbanned = True
+        creator.save()
+
+        # Shouldn't be visible to others
+        self.assertNotIn(vs,
+                         VerseSet.objects.visible_for_account(viewer)
+                         )
