@@ -63,7 +63,7 @@ class VerseCountTests(IdentityBase, TestCase):
         Test that counts for verses started deduplicate verses that have the
         same reference.
         """
-        account = self._create_account()
+        account = self.create_account()
         i = account.identity
         version = i.default_bible_version
         vs1, vs2 = self._create_overlapping_verse_sets(account)
@@ -86,7 +86,7 @@ class VerseCountTests(IdentityBase, TestCase):
         Test that counts for verses finished deduplicate verses that have the
         same reference.
         """
-        account = self._create_account()
+        account = self.create_account()
         i = account.identity
         version = i.default_bible_version
         vs1, vs2 = self._create_overlapping_verse_sets(account)
