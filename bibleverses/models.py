@@ -233,6 +233,7 @@ class TextVersion(caching.base.CachingMixin, models.Model):
                         text_order=1,
                         for_identity__account__isnull=False,
                         for_identity__account__is_active=True,
+                        for_identity__account__is_hellbanned=False,
                         )]
 
 
