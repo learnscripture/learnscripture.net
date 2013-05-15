@@ -49,6 +49,9 @@ urlpatterns = patterns('',
                        url(r'^user/(.*)/$', 'learnscripture.views.user_stats', name='user_stats'),
                        url(r'^user/(.*)/verses_timeline_stats.csv$', 'learnscripture.views.user_stats_verses_timeline_stats_csv'),
 
+                       # Activity
+                       url(r'^activity/$', 'learnscripture.views.activity_stream', name='activity_stream'),
+
                        # Badges
                        url(r'^badges/$', 'learnscripture.views.awards', name='awards'),
                        url(r'^badges/(.*)/$', 'learnscripture.views.award', name='award'),

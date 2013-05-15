@@ -32,6 +32,7 @@ from learnscripture.forms import AccountSetPasswordForm, ContactForm, LogInForm,
 
 from bibleverses.models import VerseSet, TextVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType, get_passage_sections, TextType
 from bibleverses.signals import public_verse_set_created
+from events.models import Event
 from learnscripture import session
 from bibleverses.forms import VerseSetForm
 from groups.forms import EditGroupForm
@@ -1424,3 +1425,12 @@ Message:
                       to=[settings.CONTACT_EMAIL],
                       headers={'Reply-To': email} if email else {},
 ).send()
+
+
+def activity_stream(request):
+    return render(request,
+                  'learnscripture/activity_stream.html',
+                  {'events': Event.objects.for_activity_stream(
+                account=account_from_request(request)),
+                   'title': "Recent activity",
+                   })

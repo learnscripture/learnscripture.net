@@ -265,6 +265,13 @@ class EventManager(models.Manager):
 
         return grouped_events[0:EVENTSTREAM_CUTOFF_NUMBER]
 
+    def for_activity_stream(self, account=None):
+        qs = Event.objects.order_by('-created').select_related('account')
+        if account is None or not account.is_hellbanned:
+            qs = qs.exclude(account__is_hellbanned=True)
+
+        return qs
+
 
 class Event(models.Model):
     message_html = models.TextField()
