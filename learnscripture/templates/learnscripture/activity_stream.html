@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% load url from future %}
+{% load pagination_tags %}
+
+{% block content %}
+
+{% autopaginate events 40 %}
+
+{% paginate %}
+
+<div class="activitystream">
+  {% for event in events %}
+  {% with rendered=event.render_html %}
+  {% ifchanged rendered %}
+  <div class="activityitem">
+      {% ifchanged event.created.date %}
+      <div class="timestamp">
+      {{ event.created|date:"j M Y" }}
+      </div>
+      {% endifchanged %}
+    <div class="eventdetails">
+      {{ event.render_html }}
+    </div>
+  </div>
+  {% endifchanged %}
+  {% endwith %}
+  {% endfor %}
+</div>
+
+{% paginate %}
+
+{% endblock %}
