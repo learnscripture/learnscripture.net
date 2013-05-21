@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django import forms
 
-from .models import TextVersion, Verse, VerseSet, VerseChoice, QAPair
+from .models import TextVersion, Verse, VerseSet, VerseChoice, QAPair, UserVerseStatus
 
 
 class VerseChoiceAdminForm(forms.ModelForm):
@@ -45,7 +45,21 @@ class QAPairAdmin(admin.ModelAdmin):
     def queryset(self, request):
         return super(QAPairAdmin, self).queryset(request).select_related('catechism')
 
+
+class UserVerseStatusAdmin(admin.ModelAdmin):
+    search_fields = ['for_identity__account']
+    list_filter = ['ignored']
+    def username(obj):
+        return obj.for_identity.account.username
+    list_display = ['reference', username, 'ignored']
+    ordering = ['for_identity__account__username', 'reference']
+
+    def queryset(self, request):
+        return super(UserVerseStatusAdmin, self).queryset(request).select_related('for_identity__account')
+
+
 admin.site.register(TextVersion)
 admin.site.register(VerseSet, VerseSetAdmin)
 admin.site.register(Verse, VerseAdmin)
 admin.site.register(QAPair, QAPairAdmin)
+admin.site.register(UserVerseStatus, UserVerseStatusAdmin)

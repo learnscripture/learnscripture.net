@@ -631,6 +631,7 @@ class UserVerseStatus(models.Model):
 
     class Meta:
         unique_together = [('for_identity', 'verse_set', 'reference', 'version')]
+        verbose_name_plural = "User verse statuses"
 
 
 class InvalidVerseReference(ValueError):
