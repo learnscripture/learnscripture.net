@@ -512,9 +512,14 @@ class UserVerseStatus(models.Model):
     # this can happen.
 
     # By making reference a CharField instead of a tighter DB constraint, we can
-    # handle the case of VerseChoices or VerseSets being deleted, and also
-    # handle QAPairs from the same model. Since references don't change,
-    # we can handle the denormalisation easily.
+    # handle:
+    # - UserVerseStatuses that don't correspond to a Verse object, because
+    #   they span a few verses.
+    # - the case of VerseChoices or VerseSets being deleted,
+    # - UVSs that are not attached to VerseSets at all.
+    # - QAPairs and Verses from the same model
+    #
+    # Since references don't change we can handle the denormalisation easily.
 
     for_identity = models.ForeignKey('accounts.Identity', related_name='verse_statuses')
     reference = models.CharField(max_length=100)
