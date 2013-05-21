@@ -47,7 +47,7 @@ class QAPairAdmin(admin.ModelAdmin):
 
 
 class UserVerseStatusAdmin(admin.ModelAdmin):
-    search_fields = ['for_identity__account']
+    search_fields = ['for_identity__account__username']
     list_filter = ['ignored']
     def username(obj):
         return obj.for_identity.account.username
