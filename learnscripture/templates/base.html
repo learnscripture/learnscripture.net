@@ -198,6 +198,20 @@
 
 {% endif %}
 
+<!-- other common HTML fragments -->
+
+{% if request.identity.account %}
+<div id="id-add-comment" class="hide">
+  Add comment:<br/>
+  <textarea id="id-comment-box" rows="1">
+  </textarea>
+  <input type="submit" class="btn primary" value="Post" id="id-add-comment-btn">
+  <input type="submit" class="btn" value="Cancel" id="id-cancel-comment-btn">
+</div>
+{% endif %}
+
+<!-- preferences data -->
+
 <div id="id-preferences-data"
      {# NB these names are translated to preferencesSetup, enableAnimations, enableSounds, interfaceTheme, testingMethod #}
      data-preferences-setup="{{ request.identity.preferences_setup|yesno:"true,false,false" }}"
@@ -255,6 +269,7 @@
     <script type="text/javascript" src="{{ STATIC_URL }}js/groups.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/leaderboard.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/android.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/comment.js"></script>
     {% endcompress %}
 
     {% if request.identity.account and include_referral_links %}

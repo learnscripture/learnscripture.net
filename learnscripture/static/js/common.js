@@ -60,6 +60,20 @@ $(document).ajaxSend(function (event, xhr, settings) {
 
 var learnscripture = (function (learnscripture, $) {
     "use strict";
+    var displaySimpleAjaxError = function (errorResponse) {
+        var parts = errorResponse.responseText.split(/\n/);
+        if (parts.length == 1) {
+            return parts[0];
+        } else {
+            var errors = $.parseJSON(parts[1]);
+            var retval = '';
+            for (var key in errors) {
+                retval = retval + errors[key];
+            }
+            return retval;
+        }
+    }
+
     var handleFormValidationErrors = function (form, formPrefix, errorResponse) {
         var errors = $.parseJSON(errorResponse.responseText.split(/\n/)[1]);
         var prefix = '';
@@ -129,6 +143,7 @@ var learnscripture = (function (learnscripture, $) {
 
     // Export:
     learnscripture.handleFormValidationErrors = handleFormValidationErrors;
+    learnscripture.displaySimpleAjaxError = displaySimpleAjaxError;
     learnscripture.ajaxFailed = ajaxFailed;
     learnscripture.ajaxRetryOptions = {tick: ajaxRetryTick,
                                        attempts: 11
