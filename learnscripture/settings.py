@@ -222,6 +222,7 @@ INSTALLED_APPS = [
     'awards',
     'events',
     'groups',
+    'comments',
     # Third party
     'piston',
     'mptt',
