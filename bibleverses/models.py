@@ -905,7 +905,7 @@ def parse_as_bible_reference(query, allow_whole_book=True, allow_whole_chapter=T
     query = query.lower().strip()
 
     bible_ref_re = (
-        r'^[^\d]*'                   # book name
+        r'^(?:(?:1|2)\s*)?[^\d]*'    # book name
         r'\s+'                       # space
         r'(\d+)'                     # chapter
         r'\s*('                      # optionally:

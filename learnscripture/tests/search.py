@@ -63,6 +63,12 @@ class SearchTests(TestCase):
         self.assertEqual(results[0].verses[0].reference,
                          "Song of Solomon 1:1")
 
+    def test_quick_find_numbered_book(self):
+        version = TextVersion.objects.get(slug='KJV')
+        results = quick_find("1 Corinthians 1:3", version=version)
+        self.assertEqual(results[0].verses[0].reference,
+                         "1 Corinthians 1:3")
+
     def test_quick_find_book_names_as_searches(self):
         # Need to be able to find words that happen to be in the names of books.
         version = TextVersion.objects.get(slug='NET')
