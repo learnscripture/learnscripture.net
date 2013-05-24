@@ -13,15 +13,14 @@
   {% for event in events %}
   {% with rendered=event.render_html %}
   {% ifchanged rendered %}
-  <div class="activityitem">
-    {% ifchanged event.created.date %}
-    <div class="timestamp">
-      {{ event.created|date:"j M Y" }}
-    </div>
-    {% endifchanged %}
-    <div class="eventdetails">
-      {{ event.render_html }}
-    </div>
+  {% ifchanged event.created.date %}
+  <div class="timestamp">
+    {{ event.created|date:"j M Y" }}
+  </div>
+  {% endifchanged %}
+  <div class="activityitem" data-event-id="{{ event.id }}">
+    <a class="icon-replace icon-comment" title="Add comment">★</a>
+    {{ event.render_html }}
   </div>
   {% endifchanged %}
   {% endwith %}

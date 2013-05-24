@@ -12,8 +12,8 @@
          @linkColor, @footerColor, @themeFont) {
 
   @linkColorHover: darken(@linkColor, 15);
+  @bgBorderColor: darken(@bgColor1, 10%);
 
-  
   a {
     color: @linkColor;
     &:hover {
@@ -181,17 +181,23 @@
     }
   }
 
-  .verseset, .actionset {
+  .verseset, .actionset, .activityitem {
     background-color: @bgColor1;
-    border-color: darken(@bgColor1, 10%);
+    border-color: @bgBorderColor;
     hr {
-      border-bottom-color: darken(@bgColor1, 10%);
+      border-bottom-color: @bgBorderColor;
       }
   }
 
+
+  #id-add-comment {
+    border-top: 1px solid @bgBorderColor;
+  }
+
+
   .page-header {
     background-color: @bgColor1;
-    border-color: darken(@bgColor1, 10%);
+    border-color: @bgBorderColor;
   }
 
   .score-log {
@@ -928,18 +934,19 @@ p.referral-link {
 
 // Activity stream
 
-.activityitem {
-  margin-top: 1em;
-
-  .eventdetails {
-    margin-left: 1em;
-  }
-
+.activitystream {
   .timestamp {
     font-style: italic;
+    margin-top: 1em;
+  }
+  .activityitem {
+    margin-left: 20px;
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid;
+    margin-bottom: 5px;
   }
 }
-
 
 ////////////  Response to smaller screen /////////////
 

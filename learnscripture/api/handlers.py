@@ -22,6 +22,7 @@ from piston.utils import rc
 from accounts.forms import PreferencesForm
 from accounts.models import Account
 from bibleverses.models import UserVerseStatus, Verse, StageType, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, MAX_VERSE_QUERY_SIZE, TextVersion, quick_find, VerseSetType, TextType
+from events.models import Event
 from learnscripture import session
 from learnscripture.decorators import require_identity_method
 from learnscripture.views import session_stats, bible_versions_for_request, verse_sets_visible_for_request
@@ -42,6 +43,20 @@ def require_preexisting_identity(view_func):
 
 require_preexisting_identity_m = method_decorator(require_preexisting_identity)
 
+
+def require_preexisting_account(view_func):
+    """
+    Returns a 400 error if there isn't already an account
+    """
+    @wraps(view_func)
+    def view(request, *args, **kwargs):
+        # Assumes IdentityMiddleware
+        if not hasattr(request, 'identity') or request.identity.account_id is None:
+            return rc.BAD_REQUEST
+        return view_func(request, *args, **kwargs)
+    return view
+
+require_preexisting_account_m = method_decorator(require_preexisting_account)
 
 # We need a more capable 'validate' than the one provided by piston to get
 # validation errors returned as JSON.
@@ -382,3 +397,32 @@ class AndroidAppInstalled(BaseHandler):
     def create(self, request):
         request.identity.account.android_app_installed()
 
+
+class AddComment(BaseHandler):
+    allowed_methods = ('POST',)
+    fields = (
+        ('author', ('id', 'username')),
+        'event_id',
+        'created',
+        'message',
+        )
+
+    @require_preexisting_account_m
+    def create(self, request):
+        try:
+            event_id = int(request.POST['event_id'])
+        except (KeyError, ValueError):
+            return rc.BAD_REQUEST
+
+        try:
+            e = Event.objects.get(id=event_id)
+        except Event.DoesNotExist:
+            return rc.BAD_REQUEST
+
+        message = request.POST.get('message', '').strip()
+        if message == '':
+            return validation_error_response({'message': 'You must enter a message'})
+
+        c = e.comments.create(author=request.identity.account,
+                              message=message)
+        return c
