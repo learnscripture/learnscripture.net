@@ -14,11 +14,11 @@
   {% with rendered=event.render_html %}
   {% ifchanged rendered %}
   <div class="activityitem">
-      {% ifchanged event.created.date %}
-      <div class="timestamp">
+    {% ifchanged event.created.date %}
+    <div class="timestamp">
       {{ event.created|date:"j M Y" }}
-      </div>
-      {% endifchanged %}
+    </div>
+    {% endifchanged %}
     <div class="eventdetails">
       {{ event.render_html }}
     </div>
