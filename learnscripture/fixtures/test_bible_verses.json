@@ -418,5 +418,18 @@
         "verse_number": 1,
         "bible_verse_number": 17538
     }
+},
+{
+    "pk": null,
+    "model": "bibleverses.verse",
+    "fields": {
+        "reference": "1 Corinthians 1:3",
+        "chapter_number": 1,
+        "text": "Grace be unto you, and peace, from God our Father, and from the Lord Jesus Christ.",
+        "book_number": 45,
+        "version": 1,
+        "verse_number": 3,
+        "bible_verse_number": 28366
+    }
 }
 ]
