@@ -512,13 +512,18 @@ class UserVerseStatus(models.Model):
     # this can happen.
 
     # By making reference a CharField instead of a tighter DB constraint, we can
-    # handle the case of VerseChoices or VerseSets being deleted, and also
-    # handle QAPairs from the same model. Since references don't change,
-    # we can handle the denormalisation easily.
+    # handle:
+    # - UserVerseStatuses that don't correspond to a Verse object, because
+    #   they span a few verses.
+    # - the case of VerseChoices or VerseSets being deleted,
+    # - UVSs that are not attached to VerseSets at all.
+    # - QAPairs and Verses from the same model
+    #
+    # Since references don't change we can handle the denormalisation easily.
 
     for_identity = models.ForeignKey('accounts.Identity', related_name='verse_statuses')
     reference = models.CharField(max_length=100)
-    verse_set = models.ForeignKey(VerseSet, null=True,
+    verse_set = models.ForeignKey(VerseSet, null=True, blank=True,
                                   on_delete=models.SET_NULL)
     text_order = models.PositiveSmallIntegerField() # order of this item within associate TextVersion
     version = models.ForeignKey(TextVersion)
@@ -631,6 +636,7 @@ class UserVerseStatus(models.Model):
 
     class Meta:
         unique_together = [('for_identity', 'verse_set', 'reference', 'version')]
+        verbose_name_plural = "User verse statuses"
 
 
 class InvalidVerseReference(ValueError):
@@ -899,7 +905,7 @@ def parse_as_bible_reference(query, allow_whole_book=True, allow_whole_chapter=T
     query = query.lower().strip()
 
     bible_ref_re = (
-        r'^[^\d]*'                   # book name
+        r'^(?:(?:1|2)\s*)?[^\d]*'    # book name
         r'\s+'                       # space
         r'(\d+)'                     # chapter
         r'\s*('                      # optionally:
