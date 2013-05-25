@@ -18,3 +18,6 @@ class Comment(models.Model):
     @property
     def message_formatted(self):
         return format_comment_message(self.message)
+
+    def __unicode__(self):
+        return "%s: %s" % (self.id, self.message)
