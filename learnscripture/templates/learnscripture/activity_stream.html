@@ -2,6 +2,7 @@
 
 {% load url from future %}
 {% load pagination_tags %}
+{% load account_utils %}
 
 {% block content %}
 
@@ -11,7 +12,7 @@
 
 <div class="activitystream">
   {% for event in events %}
-  {% with rendered=event.render_html %}
+  {% with rendered=event.render_html comments=event.comments.all %}
   {% ifchanged rendered %}
   {% ifchanged event.created.date %}
   <div class="timestamp">
@@ -19,8 +20,26 @@
   </div>
   {% endifchanged %}
   <div class="activityitem" data-event-id="{{ event.id }}">
-    <a class="icon-replace icon-comment" title="Add comment">★</a>
-    {{ event.render_html }}
+    <span class="commentindicator">
+      <a href="#" class="icon-comment show-add-comment" title="Add comment"><span class="commentcount">{{ comments|length }}</span></a>
+    </span>
+    <span class="eventdetails">
+      {{ event.render_html }}
+    </span>
+    <div class="commentblock{% if not comments %} hide{% endif %}">
+      {% for comment in comments %}
+      <div class="comment">
+        <span class="commentauthor">
+          {{ comment.author|account_link }}:
+        </span>
+        <span class="commentmessage">
+          {{ comment.message }}
+        </span>
+        <span class="timestamp">{{ comment.created|date:"Y-m-d H:i" }}</span>
+      </div>
+      {% endfor %}
+      <div><a href="#" class="show-add-comment">Add comment</a></div>
+    </div>
   </div>
   {% endifchanged %}
   {% endwith %}
@@ -28,5 +47,16 @@
 </div>
 
 {% paginate %}
+
+
+<div id="id-add-comment" class="hide">
+  {% if request.identity.account %}
+  <textarea id="id-comment-box" rows="1"></textarea>
+  <input type="submit" class="btn primary" value="Post" id="id-add-comment-btn">
+  <input type="submit" class="btn" value="Cancel" id="id-cancel-comment-btn">
+  {% else %}
+  <div>You must be logged in to add comments</div>
+  {% endif %}
+</div>
 
 {% endblock %}
