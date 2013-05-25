@@ -13,6 +13,7 @@ class SearchTests(TestCase):
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
 
     def setUp(self):
+        super(SearchTests, self).setUp()
         self.account = AutoFixture(Account).create(1)[0]
         c = connection.cursor()
         c.execute("CREATE INDEX bibleverses_verse_tsv_index ON bibleverses_verse USING gin(text_tsv);")

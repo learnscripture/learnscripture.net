@@ -14,6 +14,7 @@ from .base import AccountTestMixin
 class LeaderboardTests(TestCase):
 
     def setUp(self):
+        super(LeaderboardTests, self).setUp()
         a1 = Account.objects.create(username='testuser1',
                                     email='test2@test.com')
         i1 = Identity.objects.create(account=a1)
