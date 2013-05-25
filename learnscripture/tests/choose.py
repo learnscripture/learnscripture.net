@@ -17,8 +17,8 @@ class ChooseTests(LiveServerTests):
     def test_search(self):
         driver = self.driver
         self.get_url('choose')
-        driver.find_element_by_id('id-search-input').send_keys('gospel')
-        driver.find_element_by_id('id-search-btn').click()
+        driver.find_element_by_css_selector("#id-search-input").send_keys("gospel")
+        driver.find_element_by_css_selector("#id-search-btn").click()
 
         self.wait_until_loaded('body')
         self.assertIn("Basic Gospel", driver.page_source)
@@ -65,7 +65,7 @@ class ChooseTests(LiveServerTests):
         self.wait_until_loaded('body')
 
         # Change version:
-        Select(driver.find_element_by_id("id-version-select")).select_by_visible_text("NET")
+        Select(driver.find_element_by_css_selector("#id-version-select")).select_by_visible_text("NET")
 
         self.wait_for_ajax()
 
@@ -100,7 +100,7 @@ class ChooseTests(LiveServerTests):
         self.set_preferences()
         self.wait_until_loaded('body')
         self.wait_for_ajax()
-        self.assertEqual(driver.find_element_by_id("id-verse-title").text, u"John 3:16")
+        self.assertEqual(driver.find_element_by_css_selector("#id-verse-title").text, u"John 3:16")
 
 
     def test_choose_individual_verse_fuzzy(self):

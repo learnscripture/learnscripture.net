@@ -28,7 +28,7 @@ class ViewSetTests(LiveServerTests):
 
         self.assertIn("saith", driver.page_source)
 
-        Select(driver.find_element_by_id("id-version-select")).select_by_visible_text("NET (New English Translation)")
+        Select(driver.find_element_by_css_selector("#id-version-select")).select_by_visible_text("NET (New English Translation)")
 
         self.wait_until_loaded('body')
         self.assertIn("replied", driver.page_source)

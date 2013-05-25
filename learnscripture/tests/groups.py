@@ -206,10 +206,10 @@ class GroupCreatePageTests(LiveServerTests):
 
         driver = self.driver
         self.get_url('create_group')
-        driver.find_element_by_id('id_name').send_keys('My group')
-        driver.find_element_by_id('id_public').click()
+        driver.find_element_by_css_selector("#id_name").send_keys("My group")
+        driver.find_element_by_css_selector("#id_public").click()
 
-        driver.find_element_by_id('id_invited_users_0').send_keys('invit')
+        driver.find_element_by_css_selector("#id_invited_users_0").send_keys("invit")
         self.wait_for_ajax()
         driver.find_element_by_css_selector('ul.ui-autocomplete li.ui-menu-item:first-child').click()
         driver.find_element_by_css_selector('input[name="save"]').click()
