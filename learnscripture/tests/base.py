@@ -113,6 +113,11 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
     def get_url(self, name, *args, **kwargs):
         self.driver.get(self.live_server_url + reverse(name, *args, **kwargs))
 
+    def click(self, css_selector):
+        self.driver.find_element_by_css_selector(css_selector).click()
+
+    def send_keys(self, css_selector, text):
+        self.driver.find_element_by_css_selector(css_selector).send_keys(text)
 
     def wait_until(self, callback, timeout=10):
         """
