@@ -181,17 +181,12 @@
     }
   }
 
-  .verseset, .actionset, .activityitem {
+  .verseset, .actionset, .activityitem, .commentindicator, .commentblock {
     background-color: @bgColor1;
     border-color: @bgBorderColor;
     hr {
       border-bottom-color: @bgBorderColor;
       }
-  }
-
-
-  #id-add-comment {
-    border-top: 1px solid @bgBorderColor;
   }
 
 
@@ -935,16 +930,45 @@ p.referral-link {
 // Activity stream
 
 .activitystream {
-  .timestamp {
-    font-style: italic;
-    margin-top: 1em;
-  }
+
+  @activityItemPadding: 5px;
+
   .activityitem {
     margin-left: 20px;
-    padding: 5px;
-    border-radius: 4px;
     border: 1px solid;
-    margin-bottom: 5px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    clear: both;
+  }
+
+
+  .commentindicator {
+    border-right: 1px solid;
+    float:left;
+    padding: 0px @activityItemPadding;
+    margin-right: @activityItemPadding;
+  }
+
+  .commentblock {
+    border-top: 1px solid;
+    padding: @activityItemPadding;
+  }
+
+  .commentauthor {
+  }
+
+  .comment {
+    border-radius: 4px;
+    background-color: @white;
+    padding: @activityItemPadding;
+    margin-bottom: 3px;
+    overflow: auto;
+
+    .timestamp {
+      font-style: italic;
+      float: right;
+      display: inline-block;
+    }
   }
 }
 

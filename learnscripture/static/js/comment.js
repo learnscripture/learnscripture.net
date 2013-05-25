@@ -4,9 +4,10 @@ var learnscripture =
 
 
         var setupCommentControls = function () {
-            $('a.icon-comment').bind('click', function (ev) {
-                var div = $(this).closest('.activityitem');
-                $('#id-add-comment').appendTo(div).show();
+            $('a.show-add-comment').bind('click', function (ev) {
+                ev.preventDefault();
+                var div = $(this).closest('.activityitem').find('.commentblock').show('fast');
+                $('#id-add-comment').appendTo(div).show('fast');
             })
 
             $('#id-add-comment-btn').bind('click', function(ev) {

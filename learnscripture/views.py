@@ -1430,7 +1430,9 @@ Message:
 def activity_stream(request):
     return render(request,
                   'learnscripture/activity_stream.html',
-                  {'events': Event.objects.for_activity_stream(
-                account=account_from_request(request)),
+                  {'events':
+                       Event.objects
+                   .for_activity_stream(account=account_from_request(request))
+                   .prefetch_related('comments'),
                    'title': "Recent activity",
                    })
