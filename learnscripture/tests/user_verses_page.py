@@ -37,19 +37,19 @@ class UserVersesPageTests(LiveServerTests):
         for i in range(1, 7):
             self.assertIn("Psalm 23:%d" % i, driver.page_source)
 
-        driver.find_element_by_css_selector('a.btn[data-reference="Psalm 23:2"]').click()
+        self.find('a.btn[data-reference="Psalm 23:2"]').click()
         self.wait_for_ajax()
 
         # 'Practise verse' button
-        btn1 = driver.find_element_by_css_selector('input[name="reviseverse"]')
+        btn1 = self.find('input[name="reviseverse"]')
         self.assertEqual(btn1.get_attribute('value'), "Practise verse")
 
         # 'Practise section' button
-        btn2 = driver.find_element_by_css_selector('input[name="practisepassagesection"]')
+        btn2 = self.find('input[name="practisepassagesection"]')
         self.assertEqual(btn2.get_attribute('value'), "Practise section: Psalm 23:1-3")
 
         # 'Practise passage' button
-        btn3 = driver.find_element_by_css_selector('input[name="practisepassage"]')
+        btn3 = self.find('input[name="practisepassage"]')
         self.assertEqual(btn3.get_attribute('value'), "Practise passage: Psalm 23:1-6")
 
         # Click "practise section":
@@ -61,16 +61,16 @@ class UserVersesPageTests(LiveServerTests):
         self.assertIn("Psalm 23:1", driver.page_source)
 
         # Should be in 'practise' mode
-        self.assertTrue(driver.find_element_by_css_selector("#id-instructions .stage-practice").is_displayed())
+        self.assertTrue(self.find("#id-instructions .stage-practice").is_displayed())
 
         # Type the verse:
         words = "The LORD is my shepherd I shall not want"
         for word in words.split():
-            driver.find_element_by_css_selector("#id-typing").send_keys(word + " ")
+            self.find("#id-typing").send_keys(word + " ")
 
         # Click finish
         self.wait_for_ajax()
-        driver.find_element_by_css_selector("#id-finish-btn").click()
+        self.find("#id-finish-btn").click()
         self.wait_for_ajax()
         self.wait_until_loaded('body')
 

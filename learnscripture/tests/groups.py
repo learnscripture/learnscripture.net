@@ -46,7 +46,7 @@ class GroupPageTests(LiveServerTests):
 
         self.assertTrue(driver.current_url.endswith('/groups/another-group/'))
 
-        driver.find_element_by_css_selector('input[name="join"]').click()
+        self.find('input[name="join"]').click()
         self.wait_until_loaded('body')
         self.assertTrue(public_group.members.filter(id=account.id).exists())
 
@@ -67,12 +67,12 @@ class GroupPageTests(LiveServerTests):
 
         self.assertIn("You are not a member of this group", driver.page_source)
 
-        driver.find_element_by_css_selector('input[name="join"]').click()
+        self.find('input[name="join"]').click()
 
         self.wait_until_loaded('body')
         self.fill_in_account_form()
         self.wait_until_loaded('body')
-        driver.find_element_by_css_selector('input[name="join"]').click()
+        self.find('input[name="join"]').click()
         self.wait_until_loaded('body')
 
         self.assertIn("You are a member of this group", driver.page_source)
@@ -206,13 +206,13 @@ class GroupCreatePageTests(LiveServerTests):
 
         driver = self.driver
         self.get_url('create_group')
-        driver.find_element_by_css_selector("#id_name").send_keys("My group")
-        driver.find_element_by_css_selector("#id_public").click()
+        self.find("#id_name").send_keys("My group")
+        self.find("#id_public").click()
 
-        driver.find_element_by_css_selector("#id_invited_users_0").send_keys("invit")
+        self.find("#id_invited_users_0").send_keys("invit")
         self.wait_for_ajax()
-        driver.find_element_by_css_selector('ul.ui-autocomplete li.ui-menu-item:first-child').click()
-        driver.find_element_by_css_selector('input[name="save"]').click()
+        self.find('ul.ui-autocomplete li.ui-menu-item:first-child').click()
+        self.find('input[name="save"]').click()
         self.wait_until_loaded('body')
 
         self.assertTrue(driver.current_url.endswith('/my-group/'))

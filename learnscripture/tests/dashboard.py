@@ -40,11 +40,11 @@ class DashboardTests(LiveServerTests):
         self.wait_until_loaded('body')
         self.assertTrue(driver.current_url.endswith(reverse('learn')))
         self.wait_for_ajax()
-        self.assertEqual(ref, driver.find_element_by_css_selector("#id-verse-title").text)
+        self.assertEqual(ref, self.find("#id-verse-title").text)
 
     def _click_clear_learning_queue_btn(self, verse_set_id):
         driver = self.driver
-        driver.find_element_by_css_selector('#id-learning-queue-verse-set-%s input[name=clearbiblequeue]' % (verse_set_id if verse_set_id else '')).click()
+        self.find('#id-learning-queue-verse-set-%s input[name=clearbiblequeue]' % (verse_set_id if verse_set_id else '')).click()
         alert = driver.switch_to_alert()
         alert.accept()
         self.wait_until_loaded('body')
@@ -80,7 +80,7 @@ class DashboardTests(LiveServerTests):
 
         self.get_url('dashboard')
         # Test clicking 'Start learning' for general queue
-        driver.find_element_by_css_selector('#id-learning-queue-verse-set- input[name=learnbiblequeue]').click()
+        self.find('#id-learning-queue-verse-set- input[name=learnbiblequeue]').click()
         self._assert_learning_reference(u"Psalm 23:2")
 
         # Test clicking 'Clear queue'
@@ -122,7 +122,7 @@ class DashboardTests(LiveServerTests):
         self.wait_until_loaded('body')
         self.assertTrue(driver.current_url.endswith(reverse('learn')))
         self.wait_for_ajax()
-        self.assertEqual(u"Psalm 23:1", driver.find_element_by_css_selector("#id-verse-title").text)
+        self.assertEqual(u"Psalm 23:1", self.find("#id-verse-title").text)
 
         # Test 'Cancel learning' button
         self.get_url('dashboard')
@@ -140,18 +140,18 @@ class DashboardTests(LiveServerTests):
         self.assertIn("You've got 4 catechism questions in your queue for learning",
                       driver.page_source)
 
-        driver.find_element_by_css_selector('input[name=learncatechismqueue]').click()
+        self.find('input[name=learncatechismqueue]').click()
         self.wait_until_loaded('body')
         self.assertTrue(driver.current_url.endswith(reverse('learn')))
 
         self.wait_for_ajax()
-        self.assertEqual(u"Q1. What is the chief end of man?", driver.find_element_by_css_selector("#id-verse-title").text)
+        self.assertEqual(u"Q1. What is the chief end of man?", self.find("#id-verse-title").text)
 
         i.record_verse_action('Q1', 'WSC', StageType.TEST, accuracy=1.0)
 
         # Test clicking 'Clear queue'
         self.get_url('dashboard')
-        driver.find_element_by_css_selector('input[name=clearcatechismqueue]').click()
+        self.find('input[name=clearcatechismqueue]').click()
         alert = driver.switch_to_alert()
         alert.accept()
         self.wait_until_loaded('body')
@@ -181,7 +181,7 @@ class DashboardTests(LiveServerTests):
         self.get_url('dashboard')
         self.assertIn('Psalm 23', driver.page_source) # sanity check
 
-        btn = driver.find_element_by_css_selector('input[value="Revise one section"]')
+        btn = self.find('input[value="Revise one section"]')
         self.assertEqual(btn.get_attribute('name'), 'revisepassagenextsection')
         btn.click()
 
@@ -191,7 +191,7 @@ class DashboardTests(LiveServerTests):
 
         # Skip through
         def skip():
-            driver.find_element_by_css_selector("#id-verse-dropdown").click()
+            self.find("#id-verse-dropdown").click()
             driver.find_element_by_link_text("Skip this").click()
             self.wait_for_ajax()
         skip()
@@ -208,7 +208,7 @@ class DashboardTests(LiveServerTests):
         ids = list(Identity.objects.all())
         driver = self.driver
         driver.get(self.live_server_url + "/")
-        e = driver.find_element_by_css_selector('a.btn.large')
+        e = self.find('a.btn.large')
         self.assertTrue(e.get_attribute('href').endswith(reverse('choose')))
         e.click()
         self.assertTrue(driver.current_url.endswith(reverse('choose')))
