@@ -3,7 +3,6 @@
 {% load url from future %}
 {% load pagination_tags %}
 {% load account_utils %}
-{% load markup %}
 
 {% block content %}
 
@@ -34,9 +33,9 @@
           {{ comment.author|account_link }}
         </span>
         <span class="timestamp">{{ comment.created|date:"Y-m-d H:i" }}</span>
-        <span class="commentmessage">
-          {{ comment.message.strip|restructuredtext }}
-        </span>
+        <div class="commentmessage">
+          {{ comment.message.strip|urlize|linebreaks }}
+        </div>
       </div>
       {% endfor %}
       <div><a href="#" class="show-add-comment">Add comment</a></div>
