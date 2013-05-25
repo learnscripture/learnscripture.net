@@ -23,7 +23,7 @@ you referred them.</p>
 {% else %}
 
 <p><strong>You first need an account, and need to
- <a href='{% url "login" %}?next={{ request.get_full_path|urlencode %}'>sign in</a>
+ <a href='{% url "login" %}?next={{ request.get_full_path|urlencode }}'>sign in</a>
  to get the full instructions and the referral link.</strong></p>
 
 {% endif %}
