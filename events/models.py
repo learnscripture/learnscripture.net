@@ -323,5 +323,7 @@ class Event(models.Model):
         else:
             return mark_safe(self.message_html)
 
+    def get_absolute_url(self):
+        return reverse('activity_item', args=(self.id,))
 
 import events.hooks
