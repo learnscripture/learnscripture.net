@@ -12,11 +12,11 @@
     <span class="commentindicator">
       <a href="#" class="icon-comment show-add-comment" title="Add comment"><span class="commentcount">{{ comments|length }}</span></a>
     </span>
-    <span class="eventdetails">
-      {{ event.render_html }}
-    </span>
     <span class="permalink">
       <a href="{{ event.get_absolute_url }}" class="icon-link icon-replace" title="Link directly to this item alone">link</a>
+    </span>
+    <span class="eventdetails">
+      <h4>{{ event.render_html }}</h4>
     </span>
     <div class="commentblock{% if not comments %} hide{% endif %}">
       <div class="commentlist">
