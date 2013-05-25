@@ -181,7 +181,7 @@
     }
   }
 
-  .verseset, .actionset, .activityitem, .commentindicator, .commentblock {
+  .verseset, .actionset, .activityitem, .commentblock {
     background-color: @bgColor1;
     border-color: @bgBorderColor;
     hr {
@@ -189,6 +189,9 @@
       }
   }
 
+  .activityitem .commentindicator {
+    border-color: @bgBorderColor;
+  }
 
   .page-header {
     background-color: @bgColor1;
@@ -840,12 +843,9 @@ body .score-log {
     margin-left: 0px;
     > li {
       list-style-type: none;
-      border-bottom: 1px solid #ddd;
-      padding: 5px 8px;
-
-      &:last-child {
-        border-bottom: 0px;
-      }
+      border: 1px solid #ddd;
+      padding: 2px 4px;
+      margin-top: -1px;
     }
   }
   .timestamp {
@@ -853,6 +853,14 @@ body .score-log {
     font-size: 90%;
   }
 
+  .commentindicator {
+    float:right;
+    border: 1px solid #ddd;
+    margin-right: -5px;
+    margin-top: -3px;
+    padding-left: 4px;
+    border-bottom-left-radius: 4px;
+  }
 }
 
 ul.grouplist {

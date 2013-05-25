@@ -248,15 +248,18 @@ only takes a few seconds. Otherwise your progress won't be saved permanently.
 <h3>News <a href="{% url 'activity_stream' %}">(see more)</a></h3>
 
 <div class="eventstream">
-<ul>
-{% for event in events %}
-<li>{{ event.render_html }}
-{% if event.created %}
-<br/><span class="timestamp">{{ event.created_display }}</span>
-{% endif %}
-</li>
-{% endfor %}
-</ul>
+  <ul>
+    {% for event in events %}
+    <li>
+      <span class="commentindicator">
+        <a href="{{ event.get_absolute_url }}" class="icon-comment" title="View/add comments"><span class="commentcount">{{ event.comment_count }}</span>
+        </a>
+      </span>
+      {{ event.render_html }}
+      <br/><span class="timestamp">{{ event.created_display }}</span>
+    </li>
+    {% endfor %}
+  </ul>
 </div>
 
 {% endblock %}
