@@ -47,6 +47,25 @@ var learnscripture =
                 $('#id-comment-box').val('');
             });
 
+            $('.moderate-comment').bind('click', function (ev) {
+                ev.preventDefault();
+                if (window.confirm("Hide this comment?")) {
+                    var commentDiv = $(this).closest('.comment');
+                    var commentId = commentDiv.data().commentId;
+                    $.ajax({url: '/api/learnscripture/v1/hidecomment/?format=json',
+                            dataType: 'json',
+                            type: 'POST',
+                            data: {
+                                'comment_id': commentId,
+                            },
+                            success: function (data) {
+                                commentDiv.remove();
+                            },
+                            error: learnscripture.ajaxFailed
+                           });
+                }
+            });
+
             $('#id-comment-box').autosize();
         };
 

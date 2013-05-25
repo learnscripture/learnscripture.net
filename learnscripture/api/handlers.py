@@ -22,6 +22,7 @@ from piston.utils import rc
 from accounts.forms import PreferencesForm
 from accounts.models import Account
 from bibleverses.models import UserVerseStatus, Verse, StageType, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, MAX_VERSE_QUERY_SIZE, TextVersion, quick_find, VerseSetType, TextType
+from comments.models import Comment
 from events.models import Event
 from learnscripture import session
 from learnscripture.decorators import require_identity_method
@@ -427,3 +428,14 @@ class AddComment(BaseHandler):
         c = e.comments.create(author=request.identity.account,
                               message=message)
         return c
+
+
+class HideComment(BaseHandler):
+
+    @require_preexisting_account_m
+    def create(self, request):
+        if not request.identity.account.is_moderator:
+            return rc.FORBIDDEN
+        Comment.objects.filter(id=int(request.POST['comment_id'])).update(hidden=True)
+        return {}
+

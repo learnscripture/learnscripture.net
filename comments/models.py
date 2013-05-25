@@ -14,6 +14,7 @@ class Comment(models.Model):
     event = models.ForeignKey(Event, related_name='comments')
     created = models.DateTimeField(default=timezone.now)
     message = models.TextField()
+    hidden = models.BooleanField(default=False, blank=True)
 
     @property
     def message_formatted(self):
