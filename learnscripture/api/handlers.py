@@ -405,6 +405,7 @@ class AddComment(BaseHandler):
         'event_id',
         'created',
         'message',
+        'message_formatted',
         )
 
     @require_preexisting_account_m
