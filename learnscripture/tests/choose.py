@@ -17,8 +17,8 @@ class ChooseTests(LiveServerTests):
     def test_search(self):
         driver = self.driver
         self.get_url('choose')
-        self.find("#id-search-input").send_keys("gospel")
-        self.find("#id-search-btn").click()
+        self.send_keys("#id-search-input", "gospel")
+        self.click("#id-search-btn")
 
         self.wait_until_loaded('body')
         self.assertIn("Basic Gospel", driver.page_source)
@@ -84,19 +84,19 @@ class ChooseTests(LiveServerTests):
     def test_choose_individual_verse(self):
         driver = self.driver
         self.get_url('choose')
-        self.find("a[href='#id-tab-individual']").click()
+        self.click("a[href='#id-tab-individual']")
 
         # Test clicking on the drop downs.
         Select(self.find("form.quickfind select[name=book]")).select_by_visible_text("John")
         Select(self.find("form.quickfind select[name=chapter_start]")).select_by_visible_text("3")
         Select(self.find("form.quickfind select[name=verse_start]")).select_by_visible_text("16")
-        self.find("input[name=lookup]").click()
+        self.click("input[name=lookup]")
         self.wait_for_ajax()
 
         self.assertIn("For this is the way God loved the world", driver.page_source)
 
         # Check we can actually click on 'Learn' and it works.
-        self.find("#id-tab-individual input[value=Learn]").click()
+        self.click("#id-tab-individual input[value=Learn]")
         self.set_preferences()
         self.wait_until_loaded('body')
         self.wait_for_ajax()
@@ -107,12 +107,12 @@ class ChooseTests(LiveServerTests):
         # Test entering into quick find, and being lazy
         driver = self.driver
         self.get_url('choose')
-        self.find("a[href='#id-tab-individual']").click()
+        self.click("a[href='#id-tab-individual']")
 
         self.find('form.quickfind input[name=quick_find]')\
             .send_keys('Gen 1:1')
         Select(self.find("form.quickfind select[name=version]")).select_by_visible_text("KJV (King James Version)")
-        self.find("input[name=lookup]").click()
+        self.click("input[name=lookup]")
         self.wait_for_ajax()
 
         self.assertIn("In the beginning God", driver.page_source)
@@ -122,12 +122,12 @@ class ChooseTests(LiveServerTests):
         # Test entering into quick find, and being lazy
         driver = self.driver
         self.get_url('choose')
-        self.find("a[href='#id-tab-individual']").click()
+        self.click("a[href='#id-tab-individual']")
 
         self.find('form.quickfind input[name=quick_find]')\
             .send_keys('Gen 100:1')
         Select(self.find("form.quickfind select[name=version]")).select_by_visible_text("KJV (King James Version)")
-        self.find("input[name=lookup]").click()
+        self.click("input[name=lookup]")
         self.wait_for_ajax()
 
         self.assertNotIn("In the beginning God", driver.page_source)
@@ -137,12 +137,12 @@ class ChooseTests(LiveServerTests):
         driver = self.driver
         self.get_url('choose')
 
-        self.find("a[href='#id-tab-individual']").click()
+        self.click("a[href='#id-tab-individual']")
 
         self.find('form.quickfind input[name=quick_find]')\
             .send_keys('firmament evening')
         Select(self.find("form.quickfind select[name=version]")).select_by_visible_text("KJV (King James Version)")
-        self.find("input[name=lookup]").click()
+        self.click("input[name=lookup]")
         self.wait_for_ajax()
 
         self.assertIn("And God called the <b>firmament</b> Heaven. And the <b>evening</b>", driver.page_source)

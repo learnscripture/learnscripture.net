@@ -22,7 +22,7 @@ class CatechismTests(LiveServerTests):
         identity, account = self.create_account()
         self.login(account)
         self.get_url('catechisms')
-        self.find("input[value=Learn]").click()
+        self.click("input[value=Learn]")
         self.set_preferences()
         self.wait_until_loaded('body')
         self.wait_for_ajax()
@@ -34,10 +34,10 @@ class CatechismTests(LiveServerTests):
 
         # Do the reading:
         for i in range(0, 9):
-            self.find("#id-next-btn").click()
+            self.click("#id-next-btn")
 
         for word in "Man's chief end is to glorify God and to enjoy him forever".split(" "):
-            self.find("#id-typing").send_keys(word + " ")
+            self.send_keys("#id-typing", word + " ")
 
         self.wait_for_ajax()
 

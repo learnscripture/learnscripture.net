@@ -43,7 +43,7 @@ class ViewSetTests(LiveServerTests):
 
         driver.get(self.live_server_url + reverse('view_verse_set', kwargs=dict(slug=vs.slug))
                    + "?version=NET")
-        self.find("input[value='Learn']").click()
+        self.click("input[value='Learn']")
 
         # Can use 'all' here because this is the first time we've chosen anything
         verse_statuses = identity.verse_statuses.all()
@@ -65,7 +65,7 @@ class ViewSetTests(LiveServerTests):
         self.assertIn("You have %d verse(s) from this set in your queue" % vs.verse_choices.count(),
                       driver.page_source)
 
-        self.find("input[name='drop']").click()
+        self.click("input[name='drop']")
         self.wait_until_loaded('body')
 
         self.assertEqual(len(identity.bible_verse_statuses_for_learning(vs.id)),

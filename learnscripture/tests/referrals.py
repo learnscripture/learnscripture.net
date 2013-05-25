@@ -22,7 +22,7 @@ class ReferralsTests(LiveServerTests):
         # Start at home page
         start_url = account.make_referral_link(self.live_server_url)
         driver.get(start_url)
-        self.find('a.btn.primary').click()
+        self.click('a.btn.primary')
 
         # Should be at 'choose' page now
         vs = VerseSet.objects.get(slug='bible-101')

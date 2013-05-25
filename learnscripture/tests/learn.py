@@ -57,12 +57,12 @@ class LearnTests(LiveServerTests):
         for word in self.kjv_john_3_16.strip().split():
             accumulator += accuracy
             if accumulator >= 1.0:
-                self.find("#id-typing").send_keys(word + " ")
+                self.send_keys("#id-typing", word + " ")
                 accumulator -= 1.0
             else:
                 # Type the wrong thing - 3 times to make it fail
                 for i in range(0, 3):
-                    self.find("#id-typing").send_keys("xxx ")
+                    self.send_keys("#id-typing", "xxx ")
 
     def _score_for_j316(self, accuracy=1.0):
         word_count = len(self.kjv_john_3_16.strip().split())
@@ -88,7 +88,7 @@ class LearnTests(LiveServerTests):
         self.assertEqual(u"John 3:16", self.find("#id-verse-title").text)
         # Do the reading:
         for i in range(0, 9):
-            self.find("#id-next-btn").click()
+            self.click("#id-next-btn")
 
         # Do the typing:
         self._type_john_3_16_kjv()
@@ -106,18 +106,18 @@ class LearnTests(LiveServerTests):
 
         identity.add_verse_choice('Psalm 23:1-2')
         self.get_url('dashboard')
-        self.find('input[name=learnbiblequeue]').click()
+        self.click('input[name=learnbiblequeue]')
         self.wait_for_ajax()
         self.assertEqual(u"Psalm 23:1-2", self.find("#id-verse-title").text)
 
         # Do the reading:
         for i in range(0, 9):
-            self.find("#id-next-btn").click()
+            self.click("#id-next-btn")
 
         # Do the typing: The fixture has 'The Lord is my shepherd--I shall not
         # want' in order to test an issue with word splitting
         for word in self.psalm_23_1_2.strip().split():
-            self.find("#id-typing").send_keys(word + " ")
+            self.send_keys("#id-typing", word + " ")
 
         self.wait_for_ajax()
 
@@ -146,7 +146,7 @@ class LearnTests(LiveServerTests):
 
         # Do the reading:
         for i in range(0, 9):
-            self.find("#id-next-btn").click()
+            self.click("#id-next-btn")
 
         # Do the typing:
         self._type_john_3_16_kjv()
@@ -188,10 +188,10 @@ class LearnTests(LiveServerTests):
 
         # This section can be replaced by a 'skip' button click once we've implemented that.
         for i in range(0, 9):
-            self.find("#id-next-btn").click()
+            self.click("#id-next-btn")
         for word in "The LORD is my shepherd, I lack nothing.".split():
-            self.find("#id-typing").send_keys(word + " ")
-        self.find("#id-next-verse-btn").click()
+            self.send_keys("#id-typing", word + " ")
+        self.click("#id-next-verse-btn")
 
         # Now check that the next verse is present and is also NET, which is the
         # main point of this test.
@@ -216,16 +216,16 @@ class LearnTests(LiveServerTests):
         self._make_verses_due_for_testing(identity.verse_statuses.filter(reference='Psalm 23:1'))
 
         self.get_url('dashboard')
-        self.find('input[name=revisepassage]').click()
+        self.click('input[name=revisepassage]')
 
         self.wait_until_loaded('body')
         self.wait_for_ajax()
 
         for word in "The LORD is my shepherd, I shall not want.".split():
-            self.find("#id-typing").send_keys(word + " ")
+            self.send_keys("#id-typing", word + " ")
 
         # Test keyboard shortcut
-        self.find('body').send_keys('\n')
+        self.send_keys('body', '\n')
         self.wait_for_ajax()
         self.assertIn(u"He maketh me to lie down in green pastures",
                       self.find('.current-verse').text)
@@ -244,8 +244,8 @@ class LearnTests(LiveServerTests):
 
         self.assertEqual(u"John 3:16", self.find("#id-verse-title").text)
 
-        self.find("#id-verse-dropdown").click()
-        self.find("#id-skip-verse-btn").click()
+        self.click("#id-verse-dropdown")
+        self.click("#id-skip-verse-btn")
 
         self.assertEqual(u"John 14:6", self.find("#id-verse-title").text)
 
@@ -272,8 +272,8 @@ class LearnTests(LiveServerTests):
 
         self.assertEqual(u"John 3:16", self.find("#id-verse-title").text)
 
-        self.find("#id-verse-dropdown").click()
-        self.find("#id-cancel-learning-btn").click()
+        self.click("#id-verse-dropdown")
+        self.click("#id-cancel-learning-btn")
         self.wait_for_ajax()
 
         # Should skip.
@@ -299,8 +299,8 @@ class LearnTests(LiveServerTests):
 
         self.assertEqual(u"John 3:16", self.find("#id-verse-title").text)
 
-        self.find("#id-verse-dropdown").click()
-        self.find("#id-reset-progress-btn").click()
+        self.click("#id-verse-dropdown")
+        self.click("#id-reset-progress-btn")
 
         alert = driver.switch_to_alert()
         alert.accept()
@@ -314,7 +314,7 @@ class LearnTests(LiveServerTests):
         self.assertTrue(self.find('#id-instructions .stage-read').is_displayed())
 
     def click_revise_bible(self):
-        self.find("input[name='revisebiblequeue']").click()
+        self.click("input[name='revisebiblequeue']")
         self.wait_until_loaded('body')
         self.wait_for_ajax()
 
@@ -341,7 +341,7 @@ class LearnTests(LiveServerTests):
 
         self._type_john_3_16_kjv()
 
-        self.find("#id-finish-btn").click()
+        self.click("#id-finish-btn")
         self.wait_for_ajax()
 
         # Reload, should have nothing more to revise
