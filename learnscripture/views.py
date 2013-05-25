@@ -1433,6 +1433,6 @@ def activity_stream(request):
                   {'events':
                        Event.objects
                    .for_activity_stream(account=account_from_request(request))
-                   .prefetch_related('comments'),
+                   .prefetch_related('comments', 'comments__author'),
                    'title': "Recent activity",
                    })
