@@ -4,7 +4,9 @@
 
 {% block content %}
 
-<p><a href="">{{ event.account|account_link }}</a>
+<p>
+  <a href="{% url 'activity_stream' %}">Other recent activity</a> |
+  {{ event.account|account_link }}
   » <a href="{% url 'user_activity_stream' event.account.username %}">Recent activity</a>
 </p>
 
