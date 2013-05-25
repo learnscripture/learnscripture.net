@@ -359,6 +359,12 @@ RESTRUCTUREDTEXT_FILTER_SETTINGS = {
     'file_insertion_enabled': False,
 }
 
+MARKUP_SETTINGS = {
+    'restructuredtext': {
+        'settings_overrides': RESTRUCTUREDTEXT_FILTER_SETTINGS,
+    }
+}
+
 CAMPAIGN_CONTEXT_PROCESSORS = [
     'learnscripture.context_processors.campaign_context_processor'
 ]
