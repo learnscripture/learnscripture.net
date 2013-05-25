@@ -77,6 +77,7 @@ class Account(AbstractBaseUser):
     email = models.EmailField()
     date_joined = models.DateTimeField(default=timezone.now)
     is_tester = models.BooleanField(default=False, blank=True)
+    is_moderator = models.BooleanField(default=False, blank=True)
     is_under_13 = models.BooleanField("Under 13 years old",
         default=False, blank=True)
     is_active = models.BooleanField(default=True)

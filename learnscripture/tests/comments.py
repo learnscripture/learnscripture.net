@@ -6,19 +6,21 @@ from events.models import Event, EventType
 from .base import LiveServerTests
 
 
-class AddCommentTests(LiveServerTests):
+class CommentPageTests(LiveServerTests):
 
-    def test_add_comment(self):
-        identity, account = self.create_account()
-        Event.objects.create(
+    def setUp(self):
+        super(CommentPageTests, self).setUp()
+        self.identity, self.account = self.create_account()
+        self.event = Event.objects.create(
             message_html="Test",
             event_type=EventType.POINTS_MILESTONE,
-            account=account,
+            account=self.account,
             event_data={},
             )
 
+    def test_add_comment(self):
         message = "This is my comment"
-        self.login(account)
+        self.login(self.account)
         self.get_url('activity_stream')
         self.click('.show-add-comment')
         self.send_keys('#id-comment-box', message)
@@ -32,3 +34,33 @@ class AddCommentTests(LiveServerTests):
         c = Comment.objects.get()
         self.assertEqual(c.author, account)
         self.assertEqual(c.message, "This is my comment")
+
+    def test_moderate_comment(self):
+        other_identity, other_account = self.create_account(username="other",
+                                                            email="other@other.com")
+        self.account.is_moderator = True
+        self.account.save()
+        c1 = self.event.comments.create(
+            message="This is a naughty message",
+            author=other_account,
+            )
+        c2 = self.event.comments.create(
+            message="This is already hidden",
+            author=other_account,
+            hidden=True
+            )
+
+        self.login(self.account)
+        self.get_url('activity_stream')
+
+        self.assertIn("This is a naughty message", self.driver.page_source)
+        self.assertNotIn("This is already hidden", self.driver.page_source)
+        self.click('.moderate-comment')
+        self.confirm()
+
+        # Test page
+        self.wait_for_ajax()
+        self.assertNotIn("This is a naughty message", self.driver.page_source)
+
+        # Test DB
+        self.assertEqual(self.event.comments.get(id=c1.id).hidden, True)

@@ -123,6 +123,9 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
     def send_keys(self, css_selector, text):
         return self.find(css_selector).send_keys(text)
 
+    def confirm(self):
+        self.driver.switch_to_alert().accept()
+
     def wait_until(self, callback, timeout=10):
         """
         Helper function that blocks the execution of the tests until the
