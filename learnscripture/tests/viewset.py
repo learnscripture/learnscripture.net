@@ -16,9 +16,6 @@ class ViewSetTests(LiveServerTests):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json']
 
-    def setUp(self):
-        super(ViewSetTests, self).setUp()
-
     def test_change_version(self):
         driver = self.driver
         identity, account = self.create_account()

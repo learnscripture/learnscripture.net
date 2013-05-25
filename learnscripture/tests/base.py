@@ -101,6 +101,7 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
             cls.display.stop()
 
     def setUp(self):
+        super(LiveServerTests, self).setUp()
         self.verificationErrors = []
 
     def tearDown(self):
