@@ -984,7 +984,24 @@ p.referral-link {
 
 }
 
+#id-comment-box {
+  width: 100%;
+  box-sizing: border-box;         /* For IE and modern versions of Chrome */
+  -moz-box-sizing: border-box;    /* For Firefox                          */
+  -webkit-box-sizing: border-box; /* For Safari                           */
+}
 
+#id-add-comment > div {
+
+  > div:last-child {
+    overflow: hidden;
+    padding: 0 5px 0 0;
+  }
+
+  > div:first-child {
+    float: right;
+  }
+}
 
 ////////////  Response to smaller screen /////////////
 

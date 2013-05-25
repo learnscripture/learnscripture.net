@@ -1,3 +1,5 @@
+{% load url from future %}
+
 {# Hidden stuff #}
 
 {# sync with template in activity_event_inc.html #}
@@ -15,10 +17,16 @@
 
 <div id="id-add-comment" class="hide">
   {% if request.identity.account %}
-  <textarea id="id-comment-box" rows="1"></textarea>
-  <input type="submit" class="btn primary" value="Post" id="id-add-comment-btn">
-  <input type="submit" class="btn" value="Cancel" id="id-cancel-comment-btn">
+  <div>
+    <div>
+      <input type="submit" class="btn primary" value="Post" id="id-add-comment-btn">
+      <input type="submit" class="btn" value="Cancel" id="id-cancel-comment-btn">
+    </div>
+    <div>
+      <textarea id="id-comment-box" rows="1"></textarea>
+    </div>
+  </div>
   {% else %}
-  <div>You must be logged in to add comments</div>
+  <div>You must be <a href='{% url "login" %}?next={{ request.get_full_path|urlencode }}'>signed in</a> to add comments.</div>
   {% endif %}
 </div>
