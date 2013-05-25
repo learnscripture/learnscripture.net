@@ -16,13 +16,13 @@ class AccountDetailsTests(LiveServerTests):
         driver = self.driver
         driver.get(self.live_server_url)
 
-        driver.find_element_by_css_selector("#id-session-menu").click()
+        self.find("#id-session-menu").click()
         # Should have an 'account' link
 
-        driver.find_element_by_css_selector('ul.dropdown-menu li a[href="/account/"]').click()
+        self.find('ul.dropdown-menu li a[href="/account/"]').click()
 
-        driver.find_element_by_css_selector("#id_first_name").send_keys("Fred")
-        driver.find_element_by_css_selector("#id-save-btn").click()
+        self.find("#id_first_name").send_keys("Fred")
+        self.find("#id-save-btn").click()
 
         self.assertEqual(Account.objects.get(id=account.id).first_name, "Fred")
 

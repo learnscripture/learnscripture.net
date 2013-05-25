@@ -28,7 +28,7 @@ class ViewSetTests(LiveServerTests):
 
         self.assertIn("saith", driver.page_source)
 
-        Select(driver.find_element_by_css_selector("#id-version-select")).select_by_visible_text("NET (New English Translation)")
+        Select(self.find("#id-version-select")).select_by_visible_text("NET (New English Translation)")
 
         self.wait_until_loaded('body')
         self.assertIn("replied", driver.page_source)
@@ -43,7 +43,7 @@ class ViewSetTests(LiveServerTests):
 
         driver.get(self.live_server_url + reverse('view_verse_set', kwargs=dict(slug=vs.slug))
                    + "?version=NET")
-        driver.find_element_by_css_selector("input[value='Learn']").click()
+        self.find("input[value='Learn']").click()
 
         # Can use 'all' here because this is the first time we've chosen anything
         verse_statuses = identity.verse_statuses.all()
@@ -65,7 +65,7 @@ class ViewSetTests(LiveServerTests):
         self.assertIn("You have %d verse(s) from this set in your queue" % vs.verse_choices.count(),
                       driver.page_source)
 
-        driver.find_element_by_css_selector("input[name='drop']").click()
+        self.find("input[name='drop']").click()
         self.wait_until_loaded('body')
 
         self.assertEqual(len(identity.bible_verse_statuses_for_learning(vs.id)),
