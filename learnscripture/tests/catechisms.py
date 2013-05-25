@@ -26,7 +26,7 @@ class CatechismTests(LiveServerTests):
         self.set_preferences()
         self.wait_until_loaded('body')
         self.wait_for_ajax()
-        self.assertEqual(driver.find_element_by_id('id-verse-title').text,
+        self.assertEqual(driver.find_element_by_css_selector("#id-verse-title").text,
                          "Q1. What is the chief end of man?")
 
         # Do some stuff on 'learn' page, for the sake of some basic testing
@@ -34,10 +34,10 @@ class CatechismTests(LiveServerTests):
 
         # Do the reading:
         for i in range(0, 9):
-            driver.find_element_by_id('id-next-btn').click()
+            driver.find_element_by_css_selector("#id-next-btn").click()
 
         for word in "Man's chief end is to glorify God and to enjoy him forever".split(" "):
-            self.driver.find_element_by_id('id-typing').send_keys(word + ' ')
+            self.driver.find_element_by_css_selector("#id-typing").send_keys(word + " ")
 
         self.wait_for_ajax()
 

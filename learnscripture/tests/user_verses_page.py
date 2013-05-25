@@ -66,11 +66,11 @@ class UserVersesPageTests(LiveServerTests):
         # Type the verse:
         words = "The LORD is my shepherd I shall not want"
         for word in words.split():
-            driver.find_element_by_id('id-typing').send_keys(word + ' ')
+            driver.find_element_by_css_selector("#id-typing").send_keys(word + " ")
 
         # Click finish
         self.wait_for_ajax()
-        driver.find_element_by_id('id-finish-btn').click()
+        driver.find_element_by_css_selector("#id-finish-btn").click()
         self.wait_for_ajax()
         self.wait_until_loaded('body')
 

@@ -40,7 +40,7 @@ class DashboardTests(LiveServerTests):
         self.wait_until_loaded('body')
         self.assertTrue(driver.current_url.endswith(reverse('learn')))
         self.wait_for_ajax()
-        self.assertEqual(ref, driver.find_element_by_id('id-verse-title').text)
+        self.assertEqual(ref, driver.find_element_by_css_selector("#id-verse-title").text)
 
     def _click_clear_learning_queue_btn(self, verse_set_id):
         driver = self.driver
@@ -122,7 +122,7 @@ class DashboardTests(LiveServerTests):
         self.wait_until_loaded('body')
         self.assertTrue(driver.current_url.endswith(reverse('learn')))
         self.wait_for_ajax()
-        self.assertEqual(u"Psalm 23:1", driver.find_element_by_id('id-verse-title').text)
+        self.assertEqual(u"Psalm 23:1", driver.find_element_by_css_selector("#id-verse-title").text)
 
         # Test 'Cancel learning' button
         self.get_url('dashboard')
@@ -145,7 +145,7 @@ class DashboardTests(LiveServerTests):
         self.assertTrue(driver.current_url.endswith(reverse('learn')))
 
         self.wait_for_ajax()
-        self.assertEqual(u"Q1. What is the chief end of man?", driver.find_element_by_id('id-verse-title').text)
+        self.assertEqual(u"Q1. What is the chief end of man?", driver.find_element_by_css_selector("#id-verse-title").text)
 
         i.record_verse_action('Q1', 'WSC', StageType.TEST, accuracy=1.0)
 
@@ -191,7 +191,7 @@ class DashboardTests(LiveServerTests):
 
         # Skip through
         def skip():
-            driver.find_element_by_id("id-verse-dropdown").click()
+            driver.find_element_by_css_selector("#id-verse-dropdown").click()
             driver.find_element_by_link_text("Skip this").click()
             self.wait_for_ajax()
         skip()

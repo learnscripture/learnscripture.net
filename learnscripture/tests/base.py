@@ -65,9 +65,9 @@ class AccountTestMixin(object):
                              username="test2",
                              password="testpassword2"):
         driver = self.driver
-        driver.find_element_by_id('id_signup-email').send_keys(email)
-        driver.find_element_by_id('id_signup-username').send_keys(username)
-        driver.find_element_by_id('id_signup-password').send_keys(password)
+        driver.find_element_by_css_selector("#id_signup-email").send_keys(email)
+        driver.find_element_by_css_selector("#id_signup-username").send_keys(username)
+        driver.find_element_by_css_selector("#id_signup-password").send_keys(password)
         driver.find_element_by_css_selector('input[name=signup]').click()
         self.wait_for_ajax()
 
@@ -150,41 +150,41 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
         # Set preferences if visible
         driver = self.driver
 
-        if not driver.find_element_by_id("id_testing_method_0").is_displayed():
+        if not driver.find_element_by_css_selector("#id_testing_method_0").is_displayed():
             return
 
-        Select(driver.find_element_by_id("id_default_bible_version")).select_by_visible_text("KJV (King James Version)")
-        driver.find_element_by_id("id_testing_method_0").click()
+        Select(driver.find_element_by_css_selector("#id_default_bible_version")).select_by_visible_text("KJV (King James Version)")
+        driver.find_element_by_css_selector("#id_testing_method_0").click()
 
         # Turn animations off, as they can complicate testing.
-        e = driver.find_element_by_id('id_enable_animations')
+        e = driver.find_element_by_css_selector("#id_enable_animations")
         if e.get_attribute('checked'):
             e.click()
 
         if 'id-preferences-save-btn' in driver.page_source:
             # popup
-            driver.find_element_by_id("id-preferences-save-btn").click()
+            driver.find_element_by_css_selector("#id-preferences-save-btn").click()
             self.wait_for_ajax()
         else:
-            driver.find_element_by_id("id-save-btn").click()
+            driver.find_element_by_css_selector("#id-save-btn").click()
             self.wait_until_loaded('body')
 
     def login(self, account):
         driver = self.driver
         self.get_url('dashboard')
-        driver.find_element_by_id("id-session-menu").click()
+        driver.find_element_by_css_selector("#id-session-menu").click()
         driver.find_element_by_link_text("Sign in").click()
         self.fill_in_login_form(account)
         self.wait_until_loaded('.logout-link')
-        elem = driver.find_element_by_id('id-session-menu')
+        elem = driver.find_element_by_css_selector("#id-session-menu")
         self.assertEqual(elem.text, account.username)
 
     def fill_in_login_form(self, account):
         driver = self.driver
         self.wait_until_loaded('body')
-        driver.find_element_by_id("id_login-email").clear()
-        driver.find_element_by_id("id_login-email").send_keys(account.email)
-        driver.find_element_by_id("id_login-password").clear()
-        driver.find_element_by_id("id_login-password").send_keys("password")
+        driver.find_element_by_css_selector("#id_login-email").clear()
+        driver.find_element_by_css_selector("#id_login-email").send_keys(account.email)
+        driver.find_element_by_css_selector("#id_login-password").clear()
+        driver.find_element_by_css_selector("#id_login-password").send_keys("password")
         driver.find_element_by_css_selector("input[name=signin]").click()
 
