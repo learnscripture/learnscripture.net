@@ -265,10 +265,12 @@ class EventManager(models.Manager):
 
         return grouped_events[0:EVENTSTREAM_CUTOFF_NUMBER]
 
-    def for_activity_stream(self, account=None):
+    def for_activity_stream(self, viewer=None, event_by=None):
         qs = Event.objects.order_by('-created').select_related('account')
-        if account is None or not account.is_hellbanned:
+        if viewer is None or not viewer.is_hellbanned:
             qs = qs.exclude(account__is_hellbanned=True)
+        if event_by is not None:
+            qs = qs.filter(account=event_by)
 
         return qs
 

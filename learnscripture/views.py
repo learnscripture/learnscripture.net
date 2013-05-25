@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 
 import csv
 from datetime import timedelta
@@ -1432,7 +1433,35 @@ def activity_stream(request):
                   'learnscripture/activity_stream.html',
                   {'events':
                        Event.objects
-                   .for_activity_stream(account=account_from_request(request))
+                   .for_activity_stream(viewer=account_from_request(request))
                    .prefetch_related('comments', 'comments__author'),
                    'title': "Recent activity",
+                   })
+
+
+def user_activity_stream(request, username):
+    account = get_object_or_404(Account.objects.visible_for_account(account_from_request(request)),
+                                username=username)
+
+    return render(request,
+                  'learnscripture/user_activity_stream.html',
+                  {'events': Event.objects
+                   .for_activity_stream(viewer=account_from_request(request),
+                                        event_by=account,
+                                        )
+                   .prefetch_related('comments', 'comments__author'),
+                   'title': "Recent activity from %s" % account.username,
+                   })
+
+
+def activity_item(request, event_id):
+    event = get_object_or_404(Event.objects
+                              .for_activity_stream(viewer=account_from_request(request))
+                              .prefetch_related('comments__author'),
+                              id=int(event_id))
+
+    return render(request,
+                  'learnscripture/activity_item.html',
+                  {'event': event,
+                   'title': "Activity from %s" % event.account.username,
                    })

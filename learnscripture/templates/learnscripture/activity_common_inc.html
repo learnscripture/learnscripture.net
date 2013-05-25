@@ -1,0 +1,24 @@
+{# Hidden stuff #}
+
+{# sync with template in activity_event_inc.html #}
+<script id="id-comment-template" type="text/x-jsrender">
+      <div class="comment">
+        <span class="commentauthor">
+          <a href="/user/[[>comment.author.username]]/">[[>comment.author.username]]</a>
+        </span>
+        <span class="timestamp">Just now</span>
+        <div class="commentmessage">
+          [[:comment.message_formatted]]
+        </div>
+      </div>
+</script>
+
+<div id="id-add-comment" class="hide">
+  {% if request.identity.account %}
+  <textarea id="id-comment-box" rows="1"></textarea>
+  <input type="submit" class="btn primary" value="Post" id="id-add-comment-btn">
+  <input type="submit" class="btn" value="Cancel" id="id-cancel-comment-btn">
+  {% else %}
+  <div>You must be logged in to add comments</div>
+  {% endif %}
+</div>

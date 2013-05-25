@@ -1,0 +1,37 @@
+{% load account_utils %}
+
+
+  {% with rendered=event.render_html comments=event.comments.all %}
+  {% ifchanged rendered %}
+  {% ifchanged event.created.date %}
+  <div class="timestamp">
+    {{ event.created|date:"j M Y" }}
+  </div>
+  {% endifchanged %}
+  <div class="activityitem" data-event-id="{{ event.id }}">
+    <span class="commentindicator">
+      <a href="#" class="icon-comment show-add-comment" title="Add comment"><span class="commentcount">{{ comments|length }}</span></a>
+    </span>
+    <span class="eventdetails">
+      {{ event.render_html }}
+    </span>
+    <div class="commentblock{% if not comments %} hide{% endif %}">
+      <div class="commentlist">
+        {% for comment in comments %}
+        {# sync with id-comment-template #}
+        <div class="comment">
+          <span class="commentauthor">
+            {{ comment.author|account_link }}
+          </span>
+          <span class="timestamp">{{ comment.created|date:"Y-m-d H:i" }}</span>
+          <div class="commentmessage">
+            {{ comment.message_formatted }}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <div><a href="#" class="show-add-comment">Add comment</a></div>
+    </div>
+  </div>
+  {% endifchanged %}
+  {% endwith %}
