@@ -37,7 +37,7 @@ class UserVersesPageTests(LiveServerTests):
         for i in range(1, 7):
             self.assertIn("Psalm 23:%d" % i, driver.page_source)
 
-        self.find('a.btn[data-reference="Psalm 23:2"]').click()
+        self.click('a.btn[data-reference="Psalm 23:2"]')
         self.wait_for_ajax()
 
         # 'Practise verse' button
@@ -66,11 +66,11 @@ class UserVersesPageTests(LiveServerTests):
         # Type the verse:
         words = "The LORD is my shepherd I shall not want"
         for word in words.split():
-            self.find("#id-typing").send_keys(word + " ")
+            self.send_keys("#id-typing", word + " ")
 
         # Click finish
         self.wait_for_ajax()
-        self.find("#id-finish-btn").click()
+        self.click("#id-finish-btn")
         self.wait_for_ajax()
         self.wait_until_loaded('body')
 

@@ -80,7 +80,7 @@ class DashboardTests(LiveServerTests):
 
         self.get_url('dashboard')
         # Test clicking 'Start learning' for general queue
-        self.find('#id-learning-queue-verse-set- input[name=learnbiblequeue]').click()
+        self.click('#id-learning-queue-verse-set- input[name=learnbiblequeue]')
         self._assert_learning_reference(u"Psalm 23:2")
 
         # Test clicking 'Clear queue'
@@ -140,7 +140,7 @@ class DashboardTests(LiveServerTests):
         self.assertIn("You've got 4 catechism questions in your queue for learning",
                       driver.page_source)
 
-        self.find('input[name=learncatechismqueue]').click()
+        self.click('input[name=learncatechismqueue]')
         self.wait_until_loaded('body')
         self.assertTrue(driver.current_url.endswith(reverse('learn')))
 
@@ -151,7 +151,7 @@ class DashboardTests(LiveServerTests):
 
         # Test clicking 'Clear queue'
         self.get_url('dashboard')
-        self.find('input[name=clearcatechismqueue]').click()
+        self.click('input[name=clearcatechismqueue]')
         alert = driver.switch_to_alert()
         alert.accept()
         self.wait_until_loaded('body')
@@ -191,7 +191,7 @@ class DashboardTests(LiveServerTests):
 
         # Skip through
         def skip():
-            self.find("#id-verse-dropdown").click()
+            self.click("#id-verse-dropdown")
             driver.find_element_by_link_text("Skip this").click()
             self.wait_for_ajax()
         skip()
