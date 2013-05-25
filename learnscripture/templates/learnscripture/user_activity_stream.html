@@ -1,6 +1,12 @@
 {% extends "base.html" %}
 
+{% load account_utils %}
+
 {% block content %}
+
+<p><a href="">{{ account|account_link }}</a>
+  » Recent activity
+</p>
 
 {% include "learnscripture/activity_stream_inc.html" %}
 
