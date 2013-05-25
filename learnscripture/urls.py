@@ -46,11 +46,13 @@ urlpatterns = patterns('',
 
                        # User stats
                        url(r'^leaderboard/$', 'learnscripture.views.leaderboard', name='leaderboard'),
-                       url(r'^user/(.*)/$', 'learnscripture.views.user_stats', name='user_stats'),
+                       url(r'^user/([^/]*)/$', 'learnscripture.views.user_stats', name='user_stats'),
                        url(r'^user/(.*)/verses_timeline_stats.csv$', 'learnscripture.views.user_stats_verses_timeline_stats_csv'),
 
                        # Activity
                        url(r'^activity/$', 'learnscripture.views.activity_stream', name='activity_stream'),
+                       url(r'^activity/(\d+)/$', 'learnscripture.views.activity_item', name='activity_item'),
+                       url(r'^user/([^/]*)/activity/$', 'learnscripture.views.user_activity_stream', name='user_activity_stream'),
 
                        # Badges
                        url(r'^badges/$', 'learnscripture.views.awards', name='awards'),
