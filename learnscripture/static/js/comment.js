@@ -46,6 +46,8 @@ var learnscripture =
                 $('#id-add-comment').hide();
                 $('#id-comment-box').val('');
             });
+
+            $('#id-comment-box').autosize();
         };
 
         // === Exports ===
