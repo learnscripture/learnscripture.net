@@ -1445,7 +1445,8 @@ def user_activity_stream(request, username):
 
     return render(request,
                   'learnscripture/user_activity_stream.html',
-                  {'events': Event.objects
+                  {'account': account,
+                   'events': Event.objects
                    .for_activity_stream(viewer=account_from_request(request),
                                         event_by=account,
                                         )

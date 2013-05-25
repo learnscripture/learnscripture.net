@@ -1,6 +1,12 @@
 {% extends "base.html" %}
 
+{% load account_utils %}
+
 {% block content %}
+
+<p><a href="">{{ event.account|account_link }}</a>
+  » <a href="{% url 'user_activity_stream' event.account.username %}">Recent activity</a>
+</p>
 
 {% include "learnscripture/activity_event_inc.html" %}
 
