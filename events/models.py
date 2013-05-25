@@ -18,7 +18,7 @@ from learnscripture.templatetags.account_utils import account_link
 
 
 EVENTSTREAM_CUTOFF_DAYS = 3 # just 3 days of events
-EVENTSTREAM_CUTOFF_NUMBER = 6
+EVENTSTREAM_CUTOFF_NUMBER = 8
 
 # Arbitrarily say stuff is 50% less interesting when it is half a day old.
 HALF_LIFE_DAYS = 0.5
@@ -204,25 +204,6 @@ EventType = make_class_enum(
      ])
 
 
-class EventGroup(object):
-    """
-    A group of Events all about the same Account.
-    """
-    def __init__(self, account, events):
-        self.account = account
-        self.events = events
-        self.created = None
-
-    def render_html(self):
-        return format_html(
-            "{0} <ul>{1}</ul>",
-            account_link(self.account),
-            format_html_join(u'', u"<li>{0}</li>",
-                             ((mark_safe(event.message_html),)
-                              for event in self.events))
-            )
-
-
 def dedupe_iterable(iterable, keyfunc):
     """
     Removes duplicates from an iterable, while preserving order.
@@ -242,7 +223,11 @@ class EventManager(models.Manager):
             now = timezone.now()
 
         start = now - timedelta(EVENTSTREAM_CUTOFF_DAYS)
-        events = self.filter(created__gte=start).select_related('account')
+        events = (self
+                  .filter(created__gte=start)
+                  .prefetch_related('account')
+                  .annotate(comment_count=models.Count('comments'))
+                  )
         if account is None or not account.is_hellbanned:
             events = events.exclude(account__is_hellbanned=True)
         events = list(events)
@@ -254,16 +239,7 @@ class EventManager(models.Manager):
         events.sort(key=lambda e: e.get_rank(friendship_weights, now=now),
                     reverse=True)
 
-        # Now group
-        grouped_events = []
-        for k, g in itertools.groupby(events, lambda e: e.account):
-            g = list(g)
-            if len(g) == 1:
-                grouped_events.append(g[0])
-            else:
-                grouped_events.append(EventGroup(k, g))
-
-        return grouped_events[0:EVENTSTREAM_CUTOFF_NUMBER]
+        return events[:EVENTSTREAM_CUTOFF_NUMBER]
 
     def for_activity_stream(self, viewer=None, event_by=None):
         qs = Event.objects.order_by('-created').select_related('account')
