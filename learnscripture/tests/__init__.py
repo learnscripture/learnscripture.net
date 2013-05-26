@@ -22,4 +22,5 @@ from .catechisms import *
 from .search import *
 from .versesets import *
 from .comments import *
+from .events import *
 

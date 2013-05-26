@@ -64,6 +64,11 @@ class EventLogic(object):
     def save(self):
         self.event.event_data = self.event_data
         self.event.save()
+        return self.event
+
+    @classmethod
+    def get_absolute_url(cls, event):
+        return reverse('activity_item', args=(event.id,))
 
 
 class GeneralEvent(EventLogic):
@@ -187,6 +192,29 @@ class StartedLearningCatechismEvent(EventLogic):
             )
 
 
+class NewCommentEvent(EventLogic):
+
+    weight = 8
+
+    def __init__(self, account=None, comment=None, parent_event=None):
+        super(NewCommentEvent, self).__init__(account=account,
+                                              comment_id=comment.id,
+                                              parent_event_id=parent_event.id)
+        self.event.message_html = format_html(
+            u'posted a <a href="{0}">comment</a> on {1}\'s activity',
+            comment.get_absolute_url(),
+            account_link(parent_event.account)
+            )
+        self.event.parent_event = parent_event
+
+    @classmethod
+    def get_absolute_url(cls, event):
+        # NewCommentEvent cannot collect comments themselves.
+        # So URL for new comment event is the comment's URL.
+        from comments.models import Comment
+        return Comment.objects.get(id=event.event_data['comment_id']).get_absolute_url()
+
+
 EventType = make_class_enum(
     'EventType',
     [(1, 'GENERAL', 'General', GeneralEvent), # No longer used
@@ -201,6 +229,7 @@ EventType = make_class_enum(
      (10, 'GROUP_JOINED', 'Group joined', GroupJoinedEvent),
      (11, 'GROUP_CREATED', 'Group created', GroupCreatedEvent),
      (12, 'STARTED_LEARNING_CATECHISM', 'Started learning catechism', StartedLearningCatechismEvent),
+     (13, 'NEW_COMMENT', 'New comment', NewCommentEvent),
      ])
 
 
@@ -259,6 +288,10 @@ class Event(models.Model):
     created = models.DateTimeField(default=timezone.now, db_index=True)
     account = models.ForeignKey(Account)
 
+    # Events like NewCommentEvent have a parent event (the event the comment is
+    # attached to).
+    parent_event = models.ForeignKey('self', null=True, blank=True)
+
     objects = EventManager()
 
     def __repr__(self):
@@ -299,7 +332,12 @@ class Event(models.Model):
         else:
             return mark_safe(self.message_html)
 
+    @property
+    def event_logic(self):
+        return EventType.classes[self.event_type]
+
     def get_absolute_url(self):
-        return reverse('activity_item', args=(self.id,))
+        return self.event_logic.get_absolute_url(self)
+
 
 import events.hooks
