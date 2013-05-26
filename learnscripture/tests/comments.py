@@ -10,15 +10,20 @@ class CommentPageTests(LiveServerTests):
 
     def setUp(self):
         super(CommentPageTests, self).setUp()
+        self.event_identity, self.event_account = \
+            self.create_account(username="other",
+                                email="other@other.com")
         self.identity, self.account = self.create_account()
         self.event = Event.objects.create(
             message_html="Test",
             event_type=EventType.POINTS_MILESTONE,
-            account=self.account,
+            account=self.event_account,
             event_data={},
             )
 
     def test_add_comment(self):
+        self.event_identity.notices.all().delete()
+
         message = "This is my comment"
         self.login(self.account)
         self.get_url('activity_stream')
@@ -40,6 +45,10 @@ class CommentPageTests(LiveServerTests):
                 parent_event=self.event,
                 event_type=EventType.NEW_COMMENT,
                 account=self.account).count(),
+                         1)
+
+        # Test notice created
+        self.assertEqual(self.event_identity.notices.filter(related_event=self.event).count(),
                          1)
 
     def test_moderate_comment(self):
