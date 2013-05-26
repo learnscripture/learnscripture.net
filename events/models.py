@@ -261,11 +261,7 @@ class EventManager(models.Manager):
             events = events.exclude(account__is_hellbanned=True)
         events = list(events)
         events = list(dedupe_iterable(events, lambda e:(e.account_id, e.message_html)))
-        if account is None:
-            friendship_weights = None
-        else:
-            friendship_weights = account.get_friendship_weights()
-        events.sort(key=lambda e: e.get_rank(friendship_weights, now=now),
+        events.sort(key=lambda e: e.get_rank(account, now=now),
                     reverse=True)
 
         return events[:EVENTSTREAM_CUTOFF_NUMBER]
@@ -300,11 +296,19 @@ class Event(models.Model):
     def __unicode__(self):
         return u"Event %d" % self.id
 
-    def get_rank(self, friendship_weights, now=None):
+    def get_rank(self, viewer, now=None):
         """
-        Returns the overall weighting for this event, given the
-        friendship weights for the viewing account.
+        Returns the overall weighting for this event, given the viewing account.
         """
+        # Don't ever want to see 'new comment' events from myself.
+        if self.event_type == EventType.NEW_COMMENT and self.account_id == viewer.id:
+            return 0
+
+        if viewer is None:
+            friendship_weights = None
+        else:
+            friendship_weights = viewer.get_friendship_weights()
+
         affinity = 1.0
         if friendship_weights is not None:
             affinity += friendship_weights.get(self.account_id, 0) * EVENTSTREAM_MAX_EXTRA_AFFINITY_FOR_FRIEND
