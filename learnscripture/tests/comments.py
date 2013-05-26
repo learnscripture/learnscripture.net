@@ -35,6 +35,13 @@ class CommentPageTests(LiveServerTests):
         self.assertEqual(c.author, account)
         self.assertEqual(c.message, "This is my comment")
 
+        # Test event created
+        self.assertEqual(Event.objects.filter(
+                parent_event=self.event,
+                event_type=EventType.NEW_COMMENT,
+                account=self.account).count(),
+                         1)
+
     def test_moderate_comment(self):
         other_identity, other_account = self.create_account(username="other",
                                                             email="other@other.com")

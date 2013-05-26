@@ -22,3 +22,8 @@ class Comment(models.Model):
 
     def __unicode__(self):
         return "%s: %s" % (self.id, self.message)
+
+    def get_absolute_url(self):
+        return self.event.get_absolute_url() + "#comment-%s" % self.id
+
+import comments.hooks

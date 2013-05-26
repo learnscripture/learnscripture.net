@@ -22,7 +22,7 @@
       <div class="commentlist">
         {% for comment in comments %}
         {# sync with id-comment-template #}
-        <div class="comment" data-comment-id="{{ comment.id }}">
+        <div class="comment" id="comment-{{ comment.id }}" data-comment-id="{{ comment.id }}">
           <span class="commentauthor">
             {{ comment.author|account_link }}
           </span>
