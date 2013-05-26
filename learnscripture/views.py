@@ -64,6 +64,9 @@ from .decorators import require_identity, require_preferences, has_preferences, 
 #   so we create it as needed, typically by the popup preferences form
 
 
+USER_EVENTS_SHORT_CUTOFF = 5
+
+
 def home(request):
     identity = getattr(request, 'identity', None)
     if identity is not None and identity.default_to_dashboard:
@@ -860,6 +863,7 @@ def user_stats(request, username):
          'title': account.username,
          'awards': account.visible_awards(),
          'include_referral_links': True,
+         'events': _user_events(account, account_from_request(request))[:USER_EVENTS_SHORT_CUTOFF]
          }
     one_week_ago = timezone.now() - timedelta(7)
 
@@ -1439,6 +1443,15 @@ def activity_stream(request):
                    })
 
 
+def _user_events(for_account, viewer):
+    return (Event.objects
+            .for_activity_stream(viewer=viewer,
+                                 event_by=for_account,
+                                 )
+            .prefetch_related('comments', 'comments__author')
+            )
+
+
 def user_activity_stream(request, username):
     account = get_object_or_404(Account.objects.visible_for_account(account_from_request(request)),
                                 username=username)
@@ -1446,11 +1459,7 @@ def user_activity_stream(request, username):
     return render(request,
                   'learnscripture/user_activity_stream.html',
                   {'account': account,
-                   'events': Event.objects
-                   .for_activity_stream(viewer=account_from_request(request),
-                                        event_by=account,
-                                        )
-                   .prefetch_related('comments', 'comments__author'),
+                   'events': _user_events(account, account_from_request(request)),
                    'title': "Recent activity from %s" % account.username,
                    })
 
