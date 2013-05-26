@@ -225,6 +225,7 @@ def push_secrets():
     local("rsync config/secrets.json %s@%s:%s/config/secrets.json" % (USER, HOST, target.SRC_DIR))
 
 
+@task
 def push_sources():
     """
     Push source code to server
@@ -241,7 +242,7 @@ def push_sources():
                rev=push_rev,
                ))
     with cd(target.SRC_DIR):
-        run("hg update %s" % push_rev)
+        run("hg update -r %s" % push_rev)
 
         assert run("hg id").split(" ")[0].strip().strip("+") == push_rev
 
