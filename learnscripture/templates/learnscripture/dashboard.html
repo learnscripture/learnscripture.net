@@ -252,8 +252,12 @@ only takes a few seconds. Otherwise your progress won't be saved permanently.
     {% for event in events %}
     <li>
       <span class="commentindicator">
+        {% if event.accepts_comments %}
         <a href="{{ event.get_absolute_url }}" class="icon-comment" title="View/add comments"><span class="commentcount">{{ event.comment_count }}</span>
         </a>
+        {% else %}
+        <a href="{{ event.get_absolute_url }}" class="icon-link icon-replace" title="View more">link</a>
+        {% endif %}
       </span>
       {{ event.render_html }}
       <br/><span class="timestamp">{{ event.created_display }}</span>
