@@ -4,11 +4,20 @@ var learnscripture =
 
 
         var setupCommentControls = function () {
+            var showAddComment = function(div) {
+                var commentBlock = div.find('.commentblock').show('fast');
+                $('#id-add-comment').appendTo(commentBlock).show('fast');
+                $('#id-comment-box').focus();
+            }
+
+            if ($('.activityitem').length == 1) {
+                showAddComment($('.activityitem'));
+            }
+
             $('a.show-add-comment').bind('click', function (ev) {
                 ev.preventDefault();
-                var div = $(this).closest('.activityitem').find('.commentblock').show('fast');
-                $('#id-add-comment').appendTo(div).show('fast');
-                $('#id-comment-box').focus();
+                var div = $(this).closest('.activityitem');
+                showAddComment(div);
             })
 
             $('#id-add-comment-btn').bind('click', function(ev) {
