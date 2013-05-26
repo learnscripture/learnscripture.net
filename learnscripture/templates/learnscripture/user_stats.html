@@ -68,6 +68,17 @@ Stats for {{ account.username }} on LearnScripture.net - the fun, easy and socia
   </tbody>
 </table>
 
+{% if events %}
+
+<h2>Activity</h2>
+
+{% include "learnscripture/activity_stream_inc.html" %}
+
+{% include "learnscripture/activity_common_inc.html" %}
+
+<p><a href="{% url 'user_activity_stream' account.username %}">See more</a></p>
+{% endif %}
+
 <h2>Charts</h2>
 <p>Click and drag to zoom. Double-click to zoom back out.</p>
 <p>Shift + drag to pan.</p>
