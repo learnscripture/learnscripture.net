@@ -20,7 +20,7 @@ var learnscripture =
                 showAddComment(div);
             })
 
-            $('#id-add-comment-btn').bind('click', function(ev) {
+            var postCommentClick = function(ev) {
                 ev.preventDefault();
                 // Find event id
                 var activityDiv = $(this).closest('.activityitem');
@@ -33,6 +33,7 @@ var learnscripture =
                             'message': $('#id-comment-box').val(),
                         },
                         success: function (data) {
+                            setTimeout(bindPostCommentClick, 500);
                             // data contains new comment to add.
                             activityDiv.find('.commentlist').append(
                                 $('#id-comment-template').render({'comment': data})
@@ -42,6 +43,7 @@ var learnscripture =
                             $('#id-add-comment').hide();
                         },
                         error: function (jqXHR, textStatus, errorThrown) {
+                            setTimeout(bindPostCommentClick, 500);
                             if (jqXHR.status.toString()[0] == "4") {
                                 alert(learnscripture.displaySimpleAjaxError(jqXHR));
                             } else {
@@ -49,7 +51,12 @@ var learnscripture =
                             }
                         }
                        });
-            });
+            };
+
+            var bindPostCommentClick = function () {
+                $('#id-add-comment-btn').one('click', postCommentClick);
+            }
+            bindPostCommentClick();
 
             $('#id-cancel-comment-btn').bind('click', function (ev) {
                 ev.preventDefault();
