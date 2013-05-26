@@ -203,7 +203,7 @@ class StartedLearningCatechismEvent(EventLogic):
 
 class NewCommentEvent(EventLogic):
 
-    weight = 8
+    weight = 11
 
     def __init__(self, account=None, comment=None, parent_event=None):
         super(NewCommentEvent, self).__init__(account=account,
