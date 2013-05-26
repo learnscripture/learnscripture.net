@@ -265,7 +265,7 @@ class Account(AbstractBaseUser):
         return sorted(visible.values(), key=lambda a: a.created, reverse=True)
 
     def add_html_notice(self, notice):
-        self.identity.add_html_notice(notice)
+        return self.identity.add_html_notice(notice)
 
     def _memberships_with_group(self):
         return self.memberships.select_related('group').order_by('group__name')
@@ -1186,7 +1186,7 @@ class Identity(models.Model):
         return Event.objects.for_dashboard(now=now, account=self.account)
 
     def add_html_notice(self, notice):
-        self.notices.create(message_html=notice)
+        return self.notices.create(message_html=notice)
 
 
 class Notice(models.Model):
@@ -1194,6 +1194,7 @@ class Notice(models.Model):
     message_html = models.TextField()
     created = models.DateTimeField(default=timezone.now)
     seen = models.DateTimeField(default=None, null=True, blank=True)
+    related_event = models.ForeignKey('events.Event', null=True, blank=True)
 
     def is_old(self):
         return (timezone.now() - self.created).days >= 2
