@@ -318,7 +318,9 @@ class Event(models.Model):
         Returns the overall weighting for this event, given the viewing account.
         """
         # Don't ever want to see 'new comment' events from myself.
-        if self.event_type == EventType.NEW_COMMENT and self.account_id == viewer.id:
+        if (viewer is not None and
+            self.event_type == EventType.NEW_COMMENT and
+            self.account_id == viewer.id):
             return 0
 
         if viewer is None:
