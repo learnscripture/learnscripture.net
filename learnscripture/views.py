@@ -1067,9 +1067,13 @@ def date_to_js_ts(d):
 
 def stats(request):
     from app_metrics.models import MetricDay
+    now = timezone.now()
+    start = now - timedelta(days=180)
 
     def build_data(metric_slugs):
-        metrics = (MetricDay.objects.filter(metric__slug__in=metric_slugs)
+        metrics = (MetricDay.objects
+                   .filter(metric__slug__in=metric_slugs)
+                   .filter(created__gte=start)
                    .select_related('metric'))
 
         # Missing metrics => zero. However, if we omit a value for a day, then the
