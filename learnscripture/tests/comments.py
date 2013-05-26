@@ -32,7 +32,7 @@ class CommentPageTests(LiveServerTests):
 
         # Test db
         c = Comment.objects.get()
-        self.assertEqual(c.author, account)
+        self.assertEqual(c.author, self.account)
         self.assertEqual(c.message, "This is my comment")
 
         # Test event created
