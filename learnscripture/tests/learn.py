@@ -57,12 +57,12 @@ class LearnTests(LiveServerTests):
         for word in self.kjv_john_3_16.strip().split():
             accumulator += accuracy
             if accumulator >= 1.0:
-                self.driver.find_element_by_id('id-typing').send_keys(word + ' ')
+                self.send_keys("#id-typing", word + " ")
                 accumulator -= 1.0
             else:
                 # Type the wrong thing - 3 times to make it fail
                 for i in range(0, 3):
-                    self.driver.find_element_by_id('id-typing').send_keys('xxx ')
+                    self.send_keys("#id-typing", "xxx ")
 
     def _score_for_j316(self, accuracy=1.0):
         word_count = len(self.kjv_john_3_16.strip().split())
@@ -85,10 +85,10 @@ class LearnTests(LiveServerTests):
                             uvs.memory_stage == MemoryStage.ZERO
                             for uvs in identity.verse_statuses.all()))
 
-        self.assertEqual(u"John 3:16", driver.find_element_by_id('id-verse-title').text)
+        self.assertEqual(u"John 3:16", self.find("#id-verse-title").text)
         # Do the reading:
         for i in range(0, 9):
-            driver.find_element_by_id('id-next-btn').click()
+            self.click("#id-next-btn")
 
         # Do the typing:
         self._type_john_3_16_kjv()
@@ -106,18 +106,18 @@ class LearnTests(LiveServerTests):
 
         identity.add_verse_choice('Psalm 23:1-2')
         self.get_url('dashboard')
-        driver.find_element_by_css_selector('input[name=learnbiblequeue]').click()
+        self.click('input[name=learnbiblequeue]')
         self.wait_for_ajax()
-        self.assertEqual(u"Psalm 23:1-2", driver.find_element_by_id('id-verse-title').text)
+        self.assertEqual(u"Psalm 23:1-2", self.find("#id-verse-title").text)
 
         # Do the reading:
         for i in range(0, 9):
-            driver.find_element_by_id('id-next-btn').click()
+            self.click("#id-next-btn")
 
         # Do the typing: The fixture has 'The Lord is my shepherd--I shall not
         # want' in order to test an issue with word splitting
         for word in self.psalm_23_1_2.strip().split():
-            self.driver.find_element_by_id('id-typing').send_keys(word + ' ')
+            self.send_keys("#id-typing", word + " ")
 
         self.wait_for_ajax()
 
@@ -146,7 +146,7 @@ class LearnTests(LiveServerTests):
 
         # Do the reading:
         for i in range(0, 9):
-            driver.find_element_by_id('id-next-btn').click()
+            self.click("#id-next-btn")
 
         # Do the typing:
         self._type_john_3_16_kjv()
@@ -177,27 +177,27 @@ class LearnTests(LiveServerTests):
         verse_set = self.choose_verse_set('Psalm 23')
         driver = self.driver
 
-        self.assertEqual(u"Psalm 23:1", driver.find_element_by_id('id-verse-title').text)
-        self.assertIn(u"I shall not want", driver.find_element_by_css_selector('.current-verse').text)
+        self.assertEqual(u"Psalm 23:1", self.find("#id-verse-title").text)
+        self.assertIn(u"I shall not want", self.find('.current-verse').text)
 
-        Select(driver.find_element_by_id("id-version-select")).select_by_visible_text("NET")
+        Select(self.find("#id-version-select")).select_by_visible_text("NET")
 
         self.wait_for_ajax()
         self.assertIn(u"I lack nothing",
-                      driver.find_element_by_css_selector('.current-verse').text)
+                      self.find('.current-verse').text)
 
         # This section can be replaced by a 'skip' button click once we've implemented that.
         for i in range(0, 9):
-            driver.find_element_by_id('id-next-btn').click()
+            self.click("#id-next-btn")
         for word in "The LORD is my shepherd, I lack nothing.".split():
-            driver.find_element_by_id('id-typing').send_keys(word + ' ')
-        driver.find_element_by_id('id-next-verse-btn').click()
+            self.send_keys("#id-typing", word + " ")
+        self.click("#id-next-verse-btn")
 
         # Now check that the next verse is present and is also NET, which is the
         # main point of this test.
         self.wait_for_ajax()
         self.assertIn(u"He takes me to lush pastures",
-                      driver.find_element_by_css_selector('.current-verse').text)
+                      self.find('.current-verse').text)
 
     def test_revise_passage_mixed(self):
         # Test revising a passage when some verses are to be tested and others
@@ -216,21 +216,21 @@ class LearnTests(LiveServerTests):
         self._make_verses_due_for_testing(identity.verse_statuses.filter(reference='Psalm 23:1'))
 
         self.get_url('dashboard')
-        driver.find_element_by_css_selector('input[name=revisepassage]').click()
+        self.click('input[name=revisepassage]')
 
         self.wait_until_loaded('body')
         self.wait_for_ajax()
 
         for word in "The LORD is my shepherd, I shall not want.".split():
-            driver.find_element_by_id('id-typing').send_keys(word + ' ')
+            self.send_keys("#id-typing", word + " ")
 
         # Test keyboard shortcut
-        driver.find_element_by_css_selector('body').send_keys('\n')
+        self.send_keys('body', '\n')
         self.wait_for_ajax()
         self.assertIn(u"He maketh me to lie down in green pastures",
-                      driver.find_element_by_css_selector('.current-verse').text)
+                      self.find('.current-verse').text)
 
-        btn = driver.find_element_by_id('id-context-next-verse-btn')
+        btn = self.find("#id-context-next-verse-btn")
         for i in range(0, 5):
             btn.click()
 
@@ -242,18 +242,18 @@ class LearnTests(LiveServerTests):
         verse_set = self.choose_verse_set('Bible 101')
         driver = self.driver
 
-        self.assertEqual(u"John 3:16", driver.find_element_by_id('id-verse-title').text)
+        self.assertEqual(u"John 3:16", self.find("#id-verse-title").text)
 
-        driver.find_element_by_id('id-verse-dropdown').click()
-        driver.find_element_by_id('id-skip-verse-btn').click()
+        self.click("#id-verse-dropdown")
+        self.click("#id-skip-verse-btn")
 
-        self.assertEqual(u"John 14:6", driver.find_element_by_id('id-verse-title').text)
+        self.assertEqual(u"John 14:6", self.find("#id-verse-title").text)
 
         # Should be removed from session too
         self.get_url('learn')
         self.wait_for_ajax()
 
-        self.assertEqual(u"John 14:6", driver.find_element_by_id('id-verse-title').text)
+        self.assertEqual(u"John 14:6", self.find("#id-verse-title").text)
 
     def test_cancel_learning(self):
         verse_set = self.add_verse_set('Bible 101')
@@ -270,21 +270,21 @@ class LearnTests(LiveServerTests):
         self.get_url('dashboard')
         self.click_revise_bible()
 
-        self.assertEqual(u"John 3:16", driver.find_element_by_id('id-verse-title').text)
+        self.assertEqual(u"John 3:16", self.find("#id-verse-title").text)
 
-        driver.find_element_by_id('id-verse-dropdown').click()
-        driver.find_element_by_id('id-cancel-learning-btn').click()
+        self.click("#id-verse-dropdown")
+        self.click("#id-cancel-learning-btn")
         self.wait_for_ajax()
 
         # Should skip.
-        self.assertEqual(u"John 14:6", driver.find_element_by_id('id-verse-title').text)
+        self.assertEqual(u"John 14:6", self.find("#id-verse-title").text)
 
         # If we go back to dashboard and choose again, it should not appear
         # Go to dashboard
         self.get_url('dashboard')
         self.click_revise_bible()
 
-        self.assertEqual(u"John 14:6", driver.find_element_by_id('id-verse-title').text)
+        self.assertEqual(u"John 14:6", self.find("#id-verse-title").text)
 
     def test_reset_progress(self):
         verse_set = self.add_verse_set('Bible 101')
@@ -297,10 +297,10 @@ class LearnTests(LiveServerTests):
         self.get_url('dashboard')
         self.click_revise_bible()
 
-        self.assertEqual(u"John 3:16", driver.find_element_by_id('id-verse-title').text)
+        self.assertEqual(u"John 3:16", self.find("#id-verse-title").text)
 
-        driver.find_element_by_id('id-verse-dropdown').click()
-        driver.find_element_by_id('id-reset-progress-btn').click()
+        self.click("#id-verse-dropdown")
+        self.click("#id-reset-progress-btn")
 
         alert = driver.switch_to_alert()
         alert.accept()
@@ -311,10 +311,10 @@ class LearnTests(LiveServerTests):
         self.assertEqual(identity.verse_statuses.get(reference='John 3:16').strength,
                          0)
         # Should revert to initial read mode
-        self.assertTrue(driver.find_element_by_css_selector('#id-instructions .stage-read').is_displayed())
+        self.assertTrue(self.find('#id-instructions .stage-read').is_displayed())
 
     def click_revise_bible(self):
-        self.driver.find_element_by_css_selector("input[name='revisebiblequeue']").click()
+        self.click("input[name='revisebiblequeue']")
         self.wait_until_loaded('body')
         self.wait_for_ajax()
 
@@ -341,7 +341,7 @@ class LearnTests(LiveServerTests):
 
         self._type_john_3_16_kjv()
 
-        driver.find_element_by_id('id-finish-btn').click()
+        self.click("#id-finish-btn")
         self.wait_for_ajax()
 
         # Reload, should have nothing more to revise
@@ -351,7 +351,7 @@ class LearnTests(LiveServerTests):
         self.wait_until_loaded('body')
         self.wait_for_ajax()
 
-        self.assertTrue(driver.find_element_by_id('id-no-verse-queue').is_displayed())
+        self.assertTrue(self.find("#id-no-verse-queue").is_displayed())
 
 
     def test_more_practice(self):
@@ -375,14 +375,14 @@ class LearnTests(LiveServerTests):
         self.wait_for_ajax()
 
         # Now the 'more practice' button will appear, and be primary
-        btn = driver.find_element_by_id('id-more-practice-btn')
+        btn = self.find("#id-more-practice-btn")
         self.assertTrue('primary' in btn.get_attribute('class'))
 
         btn.click()
 
         # Now go through 3 stages:
         for i in range(0, 3):
-            next_btn = driver.find_element_by_id('id-next-btn')
+            next_btn = self.find("#id-next-btn")
             self.assertNotEqual(next_btn.get_attribute('disabled'), 'true')
             next_btn.click()
 
@@ -414,15 +414,15 @@ class LearnTests(LiveServerTests):
         self.get_url('dashboard')
         self.click_revise_bible()
         for i in range(0, 4):
-            hint_btn = driver.find_element_by_id('id-hint-btn')
+            hint_btn = self.find("#id-hint-btn")
             self.assertEqual(hint_btn.get_attribute('disabled'),
                              None)
             hint_btn.click()
 
         # First two words should not be visually marked correct
         for i in range(0, 2):
-            self.assertIn('', driver.find_element_by_id('id-word-%d' % i).get_attribute('class'))
+            self.assertIn('', self.find("#id-word-%d" % i).get_attribute("class"))
 
         # Hint button should be disabled after 4 clicks
-        self.assertEqual(driver.find_element_by_id('id-hint-btn').get_attribute('disabled'),
+        self.assertEqual(self.find("#id-hint-btn").get_attribute("disabled"),
                          'true')

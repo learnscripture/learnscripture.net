@@ -1,0 +1,45 @@
+{% load account_utils %}
+{% load comment_utils %}
+
+  {% with rendered=event.render_html comments=event.comments.all|filter_comments:request.identity.account %}
+  {% ifchanged rendered %}
+  {% ifchanged event.created.date %}
+  <div class="timestamp">
+    {{ event.created|date:"j M Y" }}
+  </div>
+  {% endifchanged %}
+  <div class="activityitem" data-event-id="{{ event.id }}">
+    <span class="commentindicator">
+      <a href="#" class="icon-comment show-add-comment" title="Add comment"><span class="commentcount">{{ comments|length }}</span></a>
+    </span>
+    <span class="permalink">
+      <a href="{{ event.get_absolute_url }}" class="icon-link icon-replace" title="Link directly to this item alone">link</a>
+    </span>
+    <span class="eventdetails">
+      <h4>{{ event.render_html }}</h4>
+    </span>
+    <div class="commentblock{% if not comments %} hide{% endif %}">
+      <div class="commentlist">
+        {% for comment in comments %}
+        {# sync with id-comment-template #}
+        <div class="comment" id="comment-{{ comment.id }}" data-comment-id="{{ comment.id }}">
+          <span class="commentauthor">
+            {{ comment.author|account_link }}
+          </span>
+          {% if request.identity.account.is_moderator %}
+          <span class="commentmoderation">
+            <a href="#" class="icon-moderate icon-replace moderate-comment" title="Moderate comment">x</a>
+          </span>
+          {% endif %}
+          <span class="timestamp">{{ comment.created|date:"Y-m-d H:i" }}</span>
+          <div class="commentmessage">
+            {{ comment.message_formatted }}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <div><a href="#" class="show-add-comment">Add comment</a></div>
+    </div>
+  </div>
+  {% endifchanged %}
+  {% endwith %}

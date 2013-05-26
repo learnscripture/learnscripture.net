@@ -12,8 +12,8 @@
          @linkColor, @footerColor, @themeFont) {
 
   @linkColorHover: darken(@linkColor, 15);
+  @bgBorderColor: darken(@bgColor1, 10%);
 
-  
   a {
     color: @linkColor;
     &:hover {
@@ -181,17 +181,21 @@
     }
   }
 
-  .verseset, .actionset {
+  .verseset, .actionset, .activityitem, .commentblock {
     background-color: @bgColor1;
-    border-color: darken(@bgColor1, 10%);
+    border-color: @bgBorderColor;
     hr {
-      border-bottom-color: darken(@bgColor1, 10%);
+      border-bottom-color: @bgBorderColor;
       }
+  }
+
+  .activityitem .commentindicator {
+    border-color: @bgBorderColor;
   }
 
   .page-header {
     background-color: @bgColor1;
-    border-color: darken(@bgColor1, 10%);
+    border-color: @bgBorderColor;
   }
 
   .score-log {
@@ -839,12 +843,9 @@ body .score-log {
     margin-left: 0px;
     > li {
       list-style-type: none;
-      border-bottom: 1px solid #ddd;
-      padding: 5px 8px;
-
-      &:last-child {
-        border-bottom: 0px;
-      }
+      border: 1px solid #ddd;
+      padding: 2px 4px;
+      margin-top: -1px;
     }
   }
   .timestamp {
@@ -852,6 +853,14 @@ body .score-log {
     font-size: 90%;
   }
 
+  .commentindicator {
+    float:right;
+    border: 1px solid #ddd;
+    margin-right: -5px;
+    margin-top: -3px;
+    padding-left: 4px;
+    border-bottom-left-radius: 4px;
+  }
 }
 
 ul.grouplist {
@@ -928,18 +937,91 @@ p.referral-link {
 
 // Activity stream
 
-.activityitem {
-  margin-top: 1em;
+@activityItemPadding: 5px;
 
-  .eventdetails {
-    margin-left: 1em;
-  }
+.activitystream {
 
-  .timestamp {
-    font-style: italic;
-  }
 }
 
+.activityitem {
+  margin-left: 20px;
+  border: 1px solid;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  clear: both;
+
+  h4 {
+    overflow: auto;
+    padding-left: 10px;
+  }
+
+  .commentindicator {
+    border-right: 1px solid;
+    border-bottom: 1px solid;
+    float:left;
+    border-bottom-right-radius: 4px;
+    padding: 0px @activityItemPadding;
+    margin-right: @activityItemPadding;
+  }
+
+  .commentblock {
+    border-top: 1px solid;
+    padding: @activityItemPadding;
+  }
+
+  .commentauthor {
+  }
+
+  .comment {
+    border-radius: 4px;
+    background-color: @white;
+    padding: @activityItemPadding;
+    margin-bottom: 3px;
+    overflow: auto;
+
+    .timestamp {
+      font-style: italic;
+      float: right;
+      display: inline-block;
+    }
+
+    .commentmessage {
+      p:last-child {
+        margin-bottom: 0px;
+      }
+    }
+
+    .commentmoderation {
+      float: right;
+      padding-left: 5px;
+    }
+  }
+
+  .permalink {
+    float:right;
+    padding-right: @activityItemPadding;
+  }
+
+}
+
+#id-comment-box {
+  width: 100%;
+  box-sizing: border-box;         /* For IE and modern versions of Chrome */
+  -moz-box-sizing: border-box;    /* For Firefox                          */
+  -webkit-box-sizing: border-box; /* For Safari                           */
+}
+
+#id-add-comment > div {
+
+  > div:last-child {
+    overflow: hidden;
+    padding: 0 5px 0 0;
+  }
+
+  > div:first-child {
+    float: right;
+  }
+}
 
 ////////////  Response to smaller screen /////////////
 
