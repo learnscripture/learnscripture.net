@@ -6,6 +6,7 @@ from django.db import models
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.core.urlresolvers import reverse
 from django.utils import timezone
+from django.utils.functional import cached_property
 from django.utils.html import format_html, format_html_join
 from django.utils.safestring import mark_safe
 from jsonfield import JSONField
@@ -66,9 +67,17 @@ class EventLogic(object):
         self.event.save()
         return self.event
 
+    # In some cases Event wants to delegate some decisions to EventLogic and
+    # subclasses, without creating an EventLogic instance. We use the following
+    # classmethods:
+
     @classmethod
     def get_absolute_url(cls, event):
         return reverse('activity_item', args=(event.id,))
+
+    @classmethod
+    def accepts_comments(cls, event):
+        return True
 
 
 class GeneralEvent(EventLogic):
@@ -214,6 +223,10 @@ class NewCommentEvent(EventLogic):
         from comments.models import Comment
         return Comment.objects.get(id=event.event_data['comment_id']).get_absolute_url()
 
+    @classmethod
+    def accepts_comments(cls, event):
+        return False
+
 
 EventType = make_class_enum(
     'EventType',
@@ -340,12 +353,15 @@ class Event(models.Model):
         else:
             return mark_safe(self.message_html)
 
-    @property
+    @cached_property
     def event_logic(self):
         return EventType.classes[self.event_type]
 
     def get_absolute_url(self):
         return self.event_logic.get_absolute_url(self)
+
+    def accepts_comments(self):
+        return self.event_logic.accepts_comments(self)
 
 
 import events.hooks
