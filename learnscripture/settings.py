@@ -195,6 +195,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     'learnscripture.context_processors.notices',
     'learnscripture.context_processors.theme_fonts',
     'learnscripture.context_processors.settings_processor',
+    'learnscripture.context_processors.request_account',
 ]
 
 ROOT_URLCONF = 'learnscripture.urls'

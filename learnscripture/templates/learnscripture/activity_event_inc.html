@@ -1,7 +1,7 @@
 {% load account_utils %}
 {% load comment_utils %}
 
-  {% with rendered=event.render_html comments=event.comments.all|filter_comments:request.identity.account %}
+  {% with rendered=event.render_html comments=event.comments.all|filter_comments:request_account %}
   {% ifchanged rendered %}
   {% ifchanged event.created.date %}
   <div class="timestamp">

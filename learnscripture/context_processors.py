@@ -10,6 +10,7 @@ from accounts.models import DEFAULT_THEME, THEME_FONTS
 from payments.models import DonationDrive
 
 from learnscripture.models import SiteNotice
+from learnscripture.views import account_from_request
 
 NOTICES_EXPIRE_AFTER_DAYS = 3
 
@@ -92,6 +93,10 @@ def notices(request):
             retval['donation_drives'] = DonationDrive.objects.current_for_account(request.identity.account)
 
     return retval
+
+
+def request_account(request):
+    return {'request_account': account_from_request(request)}
 
 
 def campaign_context_processor(account):
