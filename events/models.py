@@ -6,6 +6,7 @@ from django.db import models
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.core.urlresolvers import reverse
 from django.utils import timezone
+from django.utils.functional import cached_property
 from django.utils.html import format_html, format_html_join
 from django.utils.safestring import mark_safe
 from jsonfield import JSONField
@@ -18,7 +19,7 @@ from learnscripture.templatetags.account_utils import account_link
 
 
 EVENTSTREAM_CUTOFF_DAYS = 3 # just 3 days of events
-EVENTSTREAM_CUTOFF_NUMBER = 6
+EVENTSTREAM_CUTOFF_NUMBER = 8
 
 # Arbitrarily say stuff is 50% less interesting when it is half a day old.
 HALF_LIFE_DAYS = 0.5
@@ -64,6 +65,19 @@ class EventLogic(object):
     def save(self):
         self.event.event_data = self.event_data
         self.event.save()
+        return self.event
+
+    # In some cases Event wants to delegate some decisions to EventLogic and
+    # subclasses, without creating an EventLogic instance. We use the following
+    # classmethods:
+
+    @classmethod
+    def get_absolute_url(cls, event):
+        return reverse('activity_item', args=(event.id,))
+
+    @classmethod
+    def accepts_comments(cls, event):
+        return True
 
 
 class GeneralEvent(EventLogic):
@@ -187,6 +201,33 @@ class StartedLearningCatechismEvent(EventLogic):
             )
 
 
+class NewCommentEvent(EventLogic):
+
+    weight = 8
+
+    def __init__(self, account=None, comment=None, parent_event=None):
+        super(NewCommentEvent, self).__init__(account=account,
+                                              comment_id=comment.id,
+                                              parent_event_id=parent_event.id)
+        self.event.message_html = format_html(
+            u'posted a <a href="{0}">comment</a> on {1}\'s activity',
+            comment.get_absolute_url(),
+            account_link(parent_event.account)
+            )
+        self.event.parent_event = parent_event
+
+    @classmethod
+    def get_absolute_url(cls, event):
+        # NewCommentEvent cannot collect comments themselves.
+        # So URL for new comment event is the comment's URL.
+        from comments.models import Comment
+        return Comment.objects.get(id=event.event_data['comment_id']).get_absolute_url()
+
+    @classmethod
+    def accepts_comments(cls, event):
+        return False
+
+
 EventType = make_class_enum(
     'EventType',
     [(1, 'GENERAL', 'General', GeneralEvent), # No longer used
@@ -201,26 +242,8 @@ EventType = make_class_enum(
      (10, 'GROUP_JOINED', 'Group joined', GroupJoinedEvent),
      (11, 'GROUP_CREATED', 'Group created', GroupCreatedEvent),
      (12, 'STARTED_LEARNING_CATECHISM', 'Started learning catechism', StartedLearningCatechismEvent),
+     (13, 'NEW_COMMENT', 'New comment', NewCommentEvent),
      ])
-
-
-class EventGroup(object):
-    """
-    A group of Events all about the same Account.
-    """
-    def __init__(self, account, events):
-        self.account = account
-        self.events = events
-        self.created = None
-
-    def render_html(self):
-        return format_html(
-            "{0} <ul>{1}</ul>",
-            account_link(self.account),
-            format_html_join(u'', u"<li>{0}</li>",
-                             ((mark_safe(event.message_html),)
-                              for event in self.events))
-            )
 
 
 def dedupe_iterable(iterable, keyfunc):
@@ -242,33 +265,30 @@ class EventManager(models.Manager):
             now = timezone.now()
 
         start = now - timedelta(EVENTSTREAM_CUTOFF_DAYS)
-        events = self.filter(created__gte=start).select_related('account')
+        events = (self
+                  .filter(created__gte=start)
+                  .prefetch_related('account')
+                  .annotate(comment_count=models.Count('comments'))
+                  )
         if account is None or not account.is_hellbanned:
             events = events.exclude(account__is_hellbanned=True)
         events = list(events)
         events = list(dedupe_iterable(events, lambda e:(e.account_id, e.message_html)))
-        if account is None:
-            friendship_weights = None
-        else:
-            friendship_weights = account.get_friendship_weights()
-        events.sort(key=lambda e: e.get_rank(friendship_weights, now=now),
+        events.sort(key=lambda e: e.get_rank(account, now=now),
                     reverse=True)
 
-        # Now group
-        grouped_events = []
-        for k, g in itertools.groupby(events, lambda e: e.account):
-            g = list(g)
-            if len(g) == 1:
-                grouped_events.append(g[0])
-            else:
-                grouped_events.append(EventGroup(k, g))
+        return events[:EVENTSTREAM_CUTOFF_NUMBER]
 
-        return grouped_events[0:EVENTSTREAM_CUTOFF_NUMBER]
-
-    def for_activity_stream(self, account=None):
-        qs = Event.objects.order_by('-created').select_related('account')
-        if account is None or not account.is_hellbanned:
+    def for_activity_stream(self, viewer=None, event_by=None):
+        qs = (Event.objects
+              .exclude(event_type=EventType.NEW_COMMENT)
+              .order_by('-created')
+              .select_related('account')
+              )
+        if viewer is None or not viewer.is_hellbanned:
             qs = qs.exclude(account__is_hellbanned=True)
+        if event_by is not None:
+            qs = qs.filter(account=event_by)
 
         return qs
 
@@ -281,6 +301,10 @@ class Event(models.Model):
     created = models.DateTimeField(default=timezone.now, db_index=True)
     account = models.ForeignKey(Account)
 
+    # Events like NewCommentEvent have a parent event (the event the comment is
+    # attached to).
+    parent_event = models.ForeignKey('self', null=True, blank=True)
+
     objects = EventManager()
 
     def __repr__(self):
@@ -289,11 +313,19 @@ class Event(models.Model):
     def __unicode__(self):
         return u"Event %d" % self.id
 
-    def get_rank(self, friendship_weights, now=None):
+    def get_rank(self, viewer, now=None):
         """
-        Returns the overall weighting for this event, given the
-        friendship weights for the viewing account.
+        Returns the overall weighting for this event, given the viewing account.
         """
+        # Don't ever want to see 'new comment' events from myself.
+        if self.event_type == EventType.NEW_COMMENT and self.account_id == viewer.id:
+            return 0
+
+        if viewer is None:
+            friendship_weights = None
+        else:
+            friendship_weights = viewer.get_friendship_weights()
+
         affinity = 1.0
         if friendship_weights is not None:
             affinity += friendship_weights.get(self.account_id, 0) * EVENTSTREAM_MAX_EXTRA_AFFINITY_FOR_FRIEND
@@ -320,6 +352,16 @@ class Event(models.Model):
                                mark_safe(self.message_html))
         else:
             return mark_safe(self.message_html)
+
+    @cached_property
+    def event_logic(self):
+        return EventType.classes[self.event_type]
+
+    def get_absolute_url(self):
+        return self.event_logic.get_absolute_url(self)
+
+    def accepts_comments(self):
+        return self.event_logic.accepts_comments(self)
 
 
 import events.hooks

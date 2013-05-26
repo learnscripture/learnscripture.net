@@ -198,6 +198,9 @@
 
 {% endif %}
 
+
+<!-- preferences data -->
+
 <div id="id-preferences-data"
      {# NB these names are translated to preferencesSetup, enableAnimations, enableSounds, interfaceTheme, testingMethod #}
      data-preferences-setup="{{ request.identity.preferences_setup|yesno:"true,false,false" }}"
@@ -232,6 +235,7 @@
     <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.ajaxretry.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.ba-bbq.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.actual.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.autosize.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-dropdown.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-modal.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-tabs.js"></script>
@@ -255,6 +259,7 @@
     <script type="text/javascript" src="{{ STATIC_URL }}js/groups.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/leaderboard.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/android.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/comment.js"></script>
     {% endcompress %}
 
     {% if request.identity.account and include_referral_links %}

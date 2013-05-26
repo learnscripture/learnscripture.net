@@ -25,11 +25,11 @@ class CreateSetTests(LiveServerTests):
 
     def _add_ref(self, ref):
         driver = self.driver
-        driver.find_element_by_id("id_quick_find").clear()
-        driver.find_element_by_id("id_quick_find").send_keys(ref)
-        driver.find_element_by_id("id_lookup").click()
+        self.find("#id_quick_find").clear()
+        self.send_keys("#id_quick_find", ref)
+        self.click("#id_lookup")
         self.wait_for_ajax()
-        driver.find_element_by_css_selector("input.add-to-set").click()
+        self.click("input.add-to-set")
         self.wait_until_loaded('#id-verse-list tbody tr td')
         time.sleep(0.1)
 
@@ -37,15 +37,15 @@ class CreateSetTests(LiveServerTests):
         self.login(self._account)
         driver = self.driver
         self.get_url('create_selection_set')
-        driver.find_element_by_id("id_name").clear()
-        driver.find_element_by_id("id_name").send_keys("My set")
-        driver.find_element_by_id("id_description").clear()
-        driver.find_element_by_id("id_description").send_keys("My description")
+        self.find("#id_name").clear()
+        self.send_keys("#id_name", "My set")
+        self.find("#id_description").clear()
+        self.send_keys("#id_description", "My description")
         self._add_ref("Gen 1:5")
         self.assertIn("And God called the light Day", driver.page_source)
 
-        driver.find_element_by_id("id_public").click()
-        driver.find_element_by_id("id-save-btn").click()
+        self.click("#id_public")
+        self.click("#id-save-btn")
         self.wait_until_loaded('body')
         self.assertTrue(driver.title.startswith("Verse set: My set"))
         self.assertIn("And God called the light Day", driver.page_source)
@@ -59,12 +59,12 @@ class CreateSetTests(LiveServerTests):
         self.login(self._account)
         driver = self.driver
         self.get_url("create_selection_set")
-        driver.find_element_by_id("id_name").send_keys("My set")
+        self.send_keys("#id_name", "My set")
 
         # Add Gen 1:5
         self._add_ref("Genesis 1:5")
 
-        driver.find_element_by_id("id-save-btn").click()
+        self.click("#id-save-btn")
         self.wait_until_loaded('body')
 
         vs = VerseSet.objects.get(name='My set')
@@ -77,7 +77,7 @@ class CreateSetTests(LiveServerTests):
             self.get_url('edit_set', kwargs=dict(slug=vs.slug))
             self._add_ref(ref)
 
-            driver.find_element_by_id("id-save-btn").click()
+            self.click("#id-save-btn")
             self.wait_until_loaded('body')
 
             self.assertIn("Verse set 'My set' saved", driver.page_source) # Checks we didn't get 500
@@ -108,7 +108,7 @@ class CreateSetTests(LiveServerTests):
         self._add_ref("Gen 1:5")
         self._add_ref("Gen 1:6")
 
-        driver.find_element_by_id("id-save-btn").click()
+        self.click("#id-save-btn")
 
         self.wait_until_loaded('body')
         self.assertTrue(driver.title.startswith("Create selection set"))
@@ -129,10 +129,10 @@ class CreateSetTests(LiveServerTests):
         self.login(self._account)
         driver = self.driver
         self.get_url('edit_set', kwargs=dict(slug=vs.slug))
-        e = driver.find_element_by_css_selector("#id-verse-list tbody tr:first-child td")
+        e = self.find("#id-verse-list tbody tr:first-child td")
         ActionChains(driver).drag_and_drop_by_offset(e, 0, 110).perform()
 
-        driver.find_element_by_id("id-save-btn").click()
+        self.click("#id-save-btn")
 
         vs = VerseSet.objects.get(id=vs.id)
         vcs = vs.verse_choices.all()
@@ -157,8 +157,8 @@ class CreateSetTests(LiveServerTests):
 
         driver = self.driver
         self.get_url('edit_set', kwargs=dict(slug=vs.slug))
-        driver.find_element_by_css_selector("#id-verse-list tbody tr:first-child td .icon-trash").click()
-        driver.find_element_by_id("id-save-btn").click()
+        self.click("#id-verse-list tbody tr:first-child td .icon-trash")
+        self.click("#id-save-btn")
 
         vs = VerseSet.objects.get(id=vs.id)
         vcs = vs.verse_choices.all()
@@ -179,23 +179,23 @@ class CreateSetTests(LiveServerTests):
         driver = self.driver
         self.get_url('create_passage_set')
 
-        driver.find_element_by_id("id_name").clear()
-        driver.find_element_by_id("id_name").send_keys("Genesis 1:1-10")
-        driver.find_element_by_id("id_description").clear()
-        driver.find_element_by_id("id_description").send_keys("My description")
+        self.find("#id_name").clear()
+        self.send_keys("#id_name", "Genesis 1:1-10")
+        self.find("#id_description").clear()
+        self.send_keys("#id_description", "My description")
 
-        driver.find_element_by_id("id_quick_find").clear()
-        driver.find_element_by_id("id_quick_find").send_keys("Gen 1:1-10")
-        driver.find_element_by_id("id_lookup").click()
+        self.find("#id_quick_find").clear()
+        self.send_keys("#id_quick_find", "Gen 1:1-10")
+        self.click("#id_lookup")
         self.wait_for_ajax()
         self.wait_until_loaded('#id-verse-list tbody tr td')
         self.assertIn("And God called the light Day", driver.page_source)
 
         # Check boxes for Genesis 1:3, 1:9
-        driver.find_element_by_css_selector('#id-verse-list tbody tr:nth-child(3) input').click()
-        driver.find_element_by_css_selector('#id-verse-list tbody tr:nth-child(9) input').click()
+        self.click('#id-verse-list tbody tr:nth-child(3) input')
+        self.click('#id-verse-list tbody tr:nth-child(9) input')
 
-        driver.find_element_by_id("id-save-btn").click()
+        self.click("#id-save-btn")
         self.wait_until_loaded('body')
         self.assertTrue(driver.title.startswith("Verse set: Genesis 1"))
         self.assertIn("And God called the light Day", driver.page_source)
@@ -211,10 +211,10 @@ class CreateSetTests(LiveServerTests):
         driver = self.driver
 
         self.get_url("create_passage_set")
-        driver.find_element_by_id("id_quick_find").clear()
-        driver.find_element_by_id("id_quick_find").send_keys("Gen 1:1-10")
+        self.find("#id_quick_find").clear()
+        self.send_keys("#id_quick_find", "Gen 1:1-10")
 
-        driver.find_element_by_id("id_lookup").click()
+        self.click("#id_lookup")
         self.wait_for_ajax()
         self.wait_until_loaded('#id-verse-list tbody tr td')
         self.assertIn("There are already", driver.page_source)
@@ -224,8 +224,8 @@ class CreateSetTests(LiveServerTests):
         driver = self.driver
         self.get_url("create_passage_set")
         self.wait_until_loaded('body')
-        driver.find_element_by_id("id_name").send_keys("xxx")
-        driver.find_element_by_id("id-save-btn").click()
+        self.send_keys("#id_name", "xxx")
+        self.click("#id-save-btn")
         self.wait_until_loaded('body')
         self.assertIn("No verses in set", driver.page_source)
 
@@ -246,7 +246,7 @@ class CreateSetTests(LiveServerTests):
         # Simple test - editing and pressing save should leave
         # everything the same.
         self.get_url('edit_set', kwargs=dict(slug=vs.slug))
-        driver.find_element_by_id("id-save-btn").click()
+        self.click("#id-save-btn")
 
         vs = VerseSet.objects.get(id=vs.id)
         vcs = vs.verse_choices.all().order_by('set_order')

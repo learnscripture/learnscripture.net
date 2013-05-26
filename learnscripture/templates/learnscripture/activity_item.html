@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% load account_utils %}
+
+{% block content %}
+
+<p>
+  <a href="{% url 'activity_stream' %}">Other recent activity</a> |
+  {{ event.account|account_link }}
+  » <a href="{% url 'user_activity_stream' event.account.username %}">Recent activity</a>
+</p>
+
+{% include "learnscripture/activity_event_inc.html" %}
+
+{% include "learnscripture/activity_common_inc.html" %}
+
+{% endblock %}

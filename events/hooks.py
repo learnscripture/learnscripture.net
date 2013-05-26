@@ -3,6 +3,7 @@ from django.dispatch import receiver
 from accounts.signals import new_account, verse_started, verse_finished, points_increase, catechism_started
 from awards.signals import new_award, lost_award
 from bibleverses.signals import verse_set_chosen, public_verse_set_created
+from comments.signals import new_comment
 import events.tasks
 from groups.signals import group_joined, public_group_created
 
@@ -85,3 +86,10 @@ def public_group_created_receiver(sender, **kwargs):
     group = sender
     events.tasks.create_group_created_event.apply_async([group.id],
                                                         countdown=5)
+
+
+@receiver(new_comment)
+def new_comment_receiver(sender, **kwargs):
+    comment = sender
+    events.tasks.create_new_comment_event.apply_async([comment.id],
+                                                      countdown=5)

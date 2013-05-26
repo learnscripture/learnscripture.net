@@ -222,6 +222,7 @@ INSTALLED_APPS = [
     'awards',
     'events',
     'groups',
+    'comments',
     # Third party
     'piston',
     'mptt',
@@ -356,6 +357,12 @@ COMPRESS_PRECOMPILERS = (
 RESTRUCTUREDTEXT_FILTER_SETTINGS = {
     'raw_enabled': False,
     'file_insertion_enabled': False,
+}
+
+MARKUP_SETTINGS = {
+    'restructuredtext': {
+        'settings_overrides': RESTRUCTUREDTEXT_FILTER_SETTINGS,
+    }
 }
 
 CAMPAIGN_CONTEXT_PROCESSORS = [

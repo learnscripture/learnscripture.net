@@ -34,7 +34,6 @@ class PaymentTests(AccountTestMixin, TestCase):
 
     def setUp(self):
         super(PaymentTests, self).setUp()
-
         self.identity, self.account = self.create_account()
 
     def test_send_bad_payment_1(self):
