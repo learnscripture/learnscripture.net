@@ -12,6 +12,7 @@ var learnscripture =
             })
 
             $('#id-add-comment-btn').bind('click', function(ev) {
+                ev.preventDefault();
                 // Find event id
                 var activityDiv = $(this).closest('.activityitem');
                 var eventId = activityDiv.data().eventId;

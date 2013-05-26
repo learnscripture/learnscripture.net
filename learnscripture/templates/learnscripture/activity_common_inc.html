@@ -19,8 +19,11 @@
   {% if request.identity.account %}
   <div>
     <div>
-      <input type="submit" class="btn primary" value="Post" id="id-add-comment-btn">
-      <input type="submit" class="btn" value="Cancel" id="id-cancel-comment-btn">
+      <a href="#" class="btn primary" id="id-add-comment-btn">
+        Post
+        <span class="icon-public icon-replace" title="Public action">&nbsp;</span>
+      </a>
+      <a href="#" class="btn" id="id-cancel-comment-btn">Cancel</a>
     </div>
     <div>
       <textarea id="id-comment-box" rows="1"></textarea>
