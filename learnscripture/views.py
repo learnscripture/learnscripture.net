@@ -1330,7 +1330,17 @@ def group(request, slug):
 
 
 def group_wall(request, slug):
-    pass
+    account = account_from_request(request)
+    groups = Group.objects.visible_for_account(account)
+    group = get_object_or_404(groups, slug=slug)
+
+    # TODO: respond to 'comment' query param and move to the right page of
+    # comments.
+    return render(request, 'learnscripture/group_wall.html',
+                  {'title': 'Group wall: %s' % group.name,
+                   'group': group,
+                   'comments': group.comments.order_by('-created'),
+                   })
 
 
 def create_group(request):
