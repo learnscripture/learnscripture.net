@@ -17,13 +17,13 @@ only takes a few seconds. Otherwise your progress won't be saved permanently.
 
 <div class="actionset">
   <div style="float: right; font-size: 120%;">
-    <a class="icon-stats icon-replace" href="{% url 'user_stats' request.identity.account.username %}" title="Your stats">Stats</a>
+    <a class="icon-stats icon-replace" href="{% url 'user_stats' request_account.username %}" title="Your stats">Stats</a>
     <a class="icon-progress icon-replace" href="{% url 'user_verses' %}" title="Your progress">Progress</a>
     <a class="icon-leaderboard icon-replace" href="{% url 'leaderboard' %}?thisweek" title="Leaderboard">Leaderboard</a>
   </div>
   <div>Points:
-    <b>{{ request.identity.account.points_this_week }}</b> this week,
-    <b>{{ request.identity.account.points_all_time }}</b> total.
+    <b>{{ request_account.points_this_week }}</b> this week,
+    <b>{{ request_account.points_all_time }}</b> total.
   </div>
 </div>
 
@@ -215,7 +215,7 @@ only takes a few seconds. Otherwise your progress won't be saved permanently.
 
 {% block rightcolumn %}
 
-{% if not request.identity.account %}
+{% if not request_account %}
 {% include 'learnscripture/session.html' %}
 {% endif %}
 
@@ -236,7 +236,7 @@ only takes a few seconds. Otherwise your progress won't be saved permanently.
        href="{% url 'leaderboard' %}?thisweek&group={{ group.id }}">Leaderboard</a></li>
   {% endfor %}
   {% if more_groups %}
-  <li><a href="{% url 'user_stats' request.identity.account.username %}#groups">(see all)</a></li>
+  <li><a href="{% url 'user_stats' request_account.username %}#groups">(see all)</a></li>
   {% endif %}
 
 </ul>
