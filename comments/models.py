@@ -43,7 +43,7 @@ class Comment(models.Model):
         Returns a desription of what the comment is attached to, as HTML fragment
         """
         if self.event is not None:
-            return format_html("{0}'s activity", account_link(self.author))
+            return format_html("{0}'s activity", account_link(self.event.account))
         elif self.group is not None:
             return format_html("{0}'s wall", group_link(self.group))
 
