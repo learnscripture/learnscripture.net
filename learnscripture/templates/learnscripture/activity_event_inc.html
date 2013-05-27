@@ -1,4 +1,3 @@
-{% load account_utils %}
 {% load comment_utils %}
 
   {% with rendered=event.render_html comments=event.comments.all|filter_comments:request_account %}
@@ -21,21 +20,7 @@
     <div class="commentblock{% if not comments %} hide{% endif %}">
       <div class="commentlist">
         {% for comment in comments %}
-        {# sync with id-comment-template #}
-        <div class="comment" id="comment-{{ comment.id }}" data-comment-id="{{ comment.id }}">
-          <span class="commentauthor">
-            {{ comment.author|account_link }}
-          </span>
-          {% if request_account.is_moderator %}
-          <span class="commentmoderation">
-            <a href="#" class="icon-moderate icon-replace moderate-comment" title="Moderate comment">x</a>
-          </span>
-          {% endif %}
-          <span class="timestamp">{{ comment.created|date:"Y-m-d H:i" }}</span>
-          <div class="commentmessage">
-            {{ comment.message_formatted }}
-          </div>
-        </div>
+        {% include "learnscripture/comment_inc.html" %}
         {% endfor %}
       </div>
       <div><a href="#" class="show-add-comment">Add comment</a></div>

@@ -1,0 +1,17 @@
+{% load account_utils %}
+
+        {# sync with id-comment-template #}
+        <div class="comment" id="comment-{{ comment.id }}" data-comment-id="{{ comment.id }}">
+          <span class="commentauthor">
+            {{ comment.author|account_link }}
+          </span>
+          {% if request_account.is_moderator %}
+          <span class="commentmoderation">
+            <a href="#" class="icon-moderate icon-replace moderate-comment" title="Moderate comment">x</a>
+          </span>
+          {% endif %}
+          <span class="timestamp">{{ comment.created|date:"Y-m-d H:i" }}</span>
+          <div class="commentmessage">
+            {{ comment.message_formatted }}
+          </div>
+        </div>
