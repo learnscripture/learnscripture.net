@@ -226,14 +226,13 @@ class NewCommentEvent(EventLogic):
 
     def __init__(self, account=None, comment=None, parent_event=None):
         super(NewCommentEvent, self).__init__(account=account,
-                                              comment_id=comment.id,
-                                              parent_event_id=parent_event.id)
+                                              comment_id=comment.id)
         self.event.message_html = format_html(
-            u'posted a <a href="{0}">comment</a> on {1}\'s activity',
+            u'posted a <a href="{0}">comment</a> on {1}',
             comment.get_absolute_url(),
-            account_link(parent_event.account)
+            comment.get_subject_html(),
             )
-        self.event.parent_event = parent_event
+        self.event.parent_event = comment.event
 
     @classmethod
     def get_absolute_url(cls, event):

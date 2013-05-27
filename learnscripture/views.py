@@ -65,7 +65,7 @@ from .decorators import require_identity, require_preferences, has_preferences, 
 
 
 USER_EVENTS_SHORT_CUTOFF = 5
-GROUP_COMMENTS_SHORT_CUTOFF = 8
+GROUP_COMMENTS_SHORT_CUTOFF = 5
 
 
 def home(request):
@@ -1284,7 +1284,8 @@ def groups_editable_for_request(request):
 
 
 def groups(request):
-    groups = groups_visible_for_request(request).order_by('name')
+    account = account_from_request(request)
+    groups = Group.objects.visible_for_account(account).order_by('name')
     if 'q' in request.GET:
         q = request.GET['q']
         groups = (groups.filter(name__icontains=q) |
@@ -1296,9 +1297,10 @@ def groups(request):
 
 
 def group(request, slug):
-    groups = groups_visible_for_request(request).filter(slug=slug)
-    group = get_object_or_404(groups)
     account = account_from_request(request)
+    groups = Group.objects.visible_for_account(account)
+    group = get_object_or_404(groups,
+                              slug=slug)
 
     if account is not None and request.method == 'POST':
         if 'leave' in request.POST:
@@ -1325,6 +1327,10 @@ def group(request, slug):
                    'include_referral_links': True,
                    'comments': reversed(group.comments.order_by('-created')[:GROUP_COMMENTS_SHORT_CUTOFF])
                    })
+
+
+def group_wall(request, slug):
+    pass
 
 
 def create_group(request):
@@ -1379,8 +1385,8 @@ def create_or_edit_group(request, slug=None):
 
 
 def group_select_list(request):
-    groups = list(groups_visible_for_request(request))
     account = account_from_request(request)
+    groups = list(Group.objects.visible_for_account(account))
     if account is not None:
         own_groups = set(account.get_groups())
         for g in groups:

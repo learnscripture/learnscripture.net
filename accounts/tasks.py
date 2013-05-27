@@ -7,6 +7,10 @@ def notify_account_about_comment(comment_id):
     comment = Comment.objects.get(id=comment_id)
 
     event = comment.event
+
+    if event is None:
+        return
+
     # Notify the account that generated the event
     account = event.account
 

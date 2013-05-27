@@ -79,6 +79,25 @@ class GroupPageTests(LiveServerTests):
 
         self.assertIn("You are a member of this group", driver.page_source)
 
+    def test_add_comment(self):
+        _, creator_account = self.create_account(username='creator',
+                                                 email='c@example.com')
+
+        g = Group.objects.create(name='My group',
+                                 slug='my-group',
+                                 created_by=creator_account,
+                                 public=True,
+                                 open=True)
+        driver = self.driver
+        self.login(creator_account)
+        self.get_url('group', args=(g.slug,))
+        self.click('.show-add-comment')
+        message = "Yay this is my comment!"
+        self.send_keys('#id-comment-box', message)
+        self.click('#id-add-comment-btn')
+        self.wait_for_ajax()
+        self.assertIn("<p>%s</p>" % message, self.driver.page_source)
+
 
 class GroupTests(AccountTestMixin, TestCase):
 
@@ -193,6 +212,35 @@ class GroupTests(AccountTestMixin, TestCase):
 
         self.assertEqual([i.group.name for i in member1.invitations.all()],
                          [])
+
+    def test_add_comment(self):
+        i, creator_account = self.create_account(username='creator',
+                                                 email='c@example.com')
+        group = Group.objects.create(name='My group',
+                                     slug='my-group',
+                                     created_by=creator_account,
+                                     public=True,
+                                     open=True)
+
+        i, other_account = self.create_account(username='a',
+                                               email='a@example.com')
+
+        self.assertTrue(group.accepts_comments_from(other_account))
+
+        group.public = False
+        group.save()
+
+        self.assertFalse(group.accepts_comments_from(other_account))
+
+        group.add_user(other_account)
+
+        self.assertTrue(group.accepts_comments_from(other_account))
+
+        group.add_comment(author=other_account,
+                          message="Hello")
+
+        self.assertEqual(["Hello"],
+                         [c.message for c in group.comments.all()])
 
 
 class GroupCreatePageTests(LiveServerTests):

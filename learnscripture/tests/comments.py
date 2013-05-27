@@ -1,9 +1,13 @@
 from __future__ import absolute_import
 
+from autofixture import AutoFixture
+from django.test import TestCase
+
 from comments.models import Comment
 from events.models import Event, EventType
+from groups.models import Group
 
-from .base import LiveServerTests
+from .base import LiveServerTests, AccountTestMixin
 
 
 class CommentPageTests(LiveServerTests):
@@ -80,4 +84,19 @@ class CommentPageTests(LiveServerTests):
 
         # Test DB
         self.assertEqual(self.event.comments.get(id=c1.id).hidden, True)
+
+
+class CommentTests(AccountTestMixin, TestCase):
+    def test_get_absolute_url(self):
+        _, account = self.create_account()
+        group = AutoFixture(Group,
+                            field_values={'slug':'my-group'},
+                            ).create_one()
+        comment = Comment.objects.create(
+            author=account,
+            message="Hello",
+            group=group)
+
+        self.assertEqual(comment.get_absolute_url(),
+                         "/groups/my-group/wall/?comment=%s" % comment.id)
 

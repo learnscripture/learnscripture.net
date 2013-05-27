@@ -189,7 +189,9 @@
       }
   }
 
-  .activityitem .commentindicator, .commentblock{
+  .activityitem .commentindicator,
+  .commentblock,
+  .relatedaddcomment {
     border-color: @bgBorderColor;
   }
 
@@ -1006,6 +1008,7 @@ p.referral-link {
   }
 
   .commentmessage {
+    padding-left: 20px;
     p:last-child {
       margin-bottom: 0px;
     }
@@ -1017,6 +1020,10 @@ p.referral-link {
   }
 }
 
+.relatedaddcomment {
+  font-size: 80%;
+  margin-top: 2px;
+}
 
 #id-comment-box {
   width: 100%;
