@@ -11,8 +11,8 @@ class CommentPageTests(LiveServerTests):
     def setUp(self):
         super(CommentPageTests, self).setUp()
         self.event_identity, self.event_account = \
-            self.create_account(username="other",
-                                email="other@other.com")
+            self.create_account(username="eventaccount",
+                                email="eventaccount@a.com")
         self.identity, self.account = self.create_account()
         self.event = Event.objects.create(
             message_html="Test",
@@ -80,3 +80,4 @@ class CommentPageTests(LiveServerTests):
 
         # Test DB
         self.assertEqual(self.event.comments.get(id=c1.id).hidden, True)
+
