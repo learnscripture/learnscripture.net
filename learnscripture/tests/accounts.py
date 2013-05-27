@@ -3,18 +3,21 @@ from __future__ import absolute_import
 from datetime import timedelta
 from decimal import Decimal
 
+from autofixture import AutoFixture
 from django.db.models import F
 from django.test import TestCase
 from django.utils import timezone
 
 from accounts.models import Account, ActionChange, Identity
 from awards.models import AwardType, Award
+from groups.models import Group
 from bibleverses.models import MemoryStage, StageType
 from events.models import Event, EventType
 from scores.models import Scores, ScoreReason
 
+from .base import AccountTestMixin
 
-class AccountTests(TestCase):
+class AccountTests(AccountTestMixin, TestCase):
     def test_password(self):
         acc = Account()
         acc.set_password('mypassword')
@@ -34,8 +37,7 @@ class AccountTests(TestCase):
                          (4 * Scores.POINTS_PER_WORD * 0.75))
 
     def test_points_events(self):
-        a = Account.objects.create(username='test',
-                                   email='test@test.com')
+        _, a = self.create_account()
         def score():
             a.award_action_points("John 3:16", "This is John 3:16",
                                   MemoryStage.TESTED,
@@ -50,9 +52,7 @@ class AccountTests(TestCase):
                              0 if i < 17 else 1)
 
     def test_ace_awards(self):
-        account = Account.objects.create(username='test',
-                                         email='test@test.com')
-        identity = Identity.objects.create(account=account)
+        _, account = self.create_account()
 
         self.assertEqual(account.awards.filter(award_type=AwardType.ACE).count(),
                          0)
@@ -101,9 +101,7 @@ class AccountTests(TestCase):
 
 
     def test_award_action_points_fully_learnt(self):
-        a = Account.objects.create(username='test',
-                                   email='test@test.com')
-        Identity.objects.create(account=a)
+        _, a = self.create_account()
 
         a.award_action_points("John 3:16", "This is John 3:16",
                               MemoryStage.TESTED,
@@ -116,9 +114,7 @@ class AccountTests(TestCase):
 
     def test_addict_award(self):
         import awards.tasks
-        account = Account.objects.create(username='test',
-                                         email='test@test.com')
-        identity = Identity.objects.create(account=account)
+        _, account = self.create_account()
 
         def score():
             # We simulate testing over time by moving previous data back an hour
@@ -296,3 +292,43 @@ class AccountTests(TestCase):
                          .filter(award_type=AwardType.REIGNING_WEEKLY_CHAMPION)
                          .count(),
                          1)
+
+    def test_friendship_weights(self):
+        _, account1 = self.create_account(username="a1",
+                                          email="a1@a.com")
+        _, account2 = self.create_account(username="a2",
+                                          email="a2@a.com")
+        _, account3 = self.create_account(username="a3",
+                                          email="a3@a.com")
+        _, account4 = self.create_account(username="a4",
+                                          email="a4@a.com")
+
+        # a1 and a2 are in a group
+        group, group2 = AutoFixture(Group).create(2)
+        assert group.members.count() == 0
+        assert group2.members.count() == 0
+
+        group.add_user(account1)
+        group.add_user(account2)
+
+        self.assertEqual(account1.get_friendship_weights(),
+                         {account1.id: 0.5,  # defined this way
+                          account2.id: 1.0,  # max
+                          # account3.id should be missing
+                          })
+
+
+        self.assertEqual(account3.get_friendship_weights(),
+                         {account3.id: 0.5})
+
+        group2.add_user(account2)
+        group2.add_user(account3)
+        group2.add_user(account4)
+
+        # account2 is considered better friends with account1 than with
+        # account3, because group2 is larger.
+
+        w2_with_1 = account2.get_friendship_weights()[account1.id]
+        w2_with_3 = account2.get_friendship_weights()[account3.id]
+
+        self.assertTrue(w2_with_1 > w2_with_3)
