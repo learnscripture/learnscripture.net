@@ -286,6 +286,8 @@ class EventManager(models.Manager):
         events = (self
                   .filter(created__gte=start)
                   .prefetch_related('account')
+                  .exclude(event_type=EventType.NEW_COMMENT,
+                           account=account)
                   .annotate(comment_count=models.Count('comments'))
                   )
         if account is None or not account.is_hellbanned:
