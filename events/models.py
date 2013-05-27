@@ -274,7 +274,11 @@ class EventManager(models.Manager):
             events = events.exclude(account__is_hellbanned=True)
         events = list(events)
         events = list(dedupe_iterable(events, lambda e:(e.account_id, e.message_html)))
-        events.sort(key=lambda e: e.get_rank(account, now=now),
+
+        friendship_weights = account.get_friendship_weights()
+        events.sort(key=lambda e: e.get_rank(viewer=account,
+                                             friendship_weights=friendship_weights,
+                                             now=now),
                     reverse=True)
 
         return events[:EVENTSTREAM_CUTOFF_NUMBER]
@@ -313,7 +317,7 @@ class Event(models.Model):
     def __unicode__(self):
         return u"Event %d" % self.id
 
-    def get_rank(self, viewer, now=None):
+    def get_rank(self, viewer=None, friendship_weights=None, now=None):
         """
         Returns the overall weighting for this event, given the viewing account.
         """
@@ -323,9 +327,7 @@ class Event(models.Model):
             self.account_id == viewer.id):
             return 0
 
-        if viewer is None:
-            friendship_weights = None
-        else:
+        if viewer is not None and friendship_weights is None:
             friendship_weights = viewer.get_friendship_weights()
 
         affinity = 1.0
