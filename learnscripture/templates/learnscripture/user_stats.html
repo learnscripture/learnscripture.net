@@ -68,6 +68,29 @@ Stats for {{ account.username }} on LearnScripture.net - the fun, easy and socia
   </tbody>
 </table>
 
+{% if request_account and request_account != account %}
+<h2>Connections</h2>
+
+<div>
+<div class="is-following
+             {% if not viewer_is_following %}hide{% endif %}">
+  <a href="#" id="id-unfollow-btn" class="btn primary" data-account-id="{{ account.id }}">Unfollow</a>
+  You are following {{ account.username }}.
+</div>
+<div class="is-not-following
+             {% if viewer_is_following %}hide{% endif %}">
+  <a href="#" id="id-follow-btn" class="btn primary" data-account-id="{{ account.id }}">Follow</a>
+
+  You are not following {{ account.username }}.
+</div>
+<p>Following a user is not visible to them, but means that this person's
+activity will feature more on your dashboard news stream. Any groups
+that you are both in will also affect your news stream.
+</p>
+</div>
+
+{% endif %}
+
 {% if events %}
 
 <h2>Activity</h2>

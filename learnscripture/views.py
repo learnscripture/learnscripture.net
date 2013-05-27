@@ -857,15 +857,20 @@ def leaderboard(request):
 
 
 def user_stats(request, username):
-    account = get_object_or_404(Account.objects.visible_for_account(account_from_request(request))
+    viewer = account_from_request(request)
+    account = get_object_or_404(Account.objects.visible_for_account(viewer)
                                 .select_related('total_score', 'identity'),
                                 username=username)
     c = {'account': account,
          'title': account.username,
          'awards': account.visible_awards(),
          'include_referral_links': True,
-         'events': _user_events(account, account_from_request(request))[:USER_EVENTS_SHORT_CUTOFF]
+         'events': _user_events(account, viewer)[:USER_EVENTS_SHORT_CUTOFF]
          }
+
+    if viewer is not None:
+        c['viewer_is_following'] = viewer.is_following(account)
+
     one_week_ago = timezone.now() - timedelta(7)
 
     c['verses_started_all_time'] = account.identity.verses_started_count()

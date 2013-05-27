@@ -181,7 +181,7 @@
     }
   }
 
-  .verseset, .actionset, .activityitem, .groupcomments {
+  .verseset, .actionset, .activityitem, .groupcomments, .is-following {
     background-color: @bgColor1;
     border-color: @bgBorderColor;
     hr {
@@ -191,7 +191,8 @@
 
   .activityitem .commentindicator,
   .commentblock,
-  .relatedaddcomment {
+  .relatedaddcomment,
+  .is-not-following {
     border-color: @bgBorderColor;
   }
 
@@ -902,6 +903,14 @@ form.quickfind {
     border: 0px;
     line-height: inherit;
   }
+}
+
+// -- User stats page --
+
+.is-following, .is-not-following {
+  padding: 10px;
+  border: 1px solid;
+  border-radius: 7px;
 }
 
 // Awards

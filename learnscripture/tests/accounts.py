@@ -332,3 +332,22 @@ class AccountTests(AccountTestMixin, TestCase):
         w2_with_3 = account2.get_friendship_weights()[account3.id]
 
         self.assertTrue(w2_with_1 > w2_with_3)
+
+        # But following has higher weight than groups.
+
+        # Test some methods while we are here:
+        self.assertFalse(account2.is_following(account3))
+
+        account2.follow_user(account3)
+
+        self.assertTrue(account2.is_following(account3))
+        self.assertFalse(account3.is_following(account2))
+
+        # get_friendship_weights is cached, but 'follow_user' clears it, because
+        # it's nice for explicit actions to be reflected immediately on the
+        # dashboard.
+
+        w2_with_1 = account2.get_friendship_weights()[account1.id]
+        w2_with_3 = account2.get_friendship_weights()[account3.id]
+
+        self.assertTrue(w2_with_3 > w2_with_1)
