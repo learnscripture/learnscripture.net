@@ -22,7 +22,7 @@ from bibleverses.signals import verse_set_chosen
 from scores.models import TotalScore, ScoreReason, Scores, get_rank_all_time, get_rank_this_week
 
 from learnscripture.datastructures import make_choices
-from learnscripture.utils.cache import cache_results
+from learnscripture.utils.cache import cache_results, clear_cache_results
 
 
 TestingMethod = make_choices('TestingMethod',
@@ -103,6 +103,11 @@ class Account(AbstractBaseUser):
 
     # Attributes needed for admin login and auth.contrib compat
     is_superuser = models.BooleanField(default=False)
+
+    # Following:
+    following = models.ManyToManyField('self',
+                                       symmetrical=False,
+                                       related_name='followers')
 
     # Managers and meta
     objects = AccountManager()
@@ -301,6 +306,17 @@ class Account(AbstractBaseUser):
     def donations_disabled(self):
         return self.is_under_13
 
+    def is_following(self, account):
+        return self.following.filter(pk=account.id).exists()
+
+    def follow_user(self, account):
+        self.following.add(account)
+        clear_friendship_weight_cache(self.id)
+
+    def unfollow_user(self, account):
+        self.following.remove(account)
+        clear_friendship_weight_cache(self.id)
+
 
 def count_words(text):
     # This logic is reproduced client side in learn.js :: countWords
@@ -312,6 +328,7 @@ def count_words(text):
 @cache_results(seconds=1200)
 def account_get_friendship_weights(account_id):
     # We use groups to define possible friendships.
+    account = Account.objects.get(id=account_id)
     from groups.models import Membership
     weights = defaultdict(int)
     for m in Membership.objects.filter(account=account_id).select_related('group').prefetch_related('group__members'):
@@ -337,9 +354,19 @@ def account_get_friendship_weights(account_id):
         for k, v in weights.items():
             weights[k] = v/max_weight
 
+    # We use following as definite friendships. Following is the worth more than
+    # any evidence from groups.
+    for acc in account.following.all():
+        weights[acc.id] += 1.5
+
+    # Give some weight to self
     weights[account_id] = 0.5
 
     return weights
+
+
+def clear_friendship_weight_cache(account_id):
+    clear_cache_results(account_get_friendship_weights, account_id)
 
 
 def send_payment_received_email(account, payment):

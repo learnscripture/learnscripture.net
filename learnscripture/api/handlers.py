@@ -459,3 +459,20 @@ class HideComment(BaseHandler):
         Comment.objects.filter(id=int(request.POST['comment_id'])).update(hidden=True)
         return {}
 
+
+class Follow(BaseHandler):
+
+    @require_preexisting_account_m
+    def create(self, request):
+        account = Account.objects.get(id=int(request.POST['account_id']))
+        request.identity.account.follow_user(account)
+        return {}
+
+
+class UnFollow(BaseHandler):
+
+    @require_preexisting_account_m
+    def create(self, request):
+        account = Account.objects.get(id=int(request.POST['account_id']))
+        request.identity.account.unfollow_user(account)
+        return {}

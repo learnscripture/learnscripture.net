@@ -1,6 +1,11 @@
 from hashlib import sha1
 from django.core.cache import cache as _djcache
 
+
+def cache_results_key(f, args, kwargs):
+    return sha1(str(f.__module__) + str(f.__name__) + str(args) + str(kwargs)).hexdigest()
+
+
 def cache_results(seconds=900):
     """
     Cache the result of a function call for the specified number of seconds,
@@ -18,11 +23,18 @@ def cache_results(seconds=900):
     """
     def do_cache(f):
         def x(*args, **kwargs):
-            key = sha1(str(f.__module__) + str(f.__name__) + str(args) + str(kwargs)).hexdigest()
+            key = cache_results_key(f, args, kwargs)
             result = _djcache.get(key)
             if result is None:
                 result = f(*args, **kwargs)
                 _djcache.set(key, result, seconds)
             return result
+        x.__name__ = f.__name__
+        x.__doc__ = f.__doc__
+        x.__module__ = f.__module__
         return x
     return do_cache
+
+def clear_cache_results(f, *args, **kwargs):
+    key = cache_results_key(f, args, kwargs)
+    _djcache.delete(key)
