@@ -1,11 +1,13 @@
 {% load account_utils %}
 
         {# sync with id-comment-template #}
-        <div class="comment" id="comment-{{ comment.id }}" data-comment-id="{{ comment.id }}">
+        <div class="comment{% if show_as_related_comment %} relatedcomment{% endif %}"
+             id="comment-{{ comment.id }}"
+             data-comment-id="{{ comment.id }}">
           <span class="commentauthor">
             {{ comment.author|account_link }}
           </span>
-          {% if show_event_link %}
+          {% if show_as_related_comment %}
           on news item “<b>{{ comment.event.render_html }}</b>”
           {% endif %}
           {% if request_account.is_moderator %}
@@ -17,7 +19,7 @@
           <div class="commentmessage">
             {{ comment.message_formatted }}
           </div>
-          {% if show_event_link %}
-          <div><a href="{{ comment.get_absolute_url }}" class="icon-comment">Add your comment</a></div>
+          {% if show_as_related_comment %}
+          <div class="relatedaddcomment"><a href="{{ comment.get_absolute_url }}" class="icon-comment">Add your comment</a></div>
           {% endif %}
         </div>

@@ -129,11 +129,10 @@ def create_group_created_event(group_id):
 def create_new_comment_event(comment_id):
     comment = Comment.objects.get(id=comment_id)
     account = comment.author
-    parent_event = comment.event
 
     # Hellbanning filtering - don't notify normal users of comments from
     # hellbanned users:
     if (account.is_hellbanned and not parent_event.account.is_hellbanned):
         return
 
-    NewCommentEvent(account=account, comment=comment, parent_event=parent_event).save()
+    NewCommentEvent(account=account, comment=comment).save()

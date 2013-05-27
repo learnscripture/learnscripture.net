@@ -16,26 +16,37 @@ var learnscripture =
 
             $('a.show-add-comment').bind('click', function (ev) {
                 ev.preventDefault();
-                var div = $(this).closest('.activityitem');
+                var div = $(this).closest('.activityitem,.groupcomments');
                 showAddComment(div);
             })
 
             var postCommentClick = function(ev) {
                 ev.preventDefault();
+                var data = {
+                    'message': $('#id-comment-box').val(),
+                }
                 // Find event id
+                var commentListDiv = null;
                 var activityDiv = $(this).closest('.activityitem');
-                var eventId = activityDiv.data().eventId;
+                if (activityDiv.length > 0) {
+                    data['event_id'] = activityDiv.data().eventId;
+                    commentListDiv = activityDiv.find('.commentlist')
+                }
+                // or group id
+                var groupDiv = $(this).closest('.groupcomments');
+                if (groupDiv.length > 0) {
+                    data['group_id'] = groupDiv.data().groupId;
+                    commentListDiv = groupDiv.find('.commentlist')
+                }
+
                 $.ajax({url: '/api/learnscripture/v1/addcomment/?format=json',
                         dataType: 'json',
                         type: 'POST',
-                        data: {
-                            'event_id': eventId,
-                            'message': $('#id-comment-box').val(),
-                        },
+                        data: data,
                         success: function (data) {
                             setTimeout(bindPostCommentClick, 500);
                             // data contains new comment to add.
-                            activityDiv.find('.commentlist').append(
+                            commentListDiv.append(
                                 $('#id-comment-template').render({'comment': data})
                             );
 
@@ -66,7 +77,7 @@ var learnscripture =
 
             $('.moderate-comment').bind('click', function (ev) {
                 ev.preventDefault();
-                if (window.confirm("Hide this comment?")) {
+                if (window.confirm("Remove this comment?")) {
                     var commentDiv = $(this).closest('.comment');
                     var commentId = commentDiv.data().commentId;
                     $.ajax({url: '/api/learnscripture/v1/hidecomment/?format=json',

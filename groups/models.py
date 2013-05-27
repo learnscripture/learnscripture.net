@@ -95,6 +95,19 @@ class Group(models.Model):
                 self.invitations.create(account=u,
                                         created_by=self.created_by)
 
+    def accepts_comments_from(self, user):
+        if self.public:
+            return True
+        else:
+            return self.active_members.filter(id=user.id).exists()
+
+    def add_comment(self, author=None, message=None):
+        if not self.accepts_comments_from(author):
+            return None
+
+        return self.comments.create(author=author,
+                                    message=message)
+
 
 class Membership(models.Model):
     account = models.ForeignKey(Account, related_name='memberships')

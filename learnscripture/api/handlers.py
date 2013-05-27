@@ -24,6 +24,7 @@ from accounts.models import Account
 from bibleverses.models import UserVerseStatus, Verse, StageType, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, MAX_VERSE_QUERY_SIZE, TextVersion, quick_find, VerseSetType, TextType
 from comments.models import Comment
 from events.models import Event
+from groups.models import Group
 from learnscripture import session
 from learnscripture.decorators import require_identity_method
 from learnscripture.views import session_stats, bible_versions_for_request, verse_sets_visible_for_request
@@ -411,23 +412,42 @@ class AddComment(BaseHandler):
 
     @require_preexisting_account_m
     def create(self, request):
-        try:
-            event_id = int(request.POST['event_id'])
-        except (KeyError, ValueError):
-            return rc.BAD_REQUEST
-
-        try:
-            e = Event.objects.get(id=event_id)
-        except Event.DoesNotExist:
-            return rc.BAD_REQUEST
+        account = request.identity.account
 
         message = request.POST.get('message', '').strip()
         if message == '':
             return validation_error_response({'message': 'You must enter a message'})
 
-        c = e.add_comment(author=request.identity.account,
-                          message=message)
-        return c
+        comment = None
+        if 'event_id' in request.POST:
+            try:
+                event_id = int(request.POST['event_id'])
+            except ValueError:
+                return rc.BAD_REQUEST
+
+            try:
+                event = Event.objects.get(id=event_id)
+            except Event.DoesNotExist:
+                return rc.BAD_REQUEST
+
+            comment = event.add_comment(author=account,
+                                        message=message)
+
+        elif 'group_id' in request.POST:
+            try:
+                group_id = int(request.POST['group_id'])
+            except ValueError:
+                return rc.BAD_REQUEST
+
+            try:
+                group = Group.objects.visible_for_account(account).get(id=group_id)
+            except Group.DoesNotExist:
+                return rc.BAD_REQUEST
+
+            comment = group.add_comment(author=account,
+                                        message=message)
+
+        return comment
 
 
 class HideComment(BaseHandler):

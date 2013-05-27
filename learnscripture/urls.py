@@ -61,6 +61,7 @@ urlpatterns = patterns('',
                        # Groups
                        url(r'^groups/$', 'learnscripture.views.groups', name='groups'),
                        url(r'^groups/(.*)/$', 'learnscripture.views.group', name='group'),
+                       url(r'^groups/(.*)/wall/$', 'learnscripture.views.group_wall', name='group_wall'),
                        url(r'^create-group/$', 'learnscripture.views.create_group', name='create_group'),
                        url(r'^edit-group/(.*)/$', 'learnscripture.views.edit_group', name='edit_group'),
                        url(r'^group-select-list/$', 'learnscripture.views.group_select_list', name='group_select_list'),

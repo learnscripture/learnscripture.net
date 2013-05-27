@@ -1,11 +1,16 @@
+from __future__ import unicode_literals
+
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils import timezone
 from django.utils.safestring import mark_safe
-from django.utils.html import urlize, linebreaks
+from django.utils.html import urlize, linebreaks, format_html
 
 from accounts.models import Account
 from events.models import Event
 from groups.models import Group
+from groups.utils import group_link
+from learnscripture.templatetags.account_utils import account_link
 
 
 def format_comment_message(message):
@@ -13,7 +18,7 @@ def format_comment_message(message):
 
 class Comment(models.Model):
     author = models.ForeignKey(Account, related_name='comments')
-    event = models.ForeignKey(Event, related_name='comments')
+    event = models.ForeignKey(Event, related_name='comments', null=True)
     group = models.ForeignKey(Group, null=True, blank=True,
                               related_name='comments')
     created = models.DateTimeField(default=timezone.now)
@@ -28,6 +33,19 @@ class Comment(models.Model):
         return "%s: %s" % (self.id, self.message)
 
     def get_absolute_url(self):
-        return self.event.get_absolute_url() + "#comment-%s" % self.id
+        if self.event is not None:
+            return self.event.get_absolute_url() + "#comment-%s" % self.id
+        else:
+            return reverse('group_wall', args=(self.group.slug,)) + "?comment=%s" % self.id
+
+    def get_subject_html(self):
+        """
+        Returns a desription of what the comment is attached to, as HTML fragment
+        """
+        if self.event is not None:
+            return format_html("{0}'s activity", account_link(self.author))
+        elif self.group is not None:
+            return format_html("{0}'s wall", group_link(self.group))
+
 
 import comments.hooks
