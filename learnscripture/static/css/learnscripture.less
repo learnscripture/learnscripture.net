@@ -189,6 +189,13 @@
       }
   }
 
+  .activitystream .activityitem.following {
+    border-top-color: @linkColor;
+    border-bottom-color: @linkColor;
+  }
+
+
+
   .activityitem .commentindicator,
   .commentblock,
   .relatedaddcomment,
@@ -951,7 +958,10 @@ p.referral-link {
 @activityItemPadding: 5px;
 
 .activitystream {
-
+  .activityitem.following {
+    border-top: 2px solid;
+    border-bottom: 2px solid;
+  }
 }
 
 .activityitem, .groupcomments {
