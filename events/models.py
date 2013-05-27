@@ -309,10 +309,11 @@ class EventManager(models.Manager):
 
     def for_activity_stream(self, viewer=None, event_by=None):
         qs = (Event.objects
-              .exclude(event_type=EventType.NEW_COMMENT)
               .order_by('-created')
               .select_related('account')
               )
+        if event_by is None:
+            qs = qs.exclude(event_type=EventType.NEW_COMMENT)
         if viewer is None or not viewer.is_hellbanned:
             qs = qs.exclude(account__is_hellbanned=True)
         if event_by is not None:

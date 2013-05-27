@@ -11,9 +11,11 @@
               {% if event.account_id in following_ids %}following{% endif %}
               "
        data-event-id="{{ event.id }}">
+    {% if event.accepts_comments %}
     <span class="commentindicator">
       <a href="#" class="icon-comment show-add-comment" title="Add comment"><span class="commentcount">{{ comments|length }}</span></a>
     </span>
+    {% endif %}
     <span class="permalink">
       <a href="{{ event.get_absolute_url }}" class="icon-link icon-replace" title="Link directly to this item alone">link</a>
     </span>
