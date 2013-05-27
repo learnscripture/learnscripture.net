@@ -5,6 +5,8 @@ from django.utils.html import urlize, linebreaks
 
 from accounts.models import Account
 from events.models import Event
+from groups.models import Group
+
 
 def format_comment_message(message):
     return mark_safe(linebreaks(mark_safe(urlize(message.strip(), autoescape=True)), autoescape=False))
@@ -12,6 +14,8 @@ def format_comment_message(message):
 class Comment(models.Model):
     author = models.ForeignKey(Account, related_name='comments')
     event = models.ForeignKey(Event, related_name='comments')
+    group = models.ForeignKey(Group, null=True, blank=True,
+                              related_name='comments')
     created = models.DateTimeField(default=timezone.now)
     message = models.TextField()
     hidden = models.BooleanField(default=False, blank=True)
