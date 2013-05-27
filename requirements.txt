@@ -15,7 +15,7 @@ django-spurl==0.6
 urlobject==2.0.0
 django-cache-machine==0.6
 pytz
--e git+https://github.com/spookylukey/django-paypal@94dae3d#egg=paypal
+-e git+https://github.com/spookylukey/django-paypal@27627681c00bb433221cb308ea173e1328bac545#egg=paypal
 docutils
 -e git+git://github.com/spookylukey/django-campaign.git@e07ff64afbb35d86494779ad5143875dd13f43b3#egg=django-campaign
 supervisor
