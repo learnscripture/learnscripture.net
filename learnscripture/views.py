@@ -1116,7 +1116,7 @@ def stats(request):
     # Build cumulative stats from 'account_data'
     all_accounts = []
     new_accounts = account_data['new_account']
-    total = 0
+    total = Account.objects.filter(date_joined__lte=start).count()
     for ts, c in new_accounts:
         total += c
         all_accounts.append((ts, total))
