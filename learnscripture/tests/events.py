@@ -4,7 +4,7 @@ from autofixture import AutoFixture
 from django.test import TestCase
 from django.utils import timezone
 
-from events.models import Event, EventType, NewCommentEvent
+from events.models import Event, EventType, NewCommentEvent, GroupJoinedEvent
 from comments.models import Comment
 from accounts.models import Account
 from groups.models import Group
@@ -78,3 +78,17 @@ class EventTests(AccountTestMixin, TestCase):
 
         # account2 and viewer are friends, so e3 should be before e2
         self.assertTrue(stream.index(e3) < stream.index(e2))
+
+
+    def test_comment_on_group_event(self):
+        """
+        Test that a comment created on an event that relates to a group
+        becomes associated with that group.
+        """
+        group = AutoFixture(Group, generate_fk=True).create(1)[0]
+        _, account1 = self.create_account(username="1")
+
+        event = GroupJoinedEvent(account=account1, group=group).save()
+        comment = event.add_comment(author=account1,
+                                    message="hello")
+        self.assertEqual(comment.group, group)
