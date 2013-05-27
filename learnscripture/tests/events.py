@@ -14,16 +14,13 @@ class EventTests(TestCase):
         orig_event = (AutoFixture(Event,
                                   field_values={'event_data': {}})
                       .create(1)[0])
+        # This should create a NewCommentEvent automatically
         comment = Comment.objects.create(
             author=account,
             event=orig_event,
             message="hello",
             )
-        event = NewCommentEvent(
-            account=account,
-            comment=comment,
-            parent_event=orig_event
-            ).save()
+        event = Event.objects.get(event_type=EventType.NEW_COMMENT)
         self.assertEqual(event.get_absolute_url(),
                          '/activity/%s/#comment-%s' % (orig_event.id,
                                                        comment.id))
