@@ -12,12 +12,12 @@
 {{ group.description|restructuredtext }}
 {% endif %}
 
-<h2>Comments</h2>
+<h2>Recent comments</h2>
 
 <div class="groupcomments">
   <div class="commentblock">
     <div class="commentlist">
-      {% for comment in group.comments.all %}
+      {% for comment in comments %}
       {% with show_event_link=True %}
       {% include "learnscripture/comment_inc.html" %}
       {% endwith %}

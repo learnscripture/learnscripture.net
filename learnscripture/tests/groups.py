@@ -1,11 +1,13 @@
 from __future__ import absolute_import
 
+from autofixture import AutoFixture, create_one
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
 from accounts.models import Account, Identity
 from awards.models import Award, AwardType
 from groups.models import Group
+from comments.models import Comment
 from events.models import Event, EventType
 
 from .base import LiveServerTests, AccountTestMixin
@@ -224,3 +226,26 @@ class GroupCreatePageTests(LiveServerTests):
 
         self.assertEqual(Event.objects.filter(event_type=EventType.GROUP_CREATED).count(),
                          1)
+
+
+# Use Django client
+class GroupPageTests2(AccountTestMixin, TestCase):
+    def test_comments_on_related_events(self):
+        _, account = self.create_account()
+        group = AutoFixture(Group,
+                            generate_fk=True,
+                            field_values={'public': True}).create_one()
+        event = Event.objects.create(
+            event_type=EventType.GROUP_JOINED,
+            event_data={},
+            account=account,
+            )
+        comment = AutoFixture(Comment, generate_fk=True,
+                              field_values={'group': group,
+                                            'event': event,
+                                            'message': "Hello there!"
+                                            }).create_one()
+        response = self.client.get(reverse('group', args=(group.slug,)))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Hello there!")
+        self.assertContains(response, comment.get_absolute_url())

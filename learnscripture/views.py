@@ -65,6 +65,7 @@ from .decorators import require_identity, require_preferences, has_preferences, 
 
 
 USER_EVENTS_SHORT_CUTOFF = 5
+GROUP_COMMENTS_SHORT_CUTOFF = 8
 
 
 def home(request):
@@ -1322,6 +1323,7 @@ def group(request, slug):
                    'can_join': group.can_join(account),
                    'can_edit': group.can_edit(account),
                    'include_referral_links': True,
+                   'comments': reversed(group.comments.order_by('-created')[:GROUP_COMMENTS_SHORT_CUTOFF])
                    })
 
 
