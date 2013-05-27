@@ -186,7 +186,7 @@ Stats for {{ account.username }} on LearnScripture.net - the fun, easy and socia
 
 <p><a href="{% url 'leaderboard' %}" class="icon-leaderboard">See all rankings</a></p>
 
-{% if request.identity.account.username == account.username %}
+{% if request_account.username == account.username %}
 <p><a href="{% url 'user_verses' %}" class="icon-progress">See detailed progress on verse learning</a></p>
 {% endif %}
 
@@ -204,7 +204,7 @@ Stats for {{ account.username }} on LearnScripture.net - the fun, easy and socia
 {% else %}
 <p>No groups.
 
-  {% if request.identity.account.username == account.username %}
+  {% if request_account.username == account.username %}
   <a href="{% url 'groups' %}">Find groups to join</a>
   {% endif %}
 </p>

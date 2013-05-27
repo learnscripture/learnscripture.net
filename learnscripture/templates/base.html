@@ -55,18 +55,18 @@
           <div class="nav secondary-nav">
             <ul>
               <li class="dropdown" data-dropdown="dropdown">
-                <a href="#" id="id-session-menu" class="dropdown-toggle">{% if request.identity.account %}{{ request.identity.account.username }}{% else %}Guest{% endif %}</a>
+                <a href="#" id="id-session-menu" class="dropdown-toggle">{% if request_account %}{{ request_account.username }}{% else %}Guest{% endif %}</a>
                 <ul class="dropdown-menu">
-                  {% if not request.identity.account %}
+                  {% if not request_account %}
                   <li><a href="{% url 'login' %}" class="icon-login login-link">Sign in</a></li>
                   <li><a href="{% url 'signup' %}?next={{ request.get_full_path|urlencode }}" class="icon-account">Create account</a></li>
                   {% endif %}
                   <li><a class="icon-preferences preferences-link" href="{% url 'preferences' %}?next={{ request.path_info }}">Preferences</a></li>
-                  {% if request.identity.account %}
+                  {% if request_account %}
                   <li><a class="icon-account" href="{% url 'account_details' %}">Account details</i></a></li>
                   <li><a class="icon-progress" href="{% url 'user_verses' %}">Verse progress</a>
                   <li><a class="icon-verse-sets" href="{% url 'user_verse_sets' %}">Verse sets</a>
-                  <li><a class="icon-stats" href="{% url 'user_stats' request.identity.account.username %}">Stats</a></li>
+                  <li><a class="icon-stats" href="{% url 'user_stats' request_account.username %}">Stats</a></li>
                   <li><a class="icon-leaderboard" href="{% url 'leaderboard' %}?thisweek">Leaderboard</a></li>
                   <li><a href="#" class="icon-logout logout-link">Log out</a></li>
                   {% endif %}
@@ -143,7 +143,7 @@
       </div>
 
       {% block referral_links %}
-      {% if request.identity.account and include_referral_links %}
+      {% if request_account and include_referral_links %}
       <div class="footer addclearfix">
         <div class="addthis_toolbox addthis_default_style"
              addthis:url="{{ referral_link }}">
@@ -209,11 +209,11 @@
      data-interface-theme="{{ request.identity.interface_theme }}"
      data-testing-method="{{ request.identity.testing_method }}">
 </div>
-{% if request.identity.account %}
+{% if request_account %}
 <div id="id-account-data"
-     data-username="{{ request.identity.account.username }}"
-     data-id="{{ request.identity.account.id }}"
-     data-has-installed-android-app="{{ request.identity.account.has_installed_android_app|yesno:"true,false" }}"
+     data-username="{{ request_account.username }}"
+     data-id="{{ request_account.id }}"
+     data-has-installed-android-app="{{ request_account.has_installed_android_app|yesno:"true,false" }}"
      >
 </div>
 {% endif %}
@@ -262,7 +262,7 @@
     <script type="text/javascript" src="{{ STATIC_URL }}js/comment.js"></script>
     {% endcompress %}
 
-    {% if request.identity.account and include_referral_links %}
+    {% if request_account and include_referral_links %}
     <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid=ra-4fa0736b6ee964ea"></script>
     {% endif %}
 

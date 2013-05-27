@@ -7,7 +7,7 @@
 
 {% if already_signed_up %}
 
-<p>You are already signed in as <b>{{ request.identity.account.username }}</b>. You should <a href="#" class="logout-link">logout</a> if you want to create a new account.</p>
+<p>You are already signed in as <b>{{ request_account.username }}</b>. You should <a href="#" class="logout-link">logout</a> if you want to create a new account.</p>
 
 {% else %}
 
