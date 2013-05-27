@@ -1460,13 +1460,16 @@ Message:
 
 
 def activity_stream(request):
+    viewer = account_from_request(request)
     return render(request,
                   'learnscripture/activity_stream.html',
                   {'events':
                        Event.objects
-                   .for_activity_stream(viewer=account_from_request(request))
+                   .for_activity_stream(viewer=viewer)
                    .prefetch_related('comments', 'comments__author'),
                    'title': "Recent activity",
+                   'following_ids': [] if viewer is None
+                   else [a.id for a in viewer.following.all()]
                    })
 
 
