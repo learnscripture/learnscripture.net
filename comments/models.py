@@ -18,7 +18,8 @@ def format_comment_message(message):
 
 class Comment(models.Model):
     author = models.ForeignKey(Account, related_name='comments')
-    event = models.ForeignKey(Event, related_name='comments', null=True)
+    event = models.ForeignKey(Event, related_name='comments',
+                              null=True, blank=True)
     group = models.ForeignKey(Group, null=True, blank=True,
                               related_name='comments')
     created = models.DateTimeField(default=timezone.now)
