@@ -34,6 +34,7 @@ class AccountAdmin(admin.ModelAdmin):
     list_display = ['username', 'email', 'first_name', 'last_name', 'date_joined']
     ordering = ['date_joined']
     search_fields = ['username', 'email']
+    filter_horizontal = ['following']
 
 
 class NoticeAdmin(admin.ModelAdmin):
