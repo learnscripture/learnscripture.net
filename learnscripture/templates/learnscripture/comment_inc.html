@@ -5,6 +5,9 @@
           <span class="commentauthor">
             {{ comment.author|account_link }}
           </span>
+          {% if show_event_link %}
+          on news item “<b>{{ comment.event.render_html }}</b>”
+          {% endif %}
           {% if request_account.is_moderator %}
           <span class="commentmoderation">
             <a href="#" class="icon-moderate icon-replace moderate-comment" title="Moderate comment">x</a>
@@ -14,4 +17,7 @@
           <div class="commentmessage">
             {{ comment.message_formatted }}
           </div>
+          {% if show_event_link %}
+          <div><a href="{{ comment.get_absolute_url }}" class="icon-comment">Add your comment</a></div>
+          {% endif %}
         </div>
