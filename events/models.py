@@ -13,6 +13,7 @@ from jsonfield import JSONField
 
 from accounts.models import Account
 from awards.utils import award_link
+from groups.models import Group
 from groups.utils import group_link
 from learnscripture.datastructures import make_class_enum
 from learnscripture.templatetags.account_utils import account_link
@@ -37,7 +38,13 @@ EVENTSTREAM_MAX_EXTRA_AFFINITY_FOR_FRIEND = 1.0
 
 
 class EventLogic(object):
+    """
+    Encapsulates logic about different types of events.
 
+    This is used instead of having Event subclasses, which usually leads to
+    performance problems. Event stores data, and all polymorphism behaviour is
+    defined in EventLogic.
+    """
     weight = 10
 
     @property
@@ -67,7 +74,8 @@ class EventLogic(object):
         self.event.save()
         return self.event
 
-    # In some cases Event wants to delegate some decisions to EventLogic and
+    # EventLogic instances are only created when the Event is first created. In
+    # some cases Event wants to delegate some decisions to EventLogic and
     # subclasses, without creating an EventLogic instance. We use the following
     # classmethods:
 
@@ -78,6 +86,10 @@ class EventLogic(object):
     @classmethod
     def accepts_comments(cls, event):
         return True
+
+    @classmethod
+    def get_group(cls, event):
+        return None
 
 
 class GeneralEvent(EventLogic):
@@ -157,7 +169,14 @@ class VersesStartedMilestoneEvent(EventLogic):
             )
 
 
-class GroupJoinedEvent(EventLogic):
+class GroupRelatedMixin(object):
+    # Subclasses must store 'group_id' in event.event_data
+    @classmethod
+    def get_group(cls, event):
+        return Group.objects.get(id=event.event_data['group_id'])
+
+
+class GroupJoinedEvent(GroupRelatedMixin, EventLogic):
 
     weight = 11
 
@@ -170,7 +189,7 @@ class GroupJoinedEvent(EventLogic):
             )
 
 
-class GroupCreatedEvent(EventLogic):
+class GroupCreatedEvent(GroupRelatedMixin, EventLogic):
 
     def __init__(self, account=None, group=None):
         super(GroupCreatedEvent, self).__init__(account=account,
@@ -359,6 +378,9 @@ class Event(models.Model):
 
     @cached_property
     def event_logic(self):
+        """
+        Returns the EventLogic subclass for this event.
+        """
         return EventType.classes[self.event_type]
 
     def get_absolute_url(self):
@@ -366,6 +388,15 @@ class Event(models.Model):
 
     def accepts_comments(self):
         return self.event_logic.accepts_comments(self)
+
+    def add_comment(self, author=None, message=None):
+        assert self.accepts_comments()
+        return self.comments.create(author=author,
+                                    message=message,
+                                    group=self.get_group())
+
+    def get_group(self):
+        return self.event_logic.get_group(self)
 
 
 import events.hooks

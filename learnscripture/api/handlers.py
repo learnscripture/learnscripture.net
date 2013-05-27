@@ -425,8 +425,8 @@ class AddComment(BaseHandler):
         if message == '':
             return validation_error_response({'message': 'You must enter a message'})
 
-        c = e.comments.create(author=request.identity.account,
-                              message=message)
+        c = e.add_comment(author=request.identity.account,
+                          message=message)
         return c
 
 
