@@ -12,7 +12,7 @@
 {{ group.description|restructuredtext }}
 {% endif %}
 
-<h2>Recent comments</h2>
+<h2>Recent comments (<a href="{% url 'group_wall' group.slug %}">see all</a>)</h2>
 
 <div class="groupcomments" data-group-id="{{ group.id }}">
   <div class="commentblock">
@@ -115,6 +115,7 @@
   <li><a href="{% url 'edit_group' group.slug %}">Edit this group</a></li>
   {% endif %}
   <li><a class="iconafter-leaderboard" href="{% url 'leaderboard' %}?group={{ group.id }}">Leaderboard</a></li>
+  <li><a href="{% url 'group_wall' group.slug %}">Group wall</a></li>
 </ul>
 
 <h3>Group stats</h3>

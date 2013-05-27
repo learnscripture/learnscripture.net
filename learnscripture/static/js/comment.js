@@ -39,6 +39,8 @@ var learnscripture =
                     commentListDiv = groupDiv.find('.commentlist')
                 }
 
+                var addToTop = commentListDiv.data().addToTop;
+
                 $.ajax({url: '/api/learnscripture/v1/addcomment/?format=json',
                         dataType: 'json',
                         type: 'POST',
@@ -46,9 +48,12 @@ var learnscripture =
                         success: function (data) {
                             setTimeout(bindPostCommentClick, 500);
                             // data contains new comment to add.
-                            commentListDiv.append(
-                                $('#id-comment-template').render({'comment': data})
-                            );
+                            var newItem = $('#id-comment-template').render({'comment': data});
+                            if (addToTop) {
+                                commentListDiv.prepend(newItem);
+                            } else {
+                                commentListDiv.append(newItem);
+                            }
 
                             $('#id-comment-box').val('');
                             $('#id-add-comment').hide();

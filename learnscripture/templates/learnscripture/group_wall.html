@@ -1,0 +1,47 @@
+{% extends 'base_twocol.html' %}
+
+{% load pagination_tags %}
+
+{% block leftcolumn %}
+
+{% autopaginate comments 40 %}
+
+<h2>Comments</h2>
+
+<p class="note">Newest comments first</p>
+
+<div class="groupcomments" data-group-id="{{ group.id }}">
+  <div class="commentblock">
+    {% if request.page == '' or request.page == 1 %}
+    <div class="commentboxlocator">
+      <a href="#" class="show-add-comment">Add comment to group wall</a>
+    </div>
+    {% endif %}
+    <div class="commentlist" data-add-to-top="true">
+      {% for comment in comments %}
+      {% with show_as_related_comment=comment.event %}
+      {% include "learnscripture/comment_inc.html" %}
+      {% endwith %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+
+{% paginate %}
+
+{% include "learnscripture/comment_common_inc.html" %}
+
+
+{% endblock %}
+
+
+{% block rightcolumn %}
+<h3>See also:</h3>
+<ul>
+  <li><a href="{% url 'groups' %}">All groups</a></li>
+  <li><a href="{% url 'group' group.slug %}">Group information</a></li>
+  <li><a class="iconafter-leaderboard" href="{% url 'leaderboard' %}?group={{ group.id }}">Leaderboard</a></li>
+</ul>
+
+{% endblock %}
