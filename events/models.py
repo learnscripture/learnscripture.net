@@ -295,7 +295,11 @@ class EventManager(models.Manager):
         events = list(events)
         events = list(dedupe_iterable(events, lambda e:(e.account_id, e.message_html)))
 
-        friendship_weights = account.get_friendship_weights()
+        if account is not None:
+            friendship_weights = account.get_friendship_weights()
+        else:
+            friendship_weights = None
+
         events.sort(key=lambda e: e.get_rank(viewer=account,
                                              friendship_weights=friendship_weights,
                                              now=now),
