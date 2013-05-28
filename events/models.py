@@ -28,7 +28,7 @@ EVENTSTREAM_TIME_DECAY_FACTOR = 3600*24*HALF_LIFE_DAYS
 
 # Events have an affinity of 1.0 normally, and this can be boosted by the amount
 # below for a maximum friendship level
-EVENTSTREAM_MAX_EXTRA_AFFINITY_FOR_FRIEND = 1.0
+EVENTSTREAM_MAX_EXTRA_AFFINITY_FOR_FRIEND = 2.0
 
 # With EVENTSTREAM_CUTOFF_DAYS = 3, and HALF_LIFE_DAYS=0.5 there is a factor of
 # 64 (6 half lives) to play with: if an event has a weight more than 64 times
