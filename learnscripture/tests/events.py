@@ -4,7 +4,7 @@ from autofixture import AutoFixture
 from django.test import TestCase
 from django.utils import timezone
 
-from events.models import Event, EventType, NewCommentEvent, GroupJoinedEvent
+from events.models import Event, EventType, NewCommentEvent, GroupJoinedEvent, PointsMilestoneEvent
 from comments.models import Comment
 from accounts.models import Account
 from groups.models import Group
@@ -19,12 +19,9 @@ class EventTests(AccountTestMixin, TestCase):
                                                 email="author@x.com")
         _, author_account2 = self.create_account(username="author2",
                                                  email="author2@x.com")
-        orig_event = (AutoFixture(Event,
-                                  field_values={'event_data': {},
-                                                'account': event_account,
-                                                })
-                      .create(1)[0])
-        # This should create a NewCommentEvent automatically
+        orig_event = PointsMilestoneEvent(account=event_account, points=1000).save()
+
+        # This should create a NewCommentEvent automatically:
         comment = Comment.objects.create(
             author=author_account,
             event=orig_event,
