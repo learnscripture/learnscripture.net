@@ -316,7 +316,11 @@ class EventManager(models.Manager):
                                              now=now),
                     reverse=True)
 
-        return events[:EVENTSTREAM_CUTOFF_NUMBER]
+        # Limit
+        events = events[:EVENTSTREAM_CUTOFF_NUMBER]
+        # Now sort by time
+        events.sort(key=lambda e: e.created, reverse=True)
+        return events
 
     def for_activity_stream(self, viewer=None, event_by=None):
         qs = (Event.objects
