@@ -326,6 +326,8 @@ def count_words(text):
 
 
 def normlise_weighting(weights):
+    if not weights:
+        return
     max_weight = max(weights.values())
     for k, v in weights.items():
         weights[k] = v/max_weight
@@ -354,20 +356,19 @@ def account_get_friendship_weights(account_id):
     except KeyError:
         pass
 
-    if len(weights) > 0:
-        # Normalise to 1
-        normlise_weighting(weights)
+    # Normalise to 1
+    normlise_weighting(weights)
 
     # We use following as definite friendships. Following is the worth more than
     # any evidence from groups.
     for acc in account.following.all():
         weights[acc.id] += 1.5
 
-    # Give some weight to self
-    weights[account_id] = 0.5
-
     # Normalise again
     normlise_weighting(weights)
+
+    # Give some weight to self
+    weights[account_id] = 0.3
 
     return weights
 
