@@ -71,9 +71,9 @@ class EventLogic(object):
 
     def save(self):
         self.event.event_data = self.event_data
+        self.event.save()
         # Force population of Event.url, to avoid doing it later.
         self.event.get_absolute_url()
-        self.event.save()
         return self.event
 
     # EventLogic instances are only created when the Event is first created. In
