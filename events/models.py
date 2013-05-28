@@ -71,6 +71,8 @@ class EventLogic(object):
 
     def save(self):
         self.event.event_data = self.event_data
+        # Force population of Event.url, to avoid doing it later.
+        self.event.get_absolute_url()
         self.event.save()
         return self.event
 
@@ -344,6 +346,9 @@ class Event(models.Model):
     # attached to).
     parent_event = models.ForeignKey('self', null=True, blank=True)
 
+    # Denormalised value
+    url = models.CharField(max_length=255, blank=True)
+
     objects = EventManager()
 
     def __repr__(self):
@@ -417,7 +422,12 @@ class Event(models.Model):
         return EventType.classes[self.event_type]
 
     def get_absolute_url(self):
-        return self.event_logic.get_absolute_url(self)
+        if not self.url:
+            url = self.event_logic.get_absolute_url(self)
+            self.url = url
+            if self.id is not None:
+                Event.objects.filter(id=self.id).update(url=url)
+        return self.url
 
     def accepts_comments(self):
         return self.event_logic.accepts_comments(self)
