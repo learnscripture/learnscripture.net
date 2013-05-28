@@ -312,14 +312,14 @@ class AccountTests(AccountTestMixin, TestCase):
         group.add_user(account2)
 
         self.assertEqual(account1.get_friendship_weights(),
-                         {account1.id: 0.5,  # defined this way
+                         {account1.id: 0.3,  # defined this way
                           account2.id: 1.0,  # max
                           # account3.id should be missing
                           })
 
 
         self.assertEqual(account3.get_friendship_weights(),
-                         {account3.id: 0.5})
+                         {account3.id: 0.3})
 
         group2.add_user(account2)
         group2.add_user(account3)
