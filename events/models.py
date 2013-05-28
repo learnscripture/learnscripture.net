@@ -224,9 +224,15 @@ class NewCommentEvent(EventLogic):
 
     weight = 11
 
+    # weight for comments on group walls, where the user is a member
+    group_wall_weight = 20
+
     def __init__(self, account=None, comment=None, parent_event=None):
-        super(NewCommentEvent, self).__init__(account=account,
-                                              comment_id=comment.id)
+        kwargs = dict(account=account,
+                      comment_id=comment.id)
+        if comment.group_id is not None:
+            kwargs['group_id'] = comment.group_id
+        super(NewCommentEvent, self).__init__(**kwargs)
         self.event.message_html = format_html(
             u'posted a <a href="{0}">comment</a> on {1}',
             comment.get_absolute_url(),
@@ -297,11 +303,14 @@ class EventManager(models.Manager):
 
         if account is not None:
             friendship_weights = account.get_friendship_weights()
+            group_ids = [g.id for g in account.get_groups()]
         else:
             friendship_weights = None
+            group_ids = []
 
         events.sort(key=lambda e: e.get_rank(viewer=account,
                                              friendship_weights=friendship_weights,
+                                             group_ids=group_ids,
                                              now=now),
                     reverse=True)
 
@@ -343,7 +352,8 @@ class Event(models.Model):
     def __unicode__(self):
         return u"Event %d" % self.id
 
-    def get_rank(self, viewer=None, friendship_weights=None, now=None):
+    def get_rank(self, viewer=None, friendship_weights=None,
+                 group_ids=None, now=None):
         """
         Returns the overall weighting for this event, given the viewing account.
         """
@@ -353,6 +363,18 @@ class Event(models.Model):
             self.account_id == viewer.id):
             return 0
 
+        if group_ids is None:
+            group_ids = []
+
+        ## Weight
+        weight = self.weight
+
+        if self.event_type == EventType.NEW_COMMENT:
+            if self.event_data.get('group_id', None) in group_ids:
+                # This is a comment on a group wall that the user is in.
+                weight = self.event_logic.group_wall_weight
+
+        ## Affinity
         if viewer is not None and friendship_weights is None:
             friendship_weights = viewer.get_friendship_weights()
 
@@ -360,13 +382,17 @@ class Event(models.Model):
         if friendship_weights is not None:
             affinity += friendship_weights.get(self.account_id, 0) * EVENTSTREAM_MAX_EXTRA_AFFINITY_FOR_FRIEND
 
+
+        ## Recency
         if now is None:
             now = timezone.now()
 
         seconds = (now - self.created).total_seconds()
 
         recency = 2 ** (-seconds/EVENTSTREAM_TIME_DECAY_FACTOR)
-        return self.weight * recency * affinity
+
+
+        return weight * recency * affinity
 
     def created_display(self):
         from django.utils.timesince import timesince
