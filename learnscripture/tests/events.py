@@ -17,6 +17,8 @@ class EventTests(AccountTestMixin, TestCase):
         _, event_account = self.create_account()
         _, author_account = self.create_account(username="author",
                                                 email="author@x.com")
+        _, author_account2 = self.create_account(username="author2",
+                                                 email="author2@x.com")
         orig_event = (AutoFixture(Event,
                                   field_values={'event_data': {},
                                                 'account': event_account,
@@ -33,10 +35,56 @@ class EventTests(AccountTestMixin, TestCase):
                          '/activity/%s/#comment-%s' % (orig_event.id,
                                                        comment.id))
 
-        # There should also be a notification
-        self.assertEqual(len([n for n in event_account.identity.notices.all()
+        self.assertFalse(event.accepts_comments())
+
+        def assert_originator_notification(account, count):
+            self.assertEqual(len([n for n in account.identity.notices.all()
                               if "You have new" in n.message_html]),
-                         1)
+                             count)
+        def assert_contributor_notification(account, count):
+            self.assertEqual(len([n for n in account.identity.notices.all()
+                              if "There are" in n.message_html]),
+                             count)
+
+        # There should also be a notification
+        assert_originator_notification(event_account, 1)
+        # But not to author
+        assert_originator_notification(author_account, 0)
+        assert_contributor_notification(author_account, 0)
+
+        # Reply from event_account
+        comment = Comment.objects.create(
+            author=event_account,
+            event=orig_event,
+            message="Thanks!"
+            )
+
+
+        # We should not have duplicated notifications for event_account
+        assert_originator_notification(event_account, 1)
+        assert_contributor_notification(event_account, 0)
+
+        assert_originator_notification(author_account, 0)
+        assert_contributor_notification(author_account, 1)
+
+        # Clear
+        event_account.identity.notices.all().delete()
+        author_account.identity.notices.all().delete()
+
+        # Comment from someone else should generate a notification
+        # to all contributors
+        comment = Comment.objects.create(
+            author=author_account2,
+            event=orig_event,
+            message="another hello"
+            )
+
+        assert_originator_notification(event_account, 1)
+        assert_contributor_notification(event_account, 0)
+
+        assert_originator_notification(author_account, 0)
+        assert_contributor_notification(author_account, 1)
+
 
     def test_dashboard_stream(self):
         _, account1 = self.create_account(username="1")
