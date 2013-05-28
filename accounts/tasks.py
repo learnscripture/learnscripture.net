@@ -12,9 +12,15 @@ def notify_account_about_comment(comment_id):
         return
 
     # Notify the account that generated the event
-    account = event.account
+    notify_about_comment(event, comment, event.account)
+    # Notify contributors
+    for c in event.comments.all():
+        notify_about_comment(event, comment, c.author)
 
-    # But not if it is the author:
+
+def notify_about_comment(event, comment, account):
+
+    # Don't notify comment author about own comment
     if account == comment.author:
         return
 
@@ -28,12 +34,18 @@ def notify_account_about_comment(comment_id):
         ).exists():
         return
 
-    msg = format_html('You have new comments on <b><a href="{0}">your event</a></b> "{1}"',
-                      event.get_absolute_url(),
-                      event.render_html()
-                      )
+    if account == event.account:
+        msg = format_html('You have new comments on <b><a href="{0}">your event</a></b> "{1}"',
+                          event.get_absolute_url(),
+                          event.render_html()
+                          )
+    else:
+        msg = format_html('There are <b><a href="{0}">new comments</a></b> on the event "{1}"',
+                          event.get_absolute_url(),
+                          event.render_html()
+                          )
+
 
     notice = account.add_html_notice(msg)
     notice.related_event = event
     notice.save()
-
