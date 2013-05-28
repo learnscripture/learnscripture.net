@@ -313,7 +313,8 @@ class EventManager(models.Manager):
               .select_related('account')
               )
         if event_by is None:
-            qs = qs.exclude(event_type=EventType.NEW_COMMENT)
+            qs = qs.exclude(event_type=EventType.NEW_COMMENT,
+                            parent_event__isnull=False)
         if viewer is None or not viewer.is_hellbanned:
             qs = qs.exclude(account__is_hellbanned=True)
         if event_by is not None:
