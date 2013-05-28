@@ -18,6 +18,8 @@ def format_comment_message(message):
 
 class Comment(models.Model):
     author = models.ForeignKey(Account, related_name='comments')
+    # NB - this is the event the comment is attached to, if any,
+    # not the 'NEW_COMMENT' event which is generated *about* this comment
     event = models.ForeignKey(Event, related_name='comments',
                               null=True, blank=True)
     group = models.ForeignKey(Group, null=True, blank=True,
