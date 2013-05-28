@@ -325,6 +325,12 @@ def count_words(text):
     return len(text.strip().split())
 
 
+def normlise_weighting(weights):
+    max_weight = max(weights.values())
+    for k, v in weights.items():
+        weights[k] = v/max_weight
+
+
 @cache_results(seconds=1200)
 def account_get_friendship_weights(account_id):
     # We use groups to define possible friendships.
@@ -350,9 +356,7 @@ def account_get_friendship_weights(account_id):
 
     if len(weights) > 0:
         # Normalise to 1
-        max_weight = max(weights.values())
-        for k, v in weights.items():
-            weights[k] = v/max_weight
+        normlise_weighting(weights)
 
     # We use following as definite friendships. Following is the worth more than
     # any evidence from groups.
@@ -361,6 +365,9 @@ def account_get_friendship_weights(account_id):
 
     # Give some weight to self
     weights[account_id] = 0.5
+
+    # Normalise again
+    normlise_weighting(weights)
 
     return weights
 
