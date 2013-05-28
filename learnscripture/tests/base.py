@@ -178,13 +178,15 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
 
     def login(self, account):
         driver = self.driver
-        self.get_url('dashboard')
-        self.click("#id-session-menu")
-        driver.find_element_by_link_text("Sign in").click()
-        self.fill_in_login_form(account)
-        self.wait_until_loaded('.logout-link')
-        elem = self.find("#id-session-menu")
-        self.assertEqual(elem.text, account.username)
+        from django.contrib.sessions.backends.db import SessionStore
+        from django.conf import settings
+        s = SessionStore()
+        s.create()
+        s['identity_id'] = account.identity.id
+        s.save()
+        driver.get(self.live_server_url) # needed to be able to set cookie
+        driver.add_cookie({'name':settings.SESSION_COOKIE_NAME,
+                           'value': s.session_key})
 
     def fill_in_login_form(self, account):
         driver = self.driver
