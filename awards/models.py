@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils import timezone
@@ -487,7 +489,7 @@ class ConsistentLearnerAward(TimeBasedAward):
 
 
 AwardType = make_class_enum(
-    'AwardType',
+    b'AwardType',
     [(0, 'STUDENT', u'Student', StudentAward),
      (1, 'MASTER', u'Master', MasterAward),
      (2, 'SHARER', u'Sharer', SharerAward),

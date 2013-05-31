@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from datetime import timedelta
 import itertools
 import math
@@ -255,7 +257,7 @@ class NewCommentEvent(EventLogic):
 
 
 EventType = make_class_enum(
-    'EventType',
+    b'EventType',
     [(1, 'GENERAL', 'General', GeneralEvent), # No longer used
      (2, 'NEW_ACCOUNT', 'New account', NewAccountEvent),
      (3, 'AWARD_RECEIVED', 'Award received', AwardReceivedEvent),
