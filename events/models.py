@@ -328,6 +328,7 @@ class EventManager(models.Manager):
         qs = (Event.objects
               .order_by('-created')
               .select_related('account')
+              .exclude(account__is_active=False)
               )
         if event_by is None:
             qs = qs.exclude(event_type=EventType.NEW_COMMENT,
