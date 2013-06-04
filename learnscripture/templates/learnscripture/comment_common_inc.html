@@ -29,6 +29,10 @@
       <textarea id="id-comment-box" rows="1"></textarea>
     </div>
   </div>
+  <div class="warning-note">
+    This message will be public. Please do not include any sensitive information, like
+    your address, in this message.
+  </div>
   {% else %}
   <div>You must be <a href='{% url "login" %}?next={{ request.get_full_path|urlencode }}'>signed in</a> to add comments.</div>
   {% endif %}
