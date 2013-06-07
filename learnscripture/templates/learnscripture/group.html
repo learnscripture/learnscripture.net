@@ -110,12 +110,12 @@
 {% block rightcolumn %}
 <h3>See also:</h3>
 <ul>
-  <li><a href="{% url 'groups' %}">All groups</a></li>
+  <li><a class="iconafter-comment" href="{% url 'group_wall' group.slug %}">Group wall</a></li>
+  <li><a class="iconafter-leaderboard" href="{% url 'leaderboard' %}?group={{ group.id }}">Leaderboard</a></li>
   {% if can_edit %}
   <li><a href="{% url 'edit_group' group.slug %}">Edit this group</a></li>
   {% endif %}
-  <li><a class="iconafter-leaderboard" href="{% url 'leaderboard' %}?group={{ group.id }}">Leaderboard</a></li>
-  <li><a href="{% url 'group_wall' group.slug %}">Group wall</a></li>
+  <li><a href="{% url 'groups' %}">Other groups</a></li>
 </ul>
 
 <h3>Group stats</h3>
