@@ -28,9 +28,11 @@
         {% include "learnscripture/comment_inc.html" %}
         {% endfor %}
       </div>
+      {% if request_account.enable_commenting or not request_account %}
       <div class="commentboxlocator">
         <a href="#" class="show-add-comment">Add comment</a>
       </div>
+      {% endif %}
     </div>
   </div>
   {% endifchanged %}

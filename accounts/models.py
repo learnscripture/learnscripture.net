@@ -81,6 +81,7 @@ class Account(AbstractBaseUser):
     is_under_13 = models.BooleanField("Under 13 years old",
         default=False, blank=True)
     is_active = models.BooleanField(default=True)
+    enable_commenting = models.BooleanField(default=True, blank=True)
 
     # A hellbanned user is barred from interaction with other users, and any
     # visibility by other users, but they not aware of that. They see an

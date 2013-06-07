@@ -414,6 +414,9 @@ class AddComment(BaseHandler):
     def create(self, request):
         account = request.identity.account
 
+        if not account.enable_commenting:
+            return {}
+
         message = request.POST.get('message', '').strip()
         if message == '':
             return validation_error_response({'message': 'You must enter a message'})

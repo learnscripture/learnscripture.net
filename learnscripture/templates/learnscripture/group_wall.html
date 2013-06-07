@@ -13,9 +13,11 @@
 <div class="groupcomments" data-group-id="{{ group.id }}">
   <div class="commentblock">
     {% if request.page == '' or request.page == 1 %}
+    {% if request_account.enable_commenting or not request_account %}
     <div class="commentboxlocator">
       <a href="#" class="show-add-comment">Add comment to group wall</a>
     </div>
+    {% endif %}
     {% endif %}
     <div class="commentlist" data-add-to-top="true">
       {% for comment in comments %}

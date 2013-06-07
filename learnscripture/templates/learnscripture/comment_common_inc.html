@@ -17,6 +17,7 @@
 
 <div id="id-add-comment" class="hide">
   {% if request_account %}
+  {% if request_account.enable_commenting %}
   <div>
     <div>
       <a href="#" class="btn primary" id="id-add-comment-btn">
@@ -33,6 +34,7 @@
     This message will be public. Please do not include any sensitive information, like
     your address, in this message.
   </div>
+  {% endif %}
   {% else %}
   <div>You must be <a href='{% url "login" %}?next={{ request.get_full_path|urlencode }}'>signed in</a> to add comments.</div>
   {% endif %}
