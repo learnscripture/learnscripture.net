@@ -108,6 +108,7 @@ class Account(AbstractBaseUser):
     # Following:
     following = models.ManyToManyField('self',
                                        symmetrical=False,
+                                       blank=True,
                                        related_name='followers')
 
     # Managers and meta
