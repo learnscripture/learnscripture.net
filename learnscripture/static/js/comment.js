@@ -5,9 +5,9 @@ var learnscripture =
 
         var setupCommentControls = function () {
             var showAddComment = function(div) {
-                var commentBlock = div.find('.commentblock').show('fast');
+                var commentBlock = div.find('.commentblock').show();
                 var locator = commentBlock.find('.commentboxlocator');
-                $('#id-add-comment').appendTo(locator).show('fast');
+                $('#id-add-comment').appendTo(locator).show();
                 $('#id-comment-box').focus();
             }
 
