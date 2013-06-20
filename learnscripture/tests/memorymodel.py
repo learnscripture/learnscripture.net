@@ -8,9 +8,7 @@ class StrengthEstimate(unittest.TestCase):
 
     def test_strength_estimate_repeat(self):
         # If we test N times after interval I at a certain score, it should
-        # return the same as if we test at the end of a single N*I interval - at
-        # least for the case where the test score = 100%, which should keep us
-        # to the ideal curve
+        # return less than if we test at the end of a single N*I interval
 
         def repeat(func, init, times):
             val = init
@@ -26,7 +24,7 @@ class StrengthEstimate(unittest.TestCase):
         after_seven_daily_tests = repeat(lambda val: strength_estimate(val, score, one_day),
                                          init, 7)
 
-        self.assertTrue(abs(after_seven_daily_tests - after_one_week) < 0.00001)
+        self.assertTrue(abs(after_seven_daily_tests - after_one_week) > 0.0001)
 
 
     def test_strength_estimate_null_previous(self):
