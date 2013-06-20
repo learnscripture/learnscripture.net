@@ -131,49 +131,12 @@ class MemoryModel(object):
         if old_strength == 1.0:
             return self.BEST_STRENGTH
 
+        # Otherwise, we move them a proportion of the way to the next point on
+        # the curve, i.e. one jump of DELTA_S_IDEAL, ignoring how long it was
+        # since they actually last took a test. This means that the total number
+        # of tests doesn't go down if they use the site infrequently.
 
-        # Otherwise, we do not allow the strength to increase more than
-        # our formula allows. Another way of interpreting the following
-        # calculation is that a test after a long gap is better evidence
-        # of it having gone into memory than a test after a short gap.
-
-        s1 = old_strength
-        delta_t = time_elapsed
-
-        # We assume old strength was according to our formula
-        t1 = self.t(s1)
-
-        t2 = t1 + time_elapsed
-
-        # If they got 100% in test, we would have this value of s:
-        s2 = self.s(t2)
-
-        # Giving:
-        delta_s_max = s2 - s1
-
-        # However, we have to adjust for the fact that test_strength may be < 1
-        #
-        # Long term, if test_strength hits a ceiling, then s should tend to
-        # test_strength, and not to 1. This implies:
-        #
-        #   delta_s_actual == 0 for test_strength == old_strength
-        #
-        # We also need to fit:
-        #
-        #   delta_s_actual == delta_s_max for test_strength == 1.
-        #
-        # Linear interpolation between these two constraints gives:
-
-        delta_s_actual = delta_s_max * (test_strength - old_strength) / (1.0 - old_strength)
-
-        # If someone had a large gap from using the system, but still got good
-        # scores, we don't want to progress them all the way to 'learnt'. So we
-        # limit the amount of progress that can be done in one jump to 3 *
-        # DELTA_S_IDEAL. This also has the benefit of slowing down progress
-        # during the few days (where the delta S for one day is greater than 3 *
-        # DELTA_S_IDEAL), so they will see the verse more in that week.
-
-        delta_s_actual = min(self.DELTA_S_IDEAL * 3, delta_s_actual)
+        delta_s_actual = test_strength * self.DELTA_S_IDEAL
 
         new_strength = old_strength + delta_s_actual
 
@@ -215,18 +178,20 @@ class MemoryModel(object):
 # test_run and test_run_using_next_test_due should be essentially identical.
 
 
-def test_run(exponent, accuracy):
+def test_run(exponent, accuracy, interval_gap=1):
     m = MemoryModel(exponent)
     interval = 0
     x = None
     day = 24*3600
     test = 0
-    for i in range(0, 10*365):
-        interval += 1
+    days_total = 0
+    while days_total < 100 * 365:
+        interval += interval_gap
+        days_total += interval_gap
         if m.needs_testing(x, day * interval):
             x = m.strength_estimate(x, accuracy, interval * day)
             test += 1
-            print "Day %d, test %d, interval %d, strength %s" % (i, test, interval, x)
+            print "Day %d, test %d, interval %d, strength %s" % (math.floor(days_total), test, interval, x)
             interval = 0
 
 def test_run_using_next_test_due(exponent, accuracy):
