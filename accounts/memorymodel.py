@@ -185,7 +185,7 @@ def test_run(exponent, accuracy, interval_gap=1):
     day = 24*3600
     test = 0
     days_total = 0
-    while days_total < 100 * 365:
+    while days_total < 10 * 365:
         interval += interval_gap
         days_total += interval_gap
         if m.needs_testing(x, day * interval):
@@ -194,7 +194,7 @@ def test_run(exponent, accuracy, interval_gap=1):
             print "Day %d, test %d, interval %d, strength %s" % (math.floor(days_total), test, interval, x)
             interval = 0
 
-def test_run_using_next_test_due(exponent, accuracy):
+def test_run_using_next_test_due(exponent, accuracy, interval_gap=1):
     from datetime import datetime
     m = MemoryModel(exponent)
     interval = 0
@@ -203,9 +203,11 @@ def test_run_using_next_test_due(exponent, accuracy):
     last_test = None
     next_test = None
     test = 0
-    for i in range(0, 10*365):
-        current_time = start + timedelta(i)
-        interval += 1
+    days_total = 0
+    while days_total < 10 * 365:
+        current_time = start + timedelta(days=days_total)
+        interval += interval_gap
+        days_total += interval_gap
         if next_test is None or (current_time > next_test and s < m.LEARNT):
             if last_test is None:
                 time_elapsed = None
@@ -215,7 +217,7 @@ def test_run_using_next_test_due(exponent, accuracy):
             last_test = current_time
             next_test = m.next_test_due(last_test, s)
             test += 1
-            print "Day %d, test %d, interval %d, strength %s" % (i, test, interval, s)
+            print "Day %d, test %d, interval %d, strength %s" % (days_total, test, interval, s)
             interval = 0
 
 
