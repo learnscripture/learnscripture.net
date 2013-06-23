@@ -131,12 +131,40 @@ class MemoryModel(object):
         if old_strength == 1.0:
             return self.BEST_STRENGTH
 
-        # Otherwise, we move them a proportion of the way to the next point on
-        # the curve, i.e. one jump of DELTA_S_IDEAL, ignoring how long it was
-        # since they actually last took a test. This means that the total number
-        # of tests doesn't go down if they use the site infrequently.
+        # Otherwise, we do not allow the strength to increase more than
+        # our formula allows.
 
-        delta_s_actual = test_strength * self.DELTA_S_IDEAL
+        s1 = old_strength
+
+        # We assume old strength was according to our formula
+        t1 = self.t(s1)
+
+        t2 = t1 + time_elapsed
+
+        # If they got 100% in test, we would have this value of s:
+        s2 = self.s(t2)
+
+        # Giving:
+        delta_s_max = s2 - s1
+
+        # However, we have to adjust for the fact that test_strength may be < 1
+        #
+        # Long term, if test_strength hits a ceiling, then s should tend to
+        # test_strength, and not to 1. This implies:
+        #
+        #   delta_s_actual == 0 for test_strength == old_strength
+        #
+        # We also need to fit:
+        #
+        #   delta_s_actual == delta_s_max for test_strength == 1.
+        #
+        # Linear interpolation between these two constraints gives:
+
+        delta_s_actual = delta_s_max * (test_strength - old_strength) / (1.0 - old_strength)
+
+        # Limit jumps to approx DELTA_S_IDEAL to avoid people progressing
+        # too quickly if they are not doing tests.
+        delta_s_actual = min(self.DELTA_S_IDEAL * 1.1, delta_s_actual)
 
         new_strength = old_strength + delta_s_actual
 
