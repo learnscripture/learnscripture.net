@@ -53,7 +53,7 @@ class ScoreLog(models.Model):
 
     def __repr__(self):
         return "<ScoreLog account=%s points=%s reason=%s created=%s>" % (
-            self.account.email, self.points, self.get_reason_display(), self.created)
+            self.account.username, self.points, self.get_reason_display(), self.created)
 
 
 class TotalScore(models.Model):
