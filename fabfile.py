@@ -254,7 +254,6 @@ def push_sources():
     # This config is shared, and rarely updates, so we push to
     # PRODUCTION.
     run("mkdir -p %s/etc" % PRODUCTION.VENV_DIR)
-    upload_template("config/pgbouncer_users.txt", "%s/etc/pgbouncer_users.txt" % PRODUCTION.VENV_DIR, context=secrets())
 
 
 @task
