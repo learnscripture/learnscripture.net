@@ -79,11 +79,9 @@ Initial setup of the project was done using:
   - webserver apps (custom app listening on port)
   - rabbitmq apps (custom app listening on port)
   - celeryd apps (custom app listening on port)
-  - pgbouncer app (custom app listening on port)
   - supervisord app (custom app listening on port)
 
 - Some manual installation of software.
-  - pgbouncer
   - lessc binary, using node/npm
 
 - Some scripted installation of software, using fabric
