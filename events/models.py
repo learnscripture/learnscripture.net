@@ -448,5 +448,15 @@ class Event(models.Model):
     def get_group(self):
         return self.event_logic.get_group(self)
 
+    @property
+    def is_new_comment(self):
+        return self.event_type == EventType.NEW_COMMENT
+
+    def get_comment(self):
+        from comments.models import Comment
+        try:
+            return Comment.objects.get(id=int(self.event_data['comment_id']))
+        except (KeyError, Comment.DoesNotExist):
+            return None
 
 import events.hooks

@@ -22,6 +22,15 @@
     <span class="eventdetails">
       <h4>{{ event.render_html }}</h4>
     </span>
+    {% if event.is_new_comment %}
+    <div class="commentblock">
+      <div class="commentlist">
+        {% with comment=event.get_comment %}
+        {% include "learnscripture/comment_inc.html" %}
+        {% endwith %}
+      </div>
+    </div>
+    {% endif %}
     <div class="commentblock{% if not comments %} hide{% endif %}">
       <div class="commentlist">
         {% for comment in comments %}
