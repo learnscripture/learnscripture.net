@@ -44,12 +44,14 @@ only takes a few seconds. Otherwise your progress won't be saved permanently.
     <input type="submit" name="revisepassage" class="btn primary" value="Revise whole passage"
            id="id-revisepassage-btn-{{ vs.id }}" /><br/>
     <input type="submit" name="revisepassagenextsection" class="btn primary" value="Revise one section"
-           id="id-revisepassage-sections-btn-{{ vs.id }}" />
+           id="id-revisepassage-sections-btn-{{ vs.id }}" /><br/>
     {% else %}
     <input type="submit" name="revisepassage" class="btn primary" value="Revise"
-           id="id-revisepassage-btn-{{ vs.id }}" />
+           id="id-revisepassage-btn-{{ vs.id }}" /><br/>
 
     {% endif %}
+    <input type="submit" name="cancelpassage" class="btn" value="Cancel"
+           id="id-cancelpassage-btn-{{ vs.id }}" /><br/>
   </form>
   <h3>{{ vs.name }}</h3>
   <div>Part or all of this passage is due for revising today.</div>
