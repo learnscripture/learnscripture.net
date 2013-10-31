@@ -3,10 +3,12 @@ LS_MANAGE=/home/cciw/webapps/learnscripture_django/src/manage.py
 LS_STAGING_PYTHON=/home/cciw/webapps/learnscripture_staging_django/venv/bin/python
 LS_STAGING_MANAGE=/home/cciw/webapps/learnscripture_staging_django/src/manage.py
 LS_RESTORE=/home/cciw/webapps/learnscripture_django/src/scripts/check_and_restore.py
+LS_SUPERVISORCTL=/home/cciw/webapps/learnscripture_django/venv/bin/supervisorctl
 
 
 */10       *    * * * /home/cciw/webapps/learnscripture_django/venv/bin/start_supervisor.sh start > /dev/null 2>&1
-*/15       *    * * * $LS_PYTHON $LS_RESTORE production 1>> /home/cciw/.learnscripture_check_and_restore.log 2>&1
+#*/15       *    * * * $LS_PYTHON $LS_RESTORE production 1>> /home/cciw/.learnscripture_check_and_restore.log 2>&1
+*          *    * * * $LS_SUPERVISORCTL restart celeryd_production
 
 0          1,13 * * *  $LS_PYTHON $LS_MANAGE send_daily_account_emails
 0          2,14 * * *  $LS_PYTHON $LS_MANAGE metrics_aggregate
