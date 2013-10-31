@@ -9,7 +9,7 @@ defaults if you are happy with the default layout.
 
 import os
 import posixpath
-import simplejson
+import json
 
 from fabric.api import run, local, abort, env, put, settings, cd, task
 from fabric.decorators import runs_once
