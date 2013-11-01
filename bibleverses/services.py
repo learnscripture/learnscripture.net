@@ -32,17 +32,19 @@ def get_esv(reference_list):
     sections = {}
     current_section = None
     for line in text.split("\n"):
-        if line.strip() == "":
+        l2 = line.strip()
+        if l2 == "":
             continue
-        if line[0] != ' ' and line[0] != '[':
-            current_section = line.strip()
+        if line[0] != ' ' and l2 in reference_list:
+            current_section = l2
         else:
             assert current_section is not None
-            line = re.sub('\[[\d:]*\]', '', line).strip()
+            l2 = re.sub('\[[\d:]*\]', '', l2).strip()
             prev = sections[current_section] + '\n' if current_section in sections else ''
-            sections[current_section] = prev + line
+            sections[current_section] = prev + l2
 
     return sections
+
 
 def higlight_search_words(verse, words):
     text = verse.text
