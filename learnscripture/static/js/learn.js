@@ -461,6 +461,15 @@ var learnscripture =
             return '.stage-' + stageName;
         }
 
+        var forceRedrawBottomControls = function () {
+            // This hack is needed for Chrome 30, possibly others
+            var n = $('#id-bottom-controls').get(0);
+            n.style.webkitTransform = '';
+            window.setTimeout(function () {
+            n.style.webkitTransform = 'scale(1)';
+            }, 0);
+        }
+
         var showStageControls = function (stageName) {
             var stageSelector = getStageSelector(stageName);
             // Hide everything that is stage specific, except stuff for this
@@ -468,7 +477,8 @@ var learnscripture =
             $('.stage-specific:not(' + stageSelector + ')').hide()
             $(stageSelector).show();
             // Once we've set things up, show the container.
-            $('#id-bottom-controls .buttonbar').show()
+            $('#id-bottom-controls .buttonbar').show();
+            forceRedrawBottomControls();
         }
 
         var showTestFinishedControls = function () {
@@ -478,6 +488,7 @@ var learnscripture =
             var stageSelector = getStageSelector('test-finished');
             $('#id-bottom-controls .stage-specific:not(' + stageSelector + ')').hide();
             $('#id-bottom-controls ' + stageSelector).show();
+            forceRedrawBottomControls();
         };
 
         var setupStage = function (idx) {
