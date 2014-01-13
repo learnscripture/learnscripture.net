@@ -217,7 +217,7 @@ def push_rev(rev):
 
 def secrets():
     thisdir = os.path.dirname(os.path.abspath(__file__))
-    return simplejson.load(open(os.path.join(thisdir, "config", "secrets.json")))
+    return json.load(open(os.path.join(thisdir, "config", "secrets.json")))
 
 
 @task
