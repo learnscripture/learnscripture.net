@@ -235,7 +235,6 @@ INSTALLED_APPS = [
     'spurl',
     'paypal.standard.ipn',
     'campaign',
-    'djcelery',
     'app_metrics',
     'selectable',
     'rstify',

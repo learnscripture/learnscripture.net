@@ -19,8 +19,7 @@ pytz
 docutils
 -e git+git://github.com/spookylukey/django-campaign.git@e07ff64afbb35d86494779ad5143875dd13f43b3#egg=django-campaign
 supervisor
-Celery
-django-celery
+celery==3.1.7
 -e git+https://github.com/spookylukey/django-app-metrics.git@896c58208da1057eebd0a6b1ea781152a8ad06c2#egg=django-app-metrics
 django-jsonfield==0.8.5
 sqlalchemy==0.7.7
