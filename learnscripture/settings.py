@@ -238,6 +238,7 @@ INSTALLED_APPS = [
     'app_metrics',
     'selectable',
     'rstify',
+    'kombu.transport.django',
 ]
 
 ALLOWED_HOSTS = [".learnscripture.net"]
@@ -375,28 +376,9 @@ RAVEN_CONFIG = {
     'dsn': SENTRY_DSN,
 }
 
-### Celery and RabbitMQ ###
+### Celery ###
 
-import djcelery
-djcelery.setup_loader()
-
-if LIVEBOX:
-    if PRODUCTION:
-        rabbitmq_user = "learnscripture"
-        rabbitmq_pass = secrets["PRODUCTION_RABBITMQ_PASSWORD"]
-        rabbitmq_port = 32048 # see also rabbitmq-env
-    if STAGING:
-        rabbitmq_user = "learnscripture_staging"
-        rabbitmq_pass = secrets["STAGING_RABBITMQ_PASSWORD"]
-        rabbitmq_port = 47292
-
-if DEVBOX:
-    rabbitmq_user = "learnscripture"
-    rabbitmq_pass = "foo"
-    rabbitmq_port = 32048
-rabbitmq_vhost = rabbitmq_user
-
-BROKER_URL = "amqp://%s:%s@localhost:%s/%s" % (rabbitmq_user, rabbitmq_pass, rabbitmq_port, rabbitmq_vhost)
+BROKER_URL = 'django://'
 
 if TESTING or DEVBOX:
     CELERY_ALWAYS_EAGER = True
