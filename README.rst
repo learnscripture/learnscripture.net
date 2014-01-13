@@ -77,15 +77,11 @@ Initial setup of the project was done using:
 
 - WebFaction control panel to create apps
   - webserver apps (custom app listening on port)
-  - rabbitmq apps (custom app listening on port)
   - celeryd apps (custom app listening on port)
   - supervisord app (custom app listening on port)
 
 - Some manual installation of software.
   - lessc binary, using node/npm
-
-- Some scripted installation of software, using fabric
-  - rabbitmq
 
 Due to shared hosting with no root access, custom installation was often
 necessary, and chef/puppet would probably not provide easy shortcuts.
