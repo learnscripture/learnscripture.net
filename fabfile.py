@@ -35,10 +35,6 @@ PYTHON_BIN = "python2.7"
 PYTHON_PREFIX = "" # e.g. /usr/local  Use "" for automatic
 PYTHON_FULL_PATH = "%s/bin/%s" % (PYTHON_PREFIX, PYTHON_BIN) if PYTHON_PREFIX else PYTHON_BIN
 
-RABBITMQ_SRC = "http://www.rabbitmq.com/releases/rabbitmq-server/v2.8.1/rabbitmq-server-generic-unix-2.8.1.tar.gz"
-RABBITMQ_DIR = "rabbitmq_server-2.8.1"
-ERLANG_SRC = "http://www.erlang.org/download/otp_src_R15B01.tar.gz"
-
 
 class Target(object):
     def __init__(self, **kwargs):
@@ -79,92 +75,6 @@ def production():
 def staging():
     global target
     target = STAGING
-
-
-def _download(src):
-    run("wget --progress=dot -c %s" % src)
-
-
-def _tarball_stem_name(fname):
-    for s in ('.tar', '.bz2', '.gz', '.tgz'):
-        fname = fname.replace(s, '')
-    return fname
-
-
-def _download_and_unpack(tarball_src):
-    """
-    Downloads and unpacks a tarball, and returns the directory name it was
-    unpacked into.
-    """
-    _download(tarball_src)
-    fname = tarball_src.split('/')[-1]
-    run("tar -xzf %s" % fname)
-    # Big assumption here, but holds for all our sources:
-    dirname = _tarball_stem_name(fname)
-    return dirname
-
-
-@task
-def install_erlang():
-    # install into $HOME/.local, since we only need it once.
-    with cd('/home/%s/tmpstore/build' % USER):
-        dirname = _download_and_unpack(ERLANG_SRC)
-        with cd(dirname):
-            run("./configure --prefix=/home/%s/.local"
-                "&& make"
-                "&& make install" % USER)
-
-
-@task
-def full_rabbitmq_setup():
-    install_rabbitmq()
-    setup_rabbitmq_conf()
-    supervisorctl("restart rabbitmq_%s" % target.NAME.lower())
-    setup_rabbitmq_users()
-
-@task
-def install_rabbitmq():
-    # install into venv dir, different instance for STAGING and PRODUCTION
-    rabbitmq_base = "%s/lib/" % target.VENV_DIR
-    with cd(rabbitmq_base):
-        _download_and_unpack(RABBITMQ_SRC)
-
-@task
-def setup_rabbitmq_conf():
-    rabbitmq_full = "%s/lib/%s" % (target.VENV_DIR, RABBITMQ_DIR)
-    # Need to fix as per these instructions:
-    # http://community.webfaction.com/questions/2366/can-i-use-rabbit-mq-on-the-shared-servers
-    local("rsync config/erl_inetrc %s:/home/%s/.erl_inetrc" % (HOST, USER))
-    run("mkdir -p /home/%s/.local/etc" % USER)
-    local("rsync config/hosts %s:/home/%s/.local/etc/" % (HOST, USER))
-
-    # Custom rabbitmq-env file
-    local("rsync config/%s/rabbitmq-env %s:%s/sbin" % (target.NAME.lower(), HOST, rabbitmq_full))
-
-
-@task
-def setup_rabbitmq_users():
-    rabbitmq_full = "%s/lib/%s" % (target.VENV_DIR, RABBITMQ_DIR)
-
-    rabbitmq_user = target.APP_BASE_NAME
-    rabbitmq_vhost = rabbitmq_user
-    run("%s/sbin/rabbitmqctl add_user %s %s" % (
-            rabbitmq_full,
-            rabbitmq_user,
-            secrets()["%s_RABBITMQ_PASSWORD" % target.NAME]
-            )
-        )
-    run("%s/sbin/rabbitmqctl add_vhost %s" % (
-            rabbitmq_full,
-            rabbitmq_vhost,
-            )
-        )
-    run("%s/sbin/rabbitmqctl set_permissions -p %s %s '.*' '.*' '.*'" % (
-            rabbitmq_full,
-            rabbitmq_vhost,
-            rabbitmq_user,
-            )
-        )
 
 
 def virtualenv(venv_dir):
