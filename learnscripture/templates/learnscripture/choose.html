@@ -4,7 +4,7 @@
 {% load pagination_tags %}
 {% load bootstrap %}
 {% load spurl %}
-{% load markup %}
+{% load markup_tags %}
 
 {% block content %}
 
@@ -69,7 +69,7 @@
       </form>
       <h3><a href="{{ vs.get_absolute_url }}">{{ vs.name }}</a></h3>
       {% if vs.description %}
-      <p>{{ vs.description|restructuredtext }}</p>
+      <p>{{ vs.description|apply_markup:"restructuredtext" }}</p>
       {% endif %}
       {% if not vs.is_passage and vs.verse_choices.all %}
       <p>Includes the following verses, {{ vs.verse_choices.all|length }} in total:<br/>

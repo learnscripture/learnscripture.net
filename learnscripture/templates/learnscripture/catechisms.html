@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% load url from future %}
-{% load markup %}
+{% load markup_tags %}
 
 {% block content %}
 
@@ -27,7 +27,7 @@ would like added, please <a href="{% url 'contact' %}">contact us</a>.</p>
 
   <h3><a href="{% url 'view_catechism' slug=catechism.slug %}">{{ catechism.full_name }}</a></h3>
 
-  <p>{{ catechism.description|restructuredtext }}</p>
+  <p>{{ catechism.description|apply_markup:"restructuredtext" }}</p>
 
   <p>It includes {{ catechism.qapairs.count }} question/answer pairs.</p>
 </div>

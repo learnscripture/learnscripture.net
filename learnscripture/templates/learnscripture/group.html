@@ -1,7 +1,7 @@
 {% extends "base_twocol.html" %}
 
 {% load url from future %}
-{% load markup %}
+{% load markup_tags %}
 {% load account_utils %}
 
 {% block leftcolumn %}
@@ -9,7 +9,7 @@
 {% if group.description %}
 <h2>Description</h2>
 
-{{ group.description|restructuredtext }}
+{{ group.description|apply_markup:"restructuredtext" }}
 {% endif %}
 
 <h2>Recent comments (<a href="{% url 'group_wall' group.slug %}">see all</a>)</h2>

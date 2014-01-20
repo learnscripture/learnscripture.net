@@ -92,7 +92,6 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
         cls.driver.implicitly_wait(1)
         super(LiveServerTests, cls).setUpClass()
 
-
     @classmethod
     def tearDownClass(cls):
         super(LiveServerTests, cls).tearDownClass()
