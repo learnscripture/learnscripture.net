@@ -16,7 +16,7 @@ class VerseChoiceAdminForm(forms.ModelForm):
 
 
 class VerseSetAdmin(admin.ModelAdmin):
-    list_display = ['name', 'set_type']
+    list_display = ['name', 'set_type', 'date_added', 'slug', 'created_by', 'description', 'additional_info',]
     list_filter = ['set_type']
 
 
