@@ -105,4 +105,6 @@ class ContactForm(forms.Form):
     name = forms.CharField(help_text=u"Optional", max_length=255, required=False)
     email = forms.EmailField(help_text=u"Optional", required=False)
     message = forms.CharField(max_length=10000, required=True,
+                              help_text=u"If you are reporting a problem, please include a full and specific description, "
+                              "and include what device/browser you are using, with version numbers.",
                               widget=widgets.Textarea(attrs={'rows':'10'}))
