@@ -1,10 +1,12 @@
 {% extends 'base.html' %}
 
 {% load bootstrap %}
+{% load fiber_tags %}
 
 {% block content %}
 
-<p>Having any problems, or got some suggestions? &nbsp;We’d love to hear your feedback!</p>
+{% show_content "contact_page_top" %}
+
 <form action="" method="POST">
 {% csrf_token %}
 
