@@ -1,17 +1,17 @@
 {% extends "base_twocol.html" %}
 
 {% load url from future %}
-{% load markup %}
+{% load markup_tags %}
 
 {% block leftcolumn %}
 
 {% if verse_set.description %}
 <h2>Description</h2>
-{{ verse_set.description|restructuredtext }}
+{{ verse_set.description|apply_markup:"restructuredtext" }}
 {% endif %}
 
 {% if verse_set.additional_info %}
-{{ verse_set.additional_info|restructuredtext }}
+{{ verse_set.additional_info|apply_markup:"restructuredtext" }}
 {% endif %}
 
 {% if verse_choices %}

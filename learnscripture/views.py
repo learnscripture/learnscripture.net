@@ -4,6 +4,7 @@ import csv
 from datetime import timedelta
 from decimal import Decimal
 import re
+import urlparse
 
 import django.contrib.auth
 from django.db import models
@@ -18,7 +19,7 @@ from django.shortcuts import render, get_object_or_404
 from django.template.defaultfilters import urlencode
 from django.template.response import TemplateResponse
 from django.utils import timezone
-from django.utils.http import urlparse, base36_to_int
+from django.utils.http import base36_to_int
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.debug import sensitive_post_parameters

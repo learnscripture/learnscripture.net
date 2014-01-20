@@ -1,6 +1,6 @@
 {% extends "base_twocol.html" %}
 
-{% load markup %}
+{% load markup_tags %}
 {% load url from future %}
 {% load account_utils %}
 
@@ -8,7 +8,7 @@
 
 <h2>Description</h2>
 
-{{ catechism.description|restructuredtext }}
+{{ catechism.description|apply_markup:"restructuredtext" }}
 
 <h2>Questions</h2>
 

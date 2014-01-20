@@ -44,6 +44,7 @@ if LIVEBOX:
                 'PASSWORD': secrets["PRODUCTION_DB_PASSWORD"],
                 'HOST': 'localhost',
                 'PORT': secrets["PRODUCTION_DB_PORT"],
+                'ATOMIC_REQUESTS': True,
                 }
             }
         SECRET_KEY = secrets["PRODUCTION_SECRET_KEY"]
@@ -58,6 +59,7 @@ if LIVEBOX:
                 'PASSWORD': secrets["STAGING_DB_PASSWORD"],
                 'HOST': 'localhost',
                 'PORT': secrets["STAGING_DB_PORT"],
+                'ATOMIC_REQUESTS': True,
                 }
             }
         SECRET_KEY = secrets["STAGING_SECRET_KEY"]
@@ -71,6 +73,7 @@ else:
             'PASSWORD': 'foo',
             'HOST': 'localhost',
             'PORT': '5432',
+            'ATOMIC_REQUESTS': True,
         }
     }
 
@@ -164,7 +167,6 @@ MIDDLEWARE_CLASSES = [
         (DEBUG, 'debug_toolbar.middleware.DebugToolbarMiddleware'),
         (True, 'learnscripture.middleware.StatsMiddleware'),
         (True, 'django.middleware.common.CommonMiddleware'),
-        (True, 'django.middleware.transaction.TransactionMiddleware'),
         (True, 'django.contrib.sessions.middleware.SessionMiddleware'),
         (True, 'django.middleware.csrf.CsrfViewMiddleware'),
         (True, 'django.contrib.auth.middleware.AuthenticationMiddleware'),
@@ -211,7 +213,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
-    'django.contrib.markup',
     'django.contrib.humanize',
     'south',
     # This project
@@ -234,11 +235,11 @@ INSTALLED_APPS = [
     'raven.contrib.django.raven_compat',
     'spurl',
     'paypal.standard.ipn',
-    'campaign',
     'app_metrics',
     'selectable',
     'rstify',
     'kombu.transport.django',
+    'django_markup',
 ]
 
 ALLOWED_HOSTS = [".learnscripture.net"]
@@ -339,14 +340,6 @@ if TESTING:
     INSTALLED_APPS = [a for a in INSTALLED_APPS
                       if a != 'south']
 
-    # TransactionMiddleware stops SQLAlchemy from seeing updates done within the
-    # transaction. This is fine normally, because it is only used for advanced
-    # queries in read only views, or in tasks run by celery in a separate
-    # process, after the current transaction has completed. However, when
-    # testing, tasks are run eagerly, within the transaction. So we need to
-    # disable TransactionMiddleware to get tests to work
-    MIDDLEWARE_CLASSES = [m for m in MIDDLEWARE_CLASSES
-                          if m != 'django.middleware.transaction.TransactionMiddleware']
 
 else:
     CACHE_COUNT_TIMEOUT = 60
