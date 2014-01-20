@@ -26,9 +26,8 @@ class ReferralsTests(LiveServerTests):
 
         # Should be at 'choose' page now
         vs = VerseSet.objects.get(slug='bible-101')
-        driver.find_element_by_id("id-learn-verseset-btn-%d" % vs.id).click()
+        self.click("#id-learn-verseset-btn-%d" % vs.id)
         self.set_preferences()
-        self.wait_until_loaded('body')
 
         # Definitely have created new identity now, which should be linked to
         # the account that was referred from.

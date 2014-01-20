@@ -274,10 +274,11 @@
     <div id="url-after-logout">{{ url_after_logout }}</div>
     {% endif %}
 
+{% if settings.GOOGLE_ANALYTICS_ACCOUNT %}
 <script type="text/javascript">
 
   var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-29644888-1']);
+  _gaq.push(['_setAccount', '{{ settings.GOOGLE_ANALYTICS_ACCOUNT }}']);
   _gaq.push(['_trackPageview']);
 
   (function() {
@@ -287,6 +288,7 @@
   })();
 
 </script>
+{% endif %}
 <script type="text/javascript">
 learnscripture.themeFonts = {{ theme_fonts|jsonify|safe }};
 Raven.config('{{ settings.SENTRY_DSN }}').install();

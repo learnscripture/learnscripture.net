@@ -44,12 +44,11 @@ class GroupPageTests(LiveServerTests):
 
         self.assertIn("Another group", driver.page_source)
         self.assertNotIn("My group", driver.page_source)
-        driver.find_element_by_xpath('//a[text() = "Another group"]').click()
+        self.click(driver.find_element_by_xpath('//a[text() = "Another group"]'))
 
         self.assertTrue(driver.current_url.endswith('/groups/another-group/'))
 
         self.click('input[name="join"]')
-        self.wait_until_loaded('body')
         self.assertTrue(public_group.members.filter(id=account.id).exists())
 
         self.assertEqual(Event.objects.filter(event_type=EventType.GROUP_JOINED).count(),
@@ -71,11 +70,8 @@ class GroupPageTests(LiveServerTests):
 
         self.click('input[name="join"]')
 
-        self.wait_until_loaded('body')
         self.fill_in_account_form()
-        self.wait_until_loaded('body')
         self.click('input[name="join"]')
-        self.wait_until_loaded('body')
 
         self.assertIn("You are a member of this group", driver.page_source)
 
@@ -95,7 +91,6 @@ class GroupPageTests(LiveServerTests):
         message = "Yay this is my comment!"
         self.send_keys('#id-comment-box', message)
         self.click('#id-add-comment-btn')
-        self.wait_for_ajax()
         self.assertIn("<p>%s</p>" % message, self.driver.page_source)
 
 
@@ -260,10 +255,8 @@ class GroupCreatePageTests(LiveServerTests):
         self.click("#id_public")
 
         self.send_keys("#id_invited_users_0", "invit")
-        self.wait_for_ajax()
         self.click('ul.ui-autocomplete li.ui-menu-item:first-child')
         self.click('input[name="save"]')
-        self.wait_until_loaded('body')
 
         self.assertTrue(driver.current_url.endswith('/my-group/'))
 

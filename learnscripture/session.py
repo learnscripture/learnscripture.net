@@ -168,18 +168,18 @@ def start_identity(request):
         except Account.DoesNotExist:
             pass
     identity = Identity.objects.create(referred_by=referrer)
-    set_identity(request, identity)
+    set_identity(request.session, identity)
     metric('new_identity')
     return identity
 
 
 def login(request, identity):
-    set_identity(request, identity)
+    set_identity(request.session, identity)
     metric('login')
 
 
-def set_identity(request, identity):
-    request.session['identity_id'] = identity.id
+def set_identity(session, identity):
+    session['identity_id'] = identity.id
 
 
 def save_referrer(request):

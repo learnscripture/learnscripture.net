@@ -6,9 +6,11 @@ from django.core.urlresolvers import reverse
 from django.db.models import F
 from django.utils import timezone
 
-from accounts import memorymodel
+import accounts.memorymodel
 from accounts.models import Identity, Notice, TestingMethod, FREE_TRIAL_LENGTH_DAYS
 from bibleverses.models import VerseSet, TextVersion, StageType, MemoryStage
+import learnscripture.session
+
 from .base import LiveServerTests
 
 
@@ -23,31 +25,26 @@ class DashboardTests(LiveServerTests):
         self.assertTrue(driver.current_url.endswith(reverse('login')))
 
     def setup_identity(self):
-        ids = list(Identity.objects.all())
-        driver = self.driver
-        self.get_url('preferences')
-        self.wait_until_loaded('body')
-        self.set_preferences()
-        # This should have created an Identity
-        i = Identity.objects.exclude(id__in=[i.id for i in ids]).get()
+        session = self.setup_session()
+        Identity.objects.all().delete()
+        i = Identity.objects.create()
         i.default_bible_version = TextVersion.objects.get(slug='NET')
         i.testing_method = TestingMethod.FULL_WORDS
         i.save()
+        learnscripture.session.set_identity(session, i)
+        session.save()
         return i
 
     def _assert_learning_reference(self, ref):
         driver = self.driver
-        self.wait_until_loaded('body')
         self.assertTrue(driver.current_url.endswith(reverse('learn')))
-        self.wait_for_ajax()
         self.assertEqual(ref, self.find("#id-verse-title").text)
 
     def _click_clear_learning_queue_btn(self, verse_set_id):
         driver = self.driver
-        self.find('#id-learning-queue-verse-set-%s input[name=clearbiblequeue]' % (verse_set_id if verse_set_id else '')).click()
-        alert = driver.switch_to_alert()
-        alert.accept()
-        self.wait_until_loaded('body')
+        self.click('#id-learning-queue-verse-set-%s input[name=clearbiblequeue]' % (verse_set_id if verse_set_id else ''),
+                   produces_alert=True)
+        self.confirm()
 
     def test_learn_queue(self):
         # This combines a bunch of tests, it's easier to avoid a lot of
@@ -71,7 +68,7 @@ class DashboardTests(LiveServerTests):
 
         # Test click 'Start learning' for 'Bible 101' verse set
         self.assertIn('Bible 101', driver.page_source)
-        driver.find_element_by_css_selector('#id-learning-queue-verse-set-%s input[name=learnbiblequeue]' % vs.id).click()
+        self.click('#id-learning-queue-verse-set-%s input[name=learnbiblequeue]' % vs.id)
         self._assert_learning_reference(u"John 3:16")
 
         # Learn one verse (otherwise we are back to dashboard redirecting us)
@@ -99,7 +96,6 @@ class DashboardTests(LiveServerTests):
 
         self.assertNotIn('Psalm 23:2', driver.page_source)
 
-
     def test_learn_passage(self):
         # As above, combine several tests as a story, for simplicity
         i = self.setup_identity()
@@ -118,18 +114,15 @@ class DashboardTests(LiveServerTests):
         self.assertIn('Psalm 23', driver.page_source)
 
         # Test 'Continue learning' button
-        driver.find_element_by_id('id-learnpassage-btn-%d' % vs.id).click()
-        self.wait_until_loaded('body')
+        self.click('#id-learnpassage-btn-%d' % vs.id)
         self.assertTrue(driver.current_url.endswith(reverse('learn')))
-        self.wait_for_ajax()
         self.assertEqual(u"Psalm 23:1", self.find("#id-verse-title").text)
 
         # Test 'Cancel learning' button
         self.get_url('dashboard')
-        driver.find_element_by_id('id-cancelpassage-btn-%d' % vs.id).click()
-        alert = driver.switch_to_alert()
-        alert.accept()
-        self.wait_until_loaded('body')
+        self.click('#id-cancelpassage-btn-%d' % vs.id,
+                   produces_alert=True)
+        self.confirm()
         self.assertNotIn('Psalm 23', driver.page_source)
 
     def test_learn_catechism(self):
@@ -141,25 +134,20 @@ class DashboardTests(LiveServerTests):
                       driver.page_source)
 
         self.click('input[name=learncatechismqueue]')
-        self.wait_until_loaded('body')
         self.assertTrue(driver.current_url.endswith(reverse('learn')))
-
-        self.wait_for_ajax()
         self.assertEqual(u"Q1. What is the chief end of man?", self.find("#id-verse-title").text)
 
         i.record_verse_action('Q1', 'WSC', StageType.TEST, accuracy=1.0)
 
         # Test clicking 'Clear queue'
         self.get_url('dashboard')
-        self.click('input[name=clearcatechismqueue]')
-        alert = driver.switch_to_alert()
-        alert.accept()
-        self.wait_until_loaded('body')
+        self.click('input[name=clearcatechismqueue]',
+                   produces_alert=True)
+        self.confirm()
 
         # Since we cleared the queue, shouldn't have anything about catechisms now
         self.assertTrue(driver.current_url.endswith(reverse('dashboard')))
         self.assertNotIn('catechism', driver.page_source)
-
 
     def test_revise_one_section(self):
         i = self.setup_identity()
@@ -171,7 +159,7 @@ class DashboardTests(LiveServerTests):
         i.add_verse_set(vs)
 
         # Get to 'group testing' stage
-        i.verse_statuses.update(strength=memorymodel.STRENGTH_FOR_GROUP_TESTING + 0.01,
+        i.verse_statuses.update(strength=accounts.memorymodel.STRENGTH_FOR_GROUP_TESTING + 0.01,
                                 last_tested=timezone.now() - timedelta(days=10),
                                 next_test_due=timezone.now() - timedelta(days=1),
                                 memory_stage=MemoryStage.TESTED)
@@ -183,17 +171,13 @@ class DashboardTests(LiveServerTests):
 
         btn = self.find('input[value="Revise one section"]')
         self.assertEqual(btn.get_attribute('name'), 'revisepassagenextsection')
-        btn.click()
-
-        self.wait_until_loaded('body')
-        self.wait_for_ajax()
+        self.click(btn)
         self.assertIn("Psalm 23:1", driver.page_source)
 
         # Skip through
         def skip():
             self.click("#id-verse-dropdown")
-            driver.find_element_by_link_text("Skip this").click()
-            self.wait_for_ajax()
+            self.click(driver.find_element_by_link_text("Skip this"))
         skip()
         self.assertIn("Psalm 23:2", driver.page_source)
         skip()
@@ -205,14 +189,15 @@ class DashboardTests(LiveServerTests):
         self.assertTrue(driver.current_url.endswith(reverse('dashboard')))
 
     def test_home_dashboard_routing(self):
-        ids = list(Identity.objects.all())
+        Identity.objects.all().delete()
         driver = self.driver
         driver.get(self.live_server_url + "/")
         e = self.find('a.btn.large')
         self.assertTrue(e.get_attribute('href').endswith(reverse('choose')))
-        e.click()
+        self.click(e)
         self.assertTrue(driver.current_url.endswith(reverse('choose')))
-        self.assertEqual(Identity.objects.exclude(id__in=[i.id for i in ids]).count(), 0)
+        # Getting this far shouldn't create an Identity
+        self.assertEqual(Identity.objects.count(), 0)
 
     def test_notices_expire(self):
         # This could be tested on any page, but this is an obvious example.

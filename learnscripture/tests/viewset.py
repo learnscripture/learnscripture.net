@@ -57,17 +57,14 @@ class ViewSetTests(LiveServerTests):
                          vs.verse_choices.count())
 
         self.get_url('view_verse_set', kwargs=dict(slug=vs.slug))
-        self.wait_until_loaded('body')
 
         self.assertIn("You have %d verse(s) from this set in your queue" % vs.verse_choices.count(),
                       driver.page_source)
 
         self.click("input[name='drop']")
-        self.wait_until_loaded('body')
 
         self.assertEqual(len(identity.bible_verse_statuses_for_learning(vs.id)),
                          0)
-
 
     def test_view_without_identity(self):
         ids = list(Identity.objects.all())
@@ -76,7 +73,6 @@ class ViewSetTests(LiveServerTests):
         vs = VerseSet.objects.get(slug='bible-101')
         self.assertEqual(Identity.objects.exclude(id__in=[i.id for i in ids]).all().count(), 0)
         self.get_url('view_verse_set', kwargs=dict(slug=vs.slug))
-        self.wait_until_loaded('body')
         # Default version is NET:
         self.assertIn("Jesus replied", driver.page_source)
 

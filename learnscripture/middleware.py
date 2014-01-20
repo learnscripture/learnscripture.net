@@ -38,7 +38,7 @@ class DebugMiddleware(object):
 
 
         if 'as' in request.GET:
-            session.set_identity(request, Account.objects.get(username=request.GET['as']).identity)
+            session.set_identity(request.session, Account.objects.get(username=request.GET['as']).identity)
 
         if 'now' in request.GET:
             now = time.strptime(request.GET['now'], "%Y-%m-%d %H:%M:%S")

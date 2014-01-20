@@ -28,7 +28,6 @@ class CreateSetTests(LiveServerTests):
         self.find("#id_quick_find").clear()
         self.send_keys("#id_quick_find", ref)
         self.click("#id_lookup")
-        self.wait_for_ajax()
         self.click("input.add-to-set")
         self.wait_until_loaded('#id-verse-list tbody tr td')
         time.sleep(0.1)
@@ -46,7 +45,6 @@ class CreateSetTests(LiveServerTests):
 
         self.click("#id_public")
         self.click("#id-save-btn")
-        self.wait_until_loaded('body')
         self.assertTrue(driver.title.startswith("Verse set: My set"))
         self.assertIn("And God called the light Day", driver.page_source)
 
@@ -65,7 +63,6 @@ class CreateSetTests(LiveServerTests):
         self._add_ref("Genesis 1:5")
 
         self.click("#id-save-btn")
-        self.wait_until_loaded('body')
 
         vs = VerseSet.objects.get(name='My set')
         self.assertEqual(len(vs.verse_choices.all()), 1)
@@ -78,7 +75,6 @@ class CreateSetTests(LiveServerTests):
             self._add_ref(ref)
 
             self.click("#id-save-btn")
-            self.wait_until_loaded('body')
 
             self.assertIn("Verse set 'My set' saved", driver.page_source) # Checks we didn't get 500
 
@@ -110,7 +106,6 @@ class CreateSetTests(LiveServerTests):
 
         self.click("#id-save-btn")
 
-        self.wait_until_loaded('body')
         self.assertTrue(driver.title.startswith("Create selection set"))
         self.assertIn("This field is required", driver.page_source)
         self.assertIn("Genesis 1:5", driver.page_source)
@@ -155,7 +150,6 @@ class CreateSetTests(LiveServerTests):
         identity.add_verse_set(vs)
         identity.record_verse_action('Genesis 1:1', 'KJV', StageType.TEST, 1.0)
 
-        driver = self.driver
         self.get_url('edit_set', kwargs=dict(slug=vs.slug))
         self.click("#id-verse-list tbody tr:first-child td .icon-trash")
         self.click("#id-save-btn")
@@ -187,7 +181,6 @@ class CreateSetTests(LiveServerTests):
         self.find("#id_quick_find").clear()
         self.send_keys("#id_quick_find", "Gen 1:1-10")
         self.click("#id_lookup")
-        self.wait_for_ajax()
         self.wait_until_loaded('#id-verse-list tbody tr td')
         self.assertIn("And God called the light Day", driver.page_source)
 
@@ -196,7 +189,6 @@ class CreateSetTests(LiveServerTests):
         self.click('#id-verse-list tbody tr:nth-child(9) input')
 
         self.click("#id-save-btn")
-        self.wait_until_loaded('body')
         self.assertTrue(driver.title.startswith("Verse set: Genesis 1"))
         self.assertIn("And God called the light Day", driver.page_source)
 
@@ -215,7 +207,6 @@ class CreateSetTests(LiveServerTests):
         self.send_keys("#id_quick_find", "Gen 1:1-10")
 
         self.click("#id_lookup")
-        self.wait_for_ajax()
         self.wait_until_loaded('#id-verse-list tbody tr td')
         self.assertIn("There are already", driver.page_source)
 
@@ -223,10 +214,8 @@ class CreateSetTests(LiveServerTests):
         self.login(self._account)
         driver = self.driver
         self.get_url("create_passage_set")
-        self.wait_until_loaded('body')
         self.send_keys("#id_name", "xxx")
         self.click("#id-save-btn")
-        self.wait_until_loaded('body')
         self.assertIn("No verses in set", driver.page_source)
 
     def test_edit_passage_set(self):

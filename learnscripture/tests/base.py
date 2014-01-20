@@ -1,9 +1,12 @@
 from __future__ import absolute_import
+import time
 
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test import LiveServerTestCase
+from django.utils.importlib import import_module
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, UnexpectedAlertPresentException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
@@ -55,9 +58,7 @@ class AccountTestMixin(object):
                                    email="test2@test.com",
                                    username="test2",
                                    password="testpassword2"):
-        driver = self.driver
-        driver.find_element_by_link_text('Create an account').click()
-        self.wait_until_loaded('body')
+        self.click(self.driver.find_element_by_link_text('Create an account'))
         self.fill_in_account_form(email=email, username=username, password=password)
 
     def fill_in_account_form(self,
@@ -69,13 +70,17 @@ class AccountTestMixin(object):
         self.send_keys("#id_signup-username", username)
         self.send_keys("#id_signup-password", password)
         self.click('input[name=signup]')
-        self.wait_for_ajax()
-
 
 
 def sqla_tear_down():
     from learnscripture.utils import sqla
     sqla.default_engine.pool.dispose()
+
+
+# https://code.google.com/p/selenium/source/browse/java/client/src/org/openqa/selenium/internal/ElementScrollBehavior.java
+class ElementScrollBehavior(object):
+    TOP = 0
+    BOTTOM = 1
 
 
 class LiveServerTests(AccountTestMixin, LiveServerTestCase):
@@ -88,19 +93,26 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
         if cls.hide_browser:
             cls.display = Display(visible=0, size=(1024, 768))
             cls.display.start()
-        cls.driver = webdriver.Chrome() # Using Chrome because we have problem with drag and drop for Firefox
+        capabilities = webdriver.DesiredCapabilities.FIREFOX.copy()
+        # We have problems clicking on elements that are scrolled to the top in
+        # order to click on them, but are then covered by the navbar at the
+        # top. The fix is to use elementScrollBehavior
+        # https://code.google.com/p/selenium/issues/detail?id=4297#c3
+        capabilities['elementScrollBehavior'] = ElementScrollBehavior.BOTTOM
+        cls.driver = webdriver.Firefox(capabilities=capabilities)
         cls.driver.implicitly_wait(1)
         super(LiveServerTests, cls).setUpClass()
 
     @classmethod
     def tearDownClass(cls):
-        super(LiveServerTests, cls).tearDownClass()
         cls.driver.quit()
         if cls.hide_browser:
             cls.display.stop()
+        super(LiveServerTests, cls).tearDownClass()
 
     def setUp(self):
         super(LiveServerTests, self).setUp()
+        self.driver.delete_all_cookies()
         self.verificationErrors = []
 
     def tearDown(self):
@@ -110,20 +122,45 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
 
 
     # Utilities:
+    def setup_session(self):
+        engine = import_module(settings.SESSION_ENGINE)
+        session = engine.SessionStore()
+        session.save()
+        self.driver.get(self.live_server_url)
+        self.driver.add_cookie({'domain': 'localhost',
+                                'name': 'sessionid',
+                                'value':session.session_key})
+        return session
+
     def get_url(self, name, *args, **kwargs):
         self.driver.get(self.live_server_url + reverse(name, *args, **kwargs))
+        self.wait_until_loaded('body')
+        self.wait_for_ajax()
 
     def find(self, css_selector):
         return self.driver.find_element_by_css_selector(css_selector)
 
-    def click(self, css_selector):
-        return self.find(css_selector).click()
+    def click(self, clickable, produces_alert=False):
+        if hasattr(clickable, 'click'):
+            retval = clickable.click()
+        else:
+            retval = self.find(clickable).click()
+        if not produces_alert:
+            # This will cause a Selenium error if an alert is open, and there
+            # doesn't sem to be any way of detecting this case.
+            self.wait_until_loaded('body')
+            self.wait_for_ajax()
+        return retval
 
     def send_keys(self, css_selector, text):
-        return self.find(css_selector).send_keys(text)
+        retval = self.find(css_selector).send_keys(text)
+        self.wait_for_ajax()
+        return retval
 
     def confirm(self):
         self.driver.switch_to_alert().accept()
+        self.wait_until_loaded('body')
+        self.wait_for_ajax()
 
     def wait_until(self, callback, timeout=10):
         """
@@ -135,6 +172,7 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
         WebDriverWait(self.driver, timeout).until(callback)
 
     def wait_for_ajax(self):
+        time.sleep(0.1)
         WebDriverWait(self.driver, 10).until(lambda driver: driver.execute_script('return jQuery.active == 0'))
 
     def wait_until_loaded(self, selector, timeout=10):
@@ -170,10 +208,10 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
         if 'id-preferences-save-btn' in driver.page_source:
             # popup
             self.click("#id-preferences-save-btn")
-            self.wait_for_ajax()
         else:
             self.click("#id-save-btn")
-            self.wait_until_loaded('body')
+        self.wait_until_loaded('body')
+        self.wait_for_ajax()
 
     def login(self, account):
         driver = self.driver

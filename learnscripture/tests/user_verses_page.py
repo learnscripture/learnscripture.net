@@ -32,13 +32,11 @@ class UserVersesPageTests(LiveServerTests):
 
         driver = self.driver
         self.get_url('user_verses')
-        self.wait_until_loaded('body')
 
         for i in range(1, 7):
             self.assertIn("Psalm 23:%d" % i, driver.page_source)
 
         self.click('a.btn[data-reference="Psalm 23:2"]')
-        self.wait_for_ajax()
 
         # 'Practise verse' button
         btn1 = self.find('input[name="reviseverse"]')
@@ -53,9 +51,7 @@ class UserVersesPageTests(LiveServerTests):
         self.assertEqual(btn3.get_attribute('value'), "Practise passage: Psalm 23:1-6")
 
         # Click "practise section":
-        btn2.click()
-        self.wait_until_loaded('body')
-        self.wait_for_ajax()
+        self.click(btn2)
 
         self.assertTrue(driver.current_url.endswith(reverse('learn')))
         self.assertIn("Psalm 23:1", driver.page_source)
@@ -69,10 +65,7 @@ class UserVersesPageTests(LiveServerTests):
             self.send_keys("#id-typing", word + " ")
 
         # Click finish
-        self.wait_for_ajax()
         self.click("#id-finish-btn")
-        self.wait_for_ajax()
-        self.wait_until_loaded('body')
 
         # Should have gone back to where we came from
         self.assertTrue(driver.current_url.endswith(reverse('user_verses')))

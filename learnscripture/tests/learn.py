@@ -36,11 +36,9 @@ class LearnTests(LiveServerTests):
         verse_set = VerseSet.objects.get(name=name)
         driver = self.driver
         self.get_url('choose')
-        driver.find_element_by_id("id-learn-verseset-btn-%d" % verse_set.id).click()
+        self.click("#id-learn-verseset-btn-%d" % verse_set.id)
         self.set_preferences()
-        self.wait_until_loaded('body')
         self.assertTrue(driver.current_url.endswith('/learn/'))
-        self.wait_for_ajax()
         return verse_set
 
     def add_verse_set(self, name):
@@ -107,7 +105,6 @@ class LearnTests(LiveServerTests):
         identity.add_verse_choice('Psalm 23:1-2')
         self.get_url('dashboard')
         self.click('input[name=learnbiblequeue]')
-        self.wait_for_ajax()
         self.assertEqual(u"Psalm 23:1-2", self.find("#id-verse-title").text)
 
         # Do the reading:
@@ -118,8 +115,6 @@ class LearnTests(LiveServerTests):
         # want' in order to test an issue with word splitting
         for word in self.psalm_23_1_2.strip().split():
             self.send_keys("#id-typing", word + " ")
-
-        self.wait_for_ajax()
 
         # Check the strength
         uvs = identity.verse_statuses.get(reference='Psalm 23:1-2')
@@ -140,8 +135,6 @@ class LearnTests(LiveServerTests):
         identity, account = self.create_account()
         self.login(account)
         verse_set = self.choose_verse_set('Bible 101')
-        self.wait_until_loaded('body')
-        self.wait_for_ajax()
         driver = self.driver
 
         # Do the reading:
@@ -150,8 +143,6 @@ class LearnTests(LiveServerTests):
 
         # Do the typing:
         self._type_john_3_16_kjv()
-
-        self.wait_for_ajax()
 
         # Check scores
 
@@ -195,7 +186,6 @@ class LearnTests(LiveServerTests):
 
         # Now check that the next verse is present and is also NET, which is the
         # main point of this test.
-        self.wait_for_ajax()
         self.assertIn(u"He takes me to lush pastures",
                       self.find('.current-verse').text)
 
@@ -218,24 +208,17 @@ class LearnTests(LiveServerTests):
         self.get_url('dashboard')
         self.click('input[name=revisepassage]')
 
-        self.wait_until_loaded('body')
-        self.wait_for_ajax()
-
         for word in "The LORD is my shepherd, I shall not want.".split():
             self.send_keys("#id-typing", word + " ")
 
         # Test keyboard shortcut
         self.send_keys('body', '\n')
-        self.wait_for_ajax()
         self.assertIn(u"He maketh me to lie down in green pastures",
                       self.find('.current-verse').text)
 
         btn = self.find("#id-context-next-verse-btn")
         for i in range(0, 5):
-            btn.click()
-
-        self.wait_for_ajax()
-        self.wait_until_loaded('body')
+            self.click(btn)
         self.assertTrue(driver.current_url.endswith('/dashboard/'))
 
     def test_skip_verse(self):
@@ -251,7 +234,6 @@ class LearnTests(LiveServerTests):
 
         # Should be removed from session too
         self.get_url('learn')
-        self.wait_for_ajax()
 
         self.assertEqual(u"John 14:6", self.find("#id-verse-title").text)
 
@@ -274,7 +256,6 @@ class LearnTests(LiveServerTests):
 
         self.click("#id-verse-dropdown")
         self.click("#id-cancel-learning-btn")
-        self.wait_for_ajax()
 
         # Should skip.
         self.assertEqual(u"John 14:6", self.find("#id-verse-title").text)
@@ -300,12 +281,9 @@ class LearnTests(LiveServerTests):
         self.assertEqual(u"John 3:16", self.find("#id-verse-title").text)
 
         self.click("#id-verse-dropdown")
-        self.click("#id-reset-progress-btn")
-
-        alert = driver.switch_to_alert()
-        alert.accept()
-        self.wait_until_loaded('body')
-        self.wait_for_ajax()
+        self.click("#id-reset-progress-btn",
+                   produces_alert=True)
+        self.confirm()
 
         # Should reset strength to zero
         self.assertEqual(identity.verse_statuses.get(reference='John 3:16').strength,
@@ -315,8 +293,6 @@ class LearnTests(LiveServerTests):
 
     def click_revise_bible(self):
         self.click("input[name='revisebiblequeue']")
-        self.wait_until_loaded('body')
-        self.wait_for_ajax()
 
     def _make_verses_due_for_testing(self, uvs_queryset):
         uvs_queryset.update(
@@ -342,14 +318,10 @@ class LearnTests(LiveServerTests):
         self._type_john_3_16_kjv()
 
         self.click("#id-finish-btn")
-        self.wait_for_ajax()
 
         # Reload, should have nothing more to revise
 
         self.get_url('learn')
-
-        self.wait_until_loaded('body')
-        self.wait_for_ajax()
 
         self.assertTrue(self.find("#id-no-verse-queue").is_displayed())
 
@@ -372,8 +344,6 @@ class LearnTests(LiveServerTests):
 
         self._type_john_3_16_kjv(accuracy=0.5)
 
-        self.wait_for_ajax()
-
         # Now the 'more practice' button will appear, and be primary
         btn = self.find("#id-more-practice-btn")
         self.assertTrue('primary' in btn.get_attribute('class'))
@@ -387,7 +357,6 @@ class LearnTests(LiveServerTests):
             next_btn.click()
 
         self._type_john_3_16_kjv(accuracy=0.95)
-        self.wait_for_ajax()
 
         # We should get points for each time revised (and award)
         j316_score_1 = self._score_for_j316(accuracy=0.5)
