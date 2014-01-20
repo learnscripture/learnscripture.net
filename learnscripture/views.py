@@ -449,7 +449,7 @@ def choose(request):
                 vs = verse_sets.prefetch_related('verse_choices').get(id=vs_id)
             except VerseSet.DoesNotExist:
                 # Shouldn't be possible by clicking on buttons.
-                pass
+                vs = None
             if vs is not None:
                 return learn_set(request, identity.add_verse_set(vs, version=version),
                                  session.LearningType.LEARNING)

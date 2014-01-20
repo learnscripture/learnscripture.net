@@ -24,8 +24,6 @@ class CatechismTests(LiveServerTests):
         self.get_url('catechisms')
         self.click("input[value=Learn]")
         self.set_preferences()
-        self.wait_until_loaded('body')
-        self.wait_for_ajax()
         self.assertEqual(self.find("#id-verse-title").text,
                          "Q1. What is the chief end of man?")
 
@@ -38,8 +36,6 @@ class CatechismTests(LiveServerTests):
 
         for word in "Man's chief end is to glorify God and to enjoy him forever".split(" "):
             self.send_keys("#id-typing", word + " ")
-
-        self.wait_for_ajax()
 
         self.assertEqual(Event.objects
                          .filter(event_type=EventType.STARTED_LEARNING_CATECHISM)

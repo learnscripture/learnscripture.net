@@ -31,5 +31,4 @@ class AccountDetailsTests(LiveServerTests):
         driver = self.driver
         self.get_url('account_details')
         self.fill_in_login_form(account)
-        self.wait_until_loaded('body')
         self.assertTrue(driver.current_url.endswith(reverse('account_details')))

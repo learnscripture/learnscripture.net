@@ -7,7 +7,7 @@ from django.db.models import F
 from django.test import TestCase
 from django.utils import timezone
 
-from accounts import memorymodel
+import accounts.memorymodel
 from accounts.models import Identity, ActionChange, Account
 from awards.models import AwardType
 from bibleverses.models import VerseSet, TextVersion, StageType, MemoryStage, Verse, VerseChoice
@@ -130,7 +130,7 @@ class IdentityTests(AccountTestMixin, TestCase):
                          1)
         # Check 'MASTER'
         # frig the data:
-        i.verse_statuses.update(strength=memorymodel.MM.LEARNT - 0.001,
+        i.verse_statuses.update(strength=accounts.memorymodel.MM.LEARNT - 0.001,
                                 last_tested=timezone.now() - timedelta(100))
         # Now do test to move above LEARNT
         i.record_verse_action('John 3:16', 'NET', StageType.TEST, 1)
@@ -363,7 +363,7 @@ class IdentityTests(AccountTestMixin, TestCase):
             for uvs in i.verse_statuses.filter(reference=ref):
                 uvs.last_tested = timezone.now() - timedelta(200 - (vn * 60.0)/(3600.0*24))
                 uvs.strength = 0.55
-                uvs.next_test_due = memorymodel.next_test_due(uvs.last_tested, uvs.strength)
+                uvs.next_test_due = accounts.memorymodel.next_test_due(uvs.last_tested, uvs.strength)
                 uvs.save()
 
         vss = i.passages_for_revising()
@@ -510,7 +510,7 @@ class IdentityTests(AccountTestMixin, TestCase):
             i.record_verse_action(ref, 'KJV', StageType.TEST, 1)
             # Move to nearly learnt:
             i.verse_statuses.filter(reference=ref).update(
-                strength=memorymodel.LEARNT - 0.001,
+                strength=accounts.memorymodel.LEARNT - 0.001,
                 last_tested=timezone.now() - timedelta(100)
                 )
             # Final test, moving to above LEARNT

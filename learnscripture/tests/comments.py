@@ -34,7 +34,6 @@ class CommentPageTests(LiveServerTests):
         self.click('.show-add-comment')
         self.send_keys('#id-comment-box', message)
         self.click('#id-add-comment-btn')
-        self.wait_for_ajax()
 
         # Test page
         self.assertIn("<p>%s</p>" % message, self.driver.page_source)
@@ -75,11 +74,10 @@ class CommentPageTests(LiveServerTests):
 
         self.assertIn("This is a naughty message", self.driver.page_source)
         self.assertNotIn("This is already hidden", self.driver.page_source)
-        self.click('.moderate-comment')
+        self.click('.moderate-comment', produces_alert=True)
         self.confirm()
 
         # Test page
-        self.wait_for_ajax()
         self.assertNotIn("This is a naughty message", self.driver.page_source)
 
         # Test DB

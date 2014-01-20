@@ -316,7 +316,7 @@
     }
 },
 {
-    "pk": null,
+    "pk": 77700,
     "model": "bibleverses.verse",
     "fields": {
         "reference": "John 14:6",
@@ -329,7 +329,7 @@
     }
 },
 {
-    "pk": null,
+    "pk": 77701,
     "model": "bibleverses.verse",
     "fields": {
         "reference": "John 14:6",
@@ -342,7 +342,7 @@
     }
 },
 {
-    "pk": null,
+    "pk": 77702,
     "model": "bibleverses.verse",
     "fields": {
         "reference": "John 5:3",
@@ -355,7 +355,7 @@
     }
 },
 {
-    "pk": null,
+    "pk": 77703,
     "model": "bibleverses.verse",
     "fields": {
         "reference": "John 5:4",
@@ -368,7 +368,7 @@
     }
 },
 {
-    "pk": null,
+    "pk": 77704,
     "model": "bibleverses.verse",
     "fields": {
         "reference": "Ephesians 2:8",
@@ -381,7 +381,7 @@
     }
 },
 {
-    "pk": null,
+    "pk": 77705,
     "model": "bibleverses.verse",
     "fields": {
         "reference": "Ephesians 2:8",
@@ -394,7 +394,7 @@
     }
 },
 {
-    "pk" : null,
+    "pk" : 77706,
     "model" : "bibleverses.verse",
     "fields" : {
         "reference" : "Matthew 4:21",
@@ -407,7 +407,7 @@
      }
 },
 {
-    "pk": null,
+    "pk": 77707,
     "model": "bibleverses.verse",
     "fields": {
         "reference": "Song of Solomon 1:1",
@@ -420,7 +420,7 @@
     }
 },
 {
-    "pk": null,
+    "pk": 77708,
     "model": "bibleverses.verse",
     "fields": {
         "reference": "1 Corinthians 1:3",
