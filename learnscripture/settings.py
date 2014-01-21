@@ -314,7 +314,7 @@ DEBUG_TOOLBAR_CONFIG = {
 
 CACHES = {
     'default': {
-        'BACKEND': 'caching.backends.memcached.CacheClass',
+        'BACKEND': 'caching.backends.memcached.MemcachedCache',
         'LOCATION': 'unix:%s/memcached.sock' % HOME_DIR,
         'KEY_PREFIX': 'learnscripture.net' if PRODUCTION else 'staging.learnscripture.net'
     }
