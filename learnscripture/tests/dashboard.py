@@ -9,7 +9,6 @@ from django.utils import timezone
 import accounts.memorymodel
 from accounts.models import Identity, Notice, TestingMethod, FREE_TRIAL_LENGTH_DAYS
 from bibleverses.models import VerseSet, TextVersion, StageType, MemoryStage
-import learnscripture.session
 
 from .base import LiveServerTests
 
@@ -23,17 +22,6 @@ class DashboardTests(LiveServerTests):
         driver = self.driver
         self.get_url('dashboard')
         self.assertTrue(driver.current_url.endswith(reverse('login')))
-
-    def setup_identity(self):
-        session = self.setup_session()
-        Identity.objects.all().delete()
-        i = Identity.objects.create()
-        i.default_bible_version = TextVersion.objects.get(slug='NET')
-        i.testing_method = TestingMethod.FULL_WORDS
-        i.save()
-        learnscripture.session.set_identity(session, i)
-        session.save()
-        return i
 
     def _assert_learning_reference(self, ref):
         driver = self.driver
