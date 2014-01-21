@@ -12,6 +12,7 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 
 from accounts.models import Identity, Account, TestingMethod
 from bibleverses.models import TextVersion
+import learnscripture.session
 
 
 class FuzzyInt(int):
@@ -128,9 +129,29 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
         session.save()
         self.driver.get(self.live_server_url)
         self.driver.add_cookie({'domain': 'localhost',
-                                'name': 'sessionid',
-                                'value':session.session_key})
+                                'name': settings.SESSION_COOKIE_NAME,
+                                'value': session.session_key})
         return session
+
+    def login(self, account):
+        session = self.setup_session()
+        self.setup_identity(identity=account.identity)
+
+    def setup_identity(self, identity=None):
+        session = self.setup_session()
+        if identity is None:
+            Identity.objects.all().delete()
+            identity = Identity.objects.create()
+            identity.default_bible_version = TextVersion.objects.get(slug='NET')
+            identity.testing_method = TestingMethod.FULL_WORDS
+            identity.save()
+        learnscripture.session.set_identity(session, identity)
+        session.save()
+        self.identity = identity
+        return identity
+
+    def get_identity(self):
+        return getattr(self, 'identity', None)
 
     def get_url(self, name, *args, **kwargs):
         self.driver.get(self.live_server_url + reverse(name, *args, **kwargs))
@@ -212,18 +233,6 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
             self.click("#id-save-btn")
         self.wait_until_loaded('body')
         self.wait_for_ajax()
-
-    def login(self, account):
-        driver = self.driver
-        from django.contrib.sessions.backends.db import SessionStore
-        from django.conf import settings
-        s = SessionStore()
-        s.create()
-        s['identity_id'] = account.identity.id
-        s.save()
-        driver.get(self.live_server_url) # needed to be able to set cookie
-        driver.add_cookie({'name':settings.SESSION_COOKIE_NAME,
-                           'value': s.session_key})
 
     def fill_in_login_form(self, account):
         driver = self.driver
