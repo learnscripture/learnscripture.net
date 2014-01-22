@@ -16,6 +16,8 @@ from scores.models import Scores
 
 from .base import FuzzyInt, AccountTestMixin
 
+__all__ = ['IdentityTests']
+
 
 class IdentityTests(AccountTestMixin, TestCase):
 

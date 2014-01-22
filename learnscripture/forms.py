@@ -89,6 +89,10 @@ class LogInForm(forms.Form):
 
 class AccountPasswordResetForm(PasswordResetForm):
 
+    error_messages = {
+        'unknown': "That email address doesn't have an associated user account. Are you sure you've registered?",
+        }
+
     def clean_email(self):
         email = self.cleaned_data["email"]
         self.users_cache = Account.objects.active().filter(email__iexact=email)

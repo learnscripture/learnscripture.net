@@ -12,6 +12,8 @@ from bibleverses.models import VerseSet, TextVersion, StageType, MemoryStage
 
 from .base import LiveServerTests
 
+__all__ = ['DashboardTests']
+
 
 class DashboardTests(LiveServerTests):
 

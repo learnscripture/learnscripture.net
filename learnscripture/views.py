@@ -19,7 +19,7 @@ from django.shortcuts import render, get_object_or_404
 from django.template.defaultfilters import urlencode
 from django.template.response import TemplateResponse
 from django.utils import timezone
-from django.utils.http import base36_to_int
+from django.utils.http import urlsafe_base64_decode
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.debug import sensitive_post_parameters
@@ -997,17 +997,17 @@ def password_reset_complete(request):
 # Large copy and paste from django.contrib.auth.views, followed by customisations.
 @sensitive_post_parameters()
 @never_cache
-def password_reset_confirm(request, uidb36=None, token=None):
+def password_reset_confirm(request, uidb64=None, token=None):
     """
     View that checks the hash in a password reset link and presents a
     form for entering a new password.
     """
     token_generator = default_token_generator
     set_password_form = AccountSetPasswordForm
-    assert uidb36 is not None and token is not None # checked by URLconf
+    assert uidb64 is not None and token is not None # checked by URLconf
     post_reset_redirect = reverse('password_reset_complete')
     try:
-        uid_int = base36_to_int(uidb36)
+        uid_int = urlsafe_base64_decode(uidb64)
         user = Account.objects.get(id=uid_int)
     except (ValueError, Account.DoesNotExist):
         user = None

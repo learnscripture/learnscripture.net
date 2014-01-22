@@ -34,7 +34,7 @@ urlpatterns = patterns('',
                        url(r'^signup/$', 'learnscripture.views.signup', name='signup'),
                        url(r'^account/$', 'learnscripture.views.account_details', name='account_details'),
                        url(r'^password-reset/$', 'learnscripture.views.password_reset_done', name='password_reset_done'),
-                       url(r'^reset/(?P<uidb36>[0-9A-Za-z]{1,13})-(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$', 'learnscripture.views.password_reset_confirm', name='password_reset_confirm'),
+                       url(r'^reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>.+)/$', 'learnscripture.views.password_reset_confirm', name='password_reset_confirm'),
                        url(r'^reset/complete/$', 'learnscripture.views.password_reset_complete', name='password_reset_complete'),
 
                        # Verse sets
