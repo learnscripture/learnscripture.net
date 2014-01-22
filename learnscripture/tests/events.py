@@ -11,6 +11,9 @@ from groups.models import Group
 
 from .base import AccountTestMixin
 
+__all__ = ['EventTests']
+
+
 class EventTests(AccountTestMixin, TestCase):
 
     def test_new_comment_event(self):

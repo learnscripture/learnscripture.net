@@ -10,6 +10,9 @@ from events.models import Event, EventType
 
 from .base import LiveServerTests
 
+__all__ = ['ChooseTests']
+
+
 class ChooseTests(LiveServerTests):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json']

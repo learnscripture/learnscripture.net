@@ -12,6 +12,8 @@ from events.models import Event, EventType
 
 from .base import LiveServerTests, AccountTestMixin
 
+__all__ = ['GroupPageTests', 'GroupTests', 'GroupCreatePageTests', 'GroupPageTests2']
+
 
 class GroupPageTests(LiveServerTests):
 

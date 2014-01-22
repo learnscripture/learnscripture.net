@@ -8,6 +8,9 @@ from django.utils import timezone
 from accounts.models import Account
 from bibleverses.models import VerseSet, VerseSetType, TextVersion, quick_find, parse_as_bible_reference
 
+__all__ = ['SearchTests']
+
+
 class SearchTests(TestCase):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
