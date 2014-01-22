@@ -2,20 +2,28 @@ from __future__ import absolute_import
 
 from datetime import timedelta
 from decimal import Decimal
+import itertools
+import re
 
 from autofixture import AutoFixture
+from django.core import mail
 from django.db.models import F
 from django.test import TestCase
 from django.utils import timezone
+from django.utils.encoding import force_text
+from django.utils.six.moves.urllib.parse import urlparse, ParseResult
 
 from accounts.models import Account, ActionChange, Identity
 from awards.models import AwardType, Award
-from groups.models import Group
 from bibleverses.models import MemoryStage, StageType
 from events.models import Event, EventType
+from groups.models import Group
+from learnscripture.forms import AccountSetPasswordForm
 from scores.models import Scores, ScoreReason
 
 from .base import AccountTestMixin
+
+__all__ = ['AccountTests', 'PasswordResetTest']
 
 class AccountTests(AccountTestMixin, TestCase):
     def test_password(self):
@@ -23,7 +31,6 @@ class AccountTests(AccountTestMixin, TestCase):
         acc.set_password('mypassword')
         self.assertTrue(acc.check_password('mypassword'))
         self.assertFalse(acc.check_password('123'))
-
 
     def test_award_action_points_revision(self):
         a = Account.objects.create(username='test',
@@ -351,3 +358,111 @@ class AccountTests(AccountTestMixin, TestCase):
         w2_with_3 = account2.get_friendship_weights()[account3.id]
 
         self.assertTrue(w2_with_3 > w2_with_1)
+
+
+class PasswordResetTest(TestCase):
+
+    def setUp(self):
+        super(PasswordResetTest, self).setUp()
+        account = Account.objects.create(username='any_user',
+                                         email='any_user@example.com')
+        account.set_password('foo')
+        account.save()
+
+    def assertURLEqual(self, url, expected, parse_qs=False):
+        """
+        Given two URLs, make sure all their components (the ones given by
+        urlparse) are equal, only comparing components that are present in both
+        URLs.
+        If `parse_qs` is True, then the querystrings are parsed with QueryDict.
+        This is useful if you don't want the order of parameters to matter.
+        Otherwise, the query strings are compared as-is.
+        """
+        fields = ParseResult._fields
+
+        for attr, x, y in zip(fields, urlparse(url), urlparse(expected)):
+            if parse_qs and attr == 'query':
+                x, y = QueryDict(x), QueryDict(y)
+            if x and y and x != y:
+                self.fail("%r != %r (%s doesn't match)" % (url, expected, attr))
+
+    def assertFormError(self, response, error):
+        """Assert that error is found in response.context['form'] errors"""
+        form_errors = list(itertools.chain(*response.context['form'].errors.values()))
+        self.assertIn(force_text(error), form_errors)
+
+    def test_email_not_found(self):
+        """If the provided email is not registered, don't raise any error but
+        also don't send any email."""
+        response = self.client.get('/login/')
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post('/login/', {'login-email': 'not_a_real_email@email.com',
+                                                'forgotpassword': '1'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(mail.outbox), 0)
+
+    def _test_confirm_start(self):
+        # Start by creating the email
+        response = self.client.post('/login/', {'login-email': 'any_user@example.com',
+                                                'forgotpassword': '1'})
+        self.assertURLEqual(response.url, '/password-reset/')
+        self.assertEqual(len(mail.outbox), 1)
+        return self._read_signup_email(mail.outbox[0])
+
+    def _read_signup_email(self, email):
+        urlmatch = re.search(r"https?://[^/]*(/.*reset/\S*)", email.body)
+        self.assertTrue(urlmatch is not None, "No URL found in sent email")
+        return urlmatch.group(), urlmatch.groups()[0]
+
+    def test_confirm_valid(self):
+        url, path = self._test_confirm_start()
+        response = self.client.get(path)
+        # redirect to a 'complete' page:
+        self.assertContains(response, "Please enter your new password")
+
+    def test_confirm_invalid(self):
+        url, path = self._test_confirm_start()
+        # Let's munge the token in the path, but keep the same length,
+        # in case the URLconf will reject a different length.
+        path = path[:-5] + ("0" * 4) + path[-1]
+
+        response = self.client.get(path)
+        self.assertContains(response, "The password reset link was invalid")
+
+    def test_confirm_invalid_user(self):
+        # Ensure that we get a 200 response for a non-existant user, not a 404
+        response = self.client.get('/reset/123456/1-1/')
+        self.assertContains(response, "The password reset link was invalid")
+
+    def test_confirm_invalid_post(self):
+        # Same as test_confirm_invalid, but trying
+        # to do a POST instead.
+        url, path = self._test_confirm_start()
+        path = path[:-5] + ("0" * 4) + path[-1]
+
+        self.client.post(path, {
+            'new_password1': 'anewpassword',
+            'new_password2': 'anewpassword',
+        })
+        # Check the password has not been changed
+        u = Account.objects.get(email='any_user@example.com')
+        self.assertTrue(not u.check_password("anewpassword"))
+
+    def test_confirm_complete(self):
+        url, path = self._test_confirm_start()
+        response = self.client.post(path, {'new_password1': 'anewpassword',
+                                           'new_password2': 'anewpassword'})
+        # Check the password has been changed
+        u = Account.objects.get(email='any_user@example.com')
+        self.assertTrue(u.check_password("anewpassword"))
+
+        # Check we can't use the link again
+        response = self.client.get(path)
+        self.assertContains(response, "The password reset link was invalid")
+
+    def test_confirm_different_passwords(self):
+        url, path = self._test_confirm_start()
+        response = self.client.post(path, {'new_password1': 'anewpassword',
+                                           'new_password2': 'x'})
+        self.assertFormError(response, AccountSetPasswordForm.error_messages['password_mismatch'])
+
