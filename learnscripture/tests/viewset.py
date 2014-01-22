@@ -11,6 +11,8 @@ from bibleverses.models import VerseSet
 
 from .base import LiveServerTests
 
+__all__ = ['ViewSetTests']
+
 
 class ViewSetTests(LiveServerTests):
 

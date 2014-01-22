@@ -6,6 +6,9 @@ from django.test import TestCase
 from accounts.models import Account, Identity
 
 
+__all__ = ['UserStatsTests']
+
+
 class UserStatsTests(TestCase):
 
     def test_get(self):

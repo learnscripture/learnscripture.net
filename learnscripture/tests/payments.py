@@ -15,6 +15,9 @@ from payments.hooks import paypal_payment_received
 from payments.models import DonationDrive
 from payments.sign import sign_payment_info
 
+__all__ = ['PaymentTests', 'DonationDriveTests']
+
+
 class IpnMock(object):
     payment_status = 'Completed'
 

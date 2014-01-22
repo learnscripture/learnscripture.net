@@ -6,6 +6,9 @@ from bibleverses.models import VerseSet, VerseSetType
 
 from .base import AccountTestMixin
 
+__all__ = ['VerseSetTests']
+
+
 class VerseSetTests(AccountTestMixin, TestCase):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json']

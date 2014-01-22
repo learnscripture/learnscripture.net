@@ -14,6 +14,8 @@ from events.models import Event, EventType
 
 from .base import LiveServerTests
 
+__all__ = ['CreateSetTests']
+
 
 class CreateSetTests(LiveServerTests):
 

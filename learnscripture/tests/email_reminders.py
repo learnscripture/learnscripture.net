@@ -12,6 +12,9 @@ from bibleverses.models import VerseSet, StageType
 
 from .base import AccountTestMixin
 
+__all__ = ['EmailReminderTests']
+
+
 class EmailReminderTests(AccountTestMixin, TestCase):
 
     fixtures = ['test_bible_versions.json', 'test_verse_sets.json', 'test_bible_verses.json']

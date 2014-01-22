@@ -9,6 +9,8 @@ from groups.models import Group
 
 from .base import LiveServerTests, AccountTestMixin
 
+__all__ = ['CommentPageTests', 'CommentTests']
+
 
 class CommentPageTests(LiveServerTests):
 

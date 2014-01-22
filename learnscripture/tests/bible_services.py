@@ -5,6 +5,8 @@ import unittest
 
 from bibleverses.services import get_esv
 
+__all__ = ['TestEsvService']
+
 class TestEsvService(unittest.TestCase):
 
     def test_get_esv_single(self):

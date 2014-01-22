@@ -20,6 +20,8 @@ from scores.models import Scores, ScoreReason
 
 from .base import LiveServerTests
 
+__all__ = ['LearnTests']
+
 
 class LearnTests(LiveServerTests):
 
