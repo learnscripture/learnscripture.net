@@ -15,7 +15,7 @@ django-spurl==0.6
 urlobject==2.0.0
 -e git+git://github.com/jbalogh/django-cache-machine.git@7c3d3abfc85fc26d0e522fd05e9a42fc9b9a5430#egg=django-cache-machine
 pytz
--e git+https://github.com/spookylukey/django-paypal@27627681c00bb433221cb308ea173e1328bac545#egg=paypal
+paypal==0.1.3
 docutils
 supervisor
 celery==3.1.7
