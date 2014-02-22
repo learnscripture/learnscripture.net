@@ -11,6 +11,7 @@ from django.db import models
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.views import password_change as auth_password_change
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.core import mail
@@ -30,7 +31,7 @@ from accounts import memorymodel
 from accounts.models import Account, Identity
 from accounts.forms import PreferencesForm, AccountDetailsForm
 from awards.models import AwardType, AnyLevel, Award
-from learnscripture.forms import AccountSetPasswordForm, ContactForm, LogInForm, AccountPasswordResetForm, SignUpForm
+from learnscripture.forms import AccountSetPasswordForm, ContactForm, LogInForm, AccountPasswordResetForm, SignUpForm, AccountPasswordChangeForm
 
 from bibleverses.models import VerseSet, TextVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType, get_passage_sections, TextType
 from bibleverses.signals import public_verse_set_created
@@ -1030,6 +1031,20 @@ def password_reset_confirm(request, uidb64=None, token=None):
         'title': 'Password reset',
     }
     return render(request, 'learnscripture/password_reset_confirm.html', context)
+
+
+@require_account
+def password_change(request):
+    return auth_password_change(request,
+                                template_name="learnscripture/password_change_form.html",
+                                post_change_redirect=reverse('learnscripture_password_change_done'),
+                                password_change_form=AccountPasswordChangeForm,
+                                )
+
+
+def password_change_done(request):
+    return render(request, "learnscripture/password_change_done.html",
+                  {})
 
 
 def csrf_failure(request, reason=""):
