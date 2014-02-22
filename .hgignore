@@ -3,3 +3,4 @@ syntax:glob
 *~
 *.orig
 secrets.json
+settings_priv.py
