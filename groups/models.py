@@ -108,6 +108,12 @@ class Group(models.Model):
         return self.comments.create(author=author,
                                     message=message)
 
+    def comments_visible_for_account(self, account):
+        qs = self.comments.all()
+        if not account.is_hellbanned:
+            qs = qs.filter(author__is_hellbanned=False)
+        return qs
+
 
 class Membership(models.Model):
     account = models.ForeignKey(Account, related_name='memberships')
