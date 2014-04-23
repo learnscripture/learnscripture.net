@@ -30,12 +30,18 @@ class IdentityAdmin(admin.ModelAdmin):
     def queryset(self, request):
         return super(IdentityAdmin, self).queryset(request).select_related('account', 'referred_by')
 
+
+def hellban_account(modeladmin, request, queryset):
+    queryset.update(is_hellbanned=True)
+hellban_account.short_description = "Hell-ban selected accounts"
+
+
 class AccountAdmin(admin.ModelAdmin):
-    list_display = ['username', 'email', 'first_name', 'last_name', 'date_joined']
+    list_display = ['username', 'email', 'first_name', 'last_name', 'date_joined', 'is_hellbanned']
     ordering = ['date_joined']
     search_fields = ['username', 'email']
     filter_horizontal = ['following']
-
+    actions = [hellban_account]
 
 class NoticeAdmin(admin.ModelAdmin):
     def queryset(self, request):
