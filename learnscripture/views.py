@@ -1346,7 +1346,7 @@ def group(request, slug):
                    'can_join': group.can_join(account),
                    'can_edit': group.can_edit(account),
                    'include_referral_links': True,
-                   'comments': reversed(group.comments.order_by('-created')[:GROUP_COMMENTS_SHORT_CUTOFF])
+                   'comments': reversed(group.comments_visible_for_account(account).order_by('-created')[:GROUP_COMMENTS_SHORT_CUTOFF])
                    })
 
 
@@ -1360,7 +1360,7 @@ def group_wall(request, slug):
     return render(request, 'learnscripture/group_wall.html',
                   {'title': 'Group wall: %s' % group.name,
                    'group': group,
-                   'comments': group.comments.order_by('-created'),
+                   'comments': group.comments_visible_for_account(account).order_by('-created'),
                    })
 
 
