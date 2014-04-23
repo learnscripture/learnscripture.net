@@ -37,11 +37,17 @@ hellban_account.short_description = "Hell-ban selected accounts"
 
 
 class AccountAdmin(admin.ModelAdmin):
-    list_display = ['username', 'email', 'first_name', 'last_name', 'date_joined', 'is_hellbanned']
+    def referred_by(account):
+        return account.identity.referred_by
+    list_display = ['username', 'email', 'first_name', 'last_name', 'date_joined', 'is_hellbanned', referred_by]
     ordering = ['date_joined']
     search_fields = ['username', 'email']
     filter_horizontal = ['following']
     actions = [hellban_account]
+
+    def queryset(self, request):
+        return super(AccountAdmin, self).queryset(request).select_related('identity__referred_by')
+
 
 class NoticeAdmin(admin.ModelAdmin):
     def queryset(self, request):
