@@ -110,8 +110,8 @@ class Group(models.Model):
 
     def comments_visible_for_account(self, account):
         qs = self.comments.all()
-        if not account.is_hellbanned:
-            qs = qs.filter(author__is_hellbanned=False)
+        if account is None or not account.is_hellbanned:
+            qs = qs.exclude(author__is_hellbanned=True)
         return qs
 
 
