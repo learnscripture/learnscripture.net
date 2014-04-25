@@ -50,7 +50,7 @@
   <li><b>Closed</b>: only invited users can join.</li>
   {% endif %}
 
-  <li><a class="iconafter-leaderboard" href="{% url 'leaderboard' %}?group={{ group.id }}">Leaderboard for {{ group.name }}</a></li>
+  <li><a href="{% url 'leaderboard' %}?group={{ group.id }}">Leaderboard for {{ group.name }} <i class="icon-leaderboard"></i></a></li>
 </ul>
 
 
@@ -70,7 +70,7 @@
   <form action="" method="POST">
     {% csrf_token %}
     {% if group.public %}
-    <span class="icon-public icon-replace" title="This action is public">&nbsp;</span>
+    <i title="This action is public" class="icon-public icon-replace"></i>
     {% endif %}
 
     <input type="submit" name="join" class="primary btn join-group-btn needs-account" value="Join group" />
@@ -112,8 +112,8 @@
 {% block rightcolumn %}
 <h3>See also:</h3>
 <ul>
-  <li><a class="iconafter-comment" href="{% url 'group_wall' group.slug %}">Group wall</a></li>
-  <li><a class="iconafter-leaderboard" href="{% url 'leaderboard' %}?group={{ group.id }}">Leaderboard</a></li>
+  <li><a href="{% url 'group_wall' group.slug %}">Group wall <i class="icon-comment"></i></a></li>
+  <li><a href="{% url 'leaderboard' %}?group={{ group.id }}">Leaderboard <i class="icon-leaderboard"></a></li>
   {% if can_edit %}
   <li><a href="{% url 'edit_group' group.slug %}">Edit this group</a></li>
   {% endif %}

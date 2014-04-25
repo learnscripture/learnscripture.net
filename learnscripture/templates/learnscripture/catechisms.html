@@ -21,7 +21,7 @@ would like added, please <a href="{% url 'contact' %}">contact us</a>.</p>
   <form action="" method="POST">
     {% csrf_token %}
     <input type="hidden" name="catechism_id" value="{{ catechism.id }}">
-    <span class="icon-public icon-replace" title="This action is public">&nbsp;</span>
+    <i class="icon-public" title="This action is public"></i>
     <input type="submit" class="btn primary needs-preferences" value="Learn" id="id-learn-catechism-btn-{{ catechism.id }}">
   </form>
 

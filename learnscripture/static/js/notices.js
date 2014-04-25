@@ -44,14 +44,14 @@ var learnscripture = (function (learnscripture, $) {
                 '&redirect_uri=' + encodeURIComponent(redirectUri) +
                 '&caption=' + encodeURIComponent(caption) +
                 '&picture=' + encodeURIComponent(urlStart + d['picture']);
-            html = html + '<a href="' + fbUrl + '" class="icon-facebook">Facebook</a>';
+            html = html + '<a href="' + fbUrl + '"><i class="icon-facebook"></i> Facebook</a>';
 
             // Twitter
             var twUrl = 'http://twitter.com/share' +
                 '?url=' + encodeURIComponent(link) +
                 '&text=' + encodeURIComponent(caption) +
                 '&hashtags=LearnScripture';
-            html = html + ' &nbsp; <a href="' + twUrl + '" class="icon-twitter">Twitter</a>';
+            html = html + ' &nbsp; <a href="' + twUrl + '"><i class="icon-twitter"></i> Twitter</a>';
 
             j.html(html);
         });

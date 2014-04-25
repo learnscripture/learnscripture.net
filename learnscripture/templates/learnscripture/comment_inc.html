@@ -12,7 +12,7 @@
           {% endif %}
           {% if request_account.is_moderator %}
           <span class="commentmoderation">
-            <a href="#" class="icon-moderate icon-replace moderate-comment" title="Moderate comment">x</a>
+            <a href="#" title="Moderate comment" class="moderate-comment"><i class="icon-moderate"></i></a>
           </span>
           {% endif %}
           <span class="timestamp">{{ comment.created|date:"Y-m-d H:i" }}</span>
@@ -20,6 +20,6 @@
             {{ comment.message_formatted }}
           </div>
           {% if show_as_related_comment %}
-          <div class="relatedaddcomment"><a href="{{ comment.get_absolute_url }}" class="icon-comment">Add your comment</a></div>
+          <div class="relatedaddcomment"><a href="{{ comment.get_absolute_url }}"><i class="icon-comment"></i> Add your comment</a></div>
           {% endif %}
         </div>
