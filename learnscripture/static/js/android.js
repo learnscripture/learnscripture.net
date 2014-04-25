@@ -2,6 +2,15 @@ $(document).ready(function () {
     "use strict";
     var CURRENT_ANDROID_APP_VERSION = 11;
     if (window.androidlearnscripture) {
+
+        if (window.androidlearnscripture.showMenu) {
+            $('.android-appmenu-link').on('click', function (ev) {
+                ev.preventDefault();
+                window.androidlearnscripture.showMenu();
+            });
+            $('.android-appmenu-link').closest('li').attr('style', '').show();
+        }
+
         if (window.androidlearnscripture.getVersionCode == undefined ||
             window.androidlearnscripture.getVersionCode() < CURRENT_ANDROID_APP_VERSION) {
             $('.page-header').after(
