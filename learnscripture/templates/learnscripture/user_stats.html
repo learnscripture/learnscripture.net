@@ -207,10 +207,10 @@ that you are both in will also affect your news stream.
 
 {% endif %}
 
-<p><a href="{% url 'leaderboard' %}" class="icon-leaderboard">See all rankings</a></p>
+<p><a href="{% url 'leaderboard' %}"><i class="icon-leaderboard"></i> See all rankings</a></p>
 
 {% if request_account.username == account.username %}
-<p><a href="{% url 'user_verses' %}" class="icon-progress">See detailed progress on verse learning</a></p>
+<p><a href="{% url 'user_verses' %}"><i class="icon-progress"></i> See detailed progress on verse learning</a></p>
 {% endif %}
 
 

@@ -1,47 +1,18 @@
-[class^="icon-"]:before {
-  font-family: HeydingsCommonIconsRegular;
-  margin-right: 5px;
-}
-[class^="iconafter-"]:after {
-  font-family: HeydingsCommonIconsRegular;
-  margin-left: 5px;
-}
-a[class^="icon-"]:hover:before {
-  text-decoration: none;
-}
-
-
-.icon-replace {
-  text-indent: -9999px;
-  overflow: hidden;
-  display: inline-block;
-  position: relative;
-  min-width: 1em;
-}
-.icon-replace:before {
-  position: absolute;
-  left: 0;  /* Firefox needs to be explicit here */
-  top: 0;
-  text-indent: 0;
-}
-
-.icon-stats:before { content: "v"; }
-.icon-progress:before { content: "s"; }
-.icon-verse-sets:before { content: "0"; }
-.icon-leaderboard:before { content: "g"; }
-.icon-account:before { content: "A"; }
-.icon-logout:before { content: "e"; }
-.icon-preferences:before { content: "G"; }
-.icon-arrow-up:before { content: "u"; }
-.icon-arrow-down:before { content: "d"; }
-.icon-trash:before { content: "-"; }
-.icon-login:before { content: "K"; }
-.icon-public:before { content: "6"; }
-.icon-facebook:before { content: "7"; }
-.icon-twitter:before { content: "9"; }
-.iconafter-leaderboard:after { content: "g"; }
-.iconafter-public:after { content: "6"; }
-.icon-comment:before { content: "b"; }
-.iconafter-comment:after { content: "b"; }
-.icon-link:before { content: "a"; }
-.icon-moderate:before { content: "2"; }
+.icon-stats:before { content: @fa-var-bar-chart-o; }
+.icon-progress:before { content: @fa-var-star; }
+.icon-verse-sets:before { content: @fa-var-folder; }
+.icon-leaderboard:before { content: @fa-var-arrows-v; }
+.icon-account:before { content: @fa-var-user; }
+.icon-logout:before { content: @fa-var-sign-out; }
+.icon-preferences:before { content: @fa-var-wrench; }
+.icon-arrow-up:before { content: @fa-var-arrow-up; }
+.icon-arrow-down:before { content: @fa-var-arrow-down; }
+.icon-trash:before { content: @fa-var-trash-o; }
+.icon-login:before { content: @fa-var-sign-in; }
+.icon-public:before { content: @fa-var-bullhorn; }
+.icon-facebook:before { content: @fa-var-facebook-square; }
+.icon-twitter:before { content: @fa-var-twitter-square; }
+.icon-comment:before { content: @fa-var-comment-o; }
+.icon-link:before { content: @fa-var-link; }
+.icon-moderate:before { content: @fa-var-thumbs-down; }
+.icon-appmenu:before { content: @fa-var-ellipsis-v; }
