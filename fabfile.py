@@ -251,6 +251,10 @@ def build_static():
     assert target.STATIC_ROOT.strip() != '' and target.STATIC_ROOT.strip() != '/'
     with virtualenv(target.VENV_DIR):
         with cd(target.SRC_DIR):
+             # django-compressor doesn't always find changes if we don't do this:
+            run("touch learnscripture/static/css/learnscripture.less")
+
+            # django-compressor doesn't always find
             run_venv("./manage.py collectstatic -v 0 --noinput")
 
     run("chmod -R ugo+r %s" % target.STATIC_ROOT)
