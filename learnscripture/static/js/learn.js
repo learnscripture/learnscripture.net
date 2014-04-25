@@ -717,6 +717,16 @@ var learnscripture =
             // 4 = 2 * size of #id-typing border
             inputBox.css({height: (wordBox.outerHeight() - 4).toString() + "px",
                           width: width});
+        };
+
+        var forceShowKeyboard = function () {
+            // Attempt to force keyboard to be shown. This is needed in case
+            // android app user pressed 'Enter' instead of 'space'
+            if (window.androidlearnscripture &&
+                window.androidlearnscripture.showKeyboard) {
+                inputBox.focus();
+                window.androidlearnscripture.showKeyboard();
+            }
 
         };
 
@@ -824,7 +834,7 @@ var learnscripture =
                 if (isReference) {
                     fadeVerseTitle(true);
                 }
-
+                forceShowKeyboard();
             }
         };
 
@@ -852,6 +862,7 @@ var learnscripture =
                 } else {
                     indicateMistake(Math.round(testingMistakes[wordIdx] / mistakeVal),
                                     testMaxAttempts);
+                    forceShowKeyboard();
                 }
             }
         };
@@ -1417,6 +1428,13 @@ var learnscripture =
 
         };
 
+        var inputFocused = function (ev) {
+            if (window.androidlearnscripture &&
+                window.androidlearnscripture.registerInputFocused) {
+                window.androidlearnscripture.registerInputFocused();
+            }
+        }
+
         var docKeyPress = function (ev) {
             var tagName = ev.target.tagName.toLowerCase();
             if (tagName === 'input' ||
@@ -1551,6 +1569,7 @@ var learnscripture =
             });
 
             inputBox = $('#id-typing');
+            inputBox.on('focus', inputFocused);
             // Chrome on Android does not fire onkeypress, only keyup and keydown.
             // It also fires onchange only after pressing 'Enter' and closing
             // the on-screen keyboard.
