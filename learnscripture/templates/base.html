@@ -60,7 +60,7 @@
                   <li><a href="{% url 'login' %}"><i class="icon-fw icon-login"></i> Sign in</a></li>
                   <li><a href="{% url 'signup' %}?next={{ request.get_full_path|urlencode }}"><i class="icon-fw icon-account"></i> Create account</a></li>
                   {% endif %}
-                  <li><a href="{% url 'preferences' %}?next={{ request.path_info }}"><i class="icon-fw icon-preferences"></i> Preferences</a></li>
+                  <li><a href="{% url 'preferences' %}?next={{ request.path_info }}" class="preferences-link"><i class="icon-fw icon-preferences"></i> Preferences</a></li>
                   {% if request_account %}
                   <li><a href="{% url 'account_details' %}"><i class="icon-fw icon-account"></i> Account details</a></li>
                   <li><a href="{% url 'user_verses' %}"><i class="icon-fw icon-progress"></i> Verse progress</a>
