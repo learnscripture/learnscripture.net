@@ -856,7 +856,7 @@ class Identity(models.Model):
                       memory_stage=MemoryStage.TESTED)
               # Don't include passages - we do those separately:
               .exclude(verse_set__set_type=VerseSetType.PASSAGE)
-              .order_by('added', 'id')
+              .order_by('next_test_due', 'added')
               )
         qs = memorymodel.filter_qs(qs, timezone.now())
         return self._dedupe_uvs_set(qs)
