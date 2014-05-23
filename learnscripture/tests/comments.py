@@ -103,6 +103,7 @@ class CommentPageTests(LiveServerTests):
         self.click('.moderate-comment', produces_alert=True)
         self.confirm()
         self.wait_for_ajax()
+        time.sleep(1)
 
         # Test page
         self.assertNotIn("This is a naughty message", self.driver.page_source)
