@@ -156,9 +156,6 @@ var learnscripture =
         // === Exports ===
         learnscripture.setupAudio = setupAudio;
         learnscripture.doBeep = doBeep;
-        learnscripture.dataUriAudioBeep = dataUriAudioBeep;
-        learnscripture.audioContextBeep = audioContextBeep;
-        learnscripture.mozAudioBeep = mozAudioBeep;
 
         return learnscripture;
     }(learnscripture || {}, $));
