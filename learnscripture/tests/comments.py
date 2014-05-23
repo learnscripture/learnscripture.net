@@ -56,6 +56,30 @@ class CommentPageTests(LiveServerTests):
         self.assertEqual(self.event_identity.notices.filter(related_event=self.event).count(),
                          1)
 
+    def test_no_event_from_hellbanned_users(self):
+
+        self.account.is_hellbanned = True
+        self.account.save()
+        message = "This is my comment"
+        self.login(self.account)
+        self.get_url('activity_stream')
+        self.click('.show-add-comment')
+        self.send_keys('#id-comment-box', message)
+        self.click('#id-add-comment-btn')
+
+        # Test db - user should be able to see own message
+        c = Comment.objects.get()
+        self.assertEqual(c.author, self.account)
+        self.assertEqual(c.message, "This is my comment")
+
+        # Test event NOT created
+        self.assertEqual(Event.objects.filter(
+                parent_event=self.event,
+                event_type=EventType.NEW_COMMENT,
+                account=self.account).count(),
+                         0)
+
+
     def test_moderate_comment(self):
         other_identity, other_account = self.create_account(username="other",
                                                             email="other@other.com")

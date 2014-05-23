@@ -131,7 +131,7 @@ def create_new_comment_event(comment_id):
 
     # Hellbanning filtering - don't notify normal users of comments from
     # hellbanned users:
-    if (account.is_hellbanned and not parent_event.account.is_hellbanned):
+    if account.is_hellbanned:
         return
 
     NewCommentEvent(account=account, comment=comment).save()
