@@ -288,14 +288,14 @@ var learnscripture =
             var msg = "Try again! (" + mistakes.toString() + "/" + maxMistakes.toString() + ")";
             flashMsg(testingStatus.attr({'class': 'incorrect'}).text(msg),
                      getWordAt(currentWordIndex));
-            beep(330, 0.05);
+            beep(330, 0.10);
         };
 
         var indicateFail = function () {
             var word = getWordAt(currentWordIndex);
             word.addClass('incorrect');
             flashMsg(testingStatus.attr({'class': 'incorrect'}).text("Incorrect"), word);
-            beep(220, 0.05);
+            beep(220, 0.10);
         };
 
         // ========== Actions completed =============
