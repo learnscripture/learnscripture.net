@@ -24,6 +24,7 @@ class ReferralsTests(LiveServerTests):
         # Start at home page
         start_url = account.make_referral_link(self.live_server_url)
         driver.get(start_url)
+        self.wait_until_loaded('body')
         self.click('a.btn.primary')
 
         # Should be at 'choose' page now

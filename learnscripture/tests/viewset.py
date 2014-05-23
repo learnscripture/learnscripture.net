@@ -39,6 +39,7 @@ class ViewSetTests(LiveServerTests):
 
         driver.get(self.live_server_url + reverse('view_verse_set', kwargs=dict(slug=vs.slug))
                    + "?version=NET")
+        self.wait_until_loaded('body')
         self.click("input[value='Learn']")
 
         # Can use 'all' here because this is the first time we've chosen anything

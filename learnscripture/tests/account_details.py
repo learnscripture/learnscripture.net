@@ -14,8 +14,8 @@ class AccountDetailsTests(LiveServerTests):
     def test_change_first_name(self):
         identity, account = self.create_account()
         self.login(account)
-        driver = self.driver
-        driver.get(self.live_server_url)
+        self.driver.get(self.live_server_url)
+        self.wait_until_loaded('body')
 
         self.click("#id-session-menu")
         # Should have an 'account' link
