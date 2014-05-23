@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+import time
+
 from autofixture import AutoFixture
 from django.test import TestCase
 
@@ -66,6 +68,7 @@ class CommentPageTests(LiveServerTests):
         self.click('.show-add-comment')
         self.send_keys('#id-comment-box', message)
         self.click('#id-add-comment-btn')
+        time.sleep(1)
 
         # Test db - user should be able to see own message
         c = Comment.objects.get()
