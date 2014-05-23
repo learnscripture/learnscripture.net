@@ -374,10 +374,10 @@ var learnscripture =
                 $('#id-finish-btn').hide();
             }
 
-            if (accuracyPercent < 85) {
+            if (accuracyPercent < 90) {
                 $('#id-more-practice-btn').show();
 
-                if (accuracyPercent < 60) {
+                if (accuracyPercent < 80) {
                     // 'More practice' the default
                     $('#id-more-practice-btn').addClass('primary');
                     $('#id-next-verse-btn').removeClass('primary');
