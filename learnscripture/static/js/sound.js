@@ -127,8 +127,13 @@ var learnscripture =
             var source = audioContext.createOscillator();
             source.frequency.value = frequency;
             source.connect(audioContext.destination);
-            source.noteOn(0);
-            source.noteOff(audioContext.currentTime + length);
+            if (source.noteOn != undefined) {
+                source.noteOn(0);
+                source.noteOff(audioContext.currentTime + length);
+            } else if (source.start != undefined) {
+                source.start(0);
+                source.stop(audioContext.currentTime + length);
+            }
         }
 
         var doBeep = function (frequency, length) {
