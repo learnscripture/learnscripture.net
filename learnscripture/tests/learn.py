@@ -3,20 +3,15 @@ from __future__ import absolute_import
 from datetime import timedelta
 from decimal import Decimal
 import math
-import re
-import time
 
 from django.db.models import F
-from django.core.urlresolvers import reverse
-from django.utils import timezone
-from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 
 from accounts.models import Identity, Account
 from accounts.memorymodel import MM
 from awards.models import AwardType, StudentAward, AceAward
-from bibleverses.models import TextVersion, VerseSet, VerseSetType, VerseChoice, MemoryStage, StageType
-from scores.models import Scores, ScoreReason
+from bibleverses.models import VerseSet, MemoryStage, StageType
+from scores.models import Scores
 
 from .base import LiveServerTests
 
@@ -45,7 +40,6 @@ class LearnTests(LiveServerTests):
 
     def add_verse_set(self, name):
         verse_set = VerseSet.objects.get(name=name)
-        driver = self.driver
         self.get_url('preferences') # ensure we have an Identity
         self.set_preferences()
         identity = self._get_current_identity()
@@ -75,7 +69,6 @@ class LearnTests(LiveServerTests):
 
     def test_save_strength(self):
         verse_set = self.choose_verse_set('Bible 101')
-        driver = self.driver
         identity = self._get_current_identity()
 
         # Preconditions - should have been set up by choose_verse_set
@@ -101,7 +94,6 @@ class LearnTests(LiveServerTests):
 
     def test_typing_verse_combo(self):
         identity, account = self.create_account()
-        driver = self.driver
         self.login(account)
 
         identity.add_verse_choice('Psalm 23:1-2')
@@ -136,7 +128,7 @@ class LearnTests(LiveServerTests):
     def test_points_and_student_award(self):
         identity, account = self.create_account()
         self.login(account)
-        verse_set = self.choose_verse_set('Bible 101')
+        self.choose_verse_set('Bible 101')
         driver = self.driver
 
         # Do the reading:
@@ -167,8 +159,7 @@ class LearnTests(LiveServerTests):
 
 
     def test_change_version_passage(self):
-        verse_set = self.choose_verse_set('Psalm 23')
-        driver = self.driver
+        self.choose_verse_set('Psalm 23')
 
         self.assertEqual(u"Psalm 23:1", self.find("#id-verse-title").text)
         self.assertIn(u"I shall not want", self.find('.current-verse').text)
@@ -194,12 +185,11 @@ class LearnTests(LiveServerTests):
     def test_revise_passage_mixed(self):
         # Test revising a passage when some verses are to be tested and others
         # are just being read.
-        import time
         driver = self.driver
         identity, account = self.create_account()
         self.login(account)
 
-        verse_set = self.add_verse_set('Psalm 23')
+        self.add_verse_set('Psalm 23')
 
         for i in range(1, 7):
             identity.record_verse_action('Psalm 23:%d' % i, 'KJV', StageType.TEST,
@@ -224,8 +214,7 @@ class LearnTests(LiveServerTests):
         self.assertTrue(driver.current_url.endswith('/dashboard/'))
 
     def test_skip_verse(self):
-        verse_set = self.choose_verse_set('Bible 101')
-        driver = self.driver
+        self.choose_verse_set('Bible 101')
 
         self.assertEqual(u"John 3:16", self.find("#id-verse-title").text)
 
@@ -240,8 +229,7 @@ class LearnTests(LiveServerTests):
         self.assertEqual(u"John 14:6", self.find("#id-verse-title").text)
 
     def test_cancel_learning(self):
-        verse_set = self.add_verse_set('Bible 101')
-        driver = self.driver
+        self.add_verse_set('Bible 101')
 
         identity = self._get_current_identity()
         # Ensure that we have seen some verses
@@ -270,8 +258,7 @@ class LearnTests(LiveServerTests):
         self.assertEqual(u"John 14:6", self.find("#id-verse-title").text)
 
     def test_reset_progress(self):
-        verse_set = self.add_verse_set('Bible 101')
-        driver = self.driver
+        self.add_verse_set('Bible 101')
         identity = self._get_current_identity()
         # Ensure that we have seen some verses
         identity.record_verse_action('John 3:16', 'KJV', StageType.TEST, 1.0)
@@ -304,8 +291,7 @@ class LearnTests(LiveServerTests):
 
 
     def test_finish_button(self):
-        verse_set = self.add_verse_set('Bible 101')
-        driver = self.driver
+        self.add_verse_set('Bible 101')
 
         identity = self._get_current_identity()
         # Ensure that we have seen some verses
@@ -331,10 +317,9 @@ class LearnTests(LiveServerTests):
     def test_more_practice(self):
         # tests that the 'more practice' button appears, and works
 
-        driver = self.driver
         identity, account = self.create_account()
         self.login(account)
-        verse_set = self.add_verse_set('Bible 101')
+        self.add_verse_set('Bible 101')
 
         # Learn one
         identity.record_verse_action('John 3:16', 'KJV', StageType.TEST, 1.0)
@@ -372,10 +357,9 @@ class LearnTests(LiveServerTests):
         self.assertEqual(account.score_logs.count(), 3)
 
     def test_hint_button(self):
-        driver = self.driver
         identity, account = self.create_account()
         self.login(account)
-        verse_set = self.add_verse_set('Bible 101')
+        self.add_verse_set('Bible 101')
 
         # Learn one
         identity.record_verse_action('John 3:16', 'KJV', StageType.TEST, 1.0)

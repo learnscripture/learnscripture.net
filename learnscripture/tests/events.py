@@ -4,9 +4,8 @@ from autofixture import AutoFixture
 from django.test import TestCase
 from django.utils import timezone
 
-from events.models import Event, EventType, NewCommentEvent, GroupJoinedEvent, PointsMilestoneEvent
+from events.models import Event, EventType, GroupJoinedEvent, PointsMilestoneEvent
 from comments.models import Comment
-from accounts.models import Account
 from groups.models import Group
 
 from .base import AccountTestMixin

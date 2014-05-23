@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import os.path
-import sys
 
 import cairo
 import rsvg

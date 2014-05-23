@@ -1,4 +1,3 @@
-import os
 import sys
 
 from django.core.management.base import BaseCommand
@@ -25,5 +24,5 @@ class Command(BaseCommand):
                         .annotate(verse_statuses_count=Count('verse_statuses'))\
                         .filter(verse_statuses_count=0)\
                         .delete()
-        except Exception as e:
+        except Exception:
             logger.error("Couldn't clean old identities", exc_info=sys.exc_info())

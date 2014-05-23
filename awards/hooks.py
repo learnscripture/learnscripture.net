@@ -86,7 +86,6 @@ def new_account_receiver(sender, **kwargs):
 @receiver(verse_tested)
 def verse_tested_receiver(sender, **kwargs):
     identity = sender
-    verse = kwargs['verse']
     # Delay to allow this request's transaction to finish count to be updated.
     awards.tasks.give_learning_awards.apply_async([identity.account_id],
                                                   countdown=2)

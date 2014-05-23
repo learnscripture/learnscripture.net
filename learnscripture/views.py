@@ -2,12 +2,10 @@ from __future__ import unicode_literals
 
 import csv
 from datetime import timedelta
-from decimal import Decimal
 import re
 import urlparse
 
 import django.contrib.auth
-from django.db import models
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.tokens import default_token_generator
@@ -27,13 +25,12 @@ from django.views.decorators.debug import sensitive_post_parameters
 
 from paypal.standard.forms import PayPalPaymentsForm
 
-from accounts import memorymodel
 from accounts.models import Account, Identity
 from accounts.forms import PreferencesForm, AccountDetailsForm
 from awards.models import AwardType, AnyLevel, Award
 from learnscripture.forms import AccountSetPasswordForm, ContactForm, LogInForm, AccountPasswordResetForm, SignUpForm, AccountPasswordChangeForm
 
-from bibleverses.models import VerseSet, TextVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseChoice, VerseSetType, get_passage_sections, TextType
+from bibleverses.models import VerseSet, TextVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseSetType, get_passage_sections, TextType
 from bibleverses.signals import public_verse_set_created
 from events.models import Event
 from learnscripture import session
@@ -42,7 +39,7 @@ from groups.forms import EditGroupForm
 from groups.models import Group
 from groups.signals import public_group_created
 from payments.sign import sign_payment_info
-from scores.models import get_all_time_leaderboard, get_leaderboard_since, ScoreReason, get_verses_tested_per_day, get_verses_started_per_day, get_verses_started_counts
+from scores.models import get_all_time_leaderboard, get_leaderboard_since, get_verses_tested_per_day, get_verses_started_per_day, get_verses_started_counts
 
 from .decorators import require_identity, require_preferences, has_preferences, redirect_via_prefs, require_account, require_account_with_redirect
 
@@ -1378,12 +1375,10 @@ def create_or_edit_group(request, slug=None):
     if slug is not None:
         groups = groups_editable_for_request(request).filter(slug=slug)
         group = get_object_or_404(groups)
-        mode = 'edit'
         title = u'Edit group: %s' % group.name
         initial = {'invited_users': group.invited_users()}
     else:
         group = None
-        mode = 'create'
         title = u"Create group"
         initial = {}
 

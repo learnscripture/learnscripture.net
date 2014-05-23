@@ -1,15 +1,10 @@
 from __future__ import absolute_import
-import time, re
+import time
 
-from django.core.urlresolvers import reverse
-from django.test import TestCase
-from selenium import webdriver
-from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.support.ui import Select
 
 from awards.models import AwardType
-from bibleverses.models import VerseSet, VerseSetType, VerseChoice, StageType
+from bibleverses.models import VerseSet, VerseSetType, StageType
 from events.models import Event, EventType
 
 from .base import LiveServerTests
@@ -26,7 +21,6 @@ class CreateSetTests(LiveServerTests):
         self._identity, self._account = self.create_account()
 
     def _add_ref(self, ref):
-        driver = self.driver
         self.find("#id_quick_find").clear()
         self.send_keys("#id_quick_find", ref)
         self.click("#id_lookup")
@@ -142,8 +136,8 @@ class CreateSetTests(LiveServerTests):
         vs = VerseSet.objects.create(created_by=self._account,
                                      set_type=VerseSetType.SELECTION,
                                      name='my set')
-        vc1 = vs.verse_choices.create(reference='Genesis 1:1',
-                                      set_order=0)
+        vs.verse_choices.create(reference='Genesis 1:1',
+                                set_order=0)
         vc2 = vs.verse_choices.create(reference='Genesis 1:5',
                                       set_order=1)
 
@@ -158,10 +152,10 @@ class CreateSetTests(LiveServerTests):
 
         vs = VerseSet.objects.get(id=vs.id)
         vcs = vs.verse_choices.all()
-        self.assertEqual(sorted(vc.id for vc in vcs), sorted([vc2.id]))
+        self.assertEqual([vc.id for vc in vcs], [vc2.id])
 
         # Need to ensure that the UVS has not been deleted
-        uvs = identity.verse_statuses.get(version__slug='KJV', reference='Genesis 1:1')
+        identity.verse_statuses.get(version__slug='KJV', reference='Genesis 1:1')
 
     def test_require_account(self):
         driver = self.driver
@@ -222,7 +216,6 @@ class CreateSetTests(LiveServerTests):
 
     def test_edit_passage_set(self):
         self.login(self._account)
-        driver = self.driver
         vs = VerseSet.objects.create(created_by=self._account,
                                      set_type=VerseSetType.PASSAGE,
                                      name='Psalm 23',

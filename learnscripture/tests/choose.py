@@ -1,11 +1,10 @@
 from __future__ import absolute_import
 
-from django.core.urlresolvers import reverse
 from selenium.webdriver.support.ui import Select
 
 from accounts.models import Identity
 from awards.models import AwardType, TrendSetterAward
-from bibleverses.models import VerseSet, Verse, TextVersion
+from bibleverses.models import VerseSet
 from events.models import Event, EventType
 
 from .base import LiveServerTests
@@ -34,7 +33,6 @@ class ChooseTests(LiveServerTests):
         identity, account = self.create_account()
         self.login(account)
 
-        driver = self.driver
         self.get_url('choose')
 
         vs_id = 1
@@ -56,7 +54,6 @@ class ChooseTests(LiveServerTests):
     def test_double_choose(self):
         ids = list(Identity.objects.all())
 
-        driver = self.driver
         self.get_url('choose')
 
         vs = VerseSet.objects.get(name="Psalm 23")

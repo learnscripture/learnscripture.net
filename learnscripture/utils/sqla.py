@@ -1,4 +1,3 @@
-from django.conf import settings
 from sqlalchemy.schema import MetaData, Table
 
 from aldjemy.core import get_engine

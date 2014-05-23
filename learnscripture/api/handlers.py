@@ -6,13 +6,10 @@ of cleaning up if clients other than the web app were to use it - we are just
 using Piston for the convenience it provides.
 
 """
-import logging
-
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
 from django.utils.functional import wraps
 from django.utils import simplejson
-from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.html import escape, mark_safe
 
@@ -21,7 +18,7 @@ from piston.utils import rc
 
 from accounts.forms import PreferencesForm
 from accounts.models import Account
-from bibleverses.models import UserVerseStatus, Verse, StageType, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, MAX_VERSE_QUERY_SIZE, TextVersion, quick_find, VerseSetType, TextType
+from bibleverses.models import StageType, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, MAX_VERSE_QUERY_SIZE, TextVersion, quick_find, VerseSetType, TextType
 from comments.models import Comment
 from events.models import Event
 from groups.models import Group
@@ -137,7 +134,6 @@ class ActionCompleteHandler(BaseHandler):
         verse_status = get_verse_status(request.data)
         reference = verse_status['reference']
         version_slug = verse_status['version']['slug']
-        verse_set_id = get_verse_set_id(verse_status)
         old_memory_stage = verse_status['memory_stage']
 
         # TODO: store StageComplete

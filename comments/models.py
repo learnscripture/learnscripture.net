@@ -51,4 +51,4 @@ class Comment(models.Model):
             return format_html("{0}'s wall", group_link(self.group))
 
 
-import comments.hooks
+from comments import hooks

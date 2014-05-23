@@ -8,11 +8,9 @@ from django.test import TestCase
 from django.utils import timezone
 
 import accounts.memorymodel
-from accounts.models import Identity, ActionChange, Account
 from awards.models import AwardType
 from bibleverses.models import VerseSet, TextVersion, StageType, MemoryStage, Verse, VerseChoice
 from events.models import Event, EventType
-from scores.models import Scores
 
 from .base import FuzzyInt, AccountTestMixin
 
@@ -46,8 +44,8 @@ class IdentityTests(AccountTestMixin, TestCase):
             # 3 for awards
             uvss = i.add_verse_set(vs1)
             # session.set_verse_statuses will use all these:
-            l = [(uvs.reference, uvs.verse_set_id)
-                 for uvs in uvss]
+            [(uvs.reference, uvs.verse_set_id)
+             for uvs in uvss]
 
 
     def test_record_read(self):
@@ -201,7 +199,7 @@ class IdentityTests(AccountTestMixin, TestCase):
         i.change_version('John 3:16', 'KJV', vs1.id)
 
         vs2 = VerseSet.objects.get(name='Basic Gospel')
-        uvss = i.add_verse_set(vs2)
+        i.add_verse_set(vs2)
         self.assertEqual(i.verse_statuses.get(verse_set=vs2,
                                               reference='John 3:16').version.slug,
                          'KJV')
@@ -219,7 +217,6 @@ class IdentityTests(AccountTestMixin, TestCase):
         version should fail.
         """
         i = self.create_identity(version_slug='NET')
-        version = i.default_bible_version # NET
         KJV = TextVersion.objects.get(slug='KJV')
         i.add_verse_choice('John 3:16')
 
@@ -460,7 +457,7 @@ class IdentityTests(AccountTestMixin, TestCase):
         with self.assertNumQueries(2):
             d = i.get_verse_statuses_bulk([uvs.id for uvs in uvss])
             self.assertEqual(d[uvss[1].id].reference, uvss[1].reference)
-            texts = [uvs.text for uvs in d.values()]
+            [uvs.text for uvs in d.values()]
 
     def test_add_verse_choice_copies_strength(self):
         i = self.create_identity(version_slug='NET')
@@ -493,9 +490,9 @@ class IdentityTests(AccountTestMixin, TestCase):
         for j, ref in enumerate(refs):
             i.add_verse_choice(ref)
             action_change = i.record_verse_action(ref, 'KJV', StageType.TEST, 1)
-            score_logs = i.award_action_points(ref,
-                                               Verse.objects.get(reference=ref, version__slug='KJV').text,
-                                               MemoryStage.SEEN, action_change, StageType.TEST, 1)
+            i.award_action_points(ref,
+                                  Verse.objects.get(reference=ref, version__slug='KJV').text,
+                                  MemoryStage.SEEN, action_change, StageType.TEST, 1)
 
             self.assertEqual(Event.objects.filter(event_type=EventType.VERSES_STARTED_MILESTONE).count(),
                              0 if j < 9 else 1)
@@ -517,9 +514,9 @@ class IdentityTests(AccountTestMixin, TestCase):
                 )
             # Final test, moving to above LEARNT
             action_change = i.record_verse_action(ref, 'KJV', StageType.TEST, 1)
-            score_logs = i.award_action_points(ref,
-                                               Verse.objects.get(reference=ref, version__slug='KJV').text,
-                                               MemoryStage.TESTED, action_change, StageType.TEST, 1)
+            i.award_action_points(ref,
+                                  Verse.objects.get(reference=ref, version__slug='KJV').text,
+                                  MemoryStage.TESTED, action_change, StageType.TEST, 1)
             self.assertEqual(Event.objects.filter(event_type=EventType.VERSES_FINISHED_MILESTONE).count(),
                              0 if j < 9 else 1)
 

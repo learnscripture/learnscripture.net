@@ -1,10 +1,10 @@
 from __future__ import absolute_import
 
-from autofixture import AutoFixture, create_one
+from autofixture import AutoFixture
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
-from accounts.models import Account, Identity
+from accounts.models import Account
 from awards.models import Award, AwardType
 from groups.models import Group
 from comments.models import Comment
@@ -86,7 +86,6 @@ class GroupPageTests(LiveServerTests):
                                  created_by=creator_account,
                                  public=True,
                                  open=True)
-        driver = self.driver
         self.login(creator_account)
         self.get_url('group', args=(g.slug,))
         self.click('.show-add-comment')
@@ -169,7 +168,7 @@ class GroupTests(AccountTestMixin, TestCase):
                          [])
 
     def test_set_invitation_list(self):
-        i, creator_account = self.create_account(username='creator',
+        _, creator_account = self.create_account(username='creator',
                                                  email='c@example.com')
         group = Group.objects.create(name='My group',
                                      slug='my-group',
@@ -177,9 +176,9 @@ class GroupTests(AccountTestMixin, TestCase):
                                      public=True,
                                      open=True)
 
-        i, member1 = self.create_account(username='member1',
+        _, member1 = self.create_account(username='member1',
                                          email='m1@example.com')
-        i, member2 = self.create_account(username='member2',
+        _, member2 = self.create_account(username='member2',
                                          email='m2@example.com')
 
         group.set_invitation_list([member1])

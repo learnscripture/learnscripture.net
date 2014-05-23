@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
 from datetime import timedelta
-from decimal import Decimal
 import itertools
 import re
 
@@ -9,7 +8,6 @@ from autofixture import AutoFixture
 from django.core import mail
 from django.db.models import F
 from django.test import TestCase
-from django.utils import timezone
 from django.utils.encoding import force_text
 from django.utils.six.moves.urllib.parse import urlparse, ParseResult
 
@@ -369,20 +367,15 @@ class PasswordResetTest(TestCase):
         account.set_password('foo')
         account.save()
 
-    def assertURLEqual(self, url, expected, parse_qs=False):
+    def assertURLEqual(self, url, expected):
         """
         Given two URLs, make sure all their components (the ones given by
         urlparse) are equal, only comparing components that are present in both
         URLs.
-        If `parse_qs` is True, then the querystrings are parsed with QueryDict.
-        This is useful if you don't want the order of parameters to matter.
-        Otherwise, the query strings are compared as-is.
         """
         fields = ParseResult._fields
 
         for attr, x, y in zip(fields, urlparse(url), urlparse(expected)):
-            if parse_qs and attr == 'query':
-                x, y = QueryDict(x), QueryDict(y)
             if x and y and x != y:
                 self.fail("%r != %r (%s doesn't match)" % (url, expected, attr))
 

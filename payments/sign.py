@@ -1,5 +1,3 @@
-import re
-
 from django.core.signing import loads, dumps, BadSignature
 
 

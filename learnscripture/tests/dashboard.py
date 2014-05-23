@@ -7,7 +7,7 @@ from django.db.models import F
 from django.utils import timezone
 
 import accounts.memorymodel
-from accounts.models import Identity, Notice, TestingMethod, FREE_TRIAL_LENGTH_DAYS
+from accounts.models import Identity, Notice
 from bibleverses.models import VerseSet, TextVersion, StageType, MemoryStage
 
 from .base import LiveServerTests
@@ -31,7 +31,6 @@ class DashboardTests(LiveServerTests):
         self.assertEqual(ref, self.find("#id-verse-title").text)
 
     def _click_clear_learning_queue_btn(self, verse_set_id):
-        driver = self.driver
         self.click('#id-learning-queue-verse-set-%s input[name=clearbiblequeue]' % (verse_set_id if verse_set_id else ''),
                    produces_alert=True)
         self.confirm()

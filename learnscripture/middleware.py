@@ -33,7 +33,6 @@ class DebugMiddleware(object):
         from accounts.models import Account
 
         if 'sleep' in request.GET:
-            import time
             time.sleep(int(request.GET['sleep']))
 
 

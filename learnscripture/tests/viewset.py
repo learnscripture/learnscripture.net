@@ -1,9 +1,6 @@
 from __future__ import absolute_import
-import time, re
 
 from django.core.urlresolvers import reverse
-from django.test import TestCase
-from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 
 from accounts.models import Identity

@@ -5,8 +5,7 @@ from django.utils import timezone
 
 from awards.models import AwardType, Award, StudentAward, MasterAward, SharerAward, TrendSetterAward, AceAward, RecruiterAward, ReigningWeeklyChampion, WeeklyChampion, AddictAward, OrganizerAward, ConsistentLearnerAward
 from accounts.models import Account, Identity, get_verse_started_running_streaks
-from accounts.memorymodel import MM
-from bibleverses.models import MemoryStage, VerseSetType, VerseSet, TextType
+from bibleverses.models import VerseSetType, VerseSet
 from groups.models import combined_membership_count_for_creator
 from scores.models import ScoreReason, get_leaderboard_since, get_number_of_distinct_hours_for_account_id
 

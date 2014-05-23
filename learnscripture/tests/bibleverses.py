@@ -4,7 +4,7 @@ from django.utils import unittest
 from django.test import TestCase
 
 from accounts.models import Identity
-from bibleverses.models import InvalidVerseReference, Verse, TextVersion, get_passage_sections, VerseSet, VerseChoice, UserVerseStatus, quick_find
+from bibleverses.models import InvalidVerseReference, Verse, TextVersion, get_passage_sections, VerseSet
 from .base import AccountTestMixin
 
 

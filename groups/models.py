@@ -4,7 +4,6 @@ from django.db.models import Count
 from django.utils import timezone
 
 from accounts.models import Account
-from learnscripture.datastructures import make_choices
 
 
 class GroupManager(models.Manager):
@@ -152,4 +151,4 @@ def combined_membership_count_for_creator(account_id):
     return val - own_groups
 
 
-import groups.hooks
+from groups import hooks

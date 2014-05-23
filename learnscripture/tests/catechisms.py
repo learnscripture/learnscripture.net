@@ -1,7 +1,5 @@
 from __future__ import absolute_import
 
-from django.core.urlresolvers import reverse
-
 from events.models import Event, EventType
 
 from .base import LiveServerTests
@@ -19,7 +17,6 @@ class CatechismTests(LiveServerTests):
         self.assertIn("4 question/answer pairs", driver.page_source)
 
     def test_learn(self):
-        driver = self.driver
         identity, account = self.create_account()
         self.login(account)
         self.get_url('catechisms')

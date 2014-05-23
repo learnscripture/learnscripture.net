@@ -3,7 +3,6 @@ from __future__ import absolute_import
 from autofixture import AutoFixture
 from django.db import connection
 from django.test import TestCase
-from django.utils import timezone
 
 from accounts.models import Account
 from bibleverses.models import VerseSet, VerseSetType, TextVersion, quick_find, parse_as_bible_reference
@@ -24,16 +23,16 @@ class SearchTests(TestCase):
 
 
     def test_search_verse_set_title(self):
-        vs1 = VerseSet.objects.create(name="For stupid people",
-                                      slug="for-stupid-people",
-                                      public=True,
-                                      set_type=VerseSetType.SELECTION,
-                                      created_by=self.account)
-        vs2 = VerseSet.objects.create(name="For intelligent people",
-                                      slug="for-intelligent-people",
-                                      public=True,
-                                      set_type=VerseSetType.SELECTION,
-                                      created_by=self.account)
+        VerseSet.objects.create(name="For stupid people",
+                                slug="for-stupid-people",
+                                public=True,
+                                set_type=VerseSetType.SELECTION,
+                                created_by=self.account)
+        VerseSet.objects.create(name="For intelligent people",
+                                slug="for-intelligent-people",
+                                public=True,
+                                set_type=VerseSetType.SELECTION,
+                                created_by=self.account)
 
         results = VerseSet.objects.search(VerseSet.objects.all(),
                                           "Stupid")

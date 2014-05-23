@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 from django.test import LiveServerTestCase
 from django.utils.importlib import import_module
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException, UnexpectedAlertPresentException
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
@@ -66,7 +66,6 @@ class AccountTestMixin(object):
                              email="test2@test.com",
                              username="test2",
                              password="testpassword2"):
-        driver = self.driver
         self.send_keys("#id_signup-email", email)
         self.send_keys("#id_signup-username", username)
         self.send_keys("#id_signup-password", password)
@@ -134,7 +133,7 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
         return session
 
     def login(self, account):
-        session = self.setup_session()
+        self.setup_session()
         self.setup_identity(identity=account.identity)
 
     def setup_identity(self, identity=None):
@@ -208,7 +207,7 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
 
     def is_element_present(self, how, what):
         try: self.driver.find_element(by=how, value=what)
-        except NoSuchElementException, e: return False
+        except NoSuchElementException: return False
         return True
 
     def set_preferences(self):
@@ -235,7 +234,6 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
         self.wait_for_ajax()
 
     def fill_in_login_form(self, account):
-        driver = self.driver
         self.wait_until_loaded('body')
         self.find("#id_login-email").clear()
         self.send_keys("#id_login-email", account.email)

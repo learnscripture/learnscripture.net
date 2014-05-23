@@ -3,7 +3,7 @@ from django.conf.urls import url, patterns
 from learnscripture.api.handlers import VersesToLearnHandler, ActionCompleteHandler, ChangeVersionHandler, LogOutHandler, SetPreferences, SessionStats, SkipVerseHandler, CancelLearningVerseHandler, ScoreLogs, VerseFind, CheckDuplicatePassageSet, DeleteNotice, ResetProgressHandler, AndroidAppInstalled, AddComment, HideComment, Follow, UnFollow
 
 
-from django.http import HttpResponse, Http404, HttpResponseNotAllowed, HttpResponseForbidden, HttpResponseServerError
+from django.http import HttpResponse, Http404, HttpResponseNotAllowed
 from django.views.decorators.vary import vary_on_headers
 from piston.emitters import Emitter
 from piston.resource import CHALLENGE
@@ -30,11 +30,6 @@ class Resource(BaseResource):
         that are different (OAuth stuff in `Authorization` header.)
         """
         rm = request.method.upper()
-
-        # Django's internal mechanism doesn't pick up
-        # PUT request, so we trick it a little here.
-        if rm == "PUT":
-            coerce_put_post(request)
 
         actor, anonymous = self.authenticate(request, rm)
 
@@ -87,9 +82,6 @@ class Resource(BaseResource):
         try:
             emitter, ct = Emitter.get(em_format)
             fields = handler.fields
-
-            if hasattr(handler, 'list_fields') and isinstance(result, (list, tuple, QuerySet)):
-                fields = handler.list_fields
         except ValueError:
             result = rc.BAD_REQUEST
             result.content = "Invalid output format specified '%s'." % em_format

@@ -6,15 +6,13 @@ TotalScore is a summary used for all time scores.
 
 ScoreLog is also used as a record of how many verse tests a user did.
 """
-from datetime import timedelta, datetime
+from datetime import timedelta
 
-from django.db import connection
 from django.db import models
-from django.db.models import F, Sum
+from django.db.models import F
 from django.utils import timezone
 
 from learnscripture.datastructures import make_choices
-from learnscripture.utils.db import dictfetchall
 
 
 ScoreReason = make_choices('ScoreReason',

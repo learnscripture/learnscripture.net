@@ -6,7 +6,6 @@ from bibleverses.models import VerseSet, TextVersion
 from comments.models import Comment
 from events.models import NewAccountEvent, AwardReceivedEvent, VerseSetCreatedEvent, StartedLearningVerseSetEvent, PointsMilestoneEvent, VersesStartedMilestoneEvent, VersesFinishedMilestoneEvent, AwardLostEvent, GroupJoinedEvent, GroupCreatedEvent, StartedLearningCatechismEvent, NewCommentEvent
 from groups.models import Group
-from scores.models import TotalScore
 
 
 @task(ignore_result=True)
