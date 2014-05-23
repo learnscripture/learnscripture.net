@@ -303,6 +303,8 @@ if DEBUG:
     LOGGING['root']['handlers'] = ['console']
     RAVEN_CONFIG = {}
 
+if TESTING:
+    LOGGING['handlers']['console']['level'] = 'ERROR'
 
 FIBER_DEFAULT_TEMPLATE = 'fiber_singlecol.html'
 FIBER_TEMPLATE_CHOICES = [(FIBER_DEFAULT_TEMPLATE, 'Single column')]
