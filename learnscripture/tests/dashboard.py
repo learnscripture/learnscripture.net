@@ -181,6 +181,7 @@ class DashboardTests(LiveServerTests):
         Identity.objects.all().delete()
         driver = self.driver
         driver.get(self.live_server_url + "/")
+        self.wait_until_loaded('body')
         e = self.find('a.btn.large')
         self.assertTrue(e.get_attribute('href').endswith(reverse('choose')))
         self.click(e)

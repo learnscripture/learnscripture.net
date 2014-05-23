@@ -5,6 +5,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test import LiveServerTestCase
 from django.utils.importlib import import_module
+from pyvirtualdisplay import Display
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
@@ -89,7 +90,6 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
 
     @classmethod
     def setUpClass(cls):
-        from pyvirtualdisplay import Display
         if cls.hide_browser:
             cls.display = Display(visible=0, size=(1024, 768))
             cls.display.start()
@@ -127,6 +127,7 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
         session = engine.SessionStore()
         session.save()
         self.driver.get(self.live_server_url)
+        self.wait_until_loaded('body')
         self.driver.add_cookie({'domain': 'localhost',
                                 'name': settings.SESSION_COOKIE_NAME,
                                 'value': session.session_key})
