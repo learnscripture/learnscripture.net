@@ -19,12 +19,12 @@ class LeaderboardTests(TestCase):
         super(LeaderboardTests, self).setUp()
         a1 = Account.objects.create(username='testuser1',
                                     email='test2@test.com')
-        i1 = Identity.objects.create(account=a1)
+        Identity.objects.create(account=a1)
         a1.add_points(100, ScoreReason.VERSE_TESTED)
         a2 = Account.objects.create(username='testuser2',
                                     email='test2@test.com',
                                     is_active=False)
-        i2 = Identity.objects.create(account=a2)
+        Identity.objects.create(account=a2)
         a2.add_points(50, ScoreReason.VERSE_TESTED)
         self.a1 = a1
         self.a2 = a2

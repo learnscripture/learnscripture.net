@@ -538,4 +538,4 @@ class Award(models.Model):
         lost_award.send(sender=self)
         return super(Award, self).delete(**kwargs)
 
-import awards.hooks
+from awards import hooks

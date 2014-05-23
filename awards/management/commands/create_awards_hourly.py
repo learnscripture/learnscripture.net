@@ -1,4 +1,3 @@
-import os
 import sys
 
 from django.core.management.base import BaseCommand
@@ -13,5 +12,5 @@ class Command(BaseCommand):
             from awards.tasks import give_champion_awards
             give_champion_awards.delay(hellbanned=False)
             give_champion_awards.delay(hellbanned=True)
-        except Exception as e:
+        except Exception:
             logger.error("Couldn't create awards", exc_info=sys.exc_info())

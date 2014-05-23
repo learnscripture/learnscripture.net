@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 
-import learnscripture.hooks
+from learnscripture import hooks
 
 
 class SiteNoticeManager(models.Manager):

@@ -1318,7 +1318,7 @@ def get_active_identity_count(since_when, until_when):
             )
 
 
-import accounts.hooks
+from accounts import hooks
 
 
 def notify_all_accounts(html_message):

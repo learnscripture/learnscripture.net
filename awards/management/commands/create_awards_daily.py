@@ -1,4 +1,3 @@
-import os
 import sys
 
 from django.core.management.base import BaseCommand
@@ -13,5 +12,5 @@ class Command(BaseCommand):
             import awards.tasks
             awards.tasks.give_all_addict_awards()
             awards.tasks.give_all_consistent_learner_awards()
-        except Exception as e:
+        except Exception:
             logger.error("Couldn't create awards", exc_info=sys.exc_info())

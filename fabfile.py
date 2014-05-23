@@ -11,10 +11,9 @@ import os
 import posixpath
 import json
 
-from fabric.api import run, local, abort, env, put, settings, cd, task
-from fabric.decorators import runs_once
+from fabric.api import run, local, env, task
 from fabric.contrib.files import exists, upload_template
-from fabric.context_managers import cd, lcd, settings, hide
+from fabric.context_managers import cd, settings
 from fabric.operations import get
 
 

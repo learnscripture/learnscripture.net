@@ -1,13 +1,10 @@
 from collections import defaultdict
-from datetime import datetime
-from decimal import Decimal
 import math
 import re
 
 from autoslug import AutoSlugField
 from django.core.urlresolvers import reverse
 from django.db import models, connection
-from django.db.models import F
 from django.utils import timezone
 from django.utils.functional import cached_property
 
@@ -995,4 +992,4 @@ def normalise_reference(query):
         return None
 
 
-import bibleverses.hooks
+from bibleverses import hooks

@@ -62,7 +62,7 @@ def site_is_up():
         if response.status in [500, 502, 408]:
             print_message("Bad status: %d" % response.status)
             return False
-        page = response.read()
+        response.read()
     except socket.error as e:
         print_message("Socket error")
         print_message(e)
@@ -165,7 +165,7 @@ def get_controllable_processes():
         if ps.username == USER:
             # Check we can get CWD, because we need that.
             try:
-                cwd = ps.getcwd()
+                ps.getcwd()
             except psutil.AccessDenied:
                 continue
             l.append(ps)

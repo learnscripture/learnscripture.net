@@ -1,15 +1,13 @@
 from __future__ import unicode_literals
 
 from datetime import timedelta
-import itertools
-import math
 
 from django.db import models
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
-from django.utils.html import format_html, format_html_join
+from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from jsonfield import JSONField
 
@@ -459,4 +457,4 @@ class Event(models.Model):
         except (KeyError, Comment.DoesNotExist):
             return None
 
-import events.hooks
+from events import hooks

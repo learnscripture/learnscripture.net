@@ -64,12 +64,12 @@ class CommentPageTests(LiveServerTests):
         c1 = self.event.comments.create(
             message="This is a naughty message",
             author=other_account,
-            )
-        c2 = self.event.comments.create(
+        )
+        self.event.comments.create(
             message="This is already hidden",
             author=other_account,
             hidden=True
-            )
+        )
 
         self.login(self.account)
         self.get_url('activity_stream')

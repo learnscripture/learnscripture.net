@@ -72,4 +72,4 @@ class DonationDrive(models.Model):
                              self.finish.strftime("%Y-%m-%d")
                              )
 
-import payments.hooks
+from payments import hooks
