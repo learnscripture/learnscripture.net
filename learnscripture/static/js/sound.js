@@ -123,7 +123,7 @@ var learnscripture =
 	    return String.fromCharCode(b&0xFF);
         }
 
-        var webAudioBeep = function(frequency, length) {
+        var audioContextBeep = function(frequency, length) {
             var source = audioContext.createOscillator();
             source.frequency.value = frequency;
             source.connect(audioContext.destination);
@@ -145,7 +145,7 @@ var learnscripture =
                         dataUriAudioBeep(frequency, length);
                     }
                 } else if (audioContext != null) {
-                    webAudioBeep(frequency, length);
+                    audioContextBeep(frequency, length);
                 }
             } catch (e) {
                 Raven.captureException(e);
@@ -157,7 +157,7 @@ var learnscripture =
         learnscripture.setupAudio = setupAudio;
         learnscripture.doBeep = doBeep;
         learnscripture.dataUriAudioBeep = dataUriAudioBeep;
-        learnscripture.webAudioBeep = webAudioBeep;
+        learnscripture.audioContextBeep = audioContextBeep;
         learnscripture.mozAudioBeep = mozAudioBeep;
 
         return learnscripture;
