@@ -78,6 +78,7 @@ class CommentPageTests(LiveServerTests):
         self.assertNotIn("This is already hidden", self.driver.page_source)
         self.click('.moderate-comment', produces_alert=True)
         self.confirm()
+        self.wait_for_ajax()
 
         # Test page
         self.assertNotIn("This is a naughty message", self.driver.page_source)
