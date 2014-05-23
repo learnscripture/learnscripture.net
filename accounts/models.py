@@ -1,6 +1,5 @@
 from collections import defaultdict
 from datetime import timedelta
-from decimal import Decimal
 import itertools
 import math
 
@@ -8,16 +7,14 @@ from django.core import mail
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import AbstractBaseUser, UserManager
-from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.sites.models import get_current_site
 from django.template import loader
 from django.utils.datastructures import SortedDict
 from django.utils.functional import cached_property
-from django.utils import timezone
 
 from accounts import memorymodel
 from accounts.signals import verse_started, verse_tested, verse_finished, points_increase, scored_100_percent, catechism_started
-from bibleverses.models import TextVersion, MemoryStage, StageType, TextVersion, VerseChoice, VerseSet, VerseSetType, UserVerseStatus, TextType, get_passage_sections, InvalidVerseReference
+from bibleverses.models import TextVersion, MemoryStage, StageType, VerseSet, VerseSetType, UserVerseStatus, TextType, get_passage_sections, InvalidVerseReference
 from bibleverses.signals import verse_set_chosen
 from scores.models import TotalScore, ScoreReason, Scores, get_rank_all_time, get_rank_this_week
 
@@ -145,13 +142,6 @@ class Account(AbstractBaseUser):
 
     def get_short_name(self):
         return self.first_name
-
-    def get_full_name(self):
-        val = self.personal_name
-        if val:
-            return val
-        else:
-            return username
 
     # Friendly wrappers
     @property
