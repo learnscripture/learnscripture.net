@@ -353,10 +353,10 @@ var learnscripture =
             var accuracyPercent = Math.floor(accuracy * 100).toString();
             $('#id-accuracy').text(accuracyPercent + "%");
             var comment =
-                accuracyPercent > 95 ? 'awesome!' :
-                accuracyPercent > 90 ? 'excellent!' :
-                accuracyPercent > 80 ? 'very good.' :
-                accuracyPercent > 70 ? 'good.' :
+                accuracyPercent > 98 ? 'awesome!' :
+                accuracyPercent > 95 ? 'excellent!' :
+                accuracyPercent > 90 ? 'very good.' :
+                accuracyPercent > 80 ? 'good.' :
                 accuracyPercent > 50 ? 'OK.' :
                 accuracyPercent > 30 ? 'could do better!' :
                 "more practice needed!";
