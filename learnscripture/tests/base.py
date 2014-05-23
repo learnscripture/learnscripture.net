@@ -160,16 +160,28 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
     def find(self, css_selector):
         return self.driver.find_element_by_css_selector(css_selector)
 
-    def click(self, clickable, produces_alert=False):
+    def click(self, clickable, produces_alert=False, wait_for_reload=False):
+        if wait_for_reload:
+            self.driver.execute_script("document.pageReloadedYetFlag='notyet'")
+
         if hasattr(clickable, 'click'):
             retval = clickable.click()
         else:
             retval = self.find(clickable).click()
+
+        if wait_for_reload:
+            def f(driver):
+                obj = driver.execute_script("return document.pageReloadedYetFlag;")
+                if obj is None or obj != "notyet":
+                    return True
+                return False
+            WebDriverWait(self.driver, 5).until(f)
+
         if not produces_alert:
             # This will cause a Selenium error if an alert is open, and there
             # doesn't sem to be any way of detecting this case.
-            self.wait_until_loaded('body')
-            self.wait_for_ajax()
+            self.wait_until_finished()
+
         return retval
 
     def send_keys(self, css_selector, text):
@@ -194,6 +206,11 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
     def wait_for_ajax(self):
         time.sleep(0.1)
         WebDriverWait(self.driver, 10).until(lambda driver: driver.execute_script('return jQuery.active == 0'))
+
+    def wait_until_finished(self):
+        time.sleep(0.1)
+        self.wait_for_ajax()
+        self.wait_until_loaded('body')
 
     def wait_until_loaded(self, selector, timeout=10):
         """

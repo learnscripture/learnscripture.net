@@ -256,6 +256,7 @@ class GroupCreatePageTests(LiveServerTests):
         self.click("#id_public")
 
         self.send_keys("#id_invited_users_0", "invit")
+        self.wait_for_ajax()
         self.click('ul.ui-autocomplete li.ui-menu-item:first-child')
         self.click('input[name="save"]')
 
@@ -268,7 +269,6 @@ class GroupCreatePageTests(LiveServerTests):
 
         self.assertEqual(Event.objects.filter(event_type=EventType.GROUP_CREATED).count(),
                          1)
-
 
 # Use Django client
 class GroupPageTests2(AccountTestMixin, TestCase):
