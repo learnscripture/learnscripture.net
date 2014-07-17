@@ -1641,12 +1641,11 @@ var learnscripture =
                 return;
             }
             preferences = prefs;
+            $('.test-method-specific').hide();
             if (preferences.testingMethod === TEST_FIRST_LETTER) {
-                $('.test-full').hide();
-                $('.test-first-letter').show();
-            } else {
-                $('.test-full').show();
-                $('.test-first-letter').hide();
+                $('.test-method-keyboard-first-letter').show();
+            } else if (preferences.testingMethod === TEST_FULL_WORDS) {
+                $('.test-method-keyboard-full-word').show();
             }
         };
 
