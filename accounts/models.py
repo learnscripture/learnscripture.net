@@ -24,8 +24,9 @@ from learnscripture.utils.cache import cache_results, clear_cache_results
 
 TestingMethod = make_choices('TestingMethod',
                              [(0, 'FULL_WORDS', 'Full words - recommended for full keyboards and normal typing skills'),
-                              (1, 'FIRST_LETTER', 'First letter - recommended for handheld devices and slower typers')]
-                             )
+                              (1, 'FIRST_LETTER', 'First letter - recommended for slower typers'),
+                              (2, 'ON_SCREEN', 'On screen buttons - recommended for handheld devices'),
+                             ])
 
 THEMES = [('calm', 'Slate'),
           ('bubblegum', 'Bubblegum pink'),
