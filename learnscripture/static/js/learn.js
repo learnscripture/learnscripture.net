@@ -494,12 +494,6 @@ var learnscripture = (function (learnscripture, $) {
             enableBtn($('#id-next-btn'), currentStageIdx < currentStageList.length - 1);
             enableBtn($('#id-back-btn'), currentStageIdx > 0);
         }
-        var currentStageName = currentStageList[currentStageIdx];
-        if ((currentStageName == 'test' || currentStageName == 'practice') && currentStageList.length == 1) {
-            enableBtn($('#id-hint-btn').show(), true);
-        } else {
-            $('#id-hint-btn').hide();
-        }
     };
 
     var fadeVerseTitle = function (fade) {
@@ -816,6 +810,12 @@ var learnscripture = (function (learnscripture, $) {
             $('#id-keyboard-test-bar').show();
             this.wordTestSetUp();
             this.hintsShown = 0;
+            if (currentStageList.length == 1) {
+                enableBtn($('#id-hint-btn').show(), true);
+            } else {
+                // Don't show hints button if we just reviewed the verse.
+                $('#id-hint-btn').hide();
+            }
         },
 
         testTearDown: function () {
@@ -1020,6 +1020,7 @@ var learnscripture = (function (learnscripture, $) {
             $('#id-onscreen-test-container').show();
             this.wordTestSetUp();
             this.ensureTestDivVisible();
+            $('#id-hint-btn').hide();
         },
 
         testTearDown: function () {
@@ -1029,6 +1030,8 @@ var learnscripture = (function (learnscripture, $) {
         },
 
         wordTestSetUp: function () {
+            this.removeCurrentWordMarker();
+            getWordAt(currentWordIndex).addClass('current-word');
             var $c = $('#id-onscreen-test-container');
             $c.hide(); // for speed.
             // For now, just use some random words from the verse
@@ -1041,6 +1044,14 @@ var learnscripture = (function (learnscripture, $) {
             $c.find('.word').bind(fastEventName,
                                   this.handleButtonClick);
             $c.show();
+        },
+
+        wordTestTearDown: function () {
+            this.removeCurrentWordMarker();
+        },
+
+        removeCurrentWordMarker: function () {
+            $('.current-verse .current-word').removeClass('current-word');
         },
 
         handleButtonClick: function (ev) {
