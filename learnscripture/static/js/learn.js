@@ -1309,39 +1309,39 @@ var learnscripture = (function (learnscripture, $) {
     var loadCurrentVerse = function () {
         var oldVerseStatus = currentVerseStatus;
         currentVerseStatus = versesToLearn[currentVerseIndex];
+        var verseStatus = currentVerseStatus;
         // TODO: Some of these attributes could be handled better by having
         // different classes for Bible questions and Catechism questions.
-        currentVerseStatus.scoringText = (
-            currentVerseStatus.version.text_type == TEXT_TYPE_BIBLE ? currentVerseStatus.text : currentVerseStatus.answer)
+        verseStatus.scoringText = (
+            verseStatus.version.text_type == TEXT_TYPE_BIBLE ? verseStatus.text : verseStatus.answer)
 
-        currentVerseStatus.titleText = (
-            currentVerseStatus.version.text_type == TEXT_TYPE_BIBLE ? currentVerseStatus.reference : currentVerseStatus.reference + ". " + currentVerseStatus.question)
+        verseStatus.titleText = (
+            verseStatus.version.text_type == TEXT_TYPE_BIBLE ? verseStatus.reference : verseStatus.reference + ". " + verseStatus.question)
 
-        currentVerseStatus.showReference = (
-            currentVerseStatus.version.text_type == TEXT_TYPE_BIBLE ? (currentVerseStatus.verse_set === null ||
-                currentVerseStatus.verse_set === undefined ||
-                currentVerseStatus.verse_set.set_type === SET_TYPE_SELECTION) : false)
+        verseStatus.showReference = (
+            verseStatus.version.text_type == TEXT_TYPE_BIBLE ? (verseStatus.verse_set === null ||
+                verseStatus.verse_set === undefined ||
+                verseStatus.verse_set.set_type === SET_TYPE_SELECTION) : false)
 
-        currentVerseStatus.wordCount = countWords(currentVerseStatus.scoringText);
-        var verse = currentVerseStatus;
-        normaliseLearningType(verse);
+        verseStatus.wordCount = countWords(verseStatus.scoringText);
+        normaliseLearningType(verseStatus);
         var moveOld = (oldVerseStatus !== null &&
             isPassageType(oldVerseStatus) &&
             // Need to cope with possibility of a gap
             // in the passage, caused by slim_passage_for_revising()
-            (currentVerseStatus.text_order === oldVerseStatus.text_order + 1))
+            (verseStatus.text_order === oldVerseStatus.text_order + 1))
         if (moveOld) {
             moveOldWords();
         } else {
             $('.current-verse').children().remove();
         }
 
-        if (currentVerseStatus.verse_set &&
-            currentVerseStatus.verse_set.get_absolute_url) {
+        if (verseStatus.verse_set &&
+            verseStatus.verse_set.get_absolute_url) {
             $('#id-verse-set-info')
                 .find('a')
-                .text(currentVerseStatus.verse_set.name)
-                .attr('href', currentVerseStatus.verse_set.get_absolute_url)
+                .text(verseStatus.verse_set.name)
+                .attr('href', verseStatus.verse_set.get_absolute_url)
                 .end()
                 .show();
         } else {
@@ -1349,16 +1349,14 @@ var learnscripture = (function (learnscripture, $) {
         }
 
         $('.current-verse').hide(); // Hide until set up
-        $('#id-verse-title').text(currentVerseStatus.titleText);
-        if (currentVerseStatus.version.text_type == TEXT_TYPE_BIBLE) {
-            $('#id-version-select').show().val(verse.version.slug);
+        $('#id-verse-title').text(verseStatus.titleText);
+        if (verseStatus.version.text_type == TEXT_TYPE_BIBLE) {
+            $('#id-version-select').show().val(verseStatus.version.slug);
         } else {
             $('#id-version-select').hide();
         }
         // convert newlines to divs
-        var text = verse.scoringText;
-        markupVerse(text,
-            verse.showReference ? verse.reference : null);
+        markupVerse(verseStatus);
         $('#id-loading').hide();
         $('#id-controls').show();
         if (moveOld) {
@@ -1368,8 +1366,8 @@ var learnscripture = (function (learnscripture, $) {
             $('.previous-verse').remove();
             $('.current-verse').show();
         }
-        setUpStageList(verse);
-        $('.selection-set-only').toggle(!isPassageType(currentVerseStatus));
+        setUpStageList(verseStatus);
+        $('.selection-set-only').toggle(!isPassageType(verseStatus));
 
         var nextBtns = $('#id-next-verse-btn, #id-context-next-verse-btn, #id-read-anyway-vext-verse-btn');
         if (nextVersePossible()) {
@@ -1377,8 +1375,8 @@ var learnscripture = (function (learnscripture, $) {
         } else {
             nextBtns.val('Done');
         }
-        if (verse.return_to) {
-            redirect_to = verse.return_to;
+        if (verseStatus.return_to) {
+            redirect_to = verseStatus.return_to;
         }
     };
 
@@ -1434,8 +1432,9 @@ var learnscripture = (function (learnscripture, $) {
             .removeClass('wordstart').removeClass('wordend');
     };
 
-    var markupVerse = function (text, reference) {
-        text = adjustWordJoiningPunctuation(text);
+    var markupVerse = function (verseStatus) {
+        var text = adjustWordJoiningPunctuation(verseStatus.scoringText);
+        var reference = (verseStatus.showReference ? verseStatus.reference : null);
         // First split lines into divs.
         $.each(text.split(/\n/), function (idx, line) {
             if (line.trim() !== '') {
@@ -1443,8 +1442,8 @@ var learnscripture = (function (learnscripture, $) {
                     line + '</div>');
             }
         });
-        var doTest = (currentVerseStatus.needs_testing ||
-                currentVerseStatus.learning_type == LEARNING_TYPE_PRACTICE)
+        var doTest = (verseStatus.needs_testing ||
+                      verseStatus.learning_type == LEARNING_TYPE_PRACTICE)
             // Then split up into words
         var wordClass = doTest ? 'word' : 'testedword';
         var wordGroups = [];
