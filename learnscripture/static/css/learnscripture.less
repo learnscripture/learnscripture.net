@@ -220,6 +220,11 @@
     font-family: ~"@{themeFont}";
   }
 
+  #id-onscreen-test-container {
+      background-color: @bgColor1;
+      border-color: darken(@bgColor1, 20%);
+  }
+
 }
 
 ///////////// THEMES ////////////
@@ -622,9 +627,9 @@ span.versenumber {
   background-color: #f0f0f0;
   }
 
-.current-verse, .previous-verse, #id-typing {
+.current-verse, .previous-verse, #id-typing, #id-onscreen-test-container {
   font-size: 20px;
-  }
+}
 
 .previous-verse {
   display: table-cell;
@@ -722,6 +727,34 @@ span.versenumber {
   margin-left: -5px;
   margin-right: -5px;
   border-radius: 0px;
+}
+
+#id-onscreen-test-container {
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    padding: 6px;
+    text-align: center;
+    .word {
+        margin: 10px;
+    }
+}
+
+.fixed-onscreen-testing() {
+    #id-onscreen-test-container {
+        position: fixed;
+        z-index: 20;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        border-bottom-width: 0px;
+        border-left-width: 0px;
+        border-height-width: 0px;
+        height: auto;
+        border-radius: 0px;
+        margin: 0px;
+    }
 }
 
 #id-testing-status {
@@ -1163,6 +1196,8 @@ p.referral-link {
     padding-right: 1px;
   }
 
+  .fixed-onscreen-testing();
+
 }
 
 // If there is not much room vertical we squeeze paddings
@@ -1215,9 +1250,9 @@ p.referral-link {
 @media screen and (max-width: 600px), screen and (max-height: 500px) {
 
   /* smaller fonts */
-  .current-verse, .previous-verse, #id-typing {
+  .current-verse, .previous-verse, #id-typing, #id-onscreen-test-container {
     font-size: 15px;
-    }
+  }
 
   #id-typing {
     font-size: inherit;
@@ -1238,13 +1273,17 @@ p.referral-link {
     margin-bottom: 1px;
     padding: 3px;
     border-radius: 3px;
-    }
+  }
 
   #id-verse-wrapper {
     border-radius: 3px;
     padding: 5px;
-    }
   }
+
+  .fixed-onscreen-testing();
+
+}
+
 
 
 // Squeeze the primary nav if horizontal space is limited
