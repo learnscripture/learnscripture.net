@@ -201,13 +201,13 @@ var learnscripture = (function (learnscripture, $) {
 
     // === Strings ===
 
-    var adjustWordJoiningPunction = function (text) {
+    var adjustWordJoiningPunctuation = function (text) {
         return text.replace(/--/g, '-- '); // this can be used to join words in ESV
     }
 
     var countWords = function (text) {
         // duplication of server side logic, accounts.models.count_words
-        return stripPunctuation(adjustWordJoiningPunction(text)).trim().split(/\W/).length;
+        return stripPunctuation(adjustWordJoiningPunctuation(text)).trim().split(/\W/).length;
     };
 
 
@@ -1435,7 +1435,7 @@ var learnscripture = (function (learnscripture, $) {
     };
 
     var markupVerse = function (text, reference) {
-        text = adjustWordJoiningPunction(text);
+        text = adjustWordJoiningPunctuation(text);
         // First split lines into divs.
         $.each(text.split(/\n/), function (idx, line) {
             if (line.trim() !== '') {
