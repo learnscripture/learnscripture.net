@@ -437,7 +437,7 @@ var learnscripture = (function (learnscripture, $) {
                 $('#id-next-verse-btn').addClass('primary');
             }
 
-            $('#id-more-practice-btn').unbind().click(function () {
+            $('#id-more-practice-btn').unbind().bind('touchstart mousedown', function () {
                 if (accuracyPercent < 10) {
                     currentStageList = chooseStageListForStrength(0);
                 } else if (accuracyPercent < 30) {
@@ -1477,7 +1477,7 @@ var learnscripture = (function (learnscripture, $) {
 
         }
 
-        $('.current-verse .word').click(function (ev) {
+        $('.current-verse .word').bind('tap click', function (ev) {
             if (!currentStage.testMode) {
                 toggleWord($(this));
             }
@@ -1797,16 +1797,16 @@ var learnscripture = (function (learnscripture, $) {
         // the on-screen keyboard.
         inputBox.bind('keydown', inputKeyDown);
         testingStatus = $('#id-testing-status');
-        $('#id-next-btn').show().click(next);
-        $('#id-back-btn').show().click(back);
-        $('#id-hint-btn').click(function (ev) {
+        $('#id-next-btn').show().bind('touchstart mousedown', next);
+        $('#id-back-btn').show().bind('touchstart mousedown', back);
+        $('#id-hint-btn').bind('touchstart mousedown', function (ev) {
             ev.preventDefault();
             testingMethodStrategy.getHint();
         });
-        $('#id-next-verse-btn').click(nextVerse);
-        $('#id-context-next-verse-btn').click(markReadAndNextVerse);
+        $('#id-next-verse-btn').bind('touchstart mousedown', nextVerse);
+        $('#id-context-next-verse-btn').bind('touchstart mousedown', markReadAndNextVerse);
         $('#id-version-select').change(versionSelectChanged);
-        $('#id-help-btn').click(function (ev) {
+        $('#id-help-btn').bind('touchstart mousedown', function (ev) {
             if (preferences.enableAnimations) {
                 $('#id-help').toggle('fast');
             } else {
@@ -1814,10 +1814,10 @@ var learnscripture = (function (learnscripture, $) {
             }
             $('#id-help-btn').button('toggle');
         });
-        $('#id-skip-verse-btn').click(skipVerse);
+        $('#id-skip-verse-btn').bind(skipVerse);
         $('#id-cancel-learning-btn').click(cancelLearning);
         $('#id-reset-progress-btn').click(resetProgress);
-        $('#id-finish-btn').click(finishBtnClick);
+        $('#id-finish-btn').bind('touchstart mousedown', finishBtnClick);
         $(window).resize(function () {
             if (currentStage !== null &&
                 currentStage.testMode) {
