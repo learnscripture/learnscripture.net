@@ -47,6 +47,7 @@ var learnscripture = (function (learnscripture, $) {
     var WORD_TOGGLE_HIDE_END = 1;
     var WORD_TOGGLE_HIDE_ALL = 2;
 
+    var scrollingTimeoutId = null;
 
     // Defined in StageType:
     var STAGE_TYPE_TEST = 'TEST';
@@ -799,7 +800,8 @@ var learnscripture = (function (learnscripture, $) {
             this.wordTestTearDown();
             this.wordTestSetUp();
         },
-        windowAdjust: function () {}
+        windowAdjust: function () {},
+        scrollingAdjust: function () {}
     };
 
     // Base class for keyboard methods
@@ -1016,10 +1018,12 @@ var learnscripture = (function (learnscripture, $) {
             setHardMode(true);
             $('#id-onscreen-test-container').show();
             this.wordTestSetUp();
+            this.ensureTestDivVisible();
         },
 
         testTearDown: function () {
             $('#id-onscreen-test-container').hide();
+            this.removeTestDivFix();
             this.wordTestTearDown();
         },
 
@@ -1051,7 +1055,36 @@ var learnscripture = (function (learnscripture, $) {
                 indicateFail();
             }
             moveOn();
+        },
+
+        windowAdjust: function () {
+            this.removeTestDivFix();
+            this.ensureTestDivVisible();
+        },
+
+        scrollingAdjust: function() {
+            this.ensureTestDivVisible();
+        },
+
+        ensureTestDivVisible: function () {
+            // For long verses, we want buttons to be displayed as absolute
+            // so they don't have to scroll off screen.
+            var $c = $('#id-onscreen-test-container');
+            if (!$c.hasClass('make-fixed')) {
+                var $win = $(window);
+                if ($c.offset().top + $c.outerHeight() > $win.height() - $win.scrollTop()) {
+                    $c.addClass('make-fixed');
+                }
+            }
+            // There isn't an easy way to undo this - we would need
+            // to calculate whether #id-onscreen-test-container would be
+            // visible if it were not fixed, which is hard.
+        },
+
+        removeTestDivFix: function () {
+            $('#id-onscreen-test-container').removeClass('make-fixed');
         }
+
     })
 
     // -----------------------
@@ -1822,6 +1855,18 @@ var learnscripture = (function (learnscripture, $) {
             if (currentStage !== null &&
                 currentStage.testMode) {
                 testingMethodStrategy.windowAdjust();
+            }
+        });
+        $(window).bind('scroll', function () {
+            if (currentStage !== null &&
+                currentStage.testMode) {
+                // Run callback if stopped scrolling for 500ms
+                if (scrollingTimeoutId !== null) {
+                    window.clearTimeout(scrollingTimeoutId);
+                }
+                scrollingTimeoutId = window.setTimeout(function () {
+                    testingMethodStrategy.scrollingAdjust();
+                }, 500);
             }
         });
         if (typeof operamini !== "undefined") {
