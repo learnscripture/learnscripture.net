@@ -48,6 +48,7 @@ var learnscripture = (function (learnscripture, $) {
     var WORD_TOGGLE_HIDE_ALL = 2;
 
     var scrollingTimeoutId = null;
+    var fastEventName = 'ontouchstart' in window ? 'touchstart' : 'mousedown';
 
     // Defined in StageType:
     var STAGE_TYPE_TEST = 'TEST';
@@ -438,7 +439,7 @@ var learnscripture = (function (learnscripture, $) {
                 $('#id-next-verse-btn').addClass('primary');
             }
 
-            $('#id-more-practice-btn').unbind().bind('touchstart mousedown', function () {
+            $('#id-more-practice-btn').unbind().bind(fastEventName, function () {
                 if (accuracyPercent < 10) {
                     currentStageList = chooseStageListForStrength(0);
                 } else if (accuracyPercent < 30) {
@@ -1037,7 +1038,7 @@ var learnscripture = (function (learnscripture, $) {
                 html += '<span class="word">' + escapeHtml(normaliseWordForTest(getWordAt(i).text())) + '</span>';
             }
             $c.html(html);
-            $c.find('.word').bind('touchstart mousedown', // use touchstart/mousedown for speed on touch screens, not click
+            $c.find('.word').bind(fastEventName,
                                   this.handleButtonClick);
             $c.show();
         },
@@ -1045,8 +1046,6 @@ var learnscripture = (function (learnscripture, $) {
         handleButtonClick: function (ev) {
             ev.preventDefault();
             var $btn = $(ev.target);
-            // Unbind to prevent double triggering:
-            $btn.unbind()
             if (normaliseWordForTest($btn.text()) ===
                 normaliseWordForTest(getWordAt(currentWordIndex).text())) {
                 indicateSuccess();
@@ -1830,16 +1829,16 @@ var learnscripture = (function (learnscripture, $) {
         // the on-screen keyboard.
         inputBox.bind('keydown', inputKeyDown);
         testingStatus = $('#id-testing-status');
-        $('#id-next-btn').show().bind('touchstart mousedown', next);
-        $('#id-back-btn').show().bind('touchstart mousedown', back);
-        $('#id-hint-btn').bind('touchstart mousedown', function (ev) {
+        $('#id-next-btn').show().bind(fastEventName, next);
+        $('#id-back-btn').show().bind(fastEventName, back);
+        $('#id-hint-btn').bind(fastEventName, function (ev) {
             ev.preventDefault();
             testingMethodStrategy.getHint();
         });
-        $('#id-next-verse-btn').bind('touchstart mousedown', nextVerse);
-        $('#id-context-next-verse-btn').bind('touchstart mousedown', markReadAndNextVerse);
+        $('#id-next-verse-btn').bind(fastEventName, nextVerse);
+        $('#id-context-next-verse-btn').bind(fastEventName, markReadAndNextVerse);
         $('#id-version-select').change(versionSelectChanged);
-        $('#id-help-btn').bind('touchstart mousedown', function (ev) {
+        $('#id-help-btn').bind(fastEventName, function (ev) {
             if (preferences.enableAnimations) {
                 $('#id-help').toggle('fast');
             } else {
@@ -1850,7 +1849,7 @@ var learnscripture = (function (learnscripture, $) {
         $('#id-skip-verse-btn').bind(skipVerse);
         $('#id-cancel-learning-btn').click(cancelLearning);
         $('#id-reset-progress-btn').click(resetProgress);
-        $('#id-finish-btn').bind('touchstart mousedown', finishBtnClick);
+        $('#id-finish-btn').bind(fastEventName, finishBtnClick);
         $(window).resize(function () {
             if (currentStage !== null &&
                 currentStage.testMode) {
