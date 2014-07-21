@@ -102,6 +102,7 @@ class VersesToLearnHandler(BaseHandler):
         'learn_order',
         'learning_type',
         'return_to',
+        'suggested_words',
         )
 
     @require_identity_method

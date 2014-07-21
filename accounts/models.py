@@ -312,11 +312,14 @@ class Account(AbstractBaseUser):
         clear_friendship_weight_cache(self.id)
 
 
-def count_words(text):
+def split_into_words(text):
     # This logic is reproduced client side in learn.js :: countWords
     # in order to display target
-    text = text.replace('--', '-- ')
-    return len(text.strip().split())
+    return text.replace('--', '-- ').strip().split()
+
+
+def count_words(text):
+    return len(split_into_words(text))
 
 
 def normlise_weighting(weights):
