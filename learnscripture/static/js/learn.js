@@ -1856,7 +1856,7 @@ var learnscripture = (function (learnscripture, $) {
             }
             $('#id-help-btn').button('toggle');
         });
-        $('#id-skip-verse-btn').bind(skipVerse);
+        $('#id-skip-verse-btn').click(skipVerse);
         $('#id-cancel-learning-btn').click(cancelLearning);
         $('#id-reset-progress-btn').click(resetProgress);
         $('#id-finish-btn').bind(fastEventName, finishBtnClick);
