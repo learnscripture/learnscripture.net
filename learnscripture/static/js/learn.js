@@ -55,6 +55,7 @@ var learnscripture = (function (learnscripture, $) {
     // Defined in TestingMethod:
     var TEST_FULL_WORDS = 0;
     var TEST_FIRST_LETTER = 1;
+    var TEST_ON_SCREEN = 2;
 
     // Defined in VerseSetType
     var SET_TYPE_SELECTION = 1;
@@ -170,6 +171,22 @@ var learnscripture = (function (learnscripture, $) {
         }
     };
 
+    function escapeHtml(s) {
+	if (!s) {
+	    return "";
+	}
+	s = s + "";
+	return s.replace(/[\&"<>\\]/g, function(s) {
+	    switch(s) {
+	    case "&": return "&amp;";
+	    case "\\": return "\\\\";
+	    case '"': return '\"';
+	    case "<": return "&lt;";
+	    case ">": return "&gt;";
+	    default: return s;
+	    }
+	});
+    }
 
     // === Events ===
 
@@ -820,8 +837,8 @@ var learnscripture = (function (learnscripture, $) {
         checkCurrentWord: function () {
             var wordIdx = currentWordIndex;
             var word = getWordAt(wordIdx);
-            var wordStr = stripPunctuation(word.text().toLowerCase());
-            var typed = stripPunctuation(inputBox.val().trim().toLowerCase());
+            var wordStr = normaliseWordForTest(word.text());
+            var typed = normaliseWordForTest(inputBox.val());
 
             if (this.matchWord(wordStr, typed)) {
                 indicateSuccess();
@@ -930,8 +947,8 @@ var learnscripture = (function (learnscripture, $) {
 
         getHint: function () {
             var word = getWordAt(currentWordIndex);
-            var wordStr = stripPunctuation(word.text());
-            var typed = stripPunctuation(inputBox.val().toLowerCase());
+            var wordStr = stripPunctuation(word.text()); // don't use normaliseWordForTest, we want case
+            var typed = normaliseWordForTest(inputBox.val());
 
             if (typed == "" || typed.slice(0, 1) != wordStr.toLowerCase().slice(0, 1)) {
                 // Nothing or incorrect letter typed: show first letter hint
@@ -980,6 +997,68 @@ var learnscripture = (function (learnscripture, $) {
             this.hintFinished();
         }
     });
+
+    // On screen testing
+
+    var OnScreenTestingStrategy = Object.create(TestingStrategy);
+
+    $.extend(OnScreenTestingStrategy, {
+        methodSetUp: function () {
+            $('.test-method-onscreen').show();
+        },
+
+        methodTearDown: function () {
+            this.testTearDown();
+            $('.test-method-onscreen').hide();
+        },
+
+        testSetUp: function () {
+            setHardMode(true);
+            $('#id-onscreen-test-container').show();
+            this.wordTestSetUp();
+        },
+
+        testTearDown: function () {
+            $('#id-onscreen-test-container').hide();
+            this.wordTestTearDown();
+        },
+
+        wordTestSetUp: function () {
+            var $c = $('#id-onscreen-test-container');
+            $c.hide(); // for speed.
+            // For now, just use some random words from the verse
+            $c.find('.word').remove();
+            var html = "";
+            for (var i = 0; i < 10; i++) {
+                html += '<span class="word">' + escapeHtml(normaliseWordForTest(getWordAt(i).text())) + '</span>';
+            }
+            $c.html(html);
+            $c.find('.word').bind('touchstart mousedown', // use touchstart/mousedown for speed on touch screens, not click
+                                  this.handleButtonClick);
+            $c.show();
+        },
+
+        handleButtonClick: function (ev) {
+            ev.preventDefault();
+            var $btn = $(ev.target);
+            // Unbind to prevent double triggering:
+            $btn.unbind()
+            if (normaliseWordForTest($btn.text()) ===
+                normaliseWordForTest(getWordAt(currentWordIndex).text())) {
+                indicateSuccess();
+            } else {
+                testingMistakes[currentWordIndex] = 1;
+                indicateFail();
+            }
+            moveOn();
+        }
+    })
+
+    // -----------------------
+
+    var normaliseWordForTest = function (str) {
+        return stripPunctuation(str.trim().toLowerCase());
+    }
 
     var stripPunctuation = function (str) {
         return str.replace(/["'\.,;!?:\/#!$%\^&\*{}=\-_`~()]/g, "");
@@ -1794,8 +1873,13 @@ var learnscripture = (function (learnscripture, $) {
             testingMethodStrategy = FullWordTestingStrategy;
         } else if (preferences.testingMethod === TEST_FIRST_LETTER) {
             testingMethodStrategy = FirstLetterTestingStrategy;
+        } else if (preferences.testingMethod === TEST_ON_SCREEN) {
+            testingMethodStrategy = OnScreenTestingStrategy;
         }
         testingMethodStrategy.methodSetUp();
+        if (currentStage != null && currentStage.testMode) {
+            testingMethodStrategy.testSetUp();
+        }
     };
 
     var receiveAccountData = function (accountData) {
