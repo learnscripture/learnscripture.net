@@ -1031,14 +1031,40 @@ var learnscripture = (function (learnscripture, $) {
 
         wordTestSetUp: function () {
             this.removeCurrentWordMarker();
-            getWordAt(currentWordIndex).addClass('current-word');
+            var $w = getWordAt(currentWordIndex);
+            $w.addClass('current-word');
             var $c = $('#id-onscreen-test-container');
             $c.hide(); // for speed.
-            // For now, just use some random words from the verse
-            $c.find('.word').remove();
-            var html = "";
-            for (var i = 0; i < 10; i++) {
-                html += '<span class="word">' + escapeHtml(normaliseWordForTest(getWordAt(i).text())) + '</span>';
+
+            var suggestions = currentVerseStatus.suggested_words[currentWordIndex];
+
+            // suggestions is an array of (word, frequency) pairs.
+            // Make bag according to frequency.
+            var bag = [];
+            for (var i = 0; i < suggestions.length; i++) {
+                var suggestion = suggestions[i];
+                for (var j = 0; j < suggestion[1]; j++) {
+                    bag.push(suggestion[0]);
+                }
+            }
+            // Pick N unique items
+            var chosen = [];
+            var CHOICE_COUNT = 10;
+            var correctWord = normaliseWordForTest($w.text());
+            chosen.push(correctWord);
+            while (chosen.length < CHOICE_COUNT && bag.length > 0) {
+                var pos = Math.floor(Math.random() * bag.length);
+                var choice = normaliseWordForTest(bag[pos]);
+                if (chosen.indexOf(choice) === -1) {
+                    chosen.push(choice);
+                }
+                bag = setRemove(bag, [choice]);
+            }
+            chosen.sort();
+
+            var html = '';
+            for (var i = 0; i < chosen.length; i++) {
+                html += '<span class="word">' + escapeHtml(chosen[i]) + '</span>';
             }
             $c.html(html);
             $c.find('.word').bind(fastEventName,

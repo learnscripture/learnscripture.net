@@ -624,6 +624,13 @@ class UserVerseStatus(models.Model):
                 if vc.reference == self.reference:
                     return section
 
+    @property
+    def suggested_words(self):
+        from accounts.models import split_into_words
+        # For now, just use words in verse. TODO - suggestions for reference
+        words = split_into_words(self.text)
+        return [[(w, 1) for w in words if w != cur_word]
+                for cur_word in words]
 
     def __unicode__(self):
         return u"%s, %s" % (self.reference, self.version.slug)
