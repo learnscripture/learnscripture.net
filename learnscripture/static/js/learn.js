@@ -96,7 +96,6 @@ var learnscripture = (function (learnscripture, $) {
     var testingMistakes = null;
     var hardMode = null;
     var practiceMode = null;
-    var hintsShown = 0;
 
     // Verse list
     var versesToLearn = null; // eventually a dictionary of index:verse
@@ -761,7 +760,6 @@ var learnscripture = (function (learnscripture, $) {
         if (!isPracticeMode()) {
             $('#id-points-target').html(' Points target: <b>' + getPointsTarget().toString() + '</b>');
         }
-        hintsShown = 0;
         testingMethodStrategy.testSetUp();
 
     };
@@ -797,6 +795,7 @@ var learnscripture = (function (learnscripture, $) {
             setHardMode(currentVerseStatus.strength > HARD_MODE_THRESHOLD);
             $('#id-keyboard-test-bar').show();
             this.wordTestSetUp();
+            this.hintsShown = 0;
         },
 
         testTearDown: function () {
@@ -885,11 +884,11 @@ var learnscripture = (function (learnscripture, $) {
 
         hintFinished: function () {
             inputBox.focus();
-            hintsShown++;
+            this.hintsShown++;
             // For very short verses, allow fewer hints e.g.  2 or 3 word
             // verses should get just 1 hint.
             var maxHints = Math.min(Math.floor(currentVerseStatus.wordCount / 2), this.maxHintsToShow);
-            if (hintsShown >= this.maxHintsToShow) {
+            if (this.hintsShown >= this.maxHintsToShow) {
                 enableBtn($('#id-hint-btn'), false);
             }
         }
