@@ -92,11 +92,11 @@ var learnscripture = (function (learnscripture, $) {
     var untestedWords = null;
     var testedWords = null;
 
+    var testingMethodStrategy = null;
     var testingMistakes = null;
     var hardMode = null;
     var practiceMode = null;
     var hintsShown = 0;
-    var maxHintsToShow = 0;
 
     // Verse list
     var versesToLearn = null; // eventually a dictionary of index:verse
@@ -350,6 +350,8 @@ var learnscripture = (function (learnscripture, $) {
     };
 
     var testComplete = function () {
+        testingMethodStrategy.testTearDown();
+
         var accuracy = 0;
         var mistakes = 0;
         $.each(testingMistakes, function (key, val) {
@@ -427,15 +429,12 @@ var learnscripture = (function (learnscripture, $) {
                 } else {
                     currentStageList = ['recall2', 'recall4', 'test'];
                 }
-                setupStage(0);
+                setUpStage(0);
             });
         } else {
             $('#id-more-practice-btn').removeClass('primary').hide();
             $('#id-next-verse-btn').addClass('primary');
         }
-
-        inputBox.blur();
-        $('#id-test-bar').hide();
         testingStatus.hide();
         bindDocKeyPress();
     };
@@ -523,7 +522,7 @@ var learnscripture = (function (learnscripture, $) {
         forceRedrawBottomControls();
     };
 
-    var setupStage = function (idx) {
+    var setUpStage = function (idx) {
         // set the globals
         var currentStageName = currentStageList[idx];
         currentStageIdx = idx;
@@ -535,21 +534,19 @@ var learnscripture = (function (learnscripture, $) {
         $('#id-points-target').html('');
 
         showStageControls(currentStageName)
-        currentStage.setup();
+        // reset current word
+        currentWordIndex = 0;
+        currentStage.setUp();
         setStageControlBtns();
         if (currentStage.testMode) {
             unbindDocKeyPress();
-            $('#id-test-bar').show();
-            inputBox.focus();
+            // currentStage.setUp will call testingMethod.testSetUp()
         } else {
-            inputBox.blur();
-            $('#id-test-bar').hide();
+            if (testingMethodStrategy != null) {
+                testingMethodStrategy.testTearDown();
+            }
             bindDocKeyPress();
         }
-
-        // reset current word
-        currentWordIndex = 0;
-        adjustTypingBox();
 
         setProgress(currentStageIdx, 0);
     };
@@ -562,7 +559,7 @@ var learnscripture = (function (learnscripture, $) {
             return;
         }
         if (currentStageIdx < currentStageList.length - 1) {
-            setupStage(currentStageIdx + 1);
+            setUpStage(currentStageIdx + 1);
         }
     };
 
@@ -570,7 +567,7 @@ var learnscripture = (function (learnscripture, $) {
         if (currentStageIdx == 0) {
             return;
         }
-        setupStage(currentStageIdx - 1);
+        setUpStage(currentStageIdx - 1);
     };
 
     var nextVerse = function () {
@@ -734,37 +731,6 @@ var learnscripture = (function (learnscripture, $) {
         return currentVerseStatus.wordCount * POINTS_PER_WORD;
     };
 
-    var adjustTypingBox = function () {
-        var wordBox = getWordAt(currentWordIndex);
-        var pos = wordBox.position();
-        var width;
-        $('#id-test-bar').css({
-            left: pos.left.toString() + "px",
-            top: pos.top.toString() + "px"
-        });
-        if (isHardMode()) {
-            width = "6em";
-        } else {
-            width = (wordBox.outerWidth() - 4).toString() + "px";
-        }
-        // 4 = 2 * size of #id-typing border
-        inputBox.css({
-            height: (wordBox.outerHeight() - 4).toString() + "px",
-            width: width
-        });
-    };
-
-    var forceShowKeyboard = function () {
-        // Attempt to force keyboard to be shown. This is needed in case
-        // android app user pressed 'Enter' instead of 'space'
-        if (window.androidlearnscripture &&
-            window.androidlearnscripture.showKeyboard) {
-            inputBox.focus();
-            window.androidlearnscripture.showKeyboard();
-        }
-
-    };
-
     var setHardMode = function (hard) {
         hardMode = hard;
         $('.current-verse').toggleClass('hard-mode', hard);
@@ -773,7 +739,6 @@ var learnscripture = (function (learnscripture, $) {
     var isHardMode = function () {
         return hardMode;
     };
-
 
     var setPracticeMode = function (practice) {
         practiceMode = practice;
@@ -793,56 +758,166 @@ var learnscripture = (function (learnscripture, $) {
         });
         resetTestingMistakes();
         testingStatus.text('');
-        // After an certain point, we make things a bit harder.
-        setHardMode(currentVerseStatus.strength > HARD_MODE_THRESHOLD);
         if (!isPracticeMode()) {
             $('#id-points-target').html(' Points target: <b>' + getPointsTarget().toString() + '</b>');
         }
         hintsShown = 0;
-        // For very short verses, allow fewer hints e.g.  2 or 3 word
-        // verses should get just 1 hint, with a maximum of 4 hints
-        // for normal testing, 3 hints for first letter testing.
-        maxHintsToShow = Math.min(Math.floor(currentVerseStatus.wordCount / 2),
-            preferences.testingMethod == TEST_FULL_WORDS ? 4 : 3);
+        testingMethodStrategy.testSetUp();
+
     };
 
     var testContinue = function () {
         return true;
     };
 
+    // === Testing logic ===
 
-    var getHint = function () {
-        var word = getWordAt(currentWordIndex);
-        var wordStr = stripPunctuation(word.text());
-        var typed = stripPunctuation(inputBox.val().toLowerCase());
+    // Abstract base class
+    var TestingStrategy = {
+        methodSetUp: function () {}, // function to run when method is chosen
+        methodTearDown: function () {}, // function to run when another method is chosen
+        testSetUp: function () {}, // function to run when a test is started
+        testTearDown: function () {}, // function to run when a test is finished
+        wordTestSetUp: function () {}, // function to run when a new word is being tested
+        wordTestTearDown: function () {}, // function to run when a new word is finished tested
+        nextWord: function () {
+            this.wordTestTearDown();
+            this.wordTestSetUp();
+        },
+        windowAdjust: function () {}
+    };
 
-        if (preferences.testingMethod == TEST_FULL_WORDS &&
-            (typed == "" || typed.slice(0, 1) != wordStr.toLowerCase().slice(0, 1))) {
-            // show first letter hint
-            inputBox.val(wordStr.slice(0, 1));
-        } else {
+    // Base class for keyboard methods
+    var KeyboardTestingStrategy = Object.create(TestingStrategy);
+    $.extend(KeyboardTestingStrategy, {
+
+        testSetUp: function () {
+            // After an certain point, we make things a bit harder by not
+            // showing the widths of words.
+            setHardMode(currentVerseStatus.strength > HARD_MODE_THRESHOLD);
+            $('#id-keyboard-test-bar').show();
+            this.wordTestSetUp();
+        },
+
+        testTearDown: function () {
+            $('#id-keyboard-test-bar').hide();
+            this.wordTestTearDown();
+        },
+
+        wordTestSetUp: function () {
+            this.adjustTypingBox();
+            inputBox.show().val('').focus();
+            this.forceShowKeyboard();
+        },
+
+        wordTestTearDown: function () {
+            inputBox.blur().hide();
+        },
+
+        windowAdjust: function () {
+            this.adjustTypingBox();
+        },
+
+        checkCurrentWord: function () {
+            var wordIdx = currentWordIndex;
+            var word = getWordAt(wordIdx);
+            var wordStr = stripPunctuation(word.text().toLowerCase());
+            var typed = stripPunctuation(inputBox.val().trim().toLowerCase());
+
+            if (this.matchWord(wordStr, typed)) {
+                indicateSuccess();
+                moveOn();
+            } else {
+                var mistakeVal = 1 / this.testMaxAttempts;
+                testingMistakes[wordIdx] += mistakeVal;
+                if (approximatelyEqual(testingMistakes[wordIdx], 1.0, 0.001) ||
+                    testingMistakes[wordIdx] > 1) // can happen if switched test method in middle
+                    {
+                        indicateFail();
+                        moveOn();
+                    } else {
+                        indicateMistake(Math.round(testingMistakes[wordIdx] / mistakeVal),
+                                        this.testMaxAttempts);
+                        this.forceShowKeyboard();
+                    }
+            }
+        },
+
+        adjustTypingBox: function () {
+            var wordBox = getWordAt(currentWordIndex);
+            var pos = wordBox.position();
+            var width;
+            $('#id-keyboard-test-bar').css({
+                left: pos.left.toString() + "px",
+                top: pos.top.toString() + "px"
+            });
+            if (isHardMode()) {
+                width = "6em";
+            } else {
+                width = (wordBox.outerWidth() - 4).toString() + "px";
+            }
+            // 4 = 2 * size of #id-typing border
+            inputBox.css({
+                height: (wordBox.outerHeight() - 4).toString() + "px",
+                width: width
+            })
+        },
+
+        forceShowKeyboard: function () {
+            // Attempt to force keyboard to be shown. This is needed in case
+            // android app user pressed 'Enter' instead of 'space'
+            if (window.androidlearnscripture &&
+                window.androidlearnscripture.showKeyboard) {
+                inputBox.focus();
+                window.androidlearnscripture.showKeyboard();
+            }
+
+        },
+
+        showFullWordHint: function () {
             // show full word hint, and move on.
+            var word = getWordAt(currentWordIndex);
+            var wordStr = stripPunctuation(word.text());
             inputBox.val(wordStr);
             moveOn();
             testingStatus.hide();
+        },
+
+        hintFinished: function () {
+            inputBox.focus();
+            hintsShown++;
+            // For very short verses, allow fewer hints e.g.  2 or 3 word
+            // verses should get just 1 hint.
+            var maxHints = Math.min(Math.floor(currentVerseStatus.wordCount / 2), this.maxHintsToShow);
+            if (hintsShown >= this.maxHintsToShow) {
+                enableBtn($('#id-hint-btn'), false);
+            }
         }
+    });
 
-        inputBox.focus();
-        hintsShown++;
-        if (hintsShown >= maxHintsToShow) {
-            enableBtn($('#id-hint-btn'), false);
-        }
-    };
 
-    // === Testing logic ===
+    // Full word keyboard testing
 
-    var stripPunctuation = function (str) {
-        return str.replace(/["'\.,;!?:\/#!$%\^&\*{}=\-_`~()]/g, "");
-    };
+    var FullWordTestingStrategy = Object.create(KeyboardTestingStrategy);
+    $.extend(FullWordTestingStrategy, {
+        testMaxAttempts: 3,
+        maxHintsToShow: 4,
 
-    var matchWord = function (target, typed) {
-        // inputs are already lowercased with punctuation stripped
-        if (preferences.testingMethod === TEST_FULL_WORDS) {
+        methodSetUp: function () {
+            $('.test-method-keyboard-full-word').show();
+        },
+
+        methodTearDown: function () {
+            this.testTearDown();
+            $('.test-method-keyboard-full-word').hide();
+        },
+
+        shouldCheckWord: function(ev, isSpace) {
+            return isSpace;
+        },
+
+        matchWord: function (target, typed) {
+            // inputs are already lowercased with punctuation stripped
             if (typed === "") {
                 return false;
             }
@@ -852,54 +927,79 @@ var learnscripture = (function (learnscripture, $) {
             }
             // After that, allow N/3 mistakes, rounded up.
             return damerauLevenshteinDistance(target, typed) <= Math.ceil(target.length / 3);
-        } else {
-            // TEST_FIRST_LETTER
-            return (typed === target.slice(0, 1));
+        },
+
+        getHint: function () {
+            var word = getWordAt(currentWordIndex);
+            var wordStr = stripPunctuation(word.text());
+            var typed = stripPunctuation(inputBox.val().toLowerCase());
+
+            if (typed == "" || typed.slice(0, 1) != wordStr.toLowerCase().slice(0, 1)) {
+                // Nothing or incorrect letter typed: show first letter hint
+                inputBox.val(wordStr.slice(0, 1));
+            } else {
+                this.showFullWordHint();
+            }
+
+            this.hintFinished();
         }
+    });
+
+
+    // First letter keyboard testing
+    var FirstLetterTestingStrategy = Object.create(KeyboardTestingStrategy);
+
+    $.extend(FirstLetterTestingStrategy, {
+        testMaxAttempts: 2, // stricter than full word because it is easier
+        maxHintsToShow: 3,
+
+        methodSetUp: function () {
+            $('.test-method-keyboard-first-letter').show();
+        },
+
+        methodTearDown: function () {
+            this.testTearDown();
+            $('.test-method-keyboard-first-letter').hide();
+        },
+
+        shouldCheckWord: function (ev, isSpace) {
+            if (isSpace) {
+                // compat for Android on Chrome, which doesn't fire the
+                // event for first letter in box, but will get here if
+                // you press one letter and then space
+                return true;
+            }
+            return alphanumeric(ev);
+        },
+
+        matchWord: function (target, typed) {
+            return (typed === target.slice(0, 1));
+        },
+
+        getHint: function () {
+            this.showFullWordHint();
+            this.hintFinished();
+        }
+    });
+
+    var stripPunctuation = function (str) {
+        return str.replace(/["'\.,;!?:\/#!$%\^&\*{}=\-_`~()]/g, "");
     };
 
     var moveOn = function () {
         var wordIdx = currentWordIndex;
         var word = getWordAt(wordIdx);
         showWord(word.find('*'));
-        inputBox.val('');
         setProgress(currentStageIdx, (wordIdx + 1) / wordList.length);
         if (wordIdx + 1 === wordList.length) {
             testComplete();
         } else {
             currentWordIndex++;
-            adjustTypingBox();
             var isReference = getWordAt(currentWordIndex).hasClass('reference');
             if (isReference) {
                 fadeVerseTitle(true);
             }
-            forceShowKeyboard();
-        }
-    };
-
-    var checkCurrentWord = function () {
-        var wordIdx = currentWordIndex;
-        var word = getWordAt(wordIdx);
-        var wordStr = stripPunctuation(word.text().toLowerCase());
-        var typed = stripPunctuation(inputBox.val().trim().toLowerCase());
-
-        if (matchWord(wordStr, typed)) {
-            indicateSuccess();
-            moveOn();
-        } else {
-            // For first letter testing, we are stricter because it is easier.
-            var testMaxAttempts = (preferences.testingMethod === TEST_FIRST_LETTER ? 2 : 3);
-            var mistakeVal = 1 / testMaxAttempts;
-            testingMistakes[wordIdx] += mistakeVal;
-            if (approximatelyEqual(testingMistakes[wordIdx], 1.0, 0.001) || testingMistakes[wordIdx] > 1) // can happen if switched test method in middle
-            {
-                indicateFail();
-                moveOn();
-            } else {
-                indicateMistake(Math.round(testingMistakes[wordIdx] / mistakeVal),
-                    testMaxAttempts);
-                forceShowKeyboard();
-            }
+            testingMethodStrategy.nextWord();
         }
     };
 
@@ -921,7 +1021,7 @@ var learnscripture = (function (learnscripture, $) {
 
     // Each stage definition contains:
     //
-    // setup: Function to do stage specific setup
+    // setUp: Function to do stage specific setup
     //
     // continueStage: function that is run when
     //  the user clicks 'Next' and moves the stage on.
@@ -936,49 +1036,49 @@ var learnscripture = (function (learnscripture, $) {
 
     var stageDefs = {
         'read': {
-            setup: readStageStart,
+            setUp: readStageStart,
             continueStage: readStageContinue,
             caption: 'Read',
             testMode: false,
             toggleMode: WORD_TOGGLE_SHOW
         },
         'recall1': {
-            setup: recall1Start,
+            setUp: recall1Start,
             continueStage: recall1Continue,
             caption: 'Recall 1 - 50% initial',
             testMode: false,
             toggleMode: WORD_TOGGLE_HIDE_END
         },
         'recall2': {
-            setup: recall2Start,
+            setUp: recall2Start,
             continueStage: recall2Continue,
             caption: 'Recall 2 - 100% initial',
             testMode: false,
             toggleMode: WORD_TOGGLE_HIDE_END
         },
         'recall3': {
-            setup: recall3Start,
+            setUp: recall3Start,
             continueStage: recall3Continue,
             caption: 'Recall 3 - 33% missing',
             testMode: false,
             toggleMode: WORD_TOGGLE_HIDE_ALL
         },
         'recall4': {
-            setup: recall4Start,
+            setUp: recall4Start,
             continueStage: recall4Continue,
             caption: 'Recall 4 - 66% missing',
             testMode: false,
             toggleMode: WORD_TOGGLE_HIDE_ALL
         },
         'test': {
-            setup: testStart,
+            setUp: testStart,
             continueStage: testContinue,
             caption: 'Test',
             testMode: true,
             toggleMode: null
         },
         'results': {
-            setup: function () {},
+            setUp: function () {},
             continueStage: function () {
                 return true;
             },
@@ -987,7 +1087,7 @@ var learnscripture = (function (learnscripture, $) {
             toggleMode: null
         },
         'readForContext': {
-            setup: function () {},
+            setUp: function () {},
             continueStage: function () {
                 return true;
             },
@@ -996,7 +1096,7 @@ var learnscripture = (function (learnscripture, $) {
             toggleMode: null
         },
         'practice': {
-            setup: testStart,
+            setUp: testStart,
             continueStage: testContinue,
             caption: 'Practice',
             testMode: true,
@@ -1007,7 +1107,7 @@ var learnscripture = (function (learnscripture, $) {
     // === Handling stage lists ===
 
 
-    var setupStageList = function (verseData) {
+    var setUpStageList = function (verseData) {
         var strength = 0;
         if (verseData.strength != null) {
             strength = verseData.strength;
@@ -1023,7 +1123,7 @@ var learnscripture = (function (learnscripture, $) {
                 currentStageList = ['readForContext'];
             }
         }
-        setupStage(0);
+        setUpStage(0);
     };
 
     var chooseStageListForStrength = function (strength) {
@@ -1158,7 +1258,7 @@ var learnscripture = (function (learnscripture, $) {
             $('.previous-verse').remove();
             $('.current-verse').show();
         }
-        setupStageList(verse);
+        setUpStageList(verse);
         $('.selection-set-only').toggle(!isPassageType(currentVerseStatus));
 
         var nextBtns = $('#id-next-verse-btn, #id-context-next-verse-btn, #id-read-anyway-vext-verse-btn');
@@ -1190,6 +1290,10 @@ var learnscripture = (function (learnscripture, $) {
     };
 
     var scrollOutPreviousVerse = function () {
+        // Animating this is tricky to do cleanly, since we'd need to using
+        // continuation style to pass in the remainder of the calling function
+        // to pass to an animate({complete:}) callback.
+
         var words = {}; // offset:node list of word spans
         var maxOffset = null;
         $('.previous-verse .word, .previous-verse .testedword').each(function (idx, elem) {
@@ -1204,13 +1308,6 @@ var learnscripture = (function (learnscripture, $) {
             words[offset].push(elem);
         });
 
-        // First fix the height
-        if (preferences.enableAnimations) {
-            $('.previous-verse').css({
-                'height': $('.previous-verse').height().toString() + 'px'
-            });
-        }
-
         // Now make the other words disappear
         $.each(words, function (offset, elems) {
             if (offset.toString() !== maxOffset.toString()) {
@@ -1221,22 +1318,6 @@ var learnscripture = (function (learnscripture, $) {
 
         // Now shrink the area
         var wordHeight = $('.previous-verse .word, .previous-verse .testedword').css('line-height');
-        if (preferences.enableAnimations) {
-            inputBox.hide();
-            $('.previous-verse')
-                .css({
-                    display: 'table-cell'
-                })
-                .animate({
-                    height: wordHeight
-                }, {
-                    duration: 500,
-                    complete: function () {
-                        inputBox.show().focus();
-                        adjustTypingBox()
-                    }
-                });
-        }
         $('.previous-verse .word, .previous-verse .testedword')
             .removeClass('word').addClass('testedword')
             .find('span')
@@ -1468,29 +1549,19 @@ var learnscripture = (function (learnscripture, $) {
             )
         ) {
             ev.preventDefault();
-            if (currentStage.testMode) {
-                if (preferences.testingMethod === TEST_FULL_WORDS) {
-                    checkCurrentWord();
-                } else if (
-                    preferences.testingMethod == TEST_FIRST_LETTER &&
-                    textSoFarTrimmed.length > 0) {
-                    // compat for Android on Chrome, which doesn't fire the
-                    // event for first letter in box, but will get here if
-                    // you press one letter and then space
-                    checkCurrentWord();
-                }
+            if (currentStage.testMode && testingMethodStrategy.shouldCheckWord(ev, true)) {
+                testingMethodStrategy.checkCurrentWord();
             }
             return;
-        }
-        // Any character
-        if (currentStage.testMode && preferences.testingMethod === TEST_FIRST_LETTER) {
-            if (alphanumeric(ev)) {
+        } else {
+            // Any other character
+            if (currentStage.testMode && testingMethodStrategy.shouldCheckWord(ev, false)) {
                 ev.preventDefault();
                 if (!characterInserted) {
                     // Put it there ourselves, so it is ready for checkCurrentWord()
                     inputBox.val(String.fromCharCode(ev.which));
                 }
-                checkCurrentWord();
+                testingMethodStrategy.checkCurrentWord();
             }
         }
 
@@ -1623,12 +1694,12 @@ var learnscripture = (function (learnscripture, $) {
     };
 
     // === Setup and wiring ===
-    var setupLearningControls = function () {
+    var setUpLearningControls = function () {
         isLearningPage = ($('#id-verse-wrapper').length > 0);
         if (!isLearningPage) {
             return;
         }
-        learnscripture.setupAudio();
+        learnscripture.setUpAudio();
         receivePreferences(learnscripture.getPreferences());
         receiveAccountData(learnscripture.getAccountData());
 
@@ -1650,7 +1721,10 @@ var learnscripture = (function (learnscripture, $) {
         testingStatus = $('#id-testing-status');
         $('#id-next-btn').show().click(next);
         $('#id-back-btn').show().click(back);
-        $('#id-hint-btn').click(getHint);
+        $('#id-hint-btn').click(function (ev) {
+            ev.preventDefault();
+            testingMethodStrategy.getHint();
+        });
         $('#id-next-verse-btn').click(nextVerse);
         $('#id-context-next-verse-btn').click(markReadAndNextVerse);
         $('#id-version-select').change(versionSelectChanged);
@@ -1669,7 +1743,7 @@ var learnscripture = (function (learnscripture, $) {
         $(window).resize(function () {
             if (currentStage !== null &&
                 currentStage.testMode) {
-                adjustTypingBox();
+                testingMethodStrategy.windowAdjust();
             }
         });
         if (typeof operamini !== "undefined") {
@@ -1678,7 +1752,7 @@ var learnscripture = (function (learnscripture, $) {
             // input onchange events, which fires when the user preses 'Done'
             inputBox.change(function (ev) {
                 ev.preventDefault();
-                checkCurrentWord();
+                testingMethodStrategy.checkCurrentWord();
                 inputBox.focus();
             });
         }
@@ -1714,12 +1788,15 @@ var learnscripture = (function (learnscripture, $) {
             return;
         }
         preferences = prefs;
-        $('.test-method-specific').hide();
-        if (preferences.testingMethod === TEST_FIRST_LETTER) {
-            $('.test-method-keyboard-first-letter').show();
-        } else if (preferences.testingMethod === TEST_FULL_WORDS) {
-            $('.test-method-keyboard-full-word').show();
+        if (testingMethodStrategy != null) {
+            testingMethodStrategy.methodTearDown();
         }
+        if (preferences.testingMethod === TEST_FULL_WORDS) {
+            testingMethodStrategy = FullWordTestingStrategy;
+        } else if (preferences.testingMethod === TEST_FIRST_LETTER) {
+            testingMethodStrategy = FirstLetterTestingStrategy;
+        }
+        testingMethodStrategy.methodSetUp();
     };
 
     var receiveAccountData = function (accountData) {
@@ -1733,7 +1810,7 @@ var learnscripture = (function (learnscripture, $) {
 
     // === Exports ===
 
-    learnscripture.setupLearningControls = setupLearningControls;
+    learnscripture.setUpLearningControls = setUpLearningControls;
     return learnscripture;
 
 }(learnscripture || {}, $));
@@ -1780,5 +1857,5 @@ function damerauLevenshteinDistance(a, b) {
 }
 
 $(document).ready(function () {
-    learnscripture.setupLearningControls();
+    learnscripture.setUpLearningControls();
 });

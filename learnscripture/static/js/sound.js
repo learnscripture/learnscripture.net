@@ -7,7 +7,7 @@ var learnscripture =
         var useAudio = false;
         var useMozSetup = false;
 
-        var setupAudio = function () {
+        var setUpAudio = function () {
             if (isSetup) {
                 return;
             }
@@ -154,7 +154,7 @@ var learnscripture =
 
 
         // === Exports ===
-        learnscripture.setupAudio = setupAudio;
+        learnscripture.setUpAudio = setUpAudio;
         learnscripture.doBeep = doBeep;
 
         return learnscripture;
