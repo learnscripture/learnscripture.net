@@ -467,6 +467,16 @@ def choose(request):
     c = {'title': u'Choose verses'}
     verse_sets = verse_sets.order_by('name').prefetch_related('verse_choices')
 
+    if 'creator' in request.GET:
+        try:
+            current_account = account_from_request(request)
+            creator = Account.objects.visible_for_account(current_account).get(username=request.GET['creator'])
+        except Account.DoesNotExist:
+            creator = None
+        if creator is not None:
+            verse_sets = verse_sets.filter(created_by=creator)
+            c['creator'] = creator
+
     # Searching for verse sets is done via this view.
     # But looking up individual verses is done by AJAX,
     # so is missing here.

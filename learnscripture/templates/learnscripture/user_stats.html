@@ -193,7 +193,7 @@ that you are both in will also affect your news stream.
       <td>{{ verses_finished_this_week|intcomma }}</td>
     </tr>
     <tr>
-      <th>Verse sets created</th>
+      <th><a href="{% url 'choose' %}?creator={{ account.username }}">Verse sets created</a></th>
       <td>{{ verse_sets_created_all_time|intcomma }}</td>
       <td>{{ verse_sets_created_this_week|intcomma }}</td>
     </tr>
