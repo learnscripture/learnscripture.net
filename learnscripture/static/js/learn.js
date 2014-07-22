@@ -1037,13 +1037,19 @@ var learnscripture = (function (learnscripture, $) {
             $c.hide(); // for speed.
 
             var suggestions = currentVerseStatus.suggested_words[currentWordIndex];
+            if (suggestions == undefined) {
+                $c.html('On screen testing is not available for this verse in this version. Sorry!');
+                $c.show();
+                return;
+            }
 
-            // suggestions is an array of (word, frequency) pairs.
+            // suggestions is an array of (word, frequency) pairs,
+            // normalised so that maximum frequency is 1.0
             // Make bag according to frequency.
             var bag = [];
             for (var i = 0; i < suggestions.length; i++) {
                 var suggestion = suggestions[i];
-                for (var j = 0; j < suggestion[1]; j++) {
+                for (var j = 0; j < suggestion[1] * 100; j++) {
                     bag.push(suggestion[0]);
                 }
             }

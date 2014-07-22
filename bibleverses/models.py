@@ -187,6 +187,35 @@ class TextVersion(caching.base.CachingMixin, models.Model):
         verse_dict = self.get_verses_by_reference_bulk(reference_list)
         return dict((ref, v.text) for (ref, v) in verse_dict.items())
 
+    def get_suggestion_dicts_by_reference(self, reference):
+        """
+        For the given reference, returns a list of suggestion dictionaries
+        for each word in the verse, where each dictionary is a mapping from
+        {word:relative frequency}
+
+        """
+        vs = self.get_verse_list(reference, max_length=MAX_VERSE_QUERY_SIZE)
+        ws = (self.word_suggestions
+              .filter(reference__in=[v.reference for v in vs])
+              .order_by('word_number'))
+        ws_dict = defaultdict(list)
+        for w in ws:
+            ws_dict[w.reference, w.word_number].append(w)
+        retval = []
+        for v in vs:
+            # Cope with possibility of ws having some missing word_numbers
+            verse_words = [w for w in ws if w.reference == v.reference]
+            if len(verse_words) > 0:
+                max_word_number = max(w.word_number for w in verse_words)
+                for i in range(0, max_word_number + 1):
+                    if (v.reference, i) in ws_dict:
+                        d = dict(w.as_dict_item() for w in ws_dict[v.reference, i])
+                    else:
+                        d = {}
+                    retval.append(d)
+        return retval
+        # TODO - references?
+
     def get_verses_by_reference_bulk(self, reference_list):
         """
         Returns a dictionary of {ref:verse} for each ref in reference_list. Bad
@@ -324,6 +353,32 @@ class Verse(caching.base.CachingMixin, models.Model):
         self.save()
         UserVerseStatus.objects.filter(version=self.version,
                                        reference=self.reference).delete()
+
+
+class WordSuggestion(models.Model):
+    # We could do FK to Verse here, but all access use version/ref, so
+    # that is easier
+    version = models.ForeignKey(TextVersion, related_name='word_suggestions')
+    reference = models.CharField(max_length=100)
+    word = models.CharField(max_length=100)
+    word_number = models.PositiveSmallIntegerField()
+    frequency = models.FloatField()
+    hits = models.PositiveIntegerField(default=0)
+
+    def as_dict_item(self):
+        # TODO: take hits into account
+        return (self.word, self.frequency)
+
+    class Meta:
+        unique_together = [
+            ('version', 'reference', 'word', 'word_number')
+        ]
+
+    def __unicode____(self):
+        return self.word
+
+    def __repr__(self):
+        return "<WordSuggestion %s for %s %s[%s]>" % (self.word, self.version.slug, self.reference, self.word_number)
 
 
 class QAPair(models.Model):
@@ -626,11 +681,7 @@ class UserVerseStatus(models.Model):
 
     @property
     def suggested_words(self):
-        from accounts.models import split_into_words
-        # For now, just use words in verse. TODO - suggestions for reference
-        words = split_into_words(self.text)
-        return [[(w, 1) for w in words if w != cur_word]
-                for cur_word in words]
+        return [i.items() for i in self.version.get_suggestion_dicts_by_reference(self.reference)]
 
     def __unicode__(self):
         return u"%s, %s" % (self.reference, self.version.slug)
@@ -816,14 +867,16 @@ def ensure_text(verses):
     for short_name, service in retrieve_version_services.items():
         missing = refs_missing_text[short_name]
         if missing:
-            verse_texts = service(missing)
-            for ref in missing:
+            for ref, text in service(missing):
                 v = verse_dict[short_name, ref]
-                if ref in verse_texts:
-                    v.text = verse_texts[ref]
-                    v.save()
-                else:
-                    v.text = u'[Text missing, please contact administrator]'
+                v.text = text
+                print "Updating %s %s" % (short_name, v.reference)
+                v.save()
+
+    for v in verses:
+        if v.text == '' and not v.missing:
+            v.text = u'[Text missing, please contact administrator]'
+            v.save()
 
 
 def pretty_passage_ref(start_ref, end_ref):
@@ -967,6 +1020,13 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
 
     results = Verse.objects.text_search(query, version, limit=11)
     return [ComboVerse(r.reference, [r]) for r in results]
+
+
+def get_whole_book(book_name, version):
+    retval = ComboVerse(book_name, version.verse_set.filter(book_number=BIBLE_BOOKS_DICT[book_name],
+                                                            missing=False))
+    ensure_text(retval.verses)
+    return retval
 
 
 def normalise_reference(query):

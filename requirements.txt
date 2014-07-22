@@ -37,3 +37,6 @@ djangorestframework==2.3.8
 Pillow==2.3.1
 easy-thumbnails==1.4
 unittest2
+pykov
+numpy
+pysparse==1.1.1-dev
