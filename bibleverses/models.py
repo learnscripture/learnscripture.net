@@ -994,7 +994,7 @@ def normalise_reference(query):
 
     if book_name in BIBLE_BOOK_ABBREVIATIONS:
         remainder = u" ".join(parts[used_parts:])
-        return BIBLE_BOOK_ABBREVIATIONS[book_name] + u" " + remainder
+        return (BIBLE_BOOK_ABBREVIATIONS[book_name] + u" " + remainder).strip()
     else:
         return None
 
