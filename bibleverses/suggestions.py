@@ -117,7 +117,7 @@ def generate_suggestions(book, version, ref=None, missing_only=True):
             # If first and last exist, assume the rest do.
             if (existing.filter(word_number=0).count() > 0
                 and existing.filter(word_number=len(words) - 1).count() > 0):
-                print "Skipping %s" % verse.reference
+                print "Skipping %s %s" % (version.slug, verse.reference)
                 continue
         else:
             existing.delete()
