@@ -2,6 +2,9 @@ import re
 import time
 import urllib
 
+import logging
+logger = logging.getLogger(__name__)
+
 from pyquery import PyQuery
 
 ESV_BASE_URL = "http://www.esvapi.org/v2/rest/"
@@ -50,10 +53,12 @@ def get_esv(reference_list):
         if line[0] != ' ' and l2 in reference_list:
             current_section = l2
         else:
-            assert current_section is not None
-            l2 = re.sub('\[[\d:]*\]', '', l2).strip()
-            prev = sections[current_section] + '\n' if current_section in sections else ''
-            sections[current_section] = prev + l2
+            if current_section is None:
+                logger.warn("get_esv: Can't parse line: %r" % line)
+            else:
+                l2 = re.sub('\[[\d:]*\]', '', l2).strip()
+                prev = sections[current_section] + '\n' if current_section in sections else ''
+                sections[current_section] = prev + l2
 
     for ref, text in sections.items():
         yield (ref, text)

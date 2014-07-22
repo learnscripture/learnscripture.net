@@ -48,6 +48,7 @@ def split_into_words_for_suggestions(text):
 def frequency_pairs(words):
     return scale_suggestions(Counter(words).items())
 
+
 def generate_suggestions(book, version, ref=None, missing_only=True):
     book_contents = get_whole_book(book, version)
 
