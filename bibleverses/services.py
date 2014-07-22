@@ -1,4 +1,5 @@
 import re
+import time
 import urllib
 
 from pyquery import PyQuery
@@ -7,6 +8,17 @@ ESV_BASE_URL = "http://www.esvapi.org/v2/rest/"
 
 def get_esv(reference_list):
     from django.conf import settings
+
+    BATCH_SIZE = 20
+    if len(reference_list) > BATCH_SIZE:
+        r = reference_list[:]
+        while len(r) > 0:
+            print "Getting batch"
+            batch, r = r[0:BATCH_SIZE], r[BATCH_SIZE:]
+            for ref, text in get_esv(batch):
+                yield (ref, text)
+            time.sleep(5) # Don't hammer them.
+        raise StopIteration()
 
     params = ['key=%s' % settings.ESV_API_KEY,
               'passage=%s' % urllib.quote(";".join(reference_list)),
@@ -43,7 +55,8 @@ def get_esv(reference_list):
             prev = sections[current_section] + '\n' if current_section in sections else ''
             sections[current_section] = prev + l2
 
-    return sections
+    for ref, text in sections.items():
+        yield (ref, text)
 
 
 def higlight_search_words(verse, words):
