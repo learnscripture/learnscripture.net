@@ -28,8 +28,8 @@ mark_missing.short_description = "Mark selected verses as missing"
 
 class VerseAdmin(admin.ModelAdmin):
     search_fields = ['reference']
-    list_display = ['reference', 'version']
-    list_filter = ['version']
+    list_display = ['reference', 'version', 'missing']
+    list_filter = ['version', 'missing']
     actions = [mark_missing]
 
     def queryset(self, request):
