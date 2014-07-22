@@ -48,6 +48,25 @@
           <input type="submit" class="btn primary" value="Search" id="id-search-btn" />
         </div>
       </div>
+
+      {% if request.identity.account %}
+      <div class="clearfix">
+        <label>Created by:</label>
+        <div class="input">
+          <ul class="pills">
+            {% if creator %}
+            <li><a href="{% spurl base=request.get_full_path remove_query_param='creator' %}">All users</a></li>
+            <li class="active"><a href="">{% if creator == request.identity.account %}You{% else %}{{ creator.username }}{% endif %}</a></li>
+            {% else %}
+            <li class="active"><a href="">All users</a></li>
+            <li><a href="{% spurl base=request.get_full_path add_query='creator={{ request.identity.account.username }}' %}">You</a></li>
+
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+      {% endif %}
+
     </form>
     {% autopaginate verse_sets 10 %}
 
