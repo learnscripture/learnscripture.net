@@ -92,6 +92,7 @@ var learnscripture = (function (learnscripture, $) {
     // of integers, where the value is the index
     // into the div of the word.
     var wordList = null;
+    var referenceList = null;
     var untestedWords = null;
     var testedWords = null;
 
@@ -367,6 +368,14 @@ var learnscripture = (function (learnscripture, $) {
         });
     };
 
+    var testableWordCount = function () {
+        if (testingMethodStrategy.testReference) {
+            return wordList.length;
+        } else {
+            return wordList.length - referenceList.length;
+        }
+    }
+
     var testComplete = function () {
         testingMethodStrategy.testTearDown();
 
@@ -375,7 +384,7 @@ var learnscripture = (function (learnscripture, $) {
         $.each(testingMistakes, function (key, val) {
             mistakes += val;
         });
-        accuracy = 1 - (mistakes / wordList.length);
+        accuracy = 1 - (mistakes / testableWordCount());
         accuracy = Math.max(0, accuracy);
 
         // Do some rounding  to avoid '99.9' and retain 3 s.f.
@@ -785,9 +794,22 @@ var learnscripture = (function (learnscripture, $) {
 
     // Abstract base class
     var TestingStrategy = {
-        methodSetUp: function () {}, // function to run when method is chosen
+        testReference: true,
+        conditionalShowReference: function () {
+            var referenceSelector = '.current-verse .reference, .current-verse .colon';
+            if (this.testReference) {
+                $(referenceSelector).show();
+            } else {
+                $(referenceSelector).hide();
+            }
+        },
+        methodSetUp: function () {  // function to run when method is chosen
+            this.conditionalShowReference();
+        },
         methodTearDown: function () {}, // function to run when another method is chosen
-        testSetUp: function () {}, // function to run when a test is started
+        testSetUp: function () { // function to run when a test is started
+            this.conditionalShowReference();
+        },
         testTearDown: function () {}, // function to run when a test is finished
         wordTestSetUp: function () {}, // function to run when a new word is being tested
         wordTestTearDown: function () {}, // function to run when a new word is finished tested
@@ -804,6 +826,7 @@ var learnscripture = (function (learnscripture, $) {
     $.extend(KeyboardTestingStrategy, {
 
         testSetUp: function () {
+            Object.getPrototypeOf(KeyboardTestingStrategy).testSetUp.call(this);
             // After an certain point, we make things a bit harder by not
             // showing the widths of words.
             setHardMode(currentVerseStatus.strength > HARD_MODE_THRESHOLD);
@@ -923,6 +946,7 @@ var learnscripture = (function (learnscripture, $) {
         maxHintsToShow: 4,
 
         methodSetUp: function () {
+            Object.getPrototypeOf(FullWordTestingStrategy).methodSetUp.call(this);
             $('.test-method-keyboard-full-word').show();
         },
 
@@ -973,6 +997,7 @@ var learnscripture = (function (learnscripture, $) {
         maxHintsToShow: 3,
 
         methodSetUp: function () {
+            Object.getPrototypeOf(FirstLetterTestingStrategy).methodSetUp.call(this);
             $('.test-method-keyboard-first-letter').show();
         },
 
@@ -1006,7 +1031,10 @@ var learnscripture = (function (learnscripture, $) {
     var OnScreenTestingStrategy = Object.create(TestingStrategy);
 
     $.extend(OnScreenTestingStrategy, {
+        testReference: false,
+
         methodSetUp: function () {
+            Object.getPrototypeOf(OnScreenTestingStrategy).methodSetUp.call(this);
             $('.test-method-onscreen').show();
         },
 
@@ -1016,6 +1044,7 @@ var learnscripture = (function (learnscripture, $) {
         },
 
         testSetUp: function () {
+            Object.getPrototypeOf(OnScreenTestingStrategy).testSetUp.call(this);
             setHardMode(true);
             $('#id-onscreen-test-container').show();
             this.wordTestSetUp();
@@ -1143,8 +1172,8 @@ var learnscripture = (function (learnscripture, $) {
         var wordIdx = currentWordIndex;
         var word = getWordAt(wordIdx);
         showWord(word.find('*'));
-        setProgress(currentStageIdx, (wordIdx + 1) / wordList.length);
-        if (wordIdx + 1 === wordList.length) {
+        setProgress(currentStageIdx, (wordIdx + 1) / testableWordCount());
+        if (wordIdx + 1 === testableWordCount()) {
             testComplete();
         } else {
             currentWordIndex++;
@@ -1495,6 +1524,7 @@ var learnscripture = (function (learnscripture, $) {
             wordGroups.push($(elem).text().trim().split(/ |\n/));
         });
         wordList = [];
+        referenceList = [];
         var replacement = [];
         var wordNumber = 0;
         var i, parts, replace;
@@ -1545,6 +1575,7 @@ var learnscripture = (function (learnscripture, $) {
                 }
                 replace.push(makeNormalWord(word, "word reference"));
                 wordList.push(wordNumber);
+                referenceList.push(wordNumber);
                 wordNumber++;
             });
             $('.current-verse').append('<br/>' + replace.join(' '));
