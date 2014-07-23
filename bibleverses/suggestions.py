@@ -3,7 +3,7 @@ import random
 
 import pykov
 
-from bibleverses.models import get_whole_book, WordSuggestion
+from bibleverses.models import get_whole_book, TextType, BIBLE_BOOKS
 
 def normalise_word(word):
     for p in "\"'?!,:;-.()[]": # TODO - apostophes in the middle of word?
@@ -49,11 +49,26 @@ def frequency_pairs(words):
     return scale_suggestions(Counter(words).items())
 
 
-def generate_suggestions(book, version, ref=None, missing_only=True):
-    book_contents = get_whole_book(book, version)
+def generate_suggestions(version, ref=None, missing_only=True):
 
-    training_text = " ".join(get_whole_book(b, version).text for b in similar_books(book))
+    if version.text_type == TextType.BIBLE:
+        for book in BIBLE_BOOKS:
+            items = get_whole_book(book, version).verses
+            training_text = " ".join(get_whole_book(b, version).text for b in similar_books(book))
+            generate_suggestions_helper(version, items,
+                                        lambda verse: verse.text,
+                                        training_text, ref=ref, missing_only=missing_only)
 
+    elif version.text_type == TextType.CATECHISM:
+        items = list(version.qapairs.all())
+        training_text = ' '.join(p.question + " " + p.answer for p in items)
+        generate_suggestions_helper(version, items,
+                                    lambda qapair: qapair.answer,
+                                    training_text,
+                                    ref=ref, missing_only=missing_only)
+
+
+def generate_suggestions_helper(version, items, text_getter, training_text, ref=None, missing_only=True):
     first_words = sentence_first_words(training_text)
     first_word_frequencies = frequency_pairs(first_words)
 
@@ -105,27 +120,33 @@ def generate_suggestions(book, version, ref=None, missing_only=True):
     MIN_SUGGESTIONS = 30
     MAX_SUGGESTIONS = 40
 
-    for verse in book_contents.verses:
-        if ref is not None and verse.reference != ref:
+    if missing_only:
+        references = [item.reference for item in items]
+        if version.word_suggestion_data.filter(reference__in=references).count() == len(references):
+            # All done
+            print "Skipping %s %s" % (version.slug, ' '.join(references))
+            return
+
+    for item in items:
+        if ref is not None and item.reference != ref:
             continue
 
-        words = split_into_words_for_suggestions(verse.text)
+        text = text_getter(item)
+        words = split_into_words_for_suggestions(text)
 
         # Clear out old suggestions
-        existing = version.word_suggestions.filter(reference=verse.reference)
+        existing = version.word_suggestion_data.filter(reference=item.reference)
         if missing_only:
-            # If first and last exist, assume the rest do.
-            if (existing.filter(word_number=0).count() > 0
-                and existing.filter(word_number=len(words) - 1).count() > 0):
-                print "Skipping %s %s" % (version.slug, verse.reference)
+            if (existing.exists()):
+                print "Skipping %s %s" % (version.slug, item.reference)
                 continue
         else:
             existing.delete()
 
-        verse_suggestions = []
+        item_suggestions = []
         for i, word in enumerate(words):
             factor = 1.0
-            suggestions = []
+            word_suggestions = []
             strategies = [
                 # Ordered according to how good they will be
                 (lambda i: i == 0, suggestions_first_word),
@@ -135,29 +156,22 @@ def generate_suggestions(book, version, ref=None, missing_only=True):
                 (lambda i: True, suggestions_random),
             ]
             for condition, method in strategies:
-                if len(suggestions) < MIN_SUGGESTIONS and condition(i):
-                    need = MIN_SUGGESTIONS - len(suggestions)
+                if len(word_suggestions) < MIN_SUGGESTIONS and condition(i):
+                    need = MIN_SUGGESTIONS - len(word_suggestions)
                     new_suggestions = scale_suggestions(method(words, i, need), factor)
-                    suggestions = merge_suggestions(suggestions, new_suggestions)
+                    word_suggestions = merge_suggestions(word_suggestions, new_suggestions)
                     factor = factor / 2
 
-            print "%s %s[%s]" % (version.slug, verse.reference, i)
-            suggestions.sort(key=lambda (a,b): -b)
-            suggestions = scale_suggestions(suggestions[0:MAX_SUGGESTIONS])
+            print "%s %s[%s]" % (version.slug, item.reference, i)
+            word_suggestions.sort(key=lambda (a,b): -b)
+            word_suggestions = scale_suggestions(word_suggestions[0:MAX_SUGGESTIONS])
 
-            verse_suggestions.append(suggestions)
+            # Add hits=0
+            item_suggestions.append([(w,f,0) for w,f in word_suggestions])
 
-        to_create = []
-        for word_number, suggestion_list in enumerate(verse_suggestions):
-            to_create.extend([WordSuggestion(version=version,
-                                             reference=verse.reference,
-                                             word=word,
-                                             word_number=word_number,
-                                             frequency=frequency)
-                              for word, frequency in suggestion_list])
-        WordSuggestion.objects.bulk_create(to_create)
+        version.word_suggestion_data.create(reference=item.reference,
+                                            suggestions=item_suggestions)
 
-    return book_contents
 
 def scale_suggestions(suggestions, factor=1.0):
     # Scale frequencies to maxium of factor
