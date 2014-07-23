@@ -245,7 +245,18 @@ ALLOWED_HOSTS = [".learnscripture.net"]
 
 if DEBUG:
     INSTALLED_APPS.append('debug_toolbar')
+    INSTALLED_APPS.append('devserver')
+    DEVSERVER_MODULES = (
+        #'devserver.modules.sql.SQLRealTimeModule',
+        'devserver.modules.sql.SQLSummaryModule',
+        #'devserver.modules.profile.ProfileSummaryModule',
 
+        # Modules not enabled by default
+        #'devserver.modules.ajax.AjaxDumpModule',
+        #'devserver.modules.profile.MemoryUseModule',
+        #'devserver.modules.cache.CacheSummaryModule',
+        #'devserver.modules.profile.LineProfilerModule',
+    )
 
 LOGGING = {
     'version': 1,
