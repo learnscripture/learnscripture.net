@@ -7,6 +7,7 @@ from django.core.urlresolvers import reverse
 from django.db import models, connection
 from django.utils import timezone
 from django.utils.functional import cached_property
+from jsonfield import JSONField 
 
 # TextVersion and Verse are pseudo static, so make extensive use of caching.
 # Other models won't benefit so much due to lots of writes and an increased
@@ -196,27 +197,23 @@ class TextVersion(caching.base.CachingMixin, models.Model):
         {word:relative frequency}
 
         """
-        vs = self.get_verse_list(reference, max_length=MAX_VERSE_QUERY_SIZE)
-        ws = (self.word_suggestions
-              .filter(reference__in=[v.reference for v in vs])
-              .order_by('word_number'))
-        ws_dict = defaultdict(list)
-        for w in ws:
-            ws_dict[w.reference, w.word_number].append(w)
-        retval = []
+        if self.text_type == TextType.BIBLE:
+            vs = self.get_verse_list(reference, max_length=MAX_VERSE_QUERY_SIZE)
+        else:
+            vs = [self.get_qapair_by_reference(reference)]
+        wsds = list((self.word_suggestion_data
+                     .filter(reference__in=[v.reference for v in vs])))
+        # For sake of combo verses, we need to order according to vs
+        suggestions = []
         for v in vs:
-            # Cope with possibility of ws having some missing word_numbers
-            verse_words = [w for w in ws if w.reference == v.reference]
-            if len(verse_words) > 0:
-                max_word_number = max(w.word_number for w in verse_words)
-                for i in range(0, max_word_number + 1):
-                    if (v.reference, i) in ws_dict:
-                        d = dict(w.as_dict_item() for w in ws_dict[v.reference, i])
-                    else:
-                        d = {}
-                    retval.append(d)
+            for wsd in wsds:
+                if wsd.reference == v.reference:
+                    suggestions.append(wsd)
+        # Now combine
+        retval = []
+        for wsd in suggestions:
+            retval.extend(wsd.get_suggestion_dicts())
         return retval
-        # TODO - references?
 
     def get_verses_by_reference_bulk(self, reference_list):
         """
@@ -357,30 +354,35 @@ class Verse(caching.base.CachingMixin, models.Model):
                                        reference=self.reference).delete()
 
 
-class WordSuggestion(models.Model):
-    # We could do FK to Verse here, but all access use version/ref, so
-    # that is easier
-    version = models.ForeignKey(TextVersion, related_name='word_suggestions')
+class WordSuggestionData(models.Model):
+    # All the suggestion data for a single verse/question
+    # For efficiency, we avoid having millions of rows, because
+    # we always need all the suggestions for a verse together.
+    version = models.ForeignKey(TextVersion, related_name='word_suggestion_data')
     reference = models.CharField(max_length=100)
-    word = models.CharField(max_length=100)
-    word_number = models.PositiveSmallIntegerField()
-    frequency = models.FloatField()
-    hits = models.PositiveIntegerField(default=0)
 
-    def as_dict_item(self):
-        # TODO: take hits into account
-        return (self.word, self.frequency)
+    # Schema:
+    # list of suggestions for each word, in order.
+    # each suggestion consists of a list of tuples
+    #  [(word, frequency, hits)]
+    suggestions = JSONField()
+
+    def get_suggestion_dicts(self):
+        if not self.suggestions:
+            return []
+        # TODO - take hits into account
+        return [dict([(word, frequency)
+                      for word, frequency, hits in suggestion])
+                for suggestion in self.suggestions]
+
 
     class Meta:
         unique_together = [
-            ('version', 'reference', 'word', 'word_number')
+            ('version', 'reference')
         ]
 
-    def __unicode____(self):
-        return self.word
-
     def __repr__(self):
-        return "<WordSuggestion %s for %s %s[%s]>" % (self.word, self.version.slug, self.reference, self.word_number)
+        return "<WordSuggestionData %s %s>" % (self.word, self.reference)
 
 
 class QAPair(models.Model):

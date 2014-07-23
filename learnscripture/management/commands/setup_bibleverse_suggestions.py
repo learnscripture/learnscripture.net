@@ -8,7 +8,6 @@ logger = logging.getLogger(__name__)
 class Command(BaseCommand):
     def handle(self, *args, **options):
         from bibleverses.suggestions import generate_suggestions
-        from bibleverses.models import TextVersion, BIBLE_BOOKS
-        for v in TextVersion.objects.filter(slug__in=['KJV', 'NET', 'ESV']):
-            for b in BIBLE_BOOKS:
-                generate_suggestions(b, v, missing_only=True)
+        from bibleverses.models import TextVersion
+        for v in TextVersion.objects.all():
+            generate_suggestions(v, missing_only=True)
