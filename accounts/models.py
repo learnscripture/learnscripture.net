@@ -720,6 +720,7 @@ class Identity(models.Model):
         # Get the texts/QAPairs in bulk
         texts = {}
         qapairs = {}
+        suggestion_d = {}
         for version_id, uvs_list in by_version.items():
             version = uvs_list[0].version
             refs = [uvs.reference for uvs in uvs_list]
@@ -729,6 +730,9 @@ class Identity(models.Model):
             for ref, qapair in version.get_qapairs_by_reference_bulk(refs).items():
                 # catechisms only here
                 qapairs[version_id, ref] = qapair
+            for ref, suggestions in version.get_suggestion_pairs_by_reference_bulk(refs).items():
+                # Bibles and catechsims here
+                suggestion_d[version_id, ref] = suggestions
 
         # Assign texts back to uvs:
         for uvs in retval.values():
@@ -738,6 +742,7 @@ class Identity(models.Model):
                 uvs.question, uvs.answer = None, None
             else:
                 uvs.question, uvs.answer = qapair.question, qapair.answer
+            uvs.suggestion_pairs = suggestion_d.get((uvs.version_id, uvs.reference), [])
 
         return retval
 

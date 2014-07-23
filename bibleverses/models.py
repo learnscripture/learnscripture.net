@@ -175,10 +175,14 @@ class TextVersion(caching.base.CachingMixin, models.Model):
         return (self.slug,)
 
     def get_verse_list(self, reference, max_length=MAX_VERSE_QUERY_SIZE):
+        """
+        Get ordered list of Verse objects for the given reference.
+        (just one objects for most references).
+        """
         return parse_ref(reference, self, max_length=max_length)
 
-    def get_text_by_reference(self, reference, max_length=MAX_VERSE_QUERY_SIZE):
-        return u' '.join([v.text for v in self.get_verse_list(reference, max_length=max_length)])
+    def get_text_by_reference(self, reference):
+        return ComboVerse(reference, self.get_verse_list(reference)).text
 
     def get_text_by_reference_bulk(self, reference_list):
         """
@@ -189,31 +193,6 @@ class TextVersion(caching.base.CachingMixin, models.Model):
         if self.is_catechism: return {}
         verse_dict = self.get_verses_by_reference_bulk(reference_list)
         return dict((ref, v.text) for (ref, v) in verse_dict.items())
-
-    def get_suggestion_dicts_by_reference(self, reference):
-        """
-        For the given reference, returns a list of suggestion dictionaries
-        for each word in the verse, where each dictionary is a mapping from
-        {word:relative frequency}
-
-        """
-        if self.text_type == TextType.BIBLE:
-            vs = self.get_verse_list(reference, max_length=MAX_VERSE_QUERY_SIZE)
-        else:
-            vs = [self.get_qapair_by_reference(reference)]
-        wsds = list((self.word_suggestion_data
-                     .filter(reference__in=[v.reference for v in vs])))
-        # For sake of combo verses, we need to order according to vs
-        suggestions = []
-        for v in vs:
-            for wsd in wsds:
-                if wsd.reference == v.reference:
-                    suggestions.append(wsd)
-        # Now combine
-        retval = []
-        for wsd in suggestions:
-            retval.extend(wsd.get_suggestion_dicts())
-        return retval
 
     def get_verses_by_reference_bulk(self, reference_list):
         """
@@ -247,6 +226,44 @@ class TextVersion(caching.base.CachingMixin, models.Model):
         if self.is_bible: return None
         return self.qapairs.get(reference=reference)
 
+    def get_suggestion_pairs_by_reference(self, reference):
+        """
+        For the given reference, returns a list of suggestion lists,
+        one list for each word in the verse, where list is a sequence of
+        (word, relative frequency) pairs.
+
+        """
+        if self.text_type == TextType.BIBLE:
+            references = [v.reference for v in self.get_verse_list(reference)]
+        else:
+            references = [reference]
+        wsds = list(self.word_suggestion_data.filter(reference__in=references))
+        # wsds might not be ordered correctly, we need to re-order
+        suggestions = []
+        for ref in references:
+            for wsd in wsds:
+                if wsd.reference == ref:
+                    suggestions.append(wsd)
+        # Now combine:
+        retval = []
+        for wsd in suggestions:
+            retval.extend(wsd.get_suggestion_pairs())
+        return retval
+
+    def get_suggestion_pairs_by_reference_bulk(self, reference_list):
+        """
+        Returns a dictionary of {ref:suggestions} for each ref in reference_list.
+        'suggestions' is itself a list of suggestion dictionaries
+        """
+        # Do simple ones in bulk:
+        simple_wsds = list(self.word_suggestion_data.filter(reference__in=reference_list))
+        s_dict = dict((w.reference, w.get_suggestion_pairs()) for w in simple_wsds)
+        # Others:
+        for ref in reference_list:
+            if ref not in s_dict:
+                s_dict[ref] = self.get_suggestion_pairs_by_reference(ref)
+        return s_dict
+
     def get_learners(self):
         # This doesn't have to be 100% accurate, so do an easier query - find
         # people who have learnt the first item
@@ -274,7 +291,12 @@ class ComboVerse(object):
         self.verse_number = verse_list[0].verse_number
         self.bible_verse_number = verse_list[0].bible_verse_number
         self.verses = verse_list
-        self.text = ' '.join(v.text for v in verse_list)
+
+    @property
+    def text(self):
+        # Do this lazily, so that we can update .text in underlying Verse
+        # objects if necessary.
+        return ' '.join(v.text for v in self.verses)
 
 
 def intersperse(iterable, delimiter):
@@ -367,12 +389,12 @@ class WordSuggestionData(models.Model):
     #  [(word, frequency, hits)]
     suggestions = JSONField()
 
-    def get_suggestion_dicts(self):
+    def get_suggestion_pairs(self):
         if not self.suggestions:
             return []
         # TODO - take hits into account
-        return [dict([(word, frequency)
-                      for word, frequency, hits in suggestion])
+        return [[(word, frequency)
+                 for word, frequency, hits in suggestion]
                 for suggestion in self.suggestions]
 
 
@@ -382,7 +404,7 @@ class WordSuggestionData(models.Model):
         ]
 
     def __repr__(self):
-        return "<WordSuggestionData %s %s>" % (self.word, self.reference)
+        return "<WordSuggestionData %s %s>" % (self.version.slug, self.reference)
 
 
 class QAPair(models.Model):
@@ -683,9 +705,11 @@ class UserVerseStatus(models.Model):
                 if vc.reference == self.reference:
                     return section
 
-    @property
-    def suggested_words(self):
-        return [i.items() for i in self.version.get_suggestion_dicts_by_reference(self.reference)]
+    # This will be overwritten by get_verse_statuses_bulk
+    @cached_property
+    def suggestion_pairs(self):
+        print "In UserVerseStatus.suggestions for %s" % self.reference
+        return self.version.get_suggestion_pairs_by_reference(self.reference)
 
     def __unicode__(self):
         return u"%s, %s" % (self.reference, self.version.slug)
@@ -751,10 +775,12 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE,
         except ValueError:
             raise InvalidVerseReference(u"Expecting '%s' to be a chapter number" % chapter)
         if return_verses:
-            retval = list(version.verse_set.filter(book_number=book_number,
-                                                   chapter_number=chapter_number,
-                                                   missing=False,
-                                                   ))
+            retval = list(version.verse_set
+                          .filter(book_number=book_number,
+                                  chapter_number=chapter_number,
+                                  missing=False)
+                          .order_by('bible_verse_number')
+                      )
         else:
             retval = Reference(book, chapter_number, None)
     else:

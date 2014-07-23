@@ -95,7 +95,7 @@ class VersesToLearnHandler(BaseHandler):
         'needs_testing',
         'text_order',
         ('version', ('full_name', 'short_name', 'slug', 'url', 'text_type')),
-        'suggested_words',
+        'suggestion_pairs',
         # added in get_verse_statuses:
         'text',
         'question',
