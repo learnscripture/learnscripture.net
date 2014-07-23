@@ -1078,7 +1078,7 @@ var learnscripture = (function (learnscripture, $) {
             var $c = $('#id-onscreen-test-container');
             $c.hide(); // for speed.
 
-            var suggestions = currentVerseStatus.suggested_words[currentWordIndex];
+            var suggestions = currentVerseStatus.suggestion_pairs[currentWordIndex];
             if (suggestions == undefined) {
                 $c.html('On screen testing is not available for this verse in this version. Sorry!');
                 $c.show();
