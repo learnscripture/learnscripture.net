@@ -3,7 +3,7 @@ import random
 
 import pykov
 
-from bibleverses.models import get_whole_book, TextType, BIBLE_BOOKS
+from bibleverses.models import get_whole_book, TextType, BIBLE_BOOKS, WordSuggestionData
 
 def normalise_word(word):
     for p in "\"'?!,:;-.()[]": # TODO - apostophes in the middle of word?
@@ -50,10 +50,19 @@ def frequency_pairs(words):
 
 
 def generate_suggestions(version, ref=None, missing_only=True):
+    def is_done(items):
+        if missing_only:
+            references = [item.reference for item in items]
+            if version.word_suggestion_data.filter(reference__in=references).count() == len(references):
+                # All done
+                print "Skipping %s %s" % (version.slug, ' '.join(references))
+                return True
 
     if version.text_type == TextType.BIBLE:
         for book in BIBLE_BOOKS:
             items = get_whole_book(book, version).verses
+            if is_done(items):
+                continue
             training_text = " ".join(get_whole_book(b, version).text for b in similar_books(book))
             generate_suggestions_helper(version, items,
                                         lambda verse: verse.text,
@@ -61,6 +70,9 @@ def generate_suggestions(version, ref=None, missing_only=True):
 
     elif version.text_type == TextType.CATECHISM:
         items = list(version.qapairs.all())
+        if is_done(items):
+            return
+
         training_text = ' '.join(p.question + " " + p.answer for p in items)
         generate_suggestions_helper(version, items,
                                     lambda qapair: qapair.answer,
@@ -120,13 +132,8 @@ def generate_suggestions_helper(version, items, text_getter, training_text, ref=
     MIN_SUGGESTIONS = 30
     MAX_SUGGESTIONS = 40
 
-    if missing_only:
-        references = [item.reference for item in items]
-        if version.word_suggestion_data.filter(reference__in=references).count() == len(references):
-            # All done
-            print "Skipping %s %s" % (version.slug, ' '.join(references))
-            return
 
+    to_create = []
     for item in items:
         if ref is not None and item.reference != ref:
             continue
@@ -142,6 +149,7 @@ def generate_suggestions_helper(version, items, text_getter, training_text, ref=
                 continue
         else:
             existing.delete()
+        print "%s %s" % (version.slug, item.reference)
 
         item_suggestions = []
         for i, word in enumerate(words):
@@ -160,17 +168,19 @@ def generate_suggestions_helper(version, items, text_getter, training_text, ref=
                     need = MIN_SUGGESTIONS - len(word_suggestions)
                     new_suggestions = scale_suggestions(method(words, i, need), factor)
                     word_suggestions = merge_suggestions(word_suggestions, new_suggestions)
-                    factor = factor / 2
+                    factor = factor / 4 # scale down worse methods for finding suggestions
 
-            print "%s %s[%s]" % (version.slug, item.reference, i)
             word_suggestions.sort(key=lambda (a,b): -b)
             word_suggestions = scale_suggestions(word_suggestions[0:MAX_SUGGESTIONS])
 
             # Add hits=0
             item_suggestions.append([(w,f,0) for w,f in word_suggestions])
 
-        version.word_suggestion_data.create(reference=item.reference,
-                                            suggestions=item_suggestions)
+        to_create.append(WordSuggestionData(version=version,
+                                            reference=item.reference,
+                                            suggestions=item_suggestions))
+
+    WordSuggestionData.objects.bulk_create(to_create)
 
 
 def scale_suggestions(suggestions, factor=1.0):
