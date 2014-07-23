@@ -25,6 +25,10 @@ LearningType = make_choices('LearningType',
 # the specific UserVerseStatus id, we can cope with a change of version more
 # easily.
 
+# Batch for verse statuses to avoid really long JSON which can get truncated.
+# See also learn.js
+VERSE_STATUS_BATCH_SIZE = 10
+
 def get_verse_statuses(request):
     learning_type = request.session.get('learning_type', None)
     # Need some backwards compat for existing sessions:
@@ -35,6 +39,11 @@ def get_verse_statuses(request):
             learning_type = LearningType.REVISION
 
     ids = _get_verse_status_ids(request)
+
+    # Pagination:
+    page = request.GET.get('p', 0)
+    ids = ids[page * VERSE_STATUS_BATCH_SIZE:][:VERSE_STATUS_BATCH_SIZE]
+
     bulk_ids = [uvs_id
                 for order, uvs_id, needs_testing_override in ids]
     uvs_dict = request.identity.get_verse_statuses_bulk(bulk_ids)
@@ -100,8 +109,7 @@ def start_learning_session(request, user_verse_statuses, learning_type, return_t
 def verse_status_finished(request, uvs_id, new_score_logs):
     _remove_user_verse_status(request, uvs_id)
 
-    if (request.session.get('revision', False)     # compat for sessions in progress
-        or request.session.get('learning_type', LearningType.PRACTICE) == LearningType.REVISION):
+    if (new_score_logs and request.session.get('learning_type', LearningType.PRACTICE) == LearningType.REVISION):
         score_log_ids = list(request.session['score_logs'])
         score_log_ids.extend([sl.id for sl in new_score_logs])
         request.session['score_logs'] = score_log_ids
