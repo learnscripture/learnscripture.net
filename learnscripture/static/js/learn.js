@@ -79,6 +79,9 @@ var learnscripture = (function (learnscripture, $) {
     // Strength == 0.6 corresponds to about 10 days learning.
     var HARD_MODE_THRESHOLD = 0.6
 
+    // Defined in learnscripture.session
+    var VERSE_STATUS_BATCH_SIZE = 10;
+
     // Initial state
     var currentStage = null;
     var currentStageIdx = null;
@@ -106,6 +109,7 @@ var learnscripture = (function (learnscripture, $) {
     var currentVerseIndex = null;
     var minVerseIndex = null;
     var maxVerseIndex = null;
+    var moreToLoad = true; // assume true initially.
     var currentVerseStatus = null;
 
     // Finish
@@ -390,25 +394,27 @@ var learnscripture = (function (learnscripture, $) {
         // Do some rounding  to avoid '99.9' and retain 3 s.f.
         accuracy = Math.round(accuracy * 1000) / 1000;
 
-        if (!isPracticeMode()) {
-            $.ajax({
-                url: '/api/learnscripture/v1/actioncomplete/?format=json',
-                dataType: 'json',
-                type: 'POST',
-                data: {
-                    verse_status: JSON.stringify(currentVerseStatus, null, 2),
-                    stage: STAGE_TYPE_TEST,
-                    accuracy: accuracy
-                },
-                success: function (data) {
-                    learnscripture.ajaxRetrySucceeded();
+        var wasPracticeMode = isPracticeMode();
+        $.ajax({
+            url: '/api/learnscripture/v1/actioncomplete/?format=json',
+            dataType: 'json',
+            type: 'POST',
+            data: {
+                verse_status: JSON.stringify(currentVerseStatus, null, 2),
+                stage: STAGE_TYPE_TEST,
+                accuracy: accuracy,
+                practice: wasPracticeMode,
+            },
+            success: function (data) {
+                learnscripture.ajaxRetrySucceeded();
+                if (!wasPracticeMode) {
                     loadStats();
                     loadScoreLogs();
-                },
-                retry: learnscripture.ajaxRetryOptions,
-                error: learnscripture.ajaxRetryFailed
-            });
-        }
+                }
+            },
+            retry: learnscripture.ajaxRetryOptions,
+            error: learnscripture.ajaxRetryFailed
+        });
 
         var accuracyPercent = Math.floor(accuracy * 100).toString();
         $('#id-accuracy').text(accuracyPercent + "%");
@@ -595,6 +601,13 @@ var learnscripture = (function (learnscripture, $) {
         if (nextVersePossible()) {
             currentVerseIndex++;
             loadCurrentVerse();
+            // Potentially need to load more.
+            // Need to do so before we are on the last one,
+            // and also give some time for the data to arrive,
+            // so we add a buffer of 2.
+            if (moreToLoad && maxVerseIndex - currentVerseIndex == 2) {
+                loadVerses();
+            }
         } else {
             finish();
         }
@@ -1340,7 +1353,11 @@ var learnscripture = (function (learnscripture, $) {
                 // This function can be called when we have already
                 // loaded the verses e.g. if the user changed the
                 // version.  Also, once some verses have been
-                // read/learnt, they will be missing.
+                // read/learnt, they will be missing from the incoming
+                // data. Also, the underlying versestolearn handler batches
+                // data to avoid sending too much over the network,
+                // so multiple calls to loadVerses will be need to
+                // get all the data.
 
                 // We use the 'learn_order' as an index to work out
                 // which verse we are on, and to merge the incoming
@@ -1360,6 +1377,11 @@ var learnscripture = (function (learnscripture, $) {
                         verse.learn_order < minVerseIndex) {
                         minVerseIndex = verse.learn_order;
                     }
+                }
+                if (data.length < VERSE_STATUS_BATCH_SIZE) {
+                    // It would only be less if versestolearn has run out of
+                    // things to send. So we don't need to try again.
+                    moreToLoad = false;
                 }
                 if (callbackAfter !== undefined) {
                     callbackAfter();

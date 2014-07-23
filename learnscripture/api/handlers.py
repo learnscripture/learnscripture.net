@@ -133,6 +133,13 @@ class ActionCompleteHandler(BaseHandler):
         identity = request.identity
 
         verse_status = get_verse_status(request.data)
+
+        # If just practising, just remove the VS from the session.
+        practice = request.POST.get('practice', 'false') == 'true'
+        if practice:
+            session.verse_status_finished(request, verse_status['id'], [])
+            return {}
+
         reference = verse_status['reference']
         version_slug = verse_status['version']['slug']
         old_memory_stage = verse_status['memory_stage']
