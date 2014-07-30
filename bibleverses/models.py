@@ -722,6 +722,54 @@ class UserVerseStatus(models.Model):
         verbose_name_plural = "User verse statuses"
 
 
+WORD_RE = re.compile('[0-9a-zA-Z]')
+
+def is_punctuation(text):
+    return not WORD_RE.search(text)
+
+
+def split_into_words(text, fix_punctuation_whitespace=True):
+    # This logic is reproduced client side in learn.js :: countWords
+    # in order to display target.
+
+    # We need to cope with things like Gen 3:22
+    #    and live forever--"'
+    # and Gen 1:16
+    #    And God made the two great lights--the greater light
+    #
+    # and when -- appears with punctuation on one side, we don't
+    # want this to end up on its own. Also, text with a single
+    # hyphen surrounding by whitespace needs to be handled too.
+    l = text.replace('--', ' -- ').strip().split()
+    if fix_punctuation_whitespace:
+        # Merge punctuation only items with item to left.
+        l = merge_punctuation_items_right(merge_punctuation_items_left(l))
+
+    return l
+
+
+def merge_punctuation_items_left(words):
+    retval = []
+    for item in words:
+        if is_punctuation(item) and len(retval) > 0:
+            retval[-1] += item
+        else:
+            retval.append(item)
+    return retval
+
+def merge_punctuation_items_right(words):
+    retval = []
+    for item in words[::-1]:
+        if is_punctuation(item) and len(retval) > 0:
+            retval[-1] = item + retval[-1]
+        else:
+            retval.append(item)
+    return retval[::-1]
+
+def count_words(text):
+    return len(split_into_words(text))
+
+
 class InvalidVerseReference(ValueError):
     pass
 
@@ -900,7 +948,6 @@ def ensure_text(verses):
             for ref, text in service(missing):
                 v = verse_dict[short_name, ref]
                 v.text = text
-                print "Updating %s %s" % (short_name, v.reference)
                 v.save()
 
     for v in verses:

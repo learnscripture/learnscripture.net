@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from collections import defaultdict
 from datetime import timedelta
 import itertools
@@ -14,7 +16,7 @@ from django.utils.functional import cached_property
 
 from accounts import memorymodel
 from accounts.signals import verse_started, verse_tested, verse_finished, points_increase, scored_100_percent, catechism_started
-from bibleverses.models import TextVersion, MemoryStage, StageType, VerseSet, VerseSetType, UserVerseStatus, TextType, get_passage_sections, InvalidVerseReference
+from bibleverses.models import TextVersion, MemoryStage, StageType, VerseSet, VerseSetType, UserVerseStatus, TextType, get_passage_sections, InvalidVerseReference, count_words, split_into_words
 from bibleverses.signals import verse_set_chosen
 from scores.models import TotalScore, ScoreReason, Scores, get_rank_all_time, get_rank_this_week
 
@@ -310,16 +312,6 @@ class Account(AbstractBaseUser):
     def unfollow_user(self, account):
         self.following.remove(account)
         clear_friendship_weight_cache(self.id)
-
-
-def split_into_words(text):
-    # This logic is reproduced client side in learn.js :: countWords
-    # in order to display target
-    return text.replace('--', '-- ').strip().split()
-
-
-def count_words(text):
-    return len(split_into_words(text))
 
 
 def normlise_weighting(weights):
@@ -736,12 +728,18 @@ class Identity(models.Model):
 
         # Assign texts back to uvs:
         for uvs in retval.values():
-            uvs.text = texts.get((uvs.version_id, uvs.reference), None)
+            text = texts.get((uvs.version_id, uvs.reference), None)
+            if text is not None:
+                # Bible
+                uvs.scoring_text_words = split_into_words(text)
+                uvs.title_text = uvs.reference
+
             qapair = qapairs.get((uvs.version_id, uvs.reference), None)
-            if qapair is None:
-                uvs.question, uvs.answer = None, None
-            else:
-                uvs.question, uvs.answer = qapair.question, qapair.answer
+            if qapair is not None:
+                # Catechism
+                question, answer = qapair.question, qapair.answer
+                uvs.scoring_text_words = split_into_words(answer)
+                uvs.title_text = uvs.reference + ". " + question
             uvs.suggestion_pairs = suggestion_d.get((uvs.version_id, uvs.reference), [])
 
         return retval
