@@ -382,6 +382,7 @@ class WordSuggestionData(models.Model):
     # we always need all the suggestions for a verse together.
     version = models.ForeignKey(TextVersion, related_name='word_suggestion_data')
     reference = models.CharField(max_length=100)
+    hash = models.CharField(max_length=40) # SHA1 of text
 
     # Schema:
     # list of suggestions for each word, in order.
