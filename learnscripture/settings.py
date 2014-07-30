@@ -413,3 +413,59 @@ if PRODUCTION:
     GOOGLE_ANALYTICS_ACCOUNT = "UA-29644888-1"
 else:
     GOOGLE_ANALYTICS_ACCOUNT = None
+
+
+if TESTING:
+    import faulthandler
+    import signal
+    faulthandler.enable()
+
+    # If the process receives signal SIGUSR1, dump a traceback
+    faulthandler.register(signal.SIGUSR1)
+
+
+if DEBUG:
+    try:
+        from sqlparse import format as sqlformat
+    except ImportError:
+        sqlformat = lambda s, reindent=None: s
+    from traceback import format_stack
+
+    class SqlWithStacktrace(object):
+        def __init__(self, skip=[], limit=5):
+            self.skip = [__name__, 'logging']
+            self.skip.extend(skip)
+            self.limit = limit
+
+        def filter(self, record):
+            if not hasattr(record, 'stack_patched'):
+                frame = sys._getframe(1)
+                if self.skip:
+                    while [skip for skip in self.skip if frame.f_globals.get('__name__', '').startswith(skip)]:
+                        frame = frame.f_back
+                if hasattr(record, 'duration') and hasattr(record, 'sql') and hasattr(record, 'params'):
+                    record.msg = "\nFrom stack: \n\x1b[32m%s\x1b[0m\n \x1b[31mduration: %s%.4f secs\x1b[0m, \x1b[33marguments: %s%s\x1b[0m\n  \x1b[1;33m%s\x1b[0m\n" % (
+                        ''.join(format_stack(f=frame, limit=self.limit)).rstrip(),
+                        "\x1b[31m" if record.duration < 0.1 else "\x1b[1;31m", record.duration,
+                        "\x1b[1;33m" if record.params else '', record.params,
+                        '\n  '.join(sqlformat(record.sql, reindent=True).strip().splitlines()),
+                    )
+                else:
+                    record.msg += "\n -- stack: \n\x1b[32m%s\x1b[0m" % (
+                        ''.join(format_stack(f=frame, limit=self.limit)).rstrip()
+                    )
+                record.stack_patched = True
+            return True
+
+
+    LOGGING.setdefault('filters', {})['add_sql_with_stack'] = {
+        '()': SqlWithStacktrace,
+        'skip': ("django.db", "django.contrib", "south.", "__main__"),
+        'limit': 3, # increase this if not enough
+    }
+
+    # To add DB debugging, uncomment this:
+    # LOGGING['loggers']['django.db.backends'] = {
+    #     'level': 'DEBUG',
+    #     'filters': ['add_sql_with_stack'],
+    # }
