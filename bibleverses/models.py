@@ -708,7 +708,6 @@ class UserVerseStatus(models.Model):
     # This will be overwritten by get_verse_statuses_bulk
     @cached_property
     def suggestion_pairs(self):
-        print "In UserVerseStatus.suggestions for %s" % self.reference
         return self.version.get_suggestion_pairs_by_reference(self.reference)
 
     def __unicode__(self):
