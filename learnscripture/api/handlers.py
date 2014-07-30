@@ -346,7 +346,10 @@ class VerseFind(BaseHandler):
 
         # Can't get 'fields' to work properly for this case, so pack into
         # dictionaries.
-        retval = [r.__dict__ for r in results]
+        retval = [dict(reference=r.reference,
+                       text=r.text,
+                       verses=r.verses)
+                  for r in results]
         for item in retval:
             # Change 'verse' objects:
             verses2 = []
