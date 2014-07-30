@@ -9,7 +9,7 @@ from django.utils import timezone
 
 import accounts.memorymodel
 from awards.models import AwardType
-from bibleverses.models import VerseSet, TextVersion, StageType, MemoryStage, Verse, VerseChoice
+from bibleverses.models import VerseSet, TextVersion, StageType, MemoryStage, Verse, VerseChoice, WordSuggestionData
 from events.models import Event, EventType
 
 from .base import FuzzyInt, AccountTestMixin
@@ -454,7 +454,11 @@ class IdentityTests(AccountTestMixin, TestCase):
         vs1 = VerseSet.objects.get(name='Psalm 23')
         uvss = list(i.add_verse_set(vs1))
 
-        with self.assertNumQueries(2):
+        # Create some WordSuggestionData
+        for uvs in uvss:
+            WordSuggestionData.objects.create(version=uvs.version, reference=uvs.reference,
+                                              suggestions=[])
+        with self.assertNumQueries(3):
             d = i.get_verse_statuses_bulk([uvs.id for uvs in uvss])
             self.assertEqual(d[uvss[1].id].reference, uvss[1].reference)
             [uvs.scoring_text_words for uvs in d.values()]

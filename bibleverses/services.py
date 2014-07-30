@@ -16,7 +16,6 @@ def get_esv(reference_list):
     if len(reference_list) > BATCH_SIZE:
         r = reference_list[:]
         while len(r) > 0:
-            print "Getting batch"
             batch, r = r[0:BATCH_SIZE], r[BATCH_SIZE:]
             for ref, text in get_esv(batch):
                 yield (ref, text)
