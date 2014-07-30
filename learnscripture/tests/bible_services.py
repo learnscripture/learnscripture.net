@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
-import unittest
+import unittest2
 
 from bibleverses.services import get_esv
 
 __all__ = ['TestEsvService']
 
-class TestEsvService(unittest.TestCase):
+class TestEsvService(unittest2.TestCase):
 
     def test_get_esv_single(self):
         d = list(get_esv(['John 3:16']))
