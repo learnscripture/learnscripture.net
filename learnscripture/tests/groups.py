@@ -1,8 +1,11 @@
 from __future__ import absolute_import
 
+import time
+
 from autofixture import AutoFixture
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+import selenium
 
 from accounts.models import Account
 from awards.models import Award, AwardType
@@ -255,16 +258,21 @@ class GroupCreatePageTests(LiveServerTests):
         self.send_keys("#id_name", "My group")
         self.click("#id_public")
 
+        self.click("#id_invited_users_0")
         self.send_keys("#id_invited_users_0", "invit")
         self.wait_for_ajax()
-        self.click('ul.ui-autocomplete li.ui-menu-item:first-child')
+        # Clicking is hard for some reason, use keyboard:
+        time.sleep(0.2)
+        self.send_keys("#id_invited_users_0", selenium.webdriver.common.keys.Keys.ARROW_DOWN)
+        time.sleep(0.2)
+        self.send_keys("#id_invited_users_0", selenium.webdriver.common.keys.Keys.ENTER)
+        time.sleep(0.2)
         self.click('input[name="save"]')
 
         self.assertTrue(driver.current_url.endswith('/my-group/'))
 
         g = Group.objects.get(slug='my-group')
         self.assertEqual(list(g.invited_users()), [invited_account])
-
         self.assertIn('invited you to join', invited_account.identity.notices.all()[0].message_html)
 
         self.assertEqual(Event.objects.filter(event_type=EventType.GROUP_CREATED).count(),
