@@ -1,4 +1,5 @@
 from collections import Counter
+import hashlib
 import random
 import re
 
@@ -90,6 +91,7 @@ def generate_suggestions(version, ref=None, missing_only=True):
                 # All done
                 print "Skipping %s %s" % (version.slug, ' '.join(references))
                 return True
+        return False
 
     if version.text_type == TextType.BIBLE:
         for book in BIBLE_BOOKS:
@@ -211,7 +213,9 @@ def generate_suggestions_helper(version, items, text_getter, training_text, ref=
 
         to_create.append(WordSuggestionData(version=version,
                                             reference=item.reference,
-                                            suggestions=item_suggestions))
+                                            suggestions=item_suggestions,
+                                            hash=hashlib.sha1(text),
+                                        ))
 
     WordSuggestionData.objects.bulk_create(to_create)
 
