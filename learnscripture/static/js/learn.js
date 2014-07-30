@@ -443,7 +443,7 @@ var learnscripture = (function (learnscripture, $) {
                 $('#id-next-verse-btn').addClass('primary');
             }
 
-            $('#id-more-practice-btn').unbind().bind(fastEventName, function () {
+            fastEventBind($('#id-more-practice-btn').unbind(), function (ev) {
                 if (accuracyPercent < 10) {
                     currentStageList = chooseStageListForStrength(0);
                 } else if (accuracyPercent < 30) {
@@ -625,7 +625,12 @@ var learnscripture = (function (learnscripture, $) {
     };
 
     var pressPrimaryButton = function () {
-        $('input.primary:visible:not([disabled])').click();
+        var $btn = $('input.primary:visible:not([disabled])');
+        if ($btn.hasClass('fastevent')) {
+            $btn.trigger(fastEventName);
+        } else {
+            $btn.click();
+        }
     };
 
     // =========== Different stages =========
@@ -1104,8 +1109,8 @@ var learnscripture = (function (learnscripture, $) {
                 html += '<span class="word">' + escapeHtml(chosen[i]) + '</span>';
             }
             $c.html(html);
-            $c.find('.word').bind(fastEventName,
-                                  this.handleButtonClick);
+            fastEventBind($c.find('.word'),
+                          this.handleButtonClick);
             $c.show();
         },
 
@@ -1883,6 +1888,11 @@ var learnscripture = (function (learnscripture, $) {
     };
 
     // === Setup and wiring ===
+    var fastEventBind = function ($elem, callback) {
+        $elem.addClass('fastevent').bind(fastEventName, callback);
+        return $elem;
+    };
+
     var setUpLearningControls = function () {
         isLearningPage = ($('#id-verse-wrapper').length > 0);
         if (!isLearningPage) {
@@ -1908,16 +1918,16 @@ var learnscripture = (function (learnscripture, $) {
         // the on-screen keyboard.
         inputBox.bind('keydown', inputKeyDown);
         testingStatus = $('#id-testing-status');
-        $('#id-next-btn').show().bind(fastEventName, next);
-        $('#id-back-btn').show().bind(fastEventName, back);
-        $('#id-hint-btn').bind(fastEventName, function (ev) {
+        fastEventBind($('#id-next-btn'), next).show();
+        fastEventBind($('#id-back-btn'), back).show();
+        fastEventBind($('#id-hint-btn'), function (ev) {
             ev.preventDefault();
             testingMethodStrategy.getHint();
         });
-        $('#id-next-verse-btn').bind(fastEventName, nextVerse);
-        $('#id-context-next-verse-btn').bind(fastEventName, markReadAndNextVerse);
+        fastEventBind($('#id-next-verse-btn'), nextVerse);
+        fastEventBind($('#id-context-next-verse-btn'), markReadAndNextVerse);
         $('#id-version-select').change(versionSelectChanged);
-        $('#id-help-btn').bind(fastEventName, function (ev) {
+        fastEventBind($('#id-help-btn'), function (ev) {
             if (preferences.enableAnimations) {
                 $('#id-help').toggle('fast');
             } else {
@@ -1925,10 +1935,10 @@ var learnscripture = (function (learnscripture, $) {
             }
             $('#id-help-btn').button('toggle');
         });
-        $('#id-skip-verse-btn').click(skipVerse);
-        $('#id-cancel-learning-btn').click(cancelLearning);
-        $('#id-reset-progress-btn').click(resetProgress);
-        $('#id-finish-btn').bind(fastEventName, finishBtnClick);
+        $('#id-skip-verse-btn').bind("click", skipVerse);
+        $('#id-cancel-learning-btn').bind("click", cancelLearning);
+        $('#id-reset-progress-btn').bind("click", resetProgress);
+        fastEventBind($('#id-finish-btn'), finishBtnClick);
         $(window).resize(function () {
             if (currentStage !== null &&
                 currentStage.testMode) {
