@@ -5,7 +5,7 @@ import re
 
 import pykov
 
-from bibleverses.models import get_whole_book, TextType, BIBLE_BOOKS, WordSuggestionData, split_into_words, is_punctuation
+from bibleverses.models import get_whole_book, TextType, BIBLE_BOOKS, WordSuggestionData, split_into_words, is_punctuation, Verse, QAPair
 
 PUNCTUATION = "!?,.<>()[];:\"'-"
 IN_WORD_PUNCTUATION = "'-"
@@ -53,7 +53,9 @@ def split_into_words_for_suggestions(text):
 
 
 def sentence_first_words(text):
-    return [l.split()[0] for l in [normalise_word(l.strip()) for l in text.split('.')] if l]
+    return [split_into_words_for_suggestions(l)[0]
+            for l in text.split('.')
+            if l]
 
 
 TORAH = ['Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy']
@@ -70,6 +72,8 @@ EPISTLES = ['Romans', '1 Corinthians', '2 Corinthians', 'Galatians', 'Ephesians'
 
 groups = [TORAH, HISTORY, WISDOM, PROPHETS, NT_HISTORY, EPISTLES]
 
+MARKOV_CHAINS = {}
+
 def similar_books(book_name):
     retval = []
     for g in groups:
@@ -83,7 +87,7 @@ def frequency_pairs(words):
     return scale_suggestions(Counter(words).items())
 
 
-def generate_suggestions(version, ref=None, missing_only=True):
+def generate_suggestions(version, ref=None, missing_only=True, thesaurus=None):
     def is_done(items):
         if missing_only:
             references = [item.reference for item in items]
@@ -99,9 +103,11 @@ def generate_suggestions(version, ref=None, missing_only=True):
             if is_done(items):
                 continue
             training_text = " ".join(get_whole_book(b, version).text for b in similar_books(book))
+            print book
             generate_suggestions_helper(version, items,
                                         lambda verse: verse.text,
-                                        training_text, ref=ref, missing_only=missing_only)
+                                        training_text, ref=ref, missing_only=missing_only,
+                                        thesaurus=thesaurus)
 
     elif version.text_type == TextType.CATECHISM:
         items = list(version.qapairs.all())
@@ -112,61 +118,100 @@ def generate_suggestions(version, ref=None, missing_only=True):
         generate_suggestions_helper(version, items,
                                     lambda qapair: qapair.answer,
                                     training_text,
-                                    ref=ref, missing_only=missing_only)
+                                    ref=ref, missing_only=missing_only,
+                                    thesaurus=thesaurus)
 
 
-def generate_suggestions_helper(version, items, text_getter, training_text, ref=None, missing_only=True):
+def build_markov_chains_with_sentence_breaks(training_text, size):
+    # Look in dict first
+    hash = hashlib.sha1(training_text).hexdigest()
+    if (hash, size) in MARKOV_CHAINS:
+        return MARKOV_CHAINS[hash, size]
+
+    sentences = training_text.split(".")
+    v_accum, c_accum = pykov.maximum_likelihood_probabilities([])
+    for i, s in enumerate(sentences):
+        print "Analysing sentence %d" % i
+        if not s:
+            continue
+        words = split_into_words_for_suggestions(s)
+        if size == 1:
+            chain_input = words
+        else:
+            chain_input = [tuple(words[i:i+size]) for i in range(0, len(words)-(size-1))]
+        v, c = pykov.maximum_likelihood_probabilities(chain_input, lag_time=1)
+        c_accum += c
+
+    MARKOV_CHAINS[hash, size] = c_accum
+    return c_accum
+
+
+def generate_suggestions_helper(version, items, text_getter, training_text, ref=None,
+                                missing_only=True, thesaurus=None):
     first_words = sentence_first_words(training_text)
     first_word_frequencies = frequency_pairs(first_words)
 
-    chain_1 = split_into_words_for_suggestions(training_text)
-    p1, P1 = pykov.maximum_likelihood_probabilities(chain_1, lag_time=1)
+    markov_chains = {}
 
-    chain_2 = [tuple(chain_1[i:i+2]) for i in range(0, len(chain_1)-1)]
-    p2, P2 = pykov.maximum_likelihood_probabilities(chain_2, lag_time=1)
+    def get_markov_chain(size):
+        if size in markov_chains:
+            return markov_chains[size]
+        else:
+            c = build_markov_chains_with_sentence_breaks(training_text, size)
+            markov_chains[size] = c
+            return c
 
-    chain_3 = [tuple(chain_1[i:i+3]) for i in range(0, len(chain_1)-2)]
-    p3, P3 = pykov.maximum_likelihood_probabilities(chain_3, lag_time=1)
+    def suggestions_thesaurus(words, i, count):
+        # Don't fill up with thesaurus answers, sometimes they are dumb,
+        # so limit to MIN_SUGGESTIONS
+        return [(w, 1.0) for w in thesaurus.get(words[i], [])][:MIN_SUGGESTIONS][:count]
 
     def suggestions_first_word(words, i, count):
         return first_word_frequencies[:]
 
-    def suggestions_markov_1(words, i, count):
-        # Use 1 word chain
-        correct_word = words[i]
-        start = words[i-1]
-        options = P1.succ(start).items()
-        # We filter out the correct word, so that we know how many
-        # alternatives we have, and so probabilities for other
-        # words aren't skewed.
-        return [(w, f) for w, f in options if w != correct_word]
-
-    def suggestions_markov_2(words, i, count):
-        # Use 2 word chain
-        correct_word = words[i]
-        start = tuple(words[i-2:i])
-        options = P2.succ(start).items()
-        return [(w, f) for (p, w), f in options if w != correct_word]
-
-    def suggestions_markov_3(words, i, count):
-        # Use 3 word chain
-        correct_word = words[i]
-        start = tuple(words[i-3:i])
-        options = P3.succ(start).items()
-        return [(w, f) for (p1, p2, w), f in options if w != correct_word]
+    def mk_suggestions_markov(size):
+        def suggestions_markov(words, i, count):
+            correct_word = words[i]
+            if size == 1:
+                start = words[i-1]
+            else:
+                start = tuple(words[i-size:i])
+            chain = get_markov_chain(size)
+            options = chain.succ(start).items()
+            # We filter out the correct word, so that we know how many
+            # alternatives we have, and so probabilities for other
+            # words aren't skewed.
+            return [(w, f) for w, f in options if w != correct_word]
+        return suggestions_markov
 
     def suggestions_random(words, i, count):
         retval = []
         correct_word = words[i]
         while len(retval) < count:
-            s = random.choice(chain_1)
+            s = random.choice(words)
             if s != correct_word:
                 retval.append((s, 1.0))
         return retval
 
     MIN_SUGGESTIONS = 30
-    MAX_SUGGESTIONS = 40
+    MAX_SUGGESTIONS = 50
 
+    # Strategies for finding alternatives, ordered according to how good they will be
+    strategies = []
+    if thesaurus is not None:
+        strategies.append(
+            # Thesaurus isn't always very good, because
+            # it can come up with some dumb suggestions.
+            (lambda i: True, suggestions_thesaurus, 1)
+        )
+
+    strategies.extend([
+        (lambda i: i == 0, suggestions_first_word, 4),
+        (lambda i: i > 2, mk_suggestions_markov(3), 4),
+        (lambda i: i > 1, mk_suggestions_markov(2), 4),
+        (lambda i: i > 0, mk_suggestions_markov(1), 4),
+        (lambda i: True, suggestions_random, 4),
+    ])
 
     to_create = []
     for item in items:
@@ -188,22 +233,15 @@ def generate_suggestions_helper(version, items, text_getter, training_text, ref=
 
         item_suggestions = []
         for i, word in enumerate(words):
-            factor = 1.0
+            relevance = 1.0
             word_suggestions = []
-            strategies = [
-                # Ordered according to how good they will be
-                (lambda i: i == 0, suggestions_first_word),
-                (lambda i: i > 2, suggestions_markov_3),
-                (lambda i: i > 1, suggestions_markov_2),
-                (lambda i: i > 0, suggestions_markov_1),
-                (lambda i: True, suggestions_random),
-            ]
-            for condition, method in strategies:
-                if len(word_suggestions) < MIN_SUGGESTIONS and condition(i):
-                    need = MIN_SUGGESTIONS - len(word_suggestions)
-                    new_suggestions = scale_suggestions(method(words, i, need), factor)
-                    word_suggestions = merge_suggestions(word_suggestions, new_suggestions)
-                    factor = factor / 4 # scale down worse methods for finding suggestions
+            for condition, method, scale_factor in strategies:
+                if condition(i):
+                    need = MIN_SUGGESTIONS - len(word_suggestions) # Only last strategy really uses this
+                    new_suggestions = scale_suggestions(method(words, i, need), relevance)
+                    if len(new_suggestions) > 0:
+                        word_suggestions = merge_suggestions(word_suggestions, new_suggestions)
+                        relevance = relevance / scale_factor # scale down worse methods for finding suggestions
 
             word_suggestions.sort(key=lambda (a,b): -b)
             word_suggestions = scale_suggestions(word_suggestions[0:MAX_SUGGESTIONS])
@@ -232,7 +270,7 @@ def merge_suggestions(s1, s2):
     return (Counter(dict(s1)) + Counter(dict(s2))).items()
 
 
-def get_in_batches(qs, batch_size=100):
+def get_in_batches(qs, batch_size=200):
     start = 0
     while True:
         q = list(qs[start:start+batch_size])
@@ -250,4 +288,14 @@ def get_all_suggestion_words(version_name):
     for wd in get_in_batches(WordSuggestionData.objects.filter(version__slug=version_name)):
         for p in wd.get_suggestion_pairs():
             s |= set(w for w,f in p)
+    return s
+
+
+def get_all_version_words(version_name):
+    s = set()
+    for verse in get_in_batches(Verse.objects.filter(version__slug=version_name)):
+        s |= set(split_into_words_for_suggestions(verse.text))
+
+    for qapair in get_in_batches(QAPair.objects.filter(catechism__slug=version_name)):
+        s |= set(split_into_words_for_suggestions(qapair.answer))
     return s
