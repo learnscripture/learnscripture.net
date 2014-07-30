@@ -6,6 +6,8 @@ of cleaning up if clients other than the web app were to use it - we are just
 using Piston for the convenience it provides.
 
 """
+from __future__ import unicode_literals
+
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
 from django.utils.functional import wraps
@@ -18,7 +20,7 @@ from piston.utils import rc
 
 from accounts.forms import PreferencesForm
 from accounts.models import Account
-from bibleverses.models import StageType, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, MAX_VERSE_QUERY_SIZE, TextVersion, quick_find, VerseSetType, TextType
+from bibleverses.models import StageType, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, MAX_VERSE_QUERY_SIZE, TextVersion, quick_find, VerseSetType
 from comments.models import Comment
 from events.models import Event
 from groups.models import Group
@@ -97,9 +99,8 @@ class VersesToLearnHandler(BaseHandler):
         ('version', ('full_name', 'short_name', 'slug', 'url', 'text_type')),
         'suggestion_pairs',
         # added in get_verse_statuses:
-        'text',
-        'question',
-        'answer',
+        'scoring_text_words',
+        'title_text',
         'learn_order',
         'learning_type',
         'return_to',
@@ -152,9 +153,7 @@ class ActionCompleteHandler(BaseHandler):
             accuracy = None
 
         # FIXME - this should probably be in the model layer somewhere
-        text = (verse_status['text']
-                if verse_status['version']['text_type'] == TextType.BIBLE
-                else verse_status['answer'])
+        text = " ".join(verse_status['scoring_text_words'])
 
         action_change = identity.record_verse_action(reference, version_slug,
                                                      stage, accuracy);

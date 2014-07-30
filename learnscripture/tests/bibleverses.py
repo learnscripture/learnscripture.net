@@ -1,10 +1,11 @@
 from __future__ import absolute_import
 
-from django.utils import unittest
+import unittest2
+
 from django.test import TestCase
 
 from accounts.models import Identity
-from bibleverses.models import InvalidVerseReference, Verse, TextVersion, get_passage_sections, VerseSet
+from bibleverses.models import InvalidVerseReference, Verse, TextVersion, get_passage_sections, VerseSet, split_into_words
 from .base import AccountTestMixin
 
 
@@ -311,7 +312,7 @@ class MockUVS(object):
         self.reference = reference
 
 
-class GetPassageSectionsTests(unittest.TestCase):
+class GetPassageSectionsTests(unittest2.TestCase):
 
     def test_empty(self):
         uvs_list = [MockUVS('Genesis 1:1'),
@@ -396,6 +397,19 @@ class UserVerseStatusTests(AccountTestMixin, TestCase):
 
         self.assertEqual(uvs.passage_reference, 'Psalm 23:1-6')
         self.assertEqual(uvs.section_reference, 'Psalm 23:1-3')
+
+
+class VerseUtilsTests(unittest2.TestCase):
+
+    def test_split_into_words(self):
+        self.assertEqual(split_into_words("""and live forever--"'"""),
+                         ["and", "live", "forever--\"'"])
+
+        self.assertEqual(split_into_words("two great lights--the greater light"),
+                         ["two", "great", "lights--", "the", "greater", "light"])
+
+        self.assertEqual(split_into_words("--some text here"),
+                         ["--some", "text", "here"])
 
 
 class ESVTests(TestCase):

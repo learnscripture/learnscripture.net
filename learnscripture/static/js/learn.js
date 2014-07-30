@@ -204,17 +204,6 @@ var learnscripture = (function (learnscripture, $) {
         )));
     };
 
-    // === Strings ===
-
-    var adjustWordJoiningPunctuation = function (text) {
-        return text.replace(/--/g, '-- '); // this can be used to join words in ESV
-    }
-
-    var countWords = function (text) {
-        // duplication of server side logic, accounts.models.count_words
-        return stripPunctuation(adjustWordJoiningPunctuation(text)).trim().split(/\W/).length;
-    };
-
 
     // ========== Word toggling =============
 
@@ -1404,20 +1393,13 @@ var learnscripture = (function (learnscripture, $) {
         var oldVerseStatus = currentVerseStatus;
         currentVerseStatus = versesToLearn[currentVerseIndex];
         var verseStatus = currentVerseStatus;
-        // TODO: Some of these attributes could be handled better by having
-        // different classes for Bible questions and Catechism questions.
-        verseStatus.scoringText = (
-            verseStatus.version.text_type == TEXT_TYPE_BIBLE ? verseStatus.text : verseStatus.answer)
-
-        verseStatus.titleText = (
-            verseStatus.version.text_type == TEXT_TYPE_BIBLE ? verseStatus.reference : verseStatus.reference + ". " + verseStatus.question)
 
         verseStatus.showReference = (
             verseStatus.version.text_type == TEXT_TYPE_BIBLE ? (verseStatus.verse_set === null ||
                 verseStatus.verse_set === undefined ||
                 verseStatus.verse_set.set_type === SET_TYPE_SELECTION) : false)
 
-        verseStatus.wordCount = countWords(verseStatus.scoringText);
+        verseStatus.wordCount = verseStatus.scoring_text_words.length;
         normaliseLearningType(verseStatus);
         var moveOld = (oldVerseStatus !== null &&
             isPassageType(oldVerseStatus) &&
@@ -1443,7 +1425,7 @@ var learnscripture = (function (learnscripture, $) {
         }
 
         $('.current-verse').hide(); // Hide until set up
-        $('#id-verse-title').text(verseStatus.titleText);
+        $('#id-verse-title').text(verseStatus.title_text);
         if (verseStatus.version.text_type == TEXT_TYPE_BIBLE) {
             $('#id-version-select').show().val(verseStatus.version.slug);
         } else {
@@ -1527,7 +1509,9 @@ var learnscripture = (function (learnscripture, $) {
     };
 
     var markupVerse = function (verseStatus) {
-        var text = adjustWordJoiningPunctuation(verseStatus.scoringText);
+        // We join words back together, so that we can split on \n
+        // which is useful for poetry
+        var text = verseStatus.scoring_text_words.join(" ")
         var reference = (verseStatus.showReference ? verseStatus.reference : null);
         // First split lines into divs.
         $.each(text.split(/\n/), function (idx, line) {
