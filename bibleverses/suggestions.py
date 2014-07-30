@@ -1,20 +1,58 @@
 from collections import Counter
 import random
+import re
 
 import pykov
 
-from bibleverses.models import get_whole_book, TextType, BIBLE_BOOKS, WordSuggestionData
+from bibleverses.models import get_whole_book, TextType, BIBLE_BOOKS, WordSuggestionData, split_into_words, is_punctuation
+
+PUNCTUATION = "!?,.<>()[];:\"'-"
+IN_WORD_PUNCTUATION = "'-"
+
+# regexp for words with punctuation in the middle.
+# We ignore digits, because things like 100,000 are allowed.
+BAD_WORD_PUNCTUATION_RE = re.compile('[A-Za-z](' + "|".join(re.escape(p) for p in PUNCTUATION if p not in IN_WORD_PUNCTUATION) + ")[A-Za-z]")
+
+
+# This is used for checking text before doing stats and finding suggestions
+# for each word. bad_punctuation occasionally will produce false positives e.g.  NET Mark 11:32:
+#
+#   But if we say, 'From people - '" (they feared the crowd, for they all considered John to be truly a prophet).
+#
+# but the default way of calling split_into_words will fix this.
+
+def bad_punctuation(text):
+    words = split_into_words(text, fix_punctuation_whitespace=False)
+
+    # Certain punctuation must not appear in middle of words
+    # Ignore punctuation at end
+    words = [w.strip(PUNCTUATION) for w in words]
+    if any(BAD_WORD_PUNCTUATION_RE.search(w) for w in words):
+        return True
+
+    # Check for pure punctuation with whitespace around it:
+    # - but allow the following:
+    #   -
+    #   --
+    # and punctuation that starts/ends with that.
+    for chunk in text.split():
+        if is_punctuation(chunk):
+            if not any(chunk.startswith(a) or chunk.endswith(a) for a in ["--", "-"]):
+                return True
+
+    return False
 
 def normalise_word(word):
-    for p in "\"'?!,:;-.()[]": # TODO - apostophes in the middle of word?
-        word = word.replace(p, "")
+    word = word.strip(PUNCTUATION)
     return word.lower().strip()
+
+
+def split_into_words_for_suggestions(text):
+    return map(normalise_word, split_into_words(text))
 
 
 def sentence_first_words(text):
     return [l.split()[0] for l in [normalise_word(l.strip()) for l in text.split('.')] if l]
-
-
 
 
 TORAH = ['Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy']
@@ -39,11 +77,6 @@ def similar_books(book_name):
     if book_name not in retval:
         retval.append(book_name)
     return retval
-
-def split_into_words_for_suggestions(text):
-    text = text.replace('--', '-- ')
-    return [w for w in [normalise_word(w) for w in text.strip().split()]
-            if w]
 
 def frequency_pairs(words):
     return scale_suggestions(Counter(words).items())
@@ -190,5 +223,27 @@ def scale_suggestions(suggestions, factor=1.0):
     max_f = max(f for w, f in suggestions)
     return [(w, float(f)/max_f * factor) for w, f in suggestions]
 
+
 def merge_suggestions(s1, s2):
     return (Counter(dict(s1)) + Counter(dict(s2))).items()
+
+
+def get_in_batches(qs, batch_size=100):
+    start = 0
+    while True:
+        q = list(qs[start:start+batch_size])
+        print start
+        if len(q) == 0:
+            raise StopIteration()
+        for item in q:
+            yield item
+        start += batch_size
+
+
+# Utility for checking our word suggestion generation:
+def get_all_suggestion_words(version_name):
+    s = set()
+    for wd in get_in_batches(WordSuggestionData.objects.filter(version__slug=version_name)):
+        for p in wd.get_suggestion_pairs():
+            s |= set(w for w,f in p)
+    return s

@@ -457,7 +457,7 @@ class IdentityTests(AccountTestMixin, TestCase):
         with self.assertNumQueries(2):
             d = i.get_verse_statuses_bulk([uvs.id for uvs in uvss])
             self.assertEqual(d[uvss[1].id].reference, uvss[1].reference)
-            [uvs.text for uvs in d.values()]
+            [uvs.scoring_text_words for uvs in d.values()]
 
     def test_add_verse_choice_copies_strength(self):
         i = self.create_identity(version_slug='NET')
