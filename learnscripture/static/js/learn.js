@@ -1112,11 +1112,11 @@ var learnscripture = (function (learnscripture, $) {
             // Pick N unique items
             var chosen = [];
             var CHOICE_COUNT = 10;
-            var correctWord = normaliseWordForTest($w.text());
+            var correctWord = normaliseWordForSuggestion($w.text());
             chosen.push(correctWord);
             while (chosen.length < CHOICE_COUNT && bag.length > 0) {
                 var pos = Math.floor(Math.random() * bag.length);
-                var choice = normaliseWordForTest(bag[pos]);
+                var choice = normaliseWordForSuggestion(bag[pos]);
                 if (chosen.indexOf(choice) === -1) {
                     chosen.push(choice);
                 }
@@ -1189,14 +1189,22 @@ var learnscripture = (function (learnscripture, $) {
     })
 
     // -----------------------
-
     var normaliseWordForTest = function (str) {
         return stripPunctuation(str.trim().toLowerCase());
+    }
+
+    var normaliseWordForSuggestion = function (str) {
+        return stripOuterPunctuation(str.trim().toLowerCase());
     }
 
     var stripPunctuation = function (str) {
         return str.replace(/["'\.,;!?:\/#!$%\^&\*{}=\-_`~()]/g, "");
     };
+
+    var stripOuterPunctuation = function (str) {
+        return str.replace(/^["'\.,;!?:\/#!$%\^&\*{}=\-_`~()]/g, "")
+                   .replace(/["'\.,;!?:\/#!$%\^&\*{}=\-_`~()]$/g, "");
+    }
 
     var moveOn = function () {
         var wordIdx = currentWordIndex;
