@@ -22,9 +22,12 @@ class BootstrapRadioSelect(forms.RadioSelect):
 
 
 class PreferencesForm(forms.ModelForm):
-    testing_method = forms.ChoiceField(widget=BootstrapRadioSelect,
-                                       choices=TestingMethod.choice_list,
-                                       )
+    desktop_testing_method = forms.ChoiceField(label="Testing method",
+                                               widget=BootstrapRadioSelect,
+                                               choices=TestingMethod.choice_list)
+    touchscreen_testing_method = forms.ChoiceField(label="Testing method",
+                                                   widget=BootstrapRadioSelect,
+                                                   choices=TestingMethod.choice_list)
 
     def __init__(self, *args, **kwargs):
         super(PreferencesForm, self).__init__(*args, **kwargs)
@@ -41,7 +44,8 @@ class PreferencesForm(forms.ModelForm):
     class Meta:
         model = Identity
         fields = ['default_bible_version',
-                  'testing_method',
+                  'desktop_testing_method',
+                  'touchscreen_testing_method',
                   'enable_animations',
                   'enable_sounds',
                   'interface_theme']
