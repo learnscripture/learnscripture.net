@@ -6,7 +6,9 @@ var learnscripture =
         var preferences = null;
 
         var setPreferences = function (prefs) {
-            prefs.testingMethod = learnscripture.isTouchDevice() ? prefs.touchscreenTestingMethod : prefs.desktopTestingMethod;
+            // Temporarily disable this until we can upload all data needed.
+            // prefs.testingMethod = learnscripture.isTouchDevice() ? prefs.touchscreenTestingMethod : prefs.desktopTestingMethod;
+            prefs.testingMethod = prefs.desktopTestingMethod;
             preferences = prefs;
             // Notify listeners. Could pick any DOM element to trigger off as
             // long as listeners do the same. It makes sense to use
@@ -19,7 +21,9 @@ var learnscripture =
         };
 
         var showPreferences = function (ev) {
-            if (learnscripture.isTouchDevice()) {
+            if (learnscripture.isTouchDevice()
+                && false // disabled temporarily
+               ) {
                 // A bit hacky but works:
                 $('#id_desktop_testing_method').parent().parent().hide();
             } else {
