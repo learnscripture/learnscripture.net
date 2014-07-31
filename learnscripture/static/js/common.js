@@ -166,9 +166,7 @@ $(document).ready(function () {
     // Dropdown in topbar
     $('.topbar').dropdown();
 
-    if (learnscripture.isTouchDevice()
-        && false // disabled temporarily
-       ) {
+    if (learnscripture.isTouchDevice()) {
         // A bit hacky but works:
         $('#id_desktop_testing_method').parent().parent().hide();
     } else {
