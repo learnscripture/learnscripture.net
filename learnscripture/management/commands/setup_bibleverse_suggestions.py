@@ -23,7 +23,7 @@ PRONOUN_THESAURUS = dict(
 )
 
 def version_thesaurus(version, base_thesaurus):
-    fname = version.slug + ".thesaurus"
+    fname = "../data/" + version.slug + ".thesaurus"
     try:
         return pickle.load(file(fname))
     except IOError:
