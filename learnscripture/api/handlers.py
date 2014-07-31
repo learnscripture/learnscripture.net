@@ -173,8 +173,6 @@ class ActionCompleteHandler(BaseHandler):
         return {}
 
 
-
-
 class RecordWordMistakes(BaseHandler):
     allowed_methods = ['POST']
 
@@ -267,7 +265,8 @@ class SetPreferences(BaseHandler):
     allowed_methods = ('POST',)
     fields = (
         ('default_bible_version', ('slug',)),
-        'testing_method',
+        'desktop_testing_method',
+        'touchscreen_testing_method',
         'enable_animations',
         'enable_sounds',
         'interface_theme',

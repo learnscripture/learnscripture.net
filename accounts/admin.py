@@ -24,7 +24,7 @@ class HasAccountListFilter(SimpleListFilter):
 
 class IdentityAdmin(admin.ModelAdmin):
     list_display = ['id', 'account', 'date_created', 'default_bible_version',
-                    'testing_method', 'interface_theme', 'referred_by']
+                    'desktop_testing_method', 'interface_theme', 'referred_by']
     list_filter = (HasAccountListFilter,)
 
     def queryset(self, request):

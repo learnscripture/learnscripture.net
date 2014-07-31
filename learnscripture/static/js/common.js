@@ -140,6 +140,9 @@ var learnscripture = (function (learnscripture, $) {
         $('#id-ajax-errors').html('');
     };
 
+    var isTouchDevice = function () {
+        return 'ontouchstart' in window;
+    };
 
     // Export:
     learnscripture.handleFormValidationErrors = handleFormValidationErrors;
@@ -150,6 +153,7 @@ var learnscripture = (function (learnscripture, $) {
                                       };
     learnscripture.ajaxRetryFailed = ajaxRetryFailed;
     learnscripture.ajaxRetrySucceeded = ajaxRetrySucceeded;
+    learnscripture.isTouchDevice = isTouchDevice;
     return learnscripture;
 
 }(learnscripture || {}, $));

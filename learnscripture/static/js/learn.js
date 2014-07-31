@@ -48,7 +48,7 @@ var learnscripture = (function (learnscripture, $) {
     var WORD_TOGGLE_HIDE_ALL = 2;
 
     var scrollingTimeoutId = null;
-    var fastEventName = 'ontouchstart' in window ? 'touchstart' : 'mousedown';
+    var fastEventName = learnscripture.isTouchDevice() ? 'touchstart' : 'mousedown';
 
     // Defined in StageType:
     var STAGE_TYPE_TEST = 'TEST';
@@ -556,7 +556,7 @@ var learnscripture = (function (learnscripture, $) {
         setStageControlBtns();
         if (currentStage.testMode) {
             unbindDocKeyPress();
-            // currentStage.setUp will call testingMethod.testSetUp()
+            // currentStage.setUp will call testingMethodStrategy.testSetUp()
         } else {
             bindDocKeyPress();
         }

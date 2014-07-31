@@ -400,8 +400,10 @@ class Identity(models.Model):
 
     # Preferences
     default_bible_version = models.ForeignKey(TextVersion, null=True, blank=True)
-    testing_method = models.PositiveSmallIntegerField(choices=TestingMethod.choice_list,
-                                                      null=True, default=None)
+    desktop_testing_method = models.PositiveSmallIntegerField(choices=TestingMethod.choice_list,
+                                                              default=TestingMethod.FULL_WORDS)
+    touchscreen_testing_method = models.PositiveSmallIntegerField(choices=TestingMethod.choice_list,
+                                                                  default=TestingMethod.ON_SCREEN)
     enable_animations = models.BooleanField(blank=True, default=True)
     enable_sounds = models.BooleanField(blank=True, default=False)
     interface_theme = models.CharField(max_length=30, choices=THEMES,
@@ -435,7 +437,7 @@ class Identity(models.Model):
 
     @property
     def preferences_setup(self):
-        return self.default_bible_version is not None and self.testing_method is not None
+        return self.default_bible_version is not None
 
     @property
     def default_to_dashboard(self):

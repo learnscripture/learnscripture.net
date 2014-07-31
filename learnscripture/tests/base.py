@@ -38,7 +38,6 @@ class AccountTestMixin(object):
     def create_identity(self, version_slug='KJV', account=None):
         version = TextVersion.objects.get(slug=version_slug)
         return Identity.objects.create(default_bible_version=version,
-                                       testing_method=TestingMethod.FULL_WORDS,
                                        enable_animations=False,
                                        enable_sounds=False,
                                        account=account,
@@ -143,7 +142,6 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
             Identity.objects.all().delete()
             identity = Identity.objects.create()
             identity.default_bible_version = TextVersion.objects.get(slug='NET')
-            identity.testing_method = TestingMethod.FULL_WORDS
             identity.save()
         learnscripture.session.set_identity(session, identity)
         session.save()
@@ -232,11 +230,10 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
         # Set preferences if visible
         driver = self.driver
 
-        if not self.find("#id_testing_method_0").is_displayed():
+        if not self.find("#id_desktop_testing_method_0").is_displayed():
             return
 
         Select(self.find("#id_default_bible_version")).select_by_visible_text("KJV (King James Version)")
-        self.click("#id_testing_method_0")
 
         # Turn animations off, as they can complicate testing.
         e = self.find("#id_enable_animations")

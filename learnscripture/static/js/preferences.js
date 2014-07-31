@@ -6,6 +6,7 @@ var learnscripture =
         var preferences = null;
 
         var setPreferences = function (prefs) {
+            prefs.testingMethod = learnscripture.isTouchDevice() ? prefs.touchscreenTestingMethod : prefs.desktopTestingMethod;
             preferences = prefs;
             // Notify listeners. Could pick any DOM element to trigger off as
             // long as listeners do the same. It makes sense to use
@@ -18,6 +19,12 @@ var learnscripture =
         };
 
         var showPreferences = function (ev) {
+            if (learnscripture.isTouchDevice()) {
+                // A bit hacky but works:
+                $('#id_desktop_testing_method').parent().parent().hide();
+            } else {
+                $('#id_touchscreen_testing_method').parent().parent().hide();
+            }
             $('#id-preferences-form').modal({backdrop: 'static', keyboard: true, show: true});
         };
 
@@ -32,7 +39,8 @@ var learnscripture =
                     success: function (data) {
                         // translate from Python attributes
                         data.defaultBibleVersion = data.default_bible_version;
-                        data.testingMethod = data.testing_method;
+                        data.desktopTestingMethod = data.desktop_testing_method;
+                        data.touchscreenTestingMethod = data.touchscreen_testing_method;
                         data.enableAnimations = data.enable_animations;
                         data.enableSounds = data.enable_sounds;
                         data.interfaceTheme = data.interface_theme;
