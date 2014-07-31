@@ -325,7 +325,7 @@ def manage_py_command(*commands):
 @task
 def get_live_db():
     filename = "dump_%s.db" % PRODUCTION.DB_NAME
-    run("pg_dump -Fc -U %s -O -o -f ~/%s %s" % (PRODUCTION.DB_USER, filename, PRODUCTION.DB_NAME))
+    run("pg_dump -Fc -U %s -O -o -T bibleverses_wordsuggestiondata -f ~/%s %s" % (PRODUCTION.DB_USER, filename, PRODUCTION.DB_NAME))
     get("~/%s" % filename)
 
 
