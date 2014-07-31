@@ -50,7 +50,6 @@ class ChooseTests(LiveServerTests):
         self.assertEqual(Event.objects.filter(event_type=EventType.STARTED_LEARNING_VERSE_SET).count(),
                          1)
 
-
     def test_double_choose(self):
         ids = list(Identity.objects.all())
 
