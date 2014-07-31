@@ -165,4 +165,14 @@ $.views.delimiters('[[', ']]');
 $(document).ready(function () {
     // Dropdown in topbar
     $('.topbar').dropdown();
+
+    if (learnscripture.isTouchDevice()
+        && false // disabled temporarily
+       ) {
+        // A bit hacky but works:
+        $('#id_desktop_testing_method').parent().parent().hide();
+    } else {
+        $('#id_touchscreen_testing_method').parent().parent().hide();
+    }
+
 });

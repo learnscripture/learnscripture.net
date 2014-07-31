@@ -24,9 +24,11 @@ class BootstrapRadioSelect(forms.RadioSelect):
 class PreferencesForm(forms.ModelForm):
     desktop_testing_method = forms.ChoiceField(label="Testing method",
                                                widget=BootstrapRadioSelect,
+                                               initial=TestingMethod.FULL_WORDS,
                                                choices=TestingMethod.choice_list[0:2]) # Keep hidden for now
     touchscreen_testing_method = forms.ChoiceField(label="Testing method",
                                                    widget=BootstrapRadioSelect,
+                                                   initial=TestingMethod.ON_SCREEN,
                                                    choices=TestingMethod.choice_list)
 
     def __init__(self, *args, **kwargs):
