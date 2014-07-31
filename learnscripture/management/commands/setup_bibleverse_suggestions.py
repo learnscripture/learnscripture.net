@@ -14,19 +14,13 @@ def get_thesaurus(fname):
 
 # Thesaurus file tends to have unhelpful suggestions for pronouns, so we overwrite.
 # These are not synonyms, but likely alternatives
-PRONOUN_THESAURUS = {
-    'i': ['he', 'she','it','they', 'you', 'thou'],
-    'me': ['him', 'her', 'myself', 'them', 'you', 'thee'],
-    'he': ['she','it','i','they', 'you', 'thou'],
-    'him': ['her','it','me','them', 'you', 'thee', 'himself'],
-    'she': ['he','it','i','they', 'you', 'thou'],
-    'her': ['him','it','me','them', 'you', 'thee', 'herself'],
-    'it': ['she','he', 'him', 'her', 'i', 'me', 'they', 'them', 'you', 'thou', 'thee'],
-    'you': ['it', 'she','he', 'him', 'her', 'i', 'me', 'they', 'them', 'thou', 'thee'],
-    'we': ['it', 'she','he', 'i', 'they', 'thou'],
-    'us': ['him', 'her', 'me', 'them', 'you', 'thee'],
-}
+OBJECTS = ['me', 'you', 'yourself', 'oneself', 'thee', 'him', 'her', 'himself', 'herself', 'it', 'itself', 'us', 'ourselves', 'yourselves', 'them', 'themselves']
+SUBJECTS = ['i', 'you', 'thou', 'he', 'she', 'it', 'we', 'they']
 
+PRONOUN_THESAURUS = dict(
+    [(k, [v for v in OBJECTS if v != k]) for k in OBJECTS] +
+    [(k, [v for v in SUBJECTS if v != k]) for k in SUBJECTS]
+)
 
 def version_thesaurus(version, base_thesaurus):
     fname = version.slug + ".thesaurus"
