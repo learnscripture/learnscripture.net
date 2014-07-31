@@ -173,6 +173,24 @@ class ActionCompleteHandler(BaseHandler):
         return {}
 
 
+
+
+class RecordWordMistakes(BaseHandler):
+    allowed_methods = ['POST']
+
+    @require_preexisting_identity_m
+    def create(self, request):
+        ref = request.POST['reference']
+        version_slug = request.POST['version']
+        mistakes = simplejson.loads(request.POST['mistakes'])
+        try:
+            version = bible_versions_for_request(request).get(slug=version_slug)
+        except TextVersion.DoesNotExist:
+            return rc.BAD_REQUEST
+        version.record_word_mistakes(ref, mistakes)
+        return {}
+
+
 class SkipVerseHandler(BaseHandler):
     allowed_methods = ('POST',)
 
@@ -205,6 +223,7 @@ class ResetProgressHandler(BaseHandler):
                                         get_verse_set_id(verse_status),
                                         verse_status['version']['slug'])
         return {}
+
 
 class ChangeVersionHandler(BaseHandler):
     allowed_methods = ('POST',)

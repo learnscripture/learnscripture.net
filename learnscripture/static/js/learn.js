@@ -558,9 +558,6 @@ var learnscripture = (function (learnscripture, $) {
             unbindDocKeyPress();
             // currentStage.setUp will call testingMethod.testSetUp()
         } else {
-            if (testingMethodStrategy != null) {
-                testingMethodStrategy.testTearDown();
-            }
             bindDocKeyPress();
         }
 
@@ -574,6 +571,9 @@ var learnscripture = (function (learnscripture, $) {
         if (currentStage.continueStage()) {
             return;
         }
+        if (currentStage.testMode) {
+            testingMethodStrategy.testTearDown();
+        }
         if (currentStageIdx < currentStageList.length - 1) {
             setUpStage(currentStageIdx + 1);
         }
@@ -582,6 +582,9 @@ var learnscripture = (function (learnscripture, $) {
     var back = function (ev) {
         if (currentStageIdx == 0) {
             return;
+        }
+        if (currentStage.testMode) {
+            testingMethodStrategy.testTearDown();
         }
         setUpStage(currentStageIdx - 1);
     };
@@ -788,6 +791,9 @@ var learnscripture = (function (learnscripture, $) {
         testingStatus.text('');
         if (!isPracticeMode()) {
             $('#id-points-target').html(' Points target: <b>' + getPointsTarget().toString() + '</b>');
+        }
+        if (testingMethodStrategy == null) {
+            setTestingMethodStrategy(preferences);
         }
         testingMethodStrategy.testSetUp();
 
@@ -1057,9 +1063,23 @@ var learnscripture = (function (learnscripture, $) {
             this.wordTestSetUp();
             this.ensureTestDivVisible();
             $('#id-hint-btn').hide();
+            this.wordMistakes = [];
         },
 
         testTearDown: function () {
+            if (this.wordMistakes !== undefined && this.wordMistakes.length > 0) {
+                var url = '/api/learnscripture/v1/recordwordmistakes/?format=json';
+                $.ajax({
+                    url: url,
+                    dataType: 'json',
+                    type: 'POST',
+                    data: {
+                        reference: currentVerseStatus.reference,
+                        version: currentVerseStatus.version.slug,
+                        mistakes: JSON.stringify(this.wordMistakes)
+                    }
+                });
+            }
             $('#id-onscreen-test-container').hide();
             this.removeTestDivFix();
             this.wordTestTearDown();
@@ -1085,7 +1105,7 @@ var learnscripture = (function (learnscripture, $) {
             var bag = [];
             for (var i = 0; i < suggestions.length; i++) {
                 var suggestion = suggestions[i];
-                for (var j = 0; j < suggestion[1] * 100; j++) {
+                for (var j = 0; j < suggestion[1] * 1000; j++) {
                     bag.push(suggestion[0]);
                 }
             }
@@ -1109,8 +1129,9 @@ var learnscripture = (function (learnscripture, $) {
                 html += '<span class="word">' + escapeHtml(chosen[i]) + '</span>';
             }
             $c.html(html);
+            var that = this;
             fastEventBind($c.find('.word'),
-                          this.handleButtonClick);
+                          function (ev) { that.handleButtonClick(ev) });
             $c.show();
         },
 
@@ -1125,11 +1146,13 @@ var learnscripture = (function (learnscripture, $) {
         handleButtonClick: function (ev) {
             ev.preventDefault();
             var $btn = $(ev.target);
-            if (normaliseWordForTest($btn.text()) ===
-                normaliseWordForTest(getWordAt(currentWordIndex).text())) {
+            var chosenWord = normaliseWordForTest($btn.text());
+            var correctWord = normaliseWordForTest(getWordAt(currentWordIndex).text());
+            if (chosenWord === correctWord) {
                 indicateSuccess();
             } else {
                 testingMistakes[currentWordIndex] = 1;
+                this.wordMistakes.push([currentWordIndex, chosenWord])
                 indicateFail();
             }
             moveOn();
@@ -1999,6 +2022,10 @@ var learnscripture = (function (learnscripture, $) {
             return;
         }
         preferences = prefs;
+        setTestingMethodStrategy(preferences);
+    };
+
+    var setTestingMethodStrategy = function (preferences) {
         if (testingMethodStrategy != null) {
             testingMethodStrategy.methodTearDown();
         }

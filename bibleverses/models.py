@@ -166,7 +166,7 @@ class TextVersion(caching.base.CachingMixin, models.Model):
         return self.text_type == TextType.CATECHISM
 
     class Meta:
-        ordering = ('short_name',)
+        ordering = ['short_name']
 
     def __unicode__(self):
         return "%s (%s)" % (self.short_name, self.full_name)
@@ -190,7 +190,7 @@ class TextVersion(caching.base.CachingMixin, models.Model):
         references are silently discarded, and won't be in the return
         dictionary.
         """
-        if self.is_catechism: return {}
+        if not self.is_bible: return {}
         verse_dict = self.get_verses_by_reference_bulk(reference_list)
         return dict((ref, v.text) for (ref, v) in verse_dict.items())
 
@@ -200,7 +200,7 @@ class TextVersion(caching.base.CachingMixin, models.Model):
         references are silently discarded, and won't be in the return
         dictionary.
         """
-        if self.is_catechism: return {}
+        if not self.is_bible: return {}
         # We try to do this efficiently, but it is hard for combo references. So
         # we do the easy ones the easy way:
         simple_verses = list(self.verse_set.filter(reference__in=reference_list,
@@ -218,13 +218,30 @@ class TextVersion(caching.base.CachingMixin, models.Model):
         return v_dict
 
     def get_qapairs_by_reference_bulk(self, reference_list):
-        if self.is_bible: return {}
+        if not self.is_catechism: return {}
         return {qapair.reference: qapair
                 for qapair in self.qapairs.filter(reference__in=reference_list)}
 
     def get_qapair_by_reference(self, reference):
-        if self.is_bible: return None
+        if not self.is_catechism: return None
         return self.qapairs.get(reference=reference)
+
+    def _get_reference_list(self, reference):
+        if self.is_bible:
+            return [v.reference for v in self.get_verse_list(reference)]
+        else:
+            return [reference]
+
+    def _get_ordered_word_suggestion_data(self, reference):
+        references = self._get_reference_list(reference)
+        wsds = list(self.word_suggestion_data.filter(reference__in=references))
+        # wsds might not be ordered correctly, we need to re-order
+        retval = []
+        for ref in references:
+            for wsd in wsds:
+                if wsd.reference == ref:
+                    retval.append(wsd)
+        return retval
 
     def get_suggestion_pairs_by_reference(self, reference):
         """
@@ -233,20 +250,10 @@ class TextVersion(caching.base.CachingMixin, models.Model):
         (word, relative frequency) pairs.
 
         """
-        if self.text_type == TextType.BIBLE:
-            references = [v.reference for v in self.get_verse_list(reference)]
-        else:
-            references = [reference]
-        wsds = list(self.word_suggestion_data.filter(reference__in=references))
-        # wsds might not be ordered correctly, we need to re-order
-        suggestions = []
-        for ref in references:
-            for wsd in wsds:
-                if wsd.reference == ref:
-                    suggestions.append(wsd)
+        wsds = self._get_ordered_word_suggestion_data(reference)
         # Now combine:
         retval = []
-        for wsd in suggestions:
+        for wsd in wsds:
             retval.extend(wsd.get_suggestion_pairs())
         return retval
 
@@ -277,6 +284,37 @@ class TextVersion(caching.base.CachingMixin, models.Model):
                         for_identity__account__is_active=True,
                         for_identity__account__is_hellbanned=False,
                         )]
+
+    def record_word_mistakes(self, reference, mistake_list):
+        # Takes a reference and a list of [word_number, wrong_word] pairs
+        # and records the hit in the relevant WordSuggestionData
+        #
+        # Note that reference might be a combo e.g. Genesis 1:1-2 in which case
+        # we need to make sure that word indexes in mistake_list are interpreted
+        # correctly and get mapped back to correct WordSuggestionData
+        wsds = self._get_ordered_word_suggestion_data(reference)
+        list_sizes = [len(wsd.get_suggestion_pairs()) for wsd in wsds]
+
+        # Find correct WordSuggestionData and word offset:
+        mapped_mistakes = []
+        for word_num, word in mistake_list:
+            for i, s in enumerate(list_sizes):
+                if word_num >= s:
+                    word_num -= s
+                else:
+                    mapped_mistakes.append((i, word_num, word))
+                    break
+
+        # Group by WordSuggestionData
+        mistake_d = defaultdict(list)
+        for i, word_num, word in mapped_mistakes:
+            mistake_d[i].append((word_num, word))
+
+        for i, mistakes in mistake_d.items():
+            wsd = wsds[i]
+            for word_num, wrong_word in mistakes:
+                wsd.record_mistake(word_num, wrong_word)
+            wsd.save()
 
 
 class ComboVerse(object):
@@ -393,11 +431,22 @@ class WordSuggestionData(models.Model):
     def get_suggestion_pairs(self):
         if not self.suggestions:
             return []
-        # TODO - take hits into account
-        return [[(word, frequency)
+        # frequency is the suggested frequency based on
+        # markov chains etc., normalised to 1.
+        # hits is the number of times someone has chosen this word.
+        # We use hits as a strong hint that this is a good word to use.
+
+        return [[(word, frequency + hits)
                  for word, frequency, hits in suggestion]
                 for suggestion in self.suggestions]
 
+    def record_mistake(self, word_num, wrong_word):
+        # Update hits for suggestion 'word' for word number 'word_num'
+        s = self.suggestions
+        s = [[(word, frequency, hits + (1 if word == wrong_word and word_num == i else 0))
+              for word, frequency, hits in suggestion]
+             for i, suggestion in enumerate(s)]
+        self.suggestions = s
 
     class Meta:
         unique_together = [
