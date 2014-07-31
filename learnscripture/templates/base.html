@@ -202,7 +202,7 @@
 <!-- preferences data -->
 
 <div id="id-preferences-data"
-     {# NB these names are translated to preferencesSetup, enableAnimations, enableSounds, interfaceTheme, testingMethod #}
+     {# NB these names are translated to preferencesSetup, enableAnimations, enableSounds, interfaceTheme, desktopTestingMethod, touchscreenTestingMethod #}
      data-preferences-setup="{{ request.identity.preferences_setup|yesno:"true,false,false" }}"
      data-enable-animations="{{ request.identity.enable_animations|yesno:"true,false,false" }}"
      data-enable-sounds="{{ request.identity.enable_sounds|yesno:"true,false,false" }}"

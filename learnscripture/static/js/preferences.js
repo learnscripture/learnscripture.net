@@ -6,9 +6,7 @@ var learnscripture =
         var preferences = null;
 
         var setPreferences = function (prefs) {
-            // Temporarily disable this until we can upload all data needed.
-            // prefs.testingMethod = learnscripture.isTouchDevice() ? prefs.touchscreenTestingMethod : prefs.desktopTestingMethod;
-            prefs.testingMethod = prefs.desktopTestingMethod;
+            prefs.testingMethod = learnscripture.isTouchDevice() ? prefs.touchscreenTestingMethod : prefs.desktopTestingMethod;
             preferences = prefs;
             // Notify listeners. Could pick any DOM element to trigger off as
             // long as listeners do the same. It makes sense to use
