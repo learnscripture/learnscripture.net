@@ -457,4 +457,7 @@ class Event(models.Model):
         except (KeyError, Comment.DoesNotExist):
             return None
 
+    def ordered_comments(self):
+        return self.comments.all().order_by('created')
+
 from events import hooks
