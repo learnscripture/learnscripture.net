@@ -856,17 +856,13 @@ var learnscripture = (function (learnscripture, $) {
 
         testTearDown: function () {
             $('#id-keyboard-test-bar').hide();
-            this.wordTestTearDown();
+            inputBox.blur().hide();
         },
 
         wordTestSetUp: function () {
             this.adjustTypingBox();
             inputBox.show().val('').focus();
             this.forceShowKeyboard();
-        },
-
-        wordTestTearDown: function () {
-            inputBox.blur().hide();
         },
 
         windowAdjust: function () {
