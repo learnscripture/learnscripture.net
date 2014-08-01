@@ -1367,7 +1367,7 @@ def group_wall(request, slug):
     return render(request, 'learnscripture/group_wall.html',
                   {'title': 'Group wall: %s' % group.name,
                    'group': group,
-                   'comments': group.comments_visible_for_account(account).order_by('-created'),
+                   'comments': group.comments_visible_for_account(account).order_by('created'),
                    })
 
 
