@@ -67,7 +67,7 @@ class AccountManager(UserManager):
         return qs
 
     def active(self):
-        return self.get_query_set().filter(is_active=True)
+        return self.get_query_set().filter(is_active=True, identity__isnull=False)
 
 
 class Account(AbstractBaseUser):
