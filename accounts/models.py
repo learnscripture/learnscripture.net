@@ -67,7 +67,7 @@ class AccountManager(UserManager):
         return qs
 
     def active(self):
-        return self.get_query_set().filter(is_active=True, identity__isnull=False)
+        return self.get_query_set().filter(is_active=True)
 
 
 class Account(AbstractBaseUser):
@@ -1331,5 +1331,5 @@ from accounts import hooks
 
 
 def notify_all_accounts(html_message):
-    for account in Account.objects.active().select_related('identity'):
+    for account in Account.objects.active().filter(identity__isnull=False).select_related('identity'):
         account.add_html_notice(html_message)
