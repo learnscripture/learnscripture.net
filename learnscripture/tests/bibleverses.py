@@ -268,7 +268,7 @@ class VersionTests(TestCase):
 
     def test_suggestions(self):
         version = TextVersion.objects.get(slug='KJV')
-        version.word_suggestion_data.create(reference='Genesis 1:1',
+        version.create_word_suggestion_data(reference='Genesis 1:1',
                                             suggestions=self._gen_1_1_suggestions())
         self.assertEqual(version.get_suggestion_pairs_by_reference('Genesis 1:1')[1],
                          [('his', 1.0),
@@ -278,9 +278,9 @@ class VersionTests(TestCase):
 
     def test_suggestions_combo(self):
         version = TextVersion.objects.get(slug='KJV')
-        version.word_suggestion_data.create(reference='Genesis 1:1',
+        version.create_word_suggestion_data(reference='Genesis 1:1',
                                             suggestions=self._gen_1_1_suggestions())
-        version.word_suggestion_data.create(reference='Genesis 1:2',
+        version.create_word_suggestion_data(reference='Genesis 1:2',
                                             suggestions=self._gen_1_2_suggestions())
         self.assertEqual(version.get_suggestion_pairs_by_reference('Genesis 1:1-2')[10],
                          [('and', 1.0),
@@ -289,11 +289,11 @@ class VersionTests(TestCase):
 
     def test_suggestions_bulk(self):
         version = TextVersion.objects.get(slug='KJV')
-        version.word_suggestion_data.create(reference='Genesis 1:1',
+        version.create_word_suggestion_data(reference='Genesis 1:1',
                                             suggestions=self._gen_1_1_suggestions())
-        version.word_suggestion_data.create(reference='Genesis 1:2',
+        version.create_word_suggestion_data(reference='Genesis 1:2',
                                             suggestions=self._gen_1_2_suggestions())
-        version.word_suggestion_data.create(reference='Genesis 1:3',
+        version.create_word_suggestion_data(reference='Genesis 1:3',
                                             suggestions=self._gen_1_2_suggestions())
         with self.assertNumQueries(4):
             # 4 queries
@@ -308,11 +308,11 @@ class VersionTests(TestCase):
 
     def test_suggestions_update(self):
         version = TextVersion.objects.get(slug='KJV')
-        version.word_suggestion_data.create(reference='Genesis 1:1',
+        version.create_word_suggestion_data(reference='Genesis 1:1',
                                             suggestions=self._gen_1_1_suggestions())
-        version.word_suggestion_data.create(reference='Genesis 1:2',
+        version.create_word_suggestion_data(reference='Genesis 1:2',
                                             suggestions=self._gen_1_2_suggestions())
-        version.word_suggestion_data.create(reference='Genesis 1:3',
+        version.create_word_suggestion_data(reference='Genesis 1:3',
                                             suggestions=self._gen_1_3_suggestions())
         version.record_word_mistakes('Genesis 1:1', [[0, 'but'],
                                                      [1, 'his']])

@@ -353,7 +353,7 @@ def generate_suggestions_helper(version, items, text_getter, training_texts, ref
                 # Add hits=0
                 item_suggestions.append([(w,f,0) for w,f in word_suggestions])
 
-        to_create.append(WordSuggestionData(version=version,
+        to_create.append(WordSuggestionData(version_slug=version.slug,
                                             reference=item.reference,
                                             suggestions=item_suggestions,
                                             hash=hash_text(text),
@@ -388,7 +388,7 @@ def get_in_batches(qs, batch_size=200):
 # Utility for checking our word suggestion generation:
 def get_all_suggestion_words(version_name):
     s = set()
-    for wd in get_in_batches(WordSuggestionData.objects.filter(version__slug=version_name)):
+    for wd in get_in_batches(WordSuggestionData.objects.filter(version_slug=version_name)):
         for p in wd.get_suggestion_pairs():
             s |= set(w for w,f in p)
     return s

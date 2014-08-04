@@ -316,6 +316,15 @@ class TextVersion(caching.base.CachingMixin, models.Model):
                 wsd.record_mistake(word_num, wrong_word)
             wsd.save()
 
+    # Simulate FK to WordSuggestionData
+    @property
+    def word_suggestion_data(self):
+        return WordSuggestionData.objects.filter(version_slug=self.slug)
+
+    def create_word_suggestion_data(self, **kwargs):
+        kwargs['version_slug'] = self.slug
+        return WordSuggestionData.objects.create(**kwargs)
+
 
 class ComboVerse(object):
     """
@@ -418,7 +427,10 @@ class WordSuggestionData(models.Model):
     # All the suggestion data for a single verse/question
     # For efficiency, we avoid having millions of rows, because
     # we always need all the suggestions for a verse together.
-    version = models.ForeignKey(TextVersion, related_name='word_suggestion_data')
+
+    # For practical reasons, this table is stored in a separate DB, so it has no
+    # explicit FKs to the main DB. So use '
+    version_slug = models.CharField(max_length=20, default='')
     reference = models.CharField(max_length=100)
     hash = models.CharField(max_length=40) # SHA1 of text
 
@@ -450,11 +462,11 @@ class WordSuggestionData(models.Model):
 
     class Meta:
         unique_together = [
-            ('version', 'reference')
+            ('version_slug', 'reference')
         ]
 
     def __repr__(self):
-        return "<WordSuggestionData %s %s>" % (self.version.slug, self.reference)
+        return "<WordSuggestionData %s %s>" % (self.version_slug, self.reference)
 
 
 class QAPair(models.Model):
