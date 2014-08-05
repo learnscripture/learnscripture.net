@@ -1198,8 +1198,8 @@ var learnscripture = (function (learnscripture, $) {
     };
 
     var stripOuterPunctuation = function (str) {
-        return str.replace(/^["'\.,;!?:\/#!$%\^&\*{}=\-_`~()]/g, "")
-                   .replace(/["'\.,;!?:\/#!$%\^&\*{}=\-_`~()]$/g, "");
+        return str.replace(/^["'\.,;!?:\/#!$%\^&\*{}=\-_`~()]+/g, "")
+                   .replace(/["'\.,;!?:\/#!$%\^&\*{}=\-_`~()]+$/g, "");
     }
 
     var moveOn = function () {
