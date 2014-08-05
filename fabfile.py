@@ -155,7 +155,7 @@ def push_sources():
 
         assert run("hg id").split(" ")[0].strip().strip("+") == push_rev
 
-    local("hg tag -r %s deploy-%s-$(date --iso-8601=seconds | tr ':' '-' | cut -f 1 -d '+')" %
+    local("hg tag -f -r %s deploy-%s-$(date --iso-8601=seconds | tr ':' '-' | cut -f 1 -d '+')" %
           (push_rev, target.NAME.lower()))
     # Also need to sync files that are not in main sources VCS repo.
     push_secrets()
