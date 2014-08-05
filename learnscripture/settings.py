@@ -45,6 +45,15 @@ if LIVEBOX:
                 'HOST': 'localhost',
                 'PORT': secrets["PRODUCTION_DB_PORT"],
                 'ATOMIC_REQUESTS': True,
+                },
+            'wordsuggestions': {
+                'ENGINE': 'django.db.backends.postgresql_psycopg2',
+                'NAME': secrets["PRODUCTION_DB_NAME_WS"],
+                'USER': secrets["PRODUCTION_DB_USER"],
+                'PASSWORD': secrets["PRODUCTION_DB_PASSWORD"],
+                'HOST': 'localhost',
+                'PORT': secrets["PRODUCTION_DB_PORT"],
+                'ATOMIC_REQUESTS': False,
                 }
             }
         SECRET_KEY = secrets["PRODUCTION_SECRET_KEY"]
@@ -60,6 +69,15 @@ if LIVEBOX:
                 'HOST': 'localhost',
                 'PORT': secrets["STAGING_DB_PORT"],
                 'ATOMIC_REQUESTS': True,
+                },
+            'wordsuggestions': {
+                'ENGINE': 'django.db.backends.postgresql_psycopg2',
+                'NAME': secrets["STAGING_DB_NAME_WS"],
+                'USER': secrets["STAGING_DB_USER"],
+                'PASSWORD': secrets["STAGING_DB_PASSWORD"],
+                'HOST': 'localhost',
+                'PORT': secrets["STAGING_DB_PORT"],
+                'ATOMIC_REQUESTS': False,
                 }
             }
         SECRET_KEY = secrets["STAGING_SECRET_KEY"]
@@ -74,6 +92,15 @@ else:
             'HOST': 'localhost',
             'PORT': '5432',
             'ATOMIC_REQUESTS': True,
+        },
+        'wordsuggestions': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'learnscripture_wordsuggestions',
+            'USER': 'learnscripture',
+            'PASSWORD': 'foo',
+            'HOST': 'localhost',
+            'PORT': '5432',
+            'ATOMIC_REQUESTS': False,
         }
     }
 
@@ -91,6 +118,7 @@ else:
 
     PRODUCTION = STAGING = False
 
+DATABASE_ROUTERS = ['learnscripture.router.LearnScriptureRouter']
 
 AUTH_USER_MODEL = 'accounts.Account'
 
