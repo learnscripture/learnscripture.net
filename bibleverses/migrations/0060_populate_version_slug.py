@@ -7,12 +7,15 @@ from django.db import models
 class Migration(DataMigration):
 
     def forwards(self, orm):
+        db.execute("SET CONSTRAINTS ALL DEFERRED;")
         for v in orm['bibleverses.TextVersion'].objects.all():
             orm['bibleverses.WordSuggestionData'].objects.filter(version=v).update(version_slug=v.slug)
 
 
     def backwards(self, orm):
-        pass
+        db.execute("SET CONSTRAINTS ALL DEFERRED;")
+        for v in orm['bibleverses.TextVersion'].objects.all():
+            orm['bibleverses.WordSuggestionData'].objects.filter(version_slug=v.slug).update(version=v)
 
     models = {
         u'accounts.account': {

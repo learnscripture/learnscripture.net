@@ -9,6 +9,7 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         # Adding field 'WordSuggestionData.version_slug'
+        db.execute("SET statement_timeout=600000;")
         db.add_column(u'bibleverses_wordsuggestiondata', 'version_slug',
                       self.gf('django.db.models.fields.CharField')(default='', max_length=20),
                       keep_default=False)
@@ -16,8 +17,11 @@ class Migration(SchemaMigration):
 
     def backwards(self, orm):
         # Deleting field 'WordSuggestionData.version_slug'
+        db.execute("SET statement_timeout=600000;")
         db.delete_column(u'bibleverses_wordsuggestiondata', 'version_slug')
 
+        # Adding unique constraint on 'WordSuggestionData', fields ['version', 'reference']
+        db.create_unique(u'bibleverses_wordsuggestiondata', ['version_id', 'reference'])
 
     models = {
         u'accounts.account': {
