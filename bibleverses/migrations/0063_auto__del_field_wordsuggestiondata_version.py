@@ -9,13 +9,15 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         # Deleting field 'WordSuggestionData.version'
+        db.execute("SET statement_timeout=600000;")
         db.delete_column(u'bibleverses_wordsuggestiondata', 'version_id')
 
 
     def backwards(self, orm):
         # Adding field 'WordSuggestionData.version'
+        db.execute("SET statement_timeout=600000;")
         db.add_column(u'bibleverses_wordsuggestiondata', 'version',
-                      self.gf('django.db.models.fields.related.ForeignKey')(default=1, related_name='word_suggestion_data', to=orm['bibleverses.TextVersion']),
+                      self.gf('django.db.models.fields.related.ForeignKey')(default=2, related_name='word_suggestion_data', to=orm['bibleverses.TextVersion']),
                       keep_default=False)
 
 

@@ -13,9 +13,8 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
-        # Adding unique constraint on 'WordSuggestionData', fields ['version', 'reference']
-        db.create_unique(u'bibleverses_wordsuggestiondata', ['version_id', 'reference'])
-
+        # Do reverse in 0059 instead, after we fix up version_id in 0060
+        pass
 
     models = {
         u'accounts.account': {
