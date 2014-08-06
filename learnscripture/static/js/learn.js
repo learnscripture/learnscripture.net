@@ -101,7 +101,7 @@ var learnscripture = (function (learnscripture, $) {
 
     var testingMethodStrategy = null;
     var testingMistakes = null;
-    var hardMode = null;
+    var wordBoundariesHidden = null;
     var practiceMode = null;
 
     // Verse list
@@ -650,7 +650,7 @@ var learnscripture = (function (learnscripture, $) {
     // === Reading stage ===
 
     var readStageStart = function () {
-        setHardMode(false);
+        hideWordBoundaries(false);
         showWord($('.current-verse .word *'));
     };
 
@@ -707,7 +707,7 @@ var learnscripture = (function (learnscripture, $) {
         // Factory function that returns a stage starter
         // function for recall stages
         return function () {
-            setHardMode(false);
+            hideWordBoundaries(false);
             untestedWords = wordList.slice(0);
             testedWords = [];
             continueFunc();
@@ -771,13 +771,13 @@ var learnscripture = (function (learnscripture, $) {
         return currentVerseStatus.wordCount * POINTS_PER_WORD;
     };
 
-    var setHardMode = function (hard) {
-        hardMode = hard;
-        $('.current-verse').toggleClass('hard-mode', hard);
+    var hideWordBoundaries = function (hard) {
+        wordBoundariesHidden = hard;
+        $('.current-verse').toggleClass('hide-word-boundaries', hard);
     };
 
-    var isHardMode = function () {
-        return hardMode;
+    var areWordBoundariesHidden = function () {
+        return wordBoundariesHidden;
     };
 
     var setPracticeMode = function (practice) {
@@ -851,7 +851,7 @@ var learnscripture = (function (learnscripture, $) {
             Object.getPrototypeOf(KeyboardTestingStrategy).testSetUp.call(this);
             // After an certain point, we make things a bit harder by not
             // showing the widths of words.
-            setHardMode(currentVerseStatus.strength > HARD_MODE_THRESHOLD);
+            hideWordBoundaries(currentVerseStatus.strength > HARD_MODE_THRESHOLD);
             $('#id-keyboard-test-bar').show();
             this.wordTestSetUp();
             this.hintsShown = 0;
@@ -911,7 +911,7 @@ var learnscripture = (function (learnscripture, $) {
                 left: pos.left.toString() + "px",
                 top: pos.top.toString() + "px"
             });
-            if (isHardMode()) {
+            if (areWordBoundariesHidden()) {
                 width = "6em";
             } else {
                 width = (wordBox.outerWidth() - 4).toString() + "px";
@@ -1063,7 +1063,7 @@ var learnscripture = (function (learnscripture, $) {
 
         testSetUp: function () {
             Object.getPrototypeOf(OnScreenTestingStrategy).testSetUp.call(this);
-            setHardMode(true);
+            hideWordBoundaries(true);
             $('#id-onscreen-test-container').show();
             this.wordTestSetUp();
             this.ensureTestDivVisible();
