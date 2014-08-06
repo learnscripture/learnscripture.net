@@ -81,9 +81,24 @@
 
     <div class="container">
 
+      <div class="relative-container">
+        <div id="id-ajax-status" style="display: none;">
+          <span id="id-ajax-loading" style="display: none;">
+            <span id="squaresWaveG">
+              <span id="squaresWaveG_1" class="squaresWaveG">
+              </span>
+              <span id="squaresWaveG_2" class="squaresWaveG">
+              </span>
+              <span id="squaresWaveG_3" class="squaresWaveG">
+              </span>
+            </span>
+          </span>
+          <span id="id-ajax-errors"></span>
+        </div>
+      </div>
+
       <div class="maincontent">
         <div class="page-header">
-          <div id="id-ajax-errors"></div>
           <h1>{% block page_title %}{{ title }}{% endblock %}</h1>
         </div>
 
