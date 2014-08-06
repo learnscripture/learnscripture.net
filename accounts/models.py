@@ -733,14 +733,14 @@ class Identity(models.Model):
             text = texts.get((uvs.version_id, uvs.reference), None)
             if text is not None:
                 # Bible
-                uvs.scoring_text_words = split_into_words(text)
+                uvs.scoring_text = text
                 uvs.title_text = uvs.reference
 
             qapair = qapairs.get((uvs.version_id, uvs.reference), None)
             if qapair is not None:
                 # Catechism
                 question, answer = qapair.question, qapair.answer
-                uvs.scoring_text_words = split_into_words(answer)
+                uvs.scoring_text = answer
                 uvs.title_text = uvs.reference + ". " + question
             uvs.suggestion_pairs = suggestion_d.get((uvs.version_id, uvs.reference), [])
 
