@@ -53,7 +53,7 @@ def send_email_reminders():
              }
 
         EmailMessage(
-            subject='Revision reminder for LearnScripture.net',
+            subject='Review reminder for LearnScripture.net',
             body=loader.render_to_string("learnscripture/reminder_email.txt", c),
             from_email=settings.SERVER_EMAIL,
             to=[account.email],
