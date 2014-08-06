@@ -459,10 +459,11 @@ class IdentityTests(AccountTestMixin, TestCase):
             WordSuggestionData.objects.create(version_slug=uvs.version.slug,
                                               reference=uvs.reference,
                                               suggestions=[])
-        with self.assertNumQueries(3):
-            d = i.get_verse_statuses_bulk([uvs.id for uvs in uvss])
-            self.assertEqual(d[uvss[1].id].reference, uvss[1].reference)
-            [uvs.scoring_text_words for uvs in d.values()]
+        with self.assertNumQueries(2, using='default'):
+            with self.assertNumQueries(1, using='wordsuggestions'):
+                d = i.get_verse_statuses_bulk([uvs.id for uvs in uvss])
+                self.assertEqual(d[uvss[1].id].reference, uvss[1].reference)
+                [uvs.scoring_text_words for uvs in d.values()]
 
     def test_add_verse_choice_copies_strength(self):
         i = self.create_identity(version_slug='NET')
