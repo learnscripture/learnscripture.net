@@ -129,10 +129,14 @@ var learnscripture = (function (learnscripture, $) {
             + info.failures.toString() + " of "
             + (info.attempts - 1).toString() + // -1 because we are want to display '1 of 10' the first time we get an error.
             "...";
+        $('#id-ajax-status').show();
+        $('#id-ajax-loading').show();
         $('#id-ajax-errors').html('<span>' + text + '</span>');
     };
 
     var ajaxRetryFailed = function (jqXHR, textStatus, errorThrown) {
+        $('#id-ajax-status').show();
+        $('#id-ajax-loading').hide();
         $('#id-ajax-errors').html('<span>Data not saved. Please check internet connection</span>');
     };
 
@@ -172,5 +176,30 @@ $(document).ready(function () {
     } else {
         $('#id_touchscreen_testing_method').parent().parent().hide();
     }
+
+    // Scrolling of #id-ajax-status
+    var TOPBAR_HEIGHT = 40;
+    $(window).scroll(function (ev) {
+        // We want ajax div to stay underneath the topbar.
+        // topbar can be either fixed or absolute depending on screen size.
+        var $tb = $('.topbar');
+        var $aj = $('#id-ajax-status');
+        var height;
+        if ($tb.css('position') == 'fixed') {
+            height = TOPBAR_HEIGHT;
+        } else {
+            // static
+            height = Math.max(0, TOPBAR_HEIGHT - window.scrollY);
+        }
+        var heightString = height.toString() + "px";
+        if ($aj.css('top') != heightString) {
+            $aj.css('top', heightString);
+        }
+    });
+
+    $(document).ajaxStop(function () {
+        $('#id-ajax-status').hide();
+        $('#id-ajax-loading').hide();
+    });
 
 });

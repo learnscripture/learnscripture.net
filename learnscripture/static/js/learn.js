@@ -633,6 +633,10 @@ var learnscripture = (function (learnscripture, $) {
         };
 
         if ($.active) {
+            // Indicate that something is happening:
+            $('#id-ajax-loading').show();
+            $('#id-ajax-status').show();
+            // Do the action when we've finished sending data
             $('body').ajaxStop(go);
         } else {
             go();
