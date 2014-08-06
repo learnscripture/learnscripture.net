@@ -8,7 +8,7 @@
 
 // Topbar for Branding and Nav
 .topbar {
-  height: 40px;
+  height: @topbarHeight;
   position: fixed;
   top: 0;
   left: 0;
@@ -48,7 +48,7 @@
   // Plain text in topbar
   p {
     margin: 0;
-    line-height: 40px;
+    line-height: @topbarHeight;
     a:hover {
       background-color: transparent;
       color: @white;
@@ -197,7 +197,7 @@ a.menu:after,
   float: left;
   display: none; // None by default, but block on "open" of the menu
   position: absolute;
-  top: 40px;
+  top: @topbarHeight;
   z-index: 900;
   min-width: 160px;
   max-width: 220px;
