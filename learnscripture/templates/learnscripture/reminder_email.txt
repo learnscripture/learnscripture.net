@@ -1,10 +1,10 @@
 {% load url from future %}{% autoescape off %}Hi {{ account.email_name }},
 
-You've got some Bible verses due for revision on LearnScripture.net!
+You've got some Bible verses due for review on LearnScripture.net!
 
 At least one is overdue by {{ overdue_by }} day{{ overdue_by|pluralize }}.
 
-You can do the revision here:
+To go to your dashboard, click this link:
 
   http://{{ domain }}{% url 'dashboard' %}
 
