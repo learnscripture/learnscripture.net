@@ -53,6 +53,19 @@ class VersionTests(TestCase):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
 
+
+    def setUp(self):
+        super(VersionTests, self).setUp()
+        # WSD doesn't get torn down correctly, so do setup each time.
+        version = TextVersion.objects.get(slug='KJV')
+        version.word_suggestion_data.delete()
+        version.create_word_suggestion_data(reference='Genesis 1:1',
+                                            suggestions=self._gen_1_1_suggestions())
+        version.create_word_suggestion_data(reference='Genesis 1:2',
+                                            suggestions=self._gen_1_2_suggestions())
+        version.create_word_suggestion_data(reference='Genesis 1:3',
+                                            suggestions=self._gen_1_3_suggestions())
+
     def test_no_chapter(self):
         version = TextVersion.objects.get(slug='KJV')
         self.assertRaises(InvalidVerseReference, lambda: version.get_verse_list('Genesis'))
@@ -268,8 +281,6 @@ class VersionTests(TestCase):
 
     def test_suggestions(self):
         version = TextVersion.objects.get(slug='KJV')
-        version.create_word_suggestion_data(reference='Genesis 1:1',
-                                            suggestions=self._gen_1_1_suggestions())
         self.assertEqual(version.get_suggestion_pairs_by_reference('Genesis 1:1')[1],
                          [('his', 1.0),
                           ('all', 0.740),
@@ -278,10 +289,6 @@ class VersionTests(TestCase):
 
     def test_suggestions_combo(self):
         version = TextVersion.objects.get(slug='KJV')
-        version.create_word_suggestion_data(reference='Genesis 1:1',
-                                            suggestions=self._gen_1_1_suggestions())
-        version.create_word_suggestion_data(reference='Genesis 1:2',
-                                            suggestions=self._gen_1_2_suggestions())
         self.assertEqual(version.get_suggestion_pairs_by_reference('Genesis 1:1-2')[10],
                          [('and', 1.0),
                           ('but', 0.049),
@@ -289,31 +296,20 @@ class VersionTests(TestCase):
 
     def test_suggestions_bulk(self):
         version = TextVersion.objects.get(slug='KJV')
-        version.create_word_suggestion_data(reference='Genesis 1:1',
-                                            suggestions=self._gen_1_1_suggestions())
-        version.create_word_suggestion_data(reference='Genesis 1:2',
-                                            suggestions=self._gen_1_2_suggestions())
-        version.create_word_suggestion_data(reference='Genesis 1:3',
-                                            suggestions=self._gen_1_2_suggestions())
-        with self.assertNumQueries(4):
-            # 4 queries
-            # - 1 for WordSuggestionData for v1, v2, v3
-            # - 2 for parseref for v2-3,
-            # - 1 for WordSuggestionData for v2-3
-            d = version.get_suggestion_pairs_by_reference_bulk(['Genesis 1:1',
-                                                                'Genesis 1:2',
-                                                                'Genesis 1:3',
-                                                                'Genesis 1:2-3'])
-            self.assertEqual(len(d), 4)
+        with self.assertNumQueries(2, using='default'):
+            with self.assertNumQueries(2, using='wordsuggestions'):
+                # 4 queries
+                # - 1 for WordSuggestionData for v1, v2, v3
+                # - 2 for parseref for v2-3,
+                # - 1 for WordSuggestionData for v2-3
+                d = version.get_suggestion_pairs_by_reference_bulk(['Genesis 1:1',
+                                                                    'Genesis 1:2',
+                                                                    'Genesis 1:3',
+                                                                    'Genesis 1:2-3'])
+                self.assertEqual(len(d), 4)
 
     def test_suggestions_update(self):
         version = TextVersion.objects.get(slug='KJV')
-        version.create_word_suggestion_data(reference='Genesis 1:1',
-                                            suggestions=self._gen_1_1_suggestions())
-        version.create_word_suggestion_data(reference='Genesis 1:2',
-                                            suggestions=self._gen_1_2_suggestions())
-        version.create_word_suggestion_data(reference='Genesis 1:3',
-                                            suggestions=self._gen_1_3_suggestions())
         version.record_word_mistakes('Genesis 1:1', [[0, 'but'],
                                                      [1, 'his']])
         self.assertEqual(version.get_suggestion_pairs_by_reference('Genesis 1:1')[0],
