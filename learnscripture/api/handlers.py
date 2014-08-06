@@ -133,6 +133,7 @@ class ActionCompleteHandler(BaseHandler):
     def create(self, request):
         identity = request.identity
 
+        # Input here is a trimmed down version of what was sent by VersesToLearnHandler
         verse_status = get_verse_status(request.data)
 
         # If just practising, just remove the VS from the session.
@@ -152,8 +153,10 @@ class ActionCompleteHandler(BaseHandler):
         else:
             accuracy = None
 
-        # FIXME - this should probably be in the model layer somewhere
-        text = " ".join(verse_status['scoring_text_words'])
+        try:
+            version = TextVersion.objects.get(slug=version_slug)
+        except TextVersion.DoesNotExist:
+            return rc.BAD_REQUEST
 
         action_change = identity.record_verse_action(reference, version_slug,
                                                      stage, accuracy);
@@ -162,6 +165,7 @@ class ActionCompleteHandler(BaseHandler):
             # implies client error
             return rc.BAD_REQUEST
 
+        text = version.get_text_by_reference(reference)
         score_logs = identity.award_action_points(reference, text,
                                                   old_memory_stage,
                                                   action_change, stage, accuracy)
