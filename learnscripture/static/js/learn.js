@@ -175,9 +175,9 @@ var learnscripture = (function (learnscripture, $) {
 
     var enableBtn = function (btn, state) {
         if (state) {
-            btn.removeAttr('disabled');
+            btn.prop('disabled', false);
         } else {
-            btn.attr('disabled', 'disabled');
+            btn.prop('disabled', true);
         }
     };
 
@@ -824,6 +824,7 @@ var learnscripture = (function (learnscripture, $) {
     // Abstract base class
     var TestingStrategy = {
         testReference: true,
+        allowHint: function () { return false; },
         conditionalShowReference: function () {
             var referenceSelector = '.current-verse .reference, .current-verse .colon';
             if (this.testReference) {
@@ -950,13 +951,20 @@ var learnscripture = (function (learnscripture, $) {
             testingStatus.hide();
         },
 
+        allowHint: function () {
+            return this.hintsShown < this.getMaxHints();
+        },
+
+        getMaxHints: function () {
+            // For very short verses, allow fewer hints e.g.  2 or 3 word
+            // verses should get just 1 hint.
+            return Math.min(Math.floor(currentVerseStatus.wordCount / 2), this.maxHintsToShow);
+        },
+
         hintFinished: function () {
             inputBox.focus();
             this.hintsShown++;
-            // For very short verses, allow fewer hints e.g.  2 or 3 word
-            // verses should get just 1 hint.
-            var maxHints = Math.min(Math.floor(currentVerseStatus.wordCount / 2), this.maxHintsToShow);
-            if (this.hintsShown >= this.maxHintsToShow) {
+            if (this.hintsShown >= this.getMaxHints()) {
                 enableBtn($('#id-hint-btn'), false);
             }
         }
@@ -1965,7 +1973,11 @@ var learnscripture = (function (learnscripture, $) {
         fastEventBind($('#id-back-btn'), back).show();
         fastEventBind($('#id-hint-btn'), function (ev) {
             ev.preventDefault();
-            testingMethodStrategy.getHint();
+            // Just disabling the button doesn't seem to be enough to stop event
+            // handler firing on iOS
+            if (testingMethodStrategy.allowHint()) {
+                testingMethodStrategy.getHint();
+            }
         });
         fastEventBind($('#id-next-verse-btn'), nextVerse);
         fastEventBind($('#id-context-next-verse-btn'), markReadAndNextVerse);
