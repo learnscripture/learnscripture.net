@@ -96,9 +96,12 @@ var learnscripture = (function (learnscripture, $) {
     // into the div of the word.
     var wordList = null;
     var referenceList = null;
-    var untestedWords = null;
-    var testedWords = null;
 
+    // Globals for recall stages:
+    var uncheckedWords = null;
+    var checkedWords = null;
+
+    // Globals for testings stages:
     var testingMethodStrategy = null;
     var testingMistakes = null;
     var wordBoundariesHidden = null;
@@ -668,13 +671,13 @@ var learnscripture = (function (learnscripture, $) {
         // FullAndInitial stage continue function
 
         var recallContinue = function () {
-            if (untestedWords.length === 0) {
+            if (uncheckedWords.length === 0) {
                 return false;
             }
-            setProgress(currentStageIdx, testedWords.length / wordList.length);
-            var testWords = getTestWords(initialFraction);
+            setProgress(currentStageIdx, checkedWords.length / wordList.length);
+            var wordsToCheck = getWordsToCheck(initialFraction);
             showWord($('.current-verse .word *'));
-            hideWord(testWords.find('.wordend'));
+            hideWord(wordsToCheck.find('.wordend'));
             return true;
         };
 
@@ -689,14 +692,14 @@ var learnscripture = (function (learnscripture, $) {
         // InitialAndMissing stage continue function
 
         var recallContinue = function () {
-            if (untestedWords.length === 0) {
+            if (uncheckedWords.length === 0) {
                 return false;
             }
-            setProgress(currentStageIdx, testedWords.length / wordList.length);
-            var testWords = getTestWords(missingFraction);
+            setProgress(currentStageIdx, checkedWords.length / wordList.length);
+            var wordsToCheck = getWordsToCheck(missingFraction);
             hideWord($('.current-verse .wordend'));
             showWord($('.current-verse .wordstart'));
-            hideWord(testWords.find('.wordstart'));
+            hideWord(wordsToCheck.find('.wordstart'));
             return true;
         };
 
@@ -708,47 +711,47 @@ var learnscripture = (function (learnscripture, $) {
         // function for recall stages
         return function () {
             hideWordBoundaries(false);
-            untestedWords = wordList.slice(0);
-            testedWords = [];
+            uncheckedWords = wordList.slice(0);
+            checkedWords = [];
             continueFunc();
         };
 
     };
 
-    var getTestWords = function (testFraction) {
-        // Moves testFraction fraction of words from
-        // untestedWords for next test, for the next test
-        // and return a jQuery objects for the words
-        // that are to be tested.
-        // Pick some words to test from untestedWords
+    var getWordsToCheck = function (checkFraction) {
+        // Moves checkFraction fraction of words from uncheckedWords to
+        // checkedWords for the next test and return a jQuery objects for the
+        // words that are to be checked.
+
+        // Pick some words to test from uncheckedWords:
         var i;
-        var toTest = [];
-        var testCount = Math.ceil(wordList.length * testFraction);
-        // Try to test the ones in untestedWords first.
-        toTest = chooseN(untestedWords, testCount);
-        if (toTest.length < testCount) {
+        var toCheck = [];
+        var checkCount = Math.ceil(wordList.length * checkFraction);
+        // Try to test the ones in uncheckedWords first.
+        toCheck = chooseN(uncheckedWords, checkCount);
+        if (toCheck.length < checkCount) {
             // But if these are fewer than the fraction we are
             // supposed to be testing, use others that
             // have already been tested.
-            var reTest = chooseN(testedWords, testCount - toTest.length);
-            toTest = setUnion(reTest, toTest);
+            var reCheck = chooseN(checkedWords, checkCount - toCheck.length);
+            toCheck = setUnion(reCheck, toCheck);
         }
-        untestedWords = setRemove(untestedWords, toTest);
-        // NB this must come after the chooseN(testedWords) above.
-        testedWords = setUnion(testedWords, toTest);
-        var selector = $.map(toTest, function (elem, idx) {
+        uncheckedWords = setRemove(uncheckedWords, toCheck);
+        // NB this must come after the chooseN(checkedWords) above.
+        checkedWords = setUnion(checkedWords, toCheck);
+        var selector = $.map(toCheck, function (elem, idx) {
             return '.current-verse .word:eq(' + elem.toString() + ')';
         }).join(', ');
         return $(selector);
     };
 
     var markRevealed = function (wordNumber) {
-        var p = testedWords.indexOf(wordNumber);
+        var p = checkedWords.indexOf(wordNumber);
         if (p !== -1) {
-            testedWords.splice(p, 1);
+            checkedWords.splice(p, 1);
         }
-        if (untestedWords.indexOf(wordNumber) === -1) {
-            untestedWords.push(wordNumber);
+        if (uncheckedWords.indexOf(wordNumber) === -1) {
+            uncheckedWords.push(wordNumber);
         }
     };
 
