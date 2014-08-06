@@ -20,7 +20,7 @@ from piston.utils import rc
 
 from accounts.forms import PreferencesForm
 from accounts.models import Account
-from bibleverses.models import StageType, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, MAX_VERSE_QUERY_SIZE, TextVersion, quick_find, VerseSetType
+from bibleverses.models import StageType, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, MAX_VERSE_QUERY_SIZE, TextVersion, quick_find, VerseSetType, UserVerseStatus
 from comments.models import Comment
 from events.models import Event
 from groups.models import Group
@@ -135,16 +135,23 @@ class ActionCompleteHandler(BaseHandler):
 
         # Input here is a trimmed down version of what was sent by VersesToLearnHandler
         verse_status = get_verse_status(request.data)
+        if verse_status is None:
+            return rc.BAD_REQUEST
+
+        # Get everything we need, also applying security:
+        try:
+            uvs_id = verse_status['id']
+            uvs = request.identity.verse_statuses.get(id=uvs_id)
+        except (KeyError, UserVerseStatus.DoesNotExist):
+            return rc.BAD_REQUEST
 
         # If just practising, just remove the VS from the session.
         practice = request.POST.get('practice', 'false') == 'true'
         if practice:
-            session.verse_status_finished(request, verse_status['id'], [])
+            session.verse_status_finished(request, uvs_id, [])
             return {}
 
-        reference = verse_status['reference']
-        version_slug = verse_status['version']['slug']
-        old_memory_stage = verse_status['memory_stage']
+        old_memory_stage = uvs.memory_stage
 
         # TODO: store StageComplete
         stage = StageType.get_value_for_name(request.data['stage'])
@@ -153,20 +160,14 @@ class ActionCompleteHandler(BaseHandler):
         else:
             accuracy = None
 
-        try:
-            version = TextVersion.objects.get(slug=version_slug)
-        except TextVersion.DoesNotExist:
-            return rc.BAD_REQUEST
-
-        action_change = identity.record_verse_action(reference, version_slug,
+        action_change = identity.record_verse_action(uvs.reference, uvs.version.slug,
                                                      stage, accuracy);
 
         if action_change is None:
             # implies client error
             return rc.BAD_REQUEST
 
-        text = version.get_text_by_reference(reference)
-        score_logs = identity.award_action_points(reference, text,
+        score_logs = identity.award_action_points(uvs.reference, uvs.scoring_text,
                                                   old_memory_stage,
                                                   action_change, stage, accuracy)
 

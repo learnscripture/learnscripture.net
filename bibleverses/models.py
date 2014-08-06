@@ -688,9 +688,22 @@ class UserVerseStatus(models.Model):
         return self.version.get_qapair_by_reference(self.reference).question
 
     @cached_property
+    def answer(self):
+        return self.version.get_qapair_by_reference(self.reference).answer
+
+    @cached_property
     def title(self):
         return self.reference + \
             ('' if self.version.is_bible else '. ' + self.question)
+
+    # This will be overwritten by get_verse_statuses_bulk
+    @cached_property
+    def scoring_text(self):
+        return self.text if self.version.is_bible else self.answer
+
+    @property
+    def scoring_text_words(self):
+        return split_into_words(self.scoring_text)
 
     @cached_property
     def short_title(self):
