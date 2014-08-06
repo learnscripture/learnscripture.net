@@ -12,218 +12,218 @@
 .dotheme(@topColor1, @topColor2, @topLinkColour, @btnColor1, @btnColor2, @bgColor1,
          @linkColor, @footerColor, @themeFont) {
 
-  @linkColorHover: darken(@linkColor, 15);
-  @bgBorderColor: darken(@bgColor1, 10%);
+    @linkColorHover: darken(@linkColor, 15);
+    @bgBorderColor: darken(@bgColor1, 10%);
 
-  a {
-    color: @linkColor;
-    &:hover {
-      color: @linkColorHover;
-    }
-  }
-
-  footer, .footer {
-    color: @footerColor;
     a {
-      text-decoration: underline;
-      color: @footerColor;
-      &:hover {
-        color: @footerColor;
-      }
-    }
-  }
-
-  .topbar div > ul,
-  .nav {
-    // Dropdowns within the .nav
-    // a.menu:hover and li.open .menu for backwards compatibility
-    a.menu:hover,
-    li.open .menu,
-    .dropdown-toggle:hover,
-    .dropdown.open .dropdown-toggle {
-      background: @topColor1;
-      background: rgba(255,255,255,.05);
-    }
-
-    // .menu-dropdown for backwards compatibility
-    .menu-dropdown,
-    .dropdown-menu {
-      background-color: @topColor2;
-      // a.menu for backwards compatibility
-      a.menu,
-      .dropdown-toggle {
-        color: @white;
-        &.open {
-          background: @topColor1;
-          background: rgba(255,255,255,.05);
-        }
-      }
-      li a {
-        color: @topLinkColour;
+        color: @linkColor;
         &:hover {
-          #gradient > .vertical(@topColor1, @topColor2);
-          color: @white;
+            color: @linkColorHover;
         }
-      }
-      .active a {
+    }
+
+    footer, .footer {
+        color: @footerColor;
+        a {
+            text-decoration: underline;
+            color: @footerColor;
+            &:hover {
+                color: @footerColor;
+            }
+        }
+    }
+
+    .topbar div > ul,
+    .nav {
+        // Dropdowns within the .nav
+        // a.menu:hover and li.open .menu for backwards compatibility
+        a.menu:hover,
+        li.open .menu,
+        .dropdown-toggle:hover,
+        .dropdown.open .dropdown-toggle {
+            background: @topColor1;
+            background: rgba(255,255,255,.05);
+        }
+
+        // .menu-dropdown for backwards compatibility
+        .menu-dropdown,
+        .dropdown-menu {
+            background-color: @topColor2;
+            // a.menu for backwards compatibility
+            a.menu,
+            .dropdown-toggle {
+                color: @white;
+                &.open {
+                    background: @topColor1;
+                    background: rgba(255,255,255,.05);
+                }
+            }
+            li a {
+                color: @topLinkColour;
+                &:hover {
+                    #gradient > .vertical(@topColor1, @topColor2);
+                    color: @white;
+                }
+            }
+            .active a {
+                color: @white;
+            }
+            .divider {
+                background-color: #222;
+                border-color: #444;
+            }
+        }
+
+        .active > a {
+            background-color: @topColor2;
+            background: rgba(0,0,0,.2);
+        }
+    }
+
+    .topbar {
+        // Links get text shadow
+        a {
+            color: @topLinkColour;
+            text-shadow: 0 -1px 0 rgba(0,0,0,.25);
+        }
+    }
+
+
+    .topbar .fill {
+        background-color: @topColor2;
+        #gradient > .vertical(@topColor1, @topColor2);
+    }
+
+    .btn {
+        // Primary Button Type
+        color: #333;
+        &:hover {
+            color: #333;
+        }
+        &.primary {
+            color: @white;
+            .gradientBar(@btnColor1, @btnColor2)
+        }
+
+        // These have been pulled out of patterns.less because some of
+        // them need to appear after the .btn colour definitions above.
+        // because they have equal specificity
+
+        // Active and Disabled states
+        &.active,
+        &:active {
+            @shadow: inset 0 2px 4px rgba(0,0,0,.25), 0 1px 2px rgba(0,0,0,.05);
+            .box-shadow(@shadow);
+        }
+        &.disabled {
+            cursor: default;
+            background-image: none;
+            .reset-filter();
+            .opacity(65);
+            .box-shadow(none);
+        }
+        &[disabled] {
+            // disabled pseudo can't be included with .disabled
+            // def because IE8 and below will drop it ;_;
+            cursor: default;
+            background-image: none;
+            .reset-filter();
+            .opacity(65);
+            .box-shadow(none);
+        }
+
+
+    }
+
+    @tabborder: darken(@bgColor1, 20%);
+    @tabhighlight: @bgColor1;
+
+    .tabs {
+        border-color: @tabborder;
+        > li {
+            > a {
+                &:hover {
+                    background-color: @tabhighlight;
+                    border-color: @tabhighlight @tabhighlight @tabborder;
+                }
+            }
+        }
+        // Active state, and it's :hover to override normal :hover
+        .active > a,
+        .active > a:hover {
+            color: @gray;
+            background-color: @white;
+            border: 1px solid @tabborder;
+            border-bottom-color: transparent;
+            cursor: default;
+        }
+    }
+
+
+    .pills {
+
+        a:hover {
+            color: @white;
+            background-color: @linkColorHover;
+        }
+        .active a {
+            color: @white;
+            background-color: @linkColor;
+        }
+    }
+
+    .media-grid {
+        a {
+            border-color: @tabborder;
+            &:hover {
+                border-color: @linkColor;
+            }
+        }
+    }
+
+    .verseset, .actionset, .activityitem, .groupcomments, .is-following {
+        background-color: @bgColor1;
+        border-color: @bgBorderColor;
+        hr {
+            border-bottom-color: @bgBorderColor;
+        }
+    }
+
+    .activitystream .activityitem.following {
+        border-top-color: @linkColor;
+        border-bottom-color: @linkColor;
+    }
+
+
+
+    .activityitem .commentindicator,
+    .commentblock,
+    .relatedaddcomment,
+    .is-not-following {
+        border-color: @bgBorderColor;
+    }
+
+    .page-header {
+        background-color: @bgColor1;
+        border-color: @bgBorderColor;
+    }
+
+    .score-log {
+        background-color: @btnColor2;
+        .gradientBar(@btnColor2, @btnColor1);
+        border: 2px solid #888;
         color: @white;
-      }
-      .divider {
-        background-color: #222;
-        border-color: #444;
-      }
-    }
-
-    .active > a {
-      background-color: @topColor2;
-      background: rgba(0,0,0,.2);
-    }
-  }
-
-  .topbar {
-    // Links get text shadow
-    a {
-      color: @topLinkColour;
-      text-shadow: 0 -1px 0 rgba(0,0,0,.25);
-      }
     }
 
 
-  .topbar .fill {
-    background-color: @topColor2;
-    #gradient > .vertical(@topColor1, @topColor2);
-  }
-
-  .btn {
-    // Primary Button Type
-    color: #333;
-    &:hover {
-       color: #333;
-    }
-    &.primary {
-      color: @white;
-      .gradientBar(@btnColor1, @btnColor2)
+    h1, h2, h3, h4, h5, .word, .testedword, #id-typing {
+        font-family: ~"@{themeFont}";
     }
 
-    // These have been pulled out of patterns.less because some of
-    // them need to appear after the .btn colour definitions above.
-    // because they have equal specificity
-
-    // Active and Disabled states
-    &.active,
-    &:active {
-      @shadow: inset 0 2px 4px rgba(0,0,0,.25), 0 1px 2px rgba(0,0,0,.05);
-      .box-shadow(@shadow);
+    #id-onscreen-test-container {
+        background-color: @bgColor1;
+        border-color: darken(@bgColor1, 20%);
     }
-    &.disabled {
-      cursor: default;
-      background-image: none;
-      .reset-filter();
-      .opacity(65);
-      .box-shadow(none);
-    }
-    &[disabled] {
-      // disabled pseudo can't be included with .disabled
-      // def because IE8 and below will drop it ;_;
-      cursor: default;
-      background-image: none;
-      .reset-filter();
-      .opacity(65);
-      .box-shadow(none);
-    }
-
-
-  }
-
-  @tabborder: darken(@bgColor1, 20%);
-  @tabhighlight: @bgColor1;
-
-  .tabs {
-    border-color: @tabborder;
-    > li {
-      > a {
-         &:hover {
-          background-color: @tabhighlight;
-          border-color: @tabhighlight @tabhighlight @tabborder;
-         }
-      }
-    }
-    // Active state, and it's :hover to override normal :hover
-    .active > a,
-    .active > a:hover {
-      color: @gray;
-      background-color: @white;
-      border: 1px solid @tabborder;
-      border-bottom-color: transparent;
-      cursor: default;
-    }
-  }
-
- 
-  .pills {
-
-    a:hover {
-      color: @white;
-      background-color: @linkColorHover;
-    }
-    .active a {
-      color: @white;
-      background-color: @linkColor;
-    }
-  }
-
-  .media-grid {
-    a {
-      border-color: @tabborder;
-      &:hover {
-        border-color: @linkColor;
-      }
-    }
-  }
-
-  .verseset, .actionset, .activityitem, .groupcomments, .is-following {
-    background-color: @bgColor1;
-    border-color: @bgBorderColor;
-    hr {
-      border-bottom-color: @bgBorderColor;
-      }
-  }
-
-  .activitystream .activityitem.following {
-    border-top-color: @linkColor;
-    border-bottom-color: @linkColor;
-  }
-
-
-
-  .activityitem .commentindicator,
-  .commentblock,
-  .relatedaddcomment,
-  .is-not-following {
-    border-color: @bgBorderColor;
-  }
-
-  .page-header {
-    background-color: @bgColor1;
-    border-color: @bgBorderColor;
-  }
-
-  .score-log {
-    background-color: @btnColor2;
-    .gradientBar(@btnColor2, @btnColor1);
-    border: 2px solid #888;
-    color: @white;
-  }
-
-
-  h1, h2, h3, h4, h5, .word, .testedword, #id-typing {
-    font-family: ~"@{themeFont}";
-  }
-
-  #id-onscreen-test-container {
-      background-color: @bgColor1;
-      border-color: darken(@bgColor1, 20%);
-  }
 
 }
 
@@ -231,62 +231,62 @@
 // CALM
 
 body.calm {
-  background-color: #1A1A1A;
-  background-image: url(/static/img/bg.jpg);
-  .dotheme(@blue, @blueDark, @grayLight, @blue, @blueDark, #f5f5f5, #0069d6, white,
-  '"Belleza", "Trebuchet MS", "Helvetica Neue", Helvetica, Arial, sans-serif');
+    background-color: #1A1A1A;
+    background-image: url(/static/img/bg.jpg);
+    .dotheme(@blue, @blueDark, @grayLight, @blue, @blueDark, #f5f5f5, #0069d6, white,
+             '"Belleza", "Trebuchet MS", "Helvetica Neue", Helvetica, Arial, sans-serif');
 }
 
 body.bubblegum {
-  @bgcolor: #e0cfb1;
-  background-color: @bgcolor;
-  footer, .footer {
+    @bgcolor: #e0cfb1;
     background-color: @bgcolor;
-    border: 1px solid darken(@bgcolor, 10%);
-  }
-  background-image: url(/static/img/bubblegum_background.jpg);
-  .dotheme(#f56c26, #f00901, black, #cc3a92,  #a12667, #ffe0f1, #f00901, black,
-           '"Short Stack", "Helvetica Neue", Helvetica, Arial, sans-serif');
+    footer, .footer {
+        background-color: @bgcolor;
+        border: 1px solid darken(@bgcolor, 10%);
+    }
+    background-image: url(/static/img/bubblegum_background.jpg);
+    .dotheme(#f56c26, #f00901, black, #cc3a92,  #a12667, #ffe0f1, #f00901, black,
+             '"Short Stack", "Helvetica Neue", Helvetica, Arial, sans-serif');
 
 }
 
 
 body.bubblegum2 {
-  @bgcolor:  #a294a5;
-  background-color: @bgcolor;
-  footer, .footer {
+    @bgcolor:  #a294a5;
     background-color: @bgcolor;
-    border: 1px solid darken(@bgcolor, 10%);
-  }
-  background-image: url(/static/img/bubblegum2_background.jpg);
-  .dotheme(lighten(#CD0074, 5%), lighten(#85004B, 5%), #e0e0e0, #679B00, darken(#679B00, 20%), #C9F76F, #CD0074, black,
-  '"Short Stack", "Helvetica Neue", Helvetica, Arial, sans-serif');
+    footer, .footer {
+        background-color: @bgcolor;
+        border: 1px solid darken(@bgcolor, 10%);
+    }
+    background-image: url(/static/img/bubblegum2_background.jpg);
+    .dotheme(lighten(#CD0074, 5%), lighten(#85004B, 5%), #e0e0e0, #679B00, darken(#679B00, 20%), #C9F76F, #CD0074, black,
+             '"Short Stack", "Helvetica Neue", Helvetica, Arial, sans-serif');
 }
 
 body.space {
-  background-color: black;
-  background-image: url(/static/img/space_bg.jpg);
-  .dotheme(lighten(#0a0b35, 5%), black, @grayLight, lighten(#090a31, 10%), #090a31, lighten(#0069d6, 35%), darken(#0069d6, 5%), white,
-  '"Prosto One", "Helvetica Neue", Helvetica, Arial, sans-serif');
-  .verseset, .actionset {
     background-color: black;
-    background-image: url(/static/img/space_bg_2.jpg);
-    background-attachment: fixed;
-    color: #dbebec;
-    border-color: darken(#bebfdc, 10%);
-    hr {
-      border-bottom-color: darken(#bebfdc, 10%);
-      }
-    h2, h3, h4 {
-      color: #f0f0f0;
+    background-image: url(/static/img/space_bg.jpg);
+    .dotheme(lighten(#0a0b35, 5%), black, @grayLight, lighten(#090a31, 10%), #090a31, lighten(#0069d6, 35%), darken(#0069d6, 5%), white,
+             '"Prosto One", "Helvetica Neue", Helvetica, Arial, sans-serif');
+    .verseset, .actionset {
+        background-color: black;
+        background-image: url(/static/img/space_bg_2.jpg);
+        background-attachment: fixed;
+        color: #dbebec;
+        border-color: darken(#bebfdc, 10%);
+        hr {
+            border-bottom-color: darken(#bebfdc, 10%);
+        }
+        h2, h3, h4 {
+            color: #f0f0f0;
+        }
+        a:link, a:visited {
+            color:  lighten(#0069b6, 15);
+            &:hover {
+                color: lighten(#0069b6, 5);
+            }
+        }
     }
-    a:link, a:visited {
-      color:  lighten(#0069b6, 15);
-      &:hover {
-        color: lighten(#0069b6, 5);
-      }
-    }
-  }
 }
 
 // Theme specific content
@@ -296,154 +296,154 @@ body.space {
 .theme-bubblegum2-only,
 .theme-space-only
 {
-  display:none;
+    display:none;
 }
 
 body.calm span.theme-calm-only {
-  display:inline;
+    display:inline;
 }
 
 body.bubblegum span.theme-bubblegum-only {
-  display:inline;
+    display:inline;
 }
 
 body.bubblegum2 span.theme-bubblegum2-only {
-  display:inline;
+    display:inline;
 }
 
 body.space span.theme-space-only {
-  display:inline;
+    display:inline;
 }
 
 
 /* Override some defaults */
 
 body {
-  padding-top: @topbarHeight; /* make the container go all the way to the bottom of the topbar */
-  background-attachment:fixed;
-  }
+    padding-top: @topbarHeight; /* make the container go all the way to the bottom of the topbar */
+    background-attachment:fixed;
+}
 .container > footer p {
-  text-align: center; /* center align it with the container */
-  }
+    text-align: center; /* center align it with the container */
+}
 
 
 li {
-  color: inherit;
-  }
+    color: inherit;
+}
 
 hr + h3 {
-  margin-top: -15px;
+    margin-top: -15px;
 }
 
 // General pages
 
 footer {
-  border: none;
-  border-radius: 6px;
-  padding-bottom: 5px;
+    border: none;
+    border-radius: 6px;
+    padding-bottom: 5px;
 }
 
 .topbar .fill {
-  @shadow: 0 1px 3px rgba(0, 0, 0, 0.25), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
-  .box-shadow(@shadow);
-  }
+    @shadow: 0 1px 3px rgba(0, 0, 0, 0.25), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    .box-shadow(@shadow);
+}
 
 .container {
-  width: 860px; /* downsize our container to make the content feel a bit tighter and more cohesive. NOTE: this removes two full columns from the grid, meaning you only go to 14 columns and not 16. */
-  }
+    width: 860px; /* downsize our container to make the content feel a bit tighter and more cohesive. NOTE: this removes two full columns from the grid, meaning you only go to 14 columns and not 16. */
+}
 
 .footer {
-  margin: 5px 0px;
-  padding: 5px;
-  border-radius: 6px;
+    margin: 5px 0px;
+    padding: 5px;
+    border-radius: 6px;
 }
 
 .footer div {
-  float: right;
+    float: right;
 }
 
 @mainSidePadding:      20px;
 @mainTopPadding:       20px;
 
 .maincontent {
-  padding-top: @mainTopPadding;
-  padding-bottom: @mainTopPadding;
-  }
+    padding-top: @mainTopPadding;
+    padding-bottom: @mainTopPadding;
+}
 
 .topbarinner, .maincontent {
-  padding-left: @mainSidePadding;
+    padding-left: @mainSidePadding;
 }
 
 .maincontent {
-  padding-right: @mainSidePadding;
+    padding-right: @mainSidePadding;
 }
 
 #id-ajax-errors {
-  position: fixed;
-  width: 100%;
-  top: 44px;
-  left: 0;
-  text-align: center;
-  span {
-    display: inline-block;
-    border: 1px solid yellow;
-    background-color: #ffffd0;
-    border-radius: 5px;
-    padding: 3px 8px;
-    color: black;
-    box-shadow: 0px 0px 3px 3px #884;
-  }
+    position: fixed;
+    width: 100%;
+    top: 44px;
+    left: 0;
+    text-align: center;
+    span {
+        display: inline-block;
+        border: 1px solid yellow;
+        background-color: #ffffd0;
+        border-radius: 5px;
+        padding: 3px 8px;
+        color: black;
+        box-shadow: 0px 0px 3px 3px #884;
+    }
 }
 
 q {
-  font-style: italic;
-  font-family: serif;
+    font-style: italic;
+    font-family: serif;
 }
 
 /* The white background content wrapper */
 .maincontent {
-  background-color: #fff;
-  .border-radius(0 0 6px 6px);
-  }
+    background-color: #fff;
+    .border-radius(0 0 6px 6px);
+}
 
 /* Page header tweaks */
 .page-header {
-  padding: 20px @mainSidePadding 10px;
-  }
+    padding: 20px @mainSidePadding 10px;
+}
 
 .page-header, .message-container {
-  margin-left: -@mainSidePadding;
-  margin-right: -@mainSidePadding;
-  margin-bottom: @mainTopPadding;
-  margin-top: -@mainTopPadding;
-  }
+    margin-left: -@mainSidePadding;
+    margin-right: -@mainSidePadding;
+    margin-bottom: @mainTopPadding;
+    margin-top: -@mainTopPadding;
+}
 
 
 input[type=image] {
-  width: auto;
-  height: auto;
-  border: 0px solid white;
-  color: white;
-  padding: 0px;
-  border-radius: 0px;
-  -webkit-box-shadow: none;
-  -moz-box-shadow: none;
-  box-shadow: none;
+    width: auto;
+    height: auto;
+    border: 0px solid white;
+    color: white;
+    padding: 0px;
+    border-radius: 0px;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
 }
 
 // Right column tweaks
 
 #id-rightcolumn {
-  h3 {
-    margin-top: 18px;
-    line-height: 20px;
-    border-bottom: 1px solid #ddd;
-    margin-bottom: 6px;
+    h3 {
+        margin-top: 18px;
+        line-height: 20px;
+        border-bottom: 1px solid #ddd;
+        margin-bottom: 6px;
 
-    &:first-child {
-      margin-top: 9px;
+        &:first-child {
+            margin-top: 9px;
+        }
     }
-  }
 }
 
 /* Messages and notices */
@@ -453,137 +453,137 @@ input[type=image] {
 // notices are custom, and permament until dismissed
 
 .notice, .clearnotices {
-  color: #666;
-  background: #ffc;
-  border-bottom: 1px solid #ddd;
-  padding: 4px 10px;
-  .close {
-    font-size: 24px;
-    line-height: 24px;
-  }
+    color: #666;
+    background: #ffc;
+    border-bottom: 1px solid #ddd;
+    padding: 4px 10px;
+    .close {
+        font-size: 24px;
+        line-height: 24px;
+    }
 
-  img {
-    vertical-align: middle;
-  }
+    img {
+        vertical-align: middle;
+    }
 }
 
 .donation-drive.notice {
-  text-align: center;
-  background: #FF8B00;
-  color: #000000;
+    text-align: center;
+    background: #FF8B00;
+    color: #000000;
 
-  a:link, a:visited {
-    color: white;
-    font-weight: bold;
+    a:link, a:visited {
+        color: white;
+        font-weight: bold;
     }
 
 }
 
 .clearnotices {
-  text-align: right;
+    text-align: right;
 }
 
 ul.messagelist {
-  padding: 0;
-  margin: 0;
-  }
+    padding: 0;
+    margin: 0;
+}
 
 ul.messagelist li {
-  font-size: 12px;
-  display: block;
-  padding: 4px 5px 4px 25px;
-  margin: 0 0 3px 0;
-  border-bottom: 1px solid #ddd;
-  color: #666;
-  background: #ffc url(/static/admin/img/icon_success.gif) 5px .3em no-repeat;
-  }
+    font-size: 12px;
+    display: block;
+    padding: 4px 5px 4px 25px;
+    margin: 0 0 3px 0;
+    border-bottom: 1px solid #ddd;
+    color: #666;
+    background: #ffc url(/static/admin/img/icon_success.gif) 5px .3em no-repeat;
+}
 
 ul.messagelist li.warning {
-  background-image: url(/static/admin/img/icon_alert.gif);
-  }
+    background-image: url(/static/admin/img/icon_alert.gif);
+}
 
 ul.messagelist li.error {
-  background-image: url(/static/admin/img/icon_error.gif);
-  }
+    background-image: url(/static/admin/img/icon_error.gif);
+}
 
 /* Various pages */
 
 p.verselist {
-  margin-left: 2em;
-  }
+    margin-left: 2em;
+}
 
 .addclearfix {
-  .clearfix();
+    .clearfix();
 }
 
 .verseset,
 .actionset {
-  padding: 15px;
-  border-radius: 7px;
-  border: 1px solid;
-  margin-bottom: 15px;
+    padding: 15px;
+    border-radius: 7px;
+    border: 1px solid;
+    margin-bottom: 15px;
 
-  h3 {
-    margin-top: 0px;
-    padding-top: 0px;
-    line-height: 20px;
-  }
-
-  form {
-    float: right;
-    text-align: right;
-    margin: 0;
-    padding: 0;
-
-    input + br + input {
-      margin-top: 5px;
+    h3 {
+        margin-top: 0px;
+        padding-top: 0px;
+        line-height: 20px;
     }
-  }
-  p:last-child {
-    margin-bottom: 0;
-  }
+
+    form {
+        float: right;
+        text-align: right;
+        margin: 0;
+        padding: 0;
+
+        input + br + input {
+            margin-top: 5px;
+        }
+    }
+    p:last-child {
+        margin-bottom: 0;
+    }
 }
 
 .form-all-errors {
-  margin-top: 1em;
+    margin-top: 1em;
 }
 
 form textarea {
-  width: 95%;
+    width: 95%;
 }
 
 td form {
-  margin: 0px;
+    margin: 0px;
 }
 
 span.chapternumber {
-  font-size: 200%;
+    font-size: 200%;
 }
 span.versenumber {
-  vertical-align: super;
-  font-size: 75%;
+    vertical-align: super;
+    font-size: 75%;
 }
 
 .modal form {
-  margin-bottom: 0px;
+    margin-bottom: 0px;
 }
 
 .filters {
-  label {
-    font-weight: bold;
-  }
-  ul.pills {
-    margin-bottom: 0px;
-  }
+    label {
+        font-weight: bold;
+    }
+    ul.pills {
+        margin-bottom: 0px;
+    }
 }
 
 .errorlist li {
-  color: @errorColor;
+    color: @errorColor;
 }
 
 .warning-note {
-  font-style: italic;
-  font-size: 90%;
+    font-style: italic;
+    font-size: 90%;
 }
 
 //// SPECIFIC PAGES ////
@@ -591,147 +591,147 @@ span.versenumber {
 /* Home page */
 
 .homepagetitle {
-  text-align: center;
-  img {
-    max-width:100%;
+    text-align: center;
+    img {
+        max-width:100%;
     }
-  }
+}
 
 .large {
-  font-size: 20px;
-  line-height: 30px;
+    font-size: 20px;
+    line-height: 30px;
 }
 
 /* Learning page */
 
 .blurry {
-   color: transparent;
-   text-shadow: 0 0 15px rgba(0,0,0,0.6);
+    color: transparent;
+    text-shadow: 0 0 15px rgba(0,0,0,0.6);
 }
 
 #id-instructions, #id-bottom-controls {
-  font-size: 15px;
-  line-height: 20px;
-  padding: 8px;
-  border-radius: 5px;
-  border: 1px solid #66a;
-  }
+    font-size: 15px;
+    line-height: 20px;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #66a;
+}
 
 #id-instructions {
-  min-height: 40px;
+    min-height: 40px;
 }
 
 #id-verse-wrapper {
-  border-radius: 5px;
-  padding: 10px;
-  background-color: #f0f0f0;
-  }
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #f0f0f0;
+}
 
 .current-verse, .previous-verse, #id-typing, #id-onscreen-test-container {
-  font-size: 20px;
+    font-size: 20px;
 }
 
 .previous-verse {
-  display: table-cell;
-  vertical-align: bottom;
-  color: #909090;
+    display: table-cell;
+    vertical-align: bottom;
+    color: #909090;
 }
 
 .previous-verse-wrapper {
-  border-bottom: 1px solid #c0c0c0;
-  margin-bottom: 0.5em;
+    border-bottom: 1px solid #c0c0c0;
+    margin-bottom: 0.5em;
 }
 
 #id-verse-options {
-  border-top: 1px solid #ccc;
-  #id-version-select {
-    float: right;
-  }
+    border-top: 1px solid #ccc;
+    #id-version-select {
+        float: right;
+    }
 }
 
 #id-version {
-  border-top: 1px solid #ccc;
-  text-align: right;
-  }
+    border-top: 1px solid #ccc;
+    text-align: right;
+}
 
 #id-instructions,
 #id-verse-wrapper,
 #id-keyboard-test-bar {
-  margin-bottom: 10px;
-  }
+    margin-bottom: 10px;
+}
 
 #id-version-select,
 #id_default_bible_version
- {
-  width: auto;
-  }
+{
+    width: auto;
+}
 
 .normalWordBorder() {
-  border-color: #C0C0C0;
-  border-top-color: #D8D8D8;
-  border-bottom-color: #9A9A9A;
+    border-color: #C0C0C0;
+    border-top-color: #D8D8D8;
+    border-bottom-color: #9A9A9A;
 }
 
 @word-margin-top: 3px;
 @word-margin-left: 1px;
 
 #id-keyboard-test-bar {
-  display: none;
-  position: absolute;
-  z-index: 10;
-  padding: @word-margin-top @word-margin-left;
+    display: none;
+    position: absolute;
+    z-index: 10;
+    padding: @word-margin-top @word-margin-left;
 }
 
 #id-typing {
-  color: black;
-  // These values are important for matching size of .word
-  padding: 0 1px;
-  margin: 0;
-  border: 2px solid; // same as .word. See also adjustTypingBox() in learn.js
+    color: black;
+    // These values are important for matching size of .word
+    padding: 0 1px;
+    margin: 0;
+    border: 2px solid; // same as .word. See also adjustTypingBox() in learn.js
 }
 
 .word {
-  border: 2px solid;
-  border-radius: 3px;
-  padding: 4px 4px;
-  margin: @word-margin-top @word-margin-left;
-  .gradientBar(#e8e8e8, #C0C0C0);
-  .normalWordBorder();
-  cursor: pointer;
+    border: 2px solid;
+    border-radius: 3px;
+    padding: 4px 4px;
+    margin: @word-margin-top @word-margin-left;
+    .gradientBar(#e8e8e8, #C0C0C0);
+    .normalWordBorder();
+    cursor: pointer;
 
-  &.correct {
-    border-color: #00D000;
-  }
+    &.correct {
+        border-color: #00D000;
+    }
 
-  &.incorrect {
-    border-color: red;
-  }
+    &.incorrect {
+        border-color: red;
+    }
 }
 .colon {
-  margin-left: 3px;
+    margin-left: 3px;
 }
 .testedword {
-  margin: 5px 1px;
+    margin: 5px 1px;
 }
 // Fix issue with IE8 not hiding words:
 .wordend, .wordstart, .word, .testedword {
-  display: inline-block;
+    display: inline-block;
 }
 
 // Hard mode - hide the clues that show word size
 .hard-mode .word {
-  border-left: 0px;
-  border-right: 0px;
-  padding-left: 8px;
-  padding-right: 8px;
-  margin-left: -5px;
-  margin-right: -5px;
-  border-radius: 0px;
-  cursor: default;
+    border-left: 0px;
+    border-right: 0px;
+    padding-left: 8px;
+    padding-right: 8px;
+    margin-left: -5px;
+    margin-right: -5px;
+    border-radius: 0px;
+    cursor: default;
 
-  &.current-word {
-      border-left: 2px solid blue;
-  }
+    &.current-word {
+        border-left: 2px solid blue;
+    }
 }
 
 #id-onscreen-test-container {
@@ -765,186 +765,186 @@ span.versenumber {
 }
 
 #id-testing-status {
-  position: absolute;
-  z-index: 5;
-  text-shadow: white 2px 2px, white -2px -2px, white -2px 2px, white 2px -2px;
+    position: absolute;
+    z-index: 5;
+    text-shadow: white 2px 2px, white -2px -2px, white -2px 2px, white 2px -2px;
 }
 
 #id-testing-status.correct {
-  color: #00A113;
-  font-weight: bold;
-  }
+    color: #00A113;
+    font-weight: bold;
+}
 
 #id-testing-status.incorrect {
-  color: #A10000;
-  font-weight: bold;
-  }
+    color: #A10000;
+    font-weight: bold;
+}
 
 .progress progress {
-  width: 100%;
+    width: 100%;
 }
 
 .buttonbar
 {
-  text-align: right;
-  display: table;
-  width: 100%;
-  border-collapse: collapse;
-  > div {
-    display: table-row;
-    > div {
-      display: table-cell;
-      padding: 2px;
-    }
-  }
-  .progress {
-    text-align: left;
+    text-align: right;
+    display: table;
     width: 100%;
-  }
+    border-collapse: collapse;
+    > div {
+        display: table-row;
+        > div {
+            display: table-cell;
+            padding: 2px;
+        }
+    }
+    .progress {
+        text-align: left;
+        width: 100%;
+    }
 }
 
 #id-results {
-  text-align: left;
+    text-align: left;
 }
 
 
 #id-points-target {
-  height: 1.3em;
+    height: 1.3em;
 }
 
 .score-log {
-  text-align: center;
-  border-radius: 12px;
-  padding: 4px;
-  margin-bottom: 2px;
-  font-weight: bold;
+    text-align: center;
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 2px;
+    font-weight: bold;
 }
 
 .score-log-type-0:after {
-  content: " - initial test";
+    content: " - initial test";
 }
 .score-log-type-1:after {
-  content: " - revision test";
+    content: " - revision test";
 }
 .score-log-type-2:before {
-  content: "Super BONUS: ";
+    content: "Super BONUS: ";
 }
 .score-log-type-2:after {
-  content: " - all revision completed";
+    content: " - all revision completed";
 }
 .score-log-type-3:before {
-  content: "BONUS: ";
+    content: "BONUS: ";
 }
 .score-log-type-3:after {
-  content: " - perfect!";
+    content: " - perfect!";
 }
 .score-log-type-4:before {
-  content: "BONUS: ";
+    content: "BONUS: ";
 }
 .score-log-type-4:after {
-  content: " - verse fully learnt";
+    content: " - verse fully learnt";
 }
 .score-log-type-5:after {
-  content: " - award bonus";
+    content: " - award bonus";
 }
 
 
 body .score-log {
-  &.score-log-type-2,
-  &.score-log-type-3,
-  &.score-log-type-4
-  {
-    border: 2px solid red;
-  }
+    &.score-log-type-2,
+    &.score-log-type-3,
+    &.score-log-type-4
+    {
+        border: 2px solid red;
+    }
 }
 
 #id-points-block {
-  height: 120px;
-  overflow: hidden;
+    height: 120px;
+    overflow: hidden;
 }
 
 .verse-dropdown ul {
-  list-style: none;
-  margin: 0px;
-  .border-radius(4px);
-  .dropdown-menu {
-    border: 1px solid #eee;
-    top: 30px;
-  }
+    list-style: none;
+    margin: 0px;
+    .border-radius(4px);
+    .dropdown-menu {
+        border: 1px solid #eee;
+        top: 30px;
+    }
 }
 
 // From Twitter Bootstrap 2
 .caret {
-  display: inline-block;
-  width: 0;
-  height: 0;
-  text-indent: -99999px;
-  *text-indent: 0;
-  vertical-align: top;
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-top: 4px solid #000000;
-  opacity: 0.3;
-  filter: alpha(opacity=30);
-  content: "\2193";
+    display: inline-block;
+    width: 0;
+    height: 0;
+    text-indent: -99999px;
+    *text-indent: 0;
+    vertical-align: top;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 4px solid #000000;
+    opacity: 0.3;
+    filter: alpha(opacity=30);
+    content: "\2193";
 }
 .dropdown .caret {
-  margin-top: 8px;
-  margin-left: 2px;
+    margin-top: 8px;
+    margin-left: 2px;
 }
 
 /* 'Dashboard' page */
 
 .eventstream {
 
-  > ul {
-    margin-left: 0px;
-    > li {
-      list-style-type: none;
-      border: 1px solid #ddd;
-      padding: 2px 4px;
-      margin-top: -1px;
+    > ul {
+        margin-left: 0px;
+        > li {
+            list-style-type: none;
+            border: 1px solid #ddd;
+            padding: 2px 4px;
+            margin-top: -1px;
+        }
     }
-  }
-  .timestamp {
-    font-style: italic;
-    font-size: 90%;
-  }
+    .timestamp {
+        font-style: italic;
+        font-size: 90%;
+    }
 
-  .commentindicator {
-    float:right;
-    border: 1px solid #ddd;
-    margin-right: -5px;
-    margin-top: -3px;
-    padding-left: 4px;
-    border-bottom-left-radius: 4px;
-  }
+    .commentindicator {
+        float:right;
+        border: 1px solid #ddd;
+        margin-right: -5px;
+        margin-top: -3px;
+        padding-left: 4px;
+        border-bottom-left-radius: 4px;
+    }
 }
 
 ul.grouplist {
-  margin-bottom: 5px;
+    margin-bottom: 5px;
 }
 
 // 'choose' page
 
 
 form.quickfind {
-  select[name=book],
-  select[name=chapter_start],
-  select[name=chapter_end],
-  select[name=verse_start],
-  select[name=verse_end] {
-    width: auto;
-  }
+    select[name=book],
+    select[name=chapter_start],
+    select[name=chapter_end],
+    select[name=verse_start],
+    select[name=verse_end] {
+        width: auto;
+    }
 }
 
 // create verse set page
 
 .icon-arrow-up, .icon-arrow-down, .icon-trash {
-  cursor: pointer;
+    cursor: pointer;
 }
 .one-column-only {
-  display: none;
+    display: none;
 }
 
 
@@ -953,52 +953,52 @@ form.quickfind {
 // flot fixes for table styling
 
 .legend table {
-  width: auto;
-  td {
-    border: 0px;
-    line-height: inherit;
-  }
+    width: auto;
+    td {
+        border: 0px;
+        line-height: inherit;
+    }
 }
 
 // -- User stats page --
 
 .is-following, .is-not-following {
-  padding: 10px;
-  border: 1px solid;
-  border-radius: 7px;
+    padding: 10px;
+    border: 1px solid;
+    border-radius: 7px;
 }
 
 // Awards
 
 table.noborders {
-  td, th, tr {
-    border: 0px
-  }
+    td, th, tr {
+        border: 0px
+    }
 }
 
 // Referral program page
 
 p.referral-link {
-  text-align: center;
-  font-weight: bold;
+    text-align: center;
+    font-weight: bold;
 }
 
 
 // Leaderboard
 
 .groupitem {
-  margin-bottom: 0.4em;
-  label,input {
-    cursor: pointer;
-    float: none;
-  }
+    margin-bottom: 0.4em;
+    label,input {
+        cursor: pointer;
+        float: none;
+    }
 }
 
 // Progress page
 
 
 .verse-popup-btn {
-  float: right;
+    float: right;
 }
 
 // Activity stream
@@ -1006,45 +1006,45 @@ p.referral-link {
 @activityItemPadding: 5px;
 
 .activitystream {
-  .activityitem.following {
-    border-top: 2px solid;
-    border-bottom: 2px solid;
-  }
+    .activityitem.following {
+        border-top: 2px solid;
+        border-bottom: 2px solid;
+    }
 }
 
 .activityitem, .groupcomments {
-  margin-left: 20px;
-  border: 1px solid;
-  border-radius: 4px;
-  margin-bottom: 8px;
-  clear: both;
+    margin-left: 20px;
+    border: 1px solid;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    clear: both;
 
-  h4 {
-    overflow: auto;
-    padding-left: 15px;
-    padding-right: 15px;
-  }
+    h4 {
+        overflow: auto;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
 
-  .commentindicator {
-    border-right: 1px solid;
-    border-bottom: 1px solid;
-    float:left;
-    border-bottom-right-radius: 4px;
-    padding: 0px @activityItemPadding;
-    margin-right: @activityItemPadding;
-  }
+    .commentindicator {
+        border-right: 1px solid;
+        border-bottom: 1px solid;
+        float:left;
+        border-bottom-right-radius: 4px;
+        padding: 0px @activityItemPadding;
+        margin-right: @activityItemPadding;
+    }
 
-  .commentblock {
-    padding: @activityItemPadding;
-  }
+    .commentblock {
+        padding: @activityItemPadding;
+    }
 
-  .commentauthor {
-  }
+    .commentauthor {
+    }
 
-  .permalink {
-    float:right;
-    padding-right: @activityItemPadding;
-  }
+    .permalink {
+        float:right;
+        padding-right: @activityItemPadding;
+    }
 
 }
 
@@ -1055,61 +1055,61 @@ p.referral-link {
 
 .comment {
 
-  &:first-child {
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-  }
-  &:last-child {
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-  }
-
-  background-color: @white;
-  padding: @activityItemPadding;
-  margin-bottom: 3px;
-  overflow: auto;
-
-  .timestamp {
-    font-style: italic;
-    float: right;
-    display: inline-block;
-  }
-
-  .commentmessage {
-    padding-left: 20px;
-    p:last-child {
-      margin-bottom: 0px;
+    &:first-child {
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
     }
-  }
+    &:last-child {
+        border-bottom-left-radius: 4px;
+        border-bottom-right-radius: 4px;
+    }
 
-  .commentmoderation {
-    float: right;
-    padding-left: 5px;
-  }
+    background-color: @white;
+    padding: @activityItemPadding;
+    margin-bottom: 3px;
+    overflow: auto;
+
+    .timestamp {
+        font-style: italic;
+        float: right;
+        display: inline-block;
+    }
+
+    .commentmessage {
+        padding-left: 20px;
+        p:last-child {
+            margin-bottom: 0px;
+        }
+    }
+
+    .commentmoderation {
+        float: right;
+        padding-left: 5px;
+    }
 }
 
 .relatedaddcomment {
-  font-size: 80%;
-  margin-top: 2px;
+    font-size: 80%;
+    margin-top: 2px;
 }
 
 #id-comment-box {
-  width: 100%;
-  box-sizing: border-box;         /* For IE and modern versions of Chrome */
-  -moz-box-sizing: border-box;    /* For Firefox                          */
-  -webkit-box-sizing: border-box; /* For Safari                           */
+    width: 100%;
+    box-sizing: border-box;         /* For IE and modern versions of Chrome */
+    -moz-box-sizing: border-box;    /* For Firefox                          */
+    -webkit-box-sizing: border-box; /* For Safari                           */
 }
 
 #id-add-comment > div {
 
-  > div:last-child {
-    overflow: hidden;
-    padding: 0 5px 0 0;
-  }
+    > div:last-child {
+        overflow: hidden;
+        padding: 0 5px 0 0;
+    }
 
-  > div:first-child {
-    float: right;
-  }
+    > div:first-child {
+        float: right;
+    }
 }
 
 ////////////  Response to smaller screen /////////////
@@ -1121,134 +1121,134 @@ p.referral-link {
 
 @media screen and (max-width: 859px) {
 
-  /* fluid width */
-  .container {
-    width: auto;
+    /* fluid width */
+    .container {
+        width: auto;
     }
-  /* no columns */
-  #id-leftcolumn {
-    width: auto;
-    float: none;
+    /* no columns */
+    #id-leftcolumn {
+        width: auto;
+        float: none;
     }
-  #id-rightcolumn {
-    width: auto;
-    float: none;
-    border-top: 1px solid #eee;
-    padding-top: 5px;
-    margin-top: 5px;
-  }
-  .row > [class*="span"] {
-    display: block;
-    margin: auto;
+    #id-rightcolumn {
+        width: auto;
+        float: none;
+        border-top: 1px solid #eee;
+        padding-top: 5px;
+        margin-top: 5px;
     }
-  .row {
-    margin: auto;
-    .span7 {
-      width: 100%;
+    .row > [class*="span"] {
+        display: block;
+        margin: auto;
     }
-  }
-
-  // Fix some hacks we added for rightcolumn
-  #id-rightcolumn h3:first-child {
-    margin-top: 0px;
+    .row {
+        margin: auto;
+        .span7 {
+            width: 100%;
+        }
     }
 
-
-  /* squeeze spacings */
-  .topbarinner, .maincontent {
-    padding-left: @smallerMainSidePadding;
-    padding-right: @smallerMainSidePadding;
-    }
-
-  .page-header {
-    padding-left: @smallerMainSidePadding;
-    padding-right: @smallerMainSidePadding;
-    }
-
-  .page-header, .message-container {
-    margin-left: -@smallerMainSidePadding;
-    margin-right: -@smallerMainSidePadding;
-    }
-
-
-  .two-column-only {
-    display: none;
-    }
-
-  span.one-column-only {
-    display:inline;
-    }
-  div.one-column-only {
-    display:block;
-    }
-
-  .modal {
-    .modal-header {
-      padding: 0px;
-      .close {
+    // Fix some hacks we added for rightcolumn
+    #id-rightcolumn h3:first-child {
         margin-top: 0px;
-        padding-top: 10px;
-        text-align: right;
-        padding-right: 10px;
-        padding-bottom: 10px;
-        padding-left: 30px;
-        }
-      h3 {
-        padding-left: 10px;
-        }
-      }
     }
 
-  .topbar .brand {
-    padding-right: 1px;
-  }
 
-  #id-onscreen-test-container {
-      .fixed-onscreen-testing();
-  }
+    /* squeeze spacings */
+    .topbarinner, .maincontent {
+        padding-left: @smallerMainSidePadding;
+        padding-right: @smallerMainSidePadding;
+    }
+
+    .page-header {
+        padding-left: @smallerMainSidePadding;
+        padding-right: @smallerMainSidePadding;
+    }
+
+    .page-header, .message-container {
+        margin-left: -@smallerMainSidePadding;
+        margin-right: -@smallerMainSidePadding;
+    }
+
+
+    .two-column-only {
+        display: none;
+    }
+
+    span.one-column-only {
+        display:inline;
+    }
+    div.one-column-only {
+        display:block;
+    }
+
+    .modal {
+        .modal-header {
+            padding: 0px;
+            .close {
+                margin-top: 0px;
+                padding-top: 10px;
+                text-align: right;
+                padding-right: 10px;
+                padding-bottom: 10px;
+                padding-left: 30px;
+            }
+            h3 {
+                padding-left: 10px;
+            }
+        }
+    }
+
+    .topbar .brand {
+        padding-right: 1px;
+    }
+
+    #id-onscreen-test-container {
+        .fixed-onscreen-testing();
+    }
 
 }
 
 // If there is not much room vertical we squeeze paddings
 
 @media screen and (max-height: 600px) {
-  /* squeeze paddings */
+    /* squeeze paddings */
 
-  .maincontent {
-    padding-top: @smallerMainTopPadding;
-    padding-bottom: @smallerMainTopPadding;
+    .maincontent {
+        padding-top: @smallerMainTopPadding;
+        padding-bottom: @smallerMainTopPadding;
     }
 
-  .page-header {
-    padding-top: 5px;
-    padding-bottom: 3px;
+    .page-header {
+        padding-top: 5px;
+        padding-bottom: 3px;
     }
 
-  .page-header, .message-container {
-    margin-bottom: @smallerMainTopPadding;
-    margin-top: -@smallerMainTopPadding;
+    .page-header, .message-container {
+        margin-bottom: @smallerMainTopPadding;
+        margin-top: -@smallerMainTopPadding;
     }
 
-  /* no fixed top bar */
-  .page-header h1 {
-    margin-bottom: 3px;
+    /* no fixed top bar */
+    .page-header h1 {
+        margin-bottom: 3px;
     }
 
-  .topbar {
-    position: static;
+    .topbar {
+        position: static;
     }
 
-  body {
-    padding-top: 0px;
+    body {
+        padding-top: 0px;
     }
 
-  #id-instructions,
-  #id-verse-wrapper,
-  #id-keyboard-test-bar {
-    margin-bottom: 1px;
+    #id-instructions,
+    #id-verse-wrapper,
+    #id-keyboard-test-bar {
+        margin-bottom: 1px;
     }
 
-  }
+}
 
 // If not much room in either direction, shrink the fonts
 // of the verse words to make more room
@@ -1258,45 +1258,45 @@ p.referral-link {
 
 @media screen and (max-width: 600px), screen and (max-height: 500px) {
 
-  /* smaller fonts */
-  .current-verse, .previous-verse, #id-typing, #id-onscreen-test-container {
-    font-size: 15px;
-  }
-
-  #id-typing {
-    font-size: inherit;
-    height: inherit;
+    /* smaller fonts */
+    .current-verse, .previous-verse, #id-typing, #id-onscreen-test-container {
+        font-size: 15px;
     }
-  .word {
-    padding: 1px 2px;
-  }
-  .word, .testedword {
-    margin: @word-margin-top-small @word-margin-left-small;
-  }
-  #id-keyboard-test-bar {
-    padding: @word-margin-top-small @word-margin-left-small;
-  }
 
-  #id-instructions, #id-bottom-controls {
-    font-size: inherit;
-    margin-bottom: 1px;
-    padding: 3px;
-    border-radius: 3px;
-  }
+    #id-typing {
+        font-size: inherit;
+        height: inherit;
+    }
+    .word {
+        padding: 1px 2px;
+    }
+    .word, .testedword {
+        margin: @word-margin-top-small @word-margin-left-small;
+    }
+    #id-keyboard-test-bar {
+        padding: @word-margin-top-small @word-margin-left-small;
+    }
 
-  #id-verse-wrapper {
-    border-radius: 3px;
-    padding: 5px;
-  }
+    #id-instructions, #id-bottom-controls {
+        font-size: inherit;
+        margin-bottom: 1px;
+        padding: 3px;
+        border-radius: 3px;
+    }
 
-  #id-onscreen-test-container {
-      .fixed-onscreen-testing();
-      .word {
-          // Easier to press:
-          padding: 3px 5px;
-          min-width: 25px;
-      }
-  }
+    #id-verse-wrapper {
+        border-radius: 3px;
+        padding: 5px;
+    }
+
+    #id-onscreen-test-container {
+        .fixed-onscreen-testing();
+        .word {
+            // Easier to press:
+            padding: 3px 5px;
+            min-width: 25px;
+        }
+    }
 
 }
 
@@ -1304,136 +1304,136 @@ p.referral-link {
 
 // Squeeze the primary nav if horizontal space is limited
 @media screen and (max-width: 700px) {
-  ul.primary-nav li:nth-child(5) {
-    display:none;
+    ul.primary-nav li:nth-child(5) {
+        display:none;
     }
 
-  }
+}
 
 @media screen and (max-width: 650px) {
-  ul.primary-nav li:nth-child(4) {
-    display:none;
+    ul.primary-nav li:nth-child(4) {
+        display:none;
     }
 
-  }
+}
 
 @media screen and (max-width: 600px) {
-  ul.primary-nav li:nth-child(3) {
-    display:none;
+    ul.primary-nav li:nth-child(3) {
+        display:none;
     }
-  }
+}
 
 @media screen and (max-width: 550px) {
-  ul.primary-nav li:nth-child(2) {
-    display:none;
+    ul.primary-nav li:nth-child(2) {
+        display:none;
     }
 
-  }
+}
 
 @media screen and (max-width: 450px) {
-  ul.primary-nav li:nth-child(1) {
-    display:none;
+    ul.primary-nav li:nth-child(1) {
+        display:none;
     }
-  }
+}
 
 // Use variable width modal if less than the fixed 560px (defined in
 // patterns.less) + 10px padding either side
 @media screen and (max-width: 580px) {
-  .modal {
-    width: auto;
-    left: 0px;
-    margin-left: 10px;
-    margin-right: 10px;
-  }
+    .modal {
+        width: auto;
+        left: 0px;
+        margin-left: 10px;
+        margin-right: 10px;
+    }
 }
 
 
 @media screen and (max-width: 600px) {
-  .award {
-    img {
-      width: 80px;
+    .award {
+        img {
+            width: 80px;
+        }
     }
-  }
 
-  img.stars {
-    width: 80px;
-  }
-
-  // Less padding on table
-  table {
-    td, th {
-      padding: 5px 6px 4px;
+    img.stars {
+        width: 80px;
     }
-  }
+
+    // Less padding on table
+    table {
+        td, th {
+            padding: 5px 6px 4px;
+        }
+    }
 }
 
 
 @media screen and (max-width: 500px) {
-  .award {
-    img {
-      width: 50px;
-    }
-    th:nth-child(4), td:nth-child(4) {
-      display: none;
-    }
-  }
-
-
-  // Stacked forms
-
-  form {
-    padding-left: 20px;
-    fieldset {
-      padding-top: @baseline / 2;
-    }
-    legend {
-      padding-left: 0;
-    }
-    label {
-      display: block;
-      float: none;
-      width: auto;
-      font-weight: bold;
-      text-align: left;
-      line-height: 20px;
-      padding-top: 0;
-    }
-    .clearfix {
-      margin-bottom: @baseline / 2;
-      div.input {
-        margin-left: 0;
-      }
-    }
-    .inputs-list {
-      margin-bottom: 0;
-      li {
-        padding-top: 0;
-        label {
-          font-weight: normal;
-          padding-top: 0;
+    .award {
+        img {
+            width: 50px;
         }
-      }
+        th:nth-child(4), td:nth-child(4) {
+            display: none;
+        }
     }
-    div.clearfix.error {
-      padding-left: 10px;
-      margin-top: 0;
-      margin-left: -10px;
+
+
+    // Stacked forms
+
+    form {
+        padding-left: 20px;
+        fieldset {
+            padding-top: @baseline / 2;
+        }
+        legend {
+            padding-left: 0;
+        }
+        label {
+            display: block;
+            float: none;
+            width: auto;
+            font-weight: bold;
+            text-align: left;
+            line-height: 20px;
+            padding-top: 0;
+        }
+        .clearfix {
+            margin-bottom: @baseline / 2;
+            div.input {
+                margin-left: 0;
+            }
+        }
+        .inputs-list {
+            margin-bottom: 0;
+            li {
+                padding-top: 0;
+                label {
+                    font-weight: normal;
+                    padding-top: 0;
+                }
+            }
+        }
+        div.clearfix.error {
+            padding-left: 10px;
+            margin-top: 0;
+            margin-left: -10px;
+        }
+        .actions {
+            margin-left: -20px;
+            padding-left: 20px;
+        }
     }
-    .actions {
-      margin-left: -20px;
-      padding-left: 20px;
-    }
-  }
 
 }
 
 // Override some things from django-fiber - we don't want the side bar at all
 #df-wpr-layer, #df-wpr-sidebar {
-  display: none;
+    display: none;
 }
 
 div#wpr-body {
-  position: static !important;
-  margin-right: 0px !important;
-  margin-left: 0px !important;
+    position: static !important;
+    margin-right: 0px !important;
+    margin-left: 0px !important;
 }
