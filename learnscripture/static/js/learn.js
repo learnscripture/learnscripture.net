@@ -341,13 +341,22 @@ var learnscripture = (function (learnscripture, $) {
 
     // ========== Actions completed =============
 
+    var trimVerseStatusDataForPostback = function (verseStatus) {
+        // Clone the data:
+        var d = JSON.parse(JSON.stringify(verseStatus));
+        // Trim stuff we don't need:
+        d.scoring_text_words = null;
+        d.suggestion_pairs = null;
+        return d;
+    };
+
     var readingComplete = function (callbackAfter) {
         $.ajax({
             url: '/api/learnscripture/v1/actioncomplete/?format=json',
             dataType: 'json',
             type: 'POST',
             data: {
-                verse_status: JSON.stringify(currentVerseStatus, null, 2),
+                verse_status: JSON.stringify(trimVerseStatusDataForPostback(currentVerseStatus), null, 2),
                 stage: STAGE_TYPE_READ
             },
             success: function () {
@@ -389,7 +398,7 @@ var learnscripture = (function (learnscripture, $) {
             dataType: 'json',
             type: 'POST',
             data: {
-                verse_status: JSON.stringify(currentVerseStatus, null, 2),
+                verse_status: JSON.stringify(trimVerseStatusDataForPostback(currentVerseStatus), null, 2),
                 stage: STAGE_TYPE_TEST,
                 accuracy: accuracy,
                 practice: wasPracticeMode,
