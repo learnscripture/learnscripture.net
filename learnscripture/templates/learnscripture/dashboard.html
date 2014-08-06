@@ -29,7 +29,7 @@ only takes a few seconds. Otherwise your progress won't be saved permanently.
 
 {% endif %}
 
-<h2>Revise</h2>
+<h2>Review</h2>
 
 <div class="actionset">
 
@@ -41,12 +41,12 @@ only takes a few seconds. Otherwise your progress won't be saved permanently.
     {% csrf_token %}
     <input type="hidden" name="verse_set_id" value="{{ vs.id }}" />
     {% if vs.splittable %}
-    <input type="submit" name="revisepassage" class="btn primary" value="Revise whole passage"
+    <input type="submit" name="revisepassage" class="btn primary" value="Review whole passage"
            id="id-revisepassage-btn-{{ vs.id }}" /><br/>
-    <input type="submit" name="revisepassagenextsection" class="btn primary" value="Revise one section"
+    <input type="submit" name="revisepassagenextsection" class="btn primary" value="Review one section"
            id="id-revisepassage-sections-btn-{{ vs.id }}" /><br/>
     {% else %}
-    <input type="submit" name="revisepassage" class="btn primary" value="Revise"
+    <input type="submit" name="revisepassage" class="btn primary" value="Review"
            id="id-revisepassage-btn-{{ vs.id }}" /><br/>
 
     {% endif %}
@@ -68,7 +68,7 @@ only takes a few seconds. Otherwise your progress won't be saved permanently.
 
   <form action="" method="POST">
     {% csrf_token %}
-    <input type="submit" name="revisebiblequeue" class="btn primary" value="Revise" />
+    <input type="submit" name="revisebiblequeue" class="btn primary" value="Review" />
   </form>
 
   <p>You've got {{ revise_verses_queue|length }}
@@ -89,7 +89,7 @@ only takes a few seconds. Otherwise your progress won't be saved permanently.
 
   <form action="" method="POST">
     {% csrf_token %}
-    <input type="submit" name="revisecatechismqueue" class="btn primary" value="Revise" />
+    <input type="submit" name="revisecatechismqueue" class="btn primary" value="Review" />
   </form>
 
   <p>You've got {{ revise_qas_queue|length }} catechism question{{revise_qas_queue|length|pluralize }} due for revising today.

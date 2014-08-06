@@ -10,7 +10,7 @@
       <input type="hidden" name="uvs_id" value="{{ uvs.id }}" />
       <input type="submit" name="reviseverse" class="btn primary"
              {% if uvs.needs_testing %}
-             value="Revise {{ uvs.item_name }}"
+             value="Review {{ uvs.item_name }}"
              {% else %}
              value="Practise {{ uvs.item_name }}"
              {% endif %}
@@ -33,7 +33,7 @@
         <p>
           {% if uvs.needs_testing %}
           <input type="submit" name="revisepassagesection" class="btn primary"
-                 value="Revise section: {{ uvs.section_reference }}"/>
+                 value="Review section: {{ uvs.section_reference }}"/>
           {% else %}
           <input type="submit" name="practisepassagesection" class="btn primary"
                  value="Practise section: {{ uvs.section_reference }}"/>
@@ -48,7 +48,7 @@
       <p>
         {% if uvs.needs_testing %}
         <input type="submit" name="revisepassage" class="btn primary"
-               value="Revise passage: {{ uvs.passage_reference }}"/>
+               value="Review passage: {{ uvs.passage_reference }}"/>
         {% else %}
         <input type="submit" name="practisepassage" class="btn primary"
                value="Practise passage: {{ uvs.passage_reference }}"/>
