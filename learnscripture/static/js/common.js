@@ -148,6 +148,10 @@ var learnscripture = (function (learnscripture, $) {
         return 'ontouchstart' in window;
     };
 
+    var isAndroid = function () {
+        return navigator.userAgent.toLowerCase().indexOf("android") > -1;
+    };
+
     // Export:
     learnscripture.handleFormValidationErrors = handleFormValidationErrors;
     learnscripture.displaySimpleAjaxError = displaySimpleAjaxError;
@@ -158,6 +162,7 @@ var learnscripture = (function (learnscripture, $) {
     learnscripture.ajaxRetryFailed = ajaxRetryFailed;
     learnscripture.ajaxRetrySucceeded = ajaxRetrySucceeded;
     learnscripture.isTouchDevice = isTouchDevice;
+    learnscripture.isAndroid = isAndroid;
     return learnscripture;
 
 }(learnscripture || {}, $));
