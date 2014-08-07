@@ -1969,8 +1969,13 @@ var learnscripture = (function (learnscripture, $) {
         // the on-screen keyboard.
         inputBox.bind('keydown', inputKeyDown);
         testingStatus = $('#id-testing-status');
-        fastEventBind($('#id-next-btn'), next).show();
-        fastEventBind($('#id-back-btn'), back).show();
+        // We don't use fast event (touchstart) for next and back buttons,
+        // because 1) they can cause movement of items on the page 2) they are
+        // right below the bible version button, which combine to mean that if
+        // we use touchstart, the user ends up triggering the version select by
+        // mistake.
+        $('#id-next-btn').bind('click', next).show();
+        $('#id-back-btn').bind('click', back).show();
         fastEventBind($('#id-hint-btn'), function (ev) {
             ev.preventDefault();
             // Just disabling the button doesn't seem to be enough to stop event
