@@ -1084,6 +1084,7 @@ var learnscripture = (function (learnscripture, $) {
             this.ensureTestDivVisible();
             $('#id-hint-btn').hide();
             this.wordMistakes = [];
+            this.clickTrapperSetUp();
         },
 
         testTearDown: function () {
@@ -1103,6 +1104,63 @@ var learnscripture = (function (learnscripture, $) {
             $('#id-onscreen-test-container').hide();
             this.removeTestDivFix();
             this.wordTestTearDown();
+            this.clickTrapperTearDown();
+        },
+
+        useClickTrapper: function () {
+            return (learnscripture.isAndroid() && learnscripture.isTouchDevice());
+        },
+
+        clickTrapperSetUp: function () {
+            if (!this.useClickTrapper()) {
+                return;
+            }
+            // Hack for Android bug with elements underneath receiving clicks
+            // https://code.google.com/p/android/issues/detail?id=6721#c16
+            // https://code.google.com/p/android/issues/detail?id=6721#c22
+            //
+            // This has a few moving parts:
+            //
+            // * event handler for clicks on body
+            //
+            // * event handler for touches on the absolutely positioned container
+            //
+            // The essential idea is that on touchstart for the absolutely
+            // positioned div, we set 'ignoreNextClick', and then ignore
+            // the next click that gets sent through to the body
+
+            var that = this;
+            this.clickTrapperTearDown();
+            this.ignoreNextClick = false;
+            var bodyClickTrapper = function (ev) {
+                if (that.ignoreNextClick) {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    that.ignoreNextClick = false;
+                    return false;
+                } else {
+                    return true;
+                }
+            };
+            $('body').bind('click', bodyClickTrapper);
+            this.bodyClickTrapper = bodyClickTrapper;
+
+            $('#id-onscreen-test-container').bind('touchstart',
+                                                  function (ev) { that.ignoreNextClick = true;
+                                                                });
+
+        },
+
+        clickTrapperTearDown: function () {
+            if (!this.useClickTrapper()) {
+                return;
+            }
+            var bodyClickTrapper = this.bodyClickTrapper;
+            if (bodyClickTrapper !== undefined && bodyClickTrapper !== null) {
+                $('body').unbind('click', bodyClickTrapper);
+                this.bodyClickTrapper = null;
+            }
+            $('#id-onscreen-test-container').unbind('click');
         },
 
         wordTestSetUp: function () {
@@ -1151,7 +1209,7 @@ var learnscripture = (function (learnscripture, $) {
             $c.html(html);
             var that = this;
             fastEventBind($c.find('.word'),
-                          function (ev) { that.handleButtonClick(ev) });
+                          function (ev) { that.handleButtonClick(ev); })
             $c.show();
         },
 
