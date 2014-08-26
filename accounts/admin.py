@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
+from django.utils.html import format_html
+from django.core.urlresolvers import reverse
 
 from .models import Identity, Account, Notice
 
@@ -22,10 +24,17 @@ class HasAccountListFilter(SimpleListFilter):
             return queryset.filter(account__isnull=False)
 
 
+class NoticeInline(admin.TabularInline):
+    model = Notice
+    raw_id_fields = ['related_event']
+    extra = 1
+
+
 class IdentityAdmin(admin.ModelAdmin):
     list_display = ['id', 'account', 'date_created', 'default_bible_version',
                     'desktop_testing_method', 'interface_theme', 'referred_by']
     list_filter = [HasAccountListFilter]
+    inlines = [NoticeInline]
 
     def queryset(self, request):
         return super(IdentityAdmin, self).queryset(request).select_related('account', 'referred_by')
@@ -36,14 +45,24 @@ def hellban_account(modeladmin, request, queryset):
 hellban_account.short_description = "Hell-ban selected accounts"
 
 
+class IdentityInline(admin.StackedInline):
+    model = Identity
+    fk_name = 'account'
+
+
 class AccountAdmin(admin.ModelAdmin):
     def referred_by(account):
         return account.identity.referred_by
-    list_display = ['username', 'email', 'first_name', 'last_name', 'date_joined', 'is_hellbanned', referred_by]
+    def identity_link(account):
+        return format_html('<a href="{0}">{1}</a>',
+                           reverse('admin:accounts_identity_change', args=[account.identity.id]),
+                           account.identity.id)
+    list_display = ['username', identity_link, 'email', 'first_name', 'last_name', 'date_joined', 'is_hellbanned', referred_by]
     ordering = ['date_joined']
     search_fields = ['username', 'email']
     filter_horizontal = ['following']
     actions = [hellban_account]
+    inlines = [IdentityInline]
 
     def queryset(self, request):
         return super(AccountAdmin, self).queryset(request).select_related('identity__referred_by')
