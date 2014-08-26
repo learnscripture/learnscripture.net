@@ -16,7 +16,7 @@ from django.utils.functional import cached_property
 
 from accounts import memorymodel
 from accounts.signals import verse_started, verse_tested, verse_finished, points_increase, scored_100_percent, catechism_started
-from bibleverses.models import TextVersion, MemoryStage, StageType, VerseSet, VerseSetType, UserVerseStatus, TextType, get_passage_sections, InvalidVerseReference, count_words, split_into_words
+from bibleverses.models import TextVersion, MemoryStage, StageType, VerseSet, VerseSetType, UserVerseStatus, TextType, get_passage_sections, InvalidVerseReference, count_words
 from bibleverses.signals import verse_set_chosen
 from scores.models import TotalScore, ScoreReason, Scores, get_rank_all_time, get_rank_this_week
 
