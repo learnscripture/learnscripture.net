@@ -25,7 +25,7 @@ class HasAccountListFilter(SimpleListFilter):
 class IdentityAdmin(admin.ModelAdmin):
     list_display = ['id', 'account', 'date_created', 'default_bible_version',
                     'desktop_testing_method', 'interface_theme', 'referred_by']
-    list_filter = (HasAccountListFilter,)
+    list_filter = [HasAccountListFilter]
 
     def queryset(self, request):
         return super(IdentityAdmin, self).queryset(request).select_related('account', 'referred_by')
