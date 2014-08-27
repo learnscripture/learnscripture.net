@@ -803,9 +803,13 @@ def is_punctuation(text):
 
 
 def split_into_words(text, fix_punctuation_whitespace=True):
-    # This logic is reproduced client side in learn.js :: countWords
-    # in order to display target.
+    """
+    Splits text into series of words. Punctuation and newlines are left in
+    place.
 
+    If fix_punctuation_whitespace==True (the default), then 'words' that consist
+    only of punctuation are merged with neighbouring actual words.
+    """
     # We need to cope with things like Gen 3:22
     #    and live forever--"'
     # and Gen 1:16
@@ -814,7 +818,7 @@ def split_into_words(text, fix_punctuation_whitespace=True):
     # and when -- appears with punctuation on one side, we don't
     # want this to end up on its own. Also, text with a single
     # hyphen surrounding by whitespace needs to be handled too.
-    l = text.replace('--', ' -- ').strip().split()
+    l = text.replace('--', ' -- ').strip().split(" ")
     if fix_punctuation_whitespace:
         # Merge punctuation only items with item to left.
         l = merge_punctuation_items_right(merge_punctuation_items_left(l))
