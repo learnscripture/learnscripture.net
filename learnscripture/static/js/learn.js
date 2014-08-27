@@ -872,8 +872,11 @@ var learnscripture = (function (learnscripture, $) {
         },
 
         testTearDown: function () {
-            $('#id-keyboard-test-bar').hide();
+            // For Safari, it seems we need to blur inputBox before we hide it
+            // or hide #id-keyboard-test-bar, otherwise it retains focus, which
+            // means that docKeyPress doesn't work.
             inputBox.blur().hide();
+            $('#id-keyboard-test-bar').hide();
         },
 
         wordTestSetUp: function () {
