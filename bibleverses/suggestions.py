@@ -35,7 +35,7 @@ def bad_punctuation(text):
 
     # Certain punctuation must not appear in middle of words
     # Ignore punctuation at end
-    words = [w.strip(PUNCTUATION) for w in words]
+    words = [w.strip(PUNCTUATION_OR_WHITESPACE) for w in words]
     if any(BAD_WORD_PUNCTUATION_RE.search(w) for w in words):
         return True
 
@@ -52,8 +52,8 @@ def bad_punctuation(text):
     return False
 
 def normalise_word(word):
-    word = word.strip(PUNCTUATION)
-    return word.lower().strip()
+    word = word.strip(PUNCTUATION_OR_WHITESPACE)
+    return word.lower()
 
 
 def split_into_words_for_suggestions(text):
