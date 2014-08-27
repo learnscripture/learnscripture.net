@@ -2001,6 +2001,9 @@ var learnscripture = (function (learnscripture, $) {
 
     // === Setup and wiring ===
     var fastEventBind = function ($elem, callback) {
+        // This is used for buttons that should respond quickly, and won't if we
+        // use 'click' for most touch screen devices (which often add 300ms
+        // delay).
         $elem.addClass('fastevent').bind(fastEventName, callback);
         return $elem;
     };
@@ -2030,13 +2033,17 @@ var learnscripture = (function (learnscripture, $) {
         // the on-screen keyboard.
         inputBox.bind('keydown', inputKeyDown);
         testingStatus = $('#id-testing-status');
-        // We don't use fast event (touchstart) for next and back buttons,
+        // We don't use fast event (touchstart) for next/back/finish buttons,
         // because 1) they can cause movement of items on the page 2) they are
         // right below the bible version button, which combine to mean that if
         // we use touchstart, the user ends up triggering the version select by
         // mistake.
         $('#id-next-btn').bind('click', next).show();
         $('#id-back-btn').bind('click', back).show();
+        $('#id-next-verse-btn').bind('click', nextVerse);
+        $('#id-context-next-verse-btn').bind('click', markReadAndNextVerse);
+        $('#id-finish-btn').bind('click', finishBtnClick);
+
         fastEventBind($('#id-hint-btn'), function (ev) {
             ev.preventDefault();
             // Just disabling the button doesn't seem to be enough to stop event
@@ -2045,8 +2052,6 @@ var learnscripture = (function (learnscripture, $) {
                 testingMethodStrategy.getHint();
             }
         });
-        fastEventBind($('#id-next-verse-btn'), nextVerse);
-        fastEventBind($('#id-context-next-verse-btn'), markReadAndNextVerse);
         $('#id-version-select').change(versionSelectChanged);
         fastEventBind($('#id-help-btn'), function (ev) {
             if (preferences.enableAnimations) {
@@ -2059,7 +2064,6 @@ var learnscripture = (function (learnscripture, $) {
         $('#id-skip-verse-btn').bind("click", skipVerse);
         $('#id-cancel-learning-btn').bind("click", cancelLearning);
         $('#id-reset-progress-btn').bind("click", resetProgress);
-        fastEventBind($('#id-finish-btn'), finishBtnClick);
         $(window).resize(function () {
             if (currentStage !== null &&
                 currentStage.testMode) {
