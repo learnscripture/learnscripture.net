@@ -1962,7 +1962,7 @@ var learnscripture = (function (learnscripture, $) {
 
     var resetProgress = function (ev) {
         ev.preventDefault();
-        if (confirm("This will reset your progress on this item to the zero. " +
+        if (confirm("This will reset your progress on this item to zero. " +
             "Continue?")) {
             $.ajax({
                 url: '/api/learnscripture/v1/resetprogress/?format=json',
