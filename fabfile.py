@@ -7,6 +7,7 @@ Change all the things marked CHANGEME. Other things can be left at their
 defaults if you are happy with the default layout.
 """
 
+from datetime import datetime
 import os
 import posixpath
 import json
@@ -16,6 +17,8 @@ from fabric.contrib.files import exists, upload_template
 from fabric.context_managers import cd, settings
 from fabric.operations import get
 
+join = os.path.join
+rel = lambda *x: join(os.path.abspath(os.path.dirname(__file__)), *x)
 
 USER = 'cciw'
 HOST = 'learnscripture.net'
@@ -34,6 +37,16 @@ PYTHON_BIN = "python2.7"
 PYTHON_PREFIX = "" # e.g. /usr/local  Use "" for automatic
 PYTHON_FULL_PATH = "%s/bin/%s" % (PYTHON_PREFIX, PYTHON_BIN) if PYTHON_PREFIX else PYTHON_BIN
 
+LOCAL_DB_BACKUPS = rel("..", "db_backups")
+
+
+def secrets():
+    thisdir = os.path.dirname(os.path.abspath(__file__))
+    retval = json.load(open(os.path.join(thisdir, "config", "secrets.json")))
+    # At least some passwords need to be bytes, not unicode objects
+    retval = dict([(k, s if not isinstance(s, unicode) else s.encode('ascii')) for k, s in retval.items()])
+    return retval
+
 
 class Target(object):
     def __init__(self, **kwargs):
@@ -48,19 +61,21 @@ class Target(object):
         self.SRC_DIR = posixpath.join(self.DJANGO_APP_ROOT, SRC_SUBDIR)
         self.VENV_DIR = posixpath.join(self.DJANGO_APP_ROOT, VENV_SUBDIR)
 
+        s = secrets()
+        self.DB = {}
+        self.DB['USER'] = s["%s_DB_USER" % self.NAME]
+        self.DB['NAME'] = s["%s_DB_NAME" % self.NAME]
+        self.DB['PASSWORD'] = s["%s_DB_PASSWORD" % self.NAME]
+
 
 PRODUCTION = Target(
     NAME = "PRODUCTION",
     APP_BASE_NAME = "learnscripture",
-    DB_USER = "cciw_learnscripture",
-    DB_NAME = "cciw_learnscripture",
 )
 
 STAGING = Target(
     NAME = "STAGING",
     APP_BASE_NAME = "learnscripture_staging",
-    DB_USER = "cciw_learnscripture_staging",
-    DB_NAME = "cciw_learnscripture_staging",
 )
 
 target = None
@@ -122,11 +137,6 @@ def ensure_src_dir():
 @task
 def push_rev(rev):
     env.push_rev = rev
-
-
-def secrets():
-    thisdir = os.path.dirname(os.path.abspath(__file__))
-    return json.load(open(os.path.join(thisdir, "config", "secrets.json")))
 
 
 @task
@@ -322,22 +332,67 @@ def manage_py_command(*commands):
             run_venv("./manage.py %s" % ' '.join(commands))
 
 
+def make_django_db_filename(target):
+    return "/home/cciw/db-%s.django.%s.pgdump" % (target.DB['NAME'], datetime.now().strftime("%Y-%m-%d_%H.%M.%S"))
+
+
+def dump_db(target):
+    filename = make_django_db_filename(target)
+    run("pg_dump -Fc -U %s -O -o -f %s %s" % (target.DB['USER'], filename, target.DB['NAME']))
+    return filename
+
+
 @task
 def get_live_db():
-    filename = "dump_%s.db" % PRODUCTION.DB_NAME
-    run("pg_dump -Fc -U %s -O -o -T bibleverses_wordsuggestiondata -f ~/%s %s" % (PRODUCTION.DB_USER, filename, PRODUCTION.DB_NAME))
-    get("~/%s" % filename)
+    filename = dump_db(PRODUCTION)
+    local("mkdir -p %s" % LOCAL_DB_BACKUPS)
+    return list(get(filename, local_path=LOCAL_DB_BACKUPS + "/%(basename)s"))[0]
+
+
+def pg_restore_cmds(db, filename, clean=False):
+    return [
+        "pg_restore -O -U %s %s -d %s %s" %
+          (db['USER'], " -c " if clean else "", db['NAME'], filename),
+        ]
+
+
+def db_restore_commands(db, filename):
+    return [
+        # DB might not exist, allow error
+        """sudo -u postgres psql -U postgres -d template1 -c "DROP DATABASE %s;" | true """
+          % db['NAME'],
+
+        """sudo -u postgres psql -U postgres -d template1 -c "CREATE DATABASE %s;" """
+          % db['NAME'],
+
+        # User might already exist, allow error
+        """sudo -u postgres psql -U postgres -d template1 -c "CREATE USER %s WITH PASSWORD '%s';" | true """
+          % (db['USER'], db['PASSWORD']),
+
+        """sudo -u postgres psql -U postgres -d template1 -c "GRANT ALL ON DATABASE %s TO %s;" """
+        % (db['NAME'], db['USER']),
+
+        """sudo -u postgres psql -U postgres -d template1 -c "ALTER USER %s CREATEDB;" """ %
+          db['USER'],
+
+        ] + pg_restore_cmds(db, filename)
 
 
 @task
 def local_restore_from_dump(filename):
-    # DB might not exist, allow error
-    local("""sudo -u postgres psql -U postgres -d template1 -c "DROP DATABASE learnscripture;" | true """)
-    local("""sudo -u postgres psql -U postgres -d template1 -c "CREATE DATABASE learnscripture;" """)
-    # User might already exist, allow error
-    local("""sudo -u postgres psql -U postgres -d template1 -c "CREATE USER learnscripture WITH PASSWORD 'foo';" | true """,)
-    local("""sudo -u postgres psql -U postgres -d template1 -c "GRANT ALL ON DATABASE learnscripture TO learnscripture;" """)
-    local("""sudo -u postgres psql -U postgres -d template1 -c "ALTER USER learnscripture CREATEDB;" """)
+    db = PRODUCTION.DB.copy()
+    db['NAME'] = 'learnscripture'
+    db['USER'] = 'learnscripture'
+    db['PASSWORD'] = 'foo'
 
-    local("pg_restore -O -U learnscripture -d learnscripture %s" % filename)
+    for cmd in db_restore_commands(db, filename):
+        local(cmd)
 
+
+@task
+def get_and_load_production_db():
+    """
+    Dump current production Django DB and load into dev environment
+    """
+    filename = get_live_db()
+    local_restore_from_dump(filename)
