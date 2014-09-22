@@ -459,7 +459,7 @@ class Identity(models.Model):
 
         uvss_dict = dict([(uvs.reference, uvs) for uvs in existing_uvss])
 
-        if verse_set.set_type == VerseSetType.SELECTION:
+        if verse_set.is_selection:
             # Prefer existing UVSs of different versions if they are used.
             other_versions = self.verse_statuses.filter(
                 verse_set__set_type=VerseSetType.SELECTION,
@@ -467,7 +467,7 @@ class Identity(models.Model):
                 reference__in=[vc.reference for vc in vc_list])\
                 .select_related('version')
             other_version_dict = dict([(uvs.reference, uvs) for uvs in other_versions])
-        elif verse_set.set_type == VerseSetType.PASSAGE:
+        elif verse_set.is_passage:
             # If they are already learning this passage in a different version,
             # use that version.
             verse_statuses = (self.verse_statuses
@@ -631,7 +631,7 @@ class Identity(models.Model):
         else:
             verse_set = VerseSet.objects.get(id=verse_set_id)
 
-        if verse_set is not None and verse_set.set_type == VerseSetType.PASSAGE:
+        if verse_set is not None and verse_set.is_passage:
             # Look for verse choices in this VerseSet, but not any others.
             start_qs = self.verse_statuses.filter(verse_set=verse_set)
             verse_choices = verse_set.verse_choices.all()

@@ -627,7 +627,7 @@ def view_verse_set(request, slug):
         # this version.
         vc.verse = verses.get(vc.reference, None)
 
-    if (verse_set.set_type == VerseSetType.SELECTION and
+    if (verse_set.is_selection and
         len(verse_list) > 1 and is_continuous_set(verse_list)):
         c['show_convert_to_passage'] = True
 
@@ -650,7 +650,7 @@ def view_verse_set(request, slug):
         verses_started = request.identity.which_verses_started(all_references)
         c['started_count'] = len(verses_started)
 
-        if verse_set.set_type == VerseSetType.SELECTION:
+        if verse_set.is_selection:
             c['in_queue'] = len(request.identity.which_in_learning_queue(all_references))
         else:
             c['in_queue'] = 0
@@ -712,7 +712,7 @@ def create_or_edit_set(request, set_type=None, slug=None):
         mode = 'create'
 
     title = ('Edit verse set' if verse_set is not None
-             else 'Create selection set' if set_type == VerseSetType.SELECTION
+             else 'Create selection set' if verse_set.is_selection
              else 'Create passage set')
 
     c = {}

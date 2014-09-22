@@ -578,6 +578,10 @@ class VerseSet(models.Model):
         return self.set_type == VerseSetType.PASSAGE
 
     @property
+    def is_selection(self):
+        return self.set_type == VerseSetType.SELECTION
+
+    @property
     def breaks_formatted(self):
         return self.breaks.replace(",", ", ")
 
@@ -608,7 +612,7 @@ class VerseSet(models.Model):
         self.update_passage_id()
 
     def update_passage_id(self):
-        if self.set_type == VerseSetType.PASSAGE:
+        if self.is_passage:
             verse_choices = list(self.verse_choices.all())
             self.passage_id = verse_choices[0].reference + u' - ' + verse_choices[-1].reference
             self.save()
