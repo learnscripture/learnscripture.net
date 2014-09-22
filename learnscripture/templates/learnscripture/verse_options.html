@@ -1,6 +1,6 @@
 {% load url from future %}
 
-<div style="text-align: center";>
+<div class="verse-options alert-message block-message info">
 {% for uvs in uvs_list %}
 
   {% if forloop.first %}  {# Avoid doing 'reviseverse' more than once #}
@@ -8,14 +8,15 @@
       {% csrf_token %}
 
       <input type="hidden" name="uvs_id" value="{{ uvs.id }}" />
-      <input type="submit" name="reviseverse" class="btn primary"
-             {% if uvs.needs_testing %}
-             value="Review {{ uvs.item_name }}"
-             {% else %}
-             value="Practise {{ uvs.item_name }}"
-             {% endif %}
-             />
-
+      <p>
+        <input type="submit" name="reviseverse" class="btn primary"
+               {% if uvs.needs_testing %}
+               value="Review {{ uvs.item_name }}"
+               {% else %}
+               value="Practise {{ uvs.item_name }}"
+               {% endif %}
+               />
+      </p>
     </form>
   {% endif %}
 

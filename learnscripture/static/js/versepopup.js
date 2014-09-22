@@ -2,36 +2,27 @@ var learnscripture = (function (learnscripture, $) {
     "use strict";
     var setupVersePopups = function () {
         $('.verse-popup-btn')
-            .popover({
-                title: function () {
-                    return this.attributes['data-title'].value +
-                        " (" + this.attributes['data-version'].value + ")";
-                },
-                content: function () {
+            .toggle(
+                function (ev) {
                     var ref = this.attributes['data-reference'].value;
                     var version = this.attributes['data-version'].value;
-                    var content;
+                    var that = this;
                     $.ajax({url: '/verse-options/',
                             dataType: 'html',
                             type: 'GET',
-                            async: false,
                             data: {
                                 'ref': ref,
                                 'version_slug': version
                             },
                             success: function(html) {
-                                content = html;
+                                var $target = $(that).closest('td')
+                                $target.append('<div class="verse-options-container">' + html + '</div>');
                             }
                            });
-                    return content;
                 },
-                html: true,
-                trigger: 'manual'
-            })
-            .toggle(
-                function(ev) { $(this).button('toggle').popover('show');},
-                function(ev) { $(this).button('toggle').popover('hide');}
-            );
+                function (ev) {
+                    $(this).closest('td').find('.verse-options-container').remove();
+                });
     };
     // Exports
     learnscripture.setupVersePopups = setupVersePopups;

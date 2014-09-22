@@ -29,6 +29,7 @@ BIBLE_BOOKS_DICT = dict((n, i) for (i, n) in enumerate(BIBLE_BOOKS))
 # All possible bible book names, lower case, matched to canonical name
 BIBLE_BOOK_ABBREVIATIONS = {}
 
+
 def make_bible_book_abbreviations():
     global BIBLE_BOOK_ABBREVIATIONS
 
