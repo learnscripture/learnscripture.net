@@ -216,6 +216,16 @@ class CancelLearningVerseHandler(BaseHandler):
         return {}
 
 
+class CancelLearningPassageHandler(BaseHandler):
+    allowed_methods = ['POST']
+
+    @require_preexisting_identity_m
+    def create(self, request):
+        vs_id = int(request.POST['verse_set_id'])
+        request.identity.cancel_passage(vs_id)
+        return {}
+
+
 class ResetProgressHandler(BaseHandler):
     allowed_methods = ('POST',)
 

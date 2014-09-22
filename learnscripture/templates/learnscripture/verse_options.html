@@ -70,19 +70,29 @@
     </form>
   {% endif %}
 
-  {# Stop learning buttons - only for bible verses that are not part of passage sets #}
+  {# Stop learning buttons #}
   {% if uvs.version.is_bible %}
-    {% if not uvs.verse_set or uvs.verse_set.is_selection %}
     <form action="" method="POST">
       {% csrf_token %}
+      {% if not uvs.verse_set or uvs.verse_set.is_selection %}
+
+      {# Selections #}
       <input type="hidden" name="verse_status_id" value="{{ uvs.id }}" />
       <input type="hidden" name="verse_status_reference" value="{{ uvs.reference }}" />
       <p>
-        <input type="submit" name="cancellearning" class="btn primary cancel-learning-btn"
+        <input type="submit" name="cancellearning" class="btn primary cancel-learning-verse-btn"
                value="Stop learning this" />
       </p>
+      {% else %}
+
+      {# Passages #}
+      <input type="hidden" name="verse_set_id" value="{{ uvs.verse_set_id }}" />
+      <p>
+        <input type="submit" name="cancellearning" class="btn primary cancel-learning-passage-btn"
+               value="Stop learning this passage ({{ uvs.verse_set.name }})" />
+      </p>
+      {% endif %}
     </form>
-    {% endif %}
   {% endif %}
 
 {% endfor %}
