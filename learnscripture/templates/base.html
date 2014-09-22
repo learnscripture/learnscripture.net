@@ -18,15 +18,6 @@
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
-    {# We avoid the request for the CSS file if the theme is not active #}
-    {% for theme, fonts in theme_fonts %}
-      {% if current_theme == theme %}
-        {% for font in fonts %}
-    <link href="{{ font }}" rel="stylesheet" type="text/css" />
-        {% endfor %}
-     {% endif %}
-   {% endfor %}
-
     <link rel="apple-touch-icon" href="{{ STATIC_URL }}img/touch-icon.png" />
 
     {% compress css %}
@@ -304,3 +295,13 @@ Raven.config('{{ settings.SENTRY_DSN }}').install();
 </script>
   </body>
 </html>
+
+    {# We avoid the request for the CSS file if the theme is not active #}
+    {# Also, place at bottom to make it non-blocking #}
+    {% for theme, fonts in theme_fonts %}
+      {% if current_theme == theme %}
+        {% for font in fonts %}
+    <link href="{{ font }}" rel="stylesheet" type="text/css" />
+        {% endfor %}
+     {% endif %}
+   {% endfor %}
