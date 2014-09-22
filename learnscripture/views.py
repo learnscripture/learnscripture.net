@@ -275,6 +275,7 @@ def get_user_groups(identity):
         return groups, False
 
 
+@never_cache
 def dashboard(request):
 
     identity = getattr(request, 'identity', None)
