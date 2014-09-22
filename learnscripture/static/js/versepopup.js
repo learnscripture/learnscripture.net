@@ -1,6 +1,6 @@
 var learnscripture = (function (learnscripture, $) {
     "use strict";
-    var cancelLearningClick = function (ev) {
+    var cancelLearningVerseClick = function (ev) {
         ev.preventDefault();
         var $btn = $(this);
         var $form = $btn.closest('form');
@@ -20,7 +20,26 @@ var learnscripture = (function (learnscripture, $) {
             error: learnscripture.ajaxFailed
 
         });
-    }
+    };
+
+    var cancelLearningPassageClick = function (ev) {
+        ev.preventDefault();
+        var $btn = $(this);
+        var $form = $btn.closest('form');
+        var verseSetId = $form.find('input[name=verse_set_id]').val();
+        $.ajax({
+            url: '/api/learnscripture/v1/cancellearningpassage/?format=json',
+            dataType: 'json',
+            type: 'POST',
+            data: {
+                verse_set_id: verseSetId
+            },
+            success: function () {
+                $btn.closest('table').find('tr[data-verse-set-id=' + verseSetId.toString() + ']').remove();
+            },
+            error: learnscripture.ajaxFailed
+        });
+    };
 
     var setupVersePopups = function () {
         $('.verse-popup-btn')
@@ -39,7 +58,8 @@ var learnscripture = (function (learnscripture, $) {
                             success: function(html) {
                                 var $target = $(that).closest('td')
                                 $target.append('<div class="verse-options-container">' + html + '</div>');
-                                $target.find('.cancel-learning-btn').bind('click', cancelLearningClick);
+                                $target.find('.cancel-learning-verse-btn').bind('click', cancelLearningVerseClick);
+                                $target.find('.cancel-learning-passage-btn').bind('click', cancelLearningPassageClick);
                             }
                            });
                 },
