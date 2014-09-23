@@ -713,7 +713,7 @@ def create_or_edit_set(request, set_type=None, slug=None):
         mode = 'create'
 
     title = ('Edit verse set' if verse_set is not None
-             else 'Create selection set' if verse_set.is_selection
+             else 'Create selection set' if set_type == VerseSetType.SELECTION
              else 'Create passage set')
 
     c = {}
