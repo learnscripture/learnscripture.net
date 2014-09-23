@@ -148,7 +148,7 @@ var learnscripture =
                     audioContextBeep(frequency, length);
                 }
             } catch (e) {
-                Raven.captureException(e);
+                // ignore
             }
         }
 

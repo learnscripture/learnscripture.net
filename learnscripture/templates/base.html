@@ -227,7 +227,6 @@
     {% endcomment %}
 
     {% compress js %}
-    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/raven-1.0.7.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery-1.7.1.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/lib/json2.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery-ui-1.8.17.custom.min.js"></script>
@@ -291,7 +290,6 @@
 {% endif %}
 <script type="text/javascript">
 learnscripture.themeFonts = {{ theme_fonts|jsonify|safe }};
-Raven.config('{{ settings.SENTRY_DSN }}').install();
 </script>
   </body>
 </html>
