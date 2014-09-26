@@ -647,7 +647,7 @@ def view_verse_set(request, slug):
             messages.info(request, "Dropped %d verse(s) from learning queue." % len(refs_to_drop))
 
     if hasattr(request, 'identity'):
-        c['can_edit'] = verse_set.created_by_id == request.identity.account_id
+        c['can_edit'] = request.identity.can_edit_verse_set(verse_set)
         verses_started = request.identity.which_verses_started(all_references)
         c['started_count'] = len(verses_started)
 
@@ -705,7 +705,7 @@ def create_or_edit_set(request, set_type=None, slug=None):
     version = request.identity.default_bible_version
 
     if slug is not None:
-        verse_set = get_object_or_404(request.identity.account.verse_sets_created.filter(slug=slug))
+        verse_set = get_object_or_404(request.identity.account.verse_sets_editable.filter(slug=slug))
         set_type = verse_set.set_type
         mode = 'edit'
     else:
@@ -755,7 +755,8 @@ def create_or_edit_set(request, set_type=None, slug=None):
         if form_is_valid:
             verse_set = form.save(commit=False)
             verse_set.set_type = set_type
-            verse_set.created_by = request.identity.account
+            if verse_set.created_by is None:
+                verse_set.created_by = request.identity.account
             verse_set.breaks = breaks
 
             if orig_verse_set_public:

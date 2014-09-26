@@ -313,6 +313,16 @@ class Account(AbstractBaseUser):
         self.following.remove(account)
         clear_friendship_weight_cache(self.id)
 
+    @property
+    def verse_sets_editable(self):
+        if self.is_superuser:
+            return VerseSet.objects.all()
+        else:
+            return self.verse_sets_created
+
+    def can_edit_verse_set(self, verse_set):
+        return self.is_superuser or self == verse_set.created_by
+
 
 def normlise_weighting(weights):
     if not weights:
@@ -1224,6 +1234,11 @@ class Identity(models.Model):
 
     def add_html_notice(self, notice):
         return self.notices.create(message_html=notice)
+
+    def can_edit_verse_set(self, verse_set):
+        if self.account_id is None:
+            return False
+        return self.account.can_edit_verse_set(verse_set)
 
 
 class Notice(models.Model):
