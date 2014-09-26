@@ -1103,11 +1103,12 @@ class Identity(models.Model):
         except IndexError:
             return None
 
-
     def verse_statuses_for_passage(self, verse_set_id):
         # Must be strictly in the bible order
         uvs_list = list(self.verse_statuses.filter(verse_set=verse_set_id,
                                                    ignored=False).order_by('text_order'))
+        if len(uvs_list) == 0:
+            return []
         min_strength = min(uvs.strength for uvs in uvs_list)
         if min_strength > memorymodel.STRENGTH_FOR_GROUP_TESTING:
             for uvs in uvs_list:
