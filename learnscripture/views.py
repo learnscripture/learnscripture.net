@@ -755,7 +755,7 @@ def create_or_edit_set(request, set_type=None, slug=None):
         if form_is_valid:
             verse_set = form.save(commit=False)
             verse_set.set_type = set_type
-            if verse_set.created_by is None:
+            if verse_set.created_by_id is None:
                 verse_set.created_by = request.identity.account
             verse_set.breaks = breaks
 
