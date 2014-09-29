@@ -47,6 +47,8 @@ var learnscripture = (function (learnscripture, $) {
     var WORD_TOGGLE_HIDE_END = 1;
     var WORD_TOGGLE_HIDE_ALL = 2;
 
+    var LOADING_QUEUE_BUFFER_SIZE = 3;
+
     var scrollingTimeoutId = null;
     var fastEventName = learnscripture.isTouchDevice() ? 'touchstart' : 'mousedown';
 
@@ -608,8 +610,8 @@ var learnscripture = (function (learnscripture, $) {
             // Potentially need to load more.
             // Need to do so before we are on the last one,
             // and also give some time for the data to arrive,
-            // so we add a buffer of 2.
-            if (moreToLoad && maxVerseIndex - currentVerseIndex == 2) {
+            // so we add a buffer.
+            if (moreToLoad && maxVerseIndex - currentVerseIndex == LOADING_QUEUE_BUFFER_SIZE) {
                 loadVerses();
             }
         } else {
