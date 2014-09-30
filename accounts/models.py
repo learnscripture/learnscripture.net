@@ -739,7 +739,7 @@ class Identity(models.Model):
             for ref, qapair in version.get_qapairs_by_reference_bulk(refs).items():
                 # catechisms only here
                 qapairs[version_id, ref] = qapair
-            for ref, suggestions in version.get_suggestion_pairs_by_reference_bulk(refs).items():
+            for ref, suggestions in version.get_suggestions_by_reference_bulk(refs).items():
                 # Bibles and catechsims here
                 suggestion_d[version_id, ref] = suggestions
 
@@ -757,7 +757,7 @@ class Identity(models.Model):
                 question, answer = qapair.question, qapair.answer
                 uvs.scoring_text = answer
                 uvs.title_text = uvs.reference + ". " + question
-            uvs.suggestion_pairs = suggestion_d.get((uvs.version_id, uvs.reference), [])
+            uvs.suggestions = suggestion_d.get((uvs.version_id, uvs.reference), [])
 
         return retval
 

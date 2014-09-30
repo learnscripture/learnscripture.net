@@ -5,7 +5,7 @@ import unittest2
 from django.test import TestCase
 
 from accounts.models import Identity
-from bibleverses.models import InvalidVerseReference, Verse, TextVersion, get_passage_sections, VerseSet, split_into_words
+from bibleverses.models import InvalidVerseReference, Verse, TextVersion, get_passage_sections, VerseSet, split_into_words, WordSuggestionData
 from .base import AccountTestMixin
 
 
@@ -281,18 +281,13 @@ class VersionTests(TestCase):
 
     def test_suggestions(self):
         version = TextVersion.objects.get(slug='KJV')
-        self.assertEqual(version.get_suggestion_pairs_by_reference('Genesis 1:1')[1],
-                         [('his', 1.0),
-                          ('all', 0.740),
-                          ('a', 0.653),
-                          ])
+        self.assertEqual(version.get_suggestions_by_reference('Genesis 1:1')[1],
+                         ['a', 'all', 'his'])
 
     def test_suggestions_combo(self):
         version = TextVersion.objects.get(slug='KJV')
-        self.assertEqual(version.get_suggestion_pairs_by_reference('Genesis 1:1-2')[10],
-                         [('and', 1.0),
-                          ('but', 0.049),
-                          ('thou', 0.035)])
+        self.assertEqual(version.get_suggestions_by_reference('Genesis 1:1-2')[10],
+                         ['and', 'but', 'thou'])
 
     def test_suggestions_bulk(self):
         version = TextVersion.objects.get(slug='KJV')
@@ -302,27 +297,27 @@ class VersionTests(TestCase):
                 # - 1 for WordSuggestionData for v1, v2, v3
                 # - 2 for parseref for v2-3,
                 # - 1 for WordSuggestionData for v2-3
-                d = version.get_suggestion_pairs_by_reference_bulk(['Genesis 1:1',
-                                                                    'Genesis 1:2',
-                                                                    'Genesis 1:3',
-                                                                    'Genesis 1:2-3'])
+                d = version.get_suggestions_by_reference_bulk(['Genesis 1:1',
+                                                               'Genesis 1:2',
+                                                               'Genesis 1:3',
+                                                               'Genesis 1:2-3'])
                 self.assertEqual(len(d), 4)
 
     def test_suggestions_update(self):
         version = TextVersion.objects.get(slug='KJV')
         version.record_word_mistakes('Genesis 1:1', [[0, 'but'],
                                                      [1, 'his']])
-        self.assertEqual(version.get_suggestion_pairs_by_reference('Genesis 1:1')[0],
-                         [(u'and', 1.0), (u'but', 1.049), (u'thou', 0.037)])
-        self.assertEqual(version.get_suggestion_pairs_by_reference('Genesis 1:1')[1],
-                         [(u'his', 2.0), (u'all', 0.740), (u'a', 0.653)])
+        self.assertEqual(WordSuggestionData.objects.get(reference='Genesis 1:1', version_slug='KJV').suggestions[0],
+                         [[u'and', 1.0, 0], [u'but', 0.049, 1], [u'thou', 0.037, 0]])
+        self.assertEqual(WordSuggestionData.objects.get(reference='Genesis 1:1', version_slug='KJV').suggestions[1],
+                         [[u'his', 1.0, 1], [u'all', 0.740, 0], [u'a', 0.653, 0]])
 
         version.record_word_mistakes('Genesis 1:2-3', [[1, 'they'],
                                                        [30, 'he']]) # 29 words in Gen 1:2, this is word at index 1 in Gen 1:3
-        self.assertEqual(version.get_suggestion_pairs_by_reference('Genesis 1:2')[1],
-                         [(u'he', 1.0), (u'they', 1.593), (u'thou', 0.403)])
-        self.assertEqual(version.get_suggestion_pairs_by_reference('Genesis 1:3')[1],
-                         [(u'the', 1.0), (u'he', 1.443), (u'they', 0.263)])
+        self.assertEqual(WordSuggestionData.objects.get(reference='Genesis 1:2', version_slug='KJV').suggestions[1],
+                         [[u'he', 1.0, 0], [u'they', 0.593, 1], [u'thou', 0.403, 0]])
+        self.assertEqual(WordSuggestionData.objects.get(reference='Genesis 1:3', version_slug='KJV').suggestions[1],
+                         [[u'the', 1.0, 0], [u'he', 0.443, 1], [u'they', 0.263, 0]])
 
 
 class MockUVS(object):

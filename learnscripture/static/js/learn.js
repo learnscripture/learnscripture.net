@@ -351,7 +351,7 @@ var learnscripture = (function (learnscripture, $) {
         var d = JSON.parse(JSON.stringify(verseStatus));
         // Trim stuff we don't need:
         d.scoring_text_words = null;
-        d.suggestion_pairs = null;
+        d.suggestions = null;
         return d;
     };
 
@@ -1175,35 +1175,17 @@ var learnscripture = (function (learnscripture, $) {
             var $c = $('#id-onscreen-test-container');
             $c.hide(); // for speed.
 
-            var suggestions = currentVerseStatus.suggestion_pairs[currentWordIndex];
+            var suggestions = currentVerseStatus.suggestions[currentWordIndex];
             if (suggestions == undefined) {
                 $c.html('On screen testing is not available for this verse in this version. Sorry!');
                 $c.show();
                 return;
             }
-
-            // suggestions is an array of (word, frequency) pairs,
-            // normalised so that maximum frequency is 1.0
-            // Make bag according to frequency.
-            var bag = [];
-            for (var i = 0; i < suggestions.length; i++) {
-                var suggestion = suggestions[i];
-                for (var j = 0; j < suggestion[1] * 1000; j++) {
-                    bag.push(suggestion[0]);
-                }
-            }
-            // Pick N unique items
             var chosen = [];
-            var CHOICE_COUNT = 10;
-            var correctWord = normaliseWordForSuggestion($w.text());
-            chosen.push(correctWord);
-            while (chosen.length < CHOICE_COUNT && bag.length > 0) {
-                var pos = Math.floor(Math.random() * bag.length);
-                var choice = normaliseWordForSuggestion(bag[pos]);
-                if (chosen.indexOf(choice) === -1) {
-                    chosen.push(choice);
-                }
-                bag = setRemove(bag, [choice]);
+            var correctWord = $w.text();
+            chosen.push(normaliseWordForSuggestion(correctWord));
+            for (var i = 0; i < suggestions.length; i++) {
+                chosen.push(normaliseWordForSuggestion(suggestions[i]));
             }
             chosen.sort();
 

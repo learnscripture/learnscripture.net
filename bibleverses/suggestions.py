@@ -389,8 +389,8 @@ def get_in_batches(qs, batch_size=200):
 def get_all_suggestion_words(version_name):
     s = set()
     for wd in get_in_batches(WordSuggestionData.objects.filter(version_slug=version_name)):
-        for p in wd.get_suggestion_pairs():
-            s |= set(w for w,f in p)
+        for suggestions in wd.get_suggestions():
+            s |= set(suggestions)
     return s
 
 
