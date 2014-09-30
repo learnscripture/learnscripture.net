@@ -19,6 +19,7 @@ from accounts.signals import verse_started, verse_tested, verse_finished, points
 from bibleverses.models import TextVersion, MemoryStage, StageType, VerseSet, VerseSetType, UserVerseStatus, TextType, get_passage_sections, InvalidVerseReference, count_words
 from bibleverses.signals import verse_set_chosen
 from scores.models import TotalScore, ScoreReason, Scores, get_rank_all_time, get_rank_this_week
+from tracking.models import track_querysets
 
 from learnscripture.datastructures import make_choices
 from learnscripture.utils.cache import cache_results, clear_cache_results
@@ -422,6 +423,8 @@ class Identity(models.Model):
                                     blank=True,
                                     related_name='referrals')
 
+    track_learning = models.BooleanField(default=False)
+
     objects = IdentityManager()
 
     @property
@@ -550,6 +553,8 @@ class Identity(models.Model):
         UserVerseStatus.objects.bulk_create(new_uvss)
         return base_uvs_query.all().order_by('text_order') # fresh QuerySet
 
+    @track_querysets(lambda self, reference, *args, **kwargs: [self.verse_statuses.filter(reference=reference)],
+                     lambda self, *args, **kwargs: self.track_learning)
     def record_verse_action(self, reference, version_slug, stage_type, accuracy=None):
         """
         Records an action such as 'READ' or 'TESTED' against a verse.

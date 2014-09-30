@@ -9,8 +9,9 @@ from django.utils import timezone
 
 import accounts.memorymodel
 from awards.models import AwardType
-from bibleverses.models import VerseSet, TextVersion, StageType, MemoryStage, Verse, VerseChoice, WordSuggestionData
+from bibleverses.models import VerseSet, TextVersion, StageType, MemoryStage, Verse, VerseChoice, WordSuggestionData, UserVerseStatus
 from events.models import Event, EventType
+from tracking.models import rewind_models, TrackingSnapshot
 
 from .base import FuzzyInt, AccountTestMixin
 
@@ -620,3 +621,38 @@ class IdentityTests(AccountTestMixin, TestCase):
 
             self.assertEqual(account.awards.filter(award_type=AwardType.CONSISTENT_LEARNER).count(),
                              0 if i < 7 else 1)
+
+    def test_learning_tracking(self):
+        i = self.create_identity(version_slug='NET')
+        i.track_learning = True
+        i.save()
+        vs1 = VerseSet.objects.get(name='Bible 101')
+        i.add_verse_set(vs1)
+        n0 = timezone.now()
+        i.record_verse_action('John 3:16', 'NET', StageType.READ, 1)
+        n1 = timezone.now()
+        i.record_verse_action('John 3:16', 'NET', StageType.TEST, 1)
+
+        def get_uvs():
+            return i.verse_statuses.get(reference='John 3:16',
+                                        version__slug='NET')
+
+        self.assertEqual(get_uvs().strength,
+                         0.1)
+        self.assertEqual(get_uvs().memory_stage,
+                         MemoryStage.TESTED)
+
+        rewind_models(UserVerseStatus, n1)
+        self.assertEqual(get_uvs().strength,
+                         0.0)
+        self.assertEqual(get_uvs().memory_stage,
+                         MemoryStage.SEEN)
+
+        rewind_models(UserVerseStatus, n0)
+        self.assertEqual(get_uvs().strength,
+                         0.0)
+        self.assertEqual(get_uvs().memory_stage,
+                         MemoryStage.ZERO)
+
+        self.assertEqual(TrackingSnapshot.objects.all().count(),
+                         2)
