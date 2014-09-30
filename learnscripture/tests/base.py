@@ -11,7 +11,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
-from accounts.models import Identity, Account, TestingMethod
+from accounts.models import Identity, Account
 from bibleverses.models import TextVersion
 import learnscripture.session
 
