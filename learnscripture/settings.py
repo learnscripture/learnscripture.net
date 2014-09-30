@@ -252,6 +252,7 @@ INSTALLED_APPS = [
     'events',
     'groups',
     'comments',
+    'tracking',
     # Third party
     'piston',
     'mptt',
@@ -267,6 +268,7 @@ INSTALLED_APPS = [
     'rstify',
     'kombu.transport.django',
     'django_markup',
+    'json_field',
 ]
 
 ALLOWED_HOSTS = [".learnscripture.net"]

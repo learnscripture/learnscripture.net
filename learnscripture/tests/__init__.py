@@ -21,6 +21,7 @@ from .memorymodel import *
 from .payments import *
 from .referrals import *
 from .search import *
+from .tracking import *
 from .user_stats import *
 from .user_verses_page import *
 from .versesets import *
