@@ -1,9 +1,13 @@
+from StringIO import StringIO
+from httplib import HTTPResponse
+import importlib
+
+from django.core.handlers.wsgi import WSGIRequest
 from django.db import models
 from django.utils import timezone
 from django.utils.functional import wraps
 from json_field import JSONField
 
-import importlib
 
 SNAPSHOT_INSERT = 'insert'
 SNAPSHOT_UPDATE = 'update'
@@ -190,3 +194,75 @@ def track_querysets(queryset_callable, when_callable):
                 return func(*args, **kwargs)
         return decorated
     return decorator
+
+
+class HttpLog(models.Model):
+    response_data = models.TextField()
+    request_data = JSONField()
+    created = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ['created']
+
+    def __repr__(self):
+        return '<HttpLog {0} {1}>'.format(self.created, self.request.path)
+
+    @classmethod
+    def log_request_response(cls, request, response):
+        log = HttpLog.objects.create(
+            response_data=cls.serialize_response(response),
+            request_data=cls.serialize_request(request))
+        return log
+
+
+    @classmethod
+    def serialize_response(cls, response):
+        return ("HTTP/1.1 {0} {1}\n{2}".format(response.status_code,
+                                               response.reason_phrase,
+                                               response.serialize())).decode('utf-8')
+    @classmethod
+    def serialize_request(cls, request):
+        retval = {}
+        meta = {}
+        for k, v in request.META.items():
+            if not k.startswith('wsgi.'):
+                meta[k] = v
+        retval['meta'] = meta
+        retval['body'] = request.body
+        if hasattr(request, 'session'):
+            retval['session'] = request.session.items()
+        return retval
+
+    @property
+    def request(self):
+        # Fix environ to fool WSGIRequest
+        data = self.request_data
+        meta = data['meta']
+        body = data['body'].encode('utf-8')
+        meta['wsgi.input'] = StringIO(body)
+        req = WSGIRequest(meta)
+        req._body = body
+        if 'session' in data:
+            req.session = dict(data['session'])
+        return req
+
+    @property
+    def response(self):
+        return httpparse(self.response_data.encode('utf-8'))
+
+
+# response parsing:
+
+class FakeSocket():
+    def __init__(self, response_str):
+        self._file = StringIO(response_str)
+    def makefile(self, *args, **kwargs):
+        return self._file
+
+def httpparse(response_str):
+    socket = FakeSocket(response_str)
+    response = HTTPResponse(socket)
+    response.begin()
+    response.content = response.read(len(response_str))
+    response.headers = response.getheaders()
+    return response

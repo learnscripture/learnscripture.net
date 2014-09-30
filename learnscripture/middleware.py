@@ -3,6 +3,7 @@ import os
 import time
 
 from django.utils import timezone
+from django.core.urlresolvers import resolve, Resolver404
 
 from app_metrics.utils import metric
 
@@ -57,3 +58,27 @@ class PaypalDebugMiddleware(object):
                               'learnscripture-paypal-request-%s' %
                               datetime.now().isoformat()),
                  'wb').write(request.META.get('CONTENT_TYPE', '') + '\n\n' + request.body)
+
+LEARNING_VIEWS = [
+    'dashboard',
+    'learn',
+    'learnscripture.api.versestolearn',
+    'learnscripture.api.actioncomplete',
+    'learnscripture.api.skipverse',
+    'learnscripture.api.cancellearningverse',
+    'learnscripture.api.cancellearningpassage',
+    'learnscripture.api.resetprogress',
+    ]
+
+class TrackingMiddleware(object):
+    def process_response(self, request, response):
+        identity = getattr(request, 'identity', None)
+        if identity is not None and identity.track_learning:
+            try:
+                match = resolve(request.path)
+            except Resolver404:
+                return response
+            if match.view_name in LEARNING_VIEWS:
+                from tracking.models import HttpLog
+                HttpLog.log_request_response(request, response)
+        return response
