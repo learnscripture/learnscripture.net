@@ -1,5 +1,6 @@
 from collections import defaultdict
 import math
+import random
 import re
 
 from autoslug import AutoSlugField
@@ -244,32 +245,30 @@ class TextVersion(caching.base.CachingMixin, models.Model):
                     retval.append(wsd)
         return retval
 
-    def get_suggestion_pairs_by_reference(self, reference):
+    def get_suggestions_by_reference(self, reference):
         """
         For the given reference, returns a list of suggestion lists,
-        one list for each word in the verse, where list is a sequence of
-        (word, relative frequency) pairs.
-
+        one list for each word in the verse
         """
         wsds = self._get_ordered_word_suggestion_data(reference)
         # Now combine:
         retval = []
         for wsd in wsds:
-            retval.extend(wsd.get_suggestion_pairs())
+            retval.extend(wsd.get_suggestions())
         return retval
 
-    def get_suggestion_pairs_by_reference_bulk(self, reference_list):
+    def get_suggestions_by_reference_bulk(self, reference_list):
         """
         Returns a dictionary of {ref:suggestions} for each ref in reference_list.
         'suggestions' is itself a list of suggestion dictionaries
         """
         # Do simple ones in bulk:
         simple_wsds = list(self.word_suggestion_data.filter(reference__in=reference_list))
-        s_dict = dict((w.reference, w.get_suggestion_pairs()) for w in simple_wsds)
+        s_dict = dict((w.reference, w.get_suggestions()) for w in simple_wsds)
         # Others:
         for ref in reference_list:
             if ref not in s_dict:
-                s_dict[ref] = self.get_suggestion_pairs_by_reference(ref)
+                s_dict[ref] = self.get_suggestions_by_reference(ref)
         return s_dict
 
     def get_learners(self):
@@ -294,7 +293,7 @@ class TextVersion(caching.base.CachingMixin, models.Model):
         # we need to make sure that word indexes in mistake_list are interpreted
         # correctly and get mapped back to correct WordSuggestionData
         wsds = self._get_ordered_word_suggestion_data(reference)
-        list_sizes = [len(wsd.get_suggestion_pairs()) for wsd in wsds]
+        list_sizes = [len(wsd.get_suggestions()) for wsd in wsds]
 
         # Find correct WordSuggestionData and word offset:
         mapped_mistakes = []
@@ -424,6 +423,8 @@ class Verse(caching.base.CachingMixin, models.Model):
                                        reference=self.reference).delete()
 
 
+SUGGESTION_COUNT = 10
+
 class WordSuggestionData(models.Model):
     # All the suggestion data for a single verse/question
     # For efficiency, we avoid having millions of rows, because
@@ -441,7 +442,7 @@ class WordSuggestionData(models.Model):
     #  [(word, frequency, hits)]
     suggestions = JSONField()
 
-    def get_suggestion_pairs(self):
+    def get_suggestions(self):
         if not self.suggestions:
             return []
         # frequency is the suggested frequency based on
@@ -449,9 +450,32 @@ class WordSuggestionData(models.Model):
         # hits is the number of times someone has chosen this word.
         # We use hits as a strong hint that this is a good word to use.
 
-        return [[(word, frequency + hits)
-                 for word, frequency, hits in suggestion]
-                for suggestion in self.suggestions]
+        # We could do some of this client side, but we save on bandwidth by
+        # returning only a selection of the words, not all the data.
+
+        retval = []
+        for word_suggestions in self.suggestions:
+            # Make a bag according to frequency
+            bag = []
+            if len(word_suggestions) <= SUGGESTION_COUNT:
+                bag = [word for word, frequency, count in word_suggestions]
+            else:
+                for word, frequency, hits in word_suggestions:
+                    # If something has been hit (chosen incorrectly) twice (once
+                    # could be accident), that's a good indication it is a good
+                    # alternative candidate, so weight that strongly.
+                    modified_frequency = hits/2.0 + frequency
+                    bag.extend([word] * int(modified_frequency * 1000))
+            # pick N unique items
+            chosen = set()
+            while len(chosen) < SUGGESTION_COUNT and len(bag) > 0:
+                item = random.choice(bag)
+                bag = [i for i in bag if i != item]
+                if item not in chosen:
+                    chosen.add(item)
+
+            retval.append(sorted(chosen))
+        return retval
 
     def record_mistake(self, word_num, wrong_word):
         # Update hits for suggestion 'word' for word number 'word_num'
@@ -787,8 +811,8 @@ class UserVerseStatus(models.Model):
 
     # This will be overwritten by get_verse_statuses_bulk
     @cached_property
-    def suggestion_pairs(self):
-        return self.version.get_suggestion_pairs_by_reference(self.reference)
+    def suggestions(self):
+        return self.version.get_suggestions_by_reference(self.reference)
 
     def __unicode__(self):
         return u"%s, %s" % (self.reference, self.version.slug)
