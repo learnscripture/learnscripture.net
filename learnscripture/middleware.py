@@ -80,5 +80,8 @@ class TrackingMiddleware(object):
                 return response
             if match.view_name in LEARNING_VIEWS:
                 from tracking.models import HttpLog
-                HttpLog.log_request_response(request, response)
+                try:
+                    HttpLog.log_request_response(request, response)
+                except:
+                    pass # Don't take down process if we can't log
         return response

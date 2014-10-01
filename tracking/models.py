@@ -220,12 +220,13 @@ class HttpLog(models.Model):
         return ("HTTP/1.1 {0} {1}\n{2}".format(response.status_code,
                                                response.reason_phrase,
                                                response.serialize())).decode('utf-8')
+
     @classmethod
     def serialize_request(cls, request):
         retval = {}
         meta = {}
         for k, v in request.META.items():
-            if not k.startswith('wsgi.'):
+            if not k.startswith('wsgi.') and not v.__class__.__module__ == 'socket':
                 meta[k] = v
         retval['meta'] = meta
         retval['body'] = request.body
