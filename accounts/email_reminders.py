@@ -9,6 +9,7 @@ from django.template import loader
 from django.utils import timezone
 
 from accounts.models import Account
+from accounts.tokens import get_login_token
 
 
 def send_email_reminders():
@@ -50,6 +51,7 @@ def send_email_reminders():
              'overdue_by': (n - v.next_test_due).days,
              'domain': current_site.domain,
              'site_name': current_site.name,
+             'login_token': get_login_token(account),
              }
 
         EmailMessage(

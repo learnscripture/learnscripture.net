@@ -3,6 +3,7 @@ import os
 import time
 
 from django.utils import timezone
+from django.conf import settings
 from django.core.urlresolvers import resolve, Resolver404
 
 from app_metrics.utils import metric
@@ -16,6 +17,38 @@ class IdentityMiddleware(object):
             request.identity = identity
 
         session.save_referrer(request)
+
+
+class TokenLoginMiddleware(object):
+    """
+    Do login if there is a valid token in request.GET['t'].
+
+    This enables us to send people emails that have URLs allowing them to log in
+    automatically.
+    """
+    def process_request(self, request):
+        from learnscripture import session
+        from accounts.models import Account
+        from accounts.tokens import check_login_token
+        token = request.GET.get('t', None)
+        if token is None:
+            return
+        account_name = check_login_token(token)
+        if account_name is None:
+            return
+        try:
+            account = Account.objects.get(username=account_name)
+        except Account.DoesNotExist:
+            return
+
+        # Success, fake a log in:
+        session.login(request, account.identity)
+        # Need to do django.contrib.auth login for the sake of some views that
+        # look for request.user (e.g. password change).
+        from django.contrib.auth import login
+        # Need to frig it because we are not going to call authenticate.
+        account.backend = settings.AUTHENTICATION_BACKENDS[0]
+        login(request, account)
 
 
 class StatsMiddleware(object):
