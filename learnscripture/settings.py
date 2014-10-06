@@ -122,6 +122,10 @@ DATABASE_ROUTERS = ['learnscripture.router.LearnScriptureRouter']
 
 AUTH_USER_MODEL = 'accounts.Account'
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend'
+]
+
 SESSION_COOKIE_AGE = 3600 * 24 * 31 * 4 # 4 months
 
 ADMINS = [
@@ -198,6 +202,7 @@ MIDDLEWARE_CLASSES = [
         (True, 'django.middleware.common.CommonMiddleware'),
         (True, 'django.contrib.sessions.middleware.SessionMiddleware'),
         (True, 'django.middleware.csrf.CsrfViewMiddleware'),
+        (True, 'learnscripture.middleware.TokenLoginMiddleware'),
         (True, 'django.contrib.auth.middleware.AuthenticationMiddleware'),
         (True, 'django.contrib.messages.middleware.MessageMiddleware'),
         (True, 'django.middleware.clickjacking.XFrameOptionsMiddleware'),
