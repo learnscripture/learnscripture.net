@@ -604,15 +604,28 @@ var learnscripture = (function (learnscripture, $) {
     };
 
     var nextVerse = function () {
-        if (nextVersePossible()) {
+        var doIt = function () {
             currentVerseIndex++;
             loadCurrentVerse();
-            // Potentially need to load more.
-            // Need to do so before we are on the last one,
-            // and also give some time for the data to arrive,
-            // so we add a buffer.
-            if (moreToLoad && maxVerseIndex - currentVerseIndex == LOADING_QUEUE_BUFFER_SIZE) {
-                loadVerses();
+            learnscripture.hideLoadingIndicator();
+        };
+
+        if (nextVersePossible()) {
+            if (currentVerseIndex == maxVerseIndex) {
+                // We got to the end, and the next batch didn't load in time. So
+                // we have to load them and wait synchronously before we can
+                // continue.
+                learnscripture.indicateLoading()
+                loadVerses(doIt);
+            } else {
+                doIt();
+                // Potentially need to load more.
+                // Need to do so before we are on the last one,
+                // and also give some time for the data to arrive,
+                // so we add a buffer.
+                if (moreToLoad && maxVerseIndex - currentVerseIndex == LOADING_QUEUE_BUFFER_SIZE) {
+                    loadVerses();
+                }
             }
         } else {
             finish();
@@ -620,7 +633,7 @@ var learnscripture = (function (learnscripture, $) {
     };
 
     var nextVersePossible = function () {
-        return (currentVerseIndex < maxVerseIndex);
+        return (currentVerseIndex < maxVerseIndex) || moreToLoad;
     };
 
     var markReadAndNextVerse = function () {
@@ -635,9 +648,7 @@ var learnscripture = (function (learnscripture, $) {
         };
 
         if ($.active) {
-            // Indicate that something is happening:
-            $('#id-ajax-loading').show();
-            $('#id-ajax-status').show();
+            learnscripture.indicateLoading();
             // Do the action when we've finished sending data
             $('body').ajaxStop(go);
         } else {
@@ -1472,6 +1483,8 @@ var learnscripture = (function (learnscripture, $) {
                     // It would only be less if versestolearn has run out of
                     // things to send. So we don't need to try again.
                     moreToLoad = false;
+                } else {
+                    moreToLoad = true;
                 }
                 if (callbackAfter !== undefined) {
                     callbackAfter();
@@ -1546,7 +1559,7 @@ var learnscripture = (function (learnscripture, $) {
         setUpStageList(verseStatus);
         $('.selection-set-only').toggle(!isPassageType(verseStatus));
 
-        var nextBtns = $('#id-next-verse-btn, #id-context-next-verse-btn, #id-read-anyway-vext-verse-btn');
+        var nextBtns = $('#id-next-verse-btn, #id-context-next-verse-btn');
         if (nextVersePossible()) {
             nextBtns.val('Next');
         } else {
