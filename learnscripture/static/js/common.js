@@ -129,8 +129,7 @@ var learnscripture = (function (learnscripture, $) {
             + info.failures.toString() + " of "
             + (info.attempts - 1).toString() + // -1 because we are want to display '1 of 10' the first time we get an error.
             "...";
-        $('#id-ajax-status').show();
-        $('#id-ajax-loading').show();
+        indicateLoading();
         $('#id-ajax-errors').html('<span>' + text + '</span>');
     };
 
@@ -138,6 +137,16 @@ var learnscripture = (function (learnscripture, $) {
         $('#id-ajax-status').show();
         $('#id-ajax-loading').hide();
         $('#id-ajax-errors').html('<span>Data not saved. Please check internet connection</span>');
+    };
+
+    var indicateLoading = function () {
+        $('#id-ajax-status').show();
+        $('#id-ajax-loading').show();
+    };
+
+    var hideLoadingIndicator = function () {
+        $('#id-ajax-status').hide();
+        $('#id-ajax-loading').hide();
     };
 
     var ajaxRetrySucceeded = function () {
@@ -163,6 +172,8 @@ var learnscripture = (function (learnscripture, $) {
     learnscripture.ajaxRetrySucceeded = ajaxRetrySucceeded;
     learnscripture.isTouchDevice = isTouchDevice;
     learnscripture.isAndroid = isAndroid;
+    learnscripture.indicateLoading = indicateLoading;
+    learnscripture.hideLoadingIndicator = hideLoadingIndicator;
     return learnscripture;
 
 }(learnscripture || {}, $));
@@ -203,8 +214,7 @@ $(document).ready(function () {
     });
 
     $(document).ajaxStop(function () {
-        $('#id-ajax-status').hide();
-        $('#id-ajax-loading').hide();
+        learnscripture.hideLoadingIndicator();
     });
 
 });
