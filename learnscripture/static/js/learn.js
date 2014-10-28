@@ -614,8 +614,15 @@ var learnscripture = (function (learnscripture, $) {
                 // We got to the end, and the next batch didn't load in time. So
                 // we have to load them and wait synchronously before we can
                 // continue.
-                learnscripture.indicateLoading()
-                loadVerses(doIt);
+                learnscripture.indicateLoading();
+                if ($.active) {
+                    // Still waiting for something to finish, probably.
+                    // loadVerses. We don't want to ask again in that
+                    // case, so just wait.
+                    window.setTimeout(nextVerse, 500);
+                } else {
+                    loadVerses(doIt);
+                }
             } else {
                 doIt();
                 // Potentially need to load more.
