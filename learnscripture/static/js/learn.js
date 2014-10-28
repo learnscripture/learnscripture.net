@@ -471,7 +471,6 @@ var learnscripture = (function (learnscripture, $) {
             $('#id-more-practice-btn').removeClass('primary').hide();
             $('#id-next-verse-btn').addClass('primary');
         }
-        testingStatus.hide();
         bindDocKeyPress();
     };
 
@@ -853,7 +852,9 @@ var learnscripture = (function (learnscripture, $) {
         testSetUp: function () { // function to run when a test is started
             this.conditionalShowReference();
         },
-        testTearDown: function () {}, // function to run when a test is finished
+        testTearDown: function () { // function to run when a test is finished
+            testingStatus.hide();
+        },
         wordTestSetUp: function () {}, // function to run when a new word is being tested
         wordTestTearDown: function () {}, // function to run when a new word is finished tested
         nextWord: function () {
@@ -885,6 +886,7 @@ var learnscripture = (function (learnscripture, $) {
         },
 
         testTearDown: function () {
+            Object.getPrototypeOf(KeyboardTestingStrategy).testTearDown.call(this);
             // For Safari, it seems we need to blur inputBox before we hide it
             // or hide #id-keyboard-test-bar, otherwise it retains focus, which
             // means that docKeyPress doesn't work.
@@ -1104,6 +1106,7 @@ var learnscripture = (function (learnscripture, $) {
         },
 
         testTearDown: function () {
+            Object.getPrototypeOf(OnScreenTestingStrategy).testTearDown.call(this);
             if (this.wordMistakes !== undefined && this.wordMistakes.length > 0) {
                 var url = '/api/learnscripture/v1/recordwordmistakes/?format=json';
                 $.ajax({
@@ -1926,6 +1929,9 @@ var learnscripture = (function (learnscripture, $) {
     };
 
     var versionSelectChanged = function (ev) {
+        if (currentStage.testMode && testingMethodStrategy != null) {
+            testingMethodStrategy.testTearDown();
+        }
         $.ajax({
             url: '/api/learnscripture/v1/changeversion/?format=json',
             dataType: 'json',
