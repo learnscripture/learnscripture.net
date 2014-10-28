@@ -40,20 +40,25 @@ def get_verse_statuses(request):
 
     ids = _get_verse_status_ids(request)
 
-    # Pagination:
-    page = request.GET.get('p', 0)
-    ids = ids[page * VERSE_STATUS_BATCH_SIZE:][:VERSE_STATUS_BATCH_SIZE]
+    if len(ids) > 0:
+        max_order_val = max(order for order, uvs_id, n in ids)
+    else:
+        max_order_val = None
+
+    # Batching:
+    id_batch = ids[:VERSE_STATUS_BATCH_SIZE]
 
     bulk_ids = [uvs_id
-                for order, uvs_id, needs_testing_override in ids]
+                for order, uvs_id, needs_testing_override in id_batch]
     uvs_dict = request.identity.get_verse_statuses_bulk(bulk_ids)
     retval = []
-    for order, uvs_id, needs_testing_override in ids:
+    for order, uvs_id, needs_testing_override in id_batch:
         try:
             uvs = uvs_dict[uvs_id]
         except KeyError:
             continue
         uvs.learn_order = order
+        uvs.max_order_val = max_order_val # Stick the same value on all, for convenience
         if needs_testing_override is not None:
             uvs.needs_testing_override = needs_testing_override
 

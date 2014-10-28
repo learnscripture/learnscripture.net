@@ -1467,6 +1467,8 @@ var learnscripture = (function (learnscripture, $) {
                 if (versesToLearn === null) {
                     versesToLearn = {};
                 }
+                moreToLoad = true;
+
                 for (i = 0; i < data.length; i++) {
                     var verse = data[i];
                     versesToLearn[verse.learn_order] = verse;
@@ -1478,13 +1480,16 @@ var learnscripture = (function (learnscripture, $) {
                         verse.learn_order < minVerseIndex) {
                         minVerseIndex = verse.learn_order;
                     }
+                    if (verse.max_order_val != undefined && verse.learn_order == verse.max_order_val) {
+                        moreToLoad = false;
+                    }
                 }
+                // TODO - this is backwards compat for sessions that don't have
+                // verse.max_order_val attribute
                 if (data.length < VERSE_STATUS_BATCH_SIZE) {
                     // It would only be less if versestolearn has run out of
                     // things to send. So we don't need to try again.
                     moreToLoad = false;
-                } else {
-                    moreToLoad = true;
                 }
                 if (callbackAfter !== undefined) {
                     callbackAfter();
