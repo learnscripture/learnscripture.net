@@ -66,13 +66,7 @@ def get_verse_statuses(request):
 
 
 def _get_verse_status_ids(request):
-    ret = request.session.get('verses_to_learn', [])
-    if len(ret) > 0:
-        if len(ret[0]) != 3:
-            # backwards compat for old format, ignore it
-            # rather than error out later.
-            return []
-    return ret
+    return request.session.get('verses_to_learn', [])
 
 
 def _save_verse_status_ids(request, ids):
