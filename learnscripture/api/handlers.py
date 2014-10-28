@@ -102,6 +102,7 @@ class VersesToLearnHandler(BaseHandler):
         'scoring_text_words',
         'title_text',
         'learn_order',
+        'max_order_val',
         'learning_type',
         'return_to',
         )
