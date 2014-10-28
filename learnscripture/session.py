@@ -38,15 +38,26 @@ def get_verse_statuses(request):
         else:
             learning_type = LearningType.REVISION
 
-    ids = _get_verse_status_ids(request)
+    id_data = _get_verse_status_ids(request)
 
-    if len(ids) > 0:
-        max_order_val = max(order for order, uvs_id, n in ids)
+    if len(id_data) > 0:
+        max_order_val = max(order for order, uvs_id, n in id_data)
     else:
         max_order_val = None
 
+    # Filtering:
+    seen = request.GET.get('seen', '').strip()
+    if seen:
+        # Don't send them things they already have
+        seen_ids = set([int(x) for x in seen.split(',')])
+    else:
+        seen_ids = set()
+
+    id_batch = [(order, uvs_id, n) for order, uvs_id, n in id_data if uvs_id not in seen_ids]
+
     # Batching:
-    id_batch = ids[:VERSE_STATUS_BATCH_SIZE]
+    id_batch = id_batch[:VERSE_STATUS_BATCH_SIZE]
+
 
     bulk_ids = [uvs_id
                 for order, uvs_id, needs_testing_override in id_batch]

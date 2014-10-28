@@ -1444,10 +1444,27 @@ var learnscripture = (function (learnscripture, $) {
 
     // ========= Handling verse loading =======
 
+    var getSeenVerseIds = function () {
+        if (versesToLearn == null) {
+            return []
+        }
+        var keys = Object.keys(versesToLearn);
+        var ids = [];
+        for (var i = 0; i < keys.length; i++) {
+            ids.push(versesToLearn[keys[i]].id);
+        }
+        return ids;
+    };
+
     var loadVerses = function (callbackAfter) {
-        var url = '/api/learnscripture/v1/versestolearn/?format=json&r=' + Math.floor(Math.random() * 1000000000).toString();
+        var url = '/api/learnscripture/v1/versestolearn/';
         $.ajax({
             url: url,
+            data: {
+                format: 'json',
+                seen: getSeenVerseIds().join(","),
+                r: Math.floor(Math.random() * 1000000000).toString() // IE cache breaker
+            },
             dataType: 'json',
             type: 'GET',
             success: function (data) {
