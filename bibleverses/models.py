@@ -431,7 +431,7 @@ class WordSuggestionData(models.Model):
     # we always need all the suggestions for a verse together.
 
     # For practical reasons, this table is stored in a separate DB, so it has no
-    # explicit FKs to the main DB. So use '
+    # explicit FKs to the main DB.
     version_slug = models.CharField(max_length=20, default='')
     reference = models.CharField(max_length=100)
     hash = models.CharField(max_length=40) # SHA1 of text
@@ -455,24 +455,41 @@ class WordSuggestionData(models.Model):
 
         retval = []
         for word_suggestions in self.suggestions:
-            # Make a bag according to frequency
-            bag = []
-            if len(word_suggestions) <= SUGGESTION_COUNT:
-                bag = [word for word, frequency, count in word_suggestions]
-            else:
-                for word, frequency, hits in word_suggestions:
-                    # If something has been hit (chosen incorrectly) twice (once
-                    # could be accident), that's a good indication it is a good
-                    # alternative candidate, so weight that strongly.
-                    modified_frequency = hits/2.0 + frequency
-                    bag.extend([word] * int(modified_frequency * 1000))
-            # pick N unique items
+            # Get modified frequencies
+
+            # Calculated frequency is always between 0 and 1.
+            # Hits can be 0 or higher.
+
+            # If something has been hit (chosen incorrectly) twice (once
+            # could be accident), that's a good indication it is a good
+            # alternative candidate, so weight that strongly.
+
+            # However, we don't want hits to overwhelm all other possibilities
+            # which haven't been hit yet, so we put a cap of 4
+            pairs = [(word, min(hits/2.0, 4) + frequency)
+                     for word, frequency, hits in word_suggestions]
+
+            # Normalise:
+            max_freq = max(frequency for word, frequency in pairs)
+            pairs = [(word, frequency/max_freq) for word, frequency in pairs]
+
+            # Make a random selection, weighted according to frequency
             chosen = set()
-            while len(chosen) < SUGGESTION_COUNT and len(bag) > 0:
-                item = random.choice(bag)
-                bag = [i for i in bag if i != item]
-                if item not in chosen:
-                    chosen.add(item)
+            available = pairs[:]
+            while len(chosen) < SUGGESTION_COUNT and len(available) > 0:
+                if len(available) == 1:
+                    # No point doing random
+                    picked = available[0][0]
+                else:
+                    # Weighting:
+                    threshold = random.random() # 0..1
+                    possible = [word for word, freq in available if freq >= threshold]
+                    if not possible:
+                        continue
+                    # Pick one
+                    picked = random.choice(possible)
+                chosen.add(picked)
+                available = [(word, freq) for word, freq in available if word != picked]
 
             retval.append(sorted(chosen))
         return retval
