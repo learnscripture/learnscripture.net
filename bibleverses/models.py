@@ -469,9 +469,10 @@ class WordSuggestionData(models.Model):
             pairs = [(word, min(hits/2.0, 4) + frequency)
                      for word, frequency, hits in word_suggestions]
 
-            # Normalise:
+            # Normalise, and also give low frequency words
+            # a boost, because they are not being seen at all
             max_freq = max(frequency for word, frequency in pairs)
-            pairs = [(word, frequency/max_freq) for word, frequency in pairs]
+            pairs = [(word, math.sqrt(frequency/max_freq)) for word, frequency in pairs]
 
             # Make a random selection, weighted according to frequency
             chosen = set()
