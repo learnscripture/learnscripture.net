@@ -66,8 +66,7 @@ class Command(BaseCommand):
         if len(args) > 0:
             thesaurus = get_thesaurus(args[0])
         else:
-            thesaurus = None
-            print "WARNING: Generating without thesaurus"
+            raise ValueError("Need to pass thesaurus (mobythes.aur) filename on command line")
 
         for v in TextVersion.objects.all():
             print "=== " + v.slug + " ==="

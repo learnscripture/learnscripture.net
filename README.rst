@@ -88,3 +88,30 @@ necessary, and chef/puppet would probably not provide easy shortcuts.
 Most config for these apps is stored in ./config (ideally all should be there)
 
 See fabfile.py for more details on some of these things.
+
+New texts and catechisms
+========================
+
+* The text needs to be prepared and loaded into the database in the development
+  environment. This involves creating TextVersion and then adding:
+
+  * For Bibles, Verse instances corresponding to every Verse in the KJV
+    (including missing verses, which should be marked with missing=True)
+
+  * For catechisms, QAPairs for each questions.
+
+* ``./manage.py setup_bibleverse_suggestions`` needs to be run (possibly
+  modify it first, to only do the newly added text, for speed. By default it will
+  skip things that are done already, but that still takes a long time).
+
+* Test locally.
+
+* Modify the new TextVersion so that it is not public.
+
+* Dump the text and the word suggestions and transfer to
+  the server.
+
+* Load the text and word suggestions on the server, making sure to load them
+  into the right databases.
+
+* Mark the text as public via the admin
