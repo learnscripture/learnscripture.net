@@ -16,6 +16,25 @@ Loading {% include "learnscripture/loading_animation.html" %}
 
 <div id="id-controls" style="display:none;">
 
+  <div id="id-verse-options">
+    {% include "learnscripture/version_select.html" %}
+
+    <div class="verse-dropdown dropdown">
+      <ul> {# Needed for bootstrap-dropdown #}
+        <li>
+          <a href="#" class="btn dropdown-toggle2" id="id-verse-dropdown"><i class="icon-verseoptions"></i><span class="options-caption"> Options</span><span class="caret"></span></a>
+          <ul class="dropdown-menu dropdown-menu-right">
+            <li><a href="#" id="id-skip-verse-btn">Skip this</a></li>
+            <span class="selection-set-only">
+              <li><a href="#" id="id-cancel-learning-btn">Stop learning this</a></li>
+            </span>
+            <li><a href="#" id="id-reset-progress-btn">Reset progress</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+
   <h2 id="id-verse-title"></h2>
 
   <div id="id-instructions">
@@ -67,25 +86,6 @@ Loading {% include "learnscripture/loading_animation.html" %}
     <div class="current-verse-wrapper">
       <div class="current-verse">
       </div>
-    </div>
-    <div id="id-verse-options">
-      <div class="verse-dropdown dropdown" style="display: inline-block;">
-        <ul> {# Needed for bootstrap-dropdown #}
-          <li>
-            <a href="#" class="btn dropdown-toggle2" id="id-verse-dropdown">Options <span class="caret"></span></a>
-            <ul class="dropdown-menu">
-              <li><a href="#" id="id-skip-verse-btn">Skip this</a></li>
-              <span class="selection-set-only">
-              <li><a href="#" id="id-cancel-learning-btn">Stop learning this</a></li>
-              </span>
-              <li><a href="#" id="id-reset-progress-btn">Reset progress</a></li>
-            </ul>
-          </li>
-        </ul>
-      </div>
-
-      {% include "learnscripture/version_select.html" %}
-
     </div>
   </div>
 
