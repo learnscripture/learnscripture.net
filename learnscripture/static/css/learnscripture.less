@@ -619,6 +619,11 @@ ul.messagelist li.error {
     background-image: url(/static/admin/img/icon_error.gif);
 }
 
+.dropdown-menu-right {
+    right: 0px;
+    left: auto;
+}
+
 /* Various pages */
 
 p.verselist {
@@ -761,9 +766,10 @@ span.versenumber {
 }
 
 #id-verse-options {
-    border-top: 1px solid #ccc;
-    #id-version-select {
-        float: right;
+    display: block;
+    float: right;
+    div {
+        display: inline-block;
     }
 }
 
@@ -1496,6 +1502,10 @@ p.referral-link {
         td, th {
             padding: 5px 6px 4px;
         }
+    }
+
+    #id-verse-options .options-caption {
+        display: none;
     }
 }
 
