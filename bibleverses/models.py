@@ -530,6 +530,7 @@ class QAPair(models.Model):
                            ('catechism', 'reference')]
 
         verbose_name = "QA pair"
+        ordering = ['order']
 
     def __unicode__(self):
         return self.reference + " " + self.question
