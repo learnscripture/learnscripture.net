@@ -1,9 +1,6 @@
 README
 ======
 
-TODO
-
-
 
 Business logic
 ==============
@@ -108,8 +105,7 @@ New texts and catechisms
 
 * Modify the new TextVersion so that it is not public.
 
-* Dump the text and the word suggestions and transfer to
-  the server.
+* Dump the text and the word suggestions and transfer to the server.
 
 * Load the text and word suggestions on the server, making sure to load them
   into the right databases.
