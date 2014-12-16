@@ -4,6 +4,9 @@ from django import forms
 from .models import TextVersion, Verse, VerseSet, VerseChoice, QAPair, UserVerseStatus
 
 
+class TextVersionAdmin(admin.ModelAdmin):
+    list_display = ['short_name', 'slug', 'full_name', 'text_type', 'url']
+
 class VerseChoiceAdminForm(forms.ModelForm):
     def clean_reference(self):
         ref = self.cleaned_data['reference']
@@ -58,7 +61,7 @@ class UserVerseStatusAdmin(admin.ModelAdmin):
         return super(UserVerseStatusAdmin, self).queryset(request).select_related('for_identity__account')
 
 
-admin.site.register(TextVersion)
+admin.site.register(TextVersion, TextVersionAdmin)
 admin.site.register(VerseSet, VerseSetAdmin)
 admin.site.register(Verse, VerseAdmin)
 admin.site.register(QAPair, QAPairAdmin)
