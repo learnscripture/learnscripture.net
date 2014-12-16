@@ -58,17 +58,19 @@ def version_thesaurus(version, base_thesaurus):
     return d
 
 class Command(BaseCommand):
-    def handle(self, *args, **options):
+    args = 'thesaurus_filename <version_slug version_slug ...>'
+
+    def handle(self, thesaurus_filename, *args, **options):
         # Pass filename of moby thesaurus .aur file as arg
         from bibleverses.suggestions import generate_suggestions
         from bibleverses.models import TextVersion
 
-        if len(args) > 0:
-            thesaurus = get_thesaurus(args[0])
-        else:
-            raise ValueError("Need to pass thesaurus (mobythes.aur) filename on command line")
+        thesaurus = get_thesaurus(thesaurus_filename)
 
-        for v in TextVersion.objects.all():
+        versions = TextVersion.objects.all()
+        if args:
+            versions = versions.filter(slug__in=list(args))
+        for v in versions:
             print "=== " + v.slug + " ==="
             if thesaurus:
                 v_thesaurus = version_thesaurus(v, thesaurus)

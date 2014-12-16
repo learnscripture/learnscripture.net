@@ -90,16 +90,19 @@ New texts and catechisms
 ========================
 
 * The text needs to be prepared and loaded into the database in the development
-  environment. This involves creating TextVersion and then adding:
+  environment. This involves creating TextVersion in the admin, and then adding:
 
   * For Bibles, Verse instances corresponding to every Verse in the KJV
     (including missing verses, which should be marked with missing=True)
 
   * For catechisms, QAPairs for each questions.
 
-* ``./manage.py setup_bibleverse_suggestions`` needs to be run (possibly
-  modify it first, to only do the newly added text, for speed. By default it will
-  skip things that are done already, but that still takes a long time).
+    Create JSON file with a list of [number, question, answer]
+
+    run: ``./manage.py load_catechism <slug> <json_filename>``
+
+* ``./manage.py setup_bibleverse_suggestions`` needs to be run, passing
+  in the thesaurus 'mobythes.aur' filename and the version slug
 
 * Test locally.
 
