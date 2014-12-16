@@ -106,11 +106,30 @@ New texts and catechisms
 
 * Test locally.
 
-* Modify the new TextVersion so that it is not public.
+* Create new TextVersion on live site, make sure that it is not public.
 
-* Dump the text and the word suggestions and transfer to the server.
+* Copy JSON file to live server:
 
-* Load the text and word suggestions on the server, making sure to load them
+  rsync ../texts/NCC.json cciw@learnscripture.net:/home/cciw
+
+* Load JSON file into live site
+
+  ssh cciw@learnscripture.net
+  cd ~/webapps/learnscripture_django/src
+  . ../venv/bin/activate
+  ./manage.py load_catechism NCC ~/NCC.json
+
+* Dump the word suggestions and transfer to the server.
+
+  e.g.:
+
+  psql -U learnscripture -d learnscripture_wordsuggestions -c "\\copy (select version_slug, reference, hash, suggestions from bibleverses_wordsuggestiondata where version_slug = 'NCC') TO stdout WITH CSV HEADER;" > wsd_NCC.csv
+
+  rsync wsd_NCC.csv cciw@learnscripture.net:/home/cciw
+
+* Load the word suggestions on the server, making sure to load them
   into the right databases.
+
+  psql -U cciw_learnscripture -d learnscripture_wordsuggestions -c "\\copy bibleverses_wordsuggestiondata (version_slug, reference, hash, suggestions) from stdin csv" < ~/wsd_NCC.csv
 
 * Mark the text as public via the admin
