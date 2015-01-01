@@ -1,6 +1,14 @@
 README
 ======
 
+This is the source code for http://learnscripture.net/
+
+Since there have only ever been one developer on the project to date, this
+repo doesn't contain nice instructions for setting the project up, but it
+does contain all the source code including deployment scripts, and excluding
+only a small file containing passwords.
+
+Some notes to help understand the project are below.
 
 Business logic
 ==============
@@ -8,7 +16,7 @@ Business logic
 As usual with Django apps, there is debate about where best to put business
 logic. Since this is a relatively small app, most business logic has been put
 onto Models, which attempt to encapsulate a lot of the schema so that client
-code can (roughly) obey the Law of Demeter
+code can (roughly) obey the Law of Demeter.
 
 This means that a lot of business logic is driven off the Identity (which in
 turn delegates to Account for some things). A middleware attaches identity to
