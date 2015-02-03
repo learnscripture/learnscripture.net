@@ -348,10 +348,11 @@ LOGGING = {
 
 if DEBUG:
     LOGGING['root']['handlers'] = ['console']
-    RAVEN_CONFIG = {}
+    LOGGING['loggers']['celery']['handlers'] = ['console']
 
 if TESTING:
     LOGGING['handlers']['console']['level'] = 'ERROR'
+
 
 FIBER_DEFAULT_TEMPLATE = 'fiber_singlecol.html'
 FIBER_TEMPLATE_CHOICES = [(FIBER_DEFAULT_TEMPLATE, 'Single column')]
@@ -418,9 +419,14 @@ CAMPAIGN_CONTEXT_PROCESSORS = [
 
 ### Raven
 
-RAVEN_CONFIG = {
-    'dsn': SENTRY_DSN,
-}
+if DEBUG:
+    RAVEN_CONFIG = {}
+    SENTRY_DSN = None
+    SENTRY_KEY = None
+else:
+    RAVEN_CONFIG = {
+        'dsn': SENTRY_DSN,
+    }
 
 ### Celery ###
 
