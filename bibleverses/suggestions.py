@@ -5,14 +5,16 @@ from __future__ import unicode_literals
 from collections import Counter
 import glob
 import hashlib
+import os
 import pickle
 import random
 import re
 import sys
 
+from django.conf import settings
 import pykov
 
-from bibleverses.models import get_whole_book, TextType, BIBLE_BOOKS, WordSuggestionData, split_into_words, is_punctuation, Verse, QAPair
+from bibleverses.models import get_whole_book, TextType, BIBLE_BOOKS, WordSuggestionData, split_into_words, is_punctuation, Verse, QAPair, TextVersion
 
 PUNCTUATION = "!?,.<>()[];:\"'-–"
 PUNCTUATION_OR_WHITESPACE = PUNCTUATION + " \n\r\t"
@@ -103,6 +105,8 @@ def generate_suggestions(version, ref=None, missing_only=True, thesaurus=None):
     def is_done(items):
         if missing_only:
             references = [item.reference for item in items]
+            if ref is not None and ref not in references:
+                return True
             if version.word_suggestion_data.filter(reference__in=references).count() == len(references):
                 # All done
                 print "Skipping %s %s" % (version.slug, ' '.join(references))
@@ -110,10 +114,20 @@ def generate_suggestions(version, ref=None, missing_only=True, thesaurus=None):
         return False
 
     if version.text_type == TextType.BIBLE:
-        for book in BIBLE_BOOKS:
-            items = get_whole_book(book, version).verses
-            if is_done(items):
-                continue
+        if ref is not None:
+            v = version.get_verse_list(ref)[0]
+            book = BIBLE_BOOKS[v.book_number]
+            books = [book]
+        else:
+            books = BIBLE_BOOKS
+
+        for book in books:
+            if ref is not None:
+                items = [v]
+            else:
+                items = get_whole_book(book, version).verses
+                if is_done(items):
+                    continue
             training_texts = {(version.slug, b): get_whole_book(b, version).text for b in similar_books(book)}
             print book
             generate_suggestions_helper(version, items,
@@ -402,3 +416,65 @@ def get_all_version_words(version_name):
     for qapair in get_in_batches(QAPair.objects.filter(catechism__slug=version_name)):
         text.extend(split_into_words_for_suggestions(qapair.answer))
     return Counter(text)
+
+
+# Thesaurus file tends to have unhelpful suggestions for pronouns, so we overwrite.
+# These are not synonyms, but likely alternatives
+OBJECTS = ['me', 'you', 'yourself', 'oneself', 'thee', 'him', 'her', 'himself', 'herself', 'it', 'itself', 'us', 'ourselves', 'yourselves', 'them', 'themselves']
+SUBJECTS = ['i', 'you', 'thou', 'he', 'she', 'it', 'we', 'they']
+
+PRONOUN_THESAURUS = dict(
+    [(k, [v for v in OBJECTS if v != k]) for k in OBJECTS] +
+    [(k, [v for v in SUBJECTS if v != k]) for k in SUBJECTS]
+)
+
+def get_thesaurus():
+    fname = os.path.join(settings.SRC_DIR, 'resources', 'mobythes.aur')
+    f = file(fname).read().decode('utf8')
+    return dict((l.split(',')[0], l.split(',')[1:]) for l in f.split('\r'))
+
+
+def version_thesaurus(version, base_thesaurus):
+    fname = os.path.join(settings.SRC_DIR, "..", "data", version.slug + ".thesaurus")
+    d = os.path.dirname(fname)
+    if not os.path.exists(d):
+        os.makedirs(d)
+    try:
+        return pickle.load(file(fname))
+    except IOError:
+        pass
+
+    thesaurus = base_thesaurus.copy()
+    thesaurus.update(PRONOUN_THESAURUS)
+
+    from bibleverses.suggestions import get_all_version_words
+    d = {}
+    print "Building thesaurus for %s" % version.slug
+    words = get_all_version_words(version.slug)
+    for word, c in words.items():
+        alts = thesaurus.get(word, None)
+        if alts is None:
+            d[word] = []
+            continue
+
+        # Don't allow multi-word alternatives
+        alts = [a for a in alts if not ' ' in a]
+        # Don't allow alternatives that don't appear in the text
+        alts = [a for a in alts if a in words]
+        # Normalise and exclude self
+        alts = [a.lower() for a in alts if a != word]
+        # Sort according to frequency in text
+        alts_with_freq = [(words[a], a) for a in alts]
+        alts_with_freq.sort(reverse=True)
+        d[word] = [w for c,w in alts_with_freq]
+
+    with file(fname, "w") as f:
+        pickle.dump(d, f)
+    return d
+
+
+def fix_item(version_slug, reference):
+    version = TextVersion.objects.get(slug=version_slug)
+    thesaurus = get_thesaurus()
+    v_thesaurus = version_thesaurus(version, thesaurus)
+    generate_suggestions(version, missing_only=False, thesaurus=v_thesaurus, ref=reference)
