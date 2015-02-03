@@ -1,15 +1,19 @@
 from __future__ import unicode_literals
 
+import os
 import pickle
+import logging
+
 from django.core.management.base import BaseCommand
 
-import logging
 logger = logging.getLogger(__name__)
 
-def get_thesaurus(fname):
+
+def get_thesaurus():
+    from django.conf import settings
+    fname = os.path.join(settings.SRC_DIR, 'resources', 'mobythes.aur')
     f = file(fname).read().decode('utf8')
     return dict((l.split(',')[0], l.split(',')[1:]) for l in f.split('\r'))
-
 
 
 # Thesaurus file tends to have unhelpful suggestions for pronouns, so we overwrite.
@@ -58,14 +62,14 @@ def version_thesaurus(version, base_thesaurus):
     return d
 
 class Command(BaseCommand):
-    args = 'thesaurus_filename <version_slug version_slug ...>'
+    args = '<version_slug version_slug ...>'
 
-    def handle(self, thesaurus_filename, *args, **options):
+    def handle(self, *args, **options):
         # Pass filename of moby thesaurus .aur file as arg
         from bibleverses.suggestions import generate_suggestions
         from bibleverses.models import TextVersion
 
-        thesaurus = get_thesaurus(thesaurus_filename)
+        thesaurus = get_thesaurus()
 
         versions = TextVersion.objects.all()
         if args:
