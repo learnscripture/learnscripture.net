@@ -273,7 +273,10 @@ def generate_suggestions_helper(version, items, text_getter, training_texts, ref
             else:
                 start = tuple(words[i-size:i])
             chain = get_markov_chain(size)
-            options = chain.succ(start).items()
+            try:
+                options = chain.succ(start).items()
+            except KeyError:
+                return []
             return [(w if size == 1 else w[-1], f) for w, f in options]
         return suggestions_markov
 
