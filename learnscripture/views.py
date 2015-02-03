@@ -222,7 +222,7 @@ def get_next(request, default_url):
     return HttpResponseRedirect(default_url)
 
 
-def session_stats(identity):
+def todays_stats(identity):
     stats = {}
     session_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
@@ -389,7 +389,7 @@ def dashboard(request):
          'more_groups': more_groups,
          'url_after_logout': '/',
          }
-    c.update(session_stats(identity))
+    c.update(todays_stats(identity))
     return render(request, 'learnscripture/dashboard.html', c)
 
 

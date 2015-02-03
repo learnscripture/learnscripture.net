@@ -26,7 +26,7 @@ from events.models import Event
 from groups.models import Group
 from learnscripture import session
 from learnscripture.decorators import require_identity_method
-from learnscripture.views import session_stats, bible_versions_for_request, verse_sets_visible_for_request
+from learnscripture.views import todays_stats, bible_versions_for_request, verse_sets_visible_for_request
 
 
 
@@ -312,7 +312,7 @@ class SessionStats(BaseHandler):
         # Render template
         c = {}
         c['identity'] = identity
-        c.update(session_stats(identity))
+        c.update(todays_stats(identity))
         retval['stats_html'] = render_to_string('learnscripture/sessionstats.html', c)
         return retval
 
