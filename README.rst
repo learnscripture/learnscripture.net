@@ -110,7 +110,7 @@ New texts and catechisms
     run: ``./manage.py load_catechism <slug> <json_filename>``
 
 * ``./manage.py setup_bibleverse_suggestions`` needs to be run, passing
-  in the thesaurus 'mobythes.aur' filename and the version slug
+  in the version slug
 
 * Test locally.
 
