@@ -165,7 +165,7 @@ def build_markov_chains_with_sentence_breaks(training_texts, size):
                         for key, training_text in training_texts.items())
 
 def filename_for_labels(labels, size):
-    return "../data/%s__level%s.markov.data" % ('_'.join(labels), str(size))
+    return os.path.join(settings.SRC_DIR, "..", "data", "%s__level%s.markov.data" % ('_'.join(labels), str(size)))
 
 
 def load_saved_markov_data(label_set):
