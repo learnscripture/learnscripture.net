@@ -14,9 +14,9 @@ def verse_set_chosen_receiver(sender, **kwargs):
 @receiver(post_save, sender=Verse)
 def verse_saved(sender, **kwargs):
     verse = kwargs['instance']
-    fix_item_suggestions(verse.version.slug, verse.reference)
+    fix_item_suggestions.delay(verse.version.slug, verse.reference)
 
 @receiver(post_save, sender=QAPair)
 def qapair_saved(sender, **kwargs):
     qapair = kwargs['instance']
-    fix_item_suggestions(qapair.catechism.slug, qapair.reference)
+    fix_item_suggestions.delay(qapair.catechism.slug, qapair.reference)
