@@ -45,6 +45,10 @@
   </div>
 </form>
 
+{% if 'thisweek' in request.GET %}
+  <p class="note">Weekly statistics are measured from the current time to one week ago.</p>
+{% endif %}
+
 {% if group %}
 <h2>Group: {{ group.name }}</h2>
 <p><a href="{% url 'group' group.slug %}">See group information</a></p>

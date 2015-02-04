@@ -483,7 +483,7 @@ class ConsistentLearnerAward(TimeBasedAward):
         if self.level is AnyLevel:
             return (u"Awarded for starting to learn a new verse every day without gaps, "
                     "over a period of time. Note that you have to keep learning the verses "
-                    "for them to be counted.")
+                    "for them to be counted. Days are defined by the UTC time zone.")
         else:
             return u"Started learning a new verse every day for %s" % self.FRIENDLY_DAYS[self.level]
 
