@@ -4,28 +4,28 @@
 
 {% block content %}
 
-<h2>Group details</h2>
+  <h2>Group details</h2>
 
-<form action="" method="POST" id="id-form-edit-group">
-{% csrf_token %}
-{{ form|bootstrap }}
+  <form action="" method="POST" id="id-form-edit-group">
+    {% csrf_token %}
+    {{ form|bootstrap }}
 
-<div class="actions">
-  <input type="submit" name="save" value="Save" class="btn primary" />
-</div>
-</form>
+    <div class="actions">
+      <input type="submit" name="save" value="Save" class="btn primary" />
+    </div>
+  </form>
 
 
 {% endblock %}
 
 
 {% block extracss %}
-<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/themes/ui-lightness/jquery-ui.css" type="text/css" />
-{{ form.media.css }}
+  <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/themes/ui-lightness/jquery-ui.css" type="text/css" />
+  {{ form.media.css }}
 {% endblock %}
 
 {% block extrajs %}
-<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/jquery-ui.min.js"></script>
-{{ form.media.js }}
+  <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/jquery-ui.min.js"></script>
+  {{ form.media.js }}
 
 {% endblock %}

@@ -4,45 +4,45 @@
 
 {% block leftcolumn %}
 
-{% autopaginate comments 40 %}
+  {% autopaginate comments 40 %}
 
-<h2>Comments</h2>
+  <h2>Comments</h2>
 
 
-<div class="groupcomments" data-group-id="{{ group.id }}">
-  <div class="commentblock">
-    <div class="commentlist">
-      {% for comment in comments %}
-      {% with show_as_related_comment=comment.event %}
-      {% include "learnscripture/comment_inc.html" %}
-      {% endwith %}
-      {% endfor %}
+  <div class="groupcomments" data-group-id="{{ group.id }}">
+    <div class="commentblock">
+      <div class="commentlist">
+        {% for comment in comments %}
+          {% with show_as_related_comment=comment.event %}
+            {% include "learnscripture/comment_inc.html" %}
+          {% endwith %}
+        {% endfor %}
+      </div>
+      {% if not page_obj.has_next %}
+        {% if request_account.enable_commenting or not request_account %}
+          <div class="commentboxlocator">
+            <a href="#" class="show-add-comment">Add comment to group wall</a>
+          </div>
+        {% endif %}
+      {% endif %}
     </div>
-    {% if not page_obj.has_next %}
-    {% if request_account.enable_commenting or not request_account %}
-    <div class="commentboxlocator">
-      <a href="#" class="show-add-comment">Add comment to group wall</a>
-    </div>
-    {% endif %}
-    {% endif %}
   </div>
-</div>
 
 
-{% paginate %}
+  {% paginate %}
 
-{% include "learnscripture/comment_common_inc.html" %}
+  {% include "learnscripture/comment_common_inc.html" %}
 
 
 {% endblock %}
 
 
 {% block rightcolumn %}
-<h3>See also:</h3>
-<ul>
-  <li><a href="{% url 'group' group.slug %}">{{ group.name }} information</a></li>
-  <li><a href="{% url 'leaderboard' %}?group={{ group.id }}">Leaderboard <i class="icon-leaderboard"></i></a></li>
-  <li><a href="{% url 'groups' %}">Other groups</a></li>
-</ul>
+  <h3>See also:</h3>
+  <ul>
+    <li><a href="{% url 'group' group.slug %}">{{ group.name }} information</a></li>
+    <li><a href="{% url 'leaderboard' %}?group={{ group.id }}">Leaderboard <i class="icon-leaderboard"></i></a></li>
+    <li><a href="{% url 'groups' %}">Other groups</a></li>
+  </ul>
 
 {% endblock %}

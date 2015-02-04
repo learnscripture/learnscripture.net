@@ -6,124 +6,124 @@
 
 {% block leftcolumn %}
 
-{% if group.description %}
-<h2>Description</h2>
+  {% if group.description %}
+    <h2>Description</h2>
 
-{{ group.description|apply_markup:"restructuredtext" }}
-{% endif %}
+    {{ group.description|apply_markup:"restructuredtext" }}
+  {% endif %}
 
-<h2>Recent comments (<a href="{% url 'group_wall' group.slug %}">see all</a>)</h2>
+  <h2>Recent comments (<a href="{% url 'group_wall' group.slug %}">see all</a>)</h2>
 
-<div class="groupcomments" data-group-id="{{ group.id }}">
-  <div class="commentblock">
-    <div class="commentlist">
-      {% for comment in comments %}
-      {% with show_as_related_comment=comment.event %}
-      {% include "learnscripture/comment_inc.html" %}
-      {% endwith %}
-      {% endfor %}
+  <div class="groupcomments" data-group-id="{{ group.id }}">
+    <div class="commentblock">
+      <div class="commentlist">
+        {% for comment in comments %}
+          {% with show_as_related_comment=comment.event %}
+            {% include "learnscripture/comment_inc.html" %}
+          {% endwith %}
+        {% endfor %}
+      </div>
+      {% if request_account.enable_commenting or not request_account %}
+        <div class="commentboxlocator">
+          <a href="#" class="show-add-comment">Add comment to group wall</a>
+        </div>
+      {% endif %}
     </div>
-    {% if request_account.enable_commenting or not request_account %}
-    <div class="commentboxlocator">
-      <a href="#" class="show-add-comment">Add comment to group wall</a>
-    </div>
-    {% endif %}
   </div>
-</div>
 
-{% include "learnscripture/comment_common_inc.html" %}
+  {% include "learnscripture/comment_common_inc.html" %}
 
-<h2>Group info</h2>
+  <h2>Group info</h2>
 
-<ul>
-  {% if group.public %}
-  <li><b>Public</b>: the group and its member list are visible to
-    everyone.</li>
-  {% else %}
-  <li><b>Private</b>: the group and its member list are visible only to
-    members and invited users.</li>
-  {% endif %}
-
-  {% if group.open %}
-  <li><b>Open</b>: anyone may join.</li>
-  {% else %}
-  <li><b>Closed</b>: only invited users can join.</li>
-  {% endif %}
-
-  <li><a href="{% url 'leaderboard' %}?group={{ group.id }}">Leaderboard for {{ group.name }} <i class="icon-leaderboard"></i></a></li>
-</ul>
-
-
-<h2>Your status</h2>
-
-<div class="actionset addclearfix">
-  {% if in_group %}
-
-  <form action="" method="POST">
-    {% csrf_token %}
-    <input type="submit" name="leave" class="btn" value="Leave group" />
-  </form>
-  <p>You are a member of this group.</p>
-
-  {% else %}
-  {% if can_join %}
-  <form action="" method="POST">
-    {% csrf_token %}
+  <ul>
     {% if group.public %}
-    <i title="This action is public" class="icon-public icon-replace"></i>
+      <li><b>Public</b>: the group and its member list are visible to
+        everyone.</li>
+    {% else %}
+      <li><b>Private</b>: the group and its member list are visible only to
+        members and invited users.</li>
     {% endif %}
 
-    <input type="submit" name="join" class="primary btn join-group-btn needs-account" value="Join group" />
-  </form>
+    {% if group.open %}
+      <li><b>Open</b>: anyone may join.</li>
+    {% else %}
+      <li><b>Closed</b>: only invited users can join.</li>
+    {% endif %}
 
-  {% endif %}
-
-  <p>You are not a member of this group.</p>
-
-  {% if can_join %}
-  <p>By joining this group, you will join the <b>leaderboard</b> for the group, and the
-    <b>news stream</b> on your dashboard will be customised to prefer news from
-    the people in this group.</p>
-
-  <p>Joining groups is a public action, unless the group is private and remains
-    private.</p>
-  {% endif %}
-
-  {% endif %}
-
-</div>
-
-
-<h2>Members</h2>
-
-{% with members=group.active_members %}
-{% if members %}
-  <ul>
-  {% for account in members %}
-    <li>{{ account|account_link }}</li>
-  {% endfor %}
+    <li><a href="{% url 'leaderboard' %}?group={{ group.id }}">Leaderboard for {{ group.name }} <i class="icon-leaderboard"></i></a></li>
   </ul>
-{% else %}
-  <p>No members in this group</p>
-{% endif %}
-{% endwith %}
+
+
+  <h2>Your status</h2>
+
+  <div class="actionset addclearfix">
+    {% if in_group %}
+
+      <form action="" method="POST">
+        {% csrf_token %}
+        <input type="submit" name="leave" class="btn" value="Leave group" />
+      </form>
+      <p>You are a member of this group.</p>
+
+    {% else %}
+      {% if can_join %}
+        <form action="" method="POST">
+          {% csrf_token %}
+          {% if group.public %}
+            <i title="This action is public" class="icon-public icon-replace"></i>
+          {% endif %}
+
+          <input type="submit" name="join" class="primary btn join-group-btn needs-account" value="Join group" />
+        </form>
+
+      {% endif %}
+
+      <p>You are not a member of this group.</p>
+
+      {% if can_join %}
+        <p>By joining this group, you will join the <b>leaderboard</b> for the group, and the
+          <b>news stream</b> on your dashboard will be customised to prefer news from
+          the people in this group.</p>
+
+        <p>Joining groups is a public action, unless the group is private and remains
+          private.</p>
+      {% endif %}
+
+    {% endif %}
+
+  </div>
+
+
+  <h2>Members</h2>
+
+  {% with members=group.active_members %}
+    {% if members %}
+      <ul>
+        {% for account in members %}
+          <li>{{ account|account_link }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No members in this group</p>
+    {% endif %}
+  {% endwith %}
 {% endblock %}
 
 {% block rightcolumn %}
-<h3>See also:</h3>
-<ul>
-  <li><a href="{% url 'group_wall' group.slug %}">Group wall <i class="icon-comment"></i></a></li>
-  <li><a href="{% url 'leaderboard' %}?group={{ group.id }}">Leaderboard <i class="icon-leaderboard"></i></a></li>
-  {% if can_edit %}
-  <li><a href="{% url 'edit_group' group.slug %}">Edit this group</a></li>
-  {% endif %}
-  <li><a href="{% url 'groups' %}">Other groups</a></li>
-</ul>
+  <h3>See also:</h3>
+  <ul>
+    <li><a href="{% url 'group_wall' group.slug %}">Group wall <i class="icon-comment"></i></a></li>
+    <li><a href="{% url 'leaderboard' %}?group={{ group.id }}">Leaderboard <i class="icon-leaderboard"></i></a></li>
+    {% if can_edit %}
+      <li><a href="{% url 'edit_group' group.slug %}">Edit this group</a></li>
+    {% endif %}
+    <li><a href="{% url 'groups' %}">Other groups</a></li>
+  </ul>
 
-<h3>Group stats</h3>
+  <h3>Group stats</h3>
 
-<p>Created by {{ group.created_by|account_link }}, on {{ group.created|date:"d M Y" }}.</p>
+  <p>Created by {{ group.created_by|account_link }}, on {{ group.created|date:"d M Y" }}.</p>
 
 
-{{ block.super }}
+  {{ block.super }}
 {% endblock %}

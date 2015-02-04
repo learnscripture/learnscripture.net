@@ -16,13 +16,13 @@
 
     <!-- HTML5 shim, for IE6-8 support of HTML elements -->
     <!--[if lt IE 9]>
-      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+          <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+          <![endif]-->
 
     <link rel="apple-touch-icon" href="{{ STATIC_URL }}img/touch-icon.png" />
 
     {% compress css %}
-    <link type="text/less" rel="stylesheet" href="{{ STATIC_URL }}css/learnscripture.less" charset="utf-8" />
+      <link type="text/less" rel="stylesheet" href="{{ STATIC_URL }}css/learnscripture.less" charset="utf-8" />
     {% endcompress %}
 
     {% block extracss %}
@@ -36,35 +36,35 @@
       <div class="fill">
         <div class="container">
           <div class="topbarinner">
-          <a class="brand" {% if request.identity.default_to_dashboard %}href="/dashboard/" title="Dashboard"{% else %}href="/"{% endif %}>Learn Scripture</a>
-          <ul class="nav primary-nav">
-            {% for m in menuitems %}
-            <li {% if m.active %}class="active"{% endif %}><a href="{{ m.path }}">{{ m.caption }}</a></li>
-            {% endfor %}
-          </ul>
-          <div class="nav secondary-nav">
-            <ul>
-              <li class="dropdown" data-dropdown="dropdown">
-                <a href="#" id="id-session-menu" class="dropdown-toggle">{% if request_account %}{{ request_account.username }}{% else %}Guest{% endif %}</a>
-                <ul class="dropdown-menu">
-                  {% if not request_account %}
-                  <li><a href="{% url 'login' %}"><i class="icon-fw icon-login"></i> Sign in</a></li>
-                  <li><a href="{% url 'signup' %}?next={{ request.get_full_path|urlencode }}"><i class="icon-fw icon-account"></i> Create account</a></li>
-                  {% endif %}
-                  <li><a href="{% url 'preferences' %}?next={{ request.path_info }}" class="preferences-link"><i class="icon-fw icon-preferences"></i> Preferences</a></li>
-                  {% if request_account %}
-                  <li><a href="{% url 'account_details' %}"><i class="icon-fw icon-account"></i> Account details</a></li>
-                  <li><a href="{% url 'user_verses' %}"><i class="icon-fw icon-progress"></i> Verse progress</a>
-                  <li><a href="{% url 'user_verse_sets' %}"><i class="icon-fw icon-verse-sets"></i> Verse sets</a>
-                  <li><a href="{% url 'user_stats' request_account.username %}"><i class="icon-fw icon-stats"></i> Stats</a></li>
-                  <li><a href="{% url 'leaderboard' %}?thisweek"><i class="icon-fw icon-leaderboard"></i> Leaderboard</a></li>
-                  <li><a href="#" class="logout-link"><i class="icon-fw icon-logout"></i> Log out</a></li>
-                  {% endif %}
-                </ul>
-              </li>
-              <li style="display: none;"><a class="android-appmenu-link" href="#"><i class="icon-fw icon-appmenu"></i></a></li>
+            <a class="brand" {% if request.identity.default_to_dashboard %}href="/dashboard/" title="Dashboard"{% else %}href="/"{% endif %}>Learn Scripture</a>
+            <ul class="nav primary-nav">
+              {% for m in menuitems %}
+                <li {% if m.active %}class="active"{% endif %}><a href="{{ m.path }}">{{ m.caption }}</a></li>
+              {% endfor %}
             </ul>
-          </div>
+            <div class="nav secondary-nav">
+              <ul>
+                <li class="dropdown" data-dropdown="dropdown">
+                  <a href="#" id="id-session-menu" class="dropdown-toggle">{% if request_account %}{{ request_account.username }}{% else %}Guest{% endif %}</a>
+                  <ul class="dropdown-menu">
+                    {% if not request_account %}
+                      <li><a href="{% url 'login' %}"><i class="icon-fw icon-login"></i> Sign in</a></li>
+                      <li><a href="{% url 'signup' %}?next={{ request.get_full_path|urlencode }}"><i class="icon-fw icon-account"></i> Create account</a></li>
+                    {% endif %}
+                    <li><a href="{% url 'preferences' %}?next={{ request.path_info }}" class="preferences-link"><i class="icon-fw icon-preferences"></i> Preferences</a></li>
+                    {% if request_account %}
+                      <li><a href="{% url 'account_details' %}"><i class="icon-fw icon-account"></i> Account details</a></li>
+                      <li><a href="{% url 'user_verses' %}"><i class="icon-fw icon-progress"></i> Verse progress</a>
+                        <li><a href="{% url 'user_verse_sets' %}"><i class="icon-fw icon-verse-sets"></i> Verse sets</a>
+                          <li><a href="{% url 'user_stats' request_account.username %}"><i class="icon-fw icon-stats"></i> Stats</a></li>
+                          <li><a href="{% url 'leaderboard' %}?thisweek"><i class="icon-fw icon-leaderboard"></i> Leaderboard</a></li>
+                          <li><a href="#" class="logout-link"><i class="icon-fw icon-logout"></i> Log out</a></li>
+                    {% endif %}
+                  </ul>
+                        </li>
+                        <li style="display: none;"><a class="android-appmenu-link" href="#"><i class="icon-fw icon-appmenu"></i></a></li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
@@ -87,53 +87,53 @@
         </div>
 
         {% block messages %}
-        {% if site_notices %}
-        <div class="message-container">
-          {% for notice in site_notices %}
-          <div class="notice">
-            {{ notice.message_html|safe }}
-          </div>
-          {% endfor %}
-        </div>
-        {% endif %}
+          {% if site_notices %}
+            <div class="message-container">
+              {% for notice in site_notices %}
+                <div class="notice">
+                  {{ notice.message_html|safe }}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
 
-        {% block donation_drives %}
-        {% if donation_drives %}
-        <div class="message-container">
-          {% for notice in donation_drives %}
-          <div class="notice donation-drive">
-            {{ notice.message_html|safe }}
-          </div>
-          {% endfor %}
-        </div>
-        {% endif %}
-        {% endblock %}
+          {% block donation_drives %}
+            {% if donation_drives %}
+              <div class="message-container">
+                {% for notice in donation_drives %}
+                  <div class="notice donation-drive">
+                    {{ notice.message_html|safe }}
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          {% endblock %}
 
-        {% if notices %}
-        <div class="message-container">
-        {% for notice in notices %}
-          <div class="notice">
-            <a class="close" title="Clear this message" href="#" data-notice-id="{{ notice.id }}">×</a>
-            {{ notice.message_html|safe }}
-          </div>
-        {% endfor %}
-        {% if notices.0.is_old %}
-          <div class="clearnotices">
-            You can clear these notices with the cross here ↑
-          </div>
-        {% endif %}
-        </div>
-        {% endif %}
+          {% if notices %}
+            <div class="message-container">
+              {% for notice in notices %}
+                <div class="notice">
+                  <a class="close" title="Clear this message" href="#" data-notice-id="{{ notice.id }}">×</a>
+                  {{ notice.message_html|safe }}
+                </div>
+              {% endfor %}
+              {% if notices.0.is_old %}
+                <div class="clearnotices">
+                  You can clear these notices with the cross here ↑
+                </div>
+              {% endif %}
+            </div>
+          {% endif %}
 
-        {% if messages %}
-        <div class="message-container">
-          <ul class="messagelist">
-            {% for message in messages %}
-            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-            {% endfor %}
-          </ul>
-        </div>
-        {% endif %}
+          {% if messages %}
+            <div class="message-container">
+              <ul class="messagelist">
+                {% for message in messages %}
+                  <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
         {% endblock %}
 
         {% block content %}
@@ -142,21 +142,21 @@
       </div>
 
       {% block referral_links %}
-      {% if request_account and include_referral_links %}
-      <div class="footer addclearfix">
-        <div class="addthis_toolbox addthis_default_style"
-             addthis:url="{{ referral_link }}">
-          <a class="addthis_button_preferred_1"></a>
-          <a class="addthis_button_preferred_2"></a>
-          <a class="addthis_button_preferred_3"></a>
-          <a class="addthis_button_preferred_4"></a>
-          <a class="addthis_button_compact"></a>
-          <a class="addthis_counter addthis_bubble_style"></a>
-          <span class="addthis_separator">|</span>
-          <a id="id_referral_link" href="{{ referral_link }}">referral link</a> | <a href="/referral-program/">What's this?</a>
-        </div>
-      </div>
-      {% endif %}
+        {% if request_account and include_referral_links %}
+          <div class="footer addclearfix">
+            <div class="addthis_toolbox addthis_default_style"
+                 addthis:url="{{ referral_link }}">
+              <a class="addthis_button_preferred_1"></a>
+              <a class="addthis_button_preferred_2"></a>
+              <a class="addthis_button_preferred_3"></a>
+              <a class="addthis_button_preferred_4"></a>
+              <a class="addthis_button_compact"></a>
+              <a class="addthis_counter addthis_bubble_style"></a>
+              <span class="addthis_separator">|</span>
+              <a id="id_referral_link" href="{{ referral_link }}">referral link</a> | <a href="/referral-program/">What's this?</a>
+            </div>
+          </div>
+        {% endif %}
       {% endblock %}
       <footer>
         <p><a href="/help/">Help</a> |
@@ -171,52 +171,52 @@
     </div> <!-- /container -->
 
 
-<!-- popup forms -->
+    <!-- popup forms -->
 
-{% if not hide_preferences_popup %}
+    {% if not hide_preferences_popup %}
 
-<div id="id-preferences-form" class="modal hide">
-  <div class="modal-header">
-    <a href="#" class="close">&times;</a>
-    <h3>Preferences</h3>
-  </div>
+      <div id="id-preferences-form" class="modal hide">
+        <div class="modal-header">
+          <a href="#" class="close">&times;</a>
+          <h3>Preferences</h3>
+        </div>
 
-  <div class="modal-body">
-    <form action="" method="POST">
-      {% csrf_token %}
+        <div class="modal-body">
+          <form action="" method="POST">
+            {% csrf_token %}
 
-      {{ preferences_form|bootstrap }}
+            {{ preferences_form|bootstrap }}
 
-    </form>
-  </div>
-  <div class="modal-footer">
-    <a href="#" id="id-preferences-save-btn" class="btn primary default">Save</a>
-    <a href="#" id="id-preferences-cancel-btn" class="btn secondary">Cancel</a>
-  </div>
-</div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <a href="#" id="id-preferences-save-btn" class="btn primary default">Save</a>
+          <a href="#" id="id-preferences-cancel-btn" class="btn secondary">Cancel</a>
+        </div>
+      </div>
 
-{% endif %}
+    {% endif %}
 
 
-<!-- preferences data -->
+    <!-- preferences data -->
 
-<div id="id-preferences-data"
-     {# NB these names are translated to preferencesSetup, enableAnimations, enableSounds, interfaceTheme, desktopTestingMethod, touchscreenTestingMethod #}
-     data-preferences-setup="{{ request.identity.preferences_setup|yesno:"true,false,false" }}"
-     data-enable-animations="{{ request.identity.enable_animations|yesno:"true,false,false" }}"
-     data-enable-sounds="{{ request.identity.enable_sounds|yesno:"true,false,false" }}"
-     data-interface-theme="{{ request.identity.interface_theme }}"
-     data-desktop-testing-method="{{ request.identity.desktop_testing_method }}"
-     data-touchscreen-testing-method="{{ request.identity.touchscreen_testing_method }}">
-</div>
-{% if request_account %}
-<div id="id-account-data"
-     data-username="{{ request_account.username }}"
-     data-id="{{ request_account.id }}"
-     data-has-installed-android-app="{{ request_account.has_installed_android_app|yesno:"true,false" }}"
-     >
-</div>
-{% endif %}
+    <div id="id-preferences-data"
+         {# NB these names are translated to preferencesSetup, enableAnimations, enableSounds, interfaceTheme, desktopTestingMethod, touchscreenTestingMethod #}
+         data-preferences-setup="{{ request.identity.preferences_setup|yesno:"true,false,false" }}"
+         data-enable-animations="{{ request.identity.enable_animations|yesno:"true,false,false" }}"
+         data-enable-sounds="{{ request.identity.enable_sounds|yesno:"true,false,false" }}"
+         data-interface-theme="{{ request.identity.interface_theme }}"
+         data-desktop-testing-method="{{ request.identity.desktop_testing_method }}"
+         data-touchscreen-testing-method="{{ request.identity.touchscreen_testing_method }}">
+    </div>
+    {% if request_account %}
+      <div id="id-account-data"
+           data-username="{{ request_account.username }}"
+           data-id="{{ request_account.id }}"
+           data-has-installed-android-app="{{ request_account.has_installed_android_app|yesno:"true,false" }}"
+           >
+      </div>
+    {% endif %}
     {% comment %}
     We put javascript for *all* pages in the base template, with maximum expiry
     set up. This results in a bigger initial hit, but much better performace
@@ -227,79 +227,79 @@
     {% endcomment %}
 
     {% compress js %}
-    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery-1.7.1.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/json2.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery-ui-1.8.17.custom.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jsrender.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.ajaxretry.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.ba-bbq.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.actual.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.autosize.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-dropdown.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-modal.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-tabs.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-buttons.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-twipsy.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-popover.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/common.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/sound.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/notices.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/bible_book_info.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/quickfind.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/learn.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/accounts.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/choose.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/create.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/preferences.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/viewset.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/modals.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/dashboard.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/versepopup.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/groups.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/leaderboard.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/android.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/comment.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/follow.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery-1.7.1.min.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/lib/json2.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery-ui-1.8.17.custom.min.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jsrender.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.ajaxretry.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.ba-bbq.min.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.actual.min.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.autosize.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-dropdown.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-modal.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-tabs.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-buttons.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-twipsy.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-popover.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/common.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/sound.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/notices.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/bible_book_info.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/quickfind.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/learn.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/accounts.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/choose.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/create.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/preferences.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/viewset.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/modals.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/dashboard.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/versepopup.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/groups.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/leaderboard.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/android.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/comment.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/follow.js"></script>
     {% endcompress %}
 
     {% if request_account and include_referral_links %}
-    <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid=ra-4fa0736b6ee964ea"></script>
+      <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid=ra-4fa0736b6ee964ea"></script>
     {% endif %}
 
     {% block extrajs %}
     {% endblock %}
 
     {% if url_after_logout %}
-    <div id="url-after-logout">{{ url_after_logout }}</div>
+      <div id="url-after-logout">{{ url_after_logout }}</div>
     {% endif %}
 
-{% if settings.GOOGLE_ANALYTICS_ACCOUNT %}
-<script type="text/javascript">
+    {% if settings.GOOGLE_ANALYTICS_ACCOUNT %}
+      <script type="text/javascript">
 
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', '{{ settings.GOOGLE_ANALYTICS_ACCOUNT }}']);
-  _gaq.push(['_trackPageview']);
+       var _gaq = _gaq || [];
+       _gaq.push(['_setAccount', '{{ settings.GOOGLE_ANALYTICS_ACCOUNT }}']);
+       _gaq.push(['_trackPageview']);
 
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
+       (function() {
+         var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+         ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+         var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+       })();
 
-</script>
-{% endif %}
-<script type="text/javascript">
-learnscripture.themeFonts = {{ theme_fonts|jsonify|safe }};
-</script>
+      </script>
+    {% endif %}
+    <script type="text/javascript">
+     learnscripture.themeFonts = {{ theme_fonts|jsonify|safe }};
+    </script>
   </body>
 </html>
 
-    {# We avoid the request for the CSS file if the theme is not active #}
-    {# Also, place at bottom to make it non-blocking #}
-    {% for theme, fonts in theme_fonts %}
-      {% if current_theme == theme %}
-        {% for font in fonts %}
-    <link href="{{ font }}" rel="stylesheet" type="text/css" />
-        {% endfor %}
-     {% endif %}
-   {% endfor %}
+{# We avoid the request for the CSS file if the theme is not active #}
+{# Also, place at bottom to make it non-blocking #}
+{% for theme, fonts in theme_fonts %}
+  {% if current_theme == theme %}
+    {% for font in fonts %}
+      <link href="{{ font }}" rel="stylesheet" type="text/css" />
+    {% endfor %}
+  {% endif %}
+{% endfor %}

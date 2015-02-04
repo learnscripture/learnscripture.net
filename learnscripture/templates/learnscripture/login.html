@@ -5,13 +5,13 @@
 
 {% block content %}
 
-<form action="" method="POST">
-  {% csrf_token %}
-  {{ login_form|bootstrap }}
-  <div class="actions">
-    <input type="submit" name="signin" value="Sign in" class="btn primary default">
-    <input type="submit" name="forgotpassword" value="I forgot my password" class="btn">
-  </div>
-</form>
+  <form action="" method="POST">
+    {% csrf_token %}
+    {{ login_form|bootstrap }}
+    <div class="actions">
+      <input type="submit" name="signin" value="Sign in" class="btn primary default">
+      <input type="submit" name="forgotpassword" value="I forgot my password" class="btn">
+    </div>
+  </form>
 
 {% endblock %}

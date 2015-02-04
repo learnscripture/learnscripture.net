@@ -1,25 +1,25 @@
 {% load account_utils %}
 
-        {# sync with id-comment-template #}
-        <div class="comment{% if show_as_related_comment %} relatedcomment{% endif %}"
-             id="comment-{{ comment.id }}"
-             data-comment-id="{{ comment.id }}">
-          <span class="commentauthor">
-            {{ comment.author|account_link }}
-          </span>
-          {% if show_as_related_comment %}
-          on news item “<b>{{ comment.event.render_html }}</b>”
-          {% endif %}
-          {% if request_account.is_moderator %}
-          <span class="commentmoderation">
-            <a href="#" title="Moderate comment" class="moderate-comment"><i class="icon-moderate"></i></a>
-          </span>
-          {% endif %}
-          <span class="timestamp">{{ comment.created|date:"Y-m-d H:i" }}</span>
-          <div class="commentmessage">
-            {{ comment.message_formatted }}
-          </div>
-          {% if show_as_related_comment %}
-          <div class="relatedaddcomment"><a href="{{ comment.get_absolute_url }}"><i class="icon-comment"></i> Add your comment</a></div>
-          {% endif %}
-        </div>
+{# sync with id-comment-template #}
+<div class="comment{% if show_as_related_comment %} relatedcomment{% endif %}"
+     id="comment-{{ comment.id }}"
+     data-comment-id="{{ comment.id }}">
+  <span class="commentauthor">
+    {{ comment.author|account_link }}
+  </span>
+  {% if show_as_related_comment %}
+    on news item “<b>{{ comment.event.render_html }}</b>”
+  {% endif %}
+  {% if request_account.is_moderator %}
+    <span class="commentmoderation">
+      <a href="#" title="Moderate comment" class="moderate-comment"><i class="icon-moderate"></i></a>
+    </span>
+  {% endif %}
+  <span class="timestamp">{{ comment.created|date:"Y-m-d H:i" }}</span>
+  <div class="commentmessage">
+    {{ comment.message_formatted }}
+  </div>
+  {% if show_as_related_comment %}
+    <div class="relatedaddcomment"><a href="{{ comment.get_absolute_url }}"><i class="icon-comment"></i> Add your comment</a></div>
+  {% endif %}
+</div>

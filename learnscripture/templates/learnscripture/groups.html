@@ -6,52 +6,52 @@
 
 {% block content %}
 
-<p>By joining groups, you can more easily compare your progress to people that
-you know or are associated with. Browse or search for groups below,
-or <a href="{% url 'create_group' %}">create your own</a>.
-</p>
-<br>
+  <p>By joining groups, you can more easily compare your progress to people that
+    you know or are associated with. Browse or search for groups below,
+    or <a href="{% url 'create_group' %}">create your own</a>.
+  </p>
+  <br>
 
-<form action="" method="GET">
-  <div class="clearfix">
-    <label for="id-search-input">Search</label>
-    <div class="input">
-      <input type="text" name="q"  id="id-search-input" value="{{ request.GET.q }}"/>
-      <input type="submit" class="btn primary" value="Search" id="id-search-btn" />
+  <form action="" method="GET">
+    <div class="clearfix">
+      <label for="id-search-input">Search</label>
+      <div class="input">
+        <input type="text" name="q"  id="id-search-input" value="{{ request.GET.q }}"/>
+        <input type="submit" class="btn primary" value="Search" id="id-search-btn" />
+      </div>
     </div>
-  </div>
-</form>
+  </form>
 
 
-{% autopaginate groups 10 %}
+  {% autopaginate groups 10 %}
 
 
-{% if request.GET.q %}
-<h2>Search results:</h2>
-{% else %}
-<h2>All groups:</h2>
-{% endif %}
+  {% if request.GET.q %}
+    <h2>Search results:</h2>
+  {% else %}
+    <h2>All groups:</h2>
+  {% endif %}
 
-{% if groups %}
+  {% if groups %}
 
-  {% paginate %}
+    {% paginate %}
 
-  {% for group in groups %}
-  <div class="actionset">
+    {% for group in groups %}
+      <div class="actionset">
 
-    <h3><a href="{% url 'group' group.slug %}">{{ group.name }}</a></h3>
-    {{ group.description|apply_markup:"restructuredtext" }}
+        <h3><a href="{% url 'group' group.slug %}">{{ group.name }}</a></h3>
+        {{ group.description|apply_markup:"restructuredtext" }}
 
-  </div>
-  {% endfor %}
+      </div>
+    {% endfor %}
 
-  {% paginate %}
+    {% paginate %}
 
-{% else %}
+  {% else %}
 
-  <p>Sorry, no groups found!</p>
+    <p>Sorry, no groups found!</p>
 
-{% endif %}
+  {% endif %}
 
 
 {% endblock %}

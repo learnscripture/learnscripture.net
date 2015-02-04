@@ -5,33 +5,33 @@
 
 {% block content %}
 
-<p>Catechisms are a way to learn the main teachings of the Christian faith using
-a question/answer format.</p>
+  <p>Catechisms are a way to learn the main teachings of the Christian faith using
+    a question/answer format.</p>
 
-<p>They have been popular in Christianity since the Reformation, when various
-people started putting together sets of question and answers based on their
-understanding of the Bible, but the format goes back much further.</p>
+  <p>They have been popular in Christianity since the Reformation, when various
+    people started putting together sets of question and answers based on their
+    understanding of the Bible, but the format goes back much further.</p>
 
-<p>Choose from the catechisms to learn. If you have other catechisms that you
-would like added, please <a href="{% url 'contact' %}">contact us</a>.</p>
+  <p>Choose from the catechisms to learn. If you have other catechisms that you
+    would like added, please <a href="{% url 'contact' %}">contact us</a>.</p>
 
 
-{% for catechism in catechisms %}
-<div class="verseset">
-  <form action="" method="POST">
-    {% csrf_token %}
-    <input type="hidden" name="catechism_id" value="{{ catechism.id }}">
-    <i class="icon-public" title="This action is public"></i>
-    <input type="submit" class="btn primary needs-preferences" value="Learn" id="id-learn-catechism-btn-{{ catechism.id }}">
-  </form>
+  {% for catechism in catechisms %}
+    <div class="verseset">
+      <form action="" method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="catechism_id" value="{{ catechism.id }}">
+        <i class="icon-public" title="This action is public"></i>
+        <input type="submit" class="btn primary needs-preferences" value="Learn" id="id-learn-catechism-btn-{{ catechism.id }}">
+      </form>
 
-  <h3><a href="{% url 'view_catechism' slug=catechism.slug %}">{{ catechism.full_name }}</a></h3>
+      <h3><a href="{% url 'view_catechism' slug=catechism.slug %}">{{ catechism.full_name }}</a></h3>
 
-  <p>{{ catechism.description|apply_markup:"restructuredtext" }}</p>
+      <p>{{ catechism.description|apply_markup:"restructuredtext" }}</p>
 
-  <p>It includes {{ catechism.qapairs.count }} question/answer pairs.</p>
-</div>
+      <p>It includes {{ catechism.qapairs.count }} question/answer pairs.</p>
+    </div>
 
-{% endfor %}
+  {% endfor %}
 
 {% endblock %}

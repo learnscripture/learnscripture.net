@@ -3,22 +3,22 @@
 {% load url from future %}
 
 {% block content %}
-<h2>Verse sets you are learning</h2>
+  <h2>Verse sets you are learning</h2>
 
-<ul>
-  {% for vs in verse_sets_learning %}
-  <li><a href="{% url 'view_verse_set' vs.slug %}">{{ vs.name }}</a></li>
-  {% endfor %}
-</ul>
+  <ul>
+    {% for vs in verse_sets_learning %}
+      <li><a href="{% url 'view_verse_set' vs.slug %}">{{ vs.name }}</a></li>
+    {% endfor %}
+  </ul>
 
-{% if verse_sets_created %}
-<h2>Verse sets you created</h2>
+  {% if verse_sets_created %}
+    <h2>Verse sets you created</h2>
 
-<ul>
-  {% for vs in verse_sets_created %}
-  <li><a href="{% url 'view_verse_set' vs.slug %}">{{ vs.name }}</a></li>
-  {% endfor %}
-</ul>
+    <ul>
+      {% for vs in verse_sets_created %}
+        <li><a href="{% url 'view_verse_set' vs.slug %}">{{ vs.name }}</a></li>
+      {% endfor %}
+    </ul>
 
-{% endif %}
+  {% endif %}
 {% endblock %}

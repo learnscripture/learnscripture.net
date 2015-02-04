@@ -4,59 +4,59 @@
 
 {% block content %}
 
-<p>The following badges are available.</p>
+  <p>The following badges are available.</p>
 
-<table class="bordered-table award">
-  <thead>
-    <tr>
-      <th>Icon</th>
-      <th>Description</th>
-  </thead>
-  <tbody>
-    {% for award in discovered_awards %}
-    <tr>
-      <td>
-        <a href="{% url 'award' award.slug %}">
-          <img src="{{ STATIC_URL }}{{ award.image_medium }}">
-        </a>
-      </td>
-      <td>
-        <h3>{{ award.short_description }}</h3>
-        <p>{{ award.full_description }}</p>
-        {% if award.has_levels %}
-        <p>Highest level achieved so far: <b>Level {{ award.highest_level }}</b></p>
-        {% endif %}
-        <p><a href="{% url 'award' award.slug %}">People with {{ award.short_description }} badge</a></p>
-      </td>
-    </tr>
-    {% endfor %}
+  <table class="bordered-table award">
+    <thead>
+      <tr>
+        <th>Icon</th>
+        <th>Description</th>
+    </thead>
+    <tbody>
+      {% for award in discovered_awards %}
+        <tr>
+          <td>
+            <a href="{% url 'award' award.slug %}">
+              <img src="{{ STATIC_URL }}{{ award.image_medium }}">
+            </a>
+          </td>
+          <td>
+            <h3>{{ award.short_description }}</h3>
+            <p>{{ award.full_description }}</p>
+            {% if award.has_levels %}
+              <p>Highest level achieved so far: <b>Level {{ award.highest_level }}</b></p>
+            {% endif %}
+            <p><a href="{% url 'award' award.slug %}">People with {{ award.short_description }} badge</a></p>
+          </td>
+        </tr>
+      {% endfor %}
 
-{% if hidden_awards %}
-    <tr>
-      <td>
-        <img src="{{ STATIC_URL }}img/awards/award_QUESTION_level_any_100.png">
-      </td>
-      <td>
-        <h3>???</h3>
-        <p>
-          {% if hidden_awards|length == 1 %}
+      {% if hidden_awards %}
+        <tr>
+          <td>
+            <img src="{{ STATIC_URL }}img/awards/award_QUESTION_level_any_100.png">
+          </td>
+          <td>
+            <h3>???</h3>
+            <p>
+              {% if hidden_awards|length == 1 %}
 
-          There is also <b>one badge</b> that has not been discovered yet.  It will be
-          unveiled when at least one person has achieved it.
+                There is also <b>one badge</b> that has not been discovered yet.  It will be
+                unveiled when at least one person has achieved it.
 
-          {% else %}
+              {% else %}
 
-          There are also <b>{{ hidden_awards|length }} badges</b> that have not been
-          discovered yet.  They will be unveiled as soon as they are achieved by at
-          least one person.
+                There are also <b>{{ hidden_awards|length }} badges</b> that have not been
+                discovered yet.  They will be unveiled as soon as they are achieved by at
+                least one person.
 
-          {% endif %}
-        </p>
-      </td>
-    </tr>
-{% endif %}
+              {% endif %}
+            </p>
+          </td>
+        </tr>
+      {% endif %}
 
-  </tbody>
-</table>
+    </tbody>
+  </table>
 
 {% endblock %}

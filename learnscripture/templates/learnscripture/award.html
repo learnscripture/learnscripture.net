@@ -4,59 +4,59 @@
 
 {% block leftcolumn %}
 
-<h2>Description</h2>
-<p>{{ award.full_description }}</p>
-<p style="text-align:center"> <img src="{{ STATIC_URL }}{{ award.image_medium }}"></p>
+  <h2>Description</h2>
+  <p>{{ award.full_description }}</p>
+  <p style="text-align:center"> <img src="{{ STATIC_URL }}{{ award.image_medium }}"></p>
 
-<h2>Achievers</h2>
-{% if award.has_levels %}
-<p>Highest level achieved so far: <b>Level {{ award.highest_level }}</b></p>
-{% endif %}
-
-{% for level, receivers_count, sample_usernames in levels %}
+  <h2>Achievers</h2>
   {% if award.has_levels %}
-  <h3>Level {{ level }}</h3>
+    <p>Highest level achieved so far: <b>Level {{ award.highest_level }}</b></p>
   {% endif %}
-  <p>Total {{ receivers_count }} user(s){% if receivers_count > sample_usernames|length %}, including{% endif %}:</p>
-  <ul>
-    {% for username in sample_usernames %}
-    <li><a href="{% url 'user_stats' username %}">{{ username }}</a></li>
-    {% endfor %}
-  </ul>
-{% endfor %}
+
+  {% for level, receivers_count, sample_usernames in levels %}
+    {% if award.has_levels %}
+      <h3>Level {{ level }}</h3>
+    {% endif %}
+    <p>Total {{ receivers_count }} user(s){% if receivers_count > sample_usernames|length %}, including{% endif %}:</p>
+    <ul>
+      {% for username in sample_usernames %}
+        <li><a href="{% url 'user_stats' username %}">{{ username }}</a></li>
+      {% endfor %}
+    </ul>
+  {% endfor %}
 
 {% endblock %}
 
 
 {% block rightcolumn %}
-<h3>See also</h3>
-<ul>
-  <li><a href="{% url 'awards' %}">All available badges</a></li>
-  {% if request_account %}
-  <li><a href="{% url 'user_stats' request_account.username %}">Your badges</a></li>
+  <h3>See also</h3>
+  <ul>
+    <li><a href="{% url 'awards' %}">All available badges</a></li>
+    {% if request_account %}
+      <li><a href="{% url 'user_stats' request_account.username %}">Your badges</a></li>
+    {% endif %}
+
+  </ul>
+
+  {{ block.super }}
+
+  <h3>Your level</h3>
+
+  {% if account_top_award %}
+    {% if account_top_award.has_levels %}
+      <p>You have this badge, at level {{ account_top_award.level }}</p>
+    {% else %}
+      <p>You have this badge.</p>
+    {% endif %}
+
+    <p style="text-align: center">
+      <img src="{{ STATIC_URL }}{{ account_top_award.image_medium }}">
+    </p>
+  {% else %}
+
+    <p>You don't have this badge yet.</p>
+
   {% endif %}
-
-</ul>
-
-{{ block.super }}
-
-<h3>Your level</h3>
-
-{% if account_top_award %}
-{% if account_top_award.has_levels %}
-<p>You have this badge, at level {{ account_top_award.level }}</p>
-{% else %}
-<p>You have this badge.</p>
-{% endif %}
-
-<p style="text-align: center">
-<img src="{{ STATIC_URL }}{{ account_top_award.image_medium }}">
-</p>
-{% else %}
-
-<p>You don't have this badge yet.</p>
-
-{% endif %}
 
 
 {% endblock %}

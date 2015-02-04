@@ -4,222 +4,222 @@
 
 {% block leftcolumn %}
 
-<div id="id-loading">
-Loading {% include "learnscripture/loading_animation.html" %}
-</div>
-
-<div id="id-no-verse-queue" style="display:none;">
-<p>There is nothing more queued for learning or reviewing in this session.
-  <a href="{% url 'dashboard' %}">Go to the dashboard</a> to select some!
-</p>
-</div>
-
-<div id="id-controls" style="display:none;">
-
-  <div id="id-verse-options">
-    {% include "learnscripture/version_select.html" %}
-
-    <div class="verse-dropdown dropdown">
-      <ul> {# Needed for bootstrap-dropdown #}
-        <li>
-          <a href="#" class="btn dropdown-toggle2" id="id-verse-dropdown"><i class="icon-verseoptions"></i><span class="options-caption"> Options</span><span class="caret"></span></a>
-          <ul class="dropdown-menu dropdown-menu-right">
-            <li><a href="#" id="id-skip-verse-btn">Skip this</a></li>
-            <span class="selection-set-only">
-              <li><a href="#" id="id-cancel-learning-btn">Stop learning this</a></li>
-            </span>
-            <li><a href="#" id="id-reset-progress-btn">Reset progress</a></li>
-          </ul>
-        </li>
-      </ul>
-    </div>
+  <div id="id-loading">
+    Loading {% include "learnscripture/loading_animation.html" %}
   </div>
 
-  <h2 id="id-verse-title"></h2>
+  <div id="id-no-verse-queue" style="display:none;">
+    <p>There is nothing more queued for learning or reviewing in this session.
+      <a href="{% url 'dashboard' %}">Go to the dashboard</a> to select some!
+    </p>
+  </div>
 
-  <div id="id-instructions">
-    <div class="stage-specific
-                stage-read"
-         style="display:none;">
-      <b>READ:</b> Read the text through (preferably aloud), and click 'Next'.
-    </div>
-    <div class="stage-specific
-                stage-recall1
-                stage-recall2
-                stage-recall3
-                stage-recall4"
-         style="display:none;">
-      <b>READ and RECALL:</b>
-      Read the text through, filling in the gaps from your memory. Click
-      a word to reveal it if you can't remember.
-    </div>
+  <div id="id-controls" style="display:none;">
 
-    <div class="stage-specific stage-test" style="display:none;">
-      <div class="test-method-keyboard-full-word" style="display:none;">
-        <b>TEST:</b> Testing time! Type the text, using space to check each word as you go.
-        (hint: don't sweat the spelling, we should be able to work it out).
-      </div>
-      <div class="test-method-keyboard-first-letter" style="display:none;">
-        <b>QUICK TEST:</b> Testing time! Type the <b>first letter</b> of each word.
-      </div>
-      <div class="test-method-onscreen" style="display:none;">
-        <b>TEST:</b> Testing time! For each word choose from the options below.
+    <div id="id-verse-options">
+      {% include "learnscripture/version_select.html" %}
+
+      <div class="verse-dropdown dropdown">
+        <ul> {# Needed for bootstrap-dropdown #}
+          <li>
+            <a href="#" class="btn dropdown-toggle2" id="id-verse-dropdown"><i class="icon-verseoptions"></i><span class="options-caption"> Options</span><span class="caret"></span></a>
+            <ul class="dropdown-menu dropdown-menu-right">
+              <li><a href="#" id="id-skip-verse-btn">Skip this</a></li>
+              <span class="selection-set-only">
+                <li><a href="#" id="id-cancel-learning-btn">Stop learning this</a></li>
+              </span>
+              <li><a href="#" id="id-reset-progress-btn">Reset progress</a></li>
+            </ul>
+          </li>
+        </ul>
       </div>
     </div>
 
-    <div class="stage-specific stage-readForContext" style="display:none;">
-      <b>READ:</b> Read this verse to get the context and flow of the passage.
-    </div>
+    <h2 id="id-verse-title"></h2>
 
-    <div class="stage-specific stage-practice" style="display:none;">
-      <b>PRACTICE:</b> This item is not due for review, but you can test yourself if you want
-      (test score will be ignored).
-    </div>
-
-  </div>
-
-  <div id="id-keyboard-test-bar">
-    <input type="text" value="" id="id-typing" size="15" autocomplete="off" autocorrect="off" autocapitalize="off"><br/>
-  </div>
-  <div id="id-testing-status"></div>
-  <div id="id-verse-wrapper">
-    <div class="current-verse-wrapper">
-      <div class="current-verse">
+    <div id="id-instructions">
+      <div class="stage-specific
+                  stage-read"
+           style="display:none;">
+        <b>READ:</b> Read the text through (preferably aloud), and click 'Next'.
       </div>
-    </div>
-  </div>
+      <div class="stage-specific
+                  stage-recall1
+                  stage-recall2
+                  stage-recall3
+                  stage-recall4"
+           style="display:none;">
+        <b>READ and RECALL:</b>
+        Read the text through, filling in the gaps from your memory. Click
+        a word to reveal it if you can't remember.
+      </div>
 
-  <div id="id-onscreen-test-container" style="display:none;">
-  </div>
-
-  <div id="id-bottom-controls">
-    <div class="buttonbar" style="display:none;">
-      <div>
-        <div class="stage-specific
-                    stage-read
-                    stage-recall1
-                    stage-recall2
-                    stage-recall3
-                    stage-recall4
-                    stage-test
-                    stage-practice
-                    ">
-          <button class="btn" id="id-help-btn">Tips</button>
+      <div class="stage-specific stage-test" style="display:none;">
+        <div class="test-method-keyboard-full-word" style="display:none;">
+          <b>TEST:</b> Testing time! Type the text, using space to check each word as you go.
+          (hint: don't sweat the spelling, we should be able to work it out).
         </div>
-        <div class="progress
-                    stage-specific
-                    stage-read
-                    stage-recall1
-                    stage-recall2
-                    stage-recall3
-                    stage-recall4
-                    stage-test
-                    stage-practice
-                    ">
-          <progress id="id-progress-bar" value="0" max="100">0%</progress>
+        <div class="test-method-keyboard-first-letter" style="display:none;">
+          <b>QUICK TEST:</b> Testing time! Type the <b>first letter</b> of each word.
         </div>
-        <div id="id-results"
-             class="stage-specific
-                    stage-test-finished
-                    ">
-          <b>RESULTS:</b> You scored <span id="id-accuracy"></span> - <span id="id-result-comment"></span>
+        <div class="test-method-onscreen" style="display:none;">
+          <b>TEST:</b> Testing time! For each word choose from the options below.
         </div>
+      </div>
+
+      <div class="stage-specific stage-readForContext" style="display:none;">
+        <b>READ:</b> Read this verse to get the context and flow of the passage.
+      </div>
+
+      <div class="stage-specific stage-practice" style="display:none;">
+        <b>PRACTICE:</b> This item is not due for review, but you can test yourself if you want
+        (test score will be ignored).
+      </div>
+
+    </div>
+
+    <div id="id-keyboard-test-bar">
+      <input type="text" value="" id="id-typing" size="15" autocomplete="off" autocorrect="off" autocapitalize="off"><br/>
+    </div>
+    <div id="id-testing-status"></div>
+    <div id="id-verse-wrapper">
+      <div class="current-verse-wrapper">
+        <div class="current-verse">
+        </div>
+      </div>
+    </div>
+
+    <div id="id-onscreen-test-container" style="display:none;">
+    </div>
+
+    <div id="id-bottom-controls">
+      <div class="buttonbar" style="display:none;">
         <div>
-          <nobr>
+          <div class="stage-specific
+                      stage-read
+                      stage-recall1
+                      stage-recall2
+                      stage-recall3
+                      stage-recall4
+                      stage-test
+                      stage-practice
+                      ">
+            <button class="btn" id="id-help-btn">Tips</button>
+          </div>
+          <div class="progress
+                      stage-specific
+                      stage-read
+                      stage-recall1
+                      stage-recall2
+                      stage-recall3
+                      stage-recall4
+                      stage-test
+                      stage-practice
+                      ">
+            <progress id="id-progress-bar" value="0" max="100">0%</progress>
+          </div>
+          <div id="id-results"
+               class="stage-specific
+                      stage-test-finished
+                      ">
+            <b>RESULTS:</b> You scored <span id="id-accuracy"></span> - <span id="id-result-comment"></span>
+          </div>
+          <div>
+            <nobr>
 
-            <input id="id-hint-btn"
-                   value="Get hint"
-                   type="submit"
-                   class="btn
-                          stage-specific
-                          stage-test
-                          stage-practice
-                          "
-                   >
+              <input id="id-hint-btn"
+                     value="Get hint"
+                     type="submit"
+                     class="btn
+                            stage-specific
+                            stage-test
+                            stage-practice
+                            "
+                     >
 
-            <input id="id-back-btn"
-                   value="Back"
-                   type="submit"
-                   class="btn
-                          stage-specific
-                          stage-read
-                          stage-recall1
-                          stage-recall2
-                          stage-recall3
-                          stage-recall4
-                          "
-                   disabled>
+              <input id="id-back-btn"
+                     value="Back"
+                     type="submit"
+                     class="btn
+                            stage-specific
+                            stage-read
+                            stage-recall1
+                            stage-recall2
+                            stage-recall3
+                            stage-recall4
+                            "
+                     disabled>
 
-            <input id="id-next-btn"
-                   value="Next"
-                   type="submit"
-                   class="primary btn
-                          stage-specific
-                          stage-read
-                          stage-recall1
-                          stage-recall2
-                          stage-recall3
-                          stage-recall4
-                          "
-                   >
+              <input id="id-next-btn"
+                     value="Next"
+                     type="submit"
+                     class="primary btn
+                            stage-specific
+                            stage-read
+                            stage-recall1
+                            stage-recall2
+                            stage-recall3
+                            stage-recall4
+                            "
+                     >
 
-            <input id="id-more-practice-btn"
-                   value="More practice"
-                   type="submit"
-                   class="btn
-                          stage-specific
-                          "
-                   >
+              <input id="id-more-practice-btn"
+                     value="More practice"
+                     type="submit"
+                     class="btn
+                            stage-specific
+                            "
+                     >
 
-            <input id="id-next-verse-btn"
-                   value="Next"
-                   type="submit"
-                   class="btn primary
-                          stage-specific
-                          stage-test-finished
-                          "
-                   >
+              <input id="id-next-verse-btn"
+                     value="Next"
+                     type="submit"
+                     class="btn primary
+                            stage-specific
+                            stage-test-finished
+                            "
+                     >
 
-            <input id="id-context-next-verse-btn"
-                   value="Next"
-                   type="submit"
-                   class="btn primary
-                          stage-specific
-                          stage-readForContext
-                          "
-                   >
+              <input id="id-context-next-verse-btn"
+                     value="Next"
+                     type="submit"
+                     class="btn primary
+                            stage-specific
+                            stage-readForContext
+                            "
+                     >
 
-            <input id="id-finish-btn"
-                   value="Finish"
-                   type="submit"
-                   class="btn
-                          stage-specific
-                          "
-                   >
+              <input id="id-finish-btn"
+                     value="Finish"
+                     type="submit"
+                     class="btn
+                            stage-specific
+                            "
+                     >
 
-          </nobr>
+            </nobr>
+          </div>
         </div>
       </div>
+
     </div>
 
-  </div>
+    <div id="id-help" style="display:none;" class="alert-message block-message info">
+      <h3>Tips</h3>
+      <h4>Learning</h4>
+      <ul>
+        <li>When learning a new verse in a passage, it helps to read the last line
+          of the previous verse along with the new verse you are learning, so that
+          your brain connects them together.</li>
+      </ul>
 
-  <div id="id-help" style="display:none;" class="alert-message block-message info">
-    <h3>Tips</h3>
-    <h4>Learning</h4>
-    <ul>
-      <li>When learning a new verse in a passage, it helps to read the last line
-      of the previous verse along with the new verse you are learning, so that
-      your brain connects them together.</li>
-    </ul>
+      <h4>Testing</h4>
+      <p>In typing tests, you can miss out all punctuation and ignore capitals.
+        You can make a surprising number of typos, too, before the word isn't
+        recognized, especially with longer words.</p>
 
-    <h4>Testing</h4>
-    <p>In typing tests, you can miss out all punctuation and ignore capitals.
-      You can make a surprising number of typos, too, before the word isn't
-      recognized, especially with longer words.</p>
-
-    <h4>Keyboard shortcuts</h4>
-    <ul>
+      <h4>Keyboard shortcuts</h4>
+      <ul>
         <li>At any point: <br/>
           <b>Enter</b> - presses the primary button
           <span class="theme-calm-only">(dark blue)</span>
@@ -231,39 +231,39 @@ Loading {% include "learnscripture/loading_animation.html" %}
         </li>
         <li>In “TEST” stages: <br/>
           <b>ESC</b> - clears whatever you have typed. (Desktop/laptops only -
-            some handheld devices will quit the application if you press
-            ESC)<br/>
+          some handheld devices will quit the application if you press
+          ESC)<br/>
           <br/>
-    </ul>
+      </ul>
+
+    </div>
 
   </div>
-
-</div>
 
 {% endblock %}
 
 {% block rightcolumn %}
 
-{% include 'learnscripture/session.html' %}
+  {% include 'learnscripture/session.html' %}
 
-<h3>Today's stats</h3>
+  <h3>Today's stats</h3>
 
-<div id="id-stats-block">
-</div>
+  <div id="id-stats-block">
+  </div>
 
-<h3>Current verse</h3>
+  <h3>Current verse</h3>
 
-<div id="id-verse-set-info">Verse set: <a href="#" target="_blank"></a></div>
-<div id="id-points-target"></div>
+  <div id="id-verse-set-info">Verse set: <a href="#" target="_blank"></a></div>
+  <div id="id-points-target"></div>
 
-<h3>Points</h3>
+  <h3>Points</h3>
 
-<div id="id-points-block">
-{% if not request.identity.scoring_enabled %}
-  <p>Points are only enabled once you
-    <a href="{% url 'signup' %}?next={{ request.get_full_path|urlencode }}">create an account</a>.
-  </p>
-{% endif %}
-</div>
+  <div id="id-points-block">
+    {% if not request.identity.scoring_enabled %}
+      <p>Points are only enabled once you
+        <a href="{% url 'signup' %}?next={{ request.get_full_path|urlencode }}">create an account</a>.
+      </p>
+    {% endif %}
+  </div>
 
 {% endblock %}

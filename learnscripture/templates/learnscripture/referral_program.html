@@ -4,73 +4,73 @@
 
 {% block content %}
 
-<p>If you like LearnScripture.net and want to spread the word about it, our
-referral program will help you get <strong>badges</strong> while you do so!</p>
+  <p>If you like LearnScripture.net and want to spread the word about it, our
+    referral program will help you get <strong>badges</strong> while you do so!</p>
 
-<h2>How it works</h2>
+  <h2>How it works</h2>
 
-{% if referral_link %}
+  {% if referral_link %}
 
-<p>For us to recognise that you were the source of the referral, you need a link
-like the following one to refer people to LearnScripture.net:</p>
+    <p>For us to recognise that you were the source of the referral, you need a link
+      like the following one to refer people to LearnScripture.net:</p>
 
-<p class="referral-link">{{ referral_link }}</p>
+    <p class="referral-link">{{ referral_link }}</p>
 
-<p>Copy-and-paste this link and pass it on to a friend, and if they use it to
-get to the site, and then start learning verses, we'll track it and know that
-you referred them.</p>
+    <p>Copy-and-paste this link and pass it on to a friend, and if they use it to
+      get to the site, and then start learning verses, we'll track it and know that
+      you referred them.</p>
 
-{% else %}
+  {% else %}
 
-<p><strong>You first need an account, and need to
- <a href='{% url "login" %}?next={{ request.get_full_path|urlencode }}'>sign in</a>
- to get the full instructions and the referral link.</strong></p>
+    <p><strong>You first need an account, and need to
+      <a href='{% url "login" %}?next={{ request.get_full_path|urlencode }}'>sign in</a>
+      to get the full instructions and the referral link.</strong></p>
 
-{% endif %}
-
-
-<h2>Please don't:</h2>
-
-<ul class="dont">
-  <li>Send bulk emails to friends about this. Many of them may consider this to
-  be spam, or even think it came from us, and you may give LearnScripture.net a
-  bad name!
-  </li>
-</ul>
-
-<h2>Please do:</h2>
-
-<ul class="do">
-  <li>Post this link to social sites like Facebook, Twitter or Pinterest (as long as you don't post it repeatedly and annoy people!)
-  <li>Include some personal comment about why you like LearnScripture.net or how it has helped you.</li>
-</ul>
-
-<h2>Shortcuts</h2>
-
-<p>Use the following to get started quickly:</p>
-
-<div class="addthis_toolbox addthis_default_style "
-     addthis:url="{{ referral_link }}"
-     addthis:title="LearnScripture.net">
-<a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
-<a class="addthis_button_tweet"></a>
-<a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
-<a class="addthis_counter addthis_pill_style"></a>
-</div>
+  {% endif %}
 
 
-<h2>Specific pages</h2>
+  <h2>Please don't:</h2>
 
-<p>You can also get a referral link for specific pages. At the bottom of most
-pages that make good starting points, you'll see 'share' links. These will
-automatically use the right URL with the '?from=' bit added.</p>
+  <ul class="dont">
+    <li>Send bulk emails to friends about this. Many of them may consider this to
+      be spam, or even think it came from us, and you may give LearnScripture.net a
+      bad name!
+    </li>
+  </ul>
 
-<p>You can also get the 'referral link' that you can click on to get the link to
-use for that page. See the bottom of this page for an example of these buttons.</p>
+  <h2>Please do:</h2>
 
-<p>This can be especially useful to get a group of friends to start learning
-a <a href="{% url 'choose' %}">verse set</a>, or to join a
-<a href="{% url 'groups' %}">group</a>.</p>
+  <ul class="do">
+    <li>Post this link to social sites like Facebook, Twitter or Pinterest (as long as you don't post it repeatedly and annoy people!)
+      <li>Include some personal comment about why you like LearnScripture.net or how it has helped you.</li>
+  </ul>
+
+  <h2>Shortcuts</h2>
+
+  <p>Use the following to get started quickly:</p>
+
+  <div class="addthis_toolbox addthis_default_style "
+       addthis:url="{{ referral_link }}"
+       addthis:title="LearnScripture.net">
+    <a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
+    <a class="addthis_button_tweet"></a>
+    <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    <a class="addthis_counter addthis_pill_style"></a>
+  </div>
+
+
+  <h2>Specific pages</h2>
+
+  <p>You can also get a referral link for specific pages. At the bottom of most
+    pages that make good starting points, you'll see 'share' links. These will
+    automatically use the right URL with the '?from=' bit added.</p>
+
+  <p>You can also get the 'referral link' that you can click on to get the link to
+    use for that page. See the bottom of this page for an example of these buttons.</p>
+
+  <p>This can be especially useful to get a group of friends to start learning
+    a <a href="{% url 'choose' %}">verse set</a>, or to join a
+    <a href="{% url 'groups' %}">group</a>.</p>
 
 {% endblock %}
 

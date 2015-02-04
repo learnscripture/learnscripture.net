@@ -6,16 +6,16 @@
 
 {% block content %}
 
-<p>Your request could not be authenticated.</p>
+  <p>Your request could not be authenticated.</p>
 
-{% if no_csrf_cookie %}
-<p>The problem appears to be that <strong>you do not have cookies enabled in your
-  browser</strong>, or have blocked a cookie necessary for us to to correctly recognise
-  you. Please <strong>enable cookies</strong>, go back and try again.</p>
+  {% if no_csrf_cookie %}
+    <p>The problem appears to be that <strong>you do not have cookies enabled in your
+      browser</strong>, or have blocked a cookie necessary for us to to correctly recognise
+      you. Please <strong>enable cookies</strong>, go back and try again.</p>
 
-{% endif %}
+  {% endif %}
 
-<p>Please <a href="/contact/">contact us</a> if this error persists.</p>
+  <p>Please <a href="/contact/">contact us</a> if this error persists.</p>
 
 
 {% endblock %}
