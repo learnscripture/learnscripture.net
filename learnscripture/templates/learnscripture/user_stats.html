@@ -5,238 +5,238 @@
 {% load account_utils %}
 
 {% block extrajs %}
-{{ block.super }}
-<script type="text/javascript" src="{{ STATIC_URL }}js/lib/dygraph-combined.js"></script>
-<script type="text/javascript">
-$(document).ready(function () {
-    var now = new Date().getTime();
-    g = new Dygraph(
-        document.getElementById("id-user-stats-graph"),
-        "verses_timeline_stats.csv",
-        {
-          includeZero: true,
-          axisLineWidth: 1,
-          strokeWidth: 2,
-          drawCallback: function(dygraph, isInitial) {
-              if (isInitial) {
-                  g.updateOptions({ dateWindow:
-                                    [Math.max(
-                                      now - 1000 * 60 * 60 * 24 * 30 * 6, // six months ago
-                                      g.xAxisExtremes()[0] // earliest piece of data,
-                                     ),
-                                     now]});
-              }
-          }
-        }
-    );
+  {{ block.super }}
+  <script type="text/javascript" src="{{ STATIC_URL }}js/lib/dygraph-combined.js"></script>
+  <script type="text/javascript">
+   $(document).ready(function () {
+     var now = new Date().getTime();
+     g = new Dygraph(
+       document.getElementById("id-user-stats-graph"),
+       "verses_timeline_stats.csv",
+       {
+         includeZero: true,
+         axisLineWidth: 1,
+         strokeWidth: 2,
+         drawCallback: function(dygraph, isInitial) {
+           if (isInitial) {
+             g.updateOptions({ dateWindow:
+                               [Math.max(
+                                 now - 1000 * 60 * 60 * 24 * 30 * 6, // six months ago
+                                 g.xAxisExtremes()[0] // earliest piece of data,
+                               ),
+                                now]});
+           }
+         }
+       }
+     );
 
-    var rollCb = $('#id-user-stats-graph-rolling');
-    rollCb.bind('change', function (ev) {
-        g.updateOptions({rollPeriod: (rollCb.attr("checked") == "checked") ? 7 : 1})
-    });
-});
-</script>
+     var rollCb = $('#id-user-stats-graph-rolling');
+     rollCb.bind('change', function (ev) {
+       g.updateOptions({rollPeriod: (rollCb.attr("checked") == "checked") ? 7 : 1})
+     });
+   });
+  </script>
 {% endblock %}
 
 {% block description %}
-Stats for {{ account.username }} on LearnScripture.net - the fun, easy and social way to memorize the Bible online
+  Stats for {{ account.username }} on LearnScripture.net - the fun, easy and social way to memorize the Bible online
 {% endblock %}
 
 {% block content %}
 
-<h2>User information</h2>
+  <h2>User information</h2>
 
 
-<table class="bordered-table">
-  <tbody>
-    {% if account.personal_name %}
-    <tr>
-      <th>Name</th>
-      <td>{{ account.personal_name }}</td>
-    </tr>
-    {% endif %}
-    <tr>
-      <th>Started using site</th>
-      <td>{{ account.identity.date_created|date:"j M Y" }}</td>
-    </tr>
-    {% if account.recruited_by and account.recruited_by.is_active %}
-    <tr>
-      <th>Recruited by</th>
-      <td>{{ account.recruited_by|account_link }}</td>
-    </tr>
-    {% endif %}
-  </tbody>
-</table>
+  <table class="bordered-table">
+    <tbody>
+      {% if account.personal_name %}
+        <tr>
+          <th>Name</th>
+          <td>{{ account.personal_name }}</td>
+        </tr>
+      {% endif %}
+      <tr>
+        <th>Started using site</th>
+        <td>{{ account.identity.date_created|date:"j M Y" }}</td>
+      </tr>
+      {% if account.recruited_by and account.recruited_by.is_active %}
+        <tr>
+          <th>Recruited by</th>
+          <td>{{ account.recruited_by|account_link }}</td>
+        </tr>
+      {% endif %}
+    </tbody>
+  </table>
 
-{% if request_account and request_account != account %}
-<h2>Connections</h2>
+  {% if request_account and request_account != account %}
+    <h2>Connections</h2>
 
-<div>
-<div class="is-following
-             {% if not viewer_is_following %}hide{% endif %}">
-  <a href="#" id="id-unfollow-btn" class="btn primary" data-account-id="{{ account.id }}">Unfollow</a>
-  You are following {{ account.username }}.
-</div>
-<div class="is-not-following
-             {% if viewer_is_following %}hide{% endif %}">
-  <a href="#" id="id-follow-btn" class="btn primary" data-account-id="{{ account.id }}">Follow</a>
+    <div>
+      <div class="is-following
+                  {% if not viewer_is_following %}hide{% endif %}">
+        <a href="#" id="id-unfollow-btn" class="btn primary" data-account-id="{{ account.id }}">Unfollow</a>
+        You are following {{ account.username }}.
+      </div>
+      <div class="is-not-following
+                  {% if viewer_is_following %}hide{% endif %}">
+        <a href="#" id="id-follow-btn" class="btn primary" data-account-id="{{ account.id }}">Follow</a>
 
-  You are not following {{ account.username }}.
-</div>
-<p>Following a user is not visible to them, but means that this person's
-activity will feature more on your dashboard news stream. Any groups
-that you are both in will also affect your news stream.
-</p>
-</div>
+        You are not following {{ account.username }}.
+      </div>
+      <p>Following a user is not visible to them, but means that this person's
+        activity will feature more on your dashboard news stream. Any groups
+        that you are both in will also affect your news stream.
+      </p>
+    </div>
 
-{% endif %}
+  {% endif %}
 
-{% if events %}
+  {% if events %}
 
-<h2>Activity</h2>
+    <h2>Activity</h2>
 
-{% include "learnscripture/activity_stream_inc.html" %}
+    {% include "learnscripture/activity_stream_inc.html" %}
 
-{% include "learnscripture/comment_common_inc.html" %}
+    {% include "learnscripture/comment_common_inc.html" %}
 
-<p><a href="{% url 'user_activity_stream' account.username %}">See more</a></p>
-{% endif %}
+    <p><a href="{% url 'user_activity_stream' account.username %}">See more</a></p>
+  {% endif %}
 
-<h2>Charts</h2>
-<p>Click and drag to zoom. Double-click to zoom back out.</p>
-<p>Shift + drag to pan.</p>
-<h3>Verses started/tested per day</h3>
-<div id="id-user-stats-graph" style="width: 90%; margin: 0 auto 0 0;">
-<i>Loading...</i>
-</div>
-<div class="inputs-list">
-  <label><input type="checkbox" id="id-user-stats-graph-rolling"> 7 day rolling average</label>
-</div>
+  <h2>Charts</h2>
+  <p>Click and drag to zoom. Double-click to zoom back out.</p>
+  <p>Shift + drag to pan.</p>
+  <h3>Verses started/tested per day</h3>
+  <div id="id-user-stats-graph" style="width: 90%; margin: 0 auto 0 0;">
+    <i>Loading...</i>
+  </div>
+  <div class="inputs-list">
+    <label><input type="checkbox" id="id-user-stats-graph-rolling"> 7 day rolling average</label>
+  </div>
 
-<br/>
+  <br/>
 
-<p class="note">Days are defined by the UTC timezone</p>
+  <p class="note">Days are defined by the UTC timezone</p>
 
-{% if awards %}
-<h2 id="badges">Badges</h2>
+  {% if awards %}
+    <h2 id="badges">Badges</h2>
 
-<table class="bordered-table award">
-  <thead>
-    <tr>
-      <th>Badge</th>
-      <th>Description</th>
-      <th>Points</th>
-      <th>Received</th>
-    </tr>
-  </thead>
+    <table class="bordered-table award">
+      <thead>
+        <tr>
+          <th>Badge</th>
+          <th>Description</th>
+          <th>Points</th>
+          <th>Received</th>
+        </tr>
+      </thead>
 
-  <tbody>
-  {% for award in awards %}
-  <tr>
-    <td>
-      <a href="{% url 'award' award.award_detail.slug %}">
-        <img src="{{ STATIC_URL }}{{ award.image_medium }}">
-      </a>
-    </td>
-    <td>
-      <h3><a href="{% url 'award' award.award_detail.slug %}">{{ award.award_detail.title }}</a>
-        {% if award.has_levels %}
-        - level {{ award.level }}
-        {% endif %}
-      </h3>
-      <p>{{ award.full_description }}</p>
-    </td>
-    <td>
-      {{ award.award_detail.points|intcomma }}
-    </td>
-    <td>
-      {{ award.created|date:"j M Y" }}
-    </td>
-  </tr>
-  {% endfor %}
-  </tbody>
-</table>
+      <tbody>
+        {% for award in awards %}
+          <tr>
+            <td>
+              <a href="{% url 'award' award.award_detail.slug %}">
+                <img src="{{ STATIC_URL }}{{ award.image_medium }}">
+              </a>
+            </td>
+            <td>
+              <h3><a href="{% url 'award' award.award_detail.slug %}">{{ award.award_detail.title }}</a>
+                {% if award.has_levels %}
+                  - level {{ award.level }}
+                {% endif %}
+              </h3>
+              <p>{{ award.full_description }}</p>
+            </td>
+            <td>
+              {{ award.award_detail.points|intcomma }}
+            </td>
+            <td>
+              {{ award.created|date:"j M Y" }}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
 
-<p>See <a href="{% url 'awards' %}">all badge information</a>.</p>
+    <p>See <a href="{% url 'awards' %}">all badge information</a>.</p>
 
-{% endif %}
+  {% endif %}
 
-<h2>Stats</h2>
+  <h2>Stats</h2>
 
-{% if account.total_score %}
+  {% if account.total_score %}
 
-<table class="bordered-table">
-  <thead>
-    <tr>
-      <th></th>
-      <th>All time</th>
-      <th>This week</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>Rank</th>
-      <td>{{ account.rank_all_time|intcomma }}</td>
-      <td>{{ account.rank_this_week|intcomma }}</td>
-    </tr>
-    <tr>
-      <th>Points</th>
-      <td>{{ account.points_all_time|intcomma }}</td>
-      <td>{{ account.points_this_week|intcomma }}</td>
-    </tr>
-    <tr>
-      <th>Verses started</th>
-      <td>{{ verses_started_all_time|intcomma }}</td>
-      <td>{{ verses_started_this_week|intcomma }}</td>
-    </tr>
-    <tr>
-      <th>Verses fully learnt</th>
-      <td>{{ verses_finished_all_time|intcomma }}</td>
-      <td>{{ verses_finished_this_week|intcomma }}</td>
-    </tr>
-    <tr>
-      <th><a href="{% url 'choose' %}?creator={{ account.username }}">Verse sets created</a></th>
-      <td>{{ verse_sets_created_all_time|intcomma }}</td>
-      <td>{{ verse_sets_created_this_week|intcomma }}</td>
-    </tr>
+    <table class="bordered-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>All time</th>
+          <th>This week</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>Rank</th>
+          <td>{{ account.rank_all_time|intcomma }}</td>
+          <td>{{ account.rank_this_week|intcomma }}</td>
+        </tr>
+        <tr>
+          <th>Points</th>
+          <td>{{ account.points_all_time|intcomma }}</td>
+          <td>{{ account.points_this_week|intcomma }}</td>
+        </tr>
+        <tr>
+          <th>Verses started</th>
+          <td>{{ verses_started_all_time|intcomma }}</td>
+          <td>{{ verses_started_this_week|intcomma }}</td>
+        </tr>
+        <tr>
+          <th>Verses fully learnt</th>
+          <td>{{ verses_finished_all_time|intcomma }}</td>
+          <td>{{ verses_finished_this_week|intcomma }}</td>
+        </tr>
+        <tr>
+          <th><a href="{% url 'choose' %}?creator={{ account.username }}">Verse sets created</a></th>
+          <td>{{ verse_sets_created_all_time|intcomma }}</td>
+          <td>{{ verse_sets_created_this_week|intcomma }}</td>
+        </tr>
 
-  </tbody>
-</table>
+      </tbody>
+    </table>
 
-<p class="note">Weekly statistics are measured from the current time to one week ago.</p>
-
-
-{% else %}
-
-<p>No points earned yet.</p>
-
-{% endif %}
-
-<p><a href="{% url 'leaderboard' %}"><i class="icon-leaderboard"></i> See all rankings</a></p>
-
-{% if request_account.username == account.username %}
-<p><a href="{% url 'user_verses' %}"><i class="icon-progress"></i> See detailed progress on verse learning</a></p>
-{% endif %}
+    <p class="note">Weekly statistics are measured from the current time to one week ago.</p>
 
 
-<h2 id="groups">Groups</h2>
-{% if groups %}
-<ul>
-  {% for group in groups %}
-  <li>{{ group|group_link }}</li>
-  {% endfor %}
-</ul>
+  {% else %}
 
-<p><a href="{% url 'groups' %}">Find more groups to join</a></p>
+    <p>No points earned yet.</p>
 
-{% else %}
-<p>No groups.
+  {% endif %}
+
+  <p><a href="{% url 'leaderboard' %}"><i class="icon-leaderboard"></i> See all rankings</a></p>
 
   {% if request_account.username == account.username %}
-  <a href="{% url 'groups' %}">Find groups to join</a>
+    <p><a href="{% url 'user_verses' %}"><i class="icon-progress"></i> See detailed progress on verse learning</a></p>
   {% endif %}
-</p>
 
-{% endif %}
+
+  <h2 id="groups">Groups</h2>
+  {% if groups %}
+    <ul>
+      {% for group in groups %}
+        <li>{{ group|group_link }}</li>
+      {% endfor %}
+    </ul>
+
+    <p><a href="{% url 'groups' %}">Find more groups to join</a></p>
+
+  {% else %}
+    <p>No groups.
+
+      {% if request_account.username == account.username %}
+        <a href="{% url 'groups' %}">Find groups to join</a>
+      {% endif %}
+    </p>
+
+  {% endif %}
 
 {% endblock %}

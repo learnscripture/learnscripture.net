@@ -4,110 +4,110 @@
 
 {% block content %}
 
-<h2>Verses per day</h2>
+  <h2>Verses per day</h2>
 
-<div id="id-verses-tested-graph" style="width:820px;height:300px;">
-</div>
+  <div id="id-verses-tested-graph" style="width:820px;height:300px;">
+  </div>
 
-<h2>Accounts</h2>
+  <h2>Accounts</h2>
 
-<div id="id-accounts-graph" style="width:820px;height:300px;">
-</div>
+  <div id="id-accounts-graph" style="width:820px;height:300px;">
+  </div>
 
-{% if 'requests' in request.GET %}
+  {% if 'requests' in request.GET %}
 
-<h2>Requests</h2>
+    <h2>Requests</h2>
 
-<div id="id-request-stats-graph" style="width:820px;height:300px;">
-</div>
+    <div id="id-request-stats-graph" style="width:820px;height:300px;">
+    </div>
 
-{% endif %}
+  {% endif %}
 
 {% endblock %}
 
 {% block extrajs %}
-<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.flot.min.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.flot.stack.min.js"></script>
-<script type="text/javascript">
-$(function() {
+  <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.flot.min.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.flot.stack.min.js"></script>
+  <script type="text/javascript">
+   $(function() {
 
-    $.plot("#id-verses-tested-graph",
-           [
-            {label: "Started",
-             data: {{ verses_data.verse_started|jsonify }} },
-            {label: "Tested",
-             data: {{ verses_data.verse_tested|jsonify }} }
-           ],
-           { xaxis: { mode: "time",
-                      ticks: 10 },
-             yaxis: { min: 0 },
-             legend: { position: "nw" },
-             series: {
+     $.plot("#id-verses-tested-graph",
+            [
+              {label: "Started",
+               data: {{ verses_data.verse_started|jsonify }} },
+              {label: "Tested",
+               data: {{ verses_data.verse_tested|jsonify }} }
+            ],
+            { xaxis: { mode: "time",
+                       ticks: 10 },
+              yaxis: { min: 0 },
+              legend: { position: "nw" },
+              series: {
                 lines: { show: true, fill: false },
-             }
+              }
 
-           });
+            });
 
-    $.plot("#id-accounts-graph",
-           [
-            {label: "New accounts",
-             data: {{ account_data.new_account|jsonify }},
-             yaxis: 1
-            },
-            {label: "All accounts",
-             data: {{ account_data.all_accounts|jsonify }},
-             yaxis: 2
-            }
+     $.plot("#id-accounts-graph",
+            [
+              {label: "New accounts",
+               data: {{ account_data.new_account|jsonify }},
+               yaxis: 1
+              },
+              {label: "All accounts",
+               data: {{ account_data.all_accounts|jsonify }},
+               yaxis: 2
+              }
 
-{% if 'full_accounts' in request.GET %}
-            ,
-            {label: "Active accounts",
-             data: {{ account_data.accounts_active|jsonify }},
-             yaxis: 2
-            },
-            {label: "Active identities",
-             data: {{ account_data.identities_active|jsonify }},
-             yaxis: 2
-            }
-{% endif %}
-           ],
-           { xaxis: { mode: "time",
-                      ticks: 10 },
-             yaxes: [{ min: 0,
-                       position: 'left'},
-                     { min: 0,
-                       position: 'right'}],
-             legend: { position: "nw" },
-             series: {
+              {% if 'full_accounts' in request.GET %}
+   ,
+              {label: "Active accounts",
+               data: {{ account_data.accounts_active|jsonify }},
+               yaxis: 2
+              },
+              {label: "Active identities",
+               data: {{ account_data.identities_active|jsonify }},
+               yaxis: 2
+              }
+              {% endif %}
+            ],
+            { xaxis: { mode: "time",
+                       ticks: 10 },
+              yaxes: [{ min: 0,
+                        position: 'left'},
+                      { min: 0,
+                        position: 'right'}],
+              legend: { position: "nw" },
+              series: {
                 lines: { show: true, fill: false },
-             }
-           });
+              }
+            });
 
-{% if 'requests' in request.GET %}
+     {% if 'requests' in request.GET %}
 
-    $.plot("#id-request-stats-graph" ,
-           [
-            {label: "HTML requests",
-             data: {{ request_data.request_html|jsonify }} },
-            {label: "JSON requests",
-             data: {{ request_data.request_json|jsonify }} },
-            {label: "Other",
-             data: {{ request_data.request_other|jsonify }} }
-           ],
-           { xaxis: { mode: "time",
-                      ticks: 10 },
-             yaxis: { min: 0 },
-             legend: { position: "nw" },
-             series: {
+     $.plot("#id-request-stats-graph" ,
+            [
+              {label: "HTML requests",
+               data: {{ request_data.request_html|jsonify }} },
+              {label: "JSON requests",
+               data: {{ request_data.request_json|jsonify }} },
+              {label: "Other",
+               data: {{ request_data.request_other|jsonify }} }
+            ],
+            { xaxis: { mode: "time",
+                       ticks: 10 },
+              yaxis: { min: 0 },
+              legend: { position: "nw" },
+              series: {
                 stack: true,
                 lines: { show: true, fill: true },
-             }
+              }
 
-           });
+            });
 
 
-{% endif %}
+     {% endif %}
 
-});
-</script>
+   });
+  </script>
 {% endblock %}

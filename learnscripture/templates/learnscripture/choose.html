@@ -8,134 +8,134 @@
 
 {% block content %}
 
-<p>Choose a pre-made <b>set of verses</b> to start learning, or choose
- some <b>individual verses.</b></p>
+  <p>Choose a pre-made <b>set of verses</b> to start learning, or choose
+    some <b>individual verses.</b></p>
 
-<p>(Other options: <a href="{% url 'create_set_menu' %}">create your own verse set</a>, or <a href="{% url 'catechisms' %}">learn a catechism</a>)</p>
+  <p>(Other options: <a href="{% url 'create_set_menu' %}">create your own verse set</a>, or <a href="{% url 'catechisms' %}">learn a catechism</a>)</p>
 
-<ul class="tabs" data-tabs="tabs">
-  <li {% if active_tab == 'verseset' %}class="active"{% endif %}><a href="#id-tab-verseset">Verse sets</a></li>
-  <li {% if active_tab == 'individual' %}class="active"{% endif %}><a href="#id-tab-individual">Individual verses</a></li>
-</ul>
+  <ul class="tabs" data-tabs="tabs">
+    <li {% if active_tab == 'verseset' %}class="active"{% endif %}><a href="#id-tab-verseset">Verse sets</a></li>
+    <li {% if active_tab == 'individual' %}class="active"{% endif %}><a href="#id-tab-individual">Individual verses</a></li>
+  </ul>
 
-<div class="pill-content">
-  <div {% if active_tab == 'verseset' %}class="active"{% endif %} id="id-tab-verseset">
+  <div class="pill-content">
+    <div {% if active_tab == 'verseset' %}class="active"{% endif %} id="id-tab-verseset">
 
 
-    <form action="" method="GET" class="filters">
-      <div class="clearfix">
-        <label>Order:</label>
-        <div class="input">
-          <ul class="pills">
-            {% if 'new' not in request.GET %}
-            <li class="active"><a href="">Most popular first</a></li>
-            {% else %}
-            <li><a href="{% spurl base=request.get_full_path add_query='popular' remove_query_param='new' %}">Most popular first</a></li>
-            {% endif %}
-            {% if 'new' in request.GET %}
-            <li class="active"><a href="">Newest first</a></li>
-            {% else %}
-            <li><a href="{% spurl base=request.get_full_path add_query='new' remove_query_param='popular' %}">Newest first</a></li>
-            {% endif %}
-          </ul>
-        </div>
-      </div>
-
-      <div class="clearfix">
-        <label>Search:</label>
-        <div class="input">
-          <input type="text" name="q"  id="id-search-input" value="{{ request.GET.q }}"/>
-          <input type="submit" class="btn primary" value="Search" id="id-search-btn" />
-        </div>
-      </div>
-
-      {% if request.identity.account %}
-      <div class="clearfix">
-        <label>Created by:</label>
-        <div class="input">
-          <ul class="pills">
-            {% if creator %}
-            <li><a href="{% spurl base=request.get_full_path remove_query_param='creator' %}">All users</a></li>
-            <li class="active"><a href="">{% if creator == request.identity.account %}You{% else %}{{ creator.username }}{% endif %}</a></li>
-            {% else %}
-            <li class="active"><a href="">All users</a></li>
-            <li><a href="{% spurl base=request.get_full_path add_query='creator={{ request.identity.account.username }}' %}">You</a></li>
-
-            {% endif %}
-          </ul>
-        </div>
-      </div>
-      {% endif %}
-
-    </form>
-    {% autopaginate verse_sets 10 %}
-
-    {% if request.GET.q %}
-    <h2>Search results:</h2>
-    {% endif %}
-
-    {% if not verse_sets %}
-    <p>No verse sets found that match your query.</p>
-    {% endif %}
-
-    {% for vs in verse_sets %}
-    <div class="verseset">
-      <form action="" method="POST">
-        {% csrf_token %}
-        <input type="hidden" name="verseset_id" value="{{ vs.id }}">
-        <i class="icon-public" title="This action is public (unless the verse set is private and remains private)"></i>
-        <input type="submit" class="btn primary needs-preferences" value="Learn" id="id-learn-verseset-btn-{{ vs.id }}">
-      </form>
-      <h3><a href="{{ vs.get_absolute_url }}">{{ vs.name }}</a></h3>
-      {% if vs.description %}
-      <p>{{ vs.description|apply_markup:"restructuredtext" }}</p>
-      {% endif %}
-      {% if not vs.is_passage and vs.verse_choices.all %}
-      <p>Includes the following verses, {{ vs.verse_choices.all|length }} in total:<br/>
-        {% for v in vs.verse_choices.all|slice:"0:10" %}
-        {{ v.reference }}{% if not forloop.last %}, {% endif %}
-        {% endfor %}
-        {% if vs.verse_choices.all|length > 10 %}…and more.{% endif %}
-      </p>
-      {% endif %}
-      {% if vs.is_passage and vs.breaks %}
-      <p>Section breaks at: {{ vs.breaks_formatted }}</p>
-      {% endif %}
-    </div>
-    {% endfor %}
-
-    {% paginate %}
-
-  </div>
-
-  <div {% if active_tab == 'individual' %}class="active"{% endif %} id="id-tab-individual">
-    <p>Choose a verse (or a few verses). For long passages, you should
-      <a href="{% url 'create_passage_set' %}">create a 'passage' verse set</a>.
-    </p>
-
-    {% include "learnscripture/quick_find_controls.html" %}
-
-    <script id="id_individual_choose_result_template" type="text/x-jsrender">
-      {# template for .quickfind_search_results #}
-      <div class="actionset">
-        <form action="" method="POST">
-          {% csrf_token %}
-          <input type="hidden" name="reference" value="[[>reference]]">
-          <input type="hidden" name="version_slug" value="[[>version_slug]]">
-          <input type="submit" class="btn primary needs-preferences" value="Learn">
-        </form>
-        <h3>[[>book_name]]</h3>
-        <div class="verselist">
-          [[for verses]]
-          <div class="verse">
-            <span class="versenumber">[[>chapter_number]]:[[>verse_number]]</span> [[:html_text]]
+      <form action="" method="GET" class="filters">
+        <div class="clearfix">
+          <label>Order:</label>
+          <div class="input">
+            <ul class="pills">
+              {% if 'new' not in request.GET %}
+                <li class="active"><a href="">Most popular first</a></li>
+              {% else %}
+                <li><a href="{% spurl base=request.get_full_path add_query='popular' remove_query_param='new' %}">Most popular first</a></li>
+              {% endif %}
+              {% if 'new' in request.GET %}
+                <li class="active"><a href="">Newest first</a></li>
+              {% else %}
+                <li><a href="{% spurl base=request.get_full_path add_query='new' remove_query_param='popular' %}">Newest first</a></li>
+              {% endif %}
+            </ul>
           </div>
-          [[/for]]
         </div>
-      </div>
-    </script>
+
+        <div class="clearfix">
+          <label>Search:</label>
+          <div class="input">
+            <input type="text" name="q"  id="id-search-input" value="{{ request.GET.q }}"/>
+            <input type="submit" class="btn primary" value="Search" id="id-search-btn" />
+          </div>
+        </div>
+
+        {% if request.identity.account %}
+          <div class="clearfix">
+            <label>Created by:</label>
+            <div class="input">
+              <ul class="pills">
+                {% if creator %}
+                  <li><a href="{% spurl base=request.get_full_path remove_query_param='creator' %}">All users</a></li>
+                  <li class="active"><a href="">{% if creator == request.identity.account %}You{% else %}{{ creator.username }}{% endif %}</a></li>
+                {% else %}
+                  <li class="active"><a href="">All users</a></li>
+                  <li><a href="{% spurl base=request.get_full_path add_query='creator={{ request.identity.account.username }}' %}">You</a></li>
+
+                {% endif %}
+              </ul>
+            </div>
+          </div>
+        {% endif %}
+
+      </form>
+      {% autopaginate verse_sets 10 %}
+
+      {% if request.GET.q %}
+        <h2>Search results:</h2>
+      {% endif %}
+
+      {% if not verse_sets %}
+        <p>No verse sets found that match your query.</p>
+      {% endif %}
+
+      {% for vs in verse_sets %}
+        <div class="verseset">
+          <form action="" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="verseset_id" value="{{ vs.id }}">
+            <i class="icon-public" title="This action is public (unless the verse set is private and remains private)"></i>
+            <input type="submit" class="btn primary needs-preferences" value="Learn" id="id-learn-verseset-btn-{{ vs.id }}">
+          </form>
+          <h3><a href="{{ vs.get_absolute_url }}">{{ vs.name }}</a></h3>
+          {% if vs.description %}
+            <p>{{ vs.description|apply_markup:"restructuredtext" }}</p>
+          {% endif %}
+          {% if not vs.is_passage and vs.verse_choices.all %}
+            <p>Includes the following verses, {{ vs.verse_choices.all|length }} in total:<br/>
+              {% for v in vs.verse_choices.all|slice:"0:10" %}
+                {{ v.reference }}{% if not forloop.last %}, {% endif %}
+              {% endfor %}
+              {% if vs.verse_choices.all|length > 10 %}…and more.{% endif %}
+            </p>
+          {% endif %}
+          {% if vs.is_passage and vs.breaks %}
+            <p>Section breaks at: {{ vs.breaks_formatted }}</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+
+      {% paginate %}
+
+    </div>
+
+    <div {% if active_tab == 'individual' %}class="active"{% endif %} id="id-tab-individual">
+      <p>Choose a verse (or a few verses). For long passages, you should
+        <a href="{% url 'create_passage_set' %}">create a 'passage' verse set</a>.
+      </p>
+
+      {% include "learnscripture/quick_find_controls.html" %}
+
+      <script id="id_individual_choose_result_template" type="text/x-jsrender">
+       {# template for .quickfind_search_results #}
+       <div class="actionset">
+       <form action="" method="POST">
+       {% csrf_token %}
+       <input type="hidden" name="reference" value="[[>reference]]">
+       <input type="hidden" name="version_slug" value="[[>version_slug]]">
+       <input type="submit" class="btn primary needs-preferences" value="Learn">
+       </form>
+       <h3>[[>book_name]]</h3>
+       <div class="verselist">
+       [[for verses]]
+       <div class="verse">
+       <span class="versenumber">[[>chapter_number]]:[[>verse_number]]</span> [[:html_text]]
+       </div>
+       [[/for]]
+       </div>
+       </div>
+      </script>
+
+    </div>
 
   </div>
-
-</div>
 {% endblock %}

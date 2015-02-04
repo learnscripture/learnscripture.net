@@ -10,22 +10,22 @@
 
 {% block content %}
 
-{% show_content "donation_page_top" %}
+  {% show_content "donation_page_top" %}
 
-{% if request_account %}
+  {% if request_account %}
 
-{% if PRODUCTION %}
-{{ paypal_form.render }}
-{% else %}
-{{ paypal_form.sandbox }}
-{% endif %}
+    {% if PRODUCTION %}
+      {{ paypal_form.render }}
+    {% else %}
+      {{ paypal_form.sandbox }}
+    {% endif %}
 
 
-{% else %}
+  {% else %}
 
-<p>Please <a href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}">log in</a>
-(or <a href="{% url 'signup' %}?next={{ request.get_full_path|urlencode }}">create an account)</a> to donate, so that we track your donation.</p>
+    <p>Please <a href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}">log in</a>
+      (or <a href="{% url 'signup' %}?next={{ request.get_full_path|urlencode }}">create an account)</a> to donate, so that we track your donation.</p>
 
-{% endif %}
+  {% endif %}
 
 {% endblock %}

@@ -6,84 +6,84 @@
 
 {% block content %}
 
-<form class="filters">
-  <div class="clearfix">
-    <label>Who:</label>
-    <div class="input">
-      <ul class="pills">
-        {% if 'group' in request.GET %}
-        <li><a href="{% spurl base=request.get_full_path remove_query_param='group' remove_query_param='p' %}">Everyone</a></li>
-        {% else %}
-        <li class="active"><a href="">Everyone</a></li>
-        {% endif %}
+  <form class="filters">
+    <div class="clearfix">
+      <label>Who:</label>
+      <div class="input">
+        <ul class="pills">
+          {% if 'group' in request.GET %}
+            <li><a href="{% spurl base=request.get_full_path remove_query_param='group' remove_query_param='p' %}">Everyone</a></li>
+          {% else %}
+            <li class="active"><a href="">Everyone</a></li>
+          {% endif %}
 
-        {% if group %}
-        <li class="active"><a href="">{{ group.name }}</a></li>
-        {% endif %}
-        <li><a id="id-leaderboard-select-group-btn" href="#" class="btn">Select group</a></li>
-      </ul>
+          {% if group %}
+            <li class="active"><a href="">{{ group.name }}</a></li>
+          {% endif %}
+          <li><a id="id-leaderboard-select-group-btn" href="#" class="btn">Select group</a></li>
+        </ul>
+      </div>
     </div>
-  </div>
-  <div class="clearfix">
-    <label>When:</label>
-    <div class="input">
-      <ul class="pills">
-        {% if 'thisweek' in request.GET %}
-        <li><a href="{% spurl base=request.get_full_path remove_query_param='thisweek' remove_query_param='p' %}">All time</a></li>
-        {% else %}
-        <li class="active"><a href="">All time</a></li>
-        {% endif %}
+    <div class="clearfix">
+      <label>When:</label>
+      <div class="input">
+        <ul class="pills">
+          {% if 'thisweek' in request.GET %}
+            <li><a href="{% spurl base=request.get_full_path remove_query_param='thisweek' remove_query_param='p' %}">All time</a></li>
+          {% else %}
+            <li class="active"><a href="">All time</a></li>
+          {% endif %}
 
-        {% if 'thisweek' not in request.GET %}
-        <li><a href="{% spurl base=request.get_full_path add_query='thisweek' remove_query_param='p' %}">This week</a></li>
-        {% else %}
-        <li class="active"><a href="">This week</a></li>
-        {% endif %}
+          {% if 'thisweek' not in request.GET %}
+            <li><a href="{% spurl base=request.get_full_path add_query='thisweek' remove_query_param='p' %}">This week</a></li>
+          {% else %}
+            <li class="active"><a href="">This week</a></li>
+          {% endif %}
 
-      </ul>
+        </ul>
+      </div>
     </div>
-  </div>
-</form>
+  </form>
 
-{% if 'thisweek' in request.GET %}
-  <p class="note">Weekly statistics are measured from the current time to one week ago.</p>
-{% endif %}
+  {% if 'thisweek' in request.GET %}
+    <p class="note">Weekly statistics are measured from the current time to one week ago.</p>
+  {% endif %}
 
-{% if group %}
-<h2>Group: {{ group.name }}</h2>
-<p><a href="{% url 'group' group.slug %}">See group information</a></p>
-{% endif %}
+  {% if group %}
+    <h2>Group: {{ group.name }}</h2>
+    <p><a href="{% url 'group' group.slug %}">See group information</a></p>
+  {% endif %}
 
-{% if accounts %}
+  {% if accounts %}
 
-{% include 'learnscripture/leaderboard_pagination.html' %}
+    {% include 'learnscripture/leaderboard_pagination.html' %}
 
-<table>
-  <thead>
-    <tr>
-      <th>User</th>
-      <th>Points</th>
-      <th>Rank</th>
-      <th>Verses started</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for account in accounts %}
-    <tr>
-      <td><a href="{% url 'user_stats' account.username %}">{{ account.username }}</a></td>
-      <td>{{ account.points|intcomma }}</td>
-      <td>{{ account.rank|intcomma }}</td>
-      <td>{{ account.num_verses|intcomma }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-{% else %}
+    <table>
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Points</th>
+          <th>Rank</th>
+          <th>Verses started</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for account in accounts %}
+          <tr>
+            <td><a href="{% url 'user_stats' account.username %}">{{ account.username }}</a></td>
+            <td>{{ account.points|intcomma }}</td>
+            <td>{{ account.rank|intcomma }}</td>
+            <td>{{ account.num_verses|intcomma }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
 
-  <p>No more data found!</p>
+    <p>No more data found!</p>
 
-{% endif %}
+  {% endif %}
 
-{% include 'learnscripture/leaderboard_pagination.html' %}
+  {% include 'learnscripture/leaderboard_pagination.html' %}
 
 {% endblock %}

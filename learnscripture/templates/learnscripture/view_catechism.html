@@ -6,52 +6,52 @@
 
 {% block leftcolumn %}
 
-<h2>Description</h2>
+  <h2>Description</h2>
 
-{{ catechism.description|apply_markup:"restructuredtext" }}
+  {{ catechism.description|apply_markup:"restructuredtext" }}
 
-<h2>Questions</h2>
+  <h2>Questions</h2>
 
-<ol>
-{% for qapair in questions %}
-  <li><b>{{ qapair.question }}</b><br/>
-    {{ qapair.answer }}
-  </li>
-{% endfor %}
-</ol>
+  <ol>
+    {% for qapair in questions %}
+      <li><b>{{ qapair.question }}</b><br/>
+        {{ qapair.answer }}
+      </li>
+    {% endfor %}
+  </ol>
 
-<h3>Notes</h3>
-<ul>
-  <li>When learning a catechism, you can opt out of any individual question by
-    pressing ‘Stop learning this’ on the learning page.</li>
-  <li><i class="icon-public"></i> Learning a catechism is a public action</li>
-</ul>
+  <h3>Notes</h3>
+  <ul>
+    <li>When learning a catechism, you can opt out of any individual question by
+      pressing ‘Stop learning this’ on the learning page.</li>
+    <li><i class="icon-public"></i> Learning a catechism is a public action</li>
+  </ul>
 
-<form action="{% url 'catechisms' %}" method="POST">
-  {% csrf_token %}
-  <input type="hidden" name="catechism_id" value="{{ catechism.id }}">
-  <div class="actions">
-  <input type="submit" class="btn primary needs-preferences" value="Learn">
-  </div>
-</form>
+  <form action="{% url 'catechisms' %}" method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="catechism_id" value="{{ catechism.id }}">
+    <div class="actions">
+      <input type="submit" class="btn primary needs-preferences" value="Learn">
+    </div>
+  </form>
 
 {% endblock %}
 
 {% block rightcolumn %}
-<h3>See also</h3>
-<ul>
-  <li><a href="{% url 'catechisms' %}">All catechisms</a></li>
-  <li><a href="{% url 'contact' %}">Contact us</a> if you would like this
-    catechism's data files.</li>
-</ul>
+  <h3>See also</h3>
+  <ul>
+    <li><a href="{% url 'catechisms' %}">All catechisms</a></li>
+    <li><a href="{% url 'contact' %}">Contact us</a> if you would like this
+      catechism's data files.</li>
+  </ul>
 
-{% if learners %}
-<h3>People learning this</h3>
-<ul>
-  {% for account in learners %}
-  <li>{{ account|account_link }}</li>
-  {% endfor %}
-</ul>
-{% endif %}
+  {% if learners %}
+    <h3>People learning this</h3>
+    <ul>
+      {% for account in learners %}
+        <li>{{ account|account_link }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
 
 {% endblock %}

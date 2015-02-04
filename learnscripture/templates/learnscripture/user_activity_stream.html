@@ -4,14 +4,14 @@
 
 {% block content %}
 
-<p>
-  <a href="{% url 'activity_stream' %}">Other recent activity</a> |
-  {{ account|account_link }}
-  » Recent activity
-</p>
+  <p>
+    <a href="{% url 'activity_stream' %}">Other recent activity</a> |
+    {{ account|account_link }}
+    » Recent activity
+  </p>
 
-{% include "learnscripture/activity_stream_inc.html" %}
+  {% include "learnscripture/activity_stream_inc.html" %}
 
-{% include "learnscripture/comment_common_inc.html" %}
+  {% include "learnscripture/comment_common_inc.html" %}
 
 {% endblock %}
