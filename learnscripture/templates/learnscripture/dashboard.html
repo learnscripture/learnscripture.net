@@ -18,25 +18,16 @@
       <div id="id-heatmap-wrapper">
         <div id="id-heatmap-div"></div>
       </div>
+      <div style="float: right; font-size: 120%;">
+        <a href="{% url 'user_stats' request_account.username %}" title="Your stats"><i class="icon-fw icon-stats"></i></a>
+        <a href="{% url 'user_verses' %}" title="Your progress"><i class="icon-fw icon-progress"></i></a>
+      </div>
       <div id="id-heatmap-controls">
         <button id="id-heatmap-previous"><i class="icon-left btn"></i></button>
         <button id="id-heatmap-next"><i class="icon-right btn"></i></button>
       </div>
     </div>
 
-    <h2>Points</h2>
-
-    <div class="actionset">
-      <div style="float: right; font-size: 120%;">
-        <a href="{% url 'user_stats' request_account.username %}" title="Your stats"><i class="icon-fw icon-stats"></i></a>
-        <a href="{% url 'user_verses' %}" title="Your progress"><i class="icon-fw icon-progress"></i></a>
-        <a href="{% url 'leaderboard' %}?thisweek" title="Leaderboard"><i class="icon-fw icon-leaderboard"></i></a>
-      </div>
-      <div>Points:
-        <b>{{ request_account.points_this_week }}</b> this week,
-        <b>{{ request_account.points_all_time }}</b> total.
-      </div>
-    </div>
 
   {% endif %}
 
