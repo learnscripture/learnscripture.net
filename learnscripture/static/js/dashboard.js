@@ -24,7 +24,7 @@ var learnscripture =
                 maxDate: today,
                 nextSelector: '#id-heatmap-next',
                 previousSelector: '#id-heatmap-previous',
-                range: numberOfYears * 12,
+                range: numberOfYears * 12 + 1,
                 start: new Date(year, month, 1),
                 subdomain: "x_day",
                 afterLoadData: function(data) {
