@@ -14,13 +14,13 @@
 
   {% if request.identity.scoring_enabled %}
     <h2>Learning events</h2>
-    <div id="id-heatmap-section">
-      <div id="id-heatmap-controls">
-        <button id="id-heatmap-previous"><i class="icon-left btn"></i></button><br>
-        <button id="id-heatmap-next"><i class="icon-right btn"></i></button>
-      </div>
+    <div id="id-heatmap-section" class="actionset">
       <div id="id-heatmap-wrapper">
         <div id="id-heatmap-div"></div>
+      </div>
+      <div id="id-heatmap-controls">
+        <button id="id-heatmap-previous"><i class="icon-left btn"></i></button>
+        <button id="id-heatmap-next"><i class="icon-right btn"></i></button>
       </div>
     </div>
 
