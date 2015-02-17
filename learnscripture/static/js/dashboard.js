@@ -34,6 +34,7 @@ var learnscripture =
                         var num = parseInt(data[i]['Verses started'], 10) + parseInt(data[i]['Verses tested'], 10);
                         stats[ts] = num;
                     }
+                    $('#id-heatmap-loading').remove();
                     return stats;
                 }
             });
