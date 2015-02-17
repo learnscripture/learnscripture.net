@@ -1,6 +1,7 @@
 {% extends "base_twocol.html" %}
 {% load url from future %}
 {% load account_utils %}
+{% load compress %}
 
 {% block leftcolumn %}
 
@@ -12,6 +13,16 @@
   {% endif %}
 
   {% if request.identity.scoring_enabled %}
+    <h2>Learning events</h2>
+    <div id="id-heatmap-section">
+      <div id="id-heatmap-controls">
+        <button id="id-heatmap-previous"><i class="icon-left btn"></i></button><br>
+        <button id="id-heatmap-next"><i class="icon-right btn"></i></button>
+      </div>
+      <div id="id-heatmap-wrapper">
+        <div id="id-heatmap-div"></div>
+      </div>
+    </div>
 
     <h2>Points</h2>
 
@@ -268,4 +279,11 @@
     </ul>
   </div>
 
+
+  <div id="id-dashboard-script-data"
+       {% if request.identity.account %}
+       data-user-stats-verses-timeline-stats-csv-url="{% url "user_stats_verses_timeline_stats_csv" request.identity.account.username %}"
+       {% endif %}
+       >
+  </div>
 {% endblock %}

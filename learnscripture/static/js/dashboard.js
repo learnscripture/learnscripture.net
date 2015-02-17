@@ -4,8 +4,41 @@ var learnscripture =
     (function (learnscripture, $) {
         "use strict";
 
-        var confirmClearQueue = function () {
-
+        var setupCalendarHeatmap = function () {
+            var cal = new CalHeatMap();
+            var today = new Date();
+            var year = today.getFullYear();
+            var month = today.getMonth();
+            var numberOfMonths = 8;
+            month = month - (numberOfMonths - 1);
+            if (month < 0) {
+                month += 12;
+                year -= 1;
+            }
+	        cal.init({
+                cellSize: 10,
+                data: $("#id-dashboard-script-data").attr('data-user-stats-verses-timeline-stats-csv-url'),
+                dataType: "csv",
+                displayLegend: false,
+                domain: "month",
+                domainLabelFormat: "%b %Y",
+                itemSelector: '#id-heatmap-div',
+                maxDate: today,
+                nextSelector: '#id-heatmap-next',
+                previousSelector: '#id-heatmap-previous',
+                range: numberOfMonths,
+                start: new Date(year, month, 1),
+                subdomain: "x_day",
+                afterLoadData: function(data) {
+                    var stats = {};
+                    for (var i = 0; i < data.length; i++) {
+                        var ts = Date.parse(data[i]['Date']) / 1000;
+                        var num = parseInt(data[i]['Verses started'], 10) + parseInt(data[i]['Verses tested'], 10);
+                        stats[ts] = num;
+                    }
+                    return stats;
+                }
+            });
         };
 
         var setupDashboardControls = function () {
@@ -35,6 +68,7 @@ var learnscripture =
                     ev.preventDefault();
                 }
             });
+            setupCalendarHeatmap();
         };
 
         learnscripture.setupDashboardControls = setupDashboardControls;

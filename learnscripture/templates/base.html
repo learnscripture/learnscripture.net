@@ -23,6 +23,7 @@
 
     {% compress css %}
       <link type="text/less" rel="stylesheet" href="{{ STATIC_URL }}css/learnscripture.less" charset="utf-8" />
+      <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/lib/cal-heatmap.css" charset="utf-8" />
     {% endcompress %}
 
     {% block extracss %}
@@ -218,7 +219,7 @@
       </div>
     {% endif %}
     {% comment %}
-    We put javascript for *all* pages in the base template, with maximum expiry
+    We put javascript for (almost) all pages in the base template, with maximum expiry
     set up. This results in a bigger initial hit, but much better performace
     after that since the client only needs to ask for one js file (due to
     compressor) and never needs to request any js again
@@ -253,7 +254,12 @@
       <script type="text/javascript" src="{{ STATIC_URL }}js/preferences.js"></script>
       <script type="text/javascript" src="{{ STATIC_URL }}js/viewset.js"></script>
       <script type="text/javascript" src="{{ STATIC_URL }}js/modals.js"></script>
+
+      {# dashboard #}
+      <script type="text/javascript" src="{{ STATIC_URL }}js/lib/d3.v3.min.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}js/lib/cal-heatmap.min.js"></script>
       <script type="text/javascript" src="{{ STATIC_URL }}js/dashboard.js"></script>
+
       <script type="text/javascript" src="{{ STATIC_URL }}js/versepopup.js"></script>
       <script type="text/javascript" src="{{ STATIC_URL }}js/groups.js"></script>
       <script type="text/javascript" src="{{ STATIC_URL }}js/leaderboard.js"></script>
