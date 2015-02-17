@@ -9,12 +9,10 @@ var learnscripture =
             var today = new Date();
             var year = today.getFullYear();
             var month = today.getMonth();
-            var numberOfMonths = 8;
-            month = month - (numberOfMonths - 1);
-            if (month < 0) {
-                month += 12;
-                year -= 1;
-            }
+            // Go back 2 years, and then clip the left hand side
+            // This gives the best results visually.
+            var numberOfYears = 2;
+            year -= numberOfYears;
 	        cal.init({
                 cellSize: 10,
                 data: $("#id-dashboard-script-data").attr('data-user-stats-verses-timeline-stats-csv-url'),
@@ -26,7 +24,7 @@ var learnscripture =
                 maxDate: today,
                 nextSelector: '#id-heatmap-next',
                 previousSelector: '#id-heatmap-previous',
-                range: numberOfMonths,
+                range: numberOfYears * 12,
                 start: new Date(year, month, 1),
                 subdomain: "x_day",
                 afterLoadData: function(data) {
