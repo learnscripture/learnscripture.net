@@ -28,13 +28,28 @@ var learnscripture =
                 start: new Date(year, month, 1),
                 subdomain: "x_day",
                 afterLoadData: function(data) {
+                    // calculate dict in form required by CalHeatMap. Also
+                    // calculate streaks, relying on fact that data has zeros in
+                    // it and is sorted correctly.
                     var stats = {};
+                    var biggestStreak = 0;
+                    var currentStreak = 0;
                     for (var i = 0; i < data.length; i++) {
                         var ts = Date.parse(data[i]['Date']) / 1000;
                         var num = parseInt(data[i]['Verses started'], 10) + parseInt(data[i]['Verses tested'], 10);
                         stats[ts] = num;
+                        if (num == 0) {
+                            if (currentStreak > biggestStreak) {
+                                biggestStreak = currentStreak;
+                            }
+                            currentStreak = 0;
+                        } else {
+                            currentStreak += 1;
+                        }
                     }
                     $('#id-heatmap-loading').remove();
+                    $('#id-current-streak').text(currentStreak.toString());
+                    $('#id-biggest-streak').text(biggestStreak.toString());
                     return stats;
                 }
             });

@@ -225,6 +225,10 @@
         border-color: darken(@bgColor1, 20%);
     }
 
+    .streak {
+        color: @linkColor;
+        font-family: ~"@{themeFont}";
+    }
 }
 
 ///////////// THEMES ////////////
@@ -1070,6 +1074,21 @@ ul.grouplist {
     .clearfix();
 }
 
+#id-streaks {
+    .clearfix();
+    text-align: center;
+    margin-top: 5px;
+    > div {
+        float: left;
+        width: 50%;
+    }
+    .streak {
+        display: block;
+        margin-top: 5px;
+        font-size: 2em;
+        font-weight: bold;
+    }
+}
 // 'choose' page
 
 
