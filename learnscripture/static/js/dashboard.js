@@ -15,7 +15,7 @@ var learnscripture =
             year -= numberOfYears;
 	        cal.init({
                 cellSize: 10,
-                data: $("#id-dashboard-script-data").attr('data-user-stats-verses-timeline-stats-csv-url'),
+                data: $("#id-dashboard-script-data").attr('data-user-stats-verses-timeline-stats-csv-url') + "?r=" + Math.floor(Math.random() * 1000000000).toString(),
                 dataType: "csv",
                 displayLegend: false,
                 domain: "month",
