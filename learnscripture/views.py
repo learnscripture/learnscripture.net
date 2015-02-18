@@ -805,66 +805,6 @@ def get_hellbanned_mode(request):
         # hellbanned users see the hellbanned version of reality
         return account.is_hellbanned
 
-def leaderboard(request):
-    page_num = None # 1-indexed page page
-    try:
-        page_num = int(request.GET['p'])
-    except (KeyError, ValueError):
-        page_num = 1
-
-    thisweek = 'thisweek' in request.GET
-
-    page_num = max(1, page_num)
-
-    PAGE_SIZE = 30
-
-    if thisweek:
-        cutoff = timezone.now() - timedelta(7)
-    else:
-        cutoff = None
-
-    group = None
-    if 'group' in request.GET:
-        try:
-            group = Group.objects.get(id=int(request.GET['group']))
-        except (Group.DoesNotExist, ValueError):
-            pass
-
-    hellbanned_mode = get_hellbanned_mode(request)
-    if thisweek:
-        accounts = get_leaderboard_since(cutoff, hellbanned_mode,
-                                         page_num - 1, PAGE_SIZE, group=group)
-    else:
-        accounts = get_all_time_leaderboard(hellbanned_mode, page_num - 1,
-                                            PAGE_SIZE, group=group)
-
-    # Now decorate these accounts with additional info from additional queries
-    account_ids = [a['account_id'] for a in accounts]
-    # identities and account info
-    identities = Identity.objects.filter(account__id__in=account_ids).select_related('account')
-    identity_ids = [i.id for i in identities]
-    identity_dict = dict((i.account_id, i) for i in identities)
-
-    # Counts of verses learnt
-    verse_counts = get_verses_started_counts(identity_ids, cutoff)
-
-    for account_dict in accounts:
-        identity = identity_dict[account_dict['account_id']]
-        account_dict['num_verses'] = verse_counts[identity.id]
-        account_dict['username'] = identity.account.username
-
-    c = {}
-    c['include_referral_links'] = True
-    c['accounts'] = accounts
-    c['title'] = u"Leaderboard"
-    c['thisweek'] = thisweek
-    c['page_num'] = page_num
-    c['previous_page_num'] = page_num - 1
-    c['next_page_num'] = page_num + 1
-    c['PAGE_SIZE'] = PAGE_SIZE
-    c['group'] = group
-    return render(request, 'learnscripture/leaderboard.html', c)
-
 
 def user_stats(request, username):
     viewer = account_from_request(request)
@@ -1338,11 +1278,15 @@ def groups(request):
                                                           })
 
 
+def group_by_slug(request, slug):
+    groups = groups_visible_for_request(request)
+    return get_object_or_404(groups,
+                             slug=slug)
+
+
 def group(request, slug):
+    group = group_by_slug(request, slug)
     account = account_from_request(request)
-    groups = Group.objects.visible_for_account(account)
-    group = get_object_or_404(groups,
-                              slug=slug)
 
     if account is not None and request.method == 'POST':
         if 'leave' in request.POST:
@@ -1373,8 +1317,7 @@ def group(request, slug):
 
 def group_wall(request, slug):
     account = account_from_request(request)
-    groups = Group.objects.visible_for_account(account)
-    group = get_object_or_404(groups, slug=slug)
+    group = group_by_slug(request, slug)
 
     # TODO: respond to 'comment' query param and move to the right page of
     # comments.
@@ -1383,6 +1326,62 @@ def group_wall(request, slug):
                    'group': group,
                    'comments': group.comments_visible_for_account(account).order_by('created'),
                    })
+
+
+def group_leaderboard(request, slug):
+    page_num = None # 1-indexed page page
+    try:
+        page_num = int(request.GET['p'])
+    except (KeyError, ValueError):
+        page_num = 1
+
+    thisweek = 'thisweek' in request.GET
+
+    page_num = max(1, page_num)
+
+    PAGE_SIZE = 30
+
+    if thisweek:
+        cutoff = timezone.now() - timedelta(7)
+    else:
+        cutoff = None
+
+    group = group_by_slug(request, slug)
+
+    hellbanned_mode = get_hellbanned_mode(request)
+    if thisweek:
+        accounts = get_leaderboard_since(cutoff, hellbanned_mode,
+                                         page_num - 1, PAGE_SIZE, group=group)
+    else:
+        accounts = get_all_time_leaderboard(hellbanned_mode, page_num - 1,
+                                            PAGE_SIZE, group=group)
+
+    # Now decorate these accounts with additional info from additional queries
+    account_ids = [a['account_id'] for a in accounts]
+    # identities and account info
+    identities = Identity.objects.filter(account__id__in=account_ids).select_related('account')
+    identity_ids = [i.id for i in identities]
+    identity_dict = dict((i.account_id, i) for i in identities)
+
+    # Counts of verses learnt
+    verse_counts = get_verses_started_counts(identity_ids, cutoff)
+
+    for account_dict in accounts:
+        identity = identity_dict[account_dict['account_id']]
+        account_dict['num_verses'] = verse_counts[identity.id]
+        account_dict['username'] = identity.account.username
+
+    c = {}
+    c['include_referral_links'] = True
+    c['accounts'] = accounts
+    c['thisweek'] = thisweek
+    c['page_num'] = page_num
+    c['previous_page_num'] = page_num - 1
+    c['next_page_num'] = page_num + 1
+    c['PAGE_SIZE'] = PAGE_SIZE
+    c['group'] = group
+    c['title'] = "Leaderboard: {0}".format(group.name)
+    return render(request, 'learnscripture/leaderboard.html', c)
 
 
 def create_group(request):

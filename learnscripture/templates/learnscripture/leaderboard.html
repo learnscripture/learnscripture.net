@@ -5,25 +5,9 @@
 {% load spurl %}
 
 {% block content %}
+  <p><a href="{% url 'group' group.slug %}">See group information</a></p>
 
   <form class="filters">
-    <div class="clearfix">
-      <label>Who:</label>
-      <div class="input">
-        <ul class="pills">
-          {% if 'group' in request.GET %}
-            <li><a href="{% spurl base=request.get_full_path remove_query_param='group' remove_query_param='p' %}">Everyone</a></li>
-          {% else %}
-            <li class="active"><a href="">Everyone</a></li>
-          {% endif %}
-
-          {% if group %}
-            <li class="active"><a href="">{{ group.name }}</a></li>
-          {% endif %}
-          <li><a id="id-leaderboard-select-group-btn" href="#" class="btn">Select group</a></li>
-        </ul>
-      </div>
-    </div>
     <div class="clearfix">
       <label>When:</label>
       <div class="input">
@@ -49,10 +33,6 @@
     <p class="note">Weekly statistics are measured from the current time to one week ago.</p>
   {% endif %}
 
-  {% if group %}
-    <h2>Group: {{ group.name }}</h2>
-    <p><a href="{% url 'group' group.slug %}">See group information</a></p>
-  {% endif %}
 
   {% if accounts %}
 
