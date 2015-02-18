@@ -27,8 +27,6 @@ if __name__ == '__main__':
                    ('ACE', 'shield_silver.svg'),
                    ('RECRUITER', 'shield_recruit.svg'),
                    ('HACKER', 'shield_hacker.svg'),
-                   ('WEEKLY_CHAMPION', 'shield_gold.svg'),
-                   ('REIGNING_WEEKLY_CHAMPION', 'shield_gold_crown.svg'),
                    ('ADDICT', 'shield_addict.svg'),
                    ('ORGANIZER', 'shield_organizer.svg'),
                    ('CONSISTENT_LEARNER', 'shield_consistent.svg'),
@@ -46,7 +44,7 @@ if __name__ == '__main__':
                         number_file = 'shield_level_%s_t2.svg'
                     else:
                         # Single level awards
-                        if name in ['HACKER', 'REIGNING_WEEKLY_CHAMPION', 'ADDICT']:
+                        if name in ['HACKER', 'ADDICT']:
                             if level > 1:
                                 continue
                             else:
