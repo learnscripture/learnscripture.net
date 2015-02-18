@@ -47,6 +47,9 @@ var learnscripture =
                             currentStreak += 1;
                         }
                     }
+                    if (currentStreak > biggestStreak) {
+                        biggestStreak = currentStreak;
+                    }
                     $('#id-heatmap-loading').remove();
                     $('#id-current-streak').text(currentStreak.toString());
                     $('#id-biggest-streak').text(biggestStreak.toString());
