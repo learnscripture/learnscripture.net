@@ -116,7 +116,8 @@ class AwardLogic(object):
     def points(self):
         return 0
 
-    def highest_level(self):
+    @cached_property
+    def highest_level_achieved(self):
         """
         The highest level that has been achieved
         """

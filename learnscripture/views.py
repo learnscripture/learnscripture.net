@@ -1206,7 +1206,7 @@ def awards(request):
     discovered_awards = []
     hidden_awards = []
     for award in awards:
-        if award.highest_level() is None:
+        if award.highest_level_achieved is None:
             hidden_awards.append(award)
         else:
             discovered_awards.append(award)
