@@ -10,8 +10,8 @@
 
   <h2>Achievers</h2>
   {% if award.has_levels %}
-    {% if award.max_level > award.highest_level %}
-      <p>Highest level achieved so far: <b>Level {{ award.highest_level }}</b></p>
+    {% if award.max_level > award.highest_level_achieved %}
+      <p>Highest level achieved so far: <b>Level {{ award.highest_level_achieved }}</b></p>
     {% else %}
       <p>Level {{ award.max_level }} is the highest level.</p>
     {% endif %}
