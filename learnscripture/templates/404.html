@@ -7,6 +7,10 @@
 {% block content %}
   <h2>It's not here</h2>
 
-  <p>Sorry it didn't work out!</p>
+  {% if message %}
+    <p>{{ message }}</p>
+  {% else %}
+    <p>Sorry it didn't work out!</p>
+  {% endif %}
 
 {% endblock %}

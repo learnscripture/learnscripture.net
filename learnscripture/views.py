@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
 import csv
@@ -65,6 +66,12 @@ from .decorators import require_identity, require_preferences, has_preferences, 
 
 USER_EVENTS_SHORT_CUTOFF = 5
 GROUP_COMMENTS_SHORT_CUTOFF = 5
+
+
+def missing(request, message, status_code=404):
+    response = render(request, '404.html', {'message': message})
+    response.status_code = status_code
+    return response
 
 
 def home(request):
@@ -1220,7 +1227,7 @@ def award(request, award_slug):
         raise Http404
     award_class = AwardType.classes[award_type]
     if award_class.removed:
-        raise Http404
+        return missing(request, "The ‘{0}’ award is an old award that is no longer used".format(award_class.title), status_code=410)
     award = award_class(level=AnyLevel)
 
     levels = []
