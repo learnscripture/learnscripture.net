@@ -1254,7 +1254,8 @@ def referral_program(request):
 
 
 def awards(request):
-    awards = [AwardType.classes[t](level=AnyLevel) for t in AwardType.values]
+    award_classes = [AwardType.classes[t] for t in AwardType.values]
+    awards = [cls(level=AnyLevel) for cls in award_classes if not cls.removed]
     discovered_awards = []
     hidden_awards = []
     for award in awards:
@@ -1277,7 +1278,10 @@ def award(request, award_slug):
         raise Http404
     if not Award.objects.filter(award_type=award_type).exists():
         raise Http404
-    award = AwardType.classes[award_type](level=AnyLevel)
+    award_class = AwardType.classes[award_type]
+    if award_class.removed:
+        raise Http404
+    award = award_class(level=AnyLevel)
 
     levels = []
 
