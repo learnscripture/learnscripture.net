@@ -40,6 +40,11 @@ class AnyLevel(object):
 AnyLevel = AnyLevel()
 
 
+class classproperty(property):
+    def __get__(self, cls, owner):
+        return self.fget.__get__(None, owner)()
+
+
 class AwardLogic(object):
     # Abstract base class for all classes that define behaviour for the types of
     # awards listed in AwardType
@@ -52,16 +57,18 @@ class AwardLogic(object):
 
     removed = False
 
-    @property
-    def award_type(self):
-        return self.enum_val # set by make_class_enum
+    @classproperty
+    @classmethod
+    def award_type(cls):
+        return cls.enum_val # set by make_class_enum
 
     def slug(self):
         return AwardType.name_for_value[self.award_type].lower().replace(u'_', u'-')
 
-    @cached_property
-    def title(self):
-        return AwardType.titles[self.award_type]
+    @classproperty
+    @classmethod
+    def title(cls):
+        return AwardType.titles[cls.award_type]
 
     def short_description(self):
         if self.level is AnyLevel:
@@ -118,11 +125,6 @@ class AwardLogic(object):
                                     account__is_hellbanned=False,
                                     )\
             .aggregate(models.Max('level'))['level__max']
-
-
-class classproperty(property):
-    def __get__(self, cls, owner):
-        return self.fget.__get__(None, owner)()
 
 
 class MultiLevelPointsMixin(object):
