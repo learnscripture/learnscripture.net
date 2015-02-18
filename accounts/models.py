@@ -263,6 +263,8 @@ class Account(AbstractBaseUser):
         visible = SortedDict()
         # Ignore all but the highest
         for a in all_awards:
+            if a.award_class.removed:
+                continue
             visible[a.award_type] = a
         return sorted(visible.values(), key=lambda a: a.created, reverse=True)
 

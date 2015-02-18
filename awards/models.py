@@ -50,6 +50,8 @@ class AwardLogic(object):
     # Subclasses must also define 'has_levels' class attribute and 'max_level'
     # attribute
 
+    removed = False
+
     @property
     def award_type(self):
         return self.enum_val # set by make_class_enum
@@ -514,9 +516,13 @@ class Award(models.Model):
     def __unicode__(self):
         return u'%s level %d award for %s' % (self.get_award_type_display(), self.level, self.account.username)
 
+    @property
+    def award_class(self):
+        return AwardType.classes[self.award_type]
+
     @cached_property
     def award_detail(self):
-        return AwardType.classes[self.award_type](level=self.level)
+        return self.award_class(level=self.level)
 
     def image_small(self):
         return self.award_detail.image_small()
