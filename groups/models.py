@@ -3,7 +3,7 @@ from django.db import models
 from django.db.models import Count
 from django.utils import timezone
 
-from accounts.models import Account
+from accounts.models import Account, clear_friendship_weight_cache
 
 
 class GroupManager(models.Manager):
@@ -66,9 +66,13 @@ class Group(models.Model):
 
     def add_user(self, account):
         self.memberships.get_or_create(account=account)
+        for acc in self.members.all():
+            clear_friendship_weight_cache(acc.id)
 
     def remove_user(self, account):
         self.memberships.filter(account=account).delete()
+        for acc in list(self.members.all()) + [account]:
+            clear_friendship_weight_cache(acc.id)
 
     def invited_users(self):
         return [i.account for i in self.invitations.select_related('account')]

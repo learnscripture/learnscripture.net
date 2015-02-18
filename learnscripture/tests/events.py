@@ -126,7 +126,6 @@ class EventTests(AccountTestMixin, TestCase):
         # account2 and viewer are friends, so e3 should be before e2
         self.assertTrue(stream.index(e3) < stream.index(e2))
 
-
     def test_comment_on_group_event(self):
         """
         Test that a comment created on an event that relates to a group
