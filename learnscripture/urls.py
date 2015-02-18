@@ -48,7 +48,6 @@ urlpatterns = patterns('',
                        url(r'^edit-verse-set/(?P<slug>[^/]+)/$', 'learnscripture.views.edit_set', name='edit_set'),
 
                        # User stats
-                       url(r'^leaderboard/$', 'learnscripture.views.leaderboard', name='leaderboard'),
                        url(r'^user/([^/]*)/$', 'learnscripture.views.user_stats', name='user_stats'),
                        url(r'^user/(.*)/verses_timeline_stats.csv$', 'learnscripture.views.user_stats_verses_timeline_stats_csv', name='user_stats_verses_timeline_stats_csv'),
 
@@ -65,6 +64,7 @@ urlpatterns = patterns('',
                        url(r'^groups/$', 'learnscripture.views.groups', name='groups'),
                        url(r'^groups/([^/]*)/$', 'learnscripture.views.group', name='group'),
                        url(r'^groups/([^/]*)/wall/$', 'learnscripture.views.group_wall', name='group_wall'),
+                       url(r'^groups/([^/]*)/leaderboard/$', 'learnscripture.views.group_leaderboard', name='group_leaderboard'),
                        url(r'^create-group/$', 'learnscripture.views.create_group', name='create_group'),
                        url(r'^edit-group/(.*)/$', 'learnscripture.views.edit_group', name='edit_group'),
                        url(r'^group-select-list/$', 'learnscripture.views.group_select_list', name='group_select_list'),

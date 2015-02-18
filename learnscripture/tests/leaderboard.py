@@ -4,6 +4,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 
 from accounts.models import Account, Identity
+from groups.models import Group
 from bibleverses.models import VerseSet, StageType, VerseSetType
 
 from scores.models import ScoreReason, get_verses_started_counts, get_verses_started_per_day, get_verses_finished_count
@@ -28,15 +29,23 @@ class LeaderboardTests(TestCase):
         a2.add_points(50, ScoreReason.VERSE_TESTED)
         self.a1 = a1
         self.a2 = a2
+        group = Group.objects.create(name='My group',
+                                     slug='my-group',
+                                     created_by=a1,
+                                     open=True,
+                                     public=True)
+        group.add_user(a1)
+        group.add_user(a2)
+        self.group = group
 
     def test_get(self):
-        resp = self.client.get(reverse('leaderboard'))
+        resp = self.client.get(reverse('group_leaderboard', args=(self.group.slug,)))
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, self.a1.username)
         self.assertNotContains(resp, self.a2.username)
 
     def test_get_thisweek(self):
-        resp = self.client.get(reverse('leaderboard'), {'thisweek':'1'})
+        resp = self.client.get(reverse('group_leaderboard', args=(self.group.slug,)), {'thisweek':'1'})
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, self.a1.username)
         self.assertNotContains(resp, self.a2.username)

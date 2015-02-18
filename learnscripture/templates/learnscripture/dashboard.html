@@ -244,7 +244,7 @@
         <li>{{ group|group_link }} »
           <a
        title="leaderboard"
-       href="{% url 'leaderboard' %}?thisweek&group={{ group.id }}">Leaderboard <i class="icon-leaderboard icon-replace"></i></a></li>
+       href="{% url 'group_leaderboard' group.slug %}?thisweek">Leaderboard <i class="icon-leaderboard icon-replace"></i></a></li>
       {% endfor %}
       {% if more_groups %}
         <li><a href="{% url 'user_stats' request_account.username %}#groups">(see all)</a></li>

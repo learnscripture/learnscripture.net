@@ -58,7 +58,6 @@
                       <li><a href="{% url 'user_verses' %}"><i class="icon-fw icon-progress"></i> Verse progress</a>
                         <li><a href="{% url 'user_verse_sets' %}"><i class="icon-fw icon-verse-sets"></i> Verse sets</a>
                           <li><a href="{% url 'user_stats' request_account.username %}"><i class="icon-fw icon-stats"></i> Stats</a></li>
-                          <li><a href="{% url 'leaderboard' %}?thisweek"><i class="icon-fw icon-leaderboard"></i> Leaderboard</a></li>
                           <li><a href="#" class="logout-link"><i class="icon-fw icon-logout"></i> Log out</a></li>
                     {% endif %}
                   </ul>
@@ -262,7 +261,6 @@
 
       <script type="text/javascript" src="{{ STATIC_URL }}js/versepopup.js"></script>
       <script type="text/javascript" src="{{ STATIC_URL }}js/groups.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}js/leaderboard.js"></script>
       <script type="text/javascript" src="{{ STATIC_URL }}js/android.js"></script>
       <script type="text/javascript" src="{{ STATIC_URL }}js/comment.js"></script>
       <script type="text/javascript" src="{{ STATIC_URL }}js/follow.js"></script>

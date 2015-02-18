@@ -212,8 +212,6 @@
 
   {% endif %}
 
-  <p><a href="{% url 'leaderboard' %}"><i class="icon-leaderboard"></i> See all rankings</a></p>
-
   {% if request_account.username == account.username %}
     <p><a href="{% url 'user_verses' %}"><i class="icon-progress"></i> See detailed progress on verse learning</a></p>
   {% endif %}
