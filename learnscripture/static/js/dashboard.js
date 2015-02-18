@@ -51,8 +51,8 @@ var learnscripture =
                         biggestStreak = currentStreak;
                     }
                     $('#id-heatmap-loading').remove();
-                    $('#id-current-streak').text(currentStreak.toString());
-                    $('#id-biggest-streak').text(biggestStreak.toString());
+                    $('#id-current-streak').text(currentStreak.toString() + " " + (currentStreak == 1 ? "day" : "days"));
+                    $('#id-biggest-streak').text(biggestStreak.toString() + " " + (biggestStreak == 1 ? "day" : "days"));
                     return stats;
                 }
             });
