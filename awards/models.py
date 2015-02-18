@@ -344,15 +344,8 @@ class HackerAward(SingleLevelAward):
         "This award comes with the risk of getting your points reset to zero and/or being kicked out :-)"
 
 
-class ReigningWeeklyChampion(SingleLevelAward):
-    POINTS = 0
-
-    def full_description(self):
-        url = reverse('leaderboard') + "?thisweek"
-        if self.level is AnyLevel:
-            return format_html(u'Awarded to the user who is currently at the top of the <a href="{0}">weekly leaderboard</a>.', url)
-        else:
-            return format_html(u'Currently at the top of the <a href="{0}">weekly leaderboard</a>.', url)
+class ReigningWeeklyChampion(AwardLogic):
+    removed = True
 
 
 class TimeBasedAward(MultiLevelPointsMixin, AwardLogic):
@@ -387,41 +380,8 @@ class TimeBasedAward(MultiLevelPointsMixin, AwardLogic):
         return 0
 
 
-class WeeklyChampion(TimeBasedAward):
-
-    DAYS = {
-        1: 0, # less than a day
-        2: 1, # 1 day
-        3: 7,
-        4: 14,
-        5: 30,
-        6: 91,
-        7: 182,
-        8: 274,
-        9: 365,
-        }
-    FRIENDLY_DAYS = {
-        1: '',
-        2: '1 day',
-        3: '1 week',
-        4: '2 weeks',
-        5: '1 month',
-        6: '3 months',
-        7: '6 months',
-        8: '9 months',
-        9: '1 year',
-        }
-
-    def full_description(self):
-        url = reverse('leaderboard') + u"?thisweek"
-        if self.level is AnyLevel:
-            return format_html(u'Awarded to all users who have reached the top of the <a href="{0}">weekly leaderboard</a>.  Higher levels are achieved by staying there longer, up to level 9 if you stay there for a year.', url)
-        else:
-            d = format_html(u'Reached the top of the <a href="{0}">weekly leaderboard</a>', url)
-            if self.level > 1:
-                d = d + format_html(u", and stayed there for at least {0}",
-                                      self.FRIENDLY_DAYS[self.level])
-            return d
+class WeeklyChampion(AwardLogic):
+    removed = True
 
 
 class AddictAward(SingleLevelAward):
@@ -499,8 +459,8 @@ AwardType = make_class_enum(
      (4, 'ACE', u'Ace', AceAward),
      (5, 'RECRUITER', u'Recruiter', RecruiterAward),
      (6, 'HACKER', u'Hacker', HackerAward),
-     (7, 'WEEKLY_CHAMPION', u'Weekly champion', WeeklyChampion),
-     (8, 'REIGNING_WEEKLY_CHAMPION', u'Reigning weekly champion', ReigningWeeklyChampion),
+     (7, 'WEEKLY_CHAMPION', u'Weekly champion', WeeklyChampion), # Removed
+     (8, 'REIGNING_WEEKLY_CHAMPION', u'Reigning weekly champion', ReigningWeeklyChampion), # Removed
      (9, 'ADDICT', u'Addict', AddictAward),
      (10, 'ORGANIZER', u'Organizer', OrganizerAward),
      (11, 'CONSISTENT_LEARNER', u'Consistent learner', ConsistentLearnerAward),

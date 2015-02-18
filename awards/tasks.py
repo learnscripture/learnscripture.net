@@ -1,13 +1,12 @@
 from datetime import timedelta
 
 from celery.task import task
-from django.utils import timezone
 
-from awards.models import AwardType, Award, StudentAward, MasterAward, SharerAward, TrendSetterAward, AceAward, RecruiterAward, ReigningWeeklyChampion, WeeklyChampion, AddictAward, OrganizerAward, ConsistentLearnerAward
+from awards.models import StudentAward, MasterAward, SharerAward, TrendSetterAward, AceAward, RecruiterAward, AddictAward, OrganizerAward, ConsistentLearnerAward
 from accounts.models import Account, Identity, get_verse_started_running_streaks
 from bibleverses.models import VerseSetType, VerseSet
 from groups.models import combined_membership_count_for_creator
-from scores.models import ScoreReason, get_leaderboard_since, get_number_of_distinct_hours_for_account_id
+from scores.models import ScoreReason, get_number_of_distinct_hours_for_account_id
 
 @task(ignore_result=True)
 def give_learning_awards(account_id):
@@ -86,56 +85,6 @@ def give_recruiter_award(account_id):
     count = Identity.objects.filter(account__isnull=False,
                                     referred_by=account).count()
     RecruiterAward(count=count).give_to(account)
-
-
-@task(ignore_result=True)
-def give_champion_awards(hellbanned=False):
-    now = timezone.now()
-
-    # Reigning weekly champion:
-    champion_id = get_leaderboard_since(now - timedelta(days=7), hellbanned, 0, 1)[0]['account_id']
-    champion = Account.objects.get(id=champion_id)
-
-    old_awards = (Award.objects
-                  .filter(award_type=AwardType.REIGNING_WEEKLY_CHAMPION)
-                  .select_related('account'))
-
-    # Construction of alternate reality for hellbanned users is a bit tricky,
-    # and has holes in it when it comes to the champion awards, but this is good
-    # enough.
-
-    if hellbanned:
-        if champion.is_hellbanned:
-            # If in hellbanned mode, we only remove champion awards from
-            # hellbanned users.
-            old_awards = old_awards.filter(account__is_hellbanned=True)
-        else:
-            # champion wasn't a hellbanned user anyway, so awards
-            # will have been distributed by give_champion_awards(hellbanned=False)
-            return
-
-    old_champions = set([a.account for a in old_awards])
-
-    # old_champions should only contain 1 item, but DB doesn't guarantee that,
-    # so we cope with errors here by assuming multiple old champions
-
-    champions_to_remove = set(old_champions) - set([champion])
-    continuing_champions = old_champions & set([champion])
-
-    if champion not in old_champions:
-        # New champion
-        ReigningWeeklyChampion().give_to(champion)
-        WeeklyChampion(level=1).give_to(champion)
-
-    for account in champions_to_remove:
-        for award in account.awards.filter(award_type=AwardType.REIGNING_WEEKLY_CHAMPION):
-            award.delete()
-
-    for account in continuing_champions:
-        # We can calculate how long they've had it using Award.created for the
-        # 'reigning' award, and level them up if necessary
-        existing_award = account.awards.get(award_type=AwardType.REIGNING_WEEKLY_CHAMPION)
-        WeeklyChampion(time_period=now - existing_award.created).give_to(account)
 
 
 def give_all_addict_awards():

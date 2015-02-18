@@ -88,11 +88,8 @@ class Account(AbstractBaseUser):
     # A hellbanned user is barred from interaction with other users, and any
     # visibility by other users, but they not aware of that. They see an
     # alternate reality, which includes normal user and other hellbanned users.
-    # This does not work perfectly with respect to things that are calculated
-    # globally e.g. leaderboard rank, and champion awards, but it works well
-    # enough. For example, they will get champion awards if they get to the top
-    # of the leaderboard, but the previous champion will not lose their champion
-    # award.
+    # This may not work perfectly with respect to things that are calculated
+    # globally.
     is_hellbanned = models.BooleanField(default=False)
 
     has_installed_android_app = models.BooleanField(default=False)
