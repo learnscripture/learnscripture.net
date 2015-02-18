@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -14,9 +16,11 @@ def verse_set_chosen_receiver(sender, **kwargs):
 @receiver(post_save, sender=Verse)
 def verse_saved(sender, **kwargs):
     verse = kwargs['instance']
-    fix_item_suggestions.delay(verse.version.slug, verse.reference)
+    if not settings.TESTING:
+        fix_item_suggestions.delay(verse.version.slug, verse.reference)
 
 @receiver(post_save, sender=QAPair)
 def qapair_saved(sender, **kwargs):
     qapair = kwargs['instance']
-    fix_item_suggestions.delay(qapair.catechism.slug, qapair.reference)
+    if not settings.TESTING:
+        fix_item_suggestions.delay(qapair.catechism.slug, qapair.reference)
