@@ -23,7 +23,7 @@
           <td>
             <h3>{{ award.short_description }}</h3>
             <p>{{ award.full_description }}</p>
-            {% if award.has_levels %}
+            {% if award.has_levels and award.highest_level < award.max_level %}
               <p>Highest level achieved so far: <b>Level {{ award.highest_level }}</b></p>
             {% endif %}
             <p><a href="{% url 'award' award.slug %}">People with {{ award.short_description }} badge</a></p>
