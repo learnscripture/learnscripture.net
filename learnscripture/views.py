@@ -874,11 +874,12 @@ def combine_timeline_stats(*statslists):
     # Some things (calculating streaks client side) work correctly only if we
     # make sure that the data goes right up to today, or ends with a zero if it
     # doesn't.
-    today = date.today()
-    last_date = retval[-1][0]
-    if last_date < today:
-        next_day = last_date + timedelta(days=1)
-        retval.append(tuple([next_day] + [0 for s in statslists]))
+    if len(retval) > 0:
+        today = date.today()
+        last_date = retval[-1][0]
+        if last_date < today:
+            next_day = last_date + timedelta(days=1)
+            retval.append(tuple([next_day] + [0 for s in statslists]))
     return retval
 
 
