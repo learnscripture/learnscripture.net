@@ -225,7 +225,9 @@
       {% endfor %}
     </ul>
 
-    <p><a href="{% url 'groups' %}">Find more groups to join</a></p>
+    {% if request_account.username == account.username %}
+      <p><a href="{% url 'groups' %}">Find more groups to join</a></p>
+    {% endif %}
 
   {% else %}
     <p>No groups.
