@@ -14,7 +14,7 @@ var learnscripture =
             var numberOfYears = 2;
             year -= numberOfYears;
 	        cal.init({
-                cellSize: 10,
+                cellSize: 10, // need to change #id-heatmap-div height if this is changed.
                 data: $("#id-dashboard-script-data").attr('data-user-stats-verses-timeline-stats-csv-url') + "?r=" + Math.floor(Math.random() * 1000000000).toString(),
                 dataType: "csv",
                 displayLegend: false,
