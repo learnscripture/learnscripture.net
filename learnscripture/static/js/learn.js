@@ -448,12 +448,12 @@ var learnscripture = (function (learnscripture, $) {
 
             if (accuracyPercent < 80) {
                 // 'More practice' the default
+                $('.primary').removeClass('primary');
                 $('#id-more-practice-btn').addClass('primary');
-                $('#id-next-verse-btn').removeClass('primary');
 
             } else {
                 // 'More practice' available but not default
-                $('#id-more-practice-btn').removeClass('primary');
+                $('.primary').removeClass('primary');
                 $('#id-next-verse-btn').addClass('primary');
             }
 
@@ -468,7 +468,8 @@ var learnscripture = (function (learnscripture, $) {
                 setUpStage(0);
             });
         } else {
-            $('#id-more-practice-btn').removeClass('primary').hide();
+            $('#id-more-practice-btn').hide();
+            $('.primary').removeClass('primary');
             $('#id-next-verse-btn').addClass('primary');
         }
         bindDocKeyPress();
