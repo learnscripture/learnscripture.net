@@ -56,6 +56,15 @@ var learnscripture =
                     return stats;
                 }
             });
+            $('#id-heatmap-div').on('click', 'svg rect', function (ev) {
+                var candidates = ev.currentTarget.parentNode.childNodes;
+                for (var i = 0; i < candidates.length; i++) {
+                    var node = candidates[i];
+                    if (node.tagName == 'title') {
+                        $('#id-heatmap-domain-title').text(node.textContent);
+                    }
+                }
+            });
         };
 
         var setupDashboardControls = function () {
