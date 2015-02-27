@@ -26,7 +26,6 @@ var learnscripture =
                 previousSelector: '#id-heatmap-previous',
                 range: numberOfYears * 12 + 1,
                 start: new Date(year, month, 1),
-                subdomain: "x_day",
                 afterLoadData: function(data) {
                     // calculate dict in form required by CalHeatMap. Also
                     // calculate streaks, relying on fact that data has zeros in
