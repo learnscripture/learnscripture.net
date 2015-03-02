@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 from collections import Counter
 import glob
 import hashlib
+import logging
 import os
 import pickle
 import random
@@ -15,6 +16,8 @@ from django.conf import settings
 import pykov
 
 from bibleverses.models import get_whole_book, TextType, BIBLE_BOOKS, WordSuggestionData, split_into_words, is_punctuation, Verse, QAPair, TextVersion
+
+logger = logging.getLogger(__name__)
 
 PUNCTUATION = "!?,.<>()[];:\"'-–"
 PUNCTUATION_OR_WHITESPACE = PUNCTUATION + " \n\r\t"
@@ -109,7 +112,7 @@ def generate_suggestions(version, ref=None, missing_only=True, thesaurus=None):
                 return True
             if version.word_suggestion_data.filter(reference__in=references).count() == len(references):
                 # All done
-                print "Skipping %s %s" % (version.slug, ' '.join(references))
+                logger.info("Skipping %s %s\n", version.slug, ' '.join(references))
                 return True
         return False
 
@@ -129,7 +132,7 @@ def generate_suggestions(version, ref=None, missing_only=True, thesaurus=None):
                 if is_done(items):
                     continue
             training_texts = {(version.slug, b): get_whole_book(b, version).text for b in similar_books(book)}
-            print book
+            logger.info("Generating for %s", book)
             generate_suggestions_helper(version, items,
                                         lambda verse: verse.text,
                                         training_texts, ref=ref, missing_only=missing_only,
@@ -174,7 +177,7 @@ def load_saved_markov_data(label_set):
     for labels in label_set:
         if labels not in loaded_labels:
             for fname in glob.glob(filename_for_labels(labels, '*')):
-                print "loading %s" % fname
+                logger.info("loading %s", fname)
                 MARKOV_CHAINS.update(pickle.load(file(fname)))
 
 
@@ -191,7 +194,7 @@ def build_markov_chains_for_text(labels, text, size):
     sentences = text.split(".")
     v_accum, c_accum = pykov.maximum_likelihood_probabilities([])
     matrices = []
-    print "Markov analysis level %d for %s" % (size, labels)
+    logger.info("Markov analysis level %d for %s", size, labels)
     for i, s in enumerate(sentences):
         if not s:
             continue
@@ -334,11 +337,11 @@ def generate_suggestions_helper(version, items, text_getter, training_texts, ref
         existing = version.word_suggestion_data.filter(reference=item.reference)
         if missing_only:
             if (existing.exists()):
-                print "Skipping %s %s" % (version.slug, item.reference)
+                logger.info("Skipping %s %s", version.slug, item.reference)
                 continue
         else:
             existing.delete()
-        print "%s %s" % (version.slug, item.reference)
+        logger.info("Generating suggestions for %s %s", version.slug, item.reference)
 
         item_suggestions = []
 
@@ -394,7 +397,6 @@ def get_in_batches(qs, batch_size=200):
     start = 0
     while True:
         q = list(qs[start:start+batch_size])
-        print start
         if len(q) == 0:
             raise StopIteration()
         for item in q:
@@ -452,7 +454,7 @@ def version_thesaurus(version, base_thesaurus):
 
     from bibleverses.suggestions import get_all_version_words
     d = {}
-    print "Building thesaurus for %s" % version.slug
+    logger.info("Building thesaurus for %s\n", version.slug)
     words = get_all_version_words(version.slug)
     for word, c in words.items():
         alts = thesaurus.get(word, None)

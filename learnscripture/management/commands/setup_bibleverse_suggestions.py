@@ -21,7 +21,7 @@ class Command(BaseCommand):
         if args:
             versions = versions.filter(slug__in=list(args))
         for v in versions:
-            print "=== " + v.slug + " ==="
+            logger.info("Generating suggestions for %s", v.slug)
             if thesaurus:
                 v_thesaurus = version_thesaurus(v, thesaurus)
             else:
