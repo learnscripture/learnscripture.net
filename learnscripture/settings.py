@@ -318,11 +318,6 @@ LOGGING = {
         }
     },
     'loggers': {
-        'learnscripture': {
-            'level': 'INFO',
-            'handlers': ['sentry'],
-            'propagate': False,
-            },
         'django.db.backends': {
             'level': 'ERROR',
             'handlers': ['console'],
