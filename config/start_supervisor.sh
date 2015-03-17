@@ -1,6 +1,6 @@
 #! /bin/bash
 
-export PATH=/usr/kerberos/bin:/usr/local/bin:/bin:/usr/bin:/home/cciw/bin:/home/cciw/.local/bin:/home/cciw/bin:/home/cciw/.local/bin:/home/cciw/.cabal/bin
+export PATH=/usr/kerberos/bin:/usr/local/bin:/bin:/usr/bin:/home/cciw/bin:/home/cciw/.local/bin:/home/cciw/bin:/home/cciw/.local/bin:/home/cciw/.cabal/bin:/sbin
 
 NAME=supervisord
 SUPERVISORD=/home/cciw/webapps/learnscripture_django/venv/bin/supervisord
