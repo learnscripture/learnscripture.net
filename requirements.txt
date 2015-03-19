@@ -1,5 +1,5 @@
 psycopg2==2.4.2
-south==0.7.6
+south==1.0.1
 Django==1.6.11
 django-fiber==0.11.1
 -e git+git://github.com/spookylukey/django-bootstrap-form.git@cee9d102c152240e4af07551b13755b53689dd36#egg=django-bootstrap-form
