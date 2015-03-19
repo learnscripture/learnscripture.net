@@ -4,8 +4,7 @@
 
 {% block content %}
 
-  {% filter rstify:"2" %}
-    {% include "learnscripture/terms_of_service.rst" %}
+  {% filter rstify:"2" %}{% include "learnscripture/terms_of_service.rst" %}
   {% endfilter %}
 
 {% endblock %}
