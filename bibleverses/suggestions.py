@@ -211,7 +211,7 @@ def build_markov_chains_for_text(labels, text, size):
     MARKOV_CHAINS.update(new_data)
     fname = filename_for_labels(labels, size)
     with file(fname, "w") as f:
-        sys.stdout.write("Writing %s..." % fname)
+        logger.info("Writing %s...", fname)
         pickle.dump(new_data, f)
     sys.stdout.write("done\n")
     return retval
