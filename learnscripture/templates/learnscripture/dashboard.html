@@ -217,7 +217,7 @@
 
           <h3><a href="{% url 'view_catechism' catechism.slug %}">{{ catechism.full_name }}</a></h3>
           {% if catechism.tested_total == 0 %}
-            <p>You've queued this catechism for learning</p>
+            <p>You've queued this catechism for learning, {{ catechism.untested_total }} questions total.</p>
           {% else %}
             <p>You've seen {{ catechism.tested_total }} question(s) so far,
               with {{ catechism.untested_total }} to go.</p>
