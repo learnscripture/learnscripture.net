@@ -934,40 +934,83 @@ class Identity(models.Model):
             qs = qs.filter(verse_set=verse_set_id)
         qs.delete()
 
-    def _catechism_qas_base_qs(self):
-        return (self.verse_statuses
-                .filter(version__text_type=TextType.CATECHISM,
-                        ignored=False)
-                )
+    def _catechism_qas_base_qs(self, catechism_id):
+        qs = (self.verse_statuses
+              .filter(version__text_type=TextType.CATECHISM,
+                      ignored=False)
+              )
+        if catechism_id is not None:
+            qs = qs.filter(version=catechism_id)
+        return qs
 
-    def catechism_qas_for_learning_qs(self):
-        return (self._catechism_qas_base_qs()
+    def catechism_qas_for_learning_qs(self, catechism_id):
+        return (self._catechism_qas_base_qs(catechism_id)
                 .filter(memory_stage__lt=MemoryStage.TESTED)
                 .order_by('added', 'id')
                 )
 
-    def catechism_qas_for_learning(self):
+    def catechism_qas_for_learning(self, catechism_id):
         """
         Returns catechism QAs that are queued for learning
         """
-        return self.catechism_qas_for_learning_qs()
+        return self.catechism_qas_for_learning_qs(catechism_id)
 
-    def catechism_qas_for_revising(self):
+    def catechism_qas_for_revising(self, catechism_id):
         """
         Returns catechism QAs that are due for revising
         """
-        qs = (self._catechism_qas_base_qs()
+        qs = (self._catechism_qas_base_qs(catechism_id)
               .filter(memory_stage=MemoryStage.TESTED))
         qs = memorymodel.filter_qs(qs, timezone.now())
         return qs
 
-    def clear_catechism_learning_queue(self):
-        self.catechism_qas_for_learning_qs().delete()
+    def catechisms_for_learning(self):
+        """
+        Return catechism objects decorated with tested_total and untested_total
+        """
+        statuses = self.catechism_qas_for_learning(None).select_related('version')
 
-    def get_all_tested_catechism_qas(self, catechism):
-        return (self._catechism_qas_base_qs()
-                .filter(version=catechism,
-                        memory_stage__gte=MemoryStage.TESTED)
+        # Already have enough info for untested_total
+        catechisms = {}
+        for s in statuses:
+            catechism_id = s.version_id
+            if catechism_id not in catechisms:
+                catechism = s.version
+                catechisms[catechism_id] = catechism
+                catechism.untested_total = 0
+            else:
+                catechism = catechisms[catechism_id]
+            catechism.untested_total += 1
+
+        for c in catechisms.values():
+            c.tested_total = c.qapairs.count() - c.untested_total
+
+        return sorted(catechisms.values(), key=lambda c: c.full_name)
+
+    def catechisms_for_revising(self):
+        """
+        Returns catechisms that need revising, decorated with needs_revising_total
+        """
+        statuses = self.catechism_qas_for_revising(None).select_related('version')
+        catechisms = {}
+        for s in statuses:
+            catechism_id = s.version_id
+            if catechism_id not in catechisms:
+                catechism = s.version
+                catechisms[catechism_id] = catechism
+                catechism.needs_revising_total = 0
+            else:
+                catechism = catechisms[catechism_id]
+            catechism.needs_revising_total += 1
+
+        return sorted(catechisms.values(), key=lambda c: c.full_name)
+
+    def clear_catechism_learning_queue(self, catechism_id):
+        self.catechism_qas_for_learning_qs(catechism_id).delete()
+
+    def get_all_tested_catechism_qas(self, catechism_id):
+        return (self._catechism_qas_base_qs(catechism_id)
+                .filter(memory_stage__gte=MemoryStage.TESTED)
                 .order_by('text_order'))
 
     def verse_statuses_for_ref_and_version(self, reference, version_slug):
@@ -984,7 +1027,7 @@ class Identity(models.Model):
         statuses = self.verse_statuses.filter(verse_set__set_type=VerseSetType.PASSAGE,
                                               ignored=False,
                                               memory_stage__lt=MemoryStage.TESTED)\
-                                              .select_related('verse_set')
+                                      .select_related('verse_set')
         verse_sets = {}
 
         # We already have info needed for untested_total
@@ -1023,7 +1066,7 @@ class Identity(models.Model):
         """
         ids = (self.verse_statuses
                .filter(ignored=False)
-                .values_list('verse_set_id', flat=True).distinct())
+               .values_list('verse_set_id', flat=True).distinct())
 
         return VerseSet.objects.filter(id__in=ids).order_by('name')
 

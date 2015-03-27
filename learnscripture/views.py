@@ -302,6 +302,8 @@ def dashboard(request):
         except (KeyError, ValueError):
             vs_id = None
 
+        get_catechism_id = lambda: int(request.POST['catechism_id'])
+
         if 'learnbiblequeue' in request.POST:
             return learn_set(request,
                              identity.bible_verse_statuses_for_learning(vs_id),
@@ -310,10 +312,10 @@ def dashboard(request):
             return learn_set(request, identity.bible_verse_statuses_for_revising(),
                              session.LearningType.REVISION)
         if 'learncatechismqueue' in request.POST:
-            return learn_set(request, identity.catechism_qas_for_learning(),
+            return learn_set(request, identity.catechism_qas_for_learning(get_catechism_id()),
                              session.LearningType.LEARNING)
         if 'revisecatechismqueue' in request.POST:
-            return learn_set(request, identity.catechism_qas_for_revising(),
+            return learn_set(request, identity.catechism_qas_for_revising(get_catechism_id()),
                              session.LearningType.REVISION)
         if any(p in request.POST for p in
                ['learnpassage',
@@ -361,9 +363,9 @@ def dashboard(request):
                              else session.LearningType.PRACTICE)
 
         if 'revisecatechism' in request.POST:
-            catechism_id = int(request.POST['catechism_id'])
-            catechism = TextVersion.objects.catechisms().get(id=catechism_id)
-            uvss = identity.get_all_tested_catechism_qas(catechism)
+            # This option revises catechism questions even if they are not
+            # due for revision yet.
+            uvss = identity.get_all_tested_catechism_qas(get_catechism_id())
             return learn_set(request, uvss,
                              session.LearningType.REVISION)
 
@@ -371,7 +373,7 @@ def dashboard(request):
             identity.clear_bible_learning_queue(vs_id)
             return HttpResponseRedirect(reverse('dashboard'))
         if 'clearcatechismqueue' in request.POST:
-            identity.clear_catechism_learning_queue()
+            identity.clear_catechism_learning_queue(get_catechism_id())
             return HttpResponseRedirect(reverse('dashboard'))
         if 'cancelpassage' in request.POST:
             vs_id = int(request.POST['verse_set_id'])
@@ -384,8 +386,8 @@ def dashboard(request):
          'revise_verses_queue': identity.bible_verse_statuses_for_revising(),
          'passages_for_learning': identity.passages_for_learning(),
          'passages_for_revising': identity.passages_for_revising(),
-         'new_qas_queue': identity.catechism_qas_for_learning(),
-         'revise_qas_queue': identity.catechism_qas_for_revising(),
+         'catechisms_for_learning': identity.catechisms_for_learning(),
+         'catechisms_for_revising': identity.catechisms_for_revising(),
          'next_verse_due': identity.next_verse_due(),
          'title': 'Dashboard',
          'events': identity.get_dashboard_events(),

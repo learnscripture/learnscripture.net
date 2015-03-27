@@ -20,7 +20,7 @@ __all__ = ['IdentityTests']
 
 class IdentityTests(AccountTestMixin, TestCase):
 
-    fixtures = AccountTestMixin.fixtures + ['test_verse_sets.json', 'test_bible_verses.json']
+    fixtures = AccountTestMixin.fixtures + ['test_verse_sets.json', 'test_bible_verses.json', 'test_catechisms.json']
 
     def test_add_verse_set(self):
         i = self.create_identity()
@@ -295,6 +295,57 @@ class IdentityTests(AccountTestMixin, TestCase):
 
         verse_sets = i.passages_for_revising()
         self.assertEqual(verse_sets[0].id, vs1.id)
+
+    def test_catechisms_for_learning(self):
+        i = self.create_identity(version_slug='NET')
+        c = TextVersion.objects.get(slug='WSC')
+        i.add_catechism(c)
+        cs = i.catechisms_for_learning()
+        self.assertEqual(len(cs), 1)
+        self.assertEqual(cs[0].untested_total, c.qapairs.count())
+        self.assertEqual(cs[0].tested_total, 0)
+
+        # After one tested:
+        i.record_verse_action('Q1', 'WSC', StageType.TEST, 1.0)
+        cs = i.catechisms_for_learning()
+        self.assertEqual(len(cs), 1)
+        self.assertEqual(cs[0].untested_total, c.qapairs.count() - 1)
+        self.assertEqual(cs[0].tested_total, 1)
+
+        # After all tested:
+        for qapair in c.qapairs.all():
+            i.record_verse_action(qapair.reference, 'WSC', StageType.TEST, 1.0)
+        cs = i.catechisms_for_learning()
+        self.assertEqual(len(cs), 0)
+
+    def test_catechisms_for_revising(self):
+        i = self.create_identity(version_slug='NET')
+        c = TextVersion.objects.get(slug='WSC')
+        i.add_catechism(c)
+        cs = i.catechisms_for_revising()
+        self.assertEqual(len(cs), 0)
+
+        # After one tested:
+        i.record_verse_action('Q1', 'WSC', StageType.TEST, 1.0)
+
+        cs = i.catechisms_for_revising()
+        self.assertEqual(len(cs), 0)
+
+        # Artifically age
+        i.verse_statuses.filter(reference="Q1").update(
+            last_tested=F('last_tested') - timedelta(days=7),
+            next_test_due=F('next_test_due') - timedelta(days=6)
+        )
+
+        cs = i.catechisms_for_revising()
+        self.assertEqual(len(cs), 1)
+        self.assertEqual(cs[0].needs_revising_total, 1)
+
+        # After all tested:
+        for qapair in c.qapairs.all():
+            i.record_verse_action(qapair.reference, 'WSC', StageType.TEST, 1.0)
+        cs = i.catechisms_for_revising()
+        self.assertEqual(len(cs), 0)
 
     def test_verse_statuses_for_passage(self):
         i = self.create_identity(version_slug='NET')
