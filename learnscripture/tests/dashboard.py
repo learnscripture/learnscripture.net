@@ -119,7 +119,7 @@ class DashboardTests(LiveServerTests):
         i = self.setup_identity()
         i.add_catechism(TextVersion.objects.get(slug='WSC'))
         self.get_url('dashboard')
-        self.assertIn("You've got 4 catechism questions in your queue for learning",
+        self.assertIn("You've queued this catechism for learning, 4 questions total",
                       driver.page_source)
 
         self.click('input[name=learncatechismqueue]')
