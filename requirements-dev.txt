@@ -1,5 +1,5 @@
 pyvirtualdisplay==0.1.2
-selenium==2.43.0
+selenium==2.45.0
 unittest2
 django-devserver
 faulthandler
