@@ -1,13 +1,13 @@
 psycopg2==2.4.2
 south==1.0.1
 Django==1.6.11
-django-fiber==0.11.1
+-e git+git://github.com/ridethepony/django-fiber.git@48d1af8867e19b9e27332d2b98ca07a47927de15#egg=django-fiber
 -e git+git://github.com/spookylukey/django-bootstrap-form.git@cee9d102c152240e4af07551b13755b53689dd36#egg=django-bootstrap-form
 django-pagination==1.0.7
 -e hg+ssh://hg@bitbucket.org/spookylukey/django-piston@8fdaee2d8608#egg=django-piston
 django-debug-toolbar
 python-memcached==1.48
-django-autoslug==1.5.0
+-e hg+ssh://hg@bitbucket.org/neithere/django-autoslug@fb45b68#egg=django-autoslug
 selenium
 raven==3.1.17
 django-compressor==1.3
@@ -31,14 +31,14 @@ BeautifulSoup==3.2.1
 gunicorn
 aldjemy==0.3.51
 django-autofixture==0.3.1
-django-mptt==0.6.0
+django-mptt==0.6.1
 django-markup==0.4
 djangorestframework==2.3.8
-Pillow==2.3.1
-easy-thumbnails==1.4
+Pillow==2.7.0
+easy-thumbnails==2.2.1
 unittest2
-pykov
+pykov==1.0
 numpy
 pysparse==1.1.1-dev
-django-json-field==0.5.5
+django-json-field==0.5.7
 requests==2.6
