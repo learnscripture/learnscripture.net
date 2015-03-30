@@ -39,7 +39,7 @@ class TrackingSnapshot(models.Model):
     model_path = models.CharField(max_length=255)
     created = models.DateTimeField(default=timezone.now)
     snapshot_type = models.CharField(max_length=20, choices=SNAPSHOT_TYPE_CHOICES)
-    applied = models.BooleanField()
+    applied = models.BooleanField(default=False)
     old_fields = JSONField()
     new_fields = JSONField()
 

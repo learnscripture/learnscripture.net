@@ -3,7 +3,7 @@ import time
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.test import LiveServerTestCase
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.utils.importlib import import_module
 from pyvirtualdisplay import Display
 from selenium import webdriver
@@ -83,7 +83,7 @@ class ElementScrollBehavior(object):
     BOTTOM = 1
 
 
-class LiveServerTests(AccountTestMixin, LiveServerTestCase):
+class LiveServerTests(AccountTestMixin, StaticLiveServerTestCase):
 
     hide_browser = True
 
@@ -204,7 +204,7 @@ class LiveServerTests(AccountTestMixin, LiveServerTestCase):
 
     def wait_for_ajax(self):
         time.sleep(0.1)
-        WebDriverWait(self.driver, 10).until(lambda driver: driver.execute_script('return jQuery.active == 0'))
+        WebDriverWait(self.driver, 10).until(lambda driver: driver.execute_script('return (typeof(jQuery) == "undefined" || jQuery.active == 0)'))
 
     def wait_until_finished(self):
         time.sleep(0.1)

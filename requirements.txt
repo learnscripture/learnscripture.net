@@ -1,6 +1,6 @@
 psycopg2==2.4.2
 south==1.0.1
-Django==1.6.11
+Django==1.7.7
 -e git+git://github.com/ridethepony/django-fiber.git@48d1af8867e19b9e27332d2b98ca07a47927de15#egg=django-fiber
 -e git+git://github.com/spookylukey/django-bootstrap-form.git@cee9d102c152240e4af07551b13755b53689dd36#egg=django-bootstrap-form
 django-pagination==1.0.7
@@ -10,10 +10,10 @@ python-memcached==1.48
 -e hg+ssh://hg@bitbucket.org/neithere/django-autoslug@fb45b68#egg=django-autoslug
 selenium
 raven==3.1.17
-django-compressor==1.3
+django-compressor==1.4
 django-spurl==0.6
 urlobject==2.0.0
--e git+git://github.com/jbalogh/django-cache-machine.git@7c3d3abfc85fc26d0e522fd05e9a42fc9b9a5430#egg=django-cache-machine
+-e git+git://github.com/jbalogh/django-cache-machine.git@6b2b37ebbcac85a9f86e0e3b64c1c54243f50006#egg=django-cache-machine
 pytz
 django-paypal==0.2.1
 docutils
@@ -21,7 +21,7 @@ supervisor
 celery==3.1.7
 -e git+https://github.com/spookylukey/django-app-metrics.git@896c58208da1057eebd0a6b1ea781152a8ad06c2#egg=django-app-metrics
 django-jsonfield==0.8.5
-sqlalchemy==0.7.7
+sqlalchemy==0.9.9
 -e hg+ssh://hg@bitbucket.org/mlavin/django-selectable@1d5eedd99227#egg=django-selectable
 django-rstify
 psutil==0.5.1
@@ -42,3 +42,5 @@ numpy
 pysparse==1.1.1-dev
 django-json-field==0.5.7
 requests==2.6
+django-appconf==1.0.1
+six==1.9.0

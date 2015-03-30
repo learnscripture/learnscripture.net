@@ -3,3 +3,4 @@ selenium==2.45.0
 unittest2
 django-devserver
 faulthandler
+django-debug-toolbar==1.0.1

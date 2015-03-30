@@ -40,8 +40,8 @@ class Group(models.Model):
     description = models.TextField(blank=True)
     created = models.DateTimeField(default=timezone.now)
     created_by = models.ForeignKey(Account, related_name='groups_created')
-    public = models.BooleanField()
-    open = models.BooleanField()
+    public = models.BooleanField(default=False)
+    open = models.BooleanField(default=False)
     members = models.ManyToManyField(Account, through='Membership',
                                      related_name='groups')
 

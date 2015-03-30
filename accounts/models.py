@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from datetime import timedelta
 import itertools
 import math
@@ -11,7 +11,6 @@ from django.utils import timezone
 from django.contrib.auth.models import AbstractBaseUser, UserManager
 from django.contrib.sites.models import get_current_site
 from django.template import loader
-from django.utils.datastructures import SortedDict
 from django.utils.functional import cached_property
 
 from accounts import memorymodel
@@ -257,7 +256,7 @@ class Account(AbstractBaseUser):
 
     def visible_awards(self):
         all_awards = self.awards.order_by('award_type', 'level')
-        visible = SortedDict()
+        visible = OrderedDict()
         # Ignore all but the highest
         for a in all_awards:
             if a.award_class.removed:
