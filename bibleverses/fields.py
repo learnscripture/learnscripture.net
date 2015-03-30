@@ -6,11 +6,11 @@ add_introspection_rules([], ["^bibleverses\.fields\.VectorField"])
 
 class VectorField(models.Field):
 
-    def __init__( self, *args, **kwargs ):
+    def __init__(self, *args, **kwargs):
         kwargs['null'] = True
         kwargs['editable'] = False
         kwargs['serialize'] = False
         super(VectorField, self).__init__(*args, **kwargs)
 
-    def db_type(self, **kwargs):
+    def db_type(self, connection, **kwargs):
         return 'tsvector'

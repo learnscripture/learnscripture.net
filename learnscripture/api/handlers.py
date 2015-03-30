@@ -8,10 +8,11 @@ using Piston for the convenience it provides.
 """
 from __future__ import unicode_literals
 
+import json
+
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
 from django.utils.functional import wraps
-from django.utils import simplejson
 from django.utils.decorators import method_decorator
 from django.utils.html import escape, mark_safe
 
@@ -64,7 +65,7 @@ require_preexisting_account_m = method_decorator(require_preexisting_account)
 
 def validation_error_response(errors):
     resp = rc.BAD_REQUEST
-    resp.write("\n" + simplejson.dumps(errors))
+    resp.write("\n" + json.dumps(errors))
     return resp
 
 
@@ -113,7 +114,7 @@ class VersesToLearnHandler(BaseHandler):
 
 
 def get_verse_status(data):
-    return simplejson.loads(data['verse_status'])
+    return json.loads(data['verse_status'])
 
 
 def get_verse_set_id(verse_status):
@@ -162,7 +163,7 @@ class ActionCompleteHandler(BaseHandler):
             accuracy = None
 
         action_change = identity.record_verse_action(uvs.reference, uvs.version.slug,
-                                                     stage, accuracy);
+                                                     stage, accuracy)
 
         if action_change is None:
             # implies client error
@@ -186,7 +187,7 @@ class RecordWordMistakes(BaseHandler):
     def create(self, request):
         ref = request.POST['reference']
         version_slug = request.POST['version']
-        mistakes = simplejson.loads(request.POST['mistakes'])
+        mistakes = json.loads(request.POST['mistakes'])
         try:
             version = bible_versions_for_request(request).get(slug=version_slug)
         except TextVersion.DoesNotExist:

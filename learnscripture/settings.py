@@ -247,7 +247,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.humanize',
-    'south',
     # This project
     'learnscripture',
     'bibleverses',
@@ -348,6 +347,9 @@ if DEBUG:
 if TESTING:
     LOGGING['handlers']['console']['level'] = 'ERROR'
 
+SILENCED_SYSTEM_CHECKS = [
+    "1_6.W001",
+]
 
 FIBER_DEFAULT_TEMPLATE = 'fiber_singlecol.html'
 FIBER_TEMPLATE_CHOICES = [(FIBER_DEFAULT_TEMPLATE, 'Single column')]

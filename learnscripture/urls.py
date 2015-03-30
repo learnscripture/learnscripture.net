@@ -97,7 +97,6 @@ if settings.DEVBOX:
                                {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}),
                            )
 
-
 urlpatterns = urlpatterns + patterns('',
                        (r'', 'fiber.views.page'),
 )

@@ -43,7 +43,7 @@ class DonationDriveManager(models.Manager):
 class DonationDrive(models.Model):
     start = models.DateTimeField()
     finish = models.DateTimeField()
-    active = models.BooleanField()
+    active = models.BooleanField(default=False)
     message_html = models.TextField()
     hide_if_donated_days = models.PositiveIntegerField(
         help_text="The donation drive will be hidden for users who have donated within "
