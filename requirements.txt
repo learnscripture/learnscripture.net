@@ -1,7 +1,7 @@
 psycopg2==2.4.2
 south==1.0.1
 Django==1.7.7
--e git+git://github.com/ridethepony/django-fiber.git@48d1af8867e19b9e27332d2b98ca07a47927de15#egg=django-fiber
+django-fiber==1.1
 -e git+git://github.com/spookylukey/django-bootstrap-form.git@cee9d102c152240e4af07551b13755b53689dd36#egg=django-bootstrap-form
 django-pagination==1.0.7
 -e hg+ssh://hg@bitbucket.org/spookylukey/django-piston@8fdaee2d8608#egg=django-piston
@@ -33,7 +33,7 @@ aldjemy==0.3.51
 django-autofixture==0.3.1
 django-mptt==0.6.1
 django-markup==0.4
-djangorestframework==2.3.8
+djangorestframework==2.4.4
 Pillow==2.7.0
 easy-thumbnails==2.2.0
 unittest2
