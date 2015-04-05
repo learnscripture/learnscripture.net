@@ -63,7 +63,6 @@ class DashboardTests(LiveServerTests):
         # Learn one verse (otherwise we are back to dashboard redirecting us)
         i.record_verse_action('John 3:16', 'NET', StageType.TEST, accuracy=1.0)
 
-
         self.get_url('dashboard')
         # Test clicking 'Start learning' for general queue
         self.click('#id-learning-queue-verse-set- input[name=learnbiblequeue]')

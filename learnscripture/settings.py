@@ -259,7 +259,6 @@ INSTALLED_APPS = [
     'comments',
     'tracking',
     # Third party
-    'piston',
     'mptt',
     'compressor',
     'fiber',
@@ -354,11 +353,6 @@ SILENCED_SYSTEM_CHECKS = [
 FIBER_DEFAULT_TEMPLATE = 'fiber_singlecol.html'
 FIBER_TEMPLATE_CHOICES = [(FIBER_DEFAULT_TEMPLATE, 'Single column')]
 
-
-
-PISTON_DISPLAY_ERRORS = False
-
-
 DEBUG_TOOLBAR_CONFIG = {
     'INTERCEPT_REDIRECTS': False,
     }
@@ -413,6 +407,7 @@ MARKUP_SETTINGS = {
 CAMPAIGN_CONTEXT_PROCESSORS = [
     'learnscripture.context_processors.campaign_context_processor'
 ]
+
 
 ### Raven
 

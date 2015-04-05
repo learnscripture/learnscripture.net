@@ -2,22 +2,21 @@
 Handlers for AJAX requests.
 
 This isn't really a REST API in the normal sense, and would probably need a lot
-of cleaning up if clients other than the web app were to use it - we are just
-using Piston for the convenience it provides.
-
+of cleaning up if clients other than the web app were to use it.
 """
 from __future__ import unicode_literals
 
+import datetime
 import json
 
+from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse
+from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.utils.functional import wraps
 from django.utils.decorators import method_decorator
 from django.utils.html import escape, mark_safe
-
-from piston.handler import BaseHandler
-from piston.utils import rc
+from django.views.generic.base import View
 
 from accounts.forms import PreferencesForm
 from accounts.models import Account
@@ -29,6 +28,26 @@ from learnscripture import session
 from learnscripture.decorators import require_identity_method
 from learnscripture.views import todays_stats, bible_versions_for_request, verse_sets_visible_for_request
 
+
+class rc_factory(object):
+    """
+    Status codes.
+    """
+    CODES = dict(ALL_OK=('OK', 200),
+                 BAD_REQUEST=('Bad Request', 400),
+                 FORBIDDEN=('Forbidden', 401),
+                 )
+
+    def __getattr__(self, attr):
+        try:
+            (r, c) = self.CODES.get(attr)
+        except TypeError:
+            raise AttributeError(attr)
+
+        return HttpResponse(r, content_type='text/plain', status=c)
+
+
+rc = rc_factory()
 
 
 def require_preexisting_identity(view_func):
@@ -60,8 +79,6 @@ def require_preexisting_account(view_func):
 
 require_preexisting_account_m = method_decorator(require_preexisting_account)
 
-# We need a more capable 'validate' than the one provided by piston to get
-# validation errors returned as JSON.
 
 def validation_error_response(errors):
     resp = rc.BAD_REQUEST
@@ -69,35 +86,58 @@ def validation_error_response(errors):
     return resp
 
 
-def validate(form_class, **formkwargs):
-    def dec(method):
-        @wraps(method)
-        def wrapper(self, request, *args, **kwargs):
-            if request.method == 'POST':
-                data = request.POST
-            else:
-                data = request.GET
-            form = form_class(data, **formkwargs)
-            if form.is_valid():
-                request.form = form
-                return method(self, request, *args, **kwargs)
-            else:
-                return validation_error_response(form.errors)
-        return wrapper
-    return dec
+def get_instance_attr(instance, attr_name):
+    retval = getattr(instance, attr_name)
+    if callable(retval):
+        retval = retval()
+    return retval
 
 
-class VersesToLearnHandler(BaseHandler):
-    allowed_methods = ('GET',)
+def instance_to_dict(instance, fields):
+    if instance is None:
+        return None
+    retval = {}
+    for field in fields:
+        if isinstance(field, tuple):
+            attr_name, sub_fields = field
+            attr = get_instance_attr(instance, attr_name)
+            retval[attr_name] = instance_to_dict(attr, sub_fields)
+        else:
+            retval[field] = get_instance_attr(instance, field)
+    return retval
+
+
+def make_serializable(value, fields=[]):
+    if value is None:
+        return value
+    if isinstance(value, (basestring, int, float, datetime.date, datetime.datetime)):
+        return value
+    if isinstance(value, dict):
+        return {k: make_serializable(v) for k, v in value.items()}
+    if hasattr(value, '__iter__'):
+        return [make_serializable(v, fields=fields) for v in value]
+    return instance_to_dict(value, fields)
+
+
+class ApiView(View):
+    def dispatch(self, request, *args, **kwargs):
+        retval = super(ApiView, self).dispatch(request, *args, **kwargs)
+        if isinstance(retval, HttpResponse):
+            return retval
+        serializable = make_serializable(retval, getattr(self, 'fields', []))
+        return HttpResponse(DjangoJSONEncoder().encode(serializable))
+
+
+class VersesToLearnHandler(ApiView):
     # NB: all of these fields get posted back to ActionCompleteHandler
-    fields = (
+    fields = [
         'id',
         'memory_stage', 'strength', 'first_seen',
-        ('verse_set', ('id', 'set_type', 'name', 'get_absolute_url')),
+        ('verse_set', ['id', 'set_type', 'name', 'get_absolute_url']),
         'reference',
         'needs_testing',
         'text_order',
-        ('version', ('full_name', 'short_name', 'slug', 'url', 'text_type')),
+        ('version', ['full_name', 'short_name', 'slug', 'url', 'text_type']),
         'suggestions',
         # added in get_verse_statuses:
         'scoring_text_words',
@@ -106,10 +146,10 @@ class VersesToLearnHandler(BaseHandler):
         'max_order_val',
         'learning_type',
         'return_to',
-        )
+    ]
 
     @require_identity_method
-    def read(self, request):
+    def get(self, request):
         return session.get_verse_statuses(request)
 
 
@@ -128,15 +168,14 @@ def get_verse_set_id(verse_status):
     return verse_set.get('id', None)
 
 
-class ActionCompleteHandler(BaseHandler):
-    allowed_methods = ('POST',)
+class ActionCompleteHandler(ApiView):
 
     @require_preexisting_identity_m
-    def create(self, request):
+    def post(self, request):
         identity = request.identity
 
         # Input here is a trimmed down version of what was sent by VersesToLearnHandler
-        verse_status = get_verse_status(request.data)
+        verse_status = get_verse_status(request.POST)
         if verse_status is None:
             return rc.BAD_REQUEST
 
@@ -156,9 +195,9 @@ class ActionCompleteHandler(BaseHandler):
         old_memory_stage = uvs.memory_stage
 
         # TODO: store StageComplete
-        stage = StageType.get_value_for_name(request.data['stage'])
+        stage = StageType.get_value_for_name(request.POST['stage'])
         if stage == StageType.TEST:
-            accuracy = float(request.data['accuracy'])
+            accuracy = float(request.POST['accuracy'])
         else:
             accuracy = None
 
@@ -180,11 +219,10 @@ class ActionCompleteHandler(BaseHandler):
         return {}
 
 
-class RecordWordMistakes(BaseHandler):
-    allowed_methods = ['POST']
+class RecordWordMistakes(ApiView):
 
     @require_preexisting_identity_m
-    def create(self, request):
+    def post(self, request):
         ref = request.POST['reference']
         version_slug = request.POST['version']
         mistakes = json.loads(request.POST['mistakes'])
@@ -196,59 +234,54 @@ class RecordWordMistakes(BaseHandler):
         return {}
 
 
-class SkipVerseHandler(BaseHandler):
-    allowed_methods = ('POST',)
+class SkipVerseHandler(ApiView):
 
     @require_preexisting_identity_m
-    def create(self, request):
-        verse_status = get_verse_status(request.data)
+    def post(self, request):
+        verse_status = get_verse_status(request.POST)
         session.verse_status_skipped(request, verse_status['id'])
         return {}
 
 
-class CancelLearningVerseHandler(BaseHandler):
-    allowed_methods = ('POST',)
+class CancelLearningVerseHandler(ApiView):
 
     @require_preexisting_identity_m
-    def create(self, request):
-        verse_status = get_verse_status(request.data)
+    def post(self, request):
+        verse_status = get_verse_status(request.POST)
         reference = verse_status['reference']
         request.identity.cancel_learning([reference])
         session.verse_status_cancelled(request, verse_status['id'])
         return {}
 
 
-class CancelLearningPassageHandler(BaseHandler):
-    allowed_methods = ['POST']
+class CancelLearningPassageHandler(ApiView):
 
     @require_preexisting_identity_m
-    def create(self, request):
+    def post(self, request):
         vs_id = int(request.POST['verse_set_id'])
         request.identity.cancel_passage(vs_id)
         return {}
 
 
-class ResetProgressHandler(BaseHandler):
-    allowed_methods = ('POST',)
+class ResetProgressHandler(ApiView):
 
     @require_preexisting_identity_m
-    def create(self, request):
-        verse_status = get_verse_status(request.data)
+    def post(self, request):
+        verse_status = get_verse_status(request.POST)
         request.identity.reset_progress(verse_status['reference'],
                                         get_verse_set_id(verse_status),
                                         verse_status['version']['slug'])
         return {}
 
 
-class ChangeVersionHandler(BaseHandler):
-    allowed_methods = ('POST',)
+class ChangeVersionHandler(ApiView):
 
     @require_preexisting_identity_m
-    def create(self, request):
-        verse_status = get_verse_status(request.data)
+    def post(self, request):
+        verse_status = get_verse_status(request.POST)
         verse_set_id = get_verse_set_id(verse_status)
         reference = verse_status['reference']
-        new_version_slug = request.data['new_version_slug']
+        new_version_slug = request.POST['new_version_slug']
         # There is a bug here for the case where:
         # - user is learning a passage set
         # - user changes version to a version in which there are *more*
@@ -266,32 +299,30 @@ class ChangeVersionHandler(BaseHandler):
 
 
 class AccountCommon(object):
-    fields = ('id', 'username', 'email')
+    fields = ['id', 'username', 'email']
 
 
-class LogOutHandler(BaseHandler):
-    allowed_methods = ('POST,')
+class LogOutHandler(ApiView):
 
-    def create(self, request):
+    def post(self, request):
         import django.contrib.auth
         django.contrib.auth.logout(request)
         return {'username': 'Guest'}
 
 
-class SetPreferences(BaseHandler):
-    allowed_methods = ('POST',)
-    fields = (
-        ('default_bible_version', ('slug',)),
+class SetPreferences(ApiView):
+    fields = [
+        ('default_bible_version', ['slug']),
         'desktop_testing_method',
         'touchscreen_testing_method',
         'enable_animations',
         'enable_sounds',
         'interface_theme',
         'preferences_setup',
-        )
+    ]
 
     @require_identity_method
-    def create(self, request):
+    def post(self, request):
         form = PreferencesForm(request.POST, instance=request.identity)
         if form.is_valid():
             identity = form.save()
@@ -300,10 +331,9 @@ class SetPreferences(BaseHandler):
             return validation_error_response(form.errors)
 
 
-class SessionStats(BaseHandler):
-    allowed_methods = ('GET',)
+class SessionStats(ApiView):
 
-    def read(self, request):
+    def get(self, request):
         if not hasattr(request, 'identity'):
             return {}
 
@@ -318,17 +348,16 @@ class SessionStats(BaseHandler):
         return retval
 
 
-class ScoreLogs(BaseHandler):
-    allowed_methods = ('GET',)
+class ScoreLogs(ApiView):
 
-    fields = (
-        'id', # used for uniqueness tests
+    fields = [
+        'id',  # used for uniqueness tests
         'points',
         'reason',
         'created',
-        )
+    ]
 
-    def read(self, request):
+    def get(self, request):
         if not hasattr(request, 'identity'):
             return []
         return request.identity.get_score_logs(session.get_learning_session_start(request))
@@ -353,10 +382,9 @@ def html_format_text(verse):
     return mark_safe(u''.join(out))
 
 
-class VerseFind(BaseHandler):
-    allowed_methods = ('GET',)
+class VerseFind(ApiView):
 
-    def read(self, request):
+    def get(self, request):
         try:
             q = request.GET['quick_find']
             version_slug = request.GET['version_slug']
@@ -403,10 +431,9 @@ class VerseFind(BaseHandler):
         return retval
 
 
-class CheckDuplicatePassageSet(BaseHandler):
-    allowed_methods = ('GET',)
+class CheckDuplicatePassageSet(ApiView):
 
-    def read(self, request):
+    def get(self, request):
         try:
             passage_id = request.GET['passage_id']
         except KeyError:
@@ -426,33 +453,30 @@ class CheckDuplicatePassageSet(BaseHandler):
                 for vs in verse_sets]
 
 
-class DeleteNotice(BaseHandler):
-    allowed_methods = ('POST',)
+class DeleteNotice(ApiView):
 
     @require_preexisting_identity_m
-    def create(self, request):
-        request.identity.notices.filter(id=int(request.data['id'])).delete()
+    def post(self, request):
+        request.identity.notices.filter(id=int(request.POST['id'])).delete()
 
 
-class AndroidAppInstalled(BaseHandler):
-    allowed_methods = ('POST',)
+class AndroidAppInstalled(ApiView):
 
-    def create(self, request):
+    def post(self, request):
         request.identity.account.android_app_installed()
 
 
-class AddComment(BaseHandler):
-    allowed_methods = ('POST',)
-    fields = (
-        ('author', ('id', 'username')),
+class AddComment(ApiView):
+    fields = [
+        ('author', ['id', 'username']),
         'event_id',
         'created',
         'message',
         'message_formatted',
-        )
+    ]
 
     @require_preexisting_account_m
-    def create(self, request):
+    def post(self, request):
         account = request.identity.account
 
         if not account.enable_commenting:
@@ -494,29 +518,29 @@ class AddComment(BaseHandler):
         return comment
 
 
-class HideComment(BaseHandler):
+class HideComment(ApiView):
 
     @require_preexisting_account_m
-    def create(self, request):
+    def post(self, request):
         if not request.identity.account.is_moderator:
             return rc.FORBIDDEN
         Comment.objects.filter(id=int(request.POST['comment_id'])).update(hidden=True)
         return {}
 
 
-class Follow(BaseHandler):
+class Follow(ApiView):
 
     @require_preexisting_account_m
-    def create(self, request):
+    def post(self, request):
         account = Account.objects.get(id=int(request.POST['account_id']))
         request.identity.account.follow_user(account)
         return {}
 
 
-class UnFollow(BaseHandler):
+class UnFollow(ApiView):
 
     @require_preexisting_account_m
-    def create(self, request):
+    def post(self, request):
         account = Account.objects.get(id=int(request.POST['account_id']))
         request.identity.account.unfollow_user(account)
         return {}
