@@ -251,7 +251,7 @@ class GroupCreatePageTests(LiveServerTests):
         self.login(account)
 
         _, invited_account = self.create_account(username='invitee',
-                                              email='i@example.com')
+                                                 email='i@example.com')
 
         driver = self.driver
         self.get_url('create_group')

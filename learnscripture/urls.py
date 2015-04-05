@@ -78,7 +78,8 @@ urlpatterns = patterns('',
                        url(r'^stats/$', 'learnscripture.views.stats', name='stats'),
 
                        # JSON/AJAX views
-                       (r'^api/learnscripture/v1/', include('learnscripture.api.urls')),
+
+                       url(r'^api/learnscripture/v1/', include('learnscripture.api.urls')),
 
                        # Dependencies
                        (r'^admin/fiber/', include('fiber.admin_urls')),
