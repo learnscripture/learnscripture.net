@@ -17,7 +17,7 @@ pytz
 django-paypal==0.2.1
 docutils
 supervisor
-celery==3.1.7
+celery==3.1.17
 -e git+https://github.com/spookylukey/django-app-metrics.git@896c58208da1057eebd0a6b1ea781152a8ad06c2#egg=django-app-metrics
 django-jsonfield==0.9.13
 sqlalchemy==0.9.9
