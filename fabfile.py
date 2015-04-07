@@ -217,12 +217,18 @@ def no_installs():
     """
     env.no_installs = True
 
+
 @task
 def no_db():
     """
     Call first to skip upgrading DB
     """
     env.no_db = True
+
+
+@task
+def fake_migrations():
+    env.fake_migrations = True
 
 
 @task
@@ -274,7 +280,10 @@ def update_database():
         return
     with virtualenv(target.VENV_DIR):
         with cd(target.SRC_DIR):
-            run_venv("./manage.py migrate --noinput")
+            if getattr(env, 'fake_migrations', False):
+                run_venv("./manage.py migrate --noinput --fake")
+            else:
+                run_venv("./manage.py migrate --noinput")
 
 
 def _assert_target():
