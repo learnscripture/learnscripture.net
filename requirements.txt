@@ -19,7 +19,7 @@ docutils
 supervisor
 celery==3.1.7
 -e git+https://github.com/spookylukey/django-app-metrics.git@896c58208da1057eebd0a6b1ea781152a8ad06c2#egg=django-app-metrics
-django-jsonfield==0.8.5
+django-jsonfield==0.9.13
 sqlalchemy==0.9.9
 -e hg+ssh://hg@bitbucket.org/mlavin/django-selectable@1d5eedd99227#egg=django-selectable
 django-rstify
