@@ -28,7 +28,7 @@ twilio==3.3.9
 pyquery==1.2.4
 BeautifulSoup==3.2.1
 gunicorn
-aldjemy==0.3.51
+aldjemy==0.3.10
 django-autofixture==0.3.1
 django-mptt==0.6.1
 django-markup==0.4
