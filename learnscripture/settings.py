@@ -381,10 +381,6 @@ if TESTING:
     # Caching count() seems to cause errors in test suite
     CACHE_COUNT_TIMEOUT = 0
 
-    # speed up tests:
-    INSTALLED_APPS = [a for a in INSTALLED_APPS
-                      if a != 'south']
-
 
 else:
     CACHE_COUNT_TIMEOUT = 60
