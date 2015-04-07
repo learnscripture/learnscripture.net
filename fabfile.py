@@ -269,14 +269,6 @@ def build_static():
     run("chmod -R ugo+r %s" % target.STATIC_ROOT)
 
 
-@task
-def first_deployment_mode():
-    """
-    Use before first deployment to switch on fake south migrations.
-    """
-    env.initial_deploy = True
-
-
 def update_database():
     if getattr(env, 'no_db', False):
         return
