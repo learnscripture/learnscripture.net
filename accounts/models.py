@@ -50,6 +50,8 @@ PAYMENT_ALLOWED_EARLY_DAYS = 31
 
 FREE_TRIAL_LENGTH_DAYS = 62 # 2 months
 
+DONT_NAG_NEW_USERS_FOR_MONEY_DAYS = 30
+
 # Account is separate from Identity to allow guest users to use the site fully
 # without signing up.
 #
@@ -118,7 +120,6 @@ class Account(AbstractBaseUser):
 
     class Meta:
         ordering = ['username']
-
 
     def save(self, **kwargs):
         # We need to ensure that there is a TotalScore object
@@ -299,7 +300,8 @@ class Account(AbstractBaseUser):
             self.add_html_notice('Thanks for installing the Android app! Please remember to <a href="https://play.google.com/store/apps/details?id=net.learnscripture.webviewapp">rate it and leave any comments you have!</a>')
 
     def donations_disabled(self):
-        return self.is_under_13
+        return (self.is_under_13 or
+                ((timezone.now() - self.date_joined).days < DONT_NAG_NEW_USERS_FOR_MONEY_DAYS))
 
     def is_following(self, account):
         return self.following.filter(pk=account.id).exists()
