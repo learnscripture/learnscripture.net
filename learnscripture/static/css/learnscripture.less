@@ -594,8 +594,32 @@ input[type=image] {
         font-weight: bold;
     }
 
-}
+    .donation-drive-stats {
+        margin-top: 4px;
+        border: 1px solid #fff;
+        background-color: #ffa020;
+        padding: 5px 2px 2px;
 
+        .target, .raised {
+            font-weight: bold;
+        }
+
+        .chart-container {
+            display: inline-block;
+            margin: 0px 7px;
+            width: 100px;
+            border: 1px solid black;
+            vertical-align: top;
+        }
+        .chart-container, .fraction {
+            height: 15px;
+        }
+        .fraction {
+            display: block;
+            background-color: #8df;
+        }
+    }
+}
 .clearnotices {
     text-align: right;
 }
@@ -1521,6 +1545,7 @@ p.referral-link {
     }
 }
 
+
 // Use variable width modal if less than the fixed 560px (defined in
 // patterns.less) + 10px padding either side
 @media screen and (max-width: 580px) {
@@ -1532,6 +1557,11 @@ p.referral-link {
     }
 }
 
+@media screen and (max-width: 400px) {
+    .donation-drive.notice .donation-drive-stats .chart-container {
+        width: 75px;
+    }
+}
 
 @media screen and (max-width: 600px) {
     .award {
