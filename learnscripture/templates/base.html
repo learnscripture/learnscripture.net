@@ -101,9 +101,16 @@
           {% block donation_drives %}
             {% if donation_drives %}
               <div class="message-container">
-                {% for notice in donation_drives %}
+                {% for dd in donation_drives %}
                   <div class="notice donation-drive">
-                    {{ notice.message_html|safe }}
+                    {{ dd.message_html|safe }}
+                    {% if dd.target > 0  %}
+                      <div class="donation-drive-stats">
+                        Raised: <span class="raised">£{{ dd.amount_raised }}</span>
+                        <span class="chart-container"><span class="fraction" style="width: {{ dd.percentage_raised }}%;"></span></span>
+                        Target: <span class="target">£{{ dd.target }}</span>
+                      </div>
+                    {% endif %}
                   </div>
                 {% endfor %}
               </div>

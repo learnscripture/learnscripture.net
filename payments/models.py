@@ -1,5 +1,8 @@
+from decimal import Decimal
+
 from django.db import models
 from django.utils import timezone
+from django.utils.functional import cached_property
 from paypal.standard.ipn.models import PayPalIPN
 
 from accounts.models import Account
@@ -37,7 +40,7 @@ class DonationDriveManager(models.Manager):
         return [
             d for d in self.current()
             if d.active_for_account(account)
-            ]
+        ]
 
 
 class DonationDrive(models.Model):
@@ -48,6 +51,7 @@ class DonationDrive(models.Model):
     hide_if_donated_days = models.PositiveIntegerField(
         help_text="The donation drive will be hidden for users who have donated within "
         "this number of days")
+    target = models.DecimalField(default=Decimal("0"), decimal_places=0, max_digits=8)
 
     objects = DonationDriveManager()
 
@@ -66,6 +70,28 @@ class DonationDrive(models.Model):
             return True
         now = timezone.now()
         return (now - last_payment.created).days > self.hide_if_donated_days
+
+    @cached_property
+    def amount_raised(self):
+        total = Payment.objects.filter(
+            created__gt=self.start,
+            created__lt=self.finish,
+        ).aggregate(models.Sum('amount'))['amount__sum']
+        if total is None:
+            return Decimal('0')
+        else:
+            return total
+
+    @property
+    def fraction_raised(self):
+        if self.target == 0:
+            return 0
+        else:
+            return self.amount_raised / self.target
+
+    @property
+    def percentage_raised(self):
+        return self.fraction_raised * 100
 
     def __unicode__(self):
         return "%s to %s" % (self.start.strftime("%Y-%m-%d"),
