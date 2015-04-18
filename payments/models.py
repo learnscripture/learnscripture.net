@@ -30,9 +30,10 @@ class Payment(models.Model):
 class DonationDriveManager(models.Manager):
     def current(self):
         now = timezone.now()
-        return self.filter(start__lte=now,
-                           finish__gte=now,
-                           active=True)
+        return [d for d in self.filter(start__lte=now,
+                                       finish__gte=now,
+                                       active=True)
+                if not d.target_reached]
 
     def current_for_account(self, account):
         if account.donations_disabled():
@@ -92,6 +93,10 @@ class DonationDrive(models.Model):
     @property
     def percentage_raised(self):
         return self.fraction_raised * 100
+
+    @property
+    def target_reached(self):
+        return self.fraction_raised >= 1
 
     def __unicode__(self):
         return "%s to %s" % (self.start.strftime("%Y-%m-%d"),

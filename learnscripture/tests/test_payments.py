@@ -120,3 +120,33 @@ class DonationDriveTests(AccountTestMixin, TestCase):
         # Should be active again
         self.assertEqual(d2.active_for_account(self.account),
                          True)
+
+    def test_target(self):
+        DonationDrive.objects.create(
+            start=timezone.now() - timedelta(days=10),
+            finish=timezone.now() + timedelta(days=10),
+            active=True,
+            message_html="Please donate!",
+            hide_if_donated_days=4,
+            target=Decimal("100")
+        )
+        current1 = DonationDrive.objects.current()
+        self.assertEqual(len(current1), 1)
+
+        d1 = current1[0]
+        self.assertEqual(d1.fraction_raised, 0)
+
+        # Make a payment
+        ipn_1 = good_payment_ipn(self.account, Decimal("20.00"))
+        paypal_payment_received(ipn_1)
+
+        current2 = DonationDrive.objects.current()
+        d2 = current2[0]
+        self.assertEqual(d2.fraction_raised, Decimal('0.2'))
+
+        # Another payment, taking beyond target
+        ipn_2 = good_payment_ipn(self.account, Decimal("90.00"))
+        paypal_payment_received(ipn_2)
+
+        current3 = DonationDrive.objects.current()
+        self.assertEqual(len(current3), 0)
