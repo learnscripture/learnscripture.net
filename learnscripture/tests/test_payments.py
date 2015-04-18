@@ -87,16 +87,22 @@ class DonationDriveTests(AccountTestMixin, TestCase):
         super(DonationDriveTests, self).setUp()
         self.identity, self.account = self.create_account()
 
-    def test_donation_drive_active(self):
+    def test_donation_drive_active_for_account(self):
         d = DonationDrive.objects.create(
             start=timezone.now() - timedelta(days=10),
             finish=timezone.now() + timedelta(days=10),
             active=True,
             message_html="Please donate!",
             hide_if_donated_days=4,
-            )
+        )
+
         d2 = DonationDrive.objects.current()[0]
         self.assertEqual(d2, d)
+        self.assertEqual(d2.active_for_account(self.account),
+                         False)  # because it is a recently created account
+
+        self.account.date_joined -= timedelta(days=100)
+        self.account.save()
         self.assertEqual(d2.active_for_account(self.account),
                          True)
 
@@ -107,7 +113,6 @@ class DonationDriveTests(AccountTestMixin, TestCase):
         # No longer active
         self.assertEqual(d2.active_for_account(self.account),
                          False)
-
 
         # Now move payments into past
         self.account.payments.update(created=timezone.now() - timedelta(days=5))
