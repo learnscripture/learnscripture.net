@@ -150,6 +150,7 @@ else:
     PAYPAL_TEST = False
 PAYPAL_IMAGE = "https://www.paypalobjects.com/en_US/GB/i/btn/btn_buynowCC_LG.gif"
 
+VALID_RECEIVE_CURRENCY = 'GBP'
 
 TIME_ZONE = 'UTC'
 LANGUAGE_CODE = 'en-gb'

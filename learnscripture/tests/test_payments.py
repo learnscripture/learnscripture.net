@@ -21,13 +21,15 @@ class IpnMock(object):
     payment_status = 'Completed'
 
 
-def good_payment_ipn(account, amount):
-    return PayPalIPN.objects.create(mc_gross=amount,
-                                    mc_currency="GBP",
-                                    custom=sign_payment_info(dict(account=account.id)),
-                                    ipaddress="127.0.0.1",
-                                    payment_status='Completed',
-                                    )
+def good_payment_ipn(account, amount, **kwargs):
+    obj_args = dict(mc_gross=amount,
+                    mc_currency="GBP",
+                    custom=sign_payment_info(dict(account=account.id)),
+                    ipaddress="127.0.0.1",
+                    payment_status='Completed',
+                    )
+    obj_args.update(kwargs)
+    return PayPalIPN.objects.create(**obj_args)
 
 
 class PaymentTests(AccountTestMixin, TestCase):
@@ -46,7 +48,7 @@ class PaymentTests(AccountTestMixin, TestCase):
         ipn_1.id = 123
         ipn_1.mc_gross = Decimal("10.00")
         ipn_1.mc_currency = "GBP"
-        ipn_1.custom = "x" # wrong format
+        ipn_1.custom = "x"  # wrong format
 
         self.assertEqual(len(mail.outbox), 0)
         paypal_payment_received(ipn_1)
@@ -77,6 +79,16 @@ class PaymentTests(AccountTestMixin, TestCase):
 
         self.assertEqual(len(mail.outbox), 1)
         self.assertTrue('Thank you for your donation' in mail.outbox[0].body)
+
+    def test_USD_payment(self):
+        ipn_1 = good_payment_ipn(self.account, Decimal("10.00"),
+                                 mc_currency='USD',
+                                 settle_currency='GBP',
+                                 settle_amount=Decimal('6.50'))
+        paypal_payment_received(ipn_1)
+        self.account = Account.objects.get(id=self.account.id)
+        self.assertEqual(self.account.payments.count(), 1)
+        self.assertEqual(self.account.payments.all()[0].amount, Decimal('6.50'))
 
 
 class DonationDriveTests(AccountTestMixin, TestCase):

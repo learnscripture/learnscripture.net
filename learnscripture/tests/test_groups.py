@@ -43,7 +43,6 @@ class GroupPageTests(LiveServerTests):
         self.assertEqual(private_group.can_join(account), False)
         self.assertEqual(public_group.can_join(account), True)
 
-
         driver = self.driver
         self.get_url('groups')
 
@@ -151,7 +150,6 @@ class GroupTests(AccountTestMixin, TestCase):
         group.invitations.all().delete()
         self.assertEqual(list(visible()),
                          [])
-
 
         # or if a member
         group.add_user(viewer_account)
@@ -277,6 +275,7 @@ class GroupCreatePageTests(LiveServerTests):
 
         self.assertEqual(Event.objects.filter(event_type=EventType.GROUP_CREATED).count(),
                          1)
+
 
 # Use Django client
 class GroupPageTests2(AccountTestMixin, TestCase):

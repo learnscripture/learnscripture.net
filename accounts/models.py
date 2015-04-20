@@ -5,6 +5,7 @@ from datetime import timedelta
 import itertools
 import math
 
+from django.conf import settings
 from django.core import mail
 from django.db import models
 from django.utils import timezone
@@ -237,7 +238,13 @@ class Account(AbstractBaseUser):
         return get_rank_this_week(self.points_this_week, self.is_hellbanned)
 
     def receive_payment(self, ipn_obj):
-        self.payments.create(amount=ipn_obj.mc_gross,
+        if ipn_obj.mc_currency == settings.VALID_RECEIVE_CURRENCY:
+            amount = ipn_obj.mc_gross
+        elif ipn_obj.settle_currency == settings.VALID_RECEIVE_CURRENCY:
+            amount = ipn_obj.settle_amount
+        else:
+            raise ValueError("Unrecognised currency")
+        self.payments.create(amount=amount,
                              paypal_ipn=ipn_obj,
                              created=timezone.now())
         send_payment_received_email(self, ipn_obj)
