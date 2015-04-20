@@ -1,7 +1,11 @@
+from __future__ import unicode_literals
+
 from decimal import Decimal
 
 from django.conf import settings
+from django.core import mail
 from django.db import models
+from django.template import loader
 from django.utils import timezone
 from django.utils.functional import cached_property
 from paypal.standard.ipn.models import PayPalIPN
@@ -19,7 +23,7 @@ class PaymentManager(models.Manager):
 class Payment(models.Model):
     amount = models.DecimalField(decimal_places=2, max_digits=10)
     account = models.ForeignKey(Account, related_name='payments')
-    paypal_ipn = models.ForeignKey(PayPalIPN)
+    paypal_ipn = models.ForeignKey(PayPalIPN, related_name='payments')
     created = models.DateTimeField()
 
     objects = PaymentManager()
@@ -75,11 +79,21 @@ class DonationDrive(models.Model):
 
     @cached_property
     def amount_raised(self):
+        return self.get_amount_raised()
+
+    def get_amount_raised(self, before=None):
+        # if before is not None, it is used to limit the query further.
+
         # Use PayPalIPN instead of Payment, so that we include donations that
         # are not assigned to account for whatever reason.
 
         # This means we need to handle non-GBP payments as well.
-        total1 = PayPalIPN.objects.filter(
+
+        initial_qs = PayPalIPN.objects.all()
+        if before is not None:
+            initial_qs = initial_qs.filter(created_at__lt=before)
+
+        total1 = initial_qs.filter(
             created_at__gt=self.start,
             created_at__lt=self.finish,
             mc_currency=settings.VALID_RECEIVE_CURRENCY
@@ -87,7 +101,7 @@ class DonationDrive(models.Model):
         if total1 is None:
             total1 = Decimal('0')
 
-        total2 = PayPalIPN.objects.filter(
+        total2 = initial_qs.filter(
             created_at__gt=self.start,
             created_at__lt=self.finish,
             settle_currency=settings.VALID_RECEIVE_CURRENCY
@@ -96,6 +110,11 @@ class DonationDrive(models.Model):
             total2 = Decimal('0')
 
         return total1 + total2
+
+    def get_contributions(self):
+        return Payment.objects.filter(
+            created__gt=self.start,
+            created__lt=self.finish)
 
     @property
     def fraction_raised(self):
@@ -110,11 +129,42 @@ class DonationDrive(models.Model):
 
     @property
     def target_reached(self):
-        return self.fraction_raised >= 1
+        return self.fraction_raised >= 1  # Always false if target==0
 
     def __unicode__(self):
         return "%s to %s" % (self.start.strftime("%Y-%m-%d"),
                              self.finish.strftime("%Y-%m-%d")
                              )
+
+
+def send_donation_drive_target_reached_emails(donation_drive):
+    from django.conf import settings
+
+    payments = donation_drive.get_contributions()
+    recipient_data = [{
+        'name': payment.account.email_name,
+        'email': payment.account.email,
+        'amount': payment.amount}
+        for payment in payments
+    ]
+
+    # Add one to the admins:
+    for name, email in settings.ADMINS:
+        recipient_data.append({
+            'name': name or "Admin",
+            'email': email,
+            'amount': None,
+        })
+    c_base = {
+        'donation_drive': donation_drive,
+        'other_contributors': len(payments) - 1,
+    }
+    for d in recipient_data:
+        context = c_base.copy()
+        context.update(d)
+        body = loader.render_to_string("learnscripture/donation_drive_target_reached_email.txt", context)
+        subject = "LearnScripture.net - donation target reached!"
+        mail.send_mail(subject, body, settings.SERVER_EMAIL, [d['email']])
+
 
 from payments import hooks
