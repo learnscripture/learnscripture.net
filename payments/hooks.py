@@ -5,7 +5,10 @@ from django.template import loader
 from paypal.standard.ipn.signals import payment_was_successful, payment_was_flagged
 
 from accounts.models import Account
+from payments.models import DonationDrive, send_donation_drive_target_reached_emails
 from payments.sign import unsign_payment_string
+from payments.signals import target_reached, donation_drive_contributed_to
+
 
 def site_address_url_start():
     """
@@ -19,7 +22,7 @@ def send_unrecognised_payment_email(ipn_obj):
     c = {
         'url_start': site_address_url_start(),
         'ipn_obj': ipn_obj,
-        }
+    }
 
     body = loader.render_to_string("learnscripture/unrecognised_payment_email.txt", c)
     subject = u"LearnScripture.net - unrecognised payment"
@@ -50,6 +53,8 @@ def paypal_payment_received(sender, **kwargs):
     else:
         unrecognised_payment(ipn_obj)
 
+    handle_possible_donation_drive_contribution(ipn_obj)
+
 
 def paypal_account_payment_received(ipn_obj, info):
     try:
@@ -59,5 +64,30 @@ def paypal_account_payment_received(ipn_obj, info):
         unrecognised_payment(ipn_obj)
 
 
+def handle_possible_donation_drive_contribution(ipn_obj):
+    drives = DonationDrive.objects.filter(
+        active=True,
+        start__lt=ipn_obj.created_at,
+        finish__gt=ipn_obj.created_at,
+    )
+    for d in drives:
+        donation_drive_contributed_to.send(d, ipn_obj=ipn_obj)
+
+
+def donation_drive_contributed_to_handler(sender, ipn_obj=None, **kwargs):
+    drive = sender
+    if drive.target > 0 and drive.target_reached:
+        if not (drive.get_amount_raised(before=ipn_obj.created_at) >= drive.target):
+            # We've just over the threshhold
+            target_reached.send(drive)
+
+
+def target_reached_handler(sender, **kwargs):
+    drive = sender
+    send_donation_drive_target_reached_emails(drive)
+
+
+donation_drive_contributed_to.connect(donation_drive_contributed_to_handler)
+target_reached.connect(target_reached_handler)
 payment_was_successful.connect(paypal_payment_received)
 payment_was_flagged.connect(unrecognised_payment)

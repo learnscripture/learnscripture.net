@@ -13,6 +13,7 @@ from accounts.models import Account
 from payments.hooks import paypal_payment_received
 from payments.models import DonationDrive
 from payments.sign import sign_payment_info
+from payments.signals import target_reached, donation_drive_contributed_to
 
 __all__ = ['PaymentTests', 'DonationDriveTests']
 
@@ -162,3 +163,68 @@ class DonationDriveTests(AccountTestMixin, TestCase):
 
         current3 = DonationDrive.objects.current()
         self.assertEqual(len(current3), 0)
+
+    def test_target_reached_signal(self):
+        # Test whether the donation_drive_contributed_to and target_reached fire
+        # at the right times.
+
+        DonationDrive.objects.create(
+            start=timezone.now() - timedelta(days=10),
+            finish=timezone.now() + timedelta(days=10),
+            active=True,
+            message_html="Please donate!",
+            hide_if_donated_days=4,
+            target=Decimal("20")
+        )
+
+        self.donation_drive_contributed_to_called = 0
+        self.target_reached_called = 0
+
+        def donation_drive_contributed_to_handler(sender, **kwargs):
+            self.donation_drive_contributed_to_called += 1
+            self.assertEqual(sender, DonationDrive.objects.get())
+
+        def target_reached_handler(sender, **kwargs):
+            self.target_reached_called += 1
+            self.assertEqual(sender, DonationDrive.objects.get())
+
+        donation_drive_contributed_to.connect(donation_drive_contributed_to_handler)
+        target_reached.connect(target_reached_handler)
+
+        # Make a payment
+        ipn_1 = good_payment_ipn(self.account, Decimal("15.00"))
+        paypal_payment_received(ipn_1)
+
+        self.assertEqual(self.donation_drive_contributed_to_called, 1)
+        self.assertEqual(self.target_reached_called, 0)
+
+        # Make another payment, taking up to target
+        ipn_2 = good_payment_ipn(self.account, Decimal("5.00"))
+        paypal_payment_received(ipn_2)
+
+        self.assertEqual(self.donation_drive_contributed_to_called, 2)
+        self.assertEqual(self.target_reached_called, 1)
+
+        # Make another payment, taking past target
+        ipn_3 = good_payment_ipn(self.account, Decimal("5.00"))
+        paypal_payment_received(ipn_3)
+
+        self.assertEqual(self.donation_drive_contributed_to_called, 3)
+        # Should only have been called the once
+        self.assertEqual(self.target_reached_called, 1)
+
+    def test_target_reached_emails(self):
+        # Check that we send out emails to donors when a target is reached.
+        DonationDrive.objects.create(
+            start=timezone.now() - timedelta(days=10),
+            finish=timezone.now() + timedelta(days=10),
+            active=True,
+            message_html="Please donate!",
+            hide_if_donated_days=4,
+            target=Decimal("20")
+        )
+        ipn_1 = good_payment_ipn(self.account, Decimal("20.00"))
+        paypal_payment_received(ipn_1)
+
+        self.assertTrue(any(m.subject == "LearnScripture.net - donation target reached!"
+                            for m in mail.outbox))

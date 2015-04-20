@@ -390,7 +390,7 @@ def send_payment_received_email(account, payment):
         'site': get_current_site(None),
         'payment': payment,
         'account': account,
-        }
+    }
 
     body = loader.render_to_string("learnscripture/payment_received_email.txt", c)
     subject = u"LearnScripture.net - donation received"
