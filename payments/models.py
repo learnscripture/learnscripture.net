@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -74,14 +75,27 @@ class DonationDrive(models.Model):
 
     @cached_property
     def amount_raised(self):
-        total = Payment.objects.filter(
-            created__gt=self.start,
-            created__lt=self.finish,
-        ).aggregate(models.Sum('amount'))['amount__sum']
-        if total is None:
-            return Decimal('0')
-        else:
-            return total
+        # Use PayPalIPN instead of Payment, so that we include donations that
+        # are not assigned to account for whatever reason.
+
+        # This means we need to handle non-GBP payments as well.
+        total1 = PayPalIPN.objects.filter(
+            created_at__gt=self.start,
+            created_at__lt=self.finish,
+            mc_currency=settings.VALID_RECEIVE_CURRENCY
+        ).aggregate(models.Sum('mc_gross'))['mc_gross__sum']
+        if total1 is None:
+            total1 = Decimal('0')
+
+        total2 = PayPalIPN.objects.filter(
+            created_at__gt=self.start,
+            created_at__lt=self.finish,
+            settle_currency=settings.VALID_RECEIVE_CURRENCY
+        ).aggregate(models.Sum('settle_amount'))['settle_amount__sum']
+        if total2 is None:
+            total2 = Decimal('0')
+
+        return total1 + total2
 
     @property
     def fraction_raised(self):
