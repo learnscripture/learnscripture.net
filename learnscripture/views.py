@@ -1144,7 +1144,7 @@ def donation_paypal_dict(account, url_start):
         "currency_code": "GBP",
         "no_note": "1",
         "no_shipping": "1",
-        }
+    }
 
 
 def paypal_url_start_for_request(request):

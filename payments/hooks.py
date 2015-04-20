@@ -41,6 +41,10 @@ def paypal_payment_received(sender, **kwargs):
         unrecognised_payment(ipn_obj)
         return
 
+    if settings.VALID_RECEIVE_CURRENCY not in (ipn_obj.mc_currency, ipn_obj.settle_currency):
+        unrecognised_payment(ipn_obj)
+        return
+
     if 'account' in info:
         paypal_account_payment_received(ipn_obj, info)
     else:
