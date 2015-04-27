@@ -50,6 +50,7 @@ class PreferencesForm(forms.ModelForm):
                   'touchscreen_testing_method',
                   'enable_animations',
                   'enable_sounds',
+                  'enable_vibration',
                   'interface_theme']
 
 PreferencesForm.base_fields['default_bible_version'].required = True
