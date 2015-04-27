@@ -80,6 +80,11 @@ var learnscripture = (function (learnscripture, $) {
         if (window.androidlearnscripture &&
             window.androidlearnscripture.setModalIsVisible) {
             window.androidlearnscripture.setModalIsVisible(true);
+        } else {
+            if ('history' in window) {
+                var modalId = modal.attr('id');
+                window.history.pushState({'modal': modalId}, '', '#' + modalId);
+            }
         }
     });
 
@@ -87,12 +92,22 @@ var learnscripture = (function (learnscripture, $) {
         if (window.androidlearnscripture &&
             window.androidlearnscripture.setModalIsVisible) {
             window.androidlearnscripture.setModalIsVisible(false);
+        } else {
+            if ('history' in window) {
+                window.history.back();
+            }
         }
-
     });
 
     $(window).bind('resize', function (ev) {
         adjustVisibleModals();
+    });
+
+    $(window).bind('popstate', function (ev) {
+        var state = ev.originalEvent.state;
+        if (state == null || state.modal == undefined) {
+            hideModal();
+        }
     });
 
     // Export:
