@@ -204,7 +204,9 @@ var learnscripture = (function (learnscripture, $) {
     };
 
     var deviceCanVibrate = function () {
-        return ("vibrate" in navigator);
+        return (("vibrate" in navigator)
+                || (window.androidlearnscripture &&
+                    window.androidlearnscripture.vibrate));
     }
 
     // Export:

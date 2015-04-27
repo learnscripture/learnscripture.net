@@ -330,10 +330,15 @@ var learnscripture = (function (learnscripture, $) {
         if (!preferences.enableVibration) {
             return;
         }
-        if (!("vibrate" in navigator)) {
-            return;
+        if (window.androidlearnscripture &&
+            window.androidlearnscripture.vibrate) {
+            window.androidlearnscripture.vibrate(length);
+        } else {
+            if (!("vibrate" in navigator)) {
+                return;
+            }
+            navigator.vibrate(length);
         }
-        navigator.vibrate(length);
     }
 
     var indicateMistake = function (mistakes, maxMistakes) {
