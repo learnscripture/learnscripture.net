@@ -1,12 +1,15 @@
 from datetime import datetime
 import os
 import time
+import urlparse
 
-from django.utils import timezone
+from django.http import HttpResponseRedirect
 from django.conf import settings
 from django.core.urlresolvers import resolve, Resolver404
+from django.utils import timezone
 
 from app_metrics.utils import metric
+
 
 class IdentityMiddleware(object):
     def process_request(self, request):
@@ -49,6 +52,12 @@ class TokenLoginMiddleware(object):
         # Need to frig it because we are not going to call authenticate.
         account.backend = settings.AUTHENTICATION_BACKENDS[0]
         login(request, account)
+
+        # Redirect to hide access token
+        d = request.GET.copy()
+        del d['t']
+        url = urlparse.urlunparse(('', '', request.path, '', d.urlencode(), ''))
+        return HttpResponseRedirect(url)
 
 
 class StatsMiddleware(object):
