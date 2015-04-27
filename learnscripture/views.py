@@ -761,6 +761,15 @@ def create_or_edit_set(request, set_type=None, slug=None):
             form_is_valid = False
 
         if form_is_valid:
+            # If all have a 'break' applied, (excluding first, which never has
+            # one) then the user clearly doesn't understand the concept of
+            # section breaks:
+            tmp_verse_list = add_passage_breaks(mk_verse_list(ref_list,
+                                                              version.get_verses_by_reference_bulk(ref_list_raw)),
+                                                breaks)
+            if all(v.break_here for v in tmp_verse_list[1:]):
+                breaks = ""
+
             verse_set = form.save(commit=False)
             verse_set.set_type = set_type
             if verse_set.created_by_id is None:
