@@ -317,6 +317,7 @@ class SetPreferences(ApiView):
         'touchscreen_testing_method',
         'enable_animations',
         'enable_sounds',
+        'enable_vibration',
         'interface_theme',
         'preferences_setup',
     ]

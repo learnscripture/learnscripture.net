@@ -203,6 +203,10 @@ var learnscripture = (function (learnscripture, $) {
         return navigator.userAgent.toLowerCase().indexOf("android") > -1;
     };
 
+    var deviceCanVibrate = function () {
+        return ("vibrate" in navigator);
+    }
+
     // Export:
     learnscripture.handleFormValidationErrors = handleFormValidationErrors;
     learnscripture.displaySimpleAjaxError = displaySimpleAjaxError;
@@ -214,6 +218,7 @@ var learnscripture = (function (learnscripture, $) {
     learnscripture.ajaxRetrySucceeded = ajaxRetrySucceeded;
     learnscripture.isTouchDevice = isTouchDevice;
     learnscripture.isAndroid = isAndroid;
+    learnscripture.deviceCanVibrate = deviceCanVibrate;
     learnscripture.indicateLoading = indicateLoading;
     learnscripture.hideLoadingIndicator = hideLoadingIndicator;
     return learnscripture;
@@ -233,6 +238,10 @@ $(document).ready(function () {
         $('#id_desktop_testing_method').parent().parent().hide();
     } else {
         $('#id_touchscreen_testing_method').parent().parent().hide();
+    }
+
+    if (!learnscripture.deviceCanVibrate()) {
+        $('#id_enable_vibration').closest('ul').parent().hide();
     }
 
     // Scrolling of #id-ajax-status

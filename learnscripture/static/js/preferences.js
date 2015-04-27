@@ -37,6 +37,7 @@ var learnscripture =
                         data.touchscreenTestingMethod = data.touchscreen_testing_method;
                         data.enableAnimations = data.enable_animations;
                         data.enableSounds = data.enable_sounds;
+                        data.enableVibration = data.enable_vibration;
                         data.interfaceTheme = data.interface_theme;
                         data.preferencesSetup = data.preferences_setup;
 

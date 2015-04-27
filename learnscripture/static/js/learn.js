@@ -326,6 +326,16 @@ var learnscripture = (function (learnscripture, $) {
         learnscripture.doBeep(frequency, length);
     };
 
+    var vibrate = function (length) {
+        if (!preferences.enableVibration) {
+            return;
+        }
+        if (!("vibrate" in navigator)) {
+            return;
+        }
+        navigator.vibrate(length);
+    }
+
     var indicateMistake = function (mistakes, maxMistakes) {
         var msg = "Try again! (" + mistakes.toString() + "/" + maxMistakes.toString() + ")";
         flashMsg(testingStatus.attr({
@@ -333,6 +343,7 @@ var learnscripture = (function (learnscripture, $) {
             }).text(msg),
             getWordAt(currentWordIndex));
         beep(330, 0.10);
+        vibrate(25);
     };
 
     var indicateFail = function () {
@@ -342,6 +353,7 @@ var learnscripture = (function (learnscripture, $) {
             'class': 'incorrect'
         }).text("Incorrect"), word);
         beep(220, 0.10);
+        vibrate(50);
     };
 
     // ========== Actions completed =============

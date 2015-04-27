@@ -424,6 +424,7 @@ class Identity(models.Model):
                                                                   default=TestingMethod.ON_SCREEN)
     enable_animations = models.BooleanField(blank=True, default=True)
     enable_sounds = models.BooleanField(blank=True, default=False)
+    enable_vibration = models.BooleanField("Vibrate on mistakes", blank=True, default=True)
     interface_theme = models.CharField(max_length=30, choices=THEMES,
                                        default=DEFAULT_THEME)
     referred_by = models.ForeignKey(Account, null=True, default=None,
