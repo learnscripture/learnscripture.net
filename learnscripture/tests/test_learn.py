@@ -29,11 +29,10 @@ class LearnTests(LiveServerTests):
 
     def choose_verse_set(self, name):
         verse_set = VerseSet.objects.get(name=name)
-        driver = self.driver
         self.get_url('choose')
         self.click("#id-learn-verseset-btn-%d" % verse_set.id)
         self.set_preferences()
-        self.assertTrue(driver.current_url.endswith('/learn/'))
+        self.assertTrue(self.current_url.endswith('/learn/'))
         return verse_set
 
     def add_verse_set(self, name):
@@ -182,7 +181,6 @@ class LearnTests(LiveServerTests):
     def test_revise_passage_mixed(self):
         # Test revising a passage when some verses are to be tested and others
         # are just being read.
-        driver = self.driver
         identity, account = self.create_account()
         self.login(account)
 
@@ -208,7 +206,7 @@ class LearnTests(LiveServerTests):
         btn = self.find("#id-context-next-verse-btn")
         for i in range(0, 5):
             self.click(btn)
-        self.assertTrue(driver.current_url.endswith('/dashboard/'))
+        self.assertTrue(self.current_url.endswith('/dashboard/'))
 
     def test_skip_verse(self):
         self.choose_verse_set('Bible 101')

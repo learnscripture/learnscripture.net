@@ -48,7 +48,7 @@ class GroupPageTests(LiveServerTests):
         self.assertNotIn("My group", driver.page_source)
         self.click(driver.find_element_by_xpath('//a[text() = "Another group"]'))
 
-        self.assertTrue(driver.current_url.endswith('/groups/another-group/'))
+        self.assertTrue(self.current_url.endswith('/groups/another-group/'))
 
         self.click('input[name="join"]')
         self.assertTrue(public_group.members.filter(id=account.id).exists())
@@ -249,7 +249,6 @@ class GroupCreatePageTests(LiveServerTests):
         _, invited_account = self.create_account(username='invitee',
                                                  email='i@example.com')
 
-        driver = self.driver
         self.get_url('create_group')
         self.send_keys("#id_name", "My group")
         self.click("#id_public")
@@ -265,7 +264,7 @@ class GroupCreatePageTests(LiveServerTests):
         time.sleep(0.2)
         self.click('input[name="save"]')
 
-        self.assertTrue(driver.current_url.endswith('/my-group/'))
+        self.assertTrue(self.current_url.endswith('/my-group/'))
 
         g = Group.objects.get(slug='my-group')
         self.assertEqual(list(g.invited_users()), [invited_account])

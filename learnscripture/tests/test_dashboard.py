@@ -19,13 +19,11 @@ class DashboardTests(LiveServerTests):
                 'test_catechisms.json']
 
     def test_redirect(self):
-        driver = self.driver
         self.get_url('dashboard')
-        self.assertTrue(driver.current_url.endswith(reverse('login')))
+        self.assertTrue(self.current_url.endswith(reverse('login')))
 
     def _assert_learning_reference(self, ref):
-        driver = self.driver
-        self.assertTrue(driver.current_url.endswith(reverse('learn')))
+        self.assertTrue(self.current_url.endswith(reverse('learn')))
         self.assertEqual(ref, self.find("#id-verse-title").text)
 
     def _click_clear_learning_queue_btn(self, verse_set_id):
@@ -71,7 +69,7 @@ class DashboardTests(LiveServerTests):
         self._click_clear_learning_queue_btn(vs.id)
 
         # Since we cleared the queue, shouldn't have John 14:6 now
-        self.assertTrue(driver.current_url.endswith(reverse('dashboard')))
+        self.assertTrue(self.current_url.endswith(reverse('dashboard')))
         self.assertNotIn('John 14:6', driver.page_source)
 
         # but should still have Psalm 23:2
@@ -101,7 +99,7 @@ class DashboardTests(LiveServerTests):
 
         # Test 'Continue learning' button
         self.click('#id-learnpassage-btn-%d' % vs.id)
-        self.assertTrue(driver.current_url.endswith(reverse('learn')))
+        self.assertTrue(self.current_url.endswith(reverse('learn')))
         self.assertEqual(u"Psalm 23:1", self.find("#id-verse-title").text)
 
         # Test 'Cancel learning' button
@@ -120,7 +118,7 @@ class DashboardTests(LiveServerTests):
                       driver.page_source)
 
         self.click('input[name=learncatechismqueue]')
-        self.assertTrue(driver.current_url.endswith(reverse('learn')))
+        self.assertTrue(self.current_url.endswith(reverse('learn')))
         self.assertEqual(u"Q1. What is the chief end of man?", self.find("#id-verse-title").text)
 
         i.record_verse_action('Q1', 'WSC', StageType.TEST, accuracy=1.0)
@@ -132,7 +130,7 @@ class DashboardTests(LiveServerTests):
         self.confirm()
 
         # Since we cleared the queue, shouldn't have anything about catechisms now
-        self.assertTrue(driver.current_url.endswith(reverse('dashboard')))
+        self.assertTrue(self.current_url.endswith(reverse('dashboard')))
         self.assertNotIn('catechism', driver.page_source)
 
     def test_revise_one_section(self):
@@ -172,7 +170,7 @@ class DashboardTests(LiveServerTests):
         self.wait_until_loaded('body')
 
         # Should be back at dashboard
-        self.assertTrue(driver.current_url.endswith(reverse('dashboard')))
+        self.assertTrue(self.current_url.endswith(reverse('dashboard')))
 
     def test_home_dashboard_routing(self):
         Identity.objects.all().delete()
@@ -182,7 +180,7 @@ class DashboardTests(LiveServerTests):
         e = self.find('a.btn.large')
         self.assertTrue(e.get_attribute('href').endswith(reverse('choose')))
         self.click(e)
-        self.assertTrue(driver.current_url.endswith(reverse('choose')))
+        self.assertTrue(self.current_url.endswith(reverse('choose')))
         # Getting this far shouldn't create an Identity
         self.assertEqual(Identity.objects.count(), 0)
 

@@ -53,7 +53,7 @@ class UserVersesPageTests(LiveServerTests):
         # Click "practise section":
         self.click(btn2)
 
-        self.assertTrue(driver.current_url.endswith(reverse('learn')))
+        self.assertTrue(self.current_url.endswith(reverse('learn')))
         self.assertIn("Psalm 23:1", driver.page_source)
 
         # Should be in 'practise' mode
@@ -68,4 +68,4 @@ class UserVersesPageTests(LiveServerTests):
         self.click("#id-finish-btn")
 
         # Should have gone back to where we came from
-        self.assertTrue(driver.current_url.endswith(reverse('user_verses')))
+        self.assertTrue(self.current_url.endswith(reverse('user_verses')))
