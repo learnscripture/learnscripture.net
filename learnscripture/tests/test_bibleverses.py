@@ -49,10 +49,10 @@ class VerseTests(TestCase):
                                     version=version).count(),
             0)
 
+
 class VersionTests(TestCase):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
-
 
     def setUp(self):
         super(VersionTests, self).setUp()
@@ -95,7 +95,7 @@ class VersionTests(TestCase):
                 version.verse_set.get(reference="Genesis 1:2"),
                 version.verse_set.get(reference="Genesis 1:3"),
                 version.verse_set.get(reference="Genesis 1:4"),
-                ],
+            ],
             version.get_verse_list("Genesis 1:2-4"))
 
     def test_empty(self):
@@ -118,7 +118,6 @@ class VersionTests(TestCase):
         self.assertEqual(l2['Genesis 1:2-3'].text, l1['Genesis 1:2'].text + ' ' + l1['Genesis 1:3'].text)
 
         self.assertEqual(l2['Genesis 1:2-3'].chapter_number, l1['Genesis 1:2'].chapter_number)
-
 
     def _gen_1_1_suggestions(self):
         return \
@@ -313,7 +312,7 @@ class VersionTests(TestCase):
                          [[u'his', 1.0, 1], [u'all', 0.740, 0], [u'a', 0.653, 0]])
 
         version.record_word_mistakes('Genesis 1:2-3', [[1, 'they'],
-                                                       [30, 'he']]) # 29 words in Gen 1:2, this is word at index 1 in Gen 1:3
+                                                       [30, 'he']])  # 29 words in Gen 1:2, this is word at index 1 in Gen 1:3
         self.assertEqual(WordSuggestionData.objects.get(reference='Genesis 1:2', version_slug='KJV').suggestions[1],
                          [[u'he', 1.0, 0], [u'they', 0.593, 1], [u'thou', 0.403, 0]])
         self.assertEqual(WordSuggestionData.objects.get(reference='Genesis 1:3', version_slug='KJV').suggestions[1],
@@ -334,7 +333,6 @@ class GetPassageSectionsTests(unittest2.TestCase):
         self.assertEqual([[uvs.reference for uvs in section]
                           for section in sections],
                          [["Genesis 1:1", "Genesis 1:2"]])
-
 
     def test_simple_verse_list(self):
         uvs_list = [MockUVS('Genesis 1:1'),

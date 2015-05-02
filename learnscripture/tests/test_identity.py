@@ -33,8 +33,7 @@ class IdentityTests(AccountTestMixin, TestCase):
         self.assertEqual(set(u.reference for u in uvss),
                          set(["John 3:16", "John 14:6"]))
 
-
-        vs1 = VerseSet.objects.get(name='Bible 101') # fresh
+        vs1 = VerseSet.objects.get(name='Bible 101')  # fresh
         # Having already created the UserVerseStatuses, this should be an
         # efficient operation:
         with self.assertNumQueries(FuzzyInt(3, 7)):
@@ -47,7 +46,6 @@ class IdentityTests(AccountTestMixin, TestCase):
             # session.set_verse_statuses will use all these:
             [(uvs.reference, uvs.verse_set_id)
              for uvs in uvss]
-
 
     def test_record_read(self):
         i = self.create_identity(version_slug='NET')
@@ -71,7 +69,6 @@ class IdentityTests(AccountTestMixin, TestCase):
                                    version__slug='NET')
         # first_seen field should not have changed
         self.assertEqual(uvs.first_seen, first_seen)
-
 
     def test_add_verse_set_progress_and_choose_again(self):
         """
@@ -245,7 +242,7 @@ class IdentityTests(AccountTestMixin, TestCase):
         # that.
 
         # Fix data:
-        i.verse_statuses.all().update(last_tested = timezone.now() - timedelta(0.99/24))
+        i.verse_statuses.all().update(last_tested=timezone.now() - timedelta(0.99 / 24))
 
         self.assertEqual([], list(i.bible_verse_statuses_for_revising()))
 
@@ -259,7 +256,6 @@ class IdentityTests(AccountTestMixin, TestCase):
         self.assertEqual(verse_sets[0].id, vs1.id)
         self.assertEqual(verse_sets[0].tested_total, 1)
         self.assertEqual(verse_sets[0].untested_total, 5)
-
 
         # Put it back so that it ought to be up for testing.
         i.verse_statuses.update(last_tested=timezone.now() - timedelta(10))
@@ -284,7 +280,7 @@ class IdentityTests(AccountTestMixin, TestCase):
             i.verse_statuses.filter(reference=ref).update(
                 last_tested=F('last_tested') - timedelta(7 - vn),
                 next_test_due=F('next_test_due') - timedelta(7 - vn)
-                )
+            )
 
             # Now test again, for all but the first
             if vn != 1:
@@ -377,7 +373,7 @@ class IdentityTests(AccountTestMixin, TestCase):
         i.verse_statuses.filter(reference="Psalm 23:3").update(
             last_tested=now - timedelta(1000),
             next_test_due=now - timedelta(500)
-            )
+        )
 
         l = i.verse_statuses_for_passage(vs1.id)
         for uvs in l:
@@ -387,7 +383,7 @@ class IdentityTests(AccountTestMixin, TestCase):
     def test_get_next_section(self):
         i = self.create_identity(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Psalm 23')
-        vs1.breaks = "3,5" # break at v3 and v5 - unrealistic!
+        vs1.breaks = "3,5"  # break at v3 and v5 - unrealistic!
         vs1.save()
         i.add_verse_set(vs1)
 
@@ -397,7 +393,7 @@ class IdentityTests(AccountTestMixin, TestCase):
             i.verse_statuses.filter(reference=ref).update(
                 last_tested=F('last_tested') - timedelta(10),
                 next_test_due=F('next_test_due') - timedelta(10),
-                )
+            )
 
         # Shouldn't be splittable yet, since strength will be below threshold
         vss = i.passages_for_revising()
@@ -412,7 +408,7 @@ class IdentityTests(AccountTestMixin, TestCase):
             # Put each 1 minute apart, to simulate having tested the whole
             # group together.
             for uvs in i.verse_statuses.filter(reference=ref):
-                uvs.last_tested = timezone.now() - timedelta(200 - (vn * 60.0)/(3600.0*24))
+                uvs.last_tested = timezone.now() - timedelta(200 - (vn * 60.0) / (3600.0 * 24))
                 uvs.strength = 0.55
                 uvs.next_test_due = accounts.memorymodel.next_test_due(uvs.last_tested, uvs.strength)
                 uvs.save()
@@ -429,7 +425,7 @@ class IdentityTests(AccountTestMixin, TestCase):
 
         # uvss should be first two verses only:
         self.assertEqual(["Psalm 23:1", "Psalm 23:2"],
-                          [uvs.reference for uvs in uvss1])
+                         [uvs.reference for uvs in uvss1])
 
         # Now if we learn these two...
         for uvs in uvss1:
@@ -463,7 +459,6 @@ class IdentityTests(AccountTestMixin, TestCase):
         self.assertEqual([False, True, True],
                          [uvs.needs_testing for uvs in uvss3])
 
-
         # Learn next two.
         time.sleep(1)
         for uvs in uvss3:
@@ -474,13 +469,12 @@ class IdentityTests(AccountTestMixin, TestCase):
         uvss4 = i.get_next_section(uvss4, vs1)
 
         self.assertEqual(["Psalm 23:1", "Psalm 23:2"],
-                          [uvs.reference for uvs in uvss4])
-
+                         [uvs.reference for uvs in uvss4])
 
     def test_slim_passage_for_revising(self):
         i = self.create_identity(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Psalm 23')
-        vs1.breaks = "3,5" # break at v3 and v5
+        vs1.breaks = "3,5"  # break at v3 and v5
         vs1.save()
         i.add_verse_set(vs1)
 
@@ -490,8 +484,8 @@ class IdentityTests(AccountTestMixin, TestCase):
 
             # Make one of them needing testing
         i.verse_statuses.filter(reference="Psalm 23:5").update(
-                next_test_due=timezone.now() - timedelta(1)
-                )
+            next_test_due=timezone.now() - timedelta(1)
+        )
 
         uvss = i.verse_statuses_for_passage(vs1.id)
         self.assertEqual(len(uvss), 6)
@@ -499,7 +493,6 @@ class IdentityTests(AccountTestMixin, TestCase):
         uvss = i.slim_passage_for_revising(uvss, vs1)
         self.assertEqual([uvs.reference for uvs in uvss],
                          ["Psalm 23:4", "Psalm 23:5", "Psalm 23:6"])
-
 
     def test_get_verse_statuses(self):
         i = self.create_identity()
@@ -533,7 +526,6 @@ class IdentityTests(AccountTestMixin, TestCase):
         self.assertEqual(i.verse_statuses.filter(reference='Psalm 23:1').count(), 2)
 
         self.assertFalse(0.0 in [uvs.strength for uvs in i.verse_statuses.filter(reference='Psalm 23:1')])
-
 
     def test_verses_started_milestone_event(self):
         # This reproduces a bit of the logic from ActionCompleteHandler in order
@@ -569,7 +561,7 @@ class IdentityTests(AccountTestMixin, TestCase):
             i.verse_statuses.filter(reference=ref).update(
                 strength=accounts.memorymodel.LEARNT - 0.001,
                 last_tested=timezone.now() - timedelta(100)
-                )
+            )
             # Final test, moving to above LEARNT
             action_change = i.record_verse_action(ref, 'KJV', StageType.TEST, 1)
             i.award_action_points(ref,
@@ -652,7 +644,6 @@ class IdentityTests(AccountTestMixin, TestCase):
             i.verse_statuses.filter(reference='John 3:16',
                                     version=version).count(),
             0)
-
 
     def test_consistent_learner_award(self):
         import awards.tasks

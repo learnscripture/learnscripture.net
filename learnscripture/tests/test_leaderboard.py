@@ -45,7 +45,7 @@ class LeaderboardTests(TestCase):
         self.assertNotContains(resp, self.a2.username)
 
     def test_get_thisweek(self):
-        resp = self.client.get(reverse('group_leaderboard', args=(self.group.slug,)), {'thisweek':'1'})
+        resp = self.client.get(reverse('group_leaderboard', args=(self.group.slug,)), {'thisweek': '1'})
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, self.a1.username)
         self.assertNotContains(resp, self.a2.username)
@@ -85,7 +85,6 @@ class VerseCountTests(AccountTestMixin, TestCase):
         i.record_verse_action("Psalm 23:1", version.slug, StageType.TEST,
                               accuracy=1.0)
         dt = i.verse_statuses.filter(reference="Psalm 23:1")[0].last_tested.date()
-
 
         self.assertEqual(get_verses_started_counts([i.id])[i.id], 1)
 

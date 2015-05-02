@@ -221,8 +221,10 @@ class LiveServerTests(AccountTestMixin, StaticLiveServerTestCase):
         )
 
     def is_element_present(self, how, what):
-        try: self.driver.find_element(by=how, value=what)
-        except NoSuchElementException: return False
+        try:
+            self.driver.find_element(by=how, value=what)
+        except NoSuchElementException:
+            return False
         return True
 
     def set_preferences(self):
@@ -254,4 +256,3 @@ class LiveServerTests(AccountTestMixin, StaticLiveServerTestCase):
         self.find("#id_login-password").clear()
         self.send_keys("#id_login-password", "password")
         self.click("input[name=signin]")
-

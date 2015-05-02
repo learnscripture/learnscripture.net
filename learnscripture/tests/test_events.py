@@ -28,7 +28,7 @@ class EventTests(AccountTestMixin, TestCase):
             author=author_account,
             event=orig_event,
             message="hello",
-            )
+        )
         event = Event.objects.get(event_type=EventType.NEW_COMMENT)
         self.assertEqual(event.get_absolute_url(),
                          '/activity/%s/#comment-%s' % (orig_event.id,
@@ -38,11 +38,12 @@ class EventTests(AccountTestMixin, TestCase):
 
         def assert_originator_notification(account, count):
             self.assertEqual(len([n for n in account.identity.notices.all()
-                              if "You have new" in n.message_html]),
+                                  if "You have new" in n.message_html]),
                              count)
+
         def assert_contributor_notification(account, count):
             self.assertEqual(len([n for n in account.identity.notices.all()
-                              if "There are" in n.message_html]),
+                                  if "There are" in n.message_html]),
                              count)
 
         # There should also be a notification
@@ -56,8 +57,7 @@ class EventTests(AccountTestMixin, TestCase):
             author=event_account,
             event=orig_event,
             message="Thanks!"
-            )
-
+        )
 
         # We should not have duplicated notifications for event_account
         assert_originator_notification(event_account, 1)
@@ -76,14 +76,13 @@ class EventTests(AccountTestMixin, TestCase):
             author=author_account2,
             event=orig_event,
             message="another hello"
-            )
+        )
 
         assert_originator_notification(event_account, 1)
         assert_contributor_notification(event_account, 0)
 
         assert_originator_notification(author_account, 0)
         assert_contributor_notification(author_account, 1)
-
 
     def test_dashboard_stream(self):
         _, account1 = self.create_account(username="1")
@@ -97,7 +96,7 @@ class EventTests(AccountTestMixin, TestCase):
             created=now,
             weight=10,
             account=account1,
-            )
+        )
         e2 = Event.objects.create(
             message_html="Event 2",
             event_data={},
@@ -105,7 +104,7 @@ class EventTests(AccountTestMixin, TestCase):
             created=now,
             weight=11,
             account=account1,
-            )
+        )
         e3 = Event.objects.create(
             message_html="Event 3",
             event_data={},
@@ -113,7 +112,7 @@ class EventTests(AccountTestMixin, TestCase):
             created=now,
             weight=11,
             account=account2,
-            )
+        )
 
         group = AutoFixture(Group).create(1)[0]
         group.add_user(account2)

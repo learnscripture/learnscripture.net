@@ -72,7 +72,7 @@ class CreateSetTests(LiveServerTests):
 
             self.click("#id-save-btn")
 
-            self.assertIn("Verse set 'My set' saved", driver.page_source) # Checks we didn't get 500
+            self.assertIn("Verse set 'My set' saved", driver.page_source)  # Checks we didn't get 500
 
             if ref not in [r for r, i in current_ref_list]:
                 current_ref_list.append((ref, len(current_ref_list)))
@@ -86,7 +86,6 @@ class CreateSetTests(LiveServerTests):
         _add_new_ref("Genesis 1:6")
         _add_new_ref("Genesis 1:7")
         _add_new_ref("Genesis 1:7")
-
 
     def test_forget_name(self):
         """

@@ -40,7 +40,7 @@ class LearnTests(LiveServerTests):
 
     def add_verse_set(self, name):
         verse_set = VerseSet.objects.get(name=name)
-        self.get_url('preferences') # ensure we have an Identity
+        self.get_url('preferences')  # ensure we have an Identity
         self.set_preferences()
         identity = self._get_current_identity()
         identity.add_verse_set(verse_set, identity.default_bible_version)
@@ -62,9 +62,9 @@ class LearnTests(LiveServerTests):
         word_count = len(self.kjv_john_3_16.strip().split())
         # This is the accuracy that will be recorded, given the
         # algo in _type_john_3_16_kjv and learn.js
-        actual_accuracy = math.floor(word_count * accuracy)/word_count
+        actual_accuracy = math.floor(word_count * accuracy) / word_count
 
-        points_word_count = word_count - 3 # Don't get points for the reference
+        points_word_count = word_count - 3  # Don't get points for the reference
         return math.floor(Scores.POINTS_PER_WORD * points_word_count * actual_accuracy)
 
     def test_save_strength(self):
@@ -74,7 +74,7 @@ class LearnTests(LiveServerTests):
         # Preconditions - should have been set up by choose_verse_set
         self.assertEqual(verse_set.verse_choices.count(), identity.verse_statuses.count())
         self.assertTrue(all(uvs.strength == Decimal('0.0') and
-                            uvs.last_tested == None and
+                            uvs.last_tested is None and
                             uvs.memory_stage == MemoryStage.ZERO
                             for uvs in identity.verse_statuses.all()))
 
@@ -116,7 +116,7 @@ class LearnTests(LiveServerTests):
 
         # Check the score
         points_for_verse = (
-            (len(self.psalm_23_1_2.strip().split()) - 4) # don't count reference
+            (len(self.psalm_23_1_2.strip().split()) - 4)  # don't count reference
             * Scores.POINTS_PER_WORD)
         self.assertEqual(Account.objects.get(id=account.id).total_score.points,
                          points_for_verse +
@@ -156,7 +156,6 @@ class LearnTests(LiveServerTests):
         # Go back to dashboard, and should see message
         self.get_url('dashboard')
         self.assertIn("You've earned a new badge", driver.page_source)
-
 
     def test_change_version_passage(self):
         self.choose_verse_set('Psalm 23')
@@ -287,8 +286,7 @@ class LearnTests(LiveServerTests):
         uvs_queryset.update(
             last_tested=F('last_tested') - timedelta(100),
             next_test_due=F('next_test_due') - timedelta(100),
-            )
-
+        )
 
     def test_finish_button(self):
         self.add_verse_set('Bible 101')
@@ -312,7 +310,6 @@ class LearnTests(LiveServerTests):
         self.get_url('learn')
 
         self.assertTrue(self.find("#id-no-verse-queue").is_displayed())
-
 
     def test_more_practice(self):
         # tests that the 'more practice' button appears, and works
@@ -348,7 +345,7 @@ class LearnTests(LiveServerTests):
         # We should get points for each time revised (and award)
         j316_score_1 = self._score_for_j316(accuracy=0.5)
         j316_score_2 = self._score_for_j316(accuracy=0.95)
-        account = Account.objects.get(id=account.id) # refresh
+        account = Account.objects.get(id=account.id)  # refresh
         self.assertEqual(account.total_score.points,
                          (j316_score_1
                           + j316_score_2)
