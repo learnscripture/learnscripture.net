@@ -72,6 +72,10 @@ class AccountManager(UserManager):
     def active(self):
         return self.get_query_set().filter(is_active=True)
 
+    def send_reminders_to(self):
+        return self.active().filter(remind_after__gt=0,
+                                    email_bounced__isnull=True)
+
 
 class Account(AbstractBaseUser):
     username = models.CharField(max_length=100, blank=False, unique=True)

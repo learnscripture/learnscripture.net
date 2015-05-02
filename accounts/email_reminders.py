@@ -18,10 +18,11 @@ from accounts.tokens import get_login_token
 import logging
 logger = logging.getLogger(__name__)
 
+
 def send_email_reminders():
     current_site = get_current_site(None)
     # remind_after == 0 mean 'never'
-    for account in Account.objects.active().filter(remind_after__gt=0).select_related('identity'):
+    for account in Account.objects.send_reminders_to().select_related('identity'):
         # The whole loop could take some time, so we put this line inside loop:
         n = timezone.now()
 
