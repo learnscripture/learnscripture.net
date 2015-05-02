@@ -79,3 +79,10 @@ class AccountDetailsForm(forms.ModelForm):
                   "is_under_13",
                   "remind_after",
                   "remind_every"]
+
+    def save(self, *args, **kwargs):
+        old_email = Account.objects.get(id=self.instance.id).email
+        super(AccountDetailsForm, self).save(*args, **kwargs)
+        if self.instance.email != old_email:
+            self.instance.email_bounced = None
+            self.instance.save()
