@@ -43,12 +43,16 @@ var learnscripture =
 
                         setPreferences(data);
 
-                        if (afterPreferencesSave !== null) {
-                            afterPreferencesSave();
-                        }
-                        // This must come after, because the afterPreferencesSave callback
-                        // will be removed after the modal is hidden.
+                        // Take a reference now, because after hiding the modal
+                        // afterPreferencesSave is set to null
+                        var afterSaveCallback = afterPreferencesSave;
+
                         $('#id-preferences-form').modal('hide');
+
+                        if (afterSaveCallback !== null) {
+                            afterSaveCallback();
+                        }
+
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
                         if (jqXHR.status === 400) {
