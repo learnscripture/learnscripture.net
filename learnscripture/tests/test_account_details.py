@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 from django.core.urlresolvers import reverse
+from django.utils import timezone
 
 from accounts.models import Account
 from .base import WebTestBase
@@ -24,5 +25,19 @@ class AccountDetailsTests(WebTestBase):
         self.fill_in_login_form(account)
         self.assertTrue(self.current_url.endswith(reverse('account_details')))
 
+    def test_reset_email_bounced(self):
+        identity, account = self.create_account()
+        account.email_bounced = timezone.now()
+        account.save()
+        self.login(account)
+        self.get_url('account_details')
+        self.fill_input("#id_first_name", "Fred")
+        self.submit("#id-save-btn")
+        self.assertEqual(Account.objects.get(id=account.id).first_name, "Fred")
+        self.assertNotEqual(Account.objects.get(id=account.id).email_bounced, None)
 
-# TODO - test for changing email address - should reset email_bounced
+        self.fill_input('#id_email', "a_different_email@gmail.com")
+        self.submit("#id-save-btn")
+
+        self.assertEqual(Account.objects.get(id=account.id).email, "a_different_email@gmail.com")
+        self.assertEqual(Account.objects.get(id=account.id).email_bounced, None)
