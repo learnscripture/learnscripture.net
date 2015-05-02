@@ -6,8 +6,6 @@ from bibleverses.models import VerseSet, VerseSetType
 
 from .base import AccountTestMixin
 
-__all__ = ['VerseSetTests']
-
 
 class VerseSetTests(AccountTestMixin, TestCase):
 

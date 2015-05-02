@@ -15,8 +15,6 @@ from tracking.models import rewind_models, TrackingSnapshot
 
 from .base import FuzzyInt, AccountTestMixin
 
-__all__ = ['IdentityTests']
-
 
 class IdentityTests(AccountTestMixin, TestCase):
 

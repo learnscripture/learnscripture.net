@@ -9,9 +9,6 @@ from bibleverses.models import VerseSet, MemoryStage
 from .base import LiveServerTests
 
 
-__all__ = ['UserVersesPageTests']
-
-
 class UserVersesPageTests(LiveServerTests):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json']

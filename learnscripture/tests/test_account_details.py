@@ -5,7 +5,6 @@ from django.core.urlresolvers import reverse
 from accounts.models import Account
 from .base import LiveServerTests
 
-__all__ = ['AccountDetailsTests']
 
 class AccountDetailsTests(LiveServerTests):
 

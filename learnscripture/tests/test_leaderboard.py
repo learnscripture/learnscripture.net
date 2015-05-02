@@ -11,8 +11,6 @@ from scores.models import ScoreReason, get_verses_started_counts, get_verses_sta
 
 from .base import AccountTestMixin
 
-__all__ = ['LeaderboardTests', 'VerseCountTests']
-
 
 class LeaderboardTests(TestCase):
 

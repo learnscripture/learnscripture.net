@@ -5,7 +5,6 @@ import unittest2
 
 from bibleverses.services import get_esv
 
-__all__ = ['TestEsvService']
 
 class TestEsvService(unittest2.TestCase):
 

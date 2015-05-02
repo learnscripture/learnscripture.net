@@ -9,8 +9,6 @@ from bibleverses.models import InvalidVerseReference, Verse, TextVersion, get_pa
 from .base import AccountTestMixin
 
 
-__all__ = ['VerseTests', 'VersionTests', 'GetPassageSectionsTests', 'UserVerseStatusTests', 'ESVTests']
-
 class VerseTests(TestCase):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
