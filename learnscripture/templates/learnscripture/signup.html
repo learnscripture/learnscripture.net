@@ -11,7 +11,7 @@
 
   {% else %}
 
-    <form action="" method="POST">
+    <form action="" id="id_signup-form" method="POST">
       {% csrf_token %}
       {{ signup_form|bootstrap }}
 

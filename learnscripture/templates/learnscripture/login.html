@@ -5,7 +5,7 @@
 
 {% block content %}
 
-  <form action="" method="POST">
+  <form action="" id="id_login-form" method="POST">
     {% csrf_token %}
     {{ login_form|bootstrap }}
     <div class="actions">
