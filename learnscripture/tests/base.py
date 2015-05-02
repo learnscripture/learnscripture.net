@@ -30,7 +30,6 @@ class FuzzyInt(int):
         return "[%d..%d]" % (self.lowest, self.highest)
 
 
-
 class AccountTestMixin(object):
 
     fixtures = ['test_bible_versions.json']
