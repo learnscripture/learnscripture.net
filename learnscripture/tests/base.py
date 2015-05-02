@@ -130,25 +130,6 @@ class FullBrowserTest(AccountTestMixin, StaticLiveServerTestCase):
                                 'value': session.session_key})
         return session
 
-    def login(self, account):
-        self.setup_session()
-        self.setup_identity(identity=account.identity)
-
-    def setup_identity(self, identity=None):
-        session = self.setup_session()
-        if identity is None:
-            Identity.objects.all().delete()
-            identity = Identity.objects.create()
-            identity.default_bible_version = TextVersion.objects.get(slug='NET')
-            identity.save()
-        learnscripture.session.set_identity(session, identity)
-        session.save()
-        self.identity = identity
-        return identity
-
-    def get_identity(self):
-        return getattr(self, 'identity', None)
-
     def get_url(self, name, *args, **kwargs):
         self.driver.get(self.live_server_url + reverse(name, *args, **kwargs))
         self.wait_until_loaded('body')
@@ -180,6 +161,30 @@ class FullBrowserTest(AccountTestMixin, StaticLiveServerTestCase):
             self.wait_until_finished()
 
         return retval
+
+    def submit(self, css_selector, wait_for_reload=False):
+        self.click(css_selector, wait_for_reload=wait_for_reload)
+
+    def fill_input(self, elem, val):
+        if isinstance(elem, basestring):
+            elem = self.find(elem)
+        if elem.tag_name == 'select':
+            self._set_select_elem(elem, val)
+        elif elem.tag_name == 'input' and elem.get_attribute('type') == 'checkbox':
+            self._set_check_box(elem, val)
+        else:
+            elem.clear()
+            elem.send_keys(val)
+
+    def fill_by_id(self, fields):
+        for k, v in fields.items():
+            e = self.find('#' + k)
+            self.fill_input(e, v)
+
+    def fill_by_name(self, fields, prefix=""):
+        for k, v in fields.items():
+            e = self.find('[name="%s%s"]' % (prefix, k))
+            self.fill_input(e, v)
 
     @property
     def current_url(self):
@@ -230,6 +235,35 @@ class FullBrowserTest(AccountTestMixin, StaticLiveServerTestCase):
             return False
         return True
 
+    def _set_select_elem(self, elem, value):
+        s = Select(elem)
+        s.select_by_value(value)
+
+    def _set_check_box(self, elem, state):
+        if self.is_checked(elem) != state:
+            elem.click()
+
+    # Higher level, learnscripture specific things:
+
+    def login(self, account):
+        self.setup_session()
+        self.setup_identity(identity=account.identity)
+
+    def setup_identity(self, identity=None):
+        session = self.setup_session()
+        if identity is None:
+            Identity.objects.all().delete()
+            identity = Identity.objects.create()
+            identity.default_bible_version = TextVersion.objects.get(slug='NET')
+            identity.save()
+        learnscripture.session.set_identity(session, identity)
+        session.save()
+        self.identity = identity
+        return identity
+
+    def get_identity(self):
+        return getattr(self, 'identity', None)
+
     def set_preferences(self):
         # Set preferences if visible
         driver = self.driver
@@ -254,8 +288,6 @@ class FullBrowserTest(AccountTestMixin, StaticLiveServerTestCase):
 
     def fill_in_login_form(self, account):
         self.wait_until_loaded('body')
-        self.find("#id_login-email").clear()
-        self.send_keys("#id_login-email", account.email)
-        self.find("#id_login-password").clear()
-        self.send_keys("#id_login-password", "password")
-        self.click("input[name=signin]")
+        self.fill_input("#id_login-email", account.email)
+        self.fill_input("#id_login-password", "password")
+        self.submit("input[name=signin]")
