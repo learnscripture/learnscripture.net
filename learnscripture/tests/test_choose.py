@@ -7,10 +7,10 @@ from awards.models import AwardType, TrendSetterAward
 from bibleverses.models import VerseSet
 from events.models import Event, EventType
 
-from .base import LiveServerTests
+from .base import FullBrowserTest
 
 
-class ChooseTests(LiveServerTests):
+class ChooseTests(FullBrowserTest):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json']
 

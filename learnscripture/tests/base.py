@@ -82,7 +82,7 @@ class ElementScrollBehavior(object):
     BOTTOM = 1
 
 
-class LiveServerTests(AccountTestMixin, StaticLiveServerTestCase):
+class FullBrowserTest(AccountTestMixin, StaticLiveServerTestCase):
 
     hide_browser = True
 
@@ -99,25 +99,24 @@ class LiveServerTests(AccountTestMixin, StaticLiveServerTestCase):
         capabilities['elementScrollBehavior'] = ElementScrollBehavior.BOTTOM
         cls.driver = webdriver.Firefox(capabilities=capabilities)
         cls.driver.implicitly_wait(1)
-        super(LiveServerTests, cls).setUpClass()
+        super(FullBrowserTest, cls).setUpClass()
 
     @classmethod
     def tearDownClass(cls):
         cls.driver.quit()
         if cls.hide_browser:
             cls.display.stop()
-        super(LiveServerTests, cls).tearDownClass()
+        super(FullBrowserTest, cls).tearDownClass()
 
     def setUp(self):
-        super(LiveServerTests, self).setUp()
+        super(FullBrowserTest, self).setUp()
         self.driver.delete_all_cookies()
         self.verificationErrors = []
 
     def tearDown(self):
         self.assertEqual([], self.verificationErrors)
-        super(LiveServerTests, self).tearDown()
+        super(FullBrowserTest, self).tearDown()
         sqla_tear_down()
-
 
     # Utilities:
     def setup_session(self):

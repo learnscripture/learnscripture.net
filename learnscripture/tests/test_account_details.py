@@ -3,10 +3,10 @@ from __future__ import absolute_import
 from django.core.urlresolvers import reverse
 
 from accounts.models import Account
-from .base import LiveServerTests
+from .base import FullBrowserTest
 
 
-class AccountDetailsTests(LiveServerTests):
+class AccountDetailsTests(FullBrowserTest):
 
     fixtures = ['test_bible_versions.json']
 

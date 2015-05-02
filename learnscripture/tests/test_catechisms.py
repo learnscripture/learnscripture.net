@@ -2,10 +2,10 @@ from __future__ import absolute_import
 
 from events.models import Event, EventType
 
-from .base import LiveServerTests
+from .base import FullBrowserTest
 
 
-class CatechismTests(LiveServerTests):
+class CatechismTests(FullBrowserTest):
 
     fixtures = ['test_bible_versions.json', 'test_catechisms.json']
 

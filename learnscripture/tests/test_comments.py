@@ -9,10 +9,10 @@ from comments.models import Comment
 from events.models import Event, EventType
 from groups.models import Group
 
-from .base import LiveServerTests, AccountTestMixin
+from .base import FullBrowserTest, AccountTestMixin
 
 
-class CommentPageTests(LiveServerTests):
+class CommentPageTests(FullBrowserTest):
 
     def setUp(self):
         super(CommentPageTests, self).setUp()

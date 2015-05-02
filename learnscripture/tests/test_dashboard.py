@@ -10,10 +10,10 @@ import accounts.memorymodel
 from accounts.models import Identity, Notice
 from bibleverses.models import VerseSet, TextVersion, StageType, MemoryStage
 
-from .base import LiveServerTests
+from .base import FullBrowserTest
 
 
-class DashboardTests(LiveServerTests):
+class DashboardTests(FullBrowserTest):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json',
                 'test_catechisms.json']

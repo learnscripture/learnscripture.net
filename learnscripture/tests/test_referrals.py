@@ -5,10 +5,10 @@ from awards.models import AwardType
 from bibleverses.models import VerseSet
 from events.models import Event, EventType
 
-from .base import LiveServerTests
+from .base import FullBrowserTest
 
 
-class ReferralsTests(LiveServerTests):
+class ReferralsTests(FullBrowserTest):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json']
 

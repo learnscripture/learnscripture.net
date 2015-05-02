@@ -6,10 +6,10 @@ from django.core.urlresolvers import reverse
 from django.utils import timezone
 
 from bibleverses.models import VerseSet, MemoryStage
-from .base import LiveServerTests
+from .base import FullBrowserTest
 
 
-class UserVersesPageTests(LiveServerTests):
+class UserVersesPageTests(FullBrowserTest):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json']
 

@@ -13,10 +13,10 @@ from awards.models import AwardType, StudentAward, AceAward
 from bibleverses.models import VerseSet, MemoryStage, StageType
 from scores.models import Scores
 
-from .base import LiveServerTests
+from .base import FullBrowserTest
 
 
-class LearnTests(LiveServerTests):
+class LearnTests(FullBrowserTest):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json']
 
