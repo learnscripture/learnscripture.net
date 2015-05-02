@@ -57,7 +57,7 @@ class AccountAdmin(admin.ModelAdmin):
         return format_html('<a href="{0}">{1}</a>',
                            reverse('admin:accounts_identity_change', args=[account.identity.id]),
                            account.identity.id)
-    list_display = ['username', identity_link, 'email', 'first_name', 'last_name', 'date_joined', 'is_hellbanned', referred_by]
+    list_display = ['username', identity_link, 'email', 'first_name', 'last_name', 'date_joined', 'email_bounced', 'is_hellbanned', referred_by]
     ordering = ['date_joined']
     search_fields = ['username', 'email']
     filter_horizontal = ['following']

@@ -103,6 +103,8 @@ class Account(AbstractBaseUser):
         "Send email reminders every (days)", default=3)
     last_reminder_sent = models.DateTimeField(null=True, blank=True)
 
+    email_bounced = models.DateTimeField(null=True, blank=True)
+
     # Attributes needed for admin login and auth.contrib compat
     is_superuser = models.BooleanField(default=False)
 

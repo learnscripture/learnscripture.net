@@ -33,3 +33,6 @@ class AccountDetailsTests(LiveServerTests):
         self.get_url('account_details')
         self.fill_in_login_form(account)
         self.assertTrue(driver.current_url.endswith(reverse('account_details')))
+
+
+# TODO - test for changing email address - should reset email_bounced
