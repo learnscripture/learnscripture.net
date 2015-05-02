@@ -6,10 +6,10 @@ from selenium.webdriver.support.ui import Select
 from accounts.models import Identity
 from bibleverses.models import VerseSet
 
-from .base import LiveServerTests
+from .base import FullBrowserTest
 
 
-class ViewSetTests(LiveServerTests):
+class ViewSetTests(FullBrowserTest):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json']
 

@@ -13,10 +13,10 @@ from groups.models import Group
 from comments.models import Comment
 from events.models import Event, EventType
 
-from .base import LiveServerTests, AccountTestMixin
+from .base import FullBrowserTest, AccountTestMixin
 
 
-class GroupPageTests(LiveServerTests):
+class GroupPageTests(FullBrowserTest):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json']
 
@@ -238,7 +238,7 @@ class GroupTests(AccountTestMixin, TestCase):
                          [c.message for c in group.comments.all()])
 
 
-class GroupCreatePageTests(LiveServerTests):
+class GroupCreatePageTests(FullBrowserTest):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json']
 
