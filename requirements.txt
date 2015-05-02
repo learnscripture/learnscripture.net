@@ -45,7 +45,7 @@ pysparse==1.1.1-dev
 python-dateutil==2.2
 python-memcached==1.48
 pytz==2014.2
-raven==3.1.17
+raven==5.3.1
 requests==2.6.0
 six==1.9.0
 supervisor==3.0
