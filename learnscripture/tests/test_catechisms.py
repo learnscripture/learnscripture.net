@@ -4,7 +4,6 @@ from events.models import Event, EventType
 
 from .base import LiveServerTests
 
-__all__ = ['CatechismTests']
 
 class CatechismTests(LiveServerTests):
 

@@ -21,7 +21,6 @@ from scores.models import Scores
 
 from .base import AccountTestMixin
 
-__all__ = ['AccountTests', 'PasswordResetTest']
 
 class AccountTests(AccountTestMixin, TestCase):
     def test_password(self):

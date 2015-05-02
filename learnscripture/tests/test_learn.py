@@ -15,8 +15,6 @@ from scores.models import Scores
 
 from .base import LiveServerTests
 
-__all__ = ['LearnTests']
-
 
 class LearnTests(LiveServerTests):
 

@@ -15,8 +15,6 @@ from payments.models import DonationDrive
 from payments.sign import sign_payment_info
 from payments.signals import target_reached, donation_drive_contributed_to
 
-__all__ = ['PaymentTests', 'DonationDriveTests']
-
 
 class IpnMock(object):
     payment_status = 'Completed'

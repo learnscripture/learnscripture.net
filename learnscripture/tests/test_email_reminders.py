@@ -16,8 +16,6 @@ from bibleverses.models import VerseSet, StageType
 
 from .base import AccountTestMixin
 
-__all__ = ['EmailReminderTests']
-
 
 class EmailReminderTests(AccountTestMixin, TestCase):
 

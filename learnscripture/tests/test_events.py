@@ -10,8 +10,6 @@ from groups.models import Group
 
 from .base import AccountTestMixin
 
-__all__ = ['EventTests']
-
 
 class EventTests(AccountTestMixin, TestCase):
 

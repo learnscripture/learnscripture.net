@@ -4,8 +4,6 @@ import unittest2
 
 from accounts.memorymodel import strength_estimate
 
-__all__ = ['StrengthEstimate']
-
 
 class StrengthEstimate(unittest2.TestCase):
 
