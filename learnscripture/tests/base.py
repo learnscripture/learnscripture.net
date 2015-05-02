@@ -182,6 +182,10 @@ class LiveServerTests(AccountTestMixin, StaticLiveServerTestCase):
 
         return retval
 
+    @property
+    def current_url(self):
+        return self.driver.current_url
+
     def send_keys(self, css_selector, text):
         retval = self.find(css_selector).send_keys(text)
         self.wait_for_ajax()
