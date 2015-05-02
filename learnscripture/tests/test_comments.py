@@ -27,7 +27,7 @@ class CommentPageTests(LiveServerTests):
             event_type=EventType.POINTS_MILESTONE,
             account=self.event_account,
             event_data={},
-            )
+        )
 
     def test_add_comment(self):
         self.event_identity.notices.all().delete()
@@ -48,10 +48,9 @@ class CommentPageTests(LiveServerTests):
         self.assertEqual(c.message, "This is my comment")
 
         # Test event created
-        self.assertEqual(Event.objects.filter(
-                parent_event=self.event,
-                event_type=EventType.NEW_COMMENT,
-                account=self.account).count(),
+        self.assertEqual(Event.objects.filter(parent_event=self.event,
+                                              event_type=EventType.NEW_COMMENT,
+                                              account=self.account).count(),
                          1)
 
         # Test notice created
@@ -76,12 +75,10 @@ class CommentPageTests(LiveServerTests):
         self.assertEqual(c.message, "This is my comment")
 
         # Test event NOT created
-        self.assertEqual(Event.objects.filter(
-                parent_event=self.event,
-                event_type=EventType.NEW_COMMENT,
-                account=self.account).count(),
+        self.assertEqual(Event.objects.filter(parent_event=self.event,
+                                              event_type=EventType.NEW_COMMENT,
+                                              account=self.account).count(),
                          0)
-
 
     def test_moderate_comment(self):
         other_identity, other_account = self.create_account(username="other",
@@ -119,7 +116,7 @@ class CommentTests(AccountTestMixin, TestCase):
     def test_get_absolute_url(self):
         _, account = self.create_account()
         group = AutoFixture(Group,
-                            field_values={'slug':'my-group'},
+                            field_values={'slug': 'my-group'},
                             ).create_one()
         comment = Comment.objects.create(
             author=account,
@@ -128,4 +125,3 @@ class CommentTests(AccountTestMixin, TestCase):
 
         self.assertEqual(comment.get_absolute_url(),
                          "/groups/my-group/wall/?comment=%s" % comment.id)
-

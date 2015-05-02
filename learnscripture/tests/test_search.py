@@ -21,7 +21,6 @@ class SearchTests(TestCase):
         c.execute("CREATE INDEX bibleverses_verse_tsv_index ON bibleverses_verse USING gin(text_tsv);")
         c.execute("UPDATE bibleverses_verse SET text_tsv = to_tsvector(text);")
 
-
     def test_search_verse_set_title(self):
         VerseSet.objects.create(name="For stupid people",
                                 slug="for-stupid-people",
@@ -46,10 +45,10 @@ class SearchTests(TestCase):
                                       set_type=VerseSetType.SELECTION,
                                       created_by=self.account)
         vs1.set_verse_choices([
-                "Genesis 1:1",
-                "Genesis 1:2",
-                "John 3:16",
-                ])
+            "Genesis 1:1",
+            "Genesis 1:2",
+            "John 3:16",
+        ])
 
         results = VerseSet.objects.search(VerseSet.objects.all(),
                                           "Gen 1:3")
@@ -94,4 +93,3 @@ class SearchTests(TestCase):
         self.assertNotEqual(None, quick_find("Genesis 1:1-2:2", version, allow_searches=False,
                                              max_length=1000,
                                              ))
-

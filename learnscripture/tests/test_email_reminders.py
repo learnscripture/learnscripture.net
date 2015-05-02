@@ -86,7 +86,7 @@ class EmailReminderTests(AccountTestMixin, TestCase):
         send_email_reminders()
         self.assertEqual(len(mail.outbox), 1)
         msg = mail.outbox[0]
-        m = re.search("http://.*/account\S*", msg.body)
+        m = re.search(r"http://.*/account\S*", msg.body)
         self.assertNotEqual(m, None)
         link = m.group()
         u = urlparse.urlparse(link)

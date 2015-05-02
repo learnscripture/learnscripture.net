@@ -41,7 +41,6 @@ class VerseSetTests(AccountTestMixin, TestCase):
                       VerseSet.objects.visible_for_account(viewer)
                       )
 
-
         # hellbanned users
         creator.is_hellbanned = True
         creator.save()

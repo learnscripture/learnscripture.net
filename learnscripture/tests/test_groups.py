@@ -288,7 +288,7 @@ class GroupPageTests2(AccountTestMixin, TestCase):
             event_type=EventType.GROUP_JOINED,
             event_data={},
             account=account,
-            )
+        )
         comment = AutoFixture(Comment, generate_fk=True,
                               field_values={'group': group,
                                             'event': event,

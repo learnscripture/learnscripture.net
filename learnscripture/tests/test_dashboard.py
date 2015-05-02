@@ -155,7 +155,7 @@ class DashboardTests(LiveServerTests):
         driver = self.driver
 
         self.get_url('dashboard')
-        self.assertIn('Psalm 23', driver.page_source) # sanity check
+        self.assertIn('Psalm 23', driver.page_source)  # sanity check
 
         btn = self.find('input[value="Review one section"]')
         self.assertEqual(btn.get_attribute('name'), 'revisepassagenextsection')
@@ -204,7 +204,7 @@ class DashboardTests(LiveServerTests):
         self.assertNotEqual(identity.notices.all()[0].seen, None)
 
         # Move database into 'past'
-        Notice.objects.update(seen = F('seen') - timedelta(days=10))
+        Notice.objects.update(seen=F('seen') - timedelta(days=10))
 
         self.get_url('dashboard')
         self.assertNotIn("Hello you crazy guy!", driver.page_source)

@@ -11,13 +11,13 @@ from django.test import TestCase
 from django.utils.encoding import force_text
 from django.utils.six.moves.urllib.parse import urlparse, ParseResult
 
-from accounts.models import Account, ActionChange, Identity
-from awards.models import AwardType, Award
+from accounts.models import Account, ActionChange
+from awards.models import AwardType
 from bibleverses.models import MemoryStage, StageType
 from events.models import Event, EventType
 from groups.models import Group
 from learnscripture.forms import AccountSetPasswordForm
-from scores.models import Scores, ScoreReason
+from scores.models import Scores
 
 from .base import AccountTestMixin
 
@@ -43,6 +43,7 @@ class AccountTests(AccountTestMixin, TestCase):
 
     def test_points_events(self):
         _, a = self.create_account()
+
         def score():
             a.award_action_points("John 3:16", "This is John 3:16",
                                   MemoryStage.TESTED,
@@ -100,10 +101,8 @@ class AccountTests(AccountTestMixin, TestCase):
         self.assertEqual(account.awards.filter(award_type=AwardType.ACE, level=3).count(),
                          1)
 
-
         # Check 'Event' created
         self.assertTrue(Event.objects.filter(event_type=EventType.AWARD_RECEIVED).count() > 1)
-
 
     def test_award_action_points_fully_learnt(self):
         _, a = self.create_account()
@@ -115,7 +114,6 @@ class AccountTests(AccountTestMixin, TestCase):
         self.assertEqual(a.total_score.points,
                          (4 * Scores.POINTS_PER_WORD * 0.9)
                          + (4 * Scores.POINTS_PER_WORD * Scores.VERSE_LEARNT_BONUS))
-
 
     def test_addict_award(self):
         import awards.tasks
@@ -163,7 +161,6 @@ class AccountTests(AccountTestMixin, TestCase):
                           account2.id: 1.0,  # max
                           # account3.id should be missing
                           })
-
 
         self.assertEqual(account3.get_friendship_weights(),
                          {account3.id: 0.3})
@@ -300,4 +297,3 @@ class PasswordResetTest(TestCase):
         response = self.client.post(path, {'new_password1': 'anewpassword',
                                            'new_password2': 'x'})
         self.assertFormError(response, AccountSetPasswordForm.error_messages['password_mismatch'])
-
