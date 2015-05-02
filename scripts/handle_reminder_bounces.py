@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/home/cciw/webapps/learnscripture_django/venv/bin/python
 import os
 import sys
 
