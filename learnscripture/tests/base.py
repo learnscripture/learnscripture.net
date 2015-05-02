@@ -4,12 +4,15 @@ import time
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from django.test import TestCase
 from django.utils.importlib import import_module
+from django_webtest import WebTestMixin
 from pyvirtualdisplay import Display
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select, WebDriverWait
+import pyquery
 
 from accounts.models import Identity, Account
 from bibleverses.models import TextVersion
@@ -82,7 +85,16 @@ class ElementScrollBehavior(object):
     BOTTOM = 1
 
 
-class FullBrowserTest(AccountTestMixin, StaticLiveServerTestCase):
+class LoginMixin(object):
+
+    def fill_in_login_form(self, account):
+        self.wait_until_loaded('body')
+        self.fill_input("#id_login-email", account.email)
+        self.fill_input("#id_login-password", "password")
+        self.submit("input[name=signin]")
+
+
+class FullBrowserTest(AccountTestMixin, LoginMixin, StaticLiveServerTestCase):
 
     hide_browser = True
 
@@ -286,8 +298,154 @@ class FullBrowserTest(AccountTestMixin, StaticLiveServerTestCase):
         self.wait_until_loaded('body')
         self.wait_for_ajax()
 
-    def fill_in_login_form(self, account):
-        self.wait_until_loaded('body')
-        self.fill_input("#id_login-email", account.email)
-        self.fill_input("#id_login-password", "password")
-        self.submit("input[name=signin]")
+
+class WebTestBase(WebTestMixin, AccountTestMixin, LoginMixin, TestCase):
+
+    # API that is compatible with FullBrowserTest
+
+    def get_url_raw(self, url, auto_follow=True, expect_errors=False):
+        self.last_response = self.app.get(url, auto_follow=auto_follow, expect_errors=expect_errors)
+        return self.last_response
+
+    def get_url(self, name, *args, **kwargs):
+        """
+        Gets the named URL, passing *args and **kwargs to Django's URL 'reverse' function.
+        """
+        return self.get_url_raw(reverse(name, args=args, kwargs=kwargs))
+
+    def fill_input(self, css_selector, value):
+        form, field_name = self._find_form_and_field_by_css_selector(self.last_response, css_selector)
+        form[field_name] = value
+
+    def fill_by_id(self, data):
+        for element_id, value in data.items():
+            form, field_name = self._find_form_and_field_by_id(self.last_response, element_id)
+            form[field_name] = value
+
+    def submit(self, css_selector, wait_for_reload=None, auto_follow=True):
+        form, field_name = self._find_form_and_field_by_css_selector(self.last_response, css_selector)
+        response = form.submit(field_name)
+        self.last_response = response
+        if auto_follow:
+            is_redirect = lambda r: r.status_int >= 300 and r.status_int < 400
+            while is_redirect(response):
+                response = response.follow()
+        self.last_response = response
+
+    def click(self, *args, **kwargs):
+        raise NotImplementedError("Can't call 'click' on WebTestBase tests. "
+                                  "Use 'submit' or 'follow' instead, or move the test into a FullBrowserTest only subclass "
+                                  "if you cannot make it WebTest compatible.")
+
+    def follow_link(self, css_selector):
+        """
+        Follow the link described by the given CSS selector
+        """
+        self.assertTrue(self.is_element_present(css_selector))
+        elems = self._make_pq(self.last_response).find(css_selector)
+        if len(elems) == 0:
+            raise ValueError("Can't find element matching '{0}'".format(css_selector))
+
+        hrefs = []
+        for e in elems:
+            if 'href' in e.attrib:
+                hrefs.append(e.attrib['href'])
+
+        if not hrefs:
+            raise ValueError("No href attribute found for '{0}'".format(css_selector))
+
+        if not all(h == hrefs[0] for h in hrefs):
+            raise ValueError("Different href values for links '{0}': '{1}'".format(css_selector,
+                                                                                   ' ,'.join(hrefs)))
+        self.get_url_raw(hrefs[0])
+
+    @property
+    def current_url(self):
+        return self.last_response.request.url
+
+    def wait_until_loaded(self, *args, **kwargs):
+        pass
+
+    # Higher level, learnscripture specific things:
+
+    def login(self, account):
+        # We could mess with session directly, but WebTest is fast enough to do
+        # it the long way::
+        self.get_url('login')
+        self.fill_in_login_form(account)
+
+    # Implementation
+    def _make_pq(self, response):
+        # Cache to save parsing every time
+        if not hasattr(self, '_pq_cache'):
+            self._pq_cache = {}
+        if response in self._pq_cache:
+            return self._pq_cache[response]
+        pq = pyquery.PyQuery(response.content)
+        self._pq_cache[response] = pq
+        return pq
+
+    def _find_form_and_field_by_id(self, response, element_id):
+        for form in response.forms.values():
+            for field_name, widgets in form.fields.items():
+                for widget in widgets:
+                    if hasattr(widget, 'id') and widget.id == element_id:
+                        return form, field_name
+        raise ValueError("Can't find field with id {0} in response: {1}.".format(element_id, response))
+
+    def _find_parent_form(self, elem):
+        p = elem.getparent()
+        if p is None:
+            return None
+        if p.tag == 'form':
+            return p
+        return self._find_parent_form(p)
+
+    def _match_form_elem_to_webtest_form(self, form_elem, response):
+        form_sig = {'action': form_elem.attrib.get('action', ''),
+                    'id': form_elem.attrib.get('id', ''),
+                    'method': form_elem.attrib.get('method', '').lower(),
+                    }
+        matched = []
+        for k, form in response.forms.items():
+            if isinstance(k, unicode):
+                # Dupe, ignore
+                continue
+            # signature:
+            sig = {'action': getattr(form, 'action', ''),
+                   'id': getattr(form, 'id', ''),
+                   'method': getattr(form, 'method', '').lower(),
+                   }
+            sig = {k: v if v is not None else '' for k, v in sig.items()}
+            if sig == form_sig:
+                matched.append(form)
+
+        if len(matched) > 1:
+            raise ValueError("Can't find correct form, multiple found.")
+        if len(matched) == 1:
+            return matched[0]
+        raise ValueError("Can't match form {0} to response forms {1}".format(form_elem, response.forms))
+
+    def _find_form_and_field_by_css_selector(self, response, css_selector):
+        pq = self._make_pq(response)
+        items = pq.find(css_selector)
+
+        found = []
+        for item in items:
+            form_elem = self._find_parent_form(item)
+            if form_elem is None:
+                raise ValueError("Can't find form for input {0}.".format(css_selector))
+            form = self._match_form_elem_to_webtest_form(form_elem, response)
+            try:
+                field = item.name if hasattr(item, 'name') else item.attrib['name']
+            except KeyError:
+                raise ValueError("Element {0} needs 'name' attribute in order to submit it".format(css_selector))
+            found.append((form, field))
+
+        if len(found) == 1:
+            return found[0]
+
+        if len(found) > 1:
+            raise ValueError("Multiple submit buttons found matching '{0}'".format(css_selector))
+
+        raise ValueError("Can't find submit input matching {0} in response {1}.".format(css_selector, response))
