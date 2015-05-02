@@ -44,13 +44,6 @@ THEME_FONTS = [
 ]
 DEFAULT_THEME = 'calm'
 
-
-
-# Number of days payment is allowed to be made early
-PAYMENT_ALLOWED_EARLY_DAYS = 31
-
-FREE_TRIAL_LENGTH_DAYS = 62 # 2 months
-
 DONT_NAG_NEW_USERS_FOR_MONEY_DAYS = 30
 
 # Account is separate from Identity to allow guest users to use the site fully
@@ -60,6 +53,7 @@ DONT_NAG_NEW_USERS_FOR_MONEY_DAYS = 30
 # Social aspects and payment aspects are related to Account.
 # Identity methods are the main interface for most business logic,
 # and so sometimes they just delegate to Account methods.
+
 
 class AccountManager(UserManager):
     def visible_for_account(self, account):
