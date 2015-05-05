@@ -34,7 +34,7 @@ VENV_SUBDIR = 'venv'
 
 # Python version
 PYTHON_BIN = "python2.7"
-PYTHON_PREFIX = "" # e.g. /usr/local  Use "" for automatic
+PYTHON_PREFIX = ""  # e.g. /usr/local  Use "" for automatic
 PYTHON_FULL_PATH = "%s/bin/%s" % (PYTHON_PREFIX, PYTHON_BIN) if PYTHON_PREFIX else PYTHON_BIN
 
 LOCAL_DB_BACKUPS = rel("..", "db_backups")
@@ -69,21 +69,23 @@ class Target(object):
 
 
 PRODUCTION = Target(
-    NAME = "PRODUCTION",
-    APP_BASE_NAME = "learnscripture",
+    NAME="PRODUCTION",
+    APP_BASE_NAME="learnscripture",
 )
 
 STAGING = Target(
-    NAME = "STAGING",
-    APP_BASE_NAME = "learnscripture_staging",
+    NAME="STAGING",
+    APP_BASE_NAME="learnscripture_staging",
 )
 
 target = None
+
 
 @task
 def production():
     global target
     target = PRODUCTION
+
 
 @task
 def staging():
@@ -237,6 +239,7 @@ def quick():
     no_installs()
     no_db()
 
+
 @task
 def stop_webserver():
     """
@@ -266,7 +269,7 @@ def build_static():
     assert target.STATIC_ROOT.strip() != '' and target.STATIC_ROOT.strip() != '/'
     with virtualenv(target.VENV_DIR):
         with cd(target.SRC_DIR):
-             # django-compressor doesn't always find changes if we don't do this:
+            # django-compressor doesn't always find changes if we don't do this:
             run("touch learnscripture/static/css/learnscripture.less")
 
             # django-compressor doesn't always find
@@ -289,6 +292,7 @@ def update_database():
 def _assert_target():
     assert target is not None, "Use 'production' or 'staging' to set target"
 
+
 @task
 def deploy():
     """
@@ -305,9 +309,11 @@ def deploy():
         # Need to restart celeryd, as it will have old code.
         restart_celeryd()
 
+
 @task
 def restart_celeryd():
     supervisorctl("restart celeryd_%s" % target.NAME.lower())
+
 
 @task
 def supervisorctl(*commands):
@@ -348,30 +354,30 @@ def get_live_db():
 def pg_restore_cmds(db, filename, clean=False):
     return [
         "pg_restore -O -U %s %s -d %s %s" %
-          (db['USER'], " -c " if clean else "", db['NAME'], filename),
-        ]
+        (db['USER'], " -c " if clean else "", db['NAME'], filename),
+    ]
 
 
 def db_restore_commands(db, filename):
     return [
         # DB might not exist, allow error
         """sudo -u postgres psql -U postgres -d template1 -c "DROP DATABASE %s;" | true """
-          % db['NAME'],
+        % db['NAME'],
 
         """sudo -u postgres psql -U postgres -d template1 -c "CREATE DATABASE %s;" """
-          % db['NAME'],
+        % db['NAME'],
 
         # User might already exist, allow error
         """sudo -u postgres psql -U postgres -d template1 -c "CREATE USER %s WITH PASSWORD '%s';" | true """
-          % (db['USER'], db['PASSWORD']),
+        % (db['USER'], db['PASSWORD']),
 
         """sudo -u postgres psql -U postgres -d template1 -c "GRANT ALL ON DATABASE %s TO %s;" """
         % (db['NAME'], db['USER']),
 
         """sudo -u postgres psql -U postgres -d template1 -c "ALTER USER %s CREATEDB;" """ %
-          db['USER'],
+        db['USER'],
 
-        ] + pg_restore_cmds(db, filename)
+    ] + pg_restore_cmds(db, filename)
 
 
 @task

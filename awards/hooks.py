@@ -46,7 +46,7 @@ def notify_about_new_award(sender, **kwargs):
                             award_url,
                             settings.STATIC_URL,
                             award.image_medium(),
-                            award.id, # not needed at the moment
+                            award.id,  # not needed at the moment
                             award.level,
                             award.short_description(),
                             account.username,
@@ -95,7 +95,7 @@ def verse_tested_receiver(sender, **kwargs):
 def public_verse_set_created_receiver(sender, **kwargs):
     verse_set = sender
     awards.tasks.give_sharer_awards.apply_async([verse_set.created_by_id],
-                                               countdown=2)
+                                                countdown=2)
 
 
 @receiver(scored_100_percent)

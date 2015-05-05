@@ -19,4 +19,4 @@ for n in ['description', 'additional_info']:
     f = VerseSetForm.base_fields[n].widget.attrs
     del f['cols']
     f['rows'] = 3
-VerseSetForm.base_fields['public'].label="Make public (can't be undone)"
+VerseSetForm.base_fields['public'].label = "Make public (can't be undone)"

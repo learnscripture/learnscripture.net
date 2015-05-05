@@ -35,6 +35,7 @@ def cache_results(seconds=900):
         return x
     return do_cache
 
+
 def clear_cache_results(f, *args, **kwargs):
     key = cache_results_key(f, args, kwargs)
     _djcache.delete(key)

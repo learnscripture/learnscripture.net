@@ -29,6 +29,7 @@ LearningType = make_choices('LearningType',
 # See also learn.js
 VERSE_STATUS_BATCH_SIZE = 10
 
+
 def get_verse_statuses(request):
     learning_type = request.session.get('learning_type', None)
     # Need some backwards compat for existing sessions:
@@ -58,7 +59,6 @@ def get_verse_statuses(request):
     # Batching:
     id_batch = id_batch[:VERSE_STATUS_BATCH_SIZE]
 
-
     bulk_ids = [uvs_id
                 for order, uvs_id, needs_testing_override in id_batch]
     uvs_dict = request.identity.get_verse_statuses_bulk(bulk_ids)
@@ -69,7 +69,7 @@ def get_verse_statuses(request):
         except KeyError:
             continue
         uvs.learn_order = order
-        uvs.max_order_val = max_order_val # Stick the same value on all, for convenience
+        uvs.max_order_val = max_order_val  # Stick the same value on all, for convenience
         if needs_testing_override is not None:
             uvs.needs_testing_override = needs_testing_override
 

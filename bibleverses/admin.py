@@ -7,6 +7,7 @@ from .models import TextVersion, Verse, VerseSet, VerseChoice, QAPair, UserVerse
 class TextVersionAdmin(admin.ModelAdmin):
     list_display = ['short_name', 'slug', 'full_name', 'text_type', 'url']
 
+
 class VerseChoiceAdminForm(forms.ModelForm):
     def clean_reference(self):
         ref = self.cleaned_data['reference']
@@ -19,7 +20,7 @@ class VerseChoiceAdminForm(forms.ModelForm):
 
 
 class VerseSetAdmin(admin.ModelAdmin):
-    list_display = ['name', 'set_type', 'date_added', 'slug', 'created_by', 'description', 'additional_info',]
+    list_display = ['name', 'set_type', 'date_added', 'slug', 'created_by', 'description', 'additional_info']
     list_filter = ['set_type']
 
 
@@ -52,6 +53,7 @@ class QAPairAdmin(admin.ModelAdmin):
 class UserVerseStatusAdmin(admin.ModelAdmin):
     search_fields = ['for_identity__account__username']
     list_filter = ['ignored']
+
     def username(obj):
         return obj.for_identity.account.username
     list_display = ['reference', username, 'ignored']

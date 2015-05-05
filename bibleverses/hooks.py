@@ -13,11 +13,13 @@ def verse_set_chosen_receiver(sender, **kwargs):
     verse_set = sender
     verse_set_increase_popularity.delay(verse_set.id)
 
+
 @receiver(post_save, sender=Verse)
 def verse_saved(sender, **kwargs):
     verse = kwargs['instance']
     if not settings.TESTING:
         fix_item_suggestions.delay(verse.version.slug, verse.reference)
+
 
 @receiver(post_save, sender=QAPair)
 def qapair_saved(sender, **kwargs):

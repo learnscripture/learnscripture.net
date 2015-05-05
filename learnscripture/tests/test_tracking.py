@@ -6,6 +6,7 @@ from django.utils import timezone
 from bibleverses.models import TextVersion, TextType
 from tracking.models import TrackingSnapshot, auto_track_querysets, rewind_models
 
+
 class TestTracking(TestCase):
 
     def test_insert(self):

@@ -10,7 +10,7 @@ for line in data:
     if rest.startswith('<hi type="italic">') and '</hi>' in rest:
         s = rest.index('>', 1)
         e = rest.index('</hi', s)
-        title = rest[s+1:e].strip()
+        title = rest[s + 1:e].strip()
 
         print
         print ref, title
@@ -22,4 +22,3 @@ for line in data:
         v.text = v.text[len(title):].strip()
         print v.text
         v.save()
-

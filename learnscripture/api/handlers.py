@@ -213,7 +213,7 @@ class ActionCompleteHandler(ApiView):
                                                   action_change, stage, accuracy)
 
         if (stage == StageType.TEST or
-            (stage == StageType.READ and not verse_status['needs_testing'])):
+                (stage == StageType.READ and not verse_status['needs_testing'])):
             session.verse_status_finished(request, verse_status['id'], score_logs)
 
         return {}
@@ -364,7 +364,6 @@ class ScoreLogs(ApiView):
         return request.identity.get_score_logs(session.get_learning_session_start(request))
 
 
-
 def html_format_text(verse):
     # Convert highlighted_text to HTML
     if hasattr(verse, 'highlighted_text'):
@@ -419,14 +418,14 @@ class VerseFind(ApiView):
             verses2 = []
             for v in item['verses']:
                 verses2.append(dict(
-                        reference=v.reference,
-                        text=v.text,
-                        html_text=html_format_text(v),
-                        book_number=v.book_number,
-                        chapter_number=v.chapter_number,
-                        verse_number=v.verse_number,
-                        bible_verse_number=v.bible_verse_number
-                        ))
+                    reference=v.reference,
+                    text=v.text,
+                    html_text=html_format_text(v),
+                    book_number=v.book_number,
+                    chapter_number=v.chapter_number,
+                    verse_number=v.verse_number,
+                    bible_verse_number=v.bible_verse_number
+                ))
             item['verses'] = verses2
             item['version_slug'] = version_slug
         return retval

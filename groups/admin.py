@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from .models import Group, Invitation, Membership
 
+
 class GroupAdmin(admin.ModelAdmin):
     list_display = ['name', 'created', 'public', 'open']
     readonly_fields = ['slug']

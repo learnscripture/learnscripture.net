@@ -167,4 +167,4 @@ def send_donation_drive_target_reached_emails(donation_drive):
         mail.send_mail(subject, body, settings.SERVER_EMAIL, [d['email']])
 
 
-from payments import hooks
+from payments import hooks  # NOQA

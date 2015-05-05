@@ -8,6 +8,7 @@ register = Library()
 
 # This tag assumes that comments have been fetched with authors prefetched
 
+
 @register.filter
 def filter_comments(comments, viewer):
     retval = [c for c in comments

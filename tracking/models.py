@@ -214,7 +214,6 @@ class HttpLog(models.Model):
             request_data=cls.serialize_request(request))
         return log
 
-
     @classmethod
     def serialize_response(cls, response):
         return ("HTTP/1.1 {0} {1}\n{2}".format(response.status_code,
@@ -257,8 +256,10 @@ class HttpLog(models.Model):
 class FakeSocket():
     def __init__(self, response_str):
         self._file = StringIO(response_str)
+
     def makefile(self, *args, **kwargs):
         return self._file
+
 
 def httpparse(response_str):
     socket = FakeSocket(response_str)

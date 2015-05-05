@@ -19,12 +19,12 @@ from learnscripture.datastructures import make_class_enum
 from learnscripture.templatetags.account_utils import account_link
 
 
-EVENTSTREAM_CUTOFF_DAYS = 3 # just 3 days of events
+EVENTSTREAM_CUTOFF_DAYS = 3  # just 3 days of events
 EVENTSTREAM_CUTOFF_NUMBER = 8
 
 # Arbitrarily say stuff is 50% less interesting when it is half a day old.
 HALF_LIFE_DAYS = 0.5
-EVENTSTREAM_TIME_DECAY_FACTOR = 3600*24*HALF_LIFE_DAYS
+EVENTSTREAM_TIME_DECAY_FACTOR = 3600 * 24 * HALF_LIFE_DAYS
 
 # Events have an affinity of 1.0 normally, and this can be boosted by the amount
 # below for a maximum friendship level
@@ -136,7 +136,7 @@ class VerseSetCreatedEvent(EventLogic):
             u'created new verse set <a href="{0}">{1}</a>',
             reverse('view_verse_set', args=(verse_set.slug,)),
             verse_set.name
-            )
+        )
 
 
 class StartedLearningVerseSetEvent(EventLogic):
@@ -150,7 +150,7 @@ class StartedLearningVerseSetEvent(EventLogic):
             'started learning <a href="{0}">{1}</a>',
             reverse('view_verse_set', args=(verse_set.slug,)),
             verse_set.name
-            )
+        )
 
 
 class PointsMilestoneEvent(EventLogic):
@@ -159,7 +159,7 @@ class PointsMilestoneEvent(EventLogic):
                                                    points=points)
         self.event.message_html = format_html(
             u'reached {0} points', intcomma(points)
-            )
+        )
 
 
 class VersesStartedMilestoneEvent(EventLogic):
@@ -168,7 +168,7 @@ class VersesStartedMilestoneEvent(EventLogic):
                                                           verses_started=verses_started)
         self.event.message_html = format_html(
             u'reached {0} verses started', intcomma(verses_started)
-            )
+        )
 
 
 class GroupRelatedMixin(object):
@@ -188,7 +188,7 @@ class GroupJoinedEvent(GroupRelatedMixin, EventLogic):
 
         self.event.message_html = format_html(
             u"joined group {0}", group_link(group)
-            )
+        )
 
 
 class GroupCreatedEvent(GroupRelatedMixin, EventLogic):
@@ -198,7 +198,7 @@ class GroupCreatedEvent(GroupRelatedMixin, EventLogic):
                                                 group_id=group.id)
         self.event.message_html = format_html(
             u"created group {0}", group_link(group)
-            )
+        )
 
 
 class VersesFinishedMilestoneEvent(EventLogic):
@@ -207,7 +207,7 @@ class VersesFinishedMilestoneEvent(EventLogic):
                                                            verses_finished=verses_finished)
         self.event.message_html = format_html(
             u"reached {0} verses finished", intcomma(verses_finished)
-            )
+        )
 
 
 class StartedLearningCatechismEvent(EventLogic):
@@ -219,7 +219,7 @@ class StartedLearningCatechismEvent(EventLogic):
             u'started learning <a href="{0}">{1}</a>',
             reverse('view_catechism', args=(catechism.slug,)),
             catechism.full_name,
-            )
+        )
 
 
 class NewCommentEvent(EventLogic):
@@ -239,7 +239,7 @@ class NewCommentEvent(EventLogic):
             u'posted a <a href="{0}">comment</a> on {1}',
             comment.get_absolute_url(),
             comment.get_subject_html(),
-            )
+        )
         self.event.parent_event = comment.event
 
     @classmethod
@@ -256,7 +256,7 @@ class NewCommentEvent(EventLogic):
 
 EventType = make_class_enum(
     b'EventType',
-    [(1, 'GENERAL', 'General', GeneralEvent), # No longer used
+    [(1, 'GENERAL', 'General', GeneralEvent),  # No longer used
      (2, 'NEW_ACCOUNT', 'New account', NewAccountEvent),
      (3, 'AWARD_RECEIVED', 'Award received', AwardReceivedEvent),
      (4, 'POINTS_MILESTONE', 'Points milestone', PointsMilestoneEvent),
@@ -301,7 +301,7 @@ class EventManager(models.Manager):
         if account is None or not account.is_hellbanned:
             events = events.exclude(account__is_hellbanned=True)
         events = list(events)
-        events = list(dedupe_iterable(events, lambda e:(e.account_id, e.message_html)))
+        events = list(dedupe_iterable(events, lambda e: (e.account_id, e.message_html)))
 
         if account is not None:
             friendship_weights = account.get_friendship_weights()
@@ -370,13 +370,13 @@ class Event(models.Model):
         # Don't ever want to see 'new comment' events from myself.
         if (viewer is not None and
             self.event_type == EventType.NEW_COMMENT and
-            self.account_id == viewer.id):
+                self.account_id == viewer.id):
             return 0
 
         if group_ids is None:
             group_ids = []
 
-        ## Weight
+        # Weight
         weight = self.weight
 
         if self.event_type == EventType.NEW_COMMENT:
@@ -384,7 +384,7 @@ class Event(models.Model):
                 # This is a comment on a group wall that the user is in.
                 weight = self.event_logic.group_wall_weight
 
-        ## Affinity
+        # Affinity
         if viewer is not None and friendship_weights is None:
             friendship_weights = viewer.get_friendship_weights()
 
@@ -392,15 +392,13 @@ class Event(models.Model):
         if friendship_weights is not None:
             affinity += friendship_weights.get(self.account_id, 0) * EVENTSTREAM_MAX_EXTRA_AFFINITY_FOR_FRIEND
 
-
-        ## Recency
+        # Recency
         if now is None:
             now = timezone.now()
 
         seconds = (now - self.created).total_seconds()
 
-        recency = 2 ** (-seconds/EVENTSTREAM_TIME_DECAY_FACTOR)
-
+        recency = 2 ** (-seconds / EVENTSTREAM_TIME_DECAY_FACTOR)
 
         return weight * recency * affinity
 
@@ -460,4 +458,4 @@ class Event(models.Model):
     def ordered_comments(self):
         return self.comments.all().order_by('created')
 
-from events import hooks
+from events import hooks  # NOQA

@@ -14,7 +14,7 @@ TEMPLATE_DEBUG = DEBUG
 # A kitten gets killed every time you use this:
 TESTING = 'manage.py test' in ' '.join(sys.argv)
 
-SRC_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # ../
+SRC_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # ../
 PROJECT_DIR = os.path.dirname(SRC_DIR)
 WEBAPP_DIR = os.path.dirname(PROJECT_DIR)
 HOME_DIR = os.environ['HOME']
@@ -45,7 +45,7 @@ if LIVEBOX:
                 'HOST': 'localhost',
                 'PORT': secrets["PRODUCTION_DB_PORT"],
                 'ATOMIC_REQUESTS': True,
-                },
+            },
             'wordsuggestions': {
                 'ENGINE': 'django.db.backends.postgresql_psycopg2',
                 'NAME': secrets["PRODUCTION_DB_NAME_WS"],
@@ -54,8 +54,8 @@ if LIVEBOX:
                 'HOST': 'localhost',
                 'PORT': secrets["PRODUCTION_DB_PORT"],
                 'ATOMIC_REQUESTS': False,
-                }
             }
+        }
         SECRET_KEY = secrets["PRODUCTION_SECRET_KEY"]
         SENTRY_DSN = secrets["PRODUCTION_SENTRY_DSN"]
 
@@ -69,7 +69,7 @@ if LIVEBOX:
                 'HOST': 'localhost',
                 'PORT': secrets["STAGING_DB_PORT"],
                 'ATOMIC_REQUESTS': True,
-                },
+            },
             'wordsuggestions': {
                 'ENGINE': 'django.db.backends.postgresql_psycopg2',
                 'NAME': secrets["STAGING_DB_NAME_WS"],
@@ -78,8 +78,8 @@ if LIVEBOX:
                 'HOST': 'localhost',
                 'PORT': secrets["STAGING_DB_PORT"],
                 'ATOMIC_REQUESTS': False,
-                }
             }
+        }
         SECRET_KEY = secrets["STAGING_SECRET_KEY"]
         SENTRY_DSN = secrets["STAGING_SENTRY_DSN"]
 else:
@@ -126,7 +126,7 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend'
 ]
 
-SESSION_COOKIE_AGE = 3600 * 24 * 31 * 4 # 4 months
+SESSION_COOKIE_AGE = 3600 * 24 * 31 * 4  # 4 months
 
 ADMINS = [
     ('', 'admin@learnscripture.net')
@@ -357,7 +357,7 @@ FIBER_TEMPLATE_CHOICES = [(FIBER_DEFAULT_TEMPLATE, 'Single column')]
 
 DEBUG_TOOLBAR_CONFIG = {
     'INTERCEPT_REDIRECTS': False,
-    }
+}
 
 CACHES = {
     'default': {
@@ -368,7 +368,7 @@ CACHES = {
 } if LIVEBOX else {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        }
+    }
 }
 
 if DEVBOX:
@@ -407,7 +407,7 @@ CAMPAIGN_CONTEXT_PROCESSORS = [
 ]
 
 
-### Raven
+# Raven
 
 if DEBUG:
     RAVEN_CONFIG = {}
@@ -418,7 +418,7 @@ else:
         'dsn': SENTRY_DSN,
     }
 
-### Celery ###
+# Celery
 
 BROKER_URL = 'django://'
 
@@ -431,7 +431,7 @@ CELERYD_CONCURRENCY = 1
 CELERY_RESULT_BACKEND = 'disabled'
 
 
-### LearnScripture.net specific settings ###
+# == LearnScripture.net specific settings ==
 
 IDENTITY_EXPIRES_DAYS = 22
 
@@ -489,11 +489,10 @@ if DEBUG:
                 record.stack_patched = True
             return True
 
-
     LOGGING.setdefault('filters', {})['add_sql_with_stack'] = {
         '()': SqlWithStacktrace,
         'skip': ("django.db", "django.contrib", "__main__"),
-        'limit': 3, # increase this if not enough
+        'limit': 3,  # increase this if not enough
     }
 
     # To add DB debugging, uncomment this:

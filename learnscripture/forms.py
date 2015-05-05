@@ -11,10 +11,9 @@ class SignUpForm(forms.ModelForm):
     password = forms.CharField(max_length=100, widget=forms.PasswordInput)
     username = forms.RegexField(max_length=40,
                                 regex=r'^[\w.+-]+$',
-                                error_messages=
-                                {'invalid': "This value may contain only letters, numbers and "
-                                 "these characters: . + - _"})
-
+                                error_messages={'invalid':
+                                                "This value may contain only letters, numbers and "
+                                                "these characters: . + - _"})
 
     def clean_password(self):
         p = self.cleaned_data.get('password', '')
@@ -50,7 +49,7 @@ class SignUpForm(forms.ModelForm):
             'password',
             'is_under_13',
             'enable_commenting',
-            ]
+        ]
 
 SignUpForm.base_fields['email'].help_text = "Private. Needed for notifications and password reset"
 SignUpForm.base_fields['username'].help_text = "Public"
@@ -64,7 +63,7 @@ class LogInForm(forms.Form):
 
     def clean(self):
         def fail():
-            raise forms.ValidationError(u"Can't find an account matching that username/email and password");
+            raise forms.ValidationError(u"Can't find an account matching that username/email and password")
         try:
             email = self.cleaned_data.get('email', '').strip()
             if u'@' in email:
@@ -91,7 +90,7 @@ class AccountPasswordResetForm(PasswordResetForm):
 
     error_messages = {
         'unknown': "That email address doesn't have an associated user account. Are you sure you've registered?",
-        }
+    }
 
     def clean_email(self):
         email = self.cleaned_data["email"]
@@ -115,4 +114,4 @@ class ContactForm(forms.Form):
     message = forms.CharField(max_length=10000, required=True,
                               help_text=u"If you are reporting a problem, please include a full and specific description, "
                               "and include what device/browser you are using, with version numbers.",
-                              widget=widgets.Textarea(attrs={'rows':'10'}))
+                              widget=widgets.Textarea(attrs={'rows': '10'}))

@@ -17,4 +17,3 @@ def verse_started_receiver(sender, **kwargs):
 @receiver(verse_tested)
 def verse_tested_receiver(sender, **kwargs):
     metric('verse_tested')
-

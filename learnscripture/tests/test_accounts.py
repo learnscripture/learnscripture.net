@@ -135,8 +135,6 @@ class AccountTests(AccountTestMixin, TestCase):
             self.assertEqual(account.awards.filter(award_type=AwardType.ADDICT).count(),
                              0 if i < 23 else 1)
 
-
-
     def test_friendship_weights(self):
         _, account1 = self.create_account(username="a1",
                                           email="a1@a.com")
