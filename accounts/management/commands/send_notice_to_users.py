@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from accounts.models import notify_all_accounts
 
+
 class Command(BaseCommand):
     def handle(self, *args, **options):
         if len(args) != 1:

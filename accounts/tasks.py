@@ -1,6 +1,7 @@
 from celery.task import task
 from django.utils.html import format_html
 
+
 @task(ignore_result=True)
 def notify_account_about_comment(comment_id):
     from comments.models import Comment
@@ -30,8 +31,8 @@ def notify_about_comment(event, comment, account):
 
     # And not if they already have a notice about it.
     if account.identity.notices.filter(
-        related_event=event,
-        ).exists():
+            related_event=event,
+    ).exists():
         return
 
     if account == event.account:
@@ -44,7 +45,6 @@ def notify_about_comment(event, comment, account):
                           event.get_absolute_url(),
                           event.render_html()
                           )
-
 
     notice = account.add_html_notice(msg)
     notice.related_event = event

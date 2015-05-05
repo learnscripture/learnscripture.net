@@ -1,9 +1,9 @@
 from django.dispatch import Signal
 
 new_account = Signal()
-verse_started = Signal() # sender=Account
-verse_tested = Signal() # sender=Identity, verse=UserVerseStatus
-verse_finished = Signal() # sender=Account
-points_increase = Signal() # sender=Account, previous_points, points_added
+verse_started = Signal()  # sender=Account
+verse_tested = Signal()  # sender=Identity, verse=UserVerseStatus
+verse_finished = Signal()  # sender=Account
+points_increase = Signal()  # sender=Account, previous_points, points_added
 scored_100_percent = Signal()
-catechism_started = Signal() # sender=Account, catechism=TextVersion
+catechism_started = Signal()  # sender=Account, catechism=TextVersion

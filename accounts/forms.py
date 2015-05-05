@@ -8,7 +8,7 @@ from .models import Identity, Account, TestingMethod
 class BootstrapRadioFieldRenderer(forms.RadioSelect.renderer):
     def render(self):
         """Outputs a <ul> for this set of radio fields."""
-        return mark_safe('<span id="id_%s"></span>' # We need this for AJAX validation error messages
+        return mark_safe('<span id="id_%s"></span>'  # We need this for AJAX validation error messages
                          '<ul class="inputs-list">\n%s\n</ul>'
                          % (self.name,
                             u'\n'.join([u'<li>%s</li>' % force_unicode(w) for w in self])))
