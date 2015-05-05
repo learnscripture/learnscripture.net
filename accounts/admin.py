@@ -50,14 +50,39 @@ class IdentityInline(admin.StackedInline):
     fk_name = 'account'
 
 
+class HasBadEmailListFilter(SimpleListFilter):
+    title = "has bad email address"
+    parameter_name = "bad_email"
+
+    def lookups(self, request, model_admin):
+        return [
+            ('0', 'No'),
+            ('1', 'Yes'),
+        ]
+
+    def queryset(self, request, queryset):
+        val = self.value()
+        if val is None:
+            return queryset
+        return queryset.filter(email_bounced__isnull=True if self.value() == '0' else False)
+
+
 class AccountAdmin(admin.ModelAdmin):
     def referred_by(account):
         return account.identity.referred_by
+
     def identity_link(account):
         return format_html('<a href="{0}">{1}</a>',
                            reverse('admin:accounts_identity_change', args=[account.identity.id]),
                            account.identity.id)
     list_display = ['username', identity_link, 'email', 'first_name', 'last_name', 'date_joined', 'email_bounced', 'is_hellbanned', referred_by]
+    list_filter = [HasBadEmailListFilter,
+                   'is_hellbanned',
+                   'is_tester',
+                   'is_moderator',
+                   'is_under_13',
+                   'enable_commenting',
+                   ]
     ordering = ['date_joined']
     search_fields = ['username', 'email']
     filter_horizontal = ['following']
@@ -76,4 +101,3 @@ class NoticeAdmin(admin.ModelAdmin):
 admin.site.register(Identity, IdentityAdmin)
 admin.site.register(Account, AccountAdmin)
 admin.site.register(Notice, NoticeAdmin)
-
