@@ -8,6 +8,7 @@ register = Library()
 
 logger = logging.getLogger(__name__)
 
+
 @register.filter
 def account_link(account):
     if not account.is_active:

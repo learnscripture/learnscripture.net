@@ -32,6 +32,7 @@ from learnscripture.datastructures import make_class_enum
 # methods/properties that proxy to an instance of the relevant AwardLogic
 # subclass.
 
+
 # AnyLevel is used when displaying badges on the 'badges' page which describes
 # badges in generic terms.
 class AnyLevel(object):
@@ -60,7 +61,7 @@ class AwardLogic(object):
     @classproperty
     @classmethod
     def award_type(cls):
-        return cls.enum_val # set by make_class_enum
+        return cls.enum_val  # set by make_class_enum
 
     def slug(self):
         return AwardType.name_for_value[self.award_type].lower().replace(u'_', u'-')
@@ -157,7 +158,7 @@ class CountBasedAward(MultiLevelPointsMixin, AwardLogic):
         """
         Must pass at least one of level or count
         """
-        self._LEVELS_DESC = sorted([(a,b) for b, a in self.COUNTS.items()], reverse=True)
+        self._LEVELS_DESC = sorted([(a, b) for b, a in self.COUNTS.items()], reverse=True)
         if count is None:
             if level is AnyLevel:
                 self.count = None
@@ -208,7 +209,7 @@ class LearningAward(CountBasedAward):
               6: 1000,
               7: 3000,
               8: 10000,
-              9: 31102, # every verse
+              9: 31102,  # every verse
               }
 
 
@@ -237,7 +238,7 @@ class StudentAward(LearningAward):
 
 
 class MasterAward(LearningAward):
-    POINTS = dict((k, v*10) for k, v in StudentAward.POINTS.items())
+    POINTS = dict((k, v * 10) for k, v in StudentAward.POINTS.items())
 
     def full_description(self):
         if self.level is AnyLevel:
@@ -261,7 +262,7 @@ class SharerAward(CountBasedAward):
               5: 20,
               }
 
-    POINTS = dict((k, v*500) for k, v in COUNTS.items())
+    POINTS = dict((k, v * 500) for k, v in COUNTS.items())
 
     def full_description(self):
         if self.level is AnyLevel:
@@ -282,7 +283,7 @@ class TrendSetterAward(CountBasedAward):
               6: 1000,
               }
 
-    POINTS = dict((k, v*500) for k, v in COUNTS.items())
+    POINTS = dict((k, v * 500) for k, v in COUNTS.items())
 
     def full_description(self):
         if self.level is AnyLevel:
@@ -293,7 +294,7 @@ class TrendSetterAward(CountBasedAward):
 
 
 class AceAward(CountBasedAward):
-    COUNTS = {k: 2**(k-1) for k in range(1, 10)}
+    COUNTS = {k: 2 ** (k - 1) for k in range(1, 10)}
 
     POINTS = {k: v * 1000 for k, v in COUNTS.items()}
 
@@ -320,7 +321,7 @@ class RecruiterAward(CountBasedAward):
               8: 30,
               9: 50,
               }
-    POINTS = dict((k, v*20000) for (k,v) in COUNTS.items())
+    POINTS = dict((k, v * 20000) for (k, v) in COUNTS.items())
 
     def full_description(self):
         url = reverse('referral_program')
@@ -343,8 +344,8 @@ class HackerAward(SingleLevelAward):
     POINTS = 0
 
     def full_description(self):
-        return u"Awarded to leet hackers who find some bug in the site that allows you to cheat. "\
-        "This award comes with the risk of getting your points reset to zero and/or being kicked out :-)"
+        return ("Awarded to leet hackers who find some bug in the site that allows you to cheat. "
+                "This award comes with the risk of getting your points reset to zero and/or being kicked out :-)")
 
 
 class ReigningWeeklyChampion(AwardLogic):
@@ -375,7 +376,7 @@ class TimeBasedAward(MultiLevelPointsMixin, AwardLogic):
 
     def level_for_time_period(self, time_period):
         # period is a timedelta object
-        _DAYS_DESC = sorted([(a,b) for b, a in self.DAYS.items()], reverse=True)
+        _DAYS_DESC = sorted([(a, b) for b, a in self.DAYS.items()], reverse=True)
 
         for d, level in _DAYS_DESC:
             if time_period.days >= d:
@@ -405,7 +406,7 @@ class OrganizerAward(CountBasedAward):
               5: 100,
               }
 
-    POINTS = dict((k, v*500) for k, v in COUNTS.items())
+    POINTS = dict((k, v * 500) for k, v in COUNTS.items())
 
     def full_description(self):
         if self.level is AnyLevel:
@@ -417,7 +418,7 @@ class OrganizerAward(CountBasedAward):
 
 class ConsistentLearnerAward(TimeBasedAward):
 
-    POINTS = dict((l, v*4) for l, v in StudentAward.POINTS.items())
+    POINTS = dict((l, v * 4) for l, v in StudentAward.POINTS.items())
 
     DAYS = {
         1: 7,
@@ -429,8 +430,7 @@ class ConsistentLearnerAward(TimeBasedAward):
         7: 365,
         8: 547,
         9: 730,
-        }
-
+    }
 
     FRIENDLY_DAYS = {
         1: '1 week',
@@ -442,7 +442,7 @@ class ConsistentLearnerAward(TimeBasedAward):
         7: '1 year',
         8: '18 months',
         9: '2 years'
-        }
+    }
 
     def full_description(self):
         if self.level is AnyLevel:
@@ -463,8 +463,8 @@ AwardType = make_class_enum(
      (4, 'ACE', u'Ace', AceAward),
      (5, 'RECRUITER', u'Recruiter', RecruiterAward),
      (6, 'HACKER', u'Hacker', HackerAward),
-     (7, 'WEEKLY_CHAMPION', u'Weekly champion', WeeklyChampion), # Removed
-     (8, 'REIGNING_WEEKLY_CHAMPION', u'Reigning weekly champion', ReigningWeeklyChampion), # Removed
+     (7, 'WEEKLY_CHAMPION', u'Weekly champion', WeeklyChampion),  # Removed
+     (8, 'REIGNING_WEEKLY_CHAMPION', u'Reigning weekly champion', ReigningWeeklyChampion),  # Removed
      (9, 'ADDICT', u'Addict', AddictAward),
      (10, 'ORGANIZER', u'Organizer', OrganizerAward),
      (11, 'CONSISTENT_LEARNER', u'Consistent learner', ConsistentLearnerAward),
@@ -508,4 +508,4 @@ class Award(models.Model):
         lost_award.send(sender=self)
         return super(Award, self).delete(**kwargs)
 
-from awards import hooks
+from awards import hooks  # NOQA

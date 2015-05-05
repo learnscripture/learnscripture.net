@@ -9,6 +9,7 @@ from pyquery import PyQuery
 
 ESV_BASE_URL = "http://www.esvapi.org/v2/rest/"
 
+
 def get_esv(reference_list):
     from django.conf import settings
 
@@ -19,7 +20,7 @@ def get_esv(reference_list):
             batch, r = r[0:BATCH_SIZE], r[BATCH_SIZE:]
             for ref, text in get_esv(batch):
                 yield (ref, text)
-            time.sleep(5) # Don't hammer them.
+            time.sleep(5)  # Don't hammer them.
         raise StopIteration()
 
     params = ['key=%s' % settings.ESV_API_KEY,
@@ -36,7 +37,6 @@ def get_esv(reference_list):
               'include-headings=0',
               'line-length=0',
               ]
-
 
     url = ESV_BASE_URL + "passageQuery?" + "&".join(params)
     page = urllib.urlopen(url)
@@ -70,6 +70,7 @@ def higlight_search_words(verse, words):
     verse.text = text
     return verse
 
+
 def search_esv(version, words):
     from django.conf import settings
     from bibleverses.models import ComboVerse
@@ -85,7 +86,6 @@ def search_esv(version, words):
               'results-per-page=10',
               ]
 
-
     url = ESV_BASE_URL + "query?" + "&".join(params)
     page = urllib.urlopen(url)
     text = page.read()
@@ -100,4 +100,4 @@ def search_esv(version, words):
 
     # It's easier at this point to get the verse via 'get_esv'
     verses = version.get_verses_by_reference_bulk(refs)
-    return [ComboVerse(ref, [higlight_search_words(verses[ref], words)]) for ref in refs]
+    return [ComboVerse(ref, [higlight_search_words(verses[r], words)]) for r in refs]

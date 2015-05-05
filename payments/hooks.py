@@ -14,7 +14,7 @@ def site_address_url_start():
     """
     Returns start of URL (protocol and domain) for this site (a guess)
     """
-    protocol = 'https' if settings.SESSION_COOKIE_SECURE else 'http' # best guess
+    protocol = 'https' if settings.SESSION_COOKIE_SECURE else 'http'  # best guess
     return protocol + '://' + get_current_site(None).domain
 
 

@@ -58,13 +58,14 @@ def catechism_started_receiver(sender, **kwargs):
                                                              catechism.id],
                                                             countdown=2)
 
+
 @receiver(points_increase)
 def points_increase_receiver(sender=None, previous_points=None, points_added=None, **kwargs):
     account = sender
     events.tasks.create_points_milestone_event.apply_async([account.id,
                                                            previous_points,
                                                            points_added],
-                                                          countdown=5)
+                                                           countdown=5)
 
 
 @receiver(public_verse_set_created)

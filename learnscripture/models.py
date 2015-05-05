@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 
-from learnscripture import hooks
+from learnscripture import hooks  # NOQA
 
 
 class SiteNoticeManager(models.Manager):
@@ -10,6 +10,7 @@ class SiteNoticeManager(models.Manager):
         return self.get_query_set().filter(is_active=True,
                                            begins__lte=timezone.now(),
                                            ends__gt=timezone.now())
+
 
 class SiteNotice(models.Model):
     message_html = models.TextField()

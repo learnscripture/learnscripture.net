@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
-import os, logging
+import os
+import logging
 
 from celery import Celery
 from celery.signals import task_failure
@@ -9,6 +10,7 @@ from django.conf import settings
 
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'learnscripture.settings')
+
 
 @task_failure.connect
 def log_exception(

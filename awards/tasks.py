@@ -8,6 +8,7 @@ from bibleverses.models import VerseSetType, VerseSet
 from groups.models import combined_membership_count_for_creator
 from scores.models import ScoreReason, get_number_of_distinct_hours_for_account_id
 
+
 @task(ignore_result=True)
 def give_learning_awards(account_id):
     if account_id is None:
@@ -68,7 +69,7 @@ def give_ace_awards(account_id):
     except IndexError:
         breaker = None
 
-    if breaker is None: # No break, everything recorded is at 100%
+    if breaker is None:  # No break, everything recorded is at 100%
         count = scores.count()
     else:
         count = scores.filter(created__gt=breaker.created).count()
@@ -109,6 +110,7 @@ def give_all_consistent_learner_awards():
     for account_id, streak in get_verse_started_running_streaks().items():
         if streak >= min_days:
             give_consistent_learner_award.delay(account_id, streak)
+
 
 @task(ignore_result=True)
 def give_consistent_learner_award(account_id, streak):

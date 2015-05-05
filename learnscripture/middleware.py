@@ -78,7 +78,6 @@ class DebugMiddleware(object):
         if 'sleep' in request.GET:
             time.sleep(int(request.GET['sleep']))
 
-
         if 'as' in request.GET:
             session.set_identity(request.session, Account.objects.get(username=request.GET['as']).identity)
 
@@ -110,7 +109,8 @@ LEARNING_VIEWS = [
     'learnscripture.api.cancellearningverse',
     'learnscripture.api.cancellearningpassage',
     'learnscripture.api.resetprogress',
-    ]
+]
+
 
 class TrackingMiddleware(object):
     def process_response(self, request, response):
@@ -125,5 +125,5 @@ class TrackingMiddleware(object):
                 try:
                     HttpLog.log_request_response(request, response)
                 except:
-                    pass # Don't take down process if we can't log
+                    pass  # Don't take down process if we can't log
         return response

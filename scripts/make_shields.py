@@ -7,9 +7,9 @@ import rsvg
 
 
 def combine(svg_files, out_file, size):
-    img =  cairo.ImageSurface(cairo.FORMAT_ARGB32, size, size)
+    img = cairo.ImageSurface(cairo.FORMAT_ARGB32, size, size)
     ctx = cairo.Context(img)
-    ctx.scale(size/500.0, size/500.0)
+    ctx.scale(size / 500.0, size / 500.0)
     for f in svg_files:
         handler = rsvg.Handle(f)
         handler.render_cairo(ctx)

@@ -113,7 +113,7 @@ def login(request):
                     password_reset_form=lambda *args: AccountPasswordResetForm(*args, prefix="login"),
                     post_reset_redirect=reverse('password_reset_done'),
                     email_template_name='learnscripture/password_reset_email.txt',
-                    )
+                )
             else:
                 # Need errors from password reset for be used on main form - hack
                 form._errors = resetform.errors
@@ -199,8 +199,8 @@ def preferences(request):
             return get_next(request, reverse('dashboard'))
     else:
         form = PreferencesForm(instance=identity)
-    c = {'form':form,
-         'title': u'Preferences',
+    c = {'form': form,
+         'title': 'Preferences',
          'hide_preferences_popup': True}
     return render(request, 'learnscripture/preferences.html', c)
 
@@ -234,14 +234,14 @@ def todays_stats(identity):
     session_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
     stats['total_verses_tested'] = set(uvs.reference for uvs in
-                                       identity.verse_statuses\
-                                           .filter(last_tested__gte=session_start,
-                                                   ignored=False)
+                                       identity.verse_statuses
+                                       .filter(last_tested__gte=session_start,
+                                               ignored=False)
                                        )
     stats['new_verses_started'] = set(uvs.reference for uvs in
-                                      identity.verse_statuses\
-                                          .filter(first_seen__gte=session_start,
-                                                  ignored=False)
+                                      identity.verse_statuses
+                                      .filter(first_seen__gte=session_start,
+                                              ignored=False)
                                       )
     return stats
 
@@ -249,11 +249,11 @@ def todays_stats(identity):
 def learn_set(request, uvs_list, learning_type):
     uvs_list = [u for u in uvs_list if u is not None]
     # Save where we should return to after learning:
-    return_to = reverse('dashboard') # by default, the dashboard
+    return_to = reverse('dashboard')  # by default, the dashboard
     referer = request.META.get('HTTP_REFERER')
     if referer is not None:
         url = urlparse.urlparse(referer)
-        allowed_return_to = [reverse('user_verses')] # places it is useful to return to
+        allowed_return_to = [reverse('user_verses')]  # places it is useful to return to
         if url.path in allowed_return_to:
             # avoiding redirection security problems by making it relative:
             url = ('', '', url.path, url.params, url.query, url.fragment)
@@ -275,7 +275,7 @@ def get_user_groups(identity):
     account = identity.account
     groups = account.get_ordered_groups()
     limit = 3
-    groups = groups[0:limit + 1] # + 1 so we can see if we got more
+    groups = groups[0:limit + 1]  # + 1 so we can see if we got more
     if len(groups) > limit:
         return groups[0:3], True
     else:
@@ -333,7 +333,7 @@ def dashboard(request):
                 uvs_id = int(request.POST['uvs_id'])
                 main_uvs = [uvs for uvs in uvss if uvs.id == uvs_id][0]
                 if ('revisepassagesection' in request.POST or
-                    'practisepassagesection' in request.POST):
+                        'practisepassagesection' in request.POST):
                     # Revise/practise the specified section
                     refs = set(vc.reference for vc in main_uvs.get_section_verse_choices())
                     uvss = [uvs for uvs in uvss if uvs.reference in refs]
@@ -468,7 +468,7 @@ def choose(request):
             try:
                 version.get_verse_list(ref, max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
             except InvalidVerseReference:
-                pass # Ignore the post.
+                pass  # Ignore the post.
             else:
                 return learn_set(request, [identity.add_verse_choice(ref, version=version)],
                                  session.LearningType.LEARNING)
@@ -495,7 +495,7 @@ def choose(request):
 
     if 'new' in request.GET:
         verse_sets = verse_sets.order_by('-date_added')
-    else: # popular, the default
+    else:  # popular, the default
         verse_sets = verse_sets.order_by('-popularity')
     c['verse_sets'] = verse_sets
     c['active_tab'] = 'verseset'
@@ -637,7 +637,7 @@ def view_verse_set(request, slug):
         vc.verse = verses.get(vc.reference, None)
 
     if (verse_set.is_selection and
-        len(verse_list) > 1 and is_continuous_set(verse_list)):
+            len(verse_list) > 1 and is_continuous_set(verse_list)):
         c['show_convert_to_passage'] = True
 
         if request.method == 'POST':
@@ -728,11 +728,10 @@ def create_or_edit_set(request, set_type=None, slug=None):
 
     def mk_verse_list(ref_list, verse_dict):
         verses = []
-        for ref in ref_list: # preserve order
+        for ref in ref_list:  # preserve order
             if ref in verse_dict:
                 verses.append(verse_dict[ref])
         return verses
-
 
     c['set_type'] = VerseSetType.name_for_value[set_type]
 
@@ -783,7 +782,7 @@ def create_or_edit_set(request, set_type=None, slug=None):
             verse_set.set_verse_choices(ref_list)
 
             # if user just made it public or it is a new public verse set
-            if (verse_set.public and (orig_verse_set_public == False
+            if (verse_set.public and (not orig_verse_set_public
                                       or mode == 'create'
                                       )):
                 public_verse_set_created.send(sender=verse_set)
@@ -806,13 +805,14 @@ def create_or_edit_set(request, set_type=None, slug=None):
         verse_list = add_passage_breaks(verse_list, breaks)
 
     c['verses'] = verse_list
-    c['new_verse_set'] = verse_set == None
+    c['new_verse_set'] = verse_set is None
     c['verse_set_form'] = form
     c['title'] = title
 
     c.update(context_for_quick_find(request))
 
     return render(request, 'learnscripture/create_set.html', c)
+
 
 def get_hellbanned_mode(request):
     account = account_from_request(request)
@@ -861,7 +861,7 @@ def combine_timeline_stats(*statslists):
     # equality of dates, and supplying zero for missing items in any lists.
     retval = []
     num_lists = len(statslists)
-    positions = [0] * num_lists # current position in each of statslists
+    positions = [0] * num_lists  # current position in each of statslists
     statslist_r = list(range(0, num_lists))
     statslist_lengths = map(len, statslists)
 
@@ -952,6 +952,7 @@ def user_verse_sets(request):
 
     return render(request, 'learnscripture/user_verse_sets.html', c)
 
+
 # Password reset for Accounts:
 #
 # We can re-use a large amount of django.contrib.auth functionality
@@ -960,7 +961,6 @@ def user_verse_sets(request):
 #
 # Also, we do the main password_reset via AJAX,
 # from the the same form as the login form.
-
 def password_reset_done(request):
     return render(request, 'learnscripture/password_reset_done.html',
                   {'title': u'Password reset started'})
@@ -981,7 +981,7 @@ def password_reset_confirm(request, uidb64=None, token=None):
     """
     token_generator = default_token_generator
     set_password_form = AccountSetPasswordForm
-    assert uidb64 is not None and token is not None # checked by URLconf
+    assert uidb64 is not None and token is not None  # checked by URLconf
     post_reset_redirect = reverse('password_reset_complete')
     try:
         uid_int = urlsafe_base64_decode(uidb64)
@@ -1050,8 +1050,8 @@ def account_details(request):
         form = AccountDetailsForm(instance=request.identity.account)
 
     return TemplateResponse(request, 'learnscripture/account_details.html',
-                            {'form':form,
-                             'title': u"Account details",
+                            {'form': form,
+                             'title': "Account details",
                              'url_after_logout': '/',
                              })
 
@@ -1060,7 +1060,7 @@ def date_to_js_ts(d):
     """
     Converts a date object to the timestamp required by the flot library
     """
-    return int(d.strftime('%s'))*1000
+    return int(d.strftime('%s')) * 1000
 
 
 def stats(request):
@@ -1145,7 +1145,7 @@ def donation_paypal_dict(account, url_start):
         "business": settings.PAYPAL_RECEIVER_EMAIL,
         "item_name": u"Donation to LearnScripture.net",
         "invoice": "account-%s-%s" % (account.id,
-                                      timezone.now()), # We don't need this, but must be unique
+                                      timezone.now()),  # We don't need this, but must be unique
         "notify_url": "%s%s" % (url_start, reverse('paypal-ipn')),
         "return_url": "%s%s" % (url_start, reverse('pay_done')),
         "cancel_return": "%s%s" % (url_start, reverse('pay_cancelled')),
@@ -1348,7 +1348,7 @@ def group_wall(request, slug):
 
 
 def group_leaderboard(request, slug):
-    page_num = None # 1-indexed page page
+    page_num = None  # 1-indexed page page
     try:
         page_num = int(request.GET['p'])
     except (KeyError, ValueError):
@@ -1473,7 +1473,7 @@ def contact(request):
     account = account_from_request(request)
     if account is not None:
         initial = {'name': account.first_name + u' ' + account.last_name,
-                   'email': account.email }
+                   'email': account.email}
     else:
         initial = {}
     if request.method == 'POST':
@@ -1492,7 +1492,7 @@ def contact(request):
 def send_contact_email(contact_form, account):
     email = contact_form.cleaned_data['email']
     mail.EmailMessage(subject="LearnScripture feedback",
-                      body=\
+                      body=
 """
 From: %(name)s
 Email: %(email)s
@@ -1517,7 +1517,7 @@ def activity_stream(request):
     return render(request,
                   'learnscripture/activity_stream.html',
                   {'events':
-                       Event.objects
+                   Event.objects
                    .for_activity_stream(viewer=viewer)
                    .prefetch_related('comments', 'comments__author'),
                    'title': "Recent activity",

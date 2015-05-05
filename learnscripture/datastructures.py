@@ -38,6 +38,7 @@ def make_choices(name, choice_list):
 
     return Choices
 
+
 def make_class_enum(enum_name, choice_list):
     """
     Given a name of a class and a list of (val, constant name, title, class),

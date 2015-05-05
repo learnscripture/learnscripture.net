@@ -21,8 +21,8 @@ class Command(BaseCommand):
             Identity.objects\
                 .filter(account__isnull=True,
                         date_created__lt=timezone.now() - timedelta(days=settings.IDENTITY_EXPIRES_DAYS))\
-                        .annotate(verse_statuses_count=Count('verse_statuses'))\
-                        .filter(verse_statuses_count=0)\
-                        .delete()
+                .annotate(verse_statuses_count=Count('verse_statuses'))\
+                .filter(verse_statuses_count=0)\
+                .delete()
         except Exception:
             logger.error("Couldn't clean old identities", exc_info=sys.exc_info())

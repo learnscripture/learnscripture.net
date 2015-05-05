@@ -5,6 +5,7 @@ from app_metrics.models import MetricDay, Metric
 
 from accounts.models import get_active_account_count, get_active_identity_count
 
+
 def record_active_accounts(now=None):
     if now is None:
         now = timezone.now()
@@ -22,4 +23,3 @@ def record_active_accounts(now=None):
                                              created=today)
     md2.num = get_active_identity_count(start, end)
     md2.save()
-

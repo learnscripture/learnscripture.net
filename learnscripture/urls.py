@@ -84,7 +84,7 @@ urlpatterns = patterns('',
                        # Dependencies
                        (r'^admin/fiber/', include('fiber.admin_urls')),
                        (r'^api/v2/', include('fiber.rest_api.urls')),
-                       (r'^jsi18n/$', 'django.views.i18n.javascript_catalog', {'packages': ('fiber',),}),
+                       (r'^jsi18n/$', 'django.views.i18n.javascript_catalog', {'packages': ['fiber']}),
                        url(r'^admin/', include(admin.site.urls)),
 
                        (r'^paypal/ipn/', include('paypal.standard.ipn.urls')),

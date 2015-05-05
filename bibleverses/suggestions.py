@@ -56,6 +56,7 @@ def bad_punctuation(text):
 
     return False
 
+
 def normalise_word(word):
     word = word.strip(PUNCTUATION_OR_WHITESPACE)
     return word.lower()
@@ -68,6 +69,7 @@ def split_into_words_for_suggestions(text):
 def split_into_sentences(text):
     return [s for s in [s.strip(PUNCTUATION_OR_WHITESPACE) for s in text.split('.')]
             if s]
+
 
 def sentence_first_words(text):
     return [split_into_words_for_suggestions(l)[0]
@@ -99,6 +101,7 @@ def similar_books(book_name):
     if book_name not in retval:
         retval.append(book_name)
     return retval
+
 
 def frequency_pairs(words):
     return scale_suggestions(Counter(words).items())
@@ -150,6 +153,7 @@ def generate_suggestions(version, ref=None, missing_only=True, thesaurus=None):
                                     ref=ref, missing_only=missing_only,
                                     thesaurus=thesaurus)
 
+
 def sum_matrices(matrices):
     # Do our own matrix sum to avoid n^2 behaviour
     retval = pykov.Matrix()
@@ -166,6 +170,7 @@ def sum_matrices(matrices):
 def build_markov_chains_with_sentence_breaks(training_texts, size):
     return sum_matrices(build_markov_chains_for_text(key, training_text, size)
                         for key, training_text in training_texts.items())
+
 
 def filename_for_labels(labels, size):
     return os.path.join(settings.SRC_DIR, "..", "data", "%s__level%s.markov.data" % ('_'.join(labels), str(size)))
@@ -202,7 +207,7 @@ def build_markov_chains_for_text(labels, text, size):
         if size == 1:
             chain_input = words
         else:
-            chain_input = [tuple(words[i:i+size]) for i in range(0, len(words)-(size-1))]
+            chain_input = [tuple(words[i:i + size]) for i in range(0, len(words) - (size - 1))]
         v, c = pykov.maximum_likelihood_probabilities(chain_input, lag_time=1)
         matrices.append(c)
 
@@ -252,12 +257,12 @@ def generate_suggestions_helper(version, items, text_getter, training_texts, ref
         count = max(count, 10)
         # This method tries to find some alternatives to words suggested by
         # non-thesaurus methods, to throw people off the scent!
-        from_thesaurus = [w for w,f in suggestions_thesaurus(words, i, count, [])]
+        from_thesaurus = [w for w, f in suggestions_thesaurus(words, i, count, [])]
         retval = []
         new = set()
         for w, f in suggestions_so_far:
             if w not in from_thesaurus:
-                more = thesaurus.get(w, [])[:2] # Just two for each
+                more = thesaurus.get(w, [])[:2]  # Just two for each
                 for m in more:
                     if m not in new:
                         retval.append((m, f))
@@ -272,9 +277,9 @@ def generate_suggestions_helper(version, items, text_getter, training_texts, ref
     def mk_suggestions_markov(size):
         def suggestions_markov(words, i, count, suggestions_so_far):
             if size == 1:
-                start = words[i-1]
+                start = words[i - 1]
             else:
-                start = tuple(words[i-size:i])
+                start = tuple(words[i - size:i])
             chain = get_markov_chain(size)
             try:
                 options = chain.succ(start).items()
@@ -288,7 +293,7 @@ def generate_suggestions_helper(version, items, text_getter, training_texts, ref
         # Emphasise the words that come after the current one,
         # exclude the one immediately before as that is very unlikely,
         FACTOR = 5
-        bag = words[i+1:] * FACTOR + words[:max(0, i-1)]
+        bag = words[i + 1:] * FACTOR + words[:max(0, i - 1)]
         if len(bag) == 0:
             return []
         c = Counter()
@@ -357,27 +362,27 @@ def generate_suggestions_helper(version, items, text_getter, training_texts, ref
                 word_suggestions = []
                 for condition, method in strategies:
                     if condition(i):
-                        need = MIN_SUGGESTIONS - len(word_suggestions) # Only random strategies really uses this
-                        new_suggestions = [(w,f) for (w,f) in method(words, i, need, word_suggestions)
+                        need = MIN_SUGGESTIONS - len(word_suggestions)  # Only random strategies really uses this
+                        new_suggestions = [(w, f) for (w, f) in method(words, i, need, word_suggestions)
                                            if w != word]
                         new_suggestions = scale_suggestions(new_suggestions, relevance)
                         if len(new_suggestions) > 0:
                             word_suggestions = merge_suggestions(word_suggestions, new_suggestions)
-                            relevance = relevance / 2.0 # scale down worse methods for finding suggestions
+                            relevance = relevance / 2.0  # scale down worse methods for finding suggestions
 
                     # Sort after each one:
-                    word_suggestions.sort(key=lambda (a,b): -b)
+                    word_suggestions.sort(key=lambda (a, b): -b)
 
                 word_suggestions = scale_suggestions(word_suggestions[0:MAX_SUGGESTIONS])
 
                 # Add hits=0
-                item_suggestions.append([(w,f,0) for w,f in word_suggestions])
+                item_suggestions.append([(w, f, 0) for w, f in word_suggestions])
 
         to_create.append(WordSuggestionData(version_slug=version.slug,
                                             reference=item.reference,
                                             suggestions=item_suggestions,
                                             hash=hash_text(text),
-                                        ))
+                                            ))
 
     WordSuggestionData.objects.bulk_create(to_create)
 
@@ -387,7 +392,8 @@ def scale_suggestions(suggestions, factor=1.0):
     if len(suggestions) == 0:
         return suggestions
     max_f = max(f for w, f in suggestions)
-    return [(w, float(f)/max_f * factor) for w, f in suggestions]
+    return [(w, float(f) / max_f * factor) for w, f in suggestions]
+
 
 def merge_suggestions(s1, s2):
     return (Counter(dict(s1)) + Counter(dict(s2))).items()
@@ -396,7 +402,7 @@ def merge_suggestions(s1, s2):
 def get_in_batches(qs, batch_size=200):
     start = 0
     while True:
-        q = list(qs[start:start+batch_size])
+        q = list(qs[start:start + batch_size])
         if len(q) == 0:
             raise StopIteration()
         for item in q:
@@ -433,6 +439,7 @@ PRONOUN_THESAURUS = dict(
     [(k, [v for v in SUBJECTS if v != k]) for k in SUBJECTS]
 )
 
+
 def get_thesaurus():
     fname = os.path.join(settings.SRC_DIR, 'resources', 'mobythes.aur')
     f = file(fname).read().decode('utf8')
@@ -463,7 +470,7 @@ def version_thesaurus(version, base_thesaurus):
             continue
 
         # Don't allow multi-word alternatives
-        alts = [a for a in alts if not ' ' in a]
+        alts = [a for a in alts if ' ' not in a]
         # Don't allow alternatives that don't appear in the text
         alts = [a for a in alts if a in words]
         # Normalise and exclude self
@@ -471,7 +478,7 @@ def version_thesaurus(version, base_thesaurus):
         # Sort according to frequency in text
         alts_with_freq = [(words[a], a) for a in alts]
         alts_with_freq.sort(reverse=True)
-        d[word] = [w for c,w in alts_with_freq]
+        d[word] = [w for c, w in alts_with_freq]
 
     with file(fname, "w") as f:
         pickle.dump(d, f)

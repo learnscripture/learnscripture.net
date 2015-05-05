@@ -38,14 +38,16 @@ TARGETS = {
                    'DOMAIN': 'learnscripture.net',
                    'PORT': '80',
                    },
-    }
+}
 TARGET = None
 
 SUPERVISORCTL = "/home/cciw/webapps/learnscripture_django/venv/bin/supervisorctl"
 SUPERVISORD_STARTER = "/home/cciw/webapps/learnscripture_django/venv/bin/start_supervisor.sh"
 
+
 def print_message(msg):
     sys.stderr.write(datetime.now().isoformat() + "  " + str(msg) + "\n")
+
 
 def site_is_up():
     # we assume good, so that a bug in this code doesn't misdiagnose and cause
@@ -94,6 +96,7 @@ def check(attempts=ATTEMPTS):
 
 def start_supervisor():
     os.system("%s start" % SUPERVISORD_STARTER)
+
 
 def stop_supervisor():
     os.system("%s stop" % SUPERVISORD_STARTER)
@@ -152,12 +155,14 @@ def kill_cronjob_processes():
         print_message("Killing process %d %s" % (ps.pid, ' '.join(ps.cmdline)))
         ps.send_signal(signal.SIGKILL)
 
+
 def get_learnscripture_cronjob_processes():
     # We only target ones that have 'manage.py' in cmdline. Importantly, that
     # excludes this script!
     return [ps for ps in get_controllable_processes()
             if (TARGET['APPNAME'] in ps.getcwd() or TARGET['APPNAME'] in ' '.join(ps.cmdline))
             and ('manage.py' in ' '.join(ps.cmdline))]
+
 
 def get_controllable_processes():
     l = []
@@ -176,6 +181,7 @@ def secrets():
     import json
     thisdir = os.path.dirname(os.path.abspath(__file__))
     return json.load(open(os.path.join(os.path.dirname(thisdir), "config", "secrets.json")))
+
 
 def notify(message):
     from twilio.rest import TwilioRestClient

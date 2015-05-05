@@ -18,11 +18,12 @@ from learnscripture.datastructures import make_choices
 ScoreReason = make_choices('ScoreReason',
                            [(0, 'VERSE_TESTED', 'Verse tested'),
                             (1, 'VERSE_REVISED', 'Verse revised'),
-                            (2, 'REVISION_COMPLETED', 'Review completed'), # No longer used
+                            (2, 'REVISION_COMPLETED', 'Review completed'),  # No longer used
                             (3, 'PERFECT_TEST_BONUS', 'Perfect!'),
                             (4, 'VERSE_LEARNT', 'Verse fully learnt'),
                             (5, 'EARNED_AWARD', 'Earned award'),
                             ])
+
 
 class Scores(object):
     # Constants for scores. Duplicated in learn.js
@@ -104,7 +105,7 @@ def get_all_time_leaderboard(hellbanned_mode, page, page_size, group=None):
         .group_by(totalscore.c.account_id,
                   totalscore.c.points)
         .order_by(totalscore.c.points.desc())
-        )
+    )
 
     subq1 = leaderboard_group_filter(subq1, hellbanned_mode, group)
     subq1 = subq1.alias()
@@ -149,7 +150,7 @@ def get_leaderboard_since(since, hellbanned_mode, page, page_size, group=None):
                           hellbanned_mode)
         .where(scorelog.c.created > since)
         .group_by(scorelog.c.account_id)
-        )
+    )
 
     subq1 = leaderboard_group_filter(subq1, hellbanned_mode, group)
 
@@ -164,7 +165,7 @@ def get_leaderboard_since(since, hellbanned_mode, page, page_size, group=None):
                from_obj=subq1)
         .limit(page_size)
         .offset(page * page_size)
-        )
+    )
 
     default_engine.execute("CREATE TEMPORARY SEQUENCE rank_seq;")
     results = default_engine.execute(q1).fetchall()
@@ -177,7 +178,7 @@ def get_rank_all_time(total_score_obj, hellbanned_mode):
     qs = TotalScore.objects.filter(
         points__gt=total_score_obj.points,
         account__is_active=True
-        )
+    )
     if not hellbanned_mode:
         qs = qs.exclude(account__is_hellbanned=True)
 
@@ -206,7 +207,7 @@ def get_number_of_distinct_hours_for_account_id(account_id):
         [distinct(extract('hour', scores_scorelog.c.created)).label('hours')],
         scores_scorelog.c.account_id == account_id,
         from_obj=[scores_scorelog]
-        ).alias()
+    ).alias()
     q1 = select([func.count(sq1.c.hours)],
                 from_obj=sq1)
 
@@ -246,7 +247,7 @@ def get_verses_started_counts(identity_ids, started_since=None):
                       uvs.c.memory_stage >= MemoryStage.TESTED,
                       uvs.c.for_identity_id.in_(identity_ids),
                       *([uvs.c.first_seen > started_since]
-                         if started_since is not None else []))
+                        if started_since is not None else []))
                  )
           .group_by(uvs.c.for_identity_id,
                     uvs.c.reference,
@@ -324,7 +325,7 @@ def get_verses_finished_count(identity_id, finished_since=None):
                       uvs.c.strength >= MM.LEARNT,
                       uvs.c.for_identity_id == identity_id,
                       *([uvs.c.last_tested > finished_since]
-                         if finished_since is not None else [])
+                        if finished_since is not None else [])
                       ),
                  from_obj=uvs
                  )

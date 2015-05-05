@@ -15,6 +15,6 @@ def unsign_payment_string(s):
     """
     try:
         # Only allow values 1 day old, that is more than enough time to complete payment
-        return loads(s, salt='learnscripture.payments', max_age=24*3600)
+        return loads(s, salt='learnscripture.payments', max_age=24 * 3600)
     except BadSignature:
         return None

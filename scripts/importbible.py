@@ -56,6 +56,7 @@ def fix_text(text):
     text = re.sub(' "(\b|$)', '"', text)
     return text
 
+
 def parse_ref(ref):
     r = ref.rsplit(' ', 1)
     c, v = map(int, r[1].split(':'))
@@ -88,6 +89,7 @@ def import_bible(version):
 
 
 _bible_verse_numbers = {}
+
 
 def get_bible_verse_numbers():
     if _bible_verse_numbers:

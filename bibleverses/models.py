@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse
 from django.db import models, connection
 from django.utils import timezone
 from django.utils.functional import cached_property
-from jsonfield import JSONField 
+from jsonfield import JSONField
 
 # TextVersion and Verse are pseudo static, so make extensive use of caching.
 # Other models won't benefit so much due to lots of writes and an increased
@@ -34,9 +34,9 @@ BIBLE_BOOK_ABBREVIATIONS = {}
 def make_bible_book_abbreviations():
     global BIBLE_BOOK_ABBREVIATIONS
 
-    nums = {'1 ':['1', 'I ', 'I'],
-            '2 ':['2', 'II ', 'II'],
-            '3 ':['3', 'III ', 'III']
+    nums = {'1 ': ['1', 'I ', 'I'],
+            '2 ': ['2', 'II ', 'II'],
+            '3 ': ['3', 'III ', 'III']
             }
 
     def get_abbrevs(book_name):
@@ -51,7 +51,6 @@ def make_bible_book_abbreviations():
         # We don't allow abbreviations less than 3 letters
         for i in range(2, len(book_name) + 1):
             yield book_name[0:i]
-
 
     # Get all abbreviations
     d = {}
@@ -76,48 +75,48 @@ def make_bible_book_abbreviations():
 
     # Some special cases that don't fit above pattern
     BIBLE_BOOK_ABBREVIATIONS.update({
-            'dt': 'Deuteronomy',
-            'gn': 'Genesis',
-            'hg': 'Haggai',
-            'jb': 'Job',
-            'jl': 'Joel',
-            'jgs': 'Judges',
-            'jas': 'James',
-            'jm': 'James',
-            'jn': 'John',
-            'jnh': 'Jonah',
-            'jsh': 'Joshua',
-            'lev': 'Leviticus',
-            'mk': 'Mark',
-            'mrk': 'Mark',
-            'mt': 'Matthew',
-            'nm': 'Numbers',
-            'prv': 'Proverbs',
-            'phm': 'Philemon',
-            'phil': 'Philippians',
-            'php': 'Philippians',
-            'rm': 'Romans',
-            'sg': 'Song of Solomon',
-            })
+        'dt': 'Deuteronomy',
+        'gn': 'Genesis',
+        'hg': 'Haggai',
+        'jb': 'Job',
+        'jl': 'Joel',
+        'jgs': 'Judges',
+        'jas': 'James',
+        'jm': 'James',
+        'jn': 'John',
+        'jnh': 'Jonah',
+        'jsh': 'Joshua',
+        'lev': 'Leviticus',
+        'mk': 'Mark',
+        'mrk': 'Mark',
+        'mt': 'Matthew',
+        'nm': 'Numbers',
+        'prv': 'Proverbs',
+        'phm': 'Philemon',
+        'phil': 'Philippians',
+        'php': 'Philippians',
+        'rm': 'Romans',
+        'sg': 'Song of Solomon',
+    })
 
 make_bible_book_abbreviations()
 
 # Psalm 119 is 176 verses
 MAX_VERSE_QUERY_SIZE = 200
-MAX_VERSES_FOR_SINGLE_CHOICE = 4 # See also choose.js
+MAX_VERSES_FOR_SINGLE_CHOICE = 4  # See also choose.js
 
 
 # Also defined in learn.js
 VerseSetType = make_choices('VerseSetType',
                             [(1, 'SELECTION', 'Selection'),
                              (2, 'PASSAGE', 'Passage'),
-                            ])
+                             ])
 
 StageType = make_choices('StageType',
                          [(1, 'READ', 'read'),
                           (2, 'RECALL_INITIAL', 'recall from initials'),
                           (3, 'RECALL_MISSING', 'recall when missing'),
-                          (4, 'TEST', 'test'), # Also used in learn.js
+                          (4, 'TEST', 'test'),  # Also used in learn.js
                           ])
 
 
@@ -134,6 +133,7 @@ TextType = make_choices('TextType',
                         [(1, 'BIBLE', 'Bible'),
                          (2, 'CATECHISM', 'Catechism'),
                          ])
+
 
 class TextVersionManager(caching.base.CachingManager):
     def get_by_natural_key(self, slug):
@@ -192,7 +192,8 @@ class TextVersion(caching.base.CachingMixin, models.Model):
         references are silently discarded, and won't be in the return
         dictionary.
         """
-        if not self.is_bible: return {}
+        if not self.is_bible:
+            return {}
         verse_dict = self.get_verses_by_reference_bulk(reference_list)
         return dict((ref, v.text) for (ref, v) in verse_dict.items())
 
@@ -202,7 +203,8 @@ class TextVersion(caching.base.CachingMixin, models.Model):
         references are silently discarded, and won't be in the return
         dictionary.
         """
-        if not self.is_bible: return {}
+        if not self.is_bible:
+            return {}
         # We try to do this efficiently, but it is hard for combo references. So
         # we do the easy ones the easy way:
         simple_verses = list(self.verse_set.filter(reference__in=reference_list,
@@ -220,12 +222,14 @@ class TextVersion(caching.base.CachingMixin, models.Model):
         return v_dict
 
     def get_qapairs_by_reference_bulk(self, reference_list):
-        if not self.is_catechism: return {}
+        if not self.is_catechism:
+            return {}
         return {qapair.reference: qapair
                 for qapair in self.qapairs.filter(reference__in=reference_list)}
 
     def get_qapair_by_reference(self, reference):
-        if not self.is_catechism: return None
+        if not self.is_catechism:
+            return None
         return self.qapairs.get(reference=reference)
 
     def _get_reference_list(self, reference):
@@ -353,6 +357,7 @@ def intersperse(iterable, delimiter):
         yield delimiter
         yield x
 
+
 class VerseManager(caching.base.CachingManager):
 
     def text_search(self, query, version, limit=10):
@@ -382,10 +387,10 @@ class Verse(caching.base.CachingMixin, models.Model):
 
     # De-normalised fields
     # Public facing fields are 1-indexed, others are 0-indexed.
-    book_number = models.PositiveSmallIntegerField() # 0-indexed
-    chapter_number = models.PositiveSmallIntegerField() # 1-indexed
-    verse_number = models.PositiveSmallIntegerField()   # 1-indexed
-    bible_verse_number = models.PositiveSmallIntegerField() # 0-indexed
+    book_number = models.PositiveSmallIntegerField()  # 0-indexed
+    chapter_number = models.PositiveSmallIntegerField()  # 1-indexed
+    verse_number = models.PositiveSmallIntegerField()  # 1-indexed
+    bible_verse_number = models.PositiveSmallIntegerField()  # 0-indexed
 
     # This field is to cope with versions where a specific verse is entirely
     # empty e.g. John 5:4 in NET/ESV
@@ -413,7 +418,7 @@ class Verse(caching.base.CachingMixin, models.Model):
         unique_together = [
             ('bible_verse_number', 'version'),
             ('reference', 'version'),
-            ]
+        ]
         ordering = ('bible_verse_number',)
 
     def mark_missing(self):
@@ -425,6 +430,7 @@ class Verse(caching.base.CachingMixin, models.Model):
 
 SUGGESTION_COUNT = 10
 
+
 class WordSuggestionData(models.Model):
     # All the suggestion data for a single verse/question
     # For efficiency, we avoid having millions of rows, because
@@ -434,7 +440,7 @@ class WordSuggestionData(models.Model):
     # explicit FKs to the main DB.
     version_slug = models.CharField(max_length=20, default='')
     reference = models.CharField(max_length=100)
-    hash = models.CharField(max_length=40) # SHA1 of text
+    hash = models.CharField(max_length=40)  # SHA1 of text
 
     # Schema:
     # list of suggestions for each word, in order.
@@ -466,13 +472,13 @@ class WordSuggestionData(models.Model):
 
             # However, we don't want hits to overwhelm all other possibilities
             # which haven't been hit yet, so we put a cap of 4
-            pairs = [(word, min(hits/2.0, 4) + frequency)
+            pairs = [(word, min(hits / 2.0, 4) + frequency)
                      for word, frequency, hits in word_suggestions]
 
             # Normalise, and also give low frequency words
             # a boost, because they are not being seen at all
             max_freq = max(frequency for word, frequency in pairs)
-            pairs = [(word, math.sqrt(frequency/max_freq)) for word, frequency in pairs]
+            pairs = [(word, math.sqrt(frequency / max_freq)) for word, frequency in pairs]
 
             # Make a random selection, weighted according to frequency
             chosen = set()
@@ -483,7 +489,7 @@ class WordSuggestionData(models.Model):
                     picked = available[0][0]
                 else:
                     # Weighting:
-                    threshold = random.random() # 0..1
+                    threshold = random.random()  # 0..1
                     possible = [word for word, freq in available if freq >= threshold]
                     if not possible:
                         continue
@@ -578,7 +584,6 @@ SELECT COUNT(*) FROM
         cursor.execute(sql, [tuple(ignoring_account_ids), tuple(ids)])
         return cursor.fetchall()[0][0]
 
-
     def search(self, verse_sets, query):
         # Does the query look like a Bible reference?
         reference = parse_as_bible_reference(query,
@@ -606,7 +611,7 @@ class VerseSet(models.Model):
 
     # Essentially denormalised field, to make it quick to check for duplicate
     # passage sets:
-    passage_id = models.CharField(max_length=203, # 100 for reference * 2 + 3 for ' - '
+    passage_id = models.CharField(max_length=203,  # 100 for reference * 2 + 3 for ' - '
                                   default="")
 
     objects = VerseSetManager()
@@ -713,7 +718,7 @@ class UserVerseStatus(models.Model):
     reference = models.CharField(max_length=100)
     verse_set = models.ForeignKey(VerseSet, null=True, blank=True,
                                   on_delete=models.SET_NULL)
-    text_order = models.PositiveSmallIntegerField() # order of this item within associate TextVersion
+    text_order = models.PositiveSmallIntegerField()  # order of this item within associate TextVersion
     version = models.ForeignKey(TextVersion)
     memory_stage = models.PositiveSmallIntegerField(choices=MemoryStage.choice_list,
                                                     default=MemoryStage.ZERO)
@@ -725,7 +730,6 @@ class UserVerseStatus(models.Model):
 
     # See Identity.change_version for explanation of ignored
     ignored = models.BooleanField(default=False)
-
 
     @cached_property
     def text(self):
@@ -816,7 +820,7 @@ class UserVerseStatus(models.Model):
         if section is not None:
             return pretty_passage_ref(section[0].reference,
                                       section[-1].reference)
-        return None # Shouldn't get here
+        return None  # Shouldn't get here
 
     def get_section_verse_choices(self):
         # Split verse set into sections
@@ -845,6 +849,7 @@ class UserVerseStatus(models.Model):
 
 
 WORD_RE = re.compile('[0-9a-zA-Z]')
+
 
 def is_punctuation(text):
     return not WORD_RE.search(text)
@@ -883,6 +888,7 @@ def merge_punctuation_items_left(words):
             retval.append(item)
     return retval
 
+
 def merge_punctuation_items_right(words):
     retval = []
     for item in words[::-1]:
@@ -891,6 +897,7 @@ def merge_punctuation_items_right(words):
         else:
             retval.append(item)
     return retval[::-1]
+
 
 def count_words(text):
     return len(split_into_words(text))
@@ -954,7 +961,7 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE,
                                   chapter_number=chapter_number,
                                   missing=False)
                           .order_by('bible_verse_number')
-                      )
+                          )
         else:
             retval = Reference(book, chapter_number, None)
     else:
@@ -1059,8 +1066,9 @@ retrieve_version_services = {
     'ESV': get_esv,
 }
 
+
 def ensure_text(verses):
-    refs_missing_text = defaultdict(list) # divided by version
+    refs_missing_text = defaultdict(list)  # divided by version
     verse_dict = {}
     for v in verses:
         if v.text == '' and not v.missing:
@@ -1191,7 +1199,6 @@ def parse_as_bible_reference(query, allow_whole_book=True, allow_whole_chapter=T
         if allow_whole_book and query in BIBLE_BOOK_ABBREVIATIONS:
             return normalise_reference(query)
 
-
     return None
 
 
@@ -1263,4 +1270,4 @@ def normalise_reference(query):
         return None
 
 
-from bibleverses import hooks
+from bibleverses import hooks  # NOQA

@@ -4,13 +4,14 @@ import selectable.forms.fields
 from groups.models import Group
 from accounts.lookups import AccountLookup
 
+
 class EditGroupForm(forms.ModelForm):
 
     invited_users = selectable.forms.fields.AutoCompleteSelectMultipleField(
         lookup_class=AccountLookup,
         label=u'Invited users',
         required=False,
-        )
+    )
 
     class Meta:
         model = Group

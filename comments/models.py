@@ -16,6 +16,7 @@ from learnscripture.templatetags.account_utils import account_link
 def format_comment_message(message):
     return mark_safe(linebreaks(mark_safe(urlize(message.strip(), autoescape=True)), autoescape=False))
 
+
 class Comment(models.Model):
     author = models.ForeignKey(Account, related_name='comments')
     # NB - this is the event the comment is attached to, if any,
@@ -51,4 +52,4 @@ class Comment(models.Model):
             return format_html("{0}'s wall", group_link(self.group))
 
 
-from comments import hooks
+from comments import hooks  # NOQA

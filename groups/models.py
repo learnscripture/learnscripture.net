@@ -132,6 +132,7 @@ class InvitationManager(models.Manager):
     def get_query_set(self):
         return super(InvitationManager, self).get_query_set().select_related('account', 'group', 'created_by')
 
+
 class Invitation(models.Model):
     account = models.ForeignKey(Account, related_name='invitations')
     group = models.ForeignKey(Group, related_name='invitations')
@@ -141,7 +142,6 @@ class Invitation(models.Model):
 
     def __unicode__(self):
         return u'Invitation to %s for %s from %s' % (self.group, self.account, self.created_by)
-
 
 
 def combined_membership_count_for_creator(account_id):
@@ -155,4 +155,4 @@ def combined_membership_count_for_creator(account_id):
     return val - own_groups
 
 
-from groups import hooks
+from groups import hooks  # NOQA
