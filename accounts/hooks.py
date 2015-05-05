@@ -10,6 +10,7 @@ from groups.utils import group_link
 
 import accounts.tasks
 
+
 @receiver(invitation_created)
 def invitation_created_receiver(sender, **kwargs):
     invitation = sender

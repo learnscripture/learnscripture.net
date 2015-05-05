@@ -29,7 +29,7 @@ TestingMethod = make_choices('TestingMethod',
                              [(0, 'FULL_WORDS', 'Full words - recommended for full keyboards and normal typing skills'),
                               (1, 'FIRST_LETTER', 'First letter - recommended for slower typers'),
                               (2, 'ON_SCREEN', 'On screen buttons - recommended for handheld devices'),
-                             ])
+                              ])
 
 THEMES = [('calm', 'Slate'),
           ('bubblegum', 'Bubblegum pink'),
@@ -80,10 +80,10 @@ class Account(AbstractBaseUser):
     is_tester = models.BooleanField(default=False, blank=True)
     is_moderator = models.BooleanField(default=False, blank=True)
     is_under_13 = models.BooleanField("Under 13 years old",
-        default=False, blank=True)
+                                      default=False, blank=True)
     is_active = models.BooleanField(default=True)
     enable_commenting = models.BooleanField("Enable comment system",
-        default=True, blank=True)
+                                            default=True, blank=True)
 
     # A hellbanned user is barred from interaction with other users, and any
     # visibility by other users, but they not aware of that. They see an
@@ -160,7 +160,6 @@ class Account(AbstractBaseUser):
 
     def __unicode__(self):
         return self.username
-
 
     # Main business logic
     def award_action_points(self, reference, text,
@@ -337,7 +336,7 @@ def normlise_weighting(weights):
         return
     max_weight = max(weights.values())
     for k, v in weights.items():
-        weights[k] = v/max_weight
+        weights[k] = v / max_weight
 
 
 @cache_results(seconds=1200)
@@ -350,7 +349,7 @@ def account_get_friendship_weights(account_id):
         group = m.group
         members = list(group.members.all())
         # Smaller groups are better evidence of friendship.
-        w = 1.0/len(members)
+        w = 1.0 / len(members)
         for m in members:
             weights[m.id] += w
 
@@ -556,10 +555,10 @@ class Identity(models.Model):
                 text_order=qapair.order,
                 version=catechism,
                 added=timezone.now()
-                )
+            )
             for qapair in qapairs if qapair.reference not in existing_refs]
         UserVerseStatus.objects.bulk_create(new_uvss)
-        return base_uvs_query.all().order_by('text_order') # fresh QuerySet
+        return base_uvs_query.all().order_by('text_order')  # fresh QuerySet
 
     @track_querysets(lambda self, reference, *args, **kwargs: [self.verse_statuses.filter(reference=reference)],
                      lambda self, *args, **kwargs: self.track_learning)
@@ -582,7 +581,7 @@ class Identity(models.Model):
         mem_stage = {
             StageType.READ: MemoryStage.SEEN,
             StageType.TEST: MemoryStage.TESTED,
-            }[stage_type]
+        }[stage_type]
 
         # It's possible that they have already been tested, so don't move them
         # down to MemoryStage.SEEN
@@ -590,7 +589,7 @@ class Identity(models.Model):
 
         now = timezone.now()
         if mem_stage == MemoryStage.TESTED:
-            s0 = s[0] # Any should do, they should be all the same
+            s0 = s[0]  # Any should do, they should be all the same
             old_strength = s0.strength
             if s0.last_tested is None:
                 time_elapsed = None
@@ -609,7 +608,7 @@ class Identity(models.Model):
             verse_tested.send(sender=self, verse=s0)
             if (s0.version.is_catechism and s0.text_order == 1
                 and old_strength == 0.0
-                and self.account_id is not None):
+                    and self.account_id is not None):
                 catechism_started.send(self.account, catechism=s0.version)
 
             return ActionChange(old_strength=old_strength, new_strength=new_strength)
@@ -667,7 +666,6 @@ class Identity(models.Model):
             # Need a UVS for each set the user already has a UVS for.
             needed_uvss = [(uvs.verse_set, reference) for uvs in start_qs]
 
-
         # 'old' = ones with old, incorrect version
         old = start_qs.exclude(version__slug=version_slug)
         # 'correct' = ones with newly selected, correct version
@@ -682,7 +680,7 @@ class Identity(models.Model):
         correct_version.update(ignored=False)
 
         # Now we need to see if we need to create any new UserVerseStatuses.
-        missing = set(needed_uvss) - set([(uvs.verse_set,  uvs.reference)
+        missing = set(needed_uvss) - set([(uvs.verse_set, uvs.reference)
                                           for uvs in correct_version_l])
         if missing:
             version = TextVersion.objects.get(slug=version_slug)
@@ -1102,7 +1100,7 @@ class Identity(models.Model):
         statuses = self.verse_statuses.filter(verse_set__set_type=VerseSetType.PASSAGE,
                                               ignored=False,
                                               memory_stage__gte=MemoryStage.TESTED)\
-                                              .select_related('verse_set')
+                                      .select_related('verse_set')
 
         # If any of them need revising, we want to know about it:
         statuses = memorymodel.filter_qs(statuses, timezone.now())
@@ -1147,7 +1145,6 @@ class Identity(models.Model):
         except IndexError:
             return None
 
-
     def first_overdue_verse(self, now):
         try:
             return (self.verse_statuses
@@ -1187,17 +1184,16 @@ class Identity(models.Model):
         sections = get_passage_sections(uvs_list, verse_set.breaks)
 
         # For each section, work out if it has been tested 'together'
-        section_info = {} # section idx: info dict
+        section_info = {}  # section idx: info dict
         for i, section in enumerate(sections):
             max_last_tested = max(uvs.last_tested for uvs in section)
             min_last_tested = min(uvs.last_tested for uvs in section)
             # It should take no more than 2 minutes to test a single verse,
             # being conservative
             tested_together = ((max_last_tested - min_last_tested).total_seconds() <
-                                  2 * 60 * len(section))
+                               2 * 60 * len(section))
             section_info[i] = {'tested_together': tested_together,
                                'last_tested': min_last_tested}
-
 
         # Find which section was tested together last.
         last_section_tested = None
@@ -1205,7 +1201,7 @@ class Identity(models.Model):
         for i, info in reversed(sorted(section_info.items())):
             if info['tested_together']:
                 if (overall_max_last_tested is None or
-                    info['last_tested'] > overall_max_last_tested):
+                        info['last_tested'] > overall_max_last_tested):
                     overall_max_last_tested = info['last_tested']
                     last_section_tested = i
 
@@ -1257,7 +1253,6 @@ class Identity(models.Model):
                 tested_sections.add(i)
 
         return to_test
-
 
     def cancel_passage(self, verse_set_id):
         # For passages, the UserVerseStatuses may be already tested.
@@ -1389,6 +1384,7 @@ def get_active_account_count(since_when, until_when):
             .values('for_identity_id').distinct().count()
             )
 
+
 def get_active_identity_count(since_when, until_when):
     # As above, but for all identities, not just those with accounts.
     from bibleverses.models import UserVerseStatus
@@ -1399,7 +1395,7 @@ def get_active_identity_count(since_when, until_when):
             )
 
 
-from accounts import hooks
+from accounts import hooks  # NOQA
 
 
 def notify_all_accounts(html_message):

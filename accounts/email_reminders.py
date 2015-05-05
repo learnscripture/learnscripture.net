@@ -39,11 +39,11 @@ def send_email_reminders():
 
         send_reminder = False
         if (account.last_reminder_sent is not None and
-            account.last_reminder_sent > v.next_test_due):
+                account.last_reminder_sent > v.next_test_due):
             # Reminder has been sent, so we are in the region
             # for repeat reminders.
             if (account.remind_every > 0 and  # remind_every == 0 'means' never
-                (n - account.last_reminder_sent).days >= account.remind_every):
+                    (n - account.last_reminder_sent).days >= account.remind_every):
                 send_reminder = True
         else:
             # Reminder not sent, check for first reminder.
@@ -116,8 +116,9 @@ def mark_email_bounced(email_address, bounce_date):
         if account.email_bounced is None:
             account.add_html_notice(
                 format_html(
-"""Your email address doesn't seem to be working, so we've disabled email reminders. """
-"""Please update your <a href="{0}">account details</a>.""",
+                    """Your email address doesn't seem to be working, so """
+                    """we've disabled email reminders. """
+                    """Please update your <a href="{0}">account details</a>.""",
                     reverse('account_details')))
         account.email_bounced = bounce_date
         account.save()
