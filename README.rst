@@ -98,12 +98,15 @@ New texts and catechisms
 ========================
 
 * The text needs to be prepared and loaded into the database in the development
-  environment. This involves creating TextVersion in the admin, and then adding:
+  environment. This involves creating a TextVersion record in the admin, and then adding:
 
   * For Bibles, Verse instances corresponding to every Verse in the KJV
-    (including missing verses, which should be marked with missing=True)
+    (including missing verses, which should be marked with missing=True).
 
-  * For catechisms, QAPairs for each questions.
+    Set LOADING_VERSES = True in settings to stop suggestions being created while you are
+    doing this.
+
+  * For catechisms, QAPairs for each question.
 
     Create JSON file with a list of [number, question, answer]
 
@@ -138,6 +141,6 @@ New texts and catechisms
 * Load the word suggestions on the server, making sure to load them
   into the right databases.
 
-  psql -U cciw_learnscripture -d learnscripture_wordsuggestions -c "\\copy bibleverses_wordsuggestiondata (version_slug, reference, hash, suggestions) from stdin csv" < ~/wsd_NCC.csv
+  psql -U cciw_learnscripture -d learnscripture_wordsuggestions -c "\\copy bibleverses_wordsuggestiondata (version_slug, reference, hash, suggestions) from stdin CSV HEADER" < ~/wsd_NCC.csv
 
 * Mark the text as public via the admin
