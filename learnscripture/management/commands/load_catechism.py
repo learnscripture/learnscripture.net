@@ -16,9 +16,9 @@ class Command(BaseCommand):
         json_data = json.load(file(json_filename))
 
         version.qapairs.all().delete()
-        for number, question, answer in json_data:
-            number = int(number)
+        # Need to be able to handle things like question "2a"
+        for item_num, (number, question, answer) in enumerate(json_data):
             version.qapairs.create(reference="Q{0}".format(number),
                                    question=question,
                                    answer=answer,
-                                   order=number)
+                                   order=item_num)
