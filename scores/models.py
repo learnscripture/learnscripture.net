@@ -65,11 +65,11 @@ class TotalScore(models.Model):
 def active_user_query(q, hellbanned_mode):
     from learnscripture.utils.sqla import accounts_account as account
     retval = (q
-              .where(account.c.is_active == True)
+              .where(account.c.is_active == True)  # noqa
               )
     if not hellbanned_mode:
         retval = (retval
-                  .where(account.c.is_hellbanned != True)
+                  .where(account.c.is_hellbanned != True)  # noqa
                   )
     return retval
 
@@ -244,7 +244,7 @@ def get_verses_started_counts(identity_ids, started_since=None):
 
     uvs = bibleverses_userversestatus
     q1 = (select([uvs.c.for_identity_id],
-                 and_(uvs.c.ignored == False,
+                 and_(uvs.c.ignored == False,  # noqa
                       uvs.c.memory_stage >= MemoryStage.TESTED,
                       uvs.c.for_identity_id.in_(identity_ids),
                       *([uvs.c.first_seen > started_since]
@@ -270,8 +270,8 @@ def get_verses_started_per_day(identity_id):
 
     q1 = (select([day_col],
                  and_(bibleverses_userversestatus.c.for_identity_id == identity_id,
-                      bibleverses_userversestatus.c.first_seen != None,
-                      bibleverses_userversestatus.c.ignored == False,
+                      bibleverses_userversestatus.c.first_seen != None,  # noqa
+                      bibleverses_userversestatus.c.ignored == False,  # noqa
                       ),
                  from_obj=bibleverses_userversestatus
                  )
@@ -321,7 +321,7 @@ def get_verses_finished_count(identity_id, finished_since=None):
 
     uvs = bibleverses_userversestatus
     q1 = (select([uvs.c.reference, uvs.c.version_id],
-                 and_(uvs.c.ignored == False,
+                 and_(uvs.c.ignored == False,  # noqa
                       uvs.c.memory_stage >= MemoryStage.TESTED,
                       uvs.c.strength >= MM.LEARNT,
                       uvs.c.for_identity_id == identity_id,
