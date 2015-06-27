@@ -53,10 +53,6 @@
               {label: "New accounts",
                data: {{ account_data.new_account|jsonify }},
                yaxis: 1
-              },
-              {label: "All accounts",
-               data: {{ account_data.all_accounts|jsonify }},
-               yaxis: 2
               }
 
               {% if 'full_accounts' in request.GET %}
