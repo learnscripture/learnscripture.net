@@ -1066,7 +1066,8 @@ def date_to_js_ts(d):
 def stats(request):
     from app_metrics.models import MetricDay
     now = timezone.now()
-    start = now - timedelta(days=180)
+    period = int(request.GET.get('period', 180))
+    start = now - timedelta(days=period)
 
     def build_data(metric_slugs):
         metrics = (MetricDay.objects
