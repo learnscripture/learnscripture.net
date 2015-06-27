@@ -176,11 +176,12 @@ class Account(AbstractBaseUser):
         else:
             reason = ScoreReason.VERSE_TESTED
         points = max_points * accuracy
-        score_logs.append(self.add_points(points, reason, accuracy=accuracy))
+        score_logs.append(self.add_points(points, reason, accuracy=accuracy, reference=reference))
 
         if accuracy == 1:
             score_logs.append(self.add_points(points * Scores.PERFECT_BONUS_FACTOR,
                                               ScoreReason.PERFECT_TEST_BONUS,
+                                              reference=reference,
                                               accuracy=accuracy))
             # At least one subscriber to scored_100_percent relies on score_logs
             # to be created in order to do job. In context of tests, this means
@@ -191,6 +192,7 @@ class Account(AbstractBaseUser):
             score_logs.append(self.add_points(word_count * Scores.POINTS_PER_WORD *
                                               Scores.VERSE_LEARNT_BONUS,
                                               ScoreReason.VERSE_LEARNT,
+                                              reference=reference,
                                               accuracy=accuracy))
             verse_finished.send(sender=self)
 
@@ -199,12 +201,13 @@ class Account(AbstractBaseUser):
 
         return score_logs
 
-    def add_points(self, points, reason, accuracy=None):
+    def add_points(self, points, reason, accuracy=None, reference=""):
         # Need to refresh 'total_score' each time
         points = math.floor(points)
         current_points = TotalScore.objects.get(account_id=self.id).points
         score_log = self.score_logs.create(points=points,
                                            reason=reason,
+                                           reference=reference,
                                            accuracy=accuracy)
         # Change cached object to reflect DB, which has been
         # updated via a SQL UPDATE for max correctness.

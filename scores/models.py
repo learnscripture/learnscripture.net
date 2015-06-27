@@ -52,8 +52,8 @@ class ScoreLog(models.Model):
         ordering = ('-created',)
 
     def __repr__(self):
-        return "<ScoreLog account=%s points=%s reason=%s created=%s>" % (
-            self.account.username, self.points, self.get_reason_display(), self.created)
+        return "<ScoreLog account=%s points=%s reason=%s reference=%s created=%s>" % (
+            self.account.username, self.points, self.get_reason_display(), self.reference, self.created)
 
 
 class TotalScore(models.Model):
