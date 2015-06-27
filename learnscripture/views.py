@@ -1105,14 +1105,6 @@ def stats(request):
                                 'identities_active',
                                 ] if 'full_accounts' in request.GET else []))
 
-    # Build cumulative stats from 'account_data'
-    all_accounts = []
-    new_accounts = account_data['new_account']
-    total = Account.objects.filter(date_joined__lte=start).count()
-    for ts, c in new_accounts:
-        total += c
-        all_accounts.append((ts, total))
-    account_data['all_accounts'] = all_accounts
 
     if 'requests' in request.GET:
         request_data = build_data(['request_all', 'request_html', 'request_json'])
