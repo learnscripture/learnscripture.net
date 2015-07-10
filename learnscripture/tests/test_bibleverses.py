@@ -2,14 +2,13 @@ from __future__ import absolute_import
 
 import unittest2
 
-from django.test import TestCase
-
 from accounts.models import Identity
 from bibleverses.models import InvalidVerseReference, Verse, TextVersion, get_passage_sections, VerseSet, split_into_words, WordSuggestionData
-from .base import AccountTestMixin
+
+from .base import AccountTestMixin, TestBase
 
 
-class VerseTests(TestCase):
+class VerseTests(TestBase):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
 
@@ -48,7 +47,7 @@ class VerseTests(TestCase):
             0)
 
 
-class VersionTests(TestCase):
+class VersionTests(TestBase):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
 
@@ -390,7 +389,7 @@ class GetPassageSectionsTests(unittest2.TestCase):
                           ["Genesis 1:3-4", "Genesis 1:5"]])
 
 
-class UserVerseStatusTests(AccountTestMixin, TestCase):
+class UserVerseStatusTests(AccountTestMixin, TestBase):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json']
 
@@ -421,7 +420,7 @@ class VerseUtilsTests(unittest2.TestCase):
                          ["--some", "text", "here"])
 
 
-class ESVTests(TestCase):
+class ESVTests(TestBase):
     """
     Tests to ensure we can transparently get the ESV text
     """

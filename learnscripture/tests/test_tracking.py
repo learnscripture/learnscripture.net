@@ -1,13 +1,13 @@
 from __future__ import absolute_import
 
-from django.test import TestCase
 from django.utils import timezone
 
 from bibleverses.models import TextVersion, TextType
 from tracking.models import TrackingSnapshot, auto_track_querysets, rewind_models
+from learnscripture.tests.base import TestBase
 
 
-class TestTracking(TestCase):
+class TestTracking(TestBase):
 
     def test_insert(self):
         tv = TextVersion.objects.create(short_name='Fribble',

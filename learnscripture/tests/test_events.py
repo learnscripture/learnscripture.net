@@ -1,17 +1,16 @@
 from __future__ import absolute_import
 
 from autofixture import AutoFixture
-from django.test import TestCase
 from django.utils import timezone
 
 from events.models import Event, EventType, GroupJoinedEvent, PointsMilestoneEvent
 from comments.models import Comment
 from groups.models import Group
 
-from .base import AccountTestMixin
+from .base import AccountTestMixin, TestBase
 
 
-class EventTests(AccountTestMixin, TestCase):
+class EventTests(AccountTestMixin, TestBase):
 
     def test_new_comment_event(self):
         _, event_account = self.create_account()

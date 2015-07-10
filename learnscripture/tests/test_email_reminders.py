@@ -6,7 +6,6 @@ import urlparse
 import StringIO
 
 from django.db.models import F
-from django.test import TestCase
 from django.core import mail
 from django.utils import timezone
 
@@ -14,10 +13,10 @@ from accounts.models import Account
 from accounts.email_reminders import send_email_reminders, handle_bounce
 from bibleverses.models import VerseSet, StageType
 
-from .base import AccountTestMixin
+from .base import AccountTestMixin, TestBase
 
 
-class EmailReminderTests(AccountTestMixin, TestCase):
+class EmailReminderTests(AccountTestMixin, TestBase):
 
     fixtures = ['test_bible_versions.json', 'test_verse_sets.json', 'test_bible_verses.json']
 
@@ -93,7 +92,7 @@ class EmailReminderTests(AccountTestMixin, TestCase):
         self.assertContains(r1, "Send first reminder")
 
 
-class ReminderBounceTests(AccountTestMixin, TestCase):
+class ReminderBounceTests(AccountTestMixin, TestBase):
 
     def test_email_1(self):
         self.create_account(email="someone@gmail.com")

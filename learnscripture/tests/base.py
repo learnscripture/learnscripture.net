@@ -1,10 +1,12 @@
 from __future__ import absolute_import
 import time
 
+from compressor.filters import CompilerFilter
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.test import TestCase
+from django.test.utils import override_settings
 from django.utils.importlib import import_module
 from django_webtest import WebTestMixin
 from pyvirtualdisplay import Display
@@ -31,6 +33,18 @@ class FuzzyInt(int):
 
     def __repr__(self):
         return "[%d..%d]" % (self.lowest, self.highest)
+
+
+# We don't need less compilation when running normal tests, and it adds a lot to
+# the test run (nearly 1 sec per view, due to shelling out). We leave it on for
+# FullBrowserTest, because CSS could easily effect whether elements are
+# clickable etc.
+class DummyLessCssFilter(CompilerFilter):
+    def __init__(self, content, command=None, *args, **kwargs):
+        pass
+
+    def input(self, **kwargs):
+        return ''
 
 
 class AccountTestMixin(object):
@@ -299,6 +313,8 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, StaticLiveServerTestCase):
         self.wait_for_ajax()
 
 
+@override_settings(COMPRESS_PRECOMPILERS=[('text/less', 'learnscripture.tests.base.DummyLessCssFilter')],
+                   )
 class WebTestBase(WebTestMixin, AccountTestMixin, LoginMixin, TestCase):
 
     # API that is compatible with FullBrowserTest
@@ -449,3 +465,9 @@ class WebTestBase(WebTestMixin, AccountTestMixin, LoginMixin, TestCase):
             raise ValueError("Multiple submit buttons found matching '{0}'".format(css_selector))
 
         raise ValueError("Can't find submit input matching {0} in response {1}.".format(css_selector, response))
+
+
+@override_settings(COMPRESS_PRECOMPILERS=[('text/less', 'learnscripture.tests.base.DummyLessCssFilter')],
+                   )
+class TestBase(TestCase):
+    pass
