@@ -4,11 +4,10 @@ from datetime import timedelta
 from decimal import Decimal
 
 from django.core import mail
-from django.test import TestCase
 from django.utils import timezone
 from paypal.standard.ipn.models import PayPalIPN
 
-from .base import AccountTestMixin
+from .base import AccountTestMixin, TestBase
 from accounts.models import Account
 from payments.hooks import paypal_payment_received
 from payments.models import DonationDrive
@@ -31,7 +30,7 @@ def good_payment_ipn(account, amount, **kwargs):
     return PayPalIPN.objects.create(**obj_args)
 
 
-class PaymentTests(AccountTestMixin, TestCase):
+class PaymentTests(AccountTestMixin, TestBase):
 
     fixtures = ['test_bible_versions.json']
 
@@ -90,7 +89,7 @@ class PaymentTests(AccountTestMixin, TestCase):
         self.assertEqual(self.account.payments.all()[0].amount, Decimal('6.50'))
 
 
-class DonationDriveTests(AccountTestMixin, TestCase):
+class DonationDriveTests(AccountTestMixin, TestBase):
 
     fixtures = ['test_bible_versions.json']
 

@@ -1,12 +1,12 @@
 from __future__ import absolute_import
 
 from django.core.urlresolvers import reverse
-from django.test import TestCase
 
 from accounts.models import Account, Identity
+from learnscripture.tests.base import TestBase
 
 
-class UserStatsTests(TestCase):
+class UserStatsTests(TestBase):
 
     def test_get(self):
         a1 = Account.objects.create(username='testuser1',

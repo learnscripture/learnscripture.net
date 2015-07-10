@@ -4,14 +4,14 @@ import time
 
 from autofixture import AutoFixture
 from django.core.urlresolvers import reverse
-from django.test import TestCase
 import selenium
 
 from accounts.models import Account
 from awards.models import Award, AwardType
-from groups.models import Group
 from comments.models import Comment
 from events.models import Event, EventType
+from groups.models import Group
+from learnscripture.tests.base import TestBase
 
 from .base import FullBrowserTest, AccountTestMixin
 
@@ -95,7 +95,7 @@ class GroupPageTests(FullBrowserTest):
         self.assertIn("<p>%s</p>" % message, self.driver.page_source)
 
 
-class GroupTests(AccountTestMixin, TestCase):
+class GroupTests(AccountTestMixin, TestBase):
 
     def test_organizer_award(self):
         i, creator_account = self.create_account(username='creator',
@@ -275,7 +275,7 @@ class GroupCreatePageTests(FullBrowserTest):
 
 
 # Use Django client
-class GroupPageTests2(AccountTestMixin, TestCase):
+class GroupPageTests2(AccountTestMixin, TestBase):
     def test_comments_on_related_events(self):
         _, account = self.create_account()
         group = AutoFixture(Group,

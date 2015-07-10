@@ -4,7 +4,6 @@ from datetime import timedelta
 import time
 
 from django.db.models import F
-from django.test import TestCase
 from django.utils import timezone
 
 import accounts.memorymodel
@@ -13,10 +12,10 @@ from bibleverses.models import VerseSet, TextVersion, StageType, MemoryStage, Ve
 from events.models import Event, EventType
 from tracking.models import rewind_models, TrackingSnapshot
 
-from .base import FuzzyInt, AccountTestMixin
+from .base import FuzzyInt, AccountTestMixin, TestBase
 
 
-class IdentityTests(AccountTestMixin, TestCase):
+class IdentityTests(AccountTestMixin, TestBase):
 
     fixtures = AccountTestMixin.fixtures + ['test_verse_sets.json', 'test_bible_verses.json', 'test_catechisms.json']
 

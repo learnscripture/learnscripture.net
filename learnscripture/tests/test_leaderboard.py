@@ -1,18 +1,17 @@
 from __future__ import absolute_import
 
 from django.core.urlresolvers import reverse
-from django.test import TestCase
 
 from accounts.models import Account, Identity
-from groups.models import Group
 from bibleverses.models import VerseSet, StageType, VerseSetType
-
+from groups.models import Group
+from learnscripture.tests.base import TestBase
 from scores.models import ScoreReason, get_verses_started_counts, get_verses_started_per_day, get_verses_finished_count
 
 from .base import AccountTestMixin
 
 
-class LeaderboardTests(TestCase):
+class LeaderboardTests(TestBase):
 
     def setUp(self):
         super(LeaderboardTests, self).setUp()
@@ -49,7 +48,7 @@ class LeaderboardTests(TestCase):
         self.assertNotContains(resp, self.a2.username)
 
 
-class VerseCountTests(AccountTestMixin, TestCase):
+class VerseCountTests(AccountTestMixin, TestBase):
 
     fixtures = AccountTestMixin.fixtures + ['test_bible_verses.json']
 

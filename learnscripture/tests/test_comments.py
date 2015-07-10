@@ -3,13 +3,12 @@ from __future__ import absolute_import
 import time
 
 from autofixture import AutoFixture
-from django.test import TestCase
 
 from comments.models import Comment
 from events.models import Event, EventType
 from groups.models import Group
 
-from .base import FullBrowserTest, AccountTestMixin
+from .base import FullBrowserTest, AccountTestMixin, TestBase
 
 
 class CommentPageTests(FullBrowserTest):
@@ -110,7 +109,7 @@ class CommentPageTests(FullBrowserTest):
         self.assertEqual(self.event.comments.get(id=c1.id).hidden, True)
 
 
-class CommentTests(AccountTestMixin, TestCase):
+class CommentTests(AccountTestMixin, TestBase):
     def test_get_absolute_url(self):
         _, account = self.create_account()
         group = AutoFixture(Group,

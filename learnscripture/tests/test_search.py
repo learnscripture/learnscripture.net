@@ -2,13 +2,14 @@ from __future__ import absolute_import
 
 from autofixture import AutoFixture
 from django.db import connection
-from django.test import TestCase
 
 from accounts.models import Account
 from bibleverses.models import VerseSet, VerseSetType, TextVersion, quick_find, parse_as_bible_reference
 
+from .base import TestBase
 
-class SearchTests(TestCase):
+
+class SearchTests(TestBase):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
 

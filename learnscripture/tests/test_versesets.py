@@ -1,13 +1,12 @@
 from __future__ import absolute_import
 
-from django.test import TestCase
 
 from bibleverses.models import VerseSet, VerseSetType
 
-from .base import AccountTestMixin
+from .base import AccountTestMixin, TestBase
 
 
-class VerseSetTests(AccountTestMixin, TestCase):
+class VerseSetTests(AccountTestMixin, TestBase):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
 

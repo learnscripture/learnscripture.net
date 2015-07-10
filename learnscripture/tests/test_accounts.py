@@ -7,7 +7,6 @@ import re
 from autofixture import AutoFixture
 from django.core import mail
 from django.db.models import F
-from django.test import TestCase
 from django.utils.encoding import force_text
 from django.utils.six.moves.urllib.parse import urlparse, ParseResult
 
@@ -19,10 +18,10 @@ from groups.models import Group
 from learnscripture.forms import AccountSetPasswordForm
 from scores.models import Scores
 
-from .base import AccountTestMixin
+from .base import AccountTestMixin, TestBase
 
 
-class AccountTests(AccountTestMixin, TestCase):
+class AccountTests(AccountTestMixin, TestBase):
     def test_password(self):
         acc = Account()
         acc.set_password('mypassword')
@@ -194,7 +193,7 @@ class AccountTests(AccountTestMixin, TestCase):
         self.assertTrue(w2_with_3 > w2_with_1)
 
 
-class PasswordResetTest(TestCase):
+class PasswordResetTest(TestBase):
 
     def setUp(self):
         super(PasswordResetTest, self).setUp()
