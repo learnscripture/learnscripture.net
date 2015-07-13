@@ -1034,12 +1034,8 @@ def csrf_failure(request, reason=""):
     return resp
 
 
+@require_account_with_redirect
 def account_details(request):
-    if not hasattr(request, 'identity'):
-        # Probably got here from a 'revision reminder' email,
-        # so we are best redirecting them to log in.
-        return HttpResponseRedirect(reverse('login') + u"?next=" + urlencode(request.get_full_path()))
-
     if request.method == 'POST':
         form = AccountDetailsForm(request.POST, instance=request.identity.account)
         if form.is_valid():

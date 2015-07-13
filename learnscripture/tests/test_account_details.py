@@ -19,12 +19,6 @@ class AccountDetailsTests(WebTestBase):
         self.submit("#id-save-btn")
         self.assertEqual(Account.objects.get(id=account.id).first_name, "Fred")
 
-    def test_redirect_if_not_logged_in(self):
-        identity, account = self.create_account()
-        self.get_url('account_details')
-        self.fill_in_login_form(account)
-        self.assertTrue(self.current_url.endswith(reverse('account_details')))
-
     def test_reset_email_bounced(self):
         identity, account = self.create_account()
         account.email_bounced = timezone.now()
