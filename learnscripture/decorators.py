@@ -1,6 +1,7 @@
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.shortcuts import render
+from django.utils.cache import add_never_cache_headers
 from django.utils.functional import wraps
 from django.utils.decorators import method_decorator
 from django.utils.http import urlquote
@@ -65,8 +66,10 @@ def require_account_with_redirect(view_func):
     @wraps(view_func)
     def view(request, *args, **kwargs):
         if not hasattr(request, 'identity') or request.identity.account_id is None:
-            return render(request, 'learnscripture/login_and_redirect.html',
-                          {'title': 'Login',
-                           })
+            response = render(request, 'learnscripture/login_and_redirect.html',
+                              {'title': 'Login',
+                               })
+            add_never_cache_headers(response)
+            return response
         return view_func(request, *args, **kwargs)
     return view
