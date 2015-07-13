@@ -16,7 +16,6 @@ from django.core.urlresolvers import reverse
 from django.core import mail
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
-from django.template.defaultfilters import urlencode
 from django.template.response import TemplateResponse
 from django.utils import timezone
 from django.utils.http import urlsafe_base64_decode
@@ -1102,7 +1101,6 @@ def stats(request):
                                 'identities_active',
                                 ] if 'full_accounts' in request.GET else []))
 
-
     if 'requests' in request.GET:
         request_data = build_data(['request_all', 'request_html', 'request_json'])
         # request_other = request_total - request_html - request_json
@@ -1481,8 +1479,7 @@ def contact(request):
 def send_contact_email(contact_form, account):
     email = contact_form.cleaned_data['email']
     mail.EmailMessage(subject="LearnScripture feedback",
-                      body=
-"""
+                      body="""
 From: %(name)s
 Email: %(email)s
 Account: %(account)s
@@ -1490,15 +1487,15 @@ Message:
 
 %(message)s
 """ % {
-            'name': contact_form.cleaned_data['name'],
-            'email': email,
-            'account': account.username if account is not None else '',
-            'message': contact_form.cleaned_data['message'],
+    'name': contact_form.cleaned_data['name'],  # noqa
+    'email': email,
+    'account': account.username if account is not None else '',
+    'message': contact_form.cleaned_data['message'],
 },
                       from_email=settings.SERVER_EMAIL,
                       to=[settings.CONTACT_EMAIL],
                       headers={'Reply-To': email} if email else {},
-).send()
+    ).send()
 
 
 def activity_stream(request):
