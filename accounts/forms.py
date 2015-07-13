@@ -81,8 +81,12 @@ class AccountDetailsForm(forms.ModelForm):
                   "remind_every"]
 
     def save(self, *args, **kwargs):
-        old_email = Account.objects.get(id=self.instance.id).email
+        if self.instance.id is not None:
+            old_email = Account.objects.get(id=self.instance.id).email
+        else:
+            old_email = None
+
         super(AccountDetailsForm, self).save(*args, **kwargs)
-        if self.instance.email != old_email:
+        if old_email is not None and self.instance.email != old_email:
             self.instance.email_bounced = None
             self.instance.save()
