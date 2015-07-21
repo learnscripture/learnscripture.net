@@ -3,7 +3,7 @@
 -e git://github.com/spookylukey/django-bootstrap-form.git@cee9d102c152240e4af07551b13755b53689dd36#egg=django_bootstrap_form-origin
 -e hg+ssh://hg@bitbucket.org/neithere/django-autoslug@fb45b6872dbdfe71a5fa5fe39a85bb897e159d3e#egg=django_autoslug-dev
 BeautifulSoup==3.2.1
-Django==1.7.7
+Django==1.7.9
 Pillow==2.7.0
 SQLAlchemy==0.9.9
 URLObject==2.0.0
