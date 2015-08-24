@@ -1979,6 +1979,9 @@ var learnscripture = (function (learnscripture, $) {
             retry: learnscripture.ajaxRetryOptions,
             error: learnscripture.ajaxRetryFailed
         });
+        if (testingMethodStrategy != null) {
+            testingMethodStrategy.testTearDown();
+        }
         nextVerse();
     };
 
