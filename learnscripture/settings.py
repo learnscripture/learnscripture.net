@@ -271,7 +271,6 @@ INSTALLED_APPS = [
     'paypal.standard.ipn',
     'app_metrics',
     'selectable',
-    'rstify',
     'kombu.transport.django',
     'django_markup',
     'json_field',
