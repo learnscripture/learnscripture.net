@@ -38,7 +38,6 @@ meld3==0.6.10
 numpy==1.8.1
 psutil==0.5.1
 psycopg2==2.4.2
-pykov==1.0
 pyquery==1.2.4
 pysparse==1.1.1-dev
 python-dateutil==2.2
