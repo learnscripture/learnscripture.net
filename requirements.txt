@@ -1,7 +1,7 @@
 -e git+https://github.com/spookylukey/django-app-metrics.git@896c58208da1057eebd0a6b1ea781152a8ad06c2#egg=django_app_metrics-master
 -e git://github.com/jbalogh/django-cache-machine.git@6b2b37ebbcac85a9f86e0e3b64c1c54243f50006#egg=django_cache_machine-origin
 -e git://github.com/spookylukey/django-bootstrap-form.git@cee9d102c152240e4af07551b13755b53689dd36#egg=django_bootstrap_form-origin
--e hg+ssh://hg@bitbucket.org/neithere/django-autoslug@fb45b6872dbdfe71a5fa5fe39a85bb897e159d3e#egg=django_autoslug-dev
+django-autoslug==1.8.0
 BeautifulSoup==3.2.1
 Django==1.7.9
 Pillow==2.7.0
