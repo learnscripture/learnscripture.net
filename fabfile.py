@@ -300,6 +300,10 @@ def deploy():
     Deploy project.
     """
     _assert_target()
+    # Get the git rev before we tag, due to differences
+    # in tagging between hg/git
+    push_to_git_repo()
+    git_rev = local("hg log -l 1 --template '{gitnode}'", capture=True)
     push_sources()
     install_dependencies()
     update_database()
@@ -311,7 +315,7 @@ def deploy():
         restart_celeryd()
 
     push_to_git_repo()
-    register_deployment(".")
+    register_deployment(".", git_rev)
 
 
 def push_to_git_repo():
@@ -410,10 +414,10 @@ def get_and_load_production_db():
 
 @task
 @runs_once
-def register_deployment(src_path):
+def register_deployment(src_path, git_rev):
     with(lcd(src_path)):
         local("curl https://intake.opbeat.com/api/v1/organizations/ebb5516391a94a679eddcd11669d572b/apps/{0}/releases/".format(target.OPBEAT_APP_ID) +
               " -H 'Authorization: Bearer 1ee1a5ed2bbaee5e7c8e5bd5c43b7787d1f71327'"
-              " -d rev=`hg log -l 1 -T '{gitnode}'`"
+              " -d rev={0}".format(git_rev) +
               " -d branch=`hg branch`"
               " -d status=completed")
