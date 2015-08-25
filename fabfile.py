@@ -12,7 +12,7 @@ import os
 import posixpath
 import json
 
-from fabric.api import run, local, env, task
+from fabric.api import run, local, env, task, runs_once, lcd
 from fabric.contrib.files import exists, upload_template
 from fabric.context_managers import cd, settings
 from fabric.operations import get
@@ -66,6 +66,7 @@ class Target(object):
         self.DB['USER'] = s["%s_DB_USER" % self.NAME]
         self.DB['NAME'] = s["%s_DB_NAME" % self.NAME]
         self.DB['PASSWORD'] = s["%s_DB_PASSWORD" % self.NAME]
+        self.OPBEAT_APP_ID = s['%s_OPBEAT' % self.NAME]['APP_ID']
 
 
 PRODUCTION = Target(
@@ -309,6 +310,8 @@ def deploy():
         # Need to restart celeryd, as it will have old code.
         restart_celeryd()
 
+    register_deployment(".")
+
 
 @task
 def restart_celeryd():
@@ -398,3 +401,14 @@ def get_and_load_production_db():
     """
     filename = get_live_db()
     local_restore_from_dump(filename)
+
+
+@task
+@runs_once
+def register_deployment(src_path):
+    with(lcd(src_path)):
+        local("curl https://intake.opbeat.com/api/v1/organizations/ebb5516391a94a679eddcd11669d572b/apps/{0}/releases/".format(target.OPBEAT_APP_ID) +
+              " -H 'Authorization: Bearer 1ee1a5ed2bbaee5e7c8e5bd5c43b7787d1f71327'"
+              " -d rev=`hg log -l 1 -T '{node}'`"
+              " -d branch=`hg branch`"
+              " -d status=completed")
