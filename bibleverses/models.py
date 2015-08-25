@@ -523,9 +523,9 @@ class QAPair(models.Model):
     A question/answer pair in a catechism.
     """
     catechism = models.ForeignKey(TextVersion, related_name='qapairs')
-    # Reference is always 'Qn' where 'n' == order. (Apart from where 
+    # Reference is always 'Qn' where 'n' == order. (Apart from where
     # we have question numbers like '2a').
-    # This means we are guaranteed not to have clashes with Verse references, 
+    # This means we are guaranteed not to have clashes with Verse references,
     # which is useful for the UserVerseStatus models which can reference both.
 
     reference = models.CharField(max_length=100)
@@ -1189,7 +1189,7 @@ def parse_as_bible_reference(query, allow_whole_book=True, allow_whole_chapter=T
             r')?'
         r')?'
         r'$'
-        )
+    )
 
     m = re.match(bible_ref_re, query)
     if m:
