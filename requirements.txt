@@ -50,3 +50,5 @@ supervisor==3.0
 twilio==3.3.9
 unittest2==0.5.1
 wsgiref==0.1.2
+pip==7.1.2
+-e git+https://993b78d00c668c5d693a284586e8242e74ce2390:x-oauth-basic@github.com/opbeat/opbeat_python_metrics.git@feature/flask-apm#egg=opbeat
