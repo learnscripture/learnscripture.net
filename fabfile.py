@@ -310,7 +310,12 @@ def deploy():
         # Need to restart celeryd, as it will have old code.
         restart_celeryd()
 
+    push_to_git_repo()
     register_deployment(".")
+
+
+def push_to_git_repo():
+    local("hg push git+ssh://git@bitbucket.org:spookylukey/learnscripture.net-git.git")
 
 
 @task
@@ -409,6 +414,6 @@ def register_deployment(src_path):
     with(lcd(src_path)):
         local("curl https://intake.opbeat.com/api/v1/organizations/ebb5516391a94a679eddcd11669d572b/apps/{0}/releases/".format(target.OPBEAT_APP_ID) +
               " -H 'Authorization: Bearer 1ee1a5ed2bbaee5e7c8e5bd5c43b7787d1f71327'"
-              " -d rev=`hg log -l 1 -T '{node}'`"
+              " -d rev=`hg log -l 1 -T '{gitnode}'`"
               " -d branch=`hg branch`"
               " -d status=completed")
