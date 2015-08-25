@@ -10,7 +10,6 @@ import os
 import pickle
 import random
 import re
-import sys
 
 from django.conf import settings
 import pykov
