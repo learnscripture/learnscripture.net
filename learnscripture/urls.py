@@ -89,15 +89,15 @@ urlpatterns = patterns('',
 
                        (r'^paypal/ipn/', include('paypal.standard.ipn.urls')),
                        (r'^selectable/', include('selectable.urls')),
-)
+                       )
 
 
 if settings.DEVBOX:
     urlpatterns = urlpatterns + patterns('',
-                           url(r'^usermedia/(?P<path>.*)$', 'django.views.static.serve',
-                               {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}),
-                           )
+                                         url(r'^usermedia/(?P<path>.*)$', 'django.views.static.serve',
+                                             {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}),
+                                         )
 
 urlpatterns = urlpatterns + patterns('',
-                       (r'', 'fiber.views.page'),
-)
+                                     (r'', 'fiber.views.page'),
+                                     )
