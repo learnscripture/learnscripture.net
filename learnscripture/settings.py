@@ -58,6 +58,7 @@ if LIVEBOX:
         }
         SECRET_KEY = secrets["PRODUCTION_SECRET_KEY"]
         SENTRY_DSN = secrets["PRODUCTION_SENTRY_DSN"]
+        OPBEAT = secrets["PRODUCTION_OPBEAT"]
 
     elif STAGING:
         DATABASES = {
@@ -82,6 +83,8 @@ if LIVEBOX:
         }
         SECRET_KEY = secrets["STAGING_SECRET_KEY"]
         SENTRY_DSN = secrets["STAGING_SENTRY_DSN"]
+        OPBEAT = secrets["STAGING_OPBEAT"]
+
 else:
     DATABASES = {
         'default': {
@@ -113,10 +116,12 @@ else:
 
     SECRET_KEY = secrets['DEVELOPMENT_SECRET_KEY']
     SENTRY_DSN = secrets["DEVELOPMENT_SENTRY_DSN"]
+    OPBEAT = secrets["DEVELOPMENT_OPBEAT"]
 
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
     PRODUCTION = STAGING = False
+
 
 DATABASE_ROUTERS = ['learnscripture.router.LearnScriptureRouter']
 
@@ -198,6 +203,7 @@ TEMPLATE_LOADERS = (
 MIDDLEWARE_CLASSES = [
     m for b, m in
     [
+        (True, 'opbeat.contrib.django.middleware.OpbeatAPMMiddleware'),
         (DEBUG, 'debug_toolbar.middleware.DebugToolbarMiddleware'),
         (True, 'learnscripture.middleware.TrackingMiddleware'),
         (True, 'learnscripture.middleware.StatsMiddleware'),
@@ -241,6 +247,7 @@ ROOT_URLCONF = 'learnscripture.urls'
 WSGI_APPLICATION = 'learnscripture.wsgi.application'
 
 INSTALLED_APPS = [
+    'opbeat.contrib.django',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -416,6 +423,7 @@ else:
     RAVEN_CONFIG = {
         'dsn': SENTRY_DSN,
     }
+
 
 # Celery
 
