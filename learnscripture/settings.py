@@ -45,6 +45,7 @@ if LIVEBOX:
                 'HOST': 'localhost',
                 'PORT': secrets["PRODUCTION_DB_PORT"],
                 'ATOMIC_REQUESTS': True,
+                'CONN_MAX_AGE': 120,
             },
             'wordsuggestions': {
                 'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -54,6 +55,7 @@ if LIVEBOX:
                 'HOST': 'localhost',
                 'PORT': secrets["PRODUCTION_DB_PORT"],
                 'ATOMIC_REQUESTS': False,
+                'CONN_MAX_AGE': 120,
             }
         }
         SECRET_KEY = secrets["PRODUCTION_SECRET_KEY"]
@@ -70,6 +72,7 @@ if LIVEBOX:
                 'HOST': 'localhost',
                 'PORT': secrets["STAGING_DB_PORT"],
                 'ATOMIC_REQUESTS': True,
+                'CONN_MAX_AGE': 120,
             },
             'wordsuggestions': {
                 'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -79,6 +82,7 @@ if LIVEBOX:
                 'HOST': 'localhost',
                 'PORT': secrets["STAGING_DB_PORT"],
                 'ATOMIC_REQUESTS': False,
+                'CONN_MAX_AGE': 120,
             }
         }
         SECRET_KEY = secrets["STAGING_SECRET_KEY"]
@@ -95,6 +99,7 @@ else:
             'HOST': 'localhost',
             'PORT': '5432',
             'ATOMIC_REQUESTS': True,
+            'CONN_MAX_AGE': 120,
         },
         'wordsuggestions': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -104,6 +109,7 @@ else:
             'HOST': 'localhost',
             'PORT': '5432',
             'ATOMIC_REQUESTS': False,
+            'CONN_MAX_AGE': 120,
         }
     }
 
