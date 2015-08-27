@@ -90,6 +90,8 @@ if LIVEBOX:
         OPBEAT = secrets["STAGING_OPBEAT"]
 
 else:
+    # Development settings:
+
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -120,9 +122,9 @@ else:
     EMAIL_HOST_PASSWORD = None
     EMAIL_PORT = 8025
 
-    SECRET_KEY = secrets['DEVELOPMENT_SECRET_KEY']
-    SENTRY_DSN = secrets["DEVELOPMENT_SENTRY_DSN"]
-    OPBEAT = secrets["DEVELOPMENT_OPBEAT"]
+    SECRET_KEY = secrets.get('DEVELOPMENT_SECRET_KEY', "abc123")
+    SENTRY_DSN = secrets.get('DEVELOPMENT_SENTRY_DSN', None)
+    OPBEAT = secrets.get("DEVELOPMENT_OPBEAT", {})
 
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
