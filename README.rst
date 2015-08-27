@@ -3,12 +3,42 @@ README
 
 This is the source code for http://learnscripture.net/
 
-Since there have only ever been one developer on the project to date, this
-repo doesn't contain nice instructions for setting the project up, but it
-does contain all the source code including deployment scripts, and excluding
-only a small file containing passwords.
+If you are interesting in contributing, please read on.
 
-Some notes to help understand the project are below.
+Development setup
+=================
+
+Since there have only ever been one developer on the project to date, these
+instructions may not work completely, but they should be a start.
+
+1. Create a directory 'learnscripture.net'
+
+2. Checkout the sources from bitbucket into a folder called 'src'::
+
+
+       hg clone ssh://hg@bitbucket.org/spookylukey/learnscripture.net src
+
+3. Create a virtualenv for the project
+
+4. Install dependencies::
+
+       pip install numpy==1.9.2
+       pip install -r requirements.txt -r requirements-dev.txt
+
+5. Create a postgres database matching the development one in
+   ``learnscripture/settings.py``.
+
+6. Create a file ``config/secrets.json`` containing just "{}"
+   (proper contents are, well, secret).
+
+7. Setup database::
+
+   ./manage.py migrate
+
+8. See if it works by doing::
+
+   ./manage.py runserver
+
 
 Business logic
 ==============
