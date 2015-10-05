@@ -60,7 +60,6 @@ if LIVEBOX:
         }
         SECRET_KEY = secrets["PRODUCTION_SECRET_KEY"]
         SENTRY_DSN = secrets["PRODUCTION_SENTRY_DSN"]
-        OPBEAT = secrets["PRODUCTION_OPBEAT"]
 
     elif STAGING:
         DATABASES = {
@@ -87,7 +86,6 @@ if LIVEBOX:
         }
         SECRET_KEY = secrets["STAGING_SECRET_KEY"]
         SENTRY_DSN = secrets["STAGING_SENTRY_DSN"]
-        OPBEAT = secrets["STAGING_OPBEAT"]
 
 else:
     # Development settings:
@@ -124,7 +122,6 @@ else:
 
     SECRET_KEY = secrets.get('DEVELOPMENT_SECRET_KEY', "abc123")
     SENTRY_DSN = secrets.get('DEVELOPMENT_SENTRY_DSN', None)
-    OPBEAT = secrets.get("DEVELOPMENT_OPBEAT", {})
 
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
@@ -211,7 +208,6 @@ TEMPLATE_LOADERS = (
 MIDDLEWARE_CLASSES = [
     m for b, m in
     [
-        (True, 'opbeat.contrib.django.middleware.OpbeatAPMMiddleware'),
         (DEBUG, 'debug_toolbar.middleware.DebugToolbarMiddleware'),
         (True, 'learnscripture.middleware.TrackingMiddleware'),
         (True, 'learnscripture.middleware.StatsMiddleware'),
@@ -255,7 +251,6 @@ ROOT_URLCONF = 'learnscripture.urls'
 WSGI_APPLICATION = 'learnscripture.wsgi.application'
 
 INSTALLED_APPS = [
-    'opbeat.contrib.django',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
