@@ -1,4 +1,5 @@
-from __future__ import absolute_import
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, unicode_literals
 import time
 
 from compressor.filters import CompilerFilter
@@ -62,7 +63,7 @@ class AccountTestMixin(object):
     def create_account(self,
                        version_slug='KJV',
                        email="test1@test.com",
-                       username="test1"):
+                       username="tëst1"):
         account = Account.objects.create(email=email,
                                          username=username,
                                          )
@@ -73,14 +74,14 @@ class AccountTestMixin(object):
 
     def create_account_interactive(self,
                                    email="test2@test.com",
-                                   username="test2",
+                                   username="tëst2",
                                    password="testpassword2"):
         self.click(self.driver.find_element_by_link_text('Create an account'))
         self.fill_in_account_form(email=email, username=username, password=password)
 
     def fill_in_account_form(self,
                              email="test2@test.com",
-                             username="test2",
+                             username="tëst2",
                              password="testpassword2"):
         self.send_keys("#id_signup-email", email)
         self.send_keys("#id_signup-username", username)
