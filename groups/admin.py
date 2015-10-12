@@ -6,6 +6,7 @@ from .models import Group, Invitation, Membership
 class GroupAdmin(admin.ModelAdmin):
     list_display = ['name', 'created', 'public', 'open']
     readonly_fields = ['slug']
+    search_fields = ['name']
 
 
 class InvitationAdmin(admin.ModelAdmin):

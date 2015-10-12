@@ -10,10 +10,15 @@ class GroupManager(models.Manager):
 
     def visible_for_account(self, account):
         groups = self.all()
-        if account is None or not account.is_hellbanned:
-            groups = groups.exclude(created_by__is_hellbanned=True)
+
+        # We don't do the 'hell-banned' filtering at this point i.e. on
+        # 'groups', because we want people to be able to see groups they are
+        # members of, even if created by a hell-banned user.
 
         public_groups = groups.filter(public=True)
+        if account is None or not account.is_hellbanned:
+            public_groups = public_groups.exclude(created_by__is_hellbanned=True)
+
         visible_groups = public_groups
 
         if account is not None:
@@ -21,6 +26,8 @@ class GroupManager(models.Manager):
             visible_groups = visible_groups | account_groups
 
             invited_groups = groups.filter(invitations__account=account)
+            if account is None or not account.is_hellbanned:
+                invited_groups = invited_groups.exclude(created_by__is_hellbanned=True)
             visible_groups = visible_groups | invited_groups
 
             created_groups = groups.filter(created_by=account)
