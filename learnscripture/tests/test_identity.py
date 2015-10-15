@@ -397,6 +397,8 @@ class IdentityTests(AccountTestMixin, TestBase):
         self.assertEqual(len(vss), 1)
         self.assertEqual(vss[0].name, "Psalm 23")
         self.assertEqual(vss[0].splittable, False)
+        self.assertEqual(vss[0].needs_testing_count, 6)
+        self.assertEqual(vss[0].total_verse_count, 6)
 
         for vn in range(1, 7):
             ref = 'Psalm 23:%d' % vn
@@ -414,6 +416,8 @@ class IdentityTests(AccountTestMixin, TestBase):
         self.assertEqual(len(vss), 1)
         self.assertEqual(vss[0].name, "Psalm 23")
         self.assertEqual(vss[0].splittable, True)
+        self.assertEqual(vss[0].needs_testing_count, 6)
+        self.assertEqual(vss[0].next_section_verse_count, 2)
 
         # Now test verse_statuses_for_passage/get_next_section in this context:
 
