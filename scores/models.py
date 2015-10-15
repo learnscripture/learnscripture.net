@@ -175,30 +175,6 @@ def get_leaderboard_since(since, hellbanned_mode, page, page_size, group=None):
             for r in results]
 
 
-def get_rank_all_time(total_score_obj, hellbanned_mode):
-    qs = TotalScore.objects.filter(
-        points__gt=total_score_obj.points,
-        account__is_active=True
-    )
-    if not hellbanned_mode:
-        qs = qs.exclude(account__is_hellbanned=True)
-
-    return qs.count() + 1
-
-
-def get_rank_this_week(points_this_week, hellbanned_mode):
-    n = timezone.now()
-    qs = ScoreLog.objects.filter(created__gt=n - timedelta(7))\
-        .filter(account__is_active=True)\
-        .values('account_id').annotate(sum_points=models.Sum('points'))\
-        .filter(sum_points__gt=points_this_week)
-
-    if not hellbanned_mode:
-        qs = qs.exclude(account__is_hellbanned=True)
-
-    return qs.count() + 1
-
-
 def get_number_of_distinct_hours_for_account_id(account_id):
     from learnscripture.utils.sqla import scores_scorelog, default_engine
     from sqlalchemy.sql import select, distinct, extract

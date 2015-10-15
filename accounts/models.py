@@ -18,7 +18,7 @@ from accounts import memorymodel
 from accounts.signals import verse_started, verse_tested, verse_finished, points_increase, scored_100_percent, catechism_started
 from bibleverses.models import TextVersion, MemoryStage, StageType, VerseSet, VerseSetType, UserVerseStatus, TextType, get_passage_sections, InvalidVerseReference, count_words
 from bibleverses.signals import verse_set_chosen
-from scores.models import TotalScore, ScoreReason, Scores, get_rank_all_time, get_rank_this_week
+from scores.models import TotalScore, ScoreReason, Scores
 from tracking.models import track_querysets
 
 from learnscripture.datastructures import make_choices
@@ -225,19 +225,11 @@ class Account(AbstractBaseUser):
         return self.total_score.points
 
     @cached_property
-    def rank_all_time(self):
-        return get_rank_all_time(self.total_score, self.is_hellbanned)
-
-    @cached_property
     def points_this_week(self):
         n = timezone.now()
         val = self.score_logs.filter(created__gt=n - timedelta(7))\
             .aggregate(models.Sum('points'))['points__sum']
         return val if val is not None else 0
-
-    @cached_property
-    def rank_this_week(self):
-        return get_rank_this_week(self.points_this_week, self.is_hellbanned)
 
     def receive_payment(self, ipn_obj):
         if ipn_obj.mc_currency == settings.VALID_RECEIVE_CURRENCY:
