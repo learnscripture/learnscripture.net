@@ -1116,16 +1116,50 @@ class Identity(models.Model):
         # allows for the possibility of splitting into sections for section
         # learning.
 
-        verse_sets = set(uvs.verse_set for uvs in statuses)
+        uvs_list = list(statuses)  # Query 1
+        verse_sets = set(uvs.verse_set for uvs in uvs_list)
         group_testing = dict((vs.id, True) for vs in verse_sets)
         all_statuses = self.verse_statuses.filter(verse_set__in=verse_sets)\
             .select_related('verse_set')
 
-        for uvs in all_statuses:
+        all_statuses_list = list(all_statuses)  # Query 2
+
+        # UVS instances will have different VerseSet instances attached,
+        # even though the same VerseSet ID. Fix that up here:
+        vs_d = {}
+        for l in [uvs_list, all_statuses_list]:
+            for uvs in l:
+                if uvs.verse_set_id in vs_d:
+                    uvs.verse_set = vs_d[uvs.verse_set_id]
+                else:
+                    vs_d[uvs.verse_set_id] = uvs.verse_set
+
+        # Decorate with various extra things we want to show in dashboard:
+        #  - next_section_verse_count
+        #  - splittable
+        #  - needs_testing_count
+        #  - total_verse_count
+
+        for vs in verse_sets:
+            uvss = [uvs for uvs in all_statuses_list if uvs.verse_set_id == vs.id]
+            self._set_needs_testing_override(uvss)
+            next_section = self.get_next_section(uvss, vs, add_buffer=False)
+            vs.next_section_verse_count = len(next_section)
+
+        for uvs in all_statuses_list:
+            vs = uvs.verse_set
+            if not hasattr(vs, 'needs_testing_count'):
+                uvs.verse_set.needs_testing_count = 0
+                uvs.verse_set.total_verse_count = 0
+
+            if uvs.needs_testing:
+                uvs.verse_set.needs_testing_count += 1
+            uvs.verse_set.total_verse_count += 1
+
+        for uvs in all_statuses_list:
             if uvs.strength <= memorymodel.STRENGTH_FOR_GROUP_TESTING:
                 group_testing[uvs.verse_set_id] = False
 
-        # Decorate with info about possibility of combining
         vss = list(verse_sets)
         for vs in vss:
             vs.splittable = vs.breaks != "" and group_testing[vs.id]
@@ -1165,13 +1199,20 @@ class Identity(models.Model):
                                                    ignored=False).order_by('text_order'))
         if len(uvs_list) == 0:
             return []
+
+        self._set_needs_testing_override(uvs_list)
+        return uvs_list
+
+    def _set_needs_testing_override(self, uvs_list):
+        if len(uvs_list) == 0:
+            return
         min_strength = min(uvs.strength for uvs in uvs_list)
         if min_strength > memorymodel.STRENGTH_FOR_GROUP_TESTING:
             for uvs in uvs_list:
                 uvs.needs_testing_override = True
         return uvs_list
 
-    def get_next_section(self, uvs_list, verse_set):
+    def get_next_section(self, uvs_list, verse_set, add_buffer=True):
         """
         Given a UVS list and a VerseSet, get the items in uvs_list
         which are the next section to revise.
@@ -1218,12 +1259,13 @@ class Identity(models.Model):
         section_num = (last_section_tested + 1) % len(sections)
 
         retval = []
-        if section_num > 0:
-            # Return a verse of context with 'needs_testing_override' being set
-            # to False.
-            context = sections[section_num - 1][-1]
-            context.needs_testing_override = False
-            retval.append(context)
+        if add_buffer:
+            if section_num > 0:
+                # Return a verse of context with 'needs_testing_override' being set
+                # to False.
+                context = sections[section_num - 1][-1]
+                context.needs_testing_override = False
+                retval.append(context)
 
         retval.extend(sections[section_num])
 

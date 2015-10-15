@@ -53,7 +53,8 @@
           {% if vs.splittable %}
             <input type="submit" name="revisepassage" class="btn primary" value="Review whole passage"
                    id="id-revisepassage-btn-{{ vs.id }}" /><br/>
-            <input type="submit" name="revisepassagenextsection" class="btn primary" value="Review one section"
+            <input type="submit" name="revisepassagenextsection" class="btn primary"
+                   value="Review one section ({{ vs.next_section_verse_count }} vss)"
                    id="id-revisepassage-sections-btn-{{ vs.id }}" /><br/>
           {% else %}
             <input type="submit" name="revisepassage" class="btn primary" value="Review"
@@ -64,7 +65,15 @@
                  id="id-cancelpassage-btn-{{ vs.id }}" /><br/>
         </form>
         <h3>{{ vs.name }}</h3>
-        <div>Part or all of this passage is due for review today.</div>
+        <div>
+          {% if vs.needs_testing_count == vs.total_verse_count %}
+            This passage is due for review today
+            ({{ vs.total_verse_count }} verses).
+          {% else %}
+            Part of this passage is due for review today
+            ({{ vs.needs_testing_count }}/{{ vs.total_verse_count }} verses).
+          {% endif %}
+        </div>
       </div>
       {% if not forloop.last %}<hr>{% endif %}
 
