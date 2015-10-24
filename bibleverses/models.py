@@ -140,10 +140,10 @@ class TextVersionManager(caching.base.CachingManager):
         return self.get(slug=slug)
 
     def bibles(self):
-        return self.get_query_set().filter(text_type=TextType.BIBLE)
+        return self.get_queryset().filter(text_type=TextType.BIBLE)
 
     def catechisms(self):
-        return self.get_query_set().filter(text_type=TextType.CATECHISM)
+        return self.get_queryset().filter(text_type=TextType.CATECHISM)
 
 
 class TextVersion(caching.base.CachingMixin, models.Model):
@@ -556,7 +556,7 @@ class VerseSetManager(models.Manager):
         return qs
 
     def public(self):
-        return self.get_query_set().filter(public=True)
+        return self.get_queryset().filter(public=True)
 
     def popularity_for_sets(self, ids, ignoring_account_ids):
         """
@@ -672,8 +672,8 @@ class VerseSet(models.Model):
 class VerseChoiceManager(models.Manager):
     use_for_related_fields = True
 
-    def get_query_set(self):
-        return super(VerseChoiceManager, self).get_query_set().order_by('set_order')
+    def get_queryset(self):
+        return super(VerseChoiceManager, self).get_queryset().order_by('set_order')
 
 
 # Note that VerseChoice and Verse are not related, since we want a VerseChoice

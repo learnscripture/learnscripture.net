@@ -64,7 +64,7 @@ class AccountManager(UserManager):
         return qs
 
     def active(self):
-        return self.get_query_set().filter(is_active=True)
+        return self.get_queryset().filter(is_active=True)
 
     def send_reminders_to(self):
         return self.active().filter(remind_after__gt=0,
@@ -397,8 +397,8 @@ class ActionChange(object):
 
 
 class IdentityManager(models.Manager):
-    def get_query_set(self):
-        return super(IdentityManager, self).get_query_set().select_related('default_bible_version', 'account')
+    def get_queryset(self):
+        return super(IdentityManager, self).get_queryset().select_related('default_bible_version', 'account')
 
 
 # Most of business logic regarding verses is tied to Identity, for the sake of

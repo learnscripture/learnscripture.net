@@ -16,8 +16,8 @@ from accounts.models import Account
 class PaymentManager(models.Manager):
     use_for_related_fields = True
 
-    def get_query_set(self):
-        return super(PaymentManager, self).get_query_set().select_related('account')
+    def get_queryset(self):
+        return super(PaymentManager, self).get_queryset().select_related('account')
 
 
 class Payment(models.Model):

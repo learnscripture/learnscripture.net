@@ -17,6 +17,7 @@ class VerseChoiceAdminForm(forms.ModelForm):
 
     class Meta:
         model = VerseChoice
+        fields = '__all__'
 
 
 class VerseSetAdmin(admin.ModelAdmin):

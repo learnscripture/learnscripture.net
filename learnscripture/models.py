@@ -7,9 +7,9 @@ from learnscripture import hooks  # NOQA
 class SiteNoticeManager(models.Manager):
 
     def current(self):
-        return self.get_query_set().filter(is_active=True,
-                                           begins__lte=timezone.now(),
-                                           ends__gt=timezone.now())
+        return self.get_queryset().filter(is_active=True,
+                                          begins__lte=timezone.now(),
+                                          ends__gt=timezone.now())
 
 
 class SiteNotice(models.Model):
