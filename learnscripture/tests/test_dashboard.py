@@ -153,7 +153,7 @@ class DashboardTests(FullBrowserTest):
         self.get_url('dashboard')
         self.assertIn('Psalm 23', driver.page_source)  # sanity check
 
-        btn = self.find('input[value="Review one section"]')
+        btn = self.find('input[value^="Review one section"]')
         self.assertEqual(btn.get_attribute('name'), 'revisepassagenextsection')
         self.click(btn)
         self.assertIn("Psalm 23:1", driver.page_source)
