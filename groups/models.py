@@ -136,8 +136,8 @@ class Membership(models.Model):
 
 
 class InvitationManager(models.Manager):
-    def get_query_set(self):
-        return super(InvitationManager, self).get_query_set().select_related('account', 'group', 'created_by')
+    def get_queryset(self):
+        return super(InvitationManager, self).get_queryset().select_related('account', 'group', 'created_by')
 
 
 class Invitation(models.Model):

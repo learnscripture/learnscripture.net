@@ -216,6 +216,7 @@ MIDDLEWARE_CLASSES = [
         (True, 'django.middleware.csrf.CsrfViewMiddleware'),
         (True, 'learnscripture.middleware.TokenLoginMiddleware'),
         (True, 'django.contrib.auth.middleware.AuthenticationMiddleware'),
+        (True, 'django.contrib.auth.middleware.SessionAuthenticationMiddleware'),
         (True, 'django.contrib.messages.middleware.MessageMiddleware'),
         (True, 'django.middleware.clickjacking.XFrameOptionsMiddleware'),
         (DEVBOX, 'learnscripture.middleware.DebugMiddleware'),
@@ -375,6 +376,10 @@ CACHES = {
         'KEY_PREFIX': 'learnscripture.net' if PRODUCTION else 'staging.learnscripture.net'
     }
 } if LIVEBOX else {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+    }
+} if TESTING else {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     }

@@ -1,32 +1,30 @@
--e git://github.com/spookylukey/django-app-metrics.git@896c58208da1057eebd0a6b1ea781152a8ad06c2#egg=django_app_metrics-master
+-e git://github.com/spookylukey/django-app-metrics.git@08ffefcef9a65065d6eda6cac7e614335f384e75#egg=django_app_metrics-master
 -e git://github.com/jbalogh/django-cache-machine.git@6b2b37ebbcac85a9f86e0e3b64c1c54243f50006#egg=django_cache_machine-origin
 -e git://github.com/spookylukey/django-bootstrap-form.git@cee9d102c152240e4af07551b13755b53689dd36#egg=django_bootstrap_form-origin
-django-autoslug==1.8.0
+django-autoslug==1.9.3
 BeautifulSoup==3.2.1
-Django==1.7.9
-Pillow==2.7.0
-SQLAlchemy==0.9.9
+Django==1.8.5
+Pillow==3.0.0
+SQLAlchemy==1.0.9
 URLObject==2.4.0
-aldjemy==0.3.10
-amqp==1.4.6
+aldjemy==0.4.3
 anyjson==0.3.3
 argparse==1.2.1
-celery==3.1.17
+celery==3.1.18
 cssselect==0.9.1
 django-appconf==1.0.1
-django-autofixture==0.3.1
-django-celery==3.1.9
-django-compressor==1.4
+django-autofixture==0.10.1
+django-compressor==1.5
 django-fiber==1.1
 django-json-field==0.5.7
-django-jsonfield==0.9.13
+django-jsonfield==0.9.15
 django-markup==0.4
-django-mptt==0.6.1
+django-mptt==0.7.4
 django-pagination==1.0.7
-django-paypal==0.2.1
+django-paypal==0.2.7
 django-selectable==0.9.0
 django-spurl==0.6.2
-djangorestframework==2.4.4
+djangorestframework==2.4.8
 docutils==0.11
 easy-thumbnails==2.2
 ecdsa==0.11
@@ -37,7 +35,7 @@ lxml==3.3.3
 meld3==0.6.10
 numpy==1.9.2
 psutil==0.5.1
-psycopg2==2.4.2
+psycopg2==2.6.1
 pyquery==1.2.4
 pysparse==1.1.1-dev
 python-dateutil==2.2

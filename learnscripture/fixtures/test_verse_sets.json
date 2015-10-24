@@ -4,7 +4,8 @@
     "model": "accounts.account",
     "fields": {
         "email": "test@example.com",
-        "username": "versesetcreator"
+        "username": "versesetcreator",
+        "last_login": "2015-01-01"
     }
 },
 {

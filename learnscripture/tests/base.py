@@ -2,12 +2,14 @@
 from __future__ import absolute_import, unicode_literals
 import time
 
+
 from compressor.filters import CompilerFilter
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.test import TestCase
 from django.test.utils import override_settings
+from django.utils import timezone
 from django.utils.importlib import import_module
 from django_webtest import WebTestMixin
 from pyvirtualdisplay import Display
@@ -66,6 +68,7 @@ class AccountTestMixin(object):
                        username="tëst1"):
         account = Account.objects.create(email=email,
                                          username=username,
+                                         last_login=timezone.now(),
                                          )
         account.set_password('password')
         account.save()
