@@ -286,7 +286,7 @@ def update_database():
             if getattr(env, 'fake_migrations', False):
                 run_venv("./manage.py migrate --noinput --fake")
             else:
-                run_venv("./manage.py migrate --noinput")
+                run_venv("./manage.py migrate --noinput --fake-initial")
 
 
 def _assert_target():
