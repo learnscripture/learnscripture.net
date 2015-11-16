@@ -1222,6 +1222,10 @@ class Identity(models.Model):
         # For each section, work out if it has been tested 'together'
         section_info = {}  # section idx: info dict
         for i, section in enumerate(sections):
+            if any(uvs.last_tested is None for uvs in section):
+                section_info[i] = {'tested_together': False,
+                                   'last_tested': None}
+                continue
             max_last_tested = max(uvs.last_tested for uvs in section)
             min_last_tested = min(uvs.last_tested for uvs in section)
             # It should take no more than 2 minutes to test a single verse,
@@ -1237,7 +1241,8 @@ class Identity(models.Model):
         for i, info in reversed(sorted(section_info.items())):
             if info['tested_together']:
                 if (overall_max_last_tested is None or
-                        info['last_tested'] > overall_max_last_tested):
+                    (info['last_tested'] is not None and
+                     info['last_tested'] > overall_max_last_tested)):
                     overall_max_last_tested = info['last_tested']
                     last_section_tested = i
 
