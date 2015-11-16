@@ -330,6 +330,7 @@ def generate_suggestions_helper(version, items, text_getter, training_texts, ref
     ]
 
     to_create = []
+    to_delete_qs = []
     for item in items:
         if ref is not None and item.reference != ref:
             continue
@@ -343,7 +344,7 @@ def generate_suggestions_helper(version, items, text_getter, training_texts, ref
                 logger.info("Skipping %s %s", version.slug, item.reference)
                 continue
         else:
-            existing.delete()
+            to_delete_qs.append(existing)
         logger.info("Generating suggestions for %s %s", version.slug, item.reference)
 
         item_suggestions = []
@@ -382,6 +383,8 @@ def generate_suggestions_helper(version, items, text_getter, training_texts, ref
                                             hash=hash_text(text),
                                             ))
 
+    for qs in to_delete_qs:
+        qs.delete()
     WordSuggestionData.objects.bulk_create(to_create)
 
 
