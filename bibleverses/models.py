@@ -851,10 +851,15 @@ class UserVerseStatus(models.Model):
 
 
 WORD_RE = re.compile('[0-9a-zA-Z]')
+WORD_SPLITTER = re.compile(r'( |\n)')
 
 
 def is_punctuation(text):
     return not WORD_RE.search(text)
+
+
+def is_newline(text):
+    return text == "\n"
 
 
 def split_into_words(text, fix_punctuation_whitespace=True):
@@ -865,6 +870,16 @@ def split_into_words(text, fix_punctuation_whitespace=True):
     If fix_punctuation_whitespace==True (the default), then 'words' that consist
     only of punctuation are merged with neighbouring actual words.
     """
+    # The result is passed back through client side and used as
+    # the text to display and test against. It keeps newlines because
+    # they are useful in display.
+
+    # The number of items returned should be the number of words (used for
+    # scoring purposes), so punctuation and newlines are kept next to words.
+
+    # This is used by bibleverses.suggestions, therefore needs to match
+    # the way that learn.js splits words up.
+
     # We need to cope with things like Gen 3:22
     #    and live forever--"'
     # and Gen 1:16
@@ -873,28 +888,38 @@ def split_into_words(text, fix_punctuation_whitespace=True):
     # and when -- appears with punctuation on one side, we don't
     # want this to end up on its own. Also, text with a single
     # hyphen surrounding by whitespace needs to be handled too.
-    l = text.replace('--', ' -- ').strip().split(" ")
+    t = (text
+         .replace('--', ' -- ')
+         .replace('\r\n', '\n')
+         .strip())
+    l = WORD_SPLITTER.split(t)
+    # Eliminate spaces
+    l = [w for w in l if w not in [" ", ""]]
+    # Merge newlines
+    l = merge_items_left(l, is_newline)
     if fix_punctuation_whitespace:
-        # Merge punctuation only items with item to left.
-        l = merge_punctuation_items_right(merge_punctuation_items_left(l))
+        # Merge punctuation-only-items with item to left.
+        l = merge_items_left(l, is_punctuation)
+        # Then to right e.g. leading quotation marks
+        l = merge_items_right(l, is_punctuation)
 
     return l
 
 
-def merge_punctuation_items_left(words):
+def merge_items_left(words, predicate):
     retval = []
     for item in words:
-        if is_punctuation(item) and len(retval) > 0:
+        if predicate(item) and len(retval) > 0:
             retval[-1] += item
         else:
             retval.append(item)
     return retval
 
 
-def merge_punctuation_items_right(words):
+def merge_items_right(words, predicate):
     retval = []
     for item in words[::-1]:
-        if is_punctuation(item) and len(retval) > 0:
+        if predicate(item) and len(retval) > 0:
             retval[-1] = item + retval[-1]
         else:
             retval.append(item)

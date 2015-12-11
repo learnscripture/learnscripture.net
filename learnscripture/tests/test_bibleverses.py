@@ -419,6 +419,11 @@ class VerseUtilsTests(unittest2.TestCase):
         self.assertEqual(split_into_words("--some text here"),
                          ["--some", "text", "here"])
 
+    def test_split_into_words_newlines(self):
+        text = 'and\r\n"A stone of stumbling,\r\nand a rock of offense.'
+        self.assertEqual(split_into_words(text),
+                         ['and\n', '"A', 'stone', 'of', 'stumbling,\n', 'and', 'a', 'rock', 'of', 'offense.'])
+
 
 class ESVTests(TestBase):
     """

@@ -354,6 +354,10 @@ LOGGING = {
 if DEBUG:
     LOGGING['root']['handlers'] = ['console']
     LOGGING['loggers']['celery']['handlers'] = ['console']
+    LOGGING['loggers']['bibleverses.suggestions'] = {
+        'level': 'INFO',
+        'handlers': ['console'],
+    }
 
 if TESTING:
     LOGGING['handlers']['console']['level'] = 'ERROR'
