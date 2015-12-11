@@ -88,7 +88,7 @@ Many of the detailed lower-level tests are in the 'identity.py' tests, since
 most business logic runs off Identity.
 
 
-$ ./manage.py test learnscripture.tests
+$ ./manage.py test --keepdb learnscripture.tests
 
 Server config
 =============
