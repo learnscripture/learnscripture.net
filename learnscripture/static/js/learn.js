@@ -1665,6 +1665,10 @@ var learnscripture = (function (learnscripture, $) {
         // which is useful for poetry
         var text = verseStatus.scoring_text_words.join(" ")
         var reference = (verseStatus.showReference ? verseStatus.reference : null);
+
+        // Word splitting here needs to match with the way
+        // that bibleverses.suggestions splits words up.
+
         // First split lines into divs.
         $.each(text.split(/\n/), function (idx, line) {
             if (line.trim() !== '') {
