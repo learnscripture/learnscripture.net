@@ -1883,14 +1883,17 @@ var learnscripture = (function (learnscripture, $) {
             return;
         }
 
+        var isInReference = getWordAt(currentWordIndex).hasClass("reference");
         if ((textSoFarTrimmed.length > 0) && // if only whitespace entered, don't trigger test
-            (
-                ev.which === 32 || // space
-                ev.which === 13 || // enter
-                (ev.which == 186 // colon, at least for US/UK
-                    // allowed if in reference
-                    && getWordAt(currentWordIndex).hasClass("reference")
-                )
+            ((ev.which === 32 || ev.key === " ") ||
+             (ev.which === 13 || ev.key === "Enter") ||
+             (isInReference &&
+              ((ev.which === 59 || // desktop
+                ev.which === 186 || // iPhone
+                ev.key === ":") ||
+               (ev.which === 173 || // desktop
+                ev.which === 189 || // iPhone
+                ev.key === "-")))
             )
         ) {
             ev.preventDefault();
