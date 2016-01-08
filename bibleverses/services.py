@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import re
 import time
 import urllib
@@ -8,6 +10,12 @@ logger = logging.getLogger(__name__)
 from pyquery import PyQuery
 
 ESV_BASE_URL = "http://www.esvapi.org/v2/rest/"
+
+
+def do_esv_api(method, params):
+    url = ESV_BASE_URL + method + "?" + "&".join(params)
+    page = urllib.urlopen(url.encode('utf-8'))
+    return page.read()
 
 
 def get_esv(reference_list):
@@ -38,9 +46,7 @@ def get_esv(reference_list):
               'line-length=0',
               ]
 
-    url = ESV_BASE_URL + "passageQuery?" + "&".join(params)
-    page = urllib.urlopen(url)
-    text = page.read()
+    text = do_esv_api("passageQuery", params)
 
     # Split into passages
     sections = {}
@@ -86,9 +92,7 @@ def search_esv(version, words):
               'results-per-page=10',
               ]
 
-    url = ESV_BASE_URL + "query?" + "&".join(params)
-    page = urllib.urlopen(url)
-    text = page.read()
+    text = do_esv_api("query", params)
 
     # Split into results
     refs = []
