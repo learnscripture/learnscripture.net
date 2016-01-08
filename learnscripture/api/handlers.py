@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Handlers for AJAX requests.
 
@@ -391,6 +392,8 @@ class VerseFind(ApiView):
             passage_mode = request.GET.get('passage_mode', '') == '1'
         except KeyError:
             return rc.BAD_REQUEST
+
+        q = q.replace('—', '-').replace('–', '-')
 
         try:
             version = bible_versions_for_request(request).get(slug=version_slug)
