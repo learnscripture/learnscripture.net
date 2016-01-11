@@ -117,8 +117,9 @@ def install_dependencies():
             run_venv("pip install --upgrade pip")
             run_venv("pip install numpy==1.9.2")  # must be done first
             run_venv("pip install -r requirements.txt")
-            run_venv("nodeenv -p --node=5.4.0")
-            run_venv("npm install -g less==2.5.3")
+            if not exists(os.path.join(target.VENV_DIR, "bin", "node")):
+                run_venv("nodeenv -p --node=5.4.0")
+            run_venv("npm install -g --skip-installed less@2.5.3")
 
 
 def ensure_virtualenv():
