@@ -114,7 +114,11 @@ def install_dependencies():
     ensure_virtualenv()
     with virtualenv(target.VENV_DIR):
         with cd(target.SRC_DIR):
+            run_venv("pip install --upgrade pip")
+            run_venv("pip install numpy==1.9.2")  # must be done first
             run_venv("pip install -r requirements.txt")
+            run_venv("nodeenv -p --node=5.4.0")
+            run_venv("npm install -g less==2.5.3")
 
 
 def ensure_virtualenv():
@@ -171,10 +175,6 @@ def push_sources():
           (push_rev, target.NAME.lower()))
     # Also need to sync files that are not in main sources VCS repo.
     push_secrets()
-
-    # This config is shared, and rarely updates, so we push to
-    # PRODUCTION.
-    run("mkdir -p %s/etc" % PRODUCTION.VENV_DIR)
 
 
 @task
