@@ -79,6 +79,13 @@ class EmailReminderTests(AccountTestMixin, TestBase):
         send_email_reminders()
         self.assertEqual(len(mail.outbox), 2)
 
+    def test_remind_never(self):
+        self.account.remind_after = 0
+        self.account.save()
+        self.move_back(20)
+        send_email_reminders()
+        self.assertEqual(len(mail.outbox), 0)
+
     def test_dont_send_for_inactive_users(self):
         self.assertEqual(mail.outbox, [])
         self.move_back(181)
