@@ -55,6 +55,9 @@ DONT_NAG_NEW_USERS_FOR_MONEY_DAYS = 30
 # and so sometimes they just delegate to Account methods.
 
 
+SEND_REMINDERS_FOR = 30 * 6  # 6 months
+
+
 class AccountManager(UserManager):
     def visible_for_account(self, account):
         qs = self.active()
@@ -67,8 +70,13 @@ class AccountManager(UserManager):
         return self.get_queryset().filter(is_active=True)
 
     def send_reminders_to(self):
-        return self.active().filter(remind_after__gt=0,
-                                    email_bounced__isnull=True)
+        return (self.active()
+                .annotate(last_item_tested_on=models.Max('identity__verse_statuses__last_tested'))
+                .filter(remind_after__gt=0,
+                        email_bounced__isnull=True,
+                        last_item_tested_on__gt=timezone.now() - timedelta(days=SEND_REMINDERS_FOR),
+                        )
+               )
 
 
 class Account(AbstractBaseUser):

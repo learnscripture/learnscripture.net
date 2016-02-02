@@ -39,7 +39,8 @@ class EmailReminderTests(AccountTestMixin, TestBase):
     # time.
     def move_back(self, days):
         self.identity.verse_statuses.update(
-            next_test_due=F('next_test_due') - timedelta(days)
+            next_test_due=F('next_test_due') - timedelta(days),
+            last_tested=F('last_tested') - timedelta(days),
         )
         a = Account.objects.get(id=self.account.id)
         if a.last_reminder_sent is not None:
@@ -77,6 +78,12 @@ class EmailReminderTests(AccountTestMixin, TestBase):
         self.move_back(1.1)
         send_email_reminders()
         self.assertEqual(len(mail.outbox), 2)
+
+    def test_dont_send_for_inactive_users(self):
+        self.assertEqual(mail.outbox, [])
+        self.move_back(181)
+        send_email_reminders()
+        self.assertEqual(len(mail.outbox), 0)
 
     def test_login_link(self):
         self.move_back(3)
