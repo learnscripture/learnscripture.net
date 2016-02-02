@@ -51,7 +51,8 @@ def send_email_reminder(account, current_site):
             send_reminder = True
     else:
         # Reminder not sent, check for first reminder.
-        if (n - v.next_test_due).days >= account.remind_after:
+        if (account.remind_after > 0 and  # means 'never'
+                (n - v.next_test_due).days >= account.remind_after):
             send_reminder = True
 
     if not send_reminder:
