@@ -76,7 +76,7 @@ class AccountManager(UserManager):
                         email_bounced__isnull=True,
                         last_item_tested_on__gt=timezone.now() - timedelta(days=SEND_REMINDERS_FOR),
                         )
-               )
+                )
 
 
 class Account(AbstractBaseUser):
