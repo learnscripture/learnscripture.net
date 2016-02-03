@@ -101,22 +101,24 @@ source control.
 Deployment
 ==========
 
-Deployment is done using fabric, typically:
+Deployment is done using fabric, typically::
 
-$  fab production deploy
+    fab production deploy
 
 Python dependencies are managed using requirements.txt, which is used
 automatically in the deploy procedure.
 
 Initial setup of the project was done using:
 
-- WebFaction control panel to create apps
-  - webserver apps (custom app listening on port)
-  - celeryd apps (custom app listening on port)
-  - supervisord app (custom app listening on port)
+* WebFaction control panel to create apps
 
-- Some manual installation of software.
-  - lessc binary, using node/npm
+  * webserver apps (custom app listening on port)
+  * celeryd apps (custom app listening on port)
+  * supervisord app (custom app listening on port)
+
+* Some manual installation of software.
+
+  * lessc binary, using node/npm
 
 Due to shared hosting with no root access, custom installation was often
 necessary, and chef/puppet would probably not provide easy shortcuts.
@@ -163,15 +165,15 @@ New texts and catechisms
 
 * Dump the word suggestions and transfer to the server.
 
-  e.g.:
+  e.g.::
 
-  psql -U learnscripture -d learnscripture_wordsuggestions -c "\\copy (select version_slug, reference, hash, suggestions from bibleverses_wordsuggestiondata where version_slug = 'NCC') TO stdout WITH CSV HEADER;" > wsd_NCC.csv
+      psql -U learnscripture -d learnscripture_wordsuggestions -c "\\copy (select version_slug, reference, hash, suggestions from bibleverses_wordsuggestiondata where version_slug = 'NCC') TO stdout WITH CSV HEADER;" > wsd_NCC.csv
 
-  rsync wsd_NCC.csv cciw@learnscripture.net:/home/cciw
+      rsync wsd_NCC.csv cciw@learnscripture.net:/home/cciw
 
 * Load the word suggestions on the server, making sure to load them
-  into the right databases.
+  into the right databases::
 
-  psql -U cciw_learnscripture -d learnscripture_wordsuggestions -c "\\copy bibleverses_wordsuggestiondata (version_slug, reference, hash, suggestions) from stdin CSV HEADER" < ~/wsd_NCC.csv
+      psql -U cciw_learnscripture -d learnscripture_wordsuggestions -c "\\copy bibleverses_wordsuggestiondata (version_slug, reference, hash, suggestions) from stdin CSV HEADER" < ~/wsd_NCC.csv
 
 * Mark the text as public via the admin
