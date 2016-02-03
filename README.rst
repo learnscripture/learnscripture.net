@@ -11,7 +11,7 @@ Development setup
 Since there have only ever been one developer on the project to date, these
 instructions may not work completely, but they should be a start.
 
-1. Create a directory 'learnscripture.net'
+1. Create a directory 'learnscripture.net' and cd into it.
 
 2. Checkout the sources from bitbucket into a folder called 'src'::
 
