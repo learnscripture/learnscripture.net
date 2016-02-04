@@ -433,7 +433,9 @@ class Identity(models.Model):
                                     blank=True,
                                     related_name='referrals')
 
-    track_learning = models.BooleanField(default=False)
+    track_learning = models.BooleanField(default=False,
+                                         help_text="Set this to enable detailed tracking"
+                                         " of a user's learning, for debugging purposes.")
 
     objects = IdentityManager()
 

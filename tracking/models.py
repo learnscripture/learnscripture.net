@@ -168,8 +168,7 @@ def rewind_models(model, point_in_time):
     for ts in qs1:
         ts.apply()
 
-    # unapply applied snapshos before point_in_time.
-    # If everything is correct, then only one of these quer
+    # unapply applied snapshots before point_in_time.
     qs2 = (TrackingSnapshot.objects
            .filter(model_path=path,
                    applied=True,
