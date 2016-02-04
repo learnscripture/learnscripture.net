@@ -1,10 +1,10 @@
 """
-Records of user scores.
+Records of user scores and actions.
 
-ScoreLog is used for recent scores, e.g. weekly leaderboard.
+ActionLog is used for scores and for various things like calculating
+streaks and awards.
 TotalScore is a summary used for all time scores.
 
-ScoreLog is also used as a record of how many verse tests a user did.
 """
 from datetime import timedelta
 
@@ -32,8 +32,8 @@ class Scores(object):
     VERSE_LEARNT_BONUS = 2
 
 
-class ScoreLog(models.Model):
-    account = models.ForeignKey('accounts.Account', related_name='score_logs')
+class ActionLog(models.Model):
+    account = models.ForeignKey('accounts.Account', related_name='action_logs')
     points = models.PositiveIntegerField()
     reason = models.PositiveSmallIntegerField(choices=ScoreReason.choice_list)
     reference = models.CharField(max_length=255, blank=True)
@@ -46,13 +46,13 @@ class ScoreLog(models.Model):
             self.created = timezone.now()
             TotalScore.objects.filter(account=self.account)\
                 .update(points=F('points') + self.points)
-        super(ScoreLog, self).save(*args, **kwargs)
+        super(ActionLog, self).save(*args, **kwargs)
 
     class Meta:
         ordering = ('-created',)
 
     def __repr__(self):
-        return "<ScoreLog account=%s points=%s reason=%s reference=%s created=%s>" % (
+        return "<ActionLog account=%s points=%s reason=%s reference=%s created=%s>" % (
             self.account.username, self.points, self.get_reason_display(), self.reference, self.created)
 
 
@@ -130,27 +130,26 @@ def get_all_time_leaderboard(hellbanned_mode, page, page_size, group=None):
 def get_leaderboard_since(since, hellbanned_mode, page, page_size, group=None):
     # page is zero indexed
 
-    # This uses a completely different strategy to get_all_time_leaderboard, and
-    # only works if ScoreLogs haven't been cleared out for the relevant period.
-
-    from learnscripture.utils.sqla import default_engine, accounts_account, scores_scorelog
+    # This uses a completely different strategy to get_all_time_leaderboard,
+    # relying on ActionLog
+    from learnscripture.utils.sqla import default_engine, accounts_account, scores_actionlog
     from sqlalchemy.sql import select
     from sqlalchemy.sql.functions import next_value
     from sqlalchemy.schema import Sequence
     from sqlalchemy.sql import func
 
     account = accounts_account
-    scorelog = scores_scorelog
+    actionlog = scores_actionlog
 
     sq = Sequence('rank_seq')
 
     subq1 = (
-        active_user_query(select([scorelog.c.account_id,
-                                  func.sum(scorelog.c.points).label('sum_points')],
-                                 from_obj=scorelog.join(account)),
+        active_user_query(select([actionlog.c.account_id,
+                                  func.sum(actionlog.c.points).label('sum_points')],
+                                 from_obj=actionlog.join(account)),
                           hellbanned_mode)
-        .where(scorelog.c.created > since)
-        .group_by(scorelog.c.account_id)
+        .where(actionlog.c.created > since)
+        .group_by(actionlog.c.account_id)
     )
 
     subq1 = leaderboard_group_filter(subq1, hellbanned_mode, group)
@@ -176,14 +175,14 @@ def get_leaderboard_since(since, hellbanned_mode, page, page_size, group=None):
 
 
 def get_number_of_distinct_hours_for_account_id(account_id):
-    from learnscripture.utils.sqla import scores_scorelog, default_engine
+    from learnscripture.utils.sqla import scores_actionlog, default_engine
     from sqlalchemy.sql import select, distinct, extract
     from sqlalchemy import func
 
     sq1 = select(
-        [distinct(extract('hour', scores_scorelog.c.created)).label('hours')],
-        scores_scorelog.c.account_id == account_id,
-        from_obj=[scores_scorelog]
+        [distinct(extract('hour', scores_actionlog.c.created)).label('hours')],
+        scores_actionlog.c.account_id == account_id,
+        from_obj=[scores_actionlog]
     ).alias()
     q1 = select([func.count(sq1.c.hours)],
                 from_obj=sq1)
@@ -268,15 +267,15 @@ def get_verses_started_per_day(identity_id):
 
 
 def get_verses_tested_per_day(account_id):
-    from learnscripture.utils.sqla import scores_scorelog, default_engine
+    from learnscripture.utils.sqla import scores_actionlog, default_engine
     from sqlalchemy.sql import select, and_
     from sqlalchemy import func
 
-    day_col = func.date_trunc('day', scores_scorelog.c.created).label('day')
+    day_col = func.date_trunc('day', scores_actionlog.c.created).label('day')
     q1 = (select([day_col,
                   func.count(day_col)],
-                 and_(scores_scorelog.c.account_id == account_id,
-                      scores_scorelog.c.reason.in_([ScoreReason.VERSE_TESTED,
+                 and_(scores_actionlog.c.account_id == account_id,
+                      scores_actionlog.c.reason.in_([ScoreReason.VERSE_TESTED,
                                                     ScoreReason.VERSE_REVISED])
                       )
                  )

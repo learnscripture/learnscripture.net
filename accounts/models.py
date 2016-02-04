@@ -176,7 +176,7 @@ class Account(AbstractBaseUser):
         if action_stage != StageType.TEST:
             return []
 
-        score_logs = []
+        action_logs = []
         word_count = count_words(text)
         max_points = word_count * Scores.POINTS_PER_WORD
         if old_memory_stage >= MemoryStage.TESTED:
@@ -184,49 +184,49 @@ class Account(AbstractBaseUser):
         else:
             reason = ScoreReason.VERSE_TESTED
         points = max_points * accuracy
-        score_logs.append(self.add_points(points, reason, accuracy=accuracy, reference=reference))
+        action_logs.append(self.add_points(points, reason, accuracy=accuracy, reference=reference))
 
         if accuracy == 1:
-            score_logs.append(self.add_points(points * Scores.PERFECT_BONUS_FACTOR,
-                                              ScoreReason.PERFECT_TEST_BONUS,
-                                              reference=reference,
-                                              accuracy=accuracy))
-            # At least one subscriber to scored_100_percent relies on score_logs
+            action_logs.append(self.add_points(points * Scores.PERFECT_BONUS_FACTOR,
+                                               ScoreReason.PERFECT_TEST_BONUS,
+                                               reference=reference,
+                                               accuracy=accuracy))
+            # At least one subscriber to scored_100_percent relies on action_logs
             # to be created in order to do job. In context of tests, this means
-            # we have to send this signal after creating ScoreLog
+            # we have to send this signal after creating ActionLog
             scored_100_percent.send(sender=self)
 
         if (action_change.old_strength < memorymodel.LEARNT <= action_change.new_strength):
-            score_logs.append(self.add_points(word_count * Scores.POINTS_PER_WORD *
-                                              Scores.VERSE_LEARNT_BONUS,
-                                              ScoreReason.VERSE_LEARNT,
-                                              reference=reference,
-                                              accuracy=accuracy))
+            action_logs.append(self.add_points(word_count * Scores.POINTS_PER_WORD *
+                                               Scores.VERSE_LEARNT_BONUS,
+                                               ScoreReason.VERSE_LEARNT,
+                                               reference=reference,
+                                               accuracy=accuracy))
             verse_finished.send(sender=self)
 
         if action_stage == StageType.TEST and old_memory_stage < MemoryStage.TESTED:
             verse_started.send(sender=self)
 
-        return score_logs
+        return action_logs
 
     def add_points(self, points, reason, accuracy=None, reference=""):
         # Need to refresh 'total_score' each time
         points = math.floor(points)
         current_points = TotalScore.objects.get(account_id=self.id).points
-        score_log = self.score_logs.create(points=points,
-                                           reason=reason,
-                                           reference=reference,
-                                           accuracy=accuracy)
+        action_log = self.action_logs.create(points=points,
+                                             reason=reason,
+                                             reference=reference,
+                                             accuracy=accuracy)
         # Change cached object to reflect DB, which has been
         # updated via a SQL UPDATE for max correctness.
         self.total_score.points = current_points + points
         points_increase.send(sender=self,
                              previous_points=current_points,
-                             points_added=score_log.points)
-        return score_log
+                             points_added=action_log.points)
+        return action_log
 
-    def get_score_logs(self, from_datetime):
-        return self.score_logs.filter(created__gte=from_datetime).order_by('created')
+    def get_action_logs(self, from_datetime):
+        return self.action_logs.filter(created__gte=from_datetime).order_by('created')
 
     @cached_property
     def points_all_time(self):
@@ -235,7 +235,7 @@ class Account(AbstractBaseUser):
     @cached_property
     def points_this_week(self):
         n = timezone.now()
-        val = self.score_logs.filter(created__gt=n - timedelta(7))\
+        val = self.action_logs.filter(created__gt=n - timedelta(7))\
             .aggregate(models.Sum('points'))['points__sum']
         return val if val is not None else 0
 
@@ -1314,11 +1314,11 @@ class Identity(models.Model):
             .filter(verse_set=verse_set_id, ignored=False)\
             .update(ignored=True)
 
-    def get_score_logs(self, from_datetime):
+    def get_action_logs(self, from_datetime):
         if self.account_id is None:
             return []
         else:
-            return self.account.get_score_logs(from_datetime)
+            return self.account.get_action_logs(from_datetime)
 
     @property
     def scoring_enabled(self):

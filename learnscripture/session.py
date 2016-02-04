@@ -112,17 +112,17 @@ def start_learning_session(request, user_verse_statuses, learning_type, return_t
     _set_verse_statuses(request, user_verse_statuses)
     _set_learning_session_start(request, timezone.now())
     request.session['learning_type'] = learning_type
-    request.session['score_logs'] = []
+    request.session['action_logs'] = []
     request.session['return_to'] = return_to
 
 
-def verse_status_finished(request, uvs_id, new_score_logs):
+def verse_status_finished(request, uvs_id, new_action_logs):
     _remove_user_verse_status(request, uvs_id)
 
-    if (new_score_logs and request.session.get('learning_type', LearningType.PRACTICE) == LearningType.REVISION):
-        score_log_ids = list(request.session['score_logs'])
-        score_log_ids.extend([sl.id for sl in new_score_logs])
-        request.session['score_logs'] = score_log_ids
+    if (new_action_logs and request.session.get('learning_type', LearningType.PRACTICE) == LearningType.REVISION):
+        action_log_ids = list(request.session['action_logs'])
+        action_log_ids.extend([sl.id for sl in new_action_logs])
+        request.session['action_logs'] = action_log_ids
 
 
 def verse_status_skipped(request, uvs_id):

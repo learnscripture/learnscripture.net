@@ -209,13 +209,13 @@ class ActionCompleteHandler(ApiView):
             # implies client error
             return rc.BAD_REQUEST
 
-        score_logs = identity.award_action_points(uvs.reference, uvs.scoring_text,
-                                                  old_memory_stage,
-                                                  action_change, stage, accuracy)
+        action_logs = identity.award_action_points(uvs.reference, uvs.scoring_text,
+                                                   old_memory_stage,
+                                                   action_change, stage, accuracy)
 
         if (stage == StageType.TEST or
                 (stage == StageType.READ and not verse_status['needs_testing'])):
-            session.verse_status_finished(request, verse_status['id'], score_logs)
+            session.verse_status_finished(request, verse_status['id'], action_logs)
 
         return {}
 
@@ -350,7 +350,7 @@ class SessionStats(ApiView):
         return retval
 
 
-class ScoreLogs(ApiView):
+class ActionLogs(ApiView):
 
     fields = [
         'id',  # used for uniqueness tests
@@ -362,7 +362,7 @@ class ScoreLogs(ApiView):
     def get(self, request):
         if not hasattr(request, 'identity'):
             return []
-        return request.identity.get_score_logs(session.get_learning_session_start(request))
+        return request.identity.get_action_logs(session.get_learning_session_start(request))
 
 
 def html_format_text(verse):
