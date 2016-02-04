@@ -1,6 +1,6 @@
 from django.conf.urls import url, patterns
 
-from learnscripture.api.handlers import VersesToLearnHandler, ActionCompleteHandler, ChangeVersionHandler, LogOutHandler, SetPreferences, SessionStats, SkipVerseHandler, CancelLearningVerseHandler, CancelLearningPassageHandler, ActionLogs, VerseFind, CheckDuplicatePassageSet, DeleteNotice, ResetProgressHandler, AndroidAppInstalled, AddComment, HideComment, Follow, UnFollow, RecordWordMistakes
+from learnscripture.api.handlers import VersesToLearnHandler, ActionCompleteHandler, ChangeVersionHandler, LogOutHandler, SetPreferences, SessionStats, SkipVerseHandler, CancelLearningVerseHandler, CancelLearningPassageHandler, ActionLogs, VerseFind, CheckDuplicatePassageSet, DeleteNotice, ResetProgressHandler, AndroidAppInstalled, AddComment, HideComment, Follow, UnFollow
 
 
 # These URLs are hardcoded into Javascript instead of using URL reversing
@@ -11,7 +11,6 @@ from learnscripture.api.handlers import VersesToLearnHandler, ActionCompleteHand
 urlpatterns = patterns('',
                        url(r'^versestolearn/$', VersesToLearnHandler.as_view(), name='learnscripture.api.versestolearn'),
                        url(r'^actioncomplete/$', ActionCompleteHandler.as_view(), name='learnscripture.api.actioncomplete'),
-                       url(r'^recordwordmistakes/$', RecordWordMistakes.as_view(), name='learnscripture.api.recordwordmistakes'),
                        url(r'^changeversion/$', ChangeVersionHandler.as_view(), name='learnscripture.api.changeversion'),
                        url(r'^logout/$', LogOutHandler.as_view(), name='learnscripture.api.logout'),
                        url(r'^setpreferences/$', SetPreferences.as_view(), name='learnscripture.api.setpreferences'),

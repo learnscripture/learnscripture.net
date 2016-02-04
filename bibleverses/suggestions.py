@@ -374,7 +374,9 @@ def generate_suggestions_helper(version, items, text_getter, training_texts, ref
 
                 word_suggestions = scale_suggestions(word_suggestions[0:MAX_SUGGESTIONS])
 
-                # Add hits=0
+                # Add hits=0. This is now unused, and could be removed with a
+                # suitable backwards compat code in
+                # WordSuggestionData.get_suggestions and a data migration.
                 item_suggestions.append([(w, f, 0) for w, f in word_suggestions])
 
         to_create.append(WordSuggestionData(version_slug=version.slug,

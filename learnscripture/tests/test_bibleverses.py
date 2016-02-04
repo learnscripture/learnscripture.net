@@ -299,22 +299,6 @@ class VersionTests(TestBase):
                                                                'Genesis 1:2-3'])
                 self.assertEqual(len(d), 4)
 
-    def test_suggestions_update(self):
-        version = TextVersion.objects.get(slug='KJV')
-        version.record_word_mistakes('Genesis 1:1', [[0, 'but'],
-                                                     [1, 'his']])
-        self.assertEqual(WordSuggestionData.objects.get(reference='Genesis 1:1', version_slug='KJV').suggestions[0],
-                         [[u'and', 1.0, 0], [u'but', 0.049, 1], [u'thou', 0.037, 0]])
-        self.assertEqual(WordSuggestionData.objects.get(reference='Genesis 1:1', version_slug='KJV').suggestions[1],
-                         [[u'his', 1.0, 1], [u'all', 0.740, 0], [u'a', 0.653, 0]])
-
-        version.record_word_mistakes('Genesis 1:2-3', [[1, 'they'],
-                                                       [30, 'he']])  # 29 words in Gen 1:2, this is word at index 1 in Gen 1:3
-        self.assertEqual(WordSuggestionData.objects.get(reference='Genesis 1:2', version_slug='KJV').suggestions[1],
-                         [[u'he', 1.0, 0], [u'they', 0.593, 1], [u'thou', 0.403, 0]])
-        self.assertEqual(WordSuggestionData.objects.get(reference='Genesis 1:3', version_slug='KJV').suggestions[1],
-                         [[u'the', 1.0, 0], [u'he', 0.443, 1], [u'they', 0.263, 0]])
-
 
 class MockUVS(object):
     def __init__(self, reference):

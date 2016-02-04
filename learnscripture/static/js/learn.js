@@ -1114,25 +1114,11 @@ var learnscripture = (function (learnscripture, $) {
             this.wordTestSetUp();
             this.ensureTestDivVisible();
             $('#id-hint-btn').hide();
-            this.wordMistakes = [];
             this.clickTrapperSetUp();
         },
 
         testTearDown: function () {
             Object.getPrototypeOf(OnScreenTestingStrategy).testTearDown.call(this);
-            if (this.wordMistakes !== undefined && this.wordMistakes.length > 0) {
-                var url = '/api/learnscripture/v1/recordwordmistakes/?format=json';
-                $.ajax({
-                    url: url,
-                    dataType: 'json',
-                    type: 'POST',
-                    data: {
-                        reference: currentVerseStatus.reference,
-                        version: currentVerseStatus.version.slug,
-                        mistakes: JSON.stringify(this.wordMistakes)
-                    }
-                });
-            }
             $('#id-onscreen-test-container').hide();
             this.removeTestDivFix();
             this.wordTestTearDown();
@@ -1244,7 +1230,6 @@ var learnscripture = (function (learnscripture, $) {
                 indicateSuccess();
             } else {
                 testingMistakes[currentWordIndex] = 1;
-                this.wordMistakes.push([currentWordIndex, chosenWord])
                 indicateFail();
             }
             moveOn();
