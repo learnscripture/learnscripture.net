@@ -1,6 +1,6 @@
 from django.conf.urls import url, patterns
 
-from learnscripture.api.handlers import VersesToLearnHandler, ActionCompleteHandler, ChangeVersionHandler, LogOutHandler, SetPreferences, SessionStats, SkipVerseHandler, CancelLearningVerseHandler, CancelLearningPassageHandler, ScoreLogs, VerseFind, CheckDuplicatePassageSet, DeleteNotice, ResetProgressHandler, AndroidAppInstalled, AddComment, HideComment, Follow, UnFollow, RecordWordMistakes
+from learnscripture.api.handlers import VersesToLearnHandler, ActionCompleteHandler, ChangeVersionHandler, LogOutHandler, SetPreferences, SessionStats, SkipVerseHandler, CancelLearningVerseHandler, CancelLearningPassageHandler, ActionLogs, VerseFind, CheckDuplicatePassageSet, DeleteNotice, ResetProgressHandler, AndroidAppInstalled, AddComment, HideComment, Follow, UnFollow, RecordWordMistakes
 
 
 # These URLs are hardcoded into Javascript instead of using URL reversing
@@ -20,7 +20,7 @@ urlpatterns = patterns('',
                        url(r'^cancellearningverse/$', CancelLearningVerseHandler.as_view(), name='learnscripture.api.cancellearningverse'),
                        url(r'^cancellearningpassage/$', CancelLearningPassageHandler.as_view(), name='learnscripture.api.cancellearningpassage'),
                        url(r'^resetprogress/$', ResetProgressHandler.as_view(), name='learnscripture.api.resetprogress'),
-                       url(r'^scorelogs/$', ScoreLogs.as_view(), name='learnscripture.api.scorelogs'),
+                       url(r'^actionlogs/$', ActionLogs.as_view(), name='learnscripture.api.actionlogs'),
                        url(r'^versefind/$', VerseFind.as_view(), name='learnscripture.api.versefind'),
                        url(r'^checkduplicatepassageset/$', CheckDuplicatePassageSet.as_view(), name='learnscripture.api.checkduplicatepassageset'),
                        url(r'^deletenotice/$', DeleteNotice.as_view(), name='learnscripture.api.deletenotice'),

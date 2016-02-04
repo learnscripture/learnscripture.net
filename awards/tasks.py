@@ -52,27 +52,27 @@ def give_ace_awards(account_id):
     account = Account.objects.get(id=account_id)
 
     test_reasons = [ScoreReason.VERSE_TESTED, ScoreReason.VERSE_REVISED]
-    scores = account.score_logs.filter(reason__in=test_reasons).order_by('-created')
+    actions = account.action_logs.filter(reason__in=test_reasons).order_by('-created')
 
     try:
-        last_score = scores.all()[0]
+        last_action = actions.all()[0]
     except IndexError:
         return
-    if last_score.accuracy != 1.0:
+    if last_action.accuracy != 1.0:
         return
 
     # Find the most recent score that *wasn't* 100%
     try:
         # Need to deal with NULLs in 'accuracy' field, due to old data.
         # If NULL, we assume it is *not* 100%
-        breaker = (scores.filter(accuracy__isnull=True) | scores.filter(accuracy__lt=1.0))[0]
+        breaker = (actions.filter(accuracy__isnull=True) | actions.filter(accuracy__lt=1.0))[0]
     except IndexError:
         breaker = None
 
     if breaker is None:  # No break, everything recorded is at 100%
-        count = scores.count()
+        count = actions.count()
     else:
-        count = scores.filter(created__gt=breaker.created).count()
+        count = actions.filter(created__gt=breaker.created).count()
 
     AceAward(count=count).give_to(account)
 

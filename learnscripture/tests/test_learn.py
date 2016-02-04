@@ -144,7 +144,7 @@ class LearnTests(FullBrowserTest):
                          StudentAward(count=1).points() +
                          AceAward(count=1).points()
                          )
-        self.assertEqual(account.score_logs.count(), 4)
+        self.assertEqual(account.action_logs.count(), 4)
 
         # Check awards
         self.assertEqual(account.awards.filter(award_type=AwardType.STUDENT,
@@ -347,7 +347,7 @@ class LearnTests(FullBrowserTest):
                           + j316_score_2)
                          + StudentAward(count=1).points()
                          )
-        self.assertEqual(account.score_logs.count(), 3)
+        self.assertEqual(account.action_logs.count(), 3)
 
     def test_hint_button(self):
         identity, account = self.create_account()

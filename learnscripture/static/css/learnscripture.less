@@ -208,7 +208,7 @@
         border-color: @bgBorderColor;
     }
 
-    .score-log {
+    .action-log {
         background-color: @btnColor2;
         .gradientBar(@btnColor2, @btnColor1);
         border: 2px solid #888;
@@ -969,7 +969,7 @@ span.versenumber {
     height: 1.3em;
 }
 
-.score-log {
+.action-log {
     text-align: center;
     border-radius: 12px;
     padding: 4px;
@@ -977,39 +977,39 @@ span.versenumber {
     font-weight: bold;
 }
 
-.score-log-type-0:after {
+.action-log-type-0:after {
     content: " - initial test";
 }
-.score-log-type-1:after {
+.action-log-type-1:after {
     content: " - review test";
 }
-.score-log-type-2:before {
+.action-log-type-2:before {
     content: "Super BONUS: ";
 }
-.score-log-type-2:after {
+.action-log-type-2:after {
     content: " - all review completed";
 }
-.score-log-type-3:before {
+.action-log-type-3:before {
     content: "BONUS: ";
 }
-.score-log-type-3:after {
+.action-log-type-3:after {
     content: " - perfect!";
 }
-.score-log-type-4:before {
+.action-log-type-4:before {
     content: "BONUS: ";
 }
-.score-log-type-4:after {
+.action-log-type-4:after {
     content: " - verse fully learnt";
 }
-.score-log-type-5:after {
+.action-log-type-5:after {
     content: " - award bonus";
 }
 
 
-body .score-log {
-    &.score-log-type-2,
-    &.score-log-type-3,
-    &.score-log-type-4
+body .action-log {
+    &.action-log-type-2,
+    &.action-log-type-3,
+    &.action-log-type-4
     {
         border: 2px solid red;
     }

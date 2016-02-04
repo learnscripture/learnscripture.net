@@ -429,7 +429,7 @@ var learnscripture = (function (learnscripture, $) {
                 learnscripture.ajaxRetrySucceeded();
                 if (!wasPracticeMode) {
                     loadStats();
-                    loadScoreLogs();
+                    loadActionLogs();
                 }
             },
             retry: learnscripture.ajaxRetryOptions,
@@ -1765,37 +1765,37 @@ var learnscripture = (function (learnscripture, $) {
         });
     };
 
-    var loadScoreLogs = function () {
+    var loadActionLogs = function () {
         if (!scoringEnabled) {
             return;
         }
         $.ajax({
-            url: '/api/learnscripture/v1/scorelogs/?format=json&r=' +
+            url: '/api/learnscripture/v1/actionlogs/?format=json&r=' +
                 Math.floor(Math.random() * 1000000000).toString(),
             dataType: 'json',
             type: 'GET',
-            success: handleScoreLogs
+            success: handleActionLogs
         });
     };
 
-    var handleScoreLogs = function (scoreLogs) {
+    var handleActionLogs = function (actionLogs) {
         var container = $('#id-points-block');
-        var addScoreLog = function (scoreLogs) {
+        var addActionLog = function (actionLogs) {
             // This is defined recursively to get the animation to work
             // nicely for multiple score logs appearing one after the other.
-            if (scoreLogs.length === 0) {
+            if (actionLogs.length === 0) {
                 return;
             }
-            var scoreLog = scoreLogs[0];
+            var actionLog = actionLogs[0];
             var doRest = function () {
-                addScoreLog(scoreLogs.slice(1))
+                addActionLog(actionLogs.slice(1))
             };
-            var divId = 'id-score-log-' + scoreLog.id.toString();
+            var divId = 'id-action-log-' + actionLog.id.toString();
             if ($('#' + divId).length === 0) {
                 // Put new ones at top
                 var newSL = $('<div id="' + divId +
-                    '" class="score-log score-log-type-' + scoreLog.reason + '"' +
-                    '>' + scoreLog.points + '</div>');
+                    '" class="action-log action-log-type-' + actionLog.reason + '"' +
+                    '>' + actionLog.points + '</div>');
                 // Need some tricks to get height of new element without
                 // showing.
                 newSL.css({
@@ -1829,7 +1829,7 @@ var learnscripture = (function (learnscripture, $) {
                 doRest();
             }
         };
-        addScoreLog(scoreLogs);
+        addActionLog(actionLogs);
     };
 
     // =========== Event handlers ==========
@@ -2150,7 +2150,7 @@ var learnscripture = (function (learnscripture, $) {
                 currentVerseIndex = minVerseIndex;
                 loadCurrentVerse();
                 loadStats();
-                loadScoreLogs();
+                loadActionLogs();
             }
         });
 

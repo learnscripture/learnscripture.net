@@ -119,7 +119,7 @@ class AccountTests(AccountTestMixin, TestBase):
 
         def score():
             # We simulate testing over time by moving previous data back an hour
-            account.score_logs.update(created=F('created') - timedelta(hours=1))
+            account.action_logs.update(created=F('created') - timedelta(hours=1))
             account.award_action_points("John 3:16", "This is John 3:16",
                                         MemoryStage.TESTED,
                                         ActionChange(old_strength=0.5, new_strength=0.6),
