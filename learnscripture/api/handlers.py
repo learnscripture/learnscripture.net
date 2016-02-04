@@ -220,21 +220,6 @@ class ActionCompleteHandler(ApiView):
         return {}
 
 
-class RecordWordMistakes(ApiView):
-
-    @require_preexisting_identity_m
-    def post(self, request):
-        ref = request.POST['reference']
-        version_slug = request.POST['version']
-        mistakes = json.loads(request.POST['mistakes'])
-        try:
-            version = bible_versions_for_request(request).get(slug=version_slug)
-        except TextVersion.DoesNotExist:
-            return rc.BAD_REQUEST
-        version.record_word_mistakes(ref, mistakes)
-        return {}
-
-
 class SkipVerseHandler(ApiView):
 
     @require_preexisting_identity_m

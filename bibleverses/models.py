@@ -289,36 +289,6 @@ class TextVersion(caching.base.CachingMixin, models.Model):
                         for_identity__account__is_hellbanned=False,
                         )]
 
-    def record_word_mistakes(self, reference, mistake_list):
-        # Takes a reference and a list of [word_number, wrong_word] pairs
-        # and records the hit in the relevant WordSuggestionData
-        #
-        # Note that reference might be a combo e.g. Genesis 1:1-2 in which case
-        # we need to make sure that word indexes in mistake_list are interpreted
-        # correctly and get mapped back to correct WordSuggestionData
-        wsds = self._get_ordered_word_suggestion_data(reference)
-        list_sizes = [len(wsd.get_suggestions()) for wsd in wsds]
-
-        # Find correct WordSuggestionData and word offset:
-        mapped_mistakes = []
-        for word_num, word in mistake_list:
-            for i, s in enumerate(list_sizes):
-                if word_num >= s:
-                    word_num -= s
-                else:
-                    mapped_mistakes.append((i, word_num, word))
-                    break
-
-        # Group by WordSuggestionData
-        mistake_d = defaultdict(list)
-        for i, word_num, word in mapped_mistakes:
-            mistake_d[i].append((word_num, word))
-
-        for i, mistakes in mistake_d.items():
-            wsd = wsds[i]
-            for word_num, wrong_word in mistakes:
-                wsd.record_mistake(word_num, wrong_word)
-            wsd.save()
 
     # Simulate FK to WordSuggestionData
     @property
@@ -445,7 +415,7 @@ class WordSuggestionData(models.Model):
     # Schema:
     # list of suggestions for each word, in order.
     # each suggestion consists of a list of tuples
-    #  [(word, frequency, hits)]
+    #  [(word, frequency, unused)]
     suggestions = JSONField()
 
     def get_suggestions(self):
@@ -453,8 +423,6 @@ class WordSuggestionData(models.Model):
             return []
         # frequency is the suggested frequency based on
         # markov chains etc., normalised to 1.
-        # hits is the number of times someone has chosen this word.
-        # We use hits as a strong hint that this is a good word to use.
 
         # We could do some of this client side, but we save on bandwidth by
         # returning only a selection of the words, not all the data.
@@ -464,16 +432,8 @@ class WordSuggestionData(models.Model):
             # Get modified frequencies
 
             # Calculated frequency is always between 0 and 1.
-            # Hits can be 0 or higher.
-
-            # If something has been hit (chosen incorrectly) twice (once
-            # could be accident), that's a good indication it is a good
-            # alternative candidate, so weight that strongly.
-
-            # However, we don't want hits to overwhelm all other possibilities
-            # which haven't been hit yet, so we put a cap of 4
-            pairs = [(word, min(hits / 2.0, 4) + frequency)
-                     for word, frequency, hits in word_suggestions]
+            pairs = [(word, frequency)
+                     for word, frequency, unused in word_suggestions]
 
             # Normalise, and also give low frequency words
             # a boost, because they are not being seen at all
@@ -500,14 +460,6 @@ class WordSuggestionData(models.Model):
 
             retval.append(sorted(chosen))
         return retval
-
-    def record_mistake(self, word_num, wrong_word):
-        # Update hits for suggestion 'word' for word number 'word_num'
-        s = self.suggestions
-        s = [[(word, frequency, hits + (1 if word == wrong_word and word_num == i else 0))
-              for word, frequency, hits in suggestion]
-             for i, suggestion in enumerate(s)]
-        self.suggestions = s
 
     class Meta:
         unique_together = [
