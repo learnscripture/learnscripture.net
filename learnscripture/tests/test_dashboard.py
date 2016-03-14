@@ -20,22 +20,20 @@ class DashboardTests(FullBrowserTest):
 
     def test_redirect(self):
         self.get_url('dashboard')
-        self.assertTrue(self.current_url.endswith(reverse('login')))
+        self.assertUrlsEqual(reverse('login'))
 
     def _assert_learning_reference(self, ref):
-        self.assertTrue(self.current_url.endswith(reverse('learn')))
+        self.assertUrlsEqual(reverse('learn'))
         self.assertEqual(ref, self.find("#id-verse-title").text)
 
     def _click_clear_learning_queue_btn(self, verse_set_id):
-        self.click('#id-learning-queue-verse-set-%s input[name=clearbiblequeue]' % (verse_set_id if verse_set_id else ''),
-                   produces_alert=True)
+        # Avoid 'self.click' which is buggy when alerts are produced
+        self.find('#id-learning-queue-verse-set-%s input[name=clearbiblequeue]' % (verse_set_id if verse_set_id else '')).click()
         self.confirm()
 
     def test_learn_queue(self):
         # This combines a bunch of tests, it's easier to avoid a lot of
         # repetition that way.
-
-        driver = self.driver
         i = self.setup_identity()
 
         # Add a verse set
@@ -47,12 +45,12 @@ class DashboardTests(FullBrowserTest):
 
         # Test verses appear on dashboard
         self.get_url('dashboard')
-        self.assertIn('John 3:16', driver.page_source)
-        self.assertIn('John 14:6', driver.page_source)
-        self.assertIn('Psalm 23:2', driver.page_source)
+        self.assertTextPresent('John 3:16')
+        self.assertTextPresent('John 14:6')
+        self.assertTextPresent('Psalm 23:2')
 
         # Test click 'Start learning' for 'Bible 101' verse set
-        self.assertIn('Bible 101', driver.page_source)
+        self.assertTextPresent('Bible 101')
         self.click('#id-learning-queue-verse-set-%s input[name=learnbiblequeue]' % vs.id)
         self._assert_learning_reference(u"John 3:16")
 
@@ -69,16 +67,16 @@ class DashboardTests(FullBrowserTest):
         self._click_clear_learning_queue_btn(vs.id)
 
         # Since we cleared the queue, shouldn't have John 14:6 now
-        self.assertTrue(self.current_url.endswith(reverse('dashboard')))
-        self.assertNotIn('John 14:6', driver.page_source)
+        self.assertUrlsEqual(reverse('dashboard'))
+        self.assertTextAbsent('John 14:6')
 
         # but should still have Psalm 23:2
-        self.assertIn('Psalm 23:2', driver.page_source)
+        self.assertTextPresent('Psalm 23:2')
 
         # Click the other 'Clear queue' button
         self._click_clear_learning_queue_btn(None)
 
-        self.assertNotIn('Psalm 23:2', driver.page_source)
+        self.assertTextAbsent('Psalm 23:2')
 
     def test_learn_passage(self):
         # As above, combine several tests as a story, for simplicity
@@ -91,47 +89,41 @@ class DashboardTests(FullBrowserTest):
         vs = VerseSet.objects.get(slug='psalm-23')
         i.add_verse_set(vs)
 
-        driver = self.driver
-
         # Test dashboard text
         self.get_url('dashboard')
-        self.assertIn('Psalm 23', driver.page_source)
+        self.assertTextPresent('Psalm 23')
 
         # Test 'Continue learning' button
-        self.click('#id-learnpassage-btn-%d' % vs.id)
-        self.assertTrue(self.current_url.endswith(reverse('learn')))
+        self.submit('#id-learnpassage-btn-%d' % vs.id)
+        self.assertUrlsEqual(reverse('learn'))
         self.assertEqual(u"Psalm 23:1", self.find("#id-verse-title").text)
 
         # Test 'Cancel learning' button
         self.get_url('dashboard')
-        self.click('#id-cancelpassage-btn-%d' % vs.id,
-                   produces_alert=True)
+        self.find('#id-cancelpassage-btn-%d' % vs.id).click()
         self.confirm()
-        self.assertNotIn('Psalm 23', driver.page_source)
+        self.assertTextAbsent('Psalm 23')
 
     def test_learn_catechism(self):
-        driver = self.driver
         i = self.setup_identity()
         i.add_catechism(TextVersion.objects.get(slug='WSC'))
         self.get_url('dashboard')
-        self.assertIn("You've queued this catechism for learning, 4 questions total",
-                      driver.page_source)
+        self.assertTextPresent("You've queued this catechism for learning, 4 questions total")
 
         self.click('input[name=learncatechismqueue]')
-        self.assertTrue(self.current_url.endswith(reverse('learn')))
+        self.assertUrlsEqual(reverse('learn'))
         self.assertEqual(u"Q1. What is the chief end of man?", self.find("#id-verse-title").text)
 
         i.record_verse_action('Q1', 'WSC', StageType.TEST, accuracy=1.0)
 
         # Test clicking 'Clear queue'
         self.get_url('dashboard')
-        self.click('input[name=clearcatechismqueue]',
-                   produces_alert=True)
+        self.find('input[name=clearcatechismqueue]').click()
         self.confirm()
 
         # Since we cleared the queue, shouldn't have anything about catechisms now
-        self.assertTrue(self.current_url.endswith(reverse('dashboard')))
-        self.assertNotIn('catechism', driver.page_source)
+        self.assertUrlsEqual(reverse('dashboard'))
+        self.assertTextAbsent('catechism')
 
     def test_revise_one_section(self):
         i = self.setup_identity()
@@ -148,39 +140,31 @@ class DashboardTests(FullBrowserTest):
                                 next_test_due=timezone.now() - timedelta(days=1),
                                 memory_stage=MemoryStage.TESTED)
 
-        driver = self.driver
-
         self.get_url('dashboard')
-        self.assertIn('Psalm 23', driver.page_source)  # sanity check
+        self.assertTextPresent('Psalm 23')  # sanity check
 
-        btn = self.find('input[value^="Review one section"]')
-        self.assertEqual(btn.get_attribute('name'), 'revisepassagenextsection')
-        self.click(btn)
-        self.assertIn("Psalm 23:1", driver.page_source)
+        self.click('input[value^="Review one section"][name=revisepassagenextsection]')
+        self.assertTextPresent("Psalm 23:1")
 
         # Skip through
         def skip():
             self.click("#id-verse-dropdown")
-            self.click(driver.find_element_by_link_text("Skip this"))
+            self.click(text="Skip this")
         skip()
-        self.assertIn("Psalm 23:2", driver.page_source)
+        self.assertTextPresent("Psalm 23:2")
         skip()
-        self.assertIn("Psalm 23:3", driver.page_source)
+        self.assertTextPresent("Psalm 23:3")
         skip()
         self.wait_until_loaded('body')
 
         # Should be back at dashboard
-        self.assertTrue(self.current_url.endswith(reverse('dashboard')))
+        self.assertUrlsEqual(reverse('dashboard'))
 
     def test_home_dashboard_routing(self):
         Identity.objects.all().delete()
-        driver = self.driver
-        driver.get(self.live_server_url + "/")
-        self.wait_until_loaded('body')
-        e = self.find('a.btn.large')
-        self.assertTrue(e.get_attribute('href').endswith(reverse('choose')))
-        self.click(e)
-        self.assertTrue(self.current_url.endswith(reverse('choose')))
+        self.get_url('home')
+        self.click('a.btn.large[href="{0}"]'.format(reverse('choose')))
+        self.assertUrlsEqual(reverse('choose'))
         # Getting this far shouldn't create an Identity
         self.assertEqual(Identity.objects.count(), 0)
 
@@ -192,10 +176,8 @@ class DashboardTests(FullBrowserTest):
 
         self.assertEqual(identity.notices.all()[0].seen, None)
 
-        driver = self.driver
-
         self.get_url('dashboard')
-        self.assertIn("Hello you crazy guy!", driver.page_source)
+        self.assertTextPresent("Hello you crazy guy!")
 
         self.assertNotEqual(identity.notices.all()[0].seen, None)
 
@@ -203,4 +185,4 @@ class DashboardTests(FullBrowserTest):
         Notice.objects.update(seen=F('seen') - timedelta(days=10))
 
         self.get_url('dashboard')
-        self.assertNotIn("Hello you crazy guy!", driver.page_source)
+        self.assertTextAbsent("Hello you crazy guy!")

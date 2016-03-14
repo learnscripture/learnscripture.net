@@ -18,10 +18,9 @@ class ReferralsTests(FullBrowserTest):
 
         self.assertEqual(account.referred_identities_count(), 0)
 
-        driver = self.driver
         # Start at home page
-        start_url = account.make_referral_link(self.live_server_url)
-        driver.get(start_url)
+        start_url = account.make_referral_link('/')
+        self.get_literal_url(start_url)
         self.wait_until_loaded('body')
         self.click('a.btn.primary')
 

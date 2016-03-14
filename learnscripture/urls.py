@@ -98,6 +98,12 @@ if settings.DEVBOX:
                                              {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}),
                                          )
 
+
+if settings.TESTING:
+    urlpatterns += patterns('',
+                            url(r'^django_functest/', include('django_functest.urls'))
+                            )
+
 urlpatterns = urlpatterns + patterns('',
                                      (r'', 'fiber.views.page'),
                                      )

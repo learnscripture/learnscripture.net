@@ -29,12 +29,10 @@ class UserVersesPageTests(FullBrowserTest):
                                        memory_stage=MemoryStage.TESTED)
 
         self.login(account)
-
-        driver = self.driver
         self.get_url('user_verses')
 
         for i in range(1, 7):
-            self.assertIn("Psalm 23:%d" % i, driver.page_source)
+            self.assertTextPresent("Psalm 23:%d" % i)
 
         self.click('a.btn[data-reference="Psalm 23:2"]')
 
@@ -50,22 +48,21 @@ class UserVersesPageTests(FullBrowserTest):
         btn3 = self.find('input[name="practisepassage"]')
         self.assertEqual(btn3.get_attribute('value'), "Practise passage: Psalm 23:1-6")
 
-        # Click "practise section":
-        self.click(btn2)
+        self.click('input[name="practisepassagesection"]')
 
-        self.assertTrue(self.current_url.endswith(reverse('learn')))
-        self.assertIn("Psalm 23:1", driver.page_source)
+        self.assertUrlsEqual(reverse('learn'))
+        self.assertTextPresent("Psalm 23:1")
 
         # Should be in 'practise' mode
-        self.assertTrue(self.find("#id-instructions .stage-practice").is_displayed())
+        self.assertTrue(self.is_element_displayed("#id-instructions .stage-practice"))
 
         # Type the verse:
         words = "The LORD is my shepherd I shall not want"
         for word in words.split():
-            self.send_keys("#id-typing", word + " ")
+            self.fill({"#id-typing": word + " "})
 
         # Click finish
-        self.click("#id-finish-btn")
+        self.submit("#id-finish-btn")
 
         # Should have gone back to where we came from
-        self.assertTrue(self.current_url.endswith(reverse('user_verses')))
+        self.assertUrlsEqual(reverse('user_verses'))

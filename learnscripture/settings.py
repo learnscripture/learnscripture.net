@@ -90,6 +90,11 @@ if LIVEBOX:
 else:
     # Development settings:
 
+    # We have problems with wordsuggestions DB connections not being closed in
+    # test environment, especially related to the non-default DB it seems,
+    # probably a Django bug, so we workaround:
+    conn_max_age = 0 if TESTING else 120
+
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -99,7 +104,7 @@ else:
             'HOST': 'localhost',
             'PORT': '5432',
             'ATOMIC_REQUESTS': True,
-            'CONN_MAX_AGE': 120,
+            'CONN_MAX_AGE': conn_max_age,
         },
         'wordsuggestions': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -109,7 +114,7 @@ else:
             'HOST': 'localhost',
             'PORT': '5432',
             'ATOMIC_REQUESTS': False,
-            'CONN_MAX_AGE': 120,
+            'CONN_MAX_AGE': conn_max_age,
         }
     }
 

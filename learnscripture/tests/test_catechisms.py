@@ -10,10 +10,9 @@ class CatechismTests(FullBrowserTest):
     fixtures = ['test_bible_versions.json', 'test_catechisms.json']
 
     def test_list(self):
-        driver = self.driver
         self.get_url('catechisms')
-        self.assertIn("Westminster Shorter", driver.page_source)
-        self.assertIn("4 question/answer pairs", driver.page_source)
+        self.assertTextPresent("Westminster Shorter")
+        self.assertTextPresent("4 question/answer pairs")
 
     def test_learn(self):
         identity, account = self.create_account()
@@ -32,7 +31,9 @@ class CatechismTests(FullBrowserTest):
             self.click("#id-next-btn")
 
         for word in "Man's chief end is to glorify God and to enjoy him forever".split(" "):
-            self.send_keys("#id-typing", word + " ")
+            self.fill({"#id-typing": word + " "})
+
+        self.wait_for_ajax()
 
         self.assertEqual(Event.objects
                          .filter(event_type=EventType.STARTED_LEARNING_CATECHISM)

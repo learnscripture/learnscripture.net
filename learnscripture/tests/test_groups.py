@@ -40,15 +40,13 @@ class GroupPageTests(FullBrowserTest):
 
         self.assertEqual(private_group.can_join(account), False)
         self.assertEqual(public_group.can_join(account), True)
-
-        driver = self.driver
         self.get_url('groups')
 
-        self.assertIn("Another group", driver.page_source)
-        self.assertNotIn("My group", driver.page_source)
-        self.click(driver.find_element_by_xpath('//a[text() = "Another group"]'))
+        self.assertTextPresent("Another group")
+        self.assertTextAbsent("My group")
+        self.click(xpath='//a[text() = "Another group"]')
 
-        self.assertTrue(self.current_url.endswith('/groups/another-group/'))
+        self.assertUrlsEqual(reverse('group', args=('another-group',)))
 
         self.click('input[name="join"]')
         self.assertTrue(public_group.members.filter(id=account.id).exists())
@@ -65,17 +63,16 @@ class GroupPageTests(FullBrowserTest):
                                  created_by=creator_account,
                                  public=True,
                                  open=True)
-        driver = self.driver
-        self.get_url('group', args=(g.slug,))
+        self.get_url('group', g.slug)
 
-        self.assertIn("You are not a member of this group", driver.page_source)
+        self.assertTextPresent("You are not a member of this group")
 
         self.click('input[name="join"]')
 
         self.fill_in_account_form()
         self.click('input[name="join"]')
 
-        self.assertIn("You are a member of this group", driver.page_source)
+        self.assertTextPresent("You are a member of this group")
 
     def test_add_comment(self):
         _, creator_account = self.create_account(username='creator',
@@ -87,12 +84,17 @@ class GroupPageTests(FullBrowserTest):
                                  public=True,
                                  open=True)
         self.login(creator_account)
-        self.get_url('group', args=(g.slug,))
+        self.get_url('group', g.slug)
         self.click('.show-add-comment')
         message = "Yay this is my comment!"
-        self.send_keys('#id-comment-box', message)
+        self.fill({'#id-comment-box': message})
         self.click('#id-add-comment-btn')
-        self.assertIn("<p>%s</p>" % message, self.driver.page_source)
+        self.wait_for_ajax()
+        self.assertTextPresent(message)
+        # Test db
+        c = Comment.objects.get()
+        self.assertEqual(c.author, creator_account)
+        self.assertEqual(c.message, "Yay this is my comment!")
 
 
 class GroupTests(AccountTestMixin, TestBase):
@@ -250,11 +252,11 @@ class GroupCreatePageTests(FullBrowserTest):
                                                  email='i@example.com')
 
         self.get_url('create_group')
-        self.send_keys("#id_name", "My group")
+        self.fill({"#id_name": "My group"})
         self.click("#id_public")
 
         self.click("#id_invited_users_0")
-        self.send_keys("#id_invited_users_0", "invit")
+        self.fill({"#id_invited_users_0": "invit"})
         self.wait_for_ajax()
         # Clicking is hard for some reason, use keyboard:
         time.sleep(0.2)
@@ -264,7 +266,7 @@ class GroupCreatePageTests(FullBrowserTest):
         time.sleep(0.2)
         self.click('input[name="save"]')
 
-        self.assertTrue(self.current_url.endswith('/my-group/'))
+        self.assertUrlsEqual(reverse('group', args=('my-group',)))
 
         g = Group.objects.get(slug='my-group')
         self.assertEqual(list(g.invited_users()), [invited_account])
