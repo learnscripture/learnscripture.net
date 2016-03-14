@@ -2,21 +2,20 @@ from __future__ import absolute_import
 
 import time
 
+import selenium
 from autofixture import AutoFixture
 from django.core.urlresolvers import reverse
-import selenium
 
 from accounts.models import Account
 from awards.models import Award, AwardType
 from comments.models import Comment
 from events.models import Event, EventType
 from groups.models import Group
-from learnscripture.tests.base import TestBase
 
-from .base import FullBrowserTest, AccountTestMixin
+from .base import AccountTestMixin, FullBrowserTest, TestBase, WebTestBase
 
 
-class GroupPageTests(FullBrowserTest):
+class GroupPageTestsBase(object):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json']
 
@@ -44,11 +43,11 @@ class GroupPageTests(FullBrowserTest):
 
         self.assertTextPresent("Another group")
         self.assertTextAbsent("My group")
-        self.click(xpath='//a[text() = "Another group"]')
+        self.follow_link('a[href="{0}"]'.format(reverse('group', args=('another-group',))))
 
         self.assertUrlsEqual(reverse('group', args=('another-group',)))
 
-        self.click('input[name="join"]')
+        self.submit('input[name="join"]')
         self.assertTrue(public_group.members.filter(id=account.id).exists())
 
         self.assertEqual(Event.objects.filter(event_type=EventType.GROUP_JOINED).count(),
@@ -67,12 +66,17 @@ class GroupPageTests(FullBrowserTest):
 
         self.assertTextPresent("You are not a member of this group")
 
-        self.click('input[name="join"]')
+        self.submit('input[name="join"]')
 
         self.fill_in_account_form()
-        self.click('input[name="join"]')
+        self.submit('input[name="join"]')
 
         self.assertTextPresent("You are a member of this group")
+
+
+class GroupPageTestsFB(GroupPageTestsBase, FullBrowserTest):
+
+    # Additional Selenium only test
 
     def test_add_comment(self):
         _, creator_account = self.create_account(username='creator',
@@ -95,6 +99,10 @@ class GroupPageTests(FullBrowserTest):
         c = Comment.objects.get()
         self.assertEqual(c.author, creator_account)
         self.assertEqual(c.message, "Yay this is my comment!")
+
+
+class GroupPageTestsWT(GroupPageTestsBase, WebTestBase):
+    pass
 
 
 class GroupTests(AccountTestMixin, TestBase):
