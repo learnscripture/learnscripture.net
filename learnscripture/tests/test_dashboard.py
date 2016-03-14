@@ -10,10 +10,10 @@ import accounts.memorymodel
 from accounts.models import Identity, Notice
 from bibleverses.models import VerseSet, TextVersion, StageType, MemoryStage
 
-from .base import FullBrowserTest
+from .base import FullBrowserTest, WebTestBase
 
 
-class DashboardTests(FullBrowserTest):
+class DashboardTestsBase(object):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json',
                 'test_catechisms.json']
@@ -22,14 +22,23 @@ class DashboardTests(FullBrowserTest):
         self.get_url('dashboard')
         self.assertUrlsEqual(reverse('login'))
 
-    def _assert_learning_reference(self, ref):
+    def assert_learning_reference(self, ref):
         self.assertUrlsEqual(reverse('learn'))
-        self.assertEqual(ref, self.find("#id-verse-title").text)
+        if self.is_full_browser_test:
+            self.assertEqual(ref, self.get_element_text("#id-verse-title"))
+        else:
+            json = self.app.get(reverse('learnscripture.api.versestolearn')).json
+            verse_data = [d for d in json if d['learn_order'] == 0][0]
+            self.assertEqual(ref, verse_data['title_text'])
 
-    def _click_clear_learning_queue_btn(self, verse_set_id):
-        # Avoid 'self.click' which is buggy when alerts are produced
-        self.find('#id-learning-queue-verse-set-%s input[name=clearbiblequeue]' % (verse_set_id if verse_set_id else '')).click()
-        self.confirm()
+    def click_clear_learning_queue_btn(self, verse_set_id):
+        self.click_and_confirm('#id-learning-queue-verse-set-%s input[name=clearbiblequeue]' % (verse_set_id if verse_set_id else ''))
+
+    def click_cancel_passage_btn(self, verse_set_id):
+        self.click_and_confirm('#id-cancelpassage-btn-%d' % verse_set_id)
+
+    def click_clear_catechsim_queue_btn(self):
+        self.click_and_confirm('input[name=clearcatechismqueue]')
 
     def test_learn_queue(self):
         # This combines a bunch of tests, it's easier to avoid a lot of
@@ -51,20 +60,20 @@ class DashboardTests(FullBrowserTest):
 
         # Test click 'Start learning' for 'Bible 101' verse set
         self.assertTextPresent('Bible 101')
-        self.click('#id-learning-queue-verse-set-%s input[name=learnbiblequeue]' % vs.id)
-        self._assert_learning_reference(u"John 3:16")
+        self.submit('#id-learning-queue-verse-set-%s input[name=learnbiblequeue]' % vs.id)
+        self.assert_learning_reference(u"John 3:16")
 
         # Learn one verse (otherwise we are back to dashboard redirecting us)
         i.record_verse_action('John 3:16', 'NET', StageType.TEST, accuracy=1.0)
 
         self.get_url('dashboard')
         # Test clicking 'Start learning' for general queue
-        self.click('#id-learning-queue-verse-set- input[name=learnbiblequeue]')
-        self._assert_learning_reference(u"Psalm 23:2")
+        self.submit('#id-learning-queue-verse-set- input[name=learnbiblequeue]')
+        self.assert_learning_reference(u"Psalm 23:2")
 
         # Test clicking 'Clear queue'
         self.get_url('dashboard')
-        self._click_clear_learning_queue_btn(vs.id)
+        self.click_clear_learning_queue_btn(vs.id)
 
         # Since we cleared the queue, shouldn't have John 14:6 now
         self.assertUrlsEqual(reverse('dashboard'))
@@ -74,7 +83,7 @@ class DashboardTests(FullBrowserTest):
         self.assertTextPresent('Psalm 23:2')
 
         # Click the other 'Clear queue' button
-        self._click_clear_learning_queue_btn(None)
+        self.click_clear_learning_queue_btn(None)
 
         self.assertTextAbsent('Psalm 23:2')
 
@@ -95,13 +104,11 @@ class DashboardTests(FullBrowserTest):
 
         # Test 'Continue learning' button
         self.submit('#id-learnpassage-btn-%d' % vs.id)
-        self.assertUrlsEqual(reverse('learn'))
-        self.assertEqual(u"Psalm 23:1", self.find("#id-verse-title").text)
+        self.assert_learning_reference("Psalm 23:1")
 
         # Test 'Cancel learning' button
         self.get_url('dashboard')
-        self.find('#id-cancelpassage-btn-%d' % vs.id).click()
-        self.confirm()
+        self.click_cancel_passage_btn(vs.id)
         self.assertTextAbsent('Psalm 23')
 
     def test_learn_catechism(self):
@@ -110,16 +117,17 @@ class DashboardTests(FullBrowserTest):
         self.get_url('dashboard')
         self.assertTextPresent("You've queued this catechism for learning, 4 questions total")
 
-        self.click('input[name=learncatechismqueue]')
-        self.assertUrlsEqual(reverse('learn'))
-        self.assertEqual(u"Q1. What is the chief end of man?", self.find("#id-verse-title").text)
+        self.submit('input[name=learncatechismqueue]')
+        self.assert_learning_reference("Q1. What is the chief end of man?")
 
+    def test_cancel_catechsim(self):
+        # Test clicking 'Clear queue'
+        i = self.setup_identity()
+        i.add_catechism(TextVersion.objects.get(slug='WSC'))
         i.record_verse_action('Q1', 'WSC', StageType.TEST, accuracy=1.0)
 
-        # Test clicking 'Clear queue'
         self.get_url('dashboard')
-        self.find('input[name=clearcatechismqueue]').click()
-        self.confirm()
+        self.click_clear_catechsim_queue_btn()
 
         # Since we cleared the queue, shouldn't have anything about catechisms now
         self.assertUrlsEqual(reverse('dashboard'))
@@ -143,27 +151,28 @@ class DashboardTests(FullBrowserTest):
         self.get_url('dashboard')
         self.assertTextPresent('Psalm 23')  # sanity check
 
-        self.click('input[value^="Review one section"][name=revisepassagenextsection]')
-        self.assertTextPresent("Psalm 23:1")
+        self.submit('input[value^="Review one section"][name=revisepassagenextsection]')
+        self.assert_learning_reference("Psalm 23:1")
 
-        # Skip through
-        def skip():
-            self.click("#id-verse-dropdown")
-            self.click(text="Skip this")
-        skip()
-        self.assertTextPresent("Psalm 23:2")
-        skip()
-        self.assertTextPresent("Psalm 23:3")
-        skip()
-        self.wait_until_loaded('body')
+        if self.is_full_browser_test:
+            # Skip through
+            def skip():
+                self.click("#id-verse-dropdown")
+                self.click(text="Skip this")
+            skip()
+            self.assertTextPresent("Psalm 23:2")
+            skip()
+            self.assertTextPresent("Psalm 23:3")
+            skip()
+            self.wait_until_loaded('body')
 
-        # Should be back at dashboard
-        self.assertUrlsEqual(reverse('dashboard'))
+            # Should be back at dashboard
+            self.assertUrlsEqual(reverse('dashboard'))
 
     def test_home_dashboard_routing(self):
         Identity.objects.all().delete()
         self.get_url('home')
-        self.click('a.btn.large[href="{0}"]'.format(reverse('choose')))
+        self.follow_link('a.btn.large[href="{0}"]'.format(reverse('choose')))
         self.assertUrlsEqual(reverse('choose'))
         # Getting this far shouldn't create an Identity
         self.assertEqual(Identity.objects.count(), 0)
@@ -186,3 +195,11 @@ class DashboardTests(FullBrowserTest):
 
         self.get_url('dashboard')
         self.assertTextAbsent("Hello you crazy guy!")
+
+
+class DashboardTestsFB(DashboardTestsBase, FullBrowserTest):
+    pass
+
+
+class DashboardTestsWT(DashboardTestsBase, WebTestBase):
+    pass

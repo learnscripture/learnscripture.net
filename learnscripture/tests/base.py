@@ -146,11 +146,29 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
 
     # Utilities:
 
+    # We use some django-functest internals here, rather than in actual test
+    # classes, to minimize impact if django-functest changes
+
+    def click_and_confirm(self, selector):
+        # 'self.click' is buggy when alerts are produced.
+        # So we wrap all of this functionality in a utility
+        # to avoid issues.
+        self._find(selector).click()
+        self._driver.switch_to_alert().accept()
+        self.wait_for_page_load()
+        self.wait_for_ajax()
+
     def find(self, *args, **kwargs):
         # Exposes a FuncSeleniumMixin private method. This comes with
         # the problem that it is not compatible with FuncWebTestMixin tests
         # because the returned objects are different.
         return self._find(*args, **kwargs)
+
+    def get_element_text(self, css_selector):
+        return self._find(css_selector).text
+
+    def get_page_title(self):
+        return self._driver.title
 
     def send_keys(self, css_selector, keys):
         self._find(css_selector=css_selector).send_keys(keys)
@@ -158,17 +176,6 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
     def wait_for_ajax(self):
         time.sleep(0.1)
         self.wait_until(lambda driver: driver.execute_script('return (typeof(jQuery) == "undefined" || jQuery.active == 0)'))
-
-    def confirm(self):
-        # Normally this has to be after 'self.find(...).click()' rather than
-        # 'self.click(...)' due to the latter having bugs when alerts are
-        # present.
-        self._driver.switch_to_alert().accept()
-        self.wait_until_loaded('body')
-        self.wait_for_ajax()
-
-    def get_page_title(self):
-        return self._driver.title
 
     # Higher level, learnscripture specific things:
 
@@ -195,7 +202,17 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
 @override_settings(COMPRESS_PRECOMPILERS=[('text/less', 'learnscripture.tests.base.DummyLessCssFilter')],
                    )
 class WebTestBase(AccountTestMixin, LoginMixin, FuncWebTestMixin, TestCase):
-    pass
+
+    # Utilities:
+
+    # Use some django-functest internals here
+
+    def click_and_confirm(self, css_selector):
+        # No javascript, just submit the button
+        self.submit(css_selector)
+
+    def get_element_text(self, css_selector):
+        return self._make_pq(self.last_response).find(css_selector).text()
 
 
 @override_settings(COMPRESS_PRECOMPILERS=[('text/less', 'learnscripture.tests.base.DummyLessCssFilter')],
