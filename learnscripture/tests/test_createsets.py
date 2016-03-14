@@ -19,8 +19,7 @@ class CreateSetTests(FullBrowserTest):
         self._identity, self._account = self.create_account()
 
     def _add_ref(self, ref):
-        self.find("#id_quick_find").clear()
-        self.send_keys("#id_quick_find", ref)
+        self.fill({"#id_quick_find": ref})
         self.click("#id_lookup")
         self.click("input.add-to-set")
         self.wait_until_loaded('#id-verse-list tbody tr td')
@@ -28,19 +27,16 @@ class CreateSetTests(FullBrowserTest):
 
     def test_create_selection_set(self):
         self.login(self._account)
-        driver = self.driver
         self.get_url('create_selection_set')
-        self.find("#id_name").clear()
-        self.send_keys("#id_name", "My set")
-        self.find("#id_description").clear()
-        self.send_keys("#id_description", "My description")
+        self.fill({"#id_name": "My set",
+                   "#id_description": "My description"})
         self._add_ref("Gen 1:5")
-        self.assertIn("And God called the light Day", driver.page_source)
+        self.assertTextPresent("And God called the light Day")
 
-        self.click("#id_public")
-        self.click("#id-save-btn")
-        self.assertTrue(driver.title.startswith("Verse set: My set"))
-        self.assertIn("And God called the light Day", driver.page_source)
+        self.fill({"#id_public": True})
+        self.submit("#id-save-btn")
+        self.assertTrue(self.get_page_title().startswith("Verse set: My set"))
+        self.assertTextPresent("And God called the light Day")
 
         self.assertEqual(self._account.awards.filter(award_type=AwardType.SHARER).count(),
                          1)
@@ -49,9 +45,8 @@ class CreateSetTests(FullBrowserTest):
 
     def test_dedupe_selection_sets(self):
         self.login(self._account)
-        driver = self.driver
         self.get_url("create_selection_set")
-        self.send_keys("#id_name", "My set")
+        self.fill({"#id_name": "My set"})
 
         # Add Gen 1:5
         self._add_ref("Genesis 1:5")
@@ -65,12 +60,12 @@ class CreateSetTests(FullBrowserTest):
 
         def _add_new_ref(ref):
             # Edit again
-            self.get_url('edit_set', kwargs=dict(slug=vs.slug))
+            self.get_url('edit_set', slug=vs.slug)
             self._add_ref(ref)
 
             self.click("#id-save-btn")
 
-            self.assertIn("Verse set 'My set' saved", driver.page_source)  # Checks we didn't get 500
+            self.assertTextPresent("Verse set 'My set' saved")  # Checks we didn't get 500
 
             if ref not in [r for r, i in current_ref_list]:
                 current_ref_list.append((ref, len(current_ref_list)))
@@ -91,7 +86,6 @@ class CreateSetTests(FullBrowserTest):
         but shouldn't forget the verse list
         """
         self.login(self._account)
-        driver = self.driver
         self.get_url('create_selection_set')
 
         self._add_ref("Gen 1:5")
@@ -99,10 +93,10 @@ class CreateSetTests(FullBrowserTest):
 
         self.click("#id-save-btn")
 
-        self.assertTrue(driver.title.startswith("Create selection set"))
-        self.assertIn("This field is required", driver.page_source)
-        self.assertIn("Genesis 1:5", driver.page_source)
-        self.assertIn("Genesis 1:6", driver.page_source)
+        self.assertTrue(self.get_page_title().startswith("Create selection set"))
+        self.assertTextPresent("This field is required")
+        self.assertTextPresent("Genesis 1:5")
+        self.assertTextPresent("Genesis 1:6")
 
     def test_edit(self):
         vs = VerseSet.objects.create(created_by=self._account,
@@ -115,10 +109,9 @@ class CreateSetTests(FullBrowserTest):
         vc3 = vs.verse_choices.create(reference='Genesis 1:10',
                                       set_order=2)
         self.login(self._account)
-        driver = self.driver
-        self.get_url('edit_set', kwargs=dict(slug=vs.slug))
+        self.get_url('edit_set', slug=vs.slug)
         e = self.find("#id-verse-list tbody tr:first-child td")
-        ActionChains(driver).drag_and_drop_by_offset(e, 0, 60).perform()
+        ActionChains(self._driver).drag_and_drop_by_offset(e, 0, 60).perform()
 
         self.click("#id-save-btn")
 
@@ -143,7 +136,7 @@ class CreateSetTests(FullBrowserTest):
         identity.add_verse_set(vs)
         identity.record_verse_action('Genesis 1:1', 'KJV', StageType.TEST, 1.0)
 
-        self.get_url('edit_set', kwargs=dict(slug=vs.slug))
+        self.get_url('edit_set', slug=vs.slug)
         self.click("#id-verse-list tbody tr:first-child td .icon-trash")
         self.click("#id-save-btn")
 
@@ -155,35 +148,30 @@ class CreateSetTests(FullBrowserTest):
         identity.verse_statuses.get(version__slug='KJV', reference='Genesis 1:1')
 
     def test_require_account(self):
-        driver = self.driver
         self.get_url('create_selection_set')
         self.set_preferences()
-        self.assertIn('You need to', driver.page_source)
-        self.assertIn('create an account', driver.page_source)
+        self.assertTextPresent('You need to')
+        self.assertTextPresent('create an account')
 
     def test_create_passage_set(self):
         self.login(self._account)
-        driver = self.driver
         self.get_url('create_passage_set')
 
-        self.find("#id_name").clear()
-        self.send_keys("#id_name", "Genesis 1:1-10")
-        self.find("#id_description").clear()
-        self.send_keys("#id_description", "My description")
+        self.fill({"#id_name": "Genesis 1:1-10"})
+        self.fill({"#id_description": "My description"})
 
-        self.find("#id_quick_find").clear()
-        self.send_keys("#id_quick_find", "Gen 1:1-10")
+        self.fill({"#id_quick_find": "Gen 1:1-10"})
         self.click("#id_lookup")
         self.wait_until_loaded('#id-verse-list tbody tr td')
-        self.assertIn("And God called the light Day", driver.page_source)
+        self.assertTextPresent("And God called the light Day")
 
         # Check boxes for Genesis 1:3, 1:9
         self.click('#id-verse-list tbody tr:nth-child(3) input')
         self.click('#id-verse-list tbody tr:nth-child(9) input')
 
         self.click("#id-save-btn")
-        self.assertTrue(driver.title.startswith("Verse set: Genesis 1"))
-        self.assertIn("And God called the light Day", driver.page_source)
+        self.assertTrue(self.get_page_title().startswith("Verse set: Genesis 1"))
+        self.assertTextPresent("And God called the light Day")
 
         vs = VerseSet.objects.get(name='Genesis 1:1-10',
                                   set_type=VerseSetType.PASSAGE)
@@ -193,23 +181,19 @@ class CreateSetTests(FullBrowserTest):
 
     def test_create_duplicate_passage_set(self):
         self.test_create_passage_set()
-        driver = self.driver
-
         self.get_url("create_passage_set")
-        self.find("#id_quick_find").clear()
-        self.send_keys("#id_quick_find", "Gen 1:1-10")
+        self.fill({"#id_quick_find": "Gen 1:1-10"})
 
         self.click("#id_lookup")
         self.wait_until_loaded('#id-verse-list tbody tr td')
-        self.assertIn("There are already", driver.page_source)
+        self.assertTextPresent("There are already")
 
     def test_empty_passage_set(self):
         self.login(self._account)
-        driver = self.driver
         self.get_url("create_passage_set")
-        self.send_keys("#id_name", "xxx")
+        self.fill({"#id_name": "xxx"})
         self.click("#id-save-btn")
-        self.assertIn("No verses in set", driver.page_source)
+        self.assertTextPresent("No verses in set")
 
     def test_edit_passage_set(self):
         self.login(self._account)
@@ -226,7 +210,7 @@ class CreateSetTests(FullBrowserTest):
 
         # Simple test - editing and pressing save should leave
         # everything the same.
-        self.get_url('edit_set', kwargs=dict(slug=vs.slug))
+        self.get_url('edit_set', slug=vs.slug)
         self.click("#id-save-btn")
 
         vs = VerseSet.objects.get(id=vs.id)

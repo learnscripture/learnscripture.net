@@ -81,15 +81,22 @@ object being created.
 Tests
 =====
 
-Tests use a mixture of Selenium for front end and lower level unit tests, which
-combine to give a reasonable level of coverage.
+Tests use a mixture of Selenium/WebTest for front end tests, and lower level
+unit tests, which combine to give a reasonable level of coverage. We use
+django-functest, which provides a higher level wrapper for both Selenium and
+WebTest. django-functest was designed to make it easy to write two tests at
+once - one that runs against Selenium, one against WebTest, but we rarely use
+this - tests are normally either WebTest, for pages that don't use Javascript,
+or Selenium, for pages that do. This is because the pages that do need
+Javascript can't usually gracefully degrade in the case when Javascript is not
+available.
 
 Many of the detailed lower-level tests are in the 'identity.py' tests, since
 most business logic runs off Identity.
 
 Run the tests::
 
-    ./manage.py test --keepdb learnscripture.tests
+    ./runtests.py
 
 Server config
 =============

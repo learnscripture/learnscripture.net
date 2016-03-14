@@ -202,7 +202,7 @@ class PasswordResetTest(TestBase):
         account.set_password('foo')
         account.save()
 
-    def assertURLEqual(self, url, expected):
+    def assertUrlsEqual(self, url, expected):
         """
         Given two URLs, make sure all their components (the ones given by
         urlparse) are equal, only comparing components that are present in both
@@ -233,7 +233,7 @@ class PasswordResetTest(TestBase):
         # Start by creating the email
         response = self.client.post('/login/', {'login-email': 'any_user@example.com',
                                                 'forgotpassword': '1'})
-        self.assertURLEqual(response.url, '/password-reset/')
+        self.assertUrlsEqual(response.url, '/password-reset/')
         self.assertEqual(len(mail.outbox), 1)
         return self._read_signup_email(mail.outbox[0])
 

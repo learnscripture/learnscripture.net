@@ -1,7 +1,5 @@
 from __future__ import absolute_import
 
-from selenium.webdriver.support.ui import Select
-
 from accounts.models import Identity
 from awards.models import AwardType, TrendSetterAward
 from bibleverses.models import VerseSet
@@ -15,13 +13,12 @@ class ChooseTests(FullBrowserTest):
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json']
 
     def test_search(self):
-        driver = self.driver
         self.get_url('choose')
-        self.send_keys("#id-search-input", "gospel")
+        self.fill({"#id-search-input": "gospel"})
         self.click("#id-search-btn")
 
-        self.assertIn("Basic Gospel", driver.page_source)
-        self.assertNotIn("Bible 101", driver.page_source)
+        self.assertTextPresent("Basic Gospel")
+        self.assertTextAbsent("Bible 101")
 
     def test_verse_set_popularity_tracking(self):
         # Frig a quantity to make test easier
@@ -59,8 +56,7 @@ class ChooseTests(FullBrowserTest):
         self.set_preferences()
 
         # Change version:
-        Select(self.find("#id-version-select")).select_by_visible_text("NET")
-
+        self.fill_by_text({"#id-version-select": "NET"})
         self.wait_for_ajax()
 
         identity = Identity.objects.exclude(id__in=[i.id for i in ids]).get()
@@ -76,17 +72,16 @@ class ChooseTests(FullBrowserTest):
                          identity.verse_statuses.filter(ignored=False).count())
 
     def test_choose_individual_verse(self):
-        driver = self.driver
         self.get_url('choose')
         self.click("a[href='#id-tab-individual']")
 
         # Test clicking on the drop downs.
-        Select(self.find("form.quickfind select[name=book]")).select_by_visible_text("John")
-        Select(self.find("form.quickfind select[name=chapter_start]")).select_by_visible_text("3")
-        Select(self.find("form.quickfind select[name=verse_start]")).select_by_visible_text("16")
+        self.fill_by_text({"form.quickfind select[name=book]": "John"})
+        self.fill_by_text({"form.quickfind select[name=chapter_start]": "3"})
+        self.fill_by_text({"form.quickfind select[name=verse_start]": "16"})
         self.click("input[name=lookup]")
 
-        self.assertIn("For this is the way God loved the world", driver.page_source)
+        self.assertTextPresent("For this is the way God loved the world")
 
         # Check we can actually click on 'Learn' and it works.
         self.click("#id-tab-individual input[value=Learn]")
@@ -95,40 +90,34 @@ class ChooseTests(FullBrowserTest):
 
     def test_choose_individual_verse_fuzzy(self):
         # Test entering into quick find, and being lazy
-        driver = self.driver
         self.get_url('choose')
         self.click("a[href='#id-tab-individual']")
 
-        self.find('form.quickfind input[name=quick_find]')\
-            .send_keys('Gen 1:1')
-        Select(self.find("form.quickfind select[name=version]")).select_by_visible_text("KJV (King James Version)")
+        self.fill({'form.quickfind input[name=quick_find]': 'Gen 1:1'})
+        self.fill_by_text({"form.quickfind select[name=version]": "KJV (King James Version)"})
         self.click("input[name=lookup]")
 
-        self.assertIn("In the beginning God", driver.page_source)
+        self.assertTextPresent("In the beginning God")
 
     def test_choose_individual_verse_bad_ref(self):
         # Test entering into quick find, and being lazy
-        driver = self.driver
         self.get_url('choose')
         self.click("a[href='#id-tab-individual']")
 
-        self.find('form.quickfind input[name=quick_find]')\
-            .send_keys('Gen 100:1')
-        Select(self.find("form.quickfind select[name=version]")).select_by_visible_text("KJV (King James Version)")
+        self.fill({'form.quickfind input[name=quick_find]': 'Gen 100:1'})
+        self.fill_by_text({"form.quickfind select[name=version]": "KJV (King James Version)"})
         self.click("input[name=lookup]")
 
-        self.assertNotIn("In the beginning God", driver.page_source)
-        self.assertIn("No verses matched 'Genesis 100:1'", driver.page_source)
+        self.assertTextAbsent("In the beginning God")
+        self.assertTextPresent("No verses matched 'Genesis 100:1'")
 
     def test_choose_individual_by_search(self):
-        driver = self.driver
         self.get_url('choose')
 
         self.click("a[href='#id-tab-individual']")
 
-        self.find('form.quickfind input[name=quick_find]')\
-            .send_keys('firmament evening')
-        Select(self.find("form.quickfind select[name=version]")).select_by_visible_text("KJV (King James Version)")
+        self.fill({'form.quickfind input[name=quick_find]': 'firmament evening'})
+        self.fill_by_text({"form.quickfind select[name=version]": "KJV (King James Version)"})
         self.click("input[name=lookup]")
 
-        self.assertIn("And God called the <b>firmament</b> Heaven. And the <b>evening</b>", driver.page_source)
+        self.assertTextPresent("And God called the")

@@ -33,11 +33,12 @@ class CommentPageTests(FullBrowserTest):
         self.login(self.account)
         self.get_url('activity_stream')
         self.click('.show-add-comment')
-        self.send_keys('#id-comment-box', message)
+        self.fill({'#id-comment-box': message})
         self.click('#id-add-comment-btn')
+        self.wait_for_ajax()
 
         # Test page
-        self.assertIn("<p>%s</p>" % message, self.driver.page_source)
+        self.assertTextPresent(message)
 
         # Test db
         c = Comment.objects.get()
@@ -62,7 +63,7 @@ class CommentPageTests(FullBrowserTest):
         self.login(self.account)
         self.get_url('activity_stream')
         self.click('.show-add-comment')
-        self.send_keys('#id-comment-box', message)
+        self.fill({'#id-comment-box': message})
         self.click('#id-add-comment-btn')
         time.sleep(1)
 
@@ -95,15 +96,15 @@ class CommentPageTests(FullBrowserTest):
         self.login(self.account)
         self.get_url('activity_stream')
 
-        self.assertIn("This is a naughty message", self.driver.page_source)
-        self.assertNotIn("This is already hidden", self.driver.page_source)
-        self.click('.moderate-comment', produces_alert=True)
+        self.assertTextPresent("This is a naughty message")
+        self.assertTextAbsent("This is already hidden")
+        self.find('.moderate-comment').click()
         self.confirm()
         self.wait_for_ajax()
         time.sleep(1)
 
         # Test page
-        self.assertNotIn("This is a naughty message", self.driver.page_source)
+        self.assertTextAbsent("This is a naughty message")
 
         # Test DB
         self.assertEqual(self.event.comments.get(id=c1.id).hidden, True)
