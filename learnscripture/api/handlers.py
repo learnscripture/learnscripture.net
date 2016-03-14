@@ -126,7 +126,8 @@ class ApiView(View):
         if isinstance(retval, HttpResponse):
             return retval
         serializable = make_serializable(retval, getattr(self, 'fields', []))
-        return HttpResponse(DjangoJSONEncoder().encode(serializable))
+        return HttpResponse(DjangoJSONEncoder().encode(serializable),
+                            content_type='application/json')
 
 
 class VersesToLearnHandler(ApiView):
