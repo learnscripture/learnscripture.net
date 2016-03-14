@@ -267,8 +267,7 @@ class LearnTests(FullBrowserTest):
         self.assertEqual(u"John 3:16", self.find("#id-verse-title").text)
 
         self.click("#id-verse-dropdown")
-        self.find("#id-reset-progress-btn").click()
-        self.confirm()
+        self.click_and_confirm("#id-reset-progress-btn")
 
         # Should reset strength to zero
         self.assertEqual(identity.verse_statuses.get(reference='John 3:16').strength,
