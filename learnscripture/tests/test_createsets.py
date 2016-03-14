@@ -1,8 +1,6 @@
 from __future__ import absolute_import
 import time
 
-from selenium.webdriver.common.action_chains import ActionChains
-
 from awards.models import AwardType
 from bibleverses.models import VerseSet, VerseSetType, StageType
 from events.models import Event, EventType
@@ -91,7 +89,7 @@ class CreateSetTests(FullBrowserTest):
         self._add_ref("Gen 1:5")
         self._add_ref("Gen 1:6")
 
-        self.click("#id-save-btn")
+        self.submit("#id-save-btn")
 
         self.assertTrue(self.get_page_title().startswith("Create selection set"))
         self.assertTextPresent("This field is required")
@@ -110,10 +108,9 @@ class CreateSetTests(FullBrowserTest):
                                       set_order=2)
         self.login(self._account)
         self.get_url('edit_set', slug=vs.slug)
-        e = self.find("#id-verse-list tbody tr:first-child td")
-        ActionChains(self._driver).drag_and_drop_by_offset(e, 0, 60).perform()
-
-        self.click("#id-save-btn")
+        self.drag_and_drop_by_offset("#id-verse-list tbody tr:first-child td",
+                                     0, 60)
+        self.submit("#id-save-btn")
 
         vs = VerseSet.objects.get(id=vs.id)
         vcs = vs.verse_choices.all()

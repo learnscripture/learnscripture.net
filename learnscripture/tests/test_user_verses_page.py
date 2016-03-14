@@ -37,16 +37,16 @@ class UserVersesPageTests(FullBrowserTest):
         self.click('a.btn[data-reference="Psalm 23:2"]')
 
         # 'Practise verse' button
-        btn1 = self.find('input[name="reviseverse"]')
-        self.assertEqual(btn1.get_attribute('value'), "Practise verse")
+        self.assertEqual(self.get_element_attribute('input[name="reviseverse"]', 'value'),
+                         "Practise verse")
 
         # 'Practise section' button
-        btn2 = self.find('input[name="practisepassagesection"]')
-        self.assertEqual(btn2.get_attribute('value'), "Practise section: Psalm 23:1-3")
+        self.assertEqual(self.get_element_attribute('input[name="practisepassagesection"]', 'value'),
+                         "Practise section: Psalm 23:1-3")
 
         # 'Practise passage' button
-        btn3 = self.find('input[name="practisepassage"]')
-        self.assertEqual(btn3.get_attribute('value'), "Practise passage: Psalm 23:1-6")
+        self.assertEqual(self.get_element_attribute('input[name="practisepassage"]', 'value'),
+                         "Practise passage: Psalm 23:1-6")
 
         self.click('input[name="practisepassagesection"]')
 

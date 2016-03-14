@@ -11,6 +11,7 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils import timezone
 from django_functest import FuncSeleniumMixin, FuncWebTestMixin
+from selenium.webdriver.common.action_chains import ActionChains
 
 from accounts.models import Account, Identity
 from bibleverses.models import TextVersion
@@ -149,6 +150,8 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
     # We use some django-functest internals here, rather than in actual test
     # classes, to minimize impact if django-functest changes
 
+    # WebTest/Selenium utilities
+
     def click_and_confirm(self, selector):
         # 'self.click' is buggy when alerts are produced.
         # So we wrap all of this functionality in a utility
@@ -158,14 +161,17 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
         self.wait_for_page_load()
         self.wait_for_ajax()
 
-    def find(self, *args, **kwargs):
-        # Exposes a FuncSeleniumMixin private method. This comes with
-        # the problem that it is not compatible with FuncWebTestMixin tests
-        # because the returned objects are different.
-        return self._find(*args, **kwargs)
-
     def get_element_text(self, css_selector):
         return self._find(css_selector).text
+
+    def get_element_attribute(self, css_selector, attribute_name):
+        return self._find(css_selector).get_attribute(attribute_name)
+
+    # Selenium specific utilities:
+
+    def drag_and_drop_by_offset(self, css_selector, x_offset, y_offset):
+        e = self._find(css_selector)
+        ActionChains(self._driver).drag_and_drop_by_offset(e, x_offset, y_offset).perform()
 
     def get_page_title(self):
         return self._driver.title
@@ -205,6 +211,8 @@ class WebTestBase(AccountTestMixin, LoginMixin, FuncWebTestMixin, TestCase):
 
     # Utilities:
 
+    # WebTest/Selenium utilities
+
     # Use some django-functest internals here
 
     def click_and_confirm(self, css_selector):
@@ -213,6 +221,9 @@ class WebTestBase(AccountTestMixin, LoginMixin, FuncWebTestMixin, TestCase):
 
     def get_element_text(self, css_selector):
         return self._make_pq(self.last_response).find(css_selector).text()
+
+    def get_element_attribute(self, css_selector, attribute_name):
+        return self._make_pq(self.last_response).find_(css_selector).attr(attribute_name)
 
 
 @override_settings(COMPRESS_PRECOMPILERS=[('text/less', 'learnscripture.tests.base.DummyLessCssFilter')],
