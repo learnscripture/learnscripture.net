@@ -48,7 +48,7 @@ class UserVersesPageTests(FullBrowserTest):
         self.assertEqual(self.get_element_attribute('input[name="practisepassage"]', 'value'),
                          "Practise passage: Psalm 23:1-6")
 
-        self.click('input[name="practisepassagesection"]')
+        self.submit('input[name="practisepassagesection"]')
 
         self.assertUrlsEqual(reverse('learn'))
         self.assertTextPresent("Psalm 23:1")

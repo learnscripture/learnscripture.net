@@ -84,7 +84,7 @@ class AccountTestMixin(object):
         self.fill({"#id_signup-email": email,
                    "#id_signup-username": username,
                    "#id_signup-password": password})
-        self.click('input[name=signup]')
+        self.submit('input[name=signup]')
 
 
 def sqla_tear_down():

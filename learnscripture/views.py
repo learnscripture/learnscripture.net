@@ -2,9 +2,10 @@
 from __future__ import unicode_literals
 
 import csv
-from datetime import timedelta, date
 import re
+import urllib
 import urlparse
+from datetime import date, timedelta
 
 import django.contrib.auth
 from django.conf import settings
@@ -12,36 +13,38 @@ from django.contrib import messages
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import password_change as auth_password_change
 from django.contrib.sites.models import Site
-from django.core.urlresolvers import reverse
 from django.core import mail
-from django.http import HttpResponseRedirect, Http404, HttpResponse
-from django.shortcuts import render, get_object_or_404
+from django.core.urlresolvers import reverse
+from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
 from django.template.response import TemplateResponse
 from django.utils import timezone
 from django.utils.http import urlsafe_base64_decode
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.debug import sensitive_post_parameters
-
 from paypal.standard.forms import PayPalPaymentsForm
 
+from accounts.forms import AccountDetailsForm, PreferencesForm
 from accounts.models import Account, Identity
-from accounts.forms import PreferencesForm, AccountDetailsForm
-from awards.models import AwardType, AnyLevel, Award
-from learnscripture.forms import AccountSetPasswordForm, ContactForm, LogInForm, AccountPasswordResetForm, SignUpForm, AccountPasswordChangeForm
-
-from bibleverses.models import VerseSet, TextVersion, BIBLE_BOOKS, InvalidVerseReference, MAX_VERSES_FOR_SINGLE_CHOICE, VerseSetType, get_passage_sections, TextType
+from awards.models import AnyLevel, Award, AwardType
+from bibleverses.forms import VerseSetForm
+from bibleverses.models import (BIBLE_BOOKS, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, TextType, TextVersion,
+                                VerseSet, VerseSetType, get_passage_sections)
 from bibleverses.signals import public_verse_set_created
 from events.models import Event
-from learnscripture import session
-from bibleverses.forms import VerseSetForm
 from groups.forms import EditGroupForm
 from groups.models import Group
 from groups.signals import public_group_created
+from learnscripture import session
+from learnscripture.forms import (AccountPasswordChangeForm, AccountPasswordResetForm, AccountSetPasswordForm,
+                                  ContactForm, LogInForm, SignUpForm)
 from payments.sign import sign_payment_info
-from scores.models import get_all_time_leaderboard, get_leaderboard_since, get_verses_tested_per_day, get_verses_started_per_day, get_verses_started_counts
+from scores.models import (get_all_time_leaderboard, get_leaderboard_since, get_verses_started_counts,
+                           get_verses_started_per_day, get_verses_tested_per_day)
 
-from .decorators import require_identity, require_preferences, has_preferences, redirect_via_prefs, require_account, require_account_with_redirect
+from .decorators import (has_preferences, redirect_via_prefs, require_account, require_account_with_redirect,
+                         require_identity, require_preferences)
 
 #
 # === Notes ===
@@ -1296,7 +1299,11 @@ def group(request, slug):
     group = group_by_slug(request, slug)
     account = account_from_request(request)
 
-    if account is not None and request.method == 'POST':
+    if request.method == "POST":
+        if account is None:
+            return HttpResponseRedirect(reverse('signup') +
+                                        "?next=" + urllib.quote(request.get_full_path()))
+
         if 'leave' in request.POST:
             group.remove_user(account)
             messages.info(request, "Removed you from group %s" % group.name)
