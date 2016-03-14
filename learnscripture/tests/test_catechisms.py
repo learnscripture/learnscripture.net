@@ -20,7 +20,7 @@ class CatechismTests(FullBrowserTest):
         self.get_url('catechisms')
         self.click("input[value=Learn]")
         self.set_preferences()
-        self.assertEqual(self.find("#id-verse-title").text,
+        self.assertEqual(self.get_element_text("#id-verse-title"),
                          "Q1. What is the chief end of man?")
 
         # Do some stuff on 'learn' page, for the sake of some basic testing

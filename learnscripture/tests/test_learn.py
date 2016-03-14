@@ -76,7 +76,7 @@ class LearnTests(FullBrowserTest):
                             uvs.memory_stage == MemoryStage.ZERO
                             for uvs in identity.verse_statuses.all()))
 
-        self.assertEqual(u"John 3:16", self.find("#id-verse-title").text)
+        self.assertEqual(u"John 3:16", self.get_element_text("#id-verse-title"))
         # Do the reading:
         for i in range(0, 9):
             self.click("#id-next-btn")
@@ -97,7 +97,7 @@ class LearnTests(FullBrowserTest):
         identity.add_verse_choice('Psalm 23:1-2')
         self.get_url('dashboard')
         self.submit('input[name=learnbiblequeue]')
-        self.assertEqual(u"Psalm 23:1-2", self.find("#id-verse-title").text)
+        self.assertEqual(u"Psalm 23:1-2", self.get_element_text("#id-verse-title"))
 
         # # Do the reading:
         # for i in range(0, 9):
@@ -160,14 +160,14 @@ class LearnTests(FullBrowserTest):
     def test_change_version_passage(self):
         self.choose_verse_set('Psalm 23')
 
-        self.assertEqual(u"Psalm 23:1", self.find("#id-verse-title").text)
-        self.assertIn(u"I shall not want", self.find('.current-verse').text)
+        self.assertEqual(u"Psalm 23:1", self.get_element_text("#id-verse-title"))
+        self.assertIn(u"I shall not want", self.get_element_text('.current-verse'))
 
         self.fill_by_text({"#id-version-select": "NET"})
 
         self.wait_for_ajax()
         self.assertIn(u"I lack nothing",
-                      self.find('.current-verse').text)
+                      self.get_element_text('.current-verse'))
 
         # This section can be replaced by a 'skip' button click once we've implemented that.
         for i in range(0, 9):
@@ -179,7 +179,7 @@ class LearnTests(FullBrowserTest):
         # Now check that the next verse is present and is also NET, which is the
         # main point of this test.
         self.assertIn(u"He takes me to lush pastures",
-                      self.find('.current-verse').text)
+                      self.get_element_text('.current-verse'))
 
     def test_revise_passage_mixed(self):
         # Test revising a passage when some verses are to be tested and others
@@ -204,7 +204,7 @@ class LearnTests(FullBrowserTest):
         # Test keyboard shortcut
         self.send_keys('body', '\n')
         self.assertIn(u"He maketh me to lie down in green pastures",
-                      self.find('.current-verse').text)
+                      self.get_element_text('.current-verse'))
 
         for i in range(0, 5):
             self.click("#id-context-next-verse-btn")
@@ -213,17 +213,17 @@ class LearnTests(FullBrowserTest):
     def test_skip_verse(self):
         self.choose_verse_set('Bible 101')
 
-        self.assertEqual(u"John 3:16", self.find("#id-verse-title").text)
+        self.assertEqual(u"John 3:16", self.get_element_text("#id-verse-title"))
 
         self.click("#id-verse-dropdown")
         self.click("#id-skip-verse-btn")
 
-        self.assertEqual(u"John 14:6", self.find("#id-verse-title").text)
+        self.assertEqual(u"John 14:6", self.get_element_text("#id-verse-title"))
 
         # Should be removed from session too
         self.get_url('learn')
 
-        self.assertEqual(u"John 14:6", self.find("#id-verse-title").text)
+        self.assertEqual(u"John 14:6", self.get_element_text("#id-verse-title"))
 
     def test_cancel_learning(self):
         self.add_verse_set('Bible 101')
@@ -239,20 +239,20 @@ class LearnTests(FullBrowserTest):
         self.get_url('dashboard')
         self.choose_revise_bible()
 
-        self.assertEqual(u"John 3:16", self.find("#id-verse-title").text)
+        self.assertEqual(u"John 3:16", self.get_element_text("#id-verse-title"))
 
         self.click("#id-verse-dropdown")
         self.click("#id-cancel-learning-btn")
 
         # Should skip.
-        self.assertEqual(u"John 14:6", self.find("#id-verse-title").text)
+        self.assertEqual(u"John 14:6", self.get_element_text("#id-verse-title"))
 
         # If we go back to dashboard and choose again, it should not appear
         # Go to dashboard
         self.get_url('dashboard')
         self.choose_revise_bible()
 
-        self.assertEqual(u"John 14:6", self.find("#id-verse-title").text)
+        self.assertEqual(u"John 14:6", self.get_element_text("#id-verse-title"))
 
     def test_reset_progress(self):
         self.add_verse_set('Bible 101')
@@ -264,7 +264,7 @@ class LearnTests(FullBrowserTest):
         self.get_url('dashboard')
         self.choose_revise_bible()
 
-        self.assertEqual(u"John 3:16", self.find("#id-verse-title").text)
+        self.assertEqual(u"John 3:16", self.get_element_text("#id-verse-title"))
 
         self.click("#id-verse-dropdown")
         self.click_and_confirm("#id-reset-progress-btn")
@@ -325,16 +325,14 @@ class LearnTests(FullBrowserTest):
         self._type_john_3_16_kjv(accuracy=0.5)
 
         # Now the 'more practice' button will appear, and be primary
-        btn = self.find("#id-more-practice-btn")
-        self.assertTrue('primary' in btn.get_attribute('class'))
-
-        btn.click()
+        self.assertIn('primary', self.get_element_attribute("#id-more-practice-btn", 'class').split())
+        self.click("#id-more-practice-btn")
 
         # Now go through 3 stages:
         for i in range(0, 3):
-            next_btn = self.find("#id-next-btn")
-            self.assertNotEqual(next_btn.get_attribute('disabled'), 'true')
-            next_btn.click()
+            self.assertEqual(self.get_element_attribute("#id-next-btn", "disabled"),
+                             None)
+            self.click("#id-next-btn")
 
         self._type_john_3_16_kjv(accuracy=0.95)
 
@@ -362,15 +360,16 @@ class LearnTests(FullBrowserTest):
         self.get_url('dashboard')
         self.choose_revise_bible()
         for i in range(0, 4):
-            hint_btn = self.find("#id-hint-btn")
-            self.assertEqual(hint_btn.get_attribute('disabled'),
+            self.assertEqual(self.get_element_attribute("#id-hint-btn", "disabled"),
                              None)
-            hint_btn.click()
+
+            self.click("#id-hint-btn")
 
         # First two words should not be visually marked correct
         for i in range(0, 2):
-            self.assertNotIn('correct', self.find("#id-word-%d" % i).get_attribute("class").split())
+            classes = self.get_element_attribute("#id-word-%d" % i, "class").split()
+            self.assertNotIn('correct', classes)
 
         # Hint button should be disabled after 4 clicks
-        self.assertEqual(self.find("#id-hint-btn").get_attribute("disabled"),
+        self.assertEqual(self.get_element_attribute("#id-hint-btn", "disabled"),
                          'true')

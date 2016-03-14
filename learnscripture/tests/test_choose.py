@@ -86,7 +86,7 @@ class ChooseTests(FullBrowserTest):
         # Check we can actually click on 'Learn' and it works.
         self.click("#id-tab-individual input[value=Learn]")
         self.set_preferences()
-        self.assertEqual(self.find("#id-verse-title").text, u"John 3:16")
+        self.assertEqual(self.get_element_text("#id-verse-title"), u"John 3:16")
 
     def test_choose_individual_verse_fuzzy(self):
         # Test entering into quick find, and being lazy
