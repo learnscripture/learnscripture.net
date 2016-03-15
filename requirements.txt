@@ -1,4 +1,4 @@
--e git://github.com/spookylukey/django-app-metrics.git@08ffefcef9a65065d6eda6cac7e614335f384e75#egg=django_app_metrics-master
+-e git://github.com/spookylukey/django-app-metrics.git@f6eecea753fb90440ae173462e49b676df9dfd04#egg=django_app_metrics-master
 -e git://github.com/jbalogh/django-cache-machine.git@6b2b37ebbcac85a9f86e0e3b64c1c54243f50006#egg=django_cache_machine-origin
 -e git://github.com/spookylukey/django-bootstrap-form.git@cee9d102c152240e4af07551b13755b53689dd36#egg=django_bootstrap_form-origin
 django-autoslug==1.9.3
@@ -30,7 +30,7 @@ easy-thumbnails==2.2
 ecdsa==0.11
 gunicorn==18.0
 httplib2==0.7.7
-kombu==3.0.24
+kombu==3.0.34
 lxml==3.3.3
 meld3==0.6.10
 # Also in fabfile
