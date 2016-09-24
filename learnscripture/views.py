@@ -1080,17 +1080,17 @@ def stats(request):
         # build a dictionary of all values and loop through by day.
 
         min_date = None
-        max_date = None
+        max_date = now.date()
 
         grouped = {}
         for m in metrics:
             if min_date is None or m.created < min_date:
                 min_date = m.created
-            if max_date is None or m.created > max_date:
-                max_date = m.created
             grouped[(m.metric.slug, m.created)] = m.num
 
         output_rows = dict((s, []) for s in metric_slugs)
+        if min_date is None:
+            min_date = start.date()
         cur_date = min_date
         while cur_date <= max_date:
             for s in metric_slugs:
