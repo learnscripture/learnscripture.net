@@ -1,7 +1,6 @@
 README
 ======
 
-This repo has moved - future development will be done here: https://bitbucket.org/linuxlefty/learnscripture.net-git
 This is the source code for http://learnscripture.net/
 
 If you are interesting in contributing, please read on.
