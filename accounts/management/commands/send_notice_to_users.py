@@ -3,8 +3,8 @@ from accounts.models import notify_all_accounts
 
 
 class Command(BaseCommand):
-    def handle(self, *args, **options):
-        if len(args) != 1:
-            raise Exception("Must provide message to send as sole argument")
+    def add_arguments(self, parser):
+        parser.add_argument("message_html")
 
-        notify_all_accounts(args[0])
+    def handle(self, message_html, **options):
+        notify_all_accounts(message_html)
