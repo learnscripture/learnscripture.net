@@ -22,7 +22,6 @@ logger = logging.getLogger(__name__)
 
 def send_email_reminders():
     current_site = get_current_site(None)
-    # remind_after == 0 mean 'never'
     for account in Account.objects.send_reminders_to().select_related('identity'):
         send_email_reminder(account, current_site)
 
