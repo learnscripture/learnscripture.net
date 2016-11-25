@@ -31,10 +31,6 @@ if LIVEBOX:
 
     assert not (PRODUCTION and STAGING)
 
-    EMAIL_HOST = secrets['EMAIL_HOST']
-    EMAIL_HOST_USER = secrets['EMAIL_HOST_USER']
-    EMAIL_HOST_PASSWORD = secrets['EMAIL_HOST_PASSWORD']
-
     if PRODUCTION:
         DATABASES = {
             'default': {
@@ -60,6 +56,11 @@ if LIVEBOX:
         }
         SECRET_KEY = secrets["PRODUCTION_SECRET_KEY"]
         SENTRY_DSN = secrets["PRODUCTION_SENTRY_DSN"]
+        EMAIL_BACKEND = "anymail.backends.mailgun.MailgunBackend"
+        MAILGUN_API_KEY = secrets['MAILGUN_API_KEY']
+        ANYMAIL = {
+            "MAILGUN_API_KEY": MAILGUN_API_KEY,
+        }
 
     elif STAGING:
         DATABASES = {
@@ -86,6 +87,7 @@ if LIVEBOX:
         }
         SECRET_KEY = secrets["STAGING_SECRET_KEY"]
         SENTRY_DSN = secrets["STAGING_SENTRY_DSN"]
+        EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
 
 else:
     # Development settings:
@@ -117,13 +119,6 @@ else:
             'CONN_MAX_AGE': conn_max_age,
         }
     }
-
-    # For e-mail testing, run:
-    #  fakemail.py --path=/home/luke/devel/learnscripture.net/tests/mail --background
-    EMAIL_HOST = 'localhost'
-    EMAIL_HOST_USER = None
-    EMAIL_HOST_PASSWORD = None
-    EMAIL_PORT = 8025
 
     SECRET_KEY = secrets.get('DEVELOPMENT_SECRET_KEY', "abc123")
     SENTRY_DSN = secrets.get('DEVELOPMENT_SENTRY_DSN', None)
@@ -290,6 +285,7 @@ INSTALLED_APPS = [
     'kombu.transport.django',
     'django_markup',
     'json_field',
+    'anymail',
 ]
 
 ALLOWED_HOSTS = [".learnscripture.net"]
