@@ -131,6 +131,16 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
     default_timeout = 20
     page_load_timeout = 40
 
+    @classmethod
+    def get_webdriver_options(cls):
+        kwargs = {}
+        if cls.driver_name == 'Firefox':
+            firefox_binary = os.environ.get('TEST_SELENIUM_FIREFOX_BINARY', None)
+            if firefox_binary is not None:
+                from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
+                kwargs['firefox_binary'] = FirefoxBinary(firefox_path=firefox_binary)
+        return kwargs
+
     # Overridden:
 
     def click(self, *args, **kwargs):

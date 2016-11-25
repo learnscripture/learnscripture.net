@@ -98,6 +98,11 @@ Run the tests::
 
     ./runtests.py
 
+To see more options::
+
+    ./runtests.py --help
+
+
 Server config
 =============
 
