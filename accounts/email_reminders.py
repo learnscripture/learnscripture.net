@@ -1,8 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
-from datetime import timedelta, datetime
-import email.parser
-import email.utils
+from datetime import timedelta
 import smtplib
 
 from django.conf import settings
@@ -75,46 +73,6 @@ def send_email_reminder(account, current_site):
         Account.objects.filter(id=account.id).update(last_reminder_sent=n)
     except smtplib.SMTPRecipientsRefused:
         mark_email_bounced(account.email, n)
-
-
-def handle_bounce(email_file):
-    p = email.parser.Parser()
-    msg = p.parse(email_file)
-
-    if msg.get_content_type() != 'multipart/report':
-        logger.warn("Unrecognised content type '%s' in bounce email", msg.get_content_type())
-        return
-
-    bounced_email_address = None
-    bounced_date = None
-    if len(msg.get_payload()) > 1:
-        status = msg.get_payload(1)
-        if status.get_content_type() == 'message/delivery-status':
-            for dsn in status.get_payload():
-                if dsn.get('action', '').lower() == 'failed':
-                    address_type, email_address = dsn['Final-Recipient'].split(';')
-                    email_address = email_address.strip()
-                    if address_type.lower() == 'rfc822':
-                        bounced_email_address = email_address
-
-    if bounced_email_address is not None:
-        # Attempt to find a date:
-        for part in msg.walk():
-            for header in ['Date', 'Arrival-Date']:
-                if header in part:
-                    bounced_date = parse_email_date(part[header])
-
-    if bounced_email_address is not None:
-        if bounced_date is None:
-            bounced_date = timezone.now()
-        mark_email_bounced(bounced_email_address, bounced_date)
-
-
-def parse_email_date(date_string):
-    date_tuple = email.utils.parsedate_tz(date_string)
-    if date_tuple:
-        return timezone.make_aware(datetime.fromtimestamp(email.utils.mktime_tz(date_tuple)),
-                                   timezone.utc)
 
 
 def mark_email_bounced(email_address, bounce_date):
