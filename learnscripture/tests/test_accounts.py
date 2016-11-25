@@ -110,8 +110,8 @@ class AccountTests(AccountTestMixin, TestBase):
                               ActionChange(old_strength=0.7, new_strength=0.99),
                               StageType.TEST, 0.9)
         self.assertEqual(a.total_score.points,
-                         (4 * Scores.POINTS_PER_WORD * 0.9)
-                         + (4 * Scores.POINTS_PER_WORD * Scores.VERSE_LEARNT_BONUS))
+                         (4 * Scores.POINTS_PER_WORD * 0.9) +
+                         (4 * Scores.POINTS_PER_WORD * Scores.VERSE_LEARNT_BONUS))
 
     def test_addict_award(self):
         import awards.tasks

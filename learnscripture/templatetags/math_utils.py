@@ -1,9 +1,9 @@
 from decimal import Decimal
 
 from django import template
+from django.template.defaultfilters import floatformat
 
 register = template.Library()
-from django.template.defaultfilters import floatformat
 
 
 @register.filter

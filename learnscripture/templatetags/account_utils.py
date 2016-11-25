@@ -4,6 +4,8 @@ from django.core.urlresolvers import reverse
 from django.template import Library
 from django.utils.html import format_html
 
+from groups.utils import group_link
+
 register = Library()
 
 logger = logging.getLogger(__name__)
@@ -20,6 +22,5 @@ def account_link(account):
                        account.username,
                        )
 
-from groups.utils import group_link
 
 register.filter('group_link', group_link)
