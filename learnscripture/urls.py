@@ -89,6 +89,9 @@ urlpatterns = patterns('',
 
                        (r'^paypal/ipn/', include('paypal.standard.ipn.urls')),
                        (r'^selectable/', include('selectable.urls')),
+
+                       url(r'^mailgun-bounce-notification/$', 'learnscripture.mail.views.mailgun_bounce_notification',
+                           name='mailgun-bounce-notification'),
                        )
 
 

@@ -24,6 +24,9 @@ secrets = json.load(open(os.path.join(SRC_DIR, "config", "secrets.json")))
 # At least some passwords need to be bytes, not unicode objects
 secrets = dict([(k, s if not isinstance(s, unicode) else s.encode('ascii')) for k, s in secrets.items()])
 
+MAILGUN_API_KEY = secrets['MAILGUN_API_KEY']
+MAILGUN_DOMAIN = 'learnscripture.net'
+
 if LIVEBOX:
     p = os.path.dirname(os.path.abspath(__file__))
     PRODUCTION = "webapps/learnscripture_django/" in p
@@ -57,7 +60,6 @@ if LIVEBOX:
         SECRET_KEY = secrets["PRODUCTION_SECRET_KEY"]
         SENTRY_DSN = secrets["PRODUCTION_SENTRY_DSN"]
         EMAIL_BACKEND = "anymail.backends.mailgun.MailgunBackend"
-        MAILGUN_API_KEY = secrets['MAILGUN_API_KEY']
         ANYMAIL = {
             "MAILGUN_API_KEY": MAILGUN_API_KEY,
         }
@@ -289,6 +291,8 @@ INSTALLED_APPS = [
 ]
 
 ALLOWED_HOSTS = [".learnscripture.net"]
+if DEVBOX:
+    ALLOWED_HOSTS.append('.ngrok.io')
 
 if DEBUG:
     INSTALLED_APPS.append('debug_toolbar')
