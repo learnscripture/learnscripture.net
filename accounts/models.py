@@ -55,7 +55,7 @@ DONT_NAG_NEW_USERS_FOR_MONEY_DAYS = 30
 # and so sometimes they just delegate to Account methods.
 
 
-SEND_REMINDERS_FOR = 30 * 6  # 6 months
+SEND_REMINDERS_FOR = 30 * 3  # 3 months
 
 
 class AccountManager(UserManager):
