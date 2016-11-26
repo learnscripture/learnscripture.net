@@ -20,8 +20,10 @@ logger = logging.getLogger(__name__)
 
 def send_email_reminders():
     current_site = get_current_site(None)
+    total = 0
     for account in Account.objects.send_reminders_to().select_related('identity'):
-        send_email_reminder(account, current_site)
+        total += send_email_reminder(account, current_site)
+    return total
 
 
 def send_email_reminder(account, current_site):
@@ -32,11 +34,11 @@ def send_email_reminder(account, current_site):
     # filtering.
     if account.identity is None:
         # can occur in tests
-        return
+        return 0
 
     v = account.identity.first_overdue_verse(n + timedelta(account.remind_after))
     if v is None:
-        return
+        return 0
 
     send_reminder = False
     if (account.last_reminder_sent is not None and
@@ -53,7 +55,7 @@ def send_email_reminder(account, current_site):
             send_reminder = True
 
     if not send_reminder:
-        return
+        return 0
 
     c = {'account': account,
          'overdue_by': (n - v.next_test_due).days,
@@ -73,6 +75,8 @@ def send_email_reminder(account, current_site):
         Account.objects.filter(id=account.id).update(last_reminder_sent=n)
     except smtplib.SMTPRecipientsRefused:
         mark_email_bounced(account.email, n)
+
+    return 1
 
 
 def mark_email_bounced(email_address, bounce_date):
