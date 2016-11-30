@@ -1,0 +1,83 @@
+
+# Remove www prefix:
+server {
+    listen 80;
+    %(ssl_disabled)s listen 443 ssl;
+    server_name www.learnscripture.net;
+    rewrite     ^/(.*) http://learnscripture.net/$1 permanent;
+}
+
+
+server {
+
+    listen 80;
+    %(ssl_disabled)s listen 443 ssl;
+    server_name %(domains_nginx)s;
+    client_max_body_size 10M;
+    keepalive_timeout    15;
+    error_log /home/%(proj_user)s/logs/%(proj_name)s_error_nginx.log info;
+
+    %(ssl_disabled)s ssl_certificate      conf/%(proj_name)s.crt;
+    %(ssl_disabled)s ssl_certificate_key  conf/%(proj_name)s.key;
+    %(ssl_disabled)s ssl_session_cache    shared:SSL:10m;
+    %(ssl_disabled)s ssl_session_timeout  10m;
+    %(ssl_disabled)s ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:AES:CAMELLIA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA;
+    %(ssl_disabled)s ssl_prefer_server_ciphers on;
+
+    # Deny illegal Host headers
+    if ($host !~* ^(%(domains_regex)s)$) {
+        return 444;
+    }
+
+    location /static {
+        alias            %(STATIC_ROOT)s;
+        access_log      off;
+        log_not_found   off;
+        expires 30d;
+        location /static/CACHE {
+            expires max;
+        }
+
+    }
+
+    location /usermedia {
+        alias            %(MEDIA_ROOT)s;
+        access_log      off;
+        log_not_found   off;
+        expires 30d;
+        location /usermedia/CACHE {
+            expires max;
+        }
+    }
+
+    location /robots.txt {
+        alias            %(STATIC_ROOT)s/robots.txt;
+        access_log      off;
+        log_not_found   off;
+    }
+
+    location /favicon.ico {
+        alias            %(STATIC_ROOT)s/static/img/favicon.png;
+        access_log      off;
+        log_not_found   off;
+    }
+
+
+    # Finally, send all non-media requests to the Django server.
+    location / {
+
+        add_header "X-UA-Compatible" "IE=Edge";
+
+        root /home/nonexistent;
+
+        uwsgi_pass unix:/tmp/%(proj_name)s_uwsgi.sock;
+        add_header X-Frame-Options "SAMEORIGIN";
+
+        include uwsgi_params;
+        # uwsgi_param HTTPS on;
+
+        send_timeout 180;
+        uwsgi_send_timeout 180;
+        uwsgi_read_timeout 180;
+    }
+}

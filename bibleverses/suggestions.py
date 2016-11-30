@@ -107,6 +107,7 @@ def frequency_pairs(words):
 
 
 def generate_suggestions(version, ref=None, missing_only=True, thesaurus=None):
+
     def is_done(items):
         if missing_only:
             references = [item.reference for item in items]
@@ -172,7 +173,7 @@ def build_markov_chains_with_sentence_breaks(training_texts, size):
 
 
 def filename_for_labels(labels, size):
-    return os.path.join(settings.SRC_DIR, "..", "data", "%s__level%s.markov.data" % ('_'.join(labels), str(size)))
+    return os.path.join(settings.DATA_ROOT, "wordsuggestions", "%s__level%s.markov.data" % ('_'.join(labels), str(size)))
 
 
 def load_saved_markov_data(label_set):
@@ -214,6 +215,7 @@ def build_markov_chains_for_text(labels, text, size):
     new_data = {(labels, size): retval}
     MARKOV_CHAINS.update(new_data)
     fname = filename_for_labels(labels, size)
+    ensure_dir(fname)
     with file(fname, "w") as f:
         logger.info("Writing %s...", fname)
         pickle.dump(new_data, f)
@@ -444,16 +446,20 @@ PRONOUN_THESAURUS = dict(
 
 
 def get_thesaurus():
-    fname = os.path.join(settings.SRC_DIR, 'resources', 'mobythes.aur')
+    fname = os.path.join(settings.SRC_ROOT, 'resources', 'mobythes.aur')
     f = file(fname).read().decode('utf8')
     return dict((l.split(',')[0], l.split(',')[1:]) for l in f.split('\r'))
 
 
-def version_thesaurus(version, base_thesaurus):
-    fname = os.path.join(settings.SRC_DIR, "..", "data", version.slug + ".thesaurus")
-    d = os.path.dirname(fname)
+def ensure_dir(filename):
+    d = os.path.dirname(filename)
     if not os.path.exists(d):
         os.makedirs(d)
+
+
+def version_thesaurus(version, base_thesaurus):
+    fname = os.path.join(settings.DATA_ROOT, "wordsuggestions", version.slug + ".thesaurus")
+    ensure_dir(fname)
     try:
         return pickle.load(file(fname))
     except IOError:

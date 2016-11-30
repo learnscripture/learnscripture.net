@@ -6,7 +6,8 @@ import os
 import json
 
 hostname = socket.gethostname()
-DEVBOX = ('webfaction' not in hostname)
+DEVBOX = (('webfaction' not in hostname) and
+          ('learnscripture' not in hostname))
 LIVEBOX = not DEVBOX
 DEBUG = DEVBOX
 TEMPLATE_DEBUG = DEBUG
@@ -14,12 +15,11 @@ TEMPLATE_DEBUG = DEBUG
 # A kitten gets killed every time you use this:
 TESTING = 'manage.py test' in ' '.join(sys.argv)
 
-SRC_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # ../
-PROJECT_DIR = os.path.dirname(SRC_DIR)
-WEBAPP_DIR = os.path.dirname(PROJECT_DIR)
+SRC_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # ../
+PROJECT_ROOT = os.path.dirname(SRC_ROOT)
 HOME_DIR = os.environ['HOME']
 
-secrets = json.load(open(os.path.join(SRC_DIR, "config", "secrets.json")))
+secrets = json.load(open(os.path.join(SRC_ROOT, "config", "secrets.json")))
 
 # At least some passwords need to be bytes, not unicode objects
 secrets = dict([(k, s if not isinstance(s, unicode) else s.encode('ascii')) for k, s in secrets.items()])
@@ -27,69 +27,42 @@ secrets = dict([(k, s if not isinstance(s, unicode) else s.encode('ascii')) for 
 MAILGUN_API_KEY = secrets['MAILGUN_API_KEY']
 MAILGUN_DOMAIN = 'learnscripture.net'
 
+
+# See also fabfile.py which defines these
+DB_LABEL_DEFAULT = "default"
+DB_LABEL_WORDSUGGESTIONS = "wordsuggestions"
+
 if LIVEBOX:
     p = os.path.dirname(os.path.abspath(__file__))
-    PRODUCTION = "webapps/learnscripture_django/" in p
-    STAGING = "webapps/learnscripture_staging_django/" in p
 
-    assert not (PRODUCTION and STAGING)
-
-    if PRODUCTION:
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql_psycopg2',
-                'NAME': secrets["PRODUCTION_DB_NAME"],
-                'USER': secrets["PRODUCTION_DB_USER"],
-                'PASSWORD': secrets["PRODUCTION_DB_PASSWORD"],
-                'HOST': 'localhost',
-                'PORT': secrets["PRODUCTION_DB_PORT"],
-                'ATOMIC_REQUESTS': True,
-                'CONN_MAX_AGE': 120,
-            },
-            'wordsuggestions': {
-                'ENGINE': 'django.db.backends.postgresql_psycopg2',
-                'NAME': secrets["PRODUCTION_DB_NAME_WS"],
-                'USER': secrets["PRODUCTION_DB_USER"],
-                'PASSWORD': secrets["PRODUCTION_DB_PASSWORD"],
-                'HOST': 'localhost',
-                'PORT': secrets["PRODUCTION_DB_PORT"],
-                'ATOMIC_REQUESTS': False,
-                'CONN_MAX_AGE': 120,
-            }
+    DATABASES = {
+        DB_LABEL_DEFAULT: {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': secrets["PRODUCTION_DB_NAME"],
+            'USER': secrets["PRODUCTION_DB_USER"],
+            'PASSWORD': secrets["PRODUCTION_DB_PASSWORD"],
+            'HOST': 'localhost',
+            'PORT': secrets["PRODUCTION_DB_PORT"],
+            'ATOMIC_REQUESTS': True,
+            'CONN_MAX_AGE': 120,
+        },
+        DB_LABEL_WORDSUGGESTIONS: {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': secrets["PRODUCTION_DB_NAME_WS"],
+            'USER': secrets["PRODUCTION_DB_USER"],
+            'PASSWORD': secrets["PRODUCTION_DB_PASSWORD"],
+            'HOST': 'localhost',
+            'PORT': secrets["PRODUCTION_DB_PORT"],
+            'ATOMIC_REQUESTS': False,
+            'CONN_MAX_AGE': 120,
         }
-        SECRET_KEY = secrets["PRODUCTION_SECRET_KEY"]
-        SENTRY_DSN = secrets["PRODUCTION_SENTRY_DSN"]
-        EMAIL_BACKEND = "anymail.backends.mailgun.MailgunBackend"
-        ANYMAIL = {
-            "MAILGUN_API_KEY": MAILGUN_API_KEY,
-        }
-
-    elif STAGING:
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql_psycopg2',
-                'NAME': secrets["STAGING_DB_NAME"],
-                'USER': secrets["STAGING_DB_USER"],
-                'PASSWORD': secrets["STAGING_DB_PASSWORD"],
-                'HOST': 'localhost',
-                'PORT': secrets["STAGING_DB_PORT"],
-                'ATOMIC_REQUESTS': True,
-                'CONN_MAX_AGE': 120,
-            },
-            'wordsuggestions': {
-                'ENGINE': 'django.db.backends.postgresql_psycopg2',
-                'NAME': secrets["STAGING_DB_NAME_WS"],
-                'USER': secrets["STAGING_DB_USER"],
-                'PASSWORD': secrets["STAGING_DB_PASSWORD"],
-                'HOST': 'localhost',
-                'PORT': secrets["STAGING_DB_PORT"],
-                'ATOMIC_REQUESTS': False,
-                'CONN_MAX_AGE': 120,
-            }
-        }
-        SECRET_KEY = secrets["STAGING_SECRET_KEY"]
-        SENTRY_DSN = secrets["STAGING_SENTRY_DSN"]
-        EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
+    }
+    SECRET_KEY = secrets["PRODUCTION_SECRET_KEY"]
+    SENTRY_DSN = secrets["PRODUCTION_SENTRY_DSN"]
+    EMAIL_BACKEND = "anymail.backends.mailgun.MailgunBackend"
+    ANYMAIL = {
+        "MAILGUN_API_KEY": MAILGUN_API_KEY,
+    }
 
 else:
     # Development settings:
@@ -100,7 +73,7 @@ else:
     conn_max_age = 0 if TESTING else 120
 
     DATABASES = {
-        'default': {
+        DB_LABEL_DEFAULT: {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': 'learnscripture',
             'USER': 'learnscripture',
@@ -110,7 +83,7 @@ else:
             'ATOMIC_REQUESTS': True,
             'CONN_MAX_AGE': conn_max_age,
         },
-        'wordsuggestions': {
+        DB_LABEL_WORDSUGGESTIONS: {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': 'learnscripture_wordsuggestions',
             'USER': 'learnscripture',
@@ -126,8 +99,6 @@ else:
     SENTRY_DSN = secrets.get('DEVELOPMENT_SENTRY_DSN', None)
 
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-    PRODUCTION = STAGING = False
 
 
 DATABASE_ROUTERS = ['learnscripture.router.LearnScriptureRouter']
@@ -155,7 +126,7 @@ CONTACT_EMAIL = 'contact@learnscripture.net'
 REMINDER_EMAIL = 'reminders@learnscripture.net'
 
 
-if DEVBOX or STAGING:
+if DEVBOX:
     PAYPAL_RECEIVER_EMAIL = 'paypal_1314646057_biz@cciw.co.uk'
     PAYPAL_TEST = True
 else:
@@ -174,17 +145,11 @@ USE_I18N = False
 USE_L10N = False
 USE_TZ = True
 
-if LIVEBOX:
-    if PRODUCTION:
-        MEDIA_ROOT = os.path.join(WEBAPP_DIR, 'learnscripture_usermedia')
-        STATIC_ROOT = os.path.join(WEBAPP_DIR, 'learnscripture_static')
-    elif STAGING:
-        MEDIA_ROOT = os.path.join(WEBAPP_DIR, 'learnscripture_staging_usermedia')
-        STATIC_ROOT = os.path.join(WEBAPP_DIR, 'learnscripture_staging_static')
+# Sync with fabfile
+MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'usermedia')
+STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
+DATA_ROOT = os.path.join(PROJECT_ROOT, 'data')
 
-else:
-    MEDIA_ROOT = os.path.join(PROJECT_DIR, 'usermedia')
-    STATIC_ROOT = os.path.join(PROJECT_DIR, 'static')
 
 MEDIA_URL = '/usermedia/'
 STATIC_URL = '/static/'
@@ -222,7 +187,7 @@ MIDDLEWARE_CLASSES = [
         (True, 'django.contrib.messages.middleware.MessageMiddleware'),
         (True, 'django.middleware.clickjacking.XFrameOptionsMiddleware'),
         (DEVBOX, 'learnscripture.middleware.DebugMiddleware'),
-        (DEBUG or STAGING, 'learnscripture.middleware.PaypalDebugMiddleware'),
+        (DEBUG, 'learnscripture.middleware.PaypalDebugMiddleware'),
         (True, 'learnscripture.middleware.IdentityMiddleware'),
         (True, 'pagination.middleware.PaginationMiddleware'),
         (True, 'fiber.middleware.AdminPageMiddleware'),
@@ -290,9 +255,12 @@ INSTALLED_APPS = [
     'anymail',
 ]
 
-ALLOWED_HOSTS = [".learnscripture.net"]
+ALLOWED_HOSTS = ["learnscripture.net"]
 if DEVBOX:
-    ALLOWED_HOSTS.append('.ngrok.io')
+    ALLOWED_HOSTS.extend([
+        ".ngrok.io",
+        "learnscripture.local",
+    ])
 
 if DEBUG:
     INSTALLED_APPS.append('debug_toolbar')
@@ -381,8 +349,8 @@ DEBUG_TOOLBAR_CONFIG = {
 CACHES = {
     'default': {
         'BACKEND': 'caching.backends.memcached.MemcachedCache',
-        'LOCATION': 'unix:%s/memcached.sock' % HOME_DIR,
-        'KEY_PREFIX': 'learnscripture.net' if PRODUCTION else 'staging.learnscripture.net'
+        'LOCATION': 'unix:%s/learnscripture_memcached.sock' % HOME_DIR,
+        'KEY_PREFIX': 'learnscripture.net',
     }
 } if LIVEBOX else {
     'default': {
@@ -394,13 +362,7 @@ CACHES = {
     }
 }
 
-if DEVBOX:
-    CACHE_PREFIX = 'ls1'
-else:
-    if PRODUCTION:
-        CACHE_PREFIX = 'ls1'
-    else:
-        CACHE_PREFIX = 'ls2'
+CACHE_PREFIX = 'ls1'
 
 if TESTING:
     # Caching count() seems to cause errors in test suite
@@ -453,6 +415,7 @@ if TESTING or DEVBOX:
 CELERYD_CONCURRENCY = 1
 
 CELERY_RESULT_BACKEND = 'disabled'
+CELERY_TASK_SERIALIZER = 'json'
 
 
 # == LearnScripture.net specific settings ==
@@ -468,7 +431,7 @@ if LIVEBOX:
 else:
     ESV_API_KEY = 'IP'
 
-if PRODUCTION:
+if LIVEBOX:
     GOOGLE_ANALYTICS_ACCOUNT = "UA-29644888-1"
 else:
     GOOGLE_ANALYTICS_ACCOUNT = None
