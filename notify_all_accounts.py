@@ -10,8 +10,7 @@ if __name__ == '__main__':
     env.host_string = "%s@%s" % (USER, HOST)
 
     import pipes
-    production()
     from fabfile import target
     with virtualenv(target.VENV_DIR):
-        with cd(target.SRC_DIR):
+        with cd(target.SRC_ROOT):
             run_venv("./manage.py send_notice_to_users " + pipes.quote(message))
