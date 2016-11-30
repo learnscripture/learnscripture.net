@@ -482,7 +482,7 @@ if DEBUG:
 
     LOGGING.setdefault('filters', {})['add_sql_with_stack'] = {
         '()': SqlWithStacktrace,
-        'skip': ("django.db", "django.contrib", "__main__"),
+        'skip': ("django.db", "caching.base", "django.contrib", "__main__"),
         'limit': 3,  # increase this if not enough
     }
 
