@@ -1205,8 +1205,9 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
 
 
 def get_whole_book(book_name, version):
-    retval = ComboVerse(book_name, version.verse_set.filter(book_number=BIBLE_BOOKS_DICT[book_name],
-                                                            missing=False))
+    retval = ComboVerse(book_name,
+                        list(version.verse_set.filter(book_number=BIBLE_BOOKS_DICT[book_name],
+                                                      missing=False)))
     ensure_text(retval.verses)
     return retval
 
