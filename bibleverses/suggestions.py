@@ -20,90 +20,17 @@ from learnscripture.utils.iterators import chunks
 
 logger = logging.getLogger(__name__)
 
-PUNCTUATION = "!?,.<>()[];:\"'-–"
-PUNCTUATION_OR_WHITESPACE = PUNCTUATION + " \n\r\t"
-IN_WORD_PUNCTUATION = "'-"
 
-# regexp for words with punctuation in the middle.
-# We ignore digits, because things like 100,000 are allowed.
-BAD_WORD_PUNCTUATION_RE = re.compile('[A-Za-z](' + "|".join(re.escape(p) for p in PUNCTUATION if p not in IN_WORD_PUNCTUATION) + ")[A-Za-z]")
+# -- Generate suggestions - top level code
 
+# Normally generate_suggestions is called only by management command, for
+# generating in bulk. However, at other times it has been necessary to edit a
+# text via the admin, and this triggers 'fix_item' being called to fix up the
+# word suggestions.
 
-# This is used for checking text before doing stats and finding suggestions
-# for each word. bad_punctuation occasionally will produce false positives e.g.  NET Mark 11:32:
-#
-#   But if we say, 'From people - '" (they feared the crowd, for they all considered John to be truly a prophet).
-#
-# but the default way of calling split_into_words will fix this.
-
-def bad_punctuation(text):
-    words = split_into_words(text, fix_punctuation_whitespace=False)
-
-    # Certain punctuation must not appear in middle of words
-    # Ignore punctuation at end
-    words = [w.strip(PUNCTUATION_OR_WHITESPACE) for w in words]
-    if any(BAD_WORD_PUNCTUATION_RE.search(w) for w in words):
-        return True
-
-    # Check for pure punctuation with whitespace around it:
-    # - but allow the following:
-    #   -
-    #   --
-    # and punctuation that starts/ends with that.
-    for chunk in text.split():
-        if is_punctuation(chunk):
-            if not any(chunk.startswith(a) or chunk.endswith(a) for a in ["--", "-"]):
-                return True
-
-    return False
-
-
-def normalise_word(word):
-    word = word.strip(PUNCTUATION_OR_WHITESPACE)
-    return word.lower()
-
-
-def split_into_words_for_suggestions(text):
-    return map(normalise_word, split_into_words(text))
-
-
-def split_into_sentences(text):
-    return [s for s in [s.strip(PUNCTUATION_OR_WHITESPACE) for s in text.split('.')]
-            if s]
-
-
-def sentence_first_words(text):
-    return [split_into_words_for_suggestions(l)[0]
-            for l in split_into_sentences(text)]
-
-
-TORAH = ['Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy']
-
-HISTORY = ['Joshua', 'Judges', 'Ruth', '1 Samuel', '2 Samuel', '1 Kings', '2 Kings', '1 Chronicles', '2 Chronicles', 'Ezra', 'Nehemiah', 'Esther']
-
-WISDOM = ['Job', 'Psalm', 'Proverbs', 'Ecclesiastes', 'Song of Solomon']
-
-PROPHETS = ['Isaiah', 'Jeremiah', 'Lamentations', 'Ezekiel', 'Daniel', 'Hosea', 'Joel', 'Amos', 'Obadiah', 'Jonah', 'Micah', 'Nahum', 'Habakkuk', 'Zephaniah', 'Haggai', 'Zechariah', 'Malachi']
-
-NT_HISTORY = ["Matthew", "Mark", "Luke", "John", "Acts"]
-
-EPISTLES = ['Romans', '1 Corinthians', '2 Corinthians', 'Galatians', 'Ephesians', 'Philippians', 'Colossians', '1 Thessalonians', '2 Thessalonians', '1 Timothy', '2 Timothy', 'Titus', 'Philemon', 'Hebrews', 'James', '1 Peter', '2 Peter', '1 John', '2 John', '3 John', 'Jude', 'Revelation']
-
-groups = [TORAH, HISTORY, WISDOM, PROPHETS, NT_HISTORY, EPISTLES]
-
-
-def similar_books(book_name):
-    retval = []
-    for g in groups:
-        if book_name in g:
-            retval.extend(g)
-    if book_name not in retval:
-        retval.append(book_name)
-    return retval
-
-
-def frequency_pairs(words):
-    return scale_suggestions(Counter(words).items())
+def fix_item(version_slug, reference):
+    version = TextVersion.objects.get(slug=version_slug)
+    generate_suggestions(version, missing_only=False, ref=reference)
 
 
 def generate_suggestions(version, ref=None, missing_only=True):
@@ -115,9 +42,10 @@ def generate_suggestions(version, ref=None, missing_only=True):
             items = [v]
             training_texts = get_training_texts_for_book(book)
             logger.info("Generating for %s", ref)
-            generate_suggestions_helper(version, items,
-                                        lambda verse: verse.text,
-                                        training_texts, ref=ref, missing_only=missing_only)
+            generate_suggestions_for_items(
+                version, items,
+                lambda verse: verse.text,
+                training_texts, ref=ref, missing_only=missing_only)
         else:
             for book in BIBLE_BOOKS:
                 generate_suggestions_for_book(version, book, missing_only=missing_only)
@@ -128,10 +56,11 @@ def generate_suggestions(version, ref=None, missing_only=True):
             return
 
         training_text = ' '.join(p.question + " " + p.answer for p in items)
-        generate_suggestions_helper(version, items,
-                                    lambda qapair: qapair.answer,
-                                    {(version.slug, "all"): training_text},
-                                    ref=ref, missing_only=missing_only)
+        generate_suggestions_for_items(
+            version, items,
+            lambda qapair: qapair.answer,
+            {(version.slug, "all"): training_text},
+            ref=ref, missing_only=missing_only)
 
 
 def items_all_done(version, items, ref=None, missing_only=True):
@@ -153,83 +82,23 @@ def generate_suggestions_for_book(version, book, missing_only=True):
         return
     training_texts = get_training_texts_for_book(version, book)
     thesaurus = version_thesaurus(version)
-    generate_suggestions_helper(version, items,
-                                lambda verse: verse.text,
-                                training_texts, missing_only=missing_only,
-                                thesaurus=thesaurus)
+    generate_suggestions_for_items(
+        version, items,
+        lambda verse: verse.text,
+        training_texts, missing_only=missing_only,
+        thesaurus=thesaurus)
 
 
 def get_training_texts_for_book(version, book):
     return {(version.slug, b): get_whole_book(b, version).text for b in similar_books(book)}
 
 
-def sum_matrices(matrices):
-    # Do our own matrix sum to avoid n^2 behaviour
-    retval = pykov.Matrix()
-    keys = []
-    matrices = list(matrices)
-    for m in matrices:
-        keys.extend(m.keys())
-    keys = set(keys)
-    for k in keys:
-        retval[k] = sum(m[k] for m in matrices)
-    return retval
-
-
-def build_markov_chains_with_sentence_breaks(training_texts, size):
-    return sum_matrices(build_markov_chains_for_text(key, training_text, size)
-                        for key, training_text in training_texts.items())
-
-
-def filename_for_labels(labels, size):
-    return os.path.join(settings.DATA_ROOT, "wordsuggestions", "%s__level%s.markov.data" % ('_'.join(labels), str(size)))
-
-
-def hash_text(text):
-    return hashlib.sha1(text.encode('utf-8')).hexdigest()
-
-
-def build_markov_chains_for_text(labels, text, size):
-    # Look on disk first
-    lookup_key = (labels, size)
-    fname = filename_for_labels(labels, size)
-    if os.path.exists(fname):
-        logger.info("Loading %s", fname)
-        new_data = pickle.load(file(fname))
-        return new_data[lookup_key]
-
-    # Else do calcs
-    sentences = text.split(".")
-    v_accum, c_accum = pykov.maximum_likelihood_probabilities([])
-    matrices = []
-    logger.info("Markov analysis level %d for %s", size, labels)
-    for i, s in enumerate(sentences):
-        if not s:
-            continue
-        words = split_into_words_for_suggestions(s)
-        if size == 1:
-            chain_input = words
-        else:
-            chain_input = [tuple(words[i:i + size]) for i in range(0, len(words) - (size - 1))]
-        v, c = pykov.maximum_likelihood_probabilities(chain_input, lag_time=1)
-        matrices.append(c)
-
-    retval = sum_matrices(matrices)
-    # For sanity check, we include the key in the stored data as well
-    new_data = {lookup_key: retval}
-    ensure_dir(fname)
-    with file(fname, "w") as f:
-        logger.info("Writing %s...", fname)
-        pickle.dump(new_data, f)
-    return retval
-
-
 MIN_SUGGESTIONS = 20
 MAX_SUGGESTIONS = 40
 
 
-def generate_suggestions_helper(version, items, text_getter, training_texts, ref=None,
-                                missing_only=True, thesaurus=None):
+def generate_suggestions_for_items(version, items, text_getter, training_texts, ref=None,
+                                   missing_only=True, thesaurus=None):
     all_text = ' '.join(training_texts.values())
     first_words = sentence_first_words(all_text)
     first_word_frequencies = frequency_pairs(first_words)
@@ -433,15 +302,59 @@ def merge_suggestions(s1, s2):
     return (Counter(dict(s1)) + Counter(dict(s2))).items()
 
 
-def get_in_batches(qs, batch_size=200):
-    start = 0
-    while True:
-        q = list(qs[start:start + batch_size])
-        if len(q) == 0:
-            raise StopIteration()
-        for item in q:
-            yield item
-        start += batch_size
+def frequency_pairs(words):
+    return scale_suggestions(Counter(words).items())
+
+
+# -- Markov handling
+
+
+def build_markov_chains_with_sentence_breaks(training_texts, size):
+    return sum_matrices(build_markov_chains_for_text(key, training_text, size)
+                        for key, training_text in training_texts.items())
+
+
+def build_markov_chains_for_text(labels, text, size):
+    # Look on disk first
+    lookup_key = (labels, size)
+    fname = filename_for_labels(labels, size)
+    if os.path.exists(fname):
+        logger.info("Loading %s", fname)
+        new_data = pickle.load(file(fname))
+        return new_data[lookup_key]
+
+    # Else do calcs
+    sentences = text.split(".")
+    v_accum, c_accum = pykov.maximum_likelihood_probabilities([])
+    matrices = []
+    logger.info("Markov analysis level %d for %s", size, labels)
+    for i, s in enumerate(sentences):
+        if not s:
+            continue
+        words = split_into_words_for_suggestions(s)
+        if size == 1:
+            chain_input = words
+        else:
+            chain_input = [tuple(words[i:i + size]) for i in range(0, len(words) - (size - 1))]
+        v, c = pykov.maximum_likelihood_probabilities(chain_input, lag_time=1)
+        matrices.append(c)
+
+    retval = sum_matrices(matrices)
+    # For sanity check, we include the key in the stored data as well
+    new_data = {lookup_key: retval}
+    ensure_dir(fname)
+    with file(fname, "w") as f:
+        logger.info("Writing %s...", fname)
+        pickle.dump(new_data, f)
+    return retval
+
+
+def filename_for_labels(labels, size):
+    return os.path.join(settings.DATA_ROOT, "wordsuggestions", "%s__level%s.markov.data" % ('_'.join(labels), str(size)))
+
+
+def hash_text(text):
+    return hashlib.sha1(text.encode('utf-8')).hexdigest()
 
 
 # Utility for checking our word suggestion generation:
@@ -462,6 +375,8 @@ def get_all_version_words(version_name):
         text.extend(split_into_words_for_suggestions(qapair.answer))
     return Counter(text)
 
+
+# -- Thesaurus
 
 # Thesaurus file tends to have unhelpful suggestions for pronouns, so we overwrite.
 # These are not synonyms, but likely alternatives
@@ -487,6 +402,9 @@ def ensure_dir(filename):
 
 
 def version_thesaurus(version):
+    # Create a thesaurus specific to a version - i.e. start with english
+    # thesaurus and throw out every word that isn't in the version text,
+    # and other fixes.
     base_thesaurus = english_thesaurus()
     fname = os.path.join(settings.DATA_ROOT, "wordsuggestions", version.slug + ".thesaurus")
     ensure_dir(fname)
@@ -525,6 +443,115 @@ def version_thesaurus(version):
     return d
 
 
-def fix_item(version_slug, reference):
-    version = TextVersion.objects.get(slug=version_slug)
-    generate_suggestions(version, missing_only=False, ref=reference)
+# -- Word and sentence mangling
+
+PUNCTUATION = "!?,.<>()[];:\"'-–"
+PUNCTUATION_OR_WHITESPACE = PUNCTUATION + " \n\r\t"
+IN_WORD_PUNCTUATION = "'-"
+
+# regexp for words with punctuation in the middle.
+# We ignore digits, because things like 100,000 are allowed.
+BAD_WORD_PUNCTUATION_RE = re.compile('[A-Za-z](' + "|".join(re.escape(p) for p in PUNCTUATION if p not in IN_WORD_PUNCTUATION) + ")[A-Za-z]")
+
+
+# This is used for checking text before doing stats and finding suggestions
+# for each word. bad_punctuation occasionally will produce false positives e.g.  NET Mark 11:32:
+#
+#   But if we say, 'From people - '" (they feared the crowd, for they all considered John to be truly a prophet).
+#
+# but the default way of calling split_into_words will fix this.
+
+def bad_punctuation(text):
+    words = split_into_words(text, fix_punctuation_whitespace=False)
+
+    # Certain punctuation must not appear in middle of words
+    # Ignore punctuation at end
+    words = [w.strip(PUNCTUATION_OR_WHITESPACE) for w in words]
+    if any(BAD_WORD_PUNCTUATION_RE.search(w) for w in words):
+        return True
+
+    # Check for pure punctuation with whitespace around it:
+    # - but allow the following:
+    #   -
+    #   --
+    # and punctuation that starts/ends with that.
+    for chunk in text.split():
+        if is_punctuation(chunk):
+            if not any(chunk.startswith(a) or chunk.endswith(a) for a in ["--", "-"]):
+                return True
+
+    return False
+
+
+def normalise_word(word):
+    word = word.strip(PUNCTUATION_OR_WHITESPACE)
+    return word.lower()
+
+
+def split_into_words_for_suggestions(text):
+    return map(normalise_word, split_into_words(text))
+
+
+def split_into_sentences(text):
+    return [s for s in [s.strip(PUNCTUATION_OR_WHITESPACE) for s in text.split('.')]
+            if s]
+
+
+def sentence_first_words(text):
+    return [split_into_words_for_suggestions(l)[0]
+            for l in split_into_sentences(text)]
+
+
+# -- Matrices
+
+def sum_matrices(matrices):
+    # Do our own matrix sum to avoid n^2 behaviour
+    retval = pykov.Matrix()
+    keys = []
+    matrices = list(matrices)
+    for m in matrices:
+        keys.extend(m.keys())
+    keys = set(keys)
+    for k in keys:
+        retval[k] = sum(m[k] for m in matrices)
+    return retval
+
+
+# -- Iteration utilities
+
+def get_in_batches(qs, batch_size=200):
+    start = 0
+    while True:
+        q = list(qs[start:start + batch_size])
+        if len(q) == 0:
+            raise StopIteration()
+        for item in q:
+            yield item
+        start += batch_size
+
+
+# -- Bible handling
+
+TORAH = ['Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy']
+
+HISTORY = ['Joshua', 'Judges', 'Ruth', '1 Samuel', '2 Samuel', '1 Kings', '2 Kings', '1 Chronicles', '2 Chronicles', 'Ezra', 'Nehemiah', 'Esther']
+
+WISDOM = ['Job', 'Psalm', 'Proverbs', 'Ecclesiastes', 'Song of Solomon']
+
+PROPHETS = ['Isaiah', 'Jeremiah', 'Lamentations', 'Ezekiel', 'Daniel', 'Hosea', 'Joel', 'Amos', 'Obadiah', 'Jonah', 'Micah', 'Nahum', 'Habakkuk', 'Zephaniah', 'Haggai', 'Zechariah', 'Malachi']
+
+NT_HISTORY = ["Matthew", "Mark", "Luke", "John", "Acts"]
+
+EPISTLES = ['Romans', '1 Corinthians', '2 Corinthians', 'Galatians', 'Ephesians', 'Philippians', 'Colossians', '1 Thessalonians', '2 Thessalonians', '1 Timothy', '2 Timothy', 'Titus', 'Philemon', 'Hebrews', 'James', '1 Peter', '2 Peter', '1 John', '2 John', '3 John', 'Jude', 'Revelation']
+
+groups = [TORAH, HISTORY, WISDOM, PROPHETS, NT_HISTORY, EPISTLES]
+
+
+def similar_books(book_name):
+    retval = []
+    for g in groups:
+        if book_name in g:
+            retval.extend(g)
+    if book_name not in retval:
+        retval.append(book_name)
+    return retval
