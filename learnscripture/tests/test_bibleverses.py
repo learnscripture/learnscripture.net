@@ -173,6 +173,9 @@ class VersionTests(TestBase):
                 [u'shall', u'is', u'came'],
                 [u'a', u'no', u'not']]
 
+    # Tests for suggestions are deterministic because the total number of
+    # suggestions stored is less than the number of suggestions we would like to
+    # present to the user. We therefore always end up using all the suggestions.
     def test_suggestions(self):
         version = TextVersion.objects.get(slug='KJV')
         self.assertEqual(version.get_suggestions_by_reference('Genesis 1:1')[1],
