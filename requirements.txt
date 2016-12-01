@@ -1,6 +1,7 @@
 -e git://github.com/spookylukey/django-app-metrics.git@bd56a7f31a95466c67770c8672102a775989957f#egg=django_app_metrics-master
 -e git://github.com/jbalogh/django-cache-machine.git@6b2b37ebbcac85a9f86e0e3b64c1c54243f50006#egg=django_cache_machine-origin
 -e git://github.com/spookylukey/django-bootstrap-form.git@cee9d102c152240e4af07551b13755b53689dd36#egg=django_bootstrap_form-origin
+-e git://github.com/spookylukey/Pykov.git@c21f27b56a52e7ea7caba1707e64e3753c414478#egg=pykov
 django-autoslug==1.9.3
 BeautifulSoup==3.2.1
 Django==1.8.16
@@ -37,12 +38,12 @@ numpy==1.11.2
 psutil==0.5.1
 psycopg2==2.6.1
 pyquery==1.2.11
-pysparse==1.1.1-dev
 python-dateutil==2.2
 python-memcached==1.48
 pytz==2014.2
 raven==5.32.0
 requests==2.6.0
+scipy==0.18.1
 six==1.10.0
 twilio==3.3.9
 unittest2==0.5.1
