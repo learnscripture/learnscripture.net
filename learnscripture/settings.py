@@ -324,12 +324,13 @@ LOGGING = {
     },
 }
 
-if DEBUG:
+if DEBUG or 'setup_bibleverse_suggestions' in sys.argv:
     LOGGING['root']['handlers'] = ['console']
     LOGGING['loggers']['celery']['handlers'] = ['console']
     LOGGING['loggers']['bibleverses.suggestions'] = {
         'level': 'INFO',
         'handlers': ['console'],
+        'propagate': False,
     }
 
 if TESTING:
