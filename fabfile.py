@@ -434,8 +434,7 @@ def deploy():
     make_target_current(target)
     tag_deploy()  # Once 'current' symlink is switched
     deploy_system()
-    restart_webserver()
-    restart_celeryd()
+    restart_all()
 
 
 def create_target():
@@ -599,11 +598,28 @@ def restart_webserver():
 
 
 @task
+def stop_celeryd():
+    supervisorctl("stop %s_celeryd" % env.proj_name)
+
+
+@task
 def restart_celeryd():
     """
     Restarts the Celery workers
     """
     supervisorctl("restart %s_celeryd" % env.proj_name)
+
+
+@task
+def restart_all():
+    restart_webserver()
+    restart_celeryd()
+
+
+@task
+def stop_all():
+    stop_webserver()
+    stop_celeryd()
 
 
 @task
@@ -751,7 +767,7 @@ def db_restore(db, filename):
 
 @task
 def migrate_upload_db(local_filename):
-    stop_webserver()
+    stop_all()
     local_filename = os.path.normpath(os.path.abspath(local_filename))
     remote_filename = "/home/%s/%s" % (env.proj_user, os.path.basename(local_filename))
     put(local_filename, remote_filename)
