@@ -2,19 +2,21 @@
 
 from __future__ import unicode_literals
 
-from collections import Counter
-import glob
+import gc
 import hashlib
 import logging
 import os
 import pickle
 import random
 import re
+from collections import Counter
 
-from django.conf import settings
 import pykov
+from django.conf import settings
 
-from bibleverses.models import get_whole_book, TextType, BIBLE_BOOKS, WordSuggestionData, split_into_words, is_punctuation, Verse, QAPair, TextVersion
+from bibleverses.models import (BIBLE_BOOKS, QAPair, TextType, TextVersion, Verse, WordSuggestionData, get_whole_book,
+                                is_punctuation, split_into_words)
+from learnscripture.utils.iterators import chunks
 
 logger = logging.getLogger(__name__)
 
@@ -89,8 +91,6 @@ EPISTLES = ['Romans', '1 Corinthians', '2 Corinthians', 'Galatians', 'Ephesians'
 
 groups = [TORAH, HISTORY, WISDOM, PROPHETS, NT_HISTORY, EPISTLES]
 
-MARKOV_CHAINS = {}
-
 
 def similar_books(book_name):
     retval = []
@@ -106,52 +106,61 @@ def frequency_pairs(words):
     return scale_suggestions(Counter(words).items())
 
 
-def generate_suggestions(version, ref=None, missing_only=True, thesaurus=None):
-
-    def is_done(items):
-        if missing_only:
-            references = [item.reference for item in items]
-            if ref is not None and ref not in references:
-                return True
-            if version.word_suggestion_data.filter(reference__in=references).count() == len(references):
-                # All done
-                logger.info("Skipping %s %s\n", version.slug, ' '.join(references))
-                return True
-        return False
+def generate_suggestions(version, ref=None, missing_only=True):
 
     if version.text_type == TextType.BIBLE:
         if ref is not None:
             v = version.get_verse_list(ref)[0]
             book = BIBLE_BOOKS[v.book_number]
-            books = [book]
-        else:
-            books = BIBLE_BOOKS
-
-        for book in books:
-            if ref is not None:
-                items = [v]
-            else:
-                items = get_whole_book(book, version).verses
-                if is_done(items):
-                    continue
-            training_texts = {(version.slug, b): get_whole_book(b, version).text for b in similar_books(book)}
-            logger.info("Generating for %s", book)
+            items = [v]
+            training_texts = get_training_texts_for_book(book)
+            logger.info("Generating for %s", ref)
             generate_suggestions_helper(version, items,
                                         lambda verse: verse.text,
-                                        training_texts, ref=ref, missing_only=missing_only,
-                                        thesaurus=thesaurus)
+                                        training_texts, ref=ref, missing_only=missing_only)
+        else:
+            for book in BIBLE_BOOKS:
+                generate_suggestions_for_book(version, book, missing_only=missing_only)
 
     elif version.text_type == TextType.CATECHISM:
         items = list(version.qapairs.all())
-        if is_done(items):
+        if items_all_done(version, items, ref=ref, missing_only=missing_only):
             return
 
         training_text = ' '.join(p.question + " " + p.answer for p in items)
         generate_suggestions_helper(version, items,
                                     lambda qapair: qapair.answer,
                                     {(version.slug, "all"): training_text},
-                                    ref=ref, missing_only=missing_only,
-                                    thesaurus=thesaurus)
+                                    ref=ref, missing_only=missing_only)
+
+
+def items_all_done(version, items, ref=None, missing_only=True):
+    if missing_only:
+        references = [item.reference for item in items]
+        if ref is not None and ref not in references:
+            return True
+        if version.word_suggestion_data.filter(reference__in=references).count() == len(references):
+            # All done
+            logger.info("Skipping %s %s\n", version.slug, ' '.join(references))
+            return True
+    return False
+
+
+def generate_suggestions_for_book(version, book, missing_only=True):
+    logger.info("Generating for %s", book)
+    items = get_whole_book(book, version).verses
+    if items_all_done(version, items, missing_only=missing_only):
+        return
+    training_texts = get_training_texts_for_book(version, book)
+    thesaurus = version_thesaurus(version)
+    generate_suggestions_helper(version, items,
+                                lambda verse: verse.text,
+                                training_texts, missing_only=missing_only,
+                                thesaurus=thesaurus)
+
+
+def get_training_texts_for_book(version, book):
+    return {(version.slug, b): get_whole_book(b, version).text for b in similar_books(book)}
 
 
 def sum_matrices(matrices):
@@ -176,26 +185,20 @@ def filename_for_labels(labels, size):
     return os.path.join(settings.DATA_ROOT, "wordsuggestions", "%s__level%s.markov.data" % ('_'.join(labels), str(size)))
 
 
-def load_saved_markov_data(label_set):
-    keys = MARKOV_CHAINS.keys()
-    loaded_labels = set([k[0] for k in keys])
-    for labels in label_set:
-        if labels not in loaded_labels:
-            for fname in glob.glob(filename_for_labels(labels, '*')):
-                logger.info("loading %s", fname)
-                MARKOV_CHAINS.update(pickle.load(file(fname)))
-
-
 def hash_text(text):
     return hashlib.sha1(text.encode('utf-8')).hexdigest()
 
 
 def build_markov_chains_for_text(labels, text, size):
-    # Look in dict first
-    labels = tuple(labels)
-    if (labels, size) in MARKOV_CHAINS:
-        return MARKOV_CHAINS[labels, size]
+    # Look on disk first
+    lookup_key = (labels, size)
+    fname = filename_for_labels(labels, size)
+    if os.path.exists(fname):
+        logger.info("Loading %s", fname)
+        new_data = pickle.load(file(fname))
+        return new_data[lookup_key]
 
+    # Else do calcs
     sentences = text.split(".")
     v_accum, c_accum = pykov.maximum_likelihood_probabilities([])
     matrices = []
@@ -212,14 +215,17 @@ def build_markov_chains_for_text(labels, text, size):
         matrices.append(c)
 
     retval = sum_matrices(matrices)
-    new_data = {(labels, size): retval}
-    MARKOV_CHAINS.update(new_data)
-    fname = filename_for_labels(labels, size)
+    # For sanity check, we include the key in the stored data as well
+    new_data = {lookup_key: retval}
     ensure_dir(fname)
     with file(fname, "w") as f:
         logger.info("Writing %s...", fname)
         pickle.dump(new_data, f)
     return retval
+
+
+MIN_SUGGESTIONS = 20
+MAX_SUGGESTIONS = 40
 
 
 def generate_suggestions_helper(version, items, text_getter, training_texts, ref=None,
@@ -229,15 +235,17 @@ def generate_suggestions_helper(version, items, text_getter, training_texts, ref
     first_word_frequencies = frequency_pairs(first_words)
 
     all_words = split_into_words_for_suggestions(all_text)
-    markov_chains = {}
+    markov_chains_for_size = {}
 
     def get_markov_chain(size):
-        if size in markov_chains:
-            return markov_chains[size]
+        # Due to being both memory and CPU intensive, and having limited memory
+        # on the server, we cache carefully - not too much in memory or we run
+        # out.
+        if size in markov_chains_for_size:
+            return markov_chains_for_size[size]
         else:
-            load_saved_markov_data(training_texts.keys())
             c = build_markov_chains_with_sentence_breaks(training_texts, size)
-            markov_chains[size] = c
+            markov_chains_for_size[size] = c
             return c
 
     def suggestions_thesaurus(words, i, count, suggestions_so_far):
@@ -310,9 +318,6 @@ def generate_suggestions_helper(version, items, text_getter, training_texts, ref
             c[random.choice(all_words)] += 1
         return c.items()
 
-    MIN_SUGGESTIONS = 30
-    MAX_SUGGESTIONS = 60
-
     # Strategies for finding alternatives, ordered according to how good they will be
 
     strategies = [
@@ -331,65 +336,89 @@ def generate_suggestions_helper(version, items, text_getter, training_texts, ref
         (lambda i: thesaurus is not None, suggestions_thesaurus_other),
     ]
 
-    to_create = []
-    to_delete_qs = []
-    for item in items:
-        if ref is not None and item.reference != ref:
-            continue
+    for batch in chunks(items, 100):
+        batch = list(batch)  # need to iterate twice
 
-        text = text_getter(item)
-
-        # Clear out old suggestions
-        existing = version.word_suggestion_data.filter(reference=item.reference)
+        to_create = []
+        to_delete = []
         if missing_only:
-            if (existing.exists()):
-                logger.info("Skipping %s %s", version.slug, item.reference)
-                continue
+            existing_refs = set(
+                version.word_suggestion_data
+                .filter(reference__in=[i.reference for i in batch])
+                .values_list('reference', flat=True))
         else:
-            to_delete_qs.append(existing)
-        logger.info("Generating suggestions for %s %s", version.slug, item.reference)
+            existing_refs = None
 
-        item_suggestions = []
+        for item in batch:
+            generate_suggestions_single_item(version, item, text_getter,
+                                             strategies,
+                                             ref=ref, missing_only=missing_only,
+                                             existing_refs=existing_refs,
+                                             to_create=to_create,
+                                             to_delete=to_delete)
+        if to_delete:
+            logger.info("Deleting %s old items", len(to_delete))
+            version.word_suggestion_data.filter(reference__in=to_delete).delete()
+        if to_create:
+            logger.info("Creating %s items", len(to_create))
+            WordSuggestionData.objects.bulk_create(to_create)
+        gc.collect()
 
-        # We are actually treating beginning of verse as beginning of sentence,
-        # which is not ideal, but hard to fix, and usually it's not too bad,
-        # because verse breaks are usually 'close' to being sentence breaks.
 
-        sentences = split_into_sentences(text)
-        for sentence in sentences:
-            words = split_into_words_for_suggestions(sentence)
-            for i, word in enumerate(words):
-                relevance = 1.0
-                word_suggestions = []
-                for condition, method in strategies:
-                    if condition(i):
-                        need = MIN_SUGGESTIONS - len(word_suggestions)  # Only random strategies really uses this
-                        new_suggestions = [(w, f) for (w, f) in method(words, i, need, word_suggestions)
-                                           if w != word]
-                        new_suggestions = scale_suggestions(new_suggestions, relevance)
-                        if len(new_suggestions) > 0:
-                            word_suggestions = merge_suggestions(word_suggestions, new_suggestions)
-                            relevance = relevance / 2.0  # scale down worse methods for finding suggestions
+def generate_suggestions_single_item(version, item, text_getter,
+                                     strategies,
+                                     ref=None,
+                                     missing_only=True,
+                                     existing_refs=None,
+                                     to_create=None,
+                                     to_delete=None):
+    if ref is not None and item.reference != ref:
+        return
 
-                    # Sort after each one:
-                    word_suggestions.sort(key=lambda (a, b): -b)
+    text = text_getter(item)
 
-                word_suggestions = scale_suggestions(word_suggestions[0:MAX_SUGGESTIONS])
+    if missing_only:
+        if item.reference in existing_refs:
+            # Don't recreate
+            logger.info("Skipping %s %s", version.slug, item.reference)
+            return
+    else:
+        # Clear out old suggestions first
+        to_delete.append(item.reference)
+    logger.info("Generating suggestions for %s %s", version.slug, item.reference)
 
-                # Add hits=0. This is now unused, and could be removed with a
-                # suitable backwards compat code in
-                # WordSuggestionData.get_suggestions and a data migration.
-                item_suggestions.append([(w, f, 0) for w, f in word_suggestions])
+    item_suggestions = []
 
-        to_create.append(WordSuggestionData(version_slug=version.slug,
-                                            reference=item.reference,
-                                            suggestions=item_suggestions,
-                                            hash=hash_text(text),
-                                            ))
+    # We are actually treating beginning of verse as beginning of sentence,
+    # which is not ideal, but hard to fix, and usually it's not too bad,
+    # because verse breaks are usually 'close' to being sentence breaks.
 
-    for qs in to_delete_qs:
-        qs.delete()
-    WordSuggestionData.objects.bulk_create(to_create)
+    sentences = split_into_sentences(text)
+    for sentence in sentences:
+        words = split_into_words_for_suggestions(sentence)
+        for i, word in enumerate(words):
+            relevance = 1.0
+            word_suggestions = []
+            for condition, method in strategies:
+                if condition(i):
+                    need = MIN_SUGGESTIONS - len(word_suggestions)  # Only random strategies really uses this
+                    new_suggestions = [(w, f) for (w, f) in method(words, i, need, word_suggestions)
+                                       if w != word]
+                    new_suggestions = scale_suggestions(new_suggestions, relevance)
+                    if len(new_suggestions) > 0:
+                        word_suggestions = merge_suggestions(word_suggestions, new_suggestions)
+                        relevance = relevance / 2.0  # scale down worse methods for finding suggestions
+
+                # Sort after each one:
+                word_suggestions.sort(key=lambda (w, f): -f)
+
+            item_suggestions.append([w for w, f in word_suggestions[0:MAX_SUGGESTIONS]])
+
+    to_create.append(WordSuggestionData(version_slug=version.slug,
+                                        reference=item.reference,
+                                        suggestions=item_suggestions,
+                                        hash=hash_text(text),
+                                        ))
 
 
 def scale_suggestions(suggestions, factor=1.0):
@@ -445,7 +474,7 @@ PRONOUN_THESAURUS = dict(
 )
 
 
-def get_thesaurus():
+def english_thesaurus():
     fname = os.path.join(settings.SRC_ROOT, 'resources', 'mobythes.aur')
     f = file(fname).read().decode('utf8')
     return dict((l.split(',')[0], l.split(',')[1:]) for l in f.split('\r'))
@@ -457,10 +486,12 @@ def ensure_dir(filename):
         os.makedirs(d)
 
 
-def version_thesaurus(version, base_thesaurus):
+def version_thesaurus(version):
+    base_thesaurus = english_thesaurus()
     fname = os.path.join(settings.DATA_ROOT, "wordsuggestions", version.slug + ".thesaurus")
     ensure_dir(fname)
     try:
+        logger.info("Loading thesaurus %s for %s\n", fname, version.slug)
         return pickle.load(file(fname))
     except IOError:
         pass
@@ -496,6 +527,4 @@ def version_thesaurus(version, base_thesaurus):
 
 def fix_item(version_slug, reference):
     version = TextVersion.objects.get(slug=version_slug)
-    thesaurus = get_thesaurus()
-    v_thesaurus = version_thesaurus(version, thesaurus)
-    generate_suggestions(version, missing_only=False, thesaurus=v_thesaurus, ref=reference)
+    generate_suggestions(version, missing_only=False, ref=reference)

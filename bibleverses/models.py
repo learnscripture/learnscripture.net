@@ -289,7 +289,6 @@ class TextVersion(caching.base.CachingMixin, models.Model):
                         for_identity__account__is_hellbanned=False,
                         )]
 
-
     # Simulate FK to WordSuggestionData
     @property
     def word_suggestion_data(self):
@@ -412,34 +411,26 @@ class WordSuggestionData(models.Model):
     reference = models.CharField(max_length=100)
     hash = models.CharField(max_length=40)  # SHA1 of text
 
-    # Schema:
-    # list of suggestions for each word, in order.
-    # each suggestion consists of a list of tuples
-    #  [(word, frequency, unused)]
+    # Schema: list of suggestions for each word, in order. each suggestion
+    # consists of a list of words in decreasing order of fitness.
+    # So we have
+    # [[suggestion_1_for_word_1, s_2_for_w_1,...],[s_1_for_w_2, s_2_for_w_2]]
     suggestions = JSONField()
 
     def get_suggestions(self):
         if not self.suggestions:
             return []
-        # frequency is the suggested frequency based on
-        # markov chains etc., normalised to 1.
-
         # We could do some of this client side, but we save on bandwidth by
         # returning only a selection of the words, not all the data.
 
         retval = []
+
         for word_suggestions in self.suggestions:
-            # Get modified frequencies
-
-            # Calculated frequency is always between 0 and 1.
-            pairs = [(word, frequency)
-                     for word, frequency, unused in word_suggestions]
-
-            # Normalise, and also give low frequency words
-            # a boost, because they are not being seen at all
-            max_freq = max(frequency for word, frequency in pairs)
-            boost_lower_freq = lambda x: x / 2.0 + 0.5  # works on range (0, 1)
-            pairs = [(word, boost_lower_freq(frequency / max_freq)) for word, frequency in pairs]
+            # Assign a frequency between 0.5 and 1.0 for each word
+            # (lower than 0.5 means they end up not being seen at all
+            #  in practice)
+            pairs = [(word, 1.0 - i * 0.5 / len(word_suggestions))
+                     for i, word in enumerate(word_suggestions)]
 
             # Make a random selection, weighted according to frequency
             chosen = set()
