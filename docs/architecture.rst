@@ -23,3 +23,31 @@ Server config
 
 Passwords and private server config is stored in secrets.json that is not in
 source control.
+
+
+Third-party services
+====================
+
+The following integrations are used:
+
+* Sentry for error reporting and tracking - https://sentry.io/learnscripturenet/production/
+
+* Mailgun for sending and receiving emails. Webhooks and routes (including
+  bounce handling) are set up with the management command ``setup_mailgun``.
+
+* Google analytics for statistics. There are also some stats of our own which
+  can be viewed at http://learnscripture.net/stats/?requests&full_accounts
+  although this hasn't always been working.
+
+* ESV API for getting ESV text. This is not used in practice now, since the
+  entire text is cached in our database, but we could empty the 'text' column
+  and our code would use the service to fill it back up as and when it is
+  needed. The presence of the whole text, however, is needed for the word
+  suggestions feature.
+
+  Also, the ESV API is used for searching the ESV.
+
+  A new version of the ESV API is in the works, which will give access to newer
+  versions of the ESV text. This would be tricky to integrate - people who
+  have memorized the old version will not appreciate having to re-learn.
+
