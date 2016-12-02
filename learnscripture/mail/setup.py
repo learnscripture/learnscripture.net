@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 from .mailgun import create_route, create_webhook, list_routes, update_route, update_webhook
 
 
-# Also all go to one person at the moment.
+# Almost all emails  go to one person at the moment.
 MAINTAINER = "luke@learnscripture.net"
 MAINTAINER_REAL = "L.Plant.98@cantab.net"
 
