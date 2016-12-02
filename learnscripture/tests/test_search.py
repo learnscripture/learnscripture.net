@@ -58,6 +58,18 @@ class SearchTests(TestBase):
         self.assertEqual(len(results), 1)
         self.assertEqual(list(results), [vs1])
 
+    def test_quick_find_text(self):
+        version = TextVersion.objects.get(slug='KJV')
+        results = quick_find("beginning created", version=version)
+        self.assertEqual(results[0].verses[0].reference,
+                         "Genesis 1:1")
+
+    def test_quick_find_escape(self):
+        version = TextVersion.objects.get(slug='KJV')
+        results = quick_find("beginning & | created", version=version)
+        self.assertEqual(results[0].verses[0].reference,
+                         "Genesis 1:1")
+
     def test_quick_find_song_of_solomon(self):
         version = TextVersion.objects.get(slug='KJV')
         results = quick_find('Song of Solomon 1:1', version)
