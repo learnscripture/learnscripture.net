@@ -473,8 +473,7 @@ def push_sources(target):
 
 def tag_deploy():
     # Disabled until we actually switch to DigitalOcean
-    #local("hg tag -f deploy-production-$(date --iso-8601=seconds | tr ':' '-' | cut -f 1 -d '+')")
-    pass
+    local("hg tag -f deploy-production-$(date --iso-8601=seconds | tr ':' '-' | cut -f 1 -d '+')")
 
 
 def ensure_src_dir(target):
