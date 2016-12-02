@@ -333,7 +333,7 @@ SEARCH_OPERATORS = set(["&", "|", "@@", "@@@", "||", "&&", "!!", "@>", "<@"])
 class VerseManager(caching.base.CachingManager):
 
     def text_search(self, query, version, limit=10):
-        words = query.split(u' ')
+        words = query.replace(':', ' ').split(u' ')
         # First remove anything recognised by postgres as an operator
         words = [w for w in words
                  if (w and w not in SEARCH_OPERATORS)]

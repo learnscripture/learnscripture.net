@@ -69,6 +69,8 @@ class SearchTests(TestBase):
         results = quick_find("beginning & | created", version=version)
         self.assertEqual(results[0].verses[0].reference,
                          "Genesis 1:1")
+        results = quick_find("Genesissss 1:1", version=version)
+        self.assertEqual(len(results), 0)
 
     def test_quick_find_song_of_solomon(self):
         version = TextVersion.objects.get(slug='KJV')
