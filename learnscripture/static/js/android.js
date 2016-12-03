@@ -3,19 +3,16 @@ $(document).ready(function () {
     var CURRENT_ANDROID_APP_VERSION = 13;
     if (window.androidlearnscripture) {
 
+        $('.page-header').after(
+            '<div class="message-container"><div class="notice">This Android app is no longer supported. Please go to <a href="http://bit.do/learnscripture">learnscripture.net</a> in a normal browser (e.g. Firefox or Chrome) and log in for the best experience.</div></div>'
+        );
+
         if (window.androidlearnscripture.showMenu) {
             $('.android-appmenu-link').on('click', function (ev) {
                 ev.preventDefault();
                 window.androidlearnscripture.showMenu();
             });
             $('.android-appmenu-link').closest('li').attr('style', '').show();
-        }
-
-        if (window.androidlearnscripture.getVersionCode == undefined ||
-            window.androidlearnscripture.getVersionCode() < CURRENT_ANDROID_APP_VERSION) {
-            $('.page-header').after(
-                '<div class="message-container"><div class="notice">Please <a href="https://play.google.com/store/apps/details?id=net.learnscripture.webviewapp">upgrade</a> to the most recent version of the Android app for the best experience.</div></div>'
-            );
         }
 
         var receiveAccountData = function (accountData) {
