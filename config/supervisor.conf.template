@@ -14,6 +14,7 @@ command=%(VENV_ROOT)s/bin/uwsgi
     --logto /home/%(proj_user)s/logs/%(proj_name)s_uwsgi.log --log-reopen
     --buffer-size 16384
     --ignore-sigpipe --ignore-write-errors --disable-write-exception
+    --pidfile=/tmp/%(proj_name)s_uwsgi.pid
 directory=%(SRC_ROOT)s
 user=%(proj_user)s
 autostart=true

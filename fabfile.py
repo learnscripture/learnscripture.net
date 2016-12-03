@@ -598,11 +598,12 @@ def start_webserver():
 
 
 @task
+@as_rootuser
 def restart_webserver():
     """
-    Restarts the webserver that is running the Django instance
+    Gracefully restarts the webserver that is running the Django instance
     """
-    supervisorctl("restart %s_uwsgi" % env.proj_name)
+    run("kill -HUP `cat /tmp/%s_uwsgi.pid`" % (env.proj_name))
 
 
 @task
