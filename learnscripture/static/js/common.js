@@ -1,7 +1,6 @@
 /*jslint browser: true, vars: true, plusplus: true */
 /*globals $, jQuery, alert */
 // Common functionality and requirements.
-// See also some things at end e.g. modals.js
 
 if (String.prototype.trim === undefined) {
     // Before ECMAscript 5 (e.g. Android 1.6, older IE versions)
