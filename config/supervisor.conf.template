@@ -15,6 +15,9 @@ command=%(VENV_ROOT)s/bin/uwsgi
     --buffer-size 16384
     --ignore-sigpipe --ignore-write-errors --disable-write-exception
     --pidfile=/tmp/%(proj_name)s_uwsgi.pid
+# We are careful not to choose a directory within the 'current' symlink here,
+# otherwise uwsgi will not see the change to the symlink when it does a graceful
+# restart.
 directory=/home/%(proj_user)s
 user=%(proj_user)s
 autostart=true
