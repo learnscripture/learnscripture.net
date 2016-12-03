@@ -1,5 +1,5 @@
 """
-Starter fabfile for deploying LearnScripture.net
+fabfile for deploying and managing LearnScripture.net
 """
 from __future__ import print_function, unicode_literals
 
@@ -31,7 +31,6 @@ env.domains_regex = "|".join(re.escape(d) for d in env.domains)
 env.domains_nginx = " ".join(env.domains)
 
 env.ssl_disabled = "#"
-env.vcs_tools = ["git", "hg"]
 env.locale = "en_US.UTF-8"
 env.num_workers = "4"
 
@@ -696,15 +695,6 @@ def dump_db(target):
     db = target.DBS[DB_LABEL_DEFAULT]
     run("pg_dump -Fc -U %s -O -o -f %s %s" % (db['USER'], filename, db['NAME']))
     return filename
-
-
-@task
-def get_db_dump_from_webfaction():
-    # Transitional task while migration from WebFaction to DigitalOcean
-    with settings(host_string="cciw@185.10.231.181"):
-        filename = "/home/%s/db-%s.django.%s.pgdump" % ("cciw", "cciw_learnscripture", datetime.now().strftime("%Y-%m-%d_%H.%M.%S"))
-        run("pg_dump -Fc -U %s -O -o -f %s %s" % ("cciw_learnscripture", filename, "cciw_learnscripture"))
-        return list(get(filename, local_path=LOCAL_DB_BACKUPS + "/%(basename)s"))[0]
 
 
 def pg_restore_cmds(db, filename, clean=False):

@@ -6,8 +6,7 @@ import os
 import json
 
 hostname = socket.gethostname()
-DEVBOX = (('webfaction' not in hostname) and
-          ('learnscripture' not in hostname))
+DEVBOX = ('learnscripture' not in hostname)
 LIVEBOX = not DEVBOX
 DEBUG = DEVBOX
 TEMPLATE_DEBUG = DEBUG
