@@ -184,23 +184,25 @@
 
     {% if not hide_preferences_popup %}
 
-      <div id="id-preferences-form" class="modal hide">
-        <div class="modal-header">
-          <a href="#" class="close">&times;</a>
-          <h3>Preferences</h3>
+      <div id="id-preferences-form" class="sidepanel hide">
+        <div class="close-bar backdrop">
         </div>
+        <div class="sidepanel-main">
+          <div class="sidepanel-header">
+            <h3>Preferences</h3>
+          </div>
+          <div class="sidepanel-body">
+            <form action="" method="POST">
+              {% csrf_token %}
 
-        <div class="modal-body">
-          <form action="" method="POST">
-            {% csrf_token %}
+              {{ preferences_form|bootstrap }}
 
-            {{ preferences_form|bootstrap }}
-
-          </form>
-        </div>
-        <div class="modal-footer">
-          <a href="#" id="id-preferences-save-btn" class="btn primary default">Save</a>
-          <a href="#" id="id-preferences-cancel-btn" class="btn secondary">Cancel</a>
+            </form>
+          </div>
+          <div class="sidepanel-footer">
+            <a href="#" id="id-preferences-save-btn" class="btn primary default">Save</a>
+            <a href="#" id="id-preferences-cancel-btn" class="btn secondary">Cancel</a>
+          </div>
         </div>
       </div>
 
@@ -246,7 +248,6 @@
       <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.actual.min.js"></script>
       <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.autosize.js"></script>
       <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-dropdown.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-modal.js"></script>
       <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-tabs.js"></script>
       <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-buttons.js"></script>
       <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-twipsy.js"></script>
@@ -262,7 +263,6 @@
       <script type="text/javascript" src="{{ STATIC_URL }}js/create.js"></script>
       <script type="text/javascript" src="{{ STATIC_URL }}js/preferences.js"></script>
       <script type="text/javascript" src="{{ STATIC_URL }}js/viewset.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}js/modals.js"></script>
 
       {# dashboard #}
       <script type="text/javascript" src="{{ STATIC_URL }}js/lib/d3.v3.min.js"></script>

@@ -4,6 +4,9 @@ var learnscripture =
     (function (learnscripture, $) {
         "use strict";
         var preferences = null;
+        var PREFERENCES_ID = '#id-preferences-form';
+
+        var afterPreferencesSave = null;
 
         var setPreferences = function (prefs) {
             prefs.testingMethod = learnscripture.isTouchDevice() ? prefs.touchscreenTestingMethod : prefs.desktopTestingMethod;
@@ -19,10 +22,27 @@ var learnscripture =
         };
 
         var showPreferences = function (ev) {
-            $('#id-preferences-form').modal({backdrop: 'static', keyboard: true, show: true});
-        };
+            $(PREFERENCES_ID).show();
+            window.location.hash = PREFERENCES_ID;
+            $(document).bind('keyup.sidepanel', function (e) {
+                if (e.which == 27) {
+                    closePreferences();
+                }
+            });
+        }
 
-        var afterPreferencesSave = null;
+        var closePreferences = function () {
+            $(PREFERENCES_ID).hide();
+            // We need to remove the afterPreferencesSave callback so
+            // that it doesn't get invoked if they press cancel and then
+            // open the form manually later.
+            afterPreferencesSave = null;
+
+            $(document).unbind('keyup.sidepanel');
+            if (window.location.hash.replace("#", "") != "") {
+                window.history.back();
+            }
+        }
 
         var savePrefsClick = function (ev) {
             ev.preventDefault();
@@ -43,11 +63,11 @@ var learnscripture =
 
                         setPreferences(data);
 
-                        // Take a reference now, because after hiding the modal
+                        // Take a reference now, because after hiding the panel
                         // afterPreferencesSave is set to null
                         var afterSaveCallback = afterPreferencesSave;
 
-                        $('#id-preferences-form').modal('hide');
+                        closePreferences();
 
                         if (afterSaveCallback !== null) {
                             afterSaveCallback();
@@ -75,29 +95,58 @@ var learnscripture =
                 afterPreferencesSave = function () {
                     $(ev.target).click();
                 };
-
-                // We need to remove the afterPreferencesSave callback so
-                // that it doesn't get invoked if they press cancel and then
-                // open the form manually later.
-                $('#id-preferences-form').bind('hidden', function (ev) {
-                    afterPreferencesSave = null;
-                });
-
                 showPreferences();
             }
         };
 
         var setupPreferencesControls = function () {
-            $(".preferences-link,a[href='/preferences/']").click(function (ev) {
+            $("#id-preferences-form .close-bar").on("click", function (ev) {
+                ev.preventDefault();
+                closePreferences();
+            });
+
+            $(".preferences-link,a[href='/preferences/']").on('click', function (ev) {
                 ev.preventDefault();
                 showPreferences();
             });
 
-            $('#id-preferences-save-btn').click(savePrefsClick);
-            $('#id-preferences-cancel-btn').click(function (ev) {
+            $('#id-preferences-save-btn').on('click', savePrefsClick);
+            $('#id-preferences-cancel-btn').on('click', function (ev) {
                 ev.preventDefault();
-                $('#id-preferences-form').modal('hide');
+                closePreferences();
             });
+
+            // Sidepanel:
+            // * shouldn't submit form when user presses Enter
+            // * should click the 'primary' button if they press Enter on last input
+            $("div.sidepanel form input[type=\"text\"], " +
+              "div.sidepanel form input[type=\"password\"]").keypress(function (ev) {
+                  if ((ev.which && ev.which === 13) || (ev.keyCode && ev.keyCode === 13)) {
+                      // Stop IE from submitting:
+                      ev.preventDefault();
+
+                      // Last input in list should cause submit
+                      var input = $(ev.target);
+                      var form = input.closest('form');
+                      var lastInput = form.find('input[type="text"],input[type="password"]').last();
+                      if (input.attr('id') === lastInput.attr('id')) {
+                          form.closest('.sidepanel').find('.btn.default').first().click();
+                      }
+                  }
+              });
+
+            $(window).bind('hashchange', function (ev) {
+                var oldLocation = learnscripture.getLocation(ev.originalEvent.oldURL);
+                var newLocation = learnscripture.getLocation(ev.originalEvent.newURL);
+
+                if (newLocation.hash.replace("#", "") == "") {
+                    var div = $(oldLocation.hash);
+                    if (div.length > 0 && div.hasClass('sidepanel')) {
+                        closePreferences();
+                    }
+                }
+            });
+
 
             $('#id_interface_theme').change(function (ev) {
                 var theme = $(this).val();
@@ -118,7 +167,7 @@ var learnscripture =
         };
 
         var setupNeedsPreferencesControls = function (section) {
-            section.find('.needs-preferences').click(needsPreferencesButtonClick);
+            section.find('.needs-preferences').on('click', needsPreferencesButtonClick);
         };
 
         // Public interface:
