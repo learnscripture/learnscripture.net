@@ -437,6 +437,14 @@ def deploy():
     restart_all()
 
 
+@task
+def no_tag():
+    """
+    Don't tag deployment in VCS"
+    """
+    env.no_tag = True
+
+
 def create_target():
     commit_ref = get_current_hg_ref()
     target = Version(commit_ref)
@@ -472,7 +480,8 @@ def push_sources(target):
 
 
 def tag_deploy():
-    # Disabled until we actually switch to DigitalOcean
+    if getattr(env, 'no_tag', False):
+        return
     local("hg tag -f deploy-production-$(date --iso-8601=seconds | tr ':' '-' | cut -f 1 -d '+')")
 
 
