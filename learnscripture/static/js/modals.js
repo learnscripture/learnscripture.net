@@ -81,33 +81,41 @@ var learnscripture = (function (learnscripture, $) {
             window.androidlearnscripture.setModalIsVisible) {
             window.androidlearnscripture.setModalIsVisible(true);
         } else {
-            if ('history' in window) {
-                var modalId = modal.attr('id');
-                window.history.pushState({'modal': modalId}, '', '#' + modalId);
-            }
+            var modalId = modal.attr('id');
+            window.location.hash = modalId;
         }
     });
+
+    // Need to handle two cases:
+    // - user dismisses modal with close button
+    // - user dismisses modal with back button or keyboard shortcut
 
     $('div.modal').bind('hidden', function (ev) {
         if (window.androidlearnscripture &&
             window.androidlearnscripture.setModalIsVisible) {
             window.androidlearnscripture.setModalIsVisible(false);
         } else {
-            if ('history' in window) {
+            if (window.location.hash.replace("#", "") != "") {
                 window.history.back();
             }
         }
     });
 
-    $(window).bind('resize', function (ev) {
-        adjustVisibleModals();
+    $(window).bind('hashchange', function (ev) {
+        var oldLocation = learnscripture.getLocation(ev.originalEvent.oldURL);
+        var newLocation = learnscripture.getLocation(ev.originalEvent.newURL);
+
+        if (newLocation.hash.replace("#", "") == "") {
+            var div = $(oldLocation.hash);
+            if (div.length > 0 && div.hasClass('modal')) {
+                hideModal();
+            }
+        }
     });
 
-    $(window).bind('popstate', function (ev) {
-        var state = ev.originalEvent.state;
-        if (state == null || state.modal == undefined) {
-            hideModal();
-        }
+
+    $(window).bind('resize', function (ev) {
+        adjustVisibleModals();
     });
 
     // Export:

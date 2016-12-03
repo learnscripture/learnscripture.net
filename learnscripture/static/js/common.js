@@ -209,6 +209,12 @@ var learnscripture = (function (learnscripture, $) {
                     window.androidlearnscripture.vibrate));
     }
 
+    var getLocation = function(href) {
+        var l = document.createElement("a");
+        l.href = href;
+        return l;
+    };
+
     // Export:
     learnscripture.handleFormValidationErrors = handleFormValidationErrors;
     learnscripture.displaySimpleAjaxError = displaySimpleAjaxError;
@@ -223,6 +229,7 @@ var learnscripture = (function (learnscripture, $) {
     learnscripture.deviceCanVibrate = deviceCanVibrate;
     learnscripture.indicateLoading = indicateLoading;
     learnscripture.hideLoadingIndicator = hideLoadingIndicator;
+    learnscripture.getLocation = getLocation;
     return learnscripture;
 
 }(learnscripture || {}, $));
