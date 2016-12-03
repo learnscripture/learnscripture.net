@@ -196,9 +196,11 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
     # Higher level, learnscripture specific things:
 
     def set_preferences(self):
-        # Set preferences if visible
-
-        if not self._find("#id_desktop_testing_method_0").is_displayed():
+        """
+        Fill in preferences if preferences form is visible.
+        """
+        if (not self.is_element_displayed("#id-preferences-form") and
+                not self.is_element_displayed("#id_default_bible_version")):
             return
 
         self.fill_by_text({"#id_default_bible_version": "KJV (King James Version)"})
@@ -206,10 +208,11 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
         # Turn animations off, as they can complicate testing.
         self.fill({"#id_enable_animations": False})
 
-        if 'id-preferences-save-btn' in self._driver.page_source:
-            # popup
+        if self.is_element_present('#id-preferences-save-btn'):
+            # side panel
             self.click("#id-preferences-save-btn")
         else:
+            # preferences page
             self.submit("#id-save-btn")
         self.wait_until_loaded('body')
         self.wait_for_ajax()

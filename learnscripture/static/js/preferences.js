@@ -23,6 +23,10 @@ var learnscripture =
 
         var showPreferences = function (ev) {
             $(PREFERENCES_ID).show();
+            window.setTimeout(function () {
+                $(PREFERENCES_ID).find(".backdrop").addClass('fade-in');
+            }, 0);
+            $(PREFERENCES_ID).find(".slider").removeClass('slide-out').addClass('slide-in');
             window.location.hash = PREFERENCES_ID;
             $(document).bind('keyup.sidepanel', function (e) {
                 if (e.which == 27) {
@@ -32,7 +36,12 @@ var learnscripture =
         }
 
         var closePreferences = function () {
-            $(PREFERENCES_ID).hide();
+            $(PREFERENCES_ID).find(".slider").addClass('slide-out');
+            $(PREFERENCES_ID).find(".backdrop").removeClass('fade-in');
+            window.setTimeout(function () {
+                $(PREFERENCES_ID).hide()
+            }, 250); // time also in LESS
+
             // We need to remove the afterPreferencesSave callback so
             // that it doesn't get invoked if they press cancel and then
             // open the form manually later.

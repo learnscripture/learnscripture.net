@@ -737,7 +737,13 @@ span.versenumber {
 
     .backdrop {
         background: #444;
-        opacity: 0.95;
+        // time here also in preferences.js, and for slider animation
+        .transition(opacity .25s ease-in);
+        opacity: 0;
+    }
+
+    .fade-in {
+        opacity: 0.6;
     }
 
     .sidepanel-main {
@@ -746,7 +752,7 @@ span.versenumber {
         top: 0px;
         height: 100%;
         z-index: 10000;
-        box-shadow: 3px 0px 5px #222;
+        box-shadow: 3px 0px 5px #555;
         margin-right: @closebarWidth;
         height: 100%;
         overflow-y: auto;
@@ -754,7 +760,19 @@ span.versenumber {
         form {
             margin-bottom: 0;
         }
+
     }
+
+    .slider {
+        .translate(-100%, 0);
+    }
+    .slide-in {
+        .animation(slide-in 0.25s forwards);
+    }
+    .slide-out {
+        .animation(slide-out 0.25s forwards);
+    }
+
 
     .sidepanel-body {
         padding: 10px;
@@ -779,6 +797,24 @@ span.versenumber {
             margin-left: 5px;
         }
     }
+}
+
+@keyframes slide-in {
+    100% { .translate(0%, 0%); }
+}
+
+@-webkit-keyframes slide-in {
+    100% { .translate(0%, 0%); }
+}
+
+@keyframes slide-out {
+    0% { .translate(0%, 0%); }
+    100% { .translate(-100%, 0%); }
+}
+
+@-webkit-keyframes slide-out {
+    0% { .translate(0%, 0%); }
+    100% { .translate(-100%, 0%); }
 }
 
 .filters {
