@@ -151,16 +151,8 @@
       {% block referral_links %}
         {% if request_account and include_referral_links %}
           <div class="footer addclearfix">
-            <div class="addthis_toolbox addthis_default_style"
-                 addthis:url="{{ referral_link }}">
-              <a class="addthis_button_preferred_1"></a>
-              <a class="addthis_button_preferred_2"></a>
-              <a class="addthis_button_preferred_3"></a>
-              <a class="addthis_button_preferred_4"></a>
-              <a class="addthis_button_compact"></a>
-              <a class="addthis_counter addthis_bubble_style"></a>
-              <span class="addthis_separator">|</span>
-              <a id="id_referral_link" href="{{ referral_link }}">referral link</a> | <a href="/referral-program/">What's this?</a>
+            <div>
+              <a id="id_referral_link" href="{{ referral_link }}">Referral link</a> | <a href="/referral-program/">What's this?</a>
             </div>
           </div>
         {% endif %}
@@ -274,10 +266,6 @@
       <script type="text/javascript" src="{{ STATIC_URL }}js/comment.js"></script>
       <script type="text/javascript" src="{{ STATIC_URL }}js/follow.js"></script>
     {% endcompress %}
-
-    {% if request_account and include_referral_links %}
-      <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid=ra-4fa0736b6ee964ea"></script>
-    {% endif %}
 
     {% block extrajs %}
     {% endblock %}
