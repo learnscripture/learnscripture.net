@@ -1,7 +1,5 @@
 {% extends "base.html" %}
 
-{% load url from future %}
-
 {% block content %}
   <p>You need to <a href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}">log in</a>
     (or <a href="{% url 'signup' %}?next={{ request.get_full_path|urlencode }}">create an account)</a>
