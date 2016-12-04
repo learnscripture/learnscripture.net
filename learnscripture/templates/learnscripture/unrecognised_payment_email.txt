@@ -1,4 +1,4 @@
-{% load url from future %}{% autoescape off %}
+{% autoescape off %}
 An unrecognised or flagged payment was received from Paypal. Please
 check it at:
 

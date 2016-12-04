@@ -1,4 +1,4 @@
-{% load url from future %}{% autoescape off %}
+{% autoescape off %}
 Hi {{ account.email_name }},
 
 Thank you for your donation of {{ payment.mc_gross }} {{ payment.mc_currency }}!
