@@ -75,9 +75,6 @@
         $element.remove()
       }
 
-      $.support.transition && $element.hasClass('fade') ?
-        $element.bind(transitionEnd, removeElement) :
-        removeElement()
     }
 
   }

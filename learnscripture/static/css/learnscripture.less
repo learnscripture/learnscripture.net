@@ -172,15 +172,6 @@
         }
     }
 
-    .media-grid {
-        a {
-            border-color: @tabborder;
-            &:hover {
-                border-color: @linkColor;
-            }
-        }
-    }
-
     .verseset, .actionset, .activityitem, .groupcomments, .is-following {
         background-color: @bgColor1;
         border-color: @bgBorderColor;
@@ -525,6 +516,11 @@ q {
 
 /* Page header tweaks */
 .page-header {
+    margin-bottom: @baseline - 1;
+    border-bottom: 1px solid #ddd;
+    h1 {
+        margin-bottom: (@baseline / 2) - 1px;
+    }
     padding: 20px @mainSidePadding 10px;
 }
 
