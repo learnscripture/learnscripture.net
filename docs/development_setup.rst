@@ -37,3 +37,6 @@ instructions may not work completely, but they should be a start.
 
      ./manage.py runserver
 
+9. Then, try to run the tests::
+
+     ./runtests.py
