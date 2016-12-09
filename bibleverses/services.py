@@ -29,7 +29,7 @@ def get_esv(reference_list):
             batch, r = r[0:BATCH_SIZE], r[BATCH_SIZE:]
             for ref, text in get_esv(batch):
                 yield (ref, text)
-            time.sleep(5)  # Don't hammer them.
+            time.sleep(1)  # Don't hammer them.
         raise StopIteration()
 
     params = ['key=%s' % settings.ESV_API_KEY,
