@@ -2,9 +2,8 @@
  Android app
 =============
 
-There is currently a LearnScripture.net app on Google Play Store:
-
-https://play.google.com/store/apps/details?id=net.learnscripture.webviewapp
+There used to be a LearnScripture.net app on Google Play Store. It has now been pulled,
+but some people may still be using it (despite a message telling them it is unsupported).
 
 The source code for the app is here:
 
@@ -16,20 +15,21 @@ website also has a few tweaks to make it work better with the Android app,
 including the ability to call a few Java functions that are exposed via the
 ``window.androidlearnscripture`` object.
 
-In practice, the Android app is a pain:
+In practice, the Android app was a pain:
 
-* it appears that Google Play Store gives you no way of being notified of new
+* It appears that Google Play Store gives you no way of being notified of new
   comments about the app. When people report problems, you are not notified, and
   have no way of getting more info anyway.
 
 * The many different versions of Android, all with outdated WebView components,
-  makes compatibility a nightmare.
+  made compatibility a nightmare.
 
-* Every time a change is needed to the app, getting the app to build again is
+* Every time a change is needed to the app, getting the app to build again was
   a pain - the Android Studio tools update themselves, and break or require
   changes.
 
 It is generally better to get users to access the site via Firefox/Chrome on
-their mobile device. For this reason, the app should be retired. A message could
-be displayed selectively to app users by checking for
-``window.androidlearnscripture`` from Javascript.
+their mobile device. For this reason, the app has been retired. A message is
+selectively displayed to app users (by checking for
+``window.androidlearnscripture`` from Javascript) and telling them to use
+a normal web browser. In the future, all support for this app should be removed.
