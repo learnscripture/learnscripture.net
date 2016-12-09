@@ -35,7 +35,7 @@ The following integrations are used:
 * Mailgun for sending and receiving emails. Webhooks and routes (including
   bounce handling) are set up with the management command ``setup_mailgun``.
 
-* Google analytics for statistics. There are also some stats of our own which
+* Google Analytics for statistics. There are also some stats of our own which
   can be viewed at http://learnscripture.net/stats/?requests&full_accounts
   although this hasn't always been working.
 
@@ -50,4 +50,3 @@ The following integrations are used:
   A new version of the ESV API is in the works, which will give access to newer
   versions of the ESV text. This would be tricky to integrate - people who
   have memorized the old version will not appreciate having to re-learn.
-
