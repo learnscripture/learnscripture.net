@@ -6,7 +6,7 @@ import sys
 if __name__ == '__main__':
     message = sys.argv[1]
 
-    from fabfile import virtualenv, production, cd, run_venv, USER, HOST, env
+    from fabfile import virtualenv, cd, run_venv, USER, HOST, env
     env.host_string = "%s@%s" % (USER, HOST)
 
     import pipes

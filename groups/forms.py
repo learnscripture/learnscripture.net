@@ -24,6 +24,7 @@ class EditGroupForm(forms.ModelForm):
             raise forms.ValidationError("This field is required")
         return name
 
+
 f = EditGroupForm.base_fields['description'].widget.attrs
 del f['cols']
 f['rows'] = 3

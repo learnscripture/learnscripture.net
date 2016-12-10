@@ -34,6 +34,7 @@ def log_exception(
         }
     )
 
+
 app = Celery('learnscripture')
 
 # Using a string here means the worker will not have to

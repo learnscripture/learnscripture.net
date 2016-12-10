@@ -42,7 +42,7 @@ class IdentityAdmin(admin.ModelAdmin):
 
 def hellban_account(modeladmin, request, queryset):
     queryset.update(is_hellbanned=True)
-hellban_account.short_description = "Hell-ban selected accounts"
+hellban_account.short_description = "Hell-ban selected accounts"  # noqa: E305
 
 
 class IdentityInline(admin.StackedInline):

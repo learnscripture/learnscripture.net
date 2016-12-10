@@ -15,6 +15,7 @@ class VerseSetForm(forms.ModelForm):
             raise forms.ValidationError("This field is required")
         return name
 
+
 for n in ['description', 'additional_info']:
     f = VerseSetForm.base_fields[n].widget.attrs
     del f['cols']

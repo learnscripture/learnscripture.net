@@ -12,4 +12,5 @@ def comment_post_save_handler(sender, **kwargs):
     if kwargs['created']:
         new_comment.send(sender=comment)
 
+
 post_save.connect(comment_post_save_handler, sender=Comment)

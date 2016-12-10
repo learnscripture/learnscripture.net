@@ -22,5 +22,6 @@ def invitation_post_save_handler(sender, **kwargs):
     if kwargs['created']:
         invitation_created.send(sender=kwargs['instance'])
 
+
 post_save.connect(membership_post_save_handler, sender=Membership)
 post_save.connect(invitation_post_save_handler, sender=Invitation)

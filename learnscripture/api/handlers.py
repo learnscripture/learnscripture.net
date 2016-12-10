@@ -63,6 +63,7 @@ def require_preexisting_identity(view_func):
         return view_func(request, *args, **kwargs)
     return view
 
+
 require_preexisting_identity_m = method_decorator(require_preexisting_identity)
 
 
@@ -77,6 +78,7 @@ def require_preexisting_account(view_func):
             return rc.BAD_REQUEST
         return view_func(request, *args, **kwargs)
     return view
+
 
 require_preexisting_account_m = method_decorator(require_preexisting_account)
 

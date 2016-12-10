@@ -10,7 +10,7 @@ from datetime import datetime
 
 import fabtools
 from fabric.api import env, hide, local, run, task
-from fabric.context_managers import cd, prefix, settings, shell_env
+from fabric.context_managers import cd, prefix, shell_env
 from fabric.contrib.files import exists, upload_template, append
 from fabric.contrib.project import rsync_project
 from fabric.decorators import with_settings
@@ -424,6 +424,7 @@ def deploy():
     """
     Deploy project.
     """
+    code_quality_checks()
     target = create_target()
     push_sources(target)
     create_venv(target)
@@ -434,6 +435,11 @@ def deploy():
     tag_deploy()  # Once 'current' symlink is switched
     deploy_system()
     restart_all()
+
+
+@task
+def code_quality_checks():
+    local("flake8 .")
 
 
 @task

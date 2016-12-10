@@ -38,6 +38,8 @@ from learnscripture.datastructures import make_class_enum
 class AnyLevel(object):
     def __str__(self):
         return 'any'
+
+
 AnyLevel = AnyLevel()
 
 

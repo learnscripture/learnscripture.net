@@ -12,4 +12,5 @@ def jsonify(object):
         return serialize('json', object)
     return json.dumps(object)
 
+
 register.filter('jsonify', jsonify)

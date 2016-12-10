@@ -22,6 +22,7 @@ def require_identity(view_func):
         return view_func(request, *args, **kwargs)
     return view
 
+
 require_identity_method = method_decorator(require_identity)
 
 

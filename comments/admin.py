@@ -10,4 +10,5 @@ class CommentAdmin(admin.ModelAdmin):
     def queryset(self, request):
         return super(CommentAdmin, self).queryset(request).select_related('author')
 
+
 admin.site.register(Comment, CommentAdmin)
