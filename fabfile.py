@@ -440,6 +440,7 @@ def deploy():
 @task
 def code_quality_checks():
     local("flake8 .")
+    local("./runtests.py -f")
 
 
 @task
