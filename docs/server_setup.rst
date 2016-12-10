@@ -7,6 +7,11 @@ DigitalOcean machine are below:
 
 (Completed 2016-11-30)
 
+These commands were done using my development machine (after setting up as per
+development_setup.rst). Where the prompts below indicate ``...@learnscripture>``
+it means the commands were run in an SSH session on the learnscripture
+production machine, either as user ``root`` or ``learnscripture``.
+
 
 * Created account on DigitalOcean for webmaster@learnscripture.net
 
