@@ -424,7 +424,9 @@ def deploy():
     """
     Deploy project.
     """
+    check_branch()
     code_quality_checks()
+    push_to_central_vcs()
     target = create_target()
     push_sources(target)
     create_venv(target)
@@ -439,8 +441,26 @@ def deploy():
 
 @task
 def code_quality_checks():
+    """
+    Run code quality checks, including tests.
+    """
     local("flake8 .")
     local("./runtests.py -f")
+
+
+def check_branch():
+    if local("hg id -b", capture=True) != "default":
+        raise AssertionError("Branch must be 'default' for deploying")
+    if local("hg id -B", capture=True) != "master":
+        raise AssertionError("Bookmark must be 'master' for deploying")
+
+
+def push_to_central_vcs():
+    # This task is designed to fail if it would create multiple heads on
+    # BitBucket i.e. if BitBucket has code on the master branch that hasn't been
+    # merged locally. This prevents deploys overwriting a previous deploy
+    # unknowingly due to failure to merge changes.
+    local("hg push -B master bitbucket")
 
 
 @task
