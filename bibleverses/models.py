@@ -327,14 +327,17 @@ def intersperse(iterable, delimiter):
         yield x
 
 
-SEARCH_OPERATORS = set(["&", "|", "@@", "@@@", "||", "&&", "!!", "@>", "<@"])
+SEARCH_OPERATORS = set(["&", "|", "@@", "@@@", "||", "&&", "!!", "@>", "<@", ":"])
+SEARCH_CHARS = set("".join(list(SEARCH_OPERATORS)))
 
 
 class VerseManager(caching.base.CachingManager):
 
     def text_search(self, query, version, limit=10):
-        words = query.replace(':', ' ').split(u' ')
-        # First remove anything recognised by postgres as an operator
+        # First remove anything recognised by postgres as an operator.
+        for s in SEARCH_CHARS:
+            query = query.replace(s, " ")
+        words = query.split(u' ')
         words = [w for w in words
                  if (w and w not in SEARCH_OPERATORS)]
         # Do an 'AND' on all terms.
