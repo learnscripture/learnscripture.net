@@ -53,6 +53,7 @@ class PreferencesForm(forms.ModelForm):
                   'enable_vibration',
                   'interface_theme']
 
+
 PreferencesForm.base_fields['default_bible_version'].required = True
 
 

@@ -99,6 +99,7 @@ def make_bible_book_abbreviations():
         'sg': 'Song of Solomon',
     })
 
+
 make_bible_book_abbreviations()
 
 # Psalm 119 is 176 verses
@@ -1158,11 +1159,11 @@ def parse_as_bible_reference(query, allow_whole_book=True, allow_whole_chapter=T
         r'\s+'                       # space
         r'(\d+)'                     # chapter
         r'\s*('                      # optionally:
-            r'(v|:|\.)'              #    v or : or .
-            r'\s*\d+'                #    and start verse number
-            r'('                     #    and optionally:
-              r'\s*-\s*\d+'          #        end verse/next chapter num
-              r'(\s*(v|:|\.)'        #        and optionally end verse
+            r'(v|:|\.)'              #    v or : or .                        # noqa
+            r'\s*\d+'                #    and start verse number             # noqa
+            r'('                     #    and optionally:                    # noqa
+              r'\s*-\s*\d+'          #        end verse/next chapter num     # noqa
+              r'(\s*(v|:|\.)'        #        and optionally end verse       # noqa
                r'\s*\d+)?'
             r')?'
         r')?'

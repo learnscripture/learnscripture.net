@@ -611,9 +611,9 @@ class Identity(models.Model):
             s.filter(strength__gt=0, first_seen__isnull=True).update(first_seen=now)
 
             verse_tested.send(sender=self, verse=s0)
-            if (s0.version.is_catechism and s0.text_order == 1
-                and old_strength == 0.0
-                    and self.account_id is not None):
+            if (s0.version.is_catechism and s0.text_order == 1 and
+                    old_strength == 0.0 and
+                    self.account_id is not None):
                 catechism_started.send(self.account, catechism=s0.version)
 
             return ActionChange(old_strength=old_strength, new_strength=new_strength)

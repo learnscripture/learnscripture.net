@@ -10,4 +10,5 @@ class EventAdmin(admin.ModelAdmin):
     def queryset(self, *args, **kwargs):
         return super(EventAdmin, self).queryset(*args, **kwargs).select_related('account')
 
+
 admin.site.register(Event, EventAdmin)

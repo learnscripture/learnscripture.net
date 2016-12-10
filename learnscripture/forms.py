@@ -51,6 +51,7 @@ class SignUpForm(forms.ModelForm):
             'enable_commenting',
         ]
 
+
 SignUpForm.base_fields['email'].help_text = "Private. Needed for notifications and password reset"
 SignUpForm.base_fields['username'].help_text = "Public"
 SignUpForm.base_fields['first_name'].help_text = "Optional, public"

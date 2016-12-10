@@ -100,6 +100,7 @@ class PaypalDebugMiddleware(object):
                               datetime.now().isoformat()),
                  'wb').write(request.META.get('CONTENT_TYPE', '') + '\n\n' + request.body)
 
+
 LEARNING_VIEWS = [
     'dashboard',
     'learn',

@@ -121,6 +121,7 @@ def signal_handler(sig, f):
     SIGINT_RECEIVED = True
     # No other action, just allow child to exit.
 
+
 signal.signal(signal.SIGINT, signal_handler)
 
 retcode = subprocess.call(cmd)

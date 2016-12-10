@@ -28,7 +28,7 @@ class VerseSetAdmin(admin.ModelAdmin):
 def mark_missing(modeladmin, request, queryset):
     for v in queryset:
         v.mark_missing()
-mark_missing.short_description = "Mark selected verses as missing"
+mark_missing.short_description = "Mark selected verses as missing"  # noqa: E305
 
 
 class VerseAdmin(admin.ModelAdmin):
