@@ -502,9 +502,10 @@ class IdentityTests(AccountTestMixin, TestBase):
 
         # Create some WordSuggestionData
         for uvs in uvss:
-            WordSuggestionData.objects.create(version_slug=uvs.version.slug,
-                                              reference=uvs.reference,
-                                              suggestions=[])
+            WordSuggestionData.objects.get_or_create(
+                version_slug=uvs.version.slug,
+                reference=uvs.reference,
+                defaults={'suggestions': []})
         with self.assertNumQueries(2, using='default'):
             with self.assertNumQueries(1, using='wordsuggestions'):
                 d = i.get_verse_statuses_bulk([uvs.id for uvs in uvss])
