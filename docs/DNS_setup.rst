@@ -1,3 +1,7 @@
+===========
+ DNS setup
+===========
+
 The following DNS records are set up in DigitalOcean's DNS using
 https://cloud.digitalocean.com/networking/domains
 
