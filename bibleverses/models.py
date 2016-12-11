@@ -17,8 +17,9 @@ import caching.base
 
 from accounts import memorymodel
 from bibleverses.fields import VectorField
-from bibleverses.services import get_esv, search_esv
+from bibleverses.services import get_fetch_service, get_search_service
 from learnscripture.datastructures import make_choices
+from learnscripture.utils.iterators import intersperse
 
 import logging
 logger = logging.getLogger(__name__)
@@ -180,7 +181,7 @@ class TextVersion(caching.base.CachingMixin, models.Model):
     def get_verse_list(self, reference, max_length=MAX_VERSE_QUERY_SIZE):
         """
         Get ordered list of Verse objects for the given reference.
-        (just one objects for most references).
+        (just one object for most references).
         """
         return parse_ref(reference, self, max_length=max_length)
 
@@ -232,6 +233,12 @@ class TextVersion(caching.base.CachingMixin, models.Model):
         if not self.is_catechism:
             return None
         return self.qapairs.get(reference=reference)
+
+    def get_item_by_reference(self, reference):
+        if self.is_bible:
+            return self.verse_set.get(reference=reference)
+        elif self.is_catechism:
+            return self.get_qapair_by_reference(reference)
 
     def _get_reference_list(self, reference):
         if self.is_bible:
@@ -315,17 +322,9 @@ class ComboVerse(object):
 
     @property
     def text(self):
-        # Do this lazily, so that we can update .text in underlying Verse
+        # Do this lazily, so that we can update .text_saved in underlying Verse
         # objects if necessary.
         return ' '.join(v.text for v in self.verses)
-
-
-def intersperse(iterable, delimiter):
-    it = iter(iterable)
-    yield next(it)
-    for x in it:
-        yield delimiter
-        yield x
 
 
 SEARCH_OPERATORS = set(["&", "|", "@@", "@@@", "||", "&&", "!!", "@>", "<@", ":"])
@@ -345,8 +344,8 @@ class VerseManager(caching.base.CachingManager):
         word_params = list(intersperse(words, ' & '))
         search_clause = ' || ' .join(['%s'] * len(word_params))
         return models.Manager.raw(self, """
-          SELECT id, version_id, reference, text,
-                 ts_headline(text, query, 'StartSel = **, StopSel = **, HighlightAll=TRUE') as highlighted_text,
+          SELECT id, version_id, reference, text_saved,
+                 ts_headline(text_saved, query, 'StartSel = **, StopSel = **, HighlightAll=TRUE') as highlighted_text,
                  book_number, chapter_number, verse_number,
                  bible_verse_number, ts_rank(text_tsv, query) as rank
           FROM bibleverses_verse, to_tsquery(""" + search_clause + """) query
@@ -361,7 +360,7 @@ class VerseManager(caching.base.CachingManager):
 class Verse(caching.base.CachingMixin, models.Model):
     version = models.ForeignKey(TextVersion)
     reference = models.CharField(max_length=100)
-    text = models.TextField(blank=True)
+    text_saved = models.TextField(blank=True)
     text_tsv = VectorField()
 
     # De-normalised fields
@@ -376,6 +375,14 @@ class Verse(caching.base.CachingMixin, models.Model):
     missing = models.BooleanField(default=False)
 
     objects = VerseManager()
+
+    @property
+    def text(self):
+        if self.text_saved == "" and not self.missing:
+            logger.warn("Reached ensure_text call from Verse.text, for %s %s",
+                        self.version.slug, self.reference)
+            ensure_text([self])
+        return self.text_saved
 
     @property
     def book_name(self):
@@ -405,6 +412,13 @@ class Verse(caching.base.CachingMixin, models.Model):
         self.save()
         UserVerseStatus.objects.filter(version=self.version,
                                        reference=self.reference).delete()
+
+    @property
+    def suggestion_text(self):
+        """
+        Text needed by suggestions code
+        """
+        return self.text
 
 
 SUGGESTION_COUNT = 10
@@ -496,6 +510,13 @@ class QAPair(models.Model):
 
     def __unicode__(self):
         return self.reference + " " + self.question
+
+    @property
+    def suggestion_text(self):
+        """
+        Text needed by suggestions code
+        """
+        return self.answer
 
 
 class VerseSetManager(models.Manager):
@@ -1037,37 +1058,60 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE,
         # Ensure back references to version are set, so we don't need extra DB lookup
         for v in retval:
             v.version = version
-        # Ensure verse.text is set
+        # Ensure verse.text_saved is set
         ensure_text(retval)
 
     return retval
 
 
-retrieve_version_services = {
-    'ESV': get_esv,
-}
-
-
 def ensure_text(verses):
+    """
+    Call ensure_text for a group of Verse objects to ensure that the text has
+    been fetched if necessary.
+    """
+    # This fetches the data as necessary, saving it or priming the cache.
+    # It is much more efficient to call it on all verses needed up front,
+    # due to the way we can batch requests to external services that get
+    # the data.
+
+    # Get the complete list:
+    verses_to_check = []
+
+    def add_verses(v_list):
+        for v in v_list:
+            if hasattr(v, 'verses'):
+                # ComboVerse - add the subcomponents,
+                # not the main one.
+                add_verses(v.verses)
+            else:
+                verses_to_check.append(v)
+
+    add_verses(verses)
+
+    # Group into versions
     refs_missing_text = defaultdict(list)  # divided by version
     verse_dict = {}
-    for v in verses:
-        if v.text == '' and not v.missing:
-            refs_missing_text[v.version.short_name].append(v.reference)
-            verse_dict[v.version.short_name, v.reference] = v
 
-    # Version specific stuff:
-    for short_name, service in retrieve_version_services.items():
-        missing = refs_missing_text[short_name]
-        if missing:
-            for ref, text in service(missing):
-                v = verse_dict[short_name, ref]
-                v.text = text
-                v.save()
+    for v in verses_to_check:
+        if v.text_saved == '' and not v.missing:
+            refs_missing_text[v.version.slug].append(v.reference)
+            verse_dict[v.version.slug, v.reference] = v
 
-    for v in verses:
-        if v.text == '' and not v.missing:
-            logger.warn("Marking %s %s as missing", short_name, v.reference)
+    # Now do the fetches
+    for version_slug, missing_refs in refs_missing_text.items():
+        fetcher = get_fetch_service(version_slug)
+        if fetcher is None:
+            continue  # no service for retrieving data
+
+        for ref, text in fetcher(missing_refs):
+            v = verse_dict[version_slug, ref]
+            v.text_saved = text
+            v.save()
+
+    # Check that we fixed everything
+    for v in verses_to_check:
+        if v.text_saved == '' and not v.missing:
+            logger.warn("Marking %s %s as missing", v.version.slug, v.reference)
             v.missing = True
             v.save()
 
@@ -1139,11 +1183,6 @@ def get_passage_sections(verse_list, breaks):
     return sections
 
 
-version_specific_searches = {
-    'ESV': search_esv,
-}
-
-
 def parse_as_bible_reference(query, allow_whole_book=True, allow_whole_chapter=True):
     """
     Returns a normalised Bible reference if the query looks like one,
@@ -1207,8 +1246,9 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
         raise InvalidVerseReference("Verse reference not recognised")
 
     # Do a search:
-    if version.short_name in version_specific_searches:
-        return version_specific_searches[version.short_name](version, query)
+    searcher = get_search_service(version.slug)
+    if searcher:
+        return searcher(version, query)
 
     results = Verse.objects.text_search(query, version, limit=11)
     return [ComboVerse(r.reference, [r]) for r in results]
