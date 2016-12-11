@@ -314,21 +314,62 @@ class ESVTests(TestBase):
     """
     Tests to ensure we can transparently get the ESV text
     """
+    # Specifically we are testing a lot of the functionality of 'ensure_text'
+
+    JOHN_316_TEXT = '"For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life.'
+    JOHN_317_TEXT = 'For God did not send his Son into the world to condemn the world, but in order that the world might be saved through him.'
+
+    def setUp(self):
+        super(TestBase, self).setUp()
+        self.esv = self.make_esv()
 
     def make_esv(self):
         # ESV needs to be created with text empty, but verses existing
-        esv = TextVersion.objects.get_or_create(short_name='ESV')[0]
+        esv = TextVersion.objects.get_or_create(short_name='ESV', slug='ESV')[0]
         esv.verse_set.create(reference='John 3:16',
                              book_number=42,
                              chapter_number=3,
                              verse_number=16,
                              bible_verse_number=26136)
+        esv.verse_set.create(reference='John 3:17',
+                             book_number=42,
+                             chapter_number=3,
+                             verse_number=17,
+                             bible_verse_number=26137)
+        esv.verse_set.create(reference='John 5:4',
+                             book_number=42,
+                             chapter_number=5,
+                             verse_number=4,
+                             bible_verse_number=26214)
         return esv
 
     def test_get_verse_list(self):
-        esv = self.make_esv()
-        l = esv.get_verse_list('John 3:16')
-        text = '"For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life.'
+        l = self.esv.get_verse_list('John 3:16')
+        text = self.JOHN_316_TEXT
         self.assertEqual(l[0].text, text)
-        # Now it should be cached in DB
-        self.assertEqual(esv.verse_set.get(reference='John 3:16').text, text)
+        self._assert_john316_correct()
+
+    def test_combo_verses(self):
+        d = self.esv.get_verses_by_reference_bulk(['John 5:4', 'John 3:16-17'])
+        self.assertEqual(d['John 5:4'].text, "")
+        self.assertEqual(d['John 3:16-17'].text, self.JOHN_316_TEXT + " " + self.JOHN_317_TEXT)
+
+    def test_get_verse_list_missing(self):
+        l = self.esv.get_verse_list('John 5:4')
+        self.assertEqual(l[0].text, '')
+
+        # 'missing' should be set in the DB
+        verse = self.esv.verse_set.get(reference='John 5:4')
+        self.assertEqual(verse.text_saved, "")
+        self.assertEqual(verse.missing, True)
+
+    def _assert_john316_correct(self):
+        self._assert_text_present_and_correct('John 3:16', self.JOHN_316_TEXT)
+
+    def _assert_john317_correct(self):
+        self._assert_text_present_and_correct('John 3:17', self.JOHN_316_TEXT)
+
+    def _assert_text_present_and_correct(self, ref, text):
+        verse = self.esv.verse_set.get(reference=ref)
+        self.assertEqual(verse.text_saved, text)
+        self.assertEqual(verse.missing, False)

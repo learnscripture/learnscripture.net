@@ -17,8 +17,8 @@ class SearchTests(TestBase):
         super(SearchTests, self).setUp()
         self.account = AutoFixture(Account).create(1)[0]
         c = connection.cursor()
-        c.execute("CREATE INDEX bibleverses_verse_tsv_index ON bibleverses_verse USING gin(text_tsv);")
-        c.execute("UPDATE bibleverses_verse SET text_tsv = to_tsvector(text);")
+        # This index needs updating after fixtures
+        c.execute("UPDATE bibleverses_verse SET text_tsv = to_tsvector(text_saved);")
 
     def test_search_verse_set_title(self):
         VerseSet.objects.create(name="For stupid people",

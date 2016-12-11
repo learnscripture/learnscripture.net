@@ -331,6 +331,11 @@ if DEBUG or 'setup_bibleverse_suggestions' in sys.argv:
         'handlers': ['console'],
         'propagate': False,
     }
+    LOGGING['loggers']['bibleverses.services'] = {
+        'level': 'INFO',
+        'handlers': ['console'],
+        'propagate': False,
+    }
 
 if TESTING:
     LOGGING['handlers']['console']['level'] = 'ERROR'

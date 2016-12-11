@@ -16,6 +16,7 @@ from django.conf import settings
 
 from bibleverses.models import (BIBLE_BOOKS, QAPair, TextType, TextVersion, Verse, WordSuggestionData, get_whole_book,
                                 is_punctuation, split_into_words)
+from bibleverses.services import partial_data_available
 from learnscripture.utils.iterators import chunks
 
 logger = logging.getLogger(__name__)
@@ -30,6 +31,29 @@ logger = logging.getLogger(__name__)
 
 def fix_item(version_slug, reference):
     version = TextVersion.objects.get(slug=version_slug)
+    # Before recreating, check if the hash has changed. This is especially
+    # important for versions where we only partially store locally and have to
+    # fetch the data again (triggering a save and this function being called)
+    suggestion_data = WordSuggestionData.objects.filter(version_slug=version_slug,
+                                                        reference=reference)
+    item = version.get_item_by_reference(reference)
+    if getattr(item, 'missing', False):
+        return  # Doesn't need fixing
+
+    if suggestion_data:
+        saved_hash = suggestion_data[0].hash
+        current_hash = hash_text(item.suggestion_text)
+        if saved_hash == current_hash:
+            logger.info("Skipping creation of word suggestions for unchanged %s %s",
+                        version_slug, reference)
+            return
+
+    if partial_data_available(version_slug):
+        # We are going to have problems fixing the word suggestions, because the
+        # current algo assumes access to the whole text. So just log a warning
+        logger.warn("Need to create word suggestions for %s %s but can't",
+                    version_slug, reference)
+        return
     generate_suggestions(version, missing_only=False, ref=reference)
 
 
@@ -40,11 +64,10 @@ def generate_suggestions(version, ref=None, missing_only=True):
             v = version.get_verse_list(ref)[0]
             book = BIBLE_BOOKS[v.book_number]
             items = [v]
-            training_texts = get_training_texts_for_book(book)
+            training_texts = get_training_texts_for_book(version, book)
             logger.info("Generating for %s", ref)
             generate_suggestions_for_items(
                 version, items,
-                lambda verse: verse.text,
                 training_texts, ref=ref, missing_only=missing_only)
         else:
             for book in BIBLE_BOOKS:
@@ -58,7 +81,6 @@ def generate_suggestions(version, ref=None, missing_only=True):
         training_text = ' '.join(p.question + " " + p.answer for p in items)
         generate_suggestions_for_items(
             version, items,
-            lambda qapair: qapair.answer,
             {(version.slug, "all"): training_text},
             ref=ref, missing_only=missing_only)
 
@@ -84,7 +106,6 @@ def generate_suggestions_for_book(version, book, missing_only=True):
     thesaurus = version_thesaurus(version)
     generate_suggestions_for_items(
         version, items,
-        lambda verse: verse.text,
         training_texts, missing_only=missing_only,
         thesaurus=thesaurus)
 
@@ -97,7 +118,7 @@ MIN_SUGGESTIONS = 20
 MAX_SUGGESTIONS = 40
 
 
-def generate_suggestions_for_items(version, items, text_getter, training_texts, ref=None,
+def generate_suggestions_for_items(version, items, training_texts, ref=None,
                                    missing_only=True, thesaurus=None):
     all_text = ' '.join(training_texts.values())
     first_words = sentence_first_words(all_text)
@@ -219,7 +240,7 @@ def generate_suggestions_for_items(version, items, text_getter, training_texts, 
             existing_refs = None
 
         for item in batch:
-            generate_suggestions_single_item(version, item, text_getter,
+            generate_suggestions_single_item(version, item,
                                              strategies,
                                              ref=ref, missing_only=missing_only,
                                              existing_refs=existing_refs,
@@ -234,7 +255,7 @@ def generate_suggestions_for_items(version, items, text_getter, training_texts, 
         gc.collect()
 
 
-def generate_suggestions_single_item(version, item, text_getter,
+def generate_suggestions_single_item(version, item,
                                      strategies,
                                      ref=None,
                                      missing_only=True,
@@ -244,7 +265,7 @@ def generate_suggestions_single_item(version, item, text_getter,
     if ref is not None and item.reference != ref:
         return
 
-    text = text_getter(item)
+    text = item.suggestion_text
 
     if missing_only:
         if item.reference in existing_refs:
