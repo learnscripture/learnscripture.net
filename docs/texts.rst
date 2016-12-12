@@ -20,6 +20,11 @@ available first.
 New texts and catechisms
 ========================
 
+* First, ascertain copyright and usage constraints, obviously. The
+  ``TextVersion.url`` field can be used for linking back to a website, but note
+  that this is only displayed on some page. It may be helpful to cover
+  ourselves by adding a link in the footer.
+
 * The text needs to be prepared and loaded into the database in the development
   environment. This involves creating a TextVersion record in the admin, and then adding:
 
@@ -68,7 +73,8 @@ New texts and catechisms
 
     fab manage_py_command:"setup_bibleverse_suggestions <slug>"
 
-  (This could take a while)
+  (This could take a while. Also, note that there are issues with texts
+  that are only partially available in the local database e.g. ESV.)
 
   Or, dump and transfer, e.g.::
 
