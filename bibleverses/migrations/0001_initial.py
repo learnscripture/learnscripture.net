@@ -7,7 +7,6 @@ import jsonfield.fields
 import django.db.models.deletion
 import django.utils.timezone
 from django.conf import settings
-import caching.base
 import bibleverses.fields
 
 
@@ -49,7 +48,7 @@ class Migration(migrations.Migration):
             options={
                 'ordering': ['short_name'],
             },
-            bases=(caching.base.CachingMixin, models.Model),
+            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='UserVerseStatus',
@@ -88,7 +87,7 @@ class Migration(migrations.Migration):
             options={
                 'ordering': ('bible_verse_number',),
             },
-            bases=(caching.base.CachingMixin, models.Model),
+            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='VerseChoice',
