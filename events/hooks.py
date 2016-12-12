@@ -1,10 +1,10 @@
 from django.dispatch import receiver
 
-from accounts.signals import new_account, verse_started, verse_finished, points_increase, catechism_started
-from awards.signals import new_award, lost_award
-from bibleverses.signals import verse_set_chosen, public_verse_set_created
-from comments.signals import new_comment
 import events.tasks
+from accounts.signals import catechism_started, new_account, points_increase, verse_finished, verse_started
+from awards.signals import lost_award, new_award
+from bibleverses.signals import public_verse_set_created, verse_set_chosen
+from comments.signals import new_comment
 from groups.signals import group_joined, public_group_created
 
 

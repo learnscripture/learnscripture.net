@@ -1,10 +1,10 @@
 from __future__ import absolute_import
 
-import mock
 import re
 import urlparse
 from datetime import datetime, timedelta
 
+import mock
 from django.core import mail
 from django.db.models import F
 from django.test.client import RequestFactory

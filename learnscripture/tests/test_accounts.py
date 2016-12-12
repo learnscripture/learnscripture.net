@@ -1,14 +1,14 @@
 from __future__ import absolute_import
 
-from datetime import timedelta
 import itertools
 import re
+from datetime import timedelta
 
 from autofixture import AutoFixture
 from django.core import mail
 from django.db.models import F
 from django.utils.encoding import force_text
-from django.utils.six.moves.urllib.parse import urlparse, ParseResult
+from django.utils.six.moves.urllib.parse import ParseResult, urlparse
 
 from accounts.models import Account, ActionChange
 from awards.models import AwardType

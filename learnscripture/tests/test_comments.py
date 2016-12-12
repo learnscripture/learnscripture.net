@@ -8,7 +8,7 @@ from comments.models import Comment
 from events.models import Event, EventType
 from groups.models import Group
 
-from .base import FullBrowserTest, AccountTestMixin, TestBase
+from .base import AccountTestMixin, FullBrowserTest, TestBase
 
 
 class CommentPageTests(FullBrowserTest):

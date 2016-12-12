@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save
 
-from .signals import new_comment
 from .models import Comment
+from .signals import new_comment
 
 
 def comment_post_save_handler(sender, **kwargs):

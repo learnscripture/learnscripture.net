@@ -2,9 +2,12 @@ from celery.task import task
 
 from accounts.models import Account
 from awards.models import Award
-from bibleverses.models import VerseSet, TextVersion
+from bibleverses.models import TextVersion, VerseSet
 from comments.models import Comment
-from events.models import NewAccountEvent, AwardReceivedEvent, VerseSetCreatedEvent, StartedLearningVerseSetEvent, PointsMilestoneEvent, VersesStartedMilestoneEvent, VersesFinishedMilestoneEvent, AwardLostEvent, GroupJoinedEvent, GroupCreatedEvent, StartedLearningCatechismEvent, NewCommentEvent
+from events.models import (AwardLostEvent, AwardReceivedEvent, GroupCreatedEvent, GroupJoinedEvent, NewAccountEvent,
+                           NewCommentEvent, PointsMilestoneEvent, StartedLearningCatechismEvent,
+                           StartedLearningVerseSetEvent, VerseSetCreatedEvent, VersesFinishedMilestoneEvent,
+                           VersesStartedMilestoneEvent)
 from groups.models import Group
 
 

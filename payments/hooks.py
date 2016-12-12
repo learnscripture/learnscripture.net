@@ -1,13 +1,13 @@
 from django.conf import settings
-from django.core import mail
 from django.contrib.sites.models import get_current_site
+from django.core import mail
 from django.template import loader
-from paypal.standard.ipn.signals import payment_was_successful, payment_was_flagged
+from paypal.standard.ipn.signals import payment_was_flagged, payment_was_successful
 
 from accounts.models import Account
 from payments.models import DonationDrive, send_donation_drive_target_reached_emails
 from payments.sign import unsign_payment_string
-from payments.signals import target_reached, donation_drive_contributed_to
+from payments.signals import donation_drive_contributed_to, target_reached
 
 
 def site_address_url_start():

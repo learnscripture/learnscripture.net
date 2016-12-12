@@ -2,9 +2,9 @@ from __future__ import absolute_import
 
 from django.utils import timezone
 
-from bibleverses.models import TextVersion, TextType
-from tracking.models import TrackingSnapshot, auto_track_querysets, rewind_models
+from bibleverses.models import TextType, TextVersion
 from learnscripture.tests.base import TestBase
+from tracking.models import TrackingSnapshot, auto_track_querysets, rewind_models
 
 
 class TestTracking(TestBase):

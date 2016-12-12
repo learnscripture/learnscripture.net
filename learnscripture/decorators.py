@@ -1,9 +1,9 @@
-from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.cache import add_never_cache_headers
-from django.utils.functional import wraps
 from django.utils.decorators import method_decorator
+from django.utils.functional import wraps
 from django.utils.http import urlquote
 
 from learnscripture import session

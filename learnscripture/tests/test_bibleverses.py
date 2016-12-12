@@ -3,7 +3,8 @@ from __future__ import absolute_import
 import unittest2
 
 from accounts.models import Identity
-from bibleverses.models import InvalidVerseReference, Verse, TextVersion, get_passage_sections, VerseSet, split_into_words
+from bibleverses.models import (InvalidVerseReference, TextVersion, Verse, VerseSet, get_passage_sections,
+                                split_into_words)
 
 from .base import AccountTestMixin, TestBase
 

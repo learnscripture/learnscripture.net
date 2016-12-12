@@ -5,9 +5,8 @@ from app_metrics.utils import metric
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 
-from accounts.models import Identity, Account
+from accounts.models import Account, Identity
 from learnscripture.datastructures import make_choices
-
 
 LearningType = make_choices('LearningType',
                             [('revision', 'REVISION', 'Revision'),

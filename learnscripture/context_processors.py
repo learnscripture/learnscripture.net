@@ -4,11 +4,9 @@ from django.utils import timezone
 
 from accounts.forms import PreferencesForm
 from accounts.models import DEFAULT_THEME, THEME_FONTS
-
-from payments.models import DonationDrive
-
 from learnscripture.models import SiteNotice
 from learnscripture.views import account_from_request
+from payments.models import DonationDrive
 
 NOTICES_EXPIRE_AFTER_DAYS = 3
 

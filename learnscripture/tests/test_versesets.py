@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 
-
 from bibleverses.models import VerseSet, VerseSetType
 
 from .base import AccountTestMixin, TestBase

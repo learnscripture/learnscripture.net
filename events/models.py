@@ -2,9 +2,9 @@ from __future__ import unicode_literals
 
 from datetime import timedelta
 
-from django.db import models
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.core.urlresolvers import reverse
+from django.db import models
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.html import format_html
@@ -17,7 +17,6 @@ from groups.models import Group
 from groups.utils import group_link
 from learnscripture.datastructures import make_class_enum
 from learnscripture.templatetags.account_utils import account_link
-
 
 EVENTSTREAM_CUTOFF_DAYS = 3  # just 3 days of events
 EVENTSTREAM_CUTOFF_NUMBER = 8
@@ -458,4 +457,4 @@ class Event(models.Model):
     def ordered_comments(self):
         return self.comments.all().order_by('created')
 
-from events import hooks  # NOQA
+from events import hooks  # NOQA isort:skip

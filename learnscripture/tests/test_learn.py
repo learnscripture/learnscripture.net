@@ -1,16 +1,16 @@
 from __future__ import absolute_import
 
+import math
 from datetime import timedelta
 from decimal import Decimal
-import math
 
-from django.db.models import F
 from django.core.urlresolvers import reverse
+from django.db.models import F
 
-from accounts.models import Identity, Account
 from accounts.memorymodel import MM
-from awards.models import AwardType, StudentAward, AceAward
-from bibleverses.models import VerseSet, MemoryStage, StageType
+from accounts.models import Account, Identity
+from awards.models import AceAward, AwardType, StudentAward
+from bibleverses.models import MemoryStage, StageType, VerseSet
 from scores.models import Scores
 
 from .base import FullBrowserTest

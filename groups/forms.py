@@ -1,8 +1,8 @@
-from django import forms
 import selectable.forms.fields
+from django import forms
 
-from groups.models import Group
 from accounts.lookups import AccountLookup
+from groups.models import Group
 
 
 class EditGroupForm(forms.ModelForm):

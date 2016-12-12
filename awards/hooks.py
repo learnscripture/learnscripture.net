@@ -5,10 +5,10 @@ from django.core.urlresolvers import reverse
 from django.dispatch import receiver
 from django.utils.html import format_html
 
-from accounts.signals import new_account, verse_tested, scored_100_percent
-from awards.signals import new_award, lost_award
 import awards.tasks
-from bibleverses.signals import verse_set_chosen, public_verse_set_created
+from accounts.signals import new_account, scored_100_percent, verse_tested
+from awards.signals import lost_award, new_award
+from bibleverses.signals import public_verse_set_created, verse_set_chosen
 from groups.signals import group_joined
 
 

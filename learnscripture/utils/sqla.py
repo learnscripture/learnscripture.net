@@ -1,6 +1,6 @@
+from aldjemy.core import get_engine
 from sqlalchemy.schema import MetaData, Table
 
-from aldjemy.core import get_engine
 
 default_engine = get_engine()
 metadata = MetaData()

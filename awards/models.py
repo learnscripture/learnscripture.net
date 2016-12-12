@@ -8,8 +8,9 @@ from django.utils.html import format_html
 
 from accounts.models import Account
 from awards.signals import new_award
-from scores.models import ScoreReason
 from learnscripture.datastructures import make_class_enum
+from scores.models import ScoreReason
+
 
 # In this module we have:
 #
@@ -510,4 +511,4 @@ class Award(models.Model):
         lost_award.send(sender=self)
         return super(Award, self).delete(**kwargs)
 
-from awards import hooks  # NOQA
+from awards import hooks  # NOQA isort:skip

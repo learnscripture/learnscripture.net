@@ -1,4 +1,4 @@
-from django.core.signing import loads, dumps, BadSignature
+from django.core.signing import BadSignature, dumps, loads
 
 
 def sign_payment_info(d):

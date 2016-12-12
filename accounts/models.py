@@ -1,29 +1,29 @@
 from __future__ import unicode_literals
 
-from collections import defaultdict, OrderedDict
-from datetime import timedelta
 import itertools
 import math
+from collections import OrderedDict, defaultdict
+from datetime import timedelta
 
 from django.conf import settings
-from django.core import mail
-from django.db import models
-from django.utils import timezone
 from django.contrib.auth.models import AbstractBaseUser, UserManager
 from django.contrib.sites.models import get_current_site
+from django.core import mail
+from django.db import models
 from django.template import loader
+from django.utils import timezone
 from django.utils.functional import cached_property
 
 from accounts import memorymodel
-from accounts.signals import verse_started, verse_tested, verse_finished, points_increase, scored_100_percent, catechism_started
-from bibleverses.models import TextVersion, MemoryStage, StageType, VerseSet, VerseSetType, UserVerseStatus, TextType, get_passage_sections, InvalidVerseReference, count_words
+from accounts.signals import (catechism_started, points_increase, scored_100_percent, verse_finished, verse_started,
+                              verse_tested)
+from bibleverses.models import (InvalidVerseReference, MemoryStage, StageType, TextType, TextVersion, UserVerseStatus,
+                                VerseSet, VerseSetType, count_words, get_passage_sections)
 from bibleverses.signals import verse_set_chosen
-from scores.models import TotalScore, ScoreReason, Scores
-from tracking.models import track_querysets
-
 from learnscripture.datastructures import make_choices
 from learnscripture.utils.cache import cache_results, clear_cache_results
-
+from scores.models import ScoreReason, Scores, TotalScore
+from tracking.models import track_querysets
 
 TestingMethod = make_choices('TestingMethod',
                              [(0, 'FULL_WORDS', 'Full words - recommended for full keyboards and normal typing skills'),
@@ -1425,9 +1425,10 @@ def get_active_account_count(since_when, until_when):
     """
     Returns the number of accounts that have used the site in the time period.
     """
-    # This isn't accurate is until_when is not now(), since UserVerseStatus is
-    # overwritten. However, it doesn't matter too much, since we run this daily
-    # and only had a small backlog of initial data to cope with.
+    # This isn't accurate if until_when is not now(), since
+    # UserVerseStatus.last_tested is overwritten every time a verse is tested.
+    # However, it doesn't matter too much, since we run this daily and only had
+    # a small backlog of initial data to cope with.
     from bibleverses.models import UserVerseStatus
     return (UserVerseStatus.objects.
             filter(for_identity__account__isnull=False,
@@ -1447,7 +1448,7 @@ def get_active_identity_count(since_when, until_when):
             )
 
 
-from accounts import hooks  # NOQA
+from accounts import hooks  # NOQA isort:skip
 
 
 def notify_all_accounts(html_message):

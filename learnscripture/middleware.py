@@ -1,14 +1,13 @@
-from datetime import datetime
 import os
 import time
 import urlparse
-
-from django.http import HttpResponseRedirect
-from django.conf import settings
-from django.core.urlresolvers import resolve, Resolver404
-from django.utils import timezone
+from datetime import datetime
 
 from app_metrics.utils import metric
+from django.conf import settings
+from django.core.urlresolvers import Resolver404, resolve
+from django.http import HttpResponseRedirect
+from django.utils import timezone
 
 
 class IdentityMiddleware(object):

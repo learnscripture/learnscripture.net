@@ -1,18 +1,19 @@
 from __future__ import absolute_import
 
-from datetime import timedelta
 import time
+from datetime import timedelta
 
 from django.db.models import F
 from django.utils import timezone
 
 import accounts.memorymodel
 from awards.models import AwardType
-from bibleverses.models import VerseSet, TextVersion, StageType, MemoryStage, Verse, VerseChoice, WordSuggestionData, UserVerseStatus
+from bibleverses.models import (MemoryStage, StageType, TextVersion, UserVerseStatus, Verse, VerseChoice, VerseSet,
+                                WordSuggestionData)
 from events.models import Event, EventType
-from tracking.models import rewind_models, TrackingSnapshot
+from tracking.models import TrackingSnapshot, rewind_models
 
-from .base import FuzzyInt, AccountTestMixin, TestBase
+from .base import AccountTestMixin, FuzzyInt, TestBase
 
 
 class IdentityTests(AccountTestMixin, TestBase):

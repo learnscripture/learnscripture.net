@@ -1,7 +1,7 @@
 from datetime import timedelta
-from django.utils import timezone
 
-from app_metrics.models import MetricDay, Metric
+from app_metrics.models import Metric, MetricDay
+from django.utils import timezone
 
 from accounts.models import get_active_account_count, get_active_identity_count
 

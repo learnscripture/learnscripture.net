@@ -7,7 +7,6 @@ import requests
 from django.conf import settings
 from django.utils.crypto import constant_time_compare
 
-
 logger = logging.getLogger("learnscripture.mail.mailgun")
 
 

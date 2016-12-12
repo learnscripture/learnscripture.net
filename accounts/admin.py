@@ -1,9 +1,9 @@
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
-from django.utils.html import format_html
 from django.core.urlresolvers import reverse
+from django.utils.html import format_html
 
-from .models import Identity, Account, Notice
+from .models import Account, Identity, Notice
 
 
 class HasAccountListFilter(SimpleListFilter):

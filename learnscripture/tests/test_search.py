@@ -4,7 +4,7 @@ from autofixture import AutoFixture
 from django.db import connection
 
 from accounts.models import Account
-from bibleverses.models import VerseSet, VerseSetType, TextVersion, quick_find, parse_as_bible_reference
+from bibleverses.models import TextVersion, VerseSet, VerseSetType, parse_as_bible_reference, quick_find
 
 from .base import TestBase
 

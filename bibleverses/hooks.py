@@ -1,11 +1,10 @@
 from django.conf import settings
-
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from bibleverses.models import Verse, QAPair
-from bibleverses.tasks import verse_set_increase_popularity, fix_item_suggestions
+from bibleverses.models import QAPair, Verse
 from bibleverses.signals import verse_set_chosen
+from bibleverses.tasks import fix_item_suggestions, verse_set_increase_popularity
 
 
 def should_update_word_suggestions():

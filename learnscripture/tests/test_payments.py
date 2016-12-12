@@ -7,12 +7,13 @@ from django.core import mail
 from django.utils import timezone
 from paypal.standard.ipn.models import PayPalIPN
 
-from .base import AccountTestMixin, TestBase
 from accounts.models import Account
 from payments.hooks import paypal_payment_received
 from payments.models import DonationDrive
 from payments.sign import sign_payment_info
-from payments.signals import target_reached, donation_drive_contributed_to
+from payments.signals import donation_drive_contributed_to, target_reached
+
+from .base import AccountTestMixin, TestBase
 
 
 class IpnMock(object):

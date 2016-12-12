@@ -14,20 +14,21 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.template.loader import render_to_string
-from django.utils.functional import wraps
 from django.utils.decorators import method_decorator
+from django.utils.functional import wraps
 from django.utils.html import escape, mark_safe
 from django.views.generic.base import View
 
 from accounts.forms import PreferencesForm
 from accounts.models import Account
-from bibleverses.models import StageType, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, MAX_VERSE_QUERY_SIZE, TextVersion, quick_find, VerseSetType, UserVerseStatus
+from bibleverses.models import (MAX_VERSE_QUERY_SIZE, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, StageType,
+                                TextVersion, UserVerseStatus, VerseSetType, quick_find)
 from comments.models import Comment
 from events.models import Event
 from groups.models import Group
 from learnscripture import session
 from learnscripture.decorators import require_identity_method
-from learnscripture.views import todays_stats, bible_versions_for_request, verse_sets_visible_for_request
+from learnscripture.views import bible_versions_for_request, todays_stats, verse_sets_visible_for_request
 
 
 class rc_factory(object):
