@@ -10,11 +10,6 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from jsonfield import JSONField
 
-# TextVersion and Verse are pseudo static, so make extensive use of caching.
-# Other models won't benefit so much due to lots of writes and an increased
-# risk if things go wrong.
-import caching.base
-
 from accounts import memorymodel
 from bibleverses.fields import VectorField
 from bibleverses.services import get_fetch_service, get_search_service
@@ -137,7 +132,7 @@ TextType = make_choices('TextType',
                          ])
 
 
-class TextVersionManager(caching.base.CachingManager):
+class TextVersionManager(models.Manager):
     def get_by_natural_key(self, slug):
         return self.get(slug=slug)
 
@@ -148,7 +143,7 @@ class TextVersionManager(caching.base.CachingManager):
         return self.get_queryset().filter(text_type=TextType.CATECHISM)
 
 
-class TextVersion(caching.base.CachingMixin, models.Model):
+class TextVersion(models.Model):
     short_name = models.CharField(max_length=20, unique=True)
     slug = models.CharField(max_length=20, unique=True)
     full_name = models.CharField(max_length=255, unique=True)
@@ -332,7 +327,7 @@ SEARCH_OPERATORS = set(["&", "|", "@@", "@@@", "||", "&&", "!!", "@>", "<@", ":"
 SEARCH_CHARS = set("".join(list(SEARCH_OPERATORS)))
 
 
-class VerseManager(caching.base.CachingManager):
+class VerseManager(models.Manager):
 
     def text_search(self, query, version, limit=10):
         # First remove anything recognised by postgres as an operator.
@@ -358,7 +353,7 @@ class VerseManager(caching.base.CachingManager):
 """, word_params + [version.id, limit])
 
 
-class Verse(caching.base.CachingMixin, models.Model):
+class Verse(models.Model):
     version = models.ForeignKey(TextVersion)
     reference = models.CharField(max_length=100)
     # 'text_saved' is for data stored, as opposed to 'text' which might retrieve

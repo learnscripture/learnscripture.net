@@ -353,7 +353,7 @@ DEBUG_TOOLBAR_CONFIG = {
 
 CACHES = {
     'default': {
-        'BACKEND': 'caching.backends.memcached.MemcachedCache',
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
         'LOCATION': 'unix:%s/learnscripture_memcached.sock' % HOME_DIR,
         'KEY_PREFIX': 'learnscripture.net',
     }
@@ -366,16 +366,6 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     }
 }
-
-CACHE_PREFIX = 'ls1'
-
-if TESTING:
-    # Caching count() seems to cause errors in test suite
-    CACHE_COUNT_TIMEOUT = 0
-
-
-else:
-    CACHE_COUNT_TIMEOUT = 60
 
 COMPRESS_PRECOMPILERS = (
     ('text/less', 'lessc {infile} {outfile}'),
@@ -486,7 +476,7 @@ if DEBUG:
 
     LOGGING.setdefault('filters', {})['add_sql_with_stack'] = {
         '()': SqlWithStacktrace,
-        'skip': ("django.db", "caching.base", "django.contrib", "__main__"),
+        'skip': ("django.db", "django.contrib", "__main__"),
         'limit': 3,  # increase this if not enough
     }
 
