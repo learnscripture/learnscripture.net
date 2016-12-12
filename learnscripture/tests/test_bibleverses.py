@@ -345,7 +345,6 @@ class ESVTests(SetupEsvMixin, TestBase):
     JOHN_316_TEXT = '"For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life.'
     JOHN_317_TEXT = 'For God did not send his Son into the world to condemn the world, but in order that the world might be saved through him.'
 
-
     def test_get_verse_list(self):
         l = self.esv.get_verse_list('John 3:16')
         text = self.JOHN_316_TEXT
