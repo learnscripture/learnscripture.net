@@ -7,3 +7,5 @@ Disallow: /create-passage-set/
 Disallow: /dashboard/
 Disallow: /progress/
 Disallow: /my-verse-sets/
+Disallow: /verse-set/*version=
+Disallow: /api/
