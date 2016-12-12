@@ -127,11 +127,13 @@ class DashboardTestsBase(object):
         i.record_verse_action('Q1', 'WSC', StageType.TEST, accuracy=1.0)
 
         self.get_url('dashboard')
+        sentinel = "Westminster Shorter Catechism 1647"
+        self.assertTextPresent(sentinel)
         self.click_clear_catechsim_queue_btn()
 
         # Since we cleared the queue, shouldn't have anything about catechisms now
         self.assertUrlsEqual(reverse('dashboard'))
-        self.assertTextAbsent('catechism')
+        self.assertTextAbsent(sentinel)
 
     def test_revise_one_section(self):
         i = self.setup_identity()
