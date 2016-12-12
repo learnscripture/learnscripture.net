@@ -13,9 +13,17 @@ instructions may not work completely, but they should be a start.
 
 3. Create a virtualenv for the project
 
-4. Install dependencies::
+4. Install dependencies.
+
+   System dependencies:
+
+   * postgresql 9.3 or later
+   * memcached
+
+   Python/virtualenv dependencies::
 
      pip install -r requirements.txt -r requirements-dev.txt
+     nodeenv --node=system --python-virtualenv --requirement=requirements-node.txt
 
 5. Create a postgres database matching the development one in
    ``learnscripture/settings.py``.
@@ -32,6 +40,9 @@ instructions may not work completely, but they should be a start.
 7. Setup database::
 
      ./manage.py migrate
+
+   This may not work well - it might be best to get a snapshot of the real
+   database to start from.
 
 8. See if it works by doing::
 
