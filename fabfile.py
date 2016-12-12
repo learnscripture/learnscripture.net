@@ -456,7 +456,7 @@ def code_quality_checks():
 def check_branch():
     if local("hg id -b", capture=True) != "default":
         raise AssertionError("Branch must be 'default' for deploying")
-    if local("hg id -B", capture=True) != "master":
+    if "master" not in local("hg id -B", capture=True).split(" "):
         raise AssertionError("Bookmark must be 'master' for deploying")
 
 
