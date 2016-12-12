@@ -283,6 +283,11 @@ def _fix_startup_services():
         run("update-rc.d %s defaults" % service)
         run("service %s start" % service)
 
+    for service in ['memcached',  # We use our own instance
+                    ]:
+        run("update-rc.d %s disable" % service)
+        run("service %s stop" % service)
+
 
 @as_rootuser
 def apt(packages):
