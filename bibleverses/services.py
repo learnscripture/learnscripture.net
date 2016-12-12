@@ -11,12 +11,16 @@ import re
 import time
 import urllib
 
+from django.db import models
+
 from learnscripture.utils.iterators import chunks
 
 from pyquery import PyQuery
 
 logger = logging.getLogger(__name__)
 
+
+# ----- ESV service -----
 
 ESV_BASE_URL = "http://www.esvapi.org/v2/rest/"
 
@@ -79,14 +83,6 @@ def get_esv(reference_list, batch_size=ESV_BATCH_SIZE):
     return sorted(sections.items())
 
 
-def highlight_search_words(verse, words):
-    text = verse.text
-    for word in words.split(' '):
-        text = text.replace(word, '**%s**' % word)
-    verse.text_saved = text
-    return verse
-
-
 def search_esv(version, words):
     from django.conf import settings
     from bibleverses.models import ComboVerse
@@ -127,6 +123,42 @@ def search_esv(version, words):
         verse_list.append(highlight_search_words(verse, words))
 
     return [ComboVerse(v.reference, [v]) for v in verse_list]
+
+
+ESV_MAX_STORED_CONSECUTIVE_VERSES = 500
+
+
+def adjust_stored_esv():
+    # See terms of usage at http://www.esvapi.org/
+    from bibleverses.models import TextVersion, BIBLE_BOOKS
+    esv = TextVersion.objects.get(slug='ESV')
+    for book_num, book_name in enumerate(BIBLE_BOOKS):
+        book_verses = esv.verse_set.filter(book_number=book_num,
+                                           missing=False)
+        # Work out what half a book is.
+        d = book_verses.aggregate(start=models.Min('bible_verse_number'),
+                                  end=models.Max('bible_verse_number'))
+        book_size = d['end'] - d['start'] + 1
+        max_allowed = min(ESV_MAX_STORED_CONSECUTIVE_VERSES, book_size // 2)
+        found = book_verses.filter(text_fetched_at__isnull=False)
+        found_count = found.count()
+        if found_count > max_allowed:
+            to_blank = found_count - max_allowed
+            # For now, do a simple FIFO, rather than attempting to evict
+            # according to popularity.
+            to_blank_ids = found.order_by('text_fetched_at')[:to_blank].values_list('id', flat=True)
+            logger.info("Blanking %s verses from ESV %s", len(to_blank_ids), book_name)
+            found.filter(id__in=to_blank_ids).update(text_saved='', text_fetched_at=None)
+
+
+# ----- All services -----
+
+def highlight_search_words(verse, words):
+    text = verse.text
+    for word in words.split(' '):
+        text = text.replace(word, '**%s**' % word)
+    verse.text_saved = text
+    return verse
 
 
 _FETCH_SERVICES = {

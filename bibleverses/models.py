@@ -361,8 +361,12 @@ class VerseManager(caching.base.CachingManager):
 class Verse(caching.base.CachingMixin, models.Model):
     version = models.ForeignKey(TextVersion)
     reference = models.CharField(max_length=100)
+    # 'text_saved' is for data stored, as opposed to 'text' which might retrieve
+    # from a service. Also, 'text_saved' is sometimes set without saving to the
+    # DB, just so that 'text' can find it.
     text_saved = models.TextField(blank=True)
     text_tsv = VectorField()
+    text_fetched_at = models.DateTimeField(null=True)
 
     # De-normalised fields
     # Public facing fields are 1-indexed, others are 0-indexed.
@@ -1107,6 +1111,7 @@ def ensure_text(verses):
         for ref, text in fetcher(missing_refs):
             v = verse_dict[version_slug, ref]
             v.text_saved = text
+            v.text_fetched_at = timezone.now()
             v.save()
 
     # Check that we fixed everything
