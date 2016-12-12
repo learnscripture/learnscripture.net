@@ -79,7 +79,7 @@ def get_esv(reference_list, batch_size=ESV_BATCH_SIZE):
     return sorted(sections.items())
 
 
-def higlight_search_words(verse, words):
+def highlight_search_words(verse, words):
     text = verse.text
     for word in words.split(' '):
         text = text.replace(word, '**%s**' % word)
@@ -102,20 +102,31 @@ def search_esv(version, words):
               'results-per-page=10',
               ]
 
-    text = do_esv_api("query", params)
+    result_text = do_esv_api("query", params)
 
     # Split into results
-    refs = []
-    pq = PyQuery(text)
+    pq = PyQuery(result_text)
+    results = []
     for elem in pq.find('p.search-result'):
         pq2 = PyQuery(elem)
         ref = pq2.find('.search-result-head a')[0].text_content()
-        refs.append(ref)
+        for item in elem.getchildren():
+            if (item.tag == 'span' and
+                    item.attrib.get('class', '') in ['search-result-head',
+                                                     'search-result-text-heading']):
+                item.drop_tree()
+        text = elem.text_content()
+        results.append((ref, text))
 
-    verses = version.get_verses_by_reference_bulk(refs)
-    # TODO: consider using returned text rather our local copy, which will cause
-    # queries of ESV API that we don't need.
-    return [ComboVerse(ref, [higlight_search_words(verses[r], words)]) for r in refs]
+    verses = version.get_verses_by_reference_bulk([r for r, t in results],
+                                                  fetch_text=False)
+    verse_list = []
+    for ref, text in results:
+        verse = verses[ref]
+        verse.text_saved = text
+        verse_list.append(highlight_search_words(verse, words))
+
+    return [ComboVerse(v.reference, [v]) for v in verse_list]
 
 
 _FETCH_SERVICES = {
