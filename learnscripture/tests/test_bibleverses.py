@@ -310,17 +310,9 @@ class VerseUtilsTests(unittest2.TestCase):
                          ['and\n', '"A', 'stone', 'of', 'stumbling,\n', 'and', 'a', 'rock', 'of', 'offense.'])
 
 
-class ESVTests(TestBase):
-    """
-    Tests to ensure we can transparently get the ESV text
-    """
-    # Specifically we are testing a lot of the functionality of 'ensure_text'
-
-    JOHN_316_TEXT = '"For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life.'
-    JOHN_317_TEXT = 'For God did not send his Son into the world to condemn the world, but in order that the world might be saved through him.'
-
+class SetupEsvMixin(object):
     def setUp(self):
-        super(TestBase, self).setUp()
+        super(SetupEsvMixin, self).setUp()
         self.esv = self.make_esv()
 
     def make_esv(self):
@@ -342,6 +334,17 @@ class ESVTests(TestBase):
                              verse_number=4,
                              bible_verse_number=26214)
         return esv
+
+
+class ESVTests(SetupEsvMixin, TestBase):
+    """
+    Tests to ensure we can transparently get the ESV text
+    """
+    # Specifically we are testing a lot of the functionality of 'ensure_text'
+
+    JOHN_316_TEXT = '"For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life.'
+    JOHN_317_TEXT = 'For God did not send his Son into the world to condemn the world, but in order that the world might be saved through him.'
+
 
     def test_get_verse_list(self):
         l = self.esv.get_verse_list('John 3:16')

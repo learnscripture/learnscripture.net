@@ -199,7 +199,7 @@ class TextVersion(caching.base.CachingMixin, models.Model):
         verse_dict = self.get_verses_by_reference_bulk(reference_list)
         return dict((ref, v.text) for (ref, v) in verse_dict.items())
 
-    def get_verses_by_reference_bulk(self, reference_list):
+    def get_verses_by_reference_bulk(self, reference_list, fetch_text=True):
         """
         Returns a dictionary of {ref:verse} for each ref in reference_list. Bad
         references are silently discarded, and won't be in the return
@@ -220,7 +220,8 @@ class TextVersion(caching.base.CachingMixin, models.Model):
                     v_dict[ref] = ComboVerse(ref, self.get_verse_list(ref))
                 except InvalidVerseReference:
                     pass
-        ensure_text(v_dict.values())
+        if fetch_text:
+            ensure_text(v_dict.values())
         return v_dict
 
     def get_qapairs_by_reference_bulk(self, reference_list):

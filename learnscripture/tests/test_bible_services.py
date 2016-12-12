@@ -3,7 +3,10 @@ from __future__ import absolute_import
 
 import unittest2
 
-from bibleverses.services import get_esv
+from bibleverses.services import get_esv, search_esv
+
+from .base import TestBase
+from .test_bibleverses import SetupEsvMixin
 
 
 class TestEsvService(unittest2.TestCase):
@@ -21,3 +24,12 @@ we were like those who dream.'''),
 and our tongue with shouts of joy;
 then they said among the nations,
 "The LORD has done great things for them."''')])
+
+
+class TestEsvSearch(SetupEsvMixin, TestBase):
+
+    def test_search(self):
+        l = search_esv(self.esv, "God loved world gave")
+        self.assertEqual(len(l), 1)
+        v = l[0]
+        self.assertEqual(v.reference, "John 3:16")
