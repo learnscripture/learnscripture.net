@@ -4,7 +4,6 @@ from django.utils.safestring import mark_safe
 from docutils.core import publish_parts
 from docutils.writers import html4css1
 
-
 register = template.Library()
 
 

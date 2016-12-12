@@ -12,10 +12,9 @@ import time
 import urllib
 
 from django.db import models
+from pyquery import PyQuery
 
 from learnscripture.utils.iterators import chunks
-
-from pyquery import PyQuery
 
 logger = logging.getLogger(__name__)
 

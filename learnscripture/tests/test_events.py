@@ -3,8 +3,8 @@ from __future__ import absolute_import
 from autofixture import AutoFixture
 from django.utils import timezone
 
-from events.models import Event, EventType, GroupJoinedEvent, PointsMilestoneEvent
 from comments.models import Comment
+from events.models import Event, EventType, GroupJoinedEvent, PointsMilestoneEvent
 from groups.models import Group
 
 from .base import AccountTestMixin, TestBase

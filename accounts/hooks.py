@@ -3,12 +3,11 @@ from __future__ import unicode_literals
 from django.dispatch import receiver
 from django.utils.html import format_html
 
+import accounts.tasks
 from comments.signals import new_comment
 from groups.signals import invitation_created
-from learnscripture.templatetags.account_utils import account_link
 from groups.utils import group_link
-
-import accounts.tasks
+from learnscripture.templatetags.account_utils import account_link
 
 
 @receiver(invitation_created)

@@ -1,7 +1,7 @@
 from django import forms
-from django.forms import widgets
 from django.conf import settings
-from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm, PasswordChangeForm
+from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm, SetPasswordForm
+from django.forms import widgets
 
 from accounts.models import Account
 

@@ -3,10 +3,10 @@ from __future__ import absolute_import
 from django.core.urlresolvers import reverse
 
 from accounts.models import Account, Identity
-from bibleverses.models import VerseSet, StageType, VerseSetType
+from bibleverses.models import StageType, VerseSet, VerseSetType
 from groups.models import Group
 from learnscripture.tests.base import TestBase
-from scores.models import ScoreReason, get_verses_started_counts, get_verses_started_per_day, get_verses_finished_count
+from scores.models import ScoreReason, get_verses_finished_count, get_verses_started_counts, get_verses_started_per_day
 
 from .base import AccountTestMixin
 

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Payment, DonationDrive
+from .models import DonationDrive, Payment
 
 
 class PaymentAdmin(admin.ModelAdmin):

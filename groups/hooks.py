@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save
 
+from .models import Invitation, Membership
 from .signals import group_joined, invitation_created
-from .models import Membership, Invitation
 
 
 def membership_post_save_handler(sender, **kwargs):

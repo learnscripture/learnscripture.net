@@ -162,4 +162,4 @@ def combined_membership_count_for_creator(account_id):
     return val - own_groups
 
 
-from groups import hooks  # NOQA
+from groups import hooks  # NOQA isort:skip

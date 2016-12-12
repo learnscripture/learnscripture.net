@@ -14,7 +14,6 @@ from django.utils import timezone
 
 from learnscripture.datastructures import make_choices
 
-
 ScoreReason = make_choices('ScoreReason',
                            [(0, 'VERSE_TESTED', 'Verse tested'),
                             (1, 'VERSE_REVISED', 'Verse revised'),

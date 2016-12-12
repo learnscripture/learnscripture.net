@@ -1,7 +1,7 @@
 import re
 import subprocess
 
-from bibleverses.models import Verse, TextVersion
+from bibleverses.models import TextVersion, Verse
 
 DIATHEKE = '/home/luke/tmpstore/build/sword-1.6.1/utilities/diatheke/diatheke'
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from datetime import timedelta
 import math
+from datetime import timedelta
 
 
 class MemoryModel(object):

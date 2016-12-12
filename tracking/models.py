@@ -1,13 +1,12 @@
-from StringIO import StringIO
-from httplib import HTTPResponse
 import importlib
+from httplib import HTTPResponse
+from StringIO import StringIO
 
 from django.core.handlers.wsgi import WSGIRequest
 from django.db import models
 from django.utils import timezone
 from django.utils.functional import wraps
 from json_field import JSONField
-
 
 SNAPSHOT_INSERT = 'insert'
 SNAPSHOT_UPDATE = 'update'

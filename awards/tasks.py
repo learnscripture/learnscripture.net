@@ -2,9 +2,10 @@ from datetime import timedelta
 
 from celery.task import task
 
-from awards.models import StudentAward, MasterAward, SharerAward, TrendSetterAward, AceAward, RecruiterAward, AddictAward, OrganizerAward, ConsistentLearnerAward
 from accounts.models import Account, Identity, get_verse_started_running_streaks
-from bibleverses.models import VerseSetType, VerseSet
+from awards.models import (AceAward, AddictAward, ConsistentLearnerAward, MasterAward, OrganizerAward, RecruiterAward,
+                           SharerAward, StudentAward, TrendSetterAward)
+from bibleverses.models import VerseSet, VerseSetType
 from groups.models import combined_membership_count_for_creator
 from scores.models import ScoreReason, get_number_of_distinct_hours_for_account_id
 

@@ -8,7 +8,7 @@ from django.utils import timezone
 
 import accounts.memorymodel
 from accounts.models import Identity, Notice
-from bibleverses.models import VerseSet, TextVersion, StageType, MemoryStage
+from bibleverses.models import MemoryStage, StageType, TextVersion, VerseSet
 
 from .base import FullBrowserTest, WebTestBase
 

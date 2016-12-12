@@ -1,7 +1,7 @@
 # lots of errors around punctuation in our import of NET bible
 import re
-from bibleverses.models import Verse
 
+from bibleverses.models import Verse
 
 for v in Verse.objects.filter(version__slug='NET', text__regex=r"[A-Za-z][.,!?\"]+[A-Za-z]"):
     text = v.text

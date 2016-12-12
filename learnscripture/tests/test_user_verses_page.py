@@ -5,7 +5,8 @@ from datetime import timedelta
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 
-from bibleverses.models import VerseSet, MemoryStage
+from bibleverses.models import MemoryStage, VerseSet
+
 from .base import FullBrowserTest
 
 

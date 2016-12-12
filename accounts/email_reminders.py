@@ -1,7 +1,8 @@
 from __future__ import absolute_import, unicode_literals
 
-from datetime import timedelta
+import logging
 import smtplib
+from datetime import timedelta
 
 from django.conf import settings
 from django.contrib.sites.models import get_current_site
@@ -14,7 +15,6 @@ from django.utils.html import format_html
 from accounts.models import Account
 from accounts.tokens import get_login_token
 
-import logging
 logger = logging.getLogger(__name__)
 
 

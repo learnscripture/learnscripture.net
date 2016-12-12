@@ -3,8 +3,8 @@ from __future__ import unicode_literals
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils import timezone
+from django.utils.html import format_html, linebreaks, urlize
 from django.utils.safestring import mark_safe
-from django.utils.html import urlize, linebreaks, format_html
 
 from accounts.models import Account
 from events.models import Event
@@ -52,4 +52,4 @@ class Comment(models.Model):
             return format_html("{0}'s wall", group_link(self.group))
 
 
-from comments import hooks  # NOQA
+from comments import hooks  # NOQA isort:skip

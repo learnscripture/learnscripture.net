@@ -1,4 +1,4 @@
-from django.core.signing import TimestampSigner, BadSignature
+from django.core.signing import BadSignature, TimestampSigner
 
 login_signer = TimestampSigner(salt="learnscripture:accounts.tokens.login_token")
 LOGIN_TOKEN_MAX_AGE = 10 * 24 * 3600  # 10 days in seconds

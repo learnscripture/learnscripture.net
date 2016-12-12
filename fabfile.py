@@ -11,7 +11,7 @@ from datetime import datetime
 import fabtools
 from fabric.api import env, hide, local, run, task
 from fabric.context_managers import cd, prefix, shell_env
-from fabric.contrib.files import exists, upload_template, append
+from fabric.contrib.files import append, exists, upload_template
 from fabric.contrib.project import rsync_project
 from fabric.decorators import with_settings
 from fabric.operations import get, put
@@ -450,6 +450,7 @@ def code_quality_checks():
     Run code quality checks, including tests.
     """
     local("flake8 .")
+    local("isort -c")
     local("./runtests.py -f")
 
 
