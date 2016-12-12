@@ -18,6 +18,13 @@ SRC_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # ../
 PROJECT_ROOT = os.path.dirname(SRC_ROOT)
 HOME_DIR = os.environ['HOME']
 
+if LIVEBOX:
+    LOG_ROOT = os.path.join(HOME_DIR, 'logs')
+else:
+    LOG_ROOT = os.path.join(PROJECT_ROOT, 'logs')
+if not os.path.exists(LOG_ROOT):
+    os.system("mkdir -p %s" % LOG_ROOT)
+
 secrets = json.load(open(os.path.join(SRC_ROOT, "config", "secrets.json")))
 
 # At least some passwords need to be bytes, not unicode objects
@@ -297,7 +304,15 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose'
-        }
+        },
+        'bibleservices': {
+            'level': 'INFO',
+            'class': 'cloghandler.ConcurrentRotatingFileHandler',
+            'formatter': 'verbose',
+            'filename': os.path.join(LOG_ROOT, 'bibleservices_debug.log'),
+            'maxBytes': 1024 * 1024,
+            'backupCount': 10,
+        },
     },
     'loggers': {
         'django.db.backends': {
@@ -320,6 +335,11 @@ LOGGING = {
             'handlers': ['sentry'],
             'propagate': False,
         },
+        'bibleverses.services': {
+            'level': 'INFO',
+            'handlers': ['bibleservices'],
+            'propagate': False,
+        },
     },
 }
 
@@ -336,6 +356,7 @@ if DEBUG or 'setup_bibleverse_suggestions' in sys.argv:
         'handlers': ['console'],
         'propagate': False,
     }
+
 
 if TESTING:
     LOGGING['handlers']['console']['level'] = 'ERROR'

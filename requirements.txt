@@ -51,3 +51,4 @@ urllib3==1.12
 nodeenv==1.0.0
 django-anymail==0.6.1
 uwsgi==2.0.14
+ConcurrentLogHandler==0.9.1
