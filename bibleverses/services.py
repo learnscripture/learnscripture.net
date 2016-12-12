@@ -83,7 +83,7 @@ def higlight_search_words(verse, words):
     text = verse.text
     for word in words.split(' '):
         text = text.replace(word, '**%s**' % word)
-    verse.text = text
+    verse.text_saved = text
     return verse
 
 
