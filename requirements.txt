@@ -40,7 +40,8 @@ pyquery==1.2.11
 python-dateutil==2.2
 python-memcached==1.48
 pytz==2014.2
-raven==5.32.0
+# See https://github.com/getsentry/raven-python/issues/884 before upgrading raven:
+raven==5.23.0
 requests==2.6.0
 scipy==0.18.1
 six==1.10.0
