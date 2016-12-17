@@ -323,7 +323,7 @@ class ComboVerse(object):
         return ' '.join(v.text for v in self.verses)
 
 
-SEARCH_OPERATORS = set(["&", "|", "@@", "@@@", "||", "&&", "!!", "@>", "<@", ":"])
+SEARCH_OPERATORS = set(["&", "|", "@@", "@@@", "||", "&&", "!!", "@>", "<@", ":", "\\"])
 SEARCH_CHARS = set("".join(list(SEARCH_OPERATORS)))
 
 
