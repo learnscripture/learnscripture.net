@@ -135,6 +135,7 @@ def virtualenv(venv):
 
 class Version(object):
     PROJECT_ROOT_BASE = "/home/%s/webapps/%s" % (env.proj_user, env.proj_name)
+    VERSIONS_ROOT = os.path.join(PROJECT_ROOT_BASE, 'versions')
     MEDIA_ROOT_SHARED = PROJECT_ROOT_BASE + "/media"
     DATA_ROOT_SHARED = PROJECT_ROOT_BASE + "/data"
 
@@ -144,7 +145,7 @@ class Version(object):
 
     def __init__(self, version):
         self.version = version
-        self.PROJECT_ROOT = os.path.join(self.PROJECT_ROOT_BASE, 'versions', version)
+        self.PROJECT_ROOT = os.path.join(self.VERSIONS_ROOT, version)
         self.SRC_ROOT = os.path.join(self.PROJECT_ROOT, 'src')
         self.VENV_ROOT = os.path.join(self.PROJECT_ROOT, 'venv')
         # MEDIA_ROOT/STATIC_ROOT/DATA_ROOT -  sync with settings
@@ -443,6 +444,7 @@ def deploy():
     tag_deploy()  # Once 'current' symlink is switched
     deploy_system()
     restart_all()
+    delete_old_versions()
 
 
 @task
@@ -609,6 +611,13 @@ def get_current_hg_ref():
 @task
 def fake_migrations():
     env.fake_migrations = True
+
+
+@task
+def delete_old_versions():
+    with cd(Version.VERSIONS_ROOT):
+        commitref_glob = "?" * 12
+        run("ls -dtr %s | head -n -4 | xargs rm -rf" % commitref_glob)
 
 
 # Managing running system
