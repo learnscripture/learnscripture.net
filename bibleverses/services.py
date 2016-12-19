@@ -79,7 +79,22 @@ def get_esv(reference_list, batch_size=ESV_BATCH_SIZE):
                     prev = sections[current_section] + '\n' if current_section in sections else ''
                     sections[current_section] = prev + l2
 
+    fix_esv_bugs(sections, reference_list)
+
     return sorted(sections.items())
+
+
+# The ESV API incorrectly returns nothing for these items
+# (seems to only apply with output-format=plain-text)
+MISSING_ESV = {
+    'John 8:1': 'but Jesus went to the Mount of Olives.'
+}
+
+
+def fix_esv_bugs(items, needed_references):
+    for ref in MISSING_ESV.keys():
+        if ref in needed_references:
+            items[ref] = MISSING_ESV[ref]
 
 
 def search_esv(version, words):
