@@ -37,8 +37,8 @@ class VerseAdmin(admin.ModelAdmin):
     list_filter = ['version', 'missing']
     actions = [mark_missing]
 
-    def queryset(self, request):
-        return super(VerseAdmin, self).queryset(request).select_related('version')
+    def get_queryset(self, request):
+        return super(VerseAdmin, self).get_queryset(request).select_related('version')
 
 
 class QAPairAdmin(admin.ModelAdmin):
@@ -47,8 +47,8 @@ class QAPairAdmin(admin.ModelAdmin):
     list_filter = ['catechism']
     ordering = ['catechism', 'order']
 
-    def queryset(self, request):
-        return super(QAPairAdmin, self).queryset(request).select_related('catechism')
+    def get_queryset(self, request):
+        return super(QAPairAdmin, self).get_queryset(request).select_related('catechism')
 
 
 class UserVerseStatusAdmin(admin.ModelAdmin):
@@ -60,8 +60,8 @@ class UserVerseStatusAdmin(admin.ModelAdmin):
     list_display = ['reference', username, 'ignored']
     ordering = ['for_identity__account__username', 'reference']
 
-    def queryset(self, request):
-        return super(UserVerseStatusAdmin, self).queryset(request).select_related('for_identity__account')
+    def get_queryset(self, request):
+        return super(UserVerseStatusAdmin, self).get_queryset(request).select_related('for_identity__account')
 
 
 admin.site.register(TextVersion, TextVersionAdmin)
