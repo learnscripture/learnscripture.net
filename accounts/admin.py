@@ -33,7 +33,7 @@ class NoticeInline(admin.TabularInline):
 class IdentityAdmin(admin.ModelAdmin):
     list_display = ['id', 'account', 'date_created', 'default_bible_version',
                     'desktop_testing_method', 'interface_theme', 'referred_by']
-    list_filter = [HasAccountListFilter, 'track_learning']
+    list_filter = [HasAccountListFilter]
     search_fields = ['account__username']
     inlines = [NoticeInline]
 

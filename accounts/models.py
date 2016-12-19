@@ -23,7 +23,7 @@ from bibleverses.signals import verse_set_chosen
 from learnscripture.datastructures import make_choices
 from learnscripture.utils.cache import cache_results, clear_cache_results
 from scores.models import ScoreReason, Scores, TotalScore
-from tracking.models import track_querysets
+
 
 TestingMethod = make_choices('TestingMethod',
                              [(0, 'FULL_WORDS', 'Full words - recommended for full keyboards and normal typing skills'),
@@ -433,10 +433,6 @@ class Identity(models.Model):
                                     blank=True,
                                     related_name='referrals')
 
-    track_learning = models.BooleanField(default=False,
-                                         help_text="Set this to enable detailed tracking"
-                                         " of a user's learning, for debugging purposes.")
-
     objects = IdentityManager()
 
     @property
@@ -565,8 +561,6 @@ class Identity(models.Model):
         UserVerseStatus.objects.bulk_create(new_uvss)
         return base_uvs_query.all().order_by('text_order')  # fresh QuerySet
 
-    @track_querysets(lambda self, reference, *args, **kwargs: [self.verse_statuses.filter(reference=reference)],
-                     lambda self, *args, **kwargs: self.track_learning)
     def record_verse_action(self, reference, version_slug, stage_type, accuracy=None):
         """
         Records an action such as 'READ' or 'TESTED' against a verse.
