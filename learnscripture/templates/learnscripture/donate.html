@@ -13,7 +13,7 @@
 
   {% if request_account %}
 
-    {% if PRODUCTION %}
+    {% if LIVEBOX %}
       {{ paypal_form.render }}
     {% else %}
       {{ paypal_form.sandbox }}
