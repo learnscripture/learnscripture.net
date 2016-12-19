@@ -34,10 +34,11 @@ class IdentityAdmin(admin.ModelAdmin):
     list_display = ['id', 'account', 'date_created', 'default_bible_version',
                     'desktop_testing_method', 'interface_theme', 'referred_by']
     list_filter = [HasAccountListFilter, 'track_learning']
+    search_fields = ['account__username']
     inlines = [NoticeInline]
 
-    def queryset(self, request):
-        return super(IdentityAdmin, self).queryset(request).select_related('account', 'referred_by')
+    def get_queryset(self, request):
+        return super(IdentityAdmin, self).get_queryset(request).select_related('account', 'referred_by')
 
 
 def hellban_account(modeladmin, request, queryset):
@@ -89,13 +90,15 @@ class AccountAdmin(admin.ModelAdmin):
     actions = [hellban_account]
     inlines = [IdentityInline]
 
-    def queryset(self, request):
-        return super(AccountAdmin, self).queryset(request).select_related('identity__referred_by')
+    def get_queryset(self, request):
+        return super(AccountAdmin, self).get_queryset(request).select_related('identity__referred_by')
 
 
 class NoticeAdmin(admin.ModelAdmin):
-    def queryset(self, request):
-        return super(NoticeAdmin, self).queryset(request).select_related('for_identity', 'for_identity__account')
+    raw_id_fields = ['for_identity', 'related_event']
+
+    def get_queryset(self, request):
+        return super(NoticeAdmin, self).get_queryset(request).select_related('for_identity', 'for_identity__account')
 
 
 admin.site.register(Identity, IdentityAdmin)

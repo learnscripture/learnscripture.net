@@ -10,8 +10,8 @@ class PaymentAdmin(admin.ModelAdmin):
     list_display = ['id', 'account', email, 'amount', 'created']
     search_fields = ['account__username', 'account__email']
 
-    def queryset(self, request):
-        return super(PaymentAdmin, self).queryset(request).select_related('account')
+    def get_queryset(self, request):
+        return super(PaymentAdmin, self).get_queryset(request).select_related('account')
 
 
 class DonationDriveAdmin(admin.ModelAdmin):

@@ -455,7 +455,7 @@ class Identity(models.Model):
         if self.account_id is None:
             return '<Identity %s>' % self.id
         else:
-            return '<Identity %s>' % self.account
+            return '<Identity %s: %s>' % (self.id, self.account)
 
     def __repr__(self):
         return unicode(self)
