@@ -30,8 +30,8 @@ ESV_BATCH_SIZE = 80
 
 
 def do_esv_api(method, params):
-    logger.info("ESV query %s %s", method, params)
     url = ESV_BASE_URL + method + "?" + "&".join(params)
+    logger.info("ESV query %s", url)
     page = urllib.urlopen(url.encode('utf-8'))
     return page.read()
 
