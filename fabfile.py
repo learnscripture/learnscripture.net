@@ -70,6 +70,7 @@ REQS = [
     'silversearcher-ag',
     'git-core',
     'wajig',
+    'ncdu',
 
     # Databases/servers
     'postgresql-9.5',
