@@ -88,7 +88,7 @@ def notices(request):
         retval['notices'] = memoize_nullary(get_and_mark_notices)
 
         if request.identity.account is not None:
-            retval['donation_drives'] = DonationDrive.objects.current_for_account(request.identity.account)
+            retval['donation_drives'] = memoize_nullary(lambda: DonationDrive.objects.current_for_account(request.identity.account))
 
     return retval
 

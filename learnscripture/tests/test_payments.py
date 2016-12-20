@@ -13,7 +13,7 @@ from payments.models import DonationDrive
 from payments.sign import sign_payment_info
 from payments.signals import donation_drive_contributed_to, target_reached
 
-from .base import AccountTestMixin, TestBase
+from .base import AccountTestMixin, TestBase, WebTestBase
 
 
 class IpnMock(object):
@@ -226,3 +226,24 @@ class DonationDriveTests(AccountTestMixin, TestBase):
 
         self.assertTrue(any(m.subject == "LearnScripture.net - donation target reached!"
                             for m in mail.outbox))
+
+
+class ViewDonationDriveTests(WebTestBase):
+    def setUp(self):
+        super(ViewDonationDriveTests, self).setUp()
+        self.donation_drive = DonationDrive.objects.create(
+            start=timezone.now() - timedelta(days=10),
+            finish=timezone.now() + timedelta(days=10),
+            active=True,
+            message_html="Please donate!",
+            hide_if_donated_days=4,
+            target=Decimal("20")
+        )
+        self.identity, self.account = self.create_account()
+        self.account.date_joined -= timedelta(days=100)
+        self.account.save()
+
+    def test_view(self):
+        self.login(self.account)
+        self.get_url("dashboard")
+        self.assertTextPresent("Please donate!")
