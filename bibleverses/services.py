@@ -87,7 +87,10 @@ def get_esv(reference_list, batch_size=ESV_BATCH_SIZE):
 # The ESV API incorrectly returns nothing for these items
 # (seems to only apply with output-format=plain-text)
 MISSING_ESV = {
-    'John 8:1': 'but Jesus went to the Mount of Olives.'
+    'John 8:1': 'but Jesus went to the Mount of Olives.',
+    'Psalm 119:12': 'Blessed are you, O Lord;\nteach me your statutes!',
+    'Psalm 119:25': 'My soul clings to the dust;\ngive me life according to your word!',
+    'Psalm 119:49': 'Remember your word to your servant,\nin which you have made me hope.',
 }
 
 
