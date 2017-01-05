@@ -5,7 +5,6 @@ from datetime import datetime
 
 from app_metrics.utils import metric
 from django.conf import settings
-from django.core.urlresolvers import Resolver404, resolve
 from django.http import HttpResponseRedirect
 from django.utils import timezone
 
