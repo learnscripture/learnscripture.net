@@ -55,6 +55,10 @@ production machine, either as user ``root`` or ``learnscripture``.
 
   Plus tweaks to ~/.inputrc
 
+  Also configured unattended upgrades::
+
+    root@learnscripture> dpkg-reconfigure unattended-upgrades
+
 * Copied DB from old system.
 
   There are two databases - learnscripture and learnscripture_wordsuggestions.
