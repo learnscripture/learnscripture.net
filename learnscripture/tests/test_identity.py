@@ -8,8 +8,7 @@ from django.utils import timezone
 
 import accounts.memorymodel
 from awards.models import AwardType
-from bibleverses.models import (MemoryStage, StageType, TextVersion, Verse, VerseChoice, VerseSet,
-                                WordSuggestionData)
+from bibleverses.models import MemoryStage, StageType, TextVersion, Verse, VerseChoice, VerseSet, WordSuggestionData
 from events.models import Event, EventType
 
 from .base import AccountTestMixin, FuzzyInt, TestBase
