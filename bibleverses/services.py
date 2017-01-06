@@ -40,6 +40,7 @@ def get_esv(reference_list, batch_size=ESV_BATCH_SIZE):
     from django.conf import settings
 
     first_time = True
+    sections = {}
     for batch in chunks(reference_list, batch_size):
         if not first_time:
             time.sleep(1)  # Don't hammer the API.
@@ -63,7 +64,6 @@ def get_esv(reference_list, batch_size=ESV_BATCH_SIZE):
         first_time = False
 
         # Split into passages
-        sections = {}
         current_section = None
         for line in text.split("\n"):
             l2 = line.strip()
