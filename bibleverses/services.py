@@ -73,7 +73,9 @@ def get_esv(reference_list, batch_size=ESV_BATCH_SIZE):
                 current_section = l2
             else:
                 if current_section is None:
-                    logger.error("get_esv: Can't parse line: %s", line)
+                    # This can happen when ESV sends us back things we didn't
+                    # ask for e.g. asking for John 5:4 it sends us John 5:3-5
+                    pass
                 else:
                     l2 = re.sub('\[[\d:]*\]', '', l2).strip()
                     prev = sections[current_section] + '\n' if current_section in sections else ''
