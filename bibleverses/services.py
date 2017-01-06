@@ -73,7 +73,7 @@ def get_esv(reference_list, batch_size=ESV_BATCH_SIZE):
                 current_section = l2
             else:
                 if current_section is None:
-                    logger.warn("get_esv: Can't parse line: %s", line)
+                    logger.error("get_esv: Can't parse line: %s", line)
                 else:
                     l2 = re.sub('\[[\d:]*\]', '', l2).strip()
                     prev = sections[current_section] + '\n' if current_section in sections else ''
