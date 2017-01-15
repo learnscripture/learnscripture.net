@@ -23,6 +23,7 @@ class VerseChoiceAdminForm(forms.ModelForm):
 class VerseSetAdmin(admin.ModelAdmin):
     list_display = ['name', 'set_type', 'date_added', 'slug', 'created_by', 'description', 'additional_info']
     list_filter = ['set_type']
+    search_fields = ['slug', 'name', 'description']
 
 
 def mark_missing(modeladmin, request, queryset):
