@@ -452,6 +452,8 @@ def code_quality_checks():
     """
     Run code quality checks, including tests.
     """
+    if getattr(env, 'skip_code_quality_checks', False):
+        return
     local("flake8 .")
     local("isort -c")
     local("./runtests.py -f")
@@ -816,3 +818,8 @@ def migrate_upload_db(local_filename):
     target = Version.current()
     db_restore(target.DBS[DB_LABEL_DEFAULT],
                remote_filename)
+
+
+@task
+def skip_code_quality_checks():
+    env.skip_code_quality_checks = True
