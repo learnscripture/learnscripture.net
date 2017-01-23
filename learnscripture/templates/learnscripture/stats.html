@@ -14,15 +14,6 @@
   <div id="id-accounts-graph" style="width:820px;height:300px;">
   </div>
 
-  {% if 'requests' in request.GET %}
-
-    <h2>Requests</h2>
-
-    <div id="id-request-stats-graph" style="width:820px;height:300px;">
-    </div>
-
-  {% endif %}
-
 {% endblock %}
 
 {% block extrajs %}
@@ -78,31 +69,6 @@
                 lines: { show: true, fill: false },
               }
             });
-
-     {% if 'requests' in request.GET %}
-
-     $.plot("#id-request-stats-graph" ,
-            [
-              {label: "HTML requests",
-               data: {{ request_data.request_html|jsonify }} },
-              {label: "JSON requests",
-               data: {{ request_data.request_json|jsonify }} },
-              {label: "Other",
-               data: {{ request_data.request_other|jsonify }} }
-            ],
-            { xaxis: { mode: "time",
-                       ticks: 10 },
-              yaxis: { min: 0 },
-              legend: { position: "nw" },
-              series: {
-                stack: true,
-                lines: { show: true, fill: true },
-              }
-
-            });
-
-
-     {% endif %}
 
    });
   </script>

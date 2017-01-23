@@ -3,7 +3,6 @@ import time
 import urlparse
 from datetime import datetime
 
-from app_metrics.utils import metric
 from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.utils import timezone
@@ -56,16 +55,6 @@ class TokenLoginMiddleware(object):
         del d['t']
         url = urlparse.urlunparse(('', '', request.path, '', d.urlencode(), ''))
         return HttpResponseRedirect(url)
-
-
-class StatsMiddleware(object):
-    def process_request(self, request):
-        metric('request_all')
-        accept = request.environ.get('HTTP_ACCEPT', '')
-        if accept.startswith('application/json'):
-            metric('request_json')
-        elif accept.startswith('text/html'):
-            metric('request_html')
 
 
 class DebugMiddleware(object):
