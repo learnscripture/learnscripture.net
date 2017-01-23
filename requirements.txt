@@ -10,7 +10,8 @@ URLObject==2.4.0
 aldjemy==0.4.3
 anyjson==0.3.3
 argparse==1.2.1
-celery==3.1.18
+celery==3.1.25
+billiard==3.3.0.23
 contextlib2==0.5.4
 cssselect==0.9.1
 django-appconf==1.0.1
