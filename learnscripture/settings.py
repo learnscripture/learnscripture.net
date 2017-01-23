@@ -312,6 +312,15 @@ LOGGING = {
             'maxBytes': 1024 * 1024,
             'backupCount': 10,
         },
+        'celerydebug': {
+            'level': 'DEBUG',
+            'class': 'cloghandler.ConcurrentRotatingFileHandler',
+            'formatter': 'verbose',
+            'filename': os.path.join(LOG_ROOT, 'celery_debug.log'),
+            'maxBytes': 1024 * 1024,
+            'backupCount': 10,
+        },
+
     },
     'loggers': {
         'django.db.backends': {
@@ -330,8 +339,13 @@ LOGGING = {
             'propagate': False,
         },
         'celery': {
-            'level': 'WARNING',
-            'handlers': ['sentry'],
+            'level': 'DEBUG',
+            'handlers': ['celerydebug', 'sentry'],
+            'propagate': False,
+        },
+        'celerydebug': {
+            'level': 'DEBUG',
+            'handlers': ['celerydebug'],
             'propagate': False,
         },
         'bibleverses.services': {
@@ -431,7 +445,8 @@ CELERYD_CONCURRENCY = 1
 
 CELERY_RESULT_BACKEND = 'disabled'
 CELERY_TASK_SERIALIZER = 'json'
-
+CELERY_IGNORE_RESULT = True
+CELERYD_HIJACK_ROOT_LOGGER = False
 
 # == LearnScripture.net specific settings ==
 

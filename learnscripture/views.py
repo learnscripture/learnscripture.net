@@ -25,6 +25,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.debug import sensitive_post_parameters
 from paypal.standard.forms import PayPalPaymentsForm
 
+import learnscripture.tasks
 from accounts.forms import AccountDetailsForm, PreferencesForm
 from accounts.models import Account, Identity
 from awards.models import AnyLevel, Award, AwardType
@@ -1553,3 +1554,9 @@ def activity_item(request, event_id):
                   {'event': event,
                    'title': "Activity from %s" % event.account.username,
                    })
+
+
+def celery_debug(request):
+    message = request.GET.get('message', '[no message]')
+    learnscripture.tasks.message.apply_async([message])
+    return HttpResponse("Task queued with message: {0}".format(message))
