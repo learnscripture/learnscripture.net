@@ -1107,20 +1107,9 @@ def stats(request):
                                 'identities_active',
                                 ] if 'full_accounts' in request.GET else []))
 
-    if 'requests' in request.GET:
-        request_data = build_data(['request_all', 'request_html', 'request_json'])
-        # request_other = request_total - request_html - request_json
-        request_data['request_other'] = [(r_a[0], r_a[1] - r_h[1] - r_j[1]) for r_a, r_h, r_j in
-                                         zip(request_data['request_all'],
-                                             request_data['request_html'],
-                                             request_data['request_json'])]
-    else:
-        request_data = None
-
     return render(request, 'learnscripture/stats.html',
                   {'title': 'Stats',
                    'verses_data': verses_data,
-                   'request_data': request_data,
                    'account_data': account_data,
                    })
 
