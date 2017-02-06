@@ -39,10 +39,9 @@ The following integrations are used:
   can be viewed at http://learnscripture.net/stats/?requests&full_accounts
   although this hasn't always been working.
 
-* ESV API for getting ESV text. This is not used in practice now, since the
-  entire text is cached in our database, but we could empty the 'text' column
-  and our code would use the service to fill it back up as and when it is
-  needed. The presence of the whole text, however, is needed for the word
+* ESV API for getting ESV text. We obey the ESV license which requires
+  us to cache only a limited number of verses in the local database.
+  The presence of the whole text, however, is needed for the word
   suggestions feature.
 
   Also, the ESV API is used for searching the ESV.
