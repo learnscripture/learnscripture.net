@@ -77,11 +77,13 @@ def make_bible_book_abbreviations():
         'jb': 'Job',
         'jl': 'Joel',
         'jgs': 'Judges',
+        'jdg': 'Judges',
         'jas': 'James',
         'jm': 'James',
         'jn': 'John',
         'jnh': 'Jonah',
         'jsh': 'Joshua',
+        'jud': 'Jude',
         'lev': 'Leviticus',
         'mk': 'Mark',
         'mrk': 'Mark',
@@ -93,6 +95,7 @@ def make_bible_book_abbreviations():
         'php': 'Philippians',
         'rm': 'Romans',
         'sg': 'Song of Solomon',
+        'sng': 'Song of Solomon',
     })
 
 
