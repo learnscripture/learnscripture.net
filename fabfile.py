@@ -582,8 +582,13 @@ def build_static(target):
         with cd(target.SRC_ROOT):
             # django-compressor doesn't always find changes if we don't do this:
             run("touch learnscripture/static/css/learnscripture.less")
+
             run("./manage.py collectstatic -v 0 --noinput")
 
+    # This is needed for certbot/letsencrypt:
+    run("mkdir {0}/root".format(target.STATIC_ROOT))
+
+    # Permissions
     run("chmod -R ugo+r %s" % target.STATIC_ROOT)
 
 
