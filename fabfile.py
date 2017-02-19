@@ -254,7 +254,6 @@ def _add_swap():
            "vm.swappiness=10\n")
 
 
-@task
 @as_rootuser
 def _ssl_dhparam():
     dhparams = "/etc/nginx/ssl/dhparams.pem"
