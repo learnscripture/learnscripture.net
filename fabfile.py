@@ -306,7 +306,7 @@ TEMPLATES = {
         "system": True,
         "local_path": "config/nginx.conf.template",
         "remote_path": "/etc/nginx/sites-enabled/%(proj_name)s.conf",
-        "reload_command": "service nginx restart",
+        "reload_command": "service nginx reload",
     },
     "supervisor": {
         "system": True,
