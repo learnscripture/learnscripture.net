@@ -28,7 +28,7 @@ Generating revenue from ads is also very difficult:
 
 LearnScripture.net is therefore funded entirely by donations. As and when needed
 (usually around Easter each year) a donation drive is set up on the site:
-http://learnscripture.net/admin/payments/donationdrive/
+https://learnscripture.net/admin/payments/donationdrive/
 
 This is usually sufficient to cover the modest financial needs, which are:
 

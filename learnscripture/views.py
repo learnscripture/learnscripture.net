@@ -1183,7 +1183,7 @@ def pay_cancelled(request):
 def referral_program(request):
     account = account_from_request(request)
     if account is not None:
-        referral_link = account.make_referral_link('http://%s/' % Site.objects.get_current().domain)
+        referral_link = account.make_referral_link('https://%s/' % Site.objects.get_current().domain)
     else:
         referral_link = None
 

@@ -36,7 +36,7 @@ The following integrations are used:
   bounce handling) are set up with the management command ``setup_mailgun``.
 
 * Google Analytics for statistics. There are also some stats of our own which
-  can be viewed at http://learnscripture.net/stats/?requests&full_accounts
+  can be viewed at https://learnscripture.net/stats/?requests&full_accounts
   although this hasn't always been working.
 
 * ESV API for getting ESV text. We obey the ESV license which requires

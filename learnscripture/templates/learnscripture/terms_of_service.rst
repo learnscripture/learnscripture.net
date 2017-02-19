@@ -261,5 +261,5 @@ page.
 
 
 
-.. _Privacy Policy: http://learnscripture.net/privacy-policy/
-.. _statement of faith: http://learnscripture.net/statement-of-faith/
+.. _Privacy Policy: https://learnscripture.net/privacy-policy/
+.. _statement of faith: https://learnscripture.net/statement-of-faith/
