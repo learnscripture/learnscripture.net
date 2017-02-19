@@ -34,6 +34,9 @@ The following integrations are used:
 
 * Mailgun for sending and receiving emails. Webhooks and routes (including
   bounce handling) are set up with the management command ``setup_mailgun``.
+  This needs to be run whenever webhooks change::
+
+    fab manage_py_command:setup_mailgun
 
 * Google Analytics for statistics. There are also some stats of our own which
   can be viewed at https://learnscripture.net/stats/?requests&full_accounts
