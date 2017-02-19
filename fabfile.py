@@ -823,3 +823,30 @@ def migrate_upload_db(local_filename):
 @task
 def skip_code_quality_checks():
     env.skip_code_quality_checks = True
+
+
+# This is for Ubuntu 16.04 with nginx
+@task
+@as_rootuser
+def setup_certbot():
+    run("sudo apt-get install letsencrypt")
+
+
+@task
+@as_rootuser
+def install_or_renew_ssl_certificate():
+    version = Version.current()
+    certbot_static_path = version.STATIC_ROOT + "/root"
+    run("test -d {certbot_static_path} || mkdir {certbot_static_path}".format(
+        certbot_static_path=certbot_static_path))
+
+    run("letsencrypt certonly --webroot"
+        " -w {certbot_static_path}"
+        " -d {domain}".format(
+            certbot_static_path=certbot_static_path,
+            domain=env.domains[0],
+        ))
+    run("service nginx restart")
+    # Cleanup
+    run("rmdir {certbot_static_path}/.well-known/".format(
+        certbot_static_path=certbot_static_path))

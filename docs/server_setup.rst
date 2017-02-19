@@ -107,3 +107,11 @@ production machine, either as user ``root`` or ``learnscripture``.
 
 See also DNS_setup.rst
 
+
+Later, SSL was set up::
+
+  $ fab setup_certbot
+
+  $ fab install_or_renew_ssl_certificate
+
+Email: webmaster@learnscripture.net
