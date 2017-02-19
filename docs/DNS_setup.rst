@@ -36,11 +36,12 @@ Zone file below::
     learnscripture.net. 1800 IN NS ns2.digitalocean.com.
     learnscripture.net. 1800 IN NS ns3.digitalocean.com.
     learnscripture.net. 1800 IN A 104.236.55.8
-    learnscripture.net.learnscripture.net. 1800 IN TXT v=spf1 include:mailgun.org ~all
-    pic._domainkey.learnscripture.net.learnscripture.net. 1800 IN TXT k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC+pwGZ41+8s2Fi+JAVorLYzKDLkYsmMqrE/tr4CUTSdgr50qUanokvEtv62iybA7MqBrkvuERmPkWBCyk880rn+jpFIhxThDpDObO0/86tEvMBCaNIpAWiDJ7qLLBiTGgeTuZSrE87hQ2cllsmnend18Tp6anZxjoG3lZ2Gm6K3QIDAQAB
-    email.learnscripture.net.learnscripture.net. 1800 IN CNAME mailgun.org.
+    learnscripture.net. 3600 IN TXT v=spf1 include:mailgun.org ~all
+    pic._domainkey.learnscripture.net. 3600 IN TXT k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC+pwGZ41+8s2Fi+JAVorLYzKDLkYsmMqrE/tr4CUTSdgr50qUanokvEtv62iybA7MqBrkvuERmPkWBCyk880rn+jpFIhxThDpDObO0/86tEvMBCaNIpAWiDJ7qLLBiTGgeTuZSrE87hQ2cllsmnend18Tp6anZxjoG3lZ2Gm6K3QIDAQAB
+    email.learnscripture.net. 43200 IN CNAME mailgun.org.
     learnscripture.net. 1800 IN MX 10 mxa.mailgun.org.
     learnscripture.net. 1800 IN MX 10 mxb.mailgun.org.
+
 
 Mailgun instructions are here:
 
