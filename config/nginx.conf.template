@@ -73,9 +73,13 @@ server {
 
         add_header "X-UA-Compatible" "IE=Edge";
 
-        root /home/nonexistent;
+        # This is needed only for certbot/letsencrypt to work
+        root %(STATIC_ROOT)s/root;
 
-        uwsgi_pass unix:/tmp/%(proj_name)s_uwsgi.sock;
+        if (!-f $request_filename) {
+            uwsgi_pass unix:/tmp/%(proj_name)s_uwsgi.sock;
+        }
+
         add_header X-Frame-Options "SAMEORIGIN";
 
         include uwsgi_params;
