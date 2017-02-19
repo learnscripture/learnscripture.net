@@ -6,12 +6,12 @@ At least one is overdue by {{ overdue_by }} day{{ overdue_by|pluralize }}.
 
 To go to your dashboard, click this link:
 
-  http://{{ domain }}{% url 'dashboard' %}?t={{ login_token }}
+  https://{{ domain }}{% url 'dashboard' %}?t={{ login_token }}
 
 If you want to opt out of these emails or limit the frequency,
 you can do so here:
 
-  http://{{ domain }}{% url 'account_details' %}?t={{ login_token }}
+  https://{{ domain }}{% url 'account_details' %}?t={{ login_token }}
 
 --
 This was an automated email from the learnscripture.net site,

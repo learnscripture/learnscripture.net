@@ -61,7 +61,7 @@ def setup_mailgun_routes():
 
 
 def setup_mailgun_webhooks():
-    domain = "http://learnscripture.net"
+    domain = "https://learnscripture.net"
     webhook_bounce_url = domain + reverse("mailgun-bounce-notification")
     try:
         create_webhook('bounce', webhook_bounce_url)

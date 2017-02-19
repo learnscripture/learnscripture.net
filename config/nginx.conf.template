@@ -3,7 +3,7 @@
 server {
     listen 80;
     server_name www.learnscripture.net;
-    rewrite     ^/(.*) http://learnscripture.net/$1 permanent;
+    rewrite     ^/(.*) https://learnscripture.net/$1 permanent;
 }
 
 

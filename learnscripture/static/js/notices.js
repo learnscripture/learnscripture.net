@@ -39,7 +39,7 @@ var learnscripture = (function (learnscripture, $) {
             var caption = "I just earned a badge: " + d['awardName'];
 
             // Facebook
-            var fbUrl = 'http://www.facebook.com/dialog/feed?app_id=175882602545382' +
+            var fbUrl = 'https://www.facebook.com/dialog/feed?app_id=175882602545382' +
                 '&link=' + encodeURIComponent(link) +
                 '&redirect_uri=' + encodeURIComponent(redirectUri) +
                 '&caption=' + encodeURIComponent(caption) +
@@ -47,7 +47,7 @@ var learnscripture = (function (learnscripture, $) {
             html = html + '<a href="' + fbUrl + '"><i class="icon-facebook"></i> Facebook</a>';
 
             // Twitter
-            var twUrl = 'http://twitter.com/share' +
+            var twUrl = 'https://twitter.com/share' +
                 '?url=' + encodeURIComponent(link) +
                 '&text=' + encodeURIComponent(caption) +
                 '&hashtags=LearnScripture';
