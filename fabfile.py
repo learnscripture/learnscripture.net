@@ -30,7 +30,6 @@ env.domains = ["learnscripture.net"]
 env.domains_regex = "|".join(re.escape(d) for d in env.domains)
 env.domains_nginx = " ".join(env.domains)
 
-env.ssl_disabled = "#"
 env.locale = "en_US.UTF-8"
 env.num_workers = "4"
 
@@ -234,6 +233,7 @@ def _install_system():
     apt(" ".join(REQS))
     _add_swap()
     _install_python_minimum()
+    _ssl_dhparam()
 
 
 @as_rootuser
@@ -252,6 +252,17 @@ def _add_swap():
     run("sysctl vm.swappiness=10")
     append("/etc/sysctl.conf",
            "vm.swappiness=10\n")
+
+
+@task
+@as_rootuser
+def _ssl_dhparam():
+    dhparams = "/etc/nginx/ssl/dhparams.pem"
+    if not exists(dhparams):
+        d = os.path.dirname(dhparams)
+        if not exists(d):
+            run("mkdir -p {0}".format(d))
+        run("openssl dhparam -out {0} 2048".format(dhparams))
 
 
 def _install_python_minimum():
