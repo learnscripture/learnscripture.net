@@ -6,13 +6,21 @@ import os
 import json
 
 hostname = socket.gethostname()
-DEVBOX = ('learnscripture' not in hostname)
-LIVEBOX = not DEVBOX
+CHECK_DEPLOY = 'manage.py check --deploy' in ' '.join(sys.argv)
+if CHECK_DEPLOY:
+    LIVEBOX = True
+    DEVBOX = False
+else:
+    DEVBOX = ('learnscripture' not in hostname)
+    LIVEBOX = not DEVBOX
+
+
 DEBUG = DEVBOX
 TEMPLATE_DEBUG = DEBUG
 
 # A kitten gets killed every time you use this:
 TESTING = 'manage.py test' in ' '.join(sys.argv)
+
 
 SRC_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # ../
 PROJECT_ROOT = os.path.dirname(SRC_ROOT)
@@ -118,8 +126,14 @@ AUTHENTICATION_BACKENDS = [
 SESSION_COOKIE_AGE = 3600 * 24 * 31 * 4  # 4 months
 
 if LIVEBOX:
+    # Can't use in development because we use HTTP locally
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
+
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_SSL_REDIRECT = True
+X_FRAME_OPTIONS = 'DENY'
 
 ADMINS = [
     ('', 'admin@learnscripture.net')
@@ -185,6 +199,7 @@ TEMPLATE_LOADERS = (
 MIDDLEWARE_CLASSES = [
     m for b, m in
     [
+        (True, 'django.middleware.security.SecurityMiddleware'),
         (DEBUG, 'debug_toolbar.middleware.DebugToolbarMiddleware'),
         (True, 'django.middleware.common.CommonMiddleware'),
         (True, 'django.contrib.sessions.middleware.SessionMiddleware'),
