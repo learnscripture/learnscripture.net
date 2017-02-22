@@ -117,6 +117,10 @@ AUTHENTICATION_BACKENDS = [
 
 SESSION_COOKIE_AGE = 3600 * 24 * 31 * 4  # 4 months
 
+if LIVEBOX:
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+
 ADMINS = [
     ('', 'admin@learnscripture.net')
 ]
