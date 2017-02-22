@@ -844,7 +844,7 @@ def skip_code_quality_checks():
 @task
 @as_rootuser
 def setup_certbot():
-    run("sudo apt-get install letsencrypt")
+    run("apt-get install letsencrypt")
 
 
 @task
