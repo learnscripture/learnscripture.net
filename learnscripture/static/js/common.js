@@ -63,21 +63,11 @@ if (!Object.keys) {
 
 // Django CSRF requirements
 $(document).ajaxSend(function (event, xhr, settings) {
-    function getCookie(name) {
-        var cookieValue = null, i;
-        if (document.cookie && document.cookie != '') {
-            var cookies = document.cookie.split(';');
-            for (i = 0; i < cookies.length; i++) {
-                var cookie = jQuery.trim(cookies[i]);
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
+    // due to CSRF_COOKIE_HTTPONLY, we get token from HTML, not cookie
+    function getCsrfToken () {
+        return $('[name=csrfmiddlewaretoken]').val();
     }
+
     function sameOrigin(url) {
         // url could be relative or scheme relative or absolute
         var host = document.location.host; // host + port
@@ -95,7 +85,7 @@ $(document).ajaxSend(function (event, xhr, settings) {
     }
 
     if (!safeMethod(settings.type) && sameOrigin(settings.url)) {
-        xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+        xhr.setRequestHeader("X-CSRFToken", getCsrfToken());
     }
 });
 
