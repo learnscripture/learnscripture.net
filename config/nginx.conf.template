@@ -6,7 +6,6 @@ server {
     rewrite     ^/(.*) https://learnscripture.net/$1 permanent;
 }
 
-
 server {
     listen 80;
     server_name %(domains_nginx)s;
