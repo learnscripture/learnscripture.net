@@ -11,10 +11,19 @@ Some old scripts that were used (and probably won't run now) are found in
 ``scripts/``. The texts themselves are deliberately not stored in the repo
 because of copyright, and because they would be large.
 
-A further constraint is that the need to generate 'suggestions' for any text
+A further constraint is the need to generate 'suggestions' for any text
 (used in the 'on screen testing' method). This is done using Markov chain
 analysis of the text, among other things, and requires the whole text to be
 available first.
+
+The Markov chain analysis and other methods are almost certainly only appropriate
+for English language texts - in fact these methods use an English thesaurus and a few
+sets of hard-coded English tables (e.g. for pronouns) as part of this process.
+This presents a challenge if other languages are wanted. In particular, the methods
+are likely to work badly for languages with a lot of grammatical inflections
+on words (which English does not have). For these languages, generating word
+plausible word suggestions for the on-screen testing method would be a bigger
+challenge.
 
 
 New texts and catechisms
