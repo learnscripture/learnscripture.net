@@ -193,9 +193,7 @@ var learnscripture = (function (learnscripture, $) {
     };
 
     var deviceCanVibrate = function () {
-        return (("vibrate" in navigator)
-                || (window.androidlearnscripture &&
-                    window.androidlearnscripture.vibrate));
+        return ("vibrate" in navigator);
     }
 
     var getLocation = function(href) {

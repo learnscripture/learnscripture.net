@@ -452,12 +452,6 @@ class DeleteNotice(ApiView):
         request.identity.notices.filter(id=int(request.POST['id'])).delete()
 
 
-class AndroidAppInstalled(ApiView):
-
-    def post(self, request):
-        request.identity.account.android_app_installed()
-
-
 class AddComment(ApiView):
     fields = [
         ('author', ['id', 'username']),

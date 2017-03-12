@@ -55,7 +55,6 @@
                     {% endif %}
                   </ul>
                         </li>
-                        <li style="display: none;"><a class="android-appmenu-link" href="#"><i class="icon-fw icon-appmenu"></i></a></li>
               </ul>
             </div>
           </div>
@@ -220,7 +219,6 @@
       <div id="id-account-data"
            data-username="{{ request_account.username }}"
            data-id="{{ request_account.id }}"
-           data-has-installed-android-app="{{ request_account.has_installed_android_app|yesno:"true,false" }}"
            >
       </div>
     {% endif %}
@@ -264,7 +262,6 @@
 
       <script type="text/javascript" src="{{ STATIC_URL }}js/versepopup.js"></script>
       <script type="text/javascript" src="{{ STATIC_URL }}js/groups.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}js/android.js"></script>
       <script type="text/javascript" src="{{ STATIC_URL }}js/comment.js"></script>
       <script type="text/javascript" src="{{ STATIC_URL }}js/follow.js"></script>
     {% endcompress %}
