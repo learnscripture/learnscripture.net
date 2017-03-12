@@ -330,15 +330,10 @@ var learnscripture = (function (learnscripture, $) {
         if (!preferences.enableVibration) {
             return;
         }
-        if (window.androidlearnscripture &&
-            window.androidlearnscripture.vibrate) {
-            window.androidlearnscripture.vibrate(length);
-        } else {
-            if (!("vibrate" in navigator)) {
-                return;
-            }
-            navigator.vibrate(length);
+        if (!("vibrate" in navigator)) {
+            return;
         }
+        navigator.vibrate(length);
     }
 
     var indicateMistake = function (mistakes, maxMistakes) {
@@ -910,7 +905,6 @@ var learnscripture = (function (learnscripture, $) {
         wordTestSetUp: function () {
             this.adjustTypingBox();
             inputBox.show().val('').focus();
-            this.forceShowKeyboard();
         },
 
         windowAdjust: function () {
@@ -937,7 +931,6 @@ var learnscripture = (function (learnscripture, $) {
                     } else {
                         indicateMistake(Math.round(testingMistakes[wordIdx] / mistakeVal),
                                         this.testMaxAttempts);
-                        this.forceShowKeyboard();
                     }
             }
         },
@@ -960,17 +953,6 @@ var learnscripture = (function (learnscripture, $) {
                 height: (wordBox.outerHeight() - 4).toString() + "px",
                 width: width
             })
-        },
-
-        forceShowKeyboard: function () {
-            // Attempt to force keyboard to be shown. This is needed in case
-            // android app user pressed 'Enter' instead of 'space'
-            if (window.androidlearnscripture &&
-                window.androidlearnscripture.showKeyboard) {
-                inputBox.focus();
-                window.androidlearnscripture.showKeyboard();
-            }
-
         },
 
         showFullWordHint: function () {
@@ -1900,13 +1882,6 @@ var learnscripture = (function (learnscripture, $) {
 
     };
 
-    var inputFocused = function (ev) {
-        if (window.androidlearnscripture &&
-            window.androidlearnscripture.registerInputFocused) {
-            window.androidlearnscripture.registerInputFocused();
-        }
-    }
-
     var docKeyPress = function (ev) {
         var tagName = ev.target.tagName.toLowerCase();
         if (tagName === 'input' ||
@@ -2060,7 +2035,6 @@ var learnscripture = (function (learnscripture, $) {
         });
 
         inputBox = $('#id-typing');
-        inputBox.on('focus', inputFocused);
         // Chrome on Android does not fire onkeypress, only keyup and keydown.
         // It also fires onchange only after pressing 'Enter' and closing
         // the on-screen keyboard.

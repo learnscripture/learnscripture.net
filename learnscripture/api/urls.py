@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, url
 
-from learnscripture.api.handlers import (ActionCompleteHandler, ActionLogs, AddComment, AndroidAppInstalled,
+from learnscripture.api.handlers import (ActionCompleteHandler, ActionLogs, AddComment,
                                          CancelLearningPassageHandler, CancelLearningVerseHandler, ChangeVersionHandler,
                                          CheckDuplicatePassageSet, DeleteNotice, Follow, HideComment, LogOutHandler,
                                          ResetProgressHandler, SessionStats, SetPreferences, SkipVerseHandler, UnFollow,
@@ -26,8 +26,7 @@ urlpatterns = patterns('',
                        url(r'^versefind/$', VerseFind.as_view(), name='learnscripture.api.versefind'),
                        url(r'^checkduplicatepassageset/$', CheckDuplicatePassageSet.as_view(), name='learnscripture.api.checkduplicatepassageset'),
                        url(r'^deletenotice/$', DeleteNotice.as_view(), name='learnscripture.api.deletenotice'),
-                       url(r'^androidappinstalled/$', AndroidAppInstalled.as_view(), name='learnscripture.api.androidappinstalled'),
-                       url(r'^addcomment/$', AddComment.as_view(), name='learnscripture.api.androidappinstalled'),
+                       url(r'^addcomment/$', AddComment.as_view(), name='learnscripture.api.addcomment'),
                        url(r'^hidecomment/$', HideComment.as_view(), name='learnscripture.api.hidecomment'),
                        url(r'^follow/$', Follow.as_view(), name='learnscripture.api.follow'),
                        url(r'^unfollow/$', UnFollow.as_view(), name='learnscripture.api.unfollow'),
