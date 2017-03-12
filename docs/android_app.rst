@@ -33,3 +33,5 @@ to date, making development much much easier.
 The source code for the app is here:
 
 https://bitbucket.org/spookylukey/net.learnscripture.webviewapp
+
+Integration with the app was removed in 172ca0b13c72 and 712939385c29.
