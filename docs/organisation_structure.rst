@@ -19,11 +19,11 @@ Generating revenue from ads is also very difficult:
 * ad networks are increasingly hostile, often attempting to attack users with malware.
 
   https://www.cyphort.com/huffingtonpost-serving-malware/
-  
+
   http://www.theregister.co.uk/2010/12/13/doubleclick_msn_malware_attacks/
-  
+
   https://itcsecure.com/2015/09/yahoos-ad-network-is-serving-malware/
-  
+
   http://www.theverge.com/2014/9/19/6537511/google-ad-network-exposed-millions-of-computers-to-malware
 
 LearnScripture.net is therefore funded entirely by donations. As and when needed
