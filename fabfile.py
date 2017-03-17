@@ -481,7 +481,7 @@ def push_to_central_vcs():
     # BitBucket i.e. if BitBucket has code on the master branch that hasn't been
     # merged locally. This prevents deploys overwriting a previous deploy
     # unknowingly due to failure to merge changes.
-    local("hg push -B master bitbucket")
+    local("hg push -B master bitbucket; test $? -ne 255")
 
 
 @task
