@@ -26,3 +26,6 @@ The following are areas where contributions would be welcome:
 Overall the combined required workload is not many hours per month, but some of
 the items above are "as long as a piece of string", depending on what you want
 to put into it.
+
+If you are a developer and would like to help out, please start with the README.rst
+document.
