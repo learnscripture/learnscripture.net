@@ -797,7 +797,7 @@ def db_restore_commands(db, filename):
         (True,
          """psql -U postgres -d template1 -c "DROP DATABASE IF EXISTS %s;" """ % db['NAME']),
 
-    ] + db_create_commands(db) + pg_restore_cmds(db, filename)
+    ] + db_create_user_commands(db) + db_create_commands(db) + pg_restore_cmds(db, filename)
 
 
 PG_ENVIRON_MAP = {
