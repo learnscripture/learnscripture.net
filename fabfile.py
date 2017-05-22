@@ -75,6 +75,7 @@ REQS = [
     'postgresql-9.5',
     'postgresql-contrib-9.5',
     'memcached',
+    'rabbitmq-server',
 
     # Daemons
     'supervisor',  # For running uwsgi and php-cgi daemons
@@ -285,6 +286,17 @@ def _configure_services():
               "synchronous_commit = off"]:
         append("/etc/postgresql/9.5/main/postgresql.conf", l)
     run("service postgresql restart")
+
+    s = secrets()
+    rabbitmq_username = s['RABBITMQ_USERNAME']
+    rabbitmq_password = s['RABBITMQ_PASSWORD']
+    users = run("rabbitmqctl list_users")
+    users = [u.split('\t')[0] for u in users.split("\n")]
+    if rabbitmq_username not in users:
+        run("rabbitmqctl add_user {rabbitmq_username} {rabbitmq_password}".format(**locals()))
+        run("rabbitmqctl add_vhost learnscripture")
+        run("rabbitmqctl set_user_tags {rabbitmq_username} mytag".format(**locals()))
+        run('rabbitmqctl set_permissions -p learnscripture {rabbitmq_username} ".*" ".*" ".*"'.format(**locals()))
 
 
 @as_rootuser
