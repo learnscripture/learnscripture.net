@@ -27,6 +27,9 @@ parser.add_argument("--show-browser", action='store_true',
                     help="Display the browser window")
 parser.add_argument("--firefox-binary", action='store',
                     help="Specify the path to the Firefox binary to use, otherwise default Firefox will be found")
+parser.add_argument("--traceback-pages", action='store_true',
+                    help="Display traceback pages when running tests (like when DEBUG=True)")
+
 
 known_args, remaining_args = parser.parse_known_args()
 
@@ -61,6 +64,9 @@ if known_args.show_browser:
 
 if known_args.firefox_binary:
     os.environ['TEST_SELENIUM_FIREFOX_BINARY'] = known_args.firefox_binary
+
+if known_args.traceback_pages:
+    os.environ['TEST_TRACEBACK_PAGES'] = 'TRUE'
 
 cmd += remaining_options + test_args
 
