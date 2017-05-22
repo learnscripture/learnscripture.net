@@ -243,3 +243,17 @@ class WebTestBase(AccountTestMixin, LoginMixin, FuncWebTestMixin, TestCase):
                    )
 class TestBase(TestCase):
     pass
+
+
+def show_server_error(request):
+    """
+    500 error handler to show Django default 500 template
+    with nice error information and traceback.
+    Useful in testing, if you can't set DEBUG=True.
+    """
+    import sys
+    from django import http
+    from django.views.debug import ExceptionReporter
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    error = ExceptionReporter(request, exc_type, exc_value, exc_traceback)
+    return http.HttpResponseServerError(error.get_traceback_html())

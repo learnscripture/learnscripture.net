@@ -1,3 +1,5 @@
+import os
+
 from django.conf import settings
 from django.conf.urls import include, patterns, url
 from django.contrib import admin
@@ -111,3 +113,6 @@ if settings.TESTING:
 urlpatterns = urlpatterns + patterns('',
                                      (r'', 'fiber.views.page'),
                                      )
+
+if os.environ.get('TEST_TRACEBACK_PAGES', '') == 'TRUE':
+    handler500 = 'learnscripture.tests.base.show_server_error'
