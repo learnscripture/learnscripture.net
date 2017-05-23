@@ -287,6 +287,10 @@ def _configure_services():
         append("/etc/postgresql/9.5/main/postgresql.conf", l)
     run("service postgresql restart")
 
+    _configure_rabbitmq()
+
+
+def _configure_rabbitmq():
     s = secrets()
     rabbitmq_username = s['RABBITMQ_USERNAME']
     rabbitmq_password = s['RABBITMQ_PASSWORD']
