@@ -103,6 +103,11 @@ if settings.DEVBOX:
                                          url(r'^usermedia/(?P<path>.*)$', 'django.views.static.serve',
                                              {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}),
                                          )
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = patterns('',
+                           url(r'^__debug__/', include(debug_toolbar.urls)),
+                           ) + urlpatterns
 
 
 if settings.TESTING:
