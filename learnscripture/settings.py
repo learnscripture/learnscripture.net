@@ -208,11 +208,12 @@ MIDDLEWARE_CLASSES = [
         (True, 'django.middleware.common.CommonMiddleware'),
         (True, 'django.contrib.sessions.middleware.SessionMiddleware'),
         (True, 'django.middleware.csrf.CsrfViewMiddleware'),
-        (True, 'learnscripture.middleware.TokenLoginMiddleware'),
         (True, 'django.contrib.auth.middleware.AuthenticationMiddleware'),
         (True, 'django.contrib.auth.middleware.SessionAuthenticationMiddleware'),
+        (True, 'learnscripture.middleware.TokenLoginMiddleware'),
         (True, 'django.contrib.messages.middleware.MessageMiddleware'),
-        (True, 'django.middleware.clickjacking.XFrameOptionsMiddleware'),
+        # XFrameOptionsMiddleware breaks fiber inline editing. Disabled for now.
+        # (True, 'django.middleware.clickjacking.XFrameOptionsMiddleware'),
         (DEVBOX, 'learnscripture.middleware.DebugMiddleware'),
         (DEBUG, 'learnscripture.middleware.PaypalDebugMiddleware'),
         (True, 'learnscripture.middleware.IdentityMiddleware'),
@@ -268,6 +269,7 @@ INSTALLED_APPS = [
     # Third party
     'mptt',
     'compressor',
+    'easy_thumbnails',
     'fiber',
     'bootstrapform',
     'pagination',
