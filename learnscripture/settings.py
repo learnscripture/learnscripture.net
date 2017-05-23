@@ -457,11 +457,11 @@ else:
 # Celery
 
 if LIVEBOX:
-    CELERY_BROKER_URL = 'amqp://{0}:{1}@localhost:5672//'.format(secrets['RABBITMQ_USERNAME'],
-                                                                 secrets['RABBITMQ_PASSWORD'])
+    CELERY_BROKER_URL = 'amqp://{0}:{1}@localhost:5672/learnscripture/'.format(secrets['RABBITMQ_USERNAME'],
+                                                                               secrets['RABBITMQ_PASSWORD'])
 else:
-    CELERY_BROKER_URL = 'amqp://{0}:{1}@localhost:5672//'.format('learnscripture',
-                                                                 'foo')
+    CELERY_BROKER_URL = 'amqp://{0}:{1}@localhost:5672/learnscripture/'.format('learnscripture',
+                                                                               'foo')
 
 # For easier debugging, we run Celery tasks in main process
 # when in development.
