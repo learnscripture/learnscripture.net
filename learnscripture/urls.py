@@ -85,8 +85,8 @@ urlpatterns = patterns('',
                        url(r'^api/learnscripture/v1/', include('learnscripture.api.urls')),
 
                        # Dependencies
-                       (r'^admin/fiber/', include('fiber.admin_urls')),
                        (r'^api/v2/', include('fiber.rest_api.urls')),
+                       (r'^admin/fiber/', include('fiber.admin_urls')),
                        (r'^jsi18n/$', 'django.views.i18n.javascript_catalog', {'packages': ['fiber']}),
                        url(r'^admin/', include(admin.site.urls)),
 
