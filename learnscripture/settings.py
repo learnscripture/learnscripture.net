@@ -277,7 +277,6 @@ INSTALLED_APPS = [
     'app_metrics',
     'selectable',
     'django_markup',
-    'json_field',
     'anymail',
 ]
 
