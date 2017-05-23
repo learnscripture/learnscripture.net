@@ -4,7 +4,8 @@
 django-autoslug==1.9.3
 BeautifulSoup==3.2.1
 Django==1.8.16
-Pillow==3.0.0
+Pillow==4.1.1
+olefile==0.44
 SQLAlchemy==1.0.9
 URLObject==2.4.0
 aldjemy==0.4.3
