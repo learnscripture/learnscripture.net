@@ -31,7 +31,7 @@ env.domains_regex = "|".join(re.escape(d) for d in env.domains)
 env.domains_nginx = " ".join(env.domains)
 
 env.locale = "en_US.UTF-8"
-env.num_workers = "4"
+env.num_workers = "3"
 
 # Python version
 PYTHON_BIN = "python2.7"
