@@ -1,8 +1,9 @@
-from celery.task import task
 from django.utils.html import format_html
 
+from learnscripture.celery import app
 
-@task(ignore_result=True)
+
+@app.task(ignore_result=True)
 def notify_account_about_comment(comment_id):
     from comments.models import Comment
     comment = Comment.objects.get(id=comment_id)

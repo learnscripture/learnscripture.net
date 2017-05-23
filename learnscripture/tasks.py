@@ -2,12 +2,12 @@ from __future__ import absolute_import
 
 import logging
 
-from celery.task import task
+from learnscripture.celery import app
 
 logger = logging.getLogger('celerydebug')
 
 
-@task()
+@app.task()
 def message(message):
     logger.debug("Message %s", message)
     print(message)

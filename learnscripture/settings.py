@@ -276,7 +276,6 @@ INSTALLED_APPS = [
     'paypal.standard.ipn',
     'app_metrics',
     'selectable',
-    'kombu.transport.django',
     'django_markup',
     'json_field',
     'anymail',
@@ -457,19 +456,26 @@ else:
 
 # Celery
 
-BROKER_URL = 'django://'
+if LIVEBOX:
+    CELERY_BROKER_URL = 'amqp://{0}:{1}@localhost:5672//'.format(secrets['RABBITMQ_USERNAME'],
+                                                                 secrets['RABBITMQ_PASSWORD'])
+else:
+    CELERY_BROKER_URL = 'amqp://{0}:{1}@localhost:5672//'.format('learnscripture',
+                                                                 'foo')
 
+# For easier debugging, we run Celery tasks in main process
+# when in development.
 if TESTING or DEVBOX:
-    CELERY_ALWAYS_EAGER = True
-    CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
 
-CELERYD_CONCURRENCY = 4
-CELERYD_PREFETCH_MULTIPLIER = 64
+CELERY_WORKER_CONCURRENCY = 4
+CELERY_WORKER_PREFETCH_MULTIPLIER = 64
 
 CELERY_RESULT_BACKEND = 'disabled'
 CELERY_TASK_SERIALIZER = 'json'
-CELERY_IGNORE_RESULT = True
-CELERYD_HIJACK_ROOT_LOGGER = False
+CELERY_TASK_IGNORE_RESULT = True
+CELERY_WORKER_HIJACK_ROOT_LOGGER = False
 
 # == LearnScripture.net specific settings ==
 

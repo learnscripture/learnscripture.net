@@ -1,16 +1,15 @@
 from datetime import timedelta
 
-from celery.task import task
-
 from accounts.models import Account, Identity, get_verse_started_running_streaks
 from awards.models import (AceAward, AddictAward, ConsistentLearnerAward, MasterAward, OrganizerAward, RecruiterAward,
                            SharerAward, StudentAward, TrendSetterAward)
 from bibleverses.models import VerseSet, VerseSetType
 from groups.models import combined_membership_count_for_creator
+from learnscripture.celery import app
 from scores.models import ScoreReason, get_number_of_distinct_hours_for_account_id
 
 
-@task(ignore_result=True)
+@app.task(ignore_result=True)
 def give_learning_awards(account_id):
     if account_id is None:
         return
@@ -25,7 +24,7 @@ def give_learning_awards(account_id):
         cls(count=count).give_to(account)
 
 
-@task(ignore_result=True)
+@app.task(ignore_result=True)
 def give_sharer_awards(account_id):
     if account_id is None:
         return
@@ -34,7 +33,7 @@ def give_sharer_awards(account_id):
     SharerAward(count=c).give_to(account)
 
 
-@task(ignore_result=True)
+@app.task(ignore_result=True)
 def give_verse_set_used_awards(account_id):
     if account_id is None:
         return
@@ -46,7 +45,7 @@ def give_verse_set_used_awards(account_id):
     TrendSetterAward(count=c).give_to(account)
 
 
-@task(ignore_result=True)
+@app.task(ignore_result=True)
 def give_ace_awards(account_id):
     if account_id is None:
         return
@@ -78,7 +77,7 @@ def give_ace_awards(account_id):
     AceAward(count=count).give_to(account)
 
 
-@task(ignore_result=True)
+@app.task(ignore_result=True)
 def give_recruiter_award(account_id):
     if account_id is None:
         return
@@ -94,13 +93,13 @@ def give_all_addict_awards():
         give_addict_award.delay(account.id)
 
 
-@task(ignore_result=True)
+@app.task(ignore_result=True)
 def give_addict_award(account_id):
     if get_number_of_distinct_hours_for_account_id(account_id) == 24:
         AddictAward().give_to(Account.objects.get(id=account_id))
 
 
-@task(ignore_result=True)
+@app.task(ignore_result=True)
 def give_organizer_awards(account_id):
     count = combined_membership_count_for_creator(account_id)
     OrganizerAward(count=count).give_to(Account.objects.get(id=account_id))
@@ -113,6 +112,6 @@ def give_all_consistent_learner_awards():
             give_consistent_learner_award.delay(account_id, streak)
 
 
-@task(ignore_result=True)
+@app.task(ignore_result=True)
 def give_consistent_learner_award(account_id, streak):
     ConsistentLearnerAward(time_period=timedelta(days=streak)).give_to(Account.objects.get(id=account_id))
