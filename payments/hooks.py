@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib.sites.models import get_current_site
 from django.core import mail
 from django.template import loader
-from paypal.standard.ipn.signals import payment_was_flagged, payment_was_successful
+from paypal.standard.ipn.signals import valid_ipn_received, invalid_ipn_received
 
 from accounts.models import Account
 from payments.models import DonationDrive, send_donation_drive_target_reached_emails
@@ -89,5 +89,5 @@ def target_reached_handler(sender, **kwargs):
 
 donation_drive_contributed_to.connect(donation_drive_contributed_to_handler)
 target_reached.connect(target_reached_handler)
-payment_was_successful.connect(paypal_payment_received)
-payment_was_flagged.connect(unrecognised_payment)
+valid_ipn_received.connect(paypal_payment_received)
+invalid_ipn_received.connect(unrecognised_payment)
