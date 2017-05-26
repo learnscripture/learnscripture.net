@@ -24,7 +24,7 @@ django-jsonfield==1.0.1
 django-markup==1.2
 django-mptt==0.8.7
 dj_pagination==2.2.1
-django-paypal==0.2.7
+django-paypal==0.3.6
 django-selectable==0.9.0
 django-spurl==0.6.2
 djangorestframework==3.6.3
