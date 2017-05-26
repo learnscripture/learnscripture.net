@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from datetime import timedelta
 from decimal import Decimal
 
+from django.conf import settings
 from django.core import mail
 from django.utils import timezone
 from paypal.standard.ipn.models import PayPalIPN
@@ -26,6 +27,7 @@ def good_payment_ipn(account, amount, **kwargs):
                     custom=sign_payment_info(dict(account=account.id)),
                     ipaddress="127.0.0.1",
                     payment_status='Completed',
+                    receiver_email=settings.PAYPAL_RECEIVER_EMAIL,
                     )
     obj_args.update(kwargs)
     return PayPalIPN.objects.create(**obj_args)

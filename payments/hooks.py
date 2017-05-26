@@ -48,6 +48,10 @@ def paypal_payment_received(sender, **kwargs):
         unrecognised_payment(ipn_obj)
         return
 
+    if ipn_obj.receiver_email != settings.PAYPAL_RECEIVER_EMAIL:
+        unrecognised_payment(ipn_obj)
+        return
+
     if 'account' in info:
         paypal_account_payment_received(ipn_obj, info)
     else:
