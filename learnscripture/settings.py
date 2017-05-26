@@ -217,7 +217,7 @@ MIDDLEWARE_CLASSES = [
         (DEVBOX, 'learnscripture.middleware.DebugMiddleware'),
         (DEBUG, 'learnscripture.middleware.PaypalDebugMiddleware'),
         (True, 'learnscripture.middleware.IdentityMiddleware'),
-        (True, 'pagination.middleware.PaginationMiddleware'),
+        (True, 'dj_pagination.middleware.PaginationMiddleware'),
         (True, 'fiber.middleware.AdminPageMiddleware'),
     ]
     if b
@@ -272,7 +272,7 @@ INSTALLED_APPS = [
     'easy_thumbnails',
     'fiber',
     'bootstrapform',
-    'pagination',
+    'dj_pagination',
     'raven.contrib.django.raven_compat',
     'spurl',
     'paypal.standard.ipn',
