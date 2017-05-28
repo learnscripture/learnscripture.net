@@ -25,7 +25,7 @@ django-markup==1.2
 django-mptt==0.8.7
 dj_pagination==2.2.1
 django-paypal==0.3.6
-django-selectable==1.0.0
+-e git://github.com/spookylukey/django-selectable.git@1e61fb722872115642d834e3826a395e55197e00#egg=django_selectable
 django-spurl==0.6.4
 djangorestframework==3.6.3
 docutils==0.13.1
