@@ -16,7 +16,6 @@ else:
 
 
 DEBUG = DEVBOX
-TEMPLATE_DEBUG = DEBUG
 
 # A kitten gets killed every time you use this:
 TESTING = 'manage.py test' in ' '.join(sys.argv)
@@ -195,12 +194,8 @@ LOGIN_URL = '/admin/'
 
 CSRF_FAILURE_VIEW = 'learnscripture.views.csrf_failure'
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.app_directories.Loader',
-)
 
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
     m for b, m in
     [
         (True, 'django.middleware.security.SecurityMiddleware'),
@@ -210,13 +205,13 @@ MIDDLEWARE_CLASSES = [
         (True, 'django.middleware.csrf.CsrfViewMiddleware'),
         (True, 'django.contrib.auth.middleware.AuthenticationMiddleware'),
         (True, 'django.contrib.auth.middleware.SessionAuthenticationMiddleware'),
-        (True, 'learnscripture.middleware.TokenLoginMiddleware'),
+        (True, 'learnscripture.middleware.token_login_middleware'),
         (True, 'django.contrib.messages.middleware.MessageMiddleware'),
         # XFrameOptionsMiddleware breaks fiber inline editing. Disabled for now.
         # (True, 'django.middleware.clickjacking.XFrameOptionsMiddleware'),
-        (DEVBOX, 'learnscripture.middleware.DebugMiddleware'),
-        (DEBUG, 'learnscripture.middleware.PaypalDebugMiddleware'),
-        (True, 'learnscripture.middleware.IdentityMiddleware'),
+        (DEVBOX, 'learnscripture.middleware.debug_middleware'),
+        (DEBUG, 'learnscripture.middleware.paypal_debug_middleware'),
+        (True, 'learnscripture.middleware.identity_middleware'),
         (True, 'dj_pagination.middleware.PaginationMiddleware'),
         (True, 'fiber.middleware.AdminPageMiddleware'),
     ]
@@ -224,21 +219,31 @@ MIDDLEWARE_CLASSES = [
 ]
 
 
-TEMPLATE_CONTEXT_PROCESSORS = [
-    'django.contrib.auth.context_processors.auth',
-    'django.core.context_processors.media',
-    'django.core.context_processors.static',
-    'django.core.context_processors.tz',
-    'django.core.context_processors.i18n',
-    'django.contrib.messages.context_processors.messages',
-    'django.core.context_processors.request',
-    'learnscripture.context_processors.session_forms',
-    'learnscripture.context_processors.referral_links',
-    'learnscripture.context_processors.menu',
-    'learnscripture.context_processors.notices',
-    'learnscripture.context_processors.theme_fonts',
-    'learnscripture.context_processors.settings_processor',
-    'learnscripture.context_processors.request_account',
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                'django.template.context_processors.i18n',
+                'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.request',
+                'learnscripture.context_processors.session_forms',
+                'learnscripture.context_processors.referral_links',
+                'learnscripture.context_processors.menu',
+                'learnscripture.context_processors.notices',
+                'learnscripture.context_processors.theme_fonts',
+                'learnscripture.context_processors.settings_processor',
+                'learnscripture.context_processors.request_account',
+            ],
+            'debug': DEBUG,
+        },
+    },
 ]
 
 ROOT_URLCONF = 'learnscripture.urls'
@@ -392,7 +397,7 @@ FIBER_DEFAULT_TEMPLATE = 'fiber_singlecol.html'
 FIBER_TEMPLATE_CHOICES = [(FIBER_DEFAULT_TEMPLATE, 'Single column')]
 
 DEBUG_TOOLBAR_CONFIG = {
-    'INTERCEPT_REDIRECTS': False,
+    'DISABLE_PANELS': set(['debug_toolbar.panels.redirects.RedirectsPanel']),
 }
 
 CACHES = {

@@ -63,7 +63,7 @@ class Migration(migrations.Migration):
                 ('last_tested', models.DateTimeField(null=True, blank=True)),
                 ('next_test_due', models.DateTimeField(null=True, blank=True)),
                 ('ignored', models.BooleanField(default=False)),
-                ('for_identity', models.ForeignKey(related_name='verse_statuses', to='accounts.Identity')),
+                ('for_identity', models.ForeignKey(related_name='verse_statuses', to='accounts.Identity', on_delete=models.CASCADE)),
             ],
             options={
                 'verbose_name_plural': 'User verse statuses',
@@ -82,7 +82,7 @@ class Migration(migrations.Migration):
                 ('verse_number', models.PositiveSmallIntegerField()),
                 ('bible_verse_number', models.PositiveSmallIntegerField()),
                 ('missing', models.BooleanField(default=False)),
-                ('version', models.ForeignKey(to='bibleverses.TextVersion')),
+                ('version', models.ForeignKey(to='bibleverses.TextVersion', on_delete=models.CASCADE)),
             ],
             options={
                 'ordering': ('bible_verse_number',),
@@ -114,7 +114,7 @@ class Migration(migrations.Migration):
                 ('popularity', models.PositiveIntegerField(default=0)),
                 ('date_added', models.DateTimeField(default=django.utils.timezone.now)),
                 ('passage_id', models.CharField(default=b'', max_length=203)),
-                ('created_by', models.ForeignKey(related_name='verse_sets_created', to=settings.AUTH_USER_MODEL)),
+                ('created_by', models.ForeignKey(related_name='verse_sets_created', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -140,7 +140,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='versechoice',
             name='verse_set',
-            field=models.ForeignKey(related_name='verse_choices', to='bibleverses.VerseSet'),
+            field=models.ForeignKey(related_name='verse_choices', to='bibleverses.VerseSet', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AlterUniqueTogether(
@@ -160,7 +160,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='userversestatus',
             name='version',
-            field=models.ForeignKey(to='bibleverses.TextVersion'),
+            field=models.ForeignKey(to='bibleverses.TextVersion', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AlterUniqueTogether(
@@ -170,7 +170,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='qapair',
             name='catechism',
-            field=models.ForeignKey(related_name='qapairs', to='bibleverses.TextVersion'),
+            field=models.ForeignKey(related_name='qapairs', to='bibleverses.TextVersion', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AlterUniqueTogether(

@@ -2,7 +2,7 @@
 from datetime import datetime
 
 from app_metrics.utils import metric
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils import timezone
 
 from accounts.models import Account, Identity

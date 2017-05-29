@@ -24,7 +24,6 @@ from learnscripture.datastructures import make_choices
 from learnscripture.utils.cache import cache_results, clear_cache_results
 from scores.models import ScoreReason, Scores, TotalScore
 
-
 TestingMethod = make_choices('TestingMethod',
                              [(0, 'FULL_WORDS', 'Full words - recommended for full keyboards and normal typing skills'),
                               (1, 'FIRST_LETTER', 'First letter - recommended for slower typers'),
@@ -407,7 +406,7 @@ class IdentityManager(models.Manager):
 
 
 class Identity(models.Model):
-    account = models.OneToOneField(Account, null=True, blank=True, default=None)
+    account = models.OneToOneField(Account, on_delete=models.CASCADE, null=True, blank=True, default=None)
     date_created = models.DateTimeField(default=timezone.now)
 
     # Preferences

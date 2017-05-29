@@ -7,8 +7,8 @@ from datetime import timedelta
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMessage
-from django.core.urlresolvers import reverse
 from django.template import loader
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html
 

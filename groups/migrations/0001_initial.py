@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                 ('created', models.DateTimeField(default=django.utils.timezone.now)),
                 ('public', models.BooleanField(default=False)),
                 ('open', models.BooleanField(default=False)),
-                ('created_by', models.ForeignKey(related_name='groups_created', to=settings.AUTH_USER_MODEL)),
+                ('created_by', models.ForeignKey(related_name='groups_created', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
                 'ordering': ['name'],
@@ -35,9 +35,9 @@ class Migration(migrations.Migration):
             name='Invitation',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('account', models.ForeignKey(related_name='invitations', to=settings.AUTH_USER_MODEL)),
-                ('created_by', models.ForeignKey(related_name='invitations_created', to=settings.AUTH_USER_MODEL)),
-                ('group', models.ForeignKey(related_name='invitations', to='groups.Group')),
+                ('account', models.ForeignKey(related_name='invitations', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
+                ('created_by', models.ForeignKey(related_name='invitations_created', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
+                ('group', models.ForeignKey(related_name='invitations', to='groups.Group', on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -48,8 +48,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('created', models.DateTimeField(default=django.utils.timezone.now)),
-                ('account', models.ForeignKey(related_name='memberships', to=settings.AUTH_USER_MODEL)),
-                ('group', models.ForeignKey(related_name='memberships', to='groups.Group')),
+                ('account', models.ForeignKey(related_name='memberships', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
+                ('group', models.ForeignKey(related_name='memberships', to='groups.Group', on_delete=models.CASCADE)),
             ],
             options={
             },

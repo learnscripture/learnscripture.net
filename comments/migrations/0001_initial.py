@@ -22,9 +22,9 @@ class Migration(migrations.Migration):
                 ('created', models.DateTimeField(default=django.utils.timezone.now)),
                 ('message', models.TextField()),
                 ('hidden', models.BooleanField(default=False)),
-                ('author', models.ForeignKey(related_name='comments', to=settings.AUTH_USER_MODEL)),
-                ('event', models.ForeignKey(related_name='comments', blank=True, to='events.Event', null=True)),
-                ('group', models.ForeignKey(related_name='comments', blank=True, to='groups.Group', null=True)),
+                ('author', models.ForeignKey(related_name='comments', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
+                ('event', models.ForeignKey(related_name='comments', blank=True, to='events.Event', null=True, on_delete=models.CASCADE)),
+                ('group', models.ForeignKey(related_name='comments', blank=True, to='groups.Group', null=True, on_delete=models.CASCADE)),
             ],
             options={
             },

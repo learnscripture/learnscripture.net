@@ -17,25 +17,25 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='notice',
             name='related_event',
-            field=models.ForeignKey(blank=True, to='events.Event', null=True),
+            field=models.ForeignKey(blank=True, to='events.Event', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='identity',
             name='account',
-            field=models.OneToOneField(null=True, default=None, blank=True, to=settings.AUTH_USER_MODEL),
+            field=models.OneToOneField(null=True, default=None, blank=True, to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='identity',
             name='default_bible_version',
-            field=models.ForeignKey(blank=True, to='bibleverses.TextVersion', null=True),
+            field=models.ForeignKey(blank=True, to='bibleverses.TextVersion', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='identity',
             name='referred_by',
-            field=models.ForeignKey(related_name='referrals', default=None, blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='referrals', default=None, blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(

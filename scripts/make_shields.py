@@ -3,7 +3,6 @@
 import os.path
 
 import cairo
-
 import rsvg
 
 

@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('award_type', models.PositiveSmallIntegerField(choices=[(0, 'Student'), (1, 'Master'), (2, 'Sharer'), (3, 'Trend setter'), (4, 'Ace'), (5, 'Recruiter'), (6, 'Hacker'), (7, 'Weekly champion'), (8, 'Reigning weekly champion'), (9, 'Addict'), (10, 'Organizer'), (11, 'Consistent learner')])),
                 ('level', models.PositiveSmallIntegerField()),
                 ('created', models.DateTimeField(default=django.utils.timezone.now)),
-                ('account', models.ForeignKey(related_name='awards', to=settings.AUTH_USER_MODEL)),
+                ('account', models.ForeignKey(related_name='awards', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
             },

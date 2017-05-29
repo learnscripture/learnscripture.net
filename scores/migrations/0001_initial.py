@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('reason', models.PositiveSmallIntegerField(choices=[(0, b'Verse tested'), (1, b'Verse revised'), (2, b'Review completed'), (3, b'Perfect!'), (4, b'Verse fully learnt'), (5, b'Earned award')])),
                 ('accuracy', models.FloatField(null=True, blank=True)),
                 ('created', models.DateTimeField()),
-                ('account', models.ForeignKey(related_name='score_logs', to=settings.AUTH_USER_MODEL)),
+                ('account', models.ForeignKey(related_name='score_logs', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
                 'ordering': ('-created',),
@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('points', models.PositiveIntegerField(default=0)),
                 ('visible', models.BooleanField(default=True)),
-                ('account', models.OneToOneField(related_name='total_score', to=settings.AUTH_USER_MODEL)),
+                ('account', models.OneToOneField(related_name='total_score', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
             },

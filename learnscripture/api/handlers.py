@@ -11,9 +11,9 @@ import datetime
 import json
 
 from django.core.serializers.json import DjangoJSONEncoder
-from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.template.loader import render_to_string
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.functional import wraps
 from django.utils.html import escape, mark_safe

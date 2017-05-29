@@ -14,10 +14,10 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import password_change as auth_password_change
 from django.contrib.sites.models import Site
 from django.core import mail
-from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.template.response import TemplateResponse
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import urlsafe_base64_decode
 from django.views.decorators.cache import never_cache

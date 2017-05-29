@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='payment',
             name='paypal_ipn',
-            field=models.ForeignKey(related_name='payments', to='ipn.PayPalIPN'),
+            field=models.ForeignKey(related_name='payments', to='ipn.PayPalIPN', on_delete=models.CASCADE),
             preserve_default=True,
         ),
     ]

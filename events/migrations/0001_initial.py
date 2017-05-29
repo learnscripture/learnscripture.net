@@ -24,8 +24,8 @@ class Migration(migrations.Migration):
                 ('event_data', jsonfield.fields.JSONField(default=dict, blank=True)),
                 ('created', models.DateTimeField(default=django.utils.timezone.now, db_index=True)),
                 ('url', models.CharField(max_length=255, blank=True)),
-                ('account', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
-                ('parent_event', models.ForeignKey(blank=True, to='events.Event', null=True)),
+                ('account', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
+                ('parent_event', models.ForeignKey(blank=True, to='events.Event', null=True, on_delete=models.CASCADE)),
             ],
             options={
             },
