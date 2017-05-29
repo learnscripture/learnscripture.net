@@ -5,7 +5,7 @@ import smtplib
 from datetime import timedelta
 
 from django.conf import settings
-from django.contrib.sites.models import get_current_site
+from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMessage
 from django.core.urlresolvers import reverse
 from django.template import loader

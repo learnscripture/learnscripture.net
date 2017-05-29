@@ -344,11 +344,12 @@ class Event(models.Model):
     weight = models.PositiveSmallIntegerField(default=10)
     event_data = JSONField(blank=True)
     created = models.DateTimeField(default=timezone.now, db_index=True)
-    account = models.ForeignKey(Account)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
 
     # Events like NewCommentEvent have a parent event (the event the comment is
     # attached to).
-    parent_event = models.ForeignKey('self', null=True, blank=True)
+    parent_event = models.ForeignKey('self', on_delete=models.CASCADE,
+                                     null=True, blank=True)
 
     # Denormalised value
     url = models.CharField(max_length=255, blank=True)

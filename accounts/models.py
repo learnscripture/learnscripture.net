@@ -7,7 +7,7 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, UserManager
-from django.contrib.sites.models import get_current_site
+from django.contrib.sites.shortcuts import get_current_site
 from django.core import mail
 from django.db import models
 from django.template import loader
@@ -411,7 +411,8 @@ class Identity(models.Model):
     date_created = models.DateTimeField(default=timezone.now)
 
     # Preferences
-    default_bible_version = models.ForeignKey(TextVersion, null=True, blank=True)
+    default_bible_version = models.ForeignKey(TextVersion, on_delete=models.CASCADE,
+                                              null=True, blank=True)
     desktop_testing_method = models.PositiveSmallIntegerField(choices=TestingMethod.choice_list,
                                                               default=TestingMethod.FULL_WORDS)
     touchscreen_testing_method = models.PositiveSmallIntegerField(choices=TestingMethod.choice_list,
@@ -421,7 +422,8 @@ class Identity(models.Model):
     enable_vibration = models.BooleanField("Vibrate on mistakes", blank=True, default=True)
     interface_theme = models.CharField(max_length=30, choices=THEMES,
                                        default=DEFAULT_THEME)
-    referred_by = models.ForeignKey(Account, null=True, default=None,
+    referred_by = models.ForeignKey(Account, on_delete=models.CASCADE,
+                                    null=True, default=None,
                                     blank=True,
                                     related_name='referrals')
 
@@ -1332,11 +1334,13 @@ class Identity(models.Model):
 
 
 class Notice(models.Model):
-    for_identity = models.ForeignKey(Identity, related_name='notices')
+    for_identity = models.ForeignKey(Identity, on_delete=models.CASCADE,
+                                     related_name='notices')
     message_html = models.TextField()
     created = models.DateTimeField(default=timezone.now)
     seen = models.DateTimeField(default=None, null=True, blank=True)
-    related_event = models.ForeignKey('events.Event', null=True, blank=True)
+    related_event = models.ForeignKey('events.Event', on_delete=models.CASCADE,
+                                      null=True, blank=True)
 
     def is_old(self):
         return (timezone.now() - self.created).days >= 2

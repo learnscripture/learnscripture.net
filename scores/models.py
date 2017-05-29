@@ -32,7 +32,8 @@ class Scores(object):
 
 
 class ActionLog(models.Model):
-    account = models.ForeignKey('accounts.Account', related_name='action_logs')
+    account = models.ForeignKey('accounts.Account', on_delete=models.CASCADE,
+                                related_name='action_logs')
     points = models.PositiveIntegerField()
     reason = models.PositiveSmallIntegerField(choices=ScoreReason.choice_list)
     reference = models.CharField(max_length=255, blank=True)

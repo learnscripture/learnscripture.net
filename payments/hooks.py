@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.contrib.sites.models import get_current_site
+from django.contrib.sites.shortcuts import get_current_site
 from django.core import mail
 from django.template import loader
 from paypal.standard.ipn.signals import valid_ipn_received, invalid_ipn_received

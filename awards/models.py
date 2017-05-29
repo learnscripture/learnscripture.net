@@ -477,7 +477,8 @@ AwardType = make_class_enum(
 class Award(models.Model):
     award_type = models.PositiveSmallIntegerField(choices=AwardType.choice_list)
     level = models.PositiveSmallIntegerField()
-    account = models.ForeignKey(Account, related_name='awards')
+    account = models.ForeignKey(Account, on_delete=models.CASCADE,
+                                related_name='awards')
     created = models.DateTimeField(default=timezone.now)
 
     def __unicode__(self):
