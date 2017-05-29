@@ -46,7 +46,8 @@ class Group(models.Model):
     slug = AutoSlugField(populate_from='name', unique=True)
     description = models.TextField(blank=True)
     created = models.DateTimeField(default=timezone.now)
-    created_by = models.ForeignKey(Account, related_name='groups_created')
+    created_by = models.ForeignKey(Account, on_delete=models.CASCADE,
+                                   related_name='groups_created')
     public = models.BooleanField(default=False)
     open = models.BooleanField(default=False)
     members = models.ManyToManyField(Account, through='Membership',
@@ -126,8 +127,10 @@ class Group(models.Model):
 
 
 class Membership(models.Model):
-    account = models.ForeignKey(Account, related_name='memberships')
-    group = models.ForeignKey(Group, related_name='memberships')
+    account = models.ForeignKey(Account, on_delete=models.CASCADE,
+                                related_name='memberships')
+    group = models.ForeignKey(Group, on_delete=models.CASCADE,
+                              related_name='memberships')
 
     created = models.DateTimeField(default=timezone.now)
 
@@ -141,9 +144,12 @@ class InvitationManager(models.Manager):
 
 
 class Invitation(models.Model):
-    account = models.ForeignKey(Account, related_name='invitations')
-    group = models.ForeignKey(Group, related_name='invitations')
-    created_by = models.ForeignKey(Account, related_name='invitations_created')
+    account = models.ForeignKey(Account, on_delete=models.CASCADE,
+                                related_name='invitations')
+    group = models.ForeignKey(Group, on_delete=models.CASCADE,
+                              related_name='invitations')
+    created_by = models.ForeignKey(Account, on_delete=models.CASCADE,
+                                   related_name='invitations_created')
 
     objects = InvitationManager()
 

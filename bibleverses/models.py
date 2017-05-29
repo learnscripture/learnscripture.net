@@ -357,7 +357,7 @@ class VerseManager(models.Manager):
 
 
 class Verse(models.Model):
-    version = models.ForeignKey(TextVersion)
+    version = models.ForeignKey(TextVersion, on_delete=models.CASCADE)
     reference = models.CharField(max_length=100)
     # 'text_saved' is for data stored, as opposed to 'text' which might retrieve
     # from a service. Also, 'text_saved' is sometimes set without saving to the
@@ -493,7 +493,7 @@ class QAPair(models.Model):
     """
     A question/answer pair in a catechism.
     """
-    catechism = models.ForeignKey(TextVersion, related_name='qapairs')
+    catechism = models.ForeignKey(TextVersion, on_delete=models.CASCADE, related_name='qapairs')
     # Reference is always 'Qn' where 'n' == order. (Apart from where
     # we have question numbers like '2a').
     # This means we are guaranteed not to have clashes with Verse references,
@@ -587,7 +587,8 @@ class VerseSet(models.Model):
 
     popularity = models.PositiveIntegerField(default=0)
     date_added = models.DateTimeField(default=timezone.now)
-    created_by = models.ForeignKey('accounts.Account', related_name='verse_sets_created')
+    created_by = models.ForeignKey('accounts.Account', on_delete=models.CASCADE,
+                                   related_name='verse_sets_created')
 
     # Essentially denormalised field, to make it quick to check for duplicate
     # passage sets:
@@ -658,7 +659,8 @@ class VerseChoiceManager(models.Manager):
 # to be independent of Bible version.
 class VerseChoice(models.Model):
     reference = models.CharField(max_length=100)
-    verse_set = models.ForeignKey(VerseSet, related_name='verse_choices')
+    verse_set = models.ForeignKey(VerseSet, on_delete=models.CASCADE,
+                                  related_name='verse_choices')
     set_order = models.PositiveSmallIntegerField(default=0)
 
     objects = VerseChoiceManager()
@@ -694,12 +696,13 @@ class UserVerseStatus(models.Model):
     #
     # Since references don't change we can handle the denormalisation easily.
 
-    for_identity = models.ForeignKey('accounts.Identity', related_name='verse_statuses')
+    for_identity = models.ForeignKey('accounts.Identity', on_delete=models.CASCADE,
+                                     related_name='verse_statuses')
     reference = models.CharField(max_length=100)
     verse_set = models.ForeignKey(VerseSet, null=True, blank=True,
                                   on_delete=models.SET_NULL)
     text_order = models.PositiveSmallIntegerField()  # order of this item within associate TextVersion
-    version = models.ForeignKey(TextVersion)
+    version = models.ForeignKey(TextVersion, on_delete=models.CASCADE)
     memory_stage = models.PositiveSmallIntegerField(choices=MemoryStage.choice_list,
                                                     default=MemoryStage.ZERO)
     strength = models.FloatField(default=0.00)

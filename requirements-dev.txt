@@ -3,7 +3,6 @@ WebTest==2.0.23
 beautifulsoup4==4.5.1
 django-autofixture==0.12.1
 django-debug-toolbar==1.8
-django-devserver
 django-functest==1.0.1
 django-webtest==1.8.0
 faulthandler==2.4
