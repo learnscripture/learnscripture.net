@@ -57,7 +57,8 @@ class ActionLog(models.Model):
 
 
 class TotalScore(models.Model):
-    account = models.OneToOneField('accounts.Account', related_name='total_score')
+    account = models.OneToOneField('accounts.Account', on_delete=models.CASCADE,
+                                   related_name='total_score')
     points = models.PositiveIntegerField(default=0)
     visible = models.BooleanField(default=True)
 

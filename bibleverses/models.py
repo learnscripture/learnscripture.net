@@ -5,8 +5,8 @@ import re
 from collections import defaultdict
 
 from autoslug import AutoSlugField
-from django.core.urlresolvers import reverse
 from django.db import connection, models
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
 from jsonfield import JSONField
@@ -649,7 +649,6 @@ class VerseSet(models.Model):
 
 
 class VerseChoiceManager(models.Manager):
-    use_for_related_fields = True
 
     def get_queryset(self):
         return super(VerseChoiceManager, self).get_queryset().order_by('set_order')
@@ -667,6 +666,7 @@ class VerseChoice(models.Model):
 
     class Meta:
         unique_together = [('verse_set', 'reference')]
+        base_manager_name = 'objects'
 
     def __unicode__(self):
         return self.reference

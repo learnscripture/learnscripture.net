@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
 from django.core import mail
 from django.template import loader
-from paypal.standard.ipn.signals import valid_ipn_received, invalid_ipn_received
+from paypal.standard.ipn.signals import invalid_ipn_received, valid_ipn_received
 
 from accounts.models import Account
 from payments.models import DonationDrive, send_donation_drive_target_reached_emails

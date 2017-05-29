@@ -4,7 +4,7 @@ import time
 
 import selenium
 from autofixture import AutoFixture
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from accounts.models import Account
 from awards.models import Award, AwardType

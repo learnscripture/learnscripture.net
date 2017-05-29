@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 from datetime import timedelta
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils import timezone
 
 from bibleverses.models import MemoryStage, VerseSet

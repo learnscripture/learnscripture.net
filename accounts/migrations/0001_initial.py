@@ -63,7 +63,7 @@ class Migration(migrations.Migration):
                 ('message_html', models.TextField()),
                 ('created', models.DateTimeField(default=django.utils.timezone.now)),
                 ('seen', models.DateTimeField(default=None, null=True, blank=True)),
-                ('for_identity', models.ForeignKey(related_name='notices', to='accounts.Identity')),
+                ('for_identity', models.ForeignKey(related_name='notices', to='accounts.Identity', on_delete=models.CASCADE)),
             ],
             options={
             },

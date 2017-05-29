@@ -14,7 +14,6 @@ from accounts.models import Account
 
 
 class PaymentManager(models.Manager):
-    use_for_related_fields = True
 
     def get_queryset(self):
         return super(PaymentManager, self).get_queryset().select_related('account')
@@ -29,6 +28,9 @@ class Payment(models.Model):
     created = models.DateTimeField()
 
     objects = PaymentManager()
+
+    class Meta:
+        base_manager_name = 'objects'
 
     def __unicode__(self):
         return u"Payment: %s from %s" % (self.amount, self.account)

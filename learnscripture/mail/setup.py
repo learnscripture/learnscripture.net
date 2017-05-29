@@ -1,7 +1,7 @@
 import re
 
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from .mailgun import create_route, create_webhook, list_routes, update_route, update_webhook
 

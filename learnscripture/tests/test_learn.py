@@ -4,8 +4,8 @@ import math
 from datetime import timedelta
 from decimal import Decimal
 
-from django.core.urlresolvers import reverse
 from django.db.models import F
+from django.urls import reverse
 
 from accounts.memorymodel import MM
 from accounts.models import Account, Identity

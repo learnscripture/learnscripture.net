@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
 
 from django.conf import settings
-from django.core.urlresolvers import reverse
 from django.dispatch import receiver
+from django.urls import reverse
 from django.utils.html import format_html
 
 import awards.tasks

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.html import format_html
 
 from .models import Account, Identity, Notice

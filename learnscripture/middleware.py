@@ -8,44 +8,49 @@ from django.http import HttpResponseRedirect
 from django.utils import timezone
 
 
-class IdentityMiddleware(object):
-    def process_request(self, request):
-        from learnscripture import session
+def identity_middleware(get_response):
+    from learnscripture import session
+
+    def middleware(request):
 
         identity = session.get_identity(request)
         if identity is not None:
             request.identity = identity
 
         session.save_referrer(request)
+        return get_response(request)
+    return middleware
 
 
-class TokenLoginMiddleware(object):
+def token_login_middleware(get_response):
     """
     Do login if there is a valid token in request.GET['t'].
 
     This enables us to send people emails that have URLs allowing them to log in
     automatically.
     """
-    def process_request(self, request):
-        from learnscripture import session
-        from accounts.models import Account
-        from accounts.tokens import check_login_token
+    from django.contrib.auth import login
+
+    from accounts.models import Account
+    from accounts.tokens import check_login_token
+    from learnscripture import session
+
+    def middleware(request):
         token = request.GET.get('t', None)
         if token is None:
-            return
+            return get_response(request)
         account_name = check_login_token(token)
         if account_name is None:
-            return
+            return get_response(request)
         try:
             account = Account.objects.get(username=account_name)
         except Account.DoesNotExist:
-            return
+            return get_response(request)
 
         # Success, fake a log in:
         session.login(request, account.identity)
         # Need to do django.contrib.auth login for the sake of some views that
         # look for request.user (e.g. password change).
-        from django.contrib.auth import login
         # Need to frig it because we are not going to call authenticate.
         account.backend = settings.AUTHENTICATION_BACKENDS[0]
         login(request, account)
@@ -56,11 +61,14 @@ class TokenLoginMiddleware(object):
         url = urlparse.urlunparse(('', '', request.path, '', d.urlencode(), ''))
         return HttpResponseRedirect(url)
 
+    return middleware
 
-class DebugMiddleware(object):
-    def process_request(self, request):
-        from learnscripture import session
-        from accounts.models import Account
+
+def debug_middleware(get_response):
+    from learnscripture import session
+    from accounts.models import Account
+
+    def middleware(request):
 
         if 'sleep' in request.GET:
             time.sleep(int(request.GET['sleep']))
@@ -78,11 +86,18 @@ class DebugMiddleware(object):
             # monkeypatch that instead
             timezone.now = lambda: now_dt
 
+        return get_response(request)
 
-class PaypalDebugMiddleware(object):
-    def process_request(self, request):
+    return middleware
+
+
+def paypal_debug_middleware(get_response):
+    def middleware(request):
         if 'paypal/ipn/' in request.path:
             open(os.path.join(os.environ['HOME'],
                               'learnscripture-paypal-request-%s' %
                               datetime.now().isoformat()),
                  'wb').write(request.META.get('CONTENT_TYPE', '') + '\n\n' + request.body)
+
+        return get_response(request)
+    return middleware
