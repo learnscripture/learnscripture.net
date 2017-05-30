@@ -1,12 +1,10 @@
 from __future__ import absolute_import
 
-from autofixture import AutoFixture
 from django.db import connection
 
-from accounts.models import Account
 from bibleverses.models import TextVersion, VerseSet, VerseSetType, parse_as_bible_reference, quick_find
 
-from .base import TestBase
+from .base import TestBase, get_or_create_any_account
 
 
 class SearchTests(TestBase):
@@ -15,7 +13,7 @@ class SearchTests(TestBase):
 
     def setUp(self):
         super(SearchTests, self).setUp()
-        self.account = AutoFixture(Account).create(1)[0]
+        self.account = get_or_create_any_account()
         c = connection.cursor()
         # This index needs updating after fixtures
         c.execute("UPDATE bibleverses_verse SET text_tsv = to_tsvector(text_saved);")

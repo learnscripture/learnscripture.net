@@ -3,7 +3,6 @@ from __future__ import absolute_import
 import time
 
 import selenium
-from autofixture import AutoFixture
 from django.urls import reverse
 
 from accounts.models import Account
@@ -12,7 +11,17 @@ from comments.models import Comment
 from events.models import Event, EventType
 from groups.models import Group
 
-from .base import AccountTestMixin, FullBrowserTest, TestBase, WebTestBase
+from .base import AccountTestMixin, FullBrowserTest, TestBase, WebTestBase, get_or_create_any_account
+
+
+def create_group(**fields):
+    defaults = dict(
+        slug='my-group'
+    )
+    defaults.update(fields)
+    if 'created_by' not in fields:
+        defaults['created_by'] = get_or_create_any_account()
+    return Group.objects.create(**defaults)
 
 
 class GroupPageTestsBase(object):
@@ -288,19 +297,16 @@ class GroupCreatePageTests(FullBrowserTest):
 class GroupPageTests2(AccountTestMixin, TestBase):
     def test_comments_on_related_events(self):
         _, account = self.create_account()
-        group = AutoFixture(Group,
-                            generate_fk=True,
-                            field_values={'public': True}).create_one()
+        group = create_group(public=True)
         event = Event.objects.create(
             event_type=EventType.GROUP_JOINED,
             event_data={},
             account=account,
         )
-        comment = AutoFixture(Comment, generate_fk=True,
-                              field_values={'group': group,
-                                            'event': event,
-                                            'message': "Hello there!"
-                                            }).create_one()
+        comment = Comment.objects.create(group=group,
+                                         event=event,
+                                         author=account,
+                                         message="Hello there!")
         response = self.client.get(reverse('group', args=(group.slug,)))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Hello there!")

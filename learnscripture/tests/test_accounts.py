@@ -4,7 +4,6 @@ import itertools
 import re
 from datetime import timedelta
 
-from autofixture import AutoFixture
 from django.core import mail
 from django.db.models import F
 from django.utils.encoding import force_text
@@ -14,7 +13,6 @@ from accounts.models import Account, ActionChange
 from awards.models import AwardType
 from bibleverses.models import MemoryStage, StageType
 from events.models import Event, EventType
-from groups.models import Group
 from learnscripture.forms import AccountSetPasswordForm
 from scores.models import Scores
 
@@ -135,6 +133,7 @@ class AccountTests(AccountTestMixin, TestBase):
                              0 if i < 23 else 1)
 
     def test_friendship_weights(self):
+        from .test_groups import create_group
         _, account1 = self.create_account(username="a1",
                                           email="a1@a.com")
         _, account2 = self.create_account(username="a2",
@@ -145,7 +144,7 @@ class AccountTests(AccountTestMixin, TestBase):
                                           email="a4@a.com")
 
         # a1 and a2 are in a group
-        group, group2 = AutoFixture(Group).create(2)
+        group, group2 = create_group(slug='my-group-1'), create_group(slug='my-group-2')
         assert group.members.count() == 0
         assert group2.members.count() == 0
 
