@@ -1,13 +1,12 @@
 from __future__ import absolute_import
 
-from autofixture import AutoFixture
 from django.utils import timezone
 
 from comments.models import Comment
 from events.models import Event, EventType, GroupJoinedEvent, PointsMilestoneEvent
-from groups.models import Group
 
 from .base import AccountTestMixin, TestBase
+from .test_groups import create_group
 
 
 class EventTests(AccountTestMixin, TestBase):
@@ -111,7 +110,7 @@ class EventTests(AccountTestMixin, TestBase):
             account=account2,
         )
 
-        group = AutoFixture(Group).create(1)[0]
+        group = create_group()
         group.add_user(account2)
         group.add_user(viewer)
         stream = list(Event.objects.for_dashboard(account=viewer))
@@ -127,7 +126,7 @@ class EventTests(AccountTestMixin, TestBase):
         Test that a comment created on an event that relates to a group
         becomes associated with that group.
         """
-        group = AutoFixture(Group, generate_fk=True).create(1)[0]
+        group = create_group()
         _, account1 = self.create_account(username="1")
 
         event = GroupJoinedEvent(account=account1, group=group).save()

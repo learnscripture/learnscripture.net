@@ -2,13 +2,11 @@ from __future__ import absolute_import
 
 import time
 
-from autofixture import AutoFixture
-
 from comments.models import Comment
 from events.models import Event, EventType
-from groups.models import Group
 
 from .base import AccountTestMixin, FullBrowserTest, TestBase
+from .test_groups import create_group
 
 
 class CommentPageTests(FullBrowserTest):
@@ -110,9 +108,7 @@ class CommentPageTests(FullBrowserTest):
 class CommentTests(AccountTestMixin, TestBase):
     def test_get_absolute_url(self):
         _, account = self.create_account()
-        group = AutoFixture(Group,
-                            field_values={'slug': 'my-group'},
-                            ).create_one()
+        group = create_group()
         comment = Comment.objects.create(
             author=account,
             message="Hello",

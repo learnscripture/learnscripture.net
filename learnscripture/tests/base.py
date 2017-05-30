@@ -45,30 +45,44 @@ class DummyLessCssFilter(CompilerFilter):
         return ''
 
 
+def create_account(version_slug='KJV',
+                   email="test1@test.com",
+                   username="tëst1"):
+    account = Account.objects.create(email=email,
+                                     username=username,
+                                     last_login=timezone.now(),
+                                     )
+    account.set_password('password')
+    account.save()
+    identity = create_identity(version_slug=version_slug, account=account)
+    return (identity, account)
+
+
+def create_identity(version_slug='KJV', account=None):
+    version = TextVersion.objects.get(slug=version_slug)
+    return Identity.objects.create(default_bible_version=version,
+                                   enable_animations=False,
+                                   enable_sounds=False,
+                                   account=account,
+                                   )
+
+
+def get_or_create_any_account():
+    account = Account.objects.order_by('id').first()
+    if account is None:
+        identity, account = create_account()
+    return account
+
+
 class AccountTestMixin(object):
 
     fixtures = ['test_bible_versions.json']
 
-    def create_identity(self, version_slug='KJV', account=None):
-        version = TextVersion.objects.get(slug=version_slug)
-        return Identity.objects.create(default_bible_version=version,
-                                       enable_animations=False,
-                                       enable_sounds=False,
-                                       account=account,
-                                       )
+    def create_identity(self, **kwargs):
+        return create_identity(**kwargs)
 
-    def create_account(self,
-                       version_slug='KJV',
-                       email="test1@test.com",
-                       username="tëst1"):
-        account = Account.objects.create(email=email,
-                                         username=username,
-                                         last_login=timezone.now(),
-                                         )
-        account.set_password('password')
-        account.save()
-        identity = self.create_identity(version_slug=version_slug, account=account)
-        return (identity, account)
+    def create_account(self, **kwargs):
+        return create_account(**kwargs)
 
     def create_account_interactive(self,
                                    email="test2@test.com",
