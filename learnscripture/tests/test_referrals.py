@@ -6,11 +6,12 @@ from bibleverses.models import VerseSet
 from events.models import Event, EventType
 
 from .base import FullBrowserTest
+from .test_bibleverses import RequireExampleVerseSetsMixin
 
 
-class ReferralsTests(FullBrowserTest):
+class ReferralsTests(RequireExampleVerseSetsMixin, FullBrowserTest):
 
-    fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json']
+    fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
 
     def test_register_referral(self):
         # NB: these are are not the identity we are going to use.

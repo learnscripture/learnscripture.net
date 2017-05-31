@@ -12,11 +12,12 @@ from bibleverses.models import MemoryStage, StageType, TextVersion, Verse, Verse
 from events.models import Event, EventType
 
 from .base import AccountTestMixin, FuzzyInt, TestBase
+from .test_bibleverses import RequireExampleVerseSetsMixin
 
 
-class IdentityTests(AccountTestMixin, TestBase):
+class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
 
-    fixtures = AccountTestMixin.fixtures + ['test_verse_sets.json', 'test_bible_verses.json', 'test_catechisms.json']
+    fixtures = AccountTestMixin.fixtures + ['test_bible_verses.json', 'test_catechisms.json']
 
     def test_add_verse_set(self):
         i = self.create_identity()

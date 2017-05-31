@@ -6,11 +6,12 @@ from accounts.models import Identity
 from bibleverses.models import VerseSet
 
 from .base import FullBrowserTest
+from .test_bibleverses import RequireExampleVerseSetsMixin
 
 
-class ViewSetTests(FullBrowserTest):
+class ViewSetTests(RequireExampleVerseSetsMixin, FullBrowserTest):
 
-    fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json']
+    fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
 
     def test_change_version(self):
         identity, account = self.create_account()

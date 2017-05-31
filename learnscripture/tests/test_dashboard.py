@@ -10,13 +10,13 @@ import accounts.memorymodel
 from accounts.models import Identity, Notice
 from bibleverses.models import MemoryStage, StageType, TextVersion, VerseSet
 
+from .test_bibleverses import RequireExampleVerseSetsMixin
 from .base import FullBrowserTest, WebTestBase
 
 
-class DashboardTestsBase(object):
+class DashboardTestsBase(RequireExampleVerseSetsMixin):
 
-    fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json',
-                'test_catechisms.json']
+    fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_catechisms.json']
 
     def test_redirect(self):
         self.get_url('dashboard')

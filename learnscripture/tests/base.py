@@ -47,10 +47,12 @@ class DummyLessCssFilter(CompilerFilter):
 
 def create_account(version_slug='KJV',
                    email="test1@test.com",
-                   username="tëst1"):
+                   username="tëst1",
+                   is_active=True):
     account = Account.objects.create(email=email,
                                      username=username,
                                      last_login=timezone.now(),
+                                     is_active=is_active,
                                      )
     account.set_password('password')
     account.save()

@@ -14,11 +14,12 @@ from bibleverses.models import MemoryStage, StageType, VerseSet
 from scores.models import Scores
 
 from .base import FullBrowserTest
+from .test_bibleverses import RequireExampleVerseSetsMixin
 
 
-class LearnTests(FullBrowserTest):
+class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
 
-    fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json']
+    fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
 
     kjv_john_3_16 = "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life. John 3 16"
 
