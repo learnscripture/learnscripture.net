@@ -18,11 +18,12 @@ from bibleverses.models import StageType, VerseSet
 from .base import AccountTestMixin, TestBase
 from .mailgun_test_data import (MAILGUN_EXAMPLE_POST_DATA_FOR_BOUNCE_ENDPOINT,
                                 MAILGUN_EXAMPLE_POST_DATA_FOR_BOUNCE_ENDPOINT_CONTENT_TYPE)
+from .test_bibleverses import RequireExampleVerseSetsMixin
 
 
-class EmailReminderTests(AccountTestMixin, TestBase):
+class EmailReminderTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
 
-    fixtures = ['test_bible_versions.json', 'test_verse_sets.json', 'test_bible_verses.json']
+    fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
 
     def setUp(self):
         super(EmailReminderTests, self).setUp()

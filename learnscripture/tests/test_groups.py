@@ -12,6 +12,7 @@ from events.models import Event, EventType
 from groups.models import Group
 
 from .base import AccountTestMixin, FullBrowserTest, TestBase, WebTestBase, get_or_create_any_account
+from .test_bibleverses import RequireExampleVerseSetsMixin
 
 
 def create_group(**fields):
@@ -24,9 +25,9 @@ def create_group(**fields):
     return Group.objects.create(**defaults)
 
 
-class GroupPageTestsBase(object):
+class GroupPageTestsBase(RequireExampleVerseSetsMixin):
 
-    fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json']
+    fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
 
     def test_join(self):
         identity, account = self.create_account()
@@ -257,9 +258,9 @@ class GroupTests(AccountTestMixin, TestBase):
                          [c.message for c in group.comments.all()])
 
 
-class GroupCreatePageTests(FullBrowserTest):
+class GroupCreatePageTests(RequireExampleVerseSetsMixin, FullBrowserTest):
 
-    fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json']
+    fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
 
     def test_create(self):
         identity, account = self.create_account()

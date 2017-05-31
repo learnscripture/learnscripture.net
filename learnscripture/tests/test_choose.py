@@ -6,11 +6,12 @@ from bibleverses.models import VerseSet
 from events.models import Event, EventType
 
 from .base import FullBrowserTest
+from .test_bibleverses import RequireExampleVerseSetsMixin
 
 
-class ChooseTests(FullBrowserTest):
+class ChooseTests(RequireExampleVerseSetsMixin, FullBrowserTest):
 
-    fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json']
+    fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
 
     def test_search(self):
         self.get_url('choose')
@@ -30,7 +31,7 @@ class ChooseTests(FullBrowserTest):
 
         self.get_url('choose')
 
-        vs_id = 1
+        vs_id = VerseSet.objects.get(name="Bible 101").id
         self.assertEqual(VerseSet.objects.get(id=vs_id).popularity, 0)
         self.click("#id-learn-verseset-btn-%d" % vs_id)
         self.set_preferences()

@@ -1,12 +1,57 @@
-from __future__ import absolute_import
+# -*- coding:utf-8 -*-
+from __future__ import absolute_import, unicode_literals
 
 import unittest2
 
 from accounts.models import Identity
 from bibleverses.models import (InvalidVerseReference, TextVersion, Verse, VerseSet, get_passage_sections,
-                                split_into_words)
+                                split_into_words, VerseSetType)
 
-from .base import AccountTestMixin, TestBase
+from .base import AccountTestMixin, TestBase, create_account
+
+
+class RequireExampleVerseSetsMixin(object):
+    SETS = [
+        (VerseSetType.SELECTION,
+         "Bible 101",
+         "bible-101",
+         "Some famous verses that everyone ought to know, to get you started.",
+         ["John 3:16", "John 14:6"]),
+        (VerseSetType.SELECTION,
+         "Temptation",
+         "temptation",
+         "Some help in dealing with common temptations.",
+         []),
+        (VerseSetType.SELECTION,
+         "Basic Gospel",
+         "basic-gospel",
+         "Great gospel texts",
+         ["John 3:16", "Ephesians 2:8"]),
+        (VerseSetType.PASSAGE,
+         "Psalm 23",
+         "psalm-23",
+         "",
+         ["Psalm 23:1", "Psalm 23:2", "Psalm 23:3", "Psalm 23:4", "Psalm 23:5", "Psalm 23:6"])
+    ]
+
+    def setUp(self):
+        super(RequireExampleVerseSetsMixin, self).setUp()
+
+        _, account = create_account(username='creatoraccount☺', is_active=False)
+        for set_type, name, slug, description, verse_choices in self.SETS:
+            vs = VerseSet.objects.create(
+                set_type=set_type,
+                name=name,
+                slug=slug,
+                description=description,
+                public=True,
+                created_by=account)
+            for i, ref in enumerate(verse_choices):
+                set_order = i + 1
+                vs.verse_choices.create(
+                    set_order=set_order,
+                    reference=ref
+                )
 
 
 class VerseTests(TestBase):
@@ -275,9 +320,9 @@ class GetPassageSectionsTests(unittest2.TestCase):
                           ["Genesis 1:3-4", "Genesis 1:5"]])
 
 
-class UserVerseStatusTests(AccountTestMixin, TestBase):
+class UserVerseStatusTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
 
-    fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_verse_sets.json']
+    fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
 
     def test_passage_and_section_reference(self):
         # Setup to create UVSs
