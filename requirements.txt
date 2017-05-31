@@ -1,9 +1,9 @@
--e git://github.com/spookylukey/django-app-metrics.git@bd56a7f31a95466c67770c8672102a775989957f#egg=django_app_metrics-master
--e git://github.com/spookylukey/django-bootstrap-form.git@cee9d102c152240e4af07551b13755b53689dd36#egg=django_bootstrap_form-origin
+-e git://github.com/spookylukey/django-app-metrics.git@069fc88528f9c92e769fd9e591ec11ee39d276a9#egg=django_app_metrics-master
+-e git://github.com/spookylukey/django-bootstrap-form.git@b228f986e6650ad4690eedc70cca5ff044feaab2#egg=django-bootstrap-form
 -e git://github.com/spookylukey/Pykov.git@c21f27b56a52e7ea7caba1707e64e3753c414478#egg=pykov
--e git://github.com/spookylukey/django-autoslug.git@069fc88528f9c92e769fd9e591ec11ee39d276a9#egg=django-autoslug
+-e git://github.com/spookylukey/django-autoslug.git@0a6adec1f9743743bf7d741b6845620a8f347159#egg=django-autoslug
 BeautifulSoup==3.2.1
-Django==1.10.7
+Django==1.11.1
 Pillow==4.1.1
 olefile==0.44
 SQLAlchemy==1.1.10
@@ -19,13 +19,13 @@ contextlib2==0.5.5
 cssselect==1.0.1
 django-appconf==1.0.2
 django-compressor==2.1.1
--e git://github.com/ridethepony/django-fiber.git@#egg=django-fiber@59a7910fb4931ca7c4ae107ad008e5556ac06125#egg=django-fiber
+-e git://github.com/spookylukey/django-fiber.git@b81618b553fe2c776644678ef0321b1f8961cab2#egg=django-fiber
 -e hg+https://bitbucket.org/schinckel/django-jsonfield@6c37ee0fd8f2f999b21c068e733876d937d74a00#egg=django-jsonfield
 django-markup==1.2
 django-mptt==0.8.7
 dj_pagination==2.2.1
 django-paypal==0.3.6
--e git://github.com/spookylukey/django-selectable.git@1e61fb722872115642d834e3826a395e55197e00#egg=django_selectable
+-e git://github.com/spookylukey/django-selectable.git@73b380000ad1ba87169f3a9a7bd219b76109945e#egg=django_selectable
 django-spurl==0.6.4
 djangorestframework==3.6.3
 docutils==0.13.1

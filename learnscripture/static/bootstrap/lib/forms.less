@@ -2,6 +2,7 @@
  * Base styles for various input types, form layouts, and states
  * ------------------------------------------------------------- */
 
+// MODIFIED - to work better out of the box with Django
 
 // FORM STYLES
 // -----------
@@ -390,7 +391,7 @@ textarea[readonly] {
 }
 
 // Stacked options for forms (radio buttons or checkboxes)
-.inputs-list {
+.inputs-list, div.input ul {
   margin: 0 0 5px;
   width: 100%;
   li {
