@@ -1,33 +1,15 @@
 from django import forms
-from django.utils.encoding import force_unicode
-from django.utils.safestring import mark_safe
 
 from .models import Account, Identity, TestingMethod
 
 
-class BootstrapRadioFieldRenderer(forms.RadioSelect.renderer):
-    def render(self):
-        """Outputs a <ul> for this set of radio fields."""
-        return mark_safe('<span id="id_%s"></span>'  # We need this for AJAX validation error messages
-                         '<ul class="inputs-list">\n%s\n</ul>'
-                         % (self.name,
-                            u'\n'.join([u'<li>%s</li>' % force_unicode(w) for w in self])))
-
-
-class BootstrapRadioSelect(forms.RadioSelect):
-    """
-    RadioSelect with the inputs-list class, to match bootstrap style
-    """
-    renderer = BootstrapRadioFieldRenderer
-
-
 class PreferencesForm(forms.ModelForm):
     desktop_testing_method = forms.ChoiceField(label="Testing method",
-                                               widget=BootstrapRadioSelect,
+                                               widget=forms.RadioSelect,
                                                initial=TestingMethod.FULL_WORDS,
                                                choices=TestingMethod.choice_list)
     touchscreen_testing_method = forms.ChoiceField(label="Testing method",
-                                                   widget=BootstrapRadioSelect,
+                                                   widget=forms.RadioSelect,
                                                    initial=TestingMethod.ON_SCREEN,
                                                    choices=TestingMethod.choice_list)
 

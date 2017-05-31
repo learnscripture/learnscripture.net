@@ -292,6 +292,7 @@ if DEVBOX:
     ALLOWED_HOSTS.extend([
         ".ngrok.io",
         "learnscripture.local",
+        "localhost",
     ])
 
 if DEBUG:
