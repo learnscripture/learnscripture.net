@@ -447,7 +447,7 @@ class Identity(models.Model):
             return '<Identity %s: %s>' % (self.id, self.account)
 
     def __repr__(self):
-        return unicode(self)
+        return unicode(self).encode('utf-8')
 
     @property
     def preferences_setup(self):
