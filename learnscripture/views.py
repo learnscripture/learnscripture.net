@@ -11,13 +11,14 @@ import django.contrib.auth
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.tokens import default_token_generator
-from django.contrib.auth.views import password_change as auth_password_change
+from django.contrib.auth.views import PasswordChangeView as AuthPasswordChangeView
+from django.contrib.auth.views import PasswordResetView as AuthPasswordResetView
 from django.contrib.sites.models import Site
 from django.core import mail
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.template.response import TemplateResponse
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.http import urlsafe_base64_decode
 from django.views.decorators.cache import never_cache
@@ -109,14 +110,8 @@ def login(request):
         elif 'forgotpassword' in request.POST:
             resetform = AccountPasswordResetForm(request.POST, prefix="login")
             if resetform.is_valid():
-                from django.contrib.auth.views import password_reset
                 # This will validate the form again, but it doesn't matter.
-                return password_reset(
-                    request,
-                    password_reset_form=lambda *args: AccountPasswordResetForm(*args, prefix="login"),
-                    post_reset_redirect=reverse('password_reset_done'),
-                    email_template_name='learnscripture/password_reset_email.txt',
-                )
+                return password_reset(request)
             else:
                 # Need errors from password reset for be used on main form - hack
                 form._errors = resetform.errors
@@ -126,6 +121,17 @@ def login(request):
     return render(request, "learnscripture/login.html",
                   {'title': 'Sign in',
                    'login_form': form})
+
+
+class _PasswordResetView(AuthPasswordResetView):
+    form_class = AccountPasswordResetForm
+    email_template_name = 'learnscripture/password_reset_email.txt'
+
+    def get_prefix(self):
+        return "login"
+
+
+password_reset = _PasswordResetView.as_view()
 
 
 def signup(request):
@@ -1014,13 +1020,13 @@ def password_reset_confirm(request, uidb64=None, token=None):
     return render(request, 'learnscripture/password_reset_confirm.html', context)
 
 
-@require_account
-def password_change(request):
-    return auth_password_change(request,
-                                template_name="learnscripture/password_change_form.html",
-                                post_change_redirect=reverse('learnscripture_password_change_done'),
-                                password_change_form=AccountPasswordChangeForm,
-                                )
+class _PasswordChangeView(AuthPasswordChangeView):
+    template_name = "learnscripture/password_change_form.html"
+    success_url = reverse_lazy('learnscripture_password_change_done')
+    form_class = AccountPasswordChangeForm
+
+
+password_change = require_account(_PasswordChangeView.as_view())
 
 
 def password_change_done(request):
