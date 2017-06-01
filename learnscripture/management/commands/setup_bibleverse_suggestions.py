@@ -8,15 +8,17 @@ logger = logging.getLogger("bibleverses.suggestions")
 
 
 class Command(BaseCommand):
-    args = '<version_slug version_slug ...>'
+    def add_arguments(self, parser):
+        parser.add_argument('version_slug', nargs='*')
 
     def handle(self, *args, **options):
         from bibleverses.suggestions import generate_suggestions
         from bibleverses.models import TextVersion
 
         versions = TextVersion.objects.all()
-        if args:
-            versions = versions.filter(slug__in=list(args))
+        slugs = options['version_slug']
+        if slugs:
+            versions = versions.filter(slug__in=slugs)
         for v in versions:
             logger.info("Generating suggestions for %s", v.slug)
             generate_suggestions(v, missing_only=True)
