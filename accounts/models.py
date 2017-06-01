@@ -1213,6 +1213,7 @@ class Identity(models.Model):
         if verse_set.breaks == '' or len(uvs_list) == 0:
             return uvs_list
 
+        uvs_list.sort(key=lambda u: u.text_order)
         # First split into sections according to the specified breaks
         sections = get_passage_sections(uvs_list, verse_set.breaks)
 
@@ -1274,6 +1275,7 @@ class Identity(models.Model):
         if verse_set.breaks == '' or len(uvs_list) == 0:
             return uvs_list
 
+        uvs_list.sort(key=lambda u: u.text_order)
         # First split into sections according to the specified breaks
         sections = get_passage_sections(uvs_list, verse_set.breaks)
 
