@@ -8,11 +8,14 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    args = 'version_slug json_filename'
+    def add_arguments(self, parser):
+        parser.add_argument('version_slug')
+        parser.add_argument('json_filename')
 
-    def handle(self, version_slug, json_filename, **options):
-
+    def handle(self, *args, **options):
         from bibleverses.models import TextVersion, WordSuggestionData
+        version_slug = options['version_slug']
+        json_filename = options['json_filename']
         version = TextVersion.objects.get(slug=version_slug)
         json_data = json.load(file(json_filename))
 
