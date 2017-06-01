@@ -120,110 +120,25 @@ MAX_SUGGESTIONS = 40
 
 def generate_suggestions_for_items(version, items, training_texts, ref=None,
                                    missing_only=True, thesaurus=None):
-    all_text = ' '.join(training_texts.values())
-    first_words = sentence_first_words(all_text)
-    first_word_frequencies = frequency_pairs(first_words)
-
-    all_words = split_into_words_for_suggestions(all_text)
     markov_chains_for_size = {}
 
-    def get_markov_chain(size):
-        # Due to being both memory and CPU intensive, and having limited memory
-        # on the server, we cache carefully - not too much in memory or we run
-        # out.
-        if size in markov_chains_for_size:
-            return markov_chains_for_size[size]
-        else:
-            c = build_markov_chains_with_sentence_breaks(training_texts, size)
-            markov_chains_for_size[size] = c
-            return c
-
-    def suggestions_thesaurus(words, i, count, suggestions_so_far):
-        # Thesaurus strategy can be dumb, due to words that are e.g. both nouns
-        # and verbs. Also, if suggestions are packed with synonyms, the basic
-        # meaning will be obvious.  So, we limit the number. Also, we spread
-        # them out 1.0 to 0.5 so there is a range.
-        # Note that thesaurus returns words already ordered
-        suggestions = thesaurus.get(words[i], [])[:MIN_SUGGESTIONS][:count]
-        if len(suggestions) == 0:
-            return []
-        inc = 0.5 / len(suggestions)
-
-        return [(w, 1.0 - (n * inc)) for n, w in enumerate(suggestions)]
-
-    def suggestions_thesaurus_other(words, i, count, suggestions_so_far):
-        count = max(count, 10)
-        # This method tries to find some alternatives to words suggested by
-        # non-thesaurus methods, to throw people off the scent!
-        from_thesaurus = [w for w, f in suggestions_thesaurus(words, i, count, [])]
-        retval = []
-        new = set()
-        for w, f in suggestions_so_far:
-            if w not in from_thesaurus:
-                more = thesaurus.get(w, [])[:2]  # Just two for each
-                for m in more:
-                    if m not in new:
-                        retval.append((m, f))
-                        new.add(m)
-            if len(retval) > count:
-                return retval
-        return retval
-
-    def suggestions_first_word(words, i, count, suggestions_so_far):
-        return first_word_frequencies[:]
-
-    def mk_suggestions_markov(size):
-        def suggestions_markov(words, i, count, suggestions_so_far):
-            if size == 1:
-                start = words[i - 1]
-            else:
-                start = tuple(words[i - size:i])
-            chain = get_markov_chain(size)
-            try:
-                options = chain.succ(start).items()
-            except KeyError:
-                return []
-            return [(w if size == 1 else w[-1], f) for w, f in options]
-        return suggestions_markov
-
-    def suggestions_random_local(words, i, count, suggestions_so_far):
-        count = max(count, 10)
-        # Emphasise the words that come after the current one,
-        # exclude the one immediately before as that is very unlikely,
-        FACTOR = 5
-        bag = words[i + 1:] * FACTOR + words[:max(0, i - 1)]
-        if len(bag) == 0:
-            return []
-        c = Counter()
-        # Try to cope with the fact that we'll get duplicates by boosting the
-        # number we pick a bit.
-        for i in range(0, int(count * FACTOR / 2)):
-            c[random.choice(bag)] += 1
-        return c.items()
-
-    def suggestions_random_global(words, i, count, suggestions_so_far):
-        count = max(count, 10)
-        c = Counter()
-        for i in range(0, count):
-            c[random.choice(all_words)] += 1
-        return c.items()
 
     # Strategies for finding alternatives, ordered according to how good they will be
 
     strategies = [
-        (lambda i: i == 0, suggestions_first_word),
-        (lambda i: i > 2, mk_suggestions_markov(3)),
-        (lambda i: i > 1, mk_suggestions_markov(2)),
+        (lambda i: i == 0, FirstWordSuggestions(training_texts)),
+        (lambda i: i > 2, MarkovSuggestions(3, markov_chains_for_size, training_texts)),
+        (lambda i: i > 1, MarkovSuggestions(2, markov_chains_for_size, training_texts)),
         # Thesaurus isn't always very good, because it can give the game away,
         # and also has some bizarre suggestions, so push down a bit
-        (lambda i: thesaurus is not None, suggestions_thesaurus),
+        (lambda i: thesaurus is not None, ThesaurusSuggestions(thesaurus)),
         # random from same verse are actually quite good,
         # because there are lots of cases where you can
         # miss out a word/phrase and it still makes sense
-        (lambda i: True, suggestions_random_local),
-        (lambda i: i > 0, mk_suggestions_markov(1)),
-        (lambda i: True, suggestions_random_global),
-        (lambda i: thesaurus is not None, suggestions_thesaurus_other),
+        (lambda i: True, RandomLocalSuggestions()),
+        (lambda i: i > 0, MarkovSuggestions(1, markov_chains_for_size, training_texts)),
+        (lambda i: True, RandomGlobalSuggestions(training_texts)),
+        (lambda i: thesaurus is not None, ThesaurusSuggestionsOther(thesaurus)),
     ]
 
     for batch in chunks(items, 100):
@@ -289,10 +204,11 @@ def generate_suggestions_single_item(version, item,
         for i, word in enumerate(words):
             relevance = 1.0
             word_suggestions = []
-            for condition, method in strategies:
+            for condition, strategy in strategies:
                 if condition(i):
                     need = MIN_SUGGESTIONS - len(word_suggestions)  # Only random strategies really uses this
-                    new_suggestions = [(w, f) for (w, f) in method(words, i, need, word_suggestions)
+                    new_suggestions = [(w, f) for (w, f) in
+                                       strategy.get_suggestions(words, i, need, word_suggestions)
                                        if w != word]
                     new_suggestions = scale_suggestions(new_suggestions, relevance)
                     if len(new_suggestions) > 0:
@@ -309,6 +225,124 @@ def generate_suggestions_single_item(version, item,
                                         suggestions=item_suggestions,
                                         hash=hash_text(text),
                                         ))
+
+
+class SuggestionStrategy(object):
+    def get_suggestions(self, words, i, count, suggestions_so_far):
+        raise NotImplementedError()
+
+
+class ThesaurusSuggestions(SuggestionStrategy):
+    def __init__(self, thesaurus):
+        self.thesaurus = thesaurus
+
+    def get_suggestions(self, words, i, count, suggestions_so_far):
+        # Thesaurus strategy can be dumb, due to words that are e.g. both nouns
+        # and verbs. Also, if suggestions are packed with synonyms, the basic
+        # meaning will be obvious.  So, we limit the number. Also, we spread
+        # them out 1.0 to 0.5 so there is a range.
+        # Note that thesaurus returns words already ordered
+        suggestions = self.thesaurus.get(words[i], [])[:MIN_SUGGESTIONS][:count]
+        if len(suggestions) == 0:
+            return []
+        inc = 0.5 / len(suggestions)
+
+        return [(w, 1.0 - (n * inc)) for n, w in enumerate(suggestions)]
+
+
+class ThesaurusSuggestionsOther(SuggestionStrategy):
+    def __init__(self, thesaurus):
+        self.thesaurus = thesaurus
+        self.thesaurus_strategy = ThesaurusSuggestions(thesaurus)
+
+    def get_suggestions(self, words, i, count, suggestions_so_far):
+        count = max(count, 10)
+        # This method tries to find some alternatives to words suggested by
+        # non-thesaurus methods, to throw people off the scent!
+        from_thesaurus = [w for w, f in self.thesaurus_strategy.get_suggestions(words, i, count, [])]
+        retval = []
+        new = set()
+        for w, f in suggestions_so_far:
+            if w not in from_thesaurus:
+                more = self.thesaurus.get(w, [])[:2]  # Just two for each
+                for m in more:
+                    if m not in new:
+                        retval.append((m, f))
+                        new.add(m)
+            if len(retval) > count:
+                return retval
+        return retval
+
+
+class FirstWordSuggestions(SuggestionStrategy):
+    def __init__(self, training_texts):
+        all_text = ' '.join(training_texts.values())
+        first_words = sentence_first_words(all_text)
+        self.first_word_frequencies = frequency_pairs(first_words)
+
+    def get_suggestions(self, words, i, count, suggestions_so_far):
+        return self.first_word_frequencies[:]
+
+
+class MarkovSuggestions(SuggestionStrategy):
+    def __init__(self, size, chain_storage, training_texts):
+        self.size = size
+        self.chain_storage = chain_storage
+        self.training_texts = training_texts
+
+    def get_suggestions(self, words, i, count, suggestions_so_far):
+        if self.size == 1:
+            start = words[i - 1]
+        else:
+            start = tuple(words[i - self.size:i])
+        chain = self.get_markov_chain(self.size)
+        try:
+            options = chain.succ(start).items()
+        except KeyError:
+            return []
+        return [(w if self.size == 1 else w[-1], f) for w, f in options]
+
+    def get_markov_chain(self, size):
+        # Due to being both memory and CPU intensive, and having limited memory
+        # on the server, we cache carefully - not too much in memory or we run
+        # out.
+        if size in self.chain_storage:
+            return self.chain_storage[size]
+        else:
+            c = build_markov_chains_with_sentence_breaks(self.training_texts, size)
+            self.chain_storage[size] = c
+            return c
+
+
+class RandomLocalSuggestions(SuggestionStrategy):
+    def get_suggestions(self, words, i, count, suggestions_so_far):
+        count = max(count, 10)
+        # Emphasise the words that come after the current one,
+        # exclude the one immediately before as that is very unlikely,
+        FACTOR = 5
+        bag = words[i + 1:] * FACTOR + words[:max(0, i - 1)]
+        if len(bag) == 0:
+            return []
+        c = Counter()
+        # Try to cope with the fact that we'll get duplicates by boosting the
+        # number we pick a bit.
+        for i in range(0, int(count * FACTOR / 2)):
+            c[random.choice(bag)] += 1
+        return c.items()
+
+
+class RandomGlobalSuggestions(SuggestionStrategy):
+    def __init__(self, training_texts):
+        all_text = ' '.join(training_texts.values())
+        all_words = split_into_words_for_suggestions(all_text)
+        self.all_words = all_words
+
+    def get_suggestions(self, words, i, count, suggestions_so_far):
+        count = max(count, 10)
+        c = Counter()
+        for i in range(0, count):
+            c[random.choice(self.all_words)] += 1
+        return c.items()
 
 
 def scale_suggestions(suggestions, factor=1.0):
