@@ -183,7 +183,7 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
         # So we wrap all of this functionality in a utility
         # to avoid issues.
         self._find(selector).click()
-        self._driver.switch_to_alert().accept()
+        self._driver.switch_to.alert.accept()
         self.wait_for_page_load()
         self.wait_for_ajax()
 
