@@ -586,7 +586,7 @@ def install_requirements(target):
 
     with virtualenv(target.VENV_ROOT):
         with cd(target.SRC_ROOT):
-            run("pip install --upgrade setuptools pip wheel")
+            run("pip install --upgrade setuptools pip wheel six")
             run("pip install -r requirements.txt --exists-action w")
             run("nodeenv --node=system --python-virtualenv --requirement=requirements-node.txt")
 
