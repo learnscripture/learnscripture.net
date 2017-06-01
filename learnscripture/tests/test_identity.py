@@ -420,7 +420,6 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         self.assertEqual(vss[0].next_section_verse_count, 2)
 
         # Now test verse_statuses_for_passage/get_next_section in this context:
-
         uvss1 = i.verse_statuses_for_passage(vs1.id)
         uvss1 = i.get_next_section(uvss1, vs1)
 
