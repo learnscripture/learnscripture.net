@@ -10,8 +10,8 @@ import accounts.memorymodel
 from accounts.models import Identity, Notice
 from bibleverses.models import MemoryStage, StageType, TextVersion, VerseSet
 
-from .test_bibleverses import RequireExampleVerseSetsMixin
 from .base import FullBrowserTest, WebTestBase
+from .test_bibleverses import RequireExampleVerseSetsMixin
 
 
 class DashboardTestsBase(RequireExampleVerseSetsMixin):

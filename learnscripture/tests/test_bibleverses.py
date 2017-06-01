@@ -4,8 +4,8 @@ from __future__ import absolute_import, unicode_literals
 import unittest2
 
 from accounts.models import Identity
-from bibleverses.models import (InvalidVerseReference, TextVersion, Verse, VerseSet, get_passage_sections,
-                                split_into_words, VerseSetType)
+from bibleverses.models import (InvalidVerseReference, TextVersion, Verse, VerseSet, VerseSetType, get_passage_sections,
+                                split_into_words)
 
 from .base import AccountTestMixin, TestBase, create_account
 
