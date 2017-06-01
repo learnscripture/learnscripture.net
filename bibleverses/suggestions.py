@@ -120,15 +120,12 @@ MAX_SUGGESTIONS = 40
 
 def generate_suggestions_for_items(version, items, training_texts, ref=None,
                                    missing_only=True, thesaurus=None):
-    markov_chains_for_size = {}
-
-
     # Strategies for finding alternatives, ordered according to how good they will be
 
     strategies = [
         (lambda i: i == 0, FirstWordSuggestions(training_texts)),
-        (lambda i: i > 2, MarkovSuggestions(3, markov_chains_for_size, training_texts)),
-        (lambda i: i > 1, MarkovSuggestions(2, markov_chains_for_size, training_texts)),
+        (lambda i: i > 2, MarkovSuggestions(3, training_texts)),
+        (lambda i: i > 1, MarkovSuggestions(2, training_texts)),
         # Thesaurus isn't always very good, because it can give the game away,
         # and also has some bizarre suggestions, so push down a bit
         (lambda i: thesaurus is not None, ThesaurusSuggestions(thesaurus)),
@@ -136,7 +133,7 @@ def generate_suggestions_for_items(version, items, training_texts, ref=None,
         # because there are lots of cases where you can
         # miss out a word/phrase and it still makes sense
         (lambda i: True, RandomLocalSuggestions()),
-        (lambda i: i > 0, MarkovSuggestions(1, markov_chains_for_size, training_texts)),
+        (lambda i: i > 0, MarkovSuggestions(1, training_texts)),
         (lambda i: True, RandomGlobalSuggestions(training_texts)),
         (lambda i: thesaurus is not None, ThesaurusSuggestionsOther(thesaurus)),
     ]
@@ -285,9 +282,9 @@ class FirstWordSuggestions(SuggestionStrategy):
 
 
 class MarkovSuggestions(SuggestionStrategy):
-    def __init__(self, size, chain_storage, training_texts):
+    def __init__(self, size, training_texts):
         self.size = size
-        self.chain_storage = chain_storage
+        self.chain_storage = None
         self.training_texts = training_texts
 
     def get_suggestions(self, words, i, count, suggestions_so_far):
@@ -295,22 +292,22 @@ class MarkovSuggestions(SuggestionStrategy):
             start = words[i - 1]
         else:
             start = tuple(words[i - self.size:i])
-        chain = self.get_markov_chain(self.size)
+        chain = self.get_markov_chain()
         try:
             options = chain.succ(start).items()
         except KeyError:
             return []
         return [(w if self.size == 1 else w[-1], f) for w, f in options]
 
-    def get_markov_chain(self, size):
+    def get_markov_chain(self):
         # Due to being both memory and CPU intensive, and having limited memory
         # on the server, we cache carefully - not too much in memory or we run
         # out.
-        if size in self.chain_storage:
-            return self.chain_storage[size]
+        if self.chain_storage is not None:
+            return self.chain_storage
         else:
-            c = build_markov_chains_with_sentence_breaks(self.training_texts, size)
-            self.chain_storage[size] = c
+            c = build_markov_chains_with_sentence_breaks(self.training_texts, self.size)
+            self.chain_storage = c
             return c
 
 
