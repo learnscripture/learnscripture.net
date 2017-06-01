@@ -1,4 +1,4 @@
--e git://github.com/spookylukey/django-app-metrics.git@069fc88528f9c92e769fd9e591ec11ee39d276a9#egg=django_app_metrics-master
+-e git://github.com/spookylukey/django-app-metrics.git@cbd54019026a74225b1ab6cbe4a46a3abb21e8e1#egg=django_app_metrics-master
 -e git://github.com/spookylukey/django-bootstrap-form.git@b228f986e6650ad4690eedc70cca5ff044feaab2#egg=django-bootstrap-form
 -e git://github.com/spookylukey/Pykov.git@c21f27b56a52e7ea7caba1707e64e3753c414478#egg=pykov
 -e git://github.com/spookylukey/django-autoslug.git@0a6adec1f9743743bf7d741b6845620a8f347159#egg=django-autoslug
