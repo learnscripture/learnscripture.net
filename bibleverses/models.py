@@ -1261,11 +1261,12 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
     return [ComboVerse(r.reference, [r]) for r in results]
 
 
-def get_whole_book(book_name, version):
+def get_whole_book(book_name, version, ensure_text_present=True):
     retval = ComboVerse(book_name,
                         list(version.verse_set.filter(book_number=BIBLE_BOOKS_DICT[book_name],
                                                       missing=False)))
-    ensure_text(retval.verses)
+    if ensure_text_present:
+        ensure_text(retval.verses)
     return retval
 
 

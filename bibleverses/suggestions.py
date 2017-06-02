@@ -18,7 +18,7 @@ import pykov
 from django.conf import settings
 from django.utils.functional import cached_property
 
-from bibleverses.models import (BIBLE_BOOKS, QAPair, TextType, TextVersion, Verse, WordSuggestionData, get_whole_book,
+from bibleverses.models import (BIBLE_BOOKS, TextType, TextVersion, WordSuggestionData, get_whole_book,
                                 is_punctuation, split_into_words)
 from bibleverses.services import partial_data_available
 from learnscripture.utils.iterators import chunks
@@ -81,7 +81,7 @@ def generate_suggestions(version, ref=None, missing_only=True):
             v = version.get_verse_list(ref)[0]
             book = BIBLE_BOOKS[v.book_number]
             items = [v]
-            training_texts = BibleTrainingTexts(version, book)
+            training_texts = BibleTrainingTexts(version, [book])
             logger.info("Generating for %s", ref)
             generate_suggestions_for_items(
                 version, items,
@@ -115,10 +115,10 @@ def items_all_done(version, items, ref=None, missing_only=True):
 
 def generate_suggestions_for_book(version, book, missing_only=True):
     logger.info("Generating for %s", book)
-    items = get_whole_book(book, version).verses
+    items = get_whole_book(book, version, ensure_text_present=False).verses
     if items_all_done(version, items, missing_only=missing_only):
         return
-    training_texts = BibleTrainingTexts(version, book)
+    training_texts = BibleTrainingTexts(version, [book])
     thesaurus = version_thesaurus(version)
     generate_suggestions_for_items(
         version, items,
@@ -167,9 +167,14 @@ class VersionTrainingText(TrainingTexts):
 
 
 class BibleTrainingTexts(VersionTrainingText):
-    def __init__(self, version, book):
+    def __init__(self, version, books):
         super(BibleTrainingTexts, self).__init__(version)
-        self._keys = [(version.slug, b) for b in similar_books(book)]
+        all_books = []
+        for book in books:
+            for b in similar_books(book):
+                if b not in all_books:
+                    all_books.append(b)
+        self._keys = [(version.slug, b) for b in all_books]
 
     def lookup(self, key):
         version_slug, book = key
@@ -398,19 +403,19 @@ class FirstWordSuggestions(SuggestionStrategy):
 
     @cached_property
     def first_word_frequencies(self):
-        freqs = [build_first_word_frequencies(self.training_texts, key)
-                 for key in self.training_texts.keys()]
-        return aggregate_frequency_pairs(freqs)
+        counts = [build_first_word_counts(self.training_texts, key)
+                  for key in self.training_texts.keys()]
+        return scale_suggestions(aggregate_word_counts(counts).items())
 
     def get_suggestions(self, words, i, count, suggestions_so_far):
         return self.first_word_frequencies[:]
 
 
-@cache_results_with_pickle('firstwordfrequencies')
-def build_first_word_frequencies(training_texts, key):
+@cache_results_with_pickle('firstwordcounts')
+def build_first_word_counts(training_texts, key):
     text = training_texts[key]
     first_words = sentence_first_words(text)
-    return frequency_pairs(first_words)
+    return word_counts(first_words)
 
 
 class MarkovSuggestions(SuggestionStrategy):
@@ -475,7 +480,7 @@ def filename_for_label(label, size):
 
 class RandomLocalSuggestions(SuggestionStrategy):
     def get_suggestions(self, words, i, count, suggestions_so_far):
-        count = min(count, 10)
+        count = max(count, 10)
         # Emphasise the words that come after the current one,
         # exclude the one immediately before as that is very unlikely,
         FACTOR = 5
@@ -500,15 +505,13 @@ class RandomGlobalSuggestions(SuggestionStrategy):
         Tuple of (list_of_words, list_of_frequencies) for
         all words in training texts.
         """
-        word_counter = dict(aggregate_frequency_pairs(
-            get_word_frequencies(self.training_texts, key)
-            for key in self.training_texts.keys()))
+        word_counter = get_text_word_counts(self.training_texts)
         freqs = normalise_probabilities(word_counter)
         items, probs = zip(*freqs.items())
         return items, probs
 
     def get_suggestions(self, words, i, count, suggestions_so_far):
-        count = min(count, 10)
+        count = max(count, 10)
         items, probs = self.word_distribution
         c = Counter()
         for i in range(0, count):
@@ -518,17 +521,23 @@ class RandomGlobalSuggestions(SuggestionStrategy):
         return c.items()
 
 
-@cache_results_with_pickle('wordfrequencies')
-def get_word_frequencies(training_texts, key):
+def get_text_word_counts(training_texts):
+    return aggregate_word_counts(
+        get_word_counts(training_texts, key)
+        for key in training_texts.keys())
+
+
+@cache_results_with_pickle('wordcounts')
+def get_word_counts(training_texts, key):
     text = training_texts[key]
     words = split_into_words_for_suggestions(text)
     return Counter(words)
 
 
 def scale_suggestions(suggestions, factor=1.0):
-    # Scale frequencies to maximum of factor
     if len(suggestions) == 0:
         return suggestions
+    # Scale frequencies to maximum of factor
     max_f = max(f for w, f in suggestions)
     return [(w, float(f) / max_f * factor) for w, f in suggestions]
 
@@ -537,13 +546,12 @@ def merge_suggestions(s1, s2):
     return (Counter(dict(s1)) + Counter(dict(s2))).items()
 
 
-def frequency_pairs(words):
-    return scale_suggestions(Counter(words).items())
+def word_counts(words):
+    return Counter(words)
 
 
-def aggregate_frequency_pairs(freqs):
-    return scale_suggestions(reduce(operator.add,
-                                    [Counter(dict(s)) for s in freqs]).items())
+def aggregate_word_counts(counts):
+    return reduce(operator.add, counts)
 
 
 def pick_from_distribution(counter):
@@ -574,14 +582,13 @@ def get_all_suggestion_words(version_name):
     return s
 
 
-def get_all_version_words(version_name):
-    text = []
-    for verse in get_in_batches(Verse.objects.filter(version__slug=version_name)):
-        text.extend(split_into_words_for_suggestions(verse.text))
+def get_all_version_words(version):
+    if version.text_type == TextType.BIBLE:
+        training_texts = BibleTrainingTexts(version, BIBLE_BOOKS)
+    elif version.text_type == TextType.CATECHISM:
+        training_texts = CatechismTrainingTexts(version)
 
-    for qapair in get_in_batches(QAPair.objects.filter(catechism__slug=version_name)):
-        text.extend(split_into_words_for_suggestions(qapair.answer))
-    return Counter(text)
+    return get_text_word_counts(training_texts)
 
 
 # -- Thesaurus
@@ -625,10 +632,9 @@ def version_thesaurus(version):
     thesaurus = base_thesaurus.copy()
     thesaurus.update(PRONOUN_THESAURUS)
 
-    from bibleverses.suggestions import get_all_version_words
     d = {}
     logger.info("Building thesaurus for %s\n", version.slug)
-    words = get_all_version_words(version.slug)
+    words = get_all_version_words(version)
     for word, c in words.items():
         alts = thesaurus.get(word, None)
         if alts is None:
