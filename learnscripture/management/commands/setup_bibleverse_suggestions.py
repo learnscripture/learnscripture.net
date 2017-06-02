@@ -11,6 +11,8 @@ logger = logging.getLogger("bibleverses.suggestions")
 class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('version_slug', nargs='*')
+        parser.add_argument('--recreate', action='store_true', default=False,
+                            help="If supplied, suggestions will be created even if already existing")
 
     def handle(self, *args, **options):
         from bibleverses.suggestions import generate_suggestions
@@ -24,4 +26,4 @@ class Command(BaseCommand):
             versions = versions.filter(slug__in=slugs)
         for v in versions:
             logger.info("Generating suggestions for %s", v.slug)
-            generate_suggestions(v, missing_only=True)
+            generate_suggestions(v, missing_only=not options['recreate'])
