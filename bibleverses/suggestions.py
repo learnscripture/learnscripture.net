@@ -306,9 +306,54 @@ class MarkovSuggestions(SuggestionStrategy):
         if self.chain_storage is not None:
             return self.chain_storage
         else:
-            c = build_markov_chains_with_sentence_breaks(self.training_texts, self.size)
+            c = self.build_markov_chains_with_sentence_breaks()
             self.chain_storage = c
             return c
+
+    # -- Markov handling
+    def build_markov_chains_with_sentence_breaks(self):
+        return sum_matrices(build_markov_chains_for_text(self.training_texts, label, self.size)
+                            for label in self.training_texts.keys())
+
+
+def build_markov_chains_for_text(training_texts, label, size):
+    # Look on disk first
+    lookup_key = (label, size)
+    fname = filename_for_label(label, size)
+    if os.path.exists(fname):
+        logger.info("Loading %s", fname)
+        new_data = pickle.load(file(fname))
+        return new_data[lookup_key]
+
+    # Else do calcs
+    text = training_texts[label]
+    sentences = text.split(".")
+    v_accum, c_accum = pykov.maximum_likelihood_probabilities([])
+    matrices = []
+    logger.info("Markov analysis level %d for %s", size, label)
+    for i, s in enumerate(sentences):
+        if not s:
+            continue
+        words = split_into_words_for_suggestions(s)
+        if size == 1:
+            chain_input = words
+        else:
+            chain_input = [tuple(words[i:i + size]) for i in range(0, len(words) - (size - 1))]
+        v, c = pykov.maximum_likelihood_probabilities(chain_input, lag_time=1)
+        matrices.append(c)
+
+    retval = sum_matrices(matrices)
+    # For sanity check, we include the key in the stored data as well
+    new_data = {lookup_key: retval}
+    ensure_dir(fname)
+    with file(fname, "w") as f:
+        logger.info("Writing %s...", fname)
+        pickle.dump(new_data, f)
+    return retval
+
+
+def filename_for_label(label, size):
+    return os.path.join(settings.DATA_ROOT, "wordsuggestions", "%s__level%s.markov.data" % ('_'.join(label), str(size)))
 
 
 class RandomLocalSuggestions(SuggestionStrategy):
@@ -356,53 +401,6 @@ def merge_suggestions(s1, s2):
 
 def frequency_pairs(words):
     return scale_suggestions(Counter(words).items())
-
-
-# -- Markov handling
-
-
-def build_markov_chains_with_sentence_breaks(training_texts, size):
-    return sum_matrices(build_markov_chains_for_text(key, training_text, size)
-                        for key, training_text in training_texts.items())
-
-
-def build_markov_chains_for_text(labels, text, size):
-    # Look on disk first
-    lookup_key = (labels, size)
-    fname = filename_for_labels(labels, size)
-    if os.path.exists(fname):
-        logger.info("Loading %s", fname)
-        new_data = pickle.load(file(fname))
-        return new_data[lookup_key]
-
-    # Else do calcs
-    sentences = text.split(".")
-    v_accum, c_accum = pykov.maximum_likelihood_probabilities([])
-    matrices = []
-    logger.info("Markov analysis level %d for %s", size, labels)
-    for i, s in enumerate(sentences):
-        if not s:
-            continue
-        words = split_into_words_for_suggestions(s)
-        if size == 1:
-            chain_input = words
-        else:
-            chain_input = [tuple(words[i:i + size]) for i in range(0, len(words) - (size - 1))]
-        v, c = pykov.maximum_likelihood_probabilities(chain_input, lag_time=1)
-        matrices.append(c)
-
-    retval = sum_matrices(matrices)
-    # For sanity check, we include the key in the stored data as well
-    new_data = {lookup_key: retval}
-    ensure_dir(fname)
-    with file(fname, "w") as f:
-        logger.info("Writing %s...", fname)
-        pickle.dump(new_data, f)
-    return retval
-
-
-def filename_for_labels(labels, size):
-    return os.path.join(settings.DATA_ROOT, "wordsuggestions", "%s__level%s.markov.data" % ('_'.join(labels), str(size)))
 
 
 def hash_text(text):
