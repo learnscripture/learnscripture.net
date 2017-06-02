@@ -16,10 +16,11 @@ from functools import wraps
 import numpy
 import pykov
 from django.conf import settings
+from django.db import transaction
 from django.utils.functional import cached_property
 
-from bibleverses.models import (BIBLE_BOOKS, TextType, TextVersion, WordSuggestionData, get_whole_book,
-                                is_punctuation, split_into_words)
+from bibleverses.models import (BIBLE_BOOKS, TextType, TextVersion, Verse, WordSuggestionData, ensure_text,
+                                get_whole_book, is_punctuation, split_into_words)
 from bibleverses.services import partial_data_available
 from learnscripture.utils.iterators import chunks
 
@@ -46,6 +47,10 @@ logger = logging.getLogger(__name__)
 # service as late as possible.
 
 
+class LoadingNotAllowed(Exception):
+    pass
+
+
 def fix_item(version_slug, reference):
     version = TextVersion.objects.get(slug=version_slug)
     # Before recreating, check if the hash has changed. This is especially
@@ -65,23 +70,28 @@ def fix_item(version_slug, reference):
                         version_slug, reference)
             return
 
-    if partial_data_available(version_slug):
-        # We are going to have problems fixing the word suggestions, because the
-        # current algo assumes access to the whole text. So just log a warning
-        logger.warn("Need to create word suggestions for %s %s but can't",
+    # To avoid loading large amounts of data over the API,
+    # we make it illegal to load any.
+    # We are going to have problems fixing the word suggestions, because the
+    # current algo assumes access to the whole text. So just log a warning
+    disallow_loading = partial_data_available(version_slug)
+    try:
+        # TODO complete
+        generate_suggestions(version, missing_only=False, ref=reference, disallow_loading=disallow_loading)
+    except LoadingNotAllowed:
+        logger.warn("Need to create word suggestions for %s %s but can't because text is not available and saved analysis is not complete",
                     version_slug, reference)
         return
-    generate_suggestions(version, missing_only=False, ref=reference)
 
 
-def generate_suggestions(version, ref=None, missing_only=True):
+def generate_suggestions(version, ref=None, missing_only=True, disallow_loading=False):
 
     if version.text_type == TextType.BIBLE:
         if ref is not None:
             v = version.get_verse_list(ref)[0]
             book = BIBLE_BOOKS[v.book_number]
             items = [v]
-            training_texts = BibleTrainingTexts(version, [book])
+            training_texts = BibleTrainingTexts(version, [book], disallow_loading=disallow_loading)
             logger.info("Generating for %s", ref)
             generate_suggestions_for_items(
                 version, items,
@@ -95,7 +105,7 @@ def generate_suggestions(version, ref=None, missing_only=True):
         if items_all_done(version, items, ref=ref, missing_only=missing_only):
             return
 
-        training_texts = CatechismTrainingTexts(version)
+        training_texts = CatechismTrainingTexts(version, disallow_loading=disallow_loading)
         generate_suggestions_for_items(
             version, items, training_texts,
             ref=ref, missing_only=missing_only)
@@ -133,9 +143,10 @@ class TrainingTexts(object):
     The keys always include TextVersion object, so that even for different
     TrainingTexts objects the keys are unique
     """
-    def __init__(self):
+    def __init__(self, disallow_loading=False):
         self._keys = []
         self._values = {}
+        self.disallow_loading = disallow_loading
 
     def __getitem__(self, key):
         if key not in self._keys:
@@ -156,8 +167,8 @@ class TrainingTexts(object):
 
 
 class VersionTrainingText(TrainingTexts):
-    def __init__(self, version):
-        super(VersionTrainingText, self).__init__()
+    def __init__(self, version, **kwargs):
+        super(VersionTrainingText, self).__init__(**kwargs)
         self.version = version
 
     def __get__(self, key):
@@ -167,8 +178,8 @@ class VersionTrainingText(TrainingTexts):
 
 
 class BibleTrainingTexts(VersionTrainingText):
-    def __init__(self, version, books):
-        super(BibleTrainingTexts, self).__init__(version)
+    def __init__(self, version, books, **kwargs):
+        super(BibleTrainingTexts, self).__init__(version, **kwargs)
         all_books = []
         for book in books:
             for b in similar_books(book):
@@ -177,17 +188,21 @@ class BibleTrainingTexts(VersionTrainingText):
         self._keys = [(version.slug, b) for b in all_books]
 
     def lookup(self, key):
+        if self.disallow_loading:
+            raise LoadingNotAllowed()
         version_slug, book = key
         logger.info("Retrieving {0}: {1}".format(self.version.slug, book))
         return get_whole_book(book, self.version).text
 
 
 class CatechismTrainingTexts(VersionTrainingText):
-    def __init__(self, version):
-        super(CatechismTrainingTexts, self).__init__(version)
+    def __init__(self, version, **kwargs):
+        super(CatechismTrainingTexts, self).__init__(version, **kwargs)
         self._keys = [(version.slug, "all")]
 
     def lookup(self, key):
+        if self.disallow_loading:
+            raise LoadingNotAllowed()
         logger.info("Retrieving {0}".format(self.version.slug))
         items = list(self.version.qapairs.all())
         return ' '.join(p.question + " " + p.answer for p in items)
@@ -218,7 +233,7 @@ def generate_suggestions_for_items(version, items, training_texts, ref=None,
     ]
 
     for batch in chunks(items, 100):
-        batch = list(batch)  # need to iterate twice
+        batch = list(batch)  # need to iterate multiple times
 
         to_create = []
         to_delete = []
@@ -230,6 +245,9 @@ def generate_suggestions_for_items(version, items, training_texts, ref=None,
         else:
             existing_refs = None
 
+        # TODO Call ensure_text for Verse objects
+        if isinstance(batch[0], Verse):
+            ensure_text(batch)
         for item in batch:
             generate_suggestions_single_item(version, item,
                                              strategies,
@@ -237,12 +255,13 @@ def generate_suggestions_for_items(version, items, training_texts, ref=None,
                                              existing_refs=existing_refs,
                                              to_create=to_create,
                                              to_delete=to_delete)
-        if to_delete:
-            logger.info("Deleting %s old items", len(to_delete))
-            version.word_suggestion_data.filter(reference__in=to_delete).delete()
-        if to_create:
-            logger.info("Creating %s items", len(to_create))
-            WordSuggestionData.objects.bulk_create(to_create)
+        with transaction.atomic():
+            if to_delete:
+                logger.info("Deleting %s old items", len(to_delete))
+                version.word_suggestion_data.filter(reference__in=to_delete).delete()
+            if to_create:
+                logger.info("Creating %s items", len(to_create))
+                WordSuggestionData.objects.bulk_create(to_create)
         gc.collect()
 
 
@@ -256,6 +275,7 @@ def generate_suggestions_single_item(version, item,
     if ref is not None and item.reference != ref:
         return
 
+    # TODO - Make sure text is bulk loaded before hitting this.
     text = item.suggestion_text
 
     if missing_only:
