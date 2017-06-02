@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import logging
 
+from django.conf import settings
 from django.core.management.base import BaseCommand
 
 logger = logging.getLogger("bibleverses.suggestions")
@@ -14,6 +15,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         from bibleverses.suggestions import generate_suggestions
         from bibleverses.models import TextVersion
+
+        settings.LOADING_WORD_SUGGESTIONS = True
 
         versions = TextVersion.objects.all()
         slugs = options['version_slug']
