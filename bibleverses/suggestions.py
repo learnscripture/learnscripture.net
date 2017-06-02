@@ -10,6 +10,7 @@ import pickle
 import random
 import re
 from collections import Counter
+from functools import wraps
 
 import pykov
 from django.conf import settings
@@ -316,16 +317,52 @@ class MarkovSuggestions(SuggestionStrategy):
                             for label in self.training_texts.keys())
 
 
-def build_markov_chains_for_text(training_texts, label, size):
-    # Look on disk first
-    lookup_key = (label, size)
-    fname = filename_for_label(label, size)
-    if os.path.exists(fname):
-        logger.info("Loading %s", fname)
-        new_data = pickle.load(file(fname))
-        return new_data[lookup_key]
+def cache_results_with_pickle(filename_suffix):
+    """
+    Decorator generator, takes a filename suffix to use for different functions.
 
-    # Else do calcs
+    The actual function to be decorated should be a callable with a signature
+    foo(training_texts, label, *args) and caches the results using pickle and
+    saving to disk.
+
+    """
+    # Note that the functions this is designed for take both 'training_texts'
+    # and 'key'. This means they can avoid looking up the specific training text
+    # if the result is already cached.
+    def decorator(func):
+
+        @wraps(func)
+        def wrapper(training_texts, key, *args):
+            # For sanity checking, both the pickled data and the filename
+            # we save to includes the key
+            full_lookup_key = tuple([key] + list(args))
+
+            level = "_".join(str(a) for a in args)
+            fname = os.path.join(settings.DATA_ROOT,
+                                 "wordsuggestions",
+                                 "%s__level%s.%s.data" % ('_'.join(key),
+                                                          level,
+                                                          filename_suffix))
+            if os.path.exists(fname):
+                logger.info("Loading %s", fname)
+                new_data = pickle.load(file(fname))
+                return new_data[full_lookup_key]
+            else:
+                retval = func(training_texts, key, *args)
+
+                new_data = {full_lookup_key: retval}
+                ensure_dir(fname)
+                with file(fname, "w") as f:
+                    logger.info("Writing %s...", fname)
+                    pickle.dump(new_data, f)
+
+                return retval
+        return wrapper
+    return decorator
+
+
+@cache_results_with_pickle('markov')
+def build_markov_chains_for_text(training_texts, label, size):
     text = training_texts[label]
     sentences = text.split(".")
     v_accum, c_accum = pykov.maximum_likelihood_probabilities([])
@@ -342,14 +379,7 @@ def build_markov_chains_for_text(training_texts, label, size):
         v, c = pykov.maximum_likelihood_probabilities(chain_input, lag_time=1)
         matrices.append(c)
 
-    retval = sum_matrices(matrices)
-    # For sanity check, we include the key in the stored data as well
-    new_data = {lookup_key: retval}
-    ensure_dir(fname)
-    with file(fname, "w") as f:
-        logger.info("Writing %s...", fname)
-        pickle.dump(new_data, f)
-    return retval
+    return sum_matrices(matrices)
 
 
 def filename_for_label(label, size):
