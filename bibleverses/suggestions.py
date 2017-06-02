@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import gc
 import hashlib
 import logging
+import operator
 import os
 import pickle
 import random
@@ -12,8 +13,10 @@ import re
 from collections import Counter
 from functools import wraps
 
+import numpy
 import pykov
 from django.conf import settings
+from django.utils.functional import cached_property
 
 from bibleverses.models import (BIBLE_BOOKS, QAPair, TextType, TextVersion, Verse, WordSuggestionData, get_whole_book,
                                 is_punctuation, split_into_words)
@@ -29,6 +32,19 @@ logger = logging.getLogger(__name__)
 # generating in bulk. However, at other times it has been necessary to edit a
 # text via the admin, and this triggers 'fix_item' being called to fix up the
 # word suggestions.
+
+# The design of this code is controlled by a number of considerations:
+
+# 1) Markov analysis is CPU and memory intensive
+#
+# 2) For some texts, we are not allowed to keep the whole text in our
+#    database.
+
+# For this reason, we pickle intermediate analysis results (markov, word
+# frequencies etc.) so that we can perform fixes without needing to download the
+# whole text. We also delay loading of actual texts from disk (or the text API
+# service as late as possible.
+
 
 def fix_item(version_slug, reference):
     version = TextVersion.objects.get(slug=version_slug)
@@ -282,6 +298,53 @@ def generate_suggestions_single_item(version, item,
                                         ))
 
 
+def cache_results_with_pickle(filename_suffix):
+    """
+    Decorator generator, takes a filename suffix to use for different functions.
+
+    The actual function to be decorated should be a callable with a signature
+    foo(training_texts, label, *args) and caches the results using pickle and
+    saving to disk.
+
+    """
+    # Note that the functions this is designed for take both 'training_texts'
+    # and 'key'. This means they can avoid looking up the specific training text
+    # if the result is already cached.
+    def decorator(func):
+
+        @wraps(func)
+        def wrapper(training_texts, key, *args):
+            # For sanity checking, both the pickled data and the filename
+            # we save to includes the key
+            full_lookup_key = tuple([key] + list(args))
+
+            if args:
+                level = "__level" + "_".join(str(a) for a in args)
+            else:
+                level = ""
+            fname = os.path.join(settings.DATA_ROOT,
+                                 "wordsuggestions",
+                                 "%s%s.%s.data" % ('_'.join(key),
+                                                   level,
+                                                   filename_suffix))
+            if os.path.exists(fname):
+                logger.info("Loading %s", fname)
+                new_data = pickle.load(file(fname))
+                return new_data[full_lookup_key]
+            else:
+                retval = func(training_texts, key, *args)
+
+                new_data = {full_lookup_key: retval}
+                ensure_dir(fname)
+                with file(fname, "w") as f:
+                    logger.info("Writing %s...", fname)
+                    pickle.dump(new_data, f)
+
+                return retval
+        return wrapper
+    return decorator
+
+
 class SuggestionStrategy(object):
     def get_suggestions(self, words, i, count, suggestions_so_far):
         raise NotImplementedError()
@@ -331,12 +394,23 @@ class ThesaurusSuggestionsOther(SuggestionStrategy):
 
 class FirstWordSuggestions(SuggestionStrategy):
     def __init__(self, training_texts):
-        all_text = ' '.join(training_texts.values())
-        first_words = sentence_first_words(all_text)
-        self.first_word_frequencies = frequency_pairs(first_words)
+        self.training_texts = training_texts
+
+    @cached_property
+    def first_word_frequencies(self):
+        freqs = [build_first_word_frequencies(self.training_texts, key)
+                 for key in self.training_texts.keys()]
+        return aggregate_frequency_pairs(freqs)
 
     def get_suggestions(self, words, i, count, suggestions_so_far):
         return self.first_word_frequencies[:]
+
+
+@cache_results_with_pickle('firstwordfrequencies')
+def build_first_word_frequencies(training_texts, key):
+    text = training_texts[key]
+    first_words = sentence_first_words(text)
+    return frequency_pairs(first_words)
 
 
 class MarkovSuggestions(SuggestionStrategy):
@@ -374,50 +448,6 @@ class MarkovSuggestions(SuggestionStrategy):
                             for label in self.training_texts.keys())
 
 
-def cache_results_with_pickle(filename_suffix):
-    """
-    Decorator generator, takes a filename suffix to use for different functions.
-
-    The actual function to be decorated should be a callable with a signature
-    foo(training_texts, label, *args) and caches the results using pickle and
-    saving to disk.
-
-    """
-    # Note that the functions this is designed for take both 'training_texts'
-    # and 'key'. This means they can avoid looking up the specific training text
-    # if the result is already cached.
-    def decorator(func):
-
-        @wraps(func)
-        def wrapper(training_texts, key, *args):
-            # For sanity checking, both the pickled data and the filename
-            # we save to includes the key
-            full_lookup_key = tuple([key] + list(args))
-
-            level = "_".join(str(a) for a in args)
-            fname = os.path.join(settings.DATA_ROOT,
-                                 "wordsuggestions",
-                                 "%s__level%s.%s.data" % ('_'.join(key),
-                                                          level,
-                                                          filename_suffix))
-            if os.path.exists(fname):
-                logger.info("Loading %s", fname)
-                new_data = pickle.load(file(fname))
-                return new_data[full_lookup_key]
-            else:
-                retval = func(training_texts, key, *args)
-
-                new_data = {full_lookup_key: retval}
-                ensure_dir(fname)
-                with file(fname, "w") as f:
-                    logger.info("Writing %s...", fname)
-                    pickle.dump(new_data, f)
-
-                return retval
-        return wrapper
-    return decorator
-
-
 @cache_results_with_pickle('markov')
 def build_markov_chains_for_text(training_texts, label, size):
     text = training_texts[label]
@@ -445,7 +475,7 @@ def filename_for_label(label, size):
 
 class RandomLocalSuggestions(SuggestionStrategy):
     def get_suggestions(self, words, i, count, suggestions_so_far):
-        count = max(count, 10)
+        count = min(count, 10)
         # Emphasise the words that come after the current one,
         # exclude the one immediately before as that is very unlikely,
         FACTOR = 5
@@ -462,16 +492,37 @@ class RandomLocalSuggestions(SuggestionStrategy):
 
 class RandomGlobalSuggestions(SuggestionStrategy):
     def __init__(self, training_texts):
-        all_text = ' '.join(training_texts.values())
-        all_words = split_into_words_for_suggestions(all_text)
-        self.all_words = all_words
+        self.training_texts = training_texts
+
+    @cached_property
+    def word_distribution(self):
+        """
+        Tuple of (list_of_words, list_of_frequencies) for
+        all words in training texts.
+        """
+        word_counter = dict(aggregate_frequency_pairs(
+            get_word_frequencies(self.training_texts, key)
+            for key in self.training_texts.keys()))
+        freqs = normalise_probabilities(word_counter)
+        items, probs = zip(*freqs.items())
+        return items, probs
 
     def get_suggestions(self, words, i, count, suggestions_so_far):
-        count = max(count, 10)
+        count = min(count, 10)
+        items, probs = self.word_distribution
         c = Counter()
         for i in range(0, count):
-            c[random.choice(self.all_words)] += 1
+            idx = numpy.random.choice(len(items), p=probs)
+            word = items[idx]
+            c[word] += 1
         return c.items()
+
+
+@cache_results_with_pickle('wordfrequencies')
+def get_word_frequencies(training_texts, key):
+    text = training_texts[key]
+    words = split_into_words_for_suggestions(text)
+    return Counter(words)
 
 
 def scale_suggestions(suggestions, factor=1.0):
@@ -488,6 +539,26 @@ def merge_suggestions(s1, s2):
 
 def frequency_pairs(words):
     return scale_suggestions(Counter(words).items())
+
+
+def aggregate_frequency_pairs(freqs):
+    return scale_suggestions(reduce(operator.add,
+                                    [Counter(dict(s)) for s in freqs]).items())
+
+
+def pick_from_distribution(counter):
+    c2 = normalise_probabilities(counter)
+    items, probs = zip(*c2.items())
+    choice = numpy.random.choice(len(items), p=probs)
+    return items[choice]
+
+
+def normalise_probabilities(f):
+    sm = sum(f.values())
+    retval = f.__class__()
+    for k, v in f.items():
+        retval[k] = (1.0 * v) / sm
+    return retval
 
 
 def hash_text(text):
