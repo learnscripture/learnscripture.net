@@ -65,7 +65,7 @@ def generate_suggestions(version, ref=None, missing_only=True):
             v = version.get_verse_list(ref)[0]
             book = BIBLE_BOOKS[v.book_number]
             items = [v]
-            training_texts = get_training_texts_for_book(version, book)
+            training_texts = BibleTrainingTexts(version, book)
             logger.info("Generating for %s", ref)
             generate_suggestions_for_items(
                 version, items,
@@ -79,10 +79,9 @@ def generate_suggestions(version, ref=None, missing_only=True):
         if items_all_done(version, items, ref=ref, missing_only=missing_only):
             return
 
-        training_text = ' '.join(p.question + " " + p.answer for p in items)
+        training_texts = CatechismTrainingTexts(version)
         generate_suggestions_for_items(
-            version, items,
-            {(version.slug, "all"): training_text},
+            version, items, training_texts,
             ref=ref, missing_only=missing_only)
 
 
@@ -103,7 +102,7 @@ def generate_suggestions_for_book(version, book, missing_only=True):
     items = get_whole_book(book, version).verses
     if items_all_done(version, items, missing_only=missing_only):
         return
-    training_texts = get_training_texts_for_book(version, book)
+    training_texts = BibleTrainingTexts(version, book)
     thesaurus = version_thesaurus(version)
     generate_suggestions_for_items(
         version, items,
@@ -111,8 +110,66 @@ def generate_suggestions_for_book(version, book, missing_only=True):
         thesaurus=thesaurus)
 
 
-def get_training_texts_for_book(version, book):
-    return {(version.slug, b): get_whole_book(b, version).text for b in similar_books(book)}
+class TrainingTexts(object):
+    """
+    Dictionary like storage object that returns training texts (lazily)
+
+    The keys always include TextVersion object, so that even for different
+    TrainingTexts objects the keys are unique
+    """
+    def __init__(self):
+        self._keys = []
+        self._values = {}
+
+    def __getitem__(self, key):
+        if key not in self._keys:
+            raise LookupError(key)
+        if key not in self._values:
+            retval = self.lookup(key)
+            self._values[key] = retval
+        return self._values[key]
+
+    def keys(self):
+        return self._keys[:]
+
+    def values(self):
+        return [self[k] for k in self.keys()]
+
+    def lookup(self, key):
+        raise NotImplementedError()
+
+
+class VersionTrainingText(TrainingTexts):
+    def __init__(self, version):
+        super(VersionTrainingText, self).__init__()
+        self.version = version
+
+    def __get__(self, key):
+        version_slug, _ = key
+        assert version_slug == self.version.slug
+        return super(VersionTrainingText, self).__get__(key)
+
+
+class BibleTrainingTexts(VersionTrainingText):
+    def __init__(self, version, book):
+        super(BibleTrainingTexts, self).__init__(version)
+        self._keys = [(version.slug, b) for b in similar_books(book)]
+
+    def lookup(self, key):
+        version_slug, book = key
+        logger.info("Retrieving {0}: {1}".format(self.version.slug, book))
+        return get_whole_book(book, self.version).text
+
+
+class CatechismTrainingTexts(VersionTrainingText):
+    def __init__(self, version):
+        super(CatechismTrainingTexts, self).__init__(version)
+        self._keys = [(version.slug, "all")]
+
+    def lookup(self, key):
+        logger.info("Retrieving {0}".format(self.version.slug))
+        items = list(self.version.qapairs.all())
+        return ' '.join(p.question + " " + p.answer for p in items)
 
 
 MIN_SUGGESTIONS = 20
