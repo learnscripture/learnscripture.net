@@ -92,7 +92,9 @@ def item_suggestions_need_updating(item):
         return saved_hash != current_hash
 
 
-def generate_suggestions(version, ref=None, missing_only=True, disallow_loading=False):
+def generate_suggestions(version, ref=None, missing_only=True,
+                         disallow_loading=False,
+                         force_analysis=False):
 
     if version.text_type == TextType.BIBLE:
         if ref is not None:
@@ -103,20 +105,23 @@ def generate_suggestions(version, ref=None, missing_only=True, disallow_loading=
             logger.info("Generating for %s", ref)
             generate_suggestions_for_items(
                 version, items,
-                training_texts, ref=ref, missing_only=missing_only)
+                training_texts, ref=ref, missing_only=missing_only,
+                force_analysis=force_analysis)
         else:
             for book in BIBLE_BOOKS:
-                generate_suggestions_for_book(version, book, missing_only=missing_only)
+                generate_suggestions_for_book(version, book, missing_only=missing_only,
+                                              force_analysis=force_analysis)
 
     elif version.text_type == TextType.CATECHISM:
         items = list(version.qapairs.all())
-        if items_all_done(version, items, ref=ref, missing_only=missing_only):
+        if not force_analysis and items_all_done(version, items, ref=ref, missing_only=missing_only):
             return
 
         training_texts = CatechismTrainingTexts(version, disallow_loading=disallow_loading)
         generate_suggestions_for_items(
             version, items, training_texts,
-            ref=ref, missing_only=missing_only)
+            ref=ref, missing_only=missing_only,
+            force_analysis=force_analysis)
 
 
 def items_all_done(version, items, ref=None, missing_only=True):
@@ -131,15 +136,16 @@ def items_all_done(version, items, ref=None, missing_only=True):
     return False
 
 
-def generate_suggestions_for_book(version, book, missing_only=True):
+def generate_suggestions_for_book(version, book, missing_only=True, force_analysis=False):
     logger.info("Generating for %s", book)
     items = get_whole_book(book, version, ensure_text_present=False).verses
-    if items_all_done(version, items, missing_only=missing_only):
+    if not force_analysis and items_all_done(version, items, missing_only=missing_only):
         return
     training_texts = BibleTrainingTexts(version, [book])
     generate_suggestions_for_items(
         version, items,
-        training_texts, missing_only=missing_only)
+        training_texts, missing_only=missing_only,
+        force_analysis=force_analysis)
 
 
 class TrainingTexts(object):
@@ -219,7 +225,8 @@ MAX_SUGGESTIONS = 40
 
 
 def generate_suggestions_for_items(version, items, training_texts, ref=None,
-                                   missing_only=True, skip_missing_text=True):
+                                   missing_only=True, skip_missing_text=True,
+                                   force_analysis=False):
     # Strategies for finding alternatives, ordered according to how good they will be
 
     thesaurus = version_thesaurus(version)
@@ -238,6 +245,8 @@ def generate_suggestions_for_items(version, items, training_texts, ref=None,
         (lambda i: True, RandomGlobalSuggestions(training_texts)),
         (lambda i: True, ThesaurusSuggestionsOther(thesaurus)),
     ]
+    if force_analysis:
+        force_use_of_strategies(strategies)
 
     for batch in chunks(items, 100):
         batch = list(batch)  # need to iterate multiple times
@@ -334,6 +343,12 @@ def generate_suggestions_single_item(version, item,
                                         suggestions=item_suggestions,
                                         hash=hash_text(text),
                                         ))
+
+
+def force_use_of_strategies(strategies):
+    for condition, strategy in strategies:
+        strategy.get_suggestions(["dummy", "words"],
+                                 0, MIN_SUGGESTIONS, [])
 
 
 def cache_results_with_pickle(filename_suffix):
