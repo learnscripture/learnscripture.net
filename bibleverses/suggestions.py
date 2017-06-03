@@ -71,7 +71,6 @@ def fix_item(version_slug, reference):
     # current algo assumes access to the whole text. So just log a warning
     disallow_loading = partial_data_available(version_slug)
     try:
-        # TODO complete
         generate_suggestions(version, missing_only=False, ref=reference, disallow_loading=disallow_loading)
     except LoadingNotAllowed:
         logger.warn("Need to create word suggestions for %s %s but can't because text is not available and saved analysis is not complete",
@@ -138,11 +137,9 @@ def generate_suggestions_for_book(version, book, missing_only=True):
     if items_all_done(version, items, missing_only=missing_only):
         return
     training_texts = BibleTrainingTexts(version, [book])
-    thesaurus = version_thesaurus(version)
     generate_suggestions_for_items(
         version, items,
-        training_texts, missing_only=missing_only,
-        thesaurus=thesaurus)
+        training_texts, missing_only=missing_only)
 
 
 class TrainingTexts(object):
@@ -222,23 +219,24 @@ MAX_SUGGESTIONS = 40
 
 
 def generate_suggestions_for_items(version, items, training_texts, ref=None,
-                                   missing_only=True, thesaurus=None):
+                                   missing_only=True):
     # Strategies for finding alternatives, ordered according to how good they will be
 
+    thesaurus = version_thesaurus(version)
     strategies = [
         (lambda i: i == 0, FirstWordSuggestions(training_texts)),
         (lambda i: i > 2, MarkovSuggestions(3, training_texts)),
         (lambda i: i > 1, MarkovSuggestions(2, training_texts)),
         # Thesaurus isn't always very good, because it can give the game away,
         # and also has some bizarre suggestions, so push down a bit
-        (lambda i: thesaurus is not None, ThesaurusSuggestions(thesaurus)),
+        (lambda i: True, ThesaurusSuggestions(thesaurus)),
         # random from same verse are actually quite good,
         # because there are lots of cases where you can
         # miss out a word/phrase and it still makes sense
         (lambda i: True, RandomLocalSuggestions()),
         (lambda i: i > 0, MarkovSuggestions(1, training_texts)),
         (lambda i: True, RandomGlobalSuggestions(training_texts)),
-        (lambda i: thesaurus is not None, ThesaurusSuggestionsOther(thesaurus)),
+        (lambda i: True, ThesaurusSuggestionsOther(thesaurus)),
     ]
 
     for batch in chunks(items, 100):
@@ -501,10 +499,6 @@ def build_markov_chains_for_text(training_texts, label, size):
         matrices.append(c)
 
     return sum_matrices(matrices)
-
-
-def filename_for_label(label, size):
-    return os.path.join(settings.DATA_ROOT, "wordsuggestions", "%s__level%s.markov.data" % ('_'.join(label), str(size)))
 
 
 class RandomLocalSuggestions(SuggestionStrategy):
