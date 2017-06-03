@@ -114,8 +114,12 @@ def generate_suggestions(version, ref=None, missing_only=True,
                 training_texts, ref=ref, missing_only=missing_only)
         else:
             if force_analysis:
-                force_use_of_strategies(version,
-                                        BibleTrainingTexts(version, BIBLE_BOOKS))
+                # Could do:
+                #  training_texts = BibleTrainingTexts(version, BIBLE_BOOKS)
+                # but it ends up summing massive matrices. So we split:
+                for g in BIBLE_BOOK_GROUPS:
+                    t = BibleTrainingTexts(version, g)
+                    force_use_of_strategies(version, t)
 
             for book in BIBLE_BOOKS:
                 generate_suggestions_for_book(version, book, missing_only=missing_only)
@@ -815,12 +819,12 @@ NT_HISTORY = ["Matthew", "Mark", "Luke", "John", "Acts"]
 
 EPISTLES = ['Romans', '1 Corinthians', '2 Corinthians', 'Galatians', 'Ephesians', 'Philippians', 'Colossians', '1 Thessalonians', '2 Thessalonians', '1 Timothy', '2 Timothy', 'Titus', 'Philemon', 'Hebrews', 'James', '1 Peter', '2 Peter', '1 John', '2 John', '3 John', 'Jude', 'Revelation']
 
-groups = [TORAH, HISTORY, WISDOM, PROPHETS, NT_HISTORY, EPISTLES]
+BIBLE_BOOK_GROUPS = [TORAH, HISTORY, WISDOM, PROPHETS, NT_HISTORY, EPISTLES]
 
 
 def similar_books(book_name):
     retval = []
-    for g in groups:
+    for g in BIBLE_BOOK_GROUPS:
         if book_name in g:
             retval.extend(g)
     if book_name not in retval:
