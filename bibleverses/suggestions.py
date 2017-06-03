@@ -99,6 +99,9 @@ def generate_suggestions(version, ref=None, missing_only=True,
                          disallow_loading=False,
                          force_analysis=False):
 
+    if force_analysis:
+        assert disallow_loading is False
+
     if version.text_type == TextType.BIBLE:
         if ref is not None:
             v = version.get_verse_list(ref)[0]
@@ -108,60 +111,47 @@ def generate_suggestions(version, ref=None, missing_only=True,
             logger.info("Generating for %s", ref)
             generate_suggestions_for_items(
                 version, items,
-                training_texts, ref=ref, missing_only=missing_only,
-                force_analysis=force_analysis)
+                training_texts, ref=ref, missing_only=missing_only)
         else:
+            if force_analysis:
+                force_use_of_strategies(version,
+                                        BibleTrainingTexts(version, BIBLE_BOOKS))
+
             for book in BIBLE_BOOKS:
-                generate_suggestions_for_book(version, book, missing_only=missing_only,
-                                              force_analysis=force_analysis)
+                generate_suggestions_for_book(version, book, missing_only=missing_only)
 
     elif version.text_type == TextType.CATECHISM:
+        training_texts = CatechismTrainingTexts(version, disallow_loading=disallow_loading)
+        if force_analysis:
+            force_use_of_strategies(version,
+                                    training_texts)
+
         items = list(version.qapairs.all())
-        if not force_analysis and items_all_done(version, items, ref=ref, missing_only=missing_only):
+        if items_all_done(version, items, ref=ref, missing_only=missing_only):
             return
 
-        training_texts = CatechismTrainingTexts(version, disallow_loading=disallow_loading)
         generate_suggestions_for_items(
             version, items, training_texts,
-            ref=ref, missing_only=missing_only,
-            force_analysis=force_analysis)
+            ref=ref, missing_only=missing_only)
 
 
-def generate_suggestions_for_book(version, book, missing_only=True, force_analysis=False):
+def generate_suggestions_for_book(version, book, missing_only=True):
     logger.info("Generating for %s", book)
     items = get_whole_book(book, version, ensure_text_present=False).verses
-    if not force_analysis and items_all_done(version, items, missing_only=missing_only):
+    if items_all_done(version, items, missing_only=missing_only):
         return
     training_texts = BibleTrainingTexts(version, [book])
     generate_suggestions_for_items(
         version, items,
-        training_texts, missing_only=missing_only,
-        force_analysis=force_analysis)
+        training_texts, missing_only=missing_only)
 
 
 def generate_suggestions_for_items(version, items, training_texts, ref=None,
-                                   missing_only=True, skip_missing_text=True,
-                                   force_analysis=False):
+                                   missing_only=True, skip_missing_text=True):
     # Strategies for finding alternatives, ordered according to how good they will be
 
     thesaurus = version_thesaurus(version)
-    strategies = [
-        (lambda i: i == 0, FirstWordSuggestions(training_texts)),
-        (lambda i: i > 2, MarkovSuggestions(3, training_texts)),
-        (lambda i: i > 1, MarkovSuggestions(2, training_texts)),
-        # Thesaurus isn't always very good, because it can give the game away,
-        # and also has some bizarre suggestions, so push down a bit
-        (lambda i: True, ThesaurusSuggestions(thesaurus)),
-        # random from same verse are actually quite good,
-        # because there are lots of cases where you can
-        # miss out a word/phrase and it still makes sense
-        (lambda i: True, RandomLocalSuggestions()),
-        (lambda i: i > 0, MarkovSuggestions(1, training_texts)),
-        (lambda i: True, RandomGlobalSuggestions(training_texts)),
-        (lambda i: True, ThesaurusSuggestionsOther(thesaurus)),
-    ]
-    if force_analysis:
-        force_use_of_strategies(strategies)
+    strategies = make_strategies(training_texts, thesaurus)
 
     for batch in chunks(items, 100):
         batch = list(batch)  # need to iterate multiple times
@@ -195,6 +185,24 @@ def generate_suggestions_for_items(version, items, training_texts, ref=None,
                 logger.info("Creating %s items", len(to_create))
                 WordSuggestionData.objects.bulk_create(to_create)
         gc.collect()
+
+
+def make_strategies(training_texts, thesaurus):
+    return [
+        (lambda i: i == 0, FirstWordSuggestions(training_texts)),
+        (lambda i: i > 2, MarkovSuggestions(3, training_texts)),
+        (lambda i: i > 1, MarkovSuggestions(2, training_texts)),
+        # Thesaurus isn't always very good, because it can give the game away,
+        # and also has some bizarre suggestions, so push down a bit
+        (lambda i: True, ThesaurusSuggestions(thesaurus)),
+        # random from same verse are actually quite good,
+        # because there are lots of cases where you can
+        # miss out a word/phrase and it still makes sense
+        (lambda i: True, RandomLocalSuggestions()),
+        (lambda i: i > 0, MarkovSuggestions(1, training_texts)),
+        (lambda i: True, RandomGlobalSuggestions(training_texts)),
+        (lambda i: True, ThesaurusSuggestionsOther(thesaurus)),
+    ]
 
 
 def generate_suggestions_single_item(version, item,
@@ -347,7 +355,10 @@ class CatechismTrainingTexts(VersionTrainingText):
 
 
 # Strategies:
-def force_use_of_strategies(strategies):
+
+def force_use_of_strategies(version, training_texts):
+    thesaurus = version_thesaurus(version)
+    strategies = make_strategies(training_texts, thesaurus)
     for condition, strategy in strategies:
         strategy.get_suggestions(["dummy", "words"],
                                  0, MIN_SUGGESTIONS, [])
