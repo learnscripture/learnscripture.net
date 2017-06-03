@@ -46,6 +46,9 @@ logger = logging.getLogger(__name__)
 # whole text. We also delay loading of actual texts from disk (or the text API
 # service as late as possible.
 
+MIN_SUGGESTIONS = 20
+MAX_SUGGESTIONS = 40
+
 
 class LoadingNotAllowed(Exception):
     pass
@@ -124,18 +127,6 @@ def generate_suggestions(version, ref=None, missing_only=True,
             force_analysis=force_analysis)
 
 
-def items_all_done(version, items, ref=None, missing_only=True):
-    if missing_only:
-        references = [item.reference for item in items]
-        if ref is not None and ref not in references:
-            return True
-        if version.word_suggestion_data.filter(reference__in=references).count() == len(references):
-            # All done
-            logger.info("Skipping %s %s\n", version.slug, ' '.join(references))
-            return True
-    return False
-
-
 def generate_suggestions_for_book(version, book, missing_only=True, force_analysis=False):
     logger.info("Generating for %s", book)
     items = get_whole_book(book, version, ensure_text_present=False).verses
@@ -146,82 +137,6 @@ def generate_suggestions_for_book(version, book, missing_only=True, force_analys
         version, items,
         training_texts, missing_only=missing_only,
         force_analysis=force_analysis)
-
-
-class TrainingTexts(object):
-    """
-    Dictionary like storage object that returns training texts (lazily)
-
-    The keys always include TextVersion object, so that even for different
-    TrainingTexts objects the keys are unique
-    """
-    def __init__(self, disallow_loading=False):
-        self._keys = []
-        self._values = {}
-        self.disallow_loading = disallow_loading
-
-    def __getitem__(self, key):
-        if key not in self._keys:
-            raise LookupError(key)
-        if key not in self._values:
-            retval = self.lookup(key)
-            self._values[key] = retval
-        return self._values[key]
-
-    def keys(self):
-        return self._keys[:]
-
-    def values(self):
-        return [self[k] for k in self.keys()]
-
-    def lookup(self, key):
-        raise NotImplementedError()
-
-
-class VersionTrainingText(TrainingTexts):
-    def __init__(self, version, **kwargs):
-        super(VersionTrainingText, self).__init__(**kwargs)
-        self.version = version
-
-    def __get__(self, key):
-        version_slug, _ = key
-        assert version_slug == self.version.slug
-        return super(VersionTrainingText, self).__get__(key)
-
-
-class BibleTrainingTexts(VersionTrainingText):
-    def __init__(self, version, books, **kwargs):
-        super(BibleTrainingTexts, self).__init__(version, **kwargs)
-        all_books = []
-        for book in books:
-            for b in similar_books(book):
-                if b not in all_books:
-                    all_books.append(b)
-        self._keys = [(version.slug, b) for b in all_books]
-
-    def lookup(self, key):
-        if self.disallow_loading:
-            raise LoadingNotAllowed()
-        version_slug, book = key
-        logger.info("Retrieving {0}: {1}".format(self.version.slug, book))
-        return get_whole_book(book, self.version).text
-
-
-class CatechismTrainingTexts(VersionTrainingText):
-    def __init__(self, version, **kwargs):
-        super(CatechismTrainingTexts, self).__init__(version, **kwargs)
-        self._keys = [(version.slug, "all")]
-
-    def lookup(self, key):
-        if self.disallow_loading:
-            raise LoadingNotAllowed()
-        logger.info("Retrieving {0}".format(self.version.slug))
-        items = list(self.version.qapairs.all())
-        return ' '.join(p.question + " " + p.answer for p in items)
-
-
-MIN_SUGGESTIONS = 20
-MAX_SUGGESTIONS = 40
 
 
 def generate_suggestions_for_items(version, items, training_texts, ref=None,
@@ -345,6 +260,93 @@ def generate_suggestions_single_item(version, item,
                                         ))
 
 
+def items_all_done(version, items, ref=None, missing_only=True):
+    if missing_only:
+        references = [item.reference for item in items]
+        if ref is not None and ref not in references:
+            return True
+        if version.word_suggestion_data.filter(reference__in=references).count() == len(references):
+            # All done
+            logger.info("Skipping %s %s\n", version.slug, ' '.join(references))
+            return True
+    return False
+
+
+# Training texts:
+
+class TrainingTexts(object):
+    """
+    Dictionary like storage object that returns training texts (lazily)
+
+    The keys always include TextVersion object, so that even for different
+    TrainingTexts objects the keys are unique
+    """
+    def __init__(self, disallow_loading=False):
+        self._keys = []
+        self._values = {}
+        self.disallow_loading = disallow_loading
+
+    def __getitem__(self, key):
+        if key not in self._keys:
+            raise LookupError(key)
+        if key not in self._values:
+            retval = self.lookup(key)
+            self._values[key] = retval
+        return self._values[key]
+
+    def keys(self):
+        return self._keys[:]
+
+    def values(self):
+        return [self[k] for k in self.keys()]
+
+    def lookup(self, key):
+        raise NotImplementedError()
+
+
+class VersionTrainingText(TrainingTexts):
+    def __init__(self, version, **kwargs):
+        super(VersionTrainingText, self).__init__(**kwargs)
+        self.version = version
+
+    def __get__(self, key):
+        version_slug, _ = key
+        assert version_slug == self.version.slug
+        return super(VersionTrainingText, self).__get__(key)
+
+
+class BibleTrainingTexts(VersionTrainingText):
+    def __init__(self, version, books, **kwargs):
+        super(BibleTrainingTexts, self).__init__(version, **kwargs)
+        all_books = []
+        for book in books:
+            for b in similar_books(book):
+                if b not in all_books:
+                    all_books.append(b)
+        self._keys = [(version.slug, b) for b in all_books]
+
+    def lookup(self, key):
+        if self.disallow_loading:
+            raise LoadingNotAllowed()
+        version_slug, book = key
+        logger.info("Retrieving {0}: {1}".format(self.version.slug, book))
+        return get_whole_book(book, self.version).text
+
+
+class CatechismTrainingTexts(VersionTrainingText):
+    def __init__(self, version, **kwargs):
+        super(CatechismTrainingTexts, self).__init__(version, **kwargs)
+        self._keys = [(version.slug, "all")]
+
+    def lookup(self, key):
+        if self.disallow_loading:
+            raise LoadingNotAllowed()
+        logger.info("Retrieving {0}".format(self.version.slug))
+        items = list(self.version.qapairs.all())
+        return ' '.join(p.question + " " + p.answer for p in items)
+
+
+# Strategies:
 def force_use_of_strategies(strategies):
     for condition, strategy in strategies:
         strategy.get_suggestions(["dummy", "words"],
