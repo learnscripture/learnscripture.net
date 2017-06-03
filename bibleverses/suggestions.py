@@ -219,7 +219,7 @@ MAX_SUGGESTIONS = 40
 
 
 def generate_suggestions_for_items(version, items, training_texts, ref=None,
-                                   missing_only=True):
+                                   missing_only=True, skip_missing_text=True):
     # Strategies for finding alternatives, ordered according to how good they will be
 
     thesaurus = version_thesaurus(version)
@@ -252,14 +252,15 @@ def generate_suggestions_for_items(version, items, training_texts, ref=None,
         else:
             existing_refs = None
 
-        # TODO Call ensure_text for Verse objects
-        if isinstance(batch[0], Verse):
-            ensure_text(batch)
+        if not skip_missing_text:
+            if isinstance(batch[0], Verse):
+                ensure_text(batch)
         for item in batch:
             generate_suggestions_single_item(version, item,
                                              strategies,
                                              ref=ref, missing_only=missing_only,
                                              existing_refs=existing_refs,
+                                             skip_missing_text=skip_missing_text,
                                              to_create=to_create,
                                              to_delete=to_delete)
         with transaction.atomic():
@@ -276,19 +277,24 @@ def generate_suggestions_single_item(version, item,
                                      strategies,
                                      ref=None,
                                      missing_only=True,
+                                     skip_missing_text=True,
                                      existing_refs=None,
                                      to_create=None,
                                      to_delete=None):
     if ref is not None and item.reference != ref:
         return
 
-    # TODO - Make sure text is bulk loaded before hitting this.
+    if (skip_missing_text and isinstance(item, Verse) and
+            item.text_saved == ""):
+        logger.info("Skipping %s %s which has no saved text", version.slug, item.reference)
+        return
+
     text = item.suggestion_text
 
     if missing_only:
         if item.reference in existing_refs:
             # Don't recreate
-            logger.info("Skipping %s %s", version.slug, item.reference)
+            logger.info("Skipping %s %s as suggestions already exist", version.slug, item.reference)
             return
     else:
         # Clear out old suggestions first
