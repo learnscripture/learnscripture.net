@@ -53,22 +53,17 @@ class LoadingNotAllowed(Exception):
 
 def fix_item(version_slug, reference):
     version = TextVersion.objects.get(slug=version_slug)
-    # Before recreating, check if the hash has changed. This is especially
-    # important for versions where we only partially store locally and have to
-    # fetch the data again (triggering a save and this function being called)
-    suggestion_data = WordSuggestionData.objects.filter(version_slug=version_slug,
-                                                        reference=reference)
     item = version.get_item_by_reference(reference)
     if getattr(item, 'missing', False):
         return  # Doesn't need fixing
 
-    if suggestion_data:
-        saved_hash = suggestion_data[0].hash
-        current_hash = hash_text(item.suggestion_text)
-        if saved_hash == current_hash:
-            logger.info("Skipping creation of word suggestions for unchanged %s %s",
-                        version_slug, reference)
-            return
+    # Before recreating, check if the hash has changed. This is especially
+    # important for versions where we only partially store locally and have to
+    # fetch the data again (triggering a save and this function being called)
+    if not item_suggestions_need_updating(item):
+        logger.info("Skipping creation of word suggestions for unchanged %s %s",
+                    version_slug, reference)
+        return
 
     # To avoid loading large amounts of data over the API,
     # we make it illegal to load any.
@@ -82,6 +77,20 @@ def fix_item(version_slug, reference):
         logger.warn("Need to create word suggestions for %s %s but can't because text is not available and saved analysis is not complete",
                     version_slug, reference)
         return
+
+
+def item_suggestions_need_updating(item):
+    version_slug = item.version.slug
+    reference = item.reference
+    suggestion_data = WordSuggestionData.objects.filter(version_slug=version_slug,
+                                                        reference=reference).first()
+
+    if suggestion_data is None:
+        return True
+    else:
+        saved_hash = suggestion_data.hash
+        current_hash = hash_text(item.suggestion_text)
+        return saved_hash != current_hash
 
 
 def generate_suggestions(version, ref=None, missing_only=True, disallow_loading=False):

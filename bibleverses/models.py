@@ -364,7 +364,7 @@ class Verse(models.Model):
     # DB, just so that 'text' can find it.
     text_saved = models.TextField(blank=True)
     text_tsv = VectorField()
-    text_fetched_at = models.DateTimeField(null=True)
+    text_fetched_at = models.DateTimeField(null=True, blank=True)
 
     # De-normalised fields
     # Public facing fields are 1-indexed, others are 0-indexed.

@@ -23,6 +23,12 @@ def verse_set_chosen_receiver(sender, **kwargs):
 def verse_saved(sender, **kwargs):
     verse = kwargs['instance']
     if should_update_word_suggestions_on_save():
+        from bibleverses.suggestions import item_suggestions_need_updating
+        # We definitely have text now, might not later,
+        # so do this check at this point to avoid unnecessary
+        # work and refetching the data from the API service
+        if not item_suggestions_need_updating(verse):
+            return
         fix_item_suggestions.delay(verse.version.slug, verse.reference)
 
 
@@ -30,4 +36,7 @@ def verse_saved(sender, **kwargs):
 def qapair_saved(sender, **kwargs):
     qapair = kwargs['instance']
     if should_update_word_suggestions_on_save():
+        from bibleverses.suggestions import item_suggestions_need_updating
+        if not item_suggestions_need_updating(qapair):
+            return
         fix_item_suggestions.delay(qapair.catechism.slug, qapair.reference)

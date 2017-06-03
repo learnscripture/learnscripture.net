@@ -6,6 +6,7 @@ import unittest2
 from accounts.models import Identity
 from bibleverses.models import (InvalidVerseReference, TextVersion, Verse, VerseSet, VerseSetType, get_passage_sections,
                                 split_into_words)
+from bibleverses.suggestions import item_suggestions_need_updating, hash_text
 
 from .base import AccountTestMixin, TestBase, create_account
 
@@ -102,11 +103,17 @@ class VersionTests(TestBase):
         # WSD doesn't get torn down correctly, so do setup each time.
         version = TextVersion.objects.get(slug='KJV')
         version.word_suggestion_data.delete()
+
+        def h(ref):
+            return hash_text(version.verse_set.get(reference=ref).suggestion_text)
         version.create_word_suggestion_data(reference='Genesis 1:1',
+                                            hash=h('Genesis 1:1'),
                                             suggestions=self._gen_1_1_suggestions())
         version.create_word_suggestion_data(reference='Genesis 1:2',
+                                            hash=h('Genesis 1:2'),
                                             suggestions=self._gen_1_2_suggestions())
         version.create_word_suggestion_data(reference='Genesis 1:3',
+                                            hash=h('Genesis 1:3'),
                                             suggestions=self._gen_1_3_suggestions())
 
     def test_no_chapter(self):
@@ -245,6 +252,22 @@ class VersionTests(TestBase):
                                                                'Genesis 1:3',
                                                                'Genesis 1:2-3'])
                 self.assertEqual(len(d), 4)
+
+    def test_item_suggestions_needs_updating(self):
+        v = Verse.objects.get(version__slug='KJV',
+                              reference='Genesis 1:1')
+        # Already has suggestions set up
+        self.assertFalse(item_suggestions_need_updating(v))
+
+        # But if we change the text:
+        v.text_saved = v.text_saved + " blah blah."
+        v.save()
+        self.assertTrue(item_suggestions_need_updating(v))
+
+        # No word suggestion set up:
+        v2 = Verse.objects.get(version__slug='KJV',
+                               reference='Psalm 23:1')
+        self.assertTrue(item_suggestions_need_updating(v2))
 
 
 class MockUVS(object):
