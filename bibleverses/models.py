@@ -332,6 +332,9 @@ SEARCH_CHARS = set("".join(list(SEARCH_OPERATORS)))
 
 class VerseManager(models.Manager):
 
+    def get_by_natural_key(self, version_slug, reference):
+        return self.get(version__slug=version_slug, reference=reference)
+
     def text_search(self, query, version, limit=10):
         # First remove anything recognised by postgres as an operator.
         for s in SEARCH_CHARS:
@@ -397,6 +400,9 @@ class Verse(models.Model):
             chapter_number=self.chapter_number,
             verse_number__gt=self.verse_number).exists()
 
+    def natural_key(self):
+        return (self.version.slug, self.reference)
+
     def __unicode__(self):
         return u"%s (%s)" % (self.reference, self.version.short_name)
 
@@ -422,6 +428,13 @@ class Verse(models.Model):
         Text needed by suggestions code
         """
         return self.text
+
+    @property
+    def text_version(self):
+        """
+        The related TextVersion object
+        """
+        return self.version
 
 
 SUGGESTION_COUNT = 10
@@ -489,6 +502,12 @@ class WordSuggestionData(models.Model):
         return "<WordSuggestionData %s %s>" % (self.version_slug, self.reference)
 
 
+class QAPairManager(models.Manager):
+
+    def get_by_natural_key(self, catechism_slug, reference):
+        return self.get(catechism__slug=catechism_slug, reference=reference)
+
+
 class QAPair(models.Model):
     """
     A question/answer pair in a catechism.
@@ -504,6 +523,8 @@ class QAPair(models.Model):
     answer = models.TextField()
     order = models.PositiveSmallIntegerField()
 
+    objects = QAPairManager()
+
     class Meta:
         unique_together = [('catechism', 'order'),
                            ('catechism', 'reference')]
@@ -514,12 +535,22 @@ class QAPair(models.Model):
     def __unicode__(self):
         return self.reference + " " + self.question
 
+    def natural_key(self):
+        return (self.catechism.slug, self.reference)
+
     @property
     def suggestion_text(self):
         """
         Text needed by suggestions code
         """
         return self.answer
+
+    @property
+    def text_version(self):
+        """
+        The related TextVersion object
+        """
+        return self.catechism
 
 
 class VerseSetManager(models.Manager):
@@ -692,7 +723,7 @@ class UserVerseStatus(models.Model):
     #   they span a few verses.
     # - the case of VerseChoices or VerseSets being deleted,
     # - UVSs that are not attached to VerseSets at all.
-    # - QAPairs and Verses from the same model
+    # - QAPairs and Verses being related to the same model
     #
     # Since references don't change we can handle the denormalisation easily.
 

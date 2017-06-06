@@ -82,7 +82,7 @@ def fix_item(version_slug, reference):
 
 
 def item_suggestions_need_updating(item):
-    version_slug = item.version.slug
+    version_slug = item.text_version.slug
     reference = item.reference
     suggestion_data = WordSuggestionData.objects.filter(version_slug=version_slug,
                                                         reference=reference).first()
