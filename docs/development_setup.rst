@@ -9,11 +9,11 @@ instructions may not work completely, but they should be a start.
 
 2. Checkout the sources from bitbucket into a folder called 'src'::
 
-     hg clone ssh://hg@bitbucket.org/spookylukey/learnscripture.net src
+     hg clone ssh://hg@bitbucket.org/learnscripture/learnscripture.net src
 
    You will also need a copy of the text sources::
 
-     hg clone ssh://hg@bitbucket.org/spookylukey/learnscripture-texts texts
+     hg clone ssh://hg@bitbucket.org/learnscripture/learnscripture-texts texts
 
 3. Create a virtualenv for the project e.g.::
 
