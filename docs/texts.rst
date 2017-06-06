@@ -69,7 +69,7 @@ New texts and catechisms
 
   * Transfer to live server e.g.::
 
-      $ rsync ../texts/NCC.*.json learnscripture@learnscripture.net:/home/learnscripture/texts
+      $ rsync ../texts/db_dumps/NCC.*.json learnscripture@learnscripture.net:/home/learnscripture/texts
 
   * Load JSON file into live site::
 
