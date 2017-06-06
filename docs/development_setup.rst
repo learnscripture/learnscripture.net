@@ -11,7 +11,13 @@ instructions may not work completely, but they should be a start.
 
      hg clone ssh://hg@bitbucket.org/spookylukey/learnscripture.net src
 
-3. Create a virtualenv for the project
+   You will also need a copy of the text sources::
+
+     hg clone ssh://hg@bitbucket.org/spookylukey/learnscripture-texts texts
+
+3. Create a virtualenv for the project e.g.::
+
+     mkvirtualenv learnscripture --python=`which python2.7`
 
 4. Install dependencies.
 
@@ -21,13 +27,14 @@ instructions may not work completely, but they should be a start.
    * memcached
    * rabbitmq-server
 
-   Python/virtualenv dependencies::
+   Python/virtualenv dependencies. From inside the learnscripture.net/src/
+   folder, do::
 
      pip install -r requirements.txt -r requirements-dev.txt
      nodeenv --node=system --python-virtualenv --requirement=requirements-node.txt
 
-5. Create a postgres database matching the development one in
-   ``learnscripture/settings.py``, both ``learnscripture`` and
+5. Create postgres databases matching the development ones in
+   ``learnscripture/settings.py``, both for ``learnscripture`` and
    ``learnscripture_wordsuggestions``.
 
    Similarly set up RabbitMQ::
@@ -48,24 +55,66 @@ instructions may not work completely, but they should be a start.
    deliberately excluded from the project VCS repo to allow the source code to
    be published.
 
-7. Setup database::
+7. Setup development database::
 
      ./manage.py migrate
      ./manage.py migrate --database wordsuggestions
 
-   This may not work well - it might be best to get a snapshot of the real
-   database to start from.
+   You will then need to load at least the NET Bible, as follows::
 
-   You will also need to populate the wordsuggestions database by doing::
+     ./manage.py load_text ../texts/db_dumps NET
 
-     ./manage.py setup_bibleverse_suggestions
+   This assumes you are in the ``src`` directory, with the directory structure
+   described above, so the ``texts`` directory is a sibling of ``src`` and
+   contains the learnscripture-texts repo.
 
-   But this does not need to be done immediately.
+   You can add additional text names after ``NET`` above, but you need at
+   least that one as it is the default Bible.
 
 8. See if it works by doing::
 
      ./manage.py runserver
 
+   Browse the site on http://learnscripture.local:8001/
+
 9. Then, try to run the tests::
 
      ./runtests.py
+
+   See also :doc:`project_structure.rst` for more info on running tests.
+
+
+Additional tasks
+~~~~~~~~~~~~~~~~
+
+These should be done at some point, but don't need to be done immediately.
+
+10. For the 'on screen buttons' testing mode, you will need to set up the
+    contents of the word suggestions database. Since this is a large amount of
+    data, all of which is derived from the texts and other static content, it is
+    in a separate database, and not downloaded as part of the text itself. To
+    generate it, do::
+
+      ./manage.py setup_bibleverse_suggestions NET
+
+    (Other version names can be added at the end of that line)
+
+    This will take a long time, and thrash your computer too... it's doing Markov
+    chain analysis of various lengths on the whole Bible, plus other things, in
+    order to generate sensible alternatives to the correct word when testing if
+    the user knows what the next word is.
+
+    The process can be interrupted with minimal loss of work, however, if
+    needed, and should display fairly detailed logs of what it is doing.
+
+
+Unfinished
+~~~~~~~~~~
+
+The above gives a functional site, but it is empty, and for testing some things
+it would be better to have more data (e.g. users, groups, awards, verse sets).
+Also, there are some CMS pages and chunks of content which exist only in the DB,
+resulting in missing pages and bits of text when browsing the development site.
+
+We need to fix this in a way that doesn't require downloading real user data to
+the developers' machines.

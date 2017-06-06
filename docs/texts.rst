@@ -9,7 +9,9 @@ As a result, and due to the fact that they sometimes come from different sources
 (e.g. ESV via its web API), the process for adding them is not fully automated.
 Some old scripts that were used (and probably won't run now) are found in
 ``scripts/``. The texts themselves are deliberately not stored in the repo
-because of copyright, and because they would be large.
+because of copyright, and because they would be large. Some of the texts are
+available in the learnscripture-texts repo, where there are not copyright
+issues.
 
 A further constraint is the need to generate 'suggestions' for any text
 (used in the 'on screen testing' method). This is done using Markov chain
@@ -39,6 +41,8 @@ New texts and catechisms
 
   * For Bibles, Verse instances corresponding to every Verse in the KJV
     (including missing verses, which should be marked with missing=True).
+
+    The exact process for doing this is not automated.
 
     Set LOADING_VERSES = True in settings to stop suggestions being created while you are
     doing this.
