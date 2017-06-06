@@ -14,6 +14,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         from bibleverses.models import TextVersion, TextType
+        from bibleverses.services import partial_data_available
 
         output_dir = options['output_dir']
         common_options = dict(
@@ -23,6 +24,7 @@ class Command(BaseCommand):
         )
         format = 'json'
         for version_slug in options['version_slug']:
+            print("Dumping {0}".format(version_slug))
             version = TextVersion.objects.get(slug=version_slug)
             text_file = "{0}.TextVersion.json".format(version_slug)
             with file(os.path.join(output_dir, text_file), "wb") as f1:
@@ -30,9 +32,19 @@ class Command(BaseCommand):
 
             if version.text_type == TextType.CATECHISM:
                 items_file = "{0}.QAPair.json".format(version_slug)
-                with file(os.path.join(output_dir, items_file), "wb") as f2:
-                    serializers.serialize(format, version.qapairs.all(), stream=f2, **common_options)
+                items = version.qapairs.all()
             elif version.text_type == TextType.BIBLE:
                 items_file = "{0}.Verse.json".format(version_slug)
-                with file(os.path.join(output_dir, items_file), "wb") as f2:
-                    serializers.serialize(format, version.verse_set.all(), stream=f2, **common_options)
+                items = version.verse_set.all()
+                if partial_data_available(version_slug):
+                    items = blank_text_saved(items)
+
+            with file(os.path.join(output_dir, items_file), "wb") as f2:
+                serializers.serialize(format, items, stream=f2, **common_options)
+
+
+def blank_text_saved(items):
+    for item in items:
+        item.text_saved = ''
+        item.text_fetched_at = None
+        yield item
