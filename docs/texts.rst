@@ -52,28 +52,27 @@ New texts and catechisms
 * ``./manage.py setup_bibleverse_suggestions`` needs to be run, passing
   in the version slug
 
-* Test locally.
-
-* Create new TextVersion on live site, make sure that it is not public.
+* Test locally, ensure it works as expected.
 
 * Copy text data to live server.
 
-  For catechisms:
+  * First, make the text non-public in the local development database using the
+    Django admin, so that it will be initially non-public when uploaded.
 
-  * Copy JSON file to live server::
+  * Then, dump from development e.g.::
 
-      rsync ../texts/NCC.json learnscripture@learnscripture.net:/home/learnscripture
+      $ ./manage.py dump_text ../texts/db_dumps NCC
+
+  * Transfer to live server e.g.::
+
+      $ rsync ../texts/NCC.*.json learnscripture@learnscripture.net:/home/learnscripture/texts
 
   * Load JSON file into live site::
 
-      ssh learnscripture@learnscripture.net
-      cd ~/webapps/learnscripture/verions/current/src
-      . ../venv/bin/activate
-      ./manage.py load_catechism NCC ~/NCC.json
-
-   For Bibles, dump the relevant records from the ``bibleverses_verse`` table
-   on the development machine, then transfer and load on the server. (Somehow -
-   e.g. using the psql ``\copy`` command to dump to/from CSV).
+      $ ssh learnscripture@learnscripture.net
+      $ cd ~/webapps/learnscripture/verions/current/src
+      $ . ../venv/bin/activate
+      $ ./manage.py load_text ~/texts NCC
 
 * Dump the word suggestions and transfer to the server, OR, generate them on the
   server.
