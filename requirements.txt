@@ -10,7 +10,7 @@ SQLAlchemy==1.1.10
 URLObject==2.4.0
 aldjemy==0.4.3
 anyjson==0.3.3
-argparse==1.2.1
+argparse==1.4.0
 celery==4.0.2
 amqp==2.1.4
 billiard==3.5.0.2
