@@ -1,3 +1,9 @@
+LearnScripture.net is web site created using the Python programming language,
+the `Django <https://www.djangoproject.com/>`_ web framework, and various other technologies.
+
+If you are familiar with these or are willing to learn, we'd love to have your help
+maintain and improve LearnScripture.net.
+
 Docs you will need to read:
 
 * Get set up:
