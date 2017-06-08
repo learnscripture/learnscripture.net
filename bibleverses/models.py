@@ -6,6 +6,7 @@ from collections import defaultdict
 
 from autoslug import AutoSlugField
 from django.db import connection, models
+from django.db.models import F, Func
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -359,6 +360,11 @@ class VerseManager(models.Manager):
 """, word_params + [version.id, limit])
 
 
+class VerseQuerySet(models.QuerySet):
+    def update_text_search(self):
+        self.update(text_tsv=Func(F('text_saved'), function='to_tsvector'))
+
+
 class Verse(models.Model):
     version = models.ForeignKey(TextVersion, on_delete=models.CASCADE)
     reference = models.CharField(max_length=100)
@@ -380,7 +386,7 @@ class Verse(models.Model):
     # empty e.g. John 5:4 in NET/ESV
     missing = models.BooleanField(default=False)
 
-    objects = VerseManager()
+    objects = VerseManager.from_queryset(VerseQuerySet)()
 
     @property
     def text(self):

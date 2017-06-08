@@ -3,6 +3,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from bibleverses.models import QAPair, Verse
+from bibleverses.services import get_search_service
 from bibleverses.signals import verse_set_chosen
 from bibleverses.tasks import fix_item_suggestions, verse_set_increase_popularity
 
@@ -30,6 +31,11 @@ def verse_saved(sender, **kwargs):
         if not item_suggestions_need_updating(verse):
             return
         fix_item_suggestions.delay(verse.version.slug, verse.reference)
+
+        if get_search_service(verse.version.slug) is None:
+            # No external search service, therefore must be using builtin DB
+            # search, therefore need to update:
+            Verse.objects.filter(id=verse.id).update_text_search()
 
 
 @receiver(post_save, sender=QAPair)

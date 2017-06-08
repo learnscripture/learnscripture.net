@@ -1,6 +1,4 @@
-from django.db import connection
-
-from bibleverses.models import TextVersion, VerseSet, VerseSetType, parse_as_bible_reference, quick_find
+from bibleverses.models import TextVersion, Verse, VerseSet, VerseSetType, parse_as_bible_reference, quick_find
 
 from .base import TestBase, get_or_create_any_account
 
@@ -12,9 +10,7 @@ class SearchTests(TestBase):
     def setUp(self):
         super(SearchTests, self).setUp()
         self.account = get_or_create_any_account()
-        c = connection.cursor()
-        # This index needs updating after fixtures
-        c.execute("UPDATE bibleverses_verse SET text_tsv = to_tsvector(text_saved);")
+        Verse.objects.all().update_text_search()
 
     def test_search_verse_set_title(self):
         VerseSet.objects.create(name="For stupid people",
