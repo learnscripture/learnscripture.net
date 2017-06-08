@@ -444,7 +444,7 @@ class ThesaurusSuggestionsOther(SuggestionStrategy):
         self.thesaurus_strategy = ThesaurusSuggestions(thesaurus)
 
     def get_suggestions(self, words, i, count, suggestions_so_far):
-        count = max(count, 10)
+        count = min(count, 10)
         # This method tries to find some alternatives to words suggested by
         # non-thesaurus methods, to throw people off the scent!
         from_thesaurus = [w for w, f in self.thesaurus_strategy.get_suggestions(words, i, count, [])]
@@ -541,7 +541,7 @@ def build_markov_chains_for_text(training_texts, label, size):
 
 class RandomLocalSuggestions(SuggestionStrategy):
     def get_suggestions(self, words, i, count, suggestions_so_far):
-        count = max(count, 10)
+        count = min(count, 10)
         # Emphasise the words that come after the current one,
         # exclude the one immediately before as that is very unlikely,
         FACTOR = 5
@@ -572,7 +572,7 @@ class RandomGlobalSuggestions(SuggestionStrategy):
         return items, probs
 
     def get_suggestions(self, words, i, count, suggestions_so_far):
-        count = max(count, 10)
+        count = min(count, 10)
         items, probs = self.word_distribution
         c = Counter()
         for i in range(0, count):
