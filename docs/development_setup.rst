@@ -11,11 +11,11 @@ instructions may not work completely, but they should be a start.
 
    First, it is probably best to fork the project on bitbucket - https://bitbucket.org/learnscripture/learnscripture.net/fork
    
-   Then clone your fork locally:
+   Then clone your fork locally::
 
      hg clone ssh://hg@bitbucket.org/yourusename/learnscripture.net src
 
-   You will also need a copy of the text sources::
+   You will also need a copy of the text sources, checked out in 'texts' in a sibling directory to 'src'::
 
      hg clone ssh://hg@bitbucket.org/learnscripture/learnscripture-texts texts
 
