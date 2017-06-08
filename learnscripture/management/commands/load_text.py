@@ -50,3 +50,7 @@ class Command(BaseCommand):
                         obj.save()
                         if (i + 1) % 100 == 0:
                             print("Item {0} loaded.".format(i + 1))
+
+                if version.text_type == TextType.BIBLE:
+                    print("Generating search index...")
+                    version.verse_set.all().update_text_search()
