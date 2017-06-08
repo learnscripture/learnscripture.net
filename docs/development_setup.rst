@@ -7,9 +7,13 @@ instructions may not work completely, but they should be a start.
 
 1. Create a directory 'learnscripture.net' and cd into it.
 
-2. Checkout the sources from bitbucket into a folder called 'src'::
+2. Checkout the sources from bitbucket into a folder called 'src'.
 
-     hg clone ssh://hg@bitbucket.org/learnscripture/learnscripture.net src
+   First, it is probably best to fork the project on bitbucket - https://bitbucket.org/learnscripture/learnscripture.net/fork
+   
+   Then clone your fork locally:
+
+     hg clone ssh://hg@bitbucket.org/yourusename/learnscripture.net src
 
    You will also need a copy of the text sources::
 
