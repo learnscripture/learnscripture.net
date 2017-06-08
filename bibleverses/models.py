@@ -170,7 +170,7 @@ class TextVersion(models.Model):
     class Meta:
         ordering = ['short_name']
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s (%s)" % (self.short_name, self.full_name)
 
     def natural_key(self):
@@ -339,7 +339,7 @@ class VerseManager(models.Manager):
         # First remove anything recognised by postgres as an operator.
         for s in SEARCH_CHARS:
             query = query.replace(s, " ")
-        words = query.split(u' ')
+        words = query.split(' ')
         words = [w for w in words
                  if (w and w not in SEARCH_OPERATORS)]
         # Do an 'AND' on all terms.
@@ -403,11 +403,11 @@ class Verse(models.Model):
     def natural_key(self):
         return (self.version.slug, self.reference)
 
-    def __unicode__(self):
-        return u"%s (%s)" % (self.reference, self.version.short_name)
+    def __str__(self):
+        return "%s (%s)" % (self.reference, self.version.short_name)
 
     def __repr__(self):
-        return u'<Verse %s>' % self
+        return '<Verse %s>' % self
 
     class Meta:
         unique_together = [
@@ -532,7 +532,7 @@ class QAPair(models.Model):
         verbose_name = "QA pair"
         ordering = ['order']
 
-    def __unicode__(self):
+    def __str__(self):
         return self.reference + " " + self.question
 
     def natural_key(self):
@@ -628,7 +628,7 @@ class VerseSet(models.Model):
 
     objects = VerseSetManager()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def get_absolute_url(self):
@@ -675,7 +675,7 @@ class VerseSet(models.Model):
     def update_passage_id(self):
         if self.is_passage:
             verse_choices = list(self.verse_choices.all())
-            self.passage_id = verse_choices[0].reference + u' - ' + verse_choices[-1].reference
+            self.passage_id = verse_choices[0].reference + ' - ' + verse_choices[-1].reference
             self.save()
 
 
@@ -699,11 +699,11 @@ class VerseChoice(models.Model):
         unique_together = [('verse_set', 'reference')]
         base_manager_name = 'objects'
 
-    def __unicode__(self):
+    def __str__(self):
         return self.reference
 
     def __repr__(self):
-        return u'<VerseChoice %s>' % self
+        return '<VerseChoice %s>' % self
 
 
 class UserVerseStatus(models.Model):
@@ -851,11 +851,11 @@ class UserVerseStatus(models.Model):
     def suggestions(self):
         return self.version.get_suggestions_by_reference(self.reference)
 
-    def __unicode__(self):
-        return u"%s, %s" % (self.reference, self.version.slug)
+    def __str__(self):
+        return "%s, %s" % (self.reference, self.version.slug)
 
     def __repr__(self):
-        return u'<UserVerseStatus %s>' % self
+        return '<UserVerseStatus %s>' % self
 
     class Meta:
         unique_together = [('for_identity', 'verse_set', 'reference', 'version')]
@@ -984,16 +984,16 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE,
                 # no chapter.
                 raise ValueError()
             # If no, space, the following will weed out references without a chapter
-            book, chapter = reference.rsplit(u' ', 1)
+            book, chapter = reference.rsplit(' ', 1)
         except ValueError:
-            raise InvalidVerseReference(u"Reference should provide at least book name and chapter number")
+            raise InvalidVerseReference("Reference should provide at least book name and chapter number")
         if book not in BIBLE_BOOKS_DICT:
-            raise InvalidVerseReference(u"Book '%s' not known" % book)
+            raise InvalidVerseReference("Book '%s' not known" % book)
         book_number = BIBLE_BOOKS_DICT.get(book)
         try:
             chapter_number = int(chapter)
         except ValueError:
-            raise InvalidVerseReference(u"Expecting '%s' to be a chapter number" % chapter)
+            raise InvalidVerseReference("Expecting '%s' to be a chapter number" % chapter)
         if return_verses:
             retval = list(version.verse_set
                           .filter(book_number=book_number,
@@ -1004,7 +1004,7 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE,
         else:
             retval = Reference(book, chapter_number, None)
     else:
-        parts = reference.rsplit(u'-', 1)
+        parts = reference.rsplit('-', 1)
         if len(parts) == 1:
             # e.g. Genesis 1:1
             if return_verses:
@@ -1016,41 +1016,41 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE,
                 retval = Reference(book, int(ch_num), int(v_num))
         else:
             # e.g. Genesis 1:1-2
-            book, start = parts[0].rsplit(u' ', 1)
+            book, start = parts[0].rsplit(' ', 1)
             end = parts[1]
-            if u':' not in start:
-                raise InvalidVerseReference(u"Expecting to find ':' in part '%s'" % start)
+            if ':' not in start:
+                raise InvalidVerseReference("Expecting to find ':' in part '%s'" % start)
 
-            start_chapter, start_verse = start.split(u':')
+            start_chapter, start_verse = start.split(':')
             try:
                 start_chapter = int(start_chapter)
             except ValueError:
-                raise InvalidVerseReference(u"Expecting '%s' to be a chapter number" % start_chapter)
+                raise InvalidVerseReference("Expecting '%s' to be a chapter number" % start_chapter)
 
             try:
                 start_verse = int(start_verse)
             except ValueError:
-                raise InvalidVerseReference(u"Expecting '%s' to be a verse number" % start_verse)
-            if u':' in end:
+                raise InvalidVerseReference("Expecting '%s' to be a verse number" % start_verse)
+            if ':' in end:
                 end_chapter, end_verse = end.split(':')
                 try:
                     end_chapter = int(end_chapter)
                 except ValueError:
-                    raise InvalidVerseReference(u"Expecting '%s' to be a chapter number" % end_chapter)
+                    raise InvalidVerseReference("Expecting '%s' to be a chapter number" % end_chapter)
                 try:
                     end_verse = int(end_verse)
                 except ValueError:
-                    raise InvalidVerseReference(u"Expecting '%s' to be a verse number" % end_verse)
+                    raise InvalidVerseReference("Expecting '%s' to be a verse number" % end_verse)
 
             else:
                 end_chapter = start_chapter
                 try:
                     end_verse = int(end)
                 except ValueError:
-                    raise InvalidVerseReference(u"Expecting '%s' to be a verse number" % end)
+                    raise InvalidVerseReference("Expecting '%s' to be a verse number" % end)
 
-            ref_start = u"%s %d:%d" % (book, start_chapter, start_verse)
-            ref_end = u"%s %d:%d" % (book, end_chapter, end_verse)
+            ref_start = "%s %d:%d" % (book, start_chapter, start_verse)
+            ref_end = "%s %d:%d" % (book, end_chapter, end_verse)
 
             if ref_end == ref_start:
                 raise InvalidVerseReference("Start and end verse are the same.")
@@ -1066,17 +1066,17 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE,
                 try:
                     verse_start = [v for v in vs if v.reference == ref_start][0]
                 except IndexError:
-                    raise InvalidVerseReference(u"Can't find  '%s'" % ref_start)
+                    raise InvalidVerseReference("Can't find  '%s'" % ref_start)
                 try:
                     verse_end = [v for v in vs if v.reference == ref_end][0]
                 except IndexError:
-                    raise InvalidVerseReference(u"Can't find  '%s'" % ref_end)
+                    raise InvalidVerseReference("Can't find  '%s'" % ref_end)
 
                 if verse_end.bible_verse_number < verse_start.bible_verse_number:
                     raise InvalidVerseReference("%s and %s are not in ascending order." % (ref_start, ref_end))
 
                 if verse_end.bible_verse_number - verse_start.bible_verse_number > max_length:
-                    raise InvalidVerseReference(u"References that span more than %d verses are not allowed in this context." % max_length)
+                    raise InvalidVerseReference("References that span more than %d verses are not allowed in this context." % max_length)
 
                 retval = list(version.verse_set.filter(bible_verse_number__gte=verse_start.bible_verse_number,
                                                        bible_verse_number__lte=verse_end.bible_verse_number,
@@ -1087,10 +1087,10 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE,
 
     if return_verses:
         if len(retval) == 0:
-            raise InvalidVerseReference(u"No verses matched '%s'." % reference)
+            raise InvalidVerseReference("No verses matched '%s'." % reference)
 
         if len(retval) > max_length:
-            raise InvalidVerseReference(u"References that span more than %d verses are not allowed in this context." % max_length)
+            raise InvalidVerseReference("References that span more than %d verses are not allowed in this context." % max_length)
 
         # Ensure back references to version are set, so we don't need extra DB lookup
         for v in retval:
@@ -1158,14 +1158,14 @@ def pretty_passage_ref(start_ref, end_ref):
     first = parse_ref(start_ref, None, return_verses=False)
     last = parse_ref(end_ref, None, return_verses=False)
 
-    ref = u"%s %d:%d" % (first.book,
-                         first.chapter_number,
-                         first.verse_number,
-                         )
+    ref = "%s %d:%d" % (first.book,
+                        first.chapter_number,
+                        first.verse_number,
+                        )
     if last.chapter_number == first.chapter_number:
-        ref += u"-%d" % last.verse_number
+        ref += "-%d" % last.verse_number
     else:
-        ref += u"-%d:%d" % (last.chapter_number, last.verse_number)
+        ref += "-%d:%d" % (last.chapter_number, last.verse_number)
     return ref
 
 
@@ -1273,7 +1273,7 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
 
     query = query.strip().lower()
 
-    if query == u'':
+    if query == '':
         raise InvalidVerseReference("Please enter a query term or reference")
 
     reference = parse_as_bible_reference(query, allow_whole_book=not allow_searches)
@@ -1303,30 +1303,30 @@ def get_whole_book(book_name, version, ensure_text_present=True):
 
 def normalise_reference(query):
     # Replace 'v' or '.' with ':'
-    query = re.sub(u'(?<![A-Za-z])(v|\.)(?![A-Za-z])', ':', query)
+    query = re.sub('(?<![A-Za-z])(v|\.)(?![A-Za-z])', ':', query)
     # Remove spaces around ':'
-    query = re.sub(u'\s*:\s*', ':', query)
+    query = re.sub('\s*:\s*', ':', query)
     # Remove spaces around '-'
-    query = re.sub(u'\s*-\s*', '-', query)
+    query = re.sub('\s*-\s*', '-', query)
 
     # Remove multiple spaces
-    query = re.sub(u' +', u' ', query)
+    query = re.sub(' +', ' ', query)
 
     # Normalise book names if possible.
-    parts = query.split(u' ')
+    parts = query.split(' ')
     book_name = parts[0]
     used_parts = 1
     if len(parts) > 1:
         for p in range(1, len(parts)):
-            if not re.search(u'\d', parts[p]):
-                book_name = book_name + u" " + parts[p]
+            if not re.search('\d', parts[p]):
+                book_name = book_name + " " + parts[p]
                 used_parts += 1
             else:
                 break
 
     if book_name in BIBLE_BOOK_ABBREVIATIONS:
-        remainder = u" ".join(parts[used_parts:])
-        return (BIBLE_BOOK_ABBREVIATIONS[book_name] + u" " + remainder).strip()
+        remainder = " ".join(parts[used_parts:])
+        return (BIBLE_BOOK_ABBREVIATIONS[book_name] + " " + remainder).strip()
     else:
         return None
 

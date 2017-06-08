@@ -1,6 +1,6 @@
 import os
 import time
-import urlparse
+import urllib.parse
 from datetime import datetime
 
 from django.conf import settings
@@ -58,7 +58,7 @@ def token_login_middleware(get_response):
         # Redirect to hide access token
         d = request.GET.copy()
         del d['t']
-        url = urlparse.urlunparse(('', '', request.path, '', d.urlencode(), ''))
+        url = urllib.parse.urlunparse(('', '', request.path, '', d.urlencode(), ''))
         return HttpResponseRedirect(url)
 
     return middleware

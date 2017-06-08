@@ -4,13 +4,12 @@ Services for retrieving Bible and text data, where necessary.
 # All code specific to certain versions is in this module,
 # rather than in bibleverses.models
 
-from __future__ import unicode_literals
-
 import logging
 import re
 import time
-import urllib
+import urllib.parse
 
+import requests
 from django.db import models
 from pyquery import PyQuery
 
@@ -32,8 +31,7 @@ ESV_BATCH_SIZE = 80
 def do_esv_api(method, params):
     url = ESV_BASE_URL + method + "?" + "&".join(params)
     logger.info("ESV query %s", url)
-    page = urllib.urlopen(url.encode('utf-8'))
-    return page.read()
+    return requests.get(url).content.decode('utf-8')
 
 
 def get_esv(reference_list, batch_size=ESV_BATCH_SIZE):
@@ -46,7 +44,7 @@ def get_esv(reference_list, batch_size=ESV_BATCH_SIZE):
             time.sleep(1)  # Don't hammer the API.
 
         params = ['key=%s' % settings.ESV_API_KEY,
-                  'passage=%s' % urllib.quote(";".join(batch)),
+                  'passage=%s' % urllib.parse.quote(";".join(batch)),
                   'include-short-copyright=0',
                   # Starting with plain text is easier than messing around
                   # with massaging HTML, even if it means we have to parse

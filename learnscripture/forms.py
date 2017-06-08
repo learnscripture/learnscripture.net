@@ -64,15 +64,15 @@ class LogInForm(forms.Form):
 
     def clean(self):
         def fail():
-            raise forms.ValidationError(u"Can't find an account matching that username/email and password")
+            raise forms.ValidationError("Can't find an account matching that username/email and password")
         try:
             email = self.cleaned_data.get('email', '').strip()
-            if u'@' in email:
+            if '@' in email:
                 accounts = Account.objects.active().filter(email__iexact=email)
                 if len(accounts) == 0:
                     raise Account.DoesNotExist()
                 elif len(accounts) > 1:
-                    raise forms.ValidationError(u"Multiple accounts for this email address - please enter your username instead")
+                    raise forms.ValidationError("Multiple accounts for this email address - please enter your username instead")
                 else:
                     account = accounts[0]
             else:
@@ -110,9 +110,9 @@ class AccountPasswordChangeForm(PasswordChangeForm):
 
 
 class ContactForm(forms.Form):
-    name = forms.CharField(help_text=u"Optional", max_length=255, required=False)
-    email = forms.EmailField(help_text=u"Optional", required=False)
+    name = forms.CharField(help_text="Optional", max_length=255, required=False)
+    email = forms.EmailField(help_text="Optional", required=False)
     message = forms.CharField(max_length=10000, required=True,
-                              help_text=u"If you are reporting a problem, please include a full and specific description, "
+                              help_text="If you are reporting a problem, please include a full and specific description, "
                               "and include what device/browser you are using, with version numbers.",
                               widget=widgets.Textarea(attrs={'rows': '10'}))

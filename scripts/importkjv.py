@@ -59,7 +59,7 @@ def fix_text(text):
 
 def parse_ref(ref):
     r = ref.rsplit(' ', 1)
-    c, v = map(int, r[1].split(':'))
+    c, v = list(map(int, r[1].split(':')))
     return r[0], c, v
 
 

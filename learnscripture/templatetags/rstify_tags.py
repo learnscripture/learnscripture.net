@@ -1,5 +1,5 @@
 from django import template
-from django.utils.encoding import force_unicode, smart_str
+from django.utils.encoding import force_text, smart_str
 from django.utils.safestring import mark_safe
 from docutils.core import publish_parts
 from docutils.writers import html4css1
@@ -64,7 +64,7 @@ def rstify(text,
         settings_overrides=settings
     )
 
-    return force_unicode(parts['body'])
+    return force_text(parts['body'])
 
 
 @register.filter(name='rstify')

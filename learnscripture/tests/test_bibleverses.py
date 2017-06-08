@@ -1,6 +1,4 @@
 # -*- coding:utf-8 -*-
-from __future__ import absolute_import, unicode_literals
-
 import unittest2
 
 from accounts.models import Identity
@@ -171,60 +169,60 @@ class VersionTests(TestBase):
 
     def _gen_1_1_suggestions(self):
         # in the beginning...
-        return [[u'and', u'but', u'thou'],
-                [u'his', u'all', u'a'],
-                [u'land', u'wilderness', u'sight'],
-                [u'of', u'between', u'so'],
-                [u'and', u'of', u'hath'],
-                [u'man', u'he', u'and'],
-                [u'lord', u'land', u'children'],
-                [u'to', u'in', u'that'],
-                [u'they', u'as', u'earth'],
-                [u'lord', u'god', u'evening']]
+        return [['and', 'but', 'thou'],
+                ['his', 'all', 'a'],
+                ['land', 'wilderness', 'sight'],
+                ['of', 'between', 'so'],
+                ['and', 'of', 'hath'],
+                ['man', 'he', 'and'],
+                ['lord', 'land', 'children'],
+                ['to', 'in', 'that'],
+                ['they', 'as', 'earth'],
+                ['lord', 'god', 'evening']]
 
     def _gen_1_2_suggestions(self):
-        return [[u'and', u'but', u'thou'],
-                [u'he', u'they', u'thou'],
-                [u'lord', u'priest', u'children'],
-                [u'and', u'opened', u'that'],
-                [u'filled', u'of', u'the'],
-                [u'the', u'number', u'blemish'],
-                [u'gods', u'over', u'one'],
-                [u'the', u'he', u'they'],
-                [u'after', u'but', u'on'],
-                [u'the', u'he', u'they'],
-                [u'to', u'and', u'over'],
-                [u'the', u'in', u'not'],
-                [u'them', u'him', u'it'],
-                [u'earth', u'tabernacle', u'inwards'],
-                [u'and', u'to', u'against'],
-                [u'all', u'his', u'israel'],
-                [u'earth', u'lord', u'ground'],
-                [u'that', u'sleep', u'broken'],
-                [u'he', u'they', u'thou'],
-                [u'windows', u'lord', u'priest'],
-                [u'rested', u'and', u'that'],
-                [u'jealousy', u'wisdom', u'jacob'],
-                [u'in', u'is', u'came'],
-                [u'me', u'lace', u'people'],
-                [u'his', u'them', u'him'],
-                [u'earth', u'altar', u'head'],
-                [u'and', u'to', u'against'],
-                [u'all', u'his', u'israel'],
-                [u'earth', u'lord', u'ground']]
+        return [['and', 'but', 'thou'],
+                ['he', 'they', 'thou'],
+                ['lord', 'priest', 'children'],
+                ['and', 'opened', 'that'],
+                ['filled', 'of', 'the'],
+                ['the', 'number', 'blemish'],
+                ['gods', 'over', 'one'],
+                ['the', 'he', 'they'],
+                ['after', 'but', 'on'],
+                ['the', 'he', 'they'],
+                ['to', 'and', 'over'],
+                ['the', 'in', 'not'],
+                ['them', 'him', 'it'],
+                ['earth', 'tabernacle', 'inwards'],
+                ['and', 'to', 'against'],
+                ['all', 'his', 'israel'],
+                ['earth', 'lord', 'ground'],
+                ['that', 'sleep', 'broken'],
+                ['he', 'they', 'thou'],
+                ['windows', 'lord', 'priest'],
+                ['rested', 'and', 'that'],
+                ['jealousy', 'wisdom', 'jacob'],
+                ['in', 'is', 'came'],
+                ['me', 'lace', 'people'],
+                ['his', 'them', 'him'],
+                ['earth', 'altar', 'head'],
+                ['and', 'to', 'against'],
+                ['all', 'his', 'israel'],
+                ['earth', 'lord', 'ground']]
 
     def _gen_1_3_suggestions(self):
-        return [[u'and', u'but', u'thou'],
-                [u'the', u'he', u'they'],
-                [u'saw', u'spake', u'made'],
-                [u'unto', u'behold', u'this'],
-                [u'the', u'us', u'me'],
-                [u'more', u'shall', u'was'],
-                [u'no', u'a', u'lights'],
-                [u'to', u'the', u'over'],
-                [u'the', u'his', u'for'],
-                [u'shall', u'is', u'came'],
-                [u'a', u'no', u'not']]
+        return [['and', 'but', 'thou'],
+                ['the', 'he', 'they'],
+                ['saw', 'spake', 'made'],
+                ['unto', 'behold', 'this'],
+                ['the', 'us', 'me'],
+                ['more', 'shall', 'was'],
+                ['no', 'a', 'lights'],
+                ['to', 'the', 'over'],
+                ['the', 'his', 'for'],
+                ['shall', 'is', 'came'],
+                ['a', 'no', 'not']]
 
     # Tests for suggestions are deterministic because the total number of
     # suggestions stored is less than the number of suggestions we would like to

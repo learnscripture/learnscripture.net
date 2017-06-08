@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from bibleverses.models import Verse
 
-data = file('fix_net_2_data.txt').readlines()
+data = open('fix_net_2_data.txt').readlines()
 
 for line in data:
     _, ref, rest = line.split(' ', 2)
@@ -12,13 +12,13 @@ for line in data:
         e = rest.index('</hi', s)
         title = rest[s + 1:e].strip()
 
-        print
-        print ref, title
+        print()
+        print((ref, title))
         assert '<' not in title
         v = Verse.objects.get(version__slug='NET', reference='Psalm ' + ref)
         # Random fixes:
         v.text = v.text.replace('. "', '."')
         assert v.text.startswith(title)
         v.text = v.text[len(title):].strip()
-        print v.text
+        print((v.text))
         v.save()

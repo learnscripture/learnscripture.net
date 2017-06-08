@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import time
 from datetime import timedelta
 
@@ -204,7 +202,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         vs1 = VerseSet.objects.get(name='Psalm 23')
         i.add_verse_set(vs1)
         i.change_version('Psalm 23:1', 'KJV', vs1.id)
-        self.assertEqual([u'KJV'] * 6, [uvs.version.slug for uvs in i.verse_statuses.filter(verse_set=vs1)])
+        self.assertEqual(['KJV'] * 6, [uvs.version.slug for uvs in i.verse_statuses.filter(verse_set=vs1)])
 
     def test_change_version_to_missing(self):
         """
@@ -348,12 +346,12 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         l = i.verse_statuses_for_passage(vs1.id)
 
         self.assertEqual([uvs.reference for uvs in l],
-                         [u"Psalm 23:1",
-                          u"Psalm 23:2",
-                          u"Psalm 23:3",
-                          u"Psalm 23:4",
-                          u"Psalm 23:5",
-                          u"Psalm 23:6"])
+                         ["Psalm 23:1",
+                          "Psalm 23:2",
+                          "Psalm 23:3",
+                          "Psalm 23:4",
+                          "Psalm 23:5",
+                          "Psalm 23:6"])
 
         # Now test and age them:
         for uvs in l:
@@ -595,22 +593,22 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         vs1 = VerseSet.objects.get(name='Psalm 23')
 
         # Change it so that it misses the last verse
-        vs1.set_verse_choices([u"Psalm 23:1",
-                               u"Psalm 23:2",
-                               u"Psalm 23:3",
-                               u"Psalm 23:4",
-                               u"Psalm 23:5"])
+        vs1.set_verse_choices(["Psalm 23:1",
+                               "Psalm 23:2",
+                               "Psalm 23:3",
+                               "Psalm 23:4",
+                               "Psalm 23:5"])
 
         # Now add it
         i.add_verse_set(vs1)
 
         l = i.verse_statuses_for_passage(vs1.id)
         self.assertEqual([uvs.reference for uvs in l],
-                         [u"Psalm 23:1",
-                          u"Psalm 23:2",
-                          u"Psalm 23:3",
-                          u"Psalm 23:4",
-                          u"Psalm 23:5"])
+                         ["Psalm 23:1",
+                          "Psalm 23:2",
+                          "Psalm 23:3",
+                          "Psalm 23:4",
+                          "Psalm 23:5"])
 
         # Now learn a standalone verse choice
         i.add_verse_choice('Psalm 23:6')
@@ -626,12 +624,12 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         # Should have all verses this time
         l = i.verse_statuses_for_passage(vs1.id)
         self.assertEqual([uvs.reference for uvs in l],
-                         [u"Psalm 23:1",
-                          u"Psalm 23:2",
-                          u"Psalm 23:3",
-                          u"Psalm 23:4",
-                          u"Psalm 23:5",
-                          u"Psalm 23:6"])
+                         ["Psalm 23:1",
+                          "Psalm 23:2",
+                          "Psalm 23:3",
+                          "Psalm 23:4",
+                          "Psalm 23:5",
+                          "Psalm 23:6"])
 
     def test_add_missing_verse(self):
         """

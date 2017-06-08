@@ -20,5 +20,5 @@ class SiteNotice(models.Model):
 
     objects = SiteNoticeManager()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.message_html

@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from django.urls import reverse
 
 from accounts.models import Account, Identity
@@ -59,11 +57,11 @@ class VerseCountTests(AccountTestMixin, TestBase):
         vs2 = VerseSet.objects.create(name="Psalm 23:1-2",
                                       set_type=VerseSetType.PASSAGE,
                                       created_by=account)
-        vs1.set_verse_choices([u"Psalm 23:1",
-                               u"Psalm 23:2",
-                               u"Psalm 23:3"])
-        vs2.set_verse_choices([u"Psalm 23:1",
-                               u"Psalm 23:2"])
+        vs1.set_verse_choices(["Psalm 23:1",
+                               "Psalm 23:2",
+                               "Psalm 23:3"])
+        vs2.set_verse_choices(["Psalm 23:1",
+                               "Psalm 23:2"])
 
         return vs1, vs2
 

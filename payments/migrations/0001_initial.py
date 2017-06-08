@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.db import models, migrations
 from django.conf import settings
 
@@ -21,7 +19,7 @@ class Migration(migrations.Migration):
                 ('finish', models.DateTimeField()),
                 ('active', models.BooleanField(default=False)),
                 ('message_html', models.TextField()),
-                ('hide_if_donated_days', models.PositiveIntegerField(help_text=b'The donation drive will be hidden for users who have donated within this number of days')),
+                ('hide_if_donated_days', models.PositiveIntegerField(help_text='The donation drive will be hidden for users who have donated within this number of days')),
             ],
             options={
             },

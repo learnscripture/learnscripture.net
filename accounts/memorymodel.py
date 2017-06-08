@@ -214,7 +214,7 @@ def test_run(exponent, accuracy, interval_gap=1):
         if m.needs_testing(x, day * interval):
             x = m.strength_estimate(x, accuracy, interval * day)
             test += 1
-            print "Day %d, test %d, interval %d, strength %s" % (math.floor(days_total), test, interval, x)
+            print("Day %d, test %d, interval %d, strength %s" % (math.floor(days_total), test, interval, x))
             interval = 0
 
 
@@ -241,7 +241,7 @@ def test_run_using_next_test_due(exponent, accuracy, interval_gap=1):
             last_test = current_time
             next_test = m.next_test_due(last_test, s)
             test += 1
-            print "Day %d, test %d, interval %d, strength %s" % (days_total, test, interval, s)
+            print("Day %d, test %d, interval %d, strength %s" % (days_total, test, interval, s))
             interval = 0
 
 
@@ -297,8 +297,8 @@ def test_run_passage(passage_length, days):
                 else:
                     needs_testing = MM.needs_testing(s, time_elapsed)
 
-                print "%02d: %6f %s" % (j + 1, s,
-                                        "Test" if needs_testing else "No test")
+                print("%02d: %6f %s" % (j + 1, s,
+                                        "Test" if needs_testing else "No test"))
 
                 if needs_testing:
                     acc = 0.95 + (random.random() / 20.0)
@@ -315,9 +315,9 @@ def test_run_passage(passage_length, days):
                     learnt[j] = new_time_tested, new_strength
                     number_tested += 1
         if number_tested > 0:
-            print
-            print "Day %d" % i
-            print "%02d/%02d" % (number_tested, passage_length)
+            print()
+            print("Day %d" % i)
+            print("%02d/%02d" % (number_tested, passage_length))
     return sorted(tests_for_verse.items())
 
 

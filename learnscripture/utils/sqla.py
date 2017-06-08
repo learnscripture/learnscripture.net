@@ -1,16 +1,13 @@
 from aldjemy.core import get_engine
-from sqlalchemy.schema import MetaData, Table
+
+from accounts.models import Account
+from bibleverses.models import UserVerseStatus
+from scores.models import ActionLog, TotalScore
 
 
 default_engine = get_engine()
-metadata = MetaData()
 
-
-def t(n):
-    return Table(n, metadata, autoload=True, autoload_with=default_engine)
-
-
-scores_actionlog = t('scores_actionlog')
-scores_totalscore = t('scores_totalscore')
-accounts_account = t('accounts_account')
-bibleverses_userversestatus = t('bibleverses_userversestatus')
+scores_actionlog = ActionLog.sa.table
+scores_totalscore = TotalScore.sa.table
+accounts_account = Account.sa.table
+bibleverses_userversestatus = UserVerseStatus.sa.table

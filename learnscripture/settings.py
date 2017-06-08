@@ -34,9 +34,6 @@ if not os.path.exists(LOG_ROOT):
 
 secrets = json.load(open(os.path.join(SRC_ROOT, "config", "secrets.json")))
 
-# At least some passwords need to be bytes, not unicode objects
-secrets = dict([(k, s if not isinstance(s, unicode) else s.encode('ascii')) for k, s in secrets.items()])
-
 MAILGUN_API_KEY = secrets.get('MAILGUN_API_KEY', None)
 MAILGUN_DOMAIN = 'learnscripture.net'
 
@@ -284,6 +281,7 @@ INSTALLED_APPS = [
     'selectable',
     'django_markup',
     'anymail',
+    'aldjemy',
 ]
 
 ALLOWED_HOSTS = ["learnscripture.net"]

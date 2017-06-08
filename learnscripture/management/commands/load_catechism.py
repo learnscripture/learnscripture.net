@@ -17,7 +17,7 @@ class Command(BaseCommand):
         version_slug = options['version_slug']
         json_filename = options['json_filename']
         version = TextVersion.objects.get(slug=version_slug)
-        json_data = json.load(file(json_filename))
+        json_data = json.load(open(json_filename))
 
         settings.LOADING_VERSES = True
         version.qapairs.all().delete()

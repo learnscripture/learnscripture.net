@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
-
 import unittest2
 
 from bibleverses.services import get_esv, search_esv

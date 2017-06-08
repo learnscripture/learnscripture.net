@@ -37,12 +37,12 @@ def notify_about_comment(event, comment, account):
         return
 
     if account == event.account:
-        msg = format_html(u'You have new comments on <b><a href="{0}">your event</a></b> "{1}"',
+        msg = format_html('You have new comments on <b><a href="{0}">your event</a></b> "{1}"',
                           event.get_absolute_url(),
                           event.render_html()
                           )
     else:
-        msg = format_html(u'There are <b><a href="{0}">new comments</a></b> on the event "{1}"',
+        msg = format_html('There are <b><a href="{0}">new comments</a></b> on the event "{1}"',
                           event.get_absolute_url(),
                           event.render_html()
                           )

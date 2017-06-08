@@ -5,8 +5,7 @@ Handlers for AJAX requests.
 This isn't really a REST API in the normal sense, and would probably need a lot
 of cleaning up if clients other than the web app were to use it.
 """
-from __future__ import unicode_literals
-
+import collections
 import datetime
 import json
 
@@ -92,7 +91,7 @@ def validation_error_response(errors):
 
 def get_instance_attr(instance, attr_name):
     retval = getattr(instance, attr_name)
-    if callable(retval):
+    if isinstance(retval, collections.Callable):
         retval = retval()
     return retval
 
@@ -114,7 +113,7 @@ def instance_to_dict(instance, fields):
 def make_serializable(value, fields=[]):
     if value is None:
         return value
-    if isinstance(value, (basestring, int, float, datetime.date, datetime.datetime)):
+    if isinstance(value, (str, int, float, datetime.date, datetime.datetime)):
         return value
     if isinstance(value, dict):
         return {k: make_serializable(v) for k, v in value.items()}
@@ -366,10 +365,10 @@ def html_format_text(verse):
     for b in bits:
         html = escape(b)
         if in_bold:
-            html = u'<b>' + html + u'</b>'
+            html = '<b>' + html + '</b>'
         out.append(html)
         in_bold = not in_bold
-    return mark_safe(u''.join(out))
+    return mark_safe(''.join(out))
 
 
 class VerseFind(ApiView):

@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from django.db import connection
 
 from bibleverses.models import TextVersion, VerseSet, VerseSetType, parse_as_bible_reference, quick_find
