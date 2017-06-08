@@ -94,6 +94,8 @@ REQS = [
     # For building Python extensions
     'build-essential',
     'python-dev',
+    'python3',
+    'python3-dev',
     'libpq-dev',  # For psycopg2
     'libxml2-dev',  # For lxml/uwsgi
     'libxslt-dev',  # For lxml/uwsgi
