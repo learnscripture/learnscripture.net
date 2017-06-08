@@ -7,7 +7,7 @@ Pillow==4.1.1
 olefile==0.44
 SQLAlchemy==1.1.10
 URLObject==2.4.0
-aldjemy==0.7.0
+-e git://github.com/spookylukey/aldjemy.git@364e931f304cc4e1d89a639cb0f3dbd62619d06a#egg=aldjemy
 anyjson==0.3.3
 argparse==1.4.0
 celery==4.0.2
