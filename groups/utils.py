@@ -7,5 +7,5 @@ def group_url(group):
 
 
 def group_link(group):
-    return format_html(u"<a href='{0}'>{1}</a>",
+    return format_html("<a href='{0}'>{1}</a>",
                        group_url(group), group.name)

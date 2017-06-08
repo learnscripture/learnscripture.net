@@ -89,7 +89,7 @@ class Group(models.Model):
     def active_members(self):
         return self.members.filter(is_active=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def set_invitation_list(self, new_invited_users):
@@ -134,8 +134,8 @@ class Membership(models.Model):
 
     created = models.DateTimeField(default=timezone.now)
 
-    def __unicode__(self):
-        return u'Membership of %s by %s' % (self.group, self.account)
+    def __str__(self):
+        return 'Membership of %s by %s' % (self.group, self.account)
 
 
 class InvitationManager(models.Manager):
@@ -153,8 +153,8 @@ class Invitation(models.Model):
 
     objects = InvitationManager()
 
-    def __unicode__(self):
-        return u'Invitation to %s for %s from %s' % (self.group, self.account, self.created_by)
+    def __str__(self):
+        return 'Invitation to %s for %s from %s' % (self.group, self.account, self.created_by)
 
 
 def combined_membership_count_for_creator(account_id):

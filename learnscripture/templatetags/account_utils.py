@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 @register.filter
 def account_link(account):
-    return format_html(u'<a href="{0}" title="{1} {2}">{3}</a>',
+    return format_html('<a href="{0}" title="{1} {2}">{3}</a>',
                        reverse('user_stats', args=(account.username,)),
                        account.first_name,
                        account.last_name,

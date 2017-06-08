@@ -1,7 +1,5 @@
-from __future__ import absolute_import
-
 import re
-import urlparse
+import urllib.parse
 from datetime import datetime, timedelta
 
 import mock
@@ -105,8 +103,8 @@ class EmailReminderTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBas
         m = re.search(r"https://.*/account\S*", msg.body)
         self.assertNotEqual(m, None)
         link = m.group()
-        u = urlparse.urlparse(link)
-        urlparse.urlunparse(('', '', u.path, u.params, u.query, u.fragment))
+        u = urllib.parse.urlparse(link)
+        urllib.parse.urlunparse(('', '', u.path, u.params, u.query, u.fragment))
         r1 = self.client.get(link, follow=True)
         self.assertContains(r1, "Send first reminder")
 

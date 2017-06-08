@@ -25,7 +25,7 @@ def make_choices(name, choice_list):
                 if n == name:
                     return v
 
-    Choices.__name__ = name if isinstance(name, str) else name.encode('utf8')
+    Choices.__name__ = name
 
     for (v, name, title) in choice_list:
         assert name.upper() == name

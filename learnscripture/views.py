@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import csv
 import re
-import urllib
-import urlparse
+import urllib.parse
 from datetime import date, timedelta
 
 import django.contrib.auth
@@ -157,7 +154,7 @@ def signup(request):
             identity.account = account
             identity.save()
             session.login(request, account.identity)
-            messages.info(request, u"Account created - welcome %s!" % account.username)
+            messages.info(request, "Account created - welcome %s!" % account.username)
             new_account.send(sender=account)
             return _login_redirect(request)
 
@@ -186,7 +183,7 @@ def bible_versions_for_request(request):
 @require_preferences
 def learn(request):
     c = {'bible_versions': bible_versions_for_request(request),
-         'title': u"Learn",
+         'title': "Learn",
          }
     return render(request, 'learnscripture/learn.html', c)
 
@@ -225,7 +222,7 @@ def local_redirect(url):
     """
     Returns the URL if it is local, otherwise None
     """
-    netloc = urlparse.urlparse(url)[1]
+    netloc = urllib.parse.urlparse(url)[1]
     return None if netloc else url
 
 
@@ -261,12 +258,12 @@ def learn_set(request, uvs_list, learning_type):
     return_to = reverse('dashboard')  # by default, the dashboard
     referer = request.META.get('HTTP_REFERER')
     if referer is not None:
-        url = urlparse.urlparse(referer)
+        url = urllib.parse.urlparse(referer)
         allowed_return_to = [reverse('user_verses')]  # places it is useful to return to
         if url.path in allowed_return_to:
             # avoiding redirection security problems by making it relative:
             url = ('', '', url.path, url.params, url.query, url.fragment)
-            return_to = urlparse.urlunparse(url)
+            return_to = urllib.parse.urlunparse(url)
 
     session.start_learning_session(request, uvs_list, learning_type, return_to)
     return HttpResponseRedirect(reverse('learn'))
@@ -482,7 +479,7 @@ def choose(request):
                 return learn_set(request, [identity.add_verse_choice(ref, version=version)],
                                  session.LearningType.LEARNING)
 
-    c = {'title': u'Choose verses'}
+    c = {'title': 'Choose verses'}
     verse_sets = verse_sets.order_by('name').prefetch_related('verse_choices')
 
     if 'creator' in request.GET:
@@ -680,7 +677,7 @@ def view_verse_set(request, slug):
     c['verse_set'] = verse_set
     c['verse_choices'] = [vc for vc in verse_choices if vc.verse is not None]
     c['version'] = version
-    c['title'] = u"Verse set: %s" % verse_set.name
+    c['title'] = "Verse set: %s" % verse_set.name
     c.update(context_for_version_select(request))
     return render(request, 'learnscripture/single_verse_set.html', c)
 
@@ -874,7 +871,7 @@ def combine_timeline_stats(*statslists):
     num_lists = len(statslists)
     positions = [0] * num_lists  # current position in each of statslists
     statslist_r = list(range(0, num_lists))
-    statslist_lengths = map(len, statslists)
+    statslist_lengths = list(map(len, statslists))
 
     # Modify statslists to make end condition easier to handler
     for i in statslist_r:
@@ -955,7 +952,7 @@ def user_verses(request):
 @require_identity
 def user_verse_sets(request):
     identity = request.identity
-    c = {'title': u'Verse sets',
+    c = {'title': 'Verse sets',
          'verse_sets_learning': identity.verse_sets_chosen(),
          }
     if identity.account is not None:
@@ -974,12 +971,12 @@ def user_verse_sets(request):
 # from the the same form as the login form.
 def password_reset_done(request):
     return render(request, 'learnscripture/password_reset_done.html',
-                  {'title': u'Password reset started'})
+                  {'title': 'Password reset started'})
 
 
 def password_reset_complete(request):
     return render(request, 'learnscripture/password_reset_complete.html',
-                  {'title': u'Password reset complete'})
+                  {'title': 'Password reset complete'})
 
 
 # Large copy and paste from django.contrib.auth.views, followed by customisations.
@@ -1122,16 +1119,16 @@ def stats(request):
 
 def natural_list(l):
     if len(l) == 0:
-        return u''
+        return ''
     if len(l) == 1:
         return l[0]
-    return u"%s and %s" % (u", ".join(l[0:-1]), l[-1])
+    return "%s and %s" % (", ".join(l[0:-1]), l[-1])
 
 
 def donation_paypal_dict(account, url_start):
     return {
         "business": settings.PAYPAL_RECEIVER_EMAIL,
-        "item_name": u"Donation to LearnScripture.net",
+        "item_name": "Donation to LearnScripture.net",
         "invoice": "account-%s-%s" % (account.id,
                                       timezone.now()),  # We don't need this, but must be unique
         "notify_url": "%s%s" % (url_start, reverse('paypal-ipn')),
@@ -1298,7 +1295,7 @@ def group(request, slug):
     if request.method == "POST":
         if account is None:
             return HttpResponseRedirect(reverse('signup') +
-                                        "?next=" + urllib.quote(request.get_full_path()))
+                                        "?next=" + urllib.parse.quote(request.get_full_path()))
 
         if 'leave' in request.POST:
             group.remove_user(account)
@@ -1409,11 +1406,11 @@ def create_or_edit_group(request, slug=None):
     if slug is not None:
         groups = groups_editable_for_request(request).filter(slug=slug)
         group = get_object_or_404(groups)
-        title = u'Edit group: %s' % group.name
+        title = 'Edit group: %s' % group.name
         initial = {'invited_users': group.invited_users()}
     else:
         group = None
-        title = u"Create group"
+        title = "Create group"
         initial = {}
 
     was_public = group.public if group is not None else False
@@ -1432,7 +1429,7 @@ def create_or_edit_group(request, slug=None):
 
             # Handle invitations
             group.set_invitation_list(form.cleaned_data['invited_users'])
-            messages.info(request, u"Group details saved.")
+            messages.info(request, "Group details saved.")
             return HttpResponseRedirect(reverse('group', args=(group.slug,)))
     else:
         form = EditGroupForm(instance=group, initial=initial)
@@ -1464,7 +1461,7 @@ def terms_of_service(request):
 def contact(request):
     account = account_from_request(request)
     if account is not None:
-        initial = {'name': account.first_name + u' ' + account.last_name,
+        initial = {'name': account.first_name + ' ' + account.last_name,
                    'email': account.email}
     else:
         initial = {}

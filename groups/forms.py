@@ -9,7 +9,7 @@ class EditGroupForm(forms.ModelForm):
 
     invited_users = selectable.forms.fields.AutoCompleteSelectMultipleField(
         lookup_class=AccountLookup,
-        label=u'Invited users',
+        label='Invited users',
         required=False,
     )
 
@@ -29,5 +29,5 @@ f = EditGroupForm.base_fields['description'].widget.attrs
 del f['cols']
 f['rows'] = 3
 
-EditGroupForm.base_fields['public'].help_text = u"""A public group is visible to everyone, and so is the member list. This can't be undone once selected."""
-EditGroupForm.base_fields['open'].help_text = u"""Anyone can join an open group. For a closed group, you have to specifically invite people. A group must be public to be open."""
+EditGroupForm.base_fields['public'].help_text = """A public group is visible to everyone, and so is the member list. This can't be undone once selected."""
+EditGroupForm.base_fields['open'].help_text = """Anyone can join an open group. For a closed group, you have to specifically invite people. A group must be public to be open."""

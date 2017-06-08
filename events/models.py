@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 from datetime import timedelta
 
 from django.contrib.humanize.templatetags.humanize import intcomma
@@ -102,7 +100,7 @@ class NewAccountEvent(EventLogic):
 
     def __init__(self, account=None):
         super(NewAccountEvent, self).__init__(account=account)
-        self.event.message_html = u"signed up to LearnScripture.net"
+        self.event.message_html = "signed up to LearnScripture.net"
 
 
 class AwardReceivedEvent(EventLogic):
@@ -113,7 +111,7 @@ class AwardReceivedEvent(EventLogic):
     def __init__(self, award=None):
         super(AwardReceivedEvent, self).__init__(award_id=award.id,
                                                  account=award.account)
-        self.event.message_html = u"earned " + award_link(award)
+        self.event.message_html = "earned " + award_link(award)
 
 
 class AwardLostEvent(EventLogic):
@@ -123,7 +121,7 @@ class AwardLostEvent(EventLogic):
     def __init__(self, award=None):
         super(AwardLostEvent, self).__init__(award_id=award.id,
                                              account=award.account)
-        self.event.message_html = u"lost " + award_link(award)
+        self.event.message_html = "lost " + award_link(award)
 
 
 class VerseSetCreatedEvent(EventLogic):
@@ -132,7 +130,7 @@ class VerseSetCreatedEvent(EventLogic):
         super(VerseSetCreatedEvent, self).__init__(verse_set_id=verse_set.id,
                                                    account=verse_set.created_by)
         self.event.message_html = format_html(
-            u'created new verse set <a href="{0}">{1}</a>',
+            'created new verse set <a href="{0}">{1}</a>',
             reverse('view_verse_set', args=(verse_set.slug,)),
             verse_set.name
         )
@@ -157,7 +155,7 @@ class PointsMilestoneEvent(EventLogic):
         super(PointsMilestoneEvent, self).__init__(account=account,
                                                    points=points)
         self.event.message_html = format_html(
-            u'reached {0} points', intcomma(points)
+            'reached {0} points', intcomma(points)
         )
 
 
@@ -166,7 +164,7 @@ class VersesStartedMilestoneEvent(EventLogic):
         super(VersesStartedMilestoneEvent, self).__init__(account=account,
                                                           verses_started=verses_started)
         self.event.message_html = format_html(
-            u'reached {0} verses started', intcomma(verses_started)
+            'reached {0} verses started', intcomma(verses_started)
         )
 
 
@@ -186,7 +184,7 @@ class GroupJoinedEvent(GroupRelatedMixin, EventLogic):
                                                group_id=group.id)
 
         self.event.message_html = format_html(
-            u"joined group {0}", group_link(group)
+            "joined group {0}", group_link(group)
         )
 
 
@@ -196,7 +194,7 @@ class GroupCreatedEvent(GroupRelatedMixin, EventLogic):
         super(GroupCreatedEvent, self).__init__(account=account,
                                                 group_id=group.id)
         self.event.message_html = format_html(
-            u"created group {0}", group_link(group)
+            "created group {0}", group_link(group)
         )
 
 
@@ -205,7 +203,7 @@ class VersesFinishedMilestoneEvent(EventLogic):
         super(VersesFinishedMilestoneEvent, self).__init__(account=account,
                                                            verses_finished=verses_finished)
         self.event.message_html = format_html(
-            u"reached {0} verses finished", intcomma(verses_finished)
+            "reached {0} verses finished", intcomma(verses_finished)
         )
 
 
@@ -215,7 +213,7 @@ class StartedLearningCatechismEvent(EventLogic):
         super(StartedLearningCatechismEvent, self).__init__(account=account,
                                                             catechism_id=catechism.id)
         self.event.message_html = format_html(
-            u'started learning <a href="{0}">{1}</a>',
+            'started learning <a href="{0}">{1}</a>',
             reverse('view_catechism', args=(catechism.slug,)),
             catechism.full_name,
         )
@@ -235,7 +233,7 @@ class NewCommentEvent(EventLogic):
             kwargs['group_id'] = comment.group_id
         super(NewCommentEvent, self).__init__(**kwargs)
         self.event.message_html = format_html(
-            u'posted a <a href="{0}">comment</a> on {1}',
+            'posted a <a href="{0}">comment</a> on {1}',
             comment.get_absolute_url(),
             comment.get_subject_html(),
         )
@@ -254,7 +252,7 @@ class NewCommentEvent(EventLogic):
 
 
 EventType = make_class_enum(
-    b'EventType',
+    'EventType',
     [(1, 'GENERAL', 'General', GeneralEvent),  # No longer used
      (2, 'NEW_ACCOUNT', 'New account', NewAccountEvent),
      (3, 'AWARD_RECEIVED', 'Award received', AwardReceivedEvent),
@@ -359,8 +357,8 @@ class Event(models.Model):
     def __repr__(self):
         return "<Event id=%s type=%s>" % (self.id, self.event_type)
 
-    def __unicode__(self):
-        return u"Event %d" % self.id
+    def __str__(self):
+        return "Event %d" % self.id
 
     def get_rank(self, viewer=None, friendship_weights=None,
                  group_ids=None, now=None):
@@ -407,8 +405,8 @@ class Event(models.Model):
         now = timezone.now()
         diff = now - self.created
         if diff.total_seconds() < 60:
-            return u"Just now"
-        return timesince(self.created, now=now) + u" ago"
+            return "Just now"
+        return timesince(self.created, now=now) + " ago"
 
     def render_html(self):
         if self.account is not None:

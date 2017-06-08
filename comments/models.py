@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
@@ -33,7 +31,7 @@ class Comment(models.Model):
     def message_formatted(self):
         return format_comment_message(self.message)
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s: %s" % (self.id, self.message)
 
     def get_absolute_url(self):

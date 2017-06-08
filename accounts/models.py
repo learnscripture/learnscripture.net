@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import itertools
 import math
 from collections import OrderedDict, defaultdict
@@ -157,13 +155,13 @@ class Account(AbstractBaseUser):
 
     @property
     def personal_name(self):
-        return (self.first_name.strip() + u' ' + self.last_name.strip()).strip()
+        return (self.first_name.strip() + ' ' + self.last_name.strip()).strip()
 
     @property
     def recruited_by(self):
         return self.identity.referred_by
 
-    def __unicode__(self):
+    def __str__(self):
         return self.username
 
     # Main business logic
@@ -386,7 +384,7 @@ def send_payment_received_email(account, payment):
     }
 
     body = loader.render_to_string("learnscripture/payment_received_email.txt", c)
-    subject = u"LearnScripture.net - donation received"
+    subject = "LearnScripture.net - donation received"
     mail.send_mail(subject, body, settings.SERVER_EMAIL, [account.email])
 
 
@@ -440,14 +438,14 @@ class Identity(models.Model):
     class Meta:
         verbose_name_plural = 'identities'
 
-    def __unicode__(self):
+    def __str__(self):
         if self.account_id is None:
             return '<Identity %s>' % self.id
         else:
             return '<Identity %s: %s>' % (self.id, self.account)
 
     def __repr__(self):
-        return unicode(self).encode('utf-8')
+        return str(self)
 
     @property
     def preferences_setup(self):
@@ -1046,7 +1044,7 @@ class Identity(models.Model):
             vs.tested_total = self.verse_statuses.filter(verse_set=vs,
                                                          ignored=False,
                                                          memory_stage__gte=MemoryStage.TESTED).count()
-        return verse_sets.values()
+        return list(verse_sets.values())
 
     def passage_verse_sets_being_learnt_ids(self):
         """
@@ -1346,8 +1344,8 @@ class Notice(models.Model):
     def is_old(self):
         return (timezone.now() - self.created).days >= 2
 
-    def __unicode__(self):
-        return u"Notice %d for %r" % (self.id, self.for_identity)
+    def __str__(self):
+        return "Notice %d for %r" % (self.id, self.for_identity)
 
 
 def get_verse_started_running_streaks():

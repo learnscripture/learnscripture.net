@@ -7,6 +7,6 @@ def award_url(award):
 
 
 def award_link(award):
-    return format_html(u"<a href='{0}'>{1}</a>",
+    return format_html("<a href='{0}'>{1}</a>",
                        award_url(award),
                        award.short_description())

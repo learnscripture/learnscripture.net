@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 from decimal import Decimal
 
 from django.conf import settings
@@ -32,8 +30,8 @@ class Payment(models.Model):
     class Meta:
         base_manager_name = 'objects'
 
-    def __unicode__(self):
-        return u"Payment: %s from %s" % (self.amount, self.account)
+    def __str__(self):
+        return "Payment: %s from %s" % (self.amount, self.account)
 
 
 class DonationDriveManager(models.Manager):
@@ -135,7 +133,7 @@ class DonationDrive(models.Model):
     def target_reached(self):
         return self.fraction_raised >= 1  # Always false if target==0
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s to %s" % (self.start.strftime("%Y-%m-%d"),
                              self.finish.strftime("%Y-%m-%d")
                              )

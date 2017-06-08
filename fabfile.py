@@ -1,8 +1,6 @@
 """
 fabfile for deploying and managing LearnScripture.net
 """
-from __future__ import print_function, unicode_literals
-
 import json
 import os
 import re
@@ -34,7 +32,7 @@ env.locale = "en_US.UTF-8"
 env.num_workers = "3"
 
 # Python version
-PYTHON_BIN = "python2.7"
+PYTHON_BIN = "python3.5"
 PYTHON_PREFIX = ""  # e.g. /usr/local  Use "" for automatic
 PYTHON_FULL_PATH = "%s/bin/%s" % (PYTHON_PREFIX, PYTHON_BIN) if PYTHON_PREFIX else PYTHON_BIN
 
@@ -188,10 +186,7 @@ class Version(object):
 
 
 def secrets():
-    retval = json.load(open(rel(".", "config", "secrets.json")))
-    # At least some passwords need to be bytes, not unicode objects
-    retval = dict([(k, s if not isinstance(s, unicode) else s.encode('ascii')) for k, s in retval.items()])
-    return retval
+    return json.load(open(rel(".", "config", "secrets.json")))
 
 
 # System level install
@@ -207,7 +202,7 @@ def secure(new_user=env.user):
     run("apt-get upgrade -y -q")
     if not fabtools.user.exists(new_user):
         ssh_keys = [os.path.expandvars("$HOME/.ssh/id_rsa.pub")]
-        ssh_keys = filter(os.path.exists, ssh_keys)
+        ssh_keys = list(filter(os.path.exists, ssh_keys))
         fabtools.user.create(new_user, group=new_user, ssh_public_keys=ssh_keys)
     run("sed -i 's:RootLogin yes:RootLogin without-password:' /etc/ssh/sshd_config")
     run("service ssh restart")
@@ -351,7 +346,7 @@ TEMPLATES = {
 
 
 def inject_template(data):
-    return dict([(k, v % env if isinstance(v, basestring) else v)
+    return dict([(k, v % env if isinstance(v, str) else v)
                  for k, v in data.items()])
 
 
@@ -830,7 +825,7 @@ def pg_environ(db):
     Returns the environment variables postgres command line tools like psql
     and pg_dump use as a dict, ready for use with Fabric's shell_env.
     """
-    return {PG_ENVIRON_MAP[name]: unicode(val) for name, val in db.items() if name in PG_ENVIRON_MAP}
+    return {PG_ENVIRON_MAP[name]: str(val) for name, val in db.items() if name in PG_ENVIRON_MAP}
 
 
 @as_rootuser

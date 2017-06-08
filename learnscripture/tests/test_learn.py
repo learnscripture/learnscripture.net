@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import math
 from datetime import timedelta
 from decimal import Decimal
@@ -77,7 +75,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
                             uvs.memory_stage == MemoryStage.ZERO
                             for uvs in identity.verse_statuses.all()))
 
-        self.assertEqual(u"John 3:16", self.get_element_text("#id-verse-title"))
+        self.assertEqual("John 3:16", self.get_element_text("#id-verse-title"))
         # Do the reading:
         for i in range(0, 9):
             self.click("#id-next-btn")
@@ -98,7 +96,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         identity.add_verse_choice('Psalm 23:1-2')
         self.get_url('dashboard')
         self.submit('input[name=learnbiblequeue]')
-        self.assertEqual(u"Psalm 23:1-2", self.get_element_text("#id-verse-title"))
+        self.assertEqual("Psalm 23:1-2", self.get_element_text("#id-verse-title"))
 
         # # Do the reading:
         # for i in range(0, 9):
@@ -161,13 +159,13 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
     def test_change_version_passage(self):
         self.choose_verse_set('Psalm 23')
 
-        self.assertEqual(u"Psalm 23:1", self.get_element_text("#id-verse-title"))
-        self.assertIn(u"I shall not want", self.get_element_text('.current-verse'))
+        self.assertEqual("Psalm 23:1", self.get_element_text("#id-verse-title"))
+        self.assertIn("I shall not want", self.get_element_text('.current-verse'))
 
         self.fill_by_text({"#id-version-select": "NET"})
 
         self.wait_for_ajax()
-        self.assertIn(u"I lack nothing",
+        self.assertIn("I lack nothing",
                       self.get_element_text('.current-verse'))
 
         # This section can be replaced by a 'skip' button click once we've implemented that.
@@ -179,7 +177,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
 
         # Now check that the next verse is present and is also NET, which is the
         # main point of this test.
-        self.assertIn(u"He takes me to lush pastures",
+        self.assertIn("He takes me to lush pastures",
                       self.get_element_text('.current-verse'))
 
     def test_revise_passage_mixed(self):
@@ -204,7 +202,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
 
         # Test keyboard shortcut
         self.send_keys('body', '\n')
-        self.assertIn(u"He maketh me to lie down in green pastures",
+        self.assertIn("He maketh me to lie down in green pastures",
                       self.get_element_text('.current-verse'))
 
         for i in range(0, 5):
@@ -214,17 +212,17 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
     def test_skip_verse(self):
         self.choose_verse_set('Bible 101')
 
-        self.assertEqual(u"John 3:16", self.get_element_text("#id-verse-title"))
+        self.assertEqual("John 3:16", self.get_element_text("#id-verse-title"))
 
         self.click("#id-verse-dropdown")
         self.click("#id-skip-verse-btn")
 
-        self.assertEqual(u"John 14:6", self.get_element_text("#id-verse-title"))
+        self.assertEqual("John 14:6", self.get_element_text("#id-verse-title"))
 
         # Should be removed from session too
         self.get_url('learn')
 
-        self.assertEqual(u"John 14:6", self.get_element_text("#id-verse-title"))
+        self.assertEqual("John 14:6", self.get_element_text("#id-verse-title"))
 
     def test_cancel_learning(self):
         self.add_verse_set('Bible 101')
@@ -240,20 +238,20 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.get_url('dashboard')
         self.choose_revise_bible()
 
-        self.assertEqual(u"John 3:16", self.get_element_text("#id-verse-title"))
+        self.assertEqual("John 3:16", self.get_element_text("#id-verse-title"))
 
         self.click("#id-verse-dropdown")
         self.click("#id-cancel-learning-btn")
 
         # Should skip.
-        self.assertEqual(u"John 14:6", self.get_element_text("#id-verse-title"))
+        self.assertEqual("John 14:6", self.get_element_text("#id-verse-title"))
 
         # If we go back to dashboard and choose again, it should not appear
         # Go to dashboard
         self.get_url('dashboard')
         self.choose_revise_bible()
 
-        self.assertEqual(u"John 14:6", self.get_element_text("#id-verse-title"))
+        self.assertEqual("John 14:6", self.get_element_text("#id-verse-title"))
 
     def test_reset_progress(self):
         self.add_verse_set('Bible 101')
@@ -265,7 +263,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.get_url('dashboard')
         self.choose_revise_bible()
 
-        self.assertEqual(u"John 3:16", self.get_element_text("#id-verse-title"))
+        self.assertEqual("John 3:16", self.get_element_text("#id-verse-title"))
 
         self.click("#id-verse-dropdown")
         self.click_and_confirm("#id-reset-progress-btn")

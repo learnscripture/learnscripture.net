@@ -25,7 +25,7 @@ def send_unrecognised_payment_email(ipn_obj):
     }
 
     body = loader.render_to_string("learnscripture/unrecognised_payment_email.txt", c)
-    subject = u"LearnScripture.net - unrecognised payment"
+    subject = "LearnScripture.net - unrecognised payment"
     mail.send_mail(subject, body, settings.SERVER_EMAIL, [settings.DEFAULT_FROM_EMAIL])
 
 

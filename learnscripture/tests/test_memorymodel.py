@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import unittest2
 
 from accounts.memorymodel import strength_estimate

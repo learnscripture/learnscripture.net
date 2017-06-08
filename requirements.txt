@@ -2,13 +2,12 @@
 -e git://github.com/spookylukey/django-bootstrap-form.git@b228f986e6650ad4690eedc70cca5ff044feaab2#egg=django-bootstrap-form
 -e git://github.com/spookylukey/Pykov.git@c21f27b56a52e7ea7caba1707e64e3753c414478#egg=pykov
 -e git://github.com/spookylukey/django-autoslug.git@0a6adec1f9743743bf7d741b6845620a8f347159#egg=django-autoslug
-BeautifulSoup==3.2.1
 Django==1.11.1
 Pillow==4.1.1
 olefile==0.44
 SQLAlchemy==1.1.10
 URLObject==2.4.0
-aldjemy==0.4.3
+aldjemy==0.7.0
 anyjson==0.3.3
 argparse==1.4.0
 celery==4.0.2
@@ -33,11 +32,11 @@ easy-thumbnails==2.4.1
 ecdsa==0.13
 httplib2==0.10.3
 kombu==4.0.2
-lxml==3.7.3
+lxml==3.8.0
 meld3==1.0.2
 numpy==1.12.1
 psutil==5.2.2
-psycopg2==2.6.1
+psycopg2==2.7.1
 pyquery==1.2.17
 python-dateutil==2.6
 python-memcached==1.58
@@ -46,7 +45,6 @@ raven==6.1.0
 requests==2.6.0
 scipy==0.18.1
 six==1.10.0
-wsgiref==0.1.2
 urllib3==1.21.1
 nodeenv==1.1.2
 django-anymail==0.10

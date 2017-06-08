@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from events.models import Event, EventType
 
 from .base import FullBrowserTest

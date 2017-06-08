@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from accounts.models import Account
 from awards.models import AwardType
 from bibleverses.models import VerseSet

@@ -1,7 +1,4 @@
 # -*- coding: utf8 -*-
-
-from __future__ import unicode_literals
-
 import gc
 import hashlib
 import logging
@@ -11,7 +8,7 @@ import pickle
 import random
 import re
 from collections import Counter
-from functools import wraps
+from functools import reduce, wraps
 
 import numpy
 import pykov
@@ -261,7 +258,7 @@ def generate_suggestions_single_item(version, item,
                         relevance = relevance / 2.0  # scale down worse methods for finding suggestions
 
                 # Sort after each one:
-                word_suggestions.sort(key=lambda (w, f): -f)
+                word_suggestions.sort(key=lambda w_f: -w_f[1])
 
             item_suggestions.append([w for w, f in word_suggestions[0:MAX_SUGGESTIONS]])
 
@@ -399,14 +396,14 @@ def cache_results_with_pickle(filename_suffix):
                                                    filename_suffix))
             if os.path.exists(fname):
                 logger.info("Loading %s", fname)
-                new_data = pickle.load(file(fname))
+                new_data = pickle.load(open(fname, "rb"))
                 return new_data[full_lookup_key]
             else:
                 retval = func(training_texts, key, *args)
 
                 new_data = {full_lookup_key: retval}
                 ensure_dir(fname)
-                with file(fname, "w") as f:
+                with open(fname, "wb") as f:
                     logger.info("Writing %s...", fname)
                     pickle.dump(new_data, f)
 
@@ -470,7 +467,7 @@ class FirstWordSuggestions(SuggestionStrategy):
     def first_word_frequencies(self):
         counts = [build_first_word_counts(self.training_texts, key)
                   for key in self.training_texts.keys()]
-        return scale_suggestions(aggregate_word_counts(counts).items())
+        return scale_suggestions(list(aggregate_word_counts(counts).items()))
 
     def get_suggestions(self, words, i, count, suggestions_so_far):
         return self.first_word_frequencies[:]
@@ -496,7 +493,7 @@ class MarkovSuggestions(SuggestionStrategy):
             start = tuple(words[i - self.size:i])
         chain = self.get_markov_chain()
         try:
-            options = chain.succ(start).items()
+            options = list(chain.succ(start).items())
         except KeyError:
             return []
         return [(w if self.size == 1 else w[-1], f) for w, f in options]
@@ -553,7 +550,7 @@ class RandomLocalSuggestions(SuggestionStrategy):
         # number we pick a bit.
         for i in range(0, int(count * FACTOR / 2)):
             c[random.choice(bag)] += 1
-        return c.items()
+        return list(c.items())
 
 
 class RandomGlobalSuggestions(SuggestionStrategy):
@@ -568,7 +565,7 @@ class RandomGlobalSuggestions(SuggestionStrategy):
         """
         word_counter = get_text_word_counts(self.training_texts)
         freqs = normalise_probabilities(word_counter)
-        items, probs = zip(*freqs.items())
+        items, probs = zip(*list(freqs.items()))
         return items, probs
 
     def get_suggestions(self, words, i, count, suggestions_so_far):
@@ -579,7 +576,7 @@ class RandomGlobalSuggestions(SuggestionStrategy):
             idx = numpy.random.choice(len(items), p=probs)
             word = items[idx]
             c[word] += 1
-        return c.items()
+        return list(c.items())
 
 
 def get_text_word_counts(training_texts):
@@ -604,7 +601,7 @@ def scale_suggestions(suggestions, factor=1.0):
 
 
 def merge_suggestions(s1, s2):
-    return (Counter(dict(s1)) + Counter(dict(s2))).items()
+    return list((Counter(dict(s1)) + Counter(dict(s2))).items())
 
 
 def word_counts(words):
@@ -617,7 +614,7 @@ def aggregate_word_counts(counts):
 
 def pick_from_distribution(counter):
     c2 = normalise_probabilities(counter)
-    items, probs = zip(*c2.items())
+    items, probs = zip(*list(c2.items()))
     choice = numpy.random.choice(len(items), p=probs)
     return items[choice]
 
@@ -667,7 +664,7 @@ PRONOUN_THESAURUS = dict(
 
 def english_thesaurus():
     fname = os.path.join(settings.SRC_ROOT, 'resources', 'mobythes.aur')
-    f = file(fname).read().decode('utf8')
+    f = open(fname, "rb").read().decode('utf8')
     return dict((l.split(',')[0], l.split(',')[1:]) for l in f.split('\r'))
 
 
@@ -686,7 +683,7 @@ def version_thesaurus(version):
     ensure_dir(fname)
     try:
         logger.info("Loading thesaurus %s for %s\n", fname, version.slug)
-        return pickle.load(file(fname))
+        return pickle.load(open(fname, "rb"))
     except IOError:
         pass
 
@@ -713,7 +710,7 @@ def version_thesaurus(version):
         alts_with_freq.sort(reverse=True)
         d[word] = [w for c, w in alts_with_freq]
 
-    with file(fname, "w") as f:
+    with open(fname, "wb") as f:
         pickle.dump(d, f)
     return d
 
@@ -764,7 +761,7 @@ def normalise_word(word):
 
 
 def split_into_words_for_suggestions(text):
-    return map(normalise_word, split_into_words(text))
+    return list(map(normalise_word, split_into_words(text)))
 
 
 def split_into_sentences(text):

@@ -17,7 +17,7 @@ instructions may not work completely, but they should be a start.
 
 3. Create a virtualenv for the project e.g.::
 
-     mkvirtualenv learnscripture --python=`which python2.7`
+     mkvirtualenv learnscripture --python=`which python3.5`
 
 4. Install dependencies.
 
