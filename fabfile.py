@@ -421,8 +421,9 @@ def create_databases():
     # don't want that happening after a DB has been created.
     for db in target.DBS.values():
         with shell_env(**pg_environ(db)):
-            for run_as_postgres, cmd in db_create_user_commands(db):
-                pg_run(cmd, run_as_postgres)
+            if not db_check_user_exists_remote(db):
+                for run_as_postgres, cmd in db_create_user_commands(db):
+                    pg_run(cmd, run_as_postgres)
 
     for db in target.DBS.values():
         with shell_env(**pg_environ(db)):
@@ -433,9 +434,21 @@ def create_databases():
 def pg_run(cmd, run_as_postgres):
     with cd("/"):  # suppress "could not change directory" warnings
         if run_as_postgres:
-            run("sudo -u postgres %s" % cmd)
+            return run("sudo -u postgres %s" % cmd)
         else:
-            run(cmd)
+            return run(cmd)
+
+
+def pg_local(cmd, run_as_postgres, capture=False):
+    with cd("/"):  # suppress "could not change directory" warnings
+        if run_as_postgres:
+            retval = local("sudo -u postgres %s" % cmd, capture=capture)
+        else:
+            retval = local(cmd, capture=capture)
+    if capture:
+        print(retval)
+        print(retval.stderr)
+    return retval
 
 
 @task
@@ -752,11 +765,14 @@ def local_restore_from_dump(filename):
     db['PORT'] = '5432'
 
     with shell_env(**pg_environ(db)):
-        for run_as_postgres, cmd in db_restore_commands(db, filename):
-            if run_as_postgres:
-                local("sudo -u postgres %s" % cmd)
-            else:
-                local(cmd)
+        if not db_check_user_exists_local(db):
+            for run_as_postgres, cmd in db_create_user_commands(db):
+                pg_local(cmd, run_as_postgres)
+
+        for run_as_postgres, cmd in (db_drop_database_commands(db) +
+                                     db_create_commands(db) +
+                                     pg_restore_cmds(db, filename)):
+            pg_local(cmd, run_as_postgres)
 
 
 def make_django_db_filename(target):
@@ -779,13 +795,24 @@ def pg_restore_cmds(db, filename, clean=False):
 
 def db_create_user_commands(db):
     return [
-        # Delete user first, so we can create with correct password
-        (True,
-         """psql -U postgres -d postgres -c "DROP USER IF EXISTS %s" """ % db['USER']),
-
         (True,
          """psql -U postgres -d template1 -c "CREATE USER %s WITH PASSWORD '%s';" """ % (db['USER'], db['PASSWORD'])),
     ]
+
+
+def db_check_user_exists_command(db):
+    return ("""psql -U postgres -d postgres -t -c "SELECT COUNT(*) FROM pg_user WHERE usename='%s';" """
+            % db['USER'])
+
+
+def db_check_user_exists_local(db):
+    output = pg_local(db_check_user_exists_command(db), True, capture=True).strip()
+    return output == "1"
+
+
+def db_check_user_exists_remote(db):
+    output = pg_run(db_check_user_exists_command(db), True).strip()
+    return output == "1"
 
 
 def db_create_commands(db):
@@ -805,12 +832,19 @@ def db_create_commands(db):
     ]
 
 
-def db_restore_commands(db, filename):
+def db_drop_database_commands(db):
     return [
         (True,
          """psql -U postgres -d template1 -c "DROP DATABASE IF EXISTS %s;" """ % db['NAME']),
 
-    ] + db_create_user_commands(db) + db_create_commands(db) + pg_restore_cmds(db, filename)
+    ]
+
+
+def db_restore_commands(db, filename):
+    return (db_drop_database_commands(db) +
+            db_create_user_commands(db) +
+            db_create_commands(db) +
+            pg_restore_cmds(db, filename))
 
 
 PG_ENVIRON_MAP = {
