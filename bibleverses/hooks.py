@@ -30,7 +30,8 @@ def verse_saved(sender, **kwargs):
         # work and refetching the data from the API service
         if not item_suggestions_need_updating(verse):
             return
-        fix_item_suggestions.delay(verse.version.slug, verse.reference)
+        fix_item_suggestions.apply_async([verse.version.slug, verse.reference],
+                                         countdown=5)
 
         if get_search_service(verse.version.slug) is None:
             # No external search service, therefore must be using builtin DB
@@ -45,4 +46,5 @@ def qapair_saved(sender, **kwargs):
         from bibleverses.suggestions import item_suggestions_need_updating
         if not item_suggestions_need_updating(qapair):
             return
-        fix_item_suggestions.delay(qapair.catechism.slug, qapair.reference)
+        fix_item_suggestions.apply_async([qapair.catechism.slug, qapair.reference],
+                                         countdown=5)
