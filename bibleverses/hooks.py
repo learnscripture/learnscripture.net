@@ -31,13 +31,16 @@ def verse_saved_update_word_suggestions(sender, **kwargs):
     if not should_update_word_suggestions_on_save():
         return
 
+    if verse.text_saved == "":
+        return
+
     # We definitely have text now, might not later, so do this check at this
     # point to avoid unnecessary work and refetching the data from the API
     # service
     if not item_suggestions_need_updating(verse):
         return
 
-    fix_item_suggestions.apply_async([verse.version.slug, verse.reference],
+    fix_item_suggestions.apply_async([verse.version.slug, verse.reference, verse.text_saved],
                                      countdown=5)
 
 
@@ -60,5 +63,5 @@ def qapair_saved(sender, **kwargs):
         from bibleverses.suggestions import item_suggestions_need_updating
         if not item_suggestions_need_updating(qapair):
             return
-        fix_item_suggestions.apply_async([qapair.catechism.slug, qapair.reference],
+        fix_item_suggestions.apply_async([qapair.catechism.slug, qapair.reference, None],
                                          countdown=5)
