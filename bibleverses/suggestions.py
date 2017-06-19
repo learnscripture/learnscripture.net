@@ -51,11 +51,17 @@ class LoadingNotAllowed(Exception):
     pass
 
 
-def fix_item(version_slug, reference):
+def fix_item(version_slug, reference, text_saved):
     version = TextVersion.objects.get(slug=version_slug)
     item = version.get_item_by_reference(reference)
     if getattr(item, 'missing', False):
         return  # Doesn't need fixing
+
+    # 'text_saved' is passed through, to ensure that this process (Celery) sees
+    # the same value that was being saved in the Django process. We can also
+    # avoid generating a warning in ensure_text this way.
+    if text_saved is not None:
+        item.text_saved = text_saved
 
     # Before recreating, check if the hash has changed. This is especially
     # important for versions where we only partially store locally and have to
@@ -71,7 +77,8 @@ def fix_item(version_slug, reference):
     # current algo assumes access to the whole text. So just log a warning
     disallow_loading = partial_data_available(version_slug)
     try:
-        generate_suggestions(version, missing_only=False, ref=reference, disallow_loading=disallow_loading)
+        generate_suggestions(version, missing_only=False, ref=reference, disallow_loading=disallow_loading,
+                             text_saved=text_saved)
     except LoadingNotAllowed:
         logger.warn("Need to create word suggestions for %s %s but can't because text is not available and saved analysis is not complete",
                     version_slug, reference)
@@ -94,7 +101,8 @@ def item_suggestions_need_updating(item):
 
 def generate_suggestions(version, ref=None, missing_only=True,
                          disallow_loading=False,
-                         force_analysis=False):
+                         force_analysis=False,
+                         text_saved=None):
 
     if force_analysis:
         assert disallow_loading is False
@@ -102,6 +110,8 @@ def generate_suggestions(version, ref=None, missing_only=True,
     if version.text_type == TextType.BIBLE:
         if ref is not None:
             v = version.get_verse_list(ref)[0]
+            if text_saved is not None:
+                v.text_saved = text_saved
             book = BIBLE_BOOKS[v.book_number]
             items = [v]
             training_texts = BibleTrainingTexts(version, [book], disallow_loading=disallow_loading)
