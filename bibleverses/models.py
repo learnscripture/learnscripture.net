@@ -306,6 +306,10 @@ class TextVersion(models.Model):
         kwargs['version_slug'] = self.slug
         return WordSuggestionData.objects.create(**kwargs)
 
+    @property
+    def db_based_searching(self):
+        return get_search_service(self.slug) is None
+
 
 class ComboVerse(object):
     """
