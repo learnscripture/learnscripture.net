@@ -313,6 +313,7 @@ LOGGING = {
     'root': {
         'level': 'WARNING',
         'handlers': ['sentry'],
+        'filters': ['celery_redirected_filter'],
     },
     'formatters': {
         'verbose': {
