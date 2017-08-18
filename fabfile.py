@@ -8,7 +8,7 @@ from datetime import datetime
 
 import fabtools
 from fabric.api import env, hide, local, run, task
-from fabric.context_managers import cd, prefix, shell_env
+from fabric.context_managers import cd, lcd, prefix, shell_env
 from fabric.contrib.files import append, exists, upload_template
 from fabric.contrib.project import rsync_project
 from fabric.decorators import with_settings
@@ -440,7 +440,7 @@ def pg_run(cmd, run_as_postgres):
 
 
 def pg_local(cmd, run_as_postgres, capture=False):
-    with cd("/"):  # suppress "could not change directory" warnings
+    with lcd("/"):  # suppress "could not change directory" warnings
         if run_as_postgres:
             retval = local("sudo -u postgres %s" % cmd, capture=capture)
         else:
@@ -764,6 +764,7 @@ def local_restore_from_dump(filename):
     db['HOST'] = '127.0.0.1'
     db['PORT'] = '5432'
 
+    filename = os.path.abspath(filename)
     with shell_env(**pg_environ(db)):
         if not db_check_user_exists_local(db):
             for run_as_postgres, cmd in db_create_user_commands(db):
