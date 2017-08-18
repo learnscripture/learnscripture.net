@@ -71,7 +71,7 @@ server {
     }
 
     location /favicon.ico {
-        alias            %(STATIC_ROOT)s/static/img/favicon.png;
+        alias            %(STATIC_ROOT)s/img/favicon.png;
         access_log      off;
         log_not_found   off;
     }
