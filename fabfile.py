@@ -4,15 +4,17 @@ fabfile for deploying and managing LearnScripture.net
 import json
 import os
 import re
+from contextlib import contextmanager
 from datetime import datetime
 
-import fabtools
 from fabric.api import env, hide, local, run, task
 from fabric.context_managers import cd, lcd, prefix, shell_env
 from fabric.contrib.files import append, exists, upload_template
 from fabric.contrib.project import rsync_project
 from fabric.decorators import with_settings
 from fabric.operations import get, put
+
+import fabtools
 
 join = os.path.join
 rel = lambda *x: os.path.normpath(join(os.path.abspath(os.path.dirname(__file__)), *x))
@@ -126,6 +128,12 @@ as_rootuser = with_settings(user='root')
 def virtualenv(venv):
     return prefix('source %s/bin/activate' % venv)
 
+
+@contextmanager
+def django_project(target):
+    with virtualenv(target.VENV_DIR):
+        with cd(target.SRC_DIR):
+            yield
 
 # Versions and conf:
 
@@ -594,21 +602,18 @@ def install_requirements(target):
             (previous_venv_vcs_root,
              target_venv_vcs_root))
 
-    with virtualenv(target.VENV_ROOT):
-        with cd(target.SRC_ROOT):
-            run("pip install --upgrade setuptools pip wheel six")
-            run("pip install -r requirements.txt --exists-action w")
-            run("nodeenv --node=system --python-virtualenv --requirement=requirements-node.txt")
+    with django_project(target):
+        run("pip install --upgrade setuptools pip wheel six")
+        run("pip install -r requirements.txt --exists-action w")
+        run("nodeenv --node=system --python-virtualenv --requirement=requirements-node.txt")
 
 
 def build_static(target):
     assert target.STATIC_ROOT.strip() != '' and target.STATIC_ROOT.strip() != '/'
-    with virtualenv(target.VENV_ROOT):
-        with cd(target.SRC_ROOT):
-            # django-compressor doesn't always find changes if we don't do this:
-            run("touch learnscripture/static/css/learnscripture.less")
-
-            run("./manage.py collectstatic -v 0 --noinput")
+    with django_project(target):
+        # django-compressor doesn't always find changes if we don't do this:
+        run("touch learnscripture/static/css/learnscripture.less")
+        run("./manage.py collectstatic -v 0 --noinput")
 
     # This is needed for certbot/letsencrypt:
     run("mkdir {0}/root".format(target.STATIC_ROOT))
@@ -620,15 +625,14 @@ def build_static(target):
 def update_database(target):
     if getattr(env, 'no_db', False):
         return
-    with virtualenv(target.VENV_ROOT):
-        with cd(target.SRC_ROOT):
-            if getattr(env, 'fake_migrations', False):
-                args = "--fake"
-            else:
-                args = "--fake-initial"
-            for db in [DB_LABEL_DEFAULT, DB_LABEL_WORDSUGGESTIONS]:
-                run("./manage.py migrate --database %s --noinput %s" %
-                    (db, args))
+    with django_project(target):
+        if getattr(env, 'fake_migrations', False):
+            args = "--fake"
+        else:
+            args = "--fake-initial"
+        for db in [DB_LABEL_DEFAULT, DB_LABEL_WORDSUGGESTIONS]:
+            run("./manage.py migrate --database %s --noinput %s" %
+                (db, args))
 
 
 def get_target_current_version(target):
@@ -725,9 +729,8 @@ def supervisorctl(*commands):
 @task
 def manage_py_command(*commands):
     target = Version.current()
-    with virtualenv(target.VENV_ROOT):
-        with cd(target.SRC_ROOT):
-            run("./manage.py %s" % ' '.join(commands))
+    with django_project(target):
+        run("./manage.py %s" % ' '.join(commands))
 
 
 @as_rootuser
