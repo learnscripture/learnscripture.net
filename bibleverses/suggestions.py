@@ -452,9 +452,12 @@ class ThesaurusSuggestions(SuggestionStrategy):
         # meaning will be obvious.  So, we limit the number. Also, we spread
         # them out 1.0 to 0.5 so there is a range.
         # Note that thesaurus returns words already ordered
-        suggestions = self.thesaurus.get(words[i], [])[:MIN_SUGGESTIONS][:count]
-        if len(suggestions) == 0:
+        suggestions = self.thesaurus.get(words[i], None)
+        if suggestions is None:
             return []
+        suggestions = suggestions[:MIN_SUGGESTIONS][:count]
+        if len(suggestions) == 0:
+            return suggestions
         inc = 0.5 / len(suggestions)
 
         return [(w, 1.0 - (n * inc)) for n, w in enumerate(suggestions)]
@@ -490,12 +493,18 @@ class FirstWordSuggestions(SuggestionStrategy):
 
     @cached_property
     def first_word_frequencies(self):
-        counts = [build_first_word_counts(self.training_texts, key)
-                  for key in self.training_texts.keys()]
-        return scale_suggestions(list(aggregate_word_counts(counts).items()))
+        return build_summed_scaled_first_word_counts(self.training_texts,
+                                                     list(self.training_texts.keys()))
 
     def get_suggestions(self, words, i, count, suggestions_so_far):
         return self.first_word_frequencies[:]
+
+
+@cache_results_with_pickle('firstwordcounts_combined', multiple_keys=True)
+def build_summed_scaled_first_word_counts(training_texts, keys):
+    counts = [build_first_word_counts(training_texts, key)
+              for key in keys]
+    return scale_suggestions(list(aggregate_word_counts(counts).items()))
 
 
 @cache_results_with_pickle('firstwordcounts')
@@ -595,7 +604,7 @@ class RandomGlobalSuggestions(SuggestionStrategy):
         Tuple of (list_of_words, list_of_frequencies) for
         all words in training texts.
         """
-        word_counter = get_text_word_counts(self.training_texts)
+        word_counter = get_text_word_counts(self.training_texts, list(self.training_texts.keys()))
         freqs = normalise_probabilities(word_counter)
         items, probs = zip(*list(freqs.items()))
         return items, probs
@@ -611,10 +620,11 @@ class RandomGlobalSuggestions(SuggestionStrategy):
         return list(c.items())
 
 
-def get_text_word_counts(training_texts):
+@cache_results_with_pickle('wordcounts_combined', multiple_keys=True)
+def get_text_word_counts(training_texts, keys):
     return aggregate_word_counts(
         get_word_counts(training_texts, key)
-        for key in training_texts.keys())
+        for key in keys)
 
 
 @cache_results_with_pickle('wordcounts')
@@ -678,7 +688,7 @@ def get_all_version_words(version):
     elif version.text_type == TextType.CATECHISM:
         training_texts = CatechismTrainingTexts(version)
 
-    return get_text_word_counts(training_texts)
+    return get_text_word_counts(training_texts, list(training_texts.keys()))
 
 
 # -- Thesaurus
@@ -728,7 +738,6 @@ def version_thesaurus(version):
     for word, c in words.items():
         alts = thesaurus.get(word, None)
         if alts is None:
-            d[word] = []
             continue
 
         # Don't allow multi-word alternatives
@@ -740,6 +749,8 @@ def version_thesaurus(version):
         # Sort according to frequency in text
         alts_with_freq = [(words[a], a) for a in alts]
         alts_with_freq.sort(reverse=True)
+        if len(alts_with_freq) == 0:
+            continue
         d[word] = [w for c, w in alts_with_freq]
 
     with open(fname, "wb") as f:
