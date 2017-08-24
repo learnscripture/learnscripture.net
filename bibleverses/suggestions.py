@@ -709,7 +709,6 @@ def version_thesaurus(version):
     # Create a thesaurus specific to a version - i.e. start with english
     # thesaurus and throw out every word that isn't in the version text,
     # and other fixes.
-    base_thesaurus = english_thesaurus()
     fname = os.path.join(settings.DATA_ROOT, "wordsuggestions", version.slug + ".thesaurus")
     ensure_dir(fname)
     try:
@@ -718,6 +717,7 @@ def version_thesaurus(version):
     except IOError:
         pass
 
+    base_thesaurus = english_thesaurus()
     thesaurus = base_thesaurus.copy()
     thesaurus.update(PRONOUN_THESAURUS)
 
