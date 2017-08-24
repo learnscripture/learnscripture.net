@@ -858,3 +858,36 @@ def similar_books(book_name):
     if book_name not in retval:
         retval.append(book_name)
     return retval
+
+
+def test_memory():
+    import resource
+    import pympler.asizeof
+    print_mem_usage = lambda: print(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024)
+    print_mem_usage()
+    version = TextVersion.objects.get(slug='NET')
+
+    gc.collect()
+    print("Before thesaurus:")
+    print_mem_usage()
+    thesaurus = version_thesaurus(version)
+    gc.collect()
+    print("After thesaurus:")
+    print_mem_usage()
+
+    print("Thesaurus size:")
+    print(pympler.asizeof.asizeof(thesaurus))
+    gc.collect()
+
+    all_strategies = []
+    for g in BIBLE_BOOK_GROUPS:
+        training_texts = BibleTrainingTexts(version, g)
+        strategies = make_strategies(training_texts, thesaurus)
+        all_strategies.append(strategies)
+        for condition, strategy in strategies:
+            strategy.get_suggestions(["dummy", "words"],
+                                     0, MIN_SUGGESTIONS, [])
+
+    gc.collect()
+    print("After strategies:")
+    print_mem_usage()
