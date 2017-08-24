@@ -379,13 +379,15 @@ def force_use_of_strategies(version, training_texts):
                                  0, MIN_SUGGESTIONS, [])
 
 
-def cache_results_with_pickle(filename_suffix):
+def cache_results_with_pickle(filename_suffix, multiple_keys=False):
     """
     Decorator generator, takes a filename suffix to use for different functions.
 
     The actual function to be decorated should be a callable with a signature
     foo(training_texts, label, *args) and caches the results using pickle and
     saving to disk.
+
+    If multiple_keys=True, label is a list of keys.
 
     """
     # Note that the functions this is designed for take both 'training_texts'
@@ -396,8 +398,16 @@ def cache_results_with_pickle(filename_suffix):
         @wraps(func)
         def wrapper(training_texts, key, *args):
             # For sanity checking, both the pickled data and the filename
-            # we save to includes the key
-            full_lookup_key = tuple([key] + list(args))
+            # we save to include the key
+            if multiple_keys:
+                filename_key = ','.join('_'.join(k) for k in key)
+                # "File name too long" problem - reduce size (and readability)
+                filename_key = "SHA1_" + hashlib.sha1(filename_key.encode('utf-8')).hexdigest()[0:8]
+                lookup_key = tuple(key)
+            else:
+                filename_key = '_'.join(key)
+                lookup_key = (key,)
+            full_lookup_key = lookup_key + tuple(args)
 
             if args:
                 level = "__level" + "_".join(str(a) for a in args)
@@ -405,7 +415,7 @@ def cache_results_with_pickle(filename_suffix):
                 level = ""
             fname = os.path.join(settings.DATA_ROOT,
                                  "wordsuggestions",
-                                 "%s%s.%s.data" % ('_'.join(key),
+                                 "%s%s.%s.data" % (filename_key,
                                                    level,
                                                    filename_suffix))
             if os.path.exists(fname):
@@ -525,8 +535,15 @@ class MarkovSuggestions(SuggestionStrategy):
 
     # -- Markov handling
     def build_markov_chains_with_sentence_breaks(self):
-        return sum_matrices(build_markov_chains_for_text(self.training_texts, label, self.size)
-                            for label in self.training_texts.keys())
+        return build_summed_markov_chains_for_texts(self.training_texts,
+                                                    list(self.training_texts.keys()),
+                                                    self.size)
+
+
+@cache_results_with_pickle('markov_combined', multiple_keys=True)
+def build_summed_markov_chains_for_texts(training_texts, labels, size):
+    return sum_matrices(build_markov_chains_for_text(training_texts, label, size)
+                        for label in labels)
 
 
 @cache_results_with_pickle('markov')
