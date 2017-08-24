@@ -39,9 +39,9 @@ logger = logging.getLogger(__name__)
 #    database.
 
 # For this reason, we pickle intermediate analysis results (markov, word
-# frequencies etc.) so that we can perform fixes without needing to download the
-# whole text. We also delay loading of actual texts from disk (or the text API
-# service as late as possible.
+# frequencies etc.) so that we can perform fixes to word suggestions without
+# needing to download the whole text. We also delay loading of actual texts from
+# disk (or the text API service as late as possible.
 
 MIN_SUGGESTIONS = 20
 MAX_SUGGESTIONS = 40
@@ -244,6 +244,15 @@ def generate_suggestions_single_item(version, item,
         to_delete.append(item.reference)
     logger.info("Generating suggestions for %s %s", version.slug, item.reference)
 
+    item_suggestions = generate_suggestions_for_text(text, strategies)
+    to_create.append(WordSuggestionData(version_slug=version.slug,
+                                        reference=item.reference,
+                                        suggestions=item_suggestions,
+                                        hash=hash_text(text),
+                                        ))
+
+
+def generate_suggestions_for_text(text, strategies):
     item_suggestions = []
 
     # We are actually treating beginning of verse as beginning of sentence,
@@ -271,12 +280,7 @@ def generate_suggestions_single_item(version, item,
                 word_suggestions.sort(key=lambda w_f: -w_f[1])
 
             item_suggestions.append([w for w, f in word_suggestions[0:MAX_SUGGESTIONS]])
-
-    to_create.append(WordSuggestionData(version_slug=version.slug,
-                                        reference=item.reference,
-                                        suggestions=item_suggestions,
-                                        hash=hash_text(text),
-                                        ))
+    return item_suggestions
 
 
 def items_all_done(version, items, ref=None, missing_only=True):
