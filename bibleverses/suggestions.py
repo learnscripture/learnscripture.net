@@ -400,10 +400,11 @@ def cache_results_with_pickle(filename_suffix, multiple_keys=False):
             # For sanity checking, both the pickled data and the filename
             # we save to include the key
             if multiple_keys:
-                filename_key = ','.join('_'.join(k) for k in key)
+                keys = key
+                filename_key = ','.join('_'.join(k) for k in keys)
                 # "File name too long" problem - reduce size (and readability)
                 filename_key = "SHA1_" + hashlib.sha1(filename_key.encode('utf-8')).hexdigest()[0:8]
-                lookup_key = tuple(key)
+                lookup_key = tuple(keys)
             else:
                 filename_key = '_'.join(key)
                 lookup_key = (key,)
