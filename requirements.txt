@@ -49,3 +49,4 @@ nodeenv==1.1.2
 django-anymail==0.10
 uwsgi==2.0.15
 ConcurrentLogHandler==0.9.1
+attrs==17.2.0

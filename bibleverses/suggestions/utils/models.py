@@ -1,0 +1,29 @@
+"""
+Utilities that deal with LearnScripture models, particularly bibleverses.models
+"""
+from bibleverses.constants import BIBLE_BOOKS
+from bibleverses.models import TextType, WordSuggestionData
+
+from .iterators import get_in_batches
+
+
+# This module can have a dependency on Django
+
+def get_all_version_words(version):
+    from ..trainingtexts import BibleTrainingTexts, CatechismTrainingTexts
+    from ..analyzers.wordcounts import get_text_word_counts
+
+    if version.text_type == TextType.BIBLE:
+        training_texts = BibleTrainingTexts(text=version, books=BIBLE_BOOKS)
+    elif version.text_type == TextType.CATECHISM:
+        training_texts = CatechismTrainingTexts(text=version)
+
+    return get_text_word_counts(training_texts, list(training_texts.keys()))
+
+
+def get_all_suggestion_words(version_name):
+    s = set()
+    for wd in get_in_batches(WordSuggestionData.objects.filter(version_slug=version_name)):
+        for suggestions in wd.get_suggestions():
+            s |= set(suggestions)
+    return s
