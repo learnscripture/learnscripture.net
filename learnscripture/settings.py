@@ -173,7 +173,7 @@ USE_TZ = True
 # Sync with fabfile
 MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'usermedia')
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
-DATA_ROOT = os.path.join(PROJECT_ROOT, 'data')
+DATA_ROOT = os.path.join(PROJECT_ROOT, 'data')  # See also bibleverses.storage.suggestions.DATA_ROOT
 
 
 MEDIA_URL = '/usermedia/'

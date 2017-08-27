@@ -13,94 +13,16 @@ from django.utils.functional import cached_property
 from jsonfield import JSONField
 
 from accounts import memorymodel
-from bibleverses.fields import VectorField
-from bibleverses.services import get_fetch_service, get_search_service
 from learnscripture.datastructures import make_choices
 from learnscripture.utils.iterators import intersperse
 
+from .constants import BIBLE_BOOK_ABBREVIATIONS, BIBLE_BOOKS, BIBLE_BOOKS_DICT
+from .fields import VectorField
+from .services import get_fetch_service, get_search_service
+from .textutils import split_into_words
+
 logger = logging.getLogger(__name__)
 
-BIBLE_BOOKS = ['Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy', 'Joshua', 'Judges', 'Ruth', '1 Samuel', '2 Samuel', '1 Kings', '2 Kings', '1 Chronicles', '2 Chronicles', 'Ezra', 'Nehemiah', 'Esther', 'Job', 'Psalm', 'Proverbs', 'Ecclesiastes', 'Song of Solomon', 'Isaiah', 'Jeremiah', 'Lamentations', 'Ezekiel', 'Daniel', 'Hosea', 'Joel', 'Amos', 'Obadiah', 'Jonah', 'Micah', 'Nahum', 'Habakkuk', 'Zephaniah', 'Haggai', 'Zechariah', 'Malachi', 'Matthew', 'Mark', 'Luke', 'John', 'Acts', 'Romans', '1 Corinthians', '2 Corinthians', 'Galatians', 'Ephesians', 'Philippians', 'Colossians', '1 Thessalonians', '2 Thessalonians', '1 Timothy', '2 Timothy', 'Titus', 'Philemon', 'Hebrews', 'James', '1 Peter', '2 Peter', '1 John', '2 John', '3 John', 'Jude', 'Revelation']
-BIBLE_BOOKS_DICT = dict((n, i) for (i, n) in enumerate(BIBLE_BOOKS))
-
-
-# All possible bible book names, lower case, matched to canonical name
-BIBLE_BOOK_ABBREVIATIONS = {}
-
-
-def make_bible_book_abbreviations():
-    global BIBLE_BOOK_ABBREVIATIONS
-
-    nums = {'1 ': ['1', 'I ', 'I'],
-            '2 ': ['2', 'II ', 'II'],
-            '3 ': ['3', 'III ', 'III']
-            }
-
-    def get_abbrevs(book_name):
-        # Get alternatives like '1Peter', 'I Peter' etc.
-        for k, v in nums.items():
-            if book_name.startswith(k):
-                for prefix in v:
-                    book_name2 = prefix + book_name[len(k):]
-                    for n in get_abbrevs(book_name2):
-                        yield n
-
-        # We don't allow abbreviations less than 3 letters
-        for i in range(2, len(book_name) + 1):
-            yield book_name[0:i]
-
-    # Get all abbreviations
-    d = {}
-    for b in BIBLE_BOOKS:
-        d[b] = list(get_abbrevs(b.lower()))
-
-    # Now need to make unique. Create a reverse dictionary.
-    d2 = defaultdict(set)
-    for book_name, abbrev_list in d.items():
-        for abbrev in abbrev_list:
-            d2[abbrev].add(book_name)
-
-    # Now, if any value in d2 has more than one item,
-    # it is ambiguous and should be removed altogether,
-    # otherwise replaced with the single value.
-    d3 = {}
-    for abbrev, book_names in d2.items():
-        if len(book_names) == 1:
-            d3[abbrev] = book_names.pop()
-
-    BIBLE_BOOK_ABBREVIATIONS.update(d3)
-
-    # Some special cases that don't fit above pattern
-    BIBLE_BOOK_ABBREVIATIONS.update({
-        'dt': 'Deuteronomy',
-        'gn': 'Genesis',
-        'hg': 'Haggai',
-        'jb': 'Job',
-        'jl': 'Joel',
-        'jgs': 'Judges',
-        'jdg': 'Judges',
-        'jas': 'James',
-        'jm': 'James',
-        'jn': 'John',
-        'jnh': 'Jonah',
-        'jsh': 'Joshua',
-        'jud': 'Jude',
-        'lev': 'Leviticus',
-        'mk': 'Mark',
-        'mrk': 'Mark',
-        'mt': 'Matthew',
-        'nm': 'Numbers',
-        'prv': 'Proverbs',
-        'phm': 'Philemon',
-        'phil': 'Philippians',
-        'php': 'Philippians',
-        'rm': 'Romans',
-        'sg': 'Song of Solomon',
-        'sng': 'Song of Solomon',
-    })
-
-
-make_bible_book_abbreviations()
 
 # Psalm 119 is 176 verses
 MAX_VERSE_QUERY_SIZE = 200
@@ -870,86 +792,6 @@ class UserVerseStatus(models.Model):
     class Meta:
         unique_together = [('for_identity', 'verse_set', 'reference', 'version')]
         verbose_name_plural = "User verse statuses"
-
-
-WORD_RE = re.compile('[0-9a-zA-Z]')
-WORD_SPLITTER = re.compile(r'( |\n)')
-
-
-def is_punctuation(text):
-    return not WORD_RE.search(text)
-
-
-def is_newline(text):
-    return text == "\n"
-
-
-def split_into_words(text, fix_punctuation_whitespace=True):
-    """
-    Splits text into series of words. Punctuation and newlines are left in
-    place.
-
-    If fix_punctuation_whitespace==True (the default), then 'words' that consist
-    only of punctuation are merged with neighbouring actual words.
-    """
-    # The result is passed back through client side and used as
-    # the text to display and test against. It keeps newlines because
-    # they are useful in display.
-
-    # The number of items returned should be the number of words (used for
-    # scoring purposes), so punctuation and newlines are kept next to words.
-
-    # This is used by bibleverses.suggestions, therefore needs to match
-    # the way that learn.js splits words up.
-
-    # We need to cope with things like Gen 3:22
-    #    and live forever--"'
-    # and Gen 1:16
-    #    And God made the two great lights--the greater light
-    #
-    # and when -- appears with punctuation on one side, we don't
-    # want this to end up on its own. Also, text with a single
-    # hyphen surrounding by whitespace needs to be handled too.
-    t = (text
-         .replace('--', ' -- ')
-         .replace('\r\n', '\n')
-         .strip())
-    l = WORD_SPLITTER.split(t)
-    # Eliminate spaces
-    l = [w for w in l if w not in [" ", ""]]
-    # Merge newlines
-    l = merge_items_left(l, is_newline)
-    if fix_punctuation_whitespace:
-        # Merge punctuation-only-items with item to left.
-        l = merge_items_left(l, is_punctuation)
-        # Then to right e.g. leading quotation marks
-        l = merge_items_right(l, is_punctuation)
-
-    return l
-
-
-def merge_items_left(words, predicate):
-    retval = []
-    for item in words:
-        if predicate(item) and len(retval) > 0:
-            retval[-1] += item
-        else:
-            retval.append(item)
-    return retval
-
-
-def merge_items_right(words, predicate):
-    retval = []
-    for item in words[::-1]:
-        if predicate(item) and len(retval) > 0:
-            retval[-1] = item + retval[-1]
-        else:
-            retval.append(item)
-    return retval[::-1]
-
-
-def count_words(text):
-    return len(split_into_words(text))
 
 
 class InvalidVerseReference(ValueError):

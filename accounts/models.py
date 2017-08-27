@@ -16,8 +16,9 @@ from accounts import memorymodel
 from accounts.signals import (catechism_started, points_increase, scored_100_percent, verse_finished, verse_started,
                               verse_tested)
 from bibleverses.models import (InvalidVerseReference, MemoryStage, StageType, TextType, TextVersion, UserVerseStatus,
-                                VerseSet, VerseSetType, count_words, get_passage_sections)
+                                VerseSet, VerseSetType, get_passage_sections)
 from bibleverses.signals import verse_set_chosen
+from bibleverses.textutils import count_words
 from learnscripture.datastructures import make_choices
 from learnscripture.utils.cache import cache_results, clear_cache_results
 from scores.models import ScoreReason, Scores, TotalScore
