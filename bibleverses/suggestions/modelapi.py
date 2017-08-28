@@ -1,47 +1,32 @@
 # -*- coding: utf8 -*-
+"""
+Word suggestion API for Django model layer code
+"""
 import gc
 import hashlib
 import logging
-import operator
-import os
-import pickle
-import random
-import re
-from collections import Counter
-from functools import reduce, wraps
 
-from django.conf import settings
 from django.db import transaction
 
 from bibleverses.constants import BIBLE_BOOKS
-from bibleverses.models import (TextType, TextVersion, Verse, WordSuggestionData, ensure_text,
-                                get_whole_book)
+from bibleverses.models import TextType, TextVersion, Verse, WordSuggestionData, ensure_text, get_whole_book
 from bibleverses.services import partial_data_available
 from learnscripture.utils.iterators import chunks
 
+from .exceptions import AnalysisMissing
+from .generators import SuggestionGenerator
+from .storage import AnalysisStorage
+from .trainingtexts import BibleTrainingTexts, CatechismTrainingTexts
+
 logger = logging.getLogger(__name__)
 
-
-# -- Generate suggestions - top level code
 
 # Normally generate_suggestions is called only by management command, for
 # generating in bulk. However, at other times it has been necessary to edit a
 # text via the admin, and this triggers 'fix_item' being called to fix up the
 # word suggestions.
 
-# The design of this code is controlled by a number of considerations:
-
-# 1) Markov analysis is CPU and memory intensive
-#
-# 2) For some texts, we are not allowed to keep the whole text in our
-#    database.
-
-# For this reason, we pickle intermediate analysis results (markov, word
-# frequencies etc.) so that we can perform fixes to word suggestions without
-# needing to download the whole text. We also delay loading of actual texts from
-# disk (or the text API service as late as possible.
-
-
+# See __init__.py for comments about how this code is structured.
 
 
 def fix_item(version_slug, reference, text_saved):
@@ -72,7 +57,8 @@ def fix_item(version_slug, reference, text_saved):
     try:
         generate_suggestions(version, missing_only=False, ref=reference, disallow_loading=disallow_loading,
                              text_saved=text_saved)
-    except LoadingNotAllowed:
+    except AnalysisMissing as e:
+        logger.warn("%r", e.args[0])
         logger.warn("Need to create word suggestions for %s %s but can't because text is not available and saved analysis is not complete",
                     version_slug, reference)
         return
@@ -94,12 +80,8 @@ def item_suggestions_need_updating(item):
 
 def generate_suggestions(version, ref=None, missing_only=True,
                          disallow_loading=False,
-                         force_analysis=False,
                          text_saved=None):
-
-    if force_analysis:
-        assert disallow_loading is False
-
+    analysis_storage = AnalysisStorage()
     if version.text_type == TextType.BIBLE:
         if ref is not None:
             v = version.get_verse_list(ref)[0]
@@ -107,55 +89,45 @@ def generate_suggestions(version, ref=None, missing_only=True,
                 v.text_saved = text_saved
             book = BIBLE_BOOKS[v.book_number]
             items = [v]
-            training_texts = BibleTrainingTexts(text=version, books=[book], disallow_loading=disallow_loading)
+            training_texts = BibleTrainingTexts(text=version, books=[book],
+                                                disallow_loading=disallow_loading)
             logger.info("Generating for %s", ref)
             generate_suggestions_for_items(
+                analysis_storage,
                 version, items,
                 training_texts, ref=ref, missing_only=missing_only)
         else:
-            if force_analysis:
-                # Could do:
-                #  training_texts = BibleTrainingTexts(version, BIBLE_BOOKS)
-                # but it ends up summing massive matrices. So we split:
-                for g in BIBLE_BOOK_GROUPS:
-                    t = BibleTrainingTexts(text=version, books=g)
-                    force_use_of_strategies(version, t)
-
             for book in BIBLE_BOOKS:
-                generate_suggestions_for_book(version, book, missing_only=missing_only)
+                generate_suggestions_for_book(analysis_storage, version, book, missing_only=missing_only)
 
     elif version.text_type == TextType.CATECHISM:
         training_texts = CatechismTrainingTexts(text=version, disallow_loading=disallow_loading)
-        if force_analysis:
-            force_use_of_strategies(version,
-                                    training_texts)
-
         items = list(version.qapairs.all())
         if items_all_done(version, items, ref=ref, missing_only=missing_only):
             return
 
         generate_suggestions_for_items(
+            analysis_storage,
             version, items, training_texts,
             ref=ref, missing_only=missing_only)
 
 
-def generate_suggestions_for_book(version, book, missing_only=True):
+def generate_suggestions_for_book(analysis_storage, version, book, missing_only=True):
     logger.info("Generating for %s", book)
     items = get_whole_book(book, version, ensure_text_present=False).verses
     if items_all_done(version, items, missing_only=missing_only):
         return
     training_texts = BibleTrainingTexts(text=version, books=[book])
     generate_suggestions_for_items(
+        analysis_storage,
         version, items,
         training_texts, missing_only=missing_only)
 
 
-def generate_suggestions_for_items(version, items, training_texts, ref=None,
+def generate_suggestions_for_items(analysis_storage, version, items, training_texts, ref=None,
                                    missing_only=True, skip_missing_text=True):
-    # Strategies for finding alternatives, ordered according to how good they will be
-
-    thesaurus = version_thesaurus(version)
-    strategies = make_strategies(training_texts, thesaurus)
+    generator = SuggestionGenerator(training_texts)
+    generator.load_data(analysis_storage)
 
     for batch in chunks(items, 100):
         batch = list(batch)  # need to iterate multiple times
@@ -175,7 +147,7 @@ def generate_suggestions_for_items(version, items, training_texts, ref=None,
                 ensure_text(batch)
         for item in batch:
             generate_suggestions_single_item(version, item,
-                                             strategies,
+                                             generator,
                                              ref=ref, missing_only=missing_only,
                                              existing_refs=existing_refs,
                                              skip_missing_text=skip_missing_text,
@@ -191,9 +163,8 @@ def generate_suggestions_for_items(version, items, training_texts, ref=None,
         gc.collect()
 
 
-
 def generate_suggestions_single_item(version, item,
-                                     strategies,
+                                     generator,
                                      ref=None,
                                      missing_only=True,
                                      skip_missing_text=True,
@@ -220,14 +191,12 @@ def generate_suggestions_single_item(version, item,
         to_delete.append(item.reference)
     logger.info("Generating suggestions for %s %s", version.slug, item.reference)
 
-    item_suggestions = generate_suggestions_for_text(text, strategies)
+    item_suggestions = generator.suggestions_for_text(text)
     to_create.append(WordSuggestionData(version_slug=version.slug,
                                         reference=item.reference,
                                         suggestions=item_suggestions,
                                         hash=hash_text(text),
                                         ))
-
-
 
 
 def items_all_done(version, items, ref=None, missing_only=True):
@@ -242,20 +211,5 @@ def items_all_done(version, items, ref=None, missing_only=True):
     return False
 
 
-
-
-# Strategies:
-
-def force_use_of_strategies(version, training_texts):
-    thesaurus = version_thesaurus(version)
-    strategies = make_strategies(training_texts, thesaurus)
-    for condition, strategy in strategies:
-        strategy.get_suggestions(["dummy", "words"],
-                                 0, MIN_SUGGESTIONS, [])
-
-
-
 def hash_text(text):
     return hashlib.sha1(text.encode('utf-8')).hexdigest()
-
-

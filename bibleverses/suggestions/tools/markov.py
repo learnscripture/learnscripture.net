@@ -19,6 +19,9 @@ class Markov(PicklerMixin):
 
     @classmethod
     def from_pykov(cls, pykov_chain):
+        # We could get further wins by rewriting the 'succ' method (from pykov)
+        # using our own version, which is the only method we use after analysis is done,
+        # so we can avoid loading pykov and numpy
         return cls(compress_pykov(pykov_chain))
 
 

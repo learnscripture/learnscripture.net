@@ -14,7 +14,6 @@ class WordCountsAnalyzer(Analyzer):
         return get_text_word_counts(training_texts, keys)
 
 
-@cache_results_with_pickle('wordcounts_combined', multiple_keys=True)
 def get_text_word_counts(training_texts, keys):
     return aggregate_word_counts(
         get_word_counts(training_texts, key)

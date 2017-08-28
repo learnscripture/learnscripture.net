@@ -13,6 +13,7 @@ from .tools.firstwordfrequencies import FirstWordFrequencies
 from .tools.thesaurus import Thesaurus
 from .tools.wordcounts import WordCounts
 from .tools.markov import Markov
+from .exceptions import AnalysisMissing
 
 # We don't use django settings to avoid a runtime dependency on Django. We also
 # are careful to not import analyzers, because they can import the rest of the
@@ -101,6 +102,9 @@ class AnalysisStorage(object):
             return self.loaded[filename]
         serializer = self._serializer_for_analyzer_name(analyzer_name)
         logger.info("Loading analysis %s for keys %s\n", serializer.name, training_text_keys)
+        if not os.path.exists(filename):
+            raise AnalysisMissing("Analysis file %s missing for analysis %s, text %r" %
+                                  (filename, serializer.name, training_text_keys))
         with open(filename, "rb") as f:
             logger.info("...from file %s\n", filename)
             retval = serializer.load(f)
@@ -120,11 +124,16 @@ class AnalysisStorage(object):
             serializer = self._serializer_for_analyzer_name(analyzer_name)
         filename_key = ','.join('_'.join(k) for k in training_text_keys)
 
-        # "File name too long" problem - reduce size (and readability unfortunately...)
+        # "File name too long" problem - we reduce size by taking a hash.
+        # In all cases, the first part of each training key is the same (the text slug),
+        # so we increase readability by keeping that bit plain.
+        key_first_parts = set(k1 for k1, k2 in training_text_keys)  # Always length 1
+        filename_first_part = '_'.join(key_first_parts)
         filename_key = "SHA1_" + hashlib.sha1(filename_key.encode('utf-8')).hexdigest()[0:8]
 
         filename = ".".join(
             [serializer.name,
+             filename_first_part,
              filename_key,
              str(serializer.format_version),
              'analysisdata',

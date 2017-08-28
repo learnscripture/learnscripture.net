@@ -26,7 +26,7 @@ def verse_set_chosen_receiver(sender, **kwargs):
 
 @receiver(post_save, sender=Verse)
 def verse_saved_update_word_suggestions(sender, **kwargs):
-    from bibleverses.suggestions import item_suggestions_need_updating
+    from bibleverses.suggestions.modelapi import item_suggestions_need_updating
     verse = kwargs['instance']
     if not should_update_word_suggestions_on_save():
         return
@@ -60,7 +60,7 @@ def verse_saved_update_text_search(sender, **kwargs):
 def qapair_saved(sender, **kwargs):
     qapair = kwargs['instance']
     if should_update_word_suggestions_on_save():
-        from bibleverses.suggestions import item_suggestions_need_updating
+        from bibleverses.suggestions.modelapi import item_suggestions_need_updating
         if not item_suggestions_need_updating(qapair):
             return
         fix_item_suggestions.apply_async([qapair.catechism.slug, qapair.reference, None],

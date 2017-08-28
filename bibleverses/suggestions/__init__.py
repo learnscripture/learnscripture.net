@@ -45,14 +45,17 @@ Code for generating 'suggestions' for verses.
 #   that in some cases reduce the size of the data
 #   we actually need in memory.  see `.tools`
 
-# * We run a standalone socket server process, see `.server`. This loads
-#   the serialized analysis data, and is able to very quickly
-#   generate suggestions for a chunk of text.
+# * We have a `.generators` module that loads that completed
+#   analysis and generates suggestions.
 #
-#   This server avoids as many dependencies as possible, in order to be light.
+#   This module has as few dependencies as possible e.g. it doesn't
+#   load Django at all.
+#   This makes it easier to test for memory consumption.
+#   In the future it may be possible to run this code as a standalone
+#   server, e.g. a socket server, using PyPy for performance,
+#   or rewrite to be faster and more lightweight using Cython etc.
 #
 # * For the main Django processes that need word suggestions,
-#   we have an `.api' module that handles everything transparently:
+#   we have a `.modelapi' module that handles everything transparently.
 #
-#   * Loading from disk if available
-#   * Talking to the socket server to get more suggestions if necessary
+#   If necessary, it will handle talking to the socket server

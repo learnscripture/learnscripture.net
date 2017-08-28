@@ -12,7 +12,6 @@ class FirstWordFrequencyAnalyzer(Analyzer):
         return build_summed_scaled_first_word_counts(training_texts, keys)
 
 
-@cache_results_with_pickle('firstwordcounts_combined', multiple_keys=True)
 def build_summed_scaled_first_word_counts(training_texts, keys):
     counts = [build_first_word_counts(training_texts, key)
               for key in keys]

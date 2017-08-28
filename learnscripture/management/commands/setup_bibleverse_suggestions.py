@@ -11,11 +11,9 @@ class Command(BaseCommand):
         parser.add_argument('version_slug', nargs='*')
         parser.add_argument('--recreate', action='store_true', default=False,
                             help="If supplied, suggestions will be created even if already existing")
-        parser.add_argument('--force-analysis', action='store_true', default=False,
-                            help="If supplied, textual analysis will be done even no verses need it.")
 
     def handle(self, *args, **options):
-        from bibleverses.suggestions import generate_suggestions
+        from bibleverses.suggestions.modelapi import generate_suggestions
         from bibleverses.models import TextVersion
 
         settings.LOADING_WORD_SUGGESTIONS = True
@@ -27,5 +25,4 @@ class Command(BaseCommand):
         for v in versions:
             logger.info("Generating suggestions for %s", v.slug)
             generate_suggestions(v,
-                                 missing_only=not options['recreate'],
-                                 force_analysis=options['force_analysis'])
+                                 missing_only=not options['recreate'])
