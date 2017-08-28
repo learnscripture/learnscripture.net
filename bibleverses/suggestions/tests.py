@@ -41,6 +41,8 @@ def print_mem_usage(comment):
 
 
 def print_object_usage(object_name, obj):
+    if pympler is None:
+        return
     print(object_name + ": " + nice_mem_units(pympler.asizeof.asizeof(obj)))
 
 
@@ -108,7 +110,7 @@ def test_suggestion_speed():
     for g in generators.values():
         g.load_data(storage)
 
-    COUNT = 2
+    COUNT = 5
 
     def f():
         for t in TEXTS:
