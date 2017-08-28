@@ -40,10 +40,6 @@ def merge_suggestions(s1, s2):
     return list((Counter(dict(s1)) + Counter(dict(s2))).items())
 
 
-def pick_from_distribution(counter):
-    return weighted_choice(counter.items())
-
-
 def scale_suggestions(suggestions, factor=1.0):
     if len(suggestions) == 0:
         return suggestions
@@ -52,12 +48,12 @@ def scale_suggestions(suggestions, factor=1.0):
     return [(w, float(f) / max_f * factor) for w, f in suggestions]
 
 
-def weighted_choice(choices):
+def weighted_random_choice(choices, total=1):
     """
-    Returns a weight random choice from a list of (choice, frequency)
-    pairs. The frequencies in the list do not need to add up to 1.
+    Returns a weighted random choice from a list of (choice, frequency)
+    pairs. The frequencies in the list must add up to 1,
+    or pass the total.
     """
-    total = sum(weight for c, weight in choices)
     r = random.uniform(0, total)
     upto = 0
     for c, w in choices:
