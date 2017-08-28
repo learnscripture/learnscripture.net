@@ -5,7 +5,7 @@ import pympler.asizeof
 
 from .constants import ALL_TEXT, THESAURUS_ANALYSIS, BIBLE_BOOK_GROUPS
 from .trainingtexts import BibleTrainingTexts, CatechismTrainingTexts
-from .generator import SuggestionGenerator
+from .generators import SuggestionGenerator
 
 from . import serverlogging  # noqa: F401
 
@@ -67,7 +67,7 @@ def generators_for_catechism_text(storage, text_slug):
             SuggestionGenerator(CatechismTrainingTexts(text_slug=text_slug))}
 
 
-def test_server_usage():
+def test_server_memory_usage():
     print_mem_usage("Start")
     from .storage import AnalysisStorage
     storage = AnalysisStorage()
@@ -84,7 +84,7 @@ def test_server_usage():
     print_mem_usage("After creating strategies")
 
     for strategies in all_generators.values():
-        strategies.load(storage)
+        strategies.load_data(storage)
 
     print_mem_usage("After loading strategies")
     TEXT = "For God so loved the world, he gave his only begotten Son"
@@ -93,3 +93,4 @@ def test_server_usage():
         generator.suggestions_for_text(TEXT)
     print_mem_usage("After using all strategies")
     print_object_usage("storage", storage)
+    print_object_usage("generators", all_generators)
