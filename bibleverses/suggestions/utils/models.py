@@ -9,14 +9,16 @@ from .iterators import get_in_batches
 
 # This module can have a dependency on Django
 
-def get_all_version_words(version):
+def get_all_version_words(version, disallow_text_loading=False):
     from ..trainingtexts import BibleTrainingTexts, CatechismTrainingTexts
     from ..analyzers.wordcounts import get_text_word_counts
 
     if version.text_type == TextType.BIBLE:
-        training_texts = BibleTrainingTexts(text=version, books=BIBLE_BOOKS)
+        training_texts = BibleTrainingTexts(text=version, books=BIBLE_BOOKS,
+                                            disallow_loading=disallow_text_loading)
     elif version.text_type == TextType.CATECHISM:
-        training_texts = CatechismTrainingTexts(text=version)
+        training_texts = CatechismTrainingTexts(text=version,
+                                                disallow_loading=disallow_text_loading)
 
     return get_text_word_counts(training_texts, list(training_texts.keys()))
 

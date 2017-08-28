@@ -33,7 +33,6 @@ class Markov3Analyzer(MarkovAnalyzerBase):
     name = markov_analysis_for_size(size)
 
 
-@cache_results_with_pickle('markov_combined', multiple_keys=True)
 def build_summed_markov_chains_for_texts(training_texts, keys, size):
     return sum_matrices(build_markov_chains_for_text(training_texts, key, size)
                         for key in keys)

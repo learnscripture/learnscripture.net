@@ -20,15 +20,13 @@ logger = logging.getLogger(__name__)
 # pickled data.
 
 
-def cache_results_with_pickle(filename_suffix, multiple_keys=False):
+def cache_results_with_pickle(filename_suffix):
     """
     Decorator generator, takes a filename suffix to use for different functions.
 
     The actual function to be decorated should be a callable with a signature
     foo(training_texts, label, *args) and caches the results using pickle and
     saving to disk.
-
-    If multiple_keys=True, label is a list of keys.
 
     """
     # Note that the functions this is designed for take both 'training_texts'
@@ -40,16 +38,8 @@ def cache_results_with_pickle(filename_suffix, multiple_keys=False):
         def wrapper(training_texts, key, *args):
             # For sanity checking, both the pickled data and the filename
             # we save to include the key
-            if multiple_keys:
-                keys = key
-                filename_key = ','.join('_'.join(k) for k in keys)
-                # "File name too long" problem - reduce size (and readability)
-                filename_key = "SHA1_" + hashlib.sha1(filename_key.encode('utf-8')).hexdigest()[0:8]
-                lookup_key = tuple(keys)
-            else:
-                filename_key = '_'.join(key)
-                lookup_key = (key,)
-            full_lookup_key = lookup_key + tuple(args)
+            filename_key = '_'.join(key)
+            full_lookup_key = (key,) + tuple(args)
 
             if args:
                 level = "__level" + "_".join(str(a) for a in args)

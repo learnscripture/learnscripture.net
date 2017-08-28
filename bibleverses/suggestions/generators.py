@@ -1,9 +1,10 @@
 import random
 from collections import Counter
 
-from .constants import (ALL_TEXT, FIRST_WORD_FREQUENCY_ANALYSIS, MIN_SUGGESTIONS, THESAURUS_ANALYSIS,
+from .constants import (ALL_TEXT, FIRST_WORD_FREQUENCY_ANALYSIS, MAX_SUGGESTIONS, MIN_SUGGESTIONS, THESAURUS_ANALYSIS,
                         WORD_COUNTS_ANALYSIS, markov_analysis_for_size)
-from .utils.numbers import weighted_choice
+from .utils.numbers import merge_suggestions, scale_suggestions, weighted_choice
+from .utils.text import split_into_sentences, split_into_words_for_suggestions
 
 
 class SuggestionStrategy(object):
@@ -160,25 +161,59 @@ class RandomGlobalSuggestions(SuggestionStrategy):
         return list(c.items())
 
 
-STRATEGIES = [
-    FirstWordSuggestions,
-    MarkovSuggestions.with_attributes(size=3),
-    MarkovSuggestions.with_attributes(size=2),
-    # Thesaurus isn't always very good, because it can give the game away,
-    # and also has some bizarre suggestions, so push down a bit
-    ThesaurusSuggestions,
-    # random from same verse are actually quite good,
-    # because there are lots of cases where you can
-    # miss out a word/phrase and it still makes sense
-    RandomLocalSuggestions,
-    MarkovSuggestions.with_attributes(size=1),
-    RandomGlobalSuggestions,
-    ThesaurusSuggestionsOther,
-]
-
-
-def make_strategies(training_texts):
-    return [
-        mk_strategy(training_texts)
-        for mk_strategy in STRATEGIES
+class SuggestionGenerator(object):
+    STRATEGIES = [
+        FirstWordSuggestions,
+        MarkovSuggestions.with_attributes(size=3),
+        MarkovSuggestions.with_attributes(size=2),
+        # Thesaurus isn't always very good, because it can give the game away,
+        # and also has some bizarre suggestions, so push down a bit
+        ThesaurusSuggestions,
+        # random from same verse are actually quite good,
+        # because there are lots of cases where you can
+        # miss out a word/phrase and it still makes sense
+        RandomLocalSuggestions,
+        MarkovSuggestions.with_attributes(size=1),
+        RandomGlobalSuggestions,
+        ThesaurusSuggestionsOther,
     ]
+
+    def __init__(self, training_texts):
+        self.strategies = [
+            mk_strategy(training_texts)
+            for mk_strategy in self.STRATEGIES
+        ]
+
+    def load_data(self, storage):
+        for s in self.strategies:
+            s.load(storage)
+
+    def suggestions_for_text(self, text):
+        item_suggestions = []
+
+        # We are actually treating beginning of verse as beginning of sentence,
+        # which is not ideal, but hard to fix, and usually it's not too bad,
+        # because verse breaks are usually 'close' to being sentence breaks.
+
+        sentences = split_into_sentences(text)
+        for sentence in sentences:
+            words = split_into_words_for_suggestions(sentence)
+            for i, word in enumerate(words):
+                relevance = 1.0
+                word_suggestions = []
+                for strategy in self.strategies:
+                    if strategy.use_for_word(i):
+                        need = MIN_SUGGESTIONS - len(word_suggestions)  # Only random strategies really uses this
+                        new_suggestions = [(w, f) for (w, f) in
+                                           strategy.get_suggestions(words, i, need, word_suggestions)
+                                           if w != word]
+                        new_suggestions = scale_suggestions(new_suggestions, relevance)
+                        if len(new_suggestions) > 0:
+                            word_suggestions = merge_suggestions(word_suggestions, new_suggestions)
+                            relevance = relevance / 2.0  # scale down worse methods for finding suggestions
+
+                    # Sort after each one:
+                    word_suggestions.sort(key=lambda w_f: -w_f[1])
+
+                item_suggestions.append([w for w, f in word_suggestions[0:MAX_SUGGESTIONS]])
+        return item_suggestions

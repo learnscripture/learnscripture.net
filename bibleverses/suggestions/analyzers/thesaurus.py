@@ -37,17 +37,18 @@ class ThesaurusAnalyzer(Analyzer):
         return super(ThesaurusAnalyzer, self).run(training_texts, keys)
 
     def analyze(self, training_texts, keys):
-        return make_thesaurus(training_texts.text)
+        return make_thesaurus(training_texts.text,
+                              disallow_text_loading=training_texts.disallow_loading)
 
 
-def make_thesaurus(version):
+def make_thesaurus(version, disallow_text_loading=False):
     base_thesaurus = english_thesaurus()
     thesaurus = base_thesaurus.copy()
     thesaurus.update(PRONOUN_THESAURUS)
 
     d = {}
     logger.info("Building thesaurus for %s\n", version.slug)
-    words = get_all_version_words(version)
+    words = get_all_version_words(version, disallow_text_loading=disallow_text_loading)
     for word, c in words.items():
         alts = thesaurus.get(word, None)
         if alts is None:

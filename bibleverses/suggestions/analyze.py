@@ -19,23 +19,29 @@ ANALYZERS = [
 ]
 
 
-def analyze_all():
+def analyze_all(version_slugs=None, disallow_text_loading=False):
+    if version_slugs == []:
+        version_slugs = None
     texts = TextVersion.objects.all()
+    if version_slugs is not None > 0:
+        texts = texts.filter(slug__in=version_slugs)
     storage = AnalysisStorage()
     for text in texts:
-        if partial_data_available(text.slug):
+        if version_slugs is None and partial_data_available(text.slug):
             continue
-        run_all_analyses_for_text(storage, text)
+        run_all_analyses_for_text(storage, text, disallow_text_loading=disallow_text_loading)
 
 
-def run_all_analyses_for_text(storage, text):
+def run_all_analyses_for_text(storage, text, disallow_text_loading=False):
     if text.text_type == TextType.BIBLE:
         for g in BIBLE_BOOK_GROUPS:
-            training_texts = BibleTrainingTexts(text=text, books=g)
+            training_texts = BibleTrainingTexts(text=text, books=g,
+                                                disallow_loading=disallow_text_loading)
             run_analyzers(storage, training_texts, training_texts.keys())
 
     elif text.text_type == TextType.CATECHISM:
-        training_texts = CatechismTrainingTexts(text=text)
+        training_texts = CatechismTrainingTexts(text=text,
+                                                disallow_loading=disallow_text_loading)
         run_analyzers(storage, training_texts, training_texts.keys())
 
 
