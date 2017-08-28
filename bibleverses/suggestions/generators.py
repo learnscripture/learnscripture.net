@@ -3,7 +3,7 @@ from collections import Counter
 
 from .constants import (ALL_TEXT, FIRST_WORD_FREQUENCY_ANALYSIS, MAX_SUGGESTIONS, MIN_SUGGESTIONS, THESAURUS_ANALYSIS,
                         WORD_COUNTS_ANALYSIS, markov_analysis_for_size)
-from .utils.numbers import merge_suggestions, scale_suggestions, weighted_choice
+from .utils.numbers import merge_suggestions, scale_suggestions
 from .utils.text import split_into_sentences, split_into_words_for_suggestions
 
 
@@ -154,9 +154,8 @@ class RandomGlobalSuggestions(SuggestionStrategy):
     def get_suggestions(self, words, i, count, suggestions_so_far):
         count = min(count, 10)
         c = Counter()
-        global_word_counts_items = self.global_word_counts.items()
         for i in range(0, count):
-            word = weighted_choice(global_word_counts_items)
+            word = self.global_word_counts.weighted_random_choice()
             c[word] += 1
         return list(c.items())
 
