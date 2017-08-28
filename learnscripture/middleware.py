@@ -65,16 +65,20 @@ def token_login_middleware(get_response):
 
 
 def debug_middleware(get_response):
+    from django.contrib.auth import login
+
     from learnscripture import session
     from accounts.models import Account
 
     def middleware(request):
-
         if 'sleep' in request.GET:
             time.sleep(int(request.GET['sleep']))
 
         if 'as' in request.GET:
-            session.set_identity(request.session, Account.objects.get(username=request.GET['as']).identity)
+            account = Account.objects.get(username=request.GET['as'])
+            session.login(request, account.identity)
+            account.backend = settings.AUTHENTICATION_BACKENDS[0]
+            login(request, account)
 
         if 'now' in request.GET:
             now = time.strptime(request.GET['now'], "%Y-%m-%d %H:%M:%S")
