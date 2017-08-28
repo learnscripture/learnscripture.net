@@ -2,7 +2,10 @@ import random
 import resource
 import timeit
 
-import pympler.asizeof
+try:
+    import pympler.asizeof
+except (ImportError, AttributeError):  # PyPy
+    pympler = None
 
 
 from bibleverses.constants import BIBLE_BOOKS
