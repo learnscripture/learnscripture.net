@@ -678,7 +678,7 @@ def fix_perms(path, user):
 def run_word_suggestions_analyzers():
     target = Version.current()
     with django_project(target):
-        run("./manage.py run_suggestions_analyzers --disallow-text-loading")
+        run("./manage.py run_suggestions_analyzers")
 
 # Managing running system
 
