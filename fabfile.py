@@ -130,8 +130,8 @@ def virtualenv(venv):
 
 @contextmanager
 def django_project(target):
-    with virtualenv(target.VENV_DIR):
-        with cd(target.SRC_DIR):
+    with virtualenv(target.VENV_ROOT):
+        with cd(target.SRC_ROOT):
             yield
 
 
