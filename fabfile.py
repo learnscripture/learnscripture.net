@@ -667,6 +667,12 @@ def delete_old_versions():
         run("ls -dtr %s | head -n -4 | xargs rm -rf" % commitref_glob)
 
 
+@task
+def run_word_suggestions_analyzers():
+    target = Version.current()
+    with django_project(target):
+        run("./manage.py run_suggestions_analyzers --disallow-text-loading")
+
 # Managing running system
 
 
