@@ -52,7 +52,6 @@ def test_thesaurus_memory():
     s = AnalysisStorage()
     print_mem_usage("After creating storage")
     thesaurus = s.load_analysis(THESAURUS_ANALYSIS, [('NET', ALL_TEXT)])
-    gc.collect()
     print_mem_usage("After loading NET thesaurus")
     print_object_usage("Thesaurus", thesaurus)
 
