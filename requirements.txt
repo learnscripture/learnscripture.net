@@ -1,39 +1,41 @@
--e git://github.com/spookylukey/django-app-metrics.git@994efb7ccd385a5c31ef48f23c21a94357df7344#egg=django_app_metrics-master
--e git://github.com/spookylukey/django-bootstrap-form.git@b228f986e6650ad4690eedc70cca5ff044feaab2#egg=django-bootstrap-form
--e git://github.com/spookylukey/Pykov.git@c21f27b56a52e7ea7caba1707e64e3753c414478#egg=pykov
--e git://github.com/spookylukey/django-autoslug.git@0a6adec1f9743743bf7d741b6845620a8f347159#egg=django-autoslug
-Django==1.11.4
-Pillow==4.1.1
-olefile==0.44
-SQLAlchemy==1.1.10
-URLObject==2.4.0
--e git://github.com/spookylukey/aldjemy.git@364e931f304cc4e1d89a639cb0f3dbd62619d06a#egg=aldjemy
+amqp==2.1.4
 anyjson==0.3.3
 argparse==1.4.0
-celery==4.0.2
-amqp==2.1.4
+attrs==17.2.0
 billiard==3.5.0.2
-vine==1.1.3
+celery==4.0.2
+ConcurrentLogHandler==0.9.1
+contextlib2==0.5.5
 cssselect==1.0.1
+Django==1.11.4
+django-anymail==0.10
 django-appconf==1.0.2
 django-compressor==2.1.1
--e git://github.com/spookylukey/django-fiber.git@b81618b553fe2c776644678ef0321b1f8961cab2#egg=django-fiber
--e hg+https://bitbucket.org/schinckel/django-jsonfield@6c37ee0fd8f2f999b21c068e733876d937d74a00#egg=django-jsonfield
 django-markup==1.2
 django-mptt==0.8.7
-dj_pagination==2.2.1
 django-paypal==0.3.6
--e git://github.com/spookylukey/django-selectable.git@73b380000ad1ba87169f3a9a7bd219b76109945e#egg=django_selectable
-django-spurl==0.6.4
 djangorestframework==3.6.3
+django-spurl==0.6.4
+dj_pagination==2.2.1
 docutils==0.14
 easy-thumbnails==2.4.1
 ecdsa==0.13
+-e git://github.com/spookylukey/aldjemy.git@364e931f304cc4e1d89a639cb0f3dbd62619d06a#egg=aldjemy
+-e git://github.com/spookylukey/django-app-metrics.git@994efb7ccd385a5c31ef48f23c21a94357df7344#egg=django_app_metrics-master
+-e git://github.com/spookylukey/django-autoslug.git@0a6adec1f9743743bf7d741b6845620a8f347159#egg=django-autoslug
+-e git://github.com/spookylukey/django-bootstrap-form.git@b228f986e6650ad4690eedc70cca5ff044feaab2#egg=django-bootstrap-form
+-e git://github.com/spookylukey/django-fiber.git@b81618b553fe2c776644678ef0321b1f8961cab2#egg=django-fiber
+-e git://github.com/spookylukey/django-selectable.git@73b380000ad1ba87169f3a9a7bd219b76109945e#egg=django_selectable
+-e git://github.com/spookylukey/Pykov.git@c21f27b56a52e7ea7caba1707e64e3753c414478#egg=pykov
+-e hg+https://bitbucket.org/schinckel/django-jsonfield@6c37ee0fd8f2f999b21c068e733876d937d74a00#egg=django-jsonfield
 httplib2==0.10.3
 kombu==4.0.2
 lxml==3.8.0
 meld3==1.0.2
+nodeenv==1.1.2
 numpy==1.13.0
+olefile==0.44
+Pillow==4.1.1
 psutil==5.2.2
 psycopg2==2.7.1
 pyquery==1.2.17
@@ -44,9 +46,8 @@ raven==6.1.0
 requests==2.6.0
 scipy==0.19.0
 six==1.10.0
+SQLAlchemy==1.1.10
 urllib3==1.21.1
-nodeenv==1.1.2
-django-anymail==0.10
+URLObject==2.4.0
 uwsgi==2.0.15
-ConcurrentLogHandler==0.9.1
-attrs==17.2.0
+vine==1.1.3
