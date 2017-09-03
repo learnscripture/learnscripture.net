@@ -389,7 +389,8 @@ LOGGING = {
     },
 }
 
-if DEBUG or 'setup_bibleverse_suggestions' in sys.argv:
+if (DEBUG or any(a in sys.argv for a in ['setup_bibleverse_suggestions',
+                                         'run_suggestions_analyzers'])):
     LOGGING['root']['handlers'] = ['console']
     LOGGING['loggers']['celery']['handlers'] = ['console']
     LOGGING['loggers']['bibleverses.suggestions'] = {
