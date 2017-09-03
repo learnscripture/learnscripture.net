@@ -28,7 +28,71 @@ logger = logging.getLogger(__name__)
 
 # See __init__.py for comments about how this code is structured.
 
+# -- Create - for tests only --
+def create_word_suggestion_data(
+        version=None,
+        version_slug=None,
+        reference=None,
+        hash=None,
+        text=None,
+        suggestions=None,
+        **kwargs):
+    if version_slug is None:
+        version_slug = version.slug
+    if hash is None:
+        hash = hash_text(text)
+    return WordSuggestionData.objects.create(
+        version_slug=version_slug,
+        reference=reference,
+        hash=hash,
+        suggestions=suggestions)
 
+
+# -- Fetch --
+
+def word_suggestion_data_qs_for_version(version):
+    return WordSuggestionData.objects.filter(version_slug=version.slug)
+
+
+def get_word_suggestions_by_reference(version, reference):
+    wsds = _get_ordered_word_suggestion_data(version, reference)
+    # Now combine:
+    retval = []
+    for wsd in wsds:
+        retval.extend(wsd.get_suggestions())
+    return retval
+
+
+def get_word_suggestions_by_reference_bulk(version, reference_list):
+    # Do simple ones in bulk:
+    simple_wsds = list(word_suggestion_data_qs_for_version(version).filter(reference__in=reference_list))
+    s_dict = dict((w.reference, w.get_suggestions()) for w in simple_wsds)
+    # Others: (i.e. multi-verse references that span multiple database records
+    # in WordSuggestionData). This does O(n) DB queries but hopefully n is small
+    # in any given batch.
+    for ref in reference_list:
+        if ref not in s_dict:
+            s_dict[ref] = get_word_suggestions_by_reference(version, ref)
+    return s_dict
+
+
+def _get_ordered_word_suggestion_data(version, reference):
+    """
+    Returns a list of WordSuggestionData for a given reference
+    (i.e. returning multiple items if the reference is multi-verse)
+    """
+    references = version.get_reference_list(reference)
+    wsds = list(word_suggestion_data_qs_for_version(version).filter(reference__in=references))
+    # wsds might not be ordered correctly, we need to re-order
+    retval = []
+    for ref in references:
+        for wsd in wsds:
+            if wsd.reference == ref:
+                retval.append(wsd)
+    return retval
+
+
+# -- Generate --
 def fix_item(version_slug, reference, text_saved):
     version = TextVersion.objects.get(slug=version_slug)
     item = version.get_item_by_reference(reference)
