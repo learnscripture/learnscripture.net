@@ -662,9 +662,16 @@ def fake_migrations():
 
 @task
 def delete_old_versions():
+    fix_perms(Version.VERSIONS_ROOT, env.proj_user)
     with cd(Version.VERSIONS_ROOT):
         commitref_glob = "?" * 12
         run("ls -dtr %s | head -n -4 | xargs rm -rf" % commitref_glob)
+
+
+@as_rootuser
+def fix_perms(path, user):
+    with cd(path):
+        run("find . -user root | xargs chown %s".format(user))
 
 
 @task
