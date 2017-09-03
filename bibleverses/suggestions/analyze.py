@@ -23,7 +23,7 @@ def analyze_all(version_slugs=None, disallow_text_loading=False):
     if version_slugs == []:
         version_slugs = None
     texts = TextVersion.objects.all()
-    if version_slugs is not None > 0:
+    if version_slugs is not None and len(version_slugs) > 0:
         texts = texts.filter(slug__in=version_slugs)
     storage = AnalysisStorage()
     for text in texts:
