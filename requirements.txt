@@ -57,11 +57,13 @@ kombu==4.0.2
 linecache2==1.0.0         # via traceback2
 lxml==3.8.0
 mccabe==0.5.2
+mock==2.0.0
 nodeenv==1.1.2
 numpy==1.13.0
 olefile==0.44             # via pillow
 orderedmultidict==0.7.11  # via furl
 paramiko==2.2.1           # via fabric3
+pbr==3.1.1                # via mock
 pexpect==4.2.1            # via ipython
 pickleshare==0.7.4        # via ipython
 pillow==4.1.1             # via easy-thumbnails
@@ -86,7 +88,7 @@ rjsmin==1.0.12            # via django-compressor
 scipy==0.19.0
 selenium==2.53.6
 simplegeneric==0.8.1      # via ipython
-six==1.10.0               # via bcrypt, cryptography, django-anymail, django-functest, django-markup, django-paypal, django-spurl, fabric3, furl, orderedmultidict, pip-tools, prompt-toolkit, pynacl, python-memcached, traitlets, unittest2, webtest
+six==1.10.0               # via bcrypt, cryptography, django-anymail, django-functest, django-markup, django-paypal, django-spurl, fabric3, furl, mock, orderedmultidict, pip-tools, prompt-toolkit, pynacl, python-memcached, traitlets, unittest2, webtest
 sqlalchemy==1.1.10
 sqlparse==0.2.3           # via django-debug-toolbar
 traceback2==1.4.0         # via unittest2
