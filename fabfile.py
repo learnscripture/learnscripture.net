@@ -7,14 +7,13 @@ import re
 from contextlib import contextmanager
 from datetime import datetime
 
+import fabtools
 from fabric.api import env, hide, local, run, task
 from fabric.context_managers import cd, lcd, prefix, shell_env
 from fabric.contrib.files import append, exists, upload_template
 from fabric.contrib.project import rsync_project
 from fabric.decorators import with_settings
 from fabric.operations import get, put
-
-import fabtools
 
 join = os.path.join
 rel = lambda *x: os.path.normpath(join(os.path.abspath(os.path.dirname(__file__)), *x))
@@ -134,6 +133,7 @@ def django_project(target):
     with virtualenv(target.VENV_DIR):
         with cd(target.SRC_DIR):
             yield
+
 
 # Versions and conf:
 

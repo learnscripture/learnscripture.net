@@ -1,5 +1,5 @@
-from .utils import PicklerMixin
 from ..utils.numbers import weighted_random_choice
+from .utils import PicklerMixin
 
 
 class WordCounts(PicklerMixin):

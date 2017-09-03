@@ -124,7 +124,7 @@ def fix_item(version_slug, reference, text_saved):
     except AnalysisMissing as e:
         logger.warning("%r", e.args[0])
         logger.warning("Need to create word suggestions for %s %s but can't because text is not available and saved analysis is not complete",
-                    version_slug, reference)
+                       version_slug, reference)
         return
 
 

@@ -9,11 +9,11 @@ import attr
 
 from .constants import (FIRST_WORD_FREQUENCY_ANALYSIS, MARKOV_1_ANALYSIS, MARKOV_2_ANALYSIS, MARKOV_3_ANALYSIS,
                         THESAURUS_ANALYSIS, WORD_COUNTS_ANALYSIS)
+from .exceptions import AnalysisMissing
 from .tools.firstwordfrequencies import FirstWordFrequencies
+from .tools.markov import Markov
 from .tools.thesaurus import Thesaurus
 from .tools.wordcounts import WordCounts
-from .tools.markov import Markov
-from .exceptions import AnalysisMissing
 
 # We don't use django settings to avoid a runtime dependency on Django. We also
 # are careful to not import analyzers, because they can import the rest of the

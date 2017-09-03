@@ -1,12 +1,9 @@
+# Some proper tests are in learnscripture.tests
+# These are just for experimental work at the moment and aren't run automatically.
+
 import random
 import resource
 import timeit
-
-try:
-    import pympler.asizeof
-except (ImportError, AttributeError):  # PyPy
-    pympler = None
-
 
 from bibleverses.constants import BIBLE_BOOKS
 
@@ -15,6 +12,12 @@ from .constants import ALL_TEXT, BIBLE_BOOK_GROUPS, THESAURUS_ANALYSIS
 from .generators import SuggestionGenerator
 from .storage import AnalysisStorage
 from .trainingtexts import BibleTrainingTexts, CatechismTrainingTexts
+
+try:
+    import pympler.asizeof
+except (ImportError, AttributeError):  # PyPy
+    pympler = None
+
 
 _last_mem_usage = 0
 

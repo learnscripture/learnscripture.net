@@ -4,7 +4,7 @@ import unittest2
 from accounts.models import Identity
 from bibleverses.models import (InvalidVerseReference, TextVersion, Verse, VerseSet, VerseSetType, get_passage_sections,
                                 split_into_words)
-from bibleverses.suggestions.modelapi import item_suggestions_need_updating, create_word_suggestion_data
+from bibleverses.suggestions.modelapi import create_word_suggestion_data, item_suggestions_need_updating
 
 from .base import AccountTestMixin, TestBase, create_account
 
