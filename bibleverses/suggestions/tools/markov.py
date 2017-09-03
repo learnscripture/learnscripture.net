@@ -1,7 +1,7 @@
 from collections import OrderedDict
 
-from .utils import PicklerMixin
 from ..utils.memory import intern_it
+from .utils import PicklerMixin
 
 
 class Markov(PicklerMixin):

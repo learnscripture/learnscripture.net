@@ -1,8 +1,8 @@
 # Training texts:
-from .constants import similar_books, ALL_TEXT
-from .exceptions import LoadingNotAllowed
-
 import logging
+
+from .constants import ALL_TEXT, similar_books
+from .exceptions import LoadingNotAllowed
 
 logger = logging.getLogger(__name__)
 
