@@ -1,6 +1,11 @@
 Development environment
 =======================
 
+Normal development is done using the Django development server::
+
+     ./manage.py runserver
+
+
 Celery
 ------
 
@@ -14,3 +19,7 @@ and run something like::
 
 
   celery worker -A learnscripture.celery:app
+
+
+You will also need to setup rabbitmq-server locally to do this. See
+``fabfile.py`` for details.
