@@ -268,6 +268,7 @@ INSTALLED_APPS = [
     'events',
     'groups',
     'comments',
+
     # Third party
     'mptt',
     'compressor',
