@@ -162,48 +162,27 @@ class TextVersion(models.Model):
         elif self.is_catechism:
             return self.get_qapair_by_reference(reference)
 
-    def _get_reference_list(self, reference):
+    def get_reference_list(self, reference):
         if self.is_bible:
             return [v.reference for v in self.get_verse_list(reference)]
         else:
             return [reference]
-
-    def _get_ordered_word_suggestion_data(self, reference):
-        references = self._get_reference_list(reference)
-        wsds = list(self.word_suggestion_data.filter(reference__in=references))
-        # wsds might not be ordered correctly, we need to re-order
-        retval = []
-        for ref in references:
-            for wsd in wsds:
-                if wsd.reference == ref:
-                    retval.append(wsd)
-        return retval
 
     def get_suggestions_by_reference(self, reference):
         """
         For the given reference, returns a list of suggestion lists,
         one list for each word in the verse
         """
-        wsds = self._get_ordered_word_suggestion_data(reference)
-        # Now combine:
-        retval = []
-        for wsd in wsds:
-            retval.extend(wsd.get_suggestions())
-        return retval
+        from .suggestions.modelapi import get_word_suggestions_by_reference
+        return get_word_suggestions_by_reference(self, reference)
 
     def get_suggestions_by_reference_bulk(self, reference_list):
         """
         Returns a dictionary of {ref:suggestions} for each ref in reference_list.
         'suggestions' is itself a list of suggestion dictionaries
         """
-        # Do simple ones in bulk:
-        simple_wsds = list(self.word_suggestion_data.filter(reference__in=reference_list))
-        s_dict = dict((w.reference, w.get_suggestions()) for w in simple_wsds)
-        # Others:
-        for ref in reference_list:
-            if ref not in s_dict:
-                s_dict[ref] = self.get_suggestions_by_reference(ref)
-        return s_dict
+        from .suggestions.modelapi import get_word_suggestions_by_reference_bulk
+        return get_word_suggestions_by_reference_bulk(self, reference_list)
 
     def get_learners(self):
         # This doesn't have to be 100% accurate, so do an easier query - find
@@ -222,11 +201,8 @@ class TextVersion(models.Model):
     # Simulate FK to WordSuggestionData
     @property
     def word_suggestion_data(self):
-        return WordSuggestionData.objects.filter(version_slug=self.slug)
-
-    def create_word_suggestion_data(self, **kwargs):
-        kwargs['version_slug'] = self.slug
-        return WordSuggestionData.objects.create(**kwargs)
+        from .suggestions.modelapi import word_suggestion_data_qs_for_version
+        return word_suggestion_data_qs_for_version(self)
 
     @property
     def db_based_searching(self):
