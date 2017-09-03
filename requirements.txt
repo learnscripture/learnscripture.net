@@ -2,7 +2,7 @@
 -e git://github.com/spookylukey/django-bootstrap-form.git@b228f986e6650ad4690eedc70cca5ff044feaab2#egg=django-bootstrap-form
 -e git://github.com/spookylukey/Pykov.git@c21f27b56a52e7ea7caba1707e64e3753c414478#egg=pykov
 -e git://github.com/spookylukey/django-autoslug.git@0a6adec1f9743743bf7d741b6845620a8f347159#egg=django-autoslug
-Django==1.11.1
+Django==1.11.4
 Pillow==4.1.1
 olefile==0.44
 SQLAlchemy==1.1.10
@@ -26,7 +26,7 @@ django-paypal==0.3.6
 -e git://github.com/spookylukey/django-selectable.git@73b380000ad1ba87169f3a9a7bd219b76109945e#egg=django_selectable
 django-spurl==0.6.4
 djangorestframework==3.6.3
-docutils==0.13.1
+docutils==0.14
 easy-thumbnails==2.4.1
 ecdsa==0.13
 httplib2==0.10.3
