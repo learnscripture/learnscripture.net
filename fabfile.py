@@ -500,7 +500,7 @@ def code_quality_checks():
         return
     local("flake8 .")
     local("isort -c")
-    local("./runtests.py -f")
+    local("./runtests.py -f --nokeepdb")
 
 
 def check_branch():
