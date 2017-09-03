@@ -671,7 +671,7 @@ def delete_old_versions():
 @as_rootuser
 def fix_perms(path, user):
     with cd(path):
-        run("find . -user root | xargs chown %s".format(user))
+        run("find . -user root | xargs chown %s" % user)
 
 
 @task
