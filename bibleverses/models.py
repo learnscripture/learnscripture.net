@@ -293,8 +293,8 @@ class Verse(models.Model):
     @property
     def text(self):
         if self.text_saved == "" and not self.missing:
-            logger.warn("Reached ensure_text call from Verse.text, for %s %s",
-                        self.version.slug, self.reference)
+            logger.warning("Reached ensure_text call from Verse.text, for %s %s",
+                           self.version.slug, self.reference)
             ensure_text([self])
         return self.text_saved
 
@@ -977,7 +977,7 @@ def ensure_text(verses):
     # Check that we fixed everything
     for v in verses_to_check:
         if v.text_saved == '' and not v.missing:
-            logger.warn("Marking %s %s as missing", v.version.slug, v.reference)
+            logger.warning("Marking %s %s as missing", v.version.slug, v.reference)
             v.missing = True
             v.save()
 
