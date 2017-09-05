@@ -6,6 +6,7 @@ from .models import QAPair, TextVersion, UserVerseStatus, Verse, VerseChoice, Ve
 
 class TextVersionAdmin(admin.ModelAdmin):
     list_display = ['short_name', 'slug', 'full_name', 'text_type', 'url']
+    list_filter = ['language_code']
 
 
 class VerseChoiceAdminForm(forms.ModelForm):
