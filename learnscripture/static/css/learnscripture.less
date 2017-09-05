@@ -1,6 +1,6 @@
 // Mostly this file appends to and therefor overrides bootstrap.less styles,
 // rather than modiyfing bootstrap itself. However, we have pulled out
-// various bits in order to do colour themes in this file
+// various bits in order to do color themes in this file
 
 @import "../bootstrap/lib/bootstrap.less";
 @import "../fontawesome/font-awesome.less";
@@ -9,7 +9,7 @@
 
 /* Themes */
 
-.dotheme(@topColor1, @topColor2, @topLinkColour, @btnColor1, @btnColor2, @bgColor1,
+.dotheme(@topColor1, @topColor2, @topLinkColor, @btnColor1, @btnColor2, @bgColor1,
          @linkColor, @footerColor, @themeFont) {
 
     @linkColorHover: darken(@linkColor, 15);
@@ -59,7 +59,7 @@
                 }
             }
             li a {
-                color: @topLinkColour;
+                color: @topLinkColor;
                 &:hover {
                     #gradient > .vertical(@topColor1, @topColor2);
                     color: @white;
@@ -83,7 +83,7 @@
     .topbar {
         // Links get text shadow
         a {
-            color: @topLinkColour;
+            color: @topLinkColor;
             text-shadow: 0 -1px 0 rgba(0,0,0,.25);
         }
     }
@@ -106,7 +106,7 @@
         }
 
         // These have been pulled out of patterns.less because some of
-        // them need to appear after the .btn colour definitions above.
+        // them need to appear after the .btn color definitions above.
         // because they have equal specificity
 
         // Active and Disabled states
