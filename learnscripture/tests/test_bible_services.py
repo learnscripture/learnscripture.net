@@ -30,4 +30,4 @@ class TestEsvSearch(SetupEsvMixin, TestBase):
         l = search_esv(self.esv, "God loved world gave")
         self.assertEqual(len(l), 1)
         v = l[0]
-        self.assertEqual(v.reference, "John 3:16")
+        self.assertEqual(v.localized_reference, "John 3:16")

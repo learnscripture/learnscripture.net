@@ -68,7 +68,7 @@ class VerseCountTests(AccountTestMixin, TestBase):
     def test_verses_started_dedupe(self):
         """
         Test that counts for verses started deduplicate verses that have the
-        same reference.
+        same localized_reference.
         """
         i, account = self.create_account()
         version = i.default_bible_version
@@ -79,7 +79,7 @@ class VerseCountTests(AccountTestMixin, TestBase):
 
         i.record_verse_action("Psalm 23:1", version.slug, StageType.TEST,
                               accuracy=1.0)
-        dt = i.verse_statuses.filter(reference="Psalm 23:1")[0].last_tested.date()
+        dt = i.verse_statuses.filter(localized_reference="Psalm 23:1")[0].last_tested.date()
 
         self.assertEqual(get_verses_started_counts([i.id])[i.id], 1)
 
@@ -89,7 +89,7 @@ class VerseCountTests(AccountTestMixin, TestBase):
     def test_verses_finished_dedupe(self):
         """
         Test that counts for verses finished deduplicate verses that have the
-        same reference.
+        same localized_reference.
         """
         i, account = self.create_account()
         version = i.default_bible_version
@@ -101,8 +101,8 @@ class VerseCountTests(AccountTestMixin, TestBase):
         i.record_verse_action("Psalm 23:1", version.slug, StageType.TEST,
                               accuracy=1.0)
         # Sanity check the test
-        self.assertEqual(i.verse_statuses.filter(reference="Psalm 23:1").count(),
+        self.assertEqual(i.verse_statuses.filter(localized_reference="Psalm 23:1").count(),
                          2)
-        i.verse_statuses.filter(reference="Psalm 23:1").update(strength=0.9999)
+        i.verse_statuses.filter(localized_reference="Psalm 23:1").update(strength=0.9999)
 
         self.assertEqual(get_verses_finished_count(i.id), 1)

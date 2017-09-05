@@ -36,7 +36,7 @@ class ActionLog(models.Model):
                                 related_name='action_logs')
     points = models.PositiveIntegerField()
     reason = models.PositiveSmallIntegerField(choices=ScoreReason.choice_list)
-    reference = models.CharField(max_length=255, blank=True)
+    localized_reference = models.CharField(max_length=255, blank=True)
     accuracy = models.FloatField(null=True, blank=True)
     created = models.DateTimeField()
 
@@ -52,8 +52,8 @@ class ActionLog(models.Model):
         ordering = ('-created',)
 
     def __repr__(self):
-        return "<ActionLog account=%s points=%s reason=%s reference=%s created=%s>" % (
-            self.account.username, self.points, self.get_reason_display(), self.reference, self.created)
+        return "<ActionLog account=%s points=%s reason=%s localized_reference=%s created=%s>" % (
+            self.account.username, self.points, self.get_reason_display(), self.localized_reference, self.created)
 
 
 class TotalScore(models.Model):
@@ -211,7 +211,7 @@ def get_verses_started_counts(identity_ids, started_since=None):
 
     # The important point about this complex query is that
     # it groups 'duplicate' UserVerseStatus rows i.e. ones
-    # for the same reference and text.
+    # for the same localized_reference and text.
 
     # It returns results for all identities, because this is used sometimes.
 
@@ -227,7 +227,7 @@ def get_verses_started_counts(identity_ids, started_since=None):
                         if started_since is not None else []))
                  )
           .group_by(uvs.c.for_identity_id,
-                    uvs.c.reference,
+                    uvs.c.localized_reference,
                     uvs.c.version_id)
           ).alias()
     q2 = (select([q1.c.for_identity_id, func.count()])
@@ -252,7 +252,7 @@ def get_verses_started_per_day(identity_id):
                  from_obj=bibleverses_userversestatus
                  )
           .group_by(day_col,
-                    bibleverses_userversestatus.c.reference,
+                    bibleverses_userversestatus.c.localized_reference,
                     bibleverses_userversestatus.c.version_id)
           ).alias()
 
@@ -296,7 +296,7 @@ def get_verses_finished_count(identity_id, finished_since=None):
     from sqlalchemy import func
 
     uvs = bibleverses_userversestatus
-    q1 = (select([uvs.c.reference, uvs.c.version_id],
+    q1 = (select([uvs.c.localized_reference, uvs.c.version_id],
                  and_(uvs.c.ignored == False,  # noqa
                       uvs.c.memory_stage >= MemoryStage.TESTED,
                       uvs.c.strength >= MM.LEARNT,
@@ -306,7 +306,7 @@ def get_verses_finished_count(identity_id, finished_since=None):
                       ),
                  from_obj=uvs
                  )
-          .group_by(uvs.c.reference,
+          .group_by(uvs.c.localized_reference,
                     uvs.c.version_id)
           ).alias()
     q2 = (select([func.count()],

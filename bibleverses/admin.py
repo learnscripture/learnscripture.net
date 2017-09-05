@@ -10,9 +10,9 @@ class TextVersionAdmin(admin.ModelAdmin):
 
 
 class VerseChoiceAdminForm(forms.ModelForm):
-    def clean_reference(self):
-        ref = self.cleaned_data['reference']
-        if not Verse.objects.filter(reference=ref).exists():
+    def clean_localized_reference(self):
+        ref = self.cleaned_data['localized_reference']
+        if not Verse.objects.filter(localized_reference=ref).exists():
             raise forms.ValidationError("'%s' is not a valid verse." % ref)
         return ref
 
@@ -34,8 +34,8 @@ mark_missing.short_description = "Mark selected verses as missing"  # noqa: E305
 
 
 class VerseAdmin(admin.ModelAdmin):
-    search_fields = ['reference']
-    list_display = ['reference', 'version', 'missing']
+    search_fields = ['localized_reference']
+    list_display = ['localized_reference', 'version', 'missing']
     list_filter = ['version', 'missing']
     actions = [mark_missing]
 
@@ -44,8 +44,8 @@ class VerseAdmin(admin.ModelAdmin):
 
 
 class QAPairAdmin(admin.ModelAdmin):
-    search_fields = ['reference', 'question']
-    list_display = ['reference', 'question', 'catechism']
+    search_fields = ['localized_reference', 'question']
+    list_display = ['localized_reference', 'question', 'catechism']
     list_filter = ['catechism']
     ordering = ['catechism', 'order']
 
@@ -59,8 +59,8 @@ class UserVerseStatusAdmin(admin.ModelAdmin):
 
     def username(obj):
         return obj.for_identity.account.username
-    list_display = ['reference', username, 'ignored']
-    ordering = ['for_identity__account__username', 'reference']
+    list_display = ['localized_reference', username, 'ignored']
+    ordering = ['for_identity__account__username', 'localized_reference']
 
     def get_queryset(self, request):
         return super(UserVerseStatusAdmin, self).get_queryset(request).select_related('for_identity__account')

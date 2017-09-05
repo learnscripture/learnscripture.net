@@ -239,12 +239,12 @@ def todays_stats(identity):
     stats = {}
     session_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
-    stats['total_verses_tested'] = set(uvs.reference for uvs in
+    stats['total_verses_tested'] = set(uvs.localized_reference for uvs in
                                        identity.verse_statuses
                                        .filter(last_tested__gte=session_start,
                                                ignored=False)
                                        )
-    stats['new_verses_started'] = set(uvs.reference for uvs in
+    stats['new_verses_started'] = set(uvs.localized_reference for uvs in
                                       identity.verse_statuses
                                       .filter(first_seen__gte=session_start,
                                               ignored=False)
@@ -341,8 +341,8 @@ def dashboard(request):
                 if ('revisepassagesection' in request.POST or
                         'practisepassagesection' in request.POST):
                     # Revise/practise the specified section
-                    refs = set(vc.reference for vc in main_uvs.get_section_verse_choices())
-                    uvss = [uvs for uvs in uvss if uvs.reference in refs]
+                    refs = set(vc.localized_reference for vc in main_uvs.get_section_verse_choices())
+                    uvss = [uvs for uvs in uvss if uvs.localized_reference in refs]
 
             if 'learnpassage' in request.POST:
                 uvss = identity.slim_passage_for_revising(uvss, verse_set)
@@ -468,7 +468,7 @@ def choose(request):
                                  session.LearningType.LEARNING)
 
         # Handle choose individual verse
-        ref = request.POST.get('reference', None)
+        ref = request.POST.get('localized_reference', None)
         if ref is not None:
             # First ensure it is valid
             try:
@@ -630,17 +630,17 @@ def view_verse_set(request, slug):
 
     # Decorate the verse choices with the text.
     verse_choices = list(verse_set.verse_choices.all())
-    all_references = [vc.reference for vc in verse_choices]
-    verses = version.get_verses_by_reference_bulk(all_references)
+    all_localized_references = [vc.localized_reference for vc in verse_choices]
+    verses = version.get_verses_by_localized_reference_bulk(all_localized_references)
 
     # Decorate verses with break information.
     verse_list = sorted(verses.values(), key=lambda v: v.bible_verse_number)
     verse_list = add_passage_breaks(verse_list, verse_set.breaks)
 
     for vc in verse_choices:
-        # vc.reference can be missing from verses if Verse.missing==True for
+        # vc.localized_reference can be missing from verses if Verse.missing==True for
         # this version.
-        vc.verse = verses.get(vc.reference, None)
+        vc.verse = verses.get(vc.localized_reference, None)
 
     if (verse_set.is_selection and
             len(verse_list) > 1 and is_continuous_set(verse_list)):
@@ -656,17 +656,17 @@ def view_verse_set(request, slug):
 
     if request.method == 'POST':
         if "drop" in request.POST and hasattr(request, 'identity'):
-            refs_to_drop = request.identity.which_in_learning_queue(all_references)
+            refs_to_drop = request.identity.which_in_learning_queue(all_localized_references)
             request.identity.cancel_learning(refs_to_drop)
             messages.info(request, "Dropped %d verse(s) from learning queue." % len(refs_to_drop))
 
     if hasattr(request, 'identity'):
         c['can_edit'] = request.identity.can_edit_verse_set(verse_set)
-        verses_started = request.identity.which_verses_started(all_references)
+        verses_started = request.identity.which_verses_started(all_localized_references)
         c['started_count'] = len(verses_started)
 
         if verse_set.is_selection:
-            c['in_queue'] = len(request.identity.which_in_learning_queue(all_references))
+            c['in_queue'] = len(request.identity.which_in_learning_queue(all_localized_references))
         else:
             c['in_queue'] = 0
     else:
@@ -732,9 +732,9 @@ def create_or_edit_set(request, set_type=None, slug=None):
 
     c = {}
 
-    def mk_verse_list(ref_list, verse_dict):
+    def mk_verse_list(localized_reference_list, verse_dict):
         verses = []
-        for ref in ref_list:  # preserve order
+        for ref in localized_reference_list:  # preserve order
             if ref in verse_dict:
                 verses.append(verse_dict[ref])
         return verses
@@ -747,15 +747,15 @@ def create_or_edit_set(request, set_type=None, slug=None):
         form = VerseSetForm(request.POST, instance=verse_set)
         # Need to propagate the references even if it doesn't validate,
         # so do this work here:
-        ref_list_raw = request.POST.get('reference-list', '').split('|')
-        verse_dict = version.get_verses_by_reference_bulk(ref_list_raw)
-        # Dedupe ref_list, and ensure correct references, while preserving order:
-        ref_list = []
-        for ref in ref_list_raw:
-            if ref in verse_dict and ref not in ref_list:
-                ref_list.append(ref)
+        localized_reference_list_raw = request.POST.get('localized_reference_list', '').split('|')
+        verse_dict = version.get_verses_by_localized_reference_bulk(localized_reference_list_raw)
+        # Dedupe localized_reference_list, and ensure correct references, while preserving order:
+        localized_reference_list = []
+        for ref in localized_reference_list_raw:
+            if ref in verse_dict and ref not in localized_reference_list:
+                localized_reference_list.append(ref)
 
-        breaks = request.POST.get('break-list', '')
+        breaks = request.POST.get('break_list', '')
         # Basic sanitising of 'breaks'
         if not re.match('^((\d+|\d+:\d+),)*(\d+|\d+:\d+)?$', breaks):
             breaks = ""
@@ -769,8 +769,8 @@ def create_or_edit_set(request, set_type=None, slug=None):
             # If all have a 'break' applied, (excluding first, which never has
             # one) then the user clearly doesn't understand the concept of
             # section breaks:
-            tmp_verse_list = add_passage_breaks(mk_verse_list(ref_list,
-                                                              version.get_verses_by_reference_bulk(ref_list_raw)),
+            tmp_verse_list = add_passage_breaks(mk_verse_list(localized_reference_list,
+                                                              version.get_verses_by_localized_reference_bulk(localized_reference_list_raw)),
                                                 breaks)
             if all(v.break_here for v in tmp_verse_list[1:]):
                 breaks = ""
@@ -785,7 +785,7 @@ def create_or_edit_set(request, set_type=None, slug=None):
                 # Can't undo:
                 verse_set.public = True
             verse_set.save()
-            verse_set.set_verse_choices(ref_list)
+            verse_set.set_verse_choices(localized_reference_list)
 
             # if user just made it public or it is a new public verse set
             if (verse_set.public and (not orig_verse_set_public or
@@ -800,13 +800,13 @@ def create_or_edit_set(request, set_type=None, slug=None):
         form = VerseSetForm(instance=verse_set)
 
         if verse_set is not None:
-            ref_list = [vc.reference for vc in verse_set.verse_choices.all()]
-            verse_dict = version.get_verses_by_reference_bulk(ref_list)
+            localized_reference_list = [vc.localized_reference for vc in verse_set.verse_choices.all()]
+            verse_dict = version.get_verses_by_localized_reference_bulk(localized_reference_list)
             breaks = verse_set.breaks
         else:
-            ref_list, verse_dict, breaks = [], {}, ''
+            localized_reference_list, verse_dict, breaks = [], {}, ''
 
-    verse_list = mk_verse_list(ref_list, verse_dict)
+    verse_list = mk_verse_list(localized_reference_list, verse_dict)
     if set_type == VerseSetType.PASSAGE:
         verse_list = add_passage_breaks(verse_list, breaks)
 
@@ -941,7 +941,7 @@ def user_verses(request):
             c['bibleorder'] = True
             verses = verses.order_by('text_order', 'strength')
         else:
-            verses = verses.order_by('strength', 'reference')
+            verses = verses.order_by('strength', 'localized_reference')
     c['verses'] = verses
     c['bible'] = text_type == TextType.BIBLE
     c['catechism'] = text_type == TextType.CATECHISM

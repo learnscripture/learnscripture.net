@@ -17,7 +17,7 @@
             "answer": "Man's chief end is to glorify God, and to enjoy Him forever.",
             "order": 1,
             "question": "What is the chief end of man?",
-            "reference": "Q1",
+            "localized_reference": "Q1",
             "catechism": [
                 "WSC"
             ]
@@ -30,7 +30,7 @@
             "answer": "The Word of God, which is contained in the Scriptures of the Old and New Testaments, is the only rule to direct us how we may glorify and enjoy him.",
             "order": 2,
             "question": "What rule hath God given to direct us how we may glorify and enjoy him?",
-            "reference": "Q2",
+            "localized_reference": "Q2",
             "catechism": [
                 "WSC"
             ]
@@ -43,7 +43,7 @@
             "answer": "The Scriptures principally teach what man is to believe concerning God, and what duty God requires of man.",
             "order": 3,
             "question": "What do the Scriptures principally teach?",
-            "reference": "Q3",
+            "localized_reference": "Q3",
             "catechism": [
                 "WSC"
             ]
@@ -56,7 +56,7 @@
             "answer": "God is a Spirit, infinite, eternal, and unchangeable, in his being, wisdom, power, holiness, justice, goodness, and truth.",
             "order": 4,
             "question": "What is God?",
-            "reference": "Q4",
+            "localized_reference": "Q4",
             "catechism": [
                 "WSC"
             ]

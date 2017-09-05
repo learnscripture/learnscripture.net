@@ -76,7 +76,7 @@ def import_bible(version):
             parsed_book, ch_num, v_num = parse_ref(ref)
             assert parsed_book == book
             v, x = Verse.objects.get_or_create(version=version_obj,
-                                               reference=ref,
+                                               localized_reference=ref,
                                                book_number=b_num,
                                                chapter_number=ch_num,
                                                verse_number=v_num,

@@ -15,7 +15,7 @@ for line in data:
         print()
         print((ref, title))
         assert '<' not in title
-        v = Verse.objects.get(version__slug='NET', reference='Psalm ' + ref)
+        v = Verse.objects.get(version__slug='NET', localized_reference='Psalm ' + ref)
         # Random fixes:
         v.text = v.text.replace('. "', '."')
         assert v.text.startswith(title)

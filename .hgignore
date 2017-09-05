@@ -5,4 +5,5 @@ syntax:glob
 secrets.json
 settings_priv.py
 TODO
+TODO.org
 .git/

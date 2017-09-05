@@ -1631,7 +1631,7 @@ var learnscripture = (function (learnscripture, $) {
         // We join words back together, so that we can split on \n
         // which is useful for poetry
         var text = verseStatus.scoring_text_words.join(" ")
-        var reference = (verseStatus.showReference ? verseStatus.reference : null);
+        var reference = (verseStatus.showReference ? verseStatus.localized_reference : null);
 
         // Word splitting here needs to match with the way
         // that bibleverses.suggestions splits words up.

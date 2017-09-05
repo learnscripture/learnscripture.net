@@ -25,17 +25,17 @@
         <input type="hidden" name="verse_set_id" value="{{ uvs.verse_set.id }}" />
         <input type="hidden" name="uvs_id" value="{{ uvs.id }}" />
 
-        {% if uvs.section_reference != uvs.passage_reference %}
+        {% if uvs.section_localized_reference != uvs.passage_localized_reference %}
 
           {# revise/practise section #}
 
           <p>
             {% if uvs.needs_testing %}
               <input type="submit" name="revisepassagesection" class="btn primary"
-                     value="Review section: {{ uvs.section_reference }}"/>
+                     value="Review section: {{ uvs.section_localized_reference }}"/>
             {% else %}
               <input type="submit" name="practisepassagesection" class="btn primary"
-                     value="Practise section: {{ uvs.section_reference }}"/>
+                     value="Practise section: {{ uvs.section_localized_reference }}"/>
             {% endif %}
           </p>
           <br/>
@@ -47,10 +47,10 @@
         <p>
           {% if uvs.needs_testing %}
             <input type="submit" name="revisepassage" class="btn primary"
-                   value="Review passage: {{ uvs.passage_reference }}"/>
+                   value="Review passage: {{ uvs.passage_localized_reference }}"/>
           {% else %}
             <input type="submit" name="practisepassage" class="btn primary"
-                   value="Practise passage: {{ uvs.passage_reference }}"/>
+                   value="Practise passage: {{ uvs.passage_localized_reference }}"/>
           {% endif %}
         </p>
       </form>
@@ -76,7 +76,7 @@
 
           {# Selections #}
           <input type="hidden" name="verse_status_id" value="{{ uvs.id }}" />
-          <input type="hidden" name="verse_status_reference" value="{{ uvs.reference }}" />
+          <input type="hidden" name="verse_status_localized_reference" value="{{ uvs.localized_reference }}" />
           <p>
             <input type="submit" name="cancellearning" class="btn primary cancel-learning-verse-btn"
                    value="Stop learning this" />

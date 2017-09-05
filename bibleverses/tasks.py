@@ -10,6 +10,6 @@ def verse_set_increase_popularity(verse_set_id):
 
 
 @app.task(ignore_result=True)
-def fix_item_suggestions(version_slug, reference, text_saved):
+def fix_item_suggestions(version_slug, localized_reference, text_saved):
     from bibleverses.suggestions.modelapi import fix_item
-    fix_item(version_slug, reference, text_saved)
+    fix_item(version_slug, localized_reference, text_saved)

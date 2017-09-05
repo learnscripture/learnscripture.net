@@ -90,11 +90,11 @@ New texts and catechisms
 
   Or, dump and transfer, e.g.::
 
-      psql -U learnscripture -d learnscripture_wordsuggestions -c "\\copy (select version_slug, reference, hash, suggestions from bibleverses_wordsuggestiondata where version_slug = 'NCC') TO stdout WITH CSV HEADER;" > wsd_NCC.csv
+      psql -U learnscripture -d learnscripture_wordsuggestions -c "\\copy (select version_slug, localized_reference, hash, suggestions from bibleverses_wordsuggestiondata where version_slug = 'NCC') TO stdout WITH CSV HEADER;" > wsd_NCC.csv
 
       rsync wsd_NCC.csv learnscripture@learnscripture.net:/home/learnscripture
 
-      psql -U learnscripture -d learnscripture_wordsuggestions -c "\\copy bibleverses_wordsuggestiondata (version_slug, reference, hash, suggestions) from stdin CSV HEADER" < ~/wsd_NCC.csv
+      psql -U learnscripture -d learnscripture_wordsuggestions -c "\\copy bibleverses_wordsuggestiondata (version_slug, localized_reference, hash, suggestions) from stdin CSV HEADER" < ~/wsd_NCC.csv
 
    (This could take longer, depending on upload speeds...)
 

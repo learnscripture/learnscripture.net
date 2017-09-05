@@ -86,7 +86,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.wait_for_ajax()
 
         # Check the strength
-        uvs = identity.verse_statuses.get(reference='John 3:16')
+        uvs = identity.verse_statuses.get(localized_reference='John 3:16')
         self.assertEqual(uvs.strength, MM.INITIAL_STRENGTH_FACTOR)
 
     def test_typing_verse_combo(self):
@@ -111,7 +111,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
 
         # self.wait_for_ajax()
         # # Check the strength
-        # uvs = identity.verse_statuses.get(reference='Psalm 23:1-2')
+        # uvs = identity.verse_statuses.get(localized_reference='Psalm 23:1-2')
         # self.assertEqual(uvs.strength, MM.INITIAL_STRENGTH_FACTOR)
 
         # # Check the score
@@ -192,7 +192,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
             identity.record_verse_action('Psalm 23:%d' % i, 'KJV', StageType.TEST,
                                          1.0)
 
-        self._make_verses_due_for_testing(identity.verse_statuses.filter(reference='Psalm 23:1'))
+        self._make_verses_due_for_testing(identity.verse_statuses.filter(localized_reference='Psalm 23:1'))
 
         self.get_url('dashboard')
         self.submit('input[name=revisepassage]')
@@ -269,7 +269,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.click_and_confirm("#id-reset-progress-btn")
 
         # Should reset strength to zero
-        self.assertEqual(identity.verse_statuses.get(reference='John 3:16').strength,
+        self.assertEqual(identity.verse_statuses.get(localized_reference='John 3:16').strength,
                          0)
         # Should revert to initial read mode
         self.assertTrue(self.is_element_displayed('#id-instructions .stage-read'))

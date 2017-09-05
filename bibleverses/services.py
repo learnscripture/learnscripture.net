@@ -34,12 +34,12 @@ def do_esv_api(method, params):
     return requests.get(url).content.decode('utf-8')
 
 
-def get_esv(reference_list, batch_size=ESV_BATCH_SIZE):
+def get_esv(localized_reference_list, batch_size=ESV_BATCH_SIZE):
     from django.conf import settings
 
     first_time = True
     sections = {}
-    for batch in chunks(reference_list, batch_size):
+    for batch in chunks(localized_reference_list, batch_size):
         if not first_time:
             time.sleep(1)  # Don't hammer the API.
 
@@ -67,7 +67,7 @@ def get_esv(reference_list, batch_size=ESV_BATCH_SIZE):
             l2 = line.strip()
             if l2 == "":
                 continue
-            if line[0] != ' ' and l2 in reference_list:
+            if line[0] != ' ' and l2 in localized_reference_list:
                 current_section = l2
             else:
                 if current_section is None:
@@ -79,7 +79,7 @@ def get_esv(reference_list, batch_size=ESV_BATCH_SIZE):
                     prev = sections[current_section] + '\n' if current_section in sections else ''
                     sections[current_section] = prev + l2
 
-    fix_esv_bugs(sections, reference_list)
+    fix_esv_bugs(sections, localized_reference_list)
 
     return sorted(sections.items())
 
@@ -91,9 +91,9 @@ MISSING_ESV = {
 }
 
 
-def fix_esv_bugs(items, needed_references):
+def fix_esv_bugs(items, needed_localized_references):
     for ref in MISSING_ESV.keys():
-        if ref in needed_references:
+        if ref in needed_localized_references:
             items[ref] = MISSING_ESV[ref]
 
 
@@ -128,7 +128,7 @@ def search_esv(version, words):
         text = elem.text_content()
         results.append((ref, text))
 
-    verses = version.get_verses_by_reference_bulk([r for r, t in results],
+    verses = version.get_verses_by_localized_reference_bulk([r for r, t in results],
                                                   fetch_text=False)
     verse_list = []
     for ref, text in results:
@@ -136,7 +136,7 @@ def search_esv(version, words):
         verse.text_saved = text
         verse_list.append(highlight_search_words(verse, words))
 
-    return [ComboVerse(v.reference, [v]) for v in verse_list]
+    return [ComboVerse(v.localized_reference, [v]) for v in verse_list]
 
 
 ESV_MAX_STORED_CONSECUTIVE_VERSES = 500

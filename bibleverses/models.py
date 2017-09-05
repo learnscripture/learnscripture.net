@@ -103,30 +103,30 @@ class TextVersion(models.Model):
     def natural_key(self):
         return (self.slug,)
 
-    def get_verse_list(self, reference, max_length=MAX_VERSE_QUERY_SIZE):
+    def get_verse_list(self, localized_reference, max_length=MAX_VERSE_QUERY_SIZE):
         """
-        Get ordered list of Verse objects for the given reference.
+        Get ordered list of Verse objects for the given localized reference.
         (just one object for most references).
         """
-        return parse_ref(reference, self, max_length=max_length)
+        return parse_ref(localized_reference, self, max_length=max_length)
 
-    def get_text_by_reference(self, reference):
-        return ComboVerse(reference, self.get_verse_list(reference)).text
+    def get_text_by_localized_reference(self, localized_reference):
+        return ComboVerse(localized_reference, self.get_verse_list(localized_reference)).text
 
-    def get_text_by_reference_bulk(self, reference_list):
+    def get_text_by_localized_reference_bulk(self, localized_reference_list):
         """
-        Returns a dictionary of {ref:text} for each ref in reference_list. Bad
+        Returns a dictionary of {localized_ref:text} for each ref in localized_reference_list. Bad
         references are silently discarded, and won't be in the return
         dictionary.
         """
         if not self.is_bible:
             return {}
-        verse_dict = self.get_verses_by_reference_bulk(reference_list)
-        return dict((ref, v.text) for (ref, v) in verse_dict.items())
+        verse_dict = self.get_verses_by_localized_reference_bulk(localized_reference_list)
+        return dict((r, v.text) for (r, v) in verse_dict.items())
 
-    def get_verses_by_reference_bulk(self, reference_list, fetch_text=True):
+    def get_verses_by_localized_reference_bulk(self, localized_reference_list, fetch_text=True):
         """
-        Returns a dictionary of {ref:verse} for each ref in reference_list. Bad
+        Returns a dictionary of {localized_ref:verse} for each ref in localized_reference_list. Bad
         references are silently discarded, and won't be in the return
         dictionary.
         """
@@ -134,59 +134,60 @@ class TextVersion(models.Model):
             return {}
         # We try to do this efficiently, but it is hard for combo references. So
         # we do the easy ones the easy way:
-        simple_verses = list(self.verse_set.filter(reference__in=reference_list,
+        simple_verses = list(self.verse_set.filter(localized_reference__in=localized_reference_list,
                                                    missing=False,
                                                    ))
-        v_dict = dict((v.reference, v) for v in simple_verses)
+        v_dict = dict((v.localized_reference, v) for v in simple_verses)
         # Now get the others:
-        for ref in reference_list:
-            if ref not in v_dict:
+        for localized_ref in localized_reference_list:
+            if localized_ref not in v_dict:
                 try:
-                    v_dict[ref] = ComboVerse(ref, self.get_verse_list(ref))
+                    v_dict[localized_ref] = ComboVerse(localized_ref,
+                                                       self.get_verse_list(localized_ref))
                 except InvalidVerseReference:
                     pass
         if fetch_text:
             ensure_text(v_dict.values())
         return v_dict
 
-    def get_qapairs_by_reference_bulk(self, reference_list):
+    def get_qapairs_by_localized_reference_bulk(self, localized_reference_list):
         if not self.is_catechism:
             return {}
-        return {qapair.reference: qapair
-                for qapair in self.qapairs.filter(reference__in=reference_list)}
+        return {qapair.localized_reference: qapair
+                for qapair in self.qapairs.filter(localized_reference__in=localized_reference_list)}
 
-    def get_qapair_by_reference(self, reference):
+    def get_qapair_by_localized_reference(self, localized_reference):
         if not self.is_catechism:
             return None
-        return self.qapairs.get(reference=reference)
+        return self.qapairs.get(localized_reference=localized_reference)
 
-    def get_item_by_reference(self, reference):
+    def get_item_by_localized_reference(self, localized_reference):
         if self.is_bible:
-            return self.verse_set.get(reference=reference)
+            return self.verse_set.get(localized_reference=localized_reference)
         elif self.is_catechism:
-            return self.get_qapair_by_reference(reference)
+            return self.get_qapair_by_localized_reference(localized_reference)
 
-    def get_reference_list(self, reference):
+    def get_localized_reference_list(self, localized_reference):
         if self.is_bible:
-            return [v.reference for v in self.get_verse_list(reference)]
+            return [v.localized_reference for v in self.get_verse_list(localized_reference)]
         else:
-            return [reference]
+            return [localized_reference]
 
-    def get_suggestions_by_reference(self, reference):
+    def get_suggestions_by_localized_reference(self, localized_reference):
         """
-        For the given reference, returns a list of suggestion lists,
+        For the given localized reference, returns a list of suggestion lists,
         one list for each word in the verse
         """
-        from .suggestions.modelapi import get_word_suggestions_by_reference
-        return get_word_suggestions_by_reference(self, reference)
+        from .suggestions.modelapi import get_word_suggestions_by_localized_reference
+        return get_word_suggestions_by_localized_reference(self, localized_reference)
 
-    def get_suggestions_by_reference_bulk(self, reference_list):
+    def get_suggestions_by_localized_reference_bulk(self, localized_reference_list):
         """
-        Returns a dictionary of {ref:suggestions} for each ref in reference_list.
+        Returns a dictionary of {localized_reference:suggestions} for each ref in localized_reference_list.
         'suggestions' is itself a list of suggestion dictionaries
         """
-        from .suggestions.modelapi import get_word_suggestions_by_reference_bulk
-        return get_word_suggestions_by_reference_bulk(self, reference_list)
+        from .suggestions.modelapi import get_word_suggestions_by_localized_reference_bulk
+        return get_word_suggestions_by_localized_reference_bulk(self, localized_reference_list)
 
     def get_learners(self):
         # This doesn't have to be 100% accurate, so do an easier query - find
@@ -218,8 +219,8 @@ class ComboVerse(object):
     Wrapper needed when we want a combination of verses to appear as a single
     verse.
     """
-    def __init__(self, reference, verse_list):
-        self.reference = reference
+    def __init__(self, localized_reference, verse_list):
+        self.localized_reference = localized_reference
         self.book_name = verse_list[0].book_name
         self.chapter_number = verse_list[0].chapter_number
         self.verse_number = verse_list[0].verse_number
@@ -239,8 +240,8 @@ SEARCH_CHARS = set("".join(list(SEARCH_OPERATORS)))
 
 class VerseManager(models.Manager):
 
-    def get_by_natural_key(self, version_slug, reference):
-        return self.get(version__slug=version_slug, reference=reference)
+    def get_by_natural_key(self, version_slug, localized_reference):
+        return self.get(version__slug=version_slug, localized_reference=localized_reference)
 
     def text_search(self, query, version, limit=10):
         # First remove anything recognised by postgres as an operator.
@@ -253,7 +254,7 @@ class VerseManager(models.Manager):
         word_params = list(intersperse(words, ' & '))
         search_clause = ' || ' .join(['%s'] * len(word_params))
         return models.Manager.raw(self, """
-          SELECT id, version_id, reference, text_saved,
+          SELECT id, version_id, localized_reference, text_saved,
                  ts_headline(text_saved, query, 'StartSel = **, StopSel = **, HighlightAll=TRUE') as highlighted_text,
                  book_number, chapter_number, verse_number,
                  bible_verse_number, ts_rank(text_tsv, query) as rank
@@ -273,7 +274,7 @@ class VerseQuerySet(models.QuerySet):
 
 class Verse(models.Model):
     version = models.ForeignKey(TextVersion, on_delete=models.CASCADE)
-    reference = models.CharField(max_length=100)
+    localized_reference = models.CharField(max_length=100)
     # 'text_saved' is for data stored, as opposed to 'text' which might retrieve
     # from a service. Also, 'text_saved' is sometimes set without saving to the
     # DB, just so that 'text' can find it.
@@ -298,7 +299,7 @@ class Verse(models.Model):
     def text(self):
         if self.text_saved == "" and not self.missing:
             logger.warning("Reached ensure_text call from Verse.text, for %s %s",
-                           self.version.slug, self.reference)
+                           self.version.slug, self.localized_reference)
             ensure_text([self])
         return self.text_saved
 
@@ -313,10 +314,10 @@ class Verse(models.Model):
             verse_number__gt=self.verse_number).exists()
 
     def natural_key(self):
-        return (self.version.slug, self.reference)
+        return (self.version.slug, self.localized_reference)
 
     def __str__(self):
-        return "%s (%s)" % (self.reference, self.version.short_name)
+        return "%s (%s)" % (self.localized_reference, self.version.short_name)
 
     def __repr__(self):
         return '<Verse %s>' % self
@@ -324,7 +325,7 @@ class Verse(models.Model):
     class Meta:
         unique_together = [
             ('bible_verse_number', 'version'),
-            ('reference', 'version'),
+            ('localized_reference', 'version'),
         ]
         ordering = ('bible_verse_number',)
 
@@ -332,7 +333,7 @@ class Verse(models.Model):
         self.missing = True
         self.save()
         UserVerseStatus.objects.filter(version=self.version,
-                                       reference=self.reference).delete()
+                                       localized_reference=self.localized_reference).delete()
 
     @property
     def suggestion_text(self):
@@ -360,7 +361,7 @@ class WordSuggestionData(models.Model):
     # For practical reasons, this table is stored in a separate DB, so it has no
     # explicit FKs to the main DB.
     version_slug = models.CharField(max_length=20, default='')
-    reference = models.CharField(max_length=100)
+    localized_reference = models.CharField(max_length=100)
     hash = models.CharField(max_length=40)  # SHA1 of text
 
     # Schema: list of suggestions for each word, in order. each suggestion
@@ -407,17 +408,17 @@ class WordSuggestionData(models.Model):
 
     class Meta:
         unique_together = [
-            ('version_slug', 'reference')
+            ('version_slug', 'localized_reference')
         ]
 
     def __repr__(self):
-        return "<WordSuggestionData %s %s>" % (self.version_slug, self.reference)
+        return "<WordSuggestionData %s %s>" % (self.version_slug, self.localized_reference)
 
 
 class QAPairManager(models.Manager):
 
-    def get_by_natural_key(self, catechism_slug, reference):
-        return self.get(catechism__slug=catechism_slug, reference=reference)
+    def get_by_natural_key(self, catechism_slug, localized_reference):
+        return self.get(catechism__slug=catechism_slug, localized_reference=localized_reference)
 
 
 class QAPair(models.Model):
@@ -425,12 +426,10 @@ class QAPair(models.Model):
     A question/answer pair in a catechism.
     """
     catechism = models.ForeignKey(TextVersion, on_delete=models.CASCADE, related_name='qapairs')
-    # Reference is always 'Qn' where 'n' == order. (Apart from where
+    # localized_reference is always 'Qn' where 'n' == order. (Apart from where
     # we have question numbers like '2a').
-    # This means we are guaranteed not to have clashes with Verse references,
-    # which is useful for the UserVerseStatus models which can reference both.
-
-    reference = models.CharField(max_length=100)
+    # localized_reference is referred to by UserVerseStatus
+    localized_reference = models.CharField(max_length=100)
     question = models.TextField()
     answer = models.TextField()
     order = models.PositiveSmallIntegerField()
@@ -439,16 +438,16 @@ class QAPair(models.Model):
 
     class Meta:
         unique_together = [('catechism', 'order'),
-                           ('catechism', 'reference')]
+                           ('catechism', 'localized_reference')]
 
         verbose_name = "QA pair"
         ordering = ['order']
 
     def __str__(self):
-        return self.reference + " " + self.question
+        return self.localized_reference + " " + self.question
 
     def natural_key(self):
-        return (self.catechism.slug, self.reference)
+        return (self.catechism.slug, self.localized_reference)
 
     @property
     def suggestion_text(self):
@@ -509,11 +508,11 @@ SELECT COUNT(*) FROM
 
     def search(self, verse_sets, query):
         # Does the query look like a Bible reference?
-        reference = parse_as_bible_reference(query,
+        localized_reference = parse_as_bible_localized_reference(query,
                                              allow_whole_book=False,
                                              allow_whole_chapter=False)
-        if reference is not None:
-            return verse_sets.filter(verse_choices__reference=reference)
+        if localized_reference is not None:
+            return verse_sets.filter(verse_choices__localized_reference=localized_reference)
         else:
             return verse_sets.filter(name__icontains=query)
 
@@ -558,11 +557,11 @@ class VerseSet(models.Model):
     def breaks_formatted(self):
         return self.breaks.replace(",", ", ")
 
-    def set_verse_choices(self, ref_list):
+    def set_verse_choices(self, localized_reference_list):
         existing_vcs = self.verse_choices.all()
-        existing_vcs_dict = dict((vc.reference, vc) for vc in existing_vcs)
+        existing_vcs_dict = dict((vc.localized_reference, vc) for vc in existing_vcs)
         old_vcs = set(existing_vcs)
-        for i, ref in enumerate(ref_list):  # preserve order
+        for i, ref in enumerate(localized_reference_list):  # preserve order
             dirty = False
             if ref in existing_vcs_dict:
                 vc = existing_vcs_dict[ref]
@@ -572,7 +571,7 @@ class VerseSet(models.Model):
                 old_vcs.remove(vc)
             else:
                 vc = VerseChoice(verse_set=self,
-                                 reference=ref,
+                                 localized_reference=ref,
                                  set_order=i)
                 dirty = True
             if dirty:
@@ -587,7 +586,7 @@ class VerseSet(models.Model):
     def update_passage_id(self):
         if self.is_passage:
             verse_choices = list(self.verse_choices.all())
-            self.passage_id = verse_choices[0].reference + ' - ' + verse_choices[-1].reference
+            self.passage_id = verse_choices[0].localized_reference + ' - ' + verse_choices[-1].localized_reference
             self.save()
 
 
@@ -600,7 +599,7 @@ class VerseChoiceManager(models.Manager):
 # Note that VerseChoice and Verse are not related, since we want a VerseChoice
 # to be independent of Bible version.
 class VerseChoice(models.Model):
-    reference = models.CharField(max_length=100)
+    localized_reference = models.CharField(max_length=100)
     verse_set = models.ForeignKey(VerseSet, on_delete=models.CASCADE,
                                   related_name='verse_choices')
     set_order = models.PositiveSmallIntegerField(default=0)
@@ -608,11 +607,11 @@ class VerseChoice(models.Model):
     objects = VerseChoiceManager()
 
     class Meta:
-        unique_together = [('verse_set', 'reference')]
+        unique_together = [('verse_set', 'localized_reference')]
         base_manager_name = 'objects'
 
     def __str__(self):
-        return self.reference
+        return self.localized_reference
 
     def __repr__(self):
         return '<VerseChoice %s>' % self
@@ -629,7 +628,7 @@ class UserVerseStatus(models.Model):
     # to normal), but usually it is confusing, so business logic limits how much
     # this can happen.
 
-    # By making reference a CharField instead of a tighter DB constraint, we can
+    # By making localized_reference a CharField instead of a tighter DB constraint, we can
     # handle:
     # - UserVerseStatuses that don't correspond to a Verse object, because
     #   they span a few verses.
@@ -641,7 +640,7 @@ class UserVerseStatus(models.Model):
 
     for_identity = models.ForeignKey('accounts.Identity', on_delete=models.CASCADE,
                                      related_name='verse_statuses')
-    reference = models.CharField(max_length=100)
+    localized_reference = models.CharField(max_length=100)
     verse_set = models.ForeignKey(VerseSet, null=True, blank=True,
                                   on_delete=models.SET_NULL)
     text_order = models.PositiveSmallIntegerField()  # order of this item within associate TextVersion
@@ -659,19 +658,19 @@ class UserVerseStatus(models.Model):
 
     @cached_property
     def text(self):
-        return self.version.get_text_by_reference(self.reference)
+        return self.version.get_text_by_localized_reference(self.localized_reference)
 
     @cached_property
     def question(self):
-        return self.version.get_qapair_by_reference(self.reference).question
+        return self.version.get_qapair_by_localized_reference(self.localized_reference).question
 
     @cached_property
     def answer(self):
-        return self.version.get_qapair_by_reference(self.reference).answer
+        return self.version.get_qapair_by_localized_reference(self.localized_reference).answer
 
     @cached_property
     def title(self):
-        return self.reference + \
+        return self.localized_reference + \
             ('' if self.version.is_bible else '. ' + self.question)
 
     # This will be overwritten by get_verse_statuses_bulk
@@ -686,9 +685,9 @@ class UserVerseStatus(models.Model):
     @cached_property
     def short_title(self):
         if self.version.is_bible:
-            return self.reference
+            return self.localized_reference
         else:
-            return self.version.short_name + " - " + self.reference
+            return self.version.short_name + " - " + self.localized_reference
 
     @cached_property
     def item_name(self):
@@ -720,32 +719,32 @@ class UserVerseStatus(models.Model):
         return min(10, int(math.floor((self.strength / memorymodel.LEARNT) * 10)))
 
     @cached_property
-    def passage_reference(self):
+    def passage_localized_reference(self):
         """
-        Returns the reference for the whole passage this UVS belongs to.
+        Returns the localized reference for the whole passage this UVS belongs to.
         """
         if not self.is_in_passage():
             return None
         verse_choices = self.set_verse_choices
-        return pretty_passage_ref(verse_choices[0].reference,
-                                  verse_choices[-1].reference)
+        return pretty_passage_ref(verse_choices[0].localized_reference,
+                                  verse_choices[-1].localized_reference)
 
     @cached_property
     def set_verse_choices(self):
         return list(self.verse_set.verse_choices.all())
 
     @cached_property
-    def section_reference(self):
+    def section_localized_reference(self):
         """
-        Returns the reference for the section in the passage this UVS belongs to.
+        Returns the localized reference for the section in the passage this UVS belongs to.
         """
         if not self.is_in_passage():
             return None
 
         section = self.get_section_verse_choices()
         if section is not None:
-            return pretty_passage_ref(section[0].reference,
-                                      section[-1].reference)
+            return pretty_passage_ref(section[0].localized_reference,
+                                      section[-1].localized_reference)
         return None  # Shouldn't get here
 
     def get_section_verse_choices(self):
@@ -755,22 +754,22 @@ class UserVerseStatus(models.Model):
         # Now we've got to find which one we are in:
         for section in sections:
             for vc in section:
-                if vc.reference == self.reference:
+                if vc.localized_reference == self.localized_reference:
                     return section
 
     # This will be overwritten by get_verse_statuses_bulk
     @cached_property
     def suggestions(self):
-        return self.version.get_suggestions_by_reference(self.reference)
+        return self.version.get_suggestions_by_localized_reference(self.localized_reference)
 
     def __str__(self):
-        return "%s, %s" % (self.reference, self.version.slug)
+        return "%s, %s" % (self.localized_reference, self.version.slug)
 
     def __repr__(self):
         return '<UserVerseStatus %s>' % self
 
     class Meta:
-        unique_together = [('for_identity', 'verse_set', 'reference', 'version')]
+        unique_together = [('for_identity', 'verse_set', 'localized_reference', 'version')]
         verbose_name_plural = "User verse statuses"
 
 
@@ -778,7 +777,7 @@ class InvalidVerseReference(ValueError):
     pass
 
 
-class Reference(object):
+class LocalizedReference(object):
     def __init__(self, book, chapter_number, verse_number):
         self.book = book
         self.chapter_number = chapter_number
@@ -790,17 +789,17 @@ class Reference(object):
                 self.verse_number == other.verse_number)
 
     def __repr__(self):
-        return "<Reference %s %d:%d>" % (self.book, self.chapter_number, self.verse_number)
+        return "<LocalizedReference %s %d:%d>" % (self.book, self.chapter_number, self.verse_number)
 
 
-def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE,
+def parse_ref(localized_reference, version, max_length=MAX_VERSE_QUERY_SIZE,
               return_verses=True):
     """
-    Takes a reference and returns the verses referred to in a list.
+    Takes a localized reference and returns the verses referred to in a list.
 
     If return_verses is False, then the version is not needed, more lenient
-    checking is done (the input is trusted), and a Reference object is returned
-    instead, or a two tuple (start Reference, end Reference)
+    checking is done (the input is trusted), and a LocalizedReference object is returned
+    instead, or a two tuple (start LocalizedReference, end LocalizedReference)
     """
     # This function is strict, and expects reference in normalised format.
     # Frontend function should deal with tolerance, to ensure that VerseChoice
@@ -808,15 +807,15 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE,
 
     # This function will InvalidVerseReference if a verse is not matched.
 
-    if ':' not in reference:
+    if ':' not in localized_reference:
         # chapter only
         try:
             # If there is a space in name, we need this:
-            if reference in BIBLE_BOOKS_DICT:
+            if localized_reference in BIBLE_BOOKS_DICT:
                 # no chapter.
                 raise ValueError()
             # If no, space, the following will weed out references without a chapter
-            book, chapter = reference.rsplit(' ', 1)
+            book, chapter = localized_reference.rsplit(' ', 1)
         except ValueError:
             raise InvalidVerseReference("Reference should provide at least book name and chapter number")
         if book not in BIBLE_BOOKS_DICT:
@@ -834,18 +833,18 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE,
                           .order_by('bible_verse_number')
                           )
         else:
-            retval = Reference(book, chapter_number, None)
+            retval = LocalizedReference(book, chapter_number, None)
     else:
-        parts = reference.rsplit('-', 1)
+        parts = localized_reference.rsplit('-', 1)
         if len(parts) == 1:
             # e.g. Genesis 1:1
             if return_verses:
-                retval = list(version.verse_set.filter(reference=reference,
+                retval = list(version.verse_set.filter(localized_reference=localized_reference,
                                                        missing=False))
             else:
-                book, rest = reference.rsplit(' ', 1)
+                book, rest = localized_reference.rsplit(' ', 1)
                 ch_num, v_num = rest.split(':', 1)
-                retval = Reference(book, int(ch_num), int(v_num))
+                retval = LocalizedReference(book, int(ch_num), int(v_num))
         else:
             # e.g. Genesis 1:1-2
             book, start = parts[0].rsplit(' ', 1)
@@ -894,13 +893,13 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE,
                 # able to do things like 'John 5:3-4' even if 'John 5:4' is
                 # missing in the current version. We just miss out the missing
                 # verses when creating the list.
-                vs = version.verse_set.filter(reference__in=[ref_start, ref_end])
+                vs = version.verse_set.filter(localized_reference__in=[ref_start, ref_end])
                 try:
-                    verse_start = [v for v in vs if v.reference == ref_start][0]
+                    verse_start = [v for v in vs if v.localized_reference == ref_start][0]
                 except IndexError:
                     raise InvalidVerseReference("Can't find  '%s'" % ref_start)
                 try:
-                    verse_end = [v for v in vs if v.reference == ref_end][0]
+                    verse_end = [v for v in vs if v.localized_reference == ref_end][0]
                 except IndexError:
                     raise InvalidVerseReference("Can't find  '%s'" % ref_end)
 
@@ -914,12 +913,12 @@ def parse_ref(reference, version, max_length=MAX_VERSE_QUERY_SIZE,
                                                        bible_verse_number__lte=verse_end.bible_verse_number,
                                                        missing=False))
             else:
-                retval = (Reference(book, start_chapter, start_verse),
-                          Reference(book, end_chapter, end_verse))
+                retval = (LocalizedReference(book, start_chapter, start_verse),
+                          LocalizedReference(book, end_chapter, end_verse))
 
     if return_verses:
         if len(retval) == 0:
-            raise InvalidVerseReference("No verses matched '%s'." % reference)
+            raise InvalidVerseReference("No verses matched '%s'." % localized_reference)
 
         if len(retval) > max_length:
             raise InvalidVerseReference("References that span more than %d verses are not allowed in this context." % max_length)
@@ -963,8 +962,8 @@ def ensure_text(verses):
 
     for v in verses_to_check:
         if v.text_saved == '' and not v.missing:
-            refs_missing_text[v.version.slug].append(v.reference)
-            verse_dict[v.version.slug, v.reference] = v
+            refs_missing_text[v.version.slug].append(v.localized_reference)
+            verse_dict[v.version.slug, v.localized_reference] = v
 
     # Now do the fetches
     for version_slug, missing_refs in refs_missing_text.items():
@@ -981,7 +980,7 @@ def ensure_text(verses):
     # Check that we fixed everything
     for v in verses_to_check:
         if v.text_saved == '' and not v.missing:
-            logger.warning("Marking %s %s as missing", v.version.slug, v.reference)
+            logger.warning("Marking %s %s as missing", v.version.slug, v.localized_reference)
             v.missing = True
             v.save()
 
@@ -1003,14 +1002,14 @@ def pretty_passage_ref(start_ref, end_ref):
 
 def get_passage_sections(verse_list, breaks):
     """
-    Given a list of objects with a correct 'reference' attribute, and a comma
+    Given a list of objects with a correct 'localized_reference' attribute, and a comma
     separated list of 'break definitions', each of which could be <verse_number>
     or <chapter_number>:<verse_number>, return the list in sections.
     """
     # Since the input has been sanitised, we can do parsing without needing DB
     # queries.
 
-    # First need to parse 'breaks' into a list of References.
+    # First need to parse 'breaks' into a list of LocalizedReferences.
 
     if len(verse_list) == 0:
         return []
@@ -1021,7 +1020,7 @@ def get_passage_sections(verse_list, breaks):
     break_list = []
 
     # First reference provides the context for the breaks.
-    first_ref = parse_ref(verse_list[0].reference, None, return_verses=False)
+    first_ref = parse_ref(verse_list[0].localized_reference, None, return_verses=False)
     if isinstance(first_ref, tuple):
         first_ref = first_ref[0]
 
@@ -1036,12 +1035,12 @@ def get_passage_sections(verse_list, breaks):
             verse_number = int(verse_number)
         else:
             verse_number = int(b)
-        break_list.append(Reference(book, chapter_number, verse_number))
+        break_list.append(LocalizedReference(book, chapter_number, verse_number))
 
     sections = []
     current_section = []
     for v in verse_list:
-        ref = parse_ref(v.reference, None, return_verses=False)
+        ref = parse_ref(v.localized_reference, None, return_verses=False)
         if isinstance(ref, tuple):
             ref = ref[0]
         if ref in break_list and len(current_section) > 0:
@@ -1053,9 +1052,9 @@ def get_passage_sections(verse_list, breaks):
     return sections
 
 
-def parse_as_bible_reference(query, allow_whole_book=True, allow_whole_chapter=True):
+def parse_as_bible_localized_reference(query, allow_whole_book=True, allow_whole_chapter=True):
     """
-    Returns a normalised Bible reference if the query looks like one,
+    Returns a normalised Bible localized reference if the query looks like one,
     or None otherwise.
 
     Pass allow_whole_book=False if queries that are just book names should be rejected.
@@ -1084,10 +1083,10 @@ def parse_as_bible_reference(query, allow_whole_book=True, allow_whole_chapter=T
         if not allow_whole_chapter and m.groups()[1] is None:
             return None
         else:
-            return normalise_reference(query)
+            return normalise_localized_reference(query)
     else:
         if allow_whole_book and query in BIBLE_BOOK_ABBREVIATIONS:
-            return normalise_reference(query)
+            return normalise_localized_reference(query)
 
     return None
 
@@ -1108,9 +1107,9 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
     if query == '':
         raise InvalidVerseReference("Please enter a query term or reference")
 
-    reference = parse_as_bible_reference(query, allow_whole_book=not allow_searches)
-    if reference is not None:
-        return [ComboVerse(reference, parse_ref(reference, version, max_length=max_length))]
+    localized_reference = parse_as_bible_localized_reference(query, allow_whole_book=not allow_searches)
+    if localized_reference is not None:
+        return [ComboVerse(localized_reference, parse_ref(localized_reference, version, max_length=max_length))]
 
     if not allow_searches:
         raise InvalidVerseReference("Verse reference not recognised")
@@ -1121,7 +1120,7 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
         return searcher(version, query)
 
     results = Verse.objects.text_search(query, version, limit=11)
-    return [ComboVerse(r.reference, [r]) for r in results]
+    return [ComboVerse(r.localized_reference, [r]) for r in results]
 
 
 def get_whole_book(book_name, version, ensure_text_present=True):
@@ -1133,7 +1132,7 @@ def get_whole_book(book_name, version, ensure_text_present=True):
     return retval
 
 
-def normalise_reference(query):
+def normalise_localized_reference(query):
     # Replace 'v' or '.' with ':'
     query = re.sub('(?<![A-Za-z])(v|\.)(?![A-Za-z])', ':', query)
     # Remove spaces around ':'

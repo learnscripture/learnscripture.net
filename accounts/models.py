@@ -166,7 +166,7 @@ class Account(AbstractBaseUser):
         return self.username
 
     # Main business logic
-    def award_action_points(self, reference, text,
+    def award_action_points(self, localized_reference, text,
                             old_memory_stage, action_change,
                             action_stage, accuracy):
         if action_stage != StageType.TEST:
@@ -180,12 +180,12 @@ class Account(AbstractBaseUser):
         else:
             reason = ScoreReason.VERSE_TESTED
         points = max_points * accuracy
-        action_logs.append(self.add_points(points, reason, accuracy=accuracy, reference=reference))
+        action_logs.append(self.add_points(points, reason, accuracy=accuracy, localized_reference=localized_reference))
 
         if accuracy == 1:
             action_logs.append(self.add_points(points * Scores.PERFECT_BONUS_FACTOR,
                                                ScoreReason.PERFECT_TEST_BONUS,
-                                               reference=reference,
+                                               localized_reference=localized_reference,
                                                accuracy=accuracy))
             # At least one subscriber to scored_100_percent relies on action_logs
             # to be created in order to do job. In context of tests, this means
@@ -196,7 +196,7 @@ class Account(AbstractBaseUser):
             action_logs.append(self.add_points(word_count * Scores.POINTS_PER_WORD *
                                                Scores.VERSE_LEARNT_BONUS,
                                                ScoreReason.VERSE_LEARNT,
-                                               reference=reference,
+                                               localized_reference=localized_reference,
                                                accuracy=accuracy))
             verse_finished.send(sender=self)
 
@@ -205,13 +205,13 @@ class Account(AbstractBaseUser):
 
         return action_logs
 
-    def add_points(self, points, reason, accuracy=None, reference=""):
+    def add_points(self, points, reason, accuracy=None, localized_reference=""):
         # Need to refresh 'total_score' each time
         points = math.floor(points)
         current_points = TotalScore.objects.get(account_id=self.id).points
         action_log = self.action_logs.create(points=points,
                                              reason=reason,
-                                             reference=reference,
+                                             localized_reference=localized_reference,
                                              accuracy=accuracy)
         # Change cached object to reflect DB, which has been
         # updated via a SQL UPDATE for max correctness.
@@ -470,16 +470,16 @@ class Identity(models.Model):
         existing_uvss = set(self.verse_statuses.filter(verse_set=verse_set, version=version,
                                                        ignored=False))
 
-        uvss_dict = dict([(uvs.reference, uvs) for uvs in existing_uvss])
+        uvss_dict = dict([(uvs.localized_reference, uvs) for uvs in existing_uvss])
 
         if verse_set.is_selection:
             # Prefer existing UVSs of different versions if they are used.
             other_versions = self.verse_statuses.filter(
                 verse_set__set_type=VerseSetType.SELECTION,
                 ignored=False,
-                reference__in=[vc.reference for vc in vc_list])\
+                localized_reference__in=[vc.localized_reference for vc in vc_list])\
                 .select_related('version')
-            other_version_dict = dict([(uvs.reference, uvs) for uvs in other_versions])
+            other_version_dict = dict([(uvs.localized_reference, uvs) for uvs in other_versions])
         elif verse_set.is_passage:
             # If they are already learning this passage in a different version,
             # use that version.
@@ -500,33 +500,33 @@ class Identity(models.Model):
 
         # Want to preserve order of verse_set, so iterate like this:
         for vc in vc_list:
-            if vc.reference in uvss_dict:
+            if vc.localized_reference in uvss_dict:
                 # Save work - create_verse_status is expensive
-                out.append(uvss_dict[vc.reference])
+                out.append(uvss_dict[vc.localized_reference])
             else:
-                if vc.reference in other_version_dict:
-                    use_version = other_version_dict[vc.reference].version
+                if vc.localized_reference in other_version_dict:
+                    use_version = other_version_dict[vc.localized_reference].version
                 else:
                     use_version = version
                 # Otherwise we set the version to the chosen one
-                new_uvs = self.create_verse_status(vc.reference, verse_set, use_version)
+                new_uvs = self.create_verse_status(vc.localized_reference, verse_set, use_version)
                 if new_uvs is not None:
                     out.append(new_uvs)
 
         verse_set_chosen.send(sender=verse_set, chosen_by=self.account)
         return out
 
-    def add_verse_choice(self, reference, version=None):
+    def add_verse_choice(self, localized_reference, version=None):
         if version is None:
             version = self.default_bible_version
 
-        existing = list(self.verse_statuses.filter(reference=reference,
+        existing = list(self.verse_statuses.filter(localized_reference=localized_reference,
                                                    verse_set__isnull=True,
                                                    ignored=False))
         if existing:
             return existing[0]
         else:
-            return self.create_verse_status(reference, None, version)
+            return self.create_verse_status(localized_reference, None, version)
 
     def add_catechism(self, catechism):
         """
@@ -534,7 +534,7 @@ class Identity(models.Model):
         """
         base_uvs_query = self.verse_statuses.filter(version=catechism)
         existing_uvss = base_uvs_query
-        existing_refs = set(uvs.reference for uvs in existing_uvss)
+        existing_refs = set(uvs.localized_reference for uvs in existing_uvss)
         # Some might be set to 'ignored'. Need to fix that.
         if any(uvs.ignored for uvs in existing_uvss):
             base_uvs_query.update(ignored=False)
@@ -544,16 +544,16 @@ class Identity(models.Model):
         new_uvss = [
             UserVerseStatus(
                 for_identity=self,
-                reference=qapair.reference,
+                localized_reference=qapair.localized_reference,
                 text_order=qapair.order,
                 version=catechism,
                 added=timezone.now()
             )
-            for qapair in qapairs if qapair.reference not in existing_refs]
+            for qapair in qapairs if qapair.localized_reference not in existing_refs]
         UserVerseStatus.objects.bulk_create(new_uvss)
         return base_uvs_query.all().order_by('text_order')  # fresh QuerySet
 
-    def record_verse_action(self, reference, version_slug, stage_type, accuracy=None):
+    def record_verse_action(self, localized_reference, version_slug, stage_type, accuracy=None):
         """
         Records an action such as 'READ' or 'TESTED' against a verse.
         Returns an ActionChange object.
@@ -561,7 +561,7 @@ class Identity(models.Model):
         # We keep this separate from award_action_points because it needs
         # different info, and it is easier to test with its current API.
 
-        s = self.verse_statuses.filter(reference=reference,
+        s = self.verse_statuses.filter(localized_reference=localized_reference,
                                        version__slug=version_slug).select_related('version')
 
         if len(s) == 0:
@@ -608,15 +608,15 @@ class Identity(models.Model):
             s.filter(first_seen__isnull=True).update(first_seen=now)
             return ActionChange()
 
-    def award_action_points(self, reference, text, old_memory_stage, action_change,
+    def award_action_points(self, localized_reference, text, old_memory_stage, action_change,
                             action_stage, accuracy):
         if self.account_id is None:
             return []
 
-        return self.account.award_action_points(reference, text, old_memory_stage, action_change,
+        return self.account.award_action_points(localized_reference, text, old_memory_stage, action_change,
                                                 action_stage, accuracy)
 
-    def change_version(self, reference, version_slug, verse_set_id):
+    def change_version(self, localized_reference, version_slug, verse_set_id):
         """
         Changes the version used for a choice in a certain verse set.
 
@@ -648,21 +648,21 @@ class Identity(models.Model):
             # Look for verse choices in this VerseSet, but not any others.
             start_qs = self.verse_statuses.filter(verse_set=verse_set)
             verse_choices = verse_set.verse_choices.all()
-            needed_uvss = [(verse_set, vc.reference) for vc in verse_choices]
+            needed_uvss = [(verse_set, vc.localized_reference) for vc in verse_choices]
 
         else:
-            # Look for verse choices for same reference, but not for 'passage' set types
-            start_qs = self.verse_statuses.filter(reference=reference).select_related('verse_set')
+            # Look for verse choices for same localized_reference, but not for 'passage' set types
+            start_qs = self.verse_statuses.filter(localized_reference=localized_reference).select_related('verse_set')
             start_qs = start_qs.exclude(verse_set__set_type=VerseSetType.PASSAGE)
             # Need a UVS for each set the user already has a UVS for.
-            needed_uvss = [(uvs.verse_set, reference) for uvs in start_qs]
+            needed_uvss = [(uvs.verse_set, localized_reference) for uvs in start_qs]
 
         # 'old' = ones with old, incorrect version
         old = start_qs.exclude(version__slug=version_slug)
         # 'correct' = ones with newly selected, correct version
         correct_version = start_qs.filter(version__slug=version_slug)
 
-        old_uvs_ids = [(uvs.reference, uvs.id) for uvs in old]
+        old_uvs_ids = [(uvs.localized_reference, uvs.id) for uvs in old]
 
         # For each VerseChoice, we need to create a new UserVerseStatus if
         # one with new version doesn't exist, or update 'ignored' if it
@@ -671,21 +671,21 @@ class Identity(models.Model):
         correct_version.update(ignored=False)
 
         # Now we need to see if we need to create any new UserVerseStatuses.
-        missing = set(needed_uvss) - set([(uvs.verse_set, uvs.reference)
+        missing = set(needed_uvss) - set([(uvs.verse_set, uvs.localized_reference)
                                           for uvs in correct_version_l])
         if missing:
             version = TextVersion.objects.get(slug=version_slug)
             for (vs, ref) in missing:
-                self.create_verse_status(reference=ref,
+                self.create_verse_status(localized_reference=ref,
                                          verse_set=vs,
                                          version=version)
 
         # Return value:
-        final_correct_uvss = {uvs.reference: uvs for uvs in correct_version.all()}
+        final_correct_uvss = {uvs.localized_reference: uvs for uvs in correct_version.all()}
         retval = {}
-        for reference, uvs_id in old_uvs_ids:
-            if reference in final_correct_uvss:
-                retval[uvs_id] = final_correct_uvss[reference].id
+        for localized_reference, uvs_id in old_uvs_ids:
+            if localized_reference in final_correct_uvss:
+                retval[uvs_id] = final_correct_uvss[localized_reference].id
             else:
                 # No corresponding UVS, due to Verse.missing=True
                 retval[uvs_id] = None
@@ -695,7 +695,7 @@ class Identity(models.Model):
             # implies Verse.missing==True for the verses in the destination
             # version. In this case, we effectively cancel the 'change_version'
             # request.
-            return {uvs_id: uvs_id for reference, uvs_id in old_uvs_ids}
+            return {uvs_id: uvs_id for localized_reference, uvs_id in old_uvs_ids}
         else:
             # creation of new UVS objects has succeeded, so 'remove' the old ones:
             # If they had no test data, it is safe to delete, and this keeps things
@@ -729,38 +729,38 @@ class Identity(models.Model):
         suggestion_d = {}
         for version_id, uvs_list in by_version.items():
             version = uvs_list[0].version
-            refs = [uvs.reference for uvs in uvs_list]
-            for ref, text in version.get_text_by_reference_bulk(refs).items():
+            refs = [uvs.localized_reference for uvs in uvs_list]
+            for ref, text in version.get_text_by_localized_reference_bulk(refs).items():
                 # Bibles only here
                 texts[version_id, ref] = text
-            for ref, qapair in version.get_qapairs_by_reference_bulk(refs).items():
+            for ref, qapair in version.get_qapairs_by_localized_reference_bulk(refs).items():
                 # catechisms only here
                 qapairs[version_id, ref] = qapair
-            for ref, suggestions in version.get_suggestions_by_reference_bulk(refs).items():
+            for ref, suggestions in version.get_suggestions_by_localized_reference_bulk(refs).items():
                 # Bibles and catechsims here
                 suggestion_d[version_id, ref] = suggestions
 
         # Assign texts back to uvs:
         for uvs in retval.values():
-            text = texts.get((uvs.version_id, uvs.reference), None)
+            text = texts.get((uvs.version_id, uvs.localized_reference), None)
             if text is not None:
                 # Bible
                 uvs.scoring_text = text
-                uvs.title_text = uvs.reference
+                uvs.title_text = uvs.localized_reference
 
-            qapair = qapairs.get((uvs.version_id, uvs.reference), None)
+            qapair = qapairs.get((uvs.version_id, uvs.localized_reference), None)
             if qapair is not None:
                 # Catechism
                 question, answer = qapair.question, qapair.answer
                 uvs.scoring_text = answer
-                uvs.title_text = uvs.reference + ". " + question
-            uvs.suggestions = suggestion_d.get((uvs.version_id, uvs.reference), [])
+                uvs.title_text = uvs.localized_reference + ". " + question
+            uvs.suggestions = suggestion_d.get((uvs.version_id, uvs.localized_reference), [])
 
         return retval
 
-    def create_verse_status(self, reference, verse_set, version):
+    def create_verse_status(self, localized_reference, verse_set, version):
         try:
-            verse_list = version.get_verse_list(reference)
+            verse_list = version.get_verse_list(localized_reference)
         except InvalidVerseReference:
             # This can happen if Verse.missing==True for this version.
             return
@@ -771,7 +771,7 @@ class Identity(models.Model):
         # create_verse_status will get slightly increasing values of 'added',
         # allowing us to preserve order.
         uvs, new = self.verse_statuses.get_or_create(verse_set=verse_set,
-                                                     reference=reference,
+                                                     localized_reference=localized_reference,
                                                      version=version,
                                                      defaults=dict(text_order=text_order,
                                                                    added=timezone.now()
@@ -779,7 +779,7 @@ class Identity(models.Model):
                                                      )
 
         dirty = False
-        same_verse_set = self.verse_statuses.filter(reference=reference,
+        same_verse_set = self.verse_statuses.filter(localized_reference=localized_reference,
                                                     version=version).exclude(id=uvs.id)
 
         if same_verse_set and new:
@@ -805,19 +805,19 @@ class Identity(models.Model):
 
         return uvs
 
-    def cancel_learning(self, references):
+    def cancel_learning(self, localized_references):
         """
         Cancel learning some verses.
 
         Ignores VerseChoices that belong to passage sets.
         """
         # Not used for passages verse sets.
-        qs = self.verse_statuses.filter(reference__in=references)
+        qs = self.verse_statuses.filter(localized_reference__in=localized_references)
         qs = qs.exclude(verse_set__set_type=VerseSetType.PASSAGE)
         qs.update(ignored=True)
 
-    def reset_progress(self, reference, verse_set_id, version_slug):
-        qs = self.verse_statuses.filter(reference=reference,
+    def reset_progress(self, localized_reference, verse_set_id, version_slug):
+        qs = self.verse_statuses.filter(localized_reference=localized_reference,
                                         version__slug=version_slug)
         if verse_set_id is None:
             qs = qs.filter(verse_set__isnull=True)
@@ -834,9 +834,9 @@ class Identity(models.Model):
         retval = []
         seen_refs = set()
         for uvs in uvs_set:
-            if uvs.reference in seen_refs:
+            if uvs.localized_reference in seen_refs:
                 continue
-            seen_refs.add(uvs.reference)
+            seen_refs.add(uvs.localized_reference)
             retval.append(uvs)
         return retval
 
@@ -846,9 +846,9 @@ class Identity(models.Model):
         seen_refs = set()
         for uvs in uvs_set:
             if uvs.verse_set_id is None:
-                if uvs.reference in seen_refs:
+                if uvs.localized_reference in seen_refs:
                     continue
-                seen_refs.add(uvs.reference)
+                seen_refs.add(uvs.localized_reference)
             retval.append(uvs)
         return retval
 
@@ -1011,8 +1011,8 @@ class Identity(models.Model):
                 .filter(memory_stage__gte=MemoryStage.TESTED)
                 .order_by('text_order'))
 
-    def verse_statuses_for_ref_and_version(self, reference, version_slug):
-        return self.verse_statuses.filter(reference=reference,
+    def verse_statuses_for_ref_and_version(self, localized_reference, version_slug):
+        return self.verse_statuses.filter(localized_reference=localized_reference,
                                           version__slug=version_slug,
                                           ignored=False)
 
@@ -1068,24 +1068,24 @@ class Identity(models.Model):
 
         return VerseSet.objects.filter(id__in=ids).order_by('name')
 
-    def which_verses_started(self, references):
+    def which_verses_started(self, localized_references):
         """
-        Given a list of references, returns the ones that the user has started
+        Given a list of localized_references, returns the ones that the user has started
         to learn.
         """
-        return set(uvs.reference
-                   for uvs in self.verse_statuses.filter(reference__in=references,
+        return set(uvs.localized_reference
+                   for uvs in self.verse_statuses.filter(localized_reference__in=localized_references,
                                                          ignored=False,
                                                          memory_stage__gte=MemoryStage.TESTED))
 
-    def which_in_learning_queue(self, references):
+    def which_in_learning_queue(self, localized_references):
         """
-        Given a list of references, returns the ones that are in the user's
+        Given a list of localized references, returns the ones that are in the user's
         queue for learning.
         """
-        return set(uvs.reference
+        return set(uvs.localized_reference
                    for uvs in (self.bible_verse_statuses_for_learning_qs()
-                               .filter(reference__in=references)))
+                               .filter(localized_reference__in=localized_references)))
 
     def passages_for_revising(self):
         statuses = self.verse_statuses.filter(verse_set__set_type=VerseSetType.PASSAGE,

@@ -34,7 +34,7 @@ class UserVersesPageTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         for i in range(1, 7):
             self.assertTextPresent("Psalm 23:%d" % i)
 
-        self.click('a.btn[data-reference="Psalm 23:2"]')
+        self.click('a.btn[data-localized-reference="Psalm 23:2"]')
 
         # 'Practise verse' button
         self.assertEqual(self.get_element_attribute('input[name="reviseverse"]', 'value'),
