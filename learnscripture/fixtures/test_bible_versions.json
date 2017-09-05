@@ -5,7 +5,8 @@
     "fields": {
         "full_name": "King James Version",
         "slug": "KJV",
-        "short_name": "KJV"
+        "short_name": "KJV",
+        "language_code": "en"
     }
 },
 {
@@ -14,7 +15,8 @@
     "fields": {
         "full_name": "New English Translation",
         "slug": "NET",
-        "short_name": "NET"
+        "short_name": "NET",
+        "language_code": "en"
     }
 }
 ]

@@ -17,6 +17,7 @@ from learnscripture.datastructures import make_choices
 from learnscripture.utils.iterators import intersperse
 
 from .constants import BIBLE_BOOK_ABBREVIATIONS, BIBLE_BOOKS, BIBLE_BOOKS_DICT
+from .languages import DEFAULT_LANGUAGE, LANGUAGE_CHOICES
 from .fields import VectorField
 from .services import get_fetch_service, get_search_service
 from .textutils import split_into_words
@@ -76,6 +77,9 @@ class TextVersion(models.Model):
     url = models.URLField(default="", blank=True)
     text_type = models.PositiveSmallIntegerField(choices=TextType.choice_list,
                                                  default=TextType.BIBLE)
+    language_code = models.CharField(max_length=2, blank=False,
+                                     choices=LANGUAGE_CHOICES,
+                                     default=DEFAULT_LANGUAGE.code)
     description = models.TextField(blank=True)
 
     public = models.BooleanField(default=True)
