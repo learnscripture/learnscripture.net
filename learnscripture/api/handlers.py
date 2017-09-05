@@ -138,7 +138,7 @@ class VersesToLearnHandler(ApiView):
         'id',
         'memory_stage', 'strength', 'first_seen',
         ('verse_set', ['id', 'set_type', 'name', 'get_absolute_url']),
-        'reference',
+        'localized_reference',
         'needs_testing',
         'text_order',
         ('version', ['full_name', 'short_name', 'slug', 'url', 'text_type']),
@@ -205,14 +205,14 @@ class ActionCompleteHandler(ApiView):
         else:
             accuracy = None
 
-        action_change = identity.record_verse_action(uvs.reference, uvs.version.slug,
+        action_change = identity.record_verse_action(uvs.localized_reference, uvs.version.slug,
                                                      stage, accuracy)
 
         if action_change is None:
             # implies client error
             return rc.BAD_REQUEST
 
-        action_logs = identity.award_action_points(uvs.reference, uvs.scoring_text,
+        action_logs = identity.award_action_points(uvs.localized_reference, uvs.scoring_text,
                                                    old_memory_stage,
                                                    action_change, stage, accuracy)
 
@@ -237,8 +237,8 @@ class CancelLearningVerseHandler(ApiView):
     @require_preexisting_identity_m
     def post(self, request):
         verse_status = get_verse_status(request.POST)
-        reference = verse_status['reference']
-        request.identity.cancel_learning([reference])
+        localized_reference = verse_status['localized_reference']
+        request.identity.cancel_learning([localized_reference])
         session.verse_status_cancelled(request, verse_status['id'])
         return {}
 
@@ -257,7 +257,7 @@ class ResetProgressHandler(ApiView):
     @require_preexisting_identity_m
     def post(self, request):
         verse_status = get_verse_status(request.POST)
-        request.identity.reset_progress(verse_status['reference'],
+        request.identity.reset_progress(verse_status['localized_reference'],
                                         get_verse_set_id(verse_status),
                                         verse_status['version']['slug'])
         return {}
@@ -269,7 +269,7 @@ class ChangeVersionHandler(ApiView):
     def post(self, request):
         verse_status = get_verse_status(request.POST)
         verse_set_id = get_verse_set_id(verse_status)
-        reference = verse_status['reference']
+        localized_reference = verse_status['localized_reference']
         new_version_slug = request.POST['new_version_slug']
         # There is a bug here for the case where:
         # - user is learning a passage set
@@ -280,7 +280,7 @@ class ChangeVersionHandler(ApiView):
         # This is not easy to fix, due to needing to replace a set of items
         # in the session learn queue with a longer set of items.
 
-        replacements = request.identity.change_version(reference,
+        replacements = request.identity.change_version(localized_reference,
                                                        new_version_slug,
                                                        verse_set_id)
         session.replace_user_verse_statuses(request, replacements)
@@ -400,7 +400,7 @@ class VerseFind(ApiView):
 
         # Can't get 'fields' to work properly for this case, so pack into
         # dictionaries.
-        retval = [dict(reference=r.reference,
+        retval = [dict(localized_reference=r.localized_reference,
                        text=r.text,
                        verses=r.verses)
                   for r in results]
@@ -409,7 +409,7 @@ class VerseFind(ApiView):
             verses2 = []
             for v in item['verses']:
                 verses2.append(dict(
-                    reference=v.reference,
+                    localized_reference=v.localized_reference,
                     text=v.text,
                     html_text=html_format_text(v),
                     book_number=v.book_number,

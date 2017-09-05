@@ -92,7 +92,7 @@
           {% if not vs.is_passage and vs.verse_choices.all %}
             <p>Includes the following verses, {{ vs.verse_choices.all|length }} in total:<br/>
               {% for v in vs.verse_choices.all|slice:"0:10" %}
-                {{ v.reference }}{% if not forloop.last %}, {% endif %}
+                {{ v.localized_reference }}{% if not forloop.last %}, {% endif %}
               {% endfor %}
               {% if vs.verse_choices.all|length > 10 %}…and more.{% endif %}
             </p>
@@ -119,14 +119,14 @@
        <div class="actionset">
        <form action="" method="POST">
        {% csrf_token %}
-       <input type="hidden" name="reference" value="[[>reference]]">
+       <input type="hidden" name="localized_reference" value="[[>localized_reference]]">
        <input type="hidden" name="version_slug" value="[[>version_slug]]">
        <input type="submit" class="btn primary needs-preferences" value="Learn">
        </form>
        <div class="verselist">
        [[for verses]]
        <div class="verse">
-       <span class="versenumber">[[>reference]]</span> [[:html_text]]
+       <span class="versenumber">[[>localized_reference]]</span> [[:html_text]]
        </div>
        [[/for]]
        </div>

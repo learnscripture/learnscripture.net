@@ -49,7 +49,7 @@ class RequireExampleVerseSetsMixin(object):
                 set_order = i + 1
                 vs.verse_choices.create(
                     set_order=set_order,
-                    reference=ref
+                    localized_reference=ref
                 )
 
 
@@ -58,36 +58,36 @@ class VerseTests(TestBase):
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
 
     def test_last_verse(self):
-        v = Verse.objects.get(reference='Psalm 23:6', version__slug='KJV')
+        v = Verse.objects.get(localized_reference='Psalm 23:6', version__slug='KJV')
         self.assertTrue(v.is_last_verse_in_chapter())
 
-        v2 = Verse.objects.get(reference='Psalm 23:5', version__slug='KJV')
+        v2 = Verse.objects.get(localized_reference='Psalm 23:5', version__slug='KJV')
         self.assertFalse(v2.is_last_verse_in_chapter())
 
     def test_mark_missing(self):
         version = TextVersion.objects.get(slug='NET')
         # Sanity check:
         self.assertEqual(
-            version.verse_set.get(reference="John 3:16").missing,
+            version.verse_set.get(localized_reference="John 3:16").missing,
             False)
 
         i = Identity.objects.create()
         i.create_verse_status("John 3:16", None, version)
         self.assertEqual(
-            i.verse_statuses.filter(reference="John 3:16",
+            i.verse_statuses.filter(localized_reference="John 3:16",
                                     version=version).count(),
             1)
 
         # Now remove the verse
-        Verse.objects.get(reference='John 3:16', version=version).mark_missing()
+        Verse.objects.get(localized_reference='John 3:16', version=version).mark_missing()
 
         # Should have change the Verse object
         self.assertEqual(
-            version.verse_set.get(reference="John 3:16").missing,
+            version.verse_set.get(localized_reference="John 3:16").missing,
             True)
         # ...and all UserVerseStatus objects
         self.assertEqual(
-            i.verse_statuses.filter(reference="John 3:16",
+            i.verse_statuses.filter(localized_reference="John 3:16",
                                     version=version).count(),
             0)
 
@@ -103,17 +103,17 @@ class VersionTests(TestBase):
         version.word_suggestion_data.delete()
 
         def t(ref):
-            return version.verse_set.get(reference=ref).suggestion_text
+            return version.verse_set.get(localized_reference=ref).suggestion_text
         create_word_suggestion_data(version=version,
-                                    reference='Genesis 1:1',
+                                    localized_reference='Genesis 1:1',
                                     text=t('Genesis 1:1'),
                                     suggestions=self._gen_1_1_suggestions())
         create_word_suggestion_data(version=version,
-                                    reference='Genesis 1:2',
+                                    localized_reference='Genesis 1:2',
                                     text=t('Genesis 1:2'),
                                     suggestions=self._gen_1_2_suggestions())
         create_word_suggestion_data(version=version,
-                                    reference='Genesis 1:3',
+                                    localized_reference='Genesis 1:3',
                                     text=t('Genesis 1:3'),
                                     suggestions=self._gen_1_3_suggestions())
 
@@ -131,21 +131,21 @@ class VersionTests(TestBase):
 
     def test_chapter(self):
         version = TextVersion.objects.get(slug='KJV')
-        self.assertEqual(list(version.verse_set.filter(reference__startswith='Genesis 1:')),
+        self.assertEqual(list(version.verse_set.filter(localized_reference__startswith='Genesis 1:')),
                          version.get_verse_list("Genesis 1"))
 
     def test_chapter_verse(self):
         version = TextVersion.objects.get(slug='KJV')
-        self.assertEqual([Verse.objects.get(reference="Genesis 1:2", version=version)],
+        self.assertEqual([Verse.objects.get(localized_reference="Genesis 1:2", version=version)],
                          version.get_verse_list("Genesis 1:2"))
 
     def test_verse_range(self):
         version = TextVersion.objects.get(slug='KJV')
         self.assertEqual(
             [
-                version.verse_set.get(reference="Genesis 1:2"),
-                version.verse_set.get(reference="Genesis 1:3"),
-                version.verse_set.get(reference="Genesis 1:4"),
+                version.verse_set.get(localized_reference="Genesis 1:2"),
+                version.verse_set.get(localized_reference="Genesis 1:3"),
+                version.verse_set.get(localized_reference="Genesis 1:4"),
             ],
             version.get_verse_list("Genesis 1:2-4"))
 
@@ -153,16 +153,16 @@ class VersionTests(TestBase):
         version = TextVersion.objects.get(slug='KJV')
         self.assertRaises(InvalidVerseReference, lambda: version.get_verse_list('Genesis 300:1'))
 
-    def test_reference_bulk(self):
+    def test_localized_reference_bulk(self):
         version = TextVersion.objects.get(slug='KJV')
         with self.assertNumQueries(1):
             # Only need one query if all are single verses.
-            l1 = version.get_verses_by_reference_bulk(['Genesis 1:1', 'Genesis 1:2', 'Genesis 1:3'])
+            l1 = version.get_verses_by_localized_reference_bulk(['Genesis 1:1', 'Genesis 1:2', 'Genesis 1:3'])
 
         with self.assertNumQueries(3):
             # 1 query for single verses,
             # 2 for each combo
-            l2 = version.get_verses_by_reference_bulk(['Genesis 1:1', 'Genesis 1:2-3'])
+            l2 = version.get_verses_by_localized_reference_bulk(['Genesis 1:1', 'Genesis 1:2-3'])
 
         self.assertEqual(l1['Genesis 1:1'].text, "In the beginning God created the heaven and the earth. ")
 
@@ -232,12 +232,12 @@ class VersionTests(TestBase):
     # present to the user. We therefore always end up using all the suggestions.
     def test_suggestions(self):
         version = TextVersion.objects.get(slug='KJV')
-        self.assertEqual(version.get_suggestions_by_reference('Genesis 1:1')[1],
+        self.assertEqual(version.get_suggestions_by_localized_reference('Genesis 1:1')[1],
                          ['a', 'all', 'his'])
 
     def test_suggestions_combo(self):
         version = TextVersion.objects.get(slug='KJV')
-        self.assertEqual(version.get_suggestions_by_reference('Genesis 1:1-2')[10],
+        self.assertEqual(version.get_suggestions_by_localized_reference('Genesis 1:1-2')[10],
                          ['and', 'but', 'thou'])
 
     def test_suggestions_bulk(self):
@@ -248,7 +248,7 @@ class VersionTests(TestBase):
                 # - 1 for WordSuggestionData for v1, v2, v3
                 # - 2 for parseref for v2-3,
                 # - 1 for WordSuggestionData for v2-3
-                d = version.get_suggestions_by_reference_bulk(['Genesis 1:1',
+                d = version.get_suggestions_by_localized_reference_bulk(['Genesis 1:1',
                                                                'Genesis 1:2',
                                                                'Genesis 1:3',
                                                                'Genesis 1:2-3'])
@@ -256,7 +256,7 @@ class VersionTests(TestBase):
 
     def test_item_suggestions_needs_updating(self):
         v = Verse.objects.get(version__slug='KJV',
-                              reference='Genesis 1:1')
+                              localized_reference='Genesis 1:1')
         # Already has suggestions set up
         self.assertFalse(item_suggestions_need_updating(v))
 
@@ -267,13 +267,13 @@ class VersionTests(TestBase):
 
         # No word suggestion set up:
         v2 = Verse.objects.get(version__slug='KJV',
-                               reference='Psalm 23:1')
+                               localized_reference='Psalm 23:1')
         self.assertTrue(item_suggestions_need_updating(v2))
 
 
 class MockUVS(object):
-    def __init__(self, reference):
-        self.reference = reference
+    def __init__(self, localized_reference):
+        self.localized_reference = localized_reference
 
 
 class GetPassageSectionsTests(unittest2.TestCase):
@@ -282,7 +282,7 @@ class GetPassageSectionsTests(unittest2.TestCase):
         uvs_list = [MockUVS('Genesis 1:1'),
                     MockUVS('Genesis 1:2')]
         sections = get_passage_sections(uvs_list, '')
-        self.assertEqual([[uvs.reference for uvs in section]
+        self.assertEqual([[uvs.localized_reference for uvs in section]
                           for section in sections],
                          [["Genesis 1:1", "Genesis 1:2"]])
 
@@ -294,7 +294,7 @@ class GetPassageSectionsTests(unittest2.TestCase):
                     MockUVS('Genesis 1:5')]
 
         sections = get_passage_sections(uvs_list, '1,4')
-        self.assertEqual([[uvs.reference for uvs in section]
+        self.assertEqual([[uvs.localized_reference for uvs in section]
                           for section in sections],
                          [["Genesis 1:1", "Genesis 1:2", "Genesis 1:3"],
                           ["Genesis 1:4", "Genesis 1:5"]])
@@ -307,7 +307,7 @@ class GetPassageSectionsTests(unittest2.TestCase):
                     MockUVS('Genesis 1:5')]
 
         sections = get_passage_sections(uvs_list, '4')
-        self.assertEqual([[uvs.reference for uvs in section]
+        self.assertEqual([[uvs.localized_reference for uvs in section]
                           for section in sections],
                          [["Genesis 1:1", "Genesis 1:2", "Genesis 1:3"],
                           ["Genesis 1:4", "Genesis 1:5"]])
@@ -323,7 +323,7 @@ class GetPassageSectionsTests(unittest2.TestCase):
                     MockUVS('Genesis 2:5')]
 
         sections = get_passage_sections(uvs_list, '1:13,2:2,4')
-        self.assertEqual([[uvs.reference for uvs in section]
+        self.assertEqual([[uvs.localized_reference for uvs in section]
                           for section in sections],
                          [["Genesis 1:11", "Genesis 1:12"],
                           ["Genesis 1:13", "Genesis 2:1"],
@@ -338,7 +338,7 @@ class GetPassageSectionsTests(unittest2.TestCase):
                     MockUVS('Genesis 1:5')]
 
         sections = get_passage_sections(uvs_list, '3')
-        self.assertEqual([[uvs.reference for uvs in section]
+        self.assertEqual([[uvs.localized_reference for uvs in section]
                           for section in sections],
                          [["Genesis 1:1", "Genesis 1:2"],
                           ["Genesis 1:3-4", "Genesis 1:5"]])
@@ -348,7 +348,7 @@ class UserVerseStatusTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestB
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
 
-    def test_passage_and_section_reference(self):
+    def test_passage_and_section_localized_reference(self):
         # Setup to create UVSs
         identity, account = self.create_account()
         vs = VerseSet.objects.get(name="Psalm 23")
@@ -356,10 +356,10 @@ class UserVerseStatusTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestB
         vs.save()
         identity.add_verse_set(vs)
 
-        uvs = identity.verse_statuses.get(reference='Psalm 23:2')
+        uvs = identity.verse_statuses.get(localized_reference='Psalm 23:2')
 
-        self.assertEqual(uvs.passage_reference, 'Psalm 23:1-6')
-        self.assertEqual(uvs.section_reference, 'Psalm 23:1-3')
+        self.assertEqual(uvs.passage_localized_reference, 'Psalm 23:1-6')
+        self.assertEqual(uvs.section_localized_reference, 'Psalm 23:1-3')
 
 
 class VerseUtilsTests(unittest2.TestCase):
@@ -388,17 +388,17 @@ class SetupEsvMixin(object):
     def make_esv(self):
         # ESV needs to be created with text empty, but verses existing
         esv = TextVersion.objects.get_or_create(short_name='ESV', slug='ESV')[0]
-        esv.verse_set.create(reference='John 3:16',
+        esv.verse_set.create(localized_reference='John 3:16',
                              book_number=42,
                              chapter_number=3,
                              verse_number=16,
                              bible_verse_number=26136)
-        esv.verse_set.create(reference='John 3:17',
+        esv.verse_set.create(localized_reference='John 3:17',
                              book_number=42,
                              chapter_number=3,
                              verse_number=17,
                              bible_verse_number=26137)
-        esv.verse_set.create(reference='John 5:4',
+        esv.verse_set.create(localized_reference='John 5:4',
                              book_number=42,
                              chapter_number=5,
                              verse_number=4,
@@ -422,7 +422,7 @@ class ESVTests(SetupEsvMixin, TestBase):
         self._assert_john316_correct()
 
     def test_combo_verses(self):
-        d = self.esv.get_verses_by_reference_bulk(['John 5:4', 'John 3:16-17'])
+        d = self.esv.get_verses_by_localized_reference_bulk(['John 5:4', 'John 3:16-17'])
         self.assertEqual(d['John 5:4'].text, "")
         self.assertEqual(d['John 3:16-17'].text, self.JOHN_316_TEXT + " " + self.JOHN_317_TEXT)
 
@@ -431,7 +431,7 @@ class ESVTests(SetupEsvMixin, TestBase):
         self.assertEqual(l[0].text, '')
 
         # 'missing' should be set in the DB
-        verse = self.esv.verse_set.get(reference='John 5:4')
+        verse = self.esv.verse_set.get(localized_reference='John 5:4')
         self.assertEqual(verse.text_saved, "")
         self.assertEqual(verse.missing, True)
 
@@ -442,6 +442,6 @@ class ESVTests(SetupEsvMixin, TestBase):
         self._assert_text_present_and_correct('John 3:17', self.JOHN_316_TEXT)
 
     def _assert_text_present_and_correct(self, ref, text):
-        verse = self.esv.verse_set.get(reference=ref)
+        verse = self.esv.verse_set.get(localized_reference=ref)
         self.assertEqual(verse.text_saved, text)
         self.assertEqual(verse.missing, False)

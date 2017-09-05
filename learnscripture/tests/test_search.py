@@ -1,4 +1,4 @@
-from bibleverses.models import TextVersion, Verse, VerseSet, VerseSetType, parse_as_bible_reference, quick_find
+from bibleverses.models import TextVersion, Verse, VerseSet, VerseSetType, parse_as_bible_localized_reference, quick_find
 
 from .base import TestBase, get_or_create_any_account
 
@@ -53,13 +53,13 @@ class SearchTests(TestBase):
     def test_quick_find_text(self):
         version = TextVersion.objects.get(slug='KJV')
         results = quick_find("beginning created", version=version)
-        self.assertEqual(results[0].verses[0].reference,
+        self.assertEqual(results[0].verses[0].localized_reference,
                          "Genesis 1:1")
 
     def test_quick_find_escape(self):
         version = TextVersion.objects.get(slug='KJV')
         results = quick_find("beginning & | created", version=version)
-        self.assertEqual(results[0].verses[0].reference,
+        self.assertEqual(results[0].verses[0].localized_reference,
                          "Genesis 1:1")
         results = quick_find("Genesissss 1:1", version=version)
         self.assertEqual(len(results), 0)
@@ -69,13 +69,13 @@ class SearchTests(TestBase):
     def test_quick_find_song_of_solomon(self):
         version = TextVersion.objects.get(slug='KJV')
         results = quick_find('Song of Solomon 1:1', version)
-        self.assertEqual(results[0].verses[0].reference,
+        self.assertEqual(results[0].verses[0].localized_reference,
                          "Song of Solomon 1:1")
 
     def test_quick_find_numbered_book(self):
         version = TextVersion.objects.get(slug='KJV')
         results = quick_find("1 Corinthians 1:3", version=version)
-        self.assertEqual(results[0].verses[0].reference,
+        self.assertEqual(results[0].verses[0].localized_reference,
                          "1 Corinthians 1:3")
 
     def test_quick_find_book_names_as_searches(self):
@@ -83,17 +83,17 @@ class SearchTests(TestBase):
         version = TextVersion.objects.get(slug='NET')
         results = quick_find("James", version, allow_searches=True)
         self.assertEqual(len(results), 1)
-        self.assertEqual(results[0].verses[0].reference,
+        self.assertEqual(results[0].verses[0].localized_reference,
                          "Matthew 4:21")
 
-    def test_parse_as_bible_reference(self):
-        self.assertEqual(None, parse_as_bible_reference("Matthew", allow_whole_book=False))
-        self.assertNotEqual(None, parse_as_bible_reference("Matthew", allow_whole_book=True))
-        self.assertEqual(None, parse_as_bible_reference("Matthew 1", allow_whole_chapter=False))
-        self.assertNotEqual(None, parse_as_bible_reference("Matthew 1", allow_whole_chapter=True))
-        self.assertNotEqual(None, parse_as_bible_reference("Matthew 1:1"))
-        self.assertNotEqual(None, parse_as_bible_reference("Matthew 1:1-2"))
-        self.assertNotEqual(None, parse_as_bible_reference("Matthew 1:1-2:3"))
+    def test_parse_as_bible_localized_reference(self):
+        self.assertEqual(None, parse_as_bible_localized_reference("Matthew", allow_whole_book=False))
+        self.assertNotEqual(None, parse_as_bible_localized_reference("Matthew", allow_whole_book=True))
+        self.assertEqual(None, parse_as_bible_localized_reference("Matthew 1", allow_whole_chapter=False))
+        self.assertNotEqual(None, parse_as_bible_localized_reference("Matthew 1", allow_whole_chapter=True))
+        self.assertNotEqual(None, parse_as_bible_localized_reference("Matthew 1:1"))
+        self.assertNotEqual(None, parse_as_bible_localized_reference("Matthew 1:1-2"))
+        self.assertNotEqual(None, parse_as_bible_localized_reference("Matthew 1:1-2:3"))
 
     def test_quick_find_passage_mode(self):
         version = TextVersion.objects.get(slug='KJV')

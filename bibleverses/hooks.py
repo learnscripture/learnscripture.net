@@ -40,7 +40,7 @@ def verse_saved_update_word_suggestions(sender, **kwargs):
     if not item_suggestions_need_updating(verse):
         return
 
-    fix_item_suggestions.apply_async([verse.version.slug, verse.reference, verse.text_saved],
+    fix_item_suggestions.apply_async([verse.version.slug, verse.localized_reference, verse.text_saved],
                                      countdown=5)
 
 
@@ -63,5 +63,5 @@ def qapair_saved(sender, **kwargs):
         from bibleverses.suggestions.modelapi import item_suggestions_need_updating
         if not item_suggestions_need_updating(qapair):
             return
-        fix_item_suggestions.apply_async([qapair.catechism.slug, qapair.reference, None],
+        fix_item_suggestions.apply_async([qapair.catechism.slug, qapair.localized_reference, None],
                                          countdown=5)

@@ -20,7 +20,7 @@ class DashboardTestsBase(RequireExampleVerseSetsMixin):
         self.get_url('dashboard')
         self.assertUrlsEqual(reverse('login'))
 
-    def assert_learning_reference(self, ref):
+    def assert_learning_localized_reference(self, ref):
         self.assertUrlsEqual(reverse('learn'))
         if self.is_full_browser_test:
             self.assertEqual(ref, self.get_element_text("#id-verse-title"))
@@ -59,7 +59,7 @@ class DashboardTestsBase(RequireExampleVerseSetsMixin):
         # Test click 'Start learning' for 'Bible 101' verse set
         self.assertTextPresent('Bible 101')
         self.submit('#id-learning-queue-verse-set-%s input[name=learnbiblequeue]' % vs.id)
-        self.assert_learning_reference("John 3:16")
+        self.assert_learning_localized_reference("John 3:16")
 
         # Learn one verse (otherwise we are back to dashboard redirecting us)
         i.record_verse_action('John 3:16', 'NET', StageType.TEST, accuracy=1.0)
@@ -67,7 +67,7 @@ class DashboardTestsBase(RequireExampleVerseSetsMixin):
         self.get_url('dashboard')
         # Test clicking 'Start learning' for general queue
         self.submit('#id-learning-queue-verse-set- input[name=learnbiblequeue]')
-        self.assert_learning_reference("Psalm 23:2")
+        self.assert_learning_localized_reference("Psalm 23:2")
 
         # Test clicking 'Clear queue'
         self.get_url('dashboard')
@@ -102,7 +102,7 @@ class DashboardTestsBase(RequireExampleVerseSetsMixin):
 
         # Test 'Continue learning' button
         self.submit('#id-learnpassage-btn-%d' % vs.id)
-        self.assert_learning_reference("Psalm 23:1")
+        self.assert_learning_localized_reference("Psalm 23:1")
 
         # Test 'Cancel learning' button
         self.get_url('dashboard')
@@ -116,7 +116,7 @@ class DashboardTestsBase(RequireExampleVerseSetsMixin):
         self.assertTextPresent("You've queued this catechism for learning, 4 questions total")
 
         self.submit('input[name=learncatechismqueue]')
-        self.assert_learning_reference("Q1. What is the chief end of man?")
+        self.assert_learning_localized_reference("Q1. What is the chief end of man?")
 
     def test_cancel_catechsim(self):
         # Test clicking 'Clear queue'
@@ -152,7 +152,7 @@ class DashboardTestsBase(RequireExampleVerseSetsMixin):
         self.assertTextPresent('Psalm 23')  # sanity check
 
         self.submit('input[value^="Review one section"][name=revisepassagenextsection]')
-        self.assert_learning_reference("Psalm 23:1")
+        self.assert_learning_localized_reference("Psalm 23:1")
 
         if self.is_full_browser_test:
             # Skip through

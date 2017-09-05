@@ -13,7 +13,7 @@
 
   <ul>
     {% for qapair in questions %}
-      <li><b>{{ qapair.reference }}. {{ qapair.question }}</b><br/>
+      <li><b>{{ qapair.localized_reference }}. {{ qapair.question }}</b><br/>
         {{ qapair.answer }}
       </li>
     {% endfor %}

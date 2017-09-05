@@ -19,7 +19,7 @@ LearningType = make_choices('LearningType',
 # We store the order the verses should be looked at (which allows us to remove
 # items from the list without confusion).
 #
-# We use the tuple (reference, verse_set_id) as an ID.  We need VerseSet ID
+# We use the tuple (localized_reference, verse_set_id) as an ID.  We need VerseSet ID
 # because we treat verses differently if they are part of a passage. By avoiding
 # the specific UserVerseStatus id, we can cope with a change of version more
 # easily.

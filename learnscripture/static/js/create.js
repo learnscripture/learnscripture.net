@@ -32,7 +32,7 @@ var learnscripture =
                     $('#id_verse_list_passage_row_template').render({'verseData': verseData}));
             });
             $('#id-verse-list').show();
-            var ref = passageData.reference;
+            var ref = passageData.localized_reference;
             var currentName = $('#id_name').val().trim();
             if (currentName === "" || currentName === previousPassageRef) {
                 $('#id_name').val(ref);
@@ -46,17 +46,17 @@ var learnscripture =
         };
 
         var selectionSaveBtnClick = function (ev) {
-            // Create hidden fields with all references
+            // Create hidden fields with all localized_references
             var refs = [];
             $('#id-verse-list td:first-child').each(function (idx, elem) {
                 refs.push($(elem).text());
             });
-            $('#id-reference-list').val(refs.join('|'));
+            $('#id-localized-reference-list').val(refs.join('|'));
             $('#id-verse-set-form').submit();
         };
 
         var passageSaveBtnClick = function (ev) {
-            // Create hidden fields with all references
+            // Create hidden fields with all localized_references
             var refs = [];
             var breaks = [];
             $('#id-verse-list tbody tr').each(function (idx, elem) {
@@ -67,7 +67,7 @@ var learnscripture =
                     breaks.push(ref.split(" ").slice(-1)[0]);
                 }
             });
-            $('#id-reference-list').val(refs.join('|'));
+            $('#id-localized-reference-list').val(refs.join('|'));
             $('#id-break-list').val(breaks.join(','));
             // continue with submit
         };
@@ -98,7 +98,7 @@ var learnscripture =
                     var verses = results[0].verses;
                     $.ajax({url: '/api/learnscripture/v1/checkduplicatepassageset/?format=json',
                             data: {
-                                passage_id: verses[0].reference + ' - ' + verses[verses.length-1].reference
+                                passage_id: verses[0].localized_reference + ' - ' + verses[verses.length-1].localized_reference
                             },
                             dataType: 'json',
                             success: function(results) {

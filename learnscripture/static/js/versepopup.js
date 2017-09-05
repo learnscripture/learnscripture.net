@@ -11,7 +11,7 @@ var learnscripture = (function (learnscripture, $) {
             data: {
                 verse_status: JSON.stringify({
                     id: $form.find('input[name=verse_status_id]').val(),
-                    reference: $form.find('input[name=verse_status_reference]').val()
+                    localized_reference: $form.find('input[name=verse_status_localized_reference]').val()
                 }, null, 2)
             },
             success: function () {
@@ -45,7 +45,7 @@ var learnscripture = (function (learnscripture, $) {
         $('.verse-popup-btn')
             .toggle(
                 function (ev) {
-                    var ref = this.attributes['data-reference'].value;
+                    var ref = this.attributes['data-localized-reference'].value;
                     var version = this.attributes['data-version'].value;
                     var that = this;
                     $.ajax({url: '/verse-options/',

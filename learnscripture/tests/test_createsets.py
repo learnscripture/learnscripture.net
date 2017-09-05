@@ -53,7 +53,7 @@ class CreateSetTests(FullBrowserTest):
         vs = VerseSet.objects.get(name='My set')
         self.assertEqual(len(vs.verse_choices.all()), 1)
 
-        current_ref_list = [("Genesis 1:5", 0)]
+        current_localized_reference_list = [("Genesis 1:5", 0)]
 
         def _add_new_ref(ref):
             # Edit again
@@ -64,11 +64,11 @@ class CreateSetTests(FullBrowserTest):
 
             self.assertTextPresent("Verse set 'My set' saved")  # Checks we didn't get 500
 
-            if ref not in [r for r, i in current_ref_list]:
-                current_ref_list.append((ref, len(current_ref_list)))
+            if ref not in [r for r, i in current_localized_reference_list]:
+                current_localized_reference_list.append((ref, len(current_localized_reference_list)))
 
-            self.assertEqual(current_ref_list,
-                             sorted([(vc.reference, vc.set_order)
+            self.assertEqual(current_localized_reference_list,
+                             sorted([(vc.localized_reference, vc.set_order)
                                      for vc in vs.verse_choices.all()]))
 
         # Caching could cause these to fail
@@ -99,11 +99,11 @@ class CreateSetTests(FullBrowserTest):
         vs = VerseSet.objects.create(created_by=self._account,
                                      set_type=VerseSetType.SELECTION,
                                      name='my set')
-        vc1 = vs.verse_choices.create(reference='Genesis 1:1',
+        vc1 = vs.verse_choices.create(localized_reference='Genesis 1:1',
                                       set_order=0)
-        vc2 = vs.verse_choices.create(reference='Genesis 1:5',
+        vc2 = vs.verse_choices.create(localized_reference='Genesis 1:5',
                                       set_order=1)
-        vc3 = vs.verse_choices.create(reference='Genesis 1:10',
+        vc3 = vs.verse_choices.create(localized_reference='Genesis 1:10',
                                       set_order=2)
         self.login(self._account)
         self.get_url('edit_set', slug=vs.slug)
@@ -114,17 +114,17 @@ class CreateSetTests(FullBrowserTest):
         vs = VerseSet.objects.get(id=vs.id)
         vcs = vs.verse_choices.all()
         self.assertEqual(sorted(vc.id for vc in vcs), sorted([vc1.id, vc2.id, vc3.id]))
-        self.assertEqual(vs.verse_choices.get(reference='Genesis 1:1').set_order, 1)
-        self.assertEqual(vs.verse_choices.get(reference='Genesis 1:5').set_order, 0)
+        self.assertEqual(vs.verse_choices.get(localized_reference='Genesis 1:1').set_order, 1)
+        self.assertEqual(vs.verse_choices.get(localized_reference='Genesis 1:5').set_order, 0)
 
     def test_remove(self):
         self.login(self._account)
         vs = VerseSet.objects.create(created_by=self._account,
                                      set_type=VerseSetType.SELECTION,
                                      name='my set')
-        vs.verse_choices.create(reference='Genesis 1:1',
+        vs.verse_choices.create(localized_reference='Genesis 1:1',
                                 set_order=0)
-        vc2 = vs.verse_choices.create(reference='Genesis 1:5',
+        vc2 = vs.verse_choices.create(localized_reference='Genesis 1:5',
                                       set_order=1)
 
         identity = self._identity
@@ -141,7 +141,7 @@ class CreateSetTests(FullBrowserTest):
         self.assertEqual([vc.id for vc in vcs], [vc2.id])
 
         # Need to ensure that the UVS has not been deleted
-        identity.verse_statuses.get(version__slug='KJV', reference='Genesis 1:1')
+        identity.verse_statuses.get(version__slug='KJV', localized_reference='Genesis 1:1')
 
     def test_require_account(self):
         self.get_url('create_selection_set')
@@ -197,11 +197,11 @@ class CreateSetTests(FullBrowserTest):
                                      set_type=VerseSetType.PASSAGE,
                                      name='Psalm 23',
                                      breaks="23:5")
-        references = []
+        localized_references = []
         for i in range(1, 7):
             ref = 'Psalm 23:%d' % i
-            references.append(ref)
-            vs.verse_choices.create(reference=ref,
+            localized_references.append(ref)
+            vs.verse_choices.create(localized_reference=ref,
                                     set_order=i - 1)
 
         # Simple test - editing and pressing save should leave
@@ -211,6 +211,6 @@ class CreateSetTests(FullBrowserTest):
 
         vs = VerseSet.objects.get(id=vs.id)
         vcs = vs.verse_choices.all().order_by('set_order')
-        self.assertEqual([vc.reference for vc in vcs],
-                         references)
+        self.assertEqual([vc.localized_reference for vc in vcs],
+                         localized_references)
         self.assertEqual(vs.breaks, "23:5")
