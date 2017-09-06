@@ -777,7 +777,7 @@ class InvalidVerseReference(ValueError):
     pass
 
 
-class LocalizedReference(object):
+class ParsedReference(object):
     def __init__(self, book, chapter_number, verse_number):
         self.book = book
         self.chapter_number = chapter_number
@@ -789,7 +789,7 @@ class LocalizedReference(object):
                 self.verse_number == other.verse_number)
 
     def __repr__(self):
-        return "<LocalizedReference %s %d:%d>" % (self.book, self.chapter_number, self.verse_number)
+        return "<ParsedReference %s %d:%d>" % (self.book, self.chapter_number, self.verse_number)
 
 
 def parse_ref(localized_reference, version, max_length=MAX_VERSE_QUERY_SIZE,
@@ -798,8 +798,8 @@ def parse_ref(localized_reference, version, max_length=MAX_VERSE_QUERY_SIZE,
     Takes a localized reference and returns the verses referred to in a list.
 
     If return_verses is False, then the version is not needed, more lenient
-    checking is done (the input is trusted), and a LocalizedReference object is returned
-    instead, or a two tuple (start LocalizedReference, end LocalizedReference)
+    checking is done (the input is trusted), and a ParsedReference object is returned
+    instead, or a two tuple (start ParsedReference, end ParsedReference)
     """
     # This function is strict, and expects reference in normalised format.
     # Frontend function should deal with tolerance, to ensure that VerseChoice
@@ -833,7 +833,7 @@ def parse_ref(localized_reference, version, max_length=MAX_VERSE_QUERY_SIZE,
                           .order_by('bible_verse_number')
                           )
         else:
-            retval = LocalizedReference(book, chapter_number, None)
+            retval = ParsedReference(book, chapter_number, None)
     else:
         parts = localized_reference.rsplit('-', 1)
         if len(parts) == 1:
@@ -844,7 +844,7 @@ def parse_ref(localized_reference, version, max_length=MAX_VERSE_QUERY_SIZE,
             else:
                 book, rest = localized_reference.rsplit(' ', 1)
                 ch_num, v_num = rest.split(':', 1)
-                retval = LocalizedReference(book, int(ch_num), int(v_num))
+                retval = ParsedReference(book, int(ch_num), int(v_num))
         else:
             # e.g. Genesis 1:1-2
             book, start = parts[0].rsplit(' ', 1)
@@ -913,8 +913,8 @@ def parse_ref(localized_reference, version, max_length=MAX_VERSE_QUERY_SIZE,
                                                        bible_verse_number__lte=verse_end.bible_verse_number,
                                                        missing=False))
             else:
-                retval = (LocalizedReference(book, start_chapter, start_verse),
-                          LocalizedReference(book, end_chapter, end_verse))
+                retval = (ParsedReference(book, start_chapter, start_verse),
+                          ParsedReference(book, end_chapter, end_verse))
 
     if return_verses:
         if len(retval) == 0:
@@ -1009,7 +1009,7 @@ def get_passage_sections(verse_list, breaks):
     # Since the input has been sanitised, we can do parsing without needing DB
     # queries.
 
-    # First need to parse 'breaks' into a list of LocalizedReferences.
+    # First need to parse 'breaks' into a list of ParsedReferences.
 
     if len(verse_list) == 0:
         return []
@@ -1020,13 +1020,13 @@ def get_passage_sections(verse_list, breaks):
     break_list = []
 
     # First reference provides the context for the breaks.
-    first_ref = parse_ref(verse_list[0].localized_reference, None, return_verses=False)
-    if isinstance(first_ref, tuple):
-        first_ref = first_ref[0]
+    first_parsed_ref = parse_ref(verse_list[0].localized_reference, None, return_verses=False)
+    if isinstance(first_parsed_ref, tuple):
+        first_parsed_ref = first_parsed_ref[0]
 
-    verse_number = first_ref.verse_number
-    chapter_number = first_ref.chapter_number
-    book = first_ref.book
+    verse_number = first_parsed_ref.verse_number
+    chapter_number = first_parsed_ref.chapter_number
+    book = first_parsed_ref.book
     for b in breaks.split(','):
         b = b.strip()
         if ':' in b:
@@ -1035,15 +1035,15 @@ def get_passage_sections(verse_list, breaks):
             verse_number = int(verse_number)
         else:
             verse_number = int(b)
-        break_list.append(LocalizedReference(book, chapter_number, verse_number))
+        break_list.append(ParsedReference(book, chapter_number, verse_number))
 
     sections = []
     current_section = []
     for v in verse_list:
-        ref = parse_ref(v.localized_reference, None, return_verses=False)
-        if isinstance(ref, tuple):
-            ref = ref[0]
-        if ref in break_list and len(current_section) > 0:
+        parsed_ref = parse_ref(v.localized_reference, None, return_verses=False)
+        if isinstance(parsed_ref, tuple):
+            parsed_ref = parsed_ref[0]
+        if parsed_ref in break_list and len(current_section) > 0:
             # Start new section
             sections.append(current_section)
             current_section = []
