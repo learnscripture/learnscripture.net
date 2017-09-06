@@ -166,6 +166,3 @@ def combined_membership_count_for_creator(account_id):
                                            account=account_id).aggregate(Count('id'))['id__count']
     own_groups = own_groups if not None else 0
     return val - own_groups
-
-
-from groups import hooks  # NOQA isort:skip

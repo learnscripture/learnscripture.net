@@ -1157,6 +1157,3 @@ def normalise_reference(query):
         return (BIBLE_BOOK_ABBREVIATIONS[book_name] + " " + remainder).strip()
     else:
         return None
-
-
-from bibleverses import hooks  # NOQA isort:skip

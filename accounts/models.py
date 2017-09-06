@@ -1438,9 +1438,6 @@ def get_active_identity_count(since_when, until_when):
             )
 
 
-from accounts import hooks  # NOQA isort:skip
-
-
 def notify_all_accounts(html_message):
     for account in Account.objects.active().filter(identity__isnull=False).select_related('identity'):
         account.add_html_notice(html_message)
