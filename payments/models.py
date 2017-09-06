@@ -167,6 +167,3 @@ def send_donation_drive_target_reached_emails(donation_drive):
         body = loader.render_to_string("learnscripture/donation_drive_target_reached_email.txt", context)
         subject = "LearnScripture.net - donation target reached!"
         mail.send_mail(subject, body, settings.SERVER_EMAIL, [d['email']])
-
-
-from payments import hooks  # NOQA isort:skip

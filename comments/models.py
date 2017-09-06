@@ -48,6 +48,3 @@ class Comment(models.Model):
             return format_html("{0}'s activity", account_link(self.event.account))
         elif self.group is not None:
             return format_html("{0}'s wall", group_link(self.group))
-
-
-from comments import hooks  # NOQA isort:skip

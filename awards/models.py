@@ -509,5 +509,3 @@ class Award(models.Model):
         from awards.signals import lost_award
         lost_award.send(sender=self)
         return super(Award, self).delete(**kwargs)
-
-from awards import hooks  # NOQA isort:skip

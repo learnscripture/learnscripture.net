@@ -455,5 +455,3 @@ class Event(models.Model):
 
     def ordered_comments(self):
         return self.comments.all().order_by('created')
-
-from events import hooks  # NOQA isort:skip

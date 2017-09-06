@@ -1,8 +1,6 @@
 from django.db import models
 from django.utils import timezone
 
-from learnscripture import hooks  # NOQA
-
 
 class SiteNoticeManager(models.Manager):
 
