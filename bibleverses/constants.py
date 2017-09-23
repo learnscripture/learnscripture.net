@@ -1,21 +1,37 @@
 from collections import defaultdict
 
+from .languages import LANGUAGE_CODE_EN
 
-BIBLE_BOOKS = ['Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy', 'Joshua', 'Judges', 'Ruth', '1 Samuel', '2 Samuel', '1 Kings', '2 Kings', '1 Chronicles', '2 Chronicles', 'Ezra', 'Nehemiah', 'Esther', 'Job', 'Psalm', 'Proverbs', 'Ecclesiastes', 'Song of Solomon', 'Isaiah', 'Jeremiah', 'Lamentations', 'Ezekiel', 'Daniel', 'Hosea', 'Joel', 'Amos', 'Obadiah', 'Jonah', 'Micah', 'Nahum', 'Habakkuk', 'Zephaniah', 'Haggai', 'Zechariah', 'Malachi', 'Matthew', 'Mark', 'Luke', 'John', 'Acts', 'Romans', '1 Corinthians', '2 Corinthians', 'Galatians', 'Ephesians', 'Philippians', 'Colossians', '1 Thessalonians', '2 Thessalonians', '1 Timothy', '2 Timothy', 'Titus', 'Philemon', 'Hebrews', 'James', '1 Peter', '2 Peter', '1 John', '2 John', '3 John', 'Jude', 'Revelation']
-BIBLE_BOOKS_DICT = dict((n, i) for (i, n) in enumerate(BIBLE_BOOKS))
+_BIBLE_BOOKS_FOR_LANG = {
+    LANGUAGE_CODE_EN: ['Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy', 'Joshua', 'Judges', 'Ruth', '1 Samuel', '2 Samuel', '1 Kings', '2 Kings', '1 Chronicles', '2 Chronicles', 'Ezra', 'Nehemiah', 'Esther', 'Job', 'Psalm', 'Proverbs', 'Ecclesiastes', 'Song of Solomon', 'Isaiah', 'Jeremiah', 'Lamentations', 'Ezekiel', 'Daniel', 'Hosea', 'Joel', 'Amos', 'Obadiah', 'Jonah', 'Micah', 'Nahum', 'Habakkuk', 'Zephaniah', 'Haggai', 'Zechariah', 'Malachi', 'Matthew', 'Mark', 'Luke', 'John', 'Acts', 'Romans', '1 Corinthians', '2 Corinthians', 'Galatians', 'Ephesians', 'Philippians', 'Colossians', '1 Thessalonians', '2 Thessalonians', '1 Timothy', '2 Timothy', 'Titus', 'Philemon', 'Hebrews', 'James', '1 Peter', '2 Peter', '1 John', '2 John', '3 John', 'Jude', 'Revelation'],
+}
+_BIBLE_BOOK_NUMBERS_FOR_LANG = {
+    lang: dict((n, i) for (i, n) in enumerate(books))
+    for lang, books in _BIBLE_BOOKS_FOR_LANG.items()
+}
 
 
 # All possible bible book names, lower case, matched to canonical name
-BIBLE_BOOK_ABBREVIATIONS = {}
+_BIBLE_BOOK_ABBREVIATIONS_FOR_LANG = {}
 
 
 def make_bible_book_abbreviations():
-    global BIBLE_BOOK_ABBREVIATIONS
+    for lang in _BIBLE_BOOKS_FOR_LANG:
+        make_bible_book_abbreviations_for_lang(lang)
+    make_bible_book_special_cases()
+
+
+def make_bible_book_abbreviations_for_lang(language_code):
+    global _BIBLE_BOOK_ABBREVIATIONS_FOR_LANG
+    bible_books = _BIBLE_BOOKS_FOR_LANG[language_code]
+    abbreviations = {}
+    _BIBLE_BOOK_ABBREVIATIONS_FOR_LANG[language_code] = abbreviations
 
     nums = {'1 ': ['1', 'I ', 'I'],
             '2 ': ['2', 'II ', 'II'],
             '3 ': ['3', 'III ', 'III']
             }
+    # TODO - Turkish - what is the canonical form - "1 " or "1. "
 
     def get_abbrevs(book_name):
         # Get alternatives like '1Peter', 'I Peter' etc.
@@ -32,7 +48,7 @@ def make_bible_book_abbreviations():
 
     # Get all abbreviations
     d = {}
-    for b in BIBLE_BOOKS:
+    for b in bible_books:
         d[b] = list(get_abbrevs(b.lower()))
 
     # Now need to make unique. Create a reverse dictionary.
@@ -49,10 +65,12 @@ def make_bible_book_abbreviations():
         if len(book_names) == 1:
             d3[abbrev] = book_names.pop()
 
-    BIBLE_BOOK_ABBREVIATIONS.update(d3)
+    abbreviations.update(d3)
 
+
+def make_bible_book_special_cases():
     # Some special cases that don't fit above pattern
-    BIBLE_BOOK_ABBREVIATIONS.update({
+    _BIBLE_BOOK_ABBREVIATIONS_FOR_LANG[LANGUAGE_CODE_EN].update({
         'dt': 'Deuteronomy',
         'gn': 'Genesis',
         'hg': 'Haggai',
@@ -79,6 +97,8 @@ def make_bible_book_abbreviations():
         'sg': 'Song of Solomon',
         'sng': 'Song of Solomon',
     })
+
+    # TODO - anything for Turkish?
 
 
 make_bible_book_abbreviations()

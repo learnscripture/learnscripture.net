@@ -1,7 +1,7 @@
 """
 Utilities that deal with LearnScripture models, particularly bibleverses.models
 """
-from bibleverses.constants import BIBLE_BOOKS
+from bibleverses.books import get_bible_books
 from bibleverses.models import TextType, WordSuggestionData
 
 from .iterators import get_in_batches
@@ -14,7 +14,8 @@ def get_all_version_words(version, disallow_text_loading=False):
     from ..analyzers.wordcounts import get_text_word_counts
 
     if version.text_type == TextType.BIBLE:
-        training_texts = BibleTrainingTexts(text=version, books=BIBLE_BOOKS,
+        training_texts = BibleTrainingTexts(text=version,
+                                            books=get_bible_books(version.language_code),
                                             disallow_loading=disallow_text_loading)
     elif version.text_type == TextType.CATECHISM:
         training_texts = CatechismTrainingTexts(text=version,

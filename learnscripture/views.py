@@ -27,9 +27,10 @@ import learnscripture.tasks
 from accounts.forms import AccountDetailsForm, PreferencesForm
 from accounts.models import Account, Identity
 from awards.models import AnyLevel, Award, AwardType
+from bibleverses.books import get_bible_books
 from bibleverses.forms import VerseSetForm
-from bibleverses.models import (BIBLE_BOOKS, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, TextType, TextVersion,
-                                VerseSet, VerseSetType, get_passage_sections)
+from bibleverses.models import (MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, TextType, TextVersion, VerseSet,
+                                VerseSetType, get_passage_sections)
 from bibleverses.signals import public_verse_set_created
 from events.models import Event
 from groups.forms import EditGroupForm
@@ -419,8 +420,12 @@ def context_for_quick_find(request):
     """
     Returns the context data needed to render a quick find box
     """
-    d = {'BIBLE_BOOKS': BIBLE_BOOKS,
-         'default_bible_version': default_bible_version_for_request(request)
+    # TODO - quick find needs to be fixed to update
+    # the book list captions when a different language
+    # translation is chosen.
+    version = default_bible_version_for_request(request)
+    d = {'bible_books': get_bible_books(version.language_code),
+         'default_bible_version': version,
          }
     d.update(context_for_version_select(request))
     return d
@@ -497,7 +502,10 @@ def choose(request):
     # so is missing here.
 
     if 'q' in request.GET:
-        verse_sets = VerseSet.objects.search(verse_sets, request.GET['q'])
+        # TODO - decide if we allow searching in languages other than
+        # the language of the user's default Bible version
+        language_code = default_bible_version.language_code
+        verse_sets = VerseSet.objects.search(language_code, verse_sets, request.GET['q'])
 
     if 'new' in request.GET:
         verse_sets = verse_sets.order_by('-date_added')
@@ -627,6 +635,7 @@ def view_verse_set(request, slug):
             version = request.identity.default_bible_version
         else:
             version = get_default_bible_version()
+    language_code = version.language_code
 
     # Decorate the verse choices with the text.
     verse_choices = list(verse_set.verse_choices.all())
@@ -635,7 +644,7 @@ def view_verse_set(request, slug):
 
     # Decorate verses with break information.
     verse_list = sorted(verses.values(), key=lambda v: v.bible_verse_number)
-    verse_list = add_passage_breaks(verse_list, verse_set.breaks)
+    verse_list = add_passage_breaks(language_code, verse_list, verse_set.breaks)
 
     for vc in verse_choices:
         # vc.localized_reference can be missing from verses if Verse.missing==True for
@@ -682,9 +691,9 @@ def view_verse_set(request, slug):
     return render(request, 'learnscripture/single_verse_set.html', c)
 
 
-def add_passage_breaks(verse_list, breaks):
+def add_passage_breaks(language_code, verse_list, breaks):
     retval = []
-    sections = get_passage_sections(verse_list, breaks)
+    sections = get_passage_sections(language_code, verse_list, breaks)
     for i, section in enumerate(sections):
         for j, v in enumerate(section):
             # need break at beginning of every section except first
@@ -717,6 +726,7 @@ def edit_set(request, slug=None):
 def create_or_edit_set(request, set_type=None, slug=None):
 
     version = request.identity.default_bible_version
+    language_code = version.language_code
 
     if slug is not None:
         verse_set = get_object_or_404(request.identity.account.verse_sets_editable.filter(slug=slug))
@@ -769,9 +779,11 @@ def create_or_edit_set(request, set_type=None, slug=None):
             # If all have a 'break' applied, (excluding first, which never has
             # one) then the user clearly doesn't understand the concept of
             # section breaks:
-            tmp_verse_list = add_passage_breaks(mk_verse_list(localized_reference_list,
-                                                              version.get_verses_by_localized_reference_bulk(localized_reference_list_raw)),
-                                                breaks)
+            tmp_verse_list = add_passage_breaks(
+                language_code,
+                mk_verse_list(localized_reference_list,
+                              version.get_verses_by_localized_reference_bulk(localized_reference_list_raw)),
+                breaks)
             if all(v.break_here for v in tmp_verse_list[1:]):
                 breaks = ""
 
@@ -808,7 +820,7 @@ def create_or_edit_set(request, set_type=None, slug=None):
 
     verse_list = mk_verse_list(localized_reference_list, verse_dict)
     if set_type == VerseSetType.PASSAGE:
-        verse_list = add_passage_breaks(verse_list, breaks)
+        verse_list = add_passage_breaks(language_code, verse_list, breaks)
 
     c['verses'] = verse_list
     c['new_verse_set'] = verse_set is None

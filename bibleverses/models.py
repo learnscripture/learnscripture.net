@@ -16,9 +16,9 @@ from accounts import memorymodel
 from learnscripture.datastructures import make_choices
 from learnscripture.utils.iterators import intersperse
 
-from .constants import BIBLE_BOOK_ABBREVIATIONS, BIBLE_BOOKS, BIBLE_BOOKS_DICT
-from .languages import DEFAULT_LANGUAGE, LANGUAGE_CHOICES
+from .books import get_bible_book_name, get_bible_book_number, get_canonical_bible_book_name, is_bible_book
 from .fields import VectorField
+from .languages import DEFAULT_LANGUAGE, LANGUAGE_CHOICES
 from .services import get_fetch_service, get_search_service
 from .textutils import split_into_words
 
@@ -108,7 +108,7 @@ class TextVersion(models.Model):
         Get ordered list of Verse objects for the given localized reference.
         (just one object for most references).
         """
-        return parse_ref(localized_reference, self, max_length=max_length)
+        return parse_ref(localized_reference, version=self, max_length=max_length)
 
     def get_text_by_localized_reference(self, localized_reference):
         return ComboVerse(localized_reference, self.get_verse_list(localized_reference)).text
@@ -305,7 +305,7 @@ class Verse(models.Model):
 
     @property
     def book_name(self):
-        return BIBLE_BOOKS[self.book_number]
+        return get_bible_book_name(self.version.language_code, self.book_number)
 
     def is_last_verse_in_chapter(self):
         return not self.version.verse_set.filter(
@@ -506,11 +506,13 @@ SELECT COUNT(*) FROM
         cursor.execute(sql, [tuple(ignoring_account_ids), tuple(ids)])
         return cursor.fetchall()[0][0]
 
-    def search(self, verse_sets, query):
+    def search(self, language_code, verse_sets, query):
         # Does the query look like a Bible reference?
-        localized_reference = parse_as_bible_localized_reference(query,
-                                             allow_whole_book=False,
-                                             allow_whole_chapter=False)
+        localized_reference = parse_as_bible_localized_reference(
+            language_code,
+            query,
+            allow_whole_book=False,
+            allow_whole_chapter=False)
         if localized_reference is not None:
             return verse_sets.filter(verse_choices__localized_reference=localized_reference)
         else:
@@ -726,8 +728,10 @@ class UserVerseStatus(models.Model):
         if not self.is_in_passage():
             return None
         verse_choices = self.set_verse_choices
-        return pretty_passage_ref(verse_choices[0].localized_reference,
-                                  verse_choices[-1].localized_reference)
+        return pretty_passage_ref(
+            self.version.language_code,
+            verse_choices[0].localized_reference,
+            verse_choices[-1].localized_reference)
 
     @cached_property
     def set_verse_choices(self):
@@ -743,13 +747,16 @@ class UserVerseStatus(models.Model):
 
         section = self.get_section_verse_choices()
         if section is not None:
-            return pretty_passage_ref(section[0].localized_reference,
-                                      section[-1].localized_reference)
+            return pretty_passage_ref(
+                self.version.language_code,
+                section[0].localized_reference,
+                section[-1].localized_reference)
         return None  # Shouldn't get here
 
     def get_section_verse_choices(self):
         # Split verse set into sections
-        sections = get_passage_sections(self.set_verse_choices, self.verse_set.breaks)
+        sections = get_passage_sections(self.version.language_code,
+                                        self.set_verse_choices, self.verse_set.breaks)
 
         # Now we've got to find which one we are in:
         for section in sections:
@@ -792,7 +799,10 @@ class ParsedReference(object):
         return "<ParsedReference %s %d:%d>" % (self.book, self.chapter_number, self.verse_number)
 
 
-def parse_ref(localized_reference, version, max_length=MAX_VERSE_QUERY_SIZE,
+def parse_ref(localized_reference,
+              version=None,
+              language_code=None,
+              max_length=MAX_VERSE_QUERY_SIZE,
               return_verses=True):
     """
     Takes a localized reference and returns the verses referred to in a list.
@@ -807,20 +817,27 @@ def parse_ref(localized_reference, version, max_length=MAX_VERSE_QUERY_SIZE,
 
     # This function will InvalidVerseReference if a verse is not matched.
 
+    if language_code is None:
+        if version is None:
+            raise Exception("No language_code was passed, which is required if `version` "
+                            "is not passed")
+        else:
+            language_code = version.language_code
+
     if ':' not in localized_reference:
         # chapter only
         try:
             # If there is a space in name, we need this:
-            if localized_reference in BIBLE_BOOKS_DICT:
+            if is_bible_book(language_code, localized_reference, canonical=True):
                 # no chapter.
                 raise ValueError()
             # If no, space, the following will weed out references without a chapter
             book, chapter = localized_reference.rsplit(' ', 1)
         except ValueError:
             raise InvalidVerseReference("Reference should provide at least book name and chapter number")
-        if book not in BIBLE_BOOKS_DICT:
+        if not is_bible_book(language_code, book, canonical=True):
             raise InvalidVerseReference("Book '%s' not known" % book)
-        book_number = BIBLE_BOOKS_DICT.get(book)
+        book_number = get_bible_book_number(language_code, book)
         try:
             chapter_number = int(chapter)
         except ValueError:
@@ -985,9 +1002,9 @@ def ensure_text(verses):
             v.save()
 
 
-def pretty_passage_ref(start_ref, end_ref):
-    first = parse_ref(start_ref, None, return_verses=False)
-    last = parse_ref(end_ref, None, return_verses=False)
+def pretty_passage_ref(language_code, start_ref, end_ref):
+    first = parse_ref(start_ref, language_code=language_code, return_verses=False)
+    last = parse_ref(end_ref, language_code=language_code, return_verses=False)
 
     ref = "%s %d:%d" % (first.book,
                         first.chapter_number,
@@ -1000,12 +1017,17 @@ def pretty_passage_ref(start_ref, end_ref):
     return ref
 
 
-def get_passage_sections(verse_list, breaks):
+def get_passage_sections(language_code, verse_list, breaks):
     """
     Given a list of objects with a correct 'localized_reference' attribute, and a comma
     separated list of 'break definitions', each of which could be <verse_number>
     or <chapter_number>:<verse_number>, return the list in sections.
     """
+    # TODO - currently this has been modified to accept language_code, purely so
+    # that we can pass it to parse_ref. However, different grouping of verses in
+    # different versions may mean we actually need to pass a TextVersion through
+    # this, and other modified functions like add_passage_breaks
+
     # Since the input has been sanitised, we can do parsing without needing DB
     # queries.
 
@@ -1020,7 +1042,9 @@ def get_passage_sections(verse_list, breaks):
     break_list = []
 
     # First reference provides the context for the breaks.
-    first_parsed_ref = parse_ref(verse_list[0].localized_reference, None, return_verses=False)
+    first_parsed_ref = parse_ref(verse_list[0].localized_reference,
+                                 language_code=language_code,
+                                 return_verses=False)
     if isinstance(first_parsed_ref, tuple):
         first_parsed_ref = first_parsed_ref[0]
 
@@ -1040,7 +1064,9 @@ def get_passage_sections(verse_list, breaks):
     sections = []
     current_section = []
     for v in verse_list:
-        parsed_ref = parse_ref(v.localized_reference, None, return_verses=False)
+        parsed_ref = parse_ref(v.localized_reference,
+                               language_code=language_code,
+                               return_verses=False)
         if isinstance(parsed_ref, tuple):
             parsed_ref = parsed_ref[0]
         if parsed_ref in break_list and len(current_section) > 0:
@@ -1052,7 +1078,7 @@ def get_passage_sections(verse_list, breaks):
     return sections
 
 
-def parse_as_bible_localized_reference(query, allow_whole_book=True, allow_whole_chapter=True):
+def parse_as_bible_localized_reference(language_code, query, allow_whole_book=True, allow_whole_chapter=True):
     """
     Returns a normalised Bible localized reference if the query looks like one,
     or None otherwise.
@@ -1083,10 +1109,10 @@ def parse_as_bible_localized_reference(query, allow_whole_book=True, allow_whole
         if not allow_whole_chapter and m.groups()[1] is None:
             return None
         else:
-            return normalise_localized_reference(query)
+            return normalise_localized_reference(language_code, query)
     else:
-        if allow_whole_book and query in BIBLE_BOOK_ABBREVIATIONS:
-            return normalise_localized_reference(query)
+        if allow_whole_book and is_bible_book(language_code, query):
+            return normalise_localized_reference(language_code, query)
 
     return None
 
@@ -1107,7 +1133,9 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
     if query == '':
         raise InvalidVerseReference("Please enter a query term or reference")
 
-    localized_reference = parse_as_bible_localized_reference(query, allow_whole_book=not allow_searches)
+    localized_reference = parse_as_bible_localized_reference(
+        version.language_code,
+        query, allow_whole_book=not allow_searches)
     if localized_reference is not None:
         return [ComboVerse(localized_reference, parse_ref(localized_reference, version, max_length=max_length))]
 
@@ -1125,14 +1153,15 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
 
 def get_whole_book(book_name, version, ensure_text_present=True):
     retval = ComboVerse(book_name,
-                        list(version.verse_set.filter(book_number=BIBLE_BOOKS_DICT[book_name],
-                                                      missing=False)))
+                        list(version.verse_set.filter(
+                            book_number=get_bible_book_number(version.language_code, book_name),
+                            missing=False)))
     if ensure_text_present:
         ensure_text(retval.verses)
     return retval
 
 
-def normalise_localized_reference(query):
+def normalise_localized_reference(language_code, query):
     # Replace 'v' or '.' with ':'
     query = re.sub('(?<![A-Za-z])(v|\.)(?![A-Za-z])', ':', query)
     # Remove spaces around ':'
@@ -1155,8 +1184,8 @@ def normalise_localized_reference(query):
             else:
                 break
 
-    if book_name in BIBLE_BOOK_ABBREVIATIONS:
+    if is_bible_book(language_code, book_name):
         remainder = " ".join(parts[used_parts:])
-        return (BIBLE_BOOK_ABBREVIATIONS[book_name] + " " + remainder).strip()
+        return (get_canonical_bible_book_name(language_code, book_name) + " " + remainder).strip()
     else:
         return None

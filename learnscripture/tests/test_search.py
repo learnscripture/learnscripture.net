@@ -1,4 +1,6 @@
-from bibleverses.models import TextVersion, Verse, VerseSet, VerseSetType, parse_as_bible_localized_reference, quick_find
+from bibleverses.languages import LANGUAGE_CODE_EN
+from bibleverses.models import (TextVersion, Verse, VerseSet, VerseSetType, parse_as_bible_localized_reference,
+                                quick_find)
 
 from .base import TestBase, get_or_create_any_account
 
@@ -24,7 +26,8 @@ class SearchTests(TestBase):
                                 set_type=VerseSetType.SELECTION,
                                 created_by=self.account)
 
-        results = VerseSet.objects.search(VerseSet.objects.all(),
+        results = VerseSet.objects.search(LANGUAGE_CODE_EN,
+                                          VerseSet.objects.all(),
                                           "Stupid")
         self.assertEqual(len(results), 1)
         self.assertIn("For stupid people", (v.name for v in results))
@@ -41,11 +44,13 @@ class SearchTests(TestBase):
             "John 3:16",
         ])
 
-        results = VerseSet.objects.search(VerseSet.objects.all(),
+        results = VerseSet.objects.search(LANGUAGE_CODE_EN,
+                                          VerseSet.objects.all(),
                                           "Gen 1:3")
         self.assertEqual(len(results), 0)
 
-        results = VerseSet.objects.search(VerseSet.objects.all(),
+        results = VerseSet.objects.search(LANGUAGE_CODE_EN,
+                                          VerseSet.objects.all(),
                                           "Gen 1:1")
         self.assertEqual(len(results), 1)
         self.assertEqual(list(results), [vs1])
@@ -87,13 +92,17 @@ class SearchTests(TestBase):
                          "Matthew 4:21")
 
     def test_parse_as_bible_localized_reference(self):
-        self.assertEqual(None, parse_as_bible_localized_reference("Matthew", allow_whole_book=False))
-        self.assertNotEqual(None, parse_as_bible_localized_reference("Matthew", allow_whole_book=True))
-        self.assertEqual(None, parse_as_bible_localized_reference("Matthew 1", allow_whole_chapter=False))
-        self.assertNotEqual(None, parse_as_bible_localized_reference("Matthew 1", allow_whole_chapter=True))
-        self.assertNotEqual(None, parse_as_bible_localized_reference("Matthew 1:1"))
-        self.assertNotEqual(None, parse_as_bible_localized_reference("Matthew 1:1-2"))
-        self.assertNotEqual(None, parse_as_bible_localized_reference("Matthew 1:1-2:3"))
+        self.assertEqual(None, parse_as_bible_localized_reference(LANGUAGE_CODE_EN, "Matthew",
+                                                                  allow_whole_book=False))
+        self.assertNotEqual(None, parse_as_bible_localized_reference(LANGUAGE_CODE_EN, "Matthew",
+                                                                     allow_whole_book=True))
+        self.assertEqual(None, parse_as_bible_localized_reference(LANGUAGE_CODE_EN, "Matthew 1",
+                                                                  allow_whole_chapter=False))
+        self.assertNotEqual(None, parse_as_bible_localized_reference(LANGUAGE_CODE_EN, "Matthew 1",
+                                                                     allow_whole_chapter=True))
+        self.assertNotEqual(None, parse_as_bible_localized_reference(LANGUAGE_CODE_EN, "Matthew 1:1"))
+        self.assertNotEqual(None, parse_as_bible_localized_reference(LANGUAGE_CODE_EN, "Matthew 1:1-2"))
+        self.assertNotEqual(None, parse_as_bible_localized_reference(LANGUAGE_CODE_EN, "Matthew 1:1-2:3"))
 
     def test_quick_find_passage_mode(self):
         version = TextVersion.objects.get(slug='KJV')

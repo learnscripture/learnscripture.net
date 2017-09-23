@@ -129,7 +129,7 @@ def search_esv(version, words):
         results.append((ref, text))
 
     verses = version.get_verses_by_localized_reference_bulk([r for r, t in results],
-                                                  fetch_text=False)
+                                                            fetch_text=False)
     verse_list = []
     for ref, text in results:
         verse = verses[ref]
@@ -144,9 +144,10 @@ ESV_MAX_STORED_CONSECUTIVE_VERSES = 500
 
 def adjust_stored_esv():
     # See terms of usage at http://www.esvapi.org/
-    from bibleverses.models import TextVersion, BIBLE_BOOKS
+    from bibleverses.models import TextVersion
+    from bibleverses.books import get_bible_books
     esv = TextVersion.objects.get(slug='ESV')
-    for book_num, book_name in enumerate(BIBLE_BOOKS):
+    for book_num, book_name in enumerate(get_bible_books(esv.language_code)):
         book_verses = esv.verse_set.filter(book_number=book_num,
                                            missing=False)
         # Work out what half a book is.

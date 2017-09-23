@@ -5,7 +5,8 @@ import random
 import resource
 import timeit
 
-from bibleverses.constants import BIBLE_BOOKS
+from bibleverses.books import get_bible_books
+from bibleverses.languages import LANGUAGE_CODE_EN
 
 from . import serverlogging  # noqa: F401
 from .constants import ALL_TEXT, BIBLE_BOOK_GROUPS, THESAURUS_ANALYSIS
@@ -116,7 +117,7 @@ def test_suggestion_speed():
 
     def f():
         for t in TEXTS:
-            book = random.choice(BIBLE_BOOKS)
+            book = random.choice(get_bible_books(LANGUAGE_CODE_EN))
             generator = generators['NET', book]
             generator.suggestions_for_text(t)
     print("Time per text: " + str(timeit.timeit(f, number=COUNT) / (len(TEXTS) * COUNT)))

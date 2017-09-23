@@ -18,5 +18,15 @@
         "short_name": "NET",
         "language_code": "en"
     }
+},
+{
+    "pk": 3,
+    "model": "bibleverses.textversion",
+    "fields": {
+        "full_name": "Kutsal Kitap Yeni Çeviri",
+        "slug": "TCL02",
+        "short_name": "TCL02",
+        "language_code": "tr"
+    }
 }
 ]
