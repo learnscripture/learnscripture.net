@@ -1086,6 +1086,7 @@ def parse_as_bible_localized_reference(language_code, query, allow_whole_book=Tr
     Pass allow_whole_book=False if queries that are just book names should be rejected.
     Pass allow_whole_chapter=False if queries that are whole chapters should be rejected
     """
+    # TODO - fix 'lower' for Turkish.
     query = query.lower().strip()
 
     bible_ref_re = (

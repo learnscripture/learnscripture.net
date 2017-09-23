@@ -2,9 +2,9 @@
 import unittest2
 
 from accounts.models import Identity
-from bibleverses.languages import LANGUAGE_CODE_EN
+from bibleverses.languages import LANGUAGE_CODE_EN, LANGUAGE_CODE_TR
 from bibleverses.models import (InvalidVerseReference, TextVersion, Verse, VerseSet, VerseSetType, get_passage_sections,
-                                split_into_words)
+                                parse_as_bible_localized_reference, split_into_words)
 from bibleverses.suggestions.modelapi import create_word_suggestion_data, item_suggestions_need_updating
 
 from .base import AccountTestMixin, TestBase, create_account
@@ -187,7 +187,19 @@ class VersionTests(TestBase):
         self.assertEqual(len(vl_2), 6)
 
     def test_turkish_abbreviations(self):
-        pass  # TODO
+        self.assertEqual(parse_as_bible_localized_reference(LANGUAGE_CODE_TR,
+                                                            "1 Timoteos 3:16"),
+                         "1. Timoteos 3:16")
+        self.assertEqual(parse_as_bible_localized_reference(LANGUAGE_CODE_TR,
+                                                            "1.Krallar 2"),
+                         "1. Krallar 2")
+        # TODO
+        # Test:
+        #  - upper/lower casing
+        #  - numbers
+        #  - tolerance of 'i' for 'ı', "o" for "ö" etc.
+        #  - turkish abbreviations.
+        #  - tolerance of missing "'" from book names
 
     def _gen_1_1_suggestions(self):
         # in the beginning...
