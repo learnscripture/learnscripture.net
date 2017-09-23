@@ -18,7 +18,7 @@ from learnscripture.utils.iterators import intersperse
 
 from .books import get_bible_book_name, get_bible_book_number, get_canonical_bible_book_name, is_bible_book
 from .fields import VectorField
-from .languages import DEFAULT_LANGUAGE, LANGUAGE_CHOICES
+from .languages import DEFAULT_LANGUAGE, LANGUAGE_CHOICES, normalise_search_input
 from .services import get_fetch_service, get_search_service
 from .textutils import split_into_words
 
@@ -1086,11 +1086,10 @@ def parse_as_bible_localized_reference(language_code, query, allow_whole_book=Tr
     Pass allow_whole_book=False if queries that are just book names should be rejected.
     Pass allow_whole_chapter=False if queries that are whole chapters should be rejected
     """
-    # TODO - fix 'lower' for Turkish.
-    query = query.lower().strip()
+    query = normalise_search_input(language_code, query)
 
     bible_ref_re = (
-        r'^(?:(?:1|2|3)\s*)?[^\d]*'  # book name
+        r'^(?:(?:1|2|3)\.?\s*)?[^\d]*'  # book name
         r'\s+'                       # space
         r'(\d+)'                     # chapter
         r'\s*('                      # optionally:
@@ -1129,7 +1128,7 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
     # InvalidVerseReference for things that are obviously incorrect e.g. Psalm
     # 151, or asking for too many verses.
 
-    query = query.strip().lower()
+    query = normalise_search_input(version.language_code, query)
 
     if query == '':
         raise InvalidVerseReference("Please enter a query term or reference")
@@ -1163,8 +1162,8 @@ def get_whole_book(book_name, version, ensure_text_present=True):
 
 
 def normalise_localized_reference(language_code, query):
-    # Replace 'v' or '.' with ':'
-    query = re.sub('(?<![A-Za-z])(v|\.)(?![A-Za-z])', ':', query)
+    # Replace 'v' or '.' with ':' if followed by a digit
+    query = re.sub('(?<![A-Za-z])(v|\.)(?=[0-9])', ':', query)
     # Remove spaces around ':'
     query = re.sub('\s*:\s*', ':', query)
     # Remove spaces around '-'
