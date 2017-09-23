@@ -2,7 +2,8 @@
 import unittest2
 
 from accounts.models import Identity
-from bibleverses.languages import LANGUAGE_CODE_EN, LANGUAGE_CODE_TR
+from bibleverses.books import get_bible_books
+from bibleverses.languages import LANGUAGE_CODE_EN, LANGUAGE_CODE_TR, LANGUAGES
 from bibleverses.models import (InvalidVerseReference, TextVersion, Verse, VerseSet, VerseSetType, get_passage_sections,
                                 parse_as_bible_localized_reference, split_into_words)
 from bibleverses.suggestions.modelapi import create_word_suggestion_data, item_suggestions_need_updating
@@ -186,17 +187,28 @@ class VersionTests(TestBase):
         vl_2 = version.get_verse_list('Mezmur 23')
         self.assertEqual(len(vl_2), 6)
 
+    def test_parse_as_bible_localized_reference(self):
+        for lang in LANGUAGES:
+            for book in get_bible_books(lang.code):
+                r = parse_as_bible_localized_reference(lang.code, book,
+                                                       allow_whole_book=True)
+                self.assertEqual(r, book)
+
     def test_turkish_abbreviations(self):
-        self.assertEqual(parse_as_bible_localized_reference(LANGUAGE_CODE_TR,
-                                                            "1 Timoteos 3:16"),
-                         "1. Timoteos 3:16")
-        self.assertEqual(parse_as_bible_localized_reference(LANGUAGE_CODE_TR,
-                                                            "1.Krallar 2"),
-                         "1. Krallar 2")
+        tests = [
+            ("1. Timoteos 3:16", "1. Timoteos 3:16"),
+            ("1 Timoteos 3:16", "1. Timoteos 3:16"),
+            ("1Timoteos 3:16", "1. Timoteos 3:16"),
+            ("1tim 3.16", "1. Timoteos 3:16"),
+        ]
+        for ref, output in tests:
+            self.assertEqual(parse_as_bible_localized_reference(LANGUAGE_CODE_TR,
+                                                                ref),
+                             output,
+                             "Failure parsing " + ref)
         # TODO
         # Test:
         #  - upper/lower casing
-        #  - numbers
         #  - tolerance of 'i' for 'ı', "o" for "ö" etc.
         #  - turkish abbreviations.
         #  - tolerance of missing "'" from book names

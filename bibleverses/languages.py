@@ -35,3 +35,8 @@ def get_language(code):
 
 
 DEFAULT_LANGUAGE = get_language('en')
+
+
+def normalise_search_input(language_code, input):
+    # TODO - fix 'lower' for Turkish.
+    return input.strip().lower()
