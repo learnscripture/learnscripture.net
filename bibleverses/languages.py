@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 import attr
 
 # We make Language a static class rather than DB, because
@@ -12,9 +13,11 @@ class Language(object):
 
 
 LANGUAGE_CODE_EN = 'en'
+LANGUAGE_CODE_TR = 'tr'
 
 LANGUAGES = [
     Language(code=LANGUAGE_CODE_EN, display_name='English'),
+    Language(code=LANGUAGE_CODE_TR, display_name='Türkçe'),
 ]
 
 LANGUAGES_LOOKUP = {
