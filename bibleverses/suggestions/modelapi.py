@@ -8,7 +8,7 @@ import logging
 
 from django.db import transaction
 
-from bibleverses.constants import BIBLE_BOOKS
+from bibleverses.books import get_bible_book_name, get_bible_books
 from bibleverses.models import TextType, TextVersion, Verse, WordSuggestionData, ensure_text, get_whole_book
 from bibleverses.services import partial_data_available
 from learnscripture.utils.iterators import chunks
@@ -146,12 +146,13 @@ def generate_suggestions(version, localized_reference=None, missing_only=True,
                          disallow_loading=False,
                          text_saved=None):
     analysis_storage = AnalysisStorage()
+    language_code = version.language_code
     if version.text_type == TextType.BIBLE:
         if localized_reference is not None:
             v = version.get_verse_list(localized_reference)[0]
             if text_saved is not None:
                 v.text_saved = text_saved
-            book = BIBLE_BOOKS[v.book_number]
+            book = get_bible_book_name(language_code, v.book_number)
             items = [v]
             training_texts = BibleTrainingTexts(text=version, books=[book],
                                                 disallow_loading=disallow_loading)
@@ -161,7 +162,7 @@ def generate_suggestions(version, localized_reference=None, missing_only=True,
                 version, items,
                 training_texts, localized_reference=localized_reference, missing_only=missing_only)
         else:
-            for book in BIBLE_BOOKS:
+            for book in get_bible_books(language_code):
                 generate_suggestions_for_book(analysis_storage, version, book, missing_only=missing_only)
 
     elif version.text_type == TextType.CATECHISM:

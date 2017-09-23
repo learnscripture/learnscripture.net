@@ -431,5 +431,96 @@
         "verse_number": 3,
         "bible_verse_number": 28366
     }
+},
+{
+    "pk": null,
+    "model": "bibleverses.verse",
+    "fields": {
+        "localized_reference": "Mezmur 23:1",
+        "chapter_number": 23,
+        "text_saved": "RAB çobanımdır,\nEksiğim olmaz",
+        "book_number": 18,
+        "version": 3,
+        "verse_number": 1,
+        "bible_verse_number": 14236
+    }
+},
+{
+    "pk": null,
+    "model": "bibleverses.verse",
+    "fields": {
+        "localized_reference": "Mezmur 23:2",
+        "chapter_number": 23,
+        "text_saved": "Beni yemyeşil çayırlarda yatırır,\nSakin suların kıyısına götürür.",
+        "book_number": 18,
+        "version": 3,
+        "verse_number": 2,
+        "bible_verse_number": 14237
+    }
+},
+{
+    "pk": null,
+    "model": "bibleverses.verse",
+    "fields": {
+        "localized_reference": "Mezmur 23:3",
+        "chapter_number": 23,
+        "text_saved": "İçimi tazeler,\nAdı uğruna bana doğru yollarda öncülük eder.",
+        "book_number": 18,
+        "version": 3,
+        "verse_number": 3,
+        "bible_verse_number": 14238
+    }
+},
+{
+    "pk": null,
+    "model": "bibleverses.verse",
+    "fields": {
+        "localized_reference": "Mezmur 23:4",
+        "chapter_number": 23,
+        "text_saved": "Karanlık ölüm vadisinden geçsem bile,\nKötülükten korkmam.\nÇünkü sen benimlesin.\nÇomağın, değneğin güven verir bana.",
+        "book_number": 18,
+        "version": 3,
+        "verse_number": 4,
+        "bible_verse_number": 14239
+    }
+},
+{
+    "pk": null,
+    "model": "bibleverses.verse",
+    "fields": {
+        "localized_reference": "Mezmur 23:5",
+        "chapter_number": 23,
+        "text_saved": "Düşmanlarımın önünde bana sofra kurarsın,\nBaşıma yağ sürersin,\nKâsem taşıyor.",
+        "book_number": 18,
+        "version": 3,
+        "verse_number": 5,
+        "bible_verse_number": 14240
+    }
+},
+{
+    "pk": null,
+    "model": "bibleverses.verse",
+    "fields": {
+        "localized_reference": "Mezmur 23:6",
+        "chapter_number": 23,
+        "text_saved": "Ömrüm boyunca yalnız iyilik ve sevgi izleyecek beni,\nHep RAB'bin evinde oturacağım.",
+        "book_number": 18,
+        "version": 3,
+        "verse_number": 6,
+        "bible_verse_number": 14241
+    }
+},
+{
+    "pk": null,
+    "model": "bibleverses.verse",
+    "fields": {
+        "localized_reference": "Yuhanna 3:16",
+        "chapter_number": 3,
+        "text_saved": "“Çünkü Tanrı dünyayı o kadar çok sevdi ki, biricik Oğlu'nu verdi. Öyle ki, O'na iman edenlerin hiçbiri mahvolmasın, hepsi sonsuz yaşama kavuşsun.",
+        "book_number": 42,
+        "version": 3,
+        "verse_number": 16,
+        "bible_verse_number": 26136
+    }
 }
 ]

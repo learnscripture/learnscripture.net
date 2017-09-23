@@ -11,8 +11,10 @@ class Language(object):
     display_name = attr.ib()
 
 
+LANGUAGE_CODE_EN = 'en'
+
 LANGUAGES = [
-    Language(code='en', display_name='English'),
+    Language(code=LANGUAGE_CODE_EN, display_name='English'),
 ]
 
 LANGUAGES_LOOKUP = {
