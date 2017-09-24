@@ -59,13 +59,6 @@ class VerseTests(TestBase):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
 
-    def test_last_verse(self):
-        v = Verse.objects.get(localized_reference='Psalm 23:6', version__slug='KJV')
-        self.assertTrue(v.is_last_verse_in_chapter())
-
-        v2 = Verse.objects.get(localized_reference='Psalm 23:5', version__slug='KJV')
-        self.assertFalse(v2.is_last_verse_in_chapter())
-
     def test_mark_missing(self):
         version = TextVersion.objects.get(slug='NET')
         # Sanity check:

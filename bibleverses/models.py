@@ -307,12 +307,6 @@ class Verse(models.Model):
     def book_name(self):
         return get_bible_book_name(self.version.language_code, self.book_number)
 
-    def is_last_verse_in_chapter(self):
-        return not self.version.verse_set.filter(
-            book_number=self.book_number,
-            chapter_number=self.chapter_number,
-            verse_number__gt=self.verse_number).exists()
-
     def natural_key(self):
         return (self.version.slug, self.localized_reference)
 
@@ -1048,7 +1042,6 @@ def get_passage_sections(language_code, verse_list, breaks):
     if isinstance(first_parsed_ref, tuple):
         first_parsed_ref = first_parsed_ref[0]
 
-    verse_number = first_parsed_ref.verse_number
     chapter_number = first_parsed_ref.chapter_number
     book = first_parsed_ref.book
     for b in breaks.split(','):
