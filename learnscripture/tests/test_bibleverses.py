@@ -436,17 +436,20 @@ class SetupEsvMixin(object):
         esv.verse_set.create(localized_reference='John 3:16',
                              book_number=42,
                              chapter_number=3,
-                             verse_number=16,
+                             first_verse_number=16,
+                             last_verse_number=16,
                              bible_verse_number=26136)
         esv.verse_set.create(localized_reference='John 3:17',
                              book_number=42,
                              chapter_number=3,
-                             verse_number=17,
+                             first_verse_number=17,
+                             last_verse_number=17,
                              bible_verse_number=26137)
         esv.verse_set.create(localized_reference='John 5:4',
                              book_number=42,
                              chapter_number=5,
-                             verse_number=4,
+                             first_verse_number=4,
+                             last_verse_number=4,
                              bible_verse_number=26214)
         return esv
 

@@ -223,7 +223,8 @@ class ComboVerse(object):
         self.localized_reference = localized_reference
         self.book_name = verse_list[0].book_name
         self.chapter_number = verse_list[0].chapter_number
-        self.verse_number = verse_list[0].verse_number
+        self.first_verse_number = verse_list[0].first_verse_number
+        self.last_verse_number = verse_list[-1].last_verse_number
         self.bible_verse_number = verse_list[0].bible_verse_number
         self.verses = verse_list
 
@@ -256,7 +257,7 @@ class VerseManager(models.Manager):
         return models.Manager.raw(self, """
           SELECT id, version_id, localized_reference, text_saved,
                  ts_headline(text_saved, query, 'StartSel = **, StopSel = **, HighlightAll=TRUE') as highlighted_text,
-                 book_number, chapter_number, verse_number,
+                 book_number, chapter_number, first_verse_number, last_verse_number,
                  bible_verse_number, ts_rank(text_tsv, query) as rank
           FROM bibleverses_verse, to_tsquery(""" + search_clause + """) query
           WHERE
@@ -286,7 +287,11 @@ class Verse(models.Model):
     # Public facing fields are 1-indexed, others are 0-indexed.
     book_number = models.PositiveSmallIntegerField()  # 0-indexed
     chapter_number = models.PositiveSmallIntegerField()  # 1-indexed
-    verse_number = models.PositiveSmallIntegerField()  # 1-indexed
+    first_verse_number = models.PositiveSmallIntegerField()  # 1-indexed
+    # Usually last_verse_number is equal to first_verse_number
+    last_verse_number = models.PositiveSmallIntegerField()  # 1-indexed
+
+    # Position within the Bible:
     bible_verse_number = models.PositiveSmallIntegerField()  # 0-indexed
 
     # This field is to cope with versions where a specific verse is entirely
@@ -302,6 +307,13 @@ class Verse(models.Model):
                            self.version.slug, self.localized_reference)
             ensure_text([self])
         return self.text_saved
+
+    @cached_property
+    def display_verse_number(self):
+        if self.last_verse_number == self.first_verse_number:
+            return str(self.first_verse_number)
+        else:
+            return "{0}-{1}".format(self.first_verse_number, self.last_verse_number)
 
     @property
     def book_name(self):
