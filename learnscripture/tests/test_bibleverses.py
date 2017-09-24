@@ -3,7 +3,7 @@ import unittest2
 
 from accounts.models import Identity
 from bibleverses.books import get_bible_books
-from bibleverses.languages import LANGUAGE_CODE_EN, LANGUAGE_CODE_TR, LANGUAGES
+from bibleverses.languages import LANGUAGE_CODE_EN, LANGUAGE_CODE_TR, LANGUAGES, normalise_search_input_turkish
 from bibleverses.models import (InvalidVerseReference, TextVersion, Verse, VerseSet, VerseSetType, get_passage_sections,
                                 parse_as_bible_localized_reference, split_into_words)
 from bibleverses.suggestions.modelapi import create_word_suggestion_data, item_suggestions_need_updating
@@ -194,24 +194,32 @@ class VersionTests(TestBase):
                                                        allow_whole_book=True)
                 self.assertEqual(r, book)
 
-    def test_turkish_abbreviations(self):
+    def test_turkish_reference_parsing(self):
         tests = [
+            # Different numbering styles for book names:
             ("1. Timoteos 3:16", "1. Timoteos 3:16"),
             ("1 Timoteos 3:16", "1. Timoteos 3:16"),
             ("1Timoteos 3:16", "1. Timoteos 3:16"),
             ("1tim 3.16", "1. Timoteos 3:16"),
+            # Apostrophes optional
+            ("Yasanın Tekrarı 1", "Yasa'nın Tekrarı 1"),
+            # Turkish people often miss out accents or use the wrong kind of 'i'
+            # etc. when typing, especially as keyboards may not support correct
+            # characters.
+            ("YARATILIS 2:3", "Yaratılış 2:3"),
+            ("YARATİLİS 2:3", "Yaratılış 2:3"),
+            ("yaratilis 2:3", "Yaratılış 2:3"),
+            ("colde sayim 4:5", "Çölde Sayım 4:5"),
+            ("EYÜP 1", "Eyüp 1"),
         ]
         for ref, output in tests:
             self.assertEqual(parse_as_bible_localized_reference(LANGUAGE_CODE_TR,
                                                                 ref),
                              output,
-                             "Failure parsing " + ref)
-        # TODO
-        # Test:
-        #  - upper/lower casing
-        #  - tolerance of 'i' for 'ı', "o" for "ö" etc.
-        #  - turkish abbreviations.
-        #  - tolerance of missing "'" from book names
+                             "Failure parsing '{0}'".format(ref))
+
+        self.assertEqual(normalise_search_input_turkish('  ÂâİIiıÇçŞşöü  '),
+                         'aaiiiiccssou')
 
     def _gen_1_1_suggestions(self):
         # in the beginning...
