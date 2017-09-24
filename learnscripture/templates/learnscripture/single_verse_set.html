@@ -22,7 +22,7 @@
           {% ifchanged v.verse.chapter_number %}
             <span class="chapternumber">{{ v.verse.chapter_number }}</span>
           {% endifchanged %}
-          <span class="versenumber">{{ v.verse.verse_number }}</span>
+          <span class="versenumber">{{ v.verse.display_verse_number }}</span>
           {{ v.verse.text }}
         </div>
       {% endfor %}

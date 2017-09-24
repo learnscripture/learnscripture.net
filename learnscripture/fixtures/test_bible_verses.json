@@ -4,7 +4,8 @@
         "chapter_number" : 1,
         "localized_reference" : "Genesis 1:1",
         "text_saved" : "In the beginning God created the heaven and the earth. ",
-        "verse_number" : 1,
+        "first_verse_number" : 1,
+        "last_verse_number" : 1,
         "version" : 1
       },
     "model" : "bibleverses.verse",
@@ -15,7 +16,8 @@
         "chapter_number" : 1,
         "localized_reference" : "Genesis 1:2",
         "text_saved" : "And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters. ",
-        "verse_number" : 2,
+        "first_verse_number" : 2,
+        "last_verse_number" : 2,
         "version" : 1
       },
     "model" : "bibleverses.verse",
@@ -26,7 +28,8 @@
         "chapter_number" : 1,
         "localized_reference" : "Genesis 1:3",
         "text_saved" : "And God said, Let there be light: and there was light. ",
-        "verse_number" : 3,
+        "first_verse_number" : 3,
+        "last_verse_number" : 3,
         "version" : 1
       },
     "model" : "bibleverses.verse",
@@ -37,7 +40,8 @@
         "chapter_number" : 1,
         "localized_reference" : "Genesis 1:4",
         "text_saved" : "And God saw the light, that it was good: and God divided the light from the darkness. ",
-        "verse_number" : 4,
+        "first_verse_number" : 4,
+        "last_verse_number" : 4,
         "version" : 1
       },
     "model" : "bibleverses.verse",
@@ -48,7 +52,8 @@
         "chapter_number" : 1,
         "localized_reference" : "Genesis 1:5",
         "text_saved" : "And God called the light Day, and the darkness he called Night. And the evening and the morning were the first day. ",
-        "verse_number" : 5,
+        "first_verse_number" : 5,
+        "last_verse_number" : 5,
         "version" : 1
       },
     "model" : "bibleverses.verse",
@@ -59,7 +64,8 @@
         "chapter_number" : 1,
         "localized_reference" : "Genesis 1:6",
         "text_saved" : "And God said, Let there be a firmament in the midst of the waters, and let it divide the waters from the waters. ",
-        "verse_number" : 6,
+        "first_verse_number" : 6,
+        "last_verse_number" : 6,
         "version" : 1
       },
     "model" : "bibleverses.verse",
@@ -70,7 +76,8 @@
         "chapter_number" : 1,
         "localized_reference" : "Genesis 1:7",
         "text_saved" : "And God made the firmament, and divided the waters which were under the firmament from the waters which were above the firmament: and it was so. ",
-        "verse_number" : 7,
+        "first_verse_number" : 7,
+        "last_verse_number" : 7,
         "version" : 1
       },
     "model" : "bibleverses.verse",
@@ -82,7 +89,8 @@
         "localized_reference" : "Genesis 1:8",
         "text_saved" : "And God called the firmament Heaven. And the evening and the morning were the second day. ",
         "text_tsv": "'call':3 'day':16 'even':9 'firmament':5 'god':2 'heaven':6 'morn':12 'second':15",
-        "verse_number" : 8,
+        "first_verse_number" : 8,
+        "last_verse_number" : 8,
         "version" : 1
       },
     "model" : "bibleverses.verse",
@@ -93,7 +101,8 @@
         "chapter_number" : 1,
         "localized_reference" : "Genesis 1:9",
         "text_saved" : "And God said, Let the waters under the heaven be gathered together unto one place, and let the dry land appear: and it was so. ",
-        "verse_number" : 9,
+        "first_verse_number" : 9,
+        "last_verse_number" : 9,
         "version" : 1
       },
     "model" : "bibleverses.verse",
@@ -104,7 +113,8 @@
         "chapter_number" : 1,
         "localized_reference" : "Genesis 1:10",
         "text_saved" : "And God called the dry land Earth; and the gathering together of the waters called he Seas: and God saw that it was good. ",
-        "verse_number" : 10,
+        "first_verse_number" : 10,
+        "last_verse_number" : 10,
         "version" : 1
       },
     "model" : "bibleverses.verse",
@@ -115,7 +125,8 @@
         "chapter_number" : 2,
         "localized_reference" : "Genesis 2:1",
         "text_saved" : "Thus the heavens and the earth were finished, and all the host of them.",
-        "verse_number" : 1,
+        "first_verse_number" : 1,
+        "last_verse_number" : 1,
         "version" : 1
       },
     "model" : "bibleverses.verse",
@@ -126,7 +137,8 @@
         "chapter_number" : 2,
         "localized_reference" : "Genesis 2:2",
         "text_saved" : "And on the seventh day God ended his work which he had made; and he rested on the seventh day from all his work which he had made.",
-        "verse_number" : 2,
+        "first_verse_number" : 2,
+        "last_verse_number" : 2,
         "version" : 1
       },
     "model" : "bibleverses.verse",
@@ -142,7 +154,8 @@
         "text_saved": "The LORD is my shepherd--I shall not want. ",
         "book_number": 18,
         "version": 1,
-        "verse_number": 1,
+        "first_verse_number": 1,
+        "last_verse_number": 1,
         "bible_verse_number": 14236
     }
 },
@@ -155,7 +168,8 @@
         "text_saved": "He maketh me to lie down in green pastures: he leadeth me beside the still waters. ",
         "book_number": 18,
         "version": 1,
-        "verse_number": 2,
+        "first_verse_number": 2,
+        "last_verse_number": 2,
         "bible_verse_number": 14237
     }
 },
@@ -168,7 +182,8 @@
         "text_saved": "He restoreth my soul: he leadeth me in the paths of righteousness for his name's sake. ",
         "book_number": 18,
         "version": 1,
-        "verse_number": 3,
+        "first_verse_number": 3,
+        "last_verse_number": 3,
         "bible_verse_number": 14238
     }
 },
@@ -181,7 +196,8 @@
         "text_saved": "Yea, though I walk through the valley of the shadow of death, I will fear no evil: for thou art with me; thy rod and thy staff they comfort me. ",
         "book_number": 18,
         "version": 1,
-        "verse_number": 4,
+        "first_verse_number": 4,
+        "last_verse_number": 4,
         "bible_verse_number": 14239
     }
 },
@@ -194,7 +210,8 @@
         "text_saved": "Thou preparest a table before me in the presence of mine enemies: thou anointest my head with oil; my cup runneth over. ",
         "book_number": 18,
         "version": 1,
-        "verse_number": 5,
+        "first_verse_number": 5,
+        "last_verse_number": 5,
         "bible_verse_number": 14240
     }
 },
@@ -207,7 +224,8 @@
         "text_saved": "Surely goodness and mercy shall follow me all the days of my life: and I will dwell in the house of the LORD for ever. ",
         "book_number": 18,
         "version": 1,
-        "verse_number": 6,
+        "first_verse_number": 6,
+        "last_verse_number": 6,
         "bible_verse_number": 14241
     }
 },
@@ -220,7 +238,8 @@
         "text_saved": "The LORD is my shepherd, I lack nothing. ",
         "book_number": 18,
         "version": 2,
-        "verse_number": 1,
+        "first_verse_number": 1,
+        "last_verse_number": 1,
         "bible_verse_number": 14236
     }
 },
@@ -233,7 +252,8 @@
         "text_saved": "He takes me to lush pastures, he leads me to refreshing water. ",
         "book_number": 18,
         "version": 2,
-        "verse_number": 2,
+        "first_verse_number": 2,
+        "last_verse_number": 2,
         "bible_verse_number": 14237
     }
 },
@@ -246,7 +266,8 @@
         "text_saved": "He restores my strength. He leads me down the right paths for the sake of his reputation. ",
         "book_number": 18,
         "version": 2,
-        "verse_number": 3,
+        "first_verse_number": 3,
+        "last_verse_number": 3,
         "bible_verse_number": 14238
     }
 },
@@ -259,7 +280,8 @@
         "text_saved": "Even when I must walk through the darkest valley, I fear no danger, for you are with me; your rod and your staff reassure me. ",
         "book_number": 18,
         "version": 2,
-        "verse_number": 4,
+        "first_verse_number": 4,
+        "last_verse_number": 4,
         "bible_verse_number": 14239
     }
 },
@@ -272,7 +294,8 @@
         "text_saved": "You prepare a feast before me in plain sight of my enemies. You refresh my head with oil; my cup is completely full. ",
         "book_number": 18,
         "version": 2,
-        "verse_number": 5,
+        "first_verse_number": 5,
+        "last_verse_number": 5,
         "bible_verse_number": 14240
     }
 },
@@ -285,7 +308,8 @@
         "text_saved": "Surely your goodness and faithfulness will pursue me all my days, and I will live in the LORD's house for the rest of my life. ",
         "book_number": 18,
         "version": 2,
-        "verse_number": 6,
+        "first_verse_number": 6,
+        "last_verse_number": 6,
         "bible_verse_number": 14241
     }
 },
@@ -298,7 +322,8 @@
         "text_saved": "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life. ",
         "book_number": 42,
         "version": 1,
-        "verse_number": 16,
+        "first_verse_number": 16,
+        "last_verse_number": 16,
         "bible_verse_number": 26136
     }
 },
@@ -311,7 +336,8 @@
         "text_saved": "For this is the way God loved the world: He gave his one and only Son, so that everyone who believes in him will not perish but have eternal life. ",
         "book_number": 42,
         "version": 2,
-        "verse_number": 16,
+        "first_verse_number": 16,
+        "last_verse_number": 16,
         "bible_verse_number": 26136
     }
 },
@@ -324,7 +350,8 @@
         "text_saved": "Jesus saith unto him, I am the way, the truth, and the life: no man cometh unto the Father, but by me. ",
         "book_number": 42,
         "version": 1,
-        "verse_number": 6,
+        "first_verse_number": 6,
+        "last_verse_number": 6,
         "bible_verse_number": 26674
     }
 },
@@ -337,7 +364,8 @@
         "text_saved": "Jesus replied, \"I am the way, and the truth, and the life. No one comes to the Father except through me.\"",
         "book_number": 42,
         "version": 2,
-        "verse_number": 6,
+        "first_verse_number": 6,
+        "last_verse_number": 6,
         "bible_verse_number": 26674
     }
 },
@@ -350,7 +378,8 @@
         "text_saved": "A great number of sick, blind, lame, and paralyzed people were lying in these walkways.",
         "book_number": 42,
         "version": 2,
-        "verse_number": 3,
+        "first_verse_number": 3,
+        "last_verse_number": 3,
         "bible_verse_number": 26213
     }
 },
@@ -363,7 +392,8 @@
         "text_saved": "",
         "book_number": 42,
         "version": 2,
-        "verse_number": 3,
+        "first_verse_number": 3,
+        "last_verse_number": 3,
         "bible_verse_number": 26214
     }
 },
@@ -376,7 +406,8 @@
         "text_saved": "For by grace you are saved through faith, and this is not from yourselves, it is the gift of",
         "book_number": 48,
         "version": 2,
-        "verse_number": 8,
+        "first_verse_number": 8,
+        "last_verse_number": 8,
         "bible_verse_number": 29237
     }
 },
@@ -389,7 +420,8 @@
         "text_saved": "For by grace are ye saved through faith; and that not of yourselves: it is the gift of God:",
         "book_number": 48,
         "version": 1,
-        "verse_number": 8,
+        "first_verse_number": 8,
+        "last_verse_number": 8,
         "bible_verse_number": 29237
     }
 },
@@ -402,7 +434,8 @@
         "text_saved" : "Going on from there he saw two other brothers, James the son of Zebedee and John his brother, in a boat with Zebedee their father, mending their nets. Then he called them. ",
         "book_number" : 39,
         "version" : 2,
-        "verse_number" : 21,
+        "first_verse_number" : 21,
+        "last_verse_number" : 21,
         "bible_verse_number" : 23230
      }
 },
@@ -415,7 +448,8 @@
         "text_saved": "The song of songs, which is Solomon's.",
         "book_number": 21,
         "version": 1,
-        "verse_number": 1,
+        "first_verse_number": 1,
+        "last_verse_number": 1,
         "bible_verse_number": 17538
     }
 },
@@ -428,7 +462,8 @@
         "text_saved": "Grace be unto you, and peace, from God our Father, and from the Lord Jesus Christ.",
         "book_number": 45,
         "version": 1,
-        "verse_number": 3,
+        "first_verse_number": 3,
+        "last_verse_number": 3,
         "bible_verse_number": 28366
     }
 },
@@ -441,7 +476,8 @@
         "text_saved": "RAB çobanımdır,\nEksiğim olmaz",
         "book_number": 18,
         "version": 3,
-        "verse_number": 1,
+        "first_verse_number": 1,
+        "last_verse_number": 1,
         "bible_verse_number": 14236
     }
 },
@@ -454,7 +490,8 @@
         "text_saved": "Beni yemyeşil çayırlarda yatırır,\nSakin suların kıyısına götürür.",
         "book_number": 18,
         "version": 3,
-        "verse_number": 2,
+        "first_verse_number": 2,
+        "last_verse_number": 2,
         "bible_verse_number": 14237
     }
 },
@@ -467,7 +504,8 @@
         "text_saved": "İçimi tazeler,\nAdı uğruna bana doğru yollarda öncülük eder.",
         "book_number": 18,
         "version": 3,
-        "verse_number": 3,
+        "first_verse_number": 3,
+        "last_verse_number": 3,
         "bible_verse_number": 14238
     }
 },
@@ -480,7 +518,8 @@
         "text_saved": "Karanlık ölüm vadisinden geçsem bile,\nKötülükten korkmam.\nÇünkü sen benimlesin.\nÇomağın, değneğin güven verir bana.",
         "book_number": 18,
         "version": 3,
-        "verse_number": 4,
+        "first_verse_number": 4,
+        "last_verse_number": 4,
         "bible_verse_number": 14239
     }
 },
@@ -493,7 +532,8 @@
         "text_saved": "Düşmanlarımın önünde bana sofra kurarsın,\nBaşıma yağ sürersin,\nKâsem taşıyor.",
         "book_number": 18,
         "version": 3,
-        "verse_number": 5,
+        "first_verse_number": 5,
+        "last_verse_number": 5,
         "bible_verse_number": 14240
     }
 },
@@ -506,7 +546,8 @@
         "text_saved": "Ömrüm boyunca yalnız iyilik ve sevgi izleyecek beni,\nHep RAB'bin evinde oturacağım.",
         "book_number": 18,
         "version": 3,
-        "verse_number": 6,
+        "first_verse_number": 6,
+        "last_verse_number": 6,
         "bible_verse_number": 14241
     }
 },
@@ -519,7 +560,8 @@
         "text_saved": "“Çünkü Tanrı dünyayı o kadar çok sevdi ki, biricik Oğlu'nu verdi. Öyle ki, O'na iman edenlerin hiçbiri mahvolmasın, hepsi sonsuz yaşama kavuşsun.",
         "book_number": 42,
         "version": 3,
-        "verse_number": 16,
+        "first_verse_number": 16,
+        "last_verse_number": 16,
         "bible_verse_number": 26136
     }
 }

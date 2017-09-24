@@ -414,7 +414,7 @@ class VerseFind(ApiView):
                     html_text=html_format_text(v),
                     book_number=v.book_number,
                     chapter_number=v.chapter_number,
-                    verse_number=v.verse_number,
+                    display_verse_number=v.display_verse_number,
                     bible_verse_number=v.bible_verse_number
                 ))
             item['verses'] = verses2
