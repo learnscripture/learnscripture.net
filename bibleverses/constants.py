@@ -15,7 +15,8 @@ _BIBLE_BOOK_NUMBERS_FOR_LANG = {
 }
 
 
-# All possible bible book names, lower case, matched to canonical name
+# All possible bible book names, normalised (lower case plus other transformations),
+# matched to canonical name:
 _BIBLE_BOOK_ABBREVIATIONS_FOR_LANG = {}
 
 
