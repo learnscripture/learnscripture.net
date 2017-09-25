@@ -40,13 +40,13 @@ def bad_punctuation(text):
     return False
 
 
-def normalise_word(word):
+def normalize_word(word):
     word = word.strip(PUNCTUATION_OR_WHITESPACE)
     return word.lower()
 
 
 def split_into_words_for_suggestions(text):
-    return list(map(normalise_word, split_into_words(text)))
+    return list(map(normalize_word, split_into_words(text)))
 
 
 def split_into_sentences(text):

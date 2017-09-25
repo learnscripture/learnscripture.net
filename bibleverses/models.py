@@ -18,7 +18,7 @@ from learnscripture.utils.iterators import intersperse
 
 from .books import get_bible_book_name, get_bible_book_number, get_canonical_bible_book_name, is_bible_book
 from .fields import VectorField
-from .languages import DEFAULT_LANGUAGE, LANGUAGE_CHOICES, normalise_search_input
+from .languages import DEFAULT_LANGUAGE, LANGUAGE_CHOICES, normalize_search_input
 from .services import get_fetch_service, get_search_service
 from .textutils import split_into_words
 
@@ -245,7 +245,7 @@ class VerseManager(models.Manager):
         return self.get(version__slug=version_slug, localized_reference=localized_reference)
 
     def text_search(self, query, version, limit=10):
-        # First remove anything recognised by postgres as an operator.
+        # First remove anything recognized by postgres as an operator.
         for s in SEARCH_CHARS:
             query = query.replace(s, " ")
         words = query.split(' ')
@@ -283,7 +283,7 @@ class Verse(models.Model):
     text_tsv = VectorField()
     text_fetched_at = models.DateTimeField(null=True, blank=True)
 
-    # De-normalised fields
+    # De-normalized fields
     # Public facing fields are 1-indexed, others are 0-indexed.
     book_number = models.PositiveSmallIntegerField()  # 0-indexed
     chapter_number = models.PositiveSmallIntegerField()  # 1-indexed
@@ -540,7 +540,7 @@ class VerseSet(models.Model):
     created_by = models.ForeignKey('accounts.Account', on_delete=models.CASCADE,
                                    related_name='verse_sets_created')
 
-    # Essentially denormalised field, to make it quick to check for duplicate
+    # Essentially denormalized field, to make it quick to check for duplicate
     # passage sets:
     passage_id = models.CharField(max_length=203,  # 100 for reference * 2 + 3 for ' - '
                                   default="")
@@ -722,7 +722,7 @@ class UserVerseStatus(models.Model):
 
     def simple_strength(self):
         """
-        Returns the strength normalised to a 0 to 10 scale for presentation in UI.
+        Returns the strength normalized to a 0 to 10 scale for presentation in UI.
         """
         return min(10, int(math.floor((self.strength / memorymodel.LEARNT) * 10)))
 
@@ -817,7 +817,7 @@ def parse_ref(localized_reference,
     checking is done (the input is trusted), and a ParsedReference object is returned
     instead, or a two tuple (start ParsedReference, end ParsedReference)
     """
-    # This function is strict, and expects reference in normalised format.
+    # This function is strict, and expects reference in normalized format.
     # Frontend function should deal with tolerance, to ensure that VerseChoice
     # only ever stores a canonical form.
 
@@ -1085,13 +1085,13 @@ def get_passage_sections(language_code, verse_list, breaks):
 
 def parse_as_bible_localized_reference(language_code, query, allow_whole_book=True, allow_whole_chapter=True):
     """
-    Returns a normalised Bible localized reference if the query looks like one,
+    Returns a normalized Bible localized reference if the query looks like one,
     or None otherwise.
 
     Pass allow_whole_book=False if queries that are just book names should be rejected.
     Pass allow_whole_chapter=False if queries that are whole chapters should be rejected
     """
-    query = normalise_search_input(language_code, query)
+    query = normalize_search_input(language_code, query)
 
     bible_ref_re = (
         r'^(?:(?:1|2|3)\.?\s*)?[^\d]*'  # book name
@@ -1114,10 +1114,10 @@ def parse_as_bible_localized_reference(language_code, query, allow_whole_book=Tr
         if not allow_whole_chapter and m.groups()[1] is None:
             return None
         else:
-            return normalise_localized_reference(language_code, query)
+            return normalize_localized_reference(language_code, query)
     else:
         if allow_whole_book and is_bible_book(language_code, query):
-            return normalise_localized_reference(language_code, query)
+            return normalize_localized_reference(language_code, query)
 
     return None
 
@@ -1133,7 +1133,7 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
     # InvalidVerseReference for things that are obviously incorrect e.g. Psalm
     # 151, or asking for too many verses.
 
-    query = normalise_search_input(version.language_code, query)
+    query = normalize_search_input(version.language_code, query)
 
     if query == '':
         raise InvalidVerseReference("Please enter a query term or reference")
@@ -1145,7 +1145,7 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
         return [ComboVerse(localized_reference, parse_ref(localized_reference, version, max_length=max_length))]
 
     if not allow_searches:
-        raise InvalidVerseReference("Verse reference not recognised")
+        raise InvalidVerseReference("Verse reference not recognized")
 
     # Do a search:
     searcher = get_search_service(version.slug)
@@ -1166,7 +1166,7 @@ def get_whole_book(book_name, version, ensure_text_present=True):
     return retval
 
 
-def normalise_localized_reference(language_code, query):
+def normalize_localized_reference(language_code, query):
     # Replace 'v' or '.' with ':' if followed by a digit
     query = re.sub('(?<![A-Za-z])(v|\.)(?=[0-9])', ':', query)
     # Remove spaces around ':'
@@ -1177,7 +1177,7 @@ def normalise_localized_reference(language_code, query):
     # Remove multiple spaces
     query = re.sub(' +', ' ', query)
 
-    # Normalise book names if possible.
+    # Normalize book names if possible.
     parts = query.split(' ')
     book_name = parts[0]
     used_parts = 1

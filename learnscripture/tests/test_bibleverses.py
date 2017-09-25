@@ -3,7 +3,7 @@ import unittest2
 
 from accounts.models import Identity
 from bibleverses.books import get_bible_books
-from bibleverses.languages import LANGUAGE_CODE_EN, LANGUAGE_CODE_TR, LANGUAGES, normalise_search_input_turkish
+from bibleverses.languages import LANGUAGE_CODE_EN, LANGUAGE_CODE_TR, LANGUAGES, normalize_search_input_turkish
 from bibleverses.models import (InvalidVerseReference, TextVersion, Verse, VerseSet, VerseSetType, get_passage_sections,
                                 parse_as_bible_localized_reference, split_into_words)
 from bibleverses.suggestions.modelapi import create_word_suggestion_data, item_suggestions_need_updating
@@ -211,7 +211,7 @@ class VersionTests(TestBase):
                              output,
                              "Failure parsing '{0}'".format(ref))
 
-        self.assertEqual(normalise_search_input_turkish('  ÂâİIiıÇçŞşöü  '),
+        self.assertEqual(normalize_search_input_turkish('  ÂâİIiıÇçŞşöü  '),
                          'aaiiiiccssou')
 
     def _gen_1_1_suggestions(self):

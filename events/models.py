@@ -349,7 +349,7 @@ class Event(models.Model):
     parent_event = models.ForeignKey('self', on_delete=models.CASCADE,
                                      null=True, blank=True)
 
-    # Denormalised value
+    # Denormalized value
     url = models.CharField(max_length=255, blank=True)
 
     objects = EventManager()

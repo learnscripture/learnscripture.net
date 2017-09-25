@@ -241,7 +241,7 @@ class Account(AbstractBaseUser):
         elif ipn_obj.settle_currency == settings.VALID_RECEIVE_CURRENCY:
             amount = ipn_obj.settle_amount
         else:
-            raise ValueError("Unrecognised currency")
+            raise ValueError("Unrecognized currency")
         self.payments.create(amount=amount,
                              paypal_ipn=ipn_obj,
                              created=timezone.now())
@@ -324,7 +324,7 @@ class Account(AbstractBaseUser):
         return self.is_superuser or self == verse_set.created_by
 
 
-def normlise_weighting(weights):
+def normalize_weighting(weights):
     if not weights:
         return
     max_weight = max(weights.values())
@@ -355,16 +355,16 @@ def account_get_friendship_weights(account_id):
     except KeyError:
         pass
 
-    # Normalise to 1
-    normlise_weighting(weights)
+    # Normalize to 1
+    normalize_weighting(weights)
 
     # We use following as definite friendships. Following is the worth more than
     # any evidence from groups.
     for acc in account.following.all():
         weights[acc.id] += 1.5
 
-    # Normalise again
-    normlise_weighting(weights)
+    # Normalize again
+    normalize_weighting(weights)
 
     # Give some weight to self
     weights[account_id] = 0.3
