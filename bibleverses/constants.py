@@ -1,7 +1,7 @@
 # -*- coding: utf8 -*-
 from collections import defaultdict
 
-from .languages import LANGUAGE_CODE_EN, LANGUAGE_CODE_TR, normalise_search_input
+from .languages import LANGUAGE_CODE_EN, LANGUAGE_CODE_TR, normalize_search_input
 
 _BIBLE_BOOKS_FOR_LANG = {
     LANGUAGE_CODE_EN: ['Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy', 'Joshua', 'Judges', 'Ruth', '1 Samuel', '2 Samuel', '1 Kings', '2 Kings', '1 Chronicles', '2 Chronicles', 'Ezra', 'Nehemiah', 'Esther', 'Job', 'Psalm', 'Proverbs', 'Ecclesiastes', 'Song of Solomon', 'Isaiah', 'Jeremiah', 'Lamentations', 'Ezekiel', 'Daniel', 'Hosea', 'Joel', 'Amos', 'Obadiah', 'Jonah', 'Micah', 'Nahum', 'Habakkuk', 'Zephaniah', 'Haggai', 'Zechariah', 'Malachi', 'Matthew', 'Mark', 'Luke', 'John', 'Acts', 'Romans', '1 Corinthians', '2 Corinthians', 'Galatians', 'Ephesians', 'Philippians', 'Colossians', '1 Thessalonians', '2 Thessalonians', '1 Timothy', '2 Timothy', 'Titus', 'Philemon', 'Hebrews', 'James', '1 Peter', '2 Peter', '1 John', '2 John', '3 John', 'Jude', 'Revelation'],
@@ -15,7 +15,7 @@ _BIBLE_BOOK_NUMBERS_FOR_LANG = {
 }
 
 
-# All possible bible book names, normalised (lower case plus other transformations),
+# All possible bible book names, normalized (lower case plus other transformations),
 # matched to canonical name:
 _BIBLE_BOOK_ABBREVIATIONS_FOR_LANG = {}
 
@@ -61,7 +61,7 @@ def make_bible_book_abbreviations_for_lang(language_code):
     # Get all abbreviations
     d = {}
     for b in bible_books:
-        d[b] = list(get_abbrevs(normalise_search_input(language_code, b)))
+        d[b] = list(get_abbrevs(normalize_search_input(language_code, b)))
 
     # Now need to make unique. Create a reverse dictionary.
     d2 = defaultdict(set)

@@ -18,44 +18,44 @@ def site_address_url_start():
     return protocol + '://' + get_current_site(None).domain
 
 
-def send_unrecognised_payment_email(ipn_obj):
+def send_unrecognized_payment_email(ipn_obj):
     c = {
         'url_start': site_address_url_start(),
         'ipn_obj': ipn_obj,
     }
 
-    body = loader.render_to_string("learnscripture/unrecognised_payment_email.txt", c)
-    subject = "LearnScripture.net - unrecognised payment"
+    body = loader.render_to_string("learnscripture/unrecognized_payment_email.txt", c)
+    subject = "LearnScripture.net - unrecognized payment"
     mail.send_mail(subject, body, settings.SERVER_EMAIL, [settings.DEFAULT_FROM_EMAIL])
 
 
-def unrecognised_payment(sender, **kwargs):
-    send_unrecognised_payment_email(sender)
+def unrecognized_payment(sender, **kwargs):
+    send_unrecognized_payment_email(sender)
 
 
 def paypal_payment_received(sender, **kwargs):
     ipn_obj = sender
     info = unsign_payment_string(ipn_obj.custom)
     if info is None:
-        unrecognised_payment(ipn_obj)
+        unrecognized_payment(ipn_obj)
         return
 
     if ipn_obj.payment_status.lower().strip() != 'completed':
-        unrecognised_payment(ipn_obj)
+        unrecognized_payment(ipn_obj)
         return
 
     if settings.VALID_RECEIVE_CURRENCY not in (ipn_obj.mc_currency, ipn_obj.settle_currency):
-        unrecognised_payment(ipn_obj)
+        unrecognized_payment(ipn_obj)
         return
 
     if ipn_obj.receiver_email != settings.PAYPAL_RECEIVER_EMAIL:
-        unrecognised_payment(ipn_obj)
+        unrecognized_payment(ipn_obj)
         return
 
     if 'account' in info:
         paypal_account_payment_received(ipn_obj, info)
     else:
-        unrecognised_payment(ipn_obj)
+        unrecognized_payment(ipn_obj)
 
     handle_possible_donation_drive_contribution(ipn_obj)
 
@@ -65,7 +65,7 @@ def paypal_account_payment_received(ipn_obj, info):
         account = Account.objects.get(id=info['account'])
         account.receive_payment(ipn_obj)
     except Account.DoesNotExist:
-        unrecognised_payment(ipn_obj)
+        unrecognized_payment(ipn_obj)
 
 
 def handle_possible_donation_drive_contribution(ipn_obj):
@@ -94,4 +94,4 @@ def target_reached_handler(sender, **kwargs):
 donation_drive_contributed_to.connect(donation_drive_contributed_to_handler)
 target_reached.connect(target_reached_handler)
 valid_ipn_received.connect(paypal_payment_received)
-invalid_ipn_received.connect(unrecognised_payment)
+invalid_ipn_received.connect(unrecognized_payment)

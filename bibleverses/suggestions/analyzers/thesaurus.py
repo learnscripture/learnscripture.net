@@ -58,7 +58,7 @@ def make_thesaurus(version, disallow_text_loading=False):
         alts = [a for a in alts if ' ' not in a]
         # Don't allow alternatives that don't appear in the text
         alts = [a for a in alts if a in words]
-        # Normalise and exclude self
+        # Normalize and exclude self
         alts = [a.lower() for a in alts if a != word]
         # Sort according to frequency in text
         alts_with_freq = [(words[a], a) for a in alts]

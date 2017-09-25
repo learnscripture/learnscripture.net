@@ -914,8 +914,8 @@ var learnscripture = (function (learnscripture, $) {
         checkCurrentWord: function () {
             var wordIdx = currentWordIndex;
             var word = getWordAt(wordIdx);
-            var wordStr = normaliseWordForTest(word.text());
-            var typed = normaliseWordForTest(inputBox.val());
+            var wordStr = normalizeWordForTest(word.text());
+            var typed = normalizeWordForTest(inputBox.val());
 
             if (this.matchWord(wordStr, typed)) {
                 indicateSuccess();
@@ -1020,8 +1020,8 @@ var learnscripture = (function (learnscripture, $) {
 
         getHint: function () {
             var word = getWordAt(currentWordIndex);
-            var wordStr = stripPunctuation(word.text()); // don't use normaliseWordForTest, we want case
-            var typed = normaliseWordForTest(inputBox.val());
+            var wordStr = stripPunctuation(word.text()); // don't use normalizeWordForTest, we want case
+            var typed = normalizeWordForTest(inputBox.val());
 
             if (typed == "" || typed.slice(0, 1) != wordStr.toLowerCase().slice(0, 1)) {
                 // Nothing or incorrect letter typed: show first letter hint
@@ -1178,9 +1178,9 @@ var learnscripture = (function (learnscripture, $) {
             }
             var chosen = [];
             var correctWord = $w.text();
-            chosen.push(normaliseWordForSuggestion(correctWord));
+            chosen.push(normalizeWordForSuggestion(correctWord));
             for (var i = 0; i < suggestions.length; i++) {
-                chosen.push(normaliseWordForSuggestion(suggestions[i]));
+                chosen.push(normalizeWordForSuggestion(suggestions[i]));
             }
             chosen.sort();
 
@@ -1206,8 +1206,8 @@ var learnscripture = (function (learnscripture, $) {
         handleButtonClick: function (ev) {
             ev.preventDefault();
             var $btn = $(ev.target);
-            var chosenWord = normaliseWordForTest($btn.text());
-            var correctWord = normaliseWordForTest(getWordAt(currentWordIndex).text());
+            var chosenWord = normalizeWordForTest($btn.text());
+            var correctWord = normalizeWordForTest(getWordAt(currentWordIndex).text());
             if (chosenWord === correctWord) {
                 indicateSuccess();
             } else {
@@ -1248,11 +1248,11 @@ var learnscripture = (function (learnscripture, $) {
     })
 
     // -----------------------
-    var normaliseWordForTest = function (str) {
+    var normalizeWordForTest = function (str) {
         return stripPunctuation(str.trim().toLowerCase());
     }
 
-    var normaliseWordForSuggestion = function (str) {
+    var normalizeWordForSuggestion = function (str) {
         return stripOuterPunctuation(str.trim().toLowerCase());
     }
 
@@ -1500,7 +1500,7 @@ var learnscripture = (function (learnscripture, $) {
     };
 
 
-    var normaliseLearningType = function (verseData) {
+    var normalizeLearningType = function (verseData) {
         if (verseData.learning_type != LEARNING_TYPE_PRACTICE && !verseData.needs_testing && !isPassageType(verseData)) {
             // This can happen if the user chooses a verse set to learn
             // and they already know the verses in it.
@@ -1519,7 +1519,7 @@ var learnscripture = (function (learnscripture, $) {
                 verseStatus.verse_set.set_type === SET_TYPE_SELECTION) : false)
 
         verseStatus.wordCount = verseStatus.scoring_text_words.length;
-        normaliseLearningType(verseStatus);
+        normalizeLearningType(verseStatus);
         var moveOld = (oldVerseStatus !== null &&
             isPassageType(oldVerseStatus) &&
             // Need to cope with possibility of a gap

@@ -28,7 +28,7 @@ def aggregate_word_counts(counts):
     return reduce(operator.add, counts)
 
 
-def normalise_probabilities(f):
+def normalize_probabilities(f):
     sm = sum(f.values())
     retval = f.__class__()
     for k, v in f.items():

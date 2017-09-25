@@ -1,5 +1,5 @@
 from .constants import _BIBLE_BOOK_ABBREVIATIONS_FOR_LANG, _BIBLE_BOOK_NUMBERS_FOR_LANG, _BIBLE_BOOKS_FOR_LANG
-from .languages import normalise_search_input
+from .languages import normalize_search_input
 
 
 def get_bible_books(language_code):
@@ -28,7 +28,7 @@ def get_bible_book_name(language_code, number):
 def is_bible_book(language_code, book_name, canonical=False):
     """
     Given a language code and a book name, returns try if the book
-    name is a recognised bible book.
+    name is a recognized bible book.
     If canonical==True, only the canonical name is accepted,
     otherwise abbreviations etc. are allowed.
     """
@@ -38,7 +38,7 @@ def is_bible_book(language_code, book_name, canonical=False):
         if is_bible_book(language_code, book_name, canonical=True):
             return True
         else:
-            book_name = normalise_search_input(language_code, book_name)
+            book_name = normalize_search_input(language_code, book_name)
             return book_name in _BIBLE_BOOK_ABBREVIATIONS_FOR_LANG[language_code]
 
 
@@ -49,4 +49,4 @@ def get_canonical_bible_book_name(language_code, book_name):
     """
     if is_bible_book(language_code, book_name, canonical=True):
         return book_name
-    return _BIBLE_BOOK_ABBREVIATIONS_FOR_LANG[language_code][normalise_search_input(language_code, book_name)]
+    return _BIBLE_BOOK_ABBREVIATIONS_FOR_LANG[language_code][normalize_search_input(language_code, book_name)]
