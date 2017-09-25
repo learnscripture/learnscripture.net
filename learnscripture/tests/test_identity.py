@@ -224,14 +224,14 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         self.assertEqual(list(i.verse_statuses.all()),
                          uvs_list)
 
-    def test_bible_verse_statuses_for_revising(self):
+    def test_bible_verse_statuses_for_reviewing(self):
         i = self.create_identity(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Bible 101')
         i.add_verse_set(vs1)
         i.record_verse_action('John 3:16', 'NET', StageType.TEST, 1.0)
 
-        # It should be set for revising yet
-        self.assertEqual([], list(i.bible_verse_statuses_for_revising()))
+        # It should be set for reviewing yet
+        self.assertEqual([], list(i.bible_verse_statuses_for_reviewing()))
 
         # It is confusing if it is ever ready within an hour, so we special case
         # that.
@@ -239,7 +239,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         # Fix data:
         i.verse_statuses.all().update(last_tested=timezone.now() - timedelta(0.99 / 24))
 
-        self.assertEqual([], list(i.bible_verse_statuses_for_revising()))
+        self.assertEqual([], list(i.bible_verse_statuses_for_reviewing()))
 
     def test_passages_for_learning(self):
         i = self.create_identity(version_slug='NET')
@@ -256,13 +256,13 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         i.verse_statuses.update(last_tested=timezone.now() - timedelta(10))
 
         # Shouldn't be in general revision queue -
-        # sneak a test for bible_verse_statuses_for_revising() here
-        self.assertEqual([], list(i.bible_verse_statuses_for_revising()))
+        # sneak a test for bible_verse_statuses_for_reviewing() here
+        self.assertEqual([], list(i.bible_verse_statuses_for_reviewing()))
 
-        # Sneak a test for passages_for_revising() here:
-        self.assertEqual([], list(i.passages_for_revising()))
+        # Sneak a test for passages_for_reviewing() here:
+        self.assertEqual([], list(i.passages_for_reviewing()))
 
-    def test_passages_for_revising(self):
+    def test_passages_for_reviewing(self):
         i = self.create_identity(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Psalm 23')
         i.add_verse_set(vs1)
@@ -282,9 +282,9 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
                 i.record_verse_action(ref, 'NET', StageType.TEST, 1.0)
 
         # Shouldn't be in general revision queue
-        self.assertEqual([], list(i.bible_verse_statuses_for_revising()))
+        self.assertEqual([], list(i.bible_verse_statuses_for_reviewing()))
 
-        verse_sets = i.passages_for_revising()
+        verse_sets = i.passages_for_reviewing()
         self.assertEqual(verse_sets[0].id, vs1.id)
 
     def test_catechisms_for_learning(self):
@@ -309,17 +309,17 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         cs = i.catechisms_for_learning()
         self.assertEqual(len(cs), 0)
 
-    def test_catechisms_for_revising(self):
+    def test_catechisms_for_reviewing(self):
         i = self.create_identity(version_slug='NET')
         c = TextVersion.objects.get(slug='WSC')
         i.add_catechism(c)
-        cs = i.catechisms_for_revising()
+        cs = i.catechisms_for_reviewing()
         self.assertEqual(len(cs), 0)
 
         # After one tested:
         i.record_verse_action('Q1', 'WSC', StageType.TEST, 1.0)
 
-        cs = i.catechisms_for_revising()
+        cs = i.catechisms_for_reviewing()
         self.assertEqual(len(cs), 0)
 
         # Artifically age
@@ -328,14 +328,14 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
             next_test_due=F('next_test_due') - timedelta(days=6)
         )
 
-        cs = i.catechisms_for_revising()
+        cs = i.catechisms_for_reviewing()
         self.assertEqual(len(cs), 1)
-        self.assertEqual(cs[0].needs_revising_total, 1)
+        self.assertEqual(cs[0].needs_reviewing_total, 1)
 
         # After all tested:
         for qapair in c.qapairs.all():
             i.record_verse_action(qapair.localized_reference, 'WSC', StageType.TEST, 1.0)
-        cs = i.catechisms_for_revising()
+        cs = i.catechisms_for_reviewing()
         self.assertEqual(len(cs), 0)
 
     def test_verse_statuses_for_passage(self):
@@ -391,7 +391,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
             )
 
         # Shouldn't be splittable yet, since strength will be below threshold
-        vss = i.passages_for_revising()
+        vss = i.passages_for_reviewing()
         self.assertEqual(len(vss), 1)
         self.assertEqual(vss[0].name, "Psalm 23")
         self.assertEqual(vss[0].splittable, False)
@@ -410,7 +410,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
                 uvs.next_test_due = accounts.memorymodel.next_test_due(uvs.last_tested, uvs.strength)
                 uvs.save()
 
-        vss = i.passages_for_revising()
+        vss = i.passages_for_reviewing()
         self.assertEqual(len(vss), 1)
         self.assertEqual(vss[0].name, "Psalm 23")
         self.assertEqual(vss[0].splittable, True)
@@ -469,7 +469,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         self.assertEqual(["Psalm 23:1", "Psalm 23:2"],
                          [uvs.localized_reference for uvs in uvss4])
 
-    def test_slim_passage_for_revising(self):
+    def test_slim_passage_for_reviewing(self):
         i = self.create_identity(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Psalm 23')
         vs1.breaks = "3,5"  # break at v3 and v5
@@ -488,7 +488,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         uvss = i.verse_statuses_for_passage(vs1.id)
         self.assertEqual(len(uvss), 6)
 
-        uvss = i.slim_passage_for_revising(uvss, vs1)
+        uvss = i.slim_passage_for_reviewing(uvss, vs1)
         self.assertEqual([uvs.localized_reference for uvs in uvss],
                          ["Psalm 23:4", "Psalm 23:5", "Psalm 23:6"])
 

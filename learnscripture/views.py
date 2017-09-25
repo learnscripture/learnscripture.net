@@ -315,18 +315,18 @@ def dashboard(request):
             return learn_set(request,
                              identity.bible_verse_statuses_for_learning(vs_id),
                              session.LearningType.LEARNING)
-        if 'revisebiblequeue' in request.POST:
-            return learn_set(request, identity.bible_verse_statuses_for_revising(),
+        if 'reviewbiblequeue' in request.POST:
+            return learn_set(request, identity.bible_verse_statuses_for_reviewing(),
                              session.LearningType.REVISION)
         if 'learncatechismqueue' in request.POST:
             return learn_set(request, identity.catechism_qas_for_learning(get_catechism_id()),
                              session.LearningType.LEARNING)
-        if 'revisecatechismqueue' in request.POST:
-            return learn_set(request, identity.catechism_qas_for_revising(get_catechism_id()),
+        if 'reviewcatechismqueue' in request.POST:
+            return learn_set(request, identity.catechism_qas_for_reviewing(get_catechism_id()),
                              session.LearningType.REVISION)
         if any(p in request.POST for p in
                ['learnpassage',
-                'revisepassage', 'revisepassagenextsection', 'revisepassagesection',
+                'reviewpassage', 'reviewpassagenextsection', 'reviewpassagesection',
                 'practisepassage', 'practisepassagesection']):
 
             # Some of these are sent via the verse_options.html template,
@@ -339,22 +339,22 @@ def dashboard(request):
                 # Triggered from 'verse_options.html'
                 uvs_id = int(request.POST['uvs_id'])
                 main_uvs = [uvs for uvs in uvss if uvs.id == uvs_id][0]
-                if ('revisepassagesection' in request.POST or
+                if ('reviewpassagesection' in request.POST or
                         'practisepassagesection' in request.POST):
-                    # Revise/practise the specified section
+                    # Review/practise the specified section
                     refs = set(vc.localized_reference for vc in main_uvs.get_section_verse_choices())
                     uvss = [uvs for uvs in uvss if uvs.localized_reference in refs]
 
             if 'learnpassage' in request.POST:
-                uvss = identity.slim_passage_for_revising(uvss, verse_set)
+                uvss = identity.slim_passage_for_reviewing(uvss, verse_set)
                 return learn_set(request, uvss, session.LearningType.LEARNING)
-            if 'revisepassage' in request.POST:
-                uvss = identity.slim_passage_for_revising(uvss, verse_set)
+            if 'reviewpassage' in request.POST:
+                uvss = identity.slim_passage_for_reviewing(uvss, verse_set)
                 return learn_set(request, uvss, session.LearningType.REVISION)
-            if 'revisepassagenextsection' in request.POST:
+            if 'reviewpassagenextsection' in request.POST:
                 uvss = identity.get_next_section(uvss, verse_set)
                 return learn_set(request, uvss, session.LearningType.REVISION)
-            if 'revisepassagesection' in request.POST:
+            if 'reviewpassagesection' in request.POST:
                 # Already filtered uvss above
                 return learn_set(request, uvss, session.LearningType.REVISION)
             if 'practisepassage' in request.POST:
@@ -363,14 +363,14 @@ def dashboard(request):
                 # Already filtered uvss above
                 return learn_set(request, uvss, session.LearningType.PRACTICE)
 
-        if 'reviseverse' in request.POST:
+        if 'reviewverse' in request.POST:
             uvs = identity.verse_statuses.get(id=int(request.POST['uvs_id']))
             return learn_set(request, [uvs],
                              session.LearningType.REVISION if uvs.needs_testing
                              else session.LearningType.PRACTICE)
 
-        if 'revisecatechism' in request.POST:
-            # This option revises catechism questions even if they are not
+        if 'reviewcatechism' in request.POST:
+            # This option reviews catechism questions even if they are not
             # due for revision yet.
             uvss = identity.get_all_tested_catechism_qas(get_catechism_id())
             return learn_set(request, uvss,
@@ -390,11 +390,11 @@ def dashboard(request):
     groups, more_groups = get_user_groups(identity)
 
     c = {'learn_verses_queues': identity.bible_verse_statuses_for_learning_grouped(),
-         'revise_verses_queue': identity.bible_verse_statuses_for_revising(),
+         'review_verses_queue': identity.bible_verse_statuses_for_reviewing(),
          'passages_for_learning': identity.passages_for_learning(),
-         'passages_for_revising': identity.passages_for_revising(),
+         'passages_for_reviewing': identity.passages_for_reviewing(),
          'catechisms_for_learning': identity.catechisms_for_learning(),
-         'catechisms_for_revising': identity.catechisms_for_revising(),
+         'catechisms_for_reviewing': identity.catechisms_for_reviewing(),
          'next_verse_due': identity.next_verse_due(),
          'title': 'Dashboard',
          'events': identity.get_dashboard_events(),
@@ -572,7 +572,7 @@ def verse_options(request):
     # FIXME: move more of this logic into Identity model, ideally.
 
     # Different options:
-    # - could *revise*
+    # - could *review*
     # - could *practice*, if revision not due
     # - for verses in passage sets, could learn section or passage
 

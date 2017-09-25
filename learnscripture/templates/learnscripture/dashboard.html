@@ -45,20 +45,20 @@
 
     {### Passages ###}
 
-    {% for vs in passages_for_revising %}
+    {% for vs in passages_for_reviewing %}
       <div class="addclearfix">
         <form action="" method="POST">
           {% csrf_token %}
           <input type="hidden" name="verse_set_id" value="{{ vs.id }}" />
           {% if vs.splittable %}
-            <input type="submit" name="revisepassage" class="btn primary" value="Review whole passage"
-                   id="id-revisepassage-btn-{{ vs.id }}" /><br/>
-            <input type="submit" name="revisepassagenextsection" class="btn primary"
+            <input type="submit" name="reviewpassage" class="btn primary" value="Review whole passage"
+                   id="id-reviewpassage-btn-{{ vs.id }}" /><br/>
+            <input type="submit" name="reviewpassagenextsection" class="btn primary"
                    value="Review one section ({{ vs.next_section_verse_count }} vss)"
-                   id="id-revisepassage-sections-btn-{{ vs.id }}" /><br/>
+                   id="id-reviewpassage-sections-btn-{{ vs.id }}" /><br/>
           {% else %}
-            <input type="submit" name="revisepassage" class="btn primary" value="Review"
-                   id="id-revisepassage-btn-{{ vs.id }}" /><br/>
+            <input type="submit" name="reviewpassage" class="btn primary" value="Review"
+                   id="id-reviewpassage-btn-{{ vs.id }}" /><br/>
 
           {% endif %}
           <input type="submit" name="cancelpassage" class="btn" value="Cancel"
@@ -81,22 +81,22 @@
 
     {### Verses ###}
 
-    {% if revise_verses_queue %}
+    {% if review_verses_queue %}
 
-      {% if passages_for_revising %}<hr>{% endif %}
+      {% if passages_for_reviewing %}<hr>{% endif %}
 
       <div class="addclearfix">
         <form action="" method="POST">
           {% csrf_token %}
-          <input type="submit" name="revisebiblequeue" class="btn primary" value="Review" />
+          <input type="submit" name="reviewbiblequeue" class="btn primary" value="Review" />
         </form>
 
-        <p>You've got {{ revise_verses_queue|length }}
-          verse{{revise_verses_queue|length|pluralize }} due for review today.
+        <p>You've got {{ review_verses_queue|length }}
+          verse{{review_verses_queue|length|pluralize }} due for review today.
         </p>
 
         <p>Verses coming up:
-          {% include 'learnscripture/verselist.html' with verselist=revise_verses_queue %}
+          {% include 'learnscripture/verselist.html' with verselist=review_verses_queue %}
         </p>
       </div>
 
@@ -104,22 +104,22 @@
 
     {### Catechism QAs ###}
 
-    {% if catechisms_for_revising %}
+    {% if catechisms_for_reviewing %}
 
-      {% if passages_for_revising or revise_verses_queue %}<hr>{% endif %}
+      {% if passages_for_reviewing or review_verses_queue %}<hr>{% endif %}
 
-      {% for catechism in catechisms_for_revising %}
+      {% for catechism in catechisms_for_reviewing %}
 
         <div class="addclearfix">
           <form action="" method="POST">
             {% csrf_token %}
-            <input type="submit" name="revisecatechismqueue" class="btn primary" value="Review" />
+            <input type="submit" name="reviewcatechismqueue" class="btn primary" value="Review" />
             <input type="hidden" name="catechism_id" value="{{ catechism.id }}">
           </form>
 
           <h3><a href="{% url 'view_catechism' catechism.slug %}">{{ catechism.full_name }}</a></h3>
 
-          <p>You've got {{ catechism.needs_revising_total }} question(s) due for review today.</p>
+          <p>You've got {{ catechism.needs_reviewing_total }} question(s) due for review today.</p>
           <br><br>
         </div>
 
@@ -130,7 +130,7 @@
 
     {#### Nothing ####}
 
-    {% if not passages_for_revising and not revise_verses_queue and not catechisms_for_revising %}
+    {% if not passages_for_reviewing and not review_verses_queue and not catechisms_for_reviewing %}
       <p>Nothing needs reviewing at this point in time.
         {% if next_verse_due %}
           <br/>

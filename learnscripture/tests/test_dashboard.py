@@ -133,7 +133,7 @@ class DashboardTestsBase(RequireExampleVerseSetsMixin):
         self.assertUrlsEqual(reverse('dashboard'))
         self.assertTextAbsent(sentinel)
 
-    def test_revise_one_section(self):
+    def test_review_one_section(self):
         i = self.setup_identity()
 
         # Add a passage
@@ -151,7 +151,7 @@ class DashboardTestsBase(RequireExampleVerseSetsMixin):
         self.get_url('dashboard')
         self.assertTextPresent('Psalm 23')  # sanity check
 
-        self.submit('input[value^="Review one section"][name=revisepassagenextsection]')
+        self.submit('input[value^="Review one section"][name=reviewpassagenextsection]')
         self.assert_learning_localized_reference("Psalm 23:1")
 
         if self.is_full_browser_test:

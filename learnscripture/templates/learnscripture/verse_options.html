@@ -1,13 +1,13 @@
 <div class="verse-options alert-message block-message info">
   {% for uvs in uvs_list %}
 
-    {% if forloop.first %}  {# Avoid doing 'reviseverse' more than once #}
+    {% if forloop.first %}  {# Avoid doing 'reviewverse' more than once #}
       <form action="{% url 'dashboard' %}" method="POST">
         {% csrf_token %}
 
         <input type="hidden" name="uvs_id" value="{{ uvs.id }}" />
         <p>
-          <input type="submit" name="reviseverse" class="btn primary"
+          <input type="submit" name="reviewverse" class="btn primary"
                  {% if uvs.needs_testing %}
                  value="Review {{ uvs.item_name }}"
                  {% else %}
@@ -27,11 +27,11 @@
 
         {% if uvs.section_localized_reference != uvs.passage_localized_reference %}
 
-          {# revise/practise section #}
+          {# review/practise section #}
 
           <p>
             {% if uvs.needs_testing %}
-              <input type="submit" name="revisepassagesection" class="btn primary"
+              <input type="submit" name="reviewpassagesection" class="btn primary"
                      value="Review section: {{ uvs.section_localized_reference }}"/>
             {% else %}
               <input type="submit" name="practisepassagesection" class="btn primary"
@@ -42,11 +42,11 @@
 
         {% endif %}
 
-        {# revise/practice passage #}
+        {# review/practice passage #}
 
         <p>
           {% if uvs.needs_testing %}
-            <input type="submit" name="revisepassage" class="btn primary"
+            <input type="submit" name="reviewpassage" class="btn primary"
                    value="Review passage: {{ uvs.passage_localized_reference }}"/>
           {% else %}
             <input type="submit" name="practisepassage" class="btn primary"
@@ -61,7 +61,7 @@
         {% csrf_token %}
         <input type="hidden" name="catechism_id" value="{{ uvs.version.id }}" />
         <p>
-          <input type="submit" name="revisecatechism" class="btn primary"
+          <input type="submit" name="reviewcatechism" class="btn primary"
                  value="Practice or review all of {{ uvs.version.short_name }}"/>
         </p>
 

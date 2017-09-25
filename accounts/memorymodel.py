@@ -77,7 +77,7 @@ class MemoryModel(object):
     # We want to reach this stage after 1 year on our idealised curve.
 
     # This will mean that if we learn X new verses every day,
-    # there will be X*VERSE_TESTS verses to revise each day.
+    # there will be X*VERSE_TESTS verses to review each day.
 
     # Some maths below needs a limit to stop us getting logs of
     # negative numbers:
