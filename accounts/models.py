@@ -176,7 +176,7 @@ class Account(AbstractBaseUser):
         word_count = count_words(text)
         max_points = word_count * Scores.POINTS_PER_WORD
         if old_memory_stage >= MemoryStage.TESTED:
-            reason = ScoreReason.VERSE_REVISED
+            reason = ScoreReason.VERSE_REVIEWED
         else:
             reason = ScoreReason.VERSE_TESTED
         points = max_points * accuracy
@@ -867,9 +867,9 @@ class Identity(models.Model):
         from scores.models import get_verses_finished_count
         return get_verses_finished_count(self.id, finished_since=finished_since)
 
-    def bible_verse_statuses_for_revising(self):
+    def bible_verse_statuses_for_reviewing(self):
         """
-        Returns a query set of UserVerseStatuses that need revising.
+        Returns a query set of UserVerseStatuses that need reviewing.
         """
         qs = (self.verse_statuses
               .filter(version__text_type=TextType.BIBLE,
@@ -953,9 +953,9 @@ class Identity(models.Model):
         """
         return self.catechism_qas_for_learning_qs(catechism_id)
 
-    def catechism_qas_for_revising(self, catechism_id):
+    def catechism_qas_for_reviewing(self, catechism_id):
         """
-        Returns catechism QAs that are due for revising
+        Returns catechism QAs that are due for reviewing
         """
         qs = (self._catechism_qas_base_qs(catechism_id)
               .filter(memory_stage=MemoryStage.TESTED))
@@ -985,21 +985,21 @@ class Identity(models.Model):
 
         return sorted(catechisms.values(), key=lambda c: c.full_name)
 
-    def catechisms_for_revising(self):
+    def catechisms_for_reviewing(self):
         """
-        Returns catechisms that need revising, decorated with needs_revising_total
+        Returns catechisms that need reviewing, decorated with needs_reviewing_total
         """
-        statuses = self.catechism_qas_for_revising(None).select_related('version')
+        statuses = self.catechism_qas_for_reviewing(None).select_related('version')
         catechisms = {}
         for s in statuses:
             catechism_id = s.version_id
             if catechism_id not in catechisms:
                 catechism = s.version
                 catechisms[catechism_id] = catechism
-                catechism.needs_revising_total = 0
+                catechism.needs_reviewing_total = 0
             else:
                 catechism = catechisms[catechism_id]
-            catechism.needs_revising_total += 1
+            catechism.needs_reviewing_total += 1
 
         return sorted(catechisms.values(), key=lambda c: c.full_name)
 
@@ -1087,13 +1087,13 @@ class Identity(models.Model):
                    for uvs in (self.bible_verse_statuses_for_learning_qs()
                                .filter(localized_reference__in=localized_references)))
 
-    def passages_for_revising(self):
+    def passages_for_reviewing(self):
         statuses = self.verse_statuses.filter(verse_set__set_type=VerseSetType.PASSAGE,
                                               ignored=False,
                                               memory_stage__gte=MemoryStage.TESTED)\
                                       .select_related('verse_set')
 
-        # If any of them need revising, we want to know about it:
+        # If any of them need reviewing, we want to know about it:
         statuses = memorymodel.filter_qs(statuses, timezone.now())
 
         # However, we want to exclude those which have any verses in the set
@@ -1203,7 +1203,7 @@ class Identity(models.Model):
     def get_next_section(self, uvs_list, verse_set, add_buffer=True):
         """
         Given a UVS list and a VerseSet, get the items in uvs_list
-        which are the next section to revise.
+        which are the next section to review.
         """
         # We don't track which was the last 'section' learnt, and we can't,
         # since the user can give up at any point.  We therefore use heuristics
@@ -1266,7 +1266,7 @@ class Identity(models.Model):
 
         return retval
 
-    def slim_passage_for_revising(self, uvs_list, verse_set):
+    def slim_passage_for_reviewing(self, uvs_list, verse_set):
         """
         Uses breaks defined for the verse set to slim a passage
         down if not all verses need testing.

@@ -16,7 +16,7 @@ from learnscripture.datastructures import make_choices
 
 ScoreReason = make_choices('ScoreReason',
                            [(0, 'VERSE_TESTED', 'Verse tested'),
-                            (1, 'VERSE_REVISED', 'Verse revised'),
+                            (1, 'VERSE_REVIEWED', 'Verse reviewed'),
                             (2, 'REVISION_COMPLETED', 'Review completed'),  # No longer used
                             (3, 'PERFECT_TEST_BONUS', 'Perfect!'),
                             (4, 'VERSE_LEARNT', 'Verse fully learnt'),
@@ -277,7 +277,7 @@ def get_verses_tested_per_day(account_id):
                   func.count(day_col)],
                  and_(scores_actionlog.c.account_id == account_id,
                       scores_actionlog.c.reason.in_([ScoreReason.VERSE_TESTED,
-                                                    ScoreReason.VERSE_REVISED])
+                                                    ScoreReason.VERSE_REVIEWED])
                       )
                  )
           .order_by(day_col)

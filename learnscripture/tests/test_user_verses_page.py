@@ -37,7 +37,7 @@ class UserVersesPageTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.click('a.btn[data-localized-reference="Psalm 23:2"]')
 
         # 'Practise verse' button
-        self.assertEqual(self.get_element_attribute('input[name="reviseverse"]', 'value'),
+        self.assertEqual(self.get_element_attribute('input[name="reviewverse"]', 'value'),
                          "Practise verse")
 
         # 'Practise section' button

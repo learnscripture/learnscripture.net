@@ -180,8 +180,8 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.assertIn("He takes me to lush pastures",
                       self.get_element_text('.current-verse'))
 
-    def test_revise_passage_mixed(self):
-        # Test revising a passage when some verses are to be tested and others
+    def test_review_passage_mixed(self):
+        # Test reviewing a passage when some verses are to be tested and others
         # are just being read.
         identity, account = self.create_account()
         self.login(account)
@@ -195,7 +195,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self._make_verses_due_for_testing(identity.verse_statuses.filter(localized_reference='Psalm 23:1'))
 
         self.get_url('dashboard')
-        self.submit('input[name=revisepassage]')
+        self.submit('input[name=reviewpassage]')
 
         for word in "The LORD is my shepherd, I shall not want.".split():
             self.fill({"#id-typing": word + " "})
@@ -236,7 +236,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
 
         # Go to dashboard
         self.get_url('dashboard')
-        self.choose_revise_bible()
+        self.choose_review_bible()
 
         self.assertEqual("John 3:16", self.get_element_text("#id-verse-title"))
 
@@ -249,7 +249,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         # If we go back to dashboard and choose again, it should not appear
         # Go to dashboard
         self.get_url('dashboard')
-        self.choose_revise_bible()
+        self.choose_review_bible()
 
         self.assertEqual("John 14:6", self.get_element_text("#id-verse-title"))
 
@@ -261,7 +261,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self._make_verses_due_for_testing(identity.verse_statuses)
 
         self.get_url('dashboard')
-        self.choose_revise_bible()
+        self.choose_review_bible()
 
         self.assertEqual("John 3:16", self.get_element_text("#id-verse-title"))
 
@@ -274,8 +274,8 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         # Should revert to initial read mode
         self.assertTrue(self.is_element_displayed('#id-instructions .stage-read'))
 
-    def choose_revise_bible(self):
-        self.submit("input[name='revisebiblequeue']")
+    def choose_review_bible(self):
+        self.submit("input[name='reviewbiblequeue']")
 
     def _make_verses_due_for_testing(self, uvs_queryset):
         uvs_queryset.update(
@@ -294,14 +294,14 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self._make_verses_due_for_testing(identity.verse_statuses)
 
         self.get_url('dashboard')
-        self.choose_revise_bible()
+        self.choose_review_bible()
 
         self._type_john_3_16_kjv()
 
         self.click("#id-finish-btn")
         self.wait_for_ajax()
 
-        # Reload, should have nothing more to revise
+        # Reload, should have nothing more to review
 
         self.get_url('learn')
         self.assertTrue(self.is_element_displayed("#id-no-verse-queue"))
@@ -319,7 +319,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self._make_verses_due_for_testing(identity.verse_statuses.filter(memory_stage=MemoryStage.TESTED))
 
         self.get_url('dashboard')
-        self.choose_revise_bible()
+        self.choose_review_bible()
 
         self._type_john_3_16_kjv(accuracy=0.5)
 
@@ -335,7 +335,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
 
         self._type_john_3_16_kjv(accuracy=0.95)
 
-        # We should get points for each time revised (and award)
+        # We should get points for each time reviewed (and award)
         j316_score_1 = self._score_for_j316(accuracy=0.5)
         j316_score_2 = self._score_for_j316(accuracy=0.95)
         account = Account.objects.get(id=account.id)  # refresh
@@ -357,7 +357,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self._make_verses_due_for_testing(identity.verse_statuses.filter(memory_stage=MemoryStage.TESTED))
 
         self.get_url('dashboard')
-        self.choose_revise_bible()
+        self.choose_review_bible()
         for i in range(0, 4):
             self.assertEqual(self.get_element_attribute("#id-hint-btn", "disabled"),
                              None)

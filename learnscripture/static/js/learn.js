@@ -1523,7 +1523,7 @@ var learnscripture = (function (learnscripture, $) {
         var moveOld = (oldVerseStatus !== null &&
             isPassageType(oldVerseStatus) &&
             // Need to cope with possibility of a gap
-            // in the passage, caused by slim_passage_for_revising()
+            // in the passage, caused by slim_passage_for_reviewing()
             (verseStatus.text_order === oldVerseStatus.text_order + 1))
         if (moveOld) {
             moveOldWords();
