@@ -294,6 +294,9 @@ class ParsingTests(unittest2.TestCase):
         return retval
 
     def pu(self, lang, query, **kwargs):
+        """
+        parse_unvalidated_localized_reference
+        """
         return parse_unvalidated_localized_reference(lang, query, **kwargs)
 
     def test_unparsable_strict(self):
