@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import csv
-import re
 import urllib.parse
 from datetime import date, timedelta
 
@@ -766,9 +765,6 @@ def create_or_edit_set(request, set_type=None, slug=None):
                 localized_reference_list.append(ref)
 
         breaks = request.POST.get('break_list', '')
-        # Basic sanitising of 'breaks'
-        if not re.match('^((\d+|\d+:\d+),)*(\d+|\d+:\d+)?$', breaks):
-            breaks = ""
 
         form_is_valid = form.is_valid()
         if len(verse_dict) == 0:
