@@ -917,9 +917,14 @@ def pretty_passage_ref(language_code, start_ref, end_ref):
 def get_passage_sections(language_code, verse_list, breaks):
     """
     Given a list of objects with a correct 'localized_reference' attribute, and a comma
-    separated list of 'break definitions', each of which could be <verse_number>
-    or <chapter_number>:<verse_number>, return the list in sections.
+    separated list of 'break definitions', return the list in sections.
     """
+    # Break definitions:
+    # Legacy: <verse_number>  or <chapter_number>:<verse_number>
+    # New: canonical reference in the language.
+    #   TODO - This means passage breaks won't work for versions in other languages,
+    #     we need to fix this to be language agnostic
+
     # TODO - currently this has been modified to accept language_code, purely so
     # that we can pass it to parse_break_list. However, different grouping of
     # verses in different versions may mean we actually need to pass a
