@@ -1,5 +1,5 @@
 from bibleverses.languages import LANGUAGE_CODE_EN
-from bibleverses.models import (TextVersion, Verse, VerseSet, VerseSetType, quick_find)
+from bibleverses.models import TextVersion, Verse, VerseSet, VerseSetType, quick_find
 
 from .base import TestBase, get_or_create_any_account
 
