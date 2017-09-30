@@ -1,7 +1,6 @@
 import logging
 import math
 import random
-import re
 from collections import defaultdict
 
 from autoslug import AutoSlugField
@@ -16,7 +15,7 @@ from accounts import memorymodel
 from learnscripture.datastructures import make_choices
 from learnscripture.utils.iterators import intersperse
 
-from .books import get_bible_book_name, get_bible_book_number, get_canonical_bible_book_name, is_bible_book
+from .books import get_bible_book_name, get_bible_book_number
 from .fields import VectorField
 from .languages import DEFAULT_LANGUAGE, LANGUAGE_CHOICES, normalize_search_input
 from .parsing import (InvalidVerseReference, ParsedReference, parse_break_list, parse_unvalidated_localized_reference,
@@ -520,13 +519,16 @@ SELECT COUNT(*) FROM
 
     def search(self, language_code, verse_sets, query):
         # Does the query look like a Bible reference?
-        localized_reference = parse_as_bible_localized_reference(
-            language_code,
-            query,
-            allow_whole_book=False,
-            allow_whole_chapter=False)
-        if localized_reference is not None:
-            return verse_sets.filter(verse_choices__localized_reference=localized_reference)
+        try:
+            parsed_ref = parse_unvalidated_localized_reference(
+                language_code,
+                query,
+                allow_whole_book=False,
+                allow_whole_chapter=False)
+        except InvalidVerseReference:
+            return verse_sets.none()
+        if parsed_ref is not None:
+            return verse_sets.filter(verse_choices__localized_reference=parsed_ref.canonical_form())
         else:
             return verse_sets.filter(name__icontains=query)
 
@@ -950,45 +952,6 @@ def get_passage_sections(language_code, verse_list, breaks):
     return sections
 
 
-def parse_as_bible_localized_reference(language_code, query, allow_whole_book=True, allow_whole_chapter=True):
-    """
-    Returns a normalized Bible localized reference if the query looks like one,
-    or None otherwise.
-
-    Pass allow_whole_book=False if queries that are just book names should be rejected.
-    Pass allow_whole_chapter=False if queries that are whole chapters should be rejected
-    """
-    query = normalize_search_input(language_code, query)
-
-    bible_ref_re = (
-        r'^(?:(?:1|2|3)\.?\s*)?[^\d]*'  # book name
-        r'\s+'                       # space
-        r'(\d+)'                     # chapter
-        r'\s*('                      # optionally:
-            r'(v|:|\.)'              #    v or : or .                        # noqa
-            r'\s*\d+'                #    and start verse number             # noqa
-            r'('                     #    and optionally:                    # noqa
-              r'\s*-\s*\d+'          #        end verse/next chapter num     # noqa
-              r'(\s*(v|:|\.)'        #        and optionally end verse       # noqa
-               r'\s*\d+)?'
-            r')?'
-        r')?'
-        r'$'
-    )
-
-    m = re.match(bible_ref_re, query)
-    if m:
-        if not allow_whole_chapter and m.groups()[1] is None:
-            return None
-        else:
-            return normalize_localized_reference(language_code, query)
-    else:
-        if allow_whole_book and is_bible_book(language_code, query):
-            return normalize_localized_reference(language_code, query)
-
-    return None
-
-
 def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
                allow_searches=True):
     """
@@ -1034,33 +997,3 @@ def get_whole_book(book_name, version, ensure_text_present=True):
     if ensure_text_present:
         ensure_text(retval.verses)
     return retval
-
-
-def normalize_localized_reference(language_code, query):
-    # Replace 'v' or '.' with ':' if followed by a digit
-    query = re.sub('(?<![A-Za-z])(v|\.)(?=[0-9])', ':', query)
-    # Remove spaces around ':'
-    query = re.sub('\s*:\s*', ':', query)
-    # Remove spaces around '-'
-    query = re.sub('\s*-\s*', '-', query)
-
-    # Remove multiple spaces
-    query = re.sub(' +', ' ', query)
-
-    # Normalize book names if possible.
-    parts = query.split(' ')
-    book_name = parts[0]
-    used_parts = 1
-    if len(parts) > 1:
-        for p in range(1, len(parts)):
-            if not re.search('\d', parts[p]):
-                book_name = book_name + " " + parts[p]
-                used_parts += 1
-            else:
-                break
-
-    if is_bible_book(language_code, book_name):
-        remainder = " ".join(parts[used_parts:])
-        return (get_canonical_bible_book_name(language_code, book_name) + " " + remainder).strip()
-    else:
-        return None

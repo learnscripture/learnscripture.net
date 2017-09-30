@@ -5,7 +5,7 @@ from accounts.models import Identity
 from bibleverses.books import get_bible_book_number, get_bible_books, is_single_chapter_book
 from bibleverses.languages import LANGUAGE_CODE_EN, LANGUAGE_CODE_TR, LANGUAGES, normalize_search_input_turkish
 from bibleverses.models import (InvalidVerseReference, TextVersion, Verse, VerseSet, VerseSetType, get_passage_sections,
-                                parse_as_bible_localized_reference, split_into_words)
+                                split_into_words)
 from bibleverses.parsing import (ParsedReference, parse_unvalidated_localized_reference,
                                  parse_validated_localized_reference)
 from bibleverses.suggestions.modelapi import create_word_suggestion_data, item_suggestions_need_updating
