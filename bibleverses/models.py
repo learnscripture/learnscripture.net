@@ -21,6 +21,7 @@ from .fields import VectorField
 from .languages import DEFAULT_LANGUAGE, LANGUAGE_CHOICES, normalize_search_input
 from .services import get_fetch_service, get_search_service
 from .textutils import split_into_words
+from .parsing import InvalidVerseReference
 
 logger = logging.getLogger(__name__)
 
@@ -786,10 +787,6 @@ class UserVerseStatus(models.Model):
         verbose_name_plural = "User verse statuses"
 
 
-class InvalidVerseReference(ValueError):
-    pass
-
-
 class ParsedReference(object):
     def __init__(self, book, chapter_number, verse_number):
         self.book = book
@@ -1140,7 +1137,12 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
 
     localized_reference = parse_as_bible_localized_reference(
         version.language_code,
-        query, allow_whole_book=not allow_searches)
+        query,
+        # If we allow searches, we want searches for people's names like 'John'
+        # or 'Jude' etc. to not return an entire book, but actually do a search.
+        # Therefore, we do not allow whole book references to be recognised, so
+        # that we go down the search path.
+        allow_whole_book=not allow_searches)
     if localized_reference is not None:
         return [ComboVerse(localized_reference, parse_ref(localized_reference, version, max_length=max_length))]
 
