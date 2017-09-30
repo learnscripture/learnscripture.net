@@ -1,9 +1,9 @@
 import attr
-from parsy import alt, generate, regex, string, whitespace, ParseError
+from parsy import ParseError, alt, generate, regex, string, whitespace
 
 from learnscripture.utils.cache import memoize_function
 
-from .books import get_bible_book_number, get_bible_books, get_bible_book_abbreviation_map, is_single_chapter_book
+from .books import get_bible_book_abbreviation_map, get_bible_book_number, get_bible_books, is_single_chapter_book
 from .languages import normalize_search_input
 
 
