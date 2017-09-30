@@ -6,6 +6,8 @@ from bibleverses.books import get_bible_books
 from bibleverses.languages import LANGUAGE_CODE_EN, LANGUAGE_CODE_TR, LANGUAGES, normalize_search_input_turkish
 from bibleverses.models import (InvalidVerseReference, TextVersion, Verse, VerseSet, VerseSetType, get_passage_sections,
                                 parse_as_bible_localized_reference, split_into_words)
+from bibleverses.parsing import ParsedReference, parse_unvalidated_localized_reference, parse_validated_localized_reference
+from bibleverses.books import is_single_chapter_book, get_bible_book_number
 from bibleverses.suggestions.modelapi import create_word_suggestion_data, item_suggestions_need_updating
 
 from .base import AccountTestMixin, TestBase, create_account
@@ -180,40 +182,6 @@ class VersionTests(TestBase):
         vl_2 = version.get_verse_list('Mezmur 23')
         self.assertEqual(len(vl_2), 6)
 
-    def test_parse_as_bible_localized_reference(self):
-        for lang in LANGUAGES:
-            for book in get_bible_books(lang.code):
-                r = parse_as_bible_localized_reference(lang.code, book,
-                                                       allow_whole_book=True)
-                self.assertEqual(r, book)
-
-    def test_turkish_reference_parsing(self):
-        tests = [
-            # Different numbering styles for book names:
-            ("1. Timoteos 3:16", "1. Timoteos 3:16"),
-            ("1 Timoteos 3:16", "1. Timoteos 3:16"),
-            ("1Timoteos 3:16", "1. Timoteos 3:16"),
-            ("1tim 3.16", "1. Timoteos 3:16"),
-            # Apostrophes optional
-            ("Yasanın Tekrarı 1", "Yasa'nın Tekrarı 1"),
-            # Turkish people often miss out accents or use the wrong kind of 'i'
-            # etc. when typing, especially as keyboards may not support correct
-            # characters.
-            ("YARATILIS 2:3", "Yaratılış 2:3"),
-            ("YARATİLİS 2:3", "Yaratılış 2:3"),
-            ("yaratilis 2:3", "Yaratılış 2:3"),
-            ("colde sayim 4:5", "Çölde Sayım 4:5"),
-            ("EYÜP 1", "Eyüp 1"),
-        ]
-        for ref, output in tests:
-            self.assertEqual(parse_as_bible_localized_reference(LANGUAGE_CODE_TR,
-                                                                ref),
-                             output,
-                             "Failure parsing '{0}'".format(ref))
-
-        self.assertEqual(normalize_search_input_turkish('  ÂâİIiıÇçŞşöü  '),
-                         'aaiiiiccssou')
-
     def _gen_1_1_suggestions(self):
         # in the beginning...
         return [['and', 'but', 'thou'],
@@ -314,6 +282,237 @@ class VersionTests(TestBase):
         v2 = Verse.objects.get(version__slug='KJV',
                                localized_reference='Psalm 23:1')
         self.assertTrue(item_suggestions_need_updating(v2))
+
+
+class ParsingTests(unittest2.TestCase):
+    def pv(self, lang, ref):
+        """
+        parse_validated_localized_reference, with extra checks.
+        """
+        retval = parse_validated_localized_reference(lang, ref)
+        self.assertEqual(retval.canonical_form(), ref)
+        return retval
+
+    def pu(self, lang, query, **kwargs):
+        return parse_unvalidated_localized_reference(lang, query, **kwargs)
+
+    def test_unparsable_strict(self):
+        self.assertRaises(InvalidVerseReference,
+                          lambda: self.pv(LANGUAGE_CODE_EN, "Garbage"))
+        self.assertRaises(InvalidVerseReference,
+                          lambda: self.pv(LANGUAGE_CODE_EN, "Genesis 1:x"))
+
+    def test_unparsable_loose(self):
+        self.assertEqual(self.pu(LANGUAGE_CODE_EN, "Garbage"),
+                         None)
+        self.assertEqual(self.pu(LANGUAGE_CODE_EN, "Genesis 1:x"),
+                         None)
+
+    def test_bad_order_strict(self):
+        self.assertRaises(InvalidVerseReference,
+                          lambda: self.pv(LANGUAGE_CODE_EN, "Genesis 1:3-2"))
+        self.assertRaises(InvalidVerseReference,
+                          lambda: self.pv(LANGUAGE_CODE_EN, "Genesis 2:1-1:10"))
+
+    def test_bad_order_loose(self):
+        self.assertRaises(InvalidVerseReference,
+                          lambda: self.pu(LANGUAGE_CODE_EN, "genesis 1:3-2"))
+        self.assertRaises(InvalidVerseReference,
+                          lambda: self.pu(LANGUAGE_CODE_EN, "genesis 2:1 - 1:10"))
+
+    def test_book(self):
+        parsed = self.pv(LANGUAGE_CODE_EN,
+                         "Genesis 1")
+        self.assertEqual(parsed.book_number, 0)
+        self.assertEqual(parsed.book_name, "Genesis")
+        self.assertEqual(parsed.start_chapter, 1)
+        self.assertEqual(parsed.end_chapter, 1)
+        self.assertEqual(parsed.start_verse, None)
+        self.assertEqual(parsed.end_verse, None)
+        self.assertEqual(parsed.is_single_verse(), False)
+        self.assertEqual(parsed.is_whole_book(), False)
+        self.assertEqual(parsed.is_whole_chapter(), True)
+
+    def test_single_verse_strict(self):
+        parsed = self.pv(LANGUAGE_CODE_EN,
+                         "Genesis 1:1")
+        self._test_single_verse(parsed)
+
+    def test_single_verse_loose(self):
+        parsed = self.pu(LANGUAGE_CODE_EN,
+                         "Gen 1 v 1")
+        self._test_single_verse(parsed)
+
+    def _test_single_verse(self, parsed):
+        self.assertEqual(parsed.book_number, 0)
+        self.assertEqual(parsed.book_name, "Genesis")
+        self.assertEqual(parsed.start_chapter, 1)
+        self.assertEqual(parsed.end_chapter, 1)
+        self.assertEqual(parsed.start_verse, 1)
+        self.assertEqual(parsed.end_verse, 1)
+        self.assertEqual(parsed.is_single_verse(), True)
+        self.assertEqual(parsed.is_whole_book(), False)
+        self.assertEqual(parsed.is_whole_chapter(), False)
+        self.assertEqual(parsed.get_start(), parsed)
+        self.assertEqual(parsed.get_end(), parsed)
+
+    def test_verse_range_strict(self):
+        parsed = self.pv(LANGUAGE_CODE_EN,
+                         "Genesis 1:1-2")
+        self._test_verse_range(parsed)
+
+    def test_verse_range_loose(self):
+        parsed = self.pu(LANGUAGE_CODE_EN,
+                         "gen 1 v 1 - 2")
+        self._test_verse_range(parsed)
+
+    def _test_verse_range(self, parsed):
+        self.assertEqual(parsed.book_number, 0)
+        self.assertEqual(parsed.book_name, "Genesis")
+        self.assertEqual(parsed.start_chapter, 1)
+        self.assertEqual(parsed.end_chapter, 1)
+        self.assertEqual(parsed.start_verse, 1)
+        self.assertEqual(parsed.end_verse, 2)
+        self.assertEqual(parsed.is_single_verse(), False)
+        self.assertEqual(parsed.is_whole_book(), False)
+        self.assertEqual(parsed.is_whole_chapter(), False)
+
+        start = parsed.get_start()
+        self.assertEqual(start.start_chapter, 1)
+        self.assertEqual(start.end_chapter, 1)
+        self.assertEqual(start.start_verse, 1)
+        self.assertEqual(start.end_verse, 1)
+
+        end = parsed.get_end()
+        self.assertEqual(end.start_chapter, 1)
+        self.assertEqual(end.end_chapter, 1)
+        self.assertEqual(end.start_verse, 2)
+        self.assertEqual(end.end_verse, 2)
+
+    def test_verse_range_2_strict(self):
+        parsed = self.pv(LANGUAGE_CODE_EN,
+                         "Genesis 1:2-3:4")
+        self._test_verse_range_2(parsed)
+
+    def test_verse_range_2_loose(self):
+        parsed = self.pu(LANGUAGE_CODE_EN,
+                         "gen 1v2 - 3v4")
+        self._test_verse_range_2(parsed)
+
+    def _test_verse_range_2(self, parsed):
+        self.assertEqual(parsed.start_chapter, 1)
+        self.assertEqual(parsed.end_chapter, 3)
+        self.assertEqual(parsed.start_verse, 2)
+        self.assertEqual(parsed.end_verse, 4)
+        self.assertEqual(parsed.is_single_verse(), False)
+        self.assertEqual(parsed.is_whole_book(), False)
+        self.assertEqual(parsed.is_whole_chapter(), False)
+
+        start = parsed.get_start()
+        self.assertEqual(start.start_chapter, 1)
+        self.assertEqual(start.end_chapter, 1)
+        self.assertEqual(start.start_verse, 2)
+        self.assertEqual(start.end_verse, 2)
+
+        end = parsed.get_end()
+        self.assertEqual(end.start_chapter, 3)
+        self.assertEqual(end.end_chapter, 3)
+        self.assertEqual(end.start_verse, 4)
+        self.assertEqual(end.end_verse, 4)
+
+    def test_from_start_and_end(self):
+        parsed = self.pv(LANGUAGE_CODE_EN,
+                         "Genesis 1:2-3:4")
+        combined = ParsedReference.from_start_and_end(parsed.get_start(),
+                                                      parsed.get_end())
+        self.assertEqual(parsed, combined)
+
+        parsed2 = self.pv(LANGUAGE_CODE_EN,
+                          "Genesis 1:1")
+        combined2 = ParsedReference.from_start_and_end(parsed2.get_start(),
+                                                       parsed2.get_end())
+        self.assertEqual(parsed2, combined2)
+
+        parsed3 = self.pv(LANGUAGE_CODE_EN,
+                          "Genesis 1")
+        combined3 = ParsedReference.from_start_and_end(parsed3.get_start(),
+                                                       parsed3.get_end())
+        self.assertEqual(parsed3, combined3)
+
+    def test_parse_books(self):
+        # Check that the book names parse back to themselves.
+        for lang in LANGUAGES:
+            for book in get_bible_books(lang.code):
+                r = self.pu(lang.code, book,
+                            allow_whole_book=True).canonical_form()
+                book_number = get_bible_book_number(lang.code, book)
+                if is_single_chapter_book(book_number):
+                    self.assertEqual(r, book + " 1")
+                else:
+                    self.assertEqual(r, book)
+
+    def test_single_chapter_books(self):
+        parsed = self.pu(LANGUAGE_CODE_EN, "Jude")
+        self.assertEqual(parsed.canonical_form(), "Jude 1")
+        self.assertEqual(parsed.is_whole_book(), True)
+        self.assertEqual(parsed.is_whole_chapter(), True)
+
+    def test_constraints(self):
+        self.assertEqual(self.pu(LANGUAGE_CODE_EN, "Matt 1",
+                                 allow_whole_book=False,
+                                 allow_whole_chapter=True).canonical_form(),
+                         "Matthew 1")
+        self.assertEqual(self.pu(LANGUAGE_CODE_EN, "Matt 1",
+                                 allow_whole_book=False,
+                                 allow_whole_chapter=False),
+                         None)
+        self.assertEqual(self.pu(LANGUAGE_CODE_EN, "Matt",
+                                 allow_whole_book=True,
+                                 allow_whole_chapter=True).canonical_form(),
+                         "Matthew")
+        self.assertEqual(self.pu(LANGUAGE_CODE_EN, "Matt",
+                                 allow_whole_book=False,
+                                 allow_whole_chapter=True),
+                         None)
+        self.assertEqual(self.pu(LANGUAGE_CODE_EN, "Jude",
+                                 allow_whole_book=False,
+                                 allow_whole_chapter=True).canonical_form(),
+                         "Jude 1")
+
+    def test_invalid_references(self):
+        self.assertRaises(InvalidVerseReference,
+                          lambda: self.pv(LANGUAGE_CODE_EN, "Matthew 2:1-1:2"))
+        # Even with loose parsing, we still propagage InvalidVerseReference, so
+        # that the front end code (e.g. quick_find) can recognise that the user
+        # tried to enter a verse reference.
+        self.assertRaises(InvalidVerseReference,
+                          lambda: self.pu(LANGUAGE_CODE_EN, "Matthew 2:1-1:2"))
+
+    def test_turkish_reference_parsing(self):
+        tests = [
+            # Different numbering styles for book names:
+            ("1. Timoteos 3:16", "1. Timoteos 3:16"),
+            ("1 Timoteos 3:16", "1. Timoteos 3:16"),
+            ("1Timoteos 3:16", "1. Timoteos 3:16"),
+            ("1tim 3.16", "1. Timoteos 3:16"),
+            # Apostrophes optional
+            ("Yasanın Tekrarı 1", "Yasa'nın Tekrarı 1"),
+            # Turkish people often miss out accents or use the wrong kind of 'i'
+            # etc. when typing, especially as keyboards may not support correct
+            # characters.
+            ("YARATILIS 2:3", "Yaratılış 2:3"),
+            ("YARATİLİS 2:3", "Yaratılış 2:3"),
+            ("yaratilis 2:3", "Yaratılış 2:3"),
+            ("colde sayim 4:5", "Çölde Sayım 4:5"),
+            ("EYÜP 1", "Eyüp 1"),
+        ]
+        for ref, output in tests:
+            self.assertEqual(self.pu(LANGUAGE_CODE_TR, ref).canonical_form(),
+                             output,
+                             "Failure parsing '{0}'".format(ref))
+
+        self.assertEqual(normalize_search_input_turkish('  ÂâİIiıÇçŞşöü  '),
+                         'aaiiiiccssou')
 
 
 class MockUVS(object):

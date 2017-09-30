@@ -1,4 +1,4 @@
-from .constants import _BIBLE_BOOK_ABBREVIATIONS_FOR_LANG, _BIBLE_BOOK_NUMBERS_FOR_LANG, _BIBLE_BOOKS_FOR_LANG
+from .constants import _BIBLE_BOOK_ABBREVIATIONS_FOR_LANG, _BIBLE_BOOK_NUMBERS_FOR_LANG, _BIBLE_BOOKS_FOR_LANG, _SINGLE_CHAPTER_BOOK_NUMBERS
 from .languages import normalize_search_input
 
 
@@ -7,6 +7,14 @@ def get_bible_books(language_code):
     For a given language code, returns the list of Bible books (in normal order)
     """
     return _BIBLE_BOOKS_FOR_LANG[language_code]
+
+
+def get_bible_book_abbreviation_map(language_code):
+    """
+    For a given language code, returns the mapping
+    of all acceptable book names to the canonical name
+    """
+    return _BIBLE_BOOK_ABBREVIATIONS_FOR_LANG[language_code]
 
 
 def get_bible_book_number(language_code, book_name):
@@ -50,3 +58,8 @@ def get_canonical_bible_book_name(language_code, book_name):
     if is_bible_book(language_code, book_name, canonical=True):
         return book_name
     return _BIBLE_BOOK_ABBREVIATIONS_FOR_LANG[language_code][normalize_search_input(language_code, book_name)]
+
+
+def is_single_chapter_book(book_number):
+    assert type(book_number) == int
+    return book_number in _SINGLE_CHAPTER_BOOK_NUMBERS

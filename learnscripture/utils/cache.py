@@ -1,3 +1,4 @@
+from functools import wraps
 from hashlib import sha1
 
 from django.core.cache import cache as _djcache
@@ -40,3 +41,22 @@ def cache_results(seconds=900):
 def clear_cache_results(f, *args, **kwargs):
     key = cache_results_key(f, args, kwargs)
     _djcache.delete(key)
+
+
+def memoize_function(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        key = (args, frozenset(kwargs.items()))
+        if key in wrapper.__result_cache:
+            return wrapper.__result_cache[key]
+        retval = func(*args, **kwargs)
+        wrapper.__result_cache[key] = retval
+        return retval
+
+    def clearer():
+        wrapper.__result_cache = {}
+
+    clearer()
+    wrapper.clear_result_cache = clearer
+
+    return wrapper
