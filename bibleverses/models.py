@@ -19,9 +19,10 @@ from learnscripture.utils.iterators import intersperse
 from .books import get_bible_book_name, get_bible_book_number, get_canonical_bible_book_name, is_bible_book
 from .fields import VectorField
 from .languages import DEFAULT_LANGUAGE, LANGUAGE_CHOICES, normalize_search_input
+from .parsing import (InvalidVerseReference, ParsedReference, parse_break_list, parse_unvalidated_localized_reference,
+                      parse_validated_localized_reference)
 from .services import get_fetch_service, get_search_service
 from .textutils import split_into_words
-from .parsing import InvalidVerseReference
 
 logger = logging.getLogger(__name__)
 
@@ -109,7 +110,11 @@ class TextVersion(models.Model):
         Get ordered list of Verse objects for the given localized reference.
         (just one object for most references).
         """
-        return parse_ref(localized_reference, version=self, max_length=max_length)
+        return fetch_localized_reference(
+            self,
+            self.language_code,
+            localized_reference,
+            max_length=max_length)
 
     def get_text_by_localized_reference(self, localized_reference):
         return ComboVerse(localized_reference, self.get_verse_list(localized_reference)).text
@@ -787,167 +792,62 @@ class UserVerseStatus(models.Model):
         verbose_name_plural = "User verse statuses"
 
 
-class ParsedReference(object):
-    def __init__(self, book, chapter_number, verse_number):
-        self.book = book
-        self.chapter_number = chapter_number
-        self.verse_number = verse_number
-
-    def __eq__(self, other):
-        return (self.book == other.book and
-                self.chapter_number == other.chapter_number and
-                self.verse_number == other.verse_number)
-
-    def __repr__(self):
-        return "<ParsedReference %s %d:%d>" % (self.book, self.chapter_number, self.verse_number)
+def fetch_localized_reference(version,
+                              language_code,
+                              localized_reference,
+                              max_length=MAX_VERSE_QUERY_SIZE):
+    parsed_ref = parse_validated_localized_reference(language_code, localized_reference)
+    return fetch_parsed_reference(version, parsed_ref, max_length=max_length)
 
 
-def parse_ref(localized_reference,
-              version=None,
-              language_code=None,
-              max_length=MAX_VERSE_QUERY_SIZE,
-              return_verses=True):
-    """
-    Takes a localized reference and returns the verses referred to in a list.
-
-    If return_verses is False, then the version is not needed, more lenient
-    checking is done (the input is trusted), and a ParsedReference object is returned
-    instead, or a two tuple (start ParsedReference, end ParsedReference)
-    """
-    # This function is strict, and expects reference in normalized format.
-    # Frontend function should deal with tolerance, to ensure that VerseChoice
-    # only ever stores a canonical form.
-
-    # This function will InvalidVerseReference if a verse is not matched.
-
-    if language_code is None:
-        if version is None:
-            raise Exception("No language_code was passed, which is required if `version` "
-                            "is not passed")
-        else:
-            language_code = version.language_code
-
-    if ':' not in localized_reference:
-        # chapter only
-        try:
-            # If there is a space in name, we need this:
-            if is_bible_book(language_code, localized_reference, canonical=True):
-                # no chapter.
-                raise ValueError()
-            # If no, space, the following will weed out references without a chapter
-            book, chapter = localized_reference.rsplit(' ', 1)
-        except ValueError:
-            raise InvalidVerseReference("Reference should provide at least book name and chapter number")
-        if not is_bible_book(language_code, book, canonical=True):
-            raise InvalidVerseReference("Book '%s' not known" % book)
-        book_number = get_bible_book_number(language_code, book)
-        try:
-            chapter_number = int(chapter)
-        except ValueError:
-            raise InvalidVerseReference("Expecting '%s' to be a chapter number" % chapter)
-        if return_verses:
-            retval = list(version.verse_set
-                          .filter(book_number=book_number,
-                                  chapter_number=chapter_number,
-                                  missing=False)
-                          .order_by('bible_verse_number')
-                          )
-        else:
-            retval = ParsedReference(book, chapter_number, None)
+def fetch_parsed_reference(version, parsed_ref, max_length=MAX_VERSE_QUERY_SIZE):
+    # TODO All of this will need fixing for versions with merged verses.
+    if parsed_ref.is_whole_chapter():
+        retval = list(version.verse_set
+                      .filter(book_number=parsed_ref.book_number,
+                              chapter_number=parsed_ref.start_chapter,
+                              missing=False)
+                      .order_by('bible_verse_number')
+                      )
+    elif parsed_ref.is_single_verse():
+        retval = list(version.verse_set.filter(localized_reference=parsed_ref.canonical_form(),
+                                               missing=False))
     else:
-        parts = localized_reference.rsplit('-', 1)
-        if len(parts) == 1:
-            # e.g. Genesis 1:1
-            if return_verses:
-                retval = list(version.verse_set.filter(localized_reference=localized_reference,
-                                                       missing=False))
-            else:
-                book, rest = localized_reference.rsplit(' ', 1)
-                ch_num, v_num = rest.split(':', 1)
-                retval = ParsedReference(book, int(ch_num), int(v_num))
-        else:
-            # e.g. Genesis 1:1-2
-            book, start = parts[0].rsplit(' ', 1)
-            end = parts[1]
-            if ':' not in start:
-                raise InvalidVerseReference("Expecting to find ':' in part '%s'" % start)
+        ref_start = parsed_ref.get_start().canonical_form()
+        ref_end = parsed_ref.get_end().canonical_form()
+        # Try to get results in just two queries
+        #
+        # We don't do 'missing=False' filter here, because we want to be
+        # able to do things like 'John 5:3-4' even if 'John 5:4' is
+        # missing in the current version. We just miss out the missing
+        # verses when creating the list.
+        vs = version.verse_set.filter(localized_reference__in=[ref_start, ref_end])
+        try:
+            verse_start = [v for v in vs if v.localized_reference == ref_start][0]
+        except IndexError:
+            raise InvalidVerseReference("Can't find  '%s'" % ref_start)
+        try:
+            verse_end = [v for v in vs if v.localized_reference == ref_end][0]
+        except IndexError:
+            raise InvalidVerseReference("Can't find  '%s'" % ref_end)
 
-            start_chapter, start_verse = start.split(':')
-            try:
-                start_chapter = int(start_chapter)
-            except ValueError:
-                raise InvalidVerseReference("Expecting '%s' to be a chapter number" % start_chapter)
+        if verse_end.bible_verse_number < verse_start.bible_verse_number:
+            raise InvalidVerseReference("%s and %s are not in ascending order." % (ref_start, ref_end))
 
-            try:
-                start_verse = int(start_verse)
-            except ValueError:
-                raise InvalidVerseReference("Expecting '%s' to be a verse number" % start_verse)
-            if ':' in end:
-                end_chapter, end_verse = end.split(':')
-                try:
-                    end_chapter = int(end_chapter)
-                except ValueError:
-                    raise InvalidVerseReference("Expecting '%s' to be a chapter number" % end_chapter)
-                try:
-                    end_verse = int(end_verse)
-                except ValueError:
-                    raise InvalidVerseReference("Expecting '%s' to be a verse number" % end_verse)
+        retval = list(version.verse_set.filter(bible_verse_number__gte=verse_start.bible_verse_number,
+                                               bible_verse_number__lte=verse_end.bible_verse_number,
+                                               missing=False))
+    if len(retval) == 0:
+        raise InvalidVerseReference("No verses matched '%s'." % parsed_ref.canonical_form())
 
-            else:
-                end_chapter = start_chapter
-                try:
-                    end_verse = int(end)
-                except ValueError:
-                    raise InvalidVerseReference("Expecting '%s' to be a verse number" % end)
+    if len(retval) > max_length:
+        raise InvalidVerseReference("References that span more than %d verses are not allowed in this context." % max_length)
 
-            ref_start = "%s %d:%d" % (book, start_chapter, start_verse)
-            ref_end = "%s %d:%d" % (book, end_chapter, end_verse)
-
-            if ref_end == ref_start:
-                raise InvalidVerseReference("Start and end verse are the same.")
-
-            if return_verses:
-                # Try to get results in just two queries
-                #
-                # We don't do 'missing=False' filter here, because we want to be
-                # able to do things like 'John 5:3-4' even if 'John 5:4' is
-                # missing in the current version. We just miss out the missing
-                # verses when creating the list.
-                vs = version.verse_set.filter(localized_reference__in=[ref_start, ref_end])
-                try:
-                    verse_start = [v for v in vs if v.localized_reference == ref_start][0]
-                except IndexError:
-                    raise InvalidVerseReference("Can't find  '%s'" % ref_start)
-                try:
-                    verse_end = [v for v in vs if v.localized_reference == ref_end][0]
-                except IndexError:
-                    raise InvalidVerseReference("Can't find  '%s'" % ref_end)
-
-                if verse_end.bible_verse_number < verse_start.bible_verse_number:
-                    raise InvalidVerseReference("%s and %s are not in ascending order." % (ref_start, ref_end))
-
-                if verse_end.bible_verse_number - verse_start.bible_verse_number > max_length:
-                    raise InvalidVerseReference("References that span more than %d verses are not allowed in this context." % max_length)
-
-                retval = list(version.verse_set.filter(bible_verse_number__gte=verse_start.bible_verse_number,
-                                                       bible_verse_number__lte=verse_end.bible_verse_number,
-                                                       missing=False))
-            else:
-                retval = (ParsedReference(book, start_chapter, start_verse),
-                          ParsedReference(book, end_chapter, end_verse))
-
-    if return_verses:
-        if len(retval) == 0:
-            raise InvalidVerseReference("No verses matched '%s'." % localized_reference)
-
-        if len(retval) > max_length:
-            raise InvalidVerseReference("References that span more than %d verses are not allowed in this context." % max_length)
-
-        # Ensure back references to version are set, so we don't need extra DB lookup
-        for v in retval:
-            v.version = version
-        # Ensure verse.text_saved is set
-        ensure_text(retval)
+    # Ensure back references to version are set, so we don't need extra DB lookup
+    for v in retval:
+        v.version = version
+    # Ensure verse.text_saved is set
+    ensure_text(retval)
 
     return retval
 
@@ -1006,18 +906,10 @@ def ensure_text(verses):
 
 
 def pretty_passage_ref(language_code, start_ref, end_ref):
-    first = parse_ref(start_ref, language_code=language_code, return_verses=False)
-    last = parse_ref(end_ref, language_code=language_code, return_verses=False)
-
-    ref = "%s %d:%d" % (first.book,
-                        first.chapter_number,
-                        first.verse_number,
-                        )
-    if last.chapter_number == first.chapter_number:
-        ref += "-%d" % last.verse_number
-    else:
-        ref += "-%d:%d" % (last.chapter_number, last.verse_number)
-    return ref
+    return ParsedReference.from_start_and_end(
+        parse_validated_localized_reference(language_code, start_ref),
+        parse_validated_localized_reference(language_code, end_ref)
+    ).canonical_form()
 
 
 def get_passage_sections(language_code, verse_list, breaks):
@@ -1027,51 +919,29 @@ def get_passage_sections(language_code, verse_list, breaks):
     or <chapter_number>:<verse_number>, return the list in sections.
     """
     # TODO - currently this has been modified to accept language_code, purely so
-    # that we can pass it to parse_ref. However, different grouping of verses in
-    # different versions may mean we actually need to pass a TextVersion through
-    # this, and other modified functions like add_passage_breaks
+    # that we can pass it to parse_break_list. However, different grouping of
+    # verses in different versions may mean we actually need to pass a
+    # TextVersion through this, and other modified functions like
+    # add_passage_breaks
 
     # Since the input has been sanitised, we can do parsing without needing DB
     # queries.
-
-    # First need to parse 'breaks' into a list of ParsedReferences.
-
     if len(verse_list) == 0:
         return []
 
     if breaks == '':
         return [verse_list]
 
-    break_list = []
-
-    # First reference provides the context for the breaks.
-    first_parsed_ref = parse_ref(verse_list[0].localized_reference,
-                                 language_code=language_code,
-                                 return_verses=False)
-    if isinstance(first_parsed_ref, tuple):
-        first_parsed_ref = first_parsed_ref[0]
-
-    chapter_number = first_parsed_ref.chapter_number
-    book = first_parsed_ref.book
-    for b in breaks.split(','):
-        b = b.strip()
-        if ':' in b:
-            chapter_number, verse_number = b.split(':', 1)
-            chapter_number = int(chapter_number)
-            verse_number = int(verse_number)
-        else:
-            verse_number = int(b)
-        break_list.append(ParsedReference(book, chapter_number, verse_number))
+    break_ref_list = [p.get_start() for p in parse_break_list(language_code, breaks,
+                                                              first_verse=verse_list[0])]
 
     sections = []
     current_section = []
     for v in verse_list:
-        parsed_ref = parse_ref(v.localized_reference,
-                               language_code=language_code,
-                               return_verses=False)
-        if isinstance(parsed_ref, tuple):
-            parsed_ref = parsed_ref[0]
-        if parsed_ref in break_list and len(current_section) > 0:
+        parsed_ref = parse_validated_localized_reference(
+            language_code, v.localized_reference)
+        start_ref = parsed_ref.get_start()
+        if start_ref in break_ref_list and len(current_section) > 0:
             # Start new section
             sections.append(current_section)
             current_section = []
@@ -1126,25 +996,23 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
 
     It returns a list of ComboVerse objects.
     """
-    # Unlike parse_ref, this is tolerant with input. It can still throw
-    # InvalidVerseReference for things that are obviously incorrect e.g. Psalm
-    # 151, or asking for too many verses.
+    # Unlike fetch_localized_reference, this is tolerant with input.
+    # It can still throw InvalidVerseReference for things that are obviously
+    # incorrect e.g. Psalm 151, or asking for too many verses.
 
     query = normalize_search_input(version.language_code, query)
 
     if query == '':
         raise InvalidVerseReference("Please enter a query term or reference")
 
-    localized_reference = parse_as_bible_localized_reference(
+    parsed_ref = parse_unvalidated_localized_reference(
         version.language_code,
         query,
-        # If we allow searches, we want searches for people's names like 'John'
-        # or 'Jude' etc. to not return an entire book, but actually do a search.
-        # Therefore, we do not allow whole book references to be recognised, so
-        # that we go down the search path.
         allow_whole_book=not allow_searches)
-    if localized_reference is not None:
-        return [ComboVerse(localized_reference, parse_ref(localized_reference, version, max_length=max_length))]
+    if parsed_ref is not None:
+        return [ComboVerse(parsed_ref.canonical_form(),
+                           fetch_parsed_reference(version, parsed_ref,
+                                                  max_length=max_length))]
 
     if not allow_searches:
         raise InvalidVerseReference("Verse reference not recognized")

@@ -301,3 +301,50 @@ def parse_unvalidated_localized_reference(language_code, localized_reference,
         else:
             return None
     return parsed_ref
+
+
+def parse_break_list(language_code, breaks, first_verse=None):
+    """
+    Parse a comman separated list of references, or raise a ValueError for failure.
+    """
+    # breaks is a common separated list of references, created in create.js
+    bible_ref = bible_reference_parser_for_lang(language_code, True)
+    bible_ref_list = bible_ref.sep_by(string(","), min=1)
+    parser = bible_ref_list
+    if first_verse is not None:
+        # Legacy format
+        legacy_break_list = ((regex("[0-9]+").map(int)
+                              .sep_by(string(":"), min=1, max=2))
+                             .sep_by(string(",")))
+        parser = parser | legacy_break_list
+    try:
+        ref_list = parser.parse(breaks)
+        if first_verse is not None:
+            # legacy processing
+            retval = []
+            first_parsed_ref = parse_validated_localized_reference(language_code,
+                                                                   first_verse.localized_reference)
+            current_chapter = first_parsed_ref.start_chapter
+            current_verse = first_parsed_ref.start_verse
+            for item in ref_list:
+                if isinstance(item, ParsedReference):
+                    retval.append(item)
+                else:
+                    assert isinstance(item, list)
+                    if len(item) == 1:
+                        # Verse number
+                        current_verse = item[0]
+                    else:
+                        current_chapter, current_verse = item
+                    new_item = ParsedReference(language_code=language_code,
+                                               book_name=first_parsed_ref.book_name,
+                                               start_chapter=current_chapter,
+                                               start_verse=current_verse)
+                    retval.append(new_item)
+            return retval
+        else:
+            return ref_list
+
+    except ParseError as e:
+        raise ValueError("'{0}' is not a valid list of Bible references in language {1}"
+                         .format(breaks, language_code))

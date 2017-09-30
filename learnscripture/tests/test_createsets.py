@@ -172,7 +172,7 @@ class CreateSetTests(FullBrowserTest):
         vs = VerseSet.objects.get(name='Genesis 1:1-10',
                                   set_type=VerseSetType.PASSAGE)
         self.assertTrue(len(vs.verse_choices.all()), 10)
-        self.assertEqual(vs.breaks, "1:3,1:9")
+        self.assertEqual(vs.breaks, "Genesis 1:3,Genesis 1:9")
         self.assertEqual(vs.passage_id, 'Genesis 1:1 - Genesis 1:10')
 
     def test_create_duplicate_passage_set(self):
@@ -196,7 +196,7 @@ class CreateSetTests(FullBrowserTest):
         vs = VerseSet.objects.create(created_by=self._account,
                                      set_type=VerseSetType.PASSAGE,
                                      name='Psalm 23',
-                                     breaks="23:5")
+                                     breaks="23:5")  # Legacy format for breaks
         localized_references = []
         for i in range(1, 7):
             ref = 'Psalm 23:%d' % i
@@ -213,4 +213,4 @@ class CreateSetTests(FullBrowserTest):
         vcs = vs.verse_choices.all().order_by('set_order')
         self.assertEqual([vc.localized_reference for vc in vcs],
                          localized_references)
-        self.assertEqual(vs.breaks, "23:5")
+        self.assertEqual(vs.breaks, "Psalm 23:5")

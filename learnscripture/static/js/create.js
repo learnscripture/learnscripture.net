@@ -64,7 +64,7 @@ var learnscripture =
                 var ref = $(row.find('td').get(1)).text();
                 refs.push(ref);
                 if (row.find('input').attr('checked') === 'checked') {
-                    breaks.push(ref.split(" ").slice(-1)[0]);
+                    breaks.push(ref);
                 }
             });
             $('#id-localized-reference-list').val(refs.join('|'));

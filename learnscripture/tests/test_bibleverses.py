@@ -2,12 +2,12 @@
 import unittest2
 
 from accounts.models import Identity
-from bibleverses.books import get_bible_books
+from bibleverses.books import get_bible_book_number, get_bible_books, is_single_chapter_book
 from bibleverses.languages import LANGUAGE_CODE_EN, LANGUAGE_CODE_TR, LANGUAGES, normalize_search_input_turkish
 from bibleverses.models import (InvalidVerseReference, TextVersion, Verse, VerseSet, VerseSetType, get_passage_sections,
                                 parse_as_bible_localized_reference, split_into_words)
-from bibleverses.parsing import ParsedReference, parse_unvalidated_localized_reference, parse_validated_localized_reference
-from bibleverses.books import is_single_chapter_book, get_bible_book_number
+from bibleverses.parsing import (ParsedReference, parse_unvalidated_localized_reference,
+                                 parse_validated_localized_reference)
 from bibleverses.suggestions.modelapi import create_word_suggestion_data, item_suggestions_need_updating
 
 from .base import AccountTestMixin, TestBase, create_account
@@ -537,7 +537,15 @@ class GetPassageSectionsTests(unittest2.TestCase):
                     MockUVS('Genesis 1:4'),
                     MockUVS('Genesis 1:5')]
 
+        # Legacy
         sections = get_passage_sections(LANGUAGE_CODE_EN, uvs_list, '1,4')
+        self.assertEqual([[uvs.localized_reference for uvs in section]
+                          for section in sections],
+                         [["Genesis 1:1", "Genesis 1:2", "Genesis 1:3"],
+                          ["Genesis 1:4", "Genesis 1:5"]])
+
+        # New
+        sections = get_passage_sections(LANGUAGE_CODE_EN, uvs_list, 'Genesis 1:1,Genesis 1:4')
         self.assertEqual([[uvs.localized_reference for uvs in section]
                           for section in sections],
                          [["Genesis 1:1", "Genesis 1:2", "Genesis 1:3"],
@@ -550,7 +558,15 @@ class GetPassageSectionsTests(unittest2.TestCase):
                     MockUVS('Genesis 1:4'),
                     MockUVS('Genesis 1:5')]
 
+        # Legacy
         sections = get_passage_sections(LANGUAGE_CODE_EN, uvs_list, '4')
+        self.assertEqual([[uvs.localized_reference for uvs in section]
+                          for section in sections],
+                         [["Genesis 1:1", "Genesis 1:2", "Genesis 1:3"],
+                          ["Genesis 1:4", "Genesis 1:5"]])
+
+        # New
+        sections = get_passage_sections(LANGUAGE_CODE_EN, uvs_list, 'Genesis 1:4')
         self.assertEqual([[uvs.localized_reference for uvs in section]
                           for section in sections],
                          [["Genesis 1:1", "Genesis 1:2", "Genesis 1:3"],
@@ -566,7 +582,18 @@ class GetPassageSectionsTests(unittest2.TestCase):
                     MockUVS('Genesis 2:4'),
                     MockUVS('Genesis 2:5')]
 
+        # Legacy
         sections = get_passage_sections(LANGUAGE_CODE_EN, uvs_list, '1:13,2:2,4')
+        self.assertEqual([[uvs.localized_reference for uvs in section]
+                          for section in sections],
+                         [["Genesis 1:11", "Genesis 1:12"],
+                          ["Genesis 1:13", "Genesis 2:1"],
+                          ["Genesis 2:2", "Genesis 2:3"],
+                          ["Genesis 2:4", "Genesis 2:5"],
+                          ])
+
+        # New:
+        sections = get_passage_sections(LANGUAGE_CODE_EN, uvs_list, 'Genesis 1:13,Genesis 2:2,Genesis 2:4')
         self.assertEqual([[uvs.localized_reference for uvs in section]
                           for section in sections],
                          [["Genesis 1:11", "Genesis 1:12"],
@@ -581,7 +608,15 @@ class GetPassageSectionsTests(unittest2.TestCase):
                     MockUVS('Genesis 1:3-4'),
                     MockUVS('Genesis 1:5')]
 
+        # Legacy
         sections = get_passage_sections(LANGUAGE_CODE_EN, uvs_list, '3')
+        self.assertEqual([[uvs.localized_reference for uvs in section]
+                          for section in sections],
+                         [["Genesis 1:1", "Genesis 1:2"],
+                          ["Genesis 1:3-4", "Genesis 1:5"]])
+
+        # New
+        sections = get_passage_sections(LANGUAGE_CODE_EN, uvs_list, 'Genesis 1:3')
         self.assertEqual([[uvs.localized_reference for uvs in section]
                           for section in sections],
                          [["Genesis 1:1", "Genesis 1:2"],
@@ -596,10 +631,19 @@ class UserVerseStatusTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestB
         # Setup to create UVSs
         identity, account = self.create_account()
         vs = VerseSet.objects.get(name="Psalm 23")
+        # Legacy:
         vs.breaks = "23:4"
         vs.save()
         identity.add_verse_set(vs)
 
+        uvs = identity.verse_statuses.get(localized_reference='Psalm 23:2')
+
+        self.assertEqual(uvs.passage_localized_reference, 'Psalm 23:1-6')
+        self.assertEqual(uvs.section_localized_reference, 'Psalm 23:1-3')
+
+        # New:
+        vs.breaks = "Psalm 23:4"
+        vs.save()
         uvs = identity.verse_statuses.get(localized_reference='Psalm 23:2')
 
         self.assertEqual(uvs.passage_localized_reference, 'Psalm 23:1-6')
