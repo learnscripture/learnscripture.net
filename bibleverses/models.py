@@ -137,23 +137,9 @@ class TextVersion(models.Model):
         """
         if not self.is_bible:
             return {}
-        # We try to do this efficiently, but it is hard for combo references. So
-        # we do the easy ones the easy way:
-        simple_verses = list(self.verse_set.filter(localized_reference__in=localized_reference_list,
-                                                   missing=False,
-                                                   ))
-        v_dict = dict((v.localized_reference, v) for v in simple_verses)
-        # Now get the others:
-        for localized_ref in localized_reference_list:
-            if localized_ref not in v_dict:
-                try:
-                    v_dict[localized_ref] = ComboVerse(localized_ref,
-                                                       self.get_verse_list(localized_ref))
-                except InvalidVerseReference:
-                    pass
-        if fetch_text:
-            ensure_text(v_dict.values())
-        return v_dict
+        return fetch_localized_reference_bulk(
+            self, self.language_code, localized_reference_list,
+            fetch_text=fetch_text)
 
     def get_qapairs_by_localized_reference_bulk(self, localized_reference_list):
         if not self.is_catechism:
@@ -803,6 +789,10 @@ def fetch_localized_reference(version,
 
 
 def fetch_parsed_reference(version, parsed_ref, max_length=MAX_VERSE_QUERY_SIZE):
+    """
+    Fetch the ParsedReference from the DB, return
+    as a list of (Verse or ComboVerse) objects.
+    """
     # TODO All of this will need fixing for versions with merged verses.
     if parsed_ref.is_whole_chapter():
         retval = list(version.verse_set
@@ -812,8 +802,7 @@ def fetch_parsed_reference(version, parsed_ref, max_length=MAX_VERSE_QUERY_SIZE)
                       .order_by('bible_verse_number')
                       )
     elif parsed_ref.is_single_verse():
-        retval = list(version.verse_set.filter(localized_reference=parsed_ref.canonical_form(),
-                                               missing=False))
+        retval = fetch_by_localized_reference_simple_bulk(version, [parsed_ref.canonical_form()])
     else:
         ref_start = parsed_ref.get_start().canonical_form()
         ref_end = parsed_ref.get_end().canonical_form()
@@ -852,6 +841,33 @@ def fetch_parsed_reference(version, parsed_ref, max_length=MAX_VERSE_QUERY_SIZE)
     ensure_text(retval)
 
     return retval
+
+
+def fetch_localized_reference_bulk(version, language_code,
+                                   localized_reference_list,
+                                   fetch_text=True):
+    # We try to do this efficiently, but it is hard for combo references. So
+    # we do the easy ones the easy way:
+    simple_verses = fetch_by_localized_reference_simple_bulk(version, localized_reference_list)
+    v_dict = dict((v.localized_reference, v) for v in simple_verses)
+    # Now get the others:
+    for localized_ref in localized_reference_list:
+        if localized_ref not in v_dict:
+            try:
+                v_dict[localized_ref] = ComboVerse(localized_ref,
+                                                   fetch_localized_reference(version,
+                                                                             language_code,
+                                                                             localized_ref))
+            except InvalidVerseReference:
+                pass
+    if fetch_text:
+        ensure_text(v_dict.values())
+    return v_dict
+
+
+def fetch_by_localized_reference_simple_bulk(version, localized_reference_list):
+    return list(version.verse_set.filter(localized_reference__in=localized_reference_list,
+                                         missing=False))
 
 
 def ensure_text(verses):
