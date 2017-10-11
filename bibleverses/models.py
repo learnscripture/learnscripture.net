@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import logging
 import math
 import random
@@ -288,6 +289,9 @@ class Verse(models.Model):
     # This field is to cope with versions where a specific verse is entirely
     # empty e.g. John 5:4 in NET/ESV
     missing = models.BooleanField(default=False)
+
+    merged_into = models.ForeignKey("self", on_delete=models.CASCADE,
+                                    blank=True, null=True)
 
     objects = VerseManager.from_queryset(VerseQuerySet)()
 
@@ -780,6 +784,37 @@ class UserVerseStatus(models.Model):
         verbose_name_plural = "User verse statuses"
 
 
+#  ---- Verse fetching ----
+#
+# This is significantly complicated by several factors:
+#
+# * We sometimes often want to fetch in bulk - for example,
+#   when starting a learning session for a set of UserVerseStatuses
+#   and sometimes just want a single 'thing'. This results in many functions
+#   having two versions, bulk and non-bulk for efficiency.
+#
+# * We sometimes want to parse verse references loosely (e.g. from non-canonical
+#   user entered data)
+#
+# * We need to handle:
+#   - Combo verses (e.g. when a user chooses to learn several verses
+#     together as single verse e.g. Ephesians 2:8-9)
+#   - Passages - we want to retrieve all of "John 1:1-15", to be displayed in a list
+#   - Merged verses - where the underlying Bible translation has put several
+#     verses together e.g. TCL02 Romalılar 3:25-26.
+#   - Missing verses - where the translation doesn't have a certain verse.
+#
+# * We many need to tolerate some incorrectness in requested references e.g. not
+#   accounting for merged verses in underlying translation.
+#
+# * For some TextVersions we don't store the whole text locally due to license
+#   agreements. We only have a limited local cache and must get the remainder
+#   from a service (but avoid doing so wherever possible)
+#
+# * And then the combination of all these (e.g. merged verses and combo verses)
+#   with the edge cases, combined with trying to get data efficiently with the
+#   minimum of DB queries.
+
 def fetch_localized_reference(version,
                               language_code,
                               localized_reference,
@@ -791,9 +826,17 @@ def fetch_localized_reference(version,
 def fetch_parsed_reference(version, parsed_ref, max_length=MAX_VERSE_QUERY_SIZE):
     """
     Fetch the ParsedReference from the DB, return
-    as a list of (Verse or ComboVerse) objects.
+    as a list of Verse objects.
+
+    If references that are incorrect due to merged verses will be automatically
+    corrected.
+
+    If otherwise incorrect, InvalidVerseReference will be raised
     """
-    # TODO All of this will need fixing for versions with merged verses.
+    # TODO - for some uses, it is probably bad that we autocorrect merged
+    # references, because then things might not line up later. We should throw
+    # an exception perhaps? Or ensure that when we create UserVerseStatus
+    # objects we always correct the refs first, not rely on correcting later.
     if parsed_ref.is_whole_chapter():
         retval = list(version.verse_set
                       .filter(book_number=parsed_ref.book_number,
@@ -802,7 +845,12 @@ def fetch_parsed_reference(version, parsed_ref, max_length=MAX_VERSE_QUERY_SIZE)
                       .order_by('bible_verse_number')
                       )
     elif parsed_ref.is_single_verse():
-        retval = fetch_by_localized_reference_simple_bulk(version, [parsed_ref.canonical_form()])
+        ref = parsed_ref.canonical_form()
+        verse_d = fetch_by_localized_reference_simple_bulk(version, [ref])
+        if ref in verse_d:
+            retval = [verse_d[ref]]
+        else:
+            retval = []
     else:
         ref_start = parsed_ref.get_start().canonical_form()
         ref_end = parsed_ref.get_end().canonical_form()
@@ -810,8 +858,9 @@ def fetch_parsed_reference(version, parsed_ref, max_length=MAX_VERSE_QUERY_SIZE)
         #
         # We don't do 'missing=False' filter here, because we want to be
         # able to do things like 'John 5:3-4' even if 'John 5:4' is
-        # missing in the current version. We just miss out the missing
-        # verses when creating the list.
+        # missing in the current version.
+        # We also need to handle merged verses, which are marked as 'missing=True'.
+        # We just miss out the missing verses when creating the list.
         vs = version.verse_set.filter(localized_reference__in=[ref_start, ref_end])
         try:
             verse_start = [v for v in vs if v.localized_reference == ref_start][0]
@@ -825,9 +874,24 @@ def fetch_parsed_reference(version, parsed_ref, max_length=MAX_VERSE_QUERY_SIZE)
         if verse_end.bible_verse_number < verse_start.bible_verse_number:
             raise InvalidVerseReference("%s and %s are not in ascending order." % (ref_start, ref_end))
 
-        retval = list(version.verse_set.filter(bible_verse_number__gte=verse_start.bible_verse_number,
-                                               bible_verse_number__lte=verse_end.bible_verse_number,
-                                               missing=False))
+        items = (version.verse_set
+                 .filter(bible_verse_number__gte=verse_start.bible_verse_number,
+                         bible_verse_number__lte=verse_end.bible_verse_number)
+                 .select_related('merged_into'))
+        retval = []
+        used_ids = set()
+        # Handle merged verses
+        for item in items:
+            if item.merged_into is not None:
+                real = item.merged_into
+            elif item.missing:
+                real = None
+            else:
+                real = item
+            if real is not None and real.id not in used_ids:
+                retval.append(real)
+                used_ids.add(real.id)
+
     if len(retval) == 0:
         raise InvalidVerseReference("No verses matched '%s'." % parsed_ref.canonical_form())
 
@@ -846,18 +910,33 @@ def fetch_parsed_reference(version, parsed_ref, max_length=MAX_VERSE_QUERY_SIZE)
 def fetch_localized_reference_bulk(version, language_code,
                                    localized_reference_list,
                                    fetch_text=True):
+    """
+    Returns a dictionary {ref: Verse or ComboVerse} for refs matching the request references.
+    Missing references will be silently discarded.
+    Incorrect refs due to merged verses will be corrected.
+    """
     # We try to do this efficiently, but it is hard for combo references. So
     # we do the easy ones the easy way:
-    simple_verses = fetch_by_localized_reference_simple_bulk(version, localized_reference_list)
-    v_dict = dict((v.localized_reference, v) for v in simple_verses)
+    v_dict = fetch_by_localized_reference_simple_bulk(version, localized_reference_list)
     # Now get the others:
     for localized_ref in localized_reference_list:
         if localized_ref not in v_dict:
             try:
-                v_dict[localized_ref] = ComboVerse(localized_ref,
-                                                   fetch_localized_reference(version,
-                                                                             language_code,
-                                                                             localized_ref))
+                vl = fetch_localized_reference(version,
+                                               language_code,
+                                               localized_ref)
+                # In theory, localized_reference_list should already have been
+                # corrected for merged verses. But if it has not been, this will
+                # correct it so that the ComboVerse has the correct reference.
+                if len(vl) == 1:
+                    normalized_localized_ref = vl[0].localized_ref
+                else:
+                    normalized_localized_ref = pretty_passage_ref(
+                        language_code,
+                        vl[0].localized_reference,
+                        vl[-1].localized_reference)
+                v_dict[localized_ref] = ComboVerse(normalized_localized_ref,
+                                                   vl)
             except InvalidVerseReference:
                 pass
     if fetch_text:
@@ -866,8 +945,26 @@ def fetch_localized_reference_bulk(version, language_code,
 
 
 def fetch_by_localized_reference_simple_bulk(version, localized_reference_list):
-    return list(version.verse_set.filter(localized_reference__in=localized_reference_list,
-                                         missing=False))
+    """
+    Returns a dictionary {ref: Verse} for refs matching the request references.
+    It may not be a complete.
+    Incorrect refs due to merged verses will be corrected.
+    """
+    # Allow missing refs, because we need to find merged ones
+    l = (version.verse_set
+         .filter(localized_reference__in=localized_reference_list)
+         .select_related('merged_into'))
+    verse_d = {v.localized_reference: v for v in l}
+
+    # Replace verses with the corrected one, as defined by 'merged_into' FK
+    for ref in localized_reference_list:
+        if ref in verse_d:
+            v = verse_d[ref]
+            if v.merged_into is not None:
+                verse_d[ref] = v.merged_into
+            elif v.missing:
+                del verse_d[ref]
+    return verse_d
 
 
 def ensure_text(verses):
@@ -994,9 +1091,15 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
         query,
         allow_whole_book=not allow_searches)
     if parsed_ref is not None:
-        return [ComboVerse(parsed_ref.canonical_form(),
-                           fetch_parsed_reference(version, parsed_ref,
-                                                  max_length=max_length))]
+        verse_list = fetch_parsed_reference(version, parsed_ref,
+                                            max_length=max_length)
+        if len(verse_list) == 1:
+            ref = verse_list[0].localized_reference
+        else:
+            ref = pretty_passage_ref(version.language_code,
+                                     verse_list[0].localized_reference,
+                                     verse_list[-1].localized_reference)
+        return [ComboVerse(ref, verse_list)]
 
     if not allow_searches:
         raise InvalidVerseReference("Verse reference not recognized")

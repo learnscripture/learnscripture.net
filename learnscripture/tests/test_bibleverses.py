@@ -113,23 +113,21 @@ class VersionTests(TestBase):
                                     localized_reference='Genesis 1:3',
                                     text=t('Genesis 1:3'),
                                     suggestions=self._gen_1_3_suggestions())
+        self.KJV = TextVersion.objects.get(slug='KJV')
+        self.TCL02 = TextVersion.objects.get(slug='TCL02')
 
     def test_no_chapter(self):
-        version = TextVersion.objects.get(slug='KJV')
-        self.assertRaises(InvalidVerseReference, lambda: version.get_verse_list('Genesis'))
+        self.assertRaises(InvalidVerseReference, lambda: self.KJV.get_verse_list('Genesis'))
 
     def test_bad_chapter(self):
-        version = TextVersion.objects.get(slug='KJV')
-        self.assertRaises(InvalidVerseReference, lambda: version.get_verse_list('Genesis x'))
+        self.assertRaises(InvalidVerseReference, lambda: self.KJV.get_verse_list('Genesis x'))
 
     def test_bad_book(self):
-        version = TextVersion.objects.get(slug='KJV')
-        self.assertRaises(InvalidVerseReference, lambda: version.get_verse_list('Gospel of Barnabas'))
+        self.assertRaises(InvalidVerseReference, lambda: self.KJV.get_verse_list('Gospel of Barnabas'))
 
     def test_chapter(self):
-        version = TextVersion.objects.get(slug='KJV')
-        self.assertEqual(list(version.verse_set.filter(localized_reference__startswith='Genesis 1:')),
-                         version.get_verse_list("Genesis 1"))
+        self.assertEqual(list(self.KJV.verse_set.filter(localized_reference__startswith='Genesis 1:')),
+                         self.KJV.get_verse_list("Genesis 1"))
 
     def test_chapter_verse(self):
         version = TextVersion.objects.get(slug='KJV')
@@ -137,7 +135,7 @@ class VersionTests(TestBase):
                          version.get_verse_list("Genesis 1:2"))
 
     def test_verse_range(self):
-        version = TextVersion.objects.get(slug='KJV')
+        version = self.KJV
         self.assertEqual(
             [
                 version.verse_set.get(localized_reference="Genesis 1:2"),
@@ -147,11 +145,10 @@ class VersionTests(TestBase):
             version.get_verse_list("Genesis 1:2-4"))
 
     def test_empty(self):
-        version = TextVersion.objects.get(slug='KJV')
-        self.assertRaises(InvalidVerseReference, lambda: version.get_verse_list('Genesis 300:1'))
+        self.assertRaises(InvalidVerseReference, lambda: self.KJV.get_verse_list('Genesis 300:1'))
 
     def test_get_verses_by_localized_reference_bulk(self):
-        version = TextVersion.objects.get(slug='KJV')
+        version = self.KJV
         with self.assertNumQueries(1):
             # Only need one query if all are single verses.
             l1 = version.get_verses_by_localized_reference_bulk(['Genesis 1:1', 'Genesis 1:2', 'Genesis 1:3'])
@@ -168,19 +165,85 @@ class VersionTests(TestBase):
         self.assertEqual(l2['Genesis 1:2-3'].chapter_number, l1['Genesis 1:2'].chapter_number)
 
     def test_turkish_get_verse_list(self):
-        version = TextVersion.objects.get(slug='TCL02')
+        version = self.TCL02
 
         # Single verse
         v_1 = version.get_verse_list('Yuhanna 3:16')[0]
         self.assertTrue(v_1.text.startswith("“Çünkü"))
 
         # Group of verses
-        vl_1 = version.get_verse_list('Mezmur 23:1-3')
-        self.assertEqual(len(vl_1), 3)
+        v_2 = version.get_verse_list('Mezmur 23:1-3')
+        self.assertEqual(len(v_2), 3)
 
         # Chapter
-        vl_2 = version.get_verse_list('Mezmur 23')
-        self.assertEqual(len(vl_2), 6)
+        v_3 = version.get_verse_list('Mezmur 23')
+        self.assertEqual(len(v_3), 6)
+
+    def test_get_verse_list_merged(self):
+        with self.assertNumQueries(2):
+            # We could in theory get this in one query as it is a merged verse,
+            # but because it looks like a verse range, we end up in the combo
+            # verse route. Fixing this would end up increasing query counts
+            # in other cases.
+            vl = self.TCL02.get_verse_list("Romalılar 3:25-26")
+            self.assertEqual(len(vl), 1)
+            self.assertEqual(vl[0].localized_reference, "Romalılar 3:25-26")
+
+    def test_get_verse_list_spanning_merged(self):
+        # Here our range spans over the merged verses.
+        # This relies on the merged verses having a sensible bible_verse_number,
+        # just like other bible verses
+        with self.assertNumQueries(2):
+            vl = self.TCL02.get_verse_list("Romalılar 3:24-27")
+            self.assertEqual(len(vl), 3)
+            self.assertEqual(vl[0].localized_reference, "Romalılar 3:24")
+            self.assertEqual(vl[1].localized_reference, "Romalılar 3:25-26")
+            self.assertEqual(vl[2].localized_reference, "Romalılar 3:27")
+
+    def test_get_verse_list_merged_edges(self):
+        # Edge cases
+        with self.assertNumQueries(2):
+            v1 = self.TCL02.get_verse_list("Romalılar 3:24-25")
+            self.assertEqual(len(v1), 2)
+            self.assertEqual(v1[0].localized_reference, "Romalılar 3:24")
+            self.assertEqual(v1[1].localized_reference, "Romalılar 3:25-26")
+
+        with self.assertNumQueries(2):
+            v2 = self.TCL02.get_verse_list("Romalılar 3:26-27")
+            self.assertEqual(len(v2), 2)
+            self.assertEqual(v2[0].localized_reference, "Romalılar 3:25-26")
+            self.assertEqual(v2[1].localized_reference, "Romalılar 3:27")
+
+    def test_get_verses_by_localized_reference_bulk_merged(self):
+        version = self.TCL02
+        with self.assertNumQueries(1):
+            # Only need one query if all are single verses or merged verses
+            d1 = version.get_verses_by_localized_reference_bulk(
+                ['Romalılar 3:24', 'Romalılar 3:25-26', 'Romalılar 3:27'])
+            self.assertEqual(d1['Romalılar 3:24'].text,
+                             "İnsanlar İsa Mesih'te olan kurtuluşla “Kurtuluşla” ya da “Fidyeyle”., Tanrı'nın lütfuyla, karşılıksız olarak aklanırlar.")
+            self.assertEqual(d1['Romalılar 3:25-26'].text,
+                             "Tanrı Mesih'i, kanıyla günahları bağışlatan Günahları bağışlatan kurban diye çevrilen Grekçe ifade gazabı yatıştırmak kavramını da içerir. ve imanla benimsenen kurban olarak sundu. Böylece adaletini gösterdi. Çünkü sabredip daha önce işlenmiş günahları cezasız bıraktı. Bunu, adil kalmak ve İsa'ya iman edeni aklamak için şimdiki zamanda kendi adaletini göstermek amacıyla yaptı.")
+
+    def test_get_verses_by_localized_reference_bulk_spanning_merge(self):
+        version = self.TCL02
+        with self.assertNumQueries(3):
+            # 1 for simple ones, 2 for the merged
+            d1 = version.get_verses_by_localized_reference_bulk(
+                ['Romalılar 3:23', 'Romalılar 3:24-27'])
+            self.assertEqual(d1['Romalılar 3:24-27'].text,
+                             "İnsanlar İsa Mesih'te olan kurtuluşla “Kurtuluşla” ya da “Fidyeyle”., Tanrı'nın lütfuyla, karşılıksız olarak aklanırlar. Tanrı Mesih'i, kanıyla günahları bağışlatan Günahları bağışlatan kurban diye çevrilen Grekçe ifade gazabı yatıştırmak kavramını da içerir. ve imanla benimsenen kurban olarak sundu. Böylece adaletini gösterdi. Çünkü sabredip daha önce işlenmiş günahları cezasız bıraktı. Bunu, adil kalmak ve İsa'ya iman edeni aklamak için şimdiki zamanda kendi adaletini göstermek amacıyla yaptı. Öyleyse neyle övünebiliriz? Hiçbir şeyle! Hangi ilkeye dayanarak? Yasa'yı yerine getirme ilkesine mi? Hayır, iman ilkesine.")
+
+    def test_get_verses_by_localized_reference_bulk_merged_edges(self):
+        version = self.TCL02
+        with self.assertNumQueries(3):
+            # 1 for simple ones, 2 for the merged
+            d1 = version.get_verses_by_localized_reference_bulk(
+                ['Romalılar 3:24-25'])
+            v = d1['Romalılar 3:24-25']
+            self.assertEqual(v.localized_reference, 'Romalılar 3:24-26')
+            self.assertEqual(v.text,
+                             "İnsanlar İsa Mesih'te olan kurtuluşla “Kurtuluşla” ya da “Fidyeyle”., Tanrı'nın lütfuyla, karşılıksız olarak aklanırlar. Tanrı Mesih'i, kanıyla günahları bağışlatan Günahları bağışlatan kurban diye çevrilen Grekçe ifade gazabı yatıştırmak kavramını da içerir. ve imanla benimsenen kurban olarak sundu. Böylece adaletini gösterdi. Çünkü sabredip daha önce işlenmiş günahları cezasız bıraktı. Bunu, adil kalmak ve İsa'ya iman edeni aklamak için şimdiki zamanda kendi adaletini göstermek amacıyla yaptı.")
 
     def _gen_1_1_suggestions(self):
         # in the beginning...

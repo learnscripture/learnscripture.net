@@ -296,7 +296,7 @@ def parse_unvalidated_localized_reference(language_code, localized_reference,
 
 def parse_break_list(language_code, breaks, first_verse=None):
     """
-    Parse a comman separated list of references, or raise a ValueError for failure.
+    Parse a comma separated list of references, or raise a ValueError for failure.
     """
     # breaks is a common separated list of references, created in create.js
     bible_ref = bible_reference_parser_for_lang(language_code, True)
