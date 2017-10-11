@@ -475,7 +475,7 @@
         "chapter_number": 23,
         "text_saved": "RAB çobanımdır,\nEksiğim olmaz",
         "book_number": 18,
-        "version": 3,
+        "version": ["TCL02"],
         "first_verse_number": 1,
         "last_verse_number": 1,
         "bible_verse_number": 14236
@@ -489,7 +489,7 @@
         "chapter_number": 23,
         "text_saved": "Beni yemyeşil çayırlarda yatırır,\nSakin suların kıyısına götürür.",
         "book_number": 18,
-        "version": 3,
+        "version": ["TCL02"],
         "first_verse_number": 2,
         "last_verse_number": 2,
         "bible_verse_number": 14237
@@ -503,7 +503,7 @@
         "chapter_number": 23,
         "text_saved": "İçimi tazeler,\nAdı uğruna bana doğru yollarda öncülük eder.",
         "book_number": 18,
-        "version": 3,
+        "version": ["TCL02"],
         "first_verse_number": 3,
         "last_verse_number": 3,
         "bible_verse_number": 14238
@@ -517,7 +517,7 @@
         "chapter_number": 23,
         "text_saved": "Karanlık ölüm vadisinden geçsem bile,\nKötülükten korkmam.\nÇünkü sen benimlesin.\nÇomağın, değneğin güven verir bana.",
         "book_number": 18,
-        "version": 3,
+        "version": ["TCL02"],
         "first_verse_number": 4,
         "last_verse_number": 4,
         "bible_verse_number": 14239
@@ -531,7 +531,7 @@
         "chapter_number": 23,
         "text_saved": "Düşmanlarımın önünde bana sofra kurarsın,\nBaşıma yağ sürersin,\nKâsem taşıyor.",
         "book_number": 18,
-        "version": 3,
+        "version": ["TCL02"],
         "first_verse_number": 5,
         "last_verse_number": 5,
         "bible_verse_number": 14240
@@ -545,7 +545,7 @@
         "chapter_number": 23,
         "text_saved": "Ömrüm boyunca yalnız iyilik ve sevgi izleyecek beni,\nHep RAB'bin evinde oturacağım.",
         "book_number": 18,
-        "version": 3,
+        "version": ["TCL02"],
         "first_verse_number": 6,
         "last_verse_number": 6,
         "bible_verse_number": 14241
@@ -559,10 +559,126 @@
         "chapter_number": 3,
         "text_saved": "“Çünkü Tanrı dünyayı o kadar çok sevdi ki, biricik Oğlu'nu verdi. Öyle ki, O'na iman edenlerin hiçbiri mahvolmasın, hepsi sonsuz yaşama kavuşsun.",
         "book_number": 42,
-        "version": 3,
+        "version": ["TCL02"],
         "first_verse_number": 16,
         "last_verse_number": 16,
         "bible_verse_number": 26136
+    }
+},
+{
+    "pk": null,
+    "model": "bibleverses.verse",
+    "fields": {
+        "localized_reference": "Romalılar 3:21",
+        "chapter_number": 3,
+        "text_saved": "Ama şimdi Yasa'dan bağımsız olarak Tanrı'nın insanı nasıl aklayacağı açıklandı. Yasa ve peygamberler buna tanıklık ediyor.",
+        "book_number": 44,
+        "version": 3,
+        "first_verse_number": 21,
+        "last_verse_number": 21,
+        "bible_verse_number": 27000
+    }
+},
+{
+    "pk": null,
+    "model": "bibleverses.verse",
+    "fields": {
+        "localized_reference": "Romalılar 3:22",
+        "chapter_number": 3,
+        "text_saved": "Tanrı insanları İsa Mesih'e olan imanlarıyla “Mesih'e olan imanlarıyla” ya da “Mesih'in sadakatiyle”. aklar. Bunu, iman eden herkes için yapar. Hiç ayrım yoktur.",
+        "book_number": 44,
+        "version": ["TCL02"],
+        "first_verse_number": 22,
+        "last_verse_number": 22,
+        "bible_verse_number": 27001
+    }
+},
+{
+    "pk": null,
+    "model": "bibleverses.verse",
+    "fields": {
+        "localized_reference": "Romalılar 3:23",
+        "chapter_number": 3,
+        "text_saved": "Çünkü herkes günah işledi ve Tanrı'nın yüceliğinden yoksun kaldı.",
+        "book_number": 44,
+        "version": ["TCL02"],
+        "first_verse_number": 23,
+        "last_verse_number": 23,
+        "bible_verse_number": 27002
+    }
+},
+{
+    "pk": null,
+    "model": "bibleverses.verse",
+    "fields": {
+        "localized_reference": "Romalılar 3:24",
+        "chapter_number": 3,
+        "text_saved": "İnsanlar İsa Mesih'te olan kurtuluşla “Kurtuluşla” ya da “Fidyeyle”., Tanrı'nın lütfuyla, karşılıksız olarak aklanırlar.",
+        "book_number": 44,
+        "version": ["TCL02"],
+        "first_verse_number": 24,
+        "last_verse_number": 24,
+        "bible_verse_number": 27003
+    }
+},
+{
+    "pk": null,
+    "model": "bibleverses.verse",
+    "fields": {
+        "localized_reference": "Romalılar 3:25-26",
+        "chapter_number": 3,
+        "text_saved": "Tanrı Mesih'i, kanıyla günahları bağışlatan Günahları bağışlatan kurban diye çevrilen Grekçe ifade gazabı yatıştırmak kavramını da içerir. ve imanla benimsenen kurban olarak sundu. Böylece adaletini gösterdi. Çünkü sabredip daha önce işlenmiş günahları cezasız bıraktı. Bunu, adil kalmak ve İsa'ya iman edeni aklamak için şimdiki zamanda kendi adaletini göstermek amacıyla yaptı.",
+        "book_number": 44,
+        "version": ["TCL02"],
+        "first_verse_number": 25,
+        "last_verse_number": 26,
+        "bible_verse_number": 27004
+    }
+},
+{
+    "pk": null,
+    "model": "bibleverses.verse",
+    "fields": {
+        "localized_reference": "Romalılar 3:25",
+        "chapter_number": 3,
+        "text_saved": "",
+        "book_number": 44,
+        "version": ["TCL02"],
+        "first_verse_number": 25,
+        "last_verse_number": 25,
+        "missing": true,
+        "merged_into": ["TCL02", "Romalılar 3:25-26"],
+        "bible_verse_number": 27005
+    }
+},
+{
+    "pk": null,
+    "model": "bibleverses.verse",
+    "fields": {
+        "localized_reference": "Romalılar 3:26",
+        "chapter_number": 3,
+        "text_saved": "",
+        "book_number": 44,
+        "version": ["TCL02"],
+        "first_verse_number": 26,
+        "last_verse_number": 26,
+        "missing": true,
+        "merged_into": ["TCL02", "Romalılar 3:25-26"],
+        "bible_verse_number": 27006
+    }
+},
+{
+    "pk": null,
+    "model": "bibleverses.verse",
+    "fields": {
+        "localized_reference": "Romalılar 3:27",
+        "chapter_number": 3,
+        "text_saved": "Öyleyse neyle övünebiliriz? Hiçbir şeyle! Hangi ilkeye dayanarak? Yasa'yı yerine getirme ilkesine mi? Hayır, iman ilkesine.",
+        "book_number": 44,
+        "version": ["TCL02"],
+        "first_verse_number": 27,
+        "last_verse_number": 27,
+        "bible_verse_number": 27007
     }
 }
 ]
