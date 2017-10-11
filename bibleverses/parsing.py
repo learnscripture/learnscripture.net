@@ -1,5 +1,5 @@
 import attr
-from parsy import ParseError, alt, generate, regex, string, whitespace
+from parsy import ParseError, char_from, generate, regex, string, string_from, whitespace
 
 from learnscripture.utils.cache import memoize_function
 
@@ -102,26 +102,18 @@ class InvalidVerseReference(ValueError):
 
 # Generic parsing utilities
 
-def oneof_strings(strings):
-    """
-    Returns a parser that matches any of the passed in strings
-    """
-    # Sort longest first, so that backtracking works correctly
-    return alt(*map(string, sorted(strings, key=lambda s: -len(s))))
-
-
 def dict_map(d):
     """
     Returns a parser that matches any key from the dict,
     and return the corresponding value for that key.
     """
-    return oneof_strings(d.keys()).map(lambda v: d[v])
+    return string_from(*d.keys()).map(lambda v: d[v])
 
 
 def optional(parser):
     """
-    Returns a parser that optional matches the
-    passed in parser, or returns None
+    Returns a parser that optionally matches the passed in parser, or returns
+    None if no match.
     """
     return parser.times(0, 1).map(lambda v: v[0] if v else None)
 
@@ -133,8 +125,7 @@ def book_strict(language_code):
     """
     Returns a parser for a Bible book, strict mode (canonical only)
     """
-    books = get_bible_books(language_code)
-    return oneof_strings(books).desc("|".join(books))
+    return string_from(*get_bible_books(language_code))
 
 
 @memoize_function
@@ -152,7 +143,7 @@ verse = number.desc("verse number [0-9]+")
 
 verse_range_sep = string("-")
 chapter_verse_sep = string(":")
-chapter_verse_sep_loose = oneof_strings([":", "v", "."]).result(":")
+chapter_verse_sep_loose = char_from(":v.").result(":")
 
 # To avoid the work of creating Parser objects within bible_reference_strict or
 # bible_reference_loose, we create as much as possible at this scope where we

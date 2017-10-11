@@ -6,7 +6,6 @@
 -e git://github.com/spookylukey/django-autoslug.git@0a6adec1f9743743bf7d741b6845620a8f347159#egg=django-autoslug
 -e git://github.com/spookylukey/django-bootstrap-form.git@b228f986e6650ad4690eedc70cca5ff044feaab2#egg=django-bootstrap-form
 -e hg+https://bitbucket.org/schinckel/django-jsonfield@6c37ee0fd8f2f999b21c068e733876d937d74a00#egg=django-jsonfield
--e git://github.com/python-parsy/parsy.git@012d63c7d15187b0be716828623f742384993ccc#egg=parsy
 ConcurrentLogHandler==0.9.1
 Django==1.11.4
 SQLAlchemy==1.1.10
@@ -35,3 +34,4 @@ requests==2.6.0
 scipy==0.19.0
 uwsgi==2.0.15
 certifi==2017.7.27.1
+parsy==1.0.0
