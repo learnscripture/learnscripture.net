@@ -53,4 +53,4 @@ class Command(BaseCommand):
 
                 if version.text_type == TextType.BIBLE:
                     print("Generating search index...")
-                    version.verse_set.all().update_text_search()
+                    version.update_text_search(version.verse_set.all())

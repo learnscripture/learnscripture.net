@@ -53,7 +53,7 @@ def verse_saved_update_text_search(sender, **kwargs):
     if verse.version.db_based_searching:
         # No external search service, therefore must be using builtin DB
         # search, therefore need to update:
-        Verse.objects.filter(id=verse.id).update_text_search()
+        verse.version.update_text_search(Verse.objects.filter(id=verse.id))
 
 
 @receiver(post_save, sender=QAPair)

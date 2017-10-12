@@ -1,7 +1,9 @@
 # -*- coding: utf8 -*-
 from collections import defaultdict
 
-from .languages import LANGUAGE_CODE_EN, LANGUAGE_CODE_TR, normalize_search_input
+from .languages import LANGUAGE_CODE_EN, LANGUAGE_CODE_TR, normalize_reference_input
+
+BIBLE_BOOK_COUNT = 66
 
 # These constants are prefixed _ to indicate private. They are in fact used in
 # one other module i.e. books.py, and apart from that should be accessed through
@@ -76,7 +78,7 @@ def make_bible_book_abbreviations_for_lang(language_code):
     # Get all abbreviations
     d = {}
     for b in bible_books:
-        d[b] = [normalize_search_input(language_code, i) for i in get_abbrevs(b)]
+        d[b] = [normalize_reference_input(language_code, i) for i in get_abbrevs(b)]
 
     # Now need to make unique. Create a reverse dictionary.
     d2 = defaultdict(set)
@@ -134,9 +136,8 @@ def make_bible_book_special_cases():
 
 
 def checks():
-    bible_book_count = 66
     for lang, books in _BIBLE_BOOKS_FOR_LANG.items():
-        if len(books) != bible_book_count:
+        if len(books) != BIBLE_BOOK_COUNT:
             raise AssertionError("Language {0} doesn't have the expected number of Bible books defined!".format(lang))
 
 

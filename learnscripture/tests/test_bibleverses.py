@@ -3,7 +3,7 @@ import unittest2
 
 from accounts.models import Identity
 from bibleverses.books import get_bible_book_number, get_bible_books, is_single_chapter_book
-from bibleverses.languages import LANGUAGE_CODE_EN, LANGUAGE_CODE_TR, LANGUAGES, normalize_search_input_turkish
+from bibleverses.languages import LANGUAGE_CODE_EN, LANGUAGE_CODE_TR, LANGUAGES, normalize_reference_input_turkish
 from bibleverses.models import (InvalidVerseReference, TextVersion, Verse, VerseSet, VerseSetType, get_passage_sections,
                                 split_into_words)
 from bibleverses.parsing import (ParsedReference, parse_unvalidated_localized_reference,
@@ -577,7 +577,7 @@ class ParsingTests(unittest2.TestCase):
                              output,
                              "Failure parsing '{0}'".format(ref))
 
-        self.assertEqual(normalize_search_input_turkish('  ÂâİIiıÇçŞşöü  '),
+        self.assertEqual(normalize_reference_input_turkish('  ÂâİIiıÇçŞşöü  '),
                          'aaiiiiccssou')
 
 
