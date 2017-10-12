@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from bibleverses.languages import LANGUAGE_CODE_EN
-from bibleverses.models import TextVersion, Verse, VerseSet, VerseSetType, quick_find
+from bibleverses.models import TextVersion, VerseSet, VerseSetType, quick_find
 
 from .base import TestBase, get_or_create_any_account
 
@@ -11,14 +11,17 @@ class SearchTestsMixin(object):
 
     def setUp(self):
         super(SearchTestsMixin, self).setUp()
-        self.account = get_or_create_any_account()
-        Verse.objects.all().update_text_search()
         self.KJV = TextVersion.objects.get(slug='KJV')
         self.NET = TextVersion.objects.get(slug='NET')
         self.TCL02 = TextVersion.objects.get(slug='TCL02')
+        for tv in TextVersion.objects.all():
+            tv.update_text_search(tv.verse_set.all())
 
 
 class SearchTests(SearchTestsMixin, TestBase):
+    def setUp(self):
+        super().setUp()
+        self.account = get_or_create_any_account()
 
     def test_search_verse_set_title(self):
         VerseSet.objects.create(name="For stupid people",
@@ -69,6 +72,16 @@ class QuickFindTests(SearchTestsMixin, TestBase):
         results = quick_find("beginning created", version=version)
         self.assertEqual(results[0].verses[0].localized_reference,
                          "Genesis 1:1")
+
+    def test_quick_find_text_turkish(self):
+        version = self.TCL02
+        # Testing for handling accents and stemming correctly.
+        # 'siniz' should be dropped, and word with 'iz' ending
+        # should be found.
+        results = quick_find("övünebilirsiniz", version=version)
+        self.assertEqual(results[0].verses[0].localized_reference,
+                         "Romalılar 3:27")
+        self.assertIn("övünebiliriz", results[0].text)
 
     def test_quick_find_escape(self):
         version = self.KJV

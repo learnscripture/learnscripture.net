@@ -6,7 +6,7 @@ from collections import defaultdict
 
 from autoslug import AutoSlugField
 from django.db import connection, models
-from django.db.models import F, Func
+from django.db.models import F, Func, Value
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -18,7 +18,7 @@ from learnscripture.utils.iterators import intersperse
 
 from .books import get_bible_book_name, get_bible_book_number
 from .fields import VectorField
-from .languages import DEFAULT_LANGUAGE, LANGUAGE_CHOICES, normalize_search_input
+from .languages import DEFAULT_LANGUAGE, LANGUAGE_CHOICES, LANGUAGE_CODE_EN, LANGUAGE_CODE_TR, normalize_reference_input
 from .parsing import (InvalidVerseReference, ParsedReference, parse_break_list, parse_unvalidated_localized_reference,
                       parse_validated_localized_reference)
 from .services import get_fetch_service, get_search_service
@@ -205,6 +205,12 @@ class TextVersion(models.Model):
     def db_based_searching(self):
         return get_search_service(self.slug) is None
 
+    def update_text_search(self, verses_qs):
+        verses_qs.update(text_tsv=Func(
+            Value(POSTGRES_SEARCH_CONFIGURATIONS[self.language_code]),
+            F('text_saved'),
+            function='to_tsvector'))
+
 
 class ComboVerse(object):
     """
@@ -231,6 +237,13 @@ SEARCH_OPERATORS = set(["&", "|", "@@", "@@@", "||", "&&", "!!", "@>", "<@", ":"
 SEARCH_CHARS = set("".join(list(SEARCH_OPERATORS)))
 
 
+# See '\dF' command in psql for list of available builtin configurations.
+POSTGRES_SEARCH_CONFIGURATIONS = {
+    LANGUAGE_CODE_EN: 'english',
+    LANGUAGE_CODE_TR: 'turkish',
+}
+
+
 class VerseManager(models.Manager):
 
     def get_by_natural_key(self, version_slug, localized_reference):
@@ -246,23 +259,19 @@ class VerseManager(models.Manager):
         # Do an 'AND' on all terms.
         word_params = list(intersperse(words, ' & '))
         search_clause = ' || ' .join(['%s'] * len(word_params))
+        search_config = POSTGRES_SEARCH_CONFIGURATIONS[version.language_code]
         return models.Manager.raw(self, """
           SELECT id, version_id, localized_reference, text_saved,
                  ts_headline(text_saved, query, 'StartSel = **, StopSel = **, HighlightAll=TRUE') as highlighted_text,
                  book_number, chapter_number, first_verse_number, last_verse_number,
                  bible_verse_number, ts_rank(text_tsv, query) as rank
-          FROM bibleverses_verse, to_tsquery(""" + search_clause + """) query
+          FROM bibleverses_verse, to_tsquery(%s, """ + search_clause + """) query
           WHERE
              query @@ text_tsv
              AND version_id = %s
           ORDER BY rank DESC
           LIMIT %s;
-""", word_params + [version.id, limit])
-
-
-class VerseQuerySet(models.QuerySet):
-    def update_text_search(self):
-        self.update(text_tsv=Func(F('text_saved'), function='to_tsvector'))
+""", [search_config] + word_params + [version.id, limit])
 
 
 class Verse(models.Model):
@@ -293,7 +302,7 @@ class Verse(models.Model):
     merged_into = models.ForeignKey("self", on_delete=models.CASCADE,
                                     blank=True, null=True)
 
-    objects = VerseManager.from_queryset(VerseQuerySet)()
+    objects = VerseManager()
 
     @property
     def text(self):
@@ -1081,14 +1090,15 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
     # It can still throw InvalidVerseReference for things that are obviously
     # incorrect e.g. Psalm 151, or asking for too many verses.
 
-    query = normalize_search_input(version.language_code, query)
+    ref_query = normalize_reference_input(version.language_code, query)
+    search_query = query  # Leave alone, postgres to_tsquery does it right.
 
-    if query == '':
+    if ref_query == '':
         raise InvalidVerseReference("Please enter a query term or reference")
 
     parsed_ref = parse_unvalidated_localized_reference(
         version.language_code,
-        query,
+        ref_query,
         allow_whole_book=not allow_searches)
     if parsed_ref is not None:
         verse_list = fetch_parsed_reference(version, parsed_ref,
@@ -1107,9 +1117,9 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
     # Do a search:
     searcher = get_search_service(version.slug)
     if searcher:
-        return searcher(version, query)
+        return searcher(version, search_query)
 
-    results = Verse.objects.text_search(query, version, limit=11)
+    results = Verse.objects.text_search(search_query, version, limit=11)
     return [ComboVerse(r.localized_reference, [r]) for r in results]
 
 

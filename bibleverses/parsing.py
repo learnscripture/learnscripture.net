@@ -4,7 +4,7 @@ from parsy import ParseError, char_from, generate, regex, string, string_from, w
 from learnscripture.utils.cache import memoize_function
 
 from .books import get_bible_book_abbreviation_map, get_bible_book_number, get_bible_books, is_single_chapter_book
-from .languages import normalize_search_input
+from .languages import normalize_reference_input
 
 
 @attr.s
@@ -276,7 +276,7 @@ def parse_unvalidated_localized_reference(language_code, localized_reference,
 
     This is used by higher level code that deals with unvalidated user input.
     """
-    q = normalize_search_input(language_code, localized_reference)
+    q = normalize_reference_input(language_code, localized_reference)
     try:
         parsed_ref = bible_reference_parser_for_lang(language_code, False).parse(q)
     except ParseError:

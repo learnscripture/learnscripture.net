@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from accounts.models import Identity
 from awards.models import AwardType, TrendSetterAward
 from bibleverses.models import VerseSet
@@ -5,9 +6,10 @@ from events.models import Event, EventType
 
 from .base import FullBrowserTest
 from .test_bibleverses import RequireExampleVerseSetsMixin
+from .test_search import SearchTestsMixin
 
 
-class ChooseTests(RequireExampleVerseSetsMixin, FullBrowserTest):
+class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTest):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
 
@@ -120,3 +122,17 @@ class ChooseTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.click("input[name=lookup]")
 
         self.assertTextPresent("And God called the")
+
+    def test_choose_individual_by_search_turkish(self):
+        self.get_url('choose')
+
+        self.click("a[href='#id-tab-individual']")
+
+        self.fill({"form.quickfind select[name=version]": "TCL02"})
+
+        # Testing for handling accents and stemming correctly
+        self.fill({'form.quickfind input[name=quick_find]': 'övünebilirsiniz'})
+        self.click("input[name=lookup]")
+
+        self.assertTextPresent("Öyleyse neyle övünebiliriz?")
+        self.assertTextPresent("Romalılar 3:27")

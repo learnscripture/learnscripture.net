@@ -39,11 +39,11 @@ def get_language(code):
 DEFAULT_LANGUAGE = get_language('en')
 
 
-def normalize_search_input_english(query):
+def normalize_reference_input_english(query):
     return query.strip().lower()
 
 
-def normalize_search_input_turkish(query):
+def normalize_reference_input_turkish(query):
     query = query.strip().replace("'", "")
     # Turkish is often typed incorrectly with accents lost etc.
     # Strategy:
@@ -60,10 +60,10 @@ def normalize_search_input_turkish(query):
 
 
 _NORMALIZE_SEARCH_FUNCS = {
-    LANGUAGE_CODE_EN: normalize_search_input_english,
-    LANGUAGE_CODE_TR: normalize_search_input_turkish
+    LANGUAGE_CODE_EN: normalize_reference_input_english,
+    LANGUAGE_CODE_TR: normalize_reference_input_turkish
 }
 
 
-def normalize_search_input(language_code, query):
+def normalize_reference_input(language_code, query):
     return _NORMALIZE_SEARCH_FUNCS[language_code](query.strip())

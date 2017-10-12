@@ -88,7 +88,6 @@
         "chapter_number" : 1,
         "localized_reference" : "Genesis 1:8",
         "text_saved" : "And God called the firmament Heaven. And the evening and the morning were the second day. ",
-        "text_tsv": "'call':3 'day':16 'even':9 'firmament':5 'god':2 'heaven':6 'morn':12 'second':15",
         "first_verse_number" : 8,
         "last_verse_number" : 8,
         "version" : 1
