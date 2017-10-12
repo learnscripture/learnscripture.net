@@ -34,7 +34,7 @@ class Command(BaseCommand):
             version = TextVersion.objects.get(slug=version_slug)
             text_file = TEXTVERSION_TEMPLATE.format(version_slug)
             with gzip.open(os.path.join(output_dir, text_file), "wb") as f1:
-                serializers.serialize(format, [version], stream=f1, **common_options)
+                serializers.serialize(format, [version], stream=str_to_bytes(f1), **common_options)
 
             if version.text_type == TextType.CATECHISM:
                 items_file = CATECHISM_ITEM_TEMPLATE.format(version_slug)
@@ -46,7 +46,15 @@ class Command(BaseCommand):
                     items = blank_text_saved(items)
 
             with gzip.open(os.path.join(output_dir, items_file), "wb") as f2:
-                serializers.serialize(format, items, stream=f2, **common_options)
+                serializers.serialize(format, items, stream=str_to_bytes(f2), **common_options)
+
+
+def str_to_bytes(writer):
+    class BytesWriter(writer.__class__):
+        def write(self, data):
+            return super().write(data.encode('utf-8'))
+    writer.__class__ = BytesWriter  # Slightly hacky *ahem*
+    return writer
 
 
 def blank_text_saved(items):
