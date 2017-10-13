@@ -1,7 +1,7 @@
 # -*- coding: utf8 -*-
 from collections import defaultdict
 
-from .languages import LANGUAGE_CODE_EN, LANGUAGE_CODE_TR, normalize_reference_input
+from .languages import LANGUAGE_CODE_EN, LANGUAGE_CODE_INTERNAL, LANGUAGE_CODE_TR, normalize_reference_input
 
 BIBLE_BOOK_COUNT = 66
 
@@ -10,7 +10,8 @@ BIBLE_BOOK_COUNT = 66
 # the utility functions in books.py
 _BIBLE_BOOKS_FOR_LANG = {
     LANGUAGE_CODE_EN: ['Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy', 'Joshua', 'Judges', 'Ruth', '1 Samuel', '2 Samuel', '1 Kings', '2 Kings', '1 Chronicles', '2 Chronicles', 'Ezra', 'Nehemiah', 'Esther', 'Job', 'Psalm', 'Proverbs', 'Ecclesiastes', 'Song of Solomon', 'Isaiah', 'Jeremiah', 'Lamentations', 'Ezekiel', 'Daniel', 'Hosea', 'Joel', 'Amos', 'Obadiah', 'Jonah', 'Micah', 'Nahum', 'Habakkuk', 'Zephaniah', 'Haggai', 'Zechariah', 'Malachi', 'Matthew', 'Mark', 'Luke', 'John', 'Acts', 'Romans', '1 Corinthians', '2 Corinthians', 'Galatians', 'Ephesians', 'Philippians', 'Colossians', '1 Thessalonians', '2 Thessalonians', '1 Timothy', '2 Timothy', 'Titus', 'Philemon', 'Hebrews', 'James', '1 Peter', '2 Peter', '1 John', '2 John', '3 John', 'Jude', 'Revelation'],
-    LANGUAGE_CODE_TR: ["Yaratılış", "Mısır'dan Çıkış", "Levililer", "Çölde Sayım", "Yasa'nın Tekrarı", "Yeşu", "Hâkimler", "Rut", "1. Samuel", "2. Samuel", "1. Krallar", "2. Krallar", "1. Tarihler", "2. Tarihler", "Ezra", "Nehemya", "Ester", "Eyüp", "Mezmur", "Süleyman'ın Özdeyişleri", "Vaiz", "Ezgiler Ezgisi", "Yeşaya", "Yeremya", "Ağıtlar", "Hezekiel", "Daniel", "Hoşea", "Yoel", "Amos", "Ovadya", "Yunus", "Mika", "Nahum", "Habakkuk", "Sefanya", "Hagay", "Zekeriya", "Malaki", "Matta", "Markos", "Luka", "Yuhanna", "Elçilerin İşleri", "Romalılar", "1. Korintliler", "2. Korintliler", "Galatyalılar", "Efesliler", "Filipililer", "Koloseliler", "1. Selanikliler", "2. Selanikliler", "1. Timoteos", "2. Timoteos", "Titus", "Filimon", "İbraniler", "Yakup", "1. Petrus", "2. Petrus", "1. Yuhanna", "2. Yuhanna", "3. Yuhanna", "Yahuda", "Vahiy"]
+    LANGUAGE_CODE_TR: ["Yaratılış", "Mısır'dan Çıkış", "Levililer", "Çölde Sayım", "Yasa'nın Tekrarı", "Yeşu", "Hâkimler", "Rut", "1. Samuel", "2. Samuel", "1. Krallar", "2. Krallar", "1. Tarihler", "2. Tarihler", "Ezra", "Nehemya", "Ester", "Eyüp", "Mezmur", "Süleyman'ın Özdeyişleri", "Vaiz", "Ezgiler Ezgisi", "Yeşaya", "Yeremya", "Ağıtlar", "Hezekiel", "Daniel", "Hoşea", "Yoel", "Amos", "Ovadya", "Yunus", "Mika", "Nahum", "Habakkuk", "Sefanya", "Hagay", "Zekeriya", "Malaki", "Matta", "Markos", "Luka", "Yuhanna", "Elçilerin İşleri", "Romalılar", "1. Korintliler", "2. Korintliler", "Galatyalılar", "Efesliler", "Filipililer", "Koloseliler", "1. Selanikliler", "2. Selanikliler", "1. Timoteos", "2. Timoteos", "Titus", "Filimon", "İbraniler", "Yakup", "1. Petrus", "2. Petrus", "1. Yuhanna", "2. Yuhanna", "3. Yuhanna", "Yahuda", "Vahiy"],
+    LANGUAGE_CODE_INTERNAL: ["BOOK" + str(i) for i in range(0, BIBLE_BOOK_COUNT)],
 }
 
 # Book numbers of books that have a single chapter.
@@ -52,7 +53,8 @@ def make_bible_book_abbreviations_for_lang(language_code):
             '1. ': ['1', '1 ', '1.'],
             '2. ': ['2', '2 ', '2.'],
             '3. ': ['3', '3 ', '3.'],
-        }
+        },
+        LANGUAGE_CODE_INTERNAL: {},
     }
 
     def get_abbrevs(book_name, min_length=2):

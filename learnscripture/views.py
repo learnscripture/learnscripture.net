@@ -26,7 +26,8 @@ import learnscripture.tasks
 from accounts.forms import AccountDetailsForm, PreferencesForm
 from accounts.models import Account, Identity
 from awards.models import AnyLevel, Award, AwardType
-from bibleverses.books import get_bible_books
+from bibleverses.books import get_bible_book_name, BIBLE_BOOK_COUNT
+from bibleverses.languages import LANGUAGES, LANGUAGE_CODE_INTERNAL
 from bibleverses.forms import VerseSetForm
 from bibleverses.models import (MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, TextType, TextVersion, VerseSet,
                                 VerseSetType, get_passage_sections)
@@ -423,8 +424,17 @@ def context_for_quick_find(request):
     # the book list captions when a different language
     # translation is chosen.
     version = default_bible_version_for_request(request)
-    d = {'bible_books': get_bible_books(version.language_code),
+    language_codes = [l.code for l in LANGUAGES] + [LANGUAGE_CODE_INTERNAL]
+
+    bible_books = [
+        {lc: get_bible_book_name(lc, i)
+         for lc in language_codes}
+        for i in range(0, BIBLE_BOOK_COUNT)
+    ]
+    d = {'bible_books': bible_books,
          'default_bible_version': version,
+         'language_codes': language_codes,
+         'current_language_code': version.language_code,
          }
     d.update(context_for_version_select(request))
     return d
