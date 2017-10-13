@@ -209,7 +209,8 @@ var learnscripture =
                 return;
             }
 
-            var text = book + " ";
+            var bookName = getBookName(book);
+            var text = bookName + " ";
             if (chapterStart != undefined) {
                 text = text + chapterStart.toString();
             }
@@ -228,6 +229,10 @@ var learnscripture =
             }
             form.find('input[name=quick_find]').val(text);
         };
+
+        var getBookName = function (internalBookName) {
+            return $('select[name=book] option[value=' + internalBookName + ']').text();
+        }
 
         var quickFindAndHandleResults = function (resultHandler, passageMode) {
 

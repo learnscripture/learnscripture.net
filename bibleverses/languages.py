@@ -17,6 +17,9 @@ class Language(object):
 LANGUAGE_CODE_EN = 'en'
 LANGUAGE_CODE_TR = 'tr'
 
+# Code for language agnostic name
+LANGUAGE_CODE_INTERNAL = 'internal'
+
 LANGUAGES = [
     Language(code=LANGUAGE_CODE_EN, display_name='English'),
     Language(code=LANGUAGE_CODE_TR, display_name='Türkçe'),
@@ -61,7 +64,8 @@ def normalize_reference_input_turkish(query):
 
 _NORMALIZE_SEARCH_FUNCS = {
     LANGUAGE_CODE_EN: normalize_reference_input_english,
-    LANGUAGE_CODE_TR: normalize_reference_input_turkish
+    LANGUAGE_CODE_TR: normalize_reference_input_turkish,
+    LANGUAGE_CODE_INTERNAL: lambda x: x,
 }
 
 

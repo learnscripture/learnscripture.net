@@ -1,3 +1,5 @@
+{% load dict_utils %}
+
 <form action="" method="GET" class="quickfind always-adjust-size" id="id-quick-find-form">
   <div class="clearfix">
     <label for="id_quick_find">Quick find</label>
@@ -18,7 +20,11 @@
       <select name="book" id="id_book">
         <option value="">----</option>
         {% for b in bible_books %}
-          <option value="{{ b }}">{{ b }}</option>
+          <option value="{{ b|lookup:"internal" }}"
+                  {% for l in language_codes %}
+                  data-lang-{{ l }}="{{ b|lookup:l }}"
+                  {% endfor %}
+                  >{{ b|lookup:current_language_code }}</option>
         {% endfor %}
       </select>
 

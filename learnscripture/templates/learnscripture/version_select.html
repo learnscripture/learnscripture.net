@@ -1,6 +1,7 @@
 <select id="id-version-select" name="version">
   {% for v in bible_versions %}
     <option value="{{ v.slug }}"
+            data-lang-code="{{ v.language_code }}"
             {% if v.slug == current_version.slug %}selected{% endif %}
             >{{ v.short_name }}{% if show_full_name %} ({{ v.full_name }}){% endif %}</option>
   {% endfor %}
