@@ -14,63 +14,63 @@ var learnscripture =
             return foo;
         };
 
-        var isInPassageMode = function (form) {
-            return form.find('select[name=chapter_end]').length > 0;
+        var isInPassageMode = function ($form) {
+            return $form.find('select[name=chapter_end]').length > 0;
         };
 
         var bookChange = function (ev) {
-            var form = $(this).closest('form');
+            var $form = $(this).closest('form');
             var book = $(ev.target).val();
             if (book === '' || book === null) {
-                setChapterStartSelect(form, []);
+                setChapterStartSelect($form, []);
             } else {
-                setChapterStartSelect(form, range(1, BIBLE_BOOK_INFO[book]['chapter_count'] + 1));
-                setQuickFind(form);
+                setChapterStartSelect($form, range(1, BIBLE_BOOK_INFO[book]['chapter_count'] + 1));
+                setQuickFind($form);
             }
         };
 
         var chapterStartChange = function (ev) {
-            var form = $(this).closest('form');
-            var book = getBook(form);
-            var chapterStart = getChapterStart(form);
+            var $form = $(this).closest('form');
+            var book = getBook($form);
+            var chapterStart = getChapterStart($form);
             if (chapterStart === null) {
-                setChapterEndSelect(form, []);
-                setVerseStartSelect(form, []);
+                setChapterEndSelect($form, []);
+                setVerseStartSelect($form, []);
             } else {
-                setChapterEndSelect(form, range(chapterStart, BIBLE_BOOK_INFO[book]['chapter_count'] + 1));
-                setVerseStartSelect(form, range(1, BIBLE_BOOK_INFO[book]['verse_counts'][chapterStart] + 1))
+                setChapterEndSelect($form, range(chapterStart, BIBLE_BOOK_INFO[book]['chapter_count'] + 1));
+                setVerseStartSelect($form, range(1, BIBLE_BOOK_INFO[book]['verse_counts'][chapterStart] + 1))
             }
-            setQuickFind(form);
+            setQuickFind($form);
 
         };
 
         var chapterEndChange = function (ev) {
-            var form = $(this).closest('form');
-            var book = getBook(form);
-            var chapterEnd = getChapterEnd(form);
+            var $form = $(this).closest('form');
+            var book = getBook($form);
+            var chapterEnd = getChapterEnd($form);
             // chapterEnd doesn't have an empty option, so don't need to deal with that.
-            setVerseEndSelect(form, range(1, BIBLE_BOOK_INFO[book]['verse_counts'][chapterEnd] + 1))
-            setQuickFind(form);
+            setVerseEndSelect($form, range(1, BIBLE_BOOK_INFO[book]['verse_counts'][chapterEnd] + 1))
+            setQuickFind($form);
 
         };
 
         var verseStartChange = function (ev) {
-            var form = $(this).closest('form');
-            var book = getBook(form);
-            var verseStart = getVerseStart(form);
-            var verseEnd = getVerseEnd(form);
-            var chapterStart = getChapterStart(form);
-            var chapterEnd = getChapterEnd(form);
-            var passageMode = isInPassageMode(form);
+            var $form = $(this).closest('form');
+            var book = getBook($form);
+            var verseStart = getVerseStart($form);
+            var verseEnd = getVerseEnd($form);
+            var chapterStart = getChapterStart($form);
+            var chapterEnd = getChapterEnd($form);
+            var passageMode = isInPassageMode($form);
             if (verseStart === null) {
                 if (passageMode) {
-                    setChapterEndSelect(form, [])
+                    setChapterEndSelect($form, [])
                 }
-                setVerseEndSelect(form, []);
+                setVerseEndSelect($form, []);
             } else {
                 if (passageMode && chapterEnd === null) {
-                    setChapterEndSelect(form, range(chapterStart, BIBLE_BOOK_INFO[book]['chapter_count'] + 1));
-                    setChapterEndSelectValue(form, chapterStart);
+                    setChapterEndSelect($form, range(chapterStart, BIBLE_BOOK_INFO[book]['chapter_count'] + 1));
+                    setChapterEndSelectValue($form, chapterStart);
                     chapterEnd = chapterStart;
                 }
 
@@ -82,50 +82,50 @@ var learnscripture =
                     lastVerse = Math.min(lastVerse, verseStart - 1 + MAX_VERSES_FOR_SINGLE_CHOICE);
                 }
                 if (passageMode && chapterStart !== chapterEnd) {
-                    setVerseEndSelect(form, range(1, lastVerse + 1));
+                    setVerseEndSelect($form, range(1, lastVerse + 1));
                     if (verseEnd < lastVerse + 1) {
                         // restore
-                        setVerseEndSelectValue(form, verseEnd);
+                        setVerseEndSelectValue($form, verseEnd);
                     }
                 } else {
-                    setVerseEndSelect(form, range(verseStart + 1, lastVerse + 1));
+                    setVerseEndSelect($form, range(verseStart + 1, lastVerse + 1));
                     if (verseEnd >= verseStart + 1 &&
                         verseEnd < lastVerse + 1) {
                         // restore
-                        setVerseEndSelectValue(form, verseEnd);
+                        setVerseEndSelectValue($form, verseEnd);
                     }
                 }
             }
-            setQuickFind(form);
+            setQuickFind($form);
         };
 
         var verseEndChange = function (ev) {
-            var form = $(this).closest('form');
-            setQuickFind(form);
+            var $form = $(this).closest('form');
+            setQuickFind($form);
         };
 
-        var getBook = function (form) {
-            return form.find('select[name=book]').val();
+        var getBook = function ($form) {
+            return $form.find('select[name=book]').val();
         };
 
-        var getChapterStart = function (form) {
-            return getSelectNumber(form, 'select[name=chapter_start]');
+        var getChapterStart = function ($form) {
+            return getSelectNumber($form, 'select[name=chapter_start]');
         };
 
-        var getChapterEnd = function (form) {
-            return getSelectNumber(form, 'select[name=chapter_end]');
+        var getChapterEnd = function ($form) {
+            return getSelectNumber($form, 'select[name=chapter_end]');
         };
 
-        var getVerseStart = function (form) {
-            return getSelectNumber(form, 'select[name=verse_start]');
+        var getVerseStart = function ($form) {
+            return getSelectNumber($form, 'select[name=verse_start]');
         };
 
-        var getVerseEnd = function (form) {
-            return getSelectNumber(form, 'select[name=verse_end]');
+        var getVerseEnd = function ($form) {
+            return getSelectNumber($form, 'select[name=verse_end]');
         };
 
-        var getSelectNumber = function (form, selector) {
-            var s = form.find(selector);
+        var getSelectNumber = function ($form, selector) {
+            var s = $form.find(selector);
             if (s.length === 0) {
                 return null;
             }
@@ -154,39 +154,39 @@ var learnscripture =
             }
         };
 
-        var setChapterStartSelect = function (form, chapters) {
-            fillNumberSelect(form.find('select[name=chapter_start]'), chapters, true);
-            setChapterEndSelect(form, []);
-            setVerseStartSelect(form, []);
+        var setChapterStartSelect = function ($form, chapters) {
+            fillNumberSelect($form.find('select[name=chapter_start]'), chapters, true);
+            setChapterEndSelect($form, []);
+            setVerseStartSelect($form, []);
         };
 
-        var setChapterEndSelect = function (form, chapters) {
-            fillNumberSelect(form.find('select[name=chapter_end]'), chapters, false);
+        var setChapterEndSelect = function ($form, chapters) {
+            fillNumberSelect($form.find('select[name=chapter_end]'), chapters, false);
         };
 
-        var setChapterEndSelectValue = function (form, value) {
-            form.find('select[name=chapter_end]').val(value);
+        var setChapterEndSelectValue = function ($form, value) {
+            $form.find('select[name=chapter_end]').val(value);
         };
 
-        var setVerseStartSelect = function (form, verses) {
-            fillNumberSelect(form.find('select[name=verse_start]'), verses, true);
-            setVerseEndSelect(form, []);
+        var setVerseStartSelect = function ($form, verses) {
+            fillNumberSelect($form.find('select[name=verse_start]'), verses, true);
+            setVerseEndSelect($form, []);
         };
 
-        var setVerseEndSelect = function (form, verses) {
-            fillNumberSelect(form.find('select[name=verse_end]'), verses, true);
+        var setVerseEndSelect = function ($form, verses) {
+            fillNumberSelect($form.find('select[name=verse_end]'), verses, true);
         };
 
-        var setVerseEndSelectValue = function (form, value) {
-            form.find('select[name=verse_end]').val(value);
+        var setVerseEndSelectValue = function ($form, value) {
+            $form.find('select[name=verse_end]').val(value);
         };
 
-        var setQuickFind = function (form) {
-            var book = getBook(form);
-            var chapterStart = getChapterStart(form);
-            var chapterEnd = getChapterEnd(form);
-            var verseStart = getVerseStart(form);
-            var verseEnd = getVerseEnd(form);
+        var setQuickFind = function ($form) {
+            var book = getBook($form);
+            var chapterStart = getChapterStart($form);
+            var chapterEnd = getChapterEnd($form);
+            var verseStart = getVerseStart($form);
+            var verseEnd = getVerseEnd($form);
 
             if (chapterStart != undefined && chapterEnd != undefined
                 && chapterStart != chapterEnd
@@ -223,7 +223,7 @@ var learnscripture =
                     text = text + "-" + verseEnd.toString();
                 }
             }
-            form.find('input[name=quick_find]').val(text);
+            $form.find('input[name=quick_find]').val(text);
         };
 
         var getBookName = function (internalBookName) {
@@ -233,23 +233,23 @@ var learnscripture =
         var quickFindAndHandleResults = function (resultHandler, passageMode) {
 
             var handler = function (ev) {
-                var form = $(ev.target).closest('form');
+                var $form = $(ev.target).closest('form');
                 ev.preventDefault();
                 $.ajax({url: '/api/learnscripture/v1/versefind/?format=json',
                         dataType: 'json',
                         type: 'GET',
                         data: {
-                            'quick_find': form.find('input[name=quick_find]').val(),
+                            'quick_find': $form.find('input[name=quick_find]').val(),
                             'version_slug': $('#id-version-select').val(),
                             'passage_mode': passageMode ? '1' : '0'
                         },
                         success: resultHandler,
                         error:  function (jqXHR, textStatus, errorThrown) {
                             if (jqXHR.status === 400) {
-                                form.parent().find('.quickfind_search_results *').remove();
-                                learnscripture.handleFormValidationErrors(form, '', jqXHR);
+                                $form.parent().find('.quickfind_search_results *').remove();
+                                learnscripture.handleFormValidationErrors($form, '', jqXHR);
                             } else if (jqXHR.status === 500) {
-                                form.parent().find('.quickfind_search_results').html('Your search terms were not understood.');
+                                $form.parent().find('.quickfind_search_results').html('Your search terms were not understood.');
                             } else {
                                 learnscripture.ajaxFailed(jqXHR, textStatus, errorThrown);
                             }
