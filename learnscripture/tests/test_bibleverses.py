@@ -221,9 +221,9 @@ class VersionTests(TestBase):
             d1 = version.get_verses_by_localized_reference_bulk(
                 ['Romalılar 3:24', 'Romalılar 3:25-26', 'Romalılar 3:27'])
             self.assertEqual(d1['Romalılar 3:24'].text,
-                             "İnsanlar İsa Mesih'te olan kurtuluşla “Kurtuluşla” ya da “Fidyeyle”., Tanrı'nın lütfuyla, karşılıksız olarak aklanırlar.")
+                             "İnsanlar İsa Mesih'te olan kurtuluşla “Kurtuluşla”, Tanrı'nın lütfuyla, karşılıksız olarak aklanırlar.")
             self.assertEqual(d1['Romalılar 3:25-26'].text,
-                             "Tanrı Mesih'i, kanıyla günahları bağışlatan Günahları bağışlatan kurban diye çevrilen Grekçe ifade gazabı yatıştırmak kavramını da içerir. ve imanla benimsenen kurban olarak sundu. Böylece adaletini gösterdi. Çünkü sabredip daha önce işlenmiş günahları cezasız bıraktı. Bunu, adil kalmak ve İsa'ya iman edeni aklamak için şimdiki zamanda kendi adaletini göstermek amacıyla yaptı.")
+                             "Tanrı Mesih'i, kanıyla günahları bağışlatan ve imanla benimsenen kurban olarak sundu. Böylece adaletini gösterdi. Çünkü sabredip daha önce işlenmiş günahları cezasız bıraktı. Bunu, adil kalmak ve İsa'ya iman edeni aklamak için şimdiki zamanda kendi adaletini göstermek amacıyla yaptı.")
 
     def test_get_verses_by_localized_reference_bulk_spanning_merge(self):
         version = self.TCL02
@@ -232,7 +232,7 @@ class VersionTests(TestBase):
             d1 = version.get_verses_by_localized_reference_bulk(
                 ['Romalılar 3:23', 'Romalılar 3:24-27'])
             self.assertEqual(d1['Romalılar 3:24-27'].text,
-                             "İnsanlar İsa Mesih'te olan kurtuluşla “Kurtuluşla” ya da “Fidyeyle”., Tanrı'nın lütfuyla, karşılıksız olarak aklanırlar. Tanrı Mesih'i, kanıyla günahları bağışlatan Günahları bağışlatan kurban diye çevrilen Grekçe ifade gazabı yatıştırmak kavramını da içerir. ve imanla benimsenen kurban olarak sundu. Böylece adaletini gösterdi. Çünkü sabredip daha önce işlenmiş günahları cezasız bıraktı. Bunu, adil kalmak ve İsa'ya iman edeni aklamak için şimdiki zamanda kendi adaletini göstermek amacıyla yaptı. Öyleyse neyle övünebiliriz? Hiçbir şeyle! Hangi ilkeye dayanarak? Yasa'yı yerine getirme ilkesine mi? Hayır, iman ilkesine.")
+                             "İnsanlar İsa Mesih'te olan kurtuluşla “Kurtuluşla”, Tanrı'nın lütfuyla, karşılıksız olarak aklanırlar. Tanrı Mesih'i, kanıyla günahları bağışlatan ve imanla benimsenen kurban olarak sundu. Böylece adaletini gösterdi. Çünkü sabredip daha önce işlenmiş günahları cezasız bıraktı. Bunu, adil kalmak ve İsa'ya iman edeni aklamak için şimdiki zamanda kendi adaletini göstermek amacıyla yaptı. Öyleyse neyle övünebiliriz? Hiçbir şeyle! Hangi ilkeye dayanarak? Yasa'yı yerine getirme ilkesine mi? Hayır, iman ilkesine.")
 
     def test_get_verses_by_localized_reference_bulk_merged_edges(self):
         version = self.TCL02
@@ -243,7 +243,7 @@ class VersionTests(TestBase):
             v = d1['Romalılar 3:24-25']
             self.assertEqual(v.localized_reference, 'Romalılar 3:24-26')
             self.assertEqual(v.text,
-                             "İnsanlar İsa Mesih'te olan kurtuluşla “Kurtuluşla” ya da “Fidyeyle”., Tanrı'nın lütfuyla, karşılıksız olarak aklanırlar. Tanrı Mesih'i, kanıyla günahları bağışlatan Günahları bağışlatan kurban diye çevrilen Grekçe ifade gazabı yatıştırmak kavramını da içerir. ve imanla benimsenen kurban olarak sundu. Böylece adaletini gösterdi. Çünkü sabredip daha önce işlenmiş günahları cezasız bıraktı. Bunu, adil kalmak ve İsa'ya iman edeni aklamak için şimdiki zamanda kendi adaletini göstermek amacıyla yaptı.")
+                             "İnsanlar İsa Mesih'te olan kurtuluşla “Kurtuluşla”, Tanrı'nın lütfuyla, karşılıksız olarak aklanırlar. Tanrı Mesih'i, kanıyla günahları bağışlatan ve imanla benimsenen kurban olarak sundu. Böylece adaletini gösterdi. Çünkü sabredip daha önce işlenmiş günahları cezasız bıraktı. Bunu, adil kalmak ve İsa'ya iman edeni aklamak için şimdiki zamanda kendi adaletini göstermek amacıyla yaptı.")
 
         with self.assertNumQueries(1):
             # 1 for simple ones, 2 for the merged
