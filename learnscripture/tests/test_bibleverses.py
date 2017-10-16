@@ -245,6 +245,13 @@ class VersionTests(TestBase):
             self.assertEqual(v.text,
                              "İnsanlar İsa Mesih'te olan kurtuluşla “Kurtuluşla” ya da “Fidyeyle”., Tanrı'nın lütfuyla, karşılıksız olarak aklanırlar. Tanrı Mesih'i, kanıyla günahları bağışlatan Günahları bağışlatan kurban diye çevrilen Grekçe ifade gazabı yatıştırmak kavramını da içerir. ve imanla benimsenen kurban olarak sundu. Böylece adaletini gösterdi. Çünkü sabredip daha önce işlenmiş günahları cezasız bıraktı. Bunu, adil kalmak ve İsa'ya iman edeni aklamak için şimdiki zamanda kendi adaletini göstermek amacıyla yaptı.")
 
+        with self.assertNumQueries(1):
+            # 1 for simple ones, 2 for the merged
+            d1 = version.get_verses_by_localized_reference_bulk(
+                ['Romalılar 3:25'])
+            v = d1['Romalılar 3:25']
+            self.assertEqual(v.localized_reference, 'Romalılar 3:25-26')
+
     def _gen_1_1_suggestions(self):
         # in the beginning...
         return [['and', 'but', 'thou'],
