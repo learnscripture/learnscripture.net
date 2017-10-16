@@ -937,13 +937,7 @@ def fetch_localized_reference_bulk(version, language_code,
                 # In theory, localized_reference_list should already have been
                 # corrected for merged verses. But if it has not been, this will
                 # correct it so that the ComboVerse has the correct reference.
-                if len(vl) == 1:
-                    normalized_localized_ref = vl[0].localized_ref
-                else:
-                    normalized_localized_ref = pretty_passage_ref(
-                        language_code,
-                        vl[0].localized_reference,
-                        vl[-1].localized_reference)
+                normalized_localized_ref = normalized_verse_list_ref(language_code, vl)
                 v_dict[localized_ref] = ComboVerse(normalized_localized_ref,
                                                    vl)
             except InvalidVerseReference:
@@ -1036,6 +1030,16 @@ def pretty_passage_ref(language_code, start_ref, end_ref):
     ).canonical_form()
 
 
+def normalized_verse_list_ref(language_code, verse_list):
+    if len(verse_list) == 1:
+        return verse_list[0].localized_reference
+    else:
+        return ParsedReference.from_start_and_end(
+            parse_validated_localized_reference(language_code, verse_list[0].localized_reference),
+            parse_validated_localized_reference(language_code, verse_list[-1].localized_reference)
+        ).canonical_form()
+
+
 def get_passage_sections(language_code, verse_list, breaks):
     """
     Given a list of objects with a correct 'localized_reference' attribute, and a comma
@@ -1103,12 +1107,7 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
     if parsed_ref is not None:
         verse_list = fetch_parsed_reference(version, parsed_ref,
                                             max_length=max_length)
-        if len(verse_list) == 1:
-            ref = verse_list[0].localized_reference
-        else:
-            ref = pretty_passage_ref(version.language_code,
-                                     verse_list[0].localized_reference,
-                                     verse_list[-1].localized_reference)
+        ref = normalized_verse_list_ref(version.language_code, verse_list)
         return [ComboVerse(ref, verse_list)]
 
     if not allow_searches:
