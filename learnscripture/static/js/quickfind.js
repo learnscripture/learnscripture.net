@@ -25,7 +25,7 @@ var learnscripture =
                 setChapterStartSelect(form, []);
             } else {
                 setChapterStartSelect(form, range(1, BIBLE_BOOK_INFO[book]['chapter_count'] + 1));
-                setQuickFind(form, book);
+                setQuickFind(form);
             }
         };
 
@@ -33,27 +33,24 @@ var learnscripture =
             var form = $(this).closest('form');
             var book = getBook(form);
             var chapterStart = getChapterStart(form);
-            var chapterEnd = getChapterStart(form);
             if (chapterStart === null) {
                 setChapterEndSelect(form, []);
                 setVerseStartSelect(form, []);
-                setQuickFind(form, book);
             } else {
                 setChapterEndSelect(form, range(chapterStart, BIBLE_BOOK_INFO[book]['chapter_count'] + 1));
                 setVerseStartSelect(form, range(1, BIBLE_BOOK_INFO[book]['verse_counts'][chapterStart] + 1))
-                setQuickFind(form, book, chapterStart, chapterStart);
             }
+            setQuickFind(form);
 
         };
 
         var chapterEndChange = function (ev) {
             var form = $(this).closest('form');
             var book = getBook(form);
-            var chapterStart = getChapterStart(form);
             var chapterEnd = getChapterEnd(form);
             // chapterEnd doesn't have an empty option, so don't need to deal with that.
             setVerseEndSelect(form, range(1, BIBLE_BOOK_INFO[book]['verse_counts'][chapterEnd] + 1))
-            setQuickFind(form, book, chapterStart, chapterEnd);
+            setQuickFind(form);
 
         };
 
@@ -70,7 +67,6 @@ var learnscripture =
                     setChapterEndSelect(form, [])
                 }
                 setVerseEndSelect(form, []);
-                setQuickFind(form, book, chapterStart);
             } else {
                 if (passageMode && chapterEnd === null) {
                     setChapterEndSelect(form, range(chapterStart, BIBLE_BOOK_INFO[book]['chapter_count'] + 1));
@@ -99,20 +95,14 @@ var learnscripture =
                         setVerseEndSelectValue(form, verseEnd);
                     }
                 }
-                setQuickFind(form, book, chapterStart, chapterEnd, verseStart, getVerseEnd(form));
             }
+            setQuickFind(form);
         };
 
         var verseEndChange = function (ev) {
             var form = $(this).closest('form');
-            var book = getBook(form);
-            var chapterStart = getChapterStart(form);
-            var chapterEnd = getChapterEnd(form);
-            var verseStart = getVerseStart(form);
-            var verseEnd = getVerseEnd(form);
-            setQuickFind(form, book, chapterStart, chapterEnd, verseStart, verseEnd);
+            setQuickFind(form);
         };
-
 
         var getBook = function (form) {
             return form.find('select[name=book]').val();
@@ -191,7 +181,13 @@ var learnscripture =
             form.find('select[name=verse_end]').val(value);
         };
 
-        var setQuickFind = function (form, book, chapterStart, chapterEnd, verseStart, verseEnd) {
+        var setQuickFind = function (form) {
+            var book = getBook(form);
+            var chapterStart = getChapterStart(form);
+            var chapterEnd = getChapterEnd(form);
+            var verseStart = getVerseStart(form);
+            var verseEnd = getVerseEnd(form);
+
             if (chapterStart != undefined && chapterEnd != undefined
                 && chapterStart != chapterEnd
                 && verseStart != undefined
