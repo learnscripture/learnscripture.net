@@ -112,6 +112,36 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
         self.assertTextAbsent("In the beginning God")
         self.assertTextPresent("No verses matched 'Genesis 100:1'")
 
+    def test_choose_individual_and_change_language(self):
+        self.get_url('choose')
+        self.click("a[href='#id-tab-individual']")
+
+        # Text is initially in the language of the default version
+        self.assertEqual(self.get_element_text("form.quickfind select[name=book] option[value=BOOK0]"),
+                         "Genesis")
+
+        # Select verse using drop downs.
+        self.fill_by_text({"form.quickfind select[name=book]": "John"})
+        self.fill_by_text({"form.quickfind select[name=chapter_start]": "3"})
+        self.fill_by_text({"form.quickfind select[name=verse_start]": "16"})
+        self.assertEqual(self.get_element_attribute("form.quickfind input[name=quick_find]", "value"),
+                         "John 3:16")
+        self.click("input[name=lookup]")
+
+        self.assertTextPresent("For this is the way God loved the world")
+
+        self.fill({"form.quickfind select[name=version]": "TCL02"})
+
+        # Search box should change immediately
+        self.assertEqual(self.get_element_attribute("form.quickfind input[name=quick_find]", "value"),
+                         "Yuhanna 3:16")
+        # Drop-downs should change to Turkish
+        self.assertEqual(self.get_element_text("form.quickfind select[name=book] option[value=BOOK0]"),
+                         "Yaratılış")
+        self.click("input[name=lookup]")
+
+        self.assertTextPresent("Çünkü Tanrı dünyayı o kadar çok sevdi ki")
+
     def test_choose_individual_by_search(self):
         self.get_url('choose')
 

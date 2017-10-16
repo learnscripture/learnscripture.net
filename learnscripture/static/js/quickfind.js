@@ -4,6 +4,8 @@ var learnscripture =
     (function (learnscripture, $) {
         "use strict";
 
+        var lastSetReference = null;
+
         var MAX_VERSES_FOR_SINGLE_CHOICE = 4;
 
         var range = function (start, stop) {
@@ -104,6 +106,21 @@ var learnscripture =
             setQuickFind($form);
         };
 
+        var versionChange = function (ev) {
+            var $form = $(this).closest('form');
+            var langCode = $form.find('#id-version-select option:selected').attr('data-lang-code');
+            $form.find('select[name=book] option').each(function (idx, elem) {
+                var $opt = $(elem);
+                $opt.text($opt.attr('data-lang-' + langCode));
+            });
+
+            if (lastSetReference !== null) {
+                if ($('input[name=quick_find]').val() == lastSetReference) {
+                    setQuickFind($form); // Might need to be updated due to language change
+                }
+            }
+        }
+
         var getBook = function ($form) {
             return $form.find('select[name=book]').val();
         };
@@ -182,6 +199,12 @@ var learnscripture =
         };
 
         var setQuickFind = function ($form) {
+            var text = getReferenceFromControls($form);
+            $form.find('input[name=quick_find]').val(text);
+            lastSetReference = text;
+        }
+
+        var getReferenceFromControls = function ($form) {
             var book = getBook($form);
             var chapterStart = getChapterStart($form);
             var chapterEnd = getChapterEnd($form);
@@ -223,7 +246,7 @@ var learnscripture =
                     text = text + "-" + verseEnd.toString();
                 }
             }
-            $form.find('input[name=quick_find]').val(text);
+            return text;
         };
 
         var getBookName = function (internalBookName) {
@@ -266,6 +289,7 @@ var learnscripture =
             $('form.quickfind select[name=chapter_end]').change(chapterEndChange);
             $('form.quickfind select[name=verse_start]').change(verseStartChange);
             $('form.quickfind select[name=verse_end]').change(verseEndChange);
+            $('form.quickfind select[name=version]').change(versionChange);
             $('form.quickfind input[name=quick_find]');
             $('form.quickfind input[type=text]').bind('keypress', function (ev){
                 if (ev.keyCode === 13) {
