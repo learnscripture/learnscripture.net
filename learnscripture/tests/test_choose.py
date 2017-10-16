@@ -95,7 +95,7 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
         self.click("a[href='#id-tab-individual']")
 
         self.fill({'form.quickfind input[name=quick_find]': 'Gen 1:1'})
-        self.fill_by_text({"form.quickfind select[name=version]": "KJV (King James Version)"})
+        self.fill({"form.quickfind select[name=version]": "KJV"})
         self.click("input[name=lookup]")
 
         self.assertTextPresent("In the beginning God")
@@ -106,7 +106,7 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
         self.click("a[href='#id-tab-individual']")
 
         self.fill({'form.quickfind input[name=quick_find]': 'Gen 100:1'})
-        self.fill_by_text({"form.quickfind select[name=version]": "KJV (King James Version)"})
+        self.fill({"form.quickfind select[name=version]": "KJV"})
         self.click("input[name=lookup]")
 
         self.assertTextAbsent("In the beginning God")
@@ -148,7 +148,7 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
         self.click("a[href='#id-tab-individual']")
 
         self.fill({'form.quickfind input[name=quick_find]': 'firmament evening'})
-        self.fill_by_text({"form.quickfind select[name=version]": "KJV (King James Version)"})
+        self.fill({"form.quickfind select[name=version]": "KJV"})
         self.click("input[name=lookup]")
 
         self.assertTextPresent("And God called the")
