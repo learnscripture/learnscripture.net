@@ -6,7 +6,7 @@
         "text_saved" : "In the beginning God created the heaven and the earth. ",
         "first_verse_number" : 1,
         "last_verse_number" : 1,
-        "version" : 1
+        "version" : ["KJV"]
       },
     "model" : "bibleverses.verse",
     "pk" : 104655
@@ -18,7 +18,7 @@
         "text_saved" : "And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters. ",
         "first_verse_number" : 2,
         "last_verse_number" : 2,
-        "version" : 1
+        "version" : ["KJV"]
       },
     "model" : "bibleverses.verse",
     "pk" : 104656
@@ -30,7 +30,7 @@
         "text_saved" : "And God said, Let there be light: and there was light. ",
         "first_verse_number" : 3,
         "last_verse_number" : 3,
-        "version" : 1
+        "version" : ["KJV"]
       },
     "model" : "bibleverses.verse",
     "pk" : 104657
@@ -42,7 +42,7 @@
         "text_saved" : "And God saw the light, that it was good: and God divided the light from the darkness. ",
         "first_verse_number" : 4,
         "last_verse_number" : 4,
-        "version" : 1
+        "version" : ["KJV"]
       },
     "model" : "bibleverses.verse",
     "pk" : 104658
@@ -54,7 +54,7 @@
         "text_saved" : "And God called the light Day, and the darkness he called Night. And the evening and the morning were the first day. ",
         "first_verse_number" : 5,
         "last_verse_number" : 5,
-        "version" : 1
+        "version" : ["KJV"]
       },
     "model" : "bibleverses.verse",
     "pk" : 104659
@@ -66,7 +66,7 @@
         "text_saved" : "And God said, Let there be a firmament in the midst of the waters, and let it divide the waters from the waters. ",
         "first_verse_number" : 6,
         "last_verse_number" : 6,
-        "version" : 1
+        "version" : ["KJV"]
       },
     "model" : "bibleverses.verse",
     "pk" : 104660
@@ -78,7 +78,7 @@
         "text_saved" : "And God made the firmament, and divided the waters which were under the firmament from the waters which were above the firmament: and it was so. ",
         "first_verse_number" : 7,
         "last_verse_number" : 7,
-        "version" : 1
+        "version" : ["KJV"]
       },
     "model" : "bibleverses.verse",
     "pk" : 104661
@@ -90,7 +90,7 @@
         "text_saved" : "And God called the firmament Heaven. And the evening and the morning were the second day. ",
         "first_verse_number" : 8,
         "last_verse_number" : 8,
-        "version" : 1
+        "version" : ["KJV"]
       },
     "model" : "bibleverses.verse",
     "pk" : 104662
@@ -102,7 +102,7 @@
         "text_saved" : "And God said, Let the waters under the heaven be gathered together unto one place, and let the dry land appear: and it was so. ",
         "first_verse_number" : 9,
         "last_verse_number" : 9,
-        "version" : 1
+        "version" : ["KJV"]
       },
     "model" : "bibleverses.verse",
     "pk" : 104663
@@ -114,7 +114,7 @@
         "text_saved" : "And God called the dry land Earth; and the gathering together of the waters called he Seas: and God saw that it was good. ",
         "first_verse_number" : 10,
         "last_verse_number" : 10,
-        "version" : 1
+        "version" : ["KJV"]
       },
     "model" : "bibleverses.verse",
     "pk" : 104664
@@ -126,7 +126,7 @@
         "text_saved" : "Thus the heavens and the earth were finished, and all the host of them.",
         "first_verse_number" : 1,
         "last_verse_number" : 1,
-        "version" : 1
+        "version" : ["KJV"]
       },
     "model" : "bibleverses.verse",
     "pk" : 104665
@@ -138,7 +138,7 @@
         "text_saved" : "And on the seventh day God ended his work which he had made; and he rested on the seventh day from all his work which he had made.",
         "first_verse_number" : 2,
         "last_verse_number" : 2,
-        "version" : 1
+        "version" : ["KJV"]
       },
     "model" : "bibleverses.verse",
     "pk" : 104666
@@ -152,7 +152,7 @@
         "chapter_number": 23,
         "text_saved": "The LORD is my shepherd--I shall not want. ",
         "book_number": 18,
-        "version": 1,
+        "version": ["KJV"],
         "first_verse_number": 1,
         "last_verse_number": 1,
         "bible_verse_number": 14236
@@ -166,7 +166,7 @@
         "chapter_number": 23,
         "text_saved": "He maketh me to lie down in green pastures: he leadeth me beside the still waters. ",
         "book_number": 18,
-        "version": 1,
+        "version": ["KJV"],
         "first_verse_number": 2,
         "last_verse_number": 2,
         "bible_verse_number": 14237
@@ -180,7 +180,7 @@
         "chapter_number": 23,
         "text_saved": "He restoreth my soul: he leadeth me in the paths of righteousness for his name's sake. ",
         "book_number": 18,
-        "version": 1,
+        "version": ["KJV"],
         "first_verse_number": 3,
         "last_verse_number": 3,
         "bible_verse_number": 14238
@@ -194,7 +194,7 @@
         "chapter_number": 23,
         "text_saved": "Yea, though I walk through the valley of the shadow of death, I will fear no evil: for thou art with me; thy rod and thy staff they comfort me. ",
         "book_number": 18,
-        "version": 1,
+        "version": ["KJV"],
         "first_verse_number": 4,
         "last_verse_number": 4,
         "bible_verse_number": 14239
@@ -208,7 +208,7 @@
         "chapter_number": 23,
         "text_saved": "Thou preparest a table before me in the presence of mine enemies: thou anointest my head with oil; my cup runneth over. ",
         "book_number": 18,
-        "version": 1,
+        "version": ["KJV"],
         "first_verse_number": 5,
         "last_verse_number": 5,
         "bible_verse_number": 14240
@@ -222,7 +222,7 @@
         "chapter_number": 23,
         "text_saved": "Surely goodness and mercy shall follow me all the days of my life: and I will dwell in the house of the LORD for ever. ",
         "book_number": 18,
-        "version": 1,
+        "version": ["KJV"],
         "first_verse_number": 6,
         "last_verse_number": 6,
         "bible_verse_number": 14241
@@ -320,7 +320,7 @@
         "chapter_number": 3,
         "text_saved": "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life. ",
         "book_number": 42,
-        "version": 1,
+        "version": ["KJV"],
         "first_verse_number": 16,
         "last_verse_number": 16,
         "bible_verse_number": 26136
@@ -348,7 +348,7 @@
         "chapter_number": 14,
         "text_saved": "Jesus saith unto him, I am the way, the truth, and the life: no man cometh unto the Father, but by me. ",
         "book_number": 42,
-        "version": 1,
+        "version": ["KJV"],
         "first_verse_number": 6,
         "last_verse_number": 6,
         "bible_verse_number": 26674
@@ -418,7 +418,7 @@
         "chapter_number": 2,
         "text_saved": "For by grace are ye saved through faith; and that not of yourselves: it is the gift of God:",
         "book_number": 48,
-        "version": 1,
+        "version": ["KJV"],
         "first_verse_number": 8,
         "last_verse_number": 8,
         "bible_verse_number": 29237
@@ -446,7 +446,7 @@
         "chapter_number": 1,
         "text_saved": "The song of songs, which is Solomon's.",
         "book_number": 21,
-        "version": 1,
+        "version": ["KJV"],
         "first_verse_number": 1,
         "last_verse_number": 1,
         "bible_verse_number": 17538
@@ -460,7 +460,7 @@
         "chapter_number": 1,
         "text_saved": "Grace be unto you, and peace, from God our Father, and from the Lord Jesus Christ.",
         "book_number": 45,
-        "version": 1,
+        "version": ["KJV"],
         "first_verse_number": 3,
         "last_verse_number": 3,
         "bible_verse_number": 28366
