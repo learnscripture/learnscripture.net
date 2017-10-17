@@ -122,18 +122,23 @@ class QuickFindTests(SearchTestsMixin, TestBase):
     def test_quick_find_merged_verse(self):
         version = self.TCL02
         # There is no 3:25, 3:26 - rather there is 3:25-26
-        refs = [("Romalılar 3:25", "Romalılar 3:25-26", 1, 1),
-                ("Romalılar 3:26", "Romalılar 3:25-26", 1, 1),
-                ("Romalılar 3:25-26", "Romalılar 3:25-26", 1, 2),
-                ("Romalılar 3:24-25", "Romalılar 3:24-26", 2, 2),
-                ("Romalılar 3:26-27", "Romalılar 3:25-27", 2, 2),
+        refs = [("Romalılar 3:25", "Romalılar 3:25-26", 25, 26, 1, 1),
+                ("Romalılar 3:26", "Romalılar 3:25-26", 25, 26, 1, 1),
+                ("Romalılar 3:25-26", "Romalılar 3:25-26", 25, 26, 1, 2),
+                ("Romalılar 3:24-25", "Romalılar 3:24-26", 24, 26, 2, 2),
+                ("Romalılar 3:26-27", "Romalılar 3:25-27", 25, 27, 2, 2),
                 ]
-        for ref, corrected_ref, length, q in refs:
+        for ref, corrected_ref, start_verse, end_verse, length, q in refs:
             with self.assertNumQueries(q):
                 results = quick_find(ref, version)
                 v = results[0]
-                # v is always a ComboVerse for quick_find results
-                self.assertEqual(v.localized_reference, corrected_ref)
-                self.assertEqual(len(v.verses), length)
+                # v is always a VerseSearchResult for quick_find results
+                self.assertEqual(v.localized_reference, corrected_ref, "For ref " + ref)
+                self.assertEqual(len(v.verses), length, "For ref " + ref)
                 if length == 1:
-                    self.assertEqual(v.verses[0].localized_reference, corrected_ref)
+                    self.assertEqual(v.verses[0].localized_reference, corrected_ref, "For ref " + ref)
+
+                # Some tests for parsed_ref attribute that is used by
+                # front end
+                self.assertEqual(v.parsed_ref.start_verse, start_verse, "For ref " + ref)
+                self.assertEqual(v.parsed_ref.end_verse, end_verse, "For ref " + ref)

@@ -402,6 +402,8 @@ class VerseFind(ApiView):
         # dictionaries.
         retval = [dict(localized_reference=r.localized_reference,
                        text=r.text,
+                       from_reference=r.from_reference,
+                       parsed_ref=None if r.parsed_ref is None else r.parsed_ref.__dict__,
                        verses=r.verses)
                   for r in results]
         for item in retval:

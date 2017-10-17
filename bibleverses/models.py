@@ -233,6 +233,15 @@ class ComboVerse(object):
         return ' '.join(v.text for v in self.verses)
 
 
+class VerseSearchResult(ComboVerse):
+    def __init__(self, localized_reference, verse_list,
+                 parsed_ref=None,
+                 from_reference=None):
+        super().__init__(localized_reference, verse_list)
+        self.from_reference = from_reference
+        self.parsed_ref = parsed_ref
+
+
 SEARCH_OPERATORS = set(["&", "|", "@@", "@@@", "||", "&&", "!!", "@>", "<@", ":", "\\"])
 SEARCH_CHARS = set("".join(list(SEARCH_OPERATORS)))
 
@@ -1088,7 +1097,7 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
     """
     Does a verse search based on reference or contents.
 
-    It returns a list of ComboVerse objects.
+    It returns a list of VerseSearchResult objects.
     """
     # Unlike fetch_localized_reference, this is tolerant with input.
     # It can still throw InvalidVerseReference for things that are obviously
@@ -1107,8 +1116,13 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
     if parsed_ref is not None:
         verse_list = fetch_parsed_reference(version, parsed_ref,
                                             max_length=max_length)
-        ref = normalized_verse_list_ref(version.language_code, verse_list)
-        return [ComboVerse(ref, verse_list)]
+        result_ref = normalized_verse_list_ref(version.language_code, verse_list)
+        # parsed_ref might be difference from final_ref, due to merged verses
+        parsed_result_ref = parse_validated_localized_reference(version.language_code,
+                                                                result_ref)
+        return [VerseSearchResult(result_ref, verse_list,
+                                  parsed_ref=parsed_result_ref,
+                                  from_reference=query)]
 
     if not allow_searches:
         raise InvalidVerseReference("Verse reference not recognized")
@@ -1119,7 +1133,7 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
         return searcher(version, search_query)
 
     results = Verse.objects.text_search(search_query, version, limit=11)
-    return [ComboVerse(r.localized_reference, [r]) for r in results]
+    return [VerseSearchResult(r.localized_reference, [r]) for r in results]
 
 
 def get_whole_book(book_name, version, ensure_text_present=True):

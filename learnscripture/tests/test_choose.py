@@ -142,6 +142,42 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
 
         self.assertTextPresent("Çünkü Tanrı dünyayı o kadar çok sevdi ki")
 
+    def test_choose_individual_fuzzy_and_change_language(self):
+        self.get_url('choose')
+        self.click("a[href='#id-tab-individual']")
+
+        self.fill({'form.quickfind input[name=quick_find]': 'jhn 3:16'})
+        self.click("input[name=lookup]")
+        self.assertTextPresent("For this is the way God loved the world")
+
+        # # Drop downs should be updated.
+        self.assertEqual(self.get_element_text("form.quickfind select[name=book] option:checked"),
+                         "John")
+        self.assertEqual(self.get_element_attribute("form.quickfind select[name=chapter_start] option:checked", "value"),
+                         "3")
+        self.assertEqual(self.get_element_attribute("form.quickfind select[name=verse_start] option:checked", "value"),
+                         "16")
+        self.assertEqual(self.get_element_attribute("form.quickfind select[name=chapter_end] option:checked", "value"),
+                         "3")
+        self.assertEqual(self.get_element_attribute("form.quickfind select[name=verse_end] option:checked", "value"),
+                         "16")
+        self.assertEqual(self.get_element_attribute("form.quickfind input[name=quick_find]", "value"),
+                         "John 3:16")
+
+        # Now change language.
+        self.fill({"form.quickfind select[name=version]": "TCL02"})
+
+        # Search box should change immediately
+        self.assertEqual(self.get_element_attribute("form.quickfind input[name=quick_find]", "value"),
+                         "Yuhanna 3:16")
+        # And drop down
+        self.assertEqual(self.get_element_text("form.quickfind select[name=book] option:checked"),
+                         "Yuhanna")
+
+        self.click("input[name=lookup]")
+
+        self.assertTextPresent("Çünkü Tanrı dünyayı o kadar çok sevdi ki")
+
     def test_choose_individual_by_search(self):
         self.get_url('choose')
 
