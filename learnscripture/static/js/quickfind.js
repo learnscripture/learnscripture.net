@@ -16,10 +16,6 @@ var learnscripture =
             return foo;
         };
 
-        var isInPassageMode = function ($form) {
-            return $form.find('select[name=chapter_end]').length > 0;
-        };
-
         var bookChange = function (ev) {
             var $form = $(this).closest('form');
             var book = $(ev.target).val();
@@ -63,27 +59,19 @@ var learnscripture =
             var verseEnd = getVerseEnd($form);
             var chapterStart = getChapterStart($form);
             var chapterEnd = getChapterEnd($form);
-            var passageMode = isInPassageMode($form);
             if (verseStart === null) {
-                if (passageMode) {
-                    setChapterEndSelect($form, [])
-                }
+                setChapterEndSelect($form, [])
                 setVerseEndSelect($form, []);
             } else {
-                if (passageMode && chapterEnd === null) {
+                if (chapterEnd === null) {
                     setChapterEndSelect($form, range(chapterStart, BIBLE_BOOK_INFO[book]['chapter_count'] + 1));
                     setChapterEndSelectValue($form, chapterStart);
                     chapterEnd = chapterStart;
                 }
 
                 var lastVerse;
-                if (passageMode) {
-                    lastVerse = BIBLE_BOOK_INFO[book]['verse_counts'][chapterEnd];
-                } else {
-                    lastVerse = BIBLE_BOOK_INFO[book]['verse_counts'][chapterStart];
-                    lastVerse = Math.min(lastVerse, verseStart - 1 + MAX_VERSES_FOR_SINGLE_CHOICE);
-                }
-                if (passageMode && chapterStart !== chapterEnd) {
+                lastVerse = BIBLE_BOOK_INFO[book]['verse_counts'][chapterEnd];
+                if (chapterStart !== chapterEnd) {
                     setVerseEndSelect($form, range(1, lastVerse + 1));
                     if (verseEnd < lastVerse + 1) {
                         // restore
@@ -123,6 +111,10 @@ var learnscripture =
 
         var getBook = function ($form) {
             return $form.find('select[name=book]').val();
+        };
+
+        var getBookName = function (internalBookName) {
+            return $('select[name=book] option[value=' + internalBookName + ']').text();
         };
 
         var getChapterStart = function ($form) {
@@ -171,10 +163,21 @@ var learnscripture =
             }
         };
 
+        var setBookByName = function ($form, languageCode, bookName) {
+            var $bookSelect = $form.find("select[name=book]")
+            $bookSelect.find("option").filter(function() {
+                return $(this).attr('data-lang-' + languageCode) == bookName;
+            }).prop('selected', true);
+        };
+
         var setChapterStartSelect = function ($form, chapters) {
             fillNumberSelect($form.find('select[name=chapter_start]'), chapters, true);
             setChapterEndSelect($form, []);
             setVerseStartSelect($form, []);
+        };
+
+        var setChapterStartSelectValue = function ($form, value) {
+            $form.find('select[name=chapter_start]').val(value);
         };
 
         var setChapterEndSelect = function ($form, chapters) {
@@ -190,6 +193,10 @@ var learnscripture =
             setVerseEndSelect($form, []);
         };
 
+        var setVerseStartSelectValue = function ($form, value) {
+            $form.find('select[name=verse_start]').val(value);
+        };
+
         var setVerseEndSelect = function ($form, verses) {
             fillNumberSelect($form.find('select[name=verse_end]'), verses, true);
         };
@@ -197,6 +204,19 @@ var learnscripture =
         var setVerseEndSelectValue = function ($form, value) {
             $form.find('select[name=verse_end]').val(value);
         };
+
+        var setControlsFromParsedRef = function ($form, parsedRef) {
+            setBookByName($form, parsedRef.language_code, parsedRef.book_name);
+            $form.find('select[name=book]').trigger('change')
+            setChapterStartSelectValue($form, parsedRef.start_chapter.toString());
+            $form.find('select[name=chapter_start]').trigger('change');
+            setVerseStartSelectValue($form, parsedRef.start_verse.toString());
+            $form.find('select[name=verse_start]').trigger('change');
+            setChapterEndSelectValue($form, parsedRef.end_chapter.toString());
+            $form.find('select[name=chapter_end]').trigger('change');
+            setVerseEndSelectValue($form, parsedRef.end_verse.toString());
+            $form.find('select[name=verse_end]').trigger('change');
+        }
 
         var setQuickFind = function ($form) {
             var text = getReferenceFromControls($form);
@@ -242,16 +262,14 @@ var learnscripture =
                     text = text + ":" + verseEnd.toString();
                 }
             } else {
-                if (verseEnd != undefined) {
+                if (verseEnd != undefined && (
+                    (chapterStart != chapterEnd) ||
+                        (verseStart != verseEnd))) {
                     text = text + "-" + verseEnd.toString();
                 }
             }
             return text;
         };
-
-        var getBookName = function (internalBookName) {
-            return $('select[name=book] option[value=' + internalBookName + ']').text();
-        }
 
         var quickFindAndHandleResults = function (resultHandler, passageMode) {
 
@@ -266,7 +284,16 @@ var learnscripture =
                             'version_slug': $('#id-version-select').val(),
                             'passage_mode': passageMode ? '1' : '0'
                         },
-                        success: resultHandler,
+                        success: function (results) {
+                            resultHandler(results);
+                            if (results.length == 1 && results[0].from_reference !== null) {
+                                var result = results[0];
+                                var qfVal = $form.find('input[name=quick_find]').val();
+                                if (result.from_reference.trim() == qfVal.trim()) {
+                                    setControlsFromParsedRef($form, result.parsed_ref);
+                                }
+                            }
+                        },
                         error:  function (jqXHR, textStatus, errorThrown) {
                             if (jqXHR.status === 400) {
                                 $form.parent().find('.quickfind_search_results *').remove();

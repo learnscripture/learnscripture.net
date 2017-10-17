@@ -99,7 +99,7 @@ def fix_esv_bugs(items, needed_localized_references):
 
 def search_esv(version, words):
     from django.conf import settings
-    from bibleverses.models import ComboVerse
+    from bibleverses.models import VerseSearchResult
 
     params = ['key=%s' % settings.ESV_API_KEY,
               'words=%s' % words,
@@ -136,7 +136,7 @@ def search_esv(version, words):
         verse.text_saved = text
         verse_list.append(highlight_search_words(verse, words))
 
-    return [ComboVerse(v.localized_reference, [v]) for v in verse_list]
+    return [VerseSearchResult(v.localized_reference, [v]) for v in verse_list]
 
 
 ESV_MAX_STORED_CONSECUTIVE_VERSES = 500
