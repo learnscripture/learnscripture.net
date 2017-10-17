@@ -263,30 +263,6 @@ class ResetProgressHandler(ApiView):
         return {}
 
 
-class ChangeVersionHandler(ApiView):
-
-    @require_preexisting_identity_m
-    def post(self, request):
-        verse_status = get_verse_status(request.POST)
-        verse_set_id = get_verse_set_id(verse_status)
-        localized_reference = verse_status['localized_reference']
-        new_version_slug = request.POST['new_version_slug']
-        # There is a bug here for the case where:
-        # - user is learning a passage set
-        # - user changes version to a version in which there are *more*
-        #   verses for the passage, due to Verse.missing=True for some verses
-        #   in the passage in the original version.
-        #
-        # This is not easy to fix, due to needing to replace a set of items
-        # in the session learn queue with a longer set of items.
-
-        replacements = request.identity.change_version(localized_reference,
-                                                       new_version_slug,
-                                                       verse_set_id)
-        session.replace_user_verse_statuses(request, replacements)
-        return {}
-
-
 class AccountCommon(object):
     fields = ['id', 'username', 'email']
 

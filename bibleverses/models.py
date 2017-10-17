@@ -677,7 +677,7 @@ class UserVerseStatus(models.Model):
     last_tested = models.DateTimeField(null=True, blank=True)
     next_test_due = models.DateTimeField(null=True, blank=True)
 
-    # See Identity.change_version for explanation of ignored
+    # ignored is True when users have chosen to stop learning a verse.
     ignored = models.BooleanField(default=False)
 
     @cached_property

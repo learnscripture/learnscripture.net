@@ -132,13 +132,6 @@ def verse_status_cancelled(request, uvs_id):
     return _remove_user_verse_status(request, uvs_id)
 
 
-def replace_user_verse_statuses(request, uvs_id_map):
-    new_ids = []
-    for order, uvs_id, needs_testing_override in _get_verse_status_ids(request):
-        new_ids.append((order, uvs_id_map.get(uvs_id, uvs_id), needs_testing_override))
-    _save_verse_status_ids(request, new_ids)
-
-
 def _remove_user_verse_status(request, u_id):
     # We remove all that appear before reference, since we know that they will
     # be processed in order client side, and otherwise we potentially have race

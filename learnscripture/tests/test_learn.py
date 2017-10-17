@@ -156,30 +156,6 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.get_url('dashboard')
         self.assertTextPresent("You've earned a new badge")
 
-    def test_change_version_passage(self):
-        self.choose_verse_set('Psalm 23')
-
-        self.assertEqual("Psalm 23:1", self.get_element_text("#id-verse-title"))
-        self.assertIn("I shall not want", self.get_element_text('.current-verse'))
-
-        self.fill_by_text({"#id-version-select": "NET"})
-
-        self.wait_for_ajax()
-        self.assertIn("I lack nothing",
-                      self.get_element_text('.current-verse'))
-
-        # This section can be replaced by a 'skip' button click once we've implemented that.
-        for i in range(0, 9):
-            self.click("#id-next-btn")
-        for word in "The LORD is my shepherd, I lack nothing.".split():
-            self.fill({"#id-typing": word + " "})
-        self.click("#id-next-verse-btn")
-
-        # Now check that the next verse is present and is also NET, which is the
-        # main point of this test.
-        self.assertIn("He takes me to lush pastures",
-                      self.get_element_text('.current-verse'))
-
     def test_review_passage_mixed(self):
         # Test reviewing a passage when some verses are to be tested and others
         # are just being read.
