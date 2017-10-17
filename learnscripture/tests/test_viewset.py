@@ -19,7 +19,7 @@ class ViewSetTests(RequireExampleVerseSetsMixin, FullBrowserTest):
 
         self.assertTextPresent("saith")
 
-        self.fill_by_text({"#id-version-select": "NET (New English Translation)"})
+        self.fill({"#id-version-select": "NET"})
 
         self.wait_until_loaded('body')
         self.assertTextPresent("replied")

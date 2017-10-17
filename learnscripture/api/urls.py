@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
 from learnscripture.api.handlers import (ActionCompleteHandler, ActionLogs, AddComment, CancelLearningPassageHandler,
-                                         CancelLearningVerseHandler, ChangeVersionHandler, CheckDuplicatePassageSet,
+                                         CancelLearningVerseHandler, CheckDuplicatePassageSet,
                                          DeleteNotice, Follow, HideComment, LogOutHandler, ResetProgressHandler,
                                          SessionStats, SetPreferences, SkipVerseHandler, UnFollow, VerseFind,
                                          VersesToLearnHandler)
@@ -14,7 +14,6 @@ from learnscripture.api.handlers import (ActionCompleteHandler, ActionLogs, AddC
 urlpatterns = [
     url(r'^versestolearn/$', VersesToLearnHandler.as_view(), name='learnscripture.api.versestolearn'),
     url(r'^actioncomplete/$', ActionCompleteHandler.as_view(), name='learnscripture.api.actioncomplete'),
-    url(r'^changeversion/$', ChangeVersionHandler.as_view(), name='learnscripture.api.changeversion'),
     url(r'^logout/$', LogOutHandler.as_view(), name='learnscripture.api.logout'),
     url(r'^setpreferences/$', SetPreferences.as_view(), name='learnscripture.api.setpreferences'),
     url(r'^sessionstats/$', SessionStats.as_view(), name='learnscripture.api.sessionstats'),

@@ -56,10 +56,6 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
 
         self.set_preferences()
 
-        # Change version:
-        self.fill_by_text({"#id-version-select": "NET"})
-        self.wait_for_ajax()
-
         identity = Identity.objects.exclude(id__in=[i.id for i in ids]).get()
 
         self.assertEqual(vs.verse_choices.count(),

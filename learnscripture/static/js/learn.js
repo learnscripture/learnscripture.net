@@ -1545,11 +1545,14 @@ var learnscripture = (function (learnscripture, $) {
 
         $('.current-verse').hide(); // Hide until set up
         $('#id-verse-title').text(verseStatus.title_text);
-        if (verseStatus.version.text_type == TEXT_TYPE_BIBLE) {
-            $('#id-version-select').show().val(verseStatus.version.slug);
-        } else {
-            $('#id-version-select').hide();
+
+        var version = verseStatus.version;
+        var copyrightNotice = escapeHtml(version.short_name + " - " + version.full_name);
+        if (version.url != "") {
+            copyrightNotice = '<a href="' + escapeHtml(version.url) + '">' + copyrightNotice + '</a>';
         }
+        $('#id-copyright-notice').html(copyrightNotice);
+
         // convert newlines to divs
         markupVerse(verseStatus);
         $('#id-loading').hide();
@@ -1908,31 +1911,6 @@ var learnscripture = (function (learnscripture, $) {
         }
     };
 
-    var versionSelectChanged = function (ev) {
-        if (currentStage.testMode && testingMethodStrategy != null) {
-            testingMethodStrategy.testTearDown();
-        }
-        $.ajax({
-            url: '/api/learnscripture/v1/changeversion/?format=json',
-            dataType: 'json',
-            type: 'POST',
-            data: {
-                verse_status: JSON.stringify(currentVerseStatus, null, 2),
-                new_version_slug: $('#id-version-select').val()
-            },
-            success: function () {
-                // We pretend there is no 'old verse' if we changed
-                // version, to avoid the complications with moving the
-                // old verse.
-                currentVerseStatus = null;
-                // Any number of verses could have changed (if it was
-                // part of a passage), so we must reload everything.
-                loadVerses(loadCurrentVerse);
-            },
-            error: learnscripture.ajaxFailed
-        });
-    };
-
     var skipVerse = function (ev) {
         ev.preventDefault();
         $.ajax({
@@ -2059,7 +2037,6 @@ var learnscripture = (function (learnscripture, $) {
                 testingMethodStrategy.getHint();
             }
         });
-        $('#id-version-select').change(versionSelectChanged);
         fastEventBind($('#id-help-btn'), function (ev) {
             if (preferences.enableAnimations) {
                 $('#id-help').toggle('fast');
