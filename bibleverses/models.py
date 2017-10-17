@@ -806,10 +806,10 @@ class UserVerseStatus(models.Model):
 #
 # This is significantly complicated by several factors:
 #
-# * We sometimes often want to fetch in bulk - for example,
-#   when starting a learning session for a set of UserVerseStatuses
-#   and sometimes just want a single 'thing'. This results in many functions
-#   having two versions, bulk and non-bulk for efficiency.
+# * We sometimes want to fetch in bulk - for example, when starting a learning
+#   session for a set of UserVerseStatuses - and sometimes just want a single
+#   'thing'. This results in many functions having two versions, bulk and
+#   non-bulk for efficiency.
 #
 # * We sometimes want to parse verse references loosely (e.g. from non-canonical
 #   user entered data)
@@ -822,12 +822,13 @@ class UserVerseStatus(models.Model):
 #     verses together e.g. TCL02 Romalılar 3:25-26.
 #   - Missing verses - where the translation doesn't have a certain verse.
 #
-# * We many need to tolerate some incorrectness in requested references e.g. not
-#   accounting for merged verses in underlying translation.
+# * We may need to tolerate some incorrectness in requested references e.g. not
+#   accounting for merged verses in underlying translation, and do something
+#   sensible.
 #
 # * For some TextVersions we don't store the whole text locally due to license
 #   agreements. We only have a limited local cache and must get the remainder
-#   from a service (but avoid doing so wherever possible)
+#   from a service (but avoid doing so wherever possible).
 #
 # * And then the combination of all these (e.g. merged verses and combo verses)
 #   with the edge cases, combined with trying to get data efficiently with the
@@ -846,7 +847,7 @@ def fetch_parsed_reference(version, parsed_ref, max_length=MAX_VERSE_QUERY_SIZE)
     Fetch the ParsedReference from the DB, return
     as a list of Verse objects.
 
-    If references that are incorrect due to merged verses will be automatically
+    References that are incorrect due to merged verses will be automatically
     corrected.
 
     If otherwise incorrect, InvalidVerseReference will be raised
@@ -878,7 +879,7 @@ def fetch_parsed_reference(version, parsed_ref, max_length=MAX_VERSE_QUERY_SIZE)
         # able to do things like 'John 5:3-4' even if 'John 5:4' is
         # missing in the current version.
         # We also need to handle merged verses, which are marked as 'missing=True'.
-        # We just miss out the missing verses when creating the list.
+        # So we just miss out the missing verses later when creating the list.
         vs = version.verse_set.filter(localized_reference__in=[ref_start, ref_end])
         try:
             verse_start = [v for v in vs if v.localized_reference == ref_start][0]
@@ -929,7 +930,7 @@ def fetch_localized_reference_bulk(version, language_code,
                                    localized_reference_list,
                                    fetch_text=True):
     """
-    Returns a dictionary {ref: Verse or ComboVerse} for refs matching the request references.
+    Returns a dictionary {ref: Verse or ComboVerse} for refs matching the requested references.
     Missing references will be silently discarded.
     Incorrect refs due to merged verses will be corrected.
     """
