@@ -584,8 +584,8 @@ class ParsingTests(unittest2.TestCase):
                              output,
                              "Failure parsing '{0}'".format(ref))
 
-        self.assertEqual(normalize_reference_input_turkish('  ÂâİIiıÇçŞşöü  '),
-                         'aaiiiiccssou')
+        self.assertEqual(normalize_reference_input_turkish('  ÂâİIiıÇçŞşöüğĞ  '),
+                         'aaiiiiccssougg')
 
 
 class MockUVS(object):

@@ -1249,8 +1249,28 @@ var learnscripture = (function (learnscripture, $) {
 
     // -----------------------
     var normalizeWordForTest = function (str) {
-        return stripPunctuation(str.trim().toLowerCase());
+        return simplifyTurkish(stripPunctuation(str.trim().toLowerCase()));
     }
+
+    var simplifyTurkish = function (str) {
+        // People normally type Turkish without attention for correct dots etc.
+        // so we tolerate that.
+        return (str
+                .replace(/Â/g, "A")
+                .replace(/â/g, "a")
+                .replace(/Ç/g, "C")
+                .replace(/ç/g, "c")
+                .replace(/Ğ/g, "G")
+                .replace(/ğ/g, "g")
+                .replace(/İ/g, "I")
+                .replace(/ı/g, "i")
+                .replace(/Ö/g, "O")
+                .replace(/ö/g, "o")
+                .replace(/Ş/g, "S")
+                .replace(/ş/g, "ş")
+                .replace(/Ü/g, "U")
+                .replace(/ü/g, "u"))
+    };
 
     var normalizeWordForSuggestion = function (str) {
         return stripOuterPunctuation(str.trim().toLowerCase());
