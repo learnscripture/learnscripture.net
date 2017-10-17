@@ -3,8 +3,9 @@ from parsy import ParseError, char_from, generate, regex, string, string_from, w
 
 from learnscripture.utils.cache import memoize_function
 
-from .books import get_bible_book_abbreviation_map, get_bible_book_number, get_bible_books, is_single_chapter_book
-from .languages import normalize_reference_input
+from .books import (get_bible_book_abbreviation_map, get_bible_book_name, get_bible_book_number, get_bible_books,
+                    is_single_chapter_book)
+from .languages import LANGUAGE_CODE_INTERNAL, normalize_reference_input
 
 
 @attr.s
@@ -17,6 +18,9 @@ class ParsedReference(object):
     end_verse = attr.ib(default=None)
 
     def __attrs_post_init__(self):
+        self.book_number = get_bible_book_number(self.language_code, self.book_name)
+        self.internal_book_name = get_bible_book_name(LANGUAGE_CODE_INTERNAL, self.book_number)
+
         # Normalize to a form where every ParsedReference is potentially a
         # range. This means we can treat ranges and single verses uniformly.
         if is_single_chapter_book(self.book_number):
@@ -57,10 +61,6 @@ class ParsedReference(object):
                    start_verse=start.start_verse,
                    end_chapter=end.end_chapter,
                    end_verse=end.end_verse)
-
-    @property
-    def book_number(self):
-        return get_bible_book_number(self.language_code, self.book_name)
 
     def is_whole_book(self):
         return (self.start_chapter is None or

@@ -33,11 +33,21 @@ var learnscripture =
             });
             $('#id-verse-list').show();
             var ref = passageData.localized_reference;
+            var simplifiedRef = ref;
+            var parsedRef = passageData.parsed_ref;
+            if (parsedRef !== null) {
+                if (parsedRef.start_chapter == parsedRef.end_chapter &&
+                    parsedRef.start_verse == 1 &&
+                    parsedRef.end_verse == BIBLE_BOOK_INFO[parsedRef.internal_book_name]['verse_counts'][parsedRef.start_chapter.toString()]) {
+                    // Whole chapter. Special case to make name nicer.
+                    simplifiedRef = parsedRef.book_name + " " + parsedRef.start_chapter.toString();
+                }
+            }
             var currentName = $('#id_name').val().trim();
             if (currentName === "" || currentName === previousPassageRef) {
-                $('#id_name').val(ref);
+                $('#id_name').val(simplifiedRef);
             }
-            previousPassageRef = ref;
+            previousPassageRef = simplifiedRef;
         };
 
         var deleteButtonClick = function (ev) {
