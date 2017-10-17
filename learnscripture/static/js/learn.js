@@ -1277,12 +1277,12 @@ var learnscripture = (function (learnscripture, $) {
     }
 
     var stripPunctuation = function (str) {
-        return str.replace(/["'\.,;!?:\/#!$%\^&\*{}=\-_`~()\[\]]/g, "");
+        return str.replace(/["'\.,;!?:\/#!$%\^&\*{}=\-_`~()\[\]“”‘’—]/g, "");
     };
 
     var stripOuterPunctuation = function (str) {
-        return str.replace(/^["'\.,;!?:\/#!$%\^&\*{}=\-_`~()\[\]]+/g, "")
-                   .replace(/["'\.,;!?:\/#!$%\^&\*{}=\-_`~()\[\]]+$/g, "");
+        return str.replace(/^["'\.,;!?:\/#!$%\^&\*{}=\-_`~()\[\]“”‘’—]+/g, "")
+                   .replace(/["'\.,;!?:\/#!$%\^&\*{}=\-_`~()\[\]“”‘’—]+$/g, "");
     }
 
     var moveOn = function () {
