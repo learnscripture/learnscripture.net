@@ -585,7 +585,8 @@ class VerseSet(models.Model):
 
     @property
     def breaks_formatted(self):
-        return self.breaks.replace(",", ", ")
+        return ", ".join("{0}:{1}".format(pr.start_chapter, pr.start_verse)
+                         for pr in parse_break_list(self.breaks))
 
     def set_verse_choices(self, internal_reference_list):
         existing_vcs = self.verse_choices.all()
