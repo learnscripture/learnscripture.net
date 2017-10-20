@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import time
 from datetime import timedelta
 
@@ -6,10 +7,13 @@ from django.utils import timezone
 
 import accounts.memorymodel
 from awards.models import AwardType
-from bibleverses.models import MemoryStage, StageType, TextVersion, Verse, VerseChoice, VerseSet, WordSuggestionData
+from bibleverses.languages import LANGUAGE_CODE_EN
+from bibleverses.models import (MemoryStage, StageType, TextVersion, Verse, VerseChoice, VerseSet, VerseSetType,
+                                WordSuggestionData)
+from bibleverses.parsing import internalize_localized_reference
 from events.models import Event, EventType
 
-from .base import AccountTestMixin, FuzzyInt, TestBase
+from .base import AccountTestMixin, FuzzyInt, TestBase, get_or_create_any_account
 from .test_bibleverses import RequireExampleVerseSetsMixin
 
 
@@ -41,6 +45,31 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
             # session.set_verse_statuses will use all these:
             [(uvs.localized_reference, uvs.verse_set_id)
              for uvs in uvss]
+
+    def test_add_verse_set_passage_with_merged(self):
+        i = self.create_identity(version_slug='TCL02')
+        vs = VerseSet.objects.create(created_by=get_or_create_any_account(),
+                                     set_type=VerseSetType.PASSAGE,
+                                     name='Romans 3:24-27')
+        # Romans 3:25-26 is merged in TCL02
+        for so, ref in enumerate(['Romans 3:24',
+                                  'Romans 3:25',
+                                  'Romans 3:26',
+                                  'Romans 3:27']):
+            vs.verse_choices.create(
+                internal_reference=internalize_localized_reference(LANGUAGE_CODE_EN, ref),
+                set_order=so)
+
+        created = i.add_verse_set(vs)
+        self.assertEqual(len(created), 3)
+
+        uvss = i.verse_statuses.all()
+        self.assertEqual(len(uvss), 3)
+
+        self.assertEqual(set(u.localized_reference for u in uvss),
+                         set(["Romalılar 3:24",
+                              "Romalılar 3:25-26",
+                              "Romalılar 3:27"]))
 
     def test_record_read(self):
         i = self.create_identity(version_slug='NET')
@@ -284,7 +313,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
     def test_get_next_section(self):
         i = self.create_identity(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Psalm 23')
-        vs1.breaks = "3,5"  # break at v3 and v5 - unrealistic!
+        vs1.breaks = "BOOK18 23:3,BOOK18 23:5"  # break at v3 and v5 - unrealistic!
         vs1.save()
         i.add_verse_set(vs1)
 
@@ -378,7 +407,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
     def test_slim_passage_for_reviewing(self):
         i = self.create_identity(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Psalm 23')
-        vs1.breaks = "3,5"  # break at v3 and v5
+        vs1.breaks = "BOOK18 23:3,BOOK18 23:5"  # break at v3 and v5
         vs1.save()
         i.add_verse_set(vs1)
 
@@ -414,6 +443,46 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
                 d = i.get_verse_statuses_bulk([uvs.id for uvs in uvss])
                 self.assertEqual(d[uvss[1].id].localized_reference, uvss[1].localized_reference)
                 [uvs.scoring_text_words for uvs in d.values()]
+
+    def test_add_verse_choice(self):
+        i = self.create_identity()
+        uvs1 = i.add_verse_choice('Psalm 23:1')
+        self.assertEqual(uvs1.localized_reference, 'Psalm 23:1')
+        self.assertEqual([uvs.localized_reference for uvs in i.verse_statuses.all()],
+                         ['Psalm 23:1'])
+        # Second add:
+        uvs2 = i.add_verse_choice('Psalm 23:1')
+        self.assertEqual(uvs1, uvs2)
+
+    def test_add_verse_choice_combo(self):
+        i = self.create_identity()
+        uvs1 = i.add_verse_choice('Psalm 23:1-2')
+        self.assertEqual(uvs1.localized_reference, 'Psalm 23:1-2')
+        self.assertEqual([uvs.localized_reference for uvs in i.verse_statuses.all()],
+                         ['Psalm 23:1-2'])
+        # Second add:
+        uvs2 = i.add_verse_choice('Psalm 23:1-2')
+        self.assertEqual(uvs1, uvs2)
+
+    def test_add_verse_choice_merged(self):
+        i = self.create_identity(version_slug='TCL02')
+        uvs1 = i.add_verse_choice('Romalılar 3:25')
+        self.assertEqual(uvs1.localized_reference, 'Romalılar 3:25-26')
+        self.assertEqual([uvs.localized_reference for uvs in i.verse_statuses.all()],
+                         ['Romalılar 3:25-26'])
+        # Second add:
+        uvs2 = i.add_verse_choice('Romalılar 3:25')
+        self.assertEqual(uvs1, uvs2)
+
+    def test_add_verse_choice_merged_and_combo(self):
+        i = self.create_identity(version_slug='TCL02')
+        uvs1 = i.add_verse_choice('Romalılar 3:24-25')
+        self.assertEqual(uvs1.localized_reference, 'Romalılar 3:24-26')
+        self.assertEqual([uvs.localized_reference for uvs in i.verse_statuses.all()],
+                         ['Romalılar 3:24-26'])
+        # Second add:
+        uvs2 = i.add_verse_choice('Romalılar 3:24-25')
+        self.assertEqual(uvs1, uvs2)
 
     def test_add_verse_choice_copies_strength(self):
         i = self.create_identity(version_slug='NET')
@@ -499,11 +568,11 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         vs1 = VerseSet.objects.get(name='Psalm 23')
 
         # Change it so that it misses the last verse
-        vs1.set_verse_choices(["Psalm 23:1",
-                               "Psalm 23:2",
-                               "Psalm 23:3",
-                               "Psalm 23:4",
-                               "Psalm 23:5"])
+        vs1.set_verse_choices(["BOOK18 23:1",
+                               "BOOK18 23:2",
+                               "BOOK18 23:3",
+                               "BOOK18 23:4",
+                               "BOOK18 23:5"])
 
         # Now add it
         i.add_verse_set(vs1)
@@ -520,7 +589,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         i.add_verse_choice('Psalm 23:6')
 
         # Add the verse back to the set
-        VerseChoice.objects.create(localized_reference="Psalm 23:6",
+        VerseChoice.objects.create(internal_reference="BOOK18 23:6",
                                    verse_set=vs1,
                                    set_order=6)
 

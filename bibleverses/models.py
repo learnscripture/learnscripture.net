@@ -13,14 +13,15 @@ from django.utils.functional import cached_property
 from jsonfield import JSONField
 
 from accounts import memorymodel
-from learnscripture.datastructures import make_choices
+from learnscripture.datastructures import make_choices, lazy_dict_like
 from learnscripture.utils.iterators import intersperse
 
 from .books import get_bible_book_name, get_bible_book_number
 from .fields import VectorField
 from .languages import DEFAULT_LANGUAGE, LANGUAGE_CHOICES, LANGUAGE_CODE_EN, LANGUAGE_CODE_TR, normalize_reference_input
-from .parsing import (InvalidVerseReference, ParsedReference, parse_break_list, parse_unvalidated_localized_reference,
-                      parse_validated_localized_reference)
+from .parsing import (InvalidVerseReference, ParsedReference, internalize_localized_reference,
+                      localize_internal_reference, parse_break_list, parse_unvalidated_localized_reference,
+                      parse_validated_internal_reference, parse_validated_localized_reference)
 from .services import get_fetch_service, get_search_service
 from .textutils import split_into_words
 
@@ -368,6 +369,10 @@ class Verse(models.Model):
         """
         return self.version
 
+    @cached_property
+    def internal_reference(self):
+        return internalize_localized_reference(self.version.language_code, self.localized_reference)
+
 
 SUGGESTION_COUNT = 10
 
@@ -536,7 +541,8 @@ SELECT COUNT(*) FROM
         except InvalidVerseReference:
             return verse_sets.none()
         if parsed_ref is not None:
-            return verse_sets.filter(verse_choices__localized_reference=parsed_ref.canonical_form())
+            return verse_sets.filter(
+                verse_choices__internal_reference=parsed_ref.to_internal().canonical_form())
         else:
             return verse_sets.filter(name__icontains=query)
 
@@ -581,11 +587,11 @@ class VerseSet(models.Model):
     def breaks_formatted(self):
         return self.breaks.replace(",", ", ")
 
-    def set_verse_choices(self, localized_reference_list):
+    def set_verse_choices(self, internal_reference_list):
         existing_vcs = self.verse_choices.all()
-        existing_vcs_dict = dict((vc.localized_reference, vc) for vc in existing_vcs)
+        existing_vcs_dict = dict((vc.internal_reference, vc) for vc in existing_vcs)
         old_vcs = set(existing_vcs)
-        for i, ref in enumerate(localized_reference_list):  # preserve order
+        for i, ref in enumerate(internal_reference_list):  # preserve order
             dirty = False
             if ref in existing_vcs_dict:
                 vc = existing_vcs_dict[ref]
@@ -595,7 +601,7 @@ class VerseSet(models.Model):
                 old_vcs.remove(vc)
             else:
                 vc = VerseChoice(verse_set=self,
-                                 localized_reference=ref,
+                                 internal_reference=ref,
                                  set_order=i)
                 dirty = True
             if dirty:
@@ -610,7 +616,10 @@ class VerseSet(models.Model):
     def update_passage_id(self):
         if self.is_passage:
             verse_choices = list(self.verse_choices.all())
-            self.passage_id = verse_choices[0].localized_reference + ' - ' + verse_choices[-1].localized_reference
+            self.passage_id = ParsedReference.from_start_and_end(
+                parse_validated_internal_reference(verse_choices[0].internal_reference),
+                parse_validated_internal_reference(verse_choices[-1].internal_reference)
+            ).canonical_form()
             self.save()
 
 
@@ -623,7 +632,7 @@ class VerseChoiceManager(models.Manager):
 # Note that VerseChoice and Verse are not related, since we want a VerseChoice
 # to be independent of Bible version.
 class VerseChoice(models.Model):
-    localized_reference = models.CharField(max_length=100)
+    internal_reference = models.CharField(max_length=100)
     verse_set = models.ForeignKey(VerseSet, on_delete=models.CASCADE,
                                   related_name='verse_choices')
     set_order = models.PositiveSmallIntegerField(default=0)
@@ -631,14 +640,24 @@ class VerseChoice(models.Model):
     objects = VerseChoiceManager()
 
     class Meta:
-        unique_together = [('verse_set', 'localized_reference')]
+        unique_together = [
+            ('verse_set', 'internal_reference'),
+        ]
         base_manager_name = 'objects'
 
     def __str__(self):
-        return self.localized_reference
+        return self.internal_reference
 
     def __repr__(self):
         return '<VerseChoice %s>' % self
+
+    def get_localized_reference(self, language_code):
+        return localize_internal_reference(language_code, self.internal_reference)
+
+    # For use in templates:
+    @lazy_dict_like
+    def localized_reference_dict(self, language_code):
+        return self.get_localized_reference(language_code)
 
 
 class UserVerseStatus(models.Model):
@@ -749,14 +768,14 @@ class UserVerseStatus(models.Model):
         """
         if not self.is_in_passage():
             return None
-        verse_choices = self.set_verse_choices
+        verse_choices = self.verse_set_choices
         return pretty_passage_ref(
             self.version.language_code,
-            verse_choices[0].localized_reference,
-            verse_choices[-1].localized_reference)
+            verse_choices[0].internal_reference,
+            verse_choices[-1].internal_reference)
 
     @cached_property
-    def set_verse_choices(self):
+    def verse_set_choices(self):
         return list(self.verse_set.verse_choices.all())
 
     @cached_property
@@ -771,19 +790,20 @@ class UserVerseStatus(models.Model):
         if section is not None:
             return pretty_passage_ref(
                 self.version.language_code,
-                section[0].localized_reference,
-                section[-1].localized_reference)
+                section[0].internal_reference,
+                section[-1].internal_reference)
         return None  # Shouldn't get here
 
     def get_section_verse_choices(self):
         # Split verse set into sections
-        sections = get_passage_sections(self.version.language_code,
-                                        self.set_verse_choices, self.verse_set.breaks)
+        language_code = self.version.language_code
+        sections = get_passage_sections(language_code,
+                                        self.verse_set_choices, self.verse_set.breaks)
 
         # Now we've got to find which one we are in:
         for section in sections:
             for vc in section:
-                if vc.localized_reference == self.localized_reference:
+                if vc.get_localized_reference(language_code) == self.localized_reference:
                     return section
 
     # This will be overwritten by get_verse_statuses_bulk
@@ -1033,11 +1053,11 @@ def ensure_text(verses):
             v.save()
 
 
-def pretty_passage_ref(language_code, start_ref, end_ref):
+def pretty_passage_ref(language_code, internal_start_ref, internal_end_ref):
     return ParsedReference.from_start_and_end(
-        parse_validated_localized_reference(language_code, start_ref),
-        parse_validated_localized_reference(language_code, end_ref)
-    ).canonical_form()
+        parse_validated_internal_reference(internal_start_ref),
+        parse_validated_internal_reference(internal_end_ref)
+    ).translate_to(language_code).canonical_form()
 
 
 def normalized_verse_list_ref(language_code, verse_list):
@@ -1052,14 +1072,13 @@ def normalized_verse_list_ref(language_code, verse_list):
 
 def get_passage_sections(language_code, verse_list, breaks):
     """
-    Given a list of objects with a correct 'localized_reference' attribute, and a comma
-    separated list of 'break definitions', return the list in sections.
+    Given a list of objects with either a correct 'localized_reference' or
+    'internal_reference' attribute, and a break list (a comma separated list of
+    internal references), return the list in sections.
     """
     # Break definitions:
     # Legacy: <verse_number>  or <chapter_number>:<verse_number>
-    # New: canonical reference in the language.
-    #   TODO - This means passage breaks won't work for versions in other languages,
-    #     we need to fix this to be language agnostic
+    # New: canonical internal reference
 
     # TODO - currently this has been modified to accept language_code, purely so
     # that we can pass it to parse_break_list. However, different grouping of
@@ -1075,14 +1094,16 @@ def get_passage_sections(language_code, verse_list, breaks):
     if breaks == '':
         return [verse_list]
 
-    break_ref_list = [p.get_start() for p in parse_break_list(language_code, breaks,
-                                                              first_verse=verse_list[0])]
+    break_ref_list = [p.get_start() for p in parse_break_list(breaks)]
 
     sections = []
     current_section = []
     for v in verse_list:
-        parsed_ref = parse_validated_localized_reference(
-            language_code, v.localized_reference)
+        if hasattr(v, 'internal_reference'):
+            parsed_ref = parse_validated_internal_reference(v.internal_reference)
+        else:
+            parsed_ref = parse_validated_localized_reference(
+                language_code, v.localized_reference).to_internal()
         start_ref = parsed_ref.get_start()
         if start_ref in break_ref_list and len(current_section) > 0:
             # Start new section

@@ -53,14 +53,35 @@ class ParsedReference(object):
                     retval += "-{0}".format(self.end_verse)
         return retval
 
+    def _clone(self, **kwargs):
+        self_kwargs = dict(
+            language_code=self.language_code,
+            book_name=self.book_name,
+            start_chapter=self.start_chapter,
+            start_verse=self.start_verse,
+            end_chapter=self.end_chapter,
+            end_verse=self.end_verse,
+        )
+        self_kwargs.update(kwargs)
+        return ParsedReference(**self_kwargs)
+
+    def translate_to(self, language_code):
+        return self._clone(
+            language_code=language_code,
+            book_name=get_bible_book_name(language_code, self.book_number),
+        )
+
+    def to_internal(self):
+        return self.translate_to(LANGUAGE_CODE_INTERNAL)
+
     @classmethod
-    def from_start_and_end(cls, start, end):
-        return cls(language_code=start.language_code,
-                   book_name=start.book_name,
-                   start_chapter=start.start_chapter,
-                   start_verse=start.start_verse,
-                   end_chapter=end.end_chapter,
-                   end_verse=end.end_verse)
+    def from_start_and_end(cls, start_parsed_ref, end_parsed_ref):
+        return cls(language_code=start_parsed_ref.language_code,
+                   book_name=start_parsed_ref.book_name,
+                   start_chapter=start_parsed_ref.start_chapter,
+                   start_verse=start_parsed_ref.start_verse,
+                   end_chapter=end_parsed_ref.end_chapter,
+                   end_verse=end_parsed_ref.end_verse)
 
     def is_whole_book(self):
         return (self.start_chapter is None or
@@ -79,21 +100,15 @@ class ParsedReference(object):
         if self.is_single_verse():
             return self
         else:
-            return ParsedReference(
-                language_code=self.language_code,
-                book_name=self.book_name,
-                start_chapter=self.start_chapter,
-                start_verse=self.start_verse)
+            return self._clone(end_chapter=self.start_chapter,
+                               end_verse=self.start_verse)
 
     def get_end(self):
         if self.is_single_verse():
             return self
         else:
-            return ParsedReference(
-                language_code=self.language_code,
-                book_name=self.book_name,
-                start_chapter=self.end_chapter,
-                start_verse=self.end_verse)
+            return self._clone(start_chapter=self.end_chapter,
+                               start_verse=self.end_verse)
 
 
 class InvalidVerseReference(ValueError):
@@ -261,6 +276,10 @@ def parse_validated_localized_reference(language_code, localized_reference):
                 str(e)))
 
 
+def parse_validated_internal_reference(internal_reference):
+    return parse_validated_localized_reference(LANGUAGE_CODE_INTERNAL, internal_reference)
+
+
 def parse_unvalidated_localized_reference(language_code, localized_reference,
                                           allow_whole_book=True, allow_whole_chapter=True):
     """
@@ -294,48 +313,23 @@ def parse_unvalidated_localized_reference(language_code, localized_reference,
     return parsed_ref
 
 
-def parse_break_list(language_code, breaks, first_verse=None):
+def localize_internal_reference(language_code, internal_reference):
+    return parse_validated_internal_reference(internal_reference).translate_to(language_code).canonical_form()
+
+
+def internalize_localized_reference(language_code, localized_reference):
+    return parse_validated_localized_reference(language_code, localized_reference).to_internal().canonical_form()
+
+
+def parse_break_list(breaks):
     """
-    Parse a comma separated list of references, or raise a ValueError for failure.
+    Parse a break list, which is a comma separated list of internal references, or raise a ValueError for failure.
     """
-    # breaks is a common separated list of references, created in create.js
-    bible_ref = bible_reference_parser_for_lang(language_code, True)
-    bible_ref_list = bible_ref.sep_by(string(","), min=1)
-    parser = bible_ref_list
-    if first_verse is not None:
-        # Legacy format
-        legacy_break_list = ((regex("[0-9]+").map(int)
-                              .sep_by(string(":"), min=1, max=2))
-                             .sep_by(string(",")))
-        parser = parser | legacy_break_list
+    # breaks is a common separated list of internal references, created in create.js
     try:
-        ref_list = parser.parse(breaks)
-        if first_verse is not None:
-            # legacy processing
-            retval = []
-            first_parsed_ref = parse_validated_localized_reference(language_code,
-                                                                   first_verse.localized_reference)
-            current_chapter = first_parsed_ref.start_chapter
-            current_verse = first_parsed_ref.start_verse
-            for item in ref_list:
-                if isinstance(item, ParsedReference):
-                    retval.append(item)
-                else:
-                    assert isinstance(item, list)
-                    if len(item) == 1:
-                        # Verse number
-                        current_verse = item[0]
-                    else:
-                        current_chapter, current_verse = item
-                    new_item = ParsedReference(language_code=language_code,
-                                               book_name=first_parsed_ref.book_name,
-                                               start_chapter=current_chapter,
-                                               start_verse=current_verse)
-                    retval.append(new_item)
-            return retval
-        else:
-            return ref_list
+        return (bible_reference_parser_for_lang(LANGUAGE_CODE_INTERNAL, True)
+                .sep_by(string(","))).parse(breaks)
 
     except ParseError as e:
-        raise ValueError("'{0}' is not a valid list of Bible references in language {1}"
-                         .format(breaks, language_code))
+        raise ValueError("'{0}' is not a valid list of internal Bible references"
+                         .format(breaks))

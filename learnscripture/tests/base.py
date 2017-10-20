@@ -47,6 +47,9 @@ def create_account(version_slug='KJV',
                    email="test1@test.com",
                    username="tëst1",
                    is_active=True):
+    """
+    Creates an account, returning (identity, account) tuple
+    """
     account = Account.objects.create(email=email,
                                      username=username,
                                      last_login=timezone.now(),
@@ -82,6 +85,9 @@ class AccountTestMixin(object):
         return create_identity(**kwargs)
 
     def create_account(self, **kwargs):
+        """
+        Creates an account, returning (identity, account) tuple
+        """
         return create_account(**kwargs)
 
     def create_account_interactive(self,

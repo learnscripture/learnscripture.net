@@ -56,28 +56,28 @@ var learnscripture =
         };
 
         var selectionSaveBtnClick = function (ev) {
-            // Create hidden fields with all localized_references
+            // Create hidden fields with all internal_references
             var refs = [];
-            $('#id-verse-list td:first-child').each(function (idx, elem) {
-                refs.push($(elem).text());
+            $('#id-verse-list tr[data-internal-reference]').each(function (idx, elem) {
+                refs.push($(elem).attr('data-internal-reference'));
             });
-            $('#id-localized-reference-list').val(refs.join('|'));
+            $('#id-internal-reference-list').val(refs.join('|'));
             $('#id-verse-set-form').submit();
         };
 
         var passageSaveBtnClick = function (ev) {
-            // Create hidden fields with all localized_references
+            // Create hidden fields with all internal_references
             var refs = [];
             var breaks = [];
-            $('#id-verse-list tbody tr').each(function (idx, elem) {
-                var row = $(elem);
-                var ref = $(row.find('td').get(1)).text();
+            $('#id-verse-list tbody tr[data-internal-reference]').each(function (idx, elem) {
+                var $row = $(elem);
+                var ref = $row.attr('data-internal-reference');
                 refs.push(ref);
-                if (row.find('input').attr('checked') === 'checked') {
+                if ($row.find('input').attr('checked') === 'checked') {
                     breaks.push(ref);
                 }
             });
-            $('#id-localized-reference-list').val(refs.join('|'));
+            $('#id-internal-reference-list').val(refs.join('|'));
             $('#id-break-list').val(breaks.join(','));
             // continue with submit
         };

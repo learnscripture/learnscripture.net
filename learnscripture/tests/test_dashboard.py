@@ -138,7 +138,7 @@ class DashboardTestsBase(RequireExampleVerseSetsMixin):
 
         # Add a passage
         vs = VerseSet.objects.get(slug='psalm-23')
-        vs.breaks = "23:4"
+        vs.breaks = "BOOK18 23:4"
         vs.save()
         i.add_verse_set(vs)
 

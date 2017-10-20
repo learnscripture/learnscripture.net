@@ -3,6 +3,7 @@ import csv
 import urllib.parse
 from datetime import date, timedelta
 
+import attr
 import django.contrib.auth
 from django.conf import settings
 from django.contrib import messages
@@ -31,6 +32,7 @@ from bibleverses.languages import LANGUAGES, LANGUAGE_CODE_INTERNAL
 from bibleverses.forms import VerseSetForm
 from bibleverses.models import (MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, TextType, TextVersion, VerseSet,
                                 VerseSetType, get_passage_sections)
+from bibleverses.parsing import internalize_localized_reference, localize_internal_reference
 from bibleverses.signals import public_verse_set_created
 from events.models import Event
 from groups.forms import EditGroupForm
@@ -522,6 +524,7 @@ def choose(request):
         verse_sets = verse_sets.order_by('-popularity')
     c['verse_sets'] = verse_sets
     c['active_tab'] = 'verseset'
+    c['default_bible_version'] = default_bible_version
 
     c.update(context_for_quick_find(request))
 
@@ -624,9 +627,33 @@ def verse_sets_visible_for_request(request):
 
 
 def is_continuous_set(verse_list):
+    # TODO - logic needs fixing for merged verses.
     bvns = [v.bible_verse_number for v in verse_list]
     return bvns == list(range(verse_list[0].bible_verse_number,
                               verse_list[-1].bible_verse_number + 1))
+
+
+def get_verse_set_verse_list(version, verse_set):
+    language_code = version.language_code
+
+    verse_choices = list(verse_set.verse_choices.all())
+    all_localized_references = [localize_internal_reference(language_code,
+                                                            vc.internal_reference)
+                                for vc in verse_choices]
+    verses = version.get_verses_by_localized_reference_bulk(all_localized_references)
+
+    # Decorate verses with break information.
+    verse_list = sorted(verses.values(), key=lambda v: v.bible_verse_number)
+    verse_list = add_passage_breaks(language_code, verse_list, verse_set.breaks)
+
+    retval = []
+    # Decorate the verse choices with the text and reference
+    for vc in verse_choices:
+        localized_ref = localize_internal_reference(language_code, vc.internal_reference)
+        if localized_ref in verses:
+            retval.append(verses[localized_ref])
+
+    return retval
 
 
 def view_verse_set(request, slug):
@@ -644,21 +671,9 @@ def view_verse_set(request, slug):
             version = request.identity.default_bible_version
         else:
             version = get_default_bible_version()
-    language_code = version.language_code
 
-    # Decorate the verse choices with the text.
-    verse_choices = list(verse_set.verse_choices.all())
-    all_localized_references = [vc.localized_reference for vc in verse_choices]
-    verses = version.get_verses_by_localized_reference_bulk(all_localized_references)
-
-    # Decorate verses with break information.
-    verse_list = sorted(verses.values(), key=lambda v: v.bible_verse_number)
-    verse_list = add_passage_breaks(language_code, verse_list, verse_set.breaks)
-
-    for vc in verse_choices:
-        # vc.localized_reference can be missing from verses if Verse.missing==True for
-        # this version.
-        vc.verse = verses.get(vc.localized_reference, None)
+    verse_list = get_verse_set_verse_list(version, verse_set)
+    all_localized_references = [v.localized_reference for v in verse_list]
 
     if (verse_set.is_selection and
             len(verse_list) > 1 and is_continuous_set(verse_list)):
@@ -693,7 +708,7 @@ def view_verse_set(request, slug):
         c['in_queue'] = 0
 
     c['verse_set'] = verse_set
-    c['verse_choices'] = [vc for vc in verse_choices if vc.verse is not None]
+    c['verse_list'] = verse_list
     c['version'] = version
     c['title'] = "Verse set: %s" % verse_set.name
     c.update(context_for_version_select(request))
@@ -766,13 +781,24 @@ def create_or_edit_set(request, set_type=None, slug=None):
         form = VerseSetForm(request.POST, instance=verse_set)
         # Need to propagate the references even if it doesn't validate,
         # so do this work here:
-        localized_reference_list_raw = request.POST.get('localized_reference_list', '').split('|')
+        internal_reference_list_raw = [
+            i for i in request.POST.get('internal_reference_list', '').split('|')
+            if i
+        ]
+        localized_reference_list_raw = [localize_internal_reference(language_code, r)
+                                        for r in internal_reference_list_raw]
         verse_dict = version.get_verses_by_localized_reference_bulk(localized_reference_list_raw)
+
         # Dedupe localized_reference_list, and ensure correct references, while preserving order:
         localized_reference_list = []
         for ref in localized_reference_list_raw:
             if ref in verse_dict and ref not in localized_reference_list:
                 localized_reference_list.append(ref)
+
+        internal_reference_list = [
+            internalize_localized_reference(version.language_code, ref)
+            for ref in localized_reference_list
+        ]
 
         breaks = request.POST.get('break_list', '')
 
@@ -788,7 +814,7 @@ def create_or_edit_set(request, set_type=None, slug=None):
             tmp_verse_list = add_passage_breaks(
                 language_code,
                 mk_verse_list(localized_reference_list,
-                              version.get_verses_by_localized_reference_bulk(localized_reference_list_raw)),
+                              verse_dict),
                 breaks)
             if all(v.break_here for v in tmp_verse_list[1:]):
                 breaks = ""
@@ -803,7 +829,7 @@ def create_or_edit_set(request, set_type=None, slug=None):
                 # Can't undo:
                 verse_set.public = True
             verse_set.save()
-            verse_set.set_verse_choices(localized_reference_list)
+            verse_set.set_verse_choices(internal_reference_list)
 
             # if user just made it public or it is a new public verse set
             if (verse_set.public and (not orig_verse_set_public or
@@ -818,7 +844,8 @@ def create_or_edit_set(request, set_type=None, slug=None):
         form = VerseSetForm(instance=verse_set)
 
         if verse_set is not None:
-            localized_reference_list = [vc.localized_reference for vc in verse_set.verse_choices.all()]
+            localized_reference_list = [vc.get_localized_reference(language_code)
+                                        for vc in verse_set.verse_choices.all()]
             verse_dict = version.get_verses_by_localized_reference_bulk(localized_reference_list)
             breaks = verse_set.breaks
         else:

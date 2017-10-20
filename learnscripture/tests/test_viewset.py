@@ -3,13 +3,20 @@ from django.urls import reverse
 from accounts.models import Identity
 from bibleverses.models import VerseSet
 
-from .base import FullBrowserTest
+from .base import FullBrowserTest, WebTestBase
 from .test_bibleverses import RequireExampleVerseSetsMixin
 
 
-class ViewSetTests(RequireExampleVerseSetsMixin, FullBrowserTest):
+class ViewSetTestsBase(RequireExampleVerseSetsMixin):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
+
+    def trigger_version_change(self):
+        if self.is_full_browser_test:
+            # Automatically triggered, just:
+            self.wait_until_loaded('body')
+        else:
+            self.submit('#id-trigger-version-change')
 
     def test_change_version(self):
         identity, account = self.create_account()
@@ -20,8 +27,8 @@ class ViewSetTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.assertTextPresent("saith")
 
         self.fill({"#id-version-select": "NET"})
+        self.trigger_version_change()
 
-        self.wait_until_loaded('body')
         self.assertTextPresent("replied")
 
     def test_learn_selected_version(self):
@@ -33,8 +40,7 @@ class ViewSetTests(RequireExampleVerseSetsMixin, FullBrowserTest):
 
         self.get_literal_url(reverse('view_verse_set', kwargs=dict(slug=vs.slug)) +
                              "?version=NET")
-        self.wait_until_loaded('body')
-        self.click("input[value='Learn']")
+        self.submit("input[name=learn]")
 
         # Can use 'all' here because this is the first time we've chosen anything
         verse_statuses = identity.verse_statuses.all()
@@ -54,7 +60,7 @@ class ViewSetTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.assertTextPresent("You have %d verse(s) from this set in your queue" %
                                vs.verse_choices.count())
 
-        self.click("input[name='drop']")
+        self.submit("input[name='drop']")
 
         self.assertEqual(len(identity.bible_verse_statuses_for_learning(vs.id)),
                          0)
@@ -66,7 +72,16 @@ class ViewSetTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.get_url('view_verse_set', slug=vs.slug)
         # Default version is NET:
         self.assertTextPresent("Jesus replied")
+        self.assertTextPresent("John 14:6")
 
         # Shouldn't have created an Identity
 
         self.assertEqual(Identity.objects.exclude(id__in=[i.id for i in ids]).all().count(), 0)
+
+
+class ViewSetTestsFB(ViewSetTestsBase, FullBrowserTest):
+    pass
+
+
+class ViewSetTestsWT(ViewSetTestsBase, WebTestBase):
+    pass

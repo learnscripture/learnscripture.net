@@ -57,11 +57,11 @@ class VerseCountTests(AccountTestMixin, TestBase):
         vs2 = VerseSet.objects.create(name="Psalm 23:1-2",
                                       set_type=VerseSetType.PASSAGE,
                                       created_by=account)
-        vs1.set_verse_choices(["Psalm 23:1",
-                               "Psalm 23:2",
-                               "Psalm 23:3"])
-        vs2.set_verse_choices(["Psalm 23:1",
-                               "Psalm 23:2"])
+        vs1.set_verse_choices(["BOOK18 23:1",
+                               "BOOK18 23:2",
+                               "BOOK18 23:3"])
+        vs2.set_verse_choices(["BOOK18 23:1",
+                               "BOOK18 23:2"])
 
         return vs1, vs2
 
