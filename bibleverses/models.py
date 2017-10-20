@@ -616,11 +616,17 @@ class VerseSet(models.Model):
     def update_passage_id(self):
         if self.is_passage:
             verse_choices = list(self.verse_choices.all())
-            self.passage_id = ParsedReference.from_start_and_end(
-                parse_validated_internal_reference(verse_choices[0].internal_reference),
-                parse_validated_internal_reference(verse_choices[-1].internal_reference)
-            ).canonical_form()
+            self.passage_id = make_verse_set_passage_id(
+                verse_choices[0].internal_reference,
+                verse_choices[-1].internal_reference)
             self.save()
+
+
+def make_verse_set_passage_id(start_internal_reference, end_internal_reference):
+    return ParsedReference.from_start_and_end(
+        parse_validated_internal_reference(start_internal_reference),
+        parse_validated_internal_reference(end_internal_reference),
+    ).canonical_form()
 
 
 class VerseChoiceManager(models.Manager):
