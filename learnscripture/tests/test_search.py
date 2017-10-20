@@ -48,9 +48,9 @@ class SearchTests(SearchTestsMixin, TestBase):
                                       set_type=VerseSetType.SELECTION,
                                       created_by=self.account)
         vs1.set_verse_choices([
-            "Genesis 1:1",
-            "Genesis 1:2",
-            "John 3:16",
+            "BOOK0 1:1",
+            "BOOK0 1:2",
+            "BOOK41 3:16",
         ])
 
         results = VerseSet.objects.search(LANGUAGE_CODE_EN,

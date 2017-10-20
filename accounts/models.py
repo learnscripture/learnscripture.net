@@ -16,7 +16,7 @@ from accounts import memorymodel
 from accounts.signals import (catechism_started, points_increase, scored_100_percent, verse_finished, verse_started,
                               verse_tested)
 from bibleverses.models import (InvalidVerseReference, MemoryStage, StageType, TextType, TextVersion, UserVerseStatus,
-                                VerseSet, VerseSetType, get_passage_sections)
+                                VerseSet, VerseSetType, get_passage_sections, normalized_verse_list_ref)
 from bibleverses.signals import verse_set_chosen
 from bibleverses.textutils import count_words
 from learnscripture.datastructures import make_choices
@@ -463,54 +463,26 @@ class Identity(models.Model):
         """
         if version is None:
             version = self.default_bible_version
+        language_code = version.language_code
 
         out = []
 
         vc_list = verse_set.verse_choices.all()
-        existing_uvss = set(self.verse_statuses.filter(verse_set=verse_set, version=version,
+        existing_uvss = set(self.verse_statuses.filter(verse_set=verse_set,
+                                                       version=version,
                                                        ignored=False))
 
         uvss_dict = dict([(uvs.localized_reference, uvs) for uvs in existing_uvss])
 
-        if verse_set.is_selection:
-            # Prefer existing UVSs of different versions if they are used.
-            other_versions = self.verse_statuses.filter(
-                verse_set__set_type=VerseSetType.SELECTION,
-                ignored=False,
-                localized_reference__in=[vc.localized_reference for vc in vc_list])\
-                .select_related('version')
-            other_version_dict = dict([(uvs.localized_reference, uvs) for uvs in other_versions])
-        elif verse_set.is_passage:
-            # If they are already learning this passage in a different version,
-            # use that version.
-            verse_statuses = (self.verse_statuses
-                              .filter(verse_set=verse_set,
-                                      ignored=False)
-                              .exclude(version=version)
-                              )
-            if len(verse_statuses) > 0:
-                return self.add_verse_set(verse_set,
-                                          version=verse_statuses[0].version)
-
-            # Otherwise, we don't want a mixture of versions for learning a
-            # passage set.
-            other_version_dict = {}
-        else:
-            assert False, "Not reached"
-
         # Want to preserve order of verse_set, so iterate like this:
         for vc in vc_list:
-            if vc.localized_reference in uvss_dict:
+            vc_localized_reference = vc.get_localized_reference(language_code)
+            if vc_localized_reference in uvss_dict:
                 # Save work - create_verse_status is expensive
-                out.append(uvss_dict[vc.localized_reference])
+                out.append(uvss_dict[vc_localized_reference])
             else:
-                if vc.localized_reference in other_version_dict:
-                    use_version = other_version_dict[vc.localized_reference].version
-                else:
-                    use_version = version
-                # Otherwise we set the version to the chosen one
-                new_uvs = self.create_verse_status(vc.localized_reference, verse_set, use_version)
-                if new_uvs is not None:
+                new_uvs = self.create_verse_status(vc_localized_reference, verse_set, version)
+                if new_uvs is not None and new_uvs not in out:
                     out.append(new_uvs)
 
         verse_set_chosen.send(sender=verse_set, chosen_by=self.account)
@@ -677,6 +649,12 @@ class Identity(models.Model):
 
         # text_order has to be specified in create since it is non-nullable
         text_order = verse_list[0].bible_verse_number
+
+        # Merged verses: verse_list might have a different idea about what
+        # localized_reference is. Also need to cope with Combo verses.
+        localized_reference = normalized_verse_list_ref(version.language_code,
+                                                        verse_list)
+
         # NB: we are exploiting the fact that multiple calls to
         # create_verse_status will get slightly increasing values of 'added',
         # allowing us to preserve order.
@@ -689,12 +667,15 @@ class Identity(models.Model):
                                                      )
 
         dirty = False
-        same_verse_set = self.verse_statuses.filter(localized_reference=localized_reference,
-                                                    version=version).exclude(id=uvs.id)
+        # See if we already have data for this verse + version, for the
+        # case where the user started learning the verse standalone, not
+        # as part of a verse set, or in a different verse set.
+        same_verses = self.verse_statuses.filter(localized_reference=localized_reference,
+                                                 version=version).exclude(id=uvs.id)
 
-        if same_verse_set and new:
+        if same_verses and new:
             # Use existing data:
-            same_verse = same_verse_set[0]
+            same_verse = same_verses[0]
             uvs.memory_stage = same_verse.memory_stage
             uvs.strength = same_verse.strength
             # If previous record was ignored, it may have been cancelled, so we

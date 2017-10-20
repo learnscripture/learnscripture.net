@@ -4,6 +4,7 @@
 {% load bootstrap %}
 {% load spurl %}
 {% load markup_tags %}
+{% load dict_utils %}
 
 {% block content %}
 
@@ -91,8 +92,8 @@
           {% endif %}
           {% if not vs.is_passage and vs.verse_choices.all %}
             <p>Includes the following verses, {{ vs.verse_choices.all|length }} in total:<br/>
-              {% for v in vs.verse_choices.all|slice:"0:10" %}
-                {{ v.localized_reference }}{% if not forloop.last %}, {% endif %}
+              {% for vc in vs.verse_choices.all|slice:"0:10" %}
+                {{ vc.localized_reference_dict|lookup:default_bible_version.language_code }}{% if not forloop.last %}, {% endif %}
               {% endfor %}
               {% if vs.verse_choices.all|length > 10 %}…and more.{% endif %}
             </p>

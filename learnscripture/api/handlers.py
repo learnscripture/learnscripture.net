@@ -22,6 +22,7 @@ from accounts.forms import PreferencesForm
 from accounts.models import Account
 from bibleverses.models import (MAX_VERSE_QUERY_SIZE, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, StageType,
                                 TextVersion, UserVerseStatus, VerseSetType, quick_find)
+from bibleverses.parsing import internalize_localized_reference
 from comments.models import Comment
 from events.models import Event
 from groups.models import Group
@@ -377,6 +378,8 @@ class VerseFind(ApiView):
         # Can't get 'fields' to work properly for this case, so pack into
         # dictionaries.
         retval = [dict(localized_reference=r.localized_reference,
+                       internal_reference=internalize_localized_reference(version.language_code,
+                                                                          r.localized_reference),
                        text=r.text,
                        from_reference=r.from_reference,
                        parsed_ref=None if r.parsed_ref is None else r.parsed_ref.__dict__,
@@ -388,6 +391,7 @@ class VerseFind(ApiView):
             for v in item['verses']:
                 verses2.append(dict(
                     localized_reference=v.localized_reference,
+                    internal_reference=v.internal_reference,
                     text=v.text,
                     html_text=html_format_text(v),
                     book_number=v.book_number,

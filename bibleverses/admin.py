@@ -3,6 +3,8 @@ from django.contrib import admin
 
 from .models import QAPair, TextVersion, UserVerseStatus, Verse, VerseChoice, VerseSet
 
+from .parsing import parse_validated_internal_reference, InvalidVerseReference
+
 
 class TextVersionAdmin(admin.ModelAdmin):
     list_display = ['short_name', 'slug', 'full_name', 'text_type', 'url']
@@ -10,10 +12,12 @@ class TextVersionAdmin(admin.ModelAdmin):
 
 
 class VerseChoiceAdminForm(forms.ModelForm):
-    def clean_localized_reference(self):
-        ref = self.cleaned_data['localized_reference']
-        if not Verse.objects.filter(localized_reference=ref).exists():
-            raise forms.ValidationError("'%s' is not a valid verse." % ref)
+    def clean_internal_reference(self):
+        ref = self.cleaned_data['internal_reference']
+        try:
+            parse_validated_internal_reference(ref)
+        except InvalidVerseReference:
+            raise forms.ValidationError("'%s' is not a valid internal verse reference." % ref)
         return ref
 
     class Meta:

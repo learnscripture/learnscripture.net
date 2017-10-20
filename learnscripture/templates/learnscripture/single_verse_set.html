@@ -13,17 +13,17 @@
     {{ verse_set.additional_info|apply_markup:"restructuredtext" }}
   {% endif %}
 
-  {% if verse_choices %}
+  {% if verse_list %}
     {% if verse_set.is_passage %}
-      <h3>{{ verse_choices.0.verse.book_name }}</h3>
-      {% for v in verse_choices %}
-        {% if v.verse.break_here %}<br/>{% endif %}
+      <h3>{{ verse_list.0.book_name }}</h3>
+      {% for v in verse_list %}
+        {% if v.break_here %}<br/>{% endif %}
         <div>
-          {% ifchanged v.verse.chapter_number %}
-            <span class="chapternumber">{{ v.verse.chapter_number }}</span>
+          {% ifchanged v.chapter_number %}
+            <span class="chapternumber">{{ v.chapter_number }}</span>
           {% endifchanged %}
-          <span class="versenumber">{{ v.verse.display_verse_number }}</span>
-          {{ v.verse.text }}
+          <span class="versenumber">{{ v.display_verse_number }}</span>
+          {{ v.text }}
         </div>
       {% endfor %}
       <br/>
@@ -31,9 +31,9 @@
 
       <h2>Verses</h2>
       <ul>
-        {% for v in verse_choices %}
+        {% for v in verse_list %}
           <li>
-            {{ v.localized_reference }}: {{ v.verse.text }}
+            {{ v.localized_reference }}: {{ v.text }}
             <br/><br/>
           </li>
         {% endfor %}
@@ -45,9 +45,16 @@
     <form action="" method="GET">
       <div id="id-version">
         Version:
-        {% with current_version=version show_full_name=1 %}
-          {% include "learnscripture/version_select.html" %}
-        {% endwith %}
+        <select id="id-version-select" name="version">
+          {% for v in bible_versions %}
+            <option value="{{ v.slug }}"
+                    {% if v.slug == version.slug %}selected{% endif %}
+            >{{ v.short_name }} ({{ v.full_name }})</option>
+          {% endfor %}
+        </select>
+        <noscript>
+          <input type="submit" class="btn" id="id-trigger-version-change" value="Change" />
+        </noscript>
       </div>
     </form>
 
@@ -87,8 +94,8 @@
       {% if can_edit %}
         <a class="btn" href="{% url 'edit_set' slug=verse_set.slug %}">Edit</a>
       {% endif %}
-      {% if verse_choices %}
-        <input type="submit" class="btn primary needs-preferences" value="Learn">
+      {% if verse_list %}
+        <input type="submit" class="btn primary needs-preferences" name="learn" value="Learn">
       {% endif %}
     </div>
   </form>
@@ -117,10 +124,10 @@
 
   {% if started_count == 0 %}
     <p>You are not learning this verse set.</p>
-  {% elif started_count == verse_choices|length %}
+  {% elif started_count == verse_list|length %}
     <p>You've started learning all the verses in this set.</p>
   {% else %}
-    <p>You've started learning {{ started_count }} out of {{ verse_choices|length }}
+    <p>You've started learning {{ started_count }} out of {{ verse_list|length }}
       verses in this set.</p>
   {% endif %}
 
@@ -153,7 +160,7 @@
     {% if can_edit %}
       <a class="btn" href="{% url 'edit_set' slug=verse_set.slug %}">Edit</a>
     {% endif %}
-    {% if verse_choices %}
+    {% if verse_list %}
       <input type="submit" class="btn primary needs-preferences" value="Learn">
       <i class="icon-public" title="Public action"></i>
     {% endif %}

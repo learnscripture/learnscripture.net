@@ -9,7 +9,7 @@
     <div id="id-create-selection-set">
 
       <form id="id-verse-set-form" action="" method="POST">
-        <input type="hidden" value="" id="id-localized-reference-list"  name="localized_reference_list">
+        <input type="hidden" value="" id="id-internal-reference-list"  name="internal_reference_list">
         <h3>About this set</h3>
         {% csrf_token %}
         {{ verse_set_form|bootstrap }}
@@ -27,7 +27,7 @@
             </thead>
             <tbody>
               {% for v in verses %}
-                <tr>
+                <tr data-internal-reference="{{ v.internal_reference }}">
                   <td>{{ v.localized_reference }}</td>
                   <td>{{ v.text }}</td>
                   <td><span title="move up"><i class="icon-arrow-up"></i></span></td>
@@ -42,7 +42,7 @@
 
 
       <script id="id_verse_list_selection_row_template" type="text/x-jsrender">
-       <tr>
+       <tr data-internal-reference="[[>verseData.internal_reference]]">
        <td>[[>verseData.localized_reference]]</td>
        <td>[[>verseData.text]]</td>
        <td><span title="move up"><i class="icon-arrow-up"></i></span></td>
@@ -117,7 +117,7 @@
           </thead>
           <tbody>
             {% for v in verses %}
-              <tr>
+              <tr data-internal-reference="{{ v.internal_reference }}">
                 <td><input type="checkbox" {% if v.break_here %}checked{% endif %}/></td>
                 <td>{{ v.localized_reference }}</td>
                 <td>{{ v.text }}</td>
@@ -129,7 +129,7 @@
       </div>
 
       <script id="id_verse_list_passage_row_template" type="text/x-jsrender">
-       <tr>
+       <tr data-internal-reference="[[>verseData.internal_reference]]">
        <td><input type="checkbox" /></td>
        <td>[[>verseData.localized_reference]]</td>
        <td>[[>verseData.text]]</td>
@@ -148,7 +148,7 @@
         {{ verse_set_form|bootstrap }}
 
         <div class="actions">
-          <input type="hidden" value="" id="id-localized-reference-list"  name="localized_reference_list">
+          <input type="hidden" value="" id="id-internal-reference-list"  name="internal_reference_list">
           <input type="hidden" value="" id="id-break-list"  name="break_list">
           <input name="save" type="submit" class="btn primary" value="Save verse set" id="id-save-btn">
         </div>

@@ -49,9 +49,14 @@
   <div class="clearfix">
     <label for="id-version-select">Version</label>
     <div class="input">
-      {% with current_version=default_bible_version show_full_name=1 %}
-        {% include "learnscripture/version_select.html" %}
-      {% endwith %}
+      <select id="id-version-select" name="version">
+        {% for v in bible_versions %}
+          <option value="{{ v.slug }}"
+                  data-lang-code="{{ v.language_code }}"
+                  {% if v.slug == default_bible_version.slug %}selected{% endif %}
+                  >{{ v.short_name }} ({{ v.full_name }})</option>
+        {% endfor %}
+      </select>
     </div>
   </div>
 

@@ -18,7 +18,7 @@ class UserVersesPageTests(RequireExampleVerseSetsMixin, FullBrowserTest):
 
         # Add a passage
         vs = VerseSet.objects.get(slug='psalm-23')
-        vs.breaks = "23:4"
+        vs.breaks = "BOOK18 23:4"
         vs.save()
         identity.add_verse_set(vs)
 
