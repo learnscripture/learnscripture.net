@@ -21,14 +21,15 @@ from django.views.generic.base import View
 from accounts.forms import PreferencesForm
 from accounts.models import Account
 from bibleverses.models import (MAX_VERSE_QUERY_SIZE, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, StageType,
-                                TextVersion, UserVerseStatus, VerseSetType, quick_find)
+                                TextVersion, UserVerseStatus, VerseSetType, make_verse_set_passage_id, quick_find)
 from bibleverses.parsing import internalize_localized_reference
 from comments.models import Comment
 from events.models import Event
 from groups.models import Group
 from learnscripture import session
 from learnscripture.decorators import require_identity_method
-from learnscripture.views import bible_versions_for_request, todays_stats, verse_sets_visible_for_request
+from learnscripture.views import (bible_versions_for_request, default_bible_version_for_request, todays_stats,
+                                  verse_sets_visible_for_request)
 
 
 class rc_factory(object):
@@ -408,9 +409,16 @@ class CheckDuplicatePassageSet(ApiView):
 
     def get(self, request):
         try:
-            passage_id = request.GET['passage_id']
+            start_reference = request.GET['start_reference']
+            end_reference = request.GET['end_reference']
         except KeyError:
             return rc.BAD_REQUEST
+
+        language_code = default_bible_version_for_request(request).language_code
+        start_internal_reference = internalize_localized_reference(language_code, start_reference)
+        end_internal_reference = internalize_localized_reference(language_code, end_reference)
+        passage_id = make_verse_set_passage_id(start_internal_reference,
+                                               end_internal_reference)
 
         verse_sets = verse_sets_visible_for_request(request)
         # This works if they have accepted default name.  If it doesn't have the
