@@ -3,6 +3,7 @@ import math
 from collections import OrderedDict, defaultdict
 from datetime import timedelta
 
+import attr
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, UserManager
 from django.contrib.sites.shortcuts import get_current_site
@@ -951,13 +952,22 @@ class Identity(models.Model):
 
     def verse_sets_chosen(self):
         """
-        Returns a QuerySet of VerseSets that have been/are being learnt
+        Returns a list of ChosenVerseSets that have been/are being learnt
         """
-        ids = (self.verse_statuses
-               .filter(ignored=False)
-               .values_list('verse_set_id', flat=True).distinct())
-
-        return VerseSet.objects.filter(id__in=ids).order_by('name')
+        pairs = (self.verse_statuses
+                 .filter(ignored=False, verse_set__isnull=False)
+                 .values_list('verse_set_id', 'version_id')
+                 .distinct())
+        vs_ids, tv_ids = list(zip(*pairs))
+        versions = {tv.id: tv
+                    for tv in TextVersion.objects.filter(id__in=tv_ids)}
+        verse_sets = {vs.id: vs
+                      for vs in VerseSet.objects.filter(id__in=vs_ids)}
+        retval = [ChosenVerseSet(version=versions[tv_id],
+                                 verse_set=verse_sets[vs_id])
+                  for vs_id, tv_id in pairs]
+        retval.sort(key=lambda c: (c.verse_set.name, c.version.short_name))
+        return retval
 
     def which_verses_started(self, localized_references):
         """
@@ -1240,6 +1250,12 @@ class Notice(models.Model):
 
     def __str__(self):
         return "Notice %d for %r" % (self.id, self.for_identity)
+
+
+@attr.s
+class ChosenVerseSet:
+    verse_set = attr.ib()
+    version = attr.ib()
 
 
 def get_verse_started_running_streaks():

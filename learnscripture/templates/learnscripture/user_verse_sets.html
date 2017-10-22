@@ -4,8 +4,9 @@
   <h2>Verse sets you are learning</h2>
 
   <ul>
-    {% for vs in verse_sets_learning %}
-      <li><a href="{% url 'view_verse_set' vs.slug %}">{{ vs.name }}</a></li>
+    {% for cvs in chosen_verse_sets %}
+      <li><a href="{% url 'view_verse_set' cvs.verse_set.slug %}">{{ cvs.verse_set.name }}</a>
+        ({{ cvs.version.short_name }})</li>
     {% endfor %}
   </ul>
 
