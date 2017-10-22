@@ -70,10 +70,10 @@ def create_identity(version_slug='KJV', account=None):
                                    )
 
 
-def get_or_create_any_account():
+def get_or_create_any_account(**kwargs):
     account = Account.objects.order_by('id').first()
     if account is None:
-        identity, account = create_account()
+        identity, account = create_account(**kwargs)
     return account
 
 

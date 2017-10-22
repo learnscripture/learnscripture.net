@@ -13,7 +13,7 @@ from django.utils.functional import cached_property
 from jsonfield import JSONField
 
 from accounts import memorymodel
-from learnscripture.datastructures import make_choices, lazy_dict_like
+from learnscripture.datastructures import lazy_dict_like, make_choices
 from learnscripture.utils.iterators import intersperse
 
 from .books import get_bible_book_name, get_bible_book_number
@@ -775,11 +775,9 @@ class UserVerseStatus(models.Model):
         """
         if not self.is_in_passage():
             return None
-        verse_choices = self.verse_set_choices
-        return pretty_passage_ref(
-            self.version.language_code,
-            verse_choices[0].internal_reference,
-            verse_choices[-1].internal_reference)
+        passage_status_list = self.get_verse_set_verse_status_list()
+        return normalized_verse_list_ref(self.version.language_code,
+                                         passage_status_list)
 
     @cached_property
     def verse_set_choices(self):
@@ -793,25 +791,27 @@ class UserVerseStatus(models.Model):
         if not self.is_in_passage():
             return None
 
-        section = self.get_section_verse_choices()
-        if section is not None:
-            return pretty_passage_ref(
-                self.version.language_code,
-                section[0].internal_reference,
-                section[-1].internal_reference)
-        return None  # Shouldn't get here
+        section_status_list = self.get_section_verse_status_list(
+            self.get_verse_set_verse_status_list())
+        return normalized_verse_list_ref(self.version.language_code,
+                                         section_status_list)
 
-    def get_section_verse_choices(self):
-        # Split verse set into sections
-        language_code = self.version.language_code
-        sections = get_passage_sections(language_code,
-                                        self.verse_set_choices, self.verse_set.breaks)
+    def get_verse_set_verse_status_list(self):
+        return list(UserVerseStatus.objects.filter(verse_set=self.verse_set_id,
+                                                   for_identity=self.for_identity_id,
+                                                   version=self.version_id).order_by('text_order'))
 
-        # Now we've got to find which one we are in:
+    def get_section_verse_status_list(self, passage_uvs_list):
+        """
+        Returns the UVS list for the passage section the current UVS is a part of,
+        given an ordered UVS list for the whole passage.
+        """
+        sections = get_passage_sections(self.version.language_code,
+                                        passage_uvs_list,
+                                        self.verse_set.breaks)
         for section in sections:
-            for vc in section:
-                if vc.get_localized_reference(language_code) == self.localized_reference:
-                    return section
+            if self in section:
+                return section
 
     # This will be overwritten by get_verse_statuses_bulk
     @cached_property
@@ -1083,16 +1083,6 @@ def get_passage_sections(language_code, verse_list, breaks):
     'internal_reference' attribute, and a break list (a comma separated list of
     internal references), return the list in sections.
     """
-    # Break definitions:
-    # Legacy: <verse_number>  or <chapter_number>:<verse_number>
-    # New: canonical internal reference
-
-    # TODO - currently this has been modified to accept language_code, purely so
-    # that we can pass it to parse_break_list. However, different grouping of
-    # verses in different versions may mean we actually need to pass a
-    # TextVersion through this, and other modified functions like
-    # add_passage_breaks
-
     # Since the input has been sanitised, we can do parsing without needing DB
     # queries.
     if len(verse_list) == 0:

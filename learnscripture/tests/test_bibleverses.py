@@ -10,7 +10,7 @@ from bibleverses.parsing import (ParsedReference, internalize_localized_referenc
                                  parse_unvalidated_localized_reference, parse_validated_localized_reference)
 from bibleverses.suggestions.modelapi import create_word_suggestion_data, item_suggestions_need_updating
 
-from .base import AccountTestMixin, TestBase, create_account
+from .base import AccountTestMixin, TestBase, get_or_create_any_account
 
 
 class RequireExampleVerseSetsMixin(object):
@@ -39,22 +39,25 @@ class RequireExampleVerseSetsMixin(object):
 
     def setUp(self):
         super(RequireExampleVerseSetsMixin, self).setUp()
-
-        _, account = create_account(username='creatoraccount☺', is_active=False)
         for set_type, name, slug, description, verse_choices in self.SETS:
-            vs = VerseSet.objects.create(
-                set_type=set_type,
-                name=name,
-                slug=slug,
-                description=description,
-                public=True,
-                created_by=account)
-            for i, ref in enumerate(verse_choices):
-                set_order = i + 1
-                vs.verse_choices.create(
-                    set_order=set_order,
-                    internal_reference=internalize_localized_reference(LANGUAGE_CODE_EN, ref)
-                )
+            self.create_verse_set(set_type, name, slug, description, verse_choices)
+
+    def create_verse_set(self, set_type, name, slug, description, en_ref_list):
+        account = get_or_create_any_account(username='creatoraccount☺', is_active=False)
+        vs = VerseSet.objects.create(
+            set_type=set_type,
+            name=name,
+            slug=slug,
+            description=description,
+            public=True,
+            created_by=account)
+        for i, ref in enumerate(en_ref_list):
+            set_order = i + 1
+            vs.verse_choices.create(
+                set_order=set_order,
+                internal_reference=internalize_localized_reference(LANGUAGE_CODE_EN, ref)
+            )
+        return vs
 
 
 class VerseTests(TestBase):
@@ -648,7 +651,10 @@ class GetPassageSectionsTests(unittest2.TestCase):
                           ["Genesis 2:4", "Genesis 2:5"],
                           ])
 
-    def test_combo_verses(self):
+    def test_combo_and_merged_verses_1(self):
+        # For this API, combo verses and merged verses are the same
+        # (they appear as verse refs spanning multiple items)
+        # so we can combine tests additional tests
         uvs_list = [MockUVS('Genesis 1:1'),
                     MockUVS('Genesis 1:2'),
                     MockUVS('Genesis 1:3-4'),
@@ -660,6 +666,22 @@ class GetPassageSectionsTests(unittest2.TestCase):
                          [["Genesis 1:1", "Genesis 1:2"],
                           ["Genesis 1:3-4", "Genesis 1:5"]])
 
+    def test_combo_and_merged_verses_2(self):
+        uvs_list = [MockUVS('Genesis 1:1'),
+                    MockUVS('Genesis 1:2'),
+                    MockUVS('Genesis 1:3-4'),
+                    MockUVS('Genesis 1:5')]
+
+        sections = get_passage_sections(LANGUAGE_CODE_EN, uvs_list, 'BOOK0 1:4')
+        # For this case we make an arbitrary decision to ignore breaks
+        # that occur in the middle of a merged/combo verse. In reality
+        # this is just a corner case that is very unlikely to ever occur.
+        self.assertEqual([[uvs.localized_reference for uvs in section]
+                          for section in sections],
+                         [["Genesis 1:1",
+                           "Genesis 1:2",
+                           "Genesis 1:3-4",
+                           "Genesis 1:5"]])
 
 class UserVerseStatusTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
     # Many other tests for this model are found in test_identity
@@ -678,6 +700,24 @@ class UserVerseStatusTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestB
 
         self.assertEqual(uvs.passage_localized_reference, 'Psalm 23:1-6')
         self.assertEqual(uvs.section_localized_reference, 'Psalm 23:1-3')
+
+    def test_passage_and_section_localized_reference_merged(self):
+        # Setup to create UVSs
+        identity, account = self.create_account(version_slug='TCL02')
+        vs = self.create_verse_set(
+            VerseSetType.PASSAGE,
+            "Romans 3:24-25", "", "r",
+            ["Romans 3:24", "Romans 3:25"])
+        identity.add_verse_set(vs)
+
+        # Get a single verse and check its section/passage
+        uvs = identity.verse_statuses.get(localized_reference='Romalılar 3:24')
+
+        # Should be expanded to account for merged verse.
+        self.assertEqual(uvs.section_localized_reference, 'Romalılar 3:24-26')
+        self.assertEqual(uvs.passage_localized_reference, 'Romalılar 3:24-26')
+
+        # Other tests for the underlying functionality are in GetPassageSectionsTests
 
 
 class VerseUtilsTests(unittest2.TestCase):

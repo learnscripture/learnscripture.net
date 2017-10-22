@@ -3,7 +3,6 @@ import csv
 import urllib.parse
 from datetime import date, timedelta
 
-import attr
 import django.contrib.auth
 from django.conf import settings
 from django.contrib import messages
@@ -27,9 +26,9 @@ import learnscripture.tasks
 from accounts.forms import AccountDetailsForm, PreferencesForm
 from accounts.models import Account, Identity
 from awards.models import AnyLevel, Award, AwardType
-from bibleverses.books import get_bible_book_name, BIBLE_BOOK_COUNT
-from bibleverses.languages import LANGUAGES, LANGUAGE_CODE_INTERNAL
+from bibleverses.books import BIBLE_BOOK_COUNT, get_bible_book_name
 from bibleverses.forms import VerseSetForm
+from bibleverses.languages import LANGUAGE_CODE_INTERNAL, LANGUAGES
 from bibleverses.models import (MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, TextType, TextVersion, VerseSet,
                                 VerseSetType, get_passage_sections)
 from bibleverses.parsing import internalize_localized_reference, localize_internal_reference
@@ -344,8 +343,7 @@ def dashboard(request):
                 if ('reviewpassagesection' in request.POST or
                         'practisepassagesection' in request.POST):
                     # Review/practise the specified section
-                    refs = set(vc.localized_reference for vc in main_uvs.get_section_verse_choices())
-                    uvss = [uvs for uvs in uvss if uvs.localized_reference in refs]
+                    uvss = main_uvs.get_section_verse_status_list(uvss)
 
             if 'learnpassage' in request.POST:
                 uvss = identity.slim_passage_for_reviewing(uvss, verse_set)
@@ -642,12 +640,10 @@ def get_verse_set_verse_list(version, verse_set):
                                 for vc in verse_choices]
     verses = version.get_verses_by_localized_reference_bulk(all_localized_references)
 
-    # Decorate verses with break information.
     verse_list = sorted(verses.values(), key=lambda v: v.bible_verse_number)
     verse_list = add_passage_breaks(language_code, verse_list, verse_set.breaks)
 
     retval = []
-    # Decorate the verse choices with the text and reference
     for vc in verse_choices:
         localized_ref = localize_internal_reference(language_code, vc.internal_reference)
         if localized_ref in verses:
