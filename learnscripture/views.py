@@ -30,7 +30,7 @@ from bibleverses.books import BIBLE_BOOK_COUNT, get_bible_book_name
 from bibleverses.forms import VerseSetForm
 from bibleverses.languages import LANGUAGE_CODE_INTERNAL, LANGUAGES
 from bibleverses.models import (MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, TextType, TextVersion, VerseSet,
-                                VerseSetType, get_passage_sections)
+                                VerseSetType, get_passage_sections, is_continuous_set)
 from bibleverses.parsing import internalize_localized_reference, localize_internal_reference
 from bibleverses.signals import public_verse_set_created
 from events.models import Event
@@ -624,13 +624,6 @@ def verse_sets_visible_for_request(request):
     return VerseSet.objects.visible_for_account(account_from_request(request))
 
 
-def is_continuous_set(verse_list):
-    # TODO - logic needs fixing for merged verses.
-    bvns = [v.bible_verse_number for v in verse_list]
-    return bvns == list(range(verse_list[0].bible_verse_number,
-                              verse_list[-1].bible_verse_number + 1))
-
-
 def get_verse_set_verse_list(version, verse_set):
     language_code = version.language_code
 
@@ -671,8 +664,7 @@ def view_verse_set(request, slug):
     verse_list = get_verse_set_verse_list(version, verse_set)
     all_localized_references = [v.localized_reference for v in verse_list]
 
-    if (verse_set.is_selection and
-            len(verse_list) > 1 and is_continuous_set(verse_list)):
+    if (verse_set.is_selection and is_continuous_set(verse_list)):
         c['show_convert_to_passage'] = True
 
         if request.method == 'POST':

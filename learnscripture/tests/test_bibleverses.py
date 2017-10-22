@@ -5,7 +5,7 @@ from accounts.models import Identity
 from bibleverses.books import get_bible_book_number, get_bible_books, is_single_chapter_book
 from bibleverses.languages import LANGUAGE_CODE_EN, LANGUAGE_CODE_TR, LANGUAGES, normalize_reference_input_turkish
 from bibleverses.models import (InvalidVerseReference, TextVersion, Verse, VerseSet, VerseSetType, get_passage_sections,
-                                split_into_words)
+                                is_continuous_set, split_into_words)
 from bibleverses.parsing import (ParsedReference, internalize_localized_reference,
                                  parse_unvalidated_localized_reference, parse_validated_localized_reference)
 from bibleverses.suggestions.modelapi import create_word_suggestion_data, item_suggestions_need_updating
@@ -682,6 +682,51 @@ class GetPassageSectionsTests(unittest2.TestCase):
                            "Genesis 1:2",
                            "Genesis 1:3-4",
                            "Genesis 1:5"]])
+
+
+class IsContinuousSetTests(TestBase):
+    fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
+
+    def test_is_continuous_set_1(self):
+        KJV = TextVersion.objects.get(slug='KJV')
+        verse_list = list(KJV.verse_set
+                          .filter(localized_reference__in=[
+                              'Genesis 1:1',
+                              'Genesis 1:2',
+                              'Genesis 1:3'])
+                          .order_by('bible_verse_number'))
+        self.assertTrue(is_continuous_set(verse_list))
+
+    def test_is_continuous_set_2(self):
+        KJV = TextVersion.objects.get(slug='KJV')
+        verse_list = list(KJV.verse_set
+                          .filter(localized_reference__in=[
+                              'Genesis 1:1',
+                              'Genesis 1:2',
+                              'Genesis 1:7'])
+                          .order_by('bible_verse_number'))
+        self.assertFalse(is_continuous_set(verse_list))
+
+    def test_is_continuous_set_3(self):
+        TCL02 = TextVersion.objects.get(slug='TCL02')
+        verse_list = list(TCL02.verse_set
+                          .filter(localized_reference__in=[
+                              'Romalılar 3:24',
+                              'Romalılar 3:25-26',
+                              'Romalılar 3:27'])
+                          .order_by('bible_verse_number'))
+        self.assertTrue(is_continuous_set(verse_list))
+
+    def test_is_continuous_set_4(self):
+        TCL02 = TextVersion.objects.get(slug='TCL02')
+        verse_list = list(TCL02.verse_set
+                          .filter(localized_reference__in=[
+                              'Yuhanna 3:16',
+                              'Romalılar 3:24',
+                              'Romalılar 3:27'])
+                          .order_by('bible_verse_number'))
+        self.assertFalse(is_continuous_set(verse_list))
+
 
 class UserVerseStatusTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
     # Many other tests for this model are found in test_identity

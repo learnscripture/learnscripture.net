@@ -1077,6 +1077,23 @@ def normalized_verse_list_ref(language_code, verse_list):
         ).canonical_form()
 
 
+def is_continuous_set(verse_list):
+    if len(verse_list) in [0, 1]:
+        # not enough to be considered continuous
+        return False
+
+    verse_list = sorted(verse_list, key=lambda v: v.bible_verse_number)
+    version = verse_list[0].version
+    try:
+        combined_ref = normalized_verse_list_ref(version.language_code,
+                                                 verse_list)
+    except InvalidVerseReference:
+        return False
+    combined = fetch_localized_reference(version, version.language_code, combined_ref)
+    return ([v.localized_reference for v in verse_list] ==
+            [v.localized_reference for v in combined])
+
+
 def get_passage_sections(language_code, verse_list, breaks):
     """
     Given a list of objects with either a correct 'localized_reference' or

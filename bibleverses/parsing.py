@@ -76,6 +76,13 @@ class ParsedReference(object):
 
     @classmethod
     def from_start_and_end(cls, start_parsed_ref, end_parsed_ref):
+        if start_parsed_ref.language_code != end_parsed_ref.language_code:
+            raise InvalidVerseReference("Language {0} != {1}".format(start_parsed_ref.language_code,
+                                                                     end_parsed_ref.language_code))
+        if start_parsed_ref.book_name != end_parsed_ref.book_name:
+            raise InvalidVerseReference("Book {0} != {1}".format(start_parsed_ref.book_name,
+                                                                 end_parsed_ref.book_name))
+
         return cls(language_code=start_parsed_ref.language_code,
                    book_name=start_parsed_ref.book_name,
                    start_chapter=start_parsed_ref.start_chapter,
