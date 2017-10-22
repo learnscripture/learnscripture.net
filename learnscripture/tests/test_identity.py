@@ -6,6 +6,7 @@ from django.db.models import F
 from django.utils import timezone
 
 import accounts.memorymodel
+from accounts.models import ChosenVerseSet
 from awards.models import AwardType
 from bibleverses.languages import LANGUAGE_CODE_EN
 from bibleverses.models import (MemoryStage, StageType, TextVersion, Verse, VerseChoice, VerseSet, VerseSetType,
@@ -637,3 +638,39 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
 
             self.assertEqual(account.awards.filter(award_type=AwardType.CONSISTENT_LEARNER).count(),
                              0 if i < 7 else 1)
+
+    def test_verse_sets_chosen(self):
+        i = self.create_identity(version_slug='NET')
+        vs1 = VerseSet.objects.get(name='Psalm 23')
+        i.add_verse_set(vs1)
+        with self.assertNumQueries(3):
+            chosen_1 = i.verse_sets_chosen()
+        self.assertEqual(chosen_1,
+                         [ChosenVerseSet(verse_set=vs1,
+                                         version=i.default_bible_version)])
+
+        KJV = TextVersion.objects.get(slug='KJV')
+        i.add_verse_set(vs1, version=KJV)
+
+        with self.assertNumQueries(3):
+            chosen_2 = i.verse_sets_chosen()
+        self.assertEqual(chosen_2,
+                         [ChosenVerseSet(verse_set=vs1,
+                                         version=KJV),
+                          ChosenVerseSet(verse_set=vs1,
+                                         version=i.default_bible_version),
+                          ])
+
+        vs2 = VerseSet.objects.get(name='Bible 101')
+        i.add_verse_set(vs2)
+
+        with self.assertNumQueries(3):
+            chosen_3 = i.verse_sets_chosen()
+        self.assertEqual(chosen_3,
+                         [ChosenVerseSet(verse_set=vs2,
+                                         version=i.default_bible_version),
+                          ChosenVerseSet(verse_set=vs1,
+                                         version=KJV),
+                          ChosenVerseSet(verse_set=vs1,
+                                         version=i.default_bible_version),
+                          ])

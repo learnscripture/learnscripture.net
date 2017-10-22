@@ -986,7 +986,7 @@ def user_verses(request):
 def user_verse_sets(request):
     identity = request.identity
     c = {'title': 'Verse sets',
-         'verse_sets_learning': identity.verse_sets_chosen(),
+         'chosen_verse_sets': identity.verse_sets_chosen(),
          }
     if identity.account is not None:
         c['verse_sets_created'] = identity.account.verse_sets_created.all().order_by('name')
