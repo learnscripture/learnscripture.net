@@ -890,10 +890,6 @@ def fetch_parsed_reference(version, parsed_ref, max_length=MAX_VERSE_QUERY_SIZE)
 
     If otherwise incorrect, InvalidVerseReference will be raised
     """
-    # TODO - for some uses, it is probably bad that we autocorrect merged
-    # references, because then things might not line up later. We should throw
-    # an exception perhaps? Or ensure that when we create UserVerseStatus
-    # objects we always correct the refs first, not rely on correcting later.
     if parsed_ref.is_whole_chapter():
         retval = list(version.verse_set
                       .filter(book_number=parsed_ref.book_number,
