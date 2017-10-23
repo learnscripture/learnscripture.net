@@ -953,6 +953,15 @@ var learnscripture = (function (learnscripture, $) {
                 height: (wordBox.outerHeight() - 4).toString() + "px",
                 width: width
             })
+            // Trigger numeric keyboard:
+            // <input pattern="[0-9]*" inputmode="numeric">
+            if (wordBox.hasClass('number')) {
+                inputBox.attr('pattern', '[0-9]*');
+                inputBox.attr('inputmode', 'numeric');
+            } else {
+                inputBox.removeAttr('pattern');
+                inputBox.removeAttr('inputmode');
+            }
         },
 
         showFullWordHint: function () {
@@ -1001,8 +1010,8 @@ var learnscripture = (function (learnscripture, $) {
             $('.test-method-keyboard-full-word').hide();
         },
 
-        shouldCheckWord: function(ev, isSpace) {
-            return isSpace;
+        shouldCheckWord: function (textSoFar, wordSeparatorEntered) {
+            return wordSeparatorEntered;
         },
 
         matchWord: function (target, typed) {
@@ -1052,18 +1061,13 @@ var learnscripture = (function (learnscripture, $) {
             $('.test-method-keyboard-first-letter').hide();
         },
 
-        shouldCheckWord: function (ev, isSpace) {
-            if (isSpace) {
-                // compat for Android on Chrome, which doesn't fire the
-                // event for first letter in box, but will get here if
-                // you press one letter and then space
-                return true;
-            }
-            return alphanumeric(ev);
+        shouldCheckWord: function (textSoFar, wordSeparatorEntered) {
+            return textSoFar.length > 0;
         },
 
         matchWord: function (target, typed) {
-            return (typed === target.slice(0, 1));
+            var lastCharTyped = typed.slice(-1);
+            return (lastCharTyped === target.slice(0, 1));
         },
 
         getHint: function () {
@@ -1729,7 +1733,11 @@ var learnscripture = (function (learnscripture, $) {
                     replace.push('<span class="colon">' + word + '</span>');
                     return;
                 }
-                replace.push(makeNormalWord(word, "word reference"));
+                var classes = "word reference"
+                if (word.match(/\d+/)) {
+                    classes += " number";
+                }
+                replace.push(makeNormalWord(word, classes));
                 wordList.push(wordNumber);
                 referenceList.push(wordNumber);
                 wordNumber++;
@@ -1852,59 +1860,43 @@ var learnscripture = (function (learnscripture, $) {
         }
     };
 
-    var inputKeyDown = function (ev) {
-        var characterInserted = false;
-        var textSoFar = inputBox.val();
-        var textSoFarTrimmed = textSoFar.trim();
-        if (ev.which == 229) {
-            // keyboard composition code sent by Chrome on Android, which is
-            // totally useless. The only upside is that, apart from the
-            // first character in the text box, the keydown event gets sent
-            // *after* the character has already appeared in the text
-            // box. This means we can get the character just typed.
-            if (textSoFar.length > 0) {
-                var character = textSoFar.substr(textSoFar.length - 1, 1);
-                // overwrite ev.which
-                ev.which = character.charCodeAt(0);
-                characterInserted = true;
-            }
-        }
-
+    var inputBoxKeyDown = function (ev) {
         if (ev.which === 27) {
             // ESC
             ev.preventDefault();
             inputBox.val('');
             return;
         }
+        var textSoFar = inputBox.val();
+        var textSoFarTrimmed = textSoFar.trim();
 
-        var isInReference = getWordAt(currentWordIndex).hasClass("reference");
         if ((textSoFarTrimmed.length > 0) && // if only whitespace entered, don't trigger test
             ((ev.which === 32 || ev.key === " ") ||
-             (ev.which === 13 || ev.key === "Enter") ||
-             (isInReference &&
-              ((ev.which === 59 || // desktop
-                ev.which === 186 || // iPhone
-                ev.key === ":") ||
-               (ev.which === 173 || // desktop
-                ev.which === 189 || // iPhone
-                ev.key === "-")))
-            )
-        ) {
+             (ev.which === 13 || ev.key === "Enter"))) {
             ev.preventDefault();
-            if (currentStage.testMode && testingMethodStrategy.shouldCheckWord(ev, true)) {
+            if (currentStage.testMode) {
                 testingMethodStrategy.checkCurrentWord();
             }
             return;
+        }
+        // All other characters dealt with using inputBoxInput
+    };
+
+    var inputBoxInput = function (ev) {
+        var textSoFar = inputBox.val();
+        var textSoFarTrimmed = textSoFar.trim();
+        var isWordSeparator = false
+        if (textSoFarTrimmed.length > 0 && textSoFar.slice(-1) == " ") {
+            isWordSeparator = true;
         } else {
-            // Any other character
-            if (currentStage.testMode && testingMethodStrategy.shouldCheckWord(ev, false)) {
-                ev.preventDefault();
-                if (!characterInserted) {
-                    // Put it there ourselves, so it is ready for checkCurrentWord()
-                    inputBox.val(String.fromCharCode(ev.which));
-                }
-                testingMethodStrategy.checkCurrentWord();
+            var lastChar = textSoFarTrimmed.length == 0 ? "" : textSoFarTrimmed.slice(-1);
+            var isInReference = getWordAt(currentWordIndex).hasClass("reference");
+            if (isInReference && (lastChar == ":" || lastChar == "-")) {
+                isWordSeparator = true;
             }
+        }
+        if (currentStage.testMode && testingMethodStrategy.shouldCheckWord(textSoFarTrimmed, isWordSeparator)) {
+            testingMethodStrategy.checkCurrentWord();
         }
 
     };
@@ -2040,7 +2032,14 @@ var learnscripture = (function (learnscripture, $) {
         // Chrome on Android does not fire onkeypress, only keyup and keydown.
         // It also fires onchange only after pressing 'Enter' and closing
         // the on-screen keyboard.
-        inputBox.bind('keydown', inputKeyDown);
+        // Firefox (at least on desktop) doesn't show anything helpful
+        // in ev.which with keyup, only keydown.
+        // Some browsers on Linux are screwy when it comes to composed
+        // characters.
+        // So, we do as much as possible with 'input', and 'keydown'
+        // just for detecting enter
+        inputBox.bind('input', inputBoxInput);
+        inputBox.bind('keydown', inputBoxKeyDown);
         testingStatus = $('#id-testing-status');
         // We don't use fast event (touchstart) for next/back/finish buttons,
         // because 1) they can cause movement of items on the page 2) they are
