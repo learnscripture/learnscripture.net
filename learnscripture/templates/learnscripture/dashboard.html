@@ -65,8 +65,8 @@
           <input type="submit" name="cancelpassage" class="btn" value="Cancel"
                  id="id-cancelpassage-btn-{{ cvs.id }}" /><br/>
         </form>
-        <h3>{{ cvs.verse_set.name }} ({{ cvs.version.short_name }})<br/>
-</h3>
+        <h3><a href="{% url 'view_verse_set' cvs.verse_set.slug %}?version={{ cvs.version.slug }}">{{ cvs.verse_set.name }}</a> ({{ cvs.version.short_name }})<br/>
+        </h3>
         <div>
           {% if cvs.needs_testing_count == cvs.total_verse_count %}
             This passage is due for review today
