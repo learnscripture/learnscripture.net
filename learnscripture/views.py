@@ -430,9 +430,6 @@ def context_for_quick_find(request):
     """
     Returns the context data needed to render a quick find box
     """
-    # TODO - quick find needs to be fixed to update
-    # the book list captions when a different language
-    # translation is chosen.
     version = default_bible_version_for_request(request)
     language_codes = [l.code for l in LANGUAGES] + [LANGUAGE_CODE_INTERNAL]
 
@@ -521,8 +518,6 @@ def choose(request):
     # so is missing here.
 
     if 'q' in request.GET:
-        # TODO - decide if we allow searching in languages other than
-        # the language of the user's default Bible version
         language_code = default_bible_version.language_code
         verse_sets = VerseSet.objects.search(language_code, verse_sets, request.GET['q'])
 
