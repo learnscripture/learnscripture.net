@@ -3,7 +3,7 @@ import time
 
 from awards.models import AwardType
 from bibleverses.languages import LANGUAGE_CODE_EN
-from bibleverses.models import StageType, VerseSet, VerseSetType, TextVersion
+from bibleverses.models import StageType, TextVersion, VerseSet, VerseSetType
 from events.models import Event, EventType
 
 from .base import FullBrowserTest
