@@ -1715,10 +1715,14 @@ var learnscripture = (function (learnscripture, $) {
 
         // Add reference
         if (doTest && reference !== null) {
-            parts = reference.split(/\b/);
+            // Javascript regexes: no Unicode support, no lookbehinds, and we want to keep the punctuation
+            // that we are splitting on.
+            parts = [].concat.apply([], reference.split(/(?=[\s:\-])/).map(w => w.match(/^[\s:\-]/) ? [w[0], w.slice(1)] : [w]));
             replace = [];
+
             $.each(parts, function (j, word) {
-                if (word.trim() == "") {
+                word = word.trim()
+                if (word == "") {
                     return;
                 }
                 if (word == ":" || word == "-") {
