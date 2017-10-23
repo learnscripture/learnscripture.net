@@ -1109,7 +1109,17 @@ def is_continuous_set(verse_list):
                                                  verse_list)
     except InvalidVerseReference:
         return False
+    # Quick heuristic to stop us fetching lots of stuff:
+    parsed_combined_ref = parse_validated_localized_reference(version.language_code,
+                                                              combined_ref)
+    chapter_count = abs(parsed_combined_ref.end_chapter - parsed_combined_ref.start_chapter)
+    if chapter_count > 1:
+        # Most chapters have more than 20 verses
+        if len(verse_list) / chapter_count < 20:
+            return False
+
     combined = fetch_localized_reference(version, version.language_code, combined_ref)
+
     return ([v.localized_reference for v in verse_list] ==
             [v.localized_reference for v in combined])
 
