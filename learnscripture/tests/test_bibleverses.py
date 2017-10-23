@@ -91,6 +91,19 @@ class VerseTests(TestBase):
                                     version=version).count(),
             0)
 
+    def test_get_unmerged_parts(self):
+        version = TextVersion.objects.get(slug='TCL02')
+
+        v1 = version.verse_set.get(localized_reference='Romalılar 3:24')
+        with self.assertNumQueries(0):
+            self.assertEqual(v1.get_unmerged_parts(),
+                             [v1])
+
+        v2 = version.verse_set.get(localized_reference='Romalılar 3:25-26')
+        with self.assertNumQueries(1):
+            self.assertEqual([v.localized_reference for v in v2.get_unmerged_parts()],
+                             ['Romalılar 3:25', 'Romalılar 3:26'])
+
 
 class VersionTests(TestBase):
 

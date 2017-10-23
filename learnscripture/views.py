@@ -31,7 +31,7 @@ from bibleverses.forms import VerseSetForm
 from bibleverses.languages import LANGUAGE_CODE_INTERNAL, LANGUAGES
 from bibleverses.models import (MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, TextType, TextVersion, VerseSet,
                                 VerseSetType, get_passage_sections, is_continuous_set)
-from bibleverses.parsing import internalize_localized_reference, localize_internal_reference
+from bibleverses.parsing import internalize_localized_reference, localize_internal_reference, parse_break_list
 from bibleverses.signals import public_verse_set_created
 from events.models import Event
 from groups.forms import EditGroupForm
@@ -777,8 +777,6 @@ def create_or_edit_set(request, set_type=None, slug=None):
         orig_verse_set_public = False if verse_set is None else verse_set.public
 
         form = VerseSetForm(request.POST, instance=verse_set)
-        # Need to propagate the references even if it doesn't validate,
-        # so do this work here:
         internal_reference_list_raw = [
             i for i in request.POST.get('internal_reference_list', '').split('|')
             if i
@@ -793,12 +791,15 @@ def create_or_edit_set(request, set_type=None, slug=None):
             if ref in verse_dict and ref not in localized_reference_list:
                 localized_reference_list.append(ref)
 
-        internal_reference_list = [
-            internalize_localized_reference(version.language_code, ref)
-            for ref in localized_reference_list
-        ]
+        # Need to build an internal list that doesn't have merged verses.
+        internal_reference_list = []
+        for ref in localized_reference_list:
+            verse = verse_dict[ref]
+            sub_verses = verse.get_unmerged_parts()
+            for v in sub_verses:
+                internal_reference_list.append(internalize_localized_reference(version.language_code, v.localized_reference))
 
-        breaks = request.POST.get('break_list', '')
+        breaks = normalize_break_list(request.POST.get('break_list', ''))
 
         form_is_valid = form.is_valid()
         if len(verse_dict) == 0:
@@ -861,6 +862,12 @@ def create_or_edit_set(request, set_type=None, slug=None):
     c.update(context_for_quick_find(request))
 
     return render(request, 'learnscripture/create_set.html', c)
+
+
+def normalize_break_list(breaks):
+    break_list = parse_break_list(breaks)
+    break_list = [r.get_start() for r in break_list]
+    return ",".join(r.canonical_form() for r in break_list)
 
 
 def get_hellbanned_mode(request):
