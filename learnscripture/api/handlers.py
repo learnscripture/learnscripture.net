@@ -380,8 +380,7 @@ class VerseFind(ApiView):
         # Can't get 'fields' to work properly for this case, so pack into
         # dictionaries.
         retval = [dict(localized_reference=r.localized_reference,
-                       internal_reference=internalize_localized_reference(version.language_code,
-                                                                          r.localized_reference),
+                       internal_reference=r.internal_reference,
                        text=r.text,
                        from_reference=r.from_reference,
                        parsed_ref=None if r.parsed_ref is None else r.parsed_ref.__dict__,
