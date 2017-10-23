@@ -123,17 +123,17 @@
   <h3>Status</h3>
 
   {% if started_count == 0 %}
-    <p>You are not learning this verse set.</p>
+    <p>You are not learning this verse set in {{ version.short_name }}.</p>
   {% elif started_count == verse_list|length %}
-    <p>You've started learning all the verses in this set.</p>
+    <p>You've started learning all the verses in this set in {{ version.short_name }}.</p>
   {% else %}
     <p>You've started learning {{ started_count }} out of {{ verse_list|length }}
-      verses in this set.</p>
+      verses in this set in version {{ version.short_name }}.</p>
   {% endif %}
 
   {% if in_queue > 0 %}
     <p>You have {{ in_queue }} verse(s) from this set in your queue for
-      learning.</p>
+      learning in version {{ version.short_name }}.</p>
 
     <p>If you want to remove them:</p>
 

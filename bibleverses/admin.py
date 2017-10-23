@@ -2,8 +2,7 @@ from django import forms
 from django.contrib import admin
 
 from .models import QAPair, TextVersion, UserVerseStatus, Verse, VerseChoice, VerseSet
-
-from .parsing import parse_validated_internal_reference, InvalidVerseReference
+from .parsing import InvalidVerseReference, parse_validated_internal_reference
 
 
 class TextVersionAdmin(admin.ModelAdmin):

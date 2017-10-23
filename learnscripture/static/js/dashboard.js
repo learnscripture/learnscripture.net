@@ -88,7 +88,7 @@ var learnscripture =
                 }
             });
             $("input[name=cancelpassage]").click(function (ev) {
-                if (!confirm("This will cancel learning this passage. " +
+                if (!confirm("This will cancel learning this passage in this version. " +
                              "Any test scores will be saved. " +
                              "Continue?")) {
                     ev.preventDefault();

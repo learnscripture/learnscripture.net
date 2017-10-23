@@ -304,15 +304,14 @@ def dashboard(request):
         return HttpResponseRedirect(reverse('choose'))
 
     if request.method == 'POST':
-        # verse_set_id needed by a few branches
-        try:
-            vs_id = int(request.POST['verse_set_id'])
-        except (KeyError, ValueError):
-            vs_id = None
 
         get_catechism_id = lambda: int(request.POST['catechism_id'])
 
         if 'learnbiblequeue' in request.POST:
+            if 'verse_set_id' in request.POST:
+                vs_id = int(request.POST['verse_set_id'])
+            else:
+                vs_id = None
             return learn_set(request,
                              identity.bible_verse_statuses_for_learning(vs_id),
                              session.LearningType.LEARNING)
@@ -333,17 +332,23 @@ def dashboard(request):
             # Some of these are sent via the verse_options.html template,
             # not from the dashboard.
 
+            vs_id = int(request.POST['verse_set_id'])
             verse_set = VerseSet.objects.get(id=vs_id)
-            uvss = identity.verse_statuses_for_passage(vs_id)
 
             if 'uvs_id' in request.POST:
                 # Triggered from 'verse_options.html'
                 uvs_id = int(request.POST['uvs_id'])
-                main_uvs = [uvs for uvs in uvss if uvs.id == uvs_id][0]
+                main_uvs = identity.verse_statuses.get(id=uvs_id)
+                version_id = main_uvs.version_id
+
+                uvss = identity.verse_statuses_for_passage(vs_id, version_id)
                 if ('reviewpassagesection' in request.POST or
                         'practisepassagesection' in request.POST):
                     # Review/practise the specified section
                     uvss = main_uvs.get_section_verse_status_list(uvss)
+            else:
+                version_id = request.POST['version_id']
+                uvss = identity.verse_statuses_for_passage(vs_id, version_id)
 
             if 'learnpassage' in request.POST:
                 uvss = identity.slim_passage_for_reviewing(uvss, verse_set)
@@ -377,6 +382,10 @@ def dashboard(request):
                              session.LearningType.REVISION)
 
         if 'clearbiblequeue' in request.POST:
+            if 'verse_set_id' in request.POST:
+                vs_id = int(request.POST['verse_set_id'])
+            else:
+                vs_id = None
             identity.clear_bible_learning_queue(vs_id)
             return HttpResponseRedirect(reverse('dashboard'))
         if 'clearcatechismqueue' in request.POST:
@@ -384,7 +393,8 @@ def dashboard(request):
             return HttpResponseRedirect(reverse('dashboard'))
         if 'cancelpassage' in request.POST:
             vs_id = int(request.POST['verse_set_id'])
-            identity.cancel_passage(vs_id)
+            version_id = int(request.POST['version_id'])
+            identity.cancel_passage(vs_id, version_id)
             return HttpResponseRedirect(reverse('dashboard'))
 
     groups, more_groups = get_user_groups(identity)
@@ -677,17 +687,17 @@ def view_verse_set(request, slug):
 
     if request.method == 'POST':
         if "drop" in request.POST and hasattr(request, 'identity'):
-            refs_to_drop = request.identity.which_in_learning_queue(all_localized_references)
-            request.identity.cancel_learning(refs_to_drop)
+            refs_to_drop = request.identity.which_in_learning_queue(all_localized_references, version)
+            request.identity.cancel_learning(refs_to_drop, version.slug)
             messages.info(request, "Dropped %d verse(s) from learning queue." % len(refs_to_drop))
 
     if hasattr(request, 'identity'):
         c['can_edit'] = request.identity.can_edit_verse_set(verse_set)
-        verses_started = request.identity.which_verses_started(all_localized_references)
+        verses_started = request.identity.which_verses_started(all_localized_references, version)
         c['started_count'] = len(verses_started)
 
         if verse_set.is_selection:
-            c['in_queue'] = len(request.identity.which_in_learning_queue(all_localized_references))
+            c['in_queue'] = len(request.identity.which_in_learning_queue(all_localized_references, version))
         else:
             c['in_queue'] = 0
     else:

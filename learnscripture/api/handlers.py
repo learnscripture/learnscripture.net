@@ -239,8 +239,8 @@ class CancelLearningVerseHandler(ApiView):
     @require_preexisting_identity_m
     def post(self, request):
         verse_status = get_verse_status(request.POST)
-        localized_reference = verse_status['localized_reference']
-        request.identity.cancel_learning([localized_reference])
+        request.identity.cancel_learning([verse_status['localized_reference']],
+                                         verse_status['version']['slug'])
         session.verse_status_cancelled(request, verse_status['id'])
         return {}
 
@@ -250,7 +250,8 @@ class CancelLearningPassageHandler(ApiView):
     @require_preexisting_identity_m
     def post(self, request):
         vs_id = int(request.POST['verse_set_id'])
-        request.identity.cancel_passage(vs_id)
+        version_id = int(request.POST['version_id'])
+        request.identity.cancel_passage(vs_id, version_id)
         return {}
 
 

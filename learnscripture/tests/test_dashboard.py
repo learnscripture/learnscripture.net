@@ -30,10 +30,13 @@ class DashboardTestsBase(RequireExampleVerseSetsMixin):
             self.assertEqual(ref, verse_data['title_text'])
 
     def click_clear_learning_queue_btn(self, verse_set_id):
-        self.click_and_confirm('#id-learning-queue-verse-set-%s input[name=clearbiblequeue]' % (verse_set_id if verse_set_id else ''))
+        if verse_set_id:
+            self.click_and_confirm('#id-learning-queue-verse-set-%s input[name=clearbiblequeue]' % verse_set_id)
+        else:
+            self.click_and_confirm('#id-learning-queue-non-verse-set input[name=clearbiblequeue]')
 
-    def click_cancel_passage_btn(self, verse_set_id):
-        self.click_and_confirm('#id-cancelpassage-btn-%d' % verse_set_id)
+    def click_cancel_passage_btn(self, verse_set_id, version_id):
+        self.click_and_confirm('#id-cancelpassage-btn-%d-%d' % (verse_set_id, version_id))
 
     def click_clear_catechsim_queue_btn(self):
         self.click_and_confirm('input[name=clearcatechismqueue]')
@@ -66,7 +69,7 @@ class DashboardTestsBase(RequireExampleVerseSetsMixin):
 
         self.get_url('dashboard')
         # Test clicking 'Start learning' for general queue
-        self.submit('#id-learning-queue-verse-set- input[name=learnbiblequeue]')
+        self.submit('#id-learning-queue-non-verse-set input[name=learnbiblequeue]')
         self.assert_learning_localized_reference("Psalm 23:2")
 
         # Test clicking 'Clear queue'
@@ -101,12 +104,12 @@ class DashboardTestsBase(RequireExampleVerseSetsMixin):
         self.assertTextPresent('Psalm 23')
 
         # Test 'Continue learning' button
-        self.submit('#id-learnpassage-btn-%d' % vs.id)
+        self.submit('#id-learnpassage-btn-%d-%d' % (vs.id, i.default_bible_version.id))
         self.assert_learning_localized_reference("Psalm 23:1")
 
         # Test 'Cancel learning' button
         self.get_url('dashboard')
-        self.click_cancel_passage_btn(vs.id)
+        self.click_cancel_passage_btn(vs.id, i.default_bible_version.id)
         self.assertTextAbsent('Psalm 23')
 
     def test_learn_catechism(self):

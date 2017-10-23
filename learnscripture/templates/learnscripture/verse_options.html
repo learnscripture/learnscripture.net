@@ -76,6 +76,7 @@
 
           {# Selections #}
           <input type="hidden" name="verse_status_id" value="{{ uvs.id }}" />
+          <input type="hidden" name="verse_status_version_slug" value="{{ uvs.version.slug }}" />
           <input type="hidden" name="verse_status_localized_reference" value="{{ uvs.localized_reference }}" />
           <p>
             <input type="submit" name="cancellearning" class="btn primary cancel-learning-verse-btn"
@@ -85,6 +86,7 @@
 
           {# Passages #}
           <input type="hidden" name="verse_set_id" value="{{ uvs.verse_set_id }}" />
+          <input type="hidden" name="version_id" value="{{ uvs.version_id }}" />
           <p>
             <input type="submit" name="cancellearning" class="btn primary cancel-learning-passage-btn"
                    value="Stop learning this passage ({{ uvs.verse_set.name }})" />

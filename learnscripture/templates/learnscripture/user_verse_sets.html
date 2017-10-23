@@ -5,8 +5,9 @@
 
   <ul>
     {% for cvs in chosen_verse_sets %}
-      <li><a href="{% url 'view_verse_set' cvs.verse_set.slug %}">{{ cvs.verse_set.name }}</a>
-        ({{ cvs.version.short_name }})</li>
+      <li>
+        <a href="{% url 'view_verse_set' cvs.verse_set.slug %}?version={{ cvs.version.slug }}">{{ cvs.verse_set.name }}</a> ({{ cvs.version.short_name }})
+      </li>
     {% endfor %}
   </ul>
 

@@ -67,7 +67,11 @@
       <tbody>
         {% for verse in verses %}
           {% ifchanged verse.localized_reference verse.version.slug %}
-            <tr {% if verse.verse_set_id %}data-verse-set-id="{{ verse.verse_set_id }}"{% endif %}>
+            <tr {% if verse.verse_set_id %}
+                  data-verse-set-id="{{ verse.verse_set_id }}"
+                {% endif %}
+                data-version-id="{{ verse.version_id }}"
+                  >
               <td>{{ verse.title }}
                 <a class="btn verse-popup-btn" href="#" data-localized-reference="{{ verse.localized_reference }}" data-version="{{ verse.version.slug }}" data-title="{{ verse.title }}">Options</a></td>
               <td>{{ verse.version.slug }}</td>
