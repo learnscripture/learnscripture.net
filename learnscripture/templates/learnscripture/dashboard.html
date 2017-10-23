@@ -45,33 +45,35 @@
 
     {### Passages ###}
 
-    {% for vs in passages_for_reviewing %}
+    {% for cvs in passages_for_reviewing %}
       <div class="addclearfix">
         <form action="" method="POST">
           {% csrf_token %}
-          <input type="hidden" name="verse_set_id" value="{{ vs.id }}" />
-          {% if vs.splittable %}
+          <input type="hidden" name="verse_set_id" value="{{ cvs.verse_set.id }}" />
+          <input type="hidden" name="version_id" value="{{ cvs.version.id }}" />
+          {% if cvs.splittable %}
             <input type="submit" name="reviewpassage" class="btn primary" value="Review whole passage"
-                   id="id-reviewpassage-btn-{{ vs.id }}" /><br/>
+                   id="id-reviewpassage-btn-{{ cvs.id }}" /><br/>
             <input type="submit" name="reviewpassagenextsection" class="btn primary"
-                   value="Review one section ({{ vs.next_section_verse_count }} vss)"
-                   id="id-reviewpassage-sections-btn-{{ vs.id }}" /><br/>
+                   value="Review one section ({{ cvs.next_section_verse_count }} vss)"
+                   id="id-reviewpassage-sections-btn-{{ cvs.id }}" /><br/>
           {% else %}
             <input type="submit" name="reviewpassage" class="btn primary" value="Review"
-                   id="id-reviewpassage-btn-{{ vs.id }}" /><br/>
+                   id="id-reviewpassage-btn-{{ cvs.id }}" /><br/>
 
           {% endif %}
           <input type="submit" name="cancelpassage" class="btn" value="Cancel"
-                 id="id-cancelpassage-btn-{{ vs.id }}" /><br/>
+                 id="id-cancelpassage-btn-{{ cvs.id }}" /><br/>
         </form>
-        <h3>{{ vs.name }}</h3>
+        <h3>{{ cvs.verse_set.name }} ({{ cvs.version.short_name }})<br/>
+</h3>
         <div>
-          {% if vs.needs_testing_count == vs.total_verse_count %}
+          {% if cvs.needs_testing_count == cvs.total_verse_count %}
             This passage is due for review today
-            ({{ vs.total_verse_count }} verses).
+            ({{ cvs.total_verse_count }} verses).
           {% else %}
             Part of this passage is due for review today
-            ({{ vs.needs_testing_count }}/{{ vs.total_verse_count }} verses).
+            ({{ cvs.needs_testing_count }}/{{ cvs.total_verse_count }} verses).
           {% endif %}
         </div>
       </div>
@@ -148,27 +150,28 @@
 
     {### Passages ###}
 
-    {% for vs in passages_for_learning %}
+    {% for cvs in passages_for_learning %}
       <div class="addclearfix">
         <form action="" method="POST">
           {% csrf_token %}
-          <input type="hidden" name="verse_set_id" value="{{ vs.id }}" />
+          <input type="hidden" name="verse_set_id" value="{{ cvs.verse_set.id }}" />
+          <input type="hidden" name="version_id" value="{{ cvs.version.id }}" />
           <input type="submit" name="learnpassage" class="btn primary"
-                 {% if vs.tested_total == 0 %}
+                 {% if cvs.tested_total == 0 %}
                  value="Start learning"
                  {% else %}
                  value="Continue learning"
                  {% endif %}
-                 id="id-learnpassage-btn-{{ vs.id }}" /><br>
+                 id="id-learnpassage-btn-{{ cvs.id }}" /><br>
           <input type="submit" name="cancelpassage" class="btn" value="Cancel"
-                 id="id-cancelpassage-btn-{{ vs.id }}" />
+                 id="id-cancelpassage-btn-{{ cvs.id }}" />
         </form>
-        <h3><a href="{% url 'view_verse_set' vs.slug %}">{{ vs.name }}</a></h3>
-        {% if vs.tested_total == 0 %}
+        <h3><a href="{% url 'view_verse_set' cvs.verse_set.slug %}?version={{ cvs.version.slug }}">{{ cvs.verse_set.name }}</a> ({{ cvs.version.short_name }})</h3>
+        {% if cvs.tested_total == 0 %}
           <p>You've queued this passage for learning.</p>
         {% else %}
-          <p>You've seen {{ vs.tested_total }} verse(s) so far,
-            with {{ vs.untested_total }} to go.</p>
+          <p>You've seen {{ cvs.tested_total }} verse(s) so far,
+            with {{ cvs.untested_total }} to go.</p>
         {% endif %}
       </div>
       {% if not forloop.last %}<hr>{% endif %}
@@ -185,11 +188,17 @@
         <div class="addclearfix">
           <form action="" method="POST"
                 {# for benefit of testing: #}
+                {% if verse_set %}
                 id="id-learning-queue-verse-set-{{ verse_set.id }}"
+                {% else %}
+                id="id-learning-queue-non-verse-set"
+                {% endif %}
                 >
             {% csrf_token %}
             <input type="submit" name="learnbiblequeue" class="btn primary" value="Learn" /><br /><input type="submit" name="clearbiblequeue" class="btn" value="Clear" />
-            <input type="hidden" name="verse_set_id" value="{{ verse_set.id }}" />
+            {% if verse_set %}
+              <input type="hidden" name="verse_set_id" value="{{ verse_set.id }}" />
+            {% endif %}
           </form>
 
           {% if verse_set %}
