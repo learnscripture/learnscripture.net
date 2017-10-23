@@ -686,3 +686,29 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
                           ChosenVerseSet(verse_set=vs1,
                                          version=i.default_bible_version),
                           ])
+
+    def test_next_verse_due(self):
+        i = self.create_identity(version_slug='NET')
+        vs1 = VerseSet.objects.get(name='Bible 101')
+
+        # Initial
+        self.assertEqual(i.next_verse_due(), None)
+
+        # Added a verse
+        i.add_verse_set(vs1)
+        self.assertEqual(i.next_verse_due(), None)
+
+        i.record_verse_action('John 3:16', 'NET', StageType.TEST, 1)
+        nv = i.next_verse_due()
+        self.assertEqual(nv.localized_reference, 'John 3:16')
+
+    def test_next_verse_due_ignores_passages_in_initial_learning(self):
+        i = self.create_identity(version_slug='NET')
+        vs1 = VerseSet.objects.get(name='Psalm 23')
+
+        # Added a verse
+        i.add_verse_set(vs1)
+        self.assertEqual(i.next_verse_due(), None)
+
+        i.record_verse_action('Psalm 23:1', 'NET', StageType.TEST, 1)
+        self.assertEqual(i.next_verse_due(), None)
