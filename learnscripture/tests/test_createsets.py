@@ -3,7 +3,7 @@ import time
 
 from awards.models import AwardType
 from bibleverses.languages import LANGUAGE_CODE_EN
-from bibleverses.models import StageType, VerseSet, VerseSetType
+from bibleverses.models import StageType, VerseSet, VerseSetType, TextVersion
 from events.models import Event, EventType
 
 from .base import FullBrowserTest
@@ -176,6 +176,40 @@ class CreateSetTests(FullBrowserTest):
         self.assertTrue(len(vs.verse_choices.all()), 10)
         self.assertEqual(vs.breaks, "BOOK0 1:3,BOOK0 1:9")
         self.assertEqual(vs.passage_id, 'BOOK0 1:1-10')
+
+    def test_create_passage_set_merged(self):
+        # Tests for creating with a version that has merged verses
+        self._identity.default_bible_version = TextVersion.objects.get(slug='TCL02')
+        self._identity.save()
+        self.login(self._account)
+        self.get_url('create_passage_set')
+
+        self.fill({"#id_quick_find": "Romalılar 3:24-27"})
+        self.click("#id_lookup")
+        self.wait_until_loaded('#id-verse-list tbody tr td')
+
+        # Displayed verses will have to shown merged verses:
+        self.assertTextPresent("Romalılar 3:24")
+        self.assertTextPresent("İnsanlar İsa Mesih'te olan kurtuluşla")
+        self.assertTextPresent("Romalılar 3:25-26")
+        self.assertTextPresent("Tanrı Mesih'i, kanıyla günahları bağışlatan")
+        self.assertTextPresent("Romalılar 3:27")
+        self.assertTextPresent("Öyleyse neyle övünebiliriz?")
+
+        # Check boxes for Rom 3:25-26
+        self.click('#id-verse-list tbody tr:nth-child(2) input')
+
+        self.click("#id-save-btn")
+
+        self.assertTrue(self.get_page_title().startswith("Verse set: Romalılar 3:24-27"))
+
+        # VerseSet will be as neutral as possible, so has unmerged verses.
+        vs = VerseSet.objects.get(name='Romalılar 3:24-27',
+                                  set_type=VerseSetType.PASSAGE)
+        self.assertEqual([vc.internal_reference for vc in vs.verse_choices.all()],
+                         ['BOOK44 3:24', 'BOOK44 3:25', 'BOOK44 3:26', 'BOOK44 3:27'])
+        self.assertEqual(vs.breaks, "BOOK44 3:25")
+        self.assertEqual(vs.passage_id, 'BOOK44 3:24-27')
 
     def test_create_duplicate_passage_set(self):
         self.test_create_passage_set()
