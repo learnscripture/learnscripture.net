@@ -347,7 +347,7 @@ def html_format_text(verse):
             html = '<b>' + html + '</b>'
         out.append(html)
         in_bold = not in_bold
-    return mark_safe(''.join(out))
+    return mark_safe(''.join(out).replace('\n', '<br>'))
 
 
 class VerseFind(ApiView):

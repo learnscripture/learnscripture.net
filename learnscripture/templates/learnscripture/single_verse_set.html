@@ -23,7 +23,7 @@
             <span class="chapternumber">{{ v.chapter_number }}</span>
           {% endifchanged %}
           <span class="versenumber">{{ v.display_verse_number }}</span>
-          {{ v.text }}
+          {{ v.text|linebreaksbr }}
         </div>
       {% endfor %}
       <br/>
@@ -33,7 +33,7 @@
       <ul>
         {% for v in verse_list %}
           <li>
-            {{ v.localized_reference }}: {{ v.text }}
+            <strong>{{ v.localized_reference }}:</strong> {{ v.text|linebreaksbr }}
             <br/><br/>
           </li>
         {% endfor %}
