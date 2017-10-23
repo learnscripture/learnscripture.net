@@ -96,17 +96,22 @@ var learnscripture =
 
         var versionChange = function (ev) {
             var $form = $(this).closest('form');
-            var langCode = $form.find('#id-version-select option:selected').attr('data-lang-code');
+            var langCode = $('#id-version-select option:selected').attr('lang');
             $form.find('select[name=book] option').each(function (idx, elem) {
                 var $opt = $(elem);
                 $opt.text($opt.attr('data-lang-' + langCode));
             });
-
             if (lastSetReference !== null) {
                 if ($('input[name=quick_find]').val() == lastSetReference) {
                     setQuickFind($form); // Might need to be updated due to language change
                 }
             }
+            languageChange();
+        }
+
+        var languageChange = function () {
+            var langCode = $('#id-version-select option:selected').attr('lang');
+            $('[data-lang-specific]').hide().filter('[lang=' + langCode + ']').show();
         }
 
         var getBook = function ($form) {
@@ -324,6 +329,7 @@ var learnscripture =
                     $(this).closest('form').find('input[type=submit].primary:first').click();
                 }
             });
+            languageChange();
         };
 
         // Exports:
