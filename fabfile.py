@@ -538,24 +538,33 @@ def push_sources(target):
     Push source code to server
     """
     ensure_src_dir(target)
-    excludes = ["*.pyc", "*.pyo", "*.db", ".DS_Store", ".coverage",
-                ".git", ".hg"]
-    local_dir = rel(".") + "/"
 
-    # TODO - for speed use hg and hg clone instead of rsync, perhaps For speed,
-    # we copy from previous dir, then make sure we use 'delete' with rsync
+    # For speed, we copy from previous dir
     previous_target = get_target_current_version(target)
     target_src_root = target.SRC_ROOT
     previous_src_root = previous_target.SRC_ROOT
-    if exists(previous_src_root):
-        run("rsync -a '--exclude=*.pyc' --exclude=.hg %s/ %s" %
-            (previous_src_root,
-             target_src_root))
 
-    rsync_project(remote_dir=target.SRC_ROOT,
-                  local_dir=local_dir,
-                  delete=True,
-                  exclude=excludes)
+    if not exists(os.path.join(target_src_root, '.hg')):
+        previous_target = get_target_current_version(target)
+        previous_src_root = previous_target.SRC_ROOT
+        if exists(previous_src_root) and exists(os.path.join(previous_src_root, '.hg')):
+            # For speed, clone the 'current' repo which will be very similar to
+            # what we are pushing. This will also be fast due to 'hg clone'
+            # using hard links
+            run("hg clone %s %s" % (previous_src_root,
+                                    target_src_root))
+        else:
+            with cd(target_src_root):
+                run("hg init")
+
+    local("hg push -f ssh://%(user)s@%(host)s/%(path)s || true" %
+          dict(host=env.host,
+               user=env.user,
+               path=target_src_root,
+               ))
+    with cd(target_src_root):
+        run("hg update -r %s" % target.version)
+
     # Also need to sync files that are not in main sources VCS repo.
     push_secrets(target)
 
