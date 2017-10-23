@@ -218,6 +218,8 @@ class ComboVerse(object):
     Wrapper needed when we want a combination of verses to appear as a single
     verse.
     """
+    # Mimic Verse propeties
+
     def __init__(self, localized_reference, verse_list):
         self.localized_reference = localized_reference
         self.book_name = verse_list[0].book_name
@@ -232,6 +234,17 @@ class ComboVerse(object):
         # Do this lazily, so that we can update .text_saved in underlying Verse
         # objects if necessary.
         return ' '.join(v.text for v in self.verses)
+
+    def get_unmerged_parts(self):
+        return [self]
+
+    @property
+    def version(self):
+        return self.verses[0].version
+
+    @cached_property
+    def internal_reference(self):
+        return internalize_localized_reference(self.version.language_code, self.localized_reference)
 
 
 class VerseSearchResult(ComboVerse):

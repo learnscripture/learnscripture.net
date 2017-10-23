@@ -42,6 +42,27 @@ class CreateSetTests(FullBrowserTest):
         self.assertEqual(Event.objects.filter(event_type=EventType.VERSE_SET_CREATED).count(),
                          1)
 
+    def test_create_selection_set_combos(self):
+        self.login(self._account)
+        self.get_url('create_selection_set')
+        self.fill({"#id_name": "My set"})
+        self._add_ref("Gen 1:1-2")
+        self._add_ref("Gen 1:4")
+
+        self.fill({"#id_public": True})
+        self.submit("#id-save-btn")
+        self.assertTrue(self.get_page_title().startswith("Verse set: My set"))
+        self.assertTextPresent("In the beginning")
+
+        vs = VerseSet.objects.get()
+        # Check editing doesn't break it
+        self.get_url('edit_set', slug=vs.slug)
+        self.click("#id-save-btn")
+
+        vs = VerseSet.objects.get()
+        self.assertEqual([vc.internal_reference for vc in vs.verse_choices.all()],
+                         ["BOOK0 1:1-2", "BOOK0 1:4"])
+
     def test_dedupe_selection_sets(self):
         self.login(self._account)
         self.get_url("create_selection_set")
