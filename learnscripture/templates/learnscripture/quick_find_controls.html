@@ -6,11 +6,23 @@
     <div class="input">
       <input id="id_quick_find" type="text" value="" name="quick_find">
       <br/>
-      {% if quick_find_mode == 'PASSAGE' %}
-        example: <b>Romans 8:28-39</b>
-      {% else %}
-        example: <b>Matt 28:19</b> or <b>make disciples</b>
-      {% endif %}
+      <div id="id_quick_find_help">
+        {% if quick_find_mode == 'PASSAGE' %}
+          <div data-lang-specific lang="en">
+            example: <b>Romans 8:28-39</b>
+          </div>
+          <div data-lang-specific lang="tr">
+            örnek: <b>Yuh 3:16</b>
+          </div>
+        {% else %}
+          <div data-lang-specific lang="en">
+            example: <b>Matt 28:19</b> or <b>make disciples</b>
+          </div>
+          <div data-lang-specific lang="tr">
+            örnek: <b>Yuh 3:16</b> veya <b>dünya sev</b>
+          </div>
+        {% endif %}
+      </div>
     </div>
   </div>
 
@@ -52,7 +64,7 @@
       <select id="id-version-select" name="version">
         {% for v in bible_versions %}
           <option value="{{ v.slug }}"
-                  data-lang-code="{{ v.language_code }}"
+                  lang="{{ v.language_code }}"
                   {% if v.slug == default_bible_version.slug %}selected{% endif %}
                   >{{ v.short_name }} ({{ v.full_name }})</option>
         {% endfor %}

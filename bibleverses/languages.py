@@ -14,6 +14,8 @@ class Language(object):
     display_name = attr.ib()
 
 
+# These must correspond with the HTML lang attribute values. i.e. 2 letter, ISO
+# 639-1 codes in most cases.
 LANGUAGE_CODE_EN = 'en'
 LANGUAGE_CODE_TR = 'tr'
 
