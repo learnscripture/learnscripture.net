@@ -1,4 +1,4 @@
--e git://github.com/Deepwalker/aldjemy.git@45c644b04bab6e9cb657fcf2a529113b17061f76#egg=aldjemy
+-e git://github.com/Deepwalker/aldjemy.git@a692417f0afef93f929898cec2ff2a8e91a093ad#egg=aldjemy
 -e git://github.com/django-fiber/django-fiber.git@bfc3e3c1950198ef6c015feac78e155b7c508c36#egg=django-fiber
 -e git://github.com/mlavin/django-selectable.git@66ed38326cbd8ffa611c9648f58343a899cc1e41#egg=django_selectable
 -e git://github.com/riccardoscalco/Pykov.git@16cda2f2c0ed8143ddcfa25dac34d3dadc982380#egg=pykov
@@ -7,7 +7,7 @@
 -e git://github.com/spookylukey/django-bootstrap-form.git@b228f986e6650ad4690eedc70cca5ff044feaab2#egg=django-bootstrap-form
 -e hg+https://bitbucket.org/schinckel/django-jsonfield@6c37ee0fd8f2f999b21c068e733876d937d74a00#egg=django-jsonfield
 ConcurrentLogHandler==0.9.1
-Django==1.11.4
+Django==1.11.6
 SQLAlchemy==1.1.10
 amqp==2.1.4
 attrs==17.2.0
