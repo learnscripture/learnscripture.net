@@ -1280,6 +1280,9 @@ var learnscripture = (function (learnscripture, $) {
         return stripOuterPunctuation(str.trim().toLowerCase());
     }
 
+    // NB Javascript regex character classes like \W \w etc. don't handle
+    // unicode, such as Turkish characters, so we are better off building lists
+    // of non-letter-like characters.
     var stripPunctuation = function (str) {
         return str.replace(/["'\.,;!?:\/#!$%\^&\*{}=\-_`~()\[\]“”‘’—]/g, "");
     };
@@ -1687,7 +1690,8 @@ var learnscripture = (function (learnscripture, $) {
 
 
         var makeNormalWord = function (word, wordClass) {
-            var start = word.match(/\W*./)[0];
+            var core = stripOuterPunctuation(word);
+            var start = word.slice(0, word.indexOf(core[0]) + 1);
             var end = word.slice(start.length);
             return ('<span id="id-word-' + wordNumber.toString() +
                 '" class=\"' + wordClass + '\">' +
