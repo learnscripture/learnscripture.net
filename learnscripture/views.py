@@ -669,16 +669,17 @@ def view_verse_set(request, slug):
     verse_list = get_verse_set_verse_list(version, verse_set)
     all_localized_references = [v.localized_reference for v in verse_list]
 
-    if (verse_set.is_selection and is_continuous_set(verse_list)):
-        c['show_convert_to_passage'] = True
+    if hasattr(request, 'identity') and request.identity.can_edit_verse_set(verse_set):
+        if (verse_set.is_selection and is_continuous_set(verse_list)):
+            c['show_convert_to_passage'] = True
 
-        if request.method == 'POST':
-            if 'convert_to_passage_set' in request.POST:
-                verse_set.set_type = VerseSetType.PASSAGE
-                verse_set.save()
-                verse_set.update_passage_id()
-                messages.info(request, "Verse set converted to 'passage' type")
-                c['show_convert_to_passage'] = False
+            if request.method == 'POST':
+                if 'convert_to_passage_set' in request.POST:
+                    verse_set.set_type = VerseSetType.PASSAGE
+                    verse_set.save()
+                    verse_set.update_passage_id()
+                    messages.info(request, "Verse set converted to 'passage' type")
+                    c['show_convert_to_passage'] = False
 
     if request.method == 'POST':
         if "drop" in request.POST and hasattr(request, 'identity'):
