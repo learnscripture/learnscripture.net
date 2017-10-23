@@ -923,19 +923,21 @@ class Identity(models.Model):
                                       .select_related('verse_set', 'version')
         chosen_verse_sets = {}
 
-        if extra_stats:
-            # We already have info needed for untested_total
-            for s in statuses:
-                cvs_id = (s.verse_set.id, s.version.id)
-                if cvs_id not in chosen_verse_sets:
-                    cvs = ChosenVerseSet(version=s.version,
-                                         verse_set=s.verse_set)
-                    chosen_verse_sets[cvs_id] = cvs
+        # We already have info needed for untested_total
+        for s in statuses:
+            cvs_id = (s.verse_set.id, s.version.id)
+            if cvs_id not in chosen_verse_sets:
+                cvs = ChosenVerseSet(version=s.version,
+                                     verse_set=s.verse_set)
+                chosen_verse_sets[cvs_id] = cvs
+                if extra_stats:
                     cvs.untested_total = 0
-                else:
-                    cvs = chosen_verse_sets[cvs_id]
+            else:
+                cvs = chosen_verse_sets[cvs_id]
+            if extra_stats:
                 cvs.untested_total += 1
 
+        if extra_stats:
             # We need one additional query per ChosenVerseSet for tested_total
             for cvs in chosen_verse_sets.values():
                 cvs.tested_total = self.verse_statuses.filter(verse_set=cvs.verse_set,
