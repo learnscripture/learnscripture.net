@@ -1055,27 +1055,23 @@ class Identity(models.Model):
                                        .filter(verse_set=cvs.verse_set, version=cvs.version)
                                        for cvs in cvss]).values_list('id', flat=True))
 
-        try:
-            return (self.verse_statuses
-                    .filter(ignored=False,
-                            next_test_due__isnull=False,
-                            next_test_due__gte=timezone.now(),
-                            strength__lt=memorymodel.LEARNT)
-                    .exclude(id__in=exclude_ids)
-                    .order_by('next_test_due'))[0]
-        except IndexError:
-            return None
+        return (self.verse_statuses
+                .filter(ignored=False,
+                        next_test_due__isnull=False,
+                        next_test_due__gte=timezone.now(),
+                        strength__lt=memorymodel.LEARNT)
+                .exclude(id__in=exclude_ids)
+                .order_by('next_test_due')
+                .first())
 
     def first_overdue_verse(self, now):
-        try:
-            return (self.verse_statuses
-                    .filter(ignored=False,
-                            next_test_due__isnull=False,
-                            next_test_due__lt=now,
-                            strength__lt=memorymodel.LEARNT)
-                    .order_by('next_test_due'))[0]
-        except IndexError:
-            return None
+        return (self.verse_statuses
+                .filter(ignored=False,
+                        next_test_due__isnull=False,
+                        next_test_due__lt=now,
+                        strength__lt=memorymodel.LEARNT)
+                .order_by('next_test_due')
+                .first())
 
     def verse_statuses_for_passage(self, verse_set_id, version_id):
         # Must be strictly in the bible order
