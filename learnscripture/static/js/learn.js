@@ -449,12 +449,6 @@ var learnscripture = (function (learnscripture, $) {
         completeStageGroup();
         showTestFinishedControls();
 
-        if (nextVersePossible()) {
-            $('#id-finish-btn').show();
-        } else {
-            $('#id-finish-btn').hide();
-        }
-
         if (accuracyPercent < 90) {
             $('#id-more-practice-btn').show();
 
@@ -1988,22 +1982,6 @@ var learnscripture = (function (learnscripture, $) {
         }
     }
 
-    var finishBtnClick = function (ev) {
-        // Skip to end, which skips everything in between
-        var verse = versesToLearn[maxVerseIndex];
-        $.ajax({
-            url: '/api/learnscripture/v1/skipverse/?format=json',
-            dataType: 'json',
-            type: 'POST',
-            data: {
-                verse_status: JSON.stringify(verse, null, 2)
-            },
-            success: learnscripture.ajaxRetrySucceeded,
-            retry: learnscripture.ajaxRetryOptions,
-            error: learnscripture.ajaxRetryFailed
-        });
-        finish();
-    };
 
     // === Setup and wiring ===
     var fastEventBind = function ($elem, callback) {
@@ -2054,7 +2032,6 @@ var learnscripture = (function (learnscripture, $) {
         $('#id-back-btn').bind('click', back).show();
         $('#id-next-verse-btn').bind('click', nextVerse);
         $('#id-context-next-verse-btn').bind('click', markReadAndNextVerse);
-        $('#id-finish-btn').bind('click', finishBtnClick);
 
         fastEventBind($('#id-hint-btn'), function (ev) {
             ev.preventDefault();

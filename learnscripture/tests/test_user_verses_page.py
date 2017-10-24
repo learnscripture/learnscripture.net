@@ -61,8 +61,15 @@ class UserVersesPageTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         for word in words.split():
             self.fill({"#id-typing": word + " "})
 
-        # Click finish
-        self.submit("#id-finish-btn")
+        # Click next
+        self.click("#id-next-verse-btn")
+
+        # Skip twice
+        self.click("#id-verse-dropdown")
+        self.click("#id-skip-verse-btn")
+
+        self.click("#id-verse-dropdown")
+        self.click("#id-skip-verse-btn")
 
         # Should have gone back to where we came from
         self.assertUrlsEqual(reverse('user_verses'))
