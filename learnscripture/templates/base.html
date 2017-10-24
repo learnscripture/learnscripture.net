@@ -30,7 +30,11 @@
       <div class="fill">
         <div class="container">
           <div class="topbarinner">
-            <a class="brand" {% if request.identity.default_to_dashboard %}href="/dashboard/" title="Dashboard"{% else %}href="/"{% endif %}>Learn Scripture</a>
+            {% if request.identity.default_to_dashboard %}
+              <a class="brand" href="/dashboard/" title="Dashboard">Dashboard</a>
+            {% else %}
+              <a class="brand" href="/">Learn Scripture</a>
+            {% endif %}
             <ul class="nav primary-nav">
               {% for m in menuitems %}
                 <li {% if m.active %}class="active"{% endif %}><a href="{{ m.path }}">{{ m.caption }}</a></li>
