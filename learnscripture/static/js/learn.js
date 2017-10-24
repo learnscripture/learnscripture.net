@@ -449,34 +449,27 @@ var learnscripture = (function (learnscripture, $) {
         completeStageGroup();
         showTestFinishedControls();
 
-        if (accuracyPercent < 90) {
-            $('#id-more-practice-btn').show();
+        if (accuracyPercent < 80) {
+            // 'More practice' the default
+            $('#id-next-verse-btn').removeClass('primary');
+            $('#id-more-practice-btn').addClass('primary');
 
-            if (accuracyPercent < 80) {
-                // 'More practice' the default
-                $('#id-next-verse-btn').removeClass('primary');
-                $('#id-more-practice-btn').addClass('primary');
-
-            } else {
-                // 'More practice' available but not default
-                $('#id-more-practice-btn').removeClass('primary');
-                $('#id-next-verse-btn').addClass('primary');
-            }
-
-            fastEventBind($('#id-more-practice-btn').unbind(), function (ev) {
-                if (accuracyPercent < 10) {
-                    currentStageList = chooseStageListForStrength(0);
-                } else if (accuracyPercent < 30) {
-                    currentStageList = ['read', 'recall2', 'recall4', 'test'];
-                } else {
-                    currentStageList = ['recall2', 'recall4', 'test'];
-                }
-                setUpStage(0);
-            });
         } else {
-            $('#id-more-practice-btn').removeClass('primary').hide();
+            // 'More practice' available but not default
+            $('#id-more-practice-btn').removeClass('primary');
             $('#id-next-verse-btn').addClass('primary');
         }
+
+        fastEventBind($('#id-more-practice-btn').unbind(), function (ev) {
+            if (accuracyPercent < 20) {
+                currentStageList = chooseStageListForStrength(0);
+            } else if (accuracyPercent < 70) {
+                currentStageList = ['read', 'recall2', 'recall4', 'test'];
+            } else {
+                currentStageList = ['recall2', 'recall4', 'test'];
+            }
+            setUpStage(0);
+        });
         bindDocKeyPress();
     };
 

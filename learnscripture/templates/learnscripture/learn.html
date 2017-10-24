@@ -92,106 +92,102 @@
 
     <div id="id-bottom-controls">
       <div class="buttonbar" style="display:none;">
-        <div>
-          <div class="stage-specific
-                      stage-read
-                      stage-recall1
-                      stage-recall2
-                      stage-recall3
-                      stage-recall4
-                      stage-test
-                      stage-practice
-                      ">
-            <button class="btn" id="id-help-btn">Tips</button>
-          </div>
-          <div class="progress
-                      stage-specific
-                      stage-read
-                      stage-recall1
-                      stage-recall2
-                      stage-recall3
-                      stage-recall4
-                      stage-test
-                      stage-practice
-                      ">
-            <progress id="id-progress-bar" value="0" max="100">0%</progress>
-          </div>
-          <div id="id-results"
-               class="stage-specific
-                      stage-test-finished
-                      ">
-            <b>RESULTS:</b> You scored <span id="id-accuracy"></span> - <span id="id-result-comment"></span>
-          </div>
+        <div class="tabular">
           <div>
-            <nobr>
+            <div class="stage-specific
+                        stage-read
+                        stage-recall1
+                        stage-recall2
+                        stage-recall3
+                        stage-recall4
+                        stage-test
+                        stage-practice
+                        ">
+              <button class="btn" id="id-help-btn">Tips</button>
+            </div>
+            <div class="progress
+                        stage-specific
+                        stage-read
+                        stage-recall1
+                        stage-recall2
+                        stage-recall3
+                        stage-recall4
+                        stage-test
+                        stage-practice
+                        ">
+              <progress id="id-progress-bar" value="0" max="100">0%</progress>
+            </div>
+            <div class="stage-specific
+                        stage-test
+                        stage-practice">
 
               <input id="id-hint-btn"
                      value="Get hint"
                      type="submit"
-                     class="btn
-                            stage-specific
-                            stage-test
-                            stage-practice
-                            "
+                     class="btn"
                      >
-
+            </div>
+            <div class="stage-specific
+                        stage-read
+                        stage-recall1
+                        stage-recall2
+                        stage-recall3
+                        stage-recall4
+                        stage-test
+                        ">
               <input id="id-back-btn"
                      value="Back"
                      type="submit"
-                     class="btn
-                            stage-specific
-                            stage-read
-                            stage-recall1
-                            stage-recall2
-                            stage-recall3
-                            stage-recall4
-                            "
+                     class="btn"
                      disabled>
-
+            </div>
+            <div class="stage-specific
+                        stage-read
+                        stage-recall1
+                        stage-recall2
+                        stage-recall3
+                        stage-recall4
+                        stage-test
+                        ">
               <input id="id-next-btn"
                      value="Next"
                      type="submit"
-                     class="primary btn
-                            stage-specific
-                            stage-read
-                            stage-recall1
-                            stage-recall2
-                            stage-recall3
-                            stage-recall4
-                            "
-                     >
-
-              <input id="id-more-practice-btn"
-                     value="More practice"
-                     type="submit"
-                     class="btn
-                            stage-specific
-                            "
-                     >
-
-              <input id="id-next-verse-btn"
-                     value="Next"
-                     type="submit"
-                     class="btn primary
-                            stage-specific
-                            stage-test-finished
-                            "
-                     >
-
+                     class="primary btn">
+            </div>
+            <div class="stage-specific
+                        stage-readForContext
+                        "
               <input id="id-context-next-verse-btn"
                      value="Next"
                      type="submit"
-                     class="btn primary
-                            stage-specific
-                            stage-readForContext
-                            "
-                     >
-
-            </nobr>
+                     class="btn primary">
+            </div>
           </div>
         </div>
-      </div>
+        <div id="id-results"
+             class="stage-specific
+                    stage-test-finished
+                    ">
+          <b>RESULTS:</b> You scored <span id="id-accuracy"></span> - <span id="id-result-comment"></span>
+        </div>
+        <div id="id-test-finished-btns"
+             class="stage-specific
+                    stage-test-finished
+                    ">
 
+          <input id="id-more-practice-btn"
+                 value="More practice"
+                 type="submit"
+                 class="btn""
+                 >
+
+          <input id="id-next-verse-btn"
+                 value="Next"
+                 type="submit"
+                 class="btn primary"
+                 >
+        </div>
+      </div>
     </div>
 
     <div id="id-help" style="display:none;" class="alert-message block-message info">
