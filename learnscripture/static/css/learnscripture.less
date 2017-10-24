@@ -1060,15 +1060,18 @@ span.versenumber {
 
 .buttonbar
 {
-    text-align: right;
-    display: table;
-    width: 100%;
-    border-collapse: collapse;
-    > div {
-        display: table-row;
+    text-align: center;
+    div.tabular {
+        text-align: center;
+        width: 100%;
+        border-collapse: collapse;
+        display: table;
         > div {
-            display: table-cell;
-            padding: 2px;
+            display: table-row;
+            > div {
+                display: table-cell;
+                padding: 2px;
+            }
         }
     }
     .progress {
@@ -1078,9 +1081,8 @@ span.versenumber {
 }
 
 #id-results {
-    text-align: left;
+    margin-bottom: .5em;
 }
-
 
 #id-points-target {
     height: 1.3em;
