@@ -134,8 +134,20 @@ def make_bible_book_special_cases():
 
     # TODO - anything else for Turkish?
     _BIBLE_BOOK_ABBREVIATIONS_FOR_LANG[LANGUAGE_CODE_TR].update({
-        'mezmurlar': 'Mezmur',
-        'mz': 'Mezmur',
+        'mezmurlar': "Mezmur",
+        'mz': "Mezmur",
+        'cikis': "Mısır'dan Çıkış",
+        'tekvin': "Yaratılış",
+        'tesniye': "Yasa'nın Tekrarı",
+        'zabur': 'Mezmur',
+        'nesiderler': 'Ezgiler Ezgisi',
+        'nesiderler nesidesi': 'Ezgiler Ezgisi',
+        'isaya': 'Yeşaya',
+        'yeremyanin mersiyeleri': 'Ağıtlar',
+        'mersiyeleri': 'Ağıtlar',
+        'mersiyeler': 'Ağıtlar',
+        'tsefanya': 'Sefanya',
+        'zekarya': 'Zekeriya',
     })
 
 
