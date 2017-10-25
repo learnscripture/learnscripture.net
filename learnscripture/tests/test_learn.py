@@ -259,29 +259,6 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
             next_test_due=F('next_test_due') - timedelta(100),
         )
 
-    def test_finish_button(self):
-        self.add_verse_set('Bible 101')
-
-        identity = self._get_current_identity()
-        # Ensure that we have seen some verses
-        identity.record_verse_action('John 3:16', 'KJV', StageType.TEST, 1.0)
-        identity.record_verse_action('John 14:6', 'KJV', StageType.TEST, 1.0)
-
-        self._make_verses_due_for_testing(identity.verse_statuses)
-
-        self.get_url('dashboard')
-        self.choose_review_bible()
-
-        self._type_john_3_16_kjv()
-
-        self.click("#id-finish-btn")
-        self.wait_for_ajax()
-
-        # Reload, should have nothing more to review
-
-        self.get_url('learn')
-        self.assertTrue(self.is_element_displayed("#id-no-verse-queue"))
-
     def test_more_practice(self):
         # tests that the 'more practice' button appears, and works
 
