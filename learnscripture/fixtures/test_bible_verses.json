@@ -9,7 +9,7 @@
         "version" : ["KJV"]
       },
     "model" : "bibleverses.verse",
-    "pk" : 104655
+    "pk" : null
   },
   { "fields" : { "bible_verse_number" : 1,
         "book_number" : 0,
@@ -21,7 +21,7 @@
         "version" : ["KJV"]
       },
     "model" : "bibleverses.verse",
-    "pk" : 104656
+    "pk" : null
   },
   { "fields" : { "bible_verse_number" : 2,
         "book_number" : 0,
@@ -33,7 +33,7 @@
         "version" : ["KJV"]
       },
     "model" : "bibleverses.verse",
-    "pk" : 104657
+    "pk" : null
   },
   { "fields" : { "bible_verse_number" : 3,
         "book_number" : 0,
@@ -45,7 +45,7 @@
         "version" : ["KJV"]
       },
     "model" : "bibleverses.verse",
-    "pk" : 104658
+    "pk" : null
   },
   { "fields" : { "bible_verse_number" : 4,
         "book_number" : 0,
@@ -57,7 +57,7 @@
         "version" : ["KJV"]
       },
     "model" : "bibleverses.verse",
-    "pk" : 104659
+    "pk" : null
   },
   { "fields" : { "bible_verse_number" : 5,
         "book_number" : 0,
@@ -69,7 +69,7 @@
         "version" : ["KJV"]
       },
     "model" : "bibleverses.verse",
-    "pk" : 104660
+    "pk" : null
   },
   { "fields" : { "bible_verse_number" : 6,
         "book_number" : 0,
@@ -81,7 +81,7 @@
         "version" : ["KJV"]
       },
     "model" : "bibleverses.verse",
-    "pk" : 104661
+    "pk" : null
   },
   { "fields" : { "bible_verse_number" : 7,
         "book_number" : 0,
@@ -93,7 +93,7 @@
         "version" : ["KJV"]
       },
     "model" : "bibleverses.verse",
-    "pk" : 104662
+    "pk" : null
   },
   { "fields" : { "bible_verse_number" : 8,
         "book_number" : 0,
@@ -105,7 +105,7 @@
         "version" : ["KJV"]
       },
     "model" : "bibleverses.verse",
-    "pk" : 104663
+    "pk" : null
   },
   { "fields" : { "bible_verse_number" : 9,
         "book_number" : 0,
@@ -117,7 +117,7 @@
         "version" : ["KJV"]
       },
     "model" : "bibleverses.verse",
-    "pk" : 104664
+    "pk" : null
   },
   { "fields" : { "bible_verse_number" : 10,
         "book_number" : 0,
@@ -129,7 +129,7 @@
         "version" : ["KJV"]
       },
     "model" : "bibleverses.verse",
-    "pk" : 104665
+    "pk" : null
   },
   { "fields" : { "bible_verse_number" : 11,
         "book_number" : 0,
@@ -141,11 +141,11 @@
         "version" : ["KJV"]
       },
     "model" : "bibleverses.verse",
-    "pk" : 104666
+    "pk" : null
   },
 
 {
-    "pk": 118891,
+    "pk": null,
     "model": "bibleverses.verse",
     "fields": {
         "localized_reference": "Psalm 23:1",
@@ -159,7 +159,7 @@
     }
 },
 {
-    "pk": 118892,
+    "pk": null,
     "model": "bibleverses.verse",
     "fields": {
         "localized_reference": "Psalm 23:2",
@@ -173,7 +173,7 @@
     }
 },
 {
-    "pk": 118893,
+    "pk": null,
     "model": "bibleverses.verse",
     "fields": {
         "localized_reference": "Psalm 23:3",
@@ -187,7 +187,7 @@
     }
 },
 {
-    "pk": 118894,
+    "pk": null,
     "model": "bibleverses.verse",
     "fields": {
         "localized_reference": "Psalm 23:4",
@@ -201,7 +201,7 @@
     }
 },
 {
-    "pk": 118895,
+    "pk": null,
     "model": "bibleverses.verse",
     "fields": {
         "localized_reference": "Psalm 23:5",
@@ -215,7 +215,7 @@
     }
 },
 {
-    "pk": 118896,
+    "pk": null,
     "model": "bibleverses.verse",
     "fields": {
         "localized_reference": "Psalm 23:6",
@@ -229,7 +229,7 @@
     }
 },
 {
-    "pk": 149993,
+    "pk": null,
     "model": "bibleverses.verse",
     "fields": {
         "localized_reference": "Psalm 23:1",
@@ -243,7 +243,7 @@
     }
 },
 {
-    "pk": 149994,
+    "pk": null,
     "model": "bibleverses.verse",
     "fields": {
         "localized_reference": "Psalm 23:2",
@@ -257,7 +257,7 @@
     }
 },
 {
-    "pk": 149995,
+    "pk": null,
     "model": "bibleverses.verse",
     "fields": {
         "localized_reference": "Psalm 23:3",
@@ -271,7 +271,7 @@
     }
 },
 {
-    "pk": 149996,
+    "pk": null,
     "model": "bibleverses.verse",
     "fields": {
         "localized_reference": "Psalm 23:4",
@@ -285,7 +285,7 @@
     }
 },
 {
-    "pk": 149997,
+    "pk": null,
     "model": "bibleverses.verse",
     "fields": {
         "localized_reference": "Psalm 23:5",
@@ -299,7 +299,7 @@
     }
 },
 {
-    "pk": 149998,
+    "pk": null,
     "model": "bibleverses.verse",
     "fields": {
         "localized_reference": "Psalm 23:6",
@@ -313,7 +313,7 @@
     }
 },
 {
-    "pk": 130791,
+    "pk": null,
     "model": "bibleverses.verse",
     "fields": {
         "localized_reference": "John 3:16",
@@ -327,7 +327,7 @@
     }
 },
 {
-    "pk": 161893,
+    "pk": null,
     "model": "bibleverses.verse",
     "fields": {
         "localized_reference": "John 3:16",
@@ -341,7 +341,7 @@
     }
 },
 {
-    "pk": 77700,
+    "pk": null,
     "model": "bibleverses.verse",
     "fields": {
         "localized_reference": "John 14:6",
@@ -355,7 +355,7 @@
     }
 },
 {
-    "pk": 77701,
+    "pk": null,
     "model": "bibleverses.verse",
     "fields": {
         "localized_reference": "John 14:6",
@@ -369,7 +369,7 @@
     }
 },
 {
-    "pk": 77702,
+    "pk": null,
     "model": "bibleverses.verse",
     "fields": {
         "localized_reference": "John 5:3",
@@ -383,7 +383,7 @@
     }
 },
 {
-    "pk": 77703,
+    "pk": null,
     "model": "bibleverses.verse",
     "fields": {
         "localized_reference": "John 5:4",
@@ -397,21 +397,21 @@
     }
 },
 {
-    "pk": 77704,
+    "pk": null,
     "model": "bibleverses.verse",
     "fields": {
         "localized_reference": "Ephesians 2:8",
         "chapter_number": 2,
         "text_saved": "For by grace you are saved through faith, and this is not from yourselves, it is the gift of",
         "book_number": 48,
-        "version": 2,
+        "version": ["NET"],
         "first_verse_number": 8,
         "last_verse_number": 8,
         "bible_verse_number": 29237
     }
 },
 {
-    "pk": 77705,
+    "pk": null,
     "model": "bibleverses.verse",
     "fields": {
         "localized_reference": "Ephesians 2:8",
@@ -425,7 +425,35 @@
     }
 },
 {
-    "pk" : 77706,
+    "pk": null,
+    "model": "bibleverses.verse",
+    "fields": {
+        "localized_reference": "Ephesians 2:9",
+        "chapter_number": 2,
+        "text_saved": "it is not from works, so that no one can boast.",
+        "book_number": 48,
+        "version": ["NET"],
+        "first_verse_number": 9,
+        "last_verse_number": 9,
+        "bible_verse_number": 29238
+    }
+},
+{
+    "pk": null,
+    "model": "bibleverses.verse",
+    "fields": {
+        "localized_reference": "Ephesians 2:9",
+        "chapter_number": 2,
+        "text_saved": "Not of works, lest any man should boast.",
+        "book_number": 48,
+        "version": ["KJV"],
+        "first_verse_number": 9,
+        "last_verse_number": 9,
+        "bible_verse_number": 29238
+    }
+},
+{
+    "pk" : null,
     "model" : "bibleverses.verse",
     "fields" : {
         "localized_reference" : "Matthew 4:21",
@@ -439,7 +467,7 @@
      }
 },
 {
-    "pk": 77707,
+    "pk": null,
     "model": "bibleverses.verse",
     "fields": {
         "localized_reference": "Song of Solomon 1:1",
@@ -453,7 +481,7 @@
     }
 },
 {
-    "pk": 77708,
+    "pk": null,
     "model": "bibleverses.verse",
     "fields": {
         "localized_reference": "1 Corinthians 1:3",
