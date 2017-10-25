@@ -399,10 +399,11 @@ def dashboard(request):
 
     groups, more_groups = get_user_groups(identity)
 
+    passages_for_reviewing, passages_for_learning = identity.passages_for_reviewing_and_learning()
     c = {'learn_verses_queues': identity.bible_verse_statuses_for_learning_grouped(),
          'review_verses_queue': identity.bible_verse_statuses_for_reviewing(),
-         'passages_for_learning': identity.passages_for_learning(),
-         'passages_for_reviewing': identity.passages_for_reviewing(),
+         'passages_for_learning': passages_for_learning,
+         'passages_for_reviewing': passages_for_reviewing,
          'catechisms_for_learning': identity.catechisms_for_learning(),
          'catechisms_for_reviewing': identity.catechisms_for_reviewing(),
          'next_verse_due': identity.next_verse_due(),

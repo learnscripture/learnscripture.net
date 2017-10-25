@@ -203,10 +203,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         # sneak a test for bible_verse_statuses_for_reviewing() here
         self.assertEqual([], list(i.bible_verse_statuses_for_reviewing()))
 
-        # Sneak a test for passages_for_reviewing() here:
-        self.assertEqual([], list(i.passages_for_reviewing()))
-
-    def test_passages_for_reviewing(self):
+    def test_passages_for_reviewing_and_learning(self):
         i = self.create_identity(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Psalm 23')
         i.add_verse_set(vs1)
@@ -221,15 +218,32 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
                 next_test_due=F('next_test_due') - timedelta(7 - vn)
             )
 
-            # Now test again, for all but the first
+            # Now test again, for all but one verse, which means we will only
+            # have one verse that is due for review, but the whole
+            # passage should be considered as needing review.
             if vn != 1:
                 i.record_verse_action(ref, 'NET', StageType.TEST, 1.0)
 
-        # Shouldn't be in general revision queue
-        self.assertEqual([], list(i.bible_verse_statuses_for_reviewing()))
+            cvss_review, cvss_learn = i.passages_for_reviewing_and_learning()
+            if vn < 6:
+                # Nothing to review, because one item still remains
+                # to be initially learnt.
+                self.assertEqual(cvss_review, [])
+                self.assertEqual(cvss_learn[0].verse_set.id, vs1.id)
+            else:
+                self.assertEqual(cvss_learn, [])
+                self.assertEqual(cvss_review[0].verse_set.id, vs1.id)
 
-        cvss = i.passages_for_reviewing()
-        self.assertEqual(cvss[0].verse_set.id, vs1.id)
+            # Shouldn't be in general revision queue
+            self.assertEqual([], list(i.bible_verse_statuses_for_reviewing()))
+
+        # Now test remaining verse
+        i.record_verse_action("Psalm 23:1", 'NET', StageType.TEST, 1.0)
+
+        # Should have nothing left to review now.
+        cvss_review, cvss_learn = i.passages_for_reviewing_and_learning()
+        self.assertEqual(cvss_review, [])
+        self.assertEqual(cvss_learn, [])
 
     def test_catechisms_for_learning(self):
         i = self.create_identity(version_slug='NET')
@@ -337,7 +351,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
             )
 
         # Shouldn't be splittable yet, since strength will be below threshold
-        vss = i.passages_for_reviewing()
+        vss = i.passages_for_reviewing_and_learning()[0]
         self.assertEqual(len(vss), 1)
         self.assertEqual(vss[0].verse_set.name, "Psalm 23")
         self.assertEqual(vss[0].splittable, False)
@@ -356,7 +370,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
                 uvs.next_test_due = accounts.memorymodel.next_test_due(uvs.last_tested, uvs.strength)
                 uvs.save()
 
-        vss = i.passages_for_reviewing()
+        vss = i.passages_for_reviewing_and_learning()[0]
         self.assertEqual(len(vss), 1)
         self.assertEqual(vss[0].verse_set.name, "Psalm 23")
         self.assertEqual(vss[0].splittable, True)
