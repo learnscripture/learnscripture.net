@@ -986,13 +986,22 @@ class Identity(models.Model):
                                .filter(localized_reference__in=localized_references,
                                        version=version)))
 
-    def passages_for_reviewing(self):
+    def passages_for_reviewing_and_learning(self):
         """
-        Returns a list of ChosenVerseSet items for passage VerseSets
-        that need reviewing.
+        Returns a tuple:
+        (list of ChosenVerseSet items for passage VerseSets that need reviewing,
+         list of ChosenVerseSet items for passage VerseSets that need learning).
+        Both have extra info needed by dashboard.
         """
+        learning_sets = self.passages_for_learning()
+        learning_verse_set_ids = set(cvs.verse_set.id for cvs in learning_sets)
+        # We need the 'learning' sets in order to calculate the 'reviewing'
+        # sets correctly, because we exclude the former from the latter.
+        # We also always use these two return values at the same time.
+        # So it makes sense to return them together.
         statuses = (self.verse_statuses
                     .filter(verse_set__set_type=VerseSetType.PASSAGE,
+                            memory_stage__gte=MemoryStage.TESTED,
                             ignored=False)
                     .select_related('verse_set', 'version'))
 
@@ -1016,12 +1025,12 @@ class Identity(models.Model):
 
         chosen_verse_set_list = []
         for cvs in chosen_verse_sets:
+            if cvs.verse_set.id in learning_verse_set_ids:
+                # Exclude entire ChosenVerseSet
+                continue
             uvss = [uvs
                     for uvs in uvs_list
                     if uvs.verse_set.id == cvs.verse_set.id and uvs.version.id == cvs.version.id]
-            if any(uvs.memory_stage < MemoryStage.TESTED for uvs in uvss):
-                # Exclude entire ChosenVerseSet
-                continue
             self._set_needs_testing_override(uvss)
             next_section = self.get_next_section(uvss, cvs.verse_set, add_buffer=False)
             cvs.next_section_verse_count = len(next_section)
@@ -1040,7 +1049,8 @@ class Identity(models.Model):
             cvs.splittable = cvs.verse_set.breaks != "" and cvs.group_testing
             chosen_verse_set_list.append(cvs)
 
-        return sorted(list(chosen_verse_set_list), key=lambda c: c.sort_key)
+        reviewing_sets = sorted(list(chosen_verse_set_list), key=lambda c: c.sort_key)
+        return (reviewing_sets, learning_sets)
 
     def next_verse_due(self):
 
