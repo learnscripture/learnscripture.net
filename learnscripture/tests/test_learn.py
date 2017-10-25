@@ -280,8 +280,8 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.assertIn('primary', self.get_element_attribute("#id-more-practice-btn", 'class').split())
         self.click("#id-more-practice-btn")
 
-        # Now go through 3 stages:
-        for i in range(0, 3):
+        # Now go through 4 stages:
+        for i in range(0, 4):
             self.assertEqual(self.get_element_attribute("#id-next-btn", "disabled"),
                              None)
             self.click("#id-next-btn")
