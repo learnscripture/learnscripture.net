@@ -1080,13 +1080,6 @@ def ensure_text(verses):
             v.save()
 
 
-def pretty_passage_ref(language_code, internal_start_ref, internal_end_ref):
-    return ParsedReference.from_start_and_end(
-        parse_validated_internal_reference(internal_start_ref),
-        parse_validated_internal_reference(internal_end_ref)
-    ).translate_to(language_code).canonical_form()
-
-
 def normalized_verse_list_ref(language_code, verse_list):
     if len(verse_list) == 1:
         return verse_list[0].localized_reference
