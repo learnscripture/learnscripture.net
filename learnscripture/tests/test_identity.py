@@ -31,7 +31,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         self.assertEqual(len(uvss), len(vs1.verse_choices.all()))
 
         self.assertEqual(set(u.localized_reference for u in uvss),
-                         set(["John 3:16", "John 14:6"]))
+                         set(["John 3:16", "John 14:6", "Ephesians 2:8-9"]))
 
         vs1 = VerseSet.objects.get(name='Bible 101')  # fresh
         # Having already created the UserVerseStatuses, this should be an
@@ -573,7 +573,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         i.add_verse_set(vs1)
 
         self.assertEqual([uvs.localized_reference for uvs in i.bible_verse_statuses_for_learning(vs1.id)],
-                         ['John 3:16', 'John 14:6'])
+                         ['John 3:16', 'John 14:6', "Ephesians 2:8-9"])
 
     def test_issue_75(self):
         NET = TextVersion.objects.get(slug='NET')

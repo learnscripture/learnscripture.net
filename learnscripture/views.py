@@ -642,15 +642,15 @@ def get_verse_set_verse_list(version, verse_set):
     verse_list = add_passage_breaks(language_code, verse_list, verse_set.breaks)
 
     retval = []
-    added_verse_ids = set()
+    added_verse_refs = set()
     for vc in verse_choices:
         localized_ref = localize_internal_reference(language_code, vc.internal_reference)
         if localized_ref in verses:
             v = verses[localized_ref]
             # Don't add a merged verse to the list multiple times
-            if v.id not in added_verse_ids:
+            if v.localized_reference not in added_verse_refs:
                 retval.append(v)
-                added_verse_ids.add(v.id)
+                added_verse_refs.add(v.localized_reference)
 
     return retval
 
