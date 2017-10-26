@@ -190,14 +190,26 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         self.assertEqual(cvss[0].version.short_name, 'KJV')
         self.assertEqual(cvss[0].tested_total, 0)
         self.assertEqual(cvss[0].untested_total, 6)
+        self.assertEqual(cvss[0].needs_review_total, 0)
 
         self.assertEqual(cvss[1].verse_set.id, vs1.id)
         self.assertEqual(cvss[1].version.short_name, 'NET')
         self.assertEqual(cvss[1].tested_total, 1)
         self.assertEqual(cvss[1].untested_total, 5)
+        self.assertEqual(cvss[1].needs_review_total, 0)
 
-        # Put it back so that it ought to be up for testing.
-        i.verse_statuses.update(last_tested=timezone.now() - timedelta(10))
+        # Put time back so that they ought to be up for review:
+        i.verse_statuses.update(last_tested=timezone.now() - timedelta(10),
+                                next_test_due=timezone.now() - timedelta(1))
+
+        cvss = i.passages_for_learning()
+        self.assertEqual(cvss[0].verse_set.id, vs1.id)
+        self.assertEqual(cvss[0].version.short_name, 'KJV')
+        self.assertEqual(cvss[0].needs_review_total, 0)
+
+        self.assertEqual(cvss[1].verse_set.id, vs1.id)
+        self.assertEqual(cvss[1].version.short_name, 'NET')
+        self.assertEqual(cvss[1].needs_review_total, 1)  # Psalm 23:1
 
         # Shouldn't be in general revision queue -
         # sneak a test for bible_verse_statuses_for_reviewing() here

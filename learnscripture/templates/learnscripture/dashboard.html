@@ -170,8 +170,9 @@
         {% if cvs.tested_total == 0 %}
           <p>You've queued this passage for learning.</p>
         {% else %}
-          <p>You've seen {{ cvs.tested_total }} verse(s) so far,
-            with {{ cvs.untested_total }} to go.</p>
+          <p>You've seen {{ cvs.tested_total }} verse{{ cvs.tested_total|length|pluralize }} so far,
+            {% if cvs.needs_review_total > 0 %}{{ cvs.needs_review_total }} due for review,{% endif %}
+            with {{ cvs.untested_total }} still to start on.</p>
         {% endif %}
       </div>
       {% if not forloop.last %}<hr>{% endif %}
