@@ -443,6 +443,8 @@ COMPRESS_PRECOMPILERS = (
 RESTRUCTUREDTEXT_FILTER_SETTINGS = {
     'raw_enabled': False,
     'file_insertion_enabled': False,
+    'embed_stylesheet': False,
+    'stylesheet': None,
 }
 
 MARKUP_SETTINGS = {
