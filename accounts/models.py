@@ -938,12 +938,27 @@ class Identity(models.Model):
                 cvs.untested_total += 1
 
         if extra_stats:
+            now = timezone.now()
+
             # We need one additional query per ChosenVerseSet for tested_total
+            # and needs_review_total. They could be done individually more
+            # simply, but we reduce the number of queries by combining.
             for cvs in chosen_verse_sets.values():
-                cvs.tested_total = self.verse_statuses.filter(verse_set=cvs.verse_set,
-                                                              version=cvs.version,
-                                                              ignored=False,
-                                                              memory_stage__gte=MemoryStage.TESTED).count()
+                stats = (self.verse_statuses.filter(verse_set=cvs.verse_set,
+                                                    version=cvs.version,
+                                                    ignored=False,
+                                                    memory_stage__gte=MemoryStage.TESTED)
+                         .aggregate(
+                             needs_review_total=models.Sum(
+                                 models.Case(
+                                     models.When(next_test_due__lt=now, then=1),
+                                     default=models.Value(0),
+                                     output_field=models.IntegerField())),
+                             tested_total=models.Count('id')))
+
+                cvs.tested_total = stats['tested_total']
+                cvs.needs_review_total = stats['needs_review_total'] or 0
+
         return sorted(list(chosen_verse_sets.values()), key=lambda c: c.sort_key)
 
     def verse_sets_chosen(self):
