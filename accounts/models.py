@@ -969,6 +969,8 @@ class Identity(models.Model):
                  .filter(ignored=False, verse_set__isnull=False)
                  .values_list('verse_set_id', 'version_id')
                  .distinct())
+        if len(pairs) == 0:
+            return []
         vs_ids, tv_ids = list(zip(*pairs))
         versions = {tv.id: tv
                     for tv in TextVersion.objects.filter(id__in=tv_ids)}

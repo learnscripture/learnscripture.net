@@ -724,6 +724,10 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
 
     def test_verse_sets_chosen(self):
         i = self.create_identity(version_slug='NET')
+
+        with self.assertNumQueries(1):
+            self.assertEqual(i.verse_sets_chosen(), [])
+
         vs1 = VerseSet.objects.get(name='Psalm 23')
         i.add_verse_set(vs1)
         with self.assertNumQueries(3):
