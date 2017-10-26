@@ -180,12 +180,21 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
     def test_passages_for_learning(self):
         KJV = TextVersion.objects.get(slug='KJV')
         i = self.create_identity(version_slug='NET')
+
+        with self.assertNumQueries(1):  # Just 1 query when nothing being learnt
+            i.passages_for_learning()
+
         vs1 = VerseSet.objects.get(name='Psalm 23')
         i.add_verse_set(vs1)
+
+        with self.assertNumQueries(2):  # 1 base query, 1 for each passage
+            i.passages_for_learning()
+
         i.add_verse_set(vs1, KJV)
 
         i.record_verse_action('Psalm 23:1', 'NET', StageType.TEST, 1.0)
-        cvss = i.passages_for_learning()
+        with self.assertNumQueries(3):
+            cvss = i.passages_for_learning()
         self.assertEqual(cvss[0].verse_set.id, vs1.id)
         self.assertEqual(cvss[0].version.short_name, 'KJV')
         self.assertEqual(cvss[0].tested_total, 0)
@@ -202,7 +211,8 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         i.verse_statuses.update(last_tested=timezone.now() - timedelta(10),
                                 next_test_due=timezone.now() - timedelta(1))
 
-        cvss = i.passages_for_learning()
+        with self.assertNumQueries(3):
+            cvss = i.passages_for_learning()
         self.assertEqual(cvss[0].verse_set.id, vs1.id)
         self.assertEqual(cvss[0].version.short_name, 'KJV')
         self.assertEqual(cvss[0].needs_review_total, 0)
@@ -236,7 +246,11 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
             if vn != 1:
                 i.record_verse_action(ref, 'NET', StageType.TEST, 1.0)
 
-            cvss_review, cvss_learn = i.passages_for_reviewing_and_learning()
+            with self.assertNumQueries(3):
+                # 1 for passages_for_learning, 2 for review passages,
+                # or 2 for passages_for_learning, 1 for review passage
+                cvss_review, cvss_learn = i.passages_for_reviewing_and_learning()
+
             if vn < 6:
                 # Nothing to review, because one item still remains
                 # to be initially learnt.
@@ -256,6 +270,37 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         cvss_review, cvss_learn = i.passages_for_reviewing_and_learning()
         self.assertEqual(cvss_review, [])
         self.assertEqual(cvss_learn, [])
+
+    def test_issue_138(self):
+        # https://bitbucket.org/learnscripture/learnscripture.net/issues/138/incorrect-verses-to-review-count-in
+        i = self.create_identity(version_slug='NET')
+        vs1 = VerseSet.objects.get(name='Psalm 23')
+        i.add_verse_set(vs1)
+
+        for vn in range(1, 7):
+            ref = 'Psalm 23:%d' % vn
+            i.record_verse_action(ref, 'NET', StageType.TEST, 1.0)
+            # Put all into 'group testing' regime
+            i.verse_statuses.filter(localized_reference=ref).update(
+                strength=accounts.memorymodel.STRENGTH_FOR_GROUP_TESTING + 0.01
+            )
+            # Make one due for testing
+            if vn == 6:
+                now = timezone.now()
+                i.verse_statuses.filter(localized_reference=ref).update(
+                    last_tested=now - timedelta(10),
+                    next_test_due=now - timedelta(1),
+                )
+
+        cvss_review, cvss_learn = i.passages_for_reviewing_and_learning()
+        # Sanity:
+        self.assertEqual(cvss_learn, [])
+        self.assertEqual(len(cvss_review), 1)
+        cvs = cvss_review[0]
+        self.assertEqual(cvs.verse_set, vs1)
+        self.assertEqual(cvs.group_testing, True)
+        self.assertEqual(cvs.total_verse_count, 6)
+        self.assertEqual(cvs.needs_testing_count, 6)
 
     def test_catechisms_for_learning(self):
         i = self.create_identity(version_slug='NET')

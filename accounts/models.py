@@ -1017,20 +1017,20 @@ class Identity(models.Model):
         statuses = (self.verse_statuses
                     .filter(verse_set__set_type=VerseSetType.PASSAGE,
                             memory_stage__gte=MemoryStage.TESTED,
-                            ignored=False)
-                    .select_related('verse_set', 'version'))
+                            ignored=False))
 
         # If any of them need reviewing, we want to know about it:
-        statuses = memorymodel.filter_qs(statuses, timezone.now())
+        statuses_for_review = memorymodel.filter_qs(
+            statuses.select_related('verse_set', 'version'),
+            timezone.now())
 
         # We also want to exclude those which have any verses in the set still
         # untested, but this is easiest done as a second pass after retrieving.
 
-        uvs_list = list(statuses)  # Query 1
-
+        # Query 1
         chosen_verse_sets = set(ChosenVerseSet(verse_set=uvs.verse_set,
                                                version=uvs.version)
-                                for uvs in uvs_list)
+                                for uvs in statuses_for_review)
 
         # Decorate with various extra things we want to show in dashboard:
         #  - next_section_verse_count
@@ -1038,14 +1038,22 @@ class Identity(models.Model):
         #  - needs_testing_count
         #  - total_verse_count
 
-        chosen_verse_set_list = []
-        for cvs in chosen_verse_sets:
-            if cvs.verse_set.id in learning_verse_set_ids:
-                # Exclude entire ChosenVerseSet
-                continue
-            uvss = [uvs
-                    for uvs in uvs_list
-                    if uvs.verse_set.id == cvs.verse_set.id and uvs.version.id == cvs.version.id]
+        # Remove things that are still in initial learning phase
+        chosen_verse_set_list = [
+            cvs for cvs in chosen_verse_sets if cvs.verse_set.id not in learning_verse_set_ids
+        ]
+
+        # We need the complete list of UVSs for each verse set to get
+        # the rest of the info correct.
+        all_uvss = (statuses
+                    .filter(verse_set__in=[cvs.verse_set for cvs in chosen_verse_set_list])
+                    .order_by('text_order'))
+        uvss_for_cvs = defaultdict(list)
+        for uvs in all_uvss:
+            uvss_for_cvs[uvs.verse_set_id, uvs.version_id].append(uvs)
+
+        for cvs in chosen_verse_set_list:
+            uvss = uvss_for_cvs[cvs.verse_set.id, cvs.version.id]
             self._set_needs_testing_override(uvss)
             next_section = self.get_next_section(uvss, cvs.verse_set, add_buffer=False)
             cvs.next_section_verse_count = len(next_section)
@@ -1062,7 +1070,6 @@ class Identity(models.Model):
                     cvs.group_testing = False
 
             cvs.splittable = cvs.verse_set.breaks != "" and cvs.group_testing
-            chosen_verse_set_list.append(cvs)
 
         reviewing_sets = sorted(list(chosen_verse_set_list), key=lambda c: c.sort_key)
         return (reviewing_sets, learning_sets)
