@@ -1,4 +1,4 @@
--e git://github.com/Deepwalker/aldjemy.git@a692417f0afef93f929898cec2ff2a8e91a093ad#egg=aldjemy
+-e git://github.com/spookylukey/aldjemy.git@e728913f829216056a361d0886506e41dcbae8bb#egg=aldjemy
 -e git://github.com/django-fiber/django-fiber.git@bfc3e3c1950198ef6c015feac78e155b7c508c36#egg=django-fiber
 -e git://github.com/mlavin/django-selectable.git@66ed38326cbd8ffa611c9648f58343a899cc1e41#egg=django_selectable
 -e git://github.com/riccardoscalco/Pykov.git@16cda2f2c0ed8143ddcfa25dac34d3dadc982380#egg=pykov
