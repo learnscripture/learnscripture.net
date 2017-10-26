@@ -70,7 +70,7 @@
         <div>
           {% if cvs.needs_testing_count == cvs.total_verse_count %}
             This passage is due for review today
-            ({{ cvs.total_verse_count }} verses).
+            ({{ cvs.total_verse_count }} verse{{ cvs.total_verse_count|pluralize }}).
           {% else %}
             Part of this passage is due for review today
             ({{ cvs.needs_testing_count }}/{{ cvs.total_verse_count }} verses).
