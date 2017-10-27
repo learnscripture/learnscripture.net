@@ -6,7 +6,7 @@
 -e git://github.com/spookylukey/django-autoslug.git@0a6adec1f9743743bf7d741b6845620a8f347159#egg=django-autoslug
 -e git://github.com/spookylukey/django-bootstrap-form.git@b228f986e6650ad4690eedc70cca5ff044feaab2#egg=django-bootstrap-form
 -e hg+https://bitbucket.org/schinckel/django-jsonfield@6c37ee0fd8f2f999b21c068e733876d937d74a00#egg=django-jsonfield
-ConcurrentLogHandler==0.9.1
+concurrent-log-handler==0.9.7
 Django==1.11.6
 SQLAlchemy==1.1.10
 amqp==2.1.4
