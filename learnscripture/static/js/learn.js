@@ -1159,13 +1159,16 @@ var learnscripture = (function (learnscripture, $) {
             var $w = getWordAt(currentWordIndex);
             $w.addClass('current-word');
             var $c = $('#id-onscreen-test-container');
+            var $wl = $c.find('#id-onscreen-test-options');
             $c.hide(); // for speed.
 
             var suggestions = currentVerseStatus.suggestions[currentWordIndex];
             if (suggestions == undefined) {
-                $c.html('On screen testing is not available for this verse in this version. Sorry!');
+                $('#id-onscreen-not-available').show();
                 $c.show();
                 return;
+            } else {
+                $('#id-onscreen-not-available').hide();
             }
             var chosen = [];
             var correctWord = $w.text();
@@ -1179,9 +1182,9 @@ var learnscripture = (function (learnscripture, $) {
             for (var i = 0; i < chosen.length; i++) {
                 html += '<span class="word">' + escapeHtml(chosen[i]) + '</span>';
             }
-            $c.html(html);
+            $wl.html(html);
             var that = this;
-            fastEventBind($c.find('.word'),
+            fastEventBind($wl.find('.word'),
                           function (ev) { that.handleButtonClick(ev); })
             $c.show();
         },
