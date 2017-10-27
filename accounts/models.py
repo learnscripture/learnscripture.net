@@ -27,9 +27,10 @@ from learnscripture.utils.cache import cache_results, clear_cache_results
 from scores.models import ScoreReason, Scores, TotalScore
 
 TestingMethod = make_choices('TestingMethod',
-                             [(0, 'FULL_WORDS', 'Full words - recommended for full keyboards and normal typing skills'),
-                              (1, 'FIRST_LETTER', 'First letter - recommended for slower typers'),
-                              (2, 'ON_SCREEN', 'On screen buttons - recommended for handheld devices'),
+                             [(0, 'FULL_WORDS', 'Type whole word - recommended for full keyboards and normal typing skills'),
+                              (1, 'FIRST_LETTER', 'Type first letter - recommended for slower typers'),
+                              (2, 'ON_SCREEN', 'Choose from word list - recommended for handheld devices.' +
+                                  ' Only available for English translations'),
                               ])
 
 THEMES = [('calm', 'Slate'),
