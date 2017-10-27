@@ -1,7 +1,6 @@
 # Django settings for learnscripture project.
 
 import json
-import logging
 import os
 import socket
 import sys
