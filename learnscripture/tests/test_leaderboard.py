@@ -105,4 +105,4 @@ class VerseCountTests(AccountTestMixin, TestBase):
                          2)
         i.verse_statuses.filter(localized_reference="Psalm 23:1").update(strength=0.9999)
 
-        self.assertEqual(get_verses_finished_count(i.id), 1)
+        self.assertEqual(get_verses_finished_count(i.id, account.id), 1)

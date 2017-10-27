@@ -288,28 +288,36 @@ def get_verses_tested_per_day(account_id):
     return _add_zeros(vals)
 
 
-def get_verses_finished_count(identity_id, finished_since=None):
+def get_verses_finished_count(identity_id, account_id, finished_since=None):
     from accounts.memorymodel import MM
     from bibleverses.models import MemoryStage
-    from learnscripture.utils.sqla import bibleverses_userversestatus, default_engine
+    from learnscripture.utils.sqla import bibleverses_userversestatus, default_engine, scores_actionlog
     from sqlalchemy.sql import select, and_
     from sqlalchemy import func
 
-    uvs = bibleverses_userversestatus
-    q1 = (select([uvs.c.localized_reference, uvs.c.version_id],
-                 and_(uvs.c.ignored == False,  # noqa
-                      uvs.c.memory_stage >= MemoryStage.TESTED,
-                      uvs.c.strength >= MM.LEARNT,
-                      uvs.c.for_identity_id == identity_id,
-                      *([uvs.c.last_tested > finished_since]
-                        if finished_since is not None else [])
-                      ),
-                 from_obj=uvs
-                 )
-          .group_by(uvs.c.localized_reference,
-                    uvs.c.version_id)
-          ).alias()
-    q2 = (select([func.count()],
-                 from_obj=q1))
+    if finished_since is None:
+        uvs = bibleverses_userversestatus
+        q1 = (select([uvs.c.localized_reference, uvs.c.version_id],
+                     and_(uvs.c.ignored == False,  # noqa
+                          uvs.c.memory_stage >= MemoryStage.TESTED,
+                          uvs.c.strength >= MM.LEARNT,
+                          uvs.c.for_identity_id == identity_id,
+                          ),
+                     from_obj=uvs
+                     )
+              .group_by(uvs.c.localized_reference,
+                        uvs.c.version_id)
+              ).alias()
+        q2 = (select([func.count()],
+                     from_obj=q1))
 
-    return default_engine.execute(q2).fetchall()[0][0]
+        return default_engine.execute(q2).fetchall()[0][0]
+    else:
+        # Using ActionLog is less accurate, but the only reasonably accurate way
+        # we have to track the verses fully learnt since in a given time period,
+        # as UserVerseStatus doesn't have that info.
+        q = (select([func.count()],
+                    and_(scores_actionlog.c.account_id == account_id,
+                         scores_actionlog.c.reason == ScoreReason.VERSE_LEARNT,
+                         scores_actionlog.c.created > finished_since)))
+        return default_engine.execute(q).fetchall()[0][0]
