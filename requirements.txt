@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in requirements-dev.in
 #
--e git+git://github.com/Deepwalker/aldjemy.git@a692417f0afef93f929898cec2ff2a8e91a093ad#egg=aldjemy
+-e git+git://github.com/spookylukey/aldjemy.git@e728913f829216056a361d0886506e41dcbae8bb#egg=aldjemy
 -e git+git://github.com/spookylukey/django-autoslug.git@0a6adec1f9743743bf7d741b6845620a8f347159#egg=django-autoslug
 -e git+git://github.com/spookylukey/django-bootstrap-form.git@b228f986e6650ad4690eedc70cca5ff044feaab2#egg=django-bootstrap-form
 -e git+git://github.com/django-fiber/django-fiber.git@bfc3e3c1950198ef6c015feac78e155b7c508c36#egg=django-fiber
@@ -23,7 +23,7 @@ celery==4.0.2
 certifi==2017.7.27.1
 cffi==1.10.0              # via bcrypt, cryptography, pynacl
 click==6.7                # via pip-tools
-concurrentloghandler==0.9.1
+concurrent-log-handler==0.9.7
 contextlib2==0.5.5        # via raven
 coverage==4.4.1
 cryptography==2.0.3       # via paramiko
