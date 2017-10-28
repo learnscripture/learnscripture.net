@@ -1371,7 +1371,7 @@ def group(request, slug):
                    'can_join': group.can_join(account),
                    'can_edit': group.can_edit(account),
                    'include_referral_links': True,
-                   'comments': reversed(group.comments_visible_for_account(account).order_by('-created')[:GROUP_COMMENTS_SHORT_CUTOFF])
+                   'comments': group.comments_visible_for_account(account).order_by('-created')[:GROUP_COMMENTS_SHORT_CUTOFF]
                    })
 
 
@@ -1381,10 +1381,18 @@ def group_wall(request, slug):
 
     # TODO: respond to 'comment' query param and move to the right page of
     # comments.
+    comments = group.comments_visible_for_account(account)
+    sort_order = 'oldestfirst' if 'oldestfirst' in request.GET else 'newestfirst'
+    if sort_order == 'oldestfirst':
+        comments = comments.order_by('created')
+    else:
+        comments = comments.order_by('-created')
+
     return render(request, 'learnscripture/group_wall.html',
                   {'title': 'Group wall: %s' % group.name,
                    'group': group,
-                   'comments': group.comments_visible_for_account(account).order_by('created'),
+                   'comments': comments,
+                   'sort_order': sort_order,
                    })
 
 

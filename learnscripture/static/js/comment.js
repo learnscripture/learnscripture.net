@@ -39,6 +39,9 @@ var learnscripture =
                     data['group_id'] = groupDiv.data().groupId;
                     commentListDiv = groupDiv.find('.commentlist')
                 }
+                // Get position of comment box relative to comment list
+                var position = ($("#id-comment-box").add(commentListDiv).index(commentListDiv) == 0 ?
+                                'bottom' : 'top');
 
                 $.ajax({url: '/api/learnscripture/v1/addcomment/?format=json',
                         dataType: 'json',
@@ -48,7 +51,11 @@ var learnscripture =
                             setTimeout(bindPostCommentClick, 500);
                             // data contains new comment to add.
                             var newItem = $('#id-comment-template').render({'comment': data});
-                            commentListDiv.append(newItem);
+                            if (position == 'top') {
+                                commentListDiv.prepend(newItem);
+                            } else {
+                                commentListDiv.append(newItem);
+                            }
 
                             $('#id-comment-box').val('');
                             $('#id-add-comment').hide();
