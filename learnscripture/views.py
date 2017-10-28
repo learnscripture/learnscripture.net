@@ -1381,6 +1381,11 @@ def group_wall(request, slug):
 
     # TODO: respond to 'comment' query param and move to the right page of
     # comments.
+    try:
+        selected_comment_id = int(request.GET['comment'])
+    except (KeyError, ValueError):
+        selected_comment_id = None
+
     comments = group.comments_visible_for_account(account)
     sort_order = 'oldestfirst' if 'oldestfirst' in request.GET else 'newestfirst'
     if sort_order == 'oldestfirst':
@@ -1393,6 +1398,7 @@ def group_wall(request, slug):
                    'group': group,
                    'comments': comments,
                    'sort_order': sort_order,
+                   'selected_comment_id': selected_comment_id,
                    })
 
 
