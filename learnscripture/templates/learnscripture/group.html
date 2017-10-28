@@ -11,10 +11,12 @@
     {{ group.description|apply_markup:"restructuredtext" }}
   {% endif %}
 
-  <h2>Recent comments (<a href="{% url 'group_wall' group.slug %}">see all</a>)</h2>
+  <h2>Recent comments</h2>
+  <p>Most recent comments first - <a href="{% url 'group_wall' group.slug %}">see all</a>.</p>
 
   <div class="groupcomments" data-group-id="{{ group.id }}">
     <div class="commentblock">
+      {% include "learnscripture/group_wall_add_comment_inc.html" %}
       <div class="commentlist">
         {% for comment in comments %}
           {% with show_as_related_comment=comment.event %}
@@ -22,11 +24,6 @@
           {% endwith %}
         {% endfor %}
       </div>
-      {% if request_account.enable_commenting or not request_account %}
-        <div class="commentboxlocator">
-          <a href="#" class="show-add-comment">Add comment to group wall</a>
-        </div>
-      {% endif %}
     </div>
   </div>
 

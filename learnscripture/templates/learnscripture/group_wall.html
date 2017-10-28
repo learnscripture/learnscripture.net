@@ -1,6 +1,7 @@
 {% extends 'base_twocol.html' %}
 
 {% load pagination_tags %}
+{% load spurl %}
 
 {% block leftcolumn %}
 
@@ -8,9 +9,29 @@
 
   <h2>Comments</h2>
 
+  <p>Sort by:</p>
+  <div class="input">
+    <ul class="pills">
+      {% if sort_order == 'newestfirst' %}
+        <li class="active"><a href="">
+          Most recent first</a></li>
+        <li><a href="{% spurl base=request.get_full_path add_query='oldestfirst' %}">
+          Oldest first</a></li>
+      {% else %}
+        <li><a href="{% spurl base=request.get_full_path remove_query_param='oldestfirst' %}">
+          Most recent first</a></li>
+        <li class="active"><a href="">
+          Oldest first</a></li>
+      {% endif %}
+    </ul>
+  </div>
+
 
   <div class="groupcomments" data-group-id="{{ group.id }}">
     <div class="commentblock">
+      {% if not page_obj.has_prev and sort_order == 'newestfirst' %}
+        {% include "learnscripture/group_wall_add_comment_inc.html" %}
+      {% endif %}
       <div class="commentlist">
         {% for comment in comments %}
           {% with show_as_related_comment=comment.event %}
@@ -18,12 +39,8 @@
           {% endwith %}
         {% endfor %}
       </div>
-      {% if not page_obj.has_next %}
-        {% if request_account.enable_commenting or not request_account %}
-          <div class="commentboxlocator">
-            <a href="#" class="show-add-comment">Add comment to group wall</a>
-          </div>
-        {% endif %}
+      {% if not page_obj.has_next and sort_order == 'oldestfirst' %}
+        {% include "learnscripture/group_wall_add_comment_inc.html" %}
       {% endif %}
     </div>
   </div>
