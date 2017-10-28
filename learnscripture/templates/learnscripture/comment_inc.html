@@ -1,7 +1,10 @@
 {% load account_utils %}
 
 {# sync with id-comment-template #}
-<div class="comment{% if show_as_related_comment %} relatedcomment{% endif %}"
+<div class="comment
+            {% if show_as_related_comment %} relatedcomment{% endif %}
+            {% if comment.id == selected_comment_id %} selectedcomment{% endif %}
+            "
      id="comment-{{ comment.id }}"
      data-comment-id="{{ comment.id }}">
   <span class="commentauthor">
