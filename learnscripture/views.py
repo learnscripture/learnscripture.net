@@ -69,6 +69,7 @@ from .decorators import (has_preferences, redirect_via_prefs, require_account, r
 
 USER_EVENTS_SHORT_CUTOFF = 5
 GROUP_COMMENTS_SHORT_CUTOFF = 5
+GROUP_COMMENTS_PAGINATE_BY = 40
 
 
 def missing(request, message, status_code=404):
@@ -1399,6 +1400,7 @@ def group_wall(request, slug):
                    'comments': comments,
                    'sort_order': sort_order,
                    'selected_comment_id': selected_comment_id,
+                   'GROUP_COMMENTS_PAGINATE_BY': GROUP_COMMENTS_PAGINATE_BY,
                    })
 
 
