@@ -7,10 +7,12 @@
   <head>
     <meta charset="utf-8">
     <title>{% block title %}{% if title %}{{ title }} - {% endif %}LearnScripture.net{% endblock %}</title>
+    {% if noindex %}
+      <meta name="robots" content="noindex">
+    {% endif %}
     <meta name="description" content="{% block description %}The fun, easy and social way to memorize the Bible online{% endblock %}">
     <meta name="viewport" content="initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-
     <link rel="shortcut icon" type="image/x-icon" href="{{ STATIC_URL }}img/favicon-16x16.png" sizes="16x16" />
     <link rel="shortcut icon" type="image/x-icon" href="{{ STATIC_URL }}img/favicon-32x32.png" sizes="32x32" />
     <link rel="apple-touch-icon" href="{{ STATIC_URL }}img/touch-icon-152.png" />

@@ -1334,6 +1334,7 @@ def groups(request):
         groups = groups.none()
     return render(request, 'learnscripture/groups.html', {'title': 'Groups',
                                                           'groups': groups,
+                                                          'noindex': True,
                                                           })
 
 
@@ -1374,7 +1375,8 @@ def group(request, slug):
                    'can_join': group.can_join(account),
                    'can_edit': group.can_edit(account),
                    'include_referral_links': True,
-                   'comments': group.comments_visible_for_account(account).order_by('-created')[:GROUP_COMMENTS_SHORT_CUTOFF]
+                   'comments': group.comments_visible_for_account(account).order_by('-created')[:GROUP_COMMENTS_SHORT_CUTOFF],
+                   'noindex': True,
                    })
 
 
