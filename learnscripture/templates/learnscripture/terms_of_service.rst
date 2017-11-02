@@ -55,6 +55,8 @@ available, you represent and warrant that:
 -   the Content is respectful towards our `statement of faith`_ and to
     people holding those beliefs, and does not contain inflammatory material
     regarding views not covered by the statement of faith;
+-   the Content is appropriate for the aims of the Website, namely to promote
+    the memorization of the Bible;
 
 By submitting Content to LearnScripture.net for inclusion on our Website, you
 grant LearnScripture.net a world-wide, royalty-free, and non-exclusive
