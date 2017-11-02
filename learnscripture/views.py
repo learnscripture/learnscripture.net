@@ -1330,6 +1330,8 @@ def groups(request):
         groups = (groups.filter(name__icontains=q) |
                   groups.filter(description__icontains=q)
                   )
+    else:
+        groups = groups.none()
     return render(request, 'learnscripture/groups.html', {'title': 'Groups',
                                                           'groups': groups,
                                                           })

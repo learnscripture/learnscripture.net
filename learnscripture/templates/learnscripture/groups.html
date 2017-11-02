@@ -6,7 +6,7 @@
 {% block content %}
 
   <p>By joining groups, you can more easily compare your progress to people that
-    you know or are associated with. Browse or search for groups below,
+    you know or are associated with. Search for groups below,
     or <a href="{% url 'create_group' %}">create your own</a>.
   </p>
   <br>
@@ -27,30 +27,28 @@
 
   {% if request.GET.q %}
     <h2>Search results:</h2>
-  {% else %}
-    <h2>All groups:</h2>
+
+    {% if groups %}
+
+      {% paginate %}
+
+      {% for group in groups %}
+        <div class="actionset">
+
+          <h3><a href="{% url 'group' group.slug %}">{{ group.name }}</a></h3>
+          {{ group.description|apply_markup:"restructuredtext" }}
+
+        </div>
+      {% endfor %}
+
+      {% paginate %}
+
+    {% else %}
+
+      <p>Sorry, no groups found!</p>
+
+    {% endif %}
+
   {% endif %}
-
-  {% if groups %}
-
-    {% paginate %}
-
-    {% for group in groups %}
-      <div class="actionset">
-
-        <h3><a href="{% url 'group' group.slug %}">{{ group.name }}</a></h3>
-        {{ group.description|apply_markup:"restructuredtext" }}
-
-      </div>
-    {% endfor %}
-
-    {% paginate %}
-
-  {% else %}
-
-    <p>Sorry, no groups found!</p>
-
-  {% endif %}
-
 
 {% endblock %}
