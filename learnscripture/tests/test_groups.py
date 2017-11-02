@@ -48,6 +48,8 @@ class GroupPageTestsBase(RequireExampleVerseSetsMixin):
         self.assertEqual(private_group.can_join(account), False)
         self.assertEqual(public_group.can_join(account), True)
         self.get_url('groups')
+        self.fill({'#id-search-input': 'group'})
+        self.submit('#id-search-btn')
 
         self.assertTextPresent("Another group")
         self.assertTextAbsent("My group")
