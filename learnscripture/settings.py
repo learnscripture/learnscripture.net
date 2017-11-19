@@ -283,6 +283,7 @@ INSTALLED_APPS = [
     'django_markup',
     'anymail',
     'aldjemy',
+    'webpack_loader',
 ]
 
 ALLOWED_HOSTS = ["learnscripture.net"]
@@ -470,6 +471,19 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_TASK_IGNORE_RESULT = True
 CELERY_WORKER_HIJACK_ROOT_LOGGER = False
 
+# Webpack
+
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'CACHE': not DEBUG or TESTING,
+        'BUNDLE_DIR_NAME': 'webpack_bundles/',
+        'STATS_FILE': os.path.join(SRC_ROOT, 'webpack-stats.json'),
+        'POLL_INTERVAL': 0.1,
+        'TIMEOUT': None,
+        'IGNORE': ['.+\.hot-update.js', '.+\.map']
+    }
+}
+
 # == LearnScripture.net specific settings ==
 
 IDENTITY_EXPIRES_DAYS = 22
@@ -539,3 +553,7 @@ if DEBUG:
     #     'level': 'DEBUG',
     #     'filters': ['add_sql_with_stack'],
     # }
+
+
+if TESTING and not os.environ.get('SKIP_SELENIUM_TESTS'):
+    os.system("./node_modules/.bin/webpack --config webpack.config.js")

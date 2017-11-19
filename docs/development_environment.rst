@@ -5,6 +5,9 @@ Normal development is done using the Django development server::
 
      ./manage.py runserver
 
+You will also need to have ``webpack`` running::
+
+    ./node_modules/.bin/webpack --config webpack.config.js --watch
 
 Celery
 ------
