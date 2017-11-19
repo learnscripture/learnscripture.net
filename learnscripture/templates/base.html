@@ -1,6 +1,7 @@
 {% load compress %}
 {% load bootstrap %}
 {% load json_filters %}
+{% load render_bundle from webpack_loader %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -238,40 +239,7 @@
     We also put them at the bottom for speed.
     {% endcomment %}
 
-    {% compress js %}
-      <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery-1.7.1.min.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}js/lib/json2.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery-ui-1.8.17.custom.min.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jsrender.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.ajaxretry.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.ba-bbq.min.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.actual.min.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery.autosize.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-dropdown.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-tabs.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-buttons.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}js/common.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}js/sound.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}js/notices.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}js/bible_book_info.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}js/quickfind.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}js/learn.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}js/accounts.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}js/choose.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}js/create.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}js/preferences.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}js/viewset.js"></script>
-
-      {# dashboard #}
-      <script type="text/javascript" src="{{ STATIC_URL }}js/lib/d3.v3.min.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}js/lib/cal-heatmap.min.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}js/dashboard.js"></script>
-
-      <script type="text/javascript" src="{{ STATIC_URL }}js/versepopup.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}js/groups.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}js/comment.js"></script>
-      <script type="text/javascript" src="{{ STATIC_URL }}js/follow.js"></script>
-    {% endcompress %}
+    {% render_bundle 'main' %}
 
     {% block extrajs %}
     {% endblock %}
