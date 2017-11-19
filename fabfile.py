@@ -79,6 +79,7 @@ REQS = [
     'supervisor',  # For running uwsgi and php-cgi daemons
     'pgbouncer',  # For pooling and providing a central point of control of db connections
     'nginx',
+    'postfix',  # to receive error messages from cron jobs, 'Local only' setup
 
     # Non-Python stuff
     'npm',
