@@ -7,3 +7,5 @@ settings_priv.py
 TODO
 TODO.org
 .git/
+node_modules/
+webpack_bundles/
