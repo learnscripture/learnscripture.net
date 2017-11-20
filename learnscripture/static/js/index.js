@@ -4,7 +4,6 @@
 
 // Lib
 import exec from 'script-loader!lib/jquery-1.7.1.min';
-import exec from 'script-loader!lib/json2';
 import exec from 'script-loader!lib/jquery-ui-1.8.17.custom.min.js';
 import exec from 'script-loader!lib/jsrender';
 import exec from 'script-loader!lib/jquery.ajaxretry';
