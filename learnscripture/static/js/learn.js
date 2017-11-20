@@ -1243,7 +1243,7 @@ var learnscripture = (function (learnscripture, $) {
 
     // -----------------------
     var normalizeWordForTest = function (str) {
-        return simplifyTurkish(stripPunctuation(str.trim().toLowerCase()));
+        return simplifyTurkish(stripPunctuation(str.trim())).toLowerCase();
     }
 
     var simplifyTurkish = function (str) {
@@ -1261,7 +1261,7 @@ var learnscripture = (function (learnscripture, $) {
                 .replace(/Ö/g, "O")
                 .replace(/ö/g, "o")
                 .replace(/Ş/g, "S")
-                .replace(/ş/g, "ş")
+                .replace(/ş/g, "s")
                 .replace(/Ü/g, "U")
                 .replace(/ü/g, "u"))
     };
