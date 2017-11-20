@@ -3,37 +3,37 @@
 // as we fix things we can move over to something better.
 
 // Lib
-import exec from 'script-loader!lib/jquery-1.7.1.min';
-import exec from 'script-loader!lib/jquery-ui-1.8.17.custom.min.js';
-import exec from 'script-loader!lib/jsrender';
-import exec from 'script-loader!lib/jquery.ajaxretry';
-import exec from 'script-loader!lib/jquery.ba-bbq.min';
-import exec from 'script-loader!lib/jquery.actual.min';
-import exec from 'script-loader!lib/jquery.autosize';
-import exec from 'script-loader!lib/d3.v3.min';  // for dashboard
-import exec from 'script-loader!lib/cal-heatmap.min';  // for dashboard
+require('script-loader!lib/jquery-1.7.1.min');
+require('script-loader!lib/jquery-ui-1.8.17.custom.min.js');
+require('script-loader!lib/jsrender');
+require('script-loader!lib/jquery.ajaxretry');
+require('script-loader!lib/jquery.ba-bbq.min');
+require('script-loader!lib/jquery.actual.min');
+require('script-loader!lib/jquery.autosize');
+require('script-loader!lib/d3.v3.min');  // for dashboard
+require('script-loader!lib/cal-heatmap.min');  // for dashboard
 
 // Twitter Bootstrap
-import exec from 'script-loader!bootstrap-dropdown';
-import exec from 'script-loader!bootstrap-tabs';
-import exec from 'script-loader!bootstrap-buttons';
+require('script-loader!bootstrap-dropdown');
+require('script-loader!bootstrap-tabs');
+require('script-loader!bootstrap-buttons');
 
 // Ours
-import exec from 'script-loader!accounts';
-import exec from 'script-loader!common';
-import exec from 'script-loader!sound';
-import exec from 'script-loader!notices';
-import exec from 'script-loader!bible_book_info';
-import exec from 'script-loader!quickfind';
-import exec from 'script-loader!learn';
-import exec from 'script-loader!accounts';
-import exec from 'script-loader!choose';
-import exec from 'script-loader!create';
-import exec from 'script-loader!preferences';
-import exec from 'script-loader!viewset';
-import exec from 'script-loader!dashboard';
-import exec from 'script-loader!versepopup';
-import exec from 'script-loader!groups';
-import exec from 'script-loader!comment';
-import exec from 'script-loader!follow';
+require('script-loader!accounts');
+require('script-loader!common');
+require('script-loader!sound');
+require('script-loader!notices');
+require('script-loader!bible_book_info');
+require('script-loader!quickfind');
+require('script-loader!learn');
+require('script-loader!accounts');
+require('script-loader!choose');
+require('script-loader!create');
+require('script-loader!preferences');
+require('script-loader!viewset');
+require('script-loader!dashboard');
+require('script-loader!versepopup');
+require('script-loader!groups');
+require('script-loader!comment');
+require('script-loader!follow');
 
