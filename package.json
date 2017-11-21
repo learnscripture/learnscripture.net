@@ -12,9 +12,16 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "expose-loader": "^0.7.4",
+    "imports-loader": "^0.7.1",
+    "jquery": "^3.2.1",
     "script-loader": "^0.7.2",
     "webpack": "^3.8.1",
     "webpack-bundle-tracker": "^0.2.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "autosize": "^4.0.0",
+    "jquery-ui": "^1.12.1",
+    "jsrender": "^0.9.89"
+  }
 }

@@ -1,7 +1,9 @@
 /*jslint browser: true, vars: true, plusplus: true, maxerr: 1000 */
-/*globals $, jQuery, alert, confirm */
+/*globals alert, confirm */
+"use strict";
 
 // Javascript for the view-set page
+var $ = require('jquery');
 
 $(document).ready(function () {
     "use strict";

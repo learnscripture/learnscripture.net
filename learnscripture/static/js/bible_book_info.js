@@ -1521,3 +1521,5 @@ var BIBLE_BOOK_INFO =
     }
 }
 ;
+
+module.exports = BIBLE_BOOK_INFO;

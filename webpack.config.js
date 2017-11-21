@@ -14,8 +14,12 @@ module.exports = {
 
     plugins: [
         new BundleTracker({filename: './webpack-stats.json'}),
+        new webpack.ProvidePlugin({
+            $: "jquery",
+            jQuery: "jquery",
+            "window.jQuery": "jquery",
+        })
     ],
-
     resolve: {
         modules: [
             "node_modules",
@@ -24,7 +28,7 @@ module.exports = {
         ],
         alias: {
             "d3": "lib/d3.v3.min",
-            "jquery": "lib/jquery-1.7.2",
+            "jquery": "jquery/src/jquery",
         }
     }
 }
