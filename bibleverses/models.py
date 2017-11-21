@@ -885,6 +885,10 @@ class UserVerseStatus(models.Model):
 #   with the edge cases, combined with trying to get data efficiently with the
 #   minimum of DB queries.
 
+class TooManyVerses(InvalidVerseReference):
+    pass
+
+
 def fetch_localized_reference(version,
                               language_code,
                               localized_reference,
@@ -962,7 +966,7 @@ def fetch_parsed_reference(version, parsed_ref, max_length=MAX_VERSE_QUERY_SIZE)
         raise InvalidVerseReference("No verses matched '%s'." % parsed_ref.canonical_form())
 
     if len(retval) > max_length:
-        raise InvalidVerseReference("References that span more than %d verses are not allowed in this context." % max_length)
+        raise TooManyVerses("References that span more than %d verses are not allowed in this context." % max_length)
 
     # Ensure back references to version are set, so we don't need extra DB lookup
     for v in retval:
@@ -1111,7 +1115,10 @@ def is_continuous_set(verse_list):
         if len(verse_list) / chapter_count < 20:
             return False
 
-    combined = fetch_localized_reference(version, version.language_code, combined_ref)
+    try:
+        combined = fetch_localized_reference(version, version.language_code, combined_ref)
+    except TooManyVerses:
+        return False  # Can't do anything else.
 
     return ([v.localized_reference for v in verse_list] ==
             [v.localized_reference for v in combined])
