@@ -1,38 +1,33 @@
 /*jslint browser: true, vars: true, plusplus: true */
-/*globals $, jQuery, alert, confirm */
+/*globals alert, confirm */
+"use strict";
 
-var learnscripture =
-    (function (learnscripture, $) {
-        "use strict";
-        var loadResults = function (results) {
-            $('#id-quick-find-form .validation-error').remove();
-            var d = $('.quickfind_search_results');
-            if (results.length > 0) {
-                var html = '';
-                if (results.length > 10) {
-                    html = html + "<p>The first 10 results matching your search are below:</p>";
-                }
-                html = html + $('#id_individual_choose_result_template').render(results);
-                d.html(html);
-                learnscripture.setupNeedsPreferencesControls(d);
-            } else {
-                d.html("<p><span class='error'>No verses were found matching your search</span></p>");
-            }
-        };
+var $ = require('jquery');
+var quickfind = require('quickfind');
+var preferences = require('preferences');
 
-        var setupChooseControls = function () {
-            $('#id_lookup').click(learnscripture.quickFindAndHandleResults(loadResults, false));
-        };
+var loadResults = function (results) {
+    $('#id-quick-find-form .validation-error').remove();
+    var d = $('.quickfind_search_results');
+    if (results.length > 0) {
+        var html = '';
+        if (results.length > 10) {
+            html = html + "<p>The first 10 results matching your search are below:</p>";
+        }
+        html = html + $('#id_individual_choose_result_template').render(results);
+        d.html(html);
+        preferences.setupNeedsPreferencesControls(d);
+    } else {
+        d.html("<p><span class='error'>No verses were found matching your search</span></p>");
+    }
+};
 
-        // Exports:
-        learnscripture.setupChooseControls = setupChooseControls;
-
-        return learnscripture;
-
-    }(learnscripture || {}, $));
+var setupChooseControls = function () {
+    $('#id_lookup').click(quickfind.quickFindAndHandleResults(loadResults, false));
+};
 
 $(document).ready(function () {
     if ($('#id-tab-individual').length > 0) {
-        learnscripture.setupChooseControls();
+        setupChooseControls();
     }
 });
