@@ -249,6 +249,8 @@ ROOT_URLCONF = 'learnscripture.urls'
 WSGI_APPLICATION = 'learnscripture.wsgi.application'
 
 INSTALLED_APPS = [
+    'dal',  # Needs to be before admin
+    'dal_select2',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -279,7 +281,6 @@ INSTALLED_APPS = [
     'spurl',
     'paypal.standard.ipn',
     'app_metrics',
-    'selectable',
     'django_markup',
     'anymail',
     'aldjemy',
