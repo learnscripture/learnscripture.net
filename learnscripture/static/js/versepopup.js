@@ -52,9 +52,11 @@ var cancelLearningPassageClick = function (ev) {
 };
 
 var setupVersePopups = function () {
-    $('.verse-popup-btn')
-        .toggle(
-            function (ev) {
+    $('.verse-popup-btn').click(
+        function (ev) {
+            var $btn = $(this);
+            if ($btn.data("popupopen") !== "yes") {
+                $btn.data("popupopen", "yes")
                 var ref = this.attributes['data-localized-reference'].value;
                 var version = this.attributes['data-version'].value;
                 var that = this;
@@ -71,11 +73,12 @@ var setupVersePopups = function () {
                             $target.find('.cancel-learning-verse-btn').bind('click', cancelLearningVerseClick);
                             $target.find('.cancel-learning-passage-btn').bind('click', cancelLearningPassageClick);
                         }
-                       });
-            },
-            function (ev) {
-                $(this).closest('td').find('.verse-options-container').remove();
-            });
+                       })
+            } else {
+                $btn.data("popupopen", "no")
+                $btn.closest('td').find('.verse-options-container').remove();
+            }
+        });
 };
 
 
