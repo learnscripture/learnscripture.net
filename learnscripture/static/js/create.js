@@ -146,7 +146,6 @@ var setupCreateVerseSetControls = function () {
                                }
                            });
     $('#id-create-selection-set #id-verse-list tbody').sortable();
-    $('#id-create-selection-set #id-verse-list tbody').disableSelection();
     $('#id-create-selection-set #id-verse-list tbody').on('click', '.icon-trash', deleteButtonClick);
     $('#id-create-selection-set #id-save-btn').click(selectionSaveBtnClick);
 

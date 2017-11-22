@@ -5,6 +5,7 @@
 @import "../bootstrap/lib/bootstrap.less";
 @import "../fontawesome/font-awesome.less";
 @import "icons.less";
+@import "utils.less";
 
 
 /* Themes */
@@ -1270,6 +1271,12 @@ form.quickfind {
     display: none;
 }
 
+#id-create-selection-set, #id-create-passage-set {
+    #id-verse-list tbody {
+        .disable-select();
+        cursor: move;
+    }
+}
 
 // -- Stats page --
 
