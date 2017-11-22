@@ -4,7 +4,7 @@
 
 // node_modules lib
 require('expose-loader?jQuery!jquery');
-require('jquery-ui');
+require("jquery-ui/ui/widgets/sortable");
 require('jsrender');
 require('autosize');
 
