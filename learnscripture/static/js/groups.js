@@ -2,10 +2,10 @@
 var $ = require('jquery');
 
 var setOpenBtnState = function () {
-    if (!$('#id_public').attr('checked')) {
-        $('#id_open').removeAttr('checked').attr('disabled', 'disabled');
+    if (!$('#id_public').prop('checked')) {
+        $('#id_open').prop('checked', false).prop('disabled', true);
     } else {
-        $('#id_open').removeAttr('disabled');
+        $('#id_open').prop('disabled', false);
     }
 }
 
@@ -13,8 +13,8 @@ var setupGroupControls = function () {
     setOpenBtnState();
     var publicBtn = $('#id_public');
     publicBtn.bind('change', setOpenBtnState);
-    if (publicBtn.attr('checked')) {
-        publicBtn.attr('disabled', 'disabled');
+    if (publicBtn.prop('checked')) {
+        publicBtn.prop('disabled', true);
     }
 };
 
