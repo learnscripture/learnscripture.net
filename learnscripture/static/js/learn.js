@@ -43,8 +43,6 @@ var preferences = null;
 var userAccountData = null;
 var scoringEnabled = false;
 
-var isLearningPage = null;
-
 // Controls
 var inputBox = null;
 var testingStatus = null;
@@ -1995,10 +1993,6 @@ var fastEventBind = function ($elem, callback) {
 };
 
 var setUpLearningControls = function () {
-    isLearningPage = ($('#id-verse-wrapper').length > 0);
-    if (!isLearningPage) {
-        return;
-    }
     sound.setUpAudio();
     receivePreferences(getPreferences());
     receiveAccountData(getAccountData());
@@ -2175,5 +2169,7 @@ function damerauLevenshteinDistance(a, b) {
 }
 
 $(document).ready(function () {
-    setUpLearningControls();
+    if ($('#id-verse-wrapper').length > 0) {
+        setUpLearningControls();
+    }
 });
