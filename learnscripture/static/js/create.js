@@ -77,7 +77,7 @@ var passageSaveBtnClick = function (ev) {
         var $row = $(elem);
         var ref = $row.attr('data-internal-reference');
         refs.push(ref);
-        if ($row.find('input').attr('checked') === 'checked') {
+        if ($row.find('input').prop('checked')) {
             breaks.push(ref);
         }
     });
@@ -160,8 +160,8 @@ var setupCreateVerseSetControls = function () {
       });
     $('#id_public').each(function (idx, elem) {
         var input = $(elem);
-        if (input.attr('checked')) {
-            input.attr('disabled', 'disabled');
+        if (input.prop('checked')) {
+            input.prop('disabled', true);
         }
     });
     $('#id-create-selection-set #id_lookup').click(quickfind.quickFindAndHandleResults(selectionLoadResults, false));

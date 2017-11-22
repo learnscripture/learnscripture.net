@@ -31,7 +31,7 @@
 
      var rollCb = $('#id-user-stats-graph-rolling');
      rollCb.bind('change', function (ev) {
-       g.updateOptions({rollPeriod: (rollCb.attr("checked") == "checked") ? 7 : 1})
+       g.updateOptions({rollPeriod: (rollCb.prop("checked")) ? 7 : 1})
      });
    });
   </script>
