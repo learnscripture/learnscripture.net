@@ -926,10 +926,10 @@ class Identity(models.Model):
 
         # We already have info needed for untested_total
         for s in statuses:
-            cvs_id = (s.verse_set.id, s.version.id)
+            cvs = ChosenVerseSet(version=s.version,
+                                 verse_set=s.verse_set)
+            cvs_id = cvs.id
             if cvs_id not in chosen_verse_sets:
-                cvs = ChosenVerseSet(version=s.version,
-                                     verse_set=s.verse_set)
                 chosen_verse_sets[cvs_id] = cvs
                 if extra_stats:
                     cvs.untested_total = 0
@@ -1012,7 +1012,7 @@ class Identity(models.Model):
         Both have extra info needed by dashboard.
         """
         learning_sets = self.passages_for_learning()
-        learning_verse_set_ids = set(cvs.verse_set.id for cvs in learning_sets)
+        learning_verse_set_ids = set(cvs.id for cvs in learning_sets)
         # We need the 'learning' sets in order to calculate the 'reviewing'
         # sets correctly, because we exclude the former from the latter.
         # We also always use these two return values at the same time.
@@ -1043,7 +1043,7 @@ class Identity(models.Model):
 
         # Remove things that are still in initial learning phase
         chosen_verse_set_list = [
-            cvs for cvs in chosen_verse_sets if cvs.verse_set.id not in learning_verse_set_ids
+            cvs for cvs in chosen_verse_sets if cvs.id not in learning_verse_set_ids
         ]
 
         # We need the complete list of UVSs for each verse set to get
