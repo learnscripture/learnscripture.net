@@ -54,6 +54,7 @@ var cancelLearningPassageClick = function (ev) {
 var setupVersePopups = function () {
     $('.verse-popup-btn').click(
         function (ev) {
+            ev.preventDefault();
             var $btn = $(this);
             if ($btn.data("popupopen") !== "yes") {
                 $btn.data("popupopen", "yes")
