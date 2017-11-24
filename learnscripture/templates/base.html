@@ -20,7 +20,7 @@
 
     {% compress css %}
       <link type="text/less" rel="stylesheet" href="{{ STATIC_URL }}css/learnscripture.less" charset="utf-8" />
-      <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/lib/cal-heatmap.css" charset="utf-8" />
+      {% render_bundle 'main' 'css' %}
     {% endcompress %}
 
     {% block extracss %}
@@ -239,7 +239,7 @@
     We also put them at the bottom for speed.
     {% endcomment %}
 
-    {% render_bundle 'main' %}
+    {% render_bundle 'main' 'js' %}
 
     {% block extrajs %}
     {% endblock %}

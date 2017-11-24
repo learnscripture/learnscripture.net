@@ -1,7 +1,11 @@
 /*jslint browser: true, vars: true, plusplus: true */
 /*globals alert, confirm */
 "use strict";
+
+require('cal-heatmap/cal-heatmap.css');
+
 var $ = require('jquery');
+var CalHeatMap = require('cal-heatmap');
 
 var setupCalendarHeatmap = function () {
     if ($('#id-heatmap-div').length == 0) {
@@ -29,6 +33,8 @@ var setupCalendarHeatmap = function () {
         range: numberOfYears * 12 + 1,
         start: new Date(year, month, 1),
         subDomainDateFormat: "%Y-%m-%d",
+        legend: [1,10,20,35,50,65],
+        highlight: "now",
         afterLoadData: function(data) {
             // calculate dict in form required by CalHeatMap. Also
             // calculate streaks, relying on fact that data has zeros in
