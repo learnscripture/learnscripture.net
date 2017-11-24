@@ -1,8 +1,5 @@
 
-// For initial migration, use 'script-loader' for everything,
-// as we fix things we can move over to something better.
-
-// node_modules lib
+// node_modules libs
 require('expose-loader?jQuery!jquery');
 require("jquery-ui/ui/widgets/sortable");
 require('jsrender');
@@ -10,8 +7,6 @@ require('autosize');
 
 // bundled libs
 require('lib/jquery.ajaxretry');
-require('script-loader!lib/d3.v3.min');  // for dashboard
-require('script-loader!lib/cal-heatmap.min');  // for dashboard
 require('bootstrap-dropdown');
 require('bootstrap-tabs');
 require('bootstrap-buttons');

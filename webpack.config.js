@@ -11,7 +11,17 @@ module.exports = {
         path: path.resolve(__dirname, 'learnscripture/static/webpack_bundles'),
         filename: "[name]-[hash].js"
     },
-
+    module: {
+        rules: [
+            {
+                test: /\.css$/,
+                use: [
+                    'style-loader',
+                    'css-loader'
+                ]
+            },
+        ]
+    },
     plugins: [
         new BundleTracker({filename: './webpack-stats.json'}),
         new webpack.ProvidePlugin({
@@ -27,7 +37,6 @@ module.exports = {
             path.resolve(__dirname, 'learnscripture/static/js'),
         ],
         alias: {
-            "d3": "lib/d3.v3.min",
             "jquery": "jquery/src/jquery",
         }
     }
