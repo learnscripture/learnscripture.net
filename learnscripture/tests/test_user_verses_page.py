@@ -71,5 +71,8 @@ class UserVersesPageTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.click("#id-verse-dropdown")
         self.click("#id-skip-verse-btn")
 
+        self.wait_for_ajax()
+        self.wait_until_loaded('body')
+
         # Should have gone back to where we came from
         self.assertUrlsEqual(reverse('user_verses'))

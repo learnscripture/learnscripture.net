@@ -649,7 +649,7 @@ var finish = function () {
     if ($.active) {
         common.indicateLoading();
         // Do the action when we've finished sending data
-        $('body').ajaxStop(go);
+        $(document).ajaxStop(go);
     } else {
         go();
     }
