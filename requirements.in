@@ -21,7 +21,6 @@ djangorestframework==3.6.3
 docutils==0.14
 kombu==4.0.2
 lxml==3.8.0
-nodeenv==1.1.2
 numpy==1.13.0
 psycopg2==2.7.1
 pyquery==1.2.17
