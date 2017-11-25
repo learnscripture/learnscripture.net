@@ -17,7 +17,7 @@
     <link rel="shortcut icon" type="image/x-icon" href="{{ STATIC_URL }}img/favicon-32x32.png" sizes="32x32" />
     <link rel="apple-touch-icon" href="{{ STATIC_URL }}img/touch-icon-152.png" />
 
-    {% render_bundle 'main' 'css' 'DEFAULT' attrs='charset="utf-8"' %}
+    {% render_bundle 'base' 'css' 'DEFAULT' attrs='charset="utf-8"' %}
 
     {% block extracss %}
     {% endblock %}
@@ -227,7 +227,7 @@
       </div>
     {% endif %}
 
-    {% render_bundle 'main' 'js' 'DEFAULT' %}
+    {% render_bundle 'base' 'js' 'DEFAULT' %}
 
     {% block extrajs %}
     {% endblock %}
