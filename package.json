@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "webpack --config webpack.config.js --watch"
+    "watch": "webpack --config webpack.config.dev.js --watch"
   },
   "author": "",
   "license": "MIT",
