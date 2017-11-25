@@ -620,8 +620,6 @@ def install_requirements(target):
 def build_static(target):
     assert target.STATIC_ROOT.strip() != '' and target.STATIC_ROOT.strip() != '/'
     with django_project(target):
-        # django-compressor doesn't always find changes if we don't do this:
-        run("touch learnscripture/static/css/learnscripture.less")
         run("./manage.py collectstatic -v 0 --noinput")
 
     # This is needed for certbot/letsencrypt:

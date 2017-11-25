@@ -20,6 +20,14 @@ module.exports = {
                     'css-loader'
                 ]
             },
+            {
+                test: /\.less$/,
+                use: [
+                    'style-loader',
+                    'css-loader',
+                    'less-loader'
+                ]
+            }
         ]
     },
     plugins: [
@@ -35,6 +43,7 @@ module.exports = {
             "node_modules",
             path.resolve(__dirname, 'learnscripture/static/bootstrap/js'),
             path.resolve(__dirname, 'learnscripture/static/js'),
+            path.resolve(__dirname, 'learnscripture/static/css'),
         ],
         alias: {
             "jquery": "jquery/src/jquery",
