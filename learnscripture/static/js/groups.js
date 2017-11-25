@@ -1,5 +1,5 @@
 "use strict";
-var $ = require('jquery');
+import $ from 'jquery';
 
 var setOpenBtnState = function () {
     if (!$('#id_public').prop('checked')) {

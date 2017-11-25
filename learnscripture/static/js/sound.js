@@ -1,12 +1,12 @@
 "use strict";
-var $ = require('jquery');
+import $ from 'jquery';
 
 var isSetup = false;
 var audioContext = null;
 var useAudio = false;
 var useMozSetup = false;
 
-var setUpAudio = function () {
+export const setUpAudio = function () {
     if (isSetup) {
         return;
     }
@@ -135,7 +135,7 @@ var audioContextBeep = function(frequency, length) {
     }
 }
 
-var doBeep = function (frequency, length) {
+export const doBeep = function (frequency, length) {
     try {
         if (useAudio) {
             if (useMozSetup) {
@@ -150,9 +150,4 @@ var doBeep = function (frequency, length) {
         // ignore
     }
 }
-
-
-// === Exports ===
-exports.setUpAudio = setUpAudio;
-exports.doBeep = doBeep;
 

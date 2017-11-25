@@ -1,6 +1,6 @@
 "use strict";
-var $ = require('jquery');
-var common = require('common');
+import $ from 'jquery';
+import ajaxFailed from './common';
 
 
 var setupFollowingControls = function () {

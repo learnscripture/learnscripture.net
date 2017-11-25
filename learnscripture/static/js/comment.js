@@ -1,7 +1,7 @@
 "use strict";
-var $ = require('jquery');
-var autosize = require('autosize');
-var common = require('common');
+import $ from 'jquery';
+import autosize from 'autosize';
+import { ajaxFailed, displaySimpleAjaxError } from './common';
 
 
 var setupCommentControls = function () {
@@ -64,9 +64,9 @@ var setupCommentControls = function () {
                 error: function (jqXHR, textStatus, errorThrown) {
                     setTimeout(bindPostCommentClick, 500);
                     if (jqXHR.status.toString()[0] == "4") {
-                        alert(common.displaySimpleAjaxError(jqXHR));
+                        alert(displaySimpleAjaxError(jqXHR));
                     } else {
-                        return common.ajaxFailed(jqXHR, textStatus, errorThrown);
+                        return ajaxFailed(jqXHR, textStatus, errorThrown);
                     }
                 }
                });
@@ -97,7 +97,7 @@ var setupCommentControls = function () {
                     success: function (data) {
                         commentDiv.remove();
                     },
-                    error: common.ajaxFailed
+                    error: ajaxFailed
                    });
         }
     });

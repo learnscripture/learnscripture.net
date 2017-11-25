@@ -2,8 +2,7 @@
 /*globals alert, confirm */
 "use strict";
 
-// Javascript for the view-set page
-var $ = require('jquery');
+import $ from 'jquery';
 
 $(document).ready(function () {
     "use strict";

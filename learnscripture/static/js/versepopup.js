@@ -1,7 +1,7 @@
 "use strict";
 
-var $ = require('jquery');
-var common = require('common');
+import $ from 'jquery';
+import { ajaxFailed } from './common';
 
 
 var cancelLearningVerseClick = function (ev) {
@@ -22,7 +22,7 @@ var cancelLearningVerseClick = function (ev) {
         success: function () {
             $btn.closest('tr').remove();
         },
-        error: common.ajaxFailed
+        error: ajaxFailed
 
     });
 };
@@ -47,7 +47,7 @@ var cancelLearningPassageClick = function (ev) {
                                        '[data-version-id=' + versionId.toString() + ']'
                                       ).remove();
         },
-        error: common.ajaxFailed
+        error: ajaxFailed
     });
 };
 

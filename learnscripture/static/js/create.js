@@ -2,10 +2,10 @@
 /*globals $, alert */
 "use strict";
 
-var common = require('common');
-var $ = require('jquery');
-var BIBLE_BOOK_INFO = require('bible_book_info');
-var quickfind = require('quickfind');
+import $ from 'jquery';
+import { ajaxFailed } from 'common';
+import BIBLE_BOOK_INFO from './bible_book_info';
+import { quickFindAndHandleResults } from './quickfind';
 
 var addVerse = function (verseData) {
     $('#id-verse-list tbody').append(
@@ -23,7 +23,7 @@ var addVerseClick = function (ev) {
                 addVerse(results[0]);
                 btn.closest('.actionset').remove();
             },
-            error: common.ajaxFailed
+            error: ajaxFailed
            });
 };
 
@@ -164,8 +164,8 @@ var setupCreateVerseSetControls = function () {
             input.prop('disabled', true);
         }
     });
-    $('#id-create-selection-set #id_lookup').click(quickfind.quickFindAndHandleResults(selectionLoadResults, false));
-    $('#id-create-passage-set #id_lookup').click(quickfind.quickFindAndHandleResults(passageLoadResults, true));
+    $('#id-create-selection-set #id_lookup').click(quickFindAndHandleResults(selectionLoadResults, false));
+    $('#id-create-passage-set #id_lookup').click(quickFindAndHandleResults(passageLoadResults, true));
 
 };
 

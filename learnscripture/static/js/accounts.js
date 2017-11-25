@@ -1,8 +1,8 @@
 "use strict";
 /*jslint browser: true, vars: true */
 
-var $ = require('jquery');
-var common = require('common');
+import $ from 'jquery';
+import { ajaxFailed } from './common';
 
 var signedInAccountData = null;
 
@@ -12,7 +12,7 @@ var setAccountData = function (accountData) {
     $('#id-account-data').trigger('accountDataSet', accountData);
 };
 
-var getAccountData = function () {
+export const getAccountData = function () {
     return signedInAccountData;
 };
 
@@ -30,7 +30,7 @@ var doLogout = function (ev) {
                         window.location.reload();
                     }
                 },
-                error: common.ajaxFailed
+                error: ajaxFailed
                });
     }
 };
@@ -65,6 +65,3 @@ $(document).ready(function () {
         setAccountData(null);
     }
 });
-
-// Exports:
-exports.getAccountData = getAccountData;
