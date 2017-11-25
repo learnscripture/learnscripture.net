@@ -5,8 +5,9 @@ var BundleTracker = require('webpack-bundle-tracker')
 module.exports = {
     context: __dirname,
 
-    entry: './learnscripture/static/js/index', // entry point of our app, index.js
-
+    entry: {
+        base: './learnscripture/static/js/base', // for base template
+    },
     output: {
         path: path.resolve(__dirname, 'learnscripture/static/webpack_bundles'),
         filename: "[name]-[hash].js"
