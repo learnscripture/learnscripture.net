@@ -3,6 +3,7 @@
 import json
 import os
 import socket
+import subprocess
 import sys
 
 hostname = socket.gethostname()
@@ -470,11 +471,19 @@ CELERY_WORKER_HIJACK_ROOT_LOGGER = False
 
 # Webpack
 
+if DEVBOX:
+    if TESTING:
+        WEBPACK_STATS_FILE = 'webpack-stats.tests.json'
+    else:
+        WEBPACK_STATS_FILE = 'webpack-stats.dev.json'
+else:
+    WEBPACK_STATS_FILE = 'webpack-stats.production.json'
+
 WEBPACK_LOADER = {
     'DEFAULT': {
         'CACHE': not DEBUG or TESTING,
         'BUNDLE_DIR_NAME': 'webpack_bundles/',
-        'STATS_FILE': os.path.join(SRC_ROOT, 'webpack-stats.json'),
+        'STATS_FILE': os.path.join(SRC_ROOT, WEBPACK_STATS_FILE),
         'POLL_INTERVAL': 0.1,
         'TIMEOUT': None,
         'IGNORE': ['.+\.hot-update.js', '.+\.map']
@@ -553,4 +562,4 @@ if DEBUG:
 
 
 if TESTING and not os.environ.get('SKIP_SELENIUM_TESTS'):
-    os.system("./node_modules/.bin/webpack --config webpack.config.js")
+    subprocess.check_call(["./node_modules/.bin/webpack", "--config", "webpack.config.tests.js"])
