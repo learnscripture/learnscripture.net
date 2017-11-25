@@ -7,7 +7,6 @@
 -e git+git://github.com/spookylukey/aldjemy.git@e728913f829216056a361d0886506e41dcbae8bb#egg=aldjemy
 -e git+git://github.com/spookylukey/django-autoslug.git@0a6adec1f9743743bf7d741b6845620a8f347159#egg=django-autoslug
 -e git+git://github.com/spookylukey/django-bootstrap-form.git@b228f986e6650ad4690eedc70cca5ff044feaab2#egg=django-bootstrap-form
--e git+git://github.com/django-fiber/django-fiber.git@bfc3e3c1950198ef6c015feac78e155b7c508c36#egg=django-fiber
 -e hg+https://bitbucket.org/schinckel/django-jsonfield@6c37ee0fd8f2f999b21c068e733876d937d74a00#egg=django-jsonfield
 -e git+git://github.com/spookylukey/django-app-metrics.git@6de9e47459b9c3c1173f3289cbc71afd6fa45449#egg=django_app_metrics
 -e git+git://github.com/riccardoscalco/Pykov.git@16cda2f2c0ed8143ddcfa25dac34d3dadc982380#egg=pykov
@@ -32,11 +31,12 @@ dj_pagination==2.2.1
 django-anymail==0.10
 django-appconf==1.0.2     # via django-compressor
 django-autocomplete-light==3.2.10
-django-compressor==2.1.1
+django-compressor==2.1.1  # via django-fiber
 django-debug-toolbar==1.8
+django-fiber==1.4.1
 django-functest==1.0.2
 django-markup==1.2
-django-mptt==0.8.7
+django-mptt==0.8.7        # via django-fiber
 django-paypal==0.3.6
 django-spurl==0.6.4
 django-webpack-loader==0.5.0
@@ -44,7 +44,7 @@ django-webtest==1.9.2     # via django-functest
 django==1.11.6
 djangorestframework==3.6.3
 docutils==0.14
-easy-thumbnails==2.4.1
+easy-thumbnails==2.4.1    # via django-fiber
 easyprocess==0.2.3        # via pyvirtualdisplay
 fabric3==1.13.1.post1
 fabtools3==0.19.0
@@ -69,7 +69,7 @@ parsy==1.0.0
 pbr==3.1.1                # via mock
 pexpect==4.2.1            # via ipython
 pickleshare==0.7.4        # via ipython
-pillow==4.1.1             # via easy-thumbnails
+pillow==4.1.1             # via django-fiber, easy-thumbnails
 pip-tools==1.9.0
 prompt-toolkit==1.0.15    # via ipython
 psycopg2==2.7.1
