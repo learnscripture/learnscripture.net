@@ -1,5 +1,5 @@
 "use strict";
-var $ = require('jquery');
+import $ from 'jquery';
 
 var setupNoticesControls = function () {
     $('.notice a.close').click(function(ev) {

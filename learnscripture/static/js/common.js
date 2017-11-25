@@ -3,7 +3,7 @@
 // Common functionality and requirements.
 "use strict";
 
-var $ = require('jquery');
+import $ from 'jquery';
 
 if (String.prototype.trim === undefined) {
     // Before ECMAscript 5 (e.g. Android 1.6, older IE versions)
@@ -92,7 +92,7 @@ $(document).ajaxSend(function (event, xhr, settings) {
     }
 });
 
-var displaySimpleAjaxError = function (errorResponse) {
+export const displaySimpleAjaxError = function (errorResponse) {
     var parts = errorResponse.responseText.split(/\n/);
     if (parts.length == 1) {
         return parts[0];
@@ -106,7 +106,7 @@ var displaySimpleAjaxError = function (errorResponse) {
     }
 }
 
-var handleFormValidationErrors = function (form, formPrefix, errorResponse) {
+export const handleFormValidationErrors = function (form, formPrefix, errorResponse) {
     var errors = $.parseJSON(errorResponse.responseText.split(/\n/)[1]);
     var prefix = '';
     if (formPrefix.length > 0) {
@@ -145,7 +145,7 @@ var handleFormValidationErrors = function (form, formPrefix, errorResponse) {
 //       error: ajaxRetryFailed,
 //       success: ajaxRetrySucceeded
 //       (or call ajaxRetrySucceeded at beginning of success callback)
-var ajaxFailed = function (jqXHR, textStatus, errorThrown) {
+export const ajaxFailed = function (jqXHR, textStatus, errorThrown) {
     alert("The server could not be contacted. Please try again.");
     console.log("AJAX error: %s, %s, %o", textStatus, errorThrown, jqXHR);
 };
@@ -159,31 +159,36 @@ var ajaxRetryTick = function (info) {
     $('#id-ajax-errors').html('<span>' + text + '</span>');
 };
 
-var ajaxRetryFailed = function (jqXHR, textStatus, errorThrown) {
+export const ajaxRetryOptions = {
+    tick: ajaxRetryTick,
+    attempts: 11
+};
+
+export const ajaxRetryFailed = function (jqXHR, textStatus, errorThrown) {
     $('#id-ajax-status').show();
     $('#id-ajax-loading').hide();
     $('#id-ajax-errors').html('<span>Data not saved. Please check internet connection</span>');
 };
 
-var indicateLoading = function () {
+export const indicateLoading = function () {
     $('#id-ajax-status').show();
     $('#id-ajax-loading').show();
 };
 
-var hideLoadingIndicator = function () {
+export const hideLoadingIndicator = function () {
     $('#id-ajax-status').hide();
     $('#id-ajax-loading').hide();
 };
 
-var ajaxRetrySucceeded = function () {
+export const ajaxRetrySucceeded = function () {
     $('#id-ajax-errors').html('');
 };
 
-var isTouchDevice = function () {
+export const isTouchDevice = function () {
     return 'ontouchstart' in window;
 };
 
-var isAndroid = function () {
+export const isAndroid = function () {
     return navigator.userAgent.toLowerCase().indexOf("android") > -1;
 };
 
@@ -191,7 +196,7 @@ var deviceCanVibrate = function () {
     return ("vibrate" in navigator);
 }
 
-var getLocation = function(href) {
+export const getLocation = function(href) {
     var l = document.createElement("a");
     l.href = href;
     return l;
@@ -241,18 +246,3 @@ $(document).ready(function () {
     });
 
 });
-
-// Export:
-exports.handleFormValidationErrors = handleFormValidationErrors;
-exports.displaySimpleAjaxError = displaySimpleAjaxError;
-exports.ajaxFailed = ajaxFailed;
-exports.ajaxRetryOptions = {tick: ajaxRetryTick,
-                            attempts: 11
-                           };
-exports.ajaxRetryFailed = ajaxRetryFailed;
-exports.ajaxRetrySucceeded = ajaxRetrySucceeded;
-exports.isTouchDevice = isTouchDevice;
-exports.isAndroid = isAndroid;
-exports.indicateLoading = indicateLoading;
-exports.hideLoadingIndicator = hideLoadingIndicator;
-exports.getLocation = getLocation;

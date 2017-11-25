@@ -30,12 +30,11 @@
 "use strict";
 
 // Imports
-var $ = require('jquery');
-var common = require('common');
-var sound = require('sound');
-var getPreferences = require("preferences").getPreferences;
-var getAccountData = require("accounts").getAccountData;
-
+import $ from 'jquery';
+import { isTouchDevice, ajaxRetrySucceeded, ajaxRetryOptions, ajaxRetryFailed, hideLoadingIndicator, indicateLoading, isAndroid, ajaxFailed } from './common';
+import { doBeep, setUpAudio } from './sound';
+import { getPreferences } from './preferences'
+import { getAccountData } from './accounts';
 
 
 // User prefs
@@ -55,7 +54,7 @@ var WORD_TOGGLE_HIDE_ALL = 2;
 var LOADING_QUEUE_BUFFER_SIZE = 3;
 
 var scrollingTimeoutId = null;
-var fastEventName = common.isTouchDevice() ? 'touchstart' : 'mousedown';
+var fastEventName = isTouchDevice() ? 'touchstart' : 'mousedown';
 
 // Defined in StageType:
 var STAGE_TYPE_TEST = 'TEST';
@@ -328,7 +327,7 @@ var beep = function (frequency, length) {
     if (!preferences.enableSounds) {
         return;
     }
-    sound.doBeep(frequency, length);
+    doBeep(frequency, length);
 };
 
 var vibrate = function (length) {
@@ -382,13 +381,13 @@ var readingComplete = function (callbackAfter) {
             stage: STAGE_TYPE_READ
         },
         success: function () {
-            common.ajaxRetrySucceeded();
+            ajaxRetrySucceeded();
             if (callbackAfter !== undefined) {
                 callbackAfter();
             }
         },
-        retry: common.ajaxRetryOptions,
-        error: common.ajaxRetryFailed
+        retry: ajaxRetryOptions,
+        error: ajaxRetryFailed
     });
 };
 
@@ -426,14 +425,14 @@ var testComplete = function () {
             practice: wasPracticeMode,
         },
         success: function (data) {
-            common.ajaxRetrySucceeded();
+            ajaxRetrySucceeded();
             if (!wasPracticeMode) {
                 loadStats();
                 loadActionLogs();
             }
         },
-        retry: common.ajaxRetryOptions,
-        error: common.ajaxRetryFailed
+        retry: ajaxRetryOptions,
+        error: ajaxRetryFailed
     });
 
     var accuracyPercent = Math.floor(accuracy * 100).toString();
@@ -599,7 +598,7 @@ var nextVerse = function () {
     var doIt = function () {
         currentVerseIndex++;
         loadCurrentVerse();
-        common.hideLoadingIndicator();
+        hideLoadingIndicator();
     };
 
     if (nextVersePossible()) {
@@ -607,7 +606,7 @@ var nextVerse = function () {
             // We got to the end, and the next batch didn't load in time. So
             // we have to load them and wait synchronously before we can
             // continue.
-            common.indicateLoading();
+            indicateLoading();
             if ($.active) {
                 // Still waiting for something to finish, probably.
                 // loadVerses. We don't want to ask again in that
@@ -647,7 +646,7 @@ var finish = function () {
     };
 
     if ($.active) {
-        common.indicateLoading();
+        indicateLoading();
         // Do the action when we've finished sending data
         $(document).ajaxStop(go);
     } else {
@@ -1104,7 +1103,7 @@ $.extend(OnScreenTestingStrategy, {
     },
 
     useClickTrapper: function () {
-        return (common.isAndroid() && common.isTouchDevice());
+        return (isAndroid() && isTouchDevice());
     },
 
     clickTrapperSetUp: function () {
@@ -1517,7 +1516,7 @@ var loadVerses = function (callbackAfter) {
                 callbackAfter();
             }
         },
-        error: common.ajaxFailed
+        error: ajaxFailed
     });
 };
 
@@ -1934,9 +1933,9 @@ var skipVerse = function (ev) {
         data: {
             verse_status: JSON.stringify(currentVerseStatus, null, 2)
         },
-        success: common.ajaxRetrySucceeded,
-        retry: common.ajaxRetryOptions,
-        error: common.ajaxRetryFailed
+        success: ajaxRetrySucceeded,
+        retry: ajaxRetryOptions,
+        error: ajaxRetryFailed
     });
     if (testingMethodStrategy != null) {
         testingMethodStrategy.testTearDown();
@@ -1953,9 +1952,9 @@ var cancelLearning = function (ev) {
         data: {
             verse_status: JSON.stringify(currentVerseStatus, null, 2)
         },
-        success: common.ajaxRetrySucceeded,
-        retry: common.ajaxRetryOptions,
-        error: common.ajaxRetryFailed
+        success: ajaxRetrySucceeded,
+        retry: ajaxRetryOptions,
+        error: ajaxRetryFailed
     });
     nextVerse();
 };
@@ -1971,9 +1970,9 @@ var resetProgress = function (ev) {
             data: {
                 verse_status: JSON.stringify(currentVerseStatus, null, 2)
             },
-            success: common.ajaxRetrySucceeded,
-            retry: common.ajaxRetryOptions,
-            error: common.ajaxRetryFailed
+            success: ajaxRetrySucceeded,
+            retry: ajaxRetryOptions,
+            error: ajaxRetryFailed
         });
         currentVerseStatus.strength = 0;
         currentVerseStatus.needs_testing = true;
@@ -1993,7 +1992,7 @@ var fastEventBind = function ($elem, callback) {
 };
 
 var setUpLearningControls = function () {
-    sound.setUpAudio();
+    setUpAudio();
     receivePreferences(getPreferences());
     receiveAccountData(getAccountData());
 

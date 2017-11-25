@@ -2,9 +2,9 @@
 /*globals alert, confirm */
 "use strict";
 
-var $ = require('jquery');
-var common = require('common');
-var BIBLE_BOOK_INFO = require('bible_book_info');
+import $ from 'jquery';
+import { handleFormValidationErrors, ajaxFailed } from './common';
+import BIBLE_BOOK_INFO from './bible_book_info';
 
 var lastSetReference = null;
 
@@ -278,7 +278,7 @@ var getReferenceFromControls = function ($form) {
     return text;
 };
 
-var quickFindAndHandleResults = function (resultHandler, passageMode) {
+export const quickFindAndHandleResults = function (resultHandler, passageMode) {
 
     var handler = function (ev) {
         var $form = $(ev.target).closest('form');
@@ -304,11 +304,11 @@ var quickFindAndHandleResults = function (resultHandler, passageMode) {
                 error:  function (jqXHR, textStatus, errorThrown) {
                     if (jqXHR.status === 400) {
                         $form.parent().find('.quickfind_search_results *').remove();
-                        common.handleFormValidationErrors($form, '', jqXHR);
+                        handleFormValidationErrors($form, '', jqXHR);
                     } else if (jqXHR.status === 500) {
                         $form.parent().find('.quickfind_search_results').html('Your search terms were not understood.');
                     } else {
-                        common.ajaxFailed(jqXHR, textStatus, errorThrown);
+                        ajaxFailed(jqXHR, textStatus, errorThrown);
                     }
                 }
                });
@@ -338,6 +338,3 @@ var setupQuickFindControls = function () {
 $(document).ready(function () {
     setupQuickFindControls();
 });
-
-// Exports:
-exports.quickFindAndHandleResults = quickFindAndHandleResults;

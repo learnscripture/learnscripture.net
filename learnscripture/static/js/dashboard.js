@@ -2,10 +2,9 @@
 /*globals alert, confirm */
 "use strict";
 
-require('cal-heatmap/cal-heatmap.css');
-
-var $ = require('jquery');
-var CalHeatMap = require('cal-heatmap');
+import $ from 'jquery';
+import CalHeatMap from 'cal-heatmap';
+import 'cal-heatmap/cal-heatmap.css';
 
 var setupCalendarHeatmap = function () {
     if ($('#id-heatmap-div').length == 0) {

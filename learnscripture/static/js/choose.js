@@ -2,9 +2,9 @@
 /*globals alert, confirm */
 "use strict";
 
-var $ = require('jquery');
-var quickfind = require('quickfind');
-var preferences = require('preferences');
+import $ from 'jquery';
+import { quickFindAndHandleResults } from './quickfind';
+import { setupNeedsPreferencesControls } from './preferences';
 
 var loadResults = function (results) {
     $('#id-quick-find-form .validation-error').remove();
@@ -16,14 +16,14 @@ var loadResults = function (results) {
         }
         html = html + $('#id_individual_choose_result_template').render(results);
         d.html(html);
-        preferences.setupNeedsPreferencesControls(d);
+        setupNeedsPreferencesControls(d);
     } else {
         d.html("<p><span class='error'>No verses were found matching your search</span></p>");
     }
 };
 
 var setupChooseControls = function () {
-    $('#id_lookup').click(quickfind.quickFindAndHandleResults(loadResults, false));
+    $('#id_lookup').click(quickFindAndHandleResults(loadResults, false));
 };
 
 $(document).ready(function () {

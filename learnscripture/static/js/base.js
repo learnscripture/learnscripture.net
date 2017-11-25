@@ -1,15 +1,18 @@
 
 // node_modules libs
+
+// this seems to be the only way to get select2 lib to see window.jQuery,
+// import does not work.
 require('expose-loader?jQuery!jquery');
-require("jquery-ui/ui/widgets/sortable");
-require('jsrender');
-require('autosize');
+import "jquery-ui/ui/widgets/sortable";
+import 'jsrender';
+import 'autosize';
 
 // bundled libs
-require('lib/jquery.ajaxretry');
-require('bootstrap-dropdown');
-require('bootstrap-tabs');
-require('bootstrap-buttons');
+import 'lib/jquery.ajaxretry';
+import 'bootstrap-dropdown';
+import 'bootstrap-tabs';
+import 'bootstrap-buttons';
 
 // Ours
 
@@ -18,22 +21,22 @@ require('bootstrap-buttons');
 // performace after that since the client only needs to ask for one js file (due
 // to bundling) and never needs to request any js again.
 
-require('common');
-require('accounts');
-require('sound');
-require('notices');
-require('bible_book_info');
-require('quickfind');
-require('learn');
-require('preferences');
-require('choose');
-require('create');
-require('viewset');
-require('dashboard');
-require('versepopup');
-require('groups');
-require('comment');
-require('follow');
+import './common';
+import './accounts';
+import './sound';
+import './notices';
+import './bible_book_info';
+import './quickfind';
+import './learn';
+import './preferences';
+import './choose';
+import './create';
+import './viewset';
+import './dashboard';
+import './versepopup';
+import './groups';
+import './comment';
+import './follow';
 
 // CSS/Less
-require('learnscripture.less');
+import 'learnscripture.less';

@@ -2,8 +2,8 @@
 /*globals alert, confirm */
 "use strict";
 
-var $ = require('jquery');
-var common = require('common');
+import $ from 'jquery';
+import { isTouchDevice, handleFormValidationErrors, ajaxFailed, getLocation } from './common';
 
 var preferences = null;
 var PREFERENCES_ID = '#id-preferences-form';
@@ -11,7 +11,7 @@ var PREFERENCES_ID = '#id-preferences-form';
 var afterPreferencesSave = null;
 
 var setPreferences = function (prefs) {
-    prefs.testingMethod = common.isTouchDevice() ? prefs.touchscreenTestingMethod : prefs.desktopTestingMethod;
+    prefs.testingMethod = isTouchDevice() ? prefs.touchscreenTestingMethod : prefs.desktopTestingMethod;
     preferences = prefs;
     // Notify listeners. Could pick any DOM element to trigger off as
     // long as listeners do the same. It makes sense to use
@@ -19,7 +19,7 @@ var setPreferences = function (prefs) {
     $('#id-preferences-data').trigger('preferencesSet', preferences);
 };
 
-var getPreferences = function () {
+export const getPreferences = function () {
     return preferences;
 };
 
@@ -87,9 +87,9 @@ var savePrefsClick = function (ev) {
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 if (jqXHR.status === 400) {
-                    common.handleFormValidationErrors($('#id-preferences-form'), '', jqXHR);
+                    handleFormValidationErrors($('#id-preferences-form'), '', jqXHR);
                 } else {
-                    common.ajaxFailed(jqXHR, textStatus, errorThrown);
+                    ajaxFailed(jqXHR, textStatus, errorThrown);
                 }
             }
            });
@@ -147,8 +147,8 @@ var setupPreferencesControls = function () {
       });
 
     $(window).bind('hashchange', function (ev) {
-        var oldLocation = common.getLocation(ev.originalEvent.oldURL);
-        var newLocation = common.getLocation(ev.originalEvent.newURL);
+        var oldLocation = getLocation(ev.originalEvent.oldURL);
+        var newLocation = getLocation(ev.originalEvent.newURL);
 
         if (newLocation.hash.replace("#", "") == "") {
             var div = $(oldLocation.hash);
@@ -177,14 +177,9 @@ var setupPreferencesControls = function () {
     setupNeedsPreferencesControls($('body'));
 };
 
-var setupNeedsPreferencesControls = function (section) {
+export const setupNeedsPreferencesControls = function (section) {
     section.find('.needs-preferences').on('click', needsPreferencesButtonClick);
 };
-
-// Public interface:
-exports.setupNeedsPreferencesControls = setupNeedsPreferencesControls;
-exports.getPreferences = getPreferences;
-
 
 $(document).ready(function () {
     setupPreferencesControls();
