@@ -184,7 +184,7 @@ STATICFILES_DIRS = []
 # various locations.
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'compressor.finders.CompressorFinder',
+    'compressor.finders.CompressorFinder',  # for fiber
 )
 
 LOGIN_URL = '/admin/'
@@ -272,7 +272,7 @@ INSTALLED_APPS = [
 
     # Third party
     'mptt',
-    'compressor',
+    'compressor',  # for fiber
     'easy_thumbnails',
     'fiber',
     'bootstrapform',
@@ -418,10 +418,6 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     }
 }
-
-COMPRESS_PRECOMPILERS = (
-    ('text/less', 'lessc {infile} {outfile}'),
-)
 
 RESTRUCTUREDTEXT_FILTER_SETTINGS = {
     'raw_enabled': False,

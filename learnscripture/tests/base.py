@@ -3,7 +3,6 @@ import os
 import time
 import unittest
 
-from compressor.filters import CompilerFilter
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.test import TestCase
 from django.test.utils import override_settings
@@ -29,18 +28,6 @@ class FuzzyInt(int):
 
     def __repr__(self):
         return "[%d..%d]" % (self.lowest, self.highest)
-
-
-# We don't need less compilation when running normal tests, and it adds a lot to
-# the test run (nearly 1 sec per view, due to shelling out). We leave it on for
-# FullBrowserTest, because CSS could easily effect whether elements are
-# clickable etc.
-class DummyLessCssFilter(CompilerFilter):
-    def __init__(self, content, command=None, *args, **kwargs):
-        pass
-
-    def input(self, **kwargs):
-        return ''
 
 
 def create_account(version_slug='KJV',
@@ -238,8 +225,6 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
         self.wait_for_ajax()
 
 
-@override_settings(COMPRESS_PRECOMPILERS=[('text/less', 'learnscripture.tests.base.DummyLessCssFilter')],
-                   )
 class WebTestBase(AccountTestMixin, LoginMixin, FuncWebTestMixin, TestCase):
 
     # Utilities:
@@ -259,8 +244,6 @@ class WebTestBase(AccountTestMixin, LoginMixin, FuncWebTestMixin, TestCase):
         return self._make_pq(self.last_response).find_(css_selector).attr(attribute_name)
 
 
-@override_settings(COMPRESS_PRECOMPILERS=[('text/less', 'learnscripture.tests.base.DummyLessCssFilter')],
-                   )
 class TestBase(TestCase):
     pass
 
