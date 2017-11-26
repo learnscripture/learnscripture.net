@@ -9,7 +9,7 @@ import 'jsrender';
 import 'autosize';
 
 // bundled libs
-import 'lib/jquery.ajaxretry';
+import 'jquery.ajaxretry';
 import 'bootstrap-dropdown';
 import 'bootstrap-tabs';
 import 'bootstrap-buttons';
