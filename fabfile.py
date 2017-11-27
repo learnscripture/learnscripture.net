@@ -2,6 +2,7 @@
 fabfile for deploying and managing LearnScripture.net
 """
 import json
+import glob
 import os
 import re
 from contextlib import contextmanager
@@ -480,9 +481,10 @@ def deploy():
     push_to_central_vcs()
     target = create_target()
     push_sources(target)
+    build_and_push_static(target)
     create_venv(target)
     install_requirements(target)
-    build_static(target)
+    collect_static(target)
     update_database(target)
     make_target_current(target)
     tag_deploy()  # Once 'current' symlink is switched
@@ -616,7 +618,34 @@ def install_requirements(target):
         run("pip install -r requirements.txt --exists-action w")
 
 
-def build_static(target):
+@task
+def build_and_push_static(target):
+    deploy_files_pattern = "./learnscripture/static/webpack_bundles/*.deploy.*"
+    for f in glob.glob(deploy_files_pattern):
+        os.unlink(f)
+    stats_file = "./webpack-stats.deploy.json"
+    local("rm " + stats_file)
+    local("./node_modules/.bin/webpack --config webpack.config.deploy.js")
+    webpack_data = json.load(open(stats_file))
+    assert webpack_data['status'] == 'done'
+    deploy_files = [os.path.abspath(f) for f in glob.glob(deploy_files_pattern)]
+    deploy_files_2 = [part['path']
+                      for chunk in webpack_data['chunks'].values()
+                      for part in chunk]
+    s1 = set(deploy_files)
+    s2 = set(deploy_files_2)
+    assert s1 == s2, "Expected {0} == {1}".format(s1, s2)
+    for f in list(s1) + [stats_file]:
+        rel_f = os.path.relpath(f)
+        remote_f = os.path.join(target.SRC_ROOT, rel_f)
+        d = os.path.dirname(remote_f)
+        if not exists(d):
+            run("mkdir -p %s" % d)
+
+        put(f, remote_f)
+
+
+def collect_static(target):
     assert target.STATIC_ROOT.strip() != '' and target.STATIC_ROOT.strip() != '/'
     with django_project(target):
         run("./manage.py collectstatic -v 0 --noinput")
