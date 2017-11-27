@@ -478,7 +478,7 @@ if DEVBOX:
     else:
         WEBPACK_STATS_FILE = 'webpack-stats.dev.json'
 else:
-    WEBPACK_STATS_FILE = 'webpack-stats.production.json'
+    WEBPACK_STATS_FILE = 'webpack-stats.deploy.json'
 
 WEBPACK_LOADER = {
     'DEFAULT': {

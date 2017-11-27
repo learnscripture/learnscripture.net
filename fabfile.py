@@ -616,7 +616,6 @@ def install_requirements(target):
         run("pip install -r requirements.txt --exists-action w")
 
 
-@task
 def build_and_push_static(target):
     deploy_files_pattern = "./learnscripture/static/webpack_bundles/*.deploy.*"
     for f in glob.glob(deploy_files_pattern):
@@ -633,6 +632,16 @@ def build_and_push_static(target):
     s1 = set(deploy_files)
     s2 = set(deploy_files_2)
     assert s1 == s2, "Expected {0} == {1}".format(s1, s2)
+
+    # Now rewrite stats file to use server paths
+    for name, chunk in webpack_data['chunks'].items():
+        for part in chunk:
+            part['path'] = os.path.join(target.SRC_ROOT,
+                                        "learnscripture/static/webpack_bundles",
+                                        part['name'])
+    with open(stats_file, "w") as f:
+        json.dump(webpack_data, f)
+
     for f in list(s1) + [stats_file]:
         rel_f = os.path.relpath(f)
         remote_f = os.path.join(target.SRC_ROOT, rel_f)
