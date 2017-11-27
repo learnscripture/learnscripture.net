@@ -1,7 +1,4 @@
-"use strict";
-import $ from 'jquery';
-
-var setOpenBtnState = function () {
+var setOpenBtnState = function() {
     if (!$('#id_public').prop('checked')) {
         $('#id_open').prop('checked', false).prop('disabled', true);
     } else {
@@ -9,7 +6,7 @@ var setOpenBtnState = function () {
     }
 }
 
-var setupGroupControls = function () {
+var setupGroupControls = function() {
     setOpenBtnState();
     var publicBtn = $('#id_public');
     publicBtn.bind('change', setOpenBtnState);
@@ -18,7 +15,7 @@ var setupGroupControls = function () {
     }
 };
 
-$(document).ready(function () {
+$(document).ready(function() {
     if ($('#id-form-edit-group').length > 0) {
         setupGroupControls();
     }

@@ -1,4 +1,4 @@
-var BIBLE_BOOK_INFO =
+export const BIBLE_BOOK_INFO =
 {
     "BOOK44": {
         "verse_counts": {
@@ -1521,5 +1521,3 @@ var BIBLE_BOOK_INFO =
     }
 }
 ;
-
-module.exports = BIBLE_BOOK_INFO;

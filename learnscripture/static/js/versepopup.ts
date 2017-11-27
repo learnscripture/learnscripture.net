@@ -1,10 +1,7 @@
-"use strict";
-
-import $ from 'jquery';
 import { ajaxFailed } from './common';
 
 
-var cancelLearningVerseClick = function (ev) {
+var cancelLearningVerseClick = function(ev) {
     ev.preventDefault();
     var $btn = $(this);
     var $form = $btn.closest('form');
@@ -19,7 +16,7 @@ var cancelLearningVerseClick = function (ev) {
                 localized_reference: $form.find('input[name=verse_status_localized_reference]').val()
             }, null, 2)
         },
-        success: function () {
+        success: function() {
             $btn.closest('tr').remove();
         },
         error: ajaxFailed
@@ -27,7 +24,7 @@ var cancelLearningVerseClick = function (ev) {
     });
 };
 
-var cancelLearningPassageClick = function (ev) {
+var cancelLearningPassageClick = function(ev) {
     ev.preventDefault();
     var $btn = $(this);
     var $form = $btn.closest('form');
@@ -41,19 +38,19 @@ var cancelLearningPassageClick = function (ev) {
             verse_set_id: verseSetId,
             version_id: versionId
         },
-        success: function () {
+        success: function() {
             $btn.closest('table').find('tr' +
-                                       '[data-verse-set-id=' + verseSetId.toString() + ']' +
-                                       '[data-version-id=' + versionId.toString() + ']'
-                                      ).remove();
+                '[data-verse-set-id=' + verseSetId.toString() + ']' +
+                '[data-version-id=' + versionId.toString() + ']'
+            ).remove();
         },
         error: ajaxFailed
     });
 };
 
-var setupVersePopups = function () {
+var setupVersePopups = function() {
     $('.verse-popup-btn').click(
-        function (ev) {
+        function(ev) {
             ev.preventDefault();
             var $btn = $(this);
             if ($btn.data("popupopen") !== "yes") {
@@ -61,20 +58,21 @@ var setupVersePopups = function () {
                 var ref = this.attributes['data-localized-reference'].value;
                 var version = this.attributes['data-version'].value;
                 var that = this;
-                $.ajax({url: '/verse-options/',
-                        dataType: 'html',
-                        type: 'GET',
-                        data: {
-                            'ref': ref,
-                            'version_slug': version
-                        },
-                        success: function(html) {
-                            var $target = $(that).closest('td')
-                            $target.append('<div class="verse-options-container">' + html + '</div>');
-                            $target.find('.cancel-learning-verse-btn').bind('click', cancelLearningVerseClick);
-                            $target.find('.cancel-learning-passage-btn').bind('click', cancelLearningPassageClick);
-                        }
-                       })
+                $.ajax({
+                    url: '/verse-options/',
+                    dataType: 'html',
+                    type: 'GET',
+                    data: {
+                        'ref': ref,
+                        'version_slug': version
+                    },
+                    success: function(html) {
+                        var $target = $(that).closest('td')
+                        $target.append('<div class="verse-options-container">' + html + '</div>');
+                        $target.find('.cancel-learning-verse-btn').bind('click', cancelLearningVerseClick);
+                        $target.find('.cancel-learning-passage-btn').bind('click', cancelLearningPassageClick);
+                    }
+                })
             } else {
                 $btn.data("popupopen", "no")
                 $btn.closest('td').find('.verse-options-container').remove();

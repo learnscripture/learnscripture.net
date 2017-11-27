@@ -1,12 +1,11 @@
-"use strict";
-import $ from 'jquery';
+/// <reference path="../typings/audiocontext-extra.d.ts" />
 
 var isSetup = false;
 var audioContext = null;
 var useAudio = false;
 var useMozSetup = false;
 
-export const setUpAudio = function () {
+export const setUpAudio = function() {
     if (isSetup) {
         return;
     }
@@ -25,7 +24,7 @@ export const setUpAudio = function () {
     isSetup = true;
 };
 
-var mozAudioBeep = function (frequency, length) {
+var mozAudioBeep = function(frequency, length) {
     var audio = new Audio();
     // Set up a mono channel at 44.1Khz
     var sampleRate = 44100;
@@ -36,35 +35,35 @@ var mozAudioBeep = function (frequency, length) {
     var g = 2 * Math.PI * frequency / sampleRate;
 
     // Fill the sample buffer array with values
-    for(var i=0; i<samples.length; i++){
+    for (var i = 0; i < samples.length; i++) {
         samples[i] = Math.sin(g * i)
     }
     audio.mozWriteAudio(samples);
 }
 
-var dataUriAudioBeep = function (frequency, length) {
-	var output = "RIFF";
+var dataUriAudioBeep = function(frequency, length) {
+    var output = "RIFF";
     var sampleRate = 44100;
-    output+=str_from_dword(sampleRate * 2 * length+36);
-	output+="WAVE";
-	output+="fmt ";
-	output+=str_from_dword(16);
-	output+=str_from_word(1);
-	output+=str_from_word(1);
-	output+=str_from_dword(sampleRate);
-	output+=str_from_dword(sampleRate * 2);
-	output+=str_from_word(4);
-	output+=str_from_word(16);
-	output+="data";
-	output+=str_from_dword(sampleRate * 2 * length);
+    output += str_from_dword(sampleRate * 2 * length + 36);
+    output += "WAVE";
+    output += "fmt ";
+    output += str_from_dword(16);
+    output += str_from_word(1);
+    output += str_from_word(1);
+    output += str_from_dword(sampleRate);
+    output += str_from_dword(sampleRate * 2);
+    output += str_from_word(4);
+    output += str_from_word(16);
+    output += "data";
+    output += str_from_dword(sampleRate * 2 * length);
     var g = 2 * Math.PI * frequency / sampleRate;
-	for (var i = 0; i < sampleRate * length; i++) {
-        var val = Math.round(Math.sin(i * g)*32760)
-		output+=str_from_word(val);
-	}
-	var audio = new Audio();
+    for (var i = 0; i < sampleRate * length; i++) {
+        var val = Math.round(Math.sin(i * g) * 32760)
+        output += str_from_word(val);
+    }
+    var audio = new Audio();
     audio.src = "data:audio/x-wav;base64," + encode64(output);
-	audio.play();
+    audio.play();
 }
 
 var keyStr = "ABCDEFGHIJKLMNOP" +
@@ -75,8 +74,8 @@ var keyStr = "ABCDEFGHIJKLMNOP" +
 
 function encode64(input) {
     var output = "";
-    var chr1, chr2, chr3 = "";
-    var enc1, enc2, enc3, enc4 = "";
+    var chr1, chr2, chr3: number;
+    var enc1, enc2, enc3, enc4: number;
     var i = 0;
 
     do {
@@ -100,26 +99,21 @@ function encode64(input) {
             keyStr.charAt(enc2) +
             keyStr.charAt(enc3) +
             keyStr.charAt(enc4);
-        chr1 = chr2 = chr3 = "";
-        enc1 = enc2 = enc3 = enc4 = "";
     } while (i < input.length);
 
     return output;
 }
 
-function str_from_dword(dw)
-{
-	return String.fromCharCode(dw&0xFF,dw>>8&0xFF,dw>>16&0xFF,dw>>24&0xFF);
+function str_from_dword(dw) {
+    return String.fromCharCode(dw & 0xFF, dw >> 8 & 0xFF, dw >> 16 & 0xFF, dw >> 24 & 0xFF);
 }
 
-function str_from_word(w)
-{
-	return String.fromCharCode(w&0xFF,w>>8&0xFF);
+function str_from_word(w) {
+    return String.fromCharCode(w & 0xFF, w >> 8 & 0xFF);
 }
 
-function str_from_byte(b)
-{
-	return String.fromCharCode(b&0xFF);
+function str_from_byte(b) {
+    return String.fromCharCode(b & 0xFF);
 }
 
 var audioContextBeep = function(frequency, length) {
@@ -135,7 +129,7 @@ var audioContextBeep = function(frequency, length) {
     }
 }
 
-export const doBeep = function (frequency, length) {
+export const doBeep = function(frequency, length) {
     try {
         if (useAudio) {
             if (useMozSetup) {

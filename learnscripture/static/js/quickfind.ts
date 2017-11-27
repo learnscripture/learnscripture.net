@@ -2,15 +2,14 @@
 /*globals alert, confirm */
 "use strict";
 
-import $ from 'jquery';
 import { handleFormValidationErrors, ajaxFailed } from './common';
-import BIBLE_BOOK_INFO from './bible_book_info';
+import { BIBLE_BOOK_INFO } from './bible_book_info';
 
 var lastSetReference = null;
 
 var MAX_VERSES_FOR_SINGLE_CHOICE = 4;
 
-var range = function (start, stop) {
+var range = function(start, stop) {
     var foo = [], i;
     for (i = start; i < stop; i++) {
         foo.push(i);
@@ -18,10 +17,10 @@ var range = function (start, stop) {
     return foo;
 };
 
-var bookChange = function (ev) {
+var bookChange = function(ev) {
     var $form = $(this).closest('form');
     var book = $(ev.target).val();
-    if (book === '' || book === null) {
+    if (book === '' || book === null || typeof book !== "string") {
         setChapterStartSelect($form, []);
     } else {
         setChapterStartSelect($form, range(1, BIBLE_BOOK_INFO[book]['chapter_count'] + 1));
@@ -29,7 +28,7 @@ var bookChange = function (ev) {
     }
 };
 
-var chapterStartChange = function (ev) {
+var chapterStartChange = function(ev) {
     var $form = $(this).closest('form');
     var book = getBook($form);
     var chapterStart = getChapterStart($form);
@@ -44,7 +43,7 @@ var chapterStartChange = function (ev) {
 
 };
 
-var chapterEndChange = function (ev) {
+var chapterEndChange = function(ev) {
     var $form = $(this).closest('form');
     var book = getBook($form);
     var chapterEnd = getChapterEnd($form);
@@ -54,7 +53,7 @@ var chapterEndChange = function (ev) {
 
 };
 
-var verseStartChange = function (ev) {
+var verseStartChange = function(ev) {
     var $form = $(this).closest('form');
     var book = getBook($form);
     var verseStart = getVerseStart($form);
@@ -91,15 +90,15 @@ var verseStartChange = function (ev) {
     setQuickFind($form);
 };
 
-var verseEndChange = function (ev) {
+var verseEndChange = function(ev) {
     var $form = $(this).closest('form');
     setQuickFind($form);
 };
 
-var versionChange = function (ev) {
+var versionChange = function(ev) {
     var $form = $(this).closest('form');
     var langCode = $('#id-version-select option:selected').attr('lang');
-    $form.find('select[name=book] option').each(function (idx, elem) {
+    $form.find('select[name=book] option').each(function(idx, elem) {
         var $opt = $(elem);
         $opt.text($opt.attr('data-lang-' + langCode));
     });
@@ -111,36 +110,36 @@ var versionChange = function (ev) {
     languageChange();
 }
 
-var languageChange = function () {
+var languageChange = function() {
     var langCode = $('#id-version-select option:selected').attr('lang');
     $('[data-lang-specific]').hide().filter('[lang=' + langCode + ']').show();
 }
 
-var getBook = function ($form) {
+var getBook = function($form) {
     return $form.find('select[name=book]').val();
 };
 
-var getBookName = function (internalBookName) {
+var getBookName = function(internalBookName) {
     return $('select[name=book] option[value=' + internalBookName + ']').text();
 };
 
-var getChapterStart = function ($form) {
+var getChapterStart = function($form) {
     return getSelectNumber($form, 'select[name=chapter_start]');
 };
 
-var getChapterEnd = function ($form) {
+var getChapterEnd = function($form) {
     return getSelectNumber($form, 'select[name=chapter_end]');
 };
 
-var getVerseStart = function ($form) {
+var getVerseStart = function($form) {
     return getSelectNumber($form, 'select[name=verse_start]');
 };
 
-var getVerseEnd = function ($form) {
+var getVerseEnd = function($form) {
     return getSelectNumber($form, 'select[name=verse_end]');
 };
 
-var getSelectNumber = function ($form, selector) {
+var getSelectNumber = function($form, selector) {
     var s = $form.find(selector);
     if (s.length === 0) {
         return null;
@@ -153,7 +152,7 @@ var getSelectNumber = function ($form, selector) {
     }
 };
 
-var fillNumberSelect = function (select, numbers, addEmpty) {
+var fillNumberSelect = function(select, numbers, addEmpty) {
     var i;
     if (select.length === 0) {
         return;
@@ -170,49 +169,49 @@ var fillNumberSelect = function (select, numbers, addEmpty) {
     }
 };
 
-var setBookByName = function ($form, languageCode, bookName) {
+var setBookByName = function($form, languageCode, bookName) {
     var $bookSelect = $form.find("select[name=book]")
     $bookSelect.find("option").filter(function() {
         return $(this).attr('data-lang-' + languageCode) == bookName;
     }).prop('selected', true);
 };
 
-var setChapterStartSelect = function ($form, chapters) {
+var setChapterStartSelect = function($form, chapters) {
     fillNumberSelect($form.find('select[name=chapter_start]'), chapters, true);
     setChapterEndSelect($form, []);
     setVerseStartSelect($form, []);
 };
 
-var setChapterStartSelectValue = function ($form, value) {
+var setChapterStartSelectValue = function($form, value) {
     $form.find('select[name=chapter_start]').val(value);
 };
 
-var setChapterEndSelect = function ($form, chapters) {
+var setChapterEndSelect = function($form, chapters) {
     fillNumberSelect($form.find('select[name=chapter_end]'), chapters, false);
 };
 
-var setChapterEndSelectValue = function ($form, value) {
+var setChapterEndSelectValue = function($form, value) {
     $form.find('select[name=chapter_end]').val(value);
 };
 
-var setVerseStartSelect = function ($form, verses) {
+var setVerseStartSelect = function($form, verses) {
     fillNumberSelect($form.find('select[name=verse_start]'), verses, true);
     setVerseEndSelect($form, []);
 };
 
-var setVerseStartSelectValue = function ($form, value) {
+var setVerseStartSelectValue = function($form, value) {
     $form.find('select[name=verse_start]').val(value);
 };
 
-var setVerseEndSelect = function ($form, verses) {
+var setVerseEndSelect = function($form, verses) {
     fillNumberSelect($form.find('select[name=verse_end]'), verses, true);
 };
 
-var setVerseEndSelectValue = function ($form, value) {
+var setVerseEndSelectValue = function($form, value) {
     $form.find('select[name=verse_end]').val(value);
 };
 
-var setControlsFromParsedRef = function ($form, parsedRef) {
+var setControlsFromParsedRef = function($form, parsedRef) {
     setBookByName($form, parsedRef.language_code, parsedRef.book_name);
     $form.find('select[name=book]').trigger('change')
     setChapterStartSelectValue($form, parsedRef.start_chapter.toString());
@@ -225,13 +224,13 @@ var setControlsFromParsedRef = function ($form, parsedRef) {
     $form.find('select[name=verse_end]').trigger('change');
 }
 
-var setQuickFind = function ($form) {
+var setQuickFind = function($form) {
     var text = getReferenceFromControls($form);
     $form.find('input[name=quick_find]').val(text);
     lastSetReference = text;
 }
 
-var getReferenceFromControls = function ($form) {
+var getReferenceFromControls = function($form) {
     var book = getBook($form);
     var chapterStart = getChapterStart($form);
     var chapterEnd = getChapterEnd($form);
@@ -271,53 +270,54 @@ var getReferenceFromControls = function ($form) {
     } else {
         if (verseEnd != undefined && (
             (chapterStart != chapterEnd) ||
-                (verseStart != verseEnd))) {
+            (verseStart != verseEnd))) {
             text = text + "-" + verseEnd.toString();
         }
     }
     return text;
 };
 
-export const quickFindAndHandleResults = function (resultHandler, passageMode) {
+export const quickFindAndHandleResults = function(resultHandler, passageMode) {
 
-    var handler = function (ev) {
+    var handler = function(ev) {
         var $form = $(ev.target).closest('form');
         ev.preventDefault();
-        $.ajax({url: '/api/learnscripture/v1/versefind/?format=json',
-                dataType: 'json',
-                type: 'GET',
-                data: {
-                    'quick_find': $form.find('input[name=quick_find]').val(),
-                    'version_slug': $('#id-version-select').val(),
-                    'passage_mode': passageMode ? '1' : '0'
-                },
-                success: function (results) {
-                    resultHandler(results);
-                    if (results.length == 1 && results[0].from_reference !== null) {
-                        var result = results[0];
-                        var qfVal = $form.find('input[name=quick_find]').val();
-                        if (result.from_reference.trim() == qfVal.trim()) {
-                            setControlsFromParsedRef($form, result.parsed_ref);
-                        }
-                    }
-                },
-                error:  function (jqXHR, textStatus, errorThrown) {
-                    if (jqXHR.status === 400) {
-                        $form.parent().find('.quickfind_search_results *').remove();
-                        handleFormValidationErrors($form, '', jqXHR);
-                    } else if (jqXHR.status === 500) {
-                        $form.parent().find('.quickfind_search_results').html('Your search terms were not understood.');
-                    } else {
-                        ajaxFailed(jqXHR, textStatus, errorThrown);
+        $.ajax({
+            url: '/api/learnscripture/v1/versefind/?format=json',
+            dataType: 'json',
+            type: 'GET',
+            data: {
+                'quick_find': $form.find('input[name=quick_find]').val(),
+                'version_slug': $('#id-version-select').val(),
+                'passage_mode': passageMode ? '1' : '0'
+            },
+            success: function(results) {
+                resultHandler(results);
+                if (results.length == 1 && results[0].from_reference !== null) {
+                    var result = results[0];
+                    var qfVal = <string>$form.find('input[name=quick_find]').val();
+                    if (result.from_reference.trim() == qfVal.trim()) {
+                        setControlsFromParsedRef($form, result.parsed_ref);
                     }
                 }
-               });
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                if (jqXHR.status === 400) {
+                    $form.parent().find('.quickfind_search_results *').remove();
+                    handleFormValidationErrors($form, '', jqXHR);
+                } else if (jqXHR.status === 500) {
+                    $form.parent().find('.quickfind_search_results').html('Your search terms were not understood.');
+                } else {
+                    ajaxFailed(jqXHR, textStatus, errorThrown);
+                }
+            }
+        });
     };
     return handler;
 };
 
 
-var setupQuickFindControls = function () {
+var setupQuickFindControls = function() {
     $('form.quickfind select[name=book]').change(bookChange);
     $('form.quickfind select[name=chapter_start]').change(chapterStartChange);
     $('form.quickfind select[name=chapter_end]').change(chapterEndChange);
@@ -325,7 +325,7 @@ var setupQuickFindControls = function () {
     $('form.quickfind select[name=verse_end]').change(verseEndChange);
     $('form.quickfind select[name=version]').change(versionChange);
     $('form.quickfind input[name=quick_find]');
-    $('form.quickfind input[type=text]').bind('keypress', function (ev){
+    $('form.quickfind input[type=text]').bind('keypress', function(ev) {
         if (ev.keyCode === 13) {
             ev.preventDefault();
             $(this).closest('form').find('input[type=submit].primary:first').click();
@@ -335,6 +335,6 @@ var setupQuickFindControls = function () {
 };
 
 
-$(document).ready(function () {
+$(document).ready(function() {
     setupQuickFindControls();
 });
