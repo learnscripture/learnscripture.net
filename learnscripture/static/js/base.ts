@@ -36,7 +36,7 @@ import './dashboard';
 import './versepopup';
 import './groups';
 import './comment';
-import './follow';
+import './follow.ts';
 
 // CSS/Less
 import 'learnscripture.less';
