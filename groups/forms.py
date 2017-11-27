@@ -1,16 +1,22 @@
-import selectable.forms.fields
+from dal import autocomplete
 from django import forms
 
-from accounts.lookups import AccountLookup
+from accounts.models import Account
 from groups.models import Group
 
 
 class EditGroupForm(forms.ModelForm):
 
-    invited_users = selectable.forms.fields.AutoCompleteSelectMultipleField(
-        lookup_class=AccountLookup,
+    invited_users = forms.ModelMultipleChoiceField(
         label='Invited users',
         required=False,
+        queryset=Account.objects.all(),
+        widget=autocomplete.ModelSelect2Multiple(
+            url='account_autocomplete',
+            attrs={
+                'data-placeholder': 'Username...',
+                'data-minimum-input-length': 2,
+            }),
     )
 
     class Meta:

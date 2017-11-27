@@ -273,14 +273,12 @@ class GroupCreatePageTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.fill({"#id_name": "My group"})
         self.click("#id_public")
 
-        self.click("#id_invited_users_0")
-        self.fill({"#id_invited_users_0": "invit"})
+        select_input = "input.select2-search__field"
+        self.click(select_input)
+        self.fill({select_input: "invit"})
         self.wait_for_ajax()
-        # Clicking is hard for some reason, use keyboard:
         time.sleep(0.2)
-        self.send_keys("#id_invited_users_0", selenium.webdriver.common.keys.Keys.ARROW_DOWN)
-        time.sleep(0.2)
-        self.send_keys("#id_invited_users_0", selenium.webdriver.common.keys.Keys.ENTER)
+        self.send_keys(select_input, selenium.webdriver.common.keys.Keys.ENTER)
         time.sleep(0.2)
         self.click('input[name="save"]')
 

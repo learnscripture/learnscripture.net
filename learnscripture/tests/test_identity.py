@@ -271,6 +271,35 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         self.assertEqual(cvss_review, [])
         self.assertEqual(cvss_learn, [])
 
+    def test_passages_for_reviewing_and_learning_multiple_versions(self):
+        i = self.create_identity(version_slug='NET')
+        vs1 = VerseSet.objects.get(name='Psalm 23')
+        NET = TextVersion.objects.get(slug='NET')
+        TCL02 = TextVersion.objects.get(slug='TCL02')
+        vss1 = i.add_verse_set(vs1, version=NET)
+        vss2 = i.add_verse_set(vs1, version=TCL02)
+
+        self.assertEqual(len(vss1), 6)
+        self.assertEqual(len(vss2), 6)
+
+        cvss_learn = i.passages_for_learning()
+        self.assertEqual(len(cvss_learn), 2)
+
+        for vn in range(1, 7):
+            # NET only:
+            ref = 'Psalm 23:%d' % vn
+            i.record_verse_action(ref, 'NET', StageType.TEST, 1.0)
+            # Put each one back by n days i.e. as if running over
+            # multiple days
+            i.verse_statuses.filter(localized_reference=ref).update(
+                last_tested=F('last_tested') - timedelta(7 - vn),
+                next_test_due=F('next_test_due') - timedelta(7 - vn)
+            )
+
+        cvss_review, cvss_learn = i.passages_for_reviewing_and_learning()
+        self.assertEqual(len(cvss_review), 1)
+        self.assertEqual(len(cvss_learn), 1)
+
     def test_issue_138(self):
         # https://bitbucket.org/learnscripture/learnscripture.net/issues/138/incorrect-verses-to-review-count-in
         i = self.create_identity(version_slug='NET')

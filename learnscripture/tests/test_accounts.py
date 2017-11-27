@@ -217,8 +217,8 @@ class PasswordResetTest(TestBase):
         self.assertIn(force_text(error), form_errors)
 
     def test_email_not_found(self):
-        """If the provided email is not registered, don't raise any error but
-        also don't send any email."""
+        # If the provided email is not registered, don't raise any error but
+        # also don't send any email.
         response = self.client.get('/login/')
         self.assertEqual(response.status_code, 200)
         response = self.client.post('/login/', {'login-email': 'not_a_real_email@email.com',
