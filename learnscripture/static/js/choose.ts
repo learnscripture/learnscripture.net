@@ -1,12 +1,7 @@
-/*jslint browser: true, vars: true, plusplus: true */
-/*globals alert, confirm */
-"use strict";
-
-import $ from 'jquery';
 import { quickFindAndHandleResults } from './quickfind';
 import { setupNeedsPreferencesControls } from './preferences';
 
-var loadResults = function (results) {
+var loadResults = function(results) {
     $('#id-quick-find-form .validation-error').remove();
     var d = $('.quickfind_search_results');
     if (results.length > 0) {
@@ -22,11 +17,11 @@ var loadResults = function (results) {
     }
 };
 
-var setupChooseControls = function () {
+var setupChooseControls = function() {
     $('#id_lookup').click(quickFindAndHandleResults(loadResults, false));
 };
 
-$(document).ready(function () {
+$(document).ready(function() {
     if ($('#id-tab-individual').length > 0) {
         setupChooseControls();
     }

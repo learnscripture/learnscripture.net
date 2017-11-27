@@ -30,7 +30,6 @@
 "use strict";
 
 // Imports
-import $ from 'jquery';
 import { isTouchDevice, ajaxRetrySucceeded, ajaxRetryOptions, ajaxRetryFailed, hideLoadingIndicator, indicateLoading, isAndroid, ajaxFailed } from './common';
 import { doBeep, setUpAudio } from './sound';
 import { getPreferences } from './preferences'
@@ -129,7 +128,7 @@ var redirect_to = '/dashboard/';
 
 // === Randomising ===
 
-var chooseN = function (aList, n) {
+var chooseN = function(aList, n) {
     aList = aList.slice(0);
     var i;
     var chosen = [];
@@ -147,7 +146,7 @@ var chooseN = function (aList, n) {
 
 // === Sets ===
 
-var setUnion = function (list1, list2) {
+var setUnion = function(list1, list2) {
     var i, output = list1.slice(0);
     for (i = 0; i < list2.length; i++) {
         var item = list2[i];
@@ -158,7 +157,7 @@ var setUnion = function (list1, list2) {
     return output;
 };
 
-var setRemove = function (list1, list2) {
+var setRemove = function(list1, list2) {
     // Return a new list which is a copy of list1 with the items
     // of list2 removed
     var i, output = list1.slice(0);
@@ -173,13 +172,13 @@ var setRemove = function (list1, list2) {
 
 // === Maths ===
 
-var approximatelyEqual = function (a, b, epsilon) {
+var approximatelyEqual = function(a, b, epsilon) {
     return Math.abs(Math.abs(a) - Math.abs(b)) <= epsilon;
 };
 
 // === HTML ===
 
-var enableBtn = function (btn, state) {
+var enableBtn = function(btn, state) {
     if (state) {
         btn.prop('disabled', false);
     } else {
@@ -188,28 +187,28 @@ var enableBtn = function (btn, state) {
 };
 
 function escapeHtml(s) {
-	if (!s) {
-	    return "";
-	}
-	s = s + "";
-	return s.replace(/[\&"<>\\]/g, function(s) {
-	    switch(s) {
-	    case "&": return "&amp;";
-	    case "\\": return "\\\\";
-	    case '"': return '\"';
-	    case "<": return "&lt;";
-	    case ">": return "&gt;";
-	    default: return s;
-	    }
-	});
+    if (!s) {
+        return "";
+    }
+    s = s + "";
+    return s.replace(/[\&"<>\\]/g, function(s) {
+        switch (s) {
+            case "&": return "&amp;";
+            case "\\": return "\\\\";
+            case '"': return '\"';
+            case "<": return "&lt;";
+            case ">": return "&gt;";
+            default: return s;
+        }
+    });
 }
 
 // === Events ===
 
-var alphanumeric = function (ev) {
+var alphanumeric = function(ev) {
     return ((!ev.ctrlKey && !ev.altKey && (
         (ev.which >= 65 && ev.which <= 90) ||
-            (ev.which >= 48 && ev.which <= 57)
+        (ev.which >= 48 && ev.which <= 57)
     )));
 };
 
@@ -221,19 +220,19 @@ var alphanumeric = function (ev) {
 // and word number
 var currentWordIndex = null;
 
-var getWordAt = function (index) {
+var getWordAt = function(index) {
     return $('#id-word-' + index.toString());
 };
 
-var getWordNumber = function (word) {
+var getWordNumber = function(word) {
     return $('.current-verse .word').index(word);
 };
 
-var isHidden = function (word) {
+var isHidden = function(word) {
     return word.css('opacity') === '0';
 };
 
-var hideWord = function (word, options) {
+var hideWord = function(word, options?) {
     if (preferences.enableAnimations) {
         if (options === undefined) {
             options = {
@@ -251,14 +250,14 @@ var hideWord = function (word, options) {
     }
 };
 
-var showWord = function (word) {
+var showWord = function(word) {
     if (preferences.enableAnimations) {
         word.animate({
             'opacity': '1'
         }, {
-            duration: 300,
-            queue: false
-        });
+                duration: 300,
+                queue: false
+            });
     } else {
         word.css({
             'opacity': '1'
@@ -266,7 +265,7 @@ var showWord = function (word) {
     }
 };
 
-var toggleWord = function (word) {
+var toggleWord = function(word) {
     var wordNumber = getWordNumber(word);
 
     var wordEnd = word.find('.wordend');
@@ -292,7 +291,7 @@ var toggleWord = function (word) {
 
 // ========== Messages ===========
 
-var flashMsg = function (elements, wordBox) {
+var flashMsg = function(elements, wordBox) {
     var pos = wordBox.position();
     elements.css({
         'top': (pos.top - elements.outerHeight()).toString() + "px",
@@ -305,9 +304,9 @@ var flashMsg = function (elements, wordBox) {
         }).animate({
             opacity: 0
         }, {
-            duration: 1000,
-            queue: false
-        });
+                duration: 1000,
+                queue: false
+            });
     } else {
         elements.css({
             opacity: 1
@@ -315,7 +314,7 @@ var flashMsg = function (elements, wordBox) {
     }
 };
 
-var indicateSuccess = function () {
+var indicateSuccess = function() {
     var word = getWordAt(currentWordIndex);
     word.addClass('correct');
     flashMsg(testingStatus.attr({
@@ -323,14 +322,14 @@ var indicateSuccess = function () {
     }).text("Correct!"), word);
 };
 
-var beep = function (frequency, length) {
+var beep = function(frequency, length) {
     if (!preferences.enableSounds) {
         return;
     }
     doBeep(frequency, length);
 };
 
-var vibrate = function (length) {
+var vibrate = function(length) {
     if (!preferences.enableVibration) {
         return;
     }
@@ -340,17 +339,17 @@ var vibrate = function (length) {
     navigator.vibrate(length);
 }
 
-var indicateMistake = function (mistakes, maxMistakes) {
+var indicateMistake = function(mistakes, maxMistakes) {
     var msg = "Try again! (" + mistakes.toString() + "/" + maxMistakes.toString() + ")";
     flashMsg(testingStatus.attr({
         'class': 'incorrect'
     }).text(msg),
-             getWordAt(currentWordIndex));
+        getWordAt(currentWordIndex));
     beep(330, 0.10);
     vibrate(25);
 };
 
-var indicateFail = function () {
+var indicateFail = function() {
     var word = getWordAt(currentWordIndex);
     word.addClass('incorrect');
     flashMsg(testingStatus.attr({
@@ -362,7 +361,7 @@ var indicateFail = function () {
 
 // ========== Actions completed =============
 
-var trimVerseStatusDataForPostback = function (verseStatus) {
+var trimVerseStatusDataForPostback = function(verseStatus) {
     // Clone the data:
     var d = JSON.parse(JSON.stringify(verseStatus));
     // Trim stuff we don't need:
@@ -371,7 +370,7 @@ var trimVerseStatusDataForPostback = function (verseStatus) {
     return d;
 };
 
-var readingComplete = function (callbackAfter) {
+var readingComplete = function(callbackAfter?) {
     $.ajax({
         url: '/api/learnscripture/v1/actioncomplete/?format=json',
         dataType: 'json',
@@ -380,7 +379,7 @@ var readingComplete = function (callbackAfter) {
             verse_status: JSON.stringify(trimVerseStatusDataForPostback(currentVerseStatus), null, 2),
             stage: STAGE_TYPE_READ
         },
-        success: function () {
+        success: function() {
             ajaxRetrySucceeded();
             if (callbackAfter !== undefined) {
                 callbackAfter();
@@ -391,7 +390,7 @@ var readingComplete = function (callbackAfter) {
     });
 };
 
-var testableWordCount = function () {
+var testableWordCount = function() {
     if (testingMethodStrategy.testReference) {
         return wordList.length;
     } else {
@@ -399,12 +398,12 @@ var testableWordCount = function () {
     }
 }
 
-var testComplete = function () {
+var testComplete = function() {
     testingMethodStrategy.testTearDown();
 
     var accuracy = 0;
     var mistakes = 0;
-    $.each(testingMistakes, function (key, val) {
+    $.each(testingMistakes, function(key, val) {
         mistakes += val;
     });
     accuracy = 1 - (mistakes / testableWordCount());
@@ -424,7 +423,7 @@ var testComplete = function () {
             accuracy: accuracy,
             practice: wasPracticeMode,
         },
-        success: function (data) {
+        success: function(data) {
             ajaxRetrySucceeded();
             if (!wasPracticeMode) {
                 loadStats();
@@ -435,16 +434,16 @@ var testComplete = function () {
         error: ajaxRetryFailed
     });
 
-    var accuracyPercent = Math.floor(accuracy * 100).toString();
-    $('#id-accuracy').text(accuracyPercent + "%");
+    var accuracyPercent = Math.floor(accuracy * 100);
+    $('#id-accuracy').text(accuracyPercent.toString() + "%");
     var comment =
         accuracyPercent > 98 ? 'awesome!' :
-        accuracyPercent > 95 ? 'excellent!' :
-        accuracyPercent > 90 ? 'very good.' :
-        accuracyPercent > 80 ? 'good.' :
-        accuracyPercent > 50 ? 'OK.' :
-        accuracyPercent > 30 ? 'could do better!' :
-        "more practice needed!";
+            accuracyPercent > 95 ? 'excellent!' :
+                accuracyPercent > 90 ? 'very good.' :
+                    accuracyPercent > 80 ? 'good.' :
+                        accuracyPercent > 50 ? 'OK.' :
+                            accuracyPercent > 30 ? 'could do better!' :
+                                "more practice needed!";
 
     $('#id-result-comment').text(comment);
     fadeVerseTitle(false);
@@ -464,7 +463,7 @@ var testComplete = function () {
         $('#id-next-verse-btn').addClass('primary');
     }
 
-    fastEventBind($('#id-more-practice-btn').unbind(), function (ev) {
+    fastEventBind($('#id-more-practice-btn').unbind(), function(ev) {
         if (accuracyPercent < 20) {
             currentStageList = chooseStageListForStrength(0);
         } else if (accuracyPercent < 70) {
@@ -479,15 +478,15 @@ var testComplete = function () {
 
 // =========== Stage handling ==========
 
-var setProgress = function (stageIdx, fraction) {
+var setProgress = function(stageIdx, fraction) {
     var progress = (stageIdx + fraction) / currentStageList.length * 100;
     var bar = $('#id-progress-bar');
-    var oldVal = parseInt(bar.val(), 10);
+    var oldVal = parseInt(bar.val().toString(), 10);
     if (preferences.enableAnimations &&
         !currentStage.testMode &&
         Math.abs(oldVal - progress) > 5 && // animation pointless
         !(oldVal > 99 && progress === 0) // new verse - animation confusing
-       ) {
+    ) {
         bar.animate({
             value: progress,
             duration: 'fast'
@@ -498,7 +497,7 @@ var setProgress = function (stageIdx, fraction) {
     bar.html(Math.floor(progress).toString() + "%");
 };
 
-var completeStageGroup = function () {
+var completeStageGroup = function() {
     spentStagesCount += currentStageList.length;
     currentStage = stageDefs['results'];
     currentStageList = [currentStage];
@@ -506,7 +505,7 @@ var completeStageGroup = function () {
     enableBtn($('#id-next-btn, #id-back-btn'), false);
 };
 
-var setStageControlBtns = function () {
+var setStageControlBtns = function() {
     if (currentStageIdx == 0 && currentStageList.length == 1) {
         $('#id-next-btn, #id-back-btn').hide();
     } else {
@@ -516,15 +515,15 @@ var setStageControlBtns = function () {
     }
 };
 
-var fadeVerseTitle = function (fade) {
+var fadeVerseTitle = function(fade) {
     $('#id-verse-title').toggleClass('blurry', fade);
 };
 
-var getStageSelector = function (stageName) {
+var getStageSelector = function(stageName) {
     return '.stage-' + stageName;
 }
 
-var showStageControls = function (stageName) {
+var showStageControls = function(stageName) {
     var stageSelector = getStageSelector(stageName);
     // Hide everything that is stage specific, except stuff for this
     // stage.
@@ -534,7 +533,7 @@ var showStageControls = function (stageName) {
     $('#id-bottom-controls .buttonbar').show();
 }
 
-var showTestFinishedControls = function () {
+var showTestFinishedControls = function() {
     // We can't just use showStageControls, because we want to leave the
     // instructions div alone, and only affect the id-bottom-controls
     // bit.
@@ -543,7 +542,7 @@ var showTestFinishedControls = function () {
     $('#id-bottom-controls ' + stageSelector).show();
 };
 
-var setUpStage = function (idx) {
+var setUpStage = function(idx) {
     // set the globals
     var currentStageName = currentStageList[idx];
     currentStageIdx = idx;
@@ -572,7 +571,7 @@ var setUpStage = function (idx) {
 // === Moving between stages and verses ===
 
 // next stage within verse
-var next = function (ev) {
+var next = function(ev) {
     if (currentStage.continueStage()) {
         return;
     }
@@ -584,7 +583,7 @@ var next = function (ev) {
     }
 };
 
-var back = function (ev) {
+var back = function(ev) {
     if (currentStageIdx == 0) {
         return;
     }
@@ -594,8 +593,8 @@ var back = function (ev) {
     setUpStage(currentStageIdx - 1);
 };
 
-var nextVerse = function () {
-    var doIt = function () {
+var nextVerse = function() {
+    var doIt = function() {
         currentVerseIndex++;
         loadCurrentVerse();
         hideLoadingIndicator();
@@ -630,19 +629,19 @@ var nextVerse = function () {
     }
 };
 
-var nextVersePossible = function () {
+var nextVersePossible = function() {
     return (currentVerseIndex < maxVerseIndex) || moreToLoad;
 };
 
-var markReadAndNextVerse = function () {
+var markReadAndNextVerse = function() {
     readingComplete(loadStats);
     nextVerse();
 };
 
 
-var finish = function () {
-    var go = function () {
-        window.location = redirect_to;
+var finish = function() {
+    var go = function() {
+        window.location.href = redirect_to;
     };
 
     if ($.active) {
@@ -654,7 +653,7 @@ var finish = function () {
     }
 };
 
-var pressPrimaryButton = function () {
+var pressPrimaryButton = function() {
     var $btn = $('input.primary:visible:not([disabled])');
     if ($btn.hasClass('fastevent')) {
         $btn.trigger(fastEventName);
@@ -667,12 +666,12 @@ var pressPrimaryButton = function () {
 
 // === Reading stage ===
 
-var readStageStart = function () {
+var readStageStart = function() {
     hideWordBoundaries(false);
     showWord($('.current-verse .word *'));
 };
 
-var readStageContinue = function () {
+var readStageContinue = function() {
     readingComplete();
     return false;
 };
@@ -681,11 +680,11 @@ var readStageContinue = function () {
 // recall type 1 - FullAndInitial
 //    Some full words, some initial letters only
 
-var makeFullAndInitialContinue = function (initialFraction) {
+var makeFullAndInitialContinue = function(initialFraction) {
     // Factory function that generates a function for
     // FullAndInitial stage continue function
 
-    var recallContinue = function () {
+    var recallContinue = function() {
         if (uncheckedWords.length === 0) {
             return false;
         }
@@ -702,11 +701,11 @@ var makeFullAndInitialContinue = function (initialFraction) {
 // recall type 2 - InitialAndMissing
 //    Some initial words, some missing
 
-var makeInitialAndMissingContinue = function (missingFraction) {
+var makeInitialAndMissingContinue = function(missingFraction) {
     // Factory function that generates a function for
     // InitialAndMissing stage continue function
 
-    var recallContinue = function () {
+    var recallContinue = function() {
         if (uncheckedWords.length === 0) {
             return false;
         }
@@ -721,10 +720,10 @@ var makeInitialAndMissingContinue = function (missingFraction) {
     return recallContinue;
 };
 
-var makeRecallStart = function (continueFunc) {
+var makeRecallStart = function(continueFunc) {
     // Factory function that returns a stage starter
     // function for recall stages
-    return function () {
+    return function() {
         hideWordBoundaries(false);
         uncheckedWords = wordList.slice(0);
         checkedWords = [];
@@ -733,7 +732,7 @@ var makeRecallStart = function (continueFunc) {
 
 };
 
-var getWordsToCheck = function (checkFraction) {
+var getWordsToCheck = function(checkFraction) {
     // Moves checkFraction fraction of words from uncheckedWords to
     // checkedWords for the next test and return a jQuery objects for the
     // words that are to be checked.
@@ -754,13 +753,13 @@ var getWordsToCheck = function (checkFraction) {
     uncheckedWords = setRemove(uncheckedWords, toCheck);
     // NB this must come after the chooseN(checkedWords) above.
     checkedWords = setUnion(checkedWords, toCheck);
-    var selector = $.map(toCheck, function (elem, idx) {
+    var selector = $.map(toCheck, function(elem, idx) {
         return '.current-verse .word:eq(' + elem.toString() + ')';
     }).join(', ');
     return $(selector);
 };
 
-var markRevealed = function (wordNumber) {
+var markRevealed = function(wordNumber) {
     var p = checkedWords.indexOf(wordNumber);
     if (p !== -1) {
         checkedWords.splice(p, 1);
@@ -772,7 +771,7 @@ var markRevealed = function (wordNumber) {
 
 // === Testing stages ===
 
-var resetTestingMistakes = function () {
+var resetTestingMistakes = function() {
     var i;
     testingMistakes = {};
     for (i = 0; i < wordList.length; i++) {
@@ -780,7 +779,7 @@ var resetTestingMistakes = function () {
     }
 };
 
-var getPointsTarget = function () {
+var getPointsTarget = function() {
     // Constants from scores/models.py
     var POINTS_PER_WORD = 20;
     // Duplication of logic in Account.award_action_points.  NB word
@@ -789,24 +788,24 @@ var getPointsTarget = function () {
     return currentVerseStatus.wordCount * POINTS_PER_WORD;
 };
 
-var hideWordBoundaries = function (hard) {
+var hideWordBoundaries = function(hard) {
     wordBoundariesHidden = hard;
     $('.current-verse').toggleClass('hide-word-boundaries', hard);
 };
 
-var areWordBoundariesHidden = function () {
+var areWordBoundariesHidden = function() {
     return wordBoundariesHidden;
 };
 
-var setPracticeMode = function (practice) {
+var setPracticeMode = function(practice) {
     practiceMode = practice;
 }
 
-var isPracticeMode = function () {
+var isPracticeMode = function() {
     return practiceMode;
 }
 
-var testStart = function () {
+var testStart = function() {
     $('.current-verse .word *').stop(true, true);
     // Don't want to see a flash of words at the beginning,
     // so hide quickly
@@ -826,7 +825,7 @@ var testStart = function () {
 
 };
 
-var testContinue = function () {
+var testContinue = function() {
     return true;
 };
 
@@ -835,8 +834,8 @@ var testContinue = function () {
 // Abstract base class
 var TestingStrategy = {
     testReference: true,
-    allowHint: function () { return false; },
-    conditionalShowReference: function () {
+    allowHint: function() { return false; },
+    conditionalShowReference: function() {
         var referenceSelector = '.current-verse .reference, .current-verse .colon';
         if (this.testReference) {
             $(referenceSelector).show();
@@ -844,31 +843,31 @@ var TestingStrategy = {
             $(referenceSelector).hide();
         }
     },
-    methodSetUp: function () {  // function to run when method is chosen
+    methodSetUp: function() {  // function to run when method is chosen
         this.conditionalShowReference();
     },
-    methodTearDown: function () {}, // function to run when another method is chosen
-    testSetUp: function () { // function to run when a test is started
+    methodTearDown: function() { }, // function to run when another method is chosen
+    testSetUp: function() { // function to run when a test is started
         this.conditionalShowReference();
     },
-    testTearDown: function () { // function to run when a test is finished
+    testTearDown: function() { // function to run when a test is finished
         testingStatus.hide();
     },
-    wordTestSetUp: function () {}, // function to run when a new word is being tested
-    wordTestTearDown: function () {}, // function to run when a new word is finished tested
-    nextWord: function () {
+    wordTestSetUp: function() { }, // function to run when a new word is being tested
+    wordTestTearDown: function() { }, // function to run when a new word is finished tested
+    nextWord: function() {
         this.wordTestTearDown();
         this.wordTestSetUp();
     },
-    windowAdjust: function () {},
-    scrollingAdjust: function () {}
+    windowAdjust: function() { },
+    scrollingAdjust: function() { }
 };
 
 // Base class for keyboard methods
 var KeyboardTestingStrategy = Object.create(TestingStrategy);
 $.extend(KeyboardTestingStrategy, {
 
-    testSetUp: function () {
+    testSetUp: function() {
         Object.getPrototypeOf(KeyboardTestingStrategy).testSetUp.call(this);
         // After an certain point, we make things a bit harder by not
         // showing the widths of words.
@@ -884,7 +883,7 @@ $.extend(KeyboardTestingStrategy, {
         }
     },
 
-    testTearDown: function () {
+    testTearDown: function() {
         Object.getPrototypeOf(KeyboardTestingStrategy).testTearDown.call(this);
         // For Safari, it seems we need to blur inputBox before we hide it
         // or hide #id-keyboard-test-bar, otherwise it retains focus, which
@@ -893,16 +892,16 @@ $.extend(KeyboardTestingStrategy, {
         $('#id-keyboard-test-bar').hide();
     },
 
-    wordTestSetUp: function () {
+    wordTestSetUp: function() {
         this.adjustTypingBox();
         inputBox.show().val('').focus();
     },
 
-    windowAdjust: function () {
+    windowAdjust: function() {
         this.adjustTypingBox();
     },
 
-    checkCurrentWord: function () {
+    checkCurrentWord: function() {
         var wordIdx = currentWordIndex;
         var word = getWordAt(wordIdx);
         var wordStr = normalizeWordForTest(word.text());
@@ -916,17 +915,17 @@ $.extend(KeyboardTestingStrategy, {
             testingMistakes[wordIdx] += mistakeVal;
             if (approximatelyEqual(testingMistakes[wordIdx], 1.0, 0.001) ||
                 testingMistakes[wordIdx] > 1) // can happen if switched test method in middle
-                {
-                    indicateFail();
-                    moveOn();
-                } else {
-                    indicateMistake(Math.round(testingMistakes[wordIdx] / mistakeVal),
-                                    this.testMaxAttempts);
-                }
+            {
+                indicateFail();
+                moveOn();
+            } else {
+                indicateMistake(Math.round(testingMistakes[wordIdx] / mistakeVal),
+                    this.testMaxAttempts);
+            }
         }
     },
 
-    adjustTypingBox: function () {
+    adjustTypingBox: function() {
         var wordBox = getWordAt(currentWordIndex);
         var pos = wordBox.position();
         var width;
@@ -955,7 +954,7 @@ $.extend(KeyboardTestingStrategy, {
         }
     },
 
-    showFullWordHint: function () {
+    showFullWordHint: function() {
         // show full word hint, and move on.
         var word = getWordAt(currentWordIndex);
         var wordStr = stripPunctuation(word.text());
@@ -964,17 +963,17 @@ $.extend(KeyboardTestingStrategy, {
         testingStatus.hide();
     },
 
-    allowHint: function () {
+    allowHint: function() {
         return this.hintsShown < this.getMaxHints();
     },
 
-    getMaxHints: function () {
+    getMaxHints: function() {
         // For very short verses, allow fewer hints e.g.  2 or 3 word
         // verses should get just 1 hint.
         return Math.min(Math.floor(currentVerseStatus.wordCount / 2), this.maxHintsToShow);
     },
 
-    hintFinished: function () {
+    hintFinished: function() {
         inputBox.focus();
         this.hintsShown++;
         if (this.hintsShown >= this.getMaxHints()) {
@@ -991,21 +990,21 @@ $.extend(FullWordTestingStrategy, {
     testMaxAttempts: 3,
     maxHintsToShow: 4,
 
-    methodSetUp: function () {
+    methodSetUp: function() {
         Object.getPrototypeOf(FullWordTestingStrategy).methodSetUp.call(this);
         $('.test-method-keyboard-full-word').show();
     },
 
-    methodTearDown: function () {
+    methodTearDown: function() {
         this.testTearDown();
         $('.test-method-keyboard-full-word').hide();
     },
 
-    shouldCheckWord: function (textSoFar, wordSeparatorEntered) {
+    shouldCheckWord: function(textSoFar, wordSeparatorEntered) {
         return wordSeparatorEntered;
     },
 
-    matchWord: function (target, typed) {
+    matchWord: function(target, typed) {
         // inputs are already lowercased with punctuation stripped
         if (typed === "") {
             return false;
@@ -1018,7 +1017,7 @@ $.extend(FullWordTestingStrategy, {
         return damerauLevenshteinDistance(target, typed) <= Math.ceil(target.length / 3);
     },
 
-    getHint: function () {
+    getHint: function() {
         var word = getWordAt(currentWordIndex);
         var wordStr = stripPunctuation(word.text()); // don't use normalizeWordForTest, we want case
         var typed = normalizeWordForTest(inputBox.val());
@@ -1042,26 +1041,26 @@ $.extend(FirstLetterTestingStrategy, {
     testMaxAttempts: 2, // stricter than full word because it is easier
     maxHintsToShow: 3,
 
-    methodSetUp: function () {
+    methodSetUp: function() {
         Object.getPrototypeOf(FirstLetterTestingStrategy).methodSetUp.call(this);
         $('.test-method-keyboard-first-letter').show();
     },
 
-    methodTearDown: function () {
+    methodTearDown: function() {
         this.testTearDown();
         $('.test-method-keyboard-first-letter').hide();
     },
 
-    shouldCheckWord: function (textSoFar, wordSeparatorEntered) {
+    shouldCheckWord: function(textSoFar, wordSeparatorEntered) {
         return textSoFar.length > 0;
     },
 
-    matchWord: function (target, typed) {
+    matchWord: function(target, typed) {
         var lastCharTyped = typed.slice(-1);
         return (lastCharTyped === target.slice(0, 1));
     },
 
-    getHint: function () {
+    getHint: function() {
         this.showFullWordHint();
         this.hintFinished();
     }
@@ -1074,17 +1073,17 @@ var OnScreenTestingStrategy = Object.create(TestingStrategy);
 $.extend(OnScreenTestingStrategy, {
     testReference: false,
 
-    methodSetUp: function () {
+    methodSetUp: function() {
         Object.getPrototypeOf(OnScreenTestingStrategy).methodSetUp.call(this);
         $('.test-method-onscreen').show();
     },
 
-    methodTearDown: function () {
+    methodTearDown: function() {
         this.testTearDown();
         $('.test-method-onscreen').hide();
     },
 
-    testSetUp: function () {
+    testSetUp: function() {
         Object.getPrototypeOf(OnScreenTestingStrategy).testSetUp.call(this);
         hideWordBoundaries(true);
         $('#id-onscreen-test-container').show();
@@ -1094,7 +1093,7 @@ $.extend(OnScreenTestingStrategy, {
         this.clickTrapperSetUp();
     },
 
-    testTearDown: function () {
+    testTearDown: function() {
         Object.getPrototypeOf(OnScreenTestingStrategy).testTearDown.call(this);
         $('#id-onscreen-test-container').hide();
         this.removeTestDivFix();
@@ -1102,11 +1101,11 @@ $.extend(OnScreenTestingStrategy, {
         this.clickTrapperTearDown();
     },
 
-    useClickTrapper: function () {
+    useClickTrapper: function() {
         return (isAndroid() && isTouchDevice());
     },
 
-    clickTrapperSetUp: function () {
+    clickTrapperSetUp: function() {
         if (!this.useClickTrapper()) {
             return;
         }
@@ -1127,7 +1126,7 @@ $.extend(OnScreenTestingStrategy, {
         var that = this;
         this.clickTrapperTearDown();
         this.ignoreNextClick = false;
-        var bodyClickTrapper = function (ev) {
+        var bodyClickTrapper = function(ev) {
             if (that.ignoreNextClick) {
                 ev.preventDefault();
                 ev.stopPropagation();
@@ -1141,12 +1140,13 @@ $.extend(OnScreenTestingStrategy, {
         this.bodyClickTrapper = bodyClickTrapper;
 
         $('#id-onscreen-test-container').bind('touchstart',
-                                              function (ev) { that.ignoreNextClick = true;
-                                                            });
+            function(ev) {
+                that.ignoreNextClick = true;
+            });
 
     },
 
-    clickTrapperTearDown: function () {
+    clickTrapperTearDown: function() {
         if (!this.useClickTrapper()) {
             return;
         }
@@ -1158,7 +1158,7 @@ $.extend(OnScreenTestingStrategy, {
         $('#id-onscreen-test-container').unbind('click');
     },
 
-    wordTestSetUp: function () {
+    wordTestSetUp: function() {
         this.removeCurrentWordMarker();
         var $w = getWordAt(currentWordIndex);
         $w.addClass('current-word');
@@ -1189,19 +1189,19 @@ $.extend(OnScreenTestingStrategy, {
         $wl.html(html);
         var that = this;
         fastEventBind($wl.find('.word'),
-                      function (ev) { that.handleButtonClick(ev); })
+            function(ev) { that.handleButtonClick(ev); })
         $c.show();
     },
 
-    wordTestTearDown: function () {
+    wordTestTearDown: function() {
         this.removeCurrentWordMarker();
     },
 
-    removeCurrentWordMarker: function () {
+    removeCurrentWordMarker: function() {
         $('.current-verse .current-word').removeClass('current-word');
     },
 
-    handleButtonClick: function (ev) {
+    handleButtonClick: function(ev) {
         ev.preventDefault();
         var $btn = $(ev.target);
         var chosenWord = normalizeWordForTest($btn.text());
@@ -1215,7 +1215,7 @@ $.extend(OnScreenTestingStrategy, {
         moveOn();
     },
 
-    windowAdjust: function () {
+    windowAdjust: function() {
         this.removeTestDivFix();
         this.ensureTestDivVisible();
     },
@@ -1224,7 +1224,7 @@ $.extend(OnScreenTestingStrategy, {
         this.ensureTestDivVisible();
     },
 
-    ensureTestDivVisible: function () {
+    ensureTestDivVisible: function() {
         // For long verses, we want buttons to be displayed as absolute
         // so they don't have to scroll off screen.
         var $c = $('#id-onscreen-test-container');
@@ -1239,54 +1239,54 @@ $.extend(OnScreenTestingStrategy, {
         // visible if it were not fixed, which is hard.
     },
 
-    removeTestDivFix: function () {
+    removeTestDivFix: function() {
         $('#id-onscreen-test-container').removeClass('make-fixed');
     }
 
 })
 
 // -----------------------
-var normalizeWordForTest = function (str) {
+var normalizeWordForTest = function(str) {
     return simplifyTurkish(stripPunctuation(str.trim())).toLowerCase();
 }
 
-var simplifyTurkish = function (str) {
+var simplifyTurkish = function(str) {
     // People normally type Turkish without attention for correct dots etc.
     // so we tolerate that.
     return (str
-            .replace(/Â/g, "A")
-            .replace(/â/g, "a")
-            .replace(/Ç/g, "C")
-            .replace(/ç/g, "c")
-            .replace(/Ğ/g, "G")
-            .replace(/ğ/g, "g")
-            .replace(/İ/g, "I")
-            .replace(/ı/g, "i")
-            .replace(/Ö/g, "O")
-            .replace(/ö/g, "o")
-            .replace(/Ş/g, "S")
-            .replace(/ş/g, "s")
-            .replace(/Ü/g, "U")
-            .replace(/ü/g, "u"))
+        .replace(/Â/g, "A")
+        .replace(/â/g, "a")
+        .replace(/Ç/g, "C")
+        .replace(/ç/g, "c")
+        .replace(/Ğ/g, "G")
+        .replace(/ğ/g, "g")
+        .replace(/İ/g, "I")
+        .replace(/ı/g, "i")
+        .replace(/Ö/g, "O")
+        .replace(/ö/g, "o")
+        .replace(/Ş/g, "S")
+        .replace(/ş/g, "s")
+        .replace(/Ü/g, "U")
+        .replace(/ü/g, "u"))
 };
 
-var normalizeWordForSuggestion = function (str) {
+var normalizeWordForSuggestion = function(str) {
     return stripOuterPunctuation(str.trim().toLowerCase());
 }
 
 // NB Javascript regex character classes like \W \w etc. don't handle
 // unicode, such as Turkish characters, so we are better off building lists
 // of non-letter-like characters.
-var stripPunctuation = function (str) {
+var stripPunctuation = function(str) {
     return str.replace(/["'\.,;!?:\/#!$%\^&\*{}=\-_`~()\[\]“”‘’—]/g, "");
 };
 
-var stripOuterPunctuation = function (str) {
+var stripOuterPunctuation = function(str) {
     return str.replace(/^["'\.,;!?:\/#!$%\^&\*{}=\-_`~()\[\]“”‘’—]+/g, "")
         .replace(/["'\.,;!?:\/#!$%\^&\*{}=\-_`~()\[\]“”‘’—]+$/g, "");
 }
 
-var moveOn = function () {
+var moveOn = function() {
     var wordIdx = currentWordIndex;
     var word = getWordAt(wordIdx);
     showWord(word.find('*'));
@@ -1378,8 +1378,8 @@ var stageDefs = {
         toggleMode: null
     },
     'results': {
-        setUp: function () {},
-        continueStage: function () {
+        setUp: function() { },
+        continueStage: function() {
             return true;
         },
         caption: 'Results',
@@ -1387,8 +1387,8 @@ var stageDefs = {
         toggleMode: null
     },
     'readForContext': {
-        setUp: function () {},
-        continueStage: function () {
+        setUp: function() { },
+        continueStage: function() {
             return true;
         },
         caption: 'Read',
@@ -1407,7 +1407,7 @@ var stageDefs = {
 // === Handling stage lists ===
 
 
-var setUpStageList = function (verseData) {
+var setUpStageList = function(verseData) {
     var strength = 0;
     if (verseData.strength != null) {
         strength = verseData.strength;
@@ -1426,7 +1426,7 @@ var setUpStageList = function (verseData) {
     setUpStage(0);
 };
 
-var chooseStageListForStrength = function (strength) {
+var chooseStageListForStrength = function(strength) {
     // This function is tuned to give read/recall stages only for the
     // early stages, or when the verse has been completely forgotten.
     // Although it doesn't use it, it's tuned to the value of
@@ -1448,7 +1448,7 @@ var chooseStageListForStrength = function (strength) {
 
 // ========= Handling verse loading =======
 
-var getSeenVerseIds = function () {
+var getSeenVerseIds = function() {
     if (versesToLearn == null) {
         return []
     }
@@ -1460,7 +1460,7 @@ var getSeenVerseIds = function () {
     return ids;
 };
 
-var loadVerses = function (callbackAfter) {
+var loadVerses = function(callbackAfter?) {
     var url = '/api/learnscripture/v1/versestolearn/';
     $.ajax({
         url: url,
@@ -1471,7 +1471,7 @@ var loadVerses = function (callbackAfter) {
         },
         dataType: 'json',
         type: 'GET',
-        success: function (data) {
+        success: function(data) {
             // This function can be called when we have already
             // loaded the verses e.g. if the user changed the
             // version.  Also, once some verses have been
@@ -1521,7 +1521,7 @@ var loadVerses = function (callbackAfter) {
 };
 
 
-var normalizeLearningType = function (verseData) {
+var normalizeLearningType = function(verseData) {
     if (verseData.learning_type != LEARNING_TYPE_PRACTICE && !verseData.needs_testing && !isPassageType(verseData)) {
         // This can happen if the user chooses a verse set to learn
         // and they already know the verses in it.
@@ -1529,23 +1529,23 @@ var normalizeLearningType = function (verseData) {
     }
 };
 
-var loadCurrentVerse = function () {
+var loadCurrentVerse = function() {
     var oldVerseStatus = currentVerseStatus;
     currentVerseStatus = versesToLearn[currentVerseIndex];
     var verseStatus = currentVerseStatus;
 
     verseStatus.showReference = (
         verseStatus.version.text_type == TEXT_TYPE_BIBLE ? (verseStatus.verse_set === null ||
-                                                            verseStatus.verse_set === undefined ||
-                                                            verseStatus.verse_set.set_type === SET_TYPE_SELECTION) : false)
+            verseStatus.verse_set === undefined ||
+            verseStatus.verse_set.set_type === SET_TYPE_SELECTION) : false)
 
     verseStatus.wordCount = verseStatus.scoring_text_words.length;
     normalizeLearningType(verseStatus);
     var moveOld = (oldVerseStatus !== null &&
-                   isPassageType(oldVerseStatus) &&
-                   // Need to cope with possibility of a gap
-                   // in the passage, caused by slim_passage_for_reviewing()
-                   (verseStatus.text_order === oldVerseStatus.text_order + 1))
+        isPassageType(oldVerseStatus) &&
+        // Need to cope with possibility of a gap
+        // in the passage, caused by slim_passage_for_reviewing()
+        (verseStatus.text_order === oldVerseStatus.text_order + 1))
     if (moveOld) {
         moveOldWords();
     } else {
@@ -1599,31 +1599,31 @@ var loadCurrentVerse = function () {
     }
 };
 
-var isPassageType = function (verseData) {
+var isPassageType = function(verseData) {
     return (verseData &&
-            verseData.verse_set &&
-            verseData.verse_set.set_type === SET_TYPE_PASSAGE);
+        verseData.verse_set &&
+        verseData.verse_set.set_type === SET_TYPE_PASSAGE);
 };
 
-var moveOldWords = function () {
+var moveOldWords = function() {
     $('.previous-verse-wrapper').remove();
     $('.current-verse').removeClass('current-verse').addClass('previous-verse');
     $('.current-verse-wrapper').removeClass('current-verse-wrapper')
         .addClass('previous-verse-wrapper')
         .after('<div class="current-verse-wrapper"><div class="current-verse"></div></div>');
-    $('.previous-verse .word, .previous-verse .testedword').each(function (idx, elem) {
+    $('.previous-verse .word, .previous-verse .testedword').each(function(idx, elem) {
         $(elem).removeAttr('id');
     });
 };
 
-var scrollOutPreviousVerse = function () {
+var scrollOutPreviousVerse = function() {
     // Animating this is tricky to do cleanly, since we'd need to using
     // continuation style to pass in the remainder of the calling function
     // to pass to an animate({complete:}) callback.
 
     var words = {}; // offset:node list of word spans
     var maxOffset = null;
-    $('.previous-verse .word, .previous-verse .testedword').each(function (idx, elem) {
+    $('.previous-verse .word, .previous-verse .testedword').each(function(idx, elem) {
         var offset = $(elem).offset().top;
         if (maxOffset === null || offset > maxOffset) {
             maxOffset = offset;
@@ -1636,11 +1636,14 @@ var scrollOutPreviousVerse = function () {
     });
 
     // Now make the other words disappear
-    $.each(words, function (offset, elems) {
-        if (offset.toString() !== maxOffset.toString()) {
-            $(elems).remove();
+    for (var offset in words) {
+        if (words.hasOwnProperty(offset)) {
+            var elems = words[offset];
+            if (offset.toString() !== maxOffset.toString()) {
+                $(elems).remove();
+            }
         }
-    });
+    }
     $('.previous-verse br').remove();
 
     // Now shrink the area
@@ -1651,7 +1654,7 @@ var scrollOutPreviousVerse = function () {
         .removeClass('wordstart').removeClass('wordend');
 };
 
-var markupVerse = function (verseStatus) {
+var markupVerse = function(verseStatus) {
     // We join words back together, so that we can split on \n
     // which is useful for poetry
     var text = verseStatus.scoring_text_words.join(" ")
@@ -1661,19 +1664,19 @@ var markupVerse = function (verseStatus) {
     // that bibleverses.suggestions splits words up.
 
     // First split lines into divs.
-    $.each(text.split(/\n/), function (idx, line) {
+    $.each(text.split(/\n/), function(idx, line) {
         if (line.trim() !== '') {
             $('.current-verse').append('<div class="line">' +
-                                       line + '</div>');
+                line + '</div>');
         }
     });
     var doTest = (verseStatus.needs_testing ||
-                  verseStatus.learning_type == LEARNING_TYPE_PRACTICE)
+        verseStatus.learning_type == LEARNING_TYPE_PRACTICE)
     // Then split up into words
     var wordClass = doTest ? 'word' : 'testedword';
     var wordGroups = [];
 
-    $('.current-verse .line').each(function (idx, elem) {
+    $('.current-verse .line').each(function(idx, elem) {
         wordGroups.push($(elem).text().trim().split(/ |\n/));
     });
     wordList = [];
@@ -1683,21 +1686,21 @@ var markupVerse = function (verseStatus) {
     var i, parts, replace;
 
 
-    var makeNormalWord = function (word, wordClass) {
+    var makeNormalWord = function(word, wordClass) {
         var core = stripOuterPunctuation(word);
         var start = word.slice(0, word.indexOf(core[0]) + 1);
         var end = word.slice(start.length);
         return ('<span id="id-word-' + wordNumber.toString() +
-                '" class=\"' + wordClass + '\">' +
-                '<span class="wordstart">' + start +
-                '</span><span class="wordend">' + end +
-                '</span></span>');
+            '" class=\"' + wordClass + '\">' +
+            '<span class="wordstart">' + start +
+            '</span><span class="wordend">' + end +
+            '</span></span>');
 
     };
 
     for (i = 0; i < wordGroups.length; i++) {
         var group = wordGroups[i];
-        group = $.map(group, function (word, j) {
+        group = $.map(group, function(word, j) {
             if (stripPunctuation(word) === "") {
                 return null;
             } else {
@@ -1705,7 +1708,7 @@ var markupVerse = function (verseStatus) {
             }
         });
         replace = [];
-        $.each(group, function (j, word) {
+        $.each(group, function(j, word) {
             replace.push(makeNormalWord(word, wordClass));
             wordList.push(wordNumber);
             wordNumber++;
@@ -1722,7 +1725,7 @@ var markupVerse = function (verseStatus) {
         parts = [].concat.apply([], reference.split(/(?=[\s:\-])/).map(w => w.match(/^[\s:\-]/) ? [w[0], w.slice(1)] : [w]));
         replace = [];
 
-        $.each(parts, function (j, word) {
+        $.each(parts, function(j, word) {
             word = word.trim()
             if (word == "") {
                 return;
@@ -1744,7 +1747,7 @@ var markupVerse = function (verseStatus) {
 
     }
 
-    $('.current-verse .word').bind('tap click', function (ev) {
+    $('.current-verse .word').bind('tap click', function(ev) {
         if (!currentStage.testMode) {
             toggleWord($(this));
         }
@@ -1753,19 +1756,19 @@ var markupVerse = function (verseStatus) {
 
 // ========== Stats/scores loading ==========
 
-var loadStats = function () {
+var loadStats = function() {
     $.ajax({
         url: '/api/learnscripture/v1/sessionstats/?format=json&r=' +
             Math.floor(Math.random() * 1000000000).toString(),
         dataType: 'json',
         type: 'GET',
-        success: function (data) {
+        success: function(data) {
             $('#id-stats-block').html(data.stats_html);
         }
     });
 };
 
-var loadActionLogs = function () {
+var loadActionLogs = function() {
     if (!scoringEnabled) {
         return;
     }
@@ -1778,24 +1781,24 @@ var loadActionLogs = function () {
     });
 };
 
-var handleActionLogs = function (actionLogs) {
+var handleActionLogs = function(actionLogs) {
     var container = $('#id-points-block');
-    var addActionLog = function (actionLogs) {
+    var addActionLog = function(actionLogs) {
         // This is defined recursively to get the animation to work
         // nicely for multiple score logs appearing one after the other.
         if (actionLogs.length === 0) {
             return;
         }
         var actionLog = actionLogs[0];
-        var doRest = function () {
+        var doRest = function() {
             addActionLog(actionLogs.slice(1))
         };
         var divId = 'id-action-log-' + actionLog.id.toString();
         if ($('#' + divId).length === 0) {
             // Put new ones at top
             var newSL = $('<div id="' + divId +
-                          '" class="action-log action-log-type-' + actionLog.reason + '"' +
-                          '>' + actionLog.points + '</div>');
+                '" class="action-log action-log-type-' + actionLog.reason + '"' +
+                '>' + actionLog.points + '</div>');
             // Need some tricks to get height of new element without
             // showing.
             newSL.css({
@@ -1844,20 +1847,20 @@ var handleActionLogs = function (actionLogs) {
 
 var docKeyPressBound = false;
 
-var bindDocKeyPress = function () {
+var bindDocKeyPress = function() {
     if (!docKeyPressBound && !currentStage.testMode) {
         $(document).bind('keypress', docKeyPress);
         docKeyPressBound = true;
     }
 };
-var unbindDocKeyPress = function () {
+var unbindDocKeyPress = function() {
     if (docKeyPressBound) {
         $(document).unbind('keypress');
         docKeyPressBound = false;
     }
 };
 
-var inputBoxKeyDown = function (ev) {
+var inputBoxKeyDown = function(ev) {
     if (ev.which === 27) {
         // ESC
         ev.preventDefault();
@@ -1869,7 +1872,7 @@ var inputBoxKeyDown = function (ev) {
 
     if ((textSoFarTrimmed.length > 0) && // if only whitespace entered, don't trigger test
         ((ev.which === 32 || ev.key === " ") ||
-         (ev.which === 13 || ev.key === "Enter"))) {
+            (ev.which === 13 || ev.key === "Enter"))) {
         ev.preventDefault();
         if (currentStage.testMode) {
             testingMethodStrategy.checkCurrentWord();
@@ -1879,7 +1882,7 @@ var inputBoxKeyDown = function (ev) {
     // All other characters dealt with using inputBoxInput
 };
 
-var inputBoxInput = function (ev) {
+var inputBoxInput = function(ev) {
     var textSoFar = inputBox.val();
     var textSoFarTrimmed = textSoFar.trim();
     var isWordSeparator = false
@@ -1898,7 +1901,7 @@ var inputBoxInput = function (ev) {
 
 };
 
-var docKeyPress = function (ev) {
+var docKeyPress = function(ev) {
     var tagName = ev.target.tagName.toLowerCase();
     if (tagName === 'input' ||
         tagName === 'select' ||
@@ -1911,20 +1914,20 @@ var docKeyPress = function (ev) {
     if (!ev.altKey && !ev.ctrlKey && !ev.metaKey &&
         !(ev.which >= 112 && ev.which <= 123) && // F1 - F12
         !(ev.which === 0) // special characters
-       ) {
+    ) {
         ev.preventDefault();
     }
     switch (ev.which) {
-    case 13: // Enter
-        if (tagName === 'a') {
-            return;
-        }
-        pressPrimaryButton();
-        break;
+        case 13: // Enter
+            if (tagName === 'a') {
+                return;
+            }
+            pressPrimaryButton();
+            break;
     }
 };
 
-var skipVerse = function (ev) {
+var skipVerse = function(ev) {
     ev.preventDefault();
     $.ajax({
         url: '/api/learnscripture/v1/skipverse/?format=json',
@@ -1943,7 +1946,7 @@ var skipVerse = function (ev) {
     nextVerse();
 };
 
-var cancelLearning = function (ev) {
+var cancelLearning = function(ev) {
     ev.preventDefault();
     $.ajax({
         url: '/api/learnscripture/v1/cancellearningverse/?format=json',
@@ -1959,10 +1962,10 @@ var cancelLearning = function (ev) {
     nextVerse();
 };
 
-var resetProgress = function (ev) {
+var resetProgress = function(ev) {
     ev.preventDefault();
     if (confirm("This will reset your progress on this item to zero. " +
-                "Continue?")) {
+        "Continue?")) {
         $.ajax({
             url: '/api/learnscripture/v1/resetprogress/?format=json',
             dataType: 'json',
@@ -1983,7 +1986,7 @@ var resetProgress = function (ev) {
 
 
 // === Setup and wiring ===
-var fastEventBind = function ($elem, callback) {
+var fastEventBind = function($elem, callback) {
     // This is used for buttons that should respond quickly, and won't if we
     // use 'click' for most touch screen devices (which often add 300ms
     // delay).
@@ -1991,17 +1994,17 @@ var fastEventBind = function ($elem, callback) {
     return $elem;
 };
 
-var setUpLearningControls = function () {
+var setUpLearningControls = function() {
     setUpAudio();
     receivePreferences(getPreferences());
     receiveAccountData(getAccountData());
 
     // Listen for changes to preferences.
-    $('#id-preferences-data').bind('preferencesSet', function (ev, prefs) {
+    $('#id-preferences-data').bind('preferencesSet', function(ev, prefs) {
         receivePreferences(prefs);
     });
 
-    $('#id-account-data').bind('accountDataSet', function (ev, accountData) {
+    $('#id-account-data').bind('accountDataSet', function(ev, accountData) {
         receiveAccountData(accountData);
     });
 
@@ -2028,7 +2031,7 @@ var setUpLearningControls = function () {
     $('#id-next-verse-btn').bind('click', nextVerse);
     $('#id-context-next-verse-btn').bind('click', markReadAndNextVerse);
 
-    fastEventBind($('#id-hint-btn'), function (ev) {
+    fastEventBind($('#id-hint-btn'), function(ev) {
         ev.preventDefault();
         // Just disabling the button doesn't seem to be enough to stop event
         // handler firing on iOS
@@ -2036,7 +2039,7 @@ var setUpLearningControls = function () {
             testingMethodStrategy.getHint();
         }
     });
-    fastEventBind($('#id-help-btn'), function (ev) {
+    fastEventBind($('#id-help-btn'), function(ev) {
         if (preferences.enableAnimations) {
             $('#id-help').toggle('fast');
         } else {
@@ -2047,36 +2050,26 @@ var setUpLearningControls = function () {
     $('#id-skip-verse-btn').bind("click", skipVerse);
     $('#id-cancel-learning-btn').bind("click", cancelLearning);
     $('#id-reset-progress-btn').bind("click", resetProgress);
-    $(window).resize(function () {
+    $(window).resize(function() {
         if (currentStage !== null &&
             currentStage.testMode) {
             testingMethodStrategy.windowAdjust();
         }
     });
-    $(window).bind('scroll', function () {
+    $(window).bind('scroll', function() {
         if (currentStage !== null &&
             currentStage.testMode) {
             // Run callback if stopped scrolling for 500ms
             if (scrollingTimeoutId !== null) {
                 window.clearTimeout(scrollingTimeoutId);
             }
-            scrollingTimeoutId = window.setTimeout(function () {
+            scrollingTimeoutId = window.setTimeout(function() {
                 testingMethodStrategy.scrollingAdjust();
             }, 500);
         }
     });
-    if (typeof operamini !== "undefined") {
-        // Opera Mini is a thin client browser and doesn't support
-        // responding to key presses. It does, however, support
-        // input onchange events, which fires when the user preses 'Done'
-        inputBox.change(function (ev) {
-            ev.preventDefault();
-            testingMethodStrategy.checkCurrentWord();
-            inputBox.focus();
-        });
-    }
     $('.verse-dropdown').dropdown();
-    loadVerses(function () {
+    loadVerses(function() {
         if (maxVerseIndex === null) {
             $('#id-loading').hide();
             $('#id-controls').hide();
@@ -2091,7 +2084,7 @@ var setUpLearningControls = function () {
 
 };
 
-var receivePreferences = function (prefs) {
+var receivePreferences = function(prefs) {
     if (prefs === null) {
         // If preferences have not yet been loaded
         return;
@@ -2100,7 +2093,7 @@ var receivePreferences = function (prefs) {
     setTestingMethodStrategy(preferences);
 };
 
-var setTestingMethodStrategy = function (preferences) {
+var setTestingMethodStrategy = function(preferences) {
     if (testingMethodStrategy != null) {
         testingMethodStrategy.methodTearDown();
     }
@@ -2117,7 +2110,7 @@ var setTestingMethodStrategy = function (preferences) {
     }
 };
 
-var receiveAccountData = function (accountData) {
+var receiveAccountData = function(accountData) {
     userAccountData = accountData;
     scoringEnabled = (userAccountData !== null);
     if (scoringEnabled) {
@@ -2158,16 +2151,16 @@ function damerauLevenshteinDistance(a, b) {
                 DB = j;
             }
             H[i + 1][j + 1] = Math.min(H[i][j] + d,
-                                       H[i + 1][j] + 1,
-                                       H[i][j + 1] + 1,
-                                       H[i1][j1] + (i - i1 - 1) + 1 + (j - j1 - 1));
+                H[i + 1][j] + 1,
+                H[i][j + 1] + 1,
+                H[i1][j1] + (i - i1 - 1) + 1 + (j - j1 - 1));
         }
         DA[a[i - 1]] = i;
     }
     return H[a.length + 1][b.length + 1];
 }
 
-$(document).ready(function () {
+$(document).ready(function() {
     if ($('#id-verse-wrapper').length > 0) {
         setUpLearningControls();
     }
