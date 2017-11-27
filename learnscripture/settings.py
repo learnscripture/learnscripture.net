@@ -1,8 +1,10 @@
 # Django settings for learnscripture project.
 
+import glob
 import json
 import os
 import socket
+import subprocess
 import sys
 
 hostname = socket.gethostname()
@@ -184,7 +186,7 @@ STATICFILES_DIRS = []
 # various locations.
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'compressor.finders.CompressorFinder',
+    'compressor.finders.CompressorFinder',  # for fiber
 )
 
 LOGIN_URL = '/admin/'
@@ -249,6 +251,8 @@ ROOT_URLCONF = 'learnscripture.urls'
 WSGI_APPLICATION = 'learnscripture.wsgi.application'
 
 INSTALLED_APPS = [
+    'dal',  # Needs to be before admin
+    'dal_select2',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -270,7 +274,7 @@ INSTALLED_APPS = [
 
     # Third party
     'mptt',
-    'compressor',
+    'compressor',  # for fiber
     'easy_thumbnails',
     'fiber',
     'bootstrapform',
@@ -279,10 +283,10 @@ INSTALLED_APPS = [
     'spurl',
     'paypal.standard.ipn',
     'app_metrics',
-    'selectable',
     'django_markup',
     'anymail',
     'aldjemy',
+    'webpack_loader',
 ]
 
 ALLOWED_HOSTS = ["learnscripture.net"]
@@ -417,10 +421,6 @@ CACHES = {
     }
 }
 
-COMPRESS_PRECOMPILERS = (
-    ('text/less', 'lessc {infile} {outfile}'),
-)
-
 RESTRUCTUREDTEXT_FILTER_SETTINGS = {
     'raw_enabled': False,
     'file_insertion_enabled': False,
@@ -469,6 +469,27 @@ CELERY_RESULT_BACKEND = 'disabled'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_TASK_IGNORE_RESULT = True
 CELERY_WORKER_HIJACK_ROOT_LOGGER = False
+
+# Webpack
+
+if DEVBOX:
+    if TESTING:
+        WEBPACK_STATS_FILE = 'webpack-stats.tests.json'
+    else:
+        WEBPACK_STATS_FILE = 'webpack-stats.dev.json'
+else:
+    WEBPACK_STATS_FILE = 'webpack-stats.production.json'
+
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'CACHE': not DEBUG or TESTING,
+        'BUNDLE_DIR_NAME': 'webpack_bundles/',
+        'STATS_FILE': os.path.join(SRC_ROOT, WEBPACK_STATS_FILE),
+        'POLL_INTERVAL': 0.1,
+        'TIMEOUT': None,
+        'IGNORE': ['.+\.hot-update.js', '.+\.map']
+    }
+}
 
 # == LearnScripture.net specific settings ==
 
@@ -539,3 +560,14 @@ if DEBUG:
     #     'level': 'DEBUG',
     #     'filters': ['add_sql_with_stack'],
     # }
+
+if DEBUG:
+    # Delete all but 20 most recent entries, to keep things trim
+    for f in sorted(glob.glob("./learnscripture/static/webpack_bundles/*.dev.*"),
+                    key=os.path.getctime)[20:]:
+        os.unlink(f)
+
+if TESTING and not os.environ.get('SKIP_SELENIUM_TESTS'):
+    for f in glob.glob("./learnscripture/static/webpack_bundles/*.tests.*"):
+        os.unlink(f)
+    subprocess.check_call(["./node_modules/.bin/webpack", "--config", "webpack.config.tests.js"])

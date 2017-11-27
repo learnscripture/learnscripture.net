@@ -20,12 +20,9 @@
 
 
 {% block extracss %}
-  <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/lib/jquery-ui.css" charset="utf-8" />
   {{ form.media.css }}
 {% endblock %}
 
 {% block extrajs %}
-  <script type="text/javascript" src="{{ STATIC_URL }}js/lib/jquery-ui-1.8.13.min.js"></script>
   {{ form.media.js }}
-
 {% endblock %}

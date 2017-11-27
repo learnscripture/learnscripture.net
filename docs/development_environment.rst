@@ -5,6 +5,10 @@ Normal development is done using the Django development server::
 
      ./manage.py runserver
 
+You will also need to have ``webpack`` running with ``--watch``, which
+has already been set up as an ``npm`` script::
+
+     npm run watch
 
 Celery
 ------

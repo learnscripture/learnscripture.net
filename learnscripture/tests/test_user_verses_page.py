@@ -64,12 +64,13 @@ class UserVersesPageTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         # Click next
         self.click("#id-next-verse-btn")
 
-        # Skip twice
-        self.click("#id-verse-dropdown")
-        self.click("#id-skip-verse-btn")
+        for i in [1, 2]:
+            # Skip
+            self.click("#id-verse-dropdown")
+            self.click("#id-skip-verse-btn")
 
-        self.click("#id-verse-dropdown")
-        self.click("#id-skip-verse-btn")
+        self.wait_for_ajax()
+        self.wait_until_loaded('body')
 
         # Should have gone back to where we came from
         self.assertUrlsEqual(reverse('user_verses'))

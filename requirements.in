@@ -1,6 +1,4 @@
 -e git://github.com/spookylukey/aldjemy.git@e728913f829216056a361d0886506e41dcbae8bb#egg=aldjemy
--e git://github.com/django-fiber/django-fiber.git@bfc3e3c1950198ef6c015feac78e155b7c508c36#egg=django-fiber
--e git://github.com/mlavin/django-selectable.git@66ed38326cbd8ffa611c9648f58343a899cc1e41#egg=django_selectable
 -e git://github.com/riccardoscalco/Pykov.git@16cda2f2c0ed8143ddcfa25dac34d3dadc982380#egg=pykov
 -e git://github.com/spookylukey/django-app-metrics.git@6de9e47459b9c3c1173f3289cbc71afd6fa45449#egg=django_app_metrics
 -e git://github.com/spookylukey/django-autoslug.git@0a6adec1f9743743bf7d741b6845620a8f347159#egg=django-autoslug
@@ -15,7 +13,7 @@ billiard==3.5.0.2
 celery==4.0.2
 dj_pagination==2.2.1
 django-anymail==0.10
-django-compressor==2.1.1
+django-fiber==1.4.1
 django-markup==1.2
 django-paypal==0.3.6
 django-spurl==0.6.4
@@ -23,7 +21,6 @@ djangorestframework==3.6.3
 docutils==0.14
 kombu==4.0.2
 lxml==3.8.0
-nodeenv==1.1.2
 numpy==1.13.0
 psycopg2==2.7.1
 pyquery==1.2.17
@@ -35,3 +32,5 @@ scipy==0.19.0
 uwsgi==2.0.15
 certifi==2017.7.27.1
 parsy==1.0.0
+django-webpack-loader==0.5.0
+django-autocomplete-light==3.2.10

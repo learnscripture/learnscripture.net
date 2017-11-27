@@ -34,8 +34,12 @@ instructions may not work completely, but they should be a start.
    Python/virtualenv dependencies. From inside the learnscripture.net/src/
    folder, do::
 
-     pip install -r requirements.txt -r requirements-dev.txt
-     nodeenv --node=system --python-virtualenv --requirement=requirements-node.txt
+     pip install -r requirements.txt
+
+   npm/javascript dependencies::
+
+     npm install
+
 
 5. Create postgres databases matching the development ones in
    ``learnscripture/settings.py``, both for ``learnscripture`` and

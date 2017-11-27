@@ -7,6 +7,7 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from django.views.generic import RedirectView
 
+import accounts.lookups
 import learnscripture.mail.views
 import learnscripture.views
 
@@ -75,6 +76,7 @@ urlpatterns = [
     url(r'^create-group/$', learnscripture.views.create_group, name='create_group'),
     url(r'^edit-group/(.*)/$', learnscripture.views.edit_group, name='edit_group'),
     url(r'^group-select-list/$', learnscripture.views.group_select_list, name='group_select_list'),
+    url(r'^account-autocomplete/$', accounts.lookups.AccountAutocomplete.as_view(), name='account_autocomplete'),
 
     # Other
     url(r'^contact/$', learnscripture.views.contact, name='contact'),
@@ -95,7 +97,6 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
 
     url(r'^paypal/ipn/', include('paypal.standard.ipn.urls')),
-    url(r'^selectable/', include('selectable.urls')),
 
     url(r'^mailgun-bounce-notification/$', learnscripture.mail.views.mailgun_bounce_notification,
         name='mailgun-bounce-notification'),
