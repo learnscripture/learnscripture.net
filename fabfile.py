@@ -1,8 +1,8 @@
 """
 fabfile for deploying and managing LearnScripture.net
 """
-import json
 import glob
+import json
 import os
 import re
 from contextlib import contextmanager
