@@ -10,4 +10,6 @@ config.plugins = config.plugins.concat([
     new ExtractTextPlugin("[name]-[hash].dev.css"),
 ])
 
+config.devtool = 'eval-source-map';
+
 module.exports = config;
