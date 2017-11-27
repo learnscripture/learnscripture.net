@@ -7,13 +7,18 @@ module.exports = {
     context: __dirname,
 
     entry: {
-        base: './learnscripture/static/js/base', // for base template
+        base: './learnscripture/static/js/base.ts', // for base template
     },
     output: {
         path: path.resolve(__dirname, 'learnscripture/static/webpack_bundles'),
     },
     module: {
         rules: [
+            {
+                test: /\.ts$/,
+                use: 'ts-loader',
+                exclude: /node_modules/
+            },
             {
                 test: require.resolve('jquery'),
                 use: [{
@@ -48,6 +53,7 @@ module.exports = {
         })
     ],
     resolve: {
+        extensions: ['.ts', '.js'],
         modules: [
             "node_modules",
             path.resolve(__dirname, 'learnscripture/static/bootstrap/js'),
