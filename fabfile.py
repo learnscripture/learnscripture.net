@@ -83,8 +83,6 @@ REQS = [
     'postfix',  # to receive error messages from cron jobs, 'Local only' setup
 
     # Non-Python stuff
-    'npm',
-    'nodejs',  # For less css
     'postgresql-client-9.5',
 
     # Python stuff
