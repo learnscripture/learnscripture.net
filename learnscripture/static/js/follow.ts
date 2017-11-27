@@ -1,6 +1,6 @@
 "use strict";
 
-import ajaxFailed from './common';
+import { ajaxFailed } from './common';
 
 
 var setupFollowingControls = function() {
