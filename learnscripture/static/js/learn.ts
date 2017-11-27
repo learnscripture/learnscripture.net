@@ -68,17 +68,12 @@ var TEST_ON_SCREEN = 2;
 var SET_TYPE_SELECTION = 1;
 var SET_TYPE_PASSAGE = 2;
 
-// Defined in MemoryStage:
-var MEMORY_STAGE_TESTED = 3;
 
 // Defined in LearningType:
 var LEARNING_TYPE_PRACTICE = 'practice';
 
 // Defined in TextType
 var TEXT_TYPE_BIBLE = 1;
-var TEXT_TYPE_CATECHISM = 2;
-
-var INITIAL_STRENGTH_FACTOR = 0.1;
 
 // Thresholds for different testings modes:
 // Strength == 0.6 corresponds to about 10 days learning.
@@ -91,10 +86,6 @@ var VERSE_STATUS_BATCH_SIZE = 10;
 var currentStage = null;
 var currentStageIdx = null;
 var currentStageList = null;
-
-// this is changed only when a whole
-// set of stages is completed
-var spentStagesCount = 0;
 
 // tracking of words is done using a list
 // of integers, where the value is the index
@@ -202,15 +193,6 @@ function escapeHtml(s) {
         }
     });
 }
-
-// === Events ===
-
-var alphanumeric = function(ev) {
-    return ((!ev.ctrlKey && !ev.altKey && (
-        (ev.which >= 65 && ev.which <= 90) ||
-        (ev.which >= 48 && ev.which <= 57)
-    )));
-};
 
 
 // ========== Word toggling =============
@@ -498,7 +480,6 @@ var setProgress = function(stageIdx, fraction) {
 };
 
 var completeStageGroup = function() {
-    spentStagesCount += currentStageList.length;
     currentStage = stageDefs['results'];
     currentStageList = [currentStage];
     currentStageIdx = 0;
@@ -738,7 +719,6 @@ var getWordsToCheck = function(checkFraction) {
     // words that are to be checked.
 
     // Pick some words to test from uncheckedWords:
-    var i;
     var toCheck = [];
     var checkCount = Math.ceil(wordList.length * checkFraction);
     // Try to test the ones in uncheckedWords first.
@@ -1647,7 +1627,6 @@ var scrollOutPreviousVerse = function() {
     $('.previous-verse br').remove();
 
     // Now shrink the area
-    var wordHeight = $('.previous-verse .word, .previous-verse .testedword').css('line-height');
     $('.previous-verse .word, .previous-verse .testedword')
         .removeClass('word').addClass('testedword')
         .find('span')

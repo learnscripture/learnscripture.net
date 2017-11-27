@@ -10,3 +10,4 @@ TODO.org
 node_modules/
 webpack_bundles/
 webpack-stats.*.json
+build/

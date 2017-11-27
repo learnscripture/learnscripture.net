@@ -112,10 +112,6 @@ function str_from_word(w) {
     return String.fromCharCode(w & 0xFF, w >> 8 & 0xFF);
 }
 
-function str_from_byte(b) {
-    return String.fromCharCode(b & 0xFF);
-}
-
 var audioContextBeep = function(frequency, length) {
     var source = audioContext.createOscillator();
     source.frequency.value = frequency;

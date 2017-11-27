@@ -1,18 +1,24 @@
 import { ajaxFailed } from './common';
 
-var signedInAccountData = null;
 
-var setAccountData = function(accountData) {
-    signedInAccountData = accountData;
+interface AccountData {
+    username: string;
+    id: string;
+}
+var signedInAccountData: AccountData | null = null;
 
-    $('#id-account-data').trigger('accountDataSet', accountData);
+var setAccountData = function(accountData: AccountData | null) {
+    if (accountData !== null) {
+        signedInAccountData = accountData;
+        $('#id-account-data').trigger('accountDataSet', accountData);
+    }
 };
 
 export const getAccountData = function() {
     return signedInAccountData;
 };
 
-var doLogout = function(ev) {
+var doLogout = function(ev: JQuery.Event) {
     ev.preventDefault();
     if (confirm("Are you sure you want to log out?")) {
         $.ajax({
@@ -32,7 +38,7 @@ var doLogout = function(ev) {
     }
 };
 
-var needsAccountButtonClick = function(ev) {
+var needsAccountButtonClick = function(ev: JQuery.Event) {
     var account = getAccountData();
     if (account === null || account.username === "") {
         // first get user to create an account
@@ -57,7 +63,7 @@ var setupAccountControls = function() {
 $(document).ready(function() {
     setupAccountControls();
     if ($('#id-account-data').length > 0) {
-        setAccountData($('#id-account-data').data());
+        setAccountData($('#id-account-data').data() as AccountData);
     } else {
         setAccountData(null);
     }

@@ -7,8 +7,6 @@ import { BIBLE_BOOK_INFO } from './bible_book_info';
 
 var lastSetReference = null;
 
-var MAX_VERSES_FOR_SINGLE_CHOICE = 4;
-
 var range = function(start, stop) {
     var foo = [], i;
     for (i = start; i < stop; i++) {
