@@ -39,7 +39,7 @@ import './dashboard';
 import './versepopup';
 import './groups';
 import './comment';
-import './follow.ts';
+import './follow';
 
 // CSS/Less
 import 'learnscripture.less';
