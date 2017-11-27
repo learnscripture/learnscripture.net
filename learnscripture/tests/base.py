@@ -5,7 +5,6 @@ import unittest
 
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.test import TestCase
-from django.test.utils import override_settings
 from django.utils import timezone
 from django_functest import FuncSeleniumMixin, FuncWebTestMixin
 from selenium.webdriver.common.action_chains import ActionChains
