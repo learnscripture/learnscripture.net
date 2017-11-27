@@ -3,16 +3,14 @@
 // Common functionality and requirements.
 "use strict";
 
-import $ from 'jquery';
-
 if (String.prototype.trim === undefined) {
     // Before ECMAscript 5 (e.g. Android 1.6, older IE versions)
-    String.prototype.trim = function () { return this.replace(/^\s\s*/, '').replace(/\s\s*$/, ''); };
+    String.prototype.trim = function() { return this.replace(/^\s\s*/, '').replace(/\s\s*$/, ''); };
 }
 
 // IE8 and earlier need this
 if (Array.prototype.indexOf === undefined) {
-    Array.prototype.indexOf = function (obj, start) {
+    Array.prototype.indexOf = function(obj, start) {
         var i, j;
         for (i = (start || 0), j = this.length; i < j; i++) {
             if (this[i] === obj) { return i; }
@@ -23,51 +21,51 @@ if (Array.prototype.indexOf === undefined) {
 
 // From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
 if (!Object.keys) {
-  Object.keys = (function() {
-    'use strict';
-    var hasOwnProperty = Object.prototype.hasOwnProperty,
-        hasDontEnumBug = !({ toString: null }).propertyIsEnumerable('toString'),
-        dontEnums = [
-          'toString',
-          'toLocaleString',
-          'valueOf',
-          'hasOwnProperty',
-          'isPrototypeOf',
-          'propertyIsEnumerable',
-          'constructor'
-        ],
-        dontEnumsLength = dontEnums.length;
+    Object.keys = (function() {
+        'use strict';
+        var hasOwnProperty = Object.prototype.hasOwnProperty,
+            hasDontEnumBug = !({ toString: null }).propertyIsEnumerable('toString'),
+            dontEnums = [
+                'toString',
+                'toLocaleString',
+                'valueOf',
+                'hasOwnProperty',
+                'isPrototypeOf',
+                'propertyIsEnumerable',
+                'constructor'
+            ],
+            dontEnumsLength = dontEnums.length;
 
-    return function(obj) {
-      if (typeof obj !== 'object' && (typeof obj !== 'function' || obj === null)) {
-        throw new TypeError('Object.keys called on non-object');
-      }
+        return function(obj) {
+            if (typeof obj !== 'object' && (typeof obj !== 'function' || obj === null)) {
+                throw new TypeError('Object.keys called on non-object');
+            }
 
-      var result = [], prop, i;
+            var result = [], prop, i;
 
-      for (prop in obj) {
-        if (hasOwnProperty.call(obj, prop)) {
-          result.push(prop);
-        }
-      }
+            for (prop in obj) {
+                if (hasOwnProperty.call(obj, prop)) {
+                    result.push(prop);
+                }
+            }
 
-      if (hasDontEnumBug) {
-        for (i = 0; i < dontEnumsLength; i++) {
-          if (hasOwnProperty.call(obj, dontEnums[i])) {
-            result.push(dontEnums[i]);
-          }
-        }
-      }
-      return result;
-    };
-  }());
+            if (hasDontEnumBug) {
+                for (i = 0; i < dontEnumsLength; i++) {
+                    if (hasOwnProperty.call(obj, dontEnums[i])) {
+                        result.push(dontEnums[i]);
+                    }
+                }
+            }
+            return result;
+        };
+    }());
 }
 
 
 // Django CSRF requirements
-$(document).ajaxSend(function (event, xhr, settings) {
+$(document).ajaxSend(function(event, xhr, settings) {
     // due to CSRF_COOKIE_HTTPONLY, we get token from HTML, not cookie
-    function getCsrfToken () {
+    function getCsrfToken() {
         return $('[name=csrfmiddlewaretoken]').val();
     }
 
@@ -88,11 +86,15 @@ $(document).ajaxSend(function (event, xhr, settings) {
     }
 
     if (!safeMethod(settings.type) && sameOrigin(settings.url)) {
-        xhr.setRequestHeader("X-CSRFToken", getCsrfToken());
+        var token = getCsrfToken();
+        xhr.responseJSON;
+        if ((typeof token == "string") && token != "") {
+            xhr.setRequestHeader("X-CSRFToken", token);
+        }
     }
 });
 
-export const displaySimpleAjaxError = function (errorResponse) {
+export const displaySimpleAjaxError = function(errorResponse) {
     var parts = errorResponse.responseText.split(/\n/);
     if (parts.length == 1) {
         return parts[0];
@@ -106,7 +108,7 @@ export const displaySimpleAjaxError = function (errorResponse) {
     }
 }
 
-export const handleFormValidationErrors = function (form, formPrefix, errorResponse) {
+export const handleFormValidationErrors = function(form, formPrefix, errorResponse) {
     var errors = $.parseJSON(errorResponse.responseText.split(/\n/)[1]);
     var prefix = '';
     if (formPrefix.length > 0) {
@@ -114,8 +116,8 @@ export const handleFormValidationErrors = function (form, formPrefix, errorRespo
     }
     form.find(".validation-error").remove();
     form.find(".error").removeClass("error");
-    $.each(errors, function (key, val) {
-        $.each(val, function (idx, msg) {
+    $.each(errors, function(key, val) {
+        $.each(val, function(idx, msg) {
             var p;
             if (key === '__all__') {
                 p = $('#id_' + prefix + 'form_all_errors');
@@ -145,12 +147,12 @@ export const handleFormValidationErrors = function (form, formPrefix, errorRespo
 //       error: ajaxRetryFailed,
 //       success: ajaxRetrySucceeded
 //       (or call ajaxRetrySucceeded at beginning of success callback)
-export const ajaxFailed = function (jqXHR, textStatus, errorThrown) {
+export const ajaxFailed = function(jqXHR, textStatus, errorThrown) {
     alert("The server could not be contacted. Please try again.");
     console.log("AJAX error: %s, %s, %o", textStatus, errorThrown, jqXHR);
 };
 
-var ajaxRetryTick = function (info) {
+var ajaxRetryTick = function(info) {
     var text = "Data not saved. Retrying "
         + info.failures.toString() + " of "
         + (info.attempts - 1).toString() + // -1 because we are want to display '1 of 10' the first time we get an error.
@@ -164,35 +166,35 @@ export const ajaxRetryOptions = {
     attempts: 11
 };
 
-export const ajaxRetryFailed = function (jqXHR, textStatus, errorThrown) {
+export const ajaxRetryFailed = function(jqXHR, textStatus, errorThrown) {
     $('#id-ajax-status').show();
     $('#id-ajax-loading').hide();
     $('#id-ajax-errors').html('<span>Data not saved. Please check internet connection</span>');
 };
 
-export const indicateLoading = function () {
+export const indicateLoading = function() {
     $('#id-ajax-status').show();
     $('#id-ajax-loading').show();
 };
 
-export const hideLoadingIndicator = function () {
+export const hideLoadingIndicator = function() {
     $('#id-ajax-status').hide();
     $('#id-ajax-loading').hide();
 };
 
-export const ajaxRetrySucceeded = function () {
+export const ajaxRetrySucceeded = function() {
     $('#id-ajax-errors').html('');
 };
 
-export const isTouchDevice = function () {
+export const isTouchDevice = function() {
     return 'ontouchstart' in window;
 };
 
-export const isAndroid = function () {
+export const isAndroid = function() {
     return navigator.userAgent.toLowerCase().indexOf("android") > -1;
 };
 
-var deviceCanVibrate = function () {
+var deviceCanVibrate = function() {
     return ("vibrate" in navigator);
 }
 
@@ -206,7 +208,7 @@ export const getLocation = function(href) {
 // Use [[ and ]] for templates to avoid clash with Django templates
 $.views.settings.delimiters('[[', ']]');
 
-$(document).ready(function () {
+$(document).ready(function() {
     // Dropdown in topbar
     $('.topbar').dropdown();
 
@@ -223,7 +225,7 @@ $(document).ready(function () {
 
     // Scrolling of #id-ajax-status
     var TOPBAR_HEIGHT = 40;
-    $(window).scroll(function (ev) {
+    $(window).scroll(function(ev) {
         // We want ajax div to stay underneath the topbar.
         // topbar can be either fixed or absolute depending on screen size.
         var $tb = $('.topbar');
@@ -241,7 +243,7 @@ $(document).ready(function () {
         }
     });
 
-    $(document).ajaxStop(function () {
+    $(document).ajaxStop(function() {
         hideLoadingIndicator();
     });
 

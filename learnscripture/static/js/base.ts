@@ -1,3 +1,6 @@
+/// <reference path="../typings/jsrender-settings.d.ts" />
+/// <reference path="../typings/bootstrap-dropdown.d.ts" />
+
 
 // node_modules libs
 
