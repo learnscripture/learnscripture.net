@@ -51,6 +51,9 @@ server {
         location /static/CACHE {
             expires max;
         }
+        location /static/webpack_bundles {
+            expires max;
+        }
 
     }
 
