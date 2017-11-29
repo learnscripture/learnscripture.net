@@ -3,16 +3,20 @@ var webpack = require('webpack')
 var ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 
+var elmSource = path.resolve(__dirname, './learnscripture/static/elm');
+
 module.exports = {
     context: __dirname,
 
     entry: {
         base: './learnscripture/static/js/base.ts', // for base template
+        learn: './learnscripture/static/js/learn_setup.js', // for learn_beta page template
     },
     output: {
         path: path.resolve(__dirname, 'learnscripture/static/webpack_bundles'),
     },
     module: {
+        noParse: /.elm$/,
         rules: [
             {
                 test: /\.ts$/,
@@ -25,6 +29,19 @@ module.exports = {
                     loader: 'expose-loader',
                     options: 'jQuery'
                 }]
+            },
+            {
+                test: /\.elm$/,
+                exclude: [/elm-stuff/, /node_modules/],
+                use: {
+                    loader: 'elm-webpack-loader',
+                    options: {
+                        cwd: elmSource,
+                        verbose: true,
+                        warn: true,
+                        debug: true
+                    }
+                }
             },
             {
                 test: /\.css$/,
@@ -53,7 +70,7 @@ module.exports = {
         })
     ],
     resolve: {
-        extensions: ['.ts', '.js'],
+        extensions: ['.ts', '.js', '.elm'],
         modules: [
             "node_modules",
             path.resolve(__dirname, 'learnscripture/static/bootstrap/js'),

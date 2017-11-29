@@ -401,8 +401,28 @@ SILENCED_SYSTEM_CHECKS = [
 FIBER_DEFAULT_TEMPLATE = 'fiber_singlecol.html'
 FIBER_TEMPLATE_CHOICES = [(FIBER_DEFAULT_TEMPLATE, 'Single column')]
 
+
+def show_toolbar(request):
+    """
+    Default function to determine whether to show the toolbar on a given page.
+    """
+    from django.conf import settings
+    if request.META.get('REMOTE_ADDR', None) not in settings.INTERNAL_IPS:
+        return False
+
+    if request.path.startswith('/static'):
+        return False
+
+    if request.path.startswith('/learn-beta'):
+        return False
+
+    return bool(settings.DEBUG)
+
+
 DEBUG_TOOLBAR_CONFIG = {
     'DISABLE_PANELS': set(['debug_toolbar.panels.redirects.RedirectsPanel']),
+    'JQUERY_URL': '',
+    'SHOW_TOOLBAR_CALLBACK': 'learnscripture.settings.show_toolbar',
 }
 
 CACHES = {

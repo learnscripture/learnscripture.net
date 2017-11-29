@@ -191,6 +191,11 @@ def learn(request):
     return render(request, 'learnscripture/learn.html', c)
 
 
+@require_preferences
+def learn_beta(request):
+    return render(request, 'learnscripture/learn_beta.html', {})
+
+
 def preferences(request):
     identity = getattr(request, 'identity', None)
     if request.method == "POST":
