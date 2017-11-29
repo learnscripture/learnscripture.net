@@ -288,16 +288,14 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
 
         self._type_john_3_16_kjv(accuracy=0.95)
 
-        # We should get points for each time reviewed (and award)
+        # We should get points for first time reviewed (and award)
         j316_score_1 = self._score_for_j316(accuracy=0.5)
-        j316_score_2 = self._score_for_j316(accuracy=0.95)
         account = Account.objects.get(id=account.id)  # refresh
         self.assertEqual(account.total_score.points,
-                         (j316_score_1 +
-                          j316_score_2) +
+                         j316_score_1 +
                          StudentAward(count=1).points()
                          )
-        self.assertEqual(account.action_logs.count(), 3)
+        self.assertEqual(account.action_logs.count(), 2)
 
     def test_hint_button(self):
         identity, account = self.create_account()
