@@ -424,6 +424,8 @@ class Identity(models.Model):
     enable_vibration = models.BooleanField("Vibrate on mistakes", blank=True, default=True)
     interface_theme = models.CharField(max_length=30, choices=THEMES,
                                        default=DEFAULT_THEME)
+    new_learn_page = models.BooleanField("Use new learn page (beta)",
+                                         default=False)
     referred_by = models.ForeignKey(Account, on_delete=models.CASCADE,
                                     null=True, default=None,
                                     blank=True,

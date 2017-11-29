@@ -287,6 +287,7 @@ class SetPreferences(ApiView):
         'enable_sounds',
         'enable_vibration',
         'interface_theme',
+        'new_learn_page',
         'preferences_setup',
     ]
 

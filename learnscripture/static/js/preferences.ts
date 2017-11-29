@@ -68,6 +68,7 @@ var savePrefsClick = function(ev) {
             data.enableSounds = data.enable_sounds;
             data.enableVibration = data.enable_vibration;
             data.interfaceTheme = data.interface_theme;
+            data.newLearnPage = data.new_learn_page;
             data.preferencesSetup = data.preferences_setup;
 
             setPreferences(data);
