@@ -24,6 +24,9 @@ class PreferencesForm(forms.ModelForm):
                 available_bible_versions = identity.available_bible_versions()
 
         self.fields['default_bible_version'].queryset = available_bible_versions
+        if (self.instance is None or self.instance.account is None or
+                not self.instance.account.is_tester):
+            del self.fields['new_learn_page']
 
     class Meta:
         model = Identity
@@ -33,7 +36,9 @@ class PreferencesForm(forms.ModelForm):
                   'enable_animations',
                   'enable_sounds',
                   'enable_vibration',
-                  'interface_theme']
+                  'interface_theme',
+                  'new_learn_page',
+                  ]
 
 
 PreferencesForm.base_fields['default_bible_version'].required = True
