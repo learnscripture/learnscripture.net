@@ -27,6 +27,7 @@ urlpatterns = [
     url(r'^catechisms/$', learnscripture.views.view_catechism_list, name='catechisms'),
     url(r'^catechisms/(?P<slug>[^/]+)/$', learnscripture.views.view_catechism, name='view_catechism'),
     url(r'^learn/$', learnscripture.views.learn, name='learn'),
+    url(r'^learn-beta/$', learnscripture.views.learn_beta, name='learn-beta'),
     url(r'^preferences/$', learnscripture.views.preferences, name='preferences'),
     url(r'^progress/$', learnscripture.views.user_verses, name='user_verses'),
     url(r'^my-verse-sets/$', learnscripture.views.user_verse_sets, name='user_verse_sets'),

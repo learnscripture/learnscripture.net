@@ -1,0 +1,22 @@
+{% load render_bundle from webpack_loader %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Learn - LearnScripture.net</title>
+    <meta name="robots" content="noindex">
+    <meta name="viewport" content="initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    {% include "learnscripture/favicon_inc.html" %}
+
+  </head>
+
+  <body>
+    <div id="elm-main">
+    </div>
+    {# Possibly use 'base' instead of 'learn'? #}
+    {% render_bundle 'learn' 'css' 'DEFAULT' attrs='charset="utf-8"' %}
+    {% render_bundle 'learn' 'js' 'DEFAULT' %}
+  </body>
+</html>
