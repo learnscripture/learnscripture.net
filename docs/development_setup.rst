@@ -70,7 +70,7 @@ instructions may not work completely, but they should be a start.
 
    You will then need to load at least the NET Bible, as follows::
 
-     ./manage.py load_text ../texts/db_dumps NET
+     ./manage.py load_text ../learnscripture-texts/db_dumps NET
 
    This assumes you are in the ``src`` directory, with the directory structure
    described above, so the ``texts`` directory is a sibling of ``src`` and
