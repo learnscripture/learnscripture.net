@@ -453,6 +453,7 @@ var testComplete = function() {
         } else {
             currentStageList = ['recall2', 'recall4', 'test'];
         }
+        setPracticeMode(true);
         setUpStage(0);
     });
     bindDocKeyPress();
