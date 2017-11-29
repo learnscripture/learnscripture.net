@@ -5,7 +5,7 @@ import random
 from collections import defaultdict
 
 from autoslug import AutoSlugField
-from django.db import connection, models
+from django.db import models
 from django.db.models import F, Func, Value
 from django.urls import reverse
 from django.utils import timezone
@@ -532,27 +532,12 @@ class VerseSetManager(models.Manager):
         """
         if len(ids) == 0:
             return 0
-        sql = """
-SELECT COUNT(*) FROM
-
-  (SELECT uvs.for_identity_id
-   FROM
-      bibleverses_userversestatus as uvs
-      INNER JOIN accounts_identity
-      ON accounts_identity.id = uvs.for_identity_id
-
-   WHERE
-         uvs.ignored = FALSE
-     AND accounts_identity.account_id IS NOT NULL
-     AND accounts_identity.account_id NOT in %s
-     AND uvs.verse_set_id IN %s
-
-   GROUP BY uvs.for_identity_id
- ) as q
-"""
-        cursor = connection.cursor()
-        cursor.execute(sql, [tuple(ignoring_account_ids), tuple(ids)])
-        return cursor.fetchall()[0][0]
+        return (UserVerseStatus.objects
+                .exclude(for_identity__account__isnull=True)
+                .exclude(for_identity__account__in=ignoring_account_ids)
+                .filter(ignored=False, verse_set__in=ids)
+                .aggregate(count=models.Count('for_identity', distinct=True))
+                ['count'])
 
     def search(self, language_code, verse_sets, query):
         # Does the query look like a Bible reference?
