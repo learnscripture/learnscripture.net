@@ -8,6 +8,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "devserver": "webpack-dev-server --config webpack.config.dev-hotload.js --hot --inline",
     "watch": "webpack --config webpack.config.dev.js --watch"
   },
   "author": "",

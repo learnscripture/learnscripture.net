@@ -3,12 +3,22 @@ Development environment
 
 Normal development is done using the Django development server::
 
-     ./manage.py runserver
+  ./manage.py runserver
 
 You will also need to have ``webpack`` running with ``--watch``, which
 has already been set up as an ``npm`` script::
 
-     npm run watch
+  npm run watch
+
+You can also do::
+
+  npm run devserver
+
+The former run ``webpack --watch`` to build Javascript bundles and watch for
+changes. The latter uses ``webpack-dev-server``, and has hot reloading enabled
+so that you don't have to press F5 manually, but is currently a bit buggy
+(breaks font-awesome icons somehow?!?)
+
 
 Celery
 ------

@@ -83,6 +83,10 @@ instructions may not work completely, but they should be a start.
 
      ./manage.py runserver
 
+   And::
+
+     npm run watch
+
    Browse the site on http://learnscripture.local:8001/
 
 9. Then, try to run the tests::
