@@ -8,7 +8,7 @@ import 'learn.less';
 
 import Elm from "../elm/Learn";
 var preferencesNode = document.getElementById('id-preferences-data');
-
+var accountNode = document.getElementById('id-account-data');
 var preferences =
     Elm.Main.embed(
         document.getElementById('elm-main'),
@@ -20,5 +20,9 @@ var preferences =
                 "enableVibration": preferencesNode.attributes['data-enable-vibration'].value == "true",
                 "desktopTestingMethod": preferencesNode.attributes['data-desktop-testing-method'].value,
                 "touchscreenTestingMethod": preferencesNode.attributes['data-touchscreen-testing-method'].value,
+            },
+            "account": accountNode == null ? null : {
+                "username": accountNode.attributes['data-username'].value,
             }
+
         });
