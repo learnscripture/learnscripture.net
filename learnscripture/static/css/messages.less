@@ -1,0 +1,83 @@
+/* Messages and notices */
+
+// messages are from django.contrib.messages
+
+// notices are custom, and permament until dismissed
+
+.notice, .clearnotices {
+    color: #666;
+    background: #ffc;
+    border-bottom: 1px solid #ddd;
+    padding: 4px 10px;
+    .close {
+        font-size: 24px;
+        line-height: 24px;
+    }
+
+    img {
+        vertical-align: middle;
+    }
+}
+
+.donation-drive.notice {
+    text-align: center;
+    background: #FF8B00;
+    color: #000000;
+
+    a:link, a:visited {
+        color: white;
+        font-weight: bold;
+    }
+
+    .donation-drive-stats {
+        margin-top: 4px;
+        border: 1px solid #fff;
+        background-color: #ffa020;
+        padding: 5px 2px 2px;
+
+        .target, .raised {
+            font-weight: bold;
+        }
+
+        .chart-container {
+            display: inline-block;
+            margin: 0px 7px;
+            width: 100px;
+            border: 1px solid black;
+            vertical-align: top;
+        }
+        .chart-container, .fraction {
+            height: 15px;
+        }
+        .fraction {
+            display: block;
+            background-color: #8df;
+        }
+    }
+}
+.clearnotices {
+    text-align: right;
+}
+
+ul.messagelist {
+    padding: 0;
+    margin: 0;
+}
+
+ul.messagelist li {
+    font-size: 12px;
+    display: block;
+    padding: 4px 5px 4px 25px;
+    margin: 0 0 3px 0;
+    border-bottom: 1px solid #ddd;
+    color: #666;
+    background: #ffc url(/static/admin/img/icon_success.gif) 5px .3em no-repeat;
+}
+
+ul.messagelist li.warning {
+    background-image: url(/static/admin/img/icon_alert.gif);
+}
+
+ul.messagelist li.error {
+    background-image: url(/static/admin/img/icon_error.gif);
+}

@@ -1,0 +1,99 @@
+
+.eventstream {
+
+    > ul {
+        margin-left: 0px;
+        > li {
+            list-style-type: none;
+            border: 1px solid #ddd;
+            padding: 2px 4px;
+            margin-top: -1px;
+        }
+    }
+    .timestamp {
+        font-style: italic;
+        font-size: 90%;
+    }
+
+    .commentindicator {
+        float:right;
+        border: 1px solid #ddd;
+        margin-right: -5px;
+        margin-top: -3px;
+        padding-left: 4px;
+        border-bottom-left-radius: 4px;
+    }
+}
+
+ul.grouplist {
+    margin-bottom: 5px;
+}
+
+#id-heatmap-wrapper {
+    overflow-x: hidden;
+    border: 1px solid #d8d8d8;
+    margin-bottom: 2px;
+}
+
+#id-heatmap-div {
+    float: right;
+    background-color: white;
+    padding: 1px;
+    // Set to the eventual height we need, to stop controls jumping around:
+    height: 109px;
+    .cal-heatmap-container {
+        .q1 {
+            background-color: #ededed;
+            fill: #ededed;
+        }
+        .q2 {
+	        background-color: #dae289;
+	        fill: #dae289;
+        }
+        .q3 {
+	        background-color: #cedb9c;
+	        fill: #9cc069;
+        }
+        .q4 {
+	        background-color: #b5cf6b;
+	        fill: #669d45;
+        }
+        .q5 {
+	        background-color: #637939;
+	        fill: #637939;
+        }
+        .q6 {
+	        background-color: #3b6427;
+	        fill: #3b6427;
+        }
+        .q7 {
+	        background-color: #0c451c;
+	        fill: #0c451c;
+        }
+    }
+}
+
+#id-heatmap-domain-title {
+    font-size: 0.7em;
+    padding-left: 2px;
+}
+
+#id-heatmap-section {
+    .clearfix();
+}
+
+#id-streaks {
+    .clearfix();
+    text-align: center;
+    margin-top: 5px;
+    > div {
+        float: left;
+        width: 50%;
+    }
+    .streak {
+        display: block;
+        margin-top: 5px;
+        font-size: 2em;
+        font-weight: bold;
+    }
+}

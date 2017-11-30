@@ -1,0 +1,36 @@
+
+// -- User stats page --
+
+.is-following, .is-not-following {
+    padding: 10px;
+    border: 1px solid;
+    border-radius: 7px;
+}
+
+// Awards
+
+table.noborders {
+    td, th, tr {
+        border: 0px
+    }
+}
+
+@media screen and (max-width: @narrowWidthBreak2) {
+    .award {
+        img {
+            width: 80px;
+        }
+    }
+}
+
+@media screen and (max-width:  @narrowWidthBreak3) {
+    .award {
+        img {
+            width: 50px;
+        }
+        th:nth-child(4), td:nth-child(4) {
+            display: none;
+        }
+    }
+
+}

@@ -45,4 +45,4 @@ import './comment';
 import './follow';
 
 // CSS/Less
-import 'learnscripture.less';
+import 'base.less';
