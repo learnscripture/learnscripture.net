@@ -59,9 +59,9 @@ var STAGE_TYPE_TEST = 'TEST';
 var STAGE_TYPE_READ = 'READ';
 
 // Defined in TestingMethod:
-var TEST_FULL_WORDS = 0;
-var TEST_FIRST_LETTER = 1;
-var TEST_ON_SCREEN = 2;
+var TEST_FULL_WORDS = 'FULL_WORDS';
+var TEST_FIRST_LETTER = 'FIRST_LETTER';
+var TEST_ON_SCREEN = 'ON_SCREEN';
 
 // Defined in VerseSetType
 var SET_TYPE_SELECTION = 1;

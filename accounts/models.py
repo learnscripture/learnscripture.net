@@ -27,10 +27,11 @@ from learnscripture.utils.cache import cache_results, clear_cache_results
 from scores.models import ScoreReason, Scores, TotalScore
 
 TestingMethod = make_choices('TestingMethod',
-                             [(0, 'FULL_WORDS', 'Type whole word - recommended for full keyboards and normal typing skills'),
-                              (1, 'FIRST_LETTER', 'Type first letter - recommended for slower typers'),
-                              (2, 'ON_SCREEN', 'Choose from word list - recommended for handheld devices.' +
-                                  ' Only available for English translations'),
+                             [('FULL_WORDS', 'FULL_WORDS', 'Type whole word - recommended for full keyboards and normal typing skills'),
+                              ('FIRST_LETTER', 'FIRST_LETTER', 'Type first letter - recommended for slower typers'),
+                              ('ON_SCREEN', 'ON_SCREEN', 'Choose from word list - recommended for'
+                               ' handheld devices.' +
+                               ' Only available for English translations'),
                               ])
 
 THEMES = [('calm', 'Slate'),
@@ -415,10 +416,12 @@ class Identity(models.Model):
     # Preferences
     default_bible_version = models.ForeignKey(TextVersion, on_delete=models.CASCADE,
                                               null=True, blank=True)
-    desktop_testing_method = models.PositiveSmallIntegerField(choices=TestingMethod.choice_list,
-                                                              default=TestingMethod.FULL_WORDS)
-    touchscreen_testing_method = models.PositiveSmallIntegerField(choices=TestingMethod.choice_list,
-                                                                  default=TestingMethod.ON_SCREEN)
+    desktop_testing_method = models.CharField(max_length=20,
+                                              choices=TestingMethod.choice_list,
+                                              default=TestingMethod.FULL_WORDS)
+    touchscreen_testing_method = models.CharField(max_length=20,
+                                                  choices=TestingMethod.choice_list,
+                                                  default=TestingMethod.ON_SCREEN)
     enable_animations = models.BooleanField(blank=True, default=True)
     enable_sounds = models.BooleanField(blank=True, default=False)
     enable_vibration = models.BooleanField("Vibrate on mistakes", blank=True, default=True)
