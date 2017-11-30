@@ -3,6 +3,20 @@ module Main exposing (..)
 import Html exposing (div, button, text, programWithFlags)
 
 
+{- Main -}
+
+
+main : Program Flags Model Msg
+main =
+    programWithFlags
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
+        }
+
+
+
 {- Flags and external inputs -}
 
 
@@ -103,14 +117,8 @@ type alias AccountData =
     }
 
 
-main : Program Flags Model Msg
-main =
-    programWithFlags
-        { init = init
-        , view = view
-        , update = update
-        , subscriptions = subscriptions
-        }
+
+{- View -}
 
 
 view : Model -> Html.Html msg
@@ -134,9 +142,8 @@ userDisplayName u =
             ad.username
 
 
-subscriptions : a -> Sub msg
-subscriptions model =
-    Sub.none
+
+{- Update -}
 
 
 type Msg
@@ -148,3 +155,12 @@ update msg model =
     case msg of
         None ->
             ( model, Cmd.none )
+
+
+
+{- Subscriptions -}
+
+
+subscriptions : a -> Sub msg
+subscriptions model =
+    Sub.none
