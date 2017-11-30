@@ -6,5 +6,5 @@
 // CSS/Less
 import 'learn.less';
 
-import Elm from "../elm/Main";
+import Elm from "../elm/Learn";
 Elm.Main.embed(document.getElementById('elm-main'));
