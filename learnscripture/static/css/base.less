@@ -1,0 +1,48 @@
+// base.less
+// Styles corresponding to the base.html template.
+
+// This forms the basis for most pages on the site, and therefore includes
+// styling for many different pages, so that a single CSS download is needed
+// for most pages.
+
+// Mostly this file appends to and therefore overrides bootstrap.less styles,
+// rather than modiyfing bootstrap itself. However, we have pulled out
+// various bits in order to do color themes in this file.
+
+
+// 3rd party
+@import "../bootstrap/lib/bootstrap.less";
+@import "../fontawesome/font-awesome.less";
+
+// Common things
+@import "icons.less";
+@import "utils.less";
+@import "themes.less";
+@import "common.less";
+@import "sidepanel.less";
+@import "base_layout.less";
+@import "messages.less";
+
+#id-hint-btn, #id-help-btn, #id-more-practice-btn, .word {
+    // For Internet Explorer, remove 300ms delays on "click" event when touch
+    // actions are used.
+    touch-action: none;
+}
+
+
+
+// Page or component specific
+@import "activity.less";
+@import "choose.less";
+@import "comments.less";
+@import "create_set.less";
+@import "dashboard.less";
+@import "hacks.less";
+@import "home.less";
+@import "leaderboard.less";
+@import "learning.less";
+@import "progress.less";
+@import "stats.less";
+@import "user_stats.less";
+@import "user_verses.less";
+@import "verselists.less";

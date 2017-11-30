@@ -1,0 +1,50 @@
+// Activity stream
+
+@activityItemPadding: 5px;
+
+.activitystream {
+    .activityitem.following {
+        border-top: 2px solid;
+        border-bottom: 2px solid;
+    }
+}
+
+.activityitem, .groupcomments {
+    margin-left: 20px;
+    border: 1px solid;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    clear: both;
+
+    h4 {
+        overflow: auto;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    .commentindicator {
+        border-right: 1px solid;
+        border-bottom: 1px solid;
+        float:left;
+        border-bottom-right-radius: 4px;
+        padding: 0px @activityItemPadding;
+        margin-right: @activityItemPadding;
+    }
+
+    .commentblock {
+        padding: @activityItemPadding;
+    }
+
+    .commentauthor {
+    }
+
+    .permalink {
+        float:right;
+        padding-right: @activityItemPadding;
+    }
+
+}
+
+.activityitem .commentblock {
+    border-top: 1px solid;
+}

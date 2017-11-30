@@ -1,0 +1,253 @@
+// Override some bootstrap things:
+li {
+    color: inherit;
+}
+
+hr + h3 {
+    margin-top: -15px;
+}
+
+// Our things
+input[type=image] {
+    width: auto;
+    height: auto;
+    border: 0px solid white;
+    color: white;
+    padding: 0px;
+    border-radius: 0px;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+
+.relative-container {
+    position: relative;
+}
+
+#id-ajax-status {
+    position: fixed;
+    top: @topbarHeight;
+    text-align: left;
+    height: 22px;
+    background-color: #ff8;
+    padding: 1px 5px 3px;
+    opacity: 0.8;
+}
+
+#squaresWaveG {
+    position: relative;
+    width: 30px;
+}
+
+.squaresWaveG {
+    display: inline-block;
+    background-color:#B8B8B8;
+    width:8px;
+    height:8px;
+    margin-left: 2px;
+    -moz-animation-name:bounce_squaresWaveG;
+    -moz-animation-duration:1.5s;
+    -moz-animation-iteration-count:infinite;
+    -moz-animation-direction:linear;
+    -webkit-animation-name:bounce_squaresWaveG;
+    -webkit-animation-duration:1.5s;
+    -webkit-animation-iteration-count:infinite;
+    -webkit-animation-direction:linear;
+    -o-animation-name:bounce_squaresWaveG;
+    -o-animation-duration:1.5s;
+    -o-animation-iteration-count:infinite;
+    -o-animation-direction:linear;
+    -ms-animation-name:bounce_squaresWaveG;
+    -ms-animation-duration:1.5s;
+    -ms-animation-iteration-count:infinite;
+    -ms-animation-direction:linear;
+    animation-name:bounce_squaresWaveG;
+    animation-duration:1.5s;
+    animation-iteration-count:infinite;
+    animation-direction:linear;
+}
+
+#squaresWaveG_1{
+    -moz-animation-delay:0.5s;
+    -webkit-animation-delay:0.5s;
+    -o-animation-delay:0.5s;
+    -ms-animation-delay:0.5s;
+    animation-delay:0.5s;
+}
+
+#squaresWaveG_2{
+    -moz-animation-delay:1.0s;
+    -webkit-animation-delay:1.0s;
+    -o-animation-delay:1.0s;
+    -ms-animation-delay:1.0s;
+    animation-delay:1.0s;
+}
+
+#squaresWaveG_3{
+    -moz-animation-delay:1.5s;
+    -webkit-animation-delay:1.5s;
+    -o-animation-delay:1.5s;
+    -ms-animation-delay:1.5s;
+    animation-delay:1.5s;
+}
+
+@-moz-keyframes bounce_squaresWaveG{
+    0%{
+        background-color:#000000;
+    }
+
+    100%{
+        background-color:#B8B8B8;
+    }
+
+}
+
+@-webkit-keyframes bounce_squaresWaveG{
+    0%{
+        background-color:#000000;
+    }
+
+    100%{
+        background-color:#B8B8B8;
+    }
+
+}
+
+@-o-keyframes bounce_squaresWaveG{
+    0%{
+        background-color:#000000;
+    }
+
+    100%{
+        background-color:#B8B8B8;
+    }
+
+}
+
+@-ms-keyframes bounce_squaresWaveG{
+    0%{
+        background-color:#000000;
+    }
+
+    100%{
+        background-color:#B8B8B8;
+    }
+
+}
+
+@keyframes bounce_squaresWaveG{
+    0%{
+        background-color:#000000;
+    }
+
+    100%{
+        background-color:#B8B8B8;
+    }
+
+}
+
+#id-ajax-errors {
+    margin-left: 3px;
+}
+
+q {
+    font-style: italic;
+    font-family: serif;
+}
+
+.addclearfix {
+    .clearfix();
+}
+
+
+.verseset,
+.actionset {
+    padding: 15px;
+    border-radius: 7px;
+    border: 1px solid;
+    margin-bottom: 15px;
+
+    h3 {
+        margin-top: 0px;
+        padding-top: 0px;
+        line-height: 20px;
+    }
+
+    form {
+        float: right;
+        text-align: right;
+        margin: 0;
+        padding: 0;
+
+        input + br + input {
+            margin-top: 5px;
+        }
+        .btn {
+            margin-left: 0.5em;
+        }
+        .icon-public {
+            margin-right: -0.5em;
+        }
+    }
+    p:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.form-all-errors {
+    margin-top: 1em;
+}
+
+form textarea {
+    width: 95%;
+}
+
+td form {
+    margin: 0px;
+}
+
+span.chapternumber {
+    font-size: 200%;
+}
+span.versenumber {
+    vertical-align: super;
+    font-size: 75%;
+}
+
+.permissionlink {
+    text-align: right;
+    font-size: 90%;
+}
+
+
+.filters {
+    label {
+        font-weight: bold;
+    }
+    ul.pills {
+        margin-bottom: 0px;
+    }
+}
+
+.errorlist li {
+    color: @errorColor;
+}
+
+.warning-note {
+    font-style: italic;
+    font-size: 90%;
+}
+
+.note {
+    font-size: 0.8em;
+    font-style: italic;
+}
+
+
+// Referral program page
+
+p.referral-link {
+    text-align: center;
+    font-weight: bold;
+}
+

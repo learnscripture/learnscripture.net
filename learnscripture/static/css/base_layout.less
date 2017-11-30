@@ -1,0 +1,334 @@
+@mainSidePadding:      20px;
+@mainTopPadding:       20px;
+
+@smallerMainSidePadding:   6px;
+@smallerMainTopPadding:    5px;
+
+@narrowWidthBreak1: 859px;
+@narrowWidthBreak2: 600px;
+@narrowWidthBreak3: 500px;
+
+@shortHeightBreak1: 600px;
+@shortHeightBreak2: 500px;
+
+
+body {
+    padding-top: @topbarHeight; /* make the container go all the way to the bottom of the topbar */
+    background-attachment:fixed;
+}
+.container > footer p {
+    text-align: center; /* center align it with the container */
+}
+
+
+footer {
+    border: none;
+    border-radius: 6px;
+    padding-bottom: 5px;
+}
+
+.topbar .fill {
+    @shadow: 0 1px 3px rgba(0, 0, 0, 0.25), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    .box-shadow(@shadow);
+}
+
+.container {
+    width: 860px; /* downsize our container to make the content feel a bit tighter and more cohesive. NOTE: this removes two full columns from the grid, meaning you only go to 14 columns and not 16. */
+}
+
+.footer {
+    margin: 5px 0px;
+    padding: 5px;
+    border-radius: 6px;
+}
+
+.footer div {
+    float: right;
+}
+
+.maincontent {
+    padding-top: @mainTopPadding;
+    padding-bottom: @mainTopPadding;
+}
+
+.topbarinner, .maincontent {
+    padding-left: @mainSidePadding;
+}
+
+.maincontent {
+    padding-right: @mainSidePadding;
+}
+
+/* The white background content wrapper */
+.maincontent {
+    background-color: #fff;
+    .border-radius(0 0 6px 6px);
+}
+
+/* Page header tweaks */
+.page-header {
+    margin-bottom: @baseline - 1;
+    border-bottom: 1px solid #ddd;
+    h1 {
+        margin-bottom: (@baseline / 2) - 1px;
+    }
+    padding: 20px @mainSidePadding 10px;
+}
+
+.page-header, .message-container {
+    margin-left: -@mainSidePadding;
+    margin-right: -@mainSidePadding;
+    margin-bottom: @mainTopPadding;
+    margin-top: -@mainTopPadding;
+}
+
+// Right column tweaks
+
+#id-rightcolumn {
+    h3 {
+        margin-top: 18px;
+        line-height: 20px;
+        border-bottom: 1px solid #ddd;
+        margin-bottom: 6px;
+
+        &:first-child {
+            margin-top: 9px;
+        }
+    }
+}
+
+// Menu
+
+
+.dropdown-menu-right {
+    right: 0px;
+    left: auto;
+}
+
+// From Twitter Bootstrap 2
+.caret {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    text-indent: -99999px;
+    *text-indent: 0;
+    vertical-align: top;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 4px solid #000000;
+    opacity: 0.3;
+    filter: alpha(opacity=30);
+    content: "\2193";
+}
+
+.dropdown .caret {
+    margin-top: 8px;
+    margin-left: 2px;
+}
+
+////////////  Response to smaller screen /////////////
+
+/* Handhelds and narrow browsers */
+
+@media screen and (max-width: @narrowWidthBreak1) {
+
+    /* fluid width */
+    .container {
+        width: auto;
+    }
+    /* no columns */
+    #id-leftcolumn {
+        width: auto;
+        float: none;
+    }
+    #id-rightcolumn {
+        width: auto;
+        float: none;
+        border-top: 1px solid #eee;
+        padding-top: 5px;
+        margin-top: 5px;
+    }
+    .row > [class*="span"] {
+        display: block;
+        margin: auto;
+    }
+    .row {
+        margin: auto;
+        .span7 {
+            width: 100%;
+        }
+    }
+
+    // Fix some hacks we added for rightcolumn
+    #id-rightcolumn h3:first-child {
+        margin-top: 0px;
+    }
+
+
+    /* squeeze spacings */
+    .topbarinner, .maincontent {
+        padding-left: @smallerMainSidePadding;
+        padding-right: @smallerMainSidePadding;
+    }
+
+    .page-header {
+        padding-left: @smallerMainSidePadding;
+        padding-right: @smallerMainSidePadding;
+    }
+
+    .page-header, .message-container {
+        margin-left: -@smallerMainSidePadding;
+        margin-right: -@smallerMainSidePadding;
+    }
+
+
+    .two-column-only {
+        display: none;
+    }
+
+    span.one-column-only {
+        display:inline;
+    }
+    div.one-column-only {
+        display:block;
+    }
+
+    .topbar .brand {
+        padding-right: 1px;
+    }
+}
+
+
+// If there is not much room vertical we squeeze paddings
+
+@media screen and (max-height: @shortHeightBreak1) {
+    /* squeeze paddings */
+
+    .maincontent {
+        padding-top: @smallerMainTopPadding;
+        padding-bottom: @smallerMainTopPadding;
+    }
+
+    .page-header {
+        padding-top: 5px;
+        padding-bottom: 3px;
+    }
+
+    .page-header, .message-container {
+        margin-bottom: @smallerMainTopPadding;
+        margin-top: -@smallerMainTopPadding;
+    }
+
+    /* no fixed top bar */
+    .page-header h1 {
+        margin-bottom: 3px;
+    }
+
+    .topbar {
+        position: static;
+    }
+
+    body {
+        padding-top: 0px;
+    }
+
+}
+
+
+// Squeeze the primary nav if horizontal space is limited
+@media screen and (max-width: 700px) {
+    ul.primary-nav li:nth-child(5) {
+        display:none;
+    }
+
+}
+
+@media screen and (max-width: 650px) {
+    ul.primary-nav li:nth-child(4) {
+        display:none;
+    }
+
+}
+
+@media screen and (max-width: 600px) {
+    ul.primary-nav li:nth-child(3) {
+        display:none;
+    }
+}
+
+@media screen and (max-width: 550px) {
+    ul.primary-nav li:nth-child(2) {
+        display:none;
+    }
+
+}
+
+@media screen and (max-width: 450px) {
+    ul.primary-nav li:nth-child(1) {
+        display:none;
+    }
+}
+
+@media screen and (max-width: 400px) {
+    .donation-drive.notice .donation-drive-stats .chart-container {
+        width: 75px;
+    }
+}
+
+@media screen and (max-width: @narrowWidthBreak2) {
+    // Less padding on table
+    table {
+        td, th {
+            padding: 5px 6px 4px;
+        }
+    }
+}
+
+@media screen and (max-width:  @narrowWidthBreak3) {
+    // Stacked forms
+
+    form {
+        padding-left: 20px;
+        fieldset {
+            padding-top: @baseline / 2;
+        }
+        legend {
+            padding-left: 0;
+        }
+        label {
+            display: block;
+            float: none;
+            width: auto;
+            font-weight: bold;
+            text-align: left;
+            line-height: 20px;
+            padding-top: 0;
+        }
+        .clearfix {
+            margin-bottom: @baseline / 2;
+            div.input {
+                margin-left: 0;
+            }
+        }
+        .inputs-list {
+            margin-bottom: 0;
+            li {
+                padding-top: 0;
+                label {
+                    font-weight: normal;
+                    padding-top: 0;
+                }
+            }
+        }
+        div.clearfix.error {
+            padding-left: 10px;
+            margin-top: 0;
+            margin-left: -10px;
+        }
+        .actions {
+            margin-left: -20px;
+            padding-left: 20px;
+        }
+    }
+
+}
