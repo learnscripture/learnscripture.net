@@ -7,7 +7,7 @@ main =
   beginnerProgram { model = 0, view = view, update = update }
 
 
-view model = div [] [ text "Hello world!" ]
+view model = div [] [ text "Hello world! How are you?" ]
 
 
 type Msg = None
