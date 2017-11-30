@@ -1,0 +1,18 @@
+<div id="id-preferences-data"
+     {# NB these names are translated to preferencesSetup, enableAnimations, enableSounds, enableVibration, interfaceTheme, desktopTestingMethod, touchscreenTestingMethod, newLearnPage #}
+     data-preferences-setup="{{ request.identity.preferences_setup|yesno:"true,false,false" }}"
+     data-enable-animations="{{ request.identity.enable_animations|yesno:"true,false,false" }}"
+     data-enable-sounds="{{ request.identity.enable_sounds|yesno:"true,false,false" }}"
+     data-enable-vibration="{{ request.identity.enable_vibration|yesno:"true,false,false" }}"
+     data-interface-theme="{{ request.identity.interface_theme }}"
+     data-desktop-testing-method="{{ request.identity.desktop_testing_method }}"
+     data-touchscreen-testing-method="{{ request.identity.touchscreen_testing_method }}"
+     data-new-learn-page="{{ request.identity.new_learn_page }}"
+     ></div>
+{% if request_account %}
+  <div id="id-account-data"
+       data-username="{{ request_account.username }}"
+       data-id="{{ request_account.id }}"
+       >
+  </div>
+{% endif %}
