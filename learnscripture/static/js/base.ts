@@ -11,12 +11,10 @@
 // configuring in webpack.config does not seem to work.
 import 'expose-loader?jQuery!jquery';
 import "jquery-ui/ui/widgets/sortable";
-import 'jsrender';
 import 'autosize';
 
 // bundled libs
 import 'jquery.ajaxretry';
-import 'bootstrap-dropdown';
 import 'bootstrap-tabs';
 import 'bootstrap-buttons';
 

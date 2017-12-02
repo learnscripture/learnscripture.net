@@ -1,0 +1,25 @@
+{% load bootstrap %}
+
+{% if not hide_preferences_popup %}
+  <div id="id-preferences-form" class="sidepanel hide">
+    <div class="close-bar backdrop">
+    </div>
+    <div class="sidepanel-main slider">
+      <div class="sidepanel-header">
+        <h3>Preferences</h3>
+      </div>
+      <div class="sidepanel-body">
+        <form action="" method="POST">
+          {% csrf_token %}
+
+          {{ preferences_form|bootstrap }}
+
+        </form>
+      </div>
+      <div class="sidepanel-footer">
+        <a href="#" id="id-preferences-save-btn" class="btn primary default">Save</a>
+        <a href="#" id="id-preferences-cancel-btn" class="btn secondary">Cancel</a>
+      </div>
+    </div>
+  </div>
+{% endif %}

@@ -115,7 +115,7 @@ var setupPreferencesControls = function() {
         closePreferences();
     });
 
-    $(".preferences-link,a[href='/preferences/']").on('click', function(ev) {
+    $("a.preferences-link,.preferences-link>a,a[href='/preferences/']").on('click', function(ev) {
         ev.preventDefault();
         showPreferences();
     });

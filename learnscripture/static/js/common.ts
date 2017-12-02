@@ -1,4 +1,6 @@
 // Common functionality and requirements.
+import 'jsrender';
+import 'bootstrap-dropdown';
 
 
 // Django CSRF requirements

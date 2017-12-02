@@ -1,17 +1,3 @@
-@mainSidePadding:      20px;
-@mainTopPadding:       20px;
-
-@smallerMainSidePadding:   6px;
-@smallerMainTopPadding:    5px;
-
-@narrowWidthBreak1: 859px;
-@narrowWidthBreak2: 600px;
-@narrowWidthBreak3: 500px;
-
-@shortHeightBreak1: 600px;
-@shortHeightBreak2: 500px;
-
-
 body {
     padding-top: @topbarHeight; /* make the container go all the way to the bottom of the topbar */
     background-attachment:fixed;
@@ -277,53 +263,4 @@ footer {
             padding: 5px 6px 4px;
         }
     }
-}
-
-@media screen and (max-width:  @narrowWidthBreak3) {
-    // Stacked forms
-
-    form {
-        padding-left: 20px;
-        fieldset {
-            padding-top: @baseline / 2;
-        }
-        legend {
-            padding-left: 0;
-        }
-        label {
-            display: block;
-            float: none;
-            width: auto;
-            font-weight: bold;
-            text-align: left;
-            line-height: 20px;
-            padding-top: 0;
-        }
-        .clearfix {
-            margin-bottom: @baseline / 2;
-            div.input {
-                margin-left: 0;
-            }
-        }
-        .inputs-list {
-            margin-bottom: 0;
-            li {
-                padding-top: 0;
-                label {
-                    font-weight: normal;
-                    padding-top: 0;
-                }
-            }
-        }
-        div.clearfix.error {
-            padding-left: 10px;
-            margin-top: 0;
-            margin-left: -10px;
-        }
-        .actions {
-            margin-left: -20px;
-            padding-left: 20px;
-        }
-    }
-
 }

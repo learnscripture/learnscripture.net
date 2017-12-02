@@ -15,6 +15,7 @@
   <body class="learn-page {% if request.identity %}{{ request.identity.interface_theme }}{% else %}calm{% endif %}">
     <div id="elm-main">
     </div>
+    {% include "learnscripture/preferences_form_inc.html" %}
     {% include "learnscripture/preferences_data_inc.html" %}
     {# Possibly use 'base' instead of 'learn'? #}
     {% render_bundle 'learn' 'css' 'DEFAULT' attrs='charset="utf-8"' %}
