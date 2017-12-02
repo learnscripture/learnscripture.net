@@ -557,7 +557,7 @@ def push_sources(target):
             with cd(target_src_root):
                 run("hg init")
 
-    local("hg push -f ssh://%(user)s@%(host)s/%(path)s || true" %
+    local("hg push -B . -f ssh://%(user)s@%(host)s/%(path)s || true" %
           dict(host=env.host,
                user=env.user,
                path=target_src_root,
