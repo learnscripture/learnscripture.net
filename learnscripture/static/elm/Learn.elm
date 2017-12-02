@@ -121,6 +121,12 @@ type alias AccountData =
 
 {- View -}
 
+type alias IconName = String
+
+type LinkIconAlign
+    = AlignLeft
+    | AlignRight
+
 
 dashboardLink : String
 dashboardLink =
@@ -135,12 +141,24 @@ view model =
         ]
 
 
-link : String -> String -> String -> H.Html msg
-link href caption icon =
-    H.a [ A.href href ]
-        [ H.i [ A.class ("icon-fw icon-" ++ icon) ] []
-        , H.text (" " ++ caption)
-        ]
+link : String -> String -> IconName -> LinkIconAlign -> H.Html msg
+link href caption icon iconAlign =
+    let
+        iconH =
+            H.i [ A.class ("icon-fw icon-" ++ icon) ] []
+
+        captionH =
+            H.span [ A.class "nav-caption" ] [ H.text (" " ++ caption ++ " ") ]
+
+        combinedH =
+            case iconAlign of
+                AlignLeft ->
+                    [ iconH, captionH ]
+
+                AlignRight ->
+                    [ captionH, iconH ]
+    in
+        H.a [ A.href href ] combinedH
 
 
 topNav : Model -> H.Html msg
@@ -148,9 +166,9 @@ topNav model =
     H.nav [ A.class "topbar" ]
         [ H.ul []
             [ H.li [ A.class "dashboard-link" ]
-                [ link dashboardLink "Dashboard" "return" ]
-            , H.li []
-                [ H.text (userDisplayName model.user) ]
+                [ link dashboardLink "Dashboard" "return" AlignLeft ]
+            , H.li [ A.class "preferences-link" ]
+                [ link "#" (userDisplayName model.user) "preferences" AlignRight ]
             ]
         ]
 

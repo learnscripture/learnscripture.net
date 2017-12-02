@@ -1,7 +1,12 @@
+// For the moment, this is separated out from base.js to minimize breakage, but
+// will be merged eventually.
+
 // node_modules libs
+import 'expose-loader?jQuery!jquery';
+import 'jquery.ajaxretry';
 
-//import 'expose-loader?jQuery!jquery';
-
+// Ours
+import './preferences';
 
 // CSS/Less
 import 'learn.less';
