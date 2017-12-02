@@ -12,7 +12,7 @@
 
   </head>
 
-  <body>
+  <body class="learn-page {% if request.identity %}{{ request.identity.interface_theme }}{% else %}calm{% endif %}">
     <div id="elm-main">
     </div>
     {% include "learnscripture/preferences_data_inc.html" %}

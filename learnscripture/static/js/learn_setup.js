@@ -10,7 +10,7 @@ import Elm from "../elm/Learn";
 var preferencesNode = document.getElementById('id-preferences-data');
 var accountNode = document.getElementById('id-account-data');
 var preferences =
-    Elm.Main.embed(
+    Elm.Learn.embed(
         document.getElementById('elm-main'),
         {
             "preferences": {

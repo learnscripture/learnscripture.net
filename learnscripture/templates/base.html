@@ -21,7 +21,7 @@
 
   </head>
 
-  <body class="{% if request.identity %}{{ request.identity.interface_theme }}{% else %}calm{% endif %}">
+  <body class="base-page {% if request.identity %}{{ request.identity.interface_theme }}{% else %}calm{% endif %}">
 
     <div class="topbar">
       <div class="fill">
