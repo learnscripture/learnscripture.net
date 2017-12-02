@@ -1,6 +1,7 @@
-module Main exposing (..)
+module Learn exposing (..)
 
-import Html exposing (div, button, text, programWithFlags)
+import Html as H
+import Html.Attributes as A
 
 
 {- Main -}
@@ -8,7 +9,7 @@ import Html exposing (div, button, text, programWithFlags)
 
 main : Program Flags Model Msg
 main =
-    programWithFlags
+    H.programWithFlags
         { init = init
         , view = view
         , update = update
@@ -121,14 +122,36 @@ type alias AccountData =
 {- View -}
 
 
-view : Model -> Html.Html msg
+dashboardLink : String
+dashboardLink =
+    "/dashboard/"
+
+
+view : Model -> H.Html msg
 view model =
-    div []
-        [ div [] [ text ("Hello " ++ userDisplayName model.user ++ "! How are you?") ]
-        , div [] [ text ("preferencesSetup: " ++ toString model.preferences.preferencesSetup) ]
-        , div [] [ text ("enableVibration: " ++ toString model.preferences.enableVibration) ]
-        , div [] [ text ("enableAnimations: " ++ toString model.preferences.enableAnimations) ]
-        , div [] [ text ("desktopTestingMethod: " ++ toString model.preferences.desktopTestingMethod) ]
+    H.div []
+        [ topNav model
+        , H.div [] [ H.text ("Hello " ++ userDisplayName model.user ++ "! How are you?") ]
+        ]
+
+
+link : String -> String -> String -> H.Html msg
+link href caption icon =
+    H.a [ A.href href ]
+        [ H.i [ A.class ("icon-fw icon-" ++ icon) ] []
+        , H.text (" " ++ caption)
+        ]
+
+
+topNav : Model -> H.Html msg
+topNav model =
+    H.nav [ A.class "topbar" ]
+        [ H.ul []
+            [ H.li [ A.class "dashboard-link" ]
+                [ link dashboardLink "Dashboard" "return" ]
+            , H.li []
+                [ H.text (userDisplayName model.user) ]
+            ]
         ]
 
 

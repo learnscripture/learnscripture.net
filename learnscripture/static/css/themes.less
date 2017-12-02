@@ -25,65 +25,33 @@
         }
     }
 
-    .topbar div > ul,
+    .topbar,
     .nav {
-        // Dropdowns within the .nav
-        // a.menu:hover and li.open .menu for backwards compatibility
-        a.menu:hover,
-        li.open .menu,
-        .dropdown-toggle:hover,
-        .dropdown.open .dropdown-toggle {
-            background: @topColor1;
-            background: rgba(255,255,255,.05);
+        background-color: @topColor1;
+        color: @topLinkColor;
+        a {
+            text-decoration: none;
+            color: @topLinkColor;
+            text-shadow: 0 -1px 0 rgba(0,0,0,.25);
+            &:hover {
+                color: white;
+            }
         }
 
-        // .menu-dropdown for backwards compatibility
-        .menu-dropdown,
-        .dropdown-menu {
-            background-color: @topColor2;
-            // a.menu for backwards compatibility
-            a.menu,
-            .dropdown-toggle {
-                color: @white;
-                &.open {
-                    background: @topColor1;
-                    background: rgba(255,255,255,.05);
-                }
+        .dropdown {
+            &.open .dropdown-toggle {
+                background: @topColor2;
             }
-            li a {
-                color: @topLinkColor;
-                &:hover {
-                    #gradient > .vertical(@topColor1, @topColor2);
+            .dropdown-menu {
+                background-color: @topColor2;
+                a:hover {
+                    background: @topColor1;
+                }
+                .active a {
                     color: @white;
                 }
             }
-            .active a {
-                color: @white;
-            }
-            .divider {
-                background-color: #222;
-                border-color: #444;
-            }
         }
-
-        .active > a {
-            background-color: @topColor2;
-            background: rgba(0,0,0,.2);
-        }
-    }
-
-    .topbar {
-        // Links get text shadow
-        a {
-            color: @topLinkColor;
-            text-shadow: 0 -1px 0 rgba(0,0,0,.25);
-        }
-    }
-
-
-    .topbar .fill {
-        background-color: @topColor2;
-        #gradient > .vertical(@topColor1, @topColor2);
     }
 
     .btn {
@@ -224,13 +192,22 @@
 // CALM
 
 body.calm {
-    background-color: #1A1A1A;
-    background-image: url(/static/img/bg.jpg);
-    .dotheme(@blue, @blueDark, @grayLight, @blue, @blueDark, #f5f5f5, #0069d6, white,
+    .dotheme(darken(@blue, 10%), lighten(@blueDark, 10%), @grayLight, @blue, @blueDark, #f5f5f5, #0069d6, white,
              '"Cuprum", "Trebuchet MS", "Helvetica Neue", Helvetica, Arial, sans-serif');
 }
 
+body.calm.base-page {
+    background-color: #1A1A1A;
+    background-image: url(/static/img/bg.jpg);
+}
+
 body.bubblegum {
+    .dotheme(#f56c26, #f00901, black, #cc3a92,  #a12667, #ffe0f1, #f00901, black,
+             '"Short Stack", "Helvetica Neue", Helvetica, Arial, sans-serif');
+
+}
+
+body.bubblegum.base-page {
     @bgcolor: #e0cfb1;
     background-color: @bgcolor;
     footer, .footer {
@@ -238,13 +215,15 @@ body.bubblegum {
         border: 1px solid darken(@bgcolor, 10%);
     }
     background-image: url(/static/img/bubblegum_background.jpg);
-    .dotheme(#f56c26, #f00901, black, #cc3a92,  #a12667, #ffe0f1, #f00901, black,
-             '"Short Stack", "Helvetica Neue", Helvetica, Arial, sans-serif');
-
 }
 
 
 body.bubblegum2 {
+    .dotheme(lighten(#CD0074, 5%), lighten(#85004B, 5%), #e0e0e0, #679B00, darken(#679B00, 20%), #C9F76F, #CD0074, black,
+             '"Short Stack", "Helvetica Neue", Helvetica, Arial, sans-serif');
+}
+
+body.bubblegum2.base-page {
     @bgcolor:  #a294a5;
     background-color: @bgcolor;
     footer, .footer {
@@ -252,13 +231,10 @@ body.bubblegum2 {
         border: 1px solid darken(@bgcolor, 10%);
     }
     background-image: url(/static/img/bubblegum2_background.jpg);
-    .dotheme(lighten(#CD0074, 5%), lighten(#85004B, 5%), #e0e0e0, #679B00, darken(#679B00, 20%), #C9F76F, #CD0074, black,
-             '"Short Stack", "Helvetica Neue", Helvetica, Arial, sans-serif');
 }
 
+
 body.space {
-    background-color: black;
-    background-image: url(/static/img/space_bg.jpg);
     .dotheme(lighten(#0a0b35, 5%), black, @grayLight, lighten(#090a31, 10%), #090a31, lighten(#0069d6, 35%), darken(#0069d6, 5%), white,
              '"Prosto One", "Helvetica Neue", Helvetica, Arial, sans-serif');
     .verseset, .actionset {
@@ -280,6 +256,11 @@ body.space {
             }
         }
     }
+}
+
+body.space.base-page {
+    background-color: black;
+    background-image: url(/static/img/space_bg.jpg);
 }
 
 // Theme specific content
