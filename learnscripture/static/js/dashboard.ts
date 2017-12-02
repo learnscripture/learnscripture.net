@@ -27,7 +27,7 @@ var setupCalendarHeatmap = function() {
         range: numberOfYears * 12 + 1,
         start: new Date(year, month, 1),
         subDomainDateFormat: "%Y-%m-%d",
-        legend: [1, 10, 20, 35, 50, 65],
+        legend: [1, 10, 20, 35, 55, 80],
         highlight: "now",
         afterLoadData: function(data) {
             // calculate dict in form required by CalHeatMap. Also
