@@ -166,11 +166,16 @@ loadingDiv =
     H.div [ A.id "id-loading-full" ] [ H.text "Loading" ]
 
 
+makeIcon : String -> H.Html msg
+makeIcon icon =
+    H.i [ A.class ("icon-fw icon-" ++ icon) ] []
+
+
 link : String -> String -> IconName -> LinkIconAlign -> H.Html msg
 link href caption icon iconAlign =
     let
         iconH =
-            H.i [ A.class ("icon-fw icon-" ++ icon) ] []
+            makeIcon icon
 
         captionH =
             H.span [ A.class "nav-caption" ] [ H.text (" " ++ caption ++ " ") ]
