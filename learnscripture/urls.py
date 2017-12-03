@@ -103,6 +103,10 @@ urlpatterns = [
         name='mailgun-bounce-notification'),
 ]
 
+if settings.DEVBOX:
+    urlpatterns += [
+        url(r'^test-404/(?P<message>.*)$', learnscripture.views.missing)
+    ]
 
 if settings.DEVBOX:
     import django.views.static
