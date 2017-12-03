@@ -77,6 +77,7 @@ init flags =
 
                     Nothing ->
                         GuestUser
+          , verseData = Loading
           }
         , Cmd.none
         )
@@ -89,6 +90,7 @@ init flags =
 type alias Model =
     { preferences : Preferences
     , user : User
+    , verseData : VerseDataStatus
     }
 
 
@@ -118,10 +120,23 @@ type alias AccountData =
     }
 
 
+type VerseDataStatus
+    = Loading
+    | Verses VerseData
 
+
+type alias VerseData =
+    List String
+
+
+
+-- TODO
 {- View -}
 
-type alias IconName = String
+
+type alias IconName =
+    String
+
 
 type LinkIconAlign
     = AlignLeft
@@ -137,8 +152,18 @@ view : Model -> H.Html msg
 view model =
     H.div []
         [ topNav model
-        , H.div [] [ H.text ("Hello " ++ userDisplayName model.user ++ "! How are you?") ]
+        , case model.verseData of
+            Loading ->
+                loadingDiv
+
+            Verses vd ->
+                H.text "TODO"
         ]
+
+
+loadingDiv : H.Html msg
+loadingDiv =
+    H.div [ A.id "id-loading-full" ] [ H.text "Loading" ]
 
 
 link : String -> String -> IconName -> LinkIconAlign -> H.Html msg

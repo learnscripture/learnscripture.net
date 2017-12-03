@@ -37,10 +37,14 @@
     margin-top: .2em;
 }
 
-.current-verse, .previous-verse, #id-typing, #id-onscreen-test-container {
+.current-verse, .previous-verse, #id-typing, #id-onscreen-test-options {
     font-size: 20px;
+    line-height: 1;
 }
 
+#id-onscreen-not-available {
+    font-size: 20px;
+}
 .previous-verse {
     display: table-cell;
     vertical-align: bottom;
@@ -152,7 +156,7 @@
     padding: 6px;
     text-align: center;
     .word {
-        margin: 10px;
+        margin: 8px;
     }
 }
 
@@ -317,7 +321,7 @@ body .action-log {
 @media screen and (max-width: @narrowWidthBreak2), screen and (max-height: @shortHeightBreak2) {
 
     /* smaller fonts */
-    .current-verse, .previous-verse, #id-typing, #id-onscreen-test-container {
+    .current-verse, .previous-verse, #id-typing, #id-onscreen-test-options, #id-onscreen-not-available {
         font-size: 17px;
     }
 

@@ -65,7 +65,7 @@
   input {
     background-color: #444;
     background-color: rgba(255,255,255,.3);
-    #font > .sans-serif(13px, normal, 1);
+    #font > .sans-serif(13px, normal);
     padding: 4px 9px;
     color: @white;
     color: rgba(255,255,255,.75);
@@ -254,7 +254,7 @@ a.menu:after,
 // Common styles
 .tabs,
 .pills {
-  margin: 0 0 @baseline;
+  margin: 0 0 1.3em;
   padding: 0;
   list-style: none;
   .clearfix();
@@ -276,7 +276,7 @@ a.menu:after,
     > a {
       padding: 0 15px;
       margin-right: 2px;
-      line-height: (@baseline * 2) - 2;
+      line-height: 2.6em;
       border: 1px solid transparent;
       .border-radius(4px 4px 0 0);
       &:hover {
@@ -350,7 +350,7 @@ a.menu:after,
 // FOOTERS
 
 footer {
-  padding-top: @baseline - 1;
+  padding-top: 1.3em;
 }
 
 
@@ -452,7 +452,7 @@ input[type=submit].btn {
   color: @black;
   font-size: 20px;
   font-weight: bold;
-  line-height: @baseline * .75;
+  line-height: 1;
   text-shadow: 0 1px 0 rgba(255,255,255,1);
   .opacity(25);
   &:hover {
@@ -470,7 +470,7 @@ input[type=submit].btn {
 .alert-message {
   position: relative;
   padding: 7px 15px;
-  margin-bottom: @baseline;
+  margin-bottom: 1.3em;
   color: @grayDark;
   .gradientBar(#fceec1, #eedc94); // warning by default
   text-shadow: 0 1px 0 rgba(255,255,255,.5);
@@ -498,9 +498,6 @@ input[type=submit].btn {
   }
 
   // Remove extra margin from content
-  h5 {
-    line-height: @baseline;
-  }
   p {
     margin-bottom: 0;
   }
@@ -567,8 +564,8 @@ input[type=submit].btn {
 // ----------
 
 .pagination {
-  height: @baseline * 2;
-  margin: @baseline 0;
+  height: 1.3em * 2;
+  margin: 1.3em 0;
   ul {
     float: left;
     margin: 0;
@@ -583,7 +580,7 @@ input[type=submit].btn {
   a, span.a {
     float: left;
     padding: 0 14px;
-    line-height: (@baseline * 2) - 2;
+    line-height: 2.8;
     border-right: 1px solid;
     border-right-color: #ddd;
     border-right-color: rgba(0,0,0,.15);

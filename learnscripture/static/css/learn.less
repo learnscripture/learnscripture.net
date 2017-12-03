@@ -18,8 +18,11 @@
 
 // learn page specific
 body.learn-page {
+    @topbarHeight: 24px;
     nav {
-        height: auto; // TODO - instead we should fix 'base' to not put fixed height
+        // We need a fixed height, because this element has 'position: fixed'
+        // and we need to allow for that.
+        height: @topbarHeight;
 
         // reset list items
         > ul, > ul > li {
@@ -39,4 +42,19 @@ body.learn-page {
             }
         }
     }
+    nav + div {
+        margin-top: @topbarHeight;
+    }
+    #id-loading-full {
+        color: #888;
+        text-align: center;
+        font-size: 48px;
+        vertical-align: middle;
+        line-height: calc(~"100vh - " @topbarHeight);
+        animation: fadeIn 1s infinite alternate;
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0.25; }
 }
