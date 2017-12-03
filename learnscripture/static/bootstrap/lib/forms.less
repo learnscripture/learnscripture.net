@@ -8,27 +8,25 @@
 // -----------
 
 form {
-  margin-bottom: @baseline;
+    margin-bottom: 1.3em;
 }
 
 // Groups of fields with labels on top (legends)
 fieldset {
-  margin-bottom: @baseline;
-  padding-top: @baseline;
+  margin-bottom: 1.3em;
+  padding-top: 1.3em;
   legend {
     display: block;
     padding-left: 150px;
     font-size: @basefont * 1.5;
     line-height: 1;
     color: @grayDark;
-    *padding: 0 0 5px 145px; /* IE6-7 */
-    *line-height: 1.5; /* IE6-7 */
   }
 }
 
 // Parent element that clears floats and wraps labels and fields together
 form .clearfix {
-  margin-bottom: @baseline;
+  margin-bottom: 1em;
   .clearfix()
 }
 
@@ -37,14 +35,13 @@ label,
 input,
 select,
 textarea {
-  #font > .sans-serif(normal,13px,normal);
+    #font > .sans-serif(normal,13px);
 }
 
 // Float labels left
 label {
   padding-top: 6px;
   font-size: @basefont;
-  line-height: @baseline;
   float: left;
   width: 130px;
   text-align: right;
@@ -69,18 +66,17 @@ select,
 .uneditable-input {
   display: inline-block;
   width: 210px;
-  height: @baseline;
   padding: 4px;
   font-size: @basefont;
-  line-height: @baseline;
   color: @grayDark;
   border: 1px solid #ccc;
   .border-radius(3px);
 }
 
-// remove padding from select
 select {
-  padding: initial;
+    // remove padding from select
+    padding: initial;
+    height: 2em;
 }
 
 // mini reset for non-html5 file types
@@ -90,7 +86,6 @@ input[type=radio] {
   height: auto;
   padding: 0;
   margin: 3px 0;
-  *margin-top: 0; /* IE6-7 */
   line-height: normal;
   border: none;
 }
@@ -108,14 +103,6 @@ input[type=reset],
 input[type=submit] {
   width: auto;
   height: auto;
-}
-
-select,
-input[type=file] {
-  height: @baseline * 1.5; // In IE7, the height of the select element cannot be changed by height, only font-size
-  *height: auto; // Reset for IE7
-  line-height: @baseline * 1.5;
-  *margin-top: 4px; /* For IE7, add top margin to align select with labels */
 }
 
 // Make multiple select elements height not fixed
@@ -299,9 +286,9 @@ textarea[readonly] {
 // Actions (the buttons)
 .actions {
   background: #f5f5f5;
-  margin-top: @baseline;
-  margin-bottom: @baseline;
-  padding: (@baseline - 1) 20px @baseline 150px;
+  margin-top: 1.3em;
+  margin-bottom: 1.3em;
+  padding: 1.3em 20px 1.3em 150px;
   border-top: 1px solid #ddd;
   .border-radius(0 0 3px 3px);
   .secondary-action {
@@ -320,7 +307,7 @@ textarea[readonly] {
 .help-inline,
 .help-block {
   font-size: @basefont;
-  line-height: @baseline;
+  line-height: 1.3em;
   color: @grayLight;
 }
 .help-inline {
@@ -405,7 +392,6 @@ textarea[readonly] {
     width: auto;
     padding: 0;
     margin-left: 20px;
-    line-height: @baseline;
     text-align: left;
     white-space: normal;
     strong {
