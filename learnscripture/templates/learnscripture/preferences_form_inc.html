@@ -1,4 +1,5 @@
 {% load bootstrap %}
+{% load json_filters %}
 
 {% if not hide_preferences_popup %}
   <div id="id-preferences-form" class="sidepanel hide">
@@ -23,3 +24,6 @@
     </div>
   </div>
 {% endif %}
+<script type="text/javascript">
+ window.learnscriptureThemeFonts = {{ theme_fonts|jsonify|safe }};
+</script>

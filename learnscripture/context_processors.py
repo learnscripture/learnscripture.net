@@ -101,7 +101,7 @@ def campaign_context_processor(account):
     return {'account': account}
 
 
-def theme_fonts(request):
+def themes(request):
     current_theme = DEFAULT_THEME
     if hasattr(request, 'identity'):
         current_theme = request.identity.interface_theme
