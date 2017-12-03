@@ -1,17 +1,18 @@
+{% load render_bundle from webpack_loader %}
 
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
     <title>{% block title %}{% endblock %} - LearnScripture.net</title>
-    <meta name="description" content="">
-    <meta name="author" content="">
-
-    <link href="/static/css/snapshot.css" rel="stylesheet">
-
+    <meta name="robots" content="noindex">
+    <meta name="viewport" content="initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    {% include "learnscripture/favicon_inc.html" %}
+    {% render_bundle 'base' 'css' 'DEFAULT' attrs='charset="utf-8"' %}
 
   </head>
-  <body class="calm">
+  <body class="base-page" data-theme="calm">
     <div class="topbar">
       <div class="fill">
         <div class="container">
