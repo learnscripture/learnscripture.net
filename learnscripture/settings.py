@@ -236,7 +236,7 @@ TEMPLATES = [
                 'learnscripture.context_processors.referral_links',
                 'learnscripture.context_processors.menu',
                 'learnscripture.context_processors.notices',
-                'learnscripture.context_processors.theme_fonts',
+                'learnscripture.context_processors.themes',
                 'learnscripture.context_processors.settings_processor',
                 'learnscripture.context_processors.request_account',
             ],

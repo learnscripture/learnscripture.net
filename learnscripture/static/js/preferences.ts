@@ -160,7 +160,7 @@ var setupPreferencesControls = function() {
 
     $('#id_interface_theme').change(function(ev) {
         var theme = <string>$(this).val();
-        $('body').attr('class', theme);
+        $('body').attr('data-theme', theme);
         // Also need to load the webfont CSS
         var themeFontPairs = learnscriptureThemeFonts;
         for (var i = 0; i < themeFontPairs.length; i++) {
