@@ -56,10 +56,10 @@ MemoryStage = make_choices('MemoryStage',
                             (3, 'TESTED', 'tested'),
                             ])
 
-
+# Also defined in learn.ts and Learn.elm
 TextType = make_choices('TextType',
-                        [(1, 'BIBLE', 'Bible'),
-                         (2, 'CATECHISM', 'Catechism'),
+                        [('BIBLE', 'BIBLE', 'Bible'),
+                         ('CATECHISM', 'CATECHISM', 'Catechism'),
                          ])
 
 
@@ -79,8 +79,9 @@ class TextVersion(models.Model):
     slug = models.CharField(max_length=20, unique=True)
     full_name = models.CharField(max_length=255, unique=True)
     url = models.URLField(default="", blank=True)
-    text_type = models.PositiveSmallIntegerField(choices=TextType.choice_list,
-                                                 default=TextType.BIBLE)
+    text_type = models.CharField(max_length=20,
+                                 choices=TextType.choice_list,
+                                 default=TextType.BIBLE)
     language_code = models.CharField(max_length=2, blank=False,
                                      choices=LANGUAGE_CHOICES,
                                      default=DEFAULT_LANGUAGE.code)

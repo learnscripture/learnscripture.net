@@ -6,7 +6,7 @@
             "description": "The Westminster Shorter Catechism (also known simply as the Shorter Catechism) is a catechism that was written in the 1640s by English and Scottish divines. The same assembly also produced the Westminster Confession of Faith and the Westminster Larger Catechism. \r\n\r\nIt is used by many Christians and denominations, especially in the instruction of children.",
             "short_name": "WSC",
             "url": "",
-            "text_type": 2,
+            "text_type": "CATECHISM",
             "public": true,
             "full_name": "Westminster Shorter Catechism 1647",
             "slug": "WSC"

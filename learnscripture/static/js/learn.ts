@@ -72,7 +72,7 @@ var SET_TYPE_PASSAGE = 'PASSAGE';
 var LEARNING_TYPE_PRACTICE = 'practice';
 
 // Defined in TextType
-var TEXT_TYPE_BIBLE = 1;
+var TEXT_TYPE_BIBLE = 'BIBLE';
 
 // Thresholds for different testings modes:
 // Strength == 0.6 corresponds to about 10 days learning.
