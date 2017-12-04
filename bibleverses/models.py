@@ -35,21 +35,21 @@ MAX_VERSES_FOR_SINGLE_CHOICE = 4  # See also choose.js
 
 # Also defined in learn.ts and Learn.elm
 VerseSetType = make_choices('VerseSetType',
-                            [('SELECTION', 'SELECTION', 'Selection'),
-                             ('PASSAGE', 'PASSAGE', 'Passage'),
+                            [('SELECTION', 'Selection'),
+                             ('PASSAGE', 'Passage'),
                              ])
 
 # Also defined in learn.ts and Learn.elm
 StageType = make_choices('StageType',
-                         [('READ', 'READ', 'read'),
-                          ('RECALL_INITIAL', 'RECALL_INITIAL', 'recall from initials'),
-                          ('RECALL_MISSING', 'RECALL_MISSING', 'recall when missing'),
-                          ('TEST', 'TEST', 'test'),
+                         [('READ', 'read'),
+                          ('RECALL_INITIAL', 'recall from initials'),
+                          ('RECALL_MISSING', 'recall when missing'),
+                          ('TEST', 'test'),
                           ])
 
 
 # Various queries make use of the ordering in this enum, e.g. select everything
-# less than 'TESTED'
+# less than 'TESTED'. Therefore it is import to be based on an integer.
 MemoryStage = make_choices('MemoryStage',
                            [(1, 'ZERO', 'nothing'),
                             (2, 'SEEN', 'seen'),
@@ -58,8 +58,8 @@ MemoryStage = make_choices('MemoryStage',
 
 # Also defined in learn.ts and Learn.elm
 TextType = make_choices('TextType',
-                        [('BIBLE', 'BIBLE', 'Bible'),
-                         ('CATECHISM', 'CATECHISM', 'Catechism'),
+                        [('BIBLE', 'Bible'),
+                         ('CATECHISM', 'Catechism'),
                          ])
 
 
