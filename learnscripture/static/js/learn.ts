@@ -69,7 +69,7 @@ var SET_TYPE_PASSAGE = 'PASSAGE';
 
 
 // Defined in LearningType:
-var LEARNING_TYPE_PRACTICE = 'practice';
+var LEARNING_TYPE_PRACTICE = 'PRACTICE';
 
 // Defined in TextType
 var TEXT_TYPE_BIBLE = 'BIBLE';

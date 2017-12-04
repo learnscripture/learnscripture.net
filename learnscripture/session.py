@@ -8,10 +8,11 @@ from django.utils import timezone
 from accounts.models import Account, Identity
 from learnscripture.datastructures import make_choices
 
+# Also defined in learn.ts and Learn.elm
 LearningType = make_choices('LearningType',
-                            [('revision', 'REVISION', 'Revision'),
-                             ('learning', 'LEARNING', 'Learning'),
-                             ('practice', 'PRACTICE', 'Practice'),
+                            [('REVISION', 'Revision'),
+                             ('LEARNING', 'Learning'),
+                             ('PRACTICE', 'Practice'),
                              ])
 
 # In the session we store a list of verses to look at.
@@ -73,7 +74,7 @@ def get_verse_statuses(request):
             uvs.needs_testing_override = needs_testing_override
 
         # Decorate UVS with learning_type and return_to because we need it in UI
-        # (learn.js), even though the latter doesn't really belong here
+        # (learn.ts), even though the latter doesn't really belong here
         uvs.learning_type = learning_type
         uvs.return_to = request.session.get('return_to', reverse('dashboard'))
         retval.append(uvs)

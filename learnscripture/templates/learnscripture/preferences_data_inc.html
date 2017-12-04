@@ -7,7 +7,7 @@
      data-interface-theme="{{ request.identity.interface_theme }}"
      data-desktop-testing-method="{{ request.identity.desktop_testing_method }}"
      data-touchscreen-testing-method="{{ request.identity.touchscreen_testing_method }}"
-     data-new-learn-page="{{ request.identity.new_learn_page }}"
+     data-new-learn-page="{{ request.identity.new_learn_page|yesno:"true,false,false" }}"
      ></div>
 {% if request_account %}
   <div id="id-account-data"
