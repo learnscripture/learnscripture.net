@@ -39,11 +39,12 @@ VerseSetType = make_choices('VerseSetType',
                              ('PASSAGE', 'PASSAGE', 'Passage'),
                              ])
 
+# Also defined in learn.ts and Learn.elm
 StageType = make_choices('StageType',
-                         [(1, 'READ', 'read'),
-                          (2, 'RECALL_INITIAL', 'recall from initials'),
-                          (3, 'RECALL_MISSING', 'recall when missing'),
-                          (4, 'TEST', 'test'),  # Also used in learn.js
+                         [('READ', 'READ', 'read'),
+                          ('RECALL_INITIAL', 'RECALL_INITIAL', 'recall from initials'),
+                          ('RECALL_MISSING', 'RECALL_MISSING', 'recall when missing'),
+                          ('TEST', 'TEST', 'test'),
                           ])
 
 

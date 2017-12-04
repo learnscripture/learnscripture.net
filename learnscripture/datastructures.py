@@ -1,5 +1,5 @@
 
-def make_choices(name, choice_list):
+def make_choices(type_name, choice_list):
     """
     Creates a class containing the given set of choices,
     which are specified as (value, constant name, user presentable title)
@@ -27,7 +27,13 @@ def make_choices(name, choice_list):
                 if n == name:
                     return v
 
-    Choices.__name__ = name
+        @classmethod
+        def check_value(cls, value):
+            if value not in cls.values:
+                raise ValueError("{0} is not a recognised {1}".format(value, type_name))
+            return value
+
+    Choices.__name__ = type_name
 
     for d in choice_list:
         if len(d) == 3:

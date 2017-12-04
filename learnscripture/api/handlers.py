@@ -201,7 +201,7 @@ class ActionCompleteHandler(ApiView):
         old_memory_stage = uvs.memory_stage
 
         # TODO: store StageComplete
-        stage = StageType.get_value_for_name(request.POST['stage'])
+        stage = StageType.check_value(request.POST['stage'])
         if stage == StageType.TEST:
             accuracy = float(request.POST['accuracy'])
         else:
