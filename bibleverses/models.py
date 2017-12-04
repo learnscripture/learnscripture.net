@@ -33,10 +33,10 @@ MAX_VERSE_QUERY_SIZE = 200
 MAX_VERSES_FOR_SINGLE_CHOICE = 4  # See also choose.js
 
 
-# Also defined in learn.js
+# Also defined in learn.ts and Learn.elm
 VerseSetType = make_choices('VerseSetType',
-                            [(1, 'SELECTION', 'Selection'),
-                             (2, 'PASSAGE', 'Passage'),
+                            [('SELECTION', 'SELECTION', 'Selection'),
+                             ('PASSAGE', 'PASSAGE', 'Passage'),
                              ])
 
 StageType = make_choices('StageType',
@@ -561,7 +561,8 @@ class VerseSet(models.Model):
     slug = AutoSlugField(populate_from='name', unique=True)
     description = models.TextField(blank=True)
     additional_info = models.TextField(blank=True)
-    set_type = models.PositiveSmallIntegerField(choices=VerseSetType.choice_list)
+    set_type = models.CharField(max_length=20,
+                                choices=VerseSetType.choice_list)
 
     public = models.BooleanField(default=False)
     breaks = models.TextField(default='', blank=True)

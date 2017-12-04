@@ -64,8 +64,8 @@ var TEST_FIRST_LETTER = 'FIRST_LETTER';
 var TEST_ON_SCREEN = 'ON_SCREEN';
 
 // Defined in VerseSetType
-var SET_TYPE_SELECTION = 1;
-var SET_TYPE_PASSAGE = 2;
+var SET_TYPE_SELECTION = 'SELECTION';
+var SET_TYPE_PASSAGE = 'PASSAGE';
 
 
 // Defined in LearningType:
