@@ -139,7 +139,7 @@ class VersesToLearnHandler(ApiView):
     # NB: all of these fields get posted back to ActionCompleteHandler
     fields = [
         'id',
-        'memory_stage', 'strength', 'first_seen',
+        'memory_stage', 'strength',
         ('verse_set', ['id', 'set_type', 'name', 'get_absolute_url']),
         'localized_reference',
         'needs_testing',
@@ -157,7 +157,46 @@ class VersesToLearnHandler(ApiView):
 
     @require_identity_method
     def get(self, request):
-        return session.get_verse_statuses(request)
+        return session.get_verse_statuses_batch(request).verse_statuses
+
+
+class VersesToLearn2Handler(ApiView):
+    @require_identity_method
+    def get(sef, request):
+        batch = session.get_verse_statuses_batch(request)
+        verse_status_info = make_serializable(
+            batch.verse_statuses,
+            [
+                'id',
+                'memory_stage',
+                'strength',
+                'verse_set_id',
+                'localized_reference',
+                'needs_testing',
+                'text_order',
+                'suggestions',
+                # added in get_verse_statuses:
+                'version_slug',
+                'scoring_text_words',
+                'title_text',
+                'learn_order',
+            ])
+        versions = make_serializable(
+            set(vs.version for vs in batch.verse_statuses),
+            ['full_name', 'short_name', 'slug', 'url', 'text_type']
+        )
+        verse_sets = make_serializable(
+            set(vs.verse_set for vs in batch.verse_statuses),
+            ['id', 'set_type', 'name', 'get_absolute_url']
+        )
+        return dict(
+            verse_statuses=verse_status_info,
+            learning_type=batch.learning_type,
+            versions=list(versions),
+            verse_sets=list(verse_sets),
+            return_to=batch.return_to,
+            max_order_val=batch.max_order_val,
+        )
 
 
 def get_verse_status(data):

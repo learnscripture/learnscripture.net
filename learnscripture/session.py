@@ -1,6 +1,6 @@
-
 from datetime import datetime
 
+import attr
 from app_metrics.utils import metric
 from django.urls import reverse
 from django.utils import timezone
@@ -30,15 +30,18 @@ LearningType = make_choices('LearningType',
 VERSE_STATUS_BATCH_SIZE = 10
 
 
-def get_verse_statuses(request):
-    learning_type = request.session.get('learning_type', None)
-    # Need some backwards compat for existing sessions:
-    if learning_type is None:
-        if request.session.get('revision', False):
-            learning_type = LearningType.LEARNING
-        else:
-            learning_type = LearningType.REVISION
+@attr.s
+class VerseStatusBatch:
+    verse_statuses = attr.ib()
+    max_order_val = attr.ib()
+    learning_type = attr.ib()
+    return_to = attr.ib()
 
+
+def get_verse_statuses_batch(request):
+    # This currently supports both VersesToLearnHandler and
+    # VersesToLearn2Handler. When the former is removed, it can be cleaned up.
+    learning_type = request.session.get('learning_type', None)
     id_data = _get_verse_status_ids(request)
 
     if len(id_data) > 0:
@@ -63,11 +66,13 @@ def get_verse_statuses(request):
                 for order, uvs_id, needs_testing_override in id_batch]
     uvs_dict = request.identity.get_verse_statuses_bulk(bulk_ids)
     retval = []
+    return_to = request.session.get('return_to', reverse('dashboard'))
     for order, uvs_id, needs_testing_override in id_batch:
         try:
             uvs = uvs_dict[uvs_id]
         except KeyError:
             continue
+        uvs.version_slug = uvs.version.slug
         uvs.learn_order = order
         uvs.max_order_val = max_order_val  # Stick the same value on all, for convenience
         if needs_testing_override is not None:
@@ -76,9 +81,14 @@ def get_verse_statuses(request):
         # Decorate UVS with learning_type and return_to because we need it in UI
         # (learn.ts), even though the latter doesn't really belong here
         uvs.learning_type = learning_type
-        uvs.return_to = request.session.get('return_to', reverse('dashboard'))
+        uvs.return_to = return_to
         retval.append(uvs)
-    return retval
+    return VerseStatusBatch(
+        verse_statuses=retval,
+        max_order_val=max_order_val,
+        learning_type=learning_type,
+        return_to=return_to,
+    )
 
 
 def _get_verse_status_ids(request):
