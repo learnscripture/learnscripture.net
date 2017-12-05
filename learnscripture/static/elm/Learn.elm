@@ -1,9 +1,9 @@
 module Learn exposing (..)
 
 import Dict
-import Http
 import Html as H
 import Html.Attributes as A
+import Http
 import Json.Decode as JD
 import Json.Decode.Pipeline as JDP
 import Maybe
@@ -93,26 +93,123 @@ type alias AccountData =
 
 type VerseDataStatus
     = Loading
-    | VersesError
-    | Verses (List Verse)
+    | VersesError Http.Error
+    | Verses VerseBatch
 
 
-type alias Verse =
-    { id : Int
-    , strength : Float
-    , verseSet : Maybe VerseSet
-    , localizedReference : String
-    , needsTesting : Bool
-    , textOrder : Int
-    , version : Version
-    , suggestions : List (List String)
-    , scoringTextWords : List String
-    , titleText : String
-    , learnOrder : Int
-    , maxOrderVal : Int
-    , learningType : LearningType
-    , returnTo : String
+type alias VerseBatchBase a =
+    { a
+        | learningType : LearningType
+        , returnTo : String
+        , maxOrderVal : Int
     }
+
+
+type alias VerseBatchRaw =
+    VerseBatchBase
+        { verseStatusesRaw : List VerseStatusRaw
+        , versions : List Version
+        , verseSets : List VerseSet
+        }
+
+
+
+-- VerseBatchRaw constructor does not get created for us so we make one here for
+-- consistency
+
+
+verseBatchRawCtr :
+    a
+    -> b
+    -> c
+    -> d
+    -> e
+    -> f
+    -> { learningType : a
+       , maxOrderVal : c
+       , returnTo : b
+       , verseSets : f
+       , verseStatusesRaw : d
+       , versions : e
+       }
+verseBatchRawCtr l r m v1 v2 v3 =
+    { learningType = l
+    , returnTo = r
+    , maxOrderVal = m
+    , verseStatusesRaw = v1
+    , versions = v2
+    , verseSets = v3
+    }
+
+
+type alias VerseBatch =
+    VerseBatchBase
+        { verseStatuses : List VerseStatus
+        }
+
+
+type alias Suggestions =
+    List (List String)
+
+
+type alias VerseStatusBase a =
+    { a
+        | id : Int
+        , strength : Float
+        , localizedReference : String
+        , needsTesting : Bool
+        , textOrder : Int
+        , suggestions : Suggestions
+        , scoringTextWords : List String
+        , titleText : String
+        , learnOrder : Int
+    }
+
+
+type alias VerseStatusRaw =
+    VerseStatusBase
+        { verseSetId : Maybe Int
+        , versionSlug : String
+        }
+
+
+
+-- VerseStatusRaw constructor does not get created for us
+
+
+verseStatusRawCtr :
+    Int
+    -> Float
+    -> String
+    -> Bool
+    -> Int
+    -> Suggestions
+    -> List String
+    -> String
+    -> Int
+    -> Maybe Int
+    -> String
+    -> VerseStatusRaw
+verseStatusRawCtr i s l n t s2 s3 t2 l2 v v2 =
+    { id = i
+    , strength = s
+    , localizedReference = l
+    , needsTesting = n
+    , textOrder = t
+    , suggestions = s2
+    , scoringTextWords = s3
+    , titleText = t2
+    , learnOrder = l2
+    , verseSetId = v
+    , versionSlug = v2
+    }
+
+
+type alias VerseStatus =
+    VerseStatusBase
+        { verseSet : Maybe VerseSet
+        , version : Version
+        }
 
 
 type alias VerseSet =
@@ -174,8 +271,8 @@ view model =
             Loading ->
                 loadingDiv
 
-            VersesError ->
-                errorMessage "The items to learn could not be loaded. Please check your internet connection!"
+            VersesError err ->
+                errorMessage ("The items to learn could not be loaded (error message: " ++ toString err ++ ".) Please check your internet connection!")
 
             Verses vd ->
                 showVerses vd model.preferences
@@ -192,10 +289,10 @@ errorMessage msg =
     H.div [ A.class "error" ] [ H.text msg ]
 
 
-showVerses : List Verse -> Preferences -> H.Html msg
-showVerses verses preferences =
+showVerses : VerseBatch -> Preferences -> H.Html msg
+showVerses verseBatch preferences =
     H.div []
-        ((List.map (toString >> H.text >> \x -> H.div [] [ x ]) verses))
+        ((List.map (toString >> H.text >> \x -> H.div [] [ x ]) verseBatch.verseStatuses))
 
 
 makeIcon : String -> H.Html msg
@@ -251,7 +348,7 @@ userDisplayName u =
 
 type Msg
     = LoadVerses
-    | VersesToLearn (Result Http.Error (List Verse))
+    | VersesToLearn (Result Http.Error VerseBatchRaw)
 
 
 update : Msg -> Model -> ( Model, Cmd msg )
@@ -260,21 +357,21 @@ update msg model =
         LoadVerses ->
             ( model, Cmd.none )
 
-        VersesToLearn (Ok verses) ->
-            ( { model | verseData = Verses verses }, Cmd.none )
+        VersesToLearn (Ok verseBatchRaw) ->
+            ( { model | verseData = Verses (normalizeVerseBatch verseBatchRaw) }, Cmd.none )
 
-        VersesToLearn (Err _) ->
-            ( { model | verseData = VersesError }, Cmd.none )
+        VersesToLearn (Err errMsg) ->
+            ( { model | verseData = VersesError errMsg }, Cmd.none )
 
 
 versesToLearnUrl : String
 versesToLearnUrl =
-    "/api/learnscripture/v1/versestolearn/"
+    "/api/learnscripture/v1/versestolearn2/"
 
 
 loadVerses : Cmd Msg
 loadVerses =
-    Http.send VersesToLearn (Http.get versesToLearnUrl versesDecoder)
+    Http.send VersesToLearn (Http.get versesToLearnUrl verseBatchRawDecoder)
 
 
 
@@ -310,9 +407,15 @@ testingMethodDecoder =
         ]
 
 
-versesDecoder : JD.Decoder (List Verse)
-versesDecoder =
-    JD.list verseDecoder
+verseBatchRawDecoder : JD.Decoder VerseBatchRaw
+verseBatchRawDecoder =
+    JDP.decode verseBatchRawCtr
+        |> JDP.required "learning_type" learningTypeDecoder
+        |> JDP.required "return_to" JD.string
+        |> JDP.required "max_order_val" JD.int
+        |> JDP.required "verse_statuses" (JD.list verseStatusRawDecoder)
+        |> JDP.required "versions" (JD.list versionDecoder)
+        |> JDP.required "verse_sets" (JD.list verseSetDecoder)
 
 
 nullOr : JD.Decoder a -> JD.Decoder (Maybe a)
@@ -323,23 +426,20 @@ nullOr decoder =
         ]
 
 
-verseDecoder : JD.Decoder Verse
-verseDecoder =
-    JDP.decode Verse
+verseStatusRawDecoder : JD.Decoder VerseStatusRaw
+verseStatusRawDecoder =
+    JDP.decode verseStatusRawCtr
         |> JDP.required "id" JD.int
         |> JDP.required "strength" JD.float
-        |> JDP.required "verse_set" (nullOr verseSetDecoder)
         |> JDP.required "localized_reference" JD.string
         |> JDP.required "needs_testing" JD.bool
         |> JDP.required "text_order" JD.int
-        |> JDP.required "version" versionDecoder
         |> JDP.required "suggestions" (JD.list (JD.list (JD.string)))
         |> JDP.required "scoring_text_words" (JD.list (JD.string))
         |> JDP.required "title_text" JD.string
         |> JDP.required "learn_order" JD.int
-        |> JDP.required "max_order_val" JD.int
-        |> JDP.required "learning_type" learningTypeDecoder
-        |> JDP.required "return_to" JD.string
+        |> JDP.required "verse_set_id" (nullOr JD.int)
+        |> JDP.required "version_slug" JD.string
 
 
 verseSetDecoder : JD.Decoder VerseSet
@@ -398,7 +498,68 @@ textTypeDecoder =
 learningTypeDecoder : JD.Decoder LearningType
 learningTypeDecoder =
     enumDecoder
-        [ ( "REVISION", Revision)
-        , ( "LEARNING", Learning)
-        , ( "PRACTICE", Practice)
+        [ ( "REVISION", Revision )
+        , ( "LEARNING", Learning )
+        , ( "PRACTICE", Practice )
         ]
+
+
+normalizeVerseBatch : VerseBatchRaw -> VerseBatch
+normalizeVerseBatch vbr =
+    { learningType = vbr.learningType
+    , returnTo = vbr.returnTo
+    , maxOrderVal = vbr.maxOrderVal
+    , verseStatuses = normalizeVerseStatuses vbr
+    }
+
+
+normalizeVerseStatuses : VerseBatchRaw -> List VerseStatus
+normalizeVerseStatuses vrb =
+    let
+        versionDict =
+            vrb.versions |> List.map (\v -> ( v.slug, v )) |> Dict.fromList
+
+        verseSetDict =
+            vrb.verseSets |> List.map (\v -> ( v.id, v )) |> Dict.fromList
+    in
+        List.map
+            (\vs ->
+                { id = vs.id
+                , strength = vs.strength
+                , localizedReference = vs.localizedReference
+                , needsTesting = vs.needsTesting
+                , textOrder = vs.textOrder
+                , suggestions = vs.suggestions
+                , scoringTextWords = vs.scoringTextWords
+                , titleText = vs.titleText
+                , learnOrder = vs.learnOrder
+                , verseSet =
+                    case vs.verseSetId of
+                        Nothing ->
+                            Nothing
+
+                        Just verseSetId ->
+                            Just
+                                (Dict.get verseSetId verseSetDict
+                                    |> (\maybeVs ->
+                                            case maybeVs of
+                                                Nothing ->
+                                                    Debug.crash <| "VerseSet info " ++ toString verseSetId ++ " missing"
+
+                                                Just vs ->
+                                                    vs
+                                       )
+                                )
+                , version =
+                    Dict.get vs.versionSlug versionDict
+                        |> (\maybeV ->
+                                case maybeV of
+                                    Nothing ->
+                                        Debug.crash <| "Version info " ++ vs.versionSlug ++ " missing"
+
+                                    Just v ->
+                                        v
+                           )
+                }
+            )
+            vrb.verseStatusesRaw
