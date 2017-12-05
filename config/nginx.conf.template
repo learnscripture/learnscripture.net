@@ -34,8 +34,8 @@ server {
     ssl_verify_depth       4;
 
     gzip on;
-    gzip_types text/plain application/xml text/css text/javascript application/javascript application/x-javascript;
-    gzip_min_length 1000;
+    gzip_types text/plain application/xml text/css text/javascript application/javascript application/x-javascript text/html application/json;
+    gzip_min_length 500;
     gzip_vary on;
 
     # Deny illegal Host headers
