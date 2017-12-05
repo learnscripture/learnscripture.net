@@ -9,6 +9,7 @@
     <meta name="viewport" content="initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     {% include "learnscripture/favicon_inc.html" %}
+    {% render_bundle 'learn' 'css' 'DEFAULT' attrs='charset="utf-8"' %}
 
   </head>
 
@@ -18,7 +19,6 @@
     {% include "learnscripture/preferences_form_inc.html" %}
     {% include "learnscripture/preferences_data_inc.html" %}
     {# Possibly use 'base' instead of 'learn'? #}
-    {% render_bundle 'learn' 'css' 'DEFAULT' attrs='charset="utf-8"' %}
     {% render_bundle 'learn' 'js' 'DEFAULT' %}
   </body>
 </html>
