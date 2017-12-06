@@ -36,21 +36,16 @@ $(document).ajaxSend(function(event, xhr, settings) {
 });
 
 export const displaySimpleAjaxError = function(errorResponse) {
-    var parts = errorResponse.responseText.split(/\n/);
-    if (parts.length == 1) {
-        return parts[0];
-    } else {
-        var errors = $.parseJSON(parts[1]);
-        var retval = '';
-        for (var key in errors) {
-            retval = retval + errors[key];
-        }
-        return retval;
+    var errors = errorResponse.responseJSON;
+    var retval = '';
+    for (var key in errors) {
+        retval = retval + errors[key];
     }
+    return retval;
 }
 
 export const handleFormValidationErrors = function(form, formPrefix, errorResponse) {
-    var errors = $.parseJSON(errorResponse.responseText.split(/\n/)[1]);
+    var errors = errorResponse.responseJSON;
     var prefix = '';
     if (formPrefix.length > 0) {
         prefix = formPrefix + "-"; // To matche Django form prefices

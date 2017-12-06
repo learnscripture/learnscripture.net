@@ -47,7 +47,8 @@ class rc_factory(object):
         except TypeError:
             raise AttributeError(attr)
 
-        return HttpResponse(r, content_type='text/plain', status=c)
+        return lambda content: HttpResponse(r + "\n\n" + content,
+                                            content_type='text/plain', status=c)
 
 
 rc = rc_factory()
@@ -61,7 +62,7 @@ def require_preexisting_identity(view_func):
     def view(request, *args, **kwargs):
         # Assumes IdentityMiddleware
         if not hasattr(request, 'identity'):
-            return rc.BAD_REQUEST
+            return rc.BAD_REQUEST("Identity required")
         return view_func(request, *args, **kwargs)
     return view
 
@@ -77,7 +78,7 @@ def require_preexisting_account(view_func):
     def view(request, *args, **kwargs):
         # Assumes IdentityMiddleware
         if not hasattr(request, 'identity') or request.identity.account_id is None:
-            return rc.BAD_REQUEST
+            return rc.BAD_REQUEST("Account required")
         return view_func(request, *args, **kwargs)
     return view
 
@@ -86,9 +87,9 @@ require_preexisting_account_m = method_decorator(require_preexisting_account)
 
 
 def validation_error_response(errors):
-    resp = rc.BAD_REQUEST
-    resp.write("\n" + json.dumps(errors))
-    return resp
+    return HttpResponse(json.dumps(errors),
+                        content_type='application/json',
+                        status=400)
 
 
 def get_instance_attr(instance, attr_name):
@@ -183,14 +184,14 @@ class ActionCompleteHandler(ApiView):
         # Input here is a trimmed down version of what was sent by VersesToLearnHandler
         verse_status = get_verse_status(request.POST)
         if verse_status is None:
-            return rc.BAD_REQUEST
+            return rc.BAD_REQUEST("verse_status required")
 
         # Get everything we need, also applying security:
         try:
             uvs_id = verse_status['id']
             uvs = request.identity.verse_statuses.get(id=uvs_id)
         except (KeyError, UserVerseStatus.DoesNotExist):
-            return rc.BAD_REQUEST
+            return rc.BAD_REQUEST("valid verse_status id for user required")
 
         # If just practising, just remove the VS from the session.
         practice = request.POST.get('practice', 'false') == 'true'
@@ -212,7 +213,7 @@ class ActionCompleteHandler(ApiView):
 
         if action_change is None:
             # implies client error
-            return rc.BAD_REQUEST
+            return rc.BAD_REQUEST("action_change required")
 
         action_logs = identity.award_action_points(uvs.localized_reference, uvs.scoring_text,
                                                    old_memory_stage,
@@ -359,14 +360,14 @@ class VerseFind(ApiView):
             version_slug = request.GET['version_slug']
             passage_mode = request.GET.get('passage_mode', '') == '1'
         except KeyError:
-            return rc.BAD_REQUEST
+            return rc.BAD_REQUEST("Parameters q, version_slug, passage_mode required")
 
         q = q.replace('—', '-').replace('–', '-')
 
         try:
             version = bible_versions_for_request(request).get(slug=version_slug)
         except TextVersion.DoesNotExist:
-            return rc.BAD_REQUEST
+            return rc.BAD_REQUEST("Valid version required")
 
         try:
             results = quick_find(q, version,
@@ -413,7 +414,7 @@ class CheckDuplicatePassageSet(ApiView):
             start_reference = request.GET['start_reference']
             end_reference = request.GET['end_reference']
         except KeyError:
-            return rc.BAD_REQUEST
+            return rc.BAD_REQUEST("start_reference and end_reference required")
 
         language_code = default_bible_version_for_request(request).language_code
         start_internal_reference = internalize_localized_reference(language_code, start_reference)
@@ -467,12 +468,12 @@ class AddComment(ApiView):
             try:
                 event_id = int(request.POST['event_id'])
             except ValueError:
-                return rc.BAD_REQUEST
+                return rc.BAD_REQUEST("Integer event_id required")
 
             try:
                 event = Event.objects.get(id=event_id)
             except Event.DoesNotExist:
-                return rc.BAD_REQUEST
+                return rc.BAD_REQUEST("Existing event_id required")
 
             comment = event.add_comment(author=account,
                                         message=message)
@@ -481,12 +482,12 @@ class AddComment(ApiView):
             try:
                 group_id = int(request.POST['group_id'])
             except ValueError:
-                return rc.BAD_REQUEST
+                return rc.BAD_REQUEST("Integer group_id required")
 
             try:
                 group = Group.objects.visible_for_account(account).get(id=group_id)
             except Group.DoesNotExist:
-                return rc.BAD_REQUEST
+                return rc.BAD_REQUEST("Existing group_id required")
 
             comment = group.add_comment(author=account,
                                         message=message)
@@ -499,7 +500,7 @@ class HideComment(ApiView):
     @require_preexisting_account_m
     def post(self, request):
         if not request.identity.account.is_moderator:
-            return rc.FORBIDDEN
+            return rc.FORBIDDEN("Moderator account required")
         Comment.objects.filter(id=int(request.POST['comment_id'])).update(hidden=True)
         return {}
 
