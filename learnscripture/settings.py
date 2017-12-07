@@ -564,6 +564,7 @@ if DEBUG:
 if DEBUG:
     # Delete all but 20 most recent entries, to keep things trim
     for f in sorted(glob.glob("./learnscripture/static/webpack_bundles/*.dev.*"),
+                    reverse=True,
                     key=os.path.getctime)[20:]:
         os.unlink(f)
 
