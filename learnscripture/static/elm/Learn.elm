@@ -61,7 +61,7 @@ init flags =
 type alias Model =
     { preferences : Preferences
     , user : User
-    , verseData : VerseDataStatus
+    , verseData : VerseData
     }
 
 
@@ -91,17 +91,39 @@ type alias AccountData =
     }
 
 
-type VerseDataStatus
+type VerseData
     = Loading
     | VersesError Http.Error
-    | Verses VerseBatch
+    | Verses VerseStore
+
+
+type alias LearnOrder =
+    Int
+
+
+type alias UvsId =
+    Int
+
+
+type alias Url =
+    String
+
+
+type alias VerseStore =
+    { verseStatuses : Dict.Dict LearnOrder VerseStatus
+    , learningType : LearningType
+    , returnTo : Url
+    , maxOrderVal : LearnOrder
+    , currentOrderVal : LearnOrder
+    , seen : List UvsId
+    }
 
 
 type alias VerseBatchBase a =
     { a
         | learningType : LearningType
-        , returnTo : String
-        , maxOrderVal : Int
+        , returnTo : Url
+        , maxOrderVal : LearnOrder
     }
 
 
@@ -162,7 +184,7 @@ type alias VerseStatusBase a =
         , suggestions : Suggestions
         , scoringTextWords : List String
         , titleText : String
-        , learnOrder : Int
+        , learnOrder : LearnOrder
     }
 
 
@@ -274,8 +296,8 @@ view model =
             VersesError err ->
                 errorMessage ("The items to learn could not be loaded (error message: " ++ toString err ++ ".) Please check your internet connection!")
 
-            Verses vd ->
-                showVerses vd model.preferences
+            Verses vs ->
+                showVerses vs model.preferences
         ]
 
 
@@ -289,10 +311,10 @@ errorMessage msg =
     H.div [ A.class "error" ] [ H.text msg ]
 
 
-showVerses : VerseBatch -> Preferences -> H.Html msg
-showVerses verseBatch preferences =
+showVerses : VerseStore -> Preferences -> H.Html msg
+showVerses verseStore preferences =
     H.div []
-        ((List.map (toString >> H.text >> \x -> H.div [] [ x ]) verseBatch.verseStatuses))
+        [ H.text <| toString verseStore ]
 
 
 makeIcon : String -> H.Html msg
@@ -358,10 +380,127 @@ update msg model =
             ( model, Cmd.none )
 
         VersesToLearn (Ok verseBatchRaw) ->
-            ( { model | verseData = Verses (normalizeVerseBatch verseBatchRaw) }, Cmd.none )
+            let
+                batchStore =
+                    normalizeVerseBatch verseBatchRaw |> verseBatchToStore
+
+                newStore =
+                    case model.verseData of
+                        Verses verseStore ->
+                            mergeStores verseStore batchStore
+
+                        _ ->
+                            batchStore
+            in
+                ( { model
+                    | verseData = Verses newStore
+                  }
+                , Cmd.none
+                )
 
         VersesToLearn (Err errMsg) ->
             ( { model | verseData = VersesError errMsg }, Cmd.none )
+
+
+
+{- Update helpers -}
+
+
+normalizeVerseBatch : VerseBatchRaw -> VerseBatch
+normalizeVerseBatch vbr =
+    { learningType = vbr.learningType
+    , returnTo = vbr.returnTo
+    , maxOrderVal = vbr.maxOrderVal
+    , verseStatuses = normalizeVerseStatuses vbr
+    }
+
+
+normalizeVerseStatuses : VerseBatchRaw -> List VerseStatus
+normalizeVerseStatuses vrb =
+    let
+        versionDict =
+            vrb.versions |> List.map (\v -> ( v.slug, v )) |> Dict.fromList
+
+        verseSetDict =
+            vrb.verseSets |> List.map (\v -> ( v.id, v )) |> Dict.fromList
+    in
+        List.map
+            (\vs ->
+                { id = vs.id
+                , strength = vs.strength
+                , localizedReference = vs.localizedReference
+                , needsTesting = vs.needsTesting
+                , textOrder = vs.textOrder
+                , suggestions = vs.suggestions
+                , scoringTextWords = vs.scoringTextWords
+                , titleText = vs.titleText
+                , learnOrder = vs.learnOrder
+                , verseSet =
+                    case vs.verseSetId of
+                        Nothing ->
+                            Nothing
+
+                        Just verseSetId ->
+                            Just
+                                (Dict.get verseSetId verseSetDict
+                                    |> (\maybeVs ->
+                                            case maybeVs of
+                                                Nothing ->
+                                                    Debug.crash <| "VerseSet info " ++ toString verseSetId ++ " missing"
+
+                                                Just vs ->
+                                                    vs
+                                       )
+                                )
+                , version =
+                    Dict.get vs.versionSlug versionDict
+                        |> (\maybeV ->
+                                case maybeV of
+                                    Nothing ->
+                                        Debug.crash <| "Version info " ++ vs.versionSlug ++ " missing"
+
+                                    Just v ->
+                                        v
+                           )
+                }
+            )
+            vrb.verseStatusesRaw
+
+
+verseBatchToStore : VerseBatch -> VerseStore
+verseBatchToStore batch =
+    let
+        batchDict =
+            Dict.fromList (List.map (\vs -> ( vs.learnOrder, vs )) batch.verseStatuses)
+
+        minOrderVal =
+            case List.minimum <| List.map .learnOrder batch.verseStatuses of
+                Nothing ->
+                    0
+
+                -- should never happen in practice
+                Just m ->
+                    m
+    in
+        { verseStatuses = batchDict
+        , learningType = batch.learningType
+        , returnTo = batch.returnTo
+        , maxOrderVal = batch.maxOrderVal
+        , currentOrderVal = minOrderVal
+        , seen = []
+        }
+
+
+mergeStores : VerseStore -> VerseStore -> VerseStore
+mergeStores initialVerseStore newVerseStore =
+    { initialVerseStore
+        | verseStatuses =
+            Dict.union newVerseStore.verseStatuses initialVerseStore.verseStatuses
+    }
+
+
+
+{- API calls -}
 
 
 versesToLearnUrl : String
@@ -502,64 +641,3 @@ learningTypeDecoder =
         , ( "LEARNING", Learning )
         , ( "PRACTICE", Practice )
         ]
-
-
-normalizeVerseBatch : VerseBatchRaw -> VerseBatch
-normalizeVerseBatch vbr =
-    { learningType = vbr.learningType
-    , returnTo = vbr.returnTo
-    , maxOrderVal = vbr.maxOrderVal
-    , verseStatuses = normalizeVerseStatuses vbr
-    }
-
-
-normalizeVerseStatuses : VerseBatchRaw -> List VerseStatus
-normalizeVerseStatuses vrb =
-    let
-        versionDict =
-            vrb.versions |> List.map (\v -> ( v.slug, v )) |> Dict.fromList
-
-        verseSetDict =
-            vrb.verseSets |> List.map (\v -> ( v.id, v )) |> Dict.fromList
-    in
-        List.map
-            (\vs ->
-                { id = vs.id
-                , strength = vs.strength
-                , localizedReference = vs.localizedReference
-                , needsTesting = vs.needsTesting
-                , textOrder = vs.textOrder
-                , suggestions = vs.suggestions
-                , scoringTextWords = vs.scoringTextWords
-                , titleText = vs.titleText
-                , learnOrder = vs.learnOrder
-                , verseSet =
-                    case vs.verseSetId of
-                        Nothing ->
-                            Nothing
-
-                        Just verseSetId ->
-                            Just
-                                (Dict.get verseSetId verseSetDict
-                                    |> (\maybeVs ->
-                                            case maybeVs of
-                                                Nothing ->
-                                                    Debug.crash <| "VerseSet info " ++ toString verseSetId ++ " missing"
-
-                                                Just vs ->
-                                                    vs
-                                       )
-                                )
-                , version =
-                    Dict.get vs.versionSlug versionDict
-                        |> (\maybeV ->
-                                case maybeV of
-                                    Nothing ->
-                                        Debug.crash <| "Version info " ++ vs.versionSlug ++ " missing"
-
-                                    Just v ->
-                                        v
-                           )
-                }
-            )
-            vrb.verseStatusesRaw
