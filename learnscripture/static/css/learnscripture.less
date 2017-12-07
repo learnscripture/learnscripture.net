@@ -1156,6 +1156,12 @@ body .action-log {
     }
 }
 
+#id-hint-btn, #id-help-btn, #id-more-practice-btn, .word {
+    // For Internet Explorer, remove 300ms delays on "click" event when touch
+    // actions are used.
+    touch-action: none;
+}
+
 // From Twitter Bootstrap 2
 .caret {
     display: inline-block;
