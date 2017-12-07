@@ -39,8 +39,8 @@ class VerseStatusBatch:
 
 
 def get_verse_statuses_batch(request):
-    # This currently supports both VersesToLearnHandler and
-    # VersesToLearn2Handler. When the former is removed, it can be cleaned up.
+    # This currently supports both VersesToLearnHandler/learn.ts and
+    # VersesToLearn2Handler/Learn.elm. When the former is removed, it can be cleaned up.
     learning_type = request.session.get('learning_type', None)
     id_data = _get_verse_status_ids(request)
 
