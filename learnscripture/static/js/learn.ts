@@ -53,7 +53,6 @@ var WORD_TOGGLE_HIDE_ALL = 2;
 var LOADING_QUEUE_BUFFER_SIZE = 3;
 
 var scrollingTimeoutId = null;
-var fastEventName = 'touchstart mousedown';
 
 // Defined in StageType:
 var STAGE_TYPE_TEST = 'TEST';
@@ -445,7 +444,7 @@ var testComplete = function() {
         $('#id-next-verse-btn').addClass('primary');
     }
 
-    fastEventBind($('#id-more-practice-btn').unbind(), function(ev) {
+    $('#id-more-practice-btn').unbind().bind('click', function(ev) {
         if (accuracyPercent < 20) {
             currentStageList = chooseStageListForStrength(0);
         } else if (accuracyPercent < 70) {
@@ -637,11 +636,7 @@ var finish = function() {
 
 var pressPrimaryButton = function() {
     var $btn = $('input.primary:visible:not([disabled])');
-    if ($btn.hasClass('fastevent')) {
-        $btn.trigger(fastEventName);
-    } else {
-        $btn.click();
-    }
+    $btn.click();
 };
 
 // =========== Different stages =========
@@ -1110,8 +1105,9 @@ $.extend(OnScreenTestingStrategy, {
         }
         $wl.html(html);
         var that = this;
-        fastEventBind($wl.find('.word'),
-            function(ev) { that.handleButtonClick(ev); })
+        $wl.find('.word').bind('click', function(ev) {
+            that.handleButtonClick(ev);
+        });
         $c.show();
     },
 
@@ -1668,7 +1664,7 @@ var markupVerse = function(verseStatus) {
 
     }
 
-    $('.current-verse .word').bind('tap click', function(ev) {
+    $('.current-verse .word').bind('click', function(ev) {
         if (!currentStage.testMode) {
             toggleWord($(this));
         }
@@ -1907,13 +1903,6 @@ var resetProgress = function(ev) {
 
 
 // === Setup and wiring ===
-var fastEventBind = function($elem, callback) {
-    // This is used for buttons that should respond quickly, and won't if we
-    // use 'click' for most touch screen devices (which often add 300ms
-    // delay).
-    $elem.addClass('fastevent').bind(fastEventName, callback);
-    return $elem;
-};
 
 var setUpLearningControls = function() {
     setUpAudio();
@@ -1942,17 +1931,12 @@ var setUpLearningControls = function() {
     inputBox.bind('input', inputBoxInput);
     inputBox.bind('keydown', inputBoxKeyDown);
     testingStatus = $('#id-testing-status');
-    // We don't use fast event (touchstart) for next/back/finish buttons,
-    // because 1) they can cause movement of items on the page 2) they are
-    // right below the bible version button, which combine to mean that if
-    // we use touchstart, the user ends up triggering the version select by
-    // mistake.
     $('#id-next-btn').bind('click', next).show();
     $('#id-back-btn').bind('click', back).show();
     $('#id-next-verse-btn').bind('click', nextVerse);
     $('#id-context-next-verse-btn').bind('click', markReadAndNextVerse);
 
-    fastEventBind($('#id-hint-btn'), function(ev) {
+    $('#id-hint-btn').bind('click', function(ev) {
         ev.preventDefault();
         // Just disabling the button doesn't seem to be enough to stop event
         // handler firing on iOS
@@ -1960,7 +1944,7 @@ var setUpLearningControls = function() {
             testingMethodStrategy.getHint();
         }
     });
-    fastEventBind($('#id-help-btn'), function(ev) {
+    $('#id-help-btn').bind('click', function(ev) {
         if (preferences.enableAnimations) {
             $('#id-help').toggle('fast');
         } else {
