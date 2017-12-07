@@ -53,7 +53,7 @@ var WORD_TOGGLE_HIDE_ALL = 2;
 var LOADING_QUEUE_BUFFER_SIZE = 3;
 
 var scrollingTimeoutId = null;
-var fastEventName = isTouchDevice() ? 'touchstart' : 'mousedown';
+var fastEventName = 'touchstart mousedown';
 
 // Defined in StageType:
 var STAGE_TYPE_TEST = 'TEST';
