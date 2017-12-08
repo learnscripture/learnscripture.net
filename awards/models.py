@@ -457,23 +457,23 @@ class ConsistentLearnerAward(TimeBasedAward):
 
 AwardType = make_class_enum(
     'AwardType',
-    [(0, 'STUDENT', 'Student', StudentAward),
-     (1, 'MASTER', 'Master', MasterAward),
-     (2, 'SHARER', 'Sharer', SharerAward),
-     (3, 'TREND_SETTER', 'Trend setter', TrendSetterAward),
-     (4, 'ACE', 'Ace', AceAward),
-     (5, 'RECRUITER', 'Recruiter', RecruiterAward),
-     (6, 'HACKER', 'Hacker', HackerAward),
-     (7, 'WEEKLY_CHAMPION', 'Weekly champion', WeeklyChampion),  # Removed
-     (8, 'REIGNING_WEEKLY_CHAMPION', 'Reigning weekly champion', ReigningWeeklyChampion),  # Removed
-     (9, 'ADDICT', 'Addict', AddictAward),
-     (10, 'ORGANIZER', 'Organizer', OrganizerAward),
-     (11, 'CONSISTENT_LEARNER', 'Consistent learner', ConsistentLearnerAward),
+    [('STUDENT', 'Student', StudentAward),
+     ('MASTER', 'Master', MasterAward),
+     ('SHARER', 'Sharer', SharerAward),
+     ('TREND_SETTER', 'Trend setter', TrendSetterAward),
+     ('ACE', 'Ace', AceAward),
+     ('RECRUITER', 'Recruiter', RecruiterAward),
+     ('HACKER', 'Hacker', HackerAward),
+     ('WEEKLY_CHAMPION', 'Weekly champion', WeeklyChampion),  # Removed
+     ('REIGNING_WEEKLY_CHAMPION', 'Reigning weekly champion', ReigningWeeklyChampion),  # Removed
+     ('ADDICT', 'Addict', AddictAward),
+     ('ORGANIZER', 'Organizer', OrganizerAward),
+     ('CONSISTENT_LEARNER', 'Consistent learner', ConsistentLearnerAward),
      ])
 
 
 class Award(models.Model):
-    award_type = models.PositiveSmallIntegerField(choices=AwardType.choice_list)
+    award_type = models.CharField(max_length=40, choices=AwardType.choice_list)
     level = models.PositiveSmallIntegerField()
     account = models.ForeignKey(Account, on_delete=models.CASCADE,
                                 related_name='awards')
