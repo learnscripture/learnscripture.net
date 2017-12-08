@@ -38,9 +38,8 @@ class EventLogic(object):
     """
     Encapsulates logic about different types of events.
 
-    This is used instead of having Event subclasses, which usually leads to
-    performance problems. Event stores data, and all polymorphism behaviour is
-    defined in EventLogic.
+    Event stores data, and all polymorphic behaviour is defined in EventLogic.
+
     """
     weight = 10
 
@@ -57,6 +56,10 @@ class EventLogic(object):
          - message_html - passed on to Event()
          - anything else - stored in Event.event_data,
            so must be simple types that can be serialised to JSON.
+
+        The EventLogic subclasses `__init__` methods should
+        pass everything needed by their get_message_html()
+        method into Event.event_data, via a super().__init__() calls.
         """
         account = kwargs.pop('account', None)
         message_html = kwargs.pop('message_html', '')
@@ -97,6 +100,10 @@ class NewAccountEvent(EventLogic):
         super(NewAccountEvent, self).__init__(account=account)
         self.event.message_html = "signed up to LearnScripture.net"
 
+    @classmethod
+    def get_message_html(cls, event):
+        return "signed up to LearnScripture.net"
+
 
 class AwardReceivedEvent(EventLogic):
 
@@ -104,9 +111,24 @@ class AwardReceivedEvent(EventLogic):
     weight = 12
 
     def __init__(self, award=None):
+        from awards.models import AwardType
         super(AwardReceivedEvent, self).__init__(award_id=award.id,
+                                                 award_type=award.award_type,
+                                                 award_level=award.level,
+                                                 temporary_award=award.award_type in [AwardType.REIGNING_WEEKLY_CHAMPION],
                                                  account=award.account)
         self.event.message_html = "earned " + award_link(award)
+
+    @classmethod
+    def get_message_html(cls, event):
+        from awards.models import AwardType
+        award_type = event.event_data['award_type']
+        award_level = event.event_data['award_level']
+        award_class = AwardType.classes[award_type]
+        award_detail = award_class(level=award_level)
+        return format_html('earned <a href="{0}">{1}</a>',
+                           reverse('award', args=(award_class.slug(),)),
+                           award_detail.short_description())
 
 
 class AwardLostEvent(EventLogic):
@@ -115,19 +137,41 @@ class AwardLostEvent(EventLogic):
 
     def __init__(self, award=None):
         super(AwardLostEvent, self).__init__(award_id=award.id,
+                                             award_type=award.award_type,
                                              account=award.account)
         self.event.message_html = "lost " + award_link(award)
+
+    @classmethod
+    def get_message_html(cls, event):
+        from awards.models import AwardType
+        award_type = event.event_data['award_type']
+        award_level = event.event_data['award_level']
+        award_class = AwardType.classes[award_type]
+        award_detail = award_class(level=award_level)
+        return format_html('lost <a href="{0}">{1}</a>',
+                           reverse('award', args=(award_class.slug(),)),
+                           award_detail.short_description())
 
 
 class VerseSetCreatedEvent(EventLogic):
 
     def __init__(self, verse_set=None):
         super(VerseSetCreatedEvent, self).__init__(verse_set_id=verse_set.id,
+                                                   verse_set_slug=verse_set.slug,
+                                                   verse_set_name=verse_set.name,
                                                    account=verse_set.created_by)
         self.event.message_html = format_html(
             'created new verse set <a href="{0}">{1}</a>',
             reverse('view_verse_set', args=(verse_set.slug,)),
             verse_set.name
+        )
+
+    @classmethod
+    def get_message_html(cls, event):
+        return format_html(
+            'created new verse set <a href="{0}">{1}</a>',
+            reverse('view_verse_set', args=(event.event_data['verse_set_slug'],)),
+            event.event_data['verse_set_name'],
         )
 
 
@@ -137,11 +181,21 @@ class StartedLearningVerseSetEvent(EventLogic):
 
     def __init__(self, verse_set=None, chosen_by=None):
         super(StartedLearningVerseSetEvent, self).__init__(verse_set_id=verse_set.id,
+                                                           verse_set_slug=verse_set.slug,
+                                                           verse_set_name=verse_set.name,
                                                            account=chosen_by)
         self.event.message_html = format_html(
             'started learning <a href="{0}">{1}</a>',
             reverse('view_verse_set', args=(verse_set.slug,)),
             verse_set.name
+        )
+
+    @classmethod
+    def get_message_html(cls, event):
+        return format_html(
+            'started learning <a href="{0}">{1}</a>',
+            reverse('view_verse_set', args=(event.event_data['verse_set_slug'],)),
+            event.event_data['verse_set_name']
         )
 
 
@@ -153,6 +207,12 @@ class PointsMilestoneEvent(EventLogic):
             'reached {0} points', intcomma(points)
         )
 
+    @classmethod
+    def get_message_html(cls, event):
+        return format_html(
+            'reached {0} points', intcomma(event.event_data['points'])
+        )
+
 
 class VersesStartedMilestoneEvent(EventLogic):
     def __init__(self, account=None, verses_started=None):
@@ -160,6 +220,12 @@ class VersesStartedMilestoneEvent(EventLogic):
                                                           verses_started=verses_started)
         self.event.message_html = format_html(
             'reached {0} verses started', intcomma(verses_started)
+        )
+
+    @classmethod
+    def get_message_html(cls, event):
+        return format_html(
+            'reached {0} verses started', intcomma(event.event_data['verses_started'])
         )
 
 
@@ -176,21 +242,37 @@ class GroupJoinedEvent(GroupRelatedMixin, EventLogic):
 
     def __init__(self, account=None, group=None):
         super(GroupJoinedEvent, self).__init__(account=account,
+                                               group_name=group.name,
+                                               group_slug=group.slug,
                                                group_id=group.id)
 
         self.event.message_html = format_html(
             "joined group {0}", group_link(group)
         )
 
+    @classmethod
+    def get_message_html(cls, event):
+        return format_html('joined group <a href="{0}">{1}</a>',
+                           reverse('group', args=(event.event_data['group_slug'],)),
+                           event.event_data['group_name'])
+
 
 class GroupCreatedEvent(GroupRelatedMixin, EventLogic):
 
     def __init__(self, account=None, group=None):
         super(GroupCreatedEvent, self).__init__(account=account,
+                                                group_name=group.name,
+                                                group_slug=group.slug,
                                                 group_id=group.id)
         self.event.message_html = format_html(
             "created group {0}", group_link(group)
         )
+
+    @classmethod
+    def get_message_html(cls, event):
+        return format_html('created group <a href="{0}">{1}</a>',
+                           reverse('group', args=(event.event_data['group_slug'],)),
+                           event.event_data['group_name'])
 
 
 class VersesFinishedMilestoneEvent(EventLogic):
@@ -201,11 +283,19 @@ class VersesFinishedMilestoneEvent(EventLogic):
             "reached {0} verses finished", intcomma(verses_finished)
         )
 
+    @classmethod
+    def get_message_html(cls, event):
+        return format_html(
+            "reached {0} verses finished", intcomma(event.event_data['verses_finished'])
+        )
+
 
 class StartedLearningCatechismEvent(EventLogic):
 
     def __init__(self, account=None, catechism=None):
         super(StartedLearningCatechismEvent, self).__init__(account=account,
+                                                            catechism_slug=catechism.slug,
+                                                            catechism_name=catechism.full_name,
                                                             catechism_id=catechism.id)
         self.event.message_html = format_html(
             'started learning <a href="{0}">{1}</a>',
@@ -213,12 +303,20 @@ class StartedLearningCatechismEvent(EventLogic):
             catechism.full_name,
         )
 
+    @classmethod
+    def get_message_html(cls, event):
+        return format_html(
+            'started learning <a href="{0}">{1}</a>',
+            reverse('view_catechism', args=(event.event_data['catechism_slug'],)),
+            event.event_data['catechism_name'],
+        )
+
 
 class NewCommentEvent(EventLogic):
 
     weight = 11
 
-    # weight for comments on group walls, where the user is a member
+    # weight for comments on group walls where the user is a member
     group_wall_weight = 20
 
     def __init__(self, account=None, comment=None, parent_event=None):
@@ -226,6 +324,12 @@ class NewCommentEvent(EventLogic):
                       comment_id=comment.id)
         if comment.group_id is not None:
             kwargs['group_id'] = comment.group_id
+            kwargs['group_slug'] = comment.group.slug
+            kwargs['group_name'] = comment.group.name
+        if comment.event_id is not None:
+            kwargs['parent_event_id'] = comment.event.id
+            kwargs['parent_event_account_id'] = comment.event.account.id
+            kwargs['parent_event_account_username'] = comment.event.account.username
         super(NewCommentEvent, self).__init__(**kwargs)
         self.event.message_html = format_html(
             'posted a <a href="{0}">comment</a> on {1}',
@@ -244,6 +348,30 @@ class NewCommentEvent(EventLogic):
     @classmethod
     def accepts_comments(cls, event):
         return False
+
+    @classmethod
+    def get_message_html(cls, event):
+        from comments.models import Comment
+        # In theory we could write this code without loading the comment from
+        # the DB, but replicating Comment.get_absolute_url() gets complicated.
+        comment = Comment.objects.get(id=event.event_data['comment_id'])
+        if 'parent_event_id' in event.event_data:
+            return format_html(
+                """posted a <a href="{0}">comment</a> on <a href="{1}">{2}</a>'s activity""",
+                comment.get_absolute_url(),
+                reverse('user_stats', args=(event.event_data['parent_event_account_username'],)),
+                event.event_data['parent_event_account_username'])
+
+        elif 'group_id' in event.event_data:
+            return format_html(
+                """posted a <a href="{0}">comment</a> on <a href="{1}">{2}</a>'s wall""",
+                comment.get_absolute_url(),
+                reverse('group', args=(event.event_data['group_slug'],)),
+                event.event_data['group_name'])
+
+        else:
+            raise AssertionError("Expected one of parent_event_id or group_id for event {0}"
+                                 .format(event.id))
 
 
 EventType = make_class_enum(
@@ -347,6 +475,9 @@ class Event(models.Model):
     url = models.CharField(max_length=255, blank=True)
 
     objects = EventManager()
+
+    def get_message_html(self):
+        return self.event_logic.get_message_html(self)
 
     def __repr__(self):
         return "<Event id=%s type=%s>" % (self.id, self.event_type)
