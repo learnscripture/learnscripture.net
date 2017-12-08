@@ -579,4 +579,8 @@ class Event(models.Model):
             return None
 
     def ordered_comments(self):
-        return self.comments.all().order_by('created')
+        if hasattr(self, '_prefetched_objects_cache'):
+            if 'comments' in self._prefetched_objects_cache:
+                return sorted(self._prefetched_objects_cache['comments'],
+                              key=lambda c: c.created)
+        return self.comments.all().order_by('created').select_related('author')
