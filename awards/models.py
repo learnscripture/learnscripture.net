@@ -64,8 +64,9 @@ class AwardLogic(object):
     def award_type(cls):
         return cls.enum_val  # set by make_class_enum
 
-    def slug(self):
-        return AwardType.name_for_value[self.award_type].lower().replace('_', '-')
+    @classmethod
+    def slug(cls):
+        return AwardType.name_for_value[cls.award_type].lower().replace('_', '-')
 
     @classproperty
     @classmethod
@@ -349,8 +350,9 @@ class HackerAward(SingleLevelAward):
                 "This award comes with the risk of getting your points reset to zero and/or being kicked out :-)")
 
 
-class ReigningWeeklyChampion(AwardLogic):
+class ReigningWeeklyChampion(SingleLevelAward):
     removed = True
+    POINTS = 0
 
 
 class TimeBasedAward(MultiLevelPointsMixin, AwardLogic):
@@ -387,6 +389,10 @@ class TimeBasedAward(MultiLevelPointsMixin, AwardLogic):
 
 class WeeklyChampion(AwardLogic):
     removed = True
+    has_levels = True
+
+    def __init__(self, level=None):
+        self.level = level
 
 
 class AddictAward(SingleLevelAward):
