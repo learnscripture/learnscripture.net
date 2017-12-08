@@ -52,13 +52,16 @@ def make_class_enum(enum_name, choice_list):
     returns an enum class representing the choices, and a dictionary mapping
     choices to classes.
 
+    If 3-tuples are passed, the first value will be used for both val and
+    constant name
+
     Also adds the choice number to the class as attribute 'enum_val'
     """
 
     enum = make_choices(enum_name,
-                        [(val, name, title)
-                         for (val, name, title, cls) in choice_list])
-    enum.classes = dict((val, cls) for (val, name, title, cls) in choice_list)
+                        [tuple(list(i)[:-1])
+                         for i in choice_list])
+    enum.classes = dict((i[0], i[-1]) for i in choice_list)
     for val, cls in enum.classes.items():
         cls.enum_val = val
     return enum
