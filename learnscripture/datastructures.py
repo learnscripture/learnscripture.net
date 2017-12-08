@@ -11,6 +11,8 @@ def make_choices(name, choice_list):
     >>> Colors.RED
     1
 
+    If 2-tuples are passed, the first value will be used for both
+    value and constant name.
     """
     class Choices(object):
         names = []
@@ -27,7 +29,12 @@ def make_choices(name, choice_list):
 
     Choices.__name__ = name
 
-    for (v, name, title) in choice_list:
+    for d in choice_list:
+        if len(d) == 3:
+            v, name, title = d
+        else:
+            name, title = d
+            v = name
         assert name.upper() == name
         setattr(Choices, name, v)
         Choices.values.append(v)
