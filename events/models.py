@@ -253,19 +253,19 @@ class NewCommentEvent(EventLogic):
 
 EventType = make_class_enum(
     'EventType',
-    [(1, 'GENERAL', 'General', GeneralEvent),  # No longer used
-     (2, 'NEW_ACCOUNT', 'New account', NewAccountEvent),
-     (3, 'AWARD_RECEIVED', 'Award received', AwardReceivedEvent),
-     (4, 'POINTS_MILESTONE', 'Points milestone', PointsMilestoneEvent),
-     (5, 'VERSES_STARTED_MILESTONE', 'Verses started milestone', VersesStartedMilestoneEvent),
-     (6, 'VERSES_FINISHED_MILESTONE', 'Verses finished milestone', VersesFinishedMilestoneEvent),
-     (7, 'VERSE_SET_CREATED', 'Verse set created', VerseSetCreatedEvent),
-     (8, 'STARTED_LEARNING_VERSE_SET', 'Started learning a verse set', StartedLearningVerseSetEvent),
-     (9, 'AWARD_LOST', 'Award lost', AwardLostEvent),
-     (10, 'GROUP_JOINED', 'Group joined', GroupJoinedEvent),
-     (11, 'GROUP_CREATED', 'Group created', GroupCreatedEvent),
-     (12, 'STARTED_LEARNING_CATECHISM', 'Started learning catechism', StartedLearningCatechismEvent),
-     (13, 'NEW_COMMENT', 'New comment', NewCommentEvent),
+    [('GENERAL', 'General', GeneralEvent),  # No longer used
+     ('NEW_ACCOUNT', 'New account', NewAccountEvent),
+     ('AWARD_RECEIVED', 'Award received', AwardReceivedEvent),
+     ('POINTS_MILESTONE', 'Points milestone', PointsMilestoneEvent),
+     ('VERSES_STARTED_MILESTONE', 'Verses started milestone', VersesStartedMilestoneEvent),
+     ('VERSES_FINISHED_MILESTONE', 'Verses finished milestone', VersesFinishedMilestoneEvent),
+     ('VERSE_SET_CREATED', 'Verse set created', VerseSetCreatedEvent),
+     ('STARTED_LEARNING_VERSE_SET', 'Started learning a verse set', StartedLearningVerseSetEvent),
+     ('AWARD_LOST', 'Award lost', AwardLostEvent),
+     ('GROUP_JOINED', 'Group joined', GroupJoinedEvent),
+     ('GROUP_CREATED', 'Group created', GroupCreatedEvent),
+     ('STARTED_LEARNING_CATECHISM', 'Started learning catechism', StartedLearningCatechismEvent),
+     ('NEW_COMMENT', 'New comment', NewCommentEvent),
      ])
 
 
@@ -338,7 +338,7 @@ class EventManager(models.Manager):
 
 class Event(models.Model):
     message_html = models.TextField()
-    event_type = models.PositiveSmallIntegerField(choices=EventType.choice_list)
+    event_type = models.CharField(max_length=40, choices=EventType.choice_list)
     weight = models.PositiveSmallIntegerField(default=10)
     event_data = JSONField(blank=True)
     created = models.DateTimeField(default=timezone.now, db_index=True)
