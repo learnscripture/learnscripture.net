@@ -91,11 +91,6 @@ class EventLogic(object):
         return None
 
 
-class GeneralEvent(EventLogic):
-    # No longer used.
-    pass
-
-
 class NewAccountEvent(EventLogic):
 
     def __init__(self, account=None):
@@ -253,8 +248,7 @@ class NewCommentEvent(EventLogic):
 
 EventType = make_class_enum(
     'EventType',
-    [('GENERAL', 'General', GeneralEvent),  # No longer used
-     ('NEW_ACCOUNT', 'New account', NewAccountEvent),
+    [('NEW_ACCOUNT', 'New account', NewAccountEvent),
      ('AWARD_RECEIVED', 'Award received', AwardReceivedEvent),
      ('POINTS_MILESTONE', 'Points milestone', PointsMilestoneEvent),
      ('VERSES_STARTED_MILESTONE', 'Verses started milestone', VersesStartedMilestoneEvent),
