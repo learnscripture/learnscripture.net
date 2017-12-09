@@ -968,6 +968,6 @@ def install_or_renew_ssl_certificate():
             domain=env.domains[0],
         ))
     run("service nginx restart")
-    # Cleanup
+    # Cleanup letsencrypt
     run("rmdir {certbot_static_path}/.well-known/".format(
         certbot_static_path=certbot_static_path))
