@@ -91,7 +91,8 @@ class EventLogic(object):
 class NewAccountEvent(EventLogic):
     @classmethod
     def get_message_html(cls, event):
-        return "signed up to LearnScripture.net"
+        return format_html("{0} signed up to LearnScripture.net",
+                           account_link(event.account))
 
 
 class AwardReceivedEvent(EventLogic):
@@ -114,7 +115,8 @@ class AwardReceivedEvent(EventLogic):
         award_level = event.event_data['award_level']
         award_class = AwardType.classes[award_type]
         award_detail = award_class(level=award_level)
-        return format_html('earned <a href="{0}">{1}</a>',
+        return format_html('{0} earned <a href="{1}">{2}</a>',
+                           account_link(event.account),
                            reverse('award', args=(award_class.slug(),)),
                            award_detail.short_description())
 
@@ -135,7 +137,8 @@ class AwardLostEvent(EventLogic):
         award_level = event.event_data['award_level']
         award_class = AwardType.classes[award_type]
         award_detail = award_class(level=award_level)
-        return format_html('lost <a href="{0}">{1}</a>',
+        return format_html('{0} lost <a href="{1}">{2}</a>',
+                           account_link(event.account),
                            reverse('award', args=(award_class.slug(),)),
                            award_detail.short_description())
 
@@ -151,7 +154,8 @@ class VerseSetCreatedEvent(EventLogic):
     @classmethod
     def get_message_html(cls, event):
         return format_html(
-            'created new verse set <a href="{0}">{1}</a>',
+            '{0} created new verse set <a href="{1}">{2}</a>',
+            account_link(event.account),
             reverse('view_verse_set', args=(event.event_data['verse_set_slug'],)),
             event.event_data['verse_set_name'],
         )
@@ -170,7 +174,8 @@ class StartedLearningVerseSetEvent(EventLogic):
     @classmethod
     def get_message_html(cls, event):
         return format_html(
-            'started learning <a href="{0}">{1}</a>',
+            '{0} started learning <a href="{1}">{2}</a>',
+            account_link(event.account),
             reverse('view_verse_set', args=(event.event_data['verse_set_slug'],)),
             event.event_data['verse_set_name']
         )
@@ -184,7 +189,9 @@ class PointsMilestoneEvent(EventLogic):
     @classmethod
     def get_message_html(cls, event):
         return format_html(
-            'reached {0} points', intcomma(event.event_data['points'])
+            '{0} reached {1} points',
+            account_link(event.account),
+            intcomma(event.event_data['points'])
         )
 
 
@@ -196,7 +203,9 @@ class VersesStartedMilestoneEvent(EventLogic):
     @classmethod
     def get_message_html(cls, event):
         return format_html(
-            'reached {0} verses started', intcomma(event.event_data['verses_started'])
+            '{0} reached {1} verses started',
+            account_link(event.account),
+            intcomma(event.event_data['verses_started'])
         )
 
 
@@ -219,9 +228,11 @@ class GroupJoinedEvent(GroupRelatedMixin, EventLogic):
 
     @classmethod
     def get_message_html(cls, event):
-        return format_html('joined group <a href="{0}">{1}</a>',
-                           reverse('group', args=(event.event_data['group_slug'],)),
-                           event.event_data['group_name'])
+        return format_html(
+            '{0} joined group <a href="{1}">{2}</a>',
+            account_link(event.account),
+            reverse('group', args=(event.event_data['group_slug'],)),
+            event.event_data['group_name'])
 
 
 class GroupCreatedEvent(GroupRelatedMixin, EventLogic):
@@ -234,9 +245,11 @@ class GroupCreatedEvent(GroupRelatedMixin, EventLogic):
 
     @classmethod
     def get_message_html(cls, event):
-        return format_html('created group <a href="{0}">{1}</a>',
-                           reverse('group', args=(event.event_data['group_slug'],)),
-                           event.event_data['group_name'])
+        return format_html(
+            '{0} created group <a href="{1}">{2}</a>',
+            account_link(event.account),
+            reverse('group', args=(event.event_data['group_slug'],)),
+            event.event_data['group_name'])
 
 
 class VersesFinishedMilestoneEvent(EventLogic):
@@ -247,7 +260,9 @@ class VersesFinishedMilestoneEvent(EventLogic):
     @classmethod
     def get_message_html(cls, event):
         return format_html(
-            "reached {0} verses finished", intcomma(event.event_data['verses_finished'])
+            "{0} reached {1} verses finished",
+            account_link(event.account),
+            intcomma(event.event_data['verses_finished'])
         )
 
 
@@ -262,7 +277,8 @@ class StartedLearningCatechismEvent(EventLogic):
     @classmethod
     def get_message_html(cls, event):
         return format_html(
-            'started learning <a href="{0}">{1}</a>',
+            '{0} started learning <a href="{1}">{2}</a>',
+            account_link(event.account),
             reverse('view_catechism', args=(event.event_data['catechism_slug'],)),
             event.event_data['catechism_name'],
         )
@@ -308,14 +324,16 @@ class NewCommentEvent(EventLogic):
         comment = Comment.objects.get(id=event.event_data['comment_id'])
         if 'parent_event_id' in event.event_data:
             return format_html(
-                """posted a <a href="{0}">comment</a> on <a href="{1}">{2}</a>'s activity""",
+                """{0} posted a <a href="{1}">comment</a> on <a href="{2}">{3}</a>'s activity""",
+                account_link(event.account),
                 comment.get_absolute_url(),
                 reverse('user_stats', args=(event.event_data['parent_event_account_username'],)),
                 event.event_data['parent_event_account_username'])
 
         elif 'group_id' in event.event_data:
             return format_html(
-                """posted a <a href="{0}">comment</a> on <a href="{1}">{2}</a>'s wall""",
+                """{0} posted a <a href="{1}">comment</a> on <a href="{2}">{3}</a>'s wall""",
+                account_link(event.account),
                 comment.get_absolute_url(),
                 reverse('group', args=(event.event_data['group_slug'],)),
                 event.event_data['group_name'])
@@ -371,7 +389,7 @@ class EventManager(models.Manager):
         if account is None or not account.is_hellbanned:
             events = events.exclude(account__is_hellbanned=True)
         events = list(events)
-        events = list(dedupe_iterable(events, lambda e: (e.account_id, e.get_message_html())))
+        events = list(dedupe_iterable(events, lambda e: (e.account_id, e.render_html())))
 
         if account is not None:
             friendship_weights = account.get_friendship_weights()
@@ -425,9 +443,6 @@ class Event(models.Model):
     url = models.CharField(max_length=255, blank=True)
 
     objects = EventManager()
-
-    def get_message_html(self):
-        return self.event_logic.get_message_html(self)
 
     def __repr__(self):
         return "<Event id=%s type=%s>" % (self.id, self.event_type)
@@ -484,8 +499,7 @@ class Event(models.Model):
         return timesince(self.created, now=now) + " ago"
 
     def render_html(self):
-        return format_html("{0} {1}", account_link(self.account),
-                           self.get_message_html())
+        return self.event_logic.get_message_html(self)
 
     @cached_property
     def event_logic(self):
