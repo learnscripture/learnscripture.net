@@ -1,7 +1,7 @@
 import time
 
 from comments.models import Comment
-from events.models import Event, EventType
+from events.models import Event, EventType, PointsMilestoneEvent
 
 from .base import AccountTestMixin, FullBrowserTest, TestBase
 from .test_groups import create_group
@@ -15,12 +15,8 @@ class CommentPageTests(FullBrowserTest):
             self.create_account(username="eventaccount",
                                 email="eventaccount@a.com")
         self.identity, self.account = self.create_account()
-        self.event = Event.objects.create(
-            message_html="Test",
-            event_type=EventType.POINTS_MILESTONE,
-            account=self.event_account,
-            event_data={},
-        )
+        self.event = PointsMilestoneEvent(account=self.event_account,
+                                          points=1000).save()
 
     def test_add_comment(self):
         self.event_identity.notices.all().delete()

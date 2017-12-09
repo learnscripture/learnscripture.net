@@ -6,13 +6,10 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.html import format_html
-from django.utils.safestring import mark_safe
 from jsonfield import JSONField
 
 from accounts.models import Account
-from awards.utils import award_link
 from groups.models import Group
-from groups.utils import group_link
 from learnscripture.datastructures import make_class_enum
 from learnscripture.templatetags.account_utils import account_link
 
@@ -53,7 +50,6 @@ class EventLogic(object):
 
         kwargs can be:
          - account - passed on to Event()
-         - message_html - passed on to Event()
          - anything else - stored in Event.event_data,
            so must be simple types that can be serialised to JSON.
 
@@ -62,11 +58,9 @@ class EventLogic(object):
         method into Event.event_data, via a super().__init__() calls.
         """
         account = kwargs.pop('account', None)
-        message_html = kwargs.pop('message_html', '')
         self.event_data = kwargs
         self.event = Event(weight=self.weight,
                            event_type=self.event_type,
-                           message_html=message_html,
                            account=account)
 
     def save(self):
@@ -95,11 +89,6 @@ class EventLogic(object):
 
 
 class NewAccountEvent(EventLogic):
-
-    def __init__(self, account=None):
-        super(NewAccountEvent, self).__init__(account=account)
-        self.event.message_html = "signed up to LearnScripture.net"
-
     @classmethod
     def get_message_html(cls, event):
         return "signed up to LearnScripture.net"
@@ -117,7 +106,6 @@ class AwardReceivedEvent(EventLogic):
                                                  award_level=award.level,
                                                  temporary_award=award.award_type in [AwardType.REIGNING_WEEKLY_CHAMPION],
                                                  account=award.account)
-        self.event.message_html = "earned " + award_link(award)
 
     @classmethod
     def get_message_html(cls, event):
@@ -139,7 +127,6 @@ class AwardLostEvent(EventLogic):
         super(AwardLostEvent, self).__init__(award_id=award.id,
                                              award_type=award.award_type,
                                              account=award.account)
-        self.event.message_html = "lost " + award_link(award)
 
     @classmethod
     def get_message_html(cls, event):
@@ -160,11 +147,6 @@ class VerseSetCreatedEvent(EventLogic):
                                                    verse_set_slug=verse_set.slug,
                                                    verse_set_name=verse_set.name,
                                                    account=verse_set.created_by)
-        self.event.message_html = format_html(
-            'created new verse set <a href="{0}">{1}</a>',
-            reverse('view_verse_set', args=(verse_set.slug,)),
-            verse_set.name
-        )
 
     @classmethod
     def get_message_html(cls, event):
@@ -184,11 +166,6 @@ class StartedLearningVerseSetEvent(EventLogic):
                                                            verse_set_slug=verse_set.slug,
                                                            verse_set_name=verse_set.name,
                                                            account=chosen_by)
-        self.event.message_html = format_html(
-            'started learning <a href="{0}">{1}</a>',
-            reverse('view_verse_set', args=(verse_set.slug,)),
-            verse_set.name
-        )
 
     @classmethod
     def get_message_html(cls, event):
@@ -203,9 +180,6 @@ class PointsMilestoneEvent(EventLogic):
     def __init__(self, account=None, points=None):
         super(PointsMilestoneEvent, self).__init__(account=account,
                                                    points=points)
-        self.event.message_html = format_html(
-            'reached {0} points', intcomma(points)
-        )
 
     @classmethod
     def get_message_html(cls, event):
@@ -218,9 +192,6 @@ class VersesStartedMilestoneEvent(EventLogic):
     def __init__(self, account=None, verses_started=None):
         super(VersesStartedMilestoneEvent, self).__init__(account=account,
                                                           verses_started=verses_started)
-        self.event.message_html = format_html(
-            'reached {0} verses started', intcomma(verses_started)
-        )
 
     @classmethod
     def get_message_html(cls, event):
@@ -246,10 +217,6 @@ class GroupJoinedEvent(GroupRelatedMixin, EventLogic):
                                                group_slug=group.slug,
                                                group_id=group.id)
 
-        self.event.message_html = format_html(
-            "joined group {0}", group_link(group)
-        )
-
     @classmethod
     def get_message_html(cls, event):
         return format_html('joined group <a href="{0}">{1}</a>',
@@ -264,9 +231,6 @@ class GroupCreatedEvent(GroupRelatedMixin, EventLogic):
                                                 group_name=group.name,
                                                 group_slug=group.slug,
                                                 group_id=group.id)
-        self.event.message_html = format_html(
-            "created group {0}", group_link(group)
-        )
 
     @classmethod
     def get_message_html(cls, event):
@@ -279,9 +243,6 @@ class VersesFinishedMilestoneEvent(EventLogic):
     def __init__(self, account, verses_finished=None):
         super(VersesFinishedMilestoneEvent, self).__init__(account=account,
                                                            verses_finished=verses_finished)
-        self.event.message_html = format_html(
-            "reached {0} verses finished", intcomma(verses_finished)
-        )
 
     @classmethod
     def get_message_html(cls, event):
@@ -297,11 +258,6 @@ class StartedLearningCatechismEvent(EventLogic):
                                                             catechism_slug=catechism.slug,
                                                             catechism_name=catechism.full_name,
                                                             catechism_id=catechism.id)
-        self.event.message_html = format_html(
-            'started learning <a href="{0}">{1}</a>',
-            reverse('view_catechism', args=(catechism.slug,)),
-            catechism.full_name,
-        )
 
     @classmethod
     def get_message_html(cls, event):
@@ -331,11 +287,6 @@ class NewCommentEvent(EventLogic):
             kwargs['parent_event_account_id'] = comment.event.account.id
             kwargs['parent_event_account_username'] = comment.event.account.username
         super(NewCommentEvent, self).__init__(**kwargs)
-        self.event.message_html = format_html(
-            'posted a <a href="{0}">comment</a> on {1}',
-            comment.get_absolute_url(),
-            comment.get_subject_html(),
-        )
         self.event.parent_event = comment.event
 
     @classmethod
@@ -420,7 +371,7 @@ class EventManager(models.Manager):
         if account is None or not account.is_hellbanned:
             events = events.exclude(account__is_hellbanned=True)
         events = list(events)
-        events = list(dedupe_iterable(events, lambda e: (e.account_id, e.message_html)))
+        events = list(dedupe_iterable(events, lambda e: (e.account_id, e.get_message_html())))
 
         if account is not None:
             friendship_weights = account.get_friendship_weights()
@@ -459,7 +410,6 @@ class EventManager(models.Manager):
 
 
 class Event(models.Model):
-    message_html = models.TextField()
     event_type = models.CharField(max_length=40, choices=EventType.choice_list)
     weight = models.PositiveSmallIntegerField(default=10)
     event_data = JSONField(blank=True)
@@ -534,11 +484,8 @@ class Event(models.Model):
         return timesince(self.created, now=now) + " ago"
 
     def render_html(self):
-        if self.account is not None:
-            return format_html("{0} {1}", account_link(self.account),
-                               mark_safe(self.message_html))
-        else:
-            return mark_safe(self.message_html)
+        return format_html("{0} {1}", account_link(self.account),
+                           self.get_message_html())
 
     @cached_property
     def event_logic(self):
