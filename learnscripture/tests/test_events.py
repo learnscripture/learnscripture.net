@@ -1,5 +1,3 @@
-from django.utils import timezone
-
 from comments.models import Comment
 from events.models import Event, EventType, GroupJoinedEvent, PointsMilestoneEvent
 
@@ -82,31 +80,12 @@ class EventTests(AccountTestMixin, TestBase):
         _, account1 = self.create_account(username="1")
         _, account2 = self.create_account(username="2")
         _, viewer = self.create_account(username="viewer")
-        now = timezone.now()
-        e1 = Event.objects.create(
-            message_html="Event 1",
-            event_data={},
-            event_type=0,
-            created=now,
-            weight=10,
-            account=account1,
-        )
-        e2 = Event.objects.create(
-            message_html="Event 2",
-            event_data={},
-            event_type=0,
-            created=now,
-            weight=11,
-            account=account1,
-        )
-        e3 = Event.objects.create(
-            message_html="Event 3",
-            event_data={},
-            event_type=0,
-            created=now,
-            weight=11,
-            account=account2,
-        )
+        e1 = PointsMilestoneEvent(account=account1,
+                                  points=100).save()
+        e2 = PointsMilestoneEvent(account=account1,
+                                  points=200).save()
+        e3 = PointsMilestoneEvent(account=account2,
+                                  points=300).save()
 
         group = create_group()
         group.add_user(account2)

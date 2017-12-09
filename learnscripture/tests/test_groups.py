@@ -6,7 +6,7 @@ from django.urls import reverse
 from accounts.models import Account
 from awards.models import Award, AwardType
 from comments.models import Comment
-from events.models import Event, EventType
+from events.models import Event, EventType, GroupJoinedEvent
 from groups.models import Group
 
 from .base import AccountTestMixin, FullBrowserTest, TestBase, WebTestBase, get_or_create_any_account
@@ -297,11 +297,8 @@ class GroupPageTests2(AccountTestMixin, TestBase):
     def test_comments_on_related_events(self):
         _, account = self.create_account()
         group = create_group(public=True)
-        event = Event.objects.create(
-            event_type=EventType.GROUP_JOINED,
-            event_data={},
-            account=account,
-        )
+        event = GroupJoinedEvent(account=account,
+                                 group=group).save()
         comment = Comment.objects.create(group=group,
                                          event=event,
                                          author=account,
