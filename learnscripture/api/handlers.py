@@ -186,7 +186,8 @@ class VersesToLearn2Handler(ApiView):
             ['full_name', 'short_name', 'slug', 'url', 'text_type']
         )
         verse_sets = make_serializable(
-            set(vs.verse_set for vs in batch.verse_statuses),
+            set(vs.verse_set for vs in batch.verse_statuses
+                if vs.verse_set if not None),
             ['id', 'set_type', 'name', 'get_absolute_url']
         )
         return dict(
