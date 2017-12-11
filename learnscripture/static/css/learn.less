@@ -52,6 +52,105 @@ body.learn-page {
         line-height: calc(~"100vh - " @topbarHeight);
         animation: fadeIn 1s infinite alternate;
     }
+
+    #id-content-wrapper {
+        padding-left: 0.5em;
+        padding-right: 0.5em;
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 860px;
+    }
+
+
+    // Words
+    #id-verse-wrapper {
+        border-radius: 5px;
+        padding: 10px;
+        background-color: #f0f0f0;
+    }
+
+    .current-verse, .previous-verse, #id-typing, #id-onscreen-test-options {
+        font-size: 20px;
+        line-height: 1;
+    }
+
+    #id-onscreen-not-available {
+        font-size: 20px;
+    }
+    .previous-verse {
+        display: table-cell;
+        vertical-align: bottom;
+        color: #909090;
+    }
+
+    .previous-verse-wrapper {
+        border-bottom: 1px solid #c0c0c0;
+        margin-bottom: 0.5em;
+    }
+    .normalWordBorder() {
+        border-color: #C0C0C0;
+        border-top-color: #D8D8D8;
+        border-bottom-color: #9A9A9A;
+    }
+
+    @word-margin-top: 3px;
+    @word-margin-left: 1px;
+
+    .word {
+        border: 2px solid;
+        border-radius: 3px;
+        padding: 4px 4px;
+        margin: @word-margin-top @word-margin-left;
+        .gradientBar(#e8e8e8, #C0C0C0);
+        .normalWordBorder();
+        cursor: pointer;
+
+        &.correct {
+            border-color: #00D000;
+        }
+
+        &.incorrect {
+            border-color: red;
+        }
+    }
+    .colon {
+        margin-left: 3px;
+    }
+    .testedword {
+        margin: 5px 1px;
+    }
+    .wordend, .wordstart, .word, .testedword {
+        display: inline-block;
+    }
+
+    // hide the clues that show word size
+    .hide-word-boundaries .word {
+        border-left: 0px;
+        border-right: 0px;
+        padding-left: 8px;
+        padding-right: 8px;
+        margin-left: -5px;
+        margin-right: -5px;
+        border-radius: 0px;
+        cursor: default;
+
+        &.current-word {
+            border-left: 2px solid blue;
+        }
+    }
+
+
+    #id-hint-btn, #id-help-btn, #id-more-practice-btn, .word {
+        // For Internet Explorer, remove 300ms delays on "click" event when touch
+        // actions are used.
+        touch-action: none;
+    }
+
+    h1, h2, h3 {
+        line-height: 1.4;
+        padding-top: 5px;
+    }
+
 }
 
 @keyframes fadeIn {
