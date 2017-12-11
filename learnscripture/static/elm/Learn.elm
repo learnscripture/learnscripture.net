@@ -7,6 +7,7 @@ import Http
 import Json.Decode as JD
 import Json.Decode.Pipeline as JDP
 import Maybe
+import Navigation
 
 
 {- Main -}
@@ -121,9 +122,9 @@ type alias VerseStore =
 
 type alias VerseBatchBase a =
     { a
-        | learningType : LearningType
+        | learningTypeRaw : Maybe LearningType
         , returnTo : Url
-        , maxOrderVal : LearnOrder
+        , maxOrderValRaw : Maybe LearnOrder
     }
 
 
@@ -141,23 +142,17 @@ type alias VerseBatchRaw =
 
 
 verseBatchRawCtr :
-    a
-    -> b
-    -> c
-    -> d
-    -> e
-    -> f
-    -> { learningType : a
-       , maxOrderVal : c
-       , returnTo : b
-       , verseSets : f
-       , verseStatusesRaw : d
-       , versions : e
-       }
+    Maybe LearningType
+    -> String
+    -> Maybe LearnOrder
+    -> List VerseStatusRaw
+    -> List Version
+    -> List VerseSet
+    -> VerseBatchRaw
 verseBatchRawCtr l r m v1 v2 v3 =
-    { learningType = l
+    { learningTypeRaw = l
     , returnTo = r
-    , maxOrderVal = m
+    , maxOrderValRaw = m
     , verseStatusesRaw = v1
     , versions = v2
     , verseSets = v3
@@ -267,6 +262,11 @@ type LearningType
     | Practice
 
 
+getCurrentVerse : VerseStore -> Maybe VerseStatus
+getCurrentVerse vs =
+    Dict.get vs.currentOrderVal vs.verseStatuses
+
+
 
 {- View -}
 
@@ -280,8 +280,8 @@ type LinkIconAlign
     | AlignRight
 
 
-dashboardLink : String
-dashboardLink =
+dashboardUrl : String
+dashboardUrl =
     "/dashboard/"
 
 
@@ -297,7 +297,7 @@ view model =
                 errorMessage ("The items to learn could not be loaded (error message: " ++ toString err ++ ".) Please check your internet connection!")
 
             Verses vs ->
-                showVerses vs model.preferences
+                viewCurrentVerse vs model.preferences
         ]
 
 
@@ -311,10 +311,15 @@ errorMessage msg =
     H.div [ A.class "error" ] [ H.text msg ]
 
 
-showVerses : VerseStore -> Preferences -> H.Html msg
-showVerses verseStore preferences =
-    H.div []
-        [ H.text <| toString verseStore ]
+viewCurrentVerse : VerseStore -> Preferences -> H.Html msg
+viewCurrentVerse verseStore preferences =
+    case getCurrentVerse verseStore of
+        Nothing ->
+            loadingDiv
+
+        Just verse ->
+            H.div []
+                [ H.text <| toString verse ]
 
 
 makeIcon : String -> H.Html msg
@@ -347,7 +352,7 @@ topNav model =
     H.nav [ A.class "topbar" ]
         [ H.ul []
             [ H.li [ A.class "dashboard-link" ]
-                [ link dashboardLink "Dashboard" "return" AlignLeft ]
+                [ link dashboardUrl "Dashboard" "return" AlignLeft ]
             , H.li [ A.class "preferences-link" ]
                 [ link "#" (userDisplayName model.user) "preferences" AlignRight ]
             ]
@@ -381,22 +386,32 @@ update msg model =
 
         VersesToLearn (Ok verseBatchRaw) ->
             let
-                batchStore =
+                maybeBatchStore =
                     normalizeVerseBatch verseBatchRaw |> verseBatchToStore
 
                 newStore =
                     case model.verseData of
-                        Verses verseStore ->
-                            mergeStores verseStore batchStore
+                        Verses origVerseStore ->
+                            case maybeBatchStore of
+                                Nothing ->
+                                    Just origVerseStore
+
+                                Just batchStore ->
+                                    Just <| mergeStores origVerseStore batchStore
 
                         _ ->
-                            batchStore
+                            maybeBatchStore
             in
-                ( { model
-                    | verseData = Verses newStore
-                  }
-                , Cmd.none
-                )
+                case newStore of
+                    Nothing ->
+                        ( model, Navigation.load dashboardUrl )
+
+                    Just ns ->
+                        ( { model
+                            | verseData = Verses ns
+                          }
+                        , Cmd.none
+                        )
 
         VersesToLearn (Err errMsg) ->
             ( { model | verseData = VersesError errMsg }, Cmd.none )
@@ -408,9 +423,9 @@ update msg model =
 
 normalizeVerseBatch : VerseBatchRaw -> VerseBatch
 normalizeVerseBatch vbr =
-    { learningType = vbr.learningType
+    { learningTypeRaw = vbr.learningTypeRaw
     , returnTo = vbr.returnTo
-    , maxOrderVal = vbr.maxOrderVal
+    , maxOrderValRaw = vbr.maxOrderValRaw
     , verseStatuses = normalizeVerseStatuses vbr
     }
 
@@ -467,28 +482,41 @@ normalizeVerseStatuses vrb =
             vrb.verseStatusesRaw
 
 
-verseBatchToStore : VerseBatch -> VerseStore
+verseBatchToStore : VerseBatch -> Maybe VerseStore
 verseBatchToStore batch =
     let
         batchDict =
             Dict.fromList (List.map (\vs -> ( vs.learnOrder, vs )) batch.verseStatuses)
-
-        minOrderVal =
-            case List.minimum <| List.map .learnOrder batch.verseStatuses of
-                Nothing ->
-                    0
-
-                -- should never happen in practice
-                Just m ->
-                    m
     in
-        { verseStatuses = batchDict
-        , learningType = batch.learningType
-        , returnTo = batch.returnTo
-        , maxOrderVal = batch.maxOrderVal
-        , currentOrderVal = minOrderVal
-        , seen = []
-        }
+        case List.minimum <| List.map .learnOrder batch.verseStatuses of
+            Nothing ->
+                Nothing
+
+            Just minOrderVal ->
+                case batch.learningTypeRaw of
+                    Nothing ->
+                        Nothing
+
+                    Just learningType ->
+                        case batch.maxOrderValRaw of
+                            Nothing ->
+                                Nothing
+
+                            Just maxOrderVal ->
+                                Just
+                                    { verseStatuses = batchDict
+                                    , learningType = learningType
+                                    , returnTo = batch.returnTo
+                                    , maxOrderVal = maxOrderVal
+                                    , currentOrderVal = minOrderVal
+                                    , seen = []
+                                    }
+
+
+
+-- Merge in new verses. The only thing which actually needs updating is the
+-- verse store, the rest will be the same, or the current model will be
+-- more recent.
 
 
 mergeStores : VerseStore -> VerseStore -> VerseStore
@@ -549,9 +577,9 @@ testingMethodDecoder =
 verseBatchRawDecoder : JD.Decoder VerseBatchRaw
 verseBatchRawDecoder =
     JDP.decode verseBatchRawCtr
-        |> JDP.required "learning_type" learningTypeDecoder
+        |> JDP.required "learning_type" (nullOr learningTypeDecoder)
         |> JDP.required "return_to" JD.string
-        |> JDP.required "max_order_val" JD.int
+        |> JDP.required "max_order_val" (nullOr JD.int)
         |> JDP.required "verse_statuses" (JD.list verseStatusRawDecoder)
         |> JDP.required "versions" (JD.list versionDecoder)
         |> JDP.required "verse_sets" (JD.list verseSetDecoder)
