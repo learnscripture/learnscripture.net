@@ -8,6 +8,7 @@ import Json.Decode as JD
 import Json.Decode.Pipeline as JDP
 import Maybe
 import Navigation
+import Regex as R
 
 
 {- Main -}
@@ -315,11 +316,165 @@ viewCurrentVerse : VerseStore -> Preferences -> H.Html msg
 viewCurrentVerse verseStore preferences =
     case getCurrentVerse verseStore of
         Nothing ->
+            -- TODO - something better here? Crash?
             loadingDiv
 
         Just verse ->
-            H.div []
-                [ H.text <| toString verse ]
+            H.div [ A.id "id-content-wrapper" ]
+                [ H.h2 []
+                    [ H.text verse.titleText ]
+                , H.div [ A.id "id-verse-wrapper" ]
+                    [ H.div [ A.class "current-verse-wrapper" ]
+                        [ H.div [ A.class "current-verse" ]
+                            (versePartsToHtml <| partsForVerse verse)
+                        ]
+                    ]
+                ]
+
+
+linebreak : H.Html msg
+linebreak =
+    H.br [] []
+
+
+partsForVerse : VerseStatus -> List Part
+partsForVerse verse =
+    (verse.scoringTextWords
+        |> List.map verseWordToParts
+        |> List.concat
+    )
+        ++ if showReference verse then
+            [ Linebreak ] ++ referenceToParts verse.localizedReference
+           else
+            []
+
+
+type Part
+    = VerseWord String
+    | ReferenceWord String
+    | Space
+    | Punct String
+      -- only used for references
+    | Linebreak
+
+
+
+-- only used for within verse body
+-- The initial sentence has already been split into words server side, and this
+-- function does not split off punctuation, but keeps it as part of the word.
+
+
+verseWordToParts : String -> List Part
+verseWordToParts w =
+    let
+        ( start, end ) =
+            ( String.slice 0 -1 w, String.right 1 w )
+    in
+        if end == "\n" then
+            [ VerseWord start
+            , Linebreak
+            ]
+        else
+            [ VerseWord w
+            , Space
+            ]
+
+
+referenceToParts : String -> List Part
+referenceToParts reference =
+    let
+        -- Javascript regexes: no Unicode support, no lookbehinds, and we want
+        -- to keep the punctuation that we are splitting on - hence this is more
+        -- complex than you might expect.
+        splitter =
+            R.regex "(?=[\\s:\\-])"
+
+        punct =
+            R.regex "^[\\s:\\-]"
+
+        parts =
+            reference
+                |> R.split R.All splitter
+                -- Split the initial punctuation into separate bits:
+                |>
+                    List.map
+                        (\w ->
+                            if R.contains punct w then
+                                [ String.left 1 w, String.dropLeft 1 w ]
+                            else
+                                [ w ]
+                        )
+                |> List.concat
+    in
+        parts
+            |> List.map
+                (\w ->
+                    if R.contains punct w then
+                        Punct w
+                    else if String.trim w == "" then
+                        Space
+                    else
+                        ReferenceWord w
+                )
+
+
+showReference :
+    { c
+        | verseSet : Maybe { a | setType : VerseSetType }
+        , version : { b | textType : TextType }
+    }
+    -> Bool
+showReference verse =
+    case verse.version.textType of
+        Bible ->
+            case verse.verseSet of
+                Nothing ->
+                    True
+
+                Just verseSet ->
+                    case verseSet.setType of
+                        Selection ->
+                            True
+
+                        Passage ->
+                            False
+
+        Catechism ->
+            False
+
+
+versePartsToHtml : List Part -> List (H.Html msg)
+versePartsToHtml parts =
+    List.map2
+        (\idx p ->
+            case p of
+                VerseWord w ->
+                    wordButton "word" idx w
+
+                ReferenceWord w ->
+                    wordButton "word reference" idx w
+
+                Space ->
+                    H.text " "
+
+                Punct w ->
+                    H.span [ A.class "punct" ]
+                        [ H.text w ]
+
+                Linebreak ->
+                    linebreak
+        )
+        (List.range 0 (List.length parts))
+        parts
+
+
+wordButton : String -> a -> String -> H.Html msg
+wordButton classes idx text =
+    H.span
+        [ A.class classes
+        , A.id <| "id-word" ++ toString idx
+        ]
+        [ H.text text ]
 
 
 makeIcon : String -> H.Html msg
