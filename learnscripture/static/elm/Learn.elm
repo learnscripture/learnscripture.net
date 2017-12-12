@@ -9,6 +9,7 @@ import Json.Decode.Pipeline as JDP
 import Maybe
 import Navigation
 import Regex as R
+import Set
 
 
 {- Main -}
@@ -50,7 +51,7 @@ init flags =
 
                 Nothing ->
                     GuestUser
-      , verseData = Loading
+      , learningSession = Loading
       }
     , loadVerses
     )
@@ -63,7 +64,7 @@ init flags =
 type alias Model =
     { preferences : Preferences
     , user : User
-    , verseData : VerseData
+    , learningSession : LearningSession
     }
 
 
@@ -93,10 +94,16 @@ type alias AccountData =
     }
 
 
-type VerseData
+type LearningSession
     = Loading
     | VersesError Http.Error
-    | Verses VerseStore
+    | Session SessionData
+
+
+type alias SessionData =
+    { verses : VerseStore
+    , currentVerse : VerseStatus
+    }
 
 
 type alias LearnOrder =
@@ -112,11 +119,10 @@ type alias Url =
 
 
 type alias VerseStore =
-    { verseStatuses : Dict.Dict LearnOrder VerseStatus
+    { verseStatuses : List VerseStatus
     , learningType : LearningType
     , returnTo : Url
     , maxOrderVal : LearnOrder
-    , currentOrderVal : LearnOrder
     , seen : List UvsId
     }
 
@@ -263,11 +269,6 @@ type LearningType
     | Practice
 
 
-getCurrentVerse : VerseStore -> Maybe VerseStatus
-getCurrentVerse vs =
-    Dict.get vs.currentOrderVal vs.verseStatuses
-
-
 
 {- View -}
 
@@ -290,14 +291,14 @@ view : Model -> H.Html msg
 view model =
     H.div []
         [ topNav model
-        , case model.verseData of
+        , case model.learningSession of
             Loading ->
                 loadingDiv
 
             VersesError err ->
                 errorMessage ("The items to learn could not be loaded (error message: " ++ toString err ++ ".) Please check your internet connection!")
 
-            Verses vs ->
+            Session vs ->
                 viewCurrentVerse vs model.preferences
         ]
 
@@ -312,24 +313,22 @@ errorMessage msg =
     H.div [ A.class "error" ] [ H.text msg ]
 
 
-viewCurrentVerse : VerseStore -> Preferences -> H.Html msg
-viewCurrentVerse verseStore preferences =
-    case getCurrentVerse verseStore of
-        Nothing ->
-            -- TODO - something better here? Crash?
-            loadingDiv
-
-        Just verse ->
-            H.div [ A.id "id-content-wrapper" ]
-                [ H.h2 []
-                    [ H.text verse.titleText ]
-                , H.div [ A.id "id-verse-wrapper" ]
-                    [ H.div [ A.class "current-verse-wrapper" ]
-                        [ H.div [ A.class "current-verse" ]
-                            (versePartsToHtml <| partsForVerse verse)
-                        ]
+viewCurrentVerse : SessionData -> Preferences -> H.Html msg
+viewCurrentVerse session preferences =
+    let
+        currentVerse =
+            session.currentVerse
+    in
+        H.div [ A.id "id-content-wrapper" ]
+            [ H.h2 []
+                [ H.text currentVerse.titleText ]
+            , H.div [ A.id "id-verse-wrapper" ]
+                [ H.div [ A.class "current-verse-wrapper" ]
+                    [ H.div [ A.class "current-verse" ]
+                        (versePartsToHtml <| partsForVerse currentVerse)
                     ]
                 ]
+            ]
 
 
 linebreak : H.Html msg
@@ -482,20 +481,30 @@ type WordButtonType
 
 
 idPrefixForButton : WordButtonType -> String
-idPrefixForButton wbt = case wbt of
-                            VerseWordButton -> "id-word-"
-                            ReferenceWordButton -> "id-reference-part-"
+idPrefixForButton wbt =
+    case wbt of
+        VerseWordButton ->
+            "id-word-"
+
+        ReferenceWordButton ->
+            "id-reference-part-"
 
 
 idForButton : WordButtonType -> Index -> String
-idForButton wbt idx =  idPrefixForButton wbt ++ toString idx
+idForButton wbt idx =
+    idPrefixForButton wbt ++ toString idx
+
 
 wordButton : WordButtonType -> Index -> String -> H.Html msg
 wordButton wbt idx text =
     H.span
-        [ A.class <| case wbt of
-                         VerseWordButton -> "word"
-                         ReferenceWordButton -> "word reference"
+        [ A.class <|
+            case wbt of
+                VerseWordButton ->
+                    "word"
+
+                ReferenceWordButton ->
+                    "word reference"
         , A.id <| idForButton wbt idx
         ]
         [ H.text text ]
@@ -565,35 +574,35 @@ update msg model =
 
         VersesToLearn (Ok verseBatchRaw) ->
             let
-                maybeBatchStore =
-                    normalizeVerseBatch verseBatchRaw |> verseBatchToStore
+                maybeBatchSession =
+                    normalizeVerseBatch verseBatchRaw |> verseBatchToSession
 
-                newStore =
-                    case model.verseData of
-                        Verses origVerseStore ->
-                            case maybeBatchStore of
+                newSession =
+                    case model.learningSession of
+                        Session origSession ->
+                            case maybeBatchSession of
                                 Nothing ->
-                                    Just origVerseStore
+                                    Just origSession
 
-                                Just batchStore ->
-                                    Just <| mergeStores origVerseStore batchStore
+                                Just batchSession ->
+                                    Just <| mergeSession origSession batchSession
 
                         _ ->
-                            maybeBatchStore
+                            maybeBatchSession
             in
-                case newStore of
+                case newSession of
                     Nothing ->
                         ( model, Navigation.load dashboardUrl )
 
                     Just ns ->
                         ( { model
-                            | verseData = Verses ns
+                            | learningSession = Session ns
                           }
                         , Cmd.none
                         )
 
         VersesToLearn (Err errMsg) ->
-            ( { model | verseData = VersesError errMsg }, Cmd.none )
+            ( { model | learningSession = VersesError errMsg }, Cmd.none )
 
 
 
@@ -661,35 +670,33 @@ normalizeVerseStatuses vrb =
             vrb.verseStatusesRaw
 
 
-verseBatchToStore : VerseBatch -> Maybe VerseStore
-verseBatchToStore batch =
-    let
-        batchDict =
-            Dict.fromList (List.map (\vs -> ( vs.learnOrder, vs )) batch.verseStatuses)
-    in
-        case List.minimum <| List.map .learnOrder batch.verseStatuses of
-            Nothing ->
-                Nothing
+verseBatchToSession : VerseBatch -> Maybe SessionData
+verseBatchToSession batch =
+    case List.head batch.verseStatuses of
+        Nothing ->
+            Nothing
 
-            Just minOrderVal ->
-                case batch.learningTypeRaw of
-                    Nothing ->
-                        Nothing
+        Just verse ->
+            case batch.learningTypeRaw of
+                Nothing ->
+                    Nothing
 
-                    Just learningType ->
-                        case batch.maxOrderValRaw of
-                            Nothing ->
-                                Nothing
+                Just learningType ->
+                    case batch.maxOrderValRaw of
+                        Nothing ->
+                            Nothing
 
-                            Just maxOrderVal ->
-                                Just
-                                    { verseStatuses = batchDict
+                        Just maxOrderVal ->
+                            Just
+                                { verses =
+                                    { verseStatuses = batch.verseStatuses
                                     , learningType = learningType
                                     , returnTo = batch.returnTo
                                     , maxOrderVal = maxOrderVal
-                                    , currentOrderVal = minOrderVal
                                     , seen = []
                                     }
+                                , currentVerse = verse
+                                }
 
 
 
@@ -698,12 +705,43 @@ verseBatchToStore batch =
 -- more recent.
 
 
-mergeStores : VerseStore -> VerseStore -> VerseStore
-mergeStores initialVerseStore newVerseStore =
-    { initialVerseStore
-        | verseStatuses =
-            Dict.union newVerseStore.verseStatuses initialVerseStore.verseStatuses
-    }
+mergeSession : SessionData -> SessionData -> SessionData
+mergeSession initialSession newBatchSession =
+    let
+        initialVerses =
+            initialSession.verses
+    in
+        { initialSession
+            | verses =
+                { initialVerses
+                    | verseStatuses =
+                        (initialVerses.verseStatuses
+                             ++ newBatchSession.verses.verseStatuses)
+                            |> dedupeBy .learnOrder
+                }
+        }
+
+
+dedupeBy : (a -> comparable) -> List a -> List a
+dedupeBy keyFunc list =
+    let
+        helper =
+            \keyFunc list existing ->
+                case list of
+                    [] ->
+                        []
+
+                    first :: rest ->
+                        let
+                            key =
+                                keyFunc first
+                        in
+                            if Set.member key existing then
+                                helper keyFunc rest existing
+                            else
+                                first :: helper keyFunc rest (Set.insert key existing)
+    in
+        helper keyFunc list Set.empty
 
 
 
