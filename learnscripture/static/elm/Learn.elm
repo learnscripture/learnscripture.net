@@ -337,10 +337,14 @@ linebreak =
     H.br [] []
 
 
+numberItems : List a -> List Int
+numberItems l =
+    List.range 0 (List.length l)
+
+
 partsForVerse : VerseStatus -> List Part
 partsForVerse verse =
-    (verse.scoringTextWords
-        |> List.map verseWordToParts
+    (List.map2 verseWordToParts verse.scoringTextWords (numberItems verse.scoringTextWords)
         |> List.concat
     )
         ++ if showReference verse then
@@ -349,9 +353,13 @@ partsForVerse verse =
             []
 
 
+type alias Index =
+    Int
+
+
 type Part
-    = VerseWord String
-    | ReferenceWord String
+    = VerseWord Index String
+    | ReferenceWord Index String
     | Space
     | Punct String
       -- only used for references
@@ -364,18 +372,18 @@ type Part
 -- function does not split off punctuation, but keeps it as part of the word.
 
 
-verseWordToParts : String -> List Part
-verseWordToParts w =
+verseWordToParts : String -> Index -> List Part
+verseWordToParts w idx =
     let
         ( start, end ) =
             ( String.slice 0 -1 w, String.right 1 w )
     in
         if end == "\n" then
-            [ VerseWord start
+            [ VerseWord idx start
             , Linebreak
             ]
         else
-            [ VerseWord w
+            [ VerseWord idx w
             , Space
             ]
 
@@ -406,16 +414,17 @@ referenceToParts reference =
                         )
                 |> List.concat
     in
-        parts
-            |> List.map
-                (\w ->
-                    if R.contains punct w then
-                        Punct w
-                    else if String.trim w == "" then
-                        Space
-                    else
-                        ReferenceWord w
-                )
+        List.map2
+            (\idx w ->
+                if R.contains punct w then
+                    Punct w
+                else if String.trim w == "" then
+                    Space
+                else
+                    ReferenceWord idx w
+            )
+            (List.range 0 (List.length parts))
+            parts
 
 
 showReference :
@@ -445,14 +454,14 @@ showReference verse =
 
 versePartsToHtml : List Part -> List (H.Html msg)
 versePartsToHtml parts =
-    List.map2
-        (\idx p ->
+    List.map
+        (\p ->
             case p of
-                VerseWord w ->
-                    wordButton "word" idx w
+                VerseWord idx w ->
+                    wordButton VerseWordButton idx w
 
-                ReferenceWord w ->
-                    wordButton "word reference" idx w
+                ReferenceWord idx w ->
+                    wordButton ReferenceWordButton idx w
 
                 Space ->
                     H.text " "
@@ -464,15 +473,30 @@ versePartsToHtml parts =
                 Linebreak ->
                     linebreak
         )
-        (List.range 0 (List.length parts))
         parts
 
 
-wordButton : String -> a -> String -> H.Html msg
-wordButton classes idx text =
+type WordButtonType
+    = VerseWordButton
+    | ReferenceWordButton
+
+
+idPrefixForButton : WordButtonType -> String
+idPrefixForButton wbt = case wbt of
+                            VerseWordButton -> "id-word-"
+                            ReferenceWordButton -> "id-reference-part-"
+
+
+idForButton : WordButtonType -> Index -> String
+idForButton wbt idx =  idPrefixForButton wbt ++ toString idx
+
+wordButton : WordButtonType -> Index -> String -> H.Html msg
+wordButton wbt idx text =
     H.span
-        [ A.class classes
-        , A.id <| "id-word" ++ toString idx
+        [ A.class <| case wbt of
+                         VerseWordButton -> "word"
+                         ReferenceWordButton -> "word reference"
+        , A.id <| idForButton wbt idx
         ]
         [ H.text text ]
 
