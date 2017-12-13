@@ -3,6 +3,7 @@ module Learn exposing (..)
 import Dict
 import Html as H
 import Html.Attributes as A
+import Html.Events as E
 import Http
 import Json.Decode as JD
 import Json.Decode.Pipeline as JDP
@@ -32,6 +33,7 @@ main =
 type alias Flags =
     { preferences : JD.Value
     , account : Maybe AccountData
+    , isTouchDevice : Bool
     }
 
 
@@ -51,6 +53,7 @@ init flags =
 
                 Nothing ->
                     GuestUser
+      , isTouchDevice = flags.isTouchDevice
       , learningSession = Loading
       }
     , loadVerses
@@ -65,6 +68,7 @@ type alias Model =
     { preferences : Preferences
     , user : User
     , learningSession : LearningSession
+    , isTouchDevice : Bool
     }
 
 
@@ -112,14 +116,6 @@ type alias CurrentVerse =
     , remainingStages : List LearningStage
     , seenStages : List LearningStage
     }
-
-
-type LearningStage
-    = Read
-    | Test
-    | TestFinished
-    | PracticeStage
-    | PracticeFinished
 
 
 type alias LearnOrder =
@@ -303,7 +299,7 @@ dashboardUrl =
     "/dashboard/"
 
 
-view : Model -> H.Html msg
+view : Model -> H.Html Msg
 view model =
     H.div []
         [ topNav model
@@ -315,7 +311,7 @@ view model =
                 errorMessage ("The items to learn could not be loaded (error message: " ++ toString err ++ ".) Please check your internet connection!")
 
             Session vs ->
-                viewCurrentVerse vs model.preferences
+                viewCurrentVerse vs model
         ]
 
 
@@ -346,8 +342,8 @@ loadingDiv =
     H.div [ A.id "id-loading-full" ] [ H.text "Loading" ]
 
 
-viewCurrentVerse : SessionData -> Preferences -> H.Html msg
-viewCurrentVerse session preferences =
+viewCurrentVerse : SessionData -> Model -> H.Html Msg
+viewCurrentVerse session model =
     let
         currentVerse =
             session.currentVerse
@@ -362,6 +358,8 @@ viewCurrentVerse session preferences =
                     ]
                 , copyrightNotice currentVerse.verseStatus.version
                 ]
+            , actionButtons currentVerse model.preferences
+            , instructions currentVerse model
             ]
 
 
@@ -529,6 +527,171 @@ copyrightNotice version =
 
 
 
+{- Action buttons -}
+
+
+actionButtons : CurrentVerse -> Preferences -> H.Html Msg
+actionButtons verse preferences =
+    H.div [ A.id "id-action-btns" ]
+        (buttonsForStage verse preferences)
+
+
+type ButtonEnabled
+    = Enabled
+    | Disabled
+
+
+type ButtonDefault
+    = Default
+    | NonDefault
+
+
+buttonsForStage : CurrentVerse -> Preferences -> List (H.Html Msg)
+buttonsForStage verse preferences =
+    let
+        isRemainingStage =
+            not <| List.isEmpty <| List.filter (not << isFinishedStage) verse.remainingStages
+
+        isPreviousStage =
+            not <| List.isEmpty verse.seenStages
+
+        nextEnabled =
+            if isRemainingStage then
+                Enabled
+            else
+                Disabled
+
+        previousEnabled =
+            if isPreviousStage then
+                Enabled
+            else
+                Disabled
+    in
+        case verse.currentStage of
+            Read ->
+                [ previousStageBtn previousEnabled NonDefault
+                , nextStageBtn nextEnabled Default
+                ]
+
+            Test ->
+                [ previousStageBtn previousEnabled NonDefault
+                , nextStageBtn nextEnabled Default
+                ]
+
+            _ ->
+                Debug.crash "TODO implement buttonsForStage"
+
+
+getTestingMethod : Model -> TestingMethod
+getTestingMethod model =
+    if model.isTouchDevice then
+        model.preferences.touchscreenTestingMethod
+    else
+        model.preferences.desktopTestingMethod
+
+
+previousStageBtn : ButtonEnabled -> ButtonDefault -> H.Html Msg
+previousStageBtn enabled default =
+    button enabled default PreviousStage "Back"
+
+
+nextStageBtn : ButtonEnabled -> ButtonDefault -> H.Html Msg
+nextStageBtn enabled default =
+    button enabled default NextStage "Next"
+
+
+button : ButtonEnabled -> ButtonDefault -> msg -> String -> H.Html msg
+button enabled default clickMsg text =
+    let
+        class =
+            case enabled of
+                Enabled ->
+                    case default of
+                        Default ->
+                            "btn primary"
+
+                        NonDefault ->
+                            "btn"
+
+                Disabled ->
+                    "btn disabled"
+
+        attributes =
+            [ A.class class ]
+
+        eventAttributes =
+            case enabled of
+                Enabled ->
+                    [ E.onClick clickMsg ]
+                        ++ (case default of
+                                Default ->
+                                    [ onEnter clickMsg ]
+
+                                NonDefault ->
+                                    []
+                           )
+
+                Disabled ->
+                    []
+    in
+        H.button (attributes ++ eventAttributes)
+            [ H.text text ]
+
+
+onEnter : a -> H.Attribute a
+onEnter msg =
+    let
+        isEnter code =
+            if code == 13 then
+                JD.succeed msg
+            else
+                JD.fail "not ENTER"
+    in
+        E.on "keydown" (JD.andThen isEnter E.keyCode)
+
+
+
+{- View - help -}
+
+
+instructions : CurrentVerse -> Model -> H.Html msg
+instructions verse model =
+    H.div [ A.id "id-instructions" ]
+        (case verse.currentStage of
+            Read ->
+                [ bold "READ: "
+                , H.text "Read the text through (preferably aloud), and click 'Next'."
+                ]
+
+            Test ->
+                (case getTestingMethod model of
+                    FullWords ->
+                        [ bold "TEST: "
+                        , H.text
+                            ("Testing time! Type the text, pressing space after each word."
+                                ++ "(hint: don't sweat the spelling, we should be able to work it out)."
+                            )
+                        ]
+
+                    FirstLetter ->
+                        [ bold "TEST: "
+                        , H.text "Testing time! Type the "
+                        , bold "first letter"
+                        , H.text " of each word."
+                        ]
+
+                    OnScreen ->
+                        [ bold "TEST: "
+                        , H.text "Testing time! For each word choose from the options below."
+                        ]
+                )
+
+            _ ->
+                Debug.crash "TODO implement instructions"
+        )
+
+
+
 {- View - testing logic -}
 
 
@@ -554,6 +717,11 @@ shouldShowReference verse =
 
 
 {- View helpers and generic utils -}
+
+
+bold : String -> H.Html msg
+bold text =
+    H.b [] [ H.text text ]
 
 
 linebreak : H.Html msg
@@ -598,6 +766,8 @@ link href caption icon iconAlign =
 type Msg
     = LoadVerses
     | VersesToLearn (Result Http.Error VerseBatchRaw)
+    | NextStage
+    | PreviousStage
 
 
 update : Msg -> Model -> ( Model, Cmd msg )
@@ -637,6 +807,12 @@ update msg model =
 
         VersesToLearn (Err errMsg) ->
             ( { model | learningSession = VersesError errMsg }, Cmd.none )
+
+        NextStage ->
+            ( moveToNextStage model, Cmd.none )
+
+        PreviousStage ->
+            ( moveToPreviousStage model, Cmd.none )
 
 
 
@@ -770,6 +946,27 @@ mergeSession initialSession newBatchSession =
 {- Stages -}
 
 
+type LearningStage
+    = Read
+    | Test
+    | TestFinished
+    | PracticeStage
+    | PracticeFinished
+
+
+isFinishedStage : LearningStage -> Bool
+isFinishedStage stage =
+    case stage of
+        TestFinished ->
+            True
+
+        PracticeFinished ->
+            True
+
+        _ ->
+            False
+
+
 getStages : LearningType -> VerseStatus -> ( LearningStage, List LearningStage )
 getStages learningType verseStatus =
     case learningType of
@@ -781,6 +978,76 @@ getStages learningType verseStatus =
 
         Practice ->
             ( PracticeStage, [ PracticeFinished ] )
+
+
+moveToNextStage : Model -> Model
+moveToNextStage model =
+    case model.learningSession of
+        Session sessionData ->
+            let
+                currentVerse =
+                    sessionData.currentVerse
+
+                remaining =
+                    currentVerse.remainingStages
+            in
+                case remaining of
+                    [] ->
+                        model
+
+                    stage :: stages ->
+                        let
+                            newCurrentVerse =
+                                { currentVerse
+                                    | seenStages = currentVerse.currentStage :: currentVerse.seenStages
+                                    , currentStage = stage
+                                    , remainingStages = stages
+                                }
+
+                            newSessionData =
+                                { sessionData
+                                    | currentVerse = newCurrentVerse
+                                }
+                        in
+                            { model | learningSession = Session newSessionData }
+
+        _ ->
+            model
+
+
+moveToPreviousStage : Model -> Model
+moveToPreviousStage model =
+    case model.learningSession of
+        Session sessionData ->
+            let
+                currentVerse =
+                    sessionData.currentVerse
+
+                previous =
+                    currentVerse.seenStages
+            in
+                case previous of
+                    [] ->
+                        model
+
+                    stage :: stages ->
+                        let
+                            newCurrentVerse =
+                                { currentVerse
+                                    | seenStages = stages
+                                    , currentStage = stage
+                                    , remainingStages = currentVerse.currentStage :: currentVerse.remainingStages
+                                }
+
+                            newSessionData =
+                                { sessionData
+                                    | currentVerse = newCurrentVerse
+                                }
+                        in
+                            { model | learningSession = Session newSessionData }
+
+        _ ->
+            model
 
 
 
