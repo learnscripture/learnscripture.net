@@ -343,8 +343,25 @@ viewCurrentVerse session preferences =
                     [ H.div [ A.class "current-verse" ]
                         (versePartsToHtml currentVerse.currentStage <| partsForVerse currentVerse.verseStatus)
                     ]
+                , copyrightNotice currentVerse.verseStatus.version
                 ]
             ]
+
+
+copyrightNotice : Version -> H.Html msg
+copyrightNotice version =
+    let
+        caption =
+            version.shortName ++ " - " ++ version.fullName
+    in
+        H.div [ A.id "id-copyright-notice" ]
+            (if version.url == "" then
+                [ H.text caption ]
+             else
+                [ H.a [ A.href version.url ]
+                    [ H.text caption ]
+                ]
+            )
 
 
 linebreak : H.Html msg
