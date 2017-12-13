@@ -7,6 +7,7 @@ import 'jquery.ajaxretry';
 
 // Ours
 import './preferences';
+import { isTouchDevice } from './common';
 
 // CSS/Less
 import 'learn.less';
@@ -28,6 +29,6 @@ var preferences =
             },
             "account": accountNode == null ? null : {
                 "username": accountNode.attributes['data-username'].value,
-            }
-
+            },
+            "isTouchDevice": isTouchDevice()
         });
