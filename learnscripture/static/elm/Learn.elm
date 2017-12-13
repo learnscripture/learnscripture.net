@@ -319,14 +319,31 @@ view model =
         ]
 
 
+topNav : Model -> H.Html msg
+topNav model =
+    H.nav [ A.class "topbar" ]
+        [ H.ul []
+            [ H.li [ A.class "dashboard-link" ]
+                [ link dashboardUrl "Dashboard" "return" AlignLeft ]
+            , H.li [ A.class "preferences-link" ]
+                [ link "#" (userDisplayName model.user) "preferences" AlignRight ]
+            ]
+        ]
+
+
+userDisplayName : User -> String
+userDisplayName u =
+    case u of
+        GuestUser ->
+            "Guest"
+
+        Account ad ->
+            ad.username
+
+
 loadingDiv : H.Html msg
 loadingDiv =
     H.div [ A.id "id-loading-full" ] [ H.text "Loading" ]
-
-
-errorMessage : String -> H.Html msg
-errorMessage msg =
-    H.div [ A.class "error" ] [ H.text msg ]
 
 
 viewCurrentVerse : SessionData -> Preferences -> H.Html msg
@@ -348,41 +365,8 @@ viewCurrentVerse session preferences =
             ]
 
 
-copyrightNotice : Version -> H.Html msg
-copyrightNotice version =
-    let
-        caption =
-            version.shortName ++ " - " ++ version.fullName
-    in
-        H.div [ A.id "id-copyright-notice" ]
-            (if version.url == "" then
-                [ H.text caption ]
-             else
-                [ H.a [ A.href version.url ]
-                    [ H.text caption ]
-                ]
-            )
 
-
-linebreak : H.Html msg
-linebreak =
-    H.br [] []
-
-
-numberItems : List a -> List Int
-numberItems l =
-    List.range 0 (List.length l)
-
-
-partsForVerse : VerseStatus -> List Part
-partsForVerse verse =
-    (List.map2 verseWordToParts verse.scoringTextWords (numberItems verse.scoringTextWords)
-        |> List.concat
-    )
-        ++ if showReference verse then
-            [ Linebreak ] ++ referenceToParts verse.localizedReference
-           else
-            []
+{- View helpers - word/sentence splitting and word buttons -}
 
 
 type alias Index =
@@ -393,9 +377,19 @@ type Part
     = VerseWord Index String
     | ReferenceWord Index String
     | Space
-    | Punct String
-      -- only used for references
+    | ReferencePunct String
     | Linebreak
+
+
+partsForVerse : VerseStatus -> List Part
+partsForVerse verse =
+    (List.map2 verseWordToParts verse.scoringTextWords (listIndices verse.scoringTextWords)
+        |> List.concat
+    )
+        ++ if shouldShowReference verse then
+            [ Linebreak ] ++ referenceToParts verse.localizedReference
+           else
+            []
 
 
 
@@ -449,7 +443,7 @@ referenceToParts reference =
         List.map2
             (\idx w ->
                 if R.contains punct w then
-                    Punct w
+                    ReferencePunct w
                 else if String.trim w == "" then
                     Space
                 else
@@ -457,31 +451,6 @@ referenceToParts reference =
             )
             (List.range 0 (List.length parts))
             parts
-
-
-showReference :
-    { c
-        | verseSet : Maybe { a | setType : VerseSetType }
-        , version : { b | textType : TextType }
-    }
-    -> Bool
-showReference verse =
-    case verse.version.textType of
-        Bible ->
-            case verse.verseSet of
-                Nothing ->
-                    True
-
-                Just verseSet ->
-                    case verseSet.setType of
-                        Selection ->
-                            True
-
-                        Passage ->
-                            False
-
-        Catechism ->
-            False
 
 
 versePartsToHtml : LearningStage -> List Part -> List (H.Html msg)
@@ -498,7 +467,7 @@ versePartsToHtml stage parts =
                 Space ->
                     H.text " "
 
-                Punct w ->
+                ReferencePunct w ->
                     H.span [ A.class "punct" ]
                         [ H.text w ]
 
@@ -543,6 +512,60 @@ wordButton wbt stage idx text =
         [ H.text text ]
 
 
+copyrightNotice : Version -> H.Html msg
+copyrightNotice version =
+    let
+        caption =
+            version.shortName ++ " - " ++ version.fullName
+    in
+        H.div [ A.id "id-copyright-notice" ]
+            (if version.url == "" then
+                [ H.text caption ]
+             else
+                [ H.a [ A.href version.url ]
+                    [ H.text caption ]
+                ]
+            )
+
+
+
+{- View - testing logic -}
+
+
+shouldShowReference : VerseStatus -> Bool
+shouldShowReference verse =
+    case verse.version.textType of
+        Bible ->
+            case verse.verseSet of
+                Nothing ->
+                    True
+
+                Just verseSet ->
+                    case verseSet.setType of
+                        Selection ->
+                            True
+
+                        Passage ->
+                            False
+
+        Catechism ->
+            False
+
+
+
+{- View helpers and generic utils -}
+
+
+linebreak : H.Html msg
+linebreak =
+    H.br [] []
+
+
+errorMessage : String -> H.Html msg
+errorMessage msg =
+    H.div [ A.class "error" ] [ H.text msg ]
+
+
 makeIcon : String -> H.Html msg
 makeIcon icon =
     H.i [ A.class ("icon-fw icon-" ++ icon) ] []
@@ -566,28 +589,6 @@ link href caption icon iconAlign =
                     [ captionH, iconH ]
     in
         H.a [ A.href href ] combinedH
-
-
-topNav : Model -> H.Html msg
-topNav model =
-    H.nav [ A.class "topbar" ]
-        [ H.ul []
-            [ H.li [ A.class "dashboard-link" ]
-                [ link dashboardUrl "Dashboard" "return" AlignLeft ]
-            , H.li [ A.class "preferences-link" ]
-                [ link "#" (userDisplayName model.user) "preferences" AlignRight ]
-            ]
-        ]
-
-
-userDisplayName : User -> String
-userDisplayName u =
-    case u of
-        GuestUser ->
-            "Guest"
-
-        Account ad ->
-            ad.username
 
 
 
@@ -950,3 +951,8 @@ dedupeBy keyFunc list =
                                 first :: helper keyFunc rest (Set.insert key existing)
     in
         helper keyFunc list Set.empty
+
+
+listIndices : List a -> List Int
+listIndices l =
+    List.range 0 (List.length l)
