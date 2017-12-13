@@ -102,8 +102,24 @@ type LearningSession
 
 type alias SessionData =
     { verses : VerseStore
-    , currentVerse : VerseStatus
+    , currentVerse : CurrentVerse
     }
+
+
+type alias CurrentVerse =
+    { verseStatus : VerseStatus
+    , currentStage : LearningStage
+    , remainingStages : List LearningStage
+    , seenStages : List LearningStage
+    }
+
+
+type LearningStage
+    = Read
+    | Test
+    | TestFinished
+    | PracticeStage
+    | PracticeFinished
 
 
 type alias LearnOrder =
@@ -321,11 +337,11 @@ viewCurrentVerse session preferences =
     in
         H.div [ A.id "id-content-wrapper" ]
             [ H.h2 []
-                [ H.text currentVerse.titleText ]
+                [ H.text currentVerse.verseStatus.titleText ]
             , H.div [ A.id "id-verse-wrapper" ]
                 [ H.div [ A.class "current-verse-wrapper" ]
                     [ H.div [ A.class "current-verse" ]
-                        (versePartsToHtml <| partsForVerse currentVerse)
+                        (versePartsToHtml currentVerse.currentStage <| partsForVerse currentVerse.verseStatus)
                     ]
                 ]
             ]
@@ -451,16 +467,16 @@ showReference verse =
             False
 
 
-versePartsToHtml : List Part -> List (H.Html msg)
-versePartsToHtml parts =
+versePartsToHtml : LearningStage -> List Part -> List (H.Html msg)
+versePartsToHtml stage parts =
     List.map
         (\p ->
             case p of
                 VerseWord idx w ->
-                    wordButton VerseWordButton idx w
+                    wordButton VerseWordButton stage idx w
 
                 ReferenceWord idx w ->
-                    wordButton ReferenceWordButton idx w
+                    wordButton ReferenceWordButton stage idx w
 
                 Space ->
                     H.text " "
@@ -495,8 +511,8 @@ idForButton wbt idx =
     idPrefixForButton wbt ++ toString idx
 
 
-wordButton : WordButtonType -> Index -> String -> H.Html msg
-wordButton wbt idx text =
+wordButton : WordButtonType -> LearningStage -> Index -> String -> H.Html msg
+wordButton wbt stage idx text =
     H.span
         [ A.class <|
             case wbt of
@@ -687,16 +703,25 @@ verseBatchToSession batch =
                             Nothing
 
                         Just maxOrderVal ->
-                            Just
-                                { verses =
-                                    { verseStatuses = batch.verseStatuses
-                                    , learningType = learningType
-                                    , returnTo = batch.returnTo
-                                    , maxOrderVal = maxOrderVal
-                                    , seen = []
+                            let
+                                ( firstStage, remainingStages ) =
+                                    getStages learningType verse
+                            in
+                                Just
+                                    { verses =
+                                        { verseStatuses = batch.verseStatuses
+                                        , learningType = learningType
+                                        , returnTo = batch.returnTo
+                                        , maxOrderVal = maxOrderVal
+                                        , seen = []
+                                        }
+                                    , currentVerse =
+                                        { verseStatus = verse
+                                        , currentStage = firstStage
+                                        , seenStages = []
+                                        , remainingStages = remainingStages
+                                        }
                                     }
-                                , currentVerse = verse
-                                }
 
 
 
@@ -716,32 +741,28 @@ mergeSession initialSession newBatchSession =
                 { initialVerses
                     | verseStatuses =
                         (initialVerses.verseStatuses
-                             ++ newBatchSession.verses.verseStatuses)
+                            ++ newBatchSession.verses.verseStatuses
+                        )
                             |> dedupeBy .learnOrder
                 }
         }
 
 
-dedupeBy : (a -> comparable) -> List a -> List a
-dedupeBy keyFunc list =
-    let
-        helper =
-            \keyFunc list existing ->
-                case list of
-                    [] ->
-                        []
 
-                    first :: rest ->
-                        let
-                            key =
-                                keyFunc first
-                        in
-                            if Set.member key existing then
-                                helper keyFunc rest existing
-                            else
-                                first :: helper keyFunc rest (Set.insert key existing)
-    in
-        helper keyFunc list Set.empty
+{- Stages -}
+
+
+getStages : LearningType -> VerseStatus -> ( LearningStage, List LearningStage )
+getStages learningType verseStatus =
+    case learningType of
+        Learning ->
+            ( Read, [ Test, TestFinished ] )
+
+        Revision ->
+            ( Test, [ TestFinished ] )
+
+        Practice ->
+            ( PracticeStage, [ PracticeFinished ] )
 
 
 
@@ -886,3 +907,29 @@ learningTypeDecoder =
         , ( "LEARNING", Learning )
         , ( "PRACTICE", Practice )
         ]
+
+
+
+{- General utils -}
+
+
+dedupeBy : (a -> comparable) -> List a -> List a
+dedupeBy keyFunc list =
+    let
+        helper =
+            \keyFunc list existing ->
+                case list of
+                    [] ->
+                        []
+
+                    first :: rest ->
+                        let
+                            key =
+                                keyFunc first
+                        in
+                            if Set.member key existing then
+                                helper keyFunc rest existing
+                            else
+                                first :: helper keyFunc rest (Set.insert key existing)
+    in
+        helper keyFunc list Set.empty
