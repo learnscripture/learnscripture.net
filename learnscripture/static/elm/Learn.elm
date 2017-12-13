@@ -11,6 +11,7 @@ import Maybe
 import Navigation
 import Regex as R
 import Set
+import String
 
 
 {- Main -}
@@ -310,8 +311,8 @@ view model =
             VersesError err ->
                 errorMessage ("The items to learn could not be loaded (error message: " ++ toString err ++ ".) Please check your internet connection!")
 
-            Session vs ->
-                viewCurrentVerse vs model
+            Session sessionData ->
+                viewCurrentVerse sessionData model
         ]
 
 
@@ -367,16 +368,27 @@ viewCurrentVerse session model =
 {- View helpers - word/sentence splitting and word buttons -}
 
 
-type alias Index =
-    Int
-
-
 type Part
-    = VerseWord Index String
-    | ReferenceWord Index String
+    = WordPart Word
     | Space
     | ReferencePunct String
     | Linebreak
+
+
+type alias Word =
+    { type_ : WordType
+    , index : WordIndex
+    , text : String
+    }
+
+
+type WordType
+    = BodyWord
+    | ReferenceWord
+
+
+type alias WordIndex =
+    Int
 
 
 partsForVerse : VerseStatus -> List Part
@@ -396,18 +408,26 @@ partsForVerse verse =
 -- function does not split off punctuation, but keeps it as part of the word.
 
 
-verseWordToParts : String -> Index -> List Part
+verseWordToParts : String -> WordIndex -> List Part
 verseWordToParts w idx =
     let
         ( start, end ) =
             ( String.slice 0 -1 w, String.right 1 w )
     in
         if end == "\n" then
-            [ VerseWord idx start
+            [ WordPart
+                { type_ = BodyWord
+                , index = idx
+                , text = start
+                }
             , Linebreak
             ]
         else
-            [ VerseWord idx w
+            [ WordPart
+                { type_ = BodyWord
+                , index = idx
+                , text = w
+                }
             , Space
             ]
 
@@ -445,7 +465,11 @@ referenceToParts reference =
                 else if String.trim w == "" then
                     Space
                 else
-                    ReferenceWord idx w
+                    WordPart
+                        { type_ = ReferenceWord
+                        , index = idx
+                        , text = w
+                        }
             )
             (List.range 0 (List.length parts))
             parts
@@ -456,11 +480,8 @@ versePartsToHtml stage parts =
     List.map
         (\p ->
             case p of
-                VerseWord idx w ->
-                    wordButton VerseWordButton stage idx w
-
-                ReferenceWord idx w ->
-                    wordButton ReferenceWordButton stage idx w
+                WordPart word ->
+                    wordButton word stage
 
                 Space ->
                     H.text " "
@@ -475,39 +496,57 @@ versePartsToHtml stage parts =
         parts
 
 
-type WordButtonType
-    = VerseWordButton
-    | ReferenceWordButton
-
-
-idPrefixForButton : WordButtonType -> String
-idPrefixForButton wbt =
-    case wbt of
-        VerseWordButton ->
+idPrefixForButton : WordType -> String
+idPrefixForButton wt =
+    case wt of
+        BodyWord ->
             "id-word-"
 
-        ReferenceWordButton ->
+        ReferenceWord ->
             "id-reference-part-"
 
 
-idForButton : WordButtonType -> Index -> String
-idForButton wbt idx =
-    idPrefixForButton wbt ++ toString idx
+idForButton : Word -> String
+idForButton wd =
+    idPrefixForButton wd.type_ ++ toString wd.index
 
 
-wordButton : WordButtonType -> LearningStage -> Index -> String -> H.Html msg
-wordButton wbt stage idx text =
-    H.span
-        [ A.class <|
-            case wbt of
-                VerseWordButton ->
-                    "word"
+wordButton : Word -> LearningStage -> H.Html msg
+wordButton wd stage =
+    let
+        ( classesOuter, classesInner ) =
+            wordButtonClasses wd stage
+    in
+        H.span
+            [ A.class <| String.join " " classesOuter
+            , A.id <| idForButton wd
+            ]
+            [ H.span
+                [ A.class <| String.join " " ([ "wordpart" ] ++ classesInner) ]
+                [ H.text wd.text ]
+            ]
 
-                ReferenceWordButton ->
-                    "word reference"
-        , A.id <| idForButton wbt idx
-        ]
-        [ H.text text ]
+
+wordButtonClasses : Word -> LearningStage -> ( List String, List String )
+wordButtonClasses wd stage =
+    let
+        outer =
+            case wd.type_ of
+                BodyWord ->
+                    [ "word" ]
+
+                ReferenceWord ->
+                    [ "word", "reference" ]
+
+        inner =
+            case stage of
+                TestStage _ ->
+                    [ "hidden" ]
+
+                _ ->
+                    []
+    in
+        ( outer, inner )
 
 
 copyrightNotice : Version -> H.Html msg
@@ -573,7 +612,7 @@ buttonsForStage verse preferences =
                 , nextStageBtn nextEnabled Default
                 ]
 
-            Test ->
+            TestStage _ ->
                 [ previousStageBtn previousEnabled NonDefault
                 , nextStageBtn nextEnabled Default
                 ]
@@ -663,7 +702,7 @@ instructions verse model =
                 , H.text "Read the text through (preferably aloud), and click 'Next'."
                 ]
 
-            Test ->
+            TestStage _ ->
                 (case getTestingMethod model of
                     FullWords ->
                         [ bold "TEST: "
@@ -948,10 +987,28 @@ mergeSession initialSession newBatchSession =
 
 type LearningStage
     = Read
-    | Test
+    | TestStage TestProgress
     | TestFinished
     | PracticeStage
     | PracticeFinished
+
+
+type alias TestProgress =
+    { attempts : Dict.Dict Word Attempt
+    }
+
+
+type alias Attempt =
+    { mistakes : Int
+    , attempts : Int
+    , usedHints : Int
+    , allowedMistakes : Int
+    }
+
+
+initialTestProgress : TestProgress
+initialTestProgress =
+    { attempts = Dict.empty }
 
 
 isFinishedStage : LearningStage -> Bool
@@ -971,10 +1028,16 @@ getStages : LearningType -> VerseStatus -> ( LearningStage, List LearningStage )
 getStages learningType verseStatus =
     case learningType of
         Learning ->
-            ( Read, [ Test, TestFinished ] )
+            ( Read
+            , [ TestStage initialTestProgress
+              , TestFinished
+              ]
+            )
 
         Revision ->
-            ( Test, [ TestFinished ] )
+            ( TestStage initialTestProgress
+            , [ TestFinished ]
+            )
 
         Practice ->
             ( PracticeStage, [ PracticeFinished ] )
