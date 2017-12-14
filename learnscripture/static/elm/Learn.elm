@@ -12,6 +12,7 @@ import Navigation
 import Regex as R
 import Set
 import String
+import LearnPorts
 
 
 {- Main -}
@@ -348,6 +349,9 @@ viewCurrentVerse session model =
     let
         currentVerse =
             session.currentVerse
+
+        testingMethod =
+            getTestingMethod model
     in
         H.div [ A.id "id-content-wrapper" ]
             [ H.h2 []
@@ -360,7 +364,11 @@ viewCurrentVerse session model =
                 , copyrightNotice currentVerse.verseStatus.version
                 ]
             , actionButtons currentVerse model.preferences
-            , instructions currentVerse model
+            , instructions currentVerse testingMethod
+              -- We make id-typing-box a permanent fixture
+              -- to avoid issues with losing focus
+              -- and screen keyboards then disappearing
+            , typingBox currentVerse testingMethod
             ]
 
 
@@ -400,6 +408,24 @@ partsForVerse verse =
             [ Linebreak ] ++ referenceToParts verse.localizedReference
            else
             []
+
+
+wordsForVerse : VerseStatus -> List Word
+wordsForVerse verseStatus =
+    let
+        parts =
+            partsForVerse verseStatus
+    in
+        List.filterMap
+            (\p ->
+                case p of
+                    WordPart w ->
+                        Just w
+
+                    _ ->
+                        Nothing
+            )
+            parts
 
 
 
@@ -565,8 +591,33 @@ copyrightNotice version =
             )
 
 
+typingBoxId : String
+typingBoxId =
+    "id-typing"
 
-{- Action buttons -}
+
+typingBox : CurrentVerse -> TestingMethod -> H.Html Msg
+typingBox verse testingMethod =
+    let
+        value =
+            case verse.currentStage of
+                TestStage tp ->
+                    tp.currentTypedText
+
+                _ ->
+                    ""
+    in
+        H.input
+            [ A.id typingBoxId
+            , A.value value
+            , A.style
+                (if testMethodUsesTextBox testingMethod && isTestingStage verse.currentStage then
+                    []
+                 else
+                    [ ( "display", "none" ) ]
+                )
+            ]
+            []
 
 
 actionButtons : CurrentVerse -> Preferences -> H.Html Msg
@@ -693,8 +744,8 @@ onEnter msg =
 {- View - help -}
 
 
-instructions : CurrentVerse -> Model -> H.Html msg
-instructions verse model =
+instructions : CurrentVerse -> TestingMethod -> H.Html msg
+instructions verse testingMethod =
     H.div [ A.id "id-instructions" ]
         (case verse.currentStage of
             Read ->
@@ -703,7 +754,7 @@ instructions verse model =
                 ]
 
             TestStage _ ->
-                (case getTestingMethod model of
+                (case testingMethod of
                     FullWords ->
                         [ bold "TEST: "
                         , H.text
@@ -848,7 +899,7 @@ update msg model =
             ( { model | learningSession = VersesError errMsg }, Cmd.none )
 
         NextStage ->
-            ( moveToNextStage model, Cmd.none )
+            moveToNextStage model
 
         PreviousStage ->
             ( moveToPreviousStage model, Cmd.none )
@@ -995,6 +1046,9 @@ type LearningStage
 
 type alias TestProgress =
     { attempts : Dict.Dict Word Attempt
+    , currentTypedText : String
+    , words : List Word
+    , currentWordIndex : WordIndex
     }
 
 
@@ -1006,9 +1060,28 @@ type alias Attempt =
     }
 
 
-initialTestProgress : TestProgress
-initialTestProgress =
-    { attempts = Dict.empty }
+initialTestProgress : VerseStatus -> TestProgress
+initialTestProgress verseStatus =
+    { attempts = Dict.empty
+    , currentTypedText = ""
+    , words = wordsForVerse verseStatus
+    , currentWordIndex = 0
+    }
+
+
+getCurrentWord : TestProgress -> Word
+getCurrentWord testProgress =
+    case getAt testProgress.words testProgress.currentWordIndex of
+        Nothing ->
+            Debug.crash
+                ("getCurrentWord crash - getting index "
+                    ++ toString testProgress.currentWordIndex
+                    ++ " of list "
+                    ++ toString testProgress.words
+                )
+
+        Just word ->
+            word
 
 
 isFinishedStage : LearningStage -> Bool
@@ -1024,18 +1097,44 @@ isFinishedStage stage =
             False
 
 
+isTestingStage : LearningStage -> Bool
+isTestingStage stage =
+    case stage of
+        TestStage _ ->
+            True
+
+        PracticeStage ->
+            True
+
+        _ ->
+            False
+
+
+testMethodUsesTextBox : TestingMethod -> Bool
+testMethodUsesTextBox testingMethod =
+    case testingMethod of
+        FullWords ->
+            True
+
+        FirstLetter ->
+            True
+
+        OnScreen ->
+            False
+
+
 getStages : LearningType -> VerseStatus -> ( LearningStage, List LearningStage )
 getStages learningType verseStatus =
     case learningType of
         Learning ->
             ( Read
-            , [ TestStage initialTestProgress
+            , [ TestStage (initialTestProgress verseStatus)
               , TestFinished
               ]
             )
 
         Revision ->
-            ( TestStage initialTestProgress
+            ( TestStage (initialTestProgress verseStatus)
             , [ TestFinished ]
             )
 
@@ -1043,39 +1142,43 @@ getStages learningType verseStatus =
             ( PracticeStage, [ PracticeFinished ] )
 
 
-moveToNextStage : Model -> Model
+moveToNextStage : Model -> ( Model, Cmd msg )
 moveToNextStage model =
-    case model.learningSession of
-        Session sessionData ->
-            let
-                currentVerse =
-                    sessionData.currentVerse
+    let
+        newModel =
+            case model.learningSession of
+                Session sessionData ->
+                    let
+                        currentVerse =
+                            sessionData.currentVerse
 
-                remaining =
-                    currentVerse.remainingStages
-            in
-                case remaining of
-                    [] ->
-                        model
+                        remaining =
+                            currentVerse.remainingStages
+                    in
+                        case remaining of
+                            [] ->
+                                model
 
-                    stage :: stages ->
-                        let
-                            newCurrentVerse =
-                                { currentVerse
-                                    | seenStages = currentVerse.currentStage :: currentVerse.seenStages
-                                    , currentStage = stage
-                                    , remainingStages = stages
-                                }
+                            stage :: stages ->
+                                let
+                                    newCurrentVerse =
+                                        { currentVerse
+                                            | seenStages = currentVerse.currentStage :: currentVerse.seenStages
+                                            , currentStage = stage
+                                            , remainingStages = stages
+                                        }
 
-                            newSessionData =
-                                { sessionData
-                                    | currentVerse = newCurrentVerse
-                                }
-                        in
-                            { model | learningSession = Session newSessionData }
+                                    newSessionData =
+                                        { sessionData
+                                            | currentVerse = newCurrentVerse
+                                        }
+                                in
+                                    { model | learningSession = Session newSessionData }
 
-        _ ->
-            model
+                _ ->
+                    model
+    in
+        ( newModel, updateTypingBoxCommand newModel )
 
 
 moveToPreviousStage : Model -> Model
@@ -1111,6 +1214,21 @@ moveToPreviousStage model =
 
         _ ->
             model
+
+
+updateTypingBoxCommand : Model -> Cmd msg
+updateTypingBoxCommand model =
+    case model.learningSession of
+        Session sessionData ->
+            case sessionData.currentVerse.currentStage of
+                TestStage tp ->
+                    LearnPorts.updateTypingBox ( typingBoxId, (idForButton <| getCurrentWord tp) )
+
+                _ ->
+                    Cmd.none
+
+        _ ->
+            Cmd.none
 
 
 
@@ -1286,3 +1404,8 @@ dedupeBy keyFunc list =
 listIndices : List a -> List Int
 listIndices l =
     List.range 0 (List.length l)
+
+
+getAt : List a -> Int -> Maybe a
+getAt xs idx =
+    List.head <| List.drop idx xs

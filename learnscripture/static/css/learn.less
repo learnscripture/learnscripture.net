@@ -121,6 +121,18 @@ body.learn-page {
             border-color: red;
         }
     }
+    #id-typing {
+        color: black;
+        // These values are important for matching size of .word.
+        // Left padding matches to get the word to line up,
+        // the others don't to give more room for typing.
+        // See also setup_learn.js
+        padding: 0 0 0 4px;
+        margin: 0;
+        border: 2px solid; // same as .word.
+        position: absolute;
+    }
+
     .hidden {
         opacity: 0;
     }
