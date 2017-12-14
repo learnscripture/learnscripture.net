@@ -365,9 +365,8 @@ viewCurrentVerse session model =
                 ]
             , actionButtons currentVerse model.preferences
             , instructions currentVerse testingMethod
-              -- We make id-typing-box a permanent fixture
-              -- to avoid issues with losing focus
-              -- and screen keyboards then disappearing
+              -- We make typing box a permanent fixture to avoid issues with
+              -- losing focus and screen keyboards then disappearing
             , typingBox currentVerse testingMethod
             ]
 
@@ -606,17 +605,19 @@ typingBox verse testingMethod =
 
                 _ ->
                     ""
+
+        inUse =
+            testMethodUsesTextBox testingMethod && isTestingStage verse.currentStage
     in
         H.input
-            [ A.id typingBoxId
-            , A.value value
-            , A.style
-                (if testMethodUsesTextBox testingMethod && isTestingStage verse.currentStage then
-                    []
-                 else
-                    [ ( "display", "none" ) ]
-                )
-            ]
+            ([ A.id typingBoxId
+             , A.value value
+             ]
+                ++ if inUse then
+                    [ E.onInput TypingBoxInput ]
+                   else
+                    [ A.style [ ( "display", "none" ) ] ]
+            )
             []
 
 
@@ -858,6 +859,7 @@ type Msg
     | VersesToLearn (Result Http.Error VerseBatchRaw)
     | NextStage
     | PreviousStage
+    | TypingBoxInput String
 
 
 update : Msg -> Model -> ( Model, Cmd msg )
@@ -902,11 +904,49 @@ update msg model =
             moveToNextStage model
 
         PreviousStage ->
-            ( moveToPreviousStage model, Cmd.none )
+            moveToPreviousStage model
+
+        TypingBoxInput input ->
+            handleTypedInput model input
 
 
 
 {- Update helpers -}
+
+
+updateCurrentVerse : Model -> (CurrentVerse -> CurrentVerse) -> Model
+updateCurrentVerse model updater =
+    case model.learningSession of
+        Session sessionData ->
+            let
+                newCurrentVerse =
+                    updater sessionData.currentVerse
+
+                newSessionData =
+                    { sessionData
+                        | currentVerse = newCurrentVerse
+                    }
+            in
+                { model | learningSession = Session newSessionData }
+
+        _ ->
+            model
+
+
+updateTestProgress : Model -> (TestProgress -> TestProgress) -> Model
+updateTestProgress model updater =
+    updateCurrentVerse model
+        (\currentVerse ->
+            case currentVerse.currentStage of
+                TestStage tp ->
+                    { currentVerse
+                        | currentStage =
+                            TestStage (updater tp)
+                    }
+
+                _ ->
+                    currentVerse
+        )
 
 
 normalizeVerseBatch : VerseBatchRaw -> VerseBatch
@@ -1146,74 +1186,63 @@ moveToNextStage : Model -> ( Model, Cmd msg )
 moveToNextStage model =
     let
         newModel =
-            case model.learningSession of
-                Session sessionData ->
+            updateCurrentVerse model
+                (\currentVerse ->
                     let
-                        currentVerse =
-                            sessionData.currentVerse
-
                         remaining =
                             currentVerse.remainingStages
                     in
                         case remaining of
                             [] ->
-                                model
+                                currentVerse
 
                             stage :: stages ->
-                                let
-                                    newCurrentVerse =
-                                        { currentVerse
-                                            | seenStages = currentVerse.currentStage :: currentVerse.seenStages
-                                            , currentStage = stage
-                                            , remainingStages = stages
-                                        }
-
-                                    newSessionData =
-                                        { sessionData
-                                            | currentVerse = newCurrentVerse
-                                        }
-                                in
-                                    { model | learningSession = Session newSessionData }
-
-                _ ->
-                    model
+                                { currentVerse
+                                    | seenStages = currentVerse.currentStage :: currentVerse.seenStages
+                                    , currentStage = stage
+                                    , remainingStages = stages
+                                }
+                )
     in
         ( newModel, updateTypingBoxCommand newModel )
 
 
-moveToPreviousStage : Model -> Model
+moveToPreviousStage : Model -> ( Model, Cmd msg )
 moveToPreviousStage model =
-    case model.learningSession of
-        Session sessionData ->
-            let
-                currentVerse =
-                    sessionData.currentVerse
+    let
+        newModel =
+            updateCurrentVerse model
+                (\currentVerse ->
+                    let
+                        previous =
+                            currentVerse.seenStages
+                    in
+                        case previous of
+                            [] ->
+                                currentVerse
 
-                previous =
-                    currentVerse.seenStages
-            in
-                case previous of
-                    [] ->
-                        model
-
-                    stage :: stages ->
-                        let
-                            newCurrentVerse =
+                            stage :: stages ->
                                 { currentVerse
                                     | seenStages = stages
                                     , currentStage = stage
                                     , remainingStages = currentVerse.currentStage :: currentVerse.remainingStages
                                 }
+                )
+    in
+        ( newModel, updateTypingBoxCommand newModel )
 
-                            newSessionData =
-                                { sessionData
-                                    | currentVerse = newCurrentVerse
-                                }
-                        in
-                            { model | learningSession = Session newSessionData }
 
-        _ ->
-            model
+handleTypedInput : Model -> String -> ( Model, Cmd msg )
+handleTypedInput model input =
+    let
+        newModel =
+            updateTestProgress model
+                (\tp ->
+                    { tp | currentTypedText = input }
+                )
+
+    in
+        ( newModel, Cmd.none )
 
 
 updateTypingBoxCommand : Model -> Cmd msg
