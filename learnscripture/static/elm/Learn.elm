@@ -1337,7 +1337,7 @@ handleTypedInput model input =
         newModel1 =
             updateTestProgress model
                 (\tp ->
-                    { tp | currentTypedText = input }
+                    { tp | currentTypedText = String.trimRight input }
                 )
 
         testingMethod =
