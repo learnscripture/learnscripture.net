@@ -14,6 +14,7 @@ import Set
 import String
 import Window
 import LearnPorts
+import Native.StringUtils
 
 
 {- Main -}
@@ -629,12 +630,18 @@ typingBox stage testingMethod =
             case stage of
                 TestStage tp ->
                     let
-                        lastCheckFailed = case getCurrentWordAttempt tp of
-                                              Nothing -> False
-                                              Just attempt ->
-                                                  case attempt.checkResults of
-                                                      [] -> False
-                                                      r :: remainder -> r == Failure
+                        lastCheckFailed =
+                            case getCurrentWordAttempt tp of
+                                Nothing ->
+                                    False
+
+                                Just attempt ->
+                                    case attempt.checkResults of
+                                        [] ->
+                                            False
+
+                                        r :: remainder ->
+                                            r == Failure
                     in
                         ( tp.currentTypedText
                         , typingBoxInUse tp testingMethod
@@ -647,10 +654,14 @@ typingBox stage testingMethod =
         H.input
             ([ A.id typingBoxId
              , A.value value
-             , A.class (classForTypingBox inUse ++
-                            (if lastCheckFailed
-                             then " incorrect"
-                             else ""))
+             , A.class
+                (classForTypingBox inUse
+                    ++ (if lastCheckFailed then
+                            " incorrect"
+                        else
+                            ""
+                       )
+                )
              ]
                 ++ if inUse then
                     [ E.onInput TypingBoxInput
@@ -1218,7 +1229,9 @@ getCurrentWord testProgress =
 getCurrentWordAttempt : TestProgress -> Maybe Attempt
 getCurrentWordAttempt testProgress =
     case getCurrentWord testProgress of
-        Nothing -> Nothing
+        Nothing ->
+            Nothing
+
         Just word ->
             getWordAttempt testProgress word
 
@@ -1504,15 +1517,6 @@ translate fromStr toStr target =
             makeMapper allPairs
     in
         String.map mapper target
-
-
-damerauLevenshteinDistance : String -> String -> Int
-damerauLevenshteinDistance word1 word2 =
-    -- TODO
-    if word1 == word2 then
-        0
-    else
-        10
 
 
 initialAttempt : Attempt
@@ -1839,3 +1843,8 @@ listIndices l =
 getAt : List a -> Int -> Maybe a
 getAt xs idx =
     List.head <| List.drop idx xs
+
+
+damerauLevenshteinDistance : String -> String -> Int
+damerauLevenshteinDistance =
+    Native.StringUtils.damerauLevenshteinDistance
