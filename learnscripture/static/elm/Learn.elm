@@ -368,7 +368,7 @@ viewCurrentVerse session model =
             , instructions currentVerse testingMethod
               -- We make typing box a permanent fixture to avoid issues with
               -- losing focus and screen keyboards then disappearing
-            , typingBox currentVerse testingMethod
+            , typingBox currentVerse.currentStage testingMethod
             ]
 
 
@@ -622,23 +622,35 @@ typingBoxId =
     "id-typing"
 
 
-typingBox : CurrentVerse -> TestingMethod -> H.Html Msg
-typingBox verse testingMethod =
+typingBox : LearningStage -> TestingMethod -> H.Html Msg
+typingBox stage testingMethod =
     let
-        ( value, inUse ) =
-            case verse.currentStage of
+        ( value, inUse, lastCheckFailed ) =
+            case stage of
                 TestStage tp ->
-                    ( tp.currentTypedText
-                    , typingBoxInUse tp testingMethod
-                    )
+                    let
+                        lastCheckFailed = case getCurrentWordAttempt tp of
+                                              Nothing -> False
+                                              Just attempt ->
+                                                  case attempt.checkResults of
+                                                      [] -> False
+                                                      r :: remainder -> r == Failure
+                    in
+                        ( tp.currentTypedText
+                        , typingBoxInUse tp testingMethod
+                        , lastCheckFailed
+                        )
 
                 _ ->
-                    ( "", False )
+                    ( "", False, False )
     in
         H.input
             ([ A.id typingBoxId
              , A.value value
-             , A.class (classForTypingBox inUse)
+             , A.class (classForTypingBox inUse ++
+                            (if lastCheckFailed
+                             then " incorrect"
+                             else ""))
              ]
                 ++ if inUse then
                     [ E.onInput TypingBoxInput
@@ -1006,8 +1018,8 @@ updateTestProgress model updater =
         )
 
 
-getCurrentWordProgress : Model -> Maybe TestProgress
-getCurrentWordProgress model =
+getCurrentTestProgress : Model -> Maybe TestProgress
+getCurrentTestProgress model =
     case model.learningSession of
         Session sessionData ->
             case sessionData.currentVerse.currentStage of
@@ -1203,6 +1215,14 @@ getCurrentWord testProgress =
             getAt testProgress.words i
 
 
+getCurrentWordAttempt : TestProgress -> Maybe Attempt
+getCurrentWordAttempt testProgress =
+    case getCurrentWord testProgress of
+        Nothing -> Nothing
+        Just word ->
+            getWordAttempt testProgress word
+
+
 isFinishedStage : LearningStage -> Bool
 isFinishedStage stage =
     case stage of
@@ -1334,7 +1354,7 @@ handleTypedInput model input =
 
 handleTypedEnter : Model -> ( Model, Cmd msg )
 handleTypedEnter model =
-    case getCurrentWordProgress model of
+    case getCurrentTestProgress model of
         Nothing ->
             ( model, Cmd.none )
 
@@ -1619,7 +1639,7 @@ isReference wordType =
 
 updateTypingBoxCommand : Model -> Cmd msg
 updateTypingBoxCommand model =
-    case getCurrentWordProgress model of
+    case getCurrentTestProgress model of
         Just tp ->
             case getCurrentWord tp of
                 Nothing ->

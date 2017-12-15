@@ -72,7 +72,8 @@ app.ports.updateTypingBox.subscribe(function (args) {
             return;
         }
 
-        if (typingBox.className != expectedClass) {
+        var classes = typingBox.className.trim().split(/ /);
+        if (classes.indexOf(expectedClass) < 0) {
             // We have been called before the DOM was updated.
             tryAgain();
             return;
