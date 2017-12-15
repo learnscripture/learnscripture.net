@@ -120,6 +120,10 @@ body.learn-page {
         &.incorrect {
             border-color: red;
         }
+
+        &.partially-correct {
+            border-color: #D0B800;
+        }
     }
     #id-typing {
         color: black;
@@ -131,6 +135,7 @@ body.learn-page {
         margin: 0;
         border: 2px solid; // same as .word.
         position: absolute;
+        display: none; // initially hide
     }
 
     .hidden {
