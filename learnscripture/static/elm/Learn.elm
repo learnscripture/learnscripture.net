@@ -641,7 +641,9 @@ typingBox verse testingMethod =
              , A.class (classForTypingBox inUse)
              ]
                 ++ if inUse then
-                    [ E.onInput TypingBoxInput ]
+                    [ E.onInput TypingBoxInput
+                    , onEnter TypingBoxEnter
+                    ]
                    else
                     []
             )
@@ -907,6 +909,7 @@ type Msg
     | NextStage
     | PreviousStage
     | TypingBoxInput String
+    | TypingBoxEnter
     | WindowResize { width : Int, height : Int }
 
 
@@ -957,6 +960,9 @@ update msg model =
         TypingBoxInput input ->
             handleTypedInput model input
 
+        TypingBoxEnter ->
+            handleTypedEnter model
+
         WindowResize _ ->
             ( model, updateTypingBoxCommand model )
 
@@ -998,6 +1004,21 @@ updateTestProgress model updater =
                 _ ->
                     currentVerse
         )
+
+
+getCurrentWordProgress : Model -> Maybe TestProgress
+getCurrentWordProgress model =
+    case model.learningSession of
+        Session sessionData ->
+            case sessionData.currentVerse.currentStage of
+                TestStage testProgress ->
+                    Just testProgress
+
+                _ ->
+                    Nothing
+
+        _ ->
+            Nothing
 
 
 normalizeVerseBatch : VerseBatchRaw -> VerseBatch
@@ -1311,8 +1332,27 @@ handleTypedInput model input =
         ( newModel2, cmd )
 
 
+handleTypedEnter : Model -> ( Model, Cmd msg )
+handleTypedEnter model =
+    case getCurrentWordProgress model of
+        Nothing ->
+            ( model, Cmd.none )
 
---handleKeyDown : Model ->
+        Just tp ->
+            let
+                currentTypedText =
+                    tp.currentTypedText
+
+                testingMethod =
+                    getTestingMethod model
+
+                ( newModel, cmd ) =
+                    if shouldCheckTypedWord testingMethod (currentTypedText ++ "\n") then
+                        checkCurrentWordAndUpdate model currentTypedText
+                    else
+                        ( model, Cmd.none )
+            in
+                ( newModel, cmd )
 
 
 shouldCheckTypedWord : TestingMethod -> String -> Bool
@@ -1324,7 +1364,13 @@ shouldCheckTypedWord testingMethod input =
         case testingMethod of
             FullWords ->
                 -- TODO - allow ':' '.' etc in verse references
-                String.length trimmedText > 0 && String.right 1 input == " "
+                String.length trimmedText
+                    > 0
+                    && (String.right 1 input
+                            == " "
+                            || String.right 1 input
+                            == "\n"
+                       )
 
             FirstLetter ->
                 String.length trimmedText > 0
@@ -1573,25 +1619,20 @@ isReference wordType =
 
 updateTypingBoxCommand : Model -> Cmd msg
 updateTypingBoxCommand model =
-    case model.learningSession of
-        Session sessionData ->
-            case sessionData.currentVerse.currentStage of
-                TestStage tp ->
-                    case getCurrentWord tp of
-                        Nothing ->
-                            hideTypingBoxCommand
-
-                        Just w ->
-                            LearnPorts.updateTypingBox
-                                ( typingBoxId
-                                , idForButton w
-                                , classForTypingBox <| typingBoxInUse tp (getTestingMethod model)
-                                )
-
-                _ ->
+    case getCurrentWordProgress model of
+        Just tp ->
+            case getCurrentWord tp of
+                Nothing ->
                     hideTypingBoxCommand
 
-        _ ->
+                Just w ->
+                    LearnPorts.updateTypingBox
+                        ( typingBoxId
+                        , idForButton w
+                        , classForTypingBox <| typingBoxInUse tp (getTestingMethod model)
+                        )
+
+        Nothing ->
             hideTypingBoxCommand
 
 
