@@ -1607,7 +1607,7 @@ translate fromStr toStr target =
             \pairs ->
                 case pairs of
                     [] ->
-                        \x -> x
+                        identity
 
                     ( c1, c2 ) :: rest ->
                         (\c ->
@@ -1793,7 +1793,7 @@ focusDefaultButton model =
                         Cmd.none
 
                     b :: rest ->
-                        Task.attempt (\x -> Noop) (Dom.focus b.id)
+                        Task.attempt (always Noop) (Dom.focus b.id)
 
 
 
