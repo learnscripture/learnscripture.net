@@ -104,7 +104,9 @@ app.ports.updateTypingBox.subscribe(function (args) {
 
 });
 
-// Listen for changes to preferences.
+// Listen for changes to preferences. This signal is sent when the user changes
+// preferences via the form (see preferences.ts), and we need to tell Elm about
+// it.
 $('#id-preferences-data').bind('preferencesSet', function(ev, prefs) {
     app.ports.receivePreferences.send(prefs);
 });
