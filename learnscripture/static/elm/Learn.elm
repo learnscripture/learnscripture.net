@@ -1,5 +1,6 @@
 module Learn exposing (..)
 
+import Dom
 import Dict
 import Html as H
 import Html.Attributes as A
@@ -12,6 +13,7 @@ import Navigation
 import Regex as R
 import Set
 import String
+import Task
 import Window
 import LearnPorts
 import Native.StringUtils
@@ -706,7 +708,16 @@ classForTypingBox inUse =
 actionButtons : CurrentVerse -> Preferences -> H.Html Msg
 actionButtons verse preferences =
     H.div [ A.id "id-action-btns" ]
-        (buttonsForStage verse preferences)
+        (List.map viewButton <| buttonsForStage verse preferences)
+
+
+type alias Button msg =
+    { enabled : ButtonEnabled
+    , default : ButtonDefault
+    , msg : msg
+    , caption : String
+    , id : String
+    }
 
 
 type ButtonEnabled
@@ -719,7 +730,7 @@ type ButtonDefault
     | NonDefault
 
 
-buttonsForStage : CurrentVerse -> Preferences -> List (H.Html Msg)
+buttonsForStage : CurrentVerse -> Preferences -> List (Button Msg)
 buttonsForStage verse preferences =
     let
         isRemainingStage =
@@ -742,8 +753,18 @@ buttonsForStage verse preferences =
     in
         case verse.currentStage of
             Read ->
-                [ previousStageBtn previousEnabled NonDefault
-                , nextStageBtn nextEnabled Default
+                [ { enabled = previousEnabled
+                  , default = NonDefault
+                  , caption = "Back"
+                  , msg = PreviousStage
+                  , id = "id-previous-btn"
+                  }
+                , { enabled = nextEnabled
+                  , default = Default
+                  , caption = "Next"
+                  , msg = NextStage
+                  , id = "id-next-btn"
+                  }
                 ]
 
             TestStage _ ->
@@ -758,23 +779,13 @@ getTestingMethod model =
         model.preferences.desktopTestingMethod
 
 
-previousStageBtn : ButtonEnabled -> ButtonDefault -> H.Html Msg
-previousStageBtn enabled default =
-    button enabled default PreviousStage "Back"
-
-
-nextStageBtn : ButtonEnabled -> ButtonDefault -> H.Html Msg
-nextStageBtn enabled default =
-    button enabled default NextStage "Next"
-
-
-button : ButtonEnabled -> ButtonDefault -> msg -> String -> H.Html msg
-button enabled default clickMsg text =
+viewButton : Button msg -> H.Html msg
+viewButton button =
     let
         class =
-            case enabled of
+            case button.enabled of
                 Enabled ->
-                    case default of
+                    case button.default of
                         Default ->
                             "btn primary"
 
@@ -785,25 +796,20 @@ button enabled default clickMsg text =
                     "btn disabled"
 
         attributes =
-            [ A.class class ]
+            [ A.class class
+            , A.id button.id
+            ]
 
         eventAttributes =
-            case enabled of
+            case button.enabled of
                 Enabled ->
-                    [ E.onClick clickMsg ]
-                        ++ (case default of
-                                Default ->
-                                    [ onEnter clickMsg ]
-
-                                NonDefault ->
-                                    []
-                           )
+                    [ E.onClick button.msg ]
 
                 Disabled ->
                     []
     in
         H.button (attributes ++ eventAttributes)
-            [ H.text text ]
+            [ H.text button.caption ]
 
 
 onEnter : a -> H.Attribute a
@@ -969,9 +975,10 @@ type Msg
     | TypingBoxEnter
     | WindowResize { width : Int, height : Int }
     | ReceivePreferences JD.Value
+    | Noop
 
 
-update : Msg -> Model -> ( Model, Cmd msg )
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         LoadVerses ->
@@ -1000,11 +1007,15 @@ update msg model =
                         ( model, Navigation.load dashboardUrl )
 
                     Just ns ->
-                        ( { model
-                            | learningSession = Session ns
-                          }
-                        , Cmd.none
-                        )
+                        let
+                            newModel =
+                                { model
+                                    | learningSession = Session ns
+                                }
+                        in
+                            ( newModel
+                            , focusDefaultButton newModel
+                            )
 
         VersesToLearn (Err errMsg) ->
             ( { model | learningSession = VersesError errMsg }, Cmd.none )
@@ -1030,6 +1041,9 @@ update msg model =
                     { model | preferences = decodePreferences prefsValue }
             in
                 ( newModel, updateTypingBoxCommand newModel )
+
+        Noop ->
+            ( model, Cmd.none )
 
 
 
@@ -1071,18 +1085,28 @@ updateTestProgress model updater =
         )
 
 
-getCurrentTestProgress : Model -> Maybe TestProgress
-getCurrentTestProgress model =
+getCurrentVerse : Model -> Maybe CurrentVerse
+getCurrentVerse model =
     case model.learningSession of
         Session sessionData ->
-            case sessionData.currentVerse.currentStage of
+            Just sessionData.currentVerse
+
+        _ ->
+            Nothing
+
+
+getCurrentTestProgress : Model -> Maybe TestProgress
+getCurrentTestProgress model =
+    case getCurrentVerse model of
+        Just currentVerse ->
+            case currentVerse.currentStage of
                 TestStage testProgress ->
                     Just testProgress
 
                 _ ->
                     Nothing
 
-        _ ->
+        Nothing ->
             Nothing
 
 
@@ -1364,7 +1388,7 @@ getStages learningType verseStatus =
             )
 
 
-moveToNextStage : Model -> ( Model, Cmd msg )
+moveToNextStage : Model -> ( Model, Cmd Msg )
 moveToNextStage model =
     let
         newModel =
@@ -1386,10 +1410,15 @@ moveToNextStage model =
                                 }
                 )
     in
-        ( newModel, updateTypingBoxCommand newModel )
+        ( newModel
+        , Cmd.batch
+            [ updateTypingBoxCommand newModel
+            , focusDefaultButton newModel
+            ]
+        )
 
 
-moveToPreviousStage : Model -> ( Model, Cmd msg )
+moveToPreviousStage : Model -> ( Model, Cmd Msg )
 moveToPreviousStage model =
     let
         newModel =
@@ -1411,7 +1440,12 @@ moveToPreviousStage model =
                                 }
                 )
     in
-        ( newModel, updateTypingBoxCommand newModel )
+        ( newModel
+        , Cmd.batch
+            [ updateTypingBoxCommand newModel
+            , focusDefaultButton newModel
+            ]
+        )
 
 
 handleTypedInput : Model -> String -> ( Model, Cmd msg )
@@ -1738,6 +1772,28 @@ updateTypingBoxCommand model =
 hideTypingBoxCommand : Cmd msg
 hideTypingBoxCommand =
     LearnPorts.updateTypingBox ( typingBoxId, "", classForTypingBox False )
+
+
+focusDefaultButton : Model -> Cmd Msg
+focusDefaultButton model =
+    case getCurrentVerse model of
+        Nothing ->
+            Cmd.none
+
+        Just verse ->
+            let
+                buttons =
+                    buttonsForStage verse model.preferences
+
+                defaultButtons =
+                    List.filter (\b -> b.default == Default) buttons
+            in
+                case defaultButtons of
+                    [] ->
+                        Cmd.none
+
+                    b :: rest ->
+                        Task.attempt (\x -> Noop) (Dom.focus b.id)
 
 
 
