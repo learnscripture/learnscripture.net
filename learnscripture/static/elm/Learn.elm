@@ -1474,7 +1474,7 @@ checkWord word input testingMethod =
                         == String.left 1 inputN
                      )
                         && (damerauLevenshteinDistance wordN inputN
-                                < (ceiling ((toFloat <| String.length wordN) / 3.0))
+                                < (ceiling ((toFloat <| String.length wordN) / 5.0))
                            )
                     )
 
