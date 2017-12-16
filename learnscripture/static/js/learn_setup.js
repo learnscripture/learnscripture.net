@@ -103,3 +103,8 @@ app.ports.updateTypingBox.subscribe(function (args) {
     callFixTypingBox(1);
 
 });
+
+// Listen for changes to preferences.
+$('#id-preferences-data').bind('preferencesSet', function(ev, prefs) {
+    app.ports.receivePreferences.send(prefs);
+});
