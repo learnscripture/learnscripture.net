@@ -723,7 +723,7 @@ buttonsForStage : CurrentVerse -> Preferences -> List (H.Html Msg)
 buttonsForStage verse preferences =
     let
         isRemainingStage =
-            not <| List.isEmpty <| List.filter (not << isFinishedStage) verse.remainingStages
+            not <| List.isEmpty verse.remainingStages
 
         isPreviousStage =
             not <| List.isEmpty verse.seenStages
@@ -747,9 +747,7 @@ buttonsForStage verse preferences =
                 ]
 
             TestStage _ ->
-                [ previousStageBtn previousEnabled NonDefault
-                , nextStageBtn nextEnabled Default
-                ]
+                []
 
 
 getTestingMethod : Model -> TestingMethod
@@ -833,29 +831,61 @@ instructions verse testingMethod =
                 , H.text "Read the text through (preferably aloud), and click 'Next'."
                 ]
 
-            TestStage _ ->
-                (case testingMethod of
-                    FullWords ->
-                        [ bold "TEST: "
-                        , H.text
-                            ("Testing time! Type the text, pressing space after each word."
-                                ++ "(hint: don't sweat the spelling, we should be able to work it out)."
-                            )
-                        ]
+            TestStage tp ->
+                case getTestResult tp of
+                    Nothing ->
+                        (case testingMethod of
+                            FullWords ->
+                                [ bold "TEST: "
+                                , H.text
+                                    ("Testing time! Type the text, pressing space after each word."
+                                        ++ "(hint: don't sweat the spelling, we should be able to work it out)."
+                                    )
+                                ]
 
-                    FirstLetter ->
-                        [ bold "TEST: "
-                        , H.text "Testing time! Type the "
-                        , bold "first letter"
-                        , H.text " of each word."
-                        ]
+                            FirstLetter ->
+                                [ bold "TEST: "
+                                , H.text "Testing time! Type the "
+                                , bold "first letter"
+                                , H.text " of each word."
+                                ]
 
-                    OnScreen ->
-                        [ bold "TEST: "
-                        , H.text "Testing time! For each word choose from the options below."
+                            OnScreen ->
+                                [ bold "TEST: "
+                                , H.text "Testing time! For each word choose from the options below."
+                                ]
+                        )
+
+                    Just percent ->
+                        [ bold "RESULTS: "
+                        , H.text "You scored: "
+                        , bold (toString (floor percent) ++ "%")
+                        , H.text (" - " ++ resultComment percent)
                         ]
-                )
         )
+
+
+resultComment : Float -> String
+resultComment percent =
+    let
+        pairs =
+            [ ( 98, "awesome!" )
+            , ( 95, "excellent!" )
+            , ( 90, "very good." )
+            , ( 80, "good." )
+            , ( 50, "OK." )
+            , ( 30, "could do better!" )
+            ]
+
+        fallback =
+            "more practice needed!"
+    in
+        case List.head <| List.filter (\( p, c ) -> percent > p) pairs of
+            Nothing ->
+                fallback
+
+            Just ( p, c ) ->
+                c
 
 
 
@@ -1194,12 +1224,12 @@ type LearningStage
 -- but Elm doesn't support that
 
 
-type alias AttemptRecord =
+type alias AttemptRecords =
     Dict.Dict ( String, WordIndex ) Attempt
 
 
 type alias TestProgress =
-    { attemptRecord : AttemptRecord
+    { attemptRecords : AttemptRecords
     , currentTypedText : String
     , words : List Word
     , currentWordIndex :
@@ -1211,6 +1241,7 @@ type alias TestProgress =
 type alias Attempt =
     { finished : Bool
     , checkResults : List CheckResult
+    , allowedMistakes : Int
     }
 
 
@@ -1221,7 +1252,7 @@ type CheckResult
 
 initialTestProgress : VerseStatus -> TestProgress
 initialTestProgress verseStatus =
-    { attemptRecord = Dict.empty
+    { attemptRecords = Dict.empty
     , currentTypedText = ""
     , words = wordsForVerse verseStatus
     , currentWordIndex = Just 0
@@ -1248,21 +1279,6 @@ getCurrentWordAttempt testProgress =
             getWordAttempt testProgress word
 
 
-isFinishedStage : LearningStage -> Bool
-isFinishedStage stage =
-    case stage of
-        TestStage tp ->
-            case tp.currentWordIndex of
-                Nothing ->
-                    True
-
-                Just _ ->
-                    False
-
-        _ ->
-            False
-
-
 isTestingStage : LearningStage -> Bool
 isTestingStage stage =
     case stage of
@@ -1271,6 +1287,48 @@ isTestingStage stage =
 
         _ ->
             False
+
+
+getTestResult : TestProgress -> Maybe Float
+getTestResult testProgress =
+    case testProgress.currentWordIndex of
+        Just _ ->
+            -- Still in progress
+            Nothing
+
+        Nothing ->
+            let
+                attempts =
+                    List.filter .finished <| List.map Tuple.second <| Dict.toList testProgress.attemptRecords
+
+                wordAccuracies =
+                    List.map
+                        (\attempt ->
+                            -- if, for example, 2 mistakes are allowed, then
+                            -- total 3 attempts possible:
+                            -- 0 mistakes = 100% accurate
+                            -- 1 mistake = 66%
+                            -- 2 mistakes = 33%
+                            -- 3 mistakes = 0
+                            let
+                                mistakes =
+                                    List.length <| List.filter (\r -> r == Failure) attempt.checkResults
+
+                                allowedAttempts =
+                                    attempt.allowedMistakes + 1
+                            in
+                                1.0 - ((toFloat <| min mistakes allowedAttempts) / (toFloat allowedAttempts))
+                        )
+                        attempts
+            in
+                Just
+                    (case List.length wordAccuracies of
+                        0 ->
+                            100
+
+                        l ->
+                            100 * (List.sum wordAccuracies / (toFloat l))
+                    )
 
 
 testMethodUsesTextBox : TestingMethod -> Bool
@@ -1531,10 +1589,11 @@ translate fromStr toStr target =
         String.map mapper target
 
 
-initialAttempt : Attempt
-initialAttempt =
+initialAttempt : TestingMethod -> Attempt
+initialAttempt m =
     { finished = False
     , checkResults = []
+    , allowedMistakes = allowedMistakesForTestingMethod m
     }
 
 
@@ -1544,7 +1603,7 @@ markWord correct word testingProgress verse testingMethod =
         attempt =
             case getWordAttempt testingProgress word of
                 Nothing ->
-                    initialAttempt
+                    initialAttempt testingMethod
 
                 Just a ->
                     a
@@ -1557,13 +1616,17 @@ markWord correct word testingProgress verse testingMethod =
             )
                 :: attempt.checkResults
 
+        allowedMistakes =
+            allowedMistakesForTestingMethod testingMethod
+
         shouldMoveOn =
-            correct || List.length checkResults > allowedMistakesForTestingMethod testingMethod
+            correct || List.length checkResults > allowedMistakes
 
         attempt2 =
             { attempt
                 | checkResults = checkResults
                 , finished = shouldMoveOn
+                , allowedMistakes = allowedMistakes
             }
 
         newAttempts =
@@ -1596,7 +1659,7 @@ markWord correct word testingProgress verse testingMethod =
             | currentStage =
                 TestStage
                     { testingProgress
-                        | attemptRecord = newAttempts
+                        | attemptRecords = newAttempts
                         , currentWordIndex = nextWordIndex
                         , currentTypedText =
                             if shouldMoveOn then
@@ -1609,12 +1672,12 @@ markWord correct word testingProgress verse testingMethod =
 
 getWordAttempt : TestProgress -> Word -> Maybe Attempt
 getWordAttempt testingProgress word =
-    Dict.get ( toString word.type_, word.index ) testingProgress.attemptRecord
+    Dict.get ( toString word.type_, word.index ) testingProgress.attemptRecords
 
 
-updateWordAttempts : TestProgress -> Word -> Attempt -> AttemptRecord
+updateWordAttempts : TestProgress -> Word -> Attempt -> AttemptRecords
 updateWordAttempts testingProgress word attempt =
-    Dict.insert ( toString word.type_, word.index ) attempt testingProgress.attemptRecord
+    Dict.insert ( toString word.type_, word.index ) attempt testingProgress.attemptRecords
 
 
 allowedMistakesForTestingMethod : TestingMethod -> number
