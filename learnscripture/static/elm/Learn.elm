@@ -41,15 +41,19 @@ type alias Flags =
     }
 
 
+decodePreferences : JD.Value -> Preferences
+decodePreferences prefsValue =
+    case JD.decodeValue preferencesDecoder prefsValue of
+        Ok prefs ->
+            prefs
+
+        Err err ->
+            Debug.crash err
+
+
 init : Flags -> ( Model, Cmd Msg )
 init flags =
-    ( { preferences =
-            case JD.decodeValue preferencesDecoder flags.preferences of
-                Ok prefs ->
-                    prefs
-
-                Err err ->
-                    Debug.crash err
+    ( { preferences = decodePreferences flags.preferences
       , user =
             case flags.account of
                 Just ad ->
@@ -934,6 +938,7 @@ type Msg
     | TypingBoxInput String
     | TypingBoxEnter
     | WindowResize { width : Int, height : Int }
+    | ReceivePreferences JD.Value
 
 
 update : Msg -> Model -> ( Model, Cmd msg )
@@ -988,6 +993,13 @@ update msg model =
 
         WindowResize _ ->
             ( model, updateTypingBoxCommand model )
+
+        ReceivePreferences prefsValue ->
+            let
+                newModel =
+                    { model | preferences = decodePreferences prefsValue }
+            in
+                ( newModel, updateTypingBoxCommand newModel )
 
 
 
@@ -1685,7 +1697,10 @@ loadVerses =
 
 subscriptions : a -> Sub Msg
 subscriptions model =
-    Window.resizes WindowResize
+    Sub.batch
+        [ Window.resizes WindowResize
+        , LearnPorts.receivePreferences ReceivePreferences
+        ]
 
 
 
