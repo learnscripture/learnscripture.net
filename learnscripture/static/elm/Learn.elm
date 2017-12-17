@@ -194,8 +194,16 @@ type alias VerseBatch =
         }
 
 
-type alias Suggestions =
-    List (List String)
+type alias WordSuggestion =
+    String
+
+
+type alias WordSuggestions =
+    List String
+
+
+type alias VerseSuggestions =
+    List WordSuggestions
 
 
 type alias VerseStatusBase a =
@@ -205,7 +213,7 @@ type alias VerseStatusBase a =
         , localizedReference : String
         , needsTesting : Bool
         , textOrder : Int
-        , suggestions : Suggestions
+        , suggestions : VerseSuggestions
         , scoringTextWords : List String
         , titleText : String
         , learnOrder : LearnOrder
@@ -229,7 +237,7 @@ verseStatusRawCtr :
     -> String
     -> Bool
     -> Int
-    -> Suggestions
+    -> VerseSuggestions
     -> List String
     -> String
     -> Int
@@ -367,11 +375,14 @@ viewCurrentVerse session model =
             , H.div [ A.id "id-verse-wrapper" ]
                 [ H.div [ A.class "current-verse-wrapper" ]
                     [ H.div [ A.class "current-verse" ]
-                        (versePartsToHtml currentVerse.currentStage <| partsForVerse currentVerse.verseStatus)
+                        (versePartsToHtml currentVerse.currentStage <|
+                            partsForVerse currentVerse.verseStatus currentVerse.currentStage testingMethod
+                        )
                     ]
                 , copyrightNotice currentVerse.verseStatus.version
                 ]
             , actionButtons currentVerse model.preferences
+            , onScreenTestingButtons currentVerse testingMethod
             , instructions currentVerse testingMethod
               -- We make typing box a permanent fixture to avoid issues with
               -- losing focus and screen keyboards then disappearing
@@ -406,22 +417,28 @@ type alias WordIndex =
     Int
 
 
-partsForVerse : VerseStatus -> List Part
-partsForVerse verse =
+partsForVerse : VerseStatus -> LearningStage -> TestingMethod -> List Part
+partsForVerse verse currentStage testingMethod =
     (List.map2 verseWordToParts verse.scoringTextWords (listIndices verse.scoringTextWords)
         |> List.concat
     )
-        ++ if shouldShowReference verse then
+        ++ if
+            (shouldShowReference verse
+                && (not (isTestingStage currentStage)
+                        || (shouldTestReferenceForTestingMethod testingMethod)
+                   )
+            )
+           then
             [ Linebreak ] ++ referenceToParts verse.localizedReference
            else
             []
 
 
-wordsForVerse : VerseStatus -> List Word
-wordsForVerse verseStatus =
+wordsForVerse : VerseStatus -> LearningStage -> TestingMethod -> List Word
+wordsForVerse verseStatus learningStage testingMethod =
     let
         parts =
-            partsForVerse verseStatus
+            partsForVerse verseStatus learningStage testingMethod
     in
         List.filterMap
             (\p ->
@@ -576,7 +593,15 @@ wordButtonClasses wd stage =
                 TestStage tp ->
                     case getWordAttempt tp wd of
                         Nothing ->
-                            []
+                            case tp.currentWord of
+                                TestFinished ->
+                                    []
+
+                                CurrentWord cw ->
+                                    if cw.word == wd then
+                                        [ "current" ]
+                                    else
+                                        []
 
                         Just attempt ->
                             if attempt.finished then
@@ -683,11 +708,11 @@ typingBoxInUse : TestProgress -> TestingMethod -> Bool
 typingBoxInUse testProgress testingMethod =
     let
         isCurrentWord =
-            case getCurrentWord testProgress of
-                Nothing ->
+            case testProgress.currentWord of
+                TestFinished ->
                     False
 
-                Just _ ->
+                CurrentWord _ ->
                     True
     in
         isCurrentWord && testMethodUsesTextBox testingMethod
@@ -812,6 +837,67 @@ viewButton button =
             [ H.text button.caption ]
 
 
+onScreenTestingButtons : CurrentVerse -> TestingMethod -> H.Html Msg
+onScreenTestingButtons currentVerse testingMethod =
+    case currentVerse.currentStage of
+        Read ->
+            emptyNode
+
+        TestStage tp ->
+            case testingMethod of
+                FullWords ->
+                    emptyNode
+
+                FirstLetter ->
+                    emptyNode
+
+                OnScreen ->
+                    case tp.currentWord of
+                        TestFinished ->
+                            emptyNode
+
+                        CurrentWord currentWord ->
+                            let
+                                words =
+                                    getWordSuggestions currentVerse.verseStatus currentWord.word
+                            in
+                                H.div [ A.id "id-onscreen-test-container" ]
+                                    (case words of
+                                        [] ->
+                                            [ H.div [ A.id "id-onscreen-not-available" ]
+                                                [ H.text
+                                                    ("On screen testing is not available for this verse in this version."
+                                                        ++ "Sorry! Please choose another option in your "
+                                                    )
+                                                , H.a
+                                                    [ A.class "preferences-link"
+                                                    , A.href "#"
+                                                    ]
+                                                    [ H.text "preferences" ]
+                                                ]
+                                            ]
+
+                                        _ ->
+                                            [ H.div [ A.id "id-onscreen-test-options" ]
+                                                (words
+                                                    |> List.map
+                                                        (\w ->
+                                                            H.span
+                                                                [ A.class "word"
+                                                                , E.onClick (OnScreenButtonClick w)
+                                                                ]
+                                                                [ H.text w ]
+                                                        )
+                                                )
+                                            ]
+                                    )
+
+
+emptyNode : H.Html msg
+emptyNode =
+    H.text ""
+
+
 onEnter : a -> H.Attribute a
 onEnter msg =
     let
@@ -858,7 +944,7 @@ instructions verse testingMethod =
 
                             OnScreen ->
                                 [ bold "TEST: "
-                                , H.text "Testing time! For each word choose from the options below."
+                                , H.text "Testing time! For each word choose from the options shown."
                                 ]
                         )
 
@@ -973,6 +1059,7 @@ type Msg
     | PreviousStage
     | TypingBoxInput String
     | TypingBoxEnter
+    | OnScreenButtonClick String
     | WindowResize { width : Int, height : Int }
     | ReceivePreferences JD.Value
     | Noop
@@ -1031,6 +1118,9 @@ update msg model =
 
         TypingBoxEnter ->
             handleTypedEnter model
+
+        OnScreenButtonClick text ->
+            handleOnScreenButtonClick model text
 
         WindowResize _ ->
             ( model, updateTypingBoxCommand model )
@@ -1255,10 +1345,7 @@ type alias AttemptRecords =
 type alias TestProgress =
     { attemptRecords : AttemptRecords
     , currentTypedText : String
-    , words : List Word
-    , currentWordIndex :
-        Maybe WordIndex
-        -- Nothing if finished
+    , currentWord : CurrentTestWord
     }
 
 
@@ -1274,33 +1361,48 @@ type CheckResult
     | Success
 
 
+
+-- TODO - eliminate the need for passing 'Read' and 'FullWords' here, instead of
+-- correct values. Creating 'initialTestProgress' when setting up stages is the
+-- problem
+
+
 initialTestProgress : VerseStatus -> TestProgress
 initialTestProgress verseStatus =
     { attemptRecords = Dict.empty
     , currentTypedText = ""
-    , words = wordsForVerse verseStatus
-    , currentWordIndex = Just 0
+    , currentWord =
+        CurrentWord
+            { overallIndex = 0
+            , word =
+                case getAt (wordsForVerse verseStatus Read FullWords) 0 of
+                    Nothing ->
+                        Debug.crash "Should be at least one word in verse"
+
+                    Just w ->
+                        w
+            }
     }
 
 
-getCurrentWord : TestProgress -> Maybe Word
-getCurrentWord testProgress =
-    case testProgress.currentWordIndex of
-        Nothing ->
-            Nothing
-
-        Just i ->
-            getAt testProgress.words i
+type CurrentTestWord
+    = TestFinished
+    | CurrentWord
+        { word :
+            Word
+            -- overallIndex is the position in list returned by wordsForVerse, which can include references
+        , overallIndex : Int
+        }
 
 
 getCurrentWordAttempt : TestProgress -> Maybe Attempt
 getCurrentWordAttempt testProgress =
-    case getCurrentWord testProgress of
-        Nothing ->
+    case testProgress.currentWord of
+        TestFinished ->
             Nothing
 
-        Just word ->
-            getWordAttempt testProgress word
+        CurrentWord w ->
+            getWordAttempt testProgress w.word
 
 
 isTestingStage : LearningStage -> Bool
@@ -1315,12 +1417,12 @@ isTestingStage stage =
 
 getTestResult : TestProgress -> Maybe Float
 getTestResult testProgress =
-    case testProgress.currentWordIndex of
-        Just _ ->
+    case testProgress.currentWord of
+        CurrentWord _ ->
             -- Still in progress
             Nothing
 
-        Nothing ->
+        TestFinished ->
             let
                 attempts =
                     List.filter .finished <| List.map Tuple.second <| Dict.toList testProgress.attemptRecords
@@ -1492,6 +1594,11 @@ handleTypedEnter model =
                 ( newModel, cmd )
 
 
+handleOnScreenButtonClick : Model -> String -> ( Model, Cmd msg )
+handleOnScreenButtonClick model buttonText =
+    checkCurrentWordAndUpdate model buttonText
+
+
 shouldCheckTypedWord : TestingMethod -> String -> Bool
 shouldCheckTypedWord testingMethod input =
     let
@@ -1527,16 +1634,16 @@ checkCurrentWordAndUpdate model input =
                 (\currentVerse ->
                     case currentVerse.currentStage of
                         TestStage tp ->
-                            case getCurrentWord tp of
-                                Nothing ->
+                            case tp.currentWord of
+                                TestFinished ->
                                     currentVerse
 
-                                Just currentWord ->
+                                CurrentWord currentWord ->
                                     let
                                         correct =
-                                            checkWord currentWord input testingMethod
+                                            checkWord currentWord.word input testingMethod
                                     in
-                                        markWord correct currentWord tp currentVerse testingMethod
+                                        markWord correct currentWord.word tp currentVerse testingMethod
 
                         _ ->
                             currentVerse
@@ -1548,7 +1655,7 @@ checkCurrentWordAndUpdate model input =
         )
 
 
-checkWord : { a | text : String } -> String -> TestingMethod -> Bool
+checkWord : Word -> String -> TestingMethod -> Bool
 checkWord word input testingMethod =
     let
         wordN =
@@ -1574,7 +1681,7 @@ checkWord word input testingMethod =
                 String.right 1 inputN == String.left 1 wordN
 
             OnScreen ->
-                False
+                normalizeWordForSuggestion word.text == input
 
 
 normalizeWordForTest : String -> String
@@ -1582,9 +1689,30 @@ normalizeWordForTest =
     String.trim >> stripPunctuation >> simplifyTurkish >> String.toLower
 
 
+normalizeWordForSuggestion : String -> String
+normalizeWordForSuggestion =
+    String.trim >> stripOuterPunctuation >> String.toLower
+
+
+punctuationRegex : String
+punctuationRegex =
+    "[\"'\\.,;!?:\\/#!$%\\^&\\*{}=\\-_`~()\\[\\]“”‘’—]"
+
+
 stripPunctuation : String -> String
 stripPunctuation =
-    R.replace R.All (R.regex "[\"'\\.,;!?:\\/#!$%\\^&\\*{}=\\-_`~()\\[\\]“”‘’—]") (\m -> "")
+    regexRemoveAll punctuationRegex
+
+
+stripOuterPunctuation : String -> String
+stripOuterPunctuation =
+    regexRemoveAll ("^" ++ punctuationRegex ++ "+")
+        >> regexRemoveAll (punctuationRegex ++ "+$")
+
+
+regexRemoveAll : String -> String -> String
+regexRemoveAll regex =
+    R.replace R.All (R.regex regex) (\m -> "")
 
 
 simplifyTurkish : String -> String
@@ -1632,10 +1760,10 @@ initialAttempt m =
 
 
 markWord : Bool -> Word -> TestProgress -> CurrentVerse -> TestingMethod -> CurrentVerse
-markWord correct word testingProgress verse testingMethod =
+markWord correct word testProgress verse testingMethod =
     let
         attempt =
-            case getWordAttempt testingProgress word of
+            case getWordAttempt testProgress word of
                 Nothing ->
                     initialAttempt testingMethod
 
@@ -1664,54 +1792,65 @@ markWord correct word testingProgress verse testingMethod =
             }
 
         newAttempts =
-            updateWordAttempts testingProgress word attempt2
+            updateWordAttempts testProgress word attempt2
 
-        nextWordIndex =
+        currentTestWordList =
+            getCurrentTestWordList verse testingMethod
+
+        nextCurrentWord =
             if shouldMoveOn then
-                case testingProgress.currentWordIndex of
-                    Nothing ->
-                        Nothing
+                case testProgress.currentWord of
+                    TestFinished ->
+                        TestFinished
 
-                    Just i ->
+                    CurrentWord cw ->
                         let
                             nextI =
-                                i + 1
+                                cw.overallIndex + 1
                         in
-                            case getAt testingProgress.words nextI of
+                            case getAt currentTestWordList nextI of
                                 Just nextWord ->
-                                    if isReference nextWord.type_ && not (testReferenceForTestingMethod testingMethod) then
-                                        Nothing
+                                    if isReference nextWord.type_ && not (shouldTestReferenceForTestingMethod testingMethod) then
+                                        TestFinished
                                     else
-                                        Just nextI
+                                        CurrentWord
+                                            { word = nextWord
+                                            , overallIndex = nextI
+                                            }
 
                                 Nothing ->
-                                    Nothing
+                                    TestFinished
             else
-                testingProgress.currentWordIndex
+                testProgress.currentWord
     in
         { verse
             | currentStage =
                 TestStage
-                    { testingProgress
+                    { testProgress
                         | attemptRecords = newAttempts
-                        , currentWordIndex = nextWordIndex
+                        , currentWord = nextCurrentWord
                         , currentTypedText =
                             if shouldMoveOn then
                                 ""
                             else
-                                testingProgress.currentTypedText
+                                testProgress.currentTypedText
                     }
         }
 
 
+getCurrentTestWordList : CurrentVerse -> TestingMethod -> List Word
+getCurrentTestWordList currentVerse testingMethod =
+    wordsForVerse currentVerse.verseStatus currentVerse.currentStage testingMethod
+
+
 getWordAttempt : TestProgress -> Word -> Maybe Attempt
-getWordAttempt testingProgress word =
-    Dict.get ( toString word.type_, word.index ) testingProgress.attemptRecords
+getWordAttempt testProgress word =
+    Dict.get ( toString word.type_, word.index ) testProgress.attemptRecords
 
 
 updateWordAttempts : TestProgress -> Word -> Attempt -> AttemptRecords
-updateWordAttempts testingProgress word attempt =
-    Dict.insert ( toString word.type_, word.index ) attempt testingProgress.attemptRecords
+updateWordAttempts testProgress word attempt =
+    Dict.insert ( toString word.type_, word.index ) attempt testProgress.attemptRecords
 
 
 allowedMistakesForTestingMethod : TestingMethod -> number
@@ -1727,8 +1866,8 @@ allowedMistakesForTestingMethod testingMethod =
             0
 
 
-testReferenceForTestingMethod : TestingMethod -> Bool
-testReferenceForTestingMethod testingMethod =
+shouldTestReferenceForTestingMethod : TestingMethod -> Bool
+shouldTestReferenceForTestingMethod testingMethod =
     case testingMethod of
         FullWords ->
             True
@@ -1754,14 +1893,14 @@ updateTypingBoxCommand : Model -> Cmd msg
 updateTypingBoxCommand model =
     case getCurrentTestProgress model of
         Just tp ->
-            case getCurrentWord tp of
-                Nothing ->
+            case tp.currentWord of
+                TestFinished ->
                     hideTypingBoxCommand
 
-                Just w ->
+                CurrentWord cw ->
                     LearnPorts.updateTypingBox
                         ( typingBoxId
-                        , idForButton w
+                        , idForButton cw.word
                         , classForTypingBox <| typingBoxInUse tp (getTestingMethod model)
                         )
 
@@ -1794,6 +1933,20 @@ focusDefaultButton model =
 
                     b :: rest ->
                         Task.attempt (always Noop) (Dom.focus b.id)
+
+
+getWordSuggestions : VerseStatus -> Word -> WordSuggestions
+getWordSuggestions verseStatus word =
+    let
+        l =
+            getAt verseStatus.suggestions word.index
+    in
+        case l of
+            Nothing ->
+                []
+
+            Just l ->
+                List.sort <| List.map normalizeWordForSuggestion (word.text :: l)
 
 
 
