@@ -1937,16 +1937,20 @@ focusDefaultButton model =
 
 getWordSuggestions : VerseStatus -> Word -> WordSuggestions
 getWordSuggestions verseStatus word =
-    let
-        l =
-            getAt verseStatus.suggestions word.index
-    in
-        case l of
-            Nothing ->
-                []
+    case word.type_ of
+        BodyWord ->
+            let
+                l =
+                    getAt verseStatus.suggestions word.index
+            in
+                case l of
+                    Nothing ->
+                        []
 
-            Just l ->
-                List.sort <| List.map normalizeWordForSuggestion (word.text :: l)
+                    Just l ->
+                        List.sort <| List.map normalizeWordForSuggestion (word.text :: l)
+        ReferenceWord ->
+            []
 
 
 
