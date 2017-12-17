@@ -867,7 +867,7 @@ onScreenTestingButtons currentVerse testingMethod =
                                             [ H.div [ A.id "id-onscreen-not-available" ]
                                                 [ H.text
                                                     ("On screen testing is not available for this verse in this version."
-                                                        ++ "Sorry! Please choose another option in your "
+                                                        ++ " Sorry! Please choose another option in your "
                                                     )
                                                 , H.a
                                                     [ A.class "preferences-link"
