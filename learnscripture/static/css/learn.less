@@ -124,6 +124,10 @@ body.learn-page {
         &.partially-correct {
             border-color: #D0B800;
         }
+
+        &.current {
+            border-color: black;
+        }
     }
     #id-typing {
         color: black;
@@ -182,6 +186,37 @@ body.learn-page {
         padding-top: 5px;
     }
 
+    #id-onscreen-test-container {
+        border-width: 2px;
+        border-style: solid;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        padding: 6px;
+        text-align: center;
+        .word {
+            margin: 8px;
+        }
+    }
+
+    .fixed-onscreen-testing() {
+        position: fixed;
+        z-index: 20;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        border-bottom-width: 0px;
+        border-left-width: 0px;
+        border-height-width: 0px;
+        height: auto;
+        border-radius: 0px;
+        margin: 0px;
+    }
+
+    @media screen and (max-width: @narrowWidthBreak1) {
+        #id-onscreen-test-container {
+            .fixed-onscreen-testing();
+        }
+    }
 }
 
 @keyframes fadeIn {
