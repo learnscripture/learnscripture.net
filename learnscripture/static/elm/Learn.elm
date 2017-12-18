@@ -1610,10 +1610,8 @@ shouldCheckTypedWord testingMethod input =
                 -- TODO - allow ':' '.' etc in verse references
                 String.length trimmedText
                     > 0
-                    && (String.right 1 input
-                            == " "
-                            || String.right 1 input
-                            == "\n"
+                    && ((String.right 1 input == " ")
+                            || (String.right 1 input == "\n")
                        )
 
             FirstLetter ->
@@ -1949,6 +1947,7 @@ getWordSuggestions verseStatus word =
 
                     Just l ->
                         List.sort <| List.map normalizeWordForSuggestion (word.text :: l)
+
         ReferenceWord ->
             []
 
