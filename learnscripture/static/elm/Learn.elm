@@ -370,9 +370,9 @@ viewCurrentVerse session model =
             getTestingMethod model
     in
         H.div [ A.id "id-content-wrapper" ]
-            [ H.h2 []
+            ([ H.h2 []
                 [ H.text currentVerse.verseStatus.titleText ]
-            , H.div [ A.id "id-verse-wrapper" ]
+             , H.div [ A.id "id-verse-wrapper" ]
                 [ H.div [ A.class "current-verse-wrapper" ]
                     [ H.div [ A.class "current-verse" ]
                         (versePartsToHtml currentVerse.currentStage <|
@@ -381,13 +381,14 @@ viewCurrentVerse session model =
                     ]
                 , copyrightNotice currentVerse.verseStatus.version
                 ]
-            , actionButtons currentVerse model.preferences
-            , onScreenTestingButtons currentVerse testingMethod
-            , instructions currentVerse testingMethod
-              -- We make typing box a permanent fixture to avoid issues with
-              -- losing focus and screen keyboards then disappearing
-            , typingBox currentVerse.currentStage testingMethod
-            ]
+             , actionButtons currentVerse model.preferences
+             , onScreenTestingButtons currentVerse testingMethod
+             ]
+                ++ (instructions currentVerse testingMethod)
+                ++ -- We make typing box a permanent fixture to avoid issues with
+                   -- losing focus and screen keyboards then disappearing
+                   [ typingBox currentVerse.currentStage testingMethod ]
+            )
 
 
 
@@ -869,11 +870,7 @@ onScreenTestingButtons currentVerse testingMethod =
                                                     ("On screen testing is not available for this verse in this version."
                                                         ++ " Sorry! Please choose another option in your "
                                                     )
-                                                , H.a
-                                                    [ A.class "preferences-link"
-                                                    , A.href "#"
-                                                    ]
-                                                    [ H.text "preferences" ]
+                                                , preferencesLink
                                                 ]
                                             ]
 
@@ -914,47 +911,95 @@ onEnter msg =
 {- View - help -}
 
 
-instructions : CurrentVerse -> TestingMethod -> H.Html msg
+preferencesLink : H.Html msg
+preferencesLink =
+    H.a
+        [ A.class "preferences-link"
+        , A.href "#"
+        ]
+        [ H.text "preferences" ]
+
+
+instructions : CurrentVerse -> TestingMethod -> List (H.Html msg)
 instructions verse testingMethod =
-    H.div [ A.id "id-instructions" ]
-        (case verse.currentStage of
-            Read ->
-                [ bold "READ: "
-                , H.text "Read the text through (preferably aloud), and click 'Next'."
-                ]
+    let
+        testingCommonHelp =
+            [ [ H.text "You can change your testing method in your "
+              , preferencesLink
+              , H.text " at any time."
+              ]
+            ]
 
-            TestStage tp ->
-                case getTestResult tp of
-                    Nothing ->
-                        (case testingMethod of
-                            FullWords ->
-                                [ bold "TEST: "
-                                , H.text
-                                    ("Testing time! Type the text, pressing space after each word."
-                                        ++ "(hint: don't sweat the spelling, we should be able to work it out)."
+        buttonsHelp =
+            [ [ H.text "Keyboard navigation: use the Tab key to move focus between buttons, and Enter to press it. Focus is shown with a blue border."
+              ]
+            , [ H.text "The button for the most likely action is highlighted in colour and is focussed by default."
+              ]
+            ]
+
+        ( main, help ) =
+            case verse.currentStage of
+                Read ->
+                    ( [ bold "READ: "
+                      , H.text "Read the text through (preferably aloud), and click 'Next'."
+                      ]
+                    , buttonsHelp
+                    )
+
+                TestStage tp ->
+                    case getTestResult tp of
+                        Nothing ->
+                            case testingMethod of
+                                FullWords ->
+                                    ( [ bold "TEST: "
+                                      , H.text "Testing time! Type the text, pressing space after each word."
+                                      ]
+                                    , testingCommonHelp
+                                        ++ [ [ H.text "You don't need perfect spelling to get full marks."
+                                             ]
+                                           ]
                                     )
-                                ]
 
-                            FirstLetter ->
-                                [ bold "TEST: "
-                                , H.text "Testing time! Type the "
-                                , bold "first letter"
-                                , H.text " of each word."
-                                ]
+                                FirstLetter ->
+                                    ( [ bold "TEST: "
+                                      , H.text "Testing time! Type the "
+                                      , bold "first letter"
+                                      , H.text " of each word."
+                                      ]
+                                    , testingCommonHelp
+                                    )
 
-                            OnScreen ->
-                                [ bold "TEST: "
-                                , H.text "Testing time! For each word choose from the options shown."
-                                ]
-                        )
+                                OnScreen ->
+                                    ( [ bold "TEST: "
+                                      , H.text "Testing time! For each word choose from the options shown."
+                                      ]
+                                    , testingCommonHelp
+                                    )
 
-                    Just percent ->
-                        [ bold "RESULTS: "
-                        , H.text "You scored: "
-                        , bold (toString (floor percent) ++ "%")
-                        , H.text (" - " ++ resultComment percent)
+                        Just percent ->
+                            ( [ bold "RESULTS: "
+                              , H.text "You scored: "
+                              , bold (toString (floor percent) ++ "%")
+                              , H.text (" - " ++ resultComment percent)
+                              ]
+                            , []
+                            )
+    in
+        [ H.div [ A.id "id-instructions" ]
+            main
+        ]
+            ++ case help of
+                [] ->
+                    []
+
+                _ ->
+                    [ H.div [ A.id "id-help" ]
+                        [ H.h3 []
+                            [ H.text "Help" ]
+                        , H.ul []
+                            (List.map (\i -> H.li [] i) help)
                         ]
-        )
+                    ]
 
 
 resultComment : Float -> String
