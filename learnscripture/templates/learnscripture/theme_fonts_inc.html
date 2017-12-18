@@ -1,0 +1,8 @@
+{# We avoid the request for the CSS file if the theme is not active #}
+{% for theme, fonts in theme_fonts %}
+  {% if current_theme == theme %}
+    {% for font in fonts %}
+      <link href="{{ font }}" rel="stylesheet" type="text/css" />
+    {% endfor %}
+  {% endif %}
+{% endfor %}
