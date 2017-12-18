@@ -234,6 +234,14 @@ body.learn-page {
         }
     }
 
+    // We may have a fixed bottom bar, but want to ensure this doesn't cover up
+    // the help (and anything else) on the paage. Sometimes the bar can cover
+    // half the screen, so allow room for it.
+    #elm-main {
+        margin-bottom: 50vh;
+    }
+
+
     @word-margin-top-small: 3px;
     @word-margin-left-small: 1px;
     @word-padding-horizontal-small: 2px;
