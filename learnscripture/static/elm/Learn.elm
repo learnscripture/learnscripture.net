@@ -65,6 +65,7 @@ init flags =
                     GuestUser
       , isTouchDevice = flags.isTouchDevice
       , learningSession = Loading
+      , helpVisible = False
       }
     , loadVerses
     )
@@ -79,6 +80,7 @@ type alias Model =
     , user : User
     , learningSession : LearningSession
     , isTouchDevice : Bool
+    , helpVisible : Bool
     }
 
 
@@ -384,7 +386,7 @@ viewCurrentVerse session model =
              , actionButtons currentVerse model.preferences
              , onScreenTestingButtons currentVerse testingMethod
              ]
-                ++ (instructions currentVerse testingMethod)
+                ++ (instructions currentVerse testingMethod model.helpVisible)
                 ++ -- We make typing box a permanent fixture to avoid issues with
                    -- losing focus and screen keyboards then disappearing
                    [ typingBox currentVerse.currentStage testingMethod ]
@@ -920,8 +922,8 @@ preferencesLink =
         [ H.text "preferences" ]
 
 
-instructions : CurrentVerse -> TestingMethod -> List (H.Html msg)
-instructions verse testingMethod =
+instructions : CurrentVerse -> TestingMethod -> Bool -> List (H.Html Msg)
+instructions verse testingMethod helpVisible =
     let
         testingCommonHelp =
             [ [ H.text "You can change your testing method in your "
@@ -987,19 +989,39 @@ instructions verse testingMethod =
     in
         [ H.div [ A.id "id-instructions" ]
             main
-        ]
-            ++ case help of
+        , H.div [ A.id "id-help" ]
+            (case help of
                 [] ->
                     []
 
                 _ ->
-                    [ H.div [ A.id "id-help" ]
-                        [ H.h3 []
-                            [ H.text "Help" ]
-                        , H.ul []
-                            (List.map (\i -> H.li [] i) help)
+                    [ H.h3 []
+                        [ H.text "Help"
+                        , if helpVisible then
+                            (H.a
+                                [ A.href "#"
+                                , E.onClick CollapseHelp
+                                ]
+                                [ makeIcon "help-expanded" ]
+                            )
+                          else
+                            (H.a
+                                [ A.href "#"
+                                , E.onClick ExpandHelp
+                                ]
+                                [ makeIcon "help-collapsed" ]
+                            )
                         ]
                     ]
+                        ++ (if helpVisible then
+                                [ H.ul []
+                                    (List.map (\i -> H.li [] i) help)
+                                ]
+                            else
+                                []
+                           )
+            )
+        ]
 
 
 resultComment : Float -> String
@@ -1105,6 +1127,8 @@ type Msg
     | TypingBoxInput String
     | TypingBoxEnter
     | OnScreenButtonClick String
+    | ExpandHelp
+    | CollapseHelp
     | WindowResize { width : Int, height : Int }
     | ReceivePreferences JD.Value
     | Noop
@@ -1166,6 +1190,12 @@ update msg model =
 
         OnScreenButtonClick text ->
             handleOnScreenButtonClick model text
+
+        ExpandHelp ->
+            ( { model | helpVisible = True }, Cmd.none )
+
+        CollapseHelp ->
+            ( { model | helpVisible = False }, Cmd.none )
 
         WindowResize _ ->
             ( model, updateTypingBoxCommand model )
