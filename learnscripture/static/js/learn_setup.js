@@ -85,9 +85,16 @@ app.ports.updateTypingBox.subscribe(function (args) {
             typingBox.style.top = rect.top.toString() + "px";
             typingBox.style.left = rect.left.toString() + "px";
             // Allow for border
-            typingBox.style.height = (rect.height - 2 * 2).toString() + "px";
+            var styles = window.getComputedStyle(typingBox);
+            var parsePx = function (p) {
+                return parseInt(p.replace("px", ""), 10);
+            }
+            var borderWidth = parsePx(styles['border-left-width']);
+            typingBox.style.height = (rect.height - 2 * borderWidth).toString() + "px";
             // Allow for border and left padding
-            typingBox.style.width = (rect.width - 2 * 2 - 4).toString() + "px";
+            var paddingLeft = parsePx(styles['padding-left']);
+            var paddingRight = parsePx(styles['padding-right']);
+            typingBox.style.width = (rect.width - 2 * borderWidth - paddingLeft - paddingRight).toString() + "px";
             typingBox.style.display = "inline";
             typingBox.focus();
         } else if (expectedClass == "tohide") {

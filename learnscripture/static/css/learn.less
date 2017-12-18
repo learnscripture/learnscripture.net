@@ -103,11 +103,12 @@ body.learn-page {
 
     @word-margin-top: 3px;
     @word-margin-left: 1px;
+    @word-padding-horizontal: 4px;
 
     .word {
         border: 2px solid;
         border-radius: 3px;
-        padding: 4px 4px;
+        padding: 4px @word-padding-horizontal;
         margin: @word-margin-top @word-margin-left;
         .gradientBar(#e8e8e8, #C0C0C0);
         .normalWordBorder();
@@ -135,7 +136,7 @@ body.learn-page {
         // Left padding matches to get the word to line up,
         // the others don't to give more room for typing.
         // See also setup_learn.js
-        padding: 0 0 0 4px;
+        padding: 0 0 0 @word-padding-horizontal;
         margin: 0;
         border: 2px solid; // same as .word.
         position: absolute;
@@ -173,7 +174,6 @@ body.learn-page {
             border-left: 2px solid blue;
         }
     }
-
 
     #id-hint-btn, #id-help-btn, #id-more-practice-btn, .word {
         // For Internet Explorer, remove 300ms delays on "click" event when touch
@@ -215,6 +215,51 @@ body.learn-page {
     @media screen and (max-width: @narrowWidthBreak1) {
         #id-onscreen-test-container {
             .fixed-onscreen-testing();
+        }
+    }
+
+    // If not much room in either direction, shrink the fonts
+    // of the verse words to make more room
+
+    @word-margin-top-small: 3px;
+    @word-margin-left-small: 1px;
+    @word-padding-horizontal-small: 2px;
+
+    @media screen and (max-width: @narrowWidthBreak2), screen and (max-height: @shortHeightBreak2) {
+
+        /* smaller fonts */
+        .current-verse, .previous-verse, #id-typing, #id-onscreen-test-options, #id-onscreen-not-available, #id-typing {
+            font-size: 18px;
+        }
+        .word {
+            padding: 2px @word-padding-horizontal-small;
+        }
+        #id-typing {
+            padding-left: @word-padding-horizontal-small;
+        }
+        .word, .testedword {
+            margin: @word-margin-top-small @word-margin-left-small;
+        }
+
+        #id-instructions {
+            font-size: inherit;
+            margin-bottom: 1px;
+            padding: 3px;
+            border-radius: 3px;
+        }
+
+        #id-verse-wrapper {
+            border-radius: 3px;
+            padding: 5px;
+        }
+
+        #id-onscreen-test-container {
+            .fixed-onscreen-testing();
+            .word {
+                // Easier to press:
+                padding: 3px 5px;
+                min-width: 25px;
+            }
         }
     }
 }
