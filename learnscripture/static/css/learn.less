@@ -198,7 +198,7 @@ body.learn-page {
         }
     }
 
-    .fixed-onscreen-testing() {
+    .fixed-bottom() {
         position: fixed;
         z-index: 20;
         bottom: 0;
@@ -206,20 +206,26 @@ body.learn-page {
         width: 100%;
         border-bottom-width: 0px;
         border-left-width: 0px;
-        border-height-width: 0px;
+        border-right-width: 0px;
         height: auto;
         border-radius: 0px;
         margin: 0px;
     }
 
-    @media screen and (max-width: @narrowWidthBreak1) {
-        #id-onscreen-test-container {
-            .fixed-onscreen-testing();
-        }
+    #id-action-btns {
+        box-sizing: border-box;
+        background-color: white;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        margin-top: 0.2em;
     }
 
-    // If not much room in either direction, shrink the fonts
-    // of the verse words to make more room
+    #id-instructions {
+        margin-top: 0.2em;
+    }
+
 
     @word-margin-top-small: 3px;
     @word-margin-left-small: 1px;
@@ -227,7 +233,8 @@ body.learn-page {
 
     @media screen and (max-width: @narrowWidthBreak2), screen and (max-height: @shortHeightBreak2) {
 
-        /* smaller fonts */
+        // If not much room in either direction, shrink the fonts of the verse
+        // words to make more room
         .current-verse, .previous-verse, #id-typing, #id-onscreen-test-options, #id-onscreen-not-available, #id-typing {
             font-size: 18px;
         }
@@ -241,25 +248,25 @@ body.learn-page {
             margin: @word-margin-top-small @word-margin-left-small;
         }
 
-        #id-instructions {
-            font-size: inherit;
-            margin-bottom: 1px;
-            padding: 3px;
-            border-radius: 3px;
-        }
-
         #id-verse-wrapper {
             border-radius: 3px;
             padding: 5px;
         }
 
         #id-onscreen-test-container {
-            .fixed-onscreen-testing();
+            .fixed-bottom();
             .word {
                 // Easier to press:
                 padding: 3px 5px;
                 min-width: 25px;
             }
+        }
+
+        #id-action-btns {
+            padding: 8px;
+            border-top-style: solid;
+            border-top-width: 2px;
+            .fixed-bottom();
         }
     }
 }
