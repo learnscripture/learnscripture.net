@@ -735,8 +735,11 @@ classForTypingBox inUse =
 
 actionButtons : CurrentVerse -> Preferences -> H.Html Msg
 actionButtons verse preferences =
-    H.div [ A.id "id-action-btns" ]
-        (List.map viewButton <| buttonsForStage verse preferences)
+    let buttons = buttonsForStage verse preferences
+    in case buttons of
+           [] -> emptyNode
+           _ -> H.div [ A.id "id-action-btns" ]
+                (List.map viewButton <| buttons)
 
 
 type alias Button msg =
