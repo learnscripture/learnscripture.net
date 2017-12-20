@@ -221,32 +221,44 @@ class ActionCompleteHandler(ApiView):
     def post(self, request):
         identity = request.identity
 
-        # Input here is a trimmed down version of what was sent by VersesToLearnHandler
-        verse_status = get_verse_status(request.POST)
-        if verse_status is None:
-            return rc.BAD_REQUEST("verse_status required")
-
-        # Get everything we need, also applying security:
-        try:
+        # Get all inputs
+        if 'verse_status' in request.POST:
+            # Old /learn/ client page
+            # Input here is a trimmed down version of what was sent by VersesToLearnHandler
+            verse_status = get_verse_status(request.POST)
             uvs_id = verse_status['id']
+            needs_testing = verse_status['needs_testing']
+        else:
+            # New /learn/ client page
+            try:
+                uvs_id = int(request.POST['uvs_id'])
+                needs_testing = request.POST['uvs_needs_testing'] == 'true'
+            except (KeyError, ValueError):
+                return rc.BAD_REQUEST("uvs_id, uvs_needs_testing required")
+
+        practice = request.POST.get('practice', 'false') == 'true'
+        stage = StageType.check_value(request.POST['stage'])
+        if stage == StageType.TEST:
+            accuracy = float(request.POST['accuracy'])
+        else:
+            accuracy = None
+
+        # Retrieve UVS
+        try:
             uvs = request.identity.verse_statuses.get(id=uvs_id)
         except (KeyError, UserVerseStatus.DoesNotExist):
-            return rc.BAD_REQUEST("valid verse_status id for user required")
+            return rc.BAD_REQUEST("valid verse_status id/uvs_id for user required")
+
+        # Apply actions
 
         # If just practising, just remove the VS from the session.
-        practice = request.POST.get('practice', 'false') == 'true'
         if practice:
             session.verse_status_finished(request, uvs_id, [])
             return {}
 
         old_memory_stage = uvs.memory_stage
 
-        # TODO: store StageComplete
-        stage = StageType.check_value(request.POST['stage'])
-        if stage == StageType.TEST:
-            accuracy = float(request.POST['accuracy'])
-        else:
-            accuracy = None
+        # TODO: ideally store StageComplete
 
         action_change = identity.record_verse_action(uvs.localized_reference, uvs.version.slug,
                                                      stage, accuracy)
@@ -260,8 +272,8 @@ class ActionCompleteHandler(ApiView):
                                                    action_change, stage, accuracy)
 
         if (stage == StageType.TEST or
-                (stage == StageType.READ and not verse_status['needs_testing'])):
-            session.verse_status_finished(request, verse_status['id'], action_logs)
+                (stage == StageType.READ and not needs_testing)):
+            session.verse_status_finished(request, uvs_id, action_logs)
 
         return {}
 

@@ -30,7 +30,8 @@ var app =
             "account": accountNode == null ? null : {
                 "username": accountNode.attributes['data-username'].value,
             },
-            "isTouchDevice": isTouchDevice()
+            "isTouchDevice": isTouchDevice(),
+            "csrfMiddlewareToken": document.querySelector("[name=csrfmiddlewaretoken]").value
         });
 
 

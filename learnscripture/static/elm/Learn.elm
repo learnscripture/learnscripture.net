@@ -8,6 +8,7 @@ import Html.Events as E
 import Http
 import Json.Decode as JD
 import Json.Decode.Pipeline as JDP
+import Json.Encode as JE
 import Maybe
 import Navigation
 import Regex as R
@@ -40,6 +41,7 @@ type alias Flags =
     { preferences : JD.Value
     , account : Maybe AccountData
     , isTouchDevice : Bool
+    , csrfMiddlewareToken : String
     }
 
 
@@ -64,6 +66,9 @@ init flags =
                 Nothing ->
                     GuestUser
       , isTouchDevice = flags.isTouchDevice
+      , httpConfig =
+            { csrfMiddlewareToken = flags.csrfMiddlewareToken
+            }
       , learningSession = Loading
       , helpVisible = False
       }
@@ -80,6 +85,7 @@ type alias Model =
     , user : User
     , learningSession : LearningSession
     , isTouchDevice : Bool
+    , httpConfig : HttpConfig
     , helpVisible : Bool
     }
 
@@ -91,6 +97,11 @@ type alias Preferences =
     , enableVibration : Bool
     , desktopTestingMethod : TestingMethod
     , touchscreenTestingMethod : TestingMethod
+    }
+
+
+type alias HttpConfig =
+    { csrfMiddlewareToken : String
     }
 
 
@@ -735,11 +746,17 @@ classForTypingBox inUse =
 
 actionButtons : CurrentVerse -> Preferences -> H.Html Msg
 actionButtons verse preferences =
-    let buttons = buttonsForStage verse preferences
-    in case buttons of
-           [] -> emptyNode
-           _ -> H.div [ A.id "id-action-btns" ]
-                (List.map viewButton <| buttons)
+    let
+        buttons =
+            buttonsForStage verse preferences
+    in
+        case buttons of
+            [] ->
+                emptyNode
+
+            _ ->
+                H.div [ A.id "id-action-btns" ]
+                    (List.map viewButton <| buttons)
 
 
 type alias Button msg =
@@ -984,7 +1001,7 @@ instructions verse testingMethod helpVisible =
                         Just percent ->
                             ( [ bold "RESULTS: "
                               , H.text "You scored: "
-                              , bold (toString (floor percent) ++ "%")
+                              , bold (toString (floor (percent * 100)) ++ "%")
                               , H.text (" - " ++ resultComment percent)
                               ]
                             , []
@@ -1031,12 +1048,12 @@ resultComment : Float -> String
 resultComment percent =
     let
         pairs =
-            [ ( 98, "awesome!" )
-            , ( 95, "excellent!" )
-            , ( 90, "very good." )
-            , ( 80, "good." )
-            , ( 50, "OK." )
-            , ( 30, "could do better!" )
+            [ ( 0.98, "awesome!" )
+            , ( 0.95, "excellent!" )
+            , ( 0.9, "very good." )
+            , ( 0.8, "good." )
+            , ( 0.5, "OK." )
+            , ( 0.3, "could do better!" )
             ]
 
         fallback =
@@ -1130,11 +1147,16 @@ type Msg
     | TypingBoxInput String
     | TypingBoxEnter
     | OnScreenButtonClick String
+    | RecordActionComplete (Result Http.Error ())
     | ExpandHelp
     | CollapseHelp
     | WindowResize { width : Int, height : Int }
     | ReceivePreferences JD.Value
     | Noop
+
+
+type ActionCompleteType
+    = TestAction
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -1173,11 +1195,15 @@ update msg model =
                                 }
                         in
                             ( newModel
-                            , focusDefaultButton newModel
+                            , Cmd.batch
+                                [ focusDefaultButton newModel
+                                , updateTypingBoxCommand newModel
+                                ]
                             )
 
         VersesToLearn (Err errMsg) ->
-            ( { model | learningSession = VersesError errMsg }, Cmd.none )
+            let newModel = { model | learningSession = VersesError errMsg }
+            in ( newModel, updateTypingBoxCommand newModel )
 
         NextStage ->
             moveToNextStage model
@@ -1193,6 +1219,10 @@ update msg model =
 
         OnScreenButtonClick text ->
             handleOnScreenButtonClick model text
+
+        RecordActionComplete _ ->
+            -- TODO - handle error
+            ( model, Cmd.none )
 
         ExpandHelp ->
             ( { model | helpVisible = True }, Cmd.none )
@@ -1220,10 +1250,19 @@ update msg model =
 
 updateCurrentVerse : Model -> (CurrentVerse -> CurrentVerse) -> Model
 updateCurrentVerse model updater =
+    let
+        ( newModel, _ ) =
+            updateCurrentVersePlus model () (\c -> ( updater c, () ))
+    in
+        newModel
+
+
+updateCurrentVersePlus : Model -> a -> (CurrentVerse -> ( CurrentVerse, a )) -> ( Model, a )
+updateCurrentVersePlus model defaultRetval updater =
     case model.learningSession of
         Session sessionData ->
             let
-                newCurrentVerse =
+                ( newCurrentVerse, retval ) =
                     updater sessionData.currentVerse
 
                 newSessionData =
@@ -1231,10 +1270,14 @@ updateCurrentVerse model updater =
                         | currentVerse = newCurrentVerse
                     }
             in
-                { model | learningSession = Session newSessionData }
+                ( { model | learningSession = Session newSessionData }
+                , retval
+                )
 
         _ ->
-            model
+            ( model
+            , defaultRetval
+            )
 
 
 updateTestProgress : Model -> (TestProgress -> TestProgress) -> Model
@@ -1528,10 +1571,11 @@ getTestResult testProgress =
                 Just
                     (case List.length wordAccuracies of
                         0 ->
-                            100
+                            1.0
 
                         l ->
-                            100 * (List.sum wordAccuracies / (toFloat l))
+                            -- Do some rounding to avoid 0.999 and retain 3 s.f.
+                            (toFloat (round (List.sum wordAccuracies / (toFloat l) * 1000)) / 1000)
                     )
 
 
@@ -1628,7 +1672,7 @@ moveToPreviousStage model =
         )
 
 
-handleTypedInput : Model -> String -> ( Model, Cmd msg )
+handleTypedInput : Model -> String -> ( Model, Cmd Msg )
 handleTypedInput model input =
     let
         newModel1 =
@@ -1649,7 +1693,7 @@ handleTypedInput model input =
         ( newModel2, cmd )
 
 
-handleTypedEnter : Model -> ( Model, Cmd msg )
+handleTypedEnter : Model -> ( Model, Cmd Msg )
 handleTypedEnter model =
     case getCurrentTestProgress model of
         Nothing ->
@@ -1672,7 +1716,7 @@ handleTypedEnter model =
                 ( newModel, cmd )
 
 
-handleOnScreenButtonClick : Model -> String -> ( Model, Cmd msg )
+handleOnScreenButtonClick : Model -> String -> ( Model, Cmd Msg )
 handleOnScreenButtonClick model buttonText =
     checkCurrentWordAndUpdate model buttonText
 
@@ -1699,35 +1743,43 @@ shouldCheckTypedWord testingMethod input =
                 False
 
 
-checkCurrentWordAndUpdate : Model -> String -> ( Model, Cmd msg )
+checkCurrentWordAndUpdate : Model -> String -> ( Model, Cmd Msg )
 checkCurrentWordAndUpdate model input =
     let
         testingMethod =
             getTestingMethod model
 
-        newModel =
-            updateCurrentVerse model
+        ( newModel, recordCommentCmd ) =
+            updateCurrentVersePlus model
+                Cmd.none
                 (\currentVerse ->
                     case currentVerse.currentStage of
                         TestStage tp ->
                             case tp.currentWord of
                                 TestFinished ->
-                                    currentVerse
+                                    ( currentVerse
+                                    , Cmd.none
+                                    )
 
                                 CurrentWord currentWord ->
                                     let
                                         correct =
                                             checkWord currentWord.word input testingMethod
                                     in
-                                        markWord correct currentWord.word tp currentVerse testingMethod
+                                        markWord model.httpConfig correct currentWord.word tp currentVerse testingMethod
 
                         _ ->
-                            currentVerse
+                            ( currentVerse
+                            , Cmd.none
+                            )
                 )
     in
         ( newModel
           -- The typing box might need moving, so do it in case:
-        , updateTypingBoxCommand newModel
+        , Cmd.batch
+            [ updateTypingBoxCommand newModel
+            , recordCommentCmd
+            ]
         )
 
 
@@ -1835,8 +1887,8 @@ initialAttempt m =
     }
 
 
-markWord : Bool -> Word -> TestProgress -> CurrentVerse -> TestingMethod -> CurrentVerse
-markWord correct word testProgress verse testingMethod =
+markWord : HttpConfig -> Bool -> Word -> TestProgress -> CurrentVerse -> TestingMethod -> ( CurrentVerse, Cmd Msg )
+markWord httpConfig correct word testProgress verse testingMethod =
     let
         attempt =
             case getWordAttempt testProgress word of
@@ -1898,20 +1950,38 @@ markWord correct word testProgress verse testingMethod =
                                     TestFinished
             else
                 testProgress.currentWord
+
+        newTestProgress =
+            { testProgress
+                | attemptRecords = newAttempts
+                , currentWord = nextCurrentWord
+                , currentTypedText =
+                    if shouldMoveOn then
+                        ""
+                    else
+                        testProgress.currentTypedText
+            }
+
+        newCurrentVerse =
+            { verse
+                | currentStage =
+                    TestStage newTestProgress
+            }
+
+        actionCompleteCommand =
+            if
+                (shouldMoveOn
+                    && (nextCurrentWord == TestFinished)
+                    && (testProgress.currentWord /= nextCurrentWord)
+                )
+            then
+                recordTestComplete httpConfig newCurrentVerse newTestProgress
+            else
+                Cmd.none
     in
-        { verse
-            | currentStage =
-                TestStage
-                    { testProgress
-                        | attemptRecords = newAttempts
-                        , currentWord = nextCurrentWord
-                        , currentTypedText =
-                            if shouldMoveOn then
-                                ""
-                            else
-                                testProgress.currentTypedText
-                    }
-        }
+        ( newCurrentVerse
+        , actionCompleteCommand
+        )
 
 
 getCurrentTestWordList : CurrentVerse -> TestingMethod -> List Word
@@ -2039,9 +2109,86 @@ versesToLearnUrl =
     "/api/learnscripture/v1/versestolearn2/"
 
 
+actionCompleteUrl : String
+actionCompleteUrl =
+    "/api/learnscripture/v1/actioncomplete/"
+
+
 loadVerses : Cmd Msg
 loadVerses =
     Http.send VersesToLearn (Http.get versesToLearnUrl verseBatchRawDecoder)
+
+
+recordTestComplete : HttpConfig -> CurrentVerse -> TestProgress -> Cmd Msg
+recordTestComplete httpConfig currentVerse testProgress =
+    let
+        verseStatus =
+            currentVerse.verseStatus
+
+        accuracy =
+            getTestResult testProgress
+    in
+        case accuracy of
+            Nothing ->
+                Cmd.none
+
+            Just a ->
+                let
+                    -- TODO - we should be posting
+                    -- several values, not one big JSON object, using multipartBody
+                    body =
+                        Http.multipartBody
+                            [ Http.stringPart "uvs_id" (toString verseStatus.id)
+                            , Http.stringPart "uvs_needs_testing" (encodeBool <| verseStatus.needsTesting)
+                            , Http.stringPart "stage" stageTypeTest
+                            , Http.stringPart "accuracy" (encodeFloat a)
+                              -- TODO - practice field
+                            , Http.stringPart "practice" (encodeBool False)
+                            ]
+                in
+                    Http.send RecordActionComplete
+                        (myHttpPost httpConfig actionCompleteUrl body emptyDecoder)
+
+
+encodeBool : Bool -> String
+encodeBool =
+    JE.bool >> JE.encode 0
+
+
+encodeFloat : Float -> String
+encodeFloat =
+    JE.float >> JE.encode 0
+
+myHttpPost : HttpConfig -> String -> Http.Body -> JD.Decoder a -> Http.Request a
+myHttpPost config url body decoder =
+    Http.request
+        { method = "POST"
+        , headers =
+            [ Http.header "X-CSRFToken" config.csrfMiddlewareToken
+            , Http.header "X-Requested-With" "XMLHttpRequest"
+            ]
+        , url = url
+        , body = body
+        , expect = Http.expectJson decoder
+        , timeout = Nothing
+        , withCredentials = False
+        }
+
+
+
+-- The following constants are defined in StageType.
+-- Can probably clean this up if we define
+-- LearningStage as a pure enum and rework this.
+
+
+stageTypeTest : String
+stageTypeTest =
+    "TEST"
+
+
+stageTypeRead : String
+stageTypeRead =
+    "READ"
 
 
 
@@ -2175,6 +2322,11 @@ learningTypeDecoder =
         , ( "LEARNING", Learning )
         , ( "PRACTICE", Practice )
         ]
+
+
+emptyDecoder : JD.Decoder ()
+emptyDecoder =
+    JD.succeed ()
 
 
 
