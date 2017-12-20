@@ -274,7 +274,12 @@ def learn_set(request, uvs_list, learning_type):
             return_to = urllib.parse.urlunparse(url)
 
     session.start_learning_session(request, uvs_list, learning_type, return_to)
-    return HttpResponseRedirect(reverse('learn'))
+
+    return HttpResponseRedirect(get_learn_page(request))
+
+
+def get_learn_page(request):
+    return reverse('learn-beta') if request.identity.new_learn_page else reverse('learn')
 
 
 def get_user_groups(identity):
