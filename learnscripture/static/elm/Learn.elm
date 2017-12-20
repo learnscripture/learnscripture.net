@@ -381,9 +381,15 @@ viewCurrentVerse session model =
 
         testingMethod =
             getTestingMethod model
+
+        titleTextAttrs =
+            if isTestingReference currentVerse.currentStage then
+                [ A.class "blurry" ]
+            else
+                []
     in
         H.div [ A.id "id-content-wrapper" ]
-            ([ H.h2 []
+            ([ H.h2 titleTextAttrs
                 [ H.text currentVerse.verseStatus.titleText ]
              , H.div [ A.id "id-verse-wrapper" ]
                 [ H.div [ A.class "current-verse-wrapper" ]
@@ -1202,8 +1208,11 @@ update msg model =
                             )
 
         VersesToLearn (Err errMsg) ->
-            let newModel = { model | learningSession = VersesError errMsg }
-            in ( newModel, updateTypingBoxCommand newModel )
+            let
+                newModel =
+                    { model | learningSession = VersesError errMsg }
+            in
+                ( newModel, updateTypingBoxCommand newModel )
 
         NextStage ->
             moveToNextStage model
@@ -1531,6 +1540,21 @@ isTestingStage stage =
     case stage of
         TestStage _ ->
             True
+
+        _ ->
+            False
+
+
+isTestingReference : LearningStage -> Bool
+isTestingReference stage =
+    case stage of
+        TestStage tp ->
+            case tp.currentWord of
+                TestFinished ->
+                    False
+
+                CurrentWord cw ->
+                    cw.word.type_ == ReferenceWord
 
         _ ->
             False
@@ -2158,6 +2182,7 @@ encodeBool =
 encodeFloat : Float -> String
 encodeFloat =
     JE.float >> JE.encode 0
+
 
 myHttpPost : HttpConfig -> String -> Http.Body -> JD.Decoder a -> Http.Request a
 myHttpPost config url body decoder =
