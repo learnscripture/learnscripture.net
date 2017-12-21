@@ -32,6 +32,11 @@ main =
         , subscriptions = subscriptions
         }
 
+{- Constants -}
+
+-- Strength == 0.6 corresponds to about 10 days learning.
+hardModeStrengthThreshold : Float
+hardModeStrengthThreshold = 0.6
 
 
 {- Flags and external inputs -}
@@ -387,13 +392,25 @@ viewCurrentVerse session model =
                 [ A.class "blurry" ]
             else
                 []
+
+        hideWordBoundariesClass = "hide-word-boundaries"
+        verseClasses = "current-verse " ++
+                       case currentVerse.currentStage of
+                           ReadForContext -> "read-for-context"
+                           TestStage _ ->
+                               case testingMethod of
+                                   OnScreen -> hideWordBoundariesClass
+                                   _ -> if shouldUseHardTestingMode currentVerse
+                                        then hideWordBoundariesClass
+                                        else ""
+                           _ -> ""
     in
         H.div [ A.id "id-content-wrapper" ]
             ([ H.h2 titleTextAttrs
                 [ H.text currentVerse.verseStatus.titleText ]
              , H.div [ A.id "id-verse-wrapper" ]
                 [ H.div [ A.class "current-verse-wrapper" ]
-                    [ H.div [ A.class "current-verse" ]
+                    [ H.div [ A.class verseClasses ]
                         (versePartsToHtml currentVerse.currentStage <|
                             partsForVerse currentVerse.verseStatus currentVerse.currentStage testingMethod
                         )
@@ -2059,6 +2076,10 @@ isReference wordType =
             True
 
 
+shouldUseHardTestingMode : CurrentVerse -> Bool
+shouldUseHardTestingMode currentVerse =
+    currentVerse.verseStatus.strength > hardModeStrengthThreshold
+
 updateTypingBoxCommand : Model -> Cmd msg
 updateTypingBoxCommand model =
     case getCurrentTestProgress model of
@@ -2072,6 +2093,9 @@ updateTypingBoxCommand model =
                         ( typingBoxId
                         , idForButton cw.word
                         , classForTypingBox <| typingBoxInUse tp (getTestingMethod model)
+                        , case getCurrentVerse model of
+                              Nothing -> False
+                              Just currentVerse -> shouldUseHardTestingMode currentVerse
                         )
 
         Nothing ->
@@ -2080,7 +2104,7 @@ updateTypingBoxCommand model =
 
 hideTypingBoxCommand : Cmd msg
 hideTypingBoxCommand =
-    LearnPorts.updateTypingBox ( typingBoxId, "", classForTypingBox False )
+    LearnPorts.updateTypingBox ( typingBoxId, "", classForTypingBox False, False )
 
 
 focusDefaultButton : Model -> Cmd Msg

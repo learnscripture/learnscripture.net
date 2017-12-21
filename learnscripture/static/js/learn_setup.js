@@ -48,6 +48,7 @@ app.ports.updateTypingBox.subscribe(function (args) {
     var typingBoxId = args[0];
     var wordButtonId = args[1];
     var expectedClass = args[2];
+    var hardMode = args[3];
 
     var attempts = 0;
     var fixTypingBox = function () {
@@ -92,10 +93,15 @@ app.ports.updateTypingBox.subscribe(function (args) {
             }
             var borderWidth = parsePx(styles['border-left-width']);
             typingBox.style.height = (rect.height - 2 * borderWidth).toString() + "px";
-            // Allow for border and left padding
-            var paddingLeft = parsePx(styles['padding-left']);
-            var paddingRight = parsePx(styles['padding-right']);
-            typingBox.style.width = (rect.width - 2 * borderWidth - paddingLeft - paddingRight).toString() + "px";
+
+            if (hardMode) {
+                typingBox.style.width = "6em";
+            } else {
+                // Allow for border and left padding
+                var paddingLeft = parsePx(styles['padding-left']);
+                var paddingRight = parsePx(styles['padding-right']);
+                typingBox.style.width = (rect.width - 2 * borderWidth - paddingLeft - paddingRight).toString() + "px";
+            }
             typingBox.style.display = "inline";
             typingBox.focus();
         } else if (expectedClass == "tohide") {
