@@ -101,7 +101,7 @@ body.learn-page {
         border-bottom: 1px solid #c0c0c0;
         margin-bottom: 0.5em;
     }
-    .normalWordBorder() {
+    .normalWordBorderColors() {
         border-color: #C0C0C0;
         border-top-color: #D8D8D8;
         border-bottom-color: #9A9A9A;
@@ -117,7 +117,7 @@ body.learn-page {
         padding: 4px @word-padding-horizontal;
         margin: @word-margin-top @word-margin-left;
         .gradientBar(#e8e8e8, #C0C0C0);
-        .normalWordBorder();
+        .normalWordBorderColors();
         cursor: pointer;
 
         &.correct {
@@ -177,7 +177,8 @@ body.learn-page {
         border-radius: 0px;
         cursor: default;
 
-        &.current-word {
+        &.current {
+            .normalWordBorderColors();
             border-left: 2px solid blue;
         }
     }
