@@ -885,7 +885,7 @@ viewButton button =
         eventAttributes =
             case button.enabled of
                 Enabled ->
-                    [ E.onClick button.msg ]
+                    [ onClickSimply button.msg ]
 
                 Disabled ->
                     []
@@ -940,7 +940,7 @@ onScreenTestingButtons currentVerse testingMethod =
                                                         (\w ->
                                                             H.span
                                                                 [ A.class "word"
-                                                                , E.onClick (OnScreenButtonClick w)
+                                                                , onClickSimply (OnScreenButtonClick w)
                                                                 ]
                                                                 [ H.text w ]
                                                         )
@@ -1064,14 +1064,14 @@ instructions verse testingMethod helpVisible =
                         , if helpVisible then
                             (H.a
                                 [ A.href "#"
-                                , E.onClick CollapseHelp
+                                , onClickSimply CollapseHelp
                                 ]
                                 [ makeIcon "help-expanded" ]
                             )
                           else
                             (H.a
                                 [ A.href "#"
-                                , E.onClick ExpandHelp
+                                , onClickSimply ExpandHelp
                                 ]
                                 [ makeIcon "help-collapsed" ]
                             )
@@ -2402,6 +2402,15 @@ emptyDecoder =
 
 
 {- General utils -}
+
+onClickSimply : msg -> H.Attribute msg
+onClickSimply msg =
+  E.onWithOptions
+    "click"
+    { stopPropagation = False
+    , preventDefault = True
+    }
+    (JD.succeed msg)
 
 
 dedupeBy : (a -> comparable) -> List a -> List a
