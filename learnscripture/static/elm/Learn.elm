@@ -804,42 +804,53 @@ type ButtonDefault
 buttonsForStage : CurrentVerse -> Preferences -> List (Button Msg)
 buttonsForStage verse preferences =
     let
-        isRemainingStage =
-            not <| List.isEmpty verse.remainingStages
-
-        isPreviousStage =
-            not <| List.isEmpty verse.seenStages
-
-        nextEnabled =
-            if isRemainingStage then
-                Enabled
-            else
-                Disabled
-
-        previousEnabled =
-            if isPreviousStage then
-                Enabled
-            else
-                Disabled
+        multipleStages = (List.length verse.remainingStages + List.length verse.seenStages) > 0
     in
-        case verse.currentStage of
-            Read ->
-                [ { enabled = previousEnabled
-                  , default = NonDefault
-                  , caption = "Back"
-                  , msg = PreviousStage
-                  , id = "id-previous-btn"
-                  }
-                , { enabled = nextEnabled
-                  , default = Default
-                  , caption = "Next"
-                  , msg = NextStage
-                  , id = "id-next-btn"
-                  }
-                ]
+        if multipleStages
+        then
+            let
+               isRemainingStage =
+                   not <| List.isEmpty verse.remainingStages
 
-            TestStage _ ->
-                []
+               isPreviousStage =
+                   not <| List.isEmpty verse.seenStages
+
+               nextEnabled =
+                   if isRemainingStage then
+                       Enabled
+                   else
+                       Disabled
+
+               previousEnabled =
+                   if isPreviousStage then
+                       Enabled
+                   else
+                       Disabled
+           in
+               case verse.currentStage of
+                   TestStage _ ->
+                       -- Never show 'back' buttons once we've reached test
+                       []
+                   _ ->
+                       [ { enabled = previousEnabled
+                         , default = NonDefault
+                         , caption = "Back"
+                         , msg = PreviousStage
+                         , id = "id-previous-btn"
+                         }
+                       , { enabled = nextEnabled
+                         , default = Default
+                         , caption = "Next"
+                         , msg = NextStage
+                         , id = "id-next-btn"
+                         }
+                       ]
+
+        else
+            -- TODO - if next verse, show 'next' button
+            -- otherwise 'Done' button
+            -- If test mode, show 'more practice' button
+            []
 
 
 getTestingMethod : Model -> TestingMethod
@@ -887,6 +898,9 @@ onScreenTestingButtons : CurrentVerse -> TestingMethod -> H.Html Msg
 onScreenTestingButtons currentVerse testingMethod =
     case currentVerse.currentStage of
         Read ->
+            emptyNode
+
+        ReadForContext ->
             emptyNode
 
         TestStage tp ->
@@ -987,6 +1001,13 @@ instructions verse testingMethod helpVisible =
                 Read ->
                     ( [ bold "READ: "
                       , H.text "Read the text through (preferably aloud), and click 'Next'."
+                      ]
+                    , buttonsHelp
+                    )
+
+                ReadForContext ->
+                    ( [ bold "READ: "
+                      , H.text "Read this verse to get the context and flow of the passage."
                       ]
                     , buttonsHelp
                     )
@@ -1476,6 +1497,7 @@ mergeSession initialSession newBatchSession =
 
 type LearningStage
     = Read
+    | ReadForContext
     | TestStage TestProgress
 
 
