@@ -1,63 +1,110 @@
 import CalHeatMap = require('cal-heatmap');
 import 'cal-heatmap/cal-heatmap.css';
 
+var calHeatMapData = null;
+var calHeatMapInstance = null;
+var saveHeatmapPreferencesTimeout = null;
+
 var setupCalendarHeatmap = function() {
     if ($('#id-heatmap-div').length == 0) {
         return;
     }
-    var cal = new CalHeatMap();
-    var today = new Date();
-    var year = today.getFullYear();
-    var month = today.getMonth();
-    // Go back 2 years, and then clip the left hand side
-    // This gives the best results visually.
-    var numberOfYears = 2;
-    year -= numberOfYears;
-    cal.init({
-        cellSize: 10, // need to change #id-heatmap-div height if this is changed.
-        data: $("#id-dashboard-script-data").attr('data-user-stats-verses-timeline-stats-csv-url') + "?r=" + Math.floor(Math.random() * 1000000000).toString(),
-        dataType: "csv",
-        displayLegend: false,
-        domain: "month",
-        domainLabelFormat: "%b %Y",
-        itemSelector: '#id-heatmap-div',
-        maxDate: today,
-        nextSelector: '#id-heatmap-next',
-        previousSelector: '#id-heatmap-previous',
-        range: numberOfYears * 12 + 1,
-        start: new Date(year, month, 1),
-        subDomainDateFormat: "%Y-%m-%d",
-        legend: [1, 10, 20, 35, 55, 80],
-        highlight: "now",
-        afterLoadData: function(data) {
-            // calculate dict in form required by CalHeatMap. Also
-            // calculate streaks, relying on fact that data has zeros in
-            // it and is sorted correctly.
-            var stats = {};
-            var biggestStreak = 0;
-            var currentStreak = 0;
-            for (var i = 0; i < data.length; i++) {
-                var ts = Date.parse(data[i]['Date']) / 1000;
-                var num = parseInt(data[i]['Verses started'], 10) + parseInt(data[i]['Verses tested'], 10);
-                stats[ts] = num;
-                if (num == 0) {
-                    if (currentStreak > biggestStreak) {
-                        biggestStreak = currentStreak;
+    if (!getHeatmapSection().is(':visible')) {
+        // delay loading of data until we need it, which saves loading it at all
+        // if the user has selected to collapse this section.
+        return;
+    }
+    if (calHeatMapData == null) {
+        $.ajax({
+            url: $("#id-dashboard-script-data").attr('data-user-stats-verses-timeline-stats-csv-url') + "?r=" + Math.floor(Math.random() * 1000000000).toString(),
+            success: function(data) {
+                var allRows = data.replace(/\r/, '').trim().split(/\n/).map(r => r.split(/,/));
+                var headers = allRows[0];
+                var dataRows = allRows.slice(1);
+                var final = [];
+                for (var i = 0; i < dataRows.length; i++) {
+                    var d = {};
+                    for (var j = 0; j < headers.length; j++) {
+                        d[headers[j]] = dataRows[i][j];
                     }
-                    currentStreak = 0;
-                } else {
-                    currentStreak += 1;
+                    final.push(d);
                 }
+                calHeatMapData = final;
+                createOrRefreshCalendarHeatmap(calHeatMapData);
+                setupCalendarControls();
             }
+        });
+    } else {
+        createOrRefreshCalendarHeatmap(calHeatMapData);
+    }
+}
+
+var getSelectedStat = function() {
+    return $('#id-heatmap-stat-selector .active a').attr('data-heatmap-select-stat');
+}
+
+var createOrRefreshCalendarHeatmap = function(allData) {
+    // calculate dict in form required by CalHeatMap. Also calculate streaks,
+    // relying on fact that data has zeros in it and is sorted correctly.
+    var selectedStat = getSelectedStat();
+
+    var stats = {};
+    var biggestStreak = 0;
+    var currentStreak = 0;
+    for (var i = 0; i < allData.length; i++) {
+        var ts = Date.parse(allData[i]['Date']) / 1000;
+        var num = parseInt(allData[i][selectedStat], 10)
+        stats[ts] = num;
+        if (num == 0) {
             if (currentStreak > biggestStreak) {
                 biggestStreak = currentStreak;
             }
-            $('#id-heatmap-loading').remove();
-            $('#id-current-streak').text(currentStreak.toString() + " " + (currentStreak == 1 ? "day" : "days"));
-            $('#id-biggest-streak').text(biggestStreak.toString() + " " + (biggestStreak == 1 ? "day" : "days"));
-            return stats;
+            currentStreak = 0;
+        } else {
+            currentStreak += 1;
         }
-    });
+    }
+    if (currentStreak > biggestStreak) {
+        biggestStreak = currentStreak;
+    }
+    $('#id-current-streak').text(currentStreak.toString() + " " + (currentStreak == 1 ? "day" : "days"));
+    $('#id-biggest-streak').text(biggestStreak.toString() + " " + (biggestStreak == 1 ? "day" : "days"));
+
+    if (calHeatMapInstance == null) {
+        calHeatMapInstance = new CalHeatMap();
+        var today = new Date();
+        var year = today.getFullYear();
+        var month = today.getMonth();
+        // Go back 2 years, and then clip the left hand side
+        // This gives the best results visually.
+        var numberOfYears = 2;
+        year -= numberOfYears;
+        calHeatMapInstance.init({
+            cellSize: 10, // need to change #id-heatmap-div height if this is changed.
+            data: stats,
+            displayLegend: false,
+            domain: "month",
+            domainLabelFormat: "%b %Y",
+            itemSelector: '#id-heatmap-div',
+            maxDate: today,
+            nextSelector: '#id-heatmap-next',
+            previousSelector: '#id-heatmap-previous',
+            range: numberOfYears * 12 + 1,
+            start: new Date(year, month, 1),
+            subDomainDateFormat: "%Y-%m-%d",
+            legend: [0, 10, 20, 35, 55, 80],
+            highlight: "now",
+            afterLoadData: function(data) {
+                $('#id-heatmap-loading').remove();
+                return data;
+            }
+        });
+    } else {
+        calHeatMapInstance.update(stats);
+    };
+}
+
+var setupCalendarControls = function() {
     $('#id-heatmap-div').on('click', 'svg rect', function(ev) {
         var candidates = ev.currentTarget.parentNode.childNodes;
         for (var i = 0; i < candidates.length; i++) {
@@ -67,7 +114,45 @@ var setupCalendarHeatmap = function() {
             }
         }
     });
+
+    $('[data-heatmap-select-stat]').on('click', function(ev) {
+        ev.preventDefault();
+        var $target = $(ev.target);
+        $('#id-heatmap-stat-selector .active').each((idx, elem) => {
+            $(elem).removeClass('active');
+        });
+        $target.parent('[data-heatmap-select-stat-parent]').addClass('active');
+        createOrRefreshCalendarHeatmap(calHeatMapData);
+        saveHeatmapPreferencesDelayed();
+    });
+}
+
+var getHeatmapSection = function() {
+    return $('#id-heatmap-section');
+}
+
+var saveHeatmapPreferencesDelayed = function() {
+    if (saveHeatmapPreferencesTimeout != null) {
+        // Cancel previous one
+        window.clearTimeout(saveHeatmapPreferencesTimeout);
+        saveHeatmapPreferencesTimeout = null;
+    }
+    saveHeatmapPreferencesTimeout = window.setTimeout(saveHeatmapPreferences,
+        1000);
+}
+
+var saveHeatmapPreferences = function() {
+    $.ajax({
+        url: '/api/learnscripture/v1/saveheatmappreferences/?format=json',
+        dataType: 'json',
+        type: 'POST',
+        data: {
+            heatmap_default_stats_type: getSelectedStat(),
+            heatmap_default_show: getHeatmapSection().is(':visible') ? 'true' : 'false'
+        }
+    })
 };
+
 
 var setupDashboardControls = function() {
     if (document.location.pathname.match(/\/dashboard/) === null) {
@@ -97,6 +182,25 @@ var setupDashboardControls = function() {
         }
     });
     setupCalendarHeatmap();
+
+    $('#id-show-heatmap').on('click', function(ev) {
+        ev.preventDefault();
+        var $section = getHeatmapSection();
+        var $icon = $('#id-show-heatmap i');
+        if ($section.is(':visible')) {
+            // Collapse
+            $section.hide();
+            $icon.removeClass('icon-heatmap-expanded').addClass('icon-heatmap-collapsed');
+        } else {
+            // Expand
+            $section.show();
+            $icon.removeClass('icon-heatmap-collapsed').addClass('icon-heatmap-expanded');
+            if (calHeatMapData == null) {
+                setupCalendarHeatmap();
+            }
+        }
+        saveHeatmapPreferencesDelayed();
+    })
 };
 
 $(document).ready(function() {
