@@ -4,7 +4,7 @@ from learnscripture.api.handlers import (ActionCompleteHandler, ActionLogs, AddC
                                          CancelLearningVerseHandler, CheckDuplicatePassageSet,
                                          DeleteNotice, Follow, HideComment, LogOutHandler, ResetProgressHandler,
                                          SessionStats, SetPreferences, SkipVerseHandler, UnFollow, VerseFind,
-                                         VersesToLearnHandler)
+                                         VersesToLearnHandler, SaveHeatmapPreferences)
 
 # These URLs are hardcoded into Javascript instead of using URL reversing
 # somehow. That's OK, because if you want to change them, you should be adding
@@ -29,4 +29,5 @@ urlpatterns = [
     url(r'^hidecomment/$', HideComment.as_view(), name='learnscripture.api.hidecomment'),
     url(r'^follow/$', Follow.as_view(), name='learnscripture.api.follow'),
     url(r'^unfollow/$', UnFollow.as_view(), name='learnscripture.api.unfollow'),
+    url(r'^saveheatmappreferences/$', SaveHeatmapPreferences.as_view(), name='learnscripture.api.saveheatmappreferences'),
 ]

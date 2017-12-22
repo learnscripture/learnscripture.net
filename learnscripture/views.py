@@ -24,7 +24,7 @@ from paypal.standard.forms import PayPalPaymentsForm
 
 import learnscripture.tasks
 from accounts.forms import AccountDetailsForm, PreferencesForm
-from accounts.models import Account, Identity
+from accounts.models import Account, Identity, HeatmapStatsType
 from awards.models import AnyLevel, Award, AwardType
 from bibleverses.books import BIBLE_BOOK_COUNT, get_bible_book_name
 from bibleverses.forms import VerseSetForm
@@ -416,6 +416,7 @@ def dashboard(request):
          'groups': groups,
          'more_groups': more_groups,
          'url_after_logout': '/',
+         'heatmap_stats_types': HeatmapStatsType.choice_list
          }
     c.update(todays_stats(identity))
     return render(request, 'learnscripture/dashboard.html', c)
@@ -952,6 +953,7 @@ def combine_timeline_stats(*statslists):
         if last_date < today:
             next_day = last_date + timedelta(days=1)
             retval.append(tuple([next_day] + [0 for s in statslists]))
+
     return retval
 
 
@@ -963,11 +965,21 @@ def user_stats_verses_timeline_stats_csv(request, username):
 
     rows = combine_timeline_stats(started, tested)
 
+    # Add 'Combined' column
+    rows2 = []
+    for r in rows:
+        newrow = list(r)
+        newrow.append(sum(newrow[1:]))
+        rows2.append(newrow)
+
     resp = HttpResponse(content_type="text/plain")
     writer = csv.writer(resp)
-    writer.writerow(["Date", "Verses started", "Verses tested"])
-    for d, c1, c2 in rows:
-        writer.writerow([d.strftime("%Y-%m-%d"), c1, c2])
+    writer.writerow(["Date",
+                     HeatmapStatsType.VERSES_STARTED,
+                     HeatmapStatsType.VERSES_TESTED,
+                     HeatmapStatsType.COMBINED])
+    for d, c1, c2, c3 in rows2:
+        writer.writerow([d.strftime("%Y-%m-%d"), c1, c2, c3])
     return resp
 
 

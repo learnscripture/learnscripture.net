@@ -63,6 +63,7 @@ module.exports = {
         ],
         alias: {
             "jquery": "jquery/src/jquery",
+            "cal-heatmap$": "cal-heatmap/cal-heatmap.js",
         }
     }
 }

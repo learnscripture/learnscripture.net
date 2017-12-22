@@ -12,8 +12,22 @@
   {% endif %}
 
   {% if request.identity.scoring_enabled %}
-    <h2>Learning events</h2>
-    <div id="id-heatmap-section" class="actionset">
+    <h2>Learning events
+      <a href="#"
+         id="id-show-heatmap"
+         >
+        {% if request.identity.heatmap_default_show %}
+          <i class="icon-fw icon-heatmap-expanded"></i>
+        {% else %}
+          <i class="icon-fw icon-heatmap-collapsed"></i>
+        {% endif %}
+      </a>
+    </h2>
+    <div id="id-heatmap-section" class="actionset"
+         {% if not request.identity.heatmap_default_show %}
+         style="display: none;"
+         {% endif %}
+         >
       <div style="float: right; font-size: 120%;">
         <a href="{% url 'user_stats' request_account.username %}" title="Your stats"><i class="icon-fw icon-stats"></i></a>
         <a href="{% url 'user_verses' %}" title="Your progress"><i class="icon-fw icon-progress"></i></a>
@@ -33,9 +47,21 @@
         <div>Current streak:
           <span id="id-current-streak" class="streak">&nbsp;</span></div>
       </div>
+      <div id="id-heatmap-stat-selector" class="pills">
+        {% for value, caption in heatmap_stats_types %}
+          <span
+             data-heatmap-select-stat-parent
+             {% if request.identity.heatmap_default_stats_type == value %}
+             class="active"
+             {% endif %}
+             >
+            <a href="#"
+               data-heatmap-select-stat="{{ value }}">{{ caption }}</a>
+          </span>
+        {% endfor %}
+        </span>
+      </div>
     </div>
-
-
   {% endif %}
 
   <h2>Review</h2>
