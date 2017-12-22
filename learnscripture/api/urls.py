@@ -1,10 +1,10 @@
 from django.conf.urls import url
 
 from learnscripture.api.handlers import (ActionCompleteHandler, ActionLogs, AddComment, CancelLearningPassageHandler,
-                                         CancelLearningVerseHandler, CheckDuplicatePassageSet,
-                                         DeleteNotice, Follow, HideComment, LogOutHandler, ResetProgressHandler,
+                                         CancelLearningVerseHandler, CheckDuplicatePassageSet, DeleteNotice, Follow,
+                                         HideComment, LogOutHandler, ResetProgressHandler, SaveHeatmapPreferences,
                                          SessionStats, SetPreferences, SkipVerseHandler, UnFollow, VerseFind,
-                                         VersesToLearnHandler, SaveHeatmapPreferences)
+                                         VersesToLearnHandler)
 
 # These URLs are hardcoded into Javascript instead of using URL reversing
 # somehow. That's OK, because if you want to change them, you should be adding

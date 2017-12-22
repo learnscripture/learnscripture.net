@@ -24,7 +24,7 @@ from paypal.standard.forms import PayPalPaymentsForm
 
 import learnscripture.tasks
 from accounts.forms import AccountDetailsForm, PreferencesForm
-from accounts.models import Account, Identity, HeatmapStatsType
+from accounts.models import Account, HeatmapStatsType, Identity
 from awards.models import AnyLevel, Award, AwardType
 from bibleverses.books import BIBLE_BOOK_COUNT, get_bible_book_name
 from bibleverses.forms import VerseSetForm
