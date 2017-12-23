@@ -823,53 +823,82 @@ type ButtonDefault
 buttonsForStage : CurrentVerse -> Preferences -> List (Button Msg)
 buttonsForStage verse preferences =
     let
-        multipleStages = (List.length verse.remainingStages + List.length verse.seenStages) > 0
+        multipleStages =
+            (List.length verse.remainingStages + List.length verse.seenStages) > 0
+
+        -- TODO should be 'Done' if no more verses remaining
+        getNextVerseCaption =
+            "Next"
+
+        testStageButtons tp =
+            case tp.currentWord of
+                TestFinished ->
+                    [ { caption = getNextVerseCaption
+                      , msg = NextVerse
+                      , enabled = Enabled
+                      , default = Default
+                      , id = "id-next-btn"
+                      }
+                      -- TODO, "More practice" button, with correct default
+                    ]
+
+                CurrentWord _ ->
+                    -- Never show previous/back button once we've reached test
+                    -- because we might also have 'on screen buttons'
+                    -- on the screen.
+                    []
     in
-        if multipleStages
-        then
+        if multipleStages then
             let
-               isRemainingStage =
-                   not <| List.isEmpty verse.remainingStages
+                isRemainingStage =
+                    not <| List.isEmpty verse.remainingStages
 
-               isPreviousStage =
-                   not <| List.isEmpty verse.seenStages
+                isPreviousStage =
+                    not <| List.isEmpty verse.seenStages
 
-               nextEnabled =
-                   if isRemainingStage then
-                       Enabled
-                   else
-                       Disabled
+                nextEnabled =
+                    if isRemainingStage then
+                        Enabled
+                    else
+                        Disabled
 
-               previousEnabled =
-                   if isPreviousStage then
-                       Enabled
-                   else
-                       Disabled
-           in
-               case verse.currentStage of
-                   TestStage _ ->
-                       -- Never show 'back' buttons once we've reached test
-                       []
-                   _ ->
-                       [ { enabled = previousEnabled
-                         , default = NonDefault
-                         , caption = "Back"
-                         , msg = PreviousStage
-                         , id = "id-previous-btn"
-                         }
-                       , { enabled = nextEnabled
-                         , default = Default
-                         , caption = "Next"
-                         , msg = NextStage
-                         , id = "id-next-btn"
-                         }
-                       ]
+                previousEnabled =
+                    if isPreviousStage then
+                        Enabled
+                    else
+                        Disabled
+            in
+                case verse.currentStage of
+                    TestStage tp ->
+                        testStageButtons tp
 
+                    _ ->
+                        [ { caption = "Next"
+                          , msg = NextStage
+                          , enabled = nextEnabled
+                          , default = Default
+                          , id = "id-next-btn"
+                          }
+                        , { caption = "Back"
+                          , msg = PreviousStage
+                          , enabled = previousEnabled
+                          , default = NonDefault
+                          , id = "id-previous-btn"
+                          }
+                        ]
         else
-            -- TODO - if next verse, show 'next' button
-            -- otherwise 'Done' button
-            -- If test mode, show 'more practice' button
-            []
+            case verse.currentStage of
+                TestStage tp ->
+                    testStageButtons tp
+
+                _ ->
+                    [ { caption = getNextVerseCaption
+                      , msg = NextVerse
+                      , enabled = Enabled
+                      , default = Default
+                      , id = "id-next-btn"
+                      }
+                    ]
 
 
 getTestingMethod : Model -> TestingMethod
@@ -1207,6 +1236,7 @@ type Msg
     | VersesToLearn (Result Http.Error VerseBatchRaw)
     | NextStage
     | PreviousStage
+    | NextVerse
     | TypingBoxInput String
     | TypingBoxEnter
     | OnScreenButtonClick String
@@ -1258,10 +1288,7 @@ update msg model =
                                 }
                         in
                             ( newModel
-                            , Cmd.batch
-                                [ focusDefaultButton newModel
-                                , updateTypingBoxCommand newModel
-                                ]
+                            , stageOrVerseChangeCommands newModel
                             )
 
         VersesToLearn (Err errMsg) ->
@@ -1276,6 +1303,9 @@ update msg model =
 
         PreviousStage ->
             moveToPreviousStage model
+
+        NextVerse ->
+            moveToNextVerse model
 
         TypingBoxInput input ->
             handleTypedInput model input
@@ -1465,25 +1495,29 @@ verseBatchToSession batch =
                             Nothing
 
                         Just maxOrderVal ->
-                            let
-                                ( firstStage, remainingStages ) =
-                                    getStages learningType verse
-                            in
-                                Just
-                                    { verses =
-                                        { verseStatuses = batch.verseStatuses
-                                        , learningType = learningType
-                                        , returnTo = batch.returnTo
-                                        , maxOrderVal = maxOrderVal
-                                        , seen = []
-                                        }
-                                    , currentVerse =
-                                        { verseStatus = verse
-                                        , currentStage = firstStage
-                                        , seenStages = []
-                                        , remainingStages = remainingStages
-                                        }
+                            Just
+                                { verses =
+                                    { verseStatuses = batch.verseStatuses
+                                    , learningType = learningType
+                                    , returnTo = batch.returnTo
+                                    , maxOrderVal = maxOrderVal
+                                    , seen = []
                                     }
+                                , currentVerse = setupCurrentVerse verse learningType
+                                }
+
+
+setupCurrentVerse : VerseStatus -> LearningType -> CurrentVerse
+setupCurrentVerse verse learningType =
+    let
+        ( firstStage, remainingStages ) =
+            getStages learningType verse
+    in
+        { verseStatus = verse
+        , currentStage = firstStage
+        , seenStages = []
+        , remainingStages = remainingStages
+        }
 
 
 
@@ -1508,6 +1542,14 @@ mergeSession initialSession newBatchSession =
                             |> dedupeBy .learnOrder
                 }
         }
+
+
+stageOrVerseChangeCommands : Model -> Cmd Msg
+stageOrVerseChangeCommands model =
+    Cmd.batch
+        [ updateTypingBoxCommand model
+        , focusDefaultButton model
+        ]
 
 
 
@@ -1742,10 +1784,7 @@ moveToNextStage model =
                 )
     in
         ( newModel
-        , Cmd.batch
-            [ updateTypingBoxCommand newModel
-            , focusDefaultButton newModel
-            ]
+        , stageOrVerseChangeCommands newModel
         )
 
 
@@ -1772,11 +1811,42 @@ moveToPreviousStage model =
                 )
     in
         ( newModel
-        , Cmd.batch
-            [ updateTypingBoxCommand newModel
-            , focusDefaultButton newModel
-            ]
+        , stageOrVerseChangeCommands newModel
         )
+
+
+moveToNextVerse : Model -> ( Model, Cmd Msg )
+moveToNextVerse model =
+    case model.learningSession of
+        Session sessionData ->
+            case getNextVerse sessionData.verses sessionData.currentVerse of
+                Nothing ->
+                    ( model
+                    , Navigation.load sessionData.verses.returnTo
+                    )
+
+                Just verse ->
+                    let
+                        newModel =
+                            updateCurrentVerse model
+                                (\cv -> setupCurrentVerse verse sessionData.verses.learningType)
+                    in
+                        ( newModel
+                        , stageOrVerseChangeCommands newModel
+                        )
+
+        _ ->
+            ( model
+            , Cmd.none
+            )
+
+
+getNextVerse : VerseStore -> CurrentVerse -> Maybe VerseStatus
+getNextVerse verseStore currentVerse =
+    verseStore.verseStatuses
+        |> List.filter (\v -> v.learnOrder > currentVerse.verseStatus.learnOrder)
+        |> List.sortBy .learnOrder
+        |> List.head
 
 
 handleTypedInput : Model -> String -> ( Model, Cmd Msg )
@@ -1882,9 +1952,8 @@ checkCurrentWordAndUpdate model input =
                 )
     in
         ( newModel
-          -- The typing box might need moving, so do it in case:
         , Cmd.batch
-            [ updateTypingBoxCommand newModel
+            [ stageOrVerseChangeCommands newModel
             , recordCommentCmd
             ]
         )
