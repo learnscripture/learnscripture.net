@@ -49,6 +49,13 @@ DEFAULT_THEME = 'calm'
 
 DONT_NAG_NEW_USERS_FOR_MONEY_DAYS = 30
 
+HeatmapStatsType = make_choices('HeatmapStatsType',
+                                [('VERSES_STARTED', 'Items started'),
+                                 ('VERSES_TESTED', 'Items tested'),
+                                 ('COMBINED', 'Combined'),
+                                 ])
+
+
 # Account is separate from Identity to allow guest users to use the site fully
 # without signing up.
 #
@@ -433,6 +440,10 @@ class Identity(models.Model):
                                     null=True, default=None,
                                     blank=True,
                                     related_name='referrals')
+    heatmap_default_stats_type = models.CharField(max_length=20,
+                                                  choices=HeatmapStatsType.choice_list,
+                                                  default=HeatmapStatsType.COMBINED)
+    heatmap_default_show = models.BooleanField(default=True)
 
     objects = IdentityManager()
 
