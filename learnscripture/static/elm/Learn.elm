@@ -1591,12 +1591,6 @@ type CheckResult
     | Success
 
 
-
--- TODO - eliminate the need for passing 'Read' and 'FullWords' here, instead of
--- correct values. Creating 'initialTestProgress' when setting up stages is the
--- problem
-
-
 initialTestProgress : VerseStatus -> TestProgress
 initialTestProgress verseStatus =
     { attemptRecords = Dict.empty
@@ -1605,6 +1599,8 @@ initialTestProgress verseStatus =
         CurrentWord
             { overallIndex = 0
             , word =
+                -- Passing 'Read' and 'FullWords' here is a bit of a hack, but
+                -- works fine when we are only getting the first word.
                 case getAt (wordsForVerse verseStatus Read FullWords) 0 of
                     Nothing ->
                         Debug.crash "Should be at least one word in verse"
