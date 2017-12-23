@@ -1308,7 +1308,9 @@ def award(request, award_slug):
                                     .values_list('account__username', flat=True)
                                     [0:5]
                                     )
-            levels.append((level, receivers_count, sample_usernames))
+            sample_award = Award(award_type=award_type,
+                                 level=level)
+            levels.append((level, receivers_count, sample_usernames, sample_award))
 
     account_top_award = None
     account = account_from_request(request)
