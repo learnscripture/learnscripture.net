@@ -32,11 +32,16 @@ main =
         , subscriptions = subscriptions
         }
 
-{- Constants -}
 
+
+{- Constants -}
 -- Strength == 0.6 corresponds to about 10 days learning.
+
+
 hardModeStrengthThreshold : Float
-hardModeStrengthThreshold = 0.6
+hardModeStrengthThreshold =
+    0.6
+
 
 
 {- Flags and external inputs -}
@@ -393,17 +398,28 @@ viewCurrentVerse session model =
             else
                 []
 
-        hideWordBoundariesClass = "hide-word-boundaries"
-        verseClasses = "current-verse " ++
-                       case currentVerse.currentStage of
-                           ReadForContext -> "read-for-context"
-                           TestStage _ ->
-                               case testingMethod of
-                                   OnScreen -> hideWordBoundariesClass
-                                   _ -> if shouldUseHardTestingMode currentVerse
-                                        then hideWordBoundariesClass
-                                        else ""
-                           _ -> ""
+        hideWordBoundariesClass =
+            "hide-word-boundaries"
+
+        verseClasses =
+            "current-verse "
+                ++ case currentVerse.currentStage of
+                    ReadForContext ->
+                        "read-for-context"
+
+                    TestStage _ ->
+                        case testingMethod of
+                            OnScreen ->
+                                hideWordBoundariesClass
+
+                            _ ->
+                                if shouldUseHardTestingMode currentVerse then
+                                    hideWordBoundariesClass
+                                else
+                                    ""
+
+                    _ ->
+                        ""
     in
         H.div [ A.id "id-content-wrapper" ]
             ([ H.h2 titleTextAttrs
@@ -617,15 +633,18 @@ wordButton wd stage =
 wordButtonClasses : Word -> LearningStage -> ( List String, List String )
 wordButtonClasses wd stage =
     let
-        outer1 =
-            case wd.type_ of
-                BodyWord ->
-                    [ "word" ]
+        stageClasses =
+            case stage of
+                Read ->
+                    [ "word-button" ]
 
-                ReferenceWord ->
-                    [ "word", "reference" ]
+                ReadForContext ->
+                    [ "reading-word" ]
 
-        outer2 =
+                TestStage tp ->
+                    [ "word-button" ]
+
+        testStageClasses =
             case stage of
                 TestStage tp ->
                     case getWordAttempt tp wd of
@@ -667,7 +686,7 @@ wordButtonClasses wd stage =
                 _ ->
                     []
     in
-        ( outer1 ++ outer2, inner )
+        ( stageClasses ++ testStageClasses, inner )
 
 
 copyrightNotice : Version -> H.Html msg
@@ -939,7 +958,7 @@ onScreenTestingButtons currentVerse testingMethod =
                                                     |> List.map
                                                         (\w ->
                                                             H.span
-                                                                [ A.class "word"
+                                                                [ A.class "word-button"
                                                                 , onClickSimply (OnScreenButtonClick w)
                                                                 ]
                                                                 [ H.text w ]
@@ -1657,22 +1676,47 @@ testMethodUsesTextBox testingMethod =
 
 getStages : LearningType -> VerseStatus -> ( LearningStage, List LearningStage )
 getStages learningType verseStatus =
-    case learningType of
-        Learning ->
-            ( Read
-            , [ TestStage (initialTestProgress verseStatus)
-              ]
-            )
+    let
+        testStage =
+            TestStage (initialTestProgress verseStatus)
 
-        Revision ->
-            ( TestStage (initialTestProgress verseStatus)
-            , []
-            )
+        getNonPracticeStages vs =
+            if vs.needsTesting then
+                getStagesByStrength vs.strength
+            else
+                ( ReadForContext
+                , []
+                )
 
-        Practice ->
-            ( TestStage (initialTestProgress verseStatus)
-            , []
-            )
+        getStagesByStrength strength =
+            if strength < 0.02 then
+                ( Read
+                  -- TODO - Recall stages
+                , [ testStage
+                  ]
+                )
+            else if strength < 0.07 then
+                -- TODO - Recall stages
+                ( Read
+                , [ testStage
+                  ]
+                )
+            else
+                ( testStage
+                , []
+                )
+    in
+        case learningType of
+            Learning ->
+                getNonPracticeStages verseStatus
+
+            Revision ->
+                getNonPracticeStages verseStatus
+
+            Practice ->
+                ( testStage
+                , []
+                )
 
 
 moveToNextStage : Model -> ( Model, Cmd Msg )
@@ -2102,6 +2146,7 @@ shouldUseHardTestingMode : CurrentVerse -> Bool
 shouldUseHardTestingMode currentVerse =
     currentVerse.verseStatus.strength > hardModeStrengthThreshold
 
+
 updateTypingBoxCommand : Model -> Cmd msg
 updateTypingBoxCommand model =
     case getCurrentTestProgress model of
@@ -2116,8 +2161,11 @@ updateTypingBoxCommand model =
                         , idForButton cw.word
                         , classForTypingBox <| typingBoxInUse tp (getTestingMethod model)
                         , case getCurrentVerse model of
-                              Nothing -> False
-                              Just currentVerse -> shouldUseHardTestingMode currentVerse
+                            Nothing ->
+                                False
+
+                            Just currentVerse ->
+                                shouldUseHardTestingMode currentVerse
                         )
 
         Nothing ->
@@ -2403,14 +2451,15 @@ emptyDecoder =
 
 {- General utils -}
 
+
 onClickSimply : msg -> H.Attribute msg
 onClickSimply msg =
-  E.onWithOptions
-    "click"
-    { stopPropagation = False
-    , preventDefault = True
-    }
-    (JD.succeed msg)
+    E.onWithOptions
+        "click"
+        { stopPropagation = False
+        , preventDefault = True
+        }
+        (JD.succeed msg)
 
 
 dedupeBy : (a -> comparable) -> List a -> List a

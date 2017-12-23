@@ -88,6 +88,10 @@ body.learn-page {
         line-height: 1;
     }
 
+    .read-for-context {
+        line-height: 1.4em;
+    }
+
     #id-onscreen-not-available {
         font-size: 20px;
     }
@@ -111,7 +115,7 @@ body.learn-page {
     @word-margin-left: 1px;
     @word-padding-horizontal: 4px;
 
-    .word {
+    .word-button {
         border: 2px solid;
         border-radius: 3px;
         padding: 4px @word-padding-horizontal;
@@ -139,13 +143,13 @@ body.learn-page {
     }
     #id-typing {
         color: black;
-        // These values are important for matching size of .word.
+        // These values are important for matching size of .word-button.
         // Left padding matches to get the word to line up,
         // the others don't to give more room for typing.
         // See also setup_learn.js
         padding: 0 0 0 @word-padding-horizontal;
         margin: 0;
-        border: 2px solid; // same as .word.
+        border: 2px solid; // same as .word-button.
         position: absolute;
         display: none; // initially hide
         &.incorrect {
@@ -159,15 +163,12 @@ body.learn-page {
     .colon {
         margin-left: 3px;
     }
-    .testedword {
-        margin: 5px 1px;
-    }
-    .wordend, .wordstart, .word, .testedword {
+    .wordend, .wordstart, .word-button, .reading-word {
         display: inline-block;
     }
 
     // hide the clues that show word size
-    .hide-word-boundaries .word {
+    .hide-word-boundaries .word-button {
         border-left: 0px;
         border-right: 0px;
         padding-left: 8px;
@@ -183,7 +184,7 @@ body.learn-page {
         }
     }
 
-    #id-hint-btn, #id-help-btn, #id-more-practice-btn, .word {
+    #id-hint-btn, #id-help-btn, #id-more-practice-btn, .word-button {
         // For Internet Explorer, remove 300ms delays on "click" event when touch
         // actions are used.
         touch-action: none;
@@ -201,7 +202,7 @@ body.learn-page {
         margin-bottom: 10px;
         padding: 6px;
         text-align: center;
-        .word {
+        .word-button {
             margin: 8px;
         }
     }
@@ -261,13 +262,13 @@ body.learn-page {
         .current-verse, .previous-verse, #id-typing, #id-onscreen-test-options, #id-onscreen-not-available, #id-typing {
             font-size: 18px;
         }
-        .word {
+        .word-button {
             padding: 2px @word-padding-horizontal-small;
         }
         #id-typing {
             padding-left: @word-padding-horizontal-small;
         }
-        .word, .testedword {
+        .word-button {
             margin: @word-margin-top-small @word-margin-left-small;
         }
 
@@ -278,7 +279,7 @@ body.learn-page {
 
         #id-onscreen-test-container {
             .fixed-bottom();
-            .word {
+            .word-button {
                 // Easier to press:
                 padding: 3px 5px;
                 min-width: 25px;
