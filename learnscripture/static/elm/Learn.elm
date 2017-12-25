@@ -146,8 +146,8 @@ type alias SessionData =
 type alias CurrentVerse =
     { verseStatus : VerseStatus
     , currentStage : LearningStage
-    , remainingStages : List LearningStage
-    , seenStages : List LearningStage
+    , remainingStageTypes : List LearningStageType
+    , seenStageTypes : List LearningStageType
     }
 
 
@@ -407,7 +407,7 @@ viewCurrentVerse session model =
                     ReadForContext ->
                         "read-for-context"
 
-                    TestStage _ ->
+                    Test _ ->
                         case testingMethod of
                             OnScreen ->
                                 hideWordBoundariesClass
@@ -428,7 +428,7 @@ viewCurrentVerse session model =
                 [ H.div [ A.class "current-verse-wrapper" ]
                     [ H.div [ A.class verseClasses ]
                         (versePartsToHtml currentVerse.currentStage <|
-                            partsForVerse currentVerse.verseStatus currentVerse.currentStage testingMethod
+                            partsForVerse currentVerse.verseStatus (learningStageTypeForStage currentVerse.currentStage) testingMethod
                         )
                     ]
                 , copyrightNotice currentVerse.verseStatus.version
@@ -470,14 +470,14 @@ type alias WordIndex =
     Int
 
 
-partsForVerse : VerseStatus -> LearningStage -> TestingMethod -> List Part
-partsForVerse verse currentStage testingMethod =
+partsForVerse : VerseStatus -> LearningStageType -> TestingMethod -> List Part
+partsForVerse verse learningStageType testingMethod =
     (List.map2 verseWordToParts verse.scoringTextWords (listIndices verse.scoringTextWords)
         |> List.concat
     )
         ++ if
             (shouldShowReference verse
-                && (not (isTestingStage currentStage)
+                && (not (isTestingStage learningStageType)
                         || (shouldTestReferenceForTestingMethod testingMethod)
                    )
             )
@@ -487,11 +487,11 @@ partsForVerse verse currentStage testingMethod =
             []
 
 
-wordsForVerse : VerseStatus -> LearningStage -> TestingMethod -> List Word
-wordsForVerse verseStatus learningStage testingMethod =
+wordsForVerse : VerseStatus -> LearningStageType -> TestingMethod -> List Word
+wordsForVerse verseStatus learningStageType testingMethod =
     let
         parts =
-            partsForVerse verseStatus learningStage testingMethod
+            partsForVerse verseStatus learningStageType testingMethod
     in
         List.filterMap
             (\p ->
@@ -626,7 +626,7 @@ wordButton wd stage =
             ]
             [ H.span
                 [ A.class <| String.join " " ([ "wordpart" ] ++ classesInner) ]
-                [ H.text wd.text ]
+                (subWordParts wd stage)
             ]
 
 
@@ -641,12 +641,15 @@ wordButtonClasses wd stage =
                 ReadForContext ->
                     [ "reading-word" ]
 
-                TestStage tp ->
+                Recall _ ->
+                    [ "word-button" ]
+
+                Test _ ->
                     [ "word-button" ]
 
         testStageClasses =
             case stage of
-                TestStage tp ->
+                Test tp ->
                     case getWordAttempt tp wd of
                         Nothing ->
                             case tp.currentWord of
@@ -675,7 +678,7 @@ wordButtonClasses wd stage =
 
         inner =
             case stage of
-                TestStage tp ->
+                Test tp ->
                     case getWordAttempt tp wd of
                         Nothing ->
                             [ "hidden" ]
@@ -687,6 +690,37 @@ wordButtonClasses wd stage =
                     []
     in
         ( stageClasses ++ testStageClasses, inner )
+
+
+subWordParts : Word -> LearningStage -> List (H.Html msg)
+subWordParts word stage =
+    let
+        -- Need to split into first letter and remaining letters, but the first
+        -- letter part must include any initial punctuation.
+        core =
+            stripOuterPunctuation word.text
+    in
+        case String.indexes core word.text of
+            -- This shouldn't happen, a word composed of just punctuation?
+            [] ->
+                [ H.text word.text ]
+
+            coreIndex :: _ ->
+                let
+                    startChars =
+                        coreIndex + 1
+
+                    start =
+                        String.left startChars word.text
+
+                    end =
+                        String.dropLeft startChars word.text
+                in
+                    [ H.span [ A.class "wordstart" ]
+                        [ H.text start ]
+                    , H.span [ A.class "wordend" ]
+                        [ H.text end ]
+                    ]
 
 
 copyrightNotice : Version -> H.Html msg
@@ -715,7 +749,7 @@ typingBox stage testingMethod =
     let
         ( value, inUse, lastCheckFailed ) =
             case stage of
-                TestStage tp ->
+                Test tp ->
                     let
                         lastCheckFailed =
                             case getCurrentWordAttempt tp of
@@ -824,7 +858,7 @@ buttonsForStage : CurrentVerse -> Preferences -> List (Button Msg)
 buttonsForStage verse preferences =
     let
         multipleStages =
-            (List.length verse.remainingStages + List.length verse.seenStages) > 0
+            (List.length verse.remainingStageTypes + List.length verse.seenStageTypes) > 0
 
         -- TODO should be 'Done' if no more verses remaining
         getNextVerseCaption =
@@ -851,10 +885,10 @@ buttonsForStage verse preferences =
         if multipleStages then
             let
                 isRemainingStage =
-                    not <| List.isEmpty verse.remainingStages
+                    not <| List.isEmpty verse.remainingStageTypes
 
                 isPreviousStage =
-                    not <| List.isEmpty verse.seenStages
+                    not <| List.isEmpty verse.seenStageTypes
 
                 nextEnabled =
                     if isRemainingStage then
@@ -869,7 +903,7 @@ buttonsForStage verse preferences =
                         Disabled
             in
                 case verse.currentStage of
-                    TestStage tp ->
+                    Test tp ->
                         testStageButtons tp
 
                     _ ->
@@ -888,7 +922,7 @@ buttonsForStage verse preferences =
                         ]
         else
             case verse.currentStage of
-                TestStage tp ->
+                Test tp ->
                     testStageButtons tp
 
                 _ ->
@@ -951,7 +985,10 @@ onScreenTestingButtons currentVerse testingMethod =
         ReadForContext ->
             emptyNode
 
-        TestStage tp ->
+        Recall _ ->
+            emptyNode
+
+        Test tp ->
             case testingMethod of
                 FullWords ->
                     emptyNode
@@ -1038,7 +1075,7 @@ instructions verse testingMethod helpVisible =
             ]
 
         buttonsHelp =
-            [ [ H.text "Keyboard navigation: use the Tab key to move focus between buttons, and Enter to press it. Focus is shown with a blue border."
+            [ [ H.text "Keyboard navigation: use Tab and Shift-Tab to move focus between buttons, and Enter to press it. Focus is shown with a blue border."
               ]
             , [ H.text "The button for the most likely action is highlighted in colour and is focussed by default."
               ]
@@ -1060,7 +1097,14 @@ instructions verse testingMethod helpVisible =
                     , buttonsHelp
                     )
 
-                TestStage tp ->
+                Recall rp ->
+                    ( [ bold "READ and RECALL:"
+                      , H.text "Read the text through, filling in the gaps from your memory. Click a word to reveal it if you can't remember."
+                      ]
+                    , buttonsHelp
+                    )
+
+                Test tp ->
                     case getTestResult tp of
                         Nothing ->
                             case testingMethod of
@@ -1381,10 +1425,10 @@ updateTestProgress model updater =
     updateCurrentVerse model
         (\currentVerse ->
             case currentVerse.currentStage of
-                TestStage tp ->
+                Test tp ->
                     { currentVerse
                         | currentStage =
-                            TestStage (updater tp)
+                            Test (updater tp)
                     }
 
                 _ ->
@@ -1407,7 +1451,7 @@ getCurrentTestProgress model =
     case getCurrentVerse model of
         Just currentVerse ->
             case currentVerse.currentStage of
-                TestStage testProgress ->
+                Test testProgress ->
                     Just testProgress
 
                 _ ->
@@ -1510,13 +1554,13 @@ verseBatchToSession batch =
 setupCurrentVerse : VerseStatus -> LearningType -> CurrentVerse
 setupCurrentVerse verse learningType =
     let
-        ( firstStage, remainingStages ) =
+        ( firstStageType, remainingStageTypes ) =
             getStages learningType verse
     in
         { verseStatus = verse
-        , currentStage = firstStage
-        , seenStages = []
-        , remainingStages = remainingStages
+        , currentStage = initializeStage firstStageType verse
+        , seenStageTypes = []
+        , remainingStageTypes = remainingStageTypes
         }
 
 
@@ -1556,20 +1600,41 @@ stageOrVerseChangeCommands model =
 {- Stages -}
 
 
+type LearningStageType
+    = ReadStage
+    | ReadForContextStage
+    | RecallStage
+    | TestStage
+
+
 type LearningStage
     = Read
     | ReadForContext
-    | TestStage TestProgress
+    | Recall RecallProgress
+    | Test TestProgress
 
 
 
--- AttemptRecord should really be:
----  Dict.Dict (WordType, WordIndex) Attempt
--- but Elm doesn't support that
+-- We really want WordType, but it is not comparable
+-- it https://github.com/elm-lang/elm-compiler/issues/774
+-- so use `toString` on it and this alias:
+
+
+type alias WordTypeString =
+    String
+
+
+type alias WordId =
+    ( WordTypeString, WordIndex )
+
+
+type alias RecallProgress =
+    { hiddenWords : Set.Set WordId
+    }
 
 
 type alias AttemptRecords =
-    Dict.Dict ( String, WordIndex ) Attempt
+    Dict.Dict WordId Attempt
 
 
 type alias TestProgress =
@@ -1591,6 +1656,38 @@ type CheckResult
     | Success
 
 
+learningStageTypeForStage : LearningStage -> LearningStageType
+learningStageTypeForStage s =
+    case s of
+        Read ->
+            ReadStage
+
+        ReadForContext ->
+            ReadForContextStage
+
+        Recall _ ->
+            RecallStage
+
+        Test _ ->
+            TestStage
+
+
+initializeStage : LearningStageType -> VerseStatus -> LearningStage
+initializeStage stageType verseStatus =
+    case stageType of
+        ReadStage ->
+            Read
+
+        ReadForContextStage ->
+            ReadForContext
+
+        RecallStage ->
+            Recall initialRecallProgress
+
+        TestStage ->
+            Test (initialTestProgress verseStatus)
+
+
 initialTestProgress : VerseStatus -> TestProgress
 initialTestProgress verseStatus =
     { attemptRecords = Dict.empty
@@ -1599,16 +1696,22 @@ initialTestProgress verseStatus =
         CurrentWord
             { overallIndex = 0
             , word =
-                -- Passing 'Read' and 'FullWords' here is a bit of a hack, but
+                -- Passing 'FullWords' here is a bit of a hack, but
                 -- works fine when we are only getting the first word.
-                case getAt (wordsForVerse verseStatus Read FullWords) 0 of
+                -- and saves passing testingMethod around everywhere
+                case getAt (wordsForVerse verseStatus TestStage FullWords) 0 of
                     Nothing ->
-                        Debug.crash "Should be at least one word in verse"
+                        Debug.crash ("Should be at least one word in verse " ++ verseStatus.localizedReference)
 
                     Just w ->
                         w
             }
     }
+
+
+initialRecallProgress : RecallProgress
+initialRecallProgress =
+    { hiddenWords = Set.empty }
 
 
 type CurrentTestWord
@@ -1631,10 +1734,10 @@ getCurrentWordAttempt testProgress =
             getWordAttempt testProgress w.word
 
 
-isTestingStage : LearningStage -> Bool
+isTestingStage : LearningStageType -> Bool
 isTestingStage stage =
     case stage of
-        TestStage _ ->
+        TestStage ->
             True
 
         _ ->
@@ -1644,7 +1747,7 @@ isTestingStage stage =
 isTestingReference : LearningStage -> Bool
 isTestingReference stage =
     case stage of
-        TestStage tp ->
+        Test tp ->
             case tp.currentWord of
                 TestFinished ->
                     False
@@ -1712,35 +1815,33 @@ testMethodUsesTextBox testingMethod =
             False
 
 
-getStages : LearningType -> VerseStatus -> ( LearningStage, List LearningStage )
+getStages : LearningType -> VerseStatus -> ( LearningStageType, List LearningStageType )
 getStages learningType verseStatus =
     let
-        testStage =
-            TestStage (initialTestProgress verseStatus)
-
         getNonPracticeStages vs =
             if vs.needsTesting then
                 getStagesByStrength vs.strength
             else
-                ( ReadForContext
+                ( ReadForContextStage
                 , []
                 )
 
         getStagesByStrength strength =
             if strength < 0.02 then
-                ( Read
-                  -- TODO - Recall stages
-                , [ testStage
+                ( ReadStage
+                  -- TODO - All recall stages
+                , [ RecallStage
+                  , TestStage
                   ]
                 )
             else if strength < 0.07 then
                 -- TODO - Recall stages
-                ( Read
-                , [ testStage
+                ( ReadStage
+                , [ TestStage
                   ]
                 )
             else
-                ( testStage
+                ( TestStage
                 , []
                 )
     in
@@ -1752,7 +1853,7 @@ getStages learningType verseStatus =
                 getNonPracticeStages verseStatus
 
             Practice ->
-                ( testStage
+                ( TestStage
                 , []
                 )
 
@@ -1765,7 +1866,7 @@ moveToNextStage model =
                 (\currentVerse ->
                     let
                         remaining =
-                            currentVerse.remainingStages
+                            currentVerse.remainingStageTypes
                     in
                         case remaining of
                             [] ->
@@ -1773,9 +1874,9 @@ moveToNextStage model =
 
                             stage :: stages ->
                                 { currentVerse
-                                    | seenStages = currentVerse.currentStage :: currentVerse.seenStages
-                                    , currentStage = stage
-                                    , remainingStages = stages
+                                    | seenStageTypes = (learningStageTypeForStage currentVerse.currentStage) :: currentVerse.seenStageTypes
+                                    , currentStage = initializeStage stage currentVerse.verseStatus
+                                    , remainingStageTypes = stages
                                 }
                 )
     in
@@ -1792,7 +1893,7 @@ moveToPreviousStage model =
                 (\currentVerse ->
                     let
                         previous =
-                            currentVerse.seenStages
+                            currentVerse.seenStageTypes
                     in
                         case previous of
                             [] ->
@@ -1800,9 +1901,9 @@ moveToPreviousStage model =
 
                             stage :: stages ->
                                 { currentVerse
-                                    | seenStages = stages
-                                    , currentStage = stage
-                                    , remainingStages = currentVerse.currentStage :: currentVerse.remainingStages
+                                    | seenStageTypes = stages
+                                    , currentStage = initializeStage stage currentVerse.verseStatus
+                                    , remainingStageTypes = (learningStageTypeForStage currentVerse.currentStage) :: currentVerse.remainingStageTypes
                                 }
                 )
     in
@@ -1927,7 +2028,7 @@ checkCurrentWordAndUpdate model input =
                 Cmd.none
                 (\currentVerse ->
                     case currentVerse.currentStage of
-                        TestStage tp ->
+                        Test tp ->
                             case tp.currentWord of
                                 TestFinished ->
                                     ( currentVerse
@@ -2137,7 +2238,7 @@ markWord httpConfig correct word testProgress verse testingMethod =
         newCurrentVerse =
             { verse
                 | currentStage =
-                    TestStage newTestProgress
+                    Test newTestProgress
             }
 
         actionCompleteCommand =
@@ -2158,12 +2259,17 @@ markWord httpConfig correct word testProgress verse testingMethod =
 
 getCurrentTestWordList : CurrentVerse -> TestingMethod -> List Word
 getCurrentTestWordList currentVerse testingMethod =
-    wordsForVerse currentVerse.verseStatus currentVerse.currentStage testingMethod
+    wordsForVerse currentVerse.verseStatus (learningStageTypeForStage currentVerse.currentStage) testingMethod
 
 
 getWordAttempt : TestProgress -> Word -> Maybe Attempt
 getWordAttempt testProgress word =
-    Dict.get ( toString word.type_, word.index ) testProgress.attemptRecords
+    Dict.get (getWordId word) testProgress.attemptRecords
+
+
+getWordId : Word -> WordId
+getWordId word =
+    ( toString word.type_, word.index )
 
 
 updateWordAttempts : TestProgress -> Word -> Attempt -> AttemptRecords
