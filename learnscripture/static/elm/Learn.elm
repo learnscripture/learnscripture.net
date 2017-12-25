@@ -11,6 +11,8 @@ import Json.Decode.Pipeline as JDP
 import Json.Encode as JE
 import Maybe
 import Navigation
+import Random
+import Random.List
 import Regex as R
 import Set
 import String
@@ -715,10 +717,27 @@ subWordParts word stage =
 
                     end =
                         String.dropLeft startChars word.text
+
+                    isHidden =
+                        case stage of
+                            Recall rp ->
+                                Set.member (getWordId word) rp.hiddenWords
+
+                            _ ->
+                                False
                 in
                     [ H.span [ A.class "wordstart" ]
                         [ H.text start ]
-                    , H.span [ A.class "wordend" ]
+                    , H.span
+                        [ A.class
+                            ("wordend"
+                                ++ (if isHidden then
+                                        " hidden"
+                                    else
+                                        ""
+                                   )
+                            )
+                        ]
                         [ H.text end ]
                     ]
 
@@ -1281,6 +1300,7 @@ type Msg
     | NextStage
     | PreviousStage
     | NextVerse
+    | SetHiddenWords HiddenWordSet
     | TypingBoxInput String
     | TypingBoxEnter
     | OnScreenButtonClick String
@@ -1304,7 +1324,7 @@ update msg model =
 
         VersesToLearn (Ok verseBatchRaw) ->
             let
-                maybeBatchSession =
+                ( maybeBatchSession, sessionCmd ) =
                     normalizeVerseBatch verseBatchRaw |> verseBatchToSession
 
                 newSession =
@@ -1332,7 +1352,10 @@ update msg model =
                                 }
                         in
                             ( newModel
-                            , stageOrVerseChangeCommands newModel
+                            , Cmd.batch
+                                [ sessionCmd
+                                , stageOrVerseChangeCommands newModel
+                                ]
                             )
 
         VersesToLearn (Err errMsg) ->
@@ -1350,6 +1373,11 @@ update msg model =
 
         NextVerse ->
             moveToNextVerse model
+
+        SetHiddenWords hiddenWords ->
+            ( setHiddenWords model hiddenWords
+            , Cmd.none
+            )
 
         TypingBoxInput input ->
             handleTypedInput model input
@@ -1397,6 +1425,16 @@ updateCurrentVerse model updater =
         newModel
 
 
+updateCurrentStage : Model -> (LearningStage -> LearningStage) -> Model
+updateCurrentStage model updater =
+    updateCurrentVerse model
+        (\currentVerse ->
+            { currentVerse
+                | currentStage = updater currentVerse.currentStage
+            }
+        )
+
+
 updateCurrentVersePlus : Model -> a -> (CurrentVerse -> ( CurrentVerse, a )) -> ( Model, a )
 updateCurrentVersePlus model defaultRetval updater =
     case model.learningSession of
@@ -1422,17 +1460,27 @@ updateCurrentVersePlus model defaultRetval updater =
 
 updateTestProgress : Model -> (TestProgress -> TestProgress) -> Model
 updateTestProgress model updater =
-    updateCurrentVerse model
-        (\currentVerse ->
-            case currentVerse.currentStage of
+    updateCurrentStage model
+        (\currentStage ->
+            case currentStage of
                 Test tp ->
-                    { currentVerse
-                        | currentStage =
-                            Test (updater tp)
-                    }
+                    Test (updater tp)
 
                 _ ->
-                    currentVerse
+                    currentStage
+        )
+
+
+updateRecallProcess : Model -> (RecallProgress -> RecallProgress) -> Model
+updateRecallProcess model updater =
+    updateCurrentStage model
+        (\currentStage ->
+            case currentStage of
+                Recall rp ->
+                    Recall (updater rp)
+
+                _ ->
+                    currentStage
         )
 
 
@@ -1522,46 +1570,57 @@ normalizeVerseStatuses vrb =
             vrb.verseStatusesRaw
 
 
-verseBatchToSession : VerseBatch -> Maybe SessionData
+verseBatchToSession : VerseBatch -> ( Maybe SessionData, Cmd Msg )
 verseBatchToSession batch =
     case List.head batch.verseStatuses of
         Nothing ->
-            Nothing
+            ( Nothing, Cmd.none )
 
         Just verse ->
             case batch.learningTypeRaw of
                 Nothing ->
-                    Nothing
+                    ( Nothing, Cmd.none )
 
                 Just learningType ->
                     case batch.maxOrderValRaw of
                         Nothing ->
-                            Nothing
+                            ( Nothing, Cmd.none )
 
                         Just maxOrderVal ->
-                            Just
-                                { verses =
-                                    { verseStatuses = batch.verseStatuses
-                                    , learningType = learningType
-                                    , returnTo = batch.returnTo
-                                    , maxOrderVal = maxOrderVal
-                                    , seen = []
+                            let
+                                ( newCurrentVerse, cmd ) =
+                                    setupCurrentVerse verse learningType
+                            in
+                                ( Just
+                                    { verses =
+                                        { verseStatuses = batch.verseStatuses
+                                        , learningType = learningType
+                                        , returnTo = batch.returnTo
+                                        , maxOrderVal = maxOrderVal
+                                        , seen = []
+                                        }
+                                    , currentVerse = newCurrentVerse
                                     }
-                                , currentVerse = setupCurrentVerse verse learningType
-                                }
+                                , cmd
+                                )
 
 
-setupCurrentVerse : VerseStatus -> LearningType -> CurrentVerse
+setupCurrentVerse : VerseStatus -> LearningType -> ( CurrentVerse, Cmd Msg )
 setupCurrentVerse verse learningType =
     let
         ( firstStageType, remainingStageTypes ) =
             getStages learningType verse
+
+        ( newCurrentStage, cmd ) =
+            initializeStage firstStageType verse
     in
-        { verseStatus = verse
-        , currentStage = initializeStage firstStageType verse
-        , seenStageTypes = []
-        , remainingStageTypes = remainingStageTypes
-        }
+        ( { verseStatus = verse
+          , currentStage = newCurrentStage
+          , seenStageTypes = []
+          , remainingStageTypes = remainingStageTypes
+          }
+        , cmd
+        )
 
 
 
@@ -1628,8 +1687,12 @@ type alias WordId =
     ( WordTypeString, WordIndex )
 
 
+type alias HiddenWordSet =
+    Set.Set WordId
+
+
 type alias RecallProgress =
-    { hiddenWords : Set.Set WordId
+    { hiddenWords : HiddenWordSet
     }
 
 
@@ -1672,20 +1735,25 @@ learningStageTypeForStage s =
             TestStage
 
 
-initializeStage : LearningStageType -> VerseStatus -> LearningStage
+initializeStage : LearningStageType -> VerseStatus -> ( LearningStage, Cmd Msg )
 initializeStage stageType verseStatus =
     case stageType of
         ReadStage ->
-            Read
+            ( Read, Cmd.none )
 
         ReadForContextStage ->
-            ReadForContext
+            ( ReadForContext, Cmd.none )
 
         RecallStage ->
-            Recall initialRecallProgress
+            ( Recall initialRecallProgress, hideRandomWords verseStatus )
 
         TestStage ->
-            Test (initialTestProgress verseStatus)
+            ( Test (initialTestProgress verseStatus), Cmd.none )
+
+
+initialRecallProgress : RecallProgress
+initialRecallProgress =
+    { hiddenWords = Set.empty }
 
 
 initialTestProgress : VerseStatus -> TestProgress
@@ -1709,9 +1777,39 @@ initialTestProgress verseStatus =
     }
 
 
-initialRecallProgress : RecallProgress
-initialRecallProgress =
-    { hiddenWords = Set.empty }
+hideRandomWords : VerseStatus -> Cmd Msg
+hideRandomWords verseStatus =
+    let
+        words =
+            wordsForVerse verseStatus RecallStage FullWords
+
+        wordIds =
+            List.map getWordId words
+    in
+        Random.generate SetHiddenWords (hiddenWordsGenerator wordIds)
+
+
+hiddenWordsGenerator : List WordId -> Random.Generator HiddenWordSet
+hiddenWordsGenerator wordIds =
+    let
+        randoms =
+            Random.list (List.length wordIds) Random.bool
+    in
+        Random.map
+            (\l ->
+                List.map2
+                    (\b w ->
+                        if b then
+                            Just w
+                        else
+                            Nothing
+                    )
+                    l
+                    wordIds
+                    |> List.filterMap identity
+                    |> Set.fromList
+            )
+            randoms
 
 
 type CurrentTestWord
@@ -1861,8 +1959,9 @@ getStages learningType verseStatus =
 moveToNextStage : Model -> ( Model, Cmd Msg )
 moveToNextStage model =
     let
-        newModel =
-            updateCurrentVerse model
+        ( newModel, cmd ) =
+            updateCurrentVersePlus model
+                Cmd.none
                 (\currentVerse ->
                     let
                         remaining =
@@ -1870,26 +1969,36 @@ moveToNextStage model =
                     in
                         case remaining of
                             [] ->
-                                currentVerse
+                                ( currentVerse, Cmd.none )
 
                             stage :: stages ->
-                                { currentVerse
-                                    | seenStageTypes = (learningStageTypeForStage currentVerse.currentStage) :: currentVerse.seenStageTypes
-                                    , currentStage = initializeStage stage currentVerse.verseStatus
-                                    , remainingStageTypes = stages
-                                }
+                                let
+                                    ( newCurrentStage, cmd ) =
+                                        initializeStage stage currentVerse.verseStatus
+                                in
+                                    ( { currentVerse
+                                        | seenStageTypes = (learningStageTypeForStage currentVerse.currentStage) :: currentVerse.seenStageTypes
+                                        , currentStage = newCurrentStage
+                                        , remainingStageTypes = stages
+                                      }
+                                    , cmd
+                                    )
                 )
     in
         ( newModel
-        , stageOrVerseChangeCommands newModel
+        , Cmd.batch
+            [ cmd
+            , stageOrVerseChangeCommands newModel
+            ]
         )
 
 
 moveToPreviousStage : Model -> ( Model, Cmd Msg )
 moveToPreviousStage model =
     let
-        newModel =
-            updateCurrentVerse model
+        ( newModel, cmd ) =
+            updateCurrentVersePlus model
+                Cmd.none
                 (\currentVerse ->
                     let
                         previous =
@@ -1897,18 +2006,27 @@ moveToPreviousStage model =
                     in
                         case previous of
                             [] ->
-                                currentVerse
+                                ( currentVerse, Cmd.none )
 
                             stage :: stages ->
-                                { currentVerse
-                                    | seenStageTypes = stages
-                                    , currentStage = initializeStage stage currentVerse.verseStatus
-                                    , remainingStageTypes = (learningStageTypeForStage currentVerse.currentStage) :: currentVerse.remainingStageTypes
-                                }
+                                let
+                                    ( newCurrentStage, cmd ) =
+                                        initializeStage stage currentVerse.verseStatus
+                                in
+                                    ( { currentVerse
+                                        | seenStageTypes = stages
+                                        , currentStage = newCurrentStage
+                                        , remainingStageTypes = (learningStageTypeForStage currentVerse.currentStage) :: currentVerse.remainingStageTypes
+                                      }
+                                    , cmd
+                                    )
                 )
     in
         ( newModel
-        , stageOrVerseChangeCommands newModel
+        , Cmd.batch
+            [ cmd
+            , stageOrVerseChangeCommands newModel
+            ]
         )
 
 
@@ -1924,12 +2042,16 @@ moveToNextVerse model =
 
                 Just verse ->
                     let
-                        newModel =
-                            updateCurrentVerse model
+                        ( newModel, cmd ) =
+                            updateCurrentVersePlus model
+                                Cmd.none
                                 (\cv -> setupCurrentVerse verse sessionData.verses.learningType)
                     in
                         ( newModel
-                        , stageOrVerseChangeCommands newModel
+                        , Cmd.batch
+                            [ cmd
+                            , stageOrVerseChangeCommands newModel
+                            ]
                         )
 
         _ ->
@@ -1944,6 +2066,16 @@ getNextVerse verseStore currentVerse =
         |> List.filter (\v -> v.learnOrder > currentVerse.verseStatus.learnOrder)
         |> List.sortBy .learnOrder
         |> List.head
+
+
+setHiddenWords : Model -> HiddenWordSet -> Model
+setHiddenWords model hiddenWords =
+    updateRecallProcess model
+        (\recallProgress ->
+            { recallProgress
+                | hiddenWords = hiddenWords
+            }
+        )
 
 
 handleTypedInput : Model -> String -> ( Model, Cmd Msg )
