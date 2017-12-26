@@ -901,8 +901,8 @@ actionButtons verse preferences =
             _ ->
                 H.div [ A.id "id-action-btns" ]
                     ((if List.length buttons == 1 then
-                          -- empty element to take the left hand position,
-                          -- pushing the one button to the right
+                        -- empty element to take the left hand position,
+                        -- pushing the one button to the right
                         [ emptySpan ]
                       else
                         []
@@ -1417,7 +1417,7 @@ update msg model =
                             ( newModel
                             , Cmd.batch
                                 [ sessionCmd
-                                , stageOrVerseChangeCommands newModel
+                                , stageOrVerseChangeCommands newModel True
                                 ]
                             )
 
@@ -1727,12 +1727,16 @@ mergeSession initialSession newBatchSession =
         }
 
 
-stageOrVerseChangeCommands : Model -> Cmd Msg
-stageOrVerseChangeCommands model =
+stageOrVerseChangeCommands : Model -> Bool -> Cmd Msg
+stageOrVerseChangeCommands model changeFocus =
     Cmd.batch
-        [ updateTypingBoxCommand model
-        , focusDefaultButton model
-        ]
+        ([ updateTypingBoxCommand model
+         ]
+            ++ if changeFocus then
+                [ focusDefaultButton model ]
+               else
+                []
+        )
 
 
 
@@ -2184,7 +2188,7 @@ moveToNextStage model =
         ( newModel
         , Cmd.batch
             [ cmd
-            , stageOrVerseChangeCommands newModel
+            , stageOrVerseChangeCommands newModel True
             ]
         )
 
@@ -2221,7 +2225,10 @@ moveToPreviousStage model =
         ( newModel
         , Cmd.batch
             [ cmd
-            , stageOrVerseChangeCommands newModel
+              -- Do *not* include focus change here, since
+              -- they are already focussing the 'back' button and we don't
+              -- want to change that
+            , stageOrVerseChangeCommands newModel False
             ]
         )
 
@@ -2246,7 +2253,7 @@ moveToNextVerse model =
                         ( newModel
                         , Cmd.batch
                             [ cmd
-                            , stageOrVerseChangeCommands newModel
+                            , stageOrVerseChangeCommands newModel True
                             ]
                         )
 
@@ -2399,7 +2406,7 @@ checkCurrentWordAndUpdate model input =
     in
         ( newModel
         , Cmd.batch
-            [ stageOrVerseChangeCommands newModel
+            [ stageOrVerseChangeCommands newModel True
             , recordCommentCmd
             ]
         )
