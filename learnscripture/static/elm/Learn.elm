@@ -743,26 +743,45 @@ subWordParts word stage =
                     end =
                         String.dropLeft startChars word.text
 
-                    isHidden =
+                    ( startIsHidden, endIsHidden ) =
                         case stage of
-                            Recall _ rp ->
-                                Set.member (getWordId word) rp.hiddenWordIds
+                            Recall def rp ->
+                                let
+                                    wordId =
+                                        getWordId word
+
+                                    hidden =
+                                        Set.member wordId rp.hiddenWordIds
+
+                                    manuallyShown =
+                                        Set.member wordId rp.manuallyShownWordIds
+                                in
+                                    if manuallyShown then
+                                        ( False, False )
+                                    else
+                                        case def.hideType of
+                                            HideWordEnd ->
+                                                ( False, hidden )
+
+                                            HideFullWord ->
+                                                ( hidden, True )
 
                             _ ->
-                                False
+                                ( False, False )
+
+                    addHidden class isHidden =
+                        class
+                            ++ (if isHidden then
+                                    " hidden"
+                                else
+                                    ""
+                               )
                 in
-                    [ H.span [ A.class "wordstart" ]
+                    [ H.span
+                        [ A.class <| addHidden "wordstart" startIsHidden ]
                         [ H.text start ]
                     , H.span
-                        [ A.class
-                            ("wordend"
-                                ++ (if isHidden then
-                                        " hidden"
-                                    else
-                                        ""
-                                   )
-                            )
-                        ]
+                        [ A.class <| addHidden "wordend" endIsHidden ]
                         [ H.text end ]
                     ]
 
@@ -1713,7 +1732,13 @@ type LearningStageType
 
 type alias RecallDef =
     { fraction : Float
+    , hideType : HideType
     }
+
+
+type HideType
+    = HideWordEnd
+    | HideFullWord
 
 
 {-| Representation of a stage that is in progress
@@ -1740,6 +1765,7 @@ type alias WordId =
 type alias RecallProgress =
     { hiddenWordIds : Set.Set WordId
     , passedWordIds : Set.Set WordId
+    , manuallyShownWordIds : Set.Set WordId
     }
 
 
@@ -1808,6 +1834,7 @@ initialRecallProgress : RecallProgress
 initialRecallProgress =
     { hiddenWordIds = Set.empty
     , passedWordIds = Set.empty
+    , manuallyShownWordIds = Set.empty
     }
 
 
@@ -1873,7 +1900,13 @@ recallWords verseStatuses =
     -- the values passed to RecallStage here don't matter, we pass in random values.
     -- FullWords passed to ensure we get all words, rather
     -- than OnScreen which doesn't return reference (hack)
-    wordsForVerse verseStatuses (RecallStage { fraction = 0 }) FullWords
+    wordsForVerse verseStatuses
+        (RecallStage
+            { fraction = 0
+            , hideType = HideFullWord
+            }
+        )
+        FullWords
 
 
 {-| Given some WordIds we definitely want to choose,
@@ -2006,15 +2039,32 @@ getStages learningType verseStatus =
         getStagesByStrength strength =
             if strength < 0.02 then
                 ( ReadStage
-                  -- TODO - All recall stages
-                , [ RecallStage { fraction = 0.5 }
+                , [ RecallStage
+                        { fraction = 0.5
+                        , hideType = HideWordEnd
+                        }
+                  , RecallStage
+                        { fraction = 1
+                        , hideType = HideWordEnd
+                        }
+                  , RecallStage
+                        { fraction = 0.34
+                        , hideType = HideFullWord
+                        }
+                  , RecallStage
+                        { fraction = 0.67
+                        , hideType = HideFullWord
+                        }
                   , TestStage
                   ]
                 )
             else if strength < 0.07 then
-                -- TODO - Recall stages
                 ( ReadStage
-                , [ TestStage
+                , [ RecallStage
+                        { fraction = 1
+                        , hideType = HideWordEnd
+                        }
+                  , TestStage
                   ]
                 )
             else
@@ -2202,6 +2252,7 @@ setHiddenWords model hiddenWordIds =
         (\recallProgress ->
             { recallProgress
                 | hiddenWordIds = hiddenWordIds
+                , manuallyShownWordIds = Set.empty
             }
         )
 
@@ -2218,6 +2269,8 @@ handleWordButtonClicked model wordId =
                     -- it no longer 'passed'
                 , passedWordIds =
                     Set.remove wordId recallProgress.passedWordIds
+                , manuallyShownWordIds =
+                    Set.insert wordId recallProgress.manuallyShownWordIds
             }
         )
     , focusDefaultButton model
