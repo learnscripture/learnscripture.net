@@ -643,7 +643,7 @@ wordButtonClasses wd stage =
                 ReadForContext ->
                     [ "reading-word" ]
 
-                Recall _ ->
+                Recall _ _ ->
                     [ "word-button" ]
 
                 Test _ ->
@@ -720,8 +720,8 @@ subWordParts word stage =
 
                     isHidden =
                         case stage of
-                            Recall rp ->
-                                Set.member (getWordId word) rp.hiddenWords
+                            Recall _ rp ->
+                                Set.member (getWordId word) rp.hiddenWordIds
 
                             _ ->
                                 False
@@ -927,7 +927,7 @@ buttonsForStage verse preferences =
 
                     _ ->
                         [ { caption = "Next"
-                          , msg = NextStage
+                          , msg = NextStageOrSubStage
                           , enabled = nextEnabled
                           , default = Default
                           , id = "id-next-btn"
@@ -1004,7 +1004,7 @@ onScreenTestingButtons currentVerse testingMethod =
         ReadForContext ->
             emptyNode
 
-        Recall _ ->
+        Recall _ _ ->
             emptyNode
 
         Test tp ->
@@ -1116,7 +1116,7 @@ instructions verse testingMethod helpVisible =
                     , buttonsHelp
                     )
 
-                Recall rp ->
+                Recall _ rp ->
                     ( [ bold "READ and RECALL:"
                       , H.text "Read the text through, filling in the gaps from your memory. Click a word to reveal it if you can't remember."
                       ]
@@ -1297,10 +1297,10 @@ link href caption icon iconAlign =
 type Msg
     = LoadVerses
     | VersesToLearn (Result Http.Error VerseBatchRaw)
-    | NextStage
+    | NextStageOrSubStage
     | PreviousStage
     | NextVerse
-    | SetHiddenWords HiddenWordSet
+    | SetHiddenWords (Set.Set WordId)
     | TypingBoxInput String
     | TypingBoxEnter
     | OnScreenButtonClick String
@@ -1365,8 +1365,8 @@ update msg model =
             in
                 ( newModel, updateTypingBoxCommand newModel )
 
-        NextStage ->
-            moveToNextStage model
+        NextStageOrSubStage ->
+            moveToNextStageOrSubStage model
 
         PreviousStage ->
             moveToPreviousStage model
@@ -1374,8 +1374,8 @@ update msg model =
         NextVerse ->
             moveToNextVerse model
 
-        SetHiddenWords hiddenWords ->
-            ( setHiddenWords model hiddenWords
+        SetHiddenWords hiddenWordIds ->
+            ( setHiddenWords model hiddenWordIds
             , Cmd.none
             )
 
@@ -1416,6 +1416,23 @@ update msg model =
 {- Update helpers -}
 
 
+withSessionData : Model -> a -> (SessionData -> a) -> a
+withSessionData model default func =
+    case model.learningSession of
+        Session sessionData ->
+            func sessionData
+
+        _ ->
+            default
+
+
+withCurrentVerse : Model -> a -> (CurrentVerse -> a) -> a
+withCurrentVerse model default func =
+    withSessionData model
+        default
+        (\sessionData -> func sessionData.currentVerse)
+
+
 updateCurrentVerse : Model -> (CurrentVerse -> CurrentVerse) -> Model
 updateCurrentVerse model updater =
     let
@@ -1437,8 +1454,9 @@ updateCurrentStage model updater =
 
 updateCurrentVersePlus : Model -> a -> (CurrentVerse -> ( CurrentVerse, a )) -> ( Model, a )
 updateCurrentVersePlus model defaultRetval updater =
-    case model.learningSession of
-        Session sessionData ->
+    withSessionData model
+        ( model, defaultRetval )
+        (\sessionData ->
             let
                 ( newCurrentVerse, retval ) =
                     updater sessionData.currentVerse
@@ -1451,11 +1469,7 @@ updateCurrentVersePlus model defaultRetval updater =
                 ( { model | learningSession = Session newSessionData }
                 , retval
                 )
-
-        _ ->
-            ( model
-            , defaultRetval
-            )
+        )
 
 
 updateTestProgress : Model -> (TestProgress -> TestProgress) -> Model
@@ -1476,8 +1490,8 @@ updateRecallProcess model updater =
     updateCurrentStage model
         (\currentStage ->
             case currentStage of
-                Recall rp ->
-                    Recall (updater rp)
+                Recall def rp ->
+                    Recall def (updater rp)
 
                 _ ->
                     currentStage
@@ -1659,26 +1673,33 @@ stageOrVerseChangeCommands model =
 {- Stages -}
 
 
+{-| Representation of a learning stage that can be used
+-}
 type LearningStageType
     = ReadStage
     | ReadForContextStage
-    | RecallStage
+    | RecallStage RecallDef
     | TestStage
 
 
+type alias RecallDef =
+    { fraction : Float
+    }
+
+
+{-| Representation of a stage that is in progress
+-}
 type LearningStage
     = Read
     | ReadForContext
-    | Recall RecallProgress
+    | Recall RecallDef RecallProgress
     | Test TestProgress
 
 
-
--- We really want WordType, but it is not comparable
--- it https://github.com/elm-lang/elm-compiler/issues/774
--- so use `toString` on it and this alias:
-
-
+{-| We really want WordType, but it is not comparable
+    it https://github.com/elm-lang/elm-compiler/issues/774
+    so use `toString` on it and this alias:
+-}
 type alias WordTypeString =
     String
 
@@ -1687,12 +1708,9 @@ type alias WordId =
     ( WordTypeString, WordIndex )
 
 
-type alias HiddenWordSet =
-    Set.Set WordId
-
-
 type alias RecallProgress =
-    { hiddenWords : HiddenWordSet
+    { hiddenWordIds : Set.Set WordId
+    , passedWordIds : Set.Set WordId
     }
 
 
@@ -1728,8 +1746,8 @@ learningStageTypeForStage s =
         ReadForContext ->
             ReadForContextStage
 
-        Recall _ ->
-            RecallStage
+        Recall def _ ->
+            RecallStage def
 
         Test _ ->
             TestStage
@@ -1744,8 +1762,14 @@ initializeStage stageType verseStatus =
         ReadForContextStage ->
             ( ReadForContext, Cmd.none )
 
-        RecallStage ->
-            ( Recall initialRecallProgress, hideRandomWords verseStatus )
+        RecallStage def ->
+            let
+                rp =
+                    initialRecallProgress
+            in
+                ( Recall def rp
+                , hideRandomWords verseStatus def rp
+                )
 
         TestStage ->
             ( Test (initialTestProgress verseStatus), Cmd.none )
@@ -1753,7 +1777,9 @@ initializeStage stageType verseStatus =
 
 initialRecallProgress : RecallProgress
 initialRecallProgress =
-    { hiddenWords = Set.empty }
+    { hiddenWordIds = Set.empty
+    , passedWordIds = Set.empty
+    }
 
 
 initialTestProgress : VerseStatus -> TestProgress
@@ -1777,39 +1803,63 @@ initialTestProgress verseStatus =
     }
 
 
-hideRandomWords : VerseStatus -> Cmd Msg
-hideRandomWords verseStatus =
+{-| Returns a command that picks words to hide.
+
+The fraction to hide is based on RecallDef.
+We try to hide ones that haven't been hidden before i.e. ones not
+in `passedWordIds`
+-}
+hideRandomWords : VerseStatus -> RecallDef -> RecallProgress -> Cmd Msg
+hideRandomWords verseStatus recallDef recallProgress =
     let
         words =
-            wordsForVerse verseStatus RecallStage FullWords
+            recallWords verseStatus
 
         wordIds =
-            List.map getWordId words
+            List.map getWordId words |> Set.fromList
+
+        -- The number of words we want to hide:
+        neededWordCount =
+            recallDef.fraction * (toFloat <| Set.size wordIds) |> ceiling
+
+        unpassedWordIds =
+            Set.diff wordIds recallProgress.passedWordIds
+
+        unpassedWordCount =
+            Set.size unpassedWordIds
+
+        generator =
+            if neededWordCount >= unpassedWordCount then
+                -- We need all the unpassed ones, and possibly some more
+                hiddenWordsGenerator unpassedWordIds recallProgress.passedWordIds (neededWordCount - unpassedWordCount)
+            else
+                -- pick from the the unpassed ones.
+                hiddenWordsGenerator Set.empty unpassedWordIds neededWordCount
     in
-        Random.generate SetHiddenWords (hiddenWordsGenerator wordIds)
+        Random.generate SetHiddenWords generator
 
 
-hiddenWordsGenerator : List WordId -> Random.Generator HiddenWordSet
-hiddenWordsGenerator wordIds =
-    let
-        randoms =
-            Random.list (List.length wordIds) Random.bool
-    in
-        Random.map
-            (\l ->
-                List.map2
-                    (\b w ->
-                        if b then
-                            Just w
-                        else
-                            Nothing
-                    )
-                    l
-                    wordIds
-                    |> List.filterMap identity
-                    |> Set.fromList
-            )
-            randoms
+recallWords : VerseStatus -> List Word
+recallWords verseStatuses =
+    -- the values passed to RecallStage here don't matter, we pass in random values.
+    -- FullWords passed to ensure we get all words, rather
+    -- than OnScreen which doesn't return reference (hack)
+    wordsForVerse verseStatuses (RecallStage { fraction = 0 }) FullWords
+
+
+{-| Given some WordIds we definitely want to choose,
+    a Set of potentials and a number to choose from the potentials,
+    returns a Random.Generator that will return a matching
+    Set
+-}
+hiddenWordsGenerator : Set.Set WordId -> Set.Set WordId -> Int -> Random.Generator (Set.Set WordId)
+hiddenWordsGenerator wantedWordIds possibleWordIds numberWanted =
+    chooseN numberWanted (Set.toList possibleWordIds) |> Random.map (\choices -> Set.fromList choices |> Set.union wantedWordIds)
+
+
+recallStageFinished : VerseStatus -> RecallProgress -> Bool
+recallStageFinished verseStatus recallProgress =
+    List.length (recallWords verseStatus) == Set.size recallProgress.passedWordIds
 
 
 type CurrentTestWord
@@ -1928,7 +1978,7 @@ getStages learningType verseStatus =
             if strength < 0.02 then
                 ( ReadStage
                   -- TODO - All recall stages
-                , [ RecallStage
+                , [ RecallStage { fraction = 0.5 }
                   , TestStage
                   ]
                 )
@@ -1954,6 +2004,55 @@ getStages learningType verseStatus =
                 ( TestStage
                 , []
                 )
+
+
+moveToNextStageOrSubStage : Model -> ( Model, Cmd Msg )
+moveToNextStageOrSubStage model =
+    let
+        nextSubStage =
+            withCurrentVerse model
+                Nothing
+                (\currentVerse ->
+                    moveToNextSubStage currentVerse.verseStatus currentVerse.currentStage
+                )
+    in
+        case nextSubStage of
+            Nothing ->
+                moveToNextStage model
+
+            Just ( newStage, cmd ) ->
+                updateCurrentVersePlus model
+                    Cmd.none
+                    (\currentVerse ->
+                        ( { currentVerse
+                            | currentStage = newStage
+                          }
+                        , cmd
+                        )
+                    )
+
+
+moveToNextSubStage : VerseStatus -> LearningStage -> Maybe ( LearningStage, Cmd Msg )
+moveToNextSubStage verseStatus stage =
+    case stage of
+        Recall def rp ->
+            let
+                -- Anything hidden is now regarded as 'passed'
+                newRecallProgress =
+                    { rp
+                        | passedWordIds = Set.union rp.passedWordIds rp.hiddenWordIds
+                    }
+            in
+                if recallStageFinished verseStatus newRecallProgress then
+                    Nothing
+                else
+                    Just <|
+                        ( Recall def newRecallProgress
+                        , hideRandomWords verseStatus def newRecallProgress
+                        )
+
+        _ ->
+            Nothing
 
 
 moveToNextStage : Model -> ( Model, Cmd Msg )
@@ -2068,12 +2167,12 @@ getNextVerse verseStore currentVerse =
         |> List.head
 
 
-setHiddenWords : Model -> HiddenWordSet -> Model
-setHiddenWords model hiddenWords =
+setHiddenWords : Model -> Set.Set WordId -> Model
+setHiddenWords model hiddenWordIds =
     updateRecallProcess model
         (\recallProgress ->
             { recallProgress
-                | hiddenWords = hiddenWords
+                | hiddenWordIds = hiddenWordIds
             }
         )
 
@@ -2800,3 +2899,8 @@ getAt xs idx =
 damerauLevenshteinDistance : String -> String -> Int
 damerauLevenshteinDistance =
     Native.StringUtils.damerauLevenshteinDistance
+
+
+chooseN : Int -> List a -> Random.Generator (List a)
+chooseN n items =
+    Random.List.shuffle items |> Random.map (\items -> List.take n items)
