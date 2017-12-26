@@ -792,11 +792,16 @@ copyrightNotice version =
         caption =
             version.shortName ++ " - " ++ version.fullName
     in
-        H.div [ A.id "id-copyright-notice" ]
+        H.div
+            [ A.id "id-copyright-notice"
+            ]
             (if version.url == "" then
                 [ H.text caption ]
              else
-                [ H.a [ A.href version.url ]
+                [ H.a
+                    [ A.href version.url
+                    , A.tabindex -1
+                    ]
                     [ H.text caption ]
                 ]
             )
