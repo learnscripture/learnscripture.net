@@ -895,7 +895,20 @@ actionButtons verse preferences =
 
             _ ->
                 H.div [ A.id "id-action-btns" ]
-                    (List.map viewButton <| buttons)
+                    ((if List.length buttons == 1 then
+                          -- empty element to take the left hand position,
+                          -- pushing the one button to the right
+                        [ emptySpan ]
+                      else
+                        []
+                     )
+                        ++ (List.map viewButton <| buttons)
+                    )
+
+
+emptySpan : H.Html msg
+emptySpan =
+    H.span [] []
 
 
 type alias Button msg =
@@ -970,17 +983,17 @@ buttonsForStage verse preferences =
                         testStageButtons tp
 
                     _ ->
-                        [ { caption = "Next"
-                          , msg = NextStageOrSubStage
-                          , enabled = nextEnabled
-                          , default = Default
-                          , id = "id-next-btn"
-                          }
-                        , { caption = "Back"
+                        [ { caption = "Back"
                           , msg = PreviousStage
                           , enabled = previousEnabled
                           , default = NonDefault
                           , id = "id-previous-btn"
+                          }
+                        , { caption = "Next"
+                          , msg = NextStageOrSubStage
+                          , enabled = nextEnabled
+                          , default = Default
+                          , id = "id-next-btn"
                           }
                         ]
         else
