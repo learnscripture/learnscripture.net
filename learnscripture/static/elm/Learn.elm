@@ -580,7 +580,7 @@ referenceToParts reference =
             parts
 
 
-versePartsToHtml : LearningStage -> List Part -> List (H.Html msg)
+versePartsToHtml : LearningStage -> List Part -> List (H.Html Msg)
 versePartsToHtml stage parts =
     List.map
         (\p ->
@@ -616,20 +616,43 @@ idForButton wd =
     idPrefixForButton wd.type_ ++ toString wd.index
 
 
-wordButton : Word -> LearningStage -> H.Html msg
-wordButton wd stage =
+wordButton : Word -> LearningStage -> H.Html Msg
+wordButton word stage =
     let
         ( classesOuter, classesInner ) =
-            wordButtonClasses wd stage
+            wordButtonClasses word stage
+
+        clickableButton =
+            List.member clickableClass classesOuter
     in
         H.span
-            [ A.class <| String.join " " classesOuter
-            , A.id <| idForButton wd
-            ]
+            ([ A.class <| String.join " " classesOuter
+             , A.id <| idForButton word
+             ]
+                ++ if clickableButton then
+                    [ onClickSimply <| WordButtonClicked <| getWordId word ]
+                   else
+                    []
+            )
             [ H.span
                 [ A.class <| String.join " " ([ "wordpart" ] ++ classesInner) ]
-                (subWordParts wd stage)
+                (subWordParts word stage)
             ]
+
+
+wordButtonClass : String
+wordButtonClass =
+    "word-button"
+
+
+readingWordClass : String
+readingWordClass =
+    "reading-word"
+
+
+clickableClass : String
+clickableClass =
+    "clickable"
 
 
 wordButtonClasses : Word -> LearningStage -> ( List String, List String )
@@ -638,16 +661,18 @@ wordButtonClasses wd stage =
         stageClasses =
             case stage of
                 Read ->
-                    [ "word-button" ]
+                    [ wordButtonClass ]
 
                 ReadForContext ->
-                    [ "reading-word" ]
+                    [ readingWordClass ]
 
                 Recall _ _ ->
-                    [ "word-button" ]
+                    [ wordButtonClass
+                    , clickableClass
+                    ]
 
                 Test _ ->
-                    [ "word-button" ]
+                    [ wordButtonClass ]
 
         testStageClasses =
             case stage of
@@ -1301,6 +1326,7 @@ type Msg
     | PreviousStage
     | NextVerse
     | SetHiddenWords (Set.Set WordId)
+    | WordButtonClicked WordId
     | TypingBoxInput String
     | TypingBoxEnter
     | OnScreenButtonClick String
@@ -1378,6 +1404,9 @@ update msg model =
             ( setHiddenWords model hiddenWordIds
             , Cmd.none
             )
+
+        WordButtonClicked wordId ->
+            handleWordButtonClicked model wordId
 
         TypingBoxInput input ->
             handleTypedInput model input
@@ -2175,6 +2204,24 @@ setHiddenWords model hiddenWordIds =
                 | hiddenWordIds = hiddenWordIds
             }
         )
+
+
+handleWordButtonClicked : Model -> WordId -> ( Model, Cmd Msg )
+handleWordButtonClicked model wordId =
+    ( updateRecallProcess model
+        (\recallProgress ->
+            { recallProgress
+              -- reveal the word:
+                | hiddenWordIds =
+                    Set.remove wordId recallProgress.hiddenWordIds
+                    -- if the user had to press the button to reveal it, we consider
+                    -- it no longer 'passed'
+                , passedWordIds =
+                    Set.remove wordId recallProgress.passedWordIds
+            }
+        )
+    , focusDefaultButton model
+    )
 
 
 handleTypedInput : Model -> String -> ( Model, Cmd Msg )

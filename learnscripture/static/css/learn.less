@@ -122,7 +122,9 @@ body.learn-page {
         margin: @word-margin-top @word-margin-left;
         .gradientBar(#e8e8e8, #C0C0C0);
         .normalWordBorderColors();
-        cursor: pointer;
+        &.clickable {
+            cursor: pointer;
+        }
 
         &.correct {
             border-color: #00D000;
@@ -184,7 +186,7 @@ body.learn-page {
         }
     }
 
-    #id-hint-btn, #id-help-btn, #id-more-practice-btn, .word-button {
+    #id-hint-btn, #id-help-btn, #id-more-practice-btn, .word-button.clickable {
         // For Internet Explorer, remove 300ms delays on "click" event when touch
         // actions are used.
         touch-action: none;
