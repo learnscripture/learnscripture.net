@@ -427,7 +427,12 @@ viewCurrentVerse session model =
             ([ H.h2 titleTextAttrs
                 [ H.text currentVerse.verseStatus.titleText ]
              , H.div [ A.id "id-verse-wrapper" ]
-                [ H.div [ A.class "current-verse-wrapper" ]
+                -- We make typing box a permanent fixture to avoid issues with
+                -- losing focus and screen keyboards then disappearing.
+                -- It comes before verse-wrapper to fix tab order without needing
+                -- tabindex.
+                [ typingBox currentVerse.currentStage testingMethod
+                , H.div [ A.class "current-verse-wrapper" ]
                     [ H.div [ A.class verseClasses ]
                         (versePartsToHtml currentVerse.currentStage <|
                             partsForVerse currentVerse.verseStatus (learningStageTypeForStage currentVerse.currentStage) testingMethod
@@ -439,9 +444,6 @@ viewCurrentVerse session model =
              , onScreenTestingButtons currentVerse testingMethod
              ]
                 ++ (instructions currentVerse testingMethod model.helpVisible)
-                ++ -- We make typing box a permanent fixture to avoid issues with
-                   -- losing focus and screen keyboards then disappearing
-                   [ typingBox currentVerse.currentStage testingMethod ]
             )
 
 
