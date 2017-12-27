@@ -682,7 +682,7 @@ wordButtonClasses wd stage =
                     case getWordAttempt tp wd of
                         Nothing ->
                             case tp.currentWord of
-                                TestFinished ->
+                                TestFinished _ ->
                                     []
 
                                 CurrentWord cw ->
@@ -869,7 +869,7 @@ typingBoxInUse testProgress testingMethod =
     let
         isCurrentWord =
             case testProgress.currentWord of
-                TestFinished ->
+                TestFinished _ ->
                     False
 
                 CurrentWord _ ->
@@ -949,7 +949,7 @@ buttonsForStage verse preferences =
 
         testStageButtons tp =
             case tp.currentWord of
-                TestFinished ->
+                TestFinished { accuracy } ->
                     [ { caption = getNextVerseCaption
                       , msg = NextVerse
                       , enabled = Enabled
@@ -1081,7 +1081,7 @@ onScreenTestingButtons currentVerse testingMethod =
 
                 OnScreen ->
                     case tp.currentWord of
-                        TestFinished ->
+                        TestFinished _ ->
                             emptyNode
 
                         CurrentWord currentWord ->
@@ -1188,8 +1188,8 @@ instructions verse testingMethod helpVisible =
                     )
 
                 Test tp ->
-                    case getTestResult tp of
-                        Nothing ->
+                    case tp.currentWord of
+                        CurrentWord _ ->
                             case testingMethod of
                                 FullWords ->
                                     ( [ bold "TEST: "
@@ -1217,11 +1217,11 @@ instructions verse testingMethod helpVisible =
                                     , testingCommonHelp
                                     )
 
-                        Just percent ->
+                        TestFinished { accuracy } ->
                             ( [ bold "RESULTS: "
                               , H.text "You scored: "
-                              , bold (toString (floor (percent * 100)) ++ "%")
-                              , H.text (" - " ++ resultComment percent)
+                              , bold (toString (floor (accuracy * 100)) ++ "%")
+                              , H.text (" - " ++ resultComment accuracy)
                               ]
                             , []
                             )
@@ -1264,7 +1264,7 @@ instructions verse testingMethod helpVisible =
 
 
 resultComment : Float -> String
-resultComment percent =
+resultComment accuracy =
     let
         pairs =
             [ ( 0.98, "awesome!" )
@@ -1278,7 +1278,7 @@ resultComment percent =
         fallback =
             "more practice needed!"
     in
-        case List.head <| List.filter (\( p, c ) -> percent > p) pairs of
+        case List.head <| List.filter (\( p, c ) -> accuracy > p) pairs of
             Nothing ->
                 fallback
 
@@ -1949,7 +1949,7 @@ recallStageFinished verseStatus recallProgress =
 
 
 type CurrentTestWord
-    = TestFinished
+    = TestFinished { accuracy : Float }
     | CurrentWord
         { word :
             Word
@@ -1961,7 +1961,7 @@ type CurrentTestWord
 getCurrentWordAttempt : TestProgress -> Maybe Attempt
 getCurrentWordAttempt testProgress =
     case testProgress.currentWord of
-        TestFinished ->
+        TestFinished _ ->
             Nothing
 
         CurrentWord w ->
@@ -1983,7 +1983,7 @@ isTestingReference stage =
     case stage of
         Test tp ->
             case tp.currentWord of
-                TestFinished ->
+                TestFinished _ ->
                     False
 
                 CurrentWord cw ->
@@ -1993,47 +1993,39 @@ isTestingReference stage =
             False
 
 
-getTestResult : TestProgress -> Maybe Float
+getTestResult : TestProgress -> Float
 getTestResult testProgress =
-    case testProgress.currentWord of
-        CurrentWord _ ->
-            -- Still in progress
-            Nothing
+    let
+        attempts =
+            List.filter .finished <| List.map Tuple.second <| Dict.toList testProgress.attemptRecords
 
-        TestFinished ->
-            let
-                attempts =
-                    List.filter .finished <| List.map Tuple.second <| Dict.toList testProgress.attemptRecords
+        wordAccuracies =
+            List.map
+                (\attempt ->
+                    -- if, for example, 2 mistakes are allowed, then
+                    -- total 3 attempts possible:
+                    -- 0 mistakes = 100% accurate
+                    -- 1 mistake = 66%
+                    -- 2 mistakes = 33%
+                    -- 3 mistakes = 0
+                    let
+                        mistakes =
+                            List.length <| List.filter (\r -> r == Failure) attempt.checkResults
 
-                wordAccuracies =
-                    List.map
-                        (\attempt ->
-                            -- if, for example, 2 mistakes are allowed, then
-                            -- total 3 attempts possible:
-                            -- 0 mistakes = 100% accurate
-                            -- 1 mistake = 66%
-                            -- 2 mistakes = 33%
-                            -- 3 mistakes = 0
-                            let
-                                mistakes =
-                                    List.length <| List.filter (\r -> r == Failure) attempt.checkResults
+                        allowedAttempts =
+                            attempt.allowedMistakes + 1
+                    in
+                        1.0 - ((toFloat <| min mistakes allowedAttempts) / (toFloat allowedAttempts))
+                )
+                attempts
+    in
+        case List.length wordAccuracies of
+            0 ->
+                1.0
 
-                                allowedAttempts =
-                                    attempt.allowedMistakes + 1
-                            in
-                                1.0 - ((toFloat <| min mistakes allowedAttempts) / (toFloat allowedAttempts))
-                        )
-                        attempts
-            in
-                Just
-                    (case List.length wordAccuracies of
-                        0 ->
-                            1.0
-
-                        l ->
-                            -- Do some rounding to avoid 0.999 and retain 3 s.f.
-                            (toFloat (round (List.sum wordAccuracies / (toFloat l) * 1000)) / 1000)
-                    )
+            l ->
+                -- Do some rounding to avoid 0.999 and retain 3 s.f.
+                (toFloat (round (List.sum wordAccuracies / (toFloat l) * 1000)) / 1000)
 
 
 testMethodUsesTextBox : TestingMethod -> Bool
@@ -2388,7 +2380,7 @@ checkCurrentWordAndUpdate model input =
                     case currentVerse.currentStage of
                         Test tp ->
                             case tp.currentWord of
-                                TestFinished ->
+                                TestFinished _ ->
                                     ( currentVerse
                                     , Cmd.none
                                     )
@@ -2556,11 +2548,14 @@ markWord httpConfig correct word testProgress verse testingMethod =
         currentTestWordList =
             getCurrentTestWordList verse testingMethod
 
+        testAccuracy =
+            getTestResult testProgress
+
         nextCurrentWord =
             if shouldMoveOn then
                 case testProgress.currentWord of
-                    TestFinished ->
-                        TestFinished
+                    TestFinished r ->
+                        TestFinished r
 
                     CurrentWord cw ->
                         let
@@ -2570,7 +2565,7 @@ markWord httpConfig correct word testProgress verse testingMethod =
                             case getAt currentTestWordList nextI of
                                 Just nextWord ->
                                     if isReference nextWord.type_ && not (shouldTestReferenceForTestingMethod testingMethod) then
-                                        TestFinished
+                                        TestFinished { accuracy = testAccuracy }
                                     else
                                         CurrentWord
                                             { word = nextWord
@@ -2578,7 +2573,7 @@ markWord httpConfig correct word testProgress verse testingMethod =
                                             }
 
                                 Nothing ->
-                                    TestFinished
+                                    TestFinished { accuracy = testAccuracy }
             else
                 testProgress.currentWord
 
@@ -2602,11 +2597,17 @@ markWord httpConfig correct word testProgress verse testingMethod =
         actionCompleteCommand =
             if
                 (shouldMoveOn
-                    && (nextCurrentWord == TestFinished)
+                    && (case nextCurrentWord of
+                            TestFinished _ ->
+                                True
+
+                            _ ->
+                                False
+                       )
                     && (testProgress.currentWord /= nextCurrentWord)
                 )
             then
-                recordTestComplete httpConfig newCurrentVerse newTestProgress
+                recordTestComplete httpConfig newCurrentVerse testAccuracy
             else
                 Cmd.none
     in
@@ -2681,7 +2682,7 @@ updateTypingBoxCommand model =
     case getCurrentTestProgress model of
         Just tp ->
             case tp.currentWord of
-                TestFinished ->
+                TestFinished _ ->
                     hideTypingBoxCommand
 
                 CurrentWord cw ->
@@ -2766,35 +2767,24 @@ loadVerses =
     Http.send VersesToLearn (Http.get versesToLearnUrl verseBatchRawDecoder)
 
 
-recordTestComplete : HttpConfig -> CurrentVerse -> TestProgress -> Cmd Msg
-recordTestComplete httpConfig currentVerse testProgress =
+recordTestComplete : HttpConfig -> CurrentVerse -> Float -> Cmd Msg
+recordTestComplete httpConfig currentVerse accuracy =
     let
         verseStatus =
             currentVerse.verseStatus
 
-        accuracy =
-            getTestResult testProgress
+        body =
+            Http.multipartBody
+                [ Http.stringPart "uvs_id" (toString verseStatus.id)
+                , Http.stringPart "uvs_needs_testing" (encodeBool <| verseStatus.needsTesting)
+                , Http.stringPart "stage" stageTypeTest
+                , Http.stringPart "accuracy" (encodeFloat accuracy)
+                  -- TODO - practice field
+                , Http.stringPart "practice" (encodeBool False)
+                ]
     in
-        case accuracy of
-            Nothing ->
-                Cmd.none
-
-            Just a ->
-                let
-                    -- TODO - we should be posting
-                    -- several values, not one big JSON object, using multipartBody
-                    body =
-                        Http.multipartBody
-                            [ Http.stringPart "uvs_id" (toString verseStatus.id)
-                            , Http.stringPart "uvs_needs_testing" (encodeBool <| verseStatus.needsTesting)
-                            , Http.stringPart "stage" stageTypeTest
-                            , Http.stringPart "accuracy" (encodeFloat a)
-                              -- TODO - practice field
-                            , Http.stringPart "practice" (encodeBool False)
-                            ]
-                in
-                    Http.send RecordActionComplete
-                        (myHttpPost httpConfig actionCompleteUrl body emptyDecoder)
+        Http.send RecordActionComplete
+            (myHttpPost httpConfig actionCompleteUrl body emptyDecoder)
 
 
 encodeBool : Bool -> String
