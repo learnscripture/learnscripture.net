@@ -950,14 +950,31 @@ buttonsForStage verse preferences =
         testStageButtons tp =
             case tp.currentWord of
                 TestFinished { accuracy } ->
-                    [ { caption = getNextVerseCaption
-                      , msg = NextVerse
-                      , enabled = Enabled
-                      , default = Default
-                      , id = "id-next-btn"
-                      }
-                      -- TODO, "More practice" button, with correct default
-                    ]
+                    let
+                        defaultMorePractice =
+                            accuracy < 0.8
+                    in
+                        [ { caption = "More practice"
+                          , msg = MorePractice accuracy
+                          , enabled = Enabled
+                          , default =
+                                if defaultMorePractice then
+                                    Default
+                                else
+                                    NonDefault
+                          , id = "id-more-practice"
+                          }
+                        , { caption = getNextVerseCaption
+                          , msg = NextVerse
+                          , enabled = Enabled
+                          , default =
+                                if defaultMorePractice then
+                                    NonDefault
+                                else
+                                    Default
+                          , id = "id-next-btn"
+                          }
+                        ]
 
                 CurrentWord _ ->
                     -- Never show previous/back button once we've reached test
@@ -1370,6 +1387,7 @@ type Msg
     | TypingBoxEnter
     | OnScreenButtonClick String
     | RecordActionComplete (Result Http.Error ())
+    | MorePractice Float
     | ExpandHelp
     | CollapseHelp
     | WindowResize { width : Int, height : Int }
@@ -1460,6 +1478,9 @@ update msg model =
         RecordActionComplete _ ->
             -- TODO - handle error
             ( model, Cmd.none )
+
+        MorePractice accuracy ->
+            startMorePractice model accuracy
 
         ExpandHelp ->
             ( { model | helpVisible = True }, Cmd.none )
@@ -1691,24 +1712,6 @@ verseBatchToSession batch =
                                 )
 
 
-setupCurrentVerse : VerseStatus -> LearningType -> ( CurrentVerse, Cmd Msg )
-setupCurrentVerse verse learningType =
-    let
-        ( firstStageType, remainingStageTypes ) =
-            getStages learningType verse
-
-        ( newCurrentStage, cmd ) =
-            initializeStage firstStageType verse
-    in
-        ( { verseStatus = verse
-          , currentStage = newCurrentStage
-          , seenStageTypes = []
-          , remainingStageTypes = remainingStageTypes
-          }
-        , cmd
-        )
-
-
 
 -- Merge in new verses. The only thing which actually needs updating is the
 -- verse store, the rest will be the same, or the current model will be
@@ -1834,6 +1837,24 @@ learningStageTypeForStage s =
 
         Test _ ->
             TestStage
+
+
+setupCurrentVerse : VerseStatus -> LearningType -> ( CurrentVerse, Cmd Msg )
+setupCurrentVerse verse learningType =
+    let
+        ( firstStageType, remainingStageTypes ) =
+            getStages learningType verse
+
+        ( newCurrentStage, cmd ) =
+            initializeStage firstStageType verse
+    in
+        ( { verseStatus = verse
+          , currentStage = newCurrentStage
+          , seenStageTypes = []
+          , remainingStageTypes = remainingStageTypes
+          }
+        , cmd
+        )
 
 
 initializeStage : LearningStageType -> VerseStatus -> ( LearningStage, Cmd Msg )
@@ -2055,42 +2076,6 @@ getStages learningType verseStatus =
                 ( ReadForContextStage
                 , []
                 )
-
-        getStagesByStrength strength =
-            if strength < 0.02 then
-                ( ReadStage
-                , [ RecallStage
-                        { fraction = 0.5
-                        , hideType = HideWordEnd
-                        }
-                  , RecallStage
-                        { fraction = 1
-                        , hideType = HideWordEnd
-                        }
-                  , RecallStage
-                        { fraction = 0.34
-                        , hideType = HideFullWord
-                        }
-                  , RecallStage
-                        { fraction = 0.67
-                        , hideType = HideFullWord
-                        }
-                  , TestStage
-                  ]
-                )
-            else if strength < 0.07 then
-                ( ReadStage
-                , [ RecallStage
-                        { fraction = 1
-                        , hideType = HideWordEnd
-                        }
-                  , TestStage
-                  ]
-                )
-            else
-                ( TestStage
-                , []
-                )
     in
         case learningType of
             Learning ->
@@ -2103,6 +2088,62 @@ getStages learningType verseStatus =
                 ( TestStage
                 , []
                 )
+
+
+recallStage1 : LearningStageType
+recallStage1 =
+    RecallStage
+        { fraction = 0.5
+        , hideType = HideWordEnd
+        }
+
+
+recallStage2 : LearningStageType
+recallStage2 =
+    RecallStage
+        { fraction = 1
+        , hideType = HideWordEnd
+        }
+
+
+recallStage3 : LearningStageType
+recallStage3 =
+    RecallStage
+        { fraction = 0.34
+        , hideType = HideFullWord
+        }
+
+
+recallStage4 : LearningStageType
+recallStage4 =
+    RecallStage
+        { fraction = 0.67
+        , hideType = HideFullWord
+        }
+
+
+getStagesByStrength : Float -> ( LearningStageType, List LearningStageType )
+getStagesByStrength strength =
+    if strength < 0.02 then
+        ( ReadStage
+        , [ recallStage1
+          , recallStage2
+          , recallStage3
+          , recallStage4
+          , TestStage
+          ]
+        )
+    else if strength < 0.07 then
+        -- e.g. first test was 70% or less, this is second test
+        ( ReadStage
+        , [ recallStage2
+          , TestStage
+          ]
+        )
+    else
+        ( TestStage
+        , []
+        )
 
 
 moveToNextStageOrSubStage : Model -> ( Model, Cmd Msg )
@@ -2773,6 +2814,54 @@ getWordSuggestions verseStatus word =
 
         ReferenceWord ->
             []
+
+
+startMorePractice : Model -> Float -> ( Model, Cmd Msg )
+startMorePractice model accuracy =
+    let
+        ( firstStageType, remainingStageTypes ) =
+            if accuracy < 0.5 then
+                -- 0.5 is quite low, treat as if starting afresh
+                getStagesByStrength 0
+            else if accuracy < 0.8 then
+                ( ReadStage
+                , [ recallStage2
+                  , recallStage4
+                  , TestStage
+                  ]
+                )
+            else
+                ( recallStage2
+                , [ recallStage4
+                  , TestStage
+                  ]
+                )
+
+        ( newModel, cmd ) =
+            updateCurrentVersePlus model
+                Cmd.none
+                (\currentVerse ->
+                    let
+                        ( newCurrentStage, cmd ) =
+                            initializeStage firstStageType currentVerse.verseStatus
+                    in
+                        ( { currentVerse
+                            -- TODO need some flag which indicates this is 'More
+                            -- practice' mode, and therefore we don't assign points.
+                            | currentStage = newCurrentStage
+                            , seenStageTypes = []
+                            , remainingStageTypes = remainingStageTypes
+                          }
+                        , cmd
+                        )
+                )
+    in
+        ( newModel
+        , Cmd.batch
+            [ stageOrVerseChangeCommands newModel True
+            , cmd
+            ]
+        )
 
 
 
