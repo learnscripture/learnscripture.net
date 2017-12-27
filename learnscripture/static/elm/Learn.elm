@@ -1374,6 +1374,7 @@ type Msg
     | CollapseHelp
     | WindowResize { width : Int, height : Int }
     | ReceivePreferences JD.Value
+    | ReattemptFocus String Int
     | Noop
 
 
@@ -1475,6 +1476,9 @@ update msg model =
                     { model | preferences = decodePreferences prefsValue }
             in
                 ( newModel, updateTypingBoxCommand newModel )
+
+        ReattemptFocus id remainingAttempts ->
+            ( model, Task.attempt (handleFocusResult id remainingAttempts) (Dom.focus id) )
 
         Noop ->
             ( model, Cmd.none )
@@ -2726,7 +2730,30 @@ focusDefaultButton model =
                         Cmd.none
 
                     b :: rest ->
-                        Task.attempt (always Noop) (Dom.focus b.id)
+                        -- Dom.focus can fail if the control doesn't exist yet.
+                        -- Not sure if this is really possible, but we
+                        -- re-attempt focus for the case of the control not
+                        -- appearing in the DOM yet.
+                        Task.attempt (handleFocusResult b.id 5) (Dom.focus b.id)
+
+
+handleFocusResult : String -> Int -> (Result error value -> Msg)
+handleFocusResult id remainingAttempts =
+    if remainingAttempts <= 0 then
+        always Noop
+    else
+        (\r ->
+            let
+                _ =
+                    Debug.log ("Dom.focus failed - id " ++ id)
+            in
+                case r of
+                    Ok _ ->
+                        Noop
+
+                    Err _ ->
+                        ReattemptFocus id (remainingAttempts - 1)
+        )
 
 
 getWordSuggestions : VerseStatus -> Word -> WordSuggestions
