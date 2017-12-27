@@ -2516,37 +2516,6 @@ simplifyTurkish =
     translate "ÂâÇçĞğİıÖöŞşÜü" "AaCcGgIiOoSsUu"
 
 
-zip : List a -> List b -> List ( a, b )
-zip =
-    List.map2 (,)
-
-
-translate : String -> String -> String -> String
-translate fromStr toStr target =
-    let
-        allPairs =
-            zip (String.toList fromStr) (String.toList toStr)
-
-        makeMapper =
-            \pairs ->
-                case pairs of
-                    [] ->
-                        identity
-
-                    ( c1, c2 ) :: rest ->
-                        (\c ->
-                            if c == c1 then
-                                c2
-                            else
-                                makeMapper rest c
-                        )
-
-        mapper =
-            makeMapper allPairs
-    in
-        String.map mapper target
-
-
 initialAttempt : TestingMethod -> Attempt
 initialAttempt m =
     { finished = False
@@ -3137,3 +3106,34 @@ damerauLevenshteinDistance =
 chooseN : Int -> List a -> Random.Generator (List a)
 chooseN n items =
     Random.List.shuffle items |> Random.map (\items -> List.take n items)
+
+
+zip : List a -> List b -> List ( a, b )
+zip =
+    List.map2 (,)
+
+
+translate : String -> String -> String -> String
+translate fromStr toStr target =
+    let
+        allPairs =
+            zip (String.toList fromStr) (String.toList toStr)
+
+        makeMapper =
+            \pairs ->
+                case pairs of
+                    [] ->
+                        identity
+
+                    ( c1, c2 ) :: rest ->
+                        (\c ->
+                            if c == c1 then
+                                c2
+                            else
+                                makeMapper rest c
+                        )
+
+        mapper =
+            makeMapper allPairs
+    in
+        String.map mapper target
