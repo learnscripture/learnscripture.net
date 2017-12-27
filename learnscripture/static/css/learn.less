@@ -230,8 +230,11 @@ body.learn-page {
         display: flex;
         flex-direction: row;
         flex-wrap: nowrap;
-        justify-content: space-between;
+        justify-content: flex-end;
         margin-top: 0.2em;
+        > * {
+            margin-left: 5px;
+        }
     }
 
     #id-instructions {
@@ -294,6 +297,10 @@ body.learn-page {
             border-top-style: solid;
             border-top-width: 2px;
             .fixed-bottom();
+            justify-content: space-between;
+            > * {
+                margin-left: 0;
+            }
         }
     }
 }
