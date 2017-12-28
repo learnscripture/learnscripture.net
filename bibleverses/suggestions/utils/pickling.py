@@ -24,7 +24,7 @@ def cache_results_with_pickle(filename_suffix):
     Decorator generator, takes a filename suffix to use for different functions.
 
     The actual function to be decorated should be a callable with a signature
-    foo(training_texts, label, *args) and caches the results using pickle and
+    foo(training_texts, label, *args). Its results are cached using pickle and
     saving to disk.
 
     """
