@@ -18,9 +18,9 @@ from .tools.wordcounts import WordCounts
 # We don't use django settings to avoid a runtime dependency on Django. We also
 # are careful to not import analyzers, because they can import the rest of the
 # project, and we want this module to be used without doing that. That constrains
-# some of the design decisions about how to link up Analyzers and Stragies.
+# some of the design decisions about how to link up Analyzers and Strategies.
 
-# Also, some Stratgies use the same analysis, so we need to avoid loading twice.
+# Also, some Strategies use the same analysis, so we need to avoid loading twice.
 
 logger = logging.getLogger(__name__)
 
