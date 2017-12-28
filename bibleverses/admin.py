@@ -40,6 +40,7 @@ class VerseAdmin(admin.ModelAdmin):
     search_fields = ['localized_reference']
     list_display = ['localized_reference', 'version', 'missing']
     list_filter = ['version', 'missing']
+    raw_id_fields = ['merged_into']
     actions = [mark_missing]
 
     def get_queryset(self, request):
