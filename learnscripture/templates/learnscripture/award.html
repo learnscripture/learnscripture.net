@@ -15,9 +15,10 @@
     {% endif %}
   {% endif %}
 
-  {% for level, receivers_count, sample_usernames in levels %}
+  {% for level, receivers_count, sample_usernames, sample_award in levels %}
     {% if award.has_levels %}
       <h3>Level {{ level }}</h3>
+      <p>{{ sample_award.full_description }}.</p>
     {% endif %}
     <p>Total {{ receivers_count }} user(s){% if receivers_count > sample_usernames|length %}, including{% endif %}:</p>
     <ul>
