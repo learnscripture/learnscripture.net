@@ -147,6 +147,7 @@ type alias SessionData =
 
 type alias CurrentVerse =
     { verseStatus : VerseStatus
+    , sessionLearningType : LearningType
     , currentStage : LearningStage
     , remainingStageTypes : List LearningStageType
     , seenStageTypes : List LearningStageType
@@ -409,7 +410,7 @@ viewCurrentVerse session model =
                     ReadForContext ->
                         "read-for-context"
 
-                    Test _ ->
+                    Test _ _ ->
                         case testingMethod of
                             OnScreen ->
                                 hideWordBoundariesClass
@@ -673,12 +674,12 @@ wordButtonClasses wd stage =
                     , clickableClass
                     ]
 
-                Test _ ->
+                Test _ _ ->
                     [ wordButtonClass ]
 
         testStageClasses =
             case stage of
-                Test tp ->
+                Test _ tp ->
                     case getWordAttempt tp wd of
                         Nothing ->
                             case tp.currentWord of
@@ -707,7 +708,7 @@ wordButtonClasses wd stage =
 
         inner =
             case stage of
-                Test tp ->
+                Test _ tp ->
                     case getWordAttempt tp wd of
                         Nothing ->
                             [ "hidden" ]
@@ -819,7 +820,7 @@ typingBox stage testingMethod =
     let
         ( value, inUse, lastCheckFailed ) =
             case stage of
-                Test tp ->
+                Test _ tp ->
                     let
                         lastCheckFailed =
                             case getCurrentWordAttempt tp of
@@ -1003,7 +1004,7 @@ buttonsForStage verse preferences =
                         Disabled
             in
                 case verse.currentStage of
-                    Test tp ->
+                    Test _ tp ->
                         testStageButtons tp
 
                     _ ->
@@ -1022,7 +1023,7 @@ buttonsForStage verse preferences =
                         ]
         else
             case verse.currentStage of
-                Test tp ->
+                Test _ tp ->
                     testStageButtons tp
 
                 _ ->
@@ -1088,7 +1089,7 @@ onScreenTestingButtons currentVerse testingMethod =
         Recall _ _ ->
             emptyNode
 
-        Test tp ->
+        Test _ tp ->
             case testingMethod of
                 FullWords ->
                     emptyNode
@@ -1204,7 +1205,7 @@ instructions verse testingMethod helpVisible =
                     , buttonsHelp
                     )
 
-                Test tp ->
+                Test _ tp ->
                     case tp.currentWord of
                         CurrentWord _ ->
                             case testingMethod of
@@ -1570,8 +1571,8 @@ updateTestProgress model updater =
     updateCurrentStage model
         (\currentStage ->
             case currentStage of
-                Test tp ->
-                    Test (updater tp)
+                Test t tp ->
+                    Test t (updater tp)
 
                 _ ->
                     currentStage
@@ -1606,7 +1607,7 @@ getCurrentTestProgress model =
     case getCurrentVerse model of
         Just currentVerse ->
             case currentVerse.currentStage of
-                Test testProgress ->
+                Test _ testProgress ->
                     Just testProgress
 
                 _ ->
@@ -1758,7 +1759,12 @@ type LearningStageType
     = ReadStage
     | ReadForContextStage
     | RecallStage RecallDef
-    | TestStage
+    | TestStage TestType
+
+
+type TestType
+    = FirstTest
+    | MorePracticeTest
 
 
 type alias RecallDef =
@@ -1778,7 +1784,7 @@ type LearningStage
     = Read
     | ReadForContext
     | Recall RecallDef RecallProgress
-    | Test TestProgress
+    | Test TestType TestProgress
 
 
 {-| We really want WordType, but it is not comparable
@@ -1835,20 +1841,21 @@ learningStageTypeForStage s =
         Recall def _ ->
             RecallStage def
 
-        Test _ ->
-            TestStage
+        Test t _ ->
+            TestStage t
 
 
 setupCurrentVerse : VerseStatus -> LearningType -> ( CurrentVerse, Cmd Msg )
 setupCurrentVerse verse learningType =
     let
         ( firstStageType, remainingStageTypes ) =
-            getStages learningType verse
+            getStages learningType FirstTest verse
 
         ( newCurrentStage, cmd ) =
             initializeStage firstStageType verse
     in
         ( { verseStatus = verse
+          , sessionLearningType = learningType
           , currentStage = newCurrentStage
           , seenStageTypes = []
           , remainingStageTypes = remainingStageTypes
@@ -1875,8 +1882,8 @@ initializeStage stageType verseStatus =
                 , hideRandomWords verseStatus def rp
                 )
 
-        TestStage ->
-            ( Test (initialTestProgress verseStatus), Cmd.none )
+        TestStage t ->
+            ( Test t (initialTestProgress verseStatus), Cmd.none )
 
 
 initialRecallProgress : RecallProgress
@@ -1898,7 +1905,7 @@ initialTestProgress verseStatus =
                 -- Passing 'FullWords' here is a bit of a hack, but
                 -- works fine when we are only getting the first word.
                 -- and saves passing testingMethod around everywhere
-                case getAt (wordsForVerse verseStatus TestStage FullWords) 0 of
+                case getAt (wordsForVerse verseStatus (TestStage FirstTest) FullWords) 0 of
                     Nothing ->
                         Debug.crash ("Should be at least one word in verse " ++ verseStatus.localizedReference)
 
@@ -1996,7 +2003,7 @@ getCurrentWordAttempt testProgress =
 isTestingStage : LearningStageType -> Bool
 isTestingStage stage =
     case stage of
-        TestStage ->
+        TestStage _ ->
             True
 
         _ ->
@@ -2006,7 +2013,7 @@ isTestingStage stage =
 isTestingReference : LearningStage -> Bool
 isTestingReference stage =
     case stage of
-        Test tp ->
+        Test _ tp ->
             case tp.currentWord of
                 TestFinished _ ->
                     False
@@ -2066,12 +2073,12 @@ testMethodUsesTextBox testingMethod =
             False
 
 
-getStages : LearningType -> VerseStatus -> ( LearningStageType, List LearningStageType )
-getStages learningType verseStatus =
+getStages : LearningType -> TestType -> VerseStatus -> ( LearningStageType, List LearningStageType )
+getStages learningType testType verseStatus =
     let
         getNonPracticeStages vs =
             if vs.needsTesting then
-                getStagesByStrength vs.strength
+                getStagesByStrength vs.strength testType
             else
                 ( ReadForContextStage
                 , []
@@ -2085,7 +2092,7 @@ getStages learningType verseStatus =
                 getNonPracticeStages verseStatus
 
             Practice ->
-                ( TestStage
+                ( TestStage testType
                 , []
                 )
 
@@ -2122,26 +2129,26 @@ recallStage4 =
         }
 
 
-getStagesByStrength : Float -> ( LearningStageType, List LearningStageType )
-getStagesByStrength strength =
+getStagesByStrength : Float -> TestType -> ( LearningStageType, List LearningStageType )
+getStagesByStrength strength testType =
     if strength < 0.02 then
         ( ReadStage
         , [ recallStage1
           , recallStage2
           , recallStage3
           , recallStage4
-          , TestStage
+          , TestStage testType
           ]
         )
     else if strength < 0.07 then
         -- e.g. first test was 70% or less, this is second test
         ( ReadStage
         , [ recallStage2
-          , TestStage
+          , TestStage testType
           ]
         )
     else
-        ( TestStage
+        ( TestStage testType
         , []
         )
 
@@ -2423,7 +2430,7 @@ checkCurrentWordAndUpdate model input =
                 Cmd.none
                 (\currentVerse ->
                     case currentVerse.currentStage of
-                        Test tp ->
+                        Test testType tp ->
                             case tp.currentWord of
                                 TestFinished _ ->
                                     ( currentVerse
@@ -2435,7 +2442,7 @@ checkCurrentWordAndUpdate model input =
                                         correct =
                                             checkWord currentWord.word input testingMethod
                                     in
-                                        markWord model.httpConfig correct currentWord.word tp currentVerse testingMethod
+                                        markWord model.httpConfig correct currentWord.word tp testType currentVerse testingMethod
 
                         _ ->
                             ( currentVerse
@@ -2524,8 +2531,8 @@ initialAttempt m =
     }
 
 
-markWord : HttpConfig -> Bool -> Word -> TestProgress -> CurrentVerse -> TestingMethod -> ( CurrentVerse, Cmd Msg )
-markWord httpConfig correct word testProgress verse testingMethod =
+markWord : HttpConfig -> Bool -> Word -> TestProgress -> TestType -> CurrentVerse -> TestingMethod -> ( CurrentVerse, Cmd Msg )
+markWord httpConfig correct word testProgress testType verse testingMethod =
     let
         attempt =
             case getWordAttempt testProgress word of
@@ -2605,7 +2612,7 @@ markWord httpConfig correct word testProgress verse testingMethod =
         newCurrentVerse =
             { verse
                 | currentStage =
-                    Test newTestProgress
+                    Test testType newTestProgress
             }
 
         actionCompleteCommand =
@@ -2621,7 +2628,7 @@ markWord httpConfig correct word testProgress verse testingMethod =
                     && (testProgress.currentWord /= nextCurrentWord)
                 )
             then
-                recordTestComplete httpConfig newCurrentVerse testAccuracy
+                recordTestComplete httpConfig newCurrentVerse testAccuracy testType
             else
                 Cmd.none
     in
@@ -2788,21 +2795,24 @@ getWordSuggestions verseStatus word =
 startMorePractice : Model -> Float -> ( Model, Cmd Msg )
 startMorePractice model accuracy =
     let
+        testType =
+            MorePracticeTest
+
         ( firstStageType, remainingStageTypes ) =
             if accuracy < 0.5 then
                 -- 0.5 is quite low, treat as if starting afresh
-                getStagesByStrength 0
+                getStagesByStrength 0 testType
             else if accuracy < 0.8 then
                 ( ReadStage
                 , [ recallStage2
                   , recallStage4
-                  , TestStage
+                  , TestStage testType
                   ]
                 )
             else
                 ( recallStage2
                 , [ recallStage4
-                  , TestStage
+                  , TestStage testType
                   ]
                 )
 
@@ -2815,8 +2825,6 @@ startMorePractice model accuracy =
                             initializeStage firstStageType currentVerse.verseStatus
                     in
                         ( { currentVerse
-                            -- TODO need some flag which indicates this is 'More
-                            -- practice' mode, and therefore we don't assign points.
                             | currentStage = newCurrentStage
                             , seenStageTypes = []
                             , remainingStageTypes = remainingStageTypes
@@ -2852,8 +2860,8 @@ loadVerses =
     Http.send VersesToLearn (Http.get versesToLearnUrl verseBatchRawDecoder)
 
 
-recordTestComplete : HttpConfig -> CurrentVerse -> Float -> Cmd Msg
-recordTestComplete httpConfig currentVerse accuracy =
+recordTestComplete : HttpConfig -> CurrentVerse -> Float -> TestType -> Cmd Msg
+recordTestComplete httpConfig currentVerse accuracy testType =
     let
         verseStatus =
             currentVerse.verseStatus
@@ -2864,8 +2872,11 @@ recordTestComplete httpConfig currentVerse accuracy =
                 , Http.stringPart "uvs_needs_testing" (encodeBool <| verseStatus.needsTesting)
                 , Http.stringPart "stage" stageTypeTest
                 , Http.stringPart "accuracy" (encodeFloat accuracy)
-                  -- TODO - practice field
-                , Http.stringPart "practice" (encodeBool False)
+                , Http.stringPart "practice"
+                    (encodeBool <|
+                        (currentVerse.sessionLearningType == Practice)
+                            || (testType == MorePracticeTest)
+                    )
                 ]
     in
         Http.send RecordActionComplete
