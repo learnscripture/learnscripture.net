@@ -795,6 +795,11 @@ class VerseUtilsTests(unittest2.TestCase):
         self.assertEqual(split_into_words(text),
                          ['and\n', '"A', 'stone', 'of', 'stumbling,\n', 'and', 'a', 'rock', 'of', 'offense.'])
 
+    def test_split_into_words_turkish(self):
+        text = "Düşmanı, öç alanı yok etmek için."
+        self.assertEqual(split_into_words(text),
+                         ['Düşmanı,', 'öç', 'alanı', 'yok', 'etmek', 'için.'])
+
 
 class SetupEsvMixin(object):
     def setUp(self):

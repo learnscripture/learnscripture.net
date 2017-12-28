@@ -1,11 +1,11 @@
 import re
 
-WORD_RE = re.compile('[0-9a-zA-Z]')
+ALPHANUMERIC_RE = re.compile('\w')
 WORD_SPLITTER = re.compile(r'( |\n)')
 
 
 def is_punctuation(text):
-    return not WORD_RE.search(text)
+    return not ALPHANUMERIC_RE.search(text)
 
 
 def is_newline(text):
