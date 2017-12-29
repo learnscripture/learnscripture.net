@@ -1391,7 +1391,8 @@ type Msg
     | TypingBoxInput String
     | TypingBoxEnter
     | OnScreenButtonClick String
-    | RecordActionComplete (Result Http.Error ())
+    | TrackHttpCall TrackedHttpCall
+    | RecordActionCompleteReturned (Result Http.Error ())
     | MorePractice Float
     | ExpandHelp
     | CollapseHelp
@@ -1480,7 +1481,10 @@ update msg model =
         OnScreenButtonClick text ->
             handleOnScreenButtonClick model text
 
-        RecordActionComplete _ ->
+        TrackHttpCall trackedCall ->
+            doTrackedCall model trackedCall
+
+        RecordActionCompleteReturned _ ->
             -- TODO - handle error
             ( model, Cmd.none )
 
@@ -2848,6 +2852,28 @@ startMorePractice model accuracy =
 
 {- API calls -}
 
+{- For some calls, we need to:
+
+- Keep track of the fact that the call is in progress
+- Retry if necessary
+- Avoid leaving the page if the call (or retries) are in progress.
+
+So the data needed for these calls is stored on the model, along with
+info about attempts etc.
+-}
+type TrackedHttpCall
+    = RecordTestComplete CurrentVerse Float TestType
+
+
+doTrackedCall : Model -> TrackedHttpCall -> ( Model, Cmd Msg )
+doTrackedCall model trackedCall =
+    let
+        cmd =
+            case trackedCall of
+                RecordTestComplete currentVerse accuracy testType ->
+                    callRecordTestComplete model.httpConfig currentVerse accuracy testType
+    in
+        (model, cmd )
 
 versesToLearnUrl : String
 versesToLearnUrl =
@@ -2864,8 +2890,19 @@ loadVerses =
     Http.send VersesToLearn (Http.get versesToLearnUrl verseBatchRawDecoder)
 
 
+{-| For calls that require reliability, we go via `TrackedHttpCall`.
+
+Technically this doesn't need to be a Cmd Msg (we could just update the model
+directly, but rewiring from `Http.send` to `TrackedHttpCall` is much easier
+if we use a `Cmd Msg`
+ -}
 recordTestComplete : HttpConfig -> CurrentVerse -> Float -> TestType -> Cmd Msg
 recordTestComplete httpConfig currentVerse accuracy testType =
+    sendMsg <| TrackHttpCall (RecordTestComplete currentVerse accuracy testType)
+
+
+callRecordTestComplete : HttpConfig -> CurrentVerse -> Float -> TestType -> Cmd Msg
+callRecordTestComplete httpConfig currentVerse accuracy testType =
     let
         verseStatus =
             currentVerse.verseStatus
@@ -2883,8 +2920,13 @@ recordTestComplete httpConfig currentVerse accuracy testType =
                     )
                 ]
     in
-        Http.send RecordActionComplete
+        Http.send RecordActionCompleteReturned
             (myHttpPost httpConfig actionCompleteUrl body emptyDecoder)
+
+
+sendMsg : msg -> Cmd msg
+sendMsg msg =
+    Task.succeed msg |> Task.perform identity
 
 
 encodeBool : Bool -> String
