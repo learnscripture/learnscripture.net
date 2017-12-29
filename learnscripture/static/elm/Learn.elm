@@ -11,12 +11,14 @@ import Json.Decode.Pipeline as JDP
 import Json.Encode as JE
 import Maybe
 import Navigation
+import Process
 import Random
 import Random.List
 import Regex as R
 import Set
 import String
 import Task
+import Time
 import Window
 import LearnPorts
 import Native.StringUtils
@@ -2873,8 +2875,9 @@ type TrackedHttpCall
     = RecordTestComplete CurrentVerse Float TestType
 
 
+maxHttpRetries : number
 maxHttpRetries =
-    10
+    6
 
 
 type alias CallId =
@@ -2887,17 +2890,30 @@ startTrackedCall model trackedCall =
         ( newModel, callId ) =
             addTrackedCall model trackedCall
 
+        call =
+            createTrackedCall model trackedCall callId
+
+        handler =
+            handleTrackedCall trackedCall callId
+
         cmd =
-            doTrackedCall model trackedCall callId
+            Task.attempt handler call
     in
         ( newModel, cmd )
 
 
-doTrackedCall : Model -> TrackedHttpCall -> CallId -> Cmd Msg
-doTrackedCall model trackedCall callId =
+createTrackedCall : Model -> TrackedHttpCall -> CallId -> Task.Task Http.Error ()
+createTrackedCall model trackedCall callId =
     case trackedCall of
         RecordTestComplete currentVerse accuracy testType ->
-            callRecordTestComplete model.httpConfig callId currentVerse accuracy testType
+            createRecordTestComplete model.httpConfig callId currentVerse accuracy testType
+
+
+handleTrackedCall : TrackedHttpCall -> CallId -> (Result Http.Error () -> Msg)
+handleTrackedCall trackedCall callId =
+    case trackedCall of
+        RecordTestComplete _ _ _ ->
+            RecordActionCompleteReturned callId
 
 
 addTrackedCall : Model -> TrackedHttpCall -> ( Model, CallId )
@@ -2953,16 +2969,31 @@ markFailAndRetry model callId =
                 , Cmd.none
                 )
             else
-                ( { model
-                    | currentHttpCalls =
-                        Dict.insert callId
-                            { call = call
-                            , attempts = attempts + 1
-                            }
-                            model.currentHttpCalls
-                  }
-                , doTrackedCall model call callId
-                )
+                let
+                    newModel =
+                        { model
+                            | currentHttpCalls =
+                                Dict.insert callId
+                                    { call = call
+                                    , attempts = attempts + 1
+                                    }
+                                    model.currentHttpCalls
+                        }
+
+                    delayTask =
+                        Process.sleep (Time.second * (2 ^ attempts |> toFloat))
+
+                    callTask =
+                        createTrackedCall model call callId
+
+                    handler =
+                        handleTrackedCall call callId
+                in
+                    ( newModel
+                    , delayTask
+                        |> Task.andThen (\_ -> callTask)
+                        |> Task.attempt handler
+                    )
 
 
 versesToLearnUrl : String
@@ -2991,8 +3022,8 @@ recordTestComplete httpConfig currentVerse accuracy testType =
     sendMsg <| TrackHttpCall (RecordTestComplete currentVerse accuracy testType)
 
 
-callRecordTestComplete : HttpConfig -> CallId -> CurrentVerse -> Float -> TestType -> Cmd Msg
-callRecordTestComplete httpConfig callId currentVerse accuracy testType =
+createRecordTestComplete : HttpConfig -> CallId -> CurrentVerse -> Float -> TestType -> Task.Task Http.Error ()
+createRecordTestComplete httpConfig callId currentVerse accuracy testType =
     let
         verseStatus =
             currentVerse.verseStatus
@@ -3010,7 +3041,7 @@ callRecordTestComplete httpConfig callId currentVerse accuracy testType =
                     )
                 ]
     in
-        Http.send (RecordActionCompleteReturned callId)
+        Http.toTask
             (myHttpPost httpConfig
                 (actionCompleteUrl ++ "?callId=" ++ toString callId)
                 body
