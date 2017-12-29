@@ -83,6 +83,8 @@ init flags =
             }
       , learningSession = Loading
       , helpVisible = False
+      , currentHttpCalls = Dict.empty
+      , permanentFailHttpCalls = []
       }
     , loadVerses
     )
@@ -99,6 +101,12 @@ type alias Model =
     , isTouchDevice : Bool
     , httpConfig : HttpConfig
     , helpVisible : Bool
+    , currentHttpCalls :
+        Dict.Dict Int
+            { call : TrackedHttpCall
+            , attempts : Int
+            }
+    , permanentFailHttpCalls : List TrackedHttpCall
     }
 
 
@@ -1392,7 +1400,7 @@ type Msg
     | TypingBoxEnter
     | OnScreenButtonClick String
     | TrackHttpCall TrackedHttpCall
-    | RecordActionCompleteReturned (Result Http.Error ())
+    | RecordActionCompleteReturned CallId (Result Http.Error ())
     | MorePractice Float
     | ExpandHelp
     | CollapseHelp
@@ -1482,11 +1490,10 @@ update msg model =
             handleOnScreenButtonClick model text
 
         TrackHttpCall trackedCall ->
-            doTrackedCall model trackedCall
+            startTrackedCall model trackedCall
 
-        RecordActionCompleteReturned _ ->
-            -- TODO - handle error
-            ( model, Cmd.none )
+        RecordActionCompleteReturned callId result ->
+            handleRecordActionCompleteReturned model callId result
 
         MorePractice accuracy ->
             startMorePractice model accuracy
@@ -2851,29 +2858,112 @@ startMorePractice model accuracy =
 
 
 {- API calls -}
-
 {- For some calls, we need to:
 
-- Keep track of the fact that the call is in progress
-- Retry if necessary
-- Avoid leaving the page if the call (or retries) are in progress.
+   - Keep track of the fact that the call is in progress
+   - Retry if necessary
+   - Avoid leaving the page if the call (or retries) are in progress.
 
-So the data needed for these calls is stored on the model, along with
-info about attempts etc.
+   So the data needed for these calls is stored on the model, along with
+   info about attempts etc.
 -}
+
+
 type TrackedHttpCall
     = RecordTestComplete CurrentVerse Float TestType
 
 
-doTrackedCall : Model -> TrackedHttpCall -> ( Model, Cmd Msg )
-doTrackedCall model trackedCall =
+maxHttpRetries =
+    10
+
+
+type alias CallId =
+    Int
+
+
+startTrackedCall : Model -> TrackedHttpCall -> ( Model, Cmd Msg )
+startTrackedCall model trackedCall =
     let
+        ( newModel, callId ) =
+            addTrackedCall model trackedCall
+
         cmd =
-            case trackedCall of
-                RecordTestComplete currentVerse accuracy testType ->
-                    callRecordTestComplete model.httpConfig currentVerse accuracy testType
+            doTrackedCall model trackedCall callId
     in
-        (model, cmd )
+        ( newModel, cmd )
+
+
+doTrackedCall : Model -> TrackedHttpCall -> CallId -> Cmd Msg
+doTrackedCall model trackedCall callId =
+    case trackedCall of
+        RecordTestComplete currentVerse accuracy testType ->
+            callRecordTestComplete model.httpConfig callId currentVerse accuracy testType
+
+
+addTrackedCall : Model -> TrackedHttpCall -> ( Model, CallId )
+addTrackedCall model trackedCall =
+    let
+        callId =
+            case Dict.keys model.currentHttpCalls |> List.reverse |> List.head of
+                Nothing ->
+                    1
+
+                Just i ->
+                    i + 1
+
+        newCurrentCalls =
+            Dict.insert callId { call = trackedCall, attempts = 1 } model.currentHttpCalls
+    in
+        ( { model
+            | currentHttpCalls = newCurrentCalls
+          }
+        , callId
+        )
+
+
+markCallFinished : Model -> CallId -> Model
+markCallFinished model callId =
+    { model
+        | currentHttpCalls = Dict.remove callId model.currentHttpCalls
+    }
+
+
+markPermanentFailCall : Model -> CallId -> Model
+markPermanentFailCall model callId =
+    case Dict.get callId model.currentHttpCalls of
+        Nothing ->
+            model
+
+        Just { call } ->
+            { model
+                | currentHttpCalls = Dict.remove callId model.currentHttpCalls
+                , permanentFailHttpCalls = call :: model.permanentFailHttpCalls
+            }
+
+
+markFailAndRetry : Model -> CallId -> ( Model, Cmd Msg )
+markFailAndRetry model callId =
+    case Dict.get callId model.currentHttpCalls of
+        Nothing ->
+            ( model, Cmd.none )
+
+        Just { call, attempts } ->
+            if attempts == maxHttpRetries then
+                ( markPermanentFailCall model callId
+                , Cmd.none
+                )
+            else
+                ( { model
+                    | currentHttpCalls =
+                        Dict.insert callId
+                            { call = call
+                            , attempts = attempts + 1
+                            }
+                            model.currentHttpCalls
+                  }
+                , doTrackedCall model call callId
+                )
+
 
 versesToLearnUrl : String
 versesToLearnUrl =
@@ -2895,14 +2985,14 @@ loadVerses =
 Technically this doesn't need to be a Cmd Msg (we could just update the model
 directly, but rewiring from `Http.send` to `TrackedHttpCall` is much easier
 if we use a `Cmd Msg`
- -}
+-}
 recordTestComplete : HttpConfig -> CurrentVerse -> Float -> TestType -> Cmd Msg
 recordTestComplete httpConfig currentVerse accuracy testType =
     sendMsg <| TrackHttpCall (RecordTestComplete currentVerse accuracy testType)
 
 
-callRecordTestComplete : HttpConfig -> CurrentVerse -> Float -> TestType -> Cmd Msg
-callRecordTestComplete httpConfig currentVerse accuracy testType =
+callRecordTestComplete : HttpConfig -> CallId -> CurrentVerse -> Float -> TestType -> Cmd Msg
+callRecordTestComplete httpConfig callId currentVerse accuracy testType =
     let
         verseStatus =
             currentVerse.verseStatus
@@ -2920,8 +3010,33 @@ callRecordTestComplete httpConfig currentVerse accuracy testType =
                     )
                 ]
     in
-        Http.send RecordActionCompleteReturned
-            (myHttpPost httpConfig actionCompleteUrl body emptyDecoder)
+        Http.send (RecordActionCompleteReturned callId)
+            (myHttpPost httpConfig
+                (actionCompleteUrl ++ "?callId=" ++ toString callId)
+                body
+                emptyDecoder
+            )
+
+
+handleRecordActionCompleteReturned : Model -> CallId -> Result.Result Http.Error () -> ( Model, Cmd Msg )
+handleRecordActionCompleteReturned model callId result =
+    case result of
+        Ok () ->
+            ( markCallFinished model callId
+              -- TODO - load score logs
+            , Cmd.none
+            )
+
+        Err err ->
+            case err of
+                Http.BadUrl _ ->
+                    ( markPermanentFailCall model callId
+                    , Cmd.none
+                    )
+
+                _ ->
+                    -- Others could all be temporary in theory, so we try again.
+                    markFailAndRetry model callId
 
 
 sendMsg : msg -> Cmd msg
