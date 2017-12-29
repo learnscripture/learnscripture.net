@@ -88,6 +88,17 @@
       background-color: rgba(255,255,255,.5);
       color: @white;
     }
+
+    // Focus states
+    &:focus {
+      outline: 0;
+      background-color: @white;
+      color: @grayDark;
+      text-shadow: 0 1px 0 @white;
+      border: 0;
+      padding: 5px 10px;
+      .box-shadow(0 0 3px rgba(0,0,0,.15));
+    }
   }
 }
 
@@ -394,6 +405,10 @@ footer {
     text-decoration: none;
   }
 
+  // Focus state for keyboard and accessibility
+  &:focus {
+      outline: 1px dotted #666;
+  }
 
    // Transitions
   .transition(.1s linear all);
