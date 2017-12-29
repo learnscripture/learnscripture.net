@@ -1168,6 +1168,11 @@ preferencesLink =
 instructions : CurrentVerse -> TestingMethod -> Bool -> List (H.Html Msg)
 instructions verse testingMethod helpVisible =
     let
+        commonHelp =
+            [ [ H.text "Keyboard navigation: use Tab and Shift-Tab to move focus between controls, and Enter to 'press' one. Focus is shown with a blue border."
+              ]
+            ]
+
         testingCommonHelp =
             [ [ H.text "You can change your testing method in your "
               , preferencesLink
@@ -1176,9 +1181,7 @@ instructions verse testingMethod helpVisible =
             ]
 
         buttonsHelp =
-            [ [ H.text "Keyboard navigation: use Tab and Shift-Tab to move focus between buttons, and Enter to press it. Focus is shown with a blue border."
-              ]
-            , [ H.text "The button for the most likely action is highlighted in colour and is focussed by default."
+            [ [ H.text "The button for the most likely action is highlighted in colour and is focussed by default."
               ]
             ]
 
@@ -1188,21 +1191,21 @@ instructions verse testingMethod helpVisible =
                     ( [ bold "READ: "
                       , H.text "Read the text through (preferably aloud), and click 'Next'."
                       ]
-                    , buttonsHelp
+                    , commonHelp ++ buttonsHelp
                     )
 
                 ReadForContext ->
                     ( [ bold "READ: "
                       , H.text "Read this verse to get the context and flow of the passage."
                       ]
-                    , buttonsHelp
+                    , commonHelp ++ buttonsHelp
                     )
 
                 Recall _ rp ->
                     ( [ bold "READ and RECALL:"
                       , H.text "Read the text through, filling in the gaps from your memory. Click a word to reveal it if you can't remember."
                       ]
-                    , buttonsHelp
+                    , commonHelp ++ buttonsHelp
                     )
 
                 Test _ tp ->
@@ -1213,7 +1216,8 @@ instructions verse testingMethod helpVisible =
                                     ( [ bold "TEST: "
                                       , H.text "Testing time! Type the text, pressing space after each word."
                                       ]
-                                    , testingCommonHelp
+                                    , commonHelp
+                                        ++ testingCommonHelp
                                         ++ [ [ H.text "You don't need perfect spelling to get full marks."
                                              ]
                                            ]
@@ -1225,14 +1229,14 @@ instructions verse testingMethod helpVisible =
                                       , bold "first letter"
                                       , H.text " of each word."
                                       ]
-                                    , testingCommonHelp
+                                    , commonHelp ++ testingCommonHelp
                                     )
 
                                 OnScreen ->
                                     ( [ bold "TEST: "
                                       , H.text "Testing time! For each word choose from the options shown."
                                       ]
-                                    , testingCommonHelp
+                                    , commonHelp ++ testingCommonHelp
                                     )
 
                         TestFinished { accuracy } ->
