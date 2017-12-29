@@ -1495,7 +1495,7 @@ update msg model =
             startTrackedCall model trackedCall
 
         RecordActionCompleteReturned callId result ->
-            handleRecordActionCompleteReturned model callId result
+            handleRetries handleRecordActionCompleteReturned model callId result
 
         MorePractice accuracy ->
             startMorePractice model accuracy
@@ -2995,7 +2995,6 @@ markFailAndRetry model callId =
                         |> Task.attempt handler
                     )
 
-
 versesToLearnUrl : String
 versesToLearnUrl =
     "/api/learnscripture/v1/versestolearn2/"
@@ -3049,14 +3048,15 @@ createRecordTestComplete httpConfig callId currentVerse accuracy testType =
             )
 
 
-handleRecordActionCompleteReturned : Model -> CallId -> Result.Result Http.Error () -> ( Model, Cmd Msg )
-handleRecordActionCompleteReturned model callId result =
+handleRetries : (Model -> a -> (Model, Cmd Msg)) -> Model -> CallId -> Result.Result Http.Error a -> ( Model, Cmd Msg)
+handleRetries continuation model callId result =
     case result of
-        Ok () ->
-            ( markCallFinished model callId
-              -- TODO - load score logs
-            , Cmd.none
-            )
+        Ok v ->
+            let
+                newModel1 = markCallFinished model callId
+                (newModel2, cmd) = continuation newModel1 v
+            in
+                (newModel2, cmd)
 
         Err err ->
             case err of
@@ -3068,6 +3068,14 @@ handleRecordActionCompleteReturned model callId result =
                 _ ->
                     -- Others could all be temporary in theory, so we try again.
                     markFailAndRetry model callId
+
+
+handleRecordActionCompleteReturned : Model -> () -> ( Model, Cmd Msg )
+handleRecordActionCompleteReturned model () =
+    ( model
+    -- TODO - load score logs
+    , Cmd.none
+    )
 
 
 sendMsg : msg -> Cmd msg
