@@ -1402,6 +1402,7 @@ type Msg
     | TypingBoxEnter
     | OnScreenButtonClick String
     | TrackHttpCall TrackedHttpCall
+    | MakeHttpCall CallId
     | RecordActionCompleteReturned CallId (Result Http.Error ())
     | MorePractice Float
     | ExpandHelp
@@ -1493,6 +1494,9 @@ update msg model =
 
         TrackHttpCall trackedCall ->
             startTrackedCall model trackedCall
+
+        MakeHttpCall callId ->
+            makeHttpCall model callId
 
         RecordActionCompleteReturned callId result ->
             handleRetries handleRecordActionCompleteReturned model callId result
@@ -2890,23 +2894,34 @@ startTrackedCall model trackedCall =
         ( newModel, callId ) =
             addTrackedCall model trackedCall
 
-        call =
-            createTrackedCall model trackedCall callId
-
-        handler =
-            handleTrackedCall trackedCall callId
-
         cmd =
-            Task.attempt handler call
+            sendMsg <| MakeHttpCall callId
     in
         ( newModel, cmd )
 
 
-createTrackedCall : Model -> TrackedHttpCall -> CallId -> Task.Task Http.Error ()
-createTrackedCall model trackedCall callId =
-    case trackedCall of
-        RecordTestComplete currentVerse accuracy testType ->
-            createRecordTestComplete model.httpConfig callId currentVerse accuracy testType
+{-| The motivation for having 'MakeHttpCall' and 'makeHttpCall' separate from
+'startTrackedCall' is that when we retry, we want to add a delay. It seems
+easier to just use the `delay` helper and send another message than to convert
+`Http.send` calls into Task.Tasks in order to insert Process.sleep tasks etc.
+(at least, I couldn't figure out the type problems caused by trying to work with
+Tasks instead of Cmd Msg).
+
+-}
+makeHttpCall : Model -> CallId -> ( Model, Cmd Msg )
+makeHttpCall model callId =
+    let
+        cmd =
+            case Dict.get callId model.currentHttpCalls of
+                Nothing ->
+                    Cmd.none
+
+                Just { call } ->
+                    case call of
+                        RecordTestComplete currentVerse accuracy testType ->
+                            callRecordTestComplete model.httpConfig callId currentVerse accuracy testType
+    in
+        ( model, cmd )
 
 
 handleTrackedCall : TrackedHttpCall -> CallId -> (Result Http.Error () -> Msg)
@@ -2982,18 +2997,19 @@ markFailAndRetry model callId =
 
                     delayTask =
                         Process.sleep (Time.second * (2 ^ attempts |> toFloat))
-
-                    callTask =
-                        createTrackedCall model call callId
-
-                    handler =
-                        handleTrackedCall call callId
                 in
                     ( newModel
-                    , delayTask
-                        |> Task.andThen (\_ -> callTask)
-                        |> Task.attempt handler
+                    , delay
+                          (Time.second * (2 ^ attempts |> toFloat))
+                          (MakeHttpCall callId)
                     )
+
+
+delay : Time.Time -> msg -> Cmd msg
+delay time msg =
+    Process.sleep time
+        |> Task.perform (\_ -> msg)
+
 
 versesToLearnUrl : String
 versesToLearnUrl =
@@ -3021,8 +3037,8 @@ recordTestComplete httpConfig currentVerse accuracy testType =
     sendMsg <| TrackHttpCall (RecordTestComplete currentVerse accuracy testType)
 
 
-createRecordTestComplete : HttpConfig -> CallId -> CurrentVerse -> Float -> TestType -> Task.Task Http.Error ()
-createRecordTestComplete httpConfig callId currentVerse accuracy testType =
+callRecordTestComplete : HttpConfig -> CallId -> CurrentVerse -> Float -> TestType -> Cmd Msg
+callRecordTestComplete httpConfig callId currentVerse accuracy testType =
     let
         verseStatus =
             currentVerse.verseStatus
@@ -3040,7 +3056,7 @@ createRecordTestComplete httpConfig callId currentVerse accuracy testType =
                     )
                 ]
     in
-        Http.toTask
+        Http.send (RecordActionCompleteReturned callId)
             (myHttpPost httpConfig
                 (actionCompleteUrl ++ "?callId=" ++ toString callId)
                 body
@@ -3048,15 +3064,18 @@ createRecordTestComplete httpConfig callId currentVerse accuracy testType =
             )
 
 
-handleRetries : (Model -> a -> (Model, Cmd Msg)) -> Model -> CallId -> Result.Result Http.Error a -> ( Model, Cmd Msg)
+handleRetries : (Model -> a -> ( Model, Cmd Msg )) -> Model -> CallId -> Result.Result Http.Error a -> ( Model, Cmd Msg )
 handleRetries continuation model callId result =
     case result of
         Ok v ->
             let
-                newModel1 = markCallFinished model callId
-                (newModel2, cmd) = continuation newModel1 v
+                newModel1 =
+                    markCallFinished model callId
+
+                ( newModel2, cmd ) =
+                    continuation newModel1 v
             in
-                (newModel2, cmd)
+                ( newModel2, cmd )
 
         Err err ->
             case err of
@@ -3073,7 +3092,7 @@ handleRetries continuation model callId result =
 handleRecordActionCompleteReturned : Model -> () -> ( Model, Cmd Msg )
 handleRecordActionCompleteReturned model () =
     ( model
-    -- TODO - load score logs
+      -- TODO - load score logs
     , Cmd.none
     )
 
