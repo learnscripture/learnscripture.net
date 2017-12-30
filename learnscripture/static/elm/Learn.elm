@@ -374,11 +374,33 @@ topNav model =
     H.nav [ A.class "topbar" ]
         [ H.ul []
             [ H.li [ A.class "dashboard-link" ]
-                [ link dashboardUrl "Dashboard" "return" AlignLeft ]
+                [ link dashboardUrl "Dashboard" "icon-return" AlignLeft ]
+            , H.li [ A.class "ajax-info" ]
+                [ ajaxInfo model ]
             , H.li [ A.class "preferences-link" ]
-                [ link "#" (userDisplayName model.user) "preferences" AlignRight ]
+                [ link "#" (userDisplayName model.user) "icon-preferences" AlignRight ]
             ]
         ]
+
+
+ajaxInfo : Model -> H.Html msg
+ajaxInfo model =
+    let
+        currentHttpCallAttempts =
+            Dict.values model.currentHttpCalls |> List.map .attempts
+
+        anyReattempted =
+            currentHttpCallAttempts |> List.any (\a -> a > 1)
+    in
+        -- We only show an indicator if we are having trouble sending data.
+        if anyReattempted then
+            H.span []
+                [ makeIcon "icon-ajax-in-progress icon-spin"
+                , H.span [ A.class "nav-caption" ]
+                    [ H.text "Saving data" ]
+                ]
+        else
+            emptyNode
 
 
 userDisplayName : User -> String
@@ -1273,14 +1295,14 @@ instructions verse testingMethod helpVisible =
                                 [ A.href "#"
                                 , onClickSimply CollapseHelp
                                 ]
-                                [ makeIcon "help-expanded" ]
+                                [ makeIcon "icon-help-expanded" ]
                             )
                           else
                             (H.a
                                 [ A.href "#"
                                 , onClickSimply ExpandHelp
                                 ]
-                                [ makeIcon "help-collapsed" ]
+                                [ makeIcon "icon-help-collapsed" ]
                             )
                         ]
                     ]
@@ -1362,8 +1384,8 @@ errorMessage msg =
 
 
 makeIcon : String -> H.Html msg
-makeIcon icon =
-    H.i [ A.class ("icon-fw icon-" ++ icon) ] []
+makeIcon iconClass =
+    H.i [ A.class ("icon-fw " ++ iconClass) ] []
 
 
 link : String -> String -> IconName -> LinkIconAlign -> H.Html msg
@@ -3000,8 +3022,8 @@ markFailAndRetry model callId =
                 in
                     ( newModel
                     , delay
-                          (Time.second * (2 ^ attempts |> toFloat))
-                          (MakeHttpCall callId)
+                        (Time.second * (2 ^ attempts |> toFloat))
+                        (MakeHttpCall callId)
                     )
 
 
