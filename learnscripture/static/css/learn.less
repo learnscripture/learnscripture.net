@@ -67,7 +67,6 @@ body.learn-page {
         .nav-dropdown-heading {
             padding-left: 5px;
             padding-right: 5px;
-            cursor: pointer;
         }
 
         .spacer {
@@ -87,18 +86,22 @@ body.learn-page {
     }
 
     // Specific nav drop downs
-    .ajax-problem .icon-fw {
+
+    // TODO - check/fix these colors to work with different themes.
+    .ajax-retries .icon-fw,
+    .ajax-retrying {
         color: yellow;
     }
-    .ajax-fail .icon-fw {
-        color: red;
+    .ajax-failures .icon-fw,
+    .ajax-failed {
+        color: #ff2e2e;;
     }
 
     .ajax-info {
         .nav-dropdown-menu div {
             white-space: nowrap;
         }
-        .nav-dropdown-heading.hidden {
+        .nav-dropdown-heading.hidden a {
             cursor: default;
         }
     }
