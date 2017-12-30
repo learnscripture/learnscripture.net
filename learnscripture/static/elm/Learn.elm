@@ -585,7 +585,7 @@ viewCurrentVerse session model =
                     ]
                 , copyrightNotice currentVerse.verseStatus.version
                 ]
-             , actionButtons currentVerse model.preferences
+             , actionButtons currentVerse session.verses model.preferences
              , onScreenTestingButtons currentVerse testingMethod
              ]
                 ++ (instructions currentVerse testingMethod model.helpVisible)
@@ -1035,11 +1035,11 @@ classForTypingBox inUse =
         "tohide"
 
 
-actionButtons : CurrentVerse -> Preferences -> H.Html Msg
-actionButtons verse preferences =
+actionButtons : CurrentVerse -> VerseStore -> Preferences -> H.Html Msg
+actionButtons verse verseStore preferences =
     let
         buttons =
-            buttonsForStage verse preferences
+            buttonsForStage verse verseStore preferences
     in
         case buttons of
             [] ->
@@ -1082,15 +1082,19 @@ type ButtonDefault
     | NonDefault
 
 
-buttonsForStage : CurrentVerse -> Preferences -> List (Button Msg)
-buttonsForStage verse preferences =
+buttonsForStage : CurrentVerse -> VerseStore -> Preferences -> List (Button Msg)
+buttonsForStage verse verseStore preferences =
     let
         multipleStages =
             (List.length verse.remainingStageTypes + List.length verse.seenStageTypes) > 0
 
-        -- TODO should be 'Done' if no more verses remaining
         getNextVerseCaption =
-            "Next"
+            case getNextVerse verseStore verse of
+                Nothing ->
+                    "Done"
+
+                _ ->
+                    "Next"
 
         testStageButtons tp =
             case tp.currentWord of
@@ -2943,14 +2947,12 @@ hideTypingBoxCommand =
 
 focusDefaultButton : Model -> Cmd Msg
 focusDefaultButton model =
-    case getCurrentVerse model of
-        Nothing ->
-            Cmd.none
-
-        Just verse ->
+    withSessionData model
+        Cmd.none
+        (\sessionData ->
             let
                 buttons =
-                    buttonsForStage verse model.preferences
+                    buttonsForStage sessionData.currentVerse sessionData.verses model.preferences
 
                 defaultButtons =
                     List.filter (\b -> b.default == Default) buttons
@@ -2965,6 +2967,7 @@ focusDefaultButton model =
                         -- re-attempt focus for the case of the control not
                         -- appearing in the DOM yet.
                         Task.attempt (handleFocusResult b.id 5) (Dom.focus b.id)
+        )
 
 
 handleFocusResult : String -> Int -> (Result error value -> Msg)
