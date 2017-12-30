@@ -2394,25 +2394,42 @@ moveToNextStage model =
                 Cmd.none
                 (\currentVerse ->
                     let
+                        finishCmd =
+                            case currentVerse.currentStage of
+                                Read ->
+                                    recordReadComplete currentVerse
+                                ReadForContext ->
+                                    recordReadComplete currentVerse
+                                _ ->
+                                    Cmd.none
+
                         remaining =
                             currentVerse.remainingStageTypes
-                    in
-                        case remaining of
-                            [] ->
-                                ( currentVerse, Cmd.none )
 
-                            stage :: stages ->
-                                let
-                                    ( newCurrentStage, cmd ) =
-                                        initializeStage stage currentVerse.verseStatus
-                                in
-                                    ( { currentVerse
-                                        | seenStageTypes = (learningStageTypeForStage currentVerse.currentStage) :: currentVerse.seenStageTypes
-                                        , currentStage = newCurrentStage
-                                        , remainingStageTypes = stages
-                                      }
-                                    , cmd
-                                    )
+                        ( newCurrentVerse, initCmd ) =
+                            case remaining of
+                                [] ->
+                                    ( currentVerse, Cmd.none )
+
+                                stage :: stages ->
+                                    let
+                                        ( newCurrentStage, initCmd ) =
+                                            initializeStage stage currentVerse.verseStatus
+                                    in
+                                        ( { currentVerse
+                                            | seenStageTypes = (learningStageTypeForStage currentVerse.currentStage) :: currentVerse.seenStageTypes
+                                            , currentStage = newCurrentStage
+                                            , remainingStageTypes = stages
+                                          }
+                                        , initCmd
+                                        )
+                    in
+                        ( newCurrentVerse
+                        , Cmd.batch
+                            [ finishCmd
+                            , initCmd
+                            ]
+                        )
                 )
     in
         ( newModel
@@ -3040,6 +3057,7 @@ startMorePractice model accuracy =
 
 type TrackedHttpCall
     = RecordTestComplete CurrentVerse Float TestType
+    | RecordReadComplete CurrentVerse
 
 
 maxHttpRetries : number
@@ -3052,6 +3070,8 @@ trackedHttpCallCaption call =
     case call of
         RecordTestComplete currentVerse _ _ ->
             interpolate "Saving score - {0}" [ currentVerse.verseStatus.localizedReference ]
+        RecordReadComplete currentVerse ->
+            interpolate "Recording read - {0}" [ currentVerse.verseStatus.localizedReference ]
 
 
 type alias CallId =
@@ -3090,6 +3110,8 @@ makeHttpCall model callId =
                     case call of
                         RecordTestComplete currentVerse accuracy testType ->
                             callRecordTestComplete model.httpConfig callId currentVerse accuracy testType
+                        RecordReadComplete currentVerse ->
+                            callRecordReadComplete model.httpConfig callId currentVerse
     in
         ( model, cmd )
 
@@ -3098,6 +3120,8 @@ handleTrackedCall : TrackedHttpCall -> CallId -> (Result Http.Error () -> Msg)
 handleTrackedCall trackedCall callId =
     case trackedCall of
         RecordTestComplete _ _ _ ->
+            RecordActionCompleteReturned callId
+        RecordReadComplete _ ->
             RecordActionCompleteReturned callId
 
 
@@ -3228,7 +3252,33 @@ callRecordTestComplete httpConfig callId currentVerse accuracy testType =
     in
         Http.send (RecordActionCompleteReturned callId)
             (myHttpPost httpConfig
-                (actionCompleteUrl ++ "?callId=" ++ toString callId)
+                actionCompleteUrl
+                body
+                emptyDecoder
+            )
+
+
+recordReadComplete : CurrentVerse -> Cmd Msg
+recordReadComplete currentVerse =
+    sendMsg <| TrackHttpCall (RecordReadComplete currentVerse)
+
+
+callRecordReadComplete : HttpConfig -> CallId -> CurrentVerse -> Cmd Msg
+callRecordReadComplete httpConfig callId currentVerse =
+    let
+        verseStatus =
+            currentVerse.verseStatus
+
+        body =
+            Http.multipartBody
+                [ Http.stringPart "uvs_id" (toString verseStatus.id)
+                , Http.stringPart "uvs_needs_testing" (encodeBool <| verseStatus.needsTesting)
+                , Http.stringPart "stage" stageTypeRead
+                ]
+    in
+        Http.send (RecordActionCompleteReturned callId)
+            (myHttpPost httpConfig
+                actionCompleteUrl
                 body
                 emptyDecoder
             )
