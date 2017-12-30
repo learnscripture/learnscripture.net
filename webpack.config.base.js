@@ -39,7 +39,7 @@ module.exports = {
                         cwd: elmSource,
                         verbose: true,
                         warn: true,
-                        debug: true
+                        debug: false
                     }
                 }
             },
