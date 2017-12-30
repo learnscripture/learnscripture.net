@@ -12,4 +12,13 @@ config.plugins = config.plugins.concat([
 
 config.devtool = 'source-map';
 
+var rules = config.module.rules
+for (var i = 0; i < rules.length; i++) {
+    var rule = rules[i];
+    if (rule.use.loader == 'elm-webpack-loader') {
+        rule.use.options.debug = 'true';
+    }
+}
+
 module.exports = config;
+
