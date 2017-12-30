@@ -88,6 +88,7 @@ init flags =
       , helpVisible = False
       , currentHttpCalls = Dict.empty
       , permanentFailHttpCalls = []
+      , openDropdown = Nothing
       }
     , loadVerses
     )
@@ -110,6 +111,7 @@ type alias Model =
             , attempts : Int
             }
     , permanentFailHttpCalls : List TrackedHttpCall
+    , openDropdown : Maybe Dropdown
     }
 
 
@@ -349,6 +351,10 @@ type LinkIconAlign
     | AlignRight
 
 
+type Dropdown
+    = AjaxInfo
+
+
 dashboardUrl : String
 dashboardUrl =
     "/dashboard/"
@@ -375,14 +381,13 @@ topNav model =
     H.nav [ A.class "topbar" ]
         [ H.div [ A.class "dashboard-link" ]
             [ link dashboardUrl "Dashboard" "icon-return" AlignLeft ]
-        , H.div [ A.class "ajax-info nav-dropdown" ]
-            (ajaxInfo model)
+        , ajaxInfo model
         , H.div [ A.class "preferences-link" ]
             [ link "#" (userDisplayName model.user) "icon-preferences" AlignRight ]
         ]
 
 
-ajaxInfo : Model -> List (H.Html Msg)
+ajaxInfo : Model -> H.Html Msg
 ajaxInfo model =
     let
         currentHttpCalls =
@@ -398,7 +403,7 @@ ajaxInfo model =
             if httpCallsInProgress then
                 let
                     spinClass =
-                        ""
+                        "icon-spin"
 
                     topClass =
                         if retryingAttempts then
@@ -410,32 +415,52 @@ ajaxInfo model =
             else
                 ( "hidden", "" )
 
+        dropdownOpen =
+            case model.openDropdown of
+                Just AjaxInfo ->
+                    True
+
+                _ ->
+                    False
+
+        openClass =
+            if dropdownOpen && httpCallsInProgress then
+                " open"
+            else
+                ""
     in
-        [ H.div
-            [ A.class ("nav-dropdown-heading " ++ topClass)
-            ]
-            [ makeIcon ("icon-ajax-in-progress " ++ spinClass)
-            , H.span [ A.class "nav-caption" ]
-                [ H.text "Saving data" ]
-            ]
-        , if List.isEmpty currentHttpCalls then
-            emptyNode
-          else
-            H.div [ A.class "nav-dropdown-menu" ]
-                (currentHttpCalls
-                    |> List.map
-                        (\{ call, attempts } ->
-                            H.div []
-                                [ H.text <|
-                                    interpolate "{0} - {1} / {2} attempts."
-                                        [ trackedHttpCallCaption call
-                                        , toString attempts
-                                        , toString maxHttpRetries
-                                        ]
-                                ]
-                        )
+        H.div [ A.class ("ajax-info nav-dropdown" ++ openClass) ]
+            [ H.div
+                ([ A.class ("nav-dropdown-heading " ++ topClass)
+                 ]
+                    ++ if httpCallsInProgress then
+                        [ onClickSimply (ToggleDropdown AjaxInfo) ]
+                       else
+                        []
                 )
-        ]
+                [ makeIcon ("icon-ajax-in-progress " ++ spinClass)
+                , H.span [ A.class "nav-caption" ]
+                    [ H.text "Saving data" ]
+                ]
+            , if List.isEmpty currentHttpCalls then
+                emptyNode
+              else
+                H.div
+                    [ A.class "nav-dropdown-menu" ]
+                    (currentHttpCalls
+                        |> List.map
+                            (\{ call, attempts } ->
+                                H.div []
+                                    [ H.text <|
+                                        interpolate "{0} - {1} / {2} attempts."
+                                            [ trackedHttpCallCaption call
+                                            , toString attempts
+                                            , toString maxHttpRetries
+                                            ]
+                                    ]
+                            )
+                    )
+            ]
 
 
 userDisplayName : User -> String
@@ -1464,6 +1489,7 @@ type Msg
     | MorePractice Float
     | ExpandHelp
     | CollapseHelp
+    | ToggleDropdown Dropdown
     | WindowResize { width : Int, height : Int }
     | ReceivePreferences JD.Value
     | ReattemptFocus String Int
@@ -1566,6 +1592,21 @@ update msg model =
 
         CollapseHelp ->
             ( { model | helpVisible = False }, Cmd.none )
+
+        ToggleDropdown dropdown ->
+            let
+                newOpenDropdown =
+                    case model.openDropdown of
+                        Just dropdown ->
+                            Nothing
+
+                        -- close already open dropdown
+                        _ ->
+                            Just dropdown
+            in
+                ( { model | openDropdown = newOpenDropdown }
+                , Cmd.none
+                )
 
         WindowResize _ ->
             ( model, updateTypingBoxCommand model )
@@ -2939,7 +2980,6 @@ type TrackedHttpCall
 maxHttpRetries : number
 maxHttpRetries =
     6
-
 
 
 trackedHttpCallCaption : TrackedHttpCall -> String
