@@ -401,21 +401,50 @@ ajaxInfo model =
         retryingAttempts =
             currentHttpCalls |> List.map .attempts |> List.any (\a -> a > 1)
 
-        ( topClass, spinClass ) =
-            if httpCallsInProgress then
-                let
-                    spinClass =
-                        "icon-spin"
+        failedHttpCalls =
+            model.permanentFailHttpCalls
 
-                    topClass =
-                        if retryingAttempts then
-                            "ajax-problem"
-                        else
-                            ""
-                in
-                    ( topClass, spinClass )
+        retriesClass =
+            if retryingAttempts then
+                "ajax-retries"
             else
-                ( "hidden", "" )
+                ""
+
+        failuresClass =
+            if not <| List.isEmpty failedHttpCalls then
+                "ajax-failures"
+            else
+                ""
+
+        itemsToView =
+            not <| List.isEmpty currentHttpCalls && List.isEmpty failedHttpCalls
+
+        hideStatus =
+            not itemsToView
+
+        hiddenClass =
+            if hideStatus then
+                "hidden"
+            else
+                ""
+
+        spinClass =
+            if
+                hideStatus
+                -- Save some CPU cycles if we are not showing the icon
+            then
+                ""
+            else if httpCallsInProgress then
+                "icon-spin"
+            else
+                ""
+
+        topClass =
+            String.join " "
+                [ retriesClass
+                , failuresClass
+                , hiddenClass
+                ]
 
         dropdownOpen =
             case model.openDropdown of
@@ -426,7 +455,7 @@ ajaxInfo model =
                     False
 
         openClass =
-            if dropdownOpen && httpCallsInProgress then
+            if dropdownOpen && itemsToView then
                 " open"
             else
                 ""
@@ -435,24 +464,34 @@ ajaxInfo model =
             [ H.div
                 ([ A.class ("nav-dropdown-heading " ++ topClass)
                  ]
-                    ++ if httpCallsInProgress then
-                        [ onClickSimply (ToggleDropdown AjaxInfo) ]
-                       else
-                        []
                 )
-                [ H.span [ A.class "nav-caption" ]
-                    [ H.text "Saving data" ]
-                , makeIcon ("icon-ajax-in-progress " ++ spinClass)
+                [ H.a
+                    [ A.href "#"
+                    , onClickSimply (ToggleDropdown AjaxInfo)
+                    ]
+                    [ H.span [ A.class "nav-caption" ]
+                        [ H.text "Saving data" ]
+                    , makeIcon ("icon-ajax-in-progress " ++ spinClass)
+                    ]
                 ]
-            , if List.isEmpty currentHttpCalls then
+            , if not itemsToView then
                 emptyNode
               else
                 H.div
                     [ A.class "nav-dropdown-menu" ]
-                    (currentHttpCalls
+                    ((currentHttpCalls
                         |> List.map
                             (\{ call, attempts } ->
-                                H.div [ A.class "ajax-attempt" ]
+                                H.div
+                                    [ A.class
+                                        ("ajax-attempt"
+                                            ++ (if attempts > 1 then
+                                                    " ajax-retrying"
+                                                else
+                                                    ""
+                                               )
+                                        )
+                                    ]
                                     [ H.text <|
                                         interpolate "Attempt {0} of {1} - {2}"
                                             [ toString attempts
@@ -461,6 +500,17 @@ ajaxInfo model =
                                             ]
                                     ]
                             )
+                     )
+                        ++ (failedHttpCalls
+                                |> List.map
+                                    (\call ->
+                                        H.div [ A.class "ajax-failed" ]
+                                            [ H.text <|
+                                                interpolate "Failed - {0}"
+                                                    [ trackedHttpCallCaption call ]
+                                            ]
+                                    )
+                           )
                     )
             ]
 
