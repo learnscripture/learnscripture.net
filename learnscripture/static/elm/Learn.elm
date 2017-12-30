@@ -2956,17 +2956,36 @@ focusDefaultButton model =
 
                 defaultButtons =
                     List.filter (\b -> b.default == Default) buttons
+
+                shouldFocusTypingBox =
+                    case getCurrentTestProgress model of
+                        Just tp ->
+                            typingBoxInUse tp (getTestingMethod model)
+
+                        Nothing ->
+                            False
+
+                idToFocus =
+                    if shouldFocusTypingBox then
+                        Just typingBoxId
+                    else
+                        case defaultButtons of
+                            [] ->
+                                Nothing
+
+                            b :: rest ->
+                                Just b.id
             in
-                case defaultButtons of
-                    [] ->
+                case idToFocus of
+                    Nothing ->
                         Cmd.none
 
-                    b :: rest ->
+                    Just id ->
                         -- Dom.focus can fail if the control doesn't exist yet.
                         -- Not sure if this is really possible, but we
                         -- re-attempt focus for the case of the control not
                         -- appearing in the DOM yet.
-                        Task.attempt (handleFocusResult b.id 5) (Dom.focus b.id)
+                        Task.attempt (handleFocusResult id 5) (Dom.focus id)
         )
 
 
