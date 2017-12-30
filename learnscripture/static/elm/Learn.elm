@@ -2099,6 +2099,20 @@ initialTestProgress verseStatus =
     }
 
 
+finishStage : CurrentVerse -> LearningStage -> Cmd Msg
+finishStage currentVerse learningStage =
+    case learningStage of
+        Read ->
+            recordReadComplete currentVerse
+        ReadForContext ->
+            recordReadComplete currentVerse
+        Recall _ _ ->
+            Cmd.none
+        Test _ _ ->
+            -- commands for finishing test phase are done via
+            -- checkCurrentWordAndUpdate/markWord
+            Cmd.none
+
 {-| Returns a command that picks words to hide.
 
 The fraction to hide is based on RecallDef.
@@ -2394,14 +2408,7 @@ moveToNextStage model =
                 Cmd.none
                 (\currentVerse ->
                     let
-                        finishCmd =
-                            case currentVerse.currentStage of
-                                Read ->
-                                    recordReadComplete currentVerse
-                                ReadForContext ->
-                                    recordReadComplete currentVerse
-                                _ ->
-                                    Cmd.none
+                        finishCmd = finishStage currentVerse currentVerse.currentStage
 
                         remaining =
                             currentVerse.remainingStageTypes
