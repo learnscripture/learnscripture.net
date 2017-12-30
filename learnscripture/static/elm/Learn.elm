@@ -381,6 +381,8 @@ topNav model =
     H.nav [ A.class "topbar" ]
         [ H.div [ A.class "dashboard-link" ]
             [ link dashboardUrl "Dashboard" "icon-return" AlignLeft ]
+        , H.div [ A.class "spacer" ]
+            []
         , ajaxInfo model
         , H.div [ A.class "preferences-link" ]
             [ link "#" (userDisplayName model.user) "icon-preferences" AlignRight ]
@@ -438,9 +440,9 @@ ajaxInfo model =
                        else
                         []
                 )
-                [ makeIcon ("icon-ajax-in-progress " ++ spinClass)
-                , H.span [ A.class "nav-caption" ]
+                [ H.span [ A.class "nav-caption" ]
                     [ H.text "Saving data" ]
+                , makeIcon ("icon-ajax-in-progress " ++ spinClass)
                 ]
             , if List.isEmpty currentHttpCalls then
                 emptyNode
@@ -450,12 +452,12 @@ ajaxInfo model =
                     (currentHttpCalls
                         |> List.map
                             (\{ call, attempts } ->
-                                H.div []
+                                H.div [ A.class "ajax-attempt" ]
                                     [ H.text <|
-                                        interpolate "{0} - {1} / {2} attempts."
-                                            [ trackedHttpCallCaption call
-                                            , toString attempts
+                                        interpolate "Attempt {0} of {1} - {2}"
+                                            [ toString attempts
                                             , toString maxHttpRetries
+                                            , trackedHttpCallCaption call
                                             ]
                                     ]
                             )
@@ -2986,7 +2988,7 @@ trackedHttpCallCaption : TrackedHttpCall -> String
 trackedHttpCallCaption call =
     case call of
         RecordTestComplete currentVerse _ _ ->
-            interpolate "{0} - saving test score" [ currentVerse.verseStatus.localizedReference ]
+            interpolate "Saving score - {0}" [ currentVerse.verseStatus.localizedReference ]
 
 
 type alias CallId =
