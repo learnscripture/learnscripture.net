@@ -36,27 +36,44 @@ body.learn-page {
     @topbarHeight: 24px;
     nav {
         // We need a fixed height, because this element has 'position: fixed'
-        // and we need to allow for that.
+        // and we need to allow for that in margins on top of remaining content.
         height: @topbarHeight;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        > div {
+            padding: 1px 3px;
 
-        // reset list items
-        > ul, > ul > li {
-            list-style-type: none;
-            margin: 0px;
-            padding: 0px;
-        }
-        > ul {
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            li {
-                padding: 1px 3px;
+            &.nav-dropdown {
+                position: relative; // establish container for .nav-dropdown
+
+            }
+            .nav-dropdown-menu {
+                position: absolute;
+                top: @topbarHeight;
+            }
+            // Learn page drowdown, eventually everywhere:
+            .nav-dropdown-heading {
+                padding-left: 5px;
+                padding-right: 5px;
             }
         }
+
     }
     nav + div {
         margin-top: @topbarHeight;
     }
+
+
+    // Specific nav drop downs
+    .ajax-problem .icon-fw {
+        color: yellow;
+    }
+
+    .ajax-info .nav-dropdown-menu div {
+        white-space: nowrap;
+    }
+
     #id-loading-full {
         color: #888;
         text-align: center;

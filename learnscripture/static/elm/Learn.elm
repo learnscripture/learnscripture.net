@@ -17,6 +17,7 @@ import Random.List
 import Regex as R
 import Set
 import String
+import String.Interpolate exposing (interpolate)
 import Task
 import Time
 import Window
@@ -369,38 +370,72 @@ view model =
         ]
 
 
-topNav : Model -> H.Html msg
+topNav : Model -> H.Html Msg
 topNav model =
     H.nav [ A.class "topbar" ]
-        [ H.ul []
-            [ H.li [ A.class "dashboard-link" ]
-                [ link dashboardUrl "Dashboard" "icon-return" AlignLeft ]
-            , H.li [ A.class "ajax-info" ]
-                [ ajaxInfo model ]
-            , H.li [ A.class "preferences-link" ]
-                [ link "#" (userDisplayName model.user) "icon-preferences" AlignRight ]
-            ]
+        [ H.div [ A.class "dashboard-link" ]
+            [ link dashboardUrl "Dashboard" "icon-return" AlignLeft ]
+        , H.div [ A.class "ajax-info nav-dropdown" ]
+            (ajaxInfo model)
+        , H.div [ A.class "preferences-link" ]
+            [ link "#" (userDisplayName model.user) "icon-preferences" AlignRight ]
         ]
 
 
-ajaxInfo : Model -> H.Html msg
+ajaxInfo : Model -> List (H.Html Msg)
 ajaxInfo model =
     let
-        currentHttpCallAttempts =
-            Dict.values model.currentHttpCalls |> List.map .attempts
+        currentHttpCalls =
+            Dict.values model.currentHttpCalls
 
-        anyReattempted =
-            currentHttpCallAttempts |> List.any (\a -> a > 1)
+        httpCallsInProgress =
+            currentHttpCalls |> List.isEmpty |> not
+
+        retryingAttempts =
+            currentHttpCalls |> List.map .attempts |> List.any (\a -> a > 1)
+
+        ( topClass, spinClass ) =
+            if httpCallsInProgress then
+                let
+                    spinClass =
+                        ""
+
+                    topClass =
+                        if retryingAttempts then
+                            "ajax-problem"
+                        else
+                            ""
+                in
+                    ( topClass, spinClass )
+            else
+                ( "hidden", "" )
+
     in
-        -- We only show an indicator if we are having trouble sending data.
-        if anyReattempted then
-            H.span []
-                [ makeIcon "icon-ajax-in-progress icon-spin"
-                , H.span [ A.class "nav-caption" ]
-                    [ H.text "Saving data" ]
-                ]
-        else
+        [ H.div
+            [ A.class ("nav-dropdown-heading " ++ topClass)
+            ]
+            [ makeIcon ("icon-ajax-in-progress " ++ spinClass)
+            , H.span [ A.class "nav-caption" ]
+                [ H.text "Saving data" ]
+            ]
+        , if List.isEmpty currentHttpCalls then
             emptyNode
+          else
+            H.div [ A.class "nav-dropdown-menu" ]
+                (currentHttpCalls
+                    |> List.map
+                        (\{ call, attempts } ->
+                            H.div []
+                                [ H.text <|
+                                    interpolate "{0} - {1} / {2} attempts."
+                                        [ trackedHttpCallCaption call
+                                        , toString attempts
+                                        , toString maxHttpRetries
+                                        ]
+                                ]
+                        )
+                )
+        ]
 
 
 userDisplayName : User -> String
@@ -2904,6 +2939,14 @@ type TrackedHttpCall
 maxHttpRetries : number
 maxHttpRetries =
     6
+
+
+
+trackedHttpCallCaption : TrackedHttpCall -> String
+trackedHttpCallCaption call =
+    case call of
+        RecordTestComplete currentVerse _ _ ->
+            interpolate "{0} - saving test score" [ currentVerse.verseStatus.localizedReference ]
 
 
 type alias CallId =
