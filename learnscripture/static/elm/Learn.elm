@@ -1542,6 +1542,7 @@ type Msg
     | ExpandHelp
     | CollapseHelp
     | ToggleDropdown Dropdown
+    | NavigateToWhenDone String
     | WindowResize { width : Int, height : Int }
     | ReceivePreferences JD.Value
     | ReattemptFocus String Int
@@ -1658,6 +1659,18 @@ update msg model =
             in
                 ( { model | openDropdown = newOpenDropdown }
                 , Cmd.none
+                )
+
+        NavigateToWhenDone url ->
+            -- TODO - if there is a permanent error, we need to show that.
+            if Dict.isEmpty model.currentHttpCalls then
+                ( model
+                , Navigation.load url
+                )
+            else
+                ( model
+                  -- keep trying until done
+                , NavigateToWhenDone url |> delay (1 * Time.second)
                 )
 
         WindowResize _ ->
@@ -2457,7 +2470,7 @@ moveToNextVerse model =
             case getNextVerse sessionData.verses sessionData.currentVerse of
                 Nothing ->
                     ( model
-                    , Navigation.load sessionData.verses.returnTo
+                    , sendMsg <| NavigateToWhenDone sessionData.verses.returnTo
                     )
 
                 Just verse ->
