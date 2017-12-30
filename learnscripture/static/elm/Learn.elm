@@ -2104,14 +2104,18 @@ finishStage currentVerse learningStage =
     case learningStage of
         Read ->
             recordReadComplete currentVerse
+
         ReadForContext ->
             recordReadComplete currentVerse
+
         Recall _ _ ->
             Cmd.none
+
         Test _ _ ->
             -- commands for finishing test phase are done via
             -- checkCurrentWordAndUpdate/markWord
             Cmd.none
+
 
 {-| Returns a command that picks words to hide.
 
@@ -2408,7 +2412,8 @@ moveToNextStage model =
                 Cmd.none
                 (\currentVerse ->
                     let
-                        finishCmd = finishStage currentVerse currentVerse.currentStage
+                        finishCmd =
+                            finishStage currentVerse currentVerse.currentStage
 
                         remaining =
                             currentVerse.remainingStageTypes
@@ -2650,7 +2655,7 @@ checkCurrentWordAndUpdate model input =
                                         correct =
                                             checkWord currentWord.word input testingMethod
                                     in
-                                        markWord model.httpConfig correct currentWord.word tp testType currentVerse testingMethod
+                                        markWord correct currentWord.word tp testType currentVerse testingMethod
 
                         _ ->
                             ( currentVerse
@@ -2739,8 +2744,8 @@ initialAttempt m =
     }
 
 
-markWord : HttpConfig -> Bool -> Word -> TestProgress -> TestType -> CurrentVerse -> TestingMethod -> ( CurrentVerse, Cmd Msg )
-markWord httpConfig correct word testProgress testType verse testingMethod =
+markWord : Bool -> Word -> TestProgress -> TestType -> CurrentVerse -> TestingMethod -> ( CurrentVerse, Cmd Msg )
+markWord correct word testProgress testType verse testingMethod =
     let
         attempt =
             case getWordAttempt testProgress word of
@@ -2836,7 +2841,7 @@ markWord httpConfig correct word testProgress testType verse testingMethod =
                     && (testProgress.currentWord /= nextCurrentWord)
                 )
             then
-                recordTestComplete httpConfig newCurrentVerse testAccuracy testType
+                recordTestComplete newCurrentVerse testAccuracy testType
             else
                 Cmd.none
     in
@@ -3077,6 +3082,7 @@ trackedHttpCallCaption call =
     case call of
         RecordTestComplete currentVerse _ _ ->
             interpolate "Saving score - {0}" [ currentVerse.verseStatus.localizedReference ]
+
         RecordReadComplete currentVerse ->
             interpolate "Recording read - {0}" [ currentVerse.verseStatus.localizedReference ]
 
@@ -3117,6 +3123,7 @@ makeHttpCall model callId =
                     case call of
                         RecordTestComplete currentVerse accuracy testType ->
                             callRecordTestComplete model.httpConfig callId currentVerse accuracy testType
+
                         RecordReadComplete currentVerse ->
                             callRecordReadComplete model.httpConfig callId currentVerse
     in
@@ -3128,6 +3135,7 @@ handleTrackedCall trackedCall callId =
     case trackedCall of
         RecordTestComplete _ _ _ ->
             RecordActionCompleteReturned callId
+
         RecordReadComplete _ ->
             RecordActionCompleteReturned callId
 
@@ -3233,8 +3241,8 @@ Technically this doesn't need to be a Cmd Msg (we could just update the model
 directly, but rewiring from `Http.send` to `TrackedHttpCall` is much easier
 if we use a `Cmd Msg`
 -}
-recordTestComplete : HttpConfig -> CurrentVerse -> Float -> TestType -> Cmd Msg
-recordTestComplete httpConfig currentVerse accuracy testType =
+recordTestComplete : CurrentVerse -> Float -> TestType -> Cmd Msg
+recordTestComplete currentVerse accuracy testType =
     sendMsg <| TrackHttpCall (RecordTestComplete currentVerse accuracy testType)
 
 
