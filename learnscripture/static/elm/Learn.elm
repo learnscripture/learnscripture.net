@@ -2967,7 +2967,8 @@ focusDefaultButton model =
 
                 idToFocus =
                     if shouldFocusTypingBox then
-                        Just typingBoxId
+                        -- This will be done by updateTypingBox
+                        Nothing
                     else
                         case defaultButtons of
                             [] ->
