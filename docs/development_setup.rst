@@ -5,6 +5,10 @@ Development setup
 Since there has only ever been one developer on the project to date, these
 instructions may not work completely, but they should be a start.
 
+These instructions assume you are working in a Linux or Unix like environment
+(Mac should work, or a Ubuntu 16.04 virtual machine), with Python 3.5 and Mercurial
+installed.
+
 1. Create a directory 'learnscripture.net' and cd into it.
 
 2. Checkout the sources from bitbucket into a folder called 'src'.
