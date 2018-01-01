@@ -585,7 +585,7 @@ viewCurrentVerse session model =
                     ]
                 , copyrightNotice currentVerse.verseStatus.version
                 ]
-             , actionButtons currentVerse session.verses model.preferences
+             , actionButtons model currentVerse session.verses model.preferences
              , onScreenTestingButtons currentVerse testingMethod
              ]
                 ++ (instructions currentVerse testingMethod model.helpVisible)
@@ -1035,8 +1035,8 @@ classForTypingBox inUse =
         "tohide"
 
 
-actionButtons : CurrentVerse -> VerseStore -> Preferences -> H.Html Msg
-actionButtons verse verseStore preferences =
+actionButtons : Model -> CurrentVerse -> VerseStore -> Preferences -> H.Html Msg
+actionButtons model verse verseStore preferences =
     let
         buttons =
             buttonsForStage verse verseStore preferences
@@ -1054,7 +1054,7 @@ actionButtons verse verseStore preferences =
                       else
                         []
                      )
-                        ++ (List.map viewButton <| buttons)
+                        ++ (List.map (viewButton model) buttons)
                     )
 
 
@@ -1063,10 +1063,10 @@ emptySpan =
     H.span [] []
 
 
-type alias Button msg =
+type alias Button =
     { enabled : ButtonEnabled
     , default : ButtonDefault
-    , msg : msg
+    , msg : Msg
     , caption : String
     , id : String
     }
@@ -1082,7 +1082,7 @@ type ButtonDefault
     | NonDefault
 
 
-buttonsForStage : CurrentVerse -> VerseStore -> Preferences -> List (Button Msg)
+buttonsForStage : CurrentVerse -> VerseStore -> Preferences -> List Button
 buttonsForStage verse verseStore preferences =
     let
         multipleStages =
@@ -1192,8 +1192,8 @@ getTestingMethod model =
         model.preferences.desktopTestingMethod
 
 
-viewButton : Button msg -> H.Html msg
-viewButton button =
+viewButton : Model -> Button -> H.Html Msg
+viewButton model button =
     let
         class =
             case button.enabled of
@@ -1220,9 +1220,58 @@ viewButton button =
 
                 Disabled ->
                     []
+
+        -- see learn_setup.js
+        focusData =
+            getTypingBoxFocusDataForMsg model button.msg
+
+        focusAttributes =
+            case focusData of
+                Nothing ->
+                    []
+
+                Just data ->
+                    [ A.attribute "data-focus-typing-box-required" ""
+                    , A.attribute "data-focus-typingBoxId" data.typingBoxId
+                    , A.attribute "data-focus-wordButtonId" data.wordButtonId
+                    , A.attribute "data-focus-expectedClass" data.expectedClass
+                    , A.attribute "data-focus-hardMode" (encodeBool data.hardMode)
+                    ]
     in
-        H.button (attributes ++ eventAttributes)
+        H.button (attributes ++ eventAttributes ++ focusAttributes)
             [ H.text button.caption ]
+
+
+{-| If the Msg will produce a change of state such that
+the typing box will appear (and we therefore need to focus it,
+return the data for focussing/moving the typing box, otherwise Nothing.
+
+See learn_setup.js for why this is necessary.
+-}
+getTypingBoxFocusDataForMsg : Model -> Msg -> Maybe UpdateTypingBoxData
+getTypingBoxFocusDataForMsg model msg =
+    let
+        typingBoxUsed state =
+            case getCurrentTestProgress state of
+                Just tp ->
+                    typingBoxInUse tp (getTestingMethod state)
+
+                Nothing ->
+                    False
+
+        ( nextState, _ ) =
+            update msg model
+
+        typingBoxUsedCurrently =
+            typingBoxUsed model
+
+        typingBoxUsedAfterMsg =
+            typingBoxUsed nextState
+    in
+        if typingBoxUsedAfterMsg && not typingBoxUsedCurrently then
+            Just (getUpdateTypingBoxData nextState)
+        else
+            Nothing
 
 
 onScreenTestingButtons : CurrentVerse -> TestingMethod -> H.Html Msg
@@ -2915,34 +2964,51 @@ shouldUseHardTestingMode currentVerse =
     currentVerse.verseStatus.strength > hardModeStrengthThreshold
 
 
+type alias UpdateTypingBoxData =
+    { typingBoxId : String
+    , wordButtonId : String
+    , expectedClass : String
+    , hardMode : Bool
+    }
+
+
 updateTypingBoxCommand : Model -> Cmd msg
 updateTypingBoxCommand model =
+    LearnPorts.updateTypingBox (getUpdateTypingBoxData model)
+
+
+getUpdateTypingBoxData : Model -> UpdateTypingBoxData
+getUpdateTypingBoxData model =
     case getCurrentTestProgress model of
         Just tp ->
             case tp.currentWord of
                 TestFinished _ ->
-                    hideTypingBoxCommand
+                    hideTypingBoxData
 
                 CurrentWord cw ->
-                    LearnPorts.updateTypingBox
-                        ( typingBoxId
-                        , idForButton cw.word
-                        , classForTypingBox <| typingBoxInUse tp (getTestingMethod model)
-                        , case getCurrentVerse model of
+                    { typingBoxId = typingBoxId
+                    , wordButtonId = idForButton cw.word
+                    , expectedClass = classForTypingBox <| typingBoxInUse tp (getTestingMethod model)
+                    , hardMode =
+                        case getCurrentVerse model of
                             Nothing ->
                                 False
 
                             Just currentVerse ->
                                 shouldUseHardTestingMode currentVerse
-                        )
+                    }
 
         Nothing ->
-            hideTypingBoxCommand
+            hideTypingBoxData
 
 
-hideTypingBoxCommand : Cmd msg
-hideTypingBoxCommand =
-    LearnPorts.updateTypingBox ( typingBoxId, "", classForTypingBox False, False )
+hideTypingBoxData : UpdateTypingBoxData
+hideTypingBoxData =
+    { typingBoxId = typingBoxId
+    , wordButtonId = ""
+    , expectedClass = classForTypingBox False
+    , hardMode = False
+    }
 
 
 focusDefaultButton : Model -> Cmd Msg
