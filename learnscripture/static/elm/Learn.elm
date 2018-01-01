@@ -536,6 +536,12 @@ viewCurrentVerse session model =
         currentVerse =
             session.currentVerse
 
+        previousVerse =
+            if shouldShowPreviousVerse currentVerse.verseStatus then
+                getPreviousVerse session.verses currentVerse.verseStatus
+            else
+                Nothing
+
         testingMethod =
             getTestingMethod model
 
@@ -577,6 +583,17 @@ viewCurrentVerse session model =
                 -- It comes before verse-wrapper to fix tab order without needing
                 -- tabindex.
                 [ typingBox currentVerse.currentStage testingMethod
+                , case previousVerse of
+                    Nothing ->
+                        emptyNode
+
+                    Just verse ->
+                        H.div [ A.class "previous-verse-wrapper" ]
+                            [ H.div [ A.class "previous-verse" ]
+                                (versePartsToHtml ReadForContext <|
+                                    partsForVerse verse ReadForContextStage testingMethod
+                                )
+                            ]
                 , H.div [ A.class "current-verse-wrapper" ]
                     [ H.div [ A.class verseClasses ]
                         (versePartsToHtml currentVerse.currentStage <|
@@ -590,6 +607,26 @@ viewCurrentVerse session model =
              ]
                 ++ (instructions currentVerse testingMethod model.helpVisible)
             )
+
+
+shouldShowPreviousVerse : VerseStatus -> Bool
+shouldShowPreviousVerse verse =
+    case verse.version.textType of
+        Bible ->
+            case verse.verseSet of
+                Nothing ->
+                    False
+
+                Just verseSet ->
+                    case verseSet.setType of
+                        Selection ->
+                            False
+
+                        Passage ->
+                            True
+
+        Catechism ->
+            False
 
 
 
@@ -771,15 +808,31 @@ wordButton word stage =
 
         clickableButton =
             List.member clickableClass classesOuter
+
+        id =
+            case stage of
+                Read ->
+                    ""
+
+                ReadForContext ->
+                    ""
+
+                _ ->
+                    idForButton word
     in
         H.span
             ([ A.class <| String.join " " classesOuter
-             , A.id <| idForButton word
              ]
-                ++ if clickableButton then
-                    [ onClickSimply <| WordButtonClicked <| getWordId word ]
-                   else
-                    []
+                ++ (if id /= "" then
+                        [ A.id id ]
+                    else
+                        []
+                   )
+                ++ (if clickableButton then
+                        [ onClickSimply <| WordButtonClicked <| getWordId word ]
+                    else
+                        []
+                   )
             )
             [ H.span
                 [ A.class <| String.join " " ([ "wordpart" ] ++ classesInner) ]
@@ -1089,7 +1142,7 @@ buttonsForStage verse verseStore preferences =
             (List.length verse.remainingStageTypes + List.length verse.seenStageTypes) > 0
 
         getNextVerseCaption =
-            case getNextVerse verseStore verse of
+            case getNextVerse verseStore verse.verseStatus of
                 Nothing ->
                     "Done"
 
@@ -2549,7 +2602,7 @@ moveToNextVerse : Model -> ( Model, Cmd Msg )
 moveToNextVerse model =
     case model.learningSession of
         Session sessionData ->
-            case getNextVerse sessionData.verses sessionData.currentVerse of
+            case getNextVerse sessionData.verses sessionData.currentVerse.verseStatus of
                 Nothing ->
                     ( model
                     , sendMsg <| NavigateToWhenDone sessionData.verses.returnTo
@@ -2575,11 +2628,19 @@ moveToNextVerse model =
             )
 
 
-getNextVerse : VerseStore -> CurrentVerse -> Maybe VerseStatus
-getNextVerse verseStore currentVerse =
+getNextVerse : VerseStore -> VerseStatus -> Maybe VerseStatus
+getNextVerse verseStore verseStatus =
     verseStore.verseStatuses
-        |> List.filter (\v -> v.learnOrder > currentVerse.verseStatus.learnOrder)
+        |> List.filter (\v -> v.learnOrder > verseStatus.learnOrder)
         |> List.sortBy .learnOrder
+        |> List.head
+
+
+getPreviousVerse : VerseStore -> VerseStatus -> Maybe VerseStatus
+getPreviousVerse verseStore verseStatus =
+    verseStore.verseStatuses
+        |> List.filter (\v -> v.learnOrder < verseStatus.learnOrder)
+        |> List.sortBy (\v -> -v.learnOrder)
         |> List.head
 
 
