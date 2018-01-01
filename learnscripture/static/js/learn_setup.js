@@ -70,8 +70,12 @@ var fixTypingBox = function (attempts, args) {
         var correctPositioningComplete = false;
         if (wordButton != null) {
             var rect = wordButton.getClientRects()[0];
-            typingBox.style.top = rect.top.toString() + "px";
-            typingBox.style.left = rect.left.toString() + "px";
+            var doc = document.documentElement;
+            var scrollTop = (window.pageYOffset || doc.scrollTop)
+            var scrollLeft = (window.pageXOffset || doc.scrollLeft)
+
+            typingBox.style.top = (rect.top + scrollTop).toString() + "px";
+            typingBox.style.left = (rect.left + scrollLeft).toString() + "px";
             // Allow for border
             var styles = window.getComputedStyle(typingBox);
             var parsePx = function (p) {
