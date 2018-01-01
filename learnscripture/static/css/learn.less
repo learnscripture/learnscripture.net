@@ -154,8 +154,9 @@ body.learn-page {
         margin-top: .2em;
     }
 
+    @currentVerseHeight: 20px;
     .current-verse, .previous-verse, #id-typing, #id-onscreen-test-options {
-        font-size: 20px;
+        font-size: @currentVerseHeight;
         line-height: 1;
     }
 
@@ -166,16 +167,20 @@ body.learn-page {
     #id-onscreen-not-available {
         font-size: 20px;
     }
-    .previous-verse {
-        display: table-cell;
-        vertical-align: bottom;
-        color: #909090;
-    }
 
     .previous-verse-wrapper {
         border-bottom: 1px solid #c0c0c0;
         margin-bottom: 0.5em;
+        position: relative; // establish containing box.
+        height: @currentVerseHeight; // Constrain to showing one line only
+        overflow: hidden;
     }
+    .previous-verse {
+        color: #909090;
+        position: absolute;
+        bottom: 0px;
+    }
+
     .normalWordBorderColors() {
         border-color: #C0C0C0;
         border-top-color: #D8D8D8;
@@ -354,9 +359,14 @@ body.learn-page {
 
         // If not much room in either direction, shrink the fonts of the verse
         // words to make more room
+        @currentVerseSmallerHeight: 18px;
         .current-verse, .previous-verse, #id-typing, #id-onscreen-test-options, #id-onscreen-not-available, #id-typing {
-            font-size: 18px;
+            font-size: @currentVerseSmallerHeight;
         }
+        .previous-verse-wrapper {
+            height: @currentVerseSmallerHeight;
+        }
+
         .word-button {
             padding: 2px @word-padding-horizontal-small;
         }
