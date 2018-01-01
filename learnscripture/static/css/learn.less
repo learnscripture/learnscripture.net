@@ -33,7 +33,7 @@ body.learn-page {
     // End common styles
 
 
-    @topbarHeight: 24px;
+    @topbarHeight: 36px;
     nav {
         // We need a fixed height, because this element has 'position: fixed'
         // and we need to allow for that in margins on top of remaining content.
@@ -42,6 +42,10 @@ body.learn-page {
         flex-direction: row;
         justify-content: space-between;
 
+        > div {
+            height: @topbarHeight;
+            line-height: @topbarHeight;
+        }
         // Learn page dropdown, eventually everywhere:
         .nav-dropdown {
             position: relative; // establish container for .nav-dropdown
@@ -79,6 +83,11 @@ body.learn-page {
 
         i.icon-fw + .nav-caption {
             padding-left: 0px;
+        }
+
+        .icon-fw::before {
+            font-size: 120%;
+            width: 1.5em;
         }
     }
     nav + div {
