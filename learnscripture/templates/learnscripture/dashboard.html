@@ -158,7 +158,7 @@
     {#### Nothing ####}
 
     {% if not passages_for_reviewing and not review_verses_queue and not catechisms_for_reviewing %}
-      <p>Nothing needs reviewing at this point in time.
+      <p>Nothing in your general queue needs reviewing at this point in time.
         {% if next_verse_due %}
           <br/>
           Next item due for review: <b>{{ next_verse_due.short_title }}</b> in {{ next_verse_due.next_test_due|timeuntil }}
@@ -196,7 +196,7 @@
           <p>You've queued this passage for learning.</p>
         {% else %}
           <p>You've seen {{ cvs.tested_total }} verse{{ cvs.tested_total|length|pluralize }} so far,
-            {% if cvs.needs_review_total > 0 %}{{ cvs.needs_review_total }} due for review,{% endif %}
+            {% if cvs.needs_review_total > 0 %}<b>{{ cvs.needs_review_total }} due for review</b>,{% endif %}
             with {{ cvs.untested_total }} still to start on.</p>
         {% endif %}
       </div>
