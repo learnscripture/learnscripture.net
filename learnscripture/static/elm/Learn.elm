@@ -1092,7 +1092,7 @@ actionButtons : Model -> CurrentVerse -> VerseStore -> Preferences -> H.Html Msg
 actionButtons model verse verseStore preferences =
     let
         buttons =
-            buttonsForStage verse verseStore preferences
+            buttonsForStage model verse verseStore preferences
     in
         case buttons of
             [] ->
@@ -1135,19 +1135,34 @@ type ButtonDefault
     | NonDefault
 
 
-buttonsForStage : CurrentVerse -> VerseStore -> Preferences -> List Button
-buttonsForStage verse verseStore preferences =
+buttonsForStage : Model -> CurrentVerse -> VerseStore -> Preferences -> List Button
+buttonsForStage model verse verseStore preferences =
     let
         multipleStages =
             (List.length verse.remainingStageTypes + List.length verse.seenStageTypes) > 0
 
-        getNextVerseCaption =
-            case getNextVerse verseStore verse.verseStatus of
-                Nothing ->
-                    "Done"
+        nextVerseButtonCaption =
+            if moreVersesToLearn verseStore verse.verseStatus then
+                "Next"
+            else
+                "Done"
 
-                _ ->
-                    "Next"
+        nextVerseEnabled =
+            case getNextVerse verseStore verse.verseStatus of
+                NextVerseData _ ->
+                    Enabled
+                NoMoreVerses ->
+                    Enabled
+                VerseNotInStore ->
+                    if verseLoadInProgress model
+                    then
+                        -- Don't trigger another verse load,
+                        -- or a double 'next verse' message
+                        Disabled
+                    else
+                        -- Pressing the button will trigger
+                        -- the verse load.
+                        Enabled
 
         testStageButtons tp =
             case tp.currentWord of
@@ -1166,9 +1181,9 @@ buttonsForStage verse verseStore preferences =
                                     NonDefault
                           , id = "id-more-practice"
                           }
-                        , { caption = getNextVerseCaption
+                        , { caption = nextVerseButtonCaption
                           , msg = NextVerse
-                          , enabled = Enabled
+                          , enabled = nextVerseEnabled
                           , default =
                                 if defaultMorePractice then
                                     NonDefault
@@ -1228,9 +1243,9 @@ buttonsForStage verse verseStore preferences =
                     testStageButtons tp
 
                 _ ->
-                    [ { caption = getNextVerseCaption
+                    [ { caption = nextVerseButtonCaption
                       , msg = NextVerse
-                      , enabled = Enabled
+                      , enabled = nextVerseEnabled
                       , default = Default
                       , id = "id-next-btn"
                       }
@@ -2565,14 +2580,23 @@ moveToNextVerse model =
                     sessionData.currentVerse.verseStatus
             in
                 case getNextVerse verseStore currentVerseStatus of
-                    Nothing ->
+                    NoMoreVerses ->
                         ( model
                         , sendMsg <| NavigateToWhenDone sessionData.verses.returnTo
                         )
 
-                    Just verse ->
+                    VerseNotInStore ->
+                        if not (verseLoadInProgress model)
+                        then
+                            loadVersesImmediate model
+                        else
+                            ( model
+                            , Cmd.none
+                            )
+
+                    NextVerseData verse ->
                         let
-                            ( newModel, cmd ) =
+                            ( newModel1, cmd ) =
                                 updateCurrentVersePlus model
                                     Cmd.none
                                     (\cv -> setupCurrentVerse verse sessionData.verses.learningType)
@@ -2588,7 +2612,7 @@ moveToNextVerse model =
                                     Just max ->
                                         max < verseStore.maxOrderVal
 
-                            loadMoreCommand =
+                            ( newModel2, loadMoreCommand ) =
                                 if
                                     moreVersesToLoad
                                         && ((getFollowingVersesInStore verseStore currentVerseStatus
@@ -2598,15 +2622,15 @@ moveToNextVerse model =
                                            )
                                         && (not <| verseLoadInProgress model)
                                 then
-                                    loadVerses
+                                    loadVersesImmediate newModel1
                                 else
-                                    Cmd.none
+                                    ( newModel1, Cmd.none )
                         in
-                            ( newModel
+                            ( newModel2
                             , Cmd.batch
                                 [ cmd
                                 , loadMoreCommand
-                                , stageOrVerseChangeCommands newModel True
+                                , stageOrVerseChangeCommands newModel2 True
                                 ]
                             )
 
@@ -2616,11 +2640,29 @@ moveToNextVerse model =
             )
 
 
-getNextVerse : VerseStore -> VerseStatus -> Maybe VerseStatus
+type NextVerse
+    = NoMoreVerses
+    | VerseNotInStore
+    | NextVerseData VerseStatus
+
+
+getNextVerse : VerseStore -> VerseStatus -> NextVerse
 getNextVerse verseStore verseStatus =
-    getFollowingVersesInStore verseStore verseStatus
-        |> List.sortBy .learnOrder
-        |> List.head
+    let
+        nextVerseInStore =
+            getFollowingVersesInStore verseStore verseStatus
+                |> List.sortBy .learnOrder
+                |> List.head
+    in
+        case nextVerseInStore of
+            Just verseStatus ->
+                NextVerseData verseStatus
+
+            Nothing ->
+                if moreVersesToLearn verseStore verseStatus then
+                    VerseNotInStore
+                else
+                    NoMoreVerses
 
 
 getPreviousVerse : VerseStore -> VerseStatus -> Maybe VerseStatus
@@ -2640,6 +2682,11 @@ getPreviousVersesInStore : VerseStore -> VerseStatus -> List VerseStatus
 getPreviousVersesInStore verseStore verseStatus =
     verseStore.verseStatuses
         |> List.filter (\v -> v.learnOrder < verseStatus.learnOrder)
+
+
+moreVersesToLearn : VerseStore -> VerseStatus -> Bool
+moreVersesToLearn verseStore currentVerse =
+    currentVerse.learnOrder < verseStore.maxOrderVal
 
 
 setHiddenWords : Model -> Set.Set WordId -> Model
@@ -3077,7 +3124,7 @@ focusDefaultButton model =
         (\sessionData ->
             let
                 buttons =
-                    buttonsForStage sessionData.currentVerse sessionData.verses model.preferences
+                    buttonsForStage model sessionData.currentVerse sessionData.verses model.preferences
 
                 defaultButtons =
                     List.filter (\b -> b.default == Default) buttons
@@ -3389,6 +3436,11 @@ verseLoadInProgress model =
     Dict.values model.currentHttpCalls |> List.any (\{ call } -> call == LoadVerses)
 
 
+verseLoadFailed : Model -> Bool
+verseLoadFailed model =
+    model.permanentFailHttpCalls |> List.any (\c -> c == LoadVerses)
+
+
 versesToLearnUrl : String
 versesToLearnUrl =
     "/api/learnscripture/v1/versestolearn2/"
@@ -3399,9 +3451,21 @@ actionCompleteUrl =
     "/api/learnscripture/v1/actioncomplete/"
 
 
+{-| Trigger verse load via a Cmd
+-}
 loadVerses : Cmd Msg
 loadVerses =
     sendStartTrackedCallMsg LoadVerses
+
+
+{-| Trigger verse load immediately
+
+More robust than loadVerses, useful when we
+have access to the full model
+-}
+loadVersesImmediate : Model -> ( Model, Cmd Msg )
+loadVersesImmediate model =
+    startTrackedCall model LoadVerses
 
 
 callLoadVerses : HttpConfig -> CallId -> Model -> Cmd Msg
