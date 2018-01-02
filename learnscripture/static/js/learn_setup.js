@@ -133,7 +133,7 @@ app.ports.updateTypingBox.subscribe(function (args) {
 // Elm we signal this using data-focus-typing-box-required. We also
 // pass other required data using data-* attributes on the element.
 // We then do a normal event handler which spots the click, and
-// makes the typing box visible and focussed. The `.focus()` call from
+// makes the typing box visible and focused. The `.focus()` call from
 // this route causes Firefox for Android to make the keyboard appear,
 // so that the user doesn't have to manually click it.
 //
