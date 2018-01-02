@@ -3386,8 +3386,7 @@ delay time msg =
 
 verseLoadInProgress : Model -> Bool
 verseLoadInProgress model =
-    -- TODO - need to use tracked HTTP calls for loadVerse and loadMoreVerses
-    False
+    Dict.values model.currentHttpCalls |> List.any (\{ call } -> call == LoadVerses)
 
 
 versesToLearnUrl : String
