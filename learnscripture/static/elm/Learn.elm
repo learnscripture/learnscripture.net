@@ -1,5 +1,6 @@
 module Learn exposing (..)
 
+import Erl
 import Dom
 import Dict
 import Html as H
@@ -184,7 +185,6 @@ type alias VerseStore =
     , learningType : LearningType
     , returnTo : Url
     , maxOrderVal : LearnOrder
-    , seen : List UvsId
     }
 
 
@@ -1995,7 +1995,6 @@ verseBatchToSession batch =
                                         , learningType = learningType
                                         , returnTo = batch.returnTo
                                         , maxOrderVal = maxOrderVal
-                                        , seen = []
                                         }
                                     , currentVerse = newCurrentVerse
                                     }
@@ -2602,25 +2601,58 @@ moveToNextVerse : Model -> ( Model, Cmd Msg )
 moveToNextVerse model =
     case model.learningSession of
         Session sessionData ->
-            case getNextVerse sessionData.verses sessionData.currentVerse.verseStatus of
-                Nothing ->
-                    ( model
-                    , sendMsg <| NavigateToWhenDone sessionData.verses.returnTo
-                    )
+            let
+                verseStore =
+                    sessionData.verses
 
-                Just verse ->
-                    let
-                        ( newModel, cmd ) =
-                            updateCurrentVersePlus model
-                                Cmd.none
-                                (\cv -> setupCurrentVerse verse sessionData.verses.learningType)
-                    in
-                        ( newModel
-                        , Cmd.batch
-                            [ cmd
-                            , stageOrVerseChangeCommands newModel True
-                            ]
+                currentVerseStatus =
+                    sessionData.currentVerse.verseStatus
+            in
+                case getNextVerse verseStore currentVerseStatus of
+                    Nothing ->
+                        ( model
+                        , sendMsg <| NavigateToWhenDone sessionData.verses.returnTo
                         )
+
+                    Just verse ->
+                        let
+                            ( newModel, cmd ) =
+                                updateCurrentVersePlus model
+                                    Cmd.none
+                                    (\cv -> setupCurrentVerse verse sessionData.verses.learningType)
+
+                            loadingQueueBufferSize =
+                                3
+
+                            moreVersesToLoad =
+                                case List.maximum <| List.map .learnOrder <| verseStore.verseStatuses of
+                                    Nothing ->
+                                        False
+
+                                    Just max ->
+                                        max < verseStore.maxOrderVal
+
+                            loadMoreCommand =
+                                if
+                                    moreVersesToLoad
+                                        && ((getFollowingVersesInStore verseStore currentVerseStatus
+                                                |> List.length
+                                            )
+                                                <= loadingQueueBufferSize
+                                           )
+                                        && (not <| verseLoadInProgress model)
+                                then
+                                    loadMoreVerses verseStore
+                                else
+                                    Cmd.none
+                        in
+                            ( newModel
+                            , Cmd.batch
+                                [ cmd
+                                , loadMoreCommand
+                                , stageOrVerseChangeCommands newModel True
+                                ]
+                            )
 
         _ ->
             ( model
@@ -2630,18 +2662,28 @@ moveToNextVerse model =
 
 getNextVerse : VerseStore -> VerseStatus -> Maybe VerseStatus
 getNextVerse verseStore verseStatus =
-    verseStore.verseStatuses
-        |> List.filter (\v -> v.learnOrder > verseStatus.learnOrder)
+    getFollowingVersesInStore verseStore verseStatus
         |> List.sortBy .learnOrder
         |> List.head
 
 
 getPreviousVerse : VerseStore -> VerseStatus -> Maybe VerseStatus
 getPreviousVerse verseStore verseStatus =
-    verseStore.verseStatuses
-        |> List.filter (\v -> v.learnOrder < verseStatus.learnOrder)
+    getPreviousVersesInStore verseStore verseStatus
         |> List.sortBy (\v -> -v.learnOrder)
         |> List.head
+
+
+getFollowingVersesInStore : VerseStore -> VerseStatus -> List VerseStatus
+getFollowingVersesInStore verseStore verseStatus =
+    verseStore.verseStatuses
+        |> List.filter (\v -> v.learnOrder > verseStatus.learnOrder)
+
+
+getPreviousVersesInStore : VerseStore -> VerseStatus -> List VerseStatus
+getPreviousVersesInStore verseStore verseStatus =
+    verseStore.verseStatuses
+        |> List.filter (\v -> v.learnOrder < verseStatus.learnOrder)
 
 
 setHiddenWords : Model -> Set.Set WordId -> Model
@@ -3370,6 +3412,12 @@ delay time msg =
         |> Task.perform (\_ -> msg)
 
 
+verseLoadInProgress : Model -> Bool
+verseLoadInProgress model =
+    -- TODO - need to use tracked HTTP calls for loadVerse and loadMoreVerses
+    False
+
+
 versesToLearnUrl : String
 versesToLearnUrl =
     "/api/learnscripture/v1/versestolearn2/"
@@ -3383,6 +3431,22 @@ actionCompleteUrl =
 loadVerses : Cmd Msg
 loadVerses =
     Http.send VersesToLearn (Http.get versesToLearnUrl verseBatchRawDecoder)
+
+
+loadMoreVerses : VerseStore -> Cmd Msg
+loadMoreVerses verseStore =
+    let
+        url =
+            Erl.parse versesToLearnUrl
+                |> Erl.addQuery "format" "json"
+                |> Erl.addQuery "seen"
+                    (verseStore.verseStatuses
+                        |> List.map (.id >> toString)
+                        |> String.join ","
+                    )
+                |> Erl.toString
+    in
+        Http.send VersesToLearn (Http.get url verseBatchRawDecoder)
 
 
 {-| For calls that require reliability, we go via `TrackedHttpCall`.
