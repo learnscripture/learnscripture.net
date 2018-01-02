@@ -114,28 +114,27 @@ var fixTypingBox = function (attempts, args) {
 app.ports.updateTypingBox.subscribe(function (args) {
     // Move the typing box to cover the word we are testing. This is much easier
     // than trying to get it to fit in the same space without disrupting the
-    // layout at all. Doing this in Elm is really hard, so we do it in Javascript.
-    // In addition, we need to handle it appearing and disappearing, and not appearing
-    // before it has been put in the correct position.
+    // layout at all. Doing this in Elm is really hard, so we do it in
+    // Javascript. In addition, we need to handle it appearing and disappearing,
+    // and not appearing before it has been put in the correct position.
 
     fixTypingBox(0, args);
 });
 
-// Elm's runtime appears to use setTimeout / requestAnimationFrame
-// such that doing `focus()` from within it, even via ports, does
-// not cause the on screen keyboard to be brought up in Firefox for Android
-// when you press 'Next' buttons etc., even though it is possible.
+// Elm's runtime appears to use setTimeout / requestAnimationFrame such that
+// doing `focus()` from within it, even via ports, does not cause the on screen
+// keyboard to be brought up in Firefox for Android when you press 'Next'
+// buttons etc., even though it is possible.
 //
 // See https://github.com/elm-lang/dom/issues/21
 //
-// So, we have this crazy workaround: for buttons that will cause the
-// typing box to appear, and therefore require a focus event, in
-// Elm we signal this using data-focus-typing-box-required. We also
-// pass other required data using data-* attributes on the element.
-// We then do a normal event handler which spots the click, and
-// makes the typing box visible and focused. The `.focus()` call from
-// this route causes Firefox for Android to make the keyboard appear,
-// so that the user doesn't have to manually click it.
+// So, we have this crazy workaround: for buttons that will cause the typing box
+// to appear, and therefore require a focus event, in Elm we signal this using
+// data-focus-typing-box-required. We also pass other required data using data-*
+// attributes on the element. We then do a normal event handler which spots the
+// click, and makes the typing box visible and focused. The `.focus()` call from
+// this route causes Firefox for Android to make the keyboard appear, so that
+// the user doesn't have to manually click it.
 //
 // Note that in Firefox for Android, the user still has to manually click to
 // make the box appear for the first verse in a session, because the typing box
