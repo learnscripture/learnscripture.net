@@ -1001,6 +1001,7 @@ copyrightNotice version =
                 [ H.a
                     [ A.href version.url
                     , A.tabindex -1
+                    , A.target "_blank"
                     ]
                     [ H.text caption ]
                 ]
