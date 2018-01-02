@@ -1447,7 +1447,7 @@ instructions verse testingMethod helpVisible =
             ]
 
         buttonsHelp =
-            [ [ H.text "The button for the most likely action is highlighted in colour and is focussed by default."
+            [ [ H.text "The button for the most likely action is highlighted in colour and is focused by default."
               ]
             ]
 
