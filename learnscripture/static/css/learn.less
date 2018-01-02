@@ -155,7 +155,6 @@ body.learn-page {
     }
 
     @currentVerseFontSize: 20px;
-    @previousVerseLineHeight: 1.5;
     .current-verse, #id-typing, #id-onscreen-test-options {
         font-size: @currentVerseFontSize;
         line-height: 1; // The paddings on word buttons are enough, extra not needed
@@ -163,11 +162,12 @@ body.learn-page {
 
     .previous-verse {
         font-size: @currentVerseFontSize;
-        line-height: @previousVerseLineHeight;
+        line-height: @readingLineHeight;
     }
 
+    @readingLineHeight: 1.5;
     .read-for-context {
-        line-height: 1.4em;
+        line-height: @readingLineHeight;
     }
 
     #id-onscreen-not-available {
@@ -178,7 +178,7 @@ body.learn-page {
         border-bottom: 1px solid #c0c0c0;
         margin-bottom: 0.5em;
         position: relative; // establish containing box.
-        height: @currentVerseFontSize * @previousVerseLineHeight; // Constrain to showing one line only
+        height: @currentVerseFontSize * @readingLineHeight; // Constrain to showing one line only
         overflow: hidden;
     }
     .previous-verse {
@@ -370,7 +370,7 @@ body.learn-page {
             font-size: @currentVerseSmallerFontSize;
         }
         .previous-verse-wrapper {
-            height: @currentVerseSmallerFontSize * @previousVerseLineHeight;
+            height: @currentVerseSmallerFontSize * @readingLineHeight;
         }
 
         .word-button {
