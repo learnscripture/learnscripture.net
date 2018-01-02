@@ -470,7 +470,7 @@ ajaxInfo model =
                     , onClickSimply (ToggleDropdown AjaxInfo)
                     ]
                     [ H.span [ A.class "nav-caption" ]
-                        [ H.text "Saving data" ]
+                        [ H.text "Working..." ]
                     , makeIcon ("icon-ajax-in-progress " ++ spinClass)
                     ]
                 ]
@@ -1631,8 +1631,7 @@ link href caption icon iconAlign =
 
 
 type Msg
-    = LoadVerses
-    | VersesToLearn (Result Http.Error VerseBatchRaw)
+    = VersesToLearn CallId (Result Http.Error VerseBatchRaw)
     | NextStageOrSubStage
     | PreviousStage
     | NextVerse
@@ -1662,51 +1661,8 @@ type ActionCompleteType
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        LoadVerses ->
-            ( model, Cmd.none )
-
-        VersesToLearn (Ok verseBatchRaw) ->
-            let
-                ( maybeBatchSession, sessionCmd ) =
-                    normalizeVerseBatch verseBatchRaw |> verseBatchToSession
-
-                newSession =
-                    case model.learningSession of
-                        Session origSession ->
-                            case maybeBatchSession of
-                                Nothing ->
-                                    Just origSession
-
-                                Just batchSession ->
-                                    Just <| mergeSession origSession batchSession
-
-                        _ ->
-                            maybeBatchSession
-            in
-                case newSession of
-                    Nothing ->
-                        ( model, Navigation.load dashboardUrl )
-
-                    Just ns ->
-                        let
-                            newModel =
-                                { model
-                                    | learningSession = Session ns
-                                }
-                        in
-                            ( newModel
-                            , Cmd.batch
-                                [ sessionCmd
-                                , stageOrVerseChangeCommands newModel True
-                                ]
-                            )
-
-        VersesToLearn (Err errMsg) ->
-            let
-                newModel =
-                    { model | learningSession = VersesError errMsg }
-            in
-                ( newModel, updateTypingBoxCommand newModel )
+        VersesToLearn callId result ->
+            handleRetries handleVersesToLearn model callId result
 
         NextStageOrSubStage ->
             moveToNextStageOrSubStage model
@@ -2642,7 +2598,7 @@ moveToNextVerse model =
                                            )
                                         && (not <| verseLoadInProgress model)
                                 then
-                                    loadMoreVerses verseStore
+                                    loadVerses
                                 else
                                     Cmd.none
                         in
@@ -3256,12 +3212,15 @@ startMorePractice model accuracy =
 
    So the data needed for these calls is stored on the model, along with
    info about attempts etc.
+
+
 -}
 
 
 type TrackedHttpCall
     = RecordTestComplete CurrentVerse Float TestType
     | RecordReadComplete CurrentVerse
+    | LoadVerses
 
 
 maxHttpRetries : number
@@ -3278,11 +3237,18 @@ trackedHttpCallCaption call =
         RecordReadComplete currentVerse ->
             interpolate "Recording read - {0}" [ currentVerse.verseStatus.localizedReference ]
 
+        LoadVerses ->
+            "Loading items for learning..."
+
 
 type alias CallId =
     Int
 
 
+{-| Start a tracked call, first registering
+it and then triggering its execution.
+
+-}
 startTrackedCall : Model -> TrackedHttpCall -> ( Model, Cmd Msg )
 startTrackedCall model trackedCall =
     let
@@ -3293,6 +3259,19 @@ startTrackedCall model trackedCall =
             sendMsg <| MakeHttpCall callId
     in
         ( newModel, cmd )
+
+
+{-| For a given TrackedHttpCall object, return a command that triggers
+the HTTP call to be started.
+
+Technically this doesn't need to return a Cmd Msg (we could just update the
+model directly in all places that use this function), but rewiring from
+`Http.send` to using `TrackedHttpCall` is much easier if we use a `Cmd Msg` and
+this utility
+-}
+sendStartTrackedCallMsg : TrackedHttpCall -> Cmd Msg
+sendStartTrackedCallMsg trackedCall =
+    sendMsg <| TrackHttpCall trackedCall
 
 
 {-| The motivation for having 'MakeHttpCall' and 'makeHttpCall' separate from
@@ -3318,18 +3297,11 @@ makeHttpCall model callId =
 
                         RecordReadComplete currentVerse ->
                             callRecordReadComplete model.httpConfig callId currentVerse
+
+                        LoadVerses ->
+                            callLoadVerses model.httpConfig callId model
     in
         ( model, cmd )
-
-
-handleTrackedCall : TrackedHttpCall -> CallId -> (Result Http.Error () -> Msg)
-handleTrackedCall trackedCall callId =
-    case trackedCall of
-        RecordTestComplete _ _ _ ->
-            RecordActionCompleteReturned callId
-
-        RecordReadComplete _ ->
-            RecordActionCompleteReturned callId
 
 
 addTrackedCall : Model -> TrackedHttpCall -> ( Model, CallId )
@@ -3430,34 +3402,36 @@ actionCompleteUrl =
 
 loadVerses : Cmd Msg
 loadVerses =
-    Http.send VersesToLearn (Http.get versesToLearnUrl verseBatchRawDecoder)
+    sendStartTrackedCallMsg LoadVerses
 
 
-loadMoreVerses : VerseStore -> Cmd Msg
-loadMoreVerses verseStore =
+callLoadVerses : HttpConfig -> CallId -> Model -> Cmd Msg
+callLoadVerses httpConfig callId model =
     let
+        verseStatuses =
+            case model.learningSession of
+                Session sessionData ->
+                    sessionData.verses.verseStatuses
+
+                _ ->
+                    []
+
         url =
             Erl.parse versesToLearnUrl
                 |> Erl.addQuery "format" "json"
                 |> Erl.addQuery "seen"
-                    (verseStore.verseStatuses
+                    (verseStatuses
                         |> List.map (.id >> toString)
                         |> String.join ","
                     )
                 |> Erl.toString
     in
-        Http.send VersesToLearn (Http.get url verseBatchRawDecoder)
+        Http.send (VersesToLearn callId) (Http.get url verseBatchRawDecoder)
 
 
-{-| For calls that require reliability, we go via `TrackedHttpCall`.
-
-Technically this doesn't need to be a Cmd Msg (we could just update the model
-directly, but rewiring from `Http.send` to `TrackedHttpCall` is much easier
-if we use a `Cmd Msg`
--}
 recordTestComplete : CurrentVerse -> Float -> TestType -> Cmd Msg
 recordTestComplete currentVerse accuracy testType =
-    sendMsg <| TrackHttpCall (RecordTestComplete currentVerse accuracy testType)
+    sendStartTrackedCallMsg (RecordTestComplete currentVerse accuracy testType)
 
 
 callRecordTestComplete : HttpConfig -> CallId -> CurrentVerse -> Float -> TestType -> Cmd Msg
@@ -3489,7 +3463,7 @@ callRecordTestComplete httpConfig callId currentVerse accuracy testType =
 
 recordReadComplete : CurrentVerse -> Cmd Msg
 recordReadComplete currentVerse =
-    sendMsg <| TrackHttpCall (RecordReadComplete currentVerse)
+    sendStartTrackedCallMsg (RecordReadComplete currentVerse)
 
 
 callRecordReadComplete : HttpConfig -> CallId -> CurrentVerse -> Cmd Msg
@@ -3513,6 +3487,11 @@ callRecordReadComplete httpConfig callId currentVerse =
             )
 
 
+{-| Given an `update` like function of type `Model -> a -> ( Model, Cmd Msg)`,
+a model, a CallId and a Http result, handles the retries for the call, and
+executes the update function.
+
+-}
 handleRetries : (Model -> a -> ( Model, Cmd Msg )) -> Model -> CallId -> Result.Result Http.Error a -> ( Model, Cmd Msg )
 handleRetries continuation model callId result =
     case result of
@@ -3535,7 +3514,46 @@ handleRetries continuation model callId result =
 
                 _ ->
                     -- Others could all be temporary in theory, so we try again.
+                    -- TODO save error message
                     markFailAndRetry model callId
+
+
+handleVersesToLearn : Model -> VerseBatchRaw -> ( Model, Cmd Msg )
+handleVersesToLearn model verseBatchRaw =
+    let
+        ( maybeBatchSession, sessionCmd ) =
+            normalizeVerseBatch verseBatchRaw |> verseBatchToSession
+
+        newSession =
+            case model.learningSession of
+                Session origSession ->
+                    case maybeBatchSession of
+                        Nothing ->
+                            Just origSession
+
+                        Just batchSession ->
+                            Just <| mergeSession origSession batchSession
+
+                _ ->
+                    maybeBatchSession
+    in
+        case newSession of
+            Nothing ->
+                ( model, Navigation.load dashboardUrl )
+
+            Just ns ->
+                let
+                    newModel =
+                        { model
+                            | learningSession = Session ns
+                        }
+                in
+                    ( newModel
+                    , Cmd.batch
+                        [ sessionCmd
+                        , stageOrVerseChangeCommands newModel True
+                        ]
+                    )
 
 
 handleRecordActionCompleteReturned : Model -> () -> ( Model, Cmd Msg )
