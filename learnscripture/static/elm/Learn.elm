@@ -1296,7 +1296,7 @@ viewButton model button =
 
 
 {-| If the Msg will produce a change of state such that
-the typing box will appear (and we therefore need to focus it,
+the typing box will appear (and we therefore need to focus it),
 return the data for focussing/moving the typing box, otherwise Nothing.
 
 See learn_setup.js for why this is necessary.
