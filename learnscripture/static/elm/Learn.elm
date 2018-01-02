@@ -1467,7 +1467,7 @@ instructions verse testingMethod helpVisible =
                     )
 
                 Recall _ rp ->
-                    ( [ bold "READ and RECALL:"
+                    ( [ bold "READ and RECALL: "
                       , H.text "Read the text through, filling in the gaps from your memory. Click a word to reveal it if you can't remember."
                       ]
                     , commonHelp ++ buttonsHelp
