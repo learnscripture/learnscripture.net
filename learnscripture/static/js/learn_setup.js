@@ -8,6 +8,7 @@ import 'jquery.ajaxretry';
 // Ours
 import './preferences';
 import { isTouchDevice } from './common';
+import { doBeep, setUpAudio } from './sound';
 
 // CSS/Less
 import 'learn.less';
@@ -165,3 +166,12 @@ app.ports.vibrateDevice.subscribe(function (length) {
     }
     navigator.vibrate(length);
 });
+
+app.ports.beep.subscribe(function (args) {
+    var frequency = args[0],
+        length = args[1];
+    doBeep(frequency, length);
+});
+
+
+setUpAudio();
