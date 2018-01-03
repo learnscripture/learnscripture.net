@@ -429,10 +429,7 @@ ajaxInfo model =
                 ""
 
         spinClass =
-            if
-                hideStatus
-                -- Save some CPU cycles if we are not showing the icon
-            then
+            if hideStatus then
                 ""
             else if httpCallsInProgress then
                 "icon-spin"
@@ -466,9 +463,14 @@ ajaxInfo model =
                  ]
                 )
                 [ H.a
-                    [ A.href "#"
-                    , onClickSimply (ToggleDropdown AjaxInfo)
-                    ]
+                    ([ A.href "#"
+                     , onClickSimply (ToggleDropdown AjaxInfo)
+                     ]
+                        ++ if hideStatus then
+                            [ A.tabindex -1 ]
+                           else
+                            []
+                    )
                     [ H.span [ A.class "nav-caption" ]
                         [ H.text "Working..." ]
                     , makeIcon ("icon-ajax-in-progress " ++ spinClass)
