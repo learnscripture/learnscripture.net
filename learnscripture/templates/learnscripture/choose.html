@@ -21,8 +21,19 @@
   <div class="pill-content">
     <div {% if active_tab == 'verseset' %}class="active"{% endif %} id="id-tab-verseset">
 
+      <p>Browse or search the verse sets below:</p>
 
       <form action="" method="GET" class="filters">
+
+        <div class="clearfix">
+          <label>Search:</label>
+          <div class="input">
+            <input type="text" name="q"  id="id-search-input" value="{{ request.GET.q }}"/>
+            <input type="submit" class="btn primary" value="Search" id="id-search-btn" />
+          </div>
+        </div>
+
+
         <div class="clearfix">
           <label>Order:</label>
           <div class="input">
@@ -38,14 +49,6 @@
                 <li><a href="{% spurl base=request.get_full_path add_query='new' remove_query_param='popular' %}">Newest first</a></li>
               {% endif %}
             </ul>
-          </div>
-        </div>
-
-        <div class="clearfix">
-          <label>Search:</label>
-          <div class="input">
-            <input type="text" name="q"  id="id-search-input" value="{{ request.GET.q }}"/>
-            <input type="submit" class="btn primary" value="Search" id="id-search-btn" />
           </div>
         </div>
 
