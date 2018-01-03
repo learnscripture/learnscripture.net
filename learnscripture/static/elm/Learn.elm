@@ -41,9 +41,10 @@ main =
 
 
 {- Constants -}
--- Strength == 0.6 corresponds to about 10 days learning.
 
 
+{-| Strength == 0.6 corresponds to about 10 days learning.
+-}
 hardModeStrengthThreshold : Float
 hardModeStrengthThreshold =
     0.6
@@ -693,12 +694,12 @@ wordsForVerse verseStatus learningStageType testingMethod =
             parts
 
 
+{-| Split word into Part objects.
 
--- only used for within verse body
--- The initial sentence has already been split into words server side, and this
--- function does not split off punctuation, but keeps it as part of the word.
-
-
+ Only used for within verse body
+ The initial sentence has already been split into words server side, and this
+ function does not split off punctuation, but keeps it as part of the word.
+-}
 verseWordToParts : String -> WordIndex -> List Part
 verseWordToParts w idx =
     let
