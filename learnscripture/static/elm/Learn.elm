@@ -2813,7 +2813,7 @@ checkCurrentWordAndUpdate model input =
                                 CurrentWord currentWord ->
                                     let
                                         correct =
-                                            checkWord currentWord.word input testingMethod
+                                            checkWord currentWord.word.text input testingMethod
                                     in
                                         markWord correct currentWord.word tp testType currentVerse testingMethod
 
@@ -2831,25 +2831,25 @@ checkCurrentWordAndUpdate model input =
         )
 
 
-checkWord : Word -> String -> TestingMethod -> Bool
+checkWord : String -> String -> TestingMethod -> Bool
 checkWord word input testingMethod =
     let
         wordN =
-            normalizeWordForTest word.text
+            normalizeWordForTest word
 
         inputN =
             normalizeWordForTest input
     in
         case testingMethod of
             FullWords ->
-                if String.length wordN == 1 then
+                if String.length wordN <= 2 then
                     wordN == inputN
                 else
                     ((String.left 1 wordN
                         == String.left 1 inputN
                      )
                         && (damerauLevenshteinDistance wordN inputN
-                                < (ceiling ((toFloat <| String.length wordN) / 5.0))
+                                <= (ceiling ((toFloat <| String.length wordN) / 4.0))
                            )
                     )
 
@@ -2857,7 +2857,7 @@ checkWord word input testingMethod =
                 String.right 1 inputN == String.left 1 wordN
 
             OnScreen ->
-                normalizeWordForSuggestion word.text == input
+                normalizeWordForSuggestion word == input
 
 
 normalizeWordForTest : String -> String
