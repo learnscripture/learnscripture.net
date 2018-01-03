@@ -2848,7 +2848,7 @@ checkCurrentWordAndUpdate model input =
                                         correct =
                                             checkWord currentWord.word.text input testingMethod
                                     in
-                                        markWord correct input currentWord.word tp testType currentVerse testingMethod
+                                        markWord correct input currentWord.word tp testType currentVerse testingMethod model.preferences
 
                         _ ->
                             ( currentVerse
@@ -2937,8 +2937,8 @@ initialAttempt m =
     }
 
 
-markWord : Bool -> String -> Word -> TestProgress -> TestType -> CurrentVerse -> TestingMethod -> ( CurrentVerse, Cmd Msg )
-markWord correct input word testProgress testType verse testingMethod =
+markWord : Bool -> String -> Word -> TestProgress -> TestType -> CurrentVerse -> TestingMethod -> Preferences -> ( CurrentVerse, Cmd Msg )
+markWord correct input word testProgress testType verse testingMethod preferences =
     let
         attempt =
             case getWordAttempt testProgress word of
@@ -3037,9 +3037,28 @@ markWord correct input word testProgress testType verse testingMethod =
                 recordTestComplete newCurrentVerse testAccuracy testType
             else
                 Cmd.none
+
+        vibrateCommand =
+            if correct then
+                Cmd.none
+            else
+                if preferences.enableVibration
+                then
+                    if shouldMoveOn then
+                        -- failure, longer vibration
+                        LearnPorts.vibrateDevice 50
+                    else
+                        -- mistake only
+                        LearnPorts.vibrateDevice 25
+                else
+                    Cmd.none
+
     in
         ( newCurrentVerse
-        , actionCompleteCommand
+        , Cmd.batch
+            [ actionCompleteCommand
+            , vibrateCommand
+            ]
         )
 
 

@@ -8,3 +8,5 @@ port updateTypingBox : { typingBoxId : String
                        , hardMode : Bool } -> Cmd msg
 
 port receivePreferences : (JD.Value -> msg) -> Sub msg
+
+port vibrateDevice : Int -> Cmd msg

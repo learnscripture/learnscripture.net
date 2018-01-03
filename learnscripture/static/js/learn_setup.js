@@ -158,3 +158,10 @@ $('body.learn-page').on('click', '[data-focus-typing-box-required]', function (e
 $('#id-preferences-data').bind('preferencesSet', function(ev, prefs) {
     app.ports.receivePreferences.send(prefs);
 });
+
+app.ports.vibrateDevice.subscribe(function (length) {
+    if (!("vibrate" in navigator)) {
+        return;
+    }
+    navigator.vibrate(length);
+});
