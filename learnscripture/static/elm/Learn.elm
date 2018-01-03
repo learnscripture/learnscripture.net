@@ -3038,26 +3038,23 @@ markWord correct input word testProgress testType verse testingMethod preference
             else
                 Cmd.none
 
-        vibrateCommand =
+        ( vibrateCommand, beepCommand ) =
             if correct then
-                Cmd.none
+                ( Cmd.none, Cmd.none )
+            else if shouldMoveOn then
+                -- failure
+                ( LearnPorts.vibrateDevice 50, LearnPorts.beep ( 220.0, 0.2 ) )
             else
-                if preferences.enableVibration
-                then
-                    if shouldMoveOn then
-                        -- failure, longer vibration
-                        LearnPorts.vibrateDevice 50
-                    else
-                        -- mistake only
-                        LearnPorts.vibrateDevice 25
-                else
-                    Cmd.none
+                -- mistake only
+                ( LearnPorts.vibrateDevice 25, LearnPorts.beep ( 330.0, 0.15 ) )
+
 
     in
         ( newCurrentVerse
         , Cmd.batch
             [ actionCompleteCommand
-            , vibrateCommand
+            , if preferences.enableVibration then vibrateCommand else Cmd.none
+            , if preferences.enableSounds then beepCommand else Cmd.none
             ]
         )
 

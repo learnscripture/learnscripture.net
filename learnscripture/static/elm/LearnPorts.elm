@@ -16,3 +16,6 @@ port receivePreferences : (JD.Value -> msg) -> Sub msg
 
 
 port vibrateDevice : Int -> Cmd msg
+
+
+port beep : (Float, Float) -> Cmd msg
