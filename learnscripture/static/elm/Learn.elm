@@ -891,9 +891,9 @@ wordButtonClasses wd stage =
 
                         Just attempt ->
                             if attempt.finished then
-                                if List.all (\r -> r == Failure) attempt.checkResults then
+                                if List.all isAttemptFailure attempt.checkResults then
                                     [ "incorrect" ]
-                                else if List.all (\r -> r == Success) attempt.checkResults then
+                                else if List.all isAttemptSuccess attempt.checkResults then
                                     [ "correct" ]
                                 else
                                     [ "partially-correct" ]
@@ -1016,26 +1016,44 @@ typingBoxId =
 typingBox : LearningStage -> TestingMethod -> H.Html Msg
 typingBox stage testingMethod =
     let
-        ( value, inUse, lastCheckFailed ) =
+        ( value, inUse, incorrectInput ) =
             case stage of
                 Test _ tp ->
                     let
-                        lastCheckFailed =
+                        ( lastCheckFailed, failedAttemptText ) =
                             case getCurrentWordAttempt tp of
                                 Nothing ->
-                                    False
+                                    ( False, Nothing )
 
                                 Just attempt ->
                                     case attempt.checkResults of
                                         [] ->
-                                            False
+                                            ( False, Nothing )
 
                                         r :: remainder ->
-                                            r == Failure
+                                            case r of
+                                                Failure text ->
+                                                    ( True, Just text )
+
+                                                _ ->
+                                                    ( False, Nothing )
+
+                        -- If the user has edited the text since they pressed
+                        -- Space and had it checked, then remove the styling
+                        -- that indicates failure, otherwise it is confusing.
+                        currentTextEqualsFailedAttempt =
+                            case failedAttemptText of
+                                Nothing ->
+                                    False
+
+                                Just text ->
+                                    (normalizeWordForTest tp.currentTypedText
+                                        == normalizeWordForTest text
+                                    )
                     in
                         ( tp.currentTypedText
                         , typingBoxInUse tp testingMethod
-                        , lastCheckFailed
+                        , lastCheckFailed && currentTextEqualsFailedAttempt
                         )
 
                 _ ->
@@ -1046,7 +1064,7 @@ typingBox stage testingMethod =
              , A.value value
              , A.class
                 (classForTypingBox inUse
-                    ++ (if lastCheckFailed then
+                    ++ (if incorrectInput then
                             " incorrect"
                         else
                             ""
@@ -1152,11 +1170,12 @@ buttonsForStage model verse verseStore preferences =
             case getNextVerse verseStore verse.verseStatus of
                 NextVerseData _ ->
                     Enabled
+
                 NoMoreVerses ->
                     Enabled
+
                 VerseNotInStore ->
-                    if verseLoadInProgress model
-                    then
+                    if verseLoadInProgress model then
                         -- Don't trigger another verse load,
                         -- or a double 'next verse' message
                         Disabled
@@ -2086,7 +2105,7 @@ type alias Attempt =
 
 
 type CheckResult
-    = Failure
+    = Failure String
     | Success
 
 
@@ -2321,7 +2340,7 @@ getTestResult testProgress =
                     -- 3 mistakes = 0
                     let
                         mistakes =
-                            List.length <| List.filter (\r -> r == Failure) attempt.checkResults
+                            List.length <| List.filter isAttemptFailure attempt.checkResults
 
                         allowedAttempts =
                             attempt.allowedMistakes + 1
@@ -2337,6 +2356,21 @@ getTestResult testProgress =
             l ->
                 -- Do some rounding to avoid 0.999 and retain 3 s.f.
                 (toFloat (round (List.sum wordAccuracies / (toFloat l) * 1000)) / 1000)
+
+
+isAttemptFailure : CheckResult -> Bool
+isAttemptFailure r =
+    case r of
+        Failure _ ->
+            True
+
+        _ ->
+            False
+
+
+isAttemptSuccess : CheckResult -> Bool
+isAttemptSuccess r =
+    r == Success
 
 
 testMethodUsesTextBox : TestingMethod -> Bool
@@ -2587,8 +2621,7 @@ moveToNextVerse model =
                         )
 
                     VerseNotInStore ->
-                        if not (verseLoadInProgress model)
-                        then
+                        if not (verseLoadInProgress model) then
                             loadVersesImmediate model
                         else
                             ( model
@@ -2815,7 +2848,7 @@ checkCurrentWordAndUpdate model input =
                                         correct =
                                             checkWord currentWord.word.text input testingMethod
                                     in
-                                        markWord correct currentWord.word tp testType currentVerse testingMethod
+                                        markWord correct input currentWord.word tp testType currentVerse testingMethod
 
                         _ ->
                             ( currentVerse
@@ -2904,8 +2937,8 @@ initialAttempt m =
     }
 
 
-markWord : Bool -> Word -> TestProgress -> TestType -> CurrentVerse -> TestingMethod -> ( CurrentVerse, Cmd Msg )
-markWord correct word testProgress testType verse testingMethod =
+markWord : Bool -> String -> Word -> TestProgress -> TestType -> CurrentVerse -> TestingMethod -> ( CurrentVerse, Cmd Msg )
+markWord correct input word testProgress testType verse testingMethod =
     let
         attempt =
             case getWordAttempt testProgress word of
@@ -2919,7 +2952,7 @@ markWord correct word testProgress testType verse testingMethod =
             (if correct then
                 Success
              else
-                Failure
+                Failure input
             )
                 :: attempt.checkResults
 
