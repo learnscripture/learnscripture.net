@@ -3047,14 +3047,18 @@ markWord correct input word testProgress testType verse testingMethod preference
             else
                 -- mistake only
                 ( LearnPorts.vibrateDevice 25, LearnPorts.beep ( 330.0, 0.15 ) )
-
-
     in
         ( newCurrentVerse
         , Cmd.batch
             [ actionCompleteCommand
-            , if preferences.enableVibration then vibrateCommand else Cmd.none
-            , if preferences.enableSounds then beepCommand else Cmd.none
+            , if preferences.enableVibration then
+                vibrateCommand
+              else
+                Cmd.none
+            , if preferences.enableSounds then
+                beepCommand
+              else
+                Cmd.none
             ]
         )
 
