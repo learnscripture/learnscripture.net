@@ -705,7 +705,7 @@ class UserVerseStatus(models.Model):
     localized_reference = models.CharField(max_length=100)
     verse_set = models.ForeignKey(VerseSet, null=True, blank=True,
                                   on_delete=models.SET_NULL)
-    text_order = models.PositiveSmallIntegerField()  # order of this item within associate TextVersion
+    text_order = models.PositiveSmallIntegerField()  # order of this item within associated TextVersion
     version = models.ForeignKey(TextVersion, on_delete=models.CASCADE)
     memory_stage = models.PositiveSmallIntegerField(choices=MemoryStage.choice_list,
                                                     default=MemoryStage.ZERO)
