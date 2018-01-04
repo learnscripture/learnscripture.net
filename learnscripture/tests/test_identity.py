@@ -64,13 +64,16 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         created = i.add_verse_set(vs)
         self.assertEqual(len(created), 3)
 
-        uvss = i.verse_statuses.all()
+        uvss = i.verse_statuses.all().order_by('text_order')
         self.assertEqual(len(uvss), 3)
 
         self.assertEqual(set(u.localized_reference for u in uvss),
                          set(["Romalılar 3:24",
                               "Romalılar 3:25-26",
                               "Romalılar 3:27"]))
+
+        self.assertEqual([u.text_order for u in uvss],
+                         [27003, 27004, 27005])
 
     def test_record_read(self):
         i = self.create_identity(version_slug='NET')
