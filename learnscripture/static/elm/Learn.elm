@@ -2990,8 +2990,18 @@ markWord correct input word testProgress testType verse testingMethod preference
         currentTestWordList =
             getCurrentTestWordList verse testingMethod
 
+        newTestProgress1 =
+            { testProgress
+                | attemptRecords = newAttempts
+                , currentTypedText =
+                    if shouldMoveOn then
+                        ""
+                    else
+                        testProgress.currentTypedText
+            }
+
         testAccuracy =
-            getTestResult testProgress
+            getTestResult newTestProgress1
 
         nextCurrentWord =
             if shouldMoveOn then
@@ -3019,21 +3029,15 @@ markWord correct input word testProgress testType verse testingMethod preference
             else
                 testProgress.currentWord
 
-        newTestProgress =
-            { testProgress
-                | attemptRecords = newAttempts
-                , currentWord = nextCurrentWord
-                , currentTypedText =
-                    if shouldMoveOn then
-                        ""
-                    else
-                        testProgress.currentTypedText
+        newTestProgress2 =
+            { newTestProgress1
+                  | currentWord = nextCurrentWord
             }
 
         newCurrentVerse =
             { verse
                 | currentStage =
-                    Test testType newTestProgress
+                    Test testType newTestProgress2
             }
 
         actionCompleteCommand =
