@@ -1,711 +1,872 @@
 [
-{ "fields" : { "bible_verse_number" : 0,
-        "book_number" : 0,
-        "chapter_number" : 1,
-        "localized_reference" : "Genesis 1:1",
-        "text_saved" : "In the beginning God created the heaven and the earth. ",
-        "first_verse_number" : 1,
-        "last_verse_number" : 1,
-        "version" : ["KJV"]
-      },
-    "model" : "bibleverses.verse",
-    "pk" : null
-  },
-  { "fields" : { "bible_verse_number" : 1,
-        "book_number" : 0,
-        "chapter_number" : 1,
-        "localized_reference" : "Genesis 1:2",
-        "text_saved" : "And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters. ",
-        "first_verse_number" : 2,
-        "last_verse_number" : 2,
-        "version" : ["KJV"]
-      },
-    "model" : "bibleverses.verse",
-    "pk" : null
-  },
-  { "fields" : { "bible_verse_number" : 2,
-        "book_number" : 0,
-        "chapter_number" : 1,
-        "localized_reference" : "Genesis 1:3",
-        "text_saved" : "And God said, Let there be light: and there was light. ",
-        "first_verse_number" : 3,
-        "last_verse_number" : 3,
-        "version" : ["KJV"]
-      },
-    "model" : "bibleverses.verse",
-    "pk" : null
-  },
-  { "fields" : { "bible_verse_number" : 3,
-        "book_number" : 0,
-        "chapter_number" : 1,
-        "localized_reference" : "Genesis 1:4",
-        "text_saved" : "And God saw the light, that it was good: and God divided the light from the darkness. ",
-        "first_verse_number" : 4,
-        "last_verse_number" : 4,
-        "version" : ["KJV"]
-      },
-    "model" : "bibleverses.verse",
-    "pk" : null
-  },
-  { "fields" : { "bible_verse_number" : 4,
-        "book_number" : 0,
-        "chapter_number" : 1,
-        "localized_reference" : "Genesis 1:5",
-        "text_saved" : "And God called the light Day, and the darkness he called Night. And the evening and the morning were the first day. ",
-        "first_verse_number" : 5,
-        "last_verse_number" : 5,
-        "version" : ["KJV"]
-      },
-    "model" : "bibleverses.verse",
-    "pk" : null
-  },
-  { "fields" : { "bible_verse_number" : 5,
-        "book_number" : 0,
-        "chapter_number" : 1,
-        "localized_reference" : "Genesis 1:6",
-        "text_saved" : "And God said, Let there be a firmament in the midst of the waters, and let it divide the waters from the waters. ",
-        "first_verse_number" : 6,
-        "last_verse_number" : 6,
-        "version" : ["KJV"]
-      },
-    "model" : "bibleverses.verse",
-    "pk" : null
-  },
-  { "fields" : { "bible_verse_number" : 6,
-        "book_number" : 0,
-        "chapter_number" : 1,
-        "localized_reference" : "Genesis 1:7",
-        "text_saved" : "And God made the firmament, and divided the waters which were under the firmament from the waters which were above the firmament: and it was so. ",
-        "first_verse_number" : 7,
-        "last_verse_number" : 7,
-        "version" : ["KJV"]
-      },
-    "model" : "bibleverses.verse",
-    "pk" : null
-  },
-  { "fields" : { "bible_verse_number" : 7,
-        "book_number" : 0,
-        "chapter_number" : 1,
-        "localized_reference" : "Genesis 1:8",
-        "text_saved" : "And God called the firmament Heaven. And the evening and the morning were the second day. ",
-        "first_verse_number" : 8,
-        "last_verse_number" : 8,
-        "version" : ["KJV"]
-      },
-    "model" : "bibleverses.verse",
-    "pk" : null
-  },
-  { "fields" : { "bible_verse_number" : 8,
-        "book_number" : 0,
-        "chapter_number" : 1,
-        "localized_reference" : "Genesis 1:9",
-        "text_saved" : "And God said, Let the waters under the heaven be gathered together unto one place, and let the dry land appear: and it was so. ",
-        "first_verse_number" : 9,
-        "last_verse_number" : 9,
-        "version" : ["KJV"]
-      },
-    "model" : "bibleverses.verse",
-    "pk" : null
-  },
-  { "fields" : { "bible_verse_number" : 9,
-        "book_number" : 0,
-        "chapter_number" : 1,
-        "localized_reference" : "Genesis 1:10",
-        "text_saved" : "And God called the dry land Earth; and the gathering together of the waters called he Seas: and God saw that it was good. ",
-        "first_verse_number" : 10,
-        "last_verse_number" : 10,
-        "version" : ["KJV"]
-      },
-    "model" : "bibleverses.verse",
-    "pk" : null
-  },
-  { "fields" : { "bible_verse_number" : 10,
-        "book_number" : 0,
-        "chapter_number" : 2,
-        "localized_reference" : "Genesis 2:1",
-        "text_saved" : "Thus the heavens and the earth were finished, and all the host of them.",
-        "first_verse_number" : 1,
-        "last_verse_number" : 1,
-        "version" : ["KJV"]
-      },
-    "model" : "bibleverses.verse",
-    "pk" : null
-  },
-  { "fields" : { "bible_verse_number" : 11,
-        "book_number" : 0,
-        "chapter_number" : 2,
-        "localized_reference" : "Genesis 2:2",
-        "text_saved" : "And on the seventh day God ended his work which he had made; and he rested on the seventh day from all his work which he had made.",
-        "first_verse_number" : 2,
-        "last_verse_number" : 2,
-        "version" : ["KJV"]
-      },
-    "model" : "bibleverses.verse",
-    "pk" : null
-  },
-
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Psalm 23:1",
-        "chapter_number": 23,
-        "text_saved": "The LORD is my shepherd--I shall not want. ",
-        "book_number": 18,
-        "version": ["KJV"],
-        "first_verse_number": 1,
-        "last_verse_number": 1,
-        "bible_verse_number": 14236
+    {
+        "fields": {
+            "bible_verse_number": 0,
+            "gapless_bible_verse_number": 0,
+            "book_number": 0,
+            "chapter_number": 1,
+            "localized_reference": "Genesis 1:1",
+            "text_saved": "In the beginning God created the heaven and the earth. ",
+            "first_verse_number": 1,
+            "last_verse_number": 1,
+            "version": [
+                "KJV"
+            ]
+        },
+        "model": "bibleverses.verse",
+        "pk": null
+    },
+    {
+        "fields": {
+            "bible_verse_number": 1,
+            "gapless_bible_verse_number": 1,
+            "book_number": 0,
+            "chapter_number": 1,
+            "localized_reference": "Genesis 1:2",
+            "text_saved": "And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters. ",
+            "first_verse_number": 2,
+            "last_verse_number": 2,
+            "version": [
+                "KJV"
+            ]
+        },
+        "model": "bibleverses.verse",
+        "pk": null
+    },
+    {
+        "fields": {
+            "bible_verse_number": 2,
+            "gapless_bible_verse_number": 2,
+            "book_number": 0,
+            "chapter_number": 1,
+            "localized_reference": "Genesis 1:3",
+            "text_saved": "And God said, Let there be light: and there was light. ",
+            "first_verse_number": 3,
+            "last_verse_number": 3,
+            "version": [
+                "KJV"
+            ]
+        },
+        "model": "bibleverses.verse",
+        "pk": null
+    },
+    {
+        "fields": {
+            "bible_verse_number": 3,
+            "gapless_bible_verse_number": 3,
+            "book_number": 0,
+            "chapter_number": 1,
+            "localized_reference": "Genesis 1:4",
+            "text_saved": "And God saw the light, that it was good: and God divided the light from the darkness. ",
+            "first_verse_number": 4,
+            "last_verse_number": 4,
+            "version": [
+                "KJV"
+            ]
+        },
+        "model": "bibleverses.verse",
+        "pk": null
+    },
+    {
+        "fields": {
+            "bible_verse_number": 4,
+            "gapless_bible_verse_number": 4,
+            "book_number": 0,
+            "chapter_number": 1,
+            "localized_reference": "Genesis 1:5",
+            "text_saved": "And God called the light Day, and the darkness he called Night. And the evening and the morning were the first day. ",
+            "first_verse_number": 5,
+            "last_verse_number": 5,
+            "version": [
+                "KJV"
+            ]
+        },
+        "model": "bibleverses.verse",
+        "pk": null
+    },
+    {
+        "fields": {
+            "bible_verse_number": 5,
+            "gapless_bible_verse_number": 5,
+            "book_number": 0,
+            "chapter_number": 1,
+            "localized_reference": "Genesis 1:6",
+            "text_saved": "And God said, Let there be a firmament in the midst of the waters, and let it divide the waters from the waters. ",
+            "first_verse_number": 6,
+            "last_verse_number": 6,
+            "version": [
+                "KJV"
+            ]
+        },
+        "model": "bibleverses.verse",
+        "pk": null
+    },
+    {
+        "fields": {
+            "bible_verse_number": 6,
+            "gapless_bible_verse_number": 6,
+            "book_number": 0,
+            "chapter_number": 1,
+            "localized_reference": "Genesis 1:7",
+            "text_saved": "And God made the firmament, and divided the waters which were under the firmament from the waters which were above the firmament: and it was so. ",
+            "first_verse_number": 7,
+            "last_verse_number": 7,
+            "version": [
+                "KJV"
+            ]
+        },
+        "model": "bibleverses.verse",
+        "pk": null
+    },
+    {
+        "fields": {
+            "bible_verse_number": 7,
+            "gapless_bible_verse_number": 7,
+            "book_number": 0,
+            "chapter_number": 1,
+            "localized_reference": "Genesis 1:8",
+            "text_saved": "And God called the firmament Heaven. And the evening and the morning were the second day. ",
+            "first_verse_number": 8,
+            "last_verse_number": 8,
+            "version": [
+                "KJV"
+            ]
+        },
+        "model": "bibleverses.verse",
+        "pk": null
+    },
+    {
+        "fields": {
+            "bible_verse_number": 8,
+            "gapless_bible_verse_number": 8,
+            "book_number": 0,
+            "chapter_number": 1,
+            "localized_reference": "Genesis 1:9",
+            "text_saved": "And God said, Let the waters under the heaven be gathered together unto one place, and let the dry land appear: and it was so. ",
+            "first_verse_number": 9,
+            "last_verse_number": 9,
+            "version": [
+                "KJV"
+            ]
+        },
+        "model": "bibleverses.verse",
+        "pk": null
+    },
+    {
+        "fields": {
+            "bible_verse_number": 9,
+            "gapless_bible_verse_number": 9,
+            "book_number": 0,
+            "chapter_number": 1,
+            "localized_reference": "Genesis 1:10",
+            "text_saved": "And God called the dry land Earth; and the gathering together of the waters called he Seas: and God saw that it was good. ",
+            "first_verse_number": 10,
+            "last_verse_number": 10,
+            "version": [
+                "KJV"
+            ]
+        },
+        "model": "bibleverses.verse",
+        "pk": null
+    },
+    {
+        "fields": {
+            "bible_verse_number": 10,
+            "gapless_bible_verse_number": 10,
+            "book_number": 0,
+            "chapter_number": 2,
+            "localized_reference": "Genesis 2:1",
+            "text_saved": "Thus the heavens and the earth were finished, and all the host of them.",
+            "first_verse_number": 1,
+            "last_verse_number": 1,
+            "version": [
+                "KJV"
+            ]
+        },
+        "model": "bibleverses.verse",
+        "pk": null
+    },
+    {
+        "fields": {
+            "bible_verse_number": 11,
+            "gapless_bible_verse_number": 11,
+            "book_number": 0,
+            "chapter_number": 2,
+            "localized_reference": "Genesis 2:2",
+            "text_saved": "And on the seventh day God ended his work which he had made; and he rested on the seventh day from all his work which he had made.",
+            "first_verse_number": 2,
+            "last_verse_number": 2,
+            "version": [
+                "KJV"
+            ]
+        },
+        "model": "bibleverses.verse",
+        "pk": null
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Psalm 23:1",
+            "chapter_number": 23,
+            "text_saved": "The LORD is my shepherd--I shall not want. ",
+            "book_number": 18,
+            "version": [
+                "KJV"
+            ],
+            "first_verse_number": 1,
+            "last_verse_number": 1,
+            "bible_verse_number": 14236,
+            "gapless_bible_verse_number": 14236
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Psalm 23:2",
+            "chapter_number": 23,
+            "text_saved": "He maketh me to lie down in green pastures: he leadeth me beside the still waters. ",
+            "book_number": 18,
+            "version": [
+                "KJV"
+            ],
+            "first_verse_number": 2,
+            "last_verse_number": 2,
+            "bible_verse_number": 14237,
+            "gapless_bible_verse_number": 14237
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Psalm 23:3",
+            "chapter_number": 23,
+            "text_saved": "He restoreth my soul: he leadeth me in the paths of righteousness for his name's sake. ",
+            "book_number": 18,
+            "version": [
+                "KJV"
+            ],
+            "first_verse_number": 3,
+            "last_verse_number": 3,
+            "bible_verse_number": 14238,
+            "gapless_bible_verse_number": 14238
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Psalm 23:4",
+            "chapter_number": 23,
+            "text_saved": "Yea, though I walk through the valley of the shadow of death, I will fear no evil: for thou art with me; thy rod and thy staff they comfort me. ",
+            "book_number": 18,
+            "version": [
+                "KJV"
+            ],
+            "first_verse_number": 4,
+            "last_verse_number": 4,
+            "bible_verse_number": 14239,
+            "gapless_bible_verse_number": 14239
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Psalm 23:5",
+            "chapter_number": 23,
+            "text_saved": "Thou preparest a table before me in the presence of mine enemies: thou anointest my head with oil; my cup runneth over. ",
+            "book_number": 18,
+            "version": [
+                "KJV"
+            ],
+            "first_verse_number": 5,
+            "last_verse_number": 5,
+            "bible_verse_number": 14240,
+            "gapless_bible_verse_number": 14240
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Psalm 23:6",
+            "chapter_number": 23,
+            "text_saved": "Surely goodness and mercy shall follow me all the days of my life: and I will dwell in the house of the LORD for ever. ",
+            "book_number": 18,
+            "version": [
+                "KJV"
+            ],
+            "first_verse_number": 6,
+            "last_verse_number": 6,
+            "bible_verse_number": 14241,
+            "gapless_bible_verse_number": 14241
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Psalm 23:1",
+            "chapter_number": 23,
+            "text_saved": "The LORD is my shepherd, I lack nothing. ",
+            "book_number": 18,
+            "version": 2,
+            "first_verse_number": 1,
+            "last_verse_number": 1,
+            "bible_verse_number": 14236,
+            "gapless_bible_verse_number": 14236
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Psalm 23:2",
+            "chapter_number": 23,
+            "text_saved": "He takes me to lush pastures, he leads me to refreshing water. ",
+            "book_number": 18,
+            "version": 2,
+            "first_verse_number": 2,
+            "last_verse_number": 2,
+            "bible_verse_number": 14237,
+            "gapless_bible_verse_number": 14237
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Psalm 23:3",
+            "chapter_number": 23,
+            "text_saved": "He restores my strength. He leads me down the right paths for the sake of his reputation. ",
+            "book_number": 18,
+            "version": 2,
+            "first_verse_number": 3,
+            "last_verse_number": 3,
+            "bible_verse_number": 14238,
+            "gapless_bible_verse_number": 14238
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Psalm 23:4",
+            "chapter_number": 23,
+            "text_saved": "Even when I must walk through the darkest valley, I fear no danger, for you are with me; your rod and your staff reassure me. ",
+            "book_number": 18,
+            "version": 2,
+            "first_verse_number": 4,
+            "last_verse_number": 4,
+            "bible_verse_number": 14239,
+            "gapless_bible_verse_number": 14239
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Psalm 23:5",
+            "chapter_number": 23,
+            "text_saved": "You prepare a feast before me in plain sight of my enemies. You refresh my head with oil; my cup is completely full. ",
+            "book_number": 18,
+            "version": 2,
+            "first_verse_number": 5,
+            "last_verse_number": 5,
+            "bible_verse_number": 14240,
+            "gapless_bible_verse_number": 14240
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Psalm 23:6",
+            "chapter_number": 23,
+            "text_saved": "Surely your goodness and faithfulness will pursue me all my days, and I will live in the LORD's house for the rest of my life. ",
+            "book_number": 18,
+            "version": 2,
+            "first_verse_number": 6,
+            "last_verse_number": 6,
+            "bible_verse_number": 14241,
+            "gapless_bible_verse_number": 14241
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "John 3:16",
+            "chapter_number": 3,
+            "text_saved": "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life. ",
+            "book_number": 42,
+            "version": [
+                "KJV"
+            ],
+            "first_verse_number": 16,
+            "last_verse_number": 16,
+            "bible_verse_number": 26136,
+            "gapless_bible_verse_number": 26136
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "John 3:16",
+            "chapter_number": 3,
+            "text_saved": "For this is the way God loved the world: He gave his one and only Son, so that everyone who believes in him will not perish but have eternal life. ",
+            "book_number": 42,
+            "version": 2,
+            "first_verse_number": 16,
+            "last_verse_number": 16,
+            "bible_verse_number": 26136,
+            "gapless_bible_verse_number": 26136
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "John 14:6",
+            "chapter_number": 14,
+            "text_saved": "Jesus saith unto him, I am the way, the truth, and the life: no man cometh unto the Father, but by me. ",
+            "book_number": 42,
+            "version": [
+                "KJV"
+            ],
+            "first_verse_number": 6,
+            "last_verse_number": 6,
+            "bible_verse_number": 26674,
+            "gapless_bible_verse_number": 26674
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "John 14:6",
+            "chapter_number": 14,
+            "text_saved": "Jesus replied, \"I am the way, and the truth, and the life. No one comes to the Father except through me.\"",
+            "book_number": 42,
+            "version": 2,
+            "first_verse_number": 6,
+            "last_verse_number": 6,
+            "bible_verse_number": 26674,
+            "gapless_bible_verse_number": 26674
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "John 5:3",
+            "chapter_number": 5,
+            "text_saved": "A great number of sick, blind, lame, and paralyzed people were lying in these walkways.",
+            "book_number": 42,
+            "version": 2,
+            "first_verse_number": 3,
+            "last_verse_number": 3,
+            "bible_verse_number": 26213,
+            "gapless_bible_verse_number": 26213
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "John 5:4",
+            "chapter_number": 5,
+            "text_saved": "",
+            "book_number": 42,
+            "version": 2,
+            "first_verse_number": 3,
+            "last_verse_number": 3,
+            "bible_verse_number": 26214,
+            "gapless_bible_verse_number": 26214
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Ephesians 2:8",
+            "chapter_number": 2,
+            "text_saved": "For by grace you are saved through faith, and this is not from yourselves, it is the gift of",
+            "book_number": 48,
+            "version": [
+                "NET"
+            ],
+            "first_verse_number": 8,
+            "last_verse_number": 8,
+            "bible_verse_number": 29237,
+            "gapless_bible_verse_number": 29237
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Ephesians 2:8",
+            "chapter_number": 2,
+            "text_saved": "For by grace are ye saved through faith; and that not of yourselves: it is the gift of God:",
+            "book_number": 48,
+            "version": [
+                "KJV"
+            ],
+            "first_verse_number": 8,
+            "last_verse_number": 8,
+            "bible_verse_number": 29237,
+            "gapless_bible_verse_number": 29237
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Ephesians 2:9",
+            "chapter_number": 2,
+            "text_saved": "it is not from works, so that no one can boast.",
+            "book_number": 48,
+            "version": [
+                "NET"
+            ],
+            "first_verse_number": 9,
+            "last_verse_number": 9,
+            "bible_verse_number": 29238,
+            "gapless_bible_verse_number": 29238
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Ephesians 2:9",
+            "chapter_number": 2,
+            "text_saved": "Not of works, lest any man should boast.",
+            "book_number": 48,
+            "version": [
+                "KJV"
+            ],
+            "first_verse_number": 9,
+            "last_verse_number": 9,
+            "bible_verse_number": 29238,
+            "gapless_bible_verse_number": 29238
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Matthew 4:21",
+            "chapter_number": 4,
+            "text_saved": "Going on from there he saw two other brothers, James the son of Zebedee and John his brother, in a boat with Zebedee their father, mending their nets. Then he called them. ",
+            "book_number": 39,
+            "version": 2,
+            "first_verse_number": 21,
+            "last_verse_number": 21,
+            "bible_verse_number": 23230,
+            "gapless_bible_verse_number": 23230
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Song of Solomon 1:1",
+            "chapter_number": 1,
+            "text_saved": "The song of songs, which is Solomon's.",
+            "book_number": 21,
+            "version": [
+                "KJV"
+            ],
+            "first_verse_number": 1,
+            "last_verse_number": 1,
+            "bible_verse_number": 17538,
+            "gapless_bible_verse_number": 17538
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "1 Corinthians 1:3",
+            "chapter_number": 1,
+            "text_saved": "Grace be unto you, and peace, from God our Father, and from the Lord Jesus Christ.",
+            "book_number": 45,
+            "version": [
+                "KJV"
+            ],
+            "first_verse_number": 3,
+            "last_verse_number": 3,
+            "bible_verse_number": 28366,
+            "gapless_bible_verse_number": 28366
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Mezmur 23:1",
+            "chapter_number": 23,
+            "text_saved": "RAB \u00e7oban\u0131md\u0131r,\nEksi\u011fim olmaz",
+            "book_number": 18,
+            "version": [
+                "TCL02"
+            ],
+            "first_verse_number": 1,
+            "last_verse_number": 1,
+            "bible_verse_number": 14236,
+            "gapless_bible_verse_number": 14236
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Mezmur 23:2",
+            "chapter_number": 23,
+            "text_saved": "Beni yemye\u015fil \u00e7ay\u0131rlarda yat\u0131r\u0131r,\nSakin sular\u0131n k\u0131y\u0131s\u0131na g\u00f6t\u00fcr\u00fcr.",
+            "book_number": 18,
+            "version": [
+                "TCL02"
+            ],
+            "first_verse_number": 2,
+            "last_verse_number": 2,
+            "bible_verse_number": 14237,
+            "gapless_bible_verse_number": 14237
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Mezmur 23:3",
+            "chapter_number": 23,
+            "text_saved": "\u0130\u00e7imi tazeler,\nAd\u0131 u\u011fruna bana do\u011fru yollarda \u00f6nc\u00fcl\u00fck eder.",
+            "book_number": 18,
+            "version": [
+                "TCL02"
+            ],
+            "first_verse_number": 3,
+            "last_verse_number": 3,
+            "bible_verse_number": 14238,
+            "gapless_bible_verse_number": 14238
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Mezmur 23:4",
+            "chapter_number": 23,
+            "text_saved": "Karanl\u0131k \u00f6l\u00fcm vadisinden ge\u00e7sem bile,\nK\u00f6t\u00fcl\u00fckten korkmam.\n\u00c7\u00fcnk\u00fc sen benimlesin.\n\u00c7oma\u011f\u0131n, de\u011fne\u011fin g\u00fcven verir bana.",
+            "book_number": 18,
+            "version": [
+                "TCL02"
+            ],
+            "first_verse_number": 4,
+            "last_verse_number": 4,
+            "bible_verse_number": 14239,
+            "gapless_bible_verse_number": 14239
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Mezmur 23:5",
+            "chapter_number": 23,
+            "text_saved": "D\u00fc\u015fmanlar\u0131m\u0131n \u00f6n\u00fcnde bana sofra kurars\u0131n,\nBa\u015f\u0131ma ya\u011f s\u00fcrersin,\nK\u00e2sem ta\u015f\u0131yor.",
+            "book_number": 18,
+            "version": [
+                "TCL02"
+            ],
+            "first_verse_number": 5,
+            "last_verse_number": 5,
+            "bible_verse_number": 14240,
+            "gapless_bible_verse_number": 14240
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Mezmur 23:6",
+            "chapter_number": 23,
+            "text_saved": "\u00d6mr\u00fcm boyunca yaln\u0131z iyilik ve sevgi izleyecek beni,\nHep RAB'bin evinde oturaca\u011f\u0131m.",
+            "book_number": 18,
+            "version": [
+                "TCL02"
+            ],
+            "first_verse_number": 6,
+            "last_verse_number": 6,
+            "bible_verse_number": 14241,
+            "gapless_bible_verse_number": 14241
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Yuhanna 3:16",
+            "chapter_number": 3,
+            "text_saved": "\u201c\u00c7\u00fcnk\u00fc Tanr\u0131 d\u00fcnyay\u0131 o kadar \u00e7ok sevdi ki, biricik O\u011flu'nu verdi. \u00d6yle ki, O'na iman edenlerin hi\u00e7biri mahvolmas\u0131n, hepsi sonsuz ya\u015fama kavu\u015fsun.",
+            "book_number": 42,
+            "version": [
+                "TCL02"
+            ],
+            "first_verse_number": 16,
+            "last_verse_number": 16,
+            "bible_verse_number": 26136,
+            "gapless_bible_verse_number": 26136
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Romal\u0131lar 3:21",
+            "chapter_number": 3,
+            "text_saved": "Ama \u015fimdi Yasa'dan ba\u011f\u0131ms\u0131z olarak Tanr\u0131'n\u0131n insan\u0131 nas\u0131l aklayaca\u011f\u0131 a\u00e7\u0131kland\u0131. Yasa ve peygamberler buna tan\u0131kl\u0131k ediyor.",
+            "book_number": 44,
+            "version": 3,
+            "first_verse_number": 21,
+            "last_verse_number": 21,
+            "bible_verse_number": 27000,
+            "gapless_bible_verse_number": 27000
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Romal\u0131lar 3:22",
+            "chapter_number": 3,
+            "text_saved": "Tanr\u0131 insanlar\u0131 \u0130sa Mesih'e olan imanlar\u0131yla \u201cMesih'e olan imanlar\u0131yla\u201d ya da \u201cMesih'in sadakatiyle\u201d. aklar. Bunu, iman eden herkes i\u00e7in yapar. Hi\u00e7 ayr\u0131m yoktur.",
+            "book_number": 44,
+            "version": [
+                "TCL02"
+            ],
+            "first_verse_number": 22,
+            "last_verse_number": 22,
+            "bible_verse_number": 27001,
+            "gapless_bible_verse_number": 27001
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Romal\u0131lar 3:23",
+            "chapter_number": 3,
+            "text_saved": "\u00c7\u00fcnk\u00fc herkes g\u00fcnah i\u015fledi ve Tanr\u0131'n\u0131n y\u00fcceli\u011finden yoksun kald\u0131.",
+            "book_number": 44,
+            "version": [
+                "TCL02"
+            ],
+            "first_verse_number": 23,
+            "last_verse_number": 23,
+            "bible_verse_number": 27002,
+            "gapless_bible_verse_number": 27002
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Romal\u0131lar 3:24",
+            "chapter_number": 3,
+            "text_saved": "\u0130nsanlar \u0130sa Mesih'te olan kurtulu\u015fla \u201cKurtulu\u015fla\u201d, Tanr\u0131'n\u0131n l\u00fctfuyla, kar\u015f\u0131l\u0131ks\u0131z olarak aklan\u0131rlar.",
+            "book_number": 44,
+            "version": [
+                "TCL02"
+            ],
+            "first_verse_number": 24,
+            "last_verse_number": 24,
+            "bible_verse_number": 27003,
+            "gapless_bible_verse_number": 27003
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Romal\u0131lar 3:25-26",
+            "chapter_number": 3,
+            "text_saved": "Tanr\u0131 Mesih'i, kan\u0131yla g\u00fcnahlar\u0131 ba\u011f\u0131\u015flatan ve imanla benimsenen kurban olarak sundu. B\u00f6ylece adaletini g\u00f6sterdi. \u00c7\u00fcnk\u00fc sabredip daha \u00f6nce i\u015flenmi\u015f g\u00fcnahlar\u0131 cezas\u0131z b\u0131rakt\u0131. Bunu, adil kalmak ve \u0130sa'ya iman edeni aklamak i\u00e7in \u015fimdiki zamanda kendi adaletini g\u00f6stermek amac\u0131yla yapt\u0131.",
+            "book_number": 44,
+            "version": [
+                "TCL02"
+            ],
+            "first_verse_number": 25,
+            "last_verse_number": 26,
+            "bible_verse_number": 27004,
+            "gapless_bible_verse_number": 27004
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Romal\u0131lar 3:25",
+            "chapter_number": 3,
+            "text_saved": "",
+            "book_number": 44,
+            "version": [
+                "TCL02"
+            ],
+            "first_verse_number": 25,
+            "last_verse_number": 25,
+            "missing": true,
+            "merged_into": [
+                "TCL02",
+                "Romal\u0131lar 3:25-26"
+            ],
+            "bible_verse_number": 27005,
+            "gapless_bible_verse_number": null
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Romal\u0131lar 3:26",
+            "chapter_number": 3,
+            "text_saved": "",
+            "book_number": 44,
+            "version": [
+                "TCL02"
+            ],
+            "first_verse_number": 26,
+            "last_verse_number": 26,
+            "missing": true,
+            "merged_into": [
+                "TCL02",
+                "Romal\u0131lar 3:25-26"
+            ],
+            "bible_verse_number": 27006,
+            "gapless_bible_verse_number": null
+        }
+    },
+    {
+        "pk": null,
+        "model": "bibleverses.verse",
+        "fields": {
+            "localized_reference": "Romal\u0131lar 3:27",
+            "chapter_number": 3,
+            "text_saved": "\u00d6yleyse neyle \u00f6v\u00fcnebiliriz? Hi\u00e7bir \u015feyle! Hangi ilkeye dayanarak? Yasa'y\u0131 yerine getirme ilkesine mi? Hay\u0131r, iman ilkesine.",
+            "book_number": 44,
+            "version": [
+                "TCL02"
+            ],
+            "first_verse_number": 27,
+            "last_verse_number": 27,
+            "bible_verse_number": 27007,
+            "gapless_bible_verse_number": 27005
+        }
     }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Psalm 23:2",
-        "chapter_number": 23,
-        "text_saved": "He maketh me to lie down in green pastures: he leadeth me beside the still waters. ",
-        "book_number": 18,
-        "version": ["KJV"],
-        "first_verse_number": 2,
-        "last_verse_number": 2,
-        "bible_verse_number": 14237
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Psalm 23:3",
-        "chapter_number": 23,
-        "text_saved": "He restoreth my soul: he leadeth me in the paths of righteousness for his name's sake. ",
-        "book_number": 18,
-        "version": ["KJV"],
-        "first_verse_number": 3,
-        "last_verse_number": 3,
-        "bible_verse_number": 14238
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Psalm 23:4",
-        "chapter_number": 23,
-        "text_saved": "Yea, though I walk through the valley of the shadow of death, I will fear no evil: for thou art with me; thy rod and thy staff they comfort me. ",
-        "book_number": 18,
-        "version": ["KJV"],
-        "first_verse_number": 4,
-        "last_verse_number": 4,
-        "bible_verse_number": 14239
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Psalm 23:5",
-        "chapter_number": 23,
-        "text_saved": "Thou preparest a table before me in the presence of mine enemies: thou anointest my head with oil; my cup runneth over. ",
-        "book_number": 18,
-        "version": ["KJV"],
-        "first_verse_number": 5,
-        "last_verse_number": 5,
-        "bible_verse_number": 14240
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Psalm 23:6",
-        "chapter_number": 23,
-        "text_saved": "Surely goodness and mercy shall follow me all the days of my life: and I will dwell in the house of the LORD for ever. ",
-        "book_number": 18,
-        "version": ["KJV"],
-        "first_verse_number": 6,
-        "last_verse_number": 6,
-        "bible_verse_number": 14241
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Psalm 23:1",
-        "chapter_number": 23,
-        "text_saved": "The LORD is my shepherd, I lack nothing. ",
-        "book_number": 18,
-        "version": 2,
-        "first_verse_number": 1,
-        "last_verse_number": 1,
-        "bible_verse_number": 14236
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Psalm 23:2",
-        "chapter_number": 23,
-        "text_saved": "He takes me to lush pastures, he leads me to refreshing water. ",
-        "book_number": 18,
-        "version": 2,
-        "first_verse_number": 2,
-        "last_verse_number": 2,
-        "bible_verse_number": 14237
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Psalm 23:3",
-        "chapter_number": 23,
-        "text_saved": "He restores my strength. He leads me down the right paths for the sake of his reputation. ",
-        "book_number": 18,
-        "version": 2,
-        "first_verse_number": 3,
-        "last_verse_number": 3,
-        "bible_verse_number": 14238
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Psalm 23:4",
-        "chapter_number": 23,
-        "text_saved": "Even when I must walk through the darkest valley, I fear no danger, for you are with me; your rod and your staff reassure me. ",
-        "book_number": 18,
-        "version": 2,
-        "first_verse_number": 4,
-        "last_verse_number": 4,
-        "bible_verse_number": 14239
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Psalm 23:5",
-        "chapter_number": 23,
-        "text_saved": "You prepare a feast before me in plain sight of my enemies. You refresh my head with oil; my cup is completely full. ",
-        "book_number": 18,
-        "version": 2,
-        "first_verse_number": 5,
-        "last_verse_number": 5,
-        "bible_verse_number": 14240
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Psalm 23:6",
-        "chapter_number": 23,
-        "text_saved": "Surely your goodness and faithfulness will pursue me all my days, and I will live in the LORD's house for the rest of my life. ",
-        "book_number": 18,
-        "version": 2,
-        "first_verse_number": 6,
-        "last_verse_number": 6,
-        "bible_verse_number": 14241
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "John 3:16",
-        "chapter_number": 3,
-        "text_saved": "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life. ",
-        "book_number": 42,
-        "version": ["KJV"],
-        "first_verse_number": 16,
-        "last_verse_number": 16,
-        "bible_verse_number": 26136
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "John 3:16",
-        "chapter_number": 3,
-        "text_saved": "For this is the way God loved the world: He gave his one and only Son, so that everyone who believes in him will not perish but have eternal life. ",
-        "book_number": 42,
-        "version": 2,
-        "first_verse_number": 16,
-        "last_verse_number": 16,
-        "bible_verse_number": 26136
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "John 14:6",
-        "chapter_number": 14,
-        "text_saved": "Jesus saith unto him, I am the way, the truth, and the life: no man cometh unto the Father, but by me. ",
-        "book_number": 42,
-        "version": ["KJV"],
-        "first_verse_number": 6,
-        "last_verse_number": 6,
-        "bible_verse_number": 26674
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "John 14:6",
-        "chapter_number": 14,
-        "text_saved": "Jesus replied, \"I am the way, and the truth, and the life. No one comes to the Father except through me.\"",
-        "book_number": 42,
-        "version": 2,
-        "first_verse_number": 6,
-        "last_verse_number": 6,
-        "bible_verse_number": 26674
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "John 5:3",
-        "chapter_number": 5,
-        "text_saved": "A great number of sick, blind, lame, and paralyzed people were lying in these walkways.",
-        "book_number": 42,
-        "version": 2,
-        "first_verse_number": 3,
-        "last_verse_number": 3,
-        "bible_verse_number": 26213
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "John 5:4",
-        "chapter_number": 5,
-        "text_saved": "",
-        "book_number": 42,
-        "version": 2,
-        "first_verse_number": 3,
-        "last_verse_number": 3,
-        "bible_verse_number": 26214
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Ephesians 2:8",
-        "chapter_number": 2,
-        "text_saved": "For by grace you are saved through faith, and this is not from yourselves, it is the gift of",
-        "book_number": 48,
-        "version": ["NET"],
-        "first_verse_number": 8,
-        "last_verse_number": 8,
-        "bible_verse_number": 29237
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Ephesians 2:8",
-        "chapter_number": 2,
-        "text_saved": "For by grace are ye saved through faith; and that not of yourselves: it is the gift of God:",
-        "book_number": 48,
-        "version": ["KJV"],
-        "first_verse_number": 8,
-        "last_verse_number": 8,
-        "bible_verse_number": 29237
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Ephesians 2:9",
-        "chapter_number": 2,
-        "text_saved": "it is not from works, so that no one can boast.",
-        "book_number": 48,
-        "version": ["NET"],
-        "first_verse_number": 9,
-        "last_verse_number": 9,
-        "bible_verse_number": 29238
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Ephesians 2:9",
-        "chapter_number": 2,
-        "text_saved": "Not of works, lest any man should boast.",
-        "book_number": 48,
-        "version": ["KJV"],
-        "first_verse_number": 9,
-        "last_verse_number": 9,
-        "bible_verse_number": 29238
-    }
-},
-{
-    "pk" : null,
-    "model" : "bibleverses.verse",
-    "fields" : {
-        "localized_reference" : "Matthew 4:21",
-        "chapter_number" : 4,
-        "text_saved" : "Going on from there he saw two other brothers, James the son of Zebedee and John his brother, in a boat with Zebedee their father, mending their nets. Then he called them. ",
-        "book_number" : 39,
-        "version" : 2,
-        "first_verse_number" : 21,
-        "last_verse_number" : 21,
-        "bible_verse_number" : 23230
-     }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Song of Solomon 1:1",
-        "chapter_number": 1,
-        "text_saved": "The song of songs, which is Solomon's.",
-        "book_number": 21,
-        "version": ["KJV"],
-        "first_verse_number": 1,
-        "last_verse_number": 1,
-        "bible_verse_number": 17538
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "1 Corinthians 1:3",
-        "chapter_number": 1,
-        "text_saved": "Grace be unto you, and peace, from God our Father, and from the Lord Jesus Christ.",
-        "book_number": 45,
-        "version": ["KJV"],
-        "first_verse_number": 3,
-        "last_verse_number": 3,
-        "bible_verse_number": 28366
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Mezmur 23:1",
-        "chapter_number": 23,
-        "text_saved": "RAB çobanımdır,\nEksiğim olmaz",
-        "book_number": 18,
-        "version": ["TCL02"],
-        "first_verse_number": 1,
-        "last_verse_number": 1,
-        "bible_verse_number": 14236
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Mezmur 23:2",
-        "chapter_number": 23,
-        "text_saved": "Beni yemyeşil çayırlarda yatırır,\nSakin suların kıyısına götürür.",
-        "book_number": 18,
-        "version": ["TCL02"],
-        "first_verse_number": 2,
-        "last_verse_number": 2,
-        "bible_verse_number": 14237
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Mezmur 23:3",
-        "chapter_number": 23,
-        "text_saved": "İçimi tazeler,\nAdı uğruna bana doğru yollarda öncülük eder.",
-        "book_number": 18,
-        "version": ["TCL02"],
-        "first_verse_number": 3,
-        "last_verse_number": 3,
-        "bible_verse_number": 14238
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Mezmur 23:4",
-        "chapter_number": 23,
-        "text_saved": "Karanlık ölüm vadisinden geçsem bile,\nKötülükten korkmam.\nÇünkü sen benimlesin.\nÇomağın, değneğin güven verir bana.",
-        "book_number": 18,
-        "version": ["TCL02"],
-        "first_verse_number": 4,
-        "last_verse_number": 4,
-        "bible_verse_number": 14239
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Mezmur 23:5",
-        "chapter_number": 23,
-        "text_saved": "Düşmanlarımın önünde bana sofra kurarsın,\nBaşıma yağ sürersin,\nKâsem taşıyor.",
-        "book_number": 18,
-        "version": ["TCL02"],
-        "first_verse_number": 5,
-        "last_verse_number": 5,
-        "bible_verse_number": 14240
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Mezmur 23:6",
-        "chapter_number": 23,
-        "text_saved": "Ömrüm boyunca yalnız iyilik ve sevgi izleyecek beni,\nHep RAB'bin evinde oturacağım.",
-        "book_number": 18,
-        "version": ["TCL02"],
-        "first_verse_number": 6,
-        "last_verse_number": 6,
-        "bible_verse_number": 14241
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Yuhanna 3:16",
-        "chapter_number": 3,
-        "text_saved": "“Çünkü Tanrı dünyayı o kadar çok sevdi ki, biricik Oğlu'nu verdi. Öyle ki, O'na iman edenlerin hiçbiri mahvolmasın, hepsi sonsuz yaşama kavuşsun.",
-        "book_number": 42,
-        "version": ["TCL02"],
-        "first_verse_number": 16,
-        "last_verse_number": 16,
-        "bible_verse_number": 26136
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Romalılar 3:21",
-        "chapter_number": 3,
-        "text_saved": "Ama şimdi Yasa'dan bağımsız olarak Tanrı'nın insanı nasıl aklayacağı açıklandı. Yasa ve peygamberler buna tanıklık ediyor.",
-        "book_number": 44,
-        "version": 3,
-        "first_verse_number": 21,
-        "last_verse_number": 21,
-        "bible_verse_number": 27000
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Romalılar 3:22",
-        "chapter_number": 3,
-        "text_saved": "Tanrı insanları İsa Mesih'e olan imanlarıyla “Mesih'e olan imanlarıyla” ya da “Mesih'in sadakatiyle”. aklar. Bunu, iman eden herkes için yapar. Hiç ayrım yoktur.",
-        "book_number": 44,
-        "version": ["TCL02"],
-        "first_verse_number": 22,
-        "last_verse_number": 22,
-        "bible_verse_number": 27001
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Romalılar 3:23",
-        "chapter_number": 3,
-        "text_saved": "Çünkü herkes günah işledi ve Tanrı'nın yüceliğinden yoksun kaldı.",
-        "book_number": 44,
-        "version": ["TCL02"],
-        "first_verse_number": 23,
-        "last_verse_number": 23,
-        "bible_verse_number": 27002
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Romalılar 3:24",
-        "chapter_number": 3,
-        "text_saved": "İnsanlar İsa Mesih'te olan kurtuluşla “Kurtuluşla”, Tanrı'nın lütfuyla, karşılıksız olarak aklanırlar.",
-        "book_number": 44,
-        "version": ["TCL02"],
-        "first_verse_number": 24,
-        "last_verse_number": 24,
-        "bible_verse_number": 27003
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Romalılar 3:25-26",
-        "chapter_number": 3,
-        "text_saved": "Tanrı Mesih'i, kanıyla günahları bağışlatan ve imanla benimsenen kurban olarak sundu. Böylece adaletini gösterdi. Çünkü sabredip daha önce işlenmiş günahları cezasız bıraktı. Bunu, adil kalmak ve İsa'ya iman edeni aklamak için şimdiki zamanda kendi adaletini göstermek amacıyla yaptı.",
-        "book_number": 44,
-        "version": ["TCL02"],
-        "first_verse_number": 25,
-        "last_verse_number": 26,
-        "bible_verse_number": 27004
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Romalılar 3:25",
-        "chapter_number": 3,
-        "text_saved": "",
-        "book_number": 44,
-        "version": ["TCL02"],
-        "first_verse_number": 25,
-        "last_verse_number": 25,
-        "missing": true,
-        "merged_into": ["TCL02", "Romalılar 3:25-26"],
-        "bible_verse_number": 27005
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Romalılar 3:26",
-        "chapter_number": 3,
-        "text_saved": "",
-        "book_number": 44,
-        "version": ["TCL02"],
-        "first_verse_number": 26,
-        "last_verse_number": 26,
-        "missing": true,
-        "merged_into": ["TCL02", "Romalılar 3:25-26"],
-        "bible_verse_number": 27006
-    }
-},
-{
-    "pk": null,
-    "model": "bibleverses.verse",
-    "fields": {
-        "localized_reference": "Romalılar 3:27",
-        "chapter_number": 3,
-        "text_saved": "Öyleyse neyle övünebiliriz? Hiçbir şeyle! Hangi ilkeye dayanarak? Yasa'yı yerine getirme ilkesine mi? Hayır, iman ilkesine.",
-        "book_number": 44,
-        "version": ["TCL02"],
-        "first_verse_number": 27,
-        "last_verse_number": 27,
-        "bible_verse_number": 27007
-    }
-}
 ]

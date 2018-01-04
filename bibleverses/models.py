@@ -320,6 +320,11 @@ class Verse(models.Model):
     # Position within the Bible:
     bible_verse_number = models.PositiveSmallIntegerField()  # 0-indexed
 
+    # 0 indexed. Differs from bible_verse_number in that when
+    # missing and merged verses are removed, it has no gaps,
+    # while bible_verse_number does
+    gapless_bible_verse_number = models.PositiveIntegerField(null=True)
+
     # This field is to cope with versions where a specific verse is entirely
     # empty e.g. John 5:4 in NET/ESV
     missing = models.BooleanField(default=False)
@@ -361,6 +366,7 @@ class Verse(models.Model):
     class Meta:
         unique_together = [
             ('bible_verse_number', 'version'),
+            ('gapless_bible_verse_number', 'version'),
             ('localized_reference', 'version'),
         ]
         ordering = ('bible_verse_number',)
