@@ -668,7 +668,7 @@ class Identity(models.Model):
             return
 
         # text_order has to be specified in create since it is non-nullable
-        text_order = verse_list[0].bible_verse_number
+        text_order = verse_list[0].gapless_bible_verse_number
 
         # Merged verses: verse_list might have a different idea about what
         # localized_reference is. Also need to cope with Combo verses.

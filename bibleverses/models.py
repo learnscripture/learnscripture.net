@@ -229,6 +229,7 @@ class ComboVerse(object):
         self.first_verse_number = verse_list[0].first_verse_number
         self.last_verse_number = verse_list[-1].last_verse_number
         self.bible_verse_number = verse_list[0].bible_verse_number
+        self.gapless_bible_verse_number = verse_list[0].gapless_bible_verse_number
         self.verses = verse_list
 
     @property
@@ -289,7 +290,7 @@ class VerseManager(models.Manager):
           SELECT id, version_id, localized_reference, text_saved,
                  ts_headline(text_saved, query, 'StartSel = **, StopSel = **, HighlightAll=TRUE') as highlighted_text,
                  book_number, chapter_number, first_verse_number, last_verse_number,
-                 bible_verse_number, ts_rank(text_tsv, query) as rank
+                 bible_verse_number, gapless_bible_verse_number, ts_rank(text_tsv, query) as rank
           FROM bibleverses_verse, to_tsquery(%s, """ + search_clause + """) query
           WHERE
              query @@ text_tsv
