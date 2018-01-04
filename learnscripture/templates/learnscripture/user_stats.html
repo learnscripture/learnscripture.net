@@ -8,30 +8,42 @@
   <script type="text/javascript" src="{{ STATIC_URL }}lib/dygraph-combined.js"></script>
   <script type="text/javascript">
    $(document).ready(function () {
-     var now = new Date().getTime();
-     g = new Dygraph(
-       document.getElementById("id-user-stats-graph"),
-       "verses_timeline_stats.csv",
-       {
-         includeZero: true,
-         axisLineWidth: 1,
-         strokeWidth: 2,
-         drawCallback: function(dygraph, isInitial) {
-           if (isInitial) {
-             g.updateOptions({ dateWindow:
-                               [Math.max(
-                                 now - 1000 * 60 * 60 * 24 * 30 * 6, // six months ago
-                                 g.xAxisExtremes()[0] // earliest piece of data,
-                               ),
-                                now]});
-           }
-         }
-       }
-     );
+     $.ajax({
+       url: $("#id-user-stats-script-data").attr('data-user-stats-verses-timeline-stats-csv-url') + "?r=" + Math.floor(Math.random() * 1000000000).toString(),
+       success: function(data) {
+         var dataRows = data.replace(/\r/, '').trim().split(/\n/).slice(1).map(function(r) {
+           var cols = r.split(/,/);
+           return [new Date(cols[0]), parseInt(cols[1], 10), parseInt(cols[2], 0)];
+         })
 
-     var rollCb = $('#id-user-stats-graph-rolling');
-     rollCb.bind('change', function (ev) {
-       g.updateOptions({rollPeriod: (rollCb.prop("checked")) ? 7 : 1})
+         var now = new Date().getTime();
+         var g = new Dygraph(
+           document.getElementById("id-user-stats-graph"),
+           dataRows,
+           {
+             labels: [ "Date", "Verses started", "Verses tested" ],
+             includeZero: true,
+             axisLineWidth: 1,
+             strokeWidth: 2,
+             drawCallback: function(dygraph, isInitial) {
+               if (isInitial) {
+                 dygraph.updateOptions({ dateWindow:
+                                         [Math.max(
+                                           now - 1000 * 60 * 60 * 24 * 30 * 6, // six months ago
+                                           dygraph.xAxisExtremes()[0] // earliest piece of data,
+                                         ),
+                                          now]});
+               }
+             }
+           }
+         );
+
+         var rollCb = $('#id-user-stats-graph-rolling');
+         rollCb.bind('change', function (ev) {
+           g.updateOptions({rollPeriod: (rollCb.prop("checked")) ? 7 : 1})
+         });
+
+       }
      });
    });
   </script>
@@ -232,5 +244,9 @@
     </p>
 
   {% endif %}
+
+  <div id="id-user-stats-script-data"
+       data-user-stats-verses-timeline-stats-csv-url="{% url "user_stats_verses_timeline_stats_csv" account.username %}"
+  </div>
 
 {% endblock %}
