@@ -606,6 +606,7 @@ viewCurrentVerse session model =
                 , copyrightNotice currentVerse.verseStatus.version
                 ]
              , actionButtons model currentVerse session.verses model.preferences
+             , hintButton model currentVerse testingMethod
              , onScreenTestingButtons currentVerse testingMethod
              ]
                 ++ (instructions currentVerse testingMethod model.helpVisible)
@@ -894,12 +895,32 @@ wordButtonClasses wd stage =
 
                         Just attempt ->
                             if attempt.finished then
-                                if List.all isAttemptFailure attempt.checkResults then
-                                    [ "incorrect" ]
-                                else if List.all isAttemptSuccess attempt.checkResults then
-                                    [ "correct" ]
-                                else
-                                    [ "partially-correct" ]
+                                let
+                                    allFailed =
+                                        List.all isAttemptFailure attempt.checkResults
+
+                                    noneFailed =
+                                        List.all (isAttemptFailure >> not) attempt.checkResults
+
+                                    lastWasHint =
+                                        case List.head attempt.checkResults of
+                                            Nothing ->
+                                                False
+
+                                            Just Hint ->
+                                                True
+
+                                            _ ->
+                                                False
+                                in
+                                    if allFailed then
+                                        [ "incorrect" ]
+                                    else if lastWasHint then
+                                        [ "hinted" ]
+                                    else if noneFailed then
+                                        [ "correct" ]
+                                    else
+                                        [ "partially-correct" ]
                             else
                                 []
 
@@ -1131,6 +1152,58 @@ actionButtons model verse verseStore preferences =
                      )
                         ++ (List.map (viewButton model) buttons)
                     )
+
+
+hintButton : Model -> CurrentVerse -> TestingMethod -> H.Html Msg
+hintButton model currentVerse testingMethod =
+    let
+        hintDiv enabled total used =
+            H.div [ A.id "id-hint-btn-container" ]
+                [ viewButton model
+                    { enabled = enabled
+                    , default = NonDefault
+                    , msg = UseHint
+                    , caption =
+                        "Use hint"
+                            ++ interpolate " ({0}/{1})"
+                                [ toString used
+                                , toString total
+                                ]
+                    , id = "id-hint-btn"
+                    }
+                ]
+    in
+        case currentVerse.currentStage of
+            Test _ testProgress ->
+                case testProgress.currentWord of
+                    TestFinished _ ->
+                        emptyNode
+
+                    CurrentWord w ->
+                        let
+                            hintsUsed =
+                                (getHintsUsed testProgress)
+
+                            totalHints =
+                                allowedHints currentVerse testingMethod
+
+                            hintsRemaining =
+                                totalHints - hintsUsed
+                        in
+                            if totalHints == 0 then
+                                emptyNode
+                            else
+                                hintDiv
+                                    (if hintsRemaining > 0 then
+                                        Enabled
+                                     else
+                                        Disabled
+                                    )
+                                    totalHints
+                                    hintsUsed
+
+            _ ->
+                emptyNode
 
 
 emptySpan : H.Html msg
@@ -1678,6 +1751,7 @@ type Msg
     | TypingBoxInput String
     | TypingBoxEnter
     | OnScreenButtonClick String
+    | UseHint
     | TrackHttpCall TrackedHttpCall
     | MakeHttpCall CallId
     | RecordActionCompleteReturned CallId (Result Http.Error ())
@@ -1727,6 +1801,9 @@ update msg model =
 
         OnScreenButtonClick text ->
             handleOnScreenButtonClick model text
+
+        UseHint ->
+            handleUseHint model
 
         TrackHttpCall trackedCall ->
             startTrackedCall model trackedCall
@@ -1809,6 +1886,21 @@ withCurrentVerse model default func =
     withSessionData model
         default
         (\sessionData -> func sessionData.currentVerse)
+
+
+withCurrentTestWord : CurrentVerse -> a -> (TestType -> TestProgress -> CurrentWordData -> a) -> a
+withCurrentTestWord currentVerse default func =
+    case currentVerse.currentStage of
+        Test testType testProgress ->
+            case testProgress.currentWord of
+                TestFinished _ ->
+                    default
+
+                CurrentWord currentWord ->
+                    func testType testProgress currentWord
+
+        _ ->
+            default
 
 
 updateCurrentVerse : Model -> (CurrentVerse -> CurrentVerse) -> Model
@@ -2109,6 +2201,7 @@ type alias Attempt =
 
 type CheckResult
     = Failure String
+    | Hint
     | Success
 
 
@@ -2281,14 +2374,17 @@ recallStageFinished verseStatus recallProgress =
     List.length (recallWords verseStatus) == Set.size recallProgress.passedWordIds
 
 
+type alias CurrentWordData =
+    { word :
+        Word
+        -- overallIndex is the position in list returned by wordsForVerse, which can include references
+    , overallIndex : Int
+    }
+
+
 type CurrentTestWord
     = TestFinished { accuracy : Float }
-    | CurrentWord
-        { word :
-            Word
-            -- overallIndex is the position in list returned by wordsForVerse, which can include references
-        , overallIndex : Int
-        }
+    | CurrentWord CurrentWordData
 
 
 getCurrentWordAttempt : TestProgress -> Maybe Attempt
@@ -2361,6 +2457,16 @@ getTestResult testProgress =
                 (toFloat (round (List.sum wordAccuracies / (toFloat l) * 1000)) / 1000)
 
 
+getHintsUsed : TestProgress -> Int
+getHintsUsed testProgress =
+    testProgress.attemptRecords
+        |> Dict.toList
+        |> List.map (Tuple.second >> .checkResults)
+        |> List.concat
+        |> List.filter isAttemptHint
+        |> List.length
+
+
 isAttemptFailure : CheckResult -> Bool
 isAttemptFailure r =
     case r of
@@ -2371,9 +2477,14 @@ isAttemptFailure r =
             False
 
 
-isAttemptSuccess : CheckResult -> Bool
-isAttemptSuccess r =
-    r == Success
+isAttemptHint : CheckResult -> Bool
+isAttemptHint r =
+    case r of
+        Hint ->
+            True
+
+        _ ->
+            False
 
 
 testMethodUsesTextBox : TestingMethod -> Bool
@@ -2818,6 +2929,28 @@ handleOnScreenButtonClick model buttonText =
     checkCurrentWordAndUpdate model buttonText
 
 
+handleUseHint : Model -> ( Model, Cmd Msg )
+handleUseHint model =
+    let
+        ( newModel, cmd ) =
+            updateCurrentVersePlus model
+                Cmd.none
+                (\currentVerse ->
+                    withCurrentTestWord currentVerse
+                        ( currentVerse, Cmd.none )
+                        (\testType testProgress currentWord ->
+                            markWord Hint currentWord.word testProgress testType currentVerse (getTestingMethod model) model.preferences
+                        )
+                )
+    in
+        ( newModel
+        , Cmd.batch
+            [ stageOrVerseChangeCommands newModel True
+            , cmd
+            ]
+        )
+
+
 shouldCheckTypedWord : TestingMethod -> String -> Bool
 shouldCheckTypedWord testingMethod input =
     let
@@ -2846,35 +2979,32 @@ checkCurrentWordAndUpdate model input =
         testingMethod =
             getTestingMethod model
 
-        ( newModel, recordCommentCmd ) =
+        ( newModel, cmd ) =
             updateCurrentVersePlus model
                 Cmd.none
                 (\currentVerse ->
-                    case currentVerse.currentStage of
-                        Test testType tp ->
-                            case tp.currentWord of
-                                TestFinished _ ->
-                                    ( currentVerse
-                                    , Cmd.none
+                    withCurrentTestWord currentVerse
+                        ( currentVerse, Cmd.none )
+                        (\testType testProgress currentWord ->
+                            let
+                                correct =
+                                    checkWord currentWord.word.text input testingMethod
+
+                                checkResult =
+                                    (if correct then
+                                        Success
+                                     else
+                                        Failure input
                                     )
-
-                                CurrentWord currentWord ->
-                                    let
-                                        correct =
-                                            checkWord currentWord.word.text input testingMethod
-                                    in
-                                        markWord correct input currentWord.word tp testType currentVerse testingMethod model.preferences
-
-                        _ ->
-                            ( currentVerse
-                            , Cmd.none
-                            )
+                            in
+                                markWord checkResult currentWord.word testProgress testType currentVerse testingMethod model.preferences
+                        )
                 )
     in
         ( newModel
         , Cmd.batch
             [ stageOrVerseChangeCommands newModel True
-            , recordCommentCmd
+            , cmd
             ]
         )
 
@@ -2944,42 +3074,61 @@ simplifyTurkish =
     translate "ÂâÇçĞğİıÖöŞşÜü" "AaCcGgIiOoSsUu"
 
 
-initialAttempt : TestingMethod -> Attempt
-initialAttempt m =
-    { finished = False
-    , checkResults = []
-    , allowedMistakes = allowedMistakesForTestingMethod m
-    }
-
-
-markWord : Bool -> String -> Word -> TestProgress -> TestType -> CurrentVerse -> TestingMethod -> Preferences -> ( CurrentVerse, Cmd Msg )
-markWord correct input word testProgress testType verse testingMethod preferences =
+markWord : CheckResult -> Word -> TestProgress -> TestType -> CurrentVerse -> TestingMethod -> Preferences -> ( CurrentVerse, Cmd Msg )
+markWord checkResult word testProgress testType verse testingMethod preferences =
     let
         attempt =
-            case getWordAttempt testProgress word of
-                Nothing ->
-                    initialAttempt testingMethod
+            getWordAttemptWithInitial testProgress word testingMethod
 
-                Just a ->
-                    a
-
-        checkResults =
-            (if correct then
-                Success
-             else
-                Failure input
-            )
-                :: attempt.checkResults
+        newCheckResults =
+            checkResult :: attempt.checkResults
 
         allowedMistakes =
             allowedMistakesForTestingMethod testingMethod
 
-        shouldMoveOn =
-            correct || List.length checkResults > allowedMistakes
+        ( shouldMoveOn, newTypedText ) =
+            case checkResult of
+                Success ->
+                    ( True, "" )
+
+                Hint ->
+                    let
+                        previousHintCountForWord =
+                            attempt.checkResults |> List.filter isAttemptHint |> List.length
+
+                        singleLetterWord =
+                            (normalizeWordForTest word.text |> String.length) == 1
+
+                        firstLetterTestingMethod =
+                            case testingMethod of
+                                FirstLetter ->
+                                    True
+
+                                _ ->
+                                    False
+                    in
+                        if singleLetterWord || previousHintCountForWord > 0 || firstLetterTestingMethod then
+                            -- full word hint, move to next word
+                            ( True, "" )
+                        else
+                            -- single letter hint
+                            ( False, word.text |> stripPunctuation |> String.left 1 )
+
+                Failure _ ->
+                    let
+                        finalFailure =
+                            (newCheckResults |> List.filter isAttemptFailure |> List.length) > allowedMistakes
+                    in
+                        ( finalFailure
+                        , if finalFailure then
+                            ""
+                          else
+                            testProgress.currentTypedText
+                        )
 
         attempt2 =
             { attempt
-                | checkResults = checkResults
+                | checkResults = newCheckResults
                 , finished = shouldMoveOn
                 , allowedMistakes = allowedMistakes
             }
@@ -2993,11 +3142,7 @@ markWord correct input word testProgress testType verse testingMethod preference
         newTestProgress1 =
             { testProgress
                 | attemptRecords = newAttempts
-                , currentTypedText =
-                    if shouldMoveOn then
-                        ""
-                    else
-                        testProgress.currentTypedText
+                , currentTypedText = newTypedText
             }
 
         testAccuracy =
@@ -3031,7 +3176,7 @@ markWord correct input word testProgress testType verse testingMethod preference
 
         newTestProgress2 =
             { newTestProgress1
-                  | currentWord = nextCurrentWord
+                | currentWord = nextCurrentWord
             }
 
         newCurrentVerse =
@@ -3058,14 +3203,15 @@ markWord correct input word testProgress testType verse testingMethod preference
                 Cmd.none
 
         ( vibrateCommand, beepCommand ) =
-            if correct then
-                ( Cmd.none, Cmd.none )
-            else if shouldMoveOn then
-                -- failure
-                ( LearnPorts.vibrateDevice 50, LearnPorts.beep ( 220.0, 0.2 ) )
+            if isAttemptFailure checkResult then
+                if shouldMoveOn then
+                    -- final failure
+                    ( LearnPorts.vibrateDevice 50, LearnPorts.beep ( 220.0, 0.2 ) )
+                else
+                    -- mistake only
+                    ( LearnPorts.vibrateDevice 25, LearnPorts.beep ( 330.0, 0.15 ) )
             else
-                -- mistake only
-                ( LearnPorts.vibrateDevice 25, LearnPorts.beep ( 330.0, 0.15 ) )
+                ( Cmd.none, Cmd.none )
     in
         ( newCurrentVerse
         , Cmd.batch
@@ -3092,6 +3238,19 @@ getWordAttempt testProgress word =
     Dict.get (getWordId word) testProgress.attemptRecords
 
 
+getWordAttemptWithInitial : TestProgress -> Word -> TestingMethod -> Attempt
+getWordAttemptWithInitial testProgress word testingMethod =
+    case getWordAttempt testProgress word of
+        Nothing ->
+            { finished = False
+            , checkResults = []
+            , allowedMistakes = allowedMistakesForTestingMethod testingMethod
+            }
+
+        Just a ->
+            a
+
+
 getWordId : Word -> WordId
 getWordId word =
     ( toString word.type_, word.index )
@@ -3113,6 +3272,31 @@ allowedMistakesForTestingMethod testingMethod =
 
         OnScreen ->
             0
+
+
+allowedHints : CurrentVerse -> TestingMethod -> Int
+allowedHints currentVerse testingMethod =
+    let
+        wordCount =
+            currentVerse.verseStatus.scoringTextWords |> List.length |> toFloat
+
+        -- Very short verses should get few hints
+        -- For FirstLetter testing method, a hint is always
+        -- the entire word, so give fewer hints still
+    in
+        case testingMethod of
+            FullWords ->
+                -- 1 to 3 word verses - 1 hint, 4 to 6 - 2 etc.
+                -- maximum 4
+                min (wordCount / 3 |> floor) 4
+
+            FirstLetter ->
+                -- 1 to 5 word verses - 1 hint, 6 to 10 - 2 etc.
+                -- maximum 3
+                min (wordCount / 5 |> floor) 3
+
+            OnScreen ->
+                0
 
 
 shouldTestReferenceForTestingMethod : TestingMethod -> Bool
