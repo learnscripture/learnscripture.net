@@ -1094,6 +1094,10 @@ def is_continuous_set(verse_list):
         # not enough to be considered continuous
         return False
 
+    # We could use gapless_bible_verse_number here to detect continuous sets.
+    # However, that would not cover the case where a set has been put together
+    # using Combo verses, which is possible and might be desirable if some
+    # verses in a passage are very short.
     verse_list = sorted(verse_list, key=lambda v: v.bible_verse_number)
     version = verse_list[0].version
     try:
