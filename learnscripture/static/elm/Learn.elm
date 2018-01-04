@@ -2704,9 +2704,21 @@ getNextVerse verseStore verseStatus =
 
 getPreviousVerse : VerseStore -> VerseStatus -> Maybe VerseStatus
 getPreviousVerse verseStore verseStatus =
-    getPreviousVersesInStore verseStore verseStatus
-        |> List.sortBy (\v -> -v.learnOrder)
-        |> List.head
+    let
+        previousVerseInStore =
+            getPreviousVersesInStore verseStore verseStatus
+                |> List.sortBy (\v -> -v.learnOrder)
+                |> List.head
+    in
+        case previousVerseInStore of
+            Nothing ->
+                Nothing
+
+            Just previousVerseStatus ->
+                if previousVerseStatus.textOrder == verseStatus.textOrder - 1 then
+                    Just previousVerseStatus
+                else
+                    Nothing
 
 
 getFollowingVersesInStore : VerseStore -> VerseStatus -> List VerseStatus
