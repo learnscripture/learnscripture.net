@@ -1426,13 +1426,10 @@ getTypingBoxFocusDataForMsg model msg =
         ( nextState, _ ) =
             update msg model
 
-        typingBoxUsedCurrently =
-            typingBoxUsed model
-
         typingBoxUsedAfterMsg =
             typingBoxUsed nextState
     in
-        if typingBoxUsedAfterMsg && not typingBoxUsedCurrently then
+        if typingBoxUsedAfterMsg then
             Just (getUpdateTypingBoxData nextState)
         else
             Nothing
