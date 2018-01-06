@@ -84,7 +84,8 @@ export const handleFormValidationErrors = function(form, formPrefix, errorRespon
 //       success: ajaxRetrySucceeded
 //       (or call ajaxRetrySucceeded at beginning of success callback)
 export const ajaxFailed = function(jqXHR, textStatus, errorThrown) {
-    alert("The server could not be contacted. Please try again.");
+
+    alert(`The server could not be contacted or an error occurred (${jqXHR.responseText}). Please try again.`);
     console.log("AJAX error: %s, %s, %o", textStatus, errorThrown, jqXHR);
 };
 
