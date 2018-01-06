@@ -73,8 +73,14 @@ export const handleFormValidationErrors = function(form, formPrefix, errorRespon
 
 };
 
+// AJAX utilities, for use with `$.ajax`
+//
 // * if the user needs immediate feedback if the ajax failed,
-//   use ajaxFailed
+//   and we don't expect it to fail normally,
+//   use `error: ajaxFailed`
+// * if there are some expected fail conditions due to user
+//   error, write custom `error` that calls `ajaxFailed` after
+//   handling known user error cases.
 // * for non-essential things (e.g. GET requests for score logs)
 //   just silently fail
 // * for essential things (e.g. POST requests that save test scores to server)
