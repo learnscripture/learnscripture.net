@@ -19,6 +19,7 @@ urlpatterns = [
     url(r'^resetprogress/$', handlers.ResetProgressHandler.as_view(), name='learnscripture.api.resetprogress'),
     url(r'^actionlogs/$', handlers.ActionLogs.as_view(), name='learnscripture.api.actionlogs'),
     url(r'^versefind/$', handlers.VerseFind.as_view(), name='learnscripture.api.versefind'),
+    url(r'^addversetoqueue/$', handlers.AddVerseToQueue.as_view(), name='learnscripture.api.addversetoqueue'),
     url(r'^checkduplicatepassageset/$', handlers.CheckDuplicatePassageSet.as_view(), name='learnscripture.api.checkduplicatepassageset'),
     url(r'^deletenotice/$', handlers.DeleteNotice.as_view(), name='learnscripture.api.deletenotice'),
     url(r'^addcomment/$', handlers.AddComment.as_view(), name='learnscripture.api.addcomment'),

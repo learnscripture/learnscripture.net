@@ -81,9 +81,22 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
         self.assertTextPresent("For this is the way God loved the world")
 
         # Check we can actually click on 'Learn' and it works.
-        self.click("#id-tab-individual input[value=Learn]")
+        self.click("#id-tab-individual input[name=learn_now]")
         self.set_preferences()
         self.assertEqual(self.get_element_text("#id-verse-title"), "John 3:16")
+
+    def test_choose_individual_verse_learn_later(self):
+        identity, account = self.create_account()
+        self.login(account)
+        self.get_url('choose')
+        self.click("a[href='#id-tab-individual']")
+
+        self.fill({'form.quickfind input[name=quick_find]': 'John 3:16'})
+        self.click("input[name=lookup]")
+
+        self.click('#id-tab-individual input[name=add_to_queue]')
+        self.assertEqual([uvs.localized_reference for uvs in identity.verse_statuses.all()],
+                         ['John 3:16'])
 
     def test_choose_individual_verse_fuzzy(self):
         # Test entering into quick find, and being lazy
