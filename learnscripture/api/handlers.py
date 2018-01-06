@@ -459,6 +459,32 @@ class VerseFind(ApiView):
         return retval
 
 
+class AddVerseToQueue(ApiView):
+
+    @require_preexisting_identity_m
+    def post(self, request):
+        identity = request.identity
+
+        version = None
+        try:
+            version = TextVersion.objects.get(slug=request.POST['version_slug'])
+        except (KeyError, TextVersion.DoesNotExist):
+            return rc.BAD_REQUEST("Invalid version_slug")
+
+        ref = request.POST.get('localized_reference', None)
+        if ref is not None:
+            # First ensure it is valid
+            try:
+                version.get_verse_list(ref, max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
+            except InvalidVerseReference:
+                return rc.BAD_REQUEST("Invalid localized_reference")
+
+            identity.add_verse_choice(ref, version=version)
+            return {}
+        else:
+            return rc.BAD_REQUEST("No localized_reference")
+
+
 class CheckDuplicatePassageSet(ApiView):
 
     def get(self, request):
