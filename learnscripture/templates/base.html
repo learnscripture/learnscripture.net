@@ -19,7 +19,7 @@
 
   </head>
 
-  <body class="base-page" data-theme="{{ current_theme }}">
+  <body class="base-page {% block body_extra_class %}{% endblock %}" data-theme="{{ current_theme }}">
     <div class="topbar">
       <div class="fill">
         <div class="container">

@@ -44,7 +44,7 @@ var setupChooseControls = function() {
 };
 
 $(document).ready(function() {
-    if ($('#id-tab-individual').length > 0) {
+    if ($('body.choose-page').length > 0) {
         setupChooseControls();
     }
 });
