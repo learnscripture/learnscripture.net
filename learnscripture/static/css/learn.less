@@ -34,7 +34,7 @@ body.learn-page {
 
 
     @topbarHeight: 36px;
-    nav {
+    nav.topbar-new {
         // We need a fixed height, because this element has 'position: fixed'
         // and we need to allow for that in margins on top of remaining content.
         height: @topbarHeight;
@@ -50,13 +50,21 @@ body.learn-page {
         .nav-dropdown {
             position: relative; // establish container for .nav-dropdown
 
-            .nav-dropdown-menu {
-                display: none;
-            }
-
             &.open .nav-dropdown-menu {
                 display: block;
             }
+        }
+
+        .nav-dropdown-menu {
+            display: none;
+            li {
+                display: block;
+                white-space: nowrap;
+            }
+        }
+
+        .nav-dropdown-heading.hidden a {
+            cursor: default;
         }
 
         .nav-dropdown-heading {
@@ -68,9 +76,10 @@ body.learn-page {
             top: @topbarHeight;
             right: 0px;
         }
-        .nav-dropdown-heading {
-            padding-left: 5px;
-            padding-right: 5px;
+
+        .nav-dropdown-heading,
+        .nav-dropdown-menu li {
+            padding: 0 0.4em;
         }
 
         .spacer {
@@ -106,15 +115,6 @@ body.learn-page {
         color: #ff2e2e;;
     }
 
-    .ajax-info {
-        .nav-dropdown-menu div {
-            white-space: nowrap;
-        }
-        .nav-dropdown-heading.hidden a {
-            cursor: default;
-        }
-    }
-
     #id-loading-full {
         color: #888;
         text-align: center;
@@ -132,11 +132,53 @@ body.learn-page {
         max-width: 860px;
     }
 
-    // Title
+    // Title/verse header
+    #id-verse-header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+    }
 
     .blurry {
         color: transparent;
         text-shadow: 0 0 15px rgba(0,0,0,0.6);
+    }
+
+    // Options drop down
+    .icon-verse-options-menu-btn {
+        font-size: 1.4em;
+    }
+
+    // See also theme.less for colors
+    #id-verse-options-menu-btn {
+        padding-left: 5px;
+        padding-right: 5px;
+        border-width: 1px 1px 0px 1px;
+        border-style: solid;
+        z-index: 10; // > #id-verse-options-menu for border effect
+    }
+    #id-verse-options-menu {
+        position: relative;
+        ul {
+            position: absolute;
+            top: -1px; // border
+            right: 0px;
+            border-width: 1px;
+            border-style: solid;
+            li {
+                display: block;
+                white-space: nowrap;
+                padding: 5px 10px;
+                a {
+                    display: block;
+                }
+            }
+            z-index: 5px;
+        }
+
+        ul, li {
+            margin: 0px;
+        }
     }
 
     // Words
@@ -275,7 +317,7 @@ body.learn-page {
         touch-action: none;
     }
 
-    h1, h2, h3 {
+    h1, h2, h3, #id-verse-options-menu-btn {
         line-height: 1.4;
         padding-top: 5px;
     }
@@ -414,6 +456,17 @@ body.learn-page {
                 // Make buttons easier to press on mobile
                 flex-grow: 0.3;
             }
+        }
+
+        // Make options menu take up whole width, and not overlap other items on
+        // the page.
+        #id-verse-options-menu {
+            position: static;
+            ul {
+                position: relative;
+                top: -1px;
+            }
+            margin-bottom: 0.5em;
         }
     }
 }

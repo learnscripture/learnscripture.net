@@ -36,7 +36,7 @@ var app =
         });
 
 
-var fixTypingBox = function (attempts, args) {
+var fixTypingBox = function (attempts, args, afterDomUpdated) {
     if (attempts > 3) {
         return; // give up
     }
@@ -61,9 +61,6 @@ var fixTypingBox = function (attempts, args) {
 
     var wordButton = args.wordButtonId == "" ? null : document.getElementById(args.wordButtonId);
 
-    // Have we been called before the DOM was updated?
-    var classes = typingBox.className.trim().split(/ /);
-    var domUpdated = classes.indexOf(args.expectedClass) >= 0;
 
     if (args.expectedClass == "toshow") {
         // Fix size/position first, then make it visible.
@@ -99,14 +96,18 @@ var fixTypingBox = function (attempts, args) {
             typingBox.style.left = "0px";
         }
         typingBox.style.display = "inline-block";
-        typingBox.focus();
+        if (args.refocus) {
+            typingBox.focus();
+        }
 
-        if (!correctPositioningComplete || !domUpdated) {
+        if (!correctPositioningComplete || !afterDomUpdated) {
             tryAgain();
             return;
         }
     } else if (args.expectedClass == "tohide") {
-        typingBox.blur();
+        if (args.refocus) {
+            typingBox.blur();
+        }
         typingBox.style.display = 'none';
     }
 };
@@ -119,23 +120,23 @@ app.ports.updateTypingBox.subscribe(function (args) {
     // Javascript. In addition, we need to handle it appearing and disappearing,
     // and not appearing before it has been put in the correct position.
 
-    fixTypingBox(0, args);
+    fixTypingBox(0, args, false);
 });
 
 // Elm's runtime appears to use setTimeout / requestAnimationFrame such that
 // doing `focus()` from within it, even via ports, does not cause the on screen
 // keyboard to be brought up in Firefox for Android when you press 'Next'
-// buttons etc., even though it is possible.
+// buttons etc., even though it is possible using Javascript.
 //
 // See https://github.com/elm-lang/dom/issues/21
 //
-// So, we have this crazy workaround: for buttons that will cause the typing box
-// to appear, and therefore require a focus event, in Elm we signal this using
-// data-focus-typing-box-required. We also pass other required data using data-*
-// attributes on the element. We then do a normal event handler which spots the
-// click, and makes the typing box visible and focused. The `.focus()` call from
-// this route causes Firefox for Android to make the keyboard appear, so that
-// the user doesn't have to manually click it.
+// So, we have this crazy workaround: for buttons that will should cause the
+// typing box to be focuses, in Elm we signal this by putting a
+// data-focus-typing-box-required attribute on the button. We also pass other
+// required data using data-* attributes on the element. We then do a normal
+// event handler which spots the click, and makes the typing box visible and
+// focused. The `.focus()` call from this route causes Firefox for Android to
+// make the keyboard appear, so that the user doesn't have to manually click it.
 //
 // Note that in Firefox for Android, the user still has to manually click to
 // make the box appear for the first verse in a session, because the typing box
@@ -147,9 +148,10 @@ $('body.learn-page').on('click', '[data-focus-typing-box-required]', function (e
     var args = { typingBoxId: $button.attr("data-focus-typingBoxId"),
                  wordButtonId: $button.attr("data-focus-wordButtonId"),
                  expectedClass: $button.attr("data-focus-expectedClass"),
-                 hardMode: $button.attr("data-focus-hardMode") == "true"
+                 hardMode: $button.attr("data-focus-hardMode") == "true",
+                 refocus: true,  // This mechanism is only used when refocus is true
                }
-    fixTypingBox(0, args);
+    fixTypingBox(0, args, false);
 
 })
 

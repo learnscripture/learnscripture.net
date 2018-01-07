@@ -8,6 +8,7 @@ port updateTypingBox :
     , wordButtonId : String
     , expectedClass : String
     , hardMode : Bool
+    , refocus : Bool
     }
     -> Cmd msg
 
