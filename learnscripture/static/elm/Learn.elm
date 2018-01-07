@@ -354,6 +354,7 @@ type LinkIconAlign
 
 type Dropdown
     = AjaxInfo
+    | VerseOptionsMenu
 
 
 dashboardUrl : String
@@ -379,7 +380,7 @@ view model =
 
 topNav : Model -> H.Html Msg
 topNav model =
-    H.nav [ A.class "topbar" ]
+    H.nav [ A.class "topbar-new" ]
         [ H.div [ A.class "dashboard-link" ]
             [ link dashboardUrl "Dashboard" "icon-return" AlignLeft ]
         , H.div [ A.class "spacer" ]
@@ -445,12 +446,7 @@ ajaxInfo model =
                 ]
 
         dropdownOpen =
-            case model.openDropdown of
-                Just AjaxInfo ->
-                    True
-
-                _ ->
-                    False
+            dropdownIsOpen model AjaxInfo
 
         openClass =
             if dropdownOpen && itemsToView then
@@ -480,12 +476,12 @@ ajaxInfo model =
             , if not itemsToView then
                 emptyNode
               else
-                H.div
+                H.ul
                     [ A.class "nav-dropdown-menu" ]
                     ((currentHttpCalls
                         |> List.map
                             (\{ call, attempts } ->
-                                H.div
+                                H.li
                                     [ A.class
                                         ("ajax-attempt"
                                             ++ (if attempts > 1 then
@@ -576,10 +572,20 @@ viewCurrentVerse session model =
 
                     _ ->
                         ""
+
+        verseOptionsMenuOpen =
+            (dropdownIsOpen model VerseOptionsMenu)
     in
         H.div [ A.id "id-content-wrapper" ]
-            ([ H.h2 titleTextAttrs
-                [ H.text currentVerse.verseStatus.titleText ]
+            ([ H.div [ A.id "id-verse-header" ]
+                [ H.h2 titleTextAttrs
+                    [ H.text currentVerse.verseStatus.titleText ]
+                , viewVerseOptionsMenuButton verseOptionsMenuOpen
+                ]
+             , if verseOptionsMenuOpen then
+                viewVerseOptionsMenu currentVerse
+               else
+                emptyNode
              , H.div [ A.id "id-verse-wrapper" ]
                 -- We make typing box a permanent fixture to avoid issues with
                 -- losing focus and screen keyboards then disappearing.
@@ -633,8 +639,49 @@ shouldShowPreviousVerse verse =
             False
 
 
+viewVerseOptionsMenuButton : Bool -> H.Html Msg
+viewVerseOptionsMenuButton menuOpen =
+    H.div
+        [ A.id "id-verse-options-menu-btn"
+        , A.class
+            (if menuOpen then
+                "open"
+             else
+                "closed"
+            )
+        ]
+        [ H.a
+            [ A.href "#"
+            , onClickSimply (ToggleDropdown VerseOptionsMenu)
+            ]
+            [ makeIcon "icon-verse-options-menu-btn" ]
+        ]
 
-{- View helpers - word/sentence splitting and word buttons -}
+
+viewVerseOptionsMenu : CurrentVerse -> H.Html Msg
+viewVerseOptionsMenu currentVerse =
+    H.div [ A.id "id-verse-options-menu" ]
+        [ H.ul []
+            [ H.li []
+                [ H.a [ A.href "#" ]
+                    [ H.text "Stop learning this" ]
+                ]
+            ]
+        ]
+
+
+dropdownIsOpen : Model -> Dropdown -> Bool
+dropdownIsOpen model dropdown =
+    case model.openDropdown of
+        Just dropdown ->
+            True
+
+        _ ->
+            False
+
+
+
+{- word/sentence splitting and word buttons -}
 
 
 type Part
@@ -1170,6 +1217,7 @@ hintButton model currentVerse testingMethod =
                                 , toString total
                                 ]
                     , id = "id-hint-btn"
+                    , refocusTypingBox = True
                     }
                 ]
     in
@@ -1217,6 +1265,7 @@ type alias Button =
     , msg : Msg
     , caption : String
     , id : String
+    , refocusTypingBox : Bool
     }
 
 
@@ -1276,6 +1325,7 @@ buttonsForStage model verse verseStore preferences =
                                 else
                                     NonDefault
                           , id = "id-more-practice"
+                          , refocusTypingBox = True
                           }
                         , { caption = nextVerseButtonCaption
                           , msg = NextVerse
@@ -1286,6 +1336,7 @@ buttonsForStage model verse verseStore preferences =
                                 else
                                     Default
                           , id = "id-next-btn"
+                          , refocusTypingBox = True
                           }
                         ]
 
@@ -1325,12 +1376,14 @@ buttonsForStage model verse verseStore preferences =
                           , enabled = previousEnabled
                           , default = NonDefault
                           , id = "id-previous-btn"
+                          , refocusTypingBox = False
                           }
                         , { caption = "Next"
                           , msg = NextStageOrSubStage
                           , enabled = nextEnabled
                           , default = Default
                           , id = "id-next-btn"
+                          , refocusTypingBox = True
                           }
                         ]
         else
@@ -1344,6 +1397,7 @@ buttonsForStage model verse verseStore preferences =
                       , enabled = nextVerseEnabled
                       , default = Default
                       , id = "id-next-btn"
+                      , refocusTypingBox = True
                       }
                     ]
 
@@ -1387,7 +1441,10 @@ viewButton model button =
 
         -- see learn_setup.js
         focusData =
-            getTypingBoxFocusDataForMsg model button.msg
+            if button.refocusTypingBox then
+                getTypingBoxFocusDataForMsg model button.msg True
+            else
+                Nothing
 
         focusAttributes =
             case focusData of
@@ -1395,25 +1452,32 @@ viewButton model button =
                     []
 
                 Just data ->
-                    [ A.attribute "data-focus-typing-box-required" ""
-                    , A.attribute "data-focus-typingBoxId" data.typingBoxId
-                    , A.attribute "data-focus-wordButtonId" data.wordButtonId
-                    , A.attribute "data-focus-expectedClass" data.expectedClass
-                    , A.attribute "data-focus-hardMode" (encodeBool data.hardMode)
-                    ]
+                    if data.refocus then
+                        [ A.attribute "data-focus-typing-box-required" ""
+                        , A.attribute "data-focus-typingBoxId" data.typingBoxId
+                        , A.attribute "data-focus-wordButtonId" data.wordButtonId
+                        , A.attribute "data-focus-expectedClass" data.expectedClass
+                        , A.attribute "data-focus-hardMode" (encodeBool data.hardMode)
+                        ]
+                    else
+                        -- We only need this mechanism if we need a focus action,
+                        -- resizing and moving the box is handled by updateTypingBoxCommand
+                        []
     in
         H.button (attributes ++ eventAttributes ++ focusAttributes)
             [ H.text button.caption ]
 
 
 {-| If the Msg will produce a change of state such that
-the typing box will appear (and we therefore need to focus it),
+the typing box will be present (and we therefore need to focus it),
 return the data for focussing/moving the typing box, otherwise Nothing.
+
+Pass True for refocus argument if we want to refocus, False otherwise.
 
 See learn_setup.js for why this is necessary.
 -}
-getTypingBoxFocusDataForMsg : Model -> Msg -> Maybe UpdateTypingBoxData
-getTypingBoxFocusDataForMsg model msg =
+getTypingBoxFocusDataForMsg : Model -> Msg -> Bool -> Maybe UpdateTypingBoxData
+getTypingBoxFocusDataForMsg model msg refocus =
     let
         typingBoxUsed state =
             case getCurrentTestProgress state of
@@ -1430,7 +1494,7 @@ getTypingBoxFocusDataForMsg model msg =
             typingBoxUsed nextState
     in
         if typingBoxUsedAfterMsg then
-            Just (getUpdateTypingBoxData nextState)
+            Just (getUpdateTypingBoxData nextState refocus)
         else
             Nothing
 
@@ -1834,7 +1898,7 @@ update msg model =
                             Just dropdown
             in
                 ( { model | openDropdown = newOpenDropdown }
-                , Cmd.none
+                , updateTypingBoxCommand model False
                 )
 
         NavigateToWhenDone url ->
@@ -1850,14 +1914,14 @@ update msg model =
                 )
 
         WindowResize _ ->
-            ( model, updateTypingBoxCommand model )
+            ( model, updateTypingBoxCommand model False )
 
         ReceivePreferences prefsValue ->
             let
                 newModel =
                     { model | preferences = decodePreferences prefsValue }
             in
-                ( newModel, updateTypingBoxCommand newModel )
+                ( newModel, updateTypingBoxCommand newModel False )
 
         ReattemptFocus id remainingAttempts ->
             ( model, Task.attempt (handleFocusResult id remainingAttempts) (Dom.focus id) )
@@ -2114,7 +2178,7 @@ mergeSession initialSession newBatchSession =
 stageOrVerseChangeCommands : Model -> Bool -> Cmd Msg
 stageOrVerseChangeCommands model changeFocus =
     Cmd.batch
-        ([ updateTypingBoxCommand model
+        ([ updateTypingBoxCommand model changeFocus
          ]
             ++ if changeFocus then
                 [ focusDefaultButton model ]
@@ -3331,16 +3395,17 @@ type alias UpdateTypingBoxData =
     , wordButtonId : String
     , expectedClass : String
     , hardMode : Bool
+    , refocus : Bool
     }
 
 
-updateTypingBoxCommand : Model -> Cmd msg
-updateTypingBoxCommand model =
-    LearnPorts.updateTypingBox (getUpdateTypingBoxData model)
+updateTypingBoxCommand : Model -> Bool -> Cmd msg
+updateTypingBoxCommand model refocus =
+    LearnPorts.updateTypingBox (getUpdateTypingBoxData model refocus)
 
 
-getUpdateTypingBoxData : Model -> UpdateTypingBoxData
-getUpdateTypingBoxData model =
+getUpdateTypingBoxData : Model -> Bool -> UpdateTypingBoxData
+getUpdateTypingBoxData model refocus =
     case getCurrentTestProgress model of
         Just tp ->
             case tp.currentWord of
@@ -3358,6 +3423,7 @@ getUpdateTypingBoxData model =
 
                             Just currentVerse ->
                                 shouldUseHardTestingMode currentVerse
+                    , refocus = refocus
                     }
 
         Nothing ->
@@ -3370,6 +3436,7 @@ hideTypingBoxData =
     , wordButtonId = ""
     , expectedClass = classForTypingBox False
     , hardMode = False
+    , refocus = True
     }
 
 

@@ -25,8 +25,7 @@
         }
     }
 
-    .topbar,
-    .nav {
+    .topbar, nav.topbar-new, .nav {
         background-color: @topColor1;
         color: @topLinkColor;
         a {
@@ -52,7 +51,9 @@
                 }
             }
         }
+    }
 
+    nav.topbar-new {
         // New learn page, eventually new topbar everywhere:
         .nav-dropdown.open .nav-dropdown-heading {
             background-color: @topColor2;
@@ -212,6 +213,23 @@
 
     #id-loading-full {
         font-family: ~"@{themeFont}";
+    }
+
+    // TODO - generalize this if we have more than one example.
+    #id-verse-options-menu-btn {
+        background-color: white;
+        border-color: white;
+        &.open {
+            background-color: @bgColor1;
+            border-color: @bgBorderColor;
+        }
+    }
+
+    #id-verse-options-menu {
+        ul {
+            background-color: @bgColor1;
+            border-color: @bgBorderColor;
+        }
     }
 }
 
