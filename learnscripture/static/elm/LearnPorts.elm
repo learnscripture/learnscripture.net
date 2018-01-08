@@ -5,6 +5,7 @@ import Json.Decode as JD
 
 port updateTypingBox :
     { typingBoxId : String
+    , typingBoxContainerId : String
     , wordButtonId : String
     , expectedClass : String
     , hardMode : Bool

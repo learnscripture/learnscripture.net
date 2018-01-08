@@ -67,20 +67,24 @@ var fixTypingBox = function (attempts, args, afterDomUpdated) {
 
         var correctPositioningComplete = false;
         if (wordButton != null) {
-            var rect = wordButton.getClientRects()[0];
-            var doc = document.documentElement;
-            var scrollTop = (window.pageYOffset || doc.scrollTop)
-            var scrollLeft = (window.pageXOffset || doc.scrollLeft)
+            // This always exists if typingBox does:
+            var typingBoxContainer = document.getElementById(args.typingBoxContainerId);
+            // By doing `position: absolute` on typingBox and `position: relative`
+            // on typingBoxContainer, then the position of the typing box doesn't
+            // need to be updated if typingBoxContainer itself moves up or down the page
+            // e.g. things appearing above it.
+            var wordRect = wordButton.getClientRects()[0];
+            var containerRect = typingBoxContainer.getClientRects()[0];
 
-            typingBox.style.top = (rect.top + scrollTop).toString() + "px";
-            typingBox.style.left = (rect.left + scrollLeft).toString() + "px";
+            typingBox.style.top = (wordRect.top - containerRect.top).toString() + "px";
+            typingBox.style.left = (wordRect.left - containerRect.left).toString() + "px";
             // Allow for border
             var styles = window.getComputedStyle(typingBox);
             var parsePx = function (p) {
                 return parseInt(p.replace("px", ""), 10);
             }
             var borderWidth = parsePx(styles['border-left-width']);
-            typingBox.style.height = (rect.height - 2 * borderWidth).toString() + "px";
+            typingBox.style.height = (wordRect.height - 2 * borderWidth).toString() + "px";
 
             if (args.hardMode) {
                 typingBox.style.width = "6em";
@@ -88,12 +92,12 @@ var fixTypingBox = function (attempts, args, afterDomUpdated) {
                 // Allow for border and left padding
                 var paddingLeft = parsePx(styles['padding-left']);
                 var paddingRight = parsePx(styles['padding-right']);
-                typingBox.style.width = (rect.width - 2 * borderWidth - paddingLeft - paddingRight).toString() + "px";
+                typingBox.style.width = (wordRect.width - 2 * borderWidth - paddingLeft - paddingRight).toString() + "px";
             }
             correctPositioningComplete = true;
         } else {
             typingBox.style.top = "0px";
-            typingBox.style.left = "0px";
+            typingBox.style.left = "-1000px";  // hide offscreen until we know correct position.
         }
         typingBox.style.display = "inline-block";
         if (args.refocus) {
@@ -146,6 +150,7 @@ app.ports.updateTypingBox.subscribe(function (args) {
 $('body.learn-page').on('click', '[data-focus-typing-box-required]', function (ev) {
     var $button = $(ev.currentTarget);
     var args = { typingBoxId: $button.attr("data-focus-typingBoxId"),
+                 typingBoxContainerId: $button.attr("data-focus-typingBoxContainerId"),
                  wordButtonId: $button.attr("data-focus-wordButtonId"),
                  expectedClass: $button.attr("data-focus-expectedClass"),
                  hardMode: $button.attr("data-focus-hardMode") == "true",
