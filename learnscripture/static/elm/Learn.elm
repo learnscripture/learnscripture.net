@@ -586,7 +586,7 @@ viewCurrentVerse session model =
                 viewVerseOptionsMenu currentVerse
                else
                 emptyNode
-             , H.div [ A.id "id-verse-wrapper" ]
+             , H.div [ A.id typingBoxContainerId ]
                 -- We make typing box a permanent fixture to avoid issues with
                 -- losing focus and screen keyboards then disappearing.
                 -- It comes before verse-wrapper to fix tab order without needing
@@ -1084,6 +1084,11 @@ typingBoxId =
     "id-typing"
 
 
+typingBoxContainerId : String
+typingBoxContainerId =
+    "id-verse-wrapper"
+
+
 typingBox : LearningStage -> TestingMethod -> H.Html Msg
 typingBox stage testingMethod =
     let
@@ -1455,6 +1460,7 @@ viewButton model button =
                     if data.refocus then
                         [ A.attribute "data-focus-typing-box-required" ""
                         , A.attribute "data-focus-typingBoxId" data.typingBoxId
+                        , A.attribute "data-focus-typingBoxContainerId" data.typingBoxContainerId
                         , A.attribute "data-focus-wordButtonId" data.wordButtonId
                         , A.attribute "data-focus-expectedClass" data.expectedClass
                         , A.attribute "data-focus-hardMode" (encodeBool data.hardMode)
@@ -1898,7 +1904,7 @@ update msg model =
                             Just dropdown
             in
                 ( { model | openDropdown = newOpenDropdown }
-                , updateTypingBoxCommand model False
+                , Cmd.none
                 )
 
         NavigateToWhenDone url ->
@@ -1914,6 +1920,8 @@ update msg model =
                 )
 
         WindowResize _ ->
+            -- Can cause reflow of words and change of sizes of everything,
+            -- therefore need to reposition (but not change focus)
             ( model, updateTypingBoxCommand model False )
 
         ReceivePreferences prefsValue ->
@@ -1921,6 +1929,7 @@ update msg model =
                 newModel =
                     { model | preferences = decodePreferences prefsValue }
             in
+                -- Might have switched to/from method that requires typing box
                 ( newModel, updateTypingBoxCommand newModel False )
 
         ReattemptFocus id remainingAttempts ->
@@ -3392,6 +3401,7 @@ shouldUseHardTestingMode currentVerse =
 
 type alias UpdateTypingBoxData =
     { typingBoxId : String
+    , typingBoxContainerId : String
     , wordButtonId : String
     , expectedClass : String
     , hardMode : Bool
@@ -3414,6 +3424,7 @@ getUpdateTypingBoxData model refocus =
 
                 CurrentWord cw ->
                     { typingBoxId = typingBoxId
+                    , typingBoxContainerId = typingBoxContainerId
                     , wordButtonId = idForButton cw.word
                     , expectedClass = classForTypingBox <| typingBoxInUse tp (getTestingMethod model)
                     , hardMode =
@@ -3433,6 +3444,7 @@ getUpdateTypingBoxData model refocus =
 hideTypingBoxData : UpdateTypingBoxData
 hideTypingBoxData =
     { typingBoxId = typingBoxId
+    , typingBoxContainerId = typingBoxContainerId
     , wordButtonId = ""
     , expectedClass = classForTypingBox False
     , hardMode = False

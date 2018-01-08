@@ -155,7 +155,7 @@ body.learn-page {
         padding-right: 5px;
         border-width: 1px 1px 0px 1px;
         border-style: solid;
-        z-index: 10; // > #id-verse-options-menu for border effect
+        z-index: 40; // > #id-verse-options-menu for border effect
     }
     #id-verse-options-menu {
         position: relative;
@@ -173,7 +173,7 @@ body.learn-page {
                     display: block;
                 }
             }
-            z-index: 5px;
+            z-index: 30;  // above #id-typing, below #id-verse-options-menu-btn
         }
 
         ul, li {
@@ -186,6 +186,8 @@ body.learn-page {
         border-radius: 5px;
         padding: 10px;
         background-color: #f0f0f0;
+        position: relative; // Provide container for id-typing
+        z-index: 10; // below #id-typing
     }
 
     #id-copyright-notice {
@@ -278,7 +280,7 @@ body.learn-page {
         border: 2px solid; // same as .word-button.
         position: absolute;
         display: none; // initially hide
-        z-index: 100;
+        z-index: 20; // above #id-verse-wrapper, below #id-verse-options-menu
         &.incorrect {
             border-color: red;
         }
@@ -336,7 +338,7 @@ body.learn-page {
 
     .fixed-bottom() {
         position: fixed;
-        z-index: 20;
+        z-index: 100;  // Above everything
         bottom: 0;
         left: 0;
         width: 100%;
