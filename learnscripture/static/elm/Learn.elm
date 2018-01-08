@@ -660,40 +660,51 @@ viewVerseOptionsMenuButton menuOpen =
 
 viewVerseOptionsMenu : Model -> CurrentVerse -> H.Html Msg
 viewVerseOptionsMenu model currentVerse =
-    H.div [ A.id "id-verse-options-menu" ]
-        [ H.ul []
-            [ H.li []
-                [ viewButton model
-                    { enabled = Enabled
-                    , default = NonDefault
-                    , msg = SkipVerse currentVerse.verseStatus
-                    , caption = "Skip this for now"
-                    , id = "id-skip-verse-btn"
-                    , refocusTypingBox = True
-                    }
-                ]
-            , let
-                  cancelLearningButton cv =
-                      H.li []
-                          [ viewButton model
-                                { enabled = Enabled
-                                , default = NonDefault
-                                , msg = CancelLearning cv.verseStatus
-                                , caption = "Stop learning this"
-                                , id = "id-cancel-learning-btn"
-                                , refocusTypingBox = True
-                                }
-                          ]
-             in
-                 case currentVerse.verseStatus.verseSet of
-                    Nothing -> cancelLearningButton currentVerse
+    let
+        skipButton =
+            { enabled = Enabled
+            , default = NonDefault
+            , msg = SkipVerse currentVerse.verseStatus
+            , caption = "Skip this for now"
+            , id = "id-skip-verse-btn"
+            , refocusTypingBox = True
+            }
+
+        cancelLearningButton =
+            { enabled = Enabled
+            , default = NonDefault
+            , msg = CancelLearning currentVerse.verseStatus
+            , caption = "Stop learning this"
+            , id = "id-cancel-learning-btn"
+            , refocusTypingBox = True
+            }
+
+        buttons =
+            List.filterMap identity <|
+                [ Just skipButton
+                , case currentVerse.verseStatus.verseSet of
+                    Nothing ->
+                        Just <| cancelLearningButton
+
                     Just verseSet ->
                         case verseSet.setType of
-                            Selection -> cancelLearningButton currentVerse
-                            Passage -> emptyNode
+                            Selection ->
+                                Just <| cancelLearningButton
 
+                            Passage ->
+                                Nothing
+                ]
+    in
+        H.div [ A.id "id-verse-options-menu" ]
+            [ H.ul []
+                (List.map
+                    (\button ->
+                        H.li []
+                            [ viewButton model button ]
+                    )
+                    buttons
+                )
             ]
-        ]
 
 
 dropdownIsOpen : Model -> Dropdown -> Bool
