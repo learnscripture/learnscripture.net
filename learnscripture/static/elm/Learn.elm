@@ -4137,14 +4137,6 @@ callRecordResetProgress httpConfig callId verseStatus =
             Http.multipartBody
                 [ Http.stringPart "localized_reference" verseStatus.localizedReference
                 , Http.stringPart "version_slug" verseStatus.version.slug
-                , Http.stringPart "verse_set_id"
-                    (case verseStatus.verseSet of
-                        Nothing ->
-                            ""
-
-                        Just verseSet ->
-                            toString verseSet.id
-                    )
                 ]
     in
         Http.send (GenericTrackedHttpCallReturned callId)
