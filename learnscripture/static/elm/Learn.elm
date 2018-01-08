@@ -666,7 +666,7 @@ viewVerseOptionsMenu model currentVerse =
                 [ viewButton model
                     { enabled = Enabled
                     , default = NonDefault
-                    , msg = NextVerse
+                    , msg = SkipVerse currentVerse.verseStatus.id
                     , caption = "Skip this for now"
                     , id = "id-skip-verse"
                     , refocusTypingBox = True
@@ -1821,6 +1821,7 @@ type Msg
     | NextStageOrSubStage
     | PreviousStage
     | NextVerse
+    | SkipVerse UvsId
     | SetHiddenWords (Set.Set WordId)
     | WordButtonClicked WordId
     | TypingBoxInput String
@@ -1830,6 +1831,7 @@ type Msg
     | TrackHttpCall TrackedHttpCall
     | MakeHttpCall CallId
     | RecordActionCompleteReturned CallId (Result Http.Error ())
+    | GenericTrackedHttpCallReturned CallId (Result Http.Error ())
     | MorePractice Float
     | ExpandHelp
     | CollapseHelp
@@ -1860,6 +1862,18 @@ update msg model =
         NextVerse ->
             moveToNextVerse model
 
+        SkipVerse uvsId ->
+            let
+                ( newModel, cmd ) =
+                    moveToNextVerse model
+            in
+                ( newModel
+                , Cmd.batch
+                    [ cmd
+                    , recordSkipVerse uvsId
+                    ]
+                )
+
         SetHiddenWords hiddenWordIds ->
             ( setHiddenWords model hiddenWordIds
             , Cmd.none
@@ -1885,6 +1899,10 @@ update msg model =
 
         MakeHttpCall callId ->
             makeHttpCall model callId
+
+        -- This is used for calls that return no data that we need to process
+        GenericTrackedHttpCallReturned callId result ->
+            handleRetries (\model result -> ( model, Cmd.none )) model callId result
 
         RecordActionCompleteReturned callId result ->
             handleRetries handleRecordActionCompleteReturned model callId result
@@ -3626,6 +3644,7 @@ startMorePractice model accuracy =
 type TrackedHttpCall
     = RecordTestComplete CurrentVerse Float TestType
     | RecordReadComplete CurrentVerse
+    | RecordSkipVerse UvsId
     | LoadVerses
 
 
@@ -3642,6 +3661,9 @@ trackedHttpCallCaption call =
 
         RecordReadComplete currentVerse ->
             interpolate "Recording read - {0}" [ currentVerse.verseStatus.localizedReference ]
+
+        RecordSkipVerse uvsId ->
+            "Recording skipped item"
 
         LoadVerses ->
             "Loading items for learning..."
@@ -3703,6 +3725,9 @@ makeHttpCall model callId =
 
                         RecordReadComplete currentVerse ->
                             callRecordReadComplete model.httpConfig callId currentVerse
+
+                        RecordSkipVerse uvsId ->
+                            callRecordSkipVerse model.httpConfig callId uvsId
 
                         LoadVerses ->
                             callLoadVerses model.httpConfig callId model
@@ -3810,6 +3835,11 @@ actionCompleteUrl =
     "/api/learnscripture/v1/actioncomplete/"
 
 
+skipVerseUrl : String
+skipVerseUrl =
+    "/api/learnscripture/v1/skipverse/"
+
+
 {-| Trigger verse load via a Cmd
 -}
 loadVerses : Cmd Msg
@@ -3904,6 +3934,27 @@ callRecordReadComplete httpConfig callId currentVerse =
         Http.send (RecordActionCompleteReturned callId)
             (myHttpPost httpConfig
                 actionCompleteUrl
+                body
+                emptyDecoder
+            )
+
+
+recordSkipVerse : UvsId -> Cmd Msg
+recordSkipVerse uvsId =
+    sendStartTrackedCallMsg (RecordSkipVerse uvsId)
+
+
+callRecordSkipVerse : HttpConfig -> CallId -> UvsId -> Cmd Msg
+callRecordSkipVerse httpConfig callId uvsId =
+    let
+        body =
+            Http.multipartBody
+                [ Http.stringPart "uvs_id" (toString uvsId)
+                ]
+    in
+        Http.send (GenericTrackedHttpCallReturned callId)
+            (myHttpPost httpConfig
+                skipVerseUrl
                 body
                 emptyDecoder
             )
