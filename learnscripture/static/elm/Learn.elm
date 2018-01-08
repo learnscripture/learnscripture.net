@@ -666,9 +666,9 @@ viewVerseOptionsMenu model currentVerse =
                 [ viewButton model
                     { enabled = Enabled
                     , default = NonDefault
-                    , msg = SkipVerse currentVerse.verseStatus.id
+                    , msg = SkipVerse currentVerse.verseStatus
                     , caption = "Skip this for now"
-                    , id = "id-skip-verse"
+                    , id = "id-skip-verse-btn"
                     , refocusTypingBox = True
                     }
                 ]
@@ -1458,6 +1458,7 @@ viewButton model button =
                         getTypingBoxFocusDataForMsg model button.msg True
                     else
                         Nothing
+
                 Disabled ->
                     Nothing
 
@@ -1825,7 +1826,7 @@ type Msg
     | NextStageOrSubStage
     | PreviousStage
     | NextVerse
-    | SkipVerse UvsId
+    | SkipVerse VerseStatus
     | SetHiddenWords (Set.Set WordId)
     | WordButtonClicked WordId
     | TypingBoxInput String
@@ -1866,7 +1867,7 @@ update msg model =
         NextVerse ->
             moveToNextVerse model
 
-        SkipVerse uvsId ->
+        SkipVerse verseStatus ->
             let
                 ( newModel, cmd ) =
                     moveToNextVerse model
@@ -1874,7 +1875,7 @@ update msg model =
                 ( newModel
                 , Cmd.batch
                     [ cmd
-                    , recordSkipVerse uvsId
+                    , recordSkipVerse verseStatus
                     ]
                 )
 
@@ -3648,7 +3649,7 @@ startMorePractice model accuracy =
 type TrackedHttpCall
     = RecordTestComplete CurrentVerse Float TestType
     | RecordReadComplete CurrentVerse
-    | RecordSkipVerse UvsId
+    | RecordSkipVerse VerseStatus
     | LoadVerses
 
 
@@ -3666,8 +3667,8 @@ trackedHttpCallCaption call =
         RecordReadComplete currentVerse ->
             interpolate "Recording read - {0}" [ currentVerse.verseStatus.localizedReference ]
 
-        RecordSkipVerse uvsId ->
-            "Recording skipped item"
+        RecordSkipVerse verseStatus ->
+            interpolate "Recording skipped item {0}" [ verseStatus.localizedReference ]
 
         LoadVerses ->
             "Loading items for learning..."
@@ -3730,8 +3731,8 @@ makeHttpCall model callId =
                         RecordReadComplete currentVerse ->
                             callRecordReadComplete model.httpConfig callId currentVerse
 
-                        RecordSkipVerse uvsId ->
-                            callRecordSkipVerse model.httpConfig callId uvsId
+                        RecordSkipVerse verseStatus ->
+                            callRecordSkipVerse model.httpConfig callId verseStatus
 
                         LoadVerses ->
                             callLoadVerses model.httpConfig callId model
@@ -3829,7 +3830,9 @@ verseLoadFailed model =
     model.permanentFailHttpCalls |> List.any (\c -> c == LoadVerses)
 
 
+
 {- Details of actual API calls start here -}
+
 
 versesToLearnUrl : String
 versesToLearnUrl =
@@ -3945,17 +3948,17 @@ callRecordReadComplete httpConfig callId currentVerse =
             )
 
 
-recordSkipVerse : UvsId -> Cmd Msg
-recordSkipVerse uvsId =
-    sendStartTrackedCallMsg (RecordSkipVerse uvsId)
+recordSkipVerse : VerseStatus -> Cmd Msg
+recordSkipVerse verseStatus =
+    sendStartTrackedCallMsg (RecordSkipVerse verseStatus)
 
 
-callRecordSkipVerse : HttpConfig -> CallId -> UvsId -> Cmd Msg
-callRecordSkipVerse httpConfig callId uvsId =
+callRecordSkipVerse : HttpConfig -> CallId -> VerseStatus -> Cmd Msg
+callRecordSkipVerse httpConfig callId verseStatus =
     let
         body =
             Http.multipartBody
-                [ Http.stringPart "uvs_id" (toString uvsId)
+                [ Http.stringPart "uvs_id" (toString verseStatus.id)
                 ]
     in
         Http.send (GenericTrackedHttpCallReturned callId)
