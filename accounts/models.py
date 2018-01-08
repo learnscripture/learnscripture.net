@@ -728,13 +728,9 @@ class Identity(models.Model):
         qs = qs.exclude(verse_set__set_type=VerseSetType.PASSAGE)
         qs.update(ignored=True)
 
-    def reset_progress(self, localized_reference, verse_set_id, version_slug):
+    def reset_progress(self, localized_reference, version_slug):
         qs = self.verse_statuses.filter(localized_reference=localized_reference,
                                         version__slug=version_slug)
-        if verse_set_id is None:
-            qs = qs.filter(verse_set__isnull=True)
-        else:
-            qs = qs.filter(verse_set=verse_set_id)
 
         qs.update(strength=0,
                   last_tested=None,
