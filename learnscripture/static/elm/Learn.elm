@@ -583,7 +583,7 @@ viewCurrentVerse session model =
                 , viewVerseOptionsMenuButton verseOptionsMenuOpen
                 ]
              , if verseOptionsMenuOpen then
-                viewVerseOptionsMenu currentVerse
+                viewVerseOptionsMenu model currentVerse
                else
                 emptyNode
              , H.div [ A.id typingBoxContainerId ]
@@ -658,16 +658,19 @@ viewVerseOptionsMenuButton menuOpen =
         ]
 
 
-viewVerseOptionsMenu : CurrentVerse -> H.Html Msg
-viewVerseOptionsMenu currentVerse =
+viewVerseOptionsMenu : Model -> CurrentVerse -> H.Html Msg
+viewVerseOptionsMenu model currentVerse =
     H.div [ A.id "id-verse-options-menu" ]
         [ H.ul []
             [ H.li []
-                [ H.a
-                    [ A.href "#"
-                    , onClickSimply NextVerse
-                    ]
-                    [ H.text "Skip this" ]
+                [ viewButton model
+                    { enabled = Enabled
+                    , default = NonDefault
+                    , msg = NextVerse
+                    , caption = "Skip this for now"
+                    , id = "id-skip-verse"
+                    , refocusTypingBox = True
+                    }
                 ]
             ]
         ]
