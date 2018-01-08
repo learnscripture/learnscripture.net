@@ -663,8 +663,11 @@ viewVerseOptionsMenu currentVerse =
     H.div [ A.id "id-verse-options-menu" ]
         [ H.ul []
             [ H.li []
-                [ H.a [ A.href "#" ]
-                    [ H.text "Stop learning this" ]
+                [ H.a
+                    [ A.href "#"
+                    , onClickSimply NextVerse
+                    ]
+                    [ H.text "Skip this" ]
                 ]
             ]
         ]
@@ -1893,19 +1896,9 @@ update msg model =
             ( { model | helpVisible = False }, Cmd.none )
 
         ToggleDropdown dropdown ->
-            let
-                newOpenDropdown =
-                    case model.openDropdown of
-                        Just dropdown ->
-                            Nothing
-
-                        -- close already open dropdown
-                        _ ->
-                            Just dropdown
-            in
-                ( { model | openDropdown = newOpenDropdown }
-                , Cmd.none
-                )
+            ( toggleDropdown model dropdown
+            , Cmd.none
+            )
 
         NavigateToWhenDone url ->
             -- TODO - if there is a permanent error, we need to show that.
@@ -2194,6 +2187,30 @@ stageOrVerseChangeCommands model changeFocus =
                else
                 []
         )
+
+
+
+{- Dropdowns -}
+
+
+toggleDropdown : Model -> Dropdown -> Model
+toggleDropdown model dropdown =
+    let
+        newOpenDropdown =
+            case model.openDropdown of
+                Just dropdown ->
+                    Nothing
+
+                -- close already open dropdown
+                _ ->
+                    Just dropdown
+    in
+        { model | openDropdown = newOpenDropdown }
+
+
+closeDropdowns : Model -> Model
+closeDropdowns model =
+    { model | openDropdown = Nothing }
 
 
 
@@ -2845,8 +2862,11 @@ moveToNextVerse model =
                                     loadVersesImmediate newModel1
                                 else
                                     ( newModel1, Cmd.none )
+
+                            newModel3 =
+                                closeDropdowns newModel2
                         in
-                            ( newModel2
+                            ( newModel3
                             , Cmd.batch
                                 [ cmd
                                 , loadMoreCommand
