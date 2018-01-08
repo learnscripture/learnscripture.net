@@ -3825,6 +3825,8 @@ verseLoadFailed model =
     model.permanentFailHttpCalls |> List.any (\c -> c == LoadVerses)
 
 
+{- Details of actual API calls start here -}
+
 versesToLearnUrl : String
 versesToLearnUrl =
     "/api/learnscripture/v1/versestolearn2/"
