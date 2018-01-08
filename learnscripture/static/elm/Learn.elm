@@ -672,6 +672,26 @@ viewVerseOptionsMenu model currentVerse =
                     , refocusTypingBox = True
                     }
                 ]
+            , let
+                  cancelLearningButton cv =
+                      H.li []
+                          [ viewButton model
+                                { enabled = Enabled
+                                , default = NonDefault
+                                , msg = CancelLearning cv.verseStatus
+                                , caption = "Stop learning this"
+                                , id = "id-cancel-learning-btn"
+                                , refocusTypingBox = True
+                                }
+                          ]
+             in
+                 case currentVerse.verseStatus.verseSet of
+                    Nothing -> cancelLearningButton currentVerse
+                    Just verseSet ->
+                        case verseSet.setType of
+                            Selection -> cancelLearningButton currentVerse
+                            Passage -> emptyNode
+
             ]
         ]
 
@@ -1827,6 +1847,7 @@ type Msg
     | PreviousStage
     | NextVerse
     | SkipVerse VerseStatus
+    | CancelLearning VerseStatus
     | SetHiddenWords (Set.Set WordId)
     | WordButtonClicked WordId
     | TypingBoxInput String
@@ -1876,6 +1897,18 @@ update msg model =
                 , Cmd.batch
                     [ cmd
                     , recordSkipVerse verseStatus
+                    ]
+                )
+
+        CancelLearning verseStatus ->
+            let
+                ( newModel, cmd ) =
+                    moveToNextVerse model
+            in
+                ( newModel
+                , Cmd.batch
+                    [ cmd
+                    , recordCancelLearning verseStatus
                     ]
                 )
 
@@ -3650,6 +3683,7 @@ type TrackedHttpCall
     = RecordTestComplete CurrentVerse Float TestType
     | RecordReadComplete CurrentVerse
     | RecordSkipVerse VerseStatus
+    | RecordCancelLearning VerseStatus
     | LoadVerses
 
 
@@ -3669,6 +3703,9 @@ trackedHttpCallCaption call =
 
         RecordSkipVerse verseStatus ->
             interpolate "Recording skipped item {0}" [ verseStatus.localizedReference ]
+
+        RecordCancelLearning verseStatus ->
+            interpolate "Recording cancelled item {0}" [ verseStatus.localizedReference ]
 
         LoadVerses ->
             "Loading items for learning..."
@@ -3733,6 +3770,9 @@ makeHttpCall model callId =
 
                         RecordSkipVerse verseStatus ->
                             callRecordSkipVerse model.httpConfig callId verseStatus
+
+                        RecordCancelLearning verseStatus ->
+                            callRecordCancelLearning model.httpConfig callId verseStatus
 
                         LoadVerses ->
                             callLoadVerses model.httpConfig callId model
@@ -3847,6 +3887,11 @@ actionCompleteUrl =
 skipVerseUrl : String
 skipVerseUrl =
     "/api/learnscripture/v1/skipverse/"
+
+
+cancelLearningUrl : String
+cancelLearningUrl =
+    "/api/learnscripture/v1/cancellearningverse/"
 
 
 {-| Trigger verse load via a Cmd
@@ -3964,6 +4009,29 @@ callRecordSkipVerse httpConfig callId verseStatus =
         Http.send (GenericTrackedHttpCallReturned callId)
             (myHttpPost httpConfig
                 skipVerseUrl
+                body
+                emptyDecoder
+            )
+
+
+recordCancelLearning : VerseStatus -> Cmd Msg
+recordCancelLearning verseStatus =
+    sendStartTrackedCallMsg (RecordCancelLearning verseStatus)
+
+
+callRecordCancelLearning : HttpConfig -> CallId -> VerseStatus -> Cmd Msg
+callRecordCancelLearning httpConfig callId verseStatus =
+    let
+        body =
+            Http.multipartBody
+                [ Http.stringPart "uvs_id" (toString verseStatus.id)
+                , Http.stringPart "localized_reference" verseStatus.localizedReference
+                , Http.stringPart "version_slug" verseStatus.version.slug
+                ]
+    in
+        Http.send (GenericTrackedHttpCallReturned callId)
+            (myHttpPost httpConfig
+                cancelLearningUrl
                 body
                 emptyDecoder
             )
