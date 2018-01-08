@@ -701,7 +701,7 @@ viewVerseOptionsMenu model currentVerse =
             , msg = ResetProgress currentVerse.verseStatus False
             , caption = "Reset progress"
             , id = "id-reset-progress-btn"
-            , refocusTypingBox = True
+            , refocusTypingBox = False
             }
 
         buttons =
