@@ -326,10 +326,25 @@ class ResetProgressHandler(ApiView):
 
     @require_preexisting_identity_m
     def post(self, request):
-        verse_status = get_verse_status(request.POST)
-        request.identity.reset_progress(verse_status['localized_reference'],
-                                        get_verse_set_id(verse_status),
-                                        verse_status['version']['slug'])
+        if 'localized_reference' in request.POST:
+            # New /learn/ page
+            localized_reference = request.POST['localized_reference']
+            version_slug = request.POST['version_slug']
+            verse_set_id = request.POST.get('verse_set_id', '')
+            if verse_set_id == '':
+                verse_set_id = None
+            else:
+                verse_set_id = int(verse_set_id)
+
+        else:
+
+            verse_status = get_verse_status(request.POST)
+            localized_reference = verse_status['localized_reference']
+            verse_set_id = get_verse_set_id(verse_status)
+            version_slug = verse_status['version']['slug']
+        request.identity.reset_progress(localized_reference,
+                                        verse_set_id,
+                                        version_slug)
         return {}
 
 
