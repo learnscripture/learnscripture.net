@@ -282,8 +282,13 @@ class SkipVerseHandler(ApiView):
 
     @require_preexisting_identity_m
     def post(self, request):
-        verse_status = get_verse_status(request.POST)
-        session.verse_status_skipped(request, verse_status['id'])
+        if 'uvs_id' in request.POST:
+            # New /learn/ page
+            uvs_id = int(request.POST['uvs_id'])
+        else:
+            verse_status = get_verse_status(request.POST)
+            uvs_id = verse_status['id']
+        session.verse_status_skipped(request, uvs_id)
         return {}
 
 
