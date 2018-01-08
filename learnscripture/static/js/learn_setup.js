@@ -180,5 +180,4 @@ app.ports.beep.subscribe(function (args) {
     doBeep(frequency, length);
 });
 
-
 setUpAudio();

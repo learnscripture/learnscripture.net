@@ -23,6 +23,7 @@ import Task
 import Time
 import Window
 import Native.StringUtils
+import Native.Confirm
 
 
 {- Main -}
@@ -694,6 +695,15 @@ viewVerseOptionsMenu model currentVerse =
             , refocusTypingBox = True
             }
 
+        resetProgressButton =
+            { enabled = Enabled
+            , default = NonDefault
+            , msg = ResetProgress currentVerse.verseStatus False
+            , caption = "Reset progress"
+            , id = "id-reset-progress-btn"
+            , refocusTypingBox = True
+            }
+
         buttons =
             List.filterMap identity <|
                 [ Just skipButton
@@ -708,6 +718,7 @@ viewVerseOptionsMenu model currentVerse =
 
                             Passage ->
                                 Nothing
+                , Just resetProgressButton
                 ]
     in
         H.div [ A.id "id-verse-options-menu" ]
@@ -1874,6 +1885,7 @@ type Msg
     | NextVerse
     | SkipVerse VerseStatus
     | CancelLearning VerseStatus
+    | ResetProgress VerseStatus Bool
     | SetHiddenWords (Set.Set WordId)
     | WordButtonClicked WordId
     | TypingBoxInput String
@@ -1937,6 +1949,9 @@ update msg model =
                     , recordCancelLearning verseStatus
                     ]
                 )
+
+        ResetProgress verseStatus confirmed ->
+            handleResetProgress model verseStatus confirmed
 
         SetHiddenWords hiddenWordIds ->
             ( setHiddenWords model hiddenWordIds
@@ -3026,6 +3041,41 @@ moreVersesToLearn verseStore currentVerse =
     currentVerse.learnOrder < verseStore.maxOrderVal
 
 
+handleResetProgress : Model -> VerseStatus -> Bool -> ( Model, Cmd Msg )
+handleResetProgress model verseStatus confirmed =
+    if confirmed then
+        let
+            newVerseStatus =
+                { verseStatus
+                    | strength = 0
+                    , needsTesting = True
+                }
+
+            ( newModel1, cmd1 ) =
+                updateCurrentVersePlus model
+                    Cmd.none
+                    (\currentVerse ->
+                        setupCurrentVerse newVerseStatus Learning
+                    )
+
+            newModel2 =
+                closeDropdowns newModel1
+        in
+            ( newModel2
+            , Cmd.batch
+                [ cmd1
+                , stageOrVerseChangeCommands model True
+                , recordResetProgress verseStatus
+                ]
+            )
+    else
+        ( model
+        , confirm "This will reset your progress on this item to zero. Continue?"
+            (ResetProgress verseStatus True)
+            Noop
+        )
+
+
 setHiddenWords : Model -> Set.Set WordId -> Model
 setHiddenWords model hiddenWordIds =
     updateRecallProcess model
@@ -3710,6 +3760,7 @@ type TrackedHttpCall
     | RecordReadComplete CurrentVerse
     | RecordSkipVerse VerseStatus
     | RecordCancelLearning VerseStatus
+    | RecordResetProgress VerseStatus
     | LoadVerses
 
 
@@ -3732,6 +3783,9 @@ trackedHttpCallCaption call =
 
         RecordCancelLearning verseStatus ->
             interpolate "Recording cancelled item {0}" [ verseStatus.localizedReference ]
+
+        RecordResetProgress verseStatus ->
+            interpolate "Resetting progress for {0}" [ verseStatus.localizedReference ]
 
         LoadVerses ->
             "Loading items for learning..."
@@ -3799,6 +3853,9 @@ makeHttpCall model callId =
 
                         RecordCancelLearning verseStatus ->
                             callRecordCancelLearning model.httpConfig callId verseStatus
+
+                        RecordResetProgress verseStatus ->
+                            callRecordResetProgress model.httpConfig callId verseStatus
 
                         LoadVerses ->
                             callLoadVerses model.httpConfig callId model
@@ -3918,6 +3975,11 @@ skipVerseUrl =
 cancelLearningUrl : String
 cancelLearningUrl =
     "/api/learnscripture/v1/cancellearningverse/"
+
+
+resetProgressUrl : String
+resetProgressUrl =
+    "/api/learnscripture/v1/resetprogress/"
 
 
 {-| Trigger verse load via a Cmd
@@ -4058,6 +4120,36 @@ callRecordCancelLearning httpConfig callId verseStatus =
         Http.send (GenericTrackedHttpCallReturned callId)
             (myHttpPost httpConfig
                 cancelLearningUrl
+                body
+                emptyDecoder
+            )
+
+
+recordResetProgress : VerseStatus -> Cmd Msg
+recordResetProgress verseStatus =
+    sendStartTrackedCallMsg (RecordResetProgress verseStatus)
+
+
+callRecordResetProgress : HttpConfig -> CallId -> VerseStatus -> Cmd Msg
+callRecordResetProgress httpConfig callId verseStatus =
+    let
+        body =
+            Http.multipartBody
+                [ Http.stringPart "localized_reference" verseStatus.localizedReference
+                , Http.stringPart "version_slug" verseStatus.version.slug
+                , Http.stringPart "verse_set_id"
+                    (case verseStatus.verseSet of
+                        Nothing ->
+                            ""
+
+                        Just verseSet ->
+                            toString verseSet.id
+                    )
+                ]
+    in
+        Http.send (GenericTrackedHttpCallReturned callId)
+            (myHttpPost httpConfig
+                resetProgressUrl
                 body
                 emptyDecoder
             )
@@ -4413,3 +4505,31 @@ translate fromStr toStr target =
             makeMapper allPairs
     in
         String.map mapper target
+
+
+confirmTask : String -> b -> a -> Task.Task a b
+confirmTask =
+    Native.Confirm.confirm
+
+
+runConfirm : Task.Task Msg Msg -> Cmd Msg
+runConfirm task =
+    Task.attempt
+        (\result ->
+            case result of
+                Ok success ->
+                    success
+
+                Err fail ->
+                    fail
+        )
+        task
+
+
+{-| Provided with a prompt, a success Msg and a failure Msg, use standard
+window.confirm to decide which to run and run it.
+
+-}
+confirm : String -> Msg -> Msg -> Cmd Msg
+confirm prompt success fail =
+    confirmTask prompt success fail |> runConfirm
