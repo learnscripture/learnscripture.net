@@ -35,6 +35,11 @@ body.learn-page {
 
     @topbarHeight: 36px;
     nav.topbar-new {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100; // Above everything
         // We need a fixed height, because this element has 'position: fixed'
         // and we need to allow for that in margins on top of remaining content.
         height: @topbarHeight;
