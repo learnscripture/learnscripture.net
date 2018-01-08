@@ -3017,6 +3017,7 @@ handleUseHint model =
     in
         ( newModel
         , Cmd.batch
+            -- markWord may have moved us to next verse.
             [ stageOrVerseChangeCommands newModel True
             , cmd
             ]
@@ -3922,18 +3923,18 @@ handleVersesToLearn model verseBatchRaw =
         ( maybeBatchSession, sessionCmd ) =
             normalizeVerseBatch verseBatchRaw |> verseBatchToSession
 
-        newSession =
+        ( newSession, previousSessionEmpty ) =
             case model.learningSession of
                 Session origSession ->
                     case maybeBatchSession of
                         Nothing ->
-                            Just origSession
+                            ( Just origSession, False )
 
                         Just batchSession ->
-                            Just <| mergeSession origSession batchSession
+                            ( Just <| mergeSession origSession batchSession, False )
 
                 _ ->
-                    maybeBatchSession
+                    ( maybeBatchSession, True )
     in
         case newSession of
             Nothing ->
@@ -3949,7 +3950,10 @@ handleVersesToLearn model verseBatchRaw =
                     ( newModel
                     , Cmd.batch
                         [ sessionCmd
-                        , stageOrVerseChangeCommands newModel True
+                        , if previousSessionEmpty then
+                            stageOrVerseChangeCommands newModel True
+                          else
+                            Cmd.none
                         ]
                     )
 
