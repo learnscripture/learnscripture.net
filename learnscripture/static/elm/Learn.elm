@@ -1895,7 +1895,7 @@ type Msg
     | TrackHttpCall TrackedHttpCall
     | MakeHttpCall CallId
     | RecordActionCompleteReturned CallId (Result Http.Error ())
-    | GenericTrackedHttpCallReturned CallId (Result Http.Error ())
+    | EmptyResponseTrackedHttpCallReturned CallId (Result Http.Error ())
     | MorePractice Float
     | ExpandHelp
     | CollapseHelp
@@ -1927,28 +1927,12 @@ update msg model =
             moveToNextVerse model
 
         SkipVerse verseStatus ->
-            let
-                ( newModel, cmd ) =
-                    moveToNextVerse model
-            in
-                ( newModel
-                , Cmd.batch
-                    [ cmd
-                    , recordSkipVerse verseStatus
-                    ]
-                )
+            moveToNextVerse model
+                |> addCommands [ recordSkipVerse verseStatus ]
 
         CancelLearning verseStatus ->
-            let
-                ( newModel, cmd ) =
-                    moveToNextVerse model
-            in
-                ( newModel
-                , Cmd.batch
-                    [ cmd
-                    , recordCancelLearning verseStatus
-                    ]
-                )
+            moveToNextVerse model
+                |> addCommands [ recordCancelLearning verseStatus ]
 
         ResetProgress verseStatus confirmed ->
             handleResetProgress model verseStatus confirmed
@@ -1980,7 +1964,7 @@ update msg model =
             makeHttpCall model callId
 
         -- This is used for calls that return no data that we need to process
-        GenericTrackedHttpCallReturned callId result ->
+        EmptyResponseTrackedHttpCallReturned callId result ->
             handleRetries (\model result -> ( model, Cmd.none )) model callId result
 
         RecordActionCompleteReturned callId result ->
@@ -2034,6 +2018,25 @@ update msg model =
 
 
 {- Update helpers -}
+
+
+{-| Add a list of Cmds to a (Model, Cmd) pair
+-}
+addCommands : List (Cmd Msg) -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
+addCommands cmds ( model, cmd ) =
+    model ! (cmd :: cmds)
+
+
+{-| Add a list of commands produced by producer function to a (Model, Cmd) pair,
+   threading the new model into the producer.
+-}
+addCommandsM : (Model -> List (Cmd Msg)) -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
+addCommandsM producer ( model, cmd ) =
+    let
+        newCommands =
+            producer model
+    in
+        addCommands newCommands ( model, cmd )
 
 
 withSessionData : Model -> a -> (SessionData -> a) -> a
@@ -2820,90 +2823,74 @@ moveToNextSubStage verseStatus stage =
 
 moveToNextStage : Model -> ( Model, Cmd Msg )
 moveToNextStage model =
-    let
-        ( newModel, cmd ) =
-            updateCurrentVersePlus model
-                Cmd.none
-                (\currentVerse ->
-                    let
-                        finishCmd =
-                            finishStage currentVerse currentVerse.currentStage
+    updateCurrentVersePlus model
+        Cmd.none
+        (\currentVerse ->
+            let
+                finishCmd =
+                    finishStage currentVerse currentVerse.currentStage
 
-                        remaining =
-                            currentVerse.remainingStageTypes
+                remaining =
+                    currentVerse.remainingStageTypes
 
-                        ( newCurrentVerse, initCmd ) =
-                            case remaining of
-                                [] ->
-                                    ( currentVerse, Cmd.none )
+                ( newCurrentVerse, initCmd ) =
+                    case remaining of
+                        [] ->
+                            ( currentVerse, Cmd.none )
 
-                                stage :: stages ->
-                                    let
-                                        ( newCurrentStage, initCmd ) =
-                                            initializeStage stage currentVerse.verseStatus
-                                    in
-                                        ( { currentVerse
-                                            | seenStageTypes = (learningStageTypeForStage currentVerse.currentStage) :: currentVerse.seenStageTypes
-                                            , currentStage = newCurrentStage
-                                            , remainingStageTypes = stages
-                                          }
-                                        , initCmd
-                                        )
-                    in
-                        ( newCurrentVerse
-                        , Cmd.batch
-                            [ finishCmd
-                            , initCmd
-                            ]
-                        )
-                )
-    in
-        ( newModel
-        , Cmd.batch
-            [ cmd
-            , stageOrVerseChangeCommands newModel True
-            ]
+                        stage :: stages ->
+                            let
+                                ( newCurrentStage, initCmd ) =
+                                    initializeStage stage currentVerse.verseStatus
+                            in
+                                ( { currentVerse
+                                    | seenStageTypes = (learningStageTypeForStage currentVerse.currentStage) :: currentVerse.seenStageTypes
+                                    , currentStage = newCurrentStage
+                                    , remainingStageTypes = stages
+                                  }
+                                , initCmd
+                                )
+            in
+                newCurrentVerse
+                    ! [ finishCmd
+                      , initCmd
+                      ]
         )
+        |> addCommandsM (\newModel -> [ stageOrVerseChangeCommands newModel True ])
 
 
 moveToPreviousStage : Model -> ( Model, Cmd Msg )
 moveToPreviousStage model =
-    let
-        ( newModel, cmd ) =
-            updateCurrentVersePlus model
-                Cmd.none
-                (\currentVerse ->
-                    let
-                        previous =
-                            currentVerse.seenStageTypes
-                    in
-                        case previous of
-                            [] ->
-                                ( currentVerse, Cmd.none )
+    updateCurrentVersePlus model
+        Cmd.none
+        (\currentVerse ->
+            let
+                previous =
+                    currentVerse.seenStageTypes
+            in
+                case previous of
+                    [] ->
+                        ( currentVerse, Cmd.none )
 
-                            stage :: stages ->
-                                let
-                                    ( newCurrentStage, cmd ) =
-                                        initializeStage stage currentVerse.verseStatus
-                                in
-                                    ( { currentVerse
-                                        | seenStageTypes = stages
-                                        , currentStage = newCurrentStage
-                                        , remainingStageTypes = (learningStageTypeForStage currentVerse.currentStage) :: currentVerse.remainingStageTypes
-                                      }
-                                    , cmd
-                                    )
-                )
-    in
-        ( newModel
-        , Cmd.batch
-            [ cmd
-              -- Do *not* include focus change here, since
-              -- they are already focussing the 'back' button and we don't
-              -- want to change that
-            , stageOrVerseChangeCommands newModel False
-            ]
+                    stage :: stages ->
+                        let
+                            ( newCurrentStage, cmd ) =
+                                initializeStage stage currentVerse.verseStatus
+                        in
+                            ( { currentVerse
+                                | seenStageTypes = stages
+                                , currentStage = newCurrentStage
+                                , remainingStageTypes = (learningStageTypeForStage currentVerse.currentStage) :: currentVerse.remainingStageTypes
+                              }
+                            , cmd
+                            )
         )
+        |> addCommandsM
+            (\newModel ->
+                -- Do *not* include focus change here, since they are already
+                -- focussing the 'back' button and we don't want to change that
+                [ stageOrVerseChangeCommands newModel False ]
+            )
 
 
 moveToNextVerse : Model -> ( Model, Cmd Msg )
@@ -2970,7 +2957,7 @@ moveToNextVerse model =
                             , Cmd.batch
                                 [ cmd
                                 , loadMoreCommand
-                                , stageOrVerseChangeCommands newModel2 True
+                                , stageOrVerseChangeCommands newModel3 True
                                 ]
                             )
 
@@ -3051,23 +3038,20 @@ handleResetProgress model verseStatus confirmed =
                     , needsTesting = True
                 }
 
-            ( newModel1, cmd1 ) =
-                updateCurrentVersePlus model
-                    Cmd.none
-                    (\currentVerse ->
-                        setupCurrentVerse newVerseStatus Learning
-                    )
-
-            newModel2 =
-                closeDropdowns newModel1
+            newModel1 =
+                closeDropdowns model
         in
-            ( newModel2
-            , Cmd.batch
-                [ cmd1
-                , stageOrVerseChangeCommands model True
-                , recordResetProgress verseStatus
-                ]
-            )
+            updateCurrentVersePlus newModel1
+                Cmd.none
+                (\currentVerse ->
+                    setupCurrentVerse newVerseStatus Learning
+                )
+                |> addCommandsM
+                    (\m ->
+                        [ stageOrVerseChangeCommands m True
+                          --                        , recordResetProgress verseStatus
+                        ]
+                    )
     else
         ( model
         , confirm "This will reset your progress on this item to zero. Continue?"
@@ -3158,25 +3142,20 @@ handleOnScreenButtonClick model buttonText =
 
 handleUseHint : Model -> ( Model, Cmd Msg )
 handleUseHint model =
-    let
-        ( newModel, cmd ) =
-            updateCurrentVersePlus model
-                Cmd.none
-                (\currentVerse ->
-                    withCurrentTestWord currentVerse
-                        ( currentVerse, Cmd.none )
-                        (\testType testProgress currentWord ->
-                            markWord Hint currentWord.word testProgress testType currentVerse (getTestingMethod model) model.preferences
-                        )
+    updateCurrentVersePlus model
+        Cmd.none
+        (\currentVerse ->
+            withCurrentTestWord currentVerse
+                ( currentVerse, Cmd.none )
+                (\testType testProgress currentWord ->
+                    markWord Hint currentWord.word testProgress testType currentVerse (getTestingMethod model) model.preferences
                 )
-    in
-        ( newModel
-        , Cmd.batch
-            -- markWord may have moved us to next verse.
-            [ stageOrVerseChangeCommands newModel True
-            , cmd
-            ]
         )
+        |> addCommandsM
+            (\m ->
+                -- markWord may have moved us to next verse.
+                [ stageOrVerseChangeCommands m True ]
+            )
 
 
 shouldCheckTypedWord : TestingMethod -> String -> Bool
@@ -3206,35 +3185,31 @@ checkCurrentWordAndUpdate model input =
     let
         testingMethod =
             getTestingMethod model
-
-        ( newModel, cmd ) =
-            updateCurrentVersePlus model
-                Cmd.none
-                (\currentVerse ->
-                    withCurrentTestWord currentVerse
-                        ( currentVerse, Cmd.none )
-                        (\testType testProgress currentWord ->
-                            let
-                                correct =
-                                    checkWord currentWord.word.text input testingMethod
-
-                                checkResult =
-                                    (if correct then
-                                        Success
-                                     else
-                                        Failure input
-                                    )
-                            in
-                                markWord checkResult currentWord.word testProgress testType currentVerse testingMethod model.preferences
-                        )
-                )
     in
-        ( newModel
-        , Cmd.batch
-            [ stageOrVerseChangeCommands newModel True
-            , cmd
-            ]
-        )
+        updateCurrentVersePlus model
+            Cmd.none
+            (\currentVerse ->
+                withCurrentTestWord currentVerse
+                    ( currentVerse, Cmd.none )
+                    (\testType testProgress currentWord ->
+                        let
+                            correct =
+                                checkWord currentWord.word.text input testingMethod
+
+                            checkResult =
+                                (if correct then
+                                    Success
+                                 else
+                                    Failure input
+                                )
+                        in
+                            markWord checkResult currentWord.word testProgress testType currentVerse testingMethod model.preferences
+                    )
+            )
+            |> addCommandsM
+                (\m ->
+                    [ stageOrVerseChangeCommands m True ]
+                )
 
 
 checkWord : String -> String -> TestingMethod -> Bool
@@ -3714,30 +3689,26 @@ startMorePractice model accuracy =
                   , TestStage testType
                   ]
                 )
-
-        ( newModel, cmd ) =
-            updateCurrentVersePlus model
-                Cmd.none
-                (\currentVerse ->
-                    let
-                        ( newCurrentStage, cmd ) =
-                            initializeStage firstStageType currentVerse.verseStatus
-                    in
-                        ( { currentVerse
-                            | currentStage = newCurrentStage
-                            , seenStageTypes = []
-                            , remainingStageTypes = remainingStageTypes
-                          }
-                        , cmd
-                        )
-                )
     in
-        ( newModel
-        , Cmd.batch
-            [ stageOrVerseChangeCommands newModel True
-            , cmd
-            ]
-        )
+        updateCurrentVersePlus model
+            Cmd.none
+            (\currentVerse ->
+                let
+                    ( newCurrentStage, cmd ) =
+                        initializeStage firstStageType currentVerse.verseStatus
+                in
+                    ( { currentVerse
+                        | currentStage = newCurrentStage
+                        , seenStageTypes = []
+                        , remainingStageTypes = remainingStageTypes
+                      }
+                    , cmd
+                    )
+            )
+            |> addCommandsM
+                (\m ->
+                    [ stageOrVerseChangeCommands m True ]
+                )
 
 
 
@@ -4094,7 +4065,7 @@ callRecordSkipVerse httpConfig callId verseStatus =
                 [ Http.stringPart "uvs_id" (toString verseStatus.id)
                 ]
     in
-        Http.send (GenericTrackedHttpCallReturned callId)
+        Http.send (EmptyResponseTrackedHttpCallReturned callId)
             (myHttpPost httpConfig
                 skipVerseUrl
                 body
@@ -4117,7 +4088,7 @@ callRecordCancelLearning httpConfig callId verseStatus =
                 , Http.stringPart "version_slug" verseStatus.version.slug
                 ]
     in
-        Http.send (GenericTrackedHttpCallReturned callId)
+        Http.send (EmptyResponseTrackedHttpCallReturned callId)
             (myHttpPost httpConfig
                 cancelLearningUrl
                 body
@@ -4139,7 +4110,7 @@ callRecordResetProgress httpConfig callId verseStatus =
                 , Http.stringPart "version_slug" verseStatus.version.slug
                 ]
     in
-        Http.send (GenericTrackedHttpCallReturned callId)
+        Http.send (EmptyResponseTrackedHttpCallReturned callId)
             (myHttpPost httpConfig
                 resetProgressUrl
                 body
@@ -4208,15 +4179,13 @@ handleVersesToLearn model verseBatchRaw =
                             | learningSession = Session ns
                         }
                 in
-                    ( newModel
-                    , Cmd.batch
-                        [ sessionCmd
-                        , if previousSessionEmpty then
-                            stageOrVerseChangeCommands newModel True
-                          else
-                            Cmd.none
-                        ]
-                    )
+                    newModel
+                        ! [ sessionCmd
+                          , if previousSessionEmpty then
+                                stageOrVerseChangeCommands newModel True
+                            else
+                                Cmd.none
+                          ]
 
 
 handleRecordActionCompleteReturned : Model -> () -> ( Model, Cmd Msg )
