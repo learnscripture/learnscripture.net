@@ -1452,10 +1452,14 @@ viewButton model button =
 
         -- see learn_setup.js
         focusData =
-            if button.refocusTypingBox then
-                getTypingBoxFocusDataForMsg model button.msg True
-            else
-                Nothing
+            case button.enabled of
+                Enabled ->
+                    if button.refocusTypingBox then
+                        getTypingBoxFocusDataForMsg model button.msg True
+                    else
+                        Nothing
+                Disabled ->
+                    Nothing
 
         focusAttributes =
             case focusData of
