@@ -1,4 +1,4 @@
-module Learn exposing (..)
+port module Learn exposing (..)
 
 import Erl
 import Dom
@@ -22,7 +22,6 @@ import String.Interpolate exposing (interpolate)
 import Task
 import Time
 import Window
-import LearnPorts
 import Native.StringUtils
 
 
@@ -37,6 +36,22 @@ main =
         , update = update
         , subscriptions = subscriptions
         }
+
+
+
+{- Ports -}
+
+
+port updateTypingBox : UpdateTypingBoxData -> Cmd msg
+
+
+port receivePreferences : (JD.Value -> msg) -> Sub msg
+
+
+port vibrateDevice : Int -> Cmd msg
+
+
+port beep : ( Float, Float ) -> Cmd msg
 
 
 
@@ -3369,10 +3384,10 @@ markWord checkResult word testProgress testType verse testingMethod preferences 
             if isAttemptFailure checkResult then
                 if shouldMoveOn then
                     -- final failure
-                    ( LearnPorts.vibrateDevice 50, LearnPorts.beep ( 220.0, 0.2 ) )
+                    ( vibrateDevice 50, beep ( 220.0, 0.2 ) )
                 else
                     -- mistake only
-                    ( LearnPorts.vibrateDevice 25, LearnPorts.beep ( 330.0, 0.15 ) )
+                    ( vibrateDevice 25, beep ( 330.0, 0.15 ) )
             else
                 ( Cmd.none, Cmd.none )
     in
@@ -3502,7 +3517,7 @@ type alias UpdateTypingBoxData =
 
 updateTypingBoxCommand : Model -> Bool -> Cmd msg
 updateTypingBoxCommand model refocus =
-    LearnPorts.updateTypingBox (getUpdateTypingBoxData model refocus)
+    updateTypingBox (getUpdateTypingBoxData model refocus)
 
 
 getUpdateTypingBoxData : Model -> Bool -> UpdateTypingBoxData
@@ -4183,7 +4198,7 @@ subscriptions : a -> Sub Msg
 subscriptions model =
     Sub.batch
         [ Window.resizes WindowResize
-        , LearnPorts.receivePreferences ReceivePreferences
+        , receivePreferences ReceivePreferences
         ]
 
 
