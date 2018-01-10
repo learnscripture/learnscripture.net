@@ -233,8 +233,12 @@ class Account(AbstractBaseUser):
                              points_added=action_log.points)
         return action_log
 
-    def get_action_logs(self, from_datetime):
-        return self.action_logs.filter(created__gte=from_datetime).order_by('created')
+    def get_action_logs(self, from_datetime, highest_id_seen=0):
+        return (self.action_logs
+                .filter(created__gte=from_datetime,
+                        id__gt=highest_id_seen)
+                .order_by('created')
+                )
 
     @cached_property
     def points_all_time(self):
@@ -1244,11 +1248,12 @@ class Identity(models.Model):
                                    version_id=version_id,
                                    ignored=False).update(ignored=True)
 
-    def get_action_logs(self, from_datetime):
+    def get_action_logs(self, from_datetime, highest_id_seen=0):
         if self.account_id is None:
             return []
         else:
-            return self.account.get_action_logs(from_datetime)
+            return self.account.get_action_logs(from_datetime,
+                                                highest_id_seen=highest_id_seen)
 
     @property
     def scoring_enabled(self):

@@ -14,6 +14,7 @@ from django.utils import timezone
 
 from learnscripture.datastructures import make_choices
 
+# See also Learn.elm which copies definition
 ScoreReason = make_choices('ScoreReason',
                            [(0, 'VERSE_TESTED', 'Verse tested'),
                             (1, 'VERSE_REVIEWED', 'Verse reviewed'),

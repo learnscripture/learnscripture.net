@@ -173,6 +173,7 @@ type LearningSession
 type alias SessionData =
     { verses : VerseStore
     , currentVerse : CurrentVerse
+    , actionLogs : Dict.Dict Int ActionLog
     }
 
 
@@ -353,6 +354,26 @@ type LearningType
     = Revision
     | Learning
     | Practice
+
+
+type alias ActionLog =
+    { id : Int
+    , points : Int
+    , reason :
+        ScoreReason
+        -- created is technically a date, but in ISO format it is fine.
+        -- we only use it for sorting and ISO dates sort chronologically.
+    , created : String
+    }
+
+
+type ScoreReason
+    = VerseTested
+    | VerseReviewed
+    | RevisionCompleted
+    | PerfectTestBonus
+    | VerseLearnt
+    | EarnedAward
 
 
 
@@ -1896,6 +1917,7 @@ type Msg
     | MakeHttpCall CallId
     | RecordActionCompleteReturned CallId (Result Http.Error ())
     | EmptyResponseTrackedHttpCallReturned CallId (Result Http.Error ())
+    | ActionLogsLoaded (Result Http.Error (List ActionLog))
     | MorePractice Float
     | ExpandHelp
     | CollapseHelp
@@ -1969,6 +1991,9 @@ update msg model =
 
         RecordActionCompleteReturned callId result ->
             handleRetries handleRecordActionCompleteReturned model callId result
+
+        ActionLogsLoaded result ->
+            handleActionLogs model result
 
         MorePractice accuracy ->
             startMorePractice model accuracy
@@ -2071,6 +2096,30 @@ withCurrentTestWord currentVerse default func =
             default
 
 
+updateSessionDataPlus : Model -> a -> (SessionData -> ( SessionData, a )) -> ( Model, a )
+updateSessionDataPlus model defaultRetval updater =
+    withSessionData model
+        ( model, defaultRetval )
+        (\sessionData ->
+            let
+                ( newSessionData, retval ) =
+                    updater sessionData
+            in
+                ( { model | learningSession = Session newSessionData }
+                , retval
+                )
+        )
+
+
+updateSessionData : Model -> (SessionData -> SessionData) -> Model
+updateSessionData model updater =
+    let
+        ( newModel, _ ) =
+            updateSessionDataPlus model () (\s -> ( updater s, () ))
+    in
+        newModel
+
+
 updateCurrentVerse : Model -> (CurrentVerse -> CurrentVerse) -> Model
 updateCurrentVerse model updater =
     let
@@ -2092,8 +2141,8 @@ updateCurrentStage model updater =
 
 updateCurrentVersePlus : Model -> a -> (CurrentVerse -> ( CurrentVerse, a )) -> ( Model, a )
 updateCurrentVersePlus model defaultRetval updater =
-    withSessionData model
-        ( model, defaultRetval )
+    updateSessionDataPlus model
+        defaultRetval
         (\sessionData ->
             let
                 ( newCurrentVerse, retval ) =
@@ -2104,7 +2153,7 @@ updateCurrentVersePlus model defaultRetval updater =
                         | currentVerse = newCurrentVerse
                     }
             in
-                ( { model | learningSession = Session newSessionData }
+                ( newSessionData
                 , retval
                 )
         )
@@ -2251,6 +2300,7 @@ verseBatchToSession batch =
                                         , maxOrderVal = maxOrderVal
                                         }
                                     , currentVerse = newCurrentVerse
+                                    , actionLogs = Dict.fromList []
                                     }
                                 , cmd
                                 )
@@ -3788,7 +3838,12 @@ the HTTP call to be started.
 Technically this doesn't need to return a Cmd Msg (we could just update the
 model directly in all places that use this function), but rewiring from
 `Http.send` to using `TrackedHttpCall` is much easier if we use a `Cmd Msg` and
-this utility
+this utility.
+
+There can be race conditions that occur due to routing these message through
+another `update` loop, instead of updating the model directly. Mostly for our
+purposes these don't matter, but where they might we sometimes bypass this
+mechanism and update the model directly e.g. loadVersesImmediate vs loadVerses
 -}
 sendStartTrackedCallMsg : TrackedHttpCall -> Cmd Msg
 sendStartTrackedCallMsg trackedCall =
@@ -3853,6 +3908,30 @@ addTrackedCall model trackedCall =
           }
         , callId
         )
+
+
+{-| Given an `update` like function of type `Model -> a -> ( Model, Cmd Msg)`,
+a model, a CallId and a Http result, handles the retries for the call, and
+executes the update function.
+
+-}
+handleRetries : (Model -> a -> ( Model, Cmd Msg )) -> Model -> CallId -> Result.Result Http.Error a -> ( Model, Cmd Msg )
+handleRetries updateFunction model callId result =
+    case result of
+        Ok v ->
+            updateFunction (markCallFinished model callId) v
+
+        Err err ->
+            case err of
+                Http.BadUrl _ ->
+                    ( markPermanentFailCall model callId
+                    , Cmd.none
+                    )
+
+                _ ->
+                    -- Others could all be temporary in theory, so we try again.
+                    -- TODO save error message
+                    markFailAndRetry model callId
 
 
 markCallFinished : Model -> CallId -> Model
@@ -3926,31 +4005,12 @@ verseLoadFailed model =
 
 
 {- Details of actual API calls start here -}
+{- versestolearn2 API -}
 
 
 versesToLearnUrl : String
 versesToLearnUrl =
     "/api/learnscripture/v1/versestolearn2/"
-
-
-actionCompleteUrl : String
-actionCompleteUrl =
-    "/api/learnscripture/v1/actioncomplete/"
-
-
-skipVerseUrl : String
-skipVerseUrl =
-    "/api/learnscripture/v1/skipverse/"
-
-
-cancelLearningUrl : String
-cancelLearningUrl =
-    "/api/learnscripture/v1/cancellearningverse/"
-
-
-resetProgressUrl : String
-resetProgressUrl =
-    "/api/learnscripture/v1/resetprogress/"
 
 
 {-| Trigger verse load via a Cmd
@@ -3992,6 +4052,59 @@ callLoadVerses httpConfig callId model =
                 |> Erl.toString
     in
         Http.send (VersesToLearn callId) (Http.get url verseBatchRawDecoder)
+
+
+handleVersesToLearn : Model -> VerseBatchRaw -> ( Model, Cmd Msg )
+handleVersesToLearn model verseBatchRaw =
+    let
+        ( maybeBatchSession, sessionCmd ) =
+            normalizeVerseBatch verseBatchRaw |> verseBatchToSession
+
+        ( newSession, previousSessionEmpty ) =
+            case model.learningSession of
+                Session origSession ->
+                    case maybeBatchSession of
+                        Nothing ->
+                            ( Just origSession, False )
+
+                        Just batchSession ->
+                            ( Just <| mergeSession origSession batchSession, False )
+
+                _ ->
+                    ( maybeBatchSession, True )
+    in
+        case newSession of
+            Nothing ->
+                ( model, Navigation.load dashboardUrl )
+
+            Just ns ->
+                let
+                    newModel =
+                        { model
+                            | learningSession = Session ns
+                        }
+                in
+                    newModel
+                        ! [ sessionCmd
+                          , if previousSessionEmpty then
+                                stageOrVerseChangeCommands newModel True
+                            else
+                                Cmd.none
+                          , if previousSessionEmpty then
+                                loadActionLogs newModel
+                            else
+                                Cmd.none
+                          ]
+
+
+
+{- actioncomplete API -}
+-- For both test complete and reading complete
+
+
+actionCompleteUrl : String
+actionCompleteUrl =
+    "/api/learnscripture/v1/actioncomplete/"
 
 
 recordTestComplete : CurrentVerse -> Float -> TestType -> Cmd Msg
@@ -4052,6 +4165,22 @@ callRecordReadComplete httpConfig callId currentVerse =
             )
 
 
+handleRecordActionCompleteReturned : Model -> () -> ( Model, Cmd Msg )
+handleRecordActionCompleteReturned model () =
+    ( model
+    , loadActionLogs model
+    )
+
+
+
+{- skipverse -}
+
+
+skipVerseUrl : String
+skipVerseUrl =
+    "/api/learnscripture/v1/skipverse/"
+
+
 recordSkipVerse : VerseStatus -> Cmd Msg
 recordSkipVerse verseStatus =
     sendStartTrackedCallMsg (RecordSkipVerse verseStatus)
@@ -4071,6 +4200,15 @@ callRecordSkipVerse httpConfig callId verseStatus =
                 body
                 emptyDecoder
             )
+
+
+
+{- cancellearningverse API -}
+
+
+cancelLearningUrl : String
+cancelLearningUrl =
+    "/api/learnscripture/v1/cancellearningverse/"
 
 
 recordCancelLearning : VerseStatus -> Cmd Msg
@@ -4096,6 +4234,15 @@ callRecordCancelLearning httpConfig callId verseStatus =
             )
 
 
+
+{- resetprogress API -}
+
+
+resetProgressUrl : String
+resetProgressUrl =
+    "/api/learnscripture/v1/resetprogress/"
+
+
 recordResetProgress : VerseStatus -> Cmd Msg
 recordResetProgress verseStatus =
     sendStartTrackedCallMsg (RecordResetProgress verseStatus)
@@ -4118,82 +4265,77 @@ callRecordResetProgress httpConfig callId verseStatus =
             )
 
 
-{-| Given an `update` like function of type `Model -> a -> ( Model, Cmd Msg)`,
-a model, a CallId and a Http result, handles the retries for the call, and
-executes the update function.
 
--}
-handleRetries : (Model -> a -> ( Model, Cmd Msg )) -> Model -> CallId -> Result.Result Http.Error a -> ( Model, Cmd Msg )
-handleRetries continuation model callId result =
-    case result of
-        Ok v ->
-            let
-                newModel1 =
-                    markCallFinished model callId
-
-                ( newModel2, cmd ) =
-                    continuation newModel1 v
-            in
-                ( newModel2, cmd )
-
-        Err err ->
-            case err of
-                Http.BadUrl _ ->
-                    ( markPermanentFailCall model callId
-                    , Cmd.none
-                    )
-
-                _ ->
-                    -- Others could all be temporary in theory, so we try again.
-                    -- TODO save error message
-                    markFailAndRetry model callId
+{- actionlogs -}
 
 
-handleVersesToLearn : Model -> VerseBatchRaw -> ( Model, Cmd Msg )
-handleVersesToLearn model verseBatchRaw =
+loadActionLogsUrl : String
+loadActionLogsUrl =
+    "/api/learnscripture/v1/actionlogs/"
+
+
+loadActionLogs : Model -> Cmd Msg
+loadActionLogs model =
+    if scoringEnabled model then
+        -- No need for tracking, this is unimportant
+        let
+            url =
+                Erl.parse loadActionLogsUrl
+                    |> Erl.addQuery "highest_id_seen"
+                        (withSessionData model
+                            0
+                            (\sessionData ->
+                                Dict.keys sessionData.actionLogs
+                                    |> List.maximum
+                                    |> Maybe.withDefault 0
+                            )
+                            |> toString
+                        )
+                    |> Erl.toString
+        in
+            Http.send ActionLogsLoaded (Http.get url actionLogsDecoder)
+    else
+        Cmd.none
+
+
+scoringEnabled : Model -> Bool
+scoringEnabled model =
+    case model.user of
+        GuestUser ->
+            False
+
+        Account _ ->
+            True
+
+
+handleActionLogs : Model -> Result Http.Error (List ActionLog) -> ( Model, Cmd Msg )
+handleActionLogs model result =
     let
-        ( maybeBatchSession, sessionCmd ) =
-            normalizeVerseBatch verseBatchRaw |> verseBatchToSession
+        newModel =
+            case result of
+                Err msg ->
+                    let
+                        _ =
+                            Debug.log "Error loading logs" msg
+                    in
+                        model
 
-        ( newSession, previousSessionEmpty ) =
-            case model.learningSession of
-                Session origSession ->
-                    case maybeBatchSession of
-                        Nothing ->
-                            ( Just origSession, False )
-
-                        Just batchSession ->
-                            ( Just <| mergeSession origSession batchSession, False )
-
-                _ ->
-                    ( maybeBatchSession, True )
+                Ok actionLogs ->
+                    updateSessionData model
+                        (\sessionData ->
+                            let
+                                newActionLogDict =
+                                    Dict.fromList <| List.map (\log -> ( log.id, log )) actionLogs
+                            in
+                                { sessionData
+                                    | actionLogs =
+                                        Dict.union sessionData.actionLogs newActionLogDict
+                                }
+                        )
     in
-        case newSession of
-            Nothing ->
-                ( model, Navigation.load dashboardUrl )
-
-            Just ns ->
-                let
-                    newModel =
-                        { model
-                            | learningSession = Session ns
-                        }
-                in
-                    newModel
-                        ! [ sessionCmd
-                          , if previousSessionEmpty then
-                                stageOrVerseChangeCommands newModel True
-                            else
-                                Cmd.none
-                          ]
-
-
-handleRecordActionCompleteReturned : Model -> () -> ( Model, Cmd Msg )
-handleRecordActionCompleteReturned model () =
-    ( model
-      -- TODO - load score logs
-    , Cmd.none
-    )
+        ( newModel
+        , Cmd.none
+        )
 
 
 sendMsg : msg -> Cmd msg
@@ -4256,7 +4398,7 @@ subscriptions model =
 
 
 
-{- Decoder and encoders -}
+{- Decoders and encoders -}
 
 
 preferencesDecoder : JD.Decoder Preferences
@@ -4272,7 +4414,7 @@ preferencesDecoder =
 
 testingMethodDecoder : JD.Decoder TestingMethod
 testingMethodDecoder =
-    enumDecoder
+    stringEnumDecoder
         [ ( "FULL_WORDS", FullWords )
         , ( "FIRST_LETTER", FirstLetter )
         , ( "ON_SCREEN", OnScreen )
@@ -4325,7 +4467,7 @@ verseSetDecoder =
 
 verseSetTypeDecoder : JD.Decoder VerseSetType
 verseSetTypeDecoder =
-    enumDecoder
+    stringEnumDecoder
         [ ( "SELECTION", Selection )
         , ( "PASSAGE", Passage )
         ]
@@ -4341,27 +4483,51 @@ versionDecoder =
         |> JDP.required "text_type" textTypeDecoder
 
 
-enumDecoder : List ( String, a ) -> JD.Decoder a
-enumDecoder items =
+actionLogDecoder : JD.Decoder ActionLog
+actionLogDecoder =
+    JDP.decode ActionLog
+        |> JDP.required "id" JD.int
+        |> JDP.required "points" JD.int
+        |> JDP.required "reason" scoreReasonDecodor
+        |> JDP.required "created" JD.string
+
+
+actionLogsDecoder : JD.Decoder (List ActionLog)
+actionLogsDecoder =
+    JD.list actionLogDecoder
+
+
+enumDecoder : List ( comparable, a ) -> JD.Decoder comparable -> JD.Decoder a
+enumDecoder items valDecoder =
     let
         d =
             Dict.fromList items
     in
-        JD.string
+        valDecoder
             |> JD.andThen
-                (\str ->
-                    case (Dict.get str d) of
+                (\val ->
+                    case (Dict.get val d) of
                         Just v ->
                             JD.succeed v
 
                         Nothing ->
-                            JD.fail <| "Unknown enum value: " ++ str
+                            JD.fail <| "Unknown enum value: " ++ toString val
                 )
+
+
+stringEnumDecoder : List ( String, a ) -> JD.Decoder a
+stringEnumDecoder items =
+    enumDecoder items JD.string
+
+
+intEnumDecoder : List ( Int, a ) -> JD.Decoder a
+intEnumDecoder items =
+    enumDecoder items JD.int
 
 
 textTypeDecoder : JD.Decoder TextType
 textTypeDecoder =
-    enumDecoder
+    stringEnumDecoder
         [ ( "BIBLE", Bible )
         , ( "CATECHISM", Catechism )
         ]
@@ -4369,10 +4535,22 @@ textTypeDecoder =
 
 learningTypeDecoder : JD.Decoder LearningType
 learningTypeDecoder =
-    enumDecoder
+    stringEnumDecoder
         [ ( "REVISION", Revision )
         , ( "LEARNING", Learning )
         , ( "PRACTICE", Practice )
+        ]
+
+
+scoreReasonDecodor : JD.Decoder ScoreReason
+scoreReasonDecodor =
+    intEnumDecoder
+        [ ( 0, VerseTested )
+        , ( 1, VerseReviewed )
+        , ( 2, RevisionCompleted )
+        , ( 3, PerfectTestBonus )
+        , ( 4, VerseLearnt )
+        , ( 5, EarnedAward )
         ]
 
 
