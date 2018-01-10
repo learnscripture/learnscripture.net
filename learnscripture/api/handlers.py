@@ -403,7 +403,9 @@ class ActionLogs(ApiView):
     def get(self, request):
         if not hasattr(request, 'identity'):
             return []
-        return request.identity.get_action_logs(session.get_learning_session_start(request))
+        highest_id_seen = int(request.GET.get('highest_id_seen', '0'))
+        return request.identity.get_action_logs(session.get_learning_session_start(request),
+                                                highest_id_seen=highest_id_seen)
 
 
 def html_format_text(verse):
