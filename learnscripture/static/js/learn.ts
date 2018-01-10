@@ -323,7 +323,7 @@ var indicateMistake = function(mistakes, maxMistakes) {
         'class': 'incorrect'
     }).text(msg),
         getWordAt(currentWordIndex));
-    beep(330, 0.10);
+    beep(330, 1);
     vibrate(25);
 };
 
@@ -333,7 +333,7 @@ var indicateFail = function() {
     flashMsg(testingStatus.attr({
         'class': 'incorrect'
     }).text("Incorrect"), word);
-    beep(220, 0.10);
+    beep(290, 1);
     vibrate(50);
 };
 

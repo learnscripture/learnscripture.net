@@ -3409,10 +3409,10 @@ markWord checkResult word testProgress testType verse testingMethod preferences 
             if isAttemptFailure checkResult then
                 if shouldMoveOn then
                     -- final failure
-                    ( vibrateDevice 50, beep ( 220.0, 0.2 ) )
+                    ( vibrateDevice 50, beep ( 290.0, 1 ) )
                 else
                     -- mistake only
-                    ( vibrateDevice 25, beep ( 330.0, 0.15 ) )
+                    ( vibrateDevice 25, beep ( 330.0, 1 ) )
             else
                 ( Cmd.none, Cmd.none )
     in
