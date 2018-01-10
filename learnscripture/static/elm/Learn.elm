@@ -423,6 +423,7 @@ topNav model =
         , H.div [ A.class "spacer" ]
             []
         , ajaxInfo model
+        , viewActionLogs model
         , H.div [ A.class "preferences-link" ]
             [ link "#" (userDisplayName model.user) "icon-preferences" AlignRight ]
         ]
@@ -507,7 +508,7 @@ ajaxInfo model =
                     )
                     [ H.span [ A.class "nav-caption" ]
                         [ H.text "Working..." ]
-                    , makeIcon ("icon-ajax-in-progress " ++ spinClass)
+                    , makeIcon ("icon-ajax-in-progress " ++ spinClass) "Data transfer in progress"
                     ]
                 ]
             , if not itemsToView then
@@ -549,6 +550,55 @@ ajaxInfo model =
                            )
                     )
             ]
+
+
+viewActionLogs : Model -> H.Html Msg
+viewActionLogs model =
+    withSessionData model
+        emptyNode
+        (\sessionData ->
+            let
+                latest =
+                    sessionData.actionLogs
+                        |> Dict.values
+                        |> List.sortBy .created
+                        |> List.reverse
+                        |> List.map (\log -> ( log.points, log.reason ))
+                        |> List.head
+
+                total =
+                    sessionData.actionLogs
+                        |> Dict.values
+                        |> List.map .points
+                        |> List.sum
+            in
+                H.div [ A.class "action-logs" ]
+                    [ H.span [ A.class "nav-caption" ]
+                        [ H.text "Points: " ]
+                    , case latest of
+                        Nothing ->
+                            emptyNode
+
+                        Just ( points, reason ) ->
+                            H.span
+                                [ A.class "latest-points"
+                                , A.attribute "data-points-type" (toString reason)
+                                ]
+                                [ H.text (signedNumberToString points) ]
+                    , H.text " = "
+                    , H.span [ A.class "total-points" ]
+                        [ H.text (toString total) ]
+                    , makeIcon "icon-points" "Points gained this session, last item and total"
+                    ]
+        )
+
+
+signedNumberToString : Int -> String
+signedNumberToString number =
+    if number > 0 then
+        "+" ++ (toString number)
+    else
+        toString number
 
 
 userDisplayName : User -> String
@@ -691,7 +741,7 @@ viewVerseOptionsMenuButton menuOpen =
             [ A.href "#"
             , onClickSimply (ToggleDropdown VerseOptionsMenu)
             ]
-            [ makeIcon "icon-verse-options-menu-btn" ]
+            [ makeIcon "icon-verse-options-menu-btn" "verse options" ]
         ]
 
 
@@ -1782,14 +1832,14 @@ instructions verse testingMethod helpVisible =
                                 [ A.href "#"
                                 , onClickSimply CollapseHelp
                                 ]
-                                [ makeIcon "icon-help-expanded" ]
+                                [ makeIcon "icon-help-expanded" "collapse help" ]
                             )
                           else
                             (H.a
                                 [ A.href "#"
                                 , onClickSimply ExpandHelp
                                 ]
-                                [ makeIcon "icon-help-collapsed" ]
+                                [ makeIcon "icon-help-collapsed" "expand help" ]
                             )
                         ]
                     ]
@@ -1870,16 +1920,20 @@ errorMessage msg =
     H.div [ A.class "error" ] [ H.text msg ]
 
 
-makeIcon : String -> H.Html msg
-makeIcon iconClass =
-    H.i [ A.class ("icon-fw " ++ iconClass) ] []
+makeIcon : String -> String -> H.Html msg
+makeIcon iconClass titleText =
+    H.i
+        [ A.class ("icon-fw " ++ iconClass)
+        , A.title titleText
+        ]
+        []
 
 
 link : String -> String -> IconName -> LinkIconAlign -> H.Html msg
 link href caption icon iconAlign =
     let
         iconH =
-            makeIcon icon
+            makeIcon icon caption
 
         captionH =
             H.span [ A.class "nav-caption" ] [ H.text (" " ++ caption ++ " ") ]
