@@ -1983,7 +1983,7 @@ type Msg
     | MakeHttpCall CallId
     | RecordActionCompleteReturned CallId (Result Http.Error ())
     | EmptyResponseTrackedHttpCallReturned CallId (Result Http.Error ())
-    | ActionLogsLoaded (Result Http.Error (List ActionLog))
+    | ActionLogsLoaded Bool (Result Http.Error (List ActionLog))
     | ProcessNewActionLogs
     | MorePractice Float
     | ExpandHelp
@@ -2059,8 +2059,8 @@ update msg model =
         RecordActionCompleteReturned callId result ->
             handleRetries handleRecordActionCompleteReturned model callId result
 
-        ActionLogsLoaded result ->
-            handleActionLogs model result
+        ActionLogsLoaded initialPageLoad result ->
+            handleActionLogs model initialPageLoad result
 
         ProcessNewActionLogs ->
             processNewActionLogs model
@@ -4221,7 +4221,7 @@ handleVersesToLearn model verseBatchRaw =
                             else
                                 Cmd.none
                           , if previousSessionEmpty then
-                                loadActionLogs newModel
+                                loadActionLogs newModel True
                             else
                                 Cmd.none
                           ]
@@ -4298,7 +4298,7 @@ callRecordReadComplete httpConfig callId currentVerse =
 handleRecordActionCompleteReturned : Model -> () -> ( Model, Cmd Msg )
 handleRecordActionCompleteReturned model () =
     ( model
-    , loadActionLogs model
+    , loadActionLogs model False
     )
 
 
@@ -4404,8 +4404,8 @@ loadActionLogsUrl =
     "/api/learnscripture/v1/actionlogs/"
 
 
-loadActionLogs : Model -> Cmd Msg
-loadActionLogs model =
+loadActionLogs : Model -> Bool -> Cmd Msg
+loadActionLogs model initialPageLoad =
     if scoringEnabled model then
         -- No need for tracking, this is unimportant
         let
@@ -4424,7 +4424,7 @@ loadActionLogs model =
                         )
                     |> Erl.toString
         in
-            Http.send ActionLogsLoaded (Http.get url actionLogsDecoder)
+            Http.send (ActionLogsLoaded initialPageLoad) (Http.get url actionLogsDecoder)
     else
         Cmd.none
 
@@ -4439,8 +4439,8 @@ scoringEnabled model =
             True
 
 
-handleActionLogs : Model -> Result Http.Error (List ActionLog) -> ( Model, Cmd Msg )
-handleActionLogs model result =
+handleActionLogs : Model -> Bool -> Result Http.Error (List ActionLog) -> ( Model, Cmd Msg )
+handleActionLogs model initialPageLoad result =
     case result of
         Err msg ->
             let
@@ -4465,14 +4465,29 @@ handleActionLogs model result =
 
                         newToProcessLogs =
                             Dict.union oldStore.toProcess unprocessedActionLogs
-                    in
-                        ( { sessionData
-                            | actionLogStore =
-                                { oldStore
-                                    | toProcess = newToProcessLogs
+
+                        newSessionData =
+                            if initialPageLoad then
+                                -- This is the case where the user pressed
+                                -- 'Refresh' while already in the middle of a session.
+                                -- Skip the processing animations, move the items
+                                -- straight to 'processed' dict:
+                                { sessionData
+                                    | actionLogStore =
+                                        { oldStore
+                                            | processed = newToProcessLogs
+                                        }
                                 }
-                          }
-                        , if Dict.isEmpty newToProcessLogs then
+                            else
+                                { sessionData
+                                    | actionLogStore =
+                                        { oldStore
+                                            | toProcess = newToProcessLogs
+                                        }
+                                }
+                    in
+                        ( newSessionData
+                        , if initialPageLoad || Dict.isEmpty newToProcessLogs then
                             Cmd.none
                           else
                             sendMsg ProcessNewActionLogs
