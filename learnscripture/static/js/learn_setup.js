@@ -181,3 +181,37 @@ app.ports.beep.subscribe(function (args) {
 });
 
 setUpAudio();
+
+
+
+app.ports.flashActionLog.subscribe(function (id) {
+    var flashActionLogDuration = 0.6;
+    function flash(attempts) {
+        if (attempts > 6) {
+            return;
+        }
+        var $span = $("#" + id);
+        // This function gets called before the DOM is updated, so we check for
+        // that and defer until after a DOM update if the node doesn't exist
+        // yet.
+        if ($span.length == 0) {
+            setTimeout(function() {
+                flash(attempts + 1)
+            }, 10)
+            return;
+        }
+        if ($span.hasClass("flash-action-log")) {
+            // Animation won't work if the class is already present. It often is
+            // because of how Elm re-uses nodes.
+            $span.removeClass("flash-action-log");
+            setTimeout(function () {
+                flash(attempts);
+            }, 10);
+        }
+        $span.addClass("flash-action-log");
+        setTimeout(function() {
+            $span.removeClass("flash-action-log");
+        }, flashActionLogDuration * 1000 + 200);
+    }
+    flash(0);
+});

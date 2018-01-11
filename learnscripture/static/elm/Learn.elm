@@ -55,6 +55,9 @@ port vibrateDevice : Int -> Cmd msg
 port beep : ( Float, Float ) -> Cmd msg
 
 
+port flashActionLog : String -> Cmd msg
+
+
 
 {- Constants -}
 
@@ -173,7 +176,7 @@ type LearningSession
 type alias SessionData =
     { verses : VerseStore
     , currentVerse : CurrentVerse
-    , actionLogs : Dict.Dict Int ActionLog
+    , actionLogStore : ActionLogStore
     }
 
 
@@ -183,6 +186,13 @@ type alias CurrentVerse =
     , currentStage : LearningStage
     , remainingStageTypes : List LearningStageType
     , seenStageTypes : List LearningStageType
+    }
+
+
+type alias ActionLogStore =
+    { processed : Dict.Dict Int ActionLog
+    , beingProcessed : Maybe ActionLog
+    , toProcess : Dict.Dict Int ActionLog
     }
 
 
@@ -554,43 +564,45 @@ ajaxInfo model =
 
 viewActionLogs : Model -> H.Html Msg
 viewActionLogs model =
-    withSessionData model
-        emptyNode
-        (\sessionData ->
-            let
-                latest =
-                    sessionData.actionLogs
-                        |> Dict.values
-                        |> List.sortBy .created
-                        |> List.reverse
-                        |> List.map (\log -> ( log.points, log.reason ))
-                        |> List.head
+    let
+        ( totalPoints, latestLog ) =
+            withSessionData model
+                ( 0, Nothing )
+                (\sessionData ->
+                    let
+                        totalPoints =
+                            sessionData.actionLogStore.processed
+                                |> Dict.values
+                                |> List.map .points
+                                |> List.sum
+                    in
+                        ( totalPoints, sessionData.actionLogStore.beingProcessed )
+                )
+    in
+        H.div [ A.class "action-logs" ]
+            [ H.span [ A.class "nav-caption" ]
+                [ H.text "Points: " ]
+            , H.span [ A.class "total-points" ]
+                [ H.text (toString totalPoints)
+                , case latestLog of
+                    Nothing ->
+                        emptyNode
 
-                total =
-                    sessionData.actionLogs
-                        |> Dict.values
-                        |> List.map .points
-                        |> List.sum
-            in
-                H.div [ A.class "action-logs" ]
-                    [ H.span [ A.class "nav-caption" ]
-                        [ H.text "Points: " ]
-                    , case latest of
-                        Nothing ->
-                            emptyNode
+                    Just log ->
+                        H.span
+                            [ A.class "latest-points"
+                            , A.attribute "data-points-type" (toString log.reason)
+                            , A.id (idForLatestActionLogSpan log)
+                            ]
+                            [ H.text (signedNumberToString log.points) ]
+                ]
+            , makeIcon "icon-points" "Points gained this session, last item and total"
+            ]
 
-                        Just ( points, reason ) ->
-                            H.span
-                                [ A.class "latest-points"
-                                , A.attribute "data-points-type" (toString reason)
-                                ]
-                                [ H.text (signedNumberToString points) ]
-                    , H.text " = "
-                    , H.span [ A.class "total-points" ]
-                        [ H.text (toString total) ]
-                    , makeIcon "icon-points" "Points gained this session, last item and total"
-                    ]
-        )
+
+idForLatestActionLogSpan : { b | id : a } -> String
+idForLatestActionLogSpan log =
+    "id-latest-action-log-" ++ toString log.id
 
 
 signedNumberToString : Int -> String
@@ -1972,6 +1984,7 @@ type Msg
     | RecordActionCompleteReturned CallId (Result Http.Error ())
     | EmptyResponseTrackedHttpCallReturned CallId (Result Http.Error ())
     | ActionLogsLoaded (Result Http.Error (List ActionLog))
+    | ProcessNewActionLogs
     | MorePractice Float
     | ExpandHelp
     | CollapseHelp
@@ -2048,6 +2061,9 @@ update msg model =
 
         ActionLogsLoaded result ->
             handleActionLogs model result
+
+        ProcessNewActionLogs ->
+            processNewActionLogs model
 
         MorePractice accuracy ->
             startMorePractice model accuracy
@@ -2354,7 +2370,11 @@ verseBatchToSession batch =
                                         , maxOrderVal = maxOrderVal
                                         }
                                     , currentVerse = newCurrentVerse
-                                    , actionLogs = Dict.fromList []
+                                    , actionLogStore =
+                                        { processed = Dict.fromList []
+                                        , toProcess = Dict.fromList []
+                                        , beingProcessed = Nothing
+                                        }
                                     }
                                 , cmd
                                 )
@@ -2393,6 +2413,65 @@ stageOrVerseChangeCommands model changeFocus =
                 [ focusDefaultButton model ]
                else
                 []
+        )
+
+
+flashActionLogDuration : Float
+flashActionLogDuration =
+    Time.second * 0.6
+
+
+processNewActionLogs : Model -> ( Model, Cmd Msg )
+processNewActionLogs model =
+    updateSessionDataPlus model
+        Cmd.none
+        (\sessionData ->
+            case sessionData.actionLogStore.beingProcessed of
+                Just log ->
+                    -- We are in the middle of processing one.
+                    let
+                        oldStore =
+                            sessionData.actionLogStore
+
+                        newSessionData =
+                            { sessionData
+                                | actionLogStore =
+                                    { oldStore
+                                        | processed = Dict.insert log.id log <| oldStore.processed
+                                        , beingProcessed = Nothing
+                                        , toProcess = Dict.remove log.id oldStore.toProcess
+                                    }
+                            }
+                    in
+                        ( newSessionData
+                        , delay (flashActionLogDuration / 2 + Time.second * 0.5) ProcessNewActionLogs
+                        )
+
+                Nothing ->
+                    case Dict.toList sessionData.actionLogStore.toProcess |> List.sortBy (Tuple.second >> .created) of
+                        [] ->
+                            ( sessionData, Cmd.none )
+
+                        ( k, log ) :: rest ->
+                            -- Start to process it. We don't put it into actionLogStore yet, because
+                            -- we don't want to update the 'total' points until after the animation
+                            -- is done or part way through.
+                            let
+                                oldStore =
+                                    sessionData.actionLogStore
+
+                                newSessionData =
+                                    { sessionData
+                                        | actionLogStore =
+                                            { oldStore
+                                                | beingProcessed = Just log
+                                            }
+                                    }
+                            in
+                                newSessionData
+                                    ! [ flashActionLog (idForLatestActionLogSpan log)
+                                      , delay (flashActionLogDuration / 2) ProcessNewActionLogs
+                                      ]
         )
 
 
@@ -4030,9 +4109,6 @@ markFailAndRetry model callId =
                                     }
                                     model.currentHttpCalls
                         }
-
-                    delayTask =
-                        Process.sleep (Time.second * (2 ^ attempts |> toFloat))
                 in
                     ( newModel
                     , delay
@@ -4339,7 +4415,8 @@ loadActionLogs model =
                         (withSessionData model
                             0
                             (\sessionData ->
-                                Dict.keys sessionData.actionLogs
+                                Dict.union sessionData.actionLogStore.processed sessionData.actionLogStore.toProcess
+                                    |> Dict.keys
                                     |> List.maximum
                                     |> Maybe.withDefault 0
                             )
@@ -4364,32 +4441,43 @@ scoringEnabled model =
 
 handleActionLogs : Model -> Result Http.Error (List ActionLog) -> ( Model, Cmd Msg )
 handleActionLogs model result =
-    let
-        newModel =
-            case result of
-                Err msg ->
-                    let
-                        _ =
-                            Debug.log "Error loading logs" msg
-                    in
-                        model
+    case result of
+        Err msg ->
+            let
+                _ =
+                    Debug.log "Error loading logs" msg
+            in
+                ( model, Cmd.none )
 
-                Ok actionLogs ->
-                    updateSessionData model
-                        (\sessionData ->
-                            let
-                                newActionLogDict =
-                                    Dict.fromList <| List.map (\log -> ( log.id, log )) actionLogs
-                            in
-                                { sessionData
-                                    | actionLogs =
-                                        Dict.union sessionData.actionLogs newActionLogDict
+        Ok actionLogs ->
+            updateSessionDataPlus model
+                Cmd.none
+                (\sessionData ->
+                    let
+                        oldStore =
+                            sessionData.actionLogStore
+
+                        receivedActionLogDict =
+                            Dict.fromList <| List.map (\log -> ( log.id, log )) actionLogs
+
+                        unprocessedActionLogs =
+                            Dict.diff receivedActionLogDict oldStore.processed
+
+                        newToProcessLogs =
+                            Dict.union oldStore.toProcess unprocessedActionLogs
+                    in
+                        ( { sessionData
+                            | actionLogStore =
+                                { oldStore
+                                    | toProcess = newToProcessLogs
                                 }
+                          }
+                        , if Dict.isEmpty newToProcessLogs then
+                            Cmd.none
+                          else
+                            sendMsg ProcessNewActionLogs
                         )
-    in
-        ( newModel
-        , Cmd.none
-        )
+                )
 
 
 sendMsg : msg -> Cmd msg
