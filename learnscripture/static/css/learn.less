@@ -120,6 +120,46 @@ body.learn-page {
         color: #ff2e2e;;
     }
 
+    .total-points {
+        display: inline-block;
+        position: relative; // container for latest-points
+        min-width: 3em;
+        text-align: right;
+        z-index: 1;
+    }
+
+    .latest-points {
+        // Over the top of total points
+        display: inline-block;
+        position: absolute;
+        // 1px shift to stop problem with background overflowing
+        top: 1px;
+        line-height: @topbarHeight - 2px;
+        height: @topbarHeight - 2px;
+        right: 0px;
+        min-width: 3em;
+        text-align: right;
+        text-shadow: 0 0 3px white;
+        z-index: 2;
+
+        opacity: 0;
+        // Search for other instances of flashActionLogDuration
+        @flashActionLogDuration: 0.6s;
+        &.flash-action-log {
+            -webkit-animation: flash @flashActionLogDuration linear forwards;
+            -moz-animation: flash @flashActionLogDuration linear forwards;
+            -o-animation: flash @flashActionLogDuration linear forwards;
+            animation: flash @flashActionLogDuration linear forwards;
+        }
+    }
+
+    @keyframes flash {
+        0%, 100% { opacity: 0 }
+        30% { opacity: 1 }
+        70% { opacity: 1 }
+    }
+
+    // Main page
     #id-loading-full {
         color: #888;
         text-align: center;
