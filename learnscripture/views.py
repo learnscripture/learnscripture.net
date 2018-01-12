@@ -411,6 +411,10 @@ def dashboard(request):
     groups, more_groups = get_user_groups(identity)
 
     passages_for_reviewing, passages_for_learning = identity.passages_for_reviewing_and_learning()
+    # Bring passages that have already been started to the top,
+    # and ones that have more to review above them.
+    passages_for_learning.sort(key=lambda cvs: (cvs.tested_total == 0, - cvs.needs_review_total))
+
     c = {'learn_verses_queues': identity.bible_verse_statuses_for_learning_grouped(),
          'review_verses_queue': identity.bible_verse_statuses_for_reviewing(),
          'passages_for_learning': passages_for_learning,
