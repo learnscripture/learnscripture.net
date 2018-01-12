@@ -401,6 +401,7 @@ type LinkIconAlign
 
 type Dropdown
     = AjaxInfo
+    | ActionLogsInfo
     | VerseOptionsMenu
 
 
@@ -498,11 +499,11 @@ ajaxInfo model =
 
         openClass =
             if dropdownOpen && itemsToView then
-                " open"
+                "open"
             else
                 ""
     in
-        H.div [ A.class ("ajax-info nav-dropdown" ++ openClass) ]
+        H.div [ A.class ("ajax-info nav-dropdown " ++ openClass) ]
             [ H.div
                 ([ A.class ("nav-dropdown-heading " ++ topClass)
                  ]
@@ -565,9 +566,9 @@ ajaxInfo model =
 viewActionLogs : Model -> H.Html Msg
 viewActionLogs model =
     let
-        ( totalPoints, latestLog ) =
+        ( totalPoints, latestLog, processedLogs ) =
             withSessionData model
-                ( 0, Nothing )
+                ( 0, Nothing, [] )
                 (\sessionData ->
                     let
                         totalPoints =
@@ -576,28 +577,87 @@ viewActionLogs model =
                                 |> List.map .points
                                 |> List.sum
                     in
-                        ( totalPoints, sessionData.actionLogStore.beingProcessed )
+                        ( totalPoints
+                        , sessionData.actionLogStore.beingProcessed
+                        , sessionData.actionLogStore.processed
+                            |> Dict.values
+                            |> List.sortBy .created
+                            |> List.reverse
+                        )
                 )
-    in
-        H.div [ A.class "action-logs" ]
-            [ H.span [ A.class "nav-caption" ]
-                [ H.text "Points: " ]
-            , H.span [ A.class "total-points" ]
-                [ H.text (toString totalPoints)
-                , case latestLog of
-                    Nothing ->
-                        emptyNode
 
-                    Just log ->
-                        H.span
-                            [ A.class "latest-points"
-                            , A.attribute "data-points-type" (toString log.reason)
-                            , A.id (idForLatestActionLogSpan log)
-                            ]
-                            [ H.text (signedNumberToString log.points) ]
+        dropdownOpen =
+            dropdownIsOpen model ActionLogsInfo
+
+        openClass =
+            if dropdownOpen && List.length processedLogs > 0 then
+                "open"
+            else
+                ""
+    in
+        H.div [ A.class ("action-logs nav-dropdown " ++ openClass) ]
+            [ H.div
+                [ A.class "nav-dropdown-heading"
+                , onClickSimply (ToggleDropdown ActionLogsInfo)
                 ]
-            , makeIcon "icon-points" "Points gained this session, last item and total"
+                [ H.span [ A.class "nav-caption" ]
+                    [ H.text "Points: " ]
+                , H.span [ A.class "total-points" ]
+                    [ H.text (toString totalPoints)
+                    , case latestLog of
+                        Nothing ->
+                            emptyNode
+
+                        Just log ->
+                            H.span
+                                [ A.class "latest-points"
+                                , A.attribute "data-reason" (toString log.reason)
+                                , A.id (idForLatestActionLogSpan log)
+                                ]
+                                [ H.text (signedNumberToString log.points) ]
+                    ]
+                , makeIcon "icon-points" "Points gained this session"
+                ]
+            , H.ul
+                [ A.class "nav-dropdown-menu" ]
+                (processedLogs
+                    |> List.map
+                        (\log ->
+                            H.li
+                                [ A.class "action-log-item"
+                                , A.attribute "data-reason" (toString log.reason)
+                                ]
+                                [ H.text <|
+                                    interpolate "{0} - {1}"
+                                        [ toString log.points
+                                        , prettyReason log.reason
+                                        ]
+                                ]
+                        )
+                )
             ]
+
+
+prettyReason : ScoreReason -> String
+prettyReason reason =
+    case reason of
+        VerseTested ->
+            "initial test"
+
+        VerseReviewed ->
+            "review test"
+
+        RevisionCompleted ->
+            "revision completed"
+
+        PerfectTestBonus ->
+            "perfect score BONUS!"
+
+        VerseLearnt ->
+            "verse fully learnt BONUS!"
+
+        EarnedAward ->
+            "award bonus"
 
 
 idForLatestActionLogSpan : { b | id : a } -> String
@@ -673,7 +733,7 @@ viewCurrentVerse session model =
                         ""
 
         verseOptionsMenuOpen =
-            (dropdownIsOpen model VerseOptionsMenu)
+            dropdownIsOpen model VerseOptionsMenu
     in
         H.div [ A.id "id-content-wrapper" ]
             ([ H.div [ A.id "id-verse-header" ]
@@ -819,10 +879,10 @@ viewVerseOptionsMenu model currentVerse =
 dropdownIsOpen : Model -> Dropdown -> Bool
 dropdownIsOpen model dropdown =
     case model.openDropdown of
-        Just dropdown ->
-            True
+        Just d ->
+            d == dropdown
 
-        _ ->
+        Nothing ->
             False
 
 
@@ -2484,11 +2544,14 @@ toggleDropdown model dropdown =
     let
         newOpenDropdown =
             case model.openDropdown of
-                Just dropdown ->
-                    Nothing
+                Just d ->
+                    if d == dropdown then
+                        -- close already open dropdown
+                        Nothing
+                    else
+                        Just dropdown
 
-                -- close already open dropdown
-                _ ->
+                Nothing ->
                     Just dropdown
     in
         { model | openDropdown = newOpenDropdown }

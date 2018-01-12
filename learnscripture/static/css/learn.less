@@ -60,12 +60,17 @@ body.learn-page {
             }
         }
 
-        .nav-dropdown-menu {
+        ul.nav-dropdown-menu {
             display: none;
+            margin: 0px;
             li {
                 display: block;
                 white-space: nowrap;
             }
+            max-height: 50vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            box-shadow: 0 3px 2px #444;
         }
 
         .nav-dropdown-heading.hidden a {
@@ -445,7 +450,7 @@ body.learn-page {
             display: none;
         }
 
-        nav {
+        nav.topbar-new {
             .nav-dropdown {
                 // Do NOT establish container for .nav-dropdown,
                 // because dropdown is now filliing whole width
@@ -455,6 +460,7 @@ body.learn-page {
                 top: @topbarHeight;
                 left: 0px;
                 width: 100%;
+                box-sizing: border-box;
             }
         }
     }
