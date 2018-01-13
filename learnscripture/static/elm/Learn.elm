@@ -55,9 +55,6 @@ port vibrateDevice : Int -> Cmd msg
 port beep : ( Float, Float ) -> Cmd msg
 
 
-port flashActionLog : String -> Cmd msg
-
-
 
 {- Constants -}
 
@@ -598,7 +595,7 @@ viewActionLogs model =
 
                         Just log ->
                             H.span
-                                [ A.class "latest-points"
+                                [ A.class "latest-points flash-action-log"
                                 , A.attribute "data-reason" (toString log.reason)
                                 , A.id (idForLatestActionLogSpan log)
                                 ]
@@ -2524,10 +2521,9 @@ processNewActionLogs model =
                                             }
                                     }
                             in
-                                newSessionData
-                                    ! [ flashActionLog (idForLatestActionLogSpan log)
-                                      , delay (flashActionLogDuration / 2) ProcessNewActionLogs
-                                      ]
+                                ( newSessionData
+                                , delay (flashActionLogDuration / 2) ProcessNewActionLogs
+                                )
         )
 
 

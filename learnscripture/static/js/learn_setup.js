@@ -186,31 +186,3 @@ app.ports.beep.subscribe(function (args) {
 });
 
 setUpAudio();
-
-
-/** Once the required DOM element exists, call the passed function
-    with the element as a JQuery object passed as the only argument.
-
-    Needed because Elm typically calls ports before the DOM is updated.
- */
-function withElement(selector, func, attempts) {
-    var maxAttempts = 4;
-    if (attempts == undefined) {
-        attempts = 0;
-    }
-    if (attempts > maxAttempts) {
-        return;
-    }
-    var $node = $(selector);
-    if ($node.length == 0) {
-        setTimeout(withElement, 0, selector, func, attempts + 1);
-    } else {
-        func($node);
-    }
-}
-
-app.ports.flashActionLog.subscribe(function (id) {
-    withElement("#" + id, function($span) {
-        $span.addClass("flash-action-log");
-    });
-});
