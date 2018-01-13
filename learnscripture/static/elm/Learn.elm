@@ -457,15 +457,15 @@ ajaxInfo model =
 
         retriesClass =
             if retryingAttempts then
-                "ajax-retries"
+                Just "ajax-retries"
             else
-                ""
+                Nothing
 
         failuresClass =
             if not <| List.isEmpty failedHttpCalls then
-                "ajax-failures"
+                Just "ajax-failures"
             else
-                ""
+                Nothing
 
         itemsToView =
             not <| List.isEmpty currentHttpCalls && List.isEmpty failedHttpCalls
@@ -475,9 +475,15 @@ ajaxInfo model =
 
         hiddenClass =
             if hideStatus then
-                "hidden"
+                Just "hidden"
             else
-                ""
+                Nothing
+
+        topClasses =
+                [ retriesClass
+                , failuresClass
+                , hiddenClass
+                ] |> List.filterMap identity
 
         spinClass =
             if hideStatus then
@@ -486,13 +492,6 @@ ajaxInfo model =
                 "icon-spin"
             else
                 ""
-
-        topClass =
-            String.join " "
-                [ retriesClass
-                , failuresClass
-                , hiddenClass
-                ]
 
         dropdownOpen =
             dropdownIsOpen model AjaxInfo
@@ -505,23 +504,11 @@ ajaxInfo model =
     in
         H.div [ A.class ("ajax-info nav-dropdown " ++ openClass) ]
             [ H.div
-                ([ A.class ("nav-dropdown-heading " ++ topClass)
-                 ]
-                )
-                [ H.a
-                    ([ A.href "#"
-                     , onClickSimply (ToggleDropdown AjaxInfo)
-                     ]
-                        ++ if hideStatus then
-                            [ A.tabindex -1 ]
-                           else
-                            []
-                    )
-                    [ H.span [ A.class "nav-caption" ]
+                  (dropdownHeadingAttributes AjaxInfo itemsToView topClasses)
+                  [ H.span [ A.class "nav-caption" ]
                         [ H.text "Working..." ]
-                    , makeIcon ("icon-ajax-in-progress " ++ spinClass) "Data transfer in progress"
-                    ]
-                ]
+                  , makeIcon ("icon-ajax-in-progress " ++ spinClass) "Data transfer in progress"
+                  ]
             , if not itemsToView then
                 emptyNode
               else
@@ -589,17 +576,18 @@ viewActionLogs model =
         dropdownOpen =
             dropdownIsOpen model ActionLogsInfo
 
+        itemsToView =
+            List.length processedLogs > 0
+
         openClass =
-            if dropdownOpen && List.length processedLogs > 0 then
+            if dropdownOpen && itemsToView then
                 "open"
             else
                 ""
     in
         H.div [ A.class ("action-logs nav-dropdown " ++ openClass) ]
             [ H.div
-                [ A.class "nav-dropdown-heading"
-                , onClickSimply (ToggleDropdown ActionLogsInfo)
-                ]
+                (dropdownHeadingAttributes ActionLogsInfo itemsToView [])
                 [ H.span [ A.class "nav-caption" ]
                     [ H.text "Points: " ]
                 , H.span [ A.class "total-points" ]
@@ -636,6 +624,18 @@ viewActionLogs model =
                         )
                 )
             ]
+
+
+dropdownHeadingAttributes : Dropdown -> Bool -> List String -> List (H.Attribute Msg)
+dropdownHeadingAttributes dropdown openable extraClasses =
+    [ A.class <| "dropdown-heading " ++ String.join " " extraClasses ]
+        ++ if openable then
+            [ onClickSimply (ToggleDropdown dropdown)
+            , onEnter (ToggleDropdown dropdown)
+            , A.tabindex 0
+            ]
+           else
+            [ A.tabindex -1 ]
 
 
 prettyReason : ScoreReason -> String
@@ -801,18 +801,14 @@ shouldShowPreviousVerse verse =
 viewVerseOptionsMenuButton : Bool -> H.Html Msg
 viewVerseOptionsMenuButton menuOpen =
     H.div
-        [ A.id "id-verse-options-menu-btn"
-        , A.class
-            (if menuOpen then
-                "open"
+        ((dropdownHeadingAttributes VerseOptionsMenu True
+              (if menuOpen then
+                ["open"]
              else
-                "closed"
-            )
-        ]
-        [ H.a
-            [ A.href "#"
-            , onClickSimply (ToggleDropdown VerseOptionsMenu)
-            ]
+                ["closed"]
+              )
+         ) ++ [ A.id "id-verse-options-menu-btn" ])
+        [ H.span []
             [ makeIcon "icon-verse-options-menu-btn" "verse options" ]
         ]
 
