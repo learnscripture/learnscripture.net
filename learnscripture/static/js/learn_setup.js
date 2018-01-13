@@ -36,6 +36,15 @@ var app =
         });
 
 
+// We want the typing box to be in the same place and be the same size that the
+// word would be. To know the width of a piece of text, the only way is to
+// measure the width of the DOM element. In addition, we are much less likely to
+// disrupt the layout if we simply cover the word with the typing box using
+// absolute positioning, rather than putting it inside the verse HTML at the
+// right point. So we need to move the typing box into position and adjust its
+// size after the layout has been done. This is obviously hard in Elm, so it is
+// done using a port. We also need to handle focus (see below).
+
 var fixTypingBox = function (attempts, args, afterDomUpdated) {
     if (attempts > 3) {
         return; // give up
@@ -87,6 +96,7 @@ var fixTypingBox = function (attempts, args, afterDomUpdated) {
             typingBox.style.height = (wordRect.height - 2 * borderWidth).toString() + "px";
 
             if (args.hardMode) {
+                // Don't give away the word length, which would be a clue.
                 typingBox.style.width = "6em";
             } else {
                 // Allow for border and left padding
@@ -118,34 +128,29 @@ var fixTypingBox = function (attempts, args, afterDomUpdated) {
 
 
 app.ports.updateTypingBox.subscribe(function (args) {
-    // Move the typing box to cover the word we are testing. This is much easier
-    // than trying to get it to fit in the same space without disrupting the
-    // layout at all. Doing this in Elm is really hard, so we do it in
-    // Javascript. In addition, we need to handle it appearing and disappearing,
-    // and not appearing before it has been put in the correct position.
-
     fixTypingBox(0, args, false);
 });
 
 // Elm's runtime appears to use setTimeout / requestAnimationFrame such that
 // doing `focus()` from within it, even via ports, does not cause the on screen
 // keyboard to be brought up in Firefox for Android when you press 'Next'
-// buttons etc., even though it is possible using Javascript.
+// buttons etc., even though it is possible using plain Javascript.
 //
 // See https://github.com/elm-lang/dom/issues/21
 //
-// So, we have this crazy workaround: for buttons that will should cause the
-// typing box to be focuses, in Elm we signal this by putting a
+// So, we have this crazy workaround: for buttons that will cause the typing box
+// to be focused, in Elm we signal this by putting a
 // data-focus-typing-box-required attribute on the button. We also pass other
 // required data using data-* attributes on the element. We then do a normal
-// event handler which spots the click, and makes the typing box visible and
-// focused. The `.focus()` call from this route causes Firefox for Android to
-// make the keyboard appear, so that the user doesn't have to manually click it.
+// VanillaJS event handler (below) which spots the click, and makes the typing
+// box visible and focused. The `.focus()` call from this route causes Firefox
+// for Android to make the keyboard appear, so that the user doesn't have to
+// manually click it.
 //
-// Note that in Firefox for Android, the user still has to manually click to
-// make the box appear for the first verse in a session, because the typing box
-// appears without the user manually clicking on any button, and there doesn't
-// seem to be any way to get Firefox to open the keyboard in this case.
+// Note that in Firefox for Android, the user may still habe to manually click
+// to make the box appear for the first verse in a session, because the typing
+// box appears without the user manually clicking on any button, and there
+// doesn't seem to be any way to get Firefox to open the keyboard in this case.
 
 $('body.learn-page').on('click', '[data-focus-typing-box-required]', function (ev) {
     var $button = $(ev.currentTarget);
@@ -183,23 +188,29 @@ app.ports.beep.subscribe(function (args) {
 setUpAudio();
 
 
+/** Once the required DOM element exists, call the passed function
+    with the element as a JQuery object passed as the only argument.
+
+    Needed because Elm typically calls ports before the DOM is updated.
+ */
+function withElement(selector, func, attempts) {
+    var maxAttempts = 4;
+    if (attempts == undefined) {
+        attempts = 0;
+    }
+    if (attempts > maxAttempts) {
+        return;
+    }
+    var $node = $(selector);
+    if ($node.length == 0) {
+        setTimeout(withElement, 0, selector, func, attempts + 1);
+    } else {
+        func($node);
+    }
+}
 
 app.ports.flashActionLog.subscribe(function (id) {
-    function flash(attempts) {
-        if (attempts > 4) {
-            return;
-        }
-        var $span = $("#" + id);
-        // This function gets called before the DOM is updated, so we check for
-        // that and defer until after a DOM update if the node doesn't exist
-        // yet.
-        if ($span.length == 0) {
-            setTimeout(function() {
-                flash(attempts + 1)
-            }, 10)
-            return;
-        }
+    withElement("#" + id, function($span) {
         $span.addClass("flash-action-log");
-    }
-    flash(0);
+    });
 });
