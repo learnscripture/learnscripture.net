@@ -72,11 +72,7 @@ body.learn-page {
             overflow-x: hidden;
         }
 
-        .nav-dropdown-heading.hidden a {
-            cursor: default;
-        }
-
-        .nav-dropdown-heading {
+        .dropdown-heading {
             height: @topbarHeight;
         }
 
@@ -86,7 +82,7 @@ body.learn-page {
             right: 0px;
         }
 
-        .nav-dropdown-heading,
+        .dropdown-heading,
         .nav-dropdown-menu li {
             padding: 0 0.4em;
         }
@@ -112,7 +108,15 @@ body.learn-page {
         margin-top: @topbarHeight;
     }
 
-    // Specific nav drop downs
+    // All dropdowns, in nav or not:
+    .dropdown-heading:not(.hidden) {
+        cursor: pointer;
+    }
+    .dropdown-heading.hidden {
+        cursor: default;
+    }
+
+    // Specific drop downs
 
     // TODO - check/fix these colors to work with different themes.
     .ajax-retries .icon-fw,
