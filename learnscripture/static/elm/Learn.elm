@@ -477,10 +477,11 @@ ajaxInfo model =
                 Nothing
 
         topClasses =
-                [ retriesClass
-                , failuresClass
-                , hiddenClass
-                ] |> List.filterMap identity
+            [ retriesClass
+            , failuresClass
+            , hiddenClass
+            ]
+                |> List.filterMap identity
 
         spinClass =
             if hideStatus then
@@ -501,11 +502,11 @@ ajaxInfo model =
     in
         H.div [ A.class ("ajax-info nav-dropdown " ++ openClass) ]
             [ H.div
-                  (dropdownHeadingAttributes AjaxInfo itemsToView topClasses)
-                  [ H.span [ A.class "nav-caption" ]
-                        [ H.text "Working..." ]
-                  , makeIcon ("icon-ajax-in-progress " ++ spinClass) "Data transfer in progress"
-                  ]
+                (dropdownHeadingAttributes AjaxInfo itemsToView topClasses)
+                [ H.span [ A.class "nav-caption" ]
+                    [ H.text "Working..." ]
+                , makeIcon ("icon-ajax-in-progress " ++ spinClass) "Data transfer in progress"
+                ]
             , if not itemsToView then
                 emptyNode
               else
@@ -798,13 +799,16 @@ shouldShowPreviousVerse verse =
 viewVerseOptionsMenuButton : Bool -> H.Html Msg
 viewVerseOptionsMenuButton menuOpen =
     H.div
-        ((dropdownHeadingAttributes VerseOptionsMenu True
-              (if menuOpen then
-                ["open"]
+        ((dropdownHeadingAttributes VerseOptionsMenu
+            True
+            (if menuOpen then
+                [ "open" ]
              else
-                ["closed"]
-              )
-         ) ++ [ A.id "id-verse-options-menu-btn" ])
+                [ "closed" ]
+            )
+         )
+            ++ [ A.id "id-verse-options-menu-btn" ]
+        )
         [ H.span []
             [ makeIcon "icon-verse-options-menu-btn" "verse options" ]
         ]
