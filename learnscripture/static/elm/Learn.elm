@@ -447,26 +447,34 @@ topNav model =
 
 sessionProgress : Model -> H.Html Msg
 sessionProgress model =
-    case getSessionProgressData model of
-        Nothing ->
-            H.div [ A.class "nav-item spacer" ]
-                []
-
-        Just ( max, current ) ->
+    let
+        render fraction caption =
             H.div [ A.class "nav-item spacer session-progress" ]
                 [ H.div [ A.class "progress-bar" ]
-                    [ H.text <|
-                        interpolate "{0} / {1}"
-                            [ current |> floor |> toString
-                            , max |> floor |> toString
-                            ]
+                    [ H.text caption
                     , H.span
                         [ A.class "filled-bar"
-                        , A.style [ ( "width", toString (current / max * 100) ++ "%" ) ]
+                        , A.style [ ( "width", toString (fraction * 100) ++ "%" ) ]
                         ]
                         []
                     ]
                 ]
+    in
+        case getSessionProgressData model of
+            NoProgress ->
+                H.div [ A.class "nav-item spacer" ]
+                    []
+
+            VerseProgress fraction ->
+                render fraction ""
+
+            SessionProgress fraction total current ->
+                render fraction
+                    (interpolate "{0} / {1}"
+                        [ current |> toString
+                        , total |> toString
+                        ]
+                    )
 
 
 ajaxInfo : Model -> H.Html Msg
@@ -3088,76 +3096,101 @@ getStagesByStrength strength testType =
         )
 
 
-getSessionProgressData : Model -> Maybe ( Float, Float )
+type ProgressData
+    = NoProgress
+    | VerseProgress Float
+    | SessionProgress Float Int Int
+
+
+getSessionProgressData : Model -> ProgressData
 getSessionProgressData model =
     withSessionData model
-        Nothing
+        NoProgress
         (\sessionData ->
-            case sessionData.verses.learningType of
-                Learning ->
-                    -- The session will have many new items in it, and
-                    -- we don't expect the user to get through them
-                    -- all. Therefore do not display a progress bar.
-                    Nothing
+            -- For 'Learning' sessions, we might have lots of new individual
+            -- items, and we don't expect the user to get through them all.
+            -- Therefore the progress bar should be only the current verse.
+            -- For revision/practice sessions, we can display a progress bar
+            -- that includes everything in the session.
+            -- Ideally for passage sets in 'learning' phase, we'd show the
+            -- number of items to review in some way, or the number of items up
+            -- until the first new verse, and then switch. But this is
+            -- currently hard as we haven't necessarily loaded all the data due
+            -- to batching.
+            let
+                currentVerse =
+                    sessionData.currentVerse
 
-                _ ->
-                    -- Review or practice
-                    let
-                        -- Progress within batch learnOrder is zero indexed, so
-                        -- when learnOrder == 0, and e.g. maxOrderVal == 0, we
-                        -- have 1 item total, and 0 finished items.
-                        total =
-                            sessionData.verses.maxOrderVal + 1
+                ( totalVerses, versesFinished ) =
+                    case sessionData.verses.learningType of
+                        Learning ->
+                            ( 1, 0 )
 
-                        currentVerse =
-                            sessionData.currentVerse
-
-                        versesFinished =
-                            currentVerse.verseStatus.learnOrder
-
-                        -- Progress within a verse i.e. stages
-                        totalStageCount =
-                            -- 1 for currentStage
-                            1
-                                + List.length currentVerse.seenStageTypes
-                                + List.length currentVerse.remainingStageTypes
-
-                        stagesFinished =
-                            List.length currentVerse.seenStageTypes
-
-                        -- Fractional progress within a stage
-                        stageProgress =
-                            case currentVerse.currentStage of
-                                Read ->
-                                    -- Don't know how far they have read until they press 'Next'
-                                    0
-
-                                ReadForContext ->
-                                    0
-
-                                Recall rd rp ->
-                                    toFloat (recallStageWordsFinishedCount rp)
-                                        / toFloat (recallStageWordCount currentVerse.verseStatus)
-
-                                Test td tp ->
-                                    case tp.currentWord of
-                                        TestFinished _ ->
-                                            1
-
-                                        CurrentWord cw ->
-                                            let
-                                                wordCount =
-                                                    getCurrentTestWordList currentVerse (getTestingMethod model)
-                                                        |> List.length
-                                            in
-                                                toFloat cw.overallIndex / toFloat wordCount
-                    in
-                        Just
-                            ( total |> toFloat
-                            , toFloat versesFinished
-                                + (toFloat stagesFinished / toFloat totalStageCount)
-                                + (stageProgress / toFloat totalStageCount)
+                        _ ->
+                            -- Progress within batch learnOrder is zero indexed, so
+                            -- when learnOrder == 0, and e.g. maxOrderVal == 0, we
+                            -- have 1 item total, and 0 finished items.
+                            ( sessionData.verses.maxOrderVal + 1
+                            , currentVerse.verseStatus.learnOrder
                             )
+
+                -- Progress within a verse i.e. stages
+                totalStageCount =
+                    -- 1 for currentStage
+                    1
+                        + List.length currentVerse.seenStageTypes
+                        + List.length currentVerse.remainingStageTypes
+
+                stagesFinished =
+                    List.length currentVerse.seenStageTypes
+
+                -- Fractional progress within a stage
+                stageProgress =
+                    case currentVerse.currentStage of
+                        Read ->
+                            -- Don't know how far they have read until they press 'Next'
+                            0
+
+                        ReadForContext ->
+                            0
+
+                        Recall rd rp ->
+                            toFloat (recallStageWordsFinishedCount rp)
+                                / toFloat (recallStageWordCount currentVerse.verseStatus)
+
+                        Test td tp ->
+                            case tp.currentWord of
+                                TestFinished _ ->
+                                    1
+
+                                CurrentWord cw ->
+                                    let
+                                        wordCount =
+                                            getCurrentTestWordList currentVerse (getTestingMethod model)
+                                                |> List.length
+                                    in
+                                        toFloat cw.overallIndex / toFloat wordCount
+
+                overallProgress =
+                    (toFloat versesFinished
+                        + (toFloat stagesFinished / toFloat totalStageCount)
+                        + (stageProgress / toFloat totalStageCount)
+                    )
+                        / toFloat totalVerses
+            in
+                case totalVerses of
+                    0 ->
+                        NoProgress
+
+                    1 ->
+                        if currentVerse.currentStage == ReadForContext then
+                            -- Don't show a bar
+                            NoProgress
+                        else
+                            VerseProgress overallProgress
+
+                    _ ->
+                        SessionProgress overallProgress totalVerses versesFinished
         )
 
 
