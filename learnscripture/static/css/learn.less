@@ -129,7 +129,32 @@ body.learn-page {
         cursor: default;
     }
 
-    // Specific drop downs
+    // Specific drop down and nav items
+    .dashboard-link .nav-caption {
+        margin-right: 5px;
+    }
+    .session-progress {
+        text-align: center;
+        .progress-bar {
+            @progressBarHeight: @topbarHeight * 2 / 3;
+            height: @progressBarHeight;
+            line-height: @progressBarHeight;
+            margin-top: (@topbarHeight - @progressBarHeight) / 2;
+            position: relative;
+            z-index: 1;
+            border-radius: 3px;
+            background: linear-gradient(to bottom, rgba(190, 190, 190, 0.5) 0%, rgba(0, 0, 0, 0.5) 100%);
+            > .filled-bar {
+                position: absolute;
+                display: block;
+                left: 0px;
+                top: 0px;
+                height: 100%;
+                background: rgba(255,255,255,0.1);
+                z-index: 2;
+            }
+        }
+    }
 
     // TODO - check/fix these colors to work with different themes.
     .ajax-retries .icon-fw,
