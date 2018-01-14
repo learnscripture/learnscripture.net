@@ -107,6 +107,7 @@ init flags =
       , currentHttpCalls = Dict.empty
       , permanentFailHttpCalls = []
       , openDropdown = Nothing
+      , sessionStats = Nothing
       }
     , loadVerses
     )
@@ -130,6 +131,7 @@ type alias Model =
             }
     , permanentFailHttpCalls : List TrackedHttpCall
     , openDropdown : Maybe Dropdown
+    , sessionStats : Maybe SessionStats
     }
 
 
@@ -383,6 +385,12 @@ type ScoreReason
     | EarnedAward
 
 
+type alias SessionStats =
+    { totalVersesTested : Int
+    , newVersesStarted : Int
+    }
+
+
 
 {- View -}
 
@@ -426,14 +434,15 @@ view model =
 topNav : Model -> H.Html Msg
 topNav model =
     H.nav [ A.class "topbar-new" ]
-        [ H.div [ A.class "dashboard-link" ]
-            [ link dashboardUrl "Dashboard" "icon-return" AlignLeft ]
-        , H.div [ A.class "spacer" ]
+        [ H.div [ A.class "nav-item dashboard-link" ]
+            [ navLink dashboardUrl "Dashboard" "icon-return" AlignLeft ]
+        , H.div [ A.class "nav-item spacer" ]
             []
         , ajaxInfo model
+        , viewSessionStats model
         , viewActionLogs model
-        , H.div [ A.class "preferences-link" ]
-            [ link "#" (userDisplayName model.user) "icon-preferences" AlignRight ]
+        , H.div [ A.class "nav-item preferences-link" ]
+            [ navLink "#" (userDisplayName model.user) "icon-preferences" AlignRight ]
         ]
 
 
@@ -480,6 +489,7 @@ ajaxInfo model =
             [ retriesClass
             , failuresClass
             , hiddenClass
+            , Just "nav-item"
             ]
                 |> List.filterMap identity
 
@@ -548,6 +558,29 @@ ajaxInfo model =
             ]
 
 
+viewSessionStats : Model -> H.Html Msg
+viewSessionStats model =
+    case model.sessionStats of
+        Nothing ->
+            emptyNode
+
+        Just stats ->
+            H.div [ A.class "nav-item session-stats" ]
+                [ H.span [ A.class "nav-caption" ]
+                    [ H.text "Today: " ]
+                , H.span
+                    [ A.id "id-new-verses-started-count"
+                    , A.title "New items started today"
+                    ]
+                    [ H.text <| interpolate " + {0} " [ toString stats.newVersesStarted ] ]
+                , H.span
+                    [ A.id "id-total-verses-tested-count"
+                    , A.title "Total items tested today"
+                    ]
+                    [ H.text <| interpolate " ⟳ {0} " [ toString stats.totalVersesTested ] ]
+                ]
+
+
 viewActionLogs : Model -> H.Html Msg
 viewActionLogs model =
     let
@@ -585,9 +618,9 @@ viewActionLogs model =
     in
         H.div [ A.class ("action-logs nav-dropdown " ++ openClass) ]
             [ H.div
-                (dropdownHeadingAttributes ActionLogsInfo itemsToView [])
+                (dropdownHeadingAttributes ActionLogsInfo itemsToView ["nav-item"])
                 [ H.span [ A.class "nav-caption" ]
-                    [ H.text "Points: " ]
+                    [ H.text "Session points: " ]
                 , H.span [ A.class "total-points" ]
                     [ H.text (toString totalPoints)
                     , case latestLog of
@@ -1998,8 +2031,8 @@ makeIcon iconClass titleText =
         []
 
 
-link : String -> String -> IconName -> LinkIconAlign -> H.Html msg
-link href caption icon iconAlign =
+navLink : String -> String -> IconName -> LinkIconAlign -> H.Html msg
+navLink href caption icon iconAlign =
     let
         iconH =
             makeIcon icon caption
@@ -2042,6 +2075,7 @@ type Msg
     | EmptyResponseTrackedHttpCallReturned CallId (Result Http.Error ())
     | ActionLogsLoaded Bool (Result Http.Error (List ActionLog))
     | ProcessNewActionLogs
+    | SessionStatsLoaded (Result Http.Error SessionStats)
     | MorePractice Float
     | ExpandHelp
     | CollapseHelp
@@ -2121,6 +2155,9 @@ update msg model =
 
         ProcessNewActionLogs ->
             processNewActionLogs model
+
+        SessionStatsLoaded result ->
+            handleSessionStatsLoaded model result
 
         MorePractice accuracy ->
             startMorePractice model accuracy
@@ -4283,6 +4320,10 @@ handleVersesToLearn model verseBatchRaw =
                                 loadActionLogs newModel True
                             else
                                 Cmd.none
+                          , if previousSessionEmpty then
+                                loadSessionStats
+                            else
+                                Cmd.none
                           ]
 
 
@@ -4356,9 +4397,10 @@ callRecordReadComplete httpConfig callId currentVerse =
 
 handleRecordActionCompleteReturned : Model -> () -> ( Model, Cmd Msg )
 handleRecordActionCompleteReturned model () =
-    ( model
-    , loadActionLogs model False
-    )
+    model
+        ! [ loadActionLogs model False
+          , loadSessionStats
+          ]
 
 
 
@@ -4552,6 +4594,47 @@ handleActionLogs model initialPageLoad result =
                             sendMsg ProcessNewActionLogs
                         )
                 )
+
+
+
+{- sessionstats -}
+
+
+loadSessionStatsUrl : String
+loadSessionStatsUrl =
+    "/api/learnscripture/v1/sessionstats/"
+
+
+loadSessionStats : Cmd Msg
+loadSessionStats =
+    Http.send SessionStatsLoaded (Http.get loadSessionStatsUrl sessionStatsDecoder)
+
+
+handleSessionStatsLoaded : Model -> Result Http.Error SessionStats -> ( Model, Cmd Msg )
+handleSessionStatsLoaded model result =
+    let
+        newModel =
+            case result of
+                Ok stats ->
+                    { model
+                        | sessionStats = Just stats
+                    }
+
+                Err msg ->
+                    -- Don't really case about this error condition, informational only
+                    let
+                        _ =
+                            Debug.log "sessionStats error" msg
+                    in
+                        model
+    in
+        ( newModel
+        , Cmd.none
+        )
+
+
+
+{- HTTP utilities -}
 
 
 sendMsg : msg -> Cmd msg
@@ -4768,6 +4851,15 @@ scoreReasonDecodor =
         , ( 4, VerseLearnt )
         , ( 5, EarnedAward )
         ]
+
+
+sessionStatsDecoder : JD.Decoder SessionStats
+sessionStatsDecoder =
+    JD.field "stats"
+        (JDP.decode SessionStats
+            |> JDP.required "total_verses_tested" JD.int
+            |> JDP.required "new_verses_started" JD.int
+        )
 
 
 emptyDecoder : JD.Decoder ()
