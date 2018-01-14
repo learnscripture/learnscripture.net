@@ -245,18 +245,22 @@ def get_next(request, default_url):
 
 def todays_stats(identity):
     stats = {}
-    session_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
-    stats['total_verses_tested'] = set(uvs.localized_reference for uvs in
-                                       identity.verse_statuses
-                                       .filter(last_tested__gte=session_start,
-                                               ignored=False)
-                                       )
-    stats['new_verses_started'] = set(uvs.localized_reference for uvs in
-                                      identity.verse_statuses
-                                      .filter(first_seen__gte=session_start,
-                                              ignored=False)
-                                      )
+    stats['total_verses_tested'] = (
+        identity.verse_statuses
+        .filter(last_tested__gte=today_start,
+                ignored=False)
+        .values('version_id', 'localized_reference')
+        .distinct().count()
+    )
+    stats['new_verses_started'] = (
+        identity.verse_statuses
+        .filter(first_seen__gte=today_start,
+                ignored=False)
+        .values('version_id', 'localized_reference')
+        .distinct().count()
+    )
     return stats
 
 

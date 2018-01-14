@@ -47,17 +47,26 @@ body.learn-page {
         flex-direction: row;
         justify-content: space-between;
 
-        > div {
-            height: @topbarHeight;
-            line-height: @topbarHeight;
-        }
-        // Learn page dropdown, eventually everywhere:
+
+        // Learn page dropdown, eventually everywhere
+
+        // nav-dropdown is a div that contains
+        // both the heading (.dropdown-heading)
+        // and the menu (.nav-dropdown-menu)
+
         .nav-dropdown {
             position: relative; // establish container for .nav-dropdown
 
             &.open .nav-dropdown-menu {
                 display: block;
             }
+        }
+
+        // .nav-item is for the content that will appear visually in the navbar
+        // itself, not anything underneath (like a menu)
+        .nav-item {
+            height: @topbarHeight;
+            line-height: @topbarHeight;
         }
 
         ul.nav-dropdown-menu {
@@ -80,6 +89,7 @@ body.learn-page {
             position: absolute;
             top: @topbarHeight;
             right: 0px;
+            line-height: @topbarHeight;
         }
 
         .dropdown-heading,
@@ -448,10 +458,13 @@ body.learn-page {
         margin-bottom: 50vh;
     }
 
-    @media screen and (max-width: @narrowWidthBreak2) {
+    @media screen and (max-width: @narrowWidthBreak1) {
         .nav-caption {
             display: none;
         }
+    }
+
+    @media screen and (max-width: @narrowWidthBreak2) {
 
         nav.topbar-new {
             .nav-dropdown {

@@ -386,8 +386,10 @@ class SessionStats(ApiView):
         # Render template
         c = {}
         c['identity'] = identity
-        c.update(todays_stats(identity))
+        stats = todays_stats(identity)
+        c.update(stats)
         retval['stats_html'] = render_to_string('learnscripture/sessionstats.html', c)
+        retval['stats'] = stats
         return retval
 
 
