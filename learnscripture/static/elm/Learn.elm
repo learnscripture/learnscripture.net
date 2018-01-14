@@ -565,12 +565,15 @@ viewSessionStats model =
             emptyNode
 
         Just stats ->
-            H.div [ A.class "nav-item session-stats" ]
+            H.div
+                [ A.class "nav-item session-stats"
+                , A.title "Todays stats - new items / items tested"
+                ]
                 [ H.span [ A.class "nav-caption" ]
                     [ H.text "Today: " ]
                 , H.span
                     [ A.id "id-new-verses-started-count"
-                    , A.title "New items started today"
+                    , A.title "Items started today"
                     ]
                     [ H.text <| interpolate " + {0} " [ toString stats.newVersesStarted ] ]
                 , H.span
@@ -578,6 +581,7 @@ viewSessionStats model =
                     , A.title "Total items tested today"
                     ]
                     [ H.text <| interpolate " ⟳ {0} " [ toString stats.totalVersesTested ] ]
+                , makeIcon "icon-today-stats" "Stats for today"
                 ]
 
 
@@ -618,7 +622,7 @@ viewActionLogs model =
     in
         H.div [ A.class ("action-logs nav-dropdown " ++ openClass) ]
             [ H.div
-                (dropdownHeadingAttributes ActionLogsInfo itemsToView ["nav-item"])
+                (dropdownHeadingAttributes ActionLogsInfo itemsToView [ "nav-item" ])
                 [ H.span [ A.class "nav-caption" ]
                     [ H.text "Session points: " ]
                 , H.span [ A.class "total-points" ]
