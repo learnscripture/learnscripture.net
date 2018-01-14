@@ -436,14 +436,37 @@ topNav model =
     H.nav [ A.class "topbar-new" ]
         [ H.div [ A.class "nav-item dashboard-link" ]
             [ navLink dashboardUrl "Dashboard" "icon-return" AlignLeft ]
-        , H.div [ A.class "nav-item spacer" ]
-            []
+        , sessionProgress model
         , ajaxInfo model
         , viewSessionStats model
         , viewActionLogs model
         , H.div [ A.class "nav-item preferences-link" ]
             [ navLink "#" (userDisplayName model.user) "icon-preferences" AlignRight ]
         ]
+
+
+sessionProgress : Model -> H.Html Msg
+sessionProgress model =
+    case getSessionProgressData model of
+        Nothing ->
+            H.div [ A.class "nav-item spacer" ]
+                []
+
+        Just ( max, current ) ->
+            H.div [ A.class "nav-item spacer session-progress" ]
+                [ H.div [ A.class "progress-bar" ]
+                    [ H.text <|
+                        interpolate "{0} / {1}"
+                            [ current |> floor |> toString
+                            , max |> floor |> toString
+                            ]
+                    , H.span
+                        [ A.class "filled-bar"
+                        , A.style [ ( "width", toString (current / max * 100) ++ "%" ) ]
+                        ]
+                        []
+                    ]
+                ]
 
 
 ajaxInfo : Model -> H.Html Msg
@@ -2846,7 +2869,17 @@ hiddenWordsGenerator wantedWordIds possibleWordIds numberWanted =
 
 recallStageFinished : VerseStatus -> RecallProgress -> Bool
 recallStageFinished verseStatus recallProgress =
-    List.length (recallWords verseStatus) == Set.size recallProgress.passedWordIds
+    recallStageWordCount verseStatus == Set.size recallProgress.passedWordIds
+
+
+recallStageWordsFinishedCount : RecallProgress -> Int
+recallStageWordsFinishedCount recallProgress =
+    Set.size recallProgress.passedWordIds
+
+
+recallStageWordCount : VerseStatus -> Int
+recallStageWordCount verseStatus =
+    List.length (recallWords verseStatus)
 
 
 type alias CurrentWordData =
@@ -3052,6 +3085,79 @@ getStagesByStrength strength testType =
     else
         ( TestStage testType
         , []
+        )
+
+
+getSessionProgressData : Model -> Maybe ( Float, Float )
+getSessionProgressData model =
+    withSessionData model
+        Nothing
+        (\sessionData ->
+            case sessionData.verses.learningType of
+                Learning ->
+                    -- The session will have many new items in it, and
+                    -- we don't expect the user to get through them
+                    -- all. Therefore do not display a progress bar.
+                    Nothing
+
+                _ ->
+                    -- Review or practice
+                    let
+                        -- Progress within batch learnOrder is zero indexed, so
+                        -- when learnOrder == 0, and e.g. maxOrderVal == 0, we
+                        -- have 1 item total, and 0 finished items.
+                        total =
+                            sessionData.verses.maxOrderVal + 1
+
+                        currentVerse =
+                            sessionData.currentVerse
+
+                        versesFinished =
+                            currentVerse.verseStatus.learnOrder
+
+                        -- Progress within a verse i.e. stages
+                        totalStageCount =
+                            -- 1 for currentStage
+                            1
+                                + List.length currentVerse.seenStageTypes
+                                + List.length currentVerse.remainingStageTypes
+
+                        stagesFinished =
+                            List.length currentVerse.seenStageTypes
+
+                        -- Fractional progress within a stage
+                        stageProgress =
+                            case currentVerse.currentStage of
+                                Read ->
+                                    -- Don't know how far they have read until they press 'Next'
+                                    0
+
+                                ReadForContext ->
+                                    0
+
+                                Recall rd rp ->
+                                    toFloat (recallStageWordsFinishedCount rp)
+                                        / toFloat (recallStageWordCount currentVerse.verseStatus)
+
+                                Test td tp ->
+                                    case tp.currentWord of
+                                        TestFinished _ ->
+                                            1
+
+                                        CurrentWord cw ->
+                                            let
+                                                wordCount =
+                                                    getCurrentTestWordList currentVerse (getTestingMethod model)
+                                                        |> List.length
+                                            in
+                                                toFloat cw.overallIndex / toFloat wordCount
+                    in
+                        Just
+                            ( total |> toFloat
+                            , toFloat versesFinished
+                                + (toFloat stagesFinished / toFloat totalStageCount)
+                                + (stageProgress / toFloat totalStageCount)
+                            )
         )
 
 
