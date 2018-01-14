@@ -3471,7 +3471,7 @@ handleResetProgress model verseStatus confirmed =
                 |> addCommandsM
                     (\m ->
                         [ stageOrVerseChangeCommands m True
-                          --                        , recordResetProgress verseStatus
+                        , recordResetProgress verseStatus
                         ]
                     )
     else
