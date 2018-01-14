@@ -212,6 +212,7 @@ type alias VerseStore =
     , learningType : LearningType
     , returnTo : Url
     , maxOrderVal : LearnOrder
+    , unseenUvsIds : List UvsId
     }
 
 
@@ -220,6 +221,7 @@ type alias VerseBatchBase a =
         | learningTypeRaw : Maybe LearningType
         , returnTo : Url
         , maxOrderValRaw : Maybe LearnOrder
+        , unseenUvsIds : List UvsId
     }
 
 
@@ -240,14 +242,16 @@ verseBatchRawCtr :
     Maybe LearningType
     -> String
     -> Maybe LearnOrder
+    -> List UvsId
     -> List VerseStatusRaw
     -> List Version
     -> List VerseSet
     -> VerseBatchRaw
-verseBatchRawCtr l r m v1 v2 v3 =
+verseBatchRawCtr l r m u v1 v2 v3 =
     { learningTypeRaw = l
     , returnTo = r
     , maxOrderValRaw = m
+    , unseenUvsIds = u
     , verseStatusesRaw = v1
     , versions = v2
     , verseSets = v3
@@ -2414,6 +2418,7 @@ normalizeVerseBatch vbr =
     { learningTypeRaw = vbr.learningTypeRaw
     , returnTo = vbr.returnTo
     , maxOrderValRaw = vbr.maxOrderValRaw
+    , unseenUvsIds = vbr.unseenUvsIds
     , verseStatuses = normalizeVerseStatuses vbr
     }
 
@@ -2497,6 +2502,7 @@ verseBatchToSession batch =
                                         , learningType = learningType
                                         , returnTo = batch.returnTo
                                         , maxOrderVal = maxOrderVal
+                                        , unseenUvsIds = batch.unseenUvsIds
                                         }
                                     , currentVerse = newCurrentVerse
                                     , actionLogStore =
@@ -3112,27 +3118,25 @@ getSessionProgressData model =
             -- Therefore the progress bar should be only the current verse.
             -- For revision/practice sessions, we can display a progress bar
             -- that includes everything in the session.
-            -- Ideally for passage sets in 'learning' phase, we'd show the
+            -- However, for passage sets in 'learning' phase, we want to show the
             -- number of items to review in some way, or the number of items up
-            -- until the first new verse, and then switch. But this is
-            -- currently hard as we haven't necessarily loaded all the data due
-            -- to batching.
+            -- until the first new verse, and then switch to 'verse mode'.
+            -- So we subtract the number of new items from the 'total'.
             let
+                verseStore =
+                    sessionData.verses
+
                 currentVerse =
                     sessionData.currentVerse
 
-                ( totalVerses, versesFinished ) =
-                    case sessionData.verses.learningType of
-                        Learning ->
-                            ( 1, 0 )
+                -- Progress within batch learnOrder is zero indexed, so
+                -- when learnOrder == 0, and e.g. maxOrderVal == 0, we
+                -- have 1 item total, and 0 finished items.
+                totalVerses =
+                    verseStore.maxOrderVal + 1 - List.length verseStore.unseenUvsIds
 
-                        _ ->
-                            -- Progress within batch learnOrder is zero indexed, so
-                            -- when learnOrder == 0, and e.g. maxOrderVal == 0, we
-                            -- have 1 item total, and 0 finished items.
-                            ( sessionData.verses.maxOrderVal + 1
-                            , currentVerse.verseStatus.learnOrder
-                            )
+                versesFinished =
+                    currentVerse.verseStatus.learnOrder
 
                 -- Progress within a verse i.e. stages
                 totalStageCount =
@@ -3171,26 +3175,20 @@ getSessionProgressData model =
                                     in
                                         toFloat cw.overallIndex / toFloat wordCount
 
+                -- Fractional progress within verse
+                verseProgress =
+                    (toFloat stagesFinished + stageProgress) / toFloat totalStageCount
+
                 overallProgress =
-                    (toFloat versesFinished
-                        + (toFloat stagesFinished / toFloat totalStageCount)
-                        + (stageProgress / toFloat totalStageCount)
-                    )
-                        / toFloat totalVerses
+                    (toFloat versesFinished + verseProgress) / toFloat totalVerses
+
+                isNewItem =
+                    List.member currentVerse.verseStatus.id sessionData.verses.unseenUvsIds
             in
-                case totalVerses of
-                    0 ->
-                        NoProgress
-
-                    1 ->
-                        if currentVerse.currentStage == ReadForContext then
-                            -- Don't show a bar
-                            NoProgress
-                        else
-                            VerseProgress overallProgress
-
-                    _ ->
-                        SessionProgress overallProgress totalVerses versesFinished
+                if isNewItem then
+                    VerseProgress verseProgress
+                else
+                    SessionProgress overallProgress totalVerses versesFinished
         )
 
 
@@ -4869,6 +4867,7 @@ verseBatchRawDecoder =
         |> JDP.required "learning_type" (nullOr learningTypeDecoder)
         |> JDP.required "return_to" JD.string
         |> JDP.required "max_order_val" (nullOr JD.int)
+        |> JDP.required "unseen_uvs_ids" (JD.list JD.int)
         |> JDP.required "verse_statuses" (JD.list verseStatusRawDecoder)
         |> JDP.required "versions" (JD.list versionDecoder)
         |> JDP.required "verse_sets" (JD.list verseSetDecoder)

@@ -6,6 +6,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from accounts.models import Account, Identity
+from bibleverses.models import MemoryStage
 from learnscripture.datastructures import make_choices
 
 # Also defined in learn.ts and Learn.elm
@@ -36,12 +37,14 @@ class VerseStatusBatch:
     max_order_val = attr.ib()
     learning_type = attr.ib()
     return_to = attr.ib()
+    unseen_uvs_ids = attr.ib()
 
 
 def get_verse_statuses_batch(request):
     # This currently supports both VersesToLearnHandler/learn.ts and
     # VersesToLearn2Handler/Learn.elm. When the former is removed, it can be cleaned up.
     learning_type = request.session.get('learning_type', None)
+    unseen_uvs_ids = request.session.get('unseen_uvs_ids', [])
     id_data = _get_verse_status_ids(request)
 
     if len(id_data) > 0:
@@ -88,6 +91,7 @@ def get_verse_statuses_batch(request):
         max_order_val=max_order_val,
         learning_type=learning_type,
         return_to=return_to,
+        unseen_uvs_ids=unseen_uvs_ids,
     )
 
 
@@ -121,9 +125,12 @@ def _set_verse_statuses(request, user_verse_statuses):
 def start_learning_session(request, user_verse_statuses, learning_type, return_to):
     _set_verse_statuses(request, user_verse_statuses)
     _set_learning_session_start(request, timezone.now())
+    unseen_uvs_ids = [uvs.id for uvs in user_verse_statuses
+                      if uvs.memory_stage < MemoryStage.SEEN]
     request.session['learning_type'] = learning_type
     request.session['action_logs'] = []
     request.session['return_to'] = return_to
+    request.session['unseen_uvs_ids'] = unseen_uvs_ids
 
 
 def verse_status_finished(request, uvs_id, new_action_logs):
