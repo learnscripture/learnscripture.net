@@ -197,6 +197,7 @@ class VersesToLearn2Handler(ApiView):
             verse_sets=list(verse_sets),
             return_to=batch.return_to,
             max_order_val=batch.max_order_val,
+            unseen_uvs_ids=batch.unseen_uvs_ids,
         )
 
 
