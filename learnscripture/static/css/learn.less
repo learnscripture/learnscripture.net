@@ -109,9 +109,12 @@ body.learn-page {
             padding-left: 0px;
         }
 
-        .icon-fw::before {
-            font-size: 120%;
-            width: 1.5em;
+        // Make some buttons easier to press on mobile
+        .icon-return, .icon-preferences, .icon-ajax-in-progress {
+            &::before {
+                font-size: 120%;
+                width: 1.5em;
+            }
         }
     }
     nav + div {
@@ -119,7 +122,7 @@ body.learn-page {
     }
 
     // All dropdowns, in nav or not:
-    .dropdown-heading:not(.hidden) {
+    .dropdown-heading:not(.hidden):not([tabindex="-1"]) {
         cursor: pointer;
     }
     .dropdown-heading.hidden {
@@ -141,7 +144,7 @@ body.learn-page {
     .total-points {
         display: inline-block;
         position: relative; // container for latest-points
-        min-width: 3em;
+        min-width: 2em;
         text-align: right;
         z-index: 1;
     }
