@@ -3172,12 +3172,24 @@ getSessionProgressData model =
                 -- Fractional progress within a stage
                 stageProgress =
                     case currentVerse.currentStage of
+                        -- For 'Read' and 'ReadForContext' we don't know how far
+                        -- they have read until they press 'Next'. We could
+                        -- choose [0..1]. If we choose less than 1, and the last
+                        -- verse in the session has only a reading stage, then
+                        -- the progress bar is less 100% when we are finally
+                        -- done, which seems strange, so we prefer '1'. However,
+                        -- if we choose 1 always, then if there are Read
+                        -- followed by Recall stages, then we want the 'Next'
+                        -- button to advance the progress bar, so for that
+                        -- case we choose < 1.
                         Read ->
-                            -- Don't know how far they have read until they press 'Next'
-                            0
+                            if totalStageCount == 1 then
+                                1
+                            else
+                                0.5
 
                         ReadForContext ->
-                            0
+                            1
 
                         Recall rd rp ->
                             toFloat (recallStageWordsFinishedCount rp)
@@ -4326,8 +4338,8 @@ handleRetries updateFunction model callId result =
                     -- Others could all be temporary in theory, so we try again.
                     let
                         -- TODO save error message
-                        _ = Debug.log "Loading failed" err
-
+                        _ =
+                            Debug.log "Loading failed" err
                     in
                         markFailAndRetry model callId
 
@@ -4762,11 +4774,11 @@ handleActionLogs model result =
 
                         newSessionData =
                             { sessionData
-                                    | actionLogStore =
-                                        { oldStore
-                                            | toProcess = newToProcessLogs
-                                        }
-                                }
+                                | actionLogStore =
+                                    { oldStore
+                                        | toProcess = newToProcessLogs
+                                    }
+                            }
                     in
                         ( newSessionData
                         , if Dict.isEmpty newToProcessLogs then
@@ -4843,14 +4855,15 @@ myHttpGet url decoder =
     Http.request
         { method = "GET"
         , headers =
-              [ Http.header "X-Requested-With" "XMLHttpRequest"
-              ]
+            [ Http.header "X-Requested-With" "XMLHttpRequest"
+            ]
         , url = url
         , body = Http.emptyBody
         , expect = Http.expectJson decoder
         , timeout = Nothing
         , withCredentials = False
         }
+
 
 myHttpPost : HttpConfig -> String -> Http.Body -> JD.Decoder a -> Http.Request a
 myHttpPost config url body decoder =
