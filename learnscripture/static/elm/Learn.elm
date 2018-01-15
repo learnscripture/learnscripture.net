@@ -4423,7 +4423,7 @@ callLoadVerses httpConfig callId model =
                     )
                 |> Erl.toString
     in
-        Http.send (VersesToLearn callId) (Http.get url verseBatchRawDecoder)
+        Http.send (VersesToLearn callId) (myHttpGet url verseBatchRawDecoder)
 
 
 handleVersesToLearn : Model -> VerseBatchRaw -> ( Model, Cmd Msg )
@@ -4671,7 +4671,7 @@ loadActionLogs model initialPageLoad =
                         )
                     |> Erl.toString
         in
-            Http.send (ActionLogsLoaded initialPageLoad) (Http.get url actionLogsDecoder)
+            Http.send (ActionLogsLoaded initialPageLoad) (myHttpGet url actionLogsDecoder)
     else
         Cmd.none
 
@@ -4753,7 +4753,7 @@ loadSessionStatsUrl =
 
 loadSessionStats : Cmd Msg
 loadSessionStats =
-    Http.send SessionStatsLoaded (Http.get loadSessionStatsUrl sessionStatsDecoder)
+    Http.send SessionStatsLoaded (myHttpGet loadSessionStatsUrl sessionStatsDecoder)
 
 
 handleSessionStatsLoaded : Model -> Result Http.Error SessionStats -> ( Model, Cmd Msg )
@@ -4797,6 +4797,20 @@ encodeFloat : Float -> String
 encodeFloat =
     JE.float >> JE.encode 0
 
+
+myHttpGet : String -> JD.Decoder a -> Http.Request a
+myHttpGet url decoder =
+    Http.request
+        { method = "GET"
+        , headers =
+              [ Http.header "X-Requested-With" "XMLHttpRequest"
+              ]
+        , url = url
+        , body = Http.emptyBody
+        , expect = Http.expectJson decoder
+        , timeout = Nothing
+        , withCredentials = False
+        }
 
 myHttpPost : HttpConfig -> String -> Http.Body -> JD.Decoder a -> Http.Request a
 myHttpPost config url body decoder =
