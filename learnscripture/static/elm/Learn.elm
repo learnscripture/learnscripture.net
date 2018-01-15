@@ -109,7 +109,7 @@ init flags =
       , openDropdown = Nothing
       , sessionStats = Nothing
       }
-    , loadVerses
+    , loadVerses True
     )
 
 
@@ -230,6 +230,8 @@ type alias VerseBatchRaw =
         { verseStatusesRaw : List VerseStatusRaw
         , versions : List Version
         , verseSets : List VerseSet
+        , sessionStats : Maybe SessionStats
+        , actionLogs : Maybe (List ActionLog)
         }
 
 
@@ -246,8 +248,10 @@ verseBatchRawCtr :
     -> List VerseStatusRaw
     -> List Version
     -> List VerseSet
+    -> Maybe SessionStats
+    -> Maybe (List ActionLog)
     -> VerseBatchRaw
-verseBatchRawCtr l r m u v1 v2 v3 =
+verseBatchRawCtr l r m u v1 v2 v3 s a =
     { learningTypeRaw = l
     , returnTo = r
     , maxOrderValRaw = m
@@ -255,6 +259,8 @@ verseBatchRawCtr l r m u v1 v2 v3 =
     , verseStatusesRaw = v1
     , versions = v2
     , verseSets = v3
+    , sessionStats = s
+    , actionLogs = a
     }
 
 
@@ -2114,7 +2120,7 @@ type Msg
     | MakeHttpCall CallId
     | RecordActionCompleteReturned CallId (Result Http.Error ())
     | EmptyResponseTrackedHttpCallReturned CallId (Result Http.Error ())
-    | ActionLogsLoaded Bool (Result Http.Error (List ActionLog))
+    | ActionLogsLoaded (Result Http.Error (List ActionLog))
     | ProcessNewActionLogs
     | SessionStatsLoaded (Result Http.Error SessionStats)
     | MorePractice Float
@@ -2191,8 +2197,8 @@ update msg model =
         RecordActionCompleteReturned callId result ->
             handleRetries handleRecordActionCompleteReturned model callId result
 
-        ActionLogsLoaded initialPageLoad result ->
-            handleActionLogs model initialPageLoad result
+        ActionLogsLoaded result ->
+            handleActionLogs model result
 
         ProcessNewActionLogs ->
             processNewActionLogs model
@@ -2415,14 +2421,17 @@ getCurrentTestProgress model =
             Nothing
 
 
-normalizeVerseBatch : VerseBatchRaw -> VerseBatch
+normalizeVerseBatch : VerseBatchRaw -> ( VerseBatch, Maybe SessionStats, Maybe (List ActionLog) )
 normalizeVerseBatch vbr =
-    { learningTypeRaw = vbr.learningTypeRaw
-    , returnTo = vbr.returnTo
-    , maxOrderValRaw = vbr.maxOrderValRaw
-    , unseenUvsIds = vbr.unseenUvsIds
-    , verseStatuses = normalizeVerseStatuses vbr
-    }
+    ( { learningTypeRaw = vbr.learningTypeRaw
+      , returnTo = vbr.returnTo
+      , maxOrderValRaw = vbr.maxOrderValRaw
+      , unseenUvsIds = vbr.unseenUvsIds
+      , verseStatuses = normalizeVerseStatuses vbr
+      }
+    , vbr.sessionStats
+    , vbr.actionLogs
+    )
 
 
 normalizeVerseStatuses : VerseBatchRaw -> List VerseStatus
@@ -2477,8 +2486,8 @@ normalizeVerseStatuses vrb =
             vrb.verseStatusesRaw
 
 
-verseBatchToSession : VerseBatch -> ( Maybe SessionData, Cmd Msg )
-verseBatchToSession batch =
+verseBatchToSession : VerseBatch -> Maybe (List ActionLog) -> ( Maybe SessionData, Cmd Msg )
+verseBatchToSession batch actionLogs =
     case List.head batch.verseStatuses of
         Nothing ->
             ( Nothing, Cmd.none )
@@ -2497,6 +2506,20 @@ verseBatchToSession batch =
                             let
                                 ( newCurrentVerse, cmd ) =
                                     setupCurrentVerse verse learningType
+
+                                actionLogStore =
+                                    case actionLogs of
+                                        Nothing ->
+                                            { processed = Dict.empty
+                                            , toProcess = Dict.empty
+                                            , beingProcessed = Nothing
+                                            }
+
+                                        Just logs ->
+                                            { processed = actionLogListToDict logs
+                                            , toProcess = Dict.empty
+                                            , beingProcessed = Maybe.Nothing
+                                            }
                             in
                                 ( Just
                                     { verses =
@@ -2507,11 +2530,7 @@ verseBatchToSession batch =
                                         , unseenUvsIds = batch.unseenUvsIds
                                         }
                                     , currentVerse = newCurrentVerse
-                                    , actionLogStore =
-                                        { processed = Dict.fromList []
-                                        , toProcess = Dict.fromList []
-                                        , beingProcessed = Nothing
-                                        }
+                                    , actionLogStore = actionLogStore
                                     }
                                 , cmd
                                 )
@@ -3337,7 +3356,7 @@ moveToNextVerse model =
 
                     VerseNotInStore ->
                         if not (verseLoadInProgress model) then
-                            loadVersesImmediate model
+                            loadVersesImmediate model False
                         else
                             ( model
                             , Cmd.none
@@ -3371,7 +3390,7 @@ moveToNextVerse model =
                                            )
                                         && (not <| verseLoadInProgress model)
                                 then
-                                    loadVersesImmediate newModel1
+                                    loadVersesImmediate newModel1 False
                                 else
                                     ( newModel1, Cmd.none )
 
@@ -4157,7 +4176,7 @@ type TrackedHttpCall
     | RecordSkipVerse VerseStatus
     | RecordCancelLearning VerseStatus
     | RecordResetProgress VerseStatus
-    | LoadVerses
+    | LoadVerses Bool
 
 
 maxHttpRetries : number
@@ -4183,7 +4202,7 @@ trackedHttpCallCaption call =
         RecordResetProgress verseStatus ->
             interpolate "Resetting progress for {0}" [ verseStatus.localizedReference ]
 
-        LoadVerses ->
+        LoadVerses _ ->
             "Loading items for learning..."
 
 
@@ -4258,8 +4277,8 @@ makeHttpCall model callId =
                         RecordResetProgress verseStatus ->
                             callRecordResetProgress model.httpConfig callId verseStatus
 
-                        LoadVerses ->
-                            callLoadVerses model.httpConfig callId model
+                        LoadVerses initialPageLoad ->
+                            callLoadVerses model.httpConfig callId model initialPageLoad
     in
         ( model, cmd )
 
@@ -4305,8 +4324,12 @@ handleRetries updateFunction model callId result =
 
                 _ ->
                     -- Others could all be temporary in theory, so we try again.
-                    -- TODO save error message
-                    markFailAndRetry model callId
+                    let
+                        -- TODO save error message
+                        _ = Debug.log "Loading failed" err
+
+                    in
+                        markFailAndRetry model callId
 
 
 markCallFinished : Model -> CallId -> Model
@@ -4367,12 +4390,22 @@ delay time msg =
 
 verseLoadInProgress : Model -> Bool
 verseLoadInProgress model =
-    Dict.values model.currentHttpCalls |> List.any (\{ call } -> call == LoadVerses)
+    Dict.values model.currentHttpCalls |> List.any (\{ call } -> isLoadVersesCall call)
 
 
 verseLoadFailed : Model -> Bool
 verseLoadFailed model =
-    model.permanentFailHttpCalls |> List.any (\c -> c == LoadVerses)
+    model.permanentFailHttpCalls |> List.any isLoadVersesCall
+
+
+isLoadVersesCall : TrackedHttpCall -> Bool
+isLoadVersesCall call =
+    case call of
+        LoadVerses _ ->
+            True
+
+        _ ->
+            False
 
 
 
@@ -4387,9 +4420,9 @@ versesToLearnUrl =
 
 {-| Trigger verse load via a Cmd
 -}
-loadVerses : Cmd Msg
-loadVerses =
-    sendStartTrackedCallMsg LoadVerses
+loadVerses : Bool -> Cmd Msg
+loadVerses initialPageLoad =
+    sendStartTrackedCallMsg (LoadVerses initialPageLoad)
 
 
 {-| Trigger verse load immediately
@@ -4397,13 +4430,13 @@ loadVerses =
 More robust than loadVerses, useful when we
 have access to the full model
 -}
-loadVersesImmediate : Model -> ( Model, Cmd Msg )
-loadVersesImmediate model =
-    startTrackedCall model LoadVerses
+loadVersesImmediate : Model -> Bool -> ( Model, Cmd Msg )
+loadVersesImmediate model initialPageLoad =
+    startTrackedCall model (LoadVerses initialPageLoad)
 
 
-callLoadVerses : HttpConfig -> CallId -> Model -> Cmd Msg
-callLoadVerses httpConfig callId model =
+callLoadVerses : HttpConfig -> CallId -> Model -> Bool -> Cmd Msg
+callLoadVerses httpConfig callId model initialPageLoad =
     let
         verseStatuses =
             case model.learningSession of
@@ -4421,6 +4454,7 @@ callLoadVerses httpConfig callId model =
                         |> List.map (.id >> toString)
                         |> String.join ","
                     )
+                |> Erl.addQuery "initial_page_load" (encodeBool initialPageLoad)
                 |> Erl.toString
     in
         Http.send (VersesToLearn callId) (myHttpGet url verseBatchRawDecoder)
@@ -4429,8 +4463,11 @@ callLoadVerses httpConfig callId model =
 handleVersesToLearn : Model -> VerseBatchRaw -> ( Model, Cmd Msg )
 handleVersesToLearn model verseBatchRaw =
     let
+        ( verseBatch, sessionStats, actionLogs ) =
+            normalizeVerseBatch verseBatchRaw
+
         ( maybeBatchSession, sessionCmd ) =
-            normalizeVerseBatch verseBatchRaw |> verseBatchToSession
+            verseBatchToSession verseBatch actionLogs
 
         ( newSession, previousSessionEmpty ) =
             case model.learningSession of
@@ -4451,22 +4488,32 @@ handleVersesToLearn model verseBatchRaw =
 
             Just ns ->
                 let
-                    newModel =
+                    newModel1 =
                         { model
                             | learningSession = Session ns
                         }
+
+                    newModel2 =
+                        case sessionStats of
+                            Nothing ->
+                                newModel1
+
+                            Just s ->
+                                { newModel1
+                                    | sessionStats = sessionStats
+                                }
                 in
-                    newModel
+                    newModel2
                         ! [ sessionCmd
                           , if previousSessionEmpty then
-                                stageOrVerseChangeCommands newModel True
+                                stageOrVerseChangeCommands newModel2 True
                             else
                                 Cmd.none
-                          , if previousSessionEmpty then
-                                loadActionLogs newModel True
+                          , if previousSessionEmpty && actionLogs == Nothing then
+                                loadActionLogs newModel2
                             else
                                 Cmd.none
-                          , if previousSessionEmpty then
+                          , if previousSessionEmpty && sessionStats == Nothing then
                                 loadSessionStats
                             else
                                 Cmd.none
@@ -4544,7 +4591,7 @@ callRecordReadComplete httpConfig callId currentVerse =
 handleRecordActionCompleteReturned : Model -> () -> ( Model, Cmd Msg )
 handleRecordActionCompleteReturned model () =
     model
-        ! [ loadActionLogs model False
+        ! [ loadActionLogs model
           , loadSessionStats
           ]
 
@@ -4651,8 +4698,8 @@ loadActionLogsUrl =
     "/api/learnscripture/v1/actionlogs/"
 
 
-loadActionLogs : Model -> Bool -> Cmd Msg
-loadActionLogs model initialPageLoad =
+loadActionLogs : Model -> Cmd Msg
+loadActionLogs model =
     if scoringEnabled model then
         -- No need for tracking, this is unimportant
         let
@@ -4671,7 +4718,7 @@ loadActionLogs model initialPageLoad =
                         )
                     |> Erl.toString
         in
-            Http.send (ActionLogsLoaded initialPageLoad) (myHttpGet url actionLogsDecoder)
+            Http.send ActionLogsLoaded (myHttpGet url actionLogsDecoder)
     else
         Cmd.none
 
@@ -4686,8 +4733,8 @@ scoringEnabled model =
             True
 
 
-handleActionLogs : Model -> Bool -> Result Http.Error (List ActionLog) -> ( Model, Cmd Msg )
-handleActionLogs model initialPageLoad result =
+handleActionLogs : Model -> Result Http.Error (List ActionLog) -> ( Model, Cmd Msg )
+handleActionLogs model result =
     case result of
         Err msg ->
             let
@@ -4705,7 +4752,7 @@ handleActionLogs model initialPageLoad result =
                             sessionData.actionLogStore
 
                         receivedActionLogDict =
-                            Dict.fromList <| List.map (\log -> ( log.id, log )) actionLogs
+                            actionLogListToDict actionLogs
 
                         unprocessedActionLogs =
                             Dict.diff receivedActionLogDict oldStore.processed
@@ -4714,19 +4761,7 @@ handleActionLogs model initialPageLoad result =
                             Dict.union oldStore.toProcess unprocessedActionLogs
 
                         newSessionData =
-                            if initialPageLoad then
-                                -- This is the case where the user pressed
-                                -- 'Refresh' while already in the middle of a session.
-                                -- Skip the processing animations, move the items
-                                -- straight to 'processed' dict:
-                                { sessionData
-                                    | actionLogStore =
-                                        { oldStore
-                                            | processed = newToProcessLogs
-                                        }
-                                }
-                            else
-                                { sessionData
+                            { sessionData
                                     | actionLogStore =
                                         { oldStore
                                             | toProcess = newToProcessLogs
@@ -4734,12 +4769,17 @@ handleActionLogs model initialPageLoad result =
                                 }
                     in
                         ( newSessionData
-                        , if initialPageLoad || Dict.isEmpty newToProcessLogs then
+                        , if Dict.isEmpty newToProcessLogs then
                             Cmd.none
                           else
                             sendMsg ProcessNewActionLogs
                         )
                 )
+
+
+actionLogListToDict : List ActionLog -> Dict.Dict Int ActionLog
+actionLogListToDict actionLogs =
+    Dict.fromList <| List.map (\log -> ( log.id, log )) actionLogs
 
 
 
@@ -4890,6 +4930,8 @@ verseBatchRawDecoder =
         |> JDP.required "verse_statuses" (JD.list verseStatusRawDecoder)
         |> JDP.required "versions" (JD.list versionDecoder)
         |> JDP.required "verse_sets" (JD.list verseSetDecoder)
+        |> JDP.optional "session_stats" (sessionStatsDecoder |> JD.map Just) Nothing
+        |> JDP.optional "action_logs" (actionLogsDecoder |> JD.map Just) Nothing
 
 
 nullOr : JD.Decoder a -> JD.Decoder (Maybe a)

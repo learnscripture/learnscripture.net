@@ -126,13 +126,16 @@ def make_serializable(value, fields=[]):
 
 
 class ApiView(View):
+    def get_serializable(self, data):
+        return make_serializable(data, getattr(self, 'fields', []))
+
     def dispatch(self, request, *args, **kwargs):
         retval = super(ApiView, self).dispatch(request, *args, **kwargs)
         if isinstance(retval, HttpResponse):
             return retval
-        serializable = make_serializable(retval, getattr(self, 'fields', []))
-        return HttpResponse(DjangoJSONEncoder().encode(serializable),
-                            content_type='application/json')
+        return HttpResponse(DjangoJSONEncoder().encode(
+            self.get_serializable(retval)
+        ), content_type='application/json')
 
 
 class VersesToLearnHandler(ApiView):
@@ -190,7 +193,7 @@ class VersesToLearn2Handler(ApiView):
                 if vs.verse_set if not None),
             ['id', 'set_type', 'name', 'get_absolute_url']
         )
-        return dict(
+        retval = dict(
             verse_statuses=verse_status_info,
             learning_type=batch.learning_type,
             versions=list(versions),
@@ -199,6 +202,15 @@ class VersesToLearn2Handler(ApiView):
             max_order_val=batch.max_order_val,
             unseen_uvs_ids=batch.unseen_uvs_ids,
         )
+        if request.GET.get('initial_page_load', 'false') == 'true':
+            # To reduce round trips and get the entire page loading in one go
+            # initially, we hack these extra bits of data on here:
+            retval['session_stats'] = dict(stats=todays_stats(request.identity))
+            retval['action_logs'] = ActionLogs().get_serializable(
+                request.identity.get_action_logs(
+                    session.get_learning_session_start(request))
+            )
+        return retval
 
 
 def get_verse_status(data):
