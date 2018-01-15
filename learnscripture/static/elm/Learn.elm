@@ -3184,11 +3184,13 @@ getSessionProgressData model =
 
                 isNewItem =
                     List.member currentVerse.verseStatus.id sessionData.verses.unseenUvsIds
+
+                currentVerseNumber = versesFinished + 1
             in
                 if isNewItem then
                     VerseProgress verseProgress
                 else
-                    SessionProgress overallProgress totalVerses versesFinished
+                    SessionProgress overallProgress totalVerses currentVerseNumber
         )
 
 
