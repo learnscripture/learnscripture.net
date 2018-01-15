@@ -455,12 +455,14 @@ sessionProgress model =
         render fraction caption =
             H.div [ A.class "nav-item spacer session-progress" ]
                 [ H.div [ A.class "progress-bar" ]
-                    [ H.text caption
-                    , H.span
+                    [ H.div
                         [ A.class "filled-bar"
                         , A.style [ ( "width", toString (fraction * 100) ++ "%" ) ]
                         ]
                         []
+                    , H.div
+                        [ A.class "progress-caption" ]
+                        [ H.text caption ]
                     ]
                 ]
     in
@@ -3185,7 +3187,8 @@ getSessionProgressData model =
                 isNewItem =
                     List.member currentVerse.verseStatus.id sessionData.verses.unseenUvsIds
 
-                currentVerseNumber = versesFinished + 1
+                currentVerseNumber =
+                    versesFinished + 1
             in
                 if isNewItem then
                     VerseProgress verseProgress
