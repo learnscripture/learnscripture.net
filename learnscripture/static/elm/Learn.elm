@@ -846,7 +846,10 @@ viewCurrentVerse session model =
                             partsForVerse currentVerse.verseStatus (learningStageTypeForStage currentVerse.currentStage) testingMethod
                         )
                     ]
+                , verseSetLink currentVerse.verseStatus.verseSet
                 , copyrightNotice currentVerse.verseStatus.version
+                , H.div [ A.style [ ( "clear", "both" ) ] ]
+                    []
                 ]
              , actionButtons model currentVerse session.verses model.preferences
              , hintButton model currentVerse testingMethod
@@ -1338,6 +1341,25 @@ subWordParts word stage =
                         [ A.class <| addHidden "wordend" endIsHidden ]
                         [ H.text end ]
                     ]
+
+
+verseSetLink : Maybe VerseSet -> H.Html msg
+verseSetLink verseSet =
+    case verseSet of
+        Nothing ->
+            emptyNode
+
+        Just vs ->
+            H.div
+                [ A.id "id-verse-set-link"
+                ]
+                [ H.a
+                    [ A.href vs.getAbsoluteUrl
+                    , A.tabindex -1
+                    , A.target "_blank"
+                    ]
+                    [ H.text vs.name ]
+                ]
 
 
 copyrightNotice : Version -> H.Html msg
