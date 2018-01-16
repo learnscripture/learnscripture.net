@@ -1,8 +1,8 @@
 port module Learn exposing (..)
 
-import Erl
-import Dom
 import Dict
+import Dom
+import Erl
 import Html as H
 import Html.Attributes as A
 import Html.Events as E
@@ -11,6 +11,8 @@ import Json.Decode as JD
 import Json.Decode.Pipeline as JDP
 import Json.Encode as JE
 import Maybe
+import Native.Confirm
+import Native.StringUtils
 import Navigation
 import Process
 import Random
@@ -22,8 +24,6 @@ import String.Interpolate exposing (interpolate)
 import Task
 import Time
 import Window
-import Native.StringUtils
-import Native.Confirm
 
 
 {- Main -}
@@ -565,32 +565,44 @@ ajaxInfo model =
               else
                 H.ul
                     [ A.class "nav-dropdown-menu" ]
-                    ((currentHttpCalls
-                        |> List.map
-                            (\{ call, attempts } ->
-                                H.li
-                                    [ A.class
-                                        ("ajax-attempt"
-                                            ++ (if attempts > 1 then
-                                                    " ajax-retrying"
-                                                else
-                                                    ""
-                                               )
-                                        )
-                                    ]
-                                    [ H.text <|
-                                        interpolate "Attempt {0} of {1} - {2}"
-                                            [ toString attempts
-                                            , toString maxHttpRetries
-                                            , trackedHttpCallCaption call
-                                            ]
-                                    ]
-                            )
+                    ((if not <| List.isEmpty failedHttpCalls then
+                        [ H.li [ A.class "button-item" ]
+                            [ H.button
+                                [ A.class "btn"
+                                , onClickSimply RetryFailedCalls
+                                ]
+                                [ H.text "Try to load/save data again" ]
+                            ]
+                        ]
+                      else
+                        []
                      )
+                        ++ (currentHttpCalls
+                                |> List.map
+                                    (\{ call, attempts } ->
+                                        H.li
+                                            [ A.class
+                                                ("ajax-attempt"
+                                                    ++ (if attempts > 1 then
+                                                            " ajax-retrying"
+                                                        else
+                                                            ""
+                                                       )
+                                                )
+                                            ]
+                                            [ H.text <|
+                                                interpolate "Attempt {0} of {1} - {2}"
+                                                    [ toString attempts
+                                                    , toString maxHttpRetries
+                                                    , trackedHttpCallCaption call
+                                                    ]
+                                            ]
+                                    )
+                           )
                         ++ (failedHttpCalls
                                 |> List.map
                                     (\call ->
-                                        H.div [ A.class "ajax-failed" ]
+                                        H.li [ A.class "ajax-failed" ]
                                             [ H.text <|
                                                 interpolate "Failed - {0}"
                                                     [ trackedHttpCallCaption call ]
@@ -2140,6 +2152,7 @@ type Msg
     | UseHint
     | TrackHttpCall TrackedHttpCall
     | MakeHttpCall CallId
+    | RetryFailedCalls
     | RecordActionCompleteReturned CallId (Result Http.Error ())
     | EmptyResponseTrackedHttpCallReturned CallId (Result Http.Error ())
     | ActionLogsLoaded (Result Http.Error (List ActionLog))
@@ -2211,6 +2224,9 @@ update msg model =
 
         MakeHttpCall callId ->
             makeHttpCall model callId
+
+        RetryFailedCalls ->
+            retryFailedCalls model
 
         -- This is used for calls that return no data that we need to process
         EmptyResponseTrackedHttpCallReturned callId result ->
@@ -4253,6 +4269,7 @@ startTrackedCall model trackedCall =
     let
         ( newModel1, callId ) =
             addTrackedCall model trackedCall
+
         ( newModel2, cmd ) =
             makeHttpCall newModel1 callId
     in
@@ -4413,6 +4430,23 @@ markFailAndRetry model callId =
                         (Time.second * (2 ^ attempts |> toFloat))
                         (MakeHttpCall callId)
                     )
+
+
+retryFailedCalls : Model -> ( Model, Cmd Msg )
+retryFailedCalls model =
+    let
+        failedCalls =
+            model.permanentFailHttpCalls
+
+        newModel1 =
+            { model
+                | permanentFailHttpCalls = []
+            }
+
+        ( newModel2, cmds ) =
+            mapAccumL startTrackedCall newModel1 failedCalls
+    in
+        newModel2 ! cmds
 
 
 delay : Time.Time -> msg -> Cmd msg
@@ -5189,6 +5223,24 @@ translate fromStr toStr target =
             makeMapper allPairs
     in
         String.map mapper target
+
+
+mapAccumL : (a -> b -> ( a, c )) -> a -> List b -> ( a, List c )
+mapAccumL func a bs =
+    List.foldl
+        (\b1 ( a1, cs ) ->
+            let
+                ( a2, c ) =
+                    func a1 b1
+            in
+                ( a2, c :: cs )
+        )
+        ( a, [] )
+        bs
+
+
+
+{- Custom tasks -}
 
 
 confirmTask : String -> b -> a -> Task.Task a b
