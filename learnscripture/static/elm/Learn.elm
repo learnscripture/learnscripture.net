@@ -4251,13 +4251,12 @@ it and then triggering its execution.
 startTrackedCall : Model -> TrackedHttpCall -> ( Model, Cmd Msg )
 startTrackedCall model trackedCall =
     let
-        ( newModel, callId ) =
+        ( newModel1, callId ) =
             addTrackedCall model trackedCall
-
-        cmd =
-            sendMsg <| MakeHttpCall callId
+        ( newModel2, cmd ) =
+            makeHttpCall newModel1 callId
     in
-        ( newModel, cmd )
+        ( newModel2, cmd )
 
 
 {-| For a given TrackedHttpCall object, return a command that triggers
