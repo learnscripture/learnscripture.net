@@ -6,6 +6,7 @@ from datetime import datetime
 from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.utils import timezone
+from django.utils.http import urlencode
 
 
 def identity_middleware(get_response):
@@ -76,9 +77,13 @@ def debug_middleware(get_response):
 
         if 'as' in request.GET:
             account = Account.objects.get(username=request.GET['as'])
-            session.login(request, account.identity)
             account.backend = settings.AUTHENTICATION_BACKENDS[0]
             login(request, account)
+            session.login(request, account.identity)
+            params = request.GET.copy()
+            del params['as']
+            query = urlencode(params)
+            return HttpResponseRedirect(request.path + ("?" + query if query else ""))
 
         if 'now' in request.GET:
             now = time.strptime(request.GET['now'], "%Y-%m-%d %H:%M:%S")
