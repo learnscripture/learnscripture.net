@@ -458,7 +458,7 @@ topNav model =
 sessionProgress : Model -> H.Html Msg
 sessionProgress model =
     let
-        render fraction caption =
+        render fraction caption numberCaption =
             H.div [ A.class "nav-item spacer session-progress" ]
                 [ H.div [ A.class "progress-bar" ]
                     [ H.div
@@ -468,7 +468,10 @@ sessionProgress model =
                         []
                     , H.div
                         [ A.class "progress-caption" ]
-                        [ H.text caption ]
+                        [ H.span [ A.class "nav-caption" ]
+                            [ H.text caption ]
+                        , H.text numberCaption
+                        ]
                     ]
                 ]
     in
@@ -478,10 +481,11 @@ sessionProgress model =
                     []
 
             VerseProgress fraction ->
-                render fraction ""
+                render fraction "" ""
 
             SessionProgress fraction total current ->
                 render fraction
+                    "Review: "
                     (interpolate "{0} / {1}"
                         [ current |> toString
                         , total |> toString
@@ -3172,30 +3176,19 @@ getSessionProgressData model =
     withSessionData model
         NoProgress
         (\sessionData ->
-            -- For 'Learning' sessions, we might have lots of new individual
-            -- items, and we don't expect the user to get through them all.
-            -- Therefore the progress bar should be only the current verse.
-            -- For revision/practice sessions, we can display a progress bar
-            -- that includes everything in the session.
-            -- However, for passage sets in 'learning' phase, we want to show the
-            -- number of items to review in some way, or the number of items up
-            -- until the first new verse, and then switch to 'verse mode'.
-            -- So we subtract the number of new items from the 'total'.
+            -- For 'Learning' sessions as opposed to 'Review', we might have
+            -- lots of new individual items, and we don't expect the user to get
+            -- through them all. Therefore the progress bar should be only the
+            -- current verse. For revision/practice sessions, we can display a
+            -- progress bar that includes everything in the session. However,
+            -- for passage sets in 'learning' phase, we will have a mixture of
+            -- review and learning. Almost always the 'learning' items will be
+            -- at the end. So we just exclude learning items from the review
+            -- count and switch to 'learn' mode when we come across learning
+            -- items.
             let
-                verseStore =
-                    sessionData.verses
-
                 currentVerse =
                     sessionData.currentVerse
-
-                -- Progress within batch learnOrder is zero indexed, so
-                -- when learnOrder == 0, and e.g. maxOrderVal == 0, we
-                -- have 1 item total, and 0 finished items.
-                totalVerses =
-                    verseStore.maxOrderVal + 1 - List.length verseStore.unseenUvsIds
-
-                versesFinished =
-                    currentVerse.verseStatus.learnOrder
 
                 -- Progress within a verse i.e. stages
                 totalStageCount =
@@ -3250,19 +3243,44 @@ getSessionProgressData model =
                 verseProgress =
                     (toFloat stagesFinished + stageProgress) / toFloat totalStageCount
 
-                overallProgress =
-                    (toFloat versesFinished + verseProgress) / toFloat totalVerses
-
                 isNewItem =
                     List.member currentVerse.verseStatus.id sessionData.verses.unseenUvsIds
-
-                currentVerseNumber =
-                    versesFinished + 1
             in
                 if isNewItem then
                     VerseProgress verseProgress
                 else
-                    SessionProgress overallProgress totalVerses currentVerseNumber
+                    let
+                        -- Progress within batch. learnOrder is zero indexed, so
+                        verseStore =
+                            sessionData.verses
+
+                        unseenUvsIds =
+                            verseStore.unseenUvsIds
+
+                        learningVerseCount =
+                            List.length unseenUvsIds
+
+                        -- when learnOrder == 0, and e.g. maxOrderVal == 0, we
+                        -- have 1 item total, and 0 finished items.
+                        totalReviewVerses =
+                            verseStore.maxOrderVal + 1 - learningVerseCount
+
+                        reviewVersesFinished =
+                            List.filter
+                                (\v ->
+                                    (not <| List.member v.id unseenUvsIds)
+                                        && (v.learnOrder < currentVerse.verseStatus.learnOrder)
+                                )
+                                verseStore.verseStatuses
+                                |> List.length
+
+                        overallProgress =
+                            (toFloat reviewVersesFinished + verseProgress) / toFloat totalReviewVerses
+
+                        currentVerseNumber =
+                            reviewVersesFinished + 1
+                    in
+                        SessionProgress overallProgress totalReviewVerses currentVerseNumber
         )
 
 
