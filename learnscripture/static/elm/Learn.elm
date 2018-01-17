@@ -4505,9 +4505,25 @@ handleRetries updateFunction model callId result =
 
 markCallFinished : Model -> CallId -> Model
 markCallFinished model callId =
-    { model
-        | currentHttpCalls = Dict.remove callId model.currentHttpCalls
-    }
+    let
+        newModel1 =
+            { model
+                | currentHttpCalls = Dict.remove callId model.currentHttpCalls
+            }
+
+        newModel2 =
+            if
+                dropdownIsOpen model AjaxInfo
+                    && List.isEmpty newModel1.permanentFailHttpCalls
+                    && Dict.isEmpty newModel1.currentHttpCalls
+            then
+                { newModel1
+                    | openDropdown = Nothing
+                }
+            else
+                newModel1
+    in
+        newModel2
 
 
 markPermanentFailCall : Model -> CallId -> Model
