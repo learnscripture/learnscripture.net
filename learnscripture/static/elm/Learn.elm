@@ -20,7 +20,7 @@ import Random.List
 import Regex as R
 import Set
 import String
-import String.Interpolate exposing (interpolate)
+import StringInterpolate.Interpolate exposing (interpolate)
 import Task
 import Time
 import Window
