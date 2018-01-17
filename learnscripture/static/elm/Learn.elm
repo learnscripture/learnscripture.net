@@ -447,9 +447,9 @@ topNav model =
         [ H.div [ A.class "nav-item dashboard-link" ]
             [ navLink dashboardUrl "Dashboard" "icon-return" AlignLeft ]
         , sessionProgress model
+        , viewActionLogs model
         , ajaxInfo model
         , viewSessionStats model
-        , viewActionLogs model
         , H.div [ A.class "nav-item preferences-link" ]
             [ navLink "#" (userDisplayName model.user) "icon-preferences" AlignRight ]
         ]
