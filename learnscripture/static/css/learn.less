@@ -432,7 +432,17 @@ body.learn-page {
             .normalWordBorderColors();
             border-left: 2px solid blue;
         }
+
     }
+    .hide-word-boundaries .punct {
+        // Need this otherwise paddings cover up the reference punctuation
+        // completely:
+        margin-left: 5px;
+        margin-right: 5px;
+        padding-left: 2px;
+        padding-right: 2px;
+    }
+
 
     #id-hint-btn, #id-help-btn, #id-more-practice-btn, .word-button.clickable {
         // For Internet Explorer, remove 300ms delays on "click" event when touch
