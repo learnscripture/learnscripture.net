@@ -428,7 +428,7 @@ dashboardUrl =
 view : Model -> H.Html Msg
 view model =
     H.div []
-        [ topNav model
+        [ viewTopNav model
         , case model.learningSession of
             Loading ->
                 loadingDiv
@@ -441,18 +441,33 @@ view model =
         ]
 
 
-topNav : Model -> H.Html Msg
-topNav model =
+viewTopNav : Model -> H.Html Msg
+viewTopNav model =
     H.nav [ A.class "topbar-new" ]
-        [ H.div [ A.class "nav-item dashboard-link" ]
-            [ navLink dashboardUrl "Dashboard" "icon-return" AlignLeft ]
+        [ H.div [ A.class "nav-item return-link" ]
+            [ navLink
+                [ A.href "#"
+                , onClickSimply (AttemptReturn False)
+                ]
+                (getReturnUrl model |> getReturnCaption)
+                "icon-return"
+                AlignLeft
+            ]
         , sessionProgress model
         , viewActionLogs model
         , ajaxInfo model
         , viewSessionStats model
         , H.div [ A.class "nav-item preferences-link" ]
-            [ navLink "#" (userDisplayName model.user) "icon-preferences" AlignRight ]
+            [ navLink [ A.href "#" ] (userDisplayName model.user) "icon-preferences" AlignRight ]
         ]
+
+
+getReturnCaption : Url -> String
+getReturnCaption url =
+    if url == dashboardUrl then
+        "Dashboard"
+    else
+        "Return"
 
 
 sessionProgress : Model -> H.Html Msg
@@ -2116,8 +2131,8 @@ makeIcon iconClass titleText =
         []
 
 
-navLink : String -> String -> IconName -> LinkIconAlign -> H.Html msg
-navLink href caption icon iconAlign =
+navLink : List (H.Attribute Msg) -> String -> IconName -> LinkIconAlign -> H.Html Msg
+navLink attrs caption icon iconAlign =
     let
         iconH =
             makeIcon icon caption
@@ -2133,7 +2148,7 @@ navLink href caption icon iconAlign =
                 AlignRight ->
                     [ captionH, iconH ]
     in
-        H.a [ A.href href ] combinedH
+        H.a attrs combinedH
 
 
 
@@ -2142,6 +2157,7 @@ navLink href caption icon iconAlign =
 
 type Msg
     = VersesToLearn CallId (Result Http.Error VerseBatchRaw)
+    | AttemptReturn Bool
     | NextStageOrSubStage
     | PreviousStage
     | NextVerse
@@ -2166,7 +2182,7 @@ type Msg
     | ExpandHelp
     | CollapseHelp
     | ToggleDropdown Dropdown
-    | NavigateToWhenDone String
+    | NavigateTo Url
     | WindowResize { width : Int, height : Int }
     | ReceivePreferences JD.Value
     | ReattemptFocus String Int
@@ -2182,6 +2198,9 @@ update msg model =
     case msg of
         VersesToLearn callId result ->
             handleRetries handleVersesToLearn model callId result
+
+        AttemptReturn waitUntilDone ->
+            attemptReturn model waitUntilDone
 
         NextStageOrSubStage ->
             moveToNextStageOrSubStage model
@@ -2262,17 +2281,10 @@ update msg model =
             , Cmd.none
             )
 
-        NavigateToWhenDone url ->
-            -- TODO - if there is a permanent error, we need to show that.
-            if Dict.isEmpty model.currentHttpCalls then
-                ( model
-                , Navigation.load url
-                )
-            else
-                ( model
-                  -- keep trying until done
-                , NavigateToWhenDone url |> delay (1 * Time.second)
-                )
+        NavigateTo url ->
+            ( model
+            , Navigation.load url
+            )
 
         WindowResize _ ->
             -- Can cause reflow of words and change of sizes of everything,
@@ -2461,6 +2473,79 @@ getCurrentTestProgress model =
 
         Nothing ->
             Nothing
+
+
+
+{- Update functions -}
+
+
+attemptReturn : Model -> Bool -> ( Model, Cmd Msg )
+attemptReturn model waitUntilDone =
+    let
+        returnUrl =
+            getReturnUrl model
+
+        callsInProgress =
+            not <| Dict.isEmpty model.currentHttpCalls
+
+        failedCalls =
+            not <| List.isEmpty model.permanentFailHttpCalls
+
+        returnCmd =
+            Navigation.load returnUrl
+
+        -- returnMsg needed when using in conjunction with confirm
+        returnMsg =
+            NavigateTo returnUrl
+
+        doReturn =
+            ( model
+            , returnCmd
+            )
+
+        doRetry =
+            ( model
+            , AttemptReturn waitUntilDone |> delay (1 * Time.second)
+            )
+
+        openAjaxDropdownCmd =
+            if not <| dropdownIsOpen model AjaxInfo then
+                ToggleDropdown AjaxInfo
+            else
+                Noop
+
+        doFailedCallsPrompt =
+            ( model
+            , confirm
+                ("There is data that failed to save. If you go away from this page, "
+                    ++ "the data will be lost. Do you want to continue?"
+                )
+                returnMsg
+                openAjaxDropdownCmd
+            )
+
+        doCallsInProgressPrompt =
+            ( model
+            , confirm
+                ("Data is still being saved.  If you go away from this page, "
+                    ++ "the data will be lost. Do you want to continue?"
+                )
+                returnMsg
+                openAjaxDropdownCmd
+            )
+    in
+        if not callsInProgress && not failedCalls then
+            doReturn
+        else if callsInProgress then
+            if waitUntilDone then
+                -- keep trying until done, don't prompt
+                doRetry
+            else
+                doCallsInProgressPrompt
+        else
+            -- always do prompt when we have finished our attempts and still
+            -- have failed calls
+            doFailedCallsPrompt
 
 
 normalizeVerseBatch : VerseBatchRaw -> ( VerseBatch, Maybe SessionStats, Maybe (List ActionLog) )
@@ -3419,7 +3504,7 @@ moveToNextVerse model =
                 case getNextVerse verseStore currentVerseStatus of
                     NoMoreVerses ->
                         ( model
-                        , sendMsg <| NavigateToWhenDone sessionData.verses.returnTo
+                        , sendMsg (AttemptReturn True)
                         )
 
                     VerseNotInStore ->
@@ -3477,6 +3562,24 @@ moveToNextVerse model =
             ( model
             , Cmd.none
             )
+
+
+getReturnUrl : Model -> Url
+getReturnUrl model =
+    withSessionData model
+        dashboardUrl
+        (\sessionData ->
+            let
+                url =
+                    sessionData.verses.returnTo
+            in
+                case url of
+                    "" ->
+                        dashboardUrl
+
+                    _ ->
+                        url
+        )
 
 
 type NextVerse
