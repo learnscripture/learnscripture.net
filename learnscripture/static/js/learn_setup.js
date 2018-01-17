@@ -45,6 +45,10 @@ var app =
 // size after the layout has been done. This is obviously hard in Elm, so it is
 // done using a port. We also need to handle focus (see below).
 
+var parsePx = function (p) {
+    return parseInt(p.replace("px", ""), 10);
+}
+
 var fixTypingBox = function (attempts, args, afterDomUpdated) {
     if (attempts > 3) {
         return; // give up
@@ -84,15 +88,22 @@ var fixTypingBox = function (attempts, args, afterDomUpdated) {
             // e.g. things appearing above it.
             var wordRect = wordButton.getClientRects()[0];
             var containerRect = typingBoxContainer.getClientRects()[0];
+            var typingBoxStyles = window.getComputedStyle(typingBox);
+            var wordButtonStyles = window.getComputedStyle(wordButton);
 
-            typingBox.style.top = (wordRect.top - containerRect.top).toString() + "px";
-            typingBox.style.left = (wordRect.left - containerRect.left).toString() + "px";
-            // Allow for border
-            var styles = window.getComputedStyle(typingBox);
-            var parsePx = function (p) {
-                return parseInt(p.replace("px", ""), 10);
-            }
-            var borderWidth = parsePx(styles['border-left-width']);
+            // typingBox position may need to account for difference in border
+            // widths and padding (see .hide-word-boundaries) if we want typed
+            // text to line up exactly with underlying word text.
+            var typingBoxLeft = wordRect.left - containerRect.left
+                - parsePx(typingBoxStyles['border-left-width'])
+                + parsePx(wordButtonStyles['border-left-width'])
+                - parsePx(typingBoxStyles['padding-left'])
+                + parsePx(wordButtonStyles['padding-left']);
+
+            var typingBoxTop = (wordRect.top - containerRect.top);
+            typingBox.style.top =  typingBoxTop.toString() + "px";
+            typingBox.style.left = typingBoxLeft.toString() + "px";
+            var borderWidth = parsePx(typingBoxStyles['border-left-width']);
             typingBox.style.height = (wordRect.height - 2 * borderWidth).toString() + "px";
 
             if (args.hardMode) {
@@ -100,8 +111,8 @@ var fixTypingBox = function (attempts, args, afterDomUpdated) {
                 typingBox.style.width = "6em";
             } else {
                 // Allow for border and left padding
-                var paddingLeft = parsePx(styles['padding-left']);
-                var paddingRight = parsePx(styles['padding-right']);
+                var paddingLeft = parsePx(typingBoxStyles['padding-left']);
+                var paddingRight = parsePx(typingBoxStyles['padding-right']);
                 typingBox.style.width = (wordRect.width - 2 * borderWidth - paddingLeft - paddingRight).toString() + "px";
             }
             correctPositioningComplete = true;
