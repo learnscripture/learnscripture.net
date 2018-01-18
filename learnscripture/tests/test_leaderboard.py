@@ -52,9 +52,11 @@ class VerseCountTests(AccountTestMixin, TestBase):
 
     def _create_overlapping_verse_sets(self, account):
         vs1 = VerseSet.objects.create(name="Psalm 23:1-3",
+                                      language_code='en',
                                       set_type=VerseSetType.PASSAGE,
                                       created_by=account)
         vs2 = VerseSet.objects.create(name="Psalm 23:1-2",
+                                      language_code='en',
                                       set_type=VerseSetType.PASSAGE,
                                       created_by=account)
         vs1.set_verse_choices(["BOOK18 23:1",

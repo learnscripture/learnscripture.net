@@ -41,6 +41,9 @@ class CreateSetTests(FullBrowserTest):
                          1)
         self.assertEqual(Event.objects.filter(event_type=EventType.VERSE_SET_CREATED).count(),
                          1)
+        vs = VerseSet.objects.get()
+        self.assertEqual(vs.name, "My set")
+        self.assertEqual(vs.language_code, "en")
 
     def test_create_selection_set_combos(self):
         self.login(self._account)
@@ -121,6 +124,7 @@ class CreateSetTests(FullBrowserTest):
     def test_edit(self):
         vs = VerseSet.objects.create(created_by=self._account,
                                      set_type=VerseSetType.SELECTION,
+                                     language_code='en',
                                      name='my set')
         vc1 = vs.verse_choices.create(internal_reference='BOOK0 1:1',
                                       set_order=0)
@@ -143,6 +147,7 @@ class CreateSetTests(FullBrowserTest):
     def test_remove(self):
         self.login(self._account)
         vs = VerseSet.objects.create(created_by=self._account,
+                                     language_code='en',
                                      set_type=VerseSetType.SELECTION,
                                      name='my set')
         vs.verse_choices.create(internal_reference='BOOK0 1:1',
@@ -197,6 +202,7 @@ class CreateSetTests(FullBrowserTest):
         self.assertTrue(len(vs.verse_choices.all()), 10)
         self.assertEqual(vs.breaks, "BOOK0 1:3,BOOK0 1:9")
         self.assertEqual(vs.passage_id, 'BOOK0 1:1-10')
+        self.assertEqual(vs.language_code, 'en')
 
     def test_create_passage_set_merged(self):
         # Tests for creating with a version that has merged verses
@@ -251,6 +257,7 @@ class CreateSetTests(FullBrowserTest):
     def test_edit_passage_set(self):
         self.login(self._account)
         vs = VerseSet.objects.create(created_by=self._account,
+                                     language_code='en',
                                      set_type=VerseSetType.PASSAGE,
                                      name='Psalm 23',
                                      breaks="BOOK18 23:5")

@@ -587,8 +587,7 @@ class VerseSet(models.Model):
                                   default="")
 
     language_code = models.CharField(max_length=2, blank=False,
-                                     choices=LANGUAGE_CHOICES,
-                                     default=DEFAULT_LANGUAGE.code)
+                                     choices=LANGUAGE_CHOICES)
 
     objects = VerseSetManager()
 
