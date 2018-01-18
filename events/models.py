@@ -149,6 +149,7 @@ class VerseSetCreatedEvent(EventLogic):
         super(VerseSetCreatedEvent, self).__init__(verse_set_id=verse_set.id,
                                                    verse_set_slug=verse_set.slug,
                                                    verse_set_name=verse_set.name,
+                                                   verse_set_language_code=verse_set.language_code,
                                                    account=verse_set.created_by)
 
     @classmethod
@@ -169,6 +170,7 @@ class StartedLearningVerseSetEvent(EventLogic):
         super(StartedLearningVerseSetEvent, self).__init__(verse_set_id=verse_set.id,
                                                            verse_set_slug=verse_set.slug,
                                                            verse_set_name=verse_set.name,
+                                                           verse_set_language_code=verse_set.language_code,
                                                            account=chosen_by)
 
     @classmethod
