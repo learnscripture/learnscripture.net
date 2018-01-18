@@ -1,6 +1,6 @@
 import re
 
-ALPHANUMERIC_RE = re.compile('\w')
+ALPHANUMERIC_RE = re.compile(r'\w')
 WORD_SPLITTER = re.compile(r'( |\n)')
 
 
