@@ -707,7 +707,7 @@ def delete_old_versions():
     fix_perms(Version.VERSIONS_ROOT, env.proj_user)
     with cd(Version.VERSIONS_ROOT):
         commitref_glob = "?" * 12
-        run("ls -dtr %s | head -n -4 | xargs rm -rf" % commitref_glob)
+        run("ls -dtr %s | head -n -3 | xargs rm -rf" % commitref_glob)
 
 
 @as_rootuser
