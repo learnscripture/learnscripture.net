@@ -1,3 +1,5 @@
+{% load dict_utils %}
+
 <div class="verse-options alert-message block-message info">
   {% for uvs in uvs_list %}
 
@@ -89,7 +91,7 @@
           <input type="hidden" name="version_id" value="{{ uvs.version_id }}" />
           <p>
             <input type="submit" name="cancellearning" class="btn primary cancel-learning-passage-btn"
-                   value="Stop learning this passage ({{ uvs.verse_set.name }})" />
+                   value="Stop learning this passage ({{ uvs.verse_set.smart_name_dict|lookup:uvs.version.language_code }})" />
           </p>
         {% endif %}
       </form>

@@ -546,6 +546,7 @@ class CheckDuplicatePassageSet(ApiView):
                       .select_related('created_by')
                       )
         return [dict(name=vs.name,
+                     smart_name=vs.smart_name(language_code),
                      url=reverse('view_verse_set', args=[vs.slug]),
                      by=vs.created_by.username)
                 for vs in verse_sets]

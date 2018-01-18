@@ -20,8 +20,9 @@ from .books import get_bible_book_name, get_bible_book_number
 from .fields import VectorField
 from .languages import DEFAULT_LANGUAGE, LANGUAGE_CHOICES, LANGUAGE_CODE_EN, LANGUAGE_CODE_TR, normalize_reference_input
 from .parsing import (InvalidVerseReference, ParsedReference, internalize_localized_reference,
-                      localize_internal_reference, parse_break_list, parse_unvalidated_localized_reference,
-                      parse_validated_internal_reference, parse_validated_localized_reference)
+                      localize_internal_reference, parse_break_list, parse_passage_title_partial,
+                      parse_unvalidated_localized_reference, parse_validated_internal_reference,
+                      parse_validated_localized_reference)
 from .services import get_fetch_service, get_search_service
 from .textutils import split_into_words
 
@@ -643,6 +644,33 @@ class VerseSet(models.Model):
                 verse_choices[0].internal_reference,
                 verse_choices[-1].internal_reference)
             self.save()
+
+    def smart_name(self, required_language_code):
+        """
+        Attempt to translate verse references in a VerseSet name into user's language
+        """
+        if required_language_code == self.language_code:
+            return self.name
+
+        # Passage set names are often just the passage ref (this is set automatically),
+        # or start with the passage ref.
+        parsed_ref, remainder = parse_passage_title_partial(self.language_code,
+                                                            self.name)
+
+        if parsed_ref is None:
+            return self.name
+
+        required_localized_ref = parsed_ref.translate_to(required_language_code).canonical_form()
+        if remainder.strip() == "":
+            # Just the passage ref
+            return required_localized_ref
+        else:
+            return self.name.strip() + " (" + required_localized_ref + ")"
+
+    # For use in templates:
+    @lazy_dict_like
+    def smart_name_dict(self, language_code):
+        return self.smart_name(language_code)
 
 
 def make_verse_set_passage_id(start_internal_reference, end_internal_reference):

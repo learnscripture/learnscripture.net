@@ -730,7 +730,7 @@ def view_verse_set(request, slug):
     c['verse_set'] = verse_set
     c['verse_list'] = verse_list
     c['version'] = version
-    c['title'] = "Verse set: %s" % verse_set.name
+    c['title'] = "Verse set: %s" % verse_set.smart_name(version.language_code)
     c.update(context_for_version_select(request))
     return render(request, 'learnscripture/single_verse_set.html', c)
 
