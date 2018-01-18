@@ -9,8 +9,9 @@ from django.utils.html import format_html
 from jsonfield import JSONField
 
 from accounts.models import Account
+from bibleverses.models import verse_set_smart_name
 from groups.models import Group
-from learnscripture.datastructures import make_class_enum
+from learnscripture.datastructures import lazy_dict_like, make_class_enum
 from learnscripture.templatetags.account_utils import account_link
 
 EVENTSTREAM_CUTOFF_DAYS = 3  # just 3 days of events
@@ -90,7 +91,7 @@ class EventLogic(object):
 
 class NewAccountEvent(EventLogic):
     @classmethod
-    def get_message_html(cls, event):
+    def get_message_html(cls, event, language_code):
         return format_html("{0} signed up to LearnScripture.net",
                            account_link(event.account))
 
@@ -109,7 +110,7 @@ class AwardReceivedEvent(EventLogic):
                                                  account=award.account)
 
     @classmethod
-    def get_message_html(cls, event):
+    def get_message_html(cls, event, language_code):
         from awards.models import AwardType
         award_type = event.event_data['award_type']
         award_level = event.event_data['award_level']
@@ -131,7 +132,7 @@ class AwardLostEvent(EventLogic):
                                              account=award.account)
 
     @classmethod
-    def get_message_html(cls, event):
+    def get_message_html(cls, event, language_code):
         from awards.models import AwardType
         award_type = event.event_data['award_type']
         award_level = event.event_data['award_level']
@@ -153,12 +154,16 @@ class VerseSetCreatedEvent(EventLogic):
                                                    account=verse_set.created_by)
 
     @classmethod
-    def get_message_html(cls, event):
+    def get_message_html(cls, event, language_code):
         return format_html(
             '{0} created new verse set <a href="{1}">{2}</a>',
             account_link(event.account),
             reverse('view_verse_set', args=(event.event_data['verse_set_slug'],)),
-            event.event_data['verse_set_name'],
+            verse_set_smart_name(
+                event.event_data['verse_set_name'],
+                event.event_data['verse_set_language_code'],
+                language_code
+            )
         )
 
 
@@ -174,12 +179,16 @@ class StartedLearningVerseSetEvent(EventLogic):
                                                            account=chosen_by)
 
     @classmethod
-    def get_message_html(cls, event):
+    def get_message_html(cls, event, language_code):
         return format_html(
             '{0} started learning <a href="{1}">{2}</a>',
             account_link(event.account),
             reverse('view_verse_set', args=(event.event_data['verse_set_slug'],)),
-            event.event_data['verse_set_name']
+            verse_set_smart_name(
+                event.event_data['verse_set_name'],
+                event.event_data['verse_set_language_code'],
+                language_code
+            )
         )
 
 
@@ -189,7 +198,7 @@ class PointsMilestoneEvent(EventLogic):
                                                    points=points)
 
     @classmethod
-    def get_message_html(cls, event):
+    def get_message_html(cls, event, language_code):
         return format_html(
             '{0} reached {1} points',
             account_link(event.account),
@@ -203,7 +212,7 @@ class VersesStartedMilestoneEvent(EventLogic):
                                                           verses_started=verses_started)
 
     @classmethod
-    def get_message_html(cls, event):
+    def get_message_html(cls, event, language_code):
         return format_html(
             '{0} reached {1} verses started',
             account_link(event.account),
@@ -229,7 +238,7 @@ class GroupJoinedEvent(GroupRelatedMixin, EventLogic):
                                                group_id=group.id)
 
     @classmethod
-    def get_message_html(cls, event):
+    def get_message_html(cls, event, language_code):
         return format_html(
             '{0} joined group <a href="{1}">{2}</a>',
             account_link(event.account),
@@ -246,7 +255,7 @@ class GroupCreatedEvent(GroupRelatedMixin, EventLogic):
                                                 group_id=group.id)
 
     @classmethod
-    def get_message_html(cls, event):
+    def get_message_html(cls, event, language_code):
         return format_html(
             '{0} created group <a href="{1}">{2}</a>',
             account_link(event.account),
@@ -260,7 +269,7 @@ class VersesFinishedMilestoneEvent(EventLogic):
                                                            verses_finished=verses_finished)
 
     @classmethod
-    def get_message_html(cls, event):
+    def get_message_html(cls, event, language_code):
         return format_html(
             "{0} reached {1} verses finished",
             account_link(event.account),
@@ -277,7 +286,7 @@ class StartedLearningCatechismEvent(EventLogic):
                                                             catechism_id=catechism.id)
 
     @classmethod
-    def get_message_html(cls, event):
+    def get_message_html(cls, event, language_code):
         return format_html(
             '{0} started learning <a href="{1}">{2}</a>',
             account_link(event.account),
@@ -319,7 +328,7 @@ class NewCommentEvent(EventLogic):
         return False
 
     @classmethod
-    def get_message_html(cls, event):
+    def get_message_html(cls, event, language_code):
         from comments.models import Comment
         # In theory we could write this code without loading the comment from
         # the DB, but replicating Comment.get_absolute_url() gets complicated.
@@ -376,7 +385,7 @@ def dedupe_iterable(iterable, keyfunc):
 
 
 class EventManager(models.Manager):
-    def for_dashboard(self, now=None, account=None):
+    def for_dashboard(self, language_code, now=None, account=None):
         if now is None:
             now = timezone.now()
 
@@ -391,7 +400,7 @@ class EventManager(models.Manager):
         if account is None or not account.is_hellbanned:
             events = events.exclude(account__is_hellbanned=True)
         events = list(events)
-        events = list(dedupe_iterable(events, lambda e: (e.account_id, e.render_html())))
+        events = list(dedupe_iterable(events, lambda e: (e.account_id, e.render_html(language_code))))
 
         if account is not None:
             friendship_weights = account.get_friendship_weights()
@@ -500,8 +509,12 @@ class Event(models.Model):
             return "Just now"
         return timesince(self.created, now=now) + " ago"
 
-    def render_html(self):
-        return self.event_logic.get_message_html(self)
+    def render_html(self, language_code):
+        return self.event_logic.get_message_html(self, language_code)
+
+    @lazy_dict_like
+    def render_html_dict(self, language_code):
+        return self.render_html(language_code)
 
     @cached_property
     def event_logic(self):

@@ -4,6 +4,7 @@ from django.utils import timezone
 
 from accounts.forms import PreferencesForm
 from accounts.models import DEFAULT_THEME, THEME_FONTS
+from bibleverses.languages import DEFAULT_LANGUAGE
 from learnscripture.models import SiteNotice
 from learnscripture.views import account_from_request
 from payments.models import DonationDrive
@@ -94,7 +95,19 @@ def notices(request):
 
 
 def request_account(request):
-    return {'request_account': account_from_request(request)}
+    account = account_from_request(request)
+    # Everywhere we need request_account we might also need default_language_code
+    if account is None:
+        if hasattr(request, 'identity'):
+            default_language_code = request.identity.default_language_code
+        else:
+            default_language_code = DEFAULT_LANGUAGE.code
+    else:
+        default_language_code = account.default_language_code
+    return {
+        'request_account': account,
+        'default_language_code': default_language_code
+    }
 
 
 def campaign_context_processor(account):

@@ -90,7 +90,7 @@ class EventTests(AccountTestMixin, TestBase):
         group = create_group()
         group.add_user(account2)
         group.add_user(viewer)
-        stream = list(Event.objects.for_dashboard(account=viewer))
+        stream = list(Event.objects.for_dashboard('en', account=viewer))
 
         # e2 has greater weight than e1, should be earlier
         self.assertTrue(stream.index(e2) < stream.index(e1))

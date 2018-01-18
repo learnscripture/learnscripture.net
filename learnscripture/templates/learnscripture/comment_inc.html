@@ -1,5 +1,5 @@
 {% load account_utils %}
-
+{% load dict_utils %}
 {# sync with id-comment-template #}
 <div class="comment
             {% if show_as_related_comment %} relatedcomment{% endif %}
@@ -11,7 +11,7 @@
     {{ comment.author|account_link }}
   </span>
   {% if show_as_related_comment %}
-    on news item “<b>{{ comment.event.render_html }}</b>”
+    on news item “<b>{{ comment.event.render_html_dict|lookup:default_language_code }}</b>”
   {% endif %}
   {% if request_account.is_moderator %}
     <span class="commentmoderation">
