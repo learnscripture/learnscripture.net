@@ -45,6 +45,7 @@ class RequireExampleVerseSetsMixin(object):
     def create_verse_set(self, set_type, name, slug, description, en_ref_list):
         account = get_or_create_any_account(username='creatoraccount☺', is_active=False)
         vs = VerseSet.objects.create(
+            language_code='en',
             set_type=set_type,
             name=name,
             slug=slug,

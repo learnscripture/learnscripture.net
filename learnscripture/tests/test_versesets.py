@@ -14,6 +14,7 @@ class VerseSetTests(AccountTestMixin, TestBase):
         vs = VerseSet.objects.create(name="My set",
                                      slug="my-set",
                                      created_by=creator,
+                                     language_code='en',
                                      set_type=VerseSetType.SELECTION,
                                      public=False)
 

@@ -27,11 +27,13 @@ class SearchTests(SearchTestsMixin, TestBase):
         VerseSet.objects.create(name="For stupid people",
                                 slug="for-stupid-people",
                                 public=True,
+                                language_code='en',
                                 set_type=VerseSetType.SELECTION,
                                 created_by=self.account)
         VerseSet.objects.create(name="For intelligent people",
                                 slug="for-intelligent-people",
                                 public=True,
+                                language_code='en',
                                 set_type=VerseSetType.SELECTION,
                                 created_by=self.account)
 
@@ -45,6 +47,7 @@ class SearchTests(SearchTestsMixin, TestBase):
         vs1 = VerseSet.objects.create(name="A selection",
                                       slug="a-selection",
                                       public=True,
+                                      language_code='en',
                                       set_type=VerseSetType.SELECTION,
                                       created_by=self.account)
         vs1.set_verse_choices([

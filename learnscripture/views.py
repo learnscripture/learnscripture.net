@@ -844,6 +844,7 @@ def create_or_edit_set(request, set_type=None, slug=None):
             verse_set.set_type = set_type
             if verse_set.created_by_id is None:
                 verse_set.created_by = request.identity.account
+                verse_set.language_code = version.language_code
             verse_set.breaks = breaks
 
             if orig_verse_set_public:

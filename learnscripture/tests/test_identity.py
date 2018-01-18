@@ -50,6 +50,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
     def test_add_verse_set_passage_with_merged(self):
         i = self.create_identity(version_slug='TCL02')
         vs = VerseSet.objects.create(created_by=get_or_create_any_account(),
+                                     language_code='en',
                                      set_type=VerseSetType.PASSAGE,
                                      name='Romans 3:24-27')
         # Romans 3:25-26 is merged in TCL02
