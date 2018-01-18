@@ -18,6 +18,7 @@ from django.utils.functional import cached_property
 from accounts import memorymodel
 from accounts.signals import (catechism_started, points_increase, scored_100_percent, verse_finished, verse_started,
                               verse_tested)
+from bibleverses.languages import DEFAULT_LANGUAGE
 from bibleverses.models import (InvalidVerseReference, MemoryStage, StageType, TextType, TextVersion, UserVerseStatus,
                                 VerseSet, VerseSetType, get_passage_sections, normalized_verse_list_ref)
 from bibleverses.signals import verse_set_chosen
@@ -146,6 +147,10 @@ class Account(AbstractBaseUser):
             return retval
         else:
             return super(Account, self).save(**kwargs)
+
+    @property
+    def default_language_code(self):
+        return self.identity.default_language_code
 
     # admin login stuff
     @property
@@ -479,6 +484,14 @@ class Identity(models.Model):
     @property
     def default_to_dashboard(self):
         return self.preferences_setup
+
+    @property
+    def default_language_code(self):
+        # For now, just use this, make it a proper setting later.
+        if self.default_bible_version is None:
+            return DEFAULT_LANGUAGE.code
+        else:
+            return self.default_bible_version.language_code
 
     def add_verse_set(self, verse_set, version=None):
         """
@@ -1269,7 +1282,7 @@ class Identity(models.Model):
 
     def get_dashboard_events(self, now=None):
         from events.models import Event
-        return Event.objects.for_dashboard(now=now, account=self.account)
+        return Event.objects.for_dashboard(self.default_language_code, now=now, account=self.account)
 
     def add_html_notice(self, notice):
         return self.notices.create(message_html=notice)

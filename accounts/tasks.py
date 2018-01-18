@@ -39,12 +39,12 @@ def notify_about_comment(event, comment, account):
     if account == event.account:
         msg = format_html('You have new comments on <b><a href="{0}">your event</a></b> "{1}"',
                           event.get_absolute_url(),
-                          event.render_html()
+                          event.render_html(account.default_language_code)
                           )
     else:
         msg = format_html('There are <b><a href="{0}">new comments</a></b> on the event "{1}"',
                           event.get_absolute_url(),
-                          event.render_html()
+                          event.render_html(account.default_language_code)
                           )
 
     notice = account.add_html_notice(msg)

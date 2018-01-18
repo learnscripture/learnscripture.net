@@ -1,6 +1,7 @@
 {% load comment_utils %}
+{% load dict_utils %}
 
-{% with rendered=event.render_html comments=event.ordered_comments|filter_comments:request_account %}
+{% with rendered=event.render_html_dict|lookup:default_language_code comments=event.ordered_comments|filter_comments:request_account %}
   {% ifchanged rendered %}
     {% ifchanged event.created.date %}
       <div class="timestamp">
@@ -20,7 +21,7 @@
         <a href="{{ event.get_absolute_url }}" title="Link directly to this item alone"><i class="icon-link"></i></a>
       </span>
       <span class="eventdetails">
-        <h4>{{ event.render_html }}</h4>
+        <h4>{{ rendered }}</h4>
       </span>
       {% if event.is_new_comment %}
         <div class="commentblock">

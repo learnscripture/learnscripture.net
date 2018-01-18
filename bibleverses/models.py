@@ -649,28 +649,32 @@ class VerseSet(models.Model):
         """
         Attempt to translate verse references in a VerseSet name into user's language
         """
-        if required_language_code == self.language_code:
-            return self.name
-
-        # Passage set names are often just the passage ref (this is set automatically),
-        # or start with the passage ref.
-        parsed_ref, remainder = parse_passage_title_partial(self.language_code,
-                                                            self.name)
-
-        if parsed_ref is None:
-            return self.name
-
-        required_localized_ref = parsed_ref.translate_to(required_language_code).canonical_form()
-        if remainder.strip() == "":
-            # Just the passage ref
-            return required_localized_ref
-        else:
-            return self.name.strip() + " (" + required_localized_ref + ")"
+        return verse_set_smart_name(self.name, self.language_code, required_language_code)
 
     # For use in templates:
     @lazy_dict_like
     def smart_name_dict(self, language_code):
         return self.smart_name(language_code)
+
+
+def verse_set_smart_name(verse_set_name, verse_set_language_code, required_language_code):
+    if required_language_code == verse_set_language_code:
+        return verse_set_name
+
+    # Passage set names are often just the passage ref (this is set automatically),
+    # or start with the passage ref.
+    parsed_ref, remainder = parse_passage_title_partial(verse_set_language_code,
+                                                        verse_set_name)
+
+    if parsed_ref is None:
+        return verse_set_name
+
+    required_localized_ref = parsed_ref.translate_to(required_language_code).canonical_form()
+    if remainder.strip() == "":
+        # Just the passage ref
+        return required_localized_ref
+    else:
+        return verse_set_name.strip() + " (" + required_localized_ref + ")"
 
 
 def make_verse_set_passage_id(start_internal_reference, end_internal_reference):
