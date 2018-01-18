@@ -586,6 +586,10 @@ class VerseSet(models.Model):
     passage_id = models.CharField(max_length=203,  # 100 for reference * 2 + 3 for ' - '
                                   default="")
 
+    language_code = models.CharField(max_length=2, blank=False,
+                                     choices=LANGUAGE_CHOICES,
+                                     default=DEFAULT_LANGUAGE.code)
+
     objects = VerseSetManager()
 
     def __str__(self):
