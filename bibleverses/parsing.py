@@ -1,3 +1,5 @@
+import re
+
 import attr
 from parsy import ParseError, char_from, generate, regex, string, string_from, whitespace
 
@@ -318,6 +320,23 @@ def parse_unvalidated_localized_reference(language_code, localized_reference,
         else:
             return None
     return parsed_ref
+
+
+def parse_passage_title_partial(language_code, title):
+    try:
+        parsed_ref, remainder = bible_reference_parser_for_lang(language_code, True).parse_partial(title)
+    except ParseError:
+        return None, title
+
+    # We expect the remainder to be empty or to start with punctuation i.e. non
+    # alphanumeric. Otherwise it is a mistake to think the first part was a
+    # bible reference.
+    if len(remainder) > 0:
+        if re.match(r'\w', remainder[0]):
+            return None, title
+
+    # For use cases of this function, we always want to allow whole books/chapters
+    return parsed_ref, remainder
 
 
 def localize_internal_reference(language_code, internal_reference):

@@ -1,6 +1,7 @@
 {% extends "base_twocol.html" %}
 
 {% load account_utils %}
+{% load dict_utils %}
 
 {% block leftcolumn %}
 
@@ -90,7 +91,7 @@
           <input type="submit" name="cancelpassage" class="btn" value="Cancel"
                  id="id-cancelpassage-btn-{{ cvs.id }}" /><br/>
         </form>
-        <h3><a href="{% url 'view_verse_set' cvs.verse_set.slug %}?version={{ cvs.version.slug }}">{{ cvs.verse_set.name }}</a> ({{ cvs.version.short_name }})<br/>
+        <h3><a href="{% url 'view_verse_set' cvs.verse_set.slug %}?version={{ cvs.version.slug }}">{{ cvs.verse_set.smart_name_dict|lookup:cvs.version.language_code }}</a> ({{ cvs.version.short_name }})<br/>
         </h3>
         <div>
           {% if cvs.needs_testing_count == cvs.total_verse_count %}
@@ -191,7 +192,7 @@
           <input type="submit" name="cancelpassage" class="btn" value="Cancel"
                  id="id-cancelpassage-btn-{{ cvs.id }}" />
         </form>
-        <h3><a href="{% url 'view_verse_set' cvs.verse_set.slug %}?version={{ cvs.version.slug }}">{{ cvs.verse_set.name }}</a> ({{ cvs.version.short_name }})</h3>
+        <h3><a href="{% url 'view_verse_set' cvs.verse_set.slug %}?version={{ cvs.version.slug }}">{{ cvs.verse_set.smart_name_dict|lookup:cvs.version.language_code }}</a> ({{ cvs.version.short_name }})</h3>
         {% if cvs.tested_total == 0 %}
           <p>You've queued this passage for learning.</p>
         {% else %}
@@ -207,7 +208,6 @@
     {### Verses ###}
 
     {% if learn_verses_queues %}
-
       {% if passages_for_learning %}<hr>{% endif %}
 
       {% for verse_set, queue in learn_verses_queues %}
@@ -228,7 +228,7 @@
           </form>
 
           {% if verse_set %}
-            <h3><a href="{% url 'view_verse_set' verse_set.slug %}">{{ verse_set.name }}</a></h3>
+            <h3><a href="{% url 'view_verse_set' verse_set.slug %}">{{ verse_set.smart_name_dict|lookup:request.identity.default_bible_version.language_code }}</a></h3>
           {% else %}
             {% if not forloop.first %}
               <h3>Other verses</h3>
