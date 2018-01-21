@@ -3369,6 +3369,9 @@ getSessionProgressData model =
                         totalReviewVerses =
                             verseStore.maxOrderVal + 1 - learningVerseCount
 
+                        -- TODO this is buggy if uses presses 'Refresh' part way
+                        -- through session because verseStore is missing earlier
+                        -- verses.
                         reviewVersesFinished =
                             List.filter
                                 (\v ->
