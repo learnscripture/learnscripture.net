@@ -5122,7 +5122,11 @@ myHttpPost config url body decoder =
         , url = url
         , body = body
         , expect = Http.expectJson decoder
-        , timeout = Nothing
+        -- All our POSTs involve sending and receiving very little data, by
+        -- design. Delays greater than 30s are always going to be due to network
+        -- issues that mean the request is not going to get there. By aborting
+        -- early we get to try again sooner.
+        , timeout = Just (Time.second * 30)
         , withCredentials = False
         }
 
