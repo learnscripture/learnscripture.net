@@ -212,6 +212,13 @@ body.learn-page {
         }
     }
 
+    // TODO colours for other themes
+    @bonusHighlightColour: rgba(0,255,255,0.6);
+    [data-reason="PerfectTestBonus"], [data-reason="VerseLearnt"] {
+        text-shadow: 1px 1px 2px @bonusHighlightColour, -1px -1px 2px @bonusHighlightColour, -1px 1px 2px @bonusHighlightColour, 1px -1px 2px @bonusHighlightColour;
+        color: white;
+    }
+
     @keyframes flash {
         0%, 100% { opacity: 0 }
         30% { opacity: 1 }
