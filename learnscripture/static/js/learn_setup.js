@@ -49,6 +49,10 @@ var parsePx = function (p) {
     return parseInt(p.replace("px", ""), 10);
 }
 
+var asPx = function (n) {
+    return n.toString() + "px";
+}
+
 var fixTypingBox = function (attempts, args, afterDomUpdated) {
     if (attempts > 3) {
         return; // give up
@@ -101,10 +105,10 @@ var fixTypingBox = function (attempts, args, afterDomUpdated) {
                 + parsePx(wordButtonStyles['padding-left']);
 
             var typingBoxTop = (wordRect.top - containerRect.top);
-            typingBox.style.top =  typingBoxTop.toString() + "px";
-            typingBox.style.left = typingBoxLeft.toString() + "px";
+            typingBox.style.top =  asPx(typingBoxTop)
+            typingBox.style.left = asPx(typingBoxLeft)
             var borderWidth = parsePx(typingBoxStyles['border-left-width']);
-            typingBox.style.height = (wordRect.height - 2 * borderWidth).toString() + "px";
+            typingBox.style.height = asPx(wordRect.height - 2 * borderWidth)
 
             if (args.hardMode) {
                 // Don't give away the word length, which would be a clue.
@@ -113,7 +117,7 @@ var fixTypingBox = function (attempts, args, afterDomUpdated) {
                 // Allow for border and left padding
                 var paddingLeft = parsePx(typingBoxStyles['padding-left']);
                 var paddingRight = parsePx(typingBoxStyles['padding-right']);
-                typingBox.style.width = (wordRect.width - 2 * borderWidth - paddingLeft - paddingRight).toString() + "px";
+                typingBox.style.width = asPx(wordRect.width - 2 * borderWidth - paddingLeft - paddingRight)
             }
             correctPositioningComplete = true;
         } else {
@@ -197,3 +201,32 @@ app.ports.beep.subscribe(function (args) {
 });
 
 setUpAudio();
+
+
+var displayWordAttemptMessageTimeout = null;
+
+app.ports.displayWordAttemptMessage.subscribe(function (args) {
+    var status = args.status;
+    var message = args.message;
+
+    if (displayWordAttemptMessageTimeout != null) {
+        clearTimeout(displayWordAttemptMessageTimeout);
+    }
+    var wordButton = document.getElementById(args.wordButtonId);
+    var testingStatusSpan = document.getElementById(args.testingStatusId)
+    var $testingStatusSpan = $(testingStatusSpan);
+    var typingBoxContainer = document.getElementById(args.typingBoxContainerId);
+
+    var wordRect = wordButton.getClientRects()[0];
+    var containerRect = typingBoxContainer.getClientRects()[0];
+
+    // Display message below word.
+    testingStatusSpan.style.top = asPx(wordRect.bottom - containerRect.top);
+    testingStatusSpan.style.left = asPx(wordRect.left - containerRect.left);
+
+    $testingStatusSpan.text(message).attr({'class': status}).show();
+    displayWordAttemptMessageTimeout = setTimeout(function () {
+        $testingStatusSpan.hide();
+        displayWordAttemptMessageTimeout = null;
+    }, 2000);
+});
