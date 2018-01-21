@@ -446,6 +446,23 @@ body.learn-page {
         padding-right: 2px;
     }
 
+    #id-testing-status {
+        display: none;
+        position: absolute;
+        z-index: 5;
+        text-shadow: white 2px 2px, white -2px -2px, white -2px 2px, white 2px -2px;
+    }
+
+    #id-testing-status.correct {
+        color: #00A113;
+        font-weight: bold;
+    }
+
+    #id-testing-status.incorrect {
+        color: #A10000;
+        font-weight: bold;
+    }
+
 
     #id-hint-btn, #id-help-btn, #id-more-practice-btn, .word-button.clickable {
         // For Internet Explorer, remove 300ms delays on "click" event when touch
