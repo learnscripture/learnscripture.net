@@ -106,32 +106,4 @@ os.environ['PYTHONHASHSEED'] = hashseed
 print("PYTHONHASHSEED=%s" % hashseed)
 
 
-# Constraints:
-# - we want Ctrl-C to work just the way
-#   it does if we run manage.py directly, namely that
-#   it exits cleanly.
-#
-# - if another process calls this one (e.g. fabric)
-#   and user presses Ctrl-C, we want the same to happen.
-#   Using os.exec results in fab script stopping,
-#   but manage.py continuing somehow.
-#
-# - if user pressed Ctrl-C, we must return non-zero status code,
-#   which is not what manage.py does
-
-SIGINT_RECEIVED = False
-
-
-def signal_handler(sig, f):
-    global SIGINT_RECEIVED
-    SIGINT_RECEIVED = True
-    # No other action, just allow child to exit.
-
-
-signal.signal(signal.SIGINT, signal_handler)
-
-retcode = subprocess.call(cmd)
-if SIGINT_RECEIVED:
-    sys.exit(1)
-else:
-    sys.exit(retcode)
+sys.exit(subprocess.call(cmd))
