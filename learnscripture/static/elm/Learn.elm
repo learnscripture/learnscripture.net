@@ -55,19 +55,6 @@ port vibrateDevice : Int -> Cmd msg
 port beep : ( Float, Float ) -> Cmd msg
 
 
-port displayWordAttemptMessage :
-    -- status: "correct" or "incorrect"
-    { status :
-        String
-    , message : String
-    , wordButtonId : String
-    , typingBoxContainerId : String
-    , testingStatusId : String
-    }
-    -> Cmd msg
-
-
-
 {- Constants -}
 
 
@@ -872,8 +859,6 @@ viewCurrentVerse session model =
                 -- It comes before verse-wrapper to fix tab order without needing
                 -- tabindex.
                 [ typingBox currentVerse.currentStage testingMethod
-                , H.span [ A.id testingStatusId ]
-                    []
                 , case previousVerse of
                     Nothing ->
                         emptyNode
@@ -1437,11 +1422,6 @@ typingBoxId =
 typingBoxContainerId : String
 typingBoxContainerId =
     "id-verse-wrapper"
-
-
-testingStatusId : String
-testingStatusId =
-    "id-testing-status"
 
 
 typingBox : LearningStage -> TestingMethod -> H.Html Msg
@@ -4047,42 +4027,16 @@ markWord checkResult word testProgress testType verse testingMethod preferences 
             else
                 Cmd.none
 
-        makeDisplayCommand status message =
-            displayWordAttemptMessage
-                { status = status
-                , message = message
-                , wordButtonId = idForButton word
-                , typingBoxContainerId = typingBoxContainerId
-                , testingStatusId = testingStatusId
-                }
-
-        ( vibrateCommand, beepCommand, displayCommand ) =
+        ( vibrateCommand, beepCommand ) =
             if isAttemptFailure checkResult then
                 if shouldMoveOn then
                     -- final failure
-                    ( vibrateDevice 50
-                    , beep ( 290.0, 1 )
-                    , makeDisplayCommand "incorrect" "Incorrect"
-                    )
+                    ( vibrateDevice 50, beep ( 290.0, 1 ))
                 else
                     -- mistake only
-                    ( vibrateDevice 25
-                    , beep ( 330.0, 1 )
-                    , makeDisplayCommand "incorrect"
-                        (interpolate "Try again - {0} / {1}"
-                            [ toString failedCount
-                            , toString (allowedMistakes + 1)
-                            ]
-                        )
-                    )
+                    ( vibrateDevice 25, beep ( 330.0, 1 ))
             else
-                ( Cmd.none
-                , Cmd.none
-                , if checkResult == Success then
-                    makeDisplayCommand "correct" "Correct!"
-                  else
-                    Cmd.none
-                )
+                ( Cmd.none, Cmd.none)
     in
         ( newCurrentVerse
         , Cmd.batch
@@ -4095,7 +4049,6 @@ markWord checkResult word testProgress testType verse testingMethod preferences 
                 beepCommand
               else
                 Cmd.none
-            , displayCommand
             ]
         )
 
