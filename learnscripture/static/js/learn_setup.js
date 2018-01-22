@@ -201,35 +201,3 @@ app.ports.beep.subscribe(function (args) {
 });
 
 setUpAudio();
-
-
-var displayWordAttemptMessageTimeout = null;
-
-app.ports.displayWordAttemptMessage.subscribe(function (args) {
-    var status = args.status;
-    var message = args.message;
-
-    if (displayWordAttemptMessageTimeout != null) {
-        clearTimeout(displayWordAttemptMessageTimeout);
-    }
-    var wordButton = document.getElementById(args.wordButtonId);
-    var testingStatusSpan = document.getElementById(args.testingStatusId)
-    var $testingStatusSpan = $(testingStatusSpan);
-    var typingBoxContainer = document.getElementById(args.typingBoxContainerId);
-
-    var wordRect = wordButton.getClientRects()[0];
-    var containerRect = typingBoxContainer.getClientRects()[0];
-
-    // Display message above word. Below looks a bit better, but can interfere
-    // with the typing box when it moves on to the next line
-    testingStatusSpan.style.top = asPx(wordRect.top - containerRect.top
-                                       - parsePx(window.getComputedStyle(testingStatusSpan)['line-height'])
-                                       - 10);
-    testingStatusSpan.style.left = asPx(wordRect.left - containerRect.left);
-
-    $testingStatusSpan.text(message).attr({'class': status}).show();
-    displayWordAttemptMessageTimeout = setTimeout(function () {
-        $testingStatusSpan.hide();
-        displayWordAttemptMessageTimeout = null;
-    }, 2000);
-});
