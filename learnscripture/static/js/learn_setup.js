@@ -220,8 +220,11 @@ app.ports.displayWordAttemptMessage.subscribe(function (args) {
     var wordRect = wordButton.getClientRects()[0];
     var containerRect = typingBoxContainer.getClientRects()[0];
 
-    // Display message below word.
-    testingStatusSpan.style.top = asPx(wordRect.bottom - containerRect.top);
+    // Display message above word. Below looks a bit better, but can interfere
+    // with the typing box when it moves on to the next line
+    testingStatusSpan.style.top = asPx(wordRect.top - containerRect.top
+                                       - parsePx(window.getComputedStyle(testingStatusSpan)['line-height'])
+                                       - 10);
     testingStatusSpan.style.left = asPx(wordRect.left - containerRect.left);
 
     $testingStatusSpan.text(message).attr({'class': status}).show();
