@@ -12,4 +12,5 @@ webpack_bundles/
 webpack-stats.*.json
 build/
 elm-stuff/
-elm/*.js
+elm/elm.js
+elm/tests/elm.js
