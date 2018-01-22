@@ -500,6 +500,8 @@ def code_quality_checks():
         return
     local("flake8 .")
     local("isort -c")
+    with lcd("learnscripture/static/elm"):
+        local("elm-test")
     local("./runtests.py -f --nokeepdb")
 
 
