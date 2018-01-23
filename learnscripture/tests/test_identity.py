@@ -457,7 +457,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
             for uvs in i.verse_statuses.filter(localized_reference=ref):
                 uvs.last_tested = timezone.now() - timedelta(200 - (vn * 60.0) / (3600.0 * 24))
                 uvs.strength = 0.55
-                uvs.next_test_due = accounts.memorymodel.next_test_due(uvs.last_tested, uvs.strength)
+                uvs.next_test_due = uvs.last_tested + timedelta(seconds=accounts.memorymodel.next_test_due_after(uvs.strength))
                 uvs.save()
 
         vss = i.passages_for_reviewing_and_learning()[0]

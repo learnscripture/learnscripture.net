@@ -1,3 +1,5 @@
+import json
+import os.path
 import unittest2
 
 from accounts.memorymodel import strength_estimate
@@ -27,3 +29,12 @@ class StrengthEstimate(unittest2.TestCase):
 
     def test_strength_estimate_null_previous(self):
         self.assertEqual(strength_estimate(None, 1.0, None), 0.1)
+
+    def test_outputs(self):
+        # Here we test against known good values. The main purpose here is to be
+        # able to sync the Python version of the code with the Elm version -
+        # both are checked against the same JSON file.
+        data = json.load(open(os.path.join(os.path.dirname(__file__), "memorymodel_test_data.json")))['strengthEstimateTestData']
+        for vals in data:
+            with self.subTest(vals=vals):
+                self.assertEqual(vals[3], strength_estimate(vals[0], vals[1], vals[2]))
