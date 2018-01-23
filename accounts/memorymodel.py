@@ -1,6 +1,13 @@
 # -*- coding: utf-8 -*-
+import json
 import math
+import os.path
 from datetime import timedelta
+
+
+# The whole of this model is also reproduced in Elm code, to allow client side code
+# to estimate when something is next due without a server round trip. All changes
+# must be synced with that code
 
 
 class MemoryModel(object):
@@ -9,6 +16,9 @@ class MemoryModel(object):
     # We try to fit the progress of a memory to a idealised exponential curve:
     #
     # s = 1 - exp(-alpha × t^exponent)
+    #
+    # where 's' is the strength of the memory and 't' is the time elapsed in
+    # seconds since first learning.
 
     # A strength of 1 is perfect, but we assume that a person never reaches this.
     # We attempt to move a memory along this curve by testing at ever increasing
@@ -26,7 +36,6 @@ class MemoryModel(object):
     def s(self, t):
         return 1 - math.exp(-self.ALPHA * t ** self.EXPONENT)
 
-    # where 's' is the strength of the memory and t is the time elapsed,
     # We will also need the inverse:
 
     def t(self, s):
@@ -46,11 +55,13 @@ class MemoryModel(object):
     # all tests. In this way, the memory will never stop being a candidate for
     # testing, even if the user aces the tests.
     #
-    # At every point, we assume that the memory is following the curve above, so for
-    # calculating intervals in 't', we don't look at the actual 't' since they first
-    # began. Instead we only look at time intervals between the current time and the
-    # last test. This keeps us robust against the case where they started learning
-    # and then had a long gap, or forgot it completely.
+    # At every point, we assume that the memory is following the curve above, so
+    # for calculating intervals in 't', we don't look at the actual 't' since
+    # they first began. Instead we only look at time intervals between the
+    # current time and the last test, and assume the current time corresponds to
+    # the current strength as per the curve. This keeps us robust against the
+    # case where they started learning and then had a long gap, or forgot it
+    # completely.
     #
     # If the user does much worse than 100%, all that happens is that they progress
     # along the 't' curve much more slowly than the model suggests, and they will
@@ -69,9 +80,10 @@ class MemoryModel(object):
     # We want to avoid the number of verses needing testing increasing forever,
     # and so put a hard limit, after which a verse is considered 'learnt'.
 
-    # We need a value that is attainable using reasonable test accuracy.  Test
-    # accuracy of 95 - 100% is achievable for most people, but scaling means 95%
-    # accuracy goes to a strength of 0.9025, and we need to go under that.
+    # We need a value that is attainable using reasonable test accuracy. Test
+    # accuracy of 95 - 100% is achievable for most people, but scaling (see
+    # below) means 95% accuracy goes to a strength of 0.9025, and we need to go
+    # under that.
     LEARNT = 0.80
 
     # We want to reach this stage after 1 year on our idealised curve.
@@ -83,18 +95,23 @@ class MemoryModel(object):
     # negative numbers:
     BEST_STRENGTH = 0.999
 
-    # We allow one of these parameters to be tuned - pick EXPONENT
-    def __init__(self, EXPONENT):
+    # For the initial test, we don't have a previous strength recorded. We
+    # arbitrarily set the initial strength to be 0.1 test strength
 
-        # The other can be set using the above constants:
+    INITIAL_STRENGTH_FACTOR = 0.1  # This is also used in learn.js
+
+    def __init__(self, EXPONENT):
+        # We allow one of the two parameters to be tuned - pick EXPONENT
+        self.EXPONENT = EXPONENT
+
+        # ALPHA can be set using the above constants:
 
         # s  = 1 - exp(-alpha * t^n)
         # LEARNT = 1 - exp(-alpha * ONE_YEAR^n)
-        # Rearranging:
-        # ALPHA = - ln(1 - LEARNT) / (ONE_YEAR^n)
         ONE_YEAR = 365 * 24 * 3600 * 1.0
 
-        self.EXPONENT = EXPONENT
+        # Rearranging:
+        # ALPHA = - ln(1 - LEARNT) / (ONE_YEAR^n)
         self.ALPHA = - math.log(1.0 - self.LEARNT) / (ONE_YEAR ** EXPONENT)
 
         self.DELTA_S_IDEAL = (self.LEARNT - self.INITIAL_STRENGTH_FACTOR) / self.VERSE_TESTS
@@ -102,19 +119,14 @@ class MemoryModel(object):
     # Given an old strength, a new test score, and the number of seconds elapsed,
     # we need to calculate the new strength estimate.
 
-    # For the initial test, we don't have a previous strength recorded. We
-    # arbitrarily set the initial strength to be 0.1 test strength
-
-    INITIAL_STRENGTH_FACTOR = 0.1  # This is also used in learn.js
-
     def strength_estimate(self, old_strength, test_accuracy, time_elapsed):
         # We first have to convert between 'test accuracy' and some notion of
         # 'test strength'. It was found that achieving 100% is actually pretty
         # easy, and a score as high as 60% shows pretty low knowledge in reality
         # - contextual clues given on a word-by-word basis give a lot of help
         # and it is easy to guess. So we invent a somewhat arbitrary scale here
-        # that has fixed points at zero and one reduces the score for everything
-        # in between.
+        # that has fixed points at zero and one, and reduces the score for
+        # everything in between.
 
         test_strength = test_accuracy ** 2
 
@@ -188,10 +200,14 @@ class MemoryModel(object):
         t_1 = self.t(min(strength + self.DELTA_S_IDEAL, self.BEST_STRENGTH))
         return time_elapsed > t_1 - t_0
 
-    def next_test_due(self, last_test, strength):
+    def next_test_due_after(self, strength):
+        """
+        Returns the number of seconds to wait for the next test, for a given
+        strength
+        """
         t_0 = self.t(strength)
         t_1 = self.t(min(strength + self.DELTA_S_IDEAL, self.BEST_STRENGTH))
-        return last_test + timedelta(seconds=max(t_1 - t_0, self.MIN_TIME_BETWEEN_TESTS))
+        return max(t_1 - t_0, self.MIN_TIME_BETWEEN_TESTS)
 
     def filter_qs(self, qs, now):
         return qs.filter(next_test_due__lte=now,
@@ -218,7 +234,7 @@ def test_run(exponent, accuracy, interval_gap=1):
             interval = 0
 
 
-def test_run_using_next_test_due(exponent, accuracy, interval_gap=1):
+def test_run_using_next_test_due_after(exponent, accuracy, interval_gap=1):
     from datetime import datetime
     m = MemoryModel(exponent)
     interval = 0
@@ -239,7 +255,7 @@ def test_run_using_next_test_due(exponent, accuracy, interval_gap=1):
                 time_elapsed = (current_time - last_test).total_seconds()
             s = m.strength_estimate(s, accuracy, time_elapsed)
             last_test = current_time
-            next_test = m.next_test_due(last_test, s)
+            next_test = last_test + timedelta(seconds=m.next_test_due_after(s))
             test += 1
             print("Day %d, test %d, interval %d, strength %s" % (days_total, test, interval, s))
             interval = 0
@@ -321,6 +337,23 @@ def test_run_passage(passage_length, days):
     return sorted(tests_for_verse.items())
 
 
+def generate_test_file():
+    old_strengths = [None] + [x / 10.0 for x in range(0, 11)]
+    test_accuracies = [x / 10.0 for x in range(0, 11)]
+    time_elapsed = [None, 0, 100, 3600, 3600 * 10, 3600 * 24 * 10, 3600 * 24 * 100]
+
+    output = []
+    for s in old_strengths:
+        for a in test_accuracies:
+            for t in time_elapsed:
+                output.append([s, a, t, strength_estimate(s, a, t)])
+
+    with open(os.path.join(os.path.dirname(__file__),
+                           "../learnscripture/tests/memory_model_test_data.json"), "w") as fp:
+        json.dump({'strengthEstimateTestData': output}, fp,
+                  indent=4)
+
+
 # Trial and error with test_run, with the aim of getting
 # a verse tested at least 3 or 4 times in the first week
 # after learning, and then a sensible sequence of intervals,
@@ -328,10 +361,11 @@ def test_run_passage(passage_length, days):
 # This was tried for accuracy = 1.0 and accuracy = 0.95, both
 # giving sensible results
 
-MM = MemoryModel(0.25)
+EXPONENT = 0.25
+MM = MemoryModel(EXPONENT)
 filter_qs = MM.filter_qs
 needs_testing = MM.needs_testing
 strength_estimate = MM.strength_estimate
-next_test_due = MM.next_test_due
+next_test_due_after = MM.next_test_due_after
 LEARNT = MM.LEARNT
 STRENGTH_FOR_GROUP_TESTING = 0.5

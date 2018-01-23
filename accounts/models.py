@@ -596,7 +596,7 @@ class Identity(models.Model):
             else:
                 time_elapsed = (now - s0.last_tested).total_seconds()
             new_strength = memorymodel.strength_estimate(old_strength, accuracy, time_elapsed)
-            next_due = memorymodel.next_test_due(now, new_strength)
+            next_due = now + timedelta(seconds=memorymodel.next_test_due_after(new_strength))
             s.update(strength=new_strength,
                      last_tested=now,
                      next_test_due=next_due)
