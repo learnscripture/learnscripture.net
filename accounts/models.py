@@ -590,6 +590,9 @@ class Identity(models.Model):
         now = timezone.now()
         if mem_stage == MemoryStage.TESTED:
             s0 = s[0]  # Any should do, they should be all the same
+
+            # Learn.elm uses the same logic as here to indicate when a verse
+            # will be next seen. Changes should be synced.
             old_strength = s0.strength
             if s0.last_tested is None:
                 time_elapsed = None
