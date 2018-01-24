@@ -322,8 +322,8 @@ body.learn-page {
 
     #id-verse-set-link,
     #id-copyright-notice {
-        font-size: 0.9em;
-        padding-top: .2em;
+        font-size: 13px;
+        line-height: @currentVerseFontSize * @readingLineHeight; // Maintain rhythm
     }
 
     @currentVerseFontSize: 20px;
@@ -348,7 +348,6 @@ body.learn-page {
 
     .previous-verse-wrapper {
         border-bottom: 1px solid #c0c0c0;
-        margin-bottom: 0.5em;
         position: relative; // establish containing box.
         height: @currentVerseFontSize * @readingLineHeight; // Constrain to showing one line only
         overflow: hidden;
@@ -567,6 +566,11 @@ body.learn-page {
         }
         .previous-verse-wrapper {
             height: @currentVerseSmallerFontSize * @readingLineHeight;
+        }
+
+        #id-verse-set-link,
+        #id-copyright-notice {
+            line-height: @currentVerseSmallerFontSize * @readingLineHeight; // Maintain rhythm
         }
 
         .word-button {
