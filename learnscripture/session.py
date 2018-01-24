@@ -44,7 +44,7 @@ def get_verse_statuses_batch(request):
     # This currently supports both VersesToLearnHandler/learn.ts and
     # VersesToLearn2Handler/Learn.elm. When the former is removed, it can be cleaned up.
     learning_type = request.session.get('learning_type', None)
-    unseen_uvs_ids = request.session.get('unseen_uvs_ids', [])
+    unseen_uvs_ids = _get_unseen_uvs_ids(request)
     id_data = _get_verse_status_ids(request)
 
     if len(id_data) > 0:
@@ -103,6 +103,14 @@ def _save_verse_status_ids(request, ids):
     request.session['verses_to_learn'] = ids
 
 
+def _get_unseen_uvs_ids(request):
+    return request.session.get('unseen_uvs_ids', [])
+
+
+def _save_unseen_uvs_ids(request, uvs_ids):
+    request.session['unseen_uvs_ids'] = uvs_ids
+
+
 def _set_learning_session_start(request, dt):
     request.session['learning_start'] = dt.strftime("%s")
 
@@ -127,10 +135,10 @@ def start_learning_session(request, user_verse_statuses, learning_type, return_t
     _set_learning_session_start(request, timezone.now())
     unseen_uvs_ids = [uvs.id for uvs in user_verse_statuses
                       if uvs.memory_stage < MemoryStage.SEEN]
+    _save_unseen_uvs_ids(request, unseen_uvs_ids)
     request.session['learning_type'] = learning_type
     request.session['action_logs'] = []
     request.session['return_to'] = return_to
-    request.session['unseen_uvs_ids'] = unseen_uvs_ids
 
 
 def verse_status_finished(request, uvs_id, new_action_logs):
@@ -151,7 +159,7 @@ def verse_status_cancelled(request, uvs_id):
 
 
 def _remove_user_verse_status(request, u_id):
-    # We remove all that appear before reference, since we know that they will
+    # We remove all that appear before u_id, since we know that they will
     # be processed in order client side, and otherwise we potentially have race
     # conditions if the user presses 'next' or 'skip' multiple times quickly.
     ids = _get_verse_status_ids(request)
@@ -168,6 +176,12 @@ def _remove_user_verse_status(request, u_id):
         new_ids = ids
 
     _save_verse_status_ids(request, new_ids)
+
+    # To keep the progress bar correct in the case of the user pressing
+    # 'Refresh' in the bar, we need to update the 'unseen_uvs_ids' data too.
+    _save_unseen_uvs_ids(request,
+                         [uvs_id for uvs_id in _get_unseen_uvs_ids(request)
+                          if uvs_id != u_id])
 
 
 def get_identity(request):
