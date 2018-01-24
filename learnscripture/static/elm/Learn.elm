@@ -3507,7 +3507,9 @@ moveToNextVerse model =
             in
                 case getNextVerse verseStore currentVerseStatus of
                     NoMoreVerses ->
-                        ( model
+                        ( { model |
+                                openDropdown = Just AjaxInfo
+                          }
                         , sendMsg (AttemptReturn True)
                         )
 
