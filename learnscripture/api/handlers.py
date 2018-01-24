@@ -200,7 +200,7 @@ class VersesToLearn2Handler(ApiView):
             verse_sets=list(verse_sets),
             return_to=batch.return_to,
             max_order_val=batch.max_order_val,
-            untested_uvs_ids=batch.untested_uvs_ids,
+            untested_order_vals=batch.untested_order_vals,
         )
         if request.GET.get('initial_page_load', 'false') == 'true':
             # To reduce round trips and get the entire page loading in one go
