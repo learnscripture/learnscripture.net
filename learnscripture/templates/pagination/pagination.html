@@ -4,9 +4,9 @@
     <ul>
       {% block previouslink %}
         {% if page_obj.has_previous %}
-          <li class="prev"><a href="?page{{ page_suffix }}={{ page_obj.previous_page_number }}{{ getvars }}">{{ previous_link_decorator|safe }}{% trans "Previous" %}</a></li>
+          <li class="prev"><a href="?page{{ page_suffix }}={{ page_obj.previous_page_number }}{{ getvars }}">{{ previous_link_decorator|safe }}</a></li>
         {% else %}
-          <li class="prev disabled"><a>{{ previous_link_decorator|safe }}{% trans "Previous" %}</a></li>
+          <li class="prev disabled"><a>{{ previous_link_decorator|safe }}</a></li>
         {% endif %}
       {% endblock previouslink %}
       {% block pagelinks %}
@@ -24,9 +24,9 @@
       {% endblock pagelinks %}
       {% block nextlink %}
         {% if page_obj.has_next %}
-          <li class="next"><a href="?page{{ page_suffix }}={{ page_obj.next_page_number }}{{ getvars }}">{% trans "Next" %}{{ next_link_decorator|safe }}</a></li>
+          <li class="next"><a href="?page{{ page_suffix }}={{ page_obj.next_page_number }}{{ getvars }}">{{ next_link_decorator|safe }}</a></li>
         {% else %}
-          <li class="next disabled"><a>{% trans "Next" %}{{ next_link_decorator|safe }}</a></li>
+          <li class="next disabled"><a>{{ next_link_decorator|safe }}</a></li>
         {% endif %}
       {% endblock nextlink %}
     </ul>
