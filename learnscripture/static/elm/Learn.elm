@@ -2542,9 +2542,13 @@ attemptReturn model waitUntilDone =
                 doRetry
             else
                 doCallsInProgressPrompt
+        else if waitUntilDone then
+            ( { model
+                | openDropdown = Just AjaxInfo
+              }
+            , Cmd.none
+            )
         else
-            -- always do prompt when we have finished our attempts and still
-            -- have failed calls
             doFailedCallsPrompt
 
 
@@ -3507,8 +3511,8 @@ moveToNextVerse model =
             in
                 case getNextVerse verseStore currentVerseStatus of
                     NoMoreVerses ->
-                        ( { model |
-                                openDropdown = Just AjaxInfo
+                        ( { model
+                            | openDropdown = Just AjaxInfo
                           }
                         , sendMsg (AttemptReturn True)
                         )
