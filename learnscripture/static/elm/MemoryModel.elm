@@ -109,6 +109,7 @@ minTimeBetweenTests =
     3600
 
 
+{- Time delay in *seconds* from the test to the next test due -}
 nextTestDueAfter : Float -> Float
 nextTestDueAfter strength =
     let

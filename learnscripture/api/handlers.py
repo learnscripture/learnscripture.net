@@ -174,6 +174,7 @@ class VersesToLearn2Handler(ApiView):
                 'id',
                 'memory_stage',
                 'strength',
+                'last_tested',
                 'verse_set_id',
                 'localized_reference',
                 'needs_testing',

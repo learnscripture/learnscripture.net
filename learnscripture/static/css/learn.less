@@ -490,6 +490,7 @@ body.learn-page {
     }
 
     #id-action-btns {
+        float: right;
         box-sizing: border-box;
         background-color: white;
         display: flex;
@@ -500,6 +501,17 @@ body.learn-page {
         > * {
             margin-left: 5px;
         }
+
+        .btn-sub-caption {
+            display: block;
+            text-align: center;
+            padding: 2px 6px;
+            font-size: 90%;
+        }
+
+        button {
+            width: 100%;
+        }
     }
 
     #id-hint-btn-container .btn {
@@ -509,7 +521,7 @@ body.learn-page {
     }
 
     #id-instructions {
-        margin-top: 0.2em;
+        margin-top: 7px;
     }
 
     #id-help {
@@ -600,6 +612,7 @@ body.learn-page {
             padding: 8px;
             border-top-style: solid;
             border-top-width: 2px;
+            float: none;
             .fixed-bottom();
             justify-content: space-between;
             > * {
