@@ -37,14 +37,14 @@ class VerseStatusBatch:
     max_order_val = attr.ib()
     learning_type = attr.ib()
     return_to = attr.ib()
-    unseen_uvs_ids = attr.ib()
+    untested_uvs_ids = attr.ib()
 
 
 def get_verse_statuses_batch(request):
     # This currently supports both VersesToLearnHandler/learn.ts and
     # VersesToLearn2Handler/Learn.elm. When the former is removed, it can be cleaned up.
     learning_type = request.session.get('learning_type', None)
-    unseen_uvs_ids = _get_unseen_uvs_ids(request)
+    untested_uvs_ids = _get_untested_uvs_ids(request)
     id_data = _get_verse_status_ids(request)
 
     if len(id_data) > 0:
@@ -91,7 +91,7 @@ def get_verse_statuses_batch(request):
         max_order_val=max_order_val,
         learning_type=learning_type,
         return_to=return_to,
-        unseen_uvs_ids=unseen_uvs_ids,
+        untested_uvs_ids=untested_uvs_ids,
     )
 
 
@@ -103,12 +103,12 @@ def _save_verse_status_ids(request, ids):
     request.session['verses_to_learn'] = ids
 
 
-def _get_unseen_uvs_ids(request):
-    return request.session.get('unseen_uvs_ids', [])
+def _get_untested_uvs_ids(request):
+    return request.session.get('untested_uvs_ids', [])
 
 
-def _save_unseen_uvs_ids(request, uvs_ids):
-    request.session['unseen_uvs_ids'] = uvs_ids
+def _save_untested_uvs_ids(request, uvs_ids):
+    request.session['untested_uvs_ids'] = uvs_ids
 
 
 def _set_learning_session_start(request, dt):
@@ -133,9 +133,9 @@ def _set_verse_statuses(request, user_verse_statuses):
 def start_learning_session(request, user_verse_statuses, learning_type, return_to):
     _set_verse_statuses(request, user_verse_statuses)
     _set_learning_session_start(request, timezone.now())
-    unseen_uvs_ids = [uvs.id for uvs in user_verse_statuses
-                      if uvs.memory_stage < MemoryStage.SEEN]
-    _save_unseen_uvs_ids(request, unseen_uvs_ids)
+    untested_uvs_ids = [uvs.id for uvs in user_verse_statuses
+                        if uvs.memory_stage < MemoryStage.TESTED]
+    _save_untested_uvs_ids(request, untested_uvs_ids)
     request.session['learning_type'] = learning_type
     request.session['action_logs'] = []
     request.session['return_to'] = return_to
@@ -178,9 +178,9 @@ def _remove_user_verse_status(request, u_id):
     _save_verse_status_ids(request, new_ids)
 
     # To keep the progress bar correct in the case of the user pressing
-    # 'Refresh' in the bar, we need to update the 'unseen_uvs_ids' data too.
-    _save_unseen_uvs_ids(request,
-                         [uvs_id for uvs_id in _get_unseen_uvs_ids(request)
+    # 'Refresh' in the bar, we need to update the 'untested_uvs_ids' data too.
+    _save_untested_uvs_ids(request,
+                         [uvs_id for uvs_id in _get_untested_uvs_ids(request)
                           if uvs_id != u_id])
 
 
