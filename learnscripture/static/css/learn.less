@@ -505,7 +505,7 @@ body.learn-page {
         .btn-sub-caption {
             display: block;
             text-align: center;
-            padding: 2px 6px;
+            padding: 2px 2px;
             font-size: 90%;
         }
 
@@ -616,7 +616,9 @@ body.learn-page {
             .fixed-bottom();
             justify-content: space-between;
             > * {
-                margin-left: 0;
+                &:first-child {
+                    margin-left: 0;
+                }
                 // Make buttons easier to press on mobile
                 flex-grow: 0.3;
             }

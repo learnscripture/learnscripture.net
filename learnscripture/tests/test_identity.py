@@ -147,6 +147,34 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
                                               verse_set=vs2).memory_stage,
                          MemoryStage.SEEN)
 
+    def test_record_test_sets_next_due(self):
+        i = self.create_identity(version_slug='NET')
+        vs1 = VerseSet.objects.get(name='Bible 101')
+        i.add_verse_set(vs1)
+        i.record_verse_action('John 3:16', 'NET', StageType.READ, 1)
+        i.record_verse_action('John 3:16', 'NET', StageType.TEST, 1)
+        next_due = i.verse_statuses.get(localized_reference='John 3:16',
+                                        version__slug='NET').next_test_due
+        # First test - should be set to minimum of 1 hour
+        MM = accounts.memorymodel.MM
+        now = timezone.now()
+        self.assertLess(now + timedelta(seconds=0.9 * MM.MIN_TIME_BETWEEN_TESTS),
+                        next_due)
+        self.assertLess(next_due,
+                        now + timedelta(seconds=1.1 * MM.MIN_TIME_BETWEEN_TESTS))
+
+    def test_review_sooner(self):
+        i = self.create_identity(version_slug='NET')
+        vs1 = VerseSet.objects.get(name='Bible 101')
+        i.add_verse_set(vs1)
+        i.record_verse_action('John 3:16', 'NET', StageType.READ, 1)
+        i.record_verse_action('John 3:16', 'NET', StageType.TEST, 1)
+        i.review_sooner('John 3:16', 'NET', 1000)
+        uvs = i.verse_statuses.get(localized_reference='John 3:16',
+                                   version__slug='NET')
+        self.assertEqual(uvs.next_test_due,
+                         uvs.last_tested + timedelta(seconds=1000))
+
     def test_record_creates_awards(self):
         i, account = self.create_account(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Bible 101')

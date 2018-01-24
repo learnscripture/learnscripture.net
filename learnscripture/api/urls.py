@@ -17,6 +17,7 @@ urlpatterns = [
     url(r'^cancellearningverse/$', handlers.CancelLearningVerseHandler.as_view(), name='learnscripture.api.cancellearningverse'),
     url(r'^cancellearningpassage/$', handlers.CancelLearningPassageHandler.as_view(), name='learnscripture.api.cancellearningpassage'),
     url(r'^resetprogress/$', handlers.ResetProgressHandler.as_view(), name='learnscripture.api.resetprogress'),
+    url(r'^reviewsooner/$', handlers.ReviewSoonerHandler.as_view(), name='learnscripture.api.reviewsooner'),
     url(r'^actionlogs/$', handlers.ActionLogs.as_view(), name='learnscripture.api.actionlogs'),
     url(r'^versefind/$', handlers.VerseFind.as_view(), name='learnscripture.api.versefind'),
     url(r'^addversetoqueue/$', handlers.AddVerseToQueue.as_view(), name='learnscripture.api.addversetoqueue'),
