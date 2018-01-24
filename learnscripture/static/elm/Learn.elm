@@ -187,6 +187,7 @@ type alias CurrentVerse =
     , currentStage : LearningStage
     , remainingStageTypes : List LearningStageType
     , seenStageTypes : List LearningStageType
+    , recordedTestScore : Maybe Float
     }
 
 
@@ -2928,6 +2929,7 @@ setupCurrentVerse verse learningType =
           , currentStage = newCurrentStage
           , seenStageTypes = []
           , remainingStageTypes = remainingStageTypes
+          , recordedTestScore = Nothing
           }
         , cmd
         )
@@ -3695,6 +3697,7 @@ handleResetProgress model verseStatus confirmed =
             updateCurrentVersePlus newModel1
                 Cmd.none
                 (\currentVerse ->
+                    -- Need to reset 'last_seen' etc.
                     setupCurrentVerse newVerseStatus Learning
                 )
                 |> addCommandsM
@@ -3931,6 +3934,9 @@ simplifyTurkish =
 markWord : CheckResult -> Word -> TestProgress -> TestType -> CurrentVerse -> TestingMethod -> Preferences -> ( CurrentVerse, Cmd Msg )
 markWord checkResult word testProgress testType verse testingMethod preferences =
     let
+        currentWord =
+            testProgress.currentWord
+
         attempt =
             getWordAttemptWithInitial testProgress word testingMethod
 
@@ -4005,29 +4011,43 @@ markWord checkResult word testProgress testType verse testingMethod preferences 
             if shouldMoveOn then
                 getNextCurrentWord verse newTestProgress1 testingMethod
             else
-                newTestProgress1.currentWord
+                currentWord
 
         newTestProgress2 =
             { newTestProgress1
                 | currentWord = nextCurrentWord
             }
 
-        newCurrentVerse =
+        newCurrentVerse1 =
             { verse
                 | currentStage =
                     Test testType newTestProgress2
             }
 
-        actionCompleteCommand =
-            if shouldMoveOn && testProgress.currentWord /= nextCurrentWord then
+        movedOn =
+            shouldMoveOn && currentWord /= nextCurrentWord
+
+        ( newCurrentVerse2, actionCompleteCommand ) =
+            if movedOn then
                 case nextCurrentWord of
                     TestFinished { accuracy } ->
-                        recordTestComplete newCurrentVerse accuracy testType
+                        ( if testType == FirstTest then
+                            { newCurrentVerse1
+                                | recordedTestScore = Just accuracy
+                            }
+                          else
+                            newCurrentVerse1
+                        , recordTestComplete newCurrentVerse1 accuracy testType
+                        )
 
                     _ ->
-                        Cmd.none
+                        ( newCurrentVerse1
+                        , Cmd.none
+                        )
             else
-                Cmd.none
+                ( newCurrentVerse1
+                , Cmd.none
+                )
 
         ( vibrateCommand, beepCommand ) =
             if isAttemptFailure checkResult then
@@ -4040,7 +4060,7 @@ markWord checkResult word testProgress testType verse testingMethod preferences 
             else
                 ( Cmd.none, Cmd.none )
     in
-        ( newCurrentVerse
+        ( newCurrentVerse2
         , Cmd.batch
             [ actionCompleteCommand
             , if preferences.enableVibration then
