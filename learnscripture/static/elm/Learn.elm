@@ -108,6 +108,7 @@ init flags =
       , permanentFailHttpCalls = []
       , openDropdown = Nothing
       , sessionStats = Nothing
+      , attemptingReturn = False
       }
     , loadVerses True
     )
@@ -132,6 +133,7 @@ type alias Model =
     , permanentFailHttpCalls : List TrackedHttpCall
     , openDropdown : Maybe Dropdown
     , sessionStats : Maybe SessionStats
+    , attemptingReturn : Bool
     }
 
 
@@ -447,7 +449,7 @@ viewTopNav model =
         [ H.div [ A.class "nav-item return-link" ]
             [ navLink
                 [ A.href "#"
-                , onClickSimply (AttemptReturn False)
+                , onClickSimply (AttemptReturn { immediate = True, queued = False })
                 ]
                 (getReturnUrl model |> getReturnCaption)
                 "icon-return"
@@ -2157,7 +2159,10 @@ navLink attrs caption icon iconAlign =
 
 type Msg
     = VersesToLearn CallId (Result Http.Error VerseBatchRaw)
-    | AttemptReturn Bool
+    | AttemptReturn
+        { immediate : Bool
+        , queued : Bool
+        }
     | NextStageOrSubStage
     | PreviousStage
     | NextVerse
@@ -2199,8 +2204,8 @@ update msg model =
         VersesToLearn callId result ->
             handleRetries handleVersesToLearn model callId result
 
-        AttemptReturn waitUntilDone ->
-            attemptReturn model waitUntilDone
+        AttemptReturn options ->
+            attemptReturn model options
 
         NextStageOrSubStage ->
             moveToNextStageOrSubStage model
@@ -2479,8 +2484,8 @@ getCurrentTestProgress model =
 {- Update functions -}
 
 
-attemptReturn : Model -> Bool -> ( Model, Cmd Msg )
-attemptReturn model waitUntilDone =
+attemptReturn : Model -> { immediate : Bool, queued : Bool } -> ( Model, Cmd Msg )
+attemptReturn model { immediate, queued } =
     let
         returnUrl =
             getReturnUrl model
@@ -2503,10 +2508,25 @@ attemptReturn model waitUntilDone =
             , returnCmd
             )
 
-        doRetry =
+        noop =
             ( model
-            , AttemptReturn waitUntilDone |> delay (1 * Time.second)
+            , Cmd.none
             )
+
+        doRetry =
+            if model.attemptingReturn && not queued then
+                -- Don't add another queue
+                noop
+            else
+                ( { model
+                    | attemptingReturn = True
+                  }
+                , AttemptReturn
+                    { immediate = immediate
+                    , queued = True
+                    }
+                    |> delay (1 * Time.second)
+                )
 
         openAjaxDropdownCmd =
             if not <| dropdownIsOpen model AjaxInfo then
@@ -2514,8 +2534,13 @@ attemptReturn model waitUntilDone =
             else
                 Noop
 
+        cancelledAttemptingReturn =
+            { model
+                | attemptingReturn = False
+            }
+
         doFailedCallsPrompt =
-            ( model
+            ( cancelledAttemptingReturn
             , confirm
                 ("There is data that failed to save. If you go away from this page, "
                     ++ "the data will be lost. Do you want to continue?"
@@ -2525,7 +2550,7 @@ attemptReturn model waitUntilDone =
             )
 
         doCallsInProgressPrompt =
-            ( model
+            ( cancelledAttemptingReturn
             , confirm
                 ("Data is still being saved.  If you go away from this page, "
                     ++ "the data will be lost. Do you want to continue?"
@@ -2537,19 +2562,19 @@ attemptReturn model waitUntilDone =
         if not callsInProgress && not failedCalls then
             doReturn
         else if callsInProgress then
-            if waitUntilDone then
+            if immediate then
+                doCallsInProgressPrompt
+            else
                 -- keep trying until done, don't prompt
                 doRetry
-            else
-                doCallsInProgressPrompt
-        else if waitUntilDone then
+        else if immediate || not queued then
+            doFailedCallsPrompt
+        else
             ( { model
                 | openDropdown = Just AjaxInfo
               }
             , Cmd.none
             )
-        else
-            doFailedCallsPrompt
 
 
 normalizeVerseBatch : VerseBatchRaw -> ( VerseBatch, Maybe SessionStats, Maybe (List ActionLog) )
@@ -3514,7 +3539,7 @@ moveToNextVerse model =
                         ( { model
                             | openDropdown = Just AjaxInfo
                           }
-                        , sendMsg (AttemptReturn True)
+                        , sendMsg (AttemptReturn { immediate = False, queued = False })
                         )
 
                     VerseNotInStore ->
