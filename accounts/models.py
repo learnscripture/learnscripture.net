@@ -591,8 +591,8 @@ class Identity(models.Model):
         if mem_stage == MemoryStage.TESTED:
             s0 = s[0]  # Any should do, they should be all the same
 
-            # Learn.elm uses the same logic as here to indicate when a verse
-            # will be next seen. Changes should be synced.
+            # Learn.elm calculateNextTestDue uses the same logic as here to
+            # indicate when a verse will be next seen. Changes should be synced.
             old_strength = s0.strength
             if s0.last_tested is None:
                 time_elapsed = None
@@ -749,9 +749,12 @@ class Identity(models.Model):
         qs.update(ignored=True)
 
     def reset_progress(self, localized_reference, version_slug):
+        # Sync with Learn.elm verseStatusResetProgress
         qs = self.verse_statuses.filter(localized_reference=localized_reference,
                                         version__slug=version_slug)
 
+        # NB - we don't change 'first_seen', because this could destroy
+        # someone's learning streak.
         qs.update(strength=0,
                   last_tested=None,
                   next_test_due=None,

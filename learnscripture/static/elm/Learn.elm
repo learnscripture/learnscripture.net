@@ -1,5 +1,6 @@
 port module Learn exposing (..)
 
+import ISO8601
 import Dict
 import Dom
 import Erl
@@ -11,6 +12,7 @@ import Json.Decode as JD
 import Json.Decode.Pipeline as JDP
 import Json.Encode as JE
 import Maybe
+import MemoryModel
 import Native.Confirm
 import Native.StringUtils
 import Navigation
@@ -109,6 +111,7 @@ init flags =
       , openDropdown = Nothing
       , sessionStats = Nothing
       , attemptingReturn = False
+      , currentTime = ISO8601.fromTime 0
       }
     , loadVerses True
     )
@@ -134,6 +137,7 @@ type alias Model =
     , openDropdown : Maybe Dropdown
     , sessionStats : Maybe SessionStats
     , attemptingReturn : Bool
+    , currentTime : ISO8601.Time
     }
 
 
@@ -187,7 +191,11 @@ type alias CurrentVerse =
     , currentStage : LearningStage
     , remainingStageTypes : List LearningStageType
     , seenStageTypes : List LearningStageType
-    , recordedTestScore : Maybe Float
+    , recordedTestScore :
+        Maybe
+            { accuracy : Float
+            , timestamp : ISO8601.Time
+            }
     }
 
 
@@ -289,6 +297,7 @@ type alias VerseStatusBase a =
     { a
         | id : Int
         , strength : Float
+        , lastTested : Maybe ISO8601.Time
         , localizedReference : String
         , needsTesting : Bool
         , textOrder : Int
@@ -313,6 +322,7 @@ type alias VerseStatusRaw =
 verseStatusRawCtr :
     Int
     -> Float
+    -> Maybe ISO8601.Time
     -> String
     -> Bool
     -> Int
@@ -323,10 +333,11 @@ verseStatusRawCtr :
     -> Maybe Int
     -> String
     -> VerseStatusRaw
-verseStatusRawCtr i s l n t s2 s3 t2 l2 v v2 =
+verseStatusRawCtr i s lt lr n t s2 s3 t2 l2 v v2 =
     { id = i
     , strength = s
-    , localizedReference = l
+    , lastTested = lt
+    , localizedReference = lr
     , needsTesting = n
     , textOrder = t
     , suggestions = s2
@@ -1541,7 +1552,19 @@ actionButtons model verse verseStore preferences =
                       else
                         []
                      )
-                        ++ (List.map (viewButton model) buttons)
+                        ++ (buttons
+                                |> List.map
+                                    (\b ->
+                                        H.span []
+                                            [ viewButton model b
+                                            , if b.subCaption == "" then
+                                                emptyNode
+                                              else
+                                                H.span [ A.class "btn-sub-caption" ]
+                                                    [ H.text b.subCaption ]
+                                            ]
+                                    )
+                           )
                     )
 
 
@@ -1603,14 +1626,25 @@ emptySpan =
     H.span [] []
 
 
-type alias Button =
-    { enabled : ButtonEnabled
-    , default : ButtonDefault
-    , msg : Msg
-    , caption : String
-    , id : String
-    , refocusTypingBox : Bool
+type alias ButtonBase a =
+    { a
+        | enabled : ButtonEnabled
+        , default : ButtonDefault
+        , msg : Msg
+        , caption : String
+        , id : String
+        , refocusTypingBox : Bool
     }
+
+
+type alias Button =
+    ButtonBase {}
+
+
+type alias StageButton =
+    ButtonBase
+        { subCaption : String
+        }
 
 
 type ButtonEnabled
@@ -1623,17 +1657,14 @@ type ButtonDefault
     | NonDefault
 
 
-buttonsForStage : Model -> CurrentVerse -> VerseStore -> Preferences -> List Button
+buttonsForStage : Model -> CurrentVerse -> VerseStore -> Preferences -> List StageButton
 buttonsForStage model verse verseStore preferences =
     let
         multipleStages =
             (List.length verse.remainingStageTypes + List.length verse.seenStageTypes) > 0
 
         nextVerseButtonCaption =
-            if moreVersesToLearn verseStore verse.verseStatus then
-                "Next"
-            else
-                "Done"
+            "OK"
 
         nextVerseEnabled =
             case getNextVerse verseStore verse.verseStatus of
@@ -1653,6 +1684,14 @@ buttonsForStage model verse verseStore preferences =
                         -- the verse load.
                         Enabled
 
+        ( morePracticeSubCaption, nextVerseSubCaption ) =
+            case calculateNextTestDue verse of
+                Nothing ->
+                    ( "", "" )
+
+                Just t ->
+                    ( "Now", friendlyTimeUntil t )
+
         testStageButtons tp =
             case tp.currentWord of
                 TestFinished { accuracy } ->
@@ -1661,6 +1700,7 @@ buttonsForStage model verse verseStore preferences =
                             accuracy < 0.8
                     in
                         [ { caption = "More practice"
+                          , subCaption = morePracticeSubCaption
                           , msg = MorePractice accuracy
                           , enabled = Enabled
                           , default =
@@ -1672,6 +1712,7 @@ buttonsForStage model verse verseStore preferences =
                           , refocusTypingBox = True
                           }
                         , { caption = nextVerseButtonCaption
+                          , subCaption = nextVerseSubCaption
                           , msg = NextVerse
                           , enabled = nextVerseEnabled
                           , default =
@@ -1716,6 +1757,7 @@ buttonsForStage model verse verseStore preferences =
 
                     _ ->
                         [ { caption = "Back"
+                          , subCaption = ""
                           , msg = PreviousStage
                           , enabled = previousEnabled
                           , default = NonDefault
@@ -1723,6 +1765,7 @@ buttonsForStage model verse verseStore preferences =
                           , refocusTypingBox = False
                           }
                         , { caption = "Next"
+                          , subCaption = ""
                           , msg = NextStageOrSubStage
                           , enabled = nextEnabled
                           , default = Default
@@ -1737,6 +1780,7 @@ buttonsForStage model verse verseStore preferences =
 
                 _ ->
                     [ { caption = nextVerseButtonCaption
+                      , subCaption = ""
                       , msg = NextVerse
                       , enabled = nextVerseEnabled
                       , default = Default
@@ -1754,7 +1798,7 @@ getTestingMethod model =
         model.preferences.desktopTestingMethod
 
 
-viewButton : Model -> Button -> H.Html Msg
+viewButton : Model -> ButtonBase a -> H.Html Msg
 viewButton model button =
     let
         class =
@@ -2192,6 +2236,7 @@ type Msg
     | WindowResize { width : Int, height : Int }
     | ReceivePreferences JD.Value
     | ReattemptFocus String Int
+    | GetTime Time.Time
     | Noop
 
 
@@ -2307,6 +2352,13 @@ update msg model =
 
         ReattemptFocus id remainingAttempts ->
             ( model, Task.attempt (handleFocusResult id remainingAttempts) (Dom.focus id) )
+
+        GetTime time ->
+            ( { model
+                | currentTime = ISO8601.fromTime time
+              }
+            , Cmd.none
+            )
 
         Noop ->
             ( model, Cmd.none )
@@ -2602,6 +2654,7 @@ normalizeVerseStatuses vrb =
             (\vs ->
                 { id = vs.id
                 , strength = vs.strength
+                , lastTested = vs.lastTested
                 , localizedReference = vs.localizedReference
                 , needsTesting = vs.needsTesting
                 , textOrder = vs.textOrder
@@ -3686,10 +3739,7 @@ handleResetProgress model verseStatus confirmed =
     if confirmed then
         let
             newVerseStatus =
-                { verseStatus
-                    | strength = 0
-                    , needsTesting = True
-                }
+                verseStatusResetProgress verseStatus
 
             newModel1 =
                 closeDropdowns model
@@ -3697,7 +3747,6 @@ handleResetProgress model verseStatus confirmed =
             updateCurrentVersePlus newModel1
                 Cmd.none
                 (\currentVerse ->
-                    -- Need to reset 'last_seen' etc.
                     setupCurrentVerse newVerseStatus Learning
                 )
                 |> addCommandsM
@@ -3712,6 +3761,19 @@ handleResetProgress model verseStatus confirmed =
             (ResetProgress verseStatus True)
             Noop
         )
+
+
+{-| Resets a VerseStatus to how it is at the very beginning, as per
+reset_progress server side
+
+-}
+verseStatusResetProgress : VerseStatus -> VerseStatus
+verseStatusResetProgress verseStatus =
+    { verseStatus
+        | strength = 0
+        , lastTested = Nothing
+        , needsTesting = True
+    }
 
 
 setHiddenWords : Model -> Set.Set WordId -> Model
@@ -3802,7 +3864,7 @@ handleUseHint model =
             withCurrentTestWord currentVerse
                 ( currentVerse, Cmd.none )
                 (\testType testProgress currentWord ->
-                    markWord Hint currentWord.word testProgress testType currentVerse (getTestingMethod model) model.preferences
+                    markWord Hint currentWord.word testProgress testType currentVerse (getTestingMethod model) model.preferences model.currentTime
                 )
         )
         |> addCommandsM
@@ -3857,7 +3919,7 @@ checkCurrentWordAndUpdate model input =
                                     Failure input
                                 )
                         in
-                            markWord checkResult currentWord.word testProgress testType currentVerse testingMethod model.preferences
+                            markWord checkResult currentWord.word testProgress testType currentVerse testingMethod model.preferences model.currentTime
                     )
             )
             |> addCommandsM
@@ -3931,8 +3993,8 @@ simplifyTurkish =
     translate "ÂâÇçĞğİıÖöŞşÜü" "AaCcGgIiOoSsUu"
 
 
-markWord : CheckResult -> Word -> TestProgress -> TestType -> CurrentVerse -> TestingMethod -> Preferences -> ( CurrentVerse, Cmd Msg )
-markWord checkResult word testProgress testType verse testingMethod preferences =
+markWord : CheckResult -> Word -> TestProgress -> TestType -> CurrentVerse -> TestingMethod -> Preferences -> ISO8601.Time -> ( CurrentVerse, Cmd Msg )
+markWord checkResult word testProgress testType verse testingMethod preferences currentTime =
     let
         currentWord =
             testProgress.currentWord
@@ -4031,9 +4093,13 @@ markWord checkResult word testProgress testType verse testingMethod preferences 
             if movedOn then
                 case nextCurrentWord of
                     TestFinished { accuracy } ->
-                        ( if testType == FirstTest then
+                        ( if not <| isPracticeTest verse testType then
                             { newCurrentVerse1
-                                | recordedTestScore = Just accuracy
+                                | recordedTestScore =
+                                    Just
+                                        { accuracy = accuracy
+                                        , timestamp = currentTime
+                                        }
                             }
                           else
                             newCurrentVerse1
@@ -4385,6 +4451,105 @@ startMorePractice model accuracy =
                 (\m ->
                     [ stageOrVerseChangeCommands m True ]
                 )
+
+
+type TestDueAfter
+    = NeverDue
+    | DueAfter Float
+
+
+{-| If a test has been done, returns the time in milliseconds (from the last test)
+    that the next test will be due.
+
+-}
+calculateNextTestDue : CurrentVerse -> Maybe TestDueAfter
+calculateNextTestDue currentVerse =
+    let
+        verseStatus =
+            currentVerse.verseStatus
+
+        testAccuracy =
+            currentVerse.recordedTestScore
+    in
+        case testAccuracy of
+            Nothing ->
+                Nothing
+
+            Just { accuracy, timestamp } ->
+                let
+                    timeElapsed =
+                        case verseStatus.lastTested of
+                            Nothing ->
+                                Nothing
+
+                            Just lt ->
+                                Just (ISO8601.diff timestamp lt)
+
+                    -- logic here correponds to Identity.record_verse_action server side
+                    newStrength =
+                        MemoryModel.strengthEstimate (Just verseStatus.strength) accuracy timeElapsed
+                in
+                    if newStrength >= MemoryModel.learnt then
+                        Just NeverDue
+                    else
+                        -- MemoryModel works in seconds, we are in milliseconds, so
+                        -- convert here:
+                        Just (DueAfter (1000 * MemoryModel.nextTestDueAfter newStrength))
+
+
+friendlyTimeUntil : TestDueAfter -> String
+friendlyTimeUntil testdue =
+    case testdue of
+        NeverDue ->
+            "Fully learnt"
+
+        DueAfter time ->
+            let
+                seconds =
+                    time / 1000
+
+                hours =
+                    seconds / 3600
+
+                rHours =
+                    round hours
+
+                days =
+                    hours / 24
+
+                rDays =
+                    round days
+
+                weeks =
+                    days / 7
+
+                rWeeks =
+                    round weeks
+
+                months =
+                    days / 30
+
+                rMonths =
+                    round months
+            in
+                if hours < 1 then
+                    "< 1 hour"
+                else if rHours == 1 then
+                    "1 hour"
+                else if rHours < 24 then
+                    interpolate "{0} hours" [ toString rHours ]
+                else if rDays == 1 then
+                    "1 day"
+                else if rDays < 7 then
+                    interpolate "{0} days" [ toString rDays ]
+                else if rWeeks == 1 then
+                    "1 week"
+                else if rWeeks < 8 then
+                    interpolate "{0} weeks" [ toString rWeeks ]
+                else if rMonths == 1 then
+                    "1 month"
+                else
+                    interpolate "{0} months" [ toString rMonths ]
 
 
 
@@ -4811,10 +4976,7 @@ callRecordTestComplete httpConfig callId currentVerse accuracy testType =
                 , Http.stringPart "stage" stageTypeTest
                 , Http.stringPart "accuracy" (encodeFloat accuracy)
                 , Http.stringPart "practice"
-                    (encodeBool <|
-                        (currentVerse.sessionLearningType == Practice)
-                            || (testType == MorePracticeTest)
-                    )
+                    (encodeBool <| isPracticeTest currentVerse testType)
                 ]
     in
         Http.send (RecordActionCompleteReturned callId)
@@ -4823,6 +4985,12 @@ callRecordTestComplete httpConfig callId currentVerse accuracy testType =
                 body
                 emptyDecoder
             )
+
+
+isPracticeTest : CurrentVerse -> TestType -> Bool
+isPracticeTest currentVerse testType =
+    (currentVerse.sessionLearningType == Practice)
+        || (testType == MorePracticeTest)
 
 
 recordReadComplete : CurrentVerse -> Cmd Msg
@@ -5157,11 +5325,21 @@ stageTypeRead =
 {- Subscriptions -}
 
 
-subscriptions : a -> Sub Msg
+subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ Window.resizes WindowResize
         , receivePreferences ReceivePreferences
+        , Time.every
+            -- We need a rough time, so have low update period.
+            -- But want it to initialize very quickly, so
+            -- we never use the dummy '0' value
+            (if ISO8601.toTime model.currentTime == 0 then
+                1 * Time.millisecond
+             else
+                10 * Time.second
+            )
+            GetTime
         ]
 
 
@@ -5216,6 +5394,7 @@ verseStatusRawDecoder =
     JDP.decode verseStatusRawCtr
         |> JDP.required "id" JD.int
         |> JDP.required "strength" JD.float
+        |> JDP.required "last_tested" (nullOr iso8601decoder)
         |> JDP.required "localized_reference" JD.string
         |> JDP.required "needs_testing" JD.bool
         |> JDP.required "text_order" JD.int
@@ -5284,6 +5463,20 @@ enumDecoder items valDecoder =
                         Nothing ->
                             JD.fail <| "Unknown enum value: " ++ toString val
                 )
+
+
+iso8601decoder : JD.Decoder ISO8601.Time
+iso8601decoder =
+    JD.string
+        |> JD.andThen
+            (\val ->
+                case ISO8601.fromString val of
+                    Ok d ->
+                        JD.succeed d
+
+                    Err msg ->
+                        JD.fail msg
+            )
 
 
 stringEnumDecoder : List ( String, a ) -> JD.Decoder a
