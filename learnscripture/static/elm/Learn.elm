@@ -3362,16 +3362,18 @@ getSessionProgressData model =
                         -- and e.g. maxOrderVal == 0, we have 1 item total, and
                         -- 0 finished items.
                         totalReviewVerses =
-                            verseStore.maxOrderVal - minOrderVal + 1 - learningVerseCount
+                            verseStore.maxOrderVal + 1 - learningVerseCount
 
                         reviewVersesFinished =
-                            List.filter
-                                (\v ->
-                                    (not <| List.member v.id untestedUvsIds)
-                                        && (v.learnOrder < currentVerse.verseStatus.learnOrder)
-                                )
-                                verseStore.verseStatuses
-                                |> List.length
+                            minOrderVal
+                                + (List.filter
+                                    (\v ->
+                                        (not <| List.member v.id untestedUvsIds)
+                                            && (v.learnOrder < currentVerse.verseStatus.learnOrder)
+                                    )
+                                    verseStore.verseStatuses
+                                    |> List.length
+                                  )
 
                         overallProgress =
                             (toFloat reviewVersesFinished + verseProgress) / toFloat totalReviewVerses
