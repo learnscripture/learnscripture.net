@@ -877,8 +877,8 @@ viewCurrentVerse session model =
                             partsForVerse currentVerse.verseStatus (learningStageTypeForStage currentVerse.currentStage) testingMethod
                         )
                     ]
-                , verseSetLink currentVerse.verseStatus.verseSet
                 , copyrightNotice currentVerse.verseStatus.version
+                , verseSetLink currentVerse.verseStatus.verseSet
                 , H.div [ A.style [ ( "clear", "both" ) ] ]
                     []
                 ]
