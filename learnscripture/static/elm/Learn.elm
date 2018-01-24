@@ -2570,9 +2570,7 @@ attemptReturn model { immediate, queued } =
         else if immediate || not queued then
             doFailedCallsPrompt
         else
-            ( { model
-                | openDropdown = Just AjaxInfo
-              }
+            ( setDropdownOpen model AjaxInfo
             , Cmd.none
             )
 
@@ -2812,6 +2810,11 @@ toggleDropdown model dropdown =
 closeDropdowns : Model -> Model
 closeDropdowns model =
     { model | openDropdown = Nothing }
+
+
+setDropdownOpen : Model -> Dropdown -> Model
+setDropdownOpen model dropdown =
+    { model | openDropdown = Just dropdown }
 
 
 
@@ -3536,9 +3539,7 @@ moveToNextVerse model =
             in
                 case getNextVerse verseStore currentVerseStatus of
                     NoMoreVerses ->
-                        ( { model
-                            | openDropdown = Just AjaxInfo
-                          }
+                        ( setDropdownOpen model AjaxInfo
                         , sendMsg (AttemptReturn { immediate = False, queued = False })
                         )
 
@@ -4557,9 +4558,7 @@ markCallFinished model callId =
                     && List.isEmpty newModel1.permanentFailHttpCalls
                     && Dict.isEmpty newModel1.currentHttpCalls
             then
-                { newModel1
-                    | openDropdown = Nothing
-                }
+                closeDropdowns newModel1
             else
                 newModel1
     in
