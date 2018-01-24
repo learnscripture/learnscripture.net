@@ -367,6 +367,19 @@ class ResetProgressHandler(ApiView):
         return {}
 
 
+class ReviewSoonerHandler(ApiView):
+
+    @require_preexisting_identity_m
+    def post(self, request):
+        localized_reference = request.POST['localized_reference']
+        version_slug = request.POST['version_slug']
+        review_after = int(request.POST['review_after'])
+        request.identity.review_sooner(localized_reference,
+                                       version_slug,
+                                       review_after)
+        return {}
+
+
 class AccountCommon(object):
     fields = ['id', 'username', 'email']
 

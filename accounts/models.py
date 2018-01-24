@@ -760,6 +760,18 @@ class Identity(models.Model):
                   next_test_due=None,
                   memory_stage=MemoryStage.ZERO)
 
+    def review_sooner(self, localized_reference, version_slug, review_after_seconds):
+        # Could in theory do this with an update, but it is easier in Python and
+        # the queryset likely only has one item in it.
+        qs = self.verse_statuses.filter(localized_reference=localized_reference,
+                                        version__slug=version_slug)
+        for uvs in qs:
+            last_tested = uvs.last_tested
+            if last_tested is None:
+                last_tested = timezone.now()
+            uvs.next_test_due = last_tested + timedelta(seconds=review_after_seconds)
+            uvs.save()
+
     def _dedupe_uvs_set(self, uvs_set):
         # dedupe instances with same ref and version
         retval = []

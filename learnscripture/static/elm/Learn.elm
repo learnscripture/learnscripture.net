@@ -1,6 +1,5 @@
 port module Learn exposing (..)
 
-import ISO8601
 import Dict
 import Dom
 import Erl
@@ -8,6 +7,7 @@ import Html as H
 import Html.Attributes as A
 import Html.Events as E
 import Http
+import ISO8601
 import Json.Decode as JD
 import Json.Decode.Pipeline as JDP
 import Json.Encode as JE
@@ -1684,13 +1684,49 @@ buttonsForStage model verse verseStore preferences =
                         -- the verse load.
                         Enabled
 
-        ( morePracticeSubCaption, nextVerseSubCaption ) =
-            case calculateNextTestDue verse of
+        nextTestDue =
+            calculateNextTestDue verse
+
+        nextVerseSubCaption =
+            case nextTestDue of
                 Nothing ->
-                    ( "", "" )
+                    ""
 
                 Just t ->
-                    ( "Now", friendlyTimeUntil t )
+                    friendlyTimeUntil t
+
+        -- To keep things aligned, we only put subCaption on
+        -- MorePractice button if there is also one on NextVerse button
+        morePracticeSubCaption =
+            if nextVerseSubCaption == "" then
+                ""
+            else
+                "Now"
+
+        reviewSoonerButton =
+            case nextTestDue of
+                Nothing ->
+                    Nothing
+
+                Just testDueAfter ->
+                    let
+                        reviewAfter =
+                            case testDueAfter of
+                                NeverDue ->
+                                    oneYear
+
+                                DueAfter t ->
+                                    t / 2
+                    in
+                        Just
+                            { caption = "See sooner"
+                            , subCaption = friendlyTimeUntil (DueAfter reviewAfter)
+                            , msg = ReviewSooner verse.verseStatus reviewAfter
+                            , enabled = Enabled
+                            , default = NonDefault
+                            , id = "id-review-sooner"
+                            , refocusTypingBox = True
+                            }
 
         testStageButtons tp =
             case tp.currentWord of
@@ -1699,31 +1735,35 @@ buttonsForStage model verse verseStore preferences =
                         defaultMorePractice =
                             accuracy < 0.8
                     in
-                        [ { caption = "More practice"
-                          , subCaption = morePracticeSubCaption
-                          , msg = MorePractice accuracy
-                          , enabled = Enabled
-                          , default =
+                        [ Just
+                            { caption = "Practice"
+                            , subCaption = morePracticeSubCaption
+                            , msg = MorePractice accuracy
+                            , enabled = Enabled
+                            , default =
                                 if defaultMorePractice then
                                     Default
                                 else
                                     NonDefault
-                          , id = "id-more-practice"
-                          , refocusTypingBox = True
-                          }
-                        , { caption = nextVerseButtonCaption
-                          , subCaption = nextVerseSubCaption
-                          , msg = NextVerse
-                          , enabled = nextVerseEnabled
-                          , default =
+                            , id = "id-more-practice"
+                            , refocusTypingBox = True
+                            }
+                        , reviewSoonerButton
+                        , Just
+                            { caption = nextVerseButtonCaption
+                            , subCaption = nextVerseSubCaption
+                            , msg = NextVerse
+                            , enabled = nextVerseEnabled
+                            , default =
                                 if defaultMorePractice then
                                     NonDefault
                                 else
                                     Default
-                          , id = "id-next-btn"
-                          , refocusTypingBox = True
-                          }
+                            , id = "id-next-btn"
+                            , refocusTypingBox = True
+                            }
                         ]
+                            |> List.filterMap identity
 
                 CurrentWord _ ->
                     -- Never show previous/back button once we've reached test
@@ -2214,6 +2254,7 @@ type Msg
     | SkipVerse VerseStatus
     | CancelLearning VerseStatus
     | ResetProgress VerseStatus Bool
+    | ReviewSooner VerseStatus Float
     | SetHiddenWords (Set.Set WordId)
     | WordButtonClicked WordId
     | TypingBoxInput String
@@ -2272,6 +2313,10 @@ update msg model =
 
         ResetProgress verseStatus confirmed ->
             handleResetProgress model verseStatus confirmed
+
+        ReviewSooner verseStatus reviewAfter ->
+            moveToNextVerse model
+                |> addCommands [ recordReviewSooner verseStatus reviewAfter ]
 
         SetHiddenWords hiddenWordIds ->
             ( setHiddenWords model hiddenWordIds
@@ -4458,6 +4503,16 @@ type TestDueAfter
     | DueAfter Float
 
 
+oneYear : number
+oneYear =
+    365 * 24 * oneHour
+
+
+oneHour : number
+oneHour =
+    60 * 60 * 1000
+
+
 {-| If a test has been done, returns the time in milliseconds (from the last test)
     that the next test will be due.
 
@@ -4573,6 +4628,7 @@ type TrackedHttpCall
     | RecordSkipVerse VerseStatus
     | RecordCancelLearning VerseStatus
     | RecordResetProgress VerseStatus
+    | RecordReviewSooner VerseStatus Float
     | LoadVerses Bool
 
 
@@ -4598,6 +4654,9 @@ trackedHttpCallCaption call =
 
         RecordResetProgress verseStatus ->
             interpolate "Resetting progress for {0}" [ verseStatus.localizedReference ]
+
+        RecordReviewSooner verseStatus _ ->
+            interpolate "Marking {0} for reviewing sooner" [ verseStatus.localizedReference ]
 
         LoadVerses _ ->
             "Loading items for learning..."
@@ -4673,6 +4732,9 @@ makeHttpCall model callId =
 
                         RecordResetProgress verseStatus ->
                             callRecordResetProgress model.httpConfig callId verseStatus
+
+                        RecordReviewSooner verseStatus reviewAfter ->
+                            callRecordReviewSooner model.httpConfig callId verseStatus reviewAfter
 
                         LoadVerses initialPageLoad ->
                             callLoadVerses model.httpConfig callId model initialPageLoad
@@ -5115,6 +5177,38 @@ callRecordResetProgress httpConfig callId verseStatus =
         Http.send (EmptyResponseTrackedHttpCallReturned callId)
             (myHttpPost httpConfig
                 resetProgressUrl
+                body
+                emptyDecoder
+            )
+
+
+
+{- reviewSooner API -}
+
+
+reviewSoonerUrl : String
+reviewSoonerUrl =
+    "/api/learnscripture/v1/reviewsooner/"
+
+
+recordReviewSooner : VerseStatus -> Float -> Cmd Msg
+recordReviewSooner verseStatus reviewAfter =
+    sendStartTrackedCallMsg (RecordReviewSooner verseStatus reviewAfter)
+
+
+callRecordReviewSooner : HttpConfig -> CallId -> VerseStatus -> Float -> Cmd Msg
+callRecordReviewSooner httpConfig callId verseStatus reviewAfter =
+    let
+        body =
+            Http.multipartBody
+                [ Http.stringPart "localized_reference" verseStatus.localizedReference
+                , Http.stringPart "version_slug" verseStatus.version.slug
+                , Http.stringPart "review_after" (reviewAfter / 1000 |> round |> toString)
+                ]
+    in
+        Http.send (EmptyResponseTrackedHttpCallReturned callId)
+            (myHttpPost httpConfig
+                reviewSoonerUrl
                 body
                 emptyDecoder
             )
