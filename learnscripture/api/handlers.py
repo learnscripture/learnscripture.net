@@ -9,6 +9,7 @@ import collections
 import datetime
 import json
 
+import furl
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
 from django.template.loader import render_to_string
@@ -188,26 +189,29 @@ class VersesToLearn2Handler(ApiView):
             set(vs.version for vs in batch.verse_statuses),
             ['full_name', 'short_name', 'slug', 'url', 'text_type']
         )
-        verse_sets = make_serializable(
-            set(vs.verse_set for vs in batch.verse_statuses
-                if vs.verse_set if not None),
-            ['id', 'set_type', 'name', 'get_absolute_url']
-        )
-        # For verse sets additionally add 'smart_name' field:
-        verse_set_smart_names = {}
+        # For verse sets additionally add 'smart_name' field, and include
+        # version_id in link, so we don't just use make_serializable
+        verse_sets_data = {}
         for vs in batch.verse_statuses:
-            if vs.verse_set.id in verse_set_smart_names:
+            verse_set = vs.verse_set
+            if verse_set is None:
                 continue
-            verse_set_smart_names[vs.verse_set.id] = vs.verse_set.smart_name(vs.version.language_code)
-
-        for verse_set_data in verse_sets:
-            verse_set_data['smart_name'] = verse_set_smart_names[verse_set_data['id']]
+            if verse_set.id in verse_sets_data:
+                continue
+            d = {
+                "id": verse_set.id,
+                "set_type": verse_set.set_type,
+                "smart_name": verse_set.smart_name(vs.version.language_code),
+                "url": furl.furl(verse_set.get_absolute_url()).add(
+                    query_params={'version': vs.version.slug}).url
+            }
+            verse_sets_data[verse_set.id] = d
 
         retval = dict(
             verse_statuses=verse_status_info,
             learning_type=batch.learning_type,
             versions=list(versions),
-            verse_sets=list(verse_sets),
+            verse_sets=list(verse_sets_data.values()),
             return_to=batch.return_to,
             max_order_val=batch.max_order_val,
             untested_order_vals=batch.untested_order_vals,

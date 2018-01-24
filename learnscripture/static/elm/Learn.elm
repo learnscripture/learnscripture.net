@@ -346,7 +346,7 @@ type alias VerseSet =
     { id : Int
     , setType : VerseSetType
     , smartName : String
-    , getAbsoluteUrl : String
+    , url : String
     }
 
 
@@ -1385,7 +1385,7 @@ verseSetLink verseSet =
                 [ A.id "id-verse-set-link"
                 ]
                 [ H.a
-                    [ A.href vs.getAbsoluteUrl
+                    [ A.href vs.url
                     , A.tabindex -1
                     , A.target "_blank"
                     ]
@@ -5183,7 +5183,7 @@ verseSetDecoder =
         |> JDP.required "id" JD.int
         |> JDP.required "set_type" verseSetTypeDecoder
         |> JDP.required "smart_name" JD.string
-        |> JDP.required "get_absolute_url" JD.string
+        |> JDP.required "url" JD.string
 
 
 verseSetTypeDecoder : JD.Decoder VerseSetType
