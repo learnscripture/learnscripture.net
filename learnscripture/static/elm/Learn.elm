@@ -2664,8 +2664,10 @@ verseBatchToSession batch actionLogs =
 
 
 
--- Merge in new verses. The only thing which actually needs updating is the
--- verse store, the rest will be the same, or the current model will be
+-- Merge in new verses. The only things which actually needs updating are:
+-- * 'verseStatuses' - the verse store,
+-- * 'unseenUvsIds'
+-- the rest will be the same, or the current model will be
 -- more recent.
 
 
@@ -2683,6 +2685,7 @@ mergeSession initialSession newBatchSession =
                             ++ newBatchSession.verses.verseStatuses
                         )
                             |> dedupeBy .learnOrder
+                    , unseenUvsIds = newBatchSession.verses.unseenUvsIds
                 }
         }
 
@@ -3335,7 +3338,7 @@ getSessionProgressData model =
                     VerseProgress verseProgress
                 else
                     let
-                        -- Progress within batch. learnOrder is zero indexed, so
+                        -- Progress within batch.
                         verseStore =
                             sessionData.verses
 
@@ -3345,14 +3348,22 @@ getSessionProgressData model =
                         learningVerseCount =
                             List.length unseenUvsIds
 
-                        -- when learnOrder == 0, and e.g. maxOrderVal == 0, we
-                        -- have 1 item total, and 0 finished items.
-                        totalReviewVerses =
-                            verseStore.maxOrderVal + 1 - learningVerseCount
+                        -- minOrderVal can be greater than 0 if the user presses
+                        -- refresh in the browser after doing some verses,
+                        -- because the earlier verses in the session will have
+                        -- been removed.
+                        minOrderVal =
+                            verseStore.verseStatuses
+                                |> List.map .learnOrder
+                                |> List.minimum
+                                |> Maybe.withDefault 0
 
-                        -- TODO this is buggy if uses presses 'Refresh' part way
-                        -- through session because verseStore is missing earlier
-                        -- verses.
+                        -- learnOrder is zero indexed, so when learnOrder == 0,
+                        -- and e.g. maxOrderVal == 0, we have 1 item total, and
+                        -- 0 finished items.
+                        totalReviewVerses =
+                            verseStore.maxOrderVal - minOrderVal + 1 - learningVerseCount
+
                         reviewVersesFinished =
                             List.filter
                                 (\v ->
