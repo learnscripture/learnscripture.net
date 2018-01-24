@@ -55,6 +55,7 @@ port vibrateDevice : Int -> Cmd msg
 port beep : ( Float, Float ) -> Cmd msg
 
 
+
 {- Constants -}
 
 
@@ -3961,43 +3962,17 @@ markWord checkResult word testProgress testType verse testingMethod preferences 
         newAttempts =
             updateWordAttempts testProgress word attempt2
 
-        currentTestWordList =
-            getCurrentTestWordList verse testingMethod
-
         newTestProgress1 =
             { testProgress
                 | attemptRecords = newAttempts
                 , currentTypedText = newTypedText
             }
 
-        testAccuracy =
-            getTestResult newTestProgress1
-
         nextCurrentWord =
             if shouldMoveOn then
-                case testProgress.currentWord of
-                    TestFinished r ->
-                        TestFinished r
-
-                    CurrentWord cw ->
-                        let
-                            nextI =
-                                cw.overallIndex + 1
-                        in
-                            case getAt currentTestWordList nextI of
-                                Just nextWord ->
-                                    if isReference nextWord.type_ && not (shouldTestReferenceForTestingMethod testingMethod) then
-                                        TestFinished { accuracy = testAccuracy }
-                                    else
-                                        CurrentWord
-                                            { word = nextWord
-                                            , overallIndex = nextI
-                                            }
-
-                                Nothing ->
-                                    TestFinished { accuracy = testAccuracy }
+                getNextCurrentWord verse newTestProgress1 testingMethod
             else
-                testProgress.currentWord
+                newTestProgress1.currentWord
 
         newTestProgress2 =
             { newTestProgress1
@@ -4011,19 +3986,13 @@ markWord checkResult word testProgress testType verse testingMethod preferences 
             }
 
         actionCompleteCommand =
-            if
-                (shouldMoveOn
-                    && (case nextCurrentWord of
-                            TestFinished _ ->
-                                True
+            if shouldMoveOn && testProgress.currentWord /= nextCurrentWord then
+                case nextCurrentWord of
+                    TestFinished { accuracy } ->
+                        recordTestComplete newCurrentVerse accuracy testType
 
-                            _ ->
-                                False
-                       )
-                    && (testProgress.currentWord /= nextCurrentWord)
-                )
-            then
-                recordTestComplete newCurrentVerse testAccuracy testType
+                    _ ->
+                        Cmd.none
             else
                 Cmd.none
 
@@ -4031,12 +4000,12 @@ markWord checkResult word testProgress testType verse testingMethod preferences 
             if isAttemptFailure checkResult then
                 if shouldMoveOn then
                     -- final failure
-                    ( vibrateDevice 50, beep ( 290.0, 1 ))
+                    ( vibrateDevice 50, beep ( 290.0, 1 ) )
                 else
                     -- mistake only
-                    ( vibrateDevice 25, beep ( 330.0, 1 ))
+                    ( vibrateDevice 25, beep ( 330.0, 1 ) )
             else
-                ( Cmd.none, Cmd.none)
+                ( Cmd.none, Cmd.none )
     in
         ( newCurrentVerse
         , Cmd.batch
@@ -4051,6 +4020,38 @@ markWord checkResult word testProgress testType verse testingMethod preferences 
                 Cmd.none
             ]
         )
+
+
+getNextCurrentWord : CurrentVerse -> TestProgress -> TestingMethod -> CurrentTestWord
+getNextCurrentWord verse testProgress testingMethod =
+    let
+        currentTestWordList =
+            getCurrentTestWordList verse testingMethod
+
+        testAccuracy =
+            getTestResult testProgress
+    in
+        case testProgress.currentWord of
+            TestFinished r ->
+                TestFinished r
+
+            CurrentWord cw ->
+                let
+                    nextI =
+                        cw.overallIndex + 1
+                in
+                    case getAt currentTestWordList nextI of
+                        Just nextWord ->
+                            if isReference nextWord.type_ && not (shouldTestReferenceForTestingMethod testingMethod) then
+                                TestFinished { accuracy = testAccuracy }
+                            else
+                                CurrentWord
+                                    { word = nextWord
+                                    , overallIndex = nextI
+                                    }
+
+                        Nothing ->
+                            TestFinished { accuracy = testAccuracy }
 
 
 getCurrentTestWordList : CurrentVerse -> TestingMethod -> List Word
@@ -5074,11 +5075,12 @@ myHttpPost config url body decoder =
             ]
         , url = url
         , body = body
-        , expect = Http.expectJson decoder
-        -- All our POSTs involve sending and receiving very little data, by
-        -- design. Delays greater than 30s are always going to be due to network
-        -- issues that mean the request is not going to get there. By aborting
-        -- early we get to try again sooner.
+        , expect =
+            Http.expectJson decoder
+            -- All our POSTs involve sending and receiving very little data, by
+            -- design. Delays greater than 30s are always going to be due to network
+            -- issues that mean the request is not going to get there. By aborting
+            -- early we get to try again sooner.
         , timeout = Just (Time.second * 30)
         , withCredentials = False
         }
