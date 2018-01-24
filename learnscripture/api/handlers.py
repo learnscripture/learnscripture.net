@@ -193,6 +193,16 @@ class VersesToLearn2Handler(ApiView):
                 if vs.verse_set if not None),
             ['id', 'set_type', 'name', 'get_absolute_url']
         )
+        # For verse sets additionally add 'smart_name' field:
+        verse_set_smart_names = {}
+        for vs in batch.verse_statuses:
+            if vs.verse_set.id in verse_set_smart_names:
+                continue
+            verse_set_smart_names[vs.verse_set.id] = vs.verse_set.smart_name(vs.version.language_code)
+
+        for verse_set_data in verse_sets:
+            verse_set_data['smart_name'] = verse_set_smart_names[verse_set_data['id']]
+
         retval = dict(
             verse_statuses=verse_status_info,
             learning_type=batch.learning_type,
