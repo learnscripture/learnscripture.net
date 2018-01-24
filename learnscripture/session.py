@@ -37,14 +37,15 @@ class VerseStatusBatch:
     max_order_val = attr.ib()
     learning_type = attr.ib()
     return_to = attr.ib()
-    untested_uvs_ids = attr.ib()
+    untested_order_vals = attr.ib()
 
 
 def get_verse_statuses_batch(request):
     # This currently supports both VersesToLearnHandler/learn.ts and
     # VersesToLearn2Handler/Learn.elm. When the former is removed, it can be cleaned up.
     learning_type = request.session.get('learning_type', None)
-    untested_uvs_ids = _get_untested_uvs_ids(request)
+    untested_order_vals = request.session.get('untested_order_vals', [])
+
     id_data = _get_verse_status_ids(request)
 
     if len(id_data) > 0:
@@ -91,7 +92,7 @@ def get_verse_statuses_batch(request):
         max_order_val=max_order_val,
         learning_type=learning_type,
         return_to=return_to,
-        untested_uvs_ids=untested_uvs_ids,
+        untested_order_vals=untested_order_vals,
     )
 
 
@@ -99,16 +100,8 @@ def _get_verse_status_ids(request):
     return request.session.get('verses_to_learn', [])
 
 
-def _save_verse_status_ids(request, ids):
-    request.session['verses_to_learn'] = ids
-
-
-def _get_untested_uvs_ids(request):
-    return request.session.get('untested_uvs_ids', [])
-
-
-def _save_untested_uvs_ids(request, uvs_ids):
-    request.session['untested_uvs_ids'] = uvs_ids
+def _save_verse_status_data(request, data):
+    request.session['verses_to_learn'] = data
 
 
 def _set_learning_session_start(request, dt):
@@ -125,17 +118,27 @@ def _set_verse_statuses(request, user_verse_statuses):
     # used as 'learn_order', and is used in the front end as an index into a
     # dictionary (not an array), because items can be expelled from the list
     # stored in the session.
-    _save_verse_status_ids(request,
-                           [(order, uvs.id, getattr(uvs, 'needs_testing_override', None))
-                            for order, uvs in enumerate(user_verse_statuses)])
+
+    # Assign order and save:
+    data = [(order, uvs.id, getattr(uvs, 'needs_testing_override', None))
+            for order, uvs in enumerate(user_verse_statuses)]
+    _save_verse_status_data(request, data)
+
+    # To get the 'review mode' progress bar correct in the front end, we need to
+    # know which items are not up for review and should be excluded.
+    # Since the front end may have partial data and uses the learning order
+    # val to progress, we use the order as an ID.
+    order_vals = {uvs_id: order for (order, uvs_id, needs_testing_override)
+                  in data}
+    untested_order_vals = [order_vals[uvs.id]
+                           for uvs in user_verse_statuses
+                           if uvs.memory_stage < MemoryStage.TESTED]
+    request.session['untested_order_vals'] = untested_order_vals
 
 
 def start_learning_session(request, user_verse_statuses, learning_type, return_to):
     _set_verse_statuses(request, user_verse_statuses)
     _set_learning_session_start(request, timezone.now())
-    untested_uvs_ids = [uvs.id for uvs in user_verse_statuses
-                        if uvs.memory_stage < MemoryStage.TESTED]
-    _save_untested_uvs_ids(request, untested_uvs_ids)
     request.session['learning_type'] = learning_type
     request.session['action_logs'] = []
     request.session['return_to'] = return_to
@@ -175,13 +178,7 @@ def _remove_user_verse_status(request, u_id):
         # Presumably an error, or an old request arriving very late, so ignore
         new_ids = ids
 
-    _save_verse_status_ids(request, new_ids)
-
-    # To keep the progress bar correct in the case of the user pressing
-    # 'Refresh' in the bar, we need to update the 'untested_uvs_ids' data too.
-    _save_untested_uvs_ids(request,
-                         [uvs_id for uvs_id in _get_untested_uvs_ids(request)
-                          if uvs_id != u_id])
+    _save_verse_status_data(request, new_ids)
 
 
 def get_identity(request):

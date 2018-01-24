@@ -212,7 +212,7 @@ type alias VerseStore =
     , learningType : LearningType
     , returnTo : Url
     , maxOrderVal : LearnOrder
-    , untestedUvsIds : List UvsId
+    , untestedOrderVals : List LearnOrder
     }
 
 
@@ -221,7 +221,7 @@ type alias VerseBatchBase a =
         | learningTypeRaw : Maybe LearningType
         , returnTo : Url
         , maxOrderValRaw : Maybe LearnOrder
-        , untestedUvsIds : List UvsId
+        , untestedOrderVals : List LearnOrder
     }
 
 
@@ -244,7 +244,7 @@ verseBatchRawCtr :
     Maybe LearningType
     -> String
     -> Maybe LearnOrder
-    -> List UvsId
+    -> List LearnOrder
     -> List VerseStatusRaw
     -> List Version
     -> List VerseSet
@@ -255,7 +255,7 @@ verseBatchRawCtr l r m u v1 v2 v3 s a =
     { learningTypeRaw = l
     , returnTo = r
     , maxOrderValRaw = m
-    , untestedUvsIds = u
+    , untestedOrderVals = u
     , verseStatusesRaw = v1
     , versions = v2
     , verseSets = v3
@@ -2553,7 +2553,7 @@ normalizeVerseBatch vbr =
     ( { learningTypeRaw = vbr.learningTypeRaw
       , returnTo = vbr.returnTo
       , maxOrderValRaw = vbr.maxOrderValRaw
-      , untestedUvsIds = vbr.untestedUvsIds
+      , untestedOrderVals = vbr.untestedOrderVals
       , verseStatuses = normalizeVerseStatuses vbr
       }
     , vbr.sessionStats
@@ -2654,7 +2654,7 @@ verseBatchToSession batch actionLogs =
                                         , learningType = learningType
                                         , returnTo = batch.returnTo
                                         , maxOrderVal = maxOrderVal
-                                        , untestedUvsIds = batch.untestedUvsIds
+                                        , untestedOrderVals = batch.untestedOrderVals
                                         }
                                     , currentVerse = newCurrentVerse
                                     , actionLogStore = actionLogStore
@@ -2666,7 +2666,6 @@ verseBatchToSession batch actionLogs =
 
 -- Merge in new verses. The only things which actually needs updating are:
 -- * 'verseStatuses' - the verse store,
--- * 'untestedUvsIds'
 -- the rest will be the same, or the current model will be
 -- more recent.
 
@@ -2685,7 +2684,6 @@ mergeSession initialSession newBatchSession =
                             ++ newBatchSession.verses.verseStatuses
                         )
                             |> dedupeBy .learnOrder
-                    , untestedUvsIds = newBatchSession.verses.untestedUvsIds
                 }
         }
 
@@ -3332,7 +3330,7 @@ getSessionProgressData model =
                     (toFloat stagesFinished + stageProgress) / toFloat totalStageCount
 
                 isUntestedItem =
-                    List.member currentVerse.verseStatus.id sessionData.verses.untestedUvsIds
+                    List.member currentVerse.verseStatus.learnOrder sessionData.verses.untestedOrderVals
             in
                 if isUntestedItem then
                     VerseProgress verseProgress
@@ -3342,38 +3340,28 @@ getSessionProgressData model =
                         verseStore =
                             sessionData.verses
 
-                        untestedUvsIds =
-                            verseStore.untestedUvsIds
-
-                        learningVerseCount =
-                            List.length untestedUvsIds
-
-                        -- minOrderVal can be greater than 0 if the user presses
-                        -- refresh in the browser after doing some verses,
-                        -- because the earlier verses in the session will have
-                        -- been removed.
-                        minOrderVal =
-                            verseStore.verseStatuses
-                                |> List.map .learnOrder
-                                |> List.minimum
-                                |> Maybe.withDefault 0
+                        untestedOrderVals =
+                            verseStore.untestedOrderVals
 
                         -- learnOrder is zero indexed, so when learnOrder == 0,
                         -- and e.g. maxOrderVal == 0, we have 1 item total, and
                         -- 0 finished items.
                         totalReviewVerses =
-                            verseStore.maxOrderVal + 1 - learningVerseCount
+                            verseStore.maxOrderVal + 1 - (List.length untestedOrderVals)
 
                         reviewVersesFinished =
-                            minOrderVal
-                                + (List.filter
-                                    (\v ->
-                                        (not <| List.member v.id untestedUvsIds)
-                                            && (v.learnOrder < currentVerse.verseStatus.learnOrder)
+                            currentVerse.verseStatus.learnOrder
+                                -- We also need to account for any untested
+                                -- items we have already passed (can happen
+                                -- sometimes when learning a passage).
+                                -
+                                    (untestedOrderVals
+                                        |> List.filter
+                                            (\v ->
+                                                (v < currentVerse.verseStatus.learnOrder)
+                                            )
+                                        |> List.length
                                     )
-                                    verseStore.verseStatuses
-                                    |> List.length
-                                  )
 
                         overallProgress =
                             (toFloat reviewVersesFinished + verseProgress) / toFloat totalReviewVerses
@@ -5157,7 +5145,7 @@ verseBatchRawDecoder =
         |> JDP.required "learning_type" (nullOr learningTypeDecoder)
         |> JDP.required "return_to" JD.string
         |> JDP.required "max_order_val" (nullOr JD.int)
-        |> JDP.required "untested_uvs_ids" (JD.list JD.int)
+        |> JDP.required "untested_order_vals" (JD.list JD.int)
         |> JDP.required "verse_statuses" (JD.list verseStatusRawDecoder)
         |> JDP.required "versions" (JD.list versionDecoder)
         |> JDP.required "verse_sets" (JD.list verseSetDecoder)
