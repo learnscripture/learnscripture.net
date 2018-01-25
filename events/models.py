@@ -422,10 +422,12 @@ class EventManager(models.Manager):
               )
         if viewer is None or not viewer.is_hellbanned:
             qs = qs.exclude(account__is_hellbanned=True)
-        # Exclude comments on group walls, until we can find a way to limit this
-        # exclusion only to private groups.
+
+        # TODO - want to include comments in groups that the user is a member
+        # of, even private ones. For now we exclude all private group comments.
         qs = qs.exclude(event_type=EventType.NEW_COMMENT,
-                        parent_event__isnull=True)
+                        group__isnull=False,
+                        group__public=False)
         return qs
 
     def for_activity_stream(self, viewer=None, event_by=None):
