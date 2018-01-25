@@ -125,6 +125,15 @@ class Group(models.Model):
             qs = qs.exclude(author__is_hellbanned=True)
         return qs
 
+    def are_comments_visible_for_account(self, account):
+        if self.public:
+            return True
+        else:
+            if account is None:
+                return False
+            else:
+                return self.active_members.filter(id=account.id).exists()
+
 
 class Membership(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE,

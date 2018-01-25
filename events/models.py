@@ -391,6 +391,7 @@ class EventManager(models.Manager):
 
         start = now - timedelta(EVENTSTREAM_CUTOFF_DAYS)
         events = (self
+                  .for_activity_stream(viewer=account)
                   .filter(created__gte=start)
                   .prefetch_related('account')
                   .exclude(event_type=EventType.NEW_COMMENT,
@@ -434,7 +435,10 @@ class EventManager(models.Manager):
             qs = qs.exclude(account__is_hellbanned=True)
         if event_by is not None:
             qs = qs.filter(account=event_by)
-
+        # Exclude comments on group walls, until we can find a way to limit this
+        # exclusion only to private groups.
+        qs = qs.exclude(event_type=EventType.NEW_COMMENT,
+                        parent_event__isnull=True)
         return qs
 
 
