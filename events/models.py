@@ -383,7 +383,7 @@ class EventManager(models.Manager):
 
         start = now - timedelta(EVENTSTREAM_CUTOFF_DAYS)
         events = (self
-                  .for_activity_stream(viewer=account)
+                  .for_viewer(account)
                   .filter(created__gte=start)
                   .prefetch_related('account')
                   .exclude(event_type=EventType.NEW_COMMENT,
@@ -414,23 +414,30 @@ class EventManager(models.Manager):
         events.sort(key=lambda e: e.created, reverse=True)
         return events
 
-    def for_activity_stream(self, viewer=None, event_by=None):
+    def for_viewer(self, viewer):
         qs = (Event.objects
               .order_by('-created')
               .select_related('account')
               .exclude(account__is_active=False)
               )
-        if event_by is None:
-            qs = qs.exclude(event_type=EventType.NEW_COMMENT,
-                            parent_event__isnull=False)
         if viewer is None or not viewer.is_hellbanned:
             qs = qs.exclude(account__is_hellbanned=True)
-        if event_by is not None:
-            qs = qs.filter(account=event_by)
         # Exclude comments on group walls, until we can find a way to limit this
         # exclusion only to private groups.
         qs = qs.exclude(event_type=EventType.NEW_COMMENT,
                         parent_event__isnull=True)
+        return qs
+
+    def for_activity_stream(self, viewer=None, event_by=None):
+        qs = self.for_viewer(viewer)
+        if event_by is None:
+            # On the main activity stream, comments on parent events are
+            # included on that parent event, so don't show them separately as
+            # well.
+            qs = qs.exclude(event_type=EventType.NEW_COMMENT,
+                            parent_event__isnull=False)
+        if event_by is not None:
+            qs = qs.filter(account=event_by)
         return qs
 
 
