@@ -321,24 +321,22 @@ class NewCommentEvent(EventLogic):
 
     @classmethod
     def get_message_html(cls, event, language_code):
-        from comments.models import Comment
-        # In theory we could write this code without loading the comment from
-        # the DB, but replicating Comment.get_absolute_url() gets complicated.
-        comment = Comment.objects.get(id=event.event_data['comment_id'])
+        comment_id = event.event_data['comment_id']
         if 'parent_event_id' in event.event_data:
             return format_html(
                 """{0} posted a <a href="{1}">comment</a> on <a href="{2}">{3}</a>'s activity""",
                 account_link(event.account),
-                comment.get_absolute_url(),
+                get_absolute_url_for_event_comment(event, comment_id),
                 reverse('user_stats', args=(event.event_data['parent_event_account_username'],)),
                 event.event_data['parent_event_account_username'])
 
         elif 'group_id' in event.event_data:
+            group_slug = event.event_data['group_slug']
             return format_html(
                 """{0} posted a <a href="{1}">comment</a> on <a href="{2}">{3}</a>'s wall""",
                 account_link(event.account),
-                comment.get_absolute_url(),
-                reverse('group', args=(event.event_data['group_slug'],)),
+                get_absolute_url_for_group_comment(event, comment_id, group_slug),
+                reverse('group', args=(group_slug,)),
                 event.event_data['group_name'])
 
         else:
@@ -576,3 +574,11 @@ class Event(models.Model):
                 return sorted(self._prefetched_objects_cache['comments'],
                               key=lambda c: c.created)
         return self.comments.all().order_by('created').select_related('author')
+
+
+def get_absolute_url_for_event_comment(event, comment_id):
+    return event.get_absolute_url() + "#comment-%s" % comment_id
+
+
+def get_absolute_url_for_group_comment(event, comment_id, group_slug):
+    return reverse('group_wall', args=(group_slug,)) + "?comment=%s" % comment_id
