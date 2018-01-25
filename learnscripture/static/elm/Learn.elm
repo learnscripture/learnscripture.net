@@ -2030,7 +2030,7 @@ instructions verse testingMethod helpVisible =
         commonHelp =
             [ [ H.text "You can finish your review or learning session at any time using the return button in the top left corner."
               ]
-            , [ H.text "Keyboard navigation: use Tab and Shift-Tab to move focus between controls, and Enter to 'press' one. Focus is shown with a blue border."
+            , [ H.text "Keyboard navigation (for physical keyboards, not touchscreens): use Tab and Shift-Tab to move focus between controls, and Enter to 'press' one. Focus is shown with a blue border."
               ]
             ]
 
