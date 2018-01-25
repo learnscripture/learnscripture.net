@@ -563,15 +563,15 @@ body.learn-page {
         }
     }
 
-    @word-margin-top-small: 3px;
-    @word-margin-left-small: 1px;
+    @word-margin-top-small: 1px;
+    @word-margin-left-small: 0px;
     @word-padding-horizontal-small: 2px;
 
     @media screen and (max-width: @narrowWidthBreak2), screen and (max-height: @shortHeightBreak2) {
 
         // If not much room in either direction, shrink the fonts of the verse
         // words to make more room
-        @currentVerseSmallerFontSize: 18px;
+        @currentVerseSmallerFontSize: 17px;
         .current-verse, .previous-verse, #id-typing, #id-onscreen-test-options, #id-onscreen-not-available, #id-typing {
             font-size: @currentVerseSmallerFontSize;
         }
