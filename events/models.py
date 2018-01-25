@@ -397,7 +397,7 @@ class EventManager(models.Manager):
 
         if account is not None:
             friendship_weights = account.get_friendship_weights()
-            group_ids = [g.id for g in account.get_groups()]
+            group_ids = list(account.groups.values_list('id', flat=True))
         else:
             friendship_weights = None
             group_ids = []
