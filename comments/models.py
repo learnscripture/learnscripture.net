@@ -1,11 +1,10 @@
 from django.db import models
-from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html, linebreaks, urlize
 from django.utils.safestring import mark_safe
 
 from accounts.models import Account
-from events.models import Event
+from events.models import Event, get_absolute_url_for_event_comment, get_absolute_url_for_group_comment
 from groups.models import Group
 from groups.utils import group_link
 from learnscripture.templatetags.account_utils import account_link
@@ -36,9 +35,9 @@ class Comment(models.Model):
 
     def get_absolute_url(self):
         if self.event is not None:
-            return self.event.get_absolute_url() + "#comment-%s" % self.id
+            return get_absolute_url_for_event_comment(self.event, self.id)
         else:
-            return reverse('group_wall', args=(self.group.slug,)) + "?comment=%s" % self.id
+            return get_absolute_url_for_group_comment(self.event, self.id, self.group.slug)
 
     def get_subject_html(self):
         """
