@@ -484,7 +484,7 @@ class Event(models.Model):
         weight = self.weight
 
         if self.event_type == EventType.NEW_COMMENT:
-            if self.event_data.get('group_id', None) in group_ids:
+            if self.group_id in group_ids:
                 # This is a comment on a group wall that the user is in.
                 weight = self.event_logic.group_wall_weight
 
