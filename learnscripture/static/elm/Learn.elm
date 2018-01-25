@@ -3926,13 +3926,12 @@ shouldCheckTypedWord : TestingMethod -> String -> Bool
 shouldCheckTypedWord testingMethod input =
     let
         trimmedText =
-            String.trim input
+            input |> String.trim |> stripOuterPunctuation |> String.trim
     in
         case testingMethod of
             FullWords ->
                 -- TODO - allow ':' '.' etc in verse references
-                String.length trimmedText
-                    > 0
+                (String.length trimmedText > 0)
                     && ((String.right 1 input == " ")
                             || (String.right 1 input == "\n")
                        )
