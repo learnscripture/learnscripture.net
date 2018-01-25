@@ -1488,6 +1488,9 @@ typingBox stage testingMethod =
         H.input
             ([ A.id typingBoxId
              , A.value value
+             , A.autocomplete False
+             , A.attribute "autocorrect" "off"
+             , A.attribute "autocapitalize" "off"
              , A.class
                 (classForTypingBox inUse
                     ++ (if incorrectInput then
