@@ -385,7 +385,7 @@ class EventManager(models.Manager):
         events = (self
                   .for_viewer(account)
                   .filter(created__gte=start)
-                  .prefetch_related('account')
+                  .select_related('account')
                   .exclude(event_type=EventType.NEW_COMMENT,
                            account=account)
                   .annotate(comment_count=models.Count('comments'))
@@ -393,7 +393,12 @@ class EventManager(models.Manager):
         if account is None or not account.is_hellbanned:
             events = events.exclude(account__is_hellbanned=True)
         events = list(events)
-        events = list(dedupe_iterable(events, lambda e: (e.account_id, e.render_html(language_code))))
+        # Avoid repeated messages. Events with the same event type, account id
+        # and data will produce the same message.
+        events = list(dedupe_iterable(events,
+                                      lambda e: (e.account_id,
+                                                 e.event_type,
+                                                 tuple(sorted(e.event_data.items())))))
 
         if account is not None:
             friendship_weights = account.get_friendship_weights()
