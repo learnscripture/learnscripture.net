@@ -84,10 +84,6 @@ class EventLogic(object):
     def accepts_comments(cls, event):
         return True
 
-    @classmethod
-    def get_group(cls, event):
-        return None
-
 
 class NewAccountEvent(EventLogic):
     @classmethod
@@ -220,14 +216,7 @@ class VersesStartedMilestoneEvent(EventLogic):
         )
 
 
-class GroupRelatedMixin(object):
-    # Subclasses must store 'group_id' in event.event_data
-    @classmethod
-    def get_group(cls, event):
-        return Group.objects.get(id=event.event_data['group_id'])
-
-
-class GroupJoinedEvent(GroupRelatedMixin, EventLogic):
+class GroupJoinedEvent(EventLogic):
 
     weight = 11
 
@@ -236,6 +225,7 @@ class GroupJoinedEvent(GroupRelatedMixin, EventLogic):
                                                group_name=group.name,
                                                group_slug=group.slug,
                                                group_id=group.id)
+        self.event.group = group
 
     @classmethod
     def get_message_html(cls, event, language_code):
@@ -246,13 +236,14 @@ class GroupJoinedEvent(GroupRelatedMixin, EventLogic):
             event.event_data['group_name'])
 
 
-class GroupCreatedEvent(GroupRelatedMixin, EventLogic):
+class GroupCreatedEvent(EventLogic):
 
     def __init__(self, account=None, group=None):
         super(GroupCreatedEvent, self).__init__(account=account,
                                                 group_name=group.name,
                                                 group_slug=group.slug,
                                                 group_id=group.id)
+        self.event.group = group
 
     @classmethod
     def get_message_html(cls, event, language_code):
@@ -315,6 +306,7 @@ class NewCommentEvent(EventLogic):
             kwargs['parent_event_account_username'] = comment.event.account.username
         super(NewCommentEvent, self).__init__(**kwargs)
         self.event.parent_event = comment.event
+        self.event.group = comment.group
 
     @classmethod
     def get_absolute_url(cls, event):
@@ -448,6 +440,8 @@ class Event(models.Model):
     event_data = JSONField(blank=True)
     created = models.DateTimeField(default=timezone.now, db_index=True)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    # If the event relates to something in a Group, this should be set
+    group = models.ForeignKey(Group, null=True, blank=True, on_delete=models.CASCADE)
 
     # Events like NewCommentEvent have a parent event (the event the comment is
     # attached to).
@@ -542,10 +536,7 @@ class Event(models.Model):
         assert self.accepts_comments()
         return self.comments.create(author=author,
                                     message=message,
-                                    group=self.get_group())
-
-    def get_group(self):
-        return self.event_logic.get_group(self)
+                                    group=self.group)
 
     @property
     def is_new_comment(self):
