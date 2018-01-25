@@ -3926,7 +3926,7 @@ shouldCheckTypedWord : TestingMethod -> String -> Bool
 shouldCheckTypedWord testingMethod input =
     let
         trimmedText =
-            input |> String.trim |> stripOuterPunctuation |> String.trim
+            input |> normalizeWordForTest
     in
         case testingMethod of
             FullWords ->
@@ -4016,7 +4016,7 @@ normalizeWordForSuggestion =
 
 punctuationRegex : String
 punctuationRegex =
-    "[\"'\\.,;!?:\\/#!$%\\^&\\*{}=\\-_`~()\\[\\]“”‘’—–…]"
+    "[\"'\\.,;!?:\\/#!$%\\^&\\*{}=\\-_`~()\\[\\]“”‘’—–…<>]"
 
 
 stripPunctuation : String -> String
