@@ -415,19 +415,26 @@ class EventManager(models.Manager):
         return events
 
     def for_viewer(self, viewer):
-        qs = (Event.objects
-              .order_by('-created')
-              .select_related('account')
-              .exclude(account__is_active=False)
-              )
+        qs_base = (Event.objects
+                   .order_by('-created')
+                   .select_related('account')
+                   .exclude(account__is_active=False)
+                   )
         if viewer is None or not viewer.is_hellbanned:
-            qs = qs.exclude(account__is_hellbanned=True)
+            qs_base = qs_base.exclude(account__is_hellbanned=True)
 
-        # TODO - want to include comments in groups that the user is a member
-        # of, even private ones. For now we exclude all private group comments.
-        qs = qs.exclude(event_type=EventType.NEW_COMMENT,
-                        group__isnull=False,
-                        group__public=False)
+        # Exclude all comments from private groups
+        qs_1 = qs_base.exclude(group__isnull=False,
+                               group__public=False)
+
+        if viewer is not None:
+            # Re-add events from groups
+            qs_2 = qs_base.filter(group__isnull=False,
+                                  group__in=viewer.groups.all())
+            qs = qs_1 | qs_2
+        else:
+            qs = qs_1
+
         return qs
 
     def for_activity_stream(self, viewer=None, event_by=None):
