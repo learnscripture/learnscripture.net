@@ -370,15 +370,15 @@ def account_get_friendship_weights(account_id):
     # Normalize to 1
     normalize_weighting(weights)
 
-    # We use following as definite friendships. Following is the worth more than
-    # any evidence from groups.
+    # We use 'following' in indicate definite friendships. Following is worth
+    # more than any evidence from groups.
     for acc in account.following.all():
         weights[acc.id] += 1.5
 
     # Normalize again
     normalize_weighting(weights)
 
-    # Give some weight to self
+    # Give some weight to self, so user sees their own events.
     weights[account_id] = 0.3
 
     return weights
