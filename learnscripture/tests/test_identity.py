@@ -449,21 +449,8 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
 
         l = i.verse_statuses_for_passage(vs1.id, NET.id)
         for uvs in l:
-            with self.subTest(localized_reference=uvs.localized_reference):
-                self.assertEqual(uvs.needs_testing_by_db, uvs.localized_reference == "Psalm 23:3")
-                # All of them get needs_testing == True due to group testing logic
-                self.assertEqual(uvs.needs_testing, True)
-
-        # When fully learnt, we don't want to force practice.
-        i.verse_statuses.exclude(
-            localized_reference="Psalm 23:3").update(strength=accounts.memorymodel.LEARNT + 0.1)
-
-        l = i.verse_statuses_for_passage(vs1.id, NET.id)
-        for uvs in l:
-            with self.subTest(localized_reference=uvs.localized_reference):
-                # None should have 'needs_testing_override' set,
-                # only 23:3 will needs_testing == True
-                self.assertEqual(uvs.needs_testing, uvs.localized_reference == "Psalm 23:3")
+            self.assertEqual(uvs.needs_testing_by_db, uvs.localized_reference == "Psalm 23:3")
+            self.assertEqual(uvs.needs_testing, True)
 
     def test_get_next_section(self):
         NET = TextVersion.objects.get(slug='NET')
