@@ -1669,6 +1669,14 @@ buttonsForStage model verse verseStore preferences =
         nextVerseButtonCaption =
             "OK"
 
+        practiceButtonCaption =
+            if verse.sessionLearningType == Practice then
+                -- Clearer, and we will only have two buttons so will have more
+                -- room for a longer caption.
+                "Practice again"
+            else
+                "Practice"
+
         nextVerseEnabled =
             case getNextVerse verseStore verse.verseStatus of
                 NextVerseData _ ->
@@ -1739,7 +1747,7 @@ buttonsForStage model verse verseStore preferences =
                             accuracy < 0.8
                     in
                         [ Just
-                            { caption = "Practice"
+                            { caption = practiceButtonCaption
                             , subCaption = morePracticeSubCaption
                             , msg = MorePractice accuracy
                             , enabled = Enabled
