@@ -82,7 +82,7 @@ def debug_middleware(get_response):
             session.login(request, account.identity)
             params = request.GET.copy()
             del params['as']
-            query = urlencode(params)
+            query = urlencode(params, doseq=True)
             return HttpResponseRedirect(request.path + ("?" + query if query else ""))
 
         if 'now' in request.GET:
