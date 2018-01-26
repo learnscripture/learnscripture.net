@@ -2077,45 +2077,55 @@ instructions verse testingMethod helpVisible =
                     , commonHelp ++ buttonsHelp
                     )
 
-                Test _ tp ->
-                    case tp.currentWord of
-                        CurrentWord _ ->
-                            case testingMethod of
-                                FullWords ->
-                                    ( [ bold "TEST: "
-                                      , H.text "Testing time! Type the text, pressing space after each word."
-                                      ]
-                                    , commonHelp
-                                        ++ testingCommonHelp
-                                        ++ [ [ H.text "You don't need perfect spelling to get full marks."
-                                             ]
-                                           ]
-                                    )
+                Test testType tp ->
+                    let
+                        practiseNote =
+                            if isPracticeTest verse testType then
+                                [ H.br [] []
+                                , H.b [] [ H.text "PRACTICE" ]
+                                , H.text " test, scores are not counted."
+                                ]
+                            else
+                                [ emptyNode ]
+                    in
+                        case tp.currentWord of
+                            CurrentWord _ ->
+                                case testingMethod of
+                                    FullWords ->
+                                        ( [ bold "TEST: "
+                                          , H.text "Testing time! Type the text, pressing space after each word."
+                                          ] ++ practiseNote
+                                        , commonHelp
+                                            ++ testingCommonHelp
+                                            ++ [ [ H.text "You don't need perfect spelling to get full marks."
+                                                 ]
+                                               ]
+                                        )
 
-                                FirstLetter ->
-                                    ( [ bold "TEST: "
-                                      , H.text "Testing time! Type the "
-                                      , bold "first letter"
-                                      , H.text " of each word."
-                                      ]
-                                    , commonHelp ++ testingCommonHelp
-                                    )
+                                    FirstLetter ->
+                                        ( [ bold "TEST: "
+                                          , H.text "Testing time! Type the "
+                                          , bold "first letter"
+                                          , H.text " of each word."
+                                          ] ++ practiseNote
+                                        , commonHelp ++ testingCommonHelp
+                                        )
 
-                                OnScreen ->
-                                    ( [ bold "TEST: "
-                                      , H.text "Testing time! For each word choose from the options shown."
-                                      ]
-                                    , commonHelp ++ testingCommonHelp
-                                    )
+                                    OnScreen ->
+                                        ( [ bold "TEST: "
+                                          , H.text "Testing time! For each word choose from the options shown."
+                                          ] ++ practiseNote
+                                        , commonHelp ++ testingCommonHelp
+                                        )
 
-                        TestFinished { accuracy } ->
-                            ( [ bold "RESULTS: "
-                              , H.text "You scored: "
-                              , bold (toString (floor (accuracy * 100)) ++ "%")
-                              , H.text (" - " ++ resultComment accuracy)
-                              ]
-                            , []
-                            )
+                            TestFinished { accuracy } ->
+                                ( [ bold "RESULTS: "
+                                  , H.text "You scored: "
+                                  , bold (toString (floor (accuracy * 100)) ++ "%")
+                                  , H.text (" - " ++ resultComment accuracy)
+                                  ]
+                                , []
+                                )
     in
         [ H.div [ A.id "id-instructions" ]
             main
