@@ -451,10 +451,14 @@ body.learn-page {
         padding-right: 2px;
     }
 
-    #id-hint-btn, #id-help-btn, #id-more-practice-btn, .word-button.clickable {
+    #id-hint-btn, #id-help-btn, #id-more-practice-btn, .word-button.clickable,
+    #id-onscreen-test-container .word-button {
         // For Internet Explorer, remove 300ms delays on "click" event when touch
         // actions are used.
         touch-action: none;
+
+        // Disable Safari's annoying highlight
+        -webkit-tap-highlight-color: rgba(0,0,0,0);
     }
 
     h1, h2, h3, #id-verse-options-menu-btn {
