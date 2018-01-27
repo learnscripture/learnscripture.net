@@ -80,6 +80,13 @@ var fixTypingBox = function (attempts, args, afterDomUpdated) {
 
 
     if (args.expectedClass == "toshow") {
+        // to avoid seeing the previous typed text in next word word position,
+        // make sure we blank it before moving/making visible. This does seem to
+        // be necessary on some computers e.g. Safari on MacBook.
+        if (args.value === "" && typingBox.value !== "") {
+            typingBox.value = "";
+        }
+
         // Fix size/position first, then make it visible.
 
         var correctPositioningComplete = false;
