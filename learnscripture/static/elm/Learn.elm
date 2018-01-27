@@ -2094,7 +2094,8 @@ instructions verse testingMethod helpVisible =
                                     FullWords ->
                                         ( [ bold "TEST: "
                                           , H.text "Testing time! Type the text, pressing space after each word."
-                                          ] ++ practiseNote
+                                          ]
+                                            ++ practiseNote
                                         , commonHelp
                                             ++ testingCommonHelp
                                             ++ [ [ H.text "You don't need perfect spelling to get full marks."
@@ -2107,14 +2108,16 @@ instructions verse testingMethod helpVisible =
                                           , H.text "Testing time! Type the "
                                           , bold "first letter"
                                           , H.text " of each word."
-                                          ] ++ practiseNote
+                                          ]
+                                            ++ practiseNote
                                         , commonHelp ++ testingCommonHelp
                                         )
 
                                     OnScreen ->
                                         ( [ bold "TEST: "
                                           , H.text "Testing time! For each word choose from the options shown."
-                                          ] ++ practiseNote
+                                          ]
+                                            ++ practiseNote
                                         , commonHelp ++ testingCommonHelp
                                         )
 
@@ -4433,8 +4436,19 @@ focusDefaultButton model =
                         -- Dom.focus can fail if the control doesn't exist yet.
                         -- Not sure if this is really possible, but we
                         -- re-attempt focus for the case of the control not
-                        -- appearing in the DOM yet.
-                        Task.attempt (handleFocusResult id 5) (Dom.focus id)
+                        -- appearing in the DOM yet. In addition, there is some
+                        -- issue with Firefox which means that if you are in a
+                        -- test, and press space at the end of the last word,
+                        -- the word is checked, the the 'OK' button appears (as
+                        -- default), the DOM focus happens and then Firefox
+                        -- thinks that space was pressed with that button
+                        -- default, and 'presses' that button. We have found
+                        -- this can be fixed by inserting a small, non-zero
+                        -- delay using Process.sleep
+                        Task.attempt (handleFocusResult id 5)
+                            (Process.sleep 100
+                                |> Task.andThen (\_ -> Dom.focus id)
+                            )
         )
 
 
