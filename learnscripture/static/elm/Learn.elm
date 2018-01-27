@@ -4344,6 +4344,7 @@ type alias UpdateTypingBoxData =
     , expectedClass : String
     , hardMode : Bool
     , refocus : Bool
+    , value : String
     }
 
 
@@ -4373,6 +4374,7 @@ getUpdateTypingBoxData model refocus =
                             Just currentVerse ->
                                 shouldUseHardTestingMode currentVerse
                     , refocus = refocus
+                    , value = tp.currentTypedText
                     }
 
         Nothing ->
@@ -4387,6 +4389,7 @@ hideTypingBoxData =
     , expectedClass = classForTypingBox False
     , hardMode = False
     , refocus = True
+    , value = ""
     }
 
 
