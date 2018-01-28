@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import time
 from datetime import timedelta
 
 from django.db.models import F
@@ -220,13 +219,13 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         vs1 = VerseSet.objects.get(name='Psalm 23')
         i.add_verse_set(vs1)
 
-        with self.assertNumQueries(2):  # 1 base query, 1 for each passage
+        with self.assertNumQueries(3):  # 1 base query, 2 for each passage
             i.passages_for_learning()
 
         i.add_verse_set(vs1, KJV)
 
         i.record_verse_action('Psalm 23:1', 'NET', StageType.TEST, 1.0)
-        with self.assertNumQueries(3):
+        with self.assertNumQueries(5):
             cvss = i.passages_for_learning()
         self.assertEqual(cvss[0].verse_set.id, vs1.id)
         self.assertEqual(cvss[0].version.short_name, 'KJV')
@@ -244,7 +243,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         i.verse_statuses.update(last_tested=timezone.now() - timedelta(10),
                                 next_test_due=timezone.now() - timedelta(1))
 
-        with self.assertNumQueries(3):
+        with self.assertNumQueries(5):
             cvss = i.passages_for_learning()
         self.assertEqual(cvss[0].verse_set.id, vs1.id)
         self.assertEqual(cvss[0].version.short_name, 'KJV')
@@ -279,9 +278,9 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
             if vn != 1:
                 i.record_verse_action(ref, 'NET', StageType.TEST, 1.0)
 
-            with self.assertNumQueries(3):
+            with self.assertNumQueries(FuzzyInt(3, 4)):
                 # 1 for passages_for_learning, 2 for review passages,
-                # or 2 for passages_for_learning, 1 for review passage
+                # or 3 for passages_for_learning, 1 for review passage
                 cvss_review, cvss_learn = i.passages_for_reviewing_and_learning()
 
             if vn < 6:
@@ -450,7 +449,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
 
         l = i.verse_statuses_for_passage(vs1.id, NET.id)
         for uvs in l:
-            self.assertEqual(uvs.needs_testing_by_db, uvs.localized_reference == "Psalm 23:3")
+            self.assertEqual(uvs.needs_testing_individual, uvs.localized_reference == "Psalm 23:3")
             self.assertEqual(uvs.needs_testing, True)
 
     def test_get_next_section(self):
