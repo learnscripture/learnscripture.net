@@ -169,11 +169,49 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         i.add_verse_set(vs1)
         i.record_verse_action('John 3:16', 'NET', StageType.READ, 1)
         i.record_verse_action('John 3:16', 'NET', StageType.TEST, 1)
-        i.review_sooner('John 3:16', 'NET', 1000)
+        gap = timedelta(seconds=1000)
+        i.review_sooner('John 3:16', 'NET', gap.seconds)
         uvs = i.verse_statuses.get(localized_reference='John 3:16',
                                    version__slug='NET')
         self.assertEqual(uvs.next_test_due,
-                         uvs.last_tested + timedelta(seconds=1000))
+                         uvs.last_tested + gap)
+
+        self.assertEqual(i.next_verse_due(),
+                         uvs)
+
+        self.move_clock_on(gap + timedelta(seconds=100))
+
+        uvs = i.verse_statuses.get(id=uvs.id)
+        self.assertEqual(uvs.needs_testing_individual, True)
+
+        self.assertEqual(i.first_overdue_verse(timezone.now()),
+                         uvs)
+
+        # Something manually selected for review sooner should be
+        # reviewed even if strength is 'fully learnt'
+        i.verse_statuses.update(strength=accounts.memorymodel.LEARNT)
+        self.assertEqual(i.first_overdue_verse(timezone.now()),
+                         uvs)
+
+        # If we record a test again, 'early_review_requested' should be reset,
+        # so that the overrides of 'review_sooner' no longer take effect. (The
+        # user has to keep on requeted 'see sooner' if they want to that verse
+        # to keep on being seen after being learnt.
+        i.record_verse_action('John 3:16', 'NET', StageType.TEST, 1)
+        uvs = i.verse_statuses.get(id=uvs.id)
+        now = timezone.now()
+        self.assertGreater(uvs.next_test_due, now)
+
+        # Verse should not be due in the future
+        self.assertEqual(i.next_verse_due(),
+                         None)
+
+        gap2 = uvs.next_test_due - now
+        self.move_clock_on(gap2 + timedelta(seconds=100))
+
+        # Verse should not become overdue
+        self.assertEqual(i.first_overdue_verse(timezone.now()),
+                         None)
 
     def test_record_creates_awards(self):
         i, account = self.create_account(version_slug='NET')

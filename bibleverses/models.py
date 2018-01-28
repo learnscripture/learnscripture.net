@@ -6,7 +6,7 @@ from collections import defaultdict
 
 from autoslug import AutoSlugField
 from django.db import models
-from django.db.models import F, Func, Value
+from django.db.models import F, Func, Q, Value
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -739,7 +739,7 @@ class UserVerseStatusQuerySet(models.QuerySet):
                 .active()
                 .tested()
                 .filter(
-                    strength__lt=memorymodel.LEARNT,
+                    Q(strength__lt=memorymodel.LEARNT) | Q(early_review_requested=True),
                     next_test_due__isnull=False,
                 ))
 
@@ -785,6 +785,7 @@ class UserVerseStatus(models.Model):
     first_seen = models.DateTimeField(null=True, blank=True)
     last_tested = models.DateTimeField(null=True, blank=True)
     next_test_due = models.DateTimeField(null=True, blank=True)
+    early_review_requested = models.BooleanField(default=False)
 
     # ignored is True when users have chosen to stop learning a verse.
     ignored = models.BooleanField(default=False)
