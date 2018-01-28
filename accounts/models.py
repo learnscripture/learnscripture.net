@@ -595,7 +595,8 @@ class Identity(models.Model):
             next_due = now + timedelta(seconds=memorymodel.next_test_due_after(new_strength))
             s.update(strength=new_strength,
                      last_tested=now,
-                     next_test_due=next_due)
+                     next_test_due=next_due,
+                     early_review_requested=False)
 
             # Sometimes we get to here with 'first_seen' still null,
             # so we fix it to keep our data making sense.
@@ -751,7 +752,8 @@ class Identity(models.Model):
         qs.update(strength=0,
                   last_tested=None,
                   next_test_due=None,
-                  memory_stage=MemoryStage.ZERO)
+                  memory_stage=MemoryStage.ZERO,
+                  early_review_requested=False)
 
     def review_sooner(self, localized_reference, version_slug, review_after_seconds):
         # Could in theory do this with an update, but it is easier in Python and
@@ -763,6 +765,7 @@ class Identity(models.Model):
             if last_tested is None:
                 last_tested = timezone.now()
             uvs.next_test_due = last_tested + timedelta(seconds=review_after_seconds)
+            uvs.early_review_requested = True
             uvs.save()
 
     def _dedupe_uvs_set(self, uvs_set):
