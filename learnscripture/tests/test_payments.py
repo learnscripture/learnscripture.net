@@ -125,8 +125,7 @@ class DonationDriveTests(AccountTestMixin, TestBase):
         self.assertEqual(d2.active_for_account(self.account),
                          False)
 
-        # Now move payments into past
-        self.account.payments.update(created=timezone.now() - timedelta(days=5))
+        self.move_clock_on(timedelta(days=5))
 
         # Should be active again
         self.assertEqual(d2.active_for_account(self.account),

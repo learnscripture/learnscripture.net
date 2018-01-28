@@ -1,11 +1,10 @@
 from datetime import timedelta
 
-from django.db.models import F
 from django.urls import reverse
 from django.utils import timezone
 
 import accounts.memorymodel
-from accounts.models import Identity, Notice
+from accounts.models import Identity
 from bibleverses.models import MemoryStage, StageType, TextVersion, VerseSet
 
 from .base import FullBrowserTest, WebTestBase
@@ -193,8 +192,7 @@ class DashboardTestsBase(RequireExampleVerseSetsMixin):
 
         self.assertNotEqual(identity.notices.all()[0].seen, None)
 
-        # Move database into 'past'
-        Notice.objects.update(seen=F('seen') - timedelta(days=10))
+        self.move_clock_on(timedelta(days=10))
 
         self.get_url('dashboard')
         self.assertTextAbsent("Hello you crazy guy!")

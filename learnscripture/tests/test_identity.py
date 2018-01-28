@@ -86,13 +86,14 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
                          MemoryStage.ZERO)
 
         i.record_verse_action('John 3:16', 'NET', StageType.READ, 1)
+        self.move_clock_on(timedelta(seconds=10))
+
         uvs = i.verse_statuses.get(localized_reference='John 3:16',
                                    version__slug='NET')
         self.assertEqual(uvs.memory_stage, MemoryStage.SEEN)
         self.assertTrue(uvs.first_seen is not None)
 
         first_seen = uvs.first_seen
-        time.sleep(1)
         i.record_verse_action('John 3:16', 'NET', StageType.READ, 1)
         uvs = i.verse_statuses.get(localized_reference='John 3:16',
                                    version__slug='NET')
@@ -518,9 +519,8 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         self.assertEqual([False, True, True],
                          [uvs.needs_testing for uvs in uvss2])
 
-        # A sleep of one second will ensure our algo can distinguish
-        # between groups of testing.
-        time.sleep(1)
+        # A gap to ensure our algo can distinguish between groups of testing.
+        self.move_clock_on(timedelta(seconds=10))
 
         # Learn next two.
 
@@ -536,7 +536,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
                          [uvs.needs_testing for uvs in uvss3])
 
         # Learn next two.
-        time.sleep(1)
+        self.move_clock_on(timedelta(seconds=10))
         for uvs in uvss3:
             i.record_verse_action(uvs.localized_reference, 'NET', StageType.TEST, 0.95)
 
@@ -699,7 +699,6 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
                          ['John 14:6'])
         i.record_verse_action('John 14:6', 'NET', StageType.READ, 1)
         i.cancel_learning(['John 14:6'], "NET")
-        time.sleep(1)
 
         vs1 = VerseSet.objects.get(name='Bible 101')
         i.add_verse_set(vs1)
