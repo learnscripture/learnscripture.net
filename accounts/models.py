@@ -496,9 +496,10 @@ class Identity(models.Model):
         out = []
 
         vc_list = verse_set.verse_choices.all()
-        existing_uvss = set(self.verse_statuses.filter(verse_set=verse_set,
-                                                       version=version,
-                                                       ignored=False))
+        existing_uvss = set(self.verse_statuses
+                            .active()
+                            .filter(verse_set=verse_set,
+                                    version=version))
 
         uvss_dict = dict([(uvs.localized_reference, uvs) for uvs in existing_uvss])
 
@@ -520,9 +521,10 @@ class Identity(models.Model):
         if version is None:
             version = self.default_bible_version
 
-        existing = list(self.verse_statuses.filter(localized_reference=localized_reference,
-                                                   verse_set__isnull=True,
-                                                   ignored=False))
+        existing = list(self.verse_statuses
+                        .active()
+                        .filter(localized_reference=localized_reference,
+                                verse_set__isnull=True))
         if existing:
             return existing[0]
         else:
@@ -787,9 +789,10 @@ class Identity(models.Model):
         return retval
 
     def verse_statuses_started(self):
-        return self.verse_statuses.filter(ignored=False,
-                                          strength__gt=0,
-                                          last_tested__isnull=False)
+        return (self.verse_statuses
+                .active()
+                .filter(strength__gt=0,
+                        last_tested__isnull=False))
 
     def verses_started_count(self, started_since=None):
         from scores.models import get_verses_started_counts
@@ -806,20 +809,18 @@ class Identity(models.Model):
         Returns a list of UserVerseStatuses that need reviewing.
         """
         qs = (self.verse_statuses
-              .filter(version__text_type=TextType.BIBLE,
-                      ignored=False,
-                      memory_stage=MemoryStage.TESTED)
+              .filter(version__text_type=TextType.BIBLE)
+              .needs_reviewing(timezone.now())
               # Don't include passages - we do those separately:
               .exclude(verse_set__set_type=VerseSetType.PASSAGE)
               .order_by('next_test_due', 'added')
               )
-        qs = memorymodel.filter_qs(qs, timezone.now())
         return self._dedupe_uvs_set(qs)
 
     def bible_verse_statuses_for_learning_qs(self):
         qs = (self.verse_statuses
+              .active()
               .filter(version__text_type=TextType.BIBLE,
-                      ignored=False,
                       memory_stage__lt=MemoryStage.TESTED)
               # Don't include passages - we do those separately:
               .exclude(verse_set__set_type=VerseSetType.PASSAGE)
@@ -868,8 +869,8 @@ class Identity(models.Model):
 
     def _catechism_qas_base_qs(self, catechism_id):
         qs = (self.verse_statuses
-              .filter(version__text_type=TextType.CATECHISM,
-                      ignored=False)
+              .active()
+              .filter(version__text_type=TextType.CATECHISM)
               )
         if catechism_id is not None:
             qs = qs.filter(version=catechism_id)
@@ -891,10 +892,8 @@ class Identity(models.Model):
         """
         Returns catechism QAs that are due for reviewing
         """
-        qs = (self._catechism_qas_base_qs(catechism_id)
-              .filter(memory_stage=MemoryStage.TESTED))
-        qs = memorymodel.filter_qs(qs, timezone.now())
-        return qs
+        return (self._catechism_qas_base_qs(catechism_id)
+                .needs_reviewing(timezone.now()))
 
     def catechisms_for_learning(self):
         """
@@ -946,9 +945,10 @@ class Identity(models.Model):
                 .order_by('text_order'))
 
     def verse_statuses_for_ref_and_version(self, localized_reference, version_slug):
-        return self.verse_statuses.filter(localized_reference=localized_reference,
-                                          version__slug=version_slug,
-                                          ignored=False)
+        return (self.verse_statuses
+                .active()
+                .filter(localized_reference=localized_reference,
+                        version__slug=version_slug))
 
     def passages_for_learning(self, extra_stats=True):
         """
@@ -956,10 +956,11 @@ class Identity(models.Model):
         more initial learning.
         If 'extra_stats==True', they are decorated with 'untested_total' and 'tested_total' attributes.
         """
-        statuses = self.verse_statuses.filter(verse_set__set_type=VerseSetType.PASSAGE,
-                                              ignored=False,
-                                              memory_stage__lt=MemoryStage.TESTED)\
-                                      .select_related('verse_set', 'version')
+        statuses = (self.verse_statuses
+                    .active()
+                    .filter(verse_set__set_type=VerseSetType.PASSAGE,
+                            memory_stage__lt=MemoryStage.TESTED)
+                    .select_related('verse_set', 'version'))
         chosen_verse_sets = {}
 
         # We already have info needed for untested_total
@@ -979,24 +980,14 @@ class Identity(models.Model):
         if extra_stats:
             now = timezone.now()
 
-            # We need one additional query per ChosenVerseSet for tested_total
-            # and needs_review_total. They could be done individually more
-            # simply, but we reduce the number of queries by combining.
+            # We need two additional queries per ChosenVerseSet for tested_total
+            # and needs_review_total.
             for cvs in chosen_verse_sets.values():
-                stats = (self.verse_statuses.filter(verse_set=cvs.verse_set,
-                                                    version=cvs.version,
-                                                    ignored=False,
-                                                    memory_stage__gte=MemoryStage.TESTED)
-                         .aggregate(
-                             needs_review_total=models.Sum(
-                                 models.Case(
-                                     models.When(next_test_due__lt=now, then=1),
-                                     default=models.Value(0),
-                                     output_field=models.IntegerField())),
-                             tested_total=models.Count('id')))
+                stats_qs = self.verse_statuses.filter(verse_set=cvs.verse_set,
+                                                      version=cvs.version)
 
-                cvs.tested_total = stats['tested_total']
-                cvs.needs_review_total = stats['needs_review_total'] or 0
+                cvs.tested_total = stats_qs.tested().count()
+                cvs.needs_review_total = stats_qs.needs_reviewing(now).count()
 
         return sorted(list(chosen_verse_sets.values()), key=lambda c: c.sort_key)
 
@@ -1005,7 +996,8 @@ class Identity(models.Model):
         Returns a list of ChosenVerseSets that have been/are being learnt
         """
         pairs = (self.verse_statuses
-                 .filter(ignored=False, verse_set__isnull=False)
+                 .active()
+                 .filter(verse_set__isnull=False)
                  .values_list('verse_set_id', 'version_id')
                  .distinct())
         if len(pairs) == 0:
@@ -1027,10 +1019,10 @@ class Identity(models.Model):
         to learn.
         """
         return set(uvs.localized_reference
-                   for uvs in self.verse_statuses.filter(localized_reference__in=localized_references,
-                                                         ignored=False,
-                                                         version=version,
-                                                         memory_stage__gte=MemoryStage.TESTED))
+                   for uvs in (self.verse_statuses
+                               .tested()
+                               .filter(localized_reference__in=localized_references,
+                                       version=version)))
 
     def which_in_learning_queue(self, localized_references, version):
         """
@@ -1056,14 +1048,12 @@ class Identity(models.Model):
         # We also always use these two return values at the same time.
         # So it makes sense to return them together.
         statuses = (self.verse_statuses
-                    .filter(verse_set__set_type=VerseSetType.PASSAGE,
-                            memory_stage__gte=MemoryStage.TESTED,
-                            ignored=False))
+                    .reviewable()
+                    .filter(verse_set__set_type=VerseSetType.PASSAGE))
 
         # If any of them need reviewing, we want to know about it:
-        statuses_for_review = memorymodel.filter_qs(
-            statuses.select_related('verse_set', 'version'),
-            timezone.now())
+        statuses_for_review = (statuses.select_related('verse_set', 'version')
+                               .needs_reviewing(timezone.now()))
 
         # We also want to exclude those which have any verses in the set still
         # untested, but this is easiest done as a second pass after retrieving.
@@ -1129,28 +1119,25 @@ class Identity(models.Model):
                                        for cvs in cvss]).values_list('id', flat=True))
 
         return (self.verse_statuses
-                .filter(ignored=False,
-                        next_test_due__isnull=False,
-                        next_test_due__gte=timezone.now(),
-                        strength__lt=memorymodel.LEARNT)
+                .reviewable()
+                .needs_reviewing_in_future(timezone.now())
                 .exclude(id__in=exclude_ids)
                 .order_by('next_test_due')
                 .first())
 
     def first_overdue_verse(self, now):
         return (self.verse_statuses
-                .filter(ignored=False,
-                        next_test_due__isnull=False,
-                        next_test_due__lt=now,
-                        strength__lt=memorymodel.LEARNT)
+                .needs_reviewing(now)
                 .order_by('next_test_due')
                 .first())
 
     def verse_statuses_for_passage(self, verse_set_id, version_id):
         # Must be strictly in the bible order
-        uvs_list = list(self.verse_statuses.filter(verse_set=verse_set_id,
-                                                   version=version_id,
-                                                   ignored=False).order_by('text_order'))
+        uvs_list = list(self.verse_statuses
+                        .active()
+                        .filter(verse_set=verse_set_id,
+                                version=version_id)
+                        .order_by('text_order'))
         if len(uvs_list) == 0:
             return []
 

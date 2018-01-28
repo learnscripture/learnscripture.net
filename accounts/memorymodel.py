@@ -209,10 +209,6 @@ class MemoryModel(object):
         t_1 = self.t(min(strength + self.DELTA_S_IDEAL, self.BEST_STRENGTH))
         return max(t_1 - t_0, self.MIN_TIME_BETWEEN_TESTS)
 
-    def filter_qs(self, qs, now):
-        return qs.filter(next_test_due__lte=now,
-                         strength__lt=self.LEARNT)
-
 
 # test_run and test_run_using_next_test_due should be essentially identical.
 
@@ -363,7 +359,6 @@ def generate_test_file():
 
 EXPONENT = 0.25
 MM = MemoryModel(EXPONENT)
-filter_qs = MM.filter_qs
 needs_testing = MM.needs_testing
 strength_estimate = MM.strength_estimate
 next_test_due_after = MM.next_test_due_after

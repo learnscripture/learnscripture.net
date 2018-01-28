@@ -543,9 +543,10 @@ class VerseSetManager(models.Manager):
         if len(ids) == 0:
             return 0
         return (UserVerseStatus.objects
+                .active()
                 .exclude(for_identity__account__isnull=True)
                 .exclude(for_identity__account__in=ignoring_account_ids)
-                .filter(ignored=False, verse_set__in=ids)
+                .filter(verse_set__in=ids)
                 .aggregate(count=models.Count('for_identity', distinct=True))
                 ['count'])
 
@@ -721,6 +722,34 @@ class VerseChoice(models.Model):
         return self.get_localized_reference(language_code)
 
 
+class UserVerseStatusQuerySet(models.QuerySet):
+
+    def active(self):
+        return self.filter(
+            ignored=False
+        )
+
+    def tested(self):
+        return self.active().filter(
+            memory_stage=MemoryStage.TESTED,
+        )
+
+    def reviewable(self):
+        return (self
+                .active()
+                .tested()
+                .filter(
+                    strength__lt=memorymodel.LEARNT,
+                    next_test_due__isnull=False,
+                ))
+
+    def needs_reviewing(self, now):
+        return self.reviewable().filter(next_test_due__lte=now)
+
+    def needs_reviewing_in_future(self, now):
+        return self.reviewable().filter(next_test_due__gt=now)
+
+
 class UserVerseStatus(models.Model):
     """
     Tracks the user's progress for a verse or QAPair
@@ -759,6 +788,8 @@ class UserVerseStatus(models.Model):
 
     # ignored is True when users have chosen to stop learning a verse.
     ignored = models.BooleanField(default=False)
+
+    objects = models.Manager.from_queryset(UserVerseStatusQuerySet)()
 
     @cached_property
     def text(self):
@@ -802,10 +833,10 @@ class UserVerseStatus(models.Model):
         if hasattr(self, 'needs_testing_override'):
             return self.needs_testing_override
         else:
-            return self.needs_testing_by_db
+            return self.needs_testing_individual
 
     @cached_property
-    def needs_testing_by_db(self):
+    def needs_testing_individual(self):
         # We go by 'next_test_due', since that is how we do filtering.
         if self.last_tested is None:
             return True
