@@ -95,10 +95,10 @@
         </h3>
         <div>
           {% if cvs.needs_testing_count == cvs.total_verse_count %}
-            This passage is due for review today
+            This passage is due for review
             ({{ cvs.total_verse_count }} verse{{ cvs.total_verse_count|pluralize }}).
           {% else %}
-            Part of this passage is due for review today
+            Part of this passage is due for review
             ({{ cvs.needs_testing_count }}/{{ cvs.total_verse_count }} verses).
           {% endif %}
         </div>
@@ -119,8 +119,8 @@
           <input type="submit" name="reviewbiblequeue" class="btn primary" value="Review" />
         </form>
 
-        <p>You've got {{ review_verses_queue|length }}
-          verse{{review_verses_queue|length|pluralize }} due for review today.
+        <p>You've currently got {{ review_verses_queue|length }}
+          verse{{review_verses_queue|length|pluralize }} due for review.
         </p>
 
         <p>Verses coming up:
@@ -147,7 +147,7 @@
 
           <h3><a href="{% url 'view_catechism' catechism.slug %}">{{ catechism.full_name }}</a></h3>
 
-          <p>You've got {{ catechism.needs_reviewing_total }} question(s) due for review today.</p>
+          <p>You've currently got {{ catechism.needs_reviewing_total }} question(s) due for review.</p>
           <br><br>
         </div>
 
