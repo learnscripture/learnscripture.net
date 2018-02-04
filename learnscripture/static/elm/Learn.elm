@@ -4677,8 +4677,12 @@ maxHttpRetries =
 trackedHttpCallCaption : TrackedHttpCall -> String
 trackedHttpCallCaption call =
     case call of
-        RecordTestComplete currentVerse _ _ ->
-            interpolate "Saving score - {0}" [ currentVerse.verseStatus.localizedReference ]
+        RecordTestComplete currentVerse _ testType ->
+            if isPracticeTest currentVerse testType
+            then
+                interpolate "Marking done - {0}" [ currentVerse.verseStatus.localizedReference ]
+            else
+                interpolate "Saving score - {0}" [ currentVerse.verseStatus.localizedReference ]
 
         RecordReadComplete currentVerse ->
             interpolate "Recording read - {0}" [ currentVerse.verseStatus.localizedReference ]
