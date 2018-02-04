@@ -65,16 +65,16 @@ New texts and catechisms
 
   * Then, dump from development e.g.::
 
-      $ ./manage.py dump_text ../texts/db_dumps NCC
+      $ ./manage.py dump_text ../learnscripture-texts/db_dumps NCC
 
   * Transfer to live server e.g.::
 
-      $ rsync ../texts/db_dumps/NCC.*.json learnscripture@learnscripture.net:/home/learnscripture/texts
+      $ rsync ../learnscripture-texts/db_dumps/NCC.*.json learnscripture@learnscripture.net:/home/learnscripture/texts
 
   * Load JSON file into live site::
 
       $ ssh learnscripture@learnscripture.net
-      $ cd ~/webapps/learnscripture/verions/current/src
+      $ cd ~/webapps/learnscripture/versions/current/src
       $ . ../venv/bin/activate
       $ ./manage.py load_text ~/texts NCC
 
