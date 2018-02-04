@@ -74,6 +74,11 @@ aMemoryStrength =
     floatRange 0 bestStrength
 
 
+anUnlearntMemoryStrength : Fuzzer Float
+anUnlearntMemoryStrength =
+    floatRange 0 learnt
+
+
 aTestAccuracy : Fuzzer Float
 aTestAccuracy =
     floatRange 0 1
@@ -124,4 +129,11 @@ suite =
                     )
                     strengthEstimateTestData
             )
+        , describe "nextTestDueAfter"
+            [ fuzz anUnlearntMemoryStrength "maximum gap for unlearnt memory" <|
+                (\s ->
+                    nextTestDueAfter s
+                        |> Expect.lessThan (365 * 24 * 60 * 60)
+                )
+            ]
         ]
