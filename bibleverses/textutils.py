@@ -41,7 +41,7 @@ def split_into_words(text, fix_punctuation_whitespace=True):
     t = (text
          .replace('--', ' -- ')
          .replace('\r\n', '\n')
-         .strip())
+         .strip(" "))
     l = WORD_SPLITTER.split(t)
     # Eliminate spaces
     l = [w for w in l if w not in [" ", ""]]
