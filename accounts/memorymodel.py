@@ -84,6 +84,12 @@ class MemoryModel(object):
     # accuracy of 95 - 100% is achievable for most people, but scaling (see
     # below) means 95% accuracy goes to a strength of 0.9025, and we need to go
     # under that.
+    #
+    # With a value of 0.8, it is possible to move a verse fully learnt with
+    # a test score of 90%, which should be achievable by all.
+    #
+    # Also, with a strength of just less than this, a verse will be due for
+    # review in less than a year.
     LEARNT = 0.80
 
     # We want to reach this stage after 1 year on our idealised curve.
