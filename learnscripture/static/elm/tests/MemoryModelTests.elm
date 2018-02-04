@@ -11,45 +11,62 @@ import String
 import Test exposing (..)
 
 
-strengthEstimateTestData : List (Float, Float, Maybe Float, Float)
+strengthEstimateTestData : List ( Float, Float, Maybe Float, Float )
 strengthEstimateTestData =
     JD.decodeValue (JD.list (JD.list (JD.nullable JD.float))) Native.TestData.MemoryModel.strengthEstimateTestData
-        |> \v -> case v of
-                     Ok val ->
-                         List.map (\item ->
-                                       ( getAtUnsafe item 0
-                                           |> (\mi -> case mi of
-                                                         Nothing ->
-                                                             Debug.crash "Item at index 0 must not be null"
-                                                         Just i ->
-                                                             i)
-                                       , getAtUnsafe item 1
-                                           |> (\mi -> case mi of
-                                                         Nothing ->
-                                                             Debug.crash "Item at index 1 must not be null"
-                                                         Just i ->
-                                                             i)
-                                       , getAtUnsafe item 2
-                                       , getAtUnsafe item 3
-                                           |> (\mi -> case mi of
-                                                         Nothing ->
-                                                             Debug.crash "Item at index 3 must not be null"
-                                                         Just i ->
-                                                             i)
-                                       )) val
-                     Err msg ->
-                         Debug.crash msg
+        |> \v ->
+            case v of
+                Ok val ->
+                    List.map
+                        (\item ->
+                            ( getAtUnsafe item 0
+                                |> (\mi ->
+                                        case mi of
+                                            Nothing ->
+                                                Debug.crash "Item at index 0 must not be null"
+
+                                            Just i ->
+                                                i
+                                   )
+                            , getAtUnsafe item 1
+                                |> (\mi ->
+                                        case mi of
+                                            Nothing ->
+                                                Debug.crash "Item at index 1 must not be null"
+
+                                            Just i ->
+                                                i
+                                   )
+                            , getAtUnsafe item 2
+                            , getAtUnsafe item 3
+                                |> (\mi ->
+                                        case mi of
+                                            Nothing ->
+                                                Debug.crash "Item at index 3 must not be null"
+
+                                            Just i ->
+                                                i
+                                   )
+                            )
+                        )
+                        val
+
+                Err msg ->
+                    Debug.crash msg
 
 
 getAtUnsafe : List a -> Int -> a
 getAtUnsafe xs idx =
     List.drop idx xs
         |> List.head
-        |> (\v -> case v of
+        |> (\v ->
+                case v of
                     Nothing ->
                         Debug.crash ("Missing item " ++ toString idx)
+
                     Just val ->
-                        val)
+                        val
+           )
 
 
 aMemoryStrength : Fuzzer Float
@@ -63,7 +80,8 @@ aTestAccuracy =
 
 
 anOldMemoryStrength : Fuzzer Float
-anOldMemoryStrength = aMemoryStrength
+anOldMemoryStrength =
+    aMemoryStrength
 
 
 aTimeElapsed : Fuzzer (Maybe Float)
