@@ -11,13 +11,18 @@ import String
 import Test exposing (..)
 
 
-strengthEstimateTestData : List (Maybe Float, Float, Maybe Float, Float)
+strengthEstimateTestData : List (Float, Float, Maybe Float, Float)
 strengthEstimateTestData =
     JD.decodeValue (JD.list (JD.list (JD.nullable JD.float))) Native.TestData.MemoryModel.strengthEstimateTestData
         |> \v -> case v of
                      Ok val ->
                          List.map (\item ->
                                        ( getAtUnsafe item 0
+                                           |> (\mi -> case mi of
+                                                         Nothing ->
+                                                             Debug.crash "Item at index 0 must not be null"
+                                                         Just i ->
+                                                             i)
                                        , getAtUnsafe item 1
                                            |> (\mi -> case mi of
                                                          Nothing ->
@@ -57,9 +62,8 @@ aTestAccuracy =
     floatRange 0 1
 
 
-anOldMemoryStrength : Fuzzer (Maybe Float)
-anOldMemoryStrength =
-    maybe aMemoryStrength
+anOldMemoryStrength : Fuzzer Float
+anOldMemoryStrength = aMemoryStrength
 
 
 aTimeElapsed : Fuzzer (Maybe Float)
@@ -83,7 +87,7 @@ suite =
         [ describe "strengthEstimate"
             ([ fuzz2 aMemoryStrength aTestAccuracy "zero time elapsed" <|
                 \s a ->
-                    strengthEstimate (Just s) a (Just 0)
+                    strengthEstimate s a (Just 0)
                         |> Expect.atMost (s + epsilon)
              , fuzz3 anOldMemoryStrength aTestAccuracy aTimeElapsed "output range" <|
                 \s a t ->

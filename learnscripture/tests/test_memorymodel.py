@@ -28,7 +28,7 @@ class StrengthEstimate(unittest2.TestCase):
         self.assertTrue((after_seven_tests - after_one_test) > 0.0001)
 
     def test_strength_estimate_null_previous(self):
-        self.assertEqual(strength_estimate(None, 1.0, None), 0.1)
+        self.assertEqual(strength_estimate(0, 1.0, None), 0.1)
 
     def test_outputs(self):
         # Here we test against known good values. The main purpose here is to be
