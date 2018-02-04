@@ -796,6 +796,11 @@ class VerseUtilsTests(unittest2.TestCase):
         self.assertEqual(split_into_words(text),
                          ['and\n', '"A', 'stone', 'of', 'stumbling,\n', 'and', 'a', 'rock', 'of', 'offense.'])
 
+    def test_split_into_words_trailing_newline(self):
+        text = 'RAB çobanımdır, \n Eksiğim olmaz. \n'
+        self.assertEqual(split_into_words(text),
+                         ['RAB', 'çobanımdır,\n', 'Eksiğim', 'olmaz.\n'])
+
     def test_split_into_words_turkish(self):
         text = "Düşmanı, öç alanı yok etmek için."
         self.assertEqual(split_into_words(text),
