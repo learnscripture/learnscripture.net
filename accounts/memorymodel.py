@@ -130,7 +130,7 @@ class MemoryModel(object):
 
         test_strength = test_accuracy ** 2
 
-        if old_strength is None or time_elapsed is None:
+        if time_elapsed is None:
             return self.INITIAL_STRENGTH_FACTOR * test_strength
 
         # If they have gone down from recorded strength, that is very strong
@@ -187,7 +187,7 @@ class MemoryModel(object):
     # queries
 
     def needs_testing(self, strength, time_elapsed):
-        if time_elapsed is None or strength is None:
+        if time_elapsed is None:
             return True
         if time_elapsed < self.MIN_TIME_BETWEEN_TESTS:
             # It is confusing to have a verse up for revision within an hour of
@@ -216,15 +216,16 @@ class MemoryModel(object):
 def test_run(exponent, accuracy, interval_gap=1):
     m = MemoryModel(exponent)
     interval = 0
-    x = None
+    x = 0
     day = 24 * 3600
     test = 0
     days_total = 0
     while days_total < 10 * 365:
         interval += interval_gap
         days_total += interval_gap
-        if m.needs_testing(x, day * interval):
-            x = m.strength_estimate(x, accuracy, interval * day)
+        time_elapsed = None if x == 0 else day * interval
+        if m.needs_testing(x, time_elapsed):
+            x = m.strength_estimate(x, accuracy, time_elapsed)
             test += 1
             print("Day %d, test %d, interval %d, strength %s" % (math.floor(days_total), test, interval, x))
             interval = 0
@@ -234,7 +235,7 @@ def test_run_using_next_test_due_after(exponent, accuracy, interval_gap=1):
     from datetime import datetime
     m = MemoryModel(exponent)
     interval = 0
-    s = None
+    s = 0
     start = datetime.now()
     last_test = None
     next_test = None
@@ -272,7 +273,7 @@ def test_run_passage(passage_length, days):
     for i in range(0, days):
         if verses_learnt < passage_length:
             # Learn new:
-            learnt[verses_learnt] = (i * day, MM.strength_estimate(None, accuracy, None))
+            learnt[verses_learnt] = (i * day, MM.strength_estimate(0, accuracy, None))
             verses_learnt += 1
 
         need_testing = 0
@@ -334,7 +335,7 @@ def test_run_passage(passage_length, days):
 
 
 def generate_test_file():
-    old_strengths = [None] + [x / 10.0 for x in range(0, 11)]
+    old_strengths = [x / 10.0 for x in range(0, 11)]
     test_accuracies = [x / 10.0 for x in range(0, 11)]
     time_elapsed = [None, 0, 100, 3600, 3600 * 10, 3600 * 24 * 10, 3600 * 24 * 100]
 
@@ -345,7 +346,7 @@ def generate_test_file():
                 output.append([s, a, t, strength_estimate(s, a, t)])
 
     with open(os.path.join(os.path.dirname(__file__),
-                           "../learnscripture/tests/memory_model_test_data.json"), "w") as fp:
+                           "../learnscripture/tests/memorymodel_test_data.json"), "w") as fp:
         json.dump({'strengthEstimateTestData': output}, fp,
                   indent=4)
 

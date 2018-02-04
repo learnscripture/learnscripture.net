@@ -54,8 +54,8 @@ given the previous strength, the test accuracy, and the time
 elapsed in *seconds*
 
 -}
-strengthEstimate : Maybe Float -> Float -> Maybe Float -> Float
-strengthEstimate oldStrengthM testAccuracy timeElapsedM =
+strengthEstimate : Float -> Float -> Maybe Float -> Float
+strengthEstimate oldStrength testAccuracy timeElapsedM =
     let
         testStrength =
             testAccuracy ^ 2.0
@@ -63,11 +63,6 @@ strengthEstimate oldStrengthM testAccuracy timeElapsedM =
         initialStrengthEstimate =
             initialStrengthFactor * testStrength
     in
-        case oldStrengthM of
-            Nothing ->
-                initialStrengthEstimate
-
-            Just oldStrength ->
                 case timeElapsedM of
                     Nothing ->
                         initialStrengthEstimate

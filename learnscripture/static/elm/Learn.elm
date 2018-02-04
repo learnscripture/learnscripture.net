@@ -4579,7 +4579,7 @@ calculateNextTestDue currentVerse =
 
                     -- logic here correponds to Identity.record_verse_action server side
                     newStrength =
-                        MemoryModel.strengthEstimate (Just verseStatus.strength) accuracy timeElapsed
+                        MemoryModel.strengthEstimate verseStatus.strength accuracy timeElapsed
                 in
                     if newStrength >= MemoryModel.learnt then
                         Just NeverDue
