@@ -950,12 +950,12 @@ viewVerseOptionsMenu model currentVerse =
             , default = NonDefault
             , msg = SkipVerse currentVerse.verseStatus
             , caption =
-                  case currentVerse.verseStatus.version.textType of
+                case currentVerse.verseStatus.version.textType of
                     Bible ->
                         "Skip this verse for now"
+
                     Catechism ->
                         "Skip this question for now"
-
             , id = "id-skip-verse-btn"
             , refocusTypingBox = True
             }
@@ -968,6 +968,7 @@ viewVerseOptionsMenu model currentVerse =
                 case currentVerse.verseStatus.version.textType of
                     Bible ->
                         "Stop learning this verse"
+
                     Catechism ->
                         "Stop learning this question"
             , id = "id-cancel-learning-btn"
@@ -1053,6 +1054,7 @@ partsForVerse : VerseStatus -> LearningStageType -> TestingMethod -> List Part
 partsForVerse verse learningStageType testingMethod =
     (List.map2 verseWordToParts verse.scoringTextWords (listIndices verse.scoringTextWords)
         |> List.concat
+        |> dropEndWhile (\p -> p == Linebreak)
     )
         ++ if
             (shouldShowReference verse
@@ -4689,8 +4691,7 @@ trackedHttpCallCaption : TrackedHttpCall -> String
 trackedHttpCallCaption call =
     case call of
         RecordTestComplete currentVerse _ testType ->
-            if isPracticeTest currentVerse testType
-            then
+            if isPracticeTest currentVerse testType then
                 interpolate "Marking done - {0}" [ currentVerse.verseStatus.localizedReference ]
             else
                 interpolate "Saving score - {0}" [ currentVerse.verseStatus.localizedReference ]
@@ -5722,6 +5723,26 @@ listIndices l =
 getAt : List a -> Int -> Maybe a
 getAt xs idx =
     List.head <| List.drop idx xs
+
+
+dropWhile : (a -> Bool) -> List a -> List a
+dropWhile func list =
+    case list of
+        [] ->
+            []
+
+        x :: xs ->
+            if func x then
+                dropWhile func xs
+            else
+                list
+
+
+dropEndWhile : (a -> Bool) -> List a -> List a
+dropEndWhile func =
+    List.reverse
+        >> dropWhile func
+        >> List.reverse
 
 
 damerauLevenshteinDistance : String -> String -> Int
