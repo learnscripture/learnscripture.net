@@ -1217,6 +1217,7 @@ wordButton word stage =
     in
         H.span
             ([ A.class <| String.join " " classesOuter
+             , A.attribute "data-contents" word.text
              ]
                 ++ (if id /= "" then
                         [ A.id id ]
@@ -1914,6 +1915,7 @@ viewButton model button =
                         , A.attribute "data-focus-typingBoxId" data.typingBoxId
                         , A.attribute "data-focus-typingBoxContainerId" data.typingBoxContainerId
                         , A.attribute "data-focus-wordButtonId" data.wordButtonId
+                        , A.attribute "data-focus-wordContents" data.wordContents
                         , A.attribute "data-focus-expectedClass" data.expectedClass
                         , A.attribute "data-focus-hardMode" (encodeBool data.hardMode)
                         ]
@@ -4357,6 +4359,7 @@ type alias UpdateTypingBoxData =
     { typingBoxId : String
     , typingBoxContainerId : String
     , wordButtonId : String
+    , wordContents : String
     , expectedClass : String
     , hardMode : Bool
     , refocus : Bool
@@ -4381,6 +4384,7 @@ getUpdateTypingBoxData model refocus =
                     { typingBoxId = typingBoxId
                     , typingBoxContainerId = typingBoxContainerId
                     , wordButtonId = idForButton cw.word
+                    , wordContents = cw.word.text
                     , expectedClass = classForTypingBox <| typingBoxInUse tp (getTestingMethod model)
                     , hardMode =
                         case getCurrentVerse model of
@@ -4402,6 +4406,7 @@ hideTypingBoxData =
     { typingBoxId = typingBoxId
     , typingBoxContainerId = typingBoxContainerId
     , wordButtonId = ""
+    , wordContents = ""
     , expectedClass = classForTypingBox False
     , hardMode = False
     , refocus = True
