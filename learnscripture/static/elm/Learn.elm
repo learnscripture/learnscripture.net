@@ -129,11 +129,8 @@ type alias Model =
     , httpConfig : HttpConfig
     , helpVisible : Bool
     , currentHttpCalls :
-        Dict.Dict Int
-            { call : TrackedHttpCall
-            , attempts : Int
-            }
-    , permanentFailHttpCalls : List TrackedHttpCall
+        Dict.Dict CallId QueuedCall
+    , permanentFailHttpCalls : List ( CallId, TrackedHttpCall )
     , openDropdown : Maybe Dropdown
     , sessionStats : Maybe SessionStats
     , attemptingReturn : Bool
@@ -529,7 +526,7 @@ ajaxInfo model =
             Dict.values model.currentHttpCalls
 
         httpCallsInProgress =
-            currentHttpCalls |> List.isEmpty |> not
+            currentHttpCalls |> List.filter (\{ attempts } -> attempts > 0) |> List.isEmpty |> not
 
         retryingAttempts =
             currentHttpCalls |> List.map .attempts |> List.any (\a -> a > 1)
@@ -634,7 +631,7 @@ ajaxInfo model =
                            )
                         ++ (failedHttpCalls
                                 |> List.map
-                                    (\call ->
+                                    (\( callId, call ) ->
                                         H.li [ A.class "ajax-failed" ]
                                             [ H.text <|
                                                 interpolate "Failed - {0}"
@@ -4687,6 +4684,12 @@ type TrackedHttpCall
     | LoadVerses Bool
 
 
+type alias QueuedCall =
+    { call : TrackedHttpCall
+    , attempts : CallId
+    }
+
+
 maxHttpRetries : number
 maxHttpRetries =
     6
@@ -4730,14 +4733,7 @@ it and then triggering its execution.
 -}
 startTrackedCall : Model -> TrackedHttpCall -> ( Model, Cmd Msg )
 startTrackedCall model trackedCall =
-    let
-        ( newModel1, callId ) =
-            addTrackedCall model trackedCall
-
-        ( newModel2, cmd ) =
-            makeHttpCall newModel1 callId
-    in
-        ( newModel2, cmd )
+    triggerQueuedCalls (addTrackedCall model trackedCall)
 
 
 {-| For a given TrackedHttpCall object, return a command that triggers
@@ -4758,6 +4754,61 @@ sendStartTrackedCallMsg trackedCall =
     sendMsg <| TrackHttpCall trackedCall
 
 
+{-| Start an HTTP call if appropriate.
+
+There are dependencies between some API calls for correct functioning. For
+example, reviewsooner should come after actioncomplete for a given verse. Also,
+since we add timestamps server side, not client side, the data is kept in better
+more logical shape if we strictly order API calls to be sent in the order that
+the user actually triggered them.
+
+-}
+triggerQueuedCalls : Model -> ( Model, Cmd Msg )
+triggerQueuedCalls model =
+    let
+        noop =
+            ( model
+            , Cmd.none
+            )
+    in
+        if queueBlocked model then
+            -- We wait until the user has pressed the 'Retry' button and the
+            -- previous calls all succeed before we try subsequently ordered
+            -- ones.
+            noop
+        else
+            case getOrderedQueuedCalls model of
+                [] ->
+                    noop
+
+                ( callId, queuedCall ) :: _ ->
+                    makeHttpCall model callId
+
+
+{-| Gets any unsent calls in the order they should be sent.
+-}
+getOrderedQueuedCalls : Model -> List ( CallId, QueuedCall )
+getOrderedQueuedCalls model =
+    Dict.toList model.currentHttpCalls
+        |> List.filter (\( callId, { call, attempts } ) -> attempts == 0)
+        |> List.sortBy Tuple.first
+
+
+queueBlocked : Model -> Bool
+queueBlocked model =
+    let
+        failedCalls =
+            not <| List.isEmpty model.permanentFailHttpCalls
+
+        callsInProgress =
+            Dict.values model.currentHttpCalls
+                |> List.filter (\{ attempts } -> attempts > 0)
+                |> List.isEmpty
+                |> not
+    in
+        (failedCalls || callsInProgress)
+
+
 {-| The motivation for having 'MakeHttpCall' and 'makeHttpCall' separate from
 'startTrackedCall' is that when we retry, we want to add a delay. It seems
 easier to just use the `delay` helper and send another message than to convert
@@ -4768,13 +4819,23 @@ Tasks instead of Cmd Msg).
 -}
 makeHttpCall : Model -> CallId -> ( Model, Cmd Msg )
 makeHttpCall model callId =
-    let
-        cmd =
-            case Dict.get callId model.currentHttpCalls of
-                Nothing ->
-                    Cmd.none
+    case Dict.get callId model.currentHttpCalls of
+        Nothing ->
+            ( model, Cmd.none )
 
-                Just { call } ->
+        Just { call, attempts } ->
+            let
+                newModel =
+                    { model
+                        | currentHttpCalls =
+                            Dict.insert callId
+                                { call = call
+                                , attempts = attempts + 1
+                                }
+                                model.currentHttpCalls
+                    }
+
+                cmd =
                     case call of
                         RecordTestComplete currentVerse accuracy testType ->
                             callRecordTestComplete model.httpConfig callId currentVerse accuracy testType
@@ -4796,29 +4857,29 @@ makeHttpCall model callId =
 
                         LoadVerses initialPageLoad ->
                             callLoadVerses model.httpConfig callId model initialPageLoad
-    in
-        ( model, cmd )
+            in
+                ( newModel, cmd )
 
 
-addTrackedCall : Model -> TrackedHttpCall -> ( Model, CallId )
+addTrackedCall : Model -> TrackedHttpCall -> Model
 addTrackedCall model trackedCall =
     let
+        -- We need to give the call an order so that it executes after all
+        -- current (or failed) calls.
+        usedCallIds =
+            (Dict.keys model.currentHttpCalls) ++ (List.map Tuple.first model.permanentFailHttpCalls)
+
         callId =
-            case Dict.keys model.currentHttpCalls |> List.reverse |> List.head of
-                Nothing ->
-                    1
-
-                Just i ->
-                    i + 1
-
-        newCurrentCalls =
-            Dict.insert callId { call = trackedCall, attempts = 1 } model.currentHttpCalls
+            1 + (usedCallIds |> List.maximum |> Maybe.withDefault 0)
     in
-        ( { model
-            | currentHttpCalls = newCurrentCalls
-          }
-        , callId
-        )
+        addOrderedTrackedCall model callId trackedCall
+
+
+addOrderedTrackedCall : Model -> CallId -> TrackedHttpCall -> Model
+addOrderedTrackedCall model callId trackedCall =
+    { model
+        | currentHttpCalls = Dict.insert callId { call = trackedCall, attempts = 0 } model.currentHttpCalls
+    }
 
 
 {-| Given an `update` like function of type `Model -> a -> ( Model, Cmd Msg)`,
@@ -4830,7 +4891,19 @@ handleRetries : (Model -> a -> ( Model, Cmd Msg )) -> Model -> CallId -> Result.
 handleRetries updateFunction model callId result =
     case result of
         Ok v ->
-            updateFunction (markCallFinished model callId) v
+            let
+                ( newModel1, cmd1 ) =
+                    updateFunction (markCallFinished model callId) v
+
+                ( newModel2, cmd2 ) =
+                    triggerQueuedCalls newModel1
+            in
+                ( newModel2
+                , Cmd.batch
+                    [ cmd1
+                    , cmd2
+                    ]
+                )
 
         Err err ->
             case err of
@@ -4840,11 +4913,11 @@ handleRetries updateFunction model callId result =
                     )
 
                 _ ->
-                    -- Others could all be temporary in theory, so we try again.
+                    -- Other errors could all be temporary in theory, so we try again.
                     let
                         -- TODO save error message
                         _ =
-                            Debug.log "Loading failed" err
+                            Debug.log "HTTP call failed" err
                     in
                         markFailAndRetry model callId
 
@@ -4879,7 +4952,7 @@ markPermanentFailCall model callId =
         Just { call } ->
             { model
                 | currentHttpCalls = Dict.remove callId model.currentHttpCalls
-                , permanentFailHttpCalls = call :: model.permanentFailHttpCalls
+                , permanentFailHttpCalls = ( callId, call ) :: model.permanentFailHttpCalls
             }
 
 
@@ -4895,22 +4968,11 @@ markFailAndRetry model callId =
                 , Cmd.none
                 )
             else
-                let
-                    newModel =
-                        { model
-                            | currentHttpCalls =
-                                Dict.insert callId
-                                    { call = call
-                                    , attempts = attempts + 1
-                                    }
-                                    model.currentHttpCalls
-                        }
-                in
-                    ( newModel
-                    , delay
-                        (Time.second * (2 ^ attempts |> toFloat))
-                        (MakeHttpCall callId)
-                    )
+                ( model
+                , delay
+                    (Time.second * (2 ^ attempts |> toFloat))
+                    (MakeHttpCall callId)
+                )
 
 
 retryFailedCalls : Model -> ( Model, Cmd Msg )
@@ -4924,10 +4986,15 @@ retryFailedCalls model =
                 | permanentFailHttpCalls = []
             }
 
-        ( newModel2, cmds ) =
-            mapAccumL startTrackedCall newModel1 failedCalls
+        newModel2 =
+            List.foldl
+                (\( callId, call ) m ->
+                    addOrderedTrackedCall m callId call
+                )
+                newModel1
+                failedCalls
     in
-        newModel2 ! cmds
+        triggerQueuedCalls newModel2
 
 
 delay : Time.Time -> msg -> Cmd msg
@@ -4943,7 +5010,7 @@ verseLoadInProgress model =
 
 verseLoadFailed : Model -> Bool
 verseLoadFailed model =
-    model.permanentFailHttpCalls |> List.any isLoadVersesCall
+    model.permanentFailHttpCalls |> List.map Tuple.second |> List.any isLoadVersesCall
 
 
 isLoadVersesCall : TrackedHttpCall -> Bool
@@ -5789,20 +5856,6 @@ translate fromStr toStr target =
             makeMapper allPairs
     in
         String.map mapper target
-
-
-mapAccumL : (a -> b -> ( a, c )) -> a -> List b -> ( a, List c )
-mapAccumL func a bs =
-    List.foldl
-        (\b1 ( a1, cs ) ->
-            let
-                ( a2, c ) =
-                    func a1 b1
-            in
-                ( a2, c :: cs )
-        )
-        ( a, [] )
-        bs
 
 
 
