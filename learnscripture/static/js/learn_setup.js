@@ -53,7 +53,7 @@ var asPx = function (n) {
     return n.toString() + "px";
 }
 
-var fixTypingBox = function (attempts, args, afterDomUpdated) {
+var fixTypingBox = function (attempts, args) {
     if (attempts > 3) {
         return; // give up
     }
@@ -77,6 +77,11 @@ var fixTypingBox = function (attempts, args, afterDomUpdated) {
     }
 
     var wordButton = args.wordButtonId == "" ? null : document.getElementById(args.wordButtonId);
+    if (wordButton !== null &&
+        wordButton.attributes["data-contents"].value !== args.wordContents) {
+        // Must be a different button, from the previous verse.
+        wordButton = null;
+    }
 
 
     if (args.expectedClass == "toshow") {
@@ -136,7 +141,7 @@ var fixTypingBox = function (attempts, args, afterDomUpdated) {
             typingBox.focus();
         }
 
-        if (!correctPositioningComplete || !afterDomUpdated) {
+        if (!correctPositioningComplete) {
             tryAgain();
             return;
         }
@@ -150,7 +155,7 @@ var fixTypingBox = function (attempts, args, afterDomUpdated) {
 
 
 app.ports.updateTypingBox.subscribe(function (args) {
-    fixTypingBox(0, args, false);
+    fixTypingBox(0, args);
 });
 
 // Elm's runtime appears to use setTimeout / requestAnimationFrame such that
@@ -179,11 +184,12 @@ $('body.learn-page').on('click', '[data-focus-typing-box-required]', function (e
     var args = { typingBoxId: $button.attr("data-focus-typingBoxId"),
                  typingBoxContainerId: $button.attr("data-focus-typingBoxContainerId"),
                  wordButtonId: $button.attr("data-focus-wordButtonId"),
+                 wordContents: $button.attr("data-focus-wordContents"),
                  expectedClass: $button.attr("data-focus-expectedClass"),
                  hardMode: $button.attr("data-focus-hardMode") == "true",
                  refocus: true,  // This mechanism is only used when refocus is true
                }
-    fixTypingBox(0, args, false);
+    fixTypingBox(0, args);
 
 })
 
