@@ -949,7 +949,13 @@ viewVerseOptionsMenu model currentVerse =
             { enabled = Enabled
             , default = NonDefault
             , msg = SkipVerse currentVerse.verseStatus
-            , caption = "Skip this for now"
+            , caption =
+                  case currentVerse.verseStatus.version.textType of
+                    Bible ->
+                        "Skip this verse for now"
+                    Catechism ->
+                        "Skip this question for now"
+
             , id = "id-skip-verse-btn"
             , refocusTypingBox = True
             }
@@ -958,7 +964,12 @@ viewVerseOptionsMenu model currentVerse =
             { enabled = Enabled
             , default = NonDefault
             , msg = CancelLearning currentVerse.verseStatus
-            , caption = "Stop learning this"
+            , caption =
+                case currentVerse.verseStatus.version.textType of
+                    Bible ->
+                        "Stop learning this verse"
+                    Catechism ->
+                        "Stop learning this question"
             , id = "id-cancel-learning-btn"
             , refocusTypingBox = True
             }
