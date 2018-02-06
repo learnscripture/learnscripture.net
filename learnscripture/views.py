@@ -429,8 +429,7 @@ def dashboard(request):
          'title': 'Dashboard',
          'events': identity.get_dashboard_events(),
          'create_account_warning':
-             identity.account is None and
-         (timezone.now() - identity.date_created) > timedelta(days=3),
+             identity.account is None,
          'groups': groups,
          'more_groups': more_groups,
          'url_after_logout': '/',
