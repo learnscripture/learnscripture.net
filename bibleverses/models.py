@@ -848,11 +848,17 @@ class UserVerseStatus(models.Model):
     def is_in_passage(self):
         return self.verse_set is not None and self.verse_set.is_passage
 
+    def scaled_strength(self):
+        # See also Learn.elm scaledStrength. Anything more than LEARNT is
+        # counted as fully learnt, so we re-scaled according to that, only for
+        # the purposes of user presentation.
+        return min(self.strength / memorymodel.LEARNT, 1.0)
+
     def simple_strength(self):
         """
         Returns the strength normalized to a 0 to 10 scale for presentation in UI.
         """
-        return min(10, int(math.floor((self.strength / memorymodel.LEARNT) * 10)))
+        return int(math.floor(self.scaled_strength() * 10))
 
     @cached_property
     def passage_localized_reference(self):
