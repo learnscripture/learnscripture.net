@@ -3698,12 +3698,7 @@ moveToNextVerse model =
                                 3
 
                             moreVersesToLoad =
-                                case List.maximum <| List.map .learnOrder <| verseStore.verseStatuses of
-                                    Nothing ->
-                                        False
-
-                                    Just max ->
-                                        max < verseStore.maxOrderVal
+                                not <| allVersesLoaded verseStore
 
                             ( newModel2, loadMoreCommand ) =
                                 if
@@ -3813,6 +3808,16 @@ getPreviousVersesInStore verseStore verseStatus =
 moreVersesToLearn : VerseStore -> VerseStatus -> Bool
 moreVersesToLearn verseStore currentVerse =
     currentVerse.learnOrder < verseStore.maxOrderVal
+
+
+allVersesLoaded : VerseStore -> Bool
+allVersesLoaded verseStore =
+    case List.maximum <| List.map .learnOrder <| verseStore.verseStatuses of
+        Nothing ->
+            True
+
+        Just max ->
+            max >= verseStore.maxOrderVal
 
 
 handleResetProgress : Model -> VerseStatus -> Bool -> ( Model, Cmd Msg )
@@ -5117,6 +5122,29 @@ handleVersesToLearn model verseBatchRaw =
                                 { newModel1
                                     | sessionStats = sessionStats
                                 }
+
+                    loadMoreCommand =
+                        if allVersesLoaded ns.verses || verseLoadInProgress model then
+                            Cmd.none
+                        else
+                            case ns.currentVerse.verseStatus.verseSet of
+                                Nothing ->
+                                    Cmd.none
+
+                                Just vs ->
+                                    -- For passages, we eagerly load the rest of
+                                    -- the verses, because it is more imporant
+                                    -- for the user not to get interrupted in
+                                    -- reviewing the set if their internet
+                                    -- connection gets interrupted. However,
+                                    -- some verse sets are really large (more
+                                    -- than 1 chapter), so disable this
+                                    -- behaviour for them. All chapters are less
+                                    -- than 90 verses (except Psalm 119)
+                                    if vs.setType == Passage && ns.verses.maxOrderVal < 90 then
+                                        loadVerses False
+                                    else
+                                        Cmd.none
                 in
                     newModel2
                         ! [ sessionCmd
@@ -5132,6 +5160,7 @@ handleVersesToLearn model verseBatchRaw =
                                 loadSessionStats
                             else
                                 Cmd.none
+                          , loadMoreCommand
                           ]
 
 
