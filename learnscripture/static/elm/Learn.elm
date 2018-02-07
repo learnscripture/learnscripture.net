@@ -4633,15 +4633,16 @@ calculateNextTestDue currentVerse =
 
             Just { accuracy, timestamp } ->
                 let
+                    -- logic here correponds to Identity.record_verse_action server side
                     timeElapsed =
                         case verseStatus.lastTested of
                             Nothing ->
                                 Nothing
 
                             Just lt ->
-                                Just (ISO8601.diff timestamp lt)
+                                -- MemoryModel works in seconds, not milliseconds
+                                Just ((ISO8601.diff timestamp lt) / 1000)
 
-                    -- logic here correponds to Identity.record_verse_action server side
                     newStrength =
                         MemoryModel.strengthEstimate verseStatus.strength accuracy timeElapsed
                 in
