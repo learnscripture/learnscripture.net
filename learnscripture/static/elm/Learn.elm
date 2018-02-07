@@ -852,6 +852,21 @@ viewCurrentVerse session model =
                     _ ->
                         ""
 
+        verseScaledStrength =
+            scaledStrength currentVerse.verseStatus.strength
+
+        -- TODO - once a test is done, possibly adjust the strength that is used here.
+        verseStrengthPercent =
+            floor (verseScaledStrength * 100)
+
+        -- We have to rescale because the star we use to show progress will look
+        -- like '100%' from 70% onwards if we just use the percentage as a
+        -- width. We scale to 8 divisions, then shrink into the middle 70
+        -- percentage points.
+        progressStarWidth =
+            ((toFloat (floor (verseScaledStrength * 8)) / 8) * 70 + 15)
+                |> floor
+
         verseOptionsMenuOpen =
             dropdownIsOpen model VerseOptionsMenu
     in
@@ -859,6 +874,28 @@ viewCurrentVerse session model =
             ([ H.div [ A.id "id-verse-header" ]
                 [ H.h2 titleTextAttrs
                     [ H.text currentVerse.verseStatus.titleText ]
+                , H.div [ A.class "spacer" ]
+                    []
+                , H.div [ A.id "id-verse-strength-icon" ]
+                    -- Two stars, a full one on top of an outline, the full one clipped.
+                    [ H.i [ A.class "icon-fw icon-star-o" ] []
+                    , H.i
+                        [ A.class "icon-fw icon-star"
+                        , A.style
+                            [ ( "clip-path"
+                              , interpolate
+                                    "content-box inset(0px {0}% 0px 0px)"
+                                    [ toString (100 - progressStarWidth) ]
+                              )
+                            ]
+                        ]
+                        []
+                    ]
+                , H.div
+                    [ A.id "id-verse-strength-value"
+                    , A.title "Memory strength for this verse"
+                    ]
+                    [ H.text (toString verseStrengthPercent ++ "%") ]
                 , viewVerseOptionsMenuButton verseOptionsMenuOpen
                 ]
              , if verseOptionsMenuOpen then
@@ -899,6 +936,13 @@ viewCurrentVerse session model =
              ]
                 ++ (instructions currentVerse testingMethod model.helpVisible)
             )
+
+
+{-| see bibleverses/models.py scaled_strength
+-}
+scaledStrength : Float -> Float
+scaledStrength rawStrength =
+    min (rawStrength / MemoryModel.learnt) 1.0
 
 
 shouldShowPreviousVerse : VerseStatus -> Bool
