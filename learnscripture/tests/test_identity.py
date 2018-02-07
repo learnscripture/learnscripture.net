@@ -302,44 +302,66 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
 
         for vn in range(1, 7):
             ref = 'Psalm 23:%d' % vn
-            i.record_verse_action(ref, 'NET', StageType.TEST, 1.0)
-            # Put each one back by n days i.e. as if running over
-            # multiple days
-            i.verse_statuses.filter(localized_reference=ref).update(
-                last_tested=F('last_tested') - timedelta(7 - vn),
-                next_test_due=F('next_test_due') - timedelta(7 - vn)
-            )
-
-            # Now test again, for all but one verse, which means we will only
-            # have one verse that is due for review, but the whole
-            # passage should be considered as needing review.
-            if vn != 1:
+            with self.subTest(ref=ref):
                 i.record_verse_action(ref, 'NET', StageType.TEST, 1.0)
+                self.move_clock_on(timedelta(days=1))
 
-            with self.assertNumQueries(FuzzyInt(3, 4)):
-                # 1 for passages_for_learning, 2 for review passages,
-                # or 3 for passages_for_learning, 1 for review passage
-                cvss_review, cvss_learn = i.passages_for_reviewing_and_learning()
+                # Now test again, for all but one verse, which means we will only
+                # have one verse that is due for review, but the whole
+                # passage should be considered as needing review.
+                if vn != 1:
+                    i.record_verse_action(ref, 'NET', StageType.TEST, 1.0)
 
-            if vn < 6:
-                # Nothing to review, because one item still remains
-                # to be initially learnt.
-                self.assertEqual(cvss_review, [])
-                self.assertEqual(cvss_learn[0].verse_set.id, vs1.id)
-            else:
-                self.assertEqual(cvss_learn, [])
-                self.assertEqual(cvss_review[0].verse_set.id, vs1.id)
+                with self.assertNumQueries(FuzzyInt(3, 4)):
+                    # 1 for passages_for_learning, 2 for review passages,
+                    # or 3 for passages_for_learning, 1 for review passage
+                    cvss_review, cvss_learn = i.passages_for_reviewing_and_learning()
 
-            # Shouldn't be in general revision queue
-            self.assertEqual([], list(i.bible_verse_statuses_for_reviewing()))
+                if vn < 6:
+                    # Nothing to review, because one item still remains
+                    # to be initially learnt.
+                    self.assertEqual(cvss_review, [])
+                    self.assertEqual(cvss_learn[0].verse_set.id, vs1.id)
+                else:
+                    self.assertEqual(cvss_learn, [])
+                    cvs = cvss_review[0]
+                    self.assertEqual(cvs.verse_set.id, vs1.id)
+                    self.assertEqual(cvs.group_testing, False)
+                    self.assertEqual(cvs.needs_testing_count, 5)
+                    self.assertEqual(cvs.total_verse_count, 6)
 
-        # Now test remaining verse
-        i.record_verse_action("Psalm 23:1", 'NET', StageType.TEST, 1.0)
+                # Shouldn't be in general revision queue
+                self.assertEqual([], list(i.bible_verse_statuses_for_reviewing()))
+
+        # Now test all verses
+        for vn in range(1, 7):
+            ref = 'Psalm 23:%d' % vn
+            i.record_verse_action(ref, 'NET', StageType.TEST, 1.0)
 
         # Should have nothing left to review now.
         cvss_review, cvss_learn = i.passages_for_reviewing_and_learning()
         self.assertEqual(cvss_review, [])
         self.assertEqual(cvss_learn, [])
+
+        # Time passes:
+        self.move_clock_on(i.verse_statuses.order_by('next_test_due').first().next_test_due -
+                           timezone.now() + timedelta(days=1))
+        # and strengths advance a lot: First past group testing limit
+        i.verse_statuses.update(strength=accounts.memorymodel.STRENGTH_FOR_GROUP_TESTING + 0.01)
+        # Then some past fully learnt:
+        i.verse_statuses.exclude(
+            localized_reference__in=[
+                'Psalm 23:3',
+                'Psalm 23:5'
+            ]).update(strength=accounts.memorymodel.LEARNT + 0.01)
+
+        cvss_review, cvss_learn = i.passages_for_reviewing_and_learning()
+        self.assertEqual(cvss_learn, [])
+        cvs = cvss_review[0]
+
+        self.assertEqual(cvs.group_testing, True)
+        self.assertEqual(cvs.needs_testing_count, 6)
+        self.assertEqual(cvs.total_verse_count, 6)
 
     def test_passages_for_reviewing_and_learning_multiple_versions(self):
         i = self.create_identity(version_slug='NET')

@@ -1051,12 +1051,14 @@ class Identity(models.Model):
         # We also always use these two return values at the same time.
         # So it makes sense to return them together.
         statuses = (self.verse_statuses
-                    .reviewable()
+                    .active()
                     .filter(verse_set__set_type=VerseSetType.PASSAGE))
 
         # If any of them need reviewing, we want to know about it:
-        statuses_for_review = (statuses.select_related('verse_set', 'version')
-                               .needs_reviewing(timezone.now()))
+        statuses_for_review = (statuses
+                               .reviewable()
+                               .needs_reviewing(timezone.now())
+                               .select_related('verse_set', 'version'))
 
         # We also want to exclude those which have any verses in the set still
         # untested, but this is easiest done as a second pass after retrieving.
