@@ -1157,7 +1157,6 @@ class Identity(models.Model):
             for uvs in uvs_list:
                 if uvs.strength < memorymodel.LEARNT:
                     uvs.needs_testing_override = True
-        return uvs_list
 
     def get_next_section(self, uvs_list, verse_set, add_buffer=True):
         """
