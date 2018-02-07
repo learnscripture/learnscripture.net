@@ -248,6 +248,34 @@ body.learn-page {
         flex-direction: row;
         justify-content: space-between;
         padding-top: 3px; // So that #id-verse-options-menu-btn border doesn't touch top
+
+        .spacer {
+            flex-grow: 1;
+        }
+    }
+
+    #id-verse-strength-icon,
+    #id-verse-strength-value {
+      line-height: 36px;
+      font-size: 85%;
+    }
+    #id-verse-strength-icon {
+        position: relative;
+        width: 20px;
+        .icon-fw {
+            position: absolute;
+            left: 0px;
+            &::before {
+                width: auto;
+            }
+        }
+
+        .icon-star-o {
+            z-index: 1;
+        }
+        .icon-star {
+            z-index: 2;
+        }
     }
 
     .blurry {
