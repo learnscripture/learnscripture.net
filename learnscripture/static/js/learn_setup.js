@@ -54,14 +54,14 @@ var asPx = function (n) {
 }
 
 var fixTypingBox = function (attempts, args) {
-    if (attempts > 3) {
+    if (attempts > 10) {
         return; // give up
     }
 
     var tryAgain = function () {
         window.setTimeout(function () {
             fixTypingBox(attempts + 1, args)
-        }, 10)
+        }, 10 + attempts * 20)
     }
 
     var typingBox = document.getElementById(args.typingBoxId);
