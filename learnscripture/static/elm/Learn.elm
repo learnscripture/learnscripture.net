@@ -853,9 +853,8 @@ viewCurrentVerse session model =
                         ""
 
         verseScaledStrength =
-            scaledStrength currentVerse.verseStatus.strength
+            scaledStrength (currentVerseStrength currentVerse)
 
-        -- TODO - once a test is done, possibly adjust the strength that is used here.
         verseStrengthPercent =
             floor (verseScaledStrength * 100)
 
@@ -4620,28 +4619,16 @@ calculateNextTestDue currentVerse =
     let
         verseStatus =
             currentVerse.verseStatus
-
-        testAccuracy =
-            currentVerse.recordedTestScore
     in
-        case testAccuracy of
+        case currentVerse.recordedTestScore of
             Nothing ->
                 Nothing
 
-            Just { accuracy, timestamp } ->
+            Just recordedTest ->
+                -- logic here correponds to Identity.record_verse_action server side
                 let
-                    -- logic here correponds to Identity.record_verse_action server side
-                    timeElapsed =
-                        case verseStatus.lastTested of
-                            Nothing ->
-                                Nothing
-
-                            Just lt ->
-                                -- MemoryModel works in seconds, not milliseconds
-                                Just ((ISO8601.diff timestamp lt) / 1000)
-
                     newStrength =
-                        MemoryModel.strengthEstimate verseStatus.strength accuracy timeElapsed
+                        calculateNewVerseStrength verseStatus recordedTest
                 in
                     if newStrength >= MemoryModel.learnt then
                         Just NeverDue
@@ -4649,6 +4636,31 @@ calculateNextTestDue currentVerse =
                         -- MemoryModel works in seconds, we are in milliseconds, so
                         -- convert here:
                         Just (DueAfter (1000 * MemoryModel.nextTestDueAfter newStrength))
+
+
+calculateNewVerseStrength : VerseStatus -> { accuracy : Float, timestamp : ISO8601.Time } -> Float
+calculateNewVerseStrength verseStatus { accuracy, timestamp } =
+    let
+        timeElapsed =
+            case verseStatus.lastTested of
+                Nothing ->
+                    Nothing
+
+                Just lt ->
+                    -- MemoryModel works in seconds, not milliseconds
+                    Just ((ISO8601.diff timestamp lt) / 1000)
+    in
+        MemoryModel.strengthEstimate verseStatus.strength accuracy timeElapsed
+
+
+currentVerseStrength : CurrentVerse -> Float
+currentVerseStrength currentVerse =
+    case currentVerse.recordedTestScore of
+        Nothing ->
+            currentVerse.verseStatus.strength
+
+        Just recordedTest ->
+            calculateNewVerseStrength currentVerse.verseStatus recordedTest
 
 
 friendlyTimeUntil : TestDueAfter -> String
