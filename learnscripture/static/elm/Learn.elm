@@ -864,8 +864,7 @@ viewCurrentVerse session model =
         -- width. We scale to 8 divisions, then shrink into the middle 70
         -- percentage points.
         progressStarWidth =
-            ((toFloat (floor (verseScaledStrength * 8)) / 8) * 70 + 15)
-                |> floor
+            floor (verseScaledStrength * 70 + 15)
 
         verseOptionsMenuOpen =
             dropdownIsOpen model VerseOptionsMenu
