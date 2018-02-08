@@ -859,12 +859,10 @@ viewCurrentVerse session model =
         verseStrengthPercent =
             floor (verseScaledStrength * 100)
 
-        -- We have to rescale because the star we use to show progress will look
-        -- like '100%' from 70% onwards if we just use the percentage as a
-        -- width. We scale to 8 divisions, then shrink into the middle 70
-        -- percentage points.
+        -- Clip width for the overlayed 'star' icon, rescaled to make it look as
+        -- expected (trial and error)
         progressStarWidth =
-            floor (verseScaledStrength * 70 + 15)
+            floor (verseScaledStrength * 65 + 15)
 
         verseOptionsMenuOpen =
             dropdownIsOpen model VerseOptionsMenu
@@ -883,7 +881,7 @@ viewCurrentVerse session model =
                         , A.style
                             [ ( "clip-path"
                               , interpolate
-                                    "content-box inset(0px {0}% 0px 0px)"
+                                    "inset(0px {0}% 0px 0px)"
                                     [ toString (100 - progressStarWidth) ]
                               )
                             ]
