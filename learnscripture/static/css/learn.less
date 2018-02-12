@@ -400,7 +400,6 @@ body.learn-page {
 
     .word-button {
         border: 2px solid;
-        border-radius: 3px;
         padding: 4px @word-padding-horizontal;
         margin: @word-margin-top @word-margin-left;
         .gradientBar(#e8e8e8, #C0C0C0);
@@ -441,6 +440,10 @@ body.learn-page {
         &.incorrect {
             border-color: red;
         }
+    }
+
+    #id-typing, .word-button {
+        border-radius: 3px;
     }
 
     .hidden {
