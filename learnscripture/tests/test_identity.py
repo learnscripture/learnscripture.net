@@ -298,6 +298,9 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
     def test_passages_for_reviewing_and_learning(self):
         i = self.create_identity(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Psalm 23')
+        vs1.breaks = "BOOK18 23:3,BOOK18 23:6"  # break at v3 and v6 to be unsymmetric
+        vs1.save()
+
         i.add_verse_set(vs1)
 
         for vn in range(1, 7):
@@ -348,11 +351,11 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
                            timezone.now() + timedelta(days=1))
         # and strengths advance a lot: First past group testing limit
         i.verse_statuses.update(strength=accounts.memorymodel.STRENGTH_FOR_GROUP_TESTING + 0.01)
-        # Then some past fully learnt:
+        # Then some but not all past fully learnt:
         i.verse_statuses.exclude(
             localized_reference__in=[
                 'Psalm 23:3',
-                'Psalm 23:5'
+                'Psalm 23:6'
             ]).update(strength=accounts.memorymodel.LEARNT + 0.01)
 
         cvss_review, cvss_learn = i.passages_for_reviewing_and_learning()
@@ -360,8 +363,35 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         cvs = cvss_review[0]
 
         self.assertEqual(cvs.group_testing, True)
-        self.assertEqual(cvs.needs_testing_count, 6)
+        # Fully learnt verses should not be counted in this total
+        self.assertEqual(cvs.needs_testing_count, 2)
         self.assertEqual(cvs.total_verse_count, 6)
+
+        # We should skip the fully learnt first section, and choose the second.
+        self.assertEqual(cvs.next_section_verse_count, 3)
+
+        passage_uvss = i.verse_statuses_for_passage(cvs.verse_set.id, cvs.version.id)
+        section_uvss = i.get_next_section(passage_uvss, cvs.verse_set, add_buffer=False)
+        self.assertEqual([uvs.localized_reference for uvs in section_uvss],
+                         ["Psalm 23:3", "Psalm 23:4", "Psalm 23:5"])
+
+        # Now we actually test the verses in that section that we need to
+        for uvs in section_uvss:
+            if uvs.localized_reference in ['Psalm 23:3']:
+                self.assertEqual(uvs.needs_testing, True)
+                i.record_verse_action(uvs.localized_reference, 'NET', StageType.TEST, 1.0)
+            else:
+                self.assertEqual(uvs.needs_testing, False)
+
+        # Check again.
+        cvss_review, cvss_learn = i.passages_for_reviewing_and_learning()
+        cvs = cvss_review[0]
+        self.assertEqual(cvs.group_testing, True)
+        # We still have 2 that need testing, due to group testing mode.
+        self.assertEqual(cvs.needs_testing_count, 2)
+        self.assertEqual(cvs.total_verse_count, 6)
+        # But now the next section is the last section, verse 6
+        self.assertEqual(cvs.next_section_verse_count, 1)
 
     def test_passages_for_reviewing_and_learning_multiple_versions(self):
         i = self.create_identity(version_slug='NET')
@@ -544,7 +574,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
             # group together.
             for uvs in i.verse_statuses.filter(localized_reference=ref):
                 uvs.last_tested = timezone.now() - timedelta(200 - (vn * 60.0) / (3600.0 * 24))
-                uvs.strength = 0.55
+                uvs.strength = accounts.memorymodel.STRENGTH_FOR_GROUP_TESTING + 0.01
                 uvs.next_test_due = uvs.last_tested + timedelta(seconds=accounts.memorymodel.next_test_due_after(uvs.strength))
                 uvs.save()
 
@@ -578,7 +608,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         self.assertEqual([False, True, True],
                          [uvs.needs_testing for uvs in uvss2])
 
-        # A gap to ensure our algo can distinguish between groups of testing.
+        # A quick gap
         self.move_clock_on(timedelta(seconds=10))
 
         # Learn next two.

@@ -843,6 +843,8 @@ class UserVerseStatus(models.Model):
             return True
         if self.next_test_due is None:
             return True
+        if self.strength >= memorymodel.LEARNT:
+            return False
         return timezone.now() >= self.next_test_due
 
     def is_in_passage(self):

@@ -1155,8 +1155,8 @@ class Identity(models.Model):
         min_strength = min(uvs.strength for uvs in uvs_list)
         if min_strength > memorymodel.STRENGTH_FOR_GROUP_TESTING:
             for uvs in uvs_list:
-                uvs.needs_testing_override = True
-        return uvs_list
+                if uvs.strength < memorymodel.LEARNT:
+                    uvs.needs_testing_override = True
 
     def get_next_section(self, uvs_list, verse_set, add_buffer=True):
         """
@@ -1175,52 +1175,43 @@ class Identity(models.Model):
         # First split into sections according to the specified breaks
         sections = get_passage_sections(language_code, uvs_list, verse_set.breaks)
 
-        # For each section, work out if it has been tested 'together'
-        section_info = {}  # section idx: info dict
+        # Aim: get the section containing the least recently tested verse
+        # that needs to be tested.
+        last_tested_by_section = {}  # section idx: min_last_tested
+        section_to_test = None
         for i, section in enumerate(sections):
             if any(uvs.last_tested is None for uvs in section):
-                section_info[i] = {'tested_together': False,
-                                   'last_tested': None}
-                continue
-            max_last_tested = max(uvs.last_tested for uvs in section)
-            min_last_tested = min(uvs.last_tested for uvs in section)
-            # It should take no more than 2 minutes to test a single verse,
-            # being conservative
-            tested_together = ((max_last_tested - min_last_tested).total_seconds() <
-                               2 * 60 * len(section))
-            section_info[i] = {'tested_together': tested_together,
-                               'last_tested': min_last_tested}
+                # This section has not been tested fully, so make it the next
+                # section.
+                section_to_test = i
+                break
+            else:
+                last_tested = [uvs.last_tested for uvs in section
+                               if uvs.needs_testing_individual]
+                if last_tested:
+                    last_tested_by_section[i] = min(last_tested)
 
-        # Find which section was tested together last.
-        last_section_tested = None
-        overall_max_last_tested = None
-        for i, info in reversed(sorted(section_info.items())):
-            if info['tested_together']:
-                if (overall_max_last_tested is None or
-                    (info['last_tested'] is not None and
-                     info['last_tested'] > overall_max_last_tested)):
-                    overall_max_last_tested = info['last_tested']
-                    last_section_tested = i
-
-        if last_section_tested is None:
-            # Implies no section has been tested before as a group. So test the
-            # first section.
-            return sections[0]
-
-        # Go for the section after the last section that was tested together
-        # (wrapping round if necessary)
-        section_num = (last_section_tested + 1) % len(sections)
+        if section_to_test is None:
+            all_last_tested = last_tested_by_section.values()
+            if all_last_tested:
+                overall_min_last_tested = min(all_last_tested)
+                section_to_test = [i for i, min_last_tested in last_tested_by_section.items()
+                                   if min_last_tested == overall_min_last_tested][0]
+            else:
+                # No section has a verse that needs testing.
+                # So we just choose 0 arbitrarily
+                section_to_test = 0
 
         retval = []
         if add_buffer:
-            if section_num > 0:
+            if section_to_test > 0:
                 # Return a verse of context with 'needs_testing_override' being set
                 # to False.
-                context = sections[section_num - 1][-1]
+                context = sections[section_to_test - 1][-1]
                 context.needs_testing_override = False
                 retval.append(context)
 
-        retval.extend(sections[section_num])
+        retval.extend(sections[section_to_test])
 
         return retval
 
