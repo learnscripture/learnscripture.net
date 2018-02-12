@@ -77,11 +77,6 @@ var fixTypingBox = function (attempts, args) {
     }
 
     var wordButton = args.wordButtonId == "" ? null : document.getElementById(args.wordButtonId);
-    if (wordButton !== null &&
-        wordButton.attributes["data-contents"].value !== args.wordContents) {
-        // Must be a different button, from the previous verse.
-        wordButton = null;
-    }
 
 
     if (args.expectedClass == "toshow") {
@@ -184,7 +179,6 @@ $('body.learn-page').on('click', '[data-focus-typing-box-required]', function (e
     var args = { typingBoxId: $button.attr("data-focus-typingBoxId"),
                  typingBoxContainerId: $button.attr("data-focus-typingBoxContainerId"),
                  wordButtonId: $button.attr("data-focus-wordButtonId"),
-                 wordContents: $button.attr("data-focus-wordContents"),
                  expectedClass: $button.attr("data-focus-expectedClass"),
                  hardMode: $button.attr("data-focus-hardMode") == "true",
                  refocus: true,  // This mechanism is only used when refocus is true

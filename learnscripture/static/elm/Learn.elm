@@ -111,11 +111,12 @@ init flags =
       , openDropdown = Nothing
       , sessionStats = Nothing
       , attemptingReturn = False
-      , currentTime = ISO8601.fromTime 0
-      -- Hard coding this to prefer reading, instead of storing in preferences
-      -- etc., is a deliberate design decision to reduce the number of tests. If
-      -- people want to prefer testing to reading, they have to select it in
-      -- each passage testing session.
+      , currentTime =
+            ISO8601.fromTime 0
+            -- Hard coding this to prefer reading, instead of storing in preferences
+            -- etc., is a deliberate design decision to reduce the number of tests. If
+            -- people want to prefer testing to reading, they have to select it in
+            -- each passage testing session.
       , testOrReadPreference = PreferReading
       }
     , loadVerses True
@@ -945,14 +946,16 @@ viewCurrentVerse session model =
                     Just verse ->
                         H.div [ A.class "previous-verse-wrapper" ]
                             [ H.div [ A.class "previous-verse" ]
-                                (versePartsToHtml ReadForContext <|
-                                    partsForVerse verse ReadForContextStage testingMethod
+                                (versePartsToHtml ReadForContext
+                                    (partsForVerse verse ReadForContextStage testingMethod)
+                                    verse.id
                                 )
                             ]
                 , H.div [ A.class "current-verse-wrapper" ]
                     [ H.div [ A.class verseClasses ]
-                        (versePartsToHtml currentVerse.currentStage <|
-                            partsForVerse currentVerse.verseStatus (learningStageTypeForStage currentVerse.currentStage) testingMethod
+                        (versePartsToHtml currentVerse.currentStage
+                            (partsForVerse currentVerse.verseStatus (learningStageTypeForStage currentVerse.currentStage) testingMethod)
+                            currentVerse.verseStatus.id
                         )
                     ]
                 , copyrightNotice currentVerse.verseStatus.version
@@ -1111,13 +1114,16 @@ allowTestInsteadOfRead model =
     withCurrentVerse model
         False
         (\currentVerse ->
-            (isPassageSet currentVerse) &&
-            (not <| currentVerse.sessionLearningType == Practice) &&
-             (case model.learningSession of
-                  Session sessionData ->
-                      List.any (\vs -> not vs.needsTesting) sessionData.verses.verseStatuses
-                  _ ->
-                      False))
+            (isPassageSet currentVerse)
+                && (not <| currentVerse.sessionLearningType == Practice)
+                && (case model.learningSession of
+                        Session sessionData ->
+                            List.any (\vs -> not vs.needsTesting) sessionData.verses.verseStatuses
+
+                        _ ->
+                            False
+                   )
+        )
 
 
 dropdownIsOpen : Model -> Dropdown -> Bool
@@ -1266,13 +1272,13 @@ referenceToParts reference =
             parts
 
 
-versePartsToHtml : LearningStage -> List Part -> List (H.Html Msg)
-versePartsToHtml stage parts =
+versePartsToHtml : LearningStage -> List Part -> UvsId -> List (H.Html Msg)
+versePartsToHtml stage parts uvsId =
     List.map
         (\p ->
             case p of
                 WordPart word ->
-                    wordButton word stage
+                    wordButton word stage uvsId
 
                 Space ->
                     H.text " "
@@ -1297,13 +1303,13 @@ idPrefixForButton wt =
             "id-reference-part-"
 
 
-idForButton : Word -> String
-idForButton wd =
-    idPrefixForButton wd.type_ ++ toString wd.index
+idForButton : Word -> UvsId -> String
+idForButton wd uvsId =
+    idPrefixForButton wd.type_ ++ toString uvsId ++ "-" ++ toString wd.index
 
 
-wordButton : Word -> LearningStage -> H.Html Msg
-wordButton word stage =
+wordButton : Word -> LearningStage -> UvsId -> H.Html Msg
+wordButton word stage uvsId =
     let
         ( classesOuter, classesInner ) =
             wordButtonClasses word stage
@@ -1320,11 +1326,10 @@ wordButton word stage =
                     ""
 
                 _ ->
-                    idForButton word
+                    idForButton word uvsId
     in
         H.span
             ([ A.class <| String.join " " classesOuter
-             , A.attribute "data-contents" word.text
              ]
                 ++ (if id /= "" then
                         [ A.id id ]
@@ -2027,7 +2032,6 @@ getFocusAttributes focusData =
                 , A.attribute "data-focus-typingBoxId" data.typingBoxId
                 , A.attribute "data-focus-typingBoxContainerId" data.typingBoxContainerId
                 , A.attribute "data-focus-wordButtonId" data.wordButtonId
-                , A.attribute "data-focus-wordContents" data.wordContents
                 , A.attribute "data-focus-expectedClass" data.expectedClass
                 , A.attribute "data-focus-hardMode" (encodeBool data.hardMode)
                 ]
@@ -4540,7 +4544,6 @@ type alias UpdateTypingBoxData =
     { typingBoxId : String
     , typingBoxContainerId : String
     , wordButtonId : String
-    , wordContents : String
     , expectedClass : String
     , hardMode : Bool
     , refocus : Bool
@@ -4555,28 +4558,26 @@ updateTypingBoxCommand model refocus =
 
 getUpdateTypingBoxData : Model -> Bool -> UpdateTypingBoxData
 getUpdateTypingBoxData model refocus =
-    case getCurrentTestProgress model of
-        Just tp ->
-            case tp.currentWord of
-                TestFinished _ ->
+    case getCurrentVerse model of
+        Just currentVerse ->
+            case getCurrentTestProgress model of
+                Just tp ->
+                    case tp.currentWord of
+                        TestFinished _ ->
+                            hideTypingBoxData
+
+                        CurrentWord cw ->
+                            { typingBoxId = typingBoxId
+                            , typingBoxContainerId = typingBoxContainerId
+                            , wordButtonId = idForButton cw.word currentVerse.verseStatus.id
+                            , expectedClass = classForTypingBox <| typingBoxInUse tp (getTestingMethod model)
+                            , hardMode = shouldUseHardTestingMode currentVerse
+                            , refocus = refocus
+                            , value = tp.currentTypedText
+                            }
+
+                Nothing ->
                     hideTypingBoxData
-
-                CurrentWord cw ->
-                    { typingBoxId = typingBoxId
-                    , typingBoxContainerId = typingBoxContainerId
-                    , wordButtonId = idForButton cw.word
-                    , wordContents = cw.word.text
-                    , expectedClass = classForTypingBox <| typingBoxInUse tp (getTestingMethod model)
-                    , hardMode =
-                        case getCurrentVerse model of
-                            Nothing ->
-                                False
-
-                            Just currentVerse ->
-                                shouldUseHardTestingMode currentVerse
-                    , refocus = refocus
-                    , value = tp.currentTypedText
-                    }
 
         Nothing ->
             hideTypingBoxData
@@ -4587,7 +4588,6 @@ hideTypingBoxData =
     { typingBoxId = typingBoxId
     , typingBoxContainerId = typingBoxContainerId
     , wordButtonId = ""
-    , wordContents = ""
     , expectedClass = classForTypingBox False
     , hardMode = False
     , refocus = True
