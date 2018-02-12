@@ -112,6 +112,11 @@ init flags =
       , sessionStats = Nothing
       , attemptingReturn = False
       , currentTime = ISO8601.fromTime 0
+      -- Hard coding this to prefer reading, instead of storing in preferences
+      -- etc., is a deliberate design decision to reduce the number of tests. If
+      -- people want to prefer testing to reading, they have to select it in
+      -- each passage testing session.
+      , testOrReadPreference = PreferReading
       }
     , loadVerses True
     )
@@ -135,6 +140,7 @@ type alias Model =
     , sessionStats : Maybe SessionStats
     , attemptingReturn : Bool
     , currentTime : ISO8601.Time
+    , testOrReadPreference : TestOrReadPreference
     }
 
 
@@ -213,6 +219,11 @@ type alias UvsId =
 
 type alias Url =
     String
+
+
+type TestOrReadPreference
+    = PreferReading
+    | PreferTests
 
 
 type alias VerseStore =
@@ -410,6 +421,29 @@ type alias SessionStats =
     { totalVersesTested : Int
     , newVersesStarted : Int
     }
+
+
+currentSetType : CurrentVerse -> Maybe VerseSetType
+currentSetType currentVerse =
+    case currentVerse.verseStatus.verseSet of
+        Nothing ->
+            Nothing
+
+        Just verseSet ->
+            Just verseSet.setType
+
+
+isPassageSet : CurrentVerse -> Bool
+isPassageSet currentVerse =
+    case currentSetType currentVerse of
+        Nothing ->
+            False
+
+        Just Selection ->
+            False
+
+        Just Passage ->
+            True
 
 
 
@@ -1028,30 +1062,66 @@ viewVerseOptionsMenu model currentVerse =
         buttons =
             List.filterMap identity <|
                 [ Just skipButton
-                , case currentVerse.verseStatus.verseSet of
-                    Nothing ->
-                        Just <| cancelLearningButton
-
-                    Just verseSet ->
-                        case verseSet.setType of
-                            Selection ->
-                                Just <| cancelLearningButton
-
-                            Passage ->
-                                Nothing
+                , if isPassageSet currentVerse then
+                    Nothing
+                  else
+                    Just cancelLearningButton
                 , Just resetProgressButton
                 ]
     in
         H.div [ A.id "id-verse-options-menu" ]
             [ H.ul []
-                (List.map
-                    (\button ->
-                        H.li []
-                            [ viewButton model button ]
-                    )
-                    buttons
+                ((if allowTestInsteadOfRead model then
+                    [ H.li []
+                        [ H.label []
+                            [ H.input
+                                ([ A.type_ "checkbox"
+                                 , A.checked
+                                    (case model.testOrReadPreference of
+                                        PreferReading ->
+                                            False
+
+                                        PreferTests ->
+                                            True
+                                    )
+                                 , onClickSimply TogglePreferTestsToReading
+                                 ]
+                                    ++ (getTypingBoxFocusDataForMsg model TogglePreferTestsToReading True
+                                            |> getFocusAttributes
+                                       )
+                                )
+                                []
+                            , H.span []
+                                [ H.text "Test instead of read" ]
+                            ]
+                        ]
+                    ]
+                  else
+                    []
+                 )
+                    ++ (List.map
+                            (\button ->
+                                H.li []
+                                    [ viewButton model button ]
+                            )
+                            buttons
+                       )
                 )
             ]
+
+
+allowTestInsteadOfRead : Model -> Bool
+allowTestInsteadOfRead model =
+    withCurrentVerse model
+        False
+        (\currentVerse ->
+            (isPassageSet currentVerse) &&
+            (not <| currentVerse.sessionLearningType == Practice) &&
+             (case model.learningSession of
+                  Session sessionData ->
+                      List.any (\vs -> not vs.needsTesting) sessionData.verses.verseStatuses
+                  _ ->
+                      False))
 
 
 dropdownIsOpen : Model -> Dropdown -> Bool
@@ -1934,39 +2004,41 @@ viewButton model button =
                     []
 
         -- see learn_setup.js
-        focusData =
+        focusAttributes =
             case button.enabled of
                 Enabled ->
                     if button.refocusTypingBox then
-                        getTypingBoxFocusDataForMsg model button.msg True
+                        getTypingBoxFocusDataForMsg model button.msg True |> getFocusAttributes
                     else
-                        Nothing
+                        []
 
                 Disabled ->
-                    Nothing
-
-        focusAttributes =
-            case focusData of
-                Nothing ->
                     []
-
-                Just data ->
-                    if data.refocus then
-                        [ A.attribute "data-focus-typing-box-required" ""
-                        , A.attribute "data-focus-typingBoxId" data.typingBoxId
-                        , A.attribute "data-focus-typingBoxContainerId" data.typingBoxContainerId
-                        , A.attribute "data-focus-wordButtonId" data.wordButtonId
-                        , A.attribute "data-focus-wordContents" data.wordContents
-                        , A.attribute "data-focus-expectedClass" data.expectedClass
-                        , A.attribute "data-focus-hardMode" (encodeBool data.hardMode)
-                        ]
-                    else
-                        -- We only need this mechanism if we need a focus action,
-                        -- resizing and moving the box is handled by updateTypingBoxCommand
-                        []
     in
         H.button (attributes ++ eventAttributes ++ focusAttributes)
             [ H.text button.caption ]
+
+
+getFocusAttributes : Maybe UpdateTypingBoxData -> List (H.Attribute Msg)
+getFocusAttributes focusData =
+    case focusData of
+        Nothing ->
+            []
+
+        Just data ->
+            if data.refocus then
+                [ A.attribute "data-focus-typing-box-required" ""
+                , A.attribute "data-focus-typingBoxId" data.typingBoxId
+                , A.attribute "data-focus-typingBoxContainerId" data.typingBoxContainerId
+                , A.attribute "data-focus-wordButtonId" data.wordButtonId
+                , A.attribute "data-focus-wordContents" data.wordContents
+                , A.attribute "data-focus-expectedClass" data.expectedClass
+                , A.attribute "data-focus-hardMode" (encodeBool data.hardMode)
+                ]
+            else
+                -- We only need this mechanism if we need a focus action,
+                -- resizing and moving the box is handled by updateTypingBoxCommand
+                []
 
 
 {-| If the Msg will produce a change of state such that
@@ -2353,6 +2425,7 @@ type Msg
     | ExpandHelp
     | CollapseHelp
     | ToggleDropdown Dropdown
+    | TogglePreferTestsToReading
     | NavigateTo Url
     | WindowResize { width : Int, height : Int }
     | ReceivePreferences JD.Value
@@ -2456,6 +2529,9 @@ update msg model =
             ( toggleDropdown model dropdown
             , Cmd.none
             )
+
+        TogglePreferTestsToReading ->
+            togglePreferTestsToReading model
 
         NavigateTo url ->
             ( model
@@ -2819,8 +2895,8 @@ normalizeVerseStatuses vrb =
             vrb.verseStatusesRaw
 
 
-verseBatchToSession : VerseBatch -> Maybe (List ActionLog) -> ( Maybe SessionData, Cmd Msg )
-verseBatchToSession batch actionLogs =
+verseBatchToSession : VerseBatch -> Maybe (List ActionLog) -> TestOrReadPreference -> ( Maybe SessionData, Cmd Msg )
+verseBatchToSession batch actionLogs testOrReadPreference =
     case List.head batch.verseStatuses of
         Nothing ->
             ( Nothing, Cmd.none )
@@ -2838,7 +2914,7 @@ verseBatchToSession batch actionLogs =
                         Just maxOrderVal ->
                             let
                                 ( newCurrentVerse, cmd ) =
-                                    setupCurrentVerse verse learningType
+                                    setupCurrentVerse verse learningType testOrReadPreference
 
                                 actionLogStore =
                                     case actionLogs of
@@ -2997,6 +3073,69 @@ setDropdownOpen model dropdown =
 
 
 
+{- Other updates -}
+
+
+togglePreferTestsToReading : Model -> ( Model, Cmd Msg )
+togglePreferTestsToReading model =
+    let
+        newModel1 =
+            { model
+                | testOrReadPreference =
+                    case model.testOrReadPreference of
+                        PreferReading ->
+                            PreferTests
+
+                        PreferTests ->
+                            PreferReading
+            }
+                |> closeDropdowns
+
+        ( newModel2, cmd ) =
+            updateCurrentVersePlus newModel1
+                Cmd.none
+                (\currentVerse ->
+                    let
+                        learningType =
+                            case newModel1.learningSession of
+                                Session sessionData ->
+                                    sessionData.verses.learningType
+
+                                _ ->
+                                    -- Will not ever happen in reality
+                                    Practice
+
+                        testType =
+                            case currentVerse.currentStage of
+                                Test t _ ->
+                                    t
+
+                                _ ->
+                                    FirstTest
+
+                        ( newStageType, _ ) =
+                            getStages learningType testType currentVerse.verseStatus newModel1.testOrReadPreference
+                    in
+                        -- we take care not to reset a test if the toggle button
+                        -- doesn't make a difference to the current stage.
+                        -- Otherwise we do need to call setupCurrentVerse to
+                        -- initialise the test stage.
+                        if (newStageType /= learningStageTypeForStage currentVerse.currentStage) then
+                            setupCurrentVerse currentVerse.verseStatus learningType newModel1.testOrReadPreference
+                        else
+                            ( currentVerse, Cmd.none )
+                )
+                |> addCommandsM
+                    (\m ->
+                        [ stageOrVerseChangeCommands m True ]
+                    )
+    in
+        ( newModel2
+        , cmd
+        )
+
+
+
 {- Stages -}
 
 
@@ -3093,11 +3232,11 @@ learningStageTypeForStage s =
             TestStage t
 
 
-setupCurrentVerse : VerseStatus -> LearningType -> ( CurrentVerse, Cmd Msg )
-setupCurrentVerse verse learningType =
+setupCurrentVerse : VerseStatus -> LearningType -> TestOrReadPreference -> ( CurrentVerse, Cmd Msg )
+setupCurrentVerse verse learningType testOrReadPreference =
     let
         ( firstStageType, remainingStageTypes ) =
-            getStages learningType FirstTest verse
+            getStages learningType FirstTest verse testOrReadPreference
 
         ( newCurrentStage, cmd ) =
             initializeStage firstStageType verse
@@ -3383,11 +3522,11 @@ testMethodUsesTextBox testingMethod =
             False
 
 
-getStages : LearningType -> TestType -> VerseStatus -> ( LearningStageType, List LearningStageType )
-getStages learningType testType verseStatus =
+getStages : LearningType -> TestType -> VerseStatus -> TestOrReadPreference -> ( LearningStageType, List LearningStageType )
+getStages learningType testType verseStatus testOrReadPreference =
     let
         getNonPracticeStages vs =
-            if vs.needsTesting then
+            if vs.needsTesting || testOrReadPreference == PreferTests then
                 getStagesByStrength vs.strength testType
             else
                 ( ReadForContextStage
@@ -3736,7 +3875,7 @@ moveToNextVerse model =
                             ( newModel1, cmd ) =
                                 updateCurrentVersePlus model
                                     Cmd.none
-                                    (\cv -> setupCurrentVerse verse sessionData.verses.learningType)
+                                    (\cv -> setupCurrentVerse verse sessionData.verses.learningType model.testOrReadPreference)
 
                             loadingQueueBufferSize =
                                 3
@@ -3877,7 +4016,7 @@ handleResetProgress model verseStatus confirmed =
             updateCurrentVersePlus newModel1
                 Cmd.none
                 (\currentVerse ->
-                    setupCurrentVerse newVerseStatus Learning
+                    setupCurrentVerse newVerseStatus Learning model.testOrReadPreference
                 )
                 |> addCommandsM
                     (\m ->
@@ -5132,7 +5271,7 @@ handleVersesToLearn model verseBatchRaw =
             normalizeVerseBatch verseBatchRaw
 
         ( maybeBatchSession, sessionCmd ) =
-            verseBatchToSession verseBatch actionLogs
+            verseBatchToSession verseBatch actionLogs model.testOrReadPreference
 
         ( newSession, previousSessionEmpty ) =
             case model.learningSession of
