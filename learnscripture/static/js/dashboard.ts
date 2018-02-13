@@ -143,7 +143,7 @@ var saveHeatmapPreferencesDelayed = function() {
 
 var saveHeatmapPreferences = function() {
     $.ajax({
-        url: '/api/learnscripture/v1/saveheatmappreferences/?format=json',
+        url: '/api/learnscripture/v1/savemiscpreferences/?format=json',
         dataType: 'json',
         type: 'POST',
         data: {
