@@ -93,11 +93,31 @@ body.learn-page {
             top: @topbarHeight;
             right: 0px;
             line-height: @topbarHeight;
+            z-index: 1;
+
+            .menu-pin {
+                display: block;
+                position: absolute;
+                z-index: 2;
+                right: 6px;
+                top: 6px;
+                background-color: inherit;
+                color: inherit;
+                border: 1px solid silver;
+                border-radius: 2px;
+            }
         }
 
-        .dropdown-heading,
+        .dropdown-heading {
+            padding: 0 0.4em;
+        }
         .nav-dropdown-menu li {
             padding: 0 0.4em;
+        }
+
+        .nav-dropdown-menu.menu-pinnable li {
+            // Make room for 'pin' button
+            padding-right: 30px;
         }
 
         .spacer {

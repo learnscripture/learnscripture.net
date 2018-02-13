@@ -152,6 +152,9 @@ type alias Preferences =
     , enableVibration : Bool
     , desktopTestingMethod : TestingMethod
     , touchscreenTestingMethod : TestingMethod
+    , pinActionLogMenuLargeScreen : Bool
+    , pinActionLogMenuSmallScreen : Bool
+    , pinVerseOptionsMenuLargeScreen : Bool
     }
 
 
@@ -762,21 +765,25 @@ viewActionLogs model =
                 , makeIcon "icon-points" "Points gained this session"
                 ]
             , H.ul
-                [ A.class "nav-dropdown-menu" ]
-                (processedLogs
-                    |> List.map
-                        (\log ->
-                            H.li
-                                [ A.class "action-log-item"
-                                , A.attribute "data-reason" (toString log.reason)
-                                ]
-                                [ H.text <|
-                                    interpolate "{0} - {1}"
-                                        [ toString log.points
-                                        , prettyReason log.reason
+                [ A.class "nav-dropdown-menu menu-pinnable" ]
+                ([ H.button [ A.class "menu-pin" ]
+                    [ makeIcon "icon-pin-menu" "Pin menu" ]
+                 ]
+                    ++ (processedLogs
+                            |> List.map
+                                (\log ->
+                                    H.li
+                                        [ A.class "action-log-item"
+                                        , A.attribute "data-reason" (toString log.reason)
                                         ]
-                                ]
-                        )
+                                        [ H.text <|
+                                            interpolate "{0} - {1}"
+                                                [ toString log.points
+                                                , prettyReason log.reason
+                                                ]
+                                        ]
+                                )
+                       )
                 )
             ]
 
@@ -5797,6 +5804,9 @@ preferencesDecoder =
         |> JDP.required "enableVibration" JD.bool
         |> JDP.required "desktopTestingMethod" testingMethodDecoder
         |> JDP.required "touchscreenTestingMethod" testingMethodDecoder
+        |> JDP.required "pinActionLogMenuLargeScreen" JD.bool
+        |> JDP.required "pinActionLogMenuSmallScreen" JD.bool
+        |> JDP.required "pinVerseOptionsMenuLargeScreen" JD.bool
 
 
 testingMethodDecoder : JD.Decoder TestingMethod
