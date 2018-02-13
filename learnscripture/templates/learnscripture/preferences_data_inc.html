@@ -8,6 +8,9 @@
      data-desktop-testing-method="{{ request.identity.desktop_testing_method }}"
      data-touchscreen-testing-method="{{ request.identity.touchscreen_testing_method }}"
      data-new-learn-page="{{ request.identity.new_learn_page|yesno:"true,false,false" }}"
+     data-pin-action-log-menu-large-screen="{{ request.identity.pin_action_log_menu_large_screen|yesno:"true,false,false" }}"
+     data-pin-action-log-menu-small-screen="{{ request.identity.pin_action_log_menu_small_screen|yesno:"true,false,false" }}"
+     data-pin-verse-options-menu-large-screen="{{ request.identity.pin_verse_options_menu_large_screen|yesno:"true,false,false" }}"
      ></div>
 {% if request_account %}
   <div id="id-account-data"
