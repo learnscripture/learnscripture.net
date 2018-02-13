@@ -667,12 +667,15 @@ class UnFollow(ApiView):
         return {}
 
 
-class SaveHeatmapPreferences(ApiView):
+class SaveMiscPreferences(ApiView):
 
     @require_preexisting_identity_m
     def post(self, request):
         identity = request.identity
-        identity.heatmap_default_stats_type = request.POST['heatmap_default_stats_type']
-        identity.heatmap_default_show = request.POST['heatmap_default_show'] == 'true'
+
+        if 'heatmap_default_stats_type' in request.POST:
+            identity.heatmap_default_stats_type = request.POST['heatmap_default_stats_type']
+        if 'heatmap_default_show' in request.POST:
+            identity.heatmap_default_show = request.POST['heatmap_default_show'] == 'true'
         identity.save()
         return {}
