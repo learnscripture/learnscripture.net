@@ -73,8 +73,10 @@ var createOrRefreshCalendarHeatmap = function(allData) {
     if (calHeatMapInstance == null) {
         calHeatMapInstance = new CalHeatMap();
         var today = new Date();
-        var year = today.getFullYear();
-        var month = today.getMonth();
+        var year = today.getUTCFullYear();
+        var month = today.getUTCMonth();
+        var dayOfMonth = today.getUTCDate();
+        var utcToday = new Date(Date.UTC(year, month, dayOfMonth));
         // Go back 2 years, and then clip the left hand side
         // This gives the best results visually.
         var numberOfYears = 2;
@@ -86,14 +88,14 @@ var createOrRefreshCalendarHeatmap = function(allData) {
             domain: "month",
             domainLabelFormat: "%b %Y",
             itemSelector: '#id-heatmap-div',
-            maxDate: today,
+            maxDate: utcToday,
             nextSelector: '#id-heatmap-next',
             previousSelector: '#id-heatmap-previous',
             range: numberOfYears * 12 + 1,
             start: new Date(year, month, 1),
             subDomainDateFormat: "%Y-%m-%d",
             legend: [0, 10, 20, 35, 55, 80],
-            highlight: "now",
+            highlight: utcToday,
             afterLoadData: function(data) {
                 $('#id-heatmap-loading').remove();
                 return data;
