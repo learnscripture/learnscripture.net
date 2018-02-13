@@ -42,6 +42,16 @@ select,
     .border-radius(3px);
 }
 
+input,
+select,
+textarea {
+    #font > .sans-serif(normal,@basefont);
+}
+textarea {
+    line-height: 1.3;
+}
+
+// Controls within forms (layout)
 form {
     margin-bottom: 1.3em;
     // Parent element that clears floats and wraps labels and fields together
@@ -76,14 +86,6 @@ form {
          width: auto;
          height: auto;
      }
-
-    // Set font for forms
-    label,
-    input,
-    select,
-    textarea {
-        #font > .sans-serif(normal,13px);
-    }
 
     // Float labels left
     label {
