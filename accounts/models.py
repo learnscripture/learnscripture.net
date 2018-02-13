@@ -445,6 +445,10 @@ class Identity(models.Model):
                                                   default=HeatmapStatsType.COMBINED)
     heatmap_default_show = models.BooleanField(default=True)
 
+    pin_action_log_menu_large_screen = models.BooleanField(default=False)
+    pin_action_log_menu_small_screen = models.BooleanField(default=False)
+    pin_verse_options_menu_large_screen = models.BooleanField(default=False)
+
     objects = IdentityManager()
 
     @property
