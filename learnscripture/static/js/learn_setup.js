@@ -35,7 +35,11 @@ var app =
                 "username": accountNode.attributes['data-username'].value,
             },
             "isTouchDevice": isTouchDevice(),
-            "csrfMiddlewareToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+            "csrfMiddlewareToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+            "windowSize": {
+                "width": $(window).width(),
+                "height": $(window).height()
+            }
         });
 
 

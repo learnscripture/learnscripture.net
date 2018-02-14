@@ -677,5 +677,9 @@ class SaveMiscPreferences(ApiView):
             identity.heatmap_default_stats_type = request.POST['heatmap_default_stats_type']
         if 'heatmap_default_show' in request.POST:
             identity.heatmap_default_show = request.POST['heatmap_default_show'] == 'true'
+        if 'pin_action_log_menu_large_screen' in request.POST:
+            identity.pin_action_log_menu_large_screen = request.POST['pin_action_log_menu_large_screen'] == 'true'
+        if 'pin_action_log_menu_small_screen' in request.POST:
+            identity.pin_action_log_menu_small_screen = request.POST['pin_action_log_menu_small_screen'] == 'true'
         identity.save()
         return {}
