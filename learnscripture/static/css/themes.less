@@ -4,10 +4,22 @@
 .dotheme(@topColor1, @topColor2, @topLinkColor, @btnColor1, @btnColor2, @bgColor1,
          @linkColor, @footerColor, @themeFont) {
 
+    // We are slowly moving towards using variables everywhere,
+    // which will make most of the 'doTheme' mixin obsolete.
+    --topColor1: @topColor1;
+    --topColor2: @topColor2;
+    --topLinkColor: @topLinkColor;
+    --btnColor1: @btnColor1;
+    --btnColor2: @btnColor2;
+    --bgColor1: @bgColor1;
+    --linkColor: @linkColor;
+    --footerColor: @footerColor;
+
     @linkColorHover: darken(@linkColor, 15);
     @bgBorderColor: darken(@bgColor1, 10%);
 
     @topLinkHoverColor: white;
+
     a {
         color: @linkColor;
         &:hover {
@@ -56,16 +68,12 @@
 
     nav.topbar-new {
         // New learn page, eventually new topbar everywhere:
-        .nav-dropdown.open .dropdown-heading {
-            background-color: @topColor2;
-        }
 
         .dropdown-heading:not([tabindex="-1"]):hover {
             color: @topLinkHoverColor;
         }
 
         .nav-dropdown-menu {
-            background-color: @topColor2;
             color: @topLinkColor;
             padding: 2px 5px;
             a {
@@ -79,10 +87,6 @@
             li:not(:last-child):not(.button-item) {
                 border-bottom: 1px solid @topLinkColor;
             }
-        }
-
-        .latest-points {
-            background-color: @topColor1; // to obscure what is underneath.
         }
     }
 
@@ -232,7 +236,7 @@
     #id-verse-options-menu-btn {
         background-color: white;
         border-color: white;
-        &.open {
+        &.menu-open {
             background-color: white;
             border-color: @bgBorderColor;
         }

@@ -77,6 +77,10 @@ type alias Flags =
     , account : Maybe AccountData
     , isTouchDevice : Bool
     , csrfMiddlewareToken : String
+    , windowSize :
+        { width : Int
+        , height : Int
+        }
     }
 
 
@@ -92,35 +96,62 @@ decodePreferences prefsValue =
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =
-    ( { preferences = decodePreferences flags.preferences
-      , user =
-            case flags.account of
-                Just ad ->
-                    Account ad
+    let
+        preferences =
+            decodePreferences flags.preferences
 
-                Nothing ->
-                    GuestUser
-      , isTouchDevice = flags.isTouchDevice
-      , httpConfig =
-            { csrfMiddlewareToken = flags.csrfMiddlewareToken
-            }
-      , learningSession = Loading
-      , helpVisible = False
-      , currentHttpCalls = Dict.empty
-      , permanentFailHttpCalls = []
-      , openDropdown = Nothing
-      , sessionStats = Nothing
-      , attemptingReturn = False
-      , currentTime =
-            ISO8601.fromTime 0
-            -- Hard coding this to prefer reading, instead of storing in preferences
-            -- etc., is a deliberate design decision to reduce the number of tests. If
-            -- people want to prefer testing to reading, they have to select it in
-            -- each passage testing session.
-      , testOrReadPreference = PreferReading
-      }
-    , loadVerses True
-    )
+        windowSize =
+            flags.windowSize
+    in
+        ( { preferences = preferences
+          , user =
+                case flags.account of
+                    Just ad ->
+                        Account ad
+
+                    Nothing ->
+                        GuestUser
+          , isTouchDevice = flags.isTouchDevice
+          , httpConfig =
+                { csrfMiddlewareToken = flags.csrfMiddlewareToken
+                }
+          , learningSession = Loading
+          , helpVisible = False
+          , currentHttpCalls = Dict.empty
+          , permanentFailHttpCalls = []
+          , openDropdown = Nothing
+          , pinnedMenus = setPinnedMenus preferences windowSize
+          , sessionStats = Nothing
+          , attemptingReturn = False
+          , currentTime =
+                ISO8601.fromTime 0
+                -- Hard coding this to prefer reading, instead of storing in preferences
+                -- etc., is a deliberate design decision to reduce the number of tests. If
+                -- people want to prefer testing to reading, they have to select it in
+                -- each passage testing session.
+          , testOrReadPreference = PreferReading
+          , windowSize = windowSize
+          }
+        , loadVerses True
+        )
+
+
+setPinnedMenus : Preferences -> { height : Int, width : Int } -> Set.Set String
+setPinnedMenus preferences windowSize =
+    Set.fromList
+        (if
+            ((preferences.pinActionLogMenuLargeScreen
+                && isScreenLargeEnoughForSidePanels windowSize
+             )
+                || (preferences.pinActionLogMenuSmallScreen
+                        && (not <| isScreenLargeEnoughForSidePanels windowSize)
+                   )
+            )
+         then
+            [ (toString ActionLogsInfo) ]
+         else
+            []
+        )
 
 
 
@@ -138,10 +169,15 @@ type alias Model =
         Dict.Dict CallId QueuedCall
     , permanentFailHttpCalls : List ( CallId, TrackedHttpCall )
     , openDropdown : Maybe Dropdown
+    , pinnedMenus : Set.Set String
     , sessionStats : Maybe SessionStats
     , attemptingReturn : Bool
     , currentTime : ISO8601.Time
     , testOrReadPreference : TestOrReadPreference
+    , windowSize :
+        { height : Int
+        , width : Int
+        }
     }
 
 
@@ -492,7 +528,7 @@ view model =
 
 viewTopNav : Model -> H.Html Msg
 viewTopNav model =
-    H.nav [ A.class "topbar-new" ]
+    H.nav ([ A.class "topbar-new" ] ++ pinnedAttributes model)
         [ H.div [ A.class "nav-item return-link" ]
             [ navLink
                 [ A.href "#"
@@ -509,6 +545,14 @@ viewTopNav model =
         , H.div [ A.class "nav-item preferences-link" ]
             [ navLink [ A.href "#" ] (userDisplayName model.user) "icon-preferences" AlignRight ]
         ]
+
+
+pinnedAttributes : Model -> List (H.Attribute msg)
+pinnedAttributes model =
+    if menuIsPinned model ActionLogsInfo then
+        [ A.attribute "data-actionlogsinfo-pinned" "true" ]
+    else
+        []
 
 
 getReturnCaption : Url -> String
@@ -617,7 +661,7 @@ ajaxInfo model =
 
         openClass =
             if dropdownOpen && itemsToView then
-                "open"
+                "menu-open"
             else
                 ""
     in
@@ -632,7 +676,7 @@ ajaxInfo model =
                 emptyNode
               else
                 H.ul
-                    [ A.class "nav-dropdown-menu" ]
+                    [ A.class ("nav-dropdown-menu " ++ openClass) ]
                     ((if not <| List.isEmpty failedHttpCalls then
                         [ H.li [ A.class "button-item" ]
                             [ H.button
@@ -734,18 +778,30 @@ viewActionLogs model =
         dropdownOpen =
             dropdownIsOpen model ActionLogsInfo
 
+        menuPinned =
+            menuIsPinned model ActionLogsInfo
+
         itemsToView =
             List.length processedLogs > 0
 
         openClass =
-            if dropdownOpen && itemsToView then
-                "open"
+            if not menuPinned && (dropdownOpen && itemsToView) then
+                "menu-open"
             else
                 ""
+
+        pinnedClass =
+            if menuPinned then
+                "menu-pinned"
+            else
+                ""
+
+        openable =
+            itemsToView && not menuPinned
     in
-        H.div [ A.class ("action-logs nav-dropdown " ++ openClass) ]
+        H.div [ A.class ("action-logs nav-dropdown " ++ openClass ++ " " ++ pinnedClass) ]
             [ H.div
-                (dropdownHeadingAttributes ActionLogsInfo itemsToView [ "nav-item" ])
+                (dropdownHeadingAttributes ActionLogsInfo openable [ "nav-item" ])
                 [ H.span [ A.class "nav-caption" ]
                     [ H.text "Session points: " ]
                 , H.span [ A.class "total-points" ]
@@ -765,8 +821,12 @@ viewActionLogs model =
                 , makeIcon "icon-points" "Points gained this session"
                 ]
             , H.ul
-                [ A.class "nav-dropdown-menu menu-pinnable" ]
-                ([ H.button [ A.class "menu-pin" ]
+                [ A.class ("nav-dropdown-menu menu-pinnable " ++ openClass ++ " " ++ pinnedClass) ]
+                ([ H.button
+                    [ A.class "menu-pin"
+                    , onClickSimply (TogglePinnableMenu ActionLogsInfo)
+                    , A.tabindex -1
+                    ]
                     [ makeIcon "icon-pin-menu" "Pin menu" ]
                  ]
                     ++ (processedLogs
@@ -1011,9 +1071,9 @@ viewVerseOptionsMenuButton menuOpen =
         ((dropdownHeadingAttributes VerseOptionsMenu
             True
             (if menuOpen then
-                [ "open" ]
+                [ "menu-open" ]
              else
-                [ "closed" ]
+                [ "menu-closed" ]
             )
          )
             ++ [ A.id "id-verse-options-menu-btn" ]
@@ -2425,6 +2485,7 @@ type Msg
     | RetryFailedCalls
     | RecordActionCompleteReturned CallId (Result Http.Error ())
     | EmptyResponseTrackedHttpCallReturned CallId (Result Http.Error ())
+    | EmptyResponseReturned (Result Http.Error ())
     | ActionLogsLoaded (Result Http.Error (List ActionLog))
     | ProcessNewActionLogs
     | SessionStatsLoaded (Result Http.Error SessionStats)
@@ -2432,6 +2493,7 @@ type Msg
     | ExpandHelp
     | CollapseHelp
     | ToggleDropdown Dropdown
+    | TogglePinnableMenu Dropdown
     | TogglePreferTestsToReading
     | NavigateTo Url
     | WindowResize { width : Int, height : Int }
@@ -2511,6 +2573,9 @@ update msg model =
         EmptyResponseTrackedHttpCallReturned callId result ->
             handleRetries (\model result -> ( model, Cmd.none )) model callId result
 
+        EmptyResponseReturned result ->
+            ( model, Cmd.none )
+
         RecordActionCompleteReturned callId result ->
             handleRetries handleRecordActionCompleteReturned model callId result
 
@@ -2537,6 +2602,9 @@ update msg model =
             , Cmd.none
             )
 
+        TogglePinnableMenu menu ->
+            togglePinnableMenu model menu
+
         TogglePreferTestsToReading ->
             togglePreferTestsToReading model
 
@@ -2545,10 +2613,15 @@ update msg model =
             , Navigation.load url
             )
 
-        WindowResize _ ->
+        WindowResize size ->
             -- Can cause reflow of words and change of sizes of everything,
             -- therefore need to reposition (but not change focus)
-            ( model, updateTypingBoxCommand model False )
+            ( { model
+                | windowSize = size
+                , pinnedMenus = setPinnedMenus model.preferences size
+              }
+            , updateTypingBoxCommand model False
+            )
 
         ReceivePreferences prefsValue ->
             let
@@ -2831,7 +2904,7 @@ attemptReturn model { immediate, queued } =
         else if immediate || not queued then
             doFailedCallsPrompt
         else
-            ( setDropdownOpen model AjaxInfo
+            ( setDropdownOpen AjaxInfo model
             , Cmd.none
             )
 
@@ -3074,9 +3147,69 @@ closeDropdowns model =
     { model | openDropdown = Nothing }
 
 
-setDropdownOpen : Model -> Dropdown -> Model
-setDropdownOpen model dropdown =
+setDropdownOpen : Dropdown -> Model -> Model
+setDropdownOpen dropdown model =
     { model | openDropdown = Just dropdown }
+
+
+closeDropdownIfOpen : Dropdown -> Model -> Model
+closeDropdownIfOpen dropdown model =
+    if model.openDropdown == Just dropdown then
+        { model | openDropdown = Nothing }
+    else
+        model
+
+
+togglePinnableMenu : Model -> Dropdown -> ( Model, Cmd Msg )
+togglePinnableMenu model dropdown =
+    let
+        wasPinned =
+            menuIsPinned model dropdown
+
+        isPinned =
+            not wasPinned
+
+        newModel1 =
+            if isPinned then
+                { model
+                    | pinnedMenus = Set.insert (toString dropdown) model.pinnedMenus
+                }
+                    |> closeDropdownIfOpen dropdown
+            else
+                { model
+                    | pinnedMenus = Set.remove (toString dropdown) model.pinnedMenus
+                }
+                    |> setDropdownOpen dropdown
+
+        oldPreferences =
+            model.preferences
+
+        newPreferences =
+            if dropdown == ActionLogsInfo then
+                if isScreenLargeEnoughForSidePanels newModel1.windowSize then
+                    { oldPreferences
+                        | pinActionLogMenuLargeScreen = isPinned
+                    }
+                else
+                    { oldPreferences
+                        | pinActionLogMenuSmallScreen = isPinned
+                    }
+            else
+                oldPreferences
+
+        newModel2 =
+            { newModel1
+                | preferences = newPreferences
+            }
+    in
+        ( newModel2
+        , savePinningPreferences newPreferences newModel2.httpConfig
+        )
+
+
+menuIsPinned : Model -> Dropdown -> Bool
+menuIsPinned model dropdown =
+    Set.member (toString dropdown) model.pinnedMenus
 
 
 
@@ -3865,7 +3998,7 @@ moveToNextVerse model =
             in
                 case getNextVerse verseStore currentVerseStatus of
                     NoMoreVerses ->
-                        ( setDropdownOpen model AjaxInfo
+                        ( setDropdownOpen AjaxInfo model
                         , sendMsg (AttemptReturn { immediate = False, queued = False })
                         )
 
@@ -5699,6 +5832,32 @@ handleSessionStatsLoaded model result =
 
 
 
+{- savemiscpreferences -}
+
+
+saveMiscPreferencesUrl : String
+saveMiscPreferencesUrl =
+    "/api/learnscripture/v1/savemiscpreferences/"
+
+
+savePinningPreferences : Preferences -> HttpConfig -> Cmd Msg
+savePinningPreferences preferences httpConfig =
+    let
+        body =
+            Http.multipartBody
+                [ Http.stringPart "pin_action_log_menu_large_screen" (preferences.pinActionLogMenuLargeScreen |> encodeBool)
+                , Http.stringPart "pin_action_log_menu_small_screen" (preferences.pinActionLogMenuSmallScreen |> encodeBool)
+                ]
+    in
+        Http.send EmptyResponseReturned
+            (myHttpPost httpConfig
+                saveMiscPreferencesUrl
+                body
+                emptyDecoder
+            )
+
+
+
 {- HTTP utilities -}
 
 
@@ -5995,6 +6154,13 @@ onClickSimply msg =
         , preventDefault = True
         }
         (JD.succeed msg)
+
+
+{-| See also learn.less media query
+-}
+isScreenLargeEnoughForSidePanels : { width : Int, height : Int } -> Bool
+isScreenLargeEnoughForSidePanels windowSize =
+    windowSize.width >= 385 + 860
 
 
 dedupeBy : (a -> comparable) -> List a -> List a
