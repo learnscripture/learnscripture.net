@@ -4,21 +4,24 @@
 .dotheme(@topColor1, @topColor2, @topLinkColor, @btnColor1, @btnColor2, @bgColor1,
          @linkColor, @footerColor, @themeFont) {
 
+    @topTextColor: @topLinkColor;
+    @linkColorHover: darken(@linkColor, 15);
+    @bgBorderColor: darken(@bgColor1, 10%);
+    @topLinkHoverColor: white; // TODO make configurable
+
     // We are slowly moving towards using variables everywhere,
     // which will make most of the 'doTheme' mixin obsolete.
     --topColor1: @topColor1;
     --topColor2: @topColor2;
+    --topTextColor: @topTextColor;
     --topLinkColor: @topLinkColor;
     --btnColor1: @btnColor1;
     --btnColor2: @btnColor2;
     --bgColor1: @bgColor1;
     --linkColor: @linkColor;
     --footerColor: @footerColor;
-
-    @linkColorHover: darken(@linkColor, 15);
-    @bgBorderColor: darken(@bgColor1, 10%);
-
-    @topLinkHoverColor: white;
+    --linkColorHover: @linkColorHover;
+    --topLinkHoverColor: @topLinkHoverColor;
 
     a {
         color: @linkColor;
@@ -40,7 +43,7 @@
 
     .topbar, nav.topbar-new, .nav {
         background-color: @topColor1;
-        color: @topLinkColor;
+        color: @topTextColor;
         a {
             text-decoration: none;
             color: @topLinkColor;

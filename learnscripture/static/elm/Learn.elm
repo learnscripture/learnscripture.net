@@ -6,6 +6,7 @@ import Erl
 import Html as H
 import Html.Attributes as A
 import Html.Events as E
+import Html.Keyed
 import Http
 import ISO8601
 import Json.Decode as JD
@@ -820,19 +821,22 @@ viewActionLogs model =
                     ]
                 , makeIcon "icon-points" "Points gained this session"
                 ]
-            , H.ul
+            , Html.Keyed.ul
                 [ A.class ("nav-dropdown-menu menu-pinnable " ++ openClass ++ " " ++ pinnedClass) ]
-                ([ H.button
-                    [ A.class "menu-pin"
-                    , onClickSimply (TogglePinnableMenu ActionLogsInfo)
-                    , A.tabindex -1
-                    ]
-                    [ makeIcon "icon-pin-menu" "Pin menu" ]
+                ([ ( "pin-button"
+                   , H.button
+                        [ A.class "menu-pin"
+                        , onClickSimply (TogglePinnableMenu ActionLogsInfo)
+                        , A.tabindex -1
+                        ]
+                        [ makeIcon "icon-pin-menu" "Pin menu" ]
+                   )
                  ]
                     ++ (processedLogs
                             |> List.map
                                 (\log ->
-                                    H.li
+                                    ( toString log.id
+                                    , H.li
                                         [ A.class "action-log-item"
                                         , A.attribute "data-reason" (toString log.reason)
                                         ]
@@ -842,6 +846,7 @@ viewActionLogs model =
                                                 , prettyReason log.reason
                                                 ]
                                         ]
+                                    )
                                 )
                        )
                 )
