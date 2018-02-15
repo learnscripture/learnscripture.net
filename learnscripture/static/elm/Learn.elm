@@ -3103,7 +3103,7 @@ processNewActionLogs model =
                             }
                     in
                         ( newSessionData
-                        , delay (flashActionLogDuration / 2 + Time.second * 0.5) ProcessNewActionLogs
+                        , delay (flashActionLogDuration / 2 + Time.second * 0.1) ProcessNewActionLogs
                         )
 
                 Nothing ->
