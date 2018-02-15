@@ -27,6 +27,11 @@ var app =
                 "enableVibration": preferencesNode.attributes['data-enable-vibration'].value == "true",
                 "desktopTestingMethod": preferencesNode.attributes['data-desktop-testing-method'].value,
                 "touchscreenTestingMethod": preferencesNode.attributes['data-touchscreen-testing-method'].value,
+            },
+            "autoSavedPreferences": {
+                // These preferences are not manually set in the 'preferences' dialog,
+                // and therefore not part of the data sent in the receivePreferences subscription.
+                // It is then easiest to separate them out completely.
                 "pinActionLogMenuLargeScreen" : preferencesNode.attributes['data-pin-action-log-menu-large-screen'].value == "true",
                 "pinActionLogMenuSmallScreen" : preferencesNode.attributes['data-pin-action-log-menu-small-screen'].value == "true",
                 "pinVerseOptionsMenuLargeScreen" : preferencesNode.attributes['data-pin-verse-options-menu-large-screen'].value == "true",
