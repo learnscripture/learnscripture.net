@@ -242,11 +242,15 @@ body.learn-page {
         color: #ff2e2e;;
     }
 
+    // Search for other instances of flashActionLogDuration in elm code if
+    // changing this value.
+    @flashActionLogDuration: 0.6s;
+
     .action-log-item {
         overflow: hidden;
         max-height: @topbarHeight * 2;
         opacity: 1;
-        .animation(actionLogHeightAnimate 1s ease-in-out forwards);
+        .animation(actionLogHeightAnimate @flashActionLogDuration ease-in-out forwards);
     }
 
     @keyframes actionLogHeightAnimate {
@@ -283,8 +287,6 @@ body.learn-page {
         z-index: 2;
 
         opacity: 0;
-        // Search for other instances of flashActionLogDuration
-        @flashActionLogDuration: 0.6s;
         &.flash-action-log {
             .animation(flash @flashActionLogDuration linear forwards);
         }

@@ -763,6 +763,16 @@ viewActionLogs model =
                     let
                         totalPoints =
                             sessionData.actionLogStore.processed
+                                |> (\p ->
+                                        -- We exclude 'beingProcessed' so that the total is
+                                        -- updated after the animation.
+                                        case sessionData.actionLogStore.beingProcessed of
+                                            Just log ->
+                                                Dict.remove log.id p
+
+                                            Nothing ->
+                                                p
+                                   )
                                 |> Dict.values
                                 |> List.map .points
                                 |> List.sum
@@ -3088,9 +3098,7 @@ processNewActionLogs model =
                             { sessionData
                                 | actionLogStore =
                                     { oldStore
-                                        | processed = Dict.insert log.id log <| oldStore.processed
-                                        , beingProcessed = Nothing
-                                        , toProcess = Dict.remove log.id oldStore.toProcess
+                                        | beingProcessed = Nothing
                                     }
                             }
                     in
@@ -3104,9 +3112,6 @@ processNewActionLogs model =
                             ( sessionData, Cmd.none )
 
                         ( k, log ) :: rest ->
-                            -- Start to process it. We don't put it into actionLogStore yet, because
-                            -- we don't want to update the 'total' points until after the animation
-                            -- is done or part way through.
                             let
                                 oldStore =
                                     sessionData.actionLogStore
@@ -3115,7 +3120,12 @@ processNewActionLogs model =
                                     { sessionData
                                         | actionLogStore =
                                             { oldStore
-                                                | beingProcessed = Just log
+                                              -- We put into 'processed' immediately so that it appears in
+                                              -- the list at the same time as the  latest points animation is
+                                              -- happening
+                                                | processed = Dict.insert log.id log <| oldStore.processed
+                                                , beingProcessed = Just log
+                                                , toProcess = Dict.remove log.id oldStore.toProcess
                                             }
                                     }
                             in
