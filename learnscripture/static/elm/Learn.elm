@@ -75,6 +75,7 @@ hardModeStrengthThreshold =
 
 type alias Flags =
     { preferences : JD.Value
+    , autoSavedPreferences : JD.Value
     , account : Maybe AccountData
     , isTouchDevice : Bool
     , csrfMiddlewareToken : String
@@ -95,16 +96,30 @@ decodePreferences prefsValue =
             Debug.crash err
 
 
+decodeAutoSavedPreferences : JD.Value -> AutoSavedPreferences
+decodeAutoSavedPreferences prefsValue =
+    case JD.decodeValue autoSavedPreferencesDecoder prefsValue of
+        Ok prefs ->
+            prefs
+
+        Err err ->
+            Debug.crash err
+
+
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     let
         preferences =
             decodePreferences flags.preferences
 
+        autoSavedPreferences =
+            decodeAutoSavedPreferences flags.autoSavedPreferences
+
         windowSize =
             flags.windowSize
     in
         ( { preferences = preferences
+          , autoSavedPreferences = autoSavedPreferences
           , user =
                 case flags.account of
                     Just ad ->
@@ -121,7 +136,7 @@ init flags =
           , currentHttpCalls = Dict.empty
           , permanentFailHttpCalls = []
           , openDropdown = Nothing
-          , pinnedMenus = setPinnedMenus preferences windowSize
+          , pinnedMenus = setPinnedMenus autoSavedPreferences windowSize
           , sessionStats = Nothing
           , attemptingReturn = False
           , currentTime =
@@ -137,14 +152,14 @@ init flags =
         )
 
 
-setPinnedMenus : Preferences -> { height : Int, width : Int } -> Set.Set String
-setPinnedMenus preferences windowSize =
+setPinnedMenus : AutoSavedPreferences -> { height : Int, width : Int } -> Set.Set String
+setPinnedMenus prefs windowSize =
     Set.fromList
         (if
-            ((preferences.pinActionLogMenuLargeScreen
+            ((prefs.pinActionLogMenuLargeScreen
                 && isScreenLargeEnoughForSidePanels windowSize
              )
-                || (preferences.pinActionLogMenuSmallScreen
+                || (prefs.pinActionLogMenuSmallScreen
                         && (not <| isScreenLargeEnoughForSidePanels windowSize)
                    )
             )
@@ -161,6 +176,7 @@ setPinnedMenus preferences windowSize =
 
 type alias Model =
     { preferences : Preferences
+    , autoSavedPreferences : AutoSavedPreferences
     , user : User
     , learningSession : LearningSession
     , isTouchDevice : Bool
@@ -189,7 +205,11 @@ type alias Preferences =
     , enableVibration : Bool
     , desktopTestingMethod : TestingMethod
     , touchscreenTestingMethod : TestingMethod
-    , pinActionLogMenuLargeScreen : Bool
+    }
+
+
+type alias AutoSavedPreferences =
+    { pinActionLogMenuLargeScreen : Bool
     , pinActionLogMenuSmallScreen : Bool
     , pinVerseOptionsMenuLargeScreen : Bool
     }
@@ -2633,7 +2653,7 @@ update msg model =
             -- therefore need to reposition (but not change focus)
             ( { model
                 | windowSize = size
-                , pinnedMenus = setPinnedMenus model.preferences size
+                , pinnedMenus = setPinnedMenus model.autoSavedPreferences size
               }
             , updateTypingBoxCommand model False
             )
@@ -3197,7 +3217,7 @@ togglePinnableMenu model dropdown =
                     |> setDropdownOpen dropdown
 
         oldPreferences =
-            model.preferences
+            model.autoSavedPreferences
 
         newPreferences =
             if dropdown == ActionLogsInfo then
@@ -3214,11 +3234,11 @@ togglePinnableMenu model dropdown =
 
         newModel2 =
             { newModel1
-                | preferences = newPreferences
+                | autoSavedPreferences = newPreferences
             }
     in
         ( newModel2
-        , savePinningPreferences newPreferences newModel2.httpConfig
+        , saveAutoSavedPreferences newPreferences newModel2.httpConfig
         )
 
 
@@ -5855,8 +5875,8 @@ saveMiscPreferencesUrl =
     "/api/learnscripture/v1/savemiscpreferences/"
 
 
-savePinningPreferences : Preferences -> HttpConfig -> Cmd Msg
-savePinningPreferences preferences httpConfig =
+saveAutoSavedPreferences : AutoSavedPreferences -> HttpConfig -> Cmd Msg
+saveAutoSavedPreferences preferences httpConfig =
     let
         body =
             Http.multipartBody
@@ -5978,6 +5998,11 @@ preferencesDecoder =
         |> JDP.required "enableVibration" JD.bool
         |> JDP.required "desktopTestingMethod" testingMethodDecoder
         |> JDP.required "touchscreenTestingMethod" testingMethodDecoder
+
+
+autoSavedPreferencesDecoder : JD.Decoder AutoSavedPreferences
+autoSavedPreferencesDecoder =
+    JDP.decode AutoSavedPreferences
         |> JDP.required "pinActionLogMenuLargeScreen" JD.bool
         |> JDP.required "pinActionLogMenuSmallScreen" JD.bool
         |> JDP.required "pinVerseOptionsMenuLargeScreen" JD.bool
