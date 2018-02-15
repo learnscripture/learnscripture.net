@@ -246,23 +246,18 @@ body.learn-page {
         overflow: hidden;
         max-height: @topbarHeight * 2;
         opacity: 1;
-        color: var(--topTextColor);
         .animation(actionLogHeightAnimate 1s ease-in-out forwards);
     }
 
     @keyframes actionLogHeightAnimate {
         0% {
             opacity: 0;
-            color: var(--topTextColor);
             max-height: 0px;
         }
         50% {
             opacity: 1;
             color: var(--topLinkHoverColor);
             max-height: @topbarHeight * 2;
-        }
-        100% {
-            color: var(--topTextColor);
         }
     }
 
@@ -303,9 +298,11 @@ body.learn-page {
 
     // TODO colours for other themes
     @bonusHighlightColour: rgba(0,255,255,0.4);
-    [data-reason="PerfectTestBonus"], [data-reason="VerseLearnt"] {
-        text-shadow: 1px 1px 2px @bonusHighlightColour, -1px -1px 2px @bonusHighlightColour, -1px 1px 2px @bonusHighlightColour, 1px -1px 2px @bonusHighlightColour;
-        color: white;
+    .action-log-item, .latest-points {
+        &[data-reason="PerfectTestBonus"], &[data-reason="VerseLearnt"] {
+            text-shadow: 1px 1px 2px @bonusHighlightColour, -1px -1px 2px @bonusHighlightColour, -1px 1px 2px @bonusHighlightColour, 1px -1px 2px @bonusHighlightColour;
+            color: var(--topLinkHoverColor);
+        }
     }
 
     // Main page
