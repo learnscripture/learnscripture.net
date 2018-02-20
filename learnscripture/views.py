@@ -99,11 +99,6 @@ def login(request):
                 account = form.cleaned_data['account']
                 account.last_login = timezone.now()
                 account.save()
-                # Make this login form work for admin:
-                user = django.contrib.auth.authenticate(username=account.username,
-                                                        password=form.cleaned_data['password'])
-                django.contrib.auth.login(request, user)
-
                 session.login(request, account.identity)
                 return _login_redirect(request)
         elif 'forgotpassword' in request.POST:
@@ -1118,7 +1113,6 @@ def password_change(request):
     }
 
     return render(request, template_name, context)
-# TODO - check whether this logs the user out or not.
 
 
 def password_change_done(request):

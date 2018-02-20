@@ -3,6 +3,7 @@ import re
 from datetime import timedelta
 
 from django.core import mail
+from django.core.urlresolvers import reverse
 from django.db.models import F
 from django.utils.encoding import force_text
 from django.utils.six.moves.urllib.parse import ParseResult, urlparse
@@ -14,7 +15,7 @@ from events.models import Event, EventType
 from learnscripture.forms import AccountSetPasswordForm
 from scores.models import Scores
 
-from .base import AccountTestMixin, TestBase
+from .base import AccountTestMixin, FullBrowserTest, TestBase, WebTestBase
 
 
 class AccountTests(AccountTestMixin, TestBase):
@@ -290,3 +291,40 @@ class PasswordResetTest(TestBase):
         response = self.client.post(path, {'new_password1': 'anewpassword',
                                            'new_password2': 'x'})
         self.assertFormError(response, AccountSetPasswordForm.error_messages['password_mismatch'])
+
+
+class PasswordChangeTestsBase:
+    def setUp(self):
+        super(PasswordChangeTestsBase, self).setUp()
+        self.identity, self.account = self.create_account()
+
+    def test_change_valid(self):
+        self.login(self.account, shortcut=False)
+        self.get_url('learnscripture_password_change')
+        self.fill({
+            '#id_old_password': 'password',
+            '#id_new_password1': 'newpassword',
+            '#id_new_password2': 'newpassword',
+        })
+        self.submit('input[type="submit"]')
+        self.assertTextPresent("Your password was changed.")
+
+        # Should be logged in:
+        # - name should appear on page
+        self.assertTextPresent(self.account.username)
+
+        # - should not be redirected to login
+        self.get_url('learnscripture_password_change')
+        self.assertUrlsEqual(reverse('learnscripture_password_change'))
+
+        # password should actually be changed.
+        account = Account.objects.get(id=self.account.id)
+        self.assertTrue(account.check_password('newpassword'))
+
+
+class PasswordChangeTestsWT(PasswordChangeTestsBase, WebTestBase):
+    pass
+
+
+class PasswordChangeTestsFB(PasswordChangeTestsBase, FullBrowserTest):
+    pass
