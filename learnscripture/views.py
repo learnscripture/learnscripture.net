@@ -7,14 +7,13 @@ import django.contrib.auth
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.tokens import default_token_generator
-from django.contrib.auth.views import PasswordChangeView as AuthPasswordChangeView
 from django.contrib.auth.views import PasswordResetView as AuthPasswordResetView
 from django.contrib.sites.models import Site
 from django.core import mail
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.template.response import TemplateResponse
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import urlsafe_base64_decode
 from django.views.decorators.cache import never_cache
@@ -1100,13 +1099,26 @@ def password_reset_confirm(request, uidb64=None, token=None):
     return render(request, 'learnscripture/password_reset_confirm.html', context)
 
 
-class _PasswordChangeView(AuthPasswordChangeView):
+@require_account
+def password_change(request):
+    account = account_from_request(request)
+    password_change_form = AccountPasswordChangeForm
     template_name = "learnscripture/password_change_form.html"
-    success_url = reverse_lazy('learnscripture_password_change_done')
-    form_class = AccountPasswordChangeForm
 
+    if request.method == "POST":
+        form = password_change_form(user=account, data=request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('learnscripture_password_change_done'))
+    else:
+        form = password_change_form(user=account)
+    context = {
+        'form': form,
+        'title': 'Password change',
+    }
 
-password_change = require_account(_PasswordChangeView.as_view())
+    return render(request, template_name, context)
+# TODO - check whether this logs the user out or not.
 
 
 def password_change_done(request):
