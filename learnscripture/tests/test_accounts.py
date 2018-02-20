@@ -1,11 +1,9 @@
-import itertools
 import re
 from datetime import timedelta
 
 from django.core import mail
 from django.core.urlresolvers import reverse
 from django.db.models import F
-from django.utils.encoding import force_text
 from django.utils.six.moves.urllib.parse import ParseResult, urlparse
 
 from accounts.models import Account, ActionChange
@@ -191,14 +189,11 @@ class AccountTests(AccountTestMixin, TestBase):
         self.assertTrue(w2_with_3 > w2_with_1)
 
 
-class PasswordResetTest(TestBase):
+class PasswordResetTestsBase:
 
     def setUp(self):
-        super(PasswordResetTest, self).setUp()
-        account = Account.objects.create(username='any_user',
-                                         email='any_user@example.com')
-        account.set_password('foo')
-        account.save()
+        super(PasswordResetTestsBase, self).setUp()
+        self.identity, self.account = self.create_account()
 
     def assertUrlsEqual(self, url, expected):
         """
@@ -212,26 +207,20 @@ class PasswordResetTest(TestBase):
             if x and y and x != y:
                 self.fail("%r != %r (%s doesn't match)" % (url, expected, attr))
 
-    def assertFormError(self, response, error):
-        """Assert that error is found in response.context['form'] errors"""
-        form_errors = list(itertools.chain(*response.context['form'].errors.values()))
-        self.assertIn(force_text(error), form_errors)
-
     def test_email_not_found(self):
         # If the provided email is not registered, don't raise any error but
         # also don't send any email.
-        response = self.client.get('/login/')
-        self.assertEqual(response.status_code, 200)
-        response = self.client.post('/login/', {'login-email': 'not_a_real_email@email.com',
-                                                'forgotpassword': '1'})
-        self.assertEqual(response.status_code, 200)
+        self.get_url('login')
+        self.fill({'#id_login-email':
+                   'not_a_real_email@email.com'})
+        self.submit('input[name=forgotpassword]')
         self.assertEqual(len(mail.outbox), 0)
 
     def _test_confirm_start(self):
-        # Start by creating the email
-        response = self.client.post('/login/', {'login-email': 'any_user@example.com',
-                                                'forgotpassword': '1'})
-        self.assertUrlsEqual(response.url, '/password-reset/')
+        self.get_url('login')
+        self.fill({'#id_login-email':
+                   self.account.email})
+        self.submit('input[name=forgotpassword]')
         self.assertEqual(len(mail.outbox), 1)
         return self._read_signup_email(mail.outbox[0])
 
@@ -242,9 +231,8 @@ class PasswordResetTest(TestBase):
 
     def test_confirm_valid(self):
         url, path = self._test_confirm_start()
-        response = self.client.get(path)
-        # redirect to a 'complete' page:
-        self.assertContains(response, "Please enter your new password")
+        self.get_literal_url(path)
+        self.assertTextPresent("Please enter your new password")
 
     def test_confirm_invalid(self):
         url, path = self._test_confirm_start()
@@ -252,11 +240,11 @@ class PasswordResetTest(TestBase):
         # in case the URLconf will reject a different length.
         path = path[:-5] + ("0" * 4) + path[-1]
 
-        response = self.client.get(path)
-        self.assertContains(response, "The password reset link was invalid")
+        self.get_literal_url(path)
+        self.assertTextPresent("The password reset link was invalid")
 
     def test_confirm_invalid_user(self):
-        # Ensure that we get a 200 response for a non-existant user, not a 404
+        # Ensure that we get a 200 response for a non-existent user, not a 404
         response = self.client.get('/reset/123456/1-1/')
         self.assertContains(response, "The password reset link was invalid")
 
@@ -271,26 +259,38 @@ class PasswordResetTest(TestBase):
             'new_password2': 'anewpassword',
         })
         # Check the password has not been changed
-        u = Account.objects.get(email='any_user@example.com')
-        self.assertTrue(not u.check_password("anewpassword"))
+        account = Account.objects.get(id=self.account.id)
+        self.assertTrue(not account.check_password("anewpassword"))
 
     def test_confirm_complete(self):
         url, path = self._test_confirm_start()
-        response = self.client.post(path, {'new_password1': 'anewpassword',
-                                           'new_password2': 'anewpassword'})
+        self.get_literal_url(path)
+        self.fill({'#id_new_password1': 'anewpassword',
+                   '#id_new_password2': 'anewpassword'})
+        self.submit('[type=submit]')
         # Check the password has been changed
-        u = Account.objects.get(email='any_user@example.com')
-        self.assertTrue(u.check_password("anewpassword"))
+        account = Account.objects.get(id=self.account.id)
+        self.assertTrue(account.check_password("anewpassword"))
 
         # Check we can't use the link again
-        response = self.client.get(path)
-        self.assertContains(response, "The password reset link was invalid")
+        self.get_literal_url(path)
+        self.assertTextPresent("The password reset link was invalid")
 
     def test_confirm_different_passwords(self):
         url, path = self._test_confirm_start()
-        response = self.client.post(path, {'new_password1': 'anewpassword',
-                                           'new_password2': 'x'})
-        self.assertFormError(response, AccountSetPasswordForm.error_messages['password_mismatch'])
+        self.get_literal_url(path)
+        self.fill({'#id_new_password1': 'anewpassword',
+                   '#id_new_password2': 'x'})
+        self.submit('[type=submit]')
+        self.assertTextPresent(AccountSetPasswordForm.error_messages['password_mismatch'])
+
+
+class PasswordResetTestsWT(PasswordResetTestsBase, WebTestBase):
+    pass
+
+
+class PasswordResetTestsFB(PasswordResetTestsBase, FullBrowserTest):
+    pass
 
 
 class PasswordChangeTestsBase:

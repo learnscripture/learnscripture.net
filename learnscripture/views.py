@@ -3,7 +3,6 @@ import csv
 import urllib.parse
 from datetime import date, timedelta
 
-import django.contrib.auth
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.tokens import default_token_generator
