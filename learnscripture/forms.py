@@ -60,7 +60,9 @@ SignUpForm.base_fields['last_name'].help_text = "Optional, public"
 
 class LogInForm(forms.Form):
     email = forms.CharField(max_length=255, label="Email or username")
-    password = forms.CharField(max_length=100, widget=forms.PasswordInput)
+    password = forms.CharField(max_length=100,
+                               required=False,
+                               widget=forms.PasswordInput)
 
     def clean(self):
         def fail():
