@@ -30,8 +30,6 @@ def token_login_middleware(get_response):
     This enables us to send people emails that have URLs allowing them to log in
     automatically.
     """
-    from django.contrib.auth import login
-
     from accounts.models import Account
     from accounts.tokens import check_login_token
     from learnscripture import session
@@ -48,13 +46,8 @@ def token_login_middleware(get_response):
         except Account.DoesNotExist:
             return get_response(request)
 
-        # Success, fake a log in:
+        # Success, do a log in:
         session.login(request, account.identity)
-        # Need to do django.contrib.auth login for the sake of some views that
-        # look for request.user (e.g. password change).
-        # Need to frig it because we are not going to call authenticate.
-        account.backend = settings.AUTHENTICATION_BACKENDS[0]
-        login(request, account)
 
         # Redirect to hide access token
         d = request.GET.copy()
@@ -66,8 +59,6 @@ def token_login_middleware(get_response):
 
 
 def debug_middleware(get_response):
-    from django.contrib.auth import login
-
     from learnscripture import session
     from accounts.models import Account
 
@@ -77,8 +68,6 @@ def debug_middleware(get_response):
 
         if 'as' in request.GET:
             account = Account.objects.get(username=request.GET['as'])
-            account.backend = settings.AUTHENTICATION_BACKENDS[0]
-            login(request, account)
             session.login(request, account.identity)
             params = request.GET.copy()
             del params['as']

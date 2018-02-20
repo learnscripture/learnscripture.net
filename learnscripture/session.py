@@ -211,6 +211,10 @@ def start_identity(request):
     return identity
 
 
+# Due to having split account/identity, and the link between them, it was easier
+# to implement our own login mechanism rather than using Django's authentication
+# framework. However, given that our Account model is also the admin User model,
+# we may want to revisit this and unify things.
 def login(request, identity):
     set_identity(request.session, identity)
     metric('login')
