@@ -3,7 +3,6 @@ import time
 import urllib.parse
 from datetime import datetime
 
-from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.utils.http import urlencode
