@@ -710,6 +710,16 @@ ajaxInfo model =
                       else
                         []
                      )
+                        ++ (failedHttpCalls
+                                |> List.map
+                                    (\( callId, call ) ->
+                                        H.li [ A.class "ajax-failed" ]
+                                            [ H.text <|
+                                                interpolate "Failed - {0}"
+                                                    [ trackedHttpCallCaption call ]
+                                            ]
+                                    )
+                           )
                         ++ (currentHttpCalls
                                 |> List.map
                                     (\{ call, attempts } ->
@@ -729,16 +739,6 @@ ajaxInfo model =
                                                     , toString maxHttpRetries
                                                     , trackedHttpCallCaption call
                                                     ]
-                                            ]
-                                    )
-                           )
-                        ++ (failedHttpCalls
-                                |> List.map
-                                    (\( callId, call ) ->
-                                        H.li [ A.class "ajax-failed" ]
-                                            [ H.text <|
-                                                interpolate "Failed - {0}"
-                                                    [ trackedHttpCallCaption call ]
                                             ]
                                     )
                            )
