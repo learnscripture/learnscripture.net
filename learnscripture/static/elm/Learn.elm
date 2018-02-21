@@ -154,20 +154,30 @@ init flags =
 
 setPinnedMenus : AutoSavedPreferences -> { height : Int, width : Int } -> Set.Set String
 setPinnedMenus prefs windowSize =
-    Set.fromList
-        (if
-            ((prefs.pinActionLogMenuLargeScreen
-                && isScreenLargeEnoughForSidePanels windowSize
-             )
-                || (prefs.pinActionLogMenuSmallScreen
-                        && (not <| isScreenLargeEnoughForSidePanels windowSize)
-                   )
-            )
-         then
-            [ (toString ActionLogsInfo) ]
-         else
-            []
+    [ if
+        ((prefs.pinActionLogMenuLargeScreen
+            && isScreenLargeEnoughForSidePanels windowSize
+         )
+            || (prefs.pinActionLogMenuSmallScreen
+                    && (not <| isScreenLargeEnoughForSidePanels windowSize)
+               )
         )
+      then
+        Just ActionLogsInfo
+      else
+        Nothing
+    , if
+        (prefs.pinVerseOptionsMenuLargeScreen
+            && isScreenLargeEnoughForSidePanels windowSize
+        )
+      then
+        Just VerseOptionsMenu
+      else
+        Nothing
+    ]
+        |> List.filterMap identity
+        |> List.map toString
+        |> Set.fromList
 
 
 
@@ -533,7 +543,7 @@ dashboardUrl =
 
 view : Model -> H.Html Msg
 view model =
-    H.div []
+    H.div (pinnedAttributes model)
         [ viewTopNav model
         , case model.learningSession of
             Loading ->
@@ -549,7 +559,7 @@ view model =
 
 viewTopNav : Model -> H.Html Msg
 viewTopNav model =
-    H.nav ([ A.class "topbar-new" ] ++ pinnedAttributes model)
+    H.nav [ A.class "topbar-new" ]
         [ H.div [ A.class "nav-item return-link" ]
             [ navLink
                 [ A.href "#"
@@ -570,10 +580,16 @@ viewTopNav model =
 
 pinnedAttributes : Model -> List (H.Attribute msg)
 pinnedAttributes model =
-    if menuIsPinned model ActionLogsInfo then
-        [ A.attribute "data-actionlogsinfo-pinned" "true" ]
-    else
-        []
+    List.filterMap identity
+        [ if menuIsPinned model ActionLogsInfo then
+            Just (A.attribute "data-actionlogsinfo-pinned" "true")
+          else
+            Nothing
+        , if menuIsPinned model VerseOptionsMenu then
+            Just (A.attribute "data-verseoptionsmenu-pinned" "true")
+          else
+            Nothing
+        ]
 
 
 getReturnCaption : Url -> String
@@ -736,7 +752,7 @@ ajaxInfo model =
                                             [ H.text <|
                                                 if attempts == 0 then
                                                     interpolate "In queue - {0}"
-                                                       [ trackedHttpCallCaption call ]
+                                                        [ trackedHttpCallCaption call ]
                                                 else
                                                     interpolate "Attempt {0} of {1} - {2}"
                                                         [ toString attempts
@@ -858,12 +874,7 @@ viewActionLogs model =
             , Html.Keyed.ul
                 [ A.class ("nav-dropdown-menu menu-pinnable " ++ openClass ++ " " ++ pinnedClass) ]
                 ([ ( "pin-button"
-                   , H.button
-                        [ A.class "menu-pin"
-                        , onClickSimply (TogglePinnableMenu ActionLogsInfo)
-                        , A.tabindex -1
-                        ]
-                        [ makeIcon "icon-pin-menu" "Pin menu" ]
+                   , pinButton ActionLogsInfo
                    )
                  ]
                     ++ (processedLogs
@@ -885,6 +896,17 @@ viewActionLogs model =
                        )
                 )
             ]
+
+
+pinButton : Dropdown -> H.Html Msg
+pinButton dropdown =
+    H.button
+        [ A.class "menu-pin"
+        , A.title "Pin/unpin menu"
+        , onClickSimply (TogglePinnableMenu dropdown)
+        , A.tabindex -1
+        ]
+        [ makeIcon "icon-pin-menu" "Pin menu" ]
 
 
 dropdownHeadingAttributes : Dropdown -> Bool -> List String -> List (H.Attribute Msg)
@@ -1006,6 +1028,12 @@ viewCurrentVerse session model =
 
         verseOptionsMenuOpen =
             dropdownIsOpen model VerseOptionsMenu
+
+        verseOptionsMenuPinned =
+            menuIsPinned model VerseOptionsMenu
+
+        verseOptionsMenuVisible =
+            verseOptionsMenuOpen || verseOptionsMenuPinned
     in
         H.div [ A.id "id-content-wrapper" ]
             ([ H.div [ A.id "id-verse-header" ]
@@ -1033,9 +1061,9 @@ viewCurrentVerse session model =
                     , A.title "Memory strength for this verse"
                     ]
                     [ H.text (toString verseStrengthPercent ++ "%") ]
-                , viewVerseOptionsMenuButton verseOptionsMenuOpen
+                , viewVerseOptionsMenuButton verseOptionsMenuOpen verseOptionsMenuPinned
                 ]
-             , if verseOptionsMenuOpen then
+             , if verseOptionsMenuVisible then
                 viewVerseOptionsMenu model currentVerse
                else
                 emptyNode
@@ -1104,13 +1132,15 @@ shouldShowPreviousVerse verse =
             False
 
 
-viewVerseOptionsMenuButton : Bool -> H.Html Msg
-viewVerseOptionsMenuButton menuOpen =
+viewVerseOptionsMenuButton : Bool -> Bool -> H.Html Msg
+viewVerseOptionsMenuButton menuOpen menuPinned =
     H.div
         ((dropdownHeadingAttributes VerseOptionsMenu
             True
             (if menuOpen then
                 [ "menu-open" ]
+             else if menuPinned then
+                [ "menu-pinned" ]
              else
                 [ "menu-closed" ]
             )
@@ -1173,37 +1203,48 @@ viewVerseOptionsMenu model currentVerse =
                     Just cancelLearningButton
                 , Just resetProgressButton
                 ]
+
+        menuPinned =
+            menuIsPinned model VerseOptionsMenu
+
+        pinnedClass =
+            if menuPinned then
+                "menu-pinned"
+            else
+                ""
     in
         H.div [ A.id "id-verse-options-menu" ]
-            [ H.ul []
-                ((if allowTestInsteadOfRead model then
-                    [ H.li []
-                        [ H.label []
-                            [ H.input
-                                ([ A.type_ "checkbox"
-                                 , A.checked
-                                    (case model.testOrReadPreference of
-                                        PreferReading ->
-                                            False
+            [ H.ul [ A.class pinnedClass ]
+                ([ pinButton VerseOptionsMenu
+                 ]
+                    ++ (if allowTestInsteadOfRead model then
+                            [ H.li []
+                                [ H.label []
+                                    [ H.input
+                                        ([ A.type_ "checkbox"
+                                         , A.checked
+                                            (case model.testOrReadPreference of
+                                                PreferReading ->
+                                                    False
 
-                                        PreferTests ->
-                                            True
-                                    )
-                                 , onClickSimply TogglePreferTestsToReading
-                                 ]
-                                    ++ (getTypingBoxFocusDataForMsg model TogglePreferTestsToReading True
-                                            |> getFocusAttributes
-                                       )
-                                )
-                                []
-                            , H.span []
-                                [ H.text "Test instead of read" ]
+                                                PreferTests ->
+                                                    True
+                                            )
+                                         , onClickSimply TogglePreferTestsToReading
+                                         ]
+                                            ++ (getTypingBoxFocusDataForMsg model TogglePreferTestsToReading True
+                                                    |> getFocusAttributes
+                                               )
+                                        )
+                                        []
+                                    , H.span []
+                                        [ H.text "Test instead of read" ]
+                                    ]
+                                ]
                             ]
-                        ]
-                    ]
-                  else
-                    []
-                 )
+                        else
+                            []
+                       )
                     ++ (List.map
                             (\button ->
                                 H.li []
@@ -3233,6 +3274,13 @@ togglePinnableMenu model dropdown =
                     { oldPreferences
                         | pinActionLogMenuSmallScreen = isPinned
                     }
+            else if dropdown == VerseOptionsMenu then
+                if isScreenLargeEnoughForSidePanels newModel1.windowSize then
+                    { oldPreferences
+                        | pinVerseOptionsMenuLargeScreen = isPinned
+                    }
+                else
+                    oldPreferences
             else
                 oldPreferences
 
@@ -5910,6 +5958,7 @@ saveAutoSavedPreferences preferences httpConfig =
             Http.multipartBody
                 [ Http.stringPart "pin_action_log_menu_large_screen" (preferences.pinActionLogMenuLargeScreen |> encodeBool)
                 , Http.stringPart "pin_action_log_menu_small_screen" (preferences.pinActionLogMenuSmallScreen |> encodeBool)
+                , Http.stringPart "pin_verse_options_menu_large_screen" (preferences.pinVerseOptionsMenuLargeScreen |> encodeBool)
                 ]
     in
         Http.send EmptyResponseReturned
