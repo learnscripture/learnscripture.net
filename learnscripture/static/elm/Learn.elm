@@ -4254,6 +4254,14 @@ handleWordButtonClicked model wordId =
 handleTypedInput : Model -> String -> ( Model, Cmd Msg )
 handleTypedInput model input =
     let
+        oldTypedText =
+            case getCurrentTestProgress model of
+                Nothing ->
+                    ""
+
+                Just tp ->
+                    tp.currentTypedText
+
         newModel1 =
             updateTestProgress model
                 (\tp ->
@@ -4264,7 +4272,7 @@ handleTypedInput model input =
             getTestingMethod newModel1
 
         ( newModel2, cmd ) =
-            if shouldCheckTypedWord testingMethod input then
+            if shouldCheckTypedWord testingMethod oldTypedText input then
                 checkCurrentWordAndUpdate newModel1 input
             else
                 ( newModel1, Cmd.none )
@@ -4280,14 +4288,17 @@ handleTypedEnter model =
 
         Just tp ->
             let
-                currentTypedText =
+                oldTypedText =
                     tp.currentTypedText
+
+                currentTypedText =
+                    oldTypedText ++ "\n"
 
                 testingMethod =
                     getTestingMethod model
 
                 ( newModel, cmd ) =
-                    if shouldCheckTypedWord testingMethod (currentTypedText ++ "\n") then
+                    if shouldCheckTypedWord testingMethod oldTypedText currentTypedText then
                         checkCurrentWordAndUpdate model currentTypedText
                     else
                         ( model, Cmd.none )
@@ -4318,9 +4329,12 @@ handleUseHint model =
             )
 
 
-shouldCheckTypedWord : TestingMethod -> String -> Bool
-shouldCheckTypedWord testingMethod input =
+shouldCheckTypedWord : TestingMethod -> String -> String -> Bool
+shouldCheckTypedWord testingMethod oldText input =
     let
+        oldTrimmedText =
+            oldText |> normalizeWordForTest
+
         trimmedText =
             input |> normalizeWordForTest
     in
@@ -4333,8 +4347,18 @@ shouldCheckTypedWord testingMethod input =
                        )
 
             FirstLetter ->
-                String.length trimmedText > 0
+                (String.length trimmedText > 0)
+                    && -- Don't check again if they typed punctuation etc.
+                       (oldTrimmedText /= trimmedText)
+                    && -- Don't check again if they pressed delete or backspace
+                       (String.length trimmedText > String.length oldTrimmedText)
+                    && -- predictive keyboards can send multiple events if words are chosen,
+                       -- and the second event will usually have a trailing whitespace.
+                       -- We don't want to respond to this at all, otherwise a mispressed
+                       -- button causes multiple failures.
+                       (String.right 1 input /= " ")
 
+            --
             OnScreen ->
                 False
 
