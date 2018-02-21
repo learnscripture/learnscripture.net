@@ -734,11 +734,15 @@ ajaxInfo model =
                                                 )
                                             ]
                                             [ H.text <|
-                                                interpolate "Attempt {0} of {1} - {2}"
-                                                    [ toString attempts
-                                                    , toString maxHttpRetries
-                                                    , trackedHttpCallCaption call
-                                                    ]
+                                                if attempts == 0 then
+                                                    interpolate "In queue - {0}"
+                                                       [ trackedHttpCallCaption call ]
+                                                else
+                                                    interpolate "Attempt {0} of {1} - {2}"
+                                                        [ toString attempts
+                                                        , toString maxHttpRetries
+                                                        , trackedHttpCallCaption call
+                                                        ]
                                             ]
                                     )
                            )
