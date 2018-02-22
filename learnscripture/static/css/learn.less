@@ -829,10 +829,9 @@ body.learn-page {
                 overflow: auto;
             }
 
-            & + div {
+            nav + div {
                 margin-top: (@topbarHeight + @pinnedMenuHeight);
             }
-
         }
 
         @media screen and (max-width: (@screenWidthLargeEnoughForSidePanels - 1px)) and (max-height: @shortHeightBreak2) {
@@ -840,7 +839,7 @@ body.learn-page {
             .nav-dropdown.action-logs .nav-dropdown-menu {
                 height: @pinnedMenuHeightShort;
             }
-            & + div {
+            nav + div {
                 margin-top: (@topbarHeight + @pinnedMenuHeightShort);
             }
         }
