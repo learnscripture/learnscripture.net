@@ -778,6 +778,9 @@ class UserVerseStatus(models.Model):
                                   on_delete=models.SET_NULL)
     text_order = models.PositiveSmallIntegerField()  # order of this item within associated TextVersion
     version = models.ForeignKey(TextVersion, on_delete=models.CASCADE)
+
+    # The following fields vary over time and care should be take in things
+    # like create_verse_status to copy these attributes if there are duplicates.
     memory_stage = models.PositiveSmallIntegerField(choices=MemoryStage.choice_list,
                                                     default=MemoryStage.ZERO)
     strength = models.FloatField(default=0.00)

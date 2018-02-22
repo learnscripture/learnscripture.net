@@ -723,6 +723,8 @@ class Identity(models.Model):
                 uvs.added = same_verse.added
             uvs.first_seen = same_verse.first_seen
             uvs.last_tested = same_verse.last_tested
+            uvs.next_test_due = same_verse.next_test_due
+            uvs.early_review_requested = same_verse.early_review_requested
             dirty = True
 
         if uvs.ignored:
