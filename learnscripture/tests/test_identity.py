@@ -46,6 +46,29 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
             [(uvs.localized_reference, uvs.verse_set_id)
              for uvs in uvss]
 
+    def test_add_verse_set_copies_existing_data(self):
+        i = self.create_identity(version_slug='KJV')
+        # First add John 3:16
+        i.add_verse_choice('John 3:16')
+        i.record_verse_action('John 3:16', 'KJV', StageType.TEST, 1)
+        uvs_orig = i.verse_statuses.get(localized_reference='John 3:16')
+
+        # Now add verse set as well, which contains John 3:16
+        vs1 = VerseSet.objects.get(name='Bible 101')
+        i.add_verse_set(vs1)
+
+        # We should get a new one, because we want it to have a verse_set link
+        self.assertEqual(i.verse_statuses.filter(localized_reference='John 3:16').count(),
+                         2)
+
+        # The data for new John 3:16 should be copied from the old
+        for uvs in i.verse_statuses.filter(localized_reference='John 3:16'):
+            for attr in ['memory_stage', 'strength', 'ignored', 'added', 'first_seen',
+                         'last_tested', 'next_test_due', 'early_review_requested']:
+                with self.subTest(attr=attr):
+                    self.assertEqual(getattr(uvs, attr),
+                                     getattr(uvs_orig, attr))
+
     def test_add_verse_set_passage_with_merged(self):
         i = self.create_identity(version_slug='TCL02')
         vs = VerseSet.objects.create(created_by=get_or_create_any_account(),
