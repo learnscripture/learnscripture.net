@@ -111,7 +111,7 @@ suite =
                                             , index = 0
                                             , text = "Mark"
                                             }
-                                 , ReferencePunct " "
+                                 , Space
                                  , WordPart { type_ = ReferenceWord
                                             , index = 2
                                             , text = "16"
@@ -129,12 +129,12 @@ suite =
                                             , index = 0
                                             , text = "1"
                                             }
-                                 , ReferencePunct " "
+                                 , Space
                                  , WordPart { type_ = ReferenceWord
                                             , index = 2
                                             , text = "John"
                                             }
-                                 , ReferencePunct " "
+                                 , Space
                                  , WordPart { type_ = ReferenceWord
                                             , index = 4
                                             , text = "2"
@@ -152,7 +152,7 @@ suite =
                                             , index = 0
                                             , text = "John"
                                             }
-                                 , ReferencePunct " "
+                                 , Space
                                  , WordPart { type_ = ReferenceWord
                                             , index = 2
                                             , text = "2"
@@ -175,12 +175,12 @@ suite =
                                             , index = 0
                                             , text = "Mısır'dan"
                                             }
-                                 , ReferencePunct " "
+                                 , Space
                                  , WordPart { type_ = ReferenceWord
                                             , index = 2
                                             , text = "Çıkış"
                                             }
-                                 , ReferencePunct " "
+                                 , Space
                                  , WordPart { type_ = ReferenceWord
                                             , index = 4
                                             , text = "1"
@@ -198,12 +198,12 @@ suite =
                                             , index = 0
                                             , text = "1."
                                             }
-                                 , ReferencePunct " "
+                                 , Space
                                  , WordPart { type_ = ReferenceWord
                                             , index = 2
                                             , text = "Samuel"
                                             }
-                                 , ReferencePunct " "
+                                 , Space
                                  , WordPart { type_ = ReferenceWord
                                             , index = 4
                                             , text = "3"
