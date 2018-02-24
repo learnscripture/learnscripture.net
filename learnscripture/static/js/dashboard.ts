@@ -192,11 +192,11 @@ var setupDashboardControls = function() {
         if ($section.is(':visible')) {
             // Collapse
             $section.hide();
-            $icon.removeClass('icon-heatmap-expanded').addClass('icon-heatmap-collapsed');
+            $icon.removeClass('expanded');
         } else {
             // Expand
             $section.show();
-            $icon.removeClass('icon-heatmap-collapsed').addClass('icon-heatmap-expanded');
+            $icon.addClass('expanded');
             if (calHeatMapData == null) {
                 setupCalendarHeatmap();
             }

@@ -2479,14 +2479,14 @@ instructions verse testingMethod helpVisible =
                                 [ A.href "#"
                                 , onClickSimply CollapseHelp
                                 ]
-                                [ makeIcon "icon-help-expanded" "collapse help" ]
+                                [ makeIcon "icon-help-toggle expanded" "collapse help" ]
                             )
                           else
                             (H.a
                                 [ A.href "#"
                                 , onClickSimply ExpandHelp
                                 ]
-                                [ makeIcon "icon-help-collapsed" "expand help" ]
+                                [ makeIcon "icon-help-toggle" "expand help" ]
                             )
                         ]
                     ]
