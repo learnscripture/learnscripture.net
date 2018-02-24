@@ -8,6 +8,7 @@ from django.urls import reverse
 from accounts.memorymodel import MM
 from accounts.models import Account, Identity
 from awards.models import AceAward, AwardType, StudentAward
+from bibleverses.languages import LANGUAGE_CODE_EN
 from bibleverses.models import MemoryStage, StageType, VerseSet
 from scores.models import Scores
 
@@ -62,7 +63,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         actual_accuracy = math.floor(word_count * accuracy) / word_count
 
         points_word_count = word_count - 3  # Don't get points for the reference
-        return math.floor(Scores.POINTS_PER_WORD * points_word_count * actual_accuracy)
+        return math.floor(Scores.points_per_word(LANGUAGE_CODE_EN) * points_word_count * actual_accuracy)
 
     def test_save_strength(self):
         verse_set = self.choose_verse_set('Bible 101')
@@ -117,7 +118,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         # # Check the score
         # points_for_verse = (
         #     (len(self.psalm_23_1_2.strip().split()) - 4)  # don't count reference
-        #     * Scores.POINTS_PER_WORD)
+        #     * Scores.points_per_word(LANGUAGE_CODE_EN))
         # self.assertEqual(Account.objects.get(id=account.id).total_score.points,
         #                  points_for_verse +
         #                  points_for_verse * Scores.PERFECT_BONUS_FACTOR +

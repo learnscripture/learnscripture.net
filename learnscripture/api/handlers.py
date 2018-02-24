@@ -295,7 +295,9 @@ class ActionCompleteHandler(ApiView):
             # implies client error
             return rc.BAD_REQUEST("action_change required")
 
-        action_logs = identity.award_action_points(uvs.localized_reference, uvs.scoring_text,
+        action_logs = identity.award_action_points(uvs.localized_reference,
+                                                   uvs.version.language_code,
+                                                   uvs.scoring_text,
                                                    old_memory_stage,
                                                    action_change, stage, accuracy)
 

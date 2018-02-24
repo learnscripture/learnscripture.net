@@ -8,6 +8,7 @@ from django.utils.six.moves.urllib.parse import ParseResult, urlparse
 
 from accounts.models import Account, ActionChange
 from awards.models import AwardType
+from bibleverses.languages import LANGUAGE_CODE_EN
 from bibleverses.models import MemoryStage, StageType
 from events.models import Event, EventType
 from learnscripture.forms import AccountSetPasswordForm
@@ -27,18 +28,22 @@ class AccountTests(AccountTestMixin, TestBase):
         a = Account.objects.create(username='test',
                                    email='test@test.com')
 
-        a.award_action_points("John 3:16", "This is John 3:16",
+        a.award_action_points("John 3:16",
+                              LANGUAGE_CODE_EN,
+                              "This is John 3:16",
                               MemoryStage.TESTED,
                               ActionChange(old_strength=0.5, new_strength=0.6),
                               StageType.TEST, 0.75)
         self.assertEqual(a.total_score.points,
-                         (4 * Scores.POINTS_PER_WORD * 0.75))
+                         (4 * Scores.points_per_word(LANGUAGE_CODE_EN) * 0.75))
 
     def test_points_events(self):
         _, a = self.create_account()
 
         def score():
-            a.award_action_points("John 3:16", "This is John 3:16",
+            a.award_action_points("John 3:16",
+                                  LANGUAGE_CODE_EN,
+                                  "This is John 3:16",
                                   MemoryStage.TESTED,
                                   ActionChange(old_strength=0.5, new_strength=0.6),
                                   StageType.TEST, 0.75)
@@ -57,7 +62,9 @@ class AccountTests(AccountTestMixin, TestBase):
                          0)
 
         def score(accuracy):
-            account.award_action_points("John 3:16", "This is John 3:16",
+            account.award_action_points("John 3:16",
+                                        LANGUAGE_CODE_EN,
+                                        "This is John 3:16",
                                         MemoryStage.TESTED,
                                         ActionChange(old_strength=0.5, new_strength=0.6),
                                         StageType.TEST, accuracy)
@@ -100,13 +107,15 @@ class AccountTests(AccountTestMixin, TestBase):
     def test_award_action_points_fully_learnt(self):
         _, a = self.create_account()
 
-        a.award_action_points("John 3:16", "This is John 3:16",
+        a.award_action_points("John 3:16",
+                              LANGUAGE_CODE_EN,
+                              "This is John 3:16",
                               MemoryStage.TESTED,
                               ActionChange(old_strength=0.7, new_strength=0.99),
                               StageType.TEST, 0.9)
         self.assertEqual(a.total_score.points,
-                         (4 * Scores.POINTS_PER_WORD * 0.9) +
-                         (4 * Scores.POINTS_PER_WORD * Scores.VERSE_LEARNT_BONUS))
+                         (4 * Scores.points_per_word(LANGUAGE_CODE_EN) * 0.9) +
+                         (4 * Scores.points_per_word(LANGUAGE_CODE_EN) * Scores.VERSE_LEARNT_BONUS))
 
     def test_addict_award(self):
         import awards.tasks
@@ -115,7 +124,9 @@ class AccountTests(AccountTestMixin, TestBase):
         def score():
             # We simulate testing over time by moving previous data back an hour
             account.action_logs.update(created=F('created') - timedelta(hours=1))
-            account.award_action_points("John 3:16", "This is John 3:16",
+            account.award_action_points("John 3:16",
+                                        LANGUAGE_CODE_EN,
+                                        "This is John 3:16",
                                         MemoryStage.TESTED,
                                         ActionChange(old_strength=0.5, new_strength=0.6),
                                         StageType.TEST, 0.5)

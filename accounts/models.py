@@ -183,7 +183,7 @@ class Account(AbstractBaseUser):
         return self.username
 
     # Main business logic
-    def award_action_points(self, localized_reference, text,
+    def award_action_points(self, localized_reference, language_code, text,
                             old_memory_stage, action_change,
                             action_stage, accuracy):
         if action_stage != StageType.TEST:
@@ -191,7 +191,7 @@ class Account(AbstractBaseUser):
 
         action_logs = []
         word_count = count_words(text)
-        max_points = word_count * Scores.POINTS_PER_WORD
+        max_points = word_count * Scores.points_per_word(language_code)
         if old_memory_stage >= MemoryStage.TESTED:
             reason = ScoreReason.VERSE_REVIEWED
         else:
@@ -210,7 +210,7 @@ class Account(AbstractBaseUser):
             scored_100_percent.send(sender=self)
 
         if (action_change.old_strength < memorymodel.LEARNT <= action_change.new_strength):
-            action_logs.append(self.add_points(word_count * Scores.POINTS_PER_WORD *
+            action_logs.append(self.add_points(word_count * Scores.points_per_word(language_code) *
                                                Scores.VERSE_LEARNT_BONUS,
                                                ScoreReason.VERSE_LEARNT,
                                                localized_reference=localized_reference,
@@ -618,12 +618,14 @@ class Identity(models.Model):
             s.filter(first_seen__isnull=True).update(first_seen=now)
             return ActionChange()
 
-    def award_action_points(self, localized_reference, text, old_memory_stage, action_change,
+    def award_action_points(self, localized_reference, language_code,
+                            text, old_memory_stage, action_change,
                             action_stage, accuracy):
         if self.account_id is None:
             return []
 
-        return self.account.award_action_points(localized_reference, text, old_memory_stage, action_change,
+        return self.account.award_action_points(localized_reference, language_code,
+                                                text, old_memory_stage, action_change,
                                                 action_stage, accuracy)
 
     def get_verse_statuses_bulk(self, ids):
