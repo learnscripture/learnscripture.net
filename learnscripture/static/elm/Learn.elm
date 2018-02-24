@@ -1715,7 +1715,7 @@ typingBoxContainerId =
 typingBox : LearningStage -> TestingMethod -> H.Html Msg
 typingBox stage testingMethod =
     let
-        ( value, inUse, incorrectInput ) =
+        ( value, inUse, incorrectInput, inputType ) =
             case stage of
                 Test _ tp ->
                     let
@@ -1749,14 +1749,23 @@ typingBox stage testingMethod =
                                     (normalizeWordForTest tp.currentTypedText
                                         == normalizeWordForTest text
                                     )
+
+                        inputType =
+                            case tp.currentWord of
+                                TestFinished _ ->
+                                    Nothing
+
+                                CurrentWord w ->
+                                    Just (inputTypeForWord w.word)
                     in
                         ( tp.currentTypedText
                         , typingBoxInUse tp testingMethod
                         , lastCheckFailed && currentTextEqualsFailedAttempt
+                        , inputType
                         )
 
                 _ ->
-                    ( "", False, False )
+                    ( "", False, False, Nothing )
     in
         H.input
             ([ A.id typingBoxId
@@ -1773,14 +1782,64 @@ typingBox stage testingMethod =
                        )
                 )
              ]
-                ++ if inUse then
-                    [ E.onInput TypingBoxInput
-                    , onEnter TypingBoxEnter
-                    ]
-                   else
-                    []
+                ++ (if inUse then
+                        [ E.onInput TypingBoxInput
+                        , onEnter TypingBoxEnter
+                        ]
+                    else
+                        []
+                   )
+                ++ (case inputType of
+                        Nothing ->
+                            []
+
+                        Just i ->
+                            inputAttributesForType i
+                   )
             )
             []
+
+
+type InputType
+    = Alphanumerical
+    | Numerical
+
+
+onlyNumerical : R.Regex
+onlyNumerical =
+    R.regex "^[0-9]+$"
+
+
+inputTypeForWord : Word -> InputType
+inputTypeForWord word =
+    case word.type_ of
+        BodyWord ->
+            Alphanumerical
+
+        ReferenceWord ->
+            if word.index > 0 && R.contains onlyNumerical word.text then
+                Numerical
+            else
+                Alphanumerical
+
+
+{-|
+
+Attributes for an 'input' element depending on expected type. These are
+important for triggering the right keyboard on various mobile browsers.
+-}
+inputAttributesForType : InputType -> List (H.Attribute msg)
+inputAttributesForType inputType =
+    case inputType of
+        Alphanumerical ->
+            [ A.type_ "text"
+            ]
+
+        Numerical ->
+            -- pattern is needed for iOS to bring up numerical keyboard.
+            [ A.type_ "number"
+            , A.pattern "[0-9]*"
+            ]
 
 
 typingBoxInUse : TestProgress -> TestingMethod -> Bool
