@@ -108,3 +108,16 @@ ul.grouplist {
     margin-bottom: 0;
     text-align: center;
 }
+
+#id-show-heatmap i {
+    text-decoration: none;
+    &::before {
+        transform: rotate(0deg);
+        transition: transform 0.5s;
+    }
+
+    &.expanded::before {
+        transform: rotate(90deg);
+        transition: transform 0.5s;
+    }
+}
