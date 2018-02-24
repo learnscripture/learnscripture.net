@@ -754,6 +754,7 @@ var resetTestingMistakes = function() {
 
 var getPointsTarget = function() {
     // Constants from scores/models.py
+    // This is incorrect for Turkish, but this whole module is going away anyway.
     var POINTS_PER_WORD = 20;
     // Duplication of logic in Account.award_action_points.  NB word
     // count excludes reference for this purpose, so we don't use

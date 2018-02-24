@@ -12,6 +12,7 @@ from django.db import models
 from django.db.models import F
 from django.utils import timezone
 
+from bibleverses import languages
 from learnscripture.datastructures import make_choices
 
 # See also Learn.elm which copies definition
@@ -27,9 +28,25 @@ ScoreReason = make_choices('ScoreReason',
 
 class Scores(object):
     # Constants for scores. Duplicated in learn.js
-    POINTS_PER_WORD = 20
     PERFECT_BONUS_FACTOR = 0.5
     VERSE_LEARNT_BONUS = 2
+
+    # This is based on a comparison of the number of words in a typical Bible
+    # translation for each language:
+    #
+    # - NET for English
+    # - TCL02 for Turkish
+    #
+    # such that learning the same number of verses should get you the same
+    # number of points (roughly).
+    _LANGUAGE_POINTS_PER_WORD = {
+        languages.LANGUAGE_CODE_EN: 20,
+        languages.LANGUAGE_CODE_TR: 34,
+    }
+
+    @classmethod
+    def points_per_word(cls, language_code):
+        return cls._LANGUAGE_POINTS_PER_WORD[language_code]
 
 
 class ActionLog(models.Model):

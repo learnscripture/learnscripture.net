@@ -771,6 +771,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
             i.add_verse_choice(ref)
             action_change = i.record_verse_action(ref, 'KJV', StageType.TEST, 1)
             i.award_action_points(ref,
+                                  LANGUAGE_CODE_EN,
                                   Verse.objects.get(localized_reference=ref, version__slug='KJV').text,
                                   MemoryStage.SEEN, action_change, StageType.TEST, 1)
 
@@ -795,6 +796,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
             # Final test, moving to above LEARNT
             action_change = i.record_verse_action(ref, 'KJV', StageType.TEST, 1)
             i.award_action_points(ref,
+                                  LANGUAGE_CODE_EN,
                                   Verse.objects.get(localized_reference=ref, version__slug='KJV').text,
                                   MemoryStage.TESTED, action_change, StageType.TEST, 1)
             self.assertEqual(Event.objects.filter(event_type=EventType.VERSES_FINISHED_MILESTONE).count(),
