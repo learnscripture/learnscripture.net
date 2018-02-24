@@ -2474,20 +2474,20 @@ instructions verse testingMethod helpVisible =
                 _ ->
                     [ H.h3 []
                         [ H.text "Help"
-                        , if helpVisible then
-                            (H.a
-                                [ A.href "#"
-                                , onClickSimply CollapseHelp
-                                ]
-                                [ makeIcon "icon-help-toggle expanded" "collapse help" ]
-                            )
-                          else
-                            (H.a
-                                [ A.href "#"
-                                , onClickSimply ExpandHelp
-                                ]
-                                [ makeIcon "icon-help-toggle" "expand help" ]
-                            )
+                        , H.a
+                            [ A.href "#"
+                            , onClickSimply ToggleHelp
+                            ]
+                            [ makeIcon
+                                ("icon-help-toggle"
+                                    ++ (if helpVisible then
+                                            " expanded"
+                                        else
+                                            ""
+                                       )
+                                )
+                                "toggle help"
+                            ]
                         ]
                     ]
                         ++ (if helpVisible then
@@ -2629,8 +2629,7 @@ type Msg
     | ProcessNewActionLogs
     | SessionStatsLoaded (Result Http.Error SessionStats)
     | MorePractice Float
-    | ExpandHelp
-    | CollapseHelp
+    | ToggleHelp
     | ToggleDropdown Dropdown
     | TogglePinnableMenu Dropdown
     | TogglePreferTestsToReading
@@ -2730,11 +2729,8 @@ update msg model =
         MorePractice accuracy ->
             startMorePractice model accuracy
 
-        ExpandHelp ->
-            ( { model | helpVisible = True }, Cmd.none )
-
-        CollapseHelp ->
-            ( { model | helpVisible = False }, Cmd.none )
+        ToggleHelp ->
+            ( { model | helpVisible = not model.helpVisible }, Cmd.none )
 
         ToggleDropdown dropdown ->
             ( toggleDropdown model dropdown
