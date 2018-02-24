@@ -703,16 +703,7 @@ body.learn-page {
     }
 
     .icon-help-toggle {
-        text-decoration: none;
-        &::before {
-            transform: rotate(0deg);
-            transition: transform 0.5s;
-        }
-
-        &.expanded::before {
-            transform: rotate(90deg);
-            transition: transform 0.5s;
-        }
+        .rotate-expanded(90deg);
     }
 
     #id-toggle-show-previous-verse {
@@ -722,15 +713,7 @@ body.learn-page {
     }
 
     .icon-show-previous-verse {
-        text-decoration: none;
-        &::before {
-            transform: rotate(0deg);
-            transition: transform 0.5s;
-        }
-        &.expanded::before {
-            transform: rotate(-90deg);
-            transition: transform 0.5s;
-        }
+        .rotate-expanded(-90deg);
     }
 
     // We may have a fixed bottom bar, but want to ensure this doesn't cover up

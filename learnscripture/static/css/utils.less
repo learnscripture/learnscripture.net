@@ -4,3 +4,17 @@
     -ms-user-select: none;
     user-select: none;
 }
+
+
+.rotate-expanded(@angle) {
+    text-decoration: none;
+    &::before {
+        transform: rotate(0deg);
+        transition: transform 0.5s;
+    }
+
+    &.expanded::before {
+        transform: rotate(@angle);
+        transition: transform 0.5s;
+    }
+}
