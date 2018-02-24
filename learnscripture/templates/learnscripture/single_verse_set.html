@@ -33,7 +33,7 @@
       <ul>
         {% for v in verse_list %}
           <li>
-            <strong>{{ v.localized_reference }}:</strong> {{ v.text|linebreaksbr }}
+            <strong>{{ v.localized_reference }}:</strong> {{ v.text.strip|linebreaksbr }}
             <br/><br/>
           </li>
         {% endfor %}
