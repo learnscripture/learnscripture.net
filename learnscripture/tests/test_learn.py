@@ -99,32 +99,34 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.submit('input[name=learnbiblequeue]')
         self.assertEqual("Psalm 23:1-2", self.get_element_text("#id-verse-title"))
 
-        # # Do the reading:
-        # for i in range(0, 9):
-        #     self.click("#id-next-btn")
+        # Do the reading:
+        for i in range(0, 9):
+            self.click("#id-next-btn")
 
-        # self.wait_for_ajax()
+        self.wait_for_ajax()
 
-        # # Do the typing: The fixture has 'The Lord is my shepherd--I shall not
-        # # want' in order to test an issue with word splitting
-        # for word in self.psalm_23_1_2.strip().split():
-        #     self.fill({"#id-typing": word + " "})
+        # Do the typing: The fixture has 'The Lord is my shepherd--I shall not
+        # want' in order to test an issue with word splitting
+        for word in self.psalm_23_1_2.strip().split():
+            self.fill({"#id-typing": word + " "})
 
-        # self.wait_for_ajax()
-        # # Check the strength
-        # uvs = identity.verse_statuses.get(localized_reference='Psalm 23:1-2')
-        # self.assertEqual(uvs.strength, MM.INITIAL_STRENGTH_FACTOR)
+        self.wait_for_ajax()
+        # Check the strength
+        uvs = identity.verse_statuses.get(localized_reference='Psalm 23:1-2')
+        self.assertEqual(uvs.strength, MM.INITIAL_STRENGTH_FACTOR)
 
-        # # Check the score
-        # points_for_verse = (
-        #     (len(self.psalm_23_1_2.strip().split()) - 4)  # don't count reference
-        #     * Scores.points_per_word(LANGUAGE_CODE_EN))
-        # self.assertEqual(Account.objects.get(id=account.id).total_score.points,
-        #                  points_for_verse +
-        #                  points_for_verse * Scores.PERFECT_BONUS_FACTOR +
-        #                  StudentAward(count=1).points() +
-        #                  AceAward(count=1).points()
-        #                  )
+        # Check the score
+        points_for_verse = (
+            Scores.points_per_word(LANGUAGE_CODE_EN) *
+            (len(self.psalm_23_1_2.strip().split()) -
+             4))  # don't count reference
+
+        self.assertEqual(Account.objects.get(id=account.id).total_score.points,
+                         points_for_verse +
+                         points_for_verse * Scores.PERFECT_BONUS_FACTOR +
+                         StudentAward(count=1).points() +
+                         AceAward(count=1).points()
+                         )
 
     def test_points_and_student_award(self):
         identity, account = self.create_account()
