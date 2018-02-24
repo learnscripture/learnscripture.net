@@ -133,6 +133,7 @@ init flags =
                 }
           , learningSession = Loading
           , helpVisible = False
+          , previousVerseVisible = False
           , currentHttpCalls = Dict.empty
           , permanentFailHttpCalls = []
           , openDropdown = Nothing
@@ -192,6 +193,7 @@ type alias Model =
     , isTouchDevice : Bool
     , httpConfig : HttpConfig
     , helpVisible : Bool
+    , previousVerseVisible : Bool
     , currentHttpCalls :
         Dict.Dict CallId QueuedCall
     , permanentFailHttpCalls : List ( CallId, TrackedHttpCall )
@@ -1067,26 +1069,52 @@ viewCurrentVerse session model =
                 viewVerseOptionsMenu model currentVerse
                else
                 emptyNode
-             , H.div [ A.id typingBoxContainerId ]
-                -- We make typing box a permanent fixture to avoid issues with
-                -- losing focus and screen keyboards then disappearing.
-                -- It comes before verse-wrapper to fix tab order without needing
-                -- tabindex.
-                [ typingBox currentVerse.currentStage testingMethod
-                , case previousVerse of
+             , H.div [ A.id "id-verse-wrapper" ]
+                [ case previousVerse of
                     Nothing ->
                         emptyNode
 
                     Just verse ->
-                        H.div [ A.class "previous-verse-wrapper" ]
+                        H.div
+                            [ A.class
+                                ("previous-verse-wrapper"
+                                    ++ (if not model.previousVerseVisible then
+                                            " previous-verse-partial"
+                                        else
+                                            ""
+                                       )
+                                )
+                            ]
                             [ H.div [ A.class "previous-verse" ]
                                 (versePartsToHtml ReadForContext
                                     (partsForVerse verse ReadForContextStage testingMethod)
                                     verse.id
                                 )
+                            , H.a
+                                [ A.href "#"
+                                , onClickSimply TogglePreviousVerseVisible
+                                , A.tabindex -1
+                                ]
+                                [ H.span [ A.id "id-toggle-show-previous-verse" ]
+                                    [ makeIcon
+                                        ("icon-show-previous-verse"
+                                            ++ (if model.previousVerseVisible then
+                                                    " expanded"
+                                                else
+                                                    ""
+                                               )
+                                        )
+                                        "Toggle show all of previous verse"
+                                    ]
+                                ]
                             ]
-                , H.div [ A.class "current-verse-wrapper" ]
-                    [ H.div [ A.class verseClasses ]
+                , H.div [ A.id typingBoxContainerId ]
+                    -- We make typing box a permanent fixture to avoid issues
+                    -- with losing focus and screen keyboards then disappearing.
+                    -- It comes close to the verse itself to fix tab order
+                    -- without needing tabindex.
+                    [ typingBox currentVerse.currentStage testingMethod
+                    , H.div [ A.class verseClasses ]
                         (versePartsToHtml currentVerse.currentStage
                             (partsForVerse currentVerse.verseStatus (learningStageTypeForStage currentVerse.currentStage) testingMethod)
                             currentVerse.verseStatus.id
@@ -1709,7 +1737,7 @@ typingBoxId =
 
 typingBoxContainerId : String
 typingBoxContainerId =
-    "id-verse-wrapper"
+    "id-current-verse-wrapper"
 
 
 typingBox : LearningStage -> TestingMethod -> H.Html Msg
@@ -2630,6 +2658,7 @@ type Msg
     | SessionStatsLoaded (Result Http.Error SessionStats)
     | MorePractice Float
     | ToggleHelp
+    | TogglePreviousVerseVisible
     | ToggleDropdown Dropdown
     | TogglePinnableMenu Dropdown
     | TogglePreferTestsToReading
@@ -2731,6 +2760,9 @@ update msg model =
 
         ToggleHelp ->
             ( { model | helpVisible = not model.helpVisible }, Cmd.none )
+
+        TogglePreviousVerseVisible ->
+            ( { model | previousVerseVisible = not model.previousVerseVisible }, Cmd.none )
 
         ToggleDropdown dropdown ->
             ( toggleDropdown model dropdown

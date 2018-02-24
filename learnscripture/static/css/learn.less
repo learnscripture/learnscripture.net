@@ -443,12 +443,12 @@ body.learn-page {
         border-radius: 5px;
         padding: 10px;
         background-color: #f0f0f0;
-        position: relative; // Provide container for id-typing
-        z-index: 10; // below #id-typing
     }
 
-    .current-verse-wrapper {
+    #id-current-verse-wrapper {
         border-bottom: 1px solid #ccc;
+        position: relative; // Provide container for #id-typing
+        z-index: 10; // below #id-typing
     }
 
     #id-verse-set-link {
@@ -474,6 +474,8 @@ body.learn-page {
     .previous-verse {
         font-size: @currentVerseFontSize;
         line-height: @readingLineHeight;
+        padding-right: 15px; // Make room for #id-toggle-show-previous-verse
+                             // .icon-show-previous-verse
     }
 
     @readingLineHeight: 1.5;
@@ -488,13 +490,19 @@ body.learn-page {
     .previous-verse-wrapper {
         border-bottom: 1px solid #c0c0c0;
         position: relative; // establish containing box.
-        height: @currentVerseFontSize * @readingLineHeight; // Constrain to showing one line only
-        overflow: hidden;
-    }
-    .previous-verse {
-        color: #909090;
-        position: absolute;
-        bottom: 0px;
+        &.previous-verse-partial {
+            overflow: hidden;
+            height: @currentVerseFontSize * @readingLineHeight; // Constrain to showing one line only
+            .previous-verse {
+                position: absolute;
+                bottom: 0px;
+            }
+        }
+
+        .previous-verse {
+            color: #909090;
+        }
+
     }
 
     .normalWordBorderColors() {
@@ -703,6 +711,24 @@ body.learn-page {
 
         &.expanded::before {
             transform: rotate(90deg);
+            transition: transform 0.5s;
+        }
+    }
+
+    #id-toggle-show-previous-verse {
+        position: absolute;
+        top: 0px;
+        right: 0px;
+    }
+
+    .icon-show-previous-verse {
+        text-decoration: none;
+        &::before {
+            transform: rotate(0deg);
+            transition: transform 0.5s;
+        }
+        &.expanded::before {
+            transform: rotate(-90deg);
             transition: transform 0.5s;
         }
     }
