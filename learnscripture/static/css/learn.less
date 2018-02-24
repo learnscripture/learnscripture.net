@@ -549,6 +549,16 @@ body.learn-page {
         &.incorrect {
             border-color: red;
         }
+
+        // Don't show spin buttons for type=number
+        &[type=number]::-webkit-outer-spin-button,
+        &[type=number]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        &[type=number] {
+            -moz-appearance: textfield;
+        }
     }
 
     #id-typing, .word-button {
