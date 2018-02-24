@@ -1385,17 +1385,17 @@ referenceToParts reference =
         splitter =
             R.regex "(?=[\\s:\\-])"
 
-        punct =
+        initialPunctOrSpace =
             R.regex "^[\\s:\\-]"
 
         parts =
             reference
                 |> R.split R.All splitter
-                -- Split the initial punctuation into separate bits:
+                -- Split the initial punct/space we found into separate bits:
                 |>
                     List.map
                         (\w ->
-                            if R.contains punct w then
+                            if R.contains initialPunctOrSpace w then
                                 [ String.left 1 w, String.dropLeft 1 w ]
                             else
                                 [ w ]
@@ -1404,10 +1404,10 @@ referenceToParts reference =
     in
         List.map2
             (\idx w ->
-                if R.contains punct w then
-                    ReferencePunct w
-                else if String.trim w == "" then
+                if String.trim w == "" then
                     Space
+                else if R.contains initialPunctOrSpace w then
+                    ReferencePunct w
                 else
                     WordPart
                         { type_ = ReferenceWord
