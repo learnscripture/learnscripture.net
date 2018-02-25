@@ -1788,6 +1788,19 @@ typingBox stage testingMethod =
     in
         H.input
             ([ A.id typingBoxId
+               -- We experimented with making the type switch to "number" for
+               -- verse reference chapter/verse, in order to activate a numeric on
+               -- screen keyboard - see changeset e9b3664ccf48 and f3d144d3283d
+               --
+               -- However, this worked badly:
+               -- * On Chrome for Android sometimes the onscreen keyboard disappears
+               --   when we change the input type, don't know why.
+               -- * It makes the keyboard a moving target when it switches from
+               --   normal to numeric. This slows you down and causes
+               --   mistakes, which is more annoying than the alternative.
+               --
+               -- So we stick with just "text"
+             , A.type_ "text"
              , A.value value
              , A.autocomplete False
              , A.attribute "autocorrect" "off"
