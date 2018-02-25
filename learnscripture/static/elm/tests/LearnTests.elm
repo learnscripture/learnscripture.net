@@ -107,113 +107,137 @@ suite =
         , describe "referenceToParts"
             [ test "simple reference" <|
                 \_ ->
-                    Expect.equal [ WordPart { type_ = ReferenceWord
-                                            , index = 0
-                                            , text = "Mark"
-                                            }
-                                 , Space
-                                 , WordPart { type_ = ReferenceWord
-                                            , index = 2
-                                            , text = "16"
-                                            }
-                                 , ReferencePunct ":"
-                                 , WordPart { type_ = ReferenceWord
-                                            , index = 4
-                                            , text = "25"
-                                            }
-                                 ]
+                    Expect.equal
+                        [ WordPart
+                            { type_ = ReferenceWord
+                            , index = 0
+                            , text = "Mark"
+                            }
+                        , Space
+                        , WordPart
+                            { type_ = ReferenceWord
+                            , index = 2
+                            , text = "16"
+                            }
+                        , ReferencePunct ":"
+                        , WordPart
+                            { type_ = ReferenceWord
+                            , index = 4
+                            , text = "25"
+                            }
+                        ]
                         (referenceToParts "Mark 16:25")
             , test "numbered book name" <|
                 \_ ->
-                    Expect.equal [ WordPart { type_ = ReferenceWord
-                                            , index = 0
-                                            , text = "1"
-                                            }
-                                 , Space
-                                 , WordPart { type_ = ReferenceWord
-                                            , index = 2
-                                            , text = "John"
-                                            }
-                                 , Space
-                                 , WordPart { type_ = ReferenceWord
-                                            , index = 4
-                                            , text = "2"
-                                            }
-                                 , ReferencePunct ":"
-                                 , WordPart { type_ = ReferenceWord
-                                            , index = 6
-                                            , text = "3"
-                                            }
-                                 ]
+                    Expect.equal
+                        [ WordPart
+                            { type_ = ReferenceWord
+                            , index = 0
+                            , text = "1"
+                            }
+                        , Space
+                        , WordPart
+                            { type_ = ReferenceWord
+                            , index = 2
+                            , text = "John"
+                            }
+                        , Space
+                        , WordPart
+                            { type_ = ReferenceWord
+                            , index = 4
+                            , text = "2"
+                            }
+                        , ReferencePunct ":"
+                        , WordPart
+                            { type_ = ReferenceWord
+                            , index = 6
+                            , text = "3"
+                            }
+                        ]
                         (referenceToParts "1 John 2:3")
             , test "verse range" <|
                 \_ ->
-                    Expect.equal [ WordPart { type_ = ReferenceWord
-                                            , index = 0
-                                            , text = "John"
-                                            }
-                                 , Space
-                                 , WordPart { type_ = ReferenceWord
-                                            , index = 2
-                                            , text = "2"
-                                            }
-                                 , ReferencePunct ":"
-                                 , WordPart { type_ = ReferenceWord
-                                            , index = 4
-                                            , text = "8"
-                                            }
-                                 , ReferencePunct "-"
-                                 , WordPart { type_ = ReferenceWord
-                                            , index = 6
-                                            , text = "11"
-                                            }
-                                 ]
+                    Expect.equal
+                        [ WordPart
+                            { type_ = ReferenceWord
+                            , index = 0
+                            , text = "John"
+                            }
+                        , Space
+                        , WordPart
+                            { type_ = ReferenceWord
+                            , index = 2
+                            , text = "2"
+                            }
+                        , ReferencePunct ":"
+                        , WordPart
+                            { type_ = ReferenceWord
+                            , index = 4
+                            , text = "8"
+                            }
+                        , ReferencePunct "-"
+                        , WordPart
+                            { type_ = ReferenceWord
+                            , index = 6
+                            , text = "11"
+                            }
+                        ]
                         (referenceToParts "John 2:8-11")
             , test "Turkish 1" <|
                 \_ ->
-                    Expect.equal [ WordPart { type_ = ReferenceWord
-                                            , index = 0
-                                            , text = "Mısır'dan"
-                                            }
-                                 , Space
-                                 , WordPart { type_ = ReferenceWord
-                                            , index = 2
-                                            , text = "Çıkış"
-                                            }
-                                 , Space
-                                 , WordPart { type_ = ReferenceWord
-                                            , index = 4
-                                            , text = "1"
-                                            }
-                                 , ReferencePunct ":"
-                                 , WordPart { type_ = ReferenceWord
-                                            , index = 6
-                                            , text = "2"
-                                            }
-                                 ]
+                    Expect.equal
+                        [ WordPart
+                            { type_ = ReferenceWord
+                            , index = 0
+                            , text = "Mısır'dan"
+                            }
+                        , Space
+                        , WordPart
+                            { type_ = ReferenceWord
+                            , index = 2
+                            , text = "Çıkış"
+                            }
+                        , Space
+                        , WordPart
+                            { type_ = ReferenceWord
+                            , index = 4
+                            , text = "1"
+                            }
+                        , ReferencePunct ":"
+                        , WordPart
+                            { type_ = ReferenceWord
+                            , index = 6
+                            , text = "2"
+                            }
+                        ]
                         (referenceToParts "Mısır'dan Çıkış 1:2")
             , test "Turkish 2" <|
                 \_ ->
-                    Expect.equal [ WordPart { type_ = ReferenceWord
-                                            , index = 0
-                                            , text = "1."
-                                            }
-                                 , Space
-                                 , WordPart { type_ = ReferenceWord
-                                            , index = 2
-                                            , text = "Samuel"
-                                            }
-                                 , Space
-                                 , WordPart { type_ = ReferenceWord
-                                            , index = 4
-                                            , text = "3"
-                                            }
-                                 , ReferencePunct ":"
-                                 , WordPart { type_ = ReferenceWord
-                                            , index = 6
-                                            , text = "4"
-                                            }
-                                 ]
+                    Expect.equal
+                        [ WordPart
+                            { type_ = ReferenceWord
+                            , index = 0
+                            , text = "1."
+                            }
+                        , Space
+                        , WordPart
+                            { type_ = ReferenceWord
+                            , index = 2
+                            , text = "Samuel"
+                            }
+                        , Space
+                        , WordPart
+                            { type_ = ReferenceWord
+                            , index = 4
+                            , text = "3"
+                            }
+                        , ReferencePunct ":"
+                        , WordPart
+                            { type_ = ReferenceWord
+                            , index = 6
+                            , text = "4"
+                            }
+                        ]
                         (referenceToParts "1. Samuel 3:4")
             ]
         ]
