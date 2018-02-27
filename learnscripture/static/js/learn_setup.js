@@ -220,3 +220,94 @@ app.ports.beep.subscribe(function (args) {
 });
 
 setUpAudio();
+
+
+app.ports.helpTourHighlightElement.subscribe(function (selector) {
+    $("#id-help-tour-highlight").remove();
+    if (selector === "") {
+        return;
+    }
+    var delay = 10;
+    if (selector.indexOf(".menu-open") != -1) {
+        delay = 700; // allow time for opening animation
+    }
+    whenVisible(selector, 100, delay, function($item) {
+        var itemRect = $item.get(0).getBoundingClientRect();
+        var itemCenter = {
+            top: itemRect.top + itemRect.height / 2,
+            left: itemRect.left + itemRect.width / 2
+        };
+        var shapeToElementRatio = 1;
+        var shapeSize = {
+            width: itemRect.width * shapeToElementRatio,
+            height: itemRect.height * shapeToElementRatio
+        };
+        // SVG document is larger than shape, to give
+        // room for the stroke of the shape.
+        var svgDocToShapeRatio = 1.5;
+        var svgDocSize = {
+            width: shapeSize.width * svgDocToShapeRatio,
+            height: shapeSize.height * svgDocToShapeRatio
+        };
+        var svgDocPosition = {
+            top: itemCenter.top - svgDocSize.height / 2,
+            left: itemCenter.left - svgDocSize.width / 2
+        };
+        var center = {
+            x: svgDocSize.width / 2,
+            y: svgDocSize.height / 2
+        }
+        var svgDoc =
+            `<svg id="id-help-tour-highlight"
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                width="${svgDocSize.width}"
+                height="${svgDocSize.height}"
+                viewBox="0 0 ${svgDocSize.width} ${svgDocSize.height}"
+                >
+               <path d="M ${- shapeSize.width / 2 + center.x} ${0 + center.y}
+                        L ${- shapeSize.width / 2 + center.x} ${- shapeSize.height / 4 + center.y}
+                        Q ${- shapeSize.width / 2 + center.x} ${- shapeSize.height / 2 + center.y}
+                          ${- shapeSize.width / 4 + center.x} ${- shapeSize.height / 2 + center.y}
+                        L ${+ shapeSize.width / 4 + center.x} ${- shapeSize.height / 2 + center.y}
+                        Q ${+ shapeSize.width / 2 + center.x} ${- shapeSize.height / 2 + center.y}
+                          ${+ shapeSize.width / 2 + center.x} ${- shapeSize.height / 4 + center.y}
+                        L ${+ shapeSize.width / 2 + center.x} ${+ shapeSize.height / 4 + center.y}
+                        Q ${+ shapeSize.width / 2 + center.x} ${+ shapeSize.height / 2 + center.y}
+                          ${+ shapeSize.width / 4 + center.x} ${+ shapeSize.height / 2 + center.y}
+                        L ${- shapeSize.width / 4 + center.x} ${+ shapeSize.height / 2 + center.y}
+                        Q ${- shapeSize.width / 2 + center.x} ${+ shapeSize.height / 2 + center.y}
+                          ${- shapeSize.width / 2 + center.x} ${+ shapeSize.height / 4 + center.y}
+                        L ${- shapeSize.width / 2 + center.x} ${0 + center.y}
+                        "
+                   fill="transparent"
+                   stroke-width="2px">
+             </svg>`;
+
+        var $elem = $(svgDoc)
+            .css({'top': asPx(svgDocPosition.top),
+                  'left': asPx(svgDocPosition.left)});
+        $("#id-help-tour-highlight").remove();
+        $('body').append($elem);
+        var $path = $('#id-help-tour-highlight path');
+        var length = $path.get(0).getTotalLength();
+        $path.css({'stroke-dasharray': length.toString()+","+length.toString(),
+                   'stroke-dashoffset': length.toString()})
+    });
+
+});
+
+function whenVisible(selector, maxAttempts, delay, action) {
+    var $item = $(selector);
+    if (delay > 0) {
+        window.setTimeout(whenVisible, delay, selector, maxAttempts, 0, action);
+        return;
+    }
+    if ($item.length > 0 && $item.is(":visible")) {
+        action($item);
+    } else {
+        window.requestAnimationFrame(function() {
+            whenVisible(selector, maxAttempts - 1, 0, action)
+        });
+    }
+}

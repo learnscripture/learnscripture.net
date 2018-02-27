@@ -41,7 +41,7 @@ body.learn-page {
         top: 0;
         left: 0;
         right: 0;
-        z-index: 100; // Above everything
+        z-index: 100; // Above everything, below help tour
         // We need a fixed height, because this element has 'position: fixed'
         // and we need to allow for that in margins on top of remaining content.
         height: @topbarHeight;
@@ -637,7 +637,7 @@ body.learn-page {
 
     .fixed-bottom() {
         position: fixed;
-        z-index: 100;  // Above everything
+        z-index: 100;  // Above everything execpt help tour
         bottom: 0;
         left: 0;
         width: 100%;
@@ -712,6 +712,61 @@ body.learn-page {
     #elm-main {
         margin-bottom: 50vh;
     }
+
+    #id-help-tour-wrapper {
+        position: fixed;
+        bottom: 0px;
+        width: 100%;
+        height: 100%;
+        top: 0px;
+        z-index: 200; // above everything except #id-help-tour-highlight
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: stretch;
+
+        &.help-tour-welcome {
+            justify-content: space-around;
+        }
+        &.help-tour-test-finished-buttons {
+            justify-content: flex-start;
+        }
+    }
+
+    #id-help-tour-content {
+        background: rgba(0, 0, 0, 0.9);
+        padding: 1em;
+        text-align: center;
+    }
+
+    #id-help-tour-controls {
+        text-align: right;
+        > span {
+            display: inline-block;
+            margin-left: 5px;
+        }
+    }
+
+    #id-help-tour-highlight {
+        position: fixed;
+        z-index: 210; // above everything
+
+        path {
+            stroke: red;
+            .animation(helpTourHighlightAnimate 0.3s ease-in-out forwards);
+        }
+
+        @keyframes helpTourHighlightAnimate {
+            to {
+                stroke-dashoffset: 0
+            }
+        }
+
+    }
+
+    // MEDIA QUERIES
 
     @media screen and (max-width: @narrowWidthBreak1) {
         .nav-caption {

@@ -27,6 +27,7 @@ import StringInterpolate.Interpolate exposing (interpolate)
 import Task
 import Time
 import Window
+import Pivot
 
 
 {- Main -}
@@ -56,6 +57,9 @@ port vibrateDevice : Int -> Cmd msg
 
 
 port beep : ( Float, Float ) -> Cmd msg
+
+
+port helpTourHighlightElement : String -> Cmd msg
 
 
 
@@ -148,6 +152,7 @@ init flags =
                 -- each passage testing session.
           , testOrReadPreference = PreferReading
           , windowSize = windowSize
+          , helpTour = Nothing
           }
         , loadVerses True
         )
@@ -207,6 +212,7 @@ type alias Model =
         { height : Int
         , width : Int
         }
+    , helpTour : Maybe HelpTour
     }
 
 
@@ -556,6 +562,12 @@ view model =
 
             Session sessionData ->
                 viewCurrentVerse sessionData model
+        , case model.helpTour of
+            Nothing ->
+                emptyNode
+
+            Just helpTour ->
+                viewHelpTour helpTour
         ]
 
 
@@ -2163,8 +2175,35 @@ getTestingMethod model =
         model.preferences.desktopTestingMethod
 
 
+{-| renders button, complete with attributes for refocusing text box if necessary
+-}
 viewButton : Model -> ButtonBase a -> H.Html Msg
 viewButton model button =
+    let
+        -- see learn_setup.js
+        focusAttributes =
+            case button.enabled of
+                Enabled ->
+                    if button.refocusTypingBox then
+                        getTypingBoxFocusDataForMsg model button.msg True |> getFocusAttributes
+                    else
+                        []
+
+                Disabled ->
+                    []
+    in
+        viewButton_ button focusAttributes
+
+
+{-| renders button, for case when we don't need to do any refocussing stuff
+-}
+viewButtonSimple : ButtonBase a -> H.Html Msg
+viewButtonSimple button =
+    viewButton_ button []
+
+
+viewButton_ : ButtonBase a -> List (H.Attribute Msg) -> H.Html Msg
+viewButton_ button extraAttributes =
     let
         class =
             case button.enabled of
@@ -2191,20 +2230,8 @@ viewButton model button =
 
                 Disabled ->
                     []
-
-        -- see learn_setup.js
-        focusAttributes =
-            case button.enabled of
-                Enabled ->
-                    if button.refocusTypingBox then
-                        getTypingBoxFocusDataForMsg model button.msg True |> getFocusAttributes
-                    else
-                        []
-
-                Disabled ->
-                    []
     in
-        H.button (attributes ++ eventAttributes ++ focusAttributes)
+        H.button (attributes ++ eventAttributes ++ extraAttributes)
             [ H.text button.caption ]
 
 
@@ -2352,7 +2379,13 @@ instructions : CurrentVerse -> TestingMethod -> Bool -> List (H.Html Msg)
 instructions verse testingMethod helpVisible =
     let
         commonHelp =
-            [ [ H.text "You can finish your review or learning session at any time using the return button in the top left corner."
+            [ [ H.a
+                    [ A.href "#"
+                    , onClickSimply StartHelpTour
+                    ]
+                    [ H.text "Take the help tour." ]
+              ]
+            , [ H.text "You can finish your review or learning session at any time using the return button in the top left corner."
               ]
             , [ H.text "Keyboard navigation (for physical keyboards, not touchscreens): use Tab and Shift-Tab to move focus between controls, and Enter to 'press' one. Focus is shown with a blue border."
               ]
@@ -2443,7 +2476,7 @@ instructions verse testingMethod helpVisible =
                                   , bold (toString (floor (accuracy * 100)) ++ "%")
                                   , H.text (" - " ++ resultComment accuracy)
                                   ]
-                                , []
+                                , commonHelp
                                 )
     in
         [ H.div [ A.id "id-instructions" ]
@@ -2528,6 +2561,69 @@ shouldShowReference verse =
 
         Catechism ->
             False
+
+
+
+{- View - help tour -}
+
+
+viewHelpTour : HelpTour -> H.Html Msg
+viewHelpTour (HelpTour helpTour) =
+    let
+        buttons =
+            helpTourButtons helpTour
+    in
+        H.div
+            [ A.id "id-help-tour-wrapper"
+            , A.class (Pivot.getC helpTour.steps).class
+            ]
+            [ H.div [ A.id "id-help-tour-content" ]
+                [ H.div [ A.id "id-help-tour-message" ]
+                    (Pivot.getC helpTour.steps).html
+                , H.div [ A.id "id-help-tour-controls" ]
+                    (buttons
+                        |> List.map
+                            (\b ->
+                                H.span []
+                                    [ viewButtonSimple b ]
+                            )
+                    )
+                ]
+            ]
+
+
+helpTourButtons : HelpTourData -> List Button
+helpTourButtons helpTour =
+    [ { caption = "Exit tour"
+      , msg = FinishHelpTour
+      , id = "id-help-tour-finish-btn"
+      , enabled = Enabled
+      , default = NonDefault
+      , refocusTypingBox = False
+      }
+    , { caption = "Previous"
+      , msg = PreviousHelpTourStep
+      , id = "id-help-tour-previous-step-btn"
+      , enabled =
+            if Pivot.hasL helpTour.steps then
+                Enabled
+            else
+                Disabled
+      , default = NonDefault
+      , refocusTypingBox = False
+      }
+    , { caption =
+            if Pivot.hasR helpTour.steps then
+                "Next"
+            else
+                "Finish"
+      , msg = NextHelpTourStep
+      , id = "id-help-tour-next-step-btn"
+      , enabled = Enabled
+      , default = Default
+      , refocusTypingBox = False
+      }
+    ]
 
 
 
@@ -2621,6 +2717,10 @@ type Msg
     | ReceivePreferences JD.Value
     | ReattemptFocus String Int
     | GetTime Time.Time
+    | StartHelpTour
+    | FinishHelpTour
+    | NextHelpTourStep
+    | PreviousHelpTourStep
     | Noop
 
 
@@ -2630,6 +2730,16 @@ type ActionCompleteType
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
+    case model.helpTour of
+        Nothing ->
+            updateMain msg model
+
+        Just (HelpTour helpTour) ->
+            updateHelpTour msg model helpTour
+
+
+updateMain : Msg -> Model -> ( Model, Cmd Msg )
+updateMain msg model =
     case msg of
         VersesToLearn callId result ->
             handleRetries handleVersesToLearn model callId result
@@ -2761,6 +2871,18 @@ update msg model =
               }
             , Cmd.none
             )
+
+        StartHelpTour ->
+            startHelpTour model
+
+        FinishHelpTour ->
+            finishHelpTour model
+
+        NextHelpTourStep ->
+            nextHelpTourStep model
+
+        PreviousHelpTourStep ->
+            previousHelpTourStep model
 
         Noop ->
             ( model, Cmd.none )
@@ -4893,19 +5015,32 @@ focusDefaultButton model =
         Cmd.none
         (\sessionData ->
             let
+                downcastButton b =
+                    { default = b.default
+                    , id = b.id
+                    }
+
                 buttons =
-                    buttonsForStage model sessionData.currentVerse sessionData.verses model.preferences
+                    case model.helpTour of
+                        Nothing ->
+                            buttonsForStage model sessionData.currentVerse sessionData.verses model.preferences |> List.map downcastButton
+
+                        Just (HelpTour helpTour) ->
+                            helpTourButtons helpTour |> List.map downcastButton
 
                 defaultButtons =
                     List.filter (\b -> b.default == Default) buttons
 
                 shouldFocusTypingBox =
-                    case getCurrentTestProgress model of
-                        Just tp ->
-                            typingBoxInUse tp (getTestingMethod model)
+                    if model.helpTour == Nothing then
+                        case getCurrentTestProgress model of
+                            Just tp ->
+                                typingBoxInUse tp (getTestingMethod model)
 
-                        Nothing ->
-                            False
+                            Nothing ->
+                                False
+                    else
+                        False
 
                 idToFocus =
                     if shouldFocusTypingBox then
@@ -5176,7 +5311,7 @@ type TrackedHttpCall
 
 type alias QueuedCall =
     { call : TrackedHttpCall
-    , attempts : CallId
+    , attempts : Int
     }
 
 
@@ -6079,6 +6214,679 @@ stageTypeTest =
 stageTypeRead : String
 stageTypeRead =
     "READ"
+
+
+
+{- Help tour -}
+-- When displaying the help tour, we save a copy of the old model, so that we
+-- can adjust the model used for displaying in order to make certain UI elements
+-- visible that would not otherwise be visible.
+-- We also need to adjust the update function, so that:
+--
+-- 1) certain messages (e.g. normal button clicks) are ignored
+--
+-- 2) other messages (responses to AJAX requests) get forwarded
+--    to the saved model, otherwise those messages would be lost.
+
+
+type HelpTour
+    = HelpTour HelpTourData
+
+
+type alias HelpTourData =
+    { savedModel : Model
+    , savedModelInitialSnapshot : Model
+    , steps : Pivot.Pivot HelpTourStep
+    }
+
+
+type alias HelpTourStep =
+    { html : List (H.Html Msg)
+    , class : String
+    , selector : Maybe String
+    , adapter : Model -> Model
+    }
+
+
+initialTourSteps : Pivot.Pivot HelpTourStep
+initialTourSteps =
+    let
+        fakeHttpCalls =
+            (\model ->
+                withCurrentVerse model
+                    model
+                    (\currentVerse ->
+                        { model
+                            | currentHttpCalls =
+                                Dict.fromList
+                                    [ ( 0
+                                      , { call = RecordTestComplete currentVerse 0.9 FirstTest
+                                        , attempts = 2
+                                        }
+                                      )
+                                    ]
+                        }
+                    )
+            )
+
+        fakeFailedHttpCalls =
+            (\model ->
+                withCurrentVerse model
+                    model
+                    (\currentVerse ->
+                        { model
+                            | permanentFailHttpCalls =
+                                [ ( 0, RecordTestComplete currentVerse 0.9 FirstTest ) ]
+                        }
+                    )
+            )
+
+        fakeFinishedTest =
+            (\model ->
+                withSessionData model
+                    model
+                    (\sessionData ->
+                        let
+                            currentVerse =
+                                sessionData.currentVerse
+
+                            currentTestWordList =
+                                getCurrentTestWordList currentVerse FullWords
+
+                            testProgress =
+                                { attemptRecords =
+                                    Dict.fromList
+                                        (List.map
+                                            (\w ->
+                                                ( getWordId w
+                                                , { finished = True
+                                                  , checkResults = [ Success ]
+                                                  , allowedMistakes = 2
+                                                  }
+                                                )
+                                            )
+                                            currentTestWordList
+                                        )
+                                , currentTypedText = ""
+                                , currentWord = TestFinished { accuracy = 1.0 }
+                                }
+
+                            newCurrentVerse =
+                                { currentVerse
+                                    | currentStage =
+                                        Test FirstTest testProgress
+                                    , recordedTestScore =
+                                        Just
+                                            { accuracy = 1
+                                            , timestamp = model.currentTime
+                                            }
+                                }
+
+                            newSessionData =
+                                { sessionData
+                                    | currentVerse = newCurrentVerse
+                                }
+                        in
+                            { model
+                                | learningSession = Session newSessionData
+                            }
+                    )
+            )
+
+        show x =
+            [ H.p []
+                [ H.text x
+                ]
+            ]
+
+        first =
+            { html = show "Hello! This guided tour will take you around the learning page interface."
+            , class = "help-tour-welcome"
+            , selector = Nothing
+            , adapter = identity
+            }
+
+        rest =
+            [ { html = show "Use the link in the top left corner to go back to the dashboard at any time."
+              , class = "help-tour-dashboard"
+              , selector = Just ".nav-item.return-link"
+              , adapter = identity
+              }
+            , { html = show "This bar shows your progress in learning a verse for the first time, or your total progress in a review session."
+              , class = "help-tour-session-progress"
+              , selector = Just ".nav-item.session-progress"
+              , adapter = identity
+              }
+            , { html = show "The total points you've earned in the current batch of verses are displayed here."
+              , class = "help-tour-total-points"
+              , selector = Just "nav .action-logs .nav-item"
+              , adapter = identity
+              }
+            , { html = show "You can tap/click this menu header to show more detail."
+              , class = "help-tour-action-logs"
+              , selector = Just "nav .action-logs .nav-dropdown-menu.menu-open"
+              , adapter = setDropdownOpen ActionLogsInfo
+              }
+            , { html = show "You can also pin this menu to the side (large screens) or the top (small screens) to have it permanently visible."
+              , class = "help-tour-pin-action-logs"
+              , selector = Just "nav .action-logs .menu-pin"
+              , adapter = setDropdownOpen ActionLogsInfo
+              }
+            , { html = show "Tap the menu header again to close it."
+              , class = "help-tour-action-logs-closed"
+              , selector = Just "nav .action-logs .nav-item"
+              , adapter = identity
+              }
+            , { html = show "If there is a problem saving your data, it will be displayed here. Tap the menu header for more info."
+              , class = "help-tour-ajax-info"
+              , selector = Just "nav .ajax-info"
+              , adapter = fakeHttpCalls >> (setDropdownOpen AjaxInfo)
+              }
+            , { html = show "If your internet connection cuts out completely, don't worry - you can carry on working and then try to save data again when your internet connection comes back."
+              , class = "help-tour-ajax-info-failures"
+              , selector = Just "nav .ajax-info .menu-open .button-item"
+              , adapter = fakeFailedHttpCalls >> (setDropdownOpen AjaxInfo)
+              }
+            , { html = show "This shows the number of new verses you have started today. If you are new to LearnScripture, it can be important to pace yourself. Why not try to learn one new verse each day?"
+              , class = "help-tour-new-verses-started"
+              , selector = Just "#id-new-verses-started-count"
+              , adapter = identity
+              }
+            , { html = show "Here is the number of verses you've been tested on today."
+              , class = "help-tour-new-verses-started"
+              , selector = Just "#id-total-verses-tested-count"
+              , adapter = identity
+              }
+            , { html = show "You can change your preferences at any point from here."
+              , class = "help-tour-preferences"
+              , selector = Just "nav .preferences-link"
+              , adapter = identity
+              }
+            , { html = show "The approximate memory strength of each verse you are learning is displayed here."
+              , class = "help-tour-verse-strength"
+              , selector = Just "#id-verse-strength-value"
+              , adapter = identity
+              }
+            , { html = show "This menu shows additional options for the current verse."
+              , class = "help-tour-verse-options-menu"
+              , selector = Just "#id-verse-options-menu-btn"
+              , adapter = setDropdownOpen VerseOptionsMenu
+              }
+            , { html = show "When you have finished a test, your test score is used to estimate your memory strength for a verse and schedule the next review. Underneath each button is a caption indicating approximately when you will next see the verse again if you choose that option."
+              , class = "help-tour-test-finished-buttons"
+              , selector = Just "#id-action-btns"
+              , adapter = fakeFinishedTest
+              }
+            , { html = show "That's all for now - thanks for taking the tour! You can take it again at any point (see the 'Help' section)."
+              , class = "help-tour-finish"
+              , selector = Nothing
+              , adapter = identity
+              }
+            ]
+    in
+        Pivot.fromCons first rest
+
+
+startHelpTour : Model -> ( Model, Cmd Msg )
+startHelpTour model =
+    case model.helpTour of
+        Nothing ->
+            let
+                initialHelpTourState =
+                    { savedModel = model
+                    , savedModelInitialSnapshot = model
+                    , steps = initialTourSteps
+                    }
+            in
+                doHelpTourStep initialHelpTourState True
+                    |> addCommands [ updateTypingBox hideTypingBoxData ]
+
+        Just helpTour ->
+            -- Do not start the help tour twice
+            ( model
+            , Cmd.none
+            )
+
+
+doHelpTourStep : HelpTourData -> Bool -> ( Model, Cmd Msg )
+doHelpTourStep helpTour focusDefault =
+    let
+        currentStep =
+            Pivot.getC helpTour.steps
+
+        adapter =
+            adjustModelForHelpTour >> currentStep.adapter
+
+        -- .savedModel can change underneath us, e.g. score logs received, so we
+        -- use a snapshot that doesn't change.
+        adaptedModel =
+            adapter helpTour.savedModelInitialSnapshot
+
+        finalModel =
+            { adaptedModel
+                | helpTour =
+                    Just (HelpTour helpTour)
+            }
+    in
+        ( finalModel
+        , Cmd.batch
+            [ if focusDefault then
+                focusDefaultButton finalModel
+              else
+                Cmd.none
+            , helpTourCommandForStep currentStep
+            ]
+        )
+
+
+helpTourCommandForStep : HelpTourStep -> Cmd Msg
+helpTourCommandForStep step =
+    case step.selector of
+        Nothing ->
+            helpTourHighlightElement ""
+
+        Just s ->
+            helpTourHighlightElement s
+
+
+finishHelpTour : Model -> ( Model, Cmd Msg )
+finishHelpTour model =
+    case model.helpTour of
+        Nothing ->
+            -- tour can't have been started
+            ( model
+            , Cmd.none
+            )
+
+        Just (HelpTour helpTour) ->
+            let
+                newModel =
+                    helpTour.savedModel
+            in
+                ( newModel
+                , Cmd.batch
+                    [ stageOrVerseChangeCommands newModel True
+                    , helpTourHighlightElement ""
+                    ]
+                )
+
+
+nextHelpTourStep : Model -> ( Model, Cmd Msg )
+nextHelpTourStep model =
+    case model.helpTour of
+        Nothing ->
+            ( model
+            , Cmd.none
+            )
+
+        Just (HelpTour helpTour) ->
+            case Pivot.goR helpTour.steps of
+                Nothing ->
+                    finishHelpTour model
+
+                Just newSteps ->
+                    let
+                        newHelpTour =
+                            { helpTour
+                                | steps = newSteps
+                            }
+                    in
+                        doHelpTourStep newHelpTour True
+
+
+previousHelpTourStep : Model -> ( Model, Cmd Msg )
+previousHelpTourStep model =
+    case model.helpTour of
+        Nothing ->
+            ( model
+            , Cmd.none
+            )
+
+        Just (HelpTour helpTour) ->
+            case Pivot.goL helpTour.steps of
+                Nothing ->
+                    ( model
+                    , Cmd.none
+                    )
+
+                Just newSteps ->
+                    let
+                        newHelpTour =
+                            { helpTour
+                                | steps = newSteps
+                            }
+                    in
+                        -- don't change focus in this case, keep it on 'Previous' button
+                        doHelpTourStep newHelpTour False
+
+
+{-| Adjust the existing model to make it better suited
+for the purposes of a help tour.
+
+As much as possible we use the user's actually data, rather than displaying data
+that relates to a made up user. However, we also make adjustments to ensure we
+don't have unnecessary distractions, and have a sensible base starting point for
+the UI features we want to show.
+
+The help tour is normally shown for new users on their first verse,
+so in most cases the things we change simply put things to how they would be
+anyway for such a user.
+
+-}
+adjustModelForHelpTour : Model -> Model
+adjustModelForHelpTour model =
+    let
+        newAutoSavedPreferences =
+            -- we hide all the pinned menus, which is the default
+            -- anyway, so we can open the drop down menus and indicate
+            -- the pinning icons.
+            { pinActionLogMenuSmallScreen = False
+            , pinActionLogMenuLargeScreen = False
+            , pinVerseOptionsMenuLargeScreen = False
+            }
+    in
+        { model
+            | openDropdown = Nothing
+            , attemptingReturn = False
+            , autoSavedPreferences = newAutoSavedPreferences
+            , pinnedMenus = setPinnedMenus newAutoSavedPreferences model.windowSize
+            , learningSession =
+                let
+                    -- this example status is not fully used in most cases, because
+                    -- usually (always?) there is a current session with its own
+                    -- current verse, and the text/reference from that is used
+                    -- instead.
+                    exampleVerseStatus =
+                        { id = 0
+                        , strength = 0
+                        , lastTested = Nothing
+                        , localizedReference = "John 3:16"
+                        , needsTesting = True
+                        , textOrder = 1
+                        , suggestions = []
+                        , titleText = "John 3:16"
+                        , scoringTextWords = [ "For", "this", "is", "the", "way", "God", "loved", "the", "world:", "He", "gave", "his", "one", "and", "only", "Son,", "so", "that", "everyone", "who", "believes", "in", "him", "will", "not", "perish", "but", "have", "eternal", "life." ]
+                        , learnOrder = 0
+                        , verseSet = Nothing
+                        , version =
+                            { fullName = "New English Translation"
+                            , shortName = "NET"
+                            , url = "http://bible.org/"
+                            , slug = "NET"
+                            , textType = Bible
+                            }
+                        }
+
+                    exampleActionLog =
+                        { id = 0
+                        , points = 200
+                        , reason = VerseTested
+                        , created = "2018-02-26T06:34:12.923Z"
+                        }
+
+                    exampleActionLogStore =
+                        { processed = Dict.fromList [ ( 0, exampleActionLog ) ]
+                        , beingProcessed = Nothing
+                        , toProcess = Dict.empty
+                        }
+
+                    origLearningSession =
+                        model.learningSession
+
+                    ( verseStatus, actionLogStore ) =
+                        case origLearningSession of
+                            Loading ->
+                                ( exampleVerseStatus, exampleActionLogStore )
+
+                            VersesError _ ->
+                                ( exampleVerseStatus, exampleActionLogStore )
+
+                            Session sessionData ->
+                                let
+                                    userVerseStatus =
+                                        sessionData.currentVerse.verseStatus
+
+                                    userActionLogStore =
+                                        sessionData.actionLogStore
+
+                                    combinedVerseStatus =
+                                        { exampleVerseStatus
+                                            | localizedReference = userVerseStatus.localizedReference
+                                            , titleText = userVerseStatus.titleText
+                                            , scoringTextWords = userVerseStatus.scoringTextWords
+                                            , strength = userVerseStatus.strength
+                                        }
+                                in
+                                    ( combinedVerseStatus
+                                    , if Dict.size userActionLogStore.processed == 0 then
+                                        exampleActionLogStore
+                                      else
+                                        { exampleActionLogStore
+                                            | processed = userActionLogStore.processed
+                                        }
+                                    )
+
+                    -- To display testing stage right at beginning, we pass this
+                    -- verseStatus to setupCurrentVerse. But then we change back
+                    -- to the one that shows the users actual strength for that
+                    -- verse, to avoid confusion.
+                    zeroStrengthVerseStatus =
+                        { verseStatus
+                            | strength = 0
+                        }
+
+                    ( currentVerse1, _ ) =
+                        setupCurrentVerse zeroStrengthVerseStatus Learning PreferReading
+
+                    currentVerse2 =
+                        { currentVerse1
+                            | verseStatus = verseStatus
+                        }
+
+                    sessionData =
+                        { verses =
+                            { verseStatuses = [ verseStatus ]
+                            , learningType = Learning
+                            , returnTo = ""
+                            , maxOrderVal = 0
+                            , untestedOrderVals = [ 0 ]
+                            }
+                        , currentVerse = currentVerse2
+                        , actionLogStore = actionLogStore
+                        }
+                in
+                    Session sessionData
+            , currentHttpCalls = Dict.empty
+            , permanentFailHttpCalls = []
+        }
+
+
+{-| When help tour is active, we have a fake model in place, and the
+user's real data helpTour.savedModel. To handle any confusion
+between these, we have a separate update function for this case.
+
+In some cases (e.g. data received back from AJAX calls), we need
+to ensure the message gets propagated to the real model.
+In some cases (e.g. buttons pressed), we want to drop the message
+entirely, blocking the user from interacting with the fake model
+and doing AJAX calls from it etc.
+In some cases (e.g. window resize), both the fake and the real
+model should be updated.
+
+-}
+updateHelpTour : Msg -> Model -> HelpTourData -> ( Model, Cmd Msg )
+updateHelpTour msg model helpTour =
+    let
+        ignoreIt =
+            ( model, Cmd.none )
+
+        forwardToMain msg =
+            updateMain msg model
+
+        forwardToSavedModel msg =
+            let
+                savedModel =
+                    helpTour.savedModel
+
+                ( newSavedModel, cmd ) =
+                    updateMain msg savedModel
+
+                newHelpTour =
+                    { helpTour
+                        | savedModel = newSavedModel
+                    }
+
+                newFullModel =
+                    { model
+                        | helpTour = Just (HelpTour newHelpTour)
+                    }
+            in
+                ( newFullModel, cmd )
+
+        forwardToBoth msg =
+            let
+                ( fullModel1, cmd1 ) =
+                    forwardToSavedModel msg
+
+                ( fullModel2, cmd2 ) =
+                    updateMain msg fullModel1
+            in
+                ( fullModel2
+                , Cmd.batch
+                    [ cmd1
+                    , cmd2
+                    ]
+                )
+
+        ignoreSideEffects ( newModel, cmd ) =
+            ( newModel, Cmd.none )
+    in
+        case msg of
+            VersesToLearn _ _ ->
+                forwardToSavedModel msg
+
+            AttemptReturn _ ->
+                ignoreIt
+
+            NextStageOrSubStage ->
+                ignoreIt
+
+            PreviousStage ->
+                ignoreIt
+
+            NextVerse ->
+                ignoreIt
+
+            SkipVerse _ ->
+                ignoreIt
+
+            CancelLearning _ ->
+                ignoreIt
+
+            ResetProgress _ _ ->
+                ignoreIt
+
+            ReviewSooner _ _ ->
+                ignoreIt
+
+            SetHiddenWords _ ->
+                ignoreIt
+
+            WordButtonClicked _ ->
+                ignoreIt
+
+            TypingBoxInput _ ->
+                ignoreIt
+
+            TypingBoxEnter ->
+                ignoreIt
+
+            OnScreenButtonClick _ ->
+                ignoreIt
+
+            UseHint ->
+                ignoreIt
+
+            -- We allow calls to continue retrying - the user may have
+            -- started AJAX and then started the help tour.
+            TrackHttpCall _ ->
+                forwardToSavedModel msg
+
+            MakeHttpCall _ ->
+                forwardToSavedModel msg
+
+            RetryFailedCalls ->
+                forwardToSavedModel msg
+
+            EmptyResponseTrackedHttpCallReturned _ _ ->
+                forwardToSavedModel msg
+
+            EmptyResponseReturned _ ->
+                forwardToSavedModel msg
+
+            RecordActionCompleteReturned _ _ ->
+                forwardToSavedModel msg
+
+            ActionLogsLoaded _ ->
+                forwardToSavedModel msg
+
+            ProcessNewActionLogs ->
+                forwardToSavedModel msg
+
+            SessionStatsLoaded _ ->
+                forwardToSavedModel msg
+
+            MorePractice _ ->
+                ignoreIt
+
+            ToggleHelp ->
+                ignoreIt
+
+            TogglePreviousVerseVisible ->
+                ignoreIt
+
+            ToggleDropdown _ ->
+                ignoreIt
+
+            TogglePinnableMenu _ ->
+                ignoreIt
+
+            TogglePreferTestsToReading ->
+                ignoreIt
+
+            NavigateTo _ ->
+                ignoreIt
+
+            WindowResize _ ->
+                -- Need both models to be updated, but ignore side effects and
+                -- then add our own back.
+                forwardToBoth msg
+                    |> ignoreSideEffects
+                    |> addCommands [ helpTourCommandForStep (Pivot.getC helpTour.steps) ]
+
+            ReceivePreferences _ ->
+                forwardToSavedModel msg
+
+            ReattemptFocus id remainingAttempts ->
+                forwardToMain msg
+
+            GetTime time ->
+                forwardToBoth msg
+
+            StartHelpTour ->
+                ignoreIt
+
+            FinishHelpTour ->
+                forwardToMain msg
+
+            NextHelpTourStep ->
+                forwardToMain msg
+
+            PreviousHelpTourStep ->
+                forwardToMain msg
+
+            Noop ->
+                ignoreIt
 
 
 
