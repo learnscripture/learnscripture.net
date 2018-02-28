@@ -14,7 +14,7 @@ installed.
 2. Checkout the sources from bitbucket into a folder called 'src'.
 
    First, it is probably best to fork the project on bitbucket - https://bitbucket.org/learnscripture/learnscripture.net/fork
-   
+
    Then clone your fork locally::
 
      hg clone ssh://hg@bitbucket.org/yourusename/learnscripture.net src
@@ -34,16 +34,36 @@ installed.
    * postgresql 9.3 or later
    * memcached
    * rabbitmq-server
+   * nodejs
 
    Python/virtualenv dependencies. From inside the learnscripture.net/src/
    folder, do::
 
      pip install -r requirements.txt
 
-   npm/javascript dependencies::
+   npm/javascript dependencies.
+
+   Ensure ``./node_modules/.bin`` and ``./node_modules/n/bin`` are on your PATH.
+   This can be done by adding something like the following to the end of
+   ~/.virtualenvs/learnscripture/bin/activate (with LS_PROJECT_BASE modified as
+   per your directory)::
+
+     export LS_PROJECT_BASE=$HOME/devel/learnscripture.net/src
+     export N_PREFIX=$LS_PROJECT_BASE/node_modules/n
+     export PATH=$N_PREFIX/bin:$LS_PROJECT_BASE/node_modules/.bin:$PATH
+
+   Deactivate and re-activate the virtualenv for changes to take effect.
+
+   Then, we first need a recent version of node and npm, first using a utility
+   ``n`` to set this up::
+
+     npm install n
+     n stable
+     hash -r
+
+   Now we can actually install our deps::
 
      npm install
-
 
 5. Create postgres databases matching the development ones in
    ``learnscripture/settings.py``, both for ``learnscripture`` and
