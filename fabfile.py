@@ -475,11 +475,12 @@ def deploy():
     Deploy project.
     """
     check_branch()
+    build_static()
     code_quality_checks()
     push_to_central_vcs()
     target = create_target()
     push_sources(target)
-    build_and_push_static(target)
+    push_static(target)
     create_venv(target)
     install_requirements(target)
     collect_static(target)
@@ -618,16 +619,23 @@ def install_requirements(target):
         run("pip install -r requirements.txt --exists-action w")
 
 
-def build_and_push_static(target):
-    deploy_files_pattern = "./learnscripture/static/webpack_bundles/*.deploy.*"
-    for f in glob.glob(deploy_files_pattern):
+webpack_deploy_files_pattern = "./learnscripture/static/webpack_bundles/*.deploy.*"
+webpack_stats_file = "./webpack-stats.deploy.json"
+
+
+def build_static():
+    for f in glob.glob(webpack_deploy_files_pattern):
         os.unlink(f)
-    stats_file = "./webpack-stats.deploy.json"
-    local("rm " + stats_file)
+    local("rm " + webpack_stats_file)
     local("./node_modules/.bin/webpack --config webpack.config.deploy.js")
-    webpack_data = json.load(open(stats_file))
+    webpack_data = json.load(open(webpack_stats_file))
     assert webpack_data['status'] == 'done'
-    deploy_files = [os.path.abspath(f) for f in glob.glob(deploy_files_pattern)]
+
+
+def push_static(target):
+    webpack_data = json.load(open(webpack_stats_file))
+    assert webpack_data['status'] == 'done'
+    deploy_files = [os.path.abspath(f) for f in glob.glob(webpack_deploy_files_pattern)]
     deploy_files_2 = [part['path']
                       for chunk in webpack_data['chunks'].values()
                       for part in chunk]
@@ -641,10 +649,10 @@ def build_and_push_static(target):
             part['path'] = os.path.join(target.SRC_ROOT,
                                         "learnscripture/static/webpack_bundles",
                                         part['name'])
-    with open(stats_file, "w") as f:
+    with open(webpack_stats_file, "w") as f:
         json.dump(webpack_data, f)
 
-    for f in list(s1) + [stats_file]:
+    for f in list(s1) + [webpack_stats_file]:
         rel_f = os.path.relpath(f)
         remote_f = os.path.join(target.SRC_ROOT, rel_f)
         d = os.path.dirname(remote_f)
