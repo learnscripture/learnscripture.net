@@ -2087,7 +2087,7 @@ buttonsForStage model verse verseStore preferences =
                                     Default
                                 else
                                     NonDefault
-                            , id = "id-more-practice"
+                            , id = "id-more-practice-btn"
                             , refocusTypingBox = True
                             }
                         , reviewSoonerButton
@@ -2226,6 +2226,7 @@ viewButton_ button extraAttributes =
         attributes =
             [ A.class class
             , A.id button.id
+            , A.disabled (button.enabled == Disabled)
             ]
 
         eventAttributes =
