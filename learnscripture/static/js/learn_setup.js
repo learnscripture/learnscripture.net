@@ -232,6 +232,9 @@ app.ports.helpTourHighlightElement.subscribe(function (selector) {
     if (selector.indexOf(".menu-open") != -1) {
         delay = 700; // allow time for opening animation
     }
+    if (selector === "#id-action-btns") {
+        delay = 100; // Don't know why this is needed
+    }
     whenVisible(selector, 100, delay, function($item) {
         var itemRect = $item.get(0).getBoundingClientRect();
         var itemCenter = {
