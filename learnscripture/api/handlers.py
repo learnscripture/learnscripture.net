@@ -685,5 +685,7 @@ class SaveMiscPreferences(ApiView):
             identity.pin_action_log_menu_small_screen = request.POST['pin_action_log_menu_small_screen'] == 'true'
         if 'pin_verse_options_menu_large_screen' in request.POST:
             identity.pin_verse_options_menu_large_screen = request.POST['pin_verse_options_menu_large_screen'] == 'true'
+        if 'seen_help_tour' in request.POST:
+            identity.seen_help_tour = request.POST['seen_help_tour'] == 'true'
         identity.save()
         return {}
