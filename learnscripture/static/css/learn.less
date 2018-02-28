@@ -459,6 +459,7 @@ body.learn-page {
         float: right;
     }
 
+    @readingLineHeight: 1.5;
     #id-verse-set-link,
     #id-copyright-notice {
         font-size: 13px;
@@ -478,7 +479,6 @@ body.learn-page {
                              // .icon-show-previous-verse
     }
 
-    @readingLineHeight: 1.5;
     .read-for-context {
         line-height: @readingLineHeight;
     }
@@ -848,7 +848,9 @@ body.learn-page {
             font-size: @currentVerseSmallerFontSize;
         }
         .previous-verse-wrapper {
-            height: @currentVerseSmallerFontSize * @readingLineHeight;
+            &.previous-verse-partial {
+                height: @currentVerseSmallerFontSize * @readingLineHeight;
+            }
         }
 
         #id-verse-set-link,
