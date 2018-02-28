@@ -6411,7 +6411,7 @@ initialTourSteps =
             , { html = show "If there is a problem saving your data, it will be displayed here. Tap the menu header for more info."
               , class = "help-tour-below"
               , highlightSelector = Just "nav .ajax-info"
-              , positionSelector = Nothing
+              , positionSelector = Just "nav .ajax-info ul.menu-open"
               , adapter = fakeHttpCalls >> (setDropdownOpen AjaxInfo)
               }
             , { html = show "If your internet connection cuts out completely, don't worry - you can carry on working and then try to save data again when your internet connection comes back."
@@ -6449,12 +6449,6 @@ initialTourSteps =
               , highlightSelector = Just "#id-verse-options-menu-btn"
               , positionSelector = Just "#id-verse-options-menu ul"
               , adapter = setDropdownOpen VerseOptionsMenu
-              }
-            , { html = show "At each stage, you are prompted with instructions to guide you through the learning and review process."
-              , class = "help-tour-below"
-              , highlightSelector = Just "#id-instructions"
-              , positionSelector = Nothing
-              , adapter = identity
               }
             , { html = show "When you have finished a test, your test score is used to estimate your memory strength for a verse and schedule the next review. Underneath each button is a caption indicating approximately when you will next see the verse again if you choose that option."
               , class = "help-tour-above"
