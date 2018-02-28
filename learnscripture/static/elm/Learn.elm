@@ -6297,8 +6297,17 @@ initialTourSteps =
                     model
                     (\currentVerse ->
                         { model
+                          -- one failed, one queued
                             | permanentFailHttpCalls =
                                 [ ( 0, RecordTestComplete currentVerse 0.9 FirstTest ) ]
+                            , currentHttpCalls =
+                                Dict.fromList
+                                    [ ( 1
+                                      , { call = RecordTestComplete currentVerse 0.9 FirstTest
+                                        , attempts = 0
+                                        }
+                                      )
+                                    ]
                         }
                     )
             )
