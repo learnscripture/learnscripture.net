@@ -59,11 +59,23 @@ class VerseSetTests(AccountTestMixin, TestBase):
         self.assertEqual(vs2.smart_name('en'), 'Hebrews 1:1-10')
         self.assertEqual(vs2.smart_name('tr'), 'İbraniler 1:1-10')
 
-        vs2 = VerseSet(name="Romans 8 - wonderful promises!",
+        vs3 = VerseSet(name="Romans 8 - wonderful promises!",
                        language_code='en',
                        set_type=VerseSetType.PASSAGE)
-        self.assertEqual(vs2.smart_name('en'), 'Romans 8 - wonderful promises!')
-        self.assertEqual(vs2.smart_name('tr'), 'Romans 8 - wonderful promises! (Romalılar 8)')
+        self.assertEqual(vs3.smart_name('en'), 'Romans 8 - wonderful promises!')
+        self.assertEqual(vs3.smart_name('tr'), 'Romans 8 - wonderful promises! (Romalılar 8)')
+
+        vs4 = VerseSet(name="Mark 01:01-09",
+                       language_code='en',
+                       set_type=VerseSetType.PASSAGE)
+        self.assertEqual(vs4.smart_name('en'), 'Mark 01:01-09')
+        self.assertEqual(vs4.smart_name('tr'), 'Markos 1:1-9')
+
+        vs5 = VerseSet(name="Psalm 37: 1 - 40",
+                       language_code='en',
+                       set_type=VerseSetType.PASSAGE)
+        self.assertEqual(vs5.smart_name('en'), 'Psalm 37: 1 - 40')
+        self.assertEqual(vs5.smart_name('tr'), 'Mezmur 37:1-40')
 
     def test_smart_name_no_abbreviations(self):
         # 'Promises' starts with 'pro' == abbreviation for proverbs. We should
