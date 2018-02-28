@@ -1008,28 +1008,30 @@ viewCurrentVerse session model =
             else
                 []
 
-        hideWordBoundariesClass =
-            "hide-word-boundaries"
+        shouldHideWordBoundaries =
+            case currentVerse.currentStage of
+                Test _ _ ->
+                    case testingMethod of
+                        OnScreen ->
+                            True
+
+                        _ ->
+                            shouldUseHardTestingMode currentVerse
+                _ ->
+                    False
 
         verseClasses =
             "current-verse "
                 ++ case currentVerse.currentStage of
                     ReadForContext ->
-                        "read-for-context"
-
-                    Test _ _ ->
-                        case testingMethod of
-                            OnScreen ->
-                                hideWordBoundariesClass
-
-                            _ ->
-                                if shouldUseHardTestingMode currentVerse then
-                                    hideWordBoundariesClass
-                                else
-                                    ""
+                        "read-for-context "
 
                     _ ->
                         ""
+                ++ if shouldHideWordBoundaries then
+                       "hide-word-boundaries "
+                   else
+                       ""
 
         verseScaledStrength =
             scaledStrength (currentVerseStrength currentVerse)
@@ -1102,7 +1104,7 @@ viewCurrentVerse session model =
                             [ H.div [ A.class "previous-verse" ]
                                 (versePartsToHtml ReadForContext
                                     (partsForVerse verse ReadForContextStage testingMethod)
-                                    verse.id
+                                    verse.id False
                                 )
                             , H.a
                                 [ A.href "#"
@@ -1132,6 +1134,7 @@ viewCurrentVerse session model =
                         (versePartsToHtml currentVerse.currentStage
                             (partsForVerse currentVerse.verseStatus (learningStageTypeForStage currentVerse.currentStage) testingMethod)
                             currentVerse.verseStatus.id
+                            shouldHideWordBoundaries
                         )
                     ]
                 , copyrightNotice currentVerse.verseStatus.version
@@ -1461,8 +1464,8 @@ referenceToParts reference =
             parts
 
 
-versePartsToHtml : LearningStage -> List Part -> UvsId -> List (H.Html Msg)
-versePartsToHtml stage parts uvsId =
+versePartsToHtml : LearningStage -> List Part -> UvsId -> Bool -> List (H.Html Msg)
+versePartsToHtml stage parts uvsId hideWordBoundaries =
     List.map
         (\p ->
             case p of
@@ -1470,7 +1473,10 @@ versePartsToHtml stage parts uvsId =
                     wordButton word stage uvsId
 
                 Space ->
-                    H.text " "
+                    if hideWordBoundaries then
+                        emptyNode
+                    else
+                        H.text " "
 
                 ReferencePunct w ->
                     H.span [ A.class "punct" ]

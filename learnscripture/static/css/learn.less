@@ -581,15 +581,15 @@ body.learn-page {
     // hide the clues that show word size
     .hide-word-boundaries .word-button {
         // Making border transparent is not enough, you can still see the effect
-        // of the border at the corner. So we have to reduce size to 0.
-        // We use negative margins to bring words together, and extra padding
-        // to ensure that the typing box doesn't overlap earlier words.
+        // of the border at the corner. So we have to reduce size to 0. We use
+        // extra padding to ensure that the typing box doesn't overlap earlier
+        // words. The HTML is different two - there are no space nodes rendered.
         border-left: 0px;
         border-right: 0px;
-        padding-left: @word-padding-horizontal + 3px;
-        padding-right: @word-padding-horizontal + 3px;
-        margin-left: -5px;
-        margin-right: -5px;
+        padding-left: @word-padding-horizontal + 1px;
+        padding-right: @word-padding-horizontal + 1px;
+        margin-left: 0px;
+        margin-right: 0px;
         border-radius: 0px;
         cursor: default;
 
@@ -599,12 +599,8 @@ body.learn-page {
 
     }
     .hide-word-boundaries .punct {
-        // Need this otherwise paddings cover up the reference punctuation
-        // completely:
-        margin-left: 5px;
-        margin-right: 5px;
-        padding-left: 2px;
-        padding-right: 2px;
+        margin-left: 1px;
+        margin-right: 1px;
     }
 
     #id-hint-btn, #id-help-btn, #id-more-practice-btn, .word-button.clickable,
