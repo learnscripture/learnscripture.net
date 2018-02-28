@@ -35,6 +35,7 @@ var app =
                 "pinActionLogMenuLargeScreen" : preferencesNode.attributes['data-pin-action-log-menu-large-screen'].value == "true",
                 "pinActionLogMenuSmallScreen" : preferencesNode.attributes['data-pin-action-log-menu-small-screen'].value == "true",
                 "pinVerseOptionsMenuLargeScreen" : preferencesNode.attributes['data-pin-verse-options-menu-large-screen'].value == "true",
+                "seenHelpTour": preferencesNode.attributes['data-seen-help-tour'].value == "true"
             },
             "account": accountNode == null ? null : {
                 "username": accountNode.attributes['data-username'].value,

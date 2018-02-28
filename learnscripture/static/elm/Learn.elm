@@ -230,6 +230,7 @@ type alias AutoSavedPreferences =
     { pinActionLogMenuLargeScreen : Bool
     , pinActionLogMenuSmallScreen : Bool
     , pinVerseOptionsMenuLargeScreen : Bool
+    , seenHelpTour : Bool
     }
 
 
@@ -5765,6 +5766,7 @@ handleVersesToLearn model verseBatchRaw =
                                         loadVerses False
                                     else
                                         Cmd.none
+
                 in
                     newModel2
                         ! [ sessionCmd
@@ -5781,6 +5783,10 @@ handleVersesToLearn model verseBatchRaw =
                             else
                                 Cmd.none
                           , loadMoreCommand
+                          , if previousSessionEmpty && not newModel2.autoSavedPreferences.seenHelpTour then
+                                delay 500 StartHelpTour
+                            else
+                                Cmd.none
                           ]
 
 
@@ -6135,6 +6141,7 @@ saveAutoSavedPreferences preferences httpConfig =
                 [ Http.stringPart "pin_action_log_menu_large_screen" (preferences.pinActionLogMenuLargeScreen |> encodeBool)
                 , Http.stringPart "pin_action_log_menu_small_screen" (preferences.pinActionLogMenuSmallScreen |> encodeBool)
                 , Http.stringPart "pin_verse_options_menu_large_screen" (preferences.pinVerseOptionsMenuLargeScreen |> encodeBool)
+                , Http.stringPart "seen_help_tour" (preferences.seenHelpTour |> encodeBool)
                 ]
     in
         Http.send EmptyResponseReturned
@@ -6500,12 +6507,26 @@ finishHelpTour model =
 
         Just (HelpTour helpTour) ->
             let
-                newModel =
+                newModel1 =
                     helpTour.savedModel
+
+                prefs =
+                    newModel1.autoSavedPreferences
+
+                newPrefs =
+                    { prefs
+                        | seenHelpTour = True
+                    }
+
+                newModel2 =
+                    { newModel1
+                        | autoSavedPreferences = newPrefs
+                    }
             in
-                ( newModel
+                ( newModel2
                 , Cmd.batch
-                    [ stageOrVerseChangeCommands newModel True
+                    [ stageOrVerseChangeCommands newModel2 True
+                    , saveAutoSavedPreferences newPrefs newModel2.httpConfig
                     , helpTourHighlightElement ""
                     ]
                 )
@@ -6583,6 +6604,7 @@ adjustModelForHelpTour model =
             { pinActionLogMenuSmallScreen = False
             , pinActionLogMenuLargeScreen = False
             , pinVerseOptionsMenuLargeScreen = False
+            , seenHelpTour = True
             }
     in
         { model
@@ -6932,6 +6954,7 @@ autoSavedPreferencesDecoder =
         |> JDP.required "pinActionLogMenuLargeScreen" JD.bool
         |> JDP.required "pinActionLogMenuSmallScreen" JD.bool
         |> JDP.required "pinVerseOptionsMenuLargeScreen" JD.bool
+        |> JDP.required "seenHelpTour" JD.bool
 
 
 testingMethodDecoder : JD.Decoder TestingMethod

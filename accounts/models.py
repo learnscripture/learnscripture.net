@@ -448,6 +448,7 @@ class Identity(models.Model):
     pin_action_log_menu_large_screen = models.BooleanField(default=False)
     pin_action_log_menu_small_screen = models.BooleanField(default=False)
     pin_verse_options_menu_large_screen = models.BooleanField(default=False)
+    seen_help_tour = models.BooleanField(default=False)
 
     objects = IdentityManager()
 

@@ -726,12 +726,22 @@ body.learn-page {
         flex-direction: column;
         justify-content: flex-end;
         align-items: stretch;
+        .animation(fadeInHelpTour 0.5s ease-in-out forwards);
 
         &.help-tour-welcome {
             justify-content: space-around;
         }
         &.help-tour-test-finished-buttons {
             justify-content: flex-start;
+        }
+    }
+
+    @keyframes fadeInHelpTour {
+        0% {
+            opacity: 0;
+        }
+        100% {
+            opacity: 1;
         }
     }
 
