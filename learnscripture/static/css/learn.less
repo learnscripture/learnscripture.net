@@ -726,14 +726,34 @@ body.learn-page {
         flex-direction: column;
         justify-content: flex-end;
         align-items: stretch;
-        .animation(fadeInHelpTour 0.5s ease-in-out forwards);
+        transition: background 0.5s ease-in-out;
 
+        #id-help-tour-content {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 1em;
+            text-align: center;
+        }
+
+        #id-help-tour-message {
+            padding: 0.5em 0;
+        }
+
+        // Overrides for specific steps:
+
+        // First step
         &.help-tour-welcome {
             justify-content: space-around;
+            background: rgba(0, 0, 0, 0.8);
+            .animation(fadeInHelpTour 0.5s ease-in-out forwards);
+            #id-help-tour-message {
+                padding: 3em 1em;
+            }
         }
+
         &.help-tour-test-finished-buttons {
             justify-content: flex-start;
         }
+
     }
 
     @keyframes fadeInHelpTour {
@@ -745,11 +765,6 @@ body.learn-page {
         }
     }
 
-    #id-help-tour-content {
-        background: rgba(0, 0, 0, 0.9);
-        padding: 1em;
-        text-align: center;
-    }
 
     #id-help-tour-controls {
         text-align: right;
