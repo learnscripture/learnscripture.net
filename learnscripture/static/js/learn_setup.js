@@ -223,19 +223,16 @@ app.ports.beep.subscribe(function (args) {
 setUpAudio();
 
 
-app.ports.helpTourHighlightElement.subscribe(function (selector) {
+app.ports.helpTourHighlightElement.subscribe(function (args) {
+    var highlightSelector = args[0];
+    var positionSelector = args[1];
+    console.log(highlightSelector, positionSelector);
     $("#id-help-tour-highlight").remove();
-    if (selector === "") {
-        return;
+    var animationDelay = 10;
+    if (highlightSelector.indexOf(".menu-open") != -1) {
+        animationDelay = 700; // allow time for opening animation
     }
-    var delay = 10;
-    if (selector.indexOf(".menu-open") != -1) {
-        delay = 700; // allow time for opening animation
-    }
-    if (selector === "#id-action-btns") {
-        delay = 100; // Don't know why this is needed
-    }
-    whenVisible(selector, 100, delay, function($item) {
+    var highlightAnimation = function ($item) {
         var itemRect = $item.get(0).getBoundingClientRect();
         var itemCenter = {
             top: itemRect.top + itemRect.height / 2,
@@ -288,25 +285,61 @@ app.ports.helpTourHighlightElement.subscribe(function (selector) {
                    stroke-width="2px">
              </svg>`;
 
-        var $elem = $(svgDoc)
+        var $svgElem = $(svgDoc)
             .css({'top': asPx(svgDocPosition.top),
                   'left': asPx(svgDocPosition.left)});
         $("#id-help-tour-highlight").remove();
-        $('body').append($elem);
+        $('body').append($svgElem);
         var $path = $('#id-help-tour-highlight path');
         var length = $path.get(0).getTotalLength();
         $path.css({'stroke-dasharray': length.toString()+","+length.toString(),
                    'stroke-dashoffset': length.toString()})
+
+    }
+
+    var adjustMessageBox = function($item) {
+        var itemRect = $item.get(0).getBoundingClientRect();
+        var helpMessage = $('#id-help-tour-message');
+        var wrapper = $('#id-help-tour-wrapper');
+        var helpMessageRect = helpMessage.get(0).getBoundingClientRect();
+        var docWidth = $(document).width();
+        var newMessageLeft = Math.min(itemRect.left,
+                                 docWidth - helpMessageRect.width
+                                )
+        if (wrapper.hasClass('help-tour-below')) {
+            helpMessage.css({
+                'top': asPx(itemRect.top + itemRect.height + 30),
+                'left': asPx(newMessageLeft),
+                'bottom': 'auto'
+            });
+        }
+    };
+
+    window.requestAnimationFrame(function() {
+        if (highlightSelector != "") {
+            whenVisible(highlightSelector, 100, function($item) {
+                if (animationDelay > 0) {
+                    window.setTimeout(highlightAnimation, animationDelay, $item);
+                } else {
+                    highlightAnimation($item);
+                }
+            })
+        }
+        if (positionSelector != "") {
+            whenVisible(positionSelector, 100, function($item) {
+                if (animationDelay > 0) {
+                    window.setTimeout(adjustMessageBox, animationDelay, $item);
+                } else {
+                    adjustMessageBox($item);
+                }
+            })
+        }
     });
 
 });
 
-function whenVisible(selector, maxAttempts, delay, action) {
+function whenVisible(selector, maxAttempts, action) {
     var $item = $(selector);
-    if (delay > 0) {
-        window.setTimeout(whenVisible, delay, selector, maxAttempts, 0, action);
-        return;
-    }
     if ($item.length > 0 && $item.is(":visible")) {
         action($item);
     } else {

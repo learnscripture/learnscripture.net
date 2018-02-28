@@ -715,43 +715,61 @@ body.learn-page {
 
     #id-help-tour-wrapper {
         position: fixed;
-        bottom: 0px;
+        top: 0px;
+        left: 0px;
         width: 100%;
         height: 100%;
-        top: 0px;
         z-index: 200; // above everything except #id-help-tour-highlight
         background: rgba(0, 0, 0, 0.25);
         color: white;
+        transition: background 0.5s ease-in-out;
         display: flex;
         flex-direction: column;
-        justify-content: flex-end;
         align-items: stretch;
-        transition: background 0.5s ease-in-out;
+        justify-content: flex-end;
 
-        #id-help-tour-content {
+        #id-help-tour-message,
+        #id-help-tour-controls {
             background: rgba(0, 0, 0, 0.9);
             padding: 1em;
-            text-align: center;
         }
 
         #id-help-tour-message {
-            padding: 0.5em 0;
+            text-align: center;
+
+            p:last-child {
+                margin-bottom: 0;
+            }
         }
 
-        // Overrides for specific steps:
+        // Overrides for different types of steps:
+        &.help-tour-below {
+            justify-content: flex-end;
+        }
 
-        // First step
+        &.help-tour-above {
+            justify-content: flex-start;
+        }
+
+        // First step is different
         &.help-tour-welcome {
-            justify-content: space-around;
             background: rgba(0, 0, 0, 0.8);
             .animation(fadeInHelpTour 0.5s ease-in-out forwards);
+
+        }
+        &.help-tour-welcome, &.help-tour-finish {
             #id-help-tour-message {
                 padding: 3em 1em;
             }
         }
 
-        &.help-tour-test-finished-buttons {
-            justify-content: flex-start;
+        &.help-tour-below {
+            #id-help-tour-message {
+                position: fixed;
+                bottom: 0px;
+                left: 0px;
+                max-width: 100%;
+            }
         }
 
     }

@@ -59,7 +59,7 @@ port vibrateDevice : Int -> Cmd msg
 port beep : ( Float, Float ) -> Cmd msg
 
 
-port helpTourHighlightElement : String -> Cmd msg
+port helpTourHighlightElement : ( String, String ) -> Cmd msg
 
 
 
@@ -2578,18 +2578,16 @@ viewHelpTour (HelpTour helpTour) =
             [ A.id "id-help-tour-wrapper"
             , A.class (Pivot.getC helpTour.steps).class
             ]
-            [ H.div [ A.id "id-help-tour-content" ]
-                [ H.div [ A.id "id-help-tour-message" ]
-                    (Pivot.getC helpTour.steps).html
-                , H.div [ A.id "id-help-tour-controls" ]
-                    (buttons
-                        |> List.map
-                            (\b ->
-                                H.span []
-                                    [ viewButtonSimple b ]
-                            )
-                    )
-                ]
+            [ H.div [ A.id "id-help-tour-message" ]
+                (Pivot.getC helpTour.steps).html
+            , H.div [ A.id "id-help-tour-controls" ]
+                (buttons
+                    |> List.map
+                        (\b ->
+                            H.span []
+                                [ viewButtonSimple b ]
+                        )
+                )
             ]
 
 
@@ -5766,7 +5764,6 @@ handleVersesToLearn model verseBatchRaw =
                                         loadVerses False
                                     else
                                         Cmd.none
-
                 in
                     newModel2
                         ! [ sessionCmd
@@ -6250,7 +6247,8 @@ type alias HelpTourData =
 type alias HelpTourStep =
     { html : List (H.Html Msg)
     , class : String
-    , selector : Maybe String
+    , highlightSelector : Maybe String
+    , positionSelector : Maybe String
     , adapter : Model -> Model
     }
 
@@ -6349,89 +6347,106 @@ initialTourSteps =
         first =
             { html = show "Hello! This guided tour will take you around the learning page interface."
             , class = "help-tour-welcome"
-            , selector = Nothing
+            , highlightSelector = Nothing
+            , positionSelector = Nothing
             , adapter = identity
             }
 
         rest =
             [ { html = show "Use the link in the top left corner to go back to the dashboard at any time."
-              , class = "help-tour-dashboard"
-              , selector = Just ".nav-item.return-link"
+              , class = "help-tour-below"
+              , highlightSelector = Just ".nav-item.return-link"
+              , positionSelector = Nothing
               , adapter = identity
               }
             , { html = show "This bar shows your progress in learning a verse for the first time, or your total progress in a review session."
-              , class = "help-tour-session-progress"
-              , selector = Just ".nav-item.session-progress"
+              , class = "help-tour-below"
+              , highlightSelector = Just ".nav-item.session-progress"
+              , positionSelector = Nothing
               , adapter = identity
               }
             , { html = show "The total points you've earned in the current batch of verses are displayed here."
-              , class = "help-tour-total-points"
-              , selector = Just "nav .action-logs .nav-item"
+              , class = "help-tour-below"
+              , highlightSelector = Just "nav .action-logs .nav-item"
+              , positionSelector = Nothing
               , adapter = identity
               }
             , { html = show "You can tap/click this menu header to show more detail."
-              , class = "help-tour-action-logs"
-              , selector = Just "nav .action-logs .nav-dropdown-menu.menu-open"
+              , class = "help-tour-below"
+              , highlightSelector = Just "nav .action-logs .nav-dropdown-menu.menu-open"
+              , positionSelector = Nothing
               , adapter = setDropdownOpen ActionLogsInfo
               }
             , { html = show "You can also pin this menu to the side (large screens) or the top (small screens) to have it permanently visible."
-              , class = "help-tour-pin-action-logs"
-              , selector = Just "nav .action-logs .menu-pin"
+              , class = "help-tour-below"
+              , highlightSelector = Just "nav .action-logs .menu-pin"
+              , positionSelector = Nothing
               , adapter = setDropdownOpen ActionLogsInfo
               }
             , { html = show "Tap the menu header again to close it."
-              , class = "help-tour-action-logs-closed"
-              , selector = Just "nav .action-logs .nav-item"
+              , class = "help-tour-below"
+              , highlightSelector = Just "nav .action-logs .nav-item"
+              , positionSelector = Nothing
               , adapter = identity
               }
             , { html = show "If there is a problem saving your data, it will be displayed here. Tap the menu header for more info."
-              , class = "help-tour-ajax-info"
-              , selector = Just "nav .ajax-info"
+              , class = "help-tour-below"
+              , highlightSelector = Just "nav .ajax-info"
+              , positionSelector = Nothing
               , adapter = fakeHttpCalls >> (setDropdownOpen AjaxInfo)
               }
             , { html = show "If your internet connection cuts out completely, don't worry - you can carry on working and then try to save data again when your internet connection comes back."
-              , class = "help-tour-ajax-info-failures"
-              , selector = Just "nav .ajax-info .menu-open .button-item"
+              , class = "help-tour-below"
+              , highlightSelector = Just "nav .ajax-info .menu-open .button-item"
+              , positionSelector = Nothing
               , adapter = fakeFailedHttpCalls >> (setDropdownOpen AjaxInfo)
               }
             , { html = show "This shows the number of new verses you have started today. If you are new to LearnScripture, it can be important to pace yourself. Why not try to learn one new verse each day?"
-              , class = "help-tour-new-verses-started"
-              , selector = Just "#id-new-verses-started-count"
+              , class = "help-tour-below"
+              , highlightSelector = Just "#id-new-verses-started-count"
+              , positionSelector = Nothing
               , adapter = identity
               }
             , { html = show "Here is the number of verses you've been tested on today."
-              , class = "help-tour-new-verses-started"
-              , selector = Just "#id-total-verses-tested-count"
+              , class = "help-tour-below"
+              , highlightSelector = Just "#id-total-verses-tested-count"
+              , positionSelector = Nothing
               , adapter = identity
               }
             , { html = show "You can change your preferences at any point from here."
-              , class = "help-tour-preferences"
-              , selector = Just "nav .preferences-link"
+              , class = "help-tour-below"
+              , highlightSelector = Just "nav .preferences-link"
+              , positionSelector = Nothing
               , adapter = identity
               }
             , { html = show "The approximate memory strength of each verse you are learning is displayed here."
-              , class = "help-tour-verse-strength"
-              , selector = Just "#id-verse-strength-value"
-              , adapter = identity
-              }
-            , { html = show "At each stage, you are prompted with instructions to guide you through the learning and review process."
-              , class = "help-tour-instructions"
-              , selector = Just "#id-instructions"
+              , class = "help-tour-below"
+              , highlightSelector = Just "#id-verse-strength-value"
+              , positionSelector = Nothing
               , adapter = identity
               }
             , { html = show "This menu shows additional options for the current verse."
-              , class = "help-tour-verse-options-menu"
-              , selector = Just "#id-verse-options-menu-btn"
+              , class = "help-tour-below"
+              , highlightSelector = Just "#id-verse-options-menu-btn"
+              , positionSelector = Just "#id-verse-options-menu ul"
               , adapter = setDropdownOpen VerseOptionsMenu
               }
+            , { html = show "At each stage, you are prompted with instructions to guide you through the learning and review process."
+              , class = "help-tour-below"
+              , highlightSelector = Just "#id-instructions"
+              , positionSelector = Nothing
+              , adapter = identity
+              }
             , { html = show "When you have finished a test, your test score is used to estimate your memory strength for a verse and schedule the next review. Underneath each button is a caption indicating approximately when you will next see the verse again if you choose that option."
-              , class = "help-tour-test-finished-buttons"
-              , selector = Just "#id-action-btns"
+              , class = "help-tour-above"
+              , highlightSelector = Just "#id-action-btns"
+              , positionSelector = Nothing
               , adapter = fakeFinishedTest
               }
             , { html = show "That's all for now - thanks for taking the tour! You can take it again at any point (see the 'Help' section)."
               , class = "help-tour-finish"
-              , selector = Nothing
+              , highlightSelector = Nothing
+              , positionSelector = Nothing
               , adapter = identity
               }
             ]
@@ -6493,12 +6508,21 @@ doHelpTourStep helpTour focusDefault =
 
 helpTourCommandForStep : HelpTourStep -> Cmd Msg
 helpTourCommandForStep step =
-    case step.selector of
+    case step.highlightSelector of
         Nothing ->
-            helpTourHighlightElement ""
+            helpTourHighlightElement ( "", "" )
 
-        Just s ->
-            helpTourHighlightElement s
+        Just highlightSelector ->
+            let
+                positionSelector =
+                    case step.positionSelector of
+                        Nothing ->
+                            highlightSelector
+
+                        Just p ->
+                            p
+            in
+                helpTourHighlightElement ( highlightSelector, positionSelector )
 
 
 finishHelpTour : Model -> ( Model, Cmd Msg )
@@ -6532,7 +6556,7 @@ finishHelpTour model =
                 , Cmd.batch
                     [ stageOrVerseChangeCommands newModel2 True
                     , saveAutoSavedPreferences newPrefs newModel2.httpConfig
-                    , helpTourHighlightElement ""
+                    , helpTourHighlightElement ( "", "" )
                     ]
                 )
 
