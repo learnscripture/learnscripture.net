@@ -1609,7 +1609,10 @@ wordButtonClasses wd stage =
                                     if allFailed then
                                         [ "incorrect" ]
                                     else if lastWasHint then
-                                        [ "hinted" ]
+                                        if noneFailed then
+                                            [ "hinted" ]
+                                        else
+                                            [ "partially-correct" ]
                                     else if noneFailed then
                                         [ "correct" ]
                                     else
