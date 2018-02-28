@@ -553,13 +553,7 @@ dashboardUrl =
 view : Model -> H.Html Msg
 view model =
     H.div
-        ((pinnedAttributes model)
-            ++ (if model.helpTour /= Nothing then
-                    [ onEscape FinishHelpTour ]
-                else
-                    []
-               )
-        )
+        (pinnedAttributes model)
         [ viewTopNav model
         , case model.learningSession of
             Loading ->
@@ -2379,7 +2373,7 @@ onEscape msg =
             else
                 JD.fail "not ESC"
     in
-        E.on "keypress" (JD.andThen isEscape E.keyCode)
+        E.on "keydown" (JD.andThen isEscape E.keyCode)
 
 
 
@@ -2596,6 +2590,7 @@ viewHelpTour (HelpTour helpTour) =
         H.div
             [ A.id "id-help-tour-wrapper"
             , A.class (Pivot.getC helpTour.steps).class
+            , onEscape FinishHelpTour
             ]
             [ H.div [ A.id "id-help-tour-message" ]
                 (Pivot.getC helpTour.steps).html
