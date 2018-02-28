@@ -2505,12 +2505,12 @@ instructions verse testingMethod helpVisible =
 
                 _ ->
                     [ H.h3 []
-                        [ H.text "Help"
-                        , H.a
+                        [ H.a
                             [ A.href "#"
                             , onClickSimply ToggleHelp
                             ]
-                            [ makeIcon
+                            [ H.text "Help"
+                            , makeIcon
                                 ("icon-help-toggle"
                                     ++ (if helpVisible then
                                             " expanded"
