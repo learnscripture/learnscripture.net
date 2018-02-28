@@ -65,6 +65,10 @@ installed.
 
      npm install
 
+   At this point it seems we need to do this again::
+
+      n stable
+
 5. Create postgres databases matching the development ones in
    ``learnscripture/settings.py``, both for ``learnscripture`` and
    ``learnscripture_wordsuggestions``.
@@ -78,9 +82,15 @@ installed.
    You will also need to add 'learnscripture' and 'learnscripture.local' as
    aliases for 127.0.0.1 in /etc/hosts
 
-6. Create a file ``config/secrets.json`` containing just "{}" (proper contents
-   are, well, secret). You will need a proper copy from the previous maintainer
-   to deploy.
+6. Create a file ``config/secrets.json`` containing at least the following:
+
+       {"RABBITMQ_USERNAME": "learnscripture",
+        "RABBITMQ_PASSWORD": "foo",
+        "ESV_API_KEY": "IP"
+       }
+
+   (proper contents are, well, secret).
+   You will need a proper copy from the previous maintainer to deploy.
 
    If more than one developer is working on the project, and want to deploy
    directly, syncing this file will need to be rethought. It has been
