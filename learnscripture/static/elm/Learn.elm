@@ -6415,7 +6415,7 @@ initialTourSteps =
             , { html = show "If your internet connection cuts out completely, don't worry - you can carry on working and then try to save data again when your internet connection comes back."
               , class = "help-tour-below"
               , highlightSelector = Just "nav .ajax-info .menu-open .button-item"
-              , positionSelector = Nothing
+              , positionSelector = Just "nav .ajax-info ul.menu-open"
               , adapter = fakeFailedHttpCalls >> (setDropdownOpen AjaxInfo)
               }
             , { html = show "This shows the number of new verses you have started today. If you are new to LearnScripture, it can be important to pace yourself. Why not try to learn one new verse each day?"
