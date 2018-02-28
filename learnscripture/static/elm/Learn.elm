@@ -552,7 +552,14 @@ dashboardUrl =
 
 view : Model -> H.Html Msg
 view model =
-    H.div (pinnedAttributes model)
+    H.div
+        ((pinnedAttributes model)
+            ++ (if model.helpTour /= Nothing then
+                    [ onEscape FinishHelpTour ]
+                else
+                    []
+               )
+        )
         [ viewTopNav model
         , case model.learningSession of
             Loading ->
@@ -2361,6 +2368,18 @@ onEnter msg =
                 JD.fail "not ENTER"
     in
         E.on "keydown" (JD.andThen isEnter E.keyCode)
+
+
+onEscape : a -> H.Attribute a
+onEscape msg =
+    let
+        isEscape code =
+            if code == 27 then
+                JD.succeed msg
+            else
+                JD.fail "not ESC"
+    in
+        E.on "keypress" (JD.andThen isEscape E.keyCode)
 
 
 
