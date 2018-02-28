@@ -183,6 +183,14 @@ verse_or_chapter = verse | chapter
 
 
 def bible_reference_parser_for_lang(language_code, strict):
+    """
+    Returns a Bible reference parser for the language.
+
+    If strict=True, then only canonical references are allowed.
+    Otherwise looser checks are done, but it is assumed
+    that the input is already case normalized.
+    """
+
     # Bible references look something like:
     # Genesis
     # Genesis 1
@@ -322,21 +330,32 @@ def parse_unvalidated_localized_reference(language_code, localized_reference,
     return parsed_ref
 
 
-def parse_passage_title_partial(language_code, title):
+def parse_passage_title_partial_loose(language_code, title):
+    """
+    If possible, parse the initial part of a title as a bible reference,
+    returning (parsed_ref,
+               boolean that is True for a complete parse with no remainder)
+    or        (None, False)
+    """
+    title_norm = normalize_reference_input(language_code, title)
     try:
-        parsed_ref, remainder = bible_reference_parser_for_lang(language_code, True).parse_partial(title)
+        parsed_ref, remainder = bible_reference_parser_for_lang(language_code, False).parse_partial(title_norm)
     except ParseError:
-        return None, title
+        return None, False
 
     # We expect the remainder to be empty or to start with punctuation i.e. non
     # alphanumeric. Otherwise it is a mistake to think the first part was a
     # bible reference.
     if len(remainder) > 0:
         if re.match(r'\w', remainder[0]):
-            return None, title
+            return None, False
 
-    # For use cases of this function, we always want to allow whole books/chapters
-    return parsed_ref, remainder
+    # For use cases of this function, we always want to allow whole books/chapters, so
+    # don't put limits here.
+
+    # We don't return the remainder itself - it's useless because it has been
+    # mangled by normalize_reference_input.
+    return parsed_ref, (len(remainder.strip()) == 0)
 
 
 def localize_internal_reference(language_code, internal_reference):

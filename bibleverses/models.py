@@ -20,7 +20,7 @@ from .books import get_bible_book_name, get_bible_book_number
 from .fields import VectorField
 from .languages import DEFAULT_LANGUAGE, LANGUAGE_CHOICES, LANGUAGE_CODE_EN, LANGUAGE_CODE_TR, normalize_reference_input
 from .parsing import (InvalidVerseReference, ParsedReference, internalize_localized_reference,
-                      localize_internal_reference, parse_break_list, parse_passage_title_partial,
+                      localize_internal_reference, parse_break_list, parse_passage_title_partial_loose,
                       parse_unvalidated_localized_reference, parse_validated_internal_reference,
                       parse_validated_localized_reference)
 from .services import get_fetch_service, get_search_service
@@ -664,14 +664,14 @@ def verse_set_smart_name(verse_set_name, verse_set_language_code, required_langu
 
     # Passage set names are often just the passage ref (this is set automatically),
     # or start with the passage ref.
-    parsed_ref, remainder = parse_passage_title_partial(verse_set_language_code,
-                                                        verse_set_name)
+    parsed_ref, complete_parse = parse_passage_title_partial_loose(verse_set_language_code,
+                                                                   verse_set_name)
 
     if parsed_ref is None:
         return verse_set_name
 
     required_localized_ref = parsed_ref.translate_to(required_language_code).canonical_form()
-    if remainder.strip() == "":
+    if complete_parse:
         # Just the passage ref
         return required_localized_ref
     else:
