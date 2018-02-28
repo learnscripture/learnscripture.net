@@ -31,6 +31,8 @@
     "style-loader": "^0.19.0",
     "ts-loader": "^3.1.1",
     "typescript": "^2.6.1",
+    "uglify-es": "^3.3.9",
+    "uglifyjs-webpack-plugin": "^1.2.2",
     "webpack": "^3.8.1",
     "webpack-bundle-tracker": "^0.2.0",
     "webpack-dev-server": "^2.9.5"
@@ -41,6 +43,7 @@
     "elm-webpack-loader": "^4.4.0",
     "jquery": "^3.2.1",
     "jquery-ui": "^1.12.1",
-    "jsrender": "^0.9.89"
+    "jsrender": "^0.9.89",
+    "npm": "^5.6.0"
   }
 }
