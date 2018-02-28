@@ -25,7 +25,7 @@ body.learn-page {
     // Can also be simplified because there will be no specificity problems,
     // and other code can be deleted.
     a:focus, :focus, .fakefocus, .btn:focus input:focus textarea:focus, select:focus {
-        outline: 3px solid #00ffff90;
+        outline: 3px solid var(--focusOutlineColor);
         .box-shadow(none);
     }
     input:focus {
@@ -216,11 +216,11 @@ body.learn-page {
     // TODO - check/fix these colors to work with different themes.
     .ajax-retries .icon-fw,
     .ajax-retrying {
-        color: yellow;
+        color: var(--topWarningColor);
     }
     .ajax-failures .icon-fw,
     .ajax-failed {
-        color: #ff2e2e;;
+        color: var(--topErrorColor);
     }
 
     // Search for other instances of flashActionLogDuration in elm code if
@@ -792,12 +792,31 @@ body.learn-page {
         }
     }
 
+    &[data-theme=calm] {
+        --helpTourHighlightColor: red;
+        --helpTourHighlightThickness: 2px;
+    }
+    &[data-theme=bubblegum] {
+        --helpTourHighlightColor: #3300db;
+        --helpTourHighlightThickness: 2px;
+    }
+    &[data-theme=bubblegum2] {
+        --helpTourHighlightColor: #95e006;
+        --helpTourHighlightThickness: 3px;
+    }
+
+    &[data-theme=space] {
+        --helpTourHighlightColor: red;
+        --helpTourHighlightThickness: 2px;
+    }
+
     #id-help-tour-highlight {
         position: fixed;
         z-index: 210; // above everything
 
         path {
-            stroke: red;
+            stroke: var(--helpTourHighlightColor);
+            stroke-thickness: var(--helpTourHighlightThickness);
             .animation(helpTourHighlightAnimate 0.3s ease-in-out forwards);
         }
 
@@ -806,7 +825,6 @@ body.learn-page {
                 stroke-dashoffset: 0
             }
         }
-
     }
 
     // MEDIA QUERIES
