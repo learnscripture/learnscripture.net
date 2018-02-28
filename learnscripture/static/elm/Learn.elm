@@ -6414,6 +6414,11 @@ initialTourSteps =
               , selector = Just "#id-verse-strength-value"
               , adapter = identity
               }
+            , { html = show "At each stage, you are prompted with instructions to guide you through the learning and review process."
+              , class = "help-tour-instructions"
+              , selector = Just "#id-instructions"
+              , adapter = identity
+              }
             , { html = show "This menu shows additional options for the current verse."
               , class = "help-tour-verse-options-menu"
               , selector = Just "#id-verse-options-menu-btn"
