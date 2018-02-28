@@ -226,7 +226,8 @@ setUpAudio();
 app.ports.helpTourHighlightElement.subscribe(function (args) {
     var highlightSelector = args[0];
     var positionSelector = args[1];
-    console.log(highlightSelector, positionSelector);
+
+    window.scrollTo(0, 0);
     $("#id-help-tour-highlight").remove();
     var animationDelay = 10;
     if (highlightSelector.indexOf(".menu-open") != -1) {
@@ -308,7 +309,7 @@ app.ports.helpTourHighlightElement.subscribe(function (args) {
                                 )
         if (wrapper.hasClass('help-tour-below')) {
             helpMessage.css({
-                'top': asPx(itemRect.top + itemRect.height + 30),
+                'top': asPx(itemRect.top + itemRect.height + 20),
                 'left': asPx(newMessageLeft),
                 'bottom': 'auto'
             });
