@@ -39,6 +39,7 @@ class ReferralsTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         new_account_event_count_1 = Event.objects.filter(event_type=EventType.NEW_ACCOUNT).count()
 
         # If they create an account, referree gets a badge
+        self.get_url('dashboard')
         self.create_account_interactive()
         self.assertEqual(account.awards.filter(award_type=AwardType.RECRUITER).count(), 1)
 

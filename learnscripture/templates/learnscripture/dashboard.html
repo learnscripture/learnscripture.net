@@ -3,6 +3,8 @@
 {% load account_utils %}
 {% load dict_utils %}
 
+{% block body_extra_class %}{{ block.super }} dashboard-page{% endblock %}
+
 {% block leftcolumn %}
 
   {% if create_account_warning %}

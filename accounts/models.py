@@ -28,8 +28,8 @@ from learnscripture.utils.cache import cache_results, clear_cache_results
 from scores.models import ScoreReason, Scores, TotalScore
 
 TestingMethod = make_choices('TestingMethod',
-                             [('FULL_WORDS', 'FULL_WORDS', 'Type whole word - recommended for full keyboards and normal typing skills'),
-                              ('FIRST_LETTER', 'FIRST_LETTER', 'Type first letter - recommended for slower typers'),
+                             [('FULL_WORDS', 'FULL_WORDS', 'Type whole word - most thorough'),
+                              ('FIRST_LETTER', 'FIRST_LETTER', 'Type first letter - faster'),
                               ('ON_SCREEN', 'ON_SCREEN', 'Choose from word list - recommended for'
                                ' handheld devices.' +
                                ' Only available for English translations'),
@@ -431,11 +431,12 @@ class Identity(models.Model):
                                                   default=TestingMethod.ON_SCREEN)
     enable_animations = models.BooleanField(blank=True, default=True)
     enable_sounds = models.BooleanField(blank=True, default=False)
-    enable_vibration = models.BooleanField("Vibrate on mistakes", blank=True, default=True)
+    enable_vibration = models.BooleanField("Vibrate on mistakes", blank=True, default=True,
+                                           help_text="Depends on device capabilities.")
     interface_theme = models.CharField(max_length=30, choices=THEMES,
                                        default=DEFAULT_THEME)
-    new_learn_page = models.BooleanField("Use new learn page (beta)",
-                                         default=False)
+    new_learn_page = models.BooleanField("Use new learn page",
+                                         default=True)
     referred_by = models.ForeignKey(Account, on_delete=models.CASCADE,
                                     null=True, default=None,
                                     blank=True,
@@ -1419,3 +1420,8 @@ def get_active_identity_count(since_when, until_when):
 def notify_all_accounts(html_message):
     for account in Account.objects.active().filter(identity__isnull=False).select_related('identity'):
         account.add_html_notice(html_message)
+
+
+def notify_all_identities(html_message):
+    for identity in Identity.objects.all().select_related(None):
+        identity.add_html_notice(html_message)

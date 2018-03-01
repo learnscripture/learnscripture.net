@@ -83,7 +83,7 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
         # Check we can actually click on 'Learn' and it works.
         self.click("#id-tab-individual input[name=learn_now]")
         self.set_preferences()
-        self.assertEqual(self.get_element_text("#id-verse-title"), "John 3:16")
+        self.assertEqual(self.get_element_text("#id-verse-header h2"), "John 3:16")
 
     def test_choose_individual_verse_learn_later(self):
         identity, account = self.create_account()
