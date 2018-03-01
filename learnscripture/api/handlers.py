@@ -17,6 +17,7 @@ from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.functional import wraps
 from django.utils.html import escape, mark_safe
+from django.views.decorators.cache import never_cache
 from django.views.generic.base import View
 
 from accounts.forms import PreferencesForm
@@ -130,6 +131,7 @@ class ApiView(View):
     def get_serializable(self, data):
         return make_serializable(data, getattr(self, 'fields', []))
 
+    @never_cache
     def dispatch(self, request, *args, **kwargs):
         retval = super(ApiView, self).dispatch(request, *args, **kwargs)
         if isinstance(retval, HttpResponse):
