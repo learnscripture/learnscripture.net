@@ -109,8 +109,12 @@ def _set_learning_session_start(request, dt):
 
 
 def get_learning_session_start(request):
-    return datetime.utcfromtimestamp(int(request.session['learning_start']))\
-        .replace(tzinfo=timezone.utc)
+    learning_start = request.session.get('learning_start', None)
+    if learning_start is None:
+        return None
+    else:
+        return (datetime.utcfromtimestamp(int(learning_start))
+                .replace(tzinfo=timezone.utc))
 
 
 def _set_verse_statuses(request, user_verse_statuses):

@@ -223,10 +223,10 @@ class VersesToLearn2Handler(ApiView):
             # To reduce round trips and get the entire page loading in one go
             # initially, we hack these extra bits of data on here:
             retval['session_stats'] = dict(stats=todays_stats(request.identity))
-            retval['action_logs'] = ActionLogs().get_serializable(
-                request.identity.get_action_logs(
-                    session.get_learning_session_start(request))
-            )
+            session_start = session.get_learning_session_start(request)
+            if session_start is not None:
+                retval['action_logs'] = ActionLogs().get_serializable(
+                    request.identity.get_action_logs(session_start))
         return retval
 
 
@@ -462,8 +462,12 @@ class ActionLogs(ApiView):
         if not hasattr(request, 'identity'):
             return []
         highest_id_seen = int(request.GET.get('highest_id_seen', '0'))
-        return request.identity.get_action_logs(session.get_learning_session_start(request),
-                                                highest_id_seen=highest_id_seen)
+        session_start = session.get_learning_session_start(request)
+        if session_start is None:
+            return []
+        else:
+            return request.identity.get_action_logs(session_start,
+                                                    highest_id_seen=highest_id_seen)
 
 
 def html_format_text(verse):
