@@ -575,7 +575,7 @@ def push_sources(target):
 def tag_deploy():
     if getattr(env, 'no_tag', False):
         return
-    local("hg tag -f deploy-production-$(date --iso-8601=seconds | tr ':' '-' | cut -f 1 -d '+')")
+    local("hg tag -f deploy-production-$(date --utc --iso-8601=seconds | tr ':' '-' | cut -f 1 -d '+')")
 
 
 def ensure_src_dir(target):
