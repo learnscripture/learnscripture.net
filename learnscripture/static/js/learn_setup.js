@@ -4,6 +4,7 @@
 // node_modules libs
 import 'expose-loader?jQuery!jquery';
 import 'jquery.ajaxretry';
+import { UAParser } from 'ua-parser-js';
 
 // Ours
 import './preferences';
@@ -223,6 +224,11 @@ app.ports.beep.subscribe(function (args) {
 setUpAudio();
 
 
+function getBrowserEngine() {
+    var parser = new UAParser();
+    return parser.getEngine().name;
+}
+
 app.ports.helpTourHighlightElement.subscribe(function (args) {
     var highlightSelector = args[0];
     var positionSelector = args[1];
@@ -293,8 +299,15 @@ app.ports.helpTourHighlightElement.subscribe(function (args) {
         $('body').append($svgElem);
         var $path = $('#id-help-tour-highlight path');
         var length = $path.get(0).getTotalLength();
-        $path.css({'stroke-dasharray': length.toString()+","+length.toString(),
-                   'stroke-dashoffset': length.toString()})
+        var engine = getBrowserEngine();
+        if (engine == 'EdgeHTML' || engine == 'Trident') {
+            // Edge (probably IE too) seems unable to animate stroke-dashoffset,
+            // so the entire things disappears. Therefore we disable the
+            // animation by not setting 'stroke-dasharray'
+        } else {
+            $path.css({'stroke-dasharray': length.toString()+","+length.toString(),
+                       'stroke-dashoffset': length.toString()})
+        }
 
     }
 
