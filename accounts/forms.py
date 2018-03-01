@@ -13,7 +13,7 @@ class PreferencesForm(forms.ModelForm):
                                                    initial=TestingMethod.ON_SCREEN,
                                                    choices=TestingMethod.choice_list)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, new_signup=False, **kwargs):
         super(PreferencesForm, self).__init__(*args, **kwargs)
 
         from bibleverses.models import TextVersion
@@ -24,8 +24,9 @@ class PreferencesForm(forms.ModelForm):
                 available_bible_versions = identity.available_bible_versions()
 
         self.fields['default_bible_version'].queryset = available_bible_versions
-        if (self.instance is None or self.instance.account is None or
-                not self.instance.account.is_tester):
+        self.new_signup = new_signup
+        if (self.instance is None or self.instance.id is None or new_signup):
+            # Hide confusing field for new signups.
             del self.fields['new_learn_page']
 
     class Meta:
@@ -33,7 +34,6 @@ class PreferencesForm(forms.ModelForm):
         fields = ['default_bible_version',
                   'desktop_testing_method',
                   'touchscreen_testing_method',
-                  'enable_animations',
                   'enable_sounds',
                   'enable_vibration',
                   'interface_theme',

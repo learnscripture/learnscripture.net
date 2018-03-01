@@ -10,7 +10,7 @@ module.exports = {
 
     entry: {
         base: './learnscripture/static/js/base.ts', // for base template
-        learn: './learnscripture/static/js/learn_setup.js', // for learn_beta page template
+        learn: './learnscripture/static/js/learn_setup.js', // for learn page template
     },
     output: {
         path: path.resolve(__dirname, 'learnscripture/static/webpack_bundles'),

@@ -18,11 +18,10 @@ from .test_bibleverses import RequireExampleVerseSetsMixin
 
 def prepare_identity(sender, **kwargs):
     identity = kwargs['instance']
-    identity.seen_help_tour = True
-    identity.new_learn_page = True
+    identity.new_learn_page = False
 
 
-class LearnBetaTests(RequireExampleVerseSetsMixin, FullBrowserTest):
+class LearnLegacyTests(RequireExampleVerseSetsMixin, FullBrowserTest):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
 
@@ -46,7 +45,7 @@ class LearnBetaTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.get_url('choose')
         self.click("#id-learn-verseset-btn-%d" % verse_set.id)
         self.set_preferences()
-        self.assertUrlsEqual(reverse('learn-beta'))
+        self.assertUrlsEqual(reverse('learn_legacy'))
         return verse_set
 
     def add_verse_set(self, name):
@@ -90,7 +89,7 @@ class LearnBetaTests(RequireExampleVerseSetsMixin, FullBrowserTest):
                             uvs.memory_stage == MemoryStage.ZERO
                             for uvs in identity.verse_statuses.all()))
 
-        self.assertEqual("John 3:16", self.get_element_text("#id-verse-header h2"))
+        self.assertEqual("John 3:16", self.get_element_text("#id-verse-title"))
         # Do the reading:
         for i in range(0, 9):
             self.click("#id-next-btn")
@@ -111,7 +110,7 @@ class LearnBetaTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         identity.add_verse_choice('Psalm 23:1-2')
         self.get_url('dashboard')
         self.submit('input[name=learnbiblequeue]')
-        self.assertEqual("Psalm 23:1-2", self.get_element_text("#id-verse-header h2"))
+        self.assertEqual("Psalm 23:1-2", self.get_element_text("#id-verse-title"))
 
         # Do the reading:
         for i in range(0, 9):
@@ -194,28 +193,28 @@ class LearnBetaTests(RequireExampleVerseSetsMixin, FullBrowserTest):
             self.fill({"#id-typing": word + " "})
 
         # Test keyboard shortcut
-        self.send_keys('button.primary', '\n')
+        self.send_keys('body', '\n')
         self.assertIn("He maketh me to lie down in green pastures",
                       self.get_element_text('.current-verse'))
 
         for i in range(0, 5):
-            self.click("#id-next-btn")
+            self.click("#id-context-next-verse-btn")
         self.assertUrlsEqual(reverse('dashboard'))
 
     def test_skip_verse(self):
         self.choose_verse_set('Bible 101')
 
-        self.assertEqual("John 3:16", self.get_element_text("#id-verse-header h2"))
+        self.assertEqual("John 3:16", self.get_element_text("#id-verse-title"))
 
-        self.click("#id-verse-options-menu-btn")
+        self.click("#id-verse-dropdown")
         self.click("#id-skip-verse-btn")
 
-        self.assertEqual("John 14:6", self.get_element_text("#id-verse-header h2"))
+        self.assertEqual("John 14:6", self.get_element_text("#id-verse-title"))
 
         # Should be removed from session too
-        self.get_url('learn-beta')
+        self.get_url('learn_legacy')
 
-        self.assertEqual("John 14:6", self.get_element_text("#id-verse-header h2"))
+        self.assertEqual("John 14:6", self.get_element_text("#id-verse-title"))
 
     def test_cancel_learning(self):
         self.add_verse_set('Bible 101')
@@ -231,20 +230,20 @@ class LearnBetaTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.get_url('dashboard')
         self.choose_review_bible()
 
-        self.assertEqual("John 3:16", self.get_element_text("#id-verse-header h2"))
+        self.assertEqual("John 3:16", self.get_element_text("#id-verse-title"))
 
-        self.click("#id-verse-options-menu-btn")
+        self.click("#id-verse-dropdown")
         self.click("#id-cancel-learning-btn")
 
         # Should skip.
-        self.assertEqual("John 14:6", self.get_element_text("#id-verse-header h2"))
+        self.assertEqual("John 14:6", self.get_element_text("#id-verse-title"))
 
         # If we go back to dashboard and choose again, it should not appear
         # Go to dashboard
         self.get_url('dashboard')
         self.choose_review_bible()
 
-        self.assertEqual("John 14:6", self.get_element_text("#id-verse-header h2"))
+        self.assertEqual("John 14:6", self.get_element_text("#id-verse-title"))
 
     def test_reset_progress(self):
         self.add_verse_set('Bible 101')
@@ -256,16 +255,16 @@ class LearnBetaTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.get_url('dashboard')
         self.choose_review_bible()
 
-        self.assertEqual("John 3:16", self.get_element_text("#id-verse-header h2"))
+        self.assertEqual("John 3:16", self.get_element_text("#id-verse-title"))
 
-        self.click("#id-verse-options-menu-btn")
+        self.click("#id-verse-dropdown")
         self.click_and_confirm("#id-reset-progress-btn")
 
         # Should reset strength to zero
         self.assertEqual(identity.verse_statuses.get(localized_reference='John 3:16').strength,
                          0)
         # Should revert to initial read mode
-        self.assertIn("READ", self.get_element_text('#id-instructions'))
+        self.assertTrue(self.is_element_displayed('#id-instructions .stage-read'))
 
     def choose_review_bible(self):
         self.submit("input[name='reviewbiblequeue']")
@@ -332,6 +331,11 @@ class LearnBetaTests(RequireExampleVerseSetsMixin, FullBrowserTest):
 
             self.click("#id-hint-btn")
 
-        # Hint button should be disabled after 3 clicks
+        # First two words should not be visually marked correct
+        for i in range(0, 2):
+            classes = self.get_element_attribute("#id-word-%d" % i, "class").split()
+            self.assertNotIn('correct', classes)
+
+        # Hint button should be disabled after 4 clicks
         self.assertEqual(self.get_element_attribute("#id-hint-btn", "disabled"),
                          'true')

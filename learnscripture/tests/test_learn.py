@@ -1,8 +1,9 @@
 import math
+import time
 from datetime import timedelta
 from decimal import Decimal
 
-from django.db.models import F
+from django.db.models import F, signals
 from django.urls import reverse
 
 from accounts.memorymodel import MM
@@ -16,6 +17,11 @@ from .base import FullBrowserTest
 from .test_bibleverses import RequireExampleVerseSetsMixin
 
 
+def prepare_identity(sender, **kwargs):
+    identity = kwargs['instance']
+    identity.seen_help_tour = True
+
+
 class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
@@ -23,6 +29,14 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
     kjv_john_3_16 = "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life. John 3 16"
 
     psalm_23_1_2 = "The LORD is my shepherd I shall not want He maketh me to lie down in green pastures he leadeth me beside the still waters Psalm 23 1 2"
+
+    def setUp(self):
+        super().setUp()
+        signals.pre_save.connect(prepare_identity, sender=Identity)
+
+    def tearDown(self):
+        signals.pre_save.disconnect(prepare_identity, sender=Identity)
+        super().tearDown()
 
     def _get_current_identity(self):
         return Identity.objects.order_by('-date_created')[0]
@@ -76,7 +90,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
                             uvs.memory_stage == MemoryStage.ZERO
                             for uvs in identity.verse_statuses.all()))
 
-        self.assertEqual("John 3:16", self.get_element_text("#id-verse-title"))
+        self.assertEqual("John 3:16", self.get_element_text("#id-verse-header h2"))
         # Do the reading:
         for i in range(0, 9):
             self.click("#id-next-btn")
@@ -97,7 +111,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         identity.add_verse_choice('Psalm 23:1-2')
         self.get_url('dashboard')
         self.submit('input[name=learnbiblequeue]')
-        self.assertEqual("Psalm 23:1-2", self.get_element_text("#id-verse-title"))
+        self.assertEqual("Psalm 23:1-2", self.get_element_text("#id-verse-header h2"))
 
         # Do the reading:
         for i in range(0, 9):
@@ -141,7 +155,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self._type_john_3_16_kjv()
 
         # Check scores
-
+        time.sleep(0.5)
         j316_score = self._score_for_j316()
         self.assertEqual(Account.objects.get(id=account.id).total_score.points,
                          j316_score +
@@ -180,28 +194,28 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
             self.fill({"#id-typing": word + " "})
 
         # Test keyboard shortcut
-        self.send_keys('body', '\n')
+        self.send_keys('button.primary', '\n')
         self.assertIn("He maketh me to lie down in green pastures",
                       self.get_element_text('.current-verse'))
 
         for i in range(0, 5):
-            self.click("#id-context-next-verse-btn")
+            self.click("#id-next-btn")
         self.assertUrlsEqual(reverse('dashboard'))
 
     def test_skip_verse(self):
         self.choose_verse_set('Bible 101')
 
-        self.assertEqual("John 3:16", self.get_element_text("#id-verse-title"))
+        self.assertEqual("John 3:16", self.get_element_text("#id-verse-header h2"))
 
-        self.click("#id-verse-dropdown")
+        self.click("#id-verse-options-menu-btn")
         self.click("#id-skip-verse-btn")
 
-        self.assertEqual("John 14:6", self.get_element_text("#id-verse-title"))
+        self.assertEqual("John 14:6", self.get_element_text("#id-verse-header h2"))
 
         # Should be removed from session too
         self.get_url('learn')
 
-        self.assertEqual("John 14:6", self.get_element_text("#id-verse-title"))
+        self.assertEqual("John 14:6", self.get_element_text("#id-verse-header h2"))
 
     def test_cancel_learning(self):
         self.add_verse_set('Bible 101')
@@ -217,20 +231,20 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.get_url('dashboard')
         self.choose_review_bible()
 
-        self.assertEqual("John 3:16", self.get_element_text("#id-verse-title"))
+        self.assertEqual("John 3:16", self.get_element_text("#id-verse-header h2"))
 
-        self.click("#id-verse-dropdown")
+        self.click("#id-verse-options-menu-btn")
         self.click("#id-cancel-learning-btn")
 
         # Should skip.
-        self.assertEqual("John 14:6", self.get_element_text("#id-verse-title"))
+        self.assertEqual("John 14:6", self.get_element_text("#id-verse-header h2"))
 
         # If we go back to dashboard and choose again, it should not appear
         # Go to dashboard
         self.get_url('dashboard')
         self.choose_review_bible()
 
-        self.assertEqual("John 14:6", self.get_element_text("#id-verse-title"))
+        self.assertEqual("John 14:6", self.get_element_text("#id-verse-header h2"))
 
     def test_reset_progress(self):
         self.add_verse_set('Bible 101')
@@ -242,16 +256,16 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.get_url('dashboard')
         self.choose_review_bible()
 
-        self.assertEqual("John 3:16", self.get_element_text("#id-verse-title"))
+        self.assertEqual("John 3:16", self.get_element_text("#id-verse-header h2"))
 
-        self.click("#id-verse-dropdown")
+        self.click("#id-verse-options-menu-btn")
         self.click_and_confirm("#id-reset-progress-btn")
 
         # Should reset strength to zero
         self.assertEqual(identity.verse_statuses.get(localized_reference='John 3:16').strength,
                          0)
         # Should revert to initial read mode
-        self.assertTrue(self.is_element_displayed('#id-instructions .stage-read'))
+        self.assertIn("READ", self.get_element_text('#id-instructions'))
 
     def choose_review_bible(self):
         self.submit("input[name='reviewbiblequeue']")
@@ -318,11 +332,6 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
 
             self.click("#id-hint-btn")
 
-        # First two words should not be visually marked correct
-        for i in range(0, 2):
-            classes = self.get_element_attribute("#id-word-%d" % i, "class").split()
-            self.assertNotIn('correct', classes)
-
-        # Hint button should be disabled after 4 clicks
+        # Hint button should be disabled after 3 clicks
         self.assertEqual(self.get_element_attribute("#id-hint-btn", "disabled"),
                          'true')

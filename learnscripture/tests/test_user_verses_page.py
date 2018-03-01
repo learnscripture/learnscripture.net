@@ -53,8 +53,8 @@ class UserVersesPageTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.assertUrlsEqual(reverse('learn'))
         self.assertTextPresent("Psalm 23:1")
 
-        # Should be in 'practise' mode
-        self.assertTrue(self.is_element_displayed("#id-instructions .stage-practice"))
+        # Should be in 'practice' mode
+        self.assertIn("PRACTICE", self.get_element_text("#id-instructions"))
 
         # Type the verse:
         words = "The LORD is my shepherd I shall not want"
@@ -62,15 +62,15 @@ class UserVersesPageTests(RequireExampleVerseSetsMixin, FullBrowserTest):
             self.fill({"#id-typing": word + " "})
 
         # Click next
-        self.click("#id-next-verse-btn")
+        self.click("#id-next-btn")
 
         for i in [1, 2]:
             # Skip
-            self.click("#id-verse-dropdown")
+            self.click("#id-verse-options-menu-btn")
             self.click("#id-skip-verse-btn")
 
         self.wait_for_ajax()
-        self.wait_until_loaded('body')
 
         # Should have gone back to where we came from
+        self.wait_until_loaded('body.user-verses-page')
         self.assertUrlsEqual(reverse('user_verses'))

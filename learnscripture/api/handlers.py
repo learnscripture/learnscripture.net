@@ -407,11 +407,22 @@ class SetPreferences(ApiView):
         'preferences_setup',
     ]
 
-    @require_identity_method
     def post(self, request):
-        form = PreferencesForm(request.POST, instance=request.identity)
+        # Same song and dance as in views.preferences
+        identity = getattr(request, 'identity', None)
+        form = PreferencesForm(request.POST,
+                               instance=identity,
+                               new_signup=identity is None)
         if form.is_valid():
-            identity = form.save()
+            if identity is None:
+                identity = session.start_identity(request)
+                form = PreferencesForm(request.POST,
+                                       instance=identity,
+                                       new_signup=True)
+                identity = form.save()
+                request.identity = identity
+            else:
+                identity = form.save()
             return identity
         else:
             return validation_error_response(form.errors)

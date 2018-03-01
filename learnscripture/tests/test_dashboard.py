@@ -22,7 +22,7 @@ class DashboardTestsBase(RequireExampleVerseSetsMixin):
     def assert_learning_localized_reference(self, ref):
         self.assertUrlsEqual(reverse('learn'))
         if self.is_full_browser_test:
-            self.assertEqual(ref, self.get_element_text("#id-verse-title"))
+            self.assertEqual(ref, self.get_element_text("#id-verse-header h2"))
         else:
             json = self.app.get(reverse('learnscripture.api.versestolearn')).json
             verse_data = [d for d in json if d['learn_order'] == 0][0]
@@ -159,14 +159,14 @@ class DashboardTestsBase(RequireExampleVerseSetsMixin):
         if self.is_full_browser_test:
             # Skip through
             def skip():
-                self.click("#id-verse-dropdown")
-                self.click(text="Skip this")
+                self.click("#id-verse-options-menu-btn")
+                self.click("#id-skip-verse-btn")
             skip()
             self.assertTextPresent("Psalm 23:2")
             skip()
             self.assertTextPresent("Psalm 23:3")
             skip()
-            self.wait_until_loaded('body')
+            self.wait_until_loaded('body.dashboard-page')
 
             # Should be back at dashboard
             self.assertUrlsEqual(reverse('dashboard'))

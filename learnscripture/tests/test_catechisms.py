@@ -1,3 +1,5 @@
+import time
+
 from events.models import Event, EventType
 
 from .base import FullBrowserTest
@@ -18,7 +20,7 @@ class CatechismTests(FullBrowserTest):
         self.get_url('catechisms')
         self.click("input[value=Learn]")
         self.set_preferences()
-        self.assertEqual(self.get_element_text("#id-verse-title"),
+        self.assertEqual(self.get_element_text("#id-verse-header h2"),
                          "Q1. What is the chief end of man?")
 
         # Do some stuff on 'learn' page, for the sake of some basic testing
@@ -33,6 +35,7 @@ class CatechismTests(FullBrowserTest):
 
         self.wait_for_ajax()
 
+        time.sleep(0.5)
         self.assertEqual(Event.objects
                          .filter(event_type=EventType.STARTED_LEARNING_CATECHISM)
                          .count(),

@@ -177,22 +177,25 @@ def bible_versions_for_request(request):
 
 
 @require_preferences
-def learn(request):
+def learn_legacy(request):
     c = {'bible_versions': bible_versions_for_request(request),
          'title': "Learn",
          }
-    return render(request, 'learnscripture/learn.html', c)
+    return render(request, 'learnscripture/learn_legacy.html', c)
 
 
 @require_preferences
-def learn_beta(request):
-    return render(request, 'learnscripture/learn_beta.html', {})
+def learn(request):
+    return render(request, 'learnscripture/learn.html', {})
 
 
 def preferences(request):
+    # See also api.handlers.SetPreferences
     identity = getattr(request, 'identity', None)
     if request.method == "POST":
-        form = PreferencesForm(request.POST, instance=identity)
+        form = PreferencesForm(request.POST,
+                               instance=identity,
+                               new_signup=identity is None)
         if form.is_valid():
             if identity is None:
                 # This little routine is needed so that
@@ -200,8 +203,9 @@ def preferences(request):
                 # way, yet, don't create an identity until
                 # they press the 'save' button.
                 identity = session.start_identity(request)
-                form = PreferencesForm(request.POST, instance=identity)
-
+                form = PreferencesForm(request.POST, instance=identity,
+                                       new_signup=True)
+                request.identity = identity
             form.save()
             return get_next(request, reverse('dashboard'))
     else:
@@ -276,7 +280,7 @@ def learn_set(request, uvs_list, learning_type):
 
 
 def get_learn_page(request):
-    return reverse('learn-beta') if request.identity.new_learn_page else reverse('learn')
+    return reverse('learn') if request.identity.new_learn_page else reverse('learn_legacy')
 
 
 def get_user_groups(identity):

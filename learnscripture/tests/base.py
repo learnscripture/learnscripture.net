@@ -34,6 +34,7 @@ class FuzzyInt(int):
 def create_account(version_slug='KJV',
                    email="test1@test.com",
                    username="tëst1",
+                   seen_help_tour=True,
                    is_active=True):
     """
     Creates an account, returning (identity, account) tuple
@@ -45,16 +46,19 @@ def create_account(version_slug='KJV',
                                      )
     account.set_password('password')
     account.save()
-    identity = create_identity(version_slug=version_slug, account=account)
+    identity = create_identity(version_slug=version_slug,
+                               seen_help_tour=seen_help_tour,
+                               account=account)
     return (identity, account)
 
 
-def create_identity(version_slug='KJV', account=None):
+def create_identity(version_slug='KJV', account=None, seen_help_tour=True):
     version = TextVersion.objects.get(slug=version_slug)
     return Identity.objects.create(default_bible_version=version,
                                    enable_animations=False,
                                    enable_sounds=False,
                                    account=account,
+                                   seen_help_tour=True,
                                    )
 
 
@@ -124,7 +128,7 @@ class LoginMixin(object):
     def setup_identity(self, identity=None):
         if identity is None:
             Identity.objects.all().delete()
-            identity = Identity.objects.create()
+            identity = Identity.objects.create(seen_help_tour=True)
             identity.default_bible_version = TextVersion.objects.get(slug='NET')
             identity.save()
 
@@ -232,9 +236,6 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
             return
 
         self.fill_by_text({"#id_default_bible_version": "KJV (King James Version)"})
-
-        # Turn animations off, as they can complicate testing.
-        self.fill({"#id_enable_animations": False})
 
         if self.is_element_present('#id-preferences-save-btn'):
             # side panel

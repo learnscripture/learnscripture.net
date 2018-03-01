@@ -3,7 +3,7 @@
 
 // Learning and testing functionality for learnscripture.net
 
-// Refer to learn.html for UI definition.
+// Refer to learn_legacy.html for UI definition.
 //
 // = Main concepts =
 //
