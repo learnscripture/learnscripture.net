@@ -6277,8 +6277,8 @@ type alias HelpTourStep =
     }
 
 
-initialTourSteps : Pivot.Pivot HelpTourStep
-initialTourSteps =
+initialTourSteps : Model -> Pivot.Pivot HelpTourStep
+initialTourSteps model =
     let
         fakeHttpCalls =
             (\model ->
@@ -6398,7 +6398,13 @@ initialTourSteps =
               , positionSelector = Nothing
               , adapter = identity
               }
-            , { html = show "The total points you've earned in the current batch of verses are displayed here."
+            , { html = show ("The total points you've earned in the current batch of verses are displayed here." ++
+                                 (if scoringEnabled model then
+                                     ""
+                                  else
+                                      " You need to create an account (from the link on your dashboard) to start earning points."
+                                 ))
+
               , class = "help-tour-below"
               , highlightSelector = Just "nav .action-logs .nav-item"
               , positionSelector = Nothing
@@ -6489,7 +6495,7 @@ startHelpTour model =
                 initialHelpTourState =
                     { savedModel = model
                     , savedModelInitialSnapshot = model
-                    , steps = initialTourSteps
+                    , steps = initialTourSteps model
                     }
             in
                 doHelpTourStep initialHelpTourState True
