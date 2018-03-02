@@ -5325,13 +5325,49 @@ friendlyTimeUntil testdue =
 
 
 type TrackedHttpCall
-    = RecordTestComplete CurrentVerse Float TestType
-    | RecordReadComplete CurrentVerse
-    | RecordSkipVerse VerseStatus
-    | RecordCancelLearning VerseStatus
-    | RecordResetProgress VerseStatus
-    | RecordReviewSooner VerseStatus Float
+    = RecordTestComplete TestCompleteData
+    | RecordReadComplete VerseApiCallData
+    | RecordSkipVerse VerseApiCallData
+    | RecordCancelLearning VerseApiCallData
+    | RecordResetProgress VerseApiCallData
+    | RecordReviewSooner ReviewSoonerData
     | LoadVerses Bool
+
+
+type alias TestCompleteData =
+    { localizedReference : String
+    , id : UvsId
+    , needsTesting : Bool
+    , accuracy : Float
+    , testType : TestType
+    , wasPracticeTest : Bool
+    }
+
+
+{-| Generic data type that covers most of our API call needs
+-}
+type alias VerseApiCallData =
+    { localizedReference : String
+    , id : UvsId
+    , needsTesting : Bool
+    , versionSlug : String
+    }
+
+
+verseStatusToApiCallData : VerseStatus -> VerseApiCallData
+verseStatusToApiCallData verseStatus =
+    { localizedReference = verseStatus.localizedReference
+    , id = verseStatus.id
+    , needsTesting = verseStatus.needsTesting
+    , versionSlug = verseStatus.version.slug
+    }
+
+
+type alias ReviewSoonerData =
+    { localizedReference : String
+    , versionSlug : String
+    , reviewAfter : Float
+    }
 
 
 type alias QueuedCall =
@@ -5348,26 +5384,26 @@ maxHttpRetries =
 trackedHttpCallCaption : TrackedHttpCall -> String
 trackedHttpCallCaption call =
     case call of
-        RecordTestComplete currentVerse _ testType ->
-            if isPracticeTest currentVerse testType then
-                interpolate "Marking done - {0}" [ currentVerse.verseStatus.localizedReference ]
+        RecordTestComplete callData ->
+            if callData.wasPracticeTest then
+                interpolate "Marking done - {0}" [ callData.localizedReference ]
             else
-                interpolate "Saving score - {0}" [ currentVerse.verseStatus.localizedReference ]
+                interpolate "Saving score - {0}" [ callData.localizedReference ]
 
-        RecordReadComplete currentVerse ->
-            interpolate "Recording read - {0}" [ currentVerse.verseStatus.localizedReference ]
+        RecordReadComplete callData ->
+            interpolate "Recording read - {0}" [ callData.localizedReference ]
 
-        RecordSkipVerse verseStatus ->
-            interpolate "Recording skipped item {0}" [ verseStatus.localizedReference ]
+        RecordSkipVerse callData ->
+            interpolate "Recording skipped item {0}" [ callData.localizedReference ]
 
-        RecordCancelLearning verseStatus ->
-            interpolate "Recording cancelled item {0}" [ verseStatus.localizedReference ]
+        RecordCancelLearning callData ->
+            interpolate "Recording cancelled item {0}" [ callData.localizedReference ]
 
-        RecordResetProgress verseStatus ->
-            interpolate "Resetting progress for {0}" [ verseStatus.localizedReference ]
+        RecordResetProgress callData ->
+            interpolate "Resetting progress for {0}" [ callData.localizedReference ]
 
-        RecordReviewSooner verseStatus _ ->
-            interpolate "Marking {0} for reviewing sooner" [ verseStatus.localizedReference ]
+        RecordReviewSooner callData ->
+            interpolate "Marking {0} for reviewing sooner" [ callData.localizedReference ]
 
         LoadVerses _ ->
             "Loading items for learning..."
@@ -5487,14 +5523,14 @@ makeHttpCall model callId =
 
                 cmd =
                     case call of
-                        RecordTestComplete currentVerse accuracy testType ->
-                            callRecordTestComplete model.httpConfig callId currentVerse accuracy testType
+                        RecordTestComplete testCompleteData ->
+                            callRecordTestComplete model.httpConfig callId testCompleteData
 
-                        RecordReadComplete currentVerse ->
-                            callRecordReadComplete model.httpConfig callId currentVerse
+                        RecordReadComplete readCompleteData ->
+                            callRecordReadComplete model.httpConfig callId readCompleteData
 
-                        RecordSkipVerse verseStatus ->
-                            callRecordSkipVerse model.httpConfig callId verseStatus
+                        RecordSkipVerse verseSkipData ->
+                            callRecordSkipVerse model.httpConfig callId verseSkipData
 
                         RecordCancelLearning verseStatus ->
                             callRecordCancelLearning model.httpConfig callId verseStatus
@@ -5502,8 +5538,8 @@ makeHttpCall model callId =
                         RecordResetProgress verseStatus ->
                             callRecordResetProgress model.httpConfig callId verseStatus
 
-                        RecordReviewSooner verseStatus reviewAfter ->
-                            callRecordReviewSooner model.httpConfig callId verseStatus reviewAfter
+                        RecordReviewSooner callData ->
+                            callRecordReviewSooner model.httpConfig callId callData
 
                         LoadVerses initialPageLoad ->
                             callLoadVerses model.httpConfig callId model initialPageLoad
@@ -5825,23 +5861,29 @@ actionCompleteUrl =
 
 recordTestComplete : CurrentVerse -> Float -> TestType -> Cmd Msg
 recordTestComplete currentVerse accuracy testType =
-    sendStartTrackedCallMsg (RecordTestComplete currentVerse accuracy testType)
+    sendStartTrackedCallMsg
+        (RecordTestComplete
+            { localizedReference = currentVerse.verseStatus.localizedReference
+            , id = currentVerse.verseStatus.id
+            , needsTesting = currentVerse.verseStatus.needsTesting
+            , accuracy = accuracy
+            , testType = testType
+            , wasPracticeTest = isPracticeTest currentVerse testType
+            }
+        )
 
 
-callRecordTestComplete : HttpConfig -> CallId -> CurrentVerse -> Float -> TestType -> Cmd Msg
-callRecordTestComplete httpConfig callId currentVerse accuracy testType =
+callRecordTestComplete : HttpConfig -> CallId -> TestCompleteData -> Cmd Msg
+callRecordTestComplete httpConfig callId testCompleteData =
     let
-        verseStatus =
-            currentVerse.verseStatus
-
         body =
             Http.multipartBody
-                [ Http.stringPart "uvs_id" (toString verseStatus.id)
-                , Http.stringPart "uvs_needs_testing" (encodeBool <| verseStatus.needsTesting)
+                [ Http.stringPart "uvs_id" (toString testCompleteData.id)
+                , Http.stringPart "uvs_needs_testing" (encodeBool <| testCompleteData.needsTesting)
                 , Http.stringPart "stage" stageTypeTest
-                , Http.stringPart "accuracy" (encodeFloat accuracy)
+                , Http.stringPart "accuracy" (encodeFloat testCompleteData.accuracy)
                 , Http.stringPart "practice"
-                    (encodeBool <| isPracticeTest currentVerse testType)
+                    (encodeBool <| testCompleteData.wasPracticeTest)
                 ]
     in
         Http.send (RecordActionCompleteReturned callId)
@@ -5860,19 +5902,17 @@ isPracticeTest currentVerse testType =
 
 recordReadComplete : CurrentVerse -> Cmd Msg
 recordReadComplete currentVerse =
-    sendStartTrackedCallMsg (RecordReadComplete currentVerse)
+    sendStartTrackedCallMsg
+        (RecordReadComplete (verseStatusToApiCallData currentVerse.verseStatus))
 
 
-callRecordReadComplete : HttpConfig -> CallId -> CurrentVerse -> Cmd Msg
-callRecordReadComplete httpConfig callId currentVerse =
+callRecordReadComplete : HttpConfig -> CallId -> VerseApiCallData -> Cmd Msg
+callRecordReadComplete httpConfig callId callData =
     let
-        verseStatus =
-            currentVerse.verseStatus
-
         body =
             Http.multipartBody
-                [ Http.stringPart "uvs_id" (toString verseStatus.id)
-                , Http.stringPart "uvs_needs_testing" (encodeBool <| verseStatus.needsTesting)
+                [ Http.stringPart "uvs_id" (toString callData.id)
+                , Http.stringPart "uvs_needs_testing" (encodeBool <| callData.needsTesting)
                 , Http.stringPart "stage" stageTypeRead
                 ]
     in
@@ -5903,15 +5943,16 @@ skipVerseUrl =
 
 recordSkipVerse : VerseStatus -> Cmd Msg
 recordSkipVerse verseStatus =
-    sendStartTrackedCallMsg (RecordSkipVerse verseStatus)
+    sendStartTrackedCallMsg
+        (RecordSkipVerse (verseStatusToApiCallData verseStatus))
 
 
-callRecordSkipVerse : HttpConfig -> CallId -> VerseStatus -> Cmd Msg
-callRecordSkipVerse httpConfig callId verseStatus =
+callRecordSkipVerse : HttpConfig -> CallId -> VerseApiCallData -> Cmd Msg
+callRecordSkipVerse httpConfig callId callData =
     let
         body =
             Http.multipartBody
-                [ Http.stringPart "uvs_id" (toString verseStatus.id)
+                [ Http.stringPart "uvs_id" (toString callData.id)
                 ]
     in
         Http.send (EmptyResponseTrackedHttpCallReturned callId)
@@ -5933,17 +5974,18 @@ cancelLearningUrl =
 
 recordCancelLearning : VerseStatus -> Cmd Msg
 recordCancelLearning verseStatus =
-    sendStartTrackedCallMsg (RecordCancelLearning verseStatus)
+    sendStartTrackedCallMsg
+        (RecordCancelLearning (verseStatusToApiCallData verseStatus))
 
 
-callRecordCancelLearning : HttpConfig -> CallId -> VerseStatus -> Cmd Msg
-callRecordCancelLearning httpConfig callId verseStatus =
+callRecordCancelLearning : HttpConfig -> CallId -> VerseApiCallData -> Cmd Msg
+callRecordCancelLearning httpConfig callId callData =
     let
         body =
             Http.multipartBody
-                [ Http.stringPart "uvs_id" (toString verseStatus.id)
-                , Http.stringPart "localized_reference" verseStatus.localizedReference
-                , Http.stringPart "version_slug" verseStatus.version.slug
+                [ Http.stringPart "uvs_id" (toString callData.id)
+                , Http.stringPart "localized_reference" callData.localizedReference
+                , Http.stringPart "version_slug" callData.versionSlug
                 ]
     in
         Http.send (EmptyResponseTrackedHttpCallReturned callId)
@@ -5965,16 +6007,17 @@ resetProgressUrl =
 
 recordResetProgress : VerseStatus -> Cmd Msg
 recordResetProgress verseStatus =
-    sendStartTrackedCallMsg (RecordResetProgress verseStatus)
+    sendStartTrackedCallMsg
+        (RecordResetProgress (verseStatusToApiCallData verseStatus))
 
 
-callRecordResetProgress : HttpConfig -> CallId -> VerseStatus -> Cmd Msg
-callRecordResetProgress httpConfig callId verseStatus =
+callRecordResetProgress : HttpConfig -> CallId -> VerseApiCallData -> Cmd Msg
+callRecordResetProgress httpConfig callId callData =
     let
         body =
             Http.multipartBody
-                [ Http.stringPart "localized_reference" verseStatus.localizedReference
-                , Http.stringPart "version_slug" verseStatus.version.slug
+                [ Http.stringPart "localized_reference" callData.localizedReference
+                , Http.stringPart "version_slug" callData.versionSlug
                 ]
     in
         Http.send (EmptyResponseTrackedHttpCallReturned callId)
@@ -5996,17 +6039,23 @@ reviewSoonerUrl =
 
 recordReviewSooner : VerseStatus -> Float -> Cmd Msg
 recordReviewSooner verseStatus reviewAfter =
-    sendStartTrackedCallMsg (RecordReviewSooner verseStatus reviewAfter)
+    sendStartTrackedCallMsg
+        (RecordReviewSooner
+            { localizedReference = verseStatus.localizedReference
+            , versionSlug = verseStatus.version.slug
+            , reviewAfter = reviewAfter
+            }
+        )
 
 
-callRecordReviewSooner : HttpConfig -> CallId -> VerseStatus -> Float -> Cmd Msg
-callRecordReviewSooner httpConfig callId verseStatus reviewAfter =
+callRecordReviewSooner : HttpConfig -> CallId -> ReviewSoonerData -> Cmd Msg
+callRecordReviewSooner httpConfig callId callData =
     let
         body =
             Http.multipartBody
-                [ Http.stringPart "localized_reference" verseStatus.localizedReference
-                , Http.stringPart "version_slug" verseStatus.version.slug
-                , Http.stringPart "review_after" (reviewAfter / 1000 |> round |> toString)
+                [ Http.stringPart "localized_reference" callData.localizedReference
+                , Http.stringPart "version_slug" callData.versionSlug
+                , Http.stringPart "review_after" (callData.reviewAfter / 1000 |> round |> toString)
                 ]
     in
         Http.send (EmptyResponseTrackedHttpCallReturned callId)
@@ -6282,6 +6331,16 @@ type alias HelpTourStep =
 initialTourSteps : Model -> Pivot.Pivot HelpTourStep
 initialTourSteps model =
     let
+        fakeTestCompleteCallData currentVerse =
+            RecordTestComplete
+                { localizedReference = currentVerse.verseStatus.localizedReference
+                , id = 0
+                , needsTesting = True
+                , accuracy = 0.9
+                , testType = FirstTest
+                , wasPracticeTest = False
+                }
+
         fakeHttpCalls =
             (\model ->
                 withCurrentVerse model
@@ -6291,7 +6350,7 @@ initialTourSteps model =
                             | currentHttpCalls =
                                 Dict.fromList
                                     [ ( 0
-                                      , { call = RecordTestComplete currentVerse 0.9 FirstTest
+                                      , { call = fakeTestCompleteCallData currentVerse
                                         , attempts = 2
                                         }
                                       )
@@ -6308,11 +6367,11 @@ initialTourSteps model =
                         { model
                           -- one failed, one queued
                             | permanentFailHttpCalls =
-                                [ ( 0, RecordTestComplete currentVerse 0.9 FirstTest ) ]
+                                [ ( 0, fakeTestCompleteCallData currentVerse ) ]
                             , currentHttpCalls =
                                 Dict.fromList
                                     [ ( 1
-                                      , { call = RecordTestComplete currentVerse 0.9 FirstTest
+                                      , { call = fakeTestCompleteCallData currentVerse
                                         , attempts = 0
                                         }
                                       )
