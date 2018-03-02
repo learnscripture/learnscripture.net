@@ -562,11 +562,20 @@ class VerseSetManager(models.Manager):
             return verse_sets.none()
 
         if parsed_ref is not None:
+            set_types = [
+                VerseSetType.SELECTION,
+                VerseSetType.PASSAGE
+            ]
             if parsed_ref.start_verse is None:
                 # To find a whole chapter, look for sets containing first verse.
                 parsed_ref.start_verse = 1
+                # But limit to only passage types
+                set_types = [
+                    VerseSetType.PASSAGE
+                ]
 
             return verse_sets.filter(
+                set_type__in=set_types,
                 verse_choices__internal_reference=parsed_ref.to_internal().canonical_form())
 
         else:
