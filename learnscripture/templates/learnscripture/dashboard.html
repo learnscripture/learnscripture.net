@@ -72,6 +72,29 @@
     </div>
   {% endif %}
 
+  <div id="id-unfinished-session-warning"
+       {# There are two types of unfinished session #}
+       {# One is detected server side with session.unfinished_session #}
+       {# The other can only be detected using localStorage client side #}
+       {% if not unfinished_session %}
+       style="display: none;"
+       {% endif %}
+       >
+    <h2>Continue</h2>
+    <div class="actionset">
+      <div class="addclearfix">
+        <form action="" method="POST">
+          {% csrf_token %}
+          <input type="submit" name="continue_session" class="btn primary" value="Continue">
+        </form>
+        <p>You have an unfinished learning session.</p>
+        <p id="id-unfinished-session-unsaved-data-warning" style="display:none;">
+          <b>Continue the session to sync unsaved data.</b>
+        </p>
+      </div>
+    </div>
+  </div>
+
   <h2>Review</h2>
 
   <div class="actionset">

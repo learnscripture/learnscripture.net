@@ -10,6 +10,7 @@ import { UAParser } from 'ua-parser-js';
 import './preferences';
 import { isTouchDevice } from './common';
 import { doBeep, setUpAudio } from './sound';
+import { getSavedCalls, storeSavedCalls } from './offlineutils';
 
 // CSS/Less
 import 'learn.less';
@@ -18,19 +19,7 @@ import Elm from "../elm/Learn";
 var preferencesNode = document.getElementById('id-preferences-data');
 var accountNode = document.getElementById('id-account-data');
 
-var savedCalls = []
-if (window.localStorage !== undefined) {
-    var savedCallsJSON = window.localStorage.getItem("learnscripture_Learn_savedCalls");
-    if (!savedCallsJSON) {
-        savedCalls = [];
-    } else {
-        try {
-            savedCalls = JSON.parse(savedCallsJSON);
-        } catch (e) {
-            savedCalls = [];
-        }
-    }
-}
+var savedCalls = getSavedCalls();
 
 var app =
     Elm.Learn.embed(
@@ -381,8 +370,6 @@ function whenVisible(selector, maxAttempts, action) {
 
 
 app.ports.saveCallsToLocalStorage.subscribe(function (args) {
-    if (window.localStorage !== undefined) {
-        window.localStorage.setItem("learnscripture_Learn_savedCalls", JSON.stringify(args))
-    }
+    storeSavedCalls(args);
 });
 
