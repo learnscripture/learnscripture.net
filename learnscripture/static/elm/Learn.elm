@@ -1017,6 +1017,7 @@ viewCurrentVerse session model =
 
                         _ ->
                             shouldUseHardTestingMode currentVerse
+
                 _ ->
                     False
 
@@ -1028,10 +1029,10 @@ viewCurrentVerse session model =
 
                     _ ->
                         ""
-                ++ if shouldHideWordBoundaries then
-                       "hide-word-boundaries "
-                   else
-                       ""
+                            ++ if shouldHideWordBoundaries then
+                                "hide-word-boundaries "
+                               else
+                                ""
 
         verseScaledStrength =
             scaledStrength (currentVerseStrength currentVerse)
@@ -1104,7 +1105,8 @@ viewCurrentVerse session model =
                             [ H.div [ A.class "previous-verse" ]
                                 (versePartsToHtml ReadForContext
                                     (partsForVerse verse ReadForContextStage testingMethod)
-                                    verse.id False
+                                    verse.id
+                                    False
                                 )
                             , H.a
                                 [ A.href "#"
