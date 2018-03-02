@@ -557,12 +557,18 @@ class VerseSetManager(models.Manager):
                 language_code,
                 query,
                 allow_whole_book=False,
-                allow_whole_chapter=False)
+                allow_whole_chapter=True)
         except InvalidVerseReference:
             return verse_sets.none()
+
         if parsed_ref is not None:
+            if parsed_ref.start_verse is None:
+                # To find a whole chapter, look for sets containing first verse.
+                parsed_ref.start_verse = 1
+
             return verse_sets.filter(
                 verse_choices__internal_reference=parsed_ref.to_internal().canonical_form())
+
         else:
             return verse_sets.filter(name__icontains=query)
 
