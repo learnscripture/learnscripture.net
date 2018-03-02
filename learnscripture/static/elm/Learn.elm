@@ -5681,19 +5681,22 @@ markCallFinished model callId =
                 | currentHttpCalls = Dict.remove callId model.currentHttpCalls
             }
 
+        queueEmpty = trackedCallQueueEmpty newModel1
+
         newModel2 =
             if
-                dropdownIsOpen model AjaxInfo
-                    && List.isEmpty newModel1.permanentFailHttpCalls
-                    && Dict.isEmpty newModel1.currentHttpCalls
+                dropdownIsOpen model AjaxInfo && queueEmpty
             then
+                -- An empty AjaxInfo menu appears to be closed. To avoid UI
+                -- surprises we stop the menu from "opening itself" when more
+                -- items are added to it.
                 closeDropdowns newModel1
             else
                 newModel1
 
         ( newModel3, cmd ) =
             -- If we have finished doing our syncing, then move to loading verses.
-            if trackedCallQueueEmpty newModel2 && newModel2.learningSession == Syncing then
+            if queueEmpty && newModel2.learningSession == Syncing then
                 let
                     newModel3a =
                         { newModel2
