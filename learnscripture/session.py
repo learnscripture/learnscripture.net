@@ -234,3 +234,7 @@ def save_referrer(request):
     """
     if 'from' in request.GET:
         request.session['referrer_username'] = request.GET['from']
+
+
+def unfinished_session(request):
+    return len(_get_verse_status_ids(request)) > 0

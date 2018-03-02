@@ -316,8 +316,9 @@ def dashboard(request):
         return HttpResponseRedirect(reverse('choose'))
 
     if request.method == 'POST':
-
         get_catechism_id = lambda: int(request.POST['catechism_id'])
+        if 'continue_session' in request.POST:
+            return HttpResponseRedirect(get_learn_page(request))
 
         if 'learnbiblequeue' in request.POST:
             if 'verse_set_id' in request.POST:
@@ -430,7 +431,8 @@ def dashboard(request):
          'groups': groups,
          'more_groups': more_groups,
          'url_after_logout': '/',
-         'heatmap_stats_types': HeatmapStatsType.choice_list
+         'heatmap_stats_types': HeatmapStatsType.choice_list,
+         'unfinished_session': session.unfinished_session(request),
          }
     c.update(todays_stats(identity))
     return render(request, 'learnscripture/dashboard.html', c)

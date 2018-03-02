@@ -1,6 +1,8 @@
 import CalHeatMap = require('cal-heatmap');
 import 'cal-heatmap/cal-heatmap.css';
 
+import { getSavedCalls } from './offlineutils';
+
 var calHeatMapData = null;
 var calHeatMapInstance = null;
 var saveHeatmapPreferencesTimeout = null;
@@ -203,6 +205,12 @@ var setupDashboardControls = function() {
         }
         saveHeatmapPreferencesDelayed();
     })
+
+    if (getSavedCalls().length > 0) {
+        $("#id-unfinished-session-warning").show();
+        $("#id-unfinished-session-unsaved-data-warning").show();
+    }
+
 };
 
 $(document).ready(function() {
