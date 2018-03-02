@@ -12,11 +12,13 @@ import ISO8601
 import Json.Decode as JD
 import Json.Decode.Pipeline as JDP
 import Json.Encode as JE
+import Json.Helpers
 import Maybe
 import MemoryModel
 import Native.Confirm
 import Native.StringUtils
 import Navigation
+import Pivot
 import Process
 import Random
 import Random.List
@@ -27,7 +29,6 @@ import StringInterpolate.Interpolate exposing (interpolate)
 import Task
 import Time
 import Window
-import Pivot
 
 
 {- Main -}
@@ -62,6 +63,9 @@ port beep : ( Float, Float ) -> Cmd msg
 port helpTourHighlightElement : ( String, String ) -> Cmd msg
 
 
+port saveCallsToLocalStorage : JD.Value -> Cmd msg
+
+
 
 {- Constants -}
 
@@ -87,6 +91,7 @@ type alias Flags =
         { width : Int
         , height : Int
         }
+    , savedCalls : JD.Value
     }
 
 
@@ -121,41 +126,75 @@ init flags =
 
         windowSize =
             flags.windowSize
-    in
-        ( { preferences = preferences
-          , autoSavedPreferences = autoSavedPreferences
-          , user =
+
+        trackedCalls =
+            case JD.decodeValue trackedCallsListDecoder flags.savedCalls of
+                Ok v ->
+                    v
+
+                Err _ ->
+                    []
+
+        currentHttpCalls =
+            Dict.fromList
+                (trackedCalls
+                    |> List.map
+                        (\( callId, call ) ->
+                            ( callId
+                            , { attempts = 0
+                              , call = call
+                              }
+                            )
+                        )
+                )
+
+        model1 =
+            { preferences = preferences
+            , autoSavedPreferences = autoSavedPreferences
+            , user =
                 case flags.account of
                     Just ad ->
                         Account ad
 
                     Nothing ->
                         GuestUser
-          , isTouchDevice = flags.isTouchDevice
-          , httpConfig =
+            , isTouchDevice = flags.isTouchDevice
+            , httpConfig =
                 { csrfMiddlewareToken = flags.csrfMiddlewareToken
                 }
-          , learningSession = Loading
-          , helpVisible = False
-          , previousVerseVisible = False
-          , currentHttpCalls = Dict.empty
-          , permanentFailHttpCalls = []
-          , openDropdown = Nothing
-          , pinnedMenus = setPinnedMenus autoSavedPreferences windowSize
-          , sessionStats = Nothing
-          , attemptingReturn = False
-          , currentTime =
+            , learningSession = Loading
+            , helpVisible = False
+            , previousVerseVisible = False
+            , currentHttpCalls = currentHttpCalls
+            , permanentFailHttpCalls = []
+            , openDropdown = Nothing
+            , pinnedMenus = setPinnedMenus autoSavedPreferences windowSize
+            , sessionStats = Nothing
+            , attemptingReturn = False
+            , currentTime =
                 ISO8601.fromTime 0
                 -- Hard coding this to prefer reading, instead of storing in preferences
                 -- etc., is a deliberate design decision to reduce the number of tests. If
                 -- people want to prefer testing to reading, they have to select it in
                 -- each passage testing session.
-          , testOrReadPreference = PreferReading
-          , windowSize = windowSize
-          , helpTour = Nothing
-          }
-        , loadVerses True
-        )
+            , testOrReadPreference = PreferReading
+            , windowSize = windowSize
+            , helpTour = Nothing
+            }
+    in
+        -- If we have a backlog of saved calls from a previous session, we must
+        -- flush them to the server before loading new data, otherwise the data
+        -- from the server will be out of date.
+        if Dict.isEmpty currentHttpCalls then
+            ( model1, loadVerses True )
+        else
+            let
+                model2 =
+                    { model1
+                        | learningSession = Syncing
+                    }
+            in
+                triggerQueuedCalls model2
 
 
 setPinnedMenus : AutoSavedPreferences -> { height : Int, width : Int } -> Set.Set String
@@ -257,6 +296,7 @@ type alias AccountData =
 
 type LearningSession
     = Loading
+    | Syncing
     | VersesError Http.Error
     | Session SessionData
 
@@ -558,6 +598,9 @@ view model =
         , case model.learningSession of
             Loading ->
                 loadingDiv
+
+            Syncing ->
+                syncingDiv
 
             VersesError err ->
                 errorMessage ("The items to learn could not be loaded (error message: " ++ toString err ++ ".) Please check your internet connection!")
@@ -985,6 +1028,11 @@ userDisplayName u =
 loadingDiv : H.Html msg
 loadingDiv =
     H.div [ A.id "id-loading-full" ] [ H.text "Loading" ]
+
+
+syncingDiv : H.Html msg
+syncingDiv =
+    H.div [ A.id "id-loading-full" ] [ H.text "Syncing" ]
 
 
 viewCurrentVerse : SessionData -> Model -> H.Html Msg
@@ -5419,7 +5467,17 @@ it and then triggering its execution.
 -}
 startTrackedCall : Model -> TrackedHttpCall -> ( Model, Cmd Msg )
 startTrackedCall model trackedCall =
-    triggerQueuedCalls (addTrackedCall model trackedCall)
+    let
+        ( newModel1, cmd1 ) =
+            addTrackedCall model trackedCall
+
+        ( newModel2, cmd2 ) =
+            triggerQueuedCalls newModel1
+    in
+        ( newModel2
+        , Cmd.batch
+            [ cmd1, cmd2 ]
+        )
 
 
 {-| For a given TrackedHttpCall object, return a command that triggers
@@ -5547,7 +5605,7 @@ makeHttpCall model callId =
                 ( newModel, cmd )
 
 
-addTrackedCall : Model -> TrackedHttpCall -> Model
+addTrackedCall : Model -> TrackedHttpCall -> ( Model, Cmd Msg )
 addTrackedCall model trackedCall =
     let
         -- We need to give the call an order so that it executes after all
@@ -5557,8 +5615,11 @@ addTrackedCall model trackedCall =
 
         callId =
             1 + (usedCallIds |> List.maximum |> Maybe.withDefault 0)
+
+        newModel1 =
+            addOrderedTrackedCall model callId trackedCall
     in
-        addOrderedTrackedCall model callId trackedCall
+        ( newModel1, saveTrackedCallsToLocalStorage newModel1 )
 
 
 addOrderedTrackedCall : Model -> CallId -> TrackedHttpCall -> Model
@@ -5579,15 +5640,19 @@ handleRetries updateFunction model callId result =
         Ok v ->
             let
                 ( newModel1, cmd1 ) =
-                    updateFunction (markCallFinished model callId) v
+                    markCallFinished model callId
 
                 ( newModel2, cmd2 ) =
-                    triggerQueuedCalls newModel1
+                    updateFunction newModel1 v
+
+                ( newModel3, cmd3 ) =
+                    triggerQueuedCalls newModel2
             in
-                ( newModel2
+                ( newModel3
                 , Cmd.batch
                     [ cmd1
                     , cmd2
+                    , cmd3
                     ]
                 )
 
@@ -5608,7 +5673,7 @@ handleRetries updateFunction model callId result =
                         markFailAndRetry model callId
 
 
-markCallFinished : Model -> CallId -> Model
+markCallFinished : Model -> CallId -> ( Model, Cmd Msg )
 markCallFinished model callId =
     let
         newModel1 =
@@ -5625,8 +5690,31 @@ markCallFinished model callId =
                 closeDropdowns newModel1
             else
                 newModel1
+
+        ( newModel3, cmd ) =
+            -- If we have finished doing our syncing, then move to loading verses.
+            if trackedCallQueueEmpty newModel2 && newModel2.learningSession == Syncing then
+                let
+                    newModel3a =
+                        { newModel2
+                            | learningSession = Loading
+                        }
+                in
+                    loadVersesImmediate newModel3a True
+            else
+                ( newModel2, Cmd.none )
     in
-        newModel2
+        ( newModel3
+        , Cmd.batch
+            [ cmd
+            , saveTrackedCallsToLocalStorage newModel3
+            ]
+        )
+
+
+trackedCallQueueEmpty : Model -> Bool
+trackedCallQueueEmpty model =
+    Dict.isEmpty model.currentHttpCalls && List.isEmpty model.permanentFailHttpCalls
 
 
 markPermanentFailCall : Model -> CallId -> Model
@@ -5707,6 +5795,32 @@ isLoadVersesCall call =
 
         _ ->
             False
+
+
+saveTrackedCallsToLocalStorage : Model -> Cmd Msg
+saveTrackedCallsToLocalStorage model =
+    let
+        allTrackedCalls =
+            model.permanentFailHttpCalls
+                ++ (Dict.toList model.currentHttpCalls
+                        |> List.map (\( callId, { call } ) -> ( callId, call ))
+                   )
+
+        filteredTrackedCalls =
+            allTrackedCalls
+                |> List.filter (\( callId, call ) -> isRecordCall call)
+    in
+        saveCallsToLocalStorage (encodeTrackedCallsList filteredTrackedCalls)
+
+
+isRecordCall : TrackedHttpCall -> Bool
+isRecordCall trackedCall =
+    case trackedCall of
+        LoadVerses _ ->
+            False
+
+        _ ->
+            True
 
 
 
@@ -6785,6 +6899,9 @@ adjustModelForHelpTour model =
                             Loading ->
                                 ( exampleVerseStatus, exampleActionLogStore )
 
+                            Syncing ->
+                                ( exampleVerseStatus, exampleActionLogStore )
+
                             VersesError _ ->
                                 ( exampleVerseStatus, exampleActionLogStore )
 
@@ -7254,6 +7371,153 @@ sessionStatsDecoder =
 emptyDecoder : JD.Decoder ()
 emptyDecoder =
     JD.succeed ()
+
+
+encodeTrackedCallsList : List ( CallId, TrackedHttpCall ) -> JE.Value
+encodeTrackedCallsList calls =
+    calls
+        |> List.map
+            (\( callId, callData ) ->
+                JE.object
+                    [ ( "id", JE.int callId )
+                    , ( "call", encodeTrackedCall callData )
+                    ]
+            )
+        |> JE.list
+
+
+trackedCallsListDecoder : JD.Decoder (List ( CallId, TrackedHttpCall ))
+trackedCallsListDecoder =
+    JD.list
+        (JD.map2 (\id call -> ( id, call ))
+            (JD.field "id" JD.int)
+            (JD.field "call" trackedCallDecoder)
+        )
+
+
+encodeTrackedCall : TrackedHttpCall -> JE.Value
+encodeTrackedCall call =
+    let
+        testCompleteEncoding callData =
+            [ ( "localizedReference", JE.string callData.localizedReference )
+            , ( "id", JE.int callData.id )
+            , ( "needsTesting", JE.bool callData.needsTesting )
+            , ( "accuracy", JE.float callData.accuracy )
+            , ( "testType", encodeTestType callData.testType )
+            , ( "wasPracticeTest", JE.bool callData.wasPracticeTest )
+            ]
+
+        verseApiCallEncoding callData =
+            [ ( "localizedReference", JE.string callData.localizedReference )
+            , ( "id", JE.int callData.id )
+            , ( "needsTesting", JE.bool callData.needsTesting )
+            , ( "versionSlug", JE.string callData.versionSlug )
+            ]
+
+        reviewSoonerEncoding callData =
+            [ ( "localizedReference", JE.string callData.localizedReference )
+            , ( "versionSlug", JE.string callData.versionSlug )
+            , ( "reviewAfter", JE.float callData.reviewAfter )
+            ]
+
+        keyval v =
+            case v of
+                RecordTestComplete callData ->
+                    ( "RecordTestComplete"
+                    , Json.Helpers.encodeObject (testCompleteEncoding callData)
+                    )
+
+                RecordReadComplete callData ->
+                    ( "RecordReadComplete"
+                    , Json.Helpers.encodeObject (verseApiCallEncoding callData)
+                    )
+
+                RecordSkipVerse callData ->
+                    ( "RecordSkipVerse"
+                    , Json.Helpers.encodeObject (verseApiCallEncoding callData)
+                    )
+
+                RecordCancelLearning callData ->
+                    ( "RecordCancelLearning"
+                    , Json.Helpers.encodeObject (verseApiCallEncoding callData)
+                    )
+
+                RecordResetProgress callData ->
+                    ( "RecordResetProgress"
+                    , Json.Helpers.encodeObject (verseApiCallEncoding callData)
+                    )
+
+                RecordReviewSooner callData ->
+                    ( "RecordReviewSooner"
+                    , Json.Helpers.encodeObject (reviewSoonerEncoding callData)
+                    )
+
+                LoadVerses _ ->
+                    Debug.crash "LoadVerses call should be filtered out and not saved"
+    in
+        Json.Helpers.encodeSumObjectWithSingleField keyval call
+
+
+trackedCallDecoder : JD.Decoder TrackedHttpCall
+trackedCallDecoder =
+    let
+        decoderDict =
+            Dict.fromList
+                [ ( "RecordTestComplete", JD.map RecordTestComplete testCompleteDataDecoder )
+                , ( "RecordReadComplete", JD.map RecordReadComplete verseApiCallDataDecoder )
+                , ( "RecordSkipVerse", JD.map RecordSkipVerse verseApiCallDataDecoder )
+                , ( "RecordCancelLearning", JD.map RecordCancelLearning verseApiCallDataDecoder )
+                , ( "RecordResetProgress", JD.map RecordResetProgress verseApiCallDataDecoder )
+                , ( "RecordReviewSooner", JD.map RecordReviewSooner reviewSoonerDecoder )
+                ]
+    in
+        Json.Helpers.decodeSumObjectWithSingleField "TrackedHttpCall" decoderDict
+
+
+testCompleteDataDecoder : JD.Decoder TestCompleteData
+testCompleteDataDecoder =
+    JDP.decode TestCompleteData
+        |> JDP.required "localizedReference" JD.string
+        |> JDP.required "id" JD.int
+        |> JDP.required "needsTesting" JD.bool
+        |> JDP.required "accuracy" JD.float
+        |> JDP.required "testType" testTypeDecoder
+        |> JDP.required "wasPracticeTest" JD.bool
+
+
+verseApiCallDataDecoder : JD.Decoder VerseApiCallData
+verseApiCallDataDecoder =
+    JDP.decode VerseApiCallData
+        |> JDP.required "localizedReference" JD.string
+        |> JDP.required "id" JD.int
+        |> JDP.required "needsTesting" JD.bool
+        |> JDP.required "versionSlug" JD.string
+
+
+reviewSoonerDecoder : JD.Decoder ReviewSoonerData
+reviewSoonerDecoder =
+    JDP.decode ReviewSoonerData
+        |> JDP.required "localizedReference" JD.string
+        |> JDP.required "versionSlug" JD.string
+        |> JDP.required "reviewAfter" JD.float
+
+
+encodeTestType : TestType -> JE.Value
+encodeTestType testType =
+    case testType of
+        FirstTest ->
+            JE.string "FirstTest"
+
+        MorePracticeTest ->
+            JE.string "MorePracticeTest"
+
+
+testTypeDecoder : JD.Decoder TestType
+testTypeDecoder =
+    stringEnumDecoder
+        [ ( "FirstTest", FirstTest )
+        , ( "MorePracticeTest", MorePracticeTest )
+        ]
 
 
 
