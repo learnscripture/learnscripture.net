@@ -736,7 +736,7 @@ ajaxInfo model =
                                 [ A.class "btn"
                                 , onClickSimply RetryFailedCalls
                                 ]
-                                [ H.text "Try to load/save data again" ]
+                                [ H.text "Reconnect with server" ]
                             ]
                         ]
                       else
