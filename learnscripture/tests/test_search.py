@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from bibleverses.languages import LANGUAGE_CODE_EN
+from bibleverses.languages import LANGUAGE_CODE_EN, LANGUAGE_CODE_TR
 from bibleverses.models import TextVersion, VerseSet, VerseSetType, quick_find
 
 from .base import TestBase, get_or_create_any_account
@@ -66,6 +66,36 @@ class SearchTests(SearchTestsMixin, TestBase):
                                           "Gen 1:1")
         self.assertEqual(len(results), 1)
         self.assertEqual(list(results), [vs1])
+
+    def test_cross_langauge_search(self):
+        vs1 = VerseSet.objects.create(name="Psalm 23",
+                                      slug="psalm-23",
+                                      public=True,
+                                      language_code='en',
+                                      set_type=VerseSetType.PASSAGE,
+                                      created_by=self.account)
+        vs1.set_verse_choices([
+            "BOOK18 23:1",
+            "BOOK18 23:2",
+            "BOOK18 23:3",
+            "BOOK18 23:4",
+            "BOOK18 23:5",
+            "BOOK18 23:6",
+        ])
+        results = VerseSet.objects.search(LANGUAGE_CODE_EN,
+                                          VerseSet.objects.all(),
+                                          "Psalm 23")
+        self.assertEqual(list(results), [vs1])
+
+        results2 = VerseSet.objects.search(LANGUAGE_CODE_TR,
+                                           VerseSet.objects.all(),
+                                           "Mezmur 23")
+        self.assertEqual(list(results2), [vs1])
+
+        results2 = VerseSet.objects.search(LANGUAGE_CODE_TR,
+                                           VerseSet.objects.all(),
+                                           "Mz 23")
+        self.assertEqual(list(results2), [vs1])
 
 
 class QuickFindTests(SearchTestsMixin, TestBase):
