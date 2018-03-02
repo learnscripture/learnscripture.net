@@ -6459,13 +6459,15 @@ initialTourSteps model =
               , positionSelector = Nothing
               , adapter = identity
               }
-            , { html = show ("The total points you've earned in the current batch of verses are displayed here." ++
-                                 (if scoringEnabled model then
-                                     ""
-                                  else
-                                      " You need to create an account (from the link on your dashboard) to start earning points."
-                                 ))
-
+            , { html =
+                    show
+                        ("The total points you've earned in the current batch of verses are displayed here."
+                            ++ (if scoringEnabled model then
+                                    ""
+                                else
+                                    " You need to create an account (from the link on your dashboard) to start earning points."
+                               )
+                        )
               , class = "help-tour-below"
               , highlightSelector = Just "nav .action-logs .nav-item"
               , positionSelector = Nothing
