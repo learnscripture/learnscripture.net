@@ -76,7 +76,7 @@
        {# There are two types of unfinished session #}
        {# One is detected server side with session.unfinished_session #}
        {# The other can only be detected using localStorage client side #}
-       {% if not unfinished_session %}
+       {% if not unfinished_session_first_uvs %}
        style="display: none;"
        {% endif %}
        >
@@ -87,7 +87,15 @@
           {% csrf_token %}
           <input type="submit" name="continue_session" class="btn primary" value="Continue">
         </form>
-        <p>You have an unfinished learning session.</p>
+        <p>You have an unfinished learning session.
+          {% if unfinished_session_first_uvs %}
+            {% if unfinished_session_first_uvs.verse_set %}
+              ({{ unfinished_session_first_uvs.verse_set.smart_name_dict|lookup:unfinished_session_first_uvs.version.language_code }})
+            {% else %}
+              ({{ unfinished_session_first_uvs.localized_reference }}...)
+            {% endif %}
+          {% endif %}
+        </p>
         <p id="id-unfinished-session-unsaved-data-warning" style="display:none;">
           <b>Continue the session to sync unsaved data.</b>
         </p>
