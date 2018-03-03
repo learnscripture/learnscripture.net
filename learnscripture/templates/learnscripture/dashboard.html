@@ -87,7 +87,7 @@
           {% csrf_token %}
           <input type="submit" name="continue_session" class="btn primary" value="Continue">
         </form>
-        <p>You have an unfinished learning session.
+        <p>You have an unfinished session.
           {% if unfinished_session_first_uvs %}
             {% if unfinished_session_first_uvs.verse_set %}
               ({{ unfinished_session_first_uvs.verse_set.smart_name_dict|lookup:unfinished_session_first_uvs.version.language_code }})
