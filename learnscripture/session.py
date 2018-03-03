@@ -239,16 +239,17 @@ def save_referrer(request):
 def unfinished_session_first_uvs(request):
     uvs_data = _get_verse_status_ids(request)
     if len(uvs_data) == 0:
-        return False
+        return None
 
     # We might have a stale session due to verses already being
     # tested in another session.
     ids = [uvs_id for (order, uvs_id, needs_testing_override) in uvs_data]
     if request.identity.verse_statuses.needs_reviewing(timezone.now()).filter(
             id__in=ids).count() == 0:
-        # Stale session.
-        _save_verse_status_data(request, [])
-        return False
+        # Stale session, or a session including only new verses.
+        # We want to ignore these on the dashboard (at least the first),
+        # so we return False here.
+        return None
 
     uvs = request.identity.verse_statuses.get(id=uvs_data[0][1])
     return uvs
