@@ -348,10 +348,8 @@ def normalize_weighting(weights):
 def account_get_friendship_weights(account_id):
     # We use groups to define possible friendships.
     account = Account.objects.get(id=account_id)
-    from groups.models import Membership
     weights = defaultdict(int)
-    for m in Membership.objects.filter(account=account_id).select_related('group').prefetch_related('group__members'):
-        group = m.group
+    for group in account.groups.filter(count_for_friendships=True).prefetch_related('members'):
         members = list(group.members.all())
         # Smaller groups are better evidence of friendship.
         w = 1.0 / len(members)
