@@ -50,6 +50,7 @@ class Group(models.Model):
                                    related_name='groups_created')
     public = models.BooleanField(default=False)
     open = models.BooleanField(default=False)
+    count_for_friendships = models.BooleanField(default=True)
     members = models.ManyToManyField(Account, through='Membership',
                                      related_name='groups')
 
