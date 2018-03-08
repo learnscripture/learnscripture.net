@@ -194,8 +194,7 @@ def preferences(request):
     identity = getattr(request, 'identity', None)
     if request.method == "POST":
         form = PreferencesForm(request.POST,
-                               instance=identity,
-                               new_signup=identity is None)
+                               instance=identity)
         if form.is_valid():
             if identity is None:
                 # This little routine is needed so that
@@ -203,8 +202,7 @@ def preferences(request):
                 # way, yet, don't create an identity until
                 # they press the 'save' button.
                 identity = session.start_identity(request)
-                form = PreferencesForm(request.POST, instance=identity,
-                                       new_signup=True)
+                form = PreferencesForm(request.POST, instance=identity)
                 request.identity = identity
             form.save()
             return get_next(request, reverse('dashboard'))

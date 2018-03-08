@@ -405,7 +405,6 @@ class SetPreferences(ApiView):
         'enable_sounds',
         'enable_vibration',
         'interface_theme',
-        'new_learn_page',
         'preferences_setup',
     ]
 
@@ -413,14 +412,12 @@ class SetPreferences(ApiView):
         # Same song and dance as in views.preferences
         identity = getattr(request, 'identity', None)
         form = PreferencesForm(request.POST,
-                               instance=identity,
-                               new_signup=identity is None)
+                               instance=identity)
         if form.is_valid():
             if identity is None:
                 identity = session.start_identity(request)
                 form = PreferencesForm(request.POST,
-                                       instance=identity,
-                                       new_signup=True)
+                                       instance=identity)
                 identity = form.save()
                 request.identity = identity
             else:
