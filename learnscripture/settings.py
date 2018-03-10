@@ -413,7 +413,7 @@ def show_toolbar(request):
     if request.path.startswith('/static'):
         return False
 
-    if request.path.startswith('/learn-beta'):
+    if request.path.startswith('/learn'):
         return False
 
     return bool(settings.DEBUG)

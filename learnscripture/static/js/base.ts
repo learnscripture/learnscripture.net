@@ -31,7 +31,6 @@ import './sound';
 import './notices';
 import './bible_book_info';
 import './quickfind';
-import './learn';
 import './preferences';
 import './choose';
 import './create';

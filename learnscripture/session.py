@@ -9,7 +9,7 @@ from accounts.models import Account, Identity
 from bibleverses.models import MemoryStage
 from learnscripture.datastructures import make_choices
 
-# Also defined in learn.ts and Learn.elm
+# Also defined in Learn.elm
 LearningType = make_choices('LearningType',
                             [('REVISION', 'Revision'),
                              ('LEARNING', 'Learning'),
@@ -41,8 +41,6 @@ class VerseStatusBatch:
 
 
 def get_verse_statuses_batch(request):
-    # This currently supports both VersesToLearnHandler/learn.ts and
-    # VersesToLearn2Handler/Learn.elm. When the former is removed, it can be cleaned up.
     learning_type = request.session.get('learning_type', None)
     untested_order_vals = request.session.get('untested_order_vals', [])
 
@@ -78,14 +76,9 @@ def get_verse_statuses_batch(request):
             continue
         uvs.version_slug = uvs.version.slug
         uvs.learn_order = order
-        uvs.max_order_val = max_order_val  # Stick the same value on all, for convenience
         if needs_testing_override is not None:
             uvs.needs_testing_override = needs_testing_override
 
-        # Decorate UVS with learning_type and return_to because we need it in UI
-        # (learn.ts), even though the latter doesn't really belong here
-        uvs.learning_type = learning_type
-        uvs.return_to = return_to
         retval.append(uvs)
     return VerseStatusBatch(
         verse_statuses=retval,

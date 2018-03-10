@@ -141,31 +141,6 @@ class ApiView(View):
         ), content_type='application/json')
 
 
-class VersesToLearnHandler(ApiView):
-    # NB: all of these fields get posted back to ActionCompleteHandler
-    fields = [
-        'id',
-        'memory_stage', 'strength',
-        ('verse_set', ['id', 'set_type', 'name', 'get_absolute_url']),
-        'localized_reference',
-        'needs_testing',
-        'text_order',
-        ('version', ['full_name', 'short_name', 'slug', 'url', 'text_type']),
-        'suggestions',
-        # added in get_verse_statuses:
-        'scoring_text_words',
-        'title_text',
-        'learn_order',
-        'max_order_val',
-        'learning_type',
-        'return_to',
-    ]
-
-    @require_identity_method
-    def get(self, request):
-        return session.get_verse_statuses_batch(request).verse_statuses
-
-
 class VersesToLearn2Handler(ApiView):
     @require_identity_method
     def get(sef, request):
@@ -230,10 +205,6 @@ class VersesToLearn2Handler(ApiView):
         return retval
 
 
-def get_verse_status(data):
-    return json.loads(data['verse_status'])
-
-
 def get_verse_set_id(verse_status):
     """
     Returns the verse set ID for a verse status dictionary (sent by client) or
@@ -251,20 +222,11 @@ class ActionCompleteHandler(ApiView):
     def post(self, request):
         identity = request.identity
 
-        # Get all inputs
-        if 'verse_status' in request.POST:
-            # Old /learn/ client page
-            # Input here is a trimmed down version of what was sent by VersesToLearnHandler
-            verse_status = get_verse_status(request.POST)
-            uvs_id = verse_status['id']
-            needs_testing = verse_status['needs_testing']
-        else:
-            # New /learn/ client page
-            try:
-                uvs_id = int(request.POST['uvs_id'])
-                needs_testing = request.POST['uvs_needs_testing'] == 'true'
-            except (KeyError, ValueError):
-                return rc.BAD_REQUEST("uvs_id, uvs_needs_testing required")
+        try:
+            uvs_id = int(request.POST['uvs_id'])
+            needs_testing = request.POST['uvs_needs_testing'] == 'true'
+        except (KeyError, ValueError):
+            return rc.BAD_REQUEST("uvs_id, uvs_needs_testing required")
 
         practice = request.POST.get('practice', 'false') == 'true'
         stage = StageType.check_value(request.POST['stage'])
@@ -314,12 +276,7 @@ class SkipVerseHandler(ApiView):
 
     @require_preexisting_identity_m
     def post(self, request):
-        if 'uvs_id' in request.POST:
-            # New /learn/ page
-            uvs_id = int(request.POST['uvs_id'])
-        else:
-            verse_status = get_verse_status(request.POST)
-            uvs_id = verse_status['id']
+        uvs_id = int(request.POST['uvs_id'])
         session.verse_status_skipped(request, uvs_id)
         return {}
 
@@ -328,16 +285,9 @@ class CancelLearningVerseHandler(ApiView):
 
     @require_preexisting_identity_m
     def post(self, request):
-        if 'uvs_id' in request.POST:
-            # New /learn/ page
-            uvs_id = int(request.POST['uvs_id'])
-            localized_reference = request.POST['localized_reference']
-            version_slug = request.POST['version_slug']
-        else:
-            verse_status = get_verse_status(request.POST)
-            uvs_id = verse_status['id']
-            localized_reference = verse_status['localized_reference']
-            version_slug = verse_status['version']['slug']
+        uvs_id = int(request.POST['uvs_id'])
+        localized_reference = request.POST['localized_reference']
+        version_slug = request.POST['version_slug']
         request.identity.cancel_learning([localized_reference],
                                          version_slug)
         session.verse_status_cancelled(request, uvs_id)
@@ -358,14 +308,8 @@ class ResetProgressHandler(ApiView):
 
     @require_preexisting_identity_m
     def post(self, request):
-        if 'localized_reference' in request.POST:
-            # New /learn/ page
-            localized_reference = request.POST['localized_reference']
-            version_slug = request.POST['version_slug']
-        else:
-            verse_status = get_verse_status(request.POST)
-            localized_reference = verse_status['localized_reference']
-            version_slug = verse_status['version']['slug']
+        localized_reference = request.POST['localized_reference']
+        version_slug = request.POST['version_slug']
         request.identity.reset_progress(localized_reference,
                                         version_slug)
         return {}
