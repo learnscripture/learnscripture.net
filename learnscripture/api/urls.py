@@ -7,7 +7,6 @@ from learnscripture.api import handlers
 # browser, and then only remove the old one when you are sure no javascript will
 # try to use it.
 urlpatterns = [
-    url(r'^versestolearn/$', handlers.VersesToLearnHandler.as_view(), name='learnscripture.api.versestolearn'),
     url(r'^versestolearn2/$', handlers.VersesToLearn2Handler.as_view(), name='learnscripture.api.versestolearn2'),
     url(r'^actioncomplete/$', handlers.ActionCompleteHandler.as_view(), name='learnscripture.api.actioncomplete'),
     url(r'^logout/$', handlers.LogOutHandler.as_view(), name='learnscripture.api.logout'),

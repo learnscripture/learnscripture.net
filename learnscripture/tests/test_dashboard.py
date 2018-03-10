@@ -24,8 +24,9 @@ class DashboardTestsBase(RequireExampleVerseSetsMixin):
         if self.is_full_browser_test:
             self.assertEqual(ref, self.get_element_text("#id-verse-header h2"))
         else:
-            json = self.app.get(reverse('learnscripture.api.versestolearn')).json
-            verse_data = [d for d in json if d['learn_order'] == 0][0]
+            json = self.app.get(reverse('learnscripture.api.versestolearn2')).json
+            verse_statuses = json['verse_statuses']
+            verse_data = [d for d in verse_statuses if d['learn_order'] == 0][0]
             self.assertEqual(ref, verse_data['title_text'])
 
     def click_clear_learning_queue_btn(self, verse_set_id):

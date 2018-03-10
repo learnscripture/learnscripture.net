@@ -177,14 +177,6 @@ def bible_versions_for_request(request):
 
 
 @require_preferences
-def learn_legacy(request):
-    c = {'bible_versions': bible_versions_for_request(request),
-         'title': "Learn",
-         }
-    return render(request, 'learnscripture/learn_legacy.html', c)
-
-
-@require_preferences
 def learn(request):
     return render(request, 'learnscripture/learn.html', {})
 
@@ -278,7 +270,7 @@ def learn_set(request, uvs_list, learning_type):
 
 
 def get_learn_page(request):
-    return reverse('learn') if request.identity.new_learn_page else reverse('learn_legacy')
+    return reverse('learn')
 
 
 def get_user_groups(identity):

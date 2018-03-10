@@ -34,13 +34,13 @@ MAX_VERSE_QUERY_SIZE = 200
 MAX_VERSES_FOR_SINGLE_CHOICE = 4  # See also choose.js
 
 
-# Also defined in learn.ts and Learn.elm
+# Also defined in Learn.elm
 VerseSetType = make_choices('VerseSetType',
                             [('SELECTION', 'Selection'),
                              ('PASSAGE', 'Passage'),
                              ])
 
-# Also defined in learn.ts and Learn.elm
+# Also defined in Learn.elm
 StageType = make_choices('StageType',
                          [('READ', 'read'),
                           ('RECALL_INITIAL', 'recall from initials'),
@@ -57,7 +57,7 @@ MemoryStage = make_choices('MemoryStage',
                             (3, 'TESTED', 'tested'),
                             ])
 
-# Also defined in learn.ts and Learn.elm
+# Also defined in Learn.elm
 TextType = make_choices('TextType',
                         [('BIBLE', 'Bible'),
                          ('CATECHISM', 'Catechism'),

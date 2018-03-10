@@ -433,8 +433,6 @@ class Identity(models.Model):
                                            help_text="Depends on device capabilities.")
     interface_theme = models.CharField(max_length=30, choices=THEMES,
                                        default=DEFAULT_THEME)
-    new_learn_page = models.BooleanField("Use new learn page",
-                                         default=True)
     referred_by = models.ForeignKey(Account, on_delete=models.CASCADE,
                                     null=True, default=None,
                                     blank=True,
