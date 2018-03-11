@@ -89,7 +89,7 @@
         </form>
         <p>You have an unfinished session.
           {% if unfinished_session_first_uvs %}
-            {% if unfinished_session_first_uvs.verse_set %}
+            {% if unfinished_session_first_uvs.verse_set and unfinished_session_first_uvs.verse_set.is_passage %}
               ({{ unfinished_session_first_uvs.verse_set.smart_name_dict|lookup:unfinished_session_first_uvs.version.language_code }})
             {% else %}
               ({{ unfinished_session_first_uvs.localized_reference }}...)
