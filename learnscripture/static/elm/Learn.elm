@@ -6826,7 +6826,7 @@ previousHelpTourStep model =
 {-| Adjust the existing model to make it better suited
 for the purposes of a help tour.
 
-As much as possible we use the user's actually data, rather than displaying data
+As much as possible we use the user's actual data, rather than displaying data
 that relates to a made up user. However, we also make adjustments to ensure we
 don't have unnecessary distractions, and have a sensible base starting point for
 the UI features we want to show.
