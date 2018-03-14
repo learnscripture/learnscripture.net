@@ -626,7 +626,8 @@ webpack_stats_file = "./webpack-stats.deploy.json"
 def build_static():
     for f in glob.glob(webpack_deploy_files_pattern):
         os.unlink(f)
-    local("rm " + webpack_stats_file)
+    if os.path.exists(webpack_stats_file):
+        os.unlink(webpack_stats_file)
     local("./node_modules/.bin/webpack --config webpack.config.deploy.js")
     webpack_data = json.load(open(webpack_stats_file))
     assert webpack_data['status'] == 'done'
