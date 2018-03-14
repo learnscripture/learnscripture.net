@@ -592,6 +592,19 @@ dashboardUrl =
 
 view : Model -> H.Html Msg
 view model =
+    case model.helpTour of
+        Nothing ->
+            viewMain model Nothing
+
+        Just (HelpTour helpTourData) ->
+            -- When tour is active, we display a fake model in the view. We need
+            -- to also display the tour controls, so pass in the help tour data
+            -- from the main model
+            viewMain helpTourData.fakeModel (Just helpTourData)
+
+
+viewMain : Model -> Maybe HelpTourData -> H.Html Msg
+viewMain model helpTour =
     H.div
         (pinnedAttributes model)
         [ viewTopNav model
@@ -607,12 +620,12 @@ view model =
 
             Session sessionData ->
                 viewCurrentVerse sessionData model
-        , case model.helpTour of
+        , case helpTour of
             Nothing ->
                 emptyNode
 
-            Just helpTour ->
-                viewHelpTour helpTour
+            Just helpTourData ->
+                viewHelpTour helpTourData
         ]
 
 
@@ -2641,8 +2654,8 @@ shouldShowReference verse =
 {- View - help tour -}
 
 
-viewHelpTour : HelpTour -> H.Html Msg
-viewHelpTour (HelpTour helpTour) =
+viewHelpTour : HelpTourData -> H.Html Msg
+viewHelpTour helpTour =
     let
         buttons =
             helpTourButtons helpTour
@@ -5681,12 +5694,11 @@ markCallFinished model callId =
                 | currentHttpCalls = Dict.remove callId model.currentHttpCalls
             }
 
-        queueEmpty = trackedCallQueueEmpty newModel1
+        queueEmpty =
+            trackedCallQueueEmpty newModel1
 
         newModel2 =
-            if
-                dropdownIsOpen model AjaxInfo && queueEmpty
-            then
+            if dropdownIsOpen model AjaxInfo && queueEmpty then
                 -- An empty AjaxInfo menu appears to be closed. To avoid UI
                 -- surprises we stop the menu from "opening itself" when more
                 -- items are added to it.
@@ -6430,8 +6442,8 @@ type HelpTour
 
 
 type alias HelpTourData =
-    { savedModel : Model
-    , savedModelInitialSnapshot : Model
+    { fakeModel : Model
+    , realModelInitialSnapshot : Model
     , steps : Pivot.Pivot HelpTourStep
     }
 
@@ -6673,12 +6685,12 @@ startHelpTour model =
         Nothing ->
             let
                 initialHelpTourState =
-                    { savedModel = model
-                    , savedModelInitialSnapshot = model
+                    { fakeModel = model
+                    , realModelInitialSnapshot = model
                     , steps = initialTourSteps model
                     }
             in
-                doHelpTourStep initialHelpTourState True
+                doHelpTourStep model initialHelpTourState True
                     |> addCommands [ updateTypingBox hideTypingBoxData ]
 
         Just helpTour ->
@@ -6688,24 +6700,29 @@ startHelpTour model =
             )
 
 
-doHelpTourStep : HelpTourData -> Bool -> ( Model, Cmd Msg )
-doHelpTourStep helpTour focusDefault =
+doHelpTourStep : Model -> HelpTourData -> Bool -> ( Model, Cmd Msg )
+doHelpTourStep model helpTourData focusDefault =
     let
         currentStep =
-            Pivot.getC helpTour.steps
+            Pivot.getC helpTourData.steps
 
         adapter =
             adjustModelForHelpTour >> currentStep.adapter
 
-        -- .savedModel can change underneath us, e.g. score logs received, so we
-        -- use a snapshot that doesn't change.
+        -- model can change underneath us, e.g. score logs received, so we use a
+        -- snapshot that doesn't change, so what is presented is stable.
         adaptedModel =
-            adapter helpTour.savedModelInitialSnapshot
+            adapter helpTourData.realModelInitialSnapshot
+
+        finalHelpTourData =
+            { helpTourData
+                | fakeModel = adaptedModel
+            }
 
         finalModel =
-            { adaptedModel
+            { model
                 | helpTour =
-                    Just (HelpTour helpTour)
+                    Just (HelpTour finalHelpTourData)
             }
     in
         ( finalModel
@@ -6749,26 +6766,24 @@ finishHelpTour model =
 
         Just (HelpTour helpTour) ->
             let
-                newModel1 =
-                    helpTour.savedModel
-
                 prefs =
-                    newModel1.autoSavedPreferences
+                    model.autoSavedPreferences
 
                 newPrefs =
                     { prefs
                         | seenHelpTour = True
                     }
 
-                newModel2 =
-                    { newModel1
+                newModel1 =
+                    { model
                         | autoSavedPreferences = newPrefs
+                        , helpTour = Nothing
                     }
             in
-                ( newModel2
+                ( newModel1
                 , Cmd.batch
-                    [ stageOrVerseChangeCommands newModel2 True
-                    , saveAutoSavedPreferences newPrefs newModel2.httpConfig
+                    [ stageOrVerseChangeCommands newModel1 True
+                    , saveAutoSavedPreferences newPrefs newModel1.httpConfig
                     , helpTourHighlightElement ( "", "" )
                     ]
                 )
@@ -6794,7 +6809,7 @@ nextHelpTourStep model =
                                 | steps = newSteps
                             }
                     in
-                        doHelpTourStep newHelpTour True
+                        doHelpTourStep model newHelpTour True
 
 
 previousHelpTourStep : Model -> ( Model, Cmd Msg )
@@ -6820,7 +6835,7 @@ previousHelpTourStep model =
                             }
                     in
                         -- don't change focus in this case, keep it on 'Previous' button
-                        doHelpTourStep newHelpTour False
+                        doHelpTourStep model newHelpTour False
 
 
 {-| Adjust the existing model to make it better suited
@@ -6968,17 +6983,13 @@ adjustModelForHelpTour model =
         }
 
 
-{-| When help tour is active, we have a fake model in place, and the
-user's real data helpTour.savedModel. To handle any confusion
-between these, we have a separate update function for this case.
+{-| When help tour is active, we display a fake model in the view.
 
-In some cases (e.g. data received back from AJAX calls), we need
-to ensure the message gets propagated to the real model.
-In some cases (e.g. buttons pressed), we want to drop the message
-entirely, blocking the user from interacting with the fake model
-and doing AJAX calls from it etc.
-In some cases (e.g. window resize), both the fake and the real
-model should be updated.
+For many messages (e.g. data received back from AJAX calls), we need to ensure
+the message gets propagated to the real model. In some cases (e.g. buttons
+pressed), we want to drop the message entirely, blocking the user from
+interacting with the fake view and triggering AJAX calls from it etc. In some
+cases (e.g. window resize), both the fake and the real model should be updated.
 
 -}
 updateHelpTour : Msg -> Model -> HelpTourData -> ( Model, Cmd Msg )
@@ -6987,20 +6998,17 @@ updateHelpTour msg model helpTour =
         ignoreIt =
             ( model, Cmd.none )
 
-        forwardToMain msg =
+        forwardToReal msg =
             updateMain msg model
 
-        forwardToSavedModel msg =
+        forwardToFake msg =
             let
-                savedModel =
-                    helpTour.savedModel
-
-                ( newSavedModel, cmd ) =
-                    updateMain msg savedModel
+                ( newFakeModel, cmd ) =
+                    updateMain msg helpTour.fakeModel
 
                 newHelpTour =
                     { helpTour
-                        | savedModel = newSavedModel
+                        | fakeModel = newFakeModel
                     }
 
                 newFullModel =
@@ -7013,7 +7021,7 @@ updateHelpTour msg model helpTour =
         forwardToBoth msg =
             let
                 ( fullModel1, cmd1 ) =
-                    forwardToSavedModel msg
+                    forwardToFake msg
 
                 ( fullModel2, cmd2 ) =
                     updateMain msg fullModel1
@@ -7030,7 +7038,7 @@ updateHelpTour msg model helpTour =
     in
         case msg of
             VersesToLearn _ _ ->
-                forwardToSavedModel msg
+                forwardToReal msg
 
             AttemptReturn _ ->
                 ignoreIt
@@ -7077,31 +7085,31 @@ updateHelpTour msg model helpTour =
             -- We allow calls to continue retrying - the user may have
             -- started AJAX and then started the help tour.
             TrackHttpCall _ ->
-                forwardToSavedModel msg
+                forwardToReal msg
 
             MakeHttpCall _ ->
-                forwardToSavedModel msg
+                forwardToReal msg
 
             RetryFailedCalls ->
-                forwardToSavedModel msg
+                forwardToReal msg
 
             EmptyResponseTrackedHttpCallReturned _ _ ->
-                forwardToSavedModel msg
+                forwardToReal msg
 
             EmptyResponseReturned _ ->
-                forwardToSavedModel msg
+                forwardToReal msg
 
             RecordActionCompleteReturned _ _ ->
-                forwardToSavedModel msg
+                forwardToReal msg
 
             ActionLogsLoaded _ ->
-                forwardToSavedModel msg
+                forwardToReal msg
 
             ProcessNewActionLogs ->
-                forwardToSavedModel msg
+                forwardToReal msg
 
             SessionStatsLoaded _ ->
-                forwardToSavedModel msg
+                forwardToReal msg
 
             MorePractice _ ->
                 ignoreIt
@@ -7132,10 +7140,10 @@ updateHelpTour msg model helpTour =
                     |> addCommands [ helpTourCommandForStep (Pivot.getC helpTour.steps) ]
 
             ReceivePreferences _ ->
-                forwardToSavedModel msg
+                forwardToReal msg
 
             ReattemptFocus id remainingAttempts ->
-                forwardToMain msg
+                forwardToReal msg
 
             GetTime time ->
                 forwardToBoth msg
@@ -7144,13 +7152,13 @@ updateHelpTour msg model helpTour =
                 ignoreIt
 
             FinishHelpTour ->
-                forwardToMain msg
+                forwardToReal msg
 
             NextHelpTourStep ->
-                forwardToMain msg
+                forwardToReal msg
 
             PreviousHelpTourStep ->
-                forwardToMain msg
+                forwardToReal msg
 
             Noop ->
                 ignoreIt
