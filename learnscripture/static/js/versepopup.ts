@@ -10,11 +10,9 @@ var cancelLearningVerseClick = function(ev) {
         dataType: 'json',
         type: 'POST',
         data: {
-            verse_status: JSON.stringify({
-                id: $form.find('input[name=verse_status_id]').val(),
-                version: { slug: $form.find('input[name=verse_status_version_slug]').val() },
-                localized_reference: $form.find('input[name=verse_status_localized_reference]').val()
-            }, null, 2)
+            uvs_id: $form.find('input[name=verse_status_id]').val(),
+            version_slug: $form.find('input[name=verse_status_version_slug]').val(),
+            localized_reference: $form.find('input[name=verse_status_localized_reference]').val()
         },
         success: function() {
             $btn.closest('tr').remove();
