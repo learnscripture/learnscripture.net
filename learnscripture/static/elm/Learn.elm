@@ -30,6 +30,9 @@ import Task
 import Time
 import Window
 
+{- Ahem, yes, this could really do with being split up into separate modules,
+but I didn't yet work out a good way to do that makes sense for this page,
+especially with some of the things like the way `viewButton` has to work. -}
 
 {- Main -}
 
