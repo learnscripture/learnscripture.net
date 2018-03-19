@@ -2,8 +2,8 @@ import re
 from datetime import timedelta
 
 from django.core import mail
-from django.core.urlresolvers import reverse
 from django.db.models import F
+from django.urls import reverse
 from django.utils.six.moves.urllib.parse import ParseResult, urlparse
 
 from accounts.models import Account, ActionChange
