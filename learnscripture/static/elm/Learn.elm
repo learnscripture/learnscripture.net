@@ -30,10 +30,11 @@ import Task
 import Time
 import Window
 
-{- Ahem, yes, this could really do with being split up into separate modules,
-but I didn't yet work out a good way to do that makes sense for this page,
-especially with some of the things like the way `viewButton` has to work. -}
 
+{- Ahem, yes, this could really do with being split up into separate modules,
+   but I didn't yet work out a good way to do that makes sense for this page,
+   especially with some of the things like the way `viewButton` has to work.
+-}
 {- Main -}
 
 
@@ -2847,18 +2848,18 @@ updateMain msg model =
 
         SkipVerse verseStatus ->
             moveToNextVerse model
-                |> addCommands [ recordSkipVerse verseStatus ]
+                |> andThenDo (\_ -> recordSkipVerse verseStatus)
 
         CancelLearning verseStatus ->
             moveToNextVerse model
-                |> addCommands [ recordCancelLearning verseStatus ]
+                |> andThenDo (\_ -> recordCancelLearning verseStatus)
 
         ResetProgress verseStatus confirmed ->
             handleResetProgress model verseStatus confirmed
 
         ReviewSooner verseStatus reviewAfter ->
             moveToNextVerse model
-                |> addCommands [ recordReviewSooner verseStatus reviewAfter ]
+                |> andThenDo (\_ -> recordReviewSooner verseStatus reviewAfter)
 
         SetHiddenWords hiddenWordIds ->
             ( setHiddenWords model hiddenWordIds
@@ -2981,23 +2982,27 @@ updateMain msg model =
 {- Update helpers -}
 
 
-{-| Add a list of Cmds to a (Model, Cmd) pair
+{-| Chain the output of one update function into another
 -}
-addCommands : List (Cmd Msg) -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
-addCommands cmds ( model, cmd ) =
-    model ! (cmd :: cmds)
-
-
-{-| Add a list of commands produced by producer function to a (Model, Cmd) pair,
-   threading the new model into the producer.
--}
-addCommandsM : (Model -> List (Cmd Msg)) -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
-addCommandsM producer ( model, cmd ) =
+andThen : (Model -> ( Model, Cmd Msg )) -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
+andThen updateFunc ( model, cmd ) =
     let
-        newCommands =
-            producer model
+        ( newModel, cmd2 ) =
+            updateFunc model
     in
-        addCommands newCommands ( model, cmd )
+        ( newModel
+        , Cmd.batch
+            [ cmd
+            , cmd2
+            ]
+        )
+
+
+{-| Similar to addThen, but the function just produces commands.
+-}
+andThenDo : (Model -> Cmd Msg) -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
+andThenDo producer =
+    andThen (\m -> ( m, producer m ))
 
 
 withSessionData : Model -> a -> (SessionData -> a) -> a
@@ -3604,10 +3609,8 @@ togglePreferTestsToReading model =
                         else
                             ( currentVerse, Cmd.none )
                 )
-                |> addCommandsM
-                    (\m ->
-                        [ stageOrVerseChangeCommands m True ]
-                    )
+                |> andThenDo
+                    (\m -> stageOrVerseChangeCommands m True)
     in
         ( newModel2
         , cmd
@@ -4287,7 +4290,7 @@ moveToNextStage model =
                       , initCmd
                       ]
         )
-        |> addCommandsM (\newModel -> [ stageOrVerseChangeCommands newModel True ])
+        |> andThenDo (\m -> stageOrVerseChangeCommands m True)
 
 
 moveToPreviousStage : Model -> ( Model, Cmd Msg )
@@ -4316,11 +4319,11 @@ moveToPreviousStage model =
                             , cmd
                             )
         )
-        |> addCommandsM
-            (\newModel ->
+        |> andThenDo
+            (\m ->
                 -- Do *not* include focus change here, since they are already
                 -- focussing the 'back' button and we don't want to change that
-                [ stageOrVerseChangeCommands newModel False ]
+                stageOrVerseChangeCommands m False
             )
 
 
@@ -4497,11 +4500,12 @@ handleResetProgress model verseStatus confirmed =
                 (\currentVerse ->
                     setupCurrentVerse newVerseStatus Learning model.testOrReadPreference
                 )
-                |> addCommandsM
+                |> andThenDo
                     (\m ->
-                        [ stageOrVerseChangeCommands m True
-                        , recordResetProgress verseStatus
-                        ]
+                        Cmd.batch
+                            [ stageOrVerseChangeCommands m True
+                            , recordResetProgress verseStatus
+                            ]
                     )
     else
         ( model
@@ -4626,10 +4630,10 @@ handleUseHint model =
                     markWord Hint currentWord.word testProgress testType currentVerse (getTestingMethod model) model.preferences model.currentTime
                 )
         )
-        |> addCommandsM
+        |> andThenDo
             (\m ->
                 -- markWord may have moved us to next verse.
-                [ stageOrVerseChangeCommands m True ]
+                stageOrVerseChangeCommands m True
             )
 
 
@@ -4693,9 +4697,9 @@ checkCurrentWordAndUpdate model input =
                             markWord checkResult currentWord.word testProgress testType currentVerse testingMethod model.preferences model.currentTime
                     )
             )
-            |> addCommandsM
+            |> andThenDo
                 (\m ->
-                    [ stageOrVerseChangeCommands m True ]
+                    stageOrVerseChangeCommands m True
                 )
 
 
@@ -5244,10 +5248,8 @@ startMorePractice model accuracy =
                     , cmd
                     )
             )
-            |> addCommandsM
-                (\m ->
-                    [ stageOrVerseChangeCommands m True ]
-                )
+            |> andThenDo
+                (\m -> stageOrVerseChangeCommands m True)
 
 
 type TestDueAfter
@@ -6694,7 +6696,7 @@ startHelpTour model =
                     }
             in
                 doHelpTourStep model initialHelpTourState True
-                    |> addCommands [ updateTypingBox hideTypingBoxData ]
+                    |> andThenDo (\_ -> updateTypingBox hideTypingBoxData)
 
         Just helpTour ->
             -- Do not start the help tour twice
@@ -7140,7 +7142,7 @@ updateHelpTour msg model helpTour =
                 -- then add our own back.
                 forwardToBoth msg
                     |> ignoreSideEffects
-                    |> addCommands [ helpTourCommandForStep (Pivot.getC helpTour.steps) ]
+                    |> andThenDo (\_ -> helpTourCommandForStep (Pivot.getC helpTour.steps))
 
             ReceivePreferences _ ->
                 forwardToReal msg
