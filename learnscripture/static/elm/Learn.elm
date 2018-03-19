@@ -2892,7 +2892,7 @@ updateMain msg model =
 
         -- This is used for calls that return no data that we need to process
         EmptyResponseTrackedHttpCallReturned callId result ->
-            handleRetries (\model result -> ( model, Cmd.none )) model callId result
+            handleRetries (\result model -> ( model, Cmd.none )) model callId result
 
         EmptyResponseReturned result ->
             ( model, Cmd.none )
@@ -5501,17 +5501,8 @@ it and then triggering its execution.
 -}
 startTrackedCall : TrackedHttpCall -> Model -> ( Model, Cmd Msg )
 startTrackedCall trackedCall model =
-    let
-        ( newModel1, cmd1 ) =
-            addTrackedCall model trackedCall
-
-        ( newModel2, cmd2 ) =
-            triggerQueuedCalls newModel1
-    in
-        ( newModel2
-        , Cmd.batch
-            [ cmd1, cmd2 ]
-        )
+    addTrackedCall trackedCall model
+        |> andThen triggerQueuedCalls
 
 
 {-| For a given TrackedHttpCall object, return a command that triggers
@@ -5639,8 +5630,8 @@ makeHttpCall model callId =
                 ( newModel, cmd )
 
 
-addTrackedCall : Model -> TrackedHttpCall -> ( Model, Cmd Msg )
-addTrackedCall model trackedCall =
+addTrackedCall : TrackedHttpCall -> Model -> ( Model, Cmd Msg )
+addTrackedCall trackedCall model =
     let
         -- We need to give the call an order so that it executes after all
         -- current (or failed) calls.
@@ -5651,44 +5642,30 @@ addTrackedCall model trackedCall =
             1 + (usedCallIds |> List.maximum |> Maybe.withDefault 0)
 
         newModel1 =
-            addOrderedTrackedCall model callId trackedCall
+            addOrderedTrackedCall callId trackedCall model
     in
         ( newModel1, saveTrackedCallsToLocalStorage newModel1 )
 
 
-addOrderedTrackedCall : Model -> CallId -> TrackedHttpCall -> Model
-addOrderedTrackedCall model callId trackedCall =
+addOrderedTrackedCall : CallId -> TrackedHttpCall -> Model -> Model
+addOrderedTrackedCall callId trackedCall model =
     { model
         | currentHttpCalls = Dict.insert callId { call = trackedCall, attempts = 0 } model.currentHttpCalls
     }
 
 
-{-| Given an `update` like function of type `Model -> a -> ( Model, Cmd Msg)`,
+{-| Given an `update` like function of type `a -> Model -> ( Model, Cmd Msg)`,
 a model, a CallId and a Http result, handles the retries for the call, and
 executes the update function.
 
 -}
-handleRetries : (Model -> a -> ( Model, Cmd Msg )) -> Model -> CallId -> Result.Result Http.Error a -> ( Model, Cmd Msg )
+handleRetries : (a -> Model -> ( Model, Cmd Msg )) -> Model -> CallId -> Result.Result Http.Error a -> ( Model, Cmd Msg )
 handleRetries updateFunction model callId result =
     case result of
         Ok v ->
-            let
-                ( newModel1, cmd1 ) =
-                    markCallFinished model callId
-
-                ( newModel2, cmd2 ) =
-                    updateFunction newModel1 v
-
-                ( newModel3, cmd3 ) =
-                    triggerQueuedCalls newModel2
-            in
-                ( newModel3
-                , Cmd.batch
-                    [ cmd1
-                    , cmd2
-                    , cmd3
-                    ]
-                )
+            markCallFinished callId model
+                |> andThen (updateFunction v)
+                |> andThen triggerQueuedCalls
 
         Err err ->
             case err of
@@ -5707,8 +5684,8 @@ handleRetries updateFunction model callId result =
                         markFailAndRetry model callId
 
 
-markCallFinished : Model -> CallId -> ( Model, Cmd Msg )
-markCallFinished model callId =
+markCallFinished : CallId -> Model -> ( Model, Cmd Msg )
+markCallFinished callId model =
     let
         newModel1 =
             { model
@@ -5799,7 +5776,7 @@ retryFailedCalls model =
         newModel2 =
             List.foldl
                 (\( callId, call ) m ->
-                    addOrderedTrackedCall m callId call
+                    addOrderedTrackedCall callId call m
                 )
                 newModel1
                 failedCalls
@@ -5901,8 +5878,8 @@ callLoadVerses httpConfig callId model initialPageLoad =
         Http.send (VersesToLearn callId) (myHttpGet url verseBatchRawDecoder)
 
 
-handleVersesToLearn : Model -> VerseBatchRaw -> ( Model, Cmd Msg )
-handleVersesToLearn model verseBatchRaw =
+handleVersesToLearn : VerseBatchRaw -> Model -> ( Model, Cmd Msg )
+handleVersesToLearn verseBatchRaw model =
     let
         ( verseBatch, sessionStats, actionLogs ) =
             normalizeVerseBatch verseBatchRaw
@@ -6064,8 +6041,8 @@ callRecordReadComplete httpConfig callId callData =
             )
 
 
-handleRecordActionCompleteReturned : Model -> () -> ( Model, Cmd Msg )
-handleRecordActionCompleteReturned model () =
+handleRecordActionCompleteReturned : () -> Model -> ( Model, Cmd Msg )
+handleRecordActionCompleteReturned () model =
     model
         ! [ loadActionLogs model
           , loadSessionStats
@@ -7030,19 +7007,8 @@ updateHelpTour msg model helpTour =
                 ( newFullModel, cmd )
 
         forwardToBoth msg =
-            let
-                ( fullModel1, cmd1 ) =
-                    forwardToFake msg
-
-                ( fullModel2, cmd2 ) =
-                    updateMain msg fullModel1
-            in
-                ( fullModel2
-                , Cmd.batch
-                    [ cmd1
-                    , cmd2
-                    ]
-                )
+            forwardToFake msg
+                |> andThen (updateMain msg)
 
         ignoreSideEffects ( newModel, cmd ) =
             ( newModel, Cmd.none )
