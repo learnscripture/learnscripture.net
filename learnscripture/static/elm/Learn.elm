@@ -190,7 +190,7 @@ init flags =
         -- flush them to the server before loading new data, otherwise the data
         -- from the server will be out of date.
         if Dict.isEmpty currentHttpCalls then
-            ( model1, loadVerses True )
+            loadVerses model1 True
         else
             let
                 model2 =
@@ -4362,7 +4362,7 @@ moveToNextVerse model =
 
                     VerseNotInStore ->
                         if not (verseLoadInProgress model) then
-                            loadVersesImmediate model False
+                            loadVerses model False
                         else
                             ( model
                             , Cmd.none
@@ -4391,7 +4391,7 @@ moveToNextVerse model =
                                            )
                                         && (not <| verseLoadInProgress model)
                                 then
-                                    loadVersesImmediate newModel1 False
+                                    loadVerses newModel1 False
                                 else
                                     ( newModel1, Cmd.none )
 
@@ -5525,7 +5525,7 @@ this utility.
 There can be race conditions that occur due to routing these message through
 another `update` loop, instead of updating the model directly. Mostly for our
 purposes these don't matter, but where they might we sometimes bypass this
-mechanism and update the model directly e.g. loadVersesImmediate vs loadVerses
+mechanism and update the model directly e.g. loadVerses
 -}
 sendStartTrackedCallMsg : TrackedHttpCall -> Cmd Msg
 sendStartTrackedCallMsg trackedCall =
@@ -5736,7 +5736,7 @@ markCallFinished model callId =
                             | learningSession = Loading
                         }
                 in
-                    loadVersesImmediate newModel3a True
+                    loadVerses newModel3a True
             else
                 ( newModel2, Cmd.none )
     in
@@ -5869,20 +5869,11 @@ versesToLearnUrl =
     "/api/learnscripture/v1/versestolearn2/"
 
 
-{-| Trigger verse load via a Cmd
+
+{-| Trigger verse load
 -}
-loadVerses : Bool -> Cmd Msg
-loadVerses initialPageLoad =
-    sendStartTrackedCallMsg (LoadVerses initialPageLoad)
-
-
-{-| Trigger verse load immediately
-
-More robust than loadVerses, useful when we
-have access to the full model
--}
-loadVersesImmediate : Model -> Bool -> ( Model, Cmd Msg )
-loadVersesImmediate model initialPageLoad =
+loadVerses : Model -> Bool -> ( Model, Cmd Msg )
+loadVerses model initialPageLoad =
     startTrackedCall model (LoadVerses initialPageLoad)
 
 
@@ -5954,13 +5945,13 @@ handleVersesToLearn model verseBatchRaw =
                                     | sessionStats = sessionStats
                                 }
 
-                    loadMoreCommand =
-                        if allVersesLoaded ns.verses || verseLoadInProgress model then
-                            Cmd.none
+                    (newModel3, loadMoreCommand) =
+                        if allVersesLoaded ns.verses || verseLoadInProgress newModel2 then
+                            (newModel2, Cmd.none)
                         else
                             case ns.currentVerse.verseStatus.verseSet of
                                 Nothing ->
-                                    Cmd.none
+                                    (newModel2, Cmd.none)
 
                                 Just vs ->
                                     -- For passages, we eagerly load the rest of
@@ -5973,18 +5964,18 @@ handleVersesToLearn model verseBatchRaw =
                                     -- behaviour for them. All chapters are less
                                     -- than 90 verses (except Psalm 119)
                                     if vs.setType == Passage && ns.verses.maxOrderVal < 90 then
-                                        loadVerses False
+                                        loadVerses newModel2 False
                                     else
-                                        Cmd.none
+                                        (newModel2, Cmd.none)
                 in
-                    newModel2
+                    newModel3
                         ! [ sessionCmd
                           , if previousSessionEmpty then
-                                stageOrVerseChangeCommands newModel2 True
+                                stageOrVerseChangeCommands newModel3 True
                             else
                                 Cmd.none
                           , if previousSessionEmpty && actionLogs == Nothing then
-                                loadActionLogs newModel2
+                                loadActionLogs newModel3
                             else
                                 Cmd.none
                           , if previousSessionEmpty && sessionStats == Nothing then
@@ -5992,7 +5983,7 @@ handleVersesToLearn model verseBatchRaw =
                             else
                                 Cmd.none
                           , loadMoreCommand
-                          , if previousSessionEmpty && not newModel2.autoSavedPreferences.seenHelpTour then
+                          , if previousSessionEmpty && not newModel3.autoSavedPreferences.seenHelpTour then
                                 delay 500 StartHelpTour
                             else
                                 Cmd.none
