@@ -639,7 +639,7 @@ viewTopNav model =
         [ H.div [ A.class "nav-item return-link" ]
             [ navLink
                 [ A.href "#"
-                , onClickSimply (AttemptReturn { immediate = True, queued = False })
+                , onClickSimply (AttemptReturn { immediate = True, fromRetry = False })
                 ]
                 (getReturnUrl model |> getReturnCaption)
                 "icon-return"
@@ -2772,7 +2772,7 @@ type Msg
     = VersesToLearn CallId (Result Http.Error VerseBatchRaw)
     | AttemptReturn
         { immediate : Bool
-        , queued : Bool
+        , fromRetry : Bool
         }
     | NextStageOrSubStage
     | PreviousStage
@@ -2835,7 +2835,7 @@ updateMain msg model =
             handleRetries handleVersesToLearn model callId result
 
         AttemptReturn options ->
-            attemptReturn model options
+            attemptReturn options model
 
         NextStageOrSubStage ->
             moveToNextStageOrSubStage model
@@ -3155,8 +3155,25 @@ getCurrentTestProgress model =
 {- Update functions -}
 
 
-attemptReturn : Model -> { immediate : Bool, queued : Bool } -> ( Model, Cmd Msg )
-attemptReturn model { immediate, queued } =
+{-| Do a return to previous page, if possible.
+
+If not (still saving data), do other appropriate things:
+
+1. Confirm move away, despite data save in progress
+2. Wait and try again, to see if AJAX is finished yet.
+
+depending on flags
+
+immediate = True -- indicates the user pressed a button asking for return
+                    (the alternative being we just reached the end of the
+                    list of verses to review)
+
+fromRetry = True -- this command comes from the a retry i.e. after a "wait and try
+                    again"
+
+-}
+attemptReturn : { immediate : Bool, fromRetry : Bool } -> Model -> ( Model, Cmd Msg )
+attemptReturn { immediate, fromRetry } model =
     let
         returnUrl =
             getReturnUrl model
@@ -3185,7 +3202,7 @@ attemptReturn model { immediate, queued } =
             )
 
         doRetry =
-            if model.attemptingReturn && not queued then
+            if model.attemptingReturn && not fromRetry then
                 -- Don't add another queue
                 noop
             else
@@ -3194,7 +3211,7 @@ attemptReturn model { immediate, queued } =
                   }
                 , AttemptReturn
                     { immediate = immediate
-                    , queued = True
+                    , fromRetry = True
                     }
                     |> delay (1 * Time.second)
                 )
@@ -3238,7 +3255,7 @@ attemptReturn model { immediate, queued } =
             else
                 -- keep trying until done, don't prompt
                 doRetry
-        else if immediate || not queued then
+        else if immediate || not fromRetry then
             doFailedCallsPrompt
         else
             ( setDropdownOpen AjaxInfo model
@@ -4340,9 +4357,8 @@ moveToNextVerse model =
             in
                 case getNextVerse verseStore currentVerseStatus of
                     NoMoreVerses ->
-                        ( setDropdownOpen AjaxInfo model
-                        , sendMsg (AttemptReturn { immediate = False, queued = False })
-                        )
+                        ( setDropdownOpen AjaxInfo model, Cmd.none )
+                            |> andThen (attemptReturn { immediate = False, fromRetry = False })
 
                     VerseNotInStore ->
                         if not (verseLoadInProgress model) then
