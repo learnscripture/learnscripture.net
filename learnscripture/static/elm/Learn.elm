@@ -657,11 +657,11 @@ viewTopNav model =
 pinnedAttributes : Model -> List (H.Attribute msg)
 pinnedAttributes model =
     List.filterMap identity
-        [ if menuIsPinned model ActionLogsInfo then
+        [ if menuIsPinned ActionLogsInfo model then
             Just (A.attribute "data-actionlogsinfo-pinned" "true")
           else
             Nothing
-        , if menuIsPinned model VerseOptionsMenu then
+        , if menuIsPinned VerseOptionsMenu model then
             Just (A.attribute "data-verseoptionsmenu-pinned" "true")
           else
             Nothing
@@ -770,7 +770,7 @@ ajaxInfo model =
                 ""
 
         dropdownOpen =
-            dropdownIsOpen model AjaxInfo
+            dropdownIsOpen AjaxInfo model
 
         openClass =
             if dropdownOpen && itemsToView then
@@ -903,10 +903,10 @@ viewActionLogs model =
                 )
 
         dropdownOpen =
-            dropdownIsOpen model ActionLogsInfo
+            dropdownIsOpen ActionLogsInfo model
 
         menuPinned =
-            menuIsPinned model ActionLogsInfo
+            menuIsPinned ActionLogsInfo model
 
         itemsToView =
             List.length processedLogs > 0
@@ -1111,10 +1111,10 @@ viewCurrentVerse session model =
             floor (verseScaledStrength * 65 + 15)
 
         verseOptionsMenuOpen =
-            dropdownIsOpen model VerseOptionsMenu
+            dropdownIsOpen VerseOptionsMenu model
 
         verseOptionsMenuPinned =
-            menuIsPinned model VerseOptionsMenu
+            menuIsPinned VerseOptionsMenu model
 
         verseOptionsMenuVisible =
             verseOptionsMenuOpen || verseOptionsMenuPinned
@@ -1317,7 +1317,7 @@ viewVerseOptionsMenu model currentVerse =
                 ]
 
         menuPinned =
-            menuIsPinned model VerseOptionsMenu
+            menuIsPinned VerseOptionsMenu model
 
         pinnedClass =
             if menuPinned then
@@ -1385,8 +1385,8 @@ allowTestInsteadOfRead model =
         )
 
 
-dropdownIsOpen : Model -> Dropdown -> Bool
-dropdownIsOpen model dropdown =
+dropdownIsOpen : Dropdown -> Model -> Bool
+dropdownIsOpen dropdown model =
     case model.openDropdown of
         Just d ->
             d == dropdown
@@ -2919,12 +2919,12 @@ updateMain msg model =
             ( { model | previousVerseVisible = not model.previousVerseVisible }, Cmd.none )
 
         ToggleDropdown dropdown ->
-            ( toggleDropdown model dropdown
+            ( toggleDropdown dropdown model
             , Cmd.none
             )
 
         TogglePinnableMenu menu ->
-            togglePinnableMenu model menu
+            togglePinnableMenu menu model
 
         TogglePreferTestsToReading ->
             togglePreferTestsToReading model
@@ -3217,7 +3217,7 @@ attemptReturn { immediate, fromRetry } model =
                 )
 
         openAjaxDropdownCmd =
-            if not <| dropdownIsOpen model AjaxInfo then
+            if not <| dropdownIsOpen AjaxInfo model then
                 ToggleDropdown AjaxInfo
             else
                 Noop
@@ -3478,8 +3478,8 @@ processNewActionLogs model =
 {- Dropdowns -}
 
 
-toggleDropdown : Model -> Dropdown -> Model
-toggleDropdown model dropdown =
+toggleDropdown : Dropdown -> Model -> Model
+toggleDropdown dropdown model =
     let
         newOpenDropdown =
             case model.openDropdown of
@@ -3514,11 +3514,11 @@ closeDropdownIfOpen dropdown model =
         model
 
 
-togglePinnableMenu : Model -> Dropdown -> ( Model, Cmd Msg )
-togglePinnableMenu model dropdown =
+togglePinnableMenu : Dropdown -> Model -> ( Model, Cmd Msg )
+togglePinnableMenu dropdown model =
     let
         wasPinned =
-            menuIsPinned model dropdown
+            menuIsPinned dropdown model
 
         isPinned =
             not wasPinned
@@ -3568,8 +3568,8 @@ togglePinnableMenu model dropdown =
         )
 
 
-menuIsPinned : Model -> Dropdown -> Bool
-menuIsPinned model dropdown =
+menuIsPinned : Dropdown -> Model -> Bool
+menuIsPinned dropdown model =
     Set.member (toString dropdown) model.pinnedMenus
 
 
@@ -5696,7 +5696,7 @@ markCallFinished callId model =
             trackedCallQueueEmpty newModel1
 
         newModel2 =
-            if dropdownIsOpen model AjaxInfo && queueEmpty then
+            if dropdownIsOpen AjaxInfo model && queueEmpty then
                 -- An empty AjaxInfo menu appears to be closed. To avoid UI
                 -- surprises we stop the menu from "opening itself" when more
                 -- items are added to it.
