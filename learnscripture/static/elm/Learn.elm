@@ -190,7 +190,7 @@ init flags =
         -- flush them to the server before loading new data, otherwise the data
         -- from the server will be out of date.
         if Dict.isEmpty currentHttpCalls then
-            loadVerses model1 True
+            loadVerses True model1
         else
             let
                 model2 =
@@ -2882,7 +2882,7 @@ updateMain msg model =
             handleUseHint model
 
         TrackHttpCall trackedCall ->
-            startTrackedCall model trackedCall
+            startTrackedCall trackedCall model
 
         MakeHttpCall callId ->
             makeHttpCall model callId
@@ -4362,7 +4362,7 @@ moveToNextVerse model =
 
                     VerseNotInStore ->
                         if not (verseLoadInProgress model) then
-                            loadVerses model False
+                            loadVerses False model
                         else
                             ( model
                             , Cmd.none
@@ -4391,7 +4391,7 @@ moveToNextVerse model =
                                            )
                                         && (not <| verseLoadInProgress model)
                                 then
-                                    loadVerses newModel1 False
+                                    loadVerses False newModel1
                                 else
                                     ( newModel1, Cmd.none )
 
@@ -5499,8 +5499,8 @@ type alias CallId =
 it and then triggering its execution.
 
 -}
-startTrackedCall : Model -> TrackedHttpCall -> ( Model, Cmd Msg )
-startTrackedCall model trackedCall =
+startTrackedCall : TrackedHttpCall -> Model -> ( Model, Cmd Msg )
+startTrackedCall trackedCall model =
     let
         ( newModel1, cmd1 ) =
             addTrackedCall model trackedCall
@@ -5736,7 +5736,7 @@ markCallFinished model callId =
                             | learningSession = Loading
                         }
                 in
-                    loadVerses newModel3a True
+                    loadVerses True newModel3a
             else
                 ( newModel2, Cmd.none )
     in
@@ -5869,12 +5869,11 @@ versesToLearnUrl =
     "/api/learnscripture/v1/versestolearn2/"
 
 
-
 {-| Trigger verse load
 -}
-loadVerses : Model -> Bool -> ( Model, Cmd Msg )
-loadVerses model initialPageLoad =
-    startTrackedCall model (LoadVerses initialPageLoad)
+loadVerses : Bool -> Model -> ( Model, Cmd Msg )
+loadVerses initialPageLoad =
+    startTrackedCall (LoadVerses initialPageLoad)
 
 
 callLoadVerses : HttpConfig -> CallId -> Model -> Bool -> Cmd Msg
@@ -5945,13 +5944,13 @@ handleVersesToLearn model verseBatchRaw =
                                     | sessionStats = sessionStats
                                 }
 
-                    (newModel3, loadMoreCommand) =
+                    ( newModel3, loadMoreCommand ) =
                         if allVersesLoaded ns.verses || verseLoadInProgress newModel2 then
-                            (newModel2, Cmd.none)
+                            ( newModel2, Cmd.none )
                         else
                             case ns.currentVerse.verseStatus.verseSet of
                                 Nothing ->
-                                    (newModel2, Cmd.none)
+                                    ( newModel2, Cmd.none )
 
                                 Just vs ->
                                     -- For passages, we eagerly load the rest of
@@ -5964,9 +5963,9 @@ handleVersesToLearn model verseBatchRaw =
                                     -- behaviour for them. All chapters are less
                                     -- than 90 verses (except Psalm 119)
                                     if vs.setType == Passage && ns.verses.maxOrderVal < 90 then
-                                        loadVerses newModel2 False
+                                        loadVerses False newModel2
                                     else
-                                        (newModel2, Cmd.none)
+                                        ( newModel2, Cmd.none )
                 in
                     newModel3
                         ! [ sessionCmd
