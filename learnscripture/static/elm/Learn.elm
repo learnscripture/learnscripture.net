@@ -4082,7 +4082,8 @@ recallStage4 =
 
 getStagesByStrength : Float -> TestType -> ( LearningStageType, List LearningStageType )
 getStagesByStrength strength testType =
-    if strength < 0.02 then
+    if strength < (MemoryModel.initialStrengthFactor * 0.2) then
+        -- effectively zero
         ( ReadStage
         , [ recallStage1
           , recallStage2
@@ -4091,8 +4092,8 @@ getStagesByStrength strength testType =
           , TestStage testType
           ]
         )
-    else if strength < 0.07 then
-        -- e.g. first test was 70% or less, this is second test
+    else if strength < (MemoryModel.initialStrengthFactor * 0.7) then
+        -- e.g. first test was low, this is second test
         ( ReadStage
         , [ recallStage2
           , TestStage testType
