@@ -280,6 +280,31 @@ def test_run_using_next_test_due_after(exponent, accuracy, interval_gap=1):
             interval = 0
 
 
+def test_run_exact_intervals(exponent, accuracy):
+    from datetime import datetime
+    m = MemoryModel(exponent)
+    s = 0
+    start = datetime.now()
+    last_test = None
+    test = 0
+    total_elapsed = 0
+    day = 24 * 60 * 60
+    while total_elapsed / (365 * day) < 10 and s < m.LEARNT:
+        current_time = start + timedelta(seconds=total_elapsed)
+        if last_test is None:
+            time_elapsed = None
+        else:
+            time_elapsed = (current_time - last_test).total_seconds()
+        s = m.strength_estimate(s, accuracy, time_elapsed)
+        last_test = current_time
+
+        interval = m.next_test_due_after(s)
+        total_elapsed += interval
+        test += 1
+        time_elapsed_hours = 0 if time_elapsed is None else time_elapsed / 3600
+        print("Day %d, test %d, interval %s h, strength %s" % (math.floor(total_elapsed / day), test, time_elapsed_hours, s))
+
+
 def test_run_passage(passage_length, days):
     # Test function for experimenting with methods of getting testing of verses
     # in a passage to converge to tests on the same day, instead of diverging in
