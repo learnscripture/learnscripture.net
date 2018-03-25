@@ -3,7 +3,7 @@ import time
 from datetime import timedelta
 from decimal import Decimal
 
-from django.db.models import F, signals
+from django.db.models import signals
 from django.urls import reverse
 from django.utils import timezone
 
