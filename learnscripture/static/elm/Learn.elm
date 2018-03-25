@@ -6641,7 +6641,7 @@ initialTourSteps model =
               , positionSelector = Nothing
               , adapter = identity
               }
-            , { html = show "The approximate memory strength of each verse you are learning is displayed here."
+            , { html = show "The approximate progress of each verse you are learning is displayed here."
               , class = "help-tour-below"
               , highlightSelector = Just "#id-verse-strength-value"
               , positionSelector = Nothing
@@ -6653,7 +6653,7 @@ initialTourSteps model =
               , positionSelector = Just "#id-verse-options-menu ul"
               , adapter = setDropdownOpen VerseOptionsMenu
               }
-            , { html = show "When you have finished a test, your test score is used to estimate your memory strength for a verse and schedule the next review. Underneath each button is a caption indicating approximately when you will next see the verse again if you choose that option."
+            , { html = show "When you have finished a test, your test score is used to estimate your progress for a verse and schedule the next review. Underneath each button is a caption indicating approximately when you will next see the verse again if you choose that option."
               , class = "help-tour-above"
               , highlightSelector = Just "#id-action-btns"
               , positionSelector = Nothing
