@@ -16,7 +16,7 @@ time s =
 
 verseTests : number
 verseTests =
-    18
+    20
 
 
 learnt : Float
@@ -31,7 +31,7 @@ bestStrength =
 
 initialStrengthFactor : Float
 initialStrengthFactor =
-    0.1
+    deltaSIdeal
 
 
 oneYear : Float
@@ -46,7 +46,7 @@ alpha =
 
 deltaSIdeal : Float
 deltaSIdeal =
-    (learnt - initialStrengthFactor) / verseTests
+    learnt / verseTests
 
 
 {-| Calculates a strength estimate,
