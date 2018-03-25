@@ -5,6 +5,7 @@ from decimal import Decimal
 
 from django.db.models import F, signals
 from django.urls import reverse
+from django.utils import timezone
 
 from accounts.memorymodel import MM
 from accounts.models import Account, Identity
@@ -271,9 +272,10 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.submit("input[name='reviewbiblequeue']")
 
     def _make_verses_due_for_testing(self, uvs_queryset):
+        n = timezone.now()
         uvs_queryset.update(
-            last_tested=F('last_tested') - timedelta(100),
-            next_test_due=F('next_test_due') - timedelta(100),
+            last_tested=n - timedelta(200),
+            next_test_due=n - timedelta(100),
         )
 
     def test_more_practice(self):
