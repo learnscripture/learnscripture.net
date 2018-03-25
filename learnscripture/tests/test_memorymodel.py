@@ -1,8 +1,9 @@
 import json
 import os.path
+
 import unittest2
 
-from accounts.memorymodel import strength_estimate, MM
+from accounts.memorymodel import MM, strength_estimate
 
 
 class StrengthEstimate(unittest2.TestCase):
