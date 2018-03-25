@@ -1,8 +1,8 @@
 module MemoryModel exposing (..)
 
 -- See Python code accounts.memorymodel, and sync all changes
-
 -- Note that Python code works in seconds, and so does this.
+
 
 strength : Float -> Float
 strength t =
@@ -63,40 +63,40 @@ strengthEstimate oldStrength testAccuracy timeElapsedM =
         initialStrengthEstimate =
             initialStrengthFactor * testStrength
     in
-                case timeElapsedM of
-                    Nothing ->
-                        initialStrengthEstimate
+        case timeElapsedM of
+            Nothing ->
+                initialStrengthEstimate
 
-                    Just timeElapsed ->
-                        if testStrength < oldStrength then
-                            testStrength
-                        else if oldStrength == 1.0 then
-                            bestStrength
-                        else
-                            let
-                                s1 =
-                                    oldStrength
+            Just timeElapsed ->
+                if testStrength < oldStrength then
+                    testStrength
+                else if oldStrength == 1.0 then
+                    bestStrength
+                else
+                    let
+                        s1 =
+                            oldStrength
 
-                                t1 =
-                                    time s1
+                        t1 =
+                            time s1
 
-                                t2 =
-                                    t1 + timeElapsed
+                        t2 =
+                            t1 + timeElapsed
 
-                                s2 =
-                                    strength t2
+                        s2 =
+                            strength t2
 
-                                deltaSmax =
-                                    s2 - s1
+                        deltaSmax =
+                            s2 - s1
 
-                                deltaSactual =
-                                    min (deltaSmax * (testStrength - oldStrength) / (1.0 - oldStrength))
-                                        (deltaSIdeal * 1.1)
+                        deltaSactual =
+                            min (deltaSmax * (testStrength - oldStrength) / (1.0 - oldStrength))
+                                (deltaSIdeal * 1.1)
 
-                                newStrength =
-                                    oldStrength + deltaSactual
-                            in
-                                min bestStrength newStrength
+                        newStrength =
+                            oldStrength + deltaSactual
+                    in
+                        min bestStrength newStrength
 
 
 minTimeBetweenTests : number
@@ -104,7 +104,10 @@ minTimeBetweenTests =
     3600
 
 
+
 {- Time delay in *seconds* from the test to the next test due -}
+
+
 nextTestDueAfter : Float -> Float
 nextTestDueAfter strength =
     let
