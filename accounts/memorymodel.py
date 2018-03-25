@@ -75,7 +75,7 @@ class MemoryModel(object):
     # Charlotte Mason system, a verse is tested about 15 - 20 times before being
     # retired, so we aim for that (with a bit of tuning)
 
-    VERSE_TESTS = 18
+    VERSE_TESTS = 20  # A nice round number
 
     # We want to avoid the number of verses needing testing increasing forever,
     # and so put a hard limit, after which a verse is considered 'learnt'.
@@ -101,11 +101,6 @@ class MemoryModel(object):
     # negative numbers:
     BEST_STRENGTH = 0.999
 
-    # For the initial test, we don't have a previous strength recorded. We
-    # arbitrarily set the initial strength to be 0.1 test strength
-
-    INITIAL_STRENGTH_FACTOR = 0.1  # This is also used in learn.js
-
     def __init__(self, EXPONENT):
         # We allow one of the two parameters to be tuned - pick EXPONENT
         self.EXPONENT = EXPONENT
@@ -120,7 +115,26 @@ class MemoryModel(object):
         # ALPHA = - ln(1 - LEARNT) / (ONE_YEAR^n)
         self.ALPHA = - math.log(1.0 - self.LEARNT) / (ONE_YEAR ** EXPONENT)
 
-        self.DELTA_S_IDEAL = (self.LEARNT - self.INITIAL_STRENGTH_FACTOR) / self.VERSE_TESTS
+        # For the initial test, we don't have a previous strength recorded, so
+        # we need an arbitrary number. It would be nice if each test, including
+        # the first one, gave the same gap in the ideal case of scoring 100%, so
+        # we want:
+        #
+        #  INITIAL_STRENGTH_FACTOR == DELTA_S_IDEAL.
+
+        # We also want to finish learning after N jumps of DELTA_S_IDEAL,
+        # starting at zero.
+        #
+        #  DELTA_S_IDEAL = LEARNT - VERSE_TESTS
+        #
+        self.DELTA_S_IDEAL = self.LEARNT / self.VERSE_TESTS
+        self.INITIAL_STRENGTH_FACTOR = self.DELTA_S_IDEAL
+
+        # The result of these choices, and the constant chosen for VERSE_TESTS,
+        # is that after scaling through `scaled_strength` / `scaledStrength`,
+        # the first test will show a jump from 0% to (up to) 5%, allowing the
+        # user to correctly guess it will take them about 20 tests to finish
+        # learning.
 
     # Given an old strength, a new test score, and the number of seconds elapsed,
     # we need to calculate the new strength estimate.
@@ -178,8 +192,10 @@ class MemoryModel(object):
 
         delta_s_actual = delta_s_max * (test_strength - old_strength) / (1.0 - old_strength)
 
-        # Limit jumps to approx DELTA_S_IDEAL to avoid people progressing
-        # too quickly if they are not doing tests.
+        # Limit jumps to approx DELTA_S_IDEAL to avoid people progressing too
+        # quickly if they are not doing tests. This line means that people will
+        # still end up doing (approx) at least VERSE_TESTS tests even if they
+        # take a break and ace the tests.
         delta_s_actual = min(self.DELTA_S_IDEAL * 1.1, delta_s_actual)
 
         new_strength = old_strength + delta_s_actual
