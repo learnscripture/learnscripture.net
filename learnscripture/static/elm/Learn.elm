@@ -2151,7 +2151,7 @@ buttonsForStage model verse verseStore preferences =
                 TestFinished { accuracy } ->
                     let
                         defaultMorePractice =
-                            accuracy < 0.8
+                            accuracy < accuracyDefaultMorePracticeLevel
                     in
                         [ Just
                             { caption = practiceButtonCaption
@@ -2610,20 +2610,25 @@ instructions verse testingMethod helpVisible =
         ]
 
 
+accuracyDefaultMorePracticeLevel : Float
+accuracyDefaultMorePracticeLevel =
+    0.85
+
+
 resultComment : Float -> String
 resultComment accuracy =
     let
         pairs =
             [ ( 0.98, "awesome!" )
-            , ( 0.95, "excellent!" )
-            , ( 0.9, "very good." )
-            , ( 0.8, "good." )
-            , ( 0.5, "OK." )
-            , ( 0.3, "could do better!" )
+            , ( 0.96, "excellent!" )
+            , ( 0.93, "very good." )
+            , ( accuracyDefaultMorePracticeLevel, "good." )
+            , ( 0.8, "OK." )
+            , ( 0.7, "could do better!" )
             ]
 
         fallback =
-            "more practice needed!"
+            "let's try again!"
     in
         case List.head <| List.filter (\( p, c ) -> accuracy > p) pairs of
             Nothing ->
@@ -5236,10 +5241,12 @@ startMorePractice model accuracy =
             MorePracticeTest
 
         ( firstStageType, remainingStageTypes ) =
-            if accuracy < 0.5 then
-                -- 0.5 is quite low, treat as if starting afresh
+            -- Choose the number of practice levels depending on how well they
+            -- did in the test.
+            if accuracy < 0.75 then
+                -- 0.75 is quite low, treat as if starting afresh
                 getStagesByStrength 0 testType
-            else if accuracy < 0.8 then
+            else if accuracy < 0.9 then
                 ( ReadStage
                 , [ recallStage2
                   , recallStage4
