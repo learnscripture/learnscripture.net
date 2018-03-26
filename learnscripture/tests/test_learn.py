@@ -140,14 +140,15 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
             (len(self.psalm_23_1_2.strip().split()) -
              4))  # don't count reference
 
-        self.assertEqual(Account.objects.get(id=account.id).total_score.points,
+        account = Account.objects.get(id=account.id)
+        self.assertEqual(account.total_score.points,
                          points_for_verse +
                          points_for_verse * Scores.PERFECT_BONUS_FACTOR +
                          StudentAward(count=1).points() +
                          AceAward(count=1).points()
                          )
 
-    def test_points_and_student_award(self):
+    def test_points_and_awards(self):
         identity, account = self.create_account()
         self.login(account)
         self.choose_verse_set('Bible 101')
@@ -162,7 +163,8 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         # Check scores
         time.sleep(0.5)
         j316_score = self._score_for_j316()
-        self.assertEqual(Account.objects.get(id=account.id).total_score.points,
+        account = Account.objects.get(id=account.id)
+        self.assertEqual(account.total_score.points,
                          j316_score +
                          (j316_score * Scores.PERFECT_BONUS_FACTOR) +
                          StudentAward(count=1).points() +
@@ -171,8 +173,14 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.assertEqual(account.action_logs.count(), 4)
 
         # Check awards
+        self.assertEqual(account.awards.filter(award_type=AwardType.ACE,
+                                               level=1).count(), 1)
         self.assertEqual(account.awards.filter(award_type=AwardType.STUDENT,
                                                level=1).count(), 1)
+        self.assertEqual(account.action_logs.filter(award__award_type=AwardType.ACE).count(),
+                         1)
+        self.assertEqual(account.action_logs.filter(award__award_type=AwardType.STUDENT).count(),
+                         1)
 
         # Go back to dashboard, and should see message
         self.get_url('dashboard')

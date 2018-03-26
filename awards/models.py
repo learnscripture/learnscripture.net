@@ -113,7 +113,7 @@ class AwardLogic(object):
                     # calculation correct.
                     points = self.__class__(level=lev).points()
                     if points > 0:
-                        account.add_points(points, ScoreReason.EARNED_AWARD)
+                        account.add_points(points, ScoreReason.EARNED_AWARD, award=award)
                     new_award.send(sender=award, points=points)
 
     def points(self):

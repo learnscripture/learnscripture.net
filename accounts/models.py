@@ -222,14 +222,16 @@ class Account(AbstractBaseUser):
 
         return action_logs
 
-    def add_points(self, points, reason, accuracy=None, localized_reference=""):
+    def add_points(self, points, reason, accuracy=None, localized_reference="", award=None):
         # Need to refresh 'total_score' each time
         points = math.floor(points)
         current_points = TotalScore.objects.get(account_id=self.id).points
         action_log = self.action_logs.create(points=points,
                                              reason=reason,
                                              localized_reference=localized_reference,
-                                             accuracy=accuracy)
+                                             accuracy=accuracy,
+                                             award=award,
+                                             )
         # Change cached object to reflect DB, which has been
         # updated via a SQL UPDATE for max correctness.
         self.total_score.points = current_points + points
