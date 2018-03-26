@@ -63,9 +63,17 @@ class ActionLog(models.Model):
         ''' On save, update timestamps '''
         if not self.id:
             self.created = timezone.now()
-            TotalScore.objects.filter(account=self.account)\
-                .update(points=F('points') + self.points)
+            self.update_total_score(self.points)
         super(ActionLog, self).save(*args, **kwargs)
+
+    def update_total_score(self, by_points):
+        TotalScore.objects.filter(account=self.account).update(
+            points=F('points') + by_points)
+
+    def delete(self, **kwargs):
+        retval = super().delete(**kwargs)
+        self.update_total_score(-self.points)
+        return retval
 
     class Meta:
         ordering = ('-created',)
@@ -83,6 +91,9 @@ class TotalScore(models.Model):
                                    related_name='total_score')
     points = models.PositiveIntegerField(default=0)
     visible = models.BooleanField(default=True)
+
+    def __str__(self):
+        return "<TotalScore {0}>".format(self.points)
 
 
 def active_user_query(q, hellbanned_mode):
