@@ -73,9 +73,13 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
 
     def _score_for_j316(self, accuracy=1.0):
         word_count = len(self.kjv_john_3_16.strip().split())
-        # This is the accuracy that will be recorded, given the
-        # algo in _type_john_3_16_kjv and learn.js
-        actual_accuracy = math.floor(word_count * accuracy) / word_count
+        # This is the number of words that will fail, given the
+        # algo in _type_john_3_16_kjv:
+        correct_word_count = math.floor(word_count * accuracy)
+
+        # Copy algo in Learn.elm getTestResult:
+        word_accuracies = ([1.0] * correct_word_count) + ([0.0] * (word_count - correct_word_count))
+        actual_accuracy = float(round(sum(word_accuracies) / float(len(word_accuracies)) * 1000)) / 1000
 
         points_word_count = word_count - 3  # Don't get points for the reference
         return math.floor(Scores.points_per_word(LANGUAGE_CODE_EN) * points_word_count * actual_accuracy)
@@ -293,7 +297,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.get_url('dashboard')
         self.choose_review_bible()
 
-        self._type_john_3_16_kjv(accuracy=0.5)
+        self._type_john_3_16_kjv(accuracy=0.8)
 
         # Now the 'more practice' button will appear, and be primary
         self.assertIn('primary', self.get_element_attribute("#id-more-practice-btn", 'class').split())
@@ -308,7 +312,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self._type_john_3_16_kjv(accuracy=0.95)
 
         # We should get points for first time reviewed (and award)
-        j316_score_1 = self._score_for_j316(accuracy=0.5)
+        j316_score_1 = self._score_for_j316(accuracy=0.8)
         account = Account.objects.get(id=account.id)  # refresh
         self.assertEqual(account.total_score.points,
                          j316_score_1 +
