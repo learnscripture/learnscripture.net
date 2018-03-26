@@ -342,14 +342,6 @@ class RecruiterAward(CountBasedAward):
                                self.count, url)
 
 
-class HackerAward(SingleLevelAward):
-    POINTS = 0
-
-    def full_description(self):
-        return ("Awarded to leet hackers who find some bug in the site that allows you to cheat. "
-                "This award comes with the risk of getting your points reset to zero and/or being kicked out :-)")
-
-
 class ReigningWeeklyChampion(SingleLevelAward):
     removed = True
     POINTS = 0
@@ -469,7 +461,6 @@ AwardType = make_class_enum(
      ('TREND_SETTER', 'Trend setter', TrendSetterAward),
      ('ACE', 'Ace', AceAward),
      ('RECRUITER', 'Recruiter', RecruiterAward),
-     ('HACKER', 'Hacker', HackerAward),
      ('WEEKLY_CHAMPION', 'Weekly champion', WeeklyChampion),  # Removed
      ('REIGNING_WEEKLY_CHAMPION', 'Reigning weekly champion', ReigningWeeklyChampion),  # Removed
      ('ADDICT', 'Addict', AddictAward),
