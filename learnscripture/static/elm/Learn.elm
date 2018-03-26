@@ -3983,7 +3983,7 @@ getTestResult testProgress =
 
             l ->
                 -- Do some rounding to avoid 0.999 and retain 3 s.f.
-                (toFloat (round (List.sum wordAccuracies / (toFloat l) * 1000)) / 1000)
+                toFloat (round (List.sum wordAccuracies / (toFloat l) * 1000)) / 1000
 
 
 getHintsUsed : TestProgress -> Int
