@@ -57,7 +57,7 @@ class ActionLog(models.Model):
     localized_reference = models.CharField(max_length=255, blank=True)
     accuracy = models.FloatField(null=True, blank=True)
     created = models.DateTimeField()
-    award = models.ForeignKey('awards.Award', null=True, blank=True)
+    award = models.OneToOneField('awards.Award', null=True, blank=True, on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):
         ''' On save, update timestamps '''
