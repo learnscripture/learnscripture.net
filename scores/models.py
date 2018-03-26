@@ -57,6 +57,7 @@ class ActionLog(models.Model):
     localized_reference = models.CharField(max_length=255, blank=True)
     accuracy = models.FloatField(null=True, blank=True)
     created = models.DateTimeField()
+    award = models.ForeignKey('awards.Award', null=True, blank=True)
 
     def save(self, *args, **kwargs):
         ''' On save, update timestamps '''
@@ -73,8 +74,8 @@ class ActionLog(models.Model):
         return "<ActionLog {0}>".format(self.id)
 
     def __repr__(self):
-        return "<ActionLog account=%s points=%s reason=%s localized_reference=%s created=%s>" % (
-            self.account.username, self.points, self.get_reason_display(), self.localized_reference, self.created)
+        return "<ActionLog account=%s points=%s reason=%s localized_reference=%s award=%s created=%s>" % (
+            self.account.username, self.points, self.get_reason_display(), self.localized_reference, self.award, self.created)
 
 
 class TotalScore(models.Model):
