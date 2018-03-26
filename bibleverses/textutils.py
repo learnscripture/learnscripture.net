@@ -28,7 +28,7 @@ def split_into_words(text, fix_punctuation_whitespace=True):
     # scoring purposes), so punctuation and newlines are kept next to words.
 
     # This is used by bibleverses.suggestions, therefore needs to match
-    # the way that learn.js splits words up.
+    # the way that Learn.elm splits words up.
 
     # We need to cope with things like Gen 3:22
     #    and live forever--"'

@@ -27,7 +27,7 @@ LearningType = make_choices('LearningType',
 # easily.
 
 # Batch for verse statuses to avoid really long JSON which can get truncated.
-# See also learn.js
+# See also Learn.elm
 VERSE_STATUS_BATCH_SIZE = 10
 
 

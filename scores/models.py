@@ -69,6 +69,9 @@ class ActionLog(models.Model):
     class Meta:
         ordering = ('-created',)
 
+    def __str__(self):
+        return "<ActionLog {0}>".format(self.id)
+
     def __repr__(self):
         return "<ActionLog account=%s points=%s reason=%s localized_reference=%s created=%s>" % (
             self.account.username, self.points, self.get_reason_display(), self.localized_reference, self.created)
