@@ -868,7 +868,6 @@ viewSessionStats model =
                     , A.title "Total items tested today"
                     ]
                     [ H.text <| interpolate " ⟳ {0} " [ toString stats.totalVersesTested ] ]
-                , makeIcon "icon-today-stats" "Stats for today"
                 ]
 
 
