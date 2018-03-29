@@ -1180,18 +1180,17 @@ viewCurrentVerse session model =
                                 [ A.href "#"
                                 , onClickSimply TogglePreviousVerseVisible
                                 , A.tabindex -1
+                                , A.id "id-toggle-show-previous-verse"
                                 ]
-                                [ H.span [ A.id "id-toggle-show-previous-verse" ]
-                                    [ makeIcon
-                                        ("icon-show-previous-verse"
-                                            ++ (if model.previousVerseVisible then
-                                                    " expanded"
-                                                else
-                                                    ""
-                                               )
-                                        )
-                                        "Toggle show all of previous verse"
-                                    ]
+                                [ makeIcon
+                                    ("icon-show-previous-verse"
+                                        ++ (if model.previousVerseVisible then
+                                                " expanded"
+                                            else
+                                                ""
+                                           )
+                                    )
+                                    "Toggle show all of previous verse"
                                 ]
                             ]
                 , H.div [ A.id typingBoxContainerId ]
