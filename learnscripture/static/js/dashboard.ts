@@ -3,9 +3,9 @@ import 'cal-heatmap/cal-heatmap.css';
 
 import { getSavedCalls } from './offlineutils';
 
-var calHeatMapData = null;
-var calHeatMapInstance = null;
-var saveHeatmapPreferencesTimeout = null;
+var calHeatMapData: null | any[] = null;
+var calHeatMapInstance: null | any;
+var saveHeatmapPreferencesTimeout: null | number = null;
 
 var setupCalendarHeatmap = function() {
     if ($('#id-heatmap-div').length == 0) {
@@ -23,7 +23,7 @@ var setupCalendarHeatmap = function() {
                 var allRows = data.replace(/\r/, '').trim().split(/\n/).map(r => r.split(/,/));
                 var headers = allRows[0];
                 var dataRows = allRows.slice(1);
-                var final = [];
+                var final: any[] = [];
                 for (var i = 0; i < dataRows.length; i++) {
                     var d = {};
                     for (var j = 0; j < headers.length; j++) {
