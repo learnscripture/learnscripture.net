@@ -7637,7 +7637,7 @@ translate fromStr toStr target =
 
 confirmTask : String -> b -> a -> Task.Task a b
 confirmTask =
-    Native.Confirm.confirm
+    Native.Confirm.confirmTask
 
 
 runConfirm : Task.Task Msg Msg -> Cmd Msg
