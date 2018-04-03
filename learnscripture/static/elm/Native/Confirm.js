@@ -1,7 +1,7 @@
 var _user$project$Native_Confirm = function () {
     var scheduler = _elm_lang$core$Native_Scheduler;
 
-    function confirm_(prompt, successValue, failValue) {
+    function confirmTask(prompt, successValue, failValue) {
         return scheduler.nativeBinding(function (callback) {
             if (window.confirm(prompt)) {
                 callback(scheduler.succeed(successValue));
@@ -12,6 +12,6 @@ var _user$project$Native_Confirm = function () {
     };
 
     return {
-        confirm: F3(confirm_),
+        confirmTask: F3(confirmTask),
     }
 }()
