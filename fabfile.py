@@ -270,7 +270,7 @@ def _ssl_dhparam():
 
 
 def _install_python_minimum():
-    run("pip install -U pip virtualenv wheel virtualenvwrapper mercurial")
+    run("pip install --progress-bar off -U pip virtualenv wheel virtualenvwrapper mercurial")
 
 
 @as_rootuser
@@ -615,8 +615,8 @@ def install_requirements(target):
              target_venv_vcs_root))
 
     with django_project(target):
-        run("pip install --upgrade setuptools pip wheel six")
-        run("pip install -r requirements.txt --exists-action w")
+        run("pip install --progress-bar off --upgrade setuptools pip wheel six")
+        run("pip install --progress-bar off -r requirements.txt --exists-action w")
 
 
 webpack_deploy_files_pattern = "./learnscripture/static/webpack_bundles/*.deploy.*"
