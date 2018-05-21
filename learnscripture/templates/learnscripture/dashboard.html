@@ -245,9 +245,11 @@
         {% if cvs.tested_total == 0 %}
           <p>You've queued this passage for learning.</p>
         {% else %}
-          <p>You've seen {{ cvs.tested_total }} verse{{ cvs.tested_total|length|pluralize }} so far,
-            {% if cvs.needs_review_total > 0 %}<b>{{ cvs.needs_review_total }} due for review</b>,{% endif %}
-            with {{ cvs.untested_total }} still to start on.</p>
+          {% if cvs.needs_review_total > 0 %}
+            <p>{% ftl_message 'dashboard-passages-youve-seen-verses-with-review-due' tested_total=cvs.tested_total needs_review_total=cvs.needs_review_total untested_total=cvs.untested_total %}</p>
+          {% else %}
+            <p>{% ftl_message 'dashboard-passages-youve-seen-verses' tested_total=cvs.tested_total needs_review_total=cvs.needs_review_total untested_total=cvs.untested_total %}</p>
+          {% endif %}
         {% endif %}
       </div>
       {% if not forloop.last %}<hr>{% endif %}
