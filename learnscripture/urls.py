@@ -94,6 +94,7 @@ urlpatterns = [
     url(r'^admin/fiber/', include('fiber.admin_urls')),
     url(r'^jsi18n/$', django.views.i18n.javascript_catalog, {'packages': ['fiber']}),
     url(r'^admin/', admin.site.urls),
+    url(r'^i18n/', include('django.conf.urls.i18n')),
 
     url(r'^paypal/ipn/', include('paypal.standard.ipn.urls')),
 
@@ -105,6 +106,7 @@ urlpatterns = [
     url(r'^offline/$', learnscripture.views.offline, name='offline'),
     # Also 404.html template and CSRF_FAILURE_VIEW
 ]
+
 
 if settings.DEVBOX:
     urlpatterns += [

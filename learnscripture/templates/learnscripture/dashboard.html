@@ -2,6 +2,7 @@
 
 {% load account_utils %}
 {% load dict_utils %}
+{% load ftl %}
 
 {% block body_extra_class %}{{ block.super }} dashboard-page{% endblock %}
 
@@ -30,7 +31,7 @@
   </div>
 
   {% if request.identity.scoring_enabled %}
-    <h2>Learning events
+    <h2>{% ftl_message 'learning-events' %}
       <a href="#"
          id="id-show-heatmap"
          >
