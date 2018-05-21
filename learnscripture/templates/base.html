@@ -1,4 +1,8 @@
 {% load render_bundle from webpack_loader %}
+{% load i18n %}
+{% load ftl %}
+
+{% ftl_conf ftl_mode 'learnscripture.ftl_bundles.main' %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -23,7 +27,7 @@
           {% if not use_dashboard_nav %}
             <div class="nav-item">
               {% if request.identity.default_to_dashboard %}
-                <a class="brand" href="/dashboard/" title="Dashboard">Dashboard</a>
+                <a class="brand" href="/dashboard/" title="Dashboard">{% ftl_message 'topbar-dashboard' %}</a>
               {% else %}
                 <a class="brand" href="/">Learn Scripture</a>
               {% endif %}
@@ -135,6 +139,25 @@
             </p>
           {% endif %}
         {% endblock %}
+
+        <div id="id-language-chooser-form">
+          <form action="{% url 'set_language' %}" method="post">
+            {% csrf_token %}
+            {% ftl_message 'choose-language' %}
+            <input name="next" type="hidden" value="{{ request.build_absolute_url }}" />
+            <select name="language">
+              {% get_available_languages as LANGUAGES %}
+              {% get_language_info_list for LANGUAGES as languages %}
+              {% for language in languages %}
+                <option value="{{ language.code }}"{% if language.code == request.LANGUAGE_CODE %} selected{% endif %}>
+                  {{ language.name_local }}
+                </option>
+              {% endfor %}
+            </select>
+            <input type="submit" class="btn" value="Go" />
+          </form>
+        </div>
+
         <p><a href="/help/">Help</a> |
           <a href="/about/">About</a> |
           <a href="/terms-of-service/">Terms of service</a> |

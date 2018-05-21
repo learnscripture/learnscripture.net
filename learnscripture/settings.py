@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Django settings for learnscripture project.
 
 import glob
@@ -163,7 +164,11 @@ PAYPAL_IMAGE = "https://www.paypalobjects.com/en_US/GB/i/btn/btn_buynowCC_LG.gif
 VALID_RECEIVE_CURRENCY = 'GBP'
 
 TIME_ZONE = 'UTC'
-LANGUAGE_CODE = 'en-gb'
+LANGUAGE_CODE = 'en'
+LANGUAGES = [
+    ('en', 'English'),
+    ('tr', 'Turkçe'),
+]
 
 SITE_ID = 1
 
@@ -199,9 +204,10 @@ MIDDLEWARE = [
     [
         (True, 'django.middleware.security.SecurityMiddleware'),
         (DEBUG, 'debug_toolbar.middleware.DebugToolbarMiddleware'),
-        (True, 'django.middleware.common.CommonMiddleware'),
         (True, 'django.contrib.sessions.middleware.SessionMiddleware'),
         (True, 'learnscripture.middleware.pwa_tracker_middleware'),
+        (True, 'django_ftl.middleware.activate_from_request_session'),
+        (True, 'django.middleware.common.CommonMiddleware'),
         (True, 'django.middleware.csrf.CsrfViewMiddleware'),
         (True, 'django.contrib.auth.middleware.AuthenticationMiddleware'),
         (True, 'django.contrib.auth.middleware.SessionAuthenticationMiddleware'),
@@ -240,6 +246,7 @@ TEMPLATES = [
                 'learnscripture.context_processors.settings_processor',
                 'learnscripture.context_processors.request_account',
                 'learnscripture.context_processors.indexing',
+                'learnscripture.context_processors.ftl',
             ],
             'debug': DEBUG,
         },
@@ -286,6 +293,7 @@ INSTALLED_APPS = [
     'anymail',
     'aldjemy',
     'webpack_loader',
+    'django_ftl',
 ]
 
 ALLOWED_HOSTS = ["learnscripture.net"]
@@ -397,6 +405,11 @@ if (DEBUG or any(a in sys.argv for a in ['setup_bibleverse_suggestions',
         'propagate': False,
     }
     LOGGING['loggers']['bibleverses.services'] = {
+        'level': 'INFO',
+        'handlers': ['console'],
+        'propagate': False,
+    }
+    LOGGING['loggers']['django_ftl.message_errors'] = {
         'level': 'INFO',
         'handlers': ['console'],
         'propagate': False,

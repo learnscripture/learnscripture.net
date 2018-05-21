@@ -129,6 +129,10 @@ def settings_processor(request):
                          }}
 
 
+def ftl(request):
+    return {'ftl_mode': 'server'}
+
+
 def indexing(request):
     retval = {}
     if 'p' in request.GET or 'from_item' in request.GET:
