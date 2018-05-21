@@ -306,6 +306,7 @@ if DEVBOX:
 
 if DEBUG:
     INSTALLED_APPS.append('debug_toolbar')
+    INSTALLED_APPS.append('django_extensions')  # For runserver_plus
 
 
 LOGGING = {
@@ -398,6 +399,11 @@ LOGGING = {
 if (DEBUG or any(a in sys.argv for a in ['setup_bibleverse_suggestions',
                                          'run_suggestions_analyzers'])):
     LOGGING['root']['handlers'] = ['console']
+    LOGGING['loggers']['django.server'] = {
+        'level': 'INFO',
+        'handlers': ['console'],
+        'propagate': False,
+    }
     LOGGING['loggers']['celery']['handlers'] = ['console']
     LOGGING['loggers']['bibleverses.suggestions'] = {
         'level': 'INFO',
