@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 from collections import defaultdict
 
 from .languages import LANGUAGE_CODE_EN, LANGUAGE_CODE_INTERNAL, LANGUAGE_CODE_TR, normalize_reference_input
