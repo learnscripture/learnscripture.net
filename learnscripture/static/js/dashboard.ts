@@ -78,7 +78,7 @@ var createOrRefreshCalendarHeatmap = function(allData) {
         var year = today.getUTCFullYear();
         var month = today.getUTCMonth();
         var dayOfMonth = today.getUTCDate();
-        var utcToday = new Date(Date.UTC(year, month, dayOfMonth));
+        var utcToday = new Date(year, month, dayOfMonth);
         // Go back 2 years, and then clip the left hand side
         // This gives the best results visually.
         var numberOfYears = 2;
