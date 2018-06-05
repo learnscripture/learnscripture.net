@@ -3539,7 +3539,6 @@ togglePinnableMenu dropdown model =
                 { model
                     | pinnedMenus = Set.remove (toString dropdown) model.pinnedMenus
                 }
-                    |> setDropdownOpen dropdown
 
         oldPreferences =
             model.autoSavedPreferences
