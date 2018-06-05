@@ -81,7 +81,7 @@ port saveCallsToLocalStorage : JD.Value -> Cmd msg
 -}
 hardModeStrengthThreshold : Float
 hardModeStrengthThreshold =
-    0.48
+    0.46
 
 
 
