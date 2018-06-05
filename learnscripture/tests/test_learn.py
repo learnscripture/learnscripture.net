@@ -129,6 +129,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         for word in self.psalm_23_1_2.strip().split():
             self.fill({"#id-typing": word + " "})
 
+        time.sleep(0.2)
         self.wait_for_ajax()
         # Check the strength
         uvs = identity.verse_statuses.get(localized_reference='Psalm 23:1-2')
@@ -206,8 +207,9 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         for word in "The LORD is my shepherd, I shall not want.".split():
             self.fill({"#id-typing": word + " "})
 
-        # Test keyboard shortcut
-        self.send_keys('button.primary', '\n')
+        # Test focussed button
+        time.sleep(0.2)
+        self.press_enter('button.primary')
         self.assertIn("He maketh me to lie down in green pastures",
                       self.get_element_text('.current-verse'))
 
@@ -218,6 +220,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
     def test_skip_verse(self):
         self.choose_verse_set('Bible 101')
 
+        self.wait_until_loaded('#id-verse-header')
         self.assertEqual("John 3:16", self.get_element_text("#id-verse-header h2"))
 
         self.click("#id-verse-options-menu-btn")

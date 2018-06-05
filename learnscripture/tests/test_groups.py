@@ -1,6 +1,5 @@
 import time
 
-import selenium
 from django.urls import reverse
 
 from accounts.models import Account
@@ -278,7 +277,7 @@ class GroupCreatePageTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.fill({select_input: "invit"})
         self.wait_for_ajax()
         time.sleep(0.2)
-        self.send_keys(select_input, selenium.webdriver.common.keys.Keys.ENTER)
+        self.press_enter(select_input)
         time.sleep(0.2)
         self.click('input[name="save"]')
 
