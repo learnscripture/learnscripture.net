@@ -325,7 +325,7 @@ type alias CurrentVerse =
         Maybe
             { accuracy : Float
             , timestamp : ISO8601.Time
-            , strengthDelta : Float
+            , scaledStrengthDelta : Float
             }
     }
 
@@ -2579,15 +2579,15 @@ instructions verse testingMethod helpVisible =
                                             Nothing ->
                                                 []
 
-                                            Just { strengthDelta } ->
+                                            Just { scaledStrengthDelta } ->
                                                 [ H.span [ A.class "strength-delta" ]
                                                     [ H.text
-                                                        (if strengthDelta > 0 then
+                                                        (if scaledStrengthDelta > 0 then
                                                             interpolate " (strength +{0}% ↗)"
-                                                                [ toString (round (abs strengthDelta * 100)) ]
+                                                                [ toString (round (abs scaledStrengthDelta * 100)) ]
                                                          else
                                                             interpolate " (strength -{0}% ↘)"
-                                                                [ toString (round (abs strengthDelta * 100)) ]
+                                                                [ toString (round (abs scaledStrengthDelta * 100)) ]
                                                         )
                                                     ]
                                                 ]
@@ -4929,11 +4929,10 @@ markWord checkResult word testProgress testType verse testingMethod preferences 
                                         Just
                                             { accuracy = recordedTest.accuracy
                                             , timestamp = recordedTest.timestamp
-                                            , strengthDelta =
-                                                (calculateNewVerseStrength newCurrentVerse1.verseStatus
-                                                    recordedTest
+                                            , scaledStrengthDelta =
+                                                ((scaledStrength <| calculateNewVerseStrength newCurrentVerse1.verseStatus recordedTest)
+                                                    - (scaledStrength <| newCurrentVerse1.verseStatus.strength)
                                                 )
-                                                    - newCurrentVerse1.verseStatus.strength
                                             }
                                 }
                           else
@@ -6588,7 +6587,7 @@ initialTourSteps model =
                                         Just
                                             { accuracy = 1
                                             , timestamp = model.currentTime
-                                            , strengthDelta = 0.05
+                                            , scaledStrengthDelta = 0.05
                                             }
                                 }
 
