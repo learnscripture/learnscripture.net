@@ -34,7 +34,7 @@ django-autocomplete-light==3.2.10
 django-compressor==2.2    # via django-fiber
 django-debug-toolbar==1.8
 django-fiber==1.4.1
-django-functest==1.0.2
+django-functest==1.0.3
 django-js-asset==1.0.0    # via django-mptt
 django-markup==1.2
 django-mptt==0.9.0        # via django-fiber
@@ -88,7 +88,7 @@ rcssmin==1.0.6            # via django-compressor
 requests==2.6.0
 rjsmin==1.0.12            # via django-compressor
 scipy==1.0.0
-selenium==2.53.6
+selenium==3.12.0
 simplegeneric==0.8.1      # via ipython
 six==1.11.0               # via bcrypt, cryptography, django-anymail, django-functest, django-markup, django-paypal, django-spurl, fabric3, furl, mock, orderedmultidict, pip-tools, prompt-toolkit, pynacl, python-memcached, traitlets, unittest2, webtest
 sqlalchemy==1.1.10
