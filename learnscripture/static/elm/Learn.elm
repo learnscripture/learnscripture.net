@@ -325,6 +325,7 @@ type alias CurrentVerse =
         Maybe
             { accuracy : Float
             , timestamp : ISO8601.Time
+            , strengthDelta : Float
             }
     }
 
@@ -2562,12 +2563,32 @@ instructions verse testingMethod helpVisible =
                                         , commonHelp ++ testingCommonHelp
                                         )
 
-                            TestFinished { accuracy } ->
+                            TestFinished { accuracy, testType } ->
                                 ( [ bold "RESULTS: "
                                   , H.text "You scored: "
                                   , bold (toString (floor (accuracy * 100)) ++ "%")
                                   , H.text (" - " ++ resultComment accuracy)
                                   ]
+                                    ++ if isPracticeTest verse testType then
+                                        []
+                                       else
+                                        (case verse.recordedTestScore of
+                                            Nothing ->
+                                                []
+
+                                            Just { strengthDelta } ->
+                                                [ H.span [ A.class "strength-delta" ]
+                                                    [ H.text
+                                                        (if strengthDelta > 0 then
+                                                            interpolate " (strength ↗{0}%)"
+                                                                [ toString (round (abs strengthDelta * 100)) ]
+                                                         else
+                                                            interpolate " (strength ↘{0}%)"
+                                                                [ toString (round (abs strengthDelta * 100)) ]
+                                                        )
+                                                    ]
+                                                ]
+                                        )
                                 , commonHelp
                                 )
     in
@@ -3909,7 +3930,10 @@ type alias CurrentWordData =
 
 
 type CurrentTestWord
-    = TestFinished { accuracy : Float }
+    = TestFinished
+        { accuracy : Float
+        , testType : TestType
+        }
     | CurrentWord CurrentWordData
 
 
@@ -4868,7 +4892,7 @@ markWord checkResult word testProgress testType verse testingMethod preferences 
 
         nextCurrentWord =
             if shouldMoveOn then
-                getNextCurrentWord verse newTestProgress1 testingMethod
+                getNextCurrentWord verse testType newTestProgress1 testingMethod
             else
                 currentWord
 
@@ -4891,13 +4915,24 @@ markWord checkResult word testProgress testType verse testingMethod preferences 
                 case nextCurrentWord of
                     TestFinished { accuracy } ->
                         ( if not <| isPracticeTest verse testType then
-                            { newCurrentVerse1
-                                | recordedTestScore =
-                                    Just
-                                        { accuracy = accuracy
-                                        , timestamp = currentTime
-                                        }
-                            }
+                            let
+                                recordedTest =
+                                    { accuracy = accuracy
+                                    , timestamp = currentTime
+                                    }
+                            in
+                                { newCurrentVerse1
+                                    | recordedTestScore =
+                                        Just
+                                            { accuracy = recordedTest.accuracy
+                                            , timestamp = recordedTest.timestamp
+                                            , strengthDelta =
+                                                (calculateNewVerseStrength newCurrentVerse1.verseStatus
+                                                    recordedTest
+                                                )
+                                                    - newCurrentVerse1.verseStatus.strength
+                                            }
+                                }
                           else
                             newCurrentVerse1
                         , recordTestComplete newCurrentVerse1 accuracy testType
@@ -4938,14 +4973,17 @@ markWord checkResult word testProgress testType verse testingMethod preferences 
         )
 
 
-getNextCurrentWord : CurrentVerse -> TestProgress -> TestingMethod -> CurrentTestWord
-getNextCurrentWord verse testProgress testingMethod =
+getNextCurrentWord : CurrentVerse -> TestType -> TestProgress -> TestingMethod -> CurrentTestWord
+getNextCurrentWord verse testType testProgress testingMethod =
     let
         currentTestWordList =
             getCurrentTestWordList verse testingMethod
 
-        testAccuracy =
-            getTestResult testProgress
+        makeTestFinished testProgress =
+            TestFinished
+                { accuracy = getTestResult testProgress
+                , testType = testType
+                }
     in
         case testProgress.currentWord of
             TestFinished r ->
@@ -4959,7 +4997,7 @@ getNextCurrentWord verse testProgress testingMethod =
                     case getAt currentTestWordList nextI of
                         Just nextWord ->
                             if isReference nextWord.type_ && not (shouldTestReferenceForTestingMethod testingMethod) then
-                                TestFinished { accuracy = testAccuracy }
+                                makeTestFinished testProgress
                             else
                                 CurrentWord
                                     { word = nextWord
@@ -4967,7 +5005,7 @@ getNextCurrentWord verse testProgress testingMethod =
                                     }
 
                         Nothing ->
-                            TestFinished { accuracy = testAccuracy }
+                            makeTestFinished testProgress
 
 
 getCurrentTestWordList : CurrentVerse -> TestingMethod -> List Word
@@ -5319,7 +5357,7 @@ calculateNextTestDue currentVerse =
                         Just (DueAfter (1000 * MemoryModel.nextTestDueAfter newStrength))
 
 
-calculateNewVerseStrength : VerseStatus -> { accuracy : Float, timestamp : ISO8601.Time } -> Float
+calculateNewVerseStrength : VerseStatus -> { a | accuracy : Float, timestamp : ISO8601.Time } -> Float
 calculateNewVerseStrength verseStatus { accuracy, timestamp } =
     let
         timeElapsed =
@@ -6532,7 +6570,11 @@ initialTourSteps model =
                                             currentTestWordList
                                         )
                                 , currentTypedText = ""
-                                , currentWord = TestFinished { accuracy = 1.0 }
+                                , currentWord =
+                                    TestFinished
+                                        { accuracy = 1.0
+                                        , testType = FirstTest
+                                        }
                                 }
 
                             newCurrentVerse =
@@ -6543,6 +6585,7 @@ initialTourSteps model =
                                         Just
                                             { accuracy = 1
                                             , timestamp = model.currentTime
+                                            , strengthDelta = 0.05
                                             }
                                 }
 
