@@ -138,7 +138,7 @@ var fixTypingBox = function (attempts, args) {
 
             if (args.hardMode) {
                 // Don't give away the word length, which would be a clue.
-                typingBox.style.width = "6em";
+                typingBox.style.width = "7em";
             } else {
                 // Allow for border and left padding
                 var paddingLeft = parsePx(typingBoxStyles['padding-left']);
