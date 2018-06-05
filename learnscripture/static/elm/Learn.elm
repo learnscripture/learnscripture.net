@@ -1705,8 +1705,11 @@ wordButtonClasses wd stage =
                         Nothing ->
                             [ "hidden" ]
 
-                        Just _ ->
-                            []
+                        Just attempt ->
+                            if attempt.finished then
+                                []
+                            else
+                                [ "hidden" ]
 
                 _ ->
                     []
