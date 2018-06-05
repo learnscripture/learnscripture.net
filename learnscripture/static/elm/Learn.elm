@@ -2583,10 +2583,10 @@ instructions verse testingMethod helpVisible =
                                                 [ H.span [ A.class "strength-delta" ]
                                                     [ H.text
                                                         (if strengthDelta > 0 then
-                                                            interpolate " (strength ↗{0}%)"
+                                                            interpolate " (strength +{0}% ↗)"
                                                                 [ toString (round (abs strengthDelta * 100)) ]
                                                          else
-                                                            interpolate " (strength ↘{0}%)"
+                                                            interpolate " (strength -{0}% ↘)"
                                                                 [ toString (round (abs strengthDelta * 100)) ]
                                                         )
                                                     ]
