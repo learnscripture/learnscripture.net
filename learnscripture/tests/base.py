@@ -3,12 +3,15 @@ import os
 import time
 import unittest
 
+import selenium
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.db.models import F
 from django.test import TestCase
 from django.utils import timezone
 from django_functest import FuncSeleniumMixin, FuncWebTestMixin
+from selenium.common.exceptions import NoSuchWindowException
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support.ui import WebDriverWait
 
 from accounts.models import Account, Identity, Notice
 from bibleverses.models import TextVersion, UserVerseStatus
@@ -194,12 +197,29 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
 
     # WebTest/Selenium utilities
 
-    def click_and_confirm(self, selector):
+    def click_and_confirm(self, selector, wait_for_reload=True):
         # 'self.click' is buggy when alerts are produced.
         # So we wrap all of this functionality in a utility
         # to avoid issues.
+        if wait_for_reload:
+            self._driver.execute_script("document.pageReloadedYetFlag='notyet';")
+
         self._find(selector).click()
         self._driver.switch_to.alert.accept()
+
+        if wait_for_reload:
+            def f(driver):
+                obj = driver.execute_script("return document.pageReloadedYetFlag;")
+
+                if obj is None or obj != "notyet":
+                    return True
+                return False
+            try:
+                WebDriverWait(self._driver, self.get_default_timeout()).until(f)
+            except NoSuchWindowException:
+                # legitimate sometimes e.g. when window closes
+                pass
+
         self.wait_for_page_load()
         self.wait_for_ajax()
 
@@ -211,15 +231,17 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
 
     # Selenium specific utilities:
 
-    def drag_and_drop_by_offset(self, css_selector, x_offset, y_offset):
-        e = self._find(css_selector)
-        ActionChains(self._driver).drag_and_drop_by_offset(e, x_offset, y_offset).perform()
+    def drag_and_drop(self, from_css_selector, to_css_selector):
+        ActionChains(self._driver).drag_and_drop(
+            self._find(from_css_selector),
+            self._find(to_css_selector)
+        ).perform()
 
     def get_page_title(self):
         return self._driver.title
 
-    def send_keys(self, css_selector, keys):
-        self._find(css_selector=css_selector).send_keys(keys)
+    def press_enter(self, css_selector):
+        self._find(css_selector=css_selector).send_keys(selenium.webdriver.common.keys.Keys.ENTER)
 
     def wait_for_ajax(self):
         time.sleep(0.1)

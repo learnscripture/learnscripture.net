@@ -134,8 +134,8 @@ class CreateSetTests(FullBrowserTest):
                                       set_order=2)
         self.login(self._account)
         self.get_url('edit_set', slug=vs.slug)
-        self.drag_and_drop_by_offset("#id-verse-list tbody tr:first-child td",
-                                     0, 60)
+        self.drag_and_drop("#id-verse-list tbody tr:first-child td",
+                           "#id-verse-list tbody tr:nth-child(2) td")
         self.submit("#id-save-btn")
 
         vs = VerseSet.objects.get(id=vs.id)
