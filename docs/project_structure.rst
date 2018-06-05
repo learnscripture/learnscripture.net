@@ -64,12 +64,3 @@ Run the tests::
 To see more options::
 
     ./runtests.py --help
-
-See notes here about browser compatibility when running Selenium tests:
-
-http://django-functest.readthedocs.io/en/latest/installation.html#dependencies
-
-You will currently need to download Firefox 45 and do::
-
-
-    ./runtests.py --noinput --firefox-binary=/path/to/firefox45/firefox
