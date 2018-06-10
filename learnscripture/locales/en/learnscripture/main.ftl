@@ -2,7 +2,7 @@
 
 topbar-dashboard = Dashboard
 
-choose-language = Choose website interface language:
+footer-choose-language = Choose website interface language:
 
 ### Dashboard
 
