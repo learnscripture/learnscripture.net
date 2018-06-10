@@ -31,7 +31,7 @@
   </div>
 
   {% if request.identity.scoring_enabled %}
-    <h2>{% ftl_message 'learning-events' %}
+    <h2>{% ftlmsg 'dashboard-learning-events' %}
       <a href="#"
          id="id-show-heatmap"
          >
@@ -246,9 +246,9 @@
           <p>You've queued this passage for learning.</p>
         {% else %}
           {% if cvs.needs_review_total > 0 %}
-            <p>{% ftl_message 'dashboard-passages-youve-seen-verses-with-review-due' tested_total=cvs.tested_total needs_review_total=cvs.needs_review_total untested_total=cvs.untested_total %}</p>
+            <p>{% ftlmsg 'dashboard-passages-youve-seen-verses-with-review-due' tested_total=cvs.tested_total needs_review_total=cvs.needs_review_total untested_total=cvs.untested_total %}</p>
           {% else %}
-            <p>{% ftl_message 'dashboard-passages-youve-seen-verses' tested_total=cvs.tested_total needs_review_total=cvs.needs_review_total untested_total=cvs.untested_total %}</p>
+            <p>{% ftlmsg 'dashboard-passages-youve-seen-verses' tested_total=cvs.tested_total needs_review_total=cvs.needs_review_total untested_total=cvs.untested_total %}</p>
           {% endif %}
         {% endif %}
       </div>

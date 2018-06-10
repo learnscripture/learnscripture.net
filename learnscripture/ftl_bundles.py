@@ -1,5 +1,6 @@
-from django_ftl.bundle import Bundle
+from django_ftl.bundles import Bundle
 
 
 main = Bundle(['learnscripture/main.ftl'],
-              fallback_locale='en')
+              default_locale='en',
+              require_activate=True)
