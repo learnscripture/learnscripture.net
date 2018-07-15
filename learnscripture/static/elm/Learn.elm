@@ -1145,7 +1145,7 @@ viewCurrentVerse session model =
                     ]
                 , H.div
                     [ A.id "id-verse-strength-value"
-                    , A.title "Memory strength for this verse"
+                    , A.title "Memory progress for this verse"
                     ]
                     [ H.text (toString verseStrengthPercent ++ "%") ]
                 , viewVerseOptionsMenuButton verseOptionsMenuOpen verseOptionsMenuPinned
@@ -2568,7 +2568,7 @@ instructions verse testingMethod helpVisible =
 
                             TestFinished { accuracy, testType } ->
                                 ( [ bold "RESULTS: "
-                                  , H.text "You scored: "
+                                  , H.text "You scored "
                                   , bold (toString (floor (accuracy * 100)) ++ "%")
                                   , H.text (" - " ++ resultComment accuracy)
                                   ]
@@ -2580,16 +2580,16 @@ instructions verse testingMethod helpVisible =
                                                 []
 
                                             Just { scaledStrengthDelta } ->
-                                                [ H.span [ A.class "strength-delta" ]
-                                                    [ H.text
-                                                        (if scaledStrengthDelta > 0 then
-                                                            interpolate " (strength +{0}% ↗)"
-                                                                [ toString (round (abs scaledStrengthDelta * 100)) ]
-                                                         else
-                                                            interpolate " (strength -{0}% ↘)"
-                                                                [ toString (round (abs scaledStrengthDelta * 100)) ]
-                                                        )
-                                                    ]
+                                                [ H.br [] []
+                                                , bold "PROGRESS: "
+                                                , H.text
+                                                    (if scaledStrengthDelta >= 0 then
+                                                        interpolate " +{0}% ↗"
+                                                            [ toString (round (abs scaledStrengthDelta * 100)) ]
+                                                     else
+                                                        interpolate "  -{0}% ↘"
+                                                            [ toString (round (abs scaledStrengthDelta * 100)) ]
+                                                    )
                                                 ]
                                         )
                                 , commonHelp
