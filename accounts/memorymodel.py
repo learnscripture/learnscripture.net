@@ -192,11 +192,11 @@ class MemoryModel(object):
 
         delta_s_actual = delta_s_max * (test_strength - old_strength) / (1.0 - old_strength)
 
-        # Limit jumps to approx DELTA_S_IDEAL to avoid people progressing too
-        # quickly if they are not doing tests. This line means that people will
-        # still end up doing (approx) at least VERSE_TESTS tests even if they
-        # take a break and ace the tests.
-        delta_s_actual = min(self.DELTA_S_IDEAL * 1.1, delta_s_actual)
+        # Limit jumps to DELTA_S_IDEAL to avoid people progressing too quickly
+        # if they are not doing tests. This line means that people will still
+        # end up doing (approx) at least VERSE_TESTS tests even if they take a
+        # break and ace the tests.
+        delta_s_actual = min(self.DELTA_S_IDEAL, delta_s_actual)
 
         new_strength = old_strength + delta_s_actual
 
