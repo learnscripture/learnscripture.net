@@ -435,6 +435,11 @@ class Identity(models.Model):
                                            help_text="Depends on device capabilities.")
     interface_theme = models.CharField(max_length=30, choices=THEMES,
                                        default=DEFAULT_THEME)
+    interface_language = models.CharField("Interface language", max_length=10,
+                                          choices=settings.LANGUAGES,
+                                          default=settings.LANGUAGE_CODE)
+
+    # Managed invisibly:
     referred_by = models.ForeignKey(Account, on_delete=models.CASCADE,
                                     null=True, default=None,
                                     blank=True,
@@ -1279,6 +1284,9 @@ class Identity(models.Model):
             if self.account.is_tester:
                 return TextVersion.objects.bibles()
         return TextVersion.objects.bibles().filter(public=True)
+
+    def i18n_options_enabled(self):
+        return self.account_id is not None and self.account.is_tester
 
     def get_dashboard_events(self, now=None):
         from events.models import Event

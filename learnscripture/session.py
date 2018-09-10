@@ -4,6 +4,7 @@ import attr
 from app_metrics.utils import metric
 from django.urls import reverse
 from django.utils import timezone
+from django.views import i18n as i18n_views
 
 from accounts.models import Account, Identity
 from bibleverses.models import MemoryStage
@@ -246,3 +247,8 @@ def unfinished_session_first_uvs(request):
 
     uvs = request.identity.verse_statuses.get(id=uvs_data[0][1])
     return uvs
+
+
+def set_interface_language(request, lang_code):
+    if hasattr(request, 'session'):
+        request.session[i18n_views.LANGUAGE_SESSION_KEY] = lang_code

@@ -352,6 +352,7 @@ class SetPreferences(ApiView):
         'enable_sounds',
         'enable_vibration',
         'interface_theme',
+        'interface_language',
         'preferences_setup',
     ]
 
@@ -369,6 +370,7 @@ class SetPreferences(ApiView):
                 request.identity = identity
             else:
                 identity = form.save()
+            session.set_interface_language(request, identity.interface_language)
             return identity
         else:
             return validation_error_response(form.errors)

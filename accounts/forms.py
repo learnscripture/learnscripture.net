@@ -20,8 +20,14 @@ class PreferencesForm(forms.ModelForm):
         available_bible_versions = TextVersion.objects.bibles().filter(public=True)
         if 'instance' in kwargs:
             identity = kwargs['instance']
-            if identity is not None:
-                available_bible_versions = identity.available_bible_versions()
+        else:
+            identity = None
+
+        if identity is not None:
+            available_bible_versions = identity.available_bible_versions()
+
+        if identity is None or not identity.i18n_options_enabled:
+            del self.fields['interface_language']
 
         self.fields['default_bible_version'].queryset = available_bible_versions
 
@@ -33,6 +39,7 @@ class PreferencesForm(forms.ModelForm):
                   'enable_sounds',
                   'enable_vibration',
                   'interface_theme',
+                  'interface_language',
                   ]
 
 

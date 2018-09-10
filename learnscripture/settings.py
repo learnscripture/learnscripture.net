@@ -169,6 +169,7 @@ LANGUAGES = [
     ('en', 'English'),
     ('tr', 'Turkçe'),
 ]
+LANGUAGE_CODES = [c for c, n in LANGUAGES]
 
 SITE_ID = 1
 
@@ -206,7 +207,6 @@ MIDDLEWARE = [
         (DEBUG, 'debug_toolbar.middleware.DebugToolbarMiddleware'),
         (True, 'django.contrib.sessions.middleware.SessionMiddleware'),
         (True, 'learnscripture.middleware.pwa_tracker_middleware'),
-        (True, 'learnscripture.middleware.activate_language_from_request_session'),
         (True, 'django.middleware.common.CommonMiddleware'),
         (True, 'django.middleware.csrf.CsrfViewMiddleware'),
         (True, 'django.contrib.auth.middleware.AuthenticationMiddleware'),
@@ -218,6 +218,7 @@ MIDDLEWARE = [
         (DEVBOX, 'learnscripture.middleware.debug_middleware'),
         (DEBUG, 'learnscripture.middleware.paypal_debug_middleware'),
         (True, 'learnscripture.middleware.identity_middleware'),
+        (True, 'learnscripture.middleware.activate_language_from_request'),
         (True, 'fiber.middleware.AdminPageMiddleware'),
     ]
     if b

@@ -30,6 +30,7 @@ if ($('body.learn-page').length > 0) {
                     "enableVibration": preferencesNode.attributes['data-enable-vibration'].value == "true",
                     "desktopTestingMethod": preferencesNode.attributes['data-desktop-testing-method'].value,
                     "touchscreenTestingMethod": preferencesNode.attributes['data-touchscreen-testing-method'].value,
+                "interfaceLanguage": preferencesNode.attributes['data-interface-language'].value,
                 },
                 "autoSavedPreferences": {
                     // These preferences are not manually set in the 'preferences' dialog,

@@ -15,7 +15,8 @@ from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.http import urlsafe_base64_decode
+from django.utils.http import is_safe_url, urlsafe_base64_decode
+from django.views import i18n as i18n_views
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.debug import sensitive_post_parameters
@@ -203,6 +204,7 @@ def preferences(request):
                 form = PreferencesForm(request.POST, instance=identity)
                 request.identity = identity
             form.save()
+            session.set_interface_language(request, identity.interface_language)
             return get_next(request, reverse('dashboard'))
     else:
         form = PreferencesForm(instance=identity)
@@ -1709,6 +1711,26 @@ def activity_item(request, event_id):
         'event': event,
         'title': "Activity from %s" % event.account.username,
     })
+
+
+def set_language(request):
+    """
+    Save the given language in the sesison, and in the user's preferences if logged in.
+    """
+    next_url = request.POST.get('next', '/')
+    if not is_safe_url(next_url):
+        next_url = '/'
+    response = HttpResponseRedirect(next_url)
+
+    if request.method == 'POST':
+        lang_code = request.POST.get(i18n_views.LANGUAGE_QUERY_PARAMETER)
+        if lang_code and lang_code in settings.LANGUAGE_CODES:
+            session.set_interface_language(request, lang_code)
+            identity = getattr(request, 'identity', None)
+            if identity is not None:
+                identity.interface_language = lang_code
+                identity.save()
+    return response
 
 
 def celery_debug(request):
