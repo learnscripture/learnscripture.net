@@ -3,6 +3,7 @@
 -e git://github.com/spookylukey/django-app-metrics.git@6de9e47459b9c3c1173f3289cbc71afd6fa45449#egg=django_app_metrics
 -e git://github.com/spookylukey/django-autoslug.git@0a6adec1f9743743bf7d741b6845620a8f347159#egg=django-autoslug
 -e hg+https://bitbucket.org/schinckel/django-jsonfield@6c37ee0fd8f2f999b21c068e733876d937d74a00#egg=django-jsonfield
+-e git+https://github.com/django-ftl/python-fluent@django-ftl-latest#egg=fluent
 SQLAlchemy==1.1.10
 amqp==2.1.4
 attrs==18.2.0
@@ -13,6 +14,7 @@ concurrent-log-handler==0.9.7
 django-anymail==0.10
 django-autocomplete-light==3.2.10
 django-fiber==1.4.1
+django-ftl==0.9.0
 django-markup==1.2
 django-paypal==0.3.6
 django-pjax==1.4
