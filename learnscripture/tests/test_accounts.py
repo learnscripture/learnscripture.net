@@ -278,7 +278,7 @@ class PasswordResetTestsBase:
         self.get_literal_url(path)
         self.fill({'#id_new_password1': 'anewpassword',
                    '#id_new_password2': 'anewpassword'})
-        self.submit('[type=submit]')
+        self.submit('.maincontent [type=submit]')
         # Check the password has been changed
         account = Account.objects.get(id=self.account.id)
         self.assertTrue(account.check_password("anewpassword"))
@@ -292,7 +292,7 @@ class PasswordResetTestsBase:
         self.get_literal_url(path)
         self.fill({'#id_new_password1': 'anewpassword',
                    '#id_new_password2': 'x'})
-        self.submit('[type=submit]')
+        self.submit('.maincontent [type=submit]')
         self.assertTextPresent(AccountSetPasswordForm.error_messages['password_mismatch'])
 
 
@@ -317,7 +317,7 @@ class PasswordChangeTestsBase:
             '#id_new_password1': 'newpassword',
             '#id_new_password2': 'newpassword',
         })
-        self.submit('input[type="submit"]')
+        self.submit('.maincontent input[type="submit"]')
         self.assertTextPresent("Your password was changed.")
 
         # Should be logged in:
