@@ -1,5 +1,4 @@
 {% load render_bundle from webpack_loader %}
-{% load i18n %}
 {% load ftl %}
 
 {% ftlconf mode=ftl_mode bundle='learnscripture.ftl_bundles.main' %}
@@ -140,23 +139,9 @@
           {% endif %}
         {% endblock %}
 
-        <div id="id-language-chooser-form">
-          <form action="{% url 'set_language' %}" method="post">
-            {% csrf_token %}
-            {% ftlmsg 'footer-choose-language' %}
-            <input name="next" type="hidden" value="{{ request.build_absolute_url }}" />
-            <select name="language">
-              {% get_available_languages as LANGUAGES %}
-              {% get_language_info_list for LANGUAGES as languages %}
-              {% for language in languages %}
-                <option value="{{ language.code }}"{% if language.code == request.LANGUAGE_CODE %} selected{% endif %}>
-                  {{ language.name_local }}
-                </option>
-              {% endfor %}
-            </select>
-            <input type="submit" class="btn" value="Go" />
-          </form>
-        </div>
+        {% if request.identity.i18n_options_enabled %}
+          {% include "learnscripture/language_selector_inc.html" %}
+        {% endif %}
 
         <p><a href="/help/">Help</a> |
           <a href="/about/">About</a> |

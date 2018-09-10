@@ -25,10 +25,14 @@ def identity_middleware(get_response):
     return middleware
 
 
-def activate_language_from_request_session(get_response):
-    # Similar to django_ftl.middleware.activate_from_request_session, but with our default
+def activate_language_from_request(get_response):
+    # Similar to django_ftl.middleware.activate_from_request_session, but with our defaults
     def middleware(request):
-        language_code = request.session.get(LANGUAGE_SESSION_KEY, settings.LANGUAGE_CODE)
+        identity = getattr(request, 'identity', None)
+        if identity is not None:
+            language_code = identity.interface_language
+        else:
+            language_code = request.session.get(LANGUAGE_SESSION_KEY, settings.LANGUAGE_CODE)
         request.LANGUAGE_CODE = language_code
         activate(language_code)
         return get_response(request)

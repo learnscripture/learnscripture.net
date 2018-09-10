@@ -60,7 +60,7 @@ var savePrefsClick = function(ev) {
         type: 'POST',
         data: $('#id-preferences-form form').serialize(),
         success: function(data) {
-            // translate from Python attributes
+            // translate from Python data returns by SetPreferences API call
             data.defaultBibleVersion = data.default_bible_version;
             data.desktopTestingMethod = data.desktop_testing_method;
             data.touchscreenTestingMethod = data.touchscreen_testing_method;
@@ -68,6 +68,7 @@ var savePrefsClick = function(ev) {
             data.enableSounds = data.enable_sounds;
             data.enableVibration = data.enable_vibration;
             data.interfaceTheme = data.interface_theme;
+            data.interfaceLanguage = data.interface_language;
             data.preferencesSetup = data.preferences_setup;
 
             setPreferences(data);

@@ -47,7 +47,9 @@ urlpatterns = [
     url(r'^reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>.+)/$', learnscripture.views.password_reset_confirm, name='password_reset_confirm'),
     url(r'^reset/complete/$', learnscripture.views.password_reset_complete, name='password_reset_complete'),
     url(r'^login/$', learnscripture.views.login, name='admin_password_reset'),
+    url(r'^set-language/$', learnscripture.views.set_language, name='learnscripture_set_language'),
 
+    
     # Verse sets
     url(r'^verse-set/(?P<slug>[^/]+)/$', learnscripture.views.view_verse_set, name='view_verse_set'),
     url(r'^create-selection-set/$', learnscripture.views.create_selection_set, name='create_selection_set'),
