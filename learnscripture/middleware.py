@@ -3,9 +3,12 @@ import time
 import urllib.parse
 from datetime import datetime
 
+from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.utils.http import urlencode
+from django.utils.translation import LANGUAGE_SESSION_KEY
+from django_ftl import activate
 
 
 def identity_middleware(get_response):
@@ -19,6 +22,17 @@ def identity_middleware(get_response):
 
         session.save_referrer(request)
         return get_response(request)
+    return middleware
+
+
+def activate_language_from_request_session(get_response):
+    # Similar to django_ftl.middleware.activate_from_request_session, but with our default
+    def middleware(request):
+        language_code = request.session.get(LANGUAGE_SESSION_KEY, settings.LANGUAGE_CODE)
+        request.LANGUAGE_CODE = language_code
+        activate(language_code)
+        return get_response(request)
+
     return middleware
 
 
