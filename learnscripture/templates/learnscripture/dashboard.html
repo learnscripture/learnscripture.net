@@ -11,11 +11,7 @@
   {% if create_account_warning %}
     <div class="borderedbox">
       <p>
-        <small><b>Remember to <a href="{% url 'signup' %}">create an account</a></b> -
-          otherwise your progress will be lost! It's free, only takes a few
-          seconds, and enables lots of additional features like badges, groups,
-          leaderboards and statistics pages.
-        </small>
+        <small>{% ftlmsg 'dashboard-remember-to-create-an-account-html' signup_url=signup_url %}</small>
       </p>
     </div>
   {% endif %}
@@ -48,8 +44,8 @@
          {% endif %}
          >
       <div style="float: right; font-size: 120%;">
-        <a href="{% url 'user_stats' request_account.username %}" title="Your stats"><i class="icon-fw icon-stats"></i></a>
-        <a href="{% url 'user_verses' %}" title="Your progress"><i class="icon-fw icon-progress"></i></a>
+        <a href="{% url 'user_stats' request_account.username %}" title="{% ftlmsg 'calendar-heatmap-your-stats' %}"><i class="icon-fw icon-stats"></i></a>
+        <a href="{% url 'user_verses' %}" title="{% ftlmsg 'calendar-heatmap-your-progress' %}"><i class="icon-fw icon-progress"></i></a>
       </div>
       <div id="id-heatmap-controls">
         <button id="id-heatmap-previous"><i class="icon-left btn"></i></button>
@@ -61,9 +57,9 @@
         <div id="id-heatmap-div"></div>
       </div>
       <div id="id-streaks">
-        <div>Longest streak:
+        <div>{% ftlmsg 'calendar-heatmap-longest-streak' %}
           <span id="id-biggest-streak" class="streak">&nbsp;</span></div>
-        <div>Current streak:
+        <div>{% ftlmsg 'calendar-heatmap-current-streak' %}
           <span id="id-current-streak" class="streak">&nbsp;</span></div>
       </div>
       <form id="id-heatmap-stat-selector">
@@ -81,7 +77,8 @@
           </ul>
         </div>
       </form>
-      <p class="note">The calendar and streaks work in the UTC/GMT timezone</p>
+      <p class="note">{% ftlmsg 'calendar-heatmap-timezone-note' %}</p>
+
     </div>
   {% endif %}
 
@@ -93,7 +90,7 @@
        style="display: none;"
        {% endif %}
        >
-    <h2>Continue</h2>
+    <h2>{% ftlmsg 'dashboard-continue-title' %}</h2>
     <div class="actionset">
       <form action="" method="POST">
         {% csrf_token %}
@@ -246,7 +243,7 @@
           <p>You've queued this passage for learning.</p>
         {% else %}
           {% if cvs.needs_review_total > 0 %}
-            <p>{% ftlmsg 'dashboard-passages-youve-seen-verses-with-review-due' tested_total=cvs.tested_total needs_review_total=cvs.needs_review_total untested_total=cvs.untested_total %}</p>
+            <p>{% ftlmsg 'dashboard-passages-youve-seen-verses-with-review-due-html' tested_total=cvs.tested_total needs_review_total=cvs.needs_review_total untested_total=cvs.untested_total %}</p>
           {% else %}
             <p>{% ftlmsg 'dashboard-passages-youve-seen-verses' tested_total=cvs.tested_total needs_review_total=cvs.needs_review_total untested_total=cvs.untested_total %}</p>
           {% endif %}

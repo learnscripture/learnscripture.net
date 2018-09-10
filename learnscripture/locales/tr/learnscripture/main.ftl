@@ -1,7 +1,8 @@
-# Many pages
+## Global phrases shared across many pages
 
 footer-choose-language = Site genelinin dilini değiştir:
 
-# Dashboard
-learning-events = Öğrenme olaylar
+## Dashboard
+
+dashboard-learning-events = Öğrenme olaylar
 
