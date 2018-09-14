@@ -3,12 +3,16 @@ port module Learn exposing (..)
 import Dict
 import Dom
 import Erl
+import Fluent
+import Ftl.Translations.Learnscripture.Learn as T
 import Html as H
 import Html.Attributes as A
 import Html.Events as E
 import Html.Keyed
 import Http
 import ISO8601
+import Intl.Locale exposing (Locale)
+import Intl.NumberFormat as NumberFormat
 import Json.Decode as JD
 import Json.Decode.Pipeline as JDP
 import Json.Encode as JE
@@ -269,6 +273,7 @@ type alias Preferences =
     , enableVibration : Bool
     , desktopTestingMethod : TestingMethod
     , touchscreenTestingMethod : TestingMethod
+    , interfaceLanguage : Locale
     }
 
 
@@ -598,6 +603,16 @@ dashboardUrl =
     "/dashboard/"
 
 
+getLocale : Model -> Locale
+getLocale model =
+    model.preferences.interfaceLanguage
+
+
+formatNumber : Locale -> number -> String
+formatNumber locale number =
+    number |> Fluent.number |> Fluent.formatNumber locale
+
+
 view : Model -> H.Html Msg
 view model =
     case model.helpTour of
@@ -613,40 +628,48 @@ view model =
 
 viewMain : Model -> Maybe HelpTourData -> H.Html Msg
 viewMain model helpTour =
-    H.div
-        (pinnedAttributes model)
-        [ viewTopNav model
-        , case model.learningSession of
-            Loading ->
-                loadingDiv
+    let
+        locale =
+            getLocale model
+    in
+        H.div
+            (pinnedAttributes model)
+            [ viewTopNav model
+            , case model.learningSession of
+                Loading ->
+                    loadingDiv locale
 
-            Syncing ->
-                syncingDiv
+                Syncing ->
+                    syncingDiv locale
 
-            VersesError err ->
-                errorMessage ("The items to learn could not be loaded (error message: " ++ toString err ++ ".) Please check your internet connection!")
+                VersesError err ->
+                    errorMessage (T.learnItemsCouldNotBeLoadedError locale { errorMessage = toString err })
 
-            Session sessionData ->
-                viewCurrentVerse sessionData model
-        , case helpTour of
-            Nothing ->
-                emptyNode
+                Session sessionData ->
+                    viewCurrentVerse sessionData model
+            , case helpTour of
+                Nothing ->
+                    emptyNode
 
-            Just helpTourData ->
-                viewHelpTour helpTourData
-        ]
+                Just helpTourData ->
+                    viewHelpTour helpTourData locale
+            ]
 
 
 viewTopNav : Model -> H.Html Msg
 viewTopNav model =
-    H.div [ A.class "topbar-wrapper" ]
+    let
+        locale =
+            getLocale model
+    in
+      H.div [ A.class "topbar-wrapper" ]
         [ H.nav [ A.class "topbar" ]
             [ H.div [ A.class "nav-item return-link" ]
                 [ navLink
                     [ A.href "#"
                     , onClickSimply (AttemptReturn { immediate = True, fromRetry = False })
                     ]
-                    (getReturnUrl model |> getReturnCaption)
+                    (getReturnCaption (getReturnUrl model) locale)
                     "icon-return"
                     AlignLeft
                 ]
@@ -655,7 +678,7 @@ viewTopNav model =
             , ajaxInfo model
             , viewSessionStats model
             , H.div [ A.class "nav-item preferences-link" ]
-                [ navLink [ A.href "#" ] (userDisplayName model.user) "icon-preferences" AlignRight ]
+                [ navLink [ A.href "#" ] (userDisplayName model.user locale) "icon-preferences" AlignRight ]
             ]
         ]
 
@@ -674,17 +697,20 @@ pinnedAttributes model =
         ]
 
 
-getReturnCaption : Url -> String
-getReturnCaption url =
+getReturnCaption : Url -> Locale -> String
+getReturnCaption url locale =
     if url == dashboardUrl then
-        "Dashboard"
+        T.learnDashboardLink locale ()
     else
-        "Return"
+        T.learnDashboardLink locale ()
 
 
 sessionProgress : Model -> H.Html Msg
 sessionProgress model =
     let
+        locale =
+            getLocale model
+
         render fraction caption numberCaption =
             H.div [ A.class "nav-item spacer session-progress" ]
                 [ H.div [ A.class "progress-bar" ]
@@ -712,10 +738,10 @@ sessionProgress model =
 
             SessionProgress fraction total current ->
                 render fraction
-                    "Review: "
-                    (interpolate "{0} / {1}"
-                        [ current |> toString
-                        , total |> toString
+                    (T.learnReviewProgressBarCaption locale ())
+                    (interpolate " {0} / {1}"
+                        [ formatNumber locale current
+                        , formatNumber locale total
                         ]
                     )
 
@@ -723,6 +749,9 @@ sessionProgress model =
 ajaxInfo : Model -> H.Html Msg
 ajaxInfo model =
     let
+        locale =
+            getLocale model
+
         currentHttpCalls =
             Dict.values model.currentHttpCalls
 
@@ -788,8 +817,8 @@ ajaxInfo model =
             [ H.div
                 (dropdownHeadingAttributes AjaxInfo itemsToView topClasses)
                 [ H.span [ A.class "nav-caption" ]
-                    [ H.text "Working..." ]
-                , makeIcon ("icon-ajax-in-progress " ++ spinClass) "Data transfer in progress"
+                    [ H.text (T.learnDataWorking locale ()) ]
+                , makeIcon ("icon-ajax-in-progress " ++ spinClass) (T.learnDataWorking_tooltip locale ())
                 ]
             , if not itemsToView then
                 emptyNode
@@ -802,7 +831,7 @@ ajaxInfo model =
                                 [ A.class "btn"
                                 , onClickSimply RetryFailedCalls
                                 ]
-                                [ H.text "Reconnect with server" ]
+                                [ H.text (T.learnReconnectWithServer locale ()) ]
                             ]
                         ]
                       else
@@ -813,8 +842,7 @@ ajaxInfo model =
                                     (\( callId, call ) ->
                                         H.li [ A.class "ajax-failed" ]
                                             [ H.text <|
-                                                interpolate "Failed - {0}"
-                                                    [ trackedHttpCallCaption call ]
+                                                T.learnDataFailed locale { item = trackedHttpCallCaption call locale }
                                             ]
                                     )
                            )
@@ -833,14 +861,13 @@ ajaxInfo model =
                                             ]
                                             [ H.text <|
                                                 if attempts == 0 then
-                                                    interpolate "In queue - {0}"
-                                                        [ trackedHttpCallCaption call ]
+                                                    T.learnDataInQueue locale { item = trackedHttpCallCaption call locale }
                                                 else
-                                                    interpolate "Attempt {0} of {1} - {2}"
-                                                        [ toString attempts
-                                                        , toString maxHttpRetries
-                                                        , trackedHttpCallCaption call
-                                                        ]
+                                                    T.learnDataBeingAttempted locale
+                                                        { attempt = Fluent.number attempts
+                                                        , total = Fluent.number maxHttpRetries
+                                                        , item = trackedHttpCallCaption call locale
+                                                        }
                                             ]
                                     )
                            )
@@ -857,26 +884,29 @@ viewSessionStats model =
         Just stats ->
             H.div
                 [ A.class "nav-item session-stats"
-                , A.title "Todays stats - new items / items tested"
                 ]
                 [ H.span [ A.class "nav-caption" ]
-                    [ H.text "Today: " ]
-                , H.span
-                    [ A.id "id-new-verses-started-count"
-                    , A.title "Items started today"
+                    [ H.text (T.learnSessionStatsToday (getLocale model) ())
+                    , H.span
+                        [ A.id "id-new-verses-started-count"
+                        , A.title (T.learnItemsStartedToday (getLocale model) ())
+                        ]
+                        [ H.text <| interpolate " + {0} " [ toString stats.newVersesStarted ] ]
+                    , H.span
+                        [ A.id "id-total-verses-tested-count"
+                        , A.title (T.learnItemsTestedToday (getLocale model) ())
+                        ]
+                        [ H.text <| interpolate " ⟳ {0} " [ toString stats.totalVersesTested ] ]
                     ]
-                    [ H.text <| interpolate " + {0} " [ toString stats.newVersesStarted ] ]
-                , H.span
-                    [ A.id "id-total-verses-tested-count"
-                    , A.title "Total items tested today"
-                    ]
-                    [ H.text <| interpolate " ⟳ {0} " [ toString stats.totalVersesTested ] ]
                 ]
 
 
 viewActionLogs : Model -> H.Html Msg
 viewActionLogs model =
     let
+        locale =
+            getLocale model
+
         ( totalPoints, latestLog, processedLogs ) =
             withSessionData model
                 ( 0, Nothing, [] )
@@ -935,9 +965,9 @@ viewActionLogs model =
             [ H.div
                 (dropdownHeadingAttributes ActionLogsInfo openable [ "nav-item" ])
                 [ H.span [ A.class "nav-caption" ]
-                    [ H.text "Session points: " ]
+                    [ H.text (T.learnSessionPointsCaption locale ()) ]
                 , H.span [ A.class "total-points" ]
-                    [ H.text (toString totalPoints)
+                    [ H.text (formatNumber locale totalPoints)
                     , case latestLog of
                         Nothing ->
                             emptyNode
@@ -950,12 +980,12 @@ viewActionLogs model =
                                 ]
                                 [ H.text (signedNumberToString log.points) ]
                     ]
-                , makeIcon "icon-points" "Points gained this session"
+                , makeIcon "icon-points" (T.learnPointsIconCaption locale ())
                 ]
             , Html.Keyed.ul
                 [ A.class ("nav-dropdown-menu menu-pinnable " ++ openClass ++ " " ++ pinnedClass) ]
                 ([ ( "pin-button"
-                   , pinButton ActionLogsInfo
+                   , pinButton ActionLogsInfo locale
                    )
                  ]
                     ++ (processedLogs
@@ -968,8 +998,8 @@ viewActionLogs model =
                                         ]
                                         [ H.text <|
                                             interpolate "{0} - {1}"
-                                                [ toString log.points
-                                                , prettyReason log.reason
+                                                [ formatNumber locale log.points
+                                                , prettyReason log.reason locale
                                                 ]
                                         ]
                                     )
@@ -979,15 +1009,15 @@ viewActionLogs model =
             ]
 
 
-pinButton : Dropdown -> H.Html Msg
-pinButton dropdown =
+pinButton : Dropdown -> Locale -> H.Html Msg
+pinButton dropdown locale =
     H.button
         [ A.class "menu-pin"
-        , A.title "Pin/unpin menu"
+        , A.title (T.learnPinIconCaption locale ())
         , onClickSimply (TogglePinnableMenu dropdown)
         , A.tabindex -1
         ]
-        [ makeIcon "icon-pin-menu" "Pin menu" ]
+        [ makeIcon "icon-pin-menu" "" ]
 
 
 dropdownHeadingAttributes : Dropdown -> Bool -> List String -> List (H.Attribute Msg)
@@ -1002,26 +1032,26 @@ dropdownHeadingAttributes dropdown openable extraClasses =
             [ A.tabindex -1 ]
 
 
-prettyReason : ScoreReason -> String
-prettyReason reason =
+prettyReason : ScoreReason -> Locale -> String
+prettyReason reason locale =
     case reason of
         VerseTested ->
-            "initial test"
+            T.learnInitialTest locale ()
 
         VerseReviewed ->
-            "review test"
+            T.learnReviewTest locale ()
 
         RevisionCompleted ->
-            "revision completed"
+            T.learnRevisionCompleted locale ()
 
         PerfectTestBonus ->
-            "perfect score BONUS!"
+            T.learnPerfectScoreBonus locale ()
 
         VerseLearnt ->
-            "verse fully learnt BONUS!"
+            T.learnVerseFullyLearntBonus locale ()
 
         EarnedAward ->
-            "award bonus"
+            T.learnAwardBonus locale ()
 
 
 idForLatestActionLogSpan : { b | id : a } -> String
@@ -1037,29 +1067,32 @@ signedNumberToString number =
         toString number
 
 
-userDisplayName : User -> String
-userDisplayName u =
+userDisplayName : User -> Locale -> String
+userDisplayName u locale =
     case u of
         GuestUser ->
-            "Guest"
+            T.learnGuest locale ()
 
         Account ad ->
             ad.username
 
 
-loadingDiv : H.Html msg
-loadingDiv =
-    H.div [ A.id "id-loading-full" ] [ H.text "Loading" ]
+loadingDiv : Locale -> H.Html msg
+loadingDiv locale =
+    H.div [ A.id "id-loading-full" ] [ H.text (T.learnLoading locale ()) ]
 
 
-syncingDiv : H.Html msg
-syncingDiv =
-    H.div [ A.id "id-loading-full" ] [ H.text "Syncing" ]
+syncingDiv : Locale -> H.Html msg
+syncingDiv locale =
+    H.div [ A.id "id-loading-full" ] [ H.text (T.learnSyncing locale ()) ]
 
 
 viewCurrentVerse : SessionData -> Model -> H.Html Msg
 viewCurrentVerse session model =
     let
+        locale =
+            getLocale model
+
         currentVerse =
             session.currentVerse
 
@@ -1147,10 +1180,10 @@ viewCurrentVerse session model =
                     ]
                 , H.div
                     [ A.id "id-verse-strength-value"
-                    , A.title "Memory progress for this verse"
+                    , A.title (T.learnMemoryProgressCaption locale ())
                     ]
                     [ H.text (toString verseStrengthPercent ++ "%") ]
-                , viewVerseOptionsMenuButton verseOptionsMenuOpen verseOptionsMenuPinned
+                , viewVerseOptionsMenuButton verseOptionsMenuOpen verseOptionsMenuPinned locale
                 ]
              , if verseOptionsMenuVisible then
                 viewVerseOptionsMenu model currentVerse
@@ -1192,7 +1225,7 @@ viewCurrentVerse session model =
                                                 ""
                                            )
                                     )
-                                    "Toggle show all of previous verse"
+                                    (T.learnToggleShowPreviousVerse locale ())
                                 ]
                             ]
                 , H.div [ A.id typingBoxContainerId ]
@@ -1215,9 +1248,9 @@ viewCurrentVerse session model =
                 ]
              , actionButtons model currentVerse session.verses model.preferences
              , hintButton model currentVerse testingMethod
-             , onScreenTestingButtons currentVerse testingMethod
+             , onScreenTestingButtons currentVerse testingMethod (getLocale model)
              ]
-                ++ (instructions currentVerse testingMethod model.helpVisible)
+                ++ (instructions currentVerse testingMethod model.helpVisible (getLocale model))
             )
 
 
@@ -1248,8 +1281,8 @@ shouldShowPreviousVerse verse =
             False
 
 
-viewVerseOptionsMenuButton : Bool -> Bool -> H.Html Msg
-viewVerseOptionsMenuButton menuOpen menuPinned =
+viewVerseOptionsMenuButton : Bool -> Bool -> Locale -> H.Html Msg
+viewVerseOptionsMenuButton menuOpen menuPinned locale =
     H.div
         ((dropdownHeadingAttributes VerseOptionsMenu
             True
@@ -1264,13 +1297,16 @@ viewVerseOptionsMenuButton menuOpen menuPinned =
             ++ [ A.id "id-verse-options-menu-btn" ]
         )
         [ H.span []
-            [ makeIcon "icon-verse-options-menu-btn" "verse options" ]
+            [ makeIcon "icon-verse-options-menu-btn" (T.learnVerseOptionsIconCaption locale ()) ]
         ]
 
 
 viewVerseOptionsMenu : Model -> CurrentVerse -> H.Html Msg
 viewVerseOptionsMenu model currentVerse =
     let
+        locale =
+            getLocale model
+
         skipButton =
             { enabled = Enabled
             , default = NonDefault
@@ -1278,10 +1314,10 @@ viewVerseOptionsMenu model currentVerse =
             , caption =
                 case currentVerse.verseStatus.version.textType of
                     Bible ->
-                        "Skip this verse for now"
+                        T.learnSkipThisVerse locale ()
 
                     Catechism ->
-                        "Skip this question for now"
+                        T.learnSkipThisQuestion locale ()
             , id = "id-skip-verse-btn"
             , refocusTypingBox = True
             }
@@ -1293,10 +1329,10 @@ viewVerseOptionsMenu model currentVerse =
             , caption =
                 case currentVerse.verseStatus.version.textType of
                     Bible ->
-                        "Stop learning this verse"
+                        T.learnStopLearningThisVerse locale ()
 
                     Catechism ->
-                        "Stop learning this question"
+                        T.learnStopLearningThisQuestion locale ()
             , id = "id-cancel-learning-btn"
             , refocusTypingBox = True
             }
@@ -1305,7 +1341,7 @@ viewVerseOptionsMenu model currentVerse =
             { enabled = Enabled
             , default = NonDefault
             , msg = ResetProgress currentVerse.verseStatus False
-            , caption = "Reset progress"
+            , caption = T.learnResetProgress locale ()
             , id = "id-reset-progress-btn"
             , refocusTypingBox = False
             }
@@ -1331,7 +1367,7 @@ viewVerseOptionsMenu model currentVerse =
     in
         H.div [ A.id "id-verse-options-menu" ]
             [ H.ul [ A.class pinnedClass ]
-                ([ pinButton VerseOptionsMenu
+                ([ pinButton VerseOptionsMenu locale
                  ]
                     ++ (if allowTestInsteadOfRead model then
                             [ H.li []
@@ -1354,7 +1390,7 @@ viewVerseOptionsMenu model currentVerse =
                                         )
                                         []
                                     , H.span []
-                                        [ H.text "Test instead of read" ]
+                                        [ H.text <| T.learnTestInsteadOfRead locale () ]
                                     ]
                                 ]
                             ]
@@ -1985,18 +2021,16 @@ actionButtons model verse verseStore preferences =
 hintButton : Model -> CurrentVerse -> TestingMethod -> H.Html Msg
 hintButton model currentVerse testingMethod =
     let
+        locale =
+            getLocale model
+
         hintDiv enabled total used =
             H.div [ A.id "id-hint-btn-container" ]
                 [ viewButton model
                     { enabled = enabled
                     , default = NonDefault
                     , msg = UseHint
-                    , caption =
-                        "Use hint"
-                            ++ interpolate " ({0}/{1})"
-                                [ toString used
-                                , toString total
-                                ]
+                    , caption = T.learnHintButton locale { used = Fluent.number used, total = Fluent.number total }
                     , id = "id-hint-btn"
                     , refocusTypingBox = True
                     }
@@ -2074,19 +2108,22 @@ type ButtonDefault
 buttonsForStage : Model -> CurrentVerse -> VerseStore -> Preferences -> List StageButton
 buttonsForStage model verse verseStore preferences =
     let
+        locale =
+            getLocale model
+
         multipleStages =
             (List.length verse.remainingStageTypes + List.length verse.seenStageTypes) > 0
 
         nextVerseButtonCaption =
-            "OK"
+            T.learnNextButton locale ()
 
         practiceButtonCaption =
             if verse.sessionLearningType == Practice then
                 -- Clearer, and we will only have two buttons so will have more
                 -- room for a longer caption.
-                "Practice again"
+                T.learnPracticeAgain locale ()
             else
-                "Practice"
+                T.learnPractice locale ()
 
         nextVerseEnabled =
             case getNextVerse verseStore verse.verseStatus of
@@ -2115,7 +2152,7 @@ buttonsForStage model verse verseStore preferences =
                     ""
 
                 Just t ->
-                    friendlyTimeUntil t
+                    friendlyTimeUntil t locale
 
         -- To keep things aligned, we only put subCaption on
         -- MorePractice button if there is also one on NextVerse button
@@ -2123,7 +2160,7 @@ buttonsForStage model verse verseStore preferences =
             if nextVerseSubCaption == "" then
                 ""
             else
-                "Now"
+                T.learnSeeAgainNow locale ()
 
         reviewSoonerButton =
             case nextTestDue of
@@ -2141,8 +2178,8 @@ buttonsForStage model verse verseStore preferences =
                                     t / 2
                     in
                         Just
-                            { caption = "See sooner"
-                            , subCaption = friendlyTimeUntil (DueAfter reviewAfter)
+                            { caption = T.learnSeeSooner locale ()
+                            , subCaption = friendlyTimeUntil (DueAfter reviewAfter) locale
                             , msg = ReviewSooner verse.verseStatus reviewAfter
                             , enabled = Enabled
                             , default = NonDefault
@@ -2218,7 +2255,7 @@ buttonsForStage model verse verseStore preferences =
                         testStageButtons tp
 
                     _ ->
-                        [ { caption = "Back"
+                        [ { caption = T.learnBackButtonCaption locale ()
                           , subCaption = ""
                           , msg = PreviousStage
                           , enabled = previousEnabled
@@ -2226,7 +2263,7 @@ buttonsForStage model verse verseStore preferences =
                           , id = "id-previous-btn"
                           , refocusTypingBox = False
                           }
-                        , { caption = "Next"
+                        , { caption = T.learnNextButtonCaption locale ()
                           , subCaption = ""
                           , msg = NextStageOrSubStage
                           , enabled = nextEnabled
@@ -2373,8 +2410,8 @@ getTypingBoxFocusDataForMsg model msg refocus =
             Nothing
 
 
-onScreenTestingButtons : CurrentVerse -> TestingMethod -> H.Html Msg
-onScreenTestingButtons currentVerse testingMethod =
+onScreenTestingButtons : CurrentVerse -> TestingMethod -> Locale -> H.Html Msg
+onScreenTestingButtons currentVerse testingMethod locale =
     case currentVerse.currentStage of
         Read ->
             emptyNode
@@ -2407,12 +2444,7 @@ onScreenTestingButtons currentVerse testingMethod =
                                     (case words of
                                         [] ->
                                             [ H.div [ A.id "id-onscreen-not-available" ]
-                                                [ H.text
-                                                    ("On screen testing is not available for this verse in this version."
-                                                        ++ " Sorry! Please choose another option in your "
-                                                    )
-                                                , preferencesLink
-                                                ]
+                                                (T.learnOnScreenTestingNotAvailableHtml locale () [ ( "a", preferencesLinkAttrs ) ])
                                             ]
 
                                         _ ->
@@ -2464,63 +2496,52 @@ onEscape msg =
 {- View - help -}
 
 
-preferencesLink : H.Html msg
-preferencesLink =
-    H.a
-        [ A.class "preferences-link"
-        , A.href "#"
-        ]
-        [ H.text "preferences" ]
+preferencesLinkAttrs : List (H.Attribute msg)
+preferencesLinkAttrs =
+    [ A.class "preferences-link"
+    , A.href "#"
+    ]
 
 
-instructions : CurrentVerse -> TestingMethod -> Bool -> List (H.Html Msg)
-instructions verse testingMethod helpVisible =
+instructions : CurrentVerse -> TestingMethod -> Bool -> Locale -> List (H.Html Msg)
+instructions verse testingMethod helpVisible locale =
     let
         commonHelp =
             [ [ H.a
                     [ A.href "#"
                     , onClickSimply StartHelpTour
                     ]
-                    [ H.text "Take the help tour." ]
+                    [ H.text <| T.learnTakeTheHelpTour locale () ]
               ]
-            , [ H.text "You can finish your review or learning session at any time using the return button in the top left corner."
+            , [ H.text <| T.learnYouCanFinish locale ()
               ]
-            , [ H.text "Keyboard navigation (for physical keyboards, not touchscreens): use Tab and Shift-Tab to move focus between controls, and Enter to 'press' one. Focus is shown with a colored border."
+            , [ H.text <| T.learnKeyboardNavigationHelp locale ()
               ]
             ]
 
         testingCommonHelp =
-            [ [ H.text "You can change your testing method in your "
-              , preferencesLink
-              , H.text " at any time."
-              ]
+            [ T.learnYouCanChangeYourTestingMethodHtml locale () [ ( "a", preferencesLinkAttrs ) ]
             ]
 
         buttonsHelp =
-            [ [ H.text "The button for the most likely action is highlighted in colour and is focused by default."
+            [ [ H.text <| T.learnButtonGeneralHelp locale ()
               ]
             ]
 
         ( main, help ) =
             case verse.currentStage of
                 Read ->
-                    ( [ bold "READ: "
-                      , H.text "Read the text through (preferably aloud), and click 'Next'."
-                      ]
+                    ( T.learnReadTextHtml locale () []
                     , commonHelp ++ buttonsHelp
                     )
 
                 ReadForContext ->
-                    ( [ bold "READ: "
-                      , H.text "Read this verse to get the context and flow of the passage."
-                      ]
+                    ( T.learnReadForContextHtml locale () []
                     , commonHelp ++ buttonsHelp
                     )
 
                 Recall _ rp ->
-                    ( [ bold "READ and RECALL: "
-                      , H.text "Read the text through, filling in the gaps from your memory. Click a word to reveal it if you can't remember."
-                      ]
+                    ( T.learnReadAndRecallHtml locale () []
                     , commonHelp ++ buttonsHelp
                     )
 
@@ -2528,10 +2549,8 @@ instructions verse testingMethod helpVisible =
                     let
                         practiseNote =
                             if isPracticeTest verse testType then
-                                [ H.br [] []
-                                , H.b [] [ H.text "PRACTICE" ]
-                                , H.text " test, scores are not counted."
-                                ]
+                                [ H.br [] [] ]
+                                    ++ (T.learnPracticeTestNoteHtml locale () [])
                             else
                                 [ emptyNode ]
                     in
@@ -2539,45 +2558,44 @@ instructions verse testingMethod helpVisible =
                             CurrentWord _ ->
                                 case testingMethod of
                                     FullWords ->
-                                        ( [ bold "TEST: "
-                                          , H.text "Testing time! Type the text, pressing space after each word."
-                                          ]
+                                        ( (T.learnFullWordTestHtml locale () [])
                                             ++ practiseNote
                                         , commonHelp
                                             ++ testingCommonHelp
-                                            ++ [ [ H.text "You don't need perfect spelling to get full marks."
+                                            ++ [ [ H.text (T.learnYouDontNeedPerfectSpelling locale ())
                                                  ]
                                                ]
                                         )
 
                                     FirstLetter ->
-                                        ( [ bold "TEST: "
-                                          , H.text "Testing time! Type the "
-                                          , bold "first letter"
-                                          , H.text " of each word."
-                                          ]
+                                        ( (T.learnFirstLetterTestHtml locale () [])
                                             ++ practiseNote
                                         , commonHelp ++ testingCommonHelp
                                         )
 
                                     OnScreen ->
-                                        ( [ bold "TEST: "
-                                          , H.text "Testing time! For each word choose from the options shown."
-                                          ]
+                                        ( (T.learnChooseFromOptionsTestHtml locale () [])
                                             ++ practiseNote
                                         , commonHelp ++ testingCommonHelp
                                         )
 
                             TestFinished { accuracy, testType } ->
-                                ( [ bold "RESULTS: "
-                                  , H.text "You scored "
-                                  , bold (toString (floor (accuracy * 100)) ++ "%")
-                                  , H.text (" - " ++ resultComment accuracy)
-                                  ]
+                                ( (T.learnTestResultHtml locale
+                                    { score =
+                                        Fluent.formattedNumber
+                                            { defaultNumberFormatting
+                                                | style = NumberFormat.PercentStyle
+                                                , maximumFractionDigits = Just 0
+                                            }
+                                            accuracy
+                                    , comment = resultComment accuracy locale
+                                    }
+                                    []
+                                  )
                                     ++ if isPracticeTest verse testType then
                                         []
                                        else
-                                        (case verse.recordedTestScore of
+                                        case verse.recordedTestScore of
                                             Nothing ->
                                                 []
 
@@ -2589,26 +2607,30 @@ instructions verse testingMethod helpVisible =
                                                     if newStrength >= MemoryModel.learnt && verse.verseStatus.strength < MemoryModel.learnt then
                                                         [ H.br [] []
                                                         , H.span [ A.class "item-complete-celebration" ]
-                                                            [ H.text "PROGRESS: You reached 100% - well done!"
-                                                            ]
+                                                            (T.learnVerseProgressCompleteHtml locale () [])
                                                         ]
                                                     else
                                                         let
                                                             scaledStrengthDelta =
                                                                 recordedTest.scaledStrengthDelta
                                                         in
-                                                            [ H.br [] []
-                                                            , bold "PROGRESS: "
-                                                            , H.text
-                                                                (if scaledStrengthDelta >= 0 then
-                                                                    interpolate " +{0}% ↗"
-                                                                        [ toString (round (abs scaledStrengthDelta * 100)) ]
-                                                                 else
-                                                                    interpolate "  -{0}% ↘"
-                                                                        [ toString (round (abs scaledStrengthDelta * 100)) ]
-                                                                )
-                                                            ]
-                                        )
+                                                            [ H.br [] [] ]
+                                                                ++ (T.learnVerseProgressResultHtml locale
+                                                                        { progress =
+                                                                            Fluent.formattedNumber
+                                                                                { defaultNumberFormatting
+                                                                                    | style = NumberFormat.PercentStyle
+                                                                                    , maximumFractionDigits = Just 0
+                                                                                }
+                                                                                scaledStrengthDelta
+                                                                        , direction =
+                                                                            if scaledStrengthDelta >= 0 then
+                                                                                "forwards"
+                                                                            else
+                                                                                "backwards"
+                                                                        }
+                                                                        []
+                                                                   )
                                 , commonHelp
                                 )
     in
@@ -2625,7 +2647,7 @@ instructions verse testingMethod helpVisible =
                             [ A.href "#"
                             , onClickSimply ToggleHelp
                             ]
-                            [ H.text "Help"
+                            [ H.text <| T.learnHelp locale ()
                             , makeIcon
                                 ("icon-help-toggle"
                                     ++ (if helpVisible then
@@ -2634,7 +2656,7 @@ instructions verse testingMethod helpVisible =
                                             ""
                                        )
                                 )
-                                "toggle help"
+                                (T.learnHelp_tooltip locale ())
                             ]
                         ]
                     ]
@@ -2654,27 +2676,24 @@ accuracyDefaultMorePracticeLevel =
     0.85
 
 
-resultComment : Float -> String
-resultComment accuracy =
+resultComment : Float -> Locale -> String
+resultComment accuracy locale =
     let
         pairs =
-            [ ( 0.98, "awesome!" )
-            , ( 0.96, "excellent!" )
-            , ( 0.93, "very good." )
-            , ( accuracyDefaultMorePracticeLevel, "good." )
-            , ( 0.8, "OK." )
-            , ( 0.7, "could do better!" )
+            [ ( 0.98, T.learnTestResultAwesome )
+            , ( 0.96, T.learnTestResultExcellent )
+            , ( 0.93, T.learnTestResultVeryGood )
+            , ( accuracyDefaultMorePracticeLevel, T.learnTestResultGood )
+            , ( 0.8, T.learnTestResultOk )
+            , ( 0.7, T.learnTestResultCouldDoBetter )
             ]
-
-        fallback =
-            "let's try again!"
     in
         case List.head <| List.filter (\( p, c ) -> accuracy > p) pairs of
             Nothing ->
-                fallback
+                T.learnTestResultFallback locale ()
 
             Just ( p, c ) ->
-                c
+                c locale ()
 
 
 
@@ -2705,11 +2724,11 @@ shouldShowReference verse =
 {- View - help tour -}
 
 
-viewHelpTour : HelpTourData -> H.Html Msg
-viewHelpTour helpTour =
+viewHelpTour : HelpTourData -> Locale -> H.Html Msg
+viewHelpTour helpTour locale =
     let
         buttons =
-            helpTourButtons helpTour
+            helpTourButtons helpTour locale
     in
         H.div
             [ A.id "id-help-tour-wrapper"
@@ -2729,16 +2748,16 @@ viewHelpTour helpTour =
             ]
 
 
-helpTourButtons : HelpTourData -> List Button
-helpTourButtons helpTour =
-    [ { caption = "Exit tour"
+helpTourButtons : HelpTourData -> Locale -> List Button
+helpTourButtons helpTour locale =
+    [ { caption = T.learnHelpTourExit locale ()
       , msg = FinishHelpTour
       , id = "id-help-tour-finish-btn"
       , enabled = Enabled
       , default = NonDefault
       , refocusTypingBox = False
       }
-    , { caption = "Previous"
+    , { caption = T.learnHelpTourPrevious locale ()
       , msg = PreviousHelpTourStep
       , id = "id-help-tour-previous-step-btn"
       , enabled =
@@ -2751,9 +2770,9 @@ helpTourButtons helpTour =
       }
     , { caption =
             if Pivot.hasR helpTour.steps then
-                "Next"
+                T.learnHelpTourNext locale ()
             else
-                "Finish"
+                T.learnHelpTourFinish locale ()
       , msg = NextHelpTourStep
       , id = "id-help-tour-next-step-btn"
       , enabled = Enabled
@@ -3222,6 +3241,9 @@ fromRetry = True -- this command comes from the a retry i.e. after a "wait and t
 attemptReturn : { immediate : Bool, fromRetry : Bool } -> Model -> ( Model, Cmd Msg )
 attemptReturn { immediate, fromRetry } model =
     let
+        locale =
+            getLocale model
+
         returnUrl =
             getReturnUrl model
 
@@ -3276,20 +3298,14 @@ attemptReturn { immediate, fromRetry } model =
 
         doFailedCallsPrompt =
             ( cancelledAttemptingReturn
-            , confirm
-                ("There is data that failed to save. If you go away from this page, "
-                    ++ "the data will be lost. Do you want to continue?"
-                )
+            , confirm (T.learnConfirmLeavePageFailedSaved locale ())
                 returnMsg
                 openAjaxDropdownCmd
             )
 
         doCallsInProgressPrompt =
             ( cancelledAttemptingReturn
-            , confirm
-                ("Data is still being saved.  If you go away from this page, "
-                    ++ "the data will be lost. Do you want to continue?"
-                )
+            , confirm (T.learnConfirmLeavePageSaveInProgress locale ())
                 returnMsg
                 openAjaxDropdownCmd
             )
@@ -3719,7 +3735,7 @@ type LearningStage
 
 
 {-| We really want WordType, but it is not comparable
-    it https://github.com/elm-lang/elm-compiler/issues/774
+    https://github.com/elm-lang/elm-compiler/issues/774
     so use `toString` on it and this alias:
 -}
 type alias WordTypeString =
@@ -4575,7 +4591,7 @@ handleResetProgress model verseStatus confirmed =
                     )
     else
         ( model
-        , confirm "This will reset your progress on this item to zero. Continue?"
+        , confirm (T.learnConfirmResetProgress (getLocale model) ())
             (ResetProgress verseStatus True)
             Noop
         )
@@ -5187,6 +5203,9 @@ focusDefaultButton model =
         Cmd.none
         (\sessionData ->
             let
+                locale =
+                    getLocale model
+
                 downcastButton b =
                     { default = b.default
                     , id = b.id
@@ -5198,7 +5217,7 @@ focusDefaultButton model =
                             buttonsForStage model sessionData.currentVerse sessionData.verses model.preferences |> List.map downcastButton
 
                         Just (HelpTour helpTour) ->
-                            helpTourButtons helpTour |> List.map downcastButton
+                            helpTourButtons helpTour locale |> List.map downcastButton
 
                 defaultButtons =
                     List.filter (\b -> b.default == Default) buttons
@@ -5401,11 +5420,11 @@ currentVerseStrength currentVerse =
             calculateNewVerseStrength currentVerse.verseStatus recordedTest
 
 
-friendlyTimeUntil : TestDueAfter -> String
-friendlyTimeUntil testdue =
+friendlyTimeUntil : TestDueAfter -> Locale -> String
+friendlyTimeUntil testdue locale =
     case testdue of
         NeverDue ->
-            "Fully learnt"
+            T.learnVerseFullyLearnt locale ()
 
         DueAfter time ->
             let
@@ -5437,23 +5456,19 @@ friendlyTimeUntil testdue =
                     round months
             in
                 if hours < 1 then
-                    "< 1 hour"
-                else if rHours == 1 then
-                    "1 hour"
+                    T.learnSeeAgainLessThanAnHour locale ()
                 else if rHours < 24 then
-                    interpolate "{0} hours" [ toString rHours ]
-                else if rDays == 1 then
-                    "1 day"
+                    T.learnSeeAgainHours locale
+                        { hours = Fluent.number rHours }
                 else if rDays < 7 then
-                    interpolate "{0} days" [ toString rDays ]
-                else if rWeeks == 1 then
-                    "1 week"
+                    T.learnSeeAgainDays locale
+                        { days = Fluent.number rDays }
                 else if rWeeks < 8 then
-                    interpolate "{0} weeks" [ toString rWeeks ]
-                else if rMonths == 1 then
-                    "1 month"
+                    T.learnSeeAgainWeeks locale
+                        { weeks = Fluent.number rWeeks }
                 else
-                    interpolate "{0} months" [ toString rMonths ]
+                    T.learnSeeAgainMonths locale
+                        { months = Fluent.number rMonths }
 
 
 
@@ -5528,32 +5543,32 @@ maxHttpRetries =
     6
 
 
-trackedHttpCallCaption : TrackedHttpCall -> String
-trackedHttpCallCaption call =
+trackedHttpCallCaption : TrackedHttpCall -> Locale -> String
+trackedHttpCallCaption call locale =
     case call of
         RecordTestComplete callData ->
             if callData.wasPracticeTest then
-                interpolate "Marking done - {0}" [ callData.localizedReference ]
+                T.learnSaveDataItemDone locale { ref = callData.localizedReference }
             else
-                interpolate "Saving score - {0}" [ callData.localizedReference ]
+                T.learnSaveDataSavingScore locale { ref = callData.localizedReference }
 
         RecordReadComplete callData ->
-            interpolate "Recording read - {0}" [ callData.localizedReference ]
+            T.learnSaveDataReadComplete locale { ref = callData.localizedReference }
 
         RecordSkipVerse callData ->
-            interpolate "Recording skipped item {0}" [ callData.localizedReference ]
+            T.learnSaveDataRecordingSkip locale { ref = callData.localizedReference }
 
         RecordCancelLearning callData ->
-            interpolate "Recording cancelled item {0}" [ callData.localizedReference ]
+            T.learnSaveDataRecordingCancel locale { ref = callData.localizedReference }
 
         RecordResetProgress callData ->
-            interpolate "Resetting progress for {0}" [ callData.localizedReference ]
+            T.learnSaveDataRecordingResetProgress locale { ref = callData.localizedReference }
 
         RecordReviewSooner callData ->
-            interpolate "Marking {0} for reviewing sooner" [ callData.localizedReference ]
+            T.learnSaveDataMarkingReviewSooner locale { ref = callData.localizedReference }
 
         LoadVerses _ ->
-            "Loading items for learning..."
+            T.learnLoadingData locale ()
 
 
 type alias CallId =
@@ -6619,6 +6634,12 @@ initialTourSteps model =
                     )
             )
 
+        locale =
+            getLocale model
+
+        showT t =
+            show (t locale ())
+
         show x =
             [ H.p []
                 [ H.text x
@@ -6626,7 +6647,7 @@ initialTourSteps model =
             ]
 
         first =
-            { html = show "Hello! This guided tour will take you around the learning page interface."
+            { html = showT T.learnHelpTourHello
             , class = "help-tour-welcome"
             , highlightSelector = Nothing
             , positionSelector = Nothing
@@ -6634,13 +6655,13 @@ initialTourSteps model =
             }
 
         rest =
-            [ { html = show "Use the link in the top left corner to go back to the dashboard at any time."
+            [ { html = showT T.learnHelpTourDashboardLink
               , class = "help-tour-below"
               , highlightSelector = Just ".nav-item.return-link"
               , positionSelector = Nothing
               , adapter = identity
               }
-            , { html = show "This bar shows your progress in learning a verse for the first time, or your total progress in a review session."
+            , { html = showT T.learnHelpTourProgressBar
               , class = "help-tour-below"
               , highlightSelector = Just ".nav-item.session-progress"
               , positionSelector = Nothing
@@ -6648,11 +6669,11 @@ initialTourSteps model =
               }
             , { html =
                     show
-                        ("The total points you've earned in the current batch of verses are displayed here."
+                        (T.learnHelpTourTotalPoints locale ()
                             ++ (if scoringEnabled model then
                                     ""
                                 else
-                                    " You need to create an account (from the link on your dashboard) to start earning points."
+                                    " " ++ T.learnHelpTourCreateAccount locale ()
                                )
                         )
               , class = "help-tour-below"
@@ -6660,73 +6681,73 @@ initialTourSteps model =
               , positionSelector = Nothing
               , adapter = identity
               }
-            , { html = show "You can tap/click this menu header to show more detail."
+            , { html = showT T.learnHelpTourOpenMenu
               , class = "help-tour-below"
               , highlightSelector = Just "nav .action-logs .nav-dropdown-menu.menu-open"
               , positionSelector = Nothing
               , adapter = setDropdownOpen ActionLogsInfo
               }
-            , { html = show "You can also pin this menu to the side (large screens) or the top (small screens) to have it permanently visible."
+            , { html = showT T.learnHelpTourPinMenu
               , class = "help-tour-below"
               , highlightSelector = Just "nav .action-logs .menu-pin"
               , positionSelector = Nothing
               , adapter = setDropdownOpen ActionLogsInfo
               }
-            , { html = show "Tap the menu header again to close it."
+            , { html = showT T.learnHelpTourCloseMenu
               , class = "help-tour-below"
               , highlightSelector = Just "nav .action-logs .nav-item"
               , positionSelector = Nothing
               , adapter = identity
               }
-            , { html = show "If there is a problem saving your data, it will be displayed here. Tap the menu header for more info."
+            , { html = showT T.learnHelpTourProblemSavingData
               , class = "help-tour-below"
               , highlightSelector = Just "nav .ajax-info"
               , positionSelector = Just "nav .ajax-info ul.menu-open"
               , adapter = fakeHttpCalls >> (setDropdownOpen AjaxInfo)
               }
-            , { html = show "If your internet connection cuts out completely, don't worry - you can carry on working and then try to save data again when your internet connection comes back."
+            , { html = showT T.learnHelpTourInternetConnectionCut
               , class = "help-tour-below"
               , highlightSelector = Just "nav .ajax-info .menu-open .button-item"
               , positionSelector = Just "nav .ajax-info ul.menu-open"
               , adapter = fakeFailedHttpCalls >> (setDropdownOpen AjaxInfo)
               }
-            , { html = show "This shows the number of new verses you have started today. If you are new to LearnScripture, it can be important to pace yourself. Why not try to learn one new verse each day?"
+            , { html = showT T.learnHelpTourNewVerses
               , class = "help-tour-below"
               , highlightSelector = Just "#id-new-verses-started-count"
               , positionSelector = Nothing
               , adapter = identity
               }
-            , { html = show "Here is the number of verses you've been tested on today."
+            , { html = showT T.learnHelpTourTestedVerses
               , class = "help-tour-below"
               , highlightSelector = Just "#id-total-verses-tested-count"
               , positionSelector = Nothing
               , adapter = identity
               }
-            , { html = show "You can change your preferences at any point from here."
+            , { html = showT T.learnHelpTourPreferences
               , class = "help-tour-below"
               , highlightSelector = Just "nav .preferences-link"
               , positionSelector = Nothing
               , adapter = identity
               }
-            , { html = show "The approximate progress of each verse you are learning is displayed here."
+            , { html = showT T.learnHelpTourVerseProgress
               , class = "help-tour-below"
               , highlightSelector = Just "#id-verse-strength-value"
               , positionSelector = Nothing
               , adapter = identity
               }
-            , { html = show "This menu shows additional options for the current verse."
+            , { html = showT T.learnHelpTourVerseOptions
               , class = "help-tour-below"
               , highlightSelector = Just "#id-verse-options-menu-btn"
               , positionSelector = Just "#id-verse-options-menu ul"
               , adapter = setDropdownOpen VerseOptionsMenu
               }
-            , { html = show "When you have finished a test, your test score is used to estimate your progress for a verse and schedule the next review. Underneath each button is a caption indicating approximately when you will next see the verse again if you choose that option."
+            , { html = showT T.learnHelpTourFinishTest
               , class = "help-tour-above"
               , highlightSelector = Just "#id-action-btns"
               , positionSelector = Nothing
               , adapter = fakeFinishedTest
               }
-            , { html = show "That's all for now - thanks for taking the tour! You can take it again at any point (see the 'Help' section)."
+            , { html = showT T.learnHelpTourEnd
               , class = "help-tour-finish"
               , highlightSelector = Nothing
               , positionSelector = Nothing
@@ -7246,6 +7267,7 @@ preferencesDecoder =
         |> JDP.required "enableVibration" JD.bool
         |> JDP.required "desktopTestingMethod" testingMethodDecoder
         |> JDP.required "touchscreenTestingMethod" testingMethodDecoder
+        |> JDP.required "interfaceLanguage" languageDecoder
 
 
 autoSavedPreferencesDecoder : JD.Decoder AutoSavedPreferences
@@ -7264,6 +7286,30 @@ testingMethodDecoder =
         , ( "FIRST_LETTER", FirstLetter )
         , ( "ON_SCREEN", OnScreen )
         ]
+
+
+defaultLocale : Locale
+defaultLocale =
+    Intl.Locale.en
+
+
+defaultNumberFormatting : NumberFormat.Options
+defaultNumberFormatting =
+    NumberFormat.defaults
+
+
+languageDecoder : JD.Decoder Locale
+languageDecoder =
+    JD.string
+        |> JD.andThen
+            (\val ->
+                case Intl.Locale.fromLanguageTag val of
+                    Just l ->
+                        JD.succeed l
+
+                    Nothing ->
+                        JD.succeed defaultLocale
+            )
 
 
 verseBatchRawDecoder : JD.Decoder VerseBatchRaw
