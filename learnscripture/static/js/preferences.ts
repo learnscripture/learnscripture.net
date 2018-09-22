@@ -14,6 +14,7 @@ var setPreferences = function(prefs) {
     // long as listeners do the same. It makes sense to use
     // #id-preferences-data.
     $('#id-preferences-data').trigger('preferencesSet', preferences);
+    $('html').attr('lang', prefs.interfaceLanguage)
 };
 
 export const getPreferences = function() {

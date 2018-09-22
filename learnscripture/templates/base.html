@@ -4,7 +4,7 @@
 {% ftlconf mode=ftl_mode bundle='learnscripture.ftl_bundles.main' %}
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ request.LANGUAGE_CODE }}">
   <head>
     <meta charset="utf-8">
     <title>{% block title %}{% if title %}{{ title }} - {% endif %}LearnScripture.net{% endblock %}</title>
