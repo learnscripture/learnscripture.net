@@ -201,6 +201,7 @@ MIDDLEWARE = [
         (DEBUG, 'debug_toolbar.middleware.DebugToolbarMiddleware'),
         (True, 'django.middleware.common.CommonMiddleware'),
         (True, 'django.contrib.sessions.middleware.SessionMiddleware'),
+        (True, 'learnscripture.middleware.pwa_tracker_middleware'),
         (True, 'django.middleware.csrf.CsrfViewMiddleware'),
         (True, 'django.contrib.auth.middleware.AuthenticationMiddleware'),
         (True, 'django.contrib.auth.middleware.SessionAuthenticationMiddleware'),
