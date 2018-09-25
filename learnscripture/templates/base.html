@@ -9,17 +9,11 @@
       <meta name="robots" content="noindex">
     {% endif %}
     <meta name="description" content="{% block description %}The fun, easy and social way to memorize the Bible online{% endblock %}">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    {% if request_account and request_account.is_tester %}
-      <link rel="manifest" href="/manifest.webmanifest">
-    {% endif %}
-    {% include "learnscripture/favicon_inc.html" %}
+    {% include "learnscripture/head_inc.html" %}
     {% render_bundle 'base' 'css' 'DEFAULT' attrs='charset="utf-8"' %}
 
     {% block extracss %}
     {% endblock %}
-
   </head>
 
   <body class="base-page {% block body_extra_class %}{% endblock %}" data-theme="{{ current_theme }}">
