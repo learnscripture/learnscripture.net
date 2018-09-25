@@ -1128,6 +1128,9 @@ def csrf_failure(request, reason=""):
     resp.status_code = 403
     return resp
 
+def offline(request):
+    return render(request, "offline.html", {})
+
 
 @require_account_with_redirect
 def account_details(request):
