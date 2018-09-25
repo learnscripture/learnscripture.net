@@ -2579,18 +2579,33 @@ instructions verse testingMethod helpVisible =
                                             Nothing ->
                                                 []
 
-                                            Just { scaledStrengthDelta } ->
-                                                [ H.br [] []
-                                                , bold "PROGRESS: "
-                                                , H.text
-                                                    (if scaledStrengthDelta >= 0 then
-                                                        interpolate " +{0}% ↗"
-                                                            [ toString (round (abs scaledStrengthDelta * 100)) ]
-                                                     else
-                                                        interpolate "  -{0}% ↘"
-                                                            [ toString (round (abs scaledStrengthDelta * 100)) ]
-                                                    )
-                                                ]
+                                            Just recordedTest ->
+                                                let
+                                                    newStrength =
+                                                        calculateNewVerseStrength verse.verseStatus recordedTest
+                                                in
+                                                    if newStrength >= MemoryModel.learnt && verse.verseStatus.strength < MemoryModel.learnt then
+                                                        [ H.br [] []
+                                                        , H.span [ A.class "item-complete-celebration" ]
+                                                            [ H.text "PROGRESS: You reached 100% - well done!"
+                                                            ]
+                                                        ]
+                                                    else
+                                                        let
+                                                            scaledStrengthDelta =
+                                                                recordedTest.scaledStrengthDelta
+                                                        in
+                                                            [ H.br [] []
+                                                            , bold "PROGRESS: "
+                                                            , H.text
+                                                                (if scaledStrengthDelta >= 0 then
+                                                                    interpolate " +{0}% ↗"
+                                                                        [ toString (round (abs scaledStrengthDelta * 100)) ]
+                                                                 else
+                                                                    interpolate "  -{0}% ↘"
+                                                                        [ toString (round (abs scaledStrengthDelta * 100)) ]
+                                                                )
+                                                            ]
                                         )
                                 , commonHelp
                                 )
