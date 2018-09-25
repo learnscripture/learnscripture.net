@@ -1,10 +1,4 @@
-### Many pages
-
-topbar-dashboard = Dashboard
-
-footer-choose-language = Choose website interface language:
-
-### Dashboard
+### Dashboard page
 
 dashboard-learning-events = Learning events
 

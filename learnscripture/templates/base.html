@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8">
     <title>{% block title %}{% if title %}{{ title }} - {% endif %}LearnScripture.net{% endblock %}</title>
-    <meta name="description" content="{% block description %}The fun, easy and social way to memorize the Bible online{% endblock %}">
+    <meta name="description" content="{% block description %}{% ftlmsg 'site-description' %}{% endblock %}">
     {% if noindex_but_follow  %}
       <meta name="robots" content="noindex, follow">
     {% endif %}
@@ -26,7 +26,7 @@
           {% if not use_dashboard_nav %}
             <div class="nav-item">
               {% if request.identity.default_to_dashboard %}
-                <a class="brand" href="/dashboard/" title="Dashboard">{% ftlmsg 'topbar-dashboard' %}</a>
+                <a class="brand" href="/dashboard/">{% ftlmsg 'site-nav-dashboard' %}</a>
               {% else %}
                 <a class="brand" href="/">Learn Scripture</a>
               {% endif %}
@@ -44,16 +44,16 @@
             </div>
             <ul class="nav-dropdown-menu">
               {% if not request_account %}
-                <li><a href="{% url 'login' %}"><i class="icon-fw icon-login"></i> Sign in</a></li>
-                <li><a href="{% url 'signup' %}?next={{ request.get_full_path|urlencode }}"><i class="icon-fw icon-account"></i> Create account</a></li>
+                <li><a href="{% url 'login' %}"><i class="icon-fw icon-login"></i> {% ftlmsg 'site-sign-in' %}</a></li>
+                <li><a href="{% url 'signup' %}?next={{ request.get_full_path|urlencode }}"><i class="icon-fw icon-account"></i> {% ftlmsg 'site-create-account' %}</a></li>
               {% endif %}
-              <li><a href="{% url 'preferences' %}?next={{ request.path_info }}" class="preferences-link"><i class="icon-fw icon-preferences"></i> Preferences</a></li>
+              <li><a href="{% url 'preferences' %}?next={{ request.path_info }}" class="preferences-link"><i class="icon-fw icon-preferences"></i> {% ftlmsg 'site-user-preferences-link' %}</a></li>
               {% if request_account %}
-                <li><a href="{% url 'account_details' %}"><i class="icon-fw icon-account"></i> Account details</a></li>
-                <li><a href="{% url 'user_verses' %}"><i class="icon-fw icon-progress"></i> Verse progress</a></li>
-                <li><a href="{% url 'user_verse_sets' %}"><i class="icon-fw icon-verse-sets"></i> Verse sets</a></li>
-                <li><a href="{% url 'user_stats' request_account.username %}"><i class="icon-fw icon-stats"></i> Stats</a></li>
-                <li><a href="#" class="logout-link"><i class="icon-fw icon-logout"></i> Log out</a></li>
+                <li><a href="{% url 'account_details' %}"><i class="icon-fw icon-account"></i> {% ftlmsg 'site-account-details-link' %}</a></li>
+                <li><a href="{% url 'user_verses' %}"><i class="icon-fw icon-progress"></i> {% ftlmsg 'site-verse-progress-link' %}</a></li>
+                <li><a href="{% url 'user_verse_sets' %}"><i class="icon-fw icon-verse-sets"></i> {% ftlmsg 'site-verse-sets-link' %}</a></li>
+                <li><a href="{% url 'user_stats' request_account.username %}"><i class="icon-fw icon-stats"></i> {% ftlmsg 'site-user-stats-link' %}</a></li>
+                <li><a href="#" class="logout-link"><i class="icon-fw icon-logout"></i> {% ftlmsg 'site-log-out-link' %}</a></li>
               {% endif %}
             </ul>
           </div>
@@ -87,9 +87,9 @@
                     {{ dd.message_html|safe }}
                     {% if dd.target > 0  %}
                       <div class="donation-drive-stats">
-                        Raised: <span class="raised">£{{ dd.amount_raised }}</span>
+                        {% ftlmsg 'site-donation-drive-raised-html' amount=dd.amount_raised_formatted %}
                         <span class="chart-container"><span class="fraction" style="width: {{ dd.percentage_raised }}%;"></span></span>
-                        Target: <span class="target">£{{ dd.target }}</span>
+                        {% ftlmsg 'site-donation-drive-target-html' amount=dd.target_formatted %}
                       </div>
                     {% endif %}
                   </div>
@@ -102,13 +102,13 @@
             <div class="message-container">
               {% for notice in notices %}
                 <div class="notice">
-                  <a class="close" title="Clear this message" href="#" data-notice-id="{{ notice.id }}">×</a>
+                  <a class="close" title="{% ftlmsg 'site-messages-clear-this' %}" href="#" data-notice-id="{{ notice.id }}">×</a>
                   {{ notice.message_html|safe }}
                 </div>
               {% endfor %}
               {% if notices.0.is_old %}
                 <div class="clearnotices">
-                  You can clear these notices with the cross here ↑
+                  {% ftlmsg 'site-messages-clear-messages-help' %}
                 </div>
               {% endif %}
             </div>
@@ -143,17 +143,17 @@
           {% include "learnscripture/language_selector_inc.html" %}
         {% endif %}
 
-        <p><a href="/help/">Help</a> |
-          <a href="/about/">About</a> |
-          <a href="/terms-of-service/">Terms of service</a> |
-          <a href="/privacy-policy/">Privacy and cookies</a> |
-          <a href="/bible-versions/">Bible versions</a> |
-          <a href="/referral-program/">Referral program</a> |
-          <a href="/contact/">Contact us</a></p>
+        <p><a href="/help/">{% ftlmsg 'site-footer-help' %}</a> |
+          <a href="/about/">{% ftlmsg 'site-footer-about' %}</a> |
+          <a href="/terms-of-service/">{% ftlmsg 'site-footer-terms-of-service' %}</a> |
+          <a href="/privacy-policy/">{% ftlmsg 'site-footer-privacy' %}</a> |
+          <a href="/bible-versions/">{% ftlmsg 'site-footer-bible-versions' %}</a> |
+          <a href="/referral-program/">{% ftlmsg 'site-footer-referral-program' %}</a> |
+          <a href="/contact/">{% ftlmsg 'site-footer-contact-us' %}</a></p>
         <p>&copy; LearnScripture.net 2012-2018</p>
 
         <div class="footer-permission-links">
-          <p>Bible texts and catechisms used with permission:</p>
+          <p>{% ftlmsg 'site-footer-bible-texts-used' %}</p>
           <p>
             <a href="http://bible.org/">NET Bible</a> |
             <a href="http://www.esv.org/">ESV Bible</a> |

@@ -1,5 +1,8 @@
 {% load render_bundle from webpack_loader %}
 
+{% load ftl %}
+{% ftlconf mode=ftl_mode bundle='learnscripture.ftl_bundles.main' %}
+
 <!DOCTYPE html>
 <html lang="{{ request.LANGUAGE_CODE }}">
   <head>
