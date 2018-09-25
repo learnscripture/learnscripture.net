@@ -1,6 +1,8 @@
 import os
 
 import django.views.i18n
+import django.views.static
+import django.contrib.staticfiles.views
 import fiber.views
 from django.conf import settings
 from django.conf.urls import include, url
@@ -13,13 +15,10 @@ import learnscripture.views
 
 admin.autodiscover()
 
+
 urlpatterns = [
     # Home page
     url(r'^$', learnscripture.views.home, name='home'),
-
-    # Static files
-    url(r'^robots.txt$', RedirectView.as_view(url='/static/robots.txt')),
-    url(r'^favicon\.ico/?$', RedirectView.as_view(url='/static/img/favicon.png')),
 
     # Main views, different for each user
     url(r'^dashboard/$', learnscripture.views.dashboard, name='dashboard'),
@@ -114,7 +113,6 @@ if settings.DEVBOX:
     ]
 
 if settings.DEVBOX:
-    import django.views.static
     urlpatterns += [
         url(r'^usermedia/(?P<path>.*)$', django.views.static.serve,
             {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}),
@@ -131,6 +129,21 @@ if settings.TESTING:
         url(r'^django_functest/', include('django_functest.urls'))
     ]
 
+
+if settings.DEVBOX:
+    # Static files - these are handled by nginx in production, need to add there
+    # as well.
+    urlpatterns += [
+        url(r'^robots\.txt/?$', RedirectView.as_view(url='/static/robots.txt')),
+        url(r'^favicon\.ico/?$', RedirectView.as_view(url='/static/img/favicon.png')),
+        url(r'^manifest\.webmanifest/?$', RedirectView.as_view(url='/static/manifest.webmanifest')),
+        # Browsers refuse to handle service-worker.js if it is returned via a
+        # redirect, need to serve directly:
+        url(r'^service-worker.js$', lambda request: django.contrib.staticfiles.views.serve(request, 'js/service-worker.js')),
+    ]
+
+
+# Finally, fallback to fiber views
 urlpatterns += [
     url('', fiber.views.page),
 ]

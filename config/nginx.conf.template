@@ -77,16 +77,20 @@ server {
         log_not_found   off;
     }
 
-    location /manifest.webmanifest {
-        alias            %(STATIC_ROOT)s/manifest.webmanifest;
-        access_log      off;
-        log_not_found   off;
-    }
-
     location /favicon.ico {
         alias            %(STATIC_ROOT)s/img/favicon.png;
         access_log      off;
         log_not_found   off;
+    }
+
+    location /manifest.webmanifest {
+        alias            %(STATIC_ROOT)s/manifest.webmanifest;
+        access_log      off;
+    }
+
+    location /service-worker.js {
+        alias            %(STATIC_ROOT)s/js/service-worker.js;
+        access_log      off;
     }
 
     # Finally, send all non-media requests to the Django server.
