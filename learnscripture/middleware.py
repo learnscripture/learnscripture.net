@@ -57,6 +57,14 @@ def token_login_middleware(get_response):
     return middleware
 
 
+def pwa_tracker_middleware(get_response):
+    def middleware(request):
+        if 'fromhomescreen' in request.GET and 'fromhomescreen' not in request.session:
+            request.session['fromhomescreen'] = '1'
+        return get_response(request)
+    return middleware
+
+
 def debug_middleware(get_response):
     from learnscripture import session
     from accounts.models import Account

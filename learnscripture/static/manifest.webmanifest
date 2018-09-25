@@ -1,0 +1,26 @@
+{
+  "name": "LearnScripture.net",
+  "short_name": "LS",
+  "start_url": "/dashboard/?fromhomescreen",
+  "display": "standalone",
+  "background_color": "#fff",
+  "description": "A social, online Bible memorization app.",
+  "lang": "en-US",
+  "icons": [{
+    "src": "/static/img/logo.svg",
+    "sizes": "192x192 512x512",
+    "type": "image/svg+xml"
+  }, {
+    "src": "/static/img/touch-icon-152.png",
+    "sizes": "152x152",
+    "type": "image/png"
+  }, {
+    "src": "/static/img/favicon-32x32.png",
+    "sizes": "32x32",
+    "type": "image/png"
+  }, {
+    "src": "/static/img/favicon-16x16.png",
+    "sizes": "16x16",
+    "type": "image/png"
+  }]
+}

@@ -11,6 +11,9 @@
     <meta name="description" content="{% block description %}The fun, easy and social way to memorize the Bible online{% endblock %}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    {% if request_account and request_account.is_tester %}
+      <link rel="manifest" href="/manifest.webmanifest">
+    {% endif %}
     {% include "learnscripture/favicon_inc.html" %}
     {% render_bundle 'base' 'css' 'DEFAULT' attrs='charset="utf-8"' %}
 
