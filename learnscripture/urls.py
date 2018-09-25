@@ -1,8 +1,8 @@
 import os
 
+import django.contrib.staticfiles.views
 import django.views.i18n
 import django.views.static
-import django.contrib.staticfiles.views
 import fiber.views
 from django.conf import settings
 from django.conf.urls import include, url
