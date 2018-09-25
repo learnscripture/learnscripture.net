@@ -95,6 +95,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
                             uvs.memory_stage == MemoryStage.ZERO
                             for uvs in identity.verse_statuses.all()))
 
+        self.wait_until_loaded('#id-verse-header')
         self.assertEqual("John 3:16", self.get_element_text("#id-verse-header h2"))
         # Do the reading:
         for i in range(0, 9):
@@ -275,7 +276,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.assertEqual("John 3:16", self.get_element_text("#id-verse-header h2"))
 
         self.click("#id-verse-options-menu-btn")
-        self.click_and_confirm("#id-reset-progress-btn")
+        self.click_and_confirm("#id-reset-progress-btn", wait_for_reload=False)
 
         # Should reset strength to zero
         self.assertEqual(identity.verse_statuses.get(localized_reference='John 3:16').strength,
