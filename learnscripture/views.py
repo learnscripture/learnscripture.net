@@ -572,6 +572,7 @@ def view_catechism(request, slug):
          'catechism': catechism,
          'questions': catechism.qapairs.order_by('order'),
          'learners': catechism.get_learners(),
+         'include_referral_links': True,
          }
 
     return render(request, 'learnscripture/view_catechism.html', c)
@@ -719,6 +720,8 @@ def view_verse_set(request, slug):
     c['verse_list'] = verse_list
     c['version'] = version
     c['title'] = "Verse set: %s" % verse_set.smart_name(version.language_code)
+    c['include_referral_links'] = True
+
     c.update(context_for_version_select(request))
     return render(request, 'learnscripture/single_verse_set.html', c)
 
