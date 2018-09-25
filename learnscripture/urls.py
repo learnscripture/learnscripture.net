@@ -101,6 +101,11 @@ urlpatterns = [
 
     url(r'^mailgun-bounce-notification/$', learnscripture.mail.views.mailgun_bounce_notification,
         name='mailgun-bounce-notification'),
+
+    # Errors
+
+    url(r'^offline/$', learnscripture.views.offline, name='offline'),
+    # Also 404.html template and CSRF_FAILURE_VIEW
 ]
 
 if settings.DEVBOX:
