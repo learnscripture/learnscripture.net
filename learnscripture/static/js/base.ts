@@ -41,6 +41,7 @@ import './groups';
 import './comment';
 import './follow';
 import './sw_setup';
+import './homescreen';
 
 // CSS/Less
 import 'base.less';
