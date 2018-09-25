@@ -1,16 +1,18 @@
 {% extends 'base_simple.html' %}
 
-{% block title %}Page Not Found{% endblock %}
+{% load ftl %}
 
-{% block page_title %}404 - Page Not Found{% endblock %}
+{% block title %}{% ftlmsg 'errors-page-not-found-title' %}{% endblock %}
+
+{% block page_title %}404 - {% ftlmsg 'errors-page-not-found-title' %}{% endblock %}
 
 {% block content %}
-  <h2>It's not here</h2>
+  <h2>{% ftlmsg 'errors-page-not-found-subtitle' %}</h2>
 
   {% if message %}
     <p>{{ message }}</p>
   {% else %}
-    <p>Sorry it didn't work out!</p>
+    <p>{% ftlmsg 'errors-page-not-found-message' %}</p>
   {% endif %}
 
 {% endblock %}

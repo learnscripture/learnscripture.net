@@ -7,6 +7,7 @@ from accounts.models import DEFAULT_THEME, THEME_FONTS
 from bibleverses.languages import DEFAULT_LANGUAGE
 from learnscripture.models import SiteNotice
 from learnscripture.views import account_from_request
+from learnscripture.ftl_bundles import t
 from payments.models import DonationDrive
 
 NOTICES_EXPIRE_AFTER_DAYS = 3
@@ -57,11 +58,11 @@ class MenuItem(object):
 def menu(request):
     identity = getattr(request, 'identity', None)
     items = [
-        MenuItem('Choose', reverse('choose')),
-        MenuItem('Help', '/help/')
+        MenuItem(t('site-nav-choose'), reverse('choose')),
+        MenuItem(t('site-nav-help'), '/help/')
         if identity is not None and identity.default_to_dashboard
-        else MenuItem('About', '/about/'),
-        MenuItem('Contact', '/contact/'),
+        else MenuItem(t('site-nav-about'), '/about/'),
+        MenuItem(t('site-nav-contact'), '/contact/'),
     ]
     for m in items:
         m.active = request.path_info.startswith(m.path)

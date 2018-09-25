@@ -4,7 +4,7 @@
 <div id="id-language-chooser-form">
   <form action="{% url 'learnscripture_set_language' %}" method="post">
     {% csrf_token %}
-    {% ftlmsg 'footer-choose-language' %}
+    {% ftlmsg 'site-footer-choose-language' %}
     <select name="language">
       {% get_available_languages as LANGUAGES %}
       {% get_language_info_list for LANGUAGES as languages %}

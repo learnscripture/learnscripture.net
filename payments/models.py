@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from paypal.standard.ipn.models import PayPalIPN
 
+import fluent.types
 from accounts.models import Account
 
 
@@ -82,6 +83,20 @@ class DonationDrive(models.Model):
     @cached_property
     def amount_raised(self):
         return self.get_amount_raised()
+
+    @cached_property
+    def amount_raised_formatted(self):
+        return fluent.types.fluent_number(self.amount_raised,
+                                          style=fluent.types.FORMAT_STYLE_CURRENCY,
+                                          currencyDisplay=fluent.types.CURRENCY_DISPLAY_SYMBOL,
+                                          currency="GBP")
+
+    @cached_property
+    def target_formatted(self):
+        return fluent.types.fluent_number(self.target,
+                                          style=fluent.types.FORMAT_STYLE_CURRENCY,
+                                          currencyDisplay=fluent.types.CURRENCY_DISPLAY_SYMBOL,
+                                          currency="GBP")
 
     def get_amount_raised(self, before=None):
         # if before is not None, it is used to limit the query further.
