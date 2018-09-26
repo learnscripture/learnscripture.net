@@ -60,7 +60,7 @@
     float: left;
     margin: 5px 0 0 0;
     position: relative;
-    .opacity(100);
+    opacity: 1;
   }
   input {
     background-color: #444;
@@ -73,7 +73,7 @@
     .border-radius(4px);
     @shadow: inset 0 1px 2px rgba(0,0,0,.1), 0 1px 0px rgba(255,255,255,.25);
     .box-shadow(@shadow);
-    .transition(none);
+    transition: none;
 
     // Placeholder text gets special styles; can't be bundled together though for some reason
     &:-moz-placeholder {
@@ -173,7 +173,7 @@ a.menu:after,
   border-left: 4px solid transparent;
   border-right: 4px solid transparent;
   border-top: 4px solid @white;
-  .opacity(50);
+  opacity: 0.5;
 }
 // The dropdown menu (ul)
 .dropdown-menu {
@@ -411,7 +411,7 @@ footer {
   }
 
    // Transitions
-  .transition(.1s linear all);
+  transition: .1s linear all;
 
   // Button Sizes
   &.large {
@@ -445,11 +445,11 @@ input[type=submit].btn {
   font-weight: bold;
   line-height: 1;
   text-shadow: 0 1px 0 rgba(255,255,255,1);
-  .opacity(25);
+  opacity: 0.25;
   &:hover {
     color: @black;
     text-decoration: none;
-    .opacity(40);
+    opacity: 0.4;
   }
 }
 

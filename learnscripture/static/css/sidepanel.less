@@ -25,7 +25,7 @@
     .backdrop {
         background: #444;
         // time here also in preferences.js, and for slider animation
-        .transition(opacity .25s ease-in);
+        transition: opacity .25s ease-in;
         opacity: 0;
     }
 
@@ -51,15 +51,14 @@
     }
 
     .slider {
-        .translate(-100%, 0);
+        transform: translate(-100%, 0);
     }
     .slide-in {
-        .animation(slide-in 0.25s forwards);
+        animation: slide-in 0.25s forwards;
     }
     .slide-out {
-        .animation(slide-out 0.25s forwards);
+        animation: slide-out 0.25s forwards;
     }
-
 
     .sidepanel-body {
         padding: 10px;
@@ -87,19 +86,11 @@
 }
 
 @keyframes slide-in {
-    100% { .translate(0%, 0%); }
-}
-
-@-webkit-keyframes slide-in {
-    100% { .translate(0%, 0%); }
+    100% { transform: translate(0%, 0%); }
 }
 
 @keyframes slide-out {
-    0% { .translate(0%, 0%); }
-    100% { .translate(-100%, 0%); }
+    0% { transform: translate(0%, 0%); }
+    100% { transform: translate(-100%, 0%); }
 }
 
-@-webkit-keyframes slide-out {
-    0% { .translate(0%, 0%); }
-    100% { .translate(-100%, 0%); }
-}
