@@ -139,11 +139,7 @@
         {% block referral_links %}
           {% if request_account and include_referral_links %}
             <p class="referral-link-section">
-              {% if request_account.is_tester %}
-                Share link: <span class="referral-link">{% include "learnscripture/referral_link_control.html" with link=referral_link %}</span> | <a href="/referral-program/">What's this?</a>
-                {% else %}
-                <a id="id_referral_link" href="{{ referral_link }}">Referral link</a> | <a href="/referral-program/">What's this?</a>
-              {% endif %}
+              Share link: <span class="referral-link">{% include "learnscripture/referral_link_control.html" with link=referral_link %}</span> | <a href="/referral-program/">What's this?</a>
             </p>
           {% endif %}
         {% endblock %}
