@@ -262,16 +262,16 @@ span.versenumber {
 
 // Referral program page
 
-.referral-link {
-    text-align: center;
-    font-weight: bold;
-    -moz-user-select: all;
-    -ms-user-select: all;
-    -webkit-user-select: all;
-    user-select: all;
+.referral-link input {
+    width: 10em;
+    &[readonly] {
+        cursor: pointer;
+    }
 }
 
 p.referral-link {
     text-align: center;
-    font-weight: bold;
+    input {
+        width: 80%;
+    }
 }
