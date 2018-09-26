@@ -229,7 +229,7 @@ body.learn-page {
         overflow: hidden;
         max-height: @topbarHeight * 2;
         opacity: 1;
-        .animation(actionLogHeightAnimate @flashActionLogDuration ease-in-out forwards);
+        animation: actionLogHeightAnimate @flashActionLogDuration ease-in-out forwards;
     }
 
     @keyframes actionLogHeightAnimate {
@@ -267,7 +267,7 @@ body.learn-page {
 
         opacity: 0;
         &.flash-action-log {
-            .animation(flash @flashActionLogDuration linear forwards);
+            animation: flash @flashActionLogDuration linear forwards;
         }
 
         @keyframes flash {
@@ -324,7 +324,7 @@ body.learn-page {
         font-size: 48px;
         vertical-align: middle;
         line-height: calc(~"100vh - 2 * " @topbarHeight);
-        .animation(fadeIn 1s infinite alternate);
+        animation: fadeIn 1s infinite alternate;
     }
 
     @keyframes fadeIn {
@@ -781,7 +781,7 @@ body.learn-page {
         // First step is different
         &.help-tour-welcome {
             background: rgba(0, 0, 0, 0.8);
-            .animation(fadeInHelpTour 0.5s ease-in-out forwards);
+            animation: fadeInHelpTour 0.5s ease-in-out forwards;
 
         }
         &.help-tour-welcome, &.help-tour-finish {
@@ -844,7 +844,7 @@ body.learn-page {
         path {
             stroke: var(--helpTourHighlightColor);
             stroke-thickness: var(--helpTourHighlightThickness);
-            .animation(helpTourHighlightAnimate 0.3s ease-in-out forwards);
+            animation: helpTourHighlightAnimate 0.3s ease-in-out forwards;
         }
 
         @keyframes helpTourHighlightAnimate {
