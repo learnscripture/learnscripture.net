@@ -1,11 +1,27 @@
 body {
     padding-top: @topbarHeight; /* make the container go all the way to the bottom of the topbar */
-    background-attachment:fixed;
+    background-attachment: fixed;
 }
 .container > footer p {
     text-align: center; /* center align it with the container */
 }
 
+
+/* downsize our container to make the content feel a bit tighter and more cohesive. NOTE: this removes two full columns from the grid, meaning you only go to 14 columns and not 16. */
+@maxPageWidth: 860px;
+
+nav.topbar-new {
+    width: @maxPageWidth;
+    margin: auto;
+    .nav-item {
+        > a {
+            padding-left: 0.5em;
+            padding-right: 0.5em;
+            padding-top: 8px;
+            padding-bottom: 9px;
+        }
+    }
+}
 
 footer {
     border: none;
@@ -14,19 +30,13 @@ footer {
 }
 
 .container {
-    width: 860px; /* downsize our container to make the content feel a bit tighter and more cohesive. NOTE: this removes two full columns from the grid, meaning you only go to 14 columns and not 16. */
+    width: @maxPageWidth;
 }
 
 .maincontent {
     padding-top: @mainTopPadding;
     padding-bottom: @mainTopPadding;
-}
-
-.topbarinner, .maincontent {
     padding-left: @mainSidePadding;
-}
-
-.maincontent {
     padding-right: @mainSidePadding;
 }
 
@@ -76,26 +86,6 @@ footer {
     left: auto;
 }
 
-// From Twitter Bootstrap 2
-.caret {
-    display: inline-block;
-    width: 0;
-    height: 0;
-    text-indent: -99999px;
-    *text-indent: 0;
-    vertical-align: top;
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
-    border-top: 4px solid #000000;
-    opacity: 0.3;
-    filter: alpha(opacity=30);
-    content: "\2193";
-}
-
-.dropdown .caret {
-    margin-top: 8px;
-    margin-left: 2px;
-}
 
 ////////////  Response to smaller screen /////////////
 
@@ -104,7 +94,7 @@ footer {
 @media screen and (max-width: @narrowWidthBreak1) {
 
     /* fluid width */
-    .container {
+    .container, nav.topbar-new {
         width: auto;
     }
     /* no columns */
@@ -137,7 +127,7 @@ footer {
 
 
     /* squeeze spacings */
-    .topbarinner, .maincontent {
+    .maincontent {
         padding-left: @smallerMainSidePadding;
         padding-right: @smallerMainSidePadding;
     }
@@ -162,10 +152,6 @@ footer {
     }
     div.one-column-only {
         display:block;
-    }
-
-    .topbar .brand {
-        padding-right: 6px;
     }
 
     .maincontent {
@@ -195,7 +181,7 @@ footer {
     }
 
     /* no fixed top bar */
-    .topbar {
+    .topbar-wrapper {
         position: static;
     }
 
@@ -207,36 +193,21 @@ footer {
 
 
 // Squeeze the primary nav if horizontal space is limited
-@media screen and (max-width: 700px) {
-    ul.primary-nav li:nth-child(5) {
-        display:none;
-    }
-
-}
-
-@media screen and (max-width: 650px) {
-    ul.primary-nav li:nth-child(4) {
-        display:none;
-    }
-
-}
-
 @media screen and (max-width: 600px) {
-    ul.primary-nav li:nth-child(3) {
-        display:none;
+    .primary-nav .nav-item:not(.spacer):nth-child(4) {
+        display: none;
     }
 }
 
 @media screen and (max-width: 550px) {
-    ul.primary-nav li:nth-child(2) {
-        display:none;
+    .primary-nav .nav-item:not(.spacer):nth-child(3) {
+        display: none;
     }
-
 }
 
 @media screen and (max-width: 450px) {
-    ul.primary-nav li:nth-child(1) {
-        display:none;
+    .primary-nav .nav-item:not(.spacer):nth-child(2) {
+        display: none;
     }
 }
 

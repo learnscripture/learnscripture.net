@@ -1,5 +1,4 @@
 /// <reference path="../typings/jsrender-settings.d.ts" />
-/// <reference path="../typings/bootstrap-dropdown.d.ts" />
 /// <reference path="../typings/bootstrap-buttons.d.ts" />
 /// <reference path="../typings/jquery-ajaxretry.d.ts" />
 /// <reference path="../typings/jquery-extra.d.ts" />

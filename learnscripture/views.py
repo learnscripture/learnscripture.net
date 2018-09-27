@@ -423,6 +423,7 @@ def dashboard(request):
          'url_after_logout': '/',
          'heatmap_stats_types': HeatmapStatsType.choice_list,
          'unfinished_session_first_uvs': session.unfinished_session_first_uvs(request),
+         'use_dashboard_nav': True,
          }
     c.update(todays_stats(identity))
     return render(request, 'learnscripture/dashboard.html', c)
