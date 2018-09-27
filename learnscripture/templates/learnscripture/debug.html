@@ -1,0 +1,19 @@
+<html>
+  <head>
+    <title>Learnscripture debug</title>
+  </head>
+  <body>
+    <h1>Session ID:</h1>
+    <p>{{ request.session.session_key }}</p>
+    <h1>Session data:</h1>
+    <p>{{ request.session.items }}</p>
+    <h1>Local storage:</h1>
+    <script>
+      for (var i = 0; i < window.localStorage.length; i++) {
+          var key = localStorage.key(i);
+          document.write("<p>" + key + ": " + localStorage.getItem(key) + "</p>");
+      }
+    </script>
+  </body>
+</html>
+

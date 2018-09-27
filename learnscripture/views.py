@@ -1664,3 +1664,7 @@ def celery_debug(request):
     message = request.GET.get('message', '[no message]')
     learnscripture.tasks.message.apply_async([message])
     return HttpResponse("Task queued with message: {0}".format(message))
+
+
+def debug(request):
+    return render(request, "learnscripture/debug.html", {})
