@@ -639,22 +639,24 @@ viewMain model helpTour =
 
 viewTopNav : Model -> H.Html Msg
 viewTopNav model =
-    H.nav [ A.class "topbar-new" ]
-        [ H.div [ A.class "nav-item return-link" ]
-            [ navLink
-                [ A.href "#"
-                , onClickSimply (AttemptReturn { immediate = True, fromRetry = False })
+    H.div [ A.class "topbar-wrapper" ]
+        [ H.nav [ A.class "topbar-new" ]
+            [ H.div [ A.class "nav-item return-link" ]
+                [ navLink
+                    [ A.href "#"
+                    , onClickSimply (AttemptReturn { immediate = True, fromRetry = False })
+                    ]
+                    (getReturnUrl model |> getReturnCaption)
+                    "icon-return"
+                    AlignLeft
                 ]
-                (getReturnUrl model |> getReturnCaption)
-                "icon-return"
-                AlignLeft
+            , sessionProgress model
+            , viewActionLogs model
+            , ajaxInfo model
+            , viewSessionStats model
+            , H.div [ A.class "nav-item preferences-link" ]
+                [ navLink [ A.href "#" ] (userDisplayName model.user) "icon-preferences" AlignRight ]
             ]
-        , sessionProgress model
-        , viewActionLogs model
-        , ajaxInfo model
-        , viewSessionStats model
-        , H.div [ A.class "nav-item preferences-link" ]
-            [ navLink [ A.href "#" ] (userDisplayName model.user) "icon-preferences" AlignRight ]
         ]
 
 

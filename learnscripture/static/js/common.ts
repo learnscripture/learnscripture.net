@@ -1,6 +1,5 @@
 // Common functionality and requirements.
 import 'jsrender';
-import 'bootstrap-dropdown';
 
 
 // Django CSRF requirements
@@ -153,7 +152,17 @@ $.views.settings.delimiters('[[', ']]');
 
 $(document).ready(function() {
     // Dropdown in topbar
-    $('.topbar').dropdown();
+    if ($('.base-page').length > 0) {
+        var closeDropdowns = function() {
+            $('.nav-dropdown').removeClass('menu-open');
+        }
+        $('html').bind('click', closeDropdowns)
+        $('.dropdown-heading').bind('click', (ev) => {
+            ev.stopPropagation();
+            var $menu = $(ev.target).closest('.nav-dropdown');
+            $menu.toggleClass("menu-open");
+        })
+    }
 
     if (isTouchDevice()) {
         // A bit hacky but works:
@@ -167,24 +176,27 @@ $(document).ready(function() {
     }
 
     // Scrolling of #id-ajax-status
-    var TOPBAR_HEIGHT = 40;
-    $(window).scroll(function(ev) {
-        // We want ajax div to stay underneath the topbar.
-        // topbar can be either fixed or absolute depending on screen size.
-        var $tb = $('.topbar');
-        var $aj = $('#id-ajax-status');
-        var height;
-        if ($tb.css('position') == 'fixed') {
-            height = TOPBAR_HEIGHT;
-        } else {
-            // static
-            height = Math.max(0, TOPBAR_HEIGHT - window.scrollY);
-        }
-        var heightString = height.toString() + "px";
-        if ($aj.css('top') != heightString) {
-            $aj.css('top', heightString);
-        }
-    });
+    // var TOPBAR_HEIGHT = 36;
+    // $(window).scroll(function(ev) {
+    //     // We want ajax div to stay underneath the topbar.
+    //     // topbar can be either fixed or absolute depending on screen size.
+
+    //     // TODO - rework
+
+    //     var $tb = $('.topbar');
+    //     var $aj = $('#id-ajax-status');
+    //     var height;
+    //     if ($tb.css('position') == 'fixed') {
+    //         height = TOPBAR_HEIGHT;
+    //     } else {
+    //         // static
+    //         height = Math.max(0, TOPBAR_HEIGHT - window.scrollY);
+    //     }
+    //     var heightString = height.toString() + "px";
+    //     if ($aj.css('top') != heightString) {
+    //         $aj.css('top', heightString);
+    //     }
+    // });
 
     $(document).ajaxStop(function() {
         hideLoadingIndicator();
