@@ -43,13 +43,13 @@
                     <li><a href="{% url 'preferences' %}?next={{ request.path_info }}" class="preferences-link"><i class="icon-fw icon-preferences"></i> Preferences</a></li>
                     {% if request_account %}
                       <li><a href="{% url 'account_details' %}"><i class="icon-fw icon-account"></i> Account details</a></li>
-                      <li><a href="{% url 'user_verses' %}"><i class="icon-fw icon-progress"></i> Verse progress</a>
-                        <li><a href="{% url 'user_verse_sets' %}"><i class="icon-fw icon-verse-sets"></i> Verse sets</a>
-                          <li><a href="{% url 'user_stats' request_account.username %}"><i class="icon-fw icon-stats"></i> Stats</a></li>
-                          <li><a href="#" class="logout-link"><i class="icon-fw icon-logout"></i> Log out</a></li>
+                      <li><a href="{% url 'user_verses' %}"><i class="icon-fw icon-progress"></i> Verse progress</a></li>
+                      <li><a href="{% url 'user_verse_sets' %}"><i class="icon-fw icon-verse-sets"></i> Verse sets</a></li>
+                      <li><a href="{% url 'user_stats' request_account.username %}"><i class="icon-fw icon-stats"></i> Stats</a></li>
+                      <li><a href="#" class="logout-link"><i class="icon-fw icon-logout"></i> Log out</a></li>
                     {% endif %}
                   </ul>
-                        </li>
+                </li>
               </ul>
             </div>
           </div>
