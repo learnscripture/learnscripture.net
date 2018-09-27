@@ -86,6 +86,7 @@ urlpatterns = [
 
     url(r'^stats/$', learnscripture.views.stats, name='stats'),
     url(r'^celery-debug/$', learnscripture.views.celery_debug, name='celery_debug'),
+    url(r'^debug/$', learnscripture.views.debug, name='user_debug'),
 
     # JSON/AJAX views
     url(r'^api/learnscripture/v1/', include('learnscripture.api.urls')),
