@@ -1,7 +1,7 @@
 {
   "name": "LearnScripture.net",
   "short_name": "LS",
-  "start_url": "/dashboard/?fromhomescreen",
+  "start_url": "/?fromhomescreen=1",
   "display": "standalone",
   "background_color": "#fff",
   "description": "A social, online Bible memorization app.",
