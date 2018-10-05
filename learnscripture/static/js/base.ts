@@ -10,10 +10,10 @@
 import 'expose-loader?jQuery!jquery';
 import "jquery-ui/ui/widgets/sortable";
 import 'autosize';
+import 'jquery-pjax';
 
 // bundled libs
 import 'jquery.ajaxretry';
-import 'bootstrap-tabs';
 
 // Ours
 
@@ -23,6 +23,7 @@ import 'bootstrap-tabs';
 // to bundling) and never needs to request any js again.
 
 import './common';
+import './accordion';
 import './accounts';
 import './sound';
 import './notices';

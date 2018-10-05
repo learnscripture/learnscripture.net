@@ -90,7 +90,7 @@ class CommentPageTests(FullBrowserTest):
 
         self.assertTextPresent("This is a naughty message")
         self.assertTextAbsent("This is already hidden")
-        self.click_and_confirm('.moderate-comment')
+        self.click_and_confirm('.moderate-comment', wait_for_reload=False)
 
         # Test page
         self.assertTextAbsent("This is a naughty message")

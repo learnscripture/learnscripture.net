@@ -10,8 +10,6 @@
 // TABS AND PILLS
 // --------------
 
-// Common styles
-.tabs,
 .pills {
   margin: 0 0 1.3em;
   padding: 0;
@@ -25,25 +23,6 @@
   }
 }
 
-// Tabs
-.tabs {
-  border-style: solid;
-  border-width: 0 0 1px;
-  > li {
-    position: relative; // For the dropdowns mostly
-    margin-bottom: -1px;
-    > a {
-      padding: 0 15px;
-      margin-right: 2px;
-      line-height: 2.6em;
-      border: 1px solid transparent;
-      .border-radius(4px 4px 0 0);
-      &:hover {
-        text-decoration: none;
-      }
-    }
-  }
-}
 
 // Pills
 .pills {
@@ -64,16 +43,12 @@
 }
 
 // Tabbable areas
-.tab-content,
 .pill-content {
 }
-.tab-content > .tab-pane,
 .pill-content > .pill-pane,
-.tab-content > div,
 .pill-content > div {
   display: none;
 }
-.tab-content > .active,
 .pill-content > .active {
   display: block;
 }

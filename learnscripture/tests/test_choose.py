@@ -15,7 +15,8 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
 
     def test_search(self):
         self.get_url('choose')
-        self.fill({"#id-search-input": "gospel"})
+        self.click("#id-choose-verseset .accordion-heading")
+        self.fill({"#id_query": "gospel"})
         self.click("#id-search-btn")
 
         self.assertTextPresent("Basic Gospel")
@@ -30,6 +31,7 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
         self.login(account)
 
         self.get_url('choose')
+        self.click("#id-choose-verseset .accordion-heading")
 
         vs_id = VerseSet.objects.get(name="Bible 101").id
         self.assertEqual(VerseSet.objects.get(id=vs_id).popularity, 0)
@@ -50,6 +52,7 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
         ids = list(Identity.objects.all())
 
         self.get_url('choose')
+        self.click("#id-choose-verseset .accordion-heading")
 
         vs = VerseSet.objects.get(name="Psalm 23")
         self.click("#id-learn-verseset-btn-%d" % vs.id)
@@ -63,6 +66,7 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
 
         # Choose again
         self.get_url('choose')
+        self.click("#id-choose-verseset .accordion-heading")
         self.click("#id-learn-verseset-btn-%d" % vs.id)
 
         self.assertEqual(vs.verse_choices.count(),
@@ -70,7 +74,7 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
 
     def test_choose_individual_verse(self):
         self.get_url('choose')
-        self.click("a[href='#id-tab-individual']")
+        self.click("#id-choose-individual .accordion-heading")
 
         # Test clicking on the drop downs.
         self.fill_by_text({"form.quickfind select[name=book]": "John"})
@@ -81,27 +85,27 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
         self.assertTextPresent("For this is the way God loved the world")
 
         # Check we can actually click on 'Learn' and it works.
-        self.click("#id-tab-individual input[name=learn_now]")
-        self.set_preferences()
+        self.click("#id-choose-individual input[name=learn_now]")
+        self.set_preferences(wait_for_reload=True)
         self.assertEqual(self.get_element_text("#id-verse-header h2"), "John 3:16")
 
     def test_choose_individual_verse_learn_later(self):
         identity, account = self.create_account()
         self.login(account)
         self.get_url('choose')
-        self.click("a[href='#id-tab-individual']")
+        self.click("#id-choose-individual .accordion-heading")
 
         self.fill({'form.quickfind input[name=quick_find]': 'John 3:16'})
         self.click("input[name=lookup]")
 
-        self.click('#id-tab-individual input[name=add_to_queue]')
+        self.click('#id-choose-individual input[name=add_to_queue]')
         self.assertEqual([uvs.localized_reference for uvs in identity.verse_statuses.all()],
                          ['John 3:16'])
 
     def test_choose_individual_verse_fuzzy(self):
         # Test entering into quick find, and being lazy
         self.get_url('choose')
-        self.click("a[href='#id-tab-individual']")
+        self.click("#id-choose-individual .accordion-heading")
 
         self.fill({'form.quickfind input[name=quick_find]': 'Gen 1:1'})
         self.fill({"form.quickfind select[name=version]": "KJV"})
@@ -112,7 +116,7 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
     def test_choose_individual_verse_bad_ref(self):
         # Test entering into quick find, and being lazy
         self.get_url('choose')
-        self.click("a[href='#id-tab-individual']")
+        self.click("#id-choose-individual .accordion-heading")
 
         self.fill({'form.quickfind input[name=quick_find]': 'Gen 100:1'})
         self.fill({"form.quickfind select[name=version]": "KJV"})
@@ -123,7 +127,7 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
 
     def test_choose_individual_and_change_language(self):
         self.get_url('choose')
-        self.click("a[href='#id-tab-individual']")
+        self.click("#id-choose-individual .accordion-heading")
 
         # Text is initially in the language of the default version
         self.assertEqual(self.get_element_text("form.quickfind select[name=book] option[value=BOOK0]"),
@@ -153,7 +157,7 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
 
     def test_choose_individual_fuzzy_and_change_language(self):
         self.get_url('choose')
-        self.click("a[href='#id-tab-individual']")
+        self.click("#id-choose-individual .accordion-heading")
 
         self.fill({'form.quickfind input[name=quick_find]': 'jhn 3:16'})
         self.click("input[name=lookup]")
@@ -189,8 +193,7 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
 
     def test_choose_individual_by_search(self):
         self.get_url('choose')
-
-        self.click("a[href='#id-tab-individual']")
+        self.click("#id-choose-individual .accordion-heading")
 
         self.fill({'form.quickfind input[name=quick_find]': 'firmament evening'})
         self.fill({"form.quickfind select[name=version]": "KJV"})
@@ -200,8 +203,7 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
 
     def test_choose_individual_by_search_turkish(self):
         self.get_url('choose')
-
-        self.click("a[href='#id-tab-individual']")
+        self.click("#id-choose-individual .accordion-heading")
 
         self.fill({"form.quickfind select[name=version]": "TCL02"})
 

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import contextlib
 import os
 import time
 import unittest
@@ -202,23 +203,13 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
         # So we wrap all of this functionality in a utility
         # to avoid issues.
         if wait_for_reload:
-            self._driver.execute_script("document.pageReloadedYetFlag='notyet';")
+            context = self.wait_for_reload(ignore_exceptions=(NoSuchWindowException,))
+        else:
+            context = null_context()
 
-        self._find(selector).click()
-        self._driver.switch_to.alert.accept()
-
-        if wait_for_reload:
-            def f(driver):
-                obj = driver.execute_script("return document.pageReloadedYetFlag;")
-
-                if obj is None or obj != "notyet":
-                    return True
-                return False
-            try:
-                WebDriverWait(self._driver, self.get_default_timeout()).until(f)
-            except NoSuchWindowException:
-                # legitimate sometimes e.g. when window closes
-                pass
+        with context:
+            self._find(selector).click()
+            self._driver.switch_to.alert.accept()
 
         self.wait_for_page_load()
         self.wait_for_ajax()
@@ -247,9 +238,31 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
         time.sleep(0.1)
         self.wait_until(lambda driver: driver.execute_script('return (typeof(jQuery) == "undefined" || jQuery.active == 0)'))
 
+    @contextlib.contextmanager
+    def wait_for_reload(self, ignore_exceptions=None):
+
+        self._driver.execute_script("document.pageReloadedYetFlag='notyet';")
+        yield
+
+        def f(driver):
+            obj = driver.execute_script("return document.pageReloadedYetFlag;")
+
+            if obj is None or obj != "notyet":
+                return True
+            return False
+
+        if ignore_exceptions:
+            try:
+                WebDriverWait(self._driver, self.get_default_timeout()).until(f)
+            except ignore_exceptions:
+                pass
+        else:
+            WebDriverWait(self._driver, self.get_default_timeout()).until(f)
+        self.wait_for_ajax()
+
     # Higher level, learnscripture specific things:
 
-    def set_preferences(self):
+    def set_preferences(self, wait_for_reload=False):
         """
         Fill in preferences if preferences form is visible.
         """
@@ -257,16 +270,25 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
                 not self.is_element_displayed("#id_default_bible_version")):
             return
 
-        self.fill_by_text({"#id_default_bible_version": "KJV (King James Version)"})
-
-        if self.is_element_present('#id-preferences-save-btn'):
-            # side panel
-            self.click("#id-preferences-save-btn")
+        if wait_for_reload:
+            context = self.wait_for_reload()
         else:
-            # preferences page
-            self.submit("#id-save-btn")
-        self.wait_until_loaded('body')
-        self.wait_for_ajax()
+            context = null_context()
+
+        with context:
+            self.fill_by_text({"#id_default_bible_version": "KJV (King James Version)"})
+
+            if self.is_element_present('#id-preferences-save-btn'):
+                # side panel
+                self.click("#id-preferences-save-btn")
+            else:
+                # preferences page
+                self.submit("#id-save-btn")
+
+
+@contextlib.contextmanager
+def null_context():
+    yield
 
 
 class WebTestBase(AccountTestMixin, LoginMixin, FuncWebTestMixin, TimeUtilsMixin, TestCase):

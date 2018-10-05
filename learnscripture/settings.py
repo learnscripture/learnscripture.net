@@ -278,7 +278,6 @@ INSTALLED_APPS = [
     'compressor',  # for fiber
     'easy_thumbnails',
     'fiber',
-    'bootstrapform',
     'dj_pagination',
     'raven.contrib.django.raven_compat',
     'spurl',

@@ -1,0 +1,10 @@
+{{ form.non_field_errors }}
+
+{% for field in form.hidden_fields %}
+    {{ field }}
+{% endfor %}
+
+{% for field in form.visible_fields %}
+    {% include "learnscripture/form_rendering/field.html" %}
+{% endfor %}
+
