@@ -1,0 +1,33 @@
+
+// Accordion
+
+.accordion-item {
+    margin-bottom: 1em;
+
+    .accordion-body {
+        display: none;
+        padding: 4px;
+        opacity: 0;
+    }
+    .accordion-heading {
+        cursor: pointer;
+        border: 1px solid var(--linkColor);
+        border-radius: 3px;
+        padding: 0.1em 0.6em;
+    }
+    &.expanded {
+        .accordion-body {
+            display: block;
+            animation: fadeIn 0.5s ease forwards;
+        }
+    }
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}

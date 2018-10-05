@@ -3,6 +3,8 @@ import csv
 import urllib.parse
 from datetime import date, timedelta
 
+import djpjax
+import furl
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.tokens import default_token_generator
@@ -36,8 +38,9 @@ from groups.forms import EditGroupForm
 from groups.models import Group
 from groups.signals import public_group_created
 from learnscripture import session
-from learnscripture.forms import (AccountPasswordChangeForm, AccountPasswordResetForm, AccountSetPasswordForm,
-                                  ContactForm, LogInForm, SignUpForm)
+from learnscripture.forms import (VERSE_SET_ORDER_AGE, VERSE_SET_ORDER_POPULARITY, AccountPasswordChangeForm,
+                                  AccountPasswordResetForm, AccountSetPasswordForm, ContactForm, LogInForm, SignUpForm,
+                                  VerseSetSearchForm)
 from payments.sign import sign_payment_info
 from scores.models import (get_all_time_leaderboard, get_leaderboard_since, get_verses_started_counts,
                            get_verses_started_per_day, get_verses_tested_per_day)
@@ -467,6 +470,10 @@ def default_bible_version_for_request(request):
 # No 'require_preferences' or 'require_identity' so that bots can browse this
 # page and the linked pages unhindered, for SEO.
 
+@djpjax.pjax(additional_templates={
+    "#id-choose-verseset-results": "learnscripture/choose_verseset_inc.html",
+    ".more-results-container": "learnscripture/choose_verseset_more_results_inc.html",
+})
 def choose(request):
     """
     Choose a verse or verse set
@@ -510,38 +517,72 @@ def choose(request):
                 return learn_set(request, [identity.add_verse_choice(ref, version=version)],
                                  session.LearningType.LEARNING)
 
-    c = {'title': 'Choose verses'}
-    verse_sets = verse_sets.order_by('name').prefetch_related('verse_choices')
-
-    if 'creator' in request.GET:
-        try:
-            current_account = account_from_request(request)
-            creator = Account.objects.visible_for_account(current_account).get(username=request.GET['creator'])
-        except Account.DoesNotExist:
-            creator = None
-        if creator is not None:
-            verse_sets = verse_sets.filter(created_by=creator)
-            c['creator'] = creator
-
     # Searching for verse sets is done via this view.
     # But looking up individual verses is done by AJAX,
     # so is missing here.
 
-    if 'q' in request.GET:
-        language_code = default_bible_version.language_code
-        verse_sets = VerseSet.objects.search(language_code, verse_sets, request.GET['q'])
+    active_section = None
+    # Using initial_verseset_search_form data we can ensure that we always have
+    # a valid bound form to use for filtering below.
+    initial_verseset_search_form = {'query': '',
+                                    'order': VERSE_SET_ORDER_POPULARITY}
+    if any(k in request.GET for k in initial_verseset_search_form.keys()):
+        active_section = "verseset"
+        verseset_search_form = VerseSetSearchForm(request.GET)
+    else:
+        verseset_search_form = VerseSetSearchForm(initial_verseset_search_form)
+    if 'from' in request.GET:
+        active_section = "verseset"
+    assert verseset_search_form.is_valid(), verseset_search_form.errors
 
-    if 'new' in request.GET:
-        verse_sets = verse_sets.order_by('-date_added')
-    else:  # popular, the default
-        verse_sets = verse_sets.order_by('-popularity')
-    c['verse_sets'] = verse_sets
-    c['active_tab'] = 'verseset'
+    c = {
+        'title': 'Choose verses',
+        'verseset_search_form': verseset_search_form
+    }
+
+    verse_sets = verse_sets.order_by('name').prefetch_related('verse_choices')
+
+    query = verseset_search_form.cleaned_data['query']
+    if query:
+        language_code = default_bible_version.language_code
+        verse_sets = VerseSet.objects.search(language_code, verse_sets, query)
+
+    order = verseset_search_form.cleaned_data['order']
+    if order == VERSE_SET_ORDER_POPULARITY:
+        verse_sets = verse_sets.order_by('-popularity', '-id')
+    elif order == VERSE_SET_ORDER_AGE:
+        verse_sets = verse_sets.order_by('-date_added', '-id')
+
+    PAGE_SIZE = 10
+
+    if active_section:
+        c['active_section'] = active_section
+    results_total = verse_sets.count()
+
+    try:
+        from_item = int(request.GET.get('from', '0'))
+    except ValueError:
+        from_item = 0
+
+    last_item = from_item + PAGE_SIZE
+    if 'HTTP_X_PJAX' in request.META and request.GET.get('_pjax', '') == '.more-results-container':
+        # Just load next page
+        results_verse_sets = verse_sets[from_item:last_item]
+    else:
+        results_verse_sets = verse_sets[0:last_item]
+
+    shown_count = min(last_item, results_total)
+    c['results'] = dict(verse_sets=results_verse_sets,
+                        shown_count=shown_count,
+                        total=results_total,
+                        more=shown_count < results_total,
+                        more_link=furl.furl(request.get_full_path()).remove(query=['from']).add(query_params={'from': from_item + PAGE_SIZE}),
+                        )
     c['default_bible_version'] = default_bible_version
 
     c.update(context_for_quick_find(request))
 
-    return render(request, 'learnscripture/choose.html', c)
+    return TemplateResponse(request, 'learnscripture/choose.html', c)
 
 
 def view_catechism_list(request):

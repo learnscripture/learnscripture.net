@@ -148,30 +148,6 @@
 
     }
 
-    @tabborder: darken(@bgColor1, 20%);
-    @tabhighlight: @bgColor1;
-
-    .tabs {
-        border-color: @tabborder;
-        > li {
-            > a {
-                &:hover {
-                    background-color: @tabhighlight;
-                    border-color: @tabhighlight @tabhighlight @tabborder;
-                }
-            }
-        }
-        // Active state, and it's :hover to override normal :hover
-        .active > a,
-        .active > a:hover {
-            color: @gray;
-            background-color: @white;
-            border: 1px solid @tabborder;
-            border-bottom-color: transparent;
-            cursor: default;
-        }
-    }
-
 
     .pills {
 

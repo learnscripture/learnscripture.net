@@ -118,3 +118,19 @@ class ContactForm(forms.Form):
                               help_text="If you are reporting a problem, please include a full and specific description, "
                               "and include what device/browser you are using, with version numbers.",
                               widget=widgets.Textarea(attrs={'rows': '10'}))
+
+
+VERSE_SET_ORDER_POPULARITY = "popularity"
+VERSE_SET_ORDER_AGE = "age"
+
+
+class VerseSetSearchForm(forms.Form):
+    query = forms.CharField(label="Search", required=False)
+    order = forms.ChoiceField(choices=[(VERSE_SET_ORDER_POPULARITY, "Most popular first"),
+                                       (VERSE_SET_ORDER_AGE, "Newest first"),
+                                       ],
+                              initial=VERSE_SET_ORDER_POPULARITY,
+                              label="Order",
+                              required=False,
+                              widget=widgets.RadioSelect
+                              )

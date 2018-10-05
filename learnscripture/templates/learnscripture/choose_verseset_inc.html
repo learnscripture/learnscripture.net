@@ -1,0 +1,11 @@
+{% if verseset_search_form.cleaned_data.query %}
+  <h2>Search results for <i>{{ verseset_search_form.cleaned_data.query }}</i>:</h2>
+{% endif %}
+
+{% if not results.verse_sets %}
+  <p>No verse sets found that match your query.</p>
+{% endif %}
+
+{% include "learnscripture/choose_verseset_results_inc.html" %}
+
+{% include "learnscripture/choose_verseset_show_more_inc.html" %}

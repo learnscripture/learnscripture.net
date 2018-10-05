@@ -1,5 +1,6 @@
 // Common functionality and requirements.
 import 'jsrender';
+import 'jquery-pjax';
 
 
 // Django CSRF requirements
@@ -203,3 +204,5 @@ $(document).ready(function() {
     });
 
 });
+
+$.pjax.defaults.timeout = 3000

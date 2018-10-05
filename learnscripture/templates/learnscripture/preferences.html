@@ -1,12 +1,12 @@
 {% extends "base.html" %}
-{% load bootstrap %}
+{% load form_rendering %}
 
 {% block content %}
 
   <p>Enter your preferences and press 'Save' to continue.</p>
   <form action="" method="POST">
     {% csrf_token %}
-    {{ form|bootstrap }}
+    {{ form|render_form }}
 
     <p>All preferences can be changed later, and the Bible version can be chosen on
       a verse-by-verse basis</p>

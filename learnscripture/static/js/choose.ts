@@ -21,7 +21,7 @@ var loadResults = function(results) {
 var setupChooseControls = function() {
     $('#id_lookup').click(quickFindAndHandleResults(loadResults, false));
 
-    $('#id-tab-individual').on('click', 'form.individual-choose input[name=add_to_queue]', function(ev) {
+    $('#id-choose-individual').on('click', 'form.individual-choose input[name=add_to_queue]', function(ev) {
         ev.preventDefault();
         var $form = $(ev.currentTarget).parent('form');
         var localized_reference = $form.find('input[name=localized_reference]').val();
@@ -41,6 +41,30 @@ var setupChooseControls = function() {
             error: ajaxFailed
         });
     });
+
+    $('#id-choose-verseset form[data-pjax]').on('submit', function(ev) {
+        ev.preventDefault();
+        $.pjax.submit(ev, {
+            container: '#id-choose-verseset-results',
+            scrollTo: false
+        });
+    });
+
+    $('#id-choose-verseset form[data-pjax] input').on('change', function(ev) {
+        $(ev.currentTarget).closest('form').submit();
+    })
+
+    if ($.support.pjax) {
+        $('#id-choose-verseset').on('click', '.more-results-container a[data-pjax]', function(ev) {
+            // Unwrap nested .more-results-container, to ensure we only have one
+            // .more-results-container left.
+            $('.more-results-container .more-results-container').unwrap();
+            $.pjax.click(ev, {
+                container: '.more-results-container',
+                scrollTo: false
+            });
+        });
+    }
 };
 
 $(document).ready(function() {
