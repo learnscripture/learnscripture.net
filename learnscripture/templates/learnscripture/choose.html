@@ -97,8 +97,17 @@
         </div>
       </div>
     </section>
-  </div>
 
-  <p>Or <a href="{% url 'catechisms' %}">learn a catechism</a>.</p>
+    <section id="id-choose-catechism" class="accordion-item" data-accordion-link="{% url 'catechisms' %}">
+      <h2 class="accordion-heading">Learn a catechism</h2>
+      <div class="accordion-body">
+        <p>Catechisms are a question/answer method of learning Bible truth.
+          While we don't think they are on a level with the Bible itself, they
+          can be a very useful way of learning the truths the Bible teaches in a
+          systematic way, and they fit well into the system LearnScripture uses
+          for learning verses. <a href="{% url 'catechisms' %}">Browse our list of catechisms</a>.
+      </div>
+    </section>
+  </div>
 
 {% endblock %}
