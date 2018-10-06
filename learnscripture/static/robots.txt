@@ -1,7 +1,6 @@
 User-agent: *
 Disallow: /preferences/
 Disallow: /learn/
-Disallow: /create-verse-set/
 Disallow: /create-selection-set/
 Disallow: /create-passage-set/
 Disallow: /dashboard/
