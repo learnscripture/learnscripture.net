@@ -4,9 +4,9 @@
 
 // notices are custom, and permament until dismissed
 
-.notice, .clearnotices {
+.notice, .clearnotices, ul.messagelist li {
     color: #666;
-    background: #ffc;
+    background-color: #ffc;
     border-bottom: 1px solid #ddd;
     padding: 4px var(--mainSidePadding);
     .close {
@@ -65,19 +65,22 @@ ul.messagelist {
 }
 
 ul.messagelist li {
-    font-size: 12px;
     display: block;
-    padding: 4px 5px 4px 25px;
-    margin: 0 0 3px 0;
-    border-bottom: 1px solid #ddd;
-    color: #666;
-    background: #ffc url(/static/admin/img/icon_success.gif) 5px .3em no-repeat;
+    background-image: url(/static/admin/img/icon-yes.svg);
+    background-position: 5px 8px;
+    background-repeat: no-repeat;
 }
 
 ul.messagelist li.warning {
-    background-image: url(/static/admin/img/icon_alert.gif);
+    background-image: url(/static/admin/img/icon-alert.svg);
 }
 
 ul.messagelist li.error {
-    background-image: url(/static/admin/img/icon_error.gif);
+    background-image: url(/static/admin/img/icon-alert.svg);
+}
+
+@media screen and (max-width: @narrowWidthBreak1) {
+    ul.messagelist li {
+        background-position: ~"calc(100% - 10px) 8px";
+    }
 }
