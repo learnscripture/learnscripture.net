@@ -3,9 +3,10 @@
   <div class="show-more">
     {# For PJAX 'show more', this div gets replaced with the next #}
     {# page of results, plus a new 'show more' link #}
-    Showing {{ results.shown_count }} of {{ results.total }} verse sets.
+    Showing {{ results.shown_count }} of {{ results.total }} verse sets
     {% if results.more %}
-      <a data-pjax href="{{ results.more_link }}">Show more</a>
+      — <a data-pjax href="{{ results.more_link }}">Show more</a>
     {% endif %}
+    — <a href="#id-choose-verseset">Jump to top</a>
   </div>
 </div>
