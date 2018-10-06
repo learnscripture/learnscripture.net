@@ -38,9 +38,9 @@ from groups.forms import EditGroupForm
 from groups.models import Group
 from groups.signals import public_group_created
 from learnscripture import session
-from learnscripture.forms import (VERSE_SET_ORDER_AGE, VERSE_SET_ORDER_POPULARITY, AccountPasswordChangeForm,
-                                  AccountPasswordResetForm, AccountSetPasswordForm, ContactForm, LogInForm, SignUpForm,
-                                  VerseSetSearchForm)
+from learnscripture.forms import (VERSE_SET_ORDER_AGE, VERSE_SET_ORDER_POPULARITY, VERSE_SET_TYPE_ALL,
+                                  AccountPasswordChangeForm, AccountPasswordResetForm, AccountSetPasswordForm,
+                                  ContactForm, LogInForm, SignUpForm, VerseSetSearchForm)
 from payments.sign import sign_payment_info
 from scores.models import (get_all_time_leaderboard, get_leaderboard_since, get_verses_started_counts,
                            get_verses_started_per_day, get_verses_tested_per_day)
@@ -525,7 +525,9 @@ def choose(request):
     # Using initial_verseset_search_form data we can ensure that we always have
     # a valid bound form to use for filtering below.
     initial_verseset_search_form = {'query': '',
-                                    'order': VERSE_SET_ORDER_POPULARITY}
+                                    'order': VERSE_SET_ORDER_POPULARITY,
+                                    'set_type': VERSE_SET_TYPE_ALL,
+                                    }
     if any(k in request.GET for k in initial_verseset_search_form.keys()):
         active_section = "verseset"
         verseset_search_form = VerseSetSearchForm(request.GET)
@@ -546,6 +548,10 @@ def choose(request):
     if query:
         language_code = default_bible_version.language_code
         verse_sets = VerseSet.objects.search(language_code, verse_sets, query)
+
+    set_type = verseset_search_form.cleaned_data['set_type']
+    if set_type != VERSE_SET_TYPE_ALL:
+        verse_sets = verse_sets.filter(set_type=set_type)
 
     order = verseset_search_form.cleaned_data['order']
     if order == VERSE_SET_ORDER_POPULARITY:
