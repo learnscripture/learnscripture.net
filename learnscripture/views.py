@@ -786,11 +786,6 @@ def add_passage_breaks(language_code, verse_list, breaks):
 
 
 @require_preferences
-def create_set_menu(request):
-    return render(request, 'learnscripture/create_set_menu.html', {'title': "Create verse set"})
-
-
-@require_preferences
 def create_selection_set(request, slug=None):
     return create_or_edit_set(request, set_type=VerseSetType.SELECTION, slug=slug)
 

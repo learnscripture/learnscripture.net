@@ -50,7 +50,6 @@ urlpatterns = [
 
     # Verse sets
     url(r'^verse-set/(?P<slug>[^/]+)/$', learnscripture.views.view_verse_set, name='view_verse_set'),
-    url(r'^create-verse-set/$', learnscripture.views.create_set_menu, name='create_set_menu'),
     url(r'^create-selection-set/$', learnscripture.views.create_selection_set, name='create_selection_set'),
     url(r'^create-passage-set/$', learnscripture.views.create_passage_set, name='create_passage_set'),
     url(r'^edit-verse-set/(?P<slug>[^/]+)/$', learnscripture.views.edit_set, name='edit_set'),
