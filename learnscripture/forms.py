@@ -4,6 +4,7 @@ from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm, Set
 from django.forms import widgets
 
 from accounts.models import Account
+from bibleverses.models import VerseSetType
 
 
 class SignUpForm(forms.ModelForm):
@@ -123,9 +124,22 @@ class ContactForm(forms.Form):
 VERSE_SET_ORDER_POPULARITY = "popularity"
 VERSE_SET_ORDER_AGE = "age"
 
+VERSE_SET_TYPE_ALL = "all"
+VERSE_SET_TYPE_CHOICES = [
+    (VERSE_SET_TYPE_ALL, "All"),
+    (VerseSetType.SELECTION, "Selection - hand-picked verses usually on a theme or topic"),
+    (VerseSetType.PASSAGE, "Passage - continuous verses in a chapter"),
+]
+
 
 class VerseSetSearchForm(forms.Form):
     query = forms.CharField(label="Search", required=False)
+    set_type = forms.ChoiceField(choices=VERSE_SET_TYPE_CHOICES,
+                                 initial=VERSE_SET_TYPE_ALL,
+                                 label="Type",
+                                 required=False,
+                                 widget=widgets.RadioSelect
+                                 )
     order = forms.ChoiceField(choices=[(VERSE_SET_ORDER_POPULARITY, "Most popular first"),
                                        (VERSE_SET_ORDER_AGE, "Newest first"),
                                        ],
