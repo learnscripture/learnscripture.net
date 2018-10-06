@@ -1,3 +1,12 @@
+@mainSidePadding:      20px;
+@smallerMainSidePadding:   6px;
+
+body.base-page {
+    --mainSidePadding: @mainSidePadding;
+}
+
+// A lot of this should end up inside a `.base-page` selector
+
 body {
     padding-top: @topbarHeight; /* make the container go all the way to the bottom of the topbar */
     background-attachment: fixed;
@@ -34,10 +43,10 @@ footer {
 }
 
 .maincontent {
-    padding-top: @mainTopPadding;
-    padding-bottom: @mainTopPadding;
-    padding-left: @mainSidePadding;
-    padding-right: @mainSidePadding;
+    padding-top: 0;
+    padding-bottom: @basegap;
+    padding-left: var(--mainSidePadding);
+    padding-right: var(--mainSidePadding);
 }
 
 /* The white background content wrapper */
@@ -48,33 +57,28 @@ footer {
 
 /* Page header tweaks */
 .page-header {
-    margin-bottom: 1.3em;
+    margin-bottom: 0;
     border-bottom: 1px solid #ddd;
     h1 {
-        line-height: 1.2;
+        margin-top: 0;
         margin-bottom: 0;
     }
-    padding: 20px @mainSidePadding 20px;
+    padding: 20px var(--mainSidePadding) 20px;
 }
 
 .page-header, .message-container {
-    margin-left: -@mainSidePadding;
-    margin-right: -@mainSidePadding;
-    margin-bottom: @mainTopPadding;
-    margin-top: -@mainTopPadding;
+    margin-left: ~"calc(0px - var(--mainSidePadding))";
+    margin-right: ~"calc(0px - var(--mainSidePadding))";
+    margin-bottom: 0;
+    margin-top: 0;
 }
 
 // Right column tweaks
 
 #id-rightcolumn {
     h3 {
-        margin-top: 18px;
         border-bottom: 1px solid #ddd;
-        margin-bottom: 6px;
-
-        &:first-child {
-            margin-top: 9px;
-        }
+        margin-bottom: 0px;
     }
 }
 
@@ -120,28 +124,11 @@ footer {
         }
     }
 
-    // Fix some hacks we added for rightcolumn
-    #id-rightcolumn h3:first-child {
-        margin-top: 0px;
-    }
-
 
     /* squeeze spacings */
-    .maincontent {
-        padding-left: @smallerMainSidePadding;
-        padding-right: @smallerMainSidePadding;
+    body.base-page {
+        --mainSidePadding: @smallerMainSidePadding;
     }
-
-    .page-header {
-        padding-left: @smallerMainSidePadding;
-        padding-right: @smallerMainSidePadding;
-    }
-
-    .page-header, .message-container {
-        margin-left: -@smallerMainSidePadding;
-        margin-right: -@smallerMainSidePadding;
-    }
-
 
     .two-column-only {
         display: none;
@@ -165,19 +152,9 @@ footer {
 @media screen and (max-height: @shortHeightBreak1) {
     /* squeeze paddings */
 
-    .maincontent {
-        padding-top: @smallerMainTopPadding;
-        padding-bottom: @smallerMainTopPadding;
-    }
-
     .page-header {
         padding-top: 5px;
         padding-bottom: 5px;
-    }
-
-    .page-header, .message-container {
-        margin-bottom: @smallerMainTopPadding;
-        margin-top: -@smallerMainTopPadding;
     }
 
     /* no fixed top bar */
