@@ -2,20 +2,29 @@
 // Accordion
 
 .accordion-item {
-    margin-bottom: 1em;
+    margin-top: @basegap;
+    margin-bottom: @basegap;
 
     .accordion-body {
         display: none;
         padding: 4px;
         opacity: 0;
+        border-bottom: 1px solid var(--topColor2);
     }
     .accordion-heading {
         cursor: pointer;
-        border: 1px solid var(--linkColor);
-        border-radius: 3px;
-        padding: 0.1em 0.6em;
+        padding: 0.1em var(--mainSidePadding);
+        color: var(--topTextColor);
+        background-color: var(--topColor2);
+        border-top: 1px solid var(--topColor2);
     }
     &.expanded {
+        .accordion-heading {
+            color: var(--baseTextColor);
+            background-color: var(--baseBackgroundColor);
+            padding-bottom: 0px;
+            transition: color 0.5s ease;
+        }
         .accordion-body {
             display: block;
             animation: fadeIn 0.5s ease forwards;

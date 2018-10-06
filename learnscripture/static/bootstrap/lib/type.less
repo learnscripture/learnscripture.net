@@ -11,7 +11,8 @@ body {
 
 p {
   #font > .shorthand(normal,@basefont);
-  margin-bottom: 1.3em / 2;
+  margin-top: @basegap;
+  margin-bottom: @basegap;
   small {
     font-size: @basefont - 2;
   }
@@ -24,45 +25,27 @@ p {
 h1, h2, h3, h4, h5, h6 {
   font-weight: bold;
   color: @grayDark;
+  line-height: 1em;
+  margin-top: @basegap;
+  margin-bottom: @basegap;
 }
 h1 {
-  margin-bottom: 1.3em;
   font-size: 30px;
-  line-height: 1.8em;
-  small {
-    font-size: 18px;
-  }
 }
 h2 {
   font-size: 24px;
-  line-height: 1.8em;
-  small {
-    font-size: 14px;
-  }
 }
 h3 {
   font-size: 18px;
-  line-height: 2em;
-  small {
-    font-size: 14px;
-  }
 }
 h4 {
   font-size: 16px;
-  line-height: 1.6em;
-  margin-top: 0.6em;
-  margin-bottom: 0.6em;
-  small {
-    font-size: 12px;
-  }
 }
 h5 {
   font-size: 14px;
-  line-height: 2.4em;
 }
 h6 {
   font-size: 13px;
-  line-height: 2.4em;
   color: @grayLight;
   text-transform: uppercase;
 }
