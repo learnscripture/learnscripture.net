@@ -162,6 +162,9 @@ $(document).ready(function() {
             ev.stopPropagation();
             var $menu = $(ev.target).closest('.nav-dropdown');
             $menu.toggleClass("menu-open");
+        });
+        $('.dropdown-heading a').bind('click', (ev) => {
+            ev.preventDefault();
         })
     }
 

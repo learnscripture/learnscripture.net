@@ -1,0 +1,149 @@
+label {
+    input[type=checkbox],
+    input[type=radio] {
+        vertical-align: middle;
+    }
+}
+
+.help-block {
+    display: block;
+    color: @gray;
+}
+
+input,
+select,
+textarea {
+    #font > .sans-serif(normal, @basefont);
+    font-size: @basefont;
+    color: @grayDark;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 4px;
+}
+
+
+@formLeftColumnWidth: 9em;
+@formColumnSpacer: 1em;
+
+@errorColor: #a00;  // TODO this should be part of theme some day
+
+form {
+    input,
+    textarea,
+    select {
+        display: inline-block;
+        width: 14em;
+    }
+
+    input[type=submit],
+    input[type=checkbox],
+    input[type=radio] {
+        width: auto;
+    }
+
+    textarea {
+        width: 95%;
+    }
+
+    .validation-error {
+        color: @errorColor;
+    }
+
+    .error {
+        input[type=text],
+        input[type=checkbox],
+        input[type=file],
+        input[type=radio],
+        select,
+        textarea {
+            border-color: @errorColor;
+            box-shadow: 0px 0px 2px @errorColor;
+        }
+        .help-inline {
+            color: @errorColor;
+        }
+    }
+
+    :invalid {
+        // Not really useful because it applies before the
+        // user has done anything, which is distracting.
+        box-shadow: none;
+    }
+
+    :-moz-ui-invalid {
+        border-color: @errorColor;
+        box-shadow: 0px 0px 2px @errorColor;
+    }
+
+    .actions {
+        padding-left: @formLeftColumnWidth + @formColumnSpacer;
+        margin-bottom: 1em;
+
+        &.empty-form {
+            // Used when we have a form, but no controls in it other than the
+            // action buttons at the bottom. In this case we have nothing to
+            // align with, so center instead.
+            padding-left: 0px;
+            text-align: center;
+            padding-top: 1em;
+            border-top: 1px solid var(--bgBorderColor);
+        }
+    }
+}
+
+
+.form-row {
+    display: flex;
+    margin-bottom: 1em;
+
+    > label, > .label-spacer {
+        flex: 0;
+        min-width: @formLeftColumnWidth;
+        margin-right: @formColumnSpacer;
+        padding-top: 4px;
+        text-align: right;
+    }
+    > .input, > .inputs-list {
+        flex: 2;
+    }
+
+    ul.inputs-list, div.input ul {
+        padding-top: 4px;
+        margin: 0 0 5px;
+        // width: 100%;
+        li {
+            display: block;
+            padding: 0;
+            //width: 100%;
+            list-style: none;
+        }
+    }
+
+}
+
+.form-all-errors {
+    margin-top: 1em;
+}
+
+@media screen and (max-width: @narrowWidthBreak3) {
+    // Stacked forms
+
+    .form-row {
+        display: block;
+
+        > .label-spacer {
+            display: none;
+        }
+        > label {
+            min-width: auto;
+            margin-right: 0px;
+            text-align: left;
+            font-weight: bold;
+        }
+    }
+    form {
+        .actions {
+            padding-left: 0px;
+        }
+    }
+}

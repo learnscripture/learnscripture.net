@@ -10,7 +10,7 @@
 @import "utils.less";
 @import "themes.less";
 @import "common.less";
-@import "common_layout.less";
+@import "forms.less";
 @import "sidepanel.less";
 @import "nav.less";
 
@@ -19,20 +19,6 @@
 
 // learn page specific
 body.learn-page {
-    // Common styles to be merged eventually:
-    // To be moved to common.less once this is fully merged.
-
-    // Can also be simplified because there will be no specificity problems,
-    // and other code can be deleted.
-    a:focus, :focus, .fakefocus, .btn:focus input:focus textarea:focus, select:focus {
-        outline: 3px solid var(--focusOutlineColor);
-        .box-shadow(none);
-    }
-    input:focus {
-        // Needed for Chrome
-        outline-offset: 0px;
-    }
-    // End common styles
 
     .topbar-wrapper {
         z-index: 100; // Above everything, below help tour
@@ -501,6 +487,10 @@ body.learn-page {
     h1, h2, h3, #id-verse-options-menu-btn {
         line-height: 1.4;
         padding-top: 2px;
+    }
+    h1, h2, h3 {
+        margin-top: 0px;
+        margin-bottom: 0px;
     }
 
     #id-onscreen-test-container {

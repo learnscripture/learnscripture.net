@@ -1,7 +1,9 @@
 {% load form_rendering %}
 
-<div class="clearfix{% if field.errors %} error{% endif %}">
+<div class="form-row{% if field.errors %} error{% endif %}">
   {% if field|is_checkbox %}
+    <div class="label-spacer">
+    </div>
     <ul class="inputs-list">
       <li>
         <div class="input">

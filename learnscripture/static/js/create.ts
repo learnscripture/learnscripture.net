@@ -5,7 +5,8 @@ import { quickFindAndHandleResults } from './quickfind';
 var addVerse = function(verseData) {
     $('#id-verse-list tbody').append(
         $('#id_verse_list_selection_row_template').render({ 'verseData': verseData }));
-    $('#id-verse-list').show();
+    $('#id-verse-list table').show();
+    $('#id-verse-list-empty-message').hide();
 };
 
 var addVerseClick = function(ev) {
@@ -56,6 +57,7 @@ var deleteButtonClick = function(ev) {
 };
 
 var selectionSaveBtnClick = function(ev) {
+    ev.preventDefault();
     // Create hidden fields with all internal_references
     var refs = [];
     $('#id-verse-list tr[data-internal-reference]').each(function(idx, elem) {
@@ -66,6 +68,7 @@ var selectionSaveBtnClick = function(ev) {
 };
 
 var passageSaveBtnClick = function(ev) {
+    ev.preventDefault();
     // Create hidden fields with all internal_references
     var refs = [];
     var breaks = [];
@@ -131,7 +134,9 @@ var passageLoadResults = function(results) {
 
 var setupCreateVerseSetControls = function() {
     if ($('#id-verse-list tbody tr').length === 0) {
-        $('#id-verse-list').hide();
+        $('#id-verse-list table').hide();
+    } else {
+        $('#id-verse-list-empty-message').hide();
     }
     $('#id-verse-list').on('click', '.icon-arrow-up, .icon-arrow-down',
         function(ev) {

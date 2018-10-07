@@ -16,7 +16,10 @@
 
         <div id="id-verse-list">
           <h3>Verse list</h3>
-          <p>Drag/drop or use the arrows to re-order.</p>
+
+          <div id="id-verse-list-empty-message">
+            No verses added yet!
+          </div>
 
           <table>
             <thead>
@@ -36,6 +39,13 @@
                 </tr>
               {% endfor %}
             </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="5">
+                  Drag/drop or use the arrows to re-order.
+                </td>
+              </tr>
+            </tfoot>
           </table>
         </div>
       </form>
@@ -74,9 +84,12 @@
         </div>
       </script>
 
-      <div class="actions">
-        <input name="save" type="submit" class="btn primary" value="Save verse set" id="id-save-btn">
-      </div>
+      <form>
+        <hr>
+        <div class="actions">
+          <input name="save" type="submit" class="btn primary" value="Save verse set" id="id-save-btn">
+        </div>
+      </form>
 
     </div>
 
