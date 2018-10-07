@@ -35,7 +35,9 @@
           <div class="nav-item spacer"></div>
           <div class="nav-dropdown">
             <div class="dropdown-heading nav-item">
-              {% if request_account %}{{ request_account.username }}{% else %}Guest{% endif %} <i class="icon-caret-down"></i>
+              <a href="#">
+                {% if request_account %}{{ request_account.username }}{% else %}Guest{% endif %} <i class="icon-caret-down"></i>
+              </a>
             </div>
             <ul class="nav-dropdown-menu">
               {% if not request_account %}

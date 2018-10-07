@@ -125,15 +125,14 @@
         // Active and Disabled states
         &.active,
         &:active {
-            @shadow: inset 0 2px 4px rgba(0,0,0,.25), 0 1px 2px rgba(0,0,0,.05);
-            .box-shadow(@shadow);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,.25), 0 1px 2px rgba(0,0,0,.05);
         }
         &.disabled {
             cursor: default;
             background-image: none;
             .reset-filter();
             opacity: 0.65;
-            .box-shadow(none);
+            box-shadow: none;
         }
         &[disabled] {
             // disabled pseudo can't be included with .disabled
@@ -142,7 +141,7 @@
             background-image: none;
             .reset-filter();
             opacity: 0.65;
-            .box-shadow(none);
+            box-shadow: none;
         }
 
 
@@ -186,11 +185,6 @@
     .commentblock,
     .relatedaddcomment,
     .is-not-following {
-        border-color: @bgBorderColor;
-    }
-
-    .page-header {
-        background-color: @bgColor1;
         border-color: @bgBorderColor;
     }
 

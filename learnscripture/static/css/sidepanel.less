@@ -11,7 +11,7 @@
     height: 100%;
     width: 100%;
     margin: 0;
-    .box-shadow(5px 0px 7px rgba(0,0,0,0.3));
+    box-shadow: 5px 0px 7px rgba(0,0,0,0.3);
 
     .close-bar {
         position: absolute;
@@ -67,7 +67,7 @@
 
     .sidepanel-header {
         background-color: @sidepanelBodyColor;
-        border-bottom: 1px solid #eee;
+        border-bottom: 1px solid var(--bgBorderColor);
         padding: 5px 15px;
         h3 {
             padding-left: 10px;
@@ -76,7 +76,7 @@
     .sidepanel-footer {
         box-sizing: border-box;
         padding: 14px 15px 15px;
-        border-top: 1px solid #ddd;
+        border-top: 1px solid var(--bgBorderColor);
         .clearfix();
         .btn {
             float: right;
