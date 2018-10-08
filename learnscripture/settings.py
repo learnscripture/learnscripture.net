@@ -240,6 +240,7 @@ TEMPLATES = [
                 'learnscripture.context_processors.themes',
                 'learnscripture.context_processors.settings_processor',
                 'learnscripture.context_processors.request_account',
+                'learnscripture.context_processors.indexing',
             ],
             'debug': DEBUG,
         },

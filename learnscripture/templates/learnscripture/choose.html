@@ -12,7 +12,11 @@
       <div class="accordion-body">
         <p>Browse or search the verse sets below:</p>
 
-        <form action="." method="GET" data-pjax>
+        <form action="." method="GET"
+              data-pjax-results-container="#id-choose-verseset-results"
+              data-pjax-more-results-parent="#id-choose-verseset"
+              data-pjax-more-results-container=".more-results-container"
+          >
           <div class="form-row">
             <label for="id_query">Search:</label>
             <div class="input">

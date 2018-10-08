@@ -5,10 +5,10 @@
   <head>
     <meta charset="utf-8">
     <title>{% block title %}{% if title %}{{ title }} - {% endif %}LearnScripture.net{% endblock %}</title>
-    {% if noindex %}
-      <meta name="robots" content="noindex">
-    {% endif %}
     <meta name="description" content="{% block description %}The fun, easy and social way to memorize the Bible online{% endblock %}">
+    {% if noindex_but_follow  %}
+      <meta name="robots" content="noindex, follow">
+    {% endif %}
     {% include "learnscripture/head_inc.html" %}
     {% render_bundle 'base' 'css' 'DEFAULT' attrs='charset="utf-8"' %}
 

@@ -38,9 +38,10 @@ from groups.forms import EditGroupForm
 from groups.models import Group
 from groups.signals import public_group_created
 from learnscripture import session
-from learnscripture.forms import (VERSE_SET_ORDER_AGE, VERSE_SET_ORDER_POPULARITY, VERSE_SET_TYPE_ALL,
-                                  AccountPasswordChangeForm, AccountPasswordResetForm, AccountSetPasswordForm,
-                                  ContactForm, LogInForm, SignUpForm, VerseSetSearchForm)
+from learnscripture.forms import (LEADERBOARD_WHEN_ALL_TIME, LEADERBOARD_WHEN_THIS_WEEK, VERSE_SET_ORDER_AGE,
+                                  VERSE_SET_ORDER_POPULARITY, VERSE_SET_TYPE_ALL, AccountPasswordChangeForm,
+                                  AccountPasswordResetForm, AccountSetPasswordForm, ContactForm, LeaderboardFilterForm,
+                                  LogInForm, SignUpForm, VerseSetSearchForm)
 from payments.sign import sign_payment_info
 from scores.models import (get_all_time_leaderboard, get_leaderboard_since, get_verses_started_counts,
                            get_verses_started_per_day, get_verses_tested_per_day)
@@ -533,7 +534,7 @@ def choose(request):
         verseset_search_form = VerseSetSearchForm(request.GET)
     else:
         verseset_search_form = VerseSetSearchForm(initial_verseset_search_form)
-    if 'from' in request.GET:
+    if 'from_item' in request.GET:
         active_section = "verseset"
     assert verseset_search_form.is_valid(), verseset_search_form.errors
 
@@ -565,25 +566,20 @@ def choose(request):
         c['active_section'] = active_section
     results_total = verse_sets.count()
 
-    try:
-        from_item = int(request.GET.get('from', '0'))
-    except ValueError:
-        from_item = 0
-
+    from_item = get_request_from_item(request)
     last_item = from_item + PAGE_SIZE
-    if 'HTTP_X_PJAX' in request.META and request.GET.get('_pjax', '') == '.more-results-container':
-        # Just load next page
-        results_verse_sets = verse_sets[from_item:last_item]
-    else:
-        results_verse_sets = verse_sets[0:last_item]
+    results_verse_sets = verse_sets[from_item:last_item]
 
-    shown_count = min(last_item, results_total)
-    c['results'] = dict(verse_sets=results_verse_sets,
-                        shown_count=shown_count,
-                        total=results_total,
-                        more=shown_count < results_total,
-                        more_link=furl.furl(request.get_full_path()).remove(query=['from']).add(query_params={'from': from_item + PAGE_SIZE}),
-                        )
+    shown_count = min(last_item, from_item + len(results_verse_sets))
+    c['results'] = dict(
+        verse_sets=results_verse_sets,
+        shown_count=shown_count,
+        total=results_total,
+        more=shown_count < results_total,
+        more_link=(furl.furl(request.get_full_path())
+                   .remove(query=['from_item'])
+                   .add(query_params={'from_item': last_item})),
+    )
     c['default_bible_version'] = default_bible_version
 
     c.update(context_for_quick_find(request))
@@ -1417,7 +1413,6 @@ def groups(request):
         groups = groups.none()
     return render(request, 'learnscripture/groups.html', {'title': 'Groups',
                                                           'groups': groups,
-                                                          'noindex': True,
                                                           })
 
 
@@ -1459,7 +1454,6 @@ def group(request, slug):
                    'can_edit': group.can_edit(account),
                    'include_referral_links': True,
                    'comments': group.comments_visible_for_account(account).order_by('-created')[:GROUP_COMMENTS_SHORT_CUTOFF],
-                   'noindex': True,
                    })
 
 
@@ -1491,18 +1485,30 @@ def group_wall(request, slug):
                    })
 
 
-def group_leaderboard(request, slug):
-    page_num = None  # 1-indexed page page
+def get_request_from_item(request):
     try:
-        page_num = int(request.GET['p'])
-    except (KeyError, ValueError):
-        page_num = 1
+        return int(request.GET.get('from_item', '0'))
+    except ValueError:
+        return 0
 
-    thisweek = 'thisweek' in request.GET
 
-    page_num = max(1, page_num)
-
+@djpjax.pjax(additional_templates={
+    "#id-leaderboard-results-table-body": "learnscripture/leaderboard_results_table_body_inc.html",
+    ".more-results-container": "learnscripture/leaderboard_results_table_body_inc.html",
+})
+def group_leaderboard(request, slug):
     PAGE_SIZE = 30
+    from_item = get_request_from_item(request)
+
+    initial_leaderboard_filter_data = {'when': LEADERBOARD_WHEN_ALL_TIME}
+    if any(k in request.GET for k in initial_leaderboard_filter_data):
+        leaderboard_filter_form = LeaderboardFilterForm(request.GET)
+    else:
+        leaderboard_filter_form = LeaderboardFilterForm(initial_leaderboard_filter_data)
+
+    assert leaderboard_filter_form.is_valid(), leaderboard_filter_form.errors
+
+    thisweek = leaderboard_filter_form.cleaned_data['when'] == LEADERBOARD_WHEN_THIS_WEEK
 
     if thisweek:
         cutoff = timezone.now() - timedelta(7)
@@ -1514,9 +1520,9 @@ def group_leaderboard(request, slug):
     hellbanned_mode = get_hellbanned_mode(request)
     if thisweek:
         accounts = get_leaderboard_since(cutoff, hellbanned_mode,
-                                         page_num - 1, PAGE_SIZE, group=group)
+                                         from_item, PAGE_SIZE, group=group)
     else:
-        accounts = get_all_time_leaderboard(hellbanned_mode, page_num - 1,
+        accounts = get_all_time_leaderboard(hellbanned_mode, from_item,
                                             PAGE_SIZE, group=group)
 
     # Now decorate these accounts with additional info from additional queries
@@ -1534,17 +1540,27 @@ def group_leaderboard(request, slug):
         account_dict['num_verses'] = verse_counts[identity.id]
         account_dict['username'] = identity.account.username
 
-    c = {}
-    c['include_referral_links'] = True
-    c['accounts'] = accounts
-    c['thisweek'] = thisweek
-    c['page_num'] = page_num
-    c['previous_page_num'] = page_num - 1
-    c['next_page_num'] = page_num + 1
-    c['PAGE_SIZE'] = PAGE_SIZE
-    c['group'] = group
-    c['title'] = "Leaderboard: {0}".format(group.name)
-    return render(request, 'learnscripture/leaderboard.html', c)
+    last_item = from_item + PAGE_SIZE
+    shown_count = min(last_item, from_item + len(accounts))
+
+    c = {
+        'include_referral_links': True,
+        'thisweek': thisweek,
+        'results': dict(
+            accounts=accounts,
+            shown_count=shown_count,
+            empty=len(accounts) == 0 and from_item == 0,
+            more=len(accounts) == PAGE_SIZE,  # There *might* be more in this case, otherwise definitely not
+            more_link=(furl.furl(request.get_full_path())
+                       .remove(query=['from_item'])
+                       .add(query_params={'from_item': last_item})
+                       ),
+        ),
+        'group': group,
+        'title': "Leaderboard: {0}".format(group.name),
+        'leaderboard_filter_form': leaderboard_filter_form,
+    }
+    return TemplateResponse(request, 'learnscripture/leaderboard.html', c)
 
 
 def create_group(request):

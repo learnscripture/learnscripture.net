@@ -148,3 +148,17 @@ class VerseSetSearchForm(forms.Form):
                               required=False,
                               widget=widgets.RadioSelect
                               )
+
+
+LEADERBOARD_WHEN_ALL_TIME = 'alltime'
+LEADERBOARD_WHEN_THIS_WEEK = 'thisweek'
+
+
+class LeaderboardFilterForm(forms.Form):
+    when = forms.ChoiceField(choices=[(LEADERBOARD_WHEN_ALL_TIME, "All time"),
+                                      (LEADERBOARD_WHEN_THIS_WEEK, "This week"),
+                                      ],
+                             initial=LEADERBOARD_WHEN_ALL_TIME,
+                             label="When",
+                             required=False,
+                             widget=widgets.RadioSelect)
