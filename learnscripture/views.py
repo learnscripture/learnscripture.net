@@ -523,20 +523,11 @@ def choose(request):
     # so is missing here.
 
     active_section = None
-    # Using initial_verseset_search_form data we can ensure that we always have
-    # a valid bound form to use for filtering below.
-    initial_verseset_search_form = {'query': '',
-                                    'order': VERSE_SET_ORDER_POPULARITY,
-                                    'set_type': VERSE_SET_TYPE_ALL,
-                                    }
-    if any(k in request.GET for k in initial_verseset_search_form.keys()):
+    verseset_search_form = VerseSetSearchForm(request.GET)
+    if any(k in request.GET for k in VerseSetSearchForm.base_fields.keys()):
         active_section = "verseset"
-        verseset_search_form = VerseSetSearchForm(request.GET)
-    else:
-        verseset_search_form = VerseSetSearchForm(initial_verseset_search_form)
     if 'from_item' in request.GET:
         active_section = "verseset"
-    assert verseset_search_form.is_valid(), verseset_search_form.errors
 
     c = {
         'title': 'Choose verses',
@@ -1499,15 +1490,7 @@ def get_request_from_item(request):
 def group_leaderboard(request, slug):
     PAGE_SIZE = 30
     from_item = get_request_from_item(request)
-
-    initial_leaderboard_filter_data = {'when': LEADERBOARD_WHEN_ALL_TIME}
-    if any(k in request.GET for k in initial_leaderboard_filter_data):
-        leaderboard_filter_form = LeaderboardFilterForm(request.GET)
-    else:
-        leaderboard_filter_form = LeaderboardFilterForm(initial_leaderboard_filter_data)
-
-    assert leaderboard_filter_form.is_valid(), leaderboard_filter_form.errors
-
+    leaderboard_filter_form = LeaderboardFilterForm(request.GET)
     thisweek = leaderboard_filter_form.cleaned_data['when'] == LEADERBOARD_WHEN_THIS_WEEK
 
     if thisweek:

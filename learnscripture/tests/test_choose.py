@@ -3,8 +3,9 @@ from accounts.models import Identity
 from awards.models import AwardType, TrendSetterAward
 from bibleverses.models import VerseSet
 from events.models import Event, EventType
+from learnscripture.forms import VERSE_SET_ORDER_AGE, VERSE_SET_ORDER_POPULARITY, VERSE_SET_TYPE_ALL, VerseSetSearchForm
 
-from .base import FullBrowserTest
+from .base import FullBrowserTest, TestBase
 from .test_bibleverses import RequireExampleVerseSetsMixin
 from .test_search import SearchTestsMixin
 
@@ -213,3 +214,25 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
 
         self.assertTextPresent("Öyleyse neyle övünebiliriz?")
         self.assertTextPresent("Romalılar 3:27")
+
+
+class VerseSetSearchFormTests(TestBase):
+    def test_empty(self):
+        f = VerseSetSearchForm({})
+        self.assertEqual(f.cleaned_data['query'], '')
+        self.assertEqual(f.cleaned_data['set_type'], VERSE_SET_TYPE_ALL)
+        self.assertEqual(f.cleaned_data['order'], VERSE_SET_ORDER_POPULARITY)
+
+    def test_partial(self):
+        f = VerseSetSearchForm({'order': VERSE_SET_ORDER_AGE})
+        self.assertEqual(f.cleaned_data['query'], '')
+        self.assertEqual(f.cleaned_data['set_type'], VERSE_SET_TYPE_ALL)
+        self.assertEqual(f.cleaned_data['order'], VERSE_SET_ORDER_AGE)
+
+    def test_invalid(self):
+        # Invalid data should be ignored
+        f = VerseSetSearchForm({'order': 'rubbish',
+                                'query': 'foo'})
+        self.assertEqual(f.cleaned_data['query'], 'foo')
+        self.assertEqual(f.cleaned_data['set_type'], VERSE_SET_TYPE_ALL)
+        self.assertEqual(f.cleaned_data['order'], VERSE_SET_ORDER_POPULARITY)
