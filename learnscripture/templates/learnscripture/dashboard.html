@@ -126,10 +126,10 @@
           <input type="hidden" name="verse_set_id" value="{{ cvs.verse_set.id }}" />
           <input type="hidden" name="version_id" value="{{ cvs.version.id }}" />
           {% if cvs.splittable %}
-            <input type="submit" name="reviewpassage" class="btn primary" value="Review whole passage"
+            <input type="submit" name="reviewpassage" class="btn primary" value="Whole passage"
                    id="id-reviewpassage-btn-{{ cvs.id }}" /><br/>
             <input type="submit" name="reviewpassagenextsection" class="btn primary"
-                   value="Review one section ({{ cvs.next_section_verse_count }} vss)"
+                   value="One section ({{ cvs.next_section_verse_count }} vss)"
                    id="id-reviewpassage-sections-btn-{{ cvs.id }}" /><br/>
           {% else %}
             <input type="submit" name="reviewpassage" class="btn primary" value="Review"
