@@ -27,12 +27,13 @@ textarea {
 
 @errorColor: #a00;  // TODO this should be part of theme some day
 
+@inputWidth: 14em;
 form {
     input,
     textarea,
     select {
         display: inline-block;
-        width: 14em;
+        width: @inputWidth;
     }
 
     input[type=submit],
@@ -116,6 +117,16 @@ form {
             padding: 0;
             //width: 100%;
             list-style: none;
+        }
+    }
+
+    .input-line {
+        display: flex;
+        > input[type=text] {
+            margin-right: 0.4em;
+            width: auto;
+            max-width: @inputWidth;
+            flex: 1;
         }
     }
 
