@@ -18,4 +18,4 @@ LS_MANAGE=%(SRC_ROOT)s/manage.py
 30         2    * * *  root          supervisorctl restart learnscripture_celeryd
 
 # Clear out old uWSGI logs which don't rotate proplerly:
-42         4    * * *  root          find /home/%(proj_user)s/logs/ -name '*_uwsgi.log.*' -mtime +1 -exec rm {} \;
+42         4    * * *  root          find /home/%(proj_user)s/logs/ -name '*_uwsgi.log.*' -mtime +7 -exec rm {} \;
