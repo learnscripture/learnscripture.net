@@ -11,7 +11,9 @@ command=%(VENV_ROOT)s/bin/uwsgi
     --harakiri 30 --http-timeout 180 --reload-on-rss 300
     -C
     -M
-    --logto /home/%(proj_user)s/logs/%(proj_name)s_uwsgi.log --log-reopen
+    --logto /home/%(proj_user)s/logs/%(proj_name)s_uwsgi.log
+    --log-reopen
+    --log-maxsize 100000
     --buffer-size 16384
     --ignore-sigpipe --ignore-write-errors --disable-write-exception
     --pidfile=/tmp/%(proj_name)s_uwsgi.pid
