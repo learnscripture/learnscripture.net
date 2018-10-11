@@ -21,7 +21,6 @@ server {
     server_name %(domains_nginx)s;
     client_max_body_size 10M;
     keepalive_timeout    15;
-    error_log /home/%(proj_user)s/logs/%(proj_name)s_error_nginx.log info;
 
     ssl_certificate      /etc/letsencrypt/live/learnscripture.net/fullchain.pem;
     ssl_certificate_key  /etc/letsencrypt/live/learnscripture.net/privkey.pem;
