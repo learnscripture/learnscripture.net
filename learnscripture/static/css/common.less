@@ -133,8 +133,11 @@ q {
 
 // Focus
 
-:focus, .fakefocus, {
+.focus() {
     outline: 3px solid var(--focusOutlineColor);
+}
+:focus, .fakefocus, {
+    .focus();
 }
 
 input:focus {
