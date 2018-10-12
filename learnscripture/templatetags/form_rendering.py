@@ -17,3 +17,8 @@ def render_field(element):
 @register.filter
 def is_checkbox(field):
     return field.field.widget.__class__.__name__.lower() == "checkboxinput"
+
+
+@register.filter
+def is_radiobutton(field):
+    return field.field.widget.__class__.__name__.lower() == "radioselect"
