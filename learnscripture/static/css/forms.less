@@ -171,6 +171,12 @@ form[data-pjax-results-container] {
             box-shadow: inset 0 -2px 2px rgba(255,255,255,0.3), inset 0 2px 4px rgba(0,0,0,0.5);
             border-color: var(--topColor1);
         }
+        input:focus {
+            outline: none;
+        }
+        input:focus + label {
+            .focus();
+        }
     }
 }
 
