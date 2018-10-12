@@ -2,6 +2,8 @@
 
 {% load form_rendering %}
 
+{% block body_extra_class %}leaderboard-page{% endblock %}
+
 {% block content %}
   <p><a href="{% url 'group' group.slug %}">See group information</a></p>
 

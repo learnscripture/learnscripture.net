@@ -1,47 +1,47 @@
 {% load form_rendering %}
 
-<div class="form-row{% if field.errors %} error{% endif %}">
-  {% if field|is_checkbox %}
-    <div class="label-spacer">
-    </div>
-    <ul class="inputs-list">
-      <li>
-        <div class="input">
-          <label>
-            {{ field }} <span>{{ field.label }}</span>
-          </label>
+{% with field_id=field.auto_id %}
+  <div class="form-row{% if field.errors %} error{% endif %}">
+    {% if field|is_checkbox %}
+      <div class="label-spacer">
+      </div>
+      <ul class="inputs-list">
+        <li>
+          <div class="input">
+            <label>
+              {{ field }} <span>{{ field.label }}</span>
+            </label>
 
-          {% include "learnscripture/form_rendering/post_field.html" %}
-        </div>
-      </li>
-    </ul>
-  {% elif field|is_radiobutton %}
-    {{ field.label_tag }}
-    <div class="input radioinput">
-      {% with id=widget.attrs.id %}
-        <ul{% if id %} id="{{ id }}"{% endif %}{% if widget.attrs.class %} class="{{ widget.attrs.class }}"{% endif %}>
+            {% include "learnscripture/form_rendering/post_field.html" %}
+          </div>
+        </li>
+      </ul>
+    {% elif field|is_radiobutton %}
+      {{ field.label_tag }}
+      <div class="input radioinput">
+        <ul{% if field_id %} id="{{ field_id }}"{% endif %}>
           {% for radio_widget in field %}
             <li>
               {{ radio_widget.tag }}<label for="{{ radio_widget.id_for_label }}">
-                {{ radio_widget.choice_label }}
+              {{ radio_widget.choice_label }}
               </label>
             </li>
           {% endfor %}
         </ul>
-      {% endwith %}
 
-      {% include "learnscripture/form_rendering/post_field.html" %}
-    </div>
+        {% include "learnscripture/form_rendering/post_field.html" %}
+      </div>
 
-  {% else %}
-    {{ field.label_tag }}
-    <div class="input">
-      {{ field }}
+    {% else %}
+      {{ field.label_tag }}
+      <div class="input">
+        {{ field }}
 
-      {% include "learnscripture/form_rendering/post_field.html" %}
+        {% include "learnscripture/form_rendering/post_field.html" %}
 
-    </div>
-  {% endif %}
-</div>
+      </div>
+    {% endif %}
+  </div>
+{% endwith %}
 
 
