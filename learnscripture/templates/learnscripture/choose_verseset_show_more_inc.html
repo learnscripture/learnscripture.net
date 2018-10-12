@@ -1,11 +1,13 @@
 <div class="more-results-container">
-  <div class="show-more">
+  <div class="paging">
     {# For PJAX 'show more', this div gets replaced with the next #}
     {# page of results, plus a new 'show more' link #}
-    Showing {{ results.shown_count }} of {{ results.total }} verse sets
+    <span class="paging-part">
+      Showing {{ results.shown_count }} of {{ results.total }} verse sets
+    </span>
     {% if results.more %}
-      — <a data-pjax href="{{ results.more_link }}">Show more</a>
+      <span class="paging-part"><a data-pjax href="{{ results.more_link }}">Show more</a></span>
     {% endif %}
-    — <a href="#id-choose-verseset">Jump to top</a>
+    <span class="paging-part"><a href="#id-choose-verseset">Jump to top</a></span>
   </div>
 </div>

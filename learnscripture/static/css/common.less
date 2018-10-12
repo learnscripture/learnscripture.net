@@ -94,13 +94,14 @@ q {
     .clearfix();
 }
 
+@actionsetBorderRadius: 7px;
 
 .verseset,
 .actionset {
     padding: 15px;
-    border-radius: 7px;
+    border-radius: @actionsetBorderRadius;
     border: 1px solid;
-    margin-bottom: 15px;
+    margin-bottom: var(--mainSidePadding);
 
     form {
         float: right;
@@ -167,6 +168,29 @@ span.versenumber {
 .note {
     font-size: 0.8em;
     font-style: italic;
+}
+
+// Paging
+
+.paging {
+    display: flex;
+    justify-content: center;
+
+    .paging-part {
+
+        border: 1px solid var(--bgBorderColor);
+        padding: 0.5em 1em;
+        margin-left: -1px;
+
+        &:first-child {
+            border-top-left-radius: @actionsetBorderRadius;
+            border-bottom-left-radius: @actionsetBorderRadius;
+        }
+        &:last-child {
+            border-top-right-radius: @actionsetBorderRadius;
+            border-bottom-right-radius: @actionsetBorderRadius;
+        }
+    }
 }
 
 // Referral program page and links
