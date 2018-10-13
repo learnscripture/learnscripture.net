@@ -25,19 +25,17 @@
       </span>
       {% if event.is_new_comment %}
         <div class="commentblock">
-          <div class="commentlist">
-            {% with comment=event.get_comment %}
-              {% include "learnscripture/comment_inc.html" %}
-            {% endwith %}
-          </div>
+          {% with comment=event.get_comment %}
+            {% include "learnscripture/comment_inc.html" %}
+          {% endwith %}
         </div>
       {% endif %}
-      <div class="commentblock{% if not comments %} hide{% endif %}">
-        <div class="commentlist">
-          {% for comment in comments %}
-            {% include "learnscripture/comment_inc.html" %}
-          {% endfor %}
-        </div>
+      <div class="commentblock{% if not comments %} hide{% endif %}"
+           data-new-comments-position="bottom"
+           >
+        {% for comment in comments %}
+          {% include "learnscripture/comment_inc.html" %}
+        {% endfor %}
         {% if request_account.enable_commenting or not request_account %}
           <div class="commentboxlocator">
             <a href="#" class="show-add-comment">Add comment</a>

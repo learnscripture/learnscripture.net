@@ -15,15 +15,15 @@
   <p>Most recent comments first - <a href="{% url 'group_wall' group.slug %}">see all</a>.</p>
 
   <div class="groupcomments" data-group-id="{{ group.id }}">
-    <div class="commentblock">
+    <div class="commentblock"
+         data-new-comments-position="top"
+         >
       {% include "learnscripture/group_wall_add_comment_inc.html" %}
-      <div class="commentlist">
-        {% for comment in comments %}
-          {% with show_as_related_comment=comment.event %}
-            {% include "learnscripture/comment_inc.html" %}
-          {% endwith %}
-        {% endfor %}
-      </div>
+      {% for comment in comments %}
+        {% with show_as_related_comment=comment.event %}
+          {% include "learnscripture/comment_inc.html" %}
+        {% endwith %}
+      {% endfor %}
     </div>
   </div>
 

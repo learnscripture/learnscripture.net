@@ -138,7 +138,6 @@ form {
 .inline-radio-buttons() {
     li {
         display: inline;
-        margin-right: 10px;
     }
 }
 
@@ -150,8 +149,11 @@ form[data-pjax-results-container] {
         input {
             // Stack in front of the label
             position: relative;
-            // Move in front of the label:
+            // Move in front of the label (or rather, move the label
+            // in behind this)
             margin-right: -24px;
+            // Allow room for padding on label.
+            margin-left: 10px;
         }
 
         label {

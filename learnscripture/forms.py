@@ -197,3 +197,16 @@ class LeaderboardFilterForm(FilterFormMixin, forms.Form):
                              label="When",
                              required=False,
                              widget=widgets.RadioSelect)
+
+
+GROUP_WALL_SORT_BY_NEWEST_FIRST = 'newestfirst'
+GROUP_WALL_SORT_BY_OLDEST_FIRST = 'oldestfirst'
+
+
+class GroupWallFilterForm(FilterFormMixin, forms.Form):
+    sort_by = forms.ChoiceField(choices=[(GROUP_WALL_SORT_BY_NEWEST_FIRST, "Most recent first"),
+                                         (GROUP_WALL_SORT_BY_OLDEST_FIRST, "Oldest first")],
+                                initial=GROUP_WALL_SORT_BY_NEWEST_FIRST,
+                                label="Sort by",
+                                required=False,
+                                widget=widgets.RadioSelect)
