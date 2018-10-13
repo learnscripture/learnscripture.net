@@ -38,7 +38,7 @@ from groups.forms import EditGroupForm
 from groups.models import Group
 from groups.signals import public_group_created
 from learnscripture import session
-from learnscripture.forms import (GROUP_WALL_SORT_BY_OLDEST_FIRST, LEADERBOARD_WHEN_THIS_WEEK, VERSE_SET_ORDER_AGE,
+from learnscripture.forms import (GROUP_WALL_ORDER_OLDEST_FIRST, LEADERBOARD_WHEN_THIS_WEEK, VERSE_SET_ORDER_AGE,
                                   VERSE_SET_ORDER_POPULARITY, VERSE_SET_TYPE_ALL, AccountPasswordChangeForm,
                                   AccountPasswordResetForm, AccountSetPasswordForm, ContactForm, GroupWallFilterForm,
                                   LeaderboardFilterForm, LogInForm, SignUpForm, VerseSetSearchForm)
@@ -1451,8 +1451,8 @@ def group_wall(request, slug):
 
     comments = group.comments_visible_for_account(account)
     filter_form = GroupWallFilterForm.from_request_data(request.GET)
-    sort_order = filter_form.cleaned_data['sort_by']
-    if sort_order == GROUP_WALL_SORT_BY_OLDEST_FIRST:
+    sort_order = filter_form.cleaned_data['order']
+    if sort_order == GROUP_WALL_ORDER_OLDEST_FIRST:
         comments = comments.order_by('created')
     else:
         comments = comments.order_by('-created')
