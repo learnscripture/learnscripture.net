@@ -523,7 +523,7 @@ def choose(request):
     # so is missing here.
 
     active_section = None
-    verseset_search_form = VerseSetSearchForm(request.GET)
+    verseset_search_form = VerseSetSearchForm.from_request_data(request.GET)
     if any(k in request.GET for k in VerseSetSearchForm.base_fields.keys()):
         active_section = "verseset"
     if 'from_item' in request.GET:
@@ -1450,7 +1450,7 @@ def group_wall(request, slug):
         selected_comment_id = None
 
     comments = group.comments_visible_for_account(account)
-    filter_form = GroupWallFilterForm(request.GET)
+    filter_form = GroupWallFilterForm.from_request_data(request.GET)
     sort_order = filter_form.cleaned_data['sort_by']
     if sort_order == GROUP_WALL_SORT_BY_OLDEST_FIRST:
         comments = comments.order_by('created')
@@ -1484,7 +1484,7 @@ def get_request_from_item(request):
 def group_leaderboard(request, slug):
     PAGE_SIZE = 30
     from_item = get_request_from_item(request)
-    leaderboard_filter_form = LeaderboardFilterForm(request.GET)
+    leaderboard_filter_form = LeaderboardFilterForm.from_request_data(request.GET)
     thisweek = leaderboard_filter_form.cleaned_data['when'] == LEADERBOARD_WHEN_THIS_WEEK
 
     if thisweek:
