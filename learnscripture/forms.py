@@ -4,7 +4,7 @@ from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm, Set
 from django.forms import widgets
 
 from accounts.models import Account
-from bibleverses.models import VerseSetType
+from bibleverses.models import TextType, VerseSetType
 
 
 class FilterFormMixin(object):
@@ -206,6 +206,26 @@ class GroupWallFilterForm(FilterFormMixin, forms.Form):
     order = forms.ChoiceField(choices=[(GROUP_WALL_ORDER_NEWEST_FIRST, "Most recent first"),
                                        (GROUP_WALL_ORDER_OLDEST_FIRST, "Oldest first")],
                               initial=GROUP_WALL_ORDER_NEWEST_FIRST,
+                              label="Order",
+                              required=False,
+                              widget=widgets.RadioSelect)
+
+
+USER_VERSES_ORDER_WEAKEST = "weakestfirst"
+USER_VERSES_ORDER_STRONGEST = "strongestfirst"
+USER_VERSES_ORDER_TEXT_ORDER = "textorder"
+
+
+class UserVersesFilterForm(FilterFormMixin, forms.Form):
+    text_type = forms.ChoiceField(choices=TextType.choice_list,
+                                  initial=TextType.BIBLE,
+                                  label="Type",
+                                  required=False,
+                                  widget=widgets.RadioSelect)
+    order = forms.ChoiceField(choices=[(USER_VERSES_ORDER_WEAKEST, "Weakest first"),
+                                       (USER_VERSES_ORDER_STRONGEST, "Strongest first"),
+                                       (USER_VERSES_ORDER_TEXT_ORDER, "Text order")],
+                              initial=USER_VERSES_ORDER_WEAKEST,
                               label="Order",
                               required=False,
                               widget=widgets.RadioSelect)
