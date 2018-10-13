@@ -1,6 +1,6 @@
 {% load humanize %}
 
-{% for account in results.accounts %}
+{% for account in results.items %}
   <tr>
     <td><a href="{% url 'user_stats' account.username %}">{{ account.username }}</a></td>
     <td>{{ account.points|intcomma }}</td>

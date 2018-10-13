@@ -2,7 +2,7 @@
 {% load markup_tags %}
 
 
-{% for vs in results.verse_sets %}
+{% for vs in results.items %}
   <div class="verseset">
     <form action="" method="POST">
       {% csrf_token %}
