@@ -764,6 +764,23 @@ class UserVerseStatusQuerySet(models.QuerySet):
     def needs_reviewing_in_future(self, now):
         return self.reviewable().filter(next_test_due__gt=now)
 
+    def search_by_parsed_ref(self, parsed_ref):
+        # We could use the parsed_ref to find bible_verse_number ranges. But
+        # that would require knowing the Bible version, and we could be
+        # referring to any Bible version. So we use this method based on string
+        # matching.
+        query_ref = parsed_ref.canonical_form()
+        # Some slightly hacky stuff here, could break with
+        # other reference styles.
+        if parsed_ref.start_chapter is None:
+            return self.filter(localized_reference__startswith=query_ref + " ")
+        elif parsed_ref.start_verse is None:
+            # Hack - by adding ':' we can stop
+            #  "Genesis 1" matching "Genesis 10" etc.
+            return self.filter(localized_reference__startswith=query_ref + ":")
+        else:
+            return self.filter(localized_reference=query_ref)
+
 
 class UserVerseStatus(models.Model):
     """

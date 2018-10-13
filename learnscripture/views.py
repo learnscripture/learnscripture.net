@@ -31,7 +31,7 @@ from bibleverses.forms import VerseSetForm
 from bibleverses.languages import LANGUAGE_CODE_INTERNAL, LANGUAGES
 from bibleverses.models import (MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, TextType, TextVersion, VerseSet,
                                 VerseSetType, get_passage_sections, is_continuous_set)
-from bibleverses.parsing import internalize_localized_reference, localize_internal_reference, parse_break_list
+from bibleverses.parsing import internalize_localized_reference, localize_internal_reference, parse_break_list, parse_unvalidated_localized_reference
 from bibleverses.signals import public_verse_set_created
 from events.models import Event
 from groups.forms import EditGroupForm
@@ -1027,6 +1027,29 @@ def user_verses(request):
     text_type = filter_form.cleaned_data['text_type']
     verses = verses.filter(version__text_type=text_type)
     sort_order = filter_form.cleaned_data['order']
+    query = filter_form.cleaned_data['query'].strip()
+
+    if query != "":
+        if text_type == TextType.BIBLE:
+            invalid = False
+            try:
+                # TODO - this doesn't work nicely if you are learning more than
+                # one language - you can only search in the language this is
+                # your default language.
+                parsed_ref = parse_unvalidated_localized_reference(
+                    request.identity.default_language_code,
+                    query)
+            except InvalidVerseReference:
+                invalid = True
+
+            if invalid or parsed_ref is None:
+                # To make it clear we didn't match anything
+                verses = verses.none()
+            else:
+                verses = verses.search_by_parsed_ref(parsed_ref)
+        else:
+            verses = verses.filter(localized_reference__iexact=query)
+
     PAGE_SIZE = 20
 
     if sort_order == USER_VERSES_ORDER_WEAKEST:

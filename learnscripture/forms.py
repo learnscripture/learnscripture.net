@@ -217,6 +217,8 @@ USER_VERSES_ORDER_TEXT_ORDER = "textorder"
 
 
 class UserVersesFilterForm(FilterFormMixin, forms.Form):
+    query = forms.CharField(label="Search", required=False,
+                            widget=forms.TextInput(attrs={'placeholder': "Bible ref e.g. Gen 1:1"}))
     text_type = forms.ChoiceField(choices=TextType.choice_list,
                                   initial=TextType.BIBLE,
                                   label="Type",
