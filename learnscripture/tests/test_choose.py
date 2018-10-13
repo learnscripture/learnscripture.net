@@ -218,21 +218,23 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
 
 class VerseSetSearchFormTests(TestBase):
     def test_empty(self):
-        f = VerseSetSearchForm({})
+        f = VerseSetSearchForm.from_request_data({})
         self.assertEqual(f.cleaned_data['query'], '')
         self.assertEqual(f.cleaned_data['set_type'], VERSE_SET_TYPE_ALL)
         self.assertEqual(f.cleaned_data['order'], VERSE_SET_ORDER_POPULARITY)
 
     def test_partial(self):
-        f = VerseSetSearchForm({'order': VERSE_SET_ORDER_AGE})
+        f = VerseSetSearchForm.from_request_data({'order': VERSE_SET_ORDER_AGE})
         self.assertEqual(f.cleaned_data['query'], '')
         self.assertEqual(f.cleaned_data['set_type'], VERSE_SET_TYPE_ALL)
         self.assertEqual(f.cleaned_data['order'], VERSE_SET_ORDER_AGE)
 
     def test_invalid(self):
         # Invalid data should be ignored
-        f = VerseSetSearchForm({'order': 'rubbish',
-                                'query': 'foo'})
+        f = VerseSetSearchForm.from_request_data({
+            'order': 'rubbish',
+            'query': 'foo'
+        })
         self.assertEqual(f.cleaned_data['query'], 'foo')
         self.assertEqual(f.cleaned_data['set_type'], VERSE_SET_TYPE_ALL)
         self.assertEqual(f.cleaned_data['order'], VERSE_SET_ORDER_POPULARITY)

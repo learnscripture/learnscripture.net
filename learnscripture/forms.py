@@ -14,32 +14,31 @@ class FilterFormMixin(object):
     These forms should always be valid, including in initial state, and any
     state that can be set using the UI - they never show error messages.
     """
-    def __init__(self, request_data, checker=False):
-        if checker:
-            super().__init__(request_data)
-        else:
-            data = {}
-            initial_data = {}
-            for name, f in self.__class__.base_fields.items():
-                initial_data[name] = f.initial
-                if name in request_data:
-                    data[name] = request_data[name]
-                else:
-                    data[name] = initial_data[name]
+    @classmethod
+    def from_request_data(cls, request_data):
+        data = {}
+        initial_data = {}
+        for name, f in cls.base_fields.items():
+            initial_data[name] = f.initial
+            if name in request_data:
+                data[name] = request_data[name]
+            else:
+                data[name] = initial_data[name]
 
-            # First check on a different instance.
-            checker_instance = self.__class__(data, checker=True)
-            # Removed anything that doesn't validate
-            if not checker_instance.is_valid():
-                for k in checker_instance.errors.as_data().keys():
-                    data[name] = initial_data[name]
+        # First check on a different instance.
+        checker_instance = cls(data=data)
+        # Removed anything that doesn't validate
+        if not checker_instance.is_valid():
+            for k in checker_instance.errors.as_data().keys():
+                data[name] = initial_data[name]
 
-            super().__init__(data)
-            # Immediately run is_valid, so that we can use cleaned_data
-            if not self.is_valid():
-                raise AssertionError("{0} should always be valid: {1}"
-                                     .format(self.__class__,
-                                             self.errors.as_data()))
+        instance = cls(data=data)
+        # Immediately run is_valid, so that we can use cleaned_data
+        if not instance.is_valid():
+            raise AssertionError("{0} should always be valid: {1}"
+                                 .format(cls,
+                                         instance.errors.as_data()))
+        return instance
 
 
 class SignUpForm(forms.ModelForm):
