@@ -17,16 +17,14 @@
   <div class="comment-box-wrapper">
     {% if request_account %}
       {% if request_account.enable_commenting %}
-        <div>
+        <div class="comment-form-row">
+          <textarea class="comment-box" rows="1"></textarea>
           <div>
-            <a href="#" class="btn primary add-comment-btn">
-              Post
-              <i class="icon-public icon-replace" title="Public action"></i>
-            </a>
-            <a href="#" class="btn cancel-comment-btn">Cancel</a>
-          </div>
-          <div>
-            <textarea class="comment-box" rows="1"></textarea>
+            <button type="button" class="btn primary add-comment-btn">
+              Post<i class="icon-public icon-replace" title="Public action"></i>
+            </button><button type="button" class="btn cancel-comment-btn">
+              Cancel
+            </button>
           </div>
         </div>
         <div class="warning-note">

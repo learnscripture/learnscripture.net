@@ -50,15 +50,18 @@
     -webkit-box-sizing: border-box; /* For Safari                           */
 }
 
-.comment-box-wrapper > div {
-
-    > div:last-child {
-        overflow: hidden;
-        padding: 0 5px 0 0;
-    }
-
-    > div:first-child {
-        float: right;
+.comment-box-wrapper  {
+    .comment-form-row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        textarea {
+            flex: 1;
+            min-width: 15em;
+        }
+        .btn {
+            margin-left: 5px;
+        }
     }
 }
 
