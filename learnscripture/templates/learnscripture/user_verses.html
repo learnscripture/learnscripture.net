@@ -11,7 +11,15 @@
         data-pjax-results-container="#id-user-verses-results"
         data-pjax-more-results-container=".more-results-container"
         >
-    {{ filter_form|render_form }}
+    <div class="form-row">
+      <label for="id_query">Search:</label>
+      <div class="input input-line">
+        {{ filter_form.query }}
+        <input type="submit" class="btn primary" value="Search" id="id-search-btn" />
+      </div>
+    </div>
+    {{ filter_form.text_type|render_field }}
+    {{ filter_form.order|render_field }}
   </form>
 
   <div id="id-user-verses-results">
