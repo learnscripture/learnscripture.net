@@ -555,22 +555,8 @@ def choose(request):
 
     if active_section:
         c['active_section'] = active_section
-    results_total = verse_sets.count()
 
-    from_item = get_request_from_item(request)
-    last_item = from_item + PAGE_SIZE
-    results_verse_sets = verse_sets[from_item:last_item]
-
-    shown_count = min(last_item, from_item + len(results_verse_sets))
-    c['results'] = dict(
-        verse_sets=results_verse_sets,
-        shown_count=shown_count,
-        total=results_total,
-        more=shown_count < results_total,
-        more_link=(furl.furl(request.get_full_path())
-                   .remove(query=['from_item'])
-                   .add(query_params={'from_item': last_item})),
-    )
+    c['results'] = get_paged_results(verse_sets, request, PAGE_SIZE)
     c['default_bible_version'] = default_bible_version
 
     c.update(context_for_quick_find(request))
@@ -1537,8 +1523,11 @@ def group_leaderboard(request, slug):
     c = {
         'include_referral_links': True,
         'thisweek': thisweek,
+        # We can't use get_paged_results for 'results' because it doesn't use a
+        # normal queryset. Could possibly fix this by rewriting leaderboard
+        # queries with Window functions introduced in Django 2.0?
         'results': dict(
-            accounts=accounts,
+            items=accounts,
             shown_count=shown_count,
             empty=len(accounts) == 0 and from_item == 0,
             more=len(accounts) == PAGE_SIZE,  # There *might* be more in this case, otherwise definitely not
