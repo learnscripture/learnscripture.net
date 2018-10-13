@@ -1,0 +1,24 @@
+{% for verse in results.items %}
+  {% ifchanged verse.localized_reference verse.version.slug %}
+    <tr {% if verse.verse_set_id %}
+                  data-verse-set-id="{{ verse.verse_set_id }}"
+    {% endif %}
+                  data-version-id="{{ verse.version_id }}"
+                  >
+      <td>{{ verse.title }}
+        <a class="btn verse-popup-btn" href="#" data-localized-reference="{{ verse.localized_reference }}" data-version="{{ verse.version.slug }}" data-title="{{ verse.title }}">Options</a></td>
+      <td>{{ verse.version.slug }}</td>
+      <td><img class="stars" src="{{ STATIC_URL }}img/strength_{{ verse.simple_strength }}.png"></td>
+    </tr>
+  {% endifchanged %}
+{% endfor %}
+{% if results.more %}
+  <tr class="more-results-container">
+    <td colspan="3">
+      <div class="paging">
+        <span class="paging-part">Showing {{ results.shown_count }} of {{ results.total }}</span>
+        <span class="paging-part"><a href="{{ results.more_link }}" data-pjax>Show more</a></span>
+      </div>
+    </td>
+  </tr>
+{% endif %}

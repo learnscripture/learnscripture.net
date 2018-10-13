@@ -38,10 +38,12 @@ from groups.forms import EditGroupForm
 from groups.models import Group
 from groups.signals import public_group_created
 from learnscripture import session
-from learnscripture.forms import (GROUP_WALL_ORDER_OLDEST_FIRST, LEADERBOARD_WHEN_THIS_WEEK, VERSE_SET_ORDER_AGE,
+from learnscripture.forms import (GROUP_WALL_ORDER_OLDEST_FIRST, LEADERBOARD_WHEN_THIS_WEEK,
+                                  USER_VERSES_ORDER_STRONGEST, USER_VERSES_ORDER_WEAKEST, VERSE_SET_ORDER_AGE,
                                   VERSE_SET_ORDER_POPULARITY, VERSE_SET_TYPE_ALL, AccountPasswordChangeForm,
                                   AccountPasswordResetForm, AccountSetPasswordForm, ContactForm, GroupWallFilterForm,
-                                  LeaderboardFilterForm, LogInForm, SignUpForm, VerseSetSearchForm)
+                                  LeaderboardFilterForm, LogInForm, SignUpForm, UserVersesFilterForm,
+                                  VerseSetSearchForm)
 from payments.sign import sign_payment_info
 from scores.models import (get_all_time_leaderboard, get_leaderboard_since, get_verses_started_counts,
                            get_verses_started_per_day, get_verses_tested_per_day)
@@ -1010,34 +1012,44 @@ def user_stats_verses_timeline_stats_csv(request, username):
 
 
 @require_identity
+@djpjax.pjax(additional_templates={
+    "#id-user-verses-results": "learnscripture/user_verses_inc.html",
+    ".more-results-container": "learnscripture/user_verses_table_body_inc.html",
+})
 def user_verses(request):
     identity = request.identity
-    c = {'title': 'Progress'}
 
     # verse_statuses_started contains dupes, we do deduplication in the
     # template.
     verses = identity.verse_statuses_started().select_related('version')
 
-    if 'catechisms' in request.GET:
-        text_type = TextType.CATECHISM
-    else:
-        text_type = TextType.BIBLE
-
+    filter_form = UserVersesFilterForm.from_request_data(request.GET)
+    text_type = filter_form.cleaned_data['text_type']
     verses = verses.filter(version__text_type=text_type)
+    sort_order = filter_form.cleaned_data['order']
+    PAGE_SIZE = 20
 
-    if text_type == TextType.CATECHISM:
-        verses = verses.order_by('version__slug', 'text_order')
+    if sort_order == USER_VERSES_ORDER_WEAKEST:
+        verses = verses.order_by('strength', 'text_order')
+    elif sort_order == USER_VERSES_ORDER_STRONGEST:
+        verses = verses.order_by('-strength', 'text_order')
     else:
-        if 'bibleorder' in request.GET:
-            c['bibleorder'] = True
-            verses = verses.order_by('text_order', 'strength')
+        # Text order
+        if text_type == TextType.CATECHISM:
+            # It's more useful to group catechisms together
+            verses = verses.order_by('version__slug', 'text_order')
         else:
-            verses = verses.order_by('strength', 'localized_reference')
-    c['verses'] = verses
-    c['bible'] = text_type == TextType.BIBLE
-    c['catechism'] = text_type == TextType.CATECHISM
+            verses = verses.order_by('text_order', 'version__slug')
 
-    return render(request, 'learnscripture/user_verses.html', c)
+    c = {
+        'title': 'Progress stats',
+        'filter_form': filter_form,
+        'results': get_paged_results(verses, request, PAGE_SIZE),
+        'bible': text_type == TextType.BIBLE,
+        'catechism': text_type == TextType.CATECHISM
+    }
+
+    return TemplateResponse(request, 'learnscripture/user_verses.html', c)
 
 
 @require_identity
