@@ -40,7 +40,6 @@
                      value="Practise section: {{ uvs.section_localized_reference }}"/>
             {% endif %}
           </p>
-          <br/>
 
         {% endif %}
 
@@ -90,8 +89,10 @@
           <input type="hidden" name="verse_set_id" value="{{ uvs.verse_set_id }}" />
           <input type="hidden" name="version_id" value="{{ uvs.version_id }}" />
           <p>
-            <input type="submit" name="cancellearning" class="btn primary cancel-learning-passage-btn"
-                   value="Stop learning this passage ({{ uvs.verse_set.smart_name_dict|lookup:uvs.version.language_code }})" />
+            <button type="submit" name="cancellearning" class="btn primary cancel-learning-passage-btn">
+              Stop learning this passage<br>
+              ({{ uvs.passage_localized_reference }})
+            </button>
           </p>
         {% endif %}
       </form>
