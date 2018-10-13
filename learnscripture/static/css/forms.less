@@ -156,9 +156,18 @@ form[data-pjax-results-container] {
             margin-left: 10px;
         }
 
+        input[type="checkbox"], input[type="radio"] {
+            // When the label wraps onto multiple lines (narrow screens),
+            // this works better than 'vertical-align: middle'
+            vertical-align: top;
+            margin-top: 7px;
+        }
+
         label {
             cursor: pointer;
             padding: 4px 12px 4px 30px;
+            box-sizing: border-box;
+            max-width: ~"calc(100% - 30px)";
             display: inline-block;
             color: var(--topLinkHoverColor);
             background-color: var(--topColor1);
