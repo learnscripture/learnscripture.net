@@ -1,0 +1,11 @@
+<div class="more-results-container">
+  <div class="paging">
+    <span class="paging-part">
+      Showing {{ results.shown_count }} of {{ results.total }} comments
+    </span>
+    {% if results.more %}
+      <span class="paging-part"><a data-pjax href="{{ results.more_link }}">Show more</a></span>
+    {% endif %}
+    <span class="paging-part"><a href="#id-group-wall-comments">Jump to top</a></span>
+  </div>
+</div>

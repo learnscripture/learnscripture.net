@@ -25,8 +25,8 @@ class CommentPageTests(FullBrowserTest):
         self.login(self.account)
         self.get_url('activity_stream')
         self.click('.show-add-comment')
-        self.fill({'#id-comment-box': message})
-        self.click('#id-add-comment-btn')
+        self.fill({'.commentblock .comment-box': message})
+        self.click('.commentblock .add-comment-btn')
         self.wait_for_ajax()
 
         # Test page
@@ -55,8 +55,8 @@ class CommentPageTests(FullBrowserTest):
         self.login(self.account)
         self.get_url('activity_stream')
         self.click('.show-add-comment')
-        self.fill({'#id-comment-box': message})
-        self.click('#id-add-comment-btn')
+        self.fill({'.commentblock .comment-box': message})
+        self.click('.commentblock .add-comment-btn')
         time.sleep(1)
 
         # Test db - user should be able to see own message

@@ -38,10 +38,10 @@ from groups.forms import EditGroupForm
 from groups.models import Group
 from groups.signals import public_group_created
 from learnscripture import session
-from learnscripture.forms import (LEADERBOARD_WHEN_ALL_TIME, LEADERBOARD_WHEN_THIS_WEEK, VERSE_SET_ORDER_AGE,
+from learnscripture.forms import (GROUP_WALL_SORT_BY_OLDEST_FIRST, LEADERBOARD_WHEN_THIS_WEEK, VERSE_SET_ORDER_AGE,
                                   VERSE_SET_ORDER_POPULARITY, VERSE_SET_TYPE_ALL, AccountPasswordChangeForm,
-                                  AccountPasswordResetForm, AccountSetPasswordForm, ContactForm, LeaderboardFilterForm,
-                                  LogInForm, SignUpForm, VerseSetSearchForm)
+                                  AccountPasswordResetForm, AccountSetPasswordForm, ContactForm, GroupWallFilterForm,
+                                  LeaderboardFilterForm, LogInForm, SignUpForm, VerseSetSearchForm)
 from payments.sign import sign_payment_info
 from scores.models import (get_all_time_leaderboard, get_leaderboard_since, get_verses_started_counts,
                            get_verses_started_per_day, get_verses_tested_per_day)
@@ -1448,32 +1448,40 @@ def group(request, slug):
                    })
 
 
+@djpjax.pjax(additional_templates={
+    "#id-group-wall-comments": "learnscripture/group_wall_comments_inc.html",
+    ".more-results-container": "learnscripture/group_wall_comments_results_inc.html",
+})
 def group_wall(request, slug):
     account = account_from_request(request)
     group = group_by_slug(request, slug)
 
-    # TODO: respond to 'comment' query param and move to the right page of
-    # comments.
+    # TODO: respond to 'comment' query param and ensure we include the right
+    # page of comments.
     try:
         selected_comment_id = int(request.GET['comment'])
     except (KeyError, ValueError):
         selected_comment_id = None
 
     comments = group.comments_visible_for_account(account)
-    sort_order = 'oldestfirst' if 'oldestfirst' in request.GET else 'newestfirst'
-    if sort_order == 'oldestfirst':
+    filter_form = GroupWallFilterForm(request.GET)
+    sort_order = filter_form.cleaned_data['sort_by']
+    if sort_order == GROUP_WALL_SORT_BY_OLDEST_FIRST:
         comments = comments.order_by('created')
     else:
         comments = comments.order_by('-created')
 
-    return render(request, 'learnscripture/group_wall.html',
-                  {'title': 'Group wall: %s' % group.name,
-                   'group': group,
-                   'comments': comments,
-                   'sort_order': sort_order,
-                   'selected_comment_id': selected_comment_id,
-                   'GROUP_COMMENTS_PAGINATE_BY': GROUP_COMMENTS_PAGINATE_BY,
-                   })
+    results = get_paged_results(comments, request, GROUP_COMMENTS_PAGINATE_BY)
+
+    c = {
+        'title': 'Group wall: %s' % group.name,
+        'filter_form': filter_form,
+        'group': group,
+        'results': results,
+        'sort_order': sort_order,
+        'selected_comment_id': selected_comment_id,
+    }
+    return TemplateResponse(request, 'learnscripture/group_wall.html', c)
 
 
 def get_request_from_item(request):
@@ -1710,3 +1718,25 @@ def celery_debug(request):
 
 def debug(request):
     return render(request, "learnscripture/debug.html", {})
+
+
+def get_paged_results(queryset, request, page_size):
+    total = queryset.count()
+    from_item = get_request_from_item(request)
+    last_item = from_item + page_size
+    # Get one extra to see if there is more
+    result_page = list(queryset[from_item:last_item + 1])
+    more = len(result_page) > page_size
+    # Then trim result_page to correct size
+    result_page = result_page[0:page_size]
+    shown_count = from_item + len(result_page)
+    return dict(
+        items=result_page,
+        from_item=from_item,
+        shown_count=shown_count,
+        total=total,
+        more=more,
+        more_link=(furl.furl(request.get_full_path())
+                   .remove(query=['from_item'])
+                   .add(query_params={'from_item': last_item})),
+    )

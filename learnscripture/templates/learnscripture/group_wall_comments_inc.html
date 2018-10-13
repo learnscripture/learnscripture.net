@@ -1,0 +1,7 @@
+<div class="groupcomments" data-group-id="{{ group.id }}">
+  <div class="commentblock"
+       data-new-comments-position="{% if sort_order == 'newestfirst' %}top{% else %}bottom{% endif %}"
+       >
+    {% include "learnscripture/group_wall_comments_results_inc.html" %}
+  </div>
+</div>

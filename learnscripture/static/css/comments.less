@@ -9,8 +9,9 @@
         border-bottom-right-radius: 4px;
     }
 
-    background-color: @white;
+    background-color: var(--baseBackgroundColor);
     padding: @activityItemPadding;
+    border-radius: @actionsetBorderRadius;
     margin-bottom: 3px;
     overflow: auto;
 
@@ -42,14 +43,14 @@
     margin-top: 2px;
 }
 
-#id-comment-box {
+.comment-box {
     width: 100%;
     box-sizing: border-box;         /* For IE and modern versions of Chrome */
     -moz-box-sizing: border-box;    /* For Firefox                          */
     -webkit-box-sizing: border-box; /* For Safari                           */
 }
 
-#id-add-comment > div {
+.comment-box-wrapper > div {
 
     > div:last-child {
         overflow: hidden;
@@ -58,5 +59,12 @@
 
     > div:first-child {
         float: right;
+    }
+}
+
+
+.group-wall-page {
+    #id_sort_by {
+        .inline-radio-buttons();
     }
 }

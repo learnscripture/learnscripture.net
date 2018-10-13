@@ -100,8 +100,8 @@ class GroupPageTestsFB(GroupPageTestsBase, FullBrowserTest):
         self.get_url('group', g.slug)
         self.click('.show-add-comment')
         message = "Yay this is my comment!"
-        self.fill({'#id-comment-box': message})
-        self.click('#id-add-comment-btn')
+        self.fill({'.commentblock .comment-box': message})
+        self.click('.commentblock .add-comment-btn')
         self.wait_for_ajax()
         self.assertTextPresent(message)
         # Test db

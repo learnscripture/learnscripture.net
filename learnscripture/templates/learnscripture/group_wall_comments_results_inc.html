@@ -1,0 +1,15 @@
+{% if results.from_item == 0 and sort_order == 'newestfirst' %}
+  {% include "learnscripture/group_wall_add_comment_inc.html" %}
+{% endif %}
+{% for comment in results.items %}
+  {% with show_as_related_comment=comment.event %}
+    {% include "learnscripture/comment_inc.html" %}
+  {% endwith %}
+{% endfor %}
+{% if results.more %}
+  {% include "learnscripture/group_wall_comments_show_more_inc.html" %}
+{% endif %}
+{% if not results.more and sort_order == 'oldestfirst' %}
+  {# We only include the 'add comment' box when the user can see the newest comment #}
+  {% include "learnscripture/group_wall_add_comment_inc.html" %}
+{% endif %}

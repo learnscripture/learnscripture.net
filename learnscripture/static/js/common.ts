@@ -224,12 +224,23 @@ $(document).ready(function() {
         })
 
         if ($.support.pjax) {
-            var moreResultsParent = $form.attr("data-pjax-more-results-parent");
+            var $staticParent = $(containerSelector);
             var moreResultsContainer = $form.attr("data-pjax-more-results-container");
-            if (moreResultsContainer != null && moreResultsContainer != "" &&
-                moreResultsParent != null && moreResultsParent != "") {
+            if (moreResultsContainer != null && moreResultsContainer != "") {
+                // Use 'on' binding on $staticParent because this is an element
+                // that doesn't get replaced, while its children can be.
+                $staticParent.on('click', moreResultsContainer + ' a[data-pjax]', function(ev) {
+                    var $moreResults = $staticParent.find(moreResultsContainer);
+                    // We always want to eliminate the old 'more results' container,
+                    // replacing it with the results, after we've loaded them. We
+                    // will also have a new 'more results' container, nested inside
+                    // the old one, which we mustn't remove.
 
-                $(moreResultsParent).on('click', moreResultsContainer + ' a[data-pjax]', function(ev) {
+                    // TODO this probable has race conditions if multiple PJAX
+                    // requests are running at once.
+                    $(document).one('pjax:success', function() {
+                        $moreResults.find("> :first-child").unwrap();
+                    })
                     // Constraints for PJAX "show more":
                     // - we want bots to be able to browse everything on the site
                     //   using "load more" links, whether they execute Javascript or
@@ -238,7 +249,7 @@ $(document).ready(function() {
                     // - we want to avoid normal users seeing partial pages.
 
                     // This means:
-                    // - 'frompage' parameter - should only generate the next bit, not a whole page
+                    // - 'from_item' parameter - should only generate the next bit, not a whole page
                     // - users shouldn't see URLs with 'from' bit, so they won't share them.
                     //   This means 'push: false'
                     // - bots should be told `noindex, follow` for these pages
@@ -249,16 +260,6 @@ $(document).ready(function() {
                     });
                 });
 
-                // We always want to eliminate the old 'more results'
-                // container, replacing it with the results, after we've
-                // loaded them. We will also have a new 'more results'
-                // container, nested inside the old one, which we mustn't
-                // remove.
-                $(document).on('pjax:success', function() {
-                    // TODO - really should have a more robust method here, this will
-                    // only work if moreResultsContainer is a simple class selector
-                    $(moreResultsContainer + " " + moreResultsContainer).unwrap();
-                })
             }
         }
     });
