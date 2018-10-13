@@ -12,7 +12,7 @@ from django.contrib.auth.views import PasswordResetView as AuthPasswordResetView
 from django.contrib.sites.models import Site
 from django.core import mail
 from django.http import Http404, HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
@@ -77,7 +77,7 @@ GROUP_COMMENTS_PAGINATE_BY = 40
 
 
 def missing(request, message, status_code=404):
-    response = render(request, '404.html', {'message': message})
+    response = TemplateResponse(request, '404.html', {'message': message})
     response.status_code = status_code
     return response
 
@@ -86,7 +86,7 @@ def home(request):
     identity = getattr(request, 'identity', None)
     if identity is not None and identity.default_to_dashboard:
         return HttpResponseRedirect(reverse('dashboard'))
-    return render(request, 'learnscripture/home.html')
+    return TemplateResponse(request, 'learnscripture/home.html')
 
 
 def _login_redirect(request):
@@ -117,9 +117,10 @@ def login(request):
     else:
         form = LogInForm(prefix="login")
 
-    return render(request, "learnscripture/login.html",
-                  {'title': 'Sign in',
-                   'login_form': form})
+    return TemplateResponse(request, "learnscripture/login.html", {
+        'title': 'Sign in',
+        'login_form': form,
+    })
 
 
 class _PasswordResetView(AuthPasswordResetView):
@@ -166,14 +167,14 @@ def signup(request):
     c['title'] = 'Create account'
     c['signup_form'] = form
 
-    return render(request, "learnscripture/signup.html", c)
+    return TemplateResponse(request, "learnscripture/signup.html", c)
 
 
 def feature_disallowed(request, title, reason):
-    return render(request, 'learnscripture/feature_disallowed.html',
-                  {'title': title,
-                   'reason': reason,
-                   })
+    return TemplateResponse(request, 'learnscripture/feature_disallowed.html', {
+        'title': title,
+        'reason': reason,
+    })
 
 
 def bible_versions_for_request(request):
@@ -184,7 +185,7 @@ def bible_versions_for_request(request):
 
 @require_preferences
 def learn(request):
-    return render(request, 'learnscripture/learn.html', {})
+    return TemplateResponse(request, 'learnscripture/learn.html', {})
 
 
 def preferences(request):
@@ -209,7 +210,7 @@ def preferences(request):
     c = {'form': form,
          'title': 'Preferences',
          'hide_preferences_popup': True}
-    return render(request, 'learnscripture/preferences.html', c)
+    return TemplateResponse(request, 'learnscripture/preferences.html', c)
 
 
 def account_from_request(request):
@@ -432,7 +433,7 @@ def dashboard(request):
          'use_dashboard_nav': True,
          }
     c.update(todays_stats(identity))
-    return render(request, 'learnscripture/dashboard.html', c)
+    return TemplateResponse(request, 'learnscripture/dashboard.html', c)
 
 
 def context_for_version_select(request):
@@ -582,7 +583,7 @@ def view_catechism_list(request):
     c = {'catechisms': TextVersion.objects.catechisms(),
          'title': 'Catechisms',
          }
-    return render(request, 'learnscripture/catechisms.html', c)
+    return TemplateResponse(request, 'learnscripture/catechisms.html', c)
 
 
 def view_catechism(request, slug):
@@ -598,7 +599,7 @@ def view_catechism(request, slug):
          'include_referral_links': True,
          }
 
-    return render(request, 'learnscripture/view_catechism.html', c)
+    return TemplateResponse(request, 'learnscripture/view_catechism.html', c)
 
 
 def verse_options(request):
@@ -631,10 +632,9 @@ def verse_options(request):
     uvss = _reduce_uvs_set_for_verse(uvss)
     # UVS not in passage goes first
     uvss.sort(key=lambda uvs: uvs.is_in_passage())
-    return render(request,
-                  "learnscripture/verse_options.html",
-                  {'uvs_list': uvss}
-                  )
+    return TemplateResponse(request, "learnscripture/verse_options.html", {
+        'uvs_list': uvss,
+    })
 
 
 def _reduce_uvs_set_for_verse(uvss):
@@ -746,7 +746,7 @@ def view_verse_set(request, slug):
     c['include_referral_links'] = True
 
     c.update(context_for_version_select(request))
-    return render(request, 'learnscripture/single_verse_set.html', c)
+    return TemplateResponse(request, 'learnscripture/single_verse_set.html', c)
 
 
 def add_passage_breaks(language_code, verse_list, breaks):
@@ -893,7 +893,7 @@ def create_or_edit_set(request, set_type=None, slug=None):
 
     c.update(context_for_quick_find(request))
 
-    return render(request, 'learnscripture/create_set.html', c)
+    return TemplateResponse(request, 'learnscripture/create_set.html', c)
 
 
 def normalize_break_list(breaks):
@@ -942,7 +942,7 @@ def user_stats(request, username):
         account_groups = account.groups.filter(public=True).order_by('name')
     viewer_visible_groups = Group.objects.visible_for_account(viewer)
     c['groups'] = viewer_visible_groups.filter(id__in=[g.id for g in account_groups])
-    return render(request, 'learnscripture/user_stats.html', c)
+    return TemplateResponse(request, 'learnscripture/user_stats.html', c)
 
 
 def combine_timeline_stats(*statslists):
@@ -1061,7 +1061,7 @@ def user_verse_sets(request):
     if identity.account is not None:
         c['verse_sets_created'] = identity.account.verse_sets_created.all().order_by('name')
 
-    return render(request, 'learnscripture/user_verse_sets.html', c)
+    return TemplateResponse(request, 'learnscripture/user_verse_sets.html', c)
 
 
 # Password reset for Accounts:
@@ -1073,13 +1073,15 @@ def user_verse_sets(request):
 # Also, we do the main password_reset via AJAX,
 # from the the same form as the login form.
 def password_reset_done(request):
-    return render(request, 'learnscripture/password_reset_done.html',
-                  {'title': 'Password reset started'})
+    return TemplateResponse(request, 'learnscripture/password_reset_done.html', {
+        'title': 'Password reset started',
+    })
 
 
 def password_reset_complete(request):
-    return render(request, 'learnscripture/password_reset_complete.html',
-                  {'title': 'Password reset complete'})
+    return TemplateResponse(request, 'learnscripture/password_reset_complete.html', {
+        'title': 'Password reset complete',
+    })
 
 
 # Large copy and paste from django.contrib.auth.views, followed by customisations.
@@ -1117,7 +1119,7 @@ def password_reset_confirm(request, uidb64=None, token=None):
         'validlink': validlink,
         'title': 'Password reset',
     }
-    return render(request, 'learnscripture/password_reset_confirm.html', context)
+    return TemplateResponse(request, 'learnscripture/password_reset_confirm.html', context)
 
 
 @require_account
@@ -1138,12 +1140,11 @@ def password_change(request):
         'title': 'Password change',
     }
 
-    return render(request, template_name, context)
+    return TemplateResponse(request, template_name, context)
 
 
 def password_change_done(request):
-    return render(request, "learnscripture/password_change_done.html",
-                  {})
+    return TemplateResponse(request, "learnscripture/password_change_done.html", {})
 
 
 def csrf_failure(request, reason=""):
@@ -1151,14 +1152,15 @@ def csrf_failure(request, reason=""):
     Default view used when request fails CSRF protection
     """
     from django.middleware.csrf import REASON_NO_CSRF_COOKIE
-    resp = render(request, "csrf_failure.html",
-                  {'no_csrf_cookie': reason == REASON_NO_CSRF_COOKIE})
+    resp = TemplateResponse(request, "csrf_failure.html", {
+        'no_csrf_cookie': reason == REASON_NO_CSRF_COOKIE
+    })
     resp.status_code = 403
     return resp
 
 
 def offline(request):
-    return render(request, "offline.html", {})
+    return TemplateResponse(request, "offline.html", {})
 
 
 @require_account_with_redirect
@@ -1229,11 +1231,11 @@ def stats(request):
                                 'identities_active',
                                 ] if 'full_accounts' in request.GET else []))
 
-    return render(request, 'learnscripture/stats.html',
-                  {'title': 'Stats',
-                   'verses_data': verses_data,
-                   'account_data': account_data,
-                   })
+    return TemplateResponse(request, 'learnscripture/stats.html', {
+        'title': 'Stats',
+        'verses_data': verses_data,
+        'account_data': account_data,
+    })
 
 
 def natural_list(l):
@@ -1284,7 +1286,7 @@ def donate(request):
         c['LIVEBOX'] = settings.LIVEBOX
         c['paypal_form'] = form
 
-    return render(request, 'learnscripture/donate.html', c)
+    return TemplateResponse(request, 'learnscripture/donate.html', c)
 
 
 @csrf_exempt
@@ -1294,12 +1296,12 @@ def pay_done(request):
         if identity.account is not None:
             return HttpResponseRedirect(reverse('dashboard'))
 
-    return render(request, 'learnscripture/pay_done.html', {'title': "Donation complete"})
+    return TemplateResponse(request, 'learnscripture/pay_done.html', {'title': "Donation complete"})
 
 
 @csrf_exempt
 def pay_cancelled(request):
-    return render(request, 'learnscripture/pay_cancelled.html', {'title': "Donation cancelled"})
+    return TemplateResponse(request, 'learnscripture/pay_cancelled.html', {'title': "Donation cancelled"})
 
 
 def referral_program(request):
@@ -1309,11 +1311,11 @@ def referral_program(request):
     else:
         referral_link = None
 
-    return render(request, 'learnscripture/referral_program.html',
-                  {'title': 'Referral program',
-                   'referral_link': referral_link,
-                   'include_referral_links': True,
-                   })
+    return TemplateResponse(request, 'learnscripture/referral_program.html', {
+        'title': 'Referral program',
+        'referral_link': referral_link,
+        'include_referral_links': True,
+    })
 
 
 def awards(request):
@@ -1327,11 +1329,11 @@ def awards(request):
         else:
             discovered_awards.append(award)
 
-    return render(request, 'learnscripture/awards.html',
-                  {'title': 'Badges',
-                   'discovered_awards': discovered_awards,
-                   'hidden_awards': hidden_awards,
-                   })
+            return TemplateResponse(request, 'learnscripture/awards.html', {
+                'title': 'Badges',
+                'discovered_awards': discovered_awards,
+                'hidden_awards': hidden_awards,
+            })
 
 
 def award(request, award_slug):
@@ -1374,12 +1376,12 @@ def award(request, award_slug):
         except IndexError:
             pass
 
-    return render(request, 'learnscripture/award.html',
-                  {'title': 'Badge - %s' % award.short_description(),
-                   'award': award,
-                   'levels': levels,
-                   'account_top_award': account_top_award,
-                   })
+    return TemplateResponse(request, 'learnscripture/award.html', {
+        'title': 'Badge - %s' % award.short_description(),
+        'award': award,
+        'levels': levels,
+        'account_top_award': account_top_award,
+    })
 
 
 def groups_visible_for_request(request):
@@ -1400,9 +1402,10 @@ def groups(request):
                   )
     else:
         groups = groups.none()
-    return render(request, 'learnscripture/groups.html', {'title': 'Groups',
-                                                          'groups': groups,
-                                                          })
+    return TemplateResponse(request, 'learnscripture/groups.html', {
+        'title': 'Groups',
+        'groups': groups,
+    })
 
 
 def group_by_slug(request, slug):
@@ -1435,15 +1438,15 @@ def group(request, slug):
     else:
         in_group = False
 
-    return render(request, 'learnscripture/group.html',
-                  {'title': 'Group: %s' % group.name,
-                   'group': group,
-                   'in_group': in_group,
-                   'can_join': group.can_join(account),
-                   'can_edit': group.can_edit(account),
-                   'include_referral_links': True,
-                   'comments': group.comments_visible_for_account(account).order_by('-created')[:GROUP_COMMENTS_SHORT_CUTOFF],
-                   })
+    return TemplateResponse(request, 'learnscripture/group.html', {
+        'title': 'Group: %s' % group.name,
+        'group': group,
+        'in_group': in_group,
+        'can_join': group.can_join(account),
+        'can_edit': group.can_edit(account),
+        'include_referral_links': True,
+        'comments': group.comments_visible_for_account(account).order_by('-created')[:GROUP_COMMENTS_SHORT_CUTOFF],
+    })
 
 
 @djpjax.pjax(additional_templates={
@@ -1597,11 +1600,11 @@ def create_or_edit_group(request, slug=None):
     else:
         form = EditGroupForm(instance=group, initial=initial)
 
-    return render(request, 'learnscripture/edit_group.html',
-                  {'title': title,
-                   'group': group,
-                   'form': form,
-                   })
+    return TemplateResponse(request, 'learnscripture/edit_group.html', {
+        'title': title,
+        'group': group,
+        'form': form,
+    })
 
 
 def group_select_list(request):
@@ -1612,13 +1615,15 @@ def group_select_list(request):
         for g in groups:
             g.is_member = g in own_groups
         groups.sort(key=lambda g: not g.is_member)
-    return render(request, 'learnscripture/group_select_list.html',
-                  {'groups': groups})
+    return TemplateResponse(request, 'learnscripture/group_select_list.html', {
+        'groups': groups,
+    })
 
 
 def terms_of_service(request):
-    return render(request, 'learnscripture/terms_of_service.html',
-                  {'title': 'Terms of service'})
+    return TemplateResponse(request, 'learnscripture/terms_of_service.html', {
+        'title': 'Terms of service',
+    })
 
 
 def contact(request):
@@ -1635,10 +1640,10 @@ def contact(request):
             return HttpResponseRedirect('/contact/thanks/')
     else:
         form = ContactForm(initial=initial)
-    return render(request, 'learnscripture/contact.html',
-                  {'title': 'Contact us',
-                   'form': form,
-                   })
+    return TemplateResponse(request, 'learnscripture/contact.html', {
+        'title': 'Contact us',
+        'form': form,
+    })
 
 
 def send_contact_email(contact_form, account):
@@ -1665,16 +1670,13 @@ Message:
 
 def activity_stream(request):
     viewer = account_from_request(request)
-    return render(request,
-                  'learnscripture/activity_stream.html',
-                  {'events':
-                   Event.objects
+    return TemplateResponse(request, 'learnscripture/activity_stream.html', {
+        'events': (Event.objects
                    .for_activity_stream(viewer=viewer)
-                   .prefetch_related('comments', 'comments__author'),
-                   'title': "Recent activity",
-                   'following_ids': [] if viewer is None
-                   else [a.id for a in viewer.following.all()]
-                   })
+                   .prefetch_related('comments', 'comments__author')),
+        'title': "Recent activity",
+        'following_ids': [] if viewer is None else [a.id for a in viewer.following.all()],
+    })
 
 
 def _user_events(for_account, viewer):
@@ -1690,12 +1692,11 @@ def user_activity_stream(request, username):
     account = get_object_or_404(Account.objects.visible_for_account(account_from_request(request)),
                                 username=username)
 
-    return render(request,
-                  'learnscripture/user_activity_stream.html',
-                  {'account': account,
-                   'events': _user_events(account, account_from_request(request)),
-                   'title': "Recent activity from %s" % account.username,
-                   })
+    return TemplateResponse(request, 'learnscripture/user_activity_stream.html', {
+        'account': account,
+        'events': _user_events(account, account_from_request(request)),
+        'title': "Recent activity from %s" % account.username,
+    })
 
 
 def activity_item(request, event_id):
@@ -1704,11 +1705,10 @@ def activity_item(request, event_id):
                               .prefetch_related('comments__author'),
                               id=int(event_id))
 
-    return render(request,
-                  'learnscripture/activity_item.html',
-                  {'event': event,
-                   'title': "Activity from %s" % event.account.username,
-                   })
+    return TemplateResponse(request, 'learnscripture/activity_item.html', {
+        'event': event,
+        'title': "Activity from %s" % event.account.username,
+    })
 
 
 def celery_debug(request):
@@ -1718,7 +1718,7 @@ def celery_debug(request):
 
 
 def debug(request):
-    return render(request, "learnscripture/debug.html", {})
+    return TemplateResponse(request, "learnscripture/debug.html", {})
 
 
 def get_paged_results(queryset, request, page_size):
