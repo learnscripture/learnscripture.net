@@ -231,3 +231,7 @@ class UserVersesFilterForm(FilterFormMixin, forms.Form):
                               label="Order",
                               required=False,
                               widget=widgets.RadioSelect)
+
+
+class GroupFilterForm(FilterFormMixin, forms.Form):
+    query = forms.CharField(label="Search", required=False)
