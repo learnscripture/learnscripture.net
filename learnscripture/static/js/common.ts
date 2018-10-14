@@ -222,10 +222,17 @@ $(document).ready(function() {
         $form.find("input").on('change', function(ev) {
             $form.submit();
         })
+    });
 
-        if ($.support.pjax) {
+    if ($.support.pjax) {
+        $('[data-pjax-more-results-container]').each(function(idx, elem) {
+            var $dataElem = $(elem);
+            var containerSelector = $dataElem.attr("data-pjax-results-container");
+            // This element should not be within a dynamic area that gets
+            // replaced by PJAX or other actions, because we attach event
+            // handlers to it.
             var $staticParent = $(containerSelector);
-            var moreResultsContainer = $form.attr("data-pjax-more-results-container");
+            var moreResultsContainer = $dataElem.attr("data-pjax-more-results-container");
             if (moreResultsContainer != null && moreResultsContainer != "") {
                 // Use 'on' binding on $staticParent because this is an element
                 // that doesn't get replaced, while its children can be.
@@ -259,11 +266,9 @@ $(document).ready(function() {
                         scrollTo: false
                     });
                 });
-
             }
-        }
-    });
-
+        });
+    }
 });
 
 $.pjax.defaults.timeout = 3000

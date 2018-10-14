@@ -4,9 +4,9 @@
 {% with rendered=event.render_html_dict|lookup:default_language_code comments=event.ordered_comments|filter_comments:request_account %}
   {% ifchanged rendered %}
     {% ifchanged event.created.date %}
-      <div class="timestamp">
+      <h3 class="timestamp">
         {{ event.created|date:"j M Y" }}
-      </div>
+      </h3>
     {% endifchanged %}
     <div class="activityitem
                 {% if event.account_id in following_ids %}following{% endif %}

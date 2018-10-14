@@ -105,7 +105,11 @@
 
     <h2>Activity</h2>
 
-    {% include "learnscripture/activity_stream_inc.html" %}
+    <div class="activitystream">
+      {% for event in events %}
+        {% include "learnscripture/activity_event_inc.html" %}
+      {% endfor %}
+    </div>
 
     {% include "learnscripture/comment_common_inc.html" %}
 

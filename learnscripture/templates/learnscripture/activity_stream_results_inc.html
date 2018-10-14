@@ -1,7 +1,12 @@
+{% for event in results.items %}
+  {% include "learnscripture/activity_event_inc.html" %}
+{% endfor %}
 <div class="more-results-container">
   <div class="paging">
+    {# For PJAX 'show more', this div gets replaced with the next #}
+    {# page of results, plus a new 'show more' link #}
     <span class="paging-part">
-      Showing {{ results.shown_count }} of {{ results.total }} comments
+      Showing {{ results.shown_count }} of {{ results.total }} events
     </span>
     {% if results.more %}
       <span class="paging-part"><a data-pjax href="{{ results.more_link }}">Show more</a></span>
