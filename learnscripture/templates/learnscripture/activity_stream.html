@@ -2,7 +2,12 @@
 
 {% block content %}
 
-  {% include "learnscripture/activity_stream_inc.html" %}
+  <div data-pjax-results-container="#id-activity-stream"
+       data-pjax-more-results-container=".more-results-container"
+       ></div>
+  <div class="activitystream" id="id-activity-stream">
+    {% include "learnscripture/activity_stream_results_inc.html" %}
+  </div>
 
   {% include "learnscripture/comment_common_inc.html" %}
 

@@ -31,7 +31,8 @@ from bibleverses.forms import VerseSetForm
 from bibleverses.languages import LANGUAGE_CODE_INTERNAL, LANGUAGES
 from bibleverses.models import (MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, TextType, TextVersion, VerseSet,
                                 VerseSetType, get_passage_sections, is_continuous_set)
-from bibleverses.parsing import internalize_localized_reference, localize_internal_reference, parse_break_list, parse_unvalidated_localized_reference
+from bibleverses.parsing import (internalize_localized_reference, localize_internal_reference, parse_break_list,
+                                 parse_unvalidated_localized_reference)
 from bibleverses.signals import public_verse_set_created
 from events.models import Event
 from groups.forms import EditGroupForm
@@ -1698,12 +1699,16 @@ Message:
     ).send()
 
 
+@djpjax.pjax(additional_templates={
+    ".more-results-container": "learnscripture/activity_stream_results_inc.html",
+})
 def activity_stream(request):
     viewer = account_from_request(request)
+    events = (Event.objects
+              .for_activity_stream(viewer=viewer)
+              .prefetch_related('comments', 'comments__author'))
     return TemplateResponse(request, 'learnscripture/activity_stream.html', {
-        'events': (Event.objects
-                   .for_activity_stream(viewer=viewer)
-                   .prefetch_related('comments', 'comments__author')),
+        'results': get_paged_results(events, request, 40),
         'title': "Recent activity",
         'following_ids': [] if viewer is None else [a.id for a in viewer.following.all()],
     })
@@ -1718,13 +1723,16 @@ def _user_events(for_account, viewer):
             )
 
 
+@djpjax.pjax(additional_templates={
+    ".more-results-container": "learnscripture/activity_stream_results_inc.html",
+})
 def user_activity_stream(request, username):
     account = get_object_or_404(Account.objects.visible_for_account(account_from_request(request)),
                                 username=username)
-
+    events = _user_events(account, account_from_request(request))
     return TemplateResponse(request, 'learnscripture/user_activity_stream.html', {
+        'results': get_paged_results(events, request, 40),
         'account': account,
-        'events': _user_events(account, account_from_request(request)),
         'title': "Recent activity from %s" % account.username,
     })
 
