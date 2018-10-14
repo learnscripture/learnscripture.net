@@ -41,9 +41,9 @@ from learnscripture import session
 from learnscripture.forms import (GROUP_WALL_ORDER_OLDEST_FIRST, LEADERBOARD_WHEN_THIS_WEEK,
                                   USER_VERSES_ORDER_STRONGEST, USER_VERSES_ORDER_WEAKEST, VERSE_SET_ORDER_AGE,
                                   VERSE_SET_ORDER_POPULARITY, VERSE_SET_TYPE_ALL, AccountPasswordChangeForm,
-                                  AccountPasswordResetForm, AccountSetPasswordForm, ContactForm, GroupWallFilterForm,
-                                  LeaderboardFilterForm, LogInForm, SignUpForm, UserVersesFilterForm,
-                                  VerseSetSearchForm)
+                                  AccountPasswordResetForm, AccountSetPasswordForm, ContactForm, GroupFilterForm,
+                                  GroupWallFilterForm, LeaderboardFilterForm, LogInForm, SignUpForm,
+                                  UserVersesFilterForm, VerseSetSearchForm)
 from payments.sign import sign_payment_info
 from scores.models import (get_all_time_leaderboard, get_leaderboard_since, get_verses_started_counts,
                            get_verses_started_per_day, get_verses_tested_per_day)
@@ -1415,19 +1415,26 @@ def groups_editable_for_request(request):
     return Group.objects.editable_for_account(account_from_request(request))
 
 
+@djpjax.pjax(additional_templates={
+    "#id-groups-results": "learnscripture/groups_inc.html",
+    ".more-results-container": "learnscripture/groups_results_inc.html",
+})
 def groups(request):
     account = account_from_request(request)
     groups = Group.objects.visible_for_account(account).order_by('name')
-    if 'q' in request.GET:
-        q = request.GET['q']
-        groups = (groups.filter(name__icontains=q) |
-                  groups.filter(description__icontains=q)
+    filter_form = GroupFilterForm.from_request_data(request.GET)
+    query = filter_form.cleaned_data['query'].strip()
+    if query:
+        groups = (groups.filter(name__icontains=query) |
+                  groups.filter(description__icontains=query)
                   )
     else:
         groups = groups.none()
     return TemplateResponse(request, 'learnscripture/groups.html', {
         'title': 'Groups',
-        'groups': groups,
+        'results': get_paged_results(groups, request, 10),
+        'filter_form': filter_form,
+        'query': query,
     })
 
 

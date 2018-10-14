@@ -12,6 +12,13 @@ body {
     padding-top: @topbarHeight; /* make the container go all the way to the bottom of the topbar */
     background-attachment: fixed;
 }
+
+a[name="id-page-top"] {
+    position: relative;
+    top: -100px; // Take it back above the fixed header.
+    opacity: 0;
+}
+
 .container > footer p {
     text-align: center; /* center align it with the container */
 }
