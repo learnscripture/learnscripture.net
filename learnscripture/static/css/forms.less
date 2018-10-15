@@ -28,6 +28,78 @@ textarea {
 @errorColor: #a00;  // TODO this should be part of theme some day
 
 @inputWidth: 14em;
+
+@primaryButtonShadow: inset 0 1px 0 rgba(255, 255, 255, .2), 0 1px 2px rgba(0, 0, 0, .05);
+@hoverShadow: 0px 2px 2px rgba(0, 0, 0, 0.5);
+
+.nonPrimaryButtonColors() {
+    color: #333;
+    background: linear-gradient(#fff, #ddd 200%);
+    border: 1px solid #aaa;
+}
+
+.btn {
+    // See also .buttonradios() mixin which uses similar styles for coloring
+    padding: 5px 14px 6px;
+    font-size: @basefont;
+    line-height: normal;
+    cursor: pointer;
+    display: inline-block;
+    border-radius: 3px;
+    .nonPrimaryButtonColors();
+    transition: .05s linear all;
+
+    &:hover {
+        .nonPrimaryButtonColors(); // For the sake of a.btn we need to repeat color here
+        transform: translateY(-1px);
+        &:active {
+            transform: none;
+        }
+        box-shadow: @hoverShadow;
+        text-decoration: none;
+        &:focus {
+            box-shadow: @hoverShadow, @focusShadow;
+        }
+    }
+
+    &.primary {
+        color: var(--btnTextColor);
+        background: linear-gradient(var(--btnColor1), var(--btnColor2) 200%);
+        border: 1px solid var(--btnColor2);
+        box-shadow: @primaryButtonShadow;
+
+        &:focus {
+            box-shadow: @primaryButtonShadow, @focusShadow;
+        }
+
+        &:hover {
+            box-shadow: @primaryButtonShadow, @hoverShadow;
+
+            &:focus {
+                box-shadow: @primaryButtonShadow, @hoverShadow, @focusShadow;
+            }
+        }
+    }
+
+    &.disabled, &[disabled] {
+        cursor: default;
+        opacity: 0.5;
+        box-shadow: none;
+        &:hover {
+            box-shadow: none;
+            transform: none;
+        }
+    }
+}
+
+button.btn,
+input[type=submit].btn {
+    &::-moz-focus-inner {
+  	    padding: 0;
+  	    border: 0;
+    }
+}
+
 form {
     input,
     textarea,
@@ -167,17 +239,19 @@ ul.inputs-list, div.input ul {
             display: inline-block;
             margin-bottom: 3px;
             border-radius: 20px;
-            border: 1px solid var(--topColor1);
+            .nonPrimaryButtonColors();
         }
 
         label:hover, input:hover + label {
-            background-color: var(--topColor2);
-            color: var(--topLinkHoverColor);
+            color: var(--btnTextColor);
+            background: linear-gradient(var(--btnColor2) -100%, var(--btnColor1) 100%);
+            border: 1px solid var(--btnColor2);
         }
 
         input:checked, input:checked + label {
-            background-color: var(--topColor1);
-            color: var(--topLinkHoverColor);
+            color: var(--btnTextColor);
+            background: linear-gradient(var(--btnColor2) -100%, var(--btnColor1) 100%);
+            border: 1px solid var(--btnColor2);
         }
 
         input:focus {

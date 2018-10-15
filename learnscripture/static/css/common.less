@@ -7,16 +7,25 @@
 @shortHeightBreak2: 500px;
 
 
-// Override some bootstrap things:
-li {
-    color: inherit;
+@focusShadow:  0px 0px 3px 3px var(--focusOutlineColor);
+
+// General
+body {
+    color: var(--baseTextColor);
+    background-color: var(--baseBackgroundColor);
 }
 
-hr + h3 {
-    margin-top: -15px;
+a {
+    color: var(--linkColor);
+    &:hover {
+        color: var(--linkColorHover);
+    }
 }
 
-// Our things
+h1, h2, h3, h4, h5 {
+    font-family: var(--specialFontFamily);
+}
+
 input[type=image] {
     width: auto;
     height: auto;
@@ -25,6 +34,21 @@ input[type=image] {
     padding: 0px;
     border-radius: 0px;
 }
+
+
+footer {
+    color: var(--footerColor);
+    a {
+        text-decoration: underline;
+        color: var(--footerColor);
+        &:hover {
+            color: var(--footerColor);
+        }
+    }
+}
+
+
+// Specific
 
 .relative-container {
     position: relative;
@@ -94,6 +118,9 @@ q {
     .clearfix();
 }
 
+
+// Bordered, shaded action boxes
+
 @actionsetBorderRadius: 7px;
 
 .verseset,
@@ -101,7 +128,8 @@ q {
 .actionset {
     padding: 15px;
     border-radius: @actionsetBorderRadius;
-    border: 1px solid;
+    border: 1px solid var(--bgBorderColor);
+    background-color: var(--bgColor1);
     margin-bottom: var(--mainSidePadding);
     p:last-child {
         margin-bottom: 0;
@@ -109,11 +137,15 @@ q {
     > *:first-child, > form:first-child + * {
         margin-top: 0;
     }
+    hr {
+        border-bottom-color: var(--bgBorderColor);
+    }
 }
 
 .verseset,
 .actionset {
 
+    .clearfix();
     form {
         float: right;
         text-align: right;
@@ -136,10 +168,12 @@ q {
     }
 }
 
+
 // Focus
 
 .focus() {
-    outline: 3px solid var(--focusOutlineColor);
+    outline: none;
+    box-shadow: @focusShadow;
 }
 :focus, .fakefocus, {
     .focus();

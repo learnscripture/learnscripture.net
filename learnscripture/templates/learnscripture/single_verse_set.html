@@ -77,12 +77,13 @@
     <p>This looks like a continuous set of verses. These are much better learnt
       using a 'passage' set, rather than a 'selection' set. You can convert using
       the button below:
-      <form action="" method="POST">
-        {% csrf_token %}
-        <input type="submit" name="convert_to_passage_set" value="Convert to passage set"
-               class="btn"/>
-      </form>
-      <hr>
+    </p>
+    <form action="" method="POST">
+      {% csrf_token %}
+      <input type="submit" name="convert_to_passage_set" value="Convert to passage set"
+             class="btn"/>
+    </form>
+    <hr>
 
   {% endif %}
 
