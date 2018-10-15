@@ -188,6 +188,7 @@ body.learn-page {
     // Main page
     #id-loading-full {
         color: #888;
+        font-family: var(--specialFontFamily);
         text-align: center;
         font-size: 48px;
         vertical-align: middle;
@@ -257,7 +258,6 @@ body.learn-page {
         font-size: 1.4em;
     }
 
-    // See also theme.less for colors
     #id-verse-options-menu-btn {
         padding-left: 5px;
         padding-right: 5px;
@@ -310,6 +310,7 @@ body.learn-page {
     }
 
     // Words
+
     #id-verse-wrapper {
         border-radius: 5px;
         padding: 10px;
@@ -385,6 +386,10 @@ body.learn-page {
     @word-margin-top: 3px;
     @word-margin-left: 1px;
     @word-padding-horizontal: 4px;
+
+    .word-button, .current-verse, .previous-verse, #id-typing {
+        font-family: var(--specialFontFamily);
+    }
 
     .word-button {
         border: 2px solid;
@@ -804,8 +809,7 @@ body.learn-page {
 
         #id-action-btns {
             padding: 8px;
-            border-top-style: solid;
-            border-top-width: 2px;
+            border: 2px solid var(--bgBorderColor);
             float: none;
             .fixed-bottom();
             justify-content: space-between;

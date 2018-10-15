@@ -8,7 +8,6 @@
 // -------------
 
 // Shared colors for buttons and alerts
-.btn,
 .alert-message {
   // Set text color
   &.danger,
@@ -38,54 +37,6 @@
   // Info appears as a neutral blue
   &.info {
     .gradientBar(#5bc0de, #339bb9);
-  }
-}
-
-// Base .btn styles
-.btn {
-  // Button Base
-  cursor: pointer;
-  display: inline-block;
-  #gradient > .vertical-three-colors(#ffffff, #ffffff, 25%, darken(#ffffff, 10%)); // Don't use .gradientbar() here since it does a three-color gradient
-  padding: 5px 14px 6px;
-  text-shadow: 0 1px 1px rgba(255,255,255,.75);
-  color: #333;
-  font-size: @basefont;
-  line-height: normal;
-  border: 1px solid #ccc;
-  border-bottom-color: #bbb;
-  .border-radius(4px);
-
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
-
-  &:hover {
-    background-position: 0 -15px;
-    color: #333;
-    text-decoration: none;
-  }
-
-   // Transitions
-  transition: .1s linear all;
-
-  // Button Sizes
-  &.large {
-    font-size: @basefont + 2px;
-    line-height: normal;
-    padding: 9px 14px 9px;
-    .border-radius(6px);
-  }
-  &.small {
-    padding: 7px 9px 7px;
-    font-size: @basefont - 2px;
-  }
-}
-
-// Help Firefox not be a jerk about adding extra padding to buttons
-button.btn,
-input[type=submit].btn {
-  &::-moz-focus-inner {
-  	padding: 0;
-  	border: 0;
   }
 }
 
@@ -151,15 +102,10 @@ input[type=submit].btn {
     margin-bottom: 2px;
     line-height: 28px;
   }
-  .btn {
-    // Provide actions with buttons
-    box-shadow: 0 1px 0 rgba(255,255,255,.25);
-  }
 
   &.block-message {
     background-image: none;
     background-color: lighten(#fceec1, 5%);
-    .reset-filter();
     padding: 14px;
     border-color: #fceec1;
     box-shadow: none;
