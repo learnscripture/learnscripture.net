@@ -97,11 +97,22 @@ q {
 @actionsetBorderRadius: 7px;
 
 .verseset,
+.borderedbox,
 .actionset {
     padding: 15px;
     border-radius: @actionsetBorderRadius;
     border: 1px solid;
     margin-bottom: var(--mainSidePadding);
+    p:last-child {
+        margin-bottom: 0;
+    }
+    > *:first-child, > form:first-child + * {
+        margin-top: 0;
+    }
+}
+
+.verseset,
+.actionset {
 
     form {
         float: right;
@@ -122,12 +133,6 @@ q {
         .icon-public {
             margin-right: -0.5em;
         }
-    }
-    p:last-child {
-        margin-bottom: 0;
-    }
-    *:first-child, form:first-child + * {
-        margin-top: 0;
     }
 }
 
