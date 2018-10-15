@@ -40,6 +40,7 @@ import './comment';
 import './follow';
 import './sw_setup';
 import './homescreen';
+import './learn_setup';
 
 // CSS/Less
 import 'base.less';

@@ -9,8 +9,7 @@ module.exports = {
     context: __dirname,
 
     entry: {
-        base: './learnscripture/static/js/base.ts', // for base template
-        learn: './learnscripture/static/js/learn_setup.js', // for learn page template
+        base: './learnscripture/static/js/base.ts',
     },
     output: {
         path: path.resolve(__dirname, 'learnscripture/static/webpack_bundles'),

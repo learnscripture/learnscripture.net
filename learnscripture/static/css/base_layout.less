@@ -1,217 +1,196 @@
 @mainSidePadding:      20px;
 @smallerMainSidePadding:   6px;
 
-body.base-page {
-    --mainSidePadding: @mainSidePadding;
-    --mainBottomPadding: var(--mainSidePadding);
-}
-
-// A lot of this should end up inside a `.base-page` selector
-
-body {
-    padding-top: @topbarHeight; /* make the container go all the way to the bottom of the topbar */
-    background-attachment: fixed;
-}
-
-a[name="id-page-top"] {
-    position: relative;
-    top: -100px; // Take it back above the fixed header.
-    opacity: 0;
-}
-
-.container > footer p {
-    text-align: center; /* center align it with the container */
-}
-
-
 /* downsize our container to make the content feel a bit tighter and more cohesive. NOTE: this removes two full columns from the grid, meaning you only go to 14 columns and not 16. */
 @maxPageWidth: 860px;
 
-nav.topbar-new {
-    width: @maxPageWidth;
-    margin: auto;
-    .nav-item {
-        > a {
-            padding-left: 0.5em;
-            padding-right: 0.5em;
-            padding-top: 8px;
-            padding-bottom: 9px;
-        }
+body.base-page {
+    --mainSidePadding: @mainSidePadding;
+    --mainBottomPadding: var(--mainSidePadding);
+    padding-top: @topbarHeight; /* make the container go all the way to the bottom of the topbar */
+    background-attachment: fixed;
+
+    a[name="id-page-top"] {
+        position: relative;
+        top: -100px; // Take it back above the fixed header.
+        opacity: 0;
     }
-}
 
-footer {
-    border: none;
-    border-radius: 6px;
-    padding-top: 1.3em;
-    padding-bottom: 5px;
-    > p:first-child {
-        margin-top: 0px;
+    .container > footer p {
+        text-align: center; /* center align it with the container */
     }
-}
 
-.container {
-    width: @maxPageWidth;
-}
-
-.maincontent {
-    padding-top: 0;
-    padding-bottom: var(--mainBottomPadding);
-    padding-left: var(--mainSidePadding);
-    padding-right: var(--mainSidePadding);
-}
-
-/* The white background content wrapper */
-.maincontent {
-    background-color: #fff;
-    .border-radius(0 0 6px 6px);
-}
-
-/* Page header tweaks */
-.page-header {
-    margin-bottom: 0;
-    border-bottom: 1px solid var(--bgBorderColor);
-    background-color: var(--bgColor1);
-    h1 {
-        margin-top: 0;
-        margin-bottom: 0;
-    }
-    padding: 20px var(--mainSidePadding) 20px;
-}
-
-.page-header, .message-container {
-    margin-left: ~"calc(0px - var(--mainSidePadding))";
-    margin-right: ~"calc(0px - var(--mainSidePadding))";
-    margin-bottom: 0;
-    margin-top: 0;
-}
-
-// Right column tweaks
-
-#id-rightcolumn {
-    h3 {
-        border-bottom: 1px solid var(--bgBorderColor);
-        margin-bottom: 0px;
-    }
-}
-
-// Menu
-
-
-.dropdown-menu-right {
-    right: 0px;
-    left: auto;
-}
-
-
-////////////  Response to smaller screen /////////////
-
-/* Handhelds and narrow browsers */
-
-@media screen and (max-width: @narrowWidthBreak1) {
-
-    /* fluid width */
-    .container, nav.topbar-new {
-        width: auto;
-    }
-    /* no columns */
-    #id-leftcolumn {
-        width: auto;
-        float: none;
-    }
-    #id-rightcolumn {
-        width: auto;
-        float: none;
-        border-top: 1px solid var(--bgBorderColor);
-        padding-top: 5px;
-        margin-top: 5px;
-    }
-    .row > [class*="span"] {
-        display: block;
+    nav.topbar-new {
+        width: @maxPageWidth;
         margin: auto;
-    }
-    .row {
-        margin: auto;
-        .span7 {
-            width: 100%;
+        .nav-item {
+            > a {
+                padding-left: 0.5em;
+                padding-right: 0.5em;
+                padding-top: 8px;
+                padding-bottom: 9px;
+            }
         }
     }
 
-
-    /* squeeze spacings */
-    body.base-page {
-        --mainSidePadding: @smallerMainSidePadding;
+    footer {
+        border: none;
+        border-radius: 6px;
+        padding-top: 1.3em;
+        padding-bottom: 5px;
+        > p:first-child {
+            margin-top: 0px;
+        }
     }
 
-    .two-column-only {
-        display: none;
-    }
-
-    span.one-column-only {
-        display:inline;
-    }
-    div.one-column-only {
-        display:block;
+    .container {
+        width: @maxPageWidth;
     }
 
     .maincontent {
-        border-radius: 0px;
+        padding-top: 0;
+        padding-bottom: var(--mainBottomPadding);
+        padding-left: var(--mainSidePadding);
+        padding-right: var(--mainSidePadding);
+        background-color: #fff;
+        border-radius: 0 0 6px 6px;
     }
-}
 
-
-// If there is not much room vertical we squeeze paddings
-
-@media screen and (max-height: @shortHeightBreak1) {
-    /* squeeze paddings */
-
+    /* Page header */
     .page-header {
-        padding-top: 5px;
-        padding-bottom: 5px;
+        margin-bottom: 0;
+        border-bottom: 1px solid var(--bgBorderColor);
+        background-color: var(--bgColor1);
+        h1 {
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+        padding: 20px var(--mainSidePadding) 20px;
     }
 
-    /* no fixed top bar */
-    .topbar-wrapper {
-        position: static;
+    .page-header, .message-container {
+        margin-left: ~"calc(0px - var(--mainSidePadding))";
+        margin-right: ~"calc(0px - var(--mainSidePadding))";
+        margin-bottom: 0;
+        margin-top: 0;
     }
 
-    body {
+    // Right column tweaks
+
+    #id-rightcolumn {
+        h3 {
+            border-bottom: 1px solid var(--bgBorderColor);
+            margin-bottom: 0px;
+        }
+    }
+
+    // Menu
+    .dropdown-menu-right {
+        right: 0px;
+        left: auto;
+    }
+
+    ////////////  Response to smaller screen /////////////
+
+    /* Handhelds and narrow browsers */
+
+    @media screen and (max-width: @narrowWidthBreak1) {
+
+        --mainSidePadding: @smallerMainSidePadding;
+
+        /* fluid width */
+        .container, nav.topbar-new {
+            width: auto;
+        }
+        /* no columns */
+        #id-leftcolumn {
+            width: auto;
+            float: none;
+        }
+        #id-rightcolumn {
+            width: auto;
+            float: none;
+            border-top: 1px solid var(--bgBorderColor);
+            padding-top: 5px;
+            margin-top: 5px;
+        }
+        .row > [class*="span"] {
+            display: block;
+            margin: auto;
+        }
+        .row {
+            margin: auto;
+            .span7 {
+                width: 100%;
+            }
+        }
+
+        .two-column-only {
+            display: none;
+        }
+
+        span.one-column-only {
+            display:inline;
+        }
+        div.one-column-only {
+            display:block;
+        }
+
+        .maincontent {
+            border-radius: 0px;
+        }
+    }
+
+
+    // If there is not much room vertical we squeeze paddings
+
+    @media screen and (max-height: @shortHeightBreak1) {
+        /* squeeze paddings */
         padding-top: 0px;
+
+        .page-header {
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+
+        /* no fixed top bar */
+        .topbar-wrapper {
+            position: static;
+        }
     }
 
-}
 
-
-// Squeeze the primary nav if horizontal space is limited
-@media screen and (max-width: 600px) {
-    .primary-nav .nav-item:not(.spacer):nth-child(4) {
-        display: none;
+    // Squeeze the primary nav if horizontal space is limited
+    @media screen and (max-width: 600px) {
+        .primary-nav .nav-item:not(.spacer):nth-child(4) {
+            display: none;
+        }
     }
-}
 
-@media screen and (max-width: 550px) {
-    .primary-nav .nav-item:not(.spacer):nth-child(3) {
-        display: none;
+    @media screen and (max-width: 550px) {
+        .primary-nav .nav-item:not(.spacer):nth-child(3) {
+            display: none;
+        }
     }
-}
 
-@media screen and (max-width: 450px) {
-    .primary-nav .nav-item:not(.spacer):nth-child(2) {
-        display: none;
+    @media screen and (max-width: 450px) {
+        .primary-nav .nav-item:not(.spacer):nth-child(2) {
+            display: none;
+        }
     }
-}
 
-@media screen and (max-width: 400px) {
-    .donation-drive.notice .donation-drive-stats .chart-container {
-        width: 75px;
+    @media screen and (max-width: 400px) {
+        .donation-drive.notice .donation-drive-stats .chart-container {
+            width: 75px;
+        }
     }
-}
 
-@media screen and (max-width: @narrowWidthBreak2) {
-    // Less padding on table
-    table {
-        td, th {
-            padding: 5px 6px 4px;
+    @media screen and (max-width: @narrowWidthBreak2) {
+        // Less padding on table
+        table {
+            td, th {
+                padding: 5px 6px 4px;
+            }
         }
     }
 }
