@@ -64,20 +64,21 @@
         <div>Current streak:
           <span id="id-current-streak" class="streak">&nbsp;</span></div>
       </div>
-      <div id="id-heatmap-stat-selector" class="pills">
-        {% for value, caption in heatmap_stats_types %}
-          <span
-             data-heatmap-select-stat-parent
-             {% if request.identity.heatmap_default_stats_type == value %}
-             class="active"
-             {% endif %}
-             >
-            <a href="#"
-               data-heatmap-select-stat="{{ value }}">{{ caption }}</a>
-          </span>
-        {% endfor %}
-        </span>
-      </div>
+      <form id="id-heatmap-stat-selector">
+        <div class="input radioinput">
+          <ul>
+            {% for value, caption in heatmap_stats_types %}
+              <li>
+                <input type="radio" name="stat"
+                       value="{{ value }}"
+                       id="id-heatmap-select-stat-{{ value }}"
+                       {% if request.identity.heatmap_default_stats_type == value %}checked{% endif %}
+                       ><label for="id-heatmap-select-stat-{{ value }}">{{ caption }}</label>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </form>
       <p class="note">The calendar and streaks work in the UTC/GMT timezone</p>
     </div>
   {% endif %}
