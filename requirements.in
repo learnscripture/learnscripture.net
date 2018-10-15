@@ -10,7 +10,6 @@ billiard==3.5.0.2
 celery==4.0.2
 certifi==2017.7.27.1
 concurrent-log-handler==0.9.7
-dj_pagination==2.2.1
 django-anymail==0.10
 django-autocomplete-light==3.2.10
 django-fiber==1.4.1

@@ -26,7 +26,6 @@ coverage==4.4.1
 cryptography==2.1.4       # via paramiko
 cssselect==1.0.3          # via pyquery
 decorator==4.2.1          # via ipython, traitlets
-dj_pagination==2.2.1
 django-anymail==0.10
 django-appconf==1.0.2     # via django-compressor
 django-autocomplete-light==3.2.10
