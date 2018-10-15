@@ -212,7 +212,6 @@ MIDDLEWARE = [
         (DEVBOX, 'learnscripture.middleware.debug_middleware'),
         (DEBUG, 'learnscripture.middleware.paypal_debug_middleware'),
         (True, 'learnscripture.middleware.identity_middleware'),
-        (True, 'dj_pagination.middleware.PaginationMiddleware'),
         (True, 'fiber.middleware.AdminPageMiddleware'),
     ]
     if b
@@ -279,7 +278,6 @@ INSTALLED_APPS = [
     'compressor',  # for fiber
     'easy_thumbnails',
     'fiber',
-    'dj_pagination',
     'raven.contrib.django.raven_compat',
     'spurl',
     'paypal.standard.ipn',
@@ -472,8 +470,6 @@ CAMPAIGN_CONTEXT_PROCESSORS = [
     'learnscripture.context_processors.campaign_context_processor'
 ]
 
-
-PAGINATION_DEFAULT_WINDOW = 1
 
 # Raven
 
