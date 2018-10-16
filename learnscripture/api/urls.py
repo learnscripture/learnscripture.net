@@ -25,5 +25,6 @@ urlpatterns = [
     url(r'^addcomment/$', handlers.AddComment.as_view(), name='learnscripture.api.addcomment'),
     url(r'^hidecomment/$', handlers.HideComment.as_view(), name='learnscripture.api.hidecomment'),
     url(r'^follow/$', handlers.Follow.as_view(), name='learnscripture.api.follow'),
+    url(r'^unfollow/$', handlers.UnFollow.as_view(), name='learnscripture.api.unfollow'),
     url(r'^savemiscpreferences/$', handlers.SaveMiscPreferences.as_view(), name='learnscripture.api.savemiscpreferences'),
 ]
