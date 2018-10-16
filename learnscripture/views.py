@@ -32,7 +32,7 @@ from bibleverses.languages import LANGUAGE_CODE_INTERNAL, LANGUAGES
 from bibleverses.models import (MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, TextType, TextVersion, VerseSet,
                                 VerseSetType, get_passage_sections, is_continuous_set)
 from bibleverses.parsing import (internalize_localized_reference, localize_internal_reference, parse_break_list,
-                                 parse_unvalidated_localized_reference)
+                                 parse_unvalidated_localized_reference, parse_validated_internal_reference)
 from bibleverses.signals import public_verse_set_created
 from events.models import Event
 from groups.forms import EditGroupForm
@@ -540,7 +540,7 @@ def choose(request):
 
     verse_sets = verse_sets.order_by('name').prefetch_related('verse_choices')
 
-    query = verseset_search_form.cleaned_data['query']
+    query = verseset_search_form.cleaned_data['query'].strip()
     if query:
         language_code = default_bible_version.language_code
         verse_sets = VerseSet.objects.search(language_code, verse_sets, query)
@@ -554,6 +554,26 @@ def choose(request):
         verse_sets = verse_sets.order_by('-popularity', '-id')
     elif order == VERSE_SET_ORDER_AGE:
         verse_sets = verse_sets.order_by('-date_added', '-id')
+
+    if set_type != VerseSetType.SELECTION and query != "":
+        # Does the query look like a Bible reference?
+        try:
+            parsed_ref = parse_unvalidated_localized_reference(
+                language_code,
+                query,
+                allow_whole_book=False,
+                allow_whole_chapter=True)
+        except InvalidVerseReference:
+            parsed_ref = None
+
+        if parsed_ref is not None:
+            # TODO It would also be nice to detect the case where
+            # is no complete match for the searched passage.
+            if len(verse_sets) == 0:
+                c['create_passage_set_prompt'] = {
+                    'internal_reference': parsed_ref.to_internal().canonical_form(),
+                    'localized_reference': parsed_ref.canonical_form(),
+                }
 
     PAGE_SIZE = 10
 
@@ -873,8 +893,18 @@ def create_or_edit_set(request, set_type=None, slug=None):
             return HttpResponseRedirect(reverse('view_verse_set', kwargs=dict(slug=verse_set.slug)))
 
     else:
-        form = VerseSetForm(instance=verse_set)
+        initial = {}
+        if mode == 'create' and set_type == VerseSetType.PASSAGE and 'ref' in request.GET:
+            try:
+                parsed_ref = parse_validated_internal_reference(request.GET['ref'])
+            except InvalidVerseReference:
+                parsed_ref = None
+            if parsed_ref is not None:
+                localized_reference = parsed_ref.translate_to(language_code).canonical_form()
+                initial['name'] = localized_reference
+                c['initial_localized_reference'] = localized_reference
 
+        form = VerseSetForm(instance=verse_set, initial=initial)
         if verse_set is not None:
             localized_reference_list = [vc.get_localized_reference(language_code)
                                         for vc in verse_set.verse_choices.all()]

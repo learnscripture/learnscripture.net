@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.urls import reverse
 from accounts.models import Identity
 from awards.models import AwardType, TrendSetterAward
 from bibleverses.models import VerseSet
@@ -14,6 +15,9 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
 
     fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
 
+    def _get_current_identity(self):
+        return Identity.objects.order_by('-date_created')[0]
+
     def test_search(self):
         self.get_url('choose')
         self.click("#id-choose-verseset .accordion-heading")
@@ -22,6 +26,24 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
 
         self.assertTextPresent("Basic Gospel")
         self.assertTextAbsent("Bible 101")
+
+    def test_search_for_non_existent_passage_set(self):
+        identity, account = self.create_account()
+        self.login(account)
+        self.get_url('choose')
+        self.click("#id-choose-verseset .accordion-heading")
+        self.fill({'input[name="set_type"]': "PASSAGE"})
+        self.fill({"#id_query": "Eph 2"})
+        self.click("#id-search-btn")
+
+        self.assertTextPresent("You could")
+        self.assertTextPresent("create a passage set for Ephesians 2")
+        self.follow_link("a[data-create-passage-set]")
+        self.assertUrlsEqual(reverse('create_passage_set') + "?ref=BOOK48+2")
+        # Should have already loaded the verses into the page:
+        self.assertTextPresent('Ephesians 2:8')
+        self.assertTextPresent('Ephesians 2:9')
+        self.assertTextPresent('For by grace are ye saved')
 
     def test_verse_set_popularity_tracking(self):
         # Frig a quantity to make test easier
@@ -49,9 +71,7 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
         self.assertEqual(Event.objects.filter(event_type=EventType.STARTED_LEARNING_VERSE_SET).count(),
                          1)
 
-    def test_double_choose(self):
-        ids = list(Identity.objects.all())
-
+    def test_choose_verse_set(self):
         self.get_url('choose')
         self.click("#id-choose-verseset .accordion-heading")
 
@@ -60,16 +80,20 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
 
         self.set_preferences()
 
-        identity = Identity.objects.exclude(id__in=[i.id for i in ids]).get()
+        identity = self._get_current_identity()
 
         self.assertEqual(vs.verse_choices.count(),
                          identity.verse_statuses.filter(ignored=False).count())
 
+    def test_double_choose_verse_set(self):
+        vs = VerseSet.objects.get(name="Psalm 23")
+        self.test_choose_verse_set()
         # Choose again
         self.get_url('choose')
         self.click("#id-choose-verseset .accordion-heading")
         self.click("#id-learn-verseset-btn-%d" % vs.id)
 
+        identity = self._get_current_identity()
         self.assertEqual(vs.verse_choices.count(),
                          identity.verse_statuses.filter(ignored=False).count())
 
@@ -88,6 +112,7 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
         # Check we can actually click on 'Learn' and it works.
         self.click("#id-choose-individual input[name=learn_now]")
         self.set_preferences(wait_for_reload=True)
+        self.wait_until_loaded("#id-verse-header h2")
         self.assertEqual(self.get_element_text("#id-verse-header h2"), "John 3:16")
 
     def test_choose_individual_verse_learn_later(self):
