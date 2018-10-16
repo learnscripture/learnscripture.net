@@ -169,6 +169,12 @@ var setupCreateVerseSetControls = function() {
     $('#id-create-selection-set #id_lookup').click(quickFindAndHandleResults(selectionLoadResults, false));
     $('#id-create-passage-set #id_lookup').click(quickFindAndHandleResults(passageLoadResults, true));
 
+    var $initialRef = $('[name="initial_localized_reference"]');
+    if ($initialRef.length > 0 && $initialRef.val() != "") {
+        $('#id_quick_find').val($initialRef.val());
+        $('#id-create-passage-set #id_lookup').trigger('click');
+    }
+
 };
 
 $(document).ready(function() {

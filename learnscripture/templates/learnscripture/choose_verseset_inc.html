@@ -6,6 +6,11 @@
   <p>No verse sets found that match your query.</p>
 {% endif %}
 
-{% include "learnscripture/choose_verseset_results_inc.html" %}
+{% if create_passage_set_prompt %}
+  <p>You could <a data-create-passage-set href="{% url 'create_passage_set' %}?ref={{ create_passage_set_prompt.internal_reference|urlencode }}">create a passage set for {{ create_passage_set_prompt.localized_reference }}</a>.</p>
+{% endif %}
 
-{% include "learnscripture/choose_verseset_show_more_inc.html" %}
+{% include "learnscripture/choose_verseset_results_inc.html" %}
+{% if results.items %}
+  {% include "learnscripture/choose_verseset_show_more_inc.html" %}
+{% endif %}

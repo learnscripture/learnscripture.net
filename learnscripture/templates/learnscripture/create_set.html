@@ -148,6 +148,7 @@
       </script>
 
       <form id="id-verse-set-form" action="" method="POST">
+        <input type="hidden" name="initial_localized_reference" value="{{ initial_localized_reference }}">
         {% csrf_token %}
 
         <h3>Optional extra info</h3>
