@@ -4,13 +4,11 @@
 
   {% if request.identity %}
     {# If no request.identity, then there is no data that could be lost, so no need for warning #}
-    <div class="warning guest-only">
-      <p><span class="label warning">Warning:</span> As a guest, your data will expire in {{ request.identity.expires_on|timeuntil }}</span>
-        (assuming you don't clear your browser cookies).</p>
+    <p><span class="warning">Warning:</span> As a guest, your data will expire in {{ request.identity.expires_on|timeuntil }}</span>
+      (assuming you don't clear your browser cookies).</p>
 
-      <p><a href="{% url 'signup' %}?next={{ request.get_full_path|urlencode }}">Create an account</a> to save progress permanently,
-        or <a href="{% url 'login' %}">sign in</a>.</p>
-    </div>
+    <p><a href="{% url 'signup' %}?next={{ request.get_full_path|urlencode }}">Create an account</a> to save progress permanently,
+      or <a href="{% url 'login' %}">sign in</a>.</p>
   {% endif %}
 
 {% endif %}

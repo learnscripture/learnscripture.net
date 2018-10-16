@@ -7,15 +7,12 @@
 
 .help-block {
     display: block;
-    color: @gray;
+    color: #888;
 }
 
 input,
 select,
 textarea {
-    #font > .sans-serif(normal, @basefont);
-    font-size: @basefont;
-    color: @grayDark;
     border: 1px solid #ccc;
     border-radius: 3px;
     padding: 4px;
@@ -41,7 +38,7 @@ textarea {
 .btn {
     // See also .buttonradios() mixin which uses similar styles for coloring
     padding: 5px 14px 6px;
-    font-size: @basefont;
+    font-size: @baseFontSize;
     line-height: normal;
     cursor: pointer;
     display: inline-block;
