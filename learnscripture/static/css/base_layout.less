@@ -16,8 +16,15 @@ body.base-page {
         opacity: 0;
     }
 
-    .container > footer p {
-        text-align: center; /* center align it with the container */
+
+    .container {
+        width: @maxPageWidth;
+        > footer p {
+            text-align: center; /* center align it with the container */
+        }
+        margin-left: auto;
+        margin-right: auto;
+        .clearfix();
     }
 
     nav.topbar-new {
@@ -43,10 +50,6 @@ body.base-page {
         }
     }
 
-    .container {
-        width: @maxPageWidth;
-    }
-
     .maincontent {
         padding-top: 0;
         padding-bottom: var(--mainBottomPadding);
@@ -68,6 +71,11 @@ body.base-page {
         padding: 20px var(--mainSidePadding) 20px;
     }
 
+    .page-header + form,
+    #id-leftcolumn div.borderedbox:first-child {
+        margin-top: @baseGapSize;
+    }
+
     .page-header, .message-container {
         margin-left: ~"calc(0px - var(--mainSidePadding))";
         margin-right: ~"calc(0px - var(--mainSidePadding))";
@@ -81,6 +89,11 @@ body.base-page {
         h3 {
             border-bottom: 1px solid var(--bgBorderColor);
             margin-bottom: 0px;
+            margin-top: 2 * @baseGapSize;
+
+            &:first-child {
+                margin-top: @baseGapSize;
+            }
         }
     }
 
@@ -90,6 +103,26 @@ body.base-page {
         left: auto;
     }
 
+    .columns2 {
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: space-between;
+
+        > div {
+            flex: 0 0 ~"calc(50% - 20px)";
+            box-sizing: border-box;
+        }
+
+        > #id-leftcolumn, > #id-rightcolumn {
+            flex: 0 0 auto;
+        }
+        #id-leftcolumn {
+            width: 580px;
+        }
+        #id-rightcolumn {
+            width: 220px;
+        }
+    }
     ////////////  Response to smaller screen /////////////
 
     /* Handhelds and narrow browsers */
@@ -103,37 +136,17 @@ body.base-page {
             width: auto;
         }
         /* no columns */
-        #id-leftcolumn {
-            width: auto;
-            float: none;
-        }
-        #id-rightcolumn {
-            width: auto;
-            float: none;
-            border-top: 1px solid var(--bgBorderColor);
-            padding-top: 5px;
-            margin-top: 5px;
-        }
-        .row > [class*="span"] {
+        .columns2 {
             display: block;
-            margin: auto;
-        }
-        .row {
-            margin: auto;
-            .span7 {
-                width: 100%;
+            #id-leftcolumn {
+                width: auto;
             }
-        }
-
-        .two-column-only {
-            display: none;
-        }
-
-        span.one-column-only {
-            display:inline;
-        }
-        div.one-column-only {
-            display:block;
+            #id-rightcolumn {
+                width: auto;
+                border-top: 1px solid var(--bgBorderColor);
+                padding-top: 1em;
+                margin-top: 1em;
+            }
         }
 
         .maincontent {

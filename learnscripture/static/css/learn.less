@@ -379,7 +379,9 @@ body.learn-page {
         border: 2px solid;
         padding: 4px @word-padding-horizontal;
         margin: @word-margin-top @word-margin-left;
-        .gradientBar(#e8e8e8, #C0C0C0);
+        background-image: linear-gradient(#e8e8e8, #C0C0C0);
+        border-color: #d8d8d8 #c0c0c0 #9a9a9a;
+        text-shadow: 0 -1px 0 rgba(0,0,0,.25);
         .normalWordBorderColors();
         &.clickable {
             cursor: pointer;

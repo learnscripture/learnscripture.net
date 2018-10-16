@@ -82,7 +82,6 @@ module.exports = {
         extensions: ['.ts', '.js', '.elm'],
         modules: [
             "node_modules",
-            path.resolve(__dirname, 'learnscripture/static/bootstrap/js'),
             path.resolve(__dirname, 'learnscripture/static/lib'),
             path.resolve(__dirname, 'learnscripture/static/js'),
             path.resolve(__dirname, 'learnscripture/static/css'),
