@@ -212,6 +212,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         # Test focussed button
         time.sleep(0.2)
         self.press_enter('button.primary')
+        time.sleep(0.1)
         self.assertIn("He maketh me to lie down in green pastures",
                       self.get_element_text('.current-verse'))
 

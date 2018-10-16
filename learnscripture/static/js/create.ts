@@ -32,7 +32,7 @@ var addPassage = function(passageData) {
         $('#id-verse-list tbody').append(
             $('#id_verse_list_passage_row_template').render({ 'verseData': verseData }));
     });
-    $('#id-verse-list').show();
+    $('#id-verse-list, #id-verse-list table').show();
     var ref = passageData.localized_reference;
     var simplifiedRef = ref;
     var parsedRef = passageData.parsed_ref;
@@ -82,7 +82,7 @@ var passageSaveBtnClick = function(ev) {
     });
     $('#id-internal-reference-list').val(refs.join('|'));
     $('#id-break-list').val(breaks.join(','));
-    // continue with submit
+    $('#id-verse-set-form').submit();
 };
 
 var selectionLoadResults = function(results) {

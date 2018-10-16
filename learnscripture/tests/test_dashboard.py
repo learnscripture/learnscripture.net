@@ -154,7 +154,7 @@ class DashboardTestsBase(RequireExampleVerseSetsMixin):
         self.get_url('dashboard')
         self.assertTextPresent('Psalm 23')  # sanity check
 
-        self.submit('input[value^="Review one section"][name=reviewpassagenextsection]')
+        self.submit('input[name=reviewpassagenextsection]')
         self.assert_learning_localized_reference("Psalm 23:1")
 
         if self.is_full_browser_test:

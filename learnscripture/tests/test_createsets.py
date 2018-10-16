@@ -60,7 +60,7 @@ class CreateSetTests(FullBrowserTest):
         vs = VerseSet.objects.get()
         # Check editing doesn't break it
         self.get_url('edit_set', slug=vs.slug)
-        self.click("#id-save-btn")
+        self.submit("#id-save-btn")
 
         vs = VerseSet.objects.get()
         self.assertEqual([vc.internal_reference for vc in vs.verse_choices.all()],
@@ -74,7 +74,7 @@ class CreateSetTests(FullBrowserTest):
         # Add Gen 1:5
         self._add_ref("Genesis 1:5")
 
-        self.click("#id-save-btn")
+        self.submit("#id-save-btn")
 
         vs = VerseSet.objects.get(name='My set')
         self.assertEqual(len(vs.verse_choices.all()), 1)
@@ -86,7 +86,7 @@ class CreateSetTests(FullBrowserTest):
             self.get_url('edit_set', slug=vs.slug)
             self._add_ref(ref)
 
-            self.click("#id-save-btn")
+            self.submit("#id-save-btn")
 
             self.assertTextPresent("Verse set 'My set' saved")  # Checks we didn't get 500
 
@@ -162,7 +162,7 @@ class CreateSetTests(FullBrowserTest):
 
         self.get_url('edit_set', slug=vs.slug)
         self.click("#id-verse-list tbody tr:first-child td .icon-trash")
-        self.click("#id-save-btn")
+        self.submit("#id-save-btn")
 
         vs = VerseSet.objects.get(id=vs.id)
         vcs = vs.verse_choices.all()
@@ -193,7 +193,7 @@ class CreateSetTests(FullBrowserTest):
         self.click('#id-verse-list tbody tr:nth-child(3) input')
         self.click('#id-verse-list tbody tr:nth-child(9) input')
 
-        self.click("#id-save-btn")
+        self.submit("#id-save-btn")
         self.assertTrue(self.get_page_title().startswith("Verse set: Genesis 1"))
         self.assertTextPresent("And God called the light Day")
 
@@ -226,7 +226,7 @@ class CreateSetTests(FullBrowserTest):
         # Check boxes for Rom 3:25-26
         self.click('#id-verse-list tbody tr:nth-child(2) input')
 
-        self.click("#id-save-btn")
+        self.submit("#id-save-btn")
 
         self.assertTrue(self.get_page_title().startswith("Verse set: Romalılar 3:24-27"))
 
@@ -271,7 +271,7 @@ class CreateSetTests(FullBrowserTest):
         # Simple test - editing and pressing save should leave
         # everything the same.
         self.get_url('edit_set', slug=vs.slug)
-        self.click("#id-save-btn")
+        self.submit("#id-save-btn")
 
         vs = VerseSet.objects.get(id=vs.id)
         vcs = vs.verse_choices.all().order_by('set_order')
