@@ -593,6 +593,9 @@ class AddComment(ApiView):
             except Group.DoesNotExist:
                 return rc.BAD_REQUEST("Existing group_id required")
 
+            if not group.accepts_comments_from(account):
+                return validation_error_response({'message': 'You must be a member of this group to add a message'})
+
             comment = group.add_comment(author=account,
                                         message=message)
 

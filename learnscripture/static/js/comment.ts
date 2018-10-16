@@ -56,12 +56,10 @@ var setupCommentControls = function() {
                 dataType: 'json',
                 type: 'POST',
                 data: data,
-                success: function(data) {
-                    setTimeout(bindPostCommentClick, 500, $locator, $commentBoxDiv, $commentBox);
-                    // data contains new comment to add.
-                    var newItem = $('#id-comment-template').render({ 'comment': data });
+                success: function(returnedData) {
+                    // returnedData contains new comment to add.
+                    var newItem = $('#id-comment-template').render({ 'comment': returnedData });
                     $commentBoxDiv.remove();
-                    // TODO - should come after the 'Add comment' link
                     if (position == 'top') {
                         $commentListDiv.prepend(newItem);
                         $locator.prependTo($locator.parent());
@@ -81,7 +79,7 @@ var setupCommentControls = function() {
                 }
             });
         };
-        $commentBoxDiv.find('.add-comment-btn').one('click', postCommentClick);
+        $commentBoxDiv.find('.add-comment-btn').on('click', postCommentClick);
     }
 
     if ($('.activityitem').length == 1) {
