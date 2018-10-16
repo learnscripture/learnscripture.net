@@ -193,18 +193,19 @@ $(document).ready(function() {
             if (moreResultsContainer != null && moreResultsContainer != "") {
                 // Use 'on' binding on $staticParent because this is an element
                 // that doesn't get replaced, while its children can be.
-                $staticParent.on('click', moreResultsContainer + ' a[data-pjax]', function(ev) {
+                $staticParent.on('click', moreResultsContainer + ' a[data-pjax-more]', function(ev) {
                     var $moreResults = $staticParent.find(moreResultsContainer);
                     // We always want to eliminate the old 'more results' container,
                     // replacing it with the results, after we've loaded them. We
                     // will also have a new 'more results' container, nested inside
                     // the old one, which we mustn't remove.
 
-                    // TODO this probable has race conditions if multiple PJAX
+                    // TODO this probably has race conditions if multiple PJAX
                     // requests are running at once.
-                    $(document).one('pjax:success', function() {
+                    $(document).one('pjax:success', function(ev) {
                         $moreResults.find("> :first-child").unwrap();
                     })
+
                     // Constraints for PJAX "show more":
                     // - we want bots to be able to browse everything on the site
                     //   using "load more" links, whether they execute Javascript or
@@ -217,6 +218,7 @@ $(document).ready(function() {
                     // - users shouldn't see URLs with 'from' bit, so they won't share them.
                     //   This means 'push: false'
                     // - bots should be told `noindex, follow` for these pages
+
                     $.pjax.click(ev, {
                         container: moreResultsContainer,
                         push: false,
@@ -226,6 +228,25 @@ $(document).ready(function() {
             }
         });
     }
+
+    $(document).on('pjax:send', function(ev) {
+        var $container = $(ev.target);
+        $container.addClass("waiting-pjax");
+        var pos = $container.offset();
+        $('#id-pjax-loading').css({ "left": pos.left.toString() + "px", "top": pos.top.toString() + "px" }).show();
+    });
+
+    // We have to use 'pjax:beforeReplace' here instead of 'pjax:complete'
+    // because when we replace the HTML in some cases we delete the "Show more"
+    // link that triggered the pjax call. Since the event is triggered from the
+    // clicked element, this means that the pjax:complete event doesn't
+    // propagate up to document.
+    $(document).on('pjax:beforeReplace', function(ev) {
+        var $container = $(ev.target);
+        $container.removeClass("waiting-pjax");
+        $('#id-pjax-loading').hide();
+    });
+
 });
 
-$.pjax.defaults.timeout = 3000
+$.pjax.defaults.timeout = 5000
