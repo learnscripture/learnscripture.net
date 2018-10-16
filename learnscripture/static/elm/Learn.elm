@@ -640,7 +640,7 @@ viewMain model helpTour =
 viewTopNav : Model -> H.Html Msg
 viewTopNav model =
     H.div [ A.class "topbar-wrapper" ]
-        [ H.nav [ A.class "topbar-new" ]
+        [ H.nav [ A.class "topbar" ]
             [ H.div [ A.class "nav-item return-link" ]
                 [ navLink
                     [ A.href "#"
