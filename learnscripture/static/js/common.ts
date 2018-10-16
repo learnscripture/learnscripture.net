@@ -83,51 +83,11 @@ export const handleFormValidationErrors = function(form, formPrefix, errorRespon
 //   handling known user error cases.
 // * for non-essential things (e.g. GET requests for score logs)
 //   just silently fail
-// * for essential things (e.g. POST requests that save test scores to server)
-//   use:
-//       retry: ajaxRetryOptions,
-//       error: ajaxRetryFailed,
-//       success: ajaxRetrySucceeded
-//       (or call ajaxRetrySucceeded at beginning of success callback)
 export const ajaxFailed = function(jqXHR, textStatus, errorThrown) {
-
     alert(`The server could not be contacted or an error occurred (${jqXHR.responseText}). Please try again.`);
     console.log("AJAX error: %s, %s, %o", textStatus, errorThrown, jqXHR);
 };
 
-var ajaxRetryTick = function(info) {
-    var text = "Data not saved. Retrying "
-        + info.failures.toString() + " of "
-        + (info.attempts - 1).toString() + // -1 because we are want to display '1 of 10' the first time we get an error.
-        "...";
-    indicateLoading();
-    $('#id-ajax-errors').html('<span>' + text + '</span>');
-};
-
-export const ajaxRetryOptions = {
-    tick: ajaxRetryTick,
-    attempts: 11
-};
-
-export const ajaxRetryFailed = function(jqXHR, textStatus, errorThrown) {
-    $('#id-ajax-status').show();
-    $('#id-ajax-loading').hide();
-    $('#id-ajax-errors').html('<span>Data not saved. Please check internet connection</span>');
-};
-
-export const indicateLoading = function() {
-    $('#id-ajax-status').show();
-    $('#id-ajax-loading').show();
-};
-
-export const hideLoadingIndicator = function() {
-    $('#id-ajax-status').hide();
-    $('#id-ajax-loading').hide();
-};
-
-export const ajaxRetrySucceeded = function() {
-    $('#id-ajax-errors').html('');
-};
 
 export const isTouchDevice = function() {
     return 'ontouchstart' in window;
@@ -202,9 +162,6 @@ $(document).ready(function() {
     //     }
     // });
 
-    $(document).ajaxStop(function() {
-        hideLoadingIndicator();
-    });
 
     // PJAX
     $('form[data-pjax-results-container]').each(function(idx, elem) {

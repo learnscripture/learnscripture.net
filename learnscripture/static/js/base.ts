@@ -1,5 +1,4 @@
 /// <reference path="../typings/jsrender-settings.d.ts" />
-/// <reference path="../typings/jquery-ajaxretry.d.ts" />
 /// <reference path="../typings/jquery-extra.d.ts" />
 
 
@@ -12,8 +11,6 @@ import "jquery-ui/ui/widgets/sortable";
 import 'autosize';
 import 'jquery-pjax';
 
-// bundled libs
-import 'jquery.ajaxretry';
 
 // Ours
 
