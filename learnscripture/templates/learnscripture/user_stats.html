@@ -15,6 +15,9 @@
            var cols = r.split(/,/);
            return [new Date(cols[0]), parseInt(cols[1], 10), parseInt(cols[2], 0)];
          })
+         if (dataRows.length == 0) {
+             return;
+         }
 
          var now = new Date().getTime();
          var g = new Dygraph(
