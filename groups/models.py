@@ -115,7 +115,7 @@ class Group(models.Model):
 
     def add_comment(self, author=None, message=None):
         if not self.accepts_comments_from(author):
-            return None
+            raise ValueError("{0} not allowed to post to {1}".format(author.username, self.name))
 
         return self.comments.create(author=author,
                                     message=message)
