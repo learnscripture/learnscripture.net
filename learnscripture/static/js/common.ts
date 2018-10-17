@@ -139,30 +139,6 @@ $(document).ready(function() {
         $('#id_enable_vibration').closest('ul').parent().hide();
     }
 
-    // Scrolling of #id-ajax-status
-    // var TOPBAR_HEIGHT = 36;
-    // $(window).scroll(function(ev) {
-    //     // We want ajax div to stay underneath the topbar.
-    //     // topbar can be either fixed or absolute depending on screen size.
-
-    //     // TODO - rework
-
-    //     var $tb = $('.topbar');
-    //     var $aj = $('#id-ajax-status');
-    //     var height;
-    //     if ($tb.css('position') == 'fixed') {
-    //         height = TOPBAR_HEIGHT;
-    //     } else {
-    //         // static
-    //         height = Math.max(0, TOPBAR_HEIGHT - window.scrollY);
-    //     }
-    //     var heightString = height.toString() + "px";
-    //     if ($aj.css('top') != heightString) {
-    //         $aj.css('top', heightString);
-    //     }
-    // });
-
-
     // PJAX
     $('form[data-pjax-results-container]').each(function(idx, elem) {
 
@@ -240,7 +216,7 @@ $(document).ready(function() {
     // because when we replace the HTML in some cases we delete the "Show more"
     // link that triggered the pjax call. Since the event is triggered from the
     // clicked element, this means that the pjax:complete event doesn't
-    // propagate up to document.
+    // propagate up to document (it seems).
     $(document).on('pjax:beforeReplace', function(ev) {
         var $container = $(ev.target);
         $container.removeClass("waiting-pjax");
