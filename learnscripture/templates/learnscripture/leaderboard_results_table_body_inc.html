@@ -1,0 +1,18 @@
+{% load humanize %}
+
+{% for account in results.items %}
+  <tr>
+    <td><a href="{% url 'user_stats' account.username %}">{{ account.username }}</a></td>
+    <td>{{ account.points|intcomma }}</td>
+    <td>{{ account.rank|intcomma }}</td>
+    <td>{{ account.num_verses|intcomma }}</td>
+  </tr>
+{% endfor %}
+
+{% if results.empty %}
+  <tr>
+    <td colspan="4">No users found.</td>
+  </tr>
+{% else %}
+  {% include "learnscripture/leaderboard_results_show_more_inc.html" %}
+{% endif %}

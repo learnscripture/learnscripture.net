@@ -5,10 +5,10 @@
   <head>
     <meta charset="utf-8">
     <title>{% block title %}{% if title %}{{ title }} - {% endif %}LearnScripture.net{% endblock %}</title>
-    {% if noindex %}
-      <meta name="robots" content="noindex">
-    {% endif %}
     <meta name="description" content="{% block description %}The fun, easy and social way to memorize the Bible online{% endblock %}">
+    {% if noindex_but_follow  %}
+      <meta name="robots" content="noindex, follow">
+    {% endif %}
     {% include "learnscripture/head_inc.html" %}
     {% render_bundle 'base' 'css' 'DEFAULT' attrs='charset="utf-8"' %}
 
@@ -17,60 +17,52 @@
   </head>
 
   <body class="base-page {% block body_extra_class %}{% endblock %}" data-theme="{{ current_theme }}">
-    <div class="topbar">
-      <div class="fill">
-        <div class="container">
-          <div class="topbarinner">
-            {% if request.identity.default_to_dashboard %}
-              <a class="brand" href="/dashboard/" title="Dashboard">Dashboard</a>
-            {% else %}
-              <a class="brand" href="/">Learn Scripture</a>
-            {% endif %}
-            <ul class="nav primary-nav">
-              {% for m in menuitems %}
-                <li {% if m.active %}class="active"{% endif %}><a href="{{ m.path }}">{{ m.caption }}</a></li>
-              {% endfor %}
-            </ul>
-            <div class="nav secondary-nav">
-              <ul>
-                <li class="dropdown" data-dropdown="dropdown">
-                  <a href="#" id="id-session-menu" class="dropdown-toggle">{% if request_account %}{{ request_account.username }}{% else %}Guest{% endif %}</a>
-                  <ul class="dropdown-menu">
-                    {% if not request_account %}
-                      <li><a href="{% url 'login' %}"><i class="icon-fw icon-login"></i> Sign in</a></li>
-                      <li><a href="{% url 'signup' %}?next={{ request.get_full_path|urlencode }}"><i class="icon-fw icon-account"></i> Create account</a></li>
-                    {% endif %}
-                    <li><a href="{% url 'preferences' %}?next={{ request.path_info }}" class="preferences-link"><i class="icon-fw icon-preferences"></i> Preferences</a></li>
-                    {% if request_account %}
-                      <li><a href="{% url 'account_details' %}"><i class="icon-fw icon-account"></i> Account details</a></li>
-                      <li><a href="{% url 'user_verses' %}"><i class="icon-fw icon-progress"></i> Verse progress</a></li>
-                      <li><a href="{% url 'user_verse_sets' %}"><i class="icon-fw icon-verse-sets"></i> Verse sets</a></li>
-                      <li><a href="{% url 'user_stats' request_account.username %}"><i class="icon-fw icon-stats"></i> Stats</a></li>
-                      <li><a href="#" class="logout-link"><i class="icon-fw icon-logout"></i> Log out</a></li>
-                    {% endif %}
-                  </ul>
-                </li>
-              </ul>
+    <div class="topbar-wrapper">
+      <div class="container">
+        <nav class="topbar primary-nav">
+          {% if not use_dashboard_nav %}
+            <div class="nav-item">
+              {% if request.identity.default_to_dashboard %}
+                <a class="brand" href="/dashboard/" title="Dashboard">Dashboard</a>
+              {% else %}
+                <a class="brand" href="/">Learn Scripture</a>
+              {% endif %}
             </div>
+          {% endif %}
+          {% for m in menuitems %}
+            <div class="nav-item {% if m.active %}active{% endif %}"><a href="{{ m.path }}">{{ m.caption }}</a></div>
+          {% endfor %}
+          <div class="nav-item spacer"></div>
+          <div class="nav-dropdown">
+            <div class="dropdown-heading nav-item">
+              <a href="#">
+                {% if request_account %}{{ request_account.username }}{% else %}Guest{% endif %} <i class="icon-caret-down"></i>
+              </a>
+            </div>
+            <ul class="nav-dropdown-menu">
+              {% if not request_account %}
+                <li><a href="{% url 'login' %}"><i class="icon-fw icon-login"></i> Sign in</a></li>
+                <li><a href="{% url 'signup' %}?next={{ request.get_full_path|urlencode }}"><i class="icon-fw icon-account"></i> Create account</a></li>
+              {% endif %}
+              <li><a href="{% url 'preferences' %}?next={{ request.path_info }}" class="preferences-link"><i class="icon-fw icon-preferences"></i> Preferences</a></li>
+              {% if request_account %}
+                <li><a href="{% url 'account_details' %}"><i class="icon-fw icon-account"></i> Account details</a></li>
+                <li><a href="{% url 'user_verses' %}"><i class="icon-fw icon-progress"></i> Verse progress</a></li>
+                <li><a href="{% url 'user_verse_sets' %}"><i class="icon-fw icon-verse-sets"></i> Verse sets</a></li>
+                <li><a href="{% url 'user_stats' request_account.username %}"><i class="icon-fw icon-stats"></i> Stats</a></li>
+                <li><a href="#" class="logout-link"><i class="icon-fw icon-logout"></i> Log out</a></li>
+              {% endif %}
+            </ul>
           </div>
-        </div>
+        </nav>
       </div>
     </div>
 
     <div class="container">
 
-      <div class="relative-container">
-        <div id="id-ajax-status" style="display: none;">
-          <span id="id-ajax-loading" style="display: none;">
-            {% include "learnscripture/loading_animation.html" %}
-          </span>
-          <span id="id-ajax-errors"></span>
-        </div>
-      </div>
-
       <div class="maincontent">
         <div class="page-header">
-          <h1>{% block page_title %}{{ title }}{% endblock %}</h1>
+          <h1>{% block page_title %}{{ title }}{% endblock %}<a name="id-page-top">§</a></h1>
         </div>
 
         {% block messages %}
@@ -150,7 +142,7 @@
           <a href="/bible-versions/">Bible versions</a> |
           <a href="/referral-program/">Referral program</a> |
           <a href="/contact/">Contact us</a></p>
-        <p>&copy; LearnScripture.net 2012-2015</p>
+        <p>&copy; LearnScripture.net 2012-2018</p>
 
         <div class="footer-permission-links">
           <p>Bible texts and catechisms used with permission:</p>
@@ -166,6 +158,9 @@
 
     </div> <!-- /container -->
 
+    <div id="id-pjax-loading">
+      {% include "learnscripture/loading_animation.html" %}
+    </div>
 
     <!-- popup forms -->
     {% include "learnscripture/preferences_form_inc.html" %}
@@ -200,5 +195,6 @@
     {% endif %}
 
     {% include "learnscripture/theme_fonts_inc.html" %}
+    {% include "learnscripture/js_i18n_strings_inc.html" %}
   </body>
 </html>

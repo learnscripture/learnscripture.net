@@ -3,6 +3,8 @@ import csv
 import urllib.parse
 from datetime import date, timedelta
 
+import djpjax
+import furl
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.tokens import default_token_generator
@@ -10,7 +12,7 @@ from django.contrib.auth.views import PasswordResetView as AuthPasswordResetView
 from django.contrib.sites.models import Site
 from django.core import mail
 from django.http import Http404, HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
@@ -29,15 +31,20 @@ from bibleverses.forms import VerseSetForm
 from bibleverses.languages import LANGUAGE_CODE_INTERNAL, LANGUAGES
 from bibleverses.models import (MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, TextType, TextVersion, VerseSet,
                                 VerseSetType, get_passage_sections, is_continuous_set)
-from bibleverses.parsing import internalize_localized_reference, localize_internal_reference, parse_break_list
+from bibleverses.parsing import (internalize_localized_reference, localize_internal_reference, parse_break_list,
+                                 parse_unvalidated_localized_reference, parse_validated_internal_reference)
 from bibleverses.signals import public_verse_set_created
 from events.models import Event
 from groups.forms import EditGroupForm
 from groups.models import Group
 from groups.signals import public_group_created
 from learnscripture import session
-from learnscripture.forms import (AccountPasswordChangeForm, AccountPasswordResetForm, AccountSetPasswordForm,
-                                  ContactForm, LogInForm, SignUpForm)
+from learnscripture.forms import (GROUP_WALL_ORDER_OLDEST_FIRST, LEADERBOARD_WHEN_THIS_WEEK,
+                                  USER_VERSES_ORDER_STRONGEST, USER_VERSES_ORDER_WEAKEST, VERSE_SET_ORDER_AGE,
+                                  VERSE_SET_ORDER_POPULARITY, VERSE_SET_TYPE_ALL, AccountPasswordChangeForm,
+                                  AccountPasswordResetForm, AccountSetPasswordForm, ContactForm, GroupFilterForm,
+                                  GroupWallFilterForm, LeaderboardFilterForm, LogInForm, SignUpForm,
+                                  UserVersesFilterForm, VerseSetSearchForm)
 from payments.sign import sign_payment_info
 from scores.models import (get_all_time_leaderboard, get_leaderboard_since, get_verses_started_counts,
                            get_verses_started_per_day, get_verses_tested_per_day)
@@ -71,7 +78,7 @@ GROUP_COMMENTS_PAGINATE_BY = 40
 
 
 def missing(request, message, status_code=404):
-    response = render(request, '404.html', {'message': message})
+    response = TemplateResponse(request, '404.html', {'message': message})
     response.status_code = status_code
     return response
 
@@ -80,7 +87,7 @@ def home(request):
     identity = getattr(request, 'identity', None)
     if identity is not None and identity.default_to_dashboard:
         return HttpResponseRedirect(reverse('dashboard'))
-    return render(request, 'learnscripture/home.html')
+    return TemplateResponse(request, 'learnscripture/home.html')
 
 
 def _login_redirect(request):
@@ -111,9 +118,10 @@ def login(request):
     else:
         form = LogInForm(prefix="login")
 
-    return render(request, "learnscripture/login.html",
-                  {'title': 'Sign in',
-                   'login_form': form})
+    return TemplateResponse(request, "learnscripture/login.html", {
+        'title': 'Sign in',
+        'login_form': form,
+    })
 
 
 class _PasswordResetView(AuthPasswordResetView):
@@ -160,14 +168,14 @@ def signup(request):
     c['title'] = 'Create account'
     c['signup_form'] = form
 
-    return render(request, "learnscripture/signup.html", c)
+    return TemplateResponse(request, "learnscripture/signup.html", c)
 
 
 def feature_disallowed(request, title, reason):
-    return render(request, 'learnscripture/feature_disallowed.html',
-                  {'title': title,
-                   'reason': reason,
-                   })
+    return TemplateResponse(request, 'learnscripture/feature_disallowed.html', {
+        'title': title,
+        'reason': reason,
+    })
 
 
 def bible_versions_for_request(request):
@@ -178,7 +186,7 @@ def bible_versions_for_request(request):
 
 @require_preferences
 def learn(request):
-    return render(request, 'learnscripture/learn.html', {})
+    return TemplateResponse(request, 'learnscripture/learn.html', {})
 
 
 def preferences(request):
@@ -203,7 +211,7 @@ def preferences(request):
     c = {'form': form,
          'title': 'Preferences',
          'hide_preferences_popup': True}
-    return render(request, 'learnscripture/preferences.html', c)
+    return TemplateResponse(request, 'learnscripture/preferences.html', c)
 
 
 def account_from_request(request):
@@ -423,9 +431,10 @@ def dashboard(request):
          'url_after_logout': '/',
          'heatmap_stats_types': HeatmapStatsType.choice_list,
          'unfinished_session_first_uvs': session.unfinished_session_first_uvs(request),
+         'use_dashboard_nav': True,
          }
     c.update(todays_stats(identity))
-    return render(request, 'learnscripture/dashboard.html', c)
+    return TemplateResponse(request, 'learnscripture/dashboard.html', c)
 
 
 def context_for_version_select(request):
@@ -466,6 +475,10 @@ def default_bible_version_for_request(request):
 # No 'require_preferences' or 'require_identity' so that bots can browse this
 # page and the linked pages unhindered, for SEO.
 
+@djpjax.pjax(additional_templates={
+    "#id-choose-verseset-results": "learnscripture/choose_verseset_inc.html",
+    ".more-results-container": "learnscripture/choose_verseset_more_results_inc.html",
+})
 def choose(request):
     """
     Choose a verse or verse set
@@ -509,38 +522,70 @@ def choose(request):
                 return learn_set(request, [identity.add_verse_choice(ref, version=version)],
                                  session.LearningType.LEARNING)
 
-    c = {'title': 'Choose verses'}
-    verse_sets = verse_sets.order_by('name').prefetch_related('verse_choices')
-
-    if 'creator' in request.GET:
-        try:
-            current_account = account_from_request(request)
-            creator = Account.objects.visible_for_account(current_account).get(username=request.GET['creator'])
-        except Account.DoesNotExist:
-            creator = None
-        if creator is not None:
-            verse_sets = verse_sets.filter(created_by=creator)
-            c['creator'] = creator
-
     # Searching for verse sets is done via this view.
     # But looking up individual verses is done by AJAX,
     # so is missing here.
 
-    if 'q' in request.GET:
-        language_code = default_bible_version.language_code
-        verse_sets = VerseSet.objects.search(language_code, verse_sets, request.GET['q'])
+    active_section = None
+    verseset_search_form = VerseSetSearchForm.from_request_data(request.GET)
+    if any(k in request.GET for k in VerseSetSearchForm.base_fields.keys()):
+        active_section = "verseset"
+    if 'from_item' in request.GET:
+        active_section = "verseset"
 
-    if 'new' in request.GET:
-        verse_sets = verse_sets.order_by('-date_added')
-    else:  # popular, the default
-        verse_sets = verse_sets.order_by('-popularity')
-    c['verse_sets'] = verse_sets
-    c['active_tab'] = 'verseset'
+    c = {
+        'title': 'Choose verses',
+        'verseset_search_form': verseset_search_form
+    }
+
+    verse_sets = verse_sets.order_by('name').prefetch_related('verse_choices')
+
+    query = verseset_search_form.cleaned_data['query'].strip()
+    if query:
+        language_code = default_bible_version.language_code
+        verse_sets = VerseSet.objects.search(language_code, verse_sets, query)
+
+    set_type = verseset_search_form.cleaned_data['set_type']
+    if set_type != VERSE_SET_TYPE_ALL:
+        verse_sets = verse_sets.filter(set_type=set_type)
+
+    order = verseset_search_form.cleaned_data['order']
+    if order == VERSE_SET_ORDER_POPULARITY:
+        verse_sets = verse_sets.order_by('-popularity', '-id')
+    elif order == VERSE_SET_ORDER_AGE:
+        verse_sets = verse_sets.order_by('-date_added', '-id')
+
+    if set_type != VerseSetType.SELECTION and query != "":
+        # Does the query look like a Bible reference?
+        try:
+            parsed_ref = parse_unvalidated_localized_reference(
+                language_code,
+                query,
+                allow_whole_book=False,
+                allow_whole_chapter=True)
+        except InvalidVerseReference:
+            parsed_ref = None
+
+        if parsed_ref is not None:
+            # TODO It would also be nice to detect the case where
+            # is no complete match for the searched passage.
+            if len(verse_sets) == 0:
+                c['create_passage_set_prompt'] = {
+                    'internal_reference': parsed_ref.to_internal().canonical_form(),
+                    'localized_reference': parsed_ref.canonical_form(),
+                }
+
+    PAGE_SIZE = 10
+
+    if active_section:
+        c['active_section'] = active_section
+
+    c['results'] = get_paged_results(verse_sets, request, PAGE_SIZE)
     c['default_bible_version'] = default_bible_version
 
     c.update(context_for_quick_find(request))
 
-    return render(request, 'learnscripture/choose.html', c)
+    return TemplateResponse(request, 'learnscripture/choose.html', c)
 
 
 def view_catechism_list(request):
@@ -559,7 +604,7 @@ def view_catechism_list(request):
     c = {'catechisms': TextVersion.objects.catechisms(),
          'title': 'Catechisms',
          }
-    return render(request, 'learnscripture/catechisms.html', c)
+    return TemplateResponse(request, 'learnscripture/catechisms.html', c)
 
 
 def view_catechism(request, slug):
@@ -575,7 +620,7 @@ def view_catechism(request, slug):
          'include_referral_links': True,
          }
 
-    return render(request, 'learnscripture/view_catechism.html', c)
+    return TemplateResponse(request, 'learnscripture/view_catechism.html', c)
 
 
 def verse_options(request):
@@ -608,10 +653,9 @@ def verse_options(request):
     uvss = _reduce_uvs_set_for_verse(uvss)
     # UVS not in passage goes first
     uvss.sort(key=lambda uvs: uvs.is_in_passage())
-    return render(request,
-                  "learnscripture/verse_options.html",
-                  {'uvs_list': uvss}
-                  )
+    return TemplateResponse(request, "learnscripture/verse_options.html", {
+        'uvs_list': uvss,
+    })
 
 
 def _reduce_uvs_set_for_verse(uvss):
@@ -723,7 +767,7 @@ def view_verse_set(request, slug):
     c['include_referral_links'] = True
 
     c.update(context_for_version_select(request))
-    return render(request, 'learnscripture/single_verse_set.html', c)
+    return TemplateResponse(request, 'learnscripture/single_verse_set.html', c)
 
 
 def add_passage_breaks(language_code, verse_list, breaks):
@@ -735,11 +779,6 @@ def add_passage_breaks(language_code, verse_list, breaks):
             v.break_here = j == 0 and i != 0
             retval.append(v)
     return retval
-
-
-@require_preferences
-def create_set_menu(request):
-    return render(request, 'learnscripture/create_set_menu.html', {'title': "Create verse set"})
 
 
 @require_preferences
@@ -854,8 +893,18 @@ def create_or_edit_set(request, set_type=None, slug=None):
             return HttpResponseRedirect(reverse('view_verse_set', kwargs=dict(slug=verse_set.slug)))
 
     else:
-        form = VerseSetForm(instance=verse_set)
+        initial = {}
+        if mode == 'create' and set_type == VerseSetType.PASSAGE and 'ref' in request.GET:
+            try:
+                parsed_ref = parse_validated_internal_reference(request.GET['ref'])
+            except InvalidVerseReference:
+                parsed_ref = None
+            if parsed_ref is not None:
+                localized_reference = parsed_ref.translate_to(language_code).canonical_form()
+                initial['name'] = localized_reference
+                c['initial_localized_reference'] = localized_reference
 
+        form = VerseSetForm(instance=verse_set, initial=initial)
         if verse_set is not None:
             localized_reference_list = [vc.get_localized_reference(language_code)
                                         for vc in verse_set.verse_choices.all()]
@@ -875,7 +924,7 @@ def create_or_edit_set(request, set_type=None, slug=None):
 
     c.update(context_for_quick_find(request))
 
-    return render(request, 'learnscripture/create_set.html', c)
+    return TemplateResponse(request, 'learnscripture/create_set.html', c)
 
 
 def normalize_break_list(breaks):
@@ -924,7 +973,7 @@ def user_stats(request, username):
         account_groups = account.groups.filter(public=True).order_by('name')
     viewer_visible_groups = Group.objects.visible_for_account(viewer)
     c['groups'] = viewer_visible_groups.filter(id__in=[g.id for g in account_groups])
-    return render(request, 'learnscripture/user_stats.html', c)
+    return TemplateResponse(request, 'learnscripture/user_stats.html', c)
 
 
 def combine_timeline_stats(*statslists):
@@ -994,34 +1043,67 @@ def user_stats_verses_timeline_stats_csv(request, username):
 
 
 @require_identity
+@djpjax.pjax(additional_templates={
+    "#id-user-verses-results": "learnscripture/user_verses_inc.html",
+    ".more-results-container": "learnscripture/user_verses_table_body_inc.html",
+})
 def user_verses(request):
     identity = request.identity
-    c = {'title': 'Progress'}
 
     # verse_statuses_started contains dupes, we do deduplication in the
     # template.
     verses = identity.verse_statuses_started().select_related('version')
 
-    if 'catechisms' in request.GET:
-        text_type = TextType.CATECHISM
-    else:
-        text_type = TextType.BIBLE
-
+    filter_form = UserVersesFilterForm.from_request_data(request.GET)
+    text_type = filter_form.cleaned_data['text_type']
     verses = verses.filter(version__text_type=text_type)
+    sort_order = filter_form.cleaned_data['order']
+    query = filter_form.cleaned_data['query'].strip()
 
-    if text_type == TextType.CATECHISM:
-        verses = verses.order_by('version__slug', 'text_order')
-    else:
-        if 'bibleorder' in request.GET:
-            c['bibleorder'] = True
-            verses = verses.order_by('text_order', 'strength')
+    if query != "":
+        if text_type == TextType.BIBLE:
+            invalid = False
+            try:
+                # TODO - this doesn't work nicely if you are learning more than
+                # one language - you can only search in the language this is
+                # your default language.
+                parsed_ref = parse_unvalidated_localized_reference(
+                    request.identity.default_language_code,
+                    query)
+            except InvalidVerseReference:
+                invalid = True
+
+            if invalid or parsed_ref is None:
+                # To make it clear we didn't match anything
+                verses = verses.none()
+            else:
+                verses = verses.search_by_parsed_ref(parsed_ref)
         else:
-            verses = verses.order_by('strength', 'localized_reference')
-    c['verses'] = verses
-    c['bible'] = text_type == TextType.BIBLE
-    c['catechism'] = text_type == TextType.CATECHISM
+            verses = verses.filter(localized_reference__iexact=query)
 
-    return render(request, 'learnscripture/user_verses.html', c)
+    PAGE_SIZE = 20
+
+    if sort_order == USER_VERSES_ORDER_WEAKEST:
+        verses = verses.order_by('strength', 'text_order')
+    elif sort_order == USER_VERSES_ORDER_STRONGEST:
+        verses = verses.order_by('-strength', 'text_order')
+    else:
+        # Text order
+        if text_type == TextType.CATECHISM:
+            # It's more useful to group catechisms together
+            verses = verses.order_by('version__slug', 'text_order')
+        else:
+            verses = verses.order_by('text_order', 'version__slug')
+
+    c = {
+        'title': 'Progress stats',
+        'filter_form': filter_form,
+        'results': get_paged_results(verses, request, PAGE_SIZE),
+        'bible': text_type == TextType.BIBLE,
+        'catechism': text_type == TextType.CATECHISM
+    }
+
+    return TemplateResponse(request, 'learnscripture/user_verses.html', c)
 
 
 @require_identity
@@ -1033,7 +1115,7 @@ def user_verse_sets(request):
     if identity.account is not None:
         c['verse_sets_created'] = identity.account.verse_sets_created.all().order_by('name')
 
-    return render(request, 'learnscripture/user_verse_sets.html', c)
+    return TemplateResponse(request, 'learnscripture/user_verse_sets.html', c)
 
 
 # Password reset for Accounts:
@@ -1045,13 +1127,15 @@ def user_verse_sets(request):
 # Also, we do the main password_reset via AJAX,
 # from the the same form as the login form.
 def password_reset_done(request):
-    return render(request, 'learnscripture/password_reset_done.html',
-                  {'title': 'Password reset started'})
+    return TemplateResponse(request, 'learnscripture/password_reset_done.html', {
+        'title': 'Password reset started',
+    })
 
 
 def password_reset_complete(request):
-    return render(request, 'learnscripture/password_reset_complete.html',
-                  {'title': 'Password reset complete'})
+    return TemplateResponse(request, 'learnscripture/password_reset_complete.html', {
+        'title': 'Password reset complete',
+    })
 
 
 # Large copy and paste from django.contrib.auth.views, followed by customisations.
@@ -1089,7 +1173,7 @@ def password_reset_confirm(request, uidb64=None, token=None):
         'validlink': validlink,
         'title': 'Password reset',
     }
-    return render(request, 'learnscripture/password_reset_confirm.html', context)
+    return TemplateResponse(request, 'learnscripture/password_reset_confirm.html', context)
 
 
 @require_account
@@ -1110,12 +1194,11 @@ def password_change(request):
         'title': 'Password change',
     }
 
-    return render(request, template_name, context)
+    return TemplateResponse(request, template_name, context)
 
 
 def password_change_done(request):
-    return render(request, "learnscripture/password_change_done.html",
-                  {})
+    return TemplateResponse(request, "learnscripture/password_change_done.html", {})
 
 
 def csrf_failure(request, reason=""):
@@ -1123,14 +1206,15 @@ def csrf_failure(request, reason=""):
     Default view used when request fails CSRF protection
     """
     from django.middleware.csrf import REASON_NO_CSRF_COOKIE
-    resp = render(request, "csrf_failure.html",
-                  {'no_csrf_cookie': reason == REASON_NO_CSRF_COOKIE})
+    resp = TemplateResponse(request, "csrf_failure.html", {
+        'no_csrf_cookie': reason == REASON_NO_CSRF_COOKIE
+    })
     resp.status_code = 403
     return resp
 
 
 def offline(request):
-    return render(request, "offline.html", {})
+    return TemplateResponse(request, "offline.html", {})
 
 
 @require_account_with_redirect
@@ -1201,11 +1285,11 @@ def stats(request):
                                 'identities_active',
                                 ] if 'full_accounts' in request.GET else []))
 
-    return render(request, 'learnscripture/stats.html',
-                  {'title': 'Stats',
-                   'verses_data': verses_data,
-                   'account_data': account_data,
-                   })
+    return TemplateResponse(request, 'learnscripture/stats.html', {
+        'title': 'Stats',
+        'verses_data': verses_data,
+        'account_data': account_data,
+    })
 
 
 def natural_list(l):
@@ -1256,7 +1340,7 @@ def donate(request):
         c['LIVEBOX'] = settings.LIVEBOX
         c['paypal_form'] = form
 
-    return render(request, 'learnscripture/donate.html', c)
+    return TemplateResponse(request, 'learnscripture/donate.html', c)
 
 
 @csrf_exempt
@@ -1266,12 +1350,12 @@ def pay_done(request):
         if identity.account is not None:
             return HttpResponseRedirect(reverse('dashboard'))
 
-    return render(request, 'learnscripture/pay_done.html', {'title': "Donation complete"})
+    return TemplateResponse(request, 'learnscripture/pay_done.html', {'title': "Donation complete"})
 
 
 @csrf_exempt
 def pay_cancelled(request):
-    return render(request, 'learnscripture/pay_cancelled.html', {'title': "Donation cancelled"})
+    return TemplateResponse(request, 'learnscripture/pay_cancelled.html', {'title': "Donation cancelled"})
 
 
 def referral_program(request):
@@ -1281,11 +1365,11 @@ def referral_program(request):
     else:
         referral_link = None
 
-    return render(request, 'learnscripture/referral_program.html',
-                  {'title': 'Referral program',
-                   'referral_link': referral_link,
-                   'include_referral_links': True,
-                   })
+    return TemplateResponse(request, 'learnscripture/referral_program.html', {
+        'title': 'Referral program',
+        'referral_link': referral_link,
+        'include_referral_links': True,
+    })
 
 
 def awards(request):
@@ -1299,11 +1383,11 @@ def awards(request):
         else:
             discovered_awards.append(award)
 
-    return render(request, 'learnscripture/awards.html',
-                  {'title': 'Badges',
-                   'discovered_awards': discovered_awards,
-                   'hidden_awards': hidden_awards,
-                   })
+            return TemplateResponse(request, 'learnscripture/awards.html', {
+                'title': 'Badges',
+                'discovered_awards': discovered_awards,
+                'hidden_awards': hidden_awards,
+            })
 
 
 def award(request, award_slug):
@@ -1346,12 +1430,12 @@ def award(request, award_slug):
         except IndexError:
             pass
 
-    return render(request, 'learnscripture/award.html',
-                  {'title': 'Badge - %s' % award.short_description(),
-                   'award': award,
-                   'levels': levels,
-                   'account_top_award': account_top_award,
-                   })
+    return TemplateResponse(request, 'learnscripture/award.html', {
+        'title': 'Badge - %s' % award.short_description(),
+        'award': award,
+        'levels': levels,
+        'account_top_award': account_top_award,
+    })
 
 
 def groups_visible_for_request(request):
@@ -1362,20 +1446,27 @@ def groups_editable_for_request(request):
     return Group.objects.editable_for_account(account_from_request(request))
 
 
+@djpjax.pjax(additional_templates={
+    "#id-groups-results": "learnscripture/groups_inc.html",
+    ".more-results-container": "learnscripture/groups_results_inc.html",
+})
 def groups(request):
     account = account_from_request(request)
     groups = Group.objects.visible_for_account(account).order_by('name')
-    if 'q' in request.GET:
-        q = request.GET['q']
-        groups = (groups.filter(name__icontains=q) |
-                  groups.filter(description__icontains=q)
+    filter_form = GroupFilterForm.from_request_data(request.GET)
+    query = filter_form.cleaned_data['query'].strip()
+    if query:
+        groups = (groups.filter(name__icontains=query) |
+                  groups.filter(description__icontains=query)
                   )
     else:
         groups = groups.none()
-    return render(request, 'learnscripture/groups.html', {'title': 'Groups',
-                                                          'groups': groups,
-                                                          'noindex': True,
-                                                          })
+    return TemplateResponse(request, 'learnscripture/groups.html', {
+        'title': 'Groups',
+        'results': get_paged_results(groups, request, 10),
+        'filter_form': filter_form,
+        'query': query,
+    })
 
 
 def group_by_slug(request, slug):
@@ -1408,58 +1499,69 @@ def group(request, slug):
     else:
         in_group = False
 
-    return render(request, 'learnscripture/group.html',
-                  {'title': 'Group: %s' % group.name,
-                   'group': group,
-                   'in_group': in_group,
-                   'can_join': group.can_join(account),
-                   'can_edit': group.can_edit(account),
-                   'include_referral_links': True,
-                   'comments': group.comments_visible_for_account(account).order_by('-created')[:GROUP_COMMENTS_SHORT_CUTOFF],
-                   'noindex': True,
-                   })
+    return TemplateResponse(request, 'learnscripture/group.html', {
+        'title': 'Group: %s' % group.name,
+        'group': group,
+        'in_group': in_group,
+        'can_join': group.can_join(account),
+        'can_edit': group.can_edit(account),
+        'include_referral_links': True,
+        'comments': group.comments_visible_for_account(account).order_by('-created')[:GROUP_COMMENTS_SHORT_CUTOFF],
+    })
 
 
+@djpjax.pjax(additional_templates={
+    "#id-group-wall-comments": "learnscripture/group_wall_comments_inc.html",
+    ".more-results-container": "learnscripture/group_wall_comments_results_inc.html",
+})
 def group_wall(request, slug):
     account = account_from_request(request)
     group = group_by_slug(request, slug)
 
-    # TODO: respond to 'comment' query param and move to the right page of
-    # comments.
+    # TODO: respond to 'comment' query param and ensure we include the right
+    # page of comments.
     try:
         selected_comment_id = int(request.GET['comment'])
     except (KeyError, ValueError):
         selected_comment_id = None
 
     comments = group.comments_visible_for_account(account)
-    sort_order = 'oldestfirst' if 'oldestfirst' in request.GET else 'newestfirst'
-    if sort_order == 'oldestfirst':
+    filter_form = GroupWallFilterForm.from_request_data(request.GET)
+    sort_order = filter_form.cleaned_data['order']
+    if sort_order == GROUP_WALL_ORDER_OLDEST_FIRST:
         comments = comments.order_by('created')
     else:
         comments = comments.order_by('-created')
 
-    return render(request, 'learnscripture/group_wall.html',
-                  {'title': 'Group wall: %s' % group.name,
-                   'group': group,
-                   'comments': comments,
-                   'sort_order': sort_order,
-                   'selected_comment_id': selected_comment_id,
-                   'GROUP_COMMENTS_PAGINATE_BY': GROUP_COMMENTS_PAGINATE_BY,
-                   })
+    results = get_paged_results(comments, request, GROUP_COMMENTS_PAGINATE_BY)
+
+    c = {
+        'title': 'Group wall: %s' % group.name,
+        'filter_form': filter_form,
+        'group': group,
+        'results': results,
+        'sort_order': sort_order,
+        'selected_comment_id': selected_comment_id,
+    }
+    return TemplateResponse(request, 'learnscripture/group_wall.html', c)
 
 
-def group_leaderboard(request, slug):
-    page_num = None  # 1-indexed page page
+def get_request_from_item(request):
     try:
-        page_num = int(request.GET['p'])
-    except (KeyError, ValueError):
-        page_num = 1
+        return int(request.GET.get('from_item', '0'))
+    except ValueError:
+        return 0
 
-    thisweek = 'thisweek' in request.GET
 
-    page_num = max(1, page_num)
-
+@djpjax.pjax(additional_templates={
+    "#id-leaderboard-results-table-body": "learnscripture/leaderboard_results_table_body_inc.html",
+    ".more-results-container": "learnscripture/leaderboard_results_table_body_inc.html",
+})
+def group_leaderboard(request, slug):
     PAGE_SIZE = 30
+    from_item = get_request_from_item(request)
+    leaderboard_filter_form = LeaderboardFilterForm.from_request_data(request.GET)
+    thisweek = leaderboard_filter_form.cleaned_data['when'] == LEADERBOARD_WHEN_THIS_WEEK
 
     if thisweek:
         cutoff = timezone.now() - timedelta(7)
@@ -1471,9 +1573,9 @@ def group_leaderboard(request, slug):
     hellbanned_mode = get_hellbanned_mode(request)
     if thisweek:
         accounts = get_leaderboard_since(cutoff, hellbanned_mode,
-                                         page_num - 1, PAGE_SIZE, group=group)
+                                         from_item, PAGE_SIZE, group=group)
     else:
-        accounts = get_all_time_leaderboard(hellbanned_mode, page_num - 1,
+        accounts = get_all_time_leaderboard(hellbanned_mode, from_item,
                                             PAGE_SIZE, group=group)
 
     # Now decorate these accounts with additional info from additional queries
@@ -1491,17 +1593,30 @@ def group_leaderboard(request, slug):
         account_dict['num_verses'] = verse_counts[identity.id]
         account_dict['username'] = identity.account.username
 
-    c = {}
-    c['include_referral_links'] = True
-    c['accounts'] = accounts
-    c['thisweek'] = thisweek
-    c['page_num'] = page_num
-    c['previous_page_num'] = page_num - 1
-    c['next_page_num'] = page_num + 1
-    c['PAGE_SIZE'] = PAGE_SIZE
-    c['group'] = group
-    c['title'] = "Leaderboard: {0}".format(group.name)
-    return render(request, 'learnscripture/leaderboard.html', c)
+    last_item = from_item + PAGE_SIZE
+    shown_count = min(last_item, from_item + len(accounts))
+
+    c = {
+        'include_referral_links': True,
+        'thisweek': thisweek,
+        # We can't use get_paged_results for 'results' because it doesn't use a
+        # normal queryset. Could possibly fix this by rewriting leaderboard
+        # queries with Window functions introduced in Django 2.0?
+        'results': dict(
+            items=accounts,
+            shown_count=shown_count,
+            empty=len(accounts) == 0 and from_item == 0,
+            more=len(accounts) == PAGE_SIZE,  # There *might* be more in this case, otherwise definitely not
+            more_link=(furl.furl(request.get_full_path())
+                       .remove(query=['from_item'])
+                       .add(query_params={'from_item': last_item})
+                       ),
+        ),
+        'group': group,
+        'title': "Leaderboard: {0}".format(group.name),
+        'leaderboard_filter_form': leaderboard_filter_form,
+    }
+    return TemplateResponse(request, 'learnscripture/leaderboard.html', c)
 
 
 def create_group(request):
@@ -1546,11 +1661,11 @@ def create_or_edit_group(request, slug=None):
     else:
         form = EditGroupForm(instance=group, initial=initial)
 
-    return render(request, 'learnscripture/edit_group.html',
-                  {'title': title,
-                   'group': group,
-                   'form': form,
-                   })
+    return TemplateResponse(request, 'learnscripture/edit_group.html', {
+        'title': title,
+        'group': group,
+        'form': form,
+    })
 
 
 def group_select_list(request):
@@ -1561,13 +1676,15 @@ def group_select_list(request):
         for g in groups:
             g.is_member = g in own_groups
         groups.sort(key=lambda g: not g.is_member)
-    return render(request, 'learnscripture/group_select_list.html',
-                  {'groups': groups})
+    return TemplateResponse(request, 'learnscripture/group_select_list.html', {
+        'groups': groups,
+    })
 
 
 def terms_of_service(request):
-    return render(request, 'learnscripture/terms_of_service.html',
-                  {'title': 'Terms of service'})
+    return TemplateResponse(request, 'learnscripture/terms_of_service.html', {
+        'title': 'Terms of service',
+    })
 
 
 def contact(request):
@@ -1584,10 +1701,10 @@ def contact(request):
             return HttpResponseRedirect('/contact/thanks/')
     else:
         form = ContactForm(initial=initial)
-    return render(request, 'learnscripture/contact.html',
-                  {'title': 'Contact us',
-                   'form': form,
-                   })
+    return TemplateResponse(request, 'learnscripture/contact.html', {
+        'title': 'Contact us',
+        'form': form,
+    })
 
 
 def send_contact_email(contact_form, account):
@@ -1612,18 +1729,19 @@ Message:
     ).send()
 
 
+@djpjax.pjax(additional_templates={
+    ".more-results-container": "learnscripture/activity_stream_results_inc.html",
+})
 def activity_stream(request):
     viewer = account_from_request(request)
-    return render(request,
-                  'learnscripture/activity_stream.html',
-                  {'events':
-                   Event.objects
-                   .for_activity_stream(viewer=viewer)
-                   .prefetch_related('comments', 'comments__author'),
-                   'title': "Recent activity",
-                   'following_ids': [] if viewer is None
-                   else [a.id for a in viewer.following.all()]
-                   })
+    events = (Event.objects
+              .for_activity_stream(viewer=viewer)
+              .prefetch_related('comments', 'comments__author'))
+    return TemplateResponse(request, 'learnscripture/activity_stream.html', {
+        'results': get_paged_results(events, request, 40),
+        'title': "Recent activity",
+        'following_ids': [] if viewer is None else [a.id for a in viewer.following.all()],
+    })
 
 
 def _user_events(for_account, viewer):
@@ -1635,16 +1753,18 @@ def _user_events(for_account, viewer):
             )
 
 
+@djpjax.pjax(additional_templates={
+    ".more-results-container": "learnscripture/activity_stream_results_inc.html",
+})
 def user_activity_stream(request, username):
     account = get_object_or_404(Account.objects.visible_for_account(account_from_request(request)),
                                 username=username)
-
-    return render(request,
-                  'learnscripture/user_activity_stream.html',
-                  {'account': account,
-                   'events': _user_events(account, account_from_request(request)),
-                   'title': "Recent activity from %s" % account.username,
-                   })
+    events = _user_events(account, account_from_request(request))
+    return TemplateResponse(request, 'learnscripture/user_activity_stream.html', {
+        'results': get_paged_results(events, request, 40),
+        'account': account,
+        'title': "Recent activity from %s" % account.username,
+    })
 
 
 def activity_item(request, event_id):
@@ -1653,11 +1773,10 @@ def activity_item(request, event_id):
                               .prefetch_related('comments__author'),
                               id=int(event_id))
 
-    return render(request,
-                  'learnscripture/activity_item.html',
-                  {'event': event,
-                   'title': "Activity from %s" % event.account.username,
-                   })
+    return TemplateResponse(request, 'learnscripture/activity_item.html', {
+        'event': event,
+        'title': "Activity from %s" % event.account.username,
+    })
 
 
 def celery_debug(request):
@@ -1667,4 +1786,26 @@ def celery_debug(request):
 
 
 def debug(request):
-    return render(request, "learnscripture/debug.html", {})
+    return TemplateResponse(request, "learnscripture/debug.html", {})
+
+
+def get_paged_results(queryset, request, page_size):
+    total = queryset.count()
+    from_item = get_request_from_item(request)
+    last_item = from_item + page_size
+    # Get one extra to see if there is more
+    result_page = list(queryset[from_item:last_item + 1])
+    more = len(result_page) > page_size
+    # Then trim result_page to correct size
+    result_page = result_page[0:page_size]
+    shown_count = from_item + len(result_page)
+    return dict(
+        items=result_page,
+        from_item=from_item,
+        shown_count=shown_count,
+        total=total,
+        more=more,
+        more_link=(furl.furl(request.get_full_path())
+                   .remove(query=['from_item'])
+                   .add(query_params={'from_item': last_item})),
+    )

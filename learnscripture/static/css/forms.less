@@ -1,0 +1,292 @@
+.input {
+    input[type=checkbox],
+    input[type=radio] {
+        vertical-align: middle;
+    }
+}
+
+.help-block {
+    display: block;
+    color: #888;
+}
+
+input,
+select,
+textarea {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 4px;
+}
+
+
+@formLeftColumnWidth: 9em;
+@formColumnSpacer: 1em;
+
+@errorColor: #a00;  // TODO this should be part of theme some day
+
+@inputWidth: 14em;
+
+@primaryButtonShadow: inset 0 1px 0 rgba(255, 255, 255, .2), 0 1px 2px rgba(0, 0, 0, .05);
+@hoverShadow: 0px 2px 2px rgba(0, 0, 0, 0.5);
+
+.nonPrimaryButtonColors() {
+    color: #333;
+    background: linear-gradient(#fff, #ddd 200%);
+    border: 1px solid #aaa;
+}
+
+.btn {
+    // See also .buttonradios() mixin which uses similar styles for coloring
+    padding: 5px 14px 6px;
+    font-size: @baseFontSize;
+    line-height: normal;
+    cursor: pointer;
+    display: inline-block;
+    border-radius: 3px;
+    .nonPrimaryButtonColors();
+    transition: .05s linear all;
+
+    &:hover {
+        .nonPrimaryButtonColors(); // For the sake of a.btn we need to repeat color here
+        transform: translateY(-1px);
+        &:active {
+            transform: none;
+        }
+        box-shadow: @hoverShadow;
+        text-decoration: none;
+        &:focus {
+            box-shadow: @hoverShadow, @focusShadow;
+        }
+    }
+
+    &.primary {
+        color: var(--btnTextColor);
+        background: linear-gradient(var(--btnColor1), var(--btnColor2) 200%);
+        border: 1px solid var(--btnColor2);
+        box-shadow: @primaryButtonShadow;
+
+        &:focus {
+            box-shadow: @primaryButtonShadow, @focusShadow;
+        }
+
+        &:hover {
+            box-shadow: @primaryButtonShadow, @hoverShadow;
+
+            &:focus {
+                box-shadow: @primaryButtonShadow, @hoverShadow, @focusShadow;
+            }
+        }
+    }
+
+    &.disabled, &[disabled] {
+        cursor: default;
+        opacity: 0.5;
+        box-shadow: none;
+        &:hover {
+            box-shadow: none;
+            transform: none;
+        }
+    }
+}
+
+button.btn,
+input[type=submit].btn {
+    &::-moz-focus-inner {
+  	    padding: 0;
+  	    border: 0;
+    }
+}
+
+form {
+    input,
+    textarea,
+    select {
+        display: inline-block;
+        width: @inputWidth;
+    }
+
+    input[type=submit],
+    input[type=checkbox],
+    input[type=radio] {
+        width: auto;
+    }
+
+    textarea {
+        width: 95%;
+    }
+
+    .validation-error {
+        color: @errorColor;
+    }
+
+    .error {
+        input[type=text],
+        input[type=checkbox],
+        input[type=file],
+        input[type=radio],
+        select,
+        textarea {
+            border-color: @errorColor;
+            box-shadow: 0px 0px 2px @errorColor;
+        }
+        .help-inline {
+            color: @errorColor;
+        }
+    }
+
+    :invalid {
+        // Not really useful because it applies before the
+        // user has done anything, which is distracting.
+        box-shadow: none;
+    }
+
+    :-moz-ui-invalid {
+        border-color: @errorColor;
+        box-shadow: 0px 0px 2px @errorColor;
+    }
+
+    .actions {
+        padding-left: @formLeftColumnWidth + @formColumnSpacer;
+        margin-bottom: 1em;
+
+        &.empty-form {
+            // Used when we have a form, but no controls in it other than the
+            // action buttons at the bottom. In this case we have nothing to
+            // align with, so center instead.
+            padding-left: 0px;
+            text-align: center;
+            padding-top: 1em;
+            border-top: 1px solid var(--bgBorderColor);
+        }
+    }
+}
+
+.form-row {
+    display: flex;
+    margin-bottom: 1em;
+
+    > label, > .label-spacer {
+        flex: 0;
+        min-width: @formLeftColumnWidth;
+        margin-right: @formColumnSpacer;
+        padding-top: 4px;
+        text-align: right;
+    }
+    > .input, > .inputs-list {
+        flex: 2;
+    }
+
+    .input-line {
+        display: flex;
+        > input[type=text] {
+            margin-right: 0.4em;
+            width: auto;
+            max-width: @inputWidth;
+            flex: 1;
+        }
+    }
+
+}
+
+ul.inputs-list, div.input ul {
+    padding-top: 4px;
+    margin: 0 0 5px;
+    li {
+        display: block;
+        padding: 0;
+        list-style: none;
+    }
+}
+
+.form-all-errors {
+    margin-top: 1em;
+}
+
+.inline-radio-buttons() {
+    li {
+        display: inline;
+    }
+}
+
+.buttonradios() {
+    .radioinput {
+
+        input {
+            // Stack in front of the label
+            position: relative;
+            // Move in front of the label (or rather, move the label
+            // in behind this)
+            margin-right: -24px;
+            // Allow room for padding on label.
+            margin-left: 10px;
+        }
+
+        input[type="checkbox"], input[type="radio"] {
+            // When the label wraps onto multiple lines (narrow screens),
+            // this works better than 'vertical-align: middle'
+            vertical-align: top;
+            margin-top: 7px;
+        }
+
+        label {
+            cursor: pointer;
+            padding: 4px 12px 4px 30px;
+            box-sizing: border-box;
+            max-width: ~"calc(100% - 30px)";
+            display: inline-block;
+            margin-bottom: 3px;
+            border-radius: 20px;
+            .nonPrimaryButtonColors();
+        }
+
+        label:hover, input:hover + label {
+            color: var(--btnTextColor);
+            background: linear-gradient(var(--btnColor2) -100%, var(--btnColor1) 100%);
+            border: 1px solid var(--btnColor2);
+        }
+
+        input:checked, input:checked + label {
+            color: var(--btnTextColor);
+            background: linear-gradient(var(--btnColor2) -100%, var(--btnColor1) 100%);
+            border: 1px solid var(--btnColor2);
+        }
+
+        input:focus {
+            outline: none;
+        }
+
+        input:focus + label {
+            .focus();
+        }
+    }
+}
+
+form[data-pjax-results-container] {
+    // Radio buttons act immediately, so we style them to look
+    // more like buttons.
+    .buttonradios();
+
+}
+
+@media screen and (max-width: @narrowWidthBreak3) {
+    // Stacked forms
+
+    .form-row {
+        display: block;
+
+        > .label-spacer {
+            display: none;
+        }
+        > label {
+            min-width: auto;
+            margin-right: 0px;
+            text-align: left;
+            font-weight: bold;
+        }
+    }
+    form {
+        .actions {
+            padding-left: 0px;
+        }
+    }
+}

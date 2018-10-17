@@ -8,7 +8,7 @@
 {% block leftcolumn %}
 
   {% if create_account_warning %}
-    <div class="actionset">
+    <div class="borderedbox">
       <p>
         <small><b>Remember to <a href="{% url 'signup' %}">create an account</a></b> -
           otherwise your progress will be lost! It's free, only takes a few
@@ -20,12 +20,10 @@
   {% endif %}
 
   <div id="id-homescreen-install-prompt" class="actionset">
-    <div class="addclearfix">
-      <form>
-        <button type="button" class="btn">Add</button>
-      </form>
-      <p>You can add this app to your home screen for a better app experience.</p>
-    </div>
+    <form>
+      <button type="button" class="btn">Add</button>
+    </form>
+    <p>You can add this app to your home screen for a better app experience.</p>
   </div>
 
   {% if request.identity.scoring_enabled %}
@@ -40,7 +38,7 @@
         {% endif %}
       </a>
     </h2>
-    <div id="id-heatmap-section" class="actionset"
+    <div id="id-heatmap-section" class="borderedbox"
          {% if not request.identity.heatmap_default_show %}
          style="display: none;"
          {% endif %}
@@ -64,20 +62,21 @@
         <div>Current streak:
           <span id="id-current-streak" class="streak">&nbsp;</span></div>
       </div>
-      <div id="id-heatmap-stat-selector" class="pills">
-        {% for value, caption in heatmap_stats_types %}
-          <span
-             data-heatmap-select-stat-parent
-             {% if request.identity.heatmap_default_stats_type == value %}
-             class="active"
-             {% endif %}
-             >
-            <a href="#"
-               data-heatmap-select-stat="{{ value }}">{{ caption }}</a>
-          </span>
-        {% endfor %}
-        </span>
-      </div>
+      <form id="id-heatmap-stat-selector">
+        <div class="input radioinput">
+          <ul>
+            {% for value, caption in heatmap_stats_types %}
+              <li>
+                <input type="radio" name="stat"
+                       value="{{ value }}"
+                       id="id-heatmap-select-stat-{{ value }}"
+                       {% if request.identity.heatmap_default_stats_type == value %}checked{% endif %}
+                       ><label for="id-heatmap-select-stat-{{ value }}">{{ caption }}</label>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </form>
       <p class="note">The calendar and streaks work in the UTC/GMT timezone</p>
     </div>
   {% endif %}
@@ -92,24 +91,22 @@
        >
     <h2>Continue</h2>
     <div class="actionset">
-      <div class="addclearfix">
-        <form action="" method="POST">
-          {% csrf_token %}
-          <input type="submit" name="continue_session" class="btn primary" value="Continue">
-        </form>
-        <p>You have an unfinished session.
-          {% if unfinished_session_first_uvs %}
-            {% if unfinished_session_first_uvs.verse_set and unfinished_session_first_uvs.verse_set.is_passage %}
-              ({{ unfinished_session_first_uvs.verse_set.smart_name_dict|lookup:unfinished_session_first_uvs.version.language_code }})
-            {% else %}
-              ({{ unfinished_session_first_uvs.localized_reference }}...)
-            {% endif %}
+      <form action="" method="POST">
+        {% csrf_token %}
+        <input type="submit" name="continue_session" class="btn primary" value="Continue">
+      </form>
+      <p>You have an unfinished session.
+        {% if unfinished_session_first_uvs %}
+          {% if unfinished_session_first_uvs.verse_set and unfinished_session_first_uvs.verse_set.is_passage %}
+            ({{ unfinished_session_first_uvs.verse_set.smart_name_dict|lookup:unfinished_session_first_uvs.version.language_code }})
+          {% else %}
+            ({{ unfinished_session_first_uvs.localized_reference }}...)
           {% endif %}
-        </p>
-        <p id="id-unfinished-session-unsaved-data-warning" style="display:none;">
-          <b>Continue the session to sync unsaved data.</b>
-        </p>
-      </div>
+        {% endif %}
+      </p>
+      <p id="id-unfinished-session-unsaved-data-warning" style="display:none;">
+        <b>Continue the session to sync unsaved data.</b>
+      </p>
     </div>
   </div>
 
@@ -126,10 +123,10 @@
           <input type="hidden" name="verse_set_id" value="{{ cvs.verse_set.id }}" />
           <input type="hidden" name="version_id" value="{{ cvs.version.id }}" />
           {% if cvs.splittable %}
-            <input type="submit" name="reviewpassage" class="btn primary" value="Review whole passage"
+            <input type="submit" name="reviewpassage" class="btn primary" value="Whole passage"
                    id="id-reviewpassage-btn-{{ cvs.id }}" /><br/>
             <input type="submit" name="reviewpassagenextsection" class="btn primary"
-                   value="Review one section ({{ cvs.next_section_verse_count }} vss)"
+                   value="One section ({{ cvs.next_section_verse_count }} vss)"
                    id="id-reviewpassage-sections-btn-{{ cvs.id }}" /><br/>
           {% else %}
             <input type="submit" name="reviewpassage" class="btn primary" value="Review"

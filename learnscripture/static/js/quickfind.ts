@@ -275,7 +275,7 @@ var getReferenceFromControls = function($form) {
     return text;
 };
 
-export const quickFindAndHandleResults = function(resultHandler, passageMode) {
+export const quickFindAndHandleResults = function(resultHandler, passageMode, renderFor) {
 
     var handler = function(ev) {
         var $form = $(ev.target).closest('form');
@@ -287,16 +287,13 @@ export const quickFindAndHandleResults = function(resultHandler, passageMode) {
             data: {
                 'quick_find': $form.find('input[name=quick_find]').val(),
                 'version_slug': $('#id-version-select').val(),
-                'passage_mode': passageMode ? '1' : '0'
+                'passage_mode': passageMode ? '1' : '0',
+                'render_for': renderFor
             },
             success: function(results) {
                 resultHandler(results);
-                if (results.length == 1 && results[0].from_reference !== null) {
-                    var result = results[0];
-                    var qfVal = <string>$form.find('input[name=quick_find]').val();
-                    if (result.from_reference.trim() == qfVal.trim()) {
-                        setControlsFromParsedRef($form, result.parsed_ref);
-                    }
+                if (results.parsed_reference !== null) {
+                    setControlsFromParsedRef($form, results.parsed_reference);
                 }
             },
             error: function(jqXHR, textStatus, errorThrown) {

@@ -6,7 +6,7 @@ Coding style
 ------------
 
 * `PEP8`_ for Python
-* 4 space indennts for Javascript
+* 4 space indents for Javascript
 * 2 space indents for HTML
 * 4 space indents for CSS/LESS
 * Normally, every file should end with a newline (but not more than one)

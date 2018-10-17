@@ -4,6 +4,41 @@ from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm, Set
 from django.forms import widgets
 
 from accounts.models import Account
+from bibleverses.models import TextType, VerseSetType
+
+
+class FilterFormMixin(object):
+    """
+    Mixing for forms that act as filters.
+
+    These forms should always be valid, including in initial state, and any
+    state that can be set using the UI - they never show error messages.
+    """
+    @classmethod
+    def from_request_data(cls, request_data):
+        data = {}
+        initial_data = {}
+        for name, f in cls.base_fields.items():
+            initial_data[name] = f.initial
+            if name in request_data:
+                data[name] = request_data[name]
+            else:
+                data[name] = initial_data[name]
+
+        # First check on a different instance.
+        checker_instance = cls(data=data)
+        # Removed anything that doesn't validate
+        if not checker_instance.is_valid():
+            for k in checker_instance.errors.as_data().keys():
+                data[name] = initial_data[name]
+
+        instance = cls(data=data)
+        # Immediately run is_valid, so that we can use cleaned_data
+        if not instance.is_valid():
+            raise AssertionError("{0} should always be valid: {1}"
+                                 .format(cls,
+                                         instance.errors.as_data()))
+        return instance
 
 
 class SignUpForm(forms.ModelForm):
@@ -118,3 +153,85 @@ class ContactForm(forms.Form):
                               help_text="If you are reporting a problem, please include a full and specific description, "
                               "and include what device/browser you are using, with version numbers.",
                               widget=widgets.Textarea(attrs={'rows': '10'}))
+
+
+VERSE_SET_ORDER_POPULARITY = "popularity"
+VERSE_SET_ORDER_AGE = "age"
+
+VERSE_SET_TYPE_ALL = "all"
+VERSE_SET_TYPE_CHOICES = [
+    (VERSE_SET_TYPE_ALL, "All"),
+    (VerseSetType.SELECTION, "Selection - hand-picked verses usually on a theme or topic"),
+    (VerseSetType.PASSAGE, "Passage - continuous verses in a chapter"),
+]
+
+
+class VerseSetSearchForm(FilterFormMixin, forms.Form):
+    query = forms.CharField(label="Search", required=False)
+    set_type = forms.ChoiceField(choices=VERSE_SET_TYPE_CHOICES,
+                                 initial=VERSE_SET_TYPE_ALL,
+                                 label="Type",
+                                 required=False,
+                                 widget=widgets.RadioSelect
+                                 )
+    order = forms.ChoiceField(choices=[(VERSE_SET_ORDER_POPULARITY, "Most popular first"),
+                                       (VERSE_SET_ORDER_AGE, "Newest first"),
+                                       ],
+                              initial=VERSE_SET_ORDER_POPULARITY,
+                              label="Order",
+                              required=False,
+                              widget=widgets.RadioSelect
+                              )
+
+
+LEADERBOARD_WHEN_ALL_TIME = 'alltime'
+LEADERBOARD_WHEN_THIS_WEEK = 'thisweek'
+
+
+class LeaderboardFilterForm(FilterFormMixin, forms.Form):
+    when = forms.ChoiceField(choices=[(LEADERBOARD_WHEN_ALL_TIME, "All time"),
+                                      (LEADERBOARD_WHEN_THIS_WEEK, "This week"),
+                                      ],
+                             initial=LEADERBOARD_WHEN_ALL_TIME,
+                             label="When",
+                             required=False,
+                             widget=widgets.RadioSelect)
+
+
+GROUP_WALL_ORDER_NEWEST_FIRST = 'newestfirst'
+GROUP_WALL_ORDER_OLDEST_FIRST = 'oldestfirst'
+
+
+class GroupWallFilterForm(FilterFormMixin, forms.Form):
+    order = forms.ChoiceField(choices=[(GROUP_WALL_ORDER_NEWEST_FIRST, "Most recent first"),
+                                       (GROUP_WALL_ORDER_OLDEST_FIRST, "Oldest first")],
+                              initial=GROUP_WALL_ORDER_NEWEST_FIRST,
+                              label="Order",
+                              required=False,
+                              widget=widgets.RadioSelect)
+
+
+USER_VERSES_ORDER_WEAKEST = "weakestfirst"
+USER_VERSES_ORDER_STRONGEST = "strongestfirst"
+USER_VERSES_ORDER_TEXT_ORDER = "textorder"
+
+
+class UserVersesFilterForm(FilterFormMixin, forms.Form):
+    query = forms.CharField(label="Search", required=False,
+                            widget=forms.TextInput(attrs={'placeholder': "Bible ref e.g. Gen 1:1"}))
+    text_type = forms.ChoiceField(choices=TextType.choice_list,
+                                  initial=TextType.BIBLE,
+                                  label="Type",
+                                  required=False,
+                                  widget=widgets.RadioSelect)
+    order = forms.ChoiceField(choices=[(USER_VERSES_ORDER_WEAKEST, "Weakest first"),
+                                       (USER_VERSES_ORDER_STRONGEST, "Strongest first"),
+                                       (USER_VERSES_ORDER_TEXT_ORDER, "Text order")],
+                              initial=USER_VERSES_ORDER_WEAKEST,
+                              label="Order",
+                              required=False,
+                              widget=widgets.RadioSelect)
+
+
+class GroupFilterForm(FilterFormMixin, forms.Form):
+    query = forms.CharField(label="Search", required=False)

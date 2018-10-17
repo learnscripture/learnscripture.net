@@ -1,0 +1,16 @@
+{% if verseset_search_form.cleaned_data.query %}
+  <h2>Search results for <i>{{ verseset_search_form.cleaned_data.query }}</i>:</h2>
+{% endif %}
+
+{% if not results.items %}
+  <p>No verse sets found that match your query.</p>
+{% endif %}
+
+{% if create_passage_set_prompt %}
+  <p>You could <a data-create-passage-set href="{% url 'create_passage_set' %}?ref={{ create_passage_set_prompt.internal_reference|urlencode }}">create a passage set for {{ create_passage_set_prompt.localized_reference }}</a>.</p>
+{% endif %}
+
+{% include "learnscripture/choose_verseset_results_inc.html" %}
+{% if results.items %}
+  {% include "learnscripture/choose_verseset_show_more_inc.html" %}
+{% endif %}

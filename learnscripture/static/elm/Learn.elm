@@ -639,22 +639,24 @@ viewMain model helpTour =
 
 viewTopNav : Model -> H.Html Msg
 viewTopNav model =
-    H.nav [ A.class "topbar-new" ]
-        [ H.div [ A.class "nav-item return-link" ]
-            [ navLink
-                [ A.href "#"
-                , onClickSimply (AttemptReturn { immediate = True, fromRetry = False })
+    H.div [ A.class "topbar-wrapper" ]
+        [ H.nav [ A.class "topbar" ]
+            [ H.div [ A.class "nav-item return-link" ]
+                [ navLink
+                    [ A.href "#"
+                    , onClickSimply (AttemptReturn { immediate = True, fromRetry = False })
+                    ]
+                    (getReturnUrl model |> getReturnCaption)
+                    "icon-return"
+                    AlignLeft
                 ]
-                (getReturnUrl model |> getReturnCaption)
-                "icon-return"
-                AlignLeft
+            , sessionProgress model
+            , viewActionLogs model
+            , ajaxInfo model
+            , viewSessionStats model
+            , H.div [ A.class "nav-item preferences-link" ]
+                [ navLink [ A.href "#" ] (userDisplayName model.user) "icon-preferences" AlignRight ]
             ]
-        , sessionProgress model
-        , viewActionLogs model
-        , ajaxInfo model
-        , viewSessionStats model
-        , H.div [ A.class "nav-item preferences-link" ]
-            [ navLink [ A.href "#" ] (userDisplayName model.user) "icon-preferences" AlignRight ]
         ]
 
 
@@ -2483,7 +2485,7 @@ instructions verse testingMethod helpVisible =
               ]
             , [ H.text "You can finish your review or learning session at any time using the return button in the top left corner."
               ]
-            , [ H.text "Keyboard navigation (for physical keyboards, not touchscreens): use Tab and Shift-Tab to move focus between controls, and Enter to 'press' one. Focus is shown with a blue border."
+            , [ H.text "Keyboard navigation (for physical keyboards, not touchscreens): use Tab and Shift-Tab to move focus between controls, and Enter to 'press' one. Focus is shown with a colored border."
               ]
             ]
 
@@ -5901,12 +5903,12 @@ isRecordCall trackedCall =
 
 
 {- Details of actual API calls start here -}
-{- versestolearn2 API -}
+{- versestolearn API -}
 
 
 versesToLearnUrl : String
 versesToLearnUrl =
-    "/api/learnscripture/v1/versestolearn2/"
+    "/api/learnscripture/v1/versestolearn/"
 
 
 {-| Trigger verse load

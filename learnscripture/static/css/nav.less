@@ -1,0 +1,176 @@
+@topbarHeight: 36px;
+
+.topbar-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    // We need a fixed height, because this element has 'position: fixed'
+    // and we need to allow for that in margins on top of remaining content.
+    height: @topbarHeight;
+    z-index: 1;
+}
+
+nav.topbar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+
+    * {
+        box-sizing: border-box;
+    }
+    // Learn page dropdown, eventually everywhere
+
+    // nav-dropdown is a div that contains
+    // both the heading (.dropdown-heading)
+    // and the menu (.nav-dropdown-menu)
+
+    .nav-dropdown {
+        position: relative; // establish container for .nav-dropdown
+
+        &.menu-open {
+            .dropdown-heading,
+            .nav-dropdown-menu {
+                background-color: var(--topColor2);
+            }
+
+            .nav-dropdown-menu {
+                display: block;
+                position: absolute;
+                top: @topbarHeight;
+                right: 0px;
+                max-height: 50vh;
+            }
+        }
+        &.menu-pinned {
+            .dropdown-heading,
+            .nav-dropdown-menu {
+                background-color: var(--topColor1);
+            }
+        }
+    }
+
+    .dropdown-heading {
+        height: @topbarHeight;
+        &:not([tabindex="-1"]):hover {
+            color: var(--topLinkHoverColor);
+        }
+        padding: 0 0.4em;
+    }
+
+
+    .nav-dropdown-menu {
+        color: var(--topLinkColor);
+        padding: 2px 5px;
+        a {
+            text-decoration: none;
+            color: var(--topLinkColor);
+            &:hover {
+                color: var(--topLinkHoverColor);
+            }
+        }
+
+        li:not(:last-child):not(.button-item) {
+            border-bottom: 1px solid var(--topLinkColor);
+        }
+    }
+
+    // .nav-item is for the content that will appear visually in the navbar
+    // itself, not anything underneath (like a menu)
+    .nav-item {
+        height: @topbarHeight;
+        line-height: @topbarHeight;
+
+        &.active {
+            background-color: rgba(255,255,255,0.08);
+        }
+
+    }
+
+    .nav-dropdown-menu {
+        display: none;
+        margin: 0px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        line-height: @topbarHeight;
+        z-index: 1;
+
+        li {
+            display: block;
+            white-space: nowrap;
+            &.button-item {
+                text-align: center;
+            }
+            padding: 0 0.4em;
+        }
+
+        .menu-pin {
+            border-color: var(--topTextColor);
+            display: block;
+            position: absolute;
+            z-index: 2;
+            right: 6px;
+            top: 6px;
+        }
+
+        &.menu-pinnable {
+            li {
+                // Make room for 'pin' button
+                padding-right: 30px;
+            }
+        }
+
+        &.menu-pinned {
+            display: block;
+        }
+    }
+
+    .spacer {
+        flex-grow: 1;
+    }
+
+    .nav-caption {
+        padding-left: 4px;
+    }
+
+    i.icon-fw + .nav-caption {
+        padding-left: 0px;
+    }
+}
+
+.topbar-wrapper, nav.topbar, .nav {
+    background-color: var(--topColor1);
+    color: var(--topTextColor);
+    a {
+        text-decoration: none;
+        color: var(--topLinkColor);
+        text-shadow: 0 -1px 0 rgba(0,0,0,.25);
+        &:hover {
+            color: var(--topLinkHoverColor);
+        }
+    }
+
+    .dropdown {
+        &.open .dropdown-toggle {
+            background: var(--topColor2);
+        }
+        .dropdown-menu {
+            background-color: var(--topColor2);
+            a:hover {
+                background: var(--topColor1);
+            }
+            .active a {
+                color: var(--topLinkHoverColor);
+            }
+        }
+    }
+}
+
+// All dropdowns, in nav or not:
+.dropdown-heading:not(.hidden):not([tabindex="-1"]) {
+    cursor: pointer;
+}
+.dropdown-heading.hidden {
+    cursor: default;
+}

@@ -1,8 +1,8 @@
 {% load dict_utils %}
 
 <form action="" method="GET" class="quickfind always-adjust-size" id="id-quick-find-form">
-  <div class="clearfix">
-    <label for="id_quick_find">Quick find</label>
+  <div class="form-row">
+    <label for="id_quick_find">Quick find:</label>
     <div class="input">
       <input id="id_quick_find" type="text" value="" name="quick_find">
       <br/>
@@ -26,8 +26,8 @@
     </div>
   </div>
 
-  <div class="clearfix">
-    <label for="id_book">Select</label>
+  <div class="form-row">
+    <label for="id_book">Select:</label>
     <div class="input">
       <select name="book" id="id_book">
         <option value="">----</option>
@@ -58,8 +58,8 @@
     </div>
   </div>
 
-  <div class="clearfix">
-    <label for="id-version-select">Version</label>
+  <div class="form-row">
+    <label for="id-version-select">Version:</label>
     <div class="input">
       <select id="id-version-select" name="version">
         {% for v in bible_versions %}
@@ -72,19 +72,17 @@
     </div>
   </div>
 
-  <div class="clearfix">
-    <div class="input">
-      <input id="id_lookup" type="submit" name="lookup"
-             {% if quick_find_mode == 'PASSAGE' %}
-             value="Lookup passage"
-             {% else %}
-             value="Lookup verse"
-             {% endif %}
-             class="btn primary">
-    </div>
+  <div class="actions">
+    <input id="id_lookup" type="submit" name="lookup"
+           {% if quick_find_mode == 'PASSAGE' %}
+           value="Lookup passage"
+           {% else %}
+           value="Lookup verse"
+           {% endif %}
+           class="btn primary">
   </div>
 
-  <div class="clearfix error">
+  <div class="non-field-errors">
     <p id="id_form_all_errors" class="form-all-errors"></p>
   </div>
 </form>

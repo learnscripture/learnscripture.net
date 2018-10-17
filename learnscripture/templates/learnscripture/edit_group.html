@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% load bootstrap %}
+{% load form_rendering %}
 
 {% block content %}
 
@@ -8,7 +8,7 @@
 
   <form action="" method="POST" id="id-form-edit-group">
     {% csrf_token %}
-    {{ form|bootstrap }}
+    {{ form|render_form }}
 
     <div class="actions">
       <input type="submit" name="save" value="Save" class="btn primary" />

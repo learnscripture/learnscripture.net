@@ -20,7 +20,7 @@ export const getAccountData = function() {
 
 var doLogout = function(ev: JQuery.Event) {
     ev.preventDefault();
-    if (confirm("Are you sure you want to log out?")) {
+    if (confirm($('#id-i18n-site-confirm-logout').text())) {
         $.ajax({
             url: '/api/learnscripture/v1/logout/?format=json',
             dataType: 'json',

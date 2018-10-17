@@ -120,7 +120,7 @@ def leaderboard_group_filter(q, hellbanned_mode, group):
     return q
 
 
-def get_all_time_leaderboard(hellbanned_mode, page, page_size, group=None):
+def get_all_time_leaderboard(hellbanned_mode, from_item, page_size, group=None):
     # page is zero indexed
 
     from learnscripture.utils.sqla import default_engine, accounts_account, scores_totalscore
@@ -151,7 +151,7 @@ def get_all_time_leaderboard(hellbanned_mode, page, page_size, group=None):
                  from_obj=subq1
                  )
           .limit(page_size)
-          .offset(page * page_size)
+          .offset(from_item)
           )
 
     default_engine.execute("CREATE TEMPORARY SEQUENCE rank_seq;")
@@ -161,7 +161,7 @@ def get_all_time_leaderboard(hellbanned_mode, page, page_size, group=None):
             for r in results]
 
 
-def get_leaderboard_since(since, hellbanned_mode, page, page_size, group=None):
+def get_leaderboard_since(since, hellbanned_mode, from_item, page_size, group=None):
     # page is zero indexed
 
     # This uses a completely different strategy to get_all_time_leaderboard,
@@ -198,7 +198,7 @@ def get_leaderboard_since(since, hellbanned_mode, page, page_size, group=None):
                 ],
                from_obj=subq1)
         .limit(page_size)
-        .offset(page * page_size)
+        .offset(from_item)
     )
 
     default_engine.execute("CREATE TEMPORARY SEQUENCE rank_seq;")

@@ -1,4 +1,4 @@
-{% load bootstrap %}
+{% load form_rendering %}
 {% load json_filters %}
 
 {% if not hide_preferences_popup %}
@@ -13,7 +13,7 @@
         <form action="" method="POST">
           {% csrf_token %}
 
-          {{ preferences_form|bootstrap }}
+          {{ preferences_form|render_form }}
 
         </form>
       </div>

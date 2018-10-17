@@ -1,0 +1,23 @@
+{% if not results.items %}
+  {% if bible %}
+    <p>No verses learnt yet</p>
+  {% endif %}
+  {% if catechism %}
+    <p>No catechism questions learnt yet - <a href="{% url 'catechisms' %}">choose some!</a></p>
+  {% endif %}
+
+{% else %}
+
+  <table class="bordered-table">
+    <thead>
+      <tr>
+        <th>{% if bible %}Verse{% elif catechism %}Question{% endif %}</th>
+        <th>{% if bible %}Version{% elif catechism %}Catechism{% endif %}</th>
+        <th>Strength</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% include "learnscripture/user_verses_table_body_inc.html" %}
+    </tbody>
+  </table>
+{% endif %}

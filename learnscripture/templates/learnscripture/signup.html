@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% load bootstrap %}
+{% load form_rendering %}
 
 {% block content %}
 
@@ -12,7 +12,7 @@
 
     <form action="" id="id_signup-form" method="POST">
       {% csrf_token %}
-      {{ signup_form|bootstrap }}
+      {{ signup_form|render_form }}
 
       <p>By creating an account, you are agreeing to our
         <a href="/terms-of-service/" target="_blank">terms of service</a> and

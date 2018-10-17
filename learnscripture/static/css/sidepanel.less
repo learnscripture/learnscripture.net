@@ -1,6 +1,6 @@
 @closebarWidth: 20px;
 @sidepanelFooterColor: #f5f5f5;
-@sidepanelBodyColor: @white;
+@sidepanelBodyColor: white;
 
 
 .sidepanel {
@@ -11,7 +11,7 @@
     height: 100%;
     width: 100%;
     margin: 0;
-    .box-shadow(5px 0px 7px rgba(0,0,0,0.3));
+    box-shadow: 5px 0px 7px rgba(0,0,0,0.3);
 
     .close-bar {
         position: absolute;
@@ -25,7 +25,7 @@
     .backdrop {
         background: #444;
         // time here also in preferences.js, and for slider animation
-        .transition(opacity .25s ease-in);
+        transition: opacity .25s ease-in;
         opacity: 0;
     }
 
@@ -51,15 +51,14 @@
     }
 
     .slider {
-        .translate(-100%, 0);
+        transform: translate(-100%, 0);
     }
     .slide-in {
-        .animation(slide-in 0.25s forwards);
+        animation: slide-in 0.25s forwards;
     }
     .slide-out {
-        .animation(slide-out 0.25s forwards);
+        animation: slide-out 0.25s forwards;
     }
-
 
     .sidepanel-body {
         padding: 10px;
@@ -68,7 +67,7 @@
 
     .sidepanel-header {
         background-color: @sidepanelBodyColor;
-        border-bottom: 1px solid #eee;
+        border-bottom: 1px solid var(--bgBorderColor);
         padding: 5px 15px;
         h3 {
             padding-left: 10px;
@@ -77,7 +76,7 @@
     .sidepanel-footer {
         box-sizing: border-box;
         padding: 14px 15px 15px;
-        border-top: 1px solid #ddd;
+        border-top: 1px solid var(--bgBorderColor);
         .clearfix();
         .btn {
             float: right;
@@ -87,19 +86,11 @@
 }
 
 @keyframes slide-in {
-    100% { .translate(0%, 0%); }
-}
-
-@-webkit-keyframes slide-in {
-    100% { .translate(0%, 0%); }
+    100% { transform: translate(0%, 0%); }
 }
 
 @keyframes slide-out {
-    0% { .translate(0%, 0%); }
-    100% { .translate(-100%, 0%); }
+    0% { transform: translate(0%, 0%); }
+    100% { transform: translate(-100%, 0%); }
 }
 
-@-webkit-keyframes slide-out {
-    0% { .translate(0%, 0%); }
-    100% { .translate(-100%, 0%); }
-}

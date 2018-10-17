@@ -42,7 +42,7 @@ var setupCalendarHeatmap = function() {
 }
 
 var getSelectedStat = function() {
-    return $('#id-heatmap-stat-selector .active a').attr('data-heatmap-select-stat');
+    return $('#id-heatmap-stat-selector input[name=stat]:checked').val() as string;
 }
 
 var createOrRefreshCalendarHeatmap = function(allData) {
@@ -119,13 +119,7 @@ var setupCalendarControls = function() {
         }
     });
 
-    $('[data-heatmap-select-stat]').on('click', function(ev) {
-        ev.preventDefault();
-        var $target = $(ev.target);
-        $('#id-heatmap-stat-selector .active').each((idx, elem) => {
-            $(elem).removeClass('active');
-        });
-        $target.parent('[data-heatmap-select-stat-parent]').addClass('active');
+    $('#id-heatmap-stat-selector input').on('change', function(ev) {
         createOrRefreshCalendarHeatmap(calHeatMapData);
         saveHeatmapPreferencesDelayed();
     });

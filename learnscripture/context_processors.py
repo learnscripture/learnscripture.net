@@ -127,3 +127,13 @@ def settings_processor(request):
     return {'settings': {'SENTRY_DSN': settings.SENTRY_DSN,
                          'GOOGLE_ANALYTICS_ACCOUNT': settings.GOOGLE_ANALYTICS_ACCOUNT,
                          }}
+
+
+def indexing(request):
+    retval = {}
+    if 'p' in request.GET or 'from_item' in request.GET:
+        # For paginated or PJAX paginated pages, we want target items to be
+        # indexed, but the boring (or possibly partial) list of items should not
+        # be indexed.
+        retval['noindex_but_follow'] = True
+    return retval

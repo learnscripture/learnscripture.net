@@ -2,10 +2,10 @@ import { ajaxFailed } from './common';
 import { BIBLE_BOOK_INFO } from './bible_book_info';
 import { quickFindAndHandleResults } from './quickfind';
 
-var addVerse = function(verseData) {
-    $('#id-verse-list tbody').append(
-        $('#id_verse_list_selection_row_template').render({ 'verseData': verseData }));
-    $('#id-verse-list').show();
+var addVerse = function(verseHtml) {
+    $('#id-verse-list tbody').append(verseHtml);
+    $('#id-verse-list table').show();
+    $('#id-verse-list-empty-message').hide();
 };
 
 var addVerseClick = function(ev) {
@@ -16,7 +16,7 @@ var addVerseClick = function(ev) {
         data: btn.closest('form').serialize(),
         dataType: 'json',
         success: function(results) {
-            addVerse(results[0]);
+            addVerse(results['html']);
             btn.closest('.actionset').remove();
         },
         error: ajaxFailed
@@ -25,23 +25,17 @@ var addVerseClick = function(ev) {
 
 var previousPassageRef = null;
 
-var addPassage = function(passageData) {
+var addPassage = function(results) {
     $('#id-verse-list tbody tr').remove();
-    $.each(passageData.verses, function(idx, verseData) {
-        $('#id-verse-list tbody').append(
-            $('#id_verse_list_passage_row_template').render({ 'verseData': verseData }));
-    });
-    $('#id-verse-list').show();
-    var ref = passageData.localized_reference;
-    var simplifiedRef = ref;
-    var parsedRef = passageData.parsed_ref;
-    if (parsedRef !== null) {
-        if (parsedRef.start_chapter == parsedRef.end_chapter &&
-            parsedRef.start_verse == 1 &&
-            parsedRef.end_verse == BIBLE_BOOK_INFO[parsedRef.internal_book_name]['verse_counts'][parsedRef.start_chapter.toString()]) {
-            // Whole chapter. Special case to make name nicer.
-            simplifiedRef = parsedRef.book_name + " " + parsedRef.start_chapter.toString();
-        }
+    $('#id-verse-list tbody').html(results['html']);
+    $('#id-verse-list, #id-verse-list table').show();
+    var simplifiedRef = results.canonical_reference;
+    var parsedRef = results.parsed_reference;
+    if (parsedRef.start_chapter == parsedRef.end_chapter &&
+        parsedRef.start_verse == 1 &&
+        parsedRef.end_verse == BIBLE_BOOK_INFO[parsedRef.internal_book_name]['verse_counts'][parsedRef.start_chapter.toString()]) {
+        // Whole chapter. Special case to make name nicer.
+        simplifiedRef = parsedRef.book_name + " " + parsedRef.start_chapter.toString();
     }
     var currentName = (<string>$('#id_name').val()).trim();
     if (currentName === "" || currentName === previousPassageRef) {
@@ -56,6 +50,7 @@ var deleteButtonClick = function(ev) {
 };
 
 var selectionSaveBtnClick = function(ev) {
+    ev.preventDefault();
     // Create hidden fields with all internal_references
     var refs = [];
     $('#id-verse-list tr[data-internal-reference]').each(function(idx, elem) {
@@ -66,6 +61,7 @@ var selectionSaveBtnClick = function(ev) {
 };
 
 var passageSaveBtnClick = function(ev) {
+    ev.preventDefault();
     // Create hidden fields with all internal_references
     var refs = [];
     var breaks = [];
@@ -79,59 +75,33 @@ var passageSaveBtnClick = function(ev) {
     });
     $('#id-internal-reference-list').val(refs.join('|'));
     $('#id-break-list').val(breaks.join(','));
-    // continue with submit
+    $('#id-verse-set-form').submit();
 };
 
 var selectionLoadResults = function(results) {
     $('#id-quick-find-form .validation-error').remove();
     var d = $('.quickfind_search_results');
-    if (results.length > 0) {
-        var html = '';
-        if (results.length > 10) {
-            html = html + "<p>The first 10 results matching your search are below:</p>";
-        }
-        html = html + $('#id_create_selection_result_template').render(results);
-        d.html(html);
-        d.find('input[type=submit]').click(addVerseClick);
-    } else {
-        d.html("<p><span class='error'>No verses were found matching your search</span></p>");
-    }
+    d.html(results['html']);
+    d.find('input[type=submit]').click(addVerseClick);
 };
 
 var passageLoadResults = function(results) {
     $('#id-quick-find-form .validation-error').remove();
     $('#id-duplicate-warning').html('');
-    if (results.length > 0) {
-        addPassage(results[0]);
-        // If creating, not editing:
-        if (window.location.pathname.match(/\/create-passage-set\//) != null) {
-            var verses = results[0].verses;
-            $.ajax({
-                url: '/api/learnscripture/v1/checkduplicatepassageset/?format=json',
-                data: {
-                    start_reference: verses[0].localized_reference,
-                    end_reference: verses[verses.length - 1].localized_reference
-                },
-                dataType: 'json',
-                success: function(results) {
-                    if (results.length > 0) {
-                        var html = '<p>There are already some passage sets for this passage:</p>'
-                        html = html +
-                            '<ul>' +
-                            $('#id-duplicate-warning-template').render(results) +
-                            '</ul>';
-
-                        $('#id-duplicate-warning').html(html);
-                    }
-                }
-            })
+    addPassage(results);
+    // If creating, not editing:
+    if (window.location.pathname.match(/\/create-passage-set\//) != null) {
+        if (results['duplicate_check_html']) {
+            $('#id-duplicate-warning').html(results['duplicate_check_html']);
         }
     }
 };
 
 var setupCreateVerseSetControls = function() {
     if ($('#id-verse-list tbody tr').length === 0) {
-        $('#id-verse-list').hide();
+        $('#id-verse-list table').hide();
+    } else {
+        $('#id-verse-list-empty-message').hide();
     }
     $('#id-verse-list').on('click', '.icon-arrow-up, .icon-arrow-down',
         function(ev) {
@@ -161,8 +131,14 @@ var setupCreateVerseSetControls = function() {
             input.prop('disabled', true);
         }
     });
-    $('#id-create-selection-set #id_lookup').click(quickFindAndHandleResults(selectionLoadResults, false));
-    $('#id-create-passage-set #id_lookup').click(quickFindAndHandleResults(passageLoadResults, true));
+    $('#id-create-selection-set #id_lookup').click(quickFindAndHandleResults(selectionLoadResults, false, "create-selection-set"));
+    $('#id-create-passage-set #id_lookup').click(quickFindAndHandleResults(passageLoadResults, true, "create-passage-row"));
+
+    var $initialRef = $('[name="initial_localized_reference"]');
+    if ($initialRef.length > 0 && $initialRef.val() != "") {
+        $('#id_quick_find').val($initialRef.val());
+        $('#id-create-passage-set #id_lookup').trigger('click');
+    }
 
 };
 

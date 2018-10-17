@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% load bootstrap %}
+{% load form_rendering %}
 {% load fiber_tags %}
 
 {% block content %}
@@ -10,7 +10,7 @@
   <form action="" id="id_contact-form" method="POST">
     {% csrf_token %}
 
-    {{ form|bootstrap }}
+    {{ form|render_form }}
 
 
     <div class="actions">

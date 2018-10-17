@@ -24,7 +24,7 @@ class DashboardTestsBase(RequireExampleVerseSetsMixin):
         if self.is_full_browser_test:
             self.assertEqual(ref, self.get_element_text("#id-verse-header h2"))
         else:
-            json = self.app.get(reverse('learnscripture.api.versestolearn2')).json
+            json = self.app.get(reverse('learnscripture.api.versestolearn')).json
             verse_statuses = json['verse_statuses']
             verse_data = [d for d in verse_statuses if d['learn_order'] == 0][0]
             self.assertEqual(ref, verse_data['title_text'])
@@ -154,7 +154,7 @@ class DashboardTestsBase(RequireExampleVerseSetsMixin):
         self.get_url('dashboard')
         self.assertTextPresent('Psalm 23')  # sanity check
 
-        self.submit('input[value^="Review one section"][name=reviewpassagenextsection]')
+        self.submit('input[name=reviewpassagenextsection]')
         self.assert_learning_localized_reference("Psalm 23:1")
 
         if self.is_full_browser_test:

@@ -1,8 +1,5 @@
 {% extends "base.html" %}
 
-{% load markup_tags %}
-{% load pagination_tags %}
-
 {% block content %}
 
   <p>By joining groups, you can more easily compare your progress to people that
@@ -11,44 +8,20 @@
   </p>
   <br>
 
-  <form action="" method="GET">
-    <div class="clearfix">
-      <label for="id-search-input">Search</label>
-      <div class="input">
-        <input type="text" name="q"  id="id-search-input" value="{{ request.GET.q }}"/>
+  <form action="." method="GET"
+        data-pjax-results-container="#id-groups-results"
+        data-pjax-more-results-container=".more-results-container"
+        >
+    <div class="form-row">
+      <label for="id_query">Search:</label>
+      <div class="input input-line">
+        {{ filter_form.query }}
         <input type="submit" class="btn primary" value="Search" id="id-search-btn" />
       </div>
     </div>
   </form>
 
-
-  {% autopaginate groups 10 %}
-
-
-  {% if request.GET.q %}
-    <h2>Search results:</h2>
-
-    {% if groups %}
-
-      {% paginate %}
-
-      {% for group in groups %}
-        <div class="actionset">
-
-          <h3><a href="{% url 'group' group.slug %}">{{ group.name }}</a></h3>
-          {{ group.description|apply_markup:"restructuredtext" }}
-
-        </div>
-      {% endfor %}
-
-      {% paginate %}
-
-    {% else %}
-
-      <p>Sorry, no groups found!</p>
-
-    {% endif %}
-
-  {% endif %}
-
+  <div id="id-groups-results">
+    {% include "learnscripture/groups_inc.html" %}
+  </div>
 {% endblock %}

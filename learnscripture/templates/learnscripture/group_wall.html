@@ -1,52 +1,23 @@
 {% extends 'base_twocol.html' %}
 
-{% load pagination_tags %}
-{% load spurl %}
+{% load form_rendering %}
+
+{% block body_extra_class %}group-wall-page{% endblock %}
 
 {% block leftcolumn %}
 
-  {% autopaginate comments GROUP_COMMENTS_PAGINATE_BY %}
-
   <h2>Comments</h2>
 
-  <p>Sort by:</p>
-  <div class="input">
-    <ul class="pills">
-      {% if sort_order == 'newestfirst' %}
-        <li class="active"><a href="">
-          Most recent first</a></li>
-        <li><a href="{% spurl base=request.get_full_path add_query='oldestfirst' %}">
-          Oldest first</a></li>
-      {% else %}
-        <li><a href="{% spurl base=request.get_full_path remove_query_param='oldestfirst' %}">
-          Most recent first</a></li>
-        <li class="active"><a href="">
-          Oldest first</a></li>
-      {% endif %}
-    </ul>
+  <form action="." method="GET"
+        data-pjax-results-container="#id-group-wall-comments"
+        data-pjax-more-results-container=".more-results-container"
+        >
+    {{ filter_form|render_form }}
+  </form>
+
+  <div id="id-group-wall-comments">
+    {% include "learnscripture/group_wall_comments_inc.html" %}
   </div>
-
-
-  <div class="groupcomments" data-group-id="{{ group.id }}">
-    <div class="commentblock">
-      {% if not page_obj.has_prev and sort_order == 'newestfirst' %}
-        {% include "learnscripture/group_wall_add_comment_inc.html" %}
-      {% endif %}
-      <div class="commentlist">
-        {% for comment in comments %}
-          {% with show_as_related_comment=comment.event %}
-            {% include "learnscripture/comment_inc.html" %}
-          {% endwith %}
-        {% endfor %}
-      </div>
-      {% if not page_obj.has_next and sort_order == 'oldestfirst' %}
-        {% include "learnscripture/group_wall_add_comment_inc.html" %}
-      {% endif %}
-    </div>
-  </div>
-
-
-  {% paginate %}
 
   {% include "learnscripture/comment_common_inc.html" %}
 

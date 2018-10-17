@@ -253,10 +253,8 @@ class ComboVerse(object):
 
 class VerseSearchResult(ComboVerse):
     def __init__(self, localized_reference, verse_list,
-                 parsed_ref=None,
-                 from_reference=None):
+                 parsed_ref=None):
         super().__init__(localized_reference, verse_list)
-        self.from_reference = from_reference
         self.parsed_ref = parsed_ref
 
 
@@ -764,6 +762,23 @@ class UserVerseStatusQuerySet(models.QuerySet):
     def needs_reviewing_in_future(self, now):
         return self.reviewable().filter(next_test_due__gt=now)
 
+    def search_by_parsed_ref(self, parsed_ref):
+        # We could use the parsed_ref to find bible_verse_number ranges. But
+        # that would require knowing the Bible version, and we could be
+        # referring to any Bible version. So we use this method based on string
+        # matching.
+        query_ref = parsed_ref.canonical_form()
+        # Some slightly hacky stuff here, could break with
+        # other reference styles.
+        if parsed_ref.start_chapter is None:
+            return self.filter(localized_reference__startswith=query_ref + " ")
+        elif parsed_ref.start_verse is None:
+            # Hack - by adding ':' we can stop
+            #  "Genesis 1" matching "Genesis 10" etc.
+            return self.filter(localized_reference__startswith=query_ref + ":")
+        else:
+            return self.filter(localized_reference=query_ref)
+
 
 class UserVerseStatus(models.Model):
     """
@@ -1250,12 +1265,17 @@ def get_passage_sections(language_code, verse_list, breaks):
     return sections
 
 
+QUICK_FIND_SEARCH_LIMIT = 10
+
+
 def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
                allow_searches=True):
     """
     Does a verse search based on reference or contents.
 
     It returns a list of VerseSearchResult objects.
+
+    It will return at most QUICK_FIND_SEARCH_LIMIT + 1 items
     """
     # Unlike fetch_localized_reference, this is tolerant with input.
     # It can still throw InvalidVerseReference for things that are obviously
@@ -1279,8 +1299,7 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
         parsed_result_ref = parse_validated_localized_reference(version.language_code,
                                                                 result_ref)
         return [VerseSearchResult(result_ref, verse_list,
-                                  parsed_ref=parsed_result_ref,
-                                  from_reference=query)]
+                                  parsed_ref=parsed_result_ref)]
 
     if not allow_searches:
         raise InvalidVerseReference("Verse reference not recognized")
@@ -1290,7 +1309,7 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
     if searcher:
         return searcher(version, search_query)
 
-    results = Verse.objects.text_search(search_query, version, limit=11)
+    results = Verse.objects.text_search(search_query, version, limit=QUICK_FIND_SEARCH_LIMIT + 1)
     return [VerseSearchResult(r.localized_reference, [r]) for r in results]
 
 
