@@ -3,86 +3,96 @@ import { ajaxFailed, displaySimpleAjaxError } from './common';
 
 
 var setupCommentControls = function() {
+
     var showAddComment = function(div) {
-        var commentBlock = div.find('.commentblock').show();
-        var locator = commentBlock.find('.commentboxlocator');
-        $('#id-add-comment').appendTo(locator).show();
-        $('#id-comment-box').focus();
+        var $commentBlock = div.find('.commentblock').show();
+        if ($commentBlock.find(".comment-box").length > 0) {
+            return; // We've already got one
+        }
+        // TODO locator/parent etc.
+        var $locator = $commentBlock.find('.commentboxlocator');
+
+        $locator.append($('#id-add-comment').html());
+
+        var $commentBoxDiv = $locator.find('.comment-box-wrapper');
+        var $commentBox = $locator.find('.comment-box');
+
+        autosize($commentBox);
+        $commentBox.focus();
+
+        bindPostCommentClick($locator, $commentBoxDiv, $commentBox);
+
+        $locator.find('.cancel-comment-btn').bind('click', function(ev) {
+            ev.preventDefault();
+            $commentBoxDiv.remove();
+        });
+    }
+
+    var bindPostCommentClick = function($locator, $commentBoxDiv, $commentBox) {
+        var postCommentClick = function(ev) {
+            ev.preventDefault();
+            var data = {};
+            var $commentListDiv = null;
+
+            // Find event id
+            var activityDiv = $(ev.target).closest('.activityitem');
+            if (activityDiv.length > 0) {
+                data['event_id'] = activityDiv.attr("data-event-id");
+                $commentListDiv = activityDiv.find('.commentblock')
+            }
+            // or group id
+            var groupDiv = $(ev.target).closest('.groupcomments');
+            if (groupDiv.length > 0) {
+                data['group_id'] = groupDiv.attr("data-group-id");
+                $commentListDiv = groupDiv.find('.commentblock')
+            }
+
+            data['message'] = $commentBox.val();
+
+            var position = $commentListDiv.attr("data-new-comments-position")
+
+            $.ajax({
+                url: '/api/learnscripture/v1/addcomment/?format=json',
+                dataType: 'json',
+                type: 'POST',
+                data: data,
+                success: function(returnedData) {
+                    // returnedData contains new comment to add.
+                    var newItem = returnedData['html'];
+                    $commentBoxDiv.remove();
+                    if (position == 'top') {
+                        $commentListDiv.prepend(newItem);
+                        $locator.prependTo($locator.parent());
+                    } else {
+                        $commentListDiv.append(newItem);
+                        $locator.appendTo($locator.parent());
+                    }
+
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    setTimeout(bindPostCommentClick, 500, $commentBoxDiv);
+                    if (jqXHR.status.toString()[0] == "4") {
+                        alert(displaySimpleAjaxError(jqXHR));
+                    } else {
+                        return ajaxFailed(jqXHR, textStatus, errorThrown);
+                    }
+                }
+            });
+        };
+        $commentBoxDiv.find('.add-comment-btn').on('click', postCommentClick);
     }
 
     if ($('.activityitem').length == 1) {
         showAddComment($('.activityitem'));
     }
 
-    $('a.show-add-comment').bind('click', function(ev) {
+    $('body').on('click', 'a.show-add-comment', function(ev) {
         ev.preventDefault();
         var div = $(this).closest('.activityitem,.groupcomments');
         showAddComment(div);
     })
 
-    var postCommentClick = function(ev) {
-        ev.preventDefault();
-        var data = {
-            'message': $('#id-comment-box').val(),
-        }
-        // Find event id
-        var commentListDiv = null;
-        var activityDiv = $(this).closest('.activityitem');
-        if (activityDiv.length > 0) {
-            data['event_id'] = activityDiv.data().eventId;
-            commentListDiv = activityDiv.find('.commentlist')
-        }
-        // or group id
-        var groupDiv = $(this).closest('.groupcomments');
-        if (groupDiv.length > 0) {
-            data['group_id'] = groupDiv.data().groupId;
-            commentListDiv = groupDiv.find('.commentlist')
-        }
-        // Get position of comment box relative to comment list
-        var position = ($("#id-comment-box").add(commentListDiv).index(commentListDiv) == 0 ?
-            'bottom' : 'top');
-
-        $.ajax({
-            url: '/api/learnscripture/v1/addcomment/?format=json',
-            dataType: 'json',
-            type: 'POST',
-            data: data,
-            success: function(data) {
-                setTimeout(bindPostCommentClick, 500);
-                // data contains new comment to add.
-                var newItem = $('#id-comment-template').render({ 'comment': data });
-                if (position == 'top') {
-                    commentListDiv.prepend(newItem);
-                } else {
-                    commentListDiv.append(newItem);
-                }
-
-                $('#id-comment-box').val('');
-                $('#id-add-comment').hide();
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-                setTimeout(bindPostCommentClick, 500);
-                if (jqXHR.status.toString()[0] == "4") {
-                    alert(displaySimpleAjaxError(jqXHR));
-                } else {
-                    return ajaxFailed(jqXHR, textStatus, errorThrown);
-                }
-            }
-        });
-    };
-
-    var bindPostCommentClick = function() {
-        $('#id-add-comment-btn').one('click', postCommentClick);
-    }
-    bindPostCommentClick();
-
-    $('#id-cancel-comment-btn').bind('click', function(ev) {
-        ev.preventDefault();
-        $('#id-add-comment').hide();
-        $('#id-comment-box').val('');
-    });
-
-    $('.moderate-comment').bind('click', function(ev) {
+    $('body').on('click', '.moderate-comment', function(ev) {
         ev.preventDefault();
         if (window.confirm("Remove this comment?")) {
             var commentDiv = $(this).closest('.comment');
@@ -102,7 +112,6 @@ var setupCommentControls = function() {
         }
     });
 
-    autosize($('#id-comment-box'));
 };
 
 $(document).ready(function() {

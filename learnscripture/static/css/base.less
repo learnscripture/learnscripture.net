@@ -5,25 +5,24 @@
 // styling for many different pages, so that a single CSS download is needed
 // for most pages.
 
-// Mostly this file appends to and therefore overrides bootstrap.less styles,
-// rather than modiyfing bootstrap itself. However, we have pulled out
-// various bits in order to do color themes in this file.
+@import "variables.less";
+@import "reset.less";
 
-
-// 3rd party
-@import "../bootstrap/lib/bootstrap.less";
 
 // Common things
 @import "icons.less";
 @import "utils.less";
-@import "themes.less";
+@import "tables.less";
 @import "common.less";
-@import "common_layout.less";
+@import "themes.less";
+@import "forms.less";
 @import "sidepanel.less";
+@import "nav.less";
 @import "base_layout.less";
 @import "messages.less";
 
 // Page or component specific
+@import "accordion.less";
 @import "activity.less";
 @import "choose.less";
 @import "comments.less";
@@ -32,6 +31,7 @@
 @import "hacks.less";
 @import "home.less";
 @import "leaderboard.less";
+@import "learn.less";
 @import "progress.less";
 @import "stats.less";
 @import "user_stats.less";

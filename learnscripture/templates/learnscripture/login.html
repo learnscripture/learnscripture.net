@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% load bootstrap %}
+{% load form_rendering %}
 
 {% block content %}
 
   <form action="" id="id_login-form" method="POST">
     {% csrf_token %}
-    {{ login_form|bootstrap }}
+    {{ login_form|render_form }}
     <div class="actions">
       <input type="submit" name="signin" value="Sign in" class="btn primary default">
       <input type="submit" name="forgotpassword" value="I forgot my password" class="btn">

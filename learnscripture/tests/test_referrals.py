@@ -25,6 +25,7 @@ class ReferralsTests(RequireExampleVerseSetsMixin, FullBrowserTest):
 
         # Should be at 'choose' page now
         vs = VerseSet.objects.get(slug='bible-101')
+        self.click("#id-choose-verseset .accordion-heading")
         self.click("#id-learn-verseset-btn-%d" % vs.id)
         self.set_preferences()
 

@@ -45,8 +45,9 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
     def choose_verse_set(self, name):
         verse_set = VerseSet.objects.get(name=name)
         self.get_url('choose')
+        self.click("#id-choose-verseset .accordion-heading")
         self.click("#id-learn-verseset-btn-%d" % verse_set.id)
-        self.set_preferences()
+        self.set_preferences(wait_for_reload=True)
         self.assertUrlsEqual(reverse('learn'))
         return verse_set
 
@@ -211,6 +212,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         # Test focussed button
         time.sleep(0.2)
         self.press_enter('button.primary')
+        time.sleep(0.1)
         self.assertIn("He maketh me to lie down in green pastures",
                       self.get_element_text('.current-verse'))
 

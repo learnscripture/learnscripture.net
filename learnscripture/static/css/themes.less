@@ -3,7 +3,7 @@
 
 .dotheme(@topColor1, @topColor2,
          @topLinkColor, @topLinkHoverColor,
-         @btnColor1, @btnColor2,
+         @btnColor1, @btnColor2, @btnTextColor,
          @bgColor1, @linkColor, @footerColor,
          @topWarningColor, @topErrorColor,
          @focusOutlineColor,
@@ -14,17 +14,13 @@
     @bgBorderColor: darken(@bgColor1, 10%);
     @baseBackgroundColor: white;
 
-    // Styles at this level are applied to 'body' element.
-    color: @baseTextColor;
-    background-color: @baseBackgroundColor;
-    // We are slowly moving towards using variables everywhere,
-    // which will make most of the 'doTheme' mixin obsolete.
     --topColor1: @topColor1;
     --topColor2: @topColor2;
     --topTextColor: @topTextColor;
     --topLinkColor: @topLinkColor;
     --btnColor1: @btnColor1;
     --btnColor2: @btnColor2;
+    --btnTextColor: @btnTextColor;
     --bgColor1: @bgColor1;
     --bgBorderColor: @bgBorderColor;
     --linkColor: @linkColor;
@@ -36,218 +32,7 @@
     --topWarningColor: @topWarningColor;
     --topErrorColor: @topErrorColor;
     --focusOutlineColor: @focusOutlineColor;
-
-    a {
-        color: @linkColor;
-        &:hover {
-            color: @linkColorHover;
-        }
-    }
-
-    footer {
-        color: @footerColor;
-        a {
-            text-decoration: underline;
-            color: @footerColor;
-            &:hover {
-                color: @footerColor;
-            }
-        }
-    }
-
-    .topbar, nav.topbar-new, .nav {
-        background-color: @topColor1;
-        color: @topTextColor;
-        a {
-            text-decoration: none;
-            color: @topLinkColor;
-            text-shadow: 0 -1px 0 rgba(0,0,0,.25);
-            &:hover {
-                color: @topLinkHoverColor;
-            }
-        }
-
-        .dropdown {
-            &.open .dropdown-toggle {
-                background: @topColor2;
-            }
-            .dropdown-menu {
-                background-color: @topColor2;
-                a:hover {
-                    background: @topColor1;
-                }
-                .active a {
-                    color: @white;
-                }
-            }
-        }
-    }
-
-    nav.topbar-new {
-        // New learn page, eventually new topbar everywhere:
-
-        .dropdown-heading:not([tabindex="-1"]):hover {
-            color: @topLinkHoverColor;
-        }
-
-        .nav-dropdown-menu {
-            color: @topLinkColor;
-            padding: 2px 5px;
-            a {
-                text-decoration: none;
-                color: @topLinkColor;
-                &:hover {
-                    color: white;
-                }
-            }
-
-            li:not(:last-child):not(.button-item) {
-                border-bottom: 1px solid @topLinkColor;
-            }
-        }
-    }
-
-    .btn {
-        // Primary Button Type
-        color: #333;
-        &:hover {
-            color: #333;
-        }
-        &.primary {
-            color: @white;
-            .gradientBar(@btnColor1, @btnColor2)
-        }
-
-        // These have been pulled out of patterns.less because some of
-        // them need to appear after the .btn color definitions above.
-        // because they have equal specificity
-
-        // Active and Disabled states
-        &.active,
-        &:active {
-            @shadow: inset 0 2px 4px rgba(0,0,0,.25), 0 1px 2px rgba(0,0,0,.05);
-            .box-shadow(@shadow);
-        }
-        &.disabled {
-            cursor: default;
-            background-image: none;
-            .reset-filter();
-            .opacity(65);
-            .box-shadow(none);
-        }
-        &[disabled] {
-            // disabled pseudo can't be included with .disabled
-            // def because IE8 and below will drop it ;_;
-            cursor: default;
-            background-image: none;
-            .reset-filter();
-            .opacity(65);
-            .box-shadow(none);
-        }
-
-
-    }
-
-    @tabborder: darken(@bgColor1, 20%);
-    @tabhighlight: @bgColor1;
-
-    .tabs {
-        border-color: @tabborder;
-        > li {
-            > a {
-                &:hover {
-                    background-color: @tabhighlight;
-                    border-color: @tabhighlight @tabhighlight @tabborder;
-                }
-            }
-        }
-        // Active state, and it's :hover to override normal :hover
-        .active > a,
-        .active > a:hover {
-            color: @gray;
-            background-color: @white;
-            border: 1px solid @tabborder;
-            border-bottom-color: transparent;
-            cursor: default;
-        }
-    }
-
-
-    .pills {
-
-        a {
-            border: 1px solid lighten(@linkColor, 20%);
-        }
-
-        a:hover {
-            color: @white;
-            background-color: @linkColorHover;
-            border: 1px solid @linkColorHover;
-        }
-        .active a {
-            color: @white;
-            background-color: @linkColor;
-            border: 1px solid @linkColor;
-        }
-    }
-
-    .verseset, .actionset, .activityitem, .groupcomments, .is-following {
-        background-color: @bgColor1;
-        border-color: @bgBorderColor;
-        hr {
-            border-bottom-color: @bgBorderColor;
-        }
-    }
-
-    .activitystream .activityitem.following {
-        border-top-color: @linkColor;
-        border-bottom-color: @linkColor;
-    }
-
-
-
-    .activityitem .commentindicator,
-    .commentblock,
-    .relatedaddcomment,
-    .is-not-following {
-        border-color: @bgBorderColor;
-    }
-
-    .page-header {
-        background-color: @bgColor1;
-        border-color: @bgBorderColor;
-    }
-
-    .action-log {
-        background-color: @btnColor2;
-        .gradientBar(@btnColor2, @btnColor1);
-        border: 2px solid #888;
-        color: @white;
-    }
-
-
-    h1, h2, h3, h4, h5,
-    .word, .testedword, // TODO this line - from old /learn/ page, remove
-    .word-button, .current-verse, .previous-verse, #id-typing {
-        font-family: ~"@{themeFont}";
-    }
-
-    #id-onscreen-test-container {
-        background-color: @bgColor1;
-        border-color: darken(@bgColor1, 20%);
-    }
-    #id-action-btns {
-        border-color: darken(@bgColor1, 20%);
-    }
-
-    .streak {
-        color: @linkColor;
-        font-family: ~"@{themeFont}";
-    }
-
-    #id-loading-full {
-        font-family: ~"@{themeFont}";
-    }
+    --specialFontFamily: ~"@{themeFont}";
 }
 
 ///////////// THEMES ////////////
@@ -255,8 +40,8 @@
 
 body[data-theme=calm] {
     .dotheme(darken(@blue, 10%), lighten(@blueDark, 10%),
-             @grayLight, white,
-             @blue, @blueDark,
+             lighten(#000, 75%), white,
+             @blue, @blueDark, white,
              #f5f5f5, #0069d6, white,
              yellow, #ff2e2e,
              rgba(0, 255, 255, 0.5),
@@ -271,7 +56,7 @@ body.base-page[data-theme=calm] {
 body[data-theme=bubblegum] {
     .dotheme(#f56c26, #f00901,
              black, white,
-             #cc3a92,  #a12667,
+             #cc3a92,  #a12667, white,
              #ffe0f1, #f00901, black,
              yellow, #30f0ff,
              rgba(255, 000, 120, 0.8),
@@ -293,7 +78,7 @@ body.base-page[data-theme=bubblegum] {
 body[data-theme=bubblegum2] {
     .dotheme(lighten(#CD0074, 5%), lighten(#85004B, 5%),
              #e0e0e0, white,
-             #679B00, darken(#679B00, 20%),
+             #679B00, darken(#679B00, 20%), white,
              #C9F76F, #CD0074, black,
              #95e006, black,
              rgba(0, 255, 0, 0.8),
@@ -313,13 +98,13 @@ body.base-page[data-theme=bubblegum2] {
 
 body[data-theme=space] {
     .dotheme(lighten(#0a0b35, 5%), black,
-             @grayLight, white,
-             lighten(#090a31, 10%), #090a31,
+             lighten(#000, 75%), white,
+             lighten(#090a31, 10%), #090a31, white,
              lighten(#0069d6, 35%), darken(#0069d6, 5%), white,
              yellow, red,
              rgba(50, 150, 250, 0.8),
              '"Prosto One", "Helvetica Neue", Helvetica, Arial, sans-serif');
-    .verseset, .actionset {
+    .verseset, .actionset, .borderedbox {
         background-color: black;
         background-image: url(/static/img/space_bg_2.jpg);
         background-attachment: fixed;
@@ -343,20 +128,4 @@ body[data-theme=space] {
 body.base-page[data-theme=space] {
     background-color: black;
     background-image: url(/static/img/space_bg.jpg);
-}
-
-// Theme specific content
-
-.theme-calm-only,
-.theme-bubblegum-only,
-.theme-bubblegum2-only,
-.theme-space-only {
-    display:none;
-}
-
-body[data-theme=calm] span.theme-calm-only,
-body[data-theme=bubblegum] span.theme-bubblegum-only,
-body[data-theme=bubblegum2] span.theme-bubblegum2-only,
-body[data-theme=space] span.theme-space-only {
-    display:inline;
 }

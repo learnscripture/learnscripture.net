@@ -1,7 +1,3 @@
-/// <reference path="../typings/jsrender-settings.d.ts" />
-/// <reference path="../typings/bootstrap-dropdown.d.ts" />
-/// <reference path="../typings/bootstrap-buttons.d.ts" />
-/// <reference path="../typings/jquery-ajaxretry.d.ts" />
 /// <reference path="../typings/jquery-extra.d.ts" />
 
 
@@ -12,11 +8,8 @@
 import 'expose-loader?jQuery!jquery';
 import "jquery-ui/ui/widgets/sortable";
 import 'autosize';
+import 'jquery-pjax';
 
-// bundled libs
-import 'jquery.ajaxretry';
-import 'bootstrap-tabs';
-import 'bootstrap-buttons';
 
 // Ours
 
@@ -26,6 +19,7 @@ import 'bootstrap-buttons';
 // to bundling) and never needs to request any js again.
 
 import './common';
+import './accordion';
 import './accounts';
 import './sound';
 import './notices';
@@ -42,6 +36,7 @@ import './comment';
 import './follow';
 import './sw_setup';
 import './homescreen';
+import './learn_setup';
 
 // CSS/Less
 import 'base.less';

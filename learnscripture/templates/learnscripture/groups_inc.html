@@ -1,0 +1,12 @@
+{% if 'query' in request.GET %}
+  {% if query == '' %}
+    <p>Please enter a search term.</p>
+  {% else %}
+    <h2>Search results:</h2>
+    {% if results.items %}
+      {% include "learnscripture/groups_results_inc.html" %}
+    {% else %}
+      <p>Sorry, no groups found!</p>
+    {% endif %}
+  {% endif %}
+{% endif %}

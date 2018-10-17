@@ -15,8 +15,8 @@
   "license": "MIT",
   "devDependencies": {
     "@types/jquery": "^3.2.16",
+    "@types/jquery.pjax": "0.0.30",
     "@types/jqueryui": "^1.11.37",
-    "@types/jsrender": "0.0.29",
     "css-loader": "^0.28.7",
     "elm": "^0.18.0",
     "elm-oracle": "^1.1.1",
@@ -44,8 +44,8 @@
     "cal-heatmap": "^3.6.2",
     "elm-webpack-loader": "^4.4.0",
     "jquery": "^3.2.1",
+    "jquery-pjax": "^2.0.1",
     "jquery-ui": "^1.12.1",
-    "jsrender": "^0.9.89",
     "npm": "^5.6.0"
   }
 }

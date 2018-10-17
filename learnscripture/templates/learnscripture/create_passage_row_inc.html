@@ -1,0 +1,9 @@
+{% for result in results %}  {# There will only be one item in results, from a VerseSearchResult instance #}
+  {% for verse in result.verses %}
+    <tr data-internal-reference="{{ verse.internal_reference }}">
+      <td><input type="checkbox" /></td>
+      <td>{{ verse.localized_reference }}</td>
+      <td>{{ verse.text }}</td>
+    </tr>
+  {% endfor %}
+{% endfor %}

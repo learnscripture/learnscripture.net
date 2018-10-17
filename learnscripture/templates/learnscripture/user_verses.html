@@ -1,89 +1,28 @@
 {% extends "base.html" %}
 
-{% load pagination_tags %}
+{% load form_rendering %}
 
 {% block body_extra_class %}user-verses-page{% endblock %}
 
 {% block content %}
-  {% if bible %}
-    <h2>Verses you are learning</h2>
-  {% endif %}
-  {% if catechism %}
-    <h2>Catechism questions you are learning</h2>
+  <h3>Filter items</h3>
+  <form action="." method="GET"
+        data-pjax-results-container="#id-user-verses-results"
+        data-pjax-more-results-container=".more-results-container"
+        >
+    <div class="form-row">
+      <label for="id_query">Search:</label>
+      <div class="input input-line">
+        {{ filter_form.query }}
+        <input type="submit" class="btn primary" value="Search" id="id-search-btn" />
+      </div>
+    </div>
+    {{ filter_form.text_type|render_field }}
+    {{ filter_form.order|render_field }}
+  </form>
 
-  {% endif %}
-
-  {% autopaginate verses 20 %}
-
-  <ul class="pills">
-    <li {% if bible %}
-      class="active"
-    {% endif %}
-      ><a href=".">Bible verses</a>
-    </li>
-    <li {% if catechism %}
-      class="active"
-    {% endif %}
-      ><a href="?catechisms">Catechism questions</a>
-    </li>
-  </ul>
-
-  {% if not verses %}
-    {% if bible %}
-      <p>No verses learnt yet</p>
-    {% endif %}
-    {% if catechism %}
-      <p>No catechism questions learnt yet - <a href="{% url 'catechisms' %}">choose some!</a></p>
-    {% endif %}
-
-  {% else %}
-
-
-    {% if bible %}
-
-      <ul class="pills">
-        <li {% if not bibleorder %}
-      class="active"
-        {% endif %}
-      ><a href=".">Strength order</a>
-        </li>
-        <li {% if bibleorder %}
-      class="active"
-        {% endif %}
-      ><a href="?bibleorder">Bible order</a>
-        </li>
-      </ul>
-
-    {% endif %}
-
-    {% paginate %}
-
-    <table class="bordered-table">
-      <thead>
-        <tr>
-          <th>{% if bible %}Verse{% elif catechism %}Question{% endif %}</th>
-          <th>{% if bible %}Version{% elif catechism %}Catechism{% endif %}</th>
-          <th>Strength</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for verse in verses %}
-          {% ifchanged verse.localized_reference verse.version.slug %}
-            <tr {% if verse.verse_set_id %}
-                  data-verse-set-id="{{ verse.verse_set_id }}"
-                {% endif %}
-                data-version-id="{{ verse.version_id }}"
-                  >
-              <td>{{ verse.title }}
-                <a class="btn verse-popup-btn" href="#" data-localized-reference="{{ verse.localized_reference }}" data-version="{{ verse.version.slug }}" data-title="{{ verse.title }}">Options</a></td>
-              <td>{{ verse.version.slug }}</td>
-              <td><img class="stars" src="{{ STATIC_URL }}img/strength_{{ verse.simple_strength }}.png"></td>
-            </tr>
-          {% endifchanged %}
-        {% endfor %}
-      </tbody>
-    </table>
-    {% paginate %}
-  {% endif %}
+  <div id="id-user-verses-results">
+    {% include "learnscripture/user_verses_inc.html" %}
+  </div>
 
 {% endblock %}

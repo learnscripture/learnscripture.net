@@ -47,8 +47,11 @@ class GroupPageTestsBase(RequireExampleVerseSetsMixin):
         self.assertEqual(private_group.can_join(account), False)
         self.assertEqual(public_group.can_join(account), True)
         self.get_url('groups')
-        self.fill({'#id-search-input': 'group'})
-        self.submit('#id-search-btn')
+        self.fill({'#id_query': 'group'})
+        if self.is_full_browser_test:
+            self.click('#id-search-btn')
+        else:
+            self.submit('#id-search-btn')
 
         self.assertTextPresent("Another group")
         self.assertTextAbsent("My group")
@@ -100,8 +103,8 @@ class GroupPageTestsFB(GroupPageTestsBase, FullBrowserTest):
         self.get_url('group', g.slug)
         self.click('.show-add-comment')
         message = "Yay this is my comment!"
-        self.fill({'#id-comment-box': message})
-        self.click('#id-add-comment-btn')
+        self.fill({'.commentblock .comment-box': message})
+        self.click('.commentblock .add-comment-btn')
         self.wait_for_ajax()
         self.assertTextPresent(message)
         # Test db
@@ -279,7 +282,7 @@ class GroupCreatePageTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         time.sleep(0.2)
         self.press_enter(select_input)
         time.sleep(0.2)
-        self.click('input[name="save"]')
+        self.submit('input[name="save"]')
 
         self.assertUrlsEqual(reverse('group', args=('my-group',)))
 

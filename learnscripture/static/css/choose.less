@@ -11,3 +11,22 @@ form.quickfind {
 #id_quick_find_help {
     margin-top: 0.2em;
 }
+
+.choose-page {
+    .accordion-heading {
+        margin-top: 0;
+        margin-bottom: 0;
+        padding-top: @baseGapSize;
+        padding-bottom: @baseGapSize;
+    }
+
+    .accordion-container {
+        margin-left: ~"calc(0px - var(--mainSidePadding))";
+        margin-right: ~"calc(0px - var(--mainSidePadding))";
+    }
+
+    .accordion-body {
+        padding-left: var(--mainSidePadding);
+        padding-right: var(--mainSidePadding);
+    }
+}

@@ -1,0 +1,44 @@
+
+// Accordion
+
+.accordion-item {
+    margin-top: @baseGapSize;
+    margin-bottom: @baseGapSize;
+
+    .accordion-body {
+        display: none;
+        opacity: 0;
+        border-bottom: 1px solid var(--topColor2);
+    }
+    .accordion-heading {
+        cursor: pointer;
+        padding: 0.1em var(--mainSidePadding);
+        color: var(--topLinkHoverColor);
+        background-color: var(--topColor2);
+        border-top: 1px solid var(--topColor2);
+    }
+    &.expanded {
+        .accordion-heading {
+            color: var(--baseTextColor);
+            background-color: var(--baseBackgroundColor);
+            padding-bottom: 0px;
+            transition: color 0.5s ease;
+        }
+        .accordion-body {
+            display: block;
+            animation: fadeIn 0.5s ease forwards;
+            > :last-child {
+                margin-bottom: var(--mainSidePadding);
+            }
+        }
+    }
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}

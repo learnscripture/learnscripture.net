@@ -5,8 +5,8 @@
         margin-left: 0px;
         > li {
             list-style-type: none;
-            border: 1px solid #ddd;
-            padding: 2px 4px;
+            border-top: 1px solid var(--bgBorderColor);
+            padding: 2px 0px 8px;
             margin-top: -1px;
         }
     }
@@ -17,10 +17,11 @@
 
     .commentindicator {
         float:right;
-        border: 1px solid #ddd;
+        border: 1px solid var(--bgBorderColor);
         margin-right: -5px;
         margin-top: -3px;
         padding-left: 4px;
+        padding-right: 2px;
         border-bottom-left-radius: 4px;
     }
 }
@@ -103,14 +104,22 @@ ul.grouplist {
         margin-top: 5px;
         font-size: 2em;
         font-weight: bold;
+        color: var(--linkColor);
+        font-family: var(--specialFontFamily);
     }
-}
 
+}
 
 #id-heatmap-stat-selector {
     margin-top: 1em;
     margin-bottom: 0;
     text-align: center;
+
+    .buttonradios();
+    li {
+        display: inline;
+        white-space: nowrap;
+    }
 }
 
 #id-show-heatmap i {

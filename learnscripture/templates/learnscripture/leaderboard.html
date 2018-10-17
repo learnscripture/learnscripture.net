@@ -1,68 +1,35 @@
 {% extends "base.html" %}
 
-{% load humanize %}
-{% load spurl %}
+{% load form_rendering %}
+
+{% block body_extra_class %}leaderboard-page{% endblock %}
 
 {% block content %}
   <p><a href="{% url 'group' group.slug %}">See group information</a></p>
 
-  <form class="filters">
-    <div class="clearfix">
-      <label>When:</label>
-      <div class="input">
-        <ul class="pills">
-          {% if 'thisweek' in request.GET %}
-            <li><a href="{% spurl base=request.get_full_path remove_query_param='thisweek' remove_query_param='p' %}">All time</a></li>
-          {% else %}
-            <li class="active"><a href="">All time</a></li>
-          {% endif %}
-
-          {% if 'thisweek' not in request.GET %}
-            <li><a href="{% spurl base=request.get_full_path add_query='thisweek' remove_query_param='p' %}">This week</a></li>
-          {% else %}
-            <li class="active"><a href="">This week</a></li>
-          {% endif %}
-
-        </ul>
-      </div>
-    </div>
+  <form action="." method="GET"
+        data-pjax-results-container="#id-leaderboard-results-table-body"
+        data-pjax-more-results-container=".more-results-container"
+        >
+    {{ leaderboard_filter_form|render_form }}
   </form>
 
-  {% if 'thisweek' in request.GET %}
+  {% if thisweek %}
     <p class="note">Weekly statistics are measured from the current time to one week ago.</p>
   {% endif %}
 
-
-  {% if accounts %}
-
-    {% include 'learnscripture/leaderboard_pagination.html' %}
-
-    <table>
-      <thead>
-        <tr>
-          <th>User</th>
-          <th>Points</th>
-          <th>Rank</th>
-          <th>Verses started</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for account in accounts %}
-          <tr>
-            <td><a href="{% url 'user_stats' account.username %}">{{ account.username }}</a></td>
-            <td>{{ account.points|intcomma }}</td>
-            <td>{{ account.rank|intcomma }}</td>
-            <td>{{ account.num_verses|intcomma }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  {% else %}
-
-    <p>No more data found!</p>
-
-  {% endif %}
-
-  {% include 'learnscripture/leaderboard_pagination.html' %}
+  <table id="id-leaderboard-results-table">
+    <thead>
+      <tr>
+        <th>User</th>
+        <th>Points</th>
+        <th>Rank</th>
+        <th>Verses started</th>
+      </tr>
+    </thead>
+    <tbody id="id-leaderboard-results-table-body">
+      {% include "learnscripture/leaderboard_results_table_body_inc.html" %}
+    </tbody>
+  </table>
 
 {% endblock %}

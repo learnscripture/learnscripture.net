@@ -1,0 +1,30 @@
+{% load dict_utils %}
+{% load markup_tags %}
+
+
+{% for vs in results.items %}
+  <div class="verseset">
+    <form action="" method="POST">
+      {% csrf_token %}
+      <input type="hidden" name="verseset_id" value="{{ vs.id }}">
+      <i class="icon-public" title="This action is public (unless the verse set is private and remains private)"></i>
+      <input type="submit" class="btn primary needs-preferences" value="Learn" id="id-learn-verseset-btn-{{ vs.id }}">
+    </form>
+    <h3><a href="{{ vs.get_absolute_url }}">{{ vs.smart_name_dict|lookup:default_bible_version.language_code }}</a></h3>
+    {% if vs.description %}
+      <p>{{ vs.description|apply_markup:"restructuredtext" }}</p>
+    {% endif %}
+    {% if not vs.is_passage and vs.verse_choices.all %}
+      <p>Includes the following verses, {{ vs.verse_choices.all|length }} in total:<br/>
+        {% for vc in vs.verse_choices.all|slice:"0:10" %}
+          {{ vc.localized_reference_dict|lookup:default_bible_version.language_code }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+        {% if vs.verse_choices.all|length > 10 %}…and more.{% endif %}
+      </p>
+    {% endif %}
+    {% if vs.is_passage and vs.breaks %}
+      <p>Section breaks at: {{ vs.breaks_formatted }}</p>
+    {% endif %}
+  </div>
+{% endfor %}
+

@@ -47,7 +47,7 @@ var cancelLearningPassageClick = function(ev) {
 };
 
 var setupVersePopups = function() {
-    $('.verse-popup-btn').click(
+    $('#id-user-verses-results').on('click', '.verse-popup-btn',
         function(ev) {
             ev.preventDefault();
             var $btn = $(this);
