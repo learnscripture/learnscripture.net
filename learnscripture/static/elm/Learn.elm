@@ -5903,12 +5903,12 @@ isRecordCall trackedCall =
 
 
 {- Details of actual API calls start here -}
-{- versestolearn2 API -}
+{- versestolearn API -}
 
 
 versesToLearnUrl : String
 versesToLearnUrl =
-    "/api/learnscripture/v1/versestolearn2/"
+    "/api/learnscripture/v1/versestolearn/"
 
 
 {-| Trigger verse load

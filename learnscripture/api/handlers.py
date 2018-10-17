@@ -141,7 +141,7 @@ class ApiView(View):
         ), content_type='application/json')
 
 
-class VersesToLearn2Handler(ApiView):
+class VersesToLearnHandler(ApiView):
     @require_identity_method
     def get(sef, request):
         batch = session.get_verse_statuses_batch(request)
