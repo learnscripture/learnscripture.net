@@ -1,0 +1,30 @@
+{% load verse_utils %}
+
+{% if results %}
+  {% if results_truncated %}
+    <p>The first {{ search_limit }} results matching your search are below:</p>
+  {% endif %}
+  {% for result in results %}
+    <div class="actionset">
+      <form action="" method="GET">
+        {# These values are used by create.ts addVerseClick() #}
+        <input type="hidden" name="quick_find" value="{{ result.localized_reference }}">
+        <input type="hidden" name="version_slug" value="{{  version_slug }}">
+        <input type="hidden" name="render_for" value="create-selection-row">
+        <input type="hidden" name="single" value="1">
+        <input type="submit" class="btn primary add-to-set" value="Add to set">
+      </form>
+      <h3>{{ result.book_name }}</h3>
+      <div class="verselist">
+        {% for verse in result.verses %}
+          <div class="verse">
+            <span class="versenumber">{{ verse.chapter_number }}:{{ verse.display_verse_number }}</span> {{ verse|html_format_text }}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+{% else %}
+    <p><span class='error'>No verses were found matching your search</span></p>
+{% endif %}
+

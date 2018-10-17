@@ -13,18 +13,16 @@ import furl
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
 from django.template.loader import render_to_string
-from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.functional import wraps
-from django.utils.html import escape, mark_safe
 from django.views.decorators.cache import never_cache
 from django.views.generic.base import View
 
 from accounts.forms import PreferencesForm
 from accounts.models import Account
-from bibleverses.models import (MAX_VERSE_QUERY_SIZE, MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, StageType,
-                                TextVersion, UserVerseStatus, VerseSetType, make_verse_set_passage_id, quick_find)
-from bibleverses.parsing import internalize_localized_reference
+from bibleverses.models import (MAX_VERSE_QUERY_SIZE, MAX_VERSES_FOR_SINGLE_CHOICE, QUICK_FIND_SEARCH_LIMIT,
+                                InvalidVerseReference, StageType, TextVersion, UserVerseStatus, VerseSetType,
+                                make_verse_set_passage_id, quick_find)
 from comments.models import Comment
 from events.models import Event
 from groups.models import Group
@@ -411,24 +409,6 @@ class ActionLogs(ApiView):
                                                     highest_id_seen=highest_id_seen)
 
 
-def html_format_text(verse):
-    # Convert highlighted_text to HTML
-    if hasattr(verse, 'highlighted_text'):
-        t = verse.highlighted_text
-    else:
-        t = verse.text
-    bits = t.split('**')
-    out = []
-    in_bold = False
-    for b in bits:
-        html = escape(b)
-        if in_bold:
-            html = '<b>' + html + '</b>'
-        out.append(html)
-        in_bold = not in_bold
-    return mark_safe(''.join(out).replace('\n', '<br>'))
-
-
 class VerseFind(ApiView):
 
     def get(self, request):
@@ -436,8 +416,21 @@ class VerseFind(ApiView):
             q = request.GET['quick_find']
             version_slug = request.GET['version_slug']
             passage_mode = request.GET.get('passage_mode', '') == '1'
+            render_for = request.GET['render_for']
         except KeyError:
-            return rc.BAD_REQUEST("Parameters q, version_slug, passage_mode required")
+            return rc.BAD_REQUEST("Parameters q, version_slug, passage_mode, render_for required")
+
+        TEMPLATES = {
+            'choose-individual': 'learnscripture/choose_individual_results_inc.html',
+            'create-selection-set': 'learnscripture/create_selection_results_inc.html',
+            'create-selection-row': 'learnscripture/create_selection_row_inc.html',
+            'create-passage-row': 'learnscripture/create_passage_row_inc.html',
+        }
+        try:
+            template_name = TEMPLATES[render_for]
+        except KeyError:
+            return rc.BAD_REQUEST("'render_for' parameter must be one of {0}".format(
+                ", ".join(TEMPLATES.keys())))
 
         q = q.replace('—', '-').replace('–', '-')
 
@@ -456,32 +449,63 @@ class VerseFind(ApiView):
         except InvalidVerseReference as e:
             return validation_error_response({'__all__': [e.args[0]]})
 
-        # Can't get 'fields' to work properly for this case, so pack into
-        # dictionaries.
-        retval = [dict(localized_reference=r.localized_reference,
-                       internal_reference=r.internal_reference,
-                       text=r.text,
-                       from_reference=r.from_reference,
-                       parsed_ref=None if r.parsed_ref is None else r.parsed_ref.__dict__,
-                       verses=r.verses)
-                  for r in results]
-        for item in retval:
-            # Change 'verse' objects:
-            verses2 = []
-            for v in item['verses']:
-                verses2.append(dict(
-                    localized_reference=v.localized_reference,
-                    internal_reference=v.internal_reference,
-                    text=v.text,
-                    html_text=html_format_text(v),
-                    book_number=v.book_number,
-                    chapter_number=v.chapter_number,
-                    display_verse_number=v.display_verse_number,
-                    bible_verse_number=v.bible_verse_number
-                ))
-            item['verses'] = verses2
-            item['version_slug'] = version_slug
-        return retval
+        if 'single' in request.GET or passage_mode:
+            results = results[0:1]
+            results_truncated = False
+        else:
+            results_truncated = len(results) > QUICK_FIND_SEARCH_LIMIT
+            results = list(results)[0:QUICK_FIND_SEARCH_LIMIT]
+
+        # Build context for rendering
+        context = {
+            'results': results,
+            'version_slug': version_slug,
+            'search_limit': QUICK_FIND_SEARCH_LIMIT,
+            'results_truncated': results_truncated,
+        }
+
+        if (len(results) == 1 and results[0].parsed_ref is not None):
+            parsed_reference = results[0].parsed_ref
+        else:
+            parsed_reference = None
+
+        if passage_mode and len(results) == 1:
+            duplicate_check_html = duplicate_passage_check(request,
+                                                           results[0].verses[0].internal_reference,
+                                                           results[0].verses[-1].internal_reference)
+        else:
+            duplicate_check_html = None
+
+        return {
+            'html': render_to_string(template_name, context, request=request),
+            'parsed_reference': parsed_reference.__dict__ if parsed_reference is not None else None,
+            'canonical_reference': parsed_reference.canonical_form() if parsed_reference is not None else None,
+            'duplicate_check_html': duplicate_check_html,
+        }
+
+
+def duplicate_passage_check(request, start_internal_reference, end_internal_reference):
+    language_code = default_bible_version_for_request(request).language_code
+    passage_id = make_verse_set_passage_id(start_internal_reference,
+                                           end_internal_reference)
+
+    verse_sets = verse_sets_visible_for_request(request)
+    # This works if they have accepted the default name. If it doesn't have the
+    # default name, it might not be considered a true 'duplicate' anyway.
+    verse_sets = (verse_sets.filter(set_type=VerseSetType.PASSAGE,
+                                    passage_id=passage_id)
+                  .select_related('created_by')
+                  )
+
+    if len(verse_sets) == 0:
+        return ''
+    else:
+        context = {
+            'verse_sets': verse_sets,
+            'language_code': language_code
+        }
+        return render_to_string("learnscripture/duplicate_passage_warning_inc.html", context,
+                                request=request)
 
 
 class AddVerseToQueue(ApiView):
@@ -510,36 +534,6 @@ class AddVerseToQueue(ApiView):
             return rc.BAD_REQUEST("No localized_reference")
 
 
-class CheckDuplicatePassageSet(ApiView):
-
-    def get(self, request):
-        try:
-            start_reference = request.GET['start_reference']
-            end_reference = request.GET['end_reference']
-        except KeyError:
-            return rc.BAD_REQUEST("start_reference and end_reference required")
-
-        language_code = default_bible_version_for_request(request).language_code
-        start_internal_reference = internalize_localized_reference(language_code, start_reference)
-        end_internal_reference = internalize_localized_reference(language_code, end_reference)
-        passage_id = make_verse_set_passage_id(start_internal_reference,
-                                               end_internal_reference)
-
-        verse_sets = verse_sets_visible_for_request(request)
-        # This works if they have accepted default name.  If it doesn't have the
-        # default name, it might not be considered a true 'duplicate' anyway.
-        verse_sets = (verse_sets.filter(set_type=VerseSetType.PASSAGE,
-                                        passage_id=passage_id,
-                                        )
-                      .select_related('created_by')
-                      )
-        return [dict(name=vs.name,
-                     smart_name=vs.smart_name(language_code),
-                     url=reverse('view_verse_set', args=[vs.slug]),
-                     by=vs.created_by.username)
-                for vs in verse_sets]
-
-
 class DeleteNotice(ApiView):
 
     @require_preexisting_identity_m
@@ -548,13 +542,6 @@ class DeleteNotice(ApiView):
 
 
 class AddComment(ApiView):
-    fields = [
-        ('author', ['id', 'username']),
-        'event_id',
-        'created',
-        'message',
-        'message_formatted',
-    ]
 
     @require_preexisting_account_m
     def post(self, request):
@@ -599,7 +586,11 @@ class AddComment(ApiView):
             comment = group.add_comment(author=account,
                                         message=message)
 
-        return comment
+        return {
+            'html': render_to_string("learnscripture/comment_inc.html",
+                                     {'comment': comment},
+                                     request=request)
+        }
 
 
 class HideComment(ApiView):

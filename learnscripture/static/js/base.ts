@@ -1,4 +1,3 @@
-/// <reference path="../typings/jsrender-settings.d.ts" />
 /// <reference path="../typings/jquery-extra.d.ts" />
 
 

@@ -58,7 +58,7 @@ var setupCommentControls = function() {
                 data: data,
                 success: function(returnedData) {
                     // returnedData contains new comment to add.
-                    var newItem = $('#id-comment-template').render({ 'comment': returnedData });
+                    var newItem = returnedData['html'];
                     $commentBoxDiv.remove();
                     if (position == 'top') {
                         $commentListDiv.prepend(newItem);

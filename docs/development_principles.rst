@@ -13,7 +13,7 @@ Additionally, more specifically to LearnScripture.net:
   that pages load quickly, with very few HTTP resources being loaded, and
   aggressively cached where possible.
 
-  Both aspects (limited bandwith and screen space) mean that adverts
+  Both aspects (limited bandwidth and screen space) mean that adverts
   of any kind would seriously hinder the experience.
 
 * A significant number of users are children. We've aimed to make the interface

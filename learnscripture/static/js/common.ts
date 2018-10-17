@@ -1,5 +1,4 @@
 // Common functionality and requirements.
-import 'jsrender';
 import 'jquery-pjax';
 
 
@@ -107,9 +106,6 @@ export const getLocation = function(href) {
     return l;
 };
 
-
-// Use [[ and ]] for templates to avoid clash with Django templates
-$.views.settings.delimiters('[[', ']]');
 
 $(document).ready(function() {
     // Dropdown in topbar
