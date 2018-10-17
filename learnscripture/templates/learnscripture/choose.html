@@ -45,28 +45,7 @@
 
         {% include "learnscripture/quick_find_controls.html" %}
 
-        <script id="id_individual_choose_result_template" type="text/x-jsrender">
-          {# template for .quickfind_search_results #}
-          <div class="actionset">
-            <form class="individual-choose" action="" method="POST">
-              {% csrf_token %}
-              <input type="hidden" name="localized_reference" value="[[>localized_reference]]">
-              <input type="hidden" name="version_slug" value="[[>version_slug]]">
-              <input type="submit" name="learn_now" class="btn primary needs-preferences" value="{% if request.identity.account %}Learn now{% else %}Learn{% endif %}">
-              {% if request.identity.account %}
-                <br/>
-                <input type="submit" name="add_to_queue" class="btn needs-preferences" value="Add to queue">
-              {% endif %}
-            </form>
-            <div class="verselist">
-              [[for verses itemVar="~verse"]]
-              <div class="verse">
-                <span class="versenumber">[[>~verse.localized_reference]]</span> [[:~verse.html_text]]
-              </div>
-              [[/for]]
-            </div>
-          </div>
-        </script>
+        {# See also "learnscripture/choose_individual_results_inc.html" which is rendered via VerseFind API call #}
       </div>
     </section>
 

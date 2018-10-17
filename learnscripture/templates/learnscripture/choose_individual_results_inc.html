@@ -1,0 +1,30 @@
+{% load verse_utils %}
+
+{% if results %}
+  {% if results_truncated %}
+    <p>The first {{ search_limit }} results matching your search are below:</p>
+  {% endif %}
+  {% for result in results %}
+    <div class="actionset">
+      <form class="individual-choose" action="" method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="localized_reference" value="{{ result.localized_reference }}">
+        <input type="hidden" name="version_slug" value="{{ version_slug }}">
+        <input type="submit" name="learn_now" class="btn primary needs-preferences" value="{% if request.identity.account %}Learn now{% else %}Learn{% endif %}">
+        {% if request.identity.account %}
+          <br/>
+          <input type="submit" name="add_to_queue" class="btn needs-preferences" value="Add to queue" data-added-caption="Added!">
+        {% endif %}
+      </form>
+      <div class="verselist">
+        {% for verse in result.verses %}
+          <div class="verse">
+            <span class="versenumber">{{ verse.localized_reference }}</span> {{ verse|html_format_text }}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+{% else %}
+    <p><span class='error'>No verses were found matching your search</span></p>
+{% endif %}

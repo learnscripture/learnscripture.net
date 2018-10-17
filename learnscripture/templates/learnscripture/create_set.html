@@ -50,39 +50,13 @@
         </div>
       </form>
 
-
-      <script id="id_verse_list_selection_row_template" type="text/x-jsrender">
-        <tr data-internal-reference="[[>verseData.internal_reference]]">
-          <td>[[>verseData.localized_reference]]</td>
-          <td>[[>verseData.text]]</td>
-          <td><span title="move up"><i class="icon-arrow-up"></i></span></td>
-          <td><span title="move down"><i class="icon-arrow-down"></i></span></td>
-          <td><span title="remove"><i class="icon-trash"></i></span></td>
-        </tr>
-      </script>
+      {# See also "learnscripture/create_selection_row_inc.html" which is rendered by VerseFind API call #}
 
       <h3>Add verses</h3>
 
       {% include "learnscripture/quick_find_controls.html" %}
 
-      <script id="id_create_selection_result_template" type="text/x-jsrender">
-       {# template for .quickfind_search_results #}
-        <div class="actionset">
-          <form action="" method="GET">
-            <input type="hidden" name="quick_find" value="[[>localized_reference]]">
-            <input type="hidden" name="version_slug" value="[[>version_slug]]">
-            <input type="submit" class="btn primary add-to-set" value="Add to set">
-          </form>
-          <h3>[[>book_name]]</h3>
-          <div class="verselist">
-            [[for verses]]
-            <div class="verse">
-              <span class="versenumber">[[>chapter_number]]:[[>display_verse_number]]</span> [[:html_text]]
-            </div>
-            [[/for]]
-          </div>
-        </div>
-      </script>
+      {# See also "learnscripture/create_selection_results_inc.html" which is rendered by VerseFind API call #}
 
       <form>
         <hr>
@@ -106,10 +80,7 @@
 
       <div id="id-duplicate-warning"></div>
 
-      <script id="id-duplicate-warning-template" type="text/x-jsrender">
-       <li><a href="[[>url]]" target="_blank">[[>smart_name]]</a> by [[>by]]</li>
-      </script>
-
+      {# See also "learnscripture/duplicate_passage_warning_inc.html" which is rendered by VerseFind API call #}
 
       <div id="id-verse-list">
         <p>For passages more than about 10 verses, it helps if you can indicate the
@@ -139,13 +110,7 @@
 
       </div>
 
-      <script id="id_verse_list_passage_row_template" type="text/x-jsrender">
-       <tr data-internal-reference="[[>verseData.internal_reference]]">
-       <td><input type="checkbox" /></td>
-       <td>[[>verseData.localized_reference]]</td>
-       <td>[[:verseData.html_text]]</td>
-       </tr>
-      </script>
+      {# See also "learnscripture/create_passage_row_inc.html" which is rendered by VerseFind API call #}
 
       <form id="id-verse-set-form" action="" method="POST">
         <input type="hidden" name="initial_localized_reference" value="{{ initial_localized_reference }}">

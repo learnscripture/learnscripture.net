@@ -1,0 +1,10 @@
+{% for result in results %}
+  <tr data-internal-reference="{{ result.internal_reference }}">
+    <td>{{ result.localized_reference }}</td>
+    <td>{{ result.text }}</td>
+    <td><span title="move up"><i class="icon-arrow-up"></i></span></td>
+    <td><span title="move down"><i class="icon-arrow-down"></i></span></td>
+    <td><span title="remove"><i class="icon-trash"></i></span></td>
+  </tr>
+{% endfor %}
+

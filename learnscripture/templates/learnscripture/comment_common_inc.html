@@ -1,18 +1,5 @@
 {# Hidden stuff #}
 
-{# sync with template in activity_event_inc.html #}
-<script id="id-comment-template" type="text/x-jsrender">
- <div class="comment">
- <span class="commentauthor">
- <a href="/user/[[>comment.author.username]]/">[[>comment.author.username]]</a>
- </span>
- <span class="timestamp">Just now</span>
- <div class="commentmessage">
- [[:comment.message_formatted]]
- </div>
- </div>
-</script>
-
 <div id="id-add-comment" class="hide">
   <div class="comment-box-wrapper">
     {% if request_account %}
