@@ -662,25 +662,25 @@ viewTopNav model =
         locale =
             getLocale model
     in
-      H.div [ A.class "topbar-wrapper" ]
-        [ H.nav [ A.class "topbar" ]
-            [ H.div [ A.class "nav-item return-link" ]
-                [ navLink
-                    [ A.href "#"
-                    , onClickSimply (AttemptReturn { immediate = True, fromRetry = False })
+        H.div [ A.class "topbar-wrapper" ]
+            [ H.nav [ A.class "topbar" ]
+                [ H.div [ A.class "nav-item return-link" ]
+                    [ navLink
+                        [ A.href "#"
+                        , onClickSimply (AttemptReturn { immediate = True, fromRetry = False })
+                        ]
+                        (getReturnCaption (getReturnUrl model) locale)
+                        "icon-return"
+                        AlignLeft
                     ]
-                    (getReturnCaption (getReturnUrl model) locale)
-                    "icon-return"
-                    AlignLeft
+                , sessionProgress model
+                , viewActionLogs model
+                , ajaxInfo model
+                , viewSessionStats model
+                , H.div [ A.class "nav-item preferences-link" ]
+                    [ navLink [ A.href "#" ] (userDisplayName model.user locale) "icon-preferences" AlignRight ]
                 ]
-            , sessionProgress model
-            , viewActionLogs model
-            , ajaxInfo model
-            , viewSessionStats model
-            , H.div [ A.class "nav-item preferences-link" ]
-                [ navLink [ A.href "#" ] (userDisplayName model.user locale) "icon-preferences" AlignRight ]
             ]
-        ]
 
 
 pinnedAttributes : Model -> List (H.Attribute msg)
