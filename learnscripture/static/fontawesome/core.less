@@ -13,12 +13,6 @@
   speak: none;
 }
 
-/* makes the font 33% larger relative to the icon container */
-.icon-large:before {
-  vertical-align: -10%;
-  font-size: 4/3em;
-}
-
 /* makes sure icons active on rollover in links */
 a {
   [class^="icon-"],
@@ -41,34 +35,10 @@ a {
   }
 }
 
-.icons-ul {
-  margin-left: @fa-li-width;
-  list-style-type: none;
-
-  > li { position: relative; }
-
-  .icon-li {
-    position: absolute;
-    left: -@fa-li-width;
-    width: @fa-li-width;
-    text-align: center;
-  }
-}
-
 // allows usage of the hide class directly on font awesome icons
 [class^="icon-"],
 [class*=" icon-"] {
   &.hide {
     display: none;
   }
-}
-
-
-// Icon Borders
-// -------------------------
-
-.icon-border {
-  border: solid 1px @fa-border-color;
-  padding: .2em .25em .15em;
-  border-radius: 3px;
 }
