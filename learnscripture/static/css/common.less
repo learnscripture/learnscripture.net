@@ -314,3 +314,18 @@ footer .referral-link-section {
     opacity: 0.5;
     transition: 0.1s all;
 }
+
+
+// PWA standalone only
+
+.reload-icon {
+    display: none; // Don't reproduce browser functionality
+}
+
+@media all and (display-mode: standalone) {
+    .reload-icon {
+        font-size: 80%;
+        float: right;
+        display: inline-block;
+    }
+}
