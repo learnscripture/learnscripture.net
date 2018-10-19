@@ -83,7 +83,7 @@ export const handleFormValidationErrors = function(form, formPrefix, errorRespon
 // * for non-essential things (e.g. GET requests for score logs)
 //   just silently fail
 export const ajaxFailed = function(jqXHR, textStatus, errorThrown) {
-    alert(`The server could not be contacted or an error occurred (${jqXHR.responseText}). Please try again.`);
+    alert($('#id-i18n-site-ajax-failed').text() + "\n " + jqXHR.responseText);
     console.log("AJAX error: %s, %s, %o", textStatus, errorThrown, jqXHR);
 };
 

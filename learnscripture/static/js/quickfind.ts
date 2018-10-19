@@ -300,8 +300,6 @@ export const quickFindAndHandleResults = function(resultHandler, passageMode, re
                 if (jqXHR.status === 400) {
                     $form.parent().find('.quickfind_search_results *').remove();
                     handleFormValidationErrors($form, '', jqXHR);
-                } else if (jqXHR.status === 500) {
-                    $form.parent().find('.quickfind_search_results').html('Your search terms were not understood.');
                 } else {
                     ajaxFailed(jqXHR, textStatus, errorThrown);
                 }
