@@ -20,10 +20,13 @@
   {% endif %}
 
   <div id="id-homescreen-install-prompt" class="actionset">
-    <form>
-      <button type="button" class="btn">Add</button>
-    </form>
-    <p>You can add this app to your home screen for a better app experience.</p>
+    <h2>Add to home screen</h2>
+    <div class="actionset">
+      <form>
+        <button type="button" class="btn">Add</button>
+      </form>
+      <p>You can add this app to your home screen for a better app experience.</p>
+    </div>
   </div>
 
   {% if request.identity.scoring_enabled %}
@@ -333,6 +336,16 @@
     <p>When you're done with the above — <a href="{% url 'choose' %}">choose some verses or a passage to learn.</a></p>
 
   </div>
+
+  <div id="id-firefox-homescreen-install-prompt" class="hide">
+    <h2>Add to home screen</h2>
+    <div id="id-firefox-homescreen-install-prompt" class="borderedbox">
+      <p>You can add this app to your home screen for a better app experience.<br>
+        Use the homescreen icon in the menu bar that looks like this: <img src="{{ STATIC_URL }}img/firefox_add_to_home_screen.png" />
+      </p>
+    </div>
+  </div>
+
 {% endblock %}
 
 
