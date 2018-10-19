@@ -250,8 +250,8 @@ learn-you-can-finish = You can finish your review or learning session at any
   time using the return button in the top left corner.
 
 learn-keyboard-navigation-help = Keyboard navigation (for physical keyboards, not touchscreens):
- use Tab and Shift-Tab to move focus between controls, and Enter to 'press' one.
- Focus is shown with a blue border.
+  use Tab and Shift-Tab to move focus between controls, and Enter to 'press' one.
+  Focus is shown with a colored border.
 
 learn-button-general-help = The button for the most likely action is highlighted
   in colour and is focused by default.
