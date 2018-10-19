@@ -130,3 +130,13 @@ ul.grouplist {
 #id-homescreen-install-prompt {
     display: none;
 }
+
+#id-firefox-homescreen-install-prompt {
+    img {
+        height: 1.5em;
+    }
+    @media all and (display-mode: standalone) {
+        // Already done, don't display again
+        display: none;
+    }
+}
