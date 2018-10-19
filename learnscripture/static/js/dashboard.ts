@@ -153,25 +153,17 @@ var setupDashboardControls = function() {
         return;
     }
     $("input[name=clearbiblequeue]").click(function(ev) {
-        if (!confirm("This will remove chosen verses from your queue " +
-            "for learning. To learn them you will have to " +
-            "select the verses or verse sets again. " +
-            "Continue?")) {
+        if (!confirm($('#id-i18n-dashboard-remove-verses-from-queue-confirm').text())) {
             ev.preventDefault();
         }
     });
     $("input[name=clearcatechismqueue]").click(function(ev) {
-        if (!confirm("This will remove chosen catechism questions from " +
-            "your queue for learning. To learn them you will have to " +
-            "select the catechism again. " +
-            "Continue?")) {
+        if (!confirm($('#id-i18n-dashboard-remove-catechism-from-queue-confirm').text())) {
             ev.preventDefault();
         }
     });
     $("input[name=cancelpassage]").click(function(ev) {
-        if (!confirm("This will cancel learning this passage in this version. " +
-            "Any test scores will be saved. " +
-            "Continue?")) {
+        if (!confirm($('#id-i18n-dashboard-cancel-passage-confirm').text())) {
             ev.preventDefault();
         }
     });
