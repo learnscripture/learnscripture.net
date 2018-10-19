@@ -965,7 +965,7 @@ viewActionLogs model =
             [ H.div
                 (dropdownHeadingAttributes ActionLogsInfo openable [ "nav-item" ])
                 [ H.span [ A.class "nav-caption" ]
-                    [ H.text (T.learnSessionPointsCaption locale ()) ]
+                    [ H.text (T.learnSessionPointsCaption locale () ++ " ") ]
                 , H.span [ A.class "total-points" ]
                     [ H.text (formatNumber locale totalPoints)
                     , case latestLog of
