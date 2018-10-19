@@ -12,7 +12,7 @@
 amqp==2.1.4
 argparse==1.4.0           # via unittest2
 asn1crypto==0.24.0        # via cryptography
-attrs==17.2.0
+attrs==18.2.0
 bcrypt==3.1.4             # via paramiko
 beautifulsoup4==4.6.0     # via webtest
 billiard==3.5.0.2
@@ -48,7 +48,6 @@ easy-thumbnails==2.5      # via django-fiber
 easyprocess==0.2.3        # via pyvirtualdisplay
 fabric3==1.13.1.post1
 fabtools3==0.19.0
-first==2.0.1              # via pip-tools
 flake8==3.2.1
 furl==1.0.1
 idna==2.6                 # via cryptography
@@ -68,7 +67,7 @@ pbr==3.1.1                # via mock
 pexpect==4.3.1            # via ipython
 pickleshare==0.7.4        # via ipython
 pillow==5.0.0             # via django-fiber, easy-thumbnails
-pip-tools==1.9.0
+pip-tools==3.1.0
 prompt-toolkit==1.0.15    # via ipython
 psycopg2==2.7.1
 ptyprocess==0.5.2         # via pexpect
