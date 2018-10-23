@@ -406,7 +406,7 @@
 
   <div id="id-dashboard-script-data"
        {% if request.identity.account %}
-       data-user-stats-verses-timeline-stats-csv-url="{% url "user_stats_verses_timeline_stats_csv" request.identity.account.username %}"
+       data-user-timeline-stats-user="{{ request.identity.account.username }}"
        {% endif %}
        >
   </div>

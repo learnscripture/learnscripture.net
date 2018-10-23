@@ -5,6 +5,7 @@ import { UAParser } from 'ua-parser-js';
 import { getSavedCalls } from './offlineutils';
 
 var calHeatMapData: null | any[] = null;
+var streaksCaptions: null | any = null;
 var calHeatMapInstance: null | any;
 var saveHeatmapPreferencesTimeout: null | number = null;
 
@@ -19,9 +20,14 @@ var setupCalendarHeatmap = function() {
     }
     if (calHeatMapData == null) {
         $.ajax({
-            url: $("#id-dashboard-script-data").attr('data-user-stats-verses-timeline-stats-csv-url') + "?r=" + Math.floor(Math.random() * 1000000000).toString(),
+            url: '/api/learnscripture/v1/usertimelinestats/?format=json',
+            dataType: 'json',
+            type: 'GET',
+            data: {
+                username: $("#id-dashboard-script-data").attr('data-user-timeline-stats-user')
+            },
             success: function(data) {
-                var allRows = data.replace(/\r/, '').trim().split(/\n/).map(r => r.split(/,/));
+                var allRows = data['stats'].replace(/\r/, '').trim().split(/\n/).map(r => r.split(/,/));
                 var headers = allRows[0];
                 var dataRows = allRows.slice(1);
                 var final: any[] = [];
@@ -33,12 +39,13 @@ var setupCalendarHeatmap = function() {
                     final.push(d);
                 }
                 calHeatMapData = final;
-                createOrRefreshCalendarHeatmap(calHeatMapData);
+                streaksCaptions = data['streaks_formatted'];
+                createOrRefreshCalendarHeatmap(calHeatMapData, streaksCaptions);
                 setupCalendarControls();
             }
         });
     } else {
-        createOrRefreshCalendarHeatmap(calHeatMapData);
+        createOrRefreshCalendarHeatmap(calHeatMapData, streaksCaptions);
     }
 }
 
@@ -46,32 +53,20 @@ var getSelectedStat = function() {
     return $('#id-heatmap-stat-selector input[name=stat]:checked').val() as string;
 }
 
-var createOrRefreshCalendarHeatmap = function(allData) {
-    // calculate dict in form required by CalHeatMap. Also calculate streaks,
-    // relying on fact that data has zeros in it and is sorted correctly.
+var createOrRefreshCalendarHeatmap = function(allData, streaks) {
     var selectedStat = getSelectedStat();
 
+    if (streaks !== null) {
+        $('#id-current-streak').text(streaks[selectedStat]['current']);
+        $('#id-biggest-streak').text(streaks[selectedStat]['biggest']);
+    }
+    // calculate dict in form required by CalHeatMap.
     var stats = {};
-    var biggestStreak = 0;
-    var currentStreak = 0;
     for (var i = 0; i < allData.length; i++) {
         var ts = Date.parse(allData[i]['Date']) / 1000;
         var num = parseInt(allData[i][selectedStat], 10)
         stats[ts] = num;
-        if (num == 0) {
-            if (currentStreak > biggestStreak) {
-                biggestStreak = currentStreak;
-            }
-            currentStreak = 0;
-        } else {
-            currentStreak += 1;
-        }
     }
-    if (currentStreak > biggestStreak) {
-        biggestStreak = currentStreak;
-    }
-    $('#id-current-streak').text(currentStreak.toString() + " " + (currentStreak == 1 ? "day" : "days"));
-    $('#id-biggest-streak').text(biggestStreak.toString() + " " + (biggestStreak == 1 ? "day" : "days"));
 
     if (calHeatMapInstance == null) {
         calHeatMapInstance = new CalHeatMap();
@@ -121,7 +116,7 @@ var setupCalendarControls = function() {
     });
 
     $('#id-heatmap-stat-selector input').on('change', function(ev) {
-        createOrRefreshCalendarHeatmap(calHeatMapData);
+        createOrRefreshCalendarHeatmap(calHeatMapData, streaksCaptions);
         saveHeatmapPreferencesDelayed();
     });
 }

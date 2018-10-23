@@ -27,4 +27,5 @@ urlpatterns = [
     url(r'^follow/$', handlers.Follow.as_view(), name='learnscripture.api.follow'),
     url(r'^unfollow/$', handlers.UnFollow.as_view(), name='learnscripture.api.unfollow'),
     url(r'^savemiscpreferences/$', handlers.SaveMiscPreferences.as_view(), name='learnscripture.api.savemiscpreferences'),
+    url(r'^usertimelinestats/$', handlers.UserTimelineStats.as_view(), name='learnscripture.api.usertimelinestats'),
 ]
