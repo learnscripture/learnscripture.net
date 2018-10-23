@@ -134,7 +134,7 @@
         {% block referral_links %}
           {% if request_account and include_referral_links %}
             <p class="referral-link-section">
-              Share link: <span class="referral-link">{% include "learnscripture/referral_link_control.html" with link=referral_link %}</span> | <a href="/referral-program/">What's this?</a>
+              {% ftlmsg 'site-share-link' %} <span class="referral-link">{% include "learnscripture/referral_link_control.html" with link=referral_link %}</span> | <a href="/referral-program/">{% ftlmsg 'site-share-link-whats-this' %}</a>
             </p>
           {% endif %}
         {% endblock %}
