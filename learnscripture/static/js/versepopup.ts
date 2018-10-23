@@ -4,6 +4,9 @@ import { ajaxFailed } from './common';
 var cancelLearningVerseClick = function(ev) {
     ev.preventDefault();
     var $btn = $(this);
+    if (!confirm($btn.attr('data-confirm-prompt'))) {
+        return;
+    }
     var $form = $btn.closest('form');
     $.ajax({
         url: '/api/learnscripture/v1/cancellearningverse/?format=json',
@@ -25,6 +28,9 @@ var cancelLearningVerseClick = function(ev) {
 var cancelLearningPassageClick = function(ev) {
     ev.preventDefault();
     var $btn = $(this);
+    if (!confirm($btn.attr('data-confirm-prompt'))) {
+        return;
+    }
     var $form = $btn.closest('form');
     var verseSetId = $form.find('input[name=verse_set_id]').val();
     var versionId = $form.find('input[name=version_id]').val();
