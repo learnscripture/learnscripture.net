@@ -8,11 +8,17 @@ $(document).ready(function() {
 
         if ($item.hasClass('expanded')) {
             $item.removeClass('expanded');
+            $item.trigger('accordion:collapsed');
         } else {
             $accordion
-                .find('.accordion-item').removeClass('expanded')
-
+                .find('.accordion-item').each(function(idx, elem) {
+                    var $elem = $(elem);
+                    if ($elem.hasClass('expanded')) {
+                        $elem.removeClass('expanded').trigger('accordion-collapsed');
+                    }
+                });
             $item.addClass('expanded');
+            $item.trigger('accordion:expanded');
         }
     });
 });

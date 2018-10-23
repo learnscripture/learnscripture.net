@@ -8,7 +8,7 @@
 
   <div class="accordion-container">
     <section id="id-choose-verseset" class="accordion-item {% if active_section == "verseset" %}expanded{% endif %}">
-      <h2 class="accordion-heading">Choose a verse set</h2>
+      <button type="button" class="accordion-heading">Choose a verse set</button>
       <div class="accordion-body">
         <p>Browse or search the verse sets below:</p>
 
@@ -37,7 +37,7 @@
 
     </section>
     <section id="id-choose-individual" class="accordion-item {% if active_section == "individual" %}expanded{% endif %}">
-      <h2 class="accordion-heading">Choose individual verses</h2>
+      <button type="button" class="accordion-heading">Choose individual verses</button>
       <div class="accordion-body">
         <p>Choose a verse (or a few verses). For long passages, you should
           <a href="{% url 'create_passage_set' %}">create a 'passage' verse set</a>.
@@ -50,7 +50,7 @@
     </section>
 
     <section id="id-choose-create-set-menu" class="accordion-item {% if active_section == "create-set-menu" %}expanded{% endif %}">
-      <h2 class="accordion-heading">Create a verse set</h2>
+      <button type="button" class="accordion-heading">Create a verse set</button>
       <div class="accordion-body">
         <div class="actionset">
           <form>
@@ -79,7 +79,7 @@
     </section>
 
     <section id="id-choose-catechism" class="accordion-item" data-accordion-link="{% url 'catechisms' %}">
-      <h2 class="accordion-heading">Learn a catechism</h2>
+      <button type="button" class="accordion-heading">Learn a catechism</button>
       <div class="accordion-body">
         <p>Catechisms are a question/answer method of learning Bible truth.
           While we don't think they are on a level with the Bible itself, they
