@@ -89,4 +89,21 @@ site-footer-bible-texts-used = Bible texts and catechisms used with permission:
 
 site-footer-choose-language = Choose website interface language:
 
+site-logout-confirm-prompt = Are you sure you want to log out?
+
+# Caption on box that shows link for sharing the page URL
+site-share-link = Share link:
+
+# Dispayed next to the share link, the user can press if they need more info about this feature
+site-share-link-whats-this = What's this?
+
+# Title of 'Offline' page
+site-offline-title = Offline
+
+site-offline-body-1 = You are offline (or our server is down!).
+
+site-offline-body-2 = Please connect to the internet and try again.
+
+# Link text to try to connect to the site again
+site-offline-try-again = Try again
 

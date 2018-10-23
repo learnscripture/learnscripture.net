@@ -1,21 +1,22 @@
 {% extends 'base_simple.html' %}
 
-{% block title %}CSRF detected{% endblock %}
+{% load ftl %}
 
-{% block page_title %}CSRF detected{% endblock %}
+{% block title %}{% ftlmsg 'errors-csrf-title' %}{% endblock %}
+
+{% block page_title %}{% ftlmsg 'errors-csrf-title' %}{% endblock %}
 
 {% block content %}
 
-  <p>Your request could not be authenticated.</p>
+  <p>{% ftlmsg 'errors-csrf-request-not-authenticated' %}</p>
 
   {% if no_csrf_cookie %}
-    <p>The problem appears to be that <strong>you do not have cookies enabled in your
-      browser</strong>, or have blocked a cookie necessary for us to to correctly recognize
-      you. Please <strong>enable cookies</strong>, go back and try again.</p>
+    <p>{% ftlmsg 'errors-csrf-cookie-problem' %}</p>
 
   {% endif %}
 
-  <p>Please <a href="/contact/">contact us</a> if this error persists.</p>
+  {% url 'contact' as contact_url %}
+  <p>{% ftlmsg 'errors-contact-us-html' contact_url=contact_url %}</p>
 
 
 {% endblock %}

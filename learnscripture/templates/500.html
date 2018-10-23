@@ -1,12 +1,17 @@
 {% extends 'base_simple.html' %}
 
+{% load ftl %}
+
 {% block title %}Server Error{% endblock %}
 
 {% block page_title %}500 - Server Error{% endblock %}
 
 {% block content %}
-  <h2>You broke it!</h2>
+  <h2>{% ftlmsg 'errors-500-title' %}</h2>
 
-  <p>Only kidding, it was us. We'll try to fix it ASAP.</p>
+  <p>{% ftlmsg 'errors-500-body' %}</p>
+
+  {% url 'contact' as contact_url %}
+  <p>{% ftlmsg 'errors-contact-us-html' contact_url=contact_url %}</p>
 
 {% endblock %}
