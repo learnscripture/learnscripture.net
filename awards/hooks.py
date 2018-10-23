@@ -14,10 +14,15 @@ from groups.signals import group_joined
 def notify_about_new_award(sender, **kwargs):
     award = sender
     account = award.account
+    msg_html = new_award_msg_html(award, account, points=kwargs.get('points', None))
+    account.identity.add_html_notice(msg_html)
+
+
+def new_award_msg_html(award, account, points=None):
     if award.level > 1:
-        template = """<img src="{0}{1}"> You've levelled up on one of your badges: <a href="{2}">{3}</a>."""
+        template = """<img src="{0}{1}"> You've levelled up on one of your badges: <a href="{2}">{3}</a>. """
     else:
-        template = """<img src="{0}{1}"> You've earned a new badge: <a href="{2}">{3}</a>."""
+        template = """<img src="{0}{1}"> You've earned a new badge: <a href="{2}">{3}</a>. """
 
     award_url = reverse('user_stats', args=(account.username,))
 
@@ -26,10 +31,8 @@ def notify_about_new_award(sender, **kwargs):
                       award.image_small(),
                       award_url,
                       award.short_description())
-    if 'points' in kwargs:
-        points = kwargs['points']
-        if points > 0:
-            msg = msg + format_html(' Points bonus: {0}.', points)
+    if points is not None and points > 0:
+        msg = msg + format_html(' Points bonus: {0}. ', points)
 
     # Facebook: this notice could be displayed on any page, and we want the
     # 'redirect_uri' parameter to take them back to where they were.  So we
@@ -42,7 +45,8 @@ def notify_about_new_award(sender, **kwargs):
                             ' data-award-level="{4}"'
                             ' data-award-name="{5}"'
                             ' data-account-username="{6}"'
-                            '></span>',
+                            ' data-caption="{7}"'
+                            '>Tell people: {8} {9}</span> ',
                             award_url,
                             settings.STATIC_URL,
                             award.image_medium(),
@@ -50,9 +54,11 @@ def notify_about_new_award(sender, **kwargs):
                             award.level,
                             award.short_description(),
                             account.username,
+                            "I just earned a badge: {0}".format(award.short_description()),
+                            format_html('<a data-facebook-link><i class="icon-facebook"></i> Facebook</a>'),
+                            format_html('<a data-twitter-link><i class="icon-twitter"></i> Twitter</a>'),
                             )
-
-    account.identity.add_html_notice(msg)
+    return msg
 
 
 @receiver(lost_award)
