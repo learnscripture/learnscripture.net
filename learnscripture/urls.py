@@ -111,7 +111,8 @@ urlpatterns = [
 
 if settings.DEVBOX:
     urlpatterns += [
-        url(r'^test-404/(?P<message>.*)$', learnscripture.views.missing)
+        url(r'^test-404/(?P<message>.*)$', learnscripture.views.missing),
+        url(r'^test-500/$', learnscripture.views.broken),
     ]
 
 if settings.DEVBOX:

@@ -82,6 +82,12 @@ def missing(request, message, status_code=404):
     return response
 
 
+def broken(request, status_code=500):
+    response = TemplateResponse(request, '500.html', {})
+    response.status_code = status_code
+    return response
+
+
 def home(request):
     identity = getattr(request, 'identity', None)
     if identity is not None and identity.default_to_dashboard:
