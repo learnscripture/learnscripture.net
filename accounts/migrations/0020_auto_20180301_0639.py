@@ -6,11 +6,13 @@ from django.db import migrations
 
 
 def forwards(apps, schema_editor):
-    from accounts.models import notify_all_identities
-    notify_all_identities(
-        'The LearnScripture learning and review page has been upgraded!<br> '
-        'If you have any problems, please leave a message on the <a href="https://learnscripture.net/groups/website-help/">Website Help</a> group.',
-    )
+    pass
+
+    # from accounts.models import notify_all_identities
+    # notify_all_identities(
+    #     'The LearnScripture learning and review page has been upgraded!<br> '
+    #     'If you have any problems, please leave a message on the <a href="https://learnscripture.net/groups/website-help/">Website Help</a> group.',
+    # )
 
 
 def backwards(apps, schema_editor):
