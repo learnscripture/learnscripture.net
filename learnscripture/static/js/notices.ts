@@ -25,9 +25,8 @@ var setupNoticesControls = function() {
 
     // Turn broadcast data into links:
     $('.notice .broadcast').each(function(index, elem) {
-        var html = "&nbsp;&nbsp; Tell people: ";
-        var j = $(elem);
-        var d = j.data();
+        var $elem = $(elem);
+        var d = $elem.data();
         var loc = document.location;
         var urlStart = loc.protocol + '//' + loc.host;
         var redirectUri = loc.toString();
@@ -35,7 +34,7 @@ var setupNoticesControls = function() {
         link += ((link.indexOf('?') == -1) ? "?" : "&");
         link += "from=" + d['accountUsername'];
 
-        var caption = "I just earned a badge: " + d['awardName'];
+        var caption = d['caption'];
 
         // Facebook
         var fbUrl = 'https://www.facebook.com/dialog/feed?app_id=175882602545382' +
@@ -43,16 +42,15 @@ var setupNoticesControls = function() {
             '&redirect_uri=' + encodeURIComponent(redirectUri) +
             '&caption=' + encodeURIComponent(caption) +
             '&picture=' + encodeURIComponent(urlStart + d['picture']);
-        html = html + '<a href="' + fbUrl + '"><i class="icon-facebook"></i> Facebook</a>';
 
         // Twitter
         var twUrl = 'https://twitter.com/share' +
             '?url=' + encodeURIComponent(link) +
             '&text=' + encodeURIComponent(caption) +
             '&hashtags=LearnScripture';
-        html = html + ' &nbsp; <a href="' + twUrl + '"><i class="icon-twitter"></i> Twitter</a>';
 
-        j.html(html);
+        $elem.find('a[data-facebook-link]').attr('href', fbUrl);
+        $elem.find('a[data-twitter-link]').attr('href', twUrl);
     });
 
 };
