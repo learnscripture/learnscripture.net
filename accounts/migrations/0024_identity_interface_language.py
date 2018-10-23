@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounts', '0022_remove_identity_new_learn_page'),
+        ('accounts', '0023_auto_20181023_0752'),
     ]
 
     operations = [
