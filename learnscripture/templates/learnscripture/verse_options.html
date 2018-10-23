@@ -8,7 +8,7 @@
         {% csrf_token %}
 
         <input type="hidden" name="uvs_id" value="{{ uvs.id }}" />
-        <div>
+        <p>
           <input type="submit" name="reviewverse" class="btn primary"
                  {% if uvs.needs_testing %}
                  value="Review {{ uvs.item_name }}"
@@ -16,7 +16,7 @@
                  value="Practise {{ uvs.item_name }}"
                  {% endif %}
                  />
-        </div>
+        </p>
       </form>
     {% endif %}
 
@@ -31,7 +31,7 @@
 
           {# review/practise section #}
 
-          <div>
+          <p>
             {% if uvs.needs_testing %}
               <input type="submit" name="reviewpassagesection" class="btn primary"
                      value="Review section: {{ uvs.section_localized_reference }}"/>
@@ -39,13 +39,13 @@
               <input type="submit" name="practisepassagesection" class="btn primary"
                      value="Practise section: {{ uvs.section_localized_reference }}"/>
             {% endif %}
-          </div>
+          </p>
 
         {% endif %}
 
         {# review/practice passage #}
 
-        <div>
+        <p>
           {% if uvs.needs_testing %}
             <input type="submit" name="reviewpassage" class="btn primary"
                    value="Review passage: {{ uvs.passage_localized_reference }}"/>
@@ -53,7 +53,7 @@
             <input type="submit" name="practisepassage" class="btn primary"
                    value="Practise passage: {{ uvs.passage_localized_reference }}"/>
           {% endif %}
-        </div>
+        </p>
       </form>
     {% endif %}
 
@@ -61,10 +61,10 @@
       <form action="{% url 'dashboard' %}" method="POST">
         {% csrf_token %}
         <input type="hidden" name="catechism_id" value="{{ uvs.version.id }}" />
-        <div>
+        <p>
           <input type="submit" name="reviewcatechism" class="btn primary"
                  value="Practice or review all of {{ uvs.version.short_name }}"/>
-        </div>
+        </p>
 
       </form>
     {% endif %}
@@ -79,21 +79,21 @@
           <input type="hidden" name="verse_status_id" value="{{ uvs.id }}" />
           <input type="hidden" name="verse_status_version_slug" value="{{ uvs.version.slug }}" />
           <input type="hidden" name="verse_status_localized_reference" value="{{ uvs.localized_reference }}" />
-          <div>
+          <p>
             <input type="submit" name="cancellearning" class="btn primary cancel-learning-verse-btn"
                    value="Stop learning this" />
-          </div>
+          </p>
         {% else %}
 
           {# Passages #}
           <input type="hidden" name="verse_set_id" value="{{ uvs.verse_set_id }}" />
           <input type="hidden" name="version_id" value="{{ uvs.version_id }}" />
-          <div>
+          <p>
             <button type="submit" name="cancellearning" class="btn primary cancel-learning-passage-btn">
               Stop learning this passage<br>
               ({{ uvs.passage_localized_reference }})
             </button>
-          </div>
+          </p>
         {% endif %}
       </form>
     {% endif %}

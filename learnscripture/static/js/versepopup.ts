@@ -15,7 +15,7 @@ var cancelLearningVerseClick = function(ev) {
             localized_reference: $form.find('input[name=verse_status_localized_reference]').val()
         },
         success: function() {
-            $btn.closest('tr').remove();
+            $btn.closest('tbody').remove();
         },
         error: ajaxFailed
 
@@ -37,7 +37,7 @@ var cancelLearningPassageClick = function(ev) {
             version_id: versionId
         },
         success: function() {
-            $btn.closest('table').find('tr' +
+            $btn.closest('table').find('tbody' +
                 '[data-verse-set-id=' + verseSetId.toString() + ']' +
                 '[data-version-id=' + versionId.toString() + ']'
             ).remove();
@@ -51,8 +51,7 @@ var setupVersePopups = function() {
         function(ev) {
             ev.preventDefault();
             var $btn = $(this);
-            if ($btn.data("popupopen") !== "yes") {
-                $btn.data("popupopen", "yes")
+            if ($btn.closest("tbody").find(".verse-options-container").hasClass("hide")) {
                 var ref = this.attributes['data-localized-reference'].value;
                 var version = this.attributes['data-version'].value;
                 var that = this;
@@ -65,15 +64,14 @@ var setupVersePopups = function() {
                         'version_slug': version
                     },
                     success: function(html) {
-                        var $target = $(that).closest('td')
-                        $target.append('<div class="verse-options-container">' + html + '</div>');
+                        var $target = $(that).closest('tbody').find(".verse-options-container");
+                        $target.html(html).removeClass("hide")
                         $target.find('.cancel-learning-verse-btn').bind('click', cancelLearningVerseClick);
                         $target.find('.cancel-learning-passage-btn').bind('click', cancelLearningPassageClick);
                     }
                 })
             } else {
-                $btn.data("popupopen", "no")
-                $btn.closest('td').find('.verse-options-container').remove();
+                $btn.closest('tbody').find('.verse-options-container').addClass("hide");
             }
         });
 };

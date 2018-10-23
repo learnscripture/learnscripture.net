@@ -8,12 +8,13 @@
 
 {% else %}
 
-  <table class="bordered-table">
+  <table class="bordered-table verse-progress-data">
     <thead>
       <tr>
-        <th>{% if bible %}Verse{% elif catechism %}Question{% endif %}</th>
+        <th class="verse-ref">{% if bible %}Verse{% elif catechism %}Question{% endif %}</th>
         <th>{% if bible %}Version{% elif catechism %}Catechism{% endif %}</th>
         <th>Strength</th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
