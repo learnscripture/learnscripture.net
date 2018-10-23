@@ -80,8 +80,11 @@
           <input type="hidden" name="verse_status_version_slug" value="{{ uvs.version.slug }}" />
           <input type="hidden" name="verse_status_localized_reference" value="{{ uvs.localized_reference }}" />
           <p>
-            <input type="submit" name="cancellearning" class="btn primary cancel-learning-verse-btn"
-                   value="Stop learning this" />
+            <button type="button" name="cancellearning" class="btn primary cancel-learning-verse-btn"
+                    data-confirm-prompt="Are you sure you want to stop learning {{ uvs.localized_reference }} in {{ uvs.version.short_name }}?"
+              >
+              Stop learning this
+            </button>
           </p>
         {% else %}
 
@@ -89,7 +92,9 @@
           <input type="hidden" name="verse_set_id" value="{{ uvs.verse_set_id }}" />
           <input type="hidden" name="version_id" value="{{ uvs.version_id }}" />
           <p>
-            <button type="submit" name="cancellearning" class="btn primary cancel-learning-passage-btn">
+            <button type="submit" name="cancellearning" class="btn primary cancel-learning-passage-btn"
+                    data-confirm-prompt="Are you sure you want to stop learning {{ uvs.passage_localized_reference }} in {{ uvs.version.short_name }}?"
+                    >
               Stop learning this passage<br>
               ({{ uvs.passage_localized_reference }})
             </button>
