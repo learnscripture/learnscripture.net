@@ -6,12 +6,16 @@ This isn't really a REST API in the normal sense, and would probably need a lot
 of cleaning up if clients other than the web app were to use it.
 """
 import collections
+import csv
 import datetime
 import json
+from datetime import date, timedelta
+from io import StringIO
 
 import furl
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.utils.decorators import method_decorator
 from django.utils.functional import wraps
@@ -19,7 +23,7 @@ from django.views.decorators.cache import never_cache
 from django.views.generic.base import View
 
 from accounts.forms import PreferencesForm
-from accounts.models import Account
+from accounts.models import Account, HeatmapStatsType
 from bibleverses.models import (MAX_VERSE_QUERY_SIZE, MAX_VERSES_FOR_SINGLE_CHOICE, QUICK_FIND_SEARCH_LIMIT,
                                 InvalidVerseReference, StageType, TextVersion, UserVerseStatus, VerseSetType,
                                 make_verse_set_passage_id, quick_find)
@@ -30,6 +34,7 @@ from learnscripture import session
 from learnscripture.decorators import require_identity_method
 from learnscripture.views import (bible_versions_for_request, default_bible_version_for_request, todays_stats,
                                   verse_sets_visible_for_request)
+from scores.models import get_verses_started_per_day, get_verses_tested_per_day
 
 
 class rc_factory(object):
@@ -641,3 +646,104 @@ class SaveMiscPreferences(ApiView):
             identity.seen_help_tour = request.POST['seen_help_tour'] == 'true'
         identity.save()
         return {}
+
+
+class UserTimelineStats(ApiView):
+    def get(self, request):
+        username = request.GET['username']
+        account = get_object_or_404(Account.objects.active().filter(username=username))
+        identity = account.identity
+        started = get_verses_started_per_day(identity.id)
+        tested = get_verses_tested_per_day(account.id)
+
+        rows = combine_timeline_stats(started, tested)
+
+        # Add 'Combined' column
+        rows2 = []
+        for r in rows:
+            newrow = list(r)
+            newrow.append(sum(newrow[1:]))
+            rows2.append(newrow)
+
+        output = StringIO()
+        writer = csv.writer(output)
+        writer.writerow(["Date",
+                         HeatmapStatsType.VERSES_STARTED,
+                         HeatmapStatsType.VERSES_TESTED,
+                         HeatmapStatsType.COMBINED])
+        for d, c1, c2, c3 in rows2:
+            writer.writerow([d.strftime("%Y-%m-%d"), c1, c2, c3])
+
+        streaks = {
+            s: {'biggest': 0,
+                'current': 0,
+                }
+            for s in HeatmapStatsType.values
+        }
+
+        def streaks_helper():
+            for d, c1, c2, c3 in rows2:
+                yield False, d, c1, c2, c3
+            yield True, None, 0, 0, 0
+
+        for last, d, c1, c2, c3 in streaks_helper():
+            for stat, num in [(HeatmapStatsType.VERSES_STARTED, c1),
+                              (HeatmapStatsType.VERSES_TESTED, c2),
+                              (HeatmapStatsType.COMBINED, c3)]:
+                if num == 0:
+                    if streaks[stat]['current'] > streaks[stat]['biggest']:
+                        streaks[stat]['biggest'] = streaks[stat]['current']
+                if not last:
+                    if num == 0:
+                        streaks[stat]['current'] = 0
+                    else:
+                        streaks[stat]['current'] += 1
+
+        streaks_formatted = {
+            stat: {n: '1 day' if val == 1 else '{0} days'.format(val) for n, val in streak.items()}
+            for stat, streak in streaks.items()
+        }
+        return {'stats': output.getvalue(),
+                'streaks': streaks,
+                'streaks_formatted': streaks_formatted,
+                }
+
+
+def combine_timeline_stats(*statslists):
+    # Each item in statslists is a sorted list containing a date object as first
+    # item, and some other number as a second item. We zip together, based on
+    # equality of dates, and supplying zero for missing items in any lists.
+    retval = []
+    num_lists = len(statslists)
+    positions = [0] * num_lists  # current position in each of statslists
+    statslist_r = list(range(0, num_lists))
+    statslist_lengths = list(map(len, statslists))
+
+    # Modify statslists to make end condition easier to handler
+    for i in statslist_r:
+        statslists[i].append((None, None))
+
+    while any(positions[i] < statslist_lengths[i] for i in statslist_r):
+        next_rows = [statslists[i][positions[i]] for i in statslist_r]
+        next_dt_vals = [r[0] for r in next_rows if r[0] is not None]
+        next_dt = min(next_dt_vals)
+        rec = [0] * num_lists
+        for i in statslist_r:
+            dt, val = next_rows[i]
+            if dt == next_dt:
+                rec[i] = val
+                positions[i] += 1
+        rec.insert(0, next_dt)
+        retval.append(rec)
+
+    # Some things (calculating streaks client side) work correctly only if we
+    # make sure that the data goes right up to today, or ends with a zero if it
+    # doesn't.
+    if len(retval) > 0:
+        today = date.today()
+        last_date = retval[-1][0]
+        if last_date < today:
+            next_day = last_date + timedelta(days=1)
+            retval.append(tuple([next_day] + [0 for s in statslists]))
+
+    return retval

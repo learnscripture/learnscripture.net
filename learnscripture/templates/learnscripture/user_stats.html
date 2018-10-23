@@ -9,9 +9,14 @@
   <script type="text/javascript">
    $(document).ready(function () {
      $.ajax({
-       url: $("#id-user-stats-script-data").attr('data-user-stats-verses-timeline-stats-csv-url') + "?r=" + Math.floor(Math.random() * 1000000000).toString(),
+       url: '/api/learnscripture/v1/usertimelinestats/?format=json',
+       dataType: 'json',
+       type: 'GET',
+       data: {
+         username: $("#id-user-stats-script-data").attr('data-user-timeline-stats-user')
+       },
        success: function(data) {
-         var dataRows = data.replace(/\r/, '').trim().split(/\n/).slice(1).map(function(r) {
+         var dataRows = data['stats'].replace(/\r/, '').trim().split(/\n/).slice(1).map(function(r) {
            var cols = r.split(/,/);
            return [new Date(cols[0]), parseInt(cols[1], 10), parseInt(cols[2], 0)];
          })
@@ -124,7 +129,7 @@
   <p>Shift + drag to pan.</p>
   <h3>Verses started/tested per day</h3>
   <div id="id-user-stats-graph" style="width: 90%; margin: 0 auto 0 0;">
-    <i>Loading...</i>
+    <i>Loading... {% include "learnscripture/loading_animation.html" %}</i>
   </div>
   <div class="inputs-list">
     <label><input type="checkbox" id="id-user-stats-graph-rolling"> 7 day rolling average</label>
@@ -252,7 +257,7 @@
   {% endif %}
 
   <div id="id-user-stats-script-data"
-       data-user-stats-verses-timeline-stats-csv-url="{% url "user_stats_verses_timeline_stats_csv" account.username %}">
+       data-user-timeline-stats-user="{{ account.username }}"
   </div>
 
 {% endblock %}

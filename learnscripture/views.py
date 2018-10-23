@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-import csv
 import urllib.parse
-from datetime import date, timedelta
+from datetime import timedelta
 
 import djpjax
 import furl
@@ -46,8 +45,7 @@ from learnscripture.forms import (GROUP_WALL_ORDER_OLDEST_FIRST, LEADERBOARD_WHE
                                   GroupWallFilterForm, LeaderboardFilterForm, LogInForm, SignUpForm,
                                   UserVersesFilterForm, VerseSetSearchForm)
 from payments.sign import sign_payment_info
-from scores.models import (get_all_time_leaderboard, get_leaderboard_since, get_verses_started_counts,
-                           get_verses_started_per_day, get_verses_tested_per_day)
+from scores.models import get_all_time_leaderboard, get_leaderboard_since, get_verses_started_counts
 
 from .decorators import (has_preferences, redirect_via_prefs, require_account, require_account_with_redirect,
                          require_identity, require_preferences)
@@ -974,72 +972,6 @@ def user_stats(request, username):
     viewer_visible_groups = Group.objects.visible_for_account(viewer)
     c['groups'] = viewer_visible_groups.filter(id__in=[g.id for g in account_groups])
     return TemplateResponse(request, 'learnscripture/user_stats.html', c)
-
-
-def combine_timeline_stats(*statslists):
-    # Each item in statslists is a sorted list containing a date object as first
-    # item, and some other number as a second item. We zip together, based on
-    # equality of dates, and supplying zero for missing items in any lists.
-    retval = []
-    num_lists = len(statslists)
-    positions = [0] * num_lists  # current position in each of statslists
-    statslist_r = list(range(0, num_lists))
-    statslist_lengths = list(map(len, statslists))
-
-    # Modify statslists to make end condition easier to handler
-    for i in statslist_r:
-        statslists[i].append((None, None))
-
-    while any(positions[i] < statslist_lengths[i] for i in statslist_r):
-        next_rows = [statslists[i][positions[i]] for i in statslist_r]
-        next_dt_vals = [r[0] for r in next_rows if r[0] is not None]
-        next_dt = min(next_dt_vals)
-        rec = [0] * num_lists
-        for i in statslist_r:
-            dt, val = next_rows[i]
-            if dt == next_dt:
-                rec[i] = val
-                positions[i] += 1
-        rec.insert(0, next_dt)
-        retval.append(rec)
-
-    # Some things (calculating streaks client side) work correctly only if we
-    # make sure that the data goes right up to today, or ends with a zero if it
-    # doesn't.
-    if len(retval) > 0:
-        today = date.today()
-        last_date = retval[-1][0]
-        if last_date < today:
-            next_day = last_date + timedelta(days=1)
-            retval.append(tuple([next_day] + [0 for s in statslists]))
-
-    return retval
-
-
-def user_stats_verses_timeline_stats_csv(request, username):
-    account = get_object_or_404(Account.objects.active().filter(username=username))
-    identity = account.identity
-    started = get_verses_started_per_day(identity.id)
-    tested = get_verses_tested_per_day(account.id)
-
-    rows = combine_timeline_stats(started, tested)
-
-    # Add 'Combined' column
-    rows2 = []
-    for r in rows:
-        newrow = list(r)
-        newrow.append(sum(newrow[1:]))
-        rows2.append(newrow)
-
-    resp = HttpResponse(content_type="text/plain")
-    writer = csv.writer(resp)
-    writer.writerow(["Date",
-                     HeatmapStatsType.VERSES_STARTED,
-                     HeatmapStatsType.VERSES_TESTED,
-                     HeatmapStatsType.COMBINED])
-    for d, c1, c2, c3 in rows2:
-        writer.writerow([d.strftime("%Y-%m-%d"), c1, c2, c3])
-    return resp
 
 
 @require_identity
