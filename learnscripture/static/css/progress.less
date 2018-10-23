@@ -3,11 +3,18 @@
 
 
 .verse-popup-btn {
-    float: right;
+    font-size: 80%;
+    padding: 2px 6px;
 }
 
 .verse-options-container {
     clear: both;
+    p, form {
+        margin: 0;
+    }
+    p + p, form + form {
+        margin-top: @baseGapSize;
+    }
 }
 
 .verse-options {
@@ -21,3 +28,8 @@
     margin-bottom: 0px;
 }
 
+.verse-progress-data {
+    th:first-child {
+        width: 100%;
+    }
+}

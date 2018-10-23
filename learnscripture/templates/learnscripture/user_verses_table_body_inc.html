@@ -1,19 +1,25 @@
 {% for verse in results.items %}
   {% ifchanged verse.localized_reference verse.version.slug %}
-    <tr {% if verse.verse_set_id %}
+    <tbody {% if verse.verse_set_id %}
                   data-verse-set-id="{{ verse.verse_set_id }}"
     {% endif %}
                   data-version-id="{{ verse.version_id }}"
                   >
-      <td>{{ verse.title }}
-        <a class="btn verse-popup-btn" href="#" data-localized-reference="{{ verse.localized_reference }}" data-version="{{ verse.version.slug }}" data-title="{{ verse.title }}">Options</a></td>
-      <td>{{ verse.version.slug }}</td>
-      <td>
-        <div class="stars-cont">
-          <img class="stars stars-base" src="{{ STATIC_URL }}img/strength_0.png"><img style="clip-path: inset(0px calc((1 - {{ verse.scaled_strength }}) * var(--stars-width)) 0px 0px)" class="stars stars-over" title="{{ verse.scaled_strength_percentage }}%" src="{{ STATIC_URL }}img/strength_100.png">
-        </div>
-      </td>
-    </tr>
+      <tr>
+        <td>{{ verse.title }}</td>
+        <td>{{ verse.version.slug }}</td>
+        <td>
+          <div class="stars-cont">
+            <img class="stars stars-base" src="{{ STATIC_URL }}img/strength_0.png"><img style="clip-path: inset(0px calc((1 - {{ verse.scaled_strength }}) * var(--stars-width)) 0px 0px)" class="stars stars-over" title="{{ verse.scaled_strength_percentage }}%" src="{{ STATIC_URL }}img/strength_100.png">
+          </div>
+        <td>
+          <button type="button" class="btn verse-popup-btn" data-localized-reference="{{ verse.localized_reference }}" data-version="{{ verse.version.slug }}" data-title="{{ verse.title }}"><i class="icon-verse-options-menu-btn"></i></button>
+        </td>
+      </tr>
+      <tr>
+        <td class="verse-options-container hide" colspan="4"></td>
+      </tr>
+    </tbody>
   {% endifchanged %}
 {% endfor %}
 {% if results.more %}
