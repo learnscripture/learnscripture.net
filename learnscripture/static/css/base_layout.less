@@ -18,8 +18,8 @@ body.base-page {
 
     .container {
         width: @maxPageWidth;
-        > footer p {
-            text-align: center; /* center align it with the container */
+        > footer {
+            text-align: center; /* center align it within the container */
         }
         margin-left: auto;
         margin-right: auto;
@@ -110,14 +110,14 @@ body.base-page {
         > div {
             flex: 0 0 ~"calc(50% - 20px)";
             box-sizing: border-box;
-}
+        }
 
-// Footer
+        // Footer
 
-#id-language-chooser-form {
-    select {
-        width: auto;
-    }
+        #id-language-chooser-form {
+            select {
+                width: auto;
+            }
         }
 
         > #id-leftcolumn, > #id-rightcolumn {
