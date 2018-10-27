@@ -28,6 +28,8 @@ parser.add_argument("--firefox-binary", action='store',
                     help="Specify the path to the Firefox binary to use, otherwise default Firefox will be found")
 parser.add_argument("--traceback-pages", action='store_true',
                     help="Display traceback pages when running tests (like when DEBUG=True)")
+parser.add_argument("--screenshot-on-failure", action='store_true',
+                    help="Save a screenshot when a Selenium test fails")
 
 
 known_args, remaining_args = parser.parse_known_args()
@@ -66,6 +68,9 @@ if known_args.firefox_binary:
 
 if known_args.traceback_pages:
     os.environ['TEST_TRACEBACK_PAGES'] = 'TRUE'
+
+if known_args.screenshot_on_failure:
+    os.environ['SELENIUM_SCREENSHOT_ON_FAILURE'] = '1'
 
 cmd += remaining_options + test_args
 
