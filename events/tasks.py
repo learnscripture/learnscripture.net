@@ -2,7 +2,7 @@ from accounts.models import Account
 from awards.models import Award
 from bibleverses.models import TextVersion, VerseSet
 from comments.models import Comment
-from events.models import (AwardLostEvent, AwardReceivedEvent, GroupCreatedEvent, GroupJoinedEvent, NewAccountEvent,
+from events.models import (AwardReceivedEvent, GroupCreatedEvent, GroupJoinedEvent, NewAccountEvent,
                            NewCommentEvent, PointsMilestoneEvent, StartedLearningCatechismEvent,
                            StartedLearningVerseSetEvent, VerseSetCreatedEvent, VersesFinishedMilestoneEvent,
                            VersesStartedMilestoneEvent)
@@ -97,11 +97,6 @@ def create_verses_finished_milestone_event(account_id):
     c = account.identity.verses_finished_count()
     if c > 9 and is_milestone(c):
         VersesFinishedMilestoneEvent(account=account, verses_finished=c).save()
-
-
-# NB this is called synchronously, not as a task
-def create_award_lost_event(award):
-    AwardLostEvent(award=award).save()
 
 
 @app.task(ignore_result=True)

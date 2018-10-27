@@ -2,7 +2,7 @@ from django.dispatch import receiver
 
 import events.tasks
 from accounts.signals import catechism_started, new_account, points_increase, verse_finished, verse_started
-from awards.signals import lost_award, new_award
+from awards.signals import new_award
 from bibleverses.signals import public_verse_set_created, verse_set_chosen
 from comments.signals import new_comment
 from groups.signals import group_joined, public_group_created
@@ -12,14 +12,6 @@ from groups.signals import group_joined, public_group_created
 def new_award_receiver(sender, **kwargs):
     award = sender
     events.tasks.create_award_received_event.delay(award.id)
-
-
-@receiver(lost_award)
-def lost_award_receiver(sender, **kwargs):
-    award = sender
-    # Since this is called when an award is deleted,
-    # we have to call immediately, not via the queue.
-    events.tasks.create_award_lost_event(award)
 
 
 @receiver(verse_set_chosen)
