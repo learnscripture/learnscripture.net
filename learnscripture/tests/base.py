@@ -215,9 +215,11 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
         self.wait_for_ajax()
 
     def get_element_text(self, css_selector):
+        self.wait_until_loaded(css_selector)
         return self._find(css_selector).text
 
     def get_element_attribute(self, css_selector, attribute_name):
+        self.wait_until_loaded(css_selector)
         return self._find(css_selector).get_attribute(attribute_name)
 
     # Selenium specific utilities:

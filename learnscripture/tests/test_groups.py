@@ -279,7 +279,7 @@ class GroupCreatePageTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.click(select_input)
         self.fill({select_input: "invit"})
         self.wait_for_ajax()
-        time.sleep(0.2)
+        self.wait_until_loaded(".select2-results__option--highlighted")
         self.press_enter(select_input)
         time.sleep(0.2)
         self.submit('input[name="save"]')

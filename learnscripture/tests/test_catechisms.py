@@ -20,7 +20,6 @@ class CatechismTests(FullBrowserTest):
         self.get_url('catechisms')
         self.click("input[value=Learn]")
         self.set_preferences(wait_for_reload=True)
-        self.wait_until_loaded('#id-verse-header')
         self.assertEqual(self.get_element_text("#id-verse-header h2"),
                          "Q1. What is the chief end of man?")
 
