@@ -9,7 +9,6 @@ var setupCommentControls = function() {
         if ($commentBlock.find(".comment-box").length > 0) {
             return; // We've already got one
         }
-        // TODO locator/parent etc.
         var $locator = $commentBlock.find('.commentboxlocator');
 
         $locator.append($('#id-add-comment').html());
