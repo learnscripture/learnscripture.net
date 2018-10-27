@@ -96,7 +96,6 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
                             uvs.memory_stage == MemoryStage.ZERO
                             for uvs in identity.verse_statuses.all()))
 
-        self.wait_until_loaded('#id-verse-header')
         self.assertEqual("John 3:16", self.get_element_text("#id-verse-header h2"))
         # Do the reading:
         for i in range(0, 9):
@@ -206,6 +205,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.get_url('dashboard')
         self.submit('input[name=reviewpassage]')
 
+        self.wait_until_loaded('#id-typing')
         for word in "The LORD is my shepherd, I shall not want.".split():
             self.fill({"#id-typing": word + " "})
 
@@ -223,7 +223,6 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
     def test_skip_verse(self):
         self.choose_verse_set('Bible 101')
 
-        self.wait_until_loaded('#id-verse-header')
         self.assertEqual("John 3:16", self.get_element_text("#id-verse-header h2"))
 
         self.click("#id-verse-options-menu-btn")

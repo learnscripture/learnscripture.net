@@ -59,7 +59,7 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
         vs_id = VerseSet.objects.get(name="Bible 101").id
         self.assertEqual(VerseSet.objects.get(id=vs_id).popularity, 0)
         self.click("#id-learn-verseset-btn-%d" % vs_id)
-        self.set_preferences()
+        self.set_preferences(wait_for_reload=True)
         self.assertEqual(VerseSet.objects.get(id=vs_id).popularity, 1)
 
         # Test awards
@@ -78,7 +78,7 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
         vs = VerseSet.objects.get(name="Psalm 23")
         self.click("#id-learn-verseset-btn-%d" % vs.id)
 
-        self.set_preferences()
+        self.set_preferences(wait_for_reload=True)
 
         identity = self._get_current_identity()
 
@@ -112,7 +112,6 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
         # Check we can actually click on 'Learn' and it works.
         self.click("#id-choose-individual input[name=learn_now]")
         self.set_preferences(wait_for_reload=True)
-        self.wait_until_loaded("#id-verse-header h2")
         self.assertEqual(self.get_element_text("#id-verse-header h2"), "John 3:16")
 
     def test_choose_individual_verse_learn_later(self):
