@@ -3,6 +3,8 @@ import contextlib
 import os
 import time
 import unittest
+from functools import wraps
+from unittest.case import _UnexpectedSuccess
 
 import selenium
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
@@ -19,6 +21,7 @@ from bibleverses.models import TextVersion, UserVerseStatus
 from payments.models import Payment
 
 TESTS_SHOW_BROWSER = os.environ.get('TESTS_SHOW_BROWSER', '')
+SELENIUM_SCREENSHOT_ON_FAILURE = os.environ.get('SELENIUM_SCREENSHOT_ON_FAILURE', '')
 
 
 class FuzzyInt(int):
@@ -262,6 +265,21 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
             WebDriverWait(self._driver, self.get_default_timeout()).until(f)
         self.wait_for_ajax()
 
+    screenshot_on_failure = SELENIUM_SCREENSHOT_ON_FAILURE
+
+    @classmethod
+    def setUpClass(cls):
+        if cls.screenshot_on_failure:
+            # Wrap all test methods in a decorator. Should really do this in a
+            # metaclass, but this works.
+            for name in dir(cls):
+                if name.startswith('test_'):
+                    method = getattr(cls, name)
+                    if callable(method):
+                        setattr(cls, name, do_screenshot_on_failure(method))
+
+        super(FullBrowserTest, cls).setUpClass()
+
     # Higher level, learnscripture specific things:
 
     def set_preferences(self, wait_for_reload=False):
@@ -286,6 +304,27 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
             else:
                 # preferences page
                 self.submit("#id-save-btn")
+
+
+def do_screenshot_on_failure(method):
+    """
+    Wraps a method in one that calls `save_screenshot` if any exception occurs.
+    """
+    if getattr(method, '_screenshot_wrapping_done', False):
+        return method
+
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        try:
+            return method(self, *args, **kwargs)
+        except _UnexpectedSuccess:
+            # not a failure
+            raise
+        except Exception:
+            self.save_screenshot()
+            raise
+    wrapper._screenshot_wrapping_done = True
+    return wrapper
 
 
 @contextlib.contextmanager
