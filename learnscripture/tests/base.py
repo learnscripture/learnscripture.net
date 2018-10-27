@@ -181,6 +181,26 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
         return kwargs
 
     # Overridden:
+    screenshot_on_failure = SELENIUM_SCREENSHOT_ON_FAILURE
+
+    @classmethod
+    def setUpClass(cls):
+        if cls.screenshot_on_failure:
+            # Wrap all test methods in a decorator. Should really do this in a
+            # metaclass, but this works.
+            for name in dir(cls):
+                if name.startswith('test_'):
+                    method = getattr(cls, name)
+                    if callable(method):
+                        setattr(cls, name, do_screenshot_on_failure(method))
+
+        super(FullBrowserTest, cls).setUpClass()
+
+    def setUp(self):
+        super().setUp()
+        if not self._have_visited_page():
+            self.get_url('django_functest.emptypage')
+        self.execute_script("return window.localStorage.clear();")
 
     def click(self, *args, **kwargs):
         super(FullBrowserTest, self).click(*args, **kwargs)
@@ -264,21 +284,6 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
         else:
             WebDriverWait(self._driver, self.get_default_timeout()).until(f)
         self.wait_for_ajax()
-
-    screenshot_on_failure = SELENIUM_SCREENSHOT_ON_FAILURE
-
-    @classmethod
-    def setUpClass(cls):
-        if cls.screenshot_on_failure:
-            # Wrap all test methods in a decorator. Should really do this in a
-            # metaclass, but this works.
-            for name in dir(cls):
-                if name.startswith('test_'):
-                    method = getattr(cls, name)
-                    if callable(method):
-                        setattr(cls, name, do_screenshot_on_failure(method))
-
-        super(FullBrowserTest, cls).setUpClass()
 
     # Higher level, learnscripture specific things:
 
