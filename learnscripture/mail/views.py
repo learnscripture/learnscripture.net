@@ -6,7 +6,7 @@ from django.http import HttpResponse, HttpResponseForbidden
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
-from accounts.email_reminders import mark_email_bounced
+from accounts.models import Account
 
 from .mailgun import verify_webhook
 
@@ -48,3 +48,7 @@ def mailgun_bounce_notification(request):
     bounced_date = timezone.make_aware(datetime.fromtimestamp(int(request.POST['timestamp'])))
     mark_email_bounced(recipient, bounced_date)
     return HttpResponse('OK!')
+
+
+def mark_email_bounced(email_address, bounce_date):
+    Account.objects.filter(email=email_address, email_bounced__isnull=True).update(email_bounced=bounce_date)
