@@ -6,6 +6,7 @@ from datetime import timedelta
 from functools import reduce
 
 import attr
+import django_ftl
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, UserManager
 from django.contrib.sites.shortcuts import get_current_site
@@ -14,6 +15,7 @@ from django.db import models
 from django.template import loader
 from django.utils import timezone
 from django.utils.functional import cached_property
+from django.utils.text import force_text
 
 from accounts import memorymodel
 from accounts.signals import (catechism_started, points_increase, scored_100_percent, verse_finished, verse_started,

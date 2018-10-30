@@ -1005,7 +1005,7 @@ def user_verses(request):
             invalid = False
             try:
                 # TODO - this doesn't work nicely if you are learning more than
-                # one language - you can only search in the language this is
+                # one language - you can only search in the language that is
                 # your default language.
                 parsed_ref = parse_unvalidated_localized_reference(
                     request.identity.default_language_code,

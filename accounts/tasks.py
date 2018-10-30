@@ -1,6 +1,7 @@
-from django.utils.html import format_html
+import django_ftl
 
 from learnscripture.celery import app
+from learnscripture.ftl_bundles import t
 
 
 @app.task(ignore_result=True)
@@ -36,16 +37,15 @@ def notify_about_comment(event, comment, account):
     ).exists():
         return
 
-    if account == event.account:
-        msg = format_html('You have new comments on <b><a href="{0}">your event</a></b> "{1}"',
-                          event.get_absolute_url(),
-                          event.render_html(account.default_language_code)
-                          )
-    else:
-        msg = format_html('There are <b><a href="{0}">new comments</a></b> on the event "{1}"',
-                          event.get_absolute_url(),
-                          event.render_html(account.default_language_code)
-                          )
+    with django_ftl.override(account.default_language_code):
+        if account == event.account:
+            msg = t('events-you-have-new-comments-notification-html',
+                    dict(event_url=event.get_absolute_url(),
+                         event=event.render_html(account.default_language_code)))
+        else:
+            msg = t('events-new-comments-notification',
+                    dict(event_url=event.get_absolute_url(),
+                         event=event.render_html(account.default_language_code)))
 
     notice = account.add_html_notice(msg)
     notice.related_event = event

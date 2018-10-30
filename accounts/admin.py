@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
 from django.urls import reverse
-from django.utils.html import format_html
+from common.utils.html import link
 
 from .models import Account, Identity, Notice
 
@@ -73,9 +73,8 @@ class AccountAdmin(admin.ModelAdmin):
         return account.identity.referred_by
 
     def identity_link(account):
-        return format_html('<a href="{0}">{1}</a>',
-                           reverse('admin:accounts_identity_change', args=[account.identity.id]),
-                           account.identity.id)
+        return link(reverse('admin:accounts_identity_change', args=[account.identity.id]),
+                    account.identity.id)
     list_display = ['username', identity_link, 'email', 'first_name', 'last_name', 'date_joined', 'email_bounced', 'is_hellbanned', referred_by]
     list_filter = [HasBadEmailListFilter,
                    'is_hellbanned',

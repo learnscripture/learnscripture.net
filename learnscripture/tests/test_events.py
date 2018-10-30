@@ -110,3 +110,10 @@ class EventTests(AccountTestMixin, TestBase):
         comment = event.add_comment(author=account1,
                                     message="hello")
         self.assertEqual(comment.group, group)
+
+    def test_created_display(self):
+        _, event_account = self.create_account()
+        event = PointsMilestoneEvent(account=event_account, points=1000).save()
+        self.assertEqual(event.created_display(),
+                         "Just now")
+        # TODO - the rest
