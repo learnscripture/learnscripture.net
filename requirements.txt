@@ -19,7 +19,7 @@ babel==2.6.0
 bcrypt==3.1.4             # via paramiko
 beautifulsoup4==4.6.3     # via elm-fluent, webtest
 billiard==3.5.0.2
-celery==4.0.2
+celery==4.2.1
 certifi==2017.7.27.1
 cffi==1.11.4              # via bcrypt, cryptography, pynacl
 click==6.7                # via elm-fluent, pip-tools
@@ -60,7 +60,7 @@ idna==2.6                 # via cryptography
 ipython-genutils==0.2.0   # via traitlets
 ipython==5.3.0
 isort==4.2.5
-kombu==4.0.2
+kombu==4.2.1
 language-tags==0.4.4      # via elm-fluent
 linecache2==1.0.0         # via traceback2
 lxml==4.2.5
