@@ -359,11 +359,6 @@ LOGGING = {
         },
     },
     'loggers': {
-        'django.db.backends': {
-            'level': 'ERROR',
-            'handlers': ['console'],
-            'propagate': False,
-        },
         'django.server': {
             'handlers': ['django.server'],
             'level': 'INFO',
@@ -381,34 +376,24 @@ LOGGING = {
         },
         'celery': {
             'level': 'DEBUG',
-            'handlers': ['celerydebug', 'sentry'],
-            'propagate': False,
+            'handlers': ['celerydebug'],
+            'propagate': True,
         },
         'celerydebug': {
             'level': 'DEBUG',
             'handlers': ['celerydebug'],
-            'propagate': False,
+            'propagate': True,
         },
         'bibleverses.services': {
             'level': 'INFO',
             'handlers': ['bibleservices'],
-            'propagate': False,
-        },
-        'django_ftl.message_errors': {
-            'level': 'ERROR',
-            'handlers': ['console'],
-            'propagate': False,
-        },
-        'django_ftl.autoreload': {
-            'level': 'DEBUG',
-            'handlers': ['console'],
-            'propagate': False,
+            'propagate': True,
         },
     },
 }
 
-if (DEBUG or any(a in sys.argv for a in ['setup_bibleverse_suggestions',
-                                         'run_suggestions_analyzers'])):
+if (DEBUG or TESTING or any(a in sys.argv for a in ['setup_bibleverse_suggestions',
+                                                    'run_suggestions_analyzers'])):
     LOGGING['root']['handlers'] = ['console']
     LOGGING['loggers']['django.server'] = {
         'level': 'INFO',
@@ -428,6 +413,11 @@ if (DEBUG or any(a in sys.argv for a in ['setup_bibleverse_suggestions',
     }
     LOGGING['loggers']['django_ftl.message_errors'] = {
         'level': 'INFO',
+        'handlers': ['console'],
+        'propagate': False,
+    }
+    LOGGING['loggers']['django_ftl.autoreload'] = {
+        'level': 'DEBUG',
         'handlers': ['console'],
         'propagate': False,
     }
