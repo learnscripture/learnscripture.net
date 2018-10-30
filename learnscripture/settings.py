@@ -150,7 +150,6 @@ if DEBUG:
 SERVER_EMAIL = 'website@learnscripture.net'
 DEFAULT_FROM_EMAIL = SERVER_EMAIL
 CONTACT_EMAIL = 'contact@learnscripture.net'
-REMINDER_EMAIL = 'reminders@learnscripture.net'
 
 
 if DEVBOX:

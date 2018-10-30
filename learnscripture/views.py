@@ -311,11 +311,9 @@ def dashboard(request):
     identity = getattr(request, 'identity', None)
 
     if identity is None:
-        # Probably got here from a 'revision reminder' email,
-        # so we are best redirecting them to log in.
         return HttpResponseRedirect(reverse('login'))
 
-    if identity is None or not identity.verse_statuses.exists():
+    if not identity.verse_statuses.exists():
         # The only possible thing is to choose some verses
         return HttpResponseRedirect(reverse('choose'))
 

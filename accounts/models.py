@@ -68,9 +68,6 @@ HeatmapStatsType = make_choices('HeatmapStatsType',
 # and so sometimes they just delegate to Account methods.
 
 
-SEND_REMINDERS_FOR = 30 * 3  # 3 months
-
-
 class AccountManager(UserManager):
     def visible_for_account(self, account):
         qs = self.active()
@@ -81,15 +78,6 @@ class AccountManager(UserManager):
 
     def active(self):
         return self.get_queryset().filter(is_active=True)
-
-    def send_reminders_to(self):
-        return (self.active()
-                .annotate(last_item_tested_on=models.Max('identity__verse_statuses__last_tested'))
-                .filter(remind_after__gt=0,
-                        email_bounced__isnull=True,
-                        last_item_tested_on__gt=timezone.now() - timedelta(days=SEND_REMINDERS_FOR),
-                        )
-                )
 
 
 class Account(AbstractBaseUser):
@@ -112,13 +100,6 @@ class Account(AbstractBaseUser):
     # This may not work perfectly with respect to things that are calculated
     # globally.
     is_hellbanned = models.BooleanField(default=False)
-
-    # Email reminder preferences and meta data
-    remind_after = models.PositiveSmallIntegerField(
-        "Send email reminders after (days)", default=2)
-    remind_every = models.PositiveSmallIntegerField(
-        "Send email reminders every (days)", default=3)
-    last_reminder_sent = models.DateTimeField(null=True, blank=True)
 
     email_bounced = models.DateTimeField(null=True, blank=True)
 

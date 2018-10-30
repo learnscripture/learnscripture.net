@@ -1,8 +1,6 @@
 LS_PYTHON=%(VENV_ROOT)s/bin/python
 LS_MANAGE=%(SRC_ROOT)s/manage.py
 
-# Let's not send emails, and see if anyone notices...
-# 0          1,13 * * *  %(proj_user)s $LS_PYTHON $LS_MANAGE send_daily_account_emails
 0          2,14 * * *  %(proj_user)s $LS_PYTHON $LS_MANAGE metrics_aggregate
 30         1,11 * * *  %(proj_user)s $LS_PYTHON $LS_MANAGE create_metrics_daily
 20         3    * * *  %(proj_user)s $LS_PYTHON $LS_MANAGE create_awards_daily
