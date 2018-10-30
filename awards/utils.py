@@ -1,5 +1,5 @@
 from django.urls import reverse
-from django.utils.html import format_html
+from common.utils.html import link
 
 
 def award_url(award):
@@ -7,6 +7,4 @@ def award_url(award):
 
 
 def award_link(award):
-    return format_html("<a href='{0}'>{1}</a>",
-                       award_url(award),
-                       award.short_description())
+    return link(award_url(award), award.short_description())

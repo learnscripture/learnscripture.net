@@ -1,5 +1,6 @@
 from django.urls import reverse
-from django.utils.html import format_html
+
+from common.utils.html import link
 
 
 def group_url(group):
@@ -7,5 +8,4 @@ def group_url(group):
 
 
 def group_link(group):
-    return format_html("<a href='{0}'>{1}</a>",
-                       group_url(group), group.name)
+    return link(group_url(group), group.name)
