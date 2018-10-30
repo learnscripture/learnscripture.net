@@ -8,7 +8,7 @@ from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.utils.http import urlencode
 from django.utils.translation import LANGUAGE_SESSION_KEY
-from django_ftl import activate
+from django_ftl import override
 
 
 def identity_middleware(get_response):
@@ -34,8 +34,9 @@ def activate_language_from_request(get_response):
         else:
             language_code = request.session.get(LANGUAGE_SESSION_KEY, settings.LANGUAGE_CODE)
         request.LANGUAGE_CODE = language_code
-        activate(language_code)
-        return get_response(request)
+        with override(language_code, deactivate=True):
+            retval = get_response(request)
+            return retval
 
     return middleware
 
