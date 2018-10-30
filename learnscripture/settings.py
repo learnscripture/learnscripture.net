@@ -394,6 +394,11 @@ LOGGING = {
             'handlers': ['bibleservices'],
             'propagate': False,
         },
+        'django_ftl.message_errors': {
+            'level': 'ERROR',
+            'handlers': ['console'],
+            'propagate': False,
+        },
         'django_ftl.autoreload': {
             'level': 'DEBUG',
             'handlers': ['console'],
