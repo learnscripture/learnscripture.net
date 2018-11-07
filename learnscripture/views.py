@@ -1315,11 +1315,11 @@ def awards(request):
         else:
             discovered_awards.append(award)
 
-            return TemplateResponse(request, 'learnscripture/awards.html', {
-                'title': 'Badges',
-                'discovered_awards': discovered_awards,
-                'hidden_awards': hidden_awards,
-            })
+    return TemplateResponse(request, 'learnscripture/awards.html', {
+        'title': 'Badges',
+        'discovered_awards': discovered_awards,
+        'hidden_awards': hidden_awards,
+    })
 
 
 def award(request, award_slug):
