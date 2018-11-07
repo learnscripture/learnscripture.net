@@ -44,8 +44,8 @@
          {% endif %}
          >
       <div style="float: right; font-size: 120%;">
-        <a href="{% url 'user_stats' request_account.username %}" title="{% ftlmsg 'calendar-heatmap-your-stats' %}"><i class="icon-fw icon-stats"></i></a>
-        <a href="{% url 'user_verses' %}" title="{% ftlmsg 'calendar-heatmap-your-progress' %}"><i class="icon-fw icon-progress"></i></a>
+        <a href="{% url 'user_stats' request_account.username %}" title="{% ftlmsg 'heatmap-your-stats' %}"><i class="icon-fw icon-stats"></i></a>
+        <a href="{% url 'user_verses' %}" title="{% ftlmsg 'heatmap-your-progress' %}"><i class="icon-fw icon-progress"></i></a>
       </div>
       <div id="id-heatmap-controls">
         <button id="id-heatmap-previous"><i class="icon-left btn"></i></button>
@@ -57,9 +57,9 @@
         <div id="id-heatmap-div"></div>
       </div>
       <div id="id-streaks">
-        <div>{% ftlmsg 'calendar-heatmap-longest-streak' %}
+        <div>{% ftlmsg 'heatmap-longest-streak' %}
           <span id="id-biggest-streak" class="streak">&nbsp;</span></div>
-        <div>{% ftlmsg 'calendar-heatmap-current-streak' %}
+        <div>{% ftlmsg 'heatmap-current-streak' %}
           <span id="id-current-streak" class="streak">&nbsp;</span></div>
       </div>
       <form id="id-heatmap-stat-selector">
@@ -77,7 +77,7 @@
           </ul>
         </div>
       </form>
-      <p class="note">{% ftlmsg 'calendar-heatmap-timezone-note' %}</p>
+      <p class="note">{% ftlmsg 'heatmap-timezone-note' %}</p>
 
     </div>
   {% endif %}

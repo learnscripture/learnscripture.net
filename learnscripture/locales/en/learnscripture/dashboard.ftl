@@ -23,23 +23,6 @@ dashboard-remember-to-create-an-account-html =
     enables lots of additional features like badges, groups, leaderboards and
     statistics pages.
 
-# Tooltip title for 'Your stats' icon on heatmap
-calendar-heatmap-your-stats =
-    Your stats
-
-# Tooltip title for 'Your progress' icon on heatmap
-calendar-heatmap-your-progress =
-    Your progress
-
-calendar-heatmap-longest-streak =
-    Longest streak:
-
-
-calendar-heatmap-current-streak =
-    Current streak:
-
-calendar-heatmap-timezone-note =
-    The calendar and streaks work in the UTC/GMT timezone
 
 # Displayed as a title when there is an unfinished learning
 # session that the user can continue

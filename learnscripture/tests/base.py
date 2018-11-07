@@ -18,6 +18,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from accounts.models import Account, Identity, Notice
 from bibleverses.models import TextVersion, UserVerseStatus
+from events.models import Event
 from payments.models import Payment
 
 TESTS_SHOW_BROWSER = os.environ.get('TESTS_SHOW_BROWSER', '')
@@ -161,6 +162,7 @@ class TimeUtilsMixin(object):
             last_tested=F('last_tested') - delta,
             next_test_due=F('next_test_due') - delta,
         )
+        Event.objects.update(created=F('created') - delta)
 
 
 @unittest.skipIf(os.environ.get('SKIP_SELENIUM_TESTS'), "Skipping Selenium tests")

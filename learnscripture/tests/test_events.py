@@ -1,3 +1,7 @@
+from datetime import timedelta
+
+import django_ftl
+
 from comments.models import Comment
 from events.models import Event, EventType, GroupJoinedEvent, PointsMilestoneEvent
 
@@ -112,8 +116,28 @@ class EventTests(AccountTestMixin, TestBase):
         self.assertEqual(comment.group, group)
 
     def test_created_display(self):
-        _, event_account = self.create_account()
-        event = PointsMilestoneEvent(account=event_account, points=1000).save()
-        self.assertEqual(event.created_display(),
-                         "Just now")
-        # TODO - the rest
+        with django_ftl.override('en'):
+            _, event_account = self.create_account()
+            event = PointsMilestoneEvent(account=event_account, points=1000).save()
+            self.assertEqual(event.created_display(),
+                             "Just now")
+            self.move_clock_on(timedelta(seconds=5 * 60 + 5))
+            event.refresh_from_db()
+            self.assertEqual(event.created_display(),
+                             "5 minutes ago")
+            self.move_clock_on(timedelta(seconds=60 * 60))
+            event.refresh_from_db()
+            self.assertEqual(event.created_display(),
+                             "1 hour ago")
+            self.move_clock_on(timedelta(seconds=9 * 60 * 60))
+            event.refresh_from_db()
+            self.assertEqual(event.created_display(),
+                             "10 hours ago")
+            self.move_clock_on(timedelta(seconds=24 * 60 * 60))
+            event.refresh_from_db()
+            self.assertEqual(event.created_display(),
+                             "1 day ago")
+            self.move_clock_on(timedelta(seconds=24 * 60 * 60))
+            event.refresh_from_db()
+            self.assertEqual(event.created_display(),
+                             "2 days ago")

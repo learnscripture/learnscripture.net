@@ -1,3 +1,4 @@
+import math
 from datetime import timedelta
 
 from django.db import models
@@ -503,13 +504,19 @@ class Event(models.Model):
         return weight * recency * affinity
 
     def created_display(self):
-        # TODO - work out how to i18n this with Fluent
-        from django.utils.timesince import timesince
         now = timezone.now()
         diff = now - self.created
-        if diff.total_seconds() < 60:
-            return "Just now"
-        return timesince(self.created, now=now) + " ago"
+        seconds = float(diff.total_seconds())
+        if seconds < 60:
+            return t('events-time-since-just-now')
+        minutes = math.floor(seconds / 60)
+        if minutes < 60:
+            return t('events-time-since-minutes', dict(minutes=minutes))
+        hours = math.floor(minutes / 60)
+        if hours < 24:
+            return t('events-time-since-hours', dict(hours=hours))
+        days = math.floor(hours / 24)
+        return t('events-time-since-days', dict(days=days))
 
     def render_html(self, language_code):
         return self.event_logic.get_message_html(self, language_code)
