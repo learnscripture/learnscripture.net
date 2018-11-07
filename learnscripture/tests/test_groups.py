@@ -221,6 +221,10 @@ class GroupTests(AccountTestMixin, TestBase):
         self.assertEqual([i.group.name for i in member2.invitations.all()],
                          ["My group"])
 
+        self.assertEqual([m.message_html for m in member1.identity.notices.all()],
+                         ['<a href="/user/creator/">creator</a> invited you to join the group '
+                          '<a href="/groups/my-group/">My group</a>'])
+
         # hellbanned users are ignored when they invite others:
         creator_account.is_hellbanned = True
         creator_account.save()

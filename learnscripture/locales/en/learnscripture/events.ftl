@@ -66,5 +66,26 @@ events-comment-on-group-wall-html = { $username } posted a <a href="{ $comment_u
 events-you-have-new-comments-notification-html = You have new comments on <b><a href="{ $event_url }">your event</a></b> "{ $event }"
 
 # Notification sent to a user when someone comments on an event
-events-new-comments-notification = There are <b><a href="{ $event_url }">new comments</a></b> on the event "{ $event }"
+events-new-comments-notification-html = There are <b><a href="{ $event_url }">new comments</a></b> on the event "{ $event }"
+
+# Used as a friendly "when did this happen" timestamp for something done less than one minute ago
+events-time-since-just-now = Just now
+
+# Used as a friendly "when did this happen" timestamp for something done less than one hour ago
+events-time-since-minutes = { $minutes ->
+    [one]    1 minute ago
+   *[other]  { $minutes } minutes ago
+ }
+
+# Used as a friendly "when did this happen" timestamp for something done less than one day ago
+events-time-since-hours = { $hours ->
+    [one]    1 hour ago
+   *[other]  { $hours } hours ago
+ }
+
+# Used as a friendly "when did this happen" timestamp for something done one day ago or longer
+events-time-since-days = { $days ->
+    [one]    1 day ago
+   *[other]  { $days } days ago
+ }
 

@@ -15,7 +15,6 @@ from django.db import models
 from django.template import loader
 from django.utils import timezone
 from django.utils.functional import cached_property
-from django.utils.text import force_text
 
 from accounts import memorymodel
 from accounts.signals import (catechism_started, points_increase, scored_100_percent, verse_finished, verse_started,
@@ -26,21 +25,20 @@ from bibleverses.models import (InvalidVerseReference, MemoryStage, StageType, T
 from bibleverses.signals import verse_set_chosen
 from bibleverses.textutils import count_words
 from learnscripture.datastructures import make_choices
+from learnscripture.ftl_bundles import t, t_lazy
 from learnscripture.utils.cache import cache_results, clear_cache_results
 from scores.models import ScoreReason, Scores, TotalScore
 
 TestingMethod = make_choices('TestingMethod',
-                             [('FULL_WORDS', 'FULL_WORDS', 'Type whole word - most thorough'),
-                              ('FIRST_LETTER', 'FIRST_LETTER', 'Type first letter - faster'),
-                              ('ON_SCREEN', 'ON_SCREEN', 'Choose from word list - recommended for'
-                               ' handheld devices.' +
-                               ' Only available for English translations'),
+                             [('FULL_WORDS', 'FULL_WORDS', t_lazy('accounts-type-whole-word-testing-method')),
+                              ('FIRST_LETTER', 'FIRST_LETTER', t_lazy('accounts-type-first-letter-testing-method')),
+                              ('ON_SCREEN', 'ON_SCREEN', t_lazy('accounts-choose-from-list-testing-method')),
                               ])
 
-THEMES = [('calm', 'Slate'),
-          ('bubblegum', 'Bubblegum pink'),
-          ('bubblegum2', 'Bubblegum green'),
-          ('space', 'Space'),
+THEMES = [('calm', t_lazy('accounts-slate-theme')),
+          ('bubblegum', t_lazy('accounts-bubblegum-pink-theme')),
+          ('bubblegum2', t_lazy('accounts-bubblegum-green-theme')),
+          ('space', t_lazy('accounts-space-theme')),
           ]
 THEME_FONTS = [
     ('calm', ['https://fonts.googleapis.com/css?family=Cuprum&subset=latin-ext']),
@@ -53,9 +51,9 @@ DEFAULT_THEME = 'calm'
 DONT_NAG_NEW_USERS_FOR_MONEY_DAYS = 30
 
 HeatmapStatsType = make_choices('HeatmapStatsType',
-                                [('VERSES_STARTED', 'Items started'),
-                                 ('VERSES_TESTED', 'Items tested'),
-                                 ('COMBINED', 'Combined'),
+                                [('VERSES_STARTED', t_lazy('heatmap-items-started-stat')),
+                                 ('VERSES_TESTED', t_lazy('heatmap-items-tested-stat')),
+                                 ('COMBINED', t_lazy('heatmap-combined-stat')),
                                  ])
 
 
@@ -81,18 +79,21 @@ class AccountManager(UserManager):
 
 
 class Account(AbstractBaseUser):
-    username = models.CharField(max_length=100, blank=False, unique=True)
-    first_name = models.CharField(max_length=100, blank=True)
-    last_name = models.CharField(max_length=100, blank=True)
-    email = models.EmailField()
-    date_joined = models.DateTimeField(default=timezone.now)
+    username = models.CharField(t_lazy('accounts-username'), max_length=100, blank=False, unique=True)
+    first_name = models.CharField(t_lazy('accounts-first-name'), max_length=100, blank=True)
+    last_name = models.CharField(t_lazy('accounts-last-name'), max_length=100, blank=True)
+    email = models.EmailField(t_lazy('accounts-email'))
+    date_joined = models.DateTimeField(t_lazy('accounts-date-joined'), default=timezone.now)
     is_tester = models.BooleanField(default=False, blank=True)
     is_moderator = models.BooleanField(default=False, blank=True)
-    is_under_13 = models.BooleanField("Under 13 years old",
+    is_under_13 = models.BooleanField(t_lazy('accounts-under-13'),
                                       default=False, blank=True)
     is_active = models.BooleanField(default=True)
-    enable_commenting = models.BooleanField("Enable comment system",
+    enable_commenting = models.BooleanField(t_lazy('accounts-enable-commenting'),
                                             default=True, blank=True)
+
+    # Used internally only, not directly settable by users, therefore
+    # i18n not needed:
 
     # A hellbanned user is barred from interaction with other users, and any
     # visibility by other users, but they not aware of that. They see an
@@ -378,10 +379,10 @@ def send_payment_received_email(account, payment):
         'payment': payment,
         'account': account,
     }
-
-    body = loader.render_to_string("learnscripture/payment_received_email.txt", c)
-    subject = "LearnScripture.net - donation received"
-    mail.send_mail(subject, body, settings.SERVER_EMAIL, [account.email])
+    with django_ftl.override(account.default_language_code):
+        body = loader.render_to_string("learnscripture/payment_received_email.txt", c)
+        subject = t('emails-donation-received-subject')
+        mail.send_mail(subject, body, settings.SERVER_EMAIL, [account.email])
 
 
 class ActionChange(object):
@@ -400,25 +401,31 @@ class IdentityManager(models.Manager):
 
 
 class Identity(models.Model):
-    account = models.OneToOneField(Account, on_delete=models.CASCADE, null=True, blank=True, default=None)
-    date_created = models.DateTimeField(default=timezone.now)
+    account = models.OneToOneField(Account, verbose_name=t_lazy('accounts-account'),
+                                   on_delete=models.CASCADE, null=True, blank=True, default=None)
+    date_created = models.DateTimeField(t_lazy('accounts-date-created'), default=timezone.now)
 
     # Preferences
     default_bible_version = models.ForeignKey(TextVersion, on_delete=models.CASCADE,
+                                              verbose_name=t_lazy('accounts-default-bible-version'),
                                               null=True, blank=True)
     desktop_testing_method = models.CharField(max_length=20,
+                                              verbose_name=t_lazy('accounts-desktop-testing-method'),
                                               choices=TestingMethod.choice_list,
                                               default=TestingMethod.FULL_WORDS)
     touchscreen_testing_method = models.CharField(max_length=20,
+                                                  verbose_name=t_lazy('accounts-touchscreen-testing-method'),
                                                   choices=TestingMethod.choice_list,
                                                   default=TestingMethod.ON_SCREEN)
-    enable_animations = models.BooleanField(blank=True, default=True)
-    enable_sounds = models.BooleanField(blank=True, default=False)
-    enable_vibration = models.BooleanField("Vibrate on mistakes", blank=True, default=True,
-                                           help_text="Depends on device capabilities.")
-    interface_theme = models.CharField(max_length=30, choices=THEMES,
+    enable_animations = models.BooleanField(t_lazy('accounts-enable-animations'),
+                                            blank=True, default=True)
+    enable_sounds = models.BooleanField(t_lazy('accounts-enable-sounds'),
+                                        blank=True, default=False)
+    enable_vibration = models.BooleanField(t_lazy('accounts-enable-vibration'), blank=True, default=True,
+                                           help_text=t_lazy('accounts-enable-vibration.help-text'))
+    interface_theme = models.CharField(t_lazy('accounts-interface-theme'), max_length=30, choices=THEMES,
                                        default=DEFAULT_THEME)
-    interface_language = models.CharField("Interface language", max_length=10,
+    interface_language = models.CharField(t_lazy('accounts-interface-language'), max_length=10,
                                           choices=settings.LANGUAGES,
                                           default=settings.LANGUAGE_CODE)
 

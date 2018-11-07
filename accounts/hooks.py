@@ -1,20 +1,25 @@
+import django_ftl
 from django.dispatch import receiver
-from django.utils.html import format_html
 
 import accounts.tasks
 from comments.signals import new_comment
 from groups.signals import invitation_created
 from groups.utils import group_link
+from learnscripture.ftl_bundles import t
 from learnscripture.templatetags.account_utils import account_link
 
 
 @receiver(invitation_created)
 def invitation_created_receiver(sender, **kwargs):
     invitation = sender
-    msg = format_html("{0} invited you to join the group {1}",
-                      account_link(invitation.created_by),
-                      group_link(invitation.group))
-    invitation.account.add_html_notice(msg)
+    receiver_account = invitation.account
+    with django_ftl.override(receiver_account.default_language_code):
+        msg = t('accounts-invitation-received-html',
+                dict(
+                    user=account_link(invitation.created_by),
+                    group=group_link(invitation.group))
+                )
+        invitation.account.add_html_notice(msg)
 
 
 @receiver(new_comment)

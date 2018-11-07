@@ -43,7 +43,7 @@ def notify_about_comment(event, comment, account):
                     dict(event_url=event.get_absolute_url(),
                          event=event.render_html(account.default_language_code)))
         else:
-            msg = t('events-new-comments-notification',
+            msg = t('events-new-comments-notification-html',
                     dict(event_url=event.get_absolute_url(),
                          event=event.render_html(account.default_language_code)))
 

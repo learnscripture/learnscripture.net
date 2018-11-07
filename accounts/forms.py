@@ -1,14 +1,16 @@
 from django import forms
 
+from learnscripture.ftl_bundles import t_lazy
+
 from .models import Account, Identity, TestingMethod
 
 
 class PreferencesForm(forms.ModelForm):
-    desktop_testing_method = forms.ChoiceField(label="Testing method",
+    desktop_testing_method = forms.ChoiceField(label=t_lazy('accounts-testing-method'),
                                                widget=forms.RadioSelect,
                                                initial=TestingMethod.FULL_WORDS,
                                                choices=TestingMethod.choice_list)
-    touchscreen_testing_method = forms.ChoiceField(label="Testing method",
+    touchscreen_testing_method = forms.ChoiceField(label=t_lazy('accounts-testing-method'),
                                                    widget=forms.RadioSelect,
                                                    initial=TestingMethod.ON_SCREEN,
                                                    choices=TestingMethod.choice_list)
