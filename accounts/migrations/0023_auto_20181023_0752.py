@@ -36,7 +36,7 @@ def forwards(apps, schema_editor):
         else:
             points = None
 
-        with django_ftl.override(account.default_language_code):
+        with django_ftl.override("en"):  # Up to now everyone is using English
             notice.message_html = new_award_msg_html(award, account, points=points)
         notice.save()
 
