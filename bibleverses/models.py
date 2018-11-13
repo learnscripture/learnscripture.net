@@ -14,6 +14,7 @@ from jsonfield import JSONField
 
 from accounts import memorymodel
 from learnscripture.datastructures import lazy_dict_like, make_choices
+from learnscripture.ftl_bundles import t, t_lazy
 from learnscripture.utils.iterators import intersperse
 
 from .books import get_bible_book_name, get_bible_book_number
@@ -581,14 +582,14 @@ class VerseSetManager(models.Manager):
 
 
 class VerseSet(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(t_lazy("versesets-name"), max_length=255)
     slug = AutoSlugField(populate_from='name', unique=True)
-    description = models.TextField(blank=True)
-    additional_info = models.TextField(blank=True)
+    description = models.TextField(t_lazy('versesets-description'), blank=True)
+    additional_info = models.TextField(t_lazy('versesets-additional-info'), blank=True)
     set_type = models.CharField(max_length=20,
                                 choices=VerseSetType.choice_list)
 
-    public = models.BooleanField(default=False)
+    public = models.BooleanField(t_lazy('versesets-public'), default=False)
     breaks = models.TextField(default='', blank=True)
 
     popularity = models.PositiveIntegerField(default=0)
@@ -1063,10 +1064,10 @@ def fetch_parsed_reference(version, parsed_ref, max_length=MAX_VERSE_QUERY_SIZE)
                 used_ids.add(real.id)
 
     if len(retval) == 0:
-        raise InvalidVerseReference("No verses matched '%s'." % parsed_ref.canonical_form())
+        raise InvalidVerseReference(t('bibleverses-no-verses-matched', dict(ref=parsed_ref.canonical_form())))
 
     if len(retval) > max_length:
-        raise TooManyVerses("References that span more than %d verses are not allowed in this context." % max_length)
+        raise TooManyVerses(t('bibleverses-too-many-verses', dict(allowed=max_length)))
 
     # Ensure back references to version are set, so we don't need extra DB lookup
     for v in retval:
@@ -1282,7 +1283,7 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
     search_query = query  # Leave alone, postgres to_tsquery does it right.
 
     if ref_query == '':
-        raise InvalidVerseReference("Please enter a query term or reference")
+        raise InvalidVerseReference(t('bibleverses-no-query-term'))
 
     parsed_ref = parse_unvalidated_localized_reference(
         version.language_code,
@@ -1299,7 +1300,7 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
                                   parsed_ref=parsed_result_ref)]
 
     if not allow_searches:
-        raise InvalidVerseReference("Verse reference not recognized")
+        raise InvalidVerseReference(t('bibleverses-verse-reference-not-recognized'))
 
     # Do a search:
     searcher = get_search_service(version.slug)

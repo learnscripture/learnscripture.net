@@ -54,7 +54,7 @@ def normalize_reference_input_turkish(query):
     # Strategy:
     #  - for codepoints that can be decomposed into accents,
     #    remove the accents.
-    #  - replace ı with ı
+    #  - replace ı with i
     #  - throw everything else that is not ascii away.
 
     query = unicodedata.normalize('NFKD', query)
