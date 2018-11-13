@@ -501,8 +501,3 @@ class Award(models.Model):
 
     def has_levels(self):
         return self.award_detail.has_levels
-
-    def delete(self, **kwargs):
-        from awards.signals import lost_award
-        lost_award.send(sender=self)
-        return super(Award, self).delete(**kwargs)
