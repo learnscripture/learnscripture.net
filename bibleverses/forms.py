@@ -1,6 +1,7 @@
 from django import forms
 
 from bibleverses.models import VerseSet
+from learnscripture.ftl_bundles import t
 
 
 class VerseSetForm(forms.ModelForm):
@@ -12,7 +13,7 @@ class VerseSetForm(forms.ModelForm):
         name = self.cleaned_data['name']
         name = name.strip()
         if name == '':
-            raise forms.ValidationError("This field is required")
+            raise forms.ValidationError(t('forms-field-required'))
         return name
 
 
@@ -20,4 +21,3 @@ for n in ['description', 'additional_info']:
     f = VerseSetForm.base_fields[n].widget.attrs
     del f['cols']
     f['rows'] = 3
-VerseSetForm.base_fields['public'].label = "Make public (can't be undone)"

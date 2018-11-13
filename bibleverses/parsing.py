@@ -3,6 +3,7 @@ import re
 import attr
 from parsy import ParseError, char_from, generate, regex, string, string_from, whitespace
 
+from learnscripture.ftl_bundles import t
 from learnscripture.utils.cache import memoize_function
 
 from .books import (get_bible_book_abbreviation_map, get_bible_book_name, get_bible_book_number, get_bible_books,
@@ -33,13 +34,13 @@ class ParsedReference(object):
             self.end_verse = self.start_verse
         if self.end_chapter is not None:
             if self.end_chapter < self.start_chapter:
-                raise InvalidVerseReference("end chapter {0} is before start chapter {1}"
-                                            .format(self.end_chapter, self.start_chapter))
+                raise InvalidVerseReference(t('bibleverses-invalid-reference-end-chapter-before-start-chapter',
+                                              dict(end=self.end_chapter, start=self.start_chapter)))
             if self.end_chapter == self.start_chapter:
                 if self.end_verse is not None:
                     if self.end_verse < self.start_verse:
-                        raise InvalidVerseReference("end verse {0} is before start verse {1}"
-                                                    .format(self.end_verse, self.start_verse))
+                        raise InvalidVerseReference(t('bibleverses-invalid-reference-end-verse-before-start-verse',
+                                                      dict(end=self.end_verse, start=self.start_verse)))
 
     def canonical_form(self):
         # Reverse of bible_reference_strict
