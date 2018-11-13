@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import re
 
+import django_ftl
 import pyquery
 from django.db import migrations
 
@@ -15,7 +16,6 @@ def forwards(apps, schema_editor):
     from awards.hooks import new_award_msg_html
 
     Notice = apps.get_model('accounts.Notice')
-    Account = apps.get_model('accounts.Account')
 
     for notice in Notice.objects.all().filter(message_html__contains="data-award-id"):
         d = pyquery.PyQuery(notice.message_html)
@@ -29,15 +29,15 @@ def forwards(apps, schema_editor):
 
             continue
 
-        account_username = d.find('[data-account-username]')[0].attrib['data-account-username']
-        account = Account.objects.get(username=account_username)
+        account = notice.for_identity.account
         if 'Points bonus' in notice.message_html:
             m = re.search(r'Points bonus: (\d+)', notice.message_html)
             points = int(m.groups()[0])
         else:
             points = None
 
-        notice.message_html = new_award_msg_html(award, account, points=points)
+        with django_ftl.override(account.default_language_code):
+            notice.message_html = new_award_msg_html(award, account, points=points)
         notice.save()
 
 

@@ -11,7 +11,7 @@ main = Bundle(['learnscripture/site.ftl',
                'learnscripture/accounts.ftl',
                'learnscripture/emails.ftl',
                'learnscripture/stats.ftl',
-               ],
+               'learnscripture/awards.ftl'],
               default_locale='en',
               use_isolating=False,
               require_activate=True)
