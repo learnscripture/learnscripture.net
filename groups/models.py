@@ -4,6 +4,7 @@ from django.db.models import Count
 from django.utils import timezone
 
 from accounts.models import Account, clear_friendship_weight_cache
+from learnscripture.ftl_bundles import t_lazy
 
 
 class GroupManager(models.Manager):
@@ -42,9 +43,9 @@ class GroupManager(models.Manager):
 
 
 class Group(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(t_lazy('groups-name'), max_length=255)
     slug = AutoSlugField(populate_from='name', unique=True)
-    description = models.TextField(blank=True)
+    description = models.TextField(t_lazy('groups-description'), blank=True)
     created = models.DateTimeField(default=timezone.now)
     created_by = models.ForeignKey(Account, on_delete=models.CASCADE,
                                    related_name='groups_created')
