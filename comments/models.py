@@ -1,13 +1,11 @@
 from django.db import models
 from django.utils import timezone
-from django.utils.html import format_html, linebreaks, urlize
+from django.utils.html import linebreaks, urlize
 from django.utils.safestring import mark_safe
 
 from accounts.models import Account
 from events.models import Event, get_absolute_url_for_event_comment, get_absolute_url_for_group_comment
 from groups.models import Group
-from groups.utils import group_link
-from learnscripture.templatetags.account_utils import account_link
 
 
 def format_comment_message(message):
@@ -38,12 +36,3 @@ class Comment(models.Model):
             return get_absolute_url_for_event_comment(self.event, self.id)
         else:
             return get_absolute_url_for_group_comment(self.event, self.id, self.group.slug)
-
-    def get_subject_html(self):
-        """
-        Returns a desription of what the comment is attached to, as HTML fragment
-        """
-        if self.event is not None:
-            return format_html("{0}'s activity", account_link(self.event.account))
-        elif self.group is not None:
-            return format_html("{0}'s wall", group_link(self.group))
