@@ -6,7 +6,7 @@ from django.utils.html import format_html
 
 import awards.tasks
 from accounts.signals import new_account, scored_100_percent, verse_tested
-from awards.signals import lost_award, new_award
+from awards.signals import new_award
 from bibleverses.signals import public_verse_set_created, verse_set_chosen
 from common.utils.html import link
 from groups.signals import group_joined
@@ -72,20 +72,6 @@ def new_award_msg_html(award, account, points=None):
         tell_people_link
     )
     return format_html('{0} {1} {2}'.format(img_html, msg, tell_people_wrapper))
-
-
-@receiver(lost_award)
-def notify_about_lost_award(sender, **kwargs):
-    award = sender
-    account = award.account
-    msg = """<img src="%s%s"> You've lost <a href="%s">%s</a>."""
-
-    msg = msg % (settings.STATIC_URL,
-                 award.image_small(),
-                 reverse('award', args=(award.award_detail.slug(),)),
-                 award.short_description())
-
-    account.identity.add_html_notice(msg)
 
 
 @receiver(verse_set_chosen)
