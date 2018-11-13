@@ -1,3 +1,4 @@
+import django_ftl
 from django.conf import settings
 from django.dispatch import receiver
 from django.urls import reverse
@@ -7,58 +8,70 @@ import awards.tasks
 from accounts.signals import new_account, scored_100_percent, verse_tested
 from awards.signals import lost_award, new_award
 from bibleverses.signals import public_verse_set_created, verse_set_chosen
+from common.utils.html import link
 from groups.signals import group_joined
+from learnscripture.ftl_bundles import t
 
 
 @receiver(new_award)
 def notify_about_new_award(sender, **kwargs):
     award = sender
     account = award.account
-    msg_html = new_award_msg_html(award, account, points=kwargs.get('points', None))
-    account.identity.add_html_notice(msg_html)
+    with django_ftl.override(account.default_language_code):
+        msg_html = new_award_msg_html(award, account, points=kwargs.get('points', None))
+        account.identity.add_html_notice(msg_html)
 
 
 def new_award_msg_html(award, account, points=None):
-    if award.level > 1:
-        template = """<img src="{0}{1}"> You've levelled up on one of your badges: <a href="{2}">{3}</a>. """
-    else:
-        template = """<img src="{0}{1}"> You've earned a new badge: <a href="{2}">{3}</a>. """
-
+    img_html = '<img src="{0}{1}">'.format(
+        settings.STATIC_URL,
+        award.image_small(),
+    )
     award_url = reverse('user_stats', args=(account.username,))
+    award_link = link(award_url, award.short_description())
 
-    msg = format_html(template,
-                      settings.STATIC_URL,
-                      award.image_small(),
-                      award_url,
-                      award.short_description())
+    if award.level > 1:
+        msg = t('awards-levelled-up-html', dict(award=award_link))
+    else:
+        msg = t('awards-new-award-html', dict(award=award_link))
+
     if points is not None and points > 0:
-        msg = msg + format_html(' Points bonus: {0}. ', points)
+        points_msg = t('awards-points-bonus', dict(points=points))
+        msg = format_html("{0} {1}".format(msg, points_msg))
 
     # Facebook: this notice could be displayed on any page, and we want the
     # 'redirect_uri' parameter to take them back to where they were.  So we
     # render the link to facebook using javascript, embedding necessary data
     # using data attributes.
-    msg = msg + format_html('<span class="broadcast"'
-                            ' data-link="{0}"'
-                            ' data-picture="{1}{2}"'
-                            ' data-award-id="{3}"'
-                            ' data-award-level="{4}"'
-                            ' data-award-name="{5}"'
-                            ' data-account-username="{6}"'
-                            ' data-caption="{7}"'
-                            '>Tell people: {8} {9}</span> ',
-                            award_url,
-                            settings.STATIC_URL,
-                            award.image_medium(),
-                            award.id,  # not needed at the moment
-                            award.level,
-                            award.short_description(),
-                            account.username,
-                            "I just earned a badge: {0}".format(award.short_description()),
-                            format_html('<a data-facebook-link><i class="icon-facebook"></i> Facebook</a>'),
-                            format_html('<a data-twitter-link><i class="icon-twitter"></i> Twitter</a>'),
-                            )
-    return msg
+    tell_people_link = t('awards-tell-people-html',
+                         dict(facebook=format_html('<a data-facebook-link><i class="icon-facebook"></i> Facebook</a>'),
+                              twitter=format_html('<a data-twitter-link><i class="icon-twitter"></i> Twitter</a>'),
+                              ))
+
+    caption = t('awards-social-media-default-message',
+                dict(award=award.short_description()))
+
+    tell_people_wrapper = format_html(
+        '<span class="broadcast"'
+        ' data-link="{0}"'
+        ' data-picture="{1}{2}"'
+        ' data-award-id="{3}"'
+        ' data-award-level="{4}"'
+        ' data-award-name="{5}"'
+        ' data-account-username="{6}"'
+        ' data-caption="{7}"'
+        '>{8}</span>',
+        award_url,
+        settings.STATIC_URL,
+        award.image_medium(),
+        award.id,  # not needed at the moment
+        award.level,
+        award.short_description(),
+        account.username,
+        caption,
+        tell_people_link
+    )
+    return format_html('{0} {1} {2}'.format(img_html, msg, tell_people_wrapper))
 
 
 @receiver(lost_award)

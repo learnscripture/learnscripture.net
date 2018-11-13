@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import re
 from datetime import timedelta
 
@@ -18,6 +19,8 @@ from .base import AccountTestMixin, FullBrowserTest, TestBase, WebTestBase
 
 
 class AccountTests(AccountTestMixin, TestBase):
+    maxDiff = None
+
     def test_password(self):
         acc = Account()
         acc.set_password('mypassword')
@@ -103,6 +106,16 @@ class AccountTests(AccountTestMixin, TestBase):
 
         # Check 'Event' created
         self.assertTrue(Event.objects.filter(event_type=EventType.AWARD_RECEIVED).count() > 1)
+
+        # Check notices
+        self.assertEqual([m.message_html for m in account.identity.notices.order_by('created')],
+                         ['<img src="/static/img/awards/award_ACE_level_1_50.png"> You\'ve earned a new badge: <a href="/user/t%C3%ABst1/">Ace - level 1</a>. Points bonus: 1,000. <span class="broadcast" data-link="/user/t%C3%ABst1/" data-picture="/static/img/awards/award_ACE_level_1_100.png" data-award-id="{0}" data-award-level="1" data-award-name="Ace - level 1" data-account-username="tëst1" data-caption="I just earned a badge: Ace - level 1">Tell people: <a data-facebook-link><i class="icon-facebook"></i> Facebook</a> <a data-twitter-link><i class="icon-twitter"></i> Twitter</a></span>'.format(
+                             account.awards.get(award_type=AwardType.ACE, level=1).id),
+                          '<img src="/static/img/awards/award_ACE_level_2_50.png"> You\'ve levelled up on one of your badges: <a href="/user/t%C3%ABst1/">Ace - level 2</a>. Points bonus: 2,000. <span class="broadcast" data-link="/user/t%C3%ABst1/" data-picture="/static/img/awards/award_ACE_level_2_100.png" data-award-id="{0}" data-award-level="2" data-award-name="Ace - level 2" data-account-username="tëst1" data-caption="I just earned a badge: Ace - level 2">Tell people: <a data-facebook-link><i class="icon-facebook"></i> Facebook</a> <a data-twitter-link><i class="icon-twitter"></i> Twitter</a></span>'.format(
+                             account.awards.get(award_type=AwardType.ACE, level=2).id),
+                          '<img src="/static/img/awards/award_ACE_level_3_50.png"> You\'ve levelled up on one of your badges: <a href="/user/t%C3%ABst1/">Ace - level 3</a>. Points bonus: 4,000. <span class="broadcast" data-link="/user/t%C3%ABst1/" data-picture="/static/img/awards/award_ACE_level_3_100.png" data-award-id="{0}" data-award-level="3" data-award-name="Ace - level 3" data-account-username="tëst1" data-caption="I just earned a badge: Ace - level 3">Tell people: <a data-facebook-link><i class="icon-facebook"></i> Facebook</a> <a data-twitter-link><i class="icon-twitter"></i> Twitter</a></span>'.format(
+                             account.awards.get(award_type=AwardType.ACE, level=3).id),
+                          ])
 
     def test_award_action_points_fully_learnt(self):
         _, a = self.create_account()
