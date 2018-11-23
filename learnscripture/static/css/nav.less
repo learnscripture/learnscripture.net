@@ -8,7 +8,7 @@
     // We need a fixed height, because this element has 'position: fixed'
     // and we need to allow for that in margins on top of remaining content.
     height: @topbarHeight;
-    z-index: 1;
+    z-index: 100;
 }
 
 nav.topbar {
@@ -94,7 +94,7 @@ nav.topbar {
         overflow-y: auto;
         overflow-x: hidden;
         line-height: @topbarHeight;
-        z-index: 1;
+        z-index: 100;
 
         li {
             display: block;
@@ -109,7 +109,7 @@ nav.topbar {
             border-color: var(--topTextColor);
             display: block;
             position: absolute;
-            z-index: 2;
+            z-index: 101;
             right: 6px;
             top: 6px;
         }

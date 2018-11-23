@@ -8,7 +8,11 @@
       <td>{{ verse.title }}
         <a class="btn verse-popup-btn" href="#" data-localized-reference="{{ verse.localized_reference }}" data-version="{{ verse.version.slug }}" data-title="{{ verse.title }}">Options</a></td>
       <td>{{ verse.version.slug }}</td>
-      <td><img class="stars" src="{{ STATIC_URL }}img/strength_{{ verse.simple_strength }}.png"></td>
+      <td>
+        <div class="stars-cont">
+          <img class="stars stars-base" src="{{ STATIC_URL }}img/strength_0.png"><img style="clip-path: inset(0px calc((1 - {{ verse.scaled_strength }}) * var(--stars-width)) 0px 0px)" class="stars stars-over" title="{{ verse.scaled_strength_percentage }}%" src="{{ STATIC_URL }}img/strength_10.png">
+        </div>
+      </td>
     </tr>
   {% endifchanged %}
 {% endfor %}

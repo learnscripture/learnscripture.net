@@ -1,5 +1,34 @@
+.stars-cont {
+    position: relative; // establish container for stars
+
+    // NB also generated HTML that refers to these variables. Might be a nicer
+    // way to do this without hard-coding sizes here, but it escapes me at the
+    // moment.
+    --stars-width: 160px;
+    --stars-height: 26px;
+}
+
+.stars-cont, img.stars {
+    width: var(--stars-width);
+    height: var(--stars-height);
+}
+
+img.stars {
+    position: absolute;
+    left: 0;
+}
+
+img.stars-base {
+    z-index: 1;
+}
+
+img.stars-over {
+    z-index: 2;
+}
+
 @media screen and (max-width: @narrowWidthBreak2) {
-    img.stars {
-        width: 80px;
+    .stars-cont {
+        --stars-width: 80px;
+        --stars-height: 13px;
     }
 }
