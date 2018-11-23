@@ -889,11 +889,8 @@ class UserVerseStatus(models.Model):
         # the purposes of user presentation.
         return min(self.strength / memorymodel.LEARNT, 1.0)
 
-    def simple_strength(self):
-        """
-        Returns the strength normalized to a 0 to 10 scale for presentation in UI.
-        """
-        return int(math.floor(self.scaled_strength() * 10))
+    def scaled_strength_percentage(self):
+        return math.floor(self.scaled_strength() * 100)
 
     @cached_property
     def passage_localized_reference(self):
