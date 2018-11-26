@@ -1,4 +1,6 @@
 {# Hidden stuff #}
+{% load ftl %}
+{% load capture_tags %}
 
 <div id="id-add-comment" class="hide">
   <div class="comment-box-wrapper">
@@ -8,19 +10,19 @@
           <textarea class="comment-box" rows="1"></textarea>
           <div>
             <button type="button" class="btn primary add-comment-btn">
-              Post <i class="icon-public icon-replace" title="Public action"></i>
+              {% ftlmsg 'comments-post-button' %} <i class="icon-public icon-replace" title="{% ftlmsg 'site-public-action' %}"></i>
             </button><button type="button" class="btn cancel-comment-btn">
-              Cancel
+              {% ftlmsg 'comments-cancel-button' %}
             </button>
           </div>
         </div>
         <div class="warning-note">
-          This message will be public. Please do not include any sensitive information, like
-          your address, in this message.
+          {% ftlmsg 'comments-public-message-warning' %}
         </div>
       {% endif %}
     {% else %}
-      <div>You must be <a href='{% url "login" %}?next={{ request.get_full_path|urlencode }}'>signed in</a> to add comments.</div>
+      {% capture as login_and_redirect_url silent %}{% url "login" %}?next={{ request.get_full_path|urlencode }}{% endcapture %}
+      <div>{% ftlmsg 'comments-login-to-add-comments-html' login_url=login_and_redirect_url %}</div>
     {% endif %}
   </div>
 </div>

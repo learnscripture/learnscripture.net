@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from django_ftl import override
+
 from bibleverses.languages import LANGUAGE_CODE_EN, LANGUAGE_CODE_TR
 from bibleverses.models import TextVersion, VerseSet, VerseSetType, quick_find
 
@@ -102,7 +104,7 @@ class QuickFindTests(SearchTestsMixin, TestBase):
 
     def test_quick_find_text(self):
         version = self.KJV
-        results = quick_find("beginning created", version=version)
+        results, more = quick_find("beginning created", version=version)
         self.assertEqual(results[0].verses[0].localized_reference,
                          "Genesis 1:1")
 
@@ -111,46 +113,46 @@ class QuickFindTests(SearchTestsMixin, TestBase):
         # Testing for handling accents and stemming correctly.
         # 'siniz' should be dropped, and word with 'iz' ending
         # should be found.
-        results = quick_find("övünebilirsiniz", version=version)
+        results, more = quick_find("övünebilirsiniz", version=version)
         self.assertEqual(results[0].verses[0].localized_reference,
                          "Romalılar 3:27")
         self.assertIn("övünebiliriz", results[0].text)
 
     def test_quick_find_escape(self):
         version = self.KJV
-        results = quick_find("beginning & | created", version=version)
+        results, more = quick_find("beginning & | created", version=version)
         self.assertEqual(results[0].verses[0].localized_reference,
                          "Genesis 1:1")
-        results = quick_find("Genesissss 1:1", version=version)
+        results, more = quick_find("Genesissss 1:1", version=version)
         self.assertEqual(len(results), 0)
-        results = quick_find("Hello!", version=version)
+        results, more = quick_find("Hello!", version=version)
         self.assertEqual(len(results), 0)
 
     def test_quick_find_song_of_solomon(self):
         version = self.KJV
-        results = quick_find('Song of Solomon 1:1', version)
+        results, more = quick_find('Song of Solomon 1:1', version)
         self.assertEqual(results[0].verses[0].localized_reference,
                          "Song of Solomon 1:1")
 
     def test_quick_find_numbered_book(self):
         version = self.KJV
-        results = quick_find("1 Corinthians 1:3", version=version)
+        results, more = quick_find("1 Corinthians 1:3", version=version)
         self.assertEqual(results[0].verses[0].localized_reference,
                          "1 Corinthians 1:3")
 
     def test_quick_find_book_names_as_searches(self):
         # Need to be able to find words that happen to be in the names of books.
         version = self.NET
-        results = quick_find("James", version, allow_searches=True)
+        results, more = quick_find("James", version, allow_searches=True)
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0].verses[0].localized_reference,
                          "Matthew 4:21")
 
     def test_quick_find_passage_mode(self):
         version = self.KJV
-        self.assertNotEqual(None, quick_find("Genesis 1:1-2:2", version, allow_searches=False,
-                                             max_length=1000,
-                                             ))
+        results, more = quick_find("Genesis 1:1-2:2", version, allow_searches=False,
+                                   max_length=1000)
+        self.assertNotEqual(None, results)
 
     def test_quick_find_merged_verse(self):
         version = self.TCL02
@@ -163,7 +165,8 @@ class QuickFindTests(SearchTestsMixin, TestBase):
                 ]
         for ref, corrected_ref, start_verse, end_verse, length, q in refs:
             with self.assertNumQueries(q):
-                results = quick_find(ref, version)
+                with override('en'):
+                    results, more = quick_find(ref, version)
                 v = results[0]
                 # v is always a VerseSearchResult for quick_find results
                 self.assertEqual(v.localized_reference, corrected_ref, "For ref " + ref)

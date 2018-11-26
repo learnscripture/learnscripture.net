@@ -2,17 +2,18 @@
 
 {% load markup_tags %}
 {% load account_utils %}
+{% load ftl %}
 
 {% block leftcolumn %}
 
   {% if group.description %}
-    <h2>Description</h2>
+    <h2>{% ftlmsg 'groups-details-description-subtitle' %}</h2>
 
     {{ group.description|apply_markup:"restructuredtext" }}
   {% endif %}
 
-  <h2>Recent comments</h2>
-  <p>Most recent comments first - <a href="{% url 'group_wall' group.slug %}">see all</a>.</p>
+  <h2>{% ftlmsg 'groups-details-comments-subtitle' %}</h2>
+  <p>{% ftlmsg 'groups-details-comments-order' %} <a href="{% url 'group_wall' group.slug %}">{% ftlmsg 'groups-details-comments-see-all' %}</a></p>
 
   <div class="groupcomments" data-group-id="{{ group.id }}">
     <div class="commentblock"
@@ -29,60 +30,55 @@
 
   {% include "learnscripture/comment_common_inc.html" %}
 
-  <h2>Group info</h2>
+  <h2>{% ftlmsg 'groups-details-group-info-subtitle' %}</h2>
 
   <ul>
     {% if group.public %}
-      <li><b>Public</b>: the group and its member list are visible to
-        everyone.</li>
+      <li>{% ftlmsg 'groups-details-public-explanation-html' %}</li>
     {% else %}
-      <li><b>Private</b>: the group and its member list are visible only to
-        members and invited users.</li>
+      <li>{% ftlmsg 'groups-details-private-explanation-html' %}</li>
     {% endif %}
 
     {% if group.open %}
-      <li><b>Open</b>: anyone may join.</li>
+      <li>{% ftlmsg 'groups-details-open-explanation-html' %}</li>
     {% else %}
-      <li><b>Closed</b>: only invited users can join.</li>
+      <li>{% ftlmsg 'groups-details-closed-explanation-html' %}</li>
     {% endif %}
 
-    <li><a href="{% url 'group_leaderboard' group.slug %}">Leaderboard for {{ group.name }} <i class="icon-leaderboard"></i></a></li>
+    <li><a href="{% url 'group_leaderboard' group.slug %}">{% ftlmsg 'leaderboards-for-group-link' group_name=group.name %} <i class="icon-leaderboard"></i></a></li>
   </ul>
 
 
-  <h2>Your status</h2>
+  <h2>{% ftlmsg 'groups-details-your-status-subtitle' %}</h2>
 
   <div class="actionset">
     {% if in_group %}
 
       <form action="" method="POST">
         {% csrf_token %}
-        <input type="submit" name="leave" class="btn" value="Leave group" />
+        <button type="submit" name="leave" class="btn">{% ftlmsg 'groups-details-leave-button' %}</button>
       </form>
-      <p>You are a member of this group.</p>
+      <p>{% ftlmsg 'groups-details-status-member' %}</p>
 
     {% else %}
       {% if can_join %}
         <form action="" method="POST">
           {% csrf_token %}
           {% if group.public %}
-            <i title="This action is public" class="icon-public icon-replace"></i>
+            <i title="{% ftlmsg 'site-public-action' %}" class="icon-public icon-replace"></i>
           {% endif %}
 
-          <input type="submit" name="join" class="primary btn join-group-btn needs-account" value="Join group" />
+          <button type="submit" name="join" class="primary btn join-group-btn needs-account">{% ftlmsg 'groups-details-join-button' %}</button>
         </form>
 
       {% endif %}
 
-      <p>You are not a member of this group.</p>
+      <p>{% ftlmsg 'groups-details-status-not-member' %}</p>
 
       {% if can_join %}
-        <p>By joining this group, you will join the <b>leaderboard</b> for the group, and the
-          <b>news stream</b> on your dashboard will be customised to prefer news from
-          the people in this group.</p>
+        <p>{% ftlmsg 'groups-details-join-explanation-html' %}</p>
 
-        <p>Joining groups is a public action, unless the group is private and remains
-          private.</p>
+        <p>{% ftlmsg 'groups-details-join-privacy-note' %}</p>
       {% endif %}
 
     {% endif %}
@@ -90,7 +86,7 @@
   </div>
 
 
-  <h2>Members</h2>
+  <h2>{% ftlmsg 'groups-details-members-subtitle' %}</h2>
 
   {% with members=group.active_members %}
     {% if members %}
@@ -100,25 +96,25 @@
         {% endfor %}
       </ul>
     {% else %}
-      <p>No members in this group</p>
+      <p>{% ftlmsg 'groups-details-members-empty' %}</p>
     {% endif %}
   {% endwith %}
 {% endblock %}
 
 {% block rightcolumn %}
-  <h3>See also:</h3>
+  <h3>{% ftlmsg 'site-see-also-header' %}</h3>
   <ul>
-    <li><a href="{% url 'group_wall' group.slug %}">Group wall <i class="icon-comment"></i></a></li>
-    <li><a href="{% url 'group_leaderboard' group.slug %}">Leaderboard <i class="icon-leaderboard"></i></a></li>
+    <li><a href="{% url 'group_wall' group.slug %}">{% ftlmsg 'groups-wall-page-link' %} <i class="icon-comment"></i></a></li>
+    <li><a href="{% url 'group_leaderboard' group.slug %}">{% ftlmsg 'leaderboards-leaderboard' %} <i class="icon-leaderboard"></i></a></li>
     {% if can_edit %}
-      <li><a href="{% url 'edit_group' group.slug %}">Edit this group</a></li>
+      <li><a href="{% url 'edit_group' group.slug %}">{% ftlmsg 'groups-edit-group-button' %}</a></li>
     {% endif %}
-    <li><a href="{% url 'groups' %}">Other groups</a></li>
+    <li><a href="{% url 'groups' %}">{% ftlmsg 'groups-other-groups-link' %}</a></li>
   </ul>
 
-  <h3>Group stats</h3>
+  <h3>{% ftlmsg 'groups-statistics-subtitle' %}</h3>
 
-  <p>Created by {{ group.created_by|account_link }}, on {{ group.created|date:"d M Y" }}.</p>
+  <p>{% ftlmsg 'groups-group-created-by-and-when-html' creator=group.created_by|account_link created_date=group.created %}</p>
 
 
   {{ block.super }}

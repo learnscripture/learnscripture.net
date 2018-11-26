@@ -190,7 +190,6 @@ learn-see-again-days = { $days ->
                           *[other]  { $days } days
                         }
 
-# Displayed when a verse will be seen again after between 1 and 8 weeks
 # $weeks is the number of weeks
 learn-see-again-weeks = { $weeks ->
                            [one]    1 week

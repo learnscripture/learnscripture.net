@@ -97,7 +97,7 @@ def fix_esv_bugs(items, needed_localized_references):
             items[ref] = MISSING_ESV[ref]
 
 
-def search_esv(version, words):
+def search_esv(version, words, page, page_size):
     from django.conf import settings
     from bibleverses.models import VerseSearchResult
 
@@ -109,11 +109,11 @@ def search_esv(version, words):
               'include-footnotes=0',
               'include-subheadings=0',
               'include-headings=0',
-              'results-per-page=10',
+              'page=%d' % (page + 1),
+              'results-per-page=%d' % page_size,
               ]
 
     result_text = do_esv_api("query", params)
-
     # Split into results
     pq = PyQuery(result_text)
     results = []
@@ -136,7 +136,12 @@ def search_esv(version, words):
         verse.text_saved = text
         verse_list.append(highlight_search_words(verse, words))
 
-    return [VerseSearchResult(v.localized_reference, [v]) for v in verse_list]
+    # We don't strictly have enough information to work out if there are more
+    # results or not, if there is an exact multiple of $page_size results.
+    # We assume there are more pages in this case, we can always discover
+    # later that there are not.
+    more_results = len(verse_list) >= page_size
+    return [VerseSearchResult(v.localized_reference, [v]) for v in verse_list], more_results
 
 
 ESV_MAX_STORED_CONSECUTIVE_VERSES = 500

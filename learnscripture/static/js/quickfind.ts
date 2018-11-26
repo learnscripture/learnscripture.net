@@ -275,11 +275,14 @@ var getReferenceFromControls = function($form) {
     return text;
 };
 
-export const quickFindAndHandleResults = function(resultHandler, passageMode, renderFor) {
+export const quickFindAndHandleResults = function(resultHandler, passageMode, renderFor, $form: JQuery, showMore) {
 
     var handler = function(ev) {
-        var $form = $(ev.target).closest('form');
         ev.preventDefault();
+        var page = 0;
+        if (showMore) {
+            page = parseInt($(ev.target).attr('data-page'), 10);
+        }
         $.ajax({
             url: '/api/learnscripture/v1/versefind/?format=json',
             dataType: 'json',
@@ -288,7 +291,8 @@ export const quickFindAndHandleResults = function(resultHandler, passageMode, re
                 'quick_find': $form.find('input[name=quick_find]').val(),
                 'version_slug': $('#id-version-select').val(),
                 'passage_mode': passageMode ? '1' : '0',
-                'render_for': renderFor
+                'render_for': renderFor,
+                'page': page.toString(),
             },
             success: function(results) {
                 resultHandler(results);
@@ -317,11 +321,10 @@ var setupQuickFindControls = function() {
     $('form.quickfind select[name=verse_start]').change(verseStartChange);
     $('form.quickfind select[name=verse_end]').change(verseEndChange);
     $('form.quickfind select[name=version]').change(versionChange);
-    $('form.quickfind input[name=quick_find]');
     $('form.quickfind input[type=text]').bind('keypress', function(ev) {
         if (ev.keyCode === 13) {
             ev.preventDefault();
-            $(this).closest('form').find('input[type=submit].primary:first').click();
+            $(this).closest('form').find('[type=submit].primary:first').click();
         }
     });
     languageChange();

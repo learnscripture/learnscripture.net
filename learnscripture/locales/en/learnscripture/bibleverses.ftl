@@ -1,6 +1,9 @@
 # Error message displayed when a user asked for a Bible verse that doesn't exist.
 # $ref is the reference asked for
-bibleverses-no-verses-matched = No verses matched '{ $ref }'
+bibleverses-no-verses-matched-ref = No verses matched '{ $ref }'
+
+# Error message displayed when a search term returns no verses
+bibleverses-no-verses-matched = No verses were found matching your search
 
 # Error message displayed when a user asked for a reference that spans more than the allowed number of verses.
 # $allowed is the allowed number. Always 2 or more.
@@ -17,4 +20,16 @@ bibleverses-invalid-reference-end-chapter-before-start-chapter = end chapter { $
 
 # Error message displayed when a user enters a reference where the end verse is before the start verse
 bibleverses-invalid-reference-end-verse-before-start-verse = end verse { $end } is before start verse { $start }
+
+# Caption for filtering only Bible texts
+bibleverses-text-type-bible = Bible
+
+# Caption for filtering only catechism questions
+bibleverses-text-type-catechism = Catechism
+
+# Label for the bible verse reference field
+bibleverses-reference = Reference
+
+# Label for the bible verse text field
+bibleverses-text = Text
 

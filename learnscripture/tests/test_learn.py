@@ -116,7 +116,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
 
         identity.add_verse_choice('Psalm 23:1-2')
         self.get_url('dashboard')
-        self.submit('input[name=learnbiblequeue]')
+        self.submit('[name=learnbiblequeue]')
         self.assertEqual("Psalm 23:1-2", self.get_element_text("#id-verse-header h2"))
 
         # Do the reading:
@@ -203,7 +203,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self._make_verses_due_for_testing(identity.verse_statuses.filter(localized_reference='Psalm 23:1'))
 
         self.get_url('dashboard')
-        self.submit('input[name=reviewpassage]')
+        self.submit('[name=reviewpassage]')
 
         self.wait_until_loaded('#id-typing')
         for word in "The LORD is my shepherd, I shall not want.".split():
@@ -286,7 +286,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.assertIn("READ", self.get_element_text('#id-instructions'))
 
     def choose_review_bible(self):
-        self.submit("input[name='reviewbiblequeue']")
+        self.submit("[name='reviewbiblequeue']")
 
     def _make_verses_due_for_testing(self, uvs_queryset):
         n = timezone.now()

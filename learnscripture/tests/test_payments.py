@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from datetime import timedelta
 from decimal import Decimal
 
@@ -220,11 +222,21 @@ class DonationDriveTests(AccountTestMixin, TestBase):
             hide_if_donated_days=4,
             target=Decimal("20")
         )
-        ipn_1 = good_payment_ipn(self.account, Decimal("20.00"))
+        ipn_1 = good_payment_ipn(self.account, Decimal("10.00"))
         paypal_payment_received(ipn_1)
 
-        self.assertTrue(any(m.subject == "LearnScripture.net - donation target reached!"
-                            for m in mail.outbox))
+        i, account2 = self.create_account(username="test")
+
+        ipn_2 = good_payment_ipn(account2, Decimal("10.00"))
+        paypal_payment_received(ipn_2)
+
+        mails = [m for m in mail.outbox
+                 if m.subject == "LearnScripture.net - donation target reached!" and
+                 m.to != [e for n, e in settings.ADMINS]]
+
+        self.assertEqual(len(mails), 2)
+        self.assertIn("Our target of £20.00 was reached", mails[0].body)
+        self.assertIn("Thanks to your contribution of £10.00 we reached our funding target.\n\n", mails[0].body)
 
 
 class ViewDonationDriveTests(WebTestBase):

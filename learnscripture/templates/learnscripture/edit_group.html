@@ -1,17 +1,18 @@
 {% extends "base.html" %}
 
 {% load form_rendering %}
+{% load ftl %}
 
 {% block content %}
 
-  <h2>Group details</h2>
+  <h2>{% ftlmsg 'groups-edit-details-subtitle' %}</h2>
 
   <form action="" method="POST" id="id-form-edit-group">
     {% csrf_token %}
     {{ form|render_form }}
 
     <div class="actions">
-      <input type="submit" name="save" value="Save" class="btn primary" />
+      <button type="submit" name="save" class="btn primary" />{% ftlmsg 'groups-edit-save-group-button' %}</button>
     </div>
   </form>
 

@@ -1,13 +1,14 @@
 {% extends "base.html" %}
 
 {% load account_utils %}
+{% load ftl %}
 
 {% block content %}
 
   <p>
-    <a href="{% url 'activity_stream' %}">Other recent activity</a> |
+    <a href="{% url 'activity_stream' %}">{% ftlmsg 'activity-other-activity' %}</a> |
     {{ event.account|account_link }}
-    » <a href="{% url 'user_activity_stream' event.account.username %}">Recent activity</a>
+    » <a href="{% url 'user_activity_stream' event.account.username %}">{% ftlmsg 'activity-user-recent-activity-link' %}</a>
   </p>
 
   {% include "learnscripture/activity_event_inc.html" %}

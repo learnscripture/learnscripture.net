@@ -4,22 +4,39 @@ import sys
 from django_ftl import activate
 from django_ftl.bundles import Bundle
 
-main = Bundle(['learnscripture/site.ftl',
-               'learnscripture/dashboard.ftl',
-               'learnscripture/errors.ftl',
-               'learnscripture/events.ftl',
-               'learnscripture/accounts.ftl',
-               'learnscripture/emails.ftl',
-               'learnscripture/stats.ftl',
-               'learnscripture/awards.ftl',
-               'learnscripture/versesets.ftl',
-               'learnscripture/bibleverses.ftl',
-               'learnscripture/forms.ftl',
-               'learnscripture/groups.ftl',
-               ],
-              default_locale='en',
-              use_isolating=False,
-              require_activate=True)
+
+main = Bundle([
+    'learnscripture/accounts.ftl',
+    'learnscripture/activity.ftl',
+    'learnscripture/awards.ftl',
+    'learnscripture/bibleverses.ftl',
+    'learnscripture/catechisms.ftl',
+    'learnscripture/choose.ftl',
+    'learnscripture/comments.ftl',
+    'learnscripture/contact-form.ftl',
+    'learnscripture/dashboard.ftl',
+    'learnscripture/donations.ftl',
+    'learnscripture/emails.ftl',
+    'learnscripture/errors.ftl',
+    'learnscripture/events.ftl',
+    'learnscripture/forms.ftl',
+    'learnscripture/groups.ftl',
+    'learnscripture/leaderboards.ftl',
+    'learnscripture/learn.ftl',
+    'learnscripture/lists.ftl',
+    'learnscripture/login.ftl',
+    'learnscripture/pagination.ftl',
+    'learnscripture/referrals.ftl',
+    'learnscripture/site.ftl',
+    'learnscripture/stats.ftl',
+    'learnscripture/terms-of-service.ftl',
+    'learnscripture/user-verse-sets.ftl',
+    'learnscripture/user-verses.ftl',
+    'learnscripture/versesets.ftl',
+],
+    default_locale='en',
+    use_isolating=False,
+    require_activate=True)
 
 
 t = main.format

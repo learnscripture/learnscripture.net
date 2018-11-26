@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 import unittest2
+from django_ftl import override
 
 from accounts.models import Identity
 from bibleverses.books import get_bible_book_number, get_bible_books, is_single_chapter_book
@@ -162,7 +163,8 @@ class VersionTests(TestBase):
             version.get_verse_list("Genesis 1:2-4"))
 
     def test_empty(self):
-        self.assertRaises(InvalidVerseReference, lambda: self.KJV.get_verse_list('Genesis 300:1'))
+        with override('en'):
+            self.assertRaises(InvalidVerseReference, lambda: self.KJV.get_verse_list('Genesis 300:1'))
 
     def test_get_verses_by_localized_reference_bulk(self):
         version = self.KJV
@@ -399,16 +401,18 @@ class ParsingTests(unittest2.TestCase):
                          None)
 
     def test_bad_order_strict(self):
-        self.assertRaises(InvalidVerseReference,
-                          lambda: self.pv(LANGUAGE_CODE_EN, "Genesis 1:3-2"))
-        self.assertRaises(InvalidVerseReference,
-                          lambda: self.pv(LANGUAGE_CODE_EN, "Genesis 2:1-1:10"))
+        with override('en'):
+            self.assertRaises(InvalidVerseReference,
+                              lambda: self.pv(LANGUAGE_CODE_EN, "Genesis 1:3-2"))
+            self.assertRaises(InvalidVerseReference,
+                              lambda: self.pv(LANGUAGE_CODE_EN, "Genesis 2:1-1:10"))
 
     def test_bad_order_loose(self):
-        self.assertRaises(InvalidVerseReference,
-                          lambda: self.pu(LANGUAGE_CODE_EN, "genesis 1:3-2"))
-        self.assertRaises(InvalidVerseReference,
-                          lambda: self.pu(LANGUAGE_CODE_EN, "genesis 2:1 - 1:10"))
+        with override('en'):
+            self.assertRaises(InvalidVerseReference,
+                              lambda: self.pu(LANGUAGE_CODE_EN, "genesis 1:3-2"))
+            self.assertRaises(InvalidVerseReference,
+                              lambda: self.pu(LANGUAGE_CODE_EN, "genesis 2:1 - 1:10"))
 
     def test_book(self):
         parsed = self.pv(LANGUAGE_CODE_EN,
@@ -570,13 +574,14 @@ class ParsingTests(unittest2.TestCase):
                          "Jude 1")
 
     def test_invalid_references(self):
-        self.assertRaises(InvalidVerseReference,
-                          lambda: self.pv(LANGUAGE_CODE_EN, "Matthew 2:1-1:2"))
-        # Even with loose parsing, we still propagage InvalidVerseReference, so
-        # that the front end code (e.g. quick_find) can recognise that the user
-        # tried to enter a verse reference.
-        self.assertRaises(InvalidVerseReference,
-                          lambda: self.pu(LANGUAGE_CODE_EN, "Matthew 2:1-1:2"))
+        with override('en'):
+            self.assertRaises(InvalidVerseReference,
+                              lambda: self.pv(LANGUAGE_CODE_EN, "Matthew 2:1-1:2"))
+            # Even with loose parsing, we still propagage InvalidVerseReference, so
+            # that the front end code (e.g. quick_find) can recognise that the user
+            # tried to enter a verse reference.
+            self.assertRaises(InvalidVerseReference,
+                              lambda: self.pu(LANGUAGE_CODE_EN, "Matthew 2:1-1:2"))
 
     def test_turkish_reference_parsing(self):
         tests = [

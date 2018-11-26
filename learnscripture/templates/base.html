@@ -1,15 +1,13 @@
 {% load render_bundle from webpack_loader %}
 {% load ftl %}
 
-{% ftlconf mode=ftl_mode bundle='learnscripture.ftl_bundles.main' %}
-
 <!DOCTYPE html>
 <html lang="{{ request.LANGUAGE_CODE }}">
   <head>
     <meta charset="utf-8">
     <title>{% block title %}{% if title %}{{ title }} - {% endif %}LearnScripture.net{% endblock %}</title>
     <meta name="description" content="{% block description %}{% ftlmsg 'site-description' %}{% endblock %}">
-    {% if noindex_but_follow  %}
+    {% if noindex_but_follow %}
       <meta name="robots" content="noindex, follow">
     {% endif %}
     {% include "learnscripture/head_inc.html" %}
@@ -85,7 +83,7 @@
                 {% for dd in donation_drives %}
                   <div class="notice donation-drive">
                     {{ dd.message_html|safe }}
-                    {% if dd.target > 0  %}
+                    {% if dd.target > 0 %}
                       <div class="donation-drive-stats">
                         {% ftlmsg 'site-donation-drive-raised-html' amount=dd.amount_raised_formatted %}
                         <span class="chart-container"><span class="fraction" style="width: {{ dd.percentage_raised }}%;"></span></span>

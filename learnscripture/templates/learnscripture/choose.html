@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 
 {% load form_rendering %}
+{% load ftl %}
+{% load markup_tags %}
 
 {% block body_extra_class %}choose-page{% endblock %}
 
@@ -8,19 +10,21 @@
 
   <div class="accordion-container">
     <section id="id-choose-verseset" class="accordion-item {% if active_section == "verseset" %}expanded{% endif %}">
-      <button type="button" class="accordion-heading">Choose a verse set</button>
+      <button type="button" class="accordion-heading">{% ftlmsg 'choose-choose-a-verse-set-heading' %}</button>
       <div class="accordion-body">
-        <p>Browse or search the verse sets below:</p>
+        <p>{% ftlmsg 'choose-browse-or-search-verse-sets' %}</p>
 
         <form action="." method="GET"
               data-pjax-results-container="#id-choose-verseset-results"
               data-pjax-more-results-container=".more-results-container"
           >
           <div class="form-row">
-            <label for="id_query">Search:</label>
+            <label for="id_query">{% ftlmsg 'choose-search-input' %}</label>
             <div class="input input-line">
               {{ verseset_search_form.query }}
-              <input type="submit" class="btn primary" value="Search" id="id-search-btn" />
+              <button type="submit" class="btn primary" "id-search-btn">
+                {% ftlmsg 'choose-search-button' %}
+              </button>
             </div>
           </div>
 
@@ -32,16 +36,14 @@
         <div id="id-choose-verseset-results">
           {% include "learnscripture/choose_verseset_inc.html" %}
         </div>
-
       </div>
 
     </section>
     <section id="id-choose-individual" class="accordion-item {% if active_section == "individual" %}expanded{% endif %}">
-      <button type="button" class="accordion-heading">Choose individual verses</button>
+      <button type="button" class="accordion-heading">{% ftlmsg 'choose-choose-individual-verses-heading' %}</button>
       <div class="accordion-body">
-        <p>Choose a verse (or a few verses). For long passages, you should
-          <a href="{% url 'create_passage_set' %}">create a 'passage' verse set</a>.
-        </p>
+        {% url 'create_passage_set' as create_passage_set_url %}
+        <p>{% ftlmsg 'choose-choose-verse-explanation-html' create_passage_set_url=create_passage_set_url %}</p>
 
         {% include "learnscripture/quick_find_controls.html" %}
 
@@ -50,42 +52,32 @@
     </section>
 
     <section id="id-choose-create-set-menu" class="accordion-item {% if active_section == "create-set-menu" %}expanded{% endif %}">
-      <button type="button" class="accordion-heading">Create a verse set</button>
+      <button type="button" class="accordion-heading">{% ftlmsg 'choose-create-verse-set-heading' %}</button>
       <div class="accordion-body">
         <div class="actionset">
           <form>
-            <p><a class="btn primary" href="{% url 'create_selection_set' %}">Create selection set</a></p>
+            <p><a class="btn primary" href="{% url 'create_selection_set' %}">{% ftlmsg 'choose-create-selection-verse-set-button' %}</a></p>
           </form>
 
-          <h3>Selection set</h3>
-          <p>Selection verse sets are verses on a certain topic, or designed for a group
-            of people to learn together.</p>
+          <h3>{% ftlmsg 'choose-selection-set-heading' %}</h3>
+          <p>{% ftlmsg 'choose-selection-set-explanation' %}</p>
         </div>
 
         <div class="actionset">
           <form>
-            <p><a class="btn primary" href="{% url 'create_passage_set' %}">Create passage set</a></p>
+            <p><a class="btn primary" href="{% url 'create_passage_set' %}">{% ftlmsg 'choose-create-passage-verse-set-button' %}</a></p>
           </form>
 
-          <h3>Passage set</h3>
-          <p>Passage verse sets are for a continuous set of verses, like a Psalm or a
-            chapter or part of a chapter.</p>
-
-          <p>When you are learning a passage set, you're always presented with the verses
-            in order, and there are lots of tweaks to help you learn it as a passage rather
-            than just a set of verses.</p>
+          <h3>{% ftlmsg 'choose-passage-set-heading' %}</h3>
+          {% filter linebreaks %}{% ftlmsg 'choose-passage-set-explanation' %}{% endfilter %}
         </div>
       </div>
     </section>
 
     <section id="id-choose-catechism" class="accordion-item" data-accordion-link="{% url 'catechisms' %}">
-      <button type="button" class="accordion-heading">Learn a catechism</button>
+      <button type="button" class="accordion-heading">{% ftlmsg 'choose-catechisms-heading' %}</button>
       <div class="accordion-body">
-        <p>Catechisms are a question/answer method of learning Bible truth.
-          While we don't think they are on a level with the Bible itself, they
-          can be a very useful way of learning the truths the Bible teaches in a
-          systematic way, and they fit well into the system LearnScripture uses
-          for learning verses. <a href="{% url 'catechisms' %}">Browse our list of catechisms</a>.
+        <p>{% ftlmsg 'choose-catechism-intro' %} <a href="{% url 'catechisms' %}">{% ftlmsg 'choose-catechisms-link' %}</a>.
       </div>
     </section>
   </div>

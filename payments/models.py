@@ -3,12 +3,13 @@ from decimal import Decimal
 from django.conf import settings
 from django.core import mail
 from django.db import models
-from django.template import loader
 from django.utils import timezone
 from django.utils.functional import cached_property
+from fluent import types as fluent_types
 from paypal.standard.ipn.models import PayPalIPN
 
-import fluent.types
+from django_ftl import override
+from learnscripture.ftl_bundles import t
 from accounts.models import Account
 
 
@@ -86,16 +87,16 @@ class DonationDrive(models.Model):
 
     @cached_property
     def amount_raised_formatted(self):
-        return fluent.types.fluent_number(self.amount_raised,
-                                          style=fluent.types.FORMAT_STYLE_CURRENCY,
-                                          currencyDisplay=fluent.types.CURRENCY_DISPLAY_SYMBOL,
+        return fluent_types.fluent_number(self.amount_raised,
+                                          style=fluent_types.FORMAT_STYLE_CURRENCY,
+                                          currencyDisplay=fluent_types.CURRENCY_DISPLAY_SYMBOL,
                                           currency="GBP")
 
     @cached_property
     def target_formatted(self):
-        return fluent.types.fluent_number(self.target,
-                                          style=fluent.types.FORMAT_STYLE_CURRENCY,
-                                          currencyDisplay=fluent.types.CURRENCY_DISPLAY_SYMBOL,
+        return fluent_types.fluent_number(self.target,
+                                          style=fluent_types.FORMAT_STYLE_CURRENCY,
+                                          currencyDisplay=fluent_types.CURRENCY_DISPLAY_SYMBOL,
                                           currency="GBP")
 
     def get_amount_raised(self, before=None):
@@ -156,29 +157,36 @@ class DonationDrive(models.Model):
 
 def send_donation_drive_target_reached_emails(donation_drive):
     from django.conf import settings
+    from learnscripture.utils.templates import render_to_string_ftl
 
     payments = donation_drive.get_contributions()
     recipient_data = [{
+        'language_code': payment.account.identity.default_language_code,
         'name': payment.account.email_name,
         'email': payment.account.email,
-        'amount': payment.amount}
+        'amount': fluent_types.fluent_number(payment.amount,
+                                             style=fluent_types.FORMAT_STYLE_CURRENCY,
+                                             currencyDisplay=fluent_types.CURRENCY_DISPLAY_SYMBOL,
+                                             currency="GBP")
+    }
         for payment in payments
     ]
 
     # Add one to the admins:
     for name, email in settings.ADMINS:
         recipient_data.append({
+            'language_code': 'en',
             'name': name or "Admin",
             'email': email,
-            'amount': None,
+            'amount': 0,
         })
     c_base = {
-        'donation_drive': donation_drive,
-        'other_contributors': len(payments) - 1,
+        'target': donation_drive.target_formatted
     }
     for d in recipient_data:
         context = c_base.copy()
         context.update(d)
-        body = loader.render_to_string("learnscripture/donation_drive_target_reached_email.txt", context)
-        subject = "LearnScripture.net - donation target reached!"
+        with override(d['language_code']):
+            body = render_to_string_ftl("learnscripture/donation_drive_target_reached_email.txt", context)
+            subject = t('donations-target-reached-email-subject')
         mail.send_mail(subject, body, settings.SERVER_EMAIL, [d['email']])

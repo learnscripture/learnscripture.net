@@ -9,6 +9,16 @@ var loadResults = function(results) {
     setupNeedsPreferencesControls(d);
 };
 
+var loadMoreResults = function(results) {
+    var d = $('.quickfind_search_results .more-results-container');
+    d.html(results['html'])
+    setupNeedsPreferencesControls(d);
+    // d might contain a further '.more-results-container'
+    // which should be the target of the next 'show more',
+    // rather than d itself.
+    d.children().unwrap();
+}
+
 var setupChooseControls = function() {
     $('#id-choose-verseset').bind('accordion:expanded', function(ev) {
         // We want to not get in the way of mobile users who just want to browse
@@ -28,7 +38,11 @@ var setupChooseControls = function() {
         $(ev.target).find('.btn.primary')[0].focus();
     });
 
-    $('#id_lookup').click(quickFindAndHandleResults(loadResults, false, "choose-individual"))
+    var $quickFindForm = $('#id-choose-individual form.quickfind');
+    $('#id_lookup').click(quickFindAndHandleResults(loadResults, false, "choose-individual", $quickFindForm, false));
+    $('.quickfind_search_results').on(
+        'click', 'a[data-quick-find-show-more]',
+        quickFindAndHandleResults(loadMoreResults, false, "choose-individual", $quickFindForm, true))
 
     $('#id-choose-individual').on('click', 'form.individual-choose input[name=add_to_queue]', function(ev) {
         ev.preventDefault();

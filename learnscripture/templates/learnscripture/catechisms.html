@@ -1,36 +1,41 @@
 {% extends "base.html" %}
 
+{% load ftl %}
 {% load markup_tags %}
 
 {% block content %}
 
-  <p>Catechisms are a way to learn the main teachings of the Christian faith using
-    a question/answer format.</p>
+  {% filter linebreaks %}{% ftlmsg 'catechisms-page-intro' %}{% endfilter %}
 
-  <p>They have been popular in Christianity since the Reformation, when various
-    people started putting together sets of question and answers based on their
-    understanding of the Bible, but the format goes back much further.</p>
-
-  <p>Choose from the catechisms to learn. If you have other catechisms that you
-    would like added, please <a href="{% url 'contact' %}">contact us</a>.</p>
+  {% url 'contact' as contact_url %}
+  <p>{% ftlmsg 'catechisms-choose-a-catechism-html' contact_url=contact_url %}</p>
 
 
   {% for catechism in catechisms %}
-    <div class="verseset">
-      <form action="" method="POST">
-        {% csrf_token %}
-        <input type="hidden" name="catechism_id" value="{{ catechism.id }}">
-        <i class="icon-public" title="This action is public"></i>
-        <input type="submit" class="btn primary needs-preferences" value="Learn" id="id-learn-catechism-btn-{{ catechism.id }}">
-      </form>
+    {% comment %}
+    The Q/A pairs count comment appears just after the description and the title,
+    which will be in the same language.
+    It looks better to keep the entire block in the same language, rather than
+    have some of it translated, so we switch language according to the catechism
+    {% endcomment %}
+    {% withftl language=catechism.language_code %}
+      <div class="verseset">
+        <form action="" method="POST">
+          {% csrf_token %}
+          <input type="hidden" name="catechism_id" value="{{ catechism.id }}">
+          <i class="icon-public" title="{% ftlmsg 'site-public-action' %}"></i>
+          <button type="submit" class="btn primary needs-preferences" id="id-learn-catechism-btn-{{ catechism.id }}">
+            {% ftlmsg 'catechisms-learn-button' %}
+          </button>
+        </form>
 
-      <h3><a href="{% url 'view_catechism' slug=catechism.slug %}">{{ catechism.full_name }}</a></h3>
+        <h3><a href="{% url 'view_catechism' slug=catechism.slug %}">{{ catechism.full_name }}</a></h3>
 
-      <p>{{ catechism.description|apply_markup:"restructuredtext" }}</p>
+        <p>{{ catechism.description|apply_markup:"restructuredtext" }}</p>
 
-      <p>It includes {{ catechism.qapairs.count }} question/answer pairs.</p>
-    </div>
-
+        <p>{% ftlmsg 'catechisms-includes-qa-pairs-count' count=catechism.qapairs.count %}</p>
+      </div>
+    {% endwithftl %}
   {% endfor %}
 
 {% endblock %}

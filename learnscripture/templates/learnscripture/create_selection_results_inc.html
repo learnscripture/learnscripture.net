@@ -1,9 +1,7 @@
 {% load verse_utils %}
+{% load ftl %}
 
 {% if results %}
-  {% if results_truncated %}
-    <p>The first {{ search_limit }} results matching your search are below:</p>
-  {% endif %}
   {% for result in results %}
     <div class="actionset">
       <form action="" method="GET">
@@ -12,7 +10,7 @@
         <input type="hidden" name="version_slug" value="{{  version_slug }}">
         <input type="hidden" name="render_for" value="create-selection-row">
         <input type="hidden" name="single" value="1">
-        <input type="submit" class="btn primary add-to-set" value="Add to set">
+        <button type="submit" class="btn primary add-to-set">{% ftlmsg 'versesets-add-verse-to-set' %}</button>
       </form>
       <h3>{{ result.book_name }}</h3>
       <div class="verselist">
@@ -25,6 +23,9 @@
     </div>
   {% endfor %}
 {% else %}
-    <p><span class='error'>No verses were found matching your search</span></p>
+  {% if page == 0 %}
+    <p><span class='error'>{% ftlmsg 'bibleverses-no-verses-matched' %}</span></p>
+  {% endif %}
 {% endif %}
 
+{% include "learnscripture/quick_find_search_show_more_inc.html" %}

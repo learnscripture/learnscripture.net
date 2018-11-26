@@ -1,5 +1,7 @@
+{% load ftl %}
+
 {% if request_account.enable_commenting or not request_account %}
   <div class="commentboxlocator">
-    <a href="#" class="show-add-comment">Add comment to group wall</a>
+    <a href="#" class="show-add-comment">{% ftlmsg 'comments-add-comment-link' %}</a>
   </div>
 {% endif %}

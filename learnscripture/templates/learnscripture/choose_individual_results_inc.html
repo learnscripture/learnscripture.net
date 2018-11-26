@@ -1,19 +1,17 @@
 {% load verse_utils %}
+{% load ftl %}
 
 {% if results %}
-  {% if results_truncated %}
-    <p>The first {{ search_limit }} results matching your search are below:</p>
-  {% endif %}
   {% for result in results %}
     <div class="actionset">
       <form class="individual-choose" action="" method="POST">
         {% csrf_token %}
         <input type="hidden" name="localized_reference" value="{{ result.localized_reference }}">
         <input type="hidden" name="version_slug" value="{{ version_slug }}">
-        <input type="submit" name="learn_now" class="btn primary needs-preferences" value="{% if request.identity.account %}Learn now{% else %}Learn{% endif %}">
+        <input type="submit" name="learn_now" class="btn primary needs-preferences" value="{% ftlmsg 'choose-learn-button' %}">
         {% if request.identity.account %}
           <br/>
-          <input type="submit" name="add_to_queue" class="btn needs-preferences" value="Add to queue" data-added-caption="Added!">
+          <input type="submit" name="add_to_queue" class="btn needs-preferences" value="{% ftlmsg 'choose-add-to-queue-button' %}" data-added-caption="{% ftlmsg 'choose-add-to-queue-button-added' %}">
         {% endif %}
       </form>
       <div class="verselist">
@@ -26,5 +24,9 @@
     </div>
   {% endfor %}
 {% else %}
-    <p><span class='error'>No verses were found matching your search</span></p>
+  {% if page == 0 %}
+    <p><span class='error'>{% ftlmsg 'choose-verse-search-no-verses-found' %}</span></p>
+  {% endif %}
 {% endif %}
+
+{% include "learnscripture/quick_find_search_show_more_inc.html" %}

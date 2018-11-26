@@ -32,6 +32,7 @@ from events.models import Event
 from groups.models import Group
 from learnscripture import session
 from learnscripture.decorators import require_identity_method
+from learnscripture.ftl_bundles import t
 from learnscripture.views import (bible_versions_for_request, default_bible_version_for_request, todays_stats,
                                   verse_sets_visible_for_request)
 from scores.models import get_verses_started_per_day, get_verses_tested_per_day
@@ -424,6 +425,7 @@ class VerseFind(ApiView):
             version_slug = request.GET['version_slug']
             passage_mode = request.GET.get('passage_mode', '') == '1'
             render_for = request.GET['render_for']
+            page = int(request.GET.get('page', '0'))
         except KeyError:
             return rc.BAD_REQUEST("Parameters q, version_slug, passage_mode, render_for required")
 
@@ -447,28 +449,30 @@ class VerseFind(ApiView):
             return rc.BAD_REQUEST("Valid version required")
 
         try:
-            results = quick_find(q, version,
-                                 max_length=MAX_VERSES_FOR_SINGLE_CHOICE
-                                 if not passage_mode
-                                 else MAX_VERSE_QUERY_SIZE,
-                                 allow_searches=not passage_mode
-                                 )
+            results, more_results = quick_find(
+                q, version,
+                max_length=MAX_VERSES_FOR_SINGLE_CHOICE
+                if not passage_mode
+                else MAX_VERSE_QUERY_SIZE,
+                page=page,
+                page_size=QUICK_FIND_SEARCH_LIMIT,
+                allow_searches=not passage_mode
+            )
         except InvalidVerseReference as e:
             return validation_error_response({'__all__': [e.args[0]]})
 
         if 'single' in request.GET or passage_mode:
             results = results[0:1]
-            results_truncated = False
-        else:
-            results_truncated = len(results) > QUICK_FIND_SEARCH_LIMIT
-            results = list(results)[0:QUICK_FIND_SEARCH_LIMIT]
+            more_results = False
 
         # Build context for rendering
         context = {
             'results': results,
             'version_slug': version_slug,
             'search_limit': QUICK_FIND_SEARCH_LIMIT,
-            'results_truncated': results_truncated,
+            'more_results': more_results,
+            'page': page,
+            'next_page': page + 1,
         }
 
         if (len(results) == 1 and results[0].parsed_ref is not None):
@@ -559,7 +563,7 @@ class AddComment(ApiView):
 
         message = request.POST.get('message', '').strip()
         if message == '':
-            return validation_error_response({'message': 'You must enter a message'})
+            return validation_error_response({'message': t('comments-message-missing-validation')})
 
         comment = None
         if 'event_id' in request.POST:
@@ -588,7 +592,7 @@ class AddComment(ApiView):
                 return rc.BAD_REQUEST("Existing group_id required")
 
             if not group.accepts_comments_from(account):
-                return validation_error_response({'message': 'You must be a member of this group to add a message'})
+                return validation_error_response({'message': t('comments-not-member-of-group')})
 
             comment = group.add_comment(author=account,
                                         message=message)

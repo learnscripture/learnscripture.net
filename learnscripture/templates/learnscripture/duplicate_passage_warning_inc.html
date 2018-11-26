@@ -1,8 +1,8 @@
 {% load dict_utils %}
 
-<p>There are already some passage sets for this passage:</p>
+<p>{% ftlmsg 'versesets-create-duplicate-passage-warning' %}</p>
 <ul>
   {% for verse_set in verse_sets %}
-    <li><a href="{% url 'view_verse_set' verse_set.slug %}" target="_blank">{{ verse_set.smart_name_dict|lookup:language_code }}</a> by {{ verse_set.created_by.username }}</li>
+    <li><a href="{% url 'view_verse_set' verse_set.slug %}" target="_blank">{{ verse_set.smart_name_dict|lookup:language_code }}</a> ({{ verse_set.created_by.username }})</li>
   {% endfor %}
 </ul>

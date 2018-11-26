@@ -1,0 +1,16 @@
+{% if results or page > 0 %}
+  <div class="more-results-container">
+    <div class="paging">
+      {% if more_results %}
+        <span class="paging-part">
+          <a data-quick-find-show-more href="#" data-page="{{ next_page }}">Show more</a>
+        </span>
+      {% endif %}
+      {% if results|length > 1 or page > 0 %}
+        <span class="paging-part">
+          <a href="#id-quick-find-form">Jump to top</a>
+        </span>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}

@@ -82,7 +82,14 @@ var selectionLoadResults = function(results) {
     $('#id-quick-find-form .validation-error').remove();
     var d = $('.quickfind_search_results');
     d.html(results['html']);
-    d.find('input[type=submit]').click(addVerseClick);
+    d.find('[type=submit]').click(addVerseClick);
+};
+
+var selectionLoadMoreResults = function(results) {
+    var d = $('.quickfind_search_results .more-results-container');
+    d.html(results['html']);
+    d.find('[type=submit]').click(addVerseClick);
+    d.children().unwrap();
 };
 
 var passageLoadResults = function(results) {
@@ -131,8 +138,14 @@ var setupCreateVerseSetControls = function() {
             input.prop('disabled', true);
         }
     });
-    $('#id-create-selection-set #id_lookup').click(quickFindAndHandleResults(selectionLoadResults, false, "create-selection-set"));
-    $('#id-create-passage-set #id_lookup').click(quickFindAndHandleResults(passageLoadResults, true, "create-passage-row"));
+    var $quickFindForm = $('form.quickfind');
+
+    $('#id-create-selection-set #id_lookup').click(quickFindAndHandleResults(selectionLoadResults, false, "create-selection-set", $quickFindForm, false));
+    $('.quickfind_search_results').on(
+        'click', 'a[data-quick-find-show-more]',
+        quickFindAndHandleResults(selectionLoadMoreResults, false, "create-selection-set", $quickFindForm, true));
+
+    $('#id-create-passage-set #id_lookup').click(quickFindAndHandleResults(passageLoadResults, true, "create-passage-row", $quickFindForm, false));
 
     var $initialRef = $('[name="initial_localized_reference"]');
     if ($initialRef.length > 0 && $initialRef.val() != "") {

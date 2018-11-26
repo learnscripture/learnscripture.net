@@ -83,6 +83,9 @@ class Account(AbstractBaseUser):
     first_name = models.CharField(t_lazy('accounts-first-name'), max_length=100, blank=True)
     last_name = models.CharField(t_lazy('accounts-last-name'), max_length=100, blank=True)
     email = models.EmailField(t_lazy('accounts-email'))
+    # Override AbstractBaseUser.password to provide our own caption
+    password = models.CharField(t_lazy('accounts-password'), max_length=128)
+
     date_joined = models.DateTimeField(t_lazy('accounts-date-joined'), default=timezone.now)
     is_tester = models.BooleanField(default=False, blank=True)
     is_moderator = models.BooleanField(default=False, blank=True)

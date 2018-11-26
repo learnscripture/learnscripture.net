@@ -44,6 +44,8 @@ site-verse-sets-link = Verse sets
 # Link to user's statistics page
 site-user-stats-link = Stats
 
+## Misc:
+
 # Displays the amount of money that has been raised so far towards a donation target
 # $amount is a money value
 site-donation-drive-raised-html = Raised: <b>{ $amount }</b>
@@ -106,4 +108,13 @@ site-offline-body-2 = Please connect to the internet and try again.
 
 # Link text to try to connect to the site again
 site-offline-try-again = Try again
+
+# Heading for related links
+site-see-also = See also
+
+# Tooltip to indicate a certain action is publicly visible to other people
+site-public-action = This action is public
+
+# Title for group of related links
+site-see-also-header = See also:
 
