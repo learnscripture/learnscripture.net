@@ -1,5 +1,7 @@
 {% load account_utils %}
 {% load dict_utils %}
+{% load ftl %}
+{% load capture_tags %}
 
 <div class="comment
             {% if show_as_related_comment %} relatedcomment{% endif %}
@@ -11,11 +13,14 @@
     {{ comment.author|account_link }}
   </span>
   {% if show_as_related_comment %}
-    on news item “<b>{{ comment.event.render_html_dict|lookup:default_language_code }}</b>”
+    {% capture as item_title silent %}
+      <b>{{ comment.event.render_html_dict|lookup:default_language_code }}</b>
+    {% endcapture %}
+    — {% ftlmsg 'comments-event-title' item_title=item_title %}
   {% endif %}
   {% if request_account.is_moderator %}
     <span class="commentmoderation">
-      <a href="#" title="Moderate comment" class="moderate-comment"><i class="icon-moderate"></i></a>
+      <a href="#" title="{% ftlmsg 'comments-moderate-comment-button' %}" class="moderate-comment"><i class="icon-moderate"></i></a>
     </span>
   {% endif %}
   <span class="timestamp">{{ comment.created|date:"Y-m-d H:i" }}</span>
@@ -23,6 +28,6 @@
     {{ comment.message_formatted }}
   </div>
   {% if show_as_related_comment %}
-    <div class="relatedaddcomment"><a href="{{ comment.get_absolute_url }}"><i class="icon-comment"></i> Add your comment</a></div>
+    <div class="relatedaddcomment"><a href="{{ comment.get_absolute_url }}"><i class="icon-comment"></i> {% ftlmsg 'comments-add-comment-link' %}</a></div>
   {% endif %}
 </div>

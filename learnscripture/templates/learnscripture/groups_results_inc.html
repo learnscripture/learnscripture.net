@@ -1,4 +1,5 @@
 {% load markup_tags %}
+{% load ftl %}
 
 {% for group in results.items %}
   <div class="actionset">
@@ -10,9 +11,9 @@
 {% if results.more %}
   <div class="more-results-container">
     <div class="paging">
-      <span class="paging-part">Showing {{ results.shown_count }} of {{ results.total }} groups</span>
-      <span class="paging-part"><a href="{{ results.more_link }}" data-pjax-more>Show more</a></span>
-      <span class="paging-part"><a href="#id-page-top">Jump to top</a></span>
+      <span class="paging-part">{% ftlmsg 'pagination-showing-shown-of-total' shown=results.shown_count total=results.total %}</span>
+      <span class="paging-part"><a href="{{ results.more_link }}" data-pjax-more>{% ftlmsg 'pagination-show-more' %}</a></span>
+      <span class="paging-part"><a href="#id-page-top">{% ftlmsg 'pagination-jump-to-top' %}</a></span>
     </div>
   </div>
 {% endif %}

@@ -1,20 +1,21 @@
 {% extends "base_twocol.html" %}
 
 {% load form_rendering %}
+{% load ftl %}
 
 {% block leftcolumn %}
 
   <form action="" id="id_account-details-form" method="POST">
     {% csrf_token %}
 
-    <h2>Personal information</h2>
+    <h2>{% ftlmsg 'accounts-details-personal-info-subtitle' %}</h2>
 
-    <h3>Private</h3>
+    <h3>{% ftlmsg 'accounts-details-private-info-subtitle' %}</h3>
 
     {{ form.email|render_field }}
     {{ form.is_under_13|render_field }}
 
-    <h3>Public <i class="icon-public"></i></h3>
+    <h3>{% ftlmsg 'accounts-details-public-info-subtitle' %} <i class="icon-public"></i></h3>
 
     {{ form.first_name|render_field }}
     {{ form.last_name|render_field }}
@@ -31,8 +32,8 @@
   <h3>See also</h3>
 
   <ul>
-    <li><a href="{% url 'preferences' %}" class="preferences-link">Preferences</a></li>
-    <li><a href="{% url 'learnscripture_password_change' %}">Change password</a></li>
+    <li><a href="{% url 'preferences' %}" class="preferences-link">{% ftlmsg 'accounts-preferences-title' %}</a></li>
+    <li><a href="{% url 'learnscripture_password_change' %}">{% ftlmsg 'accounts-password-change-page-title' %}</a></li>
   </ul>
 
 {% endblock %}

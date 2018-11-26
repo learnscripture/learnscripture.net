@@ -59,7 +59,7 @@ class GroupPageTestsBase(RequireExampleVerseSetsMixin):
 
         self.assertUrlsEqual(reverse('group', args=('another-group',)))
 
-        self.submit('input[name="join"]')
+        self.submit('[name="join"]')
         self.assertTrue(public_group.members.filter(id=account.id).exists())
 
         self.assertEqual(Event.objects.filter(event_type=EventType.GROUP_JOINED).count(),
@@ -78,10 +78,10 @@ class GroupPageTestsBase(RequireExampleVerseSetsMixin):
 
         self.assertTextPresent("You are not a member of this group")
 
-        self.submit('input[name="join"]')
+        self.submit('[name="join"]')
 
         self.fill_in_account_form()
-        self.submit('input[name="join"]')
+        self.submit('[name="join"]')
 
         self.assertTextPresent("You are a member of this group")
 
@@ -286,7 +286,7 @@ class GroupCreatePageTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.wait_until_loaded(".select2-results__option--highlighted")
         self.press_enter(select_input)
         time.sleep(0.2)
-        self.submit('input[name="save"]')
+        self.submit('[name="save"]')
 
         self.assertUrlsEqual(reverse('group', args=('my-group',)))
 

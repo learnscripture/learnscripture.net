@@ -3,6 +3,7 @@ from datetime import timedelta
 
 from django.db.models import F
 from django.utils import timezone
+from django_ftl import override
 
 import accounts.memorymodel
 from accounts.models import ChosenVerseSet
@@ -871,7 +872,8 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         i = self.create_identity()
         version = i.default_bible_version
         version.verse_set.get(localized_reference='John 3:16').mark_missing()
-        i.add_verse_choice('John 3:16')
+        with override('en'):
+            i.add_verse_choice('John 3:16')
         self.assertEqual(
             i.verse_statuses.filter(localized_reference='John 3:16',
                                     version=version).count(),

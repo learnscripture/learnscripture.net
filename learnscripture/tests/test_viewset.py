@@ -40,7 +40,7 @@ class ViewSetTestsBase(RequireExampleVerseSetsMixin):
 
         self.get_literal_url(reverse('view_verse_set', kwargs=dict(slug=vs.slug)) +
                              "?version=NET")
-        self.submit("input[name=learn]")
+        self.submit("[name=learn]")
 
         # Can use 'all' here because this is the first time we've chosen anything
         verse_statuses = identity.verse_statuses.all()
@@ -60,7 +60,7 @@ class ViewSetTestsBase(RequireExampleVerseSetsMixin):
         self.assertTextPresent("You have %d verse(s) from this set in your queue" %
                                vs.verse_choices.count())
 
-        self.submit("input[name='drop']")
+        self.submit("[name='drop']")
 
         self.assertEqual(len(identity.bible_verse_statuses_for_learning(vs.id)),
                          0)

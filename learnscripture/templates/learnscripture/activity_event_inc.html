@@ -1,5 +1,6 @@
 {% load comment_utils %}
 {% load dict_utils %}
+{% load ftl %}
 
 {% with rendered=event.render_html_dict|lookup:default_language_code comments=event.ordered_comments|filter_comments:request_account %}
   {% ifchanged rendered %}
@@ -14,11 +15,11 @@
          data-event-id="{{ event.id }}">
       {% if event.accepts_comments %}
         <span class="commentindicator">
-          <a href="#" class="show-add-comment" title="Add comment"><i class="icon-comment"></i> <span class="commentcount">{{ comments|length }}</span></a>
+          <a href="#" class="show-add-comment" title="{% ftlmsg 'comments-add-comment-link' %}"><i class="icon-comment"></i> <span class="commentcount">{{ comments|length }}</span></a>
         </span>
       {% endif %}
       <span class="permalink">
-        <a href="{{ event.get_absolute_url }}" title="Link directly to this item alone"><i class="icon-link"></i></a>
+        <a href="{{ event.get_absolute_url }}" title="{% ftlmsg 'activity-permalink' %}"><i class="icon-link"></i></a>
       </span>
       <span class="eventdetails">
         <h4>{{ rendered }}</h4>
@@ -38,7 +39,7 @@
         {% endfor %}
         {% if request_account.enable_commenting or not request_account %}
           <div class="commentboxlocator">
-            <a href="#" class="show-add-comment">Add comment</a>
+            <a href="#" class="show-add-comment">{% ftlmsg 'comments-add-comment-link' %}</a>
           </div>
         {% endif %}
       </div>

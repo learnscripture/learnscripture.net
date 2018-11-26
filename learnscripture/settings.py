@@ -172,8 +172,8 @@ LANGUAGE_CODES = [c for c, n in LANGUAGES]
 
 SITE_ID = 1
 
-USE_I18N = False
-USE_L10N = False
+USE_I18N = True
+USE_L10N = True
 USE_TZ = True
 
 # Sync with fabfile
@@ -294,6 +294,7 @@ INSTALLED_APPS = [
     'aldjemy',
     'webpack_loader',
     'django_ftl',
+    'capture_tag',
 ]
 
 ALLOWED_HOSTS = ["learnscripture.net"]

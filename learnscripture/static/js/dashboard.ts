@@ -152,17 +152,17 @@ var setupDashboardControls = function() {
     if (document.location.pathname.match(/\/dashboard/) === null) {
         return;
     }
-    $("input[name=clearbiblequeue]").click(function(ev) {
+    $("[name=clearbiblequeue]").click(function(ev) {
         if (!confirm($('#id-i18n-dashboard-remove-verses-from-queue-confirm').text())) {
             ev.preventDefault();
         }
     });
-    $("input[name=clearcatechismqueue]").click(function(ev) {
+    $("[name=clearcatechismqueue]").click(function(ev) {
         if (!confirm($('#id-i18n-dashboard-remove-catechism-from-queue-confirm').text())) {
             ev.preventDefault();
         }
     });
-    $("input[name=cancelpassage]").click(function(ev) {
+    $("[name=cancelpassage]").click(function(ev) {
         if (!confirm($('#id-i18n-dashboard-cancel-passage-confirm').text())) {
             ev.preventDefault();
         }

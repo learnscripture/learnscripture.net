@@ -1,13 +1,14 @@
 from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
+from django_ftl.templatetags import ftl as ftl_tags
 
 from accounts.forms import PreferencesForm
 from accounts.models import DEFAULT_THEME, THEME_FONTS
 from bibleverses.languages import DEFAULT_LANGUAGE
 from learnscripture.models import SiteNotice
 from learnscripture.views import account_from_request
-from learnscripture.ftl_bundles import t
+from learnscripture.ftl_bundles import t, main as main_bundle
 from payments.models import DonationDrive
 
 NOTICES_EXPIRE_AFTER_DAYS = 3
@@ -131,7 +132,10 @@ def settings_processor(request):
 
 
 def ftl(request):
-    return {'ftl_mode': 'server'}
+    return {
+        ftl_tags.MODE_VAR_NAME: 'server',
+        ftl_tags.BUNDLE_VAR_NAME: main_bundle,
+    }
 
 
 def indexing(request):

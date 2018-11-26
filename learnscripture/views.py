@@ -45,6 +45,7 @@ from learnscripture.forms import (GROUP_WALL_ORDER_OLDEST_FIRST, LEADERBOARD_WHE
                                   AccountPasswordResetForm, AccountSetPasswordForm, ContactForm, GroupFilterForm,
                                   GroupWallFilterForm, LeaderboardFilterForm, LogInForm, SignUpForm,
                                   UserVersesFilterForm, VerseSetSearchForm)
+from learnscripture.ftl_bundles import t
 from payments.sign import sign_payment_info
 from scores.models import get_all_time_leaderboard, get_leaderboard_since, get_verses_started_counts
 
@@ -163,24 +164,17 @@ def signup(request):
             identity.account = account
             identity.save()
             session.login(request, account.identity)
-            messages.info(request, "Account created - welcome %s!" % account.username)
+            messages.info(request, t('accounts-signup-welcome-notice', dict(username=account.username)))
             new_account.send(sender=account)
             return _login_redirect(request)
 
     else:
         form = SignUpForm(prefix="signup")
 
-    c['title'] = 'Create account'
+    c['title'] = t('accounts-signup-title')
     c['signup_form'] = form
 
     return TemplateResponse(request, "learnscripture/signup.html", c)
-
-
-def feature_disallowed(request, title, reason):
-    return TemplateResponse(request, 'learnscripture/feature_disallowed.html', {
-        'title': title,
-        'reason': reason,
-    })
 
 
 def bible_versions_for_request(request):
@@ -215,7 +209,7 @@ def preferences(request):
     else:
         form = PreferencesForm(instance=identity)
     c = {'form': form,
-         'title': 'Preferences',
+         'title': t('accounts-preferences-title'),
          'hide_preferences_popup': True}
     return TemplateResponse(request, 'learnscripture/preferences.html', c)
 
@@ -426,7 +420,7 @@ def dashboard(request):
          'catechisms_for_learning': identity.catechisms_for_learning(),
          'catechisms_for_reviewing': identity.catechisms_for_reviewing(),
          'next_verse_due': identity.next_verse_due(),
-         'title': 'Dashboard',
+         'title': t('dashboard-page-title'),
          'events': identity.get_dashboard_events(),
          'create_account_warning':
              identity.account is None,
@@ -538,7 +532,7 @@ def choose(request):
         active_section = "verseset"
 
     c = {
-        'title': 'Choose verses',
+        'title': t('choose-page-title'),
         'verseset_search_form': verseset_search_form
     }
 
@@ -606,7 +600,7 @@ def view_catechism_list(request):
                          session.LearningType.LEARNING)
 
     c = {'catechisms': TextVersion.objects.catechisms(),
-         'title': 'Catechisms',
+         'title': t('catechisms-page-title'),
          }
     return TemplateResponse(request, 'learnscripture/catechisms.html', c)
 
@@ -741,14 +735,14 @@ def view_verse_set(request, slug):
                     verse_set.set_type = VerseSetType.PASSAGE
                     verse_set.save()
                     verse_set.update_passage_id()
-                    messages.info(request, "Verse set converted to 'passage' type")
+                    messages.info(request, t('versesets-converted-to-passage'))
                     c['show_convert_to_passage'] = False
 
     if request.method == 'POST':
         if "drop" in request.POST and hasattr(request, 'identity'):
             refs_to_drop = request.identity.which_in_learning_queue(all_localized_references, version)
             request.identity.cancel_learning(refs_to_drop, version.slug)
-            messages.info(request, "Dropped %d verse(s) from learning queue." % len(refs_to_drop))
+            messages.info(request, t('versesets-dropped-verses', dict(count=len(refs_to_drop))))
 
     if hasattr(request, 'identity'):
         c['can_edit'] = request.identity.can_edit_verse_set(verse_set)
@@ -767,7 +761,7 @@ def view_verse_set(request, slug):
     c['verse_set'] = verse_set
     c['verse_list'] = verse_list
     c['version'] = version
-    c['title'] = "Verse set: %s" % verse_set.smart_name(version.language_code)
+    c['title'] = t('verseset-page-title', dict(name=verse_set.smart_name(version.language_code)))
     c['include_referral_links'] = True
 
     c.update(context_for_version_select(request))
@@ -814,9 +808,9 @@ def create_or_edit_set(request, set_type=None, slug=None):
         verse_set = None
         mode = 'create'
 
-    title = ('Edit verse set' if verse_set is not None
-             else 'Create selection set' if set_type == VerseSetType.SELECTION
-             else 'Create passage set')
+    title = (t('versesets-edit-set-page-title') if verse_set is not None
+             else t('versesets-create-selection-page-title') if set_type == VerseSetType.SELECTION
+             else t('versesets-create-passage-page-title'))
 
     c = {}
 
@@ -859,7 +853,7 @@ def create_or_edit_set(request, set_type=None, slug=None):
 
         form_is_valid = form.is_valid()
         if len(verse_dict) == 0:
-            form.errors.setdefault('__all__', form.error_class()).append("No verses in set")
+            form.errors.setdefault('__all__', form.error_class()).append(t('versesets-no-verses-error'))
             form_is_valid = False
 
         if form_is_valid:
@@ -893,7 +887,7 @@ def create_or_edit_set(request, set_type=None, slug=None):
                                       )):
                 public_verse_set_created.send(sender=verse_set)
 
-            messages.info(request, "Verse set '%s' saved!" % verse_set.name)
+            messages.info(request, t('versesets-set-saved', dict(name=verse_set.name)))
             return HttpResponseRedirect(reverse('view_verse_set', kwargs=dict(slug=verse_set.slug)))
 
     else:
@@ -1034,7 +1028,7 @@ def user_verses(request):
             verses = verses.order_by('text_order', 'version__slug')
 
     c = {
-        'title': 'Progress stats',
+        'title': t('user-verses-page-title'),
         'filter_form': filter_form,
         'results': get_paged_results(verses, request, PAGE_SIZE),
         'bible': text_type == TextType.BIBLE,
@@ -1047,7 +1041,7 @@ def user_verses(request):
 @require_identity
 def user_verse_sets(request):
     identity = request.identity
-    c = {'title': 'Verse sets',
+    c = {'title': t('user-verse-sets-page-title'),
          'chosen_verse_sets': identity.verse_sets_chosen(),
          }
     if identity.account is not None:
@@ -1066,13 +1060,13 @@ def user_verse_sets(request):
 # from the the same form as the login form.
 def password_reset_done(request):
     return TemplateResponse(request, 'learnscripture/password_reset_done.html', {
-        'title': 'Password reset started',
+        'title': t('accounts-password-reset-start-page-title'),
     })
 
 
 def password_reset_complete(request):
     return TemplateResponse(request, 'learnscripture/password_reset_complete.html', {
-        'title': 'Password reset complete',
+        'title': t('accounts-password-reset-complete-page-title'),
     })
 
 
@@ -1109,7 +1103,7 @@ def password_reset_confirm(request, uidb64=None, token=None):
     context = {
         'form': form,
         'validlink': validlink,
-        'title': 'Password reset',
+        'title': t('accounts-password-reset-page-title'),
     }
     return TemplateResponse(request, 'learnscripture/password_reset_confirm.html', context)
 
@@ -1129,7 +1123,7 @@ def password_change(request):
         form = password_change_form(user=account)
     context = {
         'form': form,
-        'title': 'Password change',
+        'title': t('accounts-password-change-page-title'),
     }
 
     return TemplateResponse(request, template_name, context)
@@ -1161,14 +1155,14 @@ def account_details(request):
         form = AccountDetailsForm(request.POST, instance=request.identity.account)
         if form.is_valid():
             form.save()
-            messages.info(request, "Account details updated, thank you")
+            messages.info(request, t('accounts-details-updated'))
             return HttpResponseRedirect(reverse('account_details'))
     else:
         form = AccountDetailsForm(instance=request.identity.account)
 
     return TemplateResponse(request, 'learnscripture/account_details.html',
                             {'form': form,
-                             'title': "Account details",
+                             'title': t('accounts-details-page-title'),
                              'url_after_logout': '/',
                              })
 
@@ -1241,7 +1235,7 @@ def natural_list(l):
 def donation_paypal_dict(account, url_start):
     return {
         "business": settings.PAYPAL_RECEIVER_EMAIL,
-        "item_name": "Donation to LearnScripture.net",
+        "item_name": t('donations-paypal-title'),
         "invoice": "account-%s-%s" % (account.id,
                                       timezone.now()),  # We don't need this, but must be unique
         "notify_url": "%s%s" % (url_start, reverse('paypal-ipn')),
@@ -1268,7 +1262,7 @@ def paypal_url_start_for_request(request):
 
 
 def donate(request):
-    c = {'title': 'Donate'}
+    c = {'title': t('donations-page-title')}
 
     account = account_from_request(request)
     if account is not None:
@@ -1288,12 +1282,12 @@ def pay_done(request):
         if identity.account is not None:
             return HttpResponseRedirect(reverse('dashboard'))
 
-    return TemplateResponse(request, 'learnscripture/pay_done.html', {'title': "Donation complete"})
+    return TemplateResponse(request, 'learnscripture/pay_done.html', {'title': t('donations-completed-page-title')})
 
 
 @csrf_exempt
 def pay_cancelled(request):
-    return TemplateResponse(request, 'learnscripture/pay_cancelled.html', {'title': "Donation cancelled"})
+    return TemplateResponse(request, 'learnscripture/pay_cancelled.html', {'title': t('donations-cancelled-page-title')})
 
 
 def referral_program(request):
@@ -1304,7 +1298,7 @@ def referral_program(request):
         referral_link = None
 
     return TemplateResponse(request, 'learnscripture/referral_program.html', {
-        'title': 'Referral program',
+        'title': t('referrals-page-title'),
         'referral_link': referral_link,
         'include_referral_links': True,
     })
@@ -1313,18 +1307,10 @@ def referral_program(request):
 def awards(request):
     award_classes = [AwardType.classes[t] for t in AwardType.values]
     awards = [cls(level=AnyLevel) for cls in award_classes if not cls.removed]
-    discovered_awards = []
-    hidden_awards = []
-    for award in awards:
-        if award.highest_level_achieved is None:
-            hidden_awards.append(award)
-        else:
-            discovered_awards.append(award)
 
     return TemplateResponse(request, 'learnscripture/awards.html', {
-        'title': 'Badges',
-        'discovered_awards': discovered_awards,
-        'hidden_awards': hidden_awards,
+        'title': t('awards-page-title'),
+        'awards': awards,
     })
 
 
@@ -1337,7 +1323,7 @@ def award(request, award_slug):
         raise Http404
     award_class = AwardType.classes[award_type]
     if award_class.removed:
-        return missing(request, "The ‘{0}’ award is an old award that is no longer used".format(award_class.title), status_code=410)
+        return missing(request, t('awards-removed', dict(name=award_class.title)), status_code=410)
     award = award_class(level=AnyLevel)
 
     levels = []
@@ -1369,7 +1355,7 @@ def award(request, award_slug):
             pass
 
     return TemplateResponse(request, 'learnscripture/award.html', {
-        'title': 'Badge - %s' % award.short_description(),
+        'title': t('awards-award-page-title', dict(name=award.short_description())),
         'award': award,
         'levels': levels,
         'account_top_award': account_top_award,
@@ -1400,7 +1386,7 @@ def groups(request):
     else:
         groups = groups.none()
     return TemplateResponse(request, 'learnscripture/groups.html', {
-        'title': 'Groups',
+        'title': t('groups-page-title'),
         'results': get_paged_results(groups, request, 10),
         'filter_form': filter_form,
         'query': query,
@@ -1424,12 +1410,12 @@ def group(request, slug):
 
         if 'leave' in request.POST:
             group.remove_user(account)
-            messages.info(request, "Removed you from group %s" % group.name)
+            messages.info(request, t('groups-removed-from-group', dict(name=group.name)))
             return HttpResponseRedirect(request.get_full_path())
         if 'join' in request.POST:
             if group.can_join(account):
                 group.add_user(account)
-                messages.info(request, "Added you to group %s" % group.name)
+                messages.info(request, t('groups-added-to-group', dict(name=group.name)))
             return HttpResponseRedirect(request.get_full_path())
 
     if account is not None:
@@ -1438,7 +1424,7 @@ def group(request, slug):
         in_group = False
 
     return TemplateResponse(request, 'learnscripture/group.html', {
-        'title': 'Group: %s' % group.name,
+        'title': t('groups-group-page-title', dict(name=group.name)),
         'group': group,
         'in_group': in_group,
         'can_join': group.can_join(account),
@@ -1474,7 +1460,7 @@ def group_wall(request, slug):
     results = get_paged_results(comments, request, GROUP_COMMENTS_PAGINATE_BY)
 
     c = {
-        'title': 'Group wall: %s' % group.name,
+        'title': t('groups-wall-page-title', dict(name=group.name)),
         'filter_form': filter_form,
         'group': group,
         'results': results,
@@ -1551,7 +1537,7 @@ def group_leaderboard(request, slug):
                        ),
         ),
         'group': group,
-        'title': "Leaderboard: {0}".format(group.name),
+        'title': t('groups-leaderboard-page-title', dict(name=group.name)),
         'leaderboard_filter_form': leaderboard_filter_form,
     }
     return TemplateResponse(request, 'learnscripture/leaderboard.html', c)
@@ -1571,11 +1557,11 @@ def create_or_edit_group(request, slug=None):
     if slug is not None:
         groups = groups_editable_for_request(request).filter(slug=slug)
         group = get_object_or_404(groups)
-        title = 'Edit group: %s' % group.name
+        title = t('groups-edit-page-title', dict(name=group.name))
         initial = {'invited_users': group.invited_users()}
     else:
         group = None
-        title = "Create group"
+        title = t('groups-create-page-title')
         initial = {}
 
     was_public = group.public if group is not None else False
@@ -1594,7 +1580,7 @@ def create_or_edit_group(request, slug=None):
 
             # Handle invitations
             group.set_invitation_list(form.cleaned_data['invited_users'])
-            messages.info(request, "Group details saved.")
+            messages.info(request, t('groups-group-created'))
             return HttpResponseRedirect(reverse('group', args=(group.slug,)))
     else:
         form = EditGroupForm(instance=group, initial=initial)
@@ -1621,7 +1607,7 @@ def group_select_list(request):
 
 def terms_of_service(request):
     return TemplateResponse(request, 'learnscripture/terms_of_service.html', {
-        'title': 'Terms of service',
+        'title': t('terms-of-service-page-title'),
     })
 
 
@@ -1640,13 +1626,14 @@ def contact(request):
     else:
         form = ContactForm(initial=initial)
     return TemplateResponse(request, 'learnscripture/contact.html', {
-        'title': 'Contact us',
+        'title': t('contact-form-page-title'),
         'form': form,
     })
 
 
 def send_contact_email(contact_form, account):
     email = contact_form.cleaned_data['email']
+    # Doesn't need i18n, only goes to admins
     mail.EmailMessage(subject="LearnScripture feedback",
                       body="""
 From: %(name)s
@@ -1677,7 +1664,7 @@ def activity_stream(request):
               .prefetch_related('comments', 'comments__author'))
     return TemplateResponse(request, 'learnscripture/activity_stream.html', {
         'results': get_paged_results(events, request, 40),
-        'title': "Recent activity",
+        'title': t('activity-page-title'),
         'following_ids': [] if viewer is None else [a.id for a in viewer.following.all()],
     })
 
@@ -1701,7 +1688,7 @@ def user_activity_stream(request, username):
     return TemplateResponse(request, 'learnscripture/user_activity_stream.html', {
         'results': get_paged_results(events, request, 40),
         'account': account,
-        'title': "Recent activity from %s" % account.username,
+        'title': t('activity-user-page-title', dict(username=account.username)),
     })
 
 
@@ -1713,7 +1700,7 @@ def activity_item(request, event_id):
 
     return TemplateResponse(request, 'learnscripture/activity_item.html', {
         'event': event,
-        'title': "Activity from %s" % event.account.username,
+        'title': t('activity-item-page-title', dict(username=event.account.username)),
     })
 
 

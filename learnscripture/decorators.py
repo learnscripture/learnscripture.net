@@ -7,6 +7,7 @@ from django.utils.functional import wraps
 from django.utils.http import urlquote
 
 from learnscripture import session
+from learnscripture.ftl_bundles import t
 
 
 def require_identity(view_func):
@@ -68,7 +69,7 @@ def require_account_with_redirect(view_func):
     def view(request, *args, **kwargs):
         if not hasattr(request, 'identity') or request.identity.account_id is None:
             response = render(request, 'learnscripture/login_and_redirect.html',
-                              {'title': 'Login',
+                              {'title': t('login-title'),
                                })
             add_never_cache_headers(response)
             return response

@@ -1,26 +1,28 @@
 {% extends "base_twocol.html" %}
 
+{% load ftl %}
+
 {% block leftcolumn %}
 
-  <h2>Description</h2>
+  <h2>{% ftlmsg 'awards-description-subtitle' %}</h2>
   <p>{{ award.full_description }}</p>
   <p style="text-align:center"> <img src="{{ STATIC_URL }}{{ award.image_medium }}"></p>
 
-  <h2>Achievers</h2>
+  <h2>{% ftlmsg 'awards-achievers-subtitle' %}</h2>
   {% if award.has_levels %}
-    {% if award.max_level > award.highest_level_achieved %}
-      <p>Highest level achieved so far: <b>Level {{ award.highest_level_achieved }}</b></p>
-    {% else %}
-      <p>Level {{ award.max_level }} is the highest level.</p>
-    {% endif %}
+    <p>{% ftlmsg 'awards-award-highest-level' level=award.max_level %}</p>
   {% endif %}
 
   {% for level, receivers_count, sample_usernames, sample_award in levels %}
     {% if award.has_levels %}
-      <h3>Level {{ level }}</h3>
+      <h3>{% ftlmsg 'awards-level-subtitle' level=level %}</h3>
       <p>{{ sample_award.full_description }}.</p>
     {% endif %}
-    <p>Total {{ receivers_count }} user(s){% if receivers_count > sample_usernames|length %}, including{% endif %}:</p>
+    {% if receivers_count > sample_usernames|length %}
+      <p>{% ftlmsg 'awards-level-achievers-truncated' count=receivers_count%}</p>
+    {% else %}
+      <p>{% ftlmsg 'awards-level-achievers-all' count=receivers_count%}</p>
+    {% endif %}
     <ul>
       {% for username in sample_usernames %}
         <li><a href="{% url 'user_stats' username %}">{{ username }}</a></li>
@@ -32,24 +34,24 @@
 
 
 {% block rightcolumn %}
-  <h3>See also</h3>
+  <h3>{% ftlmsg 'site-see-also' %}</h3>
   <ul>
-    <li><a href="{% url 'awards' %}">All available badges</a></li>
+    <li><a href="{% url 'awards' %}">{% ftlmsg 'awards-all-available-badges' %}</a></li>
     {% if request_account %}
-      <li><a href="{% url 'user_stats' request_account.username %}">Your badges</a></li>
+      <li><a href="{% url 'user_stats' request_account.username %}">{% ftlmsg 'awards-your-badges' %}</a></li>
     {% endif %}
 
   </ul>
 
   {{ block.super }}
 
-  <h3>Your level</h3>
+  <h3>{% ftlmsg 'awards-your-level' %}</h3>
 
   {% if account_top_award %}
     {% if account_top_award.has_levels %}
-      <p>You have this badge, at level {{ account_top_award.level }}</p>
+      <p>{% ftlmsg 'awards-you-have-this-award-at-level' level=account_top_award.level %}</p>
     {% else %}
-      <p>You have this badge.</p>
+      <p>{% ftlmsg 'awards-you-have-this-award' %}</p>
     {% endif %}
 
     <p style="text-align: center">
@@ -57,7 +59,7 @@
     </p>
   {% else %}
 
-    <p>You don't have this badge yet.</p>
+    <p>{% ftlmsg 'awards-you-dont-have-this-award' %}</p>
 
   {% endif %}
 

@@ -60,8 +60,8 @@ MemoryStage = make_choices('MemoryStage',
 
 # Also defined in Learn.elm
 TextType = make_choices('TextType',
-                        [('BIBLE', 'Bible'),
-                         ('CATECHISM', 'Catechism'),
+                        [('BIBLE', t_lazy('bibleverses-text-type-bible')),
+                         ('CATECHISM', t_lazy('bibleverses-text-type-catechism')),
                          ])
 
 
@@ -275,7 +275,7 @@ class VerseManager(models.Manager):
     def get_by_natural_key(self, version_slug, localized_reference):
         return self.get(version__slug=version_slug, localized_reference=localized_reference)
 
-    def text_search(self, query, version, limit=10):
+    def text_search(self, query, version, limit=10, offset=0):
         # First remove anything recognized by postgres as an operator.
         for s in SEARCH_CHARS:
             query = query.replace(s, " ")
@@ -296,8 +296,9 @@ class VerseManager(models.Manager):
              query @@ text_tsv
              AND version_id = %s
           ORDER BY rank DESC
-          LIMIT %s;
-""", [search_config] + word_params + [version.id, limit])
+          LIMIT %s
+          OFFSET %s;
+""", [search_config] + word_params + [version.id, limit, offset])
 
 
 class Verse(models.Model):
@@ -1064,7 +1065,7 @@ def fetch_parsed_reference(version, parsed_ref, max_length=MAX_VERSE_QUERY_SIZE)
                 used_ids.add(real.id)
 
     if len(retval) == 0:
-        raise InvalidVerseReference(t('bibleverses-no-verses-matched', dict(ref=parsed_ref.canonical_form())))
+        raise InvalidVerseReference(t('bibleverses-no-verses-matched-ref', dict(ref=parsed_ref.canonical_form())))
 
     if len(retval) > max_length:
         raise TooManyVerses(t('bibleverses-too-many-verses', dict(allowed=max_length)))
@@ -1267,13 +1268,15 @@ QUICK_FIND_SEARCH_LIMIT = 10
 
 
 def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
+               page=0,
+               page_size=QUICK_FIND_SEARCH_LIMIT,
                allow_searches=True):
     """
     Does a verse search based on reference or contents.
 
-    It returns a list of VerseSearchResult objects.
+    It returns (list of VerseSearchResult objects, more results available boolean)
 
-    It will return at most QUICK_FIND_SEARCH_LIMIT + 1 items
+    It will return at most page_size items
     """
     # Unlike fetch_localized_reference, this is tolerant with input.
     # It can still throw InvalidVerseReference for things that are obviously
@@ -1296,8 +1299,9 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
         # parsed_ref might be difference from final_ref, due to merged verses
         parsed_result_ref = parse_validated_localized_reference(version.language_code,
                                                                 result_ref)
-        return [VerseSearchResult(result_ref, verse_list,
-                                  parsed_ref=parsed_result_ref)]
+        return ([VerseSearchResult(result_ref, verse_list,
+                                   parsed_ref=parsed_result_ref)],
+                False)
 
     if not allow_searches:
         raise InvalidVerseReference(t('bibleverses-verse-reference-not-recognized'))
@@ -1305,10 +1309,12 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
     # Do a search:
     searcher = get_search_service(version.slug)
     if searcher:
-        return searcher(version, search_query)
+        return searcher(version, search_query, page, page_size)
 
-    results = Verse.objects.text_search(search_query, version, limit=QUICK_FIND_SEARCH_LIMIT + 1)
-    return [VerseSearchResult(r.localized_reference, [r]) for r in results]
+    results = list(Verse.objects.text_search(search_query, version,
+                                             limit=page_size + 1, offset=page * page_size))
+    more_results = len(results) > page_size
+    return [VerseSearchResult(r.localized_reference, [r]) for r in results[0:page_size]], more_results
 
 
 def get_whole_book(book_name, version, ensure_text_present=True):

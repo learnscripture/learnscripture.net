@@ -32,7 +32,7 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
         self.login(account)
         self.get_url('choose')
         self.click("#id-choose-verseset .accordion-heading")
-        self.fill({'input[name="set_type"]': "PASSAGE"})
+        self.fill({'[name="set_type"]': "PASSAGE"})
         self.fill({"#id_query": "Eph 2"})
         self.click("#id-search-btn")
 
@@ -105,12 +105,12 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
         self.fill_by_text({"form.quickfind select[name=book]": "John"})
         self.fill_by_text({"form.quickfind select[name=chapter_start]": "3"})
         self.fill_by_text({"form.quickfind select[name=verse_start]": "16"})
-        self.click("input[name=lookup]")
+        self.click("[name=lookup]")
 
         self.assertTextPresent("For this is the way God loved the world")
 
         # Check we can actually click on 'Learn' and it works.
-        self.click("#id-choose-individual input[name=learn_now]")
+        self.click("#id-choose-individual [name=learn_now]")
         self.set_preferences(wait_for_reload=True)
         self.assertEqual(self.get_element_text("#id-verse-header h2"), "John 3:16")
 
@@ -120,10 +120,10 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
         self.get_url('choose')
         self.click("#id-choose-individual .accordion-heading")
 
-        self.fill({'form.quickfind input[name=quick_find]': 'John 3:16'})
-        self.click("input[name=lookup]")
+        self.fill({'form.quickfind [name=quick_find]': 'John 3:16'})
+        self.click("[name=lookup]")
 
-        self.click('#id-choose-individual input[name=add_to_queue]')
+        self.click('#id-choose-individual [name=add_to_queue]')
         self.assertEqual([uvs.localized_reference for uvs in identity.verse_statuses.all()],
                          ['John 3:16'])
 
@@ -132,9 +132,9 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
         self.get_url('choose')
         self.click("#id-choose-individual .accordion-heading")
 
-        self.fill({'form.quickfind input[name=quick_find]': 'Gen 1:1'})
+        self.fill({'form.quickfind [name=quick_find]': 'Gen 1:1'})
         self.fill({"form.quickfind select[name=version]": "KJV"})
-        self.click("input[name=lookup]")
+        self.click("[name=lookup]")
 
         self.assertTextPresent("In the beginning God")
 
@@ -143,9 +143,9 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
         self.get_url('choose')
         self.click("#id-choose-individual .accordion-heading")
 
-        self.fill({'form.quickfind input[name=quick_find]': 'Gen 100:1'})
+        self.fill({'form.quickfind [name=quick_find]': 'Gen 100:1'})
         self.fill({"form.quickfind select[name=version]": "KJV"})
-        self.click("input[name=lookup]")
+        self.click("[name=lookup]")
 
         self.assertTextAbsent("In the beginning God")
         self.assertTextPresent("No verses matched 'Genesis 100:1'")
@@ -164,7 +164,7 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
         self.fill_by_text({"form.quickfind select[name=verse_start]": "16"})
         self.assertEqual(self.get_element_attribute("form.quickfind input[name=quick_find]", "value"),
                          "John 3:16")
-        self.click("input[name=lookup]")
+        self.click("[name=lookup]")
 
         self.assertTextPresent("For this is the way God loved the world")
 
@@ -176,7 +176,7 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
         # Drop-downs should change to Turkish
         self.assertEqual(self.get_element_text("form.quickfind select[name=book] option[value=BOOK0]"),
                          "Yaratılış")
-        self.click("input[name=lookup]")
+        self.click("[name=lookup]")
 
         self.assertTextPresent("Çünkü Tanrı dünyayı o kadar çok sevdi ki")
 
@@ -185,7 +185,7 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
         self.click("#id-choose-individual .accordion-heading")
 
         self.fill({'form.quickfind input[name=quick_find]': 'jhn 3:16'})
-        self.click("input[name=lookup]")
+        self.click("[name=lookup]")
         self.assertTextPresent("For this is the way God loved the world")
 
         # # Drop downs should be updated.
@@ -212,7 +212,7 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
         self.assertEqual(self.get_element_text("form.quickfind select[name=book] option:checked"),
                          "Yuhanna")
 
-        self.click("input[name=lookup]")
+        self.click("[name=lookup]")
 
         self.assertTextPresent("Çünkü Tanrı dünyayı o kadar çok sevdi ki")
 
@@ -222,7 +222,7 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
 
         self.fill({'form.quickfind input[name=quick_find]': 'firmament evening'})
         self.fill({"form.quickfind select[name=version]": "KJV"})
-        self.click("input[name=lookup]")
+        self.click("[name=lookup]")
 
         self.assertTextPresent("And God called the")
 
@@ -234,7 +234,7 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
 
         # Testing for handling accents and stemming correctly
         self.fill({'form.quickfind input[name=quick_find]': 'övünebilirsiniz'})
-        self.click("input[name=lookup]")
+        self.click("[name=lookup]")
 
         self.assertTextPresent("Öyleyse neyle övünebiliriz?")
         self.assertTextPresent("Romalılar 3:27")

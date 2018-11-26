@@ -27,7 +27,8 @@ then they said among the nations,
 class TestEsvSearch(SetupEsvMixin, TestBase):
 
     def test_search(self):
-        l = search_esv(self.esv, "God loved world gave")
+        l, more_results = search_esv(self.esv, "God loved world gave", 0, 10)
         self.assertEqual(len(l), 1)
         v = l[0]
         self.assertEqual(v.localized_reference, "John 3:16")
+        self.assertEqual(more_results, False)

@@ -1,3 +1,5 @@
+{% load ftl %}
+
 {% for event in results.items %}
   {% include "learnscripture/activity_event_inc.html" %}
 {% endfor %}
@@ -5,12 +7,9 @@
   <div class="paging">
     {# For PJAX 'show more', this div gets replaced with the next #}
     {# page of results, plus a new 'show more' link #}
-    <span class="paging-part">
-      Showing {{ results.shown_count }} of {{ results.total }} events
-    </span>
     {% if results.more %}
-      <span class="paging-part"><a data-pjax-more href="{{ results.more_link }}">Show more</a></span>
+      <span class="paging-part"><a data-pjax-more href="{{ results.more_link }}">{% ftlmsg 'pagination-show-more' %}</a></span>
     {% endif %}
-    <span class="paging-part"><a href="#id-page-top">Jump to top</a></span>
+    <span class="paging-part"><a href="#id-page-top">{% ftlmsg 'pagination-jump-to-top' %}</a></span>
   </div>
 </div>

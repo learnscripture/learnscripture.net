@@ -104,7 +104,7 @@ class AccountTestMixin(object):
         self.fill({"#id_signup-email": email,
                    "#id_signup-username": username,
                    "#id_signup-password": password})
-        self.submit('input[name=signup]')
+        self.submit('[name=signup]')
 
 
 def sqla_tear_down():
@@ -124,7 +124,7 @@ class LoginMixin(object):
     def fill_in_login_form(self, account):
         self.fill({"#id_login-email": account.email,
                    "#id_login-password": "password"})
-        self.submit("input[name=signin]")
+        self.submit("[name=signin]")
 
     def login(self, account, shortcut=True):
         if shortcut:

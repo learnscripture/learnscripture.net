@@ -2,26 +2,25 @@
 
 {% load form_rendering %}
 {% load fiber_tags %}
+{% load ftl %}
+{% load capture_tags %}
 
 {% block content %}
 
-  {% show_content "contact_page_top" %}
+  {% ftlmsg 'contact-form-page-top-html' %}
 
   <form action="" id="id_contact-form" method="POST">
     {% csrf_token %}
 
     {{ form|render_form }}
 
-
     <div class="actions">
-      <input type="submit" name="send" value="Send" class="btn primary" />
+      <button type="submit" name="send" class="btn primary">{% ftlmsg 'contact-form-send-button' %}</button>
     </div>
 
   </form>
 
-
-  <p>Alternatively you can:</p>
-  <p style="margin-left: 40px; ">Email us: <a href="mailto:contact@learnscripture.net">contact@learnscripture.net</a></p>
-  <p style="margin-left: 40px; ">Tweet us:&nbsp;<a class="twitter-mention-button" data-related="learnscripture" href="https://twitter.com/intent/tweet?screen_name=learnscripture">Tweet to @learnscripture</a> <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script></p>
+  {% ftlmsg 'contact-form-page-bottom-html' %}
+  <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 
 {% endblock %}

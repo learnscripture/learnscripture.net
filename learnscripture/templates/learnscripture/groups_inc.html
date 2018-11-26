@@ -1,12 +1,14 @@
+{% load ftl %}
+
 {% if 'query' in request.GET %}
   {% if query == '' %}
-    <p>Please enter a search term.</p>
+    <p>{% ftlmsg 'groups-search-enter-search-term' %}</p>
   {% else %}
-    <h2>Search results:</h2>
+    <h2>{% ftlmsg 'groups-search-results-subtitle' %}</h2>
     {% if results.items %}
       {% include "learnscripture/groups_results_inc.html" %}
     {% else %}
-      <p>Sorry, no groups found!</p>
+      <p>{% ftlmsg 'groups-search-no-results' %}</p>
     {% endif %}
   {% endif %}
 {% endif %}

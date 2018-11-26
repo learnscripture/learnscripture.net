@@ -1,17 +1,19 @@
 {% extends "base.html" %}
 
+{% load ftl %}
+
 {% block content %}
 
-  <p>The following badges are available.</p>
+  <p>{% ftlmsg 'awards-the-following-are-available' %}</p>
 
   <table class="bordered-table award">
     <thead>
       <tr>
-        <th>Icon</th>
-        <th>Description</th>
+        <th>{% ftlmsg 'awards-icon' %}</th>
+        <th>{% ftlmsg 'awards-description' %}</th>
     </thead>
     <tbody>
-      {% for award in discovered_awards %}
+      {% for award in awards %}
         <tr>
           <td>
             <a href="{% url 'award' award.slug %}">
@@ -22,38 +24,12 @@
             <h3>{{ award.short_description }}</h3>
             <p>{{ award.full_description }}</p>
             {% if award.has_levels and award.highest_level_achieved < award.max_level %}
-              <p>Highest level achieved so far: <b>Level {{ award.highest_level_achieved }}</b></p>
+              <p>{% ftlmsg 'award-highest-level-achieved-html' level=award.highest_level_achieved %}</p>
             {% endif %}
-            <p><a href="{% url 'award' award.slug %}">People with {{ award.short_description }} badge</a></p>
+            <p><a href="{% url 'award' award.slug %}">{% ftlmsg 'award-people-with-award' name=award.short_description %}</a></p>
           </td>
         </tr>
       {% endfor %}
-
-      {% if hidden_awards %}
-        <tr>
-          <td>
-            <img src="{{ STATIC_URL }}img/awards/award_QUESTION_level_any_100.png">
-          </td>
-          <td>
-            <h3>???</h3>
-            <p>
-              {% if hidden_awards|length == 1 %}
-
-                There is also <b>one badge</b> that has not been discovered yet.  It will be
-                unveiled when at least one person has achieved it.
-
-              {% else %}
-
-                There are also <b>{{ hidden_awards|length }} badges</b> that have not been
-                discovered yet.  They will be unveiled as soon as they are achieved by at
-                least one person.
-
-              {% endif %}
-            </p>
-          </td>
-        </tr>
-      {% endif %}
-
     </tbody>
   </table>
 

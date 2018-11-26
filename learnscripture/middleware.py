@@ -5,6 +5,7 @@ from datetime import datetime
 
 from django.conf import settings
 from django.http import HttpResponseRedirect
+from django.utils import translation as gettext_translation
 from django.utils import timezone
 from django.utils.http import urlencode
 from django.utils.translation import LANGUAGE_SESSION_KEY
@@ -35,6 +36,10 @@ def activate_language_from_request(get_response):
             language_code = request.session.get(LANGUAGE_SESSION_KEY, settings.LANGUAGE_CODE)
         request.LANGUAGE_CODE = language_code
         with override(language_code, deactivate=True):
+            # For some things, e.g. 'timeuntil' templatetag, it is useful to
+            # have gettext translation available as well, at least
+            # until we have a replacement.
+            gettext_translation.activate(language_code)
             retval = get_response(request)
             return retval
 

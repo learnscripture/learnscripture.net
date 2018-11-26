@@ -237,14 +237,14 @@ class PasswordResetTestsBase:
         self.get_url('login')
         self.fill({'#id_login-email':
                    'not_a_real_email@email.com'})
-        self.submit('input[name=forgotpassword]')
+        self.submit('[name=forgotpassword]')
         self.assertEqual(len(mail.outbox), 0)
 
     def _test_confirm_start(self):
         self.get_url('login')
         self.fill({'#id_login-email':
                    self.account.email})
-        self.submit('input[name=forgotpassword]')
+        self.submit('[name=forgotpassword]')
         self.assertEqual(len(mail.outbox), 1)
         return self._read_signup_email(mail.outbox[0])
 
@@ -330,7 +330,7 @@ class PasswordChangeTestsBase:
             '#id_new_password1': 'newpassword',
             '#id_new_password2': 'newpassword',
         })
-        self.submit('.maincontent input[type="submit"]')
+        self.submit('.maincontent [type="submit"]')
         self.assertTextPresent("Your password was changed.")
 
         # Should be logged in:

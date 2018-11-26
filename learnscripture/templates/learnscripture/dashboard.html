@@ -17,12 +17,12 @@
   {% endif %}
 
   <div id="id-homescreen-install-prompt" class="actionset">
-    <h2>Add to home screen</h2>
+    <h2>{% ftlmsg 'dashboard-add-to-home-screen-title' %}</h2>
     <div class="actionset">
       <form>
-        <button type="button" class="btn">Add</button>
+        <button type="button" class="btn">{% ftlmsg 'dashboard-add-to-home-screen-button' %}</button>
       </form>
-      <p>You can add this app to your home screen for a better app experience.</p>
+      <p>{% ftlmsg 'dashboard-add-to-home-screen-explanation' %}</p>
     </div>
   </div>
 
@@ -94,9 +94,11 @@
     <div class="actionset">
       <form action="" method="POST">
         {% csrf_token %}
-        <input type="submit" name="continue_session" class="btn primary" value="Continue">
+        <button type="submit" name="continue_session" class="btn primary">
+          {% ftlmsg 'dashboard-continue-button' %}
+        </button>
       </form>
-      <p>You have an unfinished session.
+      <p>{% ftlmsg 'dashboard-unfinished-notice' %}
         {% if unfinished_session_first_uvs %}
           {% if unfinished_session_first_uvs.verse_set and unfinished_session_first_uvs.verse_set.is_passage %}
             ({{ unfinished_session_first_uvs.verse_set.smart_name_dict|lookup:unfinished_session_first_uvs.version.language_code }})
@@ -106,12 +108,12 @@
         {% endif %}
       </p>
       <p id="id-unfinished-session-unsaved-data-warning" style="display:none;">
-        <b>Continue the session to sync unsaved data.</b>
+        <b>{% ftlmsg 'dashboard-unfinished-notice-part-2' %}</b>
       </p>
     </div>
   </div>
 
-  <h2>Review</h2>
+  <h2>{% ftlmsg 'dashboard-review-title' %}</h2>
 
   <div class="actionset">
 
@@ -124,28 +126,29 @@
           <input type="hidden" name="verse_set_id" value="{{ cvs.verse_set.id }}" />
           <input type="hidden" name="version_id" value="{{ cvs.version.id }}" />
           {% if cvs.splittable %}
-            <input type="submit" name="reviewpassage" class="btn primary" value="Whole passage"
-                   id="id-reviewpassage-btn-{{ cvs.id }}" /><br/>
-            <input type="submit" name="reviewpassagenextsection" class="btn primary"
-                   value="One section ({{ cvs.next_section_verse_count }} vss)"
-                   id="id-reviewpassage-sections-btn-{{ cvs.id }}" /><br/>
+            <button type="submit" name="reviewpassage" class="btn primary"
+                    id="id-reviewpassage-btn-{{ cvs.id }}"
+                    >{% ftlmsg 'dashboard-review-whole-passage-button' %}</button><br/>
+            <button type="submit" name="reviewpassagenextsection" class="btn primary"
+                    id="id-reviewpassage-sections-btn-{{ cvs.id }}"
+                    >{% ftlmsg 'dashboard-review-one-section-button' verse_count=cvs.next_section_verse_count %}</button><br/>
           {% else %}
-            <input type="submit" name="reviewpassage" class="btn primary" value="Review"
-                   id="id-reviewpassage-btn-{{ cvs.id }}" /><br/>
+            <button type="submit" name="reviewpassage" class="btn primary"
+                    id="id-reviewpassage-btn-{{ cvs.id }}"
+                    >{% ftlmsg 'dashboard-review-button' %}</button><br/>
 
           {% endif %}
-          <input type="submit" name="cancelpassage" class="btn" value="Cancel"
-                 id="id-cancelpassage-btn-{{ cvs.id }}" /><br/>
+          <button type="submit" name="cancelpassage" class="btn"
+                  id="id-cancelpassage-btn-{{ cvs.id }}"
+                  >{% ftlmsg 'dashboard-cancel-learning' %}</button><br/>
         </form>
         <h3><a href="{% url 'view_verse_set' cvs.verse_set.slug %}?version={{ cvs.version.slug }}">{{ cvs.verse_set.smart_name_dict|lookup:cvs.version.language_code }}</a> ({{ cvs.version.short_name }})<br/>
         </h3>
         <div>
           {% if cvs.needs_testing_count == cvs.total_verse_count %}
-            This passage is due for review
-            ({{ cvs.total_verse_count }} verse{{ cvs.total_verse_count|pluralize }}).
+            {% ftlmsg 'dashboard-passage-due-for-review' verse_count=cvs.total_verse_count %}
           {% else %}
-            Part of this passage is due for review
-            ({{ cvs.needs_testing_count }}/{{ cvs.total_verse_count }} verses).
+            {% ftlmsg 'dashboard-passage-part-due-for-review' needs_testing_count=cvs.needs_testing_count total_verse_count=cvs.total_verse_count %}
           {% endif %}
         </div>
       </div>
@@ -162,14 +165,13 @@
       <div class="addclearfix">
         <form action="" method="POST">
           {% csrf_token %}
-          <input type="submit" name="reviewbiblequeue" class="btn primary" value="Review" />
+          <button type="submit" name="reviewbiblequeue" class="btn primary">{% ftlmsg 'dashboard-review-button' %}</button>
         </form>
 
-        <p>You've currently got {{ review_verses_queue|length }}
-          verse{{review_verses_queue|length|pluralize }} due for review.
+        <p>{% ftlmsg 'dashboard-verses-for-review-count' count=review_verses_queue|length %}
         </p>
 
-        <p>Verses coming up:
+        <p>{% ftlmsg 'dashboard-verses-coming-up' %}
           {% include 'learnscripture/verselist.html' with verselist=review_verses_queue %}
         </p>
       </div>
@@ -187,13 +189,13 @@
         <div class="addclearfix">
           <form action="" method="POST">
             {% csrf_token %}
-            <input type="submit" name="reviewcatechismqueue" class="btn primary" value="Review" />
+            <button type="submit" name="reviewcatechismqueue" class="btn primary">{% ftlmsg 'dashboard-review-button' %}</button>
             <input type="hidden" name="catechism_id" value="{{ catechism.id }}">
           </form>
 
           <h3><a href="{% url 'view_catechism' catechism.slug %}">{{ catechism.full_name }}</a></h3>
 
-          <p>You've currently got {{ catechism.needs_reviewing_total }} question(s) due for review.</p>
+          <p>{% ftlmsg 'dashboard-catechism-questions-for-review-count' count=catechism.needs_reviewing_total %}</p>
           <br><br>
         </div>
 
@@ -205,17 +207,17 @@
     {#### Nothing ####}
 
     {% if not passages_for_reviewing and not review_verses_queue and not catechisms_for_reviewing %}
-      <p>Nothing in your general queue needs reviewing at this point in time.
+      <p>{% ftlmsg 'dashboard-general-queue-empty' %}
         {% if next_verse_due %}
           <br/>
-          Next item due for review: <b>{{ next_verse_due.short_title }}</b> in {{ next_verse_due.next_test_due|timeuntil }}
+          {% ftlmsg 'dashboard-next-item-due-html' title=next_verse_due.short_title timeuntil=next_verse_due.next_test_due|timeuntil %}
         {% endif %}
       </p>
     {% endif %}
   </div>
 
 
-  <h2>Learn</h2>
+  <h2>{% ftlmsg 'dashboard-learn-title' %}</h2>
 
 
   <div class="actionset">
@@ -228,19 +230,22 @@
           {% csrf_token %}
           <input type="hidden" name="verse_set_id" value="{{ cvs.verse_set.id }}" />
           <input type="hidden" name="version_id" value="{{ cvs.version.id }}" />
-          <input type="submit" name="learnpassage" class="btn primary"
-                 {% if cvs.tested_total == 0 %}
-                 value="Start learning"
-                 {% else %}
-                 value="Continue learning"
-                 {% endif %}
-                 id="id-learnpassage-btn-{{ cvs.id }}" /><br>
-          <input type="submit" name="cancelpassage" class="btn" value="Cancel"
-                 id="id-cancelpassage-btn-{{ cvs.id }}" />
+          <button type="submit" name="learnpassage" class="btn primary"
+                  id="id-learnpassage-btn-{{ cvs.id }}">
+            {% if cvs.tested_total == 0 %}
+              {% ftlmsg 'dashboard-learn-start-learning-button' %}
+            {% else %}
+              {% ftlmsg 'dashboard-learn-continue-learning-button' %}
+            {% endif %}
+          </button><br>
+          <button type="submit" name="cancelpassage" class="btn"
+                  id="id-cancelpassage-btn-{{ cvs.id }}">
+            {% ftlmsg 'dashboard-cancel-learning' %}
+          </button>
         </form>
         <h3><a href="{% url 'view_verse_set' cvs.verse_set.slug %}?version={{ cvs.version.slug }}">{{ cvs.verse_set.smart_name_dict|lookup:cvs.version.language_code }}</a> ({{ cvs.version.short_name }})</h3>
         {% if cvs.tested_total == 0 %}
-          <p>You've queued this passage for learning.</p>
+          <p>{% ftlmsg 'dashboard-passage-queued' %}</p>
         {% else %}
           {% if cvs.needs_review_total > 0 %}
             <p>{% ftlmsg 'dashboard-passages-youve-seen-verses-with-review-due-html' tested_total=cvs.tested_total needs_review_total=cvs.needs_review_total untested_total=cvs.untested_total %}</p>
@@ -269,7 +274,7 @@
                 {% endif %}
                 >
             {% csrf_token %}
-            <input type="submit" name="learnbiblequeue" class="btn primary" value="Learn" /><br /><input type="submit" name="clearbiblequeue" class="btn" value="Clear" />
+            <button type="submit" name="learnbiblequeue" class="btn primary">{% ftlmsg 'dashboard-learn-button' %}</button><br /><button type="submit" name="clearbiblequeue" class="btn">{% ftlmsg 'dashboard-clear-queue-button' %}</button>
             {% if verse_set %}
               <input type="hidden" name="verse_set_id" value="{{ verse_set.id }}" />
             {% endif %}
@@ -279,13 +284,17 @@
             <h3><a href="{% url 'view_verse_set' verse_set.slug %}">{{ verse_set.smart_name_dict|lookup:request.identity.default_language_code }}</a></h3>
           {% else %}
             {% if not forloop.first %}
-              <h3>Other verses</h3>
+              <h3>{% ftlmsg 'dashboard-learn-other-verses' %}</h3>
             {% endif %}
           {% endif %}
 
-          <p>You've queued {{ queue|length }} new verse{{ queue|length|pluralize }} for learning{% if verse_set %} in this set{% endif %}.</p>
+          {% if verse_set %}
+            <p>{% ftlmsg 'dashboard-queued-verses-in-set' count=queue|length %}</p>
+          {% else %}
+            <p>{% ftlmsg 'dashboard-queued-verses' count=queue|length %}</p>
+          {% endif %}
 
-          <p>Verses coming up:
+          <p>{% ftlmsg 'dashboard-verses-coming-up' %}
             {% include 'learnscripture/verselist.html' with verselist=queue %}
           </p>
           {% if not forloop.last %}<hr>{% endif %}
@@ -303,16 +312,15 @@
         <div class="addclearfix">
           <form action="" method="POST">
             {% csrf_token %}
-            <input type="submit" name="learncatechismqueue" class="btn primary" value="Learn" /><br /><input type="submit" name="clearcatechismqueue" class="btn" value="Cancel" />
+            <button type="submit" name="learncatechismqueue" class="btn primary">{% ftlmsg 'dashboard-learn-button' %}</button><br /><button type="submit" name="clearcatechismqueue" class="btn">{% ftlmsg 'dashboard-cancel-learning' %}</button>
             <input type="hidden" name="catechism_id" value="{{ catechism.id }}">
           </form>
 
           <h3><a href="{% url 'view_catechism' catechism.slug %}">{{ catechism.full_name }}</a></h3>
           {% if catechism.tested_total == 0 %}
-            <p>You've queued this catechism for learning, {{ catechism.untested_total }} questions total.</p>
+            <p>{% ftlmsg 'dashboard-catechism-question-count' count=catechism.untested_total %}</p>
           {% else %}
-            <p>You've seen {{ catechism.tested_total }} question(s) so far,
-              with {{ catechism.untested_total }} to go.</p>
+            <p>{% ftlmsg 'dashboard-catechism-learnt-and-remanining-count' started_count=catechism.tested_total remaining_count=catechism.untested_total %}</p>
           {% endif %}
         </div>
 
@@ -324,24 +332,25 @@
     {#### Nothing ####}
     {% if not passages_for_learning and not learn_verses_queues and not catechisms_for_learning %}
       <div class="addclearfix">
-        <p>Nothing currently in your queue for learning.</p>
+        <p>{% ftlmsg 'dashboard-learn-nothing-in-queue' %}</p>
       </div>
     {% endif %}
 
   </div>
 
-  <h2>Choose</h2>
+  <h2>{% ftlmsg 'dashboard-choose-title' %}</h2>
 
   <div class="actionset">
-    <p>When you're done with the above — <a href="{% url 'choose' %}">choose some verses or a passage to learn.</a></p>
+    {% url 'choose' as choose_url %}
+    <p>{% ftlmsg 'dashboard-choose-link-html' url=choose_url %}</p>
 
   </div>
 
   <div id="id-firefox-homescreen-install-prompt" class="hide">
-    <h2>Add to home screen</h2>
+    <h2>{% ftlmsg 'dashboard-add-to-home-screen-title' %}</h2>
     <div id="id-firefox-homescreen-install-prompt" class="borderedbox">
-      <p>You can add this app to your home screen for a better app experience.<br>
-        Use the homescreen icon in the menu bar that looks like this: <img src="{{ STATIC_URL }}img/firefox_add_to_home_screen.png" />
+      <p>{% ftlmsg 'dashboard-add-to-home-screen-explanation' %}.<br>
+        {% ftlmsg 'dashboard-add-to-home-screen-menu-bar-instructions' %} <img src="{{ STATIC_URL }}img/firefox_add_to_home_screen.png" />
       </p>
     </div>
   </div>
@@ -356,33 +365,35 @@
     {% include 'learnscripture/session.html' %}
   {% endif %}
 
-  <h3>Today's stats</h3>
+  <h3>{% ftlmsg 'dashboard-todays-stats-title' %}</h3>
 
   <div id="id-stats-block">
     {% include 'learnscripture/sessionstats.html' %}
   </div>
 
-  <h3>Your groups</h3>
+  <h3>{% ftlmsg 'dashboard-your-groups-title' %}</h3>
 
   {% if groups %}
     <ul class="grouplist">
       {% for group in groups %}
         <li>{{ group|group_link }} »
           <a
-       title="leaderboard"
-       href="{% url 'group_leaderboard' group.slug %}?thisweek">Leaderboard <i class="icon-leaderboard icon-replace"></i></a></li>
+             href="{% url 'group_leaderboard' group.slug %}?thisweek">{% ftlmsg 'leaderboards-leaderboard' %} <i class="icon-leaderboard icon-replace"></i>
+          </a>
+        </li>
       {% endfor %}
       {% if more_groups %}
-        <li><a href="{% url 'user_stats' request_account.username %}#groups">(see all)</a></li>
+        <li><a href="{% url 'user_stats' request_account.username %}#groups">{% ftlmsg 'dashboard-groups-see-all' %}</a></li>
       {% endif %}
 
     </ul>
-    <div class="note"><a href="{% url 'groups' %}">View other groups</a></div>
+    <div class="note"><a href="{% url 'groups' %}">{% ftlmsg 'dashboard-view-other-groups-link' %}</a></div>
   {% else %}
-    <div>You're not in any groups yet. Why not <a href="{% url 'groups' %}">join a group?</a></div>
+    {% url 'gruups' as groups_url %}
+    <div>{% ftlmsg 'dashboard-why-not-join-a-group-html' url=groups_url %}</div>
   {% endif %}
 
-  <h3>News <a href="{% url 'activity_stream' %}">(see more)</a></h3>
+  <h3>{% ftlmsg 'dashboard-news-title' %}</h3>
 
   <div class="eventstream">
     <ul>
@@ -390,10 +401,10 @@
         <li>
           <span class="commentindicator">
             {% if event.accepts_comments %}
-              <a href="{{ event.get_absolute_url }}" title="View/add comments"><i class="icon-comment"></i> <span class="commentcount">{{ event.comment_count }}</span>
+              <a href="{{ event.get_absolute_url }}" title="{% ftlmsg 'comments-view-or-add-comments-tooltip' %}"><i class="icon-comment"></i> <span class="commentcount">{{ event.comment_count }}</span>
               </a>
             {% else %}
-              <a href="{{ event.get_absolute_url }}" title="View more"><i class="icon-link"></i></a>
+              <a href="{{ event.get_absolute_url }}"><i class="icon-link"></i></a>
             {% endif %}
           </span>
           {{ event.render_html_dict|lookup:request.identity.default_language_code }}
@@ -402,6 +413,8 @@
       {% endfor %}
     </ul>
   </div>
+
+  <a href="{% url 'activity_stream' %}">{% ftlmsg 'dashboard-more-news-link' %}</a>
 
 
   <div id="id-dashboard-script-data"

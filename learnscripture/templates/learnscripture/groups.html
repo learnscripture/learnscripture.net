@@ -1,10 +1,9 @@
 {% extends "base.html" %}
+{% load ftl %}
 
 {% block content %}
-
-  <p>By joining groups, you can more easily compare your progress to people that
-    you know or are associated with. Search for groups below,
-    or <a href="{% url 'create_group' %}">create your own</a>.
+  {% url 'create_group' as create_group_url %}
+  <p>{% ftlmsg 'groups-list-intro-html' create_group_url=create_group_url %}
   </p>
   <br>
 
@@ -13,10 +12,10 @@
         data-pjax-more-results-container=".more-results-container"
         >
     <div class="form-row">
-      <label for="id_query">Search:</label>
+      <label for="id_query">{% ftlmsg 'groups-search-label' %}</label>
       <div class="input input-line">
         {{ filter_form.query }}
-        <input type="submit" class="btn primary" value="Search" id="id-search-btn" />
+        <button type="submit" class="btn primary" id="id-search-btn">{% ftlmsg 'groups-search-button' %}</button>
       </div>
     </div>
   </form>
