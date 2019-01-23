@@ -40,28 +40,13 @@ PreferencesForm.base_fields['default_bible_version'].required = True
 
 
 class AccountDetailsForm(forms.ModelForm):
-    remind_after = forms.ChoiceField(choices=[(0, 'Never'),
-                                              (1, 'after 1 day'),
-                                              (2, 'after 2 days'),
-                                              (3, 'after 3 days')],
-                                     label="Send first reminder:"
-                                     )
-
-    remind_every = forms.ChoiceField(choices=[(0, 'Never'),
-                                              (1, 'every day'),
-                                              (2, 'every 2 days'),
-                                              (3, 'every 3 days'),
-                                              (7, 'every week')],
-                                     label="Then remind:")
 
     class Meta:
         model = Account
         fields = ["first_name",
                   "last_name",
                   "email",
-                  "is_under_13",
-                  "remind_after",
-                  "remind_every"]
+                  "is_under_13"]
 
     def save(self, *args, **kwargs):
         if self.instance.id is not None:

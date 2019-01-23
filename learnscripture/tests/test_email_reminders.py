@@ -106,7 +106,7 @@ class EmailReminderTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBas
         u = urllib.parse.urlparse(link)
         urllib.parse.urlunparse(('', '', u.path, u.params, u.query, u.fragment))
         r1 = self.client.get(link, follow=True)
-        self.assertContains(r1, "Send first reminder")
+        self.assertContains(r1, "Personal information")
 
 
 class ReminderBounceTests(AccountTestMixin, TestBase):
