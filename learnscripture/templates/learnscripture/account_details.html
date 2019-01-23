@@ -19,16 +19,6 @@
     {{ form.first_name|render_field }}
     {{ form.last_name|render_field }}
 
-    <h2>Email reminders</h2>
-
-    <p>We can remind you if you have items that need reviewing:</p>
-
-    {{ form.remind_after|render_field }}
-    {{ form.remind_every|render_field }}
-
-    <p>Email reminders will stop automatically if you stop using the site
-      for 6 months.</p>
-
     <div class="actions">
       <input id="id-save-btn" type="submit" value="Save" class="btn primary">
     </div>
