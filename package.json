@@ -36,7 +36,7 @@
     "uglify-es": "^3.3.9",
     "uglifyjs-webpack-plugin": "^1.2.2",
     "webpack": "^3.8.1",
-    "webpack-bundle-tracker": "^0.2.0",
+    "webpack-bundle-tracker": "^0.3.0",
     "webpack-dev-server": "^2.9.5"
   },
   "dependencies": {
@@ -46,6 +46,7 @@
     "jquery": "^3.2.1",
     "jquery-pjax": "^2.0.1",
     "jquery-ui": "^1.12.1",
+    "n": "^2.1.12",
     "npm": "^5.6.0"
   }
 }
