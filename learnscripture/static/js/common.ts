@@ -204,8 +204,6 @@ $(document).ready(function() {
     $(document).on('pjax:send', function(ev) {
         var $container = $(ev.target);
         $container.addClass("waiting-pjax");
-        var pos = $container.offset();
-        $('#id-pjax-loading').css({ "left": pos.left.toString() + "px", "top": pos.top.toString() + "px" }).show();
     });
 
     // We have to use 'pjax:beforeReplace' here instead of 'pjax:complete'
@@ -216,7 +214,6 @@ $(document).ready(function() {
     $(document).on('pjax:beforeReplace', function(ev) {
         var $container = $(ev.target);
         $container.removeClass("waiting-pjax");
-        $('#id-pjax-loading').hide();
     });
 
 });
