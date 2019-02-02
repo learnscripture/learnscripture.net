@@ -162,7 +162,6 @@ groups-details-join-privacy-note = Joining groups is a public action, unless the
           private.
 
 
-
 # Shown when the user is a member
 groups-details-status-member = You are a member of this group.
 
