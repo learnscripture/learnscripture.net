@@ -1,5 +1,10 @@
 ## Comments.
 
+# Title for a list of comments
+comments-comment-list-title = Comments
+
+
+
 # Link that displays box for writing comment
 comments-add-comment-link = Add comment
 
