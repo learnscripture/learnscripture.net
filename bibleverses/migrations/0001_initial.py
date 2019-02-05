@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from django.db import models, migrations
 import autoslug.fields
-import jsonfield.fields
 import django.db.models.deletion
 import django.utils.timezone
 from django.conf import settings
 import bibleverses.fields
+import django.contrib.postgres.fields
 
 
 class Migration(migrations.Migration):
@@ -125,7 +125,7 @@ class Migration(migrations.Migration):
                 ('version_slug', models.CharField(default='', max_length=20)),
                 ('reference', models.CharField(max_length=100)),
                 ('hash', models.CharField(max_length=40)),
-                ('suggestions', jsonfield.fields.JSONField(default=dict)),
+                ('suggestions',  django.contrib.postgres.fields.JSONField(default=dict)),
             ],
             options={
             },
