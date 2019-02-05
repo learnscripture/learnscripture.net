@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from django.db import models, migrations
 import django.utils.timezone
-import jsonfield.fields
 from django.conf import settings
+import django.contrib.postgres.fields
 
 
 class Migration(migrations.Migration):
@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 ('message_html', models.TextField()),
                 ('event_type', models.PositiveSmallIntegerField(choices=[(1, 'General'), (2, 'New account'), (3, 'Award received'), (4, 'Points milestone'), (5, 'Verses started milestone'), (6, 'Verses finished milestone'), (7, 'Verse set created'), (8, 'Started learning a verse set'), (9, 'Award lost'), (10, 'Group joined'), (11, 'Group created'), (12, 'Started learning catechism'), (13, 'New comment')])),
                 ('weight', models.PositiveSmallIntegerField(default=10)),
-                ('event_data', jsonfield.fields.JSONField(default=dict, blank=True)),
+                ('event_data', django.contrib.postgres.fields.JSONField(default=dict, blank=True)),
                 ('created', models.DateTimeField(default=django.utils.timezone.now, db_index=True)),
                 ('url', models.CharField(max_length=255, blank=True)),
                 ('account', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),

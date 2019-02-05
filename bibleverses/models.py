@@ -10,7 +10,7 @@ from django.db.models import F, Func, Q, Value
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
-from jsonfield import JSONField
+from django.contrib.postgres.fields import JSONField
 
 from accounts import memorymodel
 from learnscripture.datastructures import lazy_dict_like, make_choices
@@ -424,7 +424,7 @@ class WordSuggestionData(models.Model):
     # consists of a list of words in decreasing order of fitness.
     # So we have
     # [[suggestion_1_for_word_1, s_2_for_w_1,...],[s_1_for_w_2, s_2_for_w_2]]
-    suggestions = JSONField()
+    suggestions = JSONField(default=list)
 
     def get_suggestions(self):
         if not self.suggestions:
