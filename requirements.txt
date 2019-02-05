@@ -4,11 +4,9 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in requirements-dev.in
 #
--e git+git://github.com/spookylukey/aldjemy.git@e728913f829216056a361d0886506e41dcbae8bb#egg=aldjemy
--e git+git://github.com/spookylukey/django-autoslug.git@0a6adec1f9743743bf7d741b6845620a8f347159#egg=django-autoslug
--e hg+https://bitbucket.org/schinckel/django-jsonfield@6c37ee0fd8f2f999b21c068e733876d937d74a00#egg=django-jsonfield
--e git+git://github.com/spookylukey/django-app-metrics.git@6de9e47459b9c3c1173f3289cbc71afd6fa45449#egg=django_app_metrics
+-e git+git://github.com/spookylukey/django-app-metrics.git@29408c43cc4e8241bb3a14c818154513cab0a93b#egg=django_app_metrics
 -e git+git://github.com/riccardoscalco/Pykov.git@16cda2f2c0ed8143ddcfa25dac34d3dadc982380#egg=pykov
+aldjemy==0.9.1
 amqp==2.1.4
 argparse==1.4.0           # via unittest2
 asn1crypto==0.24.0        # via cryptography
@@ -17,11 +15,10 @@ bcrypt==3.1.4             # via paramiko
 beautifulsoup4==4.6.0     # via webtest
 billiard==3.5.0.2
 celery==4.0.2
-certifi==2017.7.27.1
+certifi==2018.11.29
 cffi==1.11.4              # via bcrypt, cryptography, pynacl
 click==6.7                # via pip-tools
 concurrent-log-handler==0.9.7
-contextlib2==0.5.5        # via raven
 coverage==4.4.1
 cryptography==2.1.4       # via paramiko
 cssselect==1.0.3          # via pyquery
@@ -29,20 +26,21 @@ decorator==4.2.1          # via ipython, traitlets
 django-anymail==0.10
 django-appconf==1.0.2     # via django-compressor
 django-autocomplete-light==3.2.10
+django-autoslug==1.9.4
 django-compressor==2.2    # via django-fiber
 django-debug-toolbar==1.8
-django-fiber==1.4.1
-django-functest==1.0.3
+django-fiber==1.5
+django-functest==1.0.4
 django-js-asset==1.0.0    # via django-mptt
 django-markup==1.2
 django-mptt==0.9.0        # via django-fiber
-django-paypal==0.3.6
+django-paypal==0.5.0
 django-pjax==1.4
-django-spurl==0.6.4
+django-spurl==0.6.5
 django-webpack-loader==0.5.0
 django-webtest==1.9.2     # via django-functest
-django==1.11.6
-djangorestframework==3.6.3
+django==2.0.10
+djangorestframework==3.9.1
 docutils==0.14
 easy-thumbnails==2.5      # via django-fiber
 easyprocess==0.2.3        # via pyvirtualdisplay
@@ -67,9 +65,9 @@ pbr==3.1.1                # via mock
 pexpect==4.3.1            # via ipython
 pickleshare==0.7.4        # via ipython
 pillow==5.0.0             # via django-fiber, easy-thumbnails
-pip-tools==3.1.0
+pip-tools==3.3.2
 prompt-toolkit==1.0.15    # via ipython
-psycopg2==2.7.1
+psycopg2-binary==2.7.7
 ptyprocess==0.5.2         # via pexpect
 pyasn1==0.4.2             # via paramiko
 pycodestyle==2.2.0        # via flake8
@@ -79,9 +77,9 @@ pygments==2.2.0           # via ipython
 pynacl==1.2.1             # via paramiko
 pyquery==1.4.0
 python-memcached==1.58
-pytz==2017.2
+pytz==2018.9
 pyvirtualdisplay==0.2.1
-raven==6.1.0
+raven==6.10.0
 rcssmin==1.0.6            # via django-compressor
 requests==2.6.0
 rjsmin==1.0.12            # via django-compressor
