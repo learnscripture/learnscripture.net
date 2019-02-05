@@ -31,7 +31,7 @@ installed.
 
    System dependencies:
 
-   * postgresql 9.3 or later
+   * postgresql 9.4 or later
    * memcached
    * rabbitmq-server
    * nodejs
