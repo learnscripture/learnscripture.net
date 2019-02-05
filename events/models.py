@@ -1,11 +1,11 @@
 import math
 from datetime import timedelta
 
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
-from jsonfield import JSONField
 
 from accounts.models import Account
 from bibleverses.models import verse_set_smart_name
@@ -441,7 +441,7 @@ class EventManager(models.Manager):
 class Event(models.Model):
     event_type = models.CharField(max_length=40, choices=EventType.choice_list)
     weight = models.PositiveSmallIntegerField(default=10)
-    event_data = JSONField(blank=True)
+    event_data = JSONField(default=dict, blank=True)
     created = models.DateTimeField(default=timezone.now, db_index=True)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     # If the event relates to something in a Group, this should be set

@@ -17,6 +17,8 @@ class LearnScriptureRouter(object):
         return None
 
     def allow_migrate(self, db, app_label, model_name=None, **hints):
+        if 'target_dbs' in hints:
+            return db in hints['target_dbs']
         return ((db == settings.DB_LABEL_WORDSUGGESTIONS)
                 if model_name is not None and self.is_word_suggestion_model(app_label, model_name)
                 else (db == settings.DB_LABEL_DEFAULT))
