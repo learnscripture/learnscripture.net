@@ -5,12 +5,12 @@ import random
 from collections import defaultdict
 
 from autoslug import AutoSlugField
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.db.models import F, Func, Q, Value
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
-from django.contrib.postgres.fields import JSONField
 
 from accounts import memorymodel
 from learnscripture.datastructures import lazy_dict_like, make_choices
