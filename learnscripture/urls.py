@@ -92,7 +92,6 @@ urlpatterns = [
     # Dependencies
     url(r'^api/v2/', include('fiber.rest_api.urls')),
     url(r'^admin/fiber/', include('fiber.admin_urls')),
-    url(r'^jsi18n/$', django.views.i18n.javascript_catalog, {'packages': ['fiber']}),
     url(r'^admin/', admin.site.urls),
 
     url(r'^paypal/ipn/', include('paypal.standard.ipn.urls')),

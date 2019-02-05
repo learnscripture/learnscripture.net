@@ -158,7 +158,8 @@ if DEVBOX:
 else:
     PAYPAL_RECEIVER_EMAIL = "paypal@learnscripture.net"
     PAYPAL_TEST = False
-PAYPAL_IMAGE = "https://www.paypalobjects.com/en_US/GB/i/btn/btn_buynowCC_LG.gif"
+
+PAYPAL_BUY_BUTTON_IMAGE = "https://www.paypalobjects.com/en_US/GB/i/btn/btn_buynowCC_LG.gif"
 
 VALID_RECEIVE_CURRENCY = 'GBP'
 
@@ -204,7 +205,6 @@ MIDDLEWARE = [
         (True, 'learnscripture.middleware.pwa_tracker_middleware'),
         (True, 'django.middleware.csrf.CsrfViewMiddleware'),
         (True, 'django.contrib.auth.middleware.AuthenticationMiddleware'),
-        (True, 'django.contrib.auth.middleware.SessionAuthenticationMiddleware'),
         (True, 'learnscripture.middleware.token_login_middleware'),
         (True, 'django.contrib.messages.middleware.MessageMiddleware'),
         # XFrameOptionsMiddleware breaks fiber inline editing. Disabled for now.
