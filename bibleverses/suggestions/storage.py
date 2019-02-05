@@ -52,7 +52,7 @@ SERIALIZERS = [
     Serializer(WORD_COUNTS_ANALYSIS, WordCounts.from_counter,
                WordCounts.dump, WordCounts.load, WordCounts.format_version),
     Serializer(THESAURUS_ANALYSIS, Thesaurus.from_dict,
-               WordCounts.dump, Thesaurus.load, Thesaurus.format_version),
+               Thesaurus.dump, Thesaurus.load, Thesaurus.format_version),
     Serializer(FIRST_WORD_FREQUENCY_ANALYSIS, FirstWordFrequencies.from_list,
                FirstWordFrequencies.dump, FirstWordFrequencies.load, FirstWordFrequencies.format_version),
     Serializer(MARKOV_1_ANALYSIS, Markov.from_pykov,
