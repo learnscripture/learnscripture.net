@@ -21,6 +21,7 @@ main = Bundle([
     'learnscripture/events.ftl',
     'learnscripture/forms.ftl',
     'learnscripture/groups.ftl',
+    'learnscripture/home.ftl',
     'learnscripture/leaderboards.ftl',
     'learnscripture/learn.ftl',
     'learnscripture/lists.ftl',
