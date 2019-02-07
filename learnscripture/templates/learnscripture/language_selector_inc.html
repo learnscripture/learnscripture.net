@@ -15,6 +15,6 @@
       {% endfor %}
     </select>
     <input name="next" type="hidden" value="{{ request.get_full_path }}" />
-    <input type="submit" class="btn" value="Go" />
+    <button type="submit" class="btn">{% ftlmsg 'site-footer-choose-language-button' %}</button>
   </form>
 </div>

@@ -1,5 +1,8 @@
 
-### Learn page localizations
+### Learn page:
+
+# Page title
+learn-page-title = Learn
 
 
 ## Navbar:

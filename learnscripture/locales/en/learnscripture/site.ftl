@@ -91,6 +91,10 @@ site-footer-bible-texts-used = Bible texts and catechisms used with permission:
 
 site-footer-choose-language = Choose website interface language:
 
+# Caption for button that changes the language
+site-footer-choose-language-button = Choose
+
+
 site-logout-confirm-prompt = Are you sure you want to log out?
 
 # Caption on box that shows link for sharing the page URL
@@ -117,4 +121,11 @@ site-public-action = This action is public
 
 # Title for group of related links
 site-see-also-header = See also:
+
+site-you-need-to-login-html = You need to <a href="{ $login_url }">log in</a> (or <a href="{ $signup_url }">create an account)</a> to access this page.
+
+site-login-button = Log in
+
+# Button on log in page for user if they forgot password
+site-forgot-password-button = I forgot my password
 

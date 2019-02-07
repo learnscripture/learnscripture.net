@@ -1,4 +1,5 @@
 {% load humanize %}
+{% load ftl %}
 
 {% for account in results.items %}
   <tr>
@@ -11,7 +12,7 @@
 
 {% if results.empty %}
   <tr>
-    <td colspan="4">No users found.</td>
+    <td colspan="4">{% ftlmsg 'leaderboards-no-users-found' %}</td>
   </tr>
 {% else %}
   {% include "learnscripture/leaderboard_results_show_more_inc.html" %}
