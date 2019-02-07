@@ -1,10 +1,11 @@
 {% load render_bundle from webpack_loader %}
+{% load ftl %}
 
 <!DOCTYPE html>
 <html lang="{{ request.LANGUAGE_CODE }}">
   <head>
     <meta charset="utf-8">
-    <title>Learn - LearnScripture.net</title>
+    <title>{% ftlmsg 'learn-page-title' %} - LearnScripture.net</title>
     <meta name="robots" content="noindex">
     <meta name="viewport" content="initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% load form_rendering %}
+{% load ftl %}
 
 {% block content %}
 
@@ -8,8 +9,8 @@
     {% csrf_token %}
     {{ login_form|render_form }}
     <div class="actions">
-      <input type="submit" name="signin" value="Sign in" class="btn primary default">
-      <input type="submit" name="forgotpassword" value="I forgot my password" class="btn">
+      <button type="submit" name="signin" class="btn primary default">{% ftlmsg 'site-login-button' %}</button>
+      <button type="submit" name="forgotpassword" class="btn">{% ftlmsg 'site-forgot-password-button' %}</button>
     </div>
   </form>
 

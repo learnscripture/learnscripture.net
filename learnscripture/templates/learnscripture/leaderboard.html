@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 
 {% load form_rendering %}
+{% load ftl %}
 
 {% block body_extra_class %}leaderboard-page{% endblock %}
 
 {% block content %}
-  <p><a href="{% url 'group' group.slug %}">See group information</a></p>
+  <p><a href="{% url 'group' group.slug %}">{% ftlmsg 'group-details-group-info-subtitle' %}</a></p>
 
   <form action="." method="GET"
         data-pjax-results-container="#id-leaderboard-results-table-body"
@@ -15,16 +16,16 @@
   </form>
 
   {% if thisweek %}
-    <p class="note">Weekly statistics are measured from the current time to one week ago.</p>
+    <p class="note">{% ftlmsg 'leaderboards-weekly-statistics-note' %}</p>
   {% endif %}
 
   <table id="id-leaderboard-results-table">
     <thead>
       <tr>
-        <th>User</th>
-        <th>Points</th>
-        <th>Rank</th>
-        <th>Verses started</th>
+        <th>{% ftlmsg 'leaderboards-user-column' %}</th>
+        <th>{% ftlmsg 'leaderboards-points-column' %}</th>
+        <th>{% ftlmsg 'leaderboards-rank-column' %}</th>
+        <th>{% ftlmsg 'leaderboards-verses-started-column' %}</th>
       </tr>
     </thead>
     <tbody id="id-leaderboard-results-table-body">

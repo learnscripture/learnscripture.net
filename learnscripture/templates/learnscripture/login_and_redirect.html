@@ -1,8 +1,10 @@
 {% extends "base.html" %}
+{% load capture_tags %}
+{% load ftl %}
 
 {% block content %}
-  <p>You need to <a href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}">log in</a>
-    (or <a href="{% url 'signup' %}?next={{ request.get_full_path|urlencode }}">create an account)</a>
-    to access this page.</p>
+  {% capture as login_url silent %}{% url 'login' %}?next={{ request.get_full_path|urlencode }}{% endcapture %}
+  {% capture as signup_url silent %}{% url 'signup' %}?next={{ request.get_full_path|urlencode }}{% endcapture %}
+  <p>{% ftlmsg 'site-you-need-to-login-html' login_url=login_url signup_url=signup_url %}</p>
 
 {% endblock %}
