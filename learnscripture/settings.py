@@ -620,7 +620,22 @@ if DEBUG:
                     key=os.path.getctime)[20:]:
         os.unlink(f)
 
-if TESTING and not os.environ.get('SKIP_SELENIUM_TESTS'):
-    for f in glob.glob("./learnscripture/static/webpack_bundles/*.tests.*"):
-        os.unlink(f)
-    subprocess.check_call(["./node_modules/.bin/webpack", "--config", "webpack.config.tests.js"])
+if TESTING:
+    # Monkey patch WebpackLoader to call `webpack` just in time.
+    # This means that tests that don't need to run webpack
+    # don't have that overhead.
+    from webpack_loader.loader import WebpackLoader
+
+    original_get_assets = WebpackLoader.get_assets
+
+    _loaded = []
+
+    def get_assets(self):
+        if not _loaded:
+            for f in glob.glob("./learnscripture/static/webpack_bundles/*.tests.*"):
+                os.unlink(f)
+            subprocess.check_call(["./node_modules/.bin/webpack", "--config", "webpack.config.tests.js"])
+            _loaded.append(True)
+        return original_get_assets(self)
+
+    WebpackLoader.get_assets = get_assets
