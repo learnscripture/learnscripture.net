@@ -2,6 +2,7 @@ from django import forms
 from django.conf import settings
 from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm, SetPasswordForm
 from django.forms import widgets
+from django.urls import reverse
 
 from accounts.models import Account
 from bibleverses.models import TextType, VerseSetType
@@ -144,6 +145,16 @@ class AccountPasswordResetForm(PasswordResetForm):
         if not len(self.users_cache):
             raise forms.ValidationError(self.error_messages['unknown'])
         return email
+
+    def send_mail(self, subject_template_name, email_template_name,
+                  context, from_email, to_email, html_email_template_name=None):
+        # We add 'reset_url' to context, which is easier to do in Python than in
+        # the template.
+        path = reverse('password_reset_confirm', kwargs={'uidb64': context['uid'],
+                                                         'token': context['token']})
+        context['reset_url'] = "{protocol}://{domain}{path}".format(path=path, **context)
+        return super().send_mail(subject_template_name, email_template_name,
+                                 context, from_email, to_email, html_email_template_name=html_email_template_name)
 
 
 class AccountSetPasswordForm(SetPasswordForm):

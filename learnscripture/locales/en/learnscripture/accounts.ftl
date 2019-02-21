@@ -152,17 +152,48 @@ accounts-password-mismatch = The two password fields didn't match.
 # Page title for start page
 accounts-password-reset-start-page-title = Password reset started
 
+accounts-password-reset-start-email-sent = We've e-mailed you instructions for setting your password to the e-mail
+    address you submitted. You should receive it shortly.
+
+
+
 # Page title for main reset page
 accounts-password-reset-page-title = Password reset
 
+# Instructions at top of password reset new password form
+accounts-password-reset-new-password-instructions = Please enter your new password twice so we can verify you typed it in correctly.
+
+
+# Title password reset was unsuccessful
+accounts-password-reset-unsuccessful-title = Password reset unsuccessful
+
+# Message shown when password reset was unsuccessful
+accounts-password-reset-unsuccessful-message = The password reset link was
+   invalid, possibly because it has already been used. Please request a new
+   password reset.
+
+
+
 # Page title for completed page
 accounts-password-reset-complete-page-title = Password reset complete
+
+# Message shown when password reset is complete
+accounts-password-reset-complete-message-html = Your password has been set.  You may go ahead and <a href="{ $login_url }">log in</a> now.
+
 
 
 ## Change password page.
 
 # Page title
 accounts-password-change-page-title = Change password
+
+# Instructions before form.
+accounts-password-change-instructions = Please enter your old password, and your new password twice:
+
+# Caption on button that will change password.
+accounts-password-change-button = Change password
+
+
 
 # Caption on password field
 accounts-new-password = New password
@@ -176,3 +207,29 @@ accounts-old-password-incorrect = Your old password was entered incorrectly. Ple
 # Caption on old password field
 accounts-old-password = Old password
 
+## Change password completed page.
+
+# Title
+accounts-password-change-done-title = Password change successful
+
+# Body text
+accounts-password-change-done-body = Your password was changed.
+
+
+## Password reset email
+
+accounts-password-reset-email-subject = Password reset on LearnScripture.net
+
+accounts-password-reset-email = Hi { $username },
+
+   You're receiving this email because you requested a password
+   reset for your account on learnscripture.net. (Just ignore
+   this email if you didn't).
+
+   Please go to the following page and choose a new password:
+
+   { $reset_url }
+
+   Thanks for using our site!
+
+   The learnscripture.net team

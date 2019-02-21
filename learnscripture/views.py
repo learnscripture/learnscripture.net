@@ -133,6 +133,7 @@ def login(request):
 class _PasswordResetView(AuthPasswordResetView):
     form_class = AccountPasswordResetForm
     email_template_name = 'learnscripture/password_reset_email.txt'
+    subject_template_name = 'learnscripture/password_reset_subject.txt'
 
     def get_prefix(self):
         return "login"
