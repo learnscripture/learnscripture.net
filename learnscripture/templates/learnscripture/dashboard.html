@@ -11,6 +11,7 @@
   {% if create_account_warning %}
     <div class="borderedbox">
       <p>
+        {% url 'signup' as signup_url %}
         <small>{% ftlmsg 'dashboard-remember-to-create-an-account-html' signup_url=signup_url expires=request.identity.expires_on %}</small>
       </p>
     </div>

@@ -94,7 +94,7 @@ class AccountTestMixin(object):
                                    email="test2@test.com",
                                    username="tëst2",
                                    password="testpassword2"):
-        self.click(text='Create account')
+        self.get_url('signup')
         self.fill_in_account_form(email=email, username=username, password=password)
 
     def fill_in_account_form(self,
