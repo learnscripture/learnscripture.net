@@ -107,10 +107,11 @@ class DonationDriveTests(AccountTestMixin, TestBase):
             finish=timezone.now() + timedelta(days=10),
             active=True,
             message_html="Please donate!",
+            language_code="en",
             hide_if_donated_days=4,
         )
 
-        d2 = DonationDrive.objects.current()[0]
+        d2 = DonationDrive.objects.current("en")[0]
         self.assertEqual(d2, d)
         self.assertEqual(d2.active_for_account(self.account),
                          False)  # because it is a recently created account
@@ -134,16 +135,23 @@ class DonationDriveTests(AccountTestMixin, TestBase):
         self.assertEqual(d2.active_for_account(self.account),
                          True)
 
+        # Change language:
+        self.account.is_tester = True  # For i18n_options_enabled
+        self.account.identity.interface_language = "tr"
+        self.assertEqual(d2.active_for_account(self.account),
+                         False)
+
     def test_target(self):
         DonationDrive.objects.create(
             start=timezone.now() - timedelta(days=10),
             finish=timezone.now() + timedelta(days=10),
             active=True,
             message_html="Please donate!",
+            language_code="en",
             hide_if_donated_days=4,
             target=Decimal("100")
         )
-        current1 = DonationDrive.objects.current()
+        current1 = DonationDrive.objects.current("en")
         self.assertEqual(len(current1), 1)
 
         d1 = current1[0]
@@ -153,7 +161,7 @@ class DonationDriveTests(AccountTestMixin, TestBase):
         ipn_1 = good_payment_ipn(self.account, Decimal("20.00"))
         paypal_payment_received(ipn_1)
 
-        current2 = DonationDrive.objects.current()
+        current2 = DonationDrive.objects.current("en")
         d2 = current2[0]
         self.assertEqual(d2.fraction_raised, Decimal('0.2'))
 
@@ -161,7 +169,7 @@ class DonationDriveTests(AccountTestMixin, TestBase):
         ipn_2 = good_payment_ipn(self.account, Decimal("90.00"))
         paypal_payment_received(ipn_2)
 
-        current3 = DonationDrive.objects.current()
+        current3 = DonationDrive.objects.current("en")
         self.assertEqual(len(current3), 0)
 
     def test_target_reached_signal(self):
@@ -248,6 +256,7 @@ class ViewDonationDriveTests(WebTestBase):
             finish=timezone.now() + timedelta(days=10),
             active=True,
             message_html="Please donate!",
+            language_code="en",
             hide_if_donated_days=4,
             target=Decimal("20")
         )

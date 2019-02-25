@@ -37,10 +37,11 @@ class Payment(models.Model):
 
 
 class DonationDriveManager(models.Manager):
-    def current(self):
+    def current(self, language_code):
         now = timezone.now()
         return [d for d in self.filter(start__lte=now,
                                        finish__gte=now,
+                                       language_code=language_code,
                                        active=True)
                 if not d.target_reached]
 
@@ -48,7 +49,7 @@ class DonationDriveManager(models.Manager):
         if account.donations_disabled():
             return []
         return [
-            d for d in self.current()
+            d for d in self.current(account.default_language_code)
             if d.active_for_account(account)
         ]
 
@@ -58,6 +59,9 @@ class DonationDrive(models.Model):
     finish = models.DateTimeField()
     active = models.BooleanField(default=False)
     message_html = models.TextField()
+    language_code = models.CharField(max_length=10,
+                                     choices=settings.LANGUAGES,
+                                     default=settings.LANGUAGE_CODE)
     hide_if_donated_days = models.PositiveIntegerField(
         help_text="The donation drive will be hidden for users who have donated within "
         "this number of days")
@@ -72,6 +76,8 @@ class DonationDrive(models.Model):
         # discover that there are no current DonationDrives, than do the queries
         # required to get last payment.
         if account.donations_disabled():
+            return False
+        if self.language_code != account.default_language_code:
             return False
         try:
             last_payment = account.payments.order_by('-created')[0]

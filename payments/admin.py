@@ -15,8 +15,8 @@ class PaymentAdmin(admin.ModelAdmin):
 
 
 class DonationDriveAdmin(admin.ModelAdmin):
-    list_display = ['start', 'finish', 'active', 'hide_if_donated_days', 'target']
-    list_filter = ['active']
+    list_display = ['start', 'finish', 'active', 'hide_if_donated_days', 'target', 'language_code']
+    list_filter = ['active', 'language_code']
 
 
 admin.site.register(Payment, PaymentAdmin)
