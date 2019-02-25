@@ -57,7 +57,7 @@ class ViewSetTestsBase(RequireExampleVerseSetsMixin):
 
         self.get_url('view_verse_set', slug=vs.slug)
 
-        self.assertTextPresent("You have %d verse(s) from this set in your queue" %
+        self.assertTextPresent("You have %d verses from this set in your queue" %
                                vs.verse_choices.count())
 
         self.submit("[name='drop']")

@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 
 {% load dict_utils %}
+{% load ftl %}
 
 {% block content %}
-  <h2>Verse sets you are learning</h2>
+  <h2>{% ftlmsg 'versesets-you-are-learning-title' %}</h2>
 
   <ul>
     {% for cvs in chosen_verse_sets %}
@@ -14,11 +15,11 @@
   </ul>
 
   {% if verse_sets_created %}
-    <h2>Verse sets you created</h2>
+    <h2>{% ftlmsg 'versesets-you-created-title' %}</h2>
 
     <ul>
       {% for vs in verse_sets_created %}
-        {# For verse sets user created, use 'name' as created, seems less confusing this way #}
+        {# For verse sets user created, use 'name' as created, seems less confusing than using smart_name #}
         <li><a href="{% url 'view_verse_set' vs.slug %}">{{ vs.name }}</a></li>
       {% endfor %}
     </ul>

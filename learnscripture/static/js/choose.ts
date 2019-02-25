@@ -44,7 +44,7 @@ var setupChooseControls = function() {
         'click', 'a[data-quick-find-show-more]',
         quickFindAndHandleResults(loadMoreResults, false, "choose-individual", $quickFindForm, true))
 
-    $('#id-choose-individual').on('click', 'form.individual-choose input[name=add_to_queue]', function(ev) {
+    $('#id-choose-individual').on('click', 'form.individual-choose [name=add_to_queue]', function(ev) {
         ev.preventDefault();
         var $form = $(ev.currentTarget).parent('form');
         var localized_reference = $form.find('input[name=localized_reference]').val();
@@ -59,7 +59,7 @@ var setupChooseControls = function() {
                 version_slug: version_slug
             },
             success: function() {
-                var $btn = $form.find('input[name=add_to_queue]');
+                var $btn = $form.find('[name=add_to_queue]');
                 $btn.val($btn.attr('data-added-caption')).prop('disabled', 'true');
             },
             error: ajaxFailed

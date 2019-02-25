@@ -63,7 +63,7 @@ from .decorators import (has_preferences, redirect_via_prefs, require_account, r
 #   bots like web crawlers don't cause database inserts
 #
 # - if there is no current 'Identity' the user will appear
-#   as 'Guest user' (session.html template, and menu in base.html)
+#   as 'Guest' (menu in base.html)
 # - if there is an Identity, but no Account, they will still
 #   appear as 'Guest user', but now have the possibility of stored
 #   data and preferences.
@@ -762,7 +762,7 @@ def view_verse_set(request, slug):
     c['verse_set'] = verse_set
     c['verse_list'] = verse_list
     c['version'] = version
-    c['title'] = t('verseset-page-title', dict(name=verse_set.smart_name(version.language_code)))
+    c['title'] = t('versesets-view-set-page-title', dict(name=verse_set.smart_name(version.language_code)))
     c['include_referral_links'] = True
 
     c.update(context_for_version_select(request))

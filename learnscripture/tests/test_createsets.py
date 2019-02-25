@@ -20,7 +20,7 @@ class CreateSetTests(FullBrowserTest):
     def _add_ref(self, ref):
         self.fill({"#id_quick_find": ref})
         self.click("#id_lookup")
-        self.click("input.add-to-set")
+        self.click(".btn.add-to-set")
         self.wait_until_loaded('#id-verse-list tbody tr td')
         time.sleep(0.1)
 
@@ -134,8 +134,8 @@ class CreateSetTests(FullBrowserTest):
                                       set_order=2)
         self.login(self._account)
         self.get_url('edit_set', slug=vs.slug)
-        self.drag_and_drop("#id-verse-list tbody tr:first-child td",
-                           "#id-verse-list tbody tr:nth-child(2) td")
+        self.drag_and_drop("#id-verse-list tbody tr:nth-child(2)",
+                           "#id-verse-list thead tr")
         self.submit("#id-save-btn")
 
         vs = VerseSet.objects.get(id=vs.id)

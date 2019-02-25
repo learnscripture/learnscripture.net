@@ -1,4 +1,4 @@
-## Awards.
+## Awards/badges.
 
 # Notification received when a user gets a new award/badge,
 # $award is the award name (appears as a link)
@@ -29,11 +29,24 @@ awards-page-title = Badges
 
 awards-the-following-are-available = The following badges are available.
 
+
+# Caption in table header for award name/icon
+awards-award = Badge
+
+# Caption in table header for when the award was received
+awards-date-received = Date
+
 # Caption in table header for award icon
 awards-icon = Icon
 
 # Caption in table header for award description
 awards-description = Description
+
+# Caption in the table header for award points
+awards-points = Points
+
+# Indicates the level of an award/badge
+awards-award-level = level { $level }
 
 # Indicates the highest level that has so been achieved for the award
 award-highest-level-achieved-html = Highest level achieved so far: <b>Level { $level }</b>
@@ -95,11 +108,5 @@ awards-you-have-this-award = You have this badge.
 # Used when the user doesn't have the award
 awards-you-dont-have-this-badge = You don't have this badge yet.
 
-
-
-
-
-
 # Message used when trying to view some old awards
 awards-removed = The ‘{ $name }’ badge is an old badge that is no longer used
-

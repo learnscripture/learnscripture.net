@@ -18,7 +18,7 @@ class CatechismTests(FullBrowserTest):
         identity, account = self.create_account()
         self.login(account)
         self.get_url('catechisms')
-        self.click("input[value=Learn]")
+        self.click(".btn.primary[type=submit]")
         self.assertEqual(self.get_element_text("#id-verse-header h2"),
                          "Q1. What is the chief end of man?")
 

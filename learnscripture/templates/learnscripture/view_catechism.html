@@ -2,14 +2,15 @@
 
 {% load markup_tags %}
 {% load account_utils %}
+{% load ftl %}
 
 {% block leftcolumn %}
 
-  <h2>Description</h2>
+  <h2>{% ftlmsg 'catechisms-description-title' %}</h2>
 
   {{ catechism.description|apply_markup:"restructuredtext" }}
 
-  <h2>Questions</h2>
+  <h2>{% ftlmsg 'catechisms-questions-title' %}</h2>
 
   <ul>
     {% for qapair in questions %}
@@ -19,35 +20,34 @@
     {% endfor %}
   </ul>
 
-  {% include "learnscripture/permission_link.html" with text=catechism %}
+  <div class="catechsim-version-info">
+    {% include "learnscripture/permission_link.html" with text=catechism %}
+  </div>
 
-  <h3>Notes</h3>
+  <h3>{% ftlmsg 'catechisms-notes-title' %}</h3>
   <ul>
-    <li>When learning a catechism, you can opt out of any individual question by
-      pressing ‘Stop learning this’ on the learning page.</li>
-    <li><i class="icon-public"></i> Learning a catechism is a public action</li>
+    <li>{% ftlmsg 'catechisms-how-to-opt-out' %}</li>
+    <li><i class="icon-public"></i> {% ftlmsg 'catechisms-learning-is-public' %}</li>
   </ul>
 
   <form action="{% url 'catechisms' %}" method="POST">
     {% csrf_token %}
     <input type="hidden" name="catechism_id" value="{{ catechism.id }}">
     <div class="actions">
-      <input type="submit" class="btn primary needs-preferences" value="Learn">
+      <button type="submit" id="id-catechism-learn-button" class="btn primary needs-preferences">{% ftlmsg 'catechisms-learn-button' %}</button>
     </div>
   </form>
 
 {% endblock %}
 
 {% block rightcolumn %}
-  <h3>See also</h3>
+  <h3>{% ftlmsg 'site-see-also-header' %}</h3>
   <ul>
-    <li><a href="{% url 'catechisms' %}">All catechisms</a></li>
-    <li><a href="{% url 'contact' %}">Contact us</a> if you would like this
-      catechism's data files.</li>
+    <li><a href="{% url 'catechisms' %}">{% ftlmsg 'catechisms-all-catechism-link' %}</a></li>
   </ul>
 
   {% if learners %}
-    <h3>People learning this</h3>
+    <h3>{% ftlmsg 'catechisms-people-learning-this-title' %}</h3>
     <ul>
       {% for account in learners %}
         <li>{{ account|account_link }}</li>

@@ -44,6 +44,11 @@ site-verse-sets-link = Verse sets
 # Link to user's statistics page
 site-user-stats-link = Stats
 
+# 'User name' that appears if the user is not logged in
+site-guest-user-name = Guest
+
+
+
 ## Misc:
 
 # Displays the amount of money that has been raised so far towards a donation target
@@ -128,4 +133,7 @@ site-login-button = Log in
 
 # Button on log in page for user if they forgot password
 site-forgot-password-button = I forgot my password
+
+# Shown when the page or part of it is still loading
+site-loading-placeholder = Loading...
 

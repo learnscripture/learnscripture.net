@@ -11,6 +11,10 @@ accounts-first-name = First name
 # Caption for last name field, editable on account details page
 accounts-last-name = Last name
 
+
+# Caption for full name field (combined first name and last name)
+accounts-full-name = Name
+
 # Caption for email field
 accounts-email = Email
 
@@ -55,7 +59,16 @@ accounts-details-updated = Account details updated, thank you
 # Page title
 accounts-preferences-title = Preferences
 
-# Caption for the Account 'default bible version' field
+# Show at top of preferences page
+accounts-preferences-instructions = Enter your preferences and press '{ accounts-preferences-save-button }' to continue.
+
+# Additional notes about preferences
+accounts-preferences-instructions-additional-notes =
+    All preferences can be changed later, and the Bible version
+    can be chosen on a verse-by-verse basis
+
+
+# Caption for the account 'default bible version' field
 accounts-default-bible-version = Default bible version
 
 # Caption for choice of testing method (how verses are tested)
@@ -101,6 +114,14 @@ accounts-space-theme = Space
 # Caption for 'interface language' field
 accounts-interface-language = Interface language
 
+# Caption for button to save changes to preferences
+accounts-preferences-save-button = Save
+
+# Caption for button to cancel changes and close preferences dialog
+accounts-preferences-cancel-button = Cancel
+
+
+
 ## Account notifications.
 
 # Notification when user is invited to join a group,
@@ -112,6 +133,25 @@ accounts-invitation-received-html = { $user } invited you to join the group { $g
 
 # Title of 'create account'/'signup' page
 accounts-signup-title = Create account
+
+# Message displayed if the user goes to the sign up page but is already logged in.
+accounts-already-logged-in-html = You are already signed in as <b>{ $username }</b>. You should <a href="#" class="logout-link">logout</a> if you want to create a new account.
+
+accounts-signup-agree-to-terms-of-service-html =
+        By creating an account, you are agreeing to our
+        <a href="/terms-of-service/" target="_blank">terms of service</a> and
+        <a href="/privacy-policy/" target="_blank">privacy policy</a>.
+        Please note that children under the age of 13 may not create
+        an account, but a parent may create an account for them,
+        and must tick the corresponding checkbox above.
+
+accounts-signup-parents-notice = Parents concerned about children having contact with other
+        people on the internet via the commenting system should
+        disable the commenting option above.
+
+# Button to create account after filling in form
+accounts-signup-create-account-button = Create account
+
 
 # Message displayed if user tries to put invalid characters in their chosen username
 accounts-username-validation = This value may contain only letters, numbers and these characters: . + - _
@@ -168,9 +208,9 @@ accounts-password-reset-new-password-instructions = Please enter your new passwo
 accounts-password-reset-unsuccessful-title = Password reset unsuccessful
 
 # Message shown when password reset was unsuccessful
-accounts-password-reset-unsuccessful-message = The password reset link was
-   invalid, possibly because it has already been used. Please request a new
-   password reset.
+accounts-password-reset-unsuccessful-message =
+   The password reset link was invalid, possibly because it has already
+   been used. Please request a new password reset.
 
 
 

@@ -13,10 +13,8 @@
     {{ comment.author|account_link }}
   </span>
   {% if show_as_related_comment %}
-    {% capture as item_title silent %}
-      <b>{{ comment.event.render_html_dict|lookup:default_language_code }}</b>
-    {% endcapture %}
-    — {% ftlmsg 'comments-event-title' item_title=item_title %}
+    {% capture as item_title silent %}<b>{{ comment.event.render_html_dict|lookup:default_language_code }}</b>{% endcapture %}
+    — {% ftlmsg 'comments-event-title-html' item_title=item_title %}
   {% endif %}
   {% if request_account.is_moderator %}
     <span class="commentmoderation">

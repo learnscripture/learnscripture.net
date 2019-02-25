@@ -11,7 +11,7 @@
   {% if create_account_warning %}
     <div class="borderedbox">
       <p>
-        <small>{% ftlmsg 'dashboard-remember-to-create-an-account-html' signup_url=signup_url %}</small>
+        <small>{% ftlmsg 'dashboard-remember-to-create-an-account-html' signup_url=signup_url expires=request.identity.expires_on %}</small>
       </p>
     </div>
   {% endif %}
@@ -361,14 +361,11 @@
 
 {% block rightcolumn %}
 
-  {% if not request_account %}
-    {% include 'learnscripture/session.html' %}
-  {% endif %}
-
   <h3>{% ftlmsg 'dashboard-todays-stats-title' %}</h3>
 
   <div id="id-stats-block">
-    {% include 'learnscripture/sessionstats.html' %}
+    {% ftlmsg 'dashboard-todays-stats-new-verses-begun' new_verses_started=new_verses_started %}<br/>
+    {% ftlmsg 'dashboard-todays-stats-total-verses-tested' total_verses_tested=total_verses_tested %}
   </div>
 
   <h3>{% ftlmsg 'dashboard-your-groups-title' %}</h3>

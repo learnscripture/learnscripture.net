@@ -1,14 +1,4 @@
-{% autoescape off %}
-Hi {{ account.email_name }},
-
-Thank you for your donation of {{ payment.mc_gross }} {{ payment.mc_currency }}!
-
-Donations like these really help to keep the site running, and
-allow us to make further improvements to the service.
-
-We hope you continue to enjoy and benefit from your use of the site!
-
-The {{ site.name }} team.
-
+{% load ftl %}{% autoescape off %}
+{% ftlmsg 'donations-dontation-received-email' account_name=account.email_name payment_amount=payment_amount %}
 {% endautoescape %}
 

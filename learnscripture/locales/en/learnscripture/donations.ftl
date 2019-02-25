@@ -33,10 +33,32 @@ donations-login-or-signup-to-donate-html = Please <a href="{ $login_and_redirect
 # Page title
 donations-completed-page-title = Donation complete
 
+# Thank you message
+donations-done-thank-you = Thank you for your donation!
+
 ## Donation cancelled page.
 
 # Page title
 donations-cancelled-page-title = Donation cancelled
+
+donations-cancelled-message-html = You cancelled part way through the payment process. You can <a href="{ $donate_url }">return to the donation page</a>.
+
+## Donation received email.
+
+donations-dontation-received-email = Hi { $account_name },
+
+    Thank you for your donation of { $payment_amount }!
+
+    Donations like these really help to keep the site running, and
+    allow us to make further improvements to the service.
+
+    We hope you continue to enjoy and benefit from your use of the site!
+
+    The LearnScripture.net team.
+
+
+## Target reached email.
+
 
 # Email sent out to donators when the target is reached,
 # $name is the user's username,

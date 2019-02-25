@@ -1,12 +1,13 @@
 {% extends "base.html" %}
 
 {% load form_rendering %}
+{% load ftl %}
 
 {% block content %}
 
   {% if already_signed_up %}
 
-    <p>You are already signed in as <b>{{ request_account.username }}</b>. You should <a href="#" class="logout-link">logout</a> if you want to create a new account.</p>
+    <p>{% ftlmsg 'accounts-already-logged-in-html' username=request_account.username %}</p>
 
   {% else %}
 
@@ -14,20 +15,13 @@
       {% csrf_token %}
       {{ signup_form|render_form }}
 
-      <p>By creating an account, you are agreeing to our
-        <a href="/terms-of-service/" target="_blank">terms of service</a> and
-        <a href="/privacy-policy/" target="_blank">privacy policy</a>.
-        Please note that children under the age of 13 may not create
-        an account, but a parent may create an account for them,
-        and must tick the corresponding checkbox above.
+      <p>{% ftlmsg 'accounts-signup-agree-to-terms-of-service-html' %}
       </p>
 
-      <p>Parents concerned about children having contact with other
-        people on the internet via the commenting system should
-        disable the commenting option above.</p>
+      <p>{% ftlmsg 'accounts-signup-parents-notice' %}</p>
 
       <div class="actions">
-        <input type="submit" name="signup" value="Create account" class="btn primary default">
+        <button type="submit" name="signup" class="btn primary default">{% ftlmsg 'accounts-signup-create-account-button' %}</button>
       </div>
     </form>
 

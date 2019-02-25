@@ -1,33 +1,34 @@
 {% load dict_utils %}
+{% load i18n %}
+{% load ftl %}
 
 <form action="" method="GET" class="quickfind always-adjust-size" id="id-quick-find-form">
   <div class="form-row">
-    <label for="id_quick_find">Quick find:</label>
+    <label for="id_quick_find">{% ftlmsg 'bibleverses-quick-find-label' %}</label>
     <div class="input">
       <input id="id_quick_find" type="text" value="" name="quick_find">
       <br/>
       <div id="id_quick_find_help">
-        {% if quick_find_mode == 'PASSAGE' %}
-          <div data-lang-specific lang="en">
-            example: <b>Romans 8:28-39</b>
-          </div>
-          <div data-lang-specific lang="tr">
-            örnek: <b>Yuh 3:1-16</b>
-          </div>
-        {% else %}
-          <div data-lang-specific lang="en">
-            example: <b>Matt 28:19</b> or <b>make disciples</b>
-          </div>
-          <div data-lang-specific lang="tr">
-            örnek: <b>Yuh 3:16</b> veya <b>dünya sev</b>
-          </div>
-        {% endif %}
+        {# Need all the languages, because the example text is changed #}
+        {# dynamically according to chosen Bible translation language, not normal interface language #}
+        {% get_available_languages as LANGUAGES %}
+        {% for language_code, language_name in LANGUAGES %}
+          {% withftl language=language_code %}
+            <div data-lang-specific lang="{{ language_code }}">
+              {% if quick_find_mode == 'PASSAGE' %}
+                {% ftlmsg 'bibleverses-quick-find-example-passage-mode-html' %}
+              {% else %}
+                {% ftlmsg 'bibleverses-quick-find-example-general-mode-html' %}
+              {% endif %}
+            </div>
+          {% endwithftl %}
+        {% endfor %}
       </div>
     </div>
   </div>
 
   <div class="form-row">
-    <label for="id_book">Select:</label>
+    <label for="id_book">{% ftlmsg 'bibleverses-select-passage-label' %}</label>
     <div class="input">
       <select name="book" id="id_book">
         <option value="">----</option>
@@ -41,17 +42,15 @@
       </select>
 
       <nobr>
-        ch
         <select name="chapter_start">
         </select>
-        v
+        :
         <select name="verse_start">
         </select>
         —
-        ch
         <select name="chapter_end">
         </select>
-        v
+        :
         <select name="verse_end">
         </select>
       </nobr>
@@ -59,7 +58,7 @@
   </div>
 
   <div class="form-row">
-    <label for="id-version-select">Version:</label>
+    <label for="id-version-select">{% ftlmsg 'bibleverses-select-version-label' %}</label>
     <div class="input">
       <select id="id-version-select" name="version">
         {% for v in bible_versions %}
@@ -73,13 +72,15 @@
   </div>
 
   <div class="actions">
-    <input id="id_lookup" type="submit" name="lookup"
-           {% if quick_find_mode == 'PASSAGE' %}
-           value="Lookup passage"
-           {% else %}
-           value="Lookup verse"
-           {% endif %}
-           class="btn primary">
+    {% spaceless %}
+      <button id="id_lookup" type="submit" name="lookup" class="btn primary">
+        {% if quick_find_mode == 'PASSAGE' %}
+          {% ftlmsg 'bibleverses-quick-find-lookup-passage-button' %}
+        {% else %}
+          {% ftlmsg 'bibleverses-quick-find-lookup-verse-button' %}
+        {% endif %}
+      </button>
+    {% endspaceless %}
   </div>
 
   <div class="non-field-errors">

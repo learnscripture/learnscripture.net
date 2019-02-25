@@ -1,4 +1,5 @@
+{% load ftl %}
 {% if text.url %}
-  <p class="permissionlink">Text used with permission
+  <p>{% ftlmsg 'bibleverses-text-used-with-permission' %}
     – <a href="{{ text.url }}">{{ text.url }}</a></p>
 {% endif %}

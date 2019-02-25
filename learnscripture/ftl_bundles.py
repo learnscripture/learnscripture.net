@@ -31,6 +31,7 @@ main = Bundle([
     'learnscripture/site.ftl',
     'learnscripture/stats.ftl',
     'learnscripture/terms-of-service.ftl',
+    'learnscripture/user-stats.ftl',
     'learnscripture/user-verse-sets.ftl',
     'learnscripture/user-verses.ftl',
     'learnscripture/versesets.ftl',

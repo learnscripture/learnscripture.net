@@ -1,4 +1,5 @@
 {% load dict_utils %}
+{% load ftl %}
 
 <div class="verse-options borderedbox">
   {% for uvs in uvs_list %}
@@ -9,13 +10,15 @@
 
         <input type="hidden" name="uvs_id" value="{{ uvs.id }}" />
         <p>
-          <input type="submit" name="reviewverse" class="btn primary"
-                 {% if uvs.needs_testing %}
-                 value="Review {{ uvs.item_name }}"
-                 {% else %}
-                 value="Practise {{ uvs.item_name }}"
-                 {% endif %}
-                 />
+          {% spaceless %}
+            <button type="submit" name="reviewverse" class="btn primary">
+              {% if uvs.needs_testing %}
+                {% ftlmsg 'user-verses-review-item-button' item_name=uvs.item_name %}
+              {% else %}
+                {% ftlmsg 'user-verses-practise-item-button' item_name=uvs.item_name %}
+              {% endif %}
+            </button>
+          {% endspaceless %}
         </p>
       </form>
     {% endif %}
@@ -30,15 +33,18 @@
         {% if uvs.section_localized_reference != uvs.passage_localized_reference %}
 
           {# review/practise section #}
-
           <p>
-            {% if uvs.needs_testing %}
-              <input type="submit" name="reviewpassagesection" class="btn primary"
-                     value="Review section: {{ uvs.section_localized_reference }}"/>
-            {% else %}
-              <input type="submit" name="practisepassagesection" class="btn primary"
-                     value="Practise section: {{ uvs.section_localized_reference }}"/>
-            {% endif %}
+            {% spaceless %}
+              {% if uvs.needs_testing %}
+                <button type="submit" name="reviewpassagesection" class="btn primary">
+                  {% ftlmsg 'user-verses-review-section-button' section_reference=uvs.section_localized_reference %}
+                </button>
+              {% else %}
+                <button type="submit" name="practisepassagesection" class="btn primary">
+                  {% ftlmsg 'user-verses-practise-section-button' section_reference=uvs.section_localized_reference %}
+                </button>
+              {% endif %}
+            {% endspaceless %}
           </p>
 
         {% endif %}
@@ -46,13 +52,17 @@
         {# review/practice passage #}
 
         <p>
-          {% if uvs.needs_testing %}
-            <input type="submit" name="reviewpassage" class="btn primary"
-                   value="Review passage: {{ uvs.passage_localized_reference }}"/>
-          {% else %}
-            <input type="submit" name="practisepassage" class="btn primary"
-                   value="Practise passage: {{ uvs.passage_localized_reference }}"/>
-          {% endif %}
+          {% spaceless %}
+            {% if uvs.needs_testing %}
+              <button type="submit" name="reviewpassage" class="btn primary">
+                {% ftlmsg 'user-verses-review-passage-button' passage_reference=uvs.passage_localized_reference %}
+              </button>
+            {% else %}
+              <button type="submit" name="practisepassage" class="btn primary">
+                {% ftlmsg 'user-verses-practise-passage-button' passage_reference=uvs.passage_localized_reference %}
+              </button>
+            {% endif %}
+          {% endspaceless %}
         </p>
       </form>
     {% endif %}
@@ -62,10 +72,12 @@
         {% csrf_token %}
         <input type="hidden" name="catechism_id" value="{{ uvs.version.id }}" />
         <p>
-          <input type="submit" name="reviewcatechism" class="btn primary"
-                 value="Practice or review all of {{ uvs.version.short_name }}"/>
+          {% spaceless %}
+            <button type="submit" name="reviewcatechism" class="btn primary">
+              {% ftlmsg 'user-verses-review-or-practice-catechism' catechism_name=uvs.version.short_name %}
+            </button>
+          {% endspaceless %}
         </p>
-
       </form>
     {% endif %}
 
@@ -81,9 +93,9 @@
           <input type="hidden" name="verse_status_localized_reference" value="{{ uvs.localized_reference }}" />
           <p>
             <button type="button" name="cancellearning" class="btn primary cancel-learning-verse-btn"
-                    data-confirm-prompt="Are you sure you want to stop learning {{ uvs.localized_reference }} in {{ uvs.version.short_name }}?"
+                    data-confirm-prompt="{% ftlmsg 'user-verses-stop-learning-verse-prompt' reference=uvs.localized_reference version_name=uvs.version.short_name %}"
               >
-              Stop learning this
+              {% ftlmsg 'user-verses-stop-learning-verse-button' %}
             </button>
           </p>
         {% else %}
@@ -93,9 +105,9 @@
           <input type="hidden" name="version_id" value="{{ uvs.version_id }}" />
           <p>
             <button type="submit" name="cancellearning" class="btn primary cancel-learning-passage-btn"
-                    data-confirm-prompt="Are you sure you want to stop learning {{ uvs.passage_localized_reference }} in {{ uvs.version.short_name }}?"
+                    data-confirm-prompt="{% ftlmsg 'user-verses-stop-learning-passage-prompt' passage_reference=uvs.passage_localized_reference version_name=uvs.version.short_name %}"
                     >
-              Stop learning this passage<br>
+              {% ftlmsg 'user-verses-stop-learning-passage-button' %}<br>
               ({{ uvs.passage_localized_reference }})
             </button>
           </p>
