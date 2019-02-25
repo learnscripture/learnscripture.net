@@ -33,3 +33,33 @@ bibleverses-reference = Reference
 # Label for the bible verse text field
 bibleverses-text = Text
 
+# Legal notice shown at the bottom of all extracts from Bibles/catechisms.
+bibleverses-text-used-with-permission = Text used with permission
+
+## Bible verse searching.
+
+# Label for the 'quick find' box for searching for verses
+bibleverses-quick-find-label = Quick find:
+
+# Example text for the search box when in 'passage' mode.
+# It shows an example reference for a group of verses.
+bibleverses-quick-find-example-passage-mode-html = example: <b>Romans 8:28-39</b>
+
+# Example text for the search box when in general mode.
+# It shows an example verse reference and text you might search for
+bibleverses-quick-find-example-general-mode-html = example: <b>Matt 28:19</b> or <b>make disciples</b>
+
+# Label for the drop down boxes for selecting a Bible verse
+bibleverses-select-passage-label = Select:
+
+# Label for the drop down box for selecting Bible version
+bibleverses-select-version-label = Version:
+
+# Caption for the button that looks up a passage
+bibleverses-quick-find-lookup-passage-button = Lookup passage
+
+# Caption for the button that looks up a verse (search or reference)
+bibleverses-quick-find-lookup-verse-button = Lookup verse
+
+
+

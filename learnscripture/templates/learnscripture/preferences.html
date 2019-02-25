@@ -1,18 +1,18 @@
 {% extends "base.html" %}
 {% load form_rendering %}
+{% load ftl %}
 
 {% block content %}
 
-  <p>Enter your preferences and press 'Save' to continue.</p>
+  <p>{% ftlmsg 'accounts-preferences-instructions' %}</p>
+  <p>{% ftlmsg 'accounts-preferences-instructions-additional-notes' %}</p>
   <form action="" method="POST">
     {% csrf_token %}
     {{ form|render_form }}
 
-    <p>All preferences can be changed later, and the Bible version can be chosen on
-      a verse-by-verse basis</p>
 
     <div class="actions">
-      <input id="id-save-btn" type="submit" value="Save" class="btn primary">
+      <button id="id-save-btn" type="submit" class="btn primary">{% ftlmsg 'accounts-preferences-save-button' %}</button>
     </div>
   </form>
 {% endblock %}

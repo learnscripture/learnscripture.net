@@ -148,11 +148,14 @@ class AccountPasswordResetForm(PasswordResetForm):
 
     def send_mail(self, subject_template_name, email_template_name,
                   context, from_email, to_email, html_email_template_name=None):
+        from learnscripture.context_processors import ftl
         # We add 'reset_url' to context, which is easier to do in Python than in
         # the template.
         path = reverse('password_reset_confirm', kwargs={'uidb64': context['uid'],
                                                          'token': context['token']})
         context['reset_url'] = "{protocol}://{domain}{path}".format(path=path, **context)
+        # We also add the ftl context
+        context.update(ftl(None))
         return super().send_mail(subject_template_name, email_template_name,
                                  context, from_email, to_email, html_email_template_name=html_email_template_name)
 
@@ -275,7 +278,7 @@ class UserVersesFilterForm(FilterFormMixin, forms.Form):
                             widget=forms.TextInput(attrs={'placeholder': t_lazy('user-verses-filter-query.placeholder')}))
     text_type = forms.ChoiceField(choices=TextType.choice_list,
                                   initial=TextType.BIBLE,
-                                  label=t_lazy('user-verses-filter-type'),
+                                  label=t_lazy('user-verses-filter-text-type'),
                                   required=False,
                                   widget=widgets.RadioSelect)
     order = forms.ChoiceField(choices=[(USER_VERSES_ORDER_WEAKEST, t_lazy('user-verses-order-weakest-first')),

@@ -3,6 +3,12 @@
 # Page title
 user-verses-page-title = Progress stats
 
+# Label for box where user can enter search terms for filtering list of verses
+user-verses-search-label = Search:
+
+# Caption for button that will do the search
+user-verses-search-button = Search
+
 # Search query field for searching through user's verses
 user-verses-filter-query = Search
                          .placeholder = Bible ref e.g. Gen 1:1
@@ -23,3 +29,60 @@ user-verses-order-strongest-first = Strongest first
 
 # Caption for showing memorized items sorted according to the natural text order (e.g. Bible order)
 user-verses-order-text = Text order
+
+# Shown in verse list when the user hasn't started learning any verses, or none that match the search terms
+user-verses-no-verses = No verses found.
+
+# Shown in the list when the user hasn't started learning any catechism questions, or none that match the search terms
+user-verses-no-catechism-questions = No catechism questions found.
+
+# Heading in table for verse references
+user-verses-verse-reference-heading = Verse reference
+
+# Heading in table for catechism question
+user-verses-question-heading = Question
+
+# Heading in table for Bible version
+user-verses-version-heading = Version
+
+# Heading in table for Catechism name
+user-verses-catechism-heading = Catechism
+
+# Heading in table for column showing the level/strength to which a verse has been learnt
+user-verses-strength-heading = Strength
+
+# Button for reviewing a verse (or catechism question).
+# $item_name is usually a verse reference (e.g. "Genesis 1:1")
+user-verses-review-item-button = Review { $item_name }
+
+# Button for practising a verse (or catechism question)
+# $item_name is usually a verse reference (e.g. "Genesis 1:1")
+user-verses-practise-item-button = Practise { $item_name }
+
+# Button for reviewing a section of a passage
+user-verses-review-section-button = Review section: { $section_reference }
+
+# Button for practising a section of a passage
+user-verses-practise-section-button = Practise section: { $section_reference }
+
+# Button for reviewing a passage
+user-verses-review-passage-button = Review passage: { $passage_reference }
+
+# Button for practising a passage
+user-verses-practise-passage-button = Practise passage: { $passage_reference }
+
+# Button for reviewing/practicing the whole of a catechsim
+user-verses-review-or-practice-catechism = Practice or review all of { $catechism_name }
+
+# Button for stopping learning a verse
+user-verses-stop-learning-verse-button = Stop learning this
+
+# Confirmation prompt for stopping learning a verse
+user-verses-stop-learning-verse-prompt = Are you sure you want to stop learning { $reference } in { $version_name }?
+
+# Button for stopping learning a whole passage
+user-verses-stop-learning-passage-button = Stop learning this passage
+
+# Confirmation prompt for stopping learning a passage
+user-verses-stop-learning-passage-prompt = Are you sure you want to stop learning { $passage_reference } in { $version_name }?
+

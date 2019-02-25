@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 
+{% load ftl %}
+
 {% block content %}
 
-  <p>Thank you for your donation!</p>
+  <p>{% ftlmsg 'donations-done-thank-you' %}</p>
 
 {% endblock %}

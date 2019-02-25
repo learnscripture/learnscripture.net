@@ -16,7 +16,6 @@ import furl
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.template.loader import render_to_string
 from django.utils.decorators import method_decorator
 from django.utils.functional import wraps
 from django.views.decorators.cache import never_cache
@@ -36,6 +35,7 @@ from learnscripture.ftl_bundles import t
 from learnscripture.views import (bible_versions_for_request, default_bible_version_for_request, todays_stats,
                                   verse_sets_visible_for_request)
 from scores.models import get_verses_started_per_day, get_verses_tested_per_day
+from learnscripture.utils.templates import render_to_string_ftl
 
 
 class rc_factory(object):
@@ -384,16 +384,7 @@ class SessionStats(ApiView):
             return {}
 
         identity = request.identity
-        retval = {}
-
-        # Render template
-        c = {}
-        c['identity'] = identity
-        stats = todays_stats(identity)
-        c.update(stats)
-        retval['stats_html'] = render_to_string('learnscripture/sessionstats.html', c)
-        retval['stats'] = stats
-        return retval
+        return {'stats': todays_stats(identity)}
 
 
 class ActionLogs(ApiView):
@@ -488,7 +479,7 @@ class VerseFind(ApiView):
             duplicate_check_html = None
 
         return {
-            'html': render_to_string(template_name, context, request=request),
+            'html': render_to_string_ftl(template_name, context, request=request),
             'parsed_reference': parsed_reference.__dict__ if parsed_reference is not None else None,
             'canonical_reference': parsed_reference.canonical_form() if parsed_reference is not None else None,
             'duplicate_check_html': duplicate_check_html,
@@ -515,7 +506,7 @@ def duplicate_passage_check(request, start_internal_reference, end_internal_refe
             'verse_sets': verse_sets,
             'language_code': language_code
         }
-        return render_to_string("learnscripture/duplicate_passage_warning_inc.html", context,
+        return render_to_string_ftl("learnscripture/duplicate_passage_warning_inc.html", context,
                                 request=request)
 
 
@@ -598,9 +589,9 @@ class AddComment(ApiView):
                                         message=message)
 
         return {
-            'html': render_to_string("learnscripture/comment_inc.html",
-                                     {'comment': comment},
-                                     request=request)
+            'html': render_to_string_ftl("learnscripture/comment_inc.html",
+                                         {'comment': comment},
+                                         request=request)
         }
 
 

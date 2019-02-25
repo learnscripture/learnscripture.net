@@ -4,12 +4,6 @@
 
 {% block content %}
 
-  <p>
-    <a href="{% url 'activity_stream' %}">Other recent activity</a> |
-    {{ account|account_link }}
-    » Recent activity
-  </p>
-
   <div data-pjax-results-container="#id-activity-stream"
        data-pjax-more-results-container=".more-results-container"
        ></div>

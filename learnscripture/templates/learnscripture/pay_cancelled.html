@@ -1,8 +1,11 @@
 {% extends "base.html" %}
 
+{% load ftl %}
+
 {% block content %}
 
-  <p>You cancelled part way through the payment process. You can 
-    <a href="{% url 'donate' %}">return to the donation page</a>.</p>
+  {% url 'donate' as donate_url %}
+
+  <p>{% ftlmsg 'donations-cancelled-message-html' donate_url=donate_url %}</p>
 
 {% endblock %}

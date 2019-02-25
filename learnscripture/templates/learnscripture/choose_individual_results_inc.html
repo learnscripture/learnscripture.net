@@ -11,7 +11,7 @@
         <input type="submit" name="learn_now" class="btn primary needs-preferences" value="{% ftlmsg 'choose-learn-button' %}">
         {% if request.identity.account %}
           <br/>
-          <input type="submit" name="add_to_queue" class="btn needs-preferences" value="{% ftlmsg 'choose-add-to-queue-button' %}" data-added-caption="{% ftlmsg 'choose-add-to-queue-button-added' %}">
+          <button type="submit" name="add_to_queue" class="btn needs-preferences" data-added-caption="{% ftlmsg 'choose-add-to-queue-button-added' %}">{% ftlmsg 'choose-add-to-queue-button' %}</button>
         {% endif %}
       </form>
       <div class="verselist">

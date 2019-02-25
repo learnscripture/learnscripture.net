@@ -9,12 +9,11 @@ import attr
 import django_ftl
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, UserManager
-from django.contrib.sites.shortcuts import get_current_site
 from django.core import mail
 from django.db import models
-from django.template import loader
 from django.utils import timezone
 from django.utils.functional import cached_property
+from fluent import types as fluent_types
 
 from accounts import memorymodel
 from accounts.signals import (catechism_started, points_increase, scored_100_percent, verse_finished, verse_started,
@@ -28,6 +27,7 @@ from learnscripture.datastructures import make_choices
 from learnscripture.ftl_bundles import t, t_lazy
 from learnscripture.utils.cache import cache_results, clear_cache_results
 from scores.models import ScoreReason, Scores, TotalScore
+from learnscripture.utils.templates import render_to_string_ftl
 
 TestingMethod = make_choices('TestingMethod',
                              [('FULL_WORDS', 'FULL_WORDS', t_lazy('accounts-type-whole-word-testing-method')),
@@ -378,12 +378,15 @@ def clear_friendship_weight_cache(account_id):
 def send_payment_received_email(account, payment):
     from django.conf import settings
     c = {
-        'site': get_current_site(None),
         'payment': payment,
         'account': account,
+        'payment_amount': fluent_types.fluent_number(payment.mc_gross,
+                                                     currency=payment.mc_currency,
+                                                     style=fluent_types.FORMAT_STYLE_CURRENCY,
+                                                     currencyDisplay=fluent_types.CURRENCY_DISPLAY_SYMBOL)
     }
     with django_ftl.override(account.default_language_code):
-        body = loader.render_to_string("learnscripture/payment_received_email.txt", c)
+        body = render_to_string_ftl("learnscripture/payment_received_email.txt", c)
         subject = t('emails-donation-received-subject')
         mail.send_mail(subject, body, settings.SERVER_EMAIL, [account.email])
 

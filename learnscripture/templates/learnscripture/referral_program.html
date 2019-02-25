@@ -1,59 +1,50 @@
 {% extends "base.html" %}
 
+{% load ftl %}
+{% load capture_tags %}
+
 {% block content %}
 
-  <p>If you like LearnScripture.net and want to spread the word about it, our
-    referral program will help you get <strong>badges</strong> while you do so!</p>
+  <p>{% ftlmsg 'referrals-intro' %}</p>
 
-  <h2>How it works</h2>
+  <h2>{% ftlmsg 'referrals-how-it-works-title' %}</h2>
 
   {% if referral_link %}
 
-    <p>For us to recognize that you were the source of the referral, you need a link
-      like the following one to refer people to LearnScripture.net:</p>
+    <p>{% ftlmsg 'referrals-how-it-works-paragraph-1' %}</p>
 
     <p class="referral-link">{% include "learnscripture/referral_link_control.html" with link=referral_link %}</p>
 
-    <p>Click on the text, then choose 'Share' (mobile devices), or
-      copy-and-paste this link and pass it on to a friend. If they use this link
-      to get to the site, and then start learning verses, we'll track it and
-      know that you referred them.</p>
+    <p>{% ftlmsg 'referrals-how-it-works-paragraph-2' %}</p>
 
   {% else %}
 
-    <p><strong>You first need an account, and need to
-      <a href='{% url "login" %}?next={{ request.get_full_path|urlencode }}'>sign in</a>
-      to get the full instructions and the referral link.</strong></p>
+    {% capture as login_url silent %}{% url "login" %}?next={{ request.get_full_path|urlencode }}{% endcapture %}
+    <p><strong>{% ftlmsg 'referrals-you-need-to-create-an-account-html' login_url=login_url %}</strong></p>
 
   {% endif %}
 
 
-  <h2>Please don't:</h2>
+  <h2>{% ftlmsg 'referrals-please-dont-title' %}</h2>
 
   <ul class="dont">
-    <li>Send bulk emails to friends about this. Many of them may consider this to
-      be spam, or even think it came from us, and you may give LearnScripture.net a
-      bad name!
-    </li>
+    <li>{% ftlmsg 'referrals-please-dont-send-bulk-emails' %}</li>
   </ul>
 
-  <h2>Please do:</h2>
+  <h2>{% ftlmsg 'referrals-please-do-title' %}</h2>
 
   <ul class="do">
-    <li>Post this link to social sites like Facebook, Twitter or Pinterest (as long as you don't post it repeatedly and annoy people!)
-      <li>Include some personal comment about why you like LearnScripture.net or how it has helped you.</li>
+    <li>{% ftlmsg 'referrals-please-do-share-on-social-media' %}</li>
+    <li>{% ftlmsg 'referrals-please-do-include-personal-comments' %}</li>
   </ul>
 
-  <h2>Specific pages</h2>
+  <h2>{% ftlmsg 'referrals-specific-pages-title' %}</h2>
 
-  <p>You can also get a referral link for specific pages. At the bottom of most
-    pages that make good starting points, you'll see 'Share link'. These will
-    automatically use the right URL with the '?from=' bit added. Click on the link to
-    select it and share.</p>
+  <p>{% ftlmsg 'referrals-specific-pages-paragraph-1' %}</p>
 
-  <p>This can be especially useful to get a group of friends to start learning
-    a <a href="{% url 'choose' %}">verse set</a>, or to join a
-    <a href="{% url 'groups' %}">group</a>.</p>
+  {% url 'choose' as choose_url %}
+  {% url 'groups' as groups_url %}
+  <p>{% ftlmsg 'referrals-paragraph-2-html' choose_url=choose_url groups_url=groups_url %}</p>
 
 {% endblock %}
 

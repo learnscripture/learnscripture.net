@@ -2,6 +2,14 @@
 # Title of 'dashboard' page
 dashboard-page-title = Dashboard
 
+# Notice that appears for guest users who haven't created an account yet
+dashboard-remember-to-create-an-account-html =
+    <b>Remember to <a href="{ $signup_url }">create an account</a></b> -
+    otherwise your progress will be lost! It's free, only takes a few seconds, and
+    enables lots of additional features like badges, groups, leaderboards and
+    statistics pages. As a guest, your data will expire on { DATETIME($expires) }.
+
+
 ## Add to home screen section.
 # Sub title
 dashboard-add-to-home-screen-title = Add to home screen
@@ -169,6 +177,12 @@ dashboard-choose-link-html = When you're done with the above, <a href="{ $url }"
 
 dashboard-todays-stats-title = Today's stats
 
+# Indicates the number of new verses the user has started today
+dashboard-todays-stats-new-verses-begun = New verses begun: { $new_verses_started }
+
+# Indicates the number of verses the user has been tested on today
+dashboard-todays-stats-total-verses-tested = Total verses tested: { $total_verses_tested }
+
 # Sub title for the list of groups the user is a member of
 dashboard-your-groups-title = Your groups
 
@@ -188,9 +202,3 @@ dashboard-news-title = News
 dashboard-more-news-link = See more news...
 
 
-
-dashboard-remember-to-create-an-account-html =
-    <b>Remember to <a href="{ $signup_url }">create an account</a></b> -
-    otherwise your progress will be lost! It's free, only takes a few seconds, and
-    enables lots of additional features like badges, groups, leaderboards and
-    statistics pages.

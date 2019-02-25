@@ -79,7 +79,8 @@ class PaymentTests(AccountTestMixin, TestBase):
         self.assertEqual(self.account.payments.count(), 1)
 
         self.assertEqual(len(mail.outbox), 1)
-        self.assertTrue('Thank you for your donation' in mail.outbox[0].body)
+        self.assertIn('Thank you for your donation', mail.outbox[0].body)
+        self.assertIn('£10', mail.outbox[0].body)
 
     def test_USD_payment(self):
         ipn_1 = good_payment_ipn(self.account, Decimal("10.00"),

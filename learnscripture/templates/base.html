@@ -37,7 +37,7 @@
           <div class="nav-dropdown">
             <div class="dropdown-heading nav-item">
               <a href="#">
-                {% if request_account %}{{ request_account.username }}{% else %}Guest{% endif %} <i class="icon-caret-down"></i>
+                {% if request_account %}{{ request_account.username }}{% else %}{% ftlmsg 'site-guest-user-name' %}{% endif %} <i class="icon-caret-down"></i>
               </a>
             </div>
             <ul class="nav-dropdown-menu">

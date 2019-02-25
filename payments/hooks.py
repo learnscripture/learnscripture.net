@@ -1,10 +1,10 @@
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
 from django.core import mail
-from django.template import loader
 from paypal.standard.ipn.signals import invalid_ipn_received, valid_ipn_received
 
 from accounts.models import Account
+from learnscripture.utils.templates import render_to_string_ftl
 from payments.models import DonationDrive, send_donation_drive_target_reached_emails
 from payments.sign import unsign_payment_string
 from payments.signals import donation_drive_contributed_to, target_reached
@@ -24,7 +24,7 @@ def send_unrecognized_payment_email(ipn_obj):
         'ipn_obj': ipn_obj,
     }
 
-    body = loader.render_to_string("learnscripture/unrecognized_payment_email.txt", c)
+    body = render_to_string_ftl("learnscripture/unrecognized_payment_email.txt", c)
     subject = "LearnScripture.net - unrecognized payment"
     mail.send_mail(subject, body, settings.SERVER_EMAIL, [settings.DEFAULT_FROM_EMAIL])
 

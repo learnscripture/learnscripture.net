@@ -1,11 +1,13 @@
 {% extends "base_twocol.html" %}
 
 {% load markup_tags %}
+{% load ftl %}
+{% load account_utils %}
 
 {% block leftcolumn %}
 
   {% if verse_set.description %}
-    <h2>Description</h2>
+    <h2>{% ftlmsg 'versesets-description' %}</h2>
     {{ verse_set.description|apply_markup:"restructuredtext" }}
   {% endif %}
 
@@ -29,7 +31,7 @@
       <br/>
     {% else %}
 
-      <h2>Verses</h2>
+      <h2>{% ftlmsg 'versesets-view-set-verses-title' %}</h2>
       <ul>
         {% for v in verse_list %}
           <li>
@@ -40,48 +42,46 @@
       </ul>
     {% endif %}
 
+    <div class="verse-set-version-info">
+      <form action="" method="GET">
+        <div id="id-version">
+          {% ftlmsg 'bibleverses-select-version-label' %}
+          <select id="id-version-select" name="version">
+            {% for v in bible_versions %}
+              <option value="{{ v.slug }}"
+                      {% if v.slug == version.slug %}selected{% endif %}
+                      >{{ v.short_name }} ({{ v.full_name }})</option>
+            {% endfor %}
+          </select>
+          <noscript>
+            {# for webtest tests #}
+            <button type="submit" class="btn" id="id-trigger-version-change">Change</button>
+          </noscript>
+
+        </div>
+      </form>
     {% include "learnscripture/permission_link.html" with text=version %}
+    </div>
 
-    <form action="" method="GET">
-      <div id="id-version">
-        Version:
-        <select id="id-version-select" name="version">
-          {% for v in bible_versions %}
-            <option value="{{ v.slug }}"
-                    {% if v.slug == version.slug %}selected{% endif %}
-            >{{ v.short_name }} ({{ v.full_name }})</option>
-          {% endfor %}
-        </select>
-        <noscript>
-          <input type="submit" class="btn" id="id-trigger-version-change" value="Change" />
-        </noscript>
-      </div>
-    </form>
-
-    <h3>Notes</h3>
+    <h3>{% ftlmsg 'versesets-view-set-notes-title' %}</h3>
     <ul>
       {% if not verse_set.is_passage %}
-        <li>When learning a set, you can opt out of any individual verse by pressing
-          ‘Stop learning this verse’ on the learning page.</li>
+        <li>{% ftlmsg 'versesets-view-set-how-to-opt-out' %}</li>
       {% endif %}
-      <li><i class="icon-public"></i> Learning a verse set is a public action
-        (unless the set is private and remains private)</li>
+      <li><i class="icon-public"></i> {% ftlmsg 'versesets-view-set-learning-is-public' %}</li>
     </ul>
 
   {% else %}
-    No verses in this set!
+    {% ftlmsg 'versesets-view-set-no-verses' %}
   {% endif %}
 
   {% if can_edit and show_convert_to_passage %}
     <hr>
-    <p>This looks like a continuous set of verses. These are much better learnt
-      using a 'passage' set, rather than a 'selection' set. You can convert using
-      the button below:
+    <p>{% ftlmsg 'versesets-view-set-change-to-passage-set' %}
     </p>
     <form action="" method="POST">
       {% csrf_token %}
-      <input type="submit" name="convert_to_passage_set" value="Convert to passage set"
-             class="btn"/>
+      <button type="submit" name="convert_to_passage_set" class="btn">{% ftlmsg 'versesets-view-set-change-to-passage-set-button' %}</button>
     </form>
     <hr>
 
@@ -93,11 +93,11 @@
     <input type="hidden" name="version_slug" value="{{ version.slug }}">
     <div class="actions empty-form">
       {% if can_edit %}
-        <a class="btn" href="{% url 'edit_set' slug=verse_set.slug %}">Edit</a>
+        <a class="btn" href="{% url 'edit_set' slug=verse_set.slug %}">{% ftlmsg 'versesets-view-set-edit-button' %}</a>
       {% endif %}
       {% if verse_list %}
-        <input type="submit" class="btn primary needs-preferences" name="learn" value="Learn">
-        <i class="icon-public" title="Public action"></i>
+        <button type="submit" class="btn primary needs-preferences" name="learn">{% ftlmsg 'choose-learn-button' %}</button>
+        <i class="icon-public" title="{% ftlmsg 'site-public-action' %}"></i>
       {% endif %}
     </div>
   </form>
@@ -108,45 +108,40 @@
 
 {% block rightcolumn %}
 
-  <h3>Verse set info</h3>
+  <h3>{% ftlmsg 'versesets-view-set-info-title' %}</h3>
 
-  <div>Put together by:
-    <a href="{% url 'user_stats' verse_set.created_by.username %}"
-       >{{ verse_set.created_by.username }}</a>
+  <div>
+    {% ftlmsg 'versesets-view-set-put-together-by-html' username=verse_set.created_by|account_link %}.
     <br/>
-    Created: {{ verse_set.date_added|timesince }} ago
+    {% ftlmsg 'versesets-view-set-date-created' date_created=verse_set.date_added %}
 
     {% if not verse_set.public %}
       <br/><br/>
-      <strong>Private</strong> - this verse set can only be accessed by you.
+      {% ftlmsg 'versesets-view-set-private' %}
     {% endif %}
   </div>
 
-  <h3>Status</h3>
+  <h3>{% ftlmsg 'versesets-view-set-status-title' %}</h3>
 
   {% if started_count == 0 %}
-    <p>You are not learning this verse set in {{ version.short_name }}.</p>
+    <p>{% ftlmsg 'versesets-view-set-not-learning' version_name=version.short_name %}</p>
   {% elif started_count == verse_list|length %}
-    <p>You've started learning all the verses in this set in {{ version.short_name }}.</p>
+    <p>{% ftlmsg 'versesets-view-set-learning-all' version_name=version.short_name %}</p>
   {% else %}
-    <p>You've started learning {{ started_count }} out of {{ verse_list|length }}
-      verses in this set in version {{ version.short_name }}.</p>
+    <p>{% ftlmsg 'versesets-view-set-learning-some' started_count=started_count total_count=verse_list|length version_name=version.short_name %}</p>
   {% endif %}
 
   {% if in_queue > 0 %}
-    <p>You have {{ in_queue }} verse(s) from this set in your queue for
-      learning in version {{ version.short_name }}.</p>
+    <p>{% ftlmsg 'versesets-view-set-number-in-queue' in_queue_count=in_queue version_name=version.short_name %}</p>
 
-    <p>If you want to remove them:</p>
+    <p>{% ftlmsg 'versesets-view-set-remove-from-queue-start' %}</p>
 
     <ul>
-      <li>remove them individually from the learning interface by choosing <b>Stop
-        learning verse</b> from the <b>Options</b> button when the verse comes
-        up for learning.</li>
-      <li>Or you can remove them all:
+      <li>{% ftlmsg 'versesets-view-set-remove-from-queue-method-1' %}</li>
+      <li>{% ftlmsg 'versesets-view-set-remove-from-queue-method-2' %}
         <form action="" method="POST">
           {% csrf_token %}
-          <input type="submit" class="btn" name="drop" value="Drop from queue">
+          <button type="submit" class="btn" name="drop">{% ftlmsg 'versesets-view-set-drop-from-queue-button' %}</button>
         </form>
       </li>
     </ul>

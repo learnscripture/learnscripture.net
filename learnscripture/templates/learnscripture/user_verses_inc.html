@@ -1,9 +1,11 @@
+{% load ftl %}
+
 {% if not results.items %}
   {% if bible %}
-    <p>No verses learnt yet</p>
+    <p>{% ftlmsg 'user-verses-no-verses' %}</p>
   {% endif %}
   {% if catechism %}
-    <p>No catechism questions learnt yet - <a href="{% url 'catechisms' %}">choose some!</a></p>
+    <p>{% ftlmsg 'user-verses-no-catechism-questions' %}</p>
   {% endif %}
 
 {% else %}
@@ -11,9 +13,9 @@
   <table class="bordered-table verse-progress-data">
     <thead>
       <tr>
-        <th class="verse-ref">{% if bible %}Verse{% elif catechism %}Question{% endif %}</th>
-        <th>{% if bible %}Version{% elif catechism %}Catechism{% endif %}</th>
-        <th>Strength</th>
+        <th class="verse-ref">{% if bible %}{% ftlmsg 'user-verses-verse-reference-heading' %}{% elif catechism %}{% ftlmsg 'user-verses-question-heading' %}{% endif %}</th>
+        <th>{% if bible %}{% ftlmsg 'user-verses-version-heading' %}{% elif catechism %}{% ftlmsg 'user-verses-catechism-heading' %}{% endif %}</th>
+        <th>{% ftlmsg 'user-verses-strength-heading' %}</th>
         <th></th>
       </tr>
     </thead>

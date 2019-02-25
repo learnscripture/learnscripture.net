@@ -6,7 +6,7 @@
 {% block body_extra_class %}leaderboard-page{% endblock %}
 
 {% block content %}
-  <p><a href="{% url 'group' group.slug %}">{% ftlmsg 'group-details-group-info-subtitle' %}</a></p>
+  <p><a href="{% url 'group' group.slug %}">{% ftlmsg 'groups-details-group-info-subtitle' %}</a></p>
 
   <form action="." method="GET"
         data-pjax-results-container="#id-leaderboard-results-table-body"
