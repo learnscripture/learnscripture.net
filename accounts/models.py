@@ -483,7 +483,9 @@ class Identity(models.Model):
 
     @property
     def default_language_code(self):
-        # For now, just use this, make it a proper setting later.
+        if self.i18n_options_enabled:
+            return self.interface_language
+        # Legacy - guess based on default_bible_version
         if self.default_bible_version is None:
             return DEFAULT_LANGUAGE.code
         else:
@@ -1281,6 +1283,7 @@ class Identity(models.Model):
                 return TextVersion.objects.bibles()
         return TextVersion.objects.bibles().filter(public=True)
 
+    @property
     def i18n_options_enabled(self):
         return self.account_id is not None and self.account.is_tester
 

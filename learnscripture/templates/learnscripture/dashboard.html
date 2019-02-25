@@ -281,7 +281,7 @@
           </form>
 
           {% if verse_set %}
-            <h3><a href="{% url 'view_verse_set' verse_set.slug %}">{{ verse_set.smart_name_dict|lookup:request.identity.default_language_code }}</a></h3>
+            <h3><a href="{% url 'view_verse_set' verse_set.slug %}">{{ verse_set.smart_name_dict|lookup:default_language_code }}</a></h3>
           {% else %}
             {% if not forloop.first %}
               <h3>{% ftlmsg 'dashboard-learn-other-verses' %}</h3>
@@ -404,7 +404,7 @@
               <a href="{{ event.get_absolute_url }}"><i class="icon-link"></i></a>
             {% endif %}
           </span>
-          {{ event.render_html_dict|lookup:request.identity.default_language_code }}
+          {{ event.render_html_dict|lookup:default_language_code }}
           <br/><span class="timestamp">{{ event.created_display }}</span>
         </li>
       {% endfor %}
