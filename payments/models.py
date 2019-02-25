@@ -161,7 +161,7 @@ def send_donation_drive_target_reached_emails(donation_drive):
 
     payments = donation_drive.get_contributions()
     recipient_data = [{
-        'language_code': payment.account.identity.default_language_code,
+        'language_code': payment.account.default_language_code,
         'name': payment.account.email_name,
         'email': payment.account.email,
         'amount': fluent_types.fluent_number(payment.amount,

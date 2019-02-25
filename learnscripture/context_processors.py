@@ -85,7 +85,14 @@ def notices(request):
                 l.append(notice)
         return l
 
-    retval = {'site_notices': memoize_nullary(SiteNotice.objects.current)}
+    def get_site_notices():
+        if hasattr(request, 'identity'):
+            default_language_code = request.identity.default_language_code
+        else:
+            default_language_code = DEFAULT_LANGUAGE.code
+        return SiteNotice.objects.current(default_language_code)
+
+    retval = {'site_notices': memoize_nullary(get_site_notices)}
 
     if hasattr(request, 'identity'):
         retval['notices'] = memoize_nullary(get_and_mark_notices)
@@ -99,13 +106,10 @@ def notices(request):
 def request_account(request):
     account = account_from_request(request)
     # Everywhere we need request_account we might also need default_language_code
-    if account is None:
-        if hasattr(request, 'identity'):
-            default_language_code = request.identity.default_language_code
-        else:
-            default_language_code = DEFAULT_LANGUAGE.code
+    if hasattr(request, 'identity'):
+        default_language_code = request.identity.default_language_code
     else:
-        default_language_code = account.default_language_code
+        default_language_code = DEFAULT_LANGUAGE.code
     return {
         'request_account': account,
         'default_language_code': default_language_code
