@@ -1422,11 +1422,16 @@ def get_active_identity_count(since_when, until_when):
             )
 
 
-def notify_all_accounts(html_message):
-    for account in Account.objects.active().filter(identity__isnull=False).select_related('identity'):
+def notify_all_accounts(language_code, html_message):
+    for account in Account.objects.active().filter(
+            identity__isnull=False,
+            identity__interface_language=language_code,
+    ).select_related('identity'):
         account.add_html_notice(html_message)
 
 
-def notify_all_identities(html_message):
-    for identity in Identity.objects.all().select_related(None):
+def notify_all_identities(language_code, html_message):
+    for identity in Identity.objects.all().filter(
+            interface_language=language_code,
+    ).select_related(None):
         identity.add_html_notice(html_message)
