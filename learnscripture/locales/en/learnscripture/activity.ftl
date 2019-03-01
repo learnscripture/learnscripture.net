@@ -10,7 +10,7 @@ activity-permalink = Link directly to this item alone
 
 ## User's activity page.
 
-# Page title,
+# Page title
 activity-user-page-title = Recent activity from { $username }
 
 ## Single activity item/event page.
