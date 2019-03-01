@@ -1,0 +1,16 @@
+# See https://moz-l10n-config.readthedocs.io/en/latest/fileformat.html
+
+basepath = "."
+
+locales = [
+    "en",
+    "tr",
+]
+
+[[paths]]
+
+reference = "learnscripture/locales/en/**/*.ftl"
+l10n = "learnscripture/locales/{locale}/**/*.ftl"
+locales = [
+    "tr",
+]
