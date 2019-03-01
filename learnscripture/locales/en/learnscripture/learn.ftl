@@ -282,6 +282,7 @@ learn-help-tour-next = Next
 # Button that closes the help tour at the end
 learn-help-tour-finish = Finish
 
+# First message shown in help tour
 learn-help-tour-hello =
     Hello! This guided tour will take you around the learning page interface.
 
