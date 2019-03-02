@@ -341,6 +341,10 @@ def null_context():
 
 class WebTestBase(AccountTestMixin, LoginMixin, FuncWebTestMixin, TimeUtilsMixin, TestCase):
 
+    def get_url(self, *args, **kwargs):
+        response = super().get_url(*args, **kwargs)
+        if b'???' in response.content:
+            raise AssertionError("Some kind of FTL error in response:\n {0}".format(response.content.decode('utf-8')))
     # Utilities:
 
     # WebTest/Selenium utilities
