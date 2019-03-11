@@ -507,7 +507,7 @@ def duplicate_passage_check(request, start_internal_reference, end_internal_refe
             'language_code': language_code
         }
         return render_to_string_ftl("learnscripture/duplicate_passage_warning_inc.html", context,
-                                request=request)
+                                    request=request)
 
 
 class AddVerseToQueue(ApiView):
