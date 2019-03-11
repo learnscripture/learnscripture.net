@@ -13,7 +13,7 @@ from django.core import mail
 from django.db import models
 from django.utils import timezone
 from django.utils.functional import cached_property
-from fluent import types as fluent_types
+from fluent.runtime import types as fluent_types
 
 from accounts import memorymodel
 from accounts.signals import (catechism_started, points_increase, scored_100_percent, verse_finished, verse_started,
