@@ -51,6 +51,13 @@ installed.
 
      npm install
 
+   We also need to install Elm dependencies::
+
+     cd learnscripture/static/elm
+     elm-install
+     cd tests
+     elm-install
+
 5. Create postgres databases matching the development ones in
    ``learnscripture/settings.py``, both for ``learnscripture`` and
    ``learnscripture_wordsuggestions``.
@@ -99,10 +106,12 @@ installed.
 
      ./manage.py runserver
 
-   And::
+   And, in separate terminals::
 
+     fab run_ftl2elm:true
      npm run watch
 
+   (These are long running processes that re-run themselves when files change)
    Browse the site on http://learnscripture.local:8001/
 
 9. Then, try to run the tests::
