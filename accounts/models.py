@@ -26,8 +26,8 @@ from bibleverses.textutils import count_words
 from learnscripture.datastructures import make_choices
 from learnscripture.ftl_bundles import t, t_lazy
 from learnscripture.utils.cache import cache_results, clear_cache_results
-from scores.models import ScoreReason, Scores, TotalScore
 from learnscripture.utils.templates import render_to_string_ftl
+from scores.models import ScoreReason, Scores, TotalScore
 
 TestingMethod = make_choices('TestingMethod',
                              [('FULL_WORDS', 'FULL_WORDS', t_lazy('accounts-type-whole-word-testing-method')),

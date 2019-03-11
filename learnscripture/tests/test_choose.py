@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.urls import reverse
+
 from accounts.models import Identity
 from awards.models import AwardType, TrendSetterAward
 from bibleverses.models import VerseSet

@@ -5,12 +5,12 @@ from django.core import mail
 from django.db import models
 from django.utils import timezone
 from django.utils.functional import cached_property
+from django_ftl import override
 from fluent.runtime import types as fluent_types
 from paypal.standard.ipn.models import PayPalIPN
 
-from django_ftl import override
-from learnscripture.ftl_bundles import t
 from accounts.models import Account
+from learnscripture.ftl_bundles import t
 
 
 class PaymentManager(models.Manager):

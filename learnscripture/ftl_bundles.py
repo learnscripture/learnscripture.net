@@ -4,7 +4,6 @@ import sys
 from django_ftl import activate
 from django_ftl.bundles import Bundle
 
-
 main = Bundle([
     'learnscripture/accounts.ftl',
     'learnscripture/activity.ftl',

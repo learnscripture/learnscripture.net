@@ -6,9 +6,10 @@ from django_ftl.templatetags import ftl as ftl_tags
 from accounts.forms import PreferencesForm
 from accounts.models import DEFAULT_THEME, THEME_FONTS
 from bibleverses.languages import DEFAULT_LANGUAGE
+from learnscripture.ftl_bundles import main as main_bundle
+from learnscripture.ftl_bundles import t
 from learnscripture.models import SiteNotice
 from learnscripture.views import account_from_request
-from learnscripture.ftl_bundles import t, main as main_bundle
 from payments.models import DonationDrive
 
 NOTICES_EXPIRE_AFTER_DAYS = 3
