@@ -37,3 +37,16 @@ and run something like::
 
 You will also need to setup rabbitmq-server locally to do this. See
 ``fabfile.py`` for details.
+
+uwsgi
+-----
+
+In production we use uswgi as a server. For testing that locally you can do
+something like::
+
+  $ pip install uwsgi
+  $ manage.py collectstatic
+  $ uwsgi --home ~/.virtualenvs/learnscripture -w learnscripture.wsgi --master --process 4 --http :9090 --check-static ..
+
+(see ../config/supervisor.conf.template for production command line)
+
