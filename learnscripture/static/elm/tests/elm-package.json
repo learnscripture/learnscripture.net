@@ -23,7 +23,19 @@
         "elm-lang/window": "1.0.1 <= v < 2.0.0",
         "jweir/elm-iso8601": "4.0.1 <= v < 5.0.0",
         "sporto/erl": "13.0.1 <= v < 14.0.0",
-        "yotamDvir/elm-pivot": "2.0.0 <= v < 3.0.0"
+        "yotamDvir/elm-pivot": "2.0.0 <= v < 3.0.0",
+        "thetalecrafter/elm-intl": "2.0.0 <= v < 3.0.0",
+        "elm-fluent/elm-fluent": "1.0.0 <= v < 2.0.0"
+    },
+    "dependency-sources": {
+        "thetalecrafter/elm-intl": {
+            "url": "https://github.com/vanwagonet/elm-intl",
+            "ref": "master"
+        },
+        "elm-fluent/elm-fluent": {
+            "url": "https://github.com/elm-fluent/elm-fluent",
+            "ref": "master"
+        }
     },
     "elm-version": "0.18.0 <= v < 0.19.0"
 }

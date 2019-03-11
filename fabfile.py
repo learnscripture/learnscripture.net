@@ -503,7 +503,7 @@ def code_quality_checks():
     local("isort -c")
     run_ftl2elm()
     with lcd("learnscripture/static/elm"):
-        local("elm-test")
+        local("elm-test --skip-install")
     local("./runtests.py -f --nokeepdb")
 
 
