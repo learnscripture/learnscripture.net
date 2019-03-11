@@ -501,6 +501,7 @@ def code_quality_checks():
         return
     local("flake8 .")
     local("isort -c")
+    run_ftl2elm()
     with lcd("learnscripture/static/elm"):
         local("elm-test")
     local("./runtests.py -f --nokeepdb")
@@ -621,6 +622,14 @@ def install_requirements(target):
 
 webpack_deploy_files_pattern = "./learnscripture/static/webpack_bundles/*.deploy.*"
 webpack_stats_file = "./webpack-stats.deploy.json"
+
+
+@task
+def run_ftl2elm(watch=False):
+    cmdline = "ftl2elm --locales-dir learnscripture/locales --output-dir learnscripture/static/elm --when-missing=fallback --include='**/learn.ftl'"
+    if watch:
+        cmdline += " --watch --verbose"
+    local(cmdline)
 
 
 def build_static():
