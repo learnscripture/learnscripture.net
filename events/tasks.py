@@ -2,10 +2,9 @@ from accounts.models import Account
 from awards.models import Award
 from bibleverses.models import TextVersion, VerseSet
 from comments.models import Comment
-from events.models import (AwardReceivedEvent, GroupCreatedEvent, GroupJoinedEvent, NewAccountEvent,
-                           NewCommentEvent, PointsMilestoneEvent, StartedLearningCatechismEvent,
-                           StartedLearningVerseSetEvent, VerseSetCreatedEvent, VersesFinishedMilestoneEvent,
-                           VersesStartedMilestoneEvent)
+from events.models import (AwardReceivedEvent, GroupCreatedEvent, GroupJoinedEvent, NewAccountEvent, NewCommentEvent,
+                           PointsMilestoneEvent, StartedLearningCatechismEvent, StartedLearningVerseSetEvent,
+                           VerseSetCreatedEvent, VersesFinishedMilestoneEvent, VersesStartedMilestoneEvent)
 from groups.models import Group
 from learnscripture.celery import app
 

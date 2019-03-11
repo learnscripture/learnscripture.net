@@ -3,8 +3,8 @@ import logging
 from django.template import Library
 from django.urls import reverse
 
-from groups.utils import group_link
 from common.utils.html import link
+from groups.utils import group_link
 
 register = Library()
 

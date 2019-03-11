@@ -1,6 +1,7 @@
 from django.conf.urls import url
 
 from learnscripture.api import handlers
+
 # These URLs are hardcoded into Javascript instead of using URL reversing
 # somehow. That's OK, because if you want to change them, you should be adding
 # to them first for the sake of Javascript that is already loaded into the

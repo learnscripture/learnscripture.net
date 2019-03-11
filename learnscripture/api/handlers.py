@@ -32,10 +32,10 @@ from groups.models import Group
 from learnscripture import session
 from learnscripture.decorators import require_identity_method
 from learnscripture.ftl_bundles import t
+from learnscripture.utils.templates import render_to_string_ftl
 from learnscripture.views import (bible_versions_for_request, default_bible_version_for_request, todays_stats,
                                   verse_sets_visible_for_request)
 from scores.models import get_verses_started_per_day, get_verses_tested_per_day
-from learnscripture.utils.templates import render_to_string_ftl
 
 
 class rc_factory(object):
