@@ -2,7 +2,7 @@
 -e git://github.com/spookylukey/django-app-metrics.git@29408c43cc4e8241bb3a14c818154513cab0a93b#egg=django_app_metrics
 aldjemy==0.9.1
 -e git+https://github.com/django-ftl/python-fluent@django-ftl-0.10#egg=fluent.runtime&subdirectory=fluent.runtime
-
+-e git+https://github.com/django-ftl/django-ftl@8660d4085f7118d0fcbd3a0778cd5f2bca5fa135#egg=django-ftl
 SQLAlchemy==1.1.10
 amqp==2.1.4
 attrs==18.2.0
@@ -14,7 +14,6 @@ django-anymail==0.10
 django-autoslug==1.9.4
 django-autocomplete-light==3.2.10
 django-fiber==1.5
-django-ftl==0.10
 django-markup==1.2
 django-paypal==0.5.0
 django-pjax==1.4
