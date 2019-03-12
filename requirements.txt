@@ -4,23 +4,26 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in requirements-dev.in
 #
+-e git+https://github.com/django-ftl/django-ftl@8660d4085f7118d0fcbd3a0778cd5f2bca5fa135#egg=django-ftl
 -e git+git://github.com/spookylukey/django-app-metrics.git@29408c43cc4e8241bb3a14c818154513cab0a93b#egg=django_app_metrics
--e git+https://github.com/django-ftl/python-fluent@django-ftl-latest#egg=fluent
+-e git+https://github.com/elm-fluent/elm-fluent@f172e4ab357fd9e4b8d2a0784d3559525cbd945e#egg=elm-fluent
+-e git+https://github.com/django-ftl/python-fluent@django-ftl-0.10#egg=fluent.runtime&subdirectory=fluent.runtime
 -e git+git://github.com/riccardoscalco/Pykov.git@16cda2f2c0ed8143ddcfa25dac34d3dadc982380#egg=pykov
 aldjemy==0.9.1
 amqp==2.1.4
+appdirs==1.4.3            # via fs
 argh==0.26.2              # via watchdog
 argparse==1.4.0           # via unittest2
 asn1crypto==0.24.0        # via cryptography
 attrs==18.2.0
 babel==2.6.0
 bcrypt==3.1.4             # via paramiko
-beautifulsoup4==4.6.3     # via elm-fluent, webtest
+beautifulsoup4==4.6.3     # via webtest
 billiard==3.5.0.2
 celery==4.2.1
 certifi==2018.11.29
 cffi==1.11.4              # via bcrypt, cryptography, pynacl
-click==6.7                # via elm-fluent, pip-tools
+click==6.7                # via pip-tools
 concurrent-log-handler==0.9.7
 coverage==4.4.1
 cryptography==2.1.4       # via paramiko
@@ -35,7 +38,6 @@ django-compressor==2.2    # via django-fiber
 django-debug-toolbar==1.8
 django-extensions==2.0.7
 django-fiber==1.5
-django-ftl==0.9.0
 django-functest==1.0.4
 django-js-asset==1.0.0    # via django-mptt
 django-markup==1.2
@@ -50,17 +52,18 @@ djangorestframework==3.9.1
 docutils==0.14
 easy-thumbnails==2.5      # via django-fiber
 easyprocess==0.2.3        # via pyvirtualdisplay
-elm-fluent==0.2.0
 fabric3==1.13.1.post1
 fabtools3==0.19.0
 flake8==3.2.1
+fluent.syntax==0.12.0
+fs==2.4.4
 furl==1.0.1
 idna==2.6                 # via cryptography
 ipython-genutils==0.2.0   # via traitlets
 ipython==5.3.0
 isort==4.2.5
 kombu==4.2.1
-language-tags==0.4.4      # via elm-fluent
+language-tags==0.4.4
 linecache2==1.0.0         # via traceback2
 lxml==4.2.5
 mccabe==0.5.2
@@ -98,17 +101,18 @@ rjsmin==1.0.12            # via django-compressor
 scipy==1.0.0
 selenium==3.12.0
 simplegeneric==0.8.1      # via ipython
-six==1.11.0               # via bcrypt, cryptography, django-anymail, django-extensions, django-functest, django-markup, django-paypal, django-spurl, fabric3, furl, language-tags, mock, orderedmultidict, pip-tools, prompt-toolkit, pynacl, python-memcached, traitlets, unittest2, webtest
+six==1.11.0               # via bcrypt, cryptography, django-anymail, django-extensions, django-functest, django-markup, django-paypal, django-spurl, fabric3, fs, furl, language-tags, mock, orderedmultidict, pip-tools, prompt-toolkit, pynacl, python-memcached, traitlets, unittest2, webtest
 sqlalchemy==1.1.10
 sqlparse==0.2.4           # via django-debug-toolbar
 traceback2==1.4.0         # via unittest2
 traitlets==4.3.2          # via ipython
+typing==3.6.6             # via fs
 unittest2==1.1.0
 urlobject==2.4.3          # via django-spurl
 uwsgi==2.0.15
 vine==1.1.4               # via amqp
 waitress==1.1.0           # via webtest
-watchdog==0.9.0           # via elm-fluent
+watchdog==0.9.0
 wcwidth==0.1.7            # via prompt-toolkit
 webob==1.7.4              # via webtest
 webtest==2.0.29           # via django-webtest
