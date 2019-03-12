@@ -633,6 +633,7 @@ def run_ftl2elm(watch=False):
 
 
 def build_static():
+    run_ftl2elm()
     for f in glob.glob(webpack_deploy_files_pattern):
         os.unlink(f)
     if os.path.exists(webpack_stats_file):
