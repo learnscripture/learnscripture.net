@@ -157,7 +157,7 @@ learn-verse-progress-result-html =
     <b>PROGRESS:</b>
     { $direction ->
       *[forwards]   +{ NUMBER($progress) } ↗
-       [backards]    { NUMBER($progress) } ↘
+       [backwards]   { NUMBER($progress) } ↘
     }
 
 learn-verse-progress-complete-html =  <b>PROGRESS:</b> You reached 100% - well done!
