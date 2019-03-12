@@ -44,5 +44,6 @@ t = main.format
 t_lazy = main.format_lazy
 
 
-if any(os.path.split(arg)[-1] == 'manage.py' for arg in sys.argv) and 'makemigrations' in sys.argv:
+if any(os.path.split(arg)[-1] == 'manage.py' for arg in sys.argv) and (
+        'makemigrations' in sys.argv or 'migrate' in sys.argv):
     activate('en')
