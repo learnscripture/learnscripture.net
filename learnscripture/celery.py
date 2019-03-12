@@ -7,10 +7,10 @@ import django_ftl
 from celery import Celery
 from celery.app.task import Task
 from celery.signals import task_failure
-from django.conf import settings
 
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'learnscripture.settings')
+from django.conf import settings  # noqa isort:skip
 
 
 @task_failure.connect
