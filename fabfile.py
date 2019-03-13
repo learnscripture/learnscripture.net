@@ -19,7 +19,7 @@ join = os.path.join
 rel = lambda *x: os.path.normpath(join(os.path.abspath(os.path.dirname(__file__)), *x))
 
 env.user = 'learnscripture'
-env.hosts = ['learnscripture.digitalocean.com']
+env.hosts = ['learnscripture.net']
 
 env.proj_name = "learnscripture"
 env.proj_app = "learnscripture"  # Python module for project
