@@ -44,6 +44,8 @@ class Command(BaseCommand):
                     items_file = CATECHISM_ITEM_TEMPLATE.format(version_slug)
                 elif version.text_type == TextType.BIBLE:
                     items_file = BIBLE_ITEM_TEMPLATE.format(version_slug)
+                else:
+                    raise AssertionError("Unnown text type {!r}".format(version.text_type))
 
                 with gzip.open(os.path.join(input_dir, items_file), "rb") as f2:
                     for i, obj in enumerate(serializers.deserialize(format, f2, **common_options)):
