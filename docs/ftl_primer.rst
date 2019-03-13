@@ -29,7 +29,7 @@ A ‘Fluent Translation List’ file consists of 3 main things:
 * Comments - these start with ``#`` and are explanations for the benefit of the
   translator. They do not need to be translated.
 
-* Message IDs - these are words separated by hyphens and are used to identifier
+* Message IDs - these are words separated by hyphens and are used to identify
   a particular bit of text. They must not be changed.
 
 * Message body - the actual text to be translated.
@@ -49,12 +49,12 @@ Example::
     learn-dashboard-link = Dashboard
 
 
-Here ``### Learn page`` is a comment that applies to the whole of the file --
+Here "``### Learn page``" is a comment that applies to the whole of the file --
 all the messages that follow are found on the ‘Learn’ page.
 
-After that we have ``# Page title``, a comment which describes the following
+After that we have "``# Page title``", a comment which describes the following
 message. That message consists of the message ID ``learn-page-title``, followed
-by an equals sign, followed by the actual message ``Learn``. This last bit is
+by an equals sign, followed by the actual message "``Learn``". This last bit is
 the only part that needs to be translated.
 
 The comments can be important for working out how something should be
@@ -63,7 +63,7 @@ description of what is happening on the page. In another situation, it might be
 the caption on a button that does something when you press it. Depending on the
 language, you might want different translations for these different situations.
 
-Below this, we have ``## Navbar:`` which is a comment for the group of items
+Below this, we have "``## Navbar:``" which is a comment for the group of items
 that follow.
 
 Multi-line text
@@ -83,7 +83,7 @@ or::
 
 In most cases where the line breaks come doesn't matter. When the text
 is for an email, the line breaks usually do matter, and it is important
-to keep the email to less than about 70 characters wide.
+to keep each line in email to less than about 70 characters wide.
 
 Substitutions
 -------------
@@ -110,9 +110,9 @@ website that will be different for every different user's page.
 When doing these translations, it will be helpful to imagine the sentence with
 a specific example of a the substitution.
 
-Notice that the variable is placed between ``{`` and ``}``. Some other things
+Notice that the variable is placed between "``{``" and "``}``". Some other things
 can also be placed between curly brackets, and together they are called
-``placeables``.
+“placeables”.
 
 Message references
 ------------------
@@ -175,10 +175,10 @@ case. It looks like this::
 
 Here ``$unread_emails`` will be a number that is compared to each of the options
 which are called keys (``0``, ``one`` and ``other``). The keys can be numbers
-like ``0``, ``1`` etc. They can also be strings ``zero``, ``one``, ``two``,
-``few``, ``many`` and ``other``. Not all of these apply to all languages - for
-example English only has ``one`` and ``other`` for cardinals, but other
-languages can have several different plural forms (e.g. `Slovenian
+like ``0``, ``1`` etc. They can also be 6 special strings "``zero``", "``one``",
+"``two``", "``few``", "``many``" and "``other``". Not all of these apply to all
+languages - for example English only has "``one``" and "``other``",
+but other languages can have several different plural forms (e.g. `Slovenian
 <http://www.unicode.org/cldr/charts/30/supplemental/language_plural_rules.html#sl>`_).
 
 So, in this example, if ``$unread_emails = 0``, you get::
@@ -194,7 +194,7 @@ For anything else e.g. ``$unread_emails = 7``, you get::
     You have 7 unread emails.
 
 Notice that the last option has a ``*`` next to it to indicate it is the default
-option if nothing else matches - this default is required.
+option if nothing else matches. It is required to always have a default like this.
 
 In some cases, a message that in English needs to use this selector can be
 written correctly without a selector in another language - and the other way
@@ -208,10 +208,10 @@ to do it correctly, please contact the developers.
 Attributes
 ----------
 
-In some cases, there is a single UI element with multiple pieces of text
-attached. For example, a text box might have a label and some help text. Rather
-than have multiple messages, the two strings are defined in a single message
-using an attribute for one or more of the strings. For example::
+In some cases, there is a single UI (user interface) element with multiple
+pieces of text attached. For example, a text box might have a label and some
+help text. Rather than have multiple messages, the two strings are defined in a
+single message using an attribute for one or more of the strings. For example::
 
 
     # Caption for 'enable vibration' field
@@ -237,7 +237,7 @@ handles the fact that, for instance, in England one thousand is written
 ``1,000`` but in most European countries it is ``1.000``. It can also be used to
 add additional formatting options (such as using percentage mode or for currencies).
 
-Without any options the NUMBER function can be used in a placeable like this:
+Without any options the NUMBER function can be used in a placeable like this::
 
     message = Points: { NUMBER($points) }
 
@@ -252,6 +252,8 @@ Dates
 Similarly, dates should be formatted using the ``DATETIME`` builtin. Usually the
 default formatting will be fine.
 
+See also the `Fluent DATETIME docs
+<https://projectfluent.org/fluent/guide/functions.html#datetime>`_.
 
 HTML
 ----
@@ -260,7 +262,7 @@ HTML is the markup language used to create web pages. In most cases, you don't
 need to use HTML or be aware of it to write the translations. Some messages,
 however, use small bits of HTML that you need to understand.
 
-Messages that use HTML have a message ID that ends with ``-html``, like this::
+Messages that use HTML have a message ID that ends with "``-html``", like this::
 
     bibleverses-quick-find-example-general-mode-html =
           example: <b>Matt 28:19</b> or <b>make disciples</b>
@@ -282,11 +284,15 @@ i       italics       Did you mean: <i>Genesis</i>                        Did yo
 a       link          Please <a href="/login/">log in</a> to continue     Please `log in </login/>`_ to continue
 ======  ============  ==================================================  =================================
 
-Notice for the ``a`` tag, inside the open ``<a>`` there is something extra - an
-``href`` attribute. This attribute is the ‘target’ of the link - the place you
-go if the link is clicked. Normally this should not be changed, but the words
-the link tags go around can be changed according to the conventions of the
-language.
+Notice for the "``a``" tag, inside the open ``<a>`` there is something extra -
+an ``href`` attribute. Attributes are used to put some extra information into
+the HTML, and there are many different attribute possible. This ``href``
+attribute is the ‘target’ of the link - the place you go if the link is clicked.
+Normally this should not be changed, but the words the link tags go around can
+be changed according to the conventions of your language.
 
 Sometimes you will see other attributes in tags - normally these do not need to
-be changed.
+be changed, but should copied into the translation.
+
+
+If you have any other questions please ask!
