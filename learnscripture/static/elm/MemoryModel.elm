@@ -41,7 +41,7 @@ oneYear =
 
 alpha : Float
 alpha =
-    -1.0 * (logBase e (1.0 - learnt)) / (oneYear ^ exponent)
+    -1.0 * logBase e (1.0 - learnt) / (oneYear ^ exponent)
 
 
 deltaSIdeal : Float
@@ -51,8 +51,7 @@ deltaSIdeal =
 
 {-| Calculates a strength estimate,
 given the previous strength, the test accuracy, and the time
-elapsed in *seconds*
-
+elapsed in _seconds_
 -}
 strengthEstimate : Float -> Float -> Maybe Float -> Float
 strengthEstimate oldStrength testAccuracy timeElapsedM =
@@ -63,40 +62,40 @@ strengthEstimate oldStrength testAccuracy timeElapsedM =
         initialStrengthEstimate =
             initialStrengthFactor * testStrength
     in
-        case timeElapsedM of
-            Nothing ->
-                initialStrengthEstimate
+    case timeElapsedM of
+        Nothing ->
+            initialStrengthEstimate
 
-            Just timeElapsed ->
-                if testStrength < oldStrength then
-                    testStrength
-                else if oldStrength == 1.0 then
-                    bestStrength
-                else
-                    let
-                        s1 =
-                            oldStrength
+        Just timeElapsed ->
+            if testStrength < oldStrength then
+                testStrength
+            else if oldStrength == 1.0 then
+                bestStrength
+            else
+                let
+                    s1 =
+                        oldStrength
 
-                        t1 =
-                            time s1
+                    t1 =
+                        time s1
 
-                        t2 =
-                            t1 + timeElapsed
+                    t2 =
+                        t1 + timeElapsed
 
-                        s2 =
-                            strength t2
+                    s2 =
+                        strength t2
 
-                        deltaSmax =
-                            s2 - s1
+                    deltaSmax =
+                        s2 - s1
 
-                        deltaSactual =
-                            min (deltaSmax * (testStrength - oldStrength) / (1.0 - oldStrength))
-                                deltaSIdeal
+                    deltaSactual =
+                        min (deltaSmax * (testStrength - oldStrength) / (1.0 - oldStrength))
+                            deltaSIdeal
 
-                        newStrength =
-                            oldStrength + deltaSactual
-                    in
-                        min bestStrength newStrength
+                    newStrength =
+                        oldStrength + deltaSactual
+                in
+                min bestStrength newStrength
 
 
 minTimeBetweenTests : number
@@ -117,7 +116,7 @@ nextTestDueAfter strength =
         t1 =
             time (min (strength + deltaSIdeal) bestStrength)
     in
-        max (t1 - t0) minTimeBetweenTests
+    max (t1 - t0) minTimeBetweenTests
 
 
 exponent : Float
