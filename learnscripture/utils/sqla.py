@@ -4,7 +4,6 @@ from accounts.models import Account
 from bibleverses.models import UserVerseStatus
 from scores.models import ActionLog, TotalScore
 
-
 default_engine = get_engine()
 
 scores_actionlog = ActionLog.sa.table

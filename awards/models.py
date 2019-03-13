@@ -9,7 +9,6 @@ from awards.signals import new_award
 from learnscripture.datastructures import make_class_enum
 from scores.models import ScoreReason
 
-
 # In this module we have:
 #
 # = AwardType =

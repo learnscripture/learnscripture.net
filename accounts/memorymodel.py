@@ -4,7 +4,6 @@ import math
 import os.path
 from datetime import timedelta
 
-
 # The whole of this model is also reproduced in Elm code, to allow client side code
 # to estimate when something is next due without a server round trip. All changes
 # must be synced with that code

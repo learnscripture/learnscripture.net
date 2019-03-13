@@ -6,8 +6,8 @@ from bibleverses.models import TextType, WordSuggestionData
 
 from .iterators import get_in_batches
 
-
 # This module can have a dependency on Django
+
 
 def get_all_version_words(version, disallow_text_loading=False):
     from ..trainingtexts import BibleTrainingTexts, CatechismTrainingTexts
