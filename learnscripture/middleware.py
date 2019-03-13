@@ -5,8 +5,8 @@ from datetime import datetime
 
 from django.conf import settings
 from django.http import HttpResponseRedirect
-from django.utils import translation as gettext_translation
 from django.utils import timezone
+from django.utils import translation as gettext_translation
 from django.utils.http import urlencode
 from django.utils.translation import LANGUAGE_SESSION_KEY
 from django_ftl import override

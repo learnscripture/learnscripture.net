@@ -3,7 +3,6 @@ import unicodedata
 
 import attr
 
-
 # We make Language a static class rather than DB, because
 # supported languages always need code-level support.
 
