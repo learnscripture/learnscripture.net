@@ -25,7 +25,7 @@ installed.
 
 3. Create a virtualenv for the project e.g.::
 
-     mkvirtualenv learnscripture --python=`which python3.5`
+     mkvirtualenv learnscripture --python=`which python3.5` -a `pwd`
 
 4. Install dependencies.
 
@@ -35,20 +35,22 @@ installed.
    * memcached
    * rabbitmq-server
    * nodejs
+   * npm
 
    Python/virtualenv dependencies: from inside the learnscripture.net/src/
    folder, do::
 
      pip install -r requirements.txt
 
-   npm/javascript dependencies: first do::
+   npm/javascript dependencies. First do::
 
      nodeenv --node=system --python-virtualenv
 
    Deactivate and re-activate the virtualenv for changes to take effect.
 
-   Now we can actually install our deps::
+   Now we also need our node and Javascript deps::
 
+     nodeenv --update -p --requirement=requirements-node.txt
      npm install
 
    We also need to install Elm dependencies::
@@ -68,7 +70,7 @@ installed.
      $ rabbitmqctl add_vhost learnscripture
      $ rabbitmqctl set_permissions -p learnscripture learnscripture ".*" ".*" ".*"
 
-   You will also need to add 'learnscripture' and 'learnscripture.local' as
+   You will also need to add 'learnscripture.local' as
    aliases for 127.0.0.1 in /etc/hosts
 
 6. Create a file ``config/secrets.json`` containing at least the following:
@@ -80,6 +82,10 @@ installed.
 
    (proper contents are, well, secret).
    You will need a proper copy from the previous maintainer to deploy.
+
+   If you have access rights to the server, you can do::
+
+       scp learnscripture@learnscripture.net:/home/learnscripture/webapps/learnscripture/versions/current/src/config/secrets.json config/secrets.json
 
    If more than one developer is working on the project, and want to deploy
    directly, syncing this file will need to be rethought. It has been
@@ -93,7 +99,7 @@ installed.
 
    You will then need to load at least the NET Bible, as follows::
 
-     ./manage.py load_text ../learnscripture-texts/db_dumps NET
+     ./manage.py load_text ../texts/db_dumps NET
 
    This assumes you are in the ``src`` directory, with the directory structure
    described above, so the ``texts`` directory is a sibling of ``src`` and
@@ -101,6 +107,10 @@ installed.
 
    You can add additional text names after ``NET`` above, but you need at
    least that one as it is the default Bible.
+
+   An alternative to the above is to get a snapshot of production::
+
+     $ fab get_and_load_production_db
 
 8. See if it works by doing::
 
