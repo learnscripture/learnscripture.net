@@ -226,7 +226,7 @@ learn-test-instead-of-read = Test instead of read
 # $used is the number of hints used so far,
 # $total is the number of hints available,
 # so it looks like "Use hint (1/2)"
-learn-hint-button = Use hint ({ NUMBER($used) })/({ NUMBER($total) })
+learn-hint-button = Use hint ({ NUMBER($used) }/{ NUMBER($total) })
 
 # Button used to accept and go to next verse
 learn-next-button = OK
