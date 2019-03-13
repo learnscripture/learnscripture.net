@@ -47,7 +47,7 @@ export const handleFormValidationErrors = function(form, formPrefix, errorRespon
     var errors = errorResponse.responseJSON;
     var prefix = '';
     if (formPrefix.length > 0) {
-        prefix = formPrefix + "-"; // To matche Django form prefices
+        prefix = formPrefix + "-"; // To match Django form prefices
     }
     form.find(".validation-error").remove();
     form.find(".error").removeClass("error");
@@ -57,7 +57,7 @@ export const handleFormValidationErrors = function(form, formPrefix, errorRespon
             if (key === '__all__') {
                 p = $('#id_' + prefix + 'form_all_errors');
             } else {
-                var formElem = $('#id_' + prefix + key);
+                var formElem = $('#id_' + prefix + <string>key);
                 p = formElem.parent();
             }
             if (p.find("ul.validation-error").length === 0) {
