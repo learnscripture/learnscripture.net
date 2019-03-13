@@ -1,10 +1,9 @@
 module MemoryModelTests exposing (..)
 
-import List
-import Json.Decode as JD
 import Expect exposing (Expectation)
-import Fuzz
-import Fuzz exposing (Fuzzer, int, list, string, float, floatRange, maybe)
+import Fuzz exposing (Fuzzer, float, floatRange, int, list, maybe, string)
+import Json.Decode as JD
+import List
 import MemoryModel exposing (..)
 import Native.TestData.MemoryModel
 import String
@@ -14,45 +13,46 @@ import Test exposing (..)
 strengthEstimateTestData : List ( Float, Float, Maybe Float, Float )
 strengthEstimateTestData =
     JD.decodeValue (JD.list (JD.list (JD.nullable JD.float))) Native.TestData.MemoryModel.strengthEstimateTestData
-        |> \v ->
-            case v of
-                Ok val ->
-                    List.map
-                        (\item ->
-                            ( getAtUnsafe item 0
-                                |> (\mi ->
-                                        case mi of
-                                            Nothing ->
-                                                Debug.crash "Item at index 0 must not be null"
+        |> (\v ->
+                case v of
+                    Ok val ->
+                        List.map
+                            (\item ->
+                                ( getAtUnsafe item 0
+                                    |> (\mi ->
+                                            case mi of
+                                                Nothing ->
+                                                    Debug.crash "Item at index 0 must not be null"
 
-                                            Just i ->
-                                                i
-                                   )
-                            , getAtUnsafe item 1
-                                |> (\mi ->
-                                        case mi of
-                                            Nothing ->
-                                                Debug.crash "Item at index 1 must not be null"
+                                                Just i ->
+                                                    i
+                                       )
+                                , getAtUnsafe item 1
+                                    |> (\mi ->
+                                            case mi of
+                                                Nothing ->
+                                                    Debug.crash "Item at index 1 must not be null"
 
-                                            Just i ->
-                                                i
-                                   )
-                            , getAtUnsafe item 2
-                            , getAtUnsafe item 3
-                                |> (\mi ->
-                                        case mi of
-                                            Nothing ->
-                                                Debug.crash "Item at index 3 must not be null"
+                                                Just i ->
+                                                    i
+                                       )
+                                , getAtUnsafe item 2
+                                , getAtUnsafe item 3
+                                    |> (\mi ->
+                                            case mi of
+                                                Nothing ->
+                                                    Debug.crash "Item at index 3 must not be null"
 
-                                            Just i ->
-                                                i
-                                   )
+                                                Just i ->
+                                                    i
+                                       )
+                                )
                             )
-                        )
-                        val
+                            val
 
-                Err msg ->
-                    Debug.crash msg
+                    Err msg ->
+                        Debug.crash msg
+           )
 
 
 getAtUnsafe : List a -> Int -> a
@@ -131,9 +131,8 @@ suite =
             )
         , describe "nextTestDueAfter"
             [ fuzz anUnlearntMemoryStrength "maximum gap for unlearnt memory" <|
-                (\s ->
+                \s ->
                     nextTestDueAfter s
                         |> Expect.lessThan (365 * 24 * 60 * 60)
-                )
             ]
         ]
