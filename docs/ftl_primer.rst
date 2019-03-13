@@ -284,15 +284,16 @@ i       italics       Did you mean: <i>Genesis</i>                        Did yo
 a       link          Please <a href="/login/">log in</a> to continue     Please `log in </login/>`_ to continue
 ======  ============  ==================================================  =================================
 
-Notice for the "``a``" tag, inside the open ``<a>`` there is something extra -
-an ``href`` attribute. Attributes are used to put some extra information into
-the HTML, and there are many different attribute possible. This ``href``
-attribute is the ‘target’ of the link - the place you go if the link is clicked.
-Normally this should not be changed, but the words the link tags go around can
-be changed according to the conventions of your language.
+Notice for the "``a``" example, inside the opening ``<a>`` tag there is
+something extra - an ``href`` attribute. Attributes are used to put some extra
+information into the HTML, and there are many different attributes possible.
+This ``href`` attribute is the ‘target’ of the link - the place you go if the
+link is clicked. Normally this should not be changed but should be copied into
+the translation. However, the position of the link in the sentence (i.e. words
+the link tags go around) can be changed according to the conventions of your
+language.
 
 Sometimes you will see other attributes in tags - normally these do not need to
 be changed, but should copied into the translation.
-
 
 If you have any other questions please ask!
