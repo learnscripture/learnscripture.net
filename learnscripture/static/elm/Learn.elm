@@ -2025,18 +2025,6 @@ hintButton model currentVerse testingMethod =
     let
         locale =
             getLocale model
-
-        hintDiv enabled total used =
-            H.div [ A.id "id-hint-btn-container" ]
-                [ viewButton model
-                    { enabled = enabled
-                    , default = NonDefault
-                    , msg = UseHint
-                    , caption = T.learnHintButton locale { used = Fluent.number used, total = Fluent.number total }
-                    , id = "id-hint-btn"
-                    , refocusTypingBox = True
-                    }
-                ]
     in
     case currentVerse.currentStage of
         Test _ testProgress ->
@@ -2055,17 +2043,20 @@ hintButton model currentVerse testingMethod =
                         hintsRemaining =
                             totalHints - hintsUsed
                     in
-                    if totalHints == 0 then
-                        emptyNode
-                    else
-                        hintDiv
-                            (if hintsRemaining > 0 then
-                                Enabled
-                             else
-                                Disabled
-                            )
-                            totalHints
-                            hintsUsed
+                    H.div [ A.id "id-hint-btn-container" ]
+                        [ viewButton model
+                            { enabled =
+                                if hintsRemaining > 0 then
+                                    Enabled
+                                else
+                                    Disabled
+                            , default = NonDefault
+                            , msg = UseHint
+                            , caption = T.learnHintButton locale { used = Fluent.number hintsUsed, total = Fluent.number totalHints }
+                            , id = "id-hint-btn"
+                            , refocusTypingBox = True
+                            }
+                        ]
 
         _ ->
             emptyNode
