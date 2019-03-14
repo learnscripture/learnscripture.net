@@ -216,6 +216,9 @@ $(document).ready(function() {
         $container.removeClass("waiting-pjax");
     });
 
+    window.addEventListener('beforeunload', function(ev) {
+        $('#id-unloader').addClass('shown');
+    });
 });
 
 $.pjax.defaults.timeout = 5000

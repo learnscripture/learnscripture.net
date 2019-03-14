@@ -336,3 +336,29 @@ footer .referral-link-section {
         display: inline-block;
     }
 }
+
+#id-unloader {
+    display: none;
+}
+
+
+@media all and (display-mode: standalone) {
+    // In standalone there is no chrome to show that something
+    // is happening, we add our own.
+    #id-unloader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        text-align: center;
+        background-color: var(--focusOutlineColor);
+        height: 3px;
+        display: block;
+        width: 0px;
+        z-index: 110; // above navbar
+
+        &.shown {
+            transition: width 0.3s ease-in;
+            width: 45vw;
+        }
+    }
+}
