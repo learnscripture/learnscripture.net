@@ -7,11 +7,12 @@ settings_priv.py
 TODO
 TODO.org
 .git/
-node_modules/
-webpack_bundles/
+node_modules
+**/webpack_bundles/*
 webpack-stats.*.json
 build/
 elm-stuff/
 elm/elm.js
 elm/tests/elm.js
 Ftl/
+*.aur
