@@ -6,7 +6,7 @@
          @btnColor1, @btnColor2, @btnTextColor,
          @bgColor1, @linkColor, @footerColor,
          @topWarningColor, @topErrorColor,
-         @focusOutlineColor,
+         @focusOutlineColorRGB,
          @themeFont) {
 
     @topTextColor: @topLinkColor;
@@ -31,7 +31,8 @@
     --baseBackgroundColor: @baseBackgroundColor;
     --topWarningColor: @topWarningColor;
     --topErrorColor: @topErrorColor;
-    --focusOutlineColor: @focusOutlineColor;
+    --focusOutlineColorRGB: ~"@{focusOutlineColorRGB}";
+    --focusOutlineColor: ~"rgba(@{focusOutlineColorRGB}, 0.7)";
     --specialFontFamily: ~"@{themeFont}";
 }
 
@@ -44,7 +45,7 @@ body[data-theme=calm] {
              @blue, @blueDark, white,
              #f5f5f5, #0069d6, white,
              yellow, #ff2e2e,
-             rgba(0, 255, 255, 0.5),
+             "0, 255, 255",
              '"Cuprum", "Trebuchet MS", "Helvetica Neue", Helvetica, Arial, sans-serif');
 }
 
@@ -59,7 +60,7 @@ body[data-theme=bubblegum] {
              #cc3a92,  #a12667, white,
              #ffe0f1, #f00901, black,
              yellow, #30f0ff,
-             rgba(255, 000, 120, 0.8),
+             "255, 000, 120",
              '"Short Stack", "Helvetica Neue", Helvetica, Arial, sans-serif');
 
 }
@@ -81,7 +82,7 @@ body[data-theme=bubblegum2] {
              #679B00, darken(#679B00, 20%), white,
              #C9F76F, #CD0074, black,
              #95e006, black,
-             rgba(0, 255, 0, 0.8),
+             "0, 255, 0",
              '"Short Stack", "Helvetica Neue", Helvetica, Arial, sans-serif');
 }
 
@@ -102,7 +103,7 @@ body[data-theme=space] {
              lighten(#090a31, 10%), #090a31, white,
              lighten(#0069d6, 35%), darken(#0069d6, 5%), white,
              yellow, red,
-             rgba(50, 150, 250, 0.8),
+             "50, 150, 250",
              '"Prosto One", "Helvetica Neue", Helvetica, Arial, sans-serif');
     .verseset, .actionset, .borderedbox {
         background-color: black;
