@@ -490,6 +490,7 @@ def deploy():
     deploy_system()
     restart_all()
     delete_old_versions()
+    push_to_central_vcs()  # push tags
 
 
 @task
