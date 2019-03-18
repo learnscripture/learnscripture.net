@@ -352,14 +352,14 @@ footer .referral-link-section {
         text-align: center;
         background-color: ~"rgba(var(--focusOutlineColorRGB), 1)";
         box-shadow: 2px 0 3px ~"rgba(var(--focusOutlineColorRGB), 1)";
-        height: 3px;
+        height: 2px;
         display: block;
         width: 0px;
         z-index: 110; // above navbar
 
         &.shown {
-            transition: width 0.3s ease-in;
-            width: 45vw;
+            transition: width 4s cubic-bezier(0.25, 0.00, 0.00, 1.00);
+            width: 100vw;
         }
     }
 }
