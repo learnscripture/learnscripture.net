@@ -887,17 +887,17 @@ viewSessionStats model =
                 ]
                 [ H.span [ A.class "nav-caption" ]
                     [ H.text (T.learnSessionStatsToday (getLocale model) ())
-                    , H.span
-                        [ A.id "id-new-verses-started-count"
-                        , A.title (T.learnItemsStartedToday (getLocale model) ())
-                        ]
-                        [ H.text <| interpolate " + {0} " [ toString stats.newVersesStarted ] ]
-                    , H.span
-                        [ A.id "id-total-verses-tested-count"
-                        , A.title (T.learnItemsTestedToday (getLocale model) ())
-                        ]
-                        [ H.text <| interpolate " ⟳ {0} " [ toString stats.totalVersesTested ] ]
                     ]
+                , H.span
+                    [ A.id "id-new-verses-started-count"
+                    , A.title (T.learnItemsStartedToday (getLocale model) ())
+                    ]
+                    [ H.text <| interpolate " + {0} " [ toString stats.newVersesStarted ] ]
+                , H.span
+                    [ A.id "id-total-verses-tested-count"
+                    , A.title (T.learnItemsTestedToday (getLocale model) ())
+                    ]
+                    [ H.text <| interpolate " ⟳ {0} " [ toString stats.totalVersesTested ] ]
                 ]
 
 
