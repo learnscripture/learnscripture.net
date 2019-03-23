@@ -188,7 +188,9 @@ var setupDashboardControls = function() {
         saveHeatmapPreferencesDelayed();
     })
 
-    if (getSavedCalls().length > 0) {
+    var accountNode = document.getElementById('id-account-data');
+    var accountName = accountNode == null ? "" : accountNode.attributes['data-username'].value;
+    if (getSavedCalls(accountName).length > 0) {
         $("#id-unfinished-session-warning").show();
         $("#id-unfinished-session-unsaved-data-warning").show();
     }

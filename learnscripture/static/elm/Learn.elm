@@ -71,7 +71,7 @@ port beep : ( Float, Float ) -> Cmd msg
 port helpTourHighlightElement : ( String, String ) -> Cmd msg
 
 
-port saveCallsToLocalStorage : JD.Value -> Cmd msg
+port saveCallsToLocalStorage : ( JD.Value, String ) -> Cmd msg
 
 
 
@@ -303,6 +303,16 @@ type User
 type alias AccountData =
     { username : String
     }
+
+
+getUserName : Model -> String
+getUserName model =
+    case model.user of
+        GuestUser ->
+            ""
+
+        Account { username } ->
+            username
 
 
 type LearningSession
@@ -5891,7 +5901,7 @@ saveTrackedCallsToLocalStorage model =
             allTrackedCalls
                 |> List.filter (\( callId, call ) -> isRecordCall call)
     in
-    saveCallsToLocalStorage (encodeTrackedCallsList filteredTrackedCalls)
+    saveCallsToLocalStorage ( encodeTrackedCallsList filteredTrackedCalls, getUserName model )
 
 
 isRecordCall : TrackedHttpCall -> Bool
