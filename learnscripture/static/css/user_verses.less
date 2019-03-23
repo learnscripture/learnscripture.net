@@ -6,24 +6,28 @@
     // moment.
     --stars-width: 160px;
     --stars-height: 26px;
+    img {
+        vertical-align: top;
+    }
 }
 
-.stars-cont, img.stars {
+.stars-cont, div.stars-base, div.stars-over, img.stars {
     width: var(--stars-width);
     height: var(--stars-height);
 }
 
-img.stars {
+div.stars-base, div.stars-over {
     position: absolute;
     left: 0;
 }
 
-img.stars-base {
+div.stars-base {
     z-index: 1;
 }
 
-img.stars-over {
+div.stars-over {
     z-index: 2;
+    overflow: hidden;
 }
 
 @media screen and (max-width: @narrowWidthBreak2) {
