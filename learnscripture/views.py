@@ -20,6 +20,7 @@ from django.views import i18n as i18n_views
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.debug import sensitive_post_parameters
+from django.views.defaults import server_error
 from paypal.standard.forms import PayPalPaymentsForm
 
 import learnscripture.tasks
@@ -83,10 +84,16 @@ def missing(request, message, status_code=404):
     return response
 
 
-def broken(request, status_code=500):
-    response = TemplateResponse(request, '500.html', {})
-    response.status_code = status_code
-    return response
+def test_500(request):
+    return handler500(request)
+
+
+def test_500_real(request):
+    1 / 0
+
+
+def handler500(request):
+    return server_error(request)
 
 
 def home(request):
