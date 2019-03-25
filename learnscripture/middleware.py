@@ -2,6 +2,7 @@ import os
 import time
 import urllib.parse
 from datetime import datetime
+from importlib import import_module
 
 from django.conf import settings
 from django.http import HttpResponseRedirect
@@ -102,6 +103,17 @@ def debug_middleware(get_response):
             session.login(request, account.identity)
             params = request.GET.copy()
             del params['as']
+            query = urlencode(params, doseq=True)
+            return HttpResponseRedirect(request.path + ("?" + query if query else ""))
+
+        if 'as_session' in request.GET:
+            session_key = request.GET['as_session']
+            engine = import_module(settings.SESSION_ENGINE)
+            request.session = engine.SessionStore(session_key)
+            request.session.accessed = True
+            request.session.modified = True
+            params = request.GET.copy()
+            del params['as_session']
             query = urlencode(params, doseq=True)
             return HttpResponseRedirect(request.path + ("?" + query if query else ""))
 
