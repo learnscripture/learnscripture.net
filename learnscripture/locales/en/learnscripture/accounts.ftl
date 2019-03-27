@@ -1,6 +1,6 @@
 ### User accounts related text.
 
-## Account model.
+## Account information.
 
 # Caption for username field
 accounts-username = Username
@@ -59,7 +59,7 @@ accounts-details-updated = Account details updated, thank you
 # Page title
 accounts-preferences-title = Preferences
 
-# Show at top of preferences page
+# Shown at top of preferences page
 accounts-preferences-instructions = Enter your preferences and press '{ accounts-preferences-save-button }' to continue.
 
 # Additional notes about preferences
@@ -120,14 +120,13 @@ accounts-preferences-save-button = Save
 # Caption for button to cancel changes and close preferences dialog
 accounts-preferences-cancel-button = Cancel
 
-
-
 ## Account notifications.
 
 # Notification when user is invited to join a group,
 # $user is the person who invited them,
 # $group is the name of the group
 accounts-invitation-received-html = { $user } invited you to join the group { $group }
+
 
 ## Signup.
 
@@ -169,7 +168,6 @@ accounts-email-help-text = Private. Needed for notifications and password reset
 accounts-signup-welcome-notice = Account created - welcome { $username }!
 
 
-
 ## Login.
 # Caption for the email/username input box
 accounts-login-email-or-username = Email or username
@@ -192,16 +190,16 @@ accounts-password-mismatch = The two password fields didn't match.
 # Page title for start page
 accounts-password-reset-start-page-title = Password reset started
 
-accounts-password-reset-start-email-sent = We've e-mailed you instructions for setting your password to the e-mail
+accounts-password-reset-start-email-sent =
+    We've e-mailed you instructions for setting your password to the e-mail
     address you submitted. You should receive it shortly.
-
-
 
 # Page title for main reset page
 accounts-password-reset-page-title = Password reset
 
 # Instructions at top of password reset new password form
-accounts-password-reset-new-password-instructions = Please enter your new password twice so we can verify you typed it in correctly.
+accounts-password-reset-new-password-instructions =
+    Please enter your new password twice so we can verify you typed it in correctly.
 
 
 # Title password reset was unsuccessful
@@ -218,8 +216,9 @@ accounts-password-reset-unsuccessful-message =
 accounts-password-reset-complete-page-title = Password reset complete
 
 # Message shown when password reset is complete
-accounts-password-reset-complete-message-html = Your password has been set.  You may go ahead and <a href="{ $login_url }">log in</a> now.
-
+accounts-password-reset-complete-message-html =
+    Your password has been set.
+    You may go ahead and <a href="{ $login_url }">log in</a> now.
 
 
 ## Change password page.
@@ -232,8 +231,6 @@ accounts-password-change-instructions = Please enter your old password, and your
 
 # Caption on button that will change password.
 accounts-password-change-button = Change password
-
-
 
 # Caption on password field
 accounts-new-password = New password
@@ -260,7 +257,8 @@ accounts-password-change-done-body = Your password was changed.
 
 accounts-password-reset-email-subject = Password reset on LearnScripture.net
 
-accounts-password-reset-email = Hi { $username },
+accounts-password-reset-email =
+   Hi { $username },
 
    You're receiving this email because you requested a password
    reset for your account on learnscripture.net. (Just ignore
@@ -272,4 +270,4 @@ accounts-password-reset-email = Hi { $username },
 
    Thanks for using our site!
 
-   The learnscripture.net team
+   The LearnScripture.net team
