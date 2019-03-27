@@ -387,7 +387,7 @@ def send_payment_received_email(account, payment):
     }
     with django_ftl.override(account.default_language_code):
         body = render_to_string_ftl("learnscripture/payment_received_email.txt", c)
-        subject = t('emails-donation-received-subject')
+        subject = t('donations-donation-received-subject')
         mail.send_mail(subject, body, settings.SERVER_EMAIL, [account.email])
 
 

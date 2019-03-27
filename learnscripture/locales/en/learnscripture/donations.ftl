@@ -45,6 +45,8 @@ donations-cancelled-message-html = You cancelled part way through the payment pr
 
 ## Donation received email.
 
+donations-donation-received-subject = LearnScripture.net - donation received
+
 donations-dontation-received-email = Hi { $account_name },
 
     Thank you for your donation of { $payment_amount }!
