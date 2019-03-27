@@ -15,7 +15,6 @@ main = Bundle([
     'learnscripture/contact-form.ftl',
     'learnscripture/dashboard.ftl',
     'learnscripture/donations.ftl',
-    'learnscripture/emails.ftl',
     'learnscripture/errors.ftl',
     'learnscripture/events.ftl',
     'learnscripture/forms.ftl',
