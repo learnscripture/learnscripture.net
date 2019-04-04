@@ -1,3 +1,5 @@
+from dal import autocomplete
+from django import forms
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
 from django.urls import reverse
@@ -5,6 +7,9 @@ from django.urls import reverse
 from common.utils.html import link
 
 from .models import Account, Identity, Notice
+
+account_autocomplete_widget = lambda: autocomplete.ModelSelect2(url='account_autocomplete')
+multi_account_autocomplete_widget = lambda: autocomplete.ModelSelect2Multiple(url='account_autocomplete')
 
 
 class HasAccountListFilter(SimpleListFilter):
@@ -31,7 +36,19 @@ class NoticeInline(admin.TabularInline):
     extra = 1
 
 
+class IdentityForm(forms.ModelForm):
+
+    class Meta:
+        model = Identity
+        fields = '__all__'
+        widgets = {
+            'account': account_autocomplete_widget(),
+            'referred_by': account_autocomplete_widget(),
+        }
+
+
 class IdentityAdmin(admin.ModelAdmin):
+    form = IdentityForm
     list_display = ['id', 'account', 'date_created', 'default_bible_version',
                     'desktop_testing_method', 'interface_theme', 'referred_by']
     list_filter = [HasAccountListFilter]
@@ -49,6 +66,7 @@ hellban_account.short_description = "Hell-ban selected accounts"  # noqa: E305
 
 class IdentityInline(admin.StackedInline):
     model = Identity
+    form = IdentityForm
     fk_name = 'account'
 
 
@@ -69,7 +87,19 @@ class HasBadEmailListFilter(SimpleListFilter):
         return queryset.filter(email_bounced__isnull=True if self.value() == '0' else False)
 
 
+class AccountForm(forms.ModelForm):
+
+    class Meta:
+        model = Account
+        fields = '__all__'
+        widgets = {
+            'following': multi_account_autocomplete_widget(),
+        }
+
+
 class AccountAdmin(admin.ModelAdmin):
+    form = AccountForm
+
     def referred_by(account):
         return account.identity.referred_by
 
@@ -86,7 +116,6 @@ class AccountAdmin(admin.ModelAdmin):
                    ]
     ordering = ['date_joined']
     search_fields = ['username', 'email']
-    filter_horizontal = ['following']
     actions = [hellban_account]
     inlines = [IdentityInline]
 
