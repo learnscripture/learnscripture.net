@@ -1260,7 +1260,15 @@ viewCurrentVerse session model =
                 []
             ]
          , actionButtons model currentVerse session.verses model.preferences
-         , hintButton model currentVerse testingMethod
+         , case getTestingMethod model of
+            FullWords ->
+                hintButton model currentVerse testingMethod
+
+            FirstLetter ->
+                hintButton model currentVerse testingMethod
+
+            OnScreen ->
+                emptyNode
          , onScreenTestingButtons currentVerse testingMethod (getLocale model)
          ]
             ++ instructions currentVerse testingMethod model.helpVisible (getLocale model)
