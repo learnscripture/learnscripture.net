@@ -86,8 +86,10 @@ New texts and catechisms
 
   Generate on the server::
 
-    fab manage_py_command:"run_suggestions_analyzers <slug>"
-    fab manage_py_command:"setup_bibleverse_suggestions <slug>"
+    $ ssh learnscripture@learnscripture.net
+    $ cd ~/webapps/learnscripture/versions/current/src
+    $ . ../venv/bin/activate
+    $ nohup nice sh -c "./manage.py run_suggestions_analyzers <slug>; ./manage.py setup_bibleverse_suggestions <slug>" &
 
   (This could take a while. Also, note that there are issues with texts
   that are only partially available in the local database e.g. ESV.)
