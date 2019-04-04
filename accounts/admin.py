@@ -64,6 +64,16 @@ def hellban_account(modeladmin, request, queryset):
 hellban_account.short_description = "Hell-ban selected accounts"  # noqa: E305
 
 
+def make_tester(ModelAdmin, request, queryset):
+    queryset.update(is_tester=True)
+make_tester.short_description = "Make selected accounts into testers"  # noqa: E305
+
+
+def unmake_tester(ModelAdmin, request, queryset):
+    queryset.update(is_tester=False)
+unmake_tester.short_description = "Make selected accounts into non-testers"  # noqa: E305
+
+
 class IdentityInline(admin.StackedInline):
     model = Identity
     form = IdentityForm
@@ -116,7 +126,11 @@ class AccountAdmin(admin.ModelAdmin):
                    ]
     ordering = ['date_joined']
     search_fields = ['username', 'email']
-    actions = [hellban_account]
+    actions = [
+        hellban_account,
+        make_tester,
+        unmake_tester,
+    ]
     inlines = [IdentityInline]
 
     def get_queryset(self, request):
