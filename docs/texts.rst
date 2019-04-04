@@ -42,7 +42,9 @@ New texts and catechisms
   * For Bibles, Verse instances corresponding to every Verse in the KJV
     (including missing verses, which should be marked with missing=True).
 
-    The exact process for doing this is not automated.
+    The exact process for doing this is not automated. In many cases you will need
+    to write a script. The most recent ``import_XXX.py`` script located in the
+    ``scripts`` folder in the ``texts`` repository may be a good start.
 
     Set LOADING_VERSES = True in settings to stop suggestions being created while you are
     doing this.
@@ -53,8 +55,9 @@ New texts and catechisms
 
     run: ``./manage.py load_catechism <slug> <json_filename>``
 
-* ``./manage.py setup_bibleverse_suggestions`` needs to be run, passing
-  in the version slug
+* First ``./manage.py run_suggestions_analyzers`` then
+  ``./manage.py setup_bibleverse_suggestions`` needs to be run, passing the version
+  slug as an argument in both cases.
 
 * Test locally, ensure it works as expected.
 
@@ -65,24 +68,25 @@ New texts and catechisms
 
   * Then, dump from development e.g.::
 
-      $ ./manage.py dump_text ../learnscripture-texts/db_dumps NCC
+      $ ./manage.py dump_text ../texts/db_dumps <slug>
 
   * Transfer to live server e.g.::
 
-      $ rsync ../learnscripture-texts/db_dumps/NCC.*.json learnscripture@learnscripture.net:/home/learnscripture/texts
+      $ rsync ../texts/db_dumps/<slug>.* learnscripture@learnscripture.net:/home/learnscripture/texts
 
   * Load JSON file into live site::
 
       $ ssh learnscripture@learnscripture.net
       $ cd ~/webapps/learnscripture/versions/current/src
       $ . ../venv/bin/activate
-      $ ./manage.py load_text ~/texts NCC
+      $ ./manage.py load_text ~/texts <slug>
 
 * Dump the word suggestions and transfer to the server, OR, generate them on the
   server.
 
   Generate on the server::
 
+    fab manage_py_command:"run_suggestions_analyzers <slug>"
     fab manage_py_command:"setup_bibleverse_suggestions <slug>"
 
   (This could take a while. Also, note that there are issues with texts
@@ -90,11 +94,11 @@ New texts and catechisms
 
   Or, dump and transfer, e.g.::
 
-      psql -U learnscripture -d learnscripture_wordsuggestions -c "\\copy (select version_slug, localized_reference, hash, suggestions from bibleverses_wordsuggestiondata where version_slug = 'NCC') TO stdout WITH CSV HEADER;" > wsd_NCC.csv
+      psql -U learnscripture -d learnscripture_wordsuggestions -c "\\copy (select version_slug, localized_reference, hash, suggestions from bibleverses_wordsuggestiondata where version_slug = '<slug>') TO stdout WITH CSV HEADER;" > wsd_<slug>.csv
 
-      rsync wsd_NCC.csv learnscripture@learnscripture.net:/home/learnscripture
+      rsync wsd_<slug>.csv learnscripture@learnscripture.net:/home/learnscripture
 
-      psql -U learnscripture -d learnscripture_wordsuggestions -c "\\copy bibleverses_wordsuggestiondata (version_slug, localized_reference, hash, suggestions) from stdin CSV HEADER" < ~/wsd_NCC.csv
+      psql -U learnscripture -d learnscripture_wordsuggestions -c "\\copy bibleverses_wordsuggestiondata (version_slug, localized_reference, hash, suggestions) from stdin CSV HEADER" < ~/wsd_<slug>.csv
 
    (This could take longer, depending on upload speeds...)
 
