@@ -878,7 +878,7 @@ class UserVerseStatus(models.Model):
             return True
         if self.next_test_due is None:
             return True
-        if self.strength >= memorymodel.LEARNT:
+        if self.strength >= memorymodel.LEARNT and not self.early_review_requested:
             return False
         return timezone.now() >= self.next_test_due
 

@@ -217,6 +217,8 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         uvs.refresh_from_db()
         self.assertEqual(i.first_overdue_verse(timezone.now()),
                          uvs)
+        self.assertEqual(uvs.needs_testing_individual, True)
+        self.assertEqual(uvs.needs_testing, True)
 
         # If we record a test again, 'early_review_requested' should be reset,
         # so that the overrides of 'review_sooner' no longer take effect. (The
