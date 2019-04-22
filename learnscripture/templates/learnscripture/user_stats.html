@@ -71,6 +71,13 @@
   {% ftlmsg 'user-stats-page-description' username=account.username %}
 {% endblock %}
 
+{% block page_title %}
+  {{ title }}
+    {% if account.is_webmaster %}
+      <span class="official-user-info">{% ftlmsg 'user-stats-is-webmaster' %}</span>
+    {% endif %}
+{% endblock %}
+
 {% block content %}
 
   <h2>{% ftlmsg 'user-stats-user-information-title' %}</h2>
