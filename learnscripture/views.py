@@ -1060,12 +1060,11 @@ def user_verse_sets(request):
 
 # Password reset for Accounts:
 #
-# We can re-use a large amount of django.contrib.auth functionality
-# due to same interface between Account and User. Some things need
-# customising replacing.
+# We can re-use a large amount of django.contrib.auth functionality due to same
+# interface between Account and User. Some things need customising/replacing.
 #
-# Also, we do the main password_reset via AJAX,
-# from the the same form as the login form.
+# Also, we do the main password_reset via AJAX, from the same form as the login
+# form.
 def password_reset_done(request):
     return TemplateResponse(request, 'learnscripture/password_reset_done.html', {
         'title': t('accounts-password-reset-start-page-title'),
