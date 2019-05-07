@@ -278,13 +278,19 @@ forgetting the forward slash **/** in the closing tag.
 
 Some of the most common tags you need to know are below:
 
-======  ============  ==================================================  =================================
-Tag     Usage         Example                                             Output
-======  ============  ==================================================  =================================
-b       bold          Here is some <b>bold</b> text                       Here is some **bold** text
-i       italics       Did you mean: <i>Genesis</i>                        Did you mean: *Genesis*
-a       link          Please <a href="/login/">log in</a> to continue     Please `log in </login/>`_ to continue
-======  ============  ==================================================  =================================
+======= ============= ==================================================== =================================
+Tag     Usage         Example                                              Output
+======= ============= ==================================================== =================================
+b       bold          ``Here is some <b>bold</b> text``                    Here is some **bold** text
+i       italics       ``Did you mean: <i>Genesis</i>``                     Did you mean: *Genesis*
+a       link          ``Please <a href="/login/">log in</a> to continue``  Please `log in </login/>`_ to continue
+ul+li   list          ::
+
+                        <ul>                                               * This is the first item in a list
+                          <li>This is the first item in a list</li>        * This is the second item
+                          <li>This is the second item</li>
+                        </ul>
+======= ============= ==================================================== =================================
 
 Notice for the "``a``" example, inside the opening ``<a>`` tag there is
 something extra - an ``href`` attribute. In HTML attributes are used to put some
