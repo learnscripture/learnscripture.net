@@ -33,10 +33,10 @@ contact-form-page-top-html =
 
     <p>We’re sorry that we won’t be able to answer queries that are already answered above.</p>
 
-    <p>The next place to ask questions is the <a href="https://learnscripture.net/groups/website-help/">Website Help Group</a>, where you can get help from other users.</p>
+    <p>The next place to ask questions is the <a href="/groups/website-help/">Website Help Group</a>, where you can get help from other users.</p>
 
     <p>For other queries, if it is something urgent we will try to respond. However,
-    <strong>the LearnScripture.net site is volunteer run</strong>.
+    <b>the LearnScripture.net site is volunteer run</b>.
     Please don't be offended if your query does not receive a fast reply!</p>
 
 

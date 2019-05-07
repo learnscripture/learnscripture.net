@@ -1,15 +1,11 @@
-
 # Displayed when a user has not entered a required field
-forms-field-required = This field is required
+forms-field-required = Bu alan zorunludur
 
 # Displayed as help text under an input box indicating it is optional
-forms-field-optional = Optional
+forms-field-optional = İsteğe bağlı
 
 # Displayed as help text under an input box indicating the information will be publicly visible
-forms-field-public = Public
+forms-field-public = Herkese açık
 
 # Displayed as help text under an input box indicating the information will be publicly visible, and is optional
-forms-field-public-optional = Public, optional
-
-
-
+forms-field-public-optional = İsteğe bağlı, herkese açık
