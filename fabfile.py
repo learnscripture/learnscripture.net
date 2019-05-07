@@ -5,6 +5,7 @@ import glob
 import json
 import os
 import re
+import sys
 from contextlib import contextmanager
 from datetime import datetime
 
@@ -116,6 +117,8 @@ REQS = [
     'libpcre3-dev',
 
 ]
+
+os.environ['DJANGO_SETTINGS_MODULE'] = 'learnscripture.settings'  # noqa
 
 
 # Utilities
@@ -502,6 +505,7 @@ def code_quality_checks():
         return
     local("flake8 .")
     local("isort -c")
+    check_ftl()
     run_ftl2elm()
     with lcd("learnscripture/static/elm"):
         local("elm-test --skip-install")
@@ -624,6 +628,18 @@ def install_requirements(target):
 webpack_deploy_files_pattern = "./learnscripture/static/webpack_bundles/*.deploy.*"
 webpack_stats_file = "./webpack-stats.deploy.json"
 
+
+@task
+def check_ftl():
+    import django
+    django.setup()
+    from django.conf import settings
+    from learnscripture.ftl_bundles import main
+    errors = main.check_all([code for code, _ in settings.LANGUAGES])
+    if errors:
+        print("Errors in FTL files:")
+        print(''.join(str(e) for e in errors))
+        sys.exit(1)
 
 @task
 def run_ftl2elm(watch=False):
