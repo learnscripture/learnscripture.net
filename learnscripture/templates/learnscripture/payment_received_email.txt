@@ -1,4 +1,4 @@
 {% load ftl %}{% autoescape off %}
-{% ftlmsg 'donations-dontation-received-email' account_name=account.email_name payment_amount=payment_amount %}
+{% ftlmsg 'donations-donation-received-email' account_name=account.email_name payment_amount=payment_amount %}
 {% endautoescape %}
 

@@ -20,7 +20,7 @@
   {% else %}
 
     {% capture as login_url silent %}{% url "login" %}?next={{ request.get_full_path|urlencode }}{% endcapture %}
-    <p><strong>{% ftlmsg 'referrals-you-need-to-create-an-account-html' login_url=login_url %}</strong></p>
+    <p><b>{% ftlmsg 'referrals-you-need-to-create-an-account-html' login_url=login_url %}</b></p>
 
   {% endif %}
 

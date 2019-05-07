@@ -169,9 +169,12 @@ accounts-signup-welcome-notice = Account created - welcome { $username }!
 
 
 ## Login.
+
+# Title of log-in page
+accounts-login-title = Login
+
 # Caption for the email/username input box
 accounts-login-email-or-username = Email or username
-
 
 # Message shown when the user enters a wrong username, email or password
 accounts-login-no-matching-username-password = Can't find an account matching that username/email and password

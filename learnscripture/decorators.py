@@ -69,7 +69,7 @@ def require_account_with_redirect(view_func):
     def view(request, *args, **kwargs):
         if not hasattr(request, 'identity') or request.identity.account_id is None:
             response = render(request, 'learnscripture/login_and_redirect.html',
-                              {'title': t('login-title'),
+                              {'title': t('accounts-login-title'),
                                })
             add_never_cache_headers(response)
             return response
