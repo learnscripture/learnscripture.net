@@ -179,18 +179,18 @@ learn-see-again-less-than-an-hour = 1 saaten az
 
 # Displayed when a verse will be seen again after between 1 and 24 hours.
 # $hours is the number of hours
-learn-see-again-hours = { $hours } saat
+learn-see-again-hours = { NUMBER($hours) } saat
 
 # Displayed when a verse will be seen again after between 1 and 7 days
 # $days is the number of days
-learn-see-again-days = { $days } gün
+learn-see-again-days = { NUMBER($days) } gün
 
 # $weeks is the number of weeks
-learn-see-again-weeks = { $weeks } hafta
+learn-see-again-weeks = { NUMBER($weeks) } hafta
 
 # Displayed when a verse will be seen again after several months
 # $months is the number of months
-learn-see-again-months = { $months } ay
+learn-see-again-months = { NUMBER($months) } ay
 
 ## Verse options menu:
 
