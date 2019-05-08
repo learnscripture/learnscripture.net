@@ -641,6 +641,7 @@ def check_ftl():
         print(''.join(str(e) for e in errors))
         sys.exit(1)
 
+
 @task
 def run_ftl2elm(watch=False):
     cmdline = "ftl2elm --locales-dir learnscripture/locales --output-dir learnscripture/static/elm --when-missing=fallback --include='**/learn.ftl'"
