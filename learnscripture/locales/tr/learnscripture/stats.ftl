@@ -15,6 +15,8 @@ heatmap-current-streak =
 heatmap-timezone-note =
     Takvim ve seriler UTC/GMT zaman dilimine göre hesaplanır
 
+heatmap-streak-length =
+    { $days } gün
 
 # Caption for 'Number of items started' statistic
 heatmap-items-started-stat = Başlanmış öge

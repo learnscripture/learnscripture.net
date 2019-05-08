@@ -16,6 +16,9 @@ heatmap-current-streak =
 heatmap-timezone-note =
     The calendar and streaks work in the UTC/GMT timezone
 
+heatmap-streak-length =
+    { $days } days
+
 
 # Caption for 'Number of items started' statistic
 heatmap-items-started-stat = Items started
