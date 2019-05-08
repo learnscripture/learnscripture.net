@@ -57,7 +57,7 @@ versesets-view-set-notes-title = Notlar
 
 # Note about how to opt out of learning
 versesets-view-set-how-to-opt-out = Bir ayet dizisini çalışırken bir ayeti öğrenmek istemezseniz çalışma sayfasında
-          “{ user-verses-stop-learning-verse-button }” düğmesine basarak onu diziden çıkarabilirsiniz.
+          “{ learn-stop-learning-this-verse }” düğmesine basarak onu diziden çıkarabilirsiniz.
 
 # Note about verse set being public
 versesets-view-set-learning-is-public = Ayeti çalışma eylemi herkes tarafından görülebilir
