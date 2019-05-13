@@ -3,32 +3,36 @@
 
     // NB also generated HTML that refers to these variables. Might be a nicer
     // way to do this without hard-coding sizes here, but it escapes me at the
-    // moment.
-    --stars-width: 160px;
+    // moment. See also sizes under @narrowWidthBreak2
+    --stars-width: 140px;
     --stars-height: 26px;
+    img {
+        vertical-align: top;
+    }
 }
 
-.stars-cont, img.stars {
+.stars-cont, div.stars-base, div.stars-over, img.stars {
     width: var(--stars-width);
     height: var(--stars-height);
 }
 
-img.stars {
+div.stars-base, div.stars-over {
     position: absolute;
     left: 0;
 }
 
-img.stars-base {
+div.stars-base {
     z-index: 1;
 }
 
-img.stars-over {
+div.stars-over {
     z-index: 2;
+    overflow: hidden;
 }
 
 @media screen and (max-width: @narrowWidthBreak2) {
     .stars-cont {
-        --stars-width: 80px;
+        --stars-width: 70px;
         --stars-height: 13px;
     }
 }

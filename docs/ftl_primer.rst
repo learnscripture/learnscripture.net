@@ -2,16 +2,17 @@ Fluent primer
 #############
 
 This page is for translators who help with LearnScripture.net and is an
-introduction to ``Fluent``, the system we use for ‘internationalizing and
-localizing’ LearnScripture.net.
+introduction to `Fluent <https://projectfluent.org/>`_, the system we use for
+internationalizing and localizing LearnScripture.net.
 
 The overall process for translating LearnScripture.net looks like this:
 
 1. Developers prepare 'FTL' files containing all the parts of the website that
    need to be translated. ‘FTL’ means “Fluent Translation List”.
 
-2. Developers send the English version of these files to you, the translator, or
-   share them in some other way that allows editing using an online editor.
+2. Developers send the English version of these files to you, the translator,
+   via email or share them in some other way that allows editing using an online
+   editor.
 
 3. You translate the English strings, save the files and send them back to the
    developers.
@@ -22,7 +23,7 @@ FTL file format
 
 The FTL file format is described fully in the `Fluent Guide
 <https://projectfluent.org/fluent/guide/>`_. This page is a more simple
-introduction and describes the features we use in LearnScripture.net
+introduction and describes the features we use in LearnScripture.net.
 
 A ‘Fluent Translation List’ file consists of 3 main things:
 
@@ -63,7 +64,7 @@ description of what is happening on the page. In another situation, it might be
 the caption on a button that does something when you press it. Depending on the
 language, you might want different translations for these different situations.
 
-Below this, we have "``## Navbar:``" which is a comment for the group of items
+Below this, we have "``## Navbar:``" which is a sub-heading for the group of items
 that follow.
 
 Multi-line text
@@ -81,18 +82,20 @@ or::
        This is a long message that flows
        onto multiple lines.
 
-In most cases where the line breaks come doesn't matter. When the text
-is for an email, the line breaks usually do matter, and it is important
-to keep each line in email to less than about 70 characters wide.
+In most cases, it doesn't matter where the line breaks come. When the text is
+for an email, the line breaks usually do matter, and it is important to keep
+each line in the email to less than about 70 characters wide.
 
 Substitutions
 -------------
 
-Above we have covered simple 'static' strings. The Fluent system has more features
-to cover additional language needs. The first is substitutions.
+Above we have covered simple 'static' strings that are always the same. The
+Fluent system has more features to cover additional language needs. The first is
+substitutions.
 
-For example, on the ‘user activity page’, the title contains the user name for example on
-`/user/spookylukey <https://learnscripture.net/user/spookylukey/activity/>`_ it has::
+For example, on the ‘user activity page’, the title contains the user name —
+e.g. on `/user/spookylukey
+<https://learnscripture.net/user/spookylukey/activity/>`_ it has::
 
     Recent activity from spookylukey
 
@@ -108,7 +111,7 @@ Here ``$username`` is a ‘variable’, a piece of data that is supplied by the
 website that will be different for every different user's page.
 
 When doing these translations, it will be helpful to imagine the sentence with
-a specific example of a the substitution.
+a specific example of the substitution.
 
 Notice that the variable is placed between "``{``" and "``}``". Some other things
 can also be placed between curly brackets, and together they are called
@@ -152,11 +155,9 @@ for variables).
 Terms
 -----
 
-Terms are a mechanism to re-use common bit of text. You can read about them in
-the `Fluent docs <https://projectfluent.org/fluent/guide/terms.html>`_ but we
-are not currently using them for LearnScripture.net
-
-`More info about terms <https://projectfluent.org/fluent/guide/terms.html>`_.
+Terms are a mechanism to re-use common bits of text. You can read about them in
+the `Fluent docs for terms <https://projectfluent.org/fluent/guide/terms.html>`_
+but we are not currently using them for LearnScripture.net.
 
 Selectors
 ---------
@@ -173,8 +174,8 @@ case. It looks like this::
            *[other] You have { $unreadEmails } unread emails.
         }
 
-Here ``$unread_emails`` will be a number that is compared to each of the options
-which are called keys (``0``, ``one`` and ``other``). The keys can be numbers
+Here ``$unread_emails`` will be a number that is compared to each of the options,
+which are called “keys” (``0``, ``one`` and ``other``). The keys can be numbers
 like ``0``, ``1`` etc. They can also be 6 special strings "``zero``", "``one``",
 "``two``", "``few``", "``many``" and "``other``". Not all of these apply to all
 languages - for example English only has "``one``" and "``other``",
@@ -196,9 +197,9 @@ For anything else e.g. ``$unread_emails = 7``, you get::
 Notice that the last option has a ``*`` next to it to indicate it is the default
 option if nothing else matches. It is required to always have a default like this.
 
-In some cases, a message that in English needs to use this selector can be
-written correctly without a selector in another language - and the other way
-around. It is up to you to decide if you need to use this.
+In some cases, a message that in English needs to use a selector can be written
+correctly without a selector in another language - and the other way around. It
+is up to you as the translator to decide if you need to use this.
 
 The same feature can also be used for other kind of variants e.g. some
 statements might need different variants depending on the gender of the person
@@ -219,7 +220,9 @@ single message using an attribute for one or more of the strings. For example::
                           .help-text = Depends on device capabilities.
 
 Here “Vibrate on mistakes” is the main label, and “Depends on device
-capabilities” is the ``help-text`` attribute.
+capabilities” is the ``help-text`` attribute. In LearnScripture.net we also use
+a ``.tooltip`` attribute for text that appears when you hover your mouse over a
+button or link.
 
 If you need to refer to attributes from other messages, it is done using dot syntax e.g.::
 
@@ -234,7 +237,7 @@ Numbers
 
 Fluent has functions for formatting numbers correctly for a given locale. This
 handles the fact that, for instance, in England one thousand is written
-``1,000`` but in most European countries it is ``1.000``. It can also be used to
+“1,000” but in most European countries it is “1.000”. It can also be used to
 add additional formatting options (such as using percentage mode or for currencies).
 
 Without any options the NUMBER function can be used in a placeable like this::
@@ -268,32 +271,41 @@ Messages that use HTML have a message ID that ends with "``-html``", like this::
           example: <b>Matt 28:19</b> or <b>make disciples</b>
 
 
-HTML formatting is done using tags with triangle brackets **<** and **>**. Most
-tags come in pairs with and opening and closing tag that wraps a bit of text
-e.g. <b> and </b>. The most common mistake is forgetting to close the pair
-or forgetting the **/** in the closing tag.
+HTML formatting is done using tags with triangle brackets: **<** and **>**. Most
+tags come in pairs with an opening and closing tag that wraps a bit of text e.g.
+<b> and </b>. The most common mistake is forgetting to close the pair or
+forgetting the forward slash **/** in the closing tag.
 
-Some of the most common ones you need to know are below:
+Some of the most common tags you need to know are below:
 
+======= ============= ==================================================== =================================
+Tag     Usage         Example                                              Output
+======= ============= ==================================================== =================================
+b       bold          ``Here is some <b>bold</b> text``                    Here is some **bold** text
+i       italics       ``Did you mean: <i>Genesis</i>``                     Did you mean: *Genesis*
+a       link          ``Please <a href="/login/">log in</a> to continue``  Please `log in </login/>`_ to continue
+ul+li   list          ::
 
-======  ============  ==================================================  =================================
-Tag     Usage         Example                                             Output
-======  ============  ==================================================  =================================
-b       bold          Here is some <b>bold</b> text                       Here is some **bold** text
-i       italics       Did you mean: <i>Genesis</i>                        Did you mean: *Genesis*
-a       link          Please <a href="/login/">log in</a> to continue     Please `log in </login/>`_ to continue
-======  ============  ==================================================  =================================
+                        <ul>                                               * This is the first item in a list
+                          <li>This is the first item in a list</li>        * This is the second item
+                          <li>This is the second item</li>
+                        </ul>
+======= ============= ==================================================== =================================
 
 Notice for the "``a``" example, inside the opening ``<a>`` tag there is
-something extra - an ``href`` attribute. Attributes are used to put some extra
-information into the HTML, and there are many different attributes possible.
-This ``href`` attribute is the ‘target’ of the link - the place you go if the
-link is clicked. Normally this should not be changed but should be copied into
-the translation. However, the position of the link in the sentence (i.e. words
-the link tags go around) can be changed according to the conventions of your
-language.
+something extra - an ``href`` attribute. In HTML attributes are used to put some
+extra information into the HTML, and there are many different attributes
+possible. This ``href`` attribute is the ‘target’ of the link - the place you go
+if the link is clicked. Normally this should not be changed but should be copied
+into the translation. However, the position of the link in the sentence (i.e.
+words the link tags go around) can be changed according to the conventions of
+your language.
 
 Sometimes you will see other attributes in tags - normally these do not need to
 be changed, but should copied into the translation.
 
 If you have any other questions please ask!
+
+You may also find it helpful to use the `interactive examples on the Fluent
+project home page <https://projectfluent.org/>`_, and the `online editor
+<https://projectfluent.org/play/>`_.

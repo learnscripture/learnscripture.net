@@ -57,7 +57,7 @@ versesets-view-set-notes-title = Notes
 
 # Note about how to opt out of learning
 versesets-view-set-how-to-opt-out = When learning a set, you can opt out of any individual verse by pressing
-          ‘Stop learning this verse’ on the learning page.
+          ‘{ learn-stop-learning-this-verse }’ on the learning page.
 
 # Note about verse set being public
 versesets-view-set-learning-is-public = Learning a verse set is a public action

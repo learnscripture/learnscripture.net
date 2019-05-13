@@ -397,16 +397,23 @@
     <ul>
       {% for event in events %}
         <li>
-          <span class="commentindicator">
-            {% if event.accepts_comments %}
+          {% if event.accepts_comments %}
+            <span class="commentindicator">
               <a href="{{ event.get_absolute_url }}" title="{% ftlmsg 'comments-view-or-add-comments-tooltip' %}"><i class="icon-comment"></i> <span class="commentcount">{{ event.comment_count }}</span>
               </a>
-            {% else %}
-              <a href="{{ event.get_absolute_url }}"><i class="icon-link"></i></a>
-            {% endif %}
-          </span>
+            </span>
+          {% endif %}
           {{ event.render_html_dict|lookup:default_language_code }}
-          <br/><span class="timestamp">{{ event.created_display }}</span>
+          {% if event.is_new_comment %}
+            {% with comment=event.get_comment %}
+              <div class="commentmessage">
+                {{ comment.message_formatted|truncatewords_html:20 }}
+              </div>
+            {% endwith %}
+          {% endif %}
+          <div class="postline">
+            <a href="{{ event.get_absolute_url }}"><span class="timestamp">{{ event.created_display }}</span></a>
+          </div>
         </li>
       {% endfor %}
     </ul>

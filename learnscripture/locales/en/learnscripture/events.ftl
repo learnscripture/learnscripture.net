@@ -30,7 +30,7 @@ events-new-user-signed-up-html = { $username } signed up to LearnScripture.net
 # $username is a user's username
 # $award is the short description of an award.
 # e.g.
-#   peter earned Ace level 1
+#   peter lost Ace level 1
 events-award-lost-html = { $username } lost { $award }
 
 # Notice in news items when a user reaches a points milestone

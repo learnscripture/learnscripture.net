@@ -17,7 +17,8 @@ import Elm from "../elm/Learn";
 if ($('body.learn-page').length > 0) {
     var preferencesNode = document.getElementById('id-preferences-data');
     var accountNode = document.getElementById('id-account-data');
-    var savedCalls = getSavedCalls();
+    var accountName = accountNode == null ? "" : accountNode.attributes['data-username'].value;
+    var savedCalls = getSavedCalls(accountName);
 
     var app =
         Elm.Learn.embed(
@@ -365,6 +366,6 @@ if ($('body.learn-page').length > 0) {
     }
 
     app.ports.saveCallsToLocalStorage.subscribe(function (args) {
-        storeSavedCalls(args);
+        storeSavedCalls(args[0], args[1]);
     });
 }

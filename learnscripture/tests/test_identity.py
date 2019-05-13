@@ -205,7 +205,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
 
         self.move_clock_on(gap + timedelta(seconds=100))
 
-        uvs = i.verse_statuses.get(id=uvs.id)
+        uvs.refresh_from_db()
         self.assertEqual(uvs.needs_testing_individual, True)
 
         self.assertEqual(i.first_overdue_verse(timezone.now()),
@@ -214,15 +214,18 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         # Something manually selected for review sooner should be
         # reviewed even if strength is 'fully learnt'
         i.verse_statuses.update(strength=accounts.memorymodel.LEARNT)
+        uvs.refresh_from_db()
         self.assertEqual(i.first_overdue_verse(timezone.now()),
                          uvs)
+        self.assertEqual(uvs.needs_testing_individual, True)
+        self.assertEqual(uvs.needs_testing, True)
 
         # If we record a test again, 'early_review_requested' should be reset,
         # so that the overrides of 'review_sooner' no longer take effect. (The
         # user has to keep on requeted 'see sooner' if they want to that verse
         # to keep on being seen after being learnt.
         i.record_verse_action('John 3:16', 'NET', StageType.TEST, 1)
-        uvs = i.verse_statuses.get(id=uvs.id)
+        uvs.refresh_from_db()
         now = timezone.now()
         self.assertGreater(uvs.next_test_due, now)
 

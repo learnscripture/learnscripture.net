@@ -10,19 +10,30 @@
             margin-top: -1px;
         }
     }
-    .timestamp {
-        font-style: italic;
-        font-size: 90%;
+    .postline {
+        .timestamp {
+            font-style: italic;
+            font-size: 90%;
+        }
     }
 
     .commentindicator {
         float:right;
         border: 1px solid var(--bgBorderColor);
-        margin-right: -5px;
         margin-top: -3px;
         padding-left: 4px;
         padding-right: 2px;
         border-bottom-left-radius: 4px;
+    }
+
+    .commentmessage {
+        background-color: var(--bgColor1);
+        border: 1px solid var(--bgBorderColor);
+        border-radius: 4px;
+        padding: 1px 3px;
+        p {
+            margin: 0;
+        }
     }
 }
 
