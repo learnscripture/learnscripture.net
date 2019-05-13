@@ -40,7 +40,7 @@ from groups.forms import EditGroupForm
 from groups.models import Group
 from groups.signals import public_group_created
 from learnscripture import session
-from learnscripture.forms import (GROUP_WALL_ORDER_OLDEST_FIRST, LEADERBOARD_WHEN_THIS_WEEK,
+from learnscripture.forms import (FILTER_LANGUAGES_ALL, GROUP_WALL_ORDER_OLDEST_FIRST, LEADERBOARD_WHEN_THIS_WEEK,
                                   USER_VERSES_ORDER_STRONGEST, USER_VERSES_ORDER_WEAKEST, VERSE_SET_ORDER_AGE,
                                   VERSE_SET_ORDER_POPULARITY, VERSE_SET_TYPE_ALL, AccountPasswordChangeForm,
                                   AccountPasswordResetForm, AccountSetPasswordForm, ContactForm, GroupFilterForm,
@@ -1384,7 +1384,10 @@ def groups_editable_for_request(request):
 def groups(request):
     account = account_from_request(request)
     groups = Group.objects.visible_for_account(account).order_by('name')
-    filter_form = GroupFilterForm.from_request_data(request.GET)
+    filter_form = GroupFilterForm.from_request_data(
+        request.GET,
+        defaults={'language': account.default_language_code},
+    )
     query = filter_form.cleaned_data['query'].strip()
     if query:
         groups = (groups.filter(name__icontains=query) |
@@ -1392,6 +1395,10 @@ def groups(request):
                   )
     else:
         groups = groups.none()
+    language = filter_form.cleaned_data['language']
+    if language != FILTER_LANGUAGES_ALL:
+        groups = groups.filter(language=language)
+
     return TemplateResponse(request, 'learnscripture/groups.html', {
         'title': t('groups-page-title'),
         'results': get_paged_results(groups, request, 10),
@@ -1569,7 +1576,7 @@ def create_or_edit_group(request, slug=None):
     else:
         group = None
         title = t('groups-create-page-title')
-        initial = {}
+        initial = {'language': account.default_language_code}
 
     was_public = group.public if group is not None else False
 

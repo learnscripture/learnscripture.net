@@ -1,4 +1,5 @@
 from autoslug import AutoSlugField
+from django.conf import settings
 from django.db import models
 from django.db.models import Count
 from django.utils import timezone
@@ -54,6 +55,11 @@ class Group(models.Model):
     count_for_friendships = models.BooleanField(default=True)
     members = models.ManyToManyField(Account, through='Membership',
                                      related_name='groups')
+    language = models.CharField(t_lazy('groups-language'),
+                                help_text=t_lazy('groups-language.help-text'),
+                                max_length=10,
+                                choices=settings.LANGUAGES,
+                                default=settings.LANGUAGE_CODE)
 
     objects = GroupManager()
 

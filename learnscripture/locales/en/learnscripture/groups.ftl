@@ -12,6 +12,10 @@ groups-name = Name
 # Caption for the 'description' field of groups
 groups-description = Description
 
+# Caption for the language field (primary language the group uses)
+groups-language = Language
+                .help-text = The main language used in the group
+
 # Caption for the 'invited users' field of groups
 groups-invited-users = Invited users
 
