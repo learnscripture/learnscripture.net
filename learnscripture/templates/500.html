@@ -7,6 +7,7 @@
 {% block page_title %}500 - Server Error{% endblock %}
 
 {% block content %}
+  {% ftlconf mode='server' bundle='learnscripture.ftl_bundles.main' %}
   <h2>{% ftlmsg 'errors-500-title' %}</h2>
 
   <p>{% ftlmsg 'errors-500-body' %}</p>

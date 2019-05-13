@@ -71,7 +71,7 @@ port beep : ( Float, Float ) -> Cmd msg
 port helpTourHighlightElement : ( String, String ) -> Cmd msg
 
 
-port saveCallsToLocalStorage : JD.Value -> Cmd msg
+port saveCallsToLocalStorage : ( JD.Value, String ) -> Cmd msg
 
 
 
@@ -303,6 +303,16 @@ type User
 type alias AccountData =
     { username : String
     }
+
+
+getUserName : Model -> String
+getUserName model =
+    case model.user of
+        GuestUser ->
+            ""
+
+        Account { username } ->
+            username
 
 
 type LearningSession
@@ -887,17 +897,17 @@ viewSessionStats model =
                 ]
                 [ H.span [ A.class "nav-caption" ]
                     [ H.text (T.learnSessionStatsToday (getLocale model) ())
-                    , H.span
-                        [ A.id "id-new-verses-started-count"
-                        , A.title (T.learnItemsStartedToday (getLocale model) ())
-                        ]
-                        [ H.text <| interpolate " + {0} " [ toString stats.newVersesStarted ] ]
-                    , H.span
-                        [ A.id "id-total-verses-tested-count"
-                        , A.title (T.learnItemsTestedToday (getLocale model) ())
-                        ]
-                        [ H.text <| interpolate " ⟳ {0} " [ toString stats.totalVersesTested ] ]
                     ]
+                , H.span
+                    [ A.id "id-new-verses-started-count"
+                    , A.title (T.learnItemsStartedToday (getLocale model) ())
+                    ]
+                    [ H.text <| interpolate " + {0} " [ toString stats.newVersesStarted ] ]
+                , H.span
+                    [ A.id "id-total-verses-tested-count"
+                    , A.title (T.learnItemsTestedToday (getLocale model) ())
+                    ]
+                    [ H.text <| interpolate " ⟳ {0} " [ toString stats.totalVersesTested ] ]
                 ]
 
 
@@ -1250,7 +1260,15 @@ viewCurrentVerse session model =
                 []
             ]
          , actionButtons model currentVerse session.verses model.preferences
-         , hintButton model currentVerse testingMethod
+         , case getTestingMethod model of
+            FullWords ->
+                hintButton model currentVerse testingMethod
+
+            FirstLetter ->
+                hintButton model currentVerse testingMethod
+
+            OnScreen ->
+                emptyNode
          , onScreenTestingButtons currentVerse testingMethod (getLocale model)
          ]
             ++ instructions currentVerse testingMethod model.helpVisible (getLocale model)
@@ -5891,7 +5909,7 @@ saveTrackedCallsToLocalStorage model =
             allTrackedCalls
                 |> List.filter (\( callId, call ) -> isRecordCall call)
     in
-    saveCallsToLocalStorage (encodeTrackedCallsList filteredTrackedCalls)
+    saveCallsToLocalStorage ( encodeTrackedCallsList filteredTrackedCalls, getUserName model )
 
 
 isRecordCall : TrackedHttpCall -> Bool

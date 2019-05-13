@@ -111,7 +111,8 @@ urlpatterns = [
 if settings.DEVBOX:
     urlpatterns += [
         url(r'^test-404/(?P<message>.*)$', learnscripture.views.missing),
-        url(r'^test-500/$', learnscripture.views.broken),
+        url(r'^test-500/$', learnscripture.views.test_500),
+        url(r'^test-500-real/$', learnscripture.views.test_500_real),
     ]
 
 if settings.DEVBOX:
@@ -152,3 +153,5 @@ urlpatterns += [
 
 if os.environ.get('TEST_TRACEBACK_PAGES', '') == 'TRUE':
     handler500 = 'learnscripture.tests.base.show_server_error'
+else:
+    handler500 = learnscripture.views.handler500

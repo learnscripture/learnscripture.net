@@ -697,7 +697,7 @@ class UserTimelineStats(ApiView):
                         streaks[stat]['current'] += 1
 
         streaks_formatted = {
-            stat: {n: '1 day' if val == 1 else '{0} days'.format(val) for n, val in streak.items()}
+            stat: {n: t('heatmap-streak-length', {'days': val}) for n, val in streak.items()}
             for stat, streak in streaks.items()
         }
         return {'stats': output.getvalue(),

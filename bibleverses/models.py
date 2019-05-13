@@ -303,6 +303,7 @@ class VerseManager(models.Manager):
 
 class Verse(models.Model):
     version = models.ForeignKey(TextVersion, on_delete=models.CASCADE)
+    # Reference in the language of the text versions e.g. "John 3:16"
     localized_reference = models.CharField(max_length=100)
     # 'text_saved' is for data stored, as opposed to 'text' which might retrieve
     # from a service. Also, 'text_saved' is sometimes set without saving to the
@@ -311,26 +312,31 @@ class Verse(models.Model):
     text_tsv = VectorField()
     text_fetched_at = models.DateTimeField(null=True, blank=True)
 
-    # De-normalized fields
+    # De-normalized fields - these can be derived from localized_reference
     # Public facing fields are 1-indexed, others are 0-indexed.
     book_number = models.PositiveSmallIntegerField()  # 0-indexed
     chapter_number = models.PositiveSmallIntegerField()  # 1-indexed
     first_verse_number = models.PositiveSmallIntegerField()  # 1-indexed
-    # Usually last_verse_number is equal to first_verse_number
+    # Usually last_verse_number is equal to first_verse_number,
+    # it's only different for merged verses.
     last_verse_number = models.PositiveSmallIntegerField()  # 1-indexed
 
     # Position within the Bible:
     bible_verse_number = models.PositiveSmallIntegerField()  # 0-indexed
 
-    # 0 indexed. Differs from bible_verse_number in that when
+    # gapless_bible_verse_number differs from bible_verse_number in that when
     # missing and merged verses are removed, it has no gaps,
-    # while bible_verse_number does
+    # while bible_verse_number does. 0 indexed.
     gapless_bible_verse_number = models.PositiveIntegerField(null=True)
 
     # This field is to cope with versions where a specific verse is entirely
     # empty e.g. John 5:4 in NET/ESV
     missing = models.BooleanField(default=False)
 
+    # For versions that do merged verses, we have dummy Verse objects
+    # for the unmerged references. e.g. in TCL02, there is 'Yuhanna 1:19-20'.
+    # For 'Yuhanna 1:19' we have a Verse object that has no text
+    # but 'merged_into' points to 'Yuhanna 1:19-20'
     merged_into = models.ForeignKey("self", on_delete=models.CASCADE,
                                     related_name='merged_from',
                                     blank=True, null=True)
@@ -811,7 +817,7 @@ class UserVerseStatus(models.Model):
     text_order = models.PositiveSmallIntegerField()  # order of this item within associated TextVersion
     version = models.ForeignKey(TextVersion, on_delete=models.CASCADE)
 
-    # The following fields vary over time and care should be take in things
+    # The following fields vary over time and care should be taken in things
     # like create_verse_status to copy these attributes if there are duplicates.
     memory_stage = models.PositiveSmallIntegerField(choices=MemoryStage.choice_list,
                                                     default=MemoryStage.ZERO)
@@ -878,7 +884,7 @@ class UserVerseStatus(models.Model):
             return True
         if self.next_test_due is None:
             return True
-        if self.strength >= memorymodel.LEARNT:
+        if self.strength >= memorymodel.LEARNT and not self.early_review_requested:
             return False
         return timezone.now() >= self.next_test_due
 

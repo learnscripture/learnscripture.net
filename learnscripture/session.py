@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views import i18n as i18n_views
 
-from accounts.models import Account, Identity
+from accounts.models import Account, Identity, UserVerseStatus
 from bibleverses.models import MemoryStage
 from learnscripture.datastructures import make_choices
 
@@ -245,8 +245,10 @@ def unfinished_session_first_uvs(request):
         # so we return False here.
         return None
 
-    uvs = request.identity.verse_statuses.get(id=uvs_data[0][1])
-    return uvs
+    try:
+        return request.identity.verse_statuses.get(id=uvs_data[0][1])
+    except UserVerseStatus.DoesNotExist:
+        return None
 
 
 def set_interface_language(request, lang_code):

@@ -1,32 +1,28 @@
 # Tooltip title for 'Your stats' icon on heatmap
 heatmap-your-stats =
-    Your stats
+    İstatistikler
 
 # Tooltip title for 'Your progress' icon on heatmap
 heatmap-your-progress =
-    Your progress
+    İlerlemeniz
 
 heatmap-longest-streak =
-    Longest streak:
-
+    En uzun seri:
 
 heatmap-current-streak =
-    Current streak:
+    Mevcut seri:
 
 heatmap-timezone-note =
-    The calendar and streaks work in the UTC/GMT timezone
+    Takvim ve seriler UTC/GMT zaman dilimine göre hesaplanır
 
 heatmap-streak-length =
-    { $days } days
-
+    { $days } gün
 
 # Caption for 'Number of items started' statistic
-heatmap-items-started-stat = Items started
+heatmap-items-started-stat = Başlanmış öge
 
 # Caption for 'Number of items tested' statistic
-heatmap-items-tested-stat = Items tested
+heatmap-items-tested-stat = Test edilmiş öge
 
 # Caption for statistic that combines both the above
-heatmap-combined-stat = Combined
-
-
+heatmap-combined-stat = Toplam öge
