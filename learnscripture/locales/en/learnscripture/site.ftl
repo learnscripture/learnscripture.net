@@ -99,6 +99,9 @@ site-footer-choose-language = Choose website interface language:
 # Caption for button that changes the language
 site-footer-choose-language-button = Choose
 
+# Option that appears in filters that allow choosing languages, for choosing
+# any/all languages.
+site-languages-all = All
 
 site-logout-confirm-prompt = Are you sure you want to log out?
 

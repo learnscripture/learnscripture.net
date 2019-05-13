@@ -17,11 +17,14 @@ class FilterFormMixin(object):
     state that can be set using the UI - they never show error messages.
     """
     @classmethod
-    def from_request_data(cls, request_data):
+    def from_request_data(cls, request_data, defaults=None):
         data = {}
         initial_data = {}
         for name, f in cls.base_fields.items():
-            initial_data[name] = f.initial
+            if defaults and name in defaults:
+                initial_data[name] = defaults[name]
+            else:
+                initial_data[name] = f.initial
             if name in request_data:
                 data[name] = request_data[name]
             else:
@@ -264,8 +267,18 @@ class GroupWallFilterForm(FilterFormMixin, forms.Form):
                               widget=widgets.RadioSelect)
 
 
+FILTER_LANGUAGES_ALL = 'all'
+
+FILTER_LANGUAGES = [
+    (FILTER_LANGUAGES_ALL, t_lazy('site-languages-all'))
+] + settings.LANGUAGES
+
+
 class GroupFilterForm(FilterFormMixin, forms.Form):
     query = forms.CharField(label=t_lazy('groups-search'), required=False)
+    language = forms.ChoiceField(choices=FILTER_LANGUAGES,
+                                 label=t_lazy('groups-language'),
+                                 help_text=t_lazy('groups-language.help-text'))
 
 
 USER_VERSES_ORDER_WEAKEST = "weakestfirst"
