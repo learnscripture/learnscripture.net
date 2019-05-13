@@ -4,6 +4,9 @@
 
 user-stats-page-description = { $username } adlı kullanıcının LearnScripture.net sitesindeki istatistikleri
 
+# Displayed in title if the user is the webmaster
+user-stats-is-webmaster = Web sorumlusu
+
 # Sub title for general information about the user
 user-stats-user-information-title = Kullanıcı bilgileri
 
