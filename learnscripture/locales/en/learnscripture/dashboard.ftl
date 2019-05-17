@@ -165,7 +165,6 @@ dashboard-remove-catechism-from-queue = This will remove chosen catechism questi
 dashboard-cancel-passage-confirm = This will cancel learning this passage in this version. Any test scores will be saved. Continue?
 
 
-
 ## 'Choose' section.
 
 # Sub title
