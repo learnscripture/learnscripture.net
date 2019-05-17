@@ -76,7 +76,7 @@ awards-level-subtitle = { $level } seviyesi
 
 # Indicates the number of people who have achieved the award at this level, followed
 # by a list containing all those users
-awards-level-achievers-all = toplam { $count } kullanıcı
+awards-level-achievers-all = Toplam { $count } kullanıcı:
 
 
 # Indicates the number of people who have achieved the award at this level, followed
