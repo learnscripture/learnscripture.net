@@ -276,9 +276,9 @@ FILTER_LANGUAGES = [
 
 class GroupFilterForm(FilterFormMixin, forms.Form):
     query = forms.CharField(label=t_lazy('groups-search'), required=False)
-    language = forms.ChoiceField(choices=FILTER_LANGUAGES,
-                                 label=t_lazy('groups-language'),
-                                 help_text=t_lazy('groups-language.help-text'))
+    language_code = forms.ChoiceField(choices=FILTER_LANGUAGES,
+                                      label=t_lazy('groups-language'),
+                                      help_text=t_lazy('groups-language.help-text'))
 
 
 USER_VERSES_ORDER_WEAKEST = "weakestfirst"

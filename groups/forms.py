@@ -25,7 +25,7 @@ class EditGroupForm(forms.ModelForm):
         fields = [
             'name',
             'description',
-            'language',
+            'language_code',
             'public',
             'open',
             'invited_users'
