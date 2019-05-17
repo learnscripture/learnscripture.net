@@ -1386,7 +1386,7 @@ def groups(request):
     groups = Group.objects.visible_for_account(account).order_by('name')
     filter_form = GroupFilterForm.from_request_data(
         request.GET,
-        defaults={'language': account.default_language_code},
+        defaults={'language_code': account.default_language_code},
     )
     query = filter_form.cleaned_data['query'].strip()
     if query:
@@ -1395,9 +1395,9 @@ def groups(request):
                   )
     else:
         groups = groups.none()
-    language = filter_form.cleaned_data['language']
-    if language != FILTER_LANGUAGES_ALL:
-        groups = groups.filter(language=language)
+    language_code = filter_form.cleaned_data['language_code']
+    if language_code != FILTER_LANGUAGES_ALL:
+        groups = groups.filter(language_code=language_code)
 
     return TemplateResponse(request, 'learnscripture/groups.html', {
         'title': t('groups-page-title'),
@@ -1576,7 +1576,7 @@ def create_or_edit_group(request, slug=None):
     else:
         group = None
         title = t('groups-create-page-title')
-        initial = {'language': account.default_language_code}
+        initial = {'language_code': account.default_language_code}
 
     was_public = group.public if group is not None else False
 
