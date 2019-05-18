@@ -9,6 +9,13 @@ from bibleverses.models import TextType, VerseSetType
 from learnscripture.ftl_bundles import t, t_lazy
 
 
+FILTER_LANGUAGES_ALL = 'all'
+
+FILTER_LANGUAGES = [
+    (FILTER_LANGUAGES_ALL, t_lazy('site-languages-all'))
+] + settings.LANGUAGES
+
+
 class FilterFormMixin(object):
     """
     Mixin for forms that act as filters.
@@ -238,6 +245,8 @@ class VerseSetSearchForm(FilterFormMixin, forms.Form):
                               required=False,
                               widget=widgets.RadioSelect
                               )
+    language_code = forms.ChoiceField(choices=FILTER_LANGUAGES,
+                                      label=t_lazy('versesets-language'))
 
 
 LEADERBOARD_WHEN_ALL_TIME = 'alltime'
@@ -265,13 +274,6 @@ class GroupWallFilterForm(FilterFormMixin, forms.Form):
                               label=t_lazy('groups-messages-order'),
                               required=False,
                               widget=widgets.RadioSelect)
-
-
-FILTER_LANGUAGES_ALL = 'all'
-
-FILTER_LANGUAGES = [
-    (FILTER_LANGUAGES_ALL, t_lazy('site-languages-all'))
-] + settings.LANGUAGES
 
 
 class GroupFilterForm(FilterFormMixin, forms.Form):
