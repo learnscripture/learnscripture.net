@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
+import operator
 import urllib.parse
 from datetime import timedelta
+from functools import reduce
 
 import djpjax
 import furl
@@ -533,7 +535,8 @@ def choose(request):
     # so is missing here.
 
     active_section = None
-    verseset_search_form = VerseSetSearchForm.from_request_data(request.GET)
+    verseset_search_form = VerseSetSearchForm.from_request_data(
+        request.GET, defaults={'language_code': request.LANGUAGE_CODE})
     if any(k in request.GET for k in VerseSetSearchForm.base_fields.keys()):
         active_section = "verseset"
     if 'from_item' in request.GET:
@@ -547,9 +550,22 @@ def choose(request):
     verse_sets = verse_sets.order_by('name').prefetch_related('verse_choices')
 
     query = verseset_search_form.cleaned_data['query'].strip()
+    language_code = verseset_search_form.cleaned_data['language_code']
     if query:
-        language_code = default_bible_version.language_code
-        verse_sets = VerseSet.objects.search(language_code, verse_sets, query)
+        if language_code == FILTER_LANGUAGES_ALL:
+            query_language_codes = settings.LANGUAGE_CODES
+        else:
+            query_language_codes = [language_code]
+
+        search_query_initial = verse_sets
+        searched_qs = [
+            VerseSet.objects.search(lc, search_query_initial, query)
+            for lc in query_language_codes
+        ]
+        verse_sets = reduce(operator.or_, searched_qs)
+
+    if language_code != FILTER_LANGUAGES_ALL:
+        verse_sets = verse_sets.filter(language_code=language_code)
 
     set_type = verseset_search_form.cleaned_data['set_type']
     if set_type != VERSE_SET_TYPE_ALL:
@@ -1386,7 +1402,7 @@ def groups(request):
     groups = Group.objects.visible_for_account(account).order_by('name')
     filter_form = GroupFilterForm.from_request_data(
         request.GET,
-        defaults={'language_code': account.default_language_code},
+        defaults={'language_code': request.LANGUAGE_CODE},
     )
     query = filter_form.cleaned_data['query'].strip()
     if query:

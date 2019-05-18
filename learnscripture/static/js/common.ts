@@ -148,7 +148,7 @@ $(document).ready(function() {
             });
         });
 
-        $form.find("input").on('change', function(ev) {
+        $form.find("input,select").on('change', function(ev) {
             $form.submit();
         })
     });
