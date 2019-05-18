@@ -33,7 +33,7 @@ contact-form-page-top-html =
 
     <p>Yukarıda cevaplanan soruları içeren iletilere cevap veremeyeceğız.</p>
 
-    <p>Sonraki adımınız <a href="/groups/website-help/">Site Yardım Grubu</a>nda bulunan dier kullanıcılarından yardım talep etmektir.</p>
+    <p>Sonraki adımınız <a href="/groups/website-help/">Site Yardım Grubu</a>nda bulunan diğer kullanıcılarından yardım talep etmektir.</p>
 
     <p>Sorunuz bunlar dışında olursa, size cevap yazmaya çabalarız. Ancak,
     <b>LearnScripture.net sitesine gönüllüler bakmaktadır</b>.
