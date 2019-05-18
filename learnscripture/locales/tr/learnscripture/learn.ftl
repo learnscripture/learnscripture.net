@@ -123,7 +123,7 @@ learn-choose-from-options-test-html = <b>TEST:</b> Hafızanızı test edin! Her 
 # Test result.
 # $score is the accuracy as a percentage.
 # $comment is one of the comments below.
-learn-test-result-html = <b>SONUÇLAR</b> <b>{ NUMBER($score) }</b> puan aldınız - { $comment }
+learn-test-result-html = <b>SONUÇLAR:</b> <b>{ NUMBER($score) }</b> puan aldınız - { $comment }
 
 # Comment for better than 98%
 learn-test-result-awesome = mükemmel!
