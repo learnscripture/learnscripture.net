@@ -4,6 +4,9 @@
 
 user-stats-page-description = Stats for { $username } on LearnScripture.net - the fun, easy and social way to memorize the Bible online
 
+# Displayed in title if the user is the webmaster
+user-stats-is-webmaster = Webmaster
+
 # Sub title for general information about the user
 user-stats-user-information-title = User information
 

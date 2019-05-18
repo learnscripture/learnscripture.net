@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load ftl %}
+{% load form_rendering %}
 
 {% block content %}
   {% url 'create_group' as create_group_url %}
@@ -18,6 +19,7 @@
         <button type="submit" class="btn primary" id="id-search-btn">{% ftlmsg 'groups-search-button' %}</button>
       </div>
     </div>
+    {{ filter_form.language_code|render_field }}
   </form>
 
   <div id="id-groups-results">

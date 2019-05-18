@@ -12,6 +12,9 @@ versesets-additional-info = Additional info
 # Caption for the 'public' field when creating a Verse Set
 versesets-public = Make public (can't be undone)
 
+# Caption for the 'language' field of verse sets.
+versesets-language = Language
+
 ## Searching and filtering verse sets.
 
 # Caption for the search input box for searching for verse sets
@@ -37,6 +40,8 @@ versesets-order-most-popular-first = Most popular first
 
 # Caption for ordering verse sets by newest first
 versesets-order-newest-first = Newest first
+
+
 
 ## Viewing a verse set.
 

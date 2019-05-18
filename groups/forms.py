@@ -22,7 +22,14 @@ class EditGroupForm(forms.ModelForm):
 
     class Meta:
         model = Group
-        fields = ('name', 'description', 'public', 'open', 'invited_users')
+        fields = [
+            'name',
+            'description',
+            'language_code',
+            'public',
+            'open',
+            'invited_users'
+        ]
 
     def clean_name(self):
         name = self.cleaned_data['name']

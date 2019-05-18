@@ -101,11 +101,11 @@ dashboard-learn-continue-learning-button = Çalışmaya devam et
 
 # Message displayed for a passage set that is in the user's queue
 # for learning (but that haven't started yet)
-dashboard-passage-queued = You've queued this passage for learning.
+dashboard-passage-queued = Çalışmanız için bu kısım sıralandı.
 
 # Message on a passage verse set indicating the number of items learnt
 # and still not started.
-dashboard-passages-youve-seen-verses ={ $tested_total } ayet çalışmış bulunyorsunuz.
+dashboard-passages-youve-seen-verses = { $tested_total } ayet çalışmış bulunyorsunuz.
      Çalışmanız gereken { $untested_total } ayet kaldı.
 
 # Message on a passage verse set indicating the number of items learnt

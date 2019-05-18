@@ -2,11 +2,11 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
-from django.utils.html import format_html
 
 from accounts.models import Account
 from awards.signals import new_award
 from learnscripture.datastructures import make_class_enum
+from learnscripture.ftl_bundles import t, t_lazy
 from scores.models import ScoreReason
 
 # In this module we have:
@@ -74,12 +74,13 @@ class AwardLogic(object):
 
     def short_description(self):
         if self.level is AnyLevel:
-            return self.title
+            return str(self.title)
         else:
             if self.has_levels:
-                return '%s - level %d' % (self.title, self.level)
+                return t('awards-level-title',
+                         dict(name=str(self.title), level=self.level))
             else:
-                return self.title
+                return str(self.title)
 
     def image_small(self):
         n = AwardType.name_for_value[self.award_type]
@@ -228,14 +229,10 @@ class StudentAward(LearningAward):
 
     def full_description(self):
         if self.level is AnyLevel:
-            return "Awarded for starting to learn verses. Level 1 is for 1 verse, "\
-                "going up to level 9 for the whole Bible."
-        elif self.level == 1:
-            return "Learning at least one verse"
-        elif self.level == 9:
-            return "Learning the whole bible!"
-        else:
-            return "Learning at least %s verses" % self.count
+            return t('awards-student-award-general-description')
+        if self.level == 9:
+            return t('awards-student-award-level-9-description')
+        return t('awards-student-award-level-n-description', dict(verse_count=self.count))
 
 
 class MasterAward(LearningAward):
@@ -243,16 +240,10 @@ class MasterAward(LearningAward):
 
     def full_description(self):
         if self.level is AnyLevel:
-            return "Awarded for fully learning verses (5 stars). This takes about "\
-                "a year, to make sure verses are really in there for good! "\
-                "Level 1 is for 1 verse, "\
-                "going up to level 9 for the whole Bible."
-        elif self.level == 1:
-            return "Finished learning at least one verse"
-        elif self.level == 9:
-            return "Finished learning the whole bible!"
-        else:
-            return "Finished learning at least %s verses" % self.count
+            return t('awards-master-award-general-description')
+        if self.level == 9:
+            return t('awards-master-award-level-9-description')
+        return t('awards-master-award-level-n-description', dict(verse_count=self.count))
 
 
 class SharerAward(CountBasedAward):
@@ -267,12 +258,8 @@ class SharerAward(CountBasedAward):
 
     def full_description(self):
         if self.level is AnyLevel:
-            return "Awarded for creating public verse sets (selections)."\
-                " Levels go from 1 for 1 verse set, to level 5 for 20 verse sets."
-        elif self.count == 1:
-            return "Created a public selection verse set"
-        else:
-            return "Created %d public selection verse sets" % self.count
+            return t('awards-sharer-award-general-description')
+        return t('awards-sharer-award-level-n-description', dict(count=self.count))
 
 
 class TrendSetterAward(CountBasedAward):
@@ -288,10 +275,9 @@ class TrendSetterAward(CountBasedAward):
 
     def full_description(self):
         if self.level is AnyLevel:
-            return "Awarded for creating verse sets that other people actually use."\
-                " Level 1 is given when 5 other people are using one of your verse sets."
+            return t('awards-trend-setter-award-level-general-description')
 
-        return "Verse sets created by this user have been used by others at least %d times" % self.count
+        return t('awards-trend-setter-award-level-n-description', dict(count=self.count))
 
 
 class AceAward(CountBasedAward):
@@ -301,14 +287,13 @@ class AceAward(CountBasedAward):
 
     def full_description(self):
         if self.level is AnyLevel:
-            return "Awarded for getting 100% in a test. Level 1 is for getting it once, "\
-                "level 2 if you do it twice in a row, level 3 for 4 times in a row, "\
-                "level 4 for 8 times in a row etc."
+            return t('awards-ace-award-general-description')
 
         if self.count == 1:
-            return "Achieved 100% in a test"
+            return t('awards-ace-award-level-1-description')
         else:
-            return "Achieved 100%% in a test %d times in a row" % self.count
+            return t('awards-ace-award-level-n-description',
+                     dict(count=self.count))
 
 
 class RecruiterAward(CountBasedAward):
@@ -327,18 +312,9 @@ class RecruiterAward(CountBasedAward):
     def full_description(self):
         url = reverse('referral_program')
         if self.level is AnyLevel:
-            return format_html("Awarded for getting other people to sign up using our "
-                               "<a href='{0}'>referral program</a>. "
-                               "Level 1 is for one referral, and is worth 20,000 points.",
-                               url)
-        elif self.count == 1:
-            return format_html("Got one person to sign up to LearnScripture.net "
-                               "through our <a href='{0}'>referral program</a>",
-                               url)
-        else:
-            return format_html("Got {0} people to sign up to LearnScripture.net "
-                               "through our <a href='{1}'>referral program</a>",
-                               self.count, url)
+            return t('awards-recruiter-award-general-description-html')
+        return t('awards-recruiter-award-level-n-description-html',
+                 dict(url=url, count=self.count))
 
 
 class ReigningWeeklyChampion(SingleLevelAward):
@@ -391,9 +367,9 @@ class AddictAward(SingleLevelAward):
 
     def full_description(self):
         if self.level is AnyLevel:
-            return "Awarded to users who've done verse tests during every hour on the clock."
+            return t('awards-addict-award-general-description')
         else:
-            return "Done verse tests during every hour on the clock"
+            return t('awards-addict-award-level-all-description')
 
 
 class OrganizerAward(CountBasedAward):
@@ -408,10 +384,9 @@ class OrganizerAward(CountBasedAward):
 
     def full_description(self):
         if self.level is AnyLevel:
-            return "Awarded for getting people to together in groups. First level "\
-                "requires 5 people to join one of your groups."
+            return t('awards-organizer-award-general-description')
         else:
-            return "Created groups that are used by at least %d people" % self.count
+            return t('awards-organizer-award-level-n-description', dict(count=self.count))
 
 
 class ConsistentLearnerAward(TimeBasedAward):
@@ -444,27 +419,25 @@ class ConsistentLearnerAward(TimeBasedAward):
 
     def full_description(self):
         if self.level is AnyLevel:
-            return ("Awarded for starting to learn a new verse every day without gaps, "
-                    "over a period of time. Note that you have to keep learning the verses "
-                    "for them to be counted. Days are defined by the UTC time zone."
-                    " Level 1 is for 1 week, level 9 is for 2 years.")
+            return t('awards-consistent-learner-award-general-description')
         else:
-            return "Started learning a new verse every day for %s" % self.FRIENDLY_DAYS[self.level]
+            # awards-consistent-learner-award-level-1-description etc
+            return t('awards-consistent-learner-award-level-{0}-description'.format(self.level))
 
 
 AwardType = make_class_enum(
     'AwardType',
-    [('STUDENT', 'Student', StudentAward),
-     ('MASTER', 'Master', MasterAward),
-     ('SHARER', 'Sharer', SharerAward),
-     ('TREND_SETTER', 'Trend setter', TrendSetterAward),
-     ('ACE', 'Ace', AceAward),
-     ('RECRUITER', 'Recruiter', RecruiterAward),
+    [('STUDENT', t_lazy('awards-student-award-name'), StudentAward),
+     ('MASTER', t_lazy('awards-master-award-name'), MasterAward),
+     ('SHARER', t_lazy('awards-sharer-award-name'), SharerAward),
+     ('TREND_SETTER', t_lazy('awards-trend-setter-award-name'), TrendSetterAward),
+     ('ACE', t_lazy('awards-ace-award-name'), AceAward),
+     ('RECRUITER', t_lazy('awards-recruiter-award-name'), RecruiterAward),
      ('WEEKLY_CHAMPION', 'Weekly champion', WeeklyChampion),  # Removed
      ('REIGNING_WEEKLY_CHAMPION', 'Reigning weekly champion', ReigningWeeklyChampion),  # Removed
-     ('ADDICT', 'Addict', AddictAward),
-     ('ORGANIZER', 'Organizer', OrganizerAward),
-     ('CONSISTENT_LEARNER', 'Consistent learner', ConsistentLearnerAward),
+     ('ADDICT', t_lazy('awards-addict-award-name'), AddictAward),
+     ('ORGANIZER', t_lazy('awards-organizer-award-name'), OrganizerAward),
+     ('CONSISTENT_LEARNER', t_lazy('awards-consistent-learner-award-name'), ConsistentLearnerAward),
      ])
 
 
@@ -476,7 +449,10 @@ class Award(models.Model):
     created = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return '%s level %d award for %s' % (self.get_award_type_display(), self.level, self.account.username)
+        return t('awards-level-awarded-for-user',
+                 dict(award_name=str(self.get_award_type_display()),
+                      award_level=self.level,
+                      username=self.account.username))
 
     @property
     def award_class(self):
