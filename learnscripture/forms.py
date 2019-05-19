@@ -246,6 +246,7 @@ class VerseSetSearchForm(FilterFormMixin, forms.Form):
                               widget=widgets.RadioSelect
                               )
     language_code = forms.ChoiceField(choices=FILTER_LANGUAGES,
+                                      initial=settings.LANGUAGE_CODE,
                                       label=t_lazy('versesets-language'))
 
 

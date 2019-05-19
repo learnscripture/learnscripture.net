@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import logging
 import math
+import operator
 import random
 from collections import defaultdict
+from functools import reduce
 
 from autoslug import AutoSlugField
 from django.contrib.postgres.fields import JSONField
@@ -528,7 +530,7 @@ class QAPair(models.Model):
         return self.catechism
 
 
-class VerseSetManager(models.Manager):
+class VerseSetQuerySet(models.QuerySet):
     def visible_for_account(self, account):
         qs = self.public()
         if account is None or not account.is_hellbanned:
@@ -540,8 +542,75 @@ class VerseSetManager(models.Manager):
         return qs
 
     def public(self):
-        return self.get_queryset().filter(public=True)
+        return self.filter(public=True)
 
+    def search(self, language_codes, query, default_language_code=None):
+        results = []
+        # If we are searching multiple languages, but using a verse ref, we will
+        # need to parse the verse ref in the language that matches e.g.
+        # "Yarat 1:1" should parse to 'BOOK0 1:1', and we then search all
+        # VerseSets in all languages that match.
+        parsed_refs = {}
+        for language_code in language_codes:
+            # Does the query look like a Bible reference?
+            try:
+                parsed_ref = parse_unvalidated_localized_reference(
+                    language_code,
+                    query,
+                    allow_whole_book=False,
+                    allow_whole_chapter=True)
+            except InvalidVerseReference:
+                # For invalid verse references, it looks like a verse ref,
+                # but refers to something that doesn't exist e.g. "Gen 73:1".
+                # It should get no results.
+                continue
+            if parsed_ref is not None:
+                parsed_refs[language_code] = parsed_ref
+
+        if len(parsed_refs) == 0:
+            fallback_parsed_ref = None
+        else:
+            try:
+                fallback_parsed_ref = parsed_refs[default_language_code]
+            except KeyError:
+                # We have potentially multiple parsed references, none of them
+                # in the default language, and potentially all of them referring
+                # to different verses. Can't do much here so just pick one.
+                fallback_parsed_ref = list(parsed_refs.values())[0]
+
+        for language_code in language_codes:
+            initial_verse_sets = self.filter(language_code=language_code)
+            parsed_ref = parsed_refs.get(language_code, fallback_parsed_ref)
+            if parsed_ref is not None:
+                if parsed_ref.start_verse is None:
+                    # To find a whole chapter, look for sets containing first verse.
+                    parsed_ref.start_verse = 1
+                    # But limit to only passage types, otherwise we'll get false
+                    # positives for selection sets that contain other verses
+                    # from that chapter.
+                    set_types = [
+                        VerseSetType.PASSAGE
+                    ]
+                else:
+                    set_types = [
+                        VerseSetType.SELECTION,
+                        VerseSetType.PASSAGE
+                    ]
+
+                results.append(initial_verse_sets.filter(
+                    set_type__in=set_types,
+                    verse_choices__internal_reference=parsed_ref.to_internal().canonical_form())
+                )
+
+            else:
+                results.append(initial_verse_sets.filter(name__icontains=query))
+        if results:
+            return reduce(operator.or_, results)
+        else:
+            return self.none()
+
+
+class VerseSetManager(models.Manager.from_queryset(VerseSetQuerySet)):
     def popularity_for_sets(self, ids, ignoring_account_ids):
         """
         Gets the 'popularity' for a group of sets, using actual usage.
@@ -555,37 +624,6 @@ class VerseSetManager(models.Manager):
                 .filter(verse_set__in=ids)
                 .aggregate(count=models.Count('for_identity', distinct=True))
                 ['count'])
-
-    def search(self, language_code, verse_sets, query):
-        # Does the query look like a Bible reference?
-        try:
-            parsed_ref = parse_unvalidated_localized_reference(
-                language_code,
-                query,
-                allow_whole_book=False,
-                allow_whole_chapter=True)
-        except InvalidVerseReference:
-            return verse_sets.none()
-
-        if parsed_ref is not None:
-            set_types = [
-                VerseSetType.SELECTION,
-                VerseSetType.PASSAGE
-            ]
-            if parsed_ref.start_verse is None:
-                # To find a whole chapter, look for sets containing first verse.
-                parsed_ref.start_verse = 1
-                # But limit to only passage types
-                set_types = [
-                    VerseSetType.PASSAGE
-                ]
-
-            return verse_sets.filter(
-                set_type__in=set_types,
-                verse_choices__internal_reference=parsed_ref.to_internal().canonical_form())
-
-        else:
-            return verse_sets.filter(name__icontains=query)
 
 
 class VerseSet(models.Model):
