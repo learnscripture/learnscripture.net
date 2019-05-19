@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-import operator
 import urllib.parse
 from datetime import timedelta
-from functools import reduce
 
 import djpjax
 import furl
@@ -552,17 +550,8 @@ def choose(request):
     query = verseset_search_form.cleaned_data['query'].strip()
     language_code = verseset_search_form.cleaned_data['language_code']
     if query:
-        if language_code == FILTER_LANGUAGES_ALL:
-            query_language_codes = settings.LANGUAGE_CODES
-        else:
-            query_language_codes = [language_code]
-
-        search_query_initial = verse_sets
-        searched_qs = [
-            VerseSet.objects.search(lc, search_query_initial, query)
-            for lc in query_language_codes
-        ]
-        verse_sets = reduce(operator.or_, searched_qs)
+        query_language_codes = settings.LANGUAGE_CODES if language_code == FILTER_LANGUAGES_ALL else [language_code]
+        verse_sets = verse_sets.search(query_language_codes, query)
 
     if language_code != FILTER_LANGUAGES_ALL:
         verse_sets = verse_sets.filter(language_code=language_code)
@@ -581,7 +570,7 @@ def choose(request):
         # Does the query look like a Bible reference?
         try:
             parsed_ref = parse_unvalidated_localized_reference(
-                language_code,
+                request.LANGUAGE_CODE,
                 query,
                 allow_whole_book=False,
                 allow_whole_chapter=True)

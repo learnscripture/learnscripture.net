@@ -39,9 +39,8 @@ class SearchTests(SearchTestsMixin, TestBase):
                                 set_type=VerseSetType.SELECTION,
                                 created_by=self.account)
 
-        results = VerseSet.objects.search(LANGUAGE_CODE_EN,
-                                          VerseSet.objects.all(),
-                                          "Stupid")
+        results = VerseSet.objects.all().search([LANGUAGE_CODE_EN],
+                                                "Stupid")
         self.assertEqual(len(results), 1)
         self.assertIn("For stupid people", (v.name for v in results))
 
@@ -58,18 +57,16 @@ class SearchTests(SearchTestsMixin, TestBase):
             "BOOK41 3:16",
         ])
 
-        results = VerseSet.objects.search(LANGUAGE_CODE_EN,
-                                          VerseSet.objects.all(),
-                                          "Gen 1:3")
+        results = VerseSet.objects.all().search([LANGUAGE_CODE_EN],
+                                                "Gen 1:3")
         self.assertEqual(len(results), 0)
 
-        results = VerseSet.objects.search(LANGUAGE_CODE_EN,
-                                          VerseSet.objects.all(),
-                                          "Gen 1:1")
+        results = VerseSet.objects.all().search([LANGUAGE_CODE_EN],
+                                                "Gen 1:1")
         self.assertEqual(len(results), 1)
         self.assertEqual(list(results), [vs1])
 
-    def test_cross_langauge_search(self):
+    def test_multi_language_search(self):
         vs1 = VerseSet.objects.create(name="Psalm 23",
                                       slug="psalm-23",
                                       public=True,
@@ -84,20 +81,46 @@ class SearchTests(SearchTestsMixin, TestBase):
             "BOOK18 23:5",
             "BOOK18 23:6",
         ])
-        results = VerseSet.objects.search(LANGUAGE_CODE_EN,
-                                          VerseSet.objects.all(),
-                                          "Psalm 23")
+
+        vs2 = VerseSet.objects.create(name="Mezmur 23",
+                                      slug="mezmur-23",
+                                      public=True,
+                                      language_code='tr',
+                                      set_type=VerseSetType.PASSAGE,
+                                      created_by=self.account)
+        vs2.set_verse_choices([
+            "BOOK18 23:1",
+            "BOOK18 23:2",
+            "BOOK18 23:3",
+            "BOOK18 23:4",
+            "BOOK18 23:5",
+            "BOOK18 23:6",
+        ])
+
+        # Search verse refs single language
+        results = VerseSet.objects.all().search([LANGUAGE_CODE_EN],
+                                                "Psalm 23")
         self.assertEqual(list(results), [vs1])
 
-        results2 = VerseSet.objects.search(LANGUAGE_CODE_TR,
-                                           VerseSet.objects.all(),
-                                           "Mezmur 23")
-        self.assertEqual(list(results2), [vs1])
+        results2 = VerseSet.objects.all().search([LANGUAGE_CODE_TR],
+                                                 "Mezmur 23")
+        self.assertEqual(list(results2), [vs2])
 
-        results2 = VerseSet.objects.search(LANGUAGE_CODE_TR,
-                                           VerseSet.objects.all(),
-                                           "Mz 23")
-        self.assertEqual(list(results2), [vs1])
+        # Search verse refs multiple languages
+        results3 = VerseSet.objects.all().search([LANGUAGE_CODE_EN, LANGUAGE_CODE_TR],
+                                                 "Mz 23")
+        self.assertEqual(set(results3), set([vs1, vs2]))
+
+        # ... with default_language_code that matches verse refs:
+        results4 = VerseSet.objects.all().search([LANGUAGE_CODE_EN, LANGUAGE_CODE_TR],
+                                                 "Mz 23", default_language_code='tr')
+        self.assertEqual(set(results4), set([vs1, vs2]))
+
+        # ... and one that doesn't. Here the logic should fall back to parsing
+        # 'Mz 23' as Turkish, because 'Mz 23' doesn't parse as a bible ref in English.
+        results5 = VerseSet.objects.all().search([LANGUAGE_CODE_EN, LANGUAGE_CODE_TR],
+                                                 "Mz 23", default_language_code='en')
+        self.assertEqual(set(results5), set([vs1, vs2]))
 
 
 class QuickFindTests(SearchTestsMixin, TestBase):
