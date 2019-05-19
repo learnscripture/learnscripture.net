@@ -30,7 +30,9 @@
 
           {{ verseset_search_form.set_type|render_field }}
           {{ verseset_search_form.order|render_field }}
-          {{ verseset_search_form.language_code|render_field }}
+          {% if request.i18n_options_enabled %}
+            {{ verseset_search_form.language_code|render_field }}
+          {% endif %}
 
         </form>
 
