@@ -90,6 +90,16 @@ def pwa_tracker_middleware(get_response):
     return middleware
 
 
+def feature_flipper_middleware(get_response):
+    def middleware(request):
+        try:
+            request.i18n_options_enabled = request.identity.i18n_options_enabled
+        except AttributeError:
+            request.i18n_options_enabled = False
+        return get_response(request)
+    return middleware
+
+
 def debug_middleware(get_response):
     from learnscripture import session
     from accounts.models import Account

@@ -548,7 +548,12 @@ def choose(request):
     verse_sets = verse_sets.order_by('name').prefetch_related('verse_choices')
 
     query = verseset_search_form.cleaned_data['query'].strip()
-    language_code = verseset_search_form.cleaned_data['language_code']
+    if request.i18n_options_enabled:
+        language_code = verseset_search_form.cleaned_data['language_code']
+    else:
+        # Since they don't have UI to select anything, allow them to see everything.
+        language_code = FILTER_LANGUAGES_ALL
+
     if query:
         query_language_codes = settings.LANGUAGE_CODES if language_code == FILTER_LANGUAGES_ALL else [language_code]
         verse_sets = verse_sets.search(query_language_codes, query)
