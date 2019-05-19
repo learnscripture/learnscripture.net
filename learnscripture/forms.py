@@ -39,10 +39,10 @@ class FilterFormMixin(object):
 
         # First check on a different instance.
         checker_instance = cls(data=data)
-        # Removed anything that doesn't validate
+        # Remove anything that doesn't validate
         if not checker_instance.is_valid():
             for k in checker_instance.errors.as_data().keys():
-                data[name] = initial_data[name]
+                data[k] = initial_data[k]
 
         instance = cls(data=data)
         # Immediately run is_valid, so that we can use cleaned_data
