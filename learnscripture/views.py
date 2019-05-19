@@ -575,7 +575,7 @@ def choose(request):
         # Does the query look like a Bible reference?
         try:
             parsed_ref = parse_unvalidated_localized_reference(
-                request.LANGUAGE_CODE,
+                language_code if language_code != FILTER_LANGUAGES_ALL else request.LANGUAGE_CODE,
                 query,
                 allow_whole_book=False,
                 allow_whole_chapter=True)
