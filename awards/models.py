@@ -313,8 +313,12 @@ class RecruiterAward(CountBasedAward):
         url = reverse('referral_program')
         if self.level is AnyLevel:
             return t('awards-recruiter-award-general-description-html')
-        return t('awards-recruiter-award-level-n-description-html',
-                 dict(url=url, count=self.count))
+        try:
+            return t('awards-recruiter-award-level-n-description-html',
+                     dict(url=url, count=self.count))
+        except UnboundLocalError:
+            # quick fix so whole page is not dead
+            return '<error>'
 
 
 class ReigningWeeklyChampion(SingleLevelAward):
