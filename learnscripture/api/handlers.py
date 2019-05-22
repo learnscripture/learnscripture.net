@@ -487,15 +487,13 @@ class VerseFind(ApiView):
         }
 
 
-def duplicate_passage_check(request, start_internal_reference, end_internal_reference):
-    language_code = default_bible_version_for_request(request).language_code
+def duplicate_passage_check(request, language_code, start_internal_reference, end_internal_reference):
     passage_id = make_verse_set_passage_id(start_internal_reference,
                                            end_internal_reference)
 
     verse_sets = verse_sets_visible_for_request(request)
-    # This works if they have accepted the default name. If it doesn't have the
-    # default name, it might not be considered a true 'duplicate' anyway.
     verse_sets = (verse_sets.filter(set_type=VerseSetType.PASSAGE,
+                                    language_code=language_code,
                                     passage_id=passage_id)
                   .select_related('created_by')
                   )
