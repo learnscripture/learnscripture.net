@@ -14,6 +14,7 @@ versesets-public = Make public (can't be undone)
 
 # Caption for the 'language' field of verse sets.
 versesets-language = Language
+                   .help-text = The language used in the ‘{ versesets-name }’, ‘{ versesets-description}’ and ‘{ versesets-additional-info }’ fields.
 
 ## Searching and filtering verse sets.
 
