@@ -47,7 +47,7 @@ bibleverses-quick-find-example-passage-mode-html = örn: <b>Romalılar 8:28-39</
 
 # Example text for the search box when in general mode.
 # It shows an example verse reference and text you might search for
-bibleverses-quick-find-example-general-mode-html = örn: <b>Mat 28:19</b> veya <b>öğrenci yetiştir</b>
+bibleverses-quick-find-example-general-mode-html = örn: <b>Mat 28:19</b> veya <b>öğrenci yetiştirin</b>
 
 # Label for the drop down boxes for selecting a Bible verse
 bibleverses-select-passage-label = Seç:
