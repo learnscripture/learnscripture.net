@@ -8,7 +8,6 @@ from accounts.models import Account
 from bibleverses.models import TextType, VerseSetType
 from learnscripture.ftl_bundles import t, t_lazy
 
-
 FILTER_LANGUAGES_ALL = 'all'
 
 FILTER_LANGUAGES = [
