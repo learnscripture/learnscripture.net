@@ -649,6 +649,7 @@ class VerseSet(models.Model):
 
     language_code = models.CharField(t_lazy('versesets-language'),
                                      max_length=2, blank=False,
+                                     help_text=t_lazy('versesets-language.help-text'),
                                      choices=LANGUAGE_CHOICES)
 
     objects = VerseSetManager()

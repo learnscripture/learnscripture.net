@@ -28,7 +28,7 @@ from accounts.forms import AccountDetailsForm, PreferencesForm
 from accounts.models import Account, HeatmapStatsType, Identity
 from awards.models import AnyLevel, Award, AwardType
 from bibleverses.books import BIBLE_BOOK_COUNT, get_bible_book_name
-from bibleverses.forms import VerseSetForm
+from bibleverses.forms import VerseSetForm, VerseSetFormAutoLanguage
 from bibleverses.languages import LANGUAGE_CODE_INTERNAL, LANGUAGES
 from bibleverses.models import (MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, TextType, TextVersion, VerseSet,
                                 VerseSetType, get_passage_sections, is_continuous_set)
@@ -814,6 +814,10 @@ def edit_set(request, slug=None):
 
 @require_account_with_redirect
 def create_or_edit_set(request, set_type=None, slug=None):
+    if request.i18n_options_enabled:
+        form_class = VerseSetForm
+    else:
+        form_class = VerseSetFormAutoLanguage
 
     version = request.identity.default_bible_version
     language_code = version.language_code
@@ -844,7 +848,7 @@ def create_or_edit_set(request, set_type=None, slug=None):
     if request.method == 'POST':
         orig_verse_set_public = False if verse_set is None else verse_set.public
 
-        form = VerseSetForm(request.POST, instance=verse_set)
+        form = form_class(request.POST, instance=verse_set)
         internal_reference_list_raw = [
             i for i in request.POST.get('internal_reference_list', '').split('|')
             if i
@@ -890,7 +894,8 @@ def create_or_edit_set(request, set_type=None, slug=None):
             verse_set.set_type = set_type
             if verse_set.created_by_id is None:
                 verse_set.created_by = request.identity.account
-                verse_set.language_code = version.language_code
+                if form_class is VerseSetFormAutoLanguage:
+                    verse_set.language_code = version.language_code
             verse_set.breaks = breaks
 
             if orig_verse_set_public:
@@ -919,8 +924,11 @@ def create_or_edit_set(request, set_type=None, slug=None):
                 localized_reference = parsed_ref.translate_to(language_code).canonical_form()
                 initial['name'] = localized_reference
                 c['initial_localized_reference'] = localized_reference
+        if verse_set is None:
+            if form_class is VerseSetForm:
+                initial['language_code'] = language_code
 
-        form = VerseSetForm(instance=verse_set, initial=initial)
+        form = form_class(instance=verse_set, initial=initial)
         if verse_set is not None:
             localized_reference_list = [vc.get_localized_reference(language_code)
                                         for vc in verse_set.verse_choices.all()]

@@ -40,6 +40,7 @@ var addPassage = function(results) {
     var currentName = (<string>$('#id_name').val()).trim();
     if (currentName === "" || currentName === previousPassageRef) {
         $('#id_name').val(simplifiedRef);
+        $('#id_language_code').val(parsedRef.language_code);
     }
     previousPassageRef = simplifiedRef;
 };

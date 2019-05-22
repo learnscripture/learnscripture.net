@@ -7,7 +7,7 @@ from learnscripture.ftl_bundles import t
 class VerseSetForm(forms.ModelForm):
     class Meta:
         model = VerseSet
-        fields = ('name', 'description', 'additional_info', 'public')
+        fields = ['name', 'description', 'additional_info', 'public', 'language_code']
 
     def clean_name(self):
         name = self.cleaned_data['name']
@@ -17,7 +17,14 @@ class VerseSetForm(forms.ModelForm):
         return name
 
 
+class VerseSetFormAutoLanguage(VerseSetForm):
+    class Meta:
+        model = VerseSet
+        fields = ['name', 'description', 'additional_info', 'public']
+
+
 for n in ['description', 'additional_info']:
-    f = VerseSetForm.base_fields[n].widget.attrs
-    del f['cols']
-    f['rows'] = 3
+    for form in [VerseSetForm, VerseSetFormAutoLanguage]:
+        f = form.base_fields[n].widget.attrs
+        del f['cols']
+        f['rows'] = 3

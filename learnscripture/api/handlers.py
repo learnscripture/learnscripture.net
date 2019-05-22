@@ -473,6 +473,7 @@ class VerseFind(ApiView):
 
         if passage_mode and len(results) == 1:
             duplicate_check_html = duplicate_passage_check(request,
+                                                           version.language_code,
                                                            results[0].verses[0].internal_reference,
                                                            results[0].verses[-1].internal_reference)
         else:
