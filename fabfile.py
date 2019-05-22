@@ -1,3 +1,4 @@
+
 """
 fabfile for deploying and managing LearnScripture.net
 """
@@ -633,9 +634,11 @@ webpack_stats_file = "./webpack-stats.deploy.json"
 def check_ftl():
     import django
     django.setup()
-    from django.conf import settings
-    from learnscripture.ftl_bundles import main
-    errors = main.check_all([code for code, _ in settings.LANGUAGES])
+    # Disbled for now until released version of django-ftl has this feature
+    # from django.conf import settings
+    # from learnscripture.ftl_bundles import main
+    # errors = main.check_all([code for code, _ in settings.LANGUAGES])
+    errors = []
     if errors:
         print("Errors in FTL files:")
         print(''.join(str(e) for e in errors))
