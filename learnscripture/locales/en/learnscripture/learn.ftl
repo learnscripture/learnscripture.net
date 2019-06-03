@@ -139,14 +139,8 @@ learn-test-result-very-good = very good.
 # Comment for better than 85%
 learn-test-result-good = good.
 
-# Comment for better than 80%
-learn-test-result-ok = OK.
-
-# Comment for better than 70%
-learn-test-result-could-do-better = could do better!
-
-# Comment for less than 70%
-learn-test-result-fallback = let's try again!
+# Comment for less than 85%, or when we are suggesting to try again.
+learn-test-result-try-again = let's try again!
 
 
 # Shows the progress of the verse as a percentage

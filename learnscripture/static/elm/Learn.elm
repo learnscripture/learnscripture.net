@@ -2695,13 +2695,11 @@ resultComment accuracy locale =
             , ( 0.96, T.learnTestResultExcellent )
             , ( 0.93, T.learnTestResultVeryGood )
             , ( accuracyDefaultMorePracticeLevel, T.learnTestResultGood )
-            , ( 0.8, T.learnTestResultOk )
-            , ( 0.7, T.learnTestResultCouldDoBetter )
             ]
     in
-    case List.head <| List.filter (\( p, c ) -> accuracy > p) pairs of
+    case List.head <| List.filter (\( p, c ) -> accuracy >= p) pairs of
         Nothing ->
-            T.learnTestResultFallback locale ()
+            T.learnTestResultTryAgain locale ()
 
         Just ( p, c ) ->
             c locale ()
