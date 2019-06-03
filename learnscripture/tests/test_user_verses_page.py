@@ -38,7 +38,7 @@ class UserVersesPageTests(RequireExampleVerseSetsMixin, FullBrowserTest):
 
         # 'Practise verse' button
         self.assertEqual(self.get_element_text('button[name="reviewverse"]'),
-                         "Practise verse")
+                         "Practise Psalm 23:2")
 
         # 'Practise section' button
         self.assertEqual(self.get_element_text('button[name="practisepassagesection"]'),
