@@ -51,13 +51,19 @@ user-verses-catechism-heading = Catechism
 # Heading in table for column showing the level/strength to which a verse has been learnt
 user-verses-strength-heading = Strength
 
-# Button for reviewing a verse (or catechism question).
-# $item_name is usually a verse reference (e.g. "Genesis 1:1")
-user-verses-review-item-button = Review { $item_name }
+# Button for reviewing a verse
+# $reference is a verse reference (e.g. "Genesis 1:1")
+user-verses-review-verse-button = Review { $reference }
 
-# Button for practising a verse (or catechism question)
-# $item_name is usually a verse reference (e.g. "Genesis 1:1")
-user-verses-practise-item-button = Practise { $item_name }
+# Button for reviewing a catechism question
+user-verses-review-question-button = Review question
+
+# Button for practising a verse.
+# $reference is a verse reference (e.g. "Genesis 1:1")
+user-verses-practise-verse-button = Practise { $reference }
+
+# Button for practising a catechism question
+user-verses-practise-question-button = Practise question
 
 # Button for reviewing a section of a passage
 user-verses-review-section-button = Review section: { $section_reference }

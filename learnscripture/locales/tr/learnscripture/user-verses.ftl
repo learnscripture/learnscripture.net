@@ -51,13 +51,19 @@ user-verses-catechism-heading = İlmihal
 # Heading in table for column showing the level/strength to which a verse has been learnt
 user-verses-strength-heading = Ayet bilinirliği
 
-# Button for reviewing a verse (or catechism question).
-# $item_name is usually a verse reference (e.g. "Genesis 1:1")
-user-verses-review-item-button = { $item_name } tekrarla
+# Button for reviewing a verse
+# $reference is a verse reference (e.g. "Genesis 1:1")
+user-verses-review-verse-button = { $reference } ayeti tekrarla
 
-# Button for practising a verse (or catechism question)
-# $item_name is usually a verse reference (e.g. "Genesis 1:1")
-user-verses-practise-item-button = { $item_name } çalış
+# Button for reviewing a catechism question
+user-verses-review-question-button = Bu soruyu tekrarla
+
+# Button for practising a verse
+# $reference_name is a verse reference (e.g. "Genesis 1:1")
+user-verses-practise-verse-button = { $reference } ayeti çalış
+
+# Button for practising a catechism question
+user-verses-practise-question-button = Bu soruyu çalış
 
 # Button for reviewing a section of a passage
 user-verses-review-section-button = { $section_reference } kısmı tekrarla
