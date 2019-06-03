@@ -906,10 +906,6 @@ class UserVerseStatus(models.Model):
         else:
             return self.version.short_name + " - " + self.localized_reference
 
-    @cached_property
-    def item_name(self):
-        return 'verse' if self.version.is_bible else 'question'
-
     @property
     def needs_testing(self):
         if hasattr(self, 'needs_testing_override'):

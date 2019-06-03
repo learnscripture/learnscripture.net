@@ -13,9 +13,17 @@
           {% spaceless %}
             <button type="submit" name="reviewverse" class="btn primary">
               {% if uvs.needs_testing %}
-                {% ftlmsg 'user-verses-review-item-button' item_name=uvs.item_name %}
+                {% if uvs.version.is_bible %}
+                  {% ftlmsg 'user-verses-review-verse-button' reference=uvs.localized_reference %}
+                {% else %}
+                  {% ftlmsg 'user-verses-review-question-button' %}
+                {% endif %}
               {% else %}
-                {% ftlmsg 'user-verses-practise-item-button' item_name=uvs.item_name %}
+                {% if uvs.version.is_bible %}
+                  {% ftlmsg 'user-verses-practise-verse-button' reference=uvs.localized_reference %}
+                {% else %}
+                  {% ftlmsg 'user-verses-practise-question-button' %}
+                {% endif %}
               {% endif %}
             </button>
           {% endspaceless %}
