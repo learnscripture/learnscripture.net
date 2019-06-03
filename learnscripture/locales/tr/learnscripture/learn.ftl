@@ -137,14 +137,8 @@ learn-test-result-very-good = çok iyi.
 # Comment for better than 85%
 learn-test-result-good = iyi.
 
-# Comment for better than 80%
-learn-test-result-ok = fena değil.
-
-# Comment for better than 70%
-learn-test-result-could-do-better = daha iyi olabilirdi!
-
-# Comment for less than 70%
-learn-test-result-fallback = tekrar deneyelim!
+# Comment for less than 85%, or when we are suggesting to try again.
+learn-test-result-try-again = tekrar deneyelim!
 
 
 # Shows the progress of the verse as a percentage
