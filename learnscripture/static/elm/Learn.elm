@@ -85,7 +85,7 @@ so that people don't notice the change so much.
 -}
 hardModeStrengthThreshold : Float
 hardModeStrengthThreshold =
-    0.46
+    0.43
 
 
 
