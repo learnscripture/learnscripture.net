@@ -78,14 +78,13 @@ port saveCallsToLocalStorage : ( JD.Value, String ) -> Cmd msg
 {- Constants -}
 
 
-{-| 10 days learning corresponds to a strength of 0.4. In the past
-this value was set to 0.6 for some reason, which is more like
-40 days learning. We are gradually reducing it towards 0.4
-so that people don't notice the change so much.
+{-| We are reducing this constant until it reaches a
+strength corresponding to a few days learning, to push people
+more earlier (but doing it gradually so people don't notice...)
 -}
 hardModeStrengthThreshold : Float
 hardModeStrengthThreshold =
-    0.43
+    0.4
 
 
 
