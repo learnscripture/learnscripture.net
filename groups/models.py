@@ -50,8 +50,8 @@ class Group(models.Model):
     created = models.DateTimeField(default=timezone.now)
     created_by = models.ForeignKey(Account, on_delete=models.CASCADE,
                                    related_name='groups_created')
-    public = models.BooleanField(default=False)
-    open = models.BooleanField(default=False)
+    public = models.BooleanField(t_lazy('groups-public-group'), default=False)
+    open = models.BooleanField(t_lazy('groups-open-group'), default=False)
     count_for_friendships = models.BooleanField(default=True)
     members = models.ManyToManyField(Account, through='Membership',
                                      related_name='groups')

@@ -1,7 +1,13 @@
 ## Groups.
 
+# Caption for the 'public' field when creating a Group
+groups-public-group = Herkese açık
+
 # Help text for the 'public' field when creating a Group
 groups-public-group-help-text = “Herkese açık” bir grubun içerikleri ve üye listesi siteye gelen herkes tarafından görülebilir. Bu ayar kaydedildikten sonra değiştirilemez.
+
+# Caption for the 'open' field when creating a Group
+groups-open-group = Açık
 
 # Help text for the 'open' field when creating a Group
 groups-open-group-help-text = İsteyen herkes bu gruba üye olabilir. Kapalı bir grubun üyeleri gruba davet edilmeli. “Açık” bir grup “Herkese açık” olarak tanımlanmalıdır.
