@@ -1,0 +1,328 @@
+.ui-context-menu,
+div.ui-dialog form label,
+#ui-file-select-filter-label,
+#ui-image-select-filter-label {
+	font-family: 'Lucida Grande', 'DejaVu Sans', 'Bitstream Vera Sans', Verdana, sans-serif;
+	font-size: 11px;
+	letter-spacing: 0;
+	font-weight: normal;
+	font-style: normal;
+	color: #000;
+	text-decoration: none;
+	text-transform: none;
+	line-height: 22px;
+	vertical-align: baseline;
+}
+
+li.hidden-in-menu {
+	opacity: 0.5;
+	filter: alpha(opacity=50);
+}
+
+/*---[ Aristo customizations ]---*/
+
+.ui-button-text-only .ui-button-text {
+	padding: 5px 12px 3px;
+}
+
+.ui-menu .ui-menu-item {
+	white-space: nowrap;
+}
+
+.ui-menu .ui-menu-item a.ui-state-hover,
+.ui-menu .ui-menu-item a.ui-state-active {
+	margin: 0;
+}
+
+.ui-dialog .ui-dialog-content {
+	padding: 0;
+}
+
+div.ui-dialog form {
+	margin: 0;
+}
+
+div.ui-dialog form fieldset {
+	margin: 0 0 5px 0;
+	border: none;
+	padding: 0;
+}
+
+div.ui-dialog form label,
+#ui-file-select-filter-label,
+#ui-image-select-filter-label {
+	float: left;
+	border: none;
+	display: block;
+	margin: 0px 5px 0 5px;
+	text-align: right;
+	min-width: 100px;
+	width: auto;
+	height: auto;
+	clear: none;
+}
+
+div.ui-dialog form label {
+	float: none;
+	margin: 0;
+	text-align: left;
+}
+
+#ui-file-select-filter-label,
+#ui-image-select-filter-label {
+	width: 328px;
+}
+
+div.ui-dialog form input[type="text"],
+div.ui-dialog form input[type="password"],
+div.ui-dialog form select,
+div.ui-dialog form textarea,
+#ui-file-select-filter-input,
+#ui-image-select-filter-input {
+	margin: 0 0 5px 0;
+	border: 1px solid #666;
+	outline: none;
+	padding: 0 3px;
+	height: 22px;
+	display: block;
+	text-align: left;
+	vertical-align: top;
+	width: 100%;
+	font: inherit;
+	text-decoration: inherit;
+	text-transform: inherit;
+	line-height: inherit;
+	color: inherit;
+	letter-spacing : inherit;
+	background: none;
+	float: none;
+	clear: none;
+}
+
+#ui-file-select-filter-input,
+#ui-image-select-filter-input {
+    margin-top: 5px;
+    width: 189px;
+}
+
+div.ui-dialog form textarea {
+    padding: 3px;
+    height: 80px;
+}
+
+div.ui-dialog form input[type="checkbox"] {
+	float: left;
+	margin: 6px 6px 0 0;
+}
+
+div.ui-dialog form select {
+	font-size: 13px;
+	padding: 3px;
+}
+
+div.ui-dialog form p.errornote,
+div.ui-dialog form p.help {
+	margin-top: 5px;
+	font: inherit;
+	text-decoration: inherit;
+	text-transform: inherit;
+	line-height: inherit;
+	letter-spacing : inherit;
+	color: #ff0000;
+}
+
+div.ui-dialog form p.help {
+	font-size: 11px;
+	line-height: 120%;
+	color: #999;
+	font-style: italic;
+}
+
+div.ui-dialog form label.required {
+	font-weight: bold;
+}
+
+div.ui-dialog form label.vCheckboxLabel {
+	text-align: left;
+	width: auto;
+}
+
+div.ui-dialog form h2 {
+	font-weight: bold;
+	font-size: 100%;
+}
+
+.ui-dialog form .advanced-button {
+	display: block;
+	margin: 0 -15px;
+	padding: 3px 15px;
+	font-weight: bold;
+	line-height: 21px;
+	text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+	text-decoration: none;
+	background: none;
+	background-color: #eaeaea;
+}
+
+.ui-dialog form .advanced-button .toggler {
+	display: block;
+	float: left;
+	margin: 7px 4px;
+	width: 8px;
+	height: 8px;
+	background: transparent url(../images/arrow-down.png) no-repeat left top;
+	text-indent: -9000px;
+}
+
+.ui-dialog form .advanced-button.closed .toggler {
+	margin-top: 6px;
+	background-image: url(../images/arrow-right.png);
+}
+
+.ui-dialog .hide-label {
+	margin: 0;
+}
+
+.ui-dialog .hide-label label {
+	display: none;
+}
+
+/* .cke_chrome and .cke_inner selectors used for CKEditor 4 */
+
+.ui-dialog .cke_chrome {
+	float: none;
+	padding: 0;
+	border: none;
+}
+
+.ui-dialog .cke_inner {
+	border-radius: 0;
+}
+
+.ui-dialog .ui-dialog-buttonpane {
+	margin-top: 0;
+	padding: 0;
+	border-top: 1px solid #a6a6a6;
+	background: #d5d5d5;
+	background: -webkit-gradient(linear, left top, left bottom, from(#eaeaea), to(#c2c2c2));
+	background: -moz-linear-gradient(top, #eaeaea, #c2c2c2);
+	filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0, startColorstr='#eaeaea', endColorstr='#c2c2c2');
+}
+
+.ui-dialog .ui-dialog-buttonpane button.upload {
+	float: left;
+}
+
+div.ui-widget-overlay {
+	position: fixed;
+}
+
+.ui-dialog-buttonset select#id_template_name {
+	margin: 0 0 5px 0;
+	border: 1px solid #666;
+	outline: none;
+	padding: 3px;
+	max-width: 200px;
+	position: absolute;
+	bottom: 10px;
+	left: 15px;
+	font-size: 13px;
+	background-color: #fff;
+}
+
+ul.ui-context-menu {
+	position: absolute;
+	z-index: 910;
+	border-radius: 4px;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+}
+
+/* ---[ Clearing elements ]--- */
+
+/* clear float container without source markup - http://www.positioniseverything.net/easyclearing.html */
+.form-row:after {
+	content: ".";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
+	font-size: 0;
+	line-height: 0;
+}
+
+/* ---[ Django admin ]--- */
+
+span.nobr {
+	white-space: nowrap;
+}
+
+.ui-dialog .ui-dialog-content.dialog {
+	padding: 10px 15px;
+}
+
+.ui-dialog .ui-dialog-content.dialog p {
+	margin-bottom: 1em;
+	line-height: 150%;
+}
+
+.ui-dialog .ui-dialog-content.dialog p strong {
+	font-weight: bold;
+}
+
+/* ---[ Custom Forms ]--- */
+
+
+
+/* permissions-related styling */
+.ui-dialog .df-non-editable {
+	color: #666;
+}
+
+/* file and image grid */
+.simple-data-grid {
+	width: 100%;
+    font-size: 11px;
+    font-family: "Lucida Grande", Verdana, Arial, sans-serif;
+	color: #333;
+}
+
+.simple-data-grid thead th {
+    vertical-align: top;
+}
+
+.simple-data-grid thead th a {
+	color: #333;
+}
+
+.simple-data-grid tbody td {
+    vertical-align: top;
+    word-wrap: break-word;
+}
+
+.simple-data-grid tbody .selected,
+.simple-data-grid tbody .selected:hover {
+	text-shadow: 0px 1px 0px rgba(255,255,255,0.7);
+}
+
+.simple-data-grid tfoot {
+	background-color: #f6f6f6;
+}
+
+.simple-data-grid tfoot .pagination li {
+    list-style-type: none;
+    font-size: 11px;
+    font-family: "Lucida Grande", Verdana, Arial, sans-serif;
+}
+
+.simple-data-grid tfoot .pagination a {
+    text-decoration: none;
+}
+
+#ui-image-select-grid img {
+	width: 111px;
+}
+
+.simple-data-grid thead th a .sort {
+	top: 4px;
+}

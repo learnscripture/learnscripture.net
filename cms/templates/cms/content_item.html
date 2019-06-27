@@ -1,0 +1,7 @@
+<div class="content">
+  {% if content_item.template_name %}
+    {% include content_item.template_name %}
+  {% else %}
+    {{ content_item.content_html|safe }}
+  {% endif %}
+</div>

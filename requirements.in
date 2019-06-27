@@ -13,7 +13,6 @@ concurrent-log-handler==0.9.7
 django-anymail==0.10
 django-autoslug==1.9.4
 django-autocomplete-light==3.2.10
-django-fiber==1.5
 django-markup==1.2
 django-paypal==0.5.0
 django-pjax==1.4
@@ -35,3 +34,6 @@ raven==6.10.0
 requests==2.6.0
 uwsgi==2.0.15
 django-capture-tag==1.0
+django-mptt==0.9.0
+easy-thumbnails==2.5
+django-compressor==2.2

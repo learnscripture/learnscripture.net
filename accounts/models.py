@@ -110,9 +110,8 @@ class Account(AbstractBaseUser):
     # Attributes needed for admin login and auth.contrib compat
     is_superuser = models.BooleanField(default=False)
 
-    # We could use `is_superuser` instead of this, but `is_superuser` also
-    # affects other things (e.g. fiber frontend editing), and it the webmaster
-    # wants to avoid the overhead caused by `is_superuser==True` on his account!
+    # We could use `is_superuser` instead of this, now that fiber
+    # frontend editing has been removed
     is_webmaster = models.BooleanField(default=False)
 
     # Following:

@@ -3,13 +3,13 @@ import os
 import django.contrib.staticfiles.views
 import django.views.i18n
 import django.views.static
-import fiber.views
 from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib import admin
 from django.views.generic import RedirectView
 
 import accounts.lookups
+import cms.views
 import learnscripture.mail.views
 import learnscripture.views
 
@@ -77,6 +77,9 @@ urlpatterns = [
     url(r'^group-select-list/$', learnscripture.views.group_select_list, name='group_select_list'),
     url(r'^account-autocomplete/$', accounts.lookups.AccountAutocomplete.as_view(), name='account_autocomplete'),
 
+    # CMS
+    url(r'^api/cms/', include('cms.rest_api.urls')),
+
     # Other
     url(r'^contact/$', learnscripture.views.contact, name='contact'),
     url(r'^terms-of-service/$', learnscripture.views.terms_of_service, name='terms_of_service'),
@@ -91,8 +94,7 @@ urlpatterns = [
     url(r'^api/learnscripture/v1/', include('learnscripture.api.urls')),
 
     # Dependencies
-    url(r'^api/v2/', include('fiber.rest_api.urls')),
-    url(r'^admin/fiber/', include('fiber.admin_urls')),
+    url(r'^admin/cms/', include('cms.admin_urls')),
     url(r'^admin/', admin.site.urls),
     url(r'^i18n/', include('django.conf.urls.i18n')),
 
@@ -146,9 +148,9 @@ if settings.DEVBOX:
     ]
 
 
-# Finally, fallback to fiber views
+# Finally, fallback to cms views
 urlpatterns += [
-    url('', fiber.views.page),
+    url('', cms.views.cms_page),
 ]
 
 if os.environ.get('TEST_TRACEBACK_PAGES', '') == 'TRUE':

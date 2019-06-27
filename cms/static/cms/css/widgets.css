@@ -1,0 +1,62 @@
+/* ---[ CKEditor 4 ]--- */
+
+.cke_chrome {
+	float: left;
+}
+
+.cke_chrome .cke_top {
+	padding-right: 0;
+}
+
+.cke_button__ffilelink_icon {
+	background: url('../js/ckeditor_4.6.2_b52fb43f6f3e/skins/moono/icons.png') no-repeat 0 -456px !important;
+}
+
+.cke_button__fcustomlink_icon {
+	background: url('../js/ckeditor_4.6.2_b52fb43f6f3e/skins/moono/icons.png') no-repeat 0 -1248px !important;
+}
+
+.cke_button__funlink_icon {
+	background: url('../js/ckeditor_4.6.2_b52fb43f6f3e/skins/moono/icons.png') no-repeat 0 -1272px !important;
+}
+
+.cke_button__fimagelink_icon,
+.cke_button__fimage_icon {
+	background: url('../js/ckeditor_4.6.2_b52fb43f6f3e/skins/moono/icons.png') no-repeat 0 -936px !important;
+}
+
+.cke_button__fimagelink_icon:before,
+.cke_button__fpagelink_icon:before,
+.cke_button__ffilelink_icon:before {
+	display: inline-block;
+	content: "";
+	margin: 6px 0 0 5px;
+	width: 16px;
+	height: 16px;
+	background: url('../js/ckeditor_4.6.2_b52fb43f6f3e/skins/moono/icons.png') no-repeat 0 -1248px !important;
+}
+
+.cke_hidpi .cke_button__fpagelink_icon,
+.cke_hidpi .cke_button__ffilelink_icon,
+.cke_hidpi .cke_button__fcustomlink_icon,
+.cke_hidpi .cke_button__funlink_icon,
+.cke_hidpi .cke_button__fimagelink_icon,
+.cke_hidpi .cke_button__fimage_icon,
+.cke_hidpi .cke_button__fimagelink_icon:before,
+.cke_hidpi .cke_button__fpagelink_icon:before,
+.cke_hidpi .cke_button__ffilelink_icon:before {
+	background-image: url('../js/ckeditor_4.6.2_b52fb43f6f3e/skins/moono/icons_hidpi.png') !important;
+	background-size: 16px !important;
+}
+
+.cke_ltr .cke_button .cke_button_label  { display: none !important; }
+
+/* ---[ Combobox ]--- */
+
+.ui-menu .ui-menu-item {
+	list-style: none;
+}
+.ui-button { margin-left: -1px; }
+.ui-button-icon-only .ui-button-text { padding: .15em; }
+.ui-autocomplete-input { margin: 0; padding: 0.48em 0 0.47em 0.45em; }
+
