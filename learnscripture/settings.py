@@ -192,7 +192,7 @@ STATICFILES_DIRS = []
 # various locations.
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'compressor.finders.CompressorFinder',  # for fiber
+    'compressor.finders.CompressorFinder',  # for cms admin
 )
 
 LOGIN_URL = '/admin/'
@@ -219,7 +219,6 @@ MIDDLEWARE = [
         (True, 'learnscripture.middleware.identity_middleware'),
         (True, 'learnscripture.middleware.activate_language_from_request'),
         (True, 'learnscripture.middleware.feature_flipper_middleware'),
-        (True, 'fiber.middleware.AdminPageMiddleware'),
     ]
     if b
 ]
@@ -280,10 +279,11 @@ INSTALLED_APPS = [
     'events',
     'groups',
     'comments',
+    'cms',
 
     # Third party
     'mptt',
-    'compressor',  # for fiber
+    'compressor',  # for cms
     'easy_thumbnails',
     'fiber',
     'raven.contrib.django.raven_compat',
@@ -431,8 +431,8 @@ SILENCED_SYSTEM_CHECKS = [
     "1_6.W001",
 ]
 
-FIBER_DEFAULT_TEMPLATE = 'fiber_singlecol.html'
-FIBER_TEMPLATE_CHOICES = [(FIBER_DEFAULT_TEMPLATE, 'Single column')]
+CMS_DEFAULT_TEMPLATE = 'cms_singlecol.html'
+CMS_TEMPLATE_CHOICES = [(CMS_DEFAULT_TEMPLATE, 'Single column')]
 
 
 def show_toolbar(request):

@@ -1,0 +1,46 @@
+{% extends "admin/change_form.html" %}
+
+{% load compress %}
+{% load staticfiles %}
+{% load get_static_prefix from static %}
+
+{% block extrahead %}{{ block.super }}
+
+  <script type="text/javascript">
+	 var LANGUAGE_CODE = '{{ LANGUAGE_CODE }}'
+	 var STATIC_URL = '{% get_static_prefix %}';
+	 var BACKEND_BASE_URL = '{{ BACKEND_BASE_URL }}';
+   var CKEDITOR_BASEPATH = '{% get_static_prefix %}cms/js/ckeditor_4.6.2_b52fb43f6f3e/';
+  </script>
+
+  {% compress js %}
+    <script src="{% static 'cms/js/jquery-1.5.2.min.js' %}" type="text/javascript"></script>
+    <script src="{% static 'cms/js/simple-javascript-inheritance.js' %}" type="text/javascript"></script>
+    <script src="{% static 'cms/js/jquery.dataset.js' %}" type="text/javascript"></script>
+    <script src="{% static 'cms/js/jquery-ui-1.9m4/ui/jquery-ui.js' %}" type="text/javascript"></script>
+    <script src="{% static 'cms/js/jquery.slugify.js' %}" type="text/javascript"></script>
+    <script src="{% static 'cms/js/jquery.cookie.js' %}" type="text/javascript"></script>
+    <script src="{% static 'cms/js/simple-datagrid/simple.datagrid.js' %}" type="text/javascript"></script>
+    <script src="{% static 'cms/js/jquery.form-2.73.js' %}" type="text/javascript"></script>
+    <script src="{% static 'cms/js/csrf.js' %}" type="text/javascript"></script>
+    <script src="{% static 'cms/js/file-uploader-3.2.0/client/js/util.js' %}" type="text/javascript"></script>
+    <script src="{% static 'cms/js/file-uploader-3.2.0/client/js/button.js' %}" type="text/javascript"></script>
+    <script src="{% static 'cms/js/file-uploader-3.2.0/client/js/uploader.basic.js' %}" type="text/javascript"></script>
+    <script src="{% static 'cms/js/file-uploader-3.2.0/client/js/handler.base.js' %}" type="text/javascript"></script>
+    <script src="{% static 'cms/js/file-uploader-3.2.0/client/js/handler.form.js' %}" type="text/javascript"></script>
+    <script src="{% static 'cms/js/file-uploader-3.2.0/client/js/handler.xhr.js' %}" type="text/javascript"></script>
+
+    <script src="{% static 'cms/js/admin.js' %}" type="text/javascript"></script>
+    <script src="{% static 'cms/js/ckeditor_4.6.2_b52fb43f6f3e/ckeditor.js' %}" type="text/javascript"></script>
+    <script src="{% static 'cms/js/cms.ckeditor.js' %}" type="text/javascript"></script>
+  {% endcompress %}
+
+
+  {% compress css %}
+    <link rel="stylesheet" href="{% static 'cms/css/Aristo-jQuery-UI-Theme/css/Aristo/jquery-ui-1.8.5.custom.css' %}" type="text/css" media="screen" />
+    <link rel="stylesheet" href="{% static 'cms/js/simple-datagrid/simple.datagrid.css' %}" type="text/css" media="screen" />
+    <link rel="stylesheet" href="{% static 'cms/css/widgets.css' %}" type="text/css" media="screen" />
+    <link rel="stylesheet" href="{% static 'cms/css/admin.css' %}" type="text/css" media="screen" />
+  {% endcompress %}
+
+{% endblock %}

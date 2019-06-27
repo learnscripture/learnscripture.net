@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% load cms_tags %}
+
+{% block title %}{{ cms_page.title }} - LearnScripture.net{% endblock %}
+
+
+{% block page_title %}{{ cms_page.title }}{% endblock %}
+
+
+{% block content %}{% show_page_content "main" %}{% endblock %}
