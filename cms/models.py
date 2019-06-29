@@ -25,7 +25,6 @@ class ContentItem(models.Model):
     content_html = CmsHTMLField(verbose_name='Content')
     protected = models.BooleanField(default=False)
     metadata = JSONField(blank=True, null=True)
-    used_on_pages_data = JSONField('used on pages', blank=True, null=True)
 
     objects = managers.ContentItemManager()
 
@@ -41,22 +40,6 @@ class ContentItem(models.Model):
             if len(contents) > 50:
                 contents = contents[:50] + '...'
             return contents or '[ EMPTY ]'
-
-    def set_used_on_pages_json(self):
-        json_pages = []
-        for page_content_item in self.page_content_items.all():
-            json_pages.append({
-                'title': page_content_item.page.title,
-                'url': page_content_item.page.get_absolute_url(),
-            })
-        self.used_on_pages_data = json_pages
-        self.save()
-
-    def get_used_on_pages_json(self):
-        if self.used_on_pages_data is None:
-            self.set_used_on_pages_json()
-
-        return json.dumps(self.used_on_pages_data, sort_keys=True)
 
 
 class Page(MPTTModel):
@@ -184,14 +167,6 @@ class PageContentItem(models.Model):
     page = models.ForeignKey(Page, related_name='page_content_items', on_delete=models.CASCADE)
     block_name = models.CharField(max_length=255)
     sort = models.IntegerField(blank=True, null=True)
-
-    def save(self, *args, **kwargs):
-        super(PageContentItem, self).save(*args, **kwargs)
-        self.content_item.set_used_on_pages_json()
-
-    def delete(self, *args, **kwargs):
-        super(PageContentItem, self).delete(*args, **kwargs)
-        self.content_item.set_used_on_pages_json()
 
     def move(self, next_item_id=None, block_name=None):
         next_item = None

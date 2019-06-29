@@ -37,3 +37,4 @@ django-capture-tag==1.0
 django-mptt==0.9.0
 easy-thumbnails==2.5
 django-compressor==2.2
+django-sql-utils==0.2.2
