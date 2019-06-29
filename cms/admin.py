@@ -2,7 +2,6 @@ from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin.utils import model_ngettext
 from django.core.exceptions import PermissionDenied
-from django.db.models.deletion import ProtectedError
 from django.utils.html import format_html, format_html_join
 from mptt.admin import MPTTModelAdmin
 from sql_util.utils import Exists
@@ -17,7 +16,6 @@ class ContentItemAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'used')
     fieldsets = (
         (None, {'fields': ('name', 'content_html')}),
-        ('Advanced options', {'classes': ('collapse',), 'fields': ('protected',)}),
         ('Metadata', {'classes': ('collapse',), 'fields': ('metadata',)}),
     )
     date_hierarchy = 'updated'
@@ -45,7 +43,7 @@ class PageAdmin(MPTTModelAdmin):
     form = forms.PageForm
     fieldsets = (
         (None, {'fields': ('parent', 'title', 'url', 'redirect_page', 'template_name')}),
-        ('Advanced options', {'classes': ('collapse',), 'fields': ('meta_description', 'is_public', 'protected',)}),
+        ('Advanced options', {'classes': ('collapse',), 'fields': ('meta_description', 'is_public',)}),
         ('Metadata', {'classes': ('collapse',), 'fields': ('metadata',)}),
     )
 
@@ -114,28 +112,18 @@ class FileAdmin(admin.ModelAdmin):
 
     def really_delete_selected(self, request, queryset):
         deleted_count = 0
-        protected_count = 0
 
         # Check that the user has delete permission for the actual model
         if not self.has_delete_permission(request):
             raise PermissionDenied
 
         for obj in queryset:
-            try:
-                obj.delete()
-                deleted_count += 1
-            except ProtectedError:
-                protected_count += 1
+            obj.delete()
+            deleted_count += 1
 
         if deleted_count:
             messages.add_message(request, messages.INFO, "Successfully deleted %(count)d %(items)s." % {
                 "count": deleted_count, "items": model_ngettext(self.opts, deleted_count)
-            })
-
-        if protected_count:
-            # TODO More informative feedback, possibly with an intermediate screen. Compare messages on trying to delete one object.
-            messages.add_message(request, messages.ERROR, "%(count)d %(items)s not deleted, because that would require deleting protected related objects." % {
-                "count": protected_count, "items": model_ngettext(self.opts, protected_count)
             })
 
     really_delete_selected.short_description = 'Delete selected files'

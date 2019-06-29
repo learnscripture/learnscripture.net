@@ -23,7 +23,6 @@ class ContentItem(models.Model):
     updated = models.DateTimeField(auto_now=True)
     name = models.CharField(blank=True, max_length=255)
     content_html = CmsHTMLField(verbose_name='Content')
-    protected = models.BooleanField(default=False)
     metadata = JSONField(blank=True, null=True)
 
     objects = managers.ContentItemManager()
@@ -53,7 +52,6 @@ class Page(MPTTModel):
     redirect_page = models.ForeignKey('self', null=True, blank=True, related_name='redirected_pages', on_delete=models.SET_NULL)
     template_name = models.CharField(blank=True, max_length=70, choices=settings.CMS_TEMPLATE_CHOICES)
     is_public = models.BooleanField(default=True)
-    protected = models.BooleanField(default=False)
     content_items = models.ManyToManyField(ContentItem, through='PageContentItem')
     metadata = JSONField(blank=True, null=True)
 
