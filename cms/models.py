@@ -1,7 +1,6 @@
 import os
 
 from django.conf import settings
-from django.contrib.postgres.fields import JSONField
 from django.core.files.images import get_image_dimensions
 from django.db import models
 from django.utils.html import format_html, strip_tags
