@@ -76,12 +76,6 @@ class Page(MPTTModel):
     def get_absolute_url(self):
         return self.url
 
-    def get_content_for_block(self, block_name):
-        """
-        Return sorted content items for this block.
-        """
-        return self.page_content_items.filter(block_name=block_name).order_by('sort')
-
     def is_first_child(self):
         if self.is_root_node():
             return True
@@ -91,14 +85,6 @@ class Page(MPTTModel):
         if self.is_root_node():
             return True
         return self.parent and (self.rght + 1 == self.parent.rght)
-
-    def is_child_of(self, node):
-        """
-        Returns True if this is a child of the given node.
-        """
-        return (self.tree_id == node.tree_id and
-                self.lft > node.lft and
-                self.rght < node.rght)
 
     def get_ancestors(self, *args, **kwargs):
         if getattr(self, '_ancestors_retrieved', False):
@@ -113,33 +99,6 @@ class Page(MPTTModel):
         else:
             return super(Page, self).get_ancestors(*args, **kwargs)
 
-    def move_page(self, target_id, position):
-        """
-        Moves the node. Parameters:
-        - target_id: target page
-        - position:
-            - before: move the page before the target page
-            - after: move the page after the target page
-            - inside: move the page inside the target page (as the first child)
-        """
-        old_url = self.get_absolute_url()
-        target_page = Page.tree.get(id=target_id)
-
-        if position == 'before':
-            self.move_to(target_page, 'left')
-        elif position == 'after':
-            self.move_to(target_page, 'right')
-        elif position == 'inside':
-            self.move_to(target_page)
-        else:
-            raise Exception('Unknown position')
-
-        # change url in content items
-        if old_url:
-            new_url = self.get_absolute_url()
-            if old_url != new_url:
-                ContentItem.objects.rename_url(old_url, new_url)
-
     def is_public_for_user(self, user):
         return user.is_staff or self.is_public
 
@@ -149,38 +108,6 @@ class PageContentItem(models.Model):
     page = models.ForeignKey(Page, related_name='page_content_items', on_delete=models.CASCADE)
     block_name = models.CharField(max_length=255)
     sort = models.IntegerField(blank=True, null=True)
-
-    def move(self, next_item_id=None, block_name=None):
-        next_item = None
-        if next_item_id:
-            next_item = PageContentItem.objects.get(pk=next_item_id)
-        if not block_name:
-            if next_item:
-                block_name = next_item.block_name
-            else:
-                block_name = self.block_name
-
-        if self.block_name != block_name:
-            self.block_name = block_name
-            self.save()
-
-        page_content_items = list(
-            self.page.get_content_for_block(block_name).exclude(id=self.id),
-        )
-
-        def resort():
-            for i, item in enumerate(page_content_items):
-                item.sort = i
-                item.save()
-
-        if not next_item:
-            page_content_items.append(self)
-            resort()
-        else:
-            if next_item in page_content_items:
-                next_index = page_content_items.index(next_item)
-                page_content_items.insert(next_index, self)
-                resort()
 
 
 def images_directory(instance, filename):
