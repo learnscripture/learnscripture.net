@@ -1,10 +1,17 @@
 {% extends "base.html" %}
-{% load cms_tags %}
 
-{% block title %}{{ cms_page.title }} - LearnScripture.net{% endblock %}
-
-
-{% block page_title %}{{ cms_page.title }}{% endblock %}
+{% block title %}{{ page.title }} - LearnScripture.net{% endblock %}
 
 
-{% block content %}{% show_page_content "main" %}{% endblock %}
+{% block page_title %}{{ page.title }}{% endblock %}
+
+
+{% block content %}
+  <div>
+    {% for content_item in page.blocks.main %}
+      <div class="content">
+        {{ content_item.content_html|safe }}
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}
