@@ -49,12 +49,9 @@ class Page(MPTTModel):
     meta_description = models.CharField(max_length=255, blank=True)
     meta_keywords = models.CharField(max_length=255, blank=True)
     title = models.CharField(max_length=255)
-    doc_title = models.CharField(max_length=255, blank=True)
     url = models.CharField(max_length=1000, blank=True)
     redirect_page = models.ForeignKey('self', null=True, blank=True, related_name='redirected_pages', on_delete=models.SET_NULL)
-    mark_current_regexes = models.TextField(blank=True)
     template_name = models.CharField(blank=True, max_length=70, choices=settings.CMS_TEMPLATE_CHOICES)
-    show_in_menu = models.BooleanField(default=True)
     is_public = models.BooleanField(default=True)
     protected = models.BooleanField(default=False)
     content_items = models.ManyToManyField(ContentItem, through='PageContentItem')
@@ -153,13 +150,6 @@ class Page(MPTTModel):
 
     def is_public_for_user(self, user):
         return user.is_staff or self.is_public
-
-    def has_visible_children(self):
-        visible_children = [page for page in self.get_children() if page.show_in_menu]
-        if visible_children:
-            return True
-        else:
-            return False
 
 
 class PageContentItem(models.Model):
