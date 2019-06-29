@@ -1,9 +1,16 @@
 {% extends "base.html" %}
+{% load ftl %}
 
 {% block title %}{{ page.title }} - LearnScripture.net{% endblock %}
 
 
-{% block page_title %}{{ page.title }}{% endblock %}
+{% block page_title %}
+  {{ page.title }}
+  {% if not page.title_right_language %}
+    <span class="wrong-language" title="{% ftlmsg 'site-wrong-or-missing-translation' %}"><a href="/translating/""><i class="icon-fix-translation"></i></a></span>
+  {% endif %}
+
+{% endblock %}
 
 
 {% block content %}
