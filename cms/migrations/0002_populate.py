@@ -65,7 +65,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('cms', '0001_initial'),
-        ('fiber', '0002_callable_upload_to'),
     ]
 
     operations = [
