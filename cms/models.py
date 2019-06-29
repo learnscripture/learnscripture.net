@@ -22,7 +22,6 @@ class ContentItem(models.Model):
     updated = models.DateTimeField(auto_now=True)
     name = models.CharField(blank=True, max_length=255)
     content_html = CmsHTMLField(verbose_name='Content')
-    metadata = JSONField(blank=True, null=True)
 
     objects = managers.ContentItemManager()
 
@@ -52,7 +51,6 @@ class Page(MPTTModel):
     template_name = models.CharField(blank=True, max_length=70, choices=settings.CMS_TEMPLATE_CHOICES)
     is_public = models.BooleanField(default=True)
     content_items = models.ManyToManyField(ContentItem, through='PageContentItem')
-    metadata = JSONField(blank=True, null=True)
 
     objects = managers.PageManager()
     tree = TreeManager()
