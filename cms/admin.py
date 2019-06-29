@@ -16,7 +16,6 @@ class ContentItemAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'used')
     fieldsets = (
         (None, {'fields': ('name', 'content_html')}),
-        ('Metadata', {'classes': ('collapse',), 'fields': ('metadata',)}),
     )
     date_hierarchy = 'updated'
     search_fields = ('name', 'content_html')
@@ -44,7 +43,6 @@ class PageAdmin(MPTTModelAdmin):
     fieldsets = (
         (None, {'fields': ('parent', 'title', 'url', 'redirect_page', 'template_name')}),
         ('Advanced options', {'classes': ('collapse',), 'fields': ('meta_description', 'is_public',)}),
-        ('Metadata', {'classes': ('collapse',), 'fields': ('metadata',)}),
     )
 
     inlines = (PageContentItemInline,)
