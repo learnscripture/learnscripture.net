@@ -35,7 +35,6 @@ django-capture-tag==1.0
 django-compressor==2.2
 django-debug-toolbar==1.8
 django-extensions==2.0.7
-django-fiber==1.5
 django-functest==1.0.4
 django-js-asset==1.0.0    # via django-mptt
 django-markup==1.2
@@ -72,7 +71,7 @@ parsy==1.0.0
 pbr==3.1.1                # via mock
 pexpect==4.3.1            # via ipython
 pickleshare==0.7.4        # via ipython
-pillow==5.0.0             # via django-fiber, easy-thumbnails
+pillow==5.0.0             # via easy-thumbnails
 pip-tools==3.8.0
 prompt-toolkit==1.0.15    # via ipython
 psycopg2-binary==2.7.7

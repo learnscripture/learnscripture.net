@@ -212,8 +212,7 @@ MIDDLEWARE = [
         (True, 'django.contrib.auth.middleware.AuthenticationMiddleware'),
         (True, 'learnscripture.middleware.token_login_middleware'),
         (True, 'django.contrib.messages.middleware.MessageMiddleware'),
-        # XFrameOptionsMiddleware breaks fiber inline editing. Disabled for now.
-        # (True, 'django.middleware.clickjacking.XFrameOptionsMiddleware'),
+        (True, 'django.middleware.clickjacking.XFrameOptionsMiddleware'),
         (DEVBOX, 'learnscripture.middleware.debug_middleware'),
         (DEBUG, 'learnscripture.middleware.paypal_debug_middleware'),
         (True, 'learnscripture.middleware.identity_middleware'),
@@ -285,7 +284,6 @@ INSTALLED_APPS = [
     'mptt',
     'compressor',  # for cms
     'easy_thumbnails',
-    'fiber',
     'raven.contrib.django.raven_compat',
     'spurl',
     'paypal.standard.ipn',
