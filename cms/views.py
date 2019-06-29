@@ -16,11 +16,19 @@ class PageWrapper:
         return Blocks(self)
 
     @cached_property
-    def title(self):
+    def title_obj(self):
         try:
-            return self.page.titles.get(language_code=self.language_code).title
+            return self.page.titles.get(language_code=self.language_code)
         except PageTitle.DoesNotExist:
-            return self.page.titles.get(language_code=settings.LANGUAGE_CODE).title
+            return self.page.titles.get(language_code=settings.LANGUAGE_CODE)
+
+    @property
+    def title(self):
+        return self.title_obj.title
+
+    @property
+    def title_right_language(self):
+        return self.title_obj.language_code == self.language_code
 
 
 class Blocks:

@@ -140,3 +140,4 @@ site-forgot-password-button = I forgot my password
 # Shown when the page or part of it is still loading
 site-loading-placeholder = Loading...
 
+site-wrong-or-missing-translation = Incorrect or missing translation? Please help us fix it!
