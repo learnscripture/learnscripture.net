@@ -42,7 +42,6 @@ class Page(MPTTModel):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     parent = models.ForeignKey('self', null=True, blank=True, related_name='subpages', verbose_name='parent', on_delete=models.CASCADE)
-    title = models.CharField(max_length=255)
     url = models.CharField(max_length=1000, blank=True)
     redirect_page = models.ForeignKey('self', null=True, blank=True, related_name='redirected_pages', on_delete=models.SET_NULL)
     template_name = models.CharField(blank=True, max_length=70, choices=settings.CMS_TEMPLATE_CHOICES)
@@ -58,7 +57,7 @@ class Page(MPTTModel):
         ordering = ('tree_id', 'lft')
 
     def __str__(self):
-        return self.title
+        return self.url
 
     def save(self, *args, **kwargs):
         if self.id:
@@ -101,6 +100,24 @@ class Page(MPTTModel):
 
     def is_public_for_user(self, user):
         return user.is_staff or self.is_public
+
+
+class PageTitle(models.Model):
+    page = models.ForeignKey(Page, related_name='titles', on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
+    language_code = models.CharField(
+        max_length=10,
+        choices=settings.LANGUAGES,
+        default=settings.LANGUAGE_CODE,
+    )
+
+    def __str__(self):
+        return '{0}: {1}'.format(self.language_code.upper(), self.title)
+
+    class Meta:
+        unique_together = [
+            ('page', 'language_code'),
+        ]
 
 
 class PageContentItem(models.Model):
