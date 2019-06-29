@@ -73,7 +73,7 @@
 
 {% block page_title %}
   {{ title }}
-    {% if account.is_webmaster %}
+    {% if account.is_superuser %}
       <span class="official-user-info">{% ftlmsg 'user-stats-is-webmaster' %}</span>
     {% endif %}
 {% endblock %}

@@ -110,10 +110,6 @@ class Account(AbstractBaseUser):
     # Attributes needed for admin login and auth.contrib compat
     is_superuser = models.BooleanField(default=False)
 
-    # We could use `is_superuser` instead of this, now that fiber
-    # frontend editing has been removed
-    is_webmaster = models.BooleanField(default=False)
-
     # Following:
     following = models.ManyToManyField('self',
                                        symmetrical=False,
