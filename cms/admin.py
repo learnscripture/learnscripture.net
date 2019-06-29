@@ -5,6 +5,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models.deletion import ProtectedError
 from django.utils.html import format_html, format_html_join
 from mptt.admin import MPTTModelAdmin
+from sql_util.utils import Exists
 
 from . import admin_forms as forms
 from .models import ContentItem, File, Image, Page, PageContentItem
@@ -13,7 +14,7 @@ from .utils.widgets import AdminImageWidgetWithPreview, CmsTextarea
 
 
 class ContentItemAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'unused')
+    list_display = ('__str__', 'used')
     fieldsets = (
         (None, {'fields': ('name', 'content_html')}),
         ('Advanced options', {'classes': ('collapse',), 'fields': ('protected',)}),
@@ -22,11 +23,12 @@ class ContentItemAdmin(admin.ModelAdmin):
     date_hierarchy = 'updated'
     search_fields = ('name', 'content_html')
 
-    def unused(self, obj):
-        if obj.used_on_pages_data is None:
-            return True
-        return False
-    unused.boolean = True
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(used=Exists('page_content_items'))
+
+    def used(self, obj):
+        return obj.used
+    used.boolean = True
 
     formfield_overrides = {
         CmsHTMLField: {'widget': CmsTextarea}
