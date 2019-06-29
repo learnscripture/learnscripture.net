@@ -2,7 +2,7 @@ from django import forms
 from django.utils.six import unichr
 from mptt.forms import TreeNodeChoiceField
 
-from cms.models import Page
+from cms.models import Page, PageTitle
 
 
 class PageForm(forms.ModelForm):
@@ -11,6 +11,12 @@ class PageForm(forms.ModelForm):
 
     class Meta:
         model = Page
+        fields = '__all__'
+
+
+class PageTitleForm(forms.ModelForm):
+    class Meta:
+        model = PageTitle
         fields = '__all__'
 
     def clean_title(self):

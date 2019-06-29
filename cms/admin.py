@@ -7,7 +7,7 @@ from mptt.admin import MPTTModelAdmin
 from sql_util.utils import Exists
 
 from . import admin_forms as forms
-from .models import ContentItem, File, Image, Page, PageContentItem
+from .models import ContentItem, File, Image, Page, PageContentItem, PageTitle
 from .utils.fields import CmsHTMLField
 from .utils.widgets import AdminImageWidgetWithPreview, CmsTextarea
 
@@ -37,17 +37,23 @@ class PageContentItemInline(admin.TabularInline):
     extra = 1
 
 
+class PageTitleInline(admin.TabularInline):
+    model = PageTitle
+    extra = 1
+    min_num = 1
+
+
 class PageAdmin(MPTTModelAdmin):
 
     form = forms.PageForm
     fieldsets = (
-        (None, {'fields': ('parent', 'title', 'url', 'redirect_page', 'template_name', 'is_public',)}),
+        (None, {'fields': ('parent', 'url', 'redirect_page', 'template_name', 'is_public',)}),
     )
 
-    inlines = (PageContentItemInline,)
-    list_display = ('title', 'view_on_site_link', 'url', 'redirect_page', 'get_absolute_url', 'action_links')
+    inlines = [PageTitleInline, PageContentItemInline]
+    list_display = ('url', 'view_on_site_link', 'redirect_page', 'get_absolute_url', 'action_links')
     list_per_page = 1000
-    search_fields = ('title', 'url', 'redirect_page__title')
+    search_fields = ('url', 'redirect_page__title')
 
     def view_on_site_link(self, page):
         absolute_url = page.get_absolute_url()

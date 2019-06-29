@@ -3,19 +3,24 @@ from django.http import Http404, HttpResponsePermanentRedirect
 from django.template.response import TemplateResponse
 from django.utils.functional import cached_property
 
-from .models import Page as Page
+from .models import Page, PageTitle
 
 
 class PageWrapper:
-    def __init__(self, page):
+    def __init__(self, page, language_code):
         self.page = page
+        self.language_code = language_code
 
     @cached_property
     def blocks(self):
         return Blocks(self)
 
+    @cached_property
     def title(self):
-        return self.page.title
+        try:
+            return self.page.titles.get(language_code=self.language_code).title
+        except PageTitle.DoesNotExist:
+            return self.page.titles.get(language_code=settings.LANGUAGE_CODE).title
 
 
 class Blocks:
@@ -53,6 +58,6 @@ def cms_page(request):
     if page.redirect_page and page.redirect_page != page:  # prevent redirecting to itself
         return HttpResponsePermanentRedirect(page.redirect_page.get_absolute_url())
     context = {
-        'page': PageWrapper(page)
+        'page': PageWrapper(page, request.LANGUAGE_CODE)
     }
     return TemplateResponse(request, template_name, context)
