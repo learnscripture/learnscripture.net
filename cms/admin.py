@@ -41,8 +41,7 @@ class PageAdmin(MPTTModelAdmin):
 
     form = forms.PageForm
     fieldsets = (
-        (None, {'fields': ('parent', 'title', 'url', 'redirect_page', 'template_name')}),
-        ('Advanced options', {'classes': ('collapse',), 'fields': ('meta_description', 'is_public',)}),
+        (None, {'fields': ('parent', 'title', 'url', 'redirect_page', 'template_name', 'is_public',)}),
     )
 
     inlines = (PageContentItemInline,)
