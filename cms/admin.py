@@ -7,29 +7,34 @@ from mptt.admin import MPTTModelAdmin
 from sql_util.utils import Exists
 
 from . import admin_forms as forms
-from .models import ContentItem, File, Image, Page, PageContentItem, PageTitle
+from .models import Content, ContentItem, File, Image, Page, PageContentItem, PageTitle
 from .utils.fields import CmsHTMLField
 from .utils.widgets import AdminImageWidgetWithPreview, CmsTextarea
 
 
+class ContentInline(admin.StackedInline):
+    model = Content
+    extra = 1
+    formfield_overrides = {
+        CmsHTMLField: {'widget': CmsTextarea}
+    }
+    min_num = 1
+
+
 class ContentItemAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'used')
-    fieldsets = (
-        (None, {'fields': ('name', 'content_html')}),
-    )
+    list_display = ('id', 'name', 'used')
     date_hierarchy = 'updated'
     search_fields = ('name', 'content_html')
+    inlines = [ContentInline]
 
     def get_queryset(self, request):
-        return super().get_queryset(request).annotate(used=Exists('page_content_items'))
+        return super().get_queryset(request).annotate(
+            used=Exists('page_content_items')
+        )
 
     def used(self, obj):
         return obj.used
     used.boolean = True
-
-    formfield_overrides = {
-        CmsHTMLField: {'widget': CmsTextarea}
-    }
 
 
 class PageContentItemInline(admin.TabularInline):

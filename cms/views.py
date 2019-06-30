@@ -4,7 +4,7 @@ from django.http import Http404, HttpResponsePermanentRedirect
 from django.template.response import TemplateResponse
 from django.utils.functional import cached_property
 
-from .models import Page, PageTitle
+from .models import Page, PageTitle, Content
 
 
 class PageWrapper:
@@ -14,7 +14,7 @@ class PageWrapper:
 
     @cached_property
     def blocks(self):
-        return Blocks(self)
+        return Blocks(self.page, self.language_code)
 
     @cached_property
     def title_data(self):
@@ -40,23 +40,58 @@ class TitleWrapper:
         return self.title_obj.title
 
 
+@attr.s
+class ContentWrapper:
+    content_obj = attr.ib()
+    right_language = attr.ib(type=bool)
+
+    @property
+    def content_html(self):
+        return self.content_obj.content_html
+
+
 class Blocks:
     """
     Provides dictionary access to the content items in a block in a Page
     """
-    def __init__(self, page_wrapper):
-        self.page_wrapper = page_wrapper
+    def __init__(self, page, language_code):
+        self.page = page
+        self.language_code = language_code
 
     def __getitem__(self, block_name):
-        return [
+        # We want the ones that are the right language,
+        # but for missing ones we want to fallback, and
+        # indicate that we got the wrong language
+        content_items = [
             pci.content_item
             for pci in (
-                self.page_wrapper.page.page_content_items
+                self.page.page_content_items
                     .filter(block_name=block_name)
                     .order_by('sort')
                     .select_related('content_item')
             )
         ]
+        # Collect all
+        content_dict = {
+            (c.content_item_id, c.language_code): c for c in Content.objects.filter(
+                content_item__in=content_items,
+                language_code__in=[self.language_code, settings.LANGUAGE_CODE]
+            )
+        }
+        # Build ContentWrapper
+        retval = []
+        for ci in content_items:
+            try:
+                retval.append(ContentWrapper(
+                    content_dict[ci.id, self.language_code],
+                    right_language=True,
+                ))
+            except:
+                retval.append(ContentWrapper(
+                    content_dict[ci.id, settings.LANGUAGE_CODE],
+                    right_language=False,
+                ))
+        return retval
 
 
 def cms_page(request):
