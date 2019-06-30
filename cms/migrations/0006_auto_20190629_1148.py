@@ -11,6 +11,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunSQL(
-            "DROP TABLE fiber_contentitem, fiber_file, fiber_image, fiber_page, fiber_pagecontentitem CASCADE;"
+            "DROP TABLE IF EXISTS fiber_contentitem, fiber_file, fiber_image, fiber_page, fiber_pagecontentitem CASCADE;"
             "", hints={'target_dbs': ['default']})
     ]
