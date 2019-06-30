@@ -4,7 +4,7 @@ from django.http import Http404, HttpResponsePermanentRedirect
 from django.template.response import TemplateResponse
 from django.utils.functional import cached_property
 
-from .models import Page, PageTitle, Content
+from .models import Content, Page, PageTitle
 
 
 class PageWrapper:
