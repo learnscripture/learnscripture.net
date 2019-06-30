@@ -4,12 +4,12 @@
 # Notice in news items when a new verse set is created
 # $username is a username (displayed as a link)
 # $verseset is the name of the verse set (displayed as a link).
-events-verse-set-created-html = { $username } { $verseset } başlıklı yeni bir ayet dizini oluşturdu.
+events-verse-set-created-html = { $username } “{ $verseset }” başlıklı yeni bir ayet dizini oluşturdu.
 
 # Notice in news items when a user starts learning a set of verses.
 # $username is a username (displayed as a link)
 # $verseset is the name of the verse set (displayed as a link).
-events-started-learning-verse-set-html = { $username } { $verseset } ayet dizini çalışıyor.
+events-started-learning-verse-set-html = { $username } “{ $verseset }” ayet dizini çalışıyor.
 
 # Notice in news items when a user starts to learn a catechism
 # $username is a username (displayed as a link)
@@ -50,16 +50,16 @@ events-verses-started-milestone-reached-html = { $username } { $verses } ayeti c
 events-verses-finished-milestone-reached-html = { $username } { $verses } ayeti çalışıp bitirdi.
 
 # Notice in news items when a user joins a group
-events-user-joined-group-html = { $username } { $group } grubuna katıldı.
+events-user-joined-group-html = { $username } “{ $group }” grubuna katıldı.
 
 # Notice in news items when a user creates a group
-events-user-created-group-html = { $username } { $group } grubunu oluşturdu.
+events-user-created-group-html = { $username } “{ $group }” grubunu oluşturdu.
 
 # Notice in news items when a user comments on an event
 events-comment-on-activity-html = { $username } { $other_user } adlı kullanıcının hareketlerine <a href="{ $comment_url }">yorum</a> yaptı.
 
 # Notice in news items when a user comments on a group wall
-events-comment-on-group-wall-html = { $username } { $group } grubun duvarına <a href="{ $comment_url }">yorum</a> yazdı.
+events-comment-on-group-wall-html = { $username } “{ $group }” grubun duvarına <a href="{ $comment_url }">yorum</a> yazdı.
 
 # Notification sent to a user when someone comments on their event.
 # $event is a title of an event.
