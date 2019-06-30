@@ -6,18 +6,25 @@
 
 {% block page_title %}
   {{ page.title_data.title }}
-  {% if not page.title_data.right_language %}
-    <span class="wrong-language" title="{% ftlmsg 'site-wrong-or-missing-translation' %}"><a href="/translating/""><i class="icon-fix-translation"></i></a></span>
-  {% endif %}
 {% endblock %}
 
+{% block messages %}
+  {% if page.missing_translations %}
+    <div class="message-container">
+      <div class="notice">
+        <a href="/translating/">{% ftlmsg 'site-wrong-or-missing-translation' %}</a>
+      </div>
+    </div>
+  {% endif %}
+  {{ block.super }}
+{% endblock %}
 
 {% block content %}
   <div>
     {% for content in page.blocks.main %}
       <div class="content">
         {% if not content.right_language %}
-          <span class="wrong-language" title="{% ftlmsg 'site-wrong-or-missing-translation' %}"><a href="/translating/""><i class="icon-fix-translation"></i></a></span>
+          <span class="wrong-language" title="{% ftlmsg 'site-wrong-or-missing-translation' %}"><a href="/translating/"><i class="icon-fix-translation"></i></a></span>
         {% endif %}
         {{ content.content_html|safe }}
       </div>
