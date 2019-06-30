@@ -23,6 +23,7 @@ class ContentInline(admin.StackedInline):
 
 class ContentItemAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'used')
+    list_display_links = ['id', 'name']
     date_hierarchy = 'updated'
     search_fields = ('name', 'content_html')
     inlines = [ContentInline]
@@ -41,6 +42,9 @@ class PageContentItemInline(admin.TabularInline):
     model = PageContentItem
     extra = 1
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).order_by('sort')
+
 
 class PageTitleInline(admin.TabularInline):
     model = PageTitle
@@ -56,7 +60,7 @@ class PageAdmin(MPTTModelAdmin):
     )
 
     inlines = [PageTitleInline, PageContentItemInline]
-    list_display = ('url', 'view_on_site_link', 'redirect_page', 'get_absolute_url', 'action_links')
+    list_display = ('url', 'view_on_site_link', 'redirect_page', 'is_public', 'action_links')
     list_per_page = 1000
     search_fields = ('url', 'redirect_page__title')
 
