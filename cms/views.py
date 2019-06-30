@@ -1,3 +1,4 @@
+import attr
 from django.conf import settings
 from django.http import Http404, HttpResponsePermanentRedirect
 from django.template.response import TemplateResponse
@@ -16,19 +17,27 @@ class PageWrapper:
         return Blocks(self)
 
     @cached_property
-    def title_obj(self):
+    def title_data(self):
         try:
-            return self.page.titles.get(language_code=self.language_code)
+            return TitleWrapper(
+                title_obj=self.page.titles.get(language_code=self.language_code),
+                right_language=True,
+            )
         except PageTitle.DoesNotExist:
-            return self.page.titles.get(language_code=settings.LANGUAGE_CODE)
+            return TitleWrapper(
+                title_obj=self.page.titles.get(language_code=settings.LANGUAGE_CODE),
+                right_language=False,
+            )
+
+
+@attr.s
+class TitleWrapper:
+    title_obj = attr.ib()
+    right_language = attr.ib(type=bool)
 
     @property
     def title(self):
         return self.title_obj.title
-
-    @property
-    def title_right_language(self):
-        return self.title_obj.language_code == self.language_code
 
 
 class Blocks:
