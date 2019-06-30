@@ -14,7 +14,58 @@ class PageWrapper:
 
     @cached_property
     def blocks(self):
-        return Blocks(self.page, self.language_code)
+        return Blocks(self)
+
+    @property
+    def missing_translations(self):
+        if not self.title_data.right_language:
+            return True
+        if any(not c.right_language for c in self.content_list):
+            return True
+        return False
+
+    @cached_property
+    def content_list(self):
+        # We get all Content objects for all blocks, for the required language,
+        # because we need them for calculating missing_translations. The Blocks
+        # wrapper does filtering for block_name in Python, so we need to keep
+        # track of that in ContentWrapper.
+
+        # Here we are careful to be fairly efficient about get the ones that are
+        # the right language, and also the fallbacks, and indicate that we got
+        # the wrong language where necessary.
+
+        blocks_and_content_items = [
+            (pci.block_name, pci.content_item)
+            for pci in (
+                self.page.page_content_items
+                    .order_by('sort')
+                    .select_related('content_item')
+            )
+        ]
+        # Collect all
+        content_dict = {
+            (c.content_item_id, c.language_code): c for c in Content.objects.filter(
+                content_item__in=[i[1] for i in blocks_and_content_items],
+                language_code__in=[self.language_code, settings.LANGUAGE_CODE]
+            ).select_related('content_item')
+        }
+        # Build ContentWrappers
+        retval = []
+        for block_name, ci in blocks_and_content_items:
+            try:
+                retval.append(ContentWrapper(
+                    content_dict[ci.id, self.language_code],
+                    block_name=block_name,
+                    right_language=True,
+                ))
+            except:
+                retval.append(ContentWrapper(
+                    content_dict[ci.id, settings.LANGUAGE_CODE],
+                    block_name=block_name,
+                    right_language=False,
+                ))
+        return retval
 
     @cached_property
     def title_data(self):
@@ -43,6 +94,7 @@ class TitleWrapper:
 @attr.s
 class ContentWrapper:
     content_obj = attr.ib()
+    block_name = attr.ib()
     right_language = attr.ib(type=bool)
 
     @property
@@ -52,46 +104,16 @@ class ContentWrapper:
 
 class Blocks:
     """
-    Provides dictionary access to the content items in a block in a Page
+    Provides dictionary access to the Content objects in a block in a Page
     """
-    def __init__(self, page, language_code):
-        self.page = page
-        self.language_code = language_code
+    def __init__(self, page_wrapper):
+        self.page_wrapper = page_wrapper
 
     def __getitem__(self, block_name):
-        # We want the ones that are the right language,
-        # but for missing ones we want to fallback, and
-        # indicate that we got the wrong language
-        content_items = [
-            pci.content_item
-            for pci in (
-                self.page.page_content_items
-                    .filter(block_name=block_name)
-                    .order_by('sort')
-                    .select_related('content_item')
-            )
+        return [
+            c for c in self.page_wrapper.content_list
+            if c.block_name == block_name
         ]
-        # Collect all
-        content_dict = {
-            (c.content_item_id, c.language_code): c for c in Content.objects.filter(
-                content_item__in=content_items,
-                language_code__in=[self.language_code, settings.LANGUAGE_CODE]
-            )
-        }
-        # Build ContentWrapper
-        retval = []
-        for ci in content_items:
-            try:
-                retval.append(ContentWrapper(
-                    content_dict[ci.id, self.language_code],
-                    right_language=True,
-                ))
-            except:
-                retval.append(ContentWrapper(
-                    content_dict[ci.id, settings.LANGUAGE_CODE],
-                    right_language=False,
-                ))
-        return retval
 
 
 def cms_page(request):
