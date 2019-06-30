@@ -3,13 +3,12 @@ import os
 from django.conf import settings
 from django.core.files.images import get_image_dimensions
 from django.db import models
-from django.utils.html import format_html, strip_tags
+from django.utils.html import format_html
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
 
 from . import managers
 from .utils.fields import CmsHTMLField
-from .utils.html import htmlentitydecode
 from .utils.images import LIST_THUMBNAIL_OPTIONS, ThumbnailException, get_thumbnail, get_thumbnail_url
 
 IMAGES_DIR = 'uploads/images'
@@ -19,8 +18,7 @@ FILES_DIR = 'uploads/files'
 class ContentItem(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    name = models.CharField(blank=True, max_length=255)
-    content_html = CmsHTMLField(verbose_name='Content')
+    name = models.CharField(max_length=255)
 
     objects = managers.ContentItemManager()
 
@@ -29,13 +27,25 @@ class ContentItem(models.Model):
         verbose_name_plural = 'content items'
 
     def __str__(self):
-        if self.name:
-            return self.name
-        else:
-            contents = u' '.join(htmlentitydecode(strip_tags(self.content_html)).strip().split())
-            if len(contents) > 50:
-                contents = contents[:50] + '...'
-            return contents or '[ EMPTY ]'
+        return self.name or '[ UNNAMED ]'
+
+
+class Content(models.Model):
+    content_item = models.ForeignKey(ContentItem, related_name='content_set', on_delete=models.CASCADE)
+    language_code = models.CharField(
+        max_length=10,
+        choices=settings.LANGUAGES,
+        default=settings.LANGUAGE_CODE,
+    )
+    content_html = CmsHTMLField(verbose_name='Content')
+
+    def __str__(self):
+        return '{0}: {1}'.format(self.language_code.upper(), str(self.content_item))
+
+    class Meta:
+        unique_together = [
+            ('content_item', 'language_code'),
+        ]
 
 
 class Page(MPTTModel):

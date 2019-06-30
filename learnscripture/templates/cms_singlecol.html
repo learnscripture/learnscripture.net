@@ -9,15 +9,17 @@
   {% if not page.title_data.right_language %}
     <span class="wrong-language" title="{% ftlmsg 'site-wrong-or-missing-translation' %}"><a href="/translating/""><i class="icon-fix-translation"></i></a></span>
   {% endif %}
-
 {% endblock %}
 
 
 {% block content %}
   <div>
-    {% for content_item in page.blocks.main %}
+    {% for content in page.blocks.main %}
       <div class="content">
-        {{ content_item.content_html|safe }}
+        {% if not content.right_language %}
+          <span class="wrong-language" title="{% ftlmsg 'site-wrong-or-missing-translation' %}"><a href="/translating/""><i class="icon-fix-translation"></i></a></span>
+        {% endif %}
+        {{ content.content_html|safe }}
       </div>
     {% endfor %}
   </div>
