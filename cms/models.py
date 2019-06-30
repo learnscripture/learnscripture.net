@@ -114,12 +114,12 @@ class Page(MPTTModel):
 
 class PageTitle(models.Model):
     page = models.ForeignKey(Page, related_name='titles', on_delete=models.CASCADE)
-    title = models.CharField(max_length=255)
     language_code = models.CharField(
         max_length=10,
         choices=settings.LANGUAGES,
         default=settings.LANGUAGE_CODE,
     )
+    title = models.CharField(max_length=255)
 
     def __str__(self):
         return '{0}: {1}'.format(self.language_code.upper(), self.title)
