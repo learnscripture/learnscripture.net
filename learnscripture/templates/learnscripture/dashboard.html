@@ -387,7 +387,7 @@
     </ul>
     <div class="note"><a href="{% url 'groups' %}">{% ftlmsg 'dashboard-view-other-groups-link' %}</a></div>
   {% else %}
-    {% url 'gruups' as groups_url %}
+    {% url 'groups' as groups_url %}
     <div>{% ftlmsg 'dashboard-why-not-join-a-group-html' url=groups_url %}</div>
   {% endif %}
 
