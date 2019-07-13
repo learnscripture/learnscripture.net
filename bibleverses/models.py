@@ -645,6 +645,7 @@ class VerseSet(models.Model):
     # Essentially denormalized field, to make it quick to check for duplicate
     # passage sets:
     passage_id = models.CharField(max_length=203,  # 100 for reference * 2 + 3 for ' - '
+                                  blank=True,
                                   default="")
 
     language_code = models.CharField(t_lazy('versesets-language'),

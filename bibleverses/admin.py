@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib import admin
 
+from accounts.admin import account_autocomplete_widget
+
 from .models import QAPair, TextVersion, UserVerseStatus, Verse, VerseChoice, VerseSet
 from .parsing import InvalidVerseReference, parse_validated_internal_reference
 
@@ -24,10 +26,26 @@ class VerseChoiceAdminForm(forms.ModelForm):
         fields = '__all__'
 
 
+class VerseChoiceInline(admin.TabularInline):
+    model = VerseChoice
+    form = VerseChoiceAdminForm
+
+
+class VerseSetForm(forms.ModelForm):
+    class Meta:
+        model = VerseSet
+        fields = '__all__'
+        widgets = {
+            'created_by': account_autocomplete_widget(),
+        }
+
+
 class VerseSetAdmin(admin.ModelAdmin):
     list_display = ['name', 'set_type', 'date_added', 'slug', 'created_by', 'description', 'additional_info']
-    list_filter = ['set_type', 'public']
+    list_filter = ['set_type', 'public', 'language_code']
     search_fields = ['slug', 'name', 'description']
+    form = VerseSetForm
+    inlines = [VerseChoiceInline]
 
 
 def mark_missing(modeladmin, request, queryset):
