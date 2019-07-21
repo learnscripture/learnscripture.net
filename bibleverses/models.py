@@ -1160,10 +1160,12 @@ def fetch_by_localized_reference_simple_bulk(version, localized_reference_list):
     Incorrect refs due to merged verses will be corrected.
     """
     # Allow missing refs, because we need to find merged ones
-    l = (version.verse_set
-         .filter(localized_reference__in=localized_reference_list)
-         .select_related('merged_into'))
-    verse_d = {v.localized_reference: v for v in l}
+    verses = (
+        version.verse_set
+        .filter(localized_reference__in=localized_reference_list)
+        .select_related('merged_into')
+    )
+    verse_d = {v.localized_reference: v for v in verses}
 
     # Replace verses with the corrected one, as defined by 'merged_into' FK
     for ref in localized_reference_list:

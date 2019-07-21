@@ -537,9 +537,9 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         vs1 = VerseSet.objects.get(name='Psalm 23')
         i.add_verse_set(vs1)
 
-        l = i.verse_statuses_for_passage(vs1.id, NET.id)
+        uvss = i.verse_statuses_for_passage(vs1.id, NET.id)
 
-        self.assertEqual([uvs.localized_reference for uvs in l],
+        self.assertEqual([uvs.localized_reference for uvs in uvss],
                          ["Psalm 23:1",
                           "Psalm 23:2",
                           "Psalm 23:3",
@@ -548,7 +548,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
                           "Psalm 23:6"])
 
         # Now test and age them:
-        for uvs in l:
+        for uvs in uvss:
             i.record_verse_action(uvs.localized_reference, 'NET', StageType.TEST, 1.0)
 
         now = timezone.now()
@@ -564,8 +564,8 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
             next_test_due=now - timedelta(500)
         )
 
-        l = i.verse_statuses_for_passage(vs1.id, NET.id)
-        for uvs in l:
+        uvss = i.verse_statuses_for_passage(vs1.id, NET.id)
+        for uvs in uvss:
             self.assertEqual(uvs.needs_testing_individual, uvs.localized_reference == "Psalm 23:3")
             self.assertEqual(uvs.needs_testing, True)
 
@@ -839,8 +839,8 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         # Now add it
         i.add_verse_set(vs1)
 
-        l = i.verse_statuses_for_passage(vs1.id, NET.id)
-        self.assertEqual([uvs.localized_reference for uvs in l],
+        uvss = i.verse_statuses_for_passage(vs1.id, NET.id)
+        self.assertEqual([uvs.localized_reference for uvs in uvss],
                          ["Psalm 23:1",
                           "Psalm 23:2",
                           "Psalm 23:3",
@@ -859,8 +859,8 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         i.add_verse_set(vs1)
 
         # Should have all verses this time
-        l = i.verse_statuses_for_passage(vs1.id, NET.id)
-        self.assertEqual([uvs.localized_reference for uvs in l],
+        uvss = i.verse_statuses_for_passage(vs1.id, NET.id)
+        self.assertEqual([uvs.localized_reference for uvs in uvss],
                          ["Psalm 23:1",
                           "Psalm 23:2",
                           "Psalm 23:3",
