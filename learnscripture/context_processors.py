@@ -74,7 +74,7 @@ def menu(request):
 def notices(request):
     # Layer of laziness to avoid expiring notices unless actually rendered
     def get_and_mark_notices():
-        l = []
+        notices = []
         for notice in request.identity.notices.all().order_by('created'):
             if notice.seen is None:
                 notice.seen = timezone.now()
@@ -83,8 +83,8 @@ def notices(request):
                 notice.delete()
                 notice = None
             if notice is not None:
-                l.append(notice)
-        return l
+                notices.append(notice)
+        return notices
 
     def get_site_notices():
         if hasattr(request, 'identity'):

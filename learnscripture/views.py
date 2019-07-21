@@ -675,8 +675,8 @@ def verse_options(request):
 
 
 def _reduce_uvs_set_for_verse(uvss):
-    # Filters out multiple instances of non-
-    l = []
+    # Filters out multiple instances of non-passage UVSs
+    retval = []
     non_passage_seen = False
     for uvs in uvss:
         if not uvs.is_in_passage():
@@ -684,8 +684,8 @@ def _reduce_uvs_set_for_verse(uvss):
                 continue
             else:
                 non_passage_seen = True
-        l.append(uvs)
-    return l
+        retval.append(uvs)
+    return retval
 
 
 def get_default_bible_version():

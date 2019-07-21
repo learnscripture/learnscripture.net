@@ -851,9 +851,9 @@ class ESVTests(SetupEsvMixin, TestBase):
     JOHN_317_TEXT = 'For God did not send his Son into the world to condemn the world, but in order that the world might be saved through him.'
 
     def test_get_verse_list(self):
-        l = self.esv.get_verse_list('John 3:16')
+        verses = self.esv.get_verse_list('John 3:16')
         text = self.JOHN_316_TEXT
-        self.assertEqual(l[0].text, text)
+        self.assertEqual(verses[0].text, text)
         self._assert_john316_correct()
 
     def test_combo_verses(self):
@@ -862,8 +862,8 @@ class ESVTests(SetupEsvMixin, TestBase):
         self.assertEqual(d['John 3:16-17'].text, self.JOHN_316_TEXT + " " + self.JOHN_317_TEXT)
 
     def test_get_verse_list_missing(self):
-        l = self.esv.get_verse_list('John 5:4')
-        self.assertEqual(l[0].text, '')
+        verses = self.esv.get_verse_list('John 5:4')
+        self.assertEqual(verses[0].text, '')
 
         # 'missing' should be set in the DB
         verse = self.esv.verse_set.get(localized_reference='John 5:4')

@@ -376,6 +376,6 @@ def parse_break_list(breaks):
         return (bible_reference_parser_for_lang(LANGUAGE_CODE_INTERNAL, True)
                 .sep_by(string(","))).parse(breaks)
 
-    except ParseError as e:
+    except ParseError:
         raise ValueError("'{0}' is not a valid list of internal Bible references"
                          .format(breaks))
