@@ -29,7 +29,7 @@ cssselect==1.0.3          # via pyquery
 decorator==4.2.1          # via ipython, traitlets
 django-anymail==0.10
 django-appconf==1.0.2     # via django-compressor
-django-autocomplete-light==3.2.10
+django-autocomplete-light==3.4.1
 django-autoslug==1.9.4
 django-capture-tag==1.0
 django-compressor==2.2
@@ -37,17 +37,17 @@ django-debug-toolbar==1.8
 django-extensions==2.0.7
 django-functest==1.0.4
 django-js-asset==1.0.0    # via django-mptt
-django-markup==1.2
+django-markup==1.4
 django-mptt==0.9.0
 django-paypal==1.0
 django-pjax==1.4
-django-spurl==0.6.5
+django-spurl==0.6.6
 django-sql-utils==0.2.2
 django-webpack-loader==0.5.0
 django-webtest==1.9.2     # via django-functest
 django==2.1.11
-djangorestframework==3.9.1
-docutils==0.14
+djangorestframework==3.10.2
+docutils==0.15.2
 easy-thumbnails==2.5
 easyprocess==0.2.3        # via pyvirtualdisplay
 entrypoints==0.3          # via flake8
