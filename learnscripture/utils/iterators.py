@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import generator_stop
 
 
 def chunks(l, n):
@@ -10,7 +11,10 @@ def chunks(l, n):
 
 def intersperse(iterable, delimiter):
     it = iter(iterable)
-    yield next(it)
+    try:
+        yield next(it)
+    except StopIteration:
+        return
     for x in it:
         yield delimiter
         yield x
