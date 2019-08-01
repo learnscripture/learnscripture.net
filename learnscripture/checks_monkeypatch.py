@@ -21,7 +21,7 @@ run_checks = django.core.management.base.checks.run_checks
 
 
 def new_run_checks(*args, **kwargs):
-    with override(settings.LANGUAGE_CODE, deactivate=True):
+    with override(settings.LANGUAGE_CODE):
         return run_checks(*args, **kwargs)
 
 
