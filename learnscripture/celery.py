@@ -12,6 +12,8 @@ from celery.signals import task_failure
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'learnscripture.settings')
 from django.conf import settings  # noqa isort:skip
 
+from . import checks_monkeypatch  # noqa isort:skip
+
 
 @task_failure.connect
 def log_exception(
