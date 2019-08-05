@@ -96,6 +96,11 @@ site-footer-bible-texts-used = Kutsal Kitap ve ilmihal metinleri izin ile kullan
 
 site-footer-choose-language = Site arabirim dili:
 
+# Option that appears in filters that allow choosing languages, for choosing
+# any/all languages.
+site-languages-all =
+    Tümü
+
 # Caption for button that changes the language
 site-footer-choose-language-button = Seçiniz
 
@@ -136,3 +141,7 @@ site-forgot-password-button = Parolamı unuttum
 
 # Shown when the page or part of it is still loading
 site-loading-placeholder = Yükleniyor...
+
+site-wrong-or-missing-translation =
+    Çeviride sorun mu var? Düzeltmemize yardımcı olun!
+
