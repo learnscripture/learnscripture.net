@@ -1741,7 +1741,7 @@ def set_language(request):
     Save the given language in the sesison, and in the user's preferences if logged in.
     """
     next_url = request.POST.get('next', '/')
-    if not is_safe_url(next_url):
+    if not is_safe_url(next_url, settings.ALLOWED_HOSTS):
         next_url = '/'
     response = HttpResponseRedirect(next_url)
 
