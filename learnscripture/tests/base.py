@@ -43,6 +43,7 @@ def create_account(version_slug='KJV',
                    email="test1@test.com",
                    username="tëst1",
                    seen_help_tour=True,
+                   is_tester=False,
                    is_active=True):
     """
     Creates an account, returning (identity, account) tuple
@@ -51,6 +52,7 @@ def create_account(version_slug='KJV',
                                      username=username,
                                      last_login=timezone.now(),
                                      is_active=is_active,
+                                     is_tester=is_tester,
                                      )
     account.set_password('password')
     account.save()
