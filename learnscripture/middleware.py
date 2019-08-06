@@ -107,10 +107,7 @@ def pwa_tracker_middleware(get_response):
 
 def feature_flipper_middleware(get_response):
     def middleware(request):
-        try:
-            request.i18n_options_enabled = request.identity.i18n_options_enabled
-        except AttributeError:
-            request.i18n_options_enabled = False
+        request.i18n_options_enabled = True
         return get_response(request)
     return middleware
 
