@@ -12,7 +12,6 @@ from django.utils.http import urlencode
 from django.utils.translation import LANGUAGE_SESSION_KEY
 from django_ftl import override
 
-
 LANGUAGE_KEY = 'lang'
 
 
