@@ -23,6 +23,9 @@
     <a href="{% url 'choose' %}" class="btn primary large">{% ftlmsg 'home-start-learning-button' %}</a>
   </p>
 
+  {% if request.i18n_options_enabled and not request.identity %}
+    {% include "learnscripture/language_selector_inc_home.html" %}
+  {% endif %}
   <hr/>
 
   <p style="text-align: center;">
