@@ -13,6 +13,9 @@ from django.utils.translation import LANGUAGE_SESSION_KEY
 from django_ftl import override
 
 
+LANGUAGE_KEY = 'lang'
+
+
 def identity_middleware(get_response):
     from learnscripture import session
 
@@ -30,19 +33,31 @@ def identity_middleware(get_response):
 def activate_language_from_request(get_response):
     # Similar to django_ftl.middleware.activate_from_request_session, but with our defaults
     def middleware(request):
+        set_cookie = False
         identity = getattr(request, 'identity', None)
         if identity is not None:
             language_code = identity.interface_language
+        elif LANGUAGE_SESSION_KEY in request.session:
+            language_code = request.session[LANGUAGE_SESSION_KEY]
+        elif LANGUAGE_KEY in request.GET and request.GET[LANGUAGE_KEY] in settings.LANGUAGE_CODES:
+            language_code = request.GET[LANGUAGE_KEY]
+            set_cookie = True
+        elif LANGUAGE_KEY in request.COOKIES and request.COOKIES[LANGUAGE_KEY] in settings.LANGUAGE_CODES:
+            language_code = request.COOKIES[LANGUAGE_KEY]
         else:
-            language_code = request.session.get(LANGUAGE_SESSION_KEY, settings.LANGUAGE_CODE)
+            language_code = settings.LANGUAGE_CODE
+
         request.LANGUAGE_CODE = language_code
         with override(language_code, deactivate=True):
             # For some things, e.g. 'timeuntil' templatetag, it is useful to
             # have gettext translation available as well, at least
             # until we have a replacement.
             gettext_translation.activate(language_code)
-            retval = get_response(request)
-            return retval
+            response = get_response(request)
+            if set_cookie:
+                response.set_cookie(LANGUAGE_KEY, language_code)
+
+            return response
 
     return middleware
 
