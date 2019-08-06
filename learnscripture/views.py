@@ -472,10 +472,15 @@ def context_for_quick_find(request):
 
 
 def default_bible_version_for_request(request):
+    version = None
     if has_preferences(request):
-        return request.identity.default_bible_version
-    else:
-        return get_default_bible_version()
+        version = request.identity.default_bible_version
+    if version is None:
+        if request.LANGUAGE_CODE != settings.LANGUAGE_CODE:
+            version = TextVersion.objects.filter(language_code=request.LANGUAGE_CODE).order_by('id').first()
+    if version is not None:
+        return version
+    return get_default_bible_version()
 
 
 # No 'require_preferences' or 'require_identity' so that bots can browse this
@@ -736,10 +741,7 @@ def view_verse_set(request, slug):
         pass
 
     if version is None:
-        if hasattr(request, 'identity') and request.identity.default_bible_version is not None:
-            version = request.identity.default_bible_version
-        else:
-            version = get_default_bible_version()
+        version = default_bible_version_for_request(request)
 
     verse_list = get_verse_set_verse_list(version, verse_set)
     all_localized_references = [v.localized_reference for v in verse_list]
