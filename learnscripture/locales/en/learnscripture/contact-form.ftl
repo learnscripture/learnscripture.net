@@ -12,7 +12,8 @@ contact-form-name = Name
 contact-form-email = Email
 
 # Help text for the 'message' when using the contact form
-contact-form-message-help-text = If you are reporting a problem, please include a full and specific description, and include what device/browser you are using, with version numbers.
+contact-form-message = Message
+                     .help-text = If you are reporting a problem, please include a full and specific description, and include what device/browser you are using, with version numbers.
 
 # Button to send the message.
 contact-form-send-button = Send
