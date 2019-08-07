@@ -7,8 +7,6 @@ choose-page-title = Ayet seçme
 # Button/heading that displays a 'verse set' section when clicked
 choose-choose-a-verse-set-heading = Ayet dizini seç
 
-choose-browse-or-search-verse-sets = Browse or search the verse sets below:
-
 # Caption on 'search' input box
 choose-search-input = Ara:
 
