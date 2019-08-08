@@ -4,8 +4,8 @@ aldjemy==0.9.1
 -e git+https://github.com/django-ftl/python-fluent@django-ftl-0.11#egg=fluent.runtime&subdirectory=fluent.runtime
 -e git+https://github.com/django-ftl/django-ftl@283c314f2f9c7c08a0dd52defa9562a07c82c8d5#egg=django-ftl
 SQLAlchemy==1.1.10
-amqp==2.1.4
-attrs==18.2.0
+amqp==2.5.0
+attrs==19.1.0
 billiard==3.5.0.2
 celery==4.2.1
 certifi==2018.11.29
@@ -21,10 +21,10 @@ django-webpack-loader==0.5.0
 django==2.2.4
 djangorestframework==3.10.2
 docutils==0.15.2
-furl==1.0.1
+furl==2.0.0
 kombu==4.2.1
-lxml==4.2.5
-numpy==1.13.0
+lxml==4.4.0
+numpy==1.17.0
 parsy==1.3.0
 psycopg2-binary==2.8.3
 pyquery==1.4.0
