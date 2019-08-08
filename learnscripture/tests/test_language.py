@@ -3,8 +3,6 @@ from .base import WebTestBase
 
 class AccountDetailsTests(WebTestBase):
 
-    fixtures = ['test_bible_versions.json']
-
     def test_change_language(self):
         identity, account = self.create_account(is_tester=True)
         self.login(account)

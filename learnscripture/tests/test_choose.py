@@ -14,8 +14,6 @@ from .test_search import SearchTestsMixin
 
 class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTest):
 
-    fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
-
     def _get_current_identity(self):
         return Identity.objects.order_by('-date_created')[0]
 

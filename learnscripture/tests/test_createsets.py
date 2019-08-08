@@ -6,12 +6,10 @@ from bibleverses.languages import LANGUAGE_CODE_EN
 from bibleverses.models import StageType, TextVersion, VerseSet, VerseSetType
 from events.models import Event, EventType
 
-from .base import FullBrowserTest
+from .base import BibleVersesMixin, FullBrowserTest
 
 
-class CreateSetTests(FullBrowserTest):
-
-    fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
+class CreateSetTests(BibleVersesMixin, FullBrowserTest):
 
     def setUp(self):
         super(CreateSetTests, self).setUp()

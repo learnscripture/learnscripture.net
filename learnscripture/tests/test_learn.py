@@ -24,8 +24,7 @@ def prepare_identity(sender, **kwargs):
 
 
 class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
-
-    fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
+    databases = {'default', 'wordsuggestions'}
 
     kjv_john_3_16 = "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life. John 3 16"
 

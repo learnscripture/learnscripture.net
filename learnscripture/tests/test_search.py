@@ -4,18 +4,13 @@ from django_ftl import override
 from bibleverses.languages import LANGUAGE_CODE_EN, LANGUAGE_CODE_TR
 from bibleverses.models import TextVersion, VerseSet, VerseSetType, quick_find
 
-from .base import TestBase, get_or_create_any_account
+from .base import BibleVersesMixin, TestBase, get_or_create_any_account
 
 
-class SearchTestsMixin(object):
-
-    fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
+class SearchTestsMixin(BibleVersesMixin):
 
     def setUp(self):
         super(SearchTestsMixin, self).setUp()
-        self.KJV = TextVersion.objects.get(slug='KJV')
-        self.NET = TextVersion.objects.get(slug='NET')
-        self.TCL02 = TextVersion.objects.get(slug='TCL02')
         for tv in TextVersion.objects.all():
             tv.update_text_search(tv.verse_set.all())
 
