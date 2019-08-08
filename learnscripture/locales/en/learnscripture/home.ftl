@@ -1,8 +1,8 @@
 ### Home page text.
 
-home-bible-text = Take up the whole armor of God
+home-bible-text = Let the word of Christ dwell in you richly
 
-home-bible-reference = Ephesians 6:13
+home-bible-reference = Colossians 3:16
 
 home-strapline = The easiest way to memorize the Word of God online.
 
