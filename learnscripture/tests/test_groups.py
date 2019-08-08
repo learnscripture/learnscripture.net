@@ -24,8 +24,6 @@ def create_group(**fields):
 
 class GroupPageTestsBase(RequireExampleVerseSetsMixin):
 
-    fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
-
     def test_join(self):
         identity, account = self.create_account()
         self.login(account)
@@ -265,8 +263,6 @@ class GroupTests(AccountTestMixin, TestBase):
 
 
 class GroupCreatePageTests(RequireExampleVerseSetsMixin, FullBrowserTest):
-
-    fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
 
     def test_create(self):
         identity, account = self.create_account()

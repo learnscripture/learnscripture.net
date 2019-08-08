@@ -11,10 +11,10 @@ from bibleverses.parsing import (ParsedReference, internalize_localized_referenc
                                  parse_unvalidated_localized_reference, parse_validated_localized_reference)
 from bibleverses.suggestions.modelapi import create_word_suggestion_data, item_suggestions_need_updating
 
-from .base import AccountTestMixin, TestBase, get_or_create_any_account
+from .base import AccountTestMixin, BibleVersesMixin, TestBase, get_or_create_any_account
 
 
-class RequireExampleVerseSetsMixin(object):
+class RequireExampleVerseSetsMixin(BibleVersesMixin):
     SETS = [
         (VerseSetType.SELECTION,
          "Bible 101",
@@ -39,7 +39,7 @@ class RequireExampleVerseSetsMixin(object):
     ]
 
     def setUp(self):
-        super(RequireExampleVerseSetsMixin, self).setUp()
+        super().setUp()
         for set_type, name, slug, description, verse_choices in self.SETS:
             self.create_verse_set(set_type, name, slug, description, verse_choices)
 
@@ -62,12 +62,10 @@ class RequireExampleVerseSetsMixin(object):
         return vs
 
 
-class VerseTests(TestBase):
-
-    fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
+class VerseTests(BibleVersesMixin, TestBase):
 
     def test_mark_missing(self):
-        version = TextVersion.objects.get(slug='NET')
+        version = self.NET
         # Sanity check:
         self.assertEqual(
             version.verse_set.get(localized_reference="John 3:16").missing,
@@ -94,7 +92,7 @@ class VerseTests(TestBase):
             0)
 
     def test_get_unmerged_parts(self):
-        version = TextVersion.objects.get(slug='TCL02')
+        version = self.TCL02
 
         v1 = version.verse_set.get(localized_reference='Romalılar 3:24')
         with self.assertNumQueries(0):
@@ -107,15 +105,12 @@ class VerseTests(TestBase):
                              ['Romalılar 3:25', 'Romalılar 3:26'])
 
 
-class VersionTests(TestBase):
-
-    fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
+class VersionTests(BibleVersesMixin, TestBase):
+    databases = {'default', 'wordsuggestions'}
 
     def setUp(self):
         super(VersionTests, self).setUp()
-        # WSD doesn't get torn down correctly, so do setup each time.
-        version = TextVersion.objects.get(slug='KJV')
-        version.word_suggestion_data.delete()
+        version = self.KJV
 
         def t(ref):
             return version.verse_set.get(localized_reference=ref).suggestion_text
@@ -131,8 +126,6 @@ class VersionTests(TestBase):
                                     localized_reference='Genesis 1:3',
                                     text=t('Genesis 1:3'),
                                     suggestions=self._gen_1_3_suggestions())
-        self.KJV = TextVersion.objects.get(slug='KJV')
-        self.TCL02 = TextVersion.objects.get(slug='TCL02')
 
     def test_no_chapter(self):
         self.assertRaises(InvalidVerseReference, lambda: self.KJV.get_verse_list('Genesis'))
@@ -703,12 +696,9 @@ class GetPassageSectionsTests(unittest2.TestCase):
                            "Genesis 1:5"]])
 
 
-class IsContinuousSetTests(TestBase):
-    fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
-
+class IsContinuousSetTests(BibleVersesMixin, TestBase):
     def test_is_continuous_set_1(self):
-        KJV = TextVersion.objects.get(slug='KJV')
-        verse_list = list(KJV.verse_set
+        verse_list = list(self.KJV.verse_set
                           .filter(localized_reference__in=[
                               'Genesis 1:1',
                               'Genesis 1:2',
@@ -717,8 +707,7 @@ class IsContinuousSetTests(TestBase):
         self.assertTrue(is_continuous_set(verse_list))
 
     def test_is_continuous_set_2(self):
-        KJV = TextVersion.objects.get(slug='KJV')
-        verse_list = list(KJV.verse_set
+        verse_list = list(self.KJV.verse_set
                           .filter(localized_reference__in=[
                               'Genesis 1:1',
                               'Genesis 1:2',
@@ -727,8 +716,7 @@ class IsContinuousSetTests(TestBase):
         self.assertFalse(is_continuous_set(verse_list))
 
     def test_is_continuous_set_3(self):
-        TCL02 = TextVersion.objects.get(slug='TCL02')
-        verse_list = list(TCL02.verse_set
+        verse_list = list(self.TCL02.verse_set
                           .filter(localized_reference__in=[
                               'Romalılar 3:24',
                               'Romalılar 3:25-26',
@@ -737,8 +725,7 @@ class IsContinuousSetTests(TestBase):
         self.assertTrue(is_continuous_set(verse_list))
 
     def test_is_continuous_set_4(self):
-        TCL02 = TextVersion.objects.get(slug='TCL02')
-        verse_list = list(TCL02.verse_set
+        verse_list = list(self.TCL02.verse_set
                           .filter(localized_reference__in=[
                               'Yuhanna 3:16',
                               'Romalılar 3:24',
@@ -749,8 +736,6 @@ class IsContinuousSetTests(TestBase):
 
 class UserVerseStatusTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
     # Many other tests for this model are found in test_identity
-
-    fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
 
     def test_passage_and_section_localized_reference(self):
         # Setup to create UVSs

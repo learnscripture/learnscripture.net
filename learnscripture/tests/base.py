@@ -8,6 +8,7 @@ from unittest.case import _UnexpectedSuccess
 
 import selenium
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from django.core.management import call_command
 from django.db.models import F
 from django.test import TestCase
 from django.utils import timezone
@@ -79,9 +80,71 @@ def get_or_create_any_account(**kwargs):
     return account
 
 
-class AccountTestMixin(object):
+# These mixins workaround the fact that `fixtures` attribute does not work for
+# us, because Django tries to load fixtures into all DBs if we have `databases
+# == '__all__'` set (which is needed for some tests)
 
-    fixtures = ['test_bible_versions.json']
+class Fixtures:
+    # setUpTestData only works for TestCase subclasses. So we add a setUp to
+    # cover TransactionTestCase
+    @classmethod
+    def setUpTestData(cls):
+        super(Fixtures, cls).setUpTestData()
+        cls.setUpFixtures()
+
+    def setUp(self):
+        super(Fixtures, self).setUp()
+        if not isinstance(self, TestCase):
+            self.setUpFixtures()
+
+    @classmethod
+    def setUpFixtures(cls):
+        pass
+
+
+class TextVersionsMixin(Fixtures):
+    @classmethod
+    def setUpFixtures(cls):
+        super(TextVersionsMixin, cls).setUpFixtures()
+        cls.KJV = TextVersion.objects.create(
+            full_name="King James Version",
+            slug="KJV",
+            short_name="KJV",
+            language_code="en",
+        )
+
+        cls.NET = TextVersion.objects.create(
+            full_name="New English Translation",
+            slug="NET",
+            short_name="NET",
+            language_code="en",
+        )
+
+        cls.TCL02 = TextVersion.objects.create(
+            full_name="Kutsal Kitap Yeni Çeviri",
+            slug="TCL02",
+            short_name="TCL02",
+            language_code="tr"
+        )
+
+
+class BibleVersesMixin(TextVersionsMixin):
+    @classmethod
+    def setUpFixtures(cls):
+        super(BibleVersesMixin, cls).setUpFixtures()
+        call_command('loaddata', 'test_bible_verses.json', verbosity=0)
+
+
+class CatechismsMixin(Fixtures):
+    @classmethod
+    def setUpFixtures(cls):
+        super(CatechismsMixin, cls).setUpFixtures()
+        # This works, where `fixtures` attribute does not, because Django tries
+        # to load fixtures into all DBs.
+        call_command('loaddata', 'test_catechisms.json', verbosity=0)
+
+
+class AccountTestMixin(TextVersionsMixin):
 
     def create_identity(self, **kwargs):
         return create_identity(**kwargs)

@@ -72,7 +72,7 @@ if LIVEBOX:
     }
     SECRET_KEY = secrets["PRODUCTION_SECRET_KEY"]
     SENTRY_DSN = secrets["PRODUCTION_SENTRY_DSN"]
-    EMAIL_BACKEND = "anymail.backends.mailgun.MailgunBackend"
+    EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
     ANYMAIL = {
         "MAILGUN_API_KEY": MAILGUN_API_KEY,
     }

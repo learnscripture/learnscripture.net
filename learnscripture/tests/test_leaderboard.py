@@ -6,7 +6,7 @@ from groups.models import Group
 from learnscripture.tests.base import TestBase
 from scores.models import ScoreReason, get_verses_finished_count, get_verses_started_counts, get_verses_started_per_day
 
-from .base import AccountTestMixin
+from .base import AccountTestMixin, BibleVersesMixin
 
 
 class LeaderboardTests(TestBase):
@@ -46,9 +46,7 @@ class LeaderboardTests(TestBase):
         self.assertNotContains(resp, self.a2.username)
 
 
-class VerseCountTests(AccountTestMixin, TestBase):
-
-    fixtures = AccountTestMixin.fixtures + ['test_bible_verses.json']
+class VerseCountTests(BibleVersesMixin, AccountTestMixin, TestBase):
 
     def _create_overlapping_verse_sets(self, account):
         vs1 = VerseSet.objects.create(name="Psalm 23:1-3",

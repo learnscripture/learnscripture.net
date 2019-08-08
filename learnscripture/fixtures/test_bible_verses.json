@@ -313,7 +313,9 @@
             "chapter_number": 23,
             "text_saved": "The LORD is my shepherd, I lack nothing. ",
             "book_number": 18,
-            "version": 2,
+            "version": [
+                "NET"
+            ],
             "first_verse_number": 1,
             "last_verse_number": 1,
             "bible_verse_number": 14236,
@@ -328,7 +330,9 @@
             "chapter_number": 23,
             "text_saved": "He takes me to lush pastures, he leads me to refreshing water. ",
             "book_number": 18,
-            "version": 2,
+            "version": [
+                "NET"
+            ],
             "first_verse_number": 2,
             "last_verse_number": 2,
             "bible_verse_number": 14237,
@@ -343,7 +347,9 @@
             "chapter_number": 23,
             "text_saved": "He restores my strength. He leads me down the right paths for the sake of his reputation. ",
             "book_number": 18,
-            "version": 2,
+            "version": [
+                "NET"
+            ],
             "first_verse_number": 3,
             "last_verse_number": 3,
             "bible_verse_number": 14238,
@@ -358,7 +364,9 @@
             "chapter_number": 23,
             "text_saved": "Even when I must walk through the darkest valley, I fear no danger, for you are with me; your rod and your staff reassure me. ",
             "book_number": 18,
-            "version": 2,
+            "version": [
+                "NET"
+            ],
             "first_verse_number": 4,
             "last_verse_number": 4,
             "bible_verse_number": 14239,
@@ -373,7 +381,9 @@
             "chapter_number": 23,
             "text_saved": "You prepare a feast before me in plain sight of my enemies. You refresh my head with oil; my cup is completely full. ",
             "book_number": 18,
-            "version": 2,
+            "version": [
+                "NET"
+            ],
             "first_verse_number": 5,
             "last_verse_number": 5,
             "bible_verse_number": 14240,
@@ -388,7 +398,9 @@
             "chapter_number": 23,
             "text_saved": "Surely your goodness and faithfulness will pursue me all my days, and I will live in the LORD's house for the rest of my life. ",
             "book_number": 18,
-            "version": 2,
+            "version": [
+                "NET"
+            ],
             "first_verse_number": 6,
             "last_verse_number": 6,
             "bible_verse_number": 14241,
@@ -420,7 +432,9 @@
             "chapter_number": 3,
             "text_saved": "For this is the way God loved the world: He gave his one and only Son, so that everyone who believes in him will not perish but have eternal life. ",
             "book_number": 42,
-            "version": 2,
+            "version": [
+                "NET"
+            ],
             "first_verse_number": 16,
             "last_verse_number": 16,
             "bible_verse_number": 26136,
@@ -452,7 +466,9 @@
             "chapter_number": 14,
             "text_saved": "Jesus replied, \"I am the way, and the truth, and the life. No one comes to the Father except through me.\"",
             "book_number": 42,
-            "version": 2,
+            "version": [
+                "NET"
+            ],
             "first_verse_number": 6,
             "last_verse_number": 6,
             "bible_verse_number": 26674,
@@ -467,7 +483,9 @@
             "chapter_number": 5,
             "text_saved": "A great number of sick, blind, lame, and paralyzed people were lying in these walkways.",
             "book_number": 42,
-            "version": 2,
+            "version": [
+                "NET"
+            ],
             "first_verse_number": 3,
             "last_verse_number": 3,
             "bible_verse_number": 26213,
@@ -482,7 +500,9 @@
             "chapter_number": 5,
             "text_saved": "",
             "book_number": 42,
-            "version": 2,
+            "version": [
+                "NET"
+            ],
             "first_verse_number": 3,
             "last_verse_number": 3,
             "bible_verse_number": 26214,
@@ -565,7 +585,9 @@
             "chapter_number": 4,
             "text_saved": "Going on from there he saw two other brothers, James the son of Zebedee and John his brother, in a boat with Zebedee their father, mending their nets. Then he called them. ",
             "book_number": 39,
-            "version": 2,
+            "version": [
+                "NET"
+            ],
             "first_verse_number": 21,
             "last_verse_number": 21,
             "bible_verse_number": 23230,
@@ -733,7 +755,9 @@
             "chapter_number": 3,
             "text_saved": "Ama \u015fimdi Yasa'dan ba\u011f\u0131ms\u0131z olarak Tanr\u0131'n\u0131n insan\u0131 nas\u0131l aklayaca\u011f\u0131 a\u00e7\u0131kland\u0131. Yasa ve peygamberler buna tan\u0131kl\u0131k ediyor.",
             "book_number": 44,
-            "version": 3,
+            "version": [
+                "TCL02"
+            ],
             "first_verse_number": 21,
             "last_verse_number": 21,
             "bible_verse_number": 27000,
