@@ -23,12 +23,12 @@ so that you don't have to press F5 manually, but is currently a bit buggy
 Celery
 ------
 
-In development, Celery tasks are run with ``CELERY_ALWAYS_EAGER = True``. This
+In development, Celery tasks are run with ``CELERY_TASK_ALWAYS_EAGER = True``. This
 makes it easier to spot bugs that are introduced in background tasks, because
 they don't happen in the background. No Celery process is needed to run the
 tasks.
 
-If you want to run a real Celery process, set ``CELERY_ALWAYS_EAGER = False``
+If you want to run a real Celery process, set ``CELERY_TASK_ALWAYS_EAGER = False``
 and run something like::
 
 
@@ -36,7 +36,8 @@ and run something like::
 
 
 You will also need to setup rabbitmq-server locally to do this. See
-``fabfile.py`` for details.
+``fabfile.py`` for details on how to configure rabbitmq. Use /celery-debug/ URL
+for debugging.
 
 uwsgi
 -----
