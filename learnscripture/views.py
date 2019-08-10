@@ -1766,6 +1766,8 @@ def celery_debug(request):
 
 
 def debug(request):
+    if 'crash' in request.GET:
+        raise AssertionError("Crash!")
     return TemplateResponse(request, "learnscripture/debug.html", {})
 
 
