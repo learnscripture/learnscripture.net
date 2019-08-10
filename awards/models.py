@@ -312,7 +312,8 @@ class RecruiterAward(CountBasedAward):
     def full_description(self):
         url = reverse('referral_program')
         if self.level is AnyLevel:
-            return t('awards-recruiter-award-general-description-html')
+            return t('awards-recruiter-award-general-description-html',
+                     dict(url=url))
         return t('awards-recruiter-award-level-n-description-html',
                  dict(url=url, count=self.count))
 
