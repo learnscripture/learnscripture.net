@@ -57,16 +57,7 @@ class ParsedReference(object):
         return retval
 
     def _clone(self, **kwargs):
-        self_kwargs = dict(
-            language_code=self.language_code,
-            book_name=self.book_name,
-            start_chapter=self.start_chapter,
-            start_verse=self.start_verse,
-            end_chapter=self.end_chapter,
-            end_verse=self.end_verse,
-        )
-        self_kwargs.update(kwargs)
-        return ParsedReference(**self_kwargs)
+        return attr.evolve(self, **kwargs)
 
     def translate_to(self, language_code):
         return self._clone(
