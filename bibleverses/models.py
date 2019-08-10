@@ -6,6 +6,7 @@ import random
 from collections import defaultdict
 from functools import reduce
 
+import attr
 from autoslug import AutoSlugField
 from django.contrib.postgres.fields import JSONField
 from django.db import models
@@ -584,24 +585,32 @@ class VerseSetQuerySet(models.QuerySet):
             if parsed_ref is not None:
                 if parsed_ref.start_verse is None:
                     # To find a whole chapter, look for sets containing first verse.
-                    parsed_ref.start_verse = 1
+                    search_parsed_ref = attr.evolve(parsed_ref, start_verse=1)
                     # But limit to only passage types, otherwise we'll get false
                     # positives for selection sets that contain other verses
                     # from that chapter.
-                    set_types = [
-                        VerseSetType.PASSAGE
-                    ]
+                    results.append(initial_verse_sets.filter(
+                        set_type=VerseSetType.PASSAGE,
+                        verse_choices__internal_reference=search_parsed_ref.to_internal().canonical_form())
+                    )
                 else:
-                    set_types = [
-                        VerseSetType.SELECTION,
-                        VerseSetType.PASSAGE
-                    ]
-
-                results.append(initial_verse_sets.filter(
-                    set_type__in=set_types,
-                    verse_choices__internal_reference=parsed_ref.to_internal().canonical_form())
-                )
-
+                    if parsed_ref.get_start() != parsed_ref.get_end():
+                        # Looks like passage ref:
+                        results.append(initial_verse_sets.filter(
+                            set_type=VerseSetType.PASSAGE,
+                            passage_id=make_verse_set_passage_id(
+                                parsed_ref.get_start().to_internal(),
+                                parsed_ref.get_end().to_internal()
+                            )
+                        ))
+                    else:
+                        results.append(initial_verse_sets.filter(
+                            set_type__in=[
+                                VerseSetType.SELECTION,
+                                VerseSetType.PASSAGE
+                            ],
+                            verse_choices__internal_reference=parsed_ref.to_internal().canonical_form())
+                        )
             else:
                 results.append(initial_verse_sets.filter(name__icontains=query))
         if results:
@@ -741,9 +750,17 @@ def verse_set_smart_name(verse_set_name, verse_set_language_code, required_langu
 
 
 def make_verse_set_passage_id(start_internal_reference, end_internal_reference):
+    if isinstance(start_internal_reference, ParsedReference):
+        parsed_start_ref = start_internal_reference
+    else:
+        parsed_start_ref = parse_validated_internal_reference(start_internal_reference)
+    if isinstance(end_internal_reference, ParsedReference):
+        parsed_end_ref = end_internal_reference
+    else:
+        parsed_end_ref = parse_validated_internal_reference(end_internal_reference)
     return ParsedReference.from_start_and_end(
-        parse_validated_internal_reference(start_internal_reference),
-        parse_validated_internal_reference(end_internal_reference),
+        parsed_start_ref,
+        parsed_end_ref,
     ).canonical_form()
 
 

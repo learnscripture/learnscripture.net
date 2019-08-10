@@ -533,9 +533,8 @@ def choose(request):
                 return learn_set(request, [identity.add_verse_choice(ref, version=version)],
                                  session.LearningType.LEARNING)
 
-    # Searching for verse sets is done via this view.
-    # But looking up individual verses is done by AJAX,
-    # so is missing here.
+    # Searching for verse sets is done via this view. But looking up individual
+    # verses is done by AJAX, so is missing here.
 
     active_section = None
     verseset_search_form = VerseSetSearchForm.from_request_data(
