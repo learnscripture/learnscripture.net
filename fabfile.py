@@ -495,7 +495,9 @@ def deploy():
     restart_all()
     delete_old_versions()
     push_to_central_vcs()  # push tags
-    create_sentry_release(target.version, target.version)
+    # See also logic in settings.py for creating release name
+    release = "learnscripturenet@" + target.version
+    create_sentry_release(release, target.version)
 
 
 @task
