@@ -379,9 +379,11 @@ if (DEBUG or TESTING or any(a in sys.argv for a in ['setup_bibleverse_suggestion
     }
 else:
     if SENTRY_DSN:
+        release = subprocess.check_output(['hg', 'id', '-id']).strip()
         sentry_sdk.init(
             dsn=SENTRY_DSN,
-            integrations=[DjangoIntegration(), CeleryIntegration()]
+            integrations=[DjangoIntegration(), CeleryIntegration()],
+            release=release,
         )
 
 
