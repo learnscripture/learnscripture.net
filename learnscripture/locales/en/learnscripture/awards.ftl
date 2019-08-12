@@ -27,7 +27,7 @@ awards-social-media-default-message = I just earned a badge: { $award }
 # Page title
 awards-page-title = Badges
 
-awards-the-following-are-available = The following badges are available.
+awards-the-following-are-available = The following badges are available:
 
 
 # Caption in table header for award name/icon
@@ -106,7 +106,7 @@ awards-you-have-this-award-at-level = You have this badge, at level { $level }.
 awards-you-have-this-award = You have this badge.
 
 # Used when the user doesn't have the award
-awards-you-dont-have-this-badge = You don't have this badge yet.
+awards-you-dont-have-this-award = You don't have this badge yet.
 
 # Message used when trying to view some old awards
 awards-removed = The ‘{ $name }’ badge is an old badge that is no longer used

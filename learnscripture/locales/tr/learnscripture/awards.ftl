@@ -28,7 +28,7 @@ awards-social-media-default-message = Ben bir rozet kazandım: { $award }
 # Page title
 awards-page-title = Rozetler
 
-awards-the-following-are-available = Alabileceğiniz rozetler
+awards-the-following-are-available = Alabileceğiniz rozetler:
 
 
 # Caption in table header for award name/icon
@@ -101,7 +101,7 @@ awards-you-have-this-award-at-level = { $level } seviyesinde bu rozete sahipsini
 awards-you-have-this-award = Bu rozete sahipsiniz.
 
 # Used when the user doesn't have the award
-awards-you-dont-have-this-badge = Bu rozete henüz sahip değilsiniz.
+awards-you-dont-have-this-award = Bu rozete henüz sahip değilsiniz.
 
 # Message used when trying to view some old awards
 awards-removed = ‘{ $name }’ rozeti artık verilmemektedir.
