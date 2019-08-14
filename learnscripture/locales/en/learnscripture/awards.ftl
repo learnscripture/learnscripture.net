@@ -193,7 +193,7 @@ awards-ace-award-level-1-description = Achieved 100% in a test
 # Description for a specific level.
 # $count is the number of times in a row they got 100%,
 # will always be greater than 1.
-awards-ace-award-level-n-description = Achieved 100%% in a test { $count } times in a row
+awards-ace-award-level-n-description = Achieved 100% in a test { $count } times in a row
 
 
 ## 'Recruiter' award.
