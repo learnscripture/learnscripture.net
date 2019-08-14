@@ -1024,3 +1024,4 @@ def create_sentry_release(version, last_commit):
     local("sentry-cli releases --org learnscripturenet new -p production {version}".format(version=version))
     local('sentry-cli releases --org learnscripturenet set-commits --commit "learnscripture/learnscripture.net@{commit}" {version}'
           .format(version=version, commit=full_hash))
+    local("sentry-cli releases --org learnscripturenet finalize {version}".format(version=version))
