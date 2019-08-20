@@ -354,7 +354,7 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
 
     # Higher level, learnscripture specific things:
 
-    def set_preferences(self, wait_for_reload=False):
+    def set_preferences(self, wait_for_reload=False, bible_version="KJV (King James Version)"):
         """
         Fill in preferences if preferences form is visible.
         """
@@ -368,7 +368,7 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
             context = null_context()
 
         with context:
-            self.fill_by_text({"#id_default_bible_version": "KJV (King James Version)"})
+            self.fill_by_text({"#id_default_bible_version": bible_version})
 
             if self.is_element_present('#id-preferences-save-btn'):
                 # side panel
