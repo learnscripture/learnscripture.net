@@ -58,6 +58,9 @@ events-user-created-group-html = { $username } created group { $group }
 # Notice in news items when a user comments on an event
 events-comment-on-activity-html = { $username } posted a <a href="{ $comment_url }">comment</a> on { $other_user }'s activity
 
+# Notice in news items when a user comments on their own event
+events-comment-on-own-activity-html = { $username } posted a <a href="{ $comment_url }">comment</a> on their activity
+
 # Notice in news items when a user comments on a group wall
 events-comment-on-group-wall-html = { $username } posted a <a href="{ $comment_url }">comment</a> on { $group }'s wall
 
