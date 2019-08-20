@@ -105,7 +105,7 @@ site-languages-all =
 site-footer-choose-language-button = Seçiniz
 
 
-site-logout-confirm-prompt = Are you sure you want to log out?
+site-logout-confirm-prompt = Çıkış yapmak istediğinizden emin misiniz?
 
 # Caption on box that shows link for sharing the page URL
 site-share-link = Sayfayı paylaş:
