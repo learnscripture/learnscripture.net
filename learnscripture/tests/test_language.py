@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django_functest import FuncBaseMixin
 
-from .base import AccountTestMixin, FullBrowserTest, WebTestBase
+from .base import AccountTestMixin, BibleVersesMixin, FullBrowserTest, WebTestBase
 
 
 class LanguageTestsBase(AccountTestMixin, FuncBaseMixin):
@@ -26,7 +26,7 @@ class LanguageTestsWT(LanguageTestsBase, WebTestBase):
     pass
 
 
-class LanguageTestsFB(LanguageTestsBase, FullBrowserTest):
+class LanguageTestsFB(LanguageTestsBase, BibleVersesMixin, FullBrowserTest):
     def test_change_language_redirect(self):
         self.get_url('choose')
         self.click("#id-choose-verseset .accordion-heading")
@@ -37,3 +37,15 @@ class LanguageTestsFB(LanguageTestsBase, FullBrowserTest):
         self.submit('#id-language-chooser-form [type="submit"]')
         self.assertTextPresent("Ayet seçme")
         self.assertUrlsEqual(self.current_url, url)
+
+    def test_setting_preferences_remembers_default_language(self):
+        self.get_url('home')
+        self.click('a[data-set-lang="tr"]')
+        self.click('.maincontent a[href="/choose/"]')
+        self.click('#id-choose-individual > button')
+        self.fill({'#id_quick_find': 'Mezmur 23:1'})
+        self.click('#id_lookup')
+        self.click('[name="learn_now"]')
+        self.set_preferences(bible_version="TCL02 (Kutsal Kitap Yeni Çeviri)")
+        self.wait_until_loaded('.help-tour-welcome')
+        self.assertTextPresent("Selam! Bu gezinti size çalışma sayfası arabirimini tanıtır.")
