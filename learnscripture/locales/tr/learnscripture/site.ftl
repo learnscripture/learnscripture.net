@@ -90,7 +90,7 @@ site-footer-bible-versions = Kutsal Kitap çevirileri
 site-footer-referral-program = Tanıtım programı
 
 # Link in the footer to page for contacting learnscripture
-site-footer-contact-us = Bizimle irtiabat geçin
+site-footer-contact-us = Bizimle irtibata geçin
 
 site-footer-bible-texts-used = Kutsal Kitap ve ilmihal metinleri izin ile kullanıldı:
 
