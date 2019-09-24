@@ -1,8 +1,8 @@
 ### Home page text.
 
-home-bible-text = Tanrı’nın bütün silahlarını Kuşanın
+home-bible-text = Mesih'in sözü bütün zenginliğiyle içinizde yaşasın.
 
-home-bible-reference = Efesliler 6:13
+home-bible-reference = Koloseliler 3:16
 
 home-strapline = Çevrimiçi Tanrı’nın sözünü ezberlemenin en kolay yolu.
 

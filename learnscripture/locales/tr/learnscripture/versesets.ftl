@@ -12,6 +12,10 @@ versesets-additional-info = Ek bilgi
 # Caption for the 'public' field when creating a Verse Set
 versesets-public = Kamuoyuna aç (geri alınamaz)
 
+# Caption for the 'language' field of verse sets.
+versesets-language = Dil
+    .help-text = ‘{ versesets-name }’, ‘{ versesets-description }’ ve ‘{ versesets-additional-info }’ alanlarında kullanılan dil.
+
 ## Searching and filtering verse sets.
 
 # Caption for the search input box for searching for verse sets

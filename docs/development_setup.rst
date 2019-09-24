@@ -60,8 +60,9 @@ installed.
      cd tests
      elm-install
 
-   Also currently need to install elm-fluent using pipx
-   (because its dependencies clash with other Python libraries we need)
+   Install ``sentry-cli`` into $VIRTUAL_ENV/bin:
+
+      https://github.com/getsentry/sentry-cli/releases/
 
 5. Create postgres databases matching the development ones in
    ``learnscripture/settings.py``, both for ``learnscripture`` and

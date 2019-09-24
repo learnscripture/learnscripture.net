@@ -7,8 +7,6 @@ choose-page-title = Choose verses
 # Button/heading that displays a 'verse set' section when clicked
 choose-choose-a-verse-set-heading = Choose a verse set
 
-choose-browse-or-search-verse-sets = Browse or search the verse sets below:
-
 # Caption on 'search' input box
 choose-search-input = Search:
 

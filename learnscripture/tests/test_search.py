@@ -4,23 +4,21 @@ from django_ftl import override
 from bibleverses.languages import LANGUAGE_CODE_EN, LANGUAGE_CODE_TR
 from bibleverses.models import TextVersion, VerseSet, VerseSetType, quick_find
 
-from .base import TestBase, get_or_create_any_account
+from .base import BibleVersesMixin, TestBase, get_or_create_any_account
 
 
-class SearchTestsMixin(object):
-
-    fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
+class SearchTestsMixin(BibleVersesMixin):
 
     def setUp(self):
         super(SearchTestsMixin, self).setUp()
-        self.KJV = TextVersion.objects.get(slug='KJV')
-        self.NET = TextVersion.objects.get(slug='NET')
-        self.TCL02 = TextVersion.objects.get(slug='TCL02')
         for tv in TextVersion.objects.all():
             tv.update_text_search(tv.verse_set.all())
 
 
 class SearchTests(SearchTestsMixin, TestBase):
+    """
+    Tests for verse set search functionality
+    """
     def setUp(self):
         super().setUp()
         self.account = get_or_create_any_account()
@@ -122,8 +120,27 @@ class SearchTests(SearchTestsMixin, TestBase):
                                                  "Mz 23", default_language_code='en')
         self.assertEqual(set(results5), set([vs1, vs2]))
 
+    def test_search_full_passage(self):
+        vs1 = VerseSet.objects.create(name="The Lord is my shepherd",
+                                      slug="the-lord-is-my-shepherd",
+                                      public=True,
+                                      language_code='en',
+                                      set_type=VerseSetType.PASSAGE,
+                                      created_by=self.account)
+        vs1.set_verse_choices([
+            "BOOK18 23:1",
+            "BOOK18 23:2",
+            "BOOK18 23:3",
+        ])
+        results1 = VerseSet.objects.all().search([LANGUAGE_CODE_EN],
+                                                 "Psalm 23:1-3", default_language_code='tr')
+        self.assertEqual(set(results1), set([vs1]))
+
 
 class QuickFindTests(SearchTestsMixin, TestBase):
+    """
+    Test for verse search / quick find functionality
+    """
 
     def test_quick_find_text(self):
         version = self.KJV

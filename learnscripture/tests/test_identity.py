@@ -14,13 +14,13 @@ from bibleverses.models import (MemoryStage, StageType, TextVersion, Verse, Vers
 from bibleverses.parsing import internalize_localized_reference
 from events.models import Event, EventType
 
-from .base import AccountTestMixin, FuzzyInt, TestBase, get_or_create_any_account
+from .base import AccountTestMixin, BibleVersesMixin, CatechismsMixin, FuzzyInt, TestBase, get_or_create_any_account
 from .test_bibleverses import RequireExampleVerseSetsMixin
 
 
-class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
+class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMixin, BibleVersesMixin, TestBase):
 
-    fixtures = AccountTestMixin.fixtures + ['test_bible_verses.json', 'test_catechisms.json']
+    databases = {'default', 'wordsuggestions'}
 
     def test_add_verse_set(self):
         i = self.create_identity()
@@ -275,7 +275,6 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         self.assertEqual([], list(i.bible_verse_statuses_for_reviewing()))
 
     def test_passages_for_learning(self):
-        KJV = TextVersion.objects.get(slug='KJV')
         i = self.create_identity(version_slug='NET')
 
         with self.assertNumQueries(1):  # Just 1 query when nothing being learnt
@@ -287,7 +286,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         with self.assertNumQueries(3):  # 1 base query, 2 for each passage
             i.passages_for_learning()
 
-        i.add_verse_set(vs1, KJV)
+        i.add_verse_set(vs1, self.KJV)
 
         i.record_verse_action('Psalm 23:1', 'NET', StageType.TEST, 1.0)
         with self.assertNumQueries(5):
@@ -423,10 +422,8 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
     def test_passages_for_reviewing_and_learning_multiple_versions(self):
         i = self.create_identity(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Psalm 23')
-        NET = TextVersion.objects.get(slug='NET')
-        TCL02 = TextVersion.objects.get(slug='TCL02')
-        vss1 = i.add_verse_set(vs1, version=NET)
-        vss2 = i.add_verse_set(vs1, version=TCL02)
+        vss1 = i.add_verse_set(vs1, version=self.NET)
+        vss2 = i.add_verse_set(vs1, version=self.TCL02)
 
         self.assertEqual(len(vss1), 6)
         self.assertEqual(len(vss2), 6)
@@ -533,13 +530,12 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
 
     def test_verse_statuses_for_passage(self):
         i = self.create_identity(version_slug='NET')
-        NET = TextVersion.objects.get(slug='NET')
         vs1 = VerseSet.objects.get(name='Psalm 23')
         i.add_verse_set(vs1)
 
-        l = i.verse_statuses_for_passage(vs1.id, NET.id)
+        uvss = i.verse_statuses_for_passage(vs1.id, self.NET.id)
 
-        self.assertEqual([uvs.localized_reference for uvs in l],
+        self.assertEqual([uvs.localized_reference for uvs in uvss],
                          ["Psalm 23:1",
                           "Psalm 23:2",
                           "Psalm 23:3",
@@ -548,7 +544,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
                           "Psalm 23:6"])
 
         # Now test and age them:
-        for uvs in l:
+        for uvs in uvss:
             i.record_verse_action(uvs.localized_reference, 'NET', StageType.TEST, 1.0)
 
         now = timezone.now()
@@ -564,13 +560,12 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
             next_test_due=now - timedelta(500)
         )
 
-        l = i.verse_statuses_for_passage(vs1.id, NET.id)
-        for uvs in l:
+        uvss = i.verse_statuses_for_passage(vs1.id, self.NET.id)
+        for uvs in uvss:
             self.assertEqual(uvs.needs_testing_individual, uvs.localized_reference == "Psalm 23:3")
             self.assertEqual(uvs.needs_testing, True)
 
     def test_get_next_section(self):
-        NET = TextVersion.objects.get(slug='NET')
         i = self.create_identity(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Psalm 23')
         vs1.breaks = "BOOK18 23:3,BOOK18 23:5"  # break at v3 and v5 - unrealistic!
@@ -613,7 +608,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         self.assertEqual(vss[0].next_section_verse_count, 2)
 
         # Now test verse_statuses_for_passage/get_next_section in this context:
-        uvss1 = i.verse_statuses_for_passage(vs1.id, NET.id)
+        uvss1 = i.verse_statuses_for_passage(vs1.id, self.NET.id)
         uvss1 = i.get_next_section(uvss1, vs1)
 
         # uvss should be first two verses only:
@@ -627,7 +622,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         # ...then we should get the next two. But we also get a verse
         # of context.
 
-        uvss2 = i.verse_statuses_for_passage(vs1.id, NET.id)
+        uvss2 = i.verse_statuses_for_passage(vs1.id, self.NET.id)
         uvss2 = i.get_next_section(uvss2, vs1)
 
         self.assertEqual(["Psalm 23:2", "Psalm 23:3", "Psalm 23:4"],
@@ -643,7 +638,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         for uvs in uvss2:
             i.record_verse_action(uvs.localized_reference, 'NET', StageType.TEST, 0.95)
 
-        uvss3 = i.verse_statuses_for_passage(vs1.id, NET.id)
+        uvss3 = i.verse_statuses_for_passage(vs1.id, self.NET.id)
         uvss3 = i.get_next_section(uvss3, vs1)
 
         self.assertEqual(["Psalm 23:4", "Psalm 23:5", "Psalm 23:6"],
@@ -657,14 +652,13 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
             i.record_verse_action(uvs.localized_reference, 'NET', StageType.TEST, 0.95)
 
         # Should wrap around now:
-        uvss4 = i.verse_statuses_for_passage(vs1.id, NET.id)
+        uvss4 = i.verse_statuses_for_passage(vs1.id, self.NET.id)
         uvss4 = i.get_next_section(uvss4, vs1)
 
         self.assertEqual(["Psalm 23:1", "Psalm 23:2"],
                          [uvs.localized_reference for uvs in uvss4])
 
     def test_slim_passage_for_reviewing(self):
-        NET = TextVersion.objects.get(slug='NET')
         i = self.create_identity(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Psalm 23')
         vs1.breaks = "BOOK18 23:3,BOOK18 23:5"  # break at v3 and v5
@@ -680,7 +674,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
             next_test_due=timezone.now() - timedelta(1)
         )
 
-        uvss = i.verse_statuses_for_passage(vs1.id, NET.id)
+        uvss = i.verse_statuses_for_passage(vs1.id, self.NET.id)
         self.assertEqual(len(uvss), 6)
 
         uvss = i.slim_passage_for_reviewing(uvss, vs1)
@@ -825,7 +819,6 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
                          ['John 3:16', 'John 14:6', "Ephesians 2:8-9"])
 
     def test_issue_75(self):
-        NET = TextVersion.objects.get(slug='NET')
         i = self.create_identity(version_slug='NET')
         vs1 = VerseSet.objects.get(name='Psalm 23')
 
@@ -839,8 +832,8 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         # Now add it
         i.add_verse_set(vs1)
 
-        l = i.verse_statuses_for_passage(vs1.id, NET.id)
-        self.assertEqual([uvs.localized_reference for uvs in l],
+        uvss = i.verse_statuses_for_passage(vs1.id, self.NET.id)
+        self.assertEqual([uvs.localized_reference for uvs in uvss],
                          ["Psalm 23:1",
                           "Psalm 23:2",
                           "Psalm 23:3",
@@ -859,8 +852,8 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
         i.add_verse_set(vs1)
 
         # Should have all verses this time
-        l = i.verse_statuses_for_passage(vs1.id, NET.id)
-        self.assertEqual([uvs.localized_reference for uvs in l],
+        uvss = i.verse_statuses_for_passage(vs1.id, self.NET.id)
+        self.assertEqual([uvs.localized_reference for uvs in uvss],
                          ["Psalm 23:1",
                           "Psalm 23:2",
                           "Psalm 23:3",
@@ -915,14 +908,13 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
                          [ChosenVerseSet(verse_set=vs1,
                                          version=i.default_bible_version)])
 
-        KJV = TextVersion.objects.get(slug='KJV')
-        i.add_verse_set(vs1, version=KJV)
+        i.add_verse_set(vs1, version=self.KJV)
 
         with self.assertNumQueries(3):
             chosen_2 = i.verse_sets_chosen()
         self.assertEqual(chosen_2,
                          [ChosenVerseSet(verse_set=vs1,
-                                         version=KJV),
+                                         version=self.KJV),
                           ChosenVerseSet(verse_set=vs1,
                                          version=i.default_bible_version),
                           ])
@@ -936,7 +928,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
                          [ChosenVerseSet(verse_set=vs2,
                                          version=i.default_bible_version),
                           ChosenVerseSet(verse_set=vs1,
-                                         version=KJV),
+                                         version=self.KJV),
                           ChosenVerseSet(verse_set=vs1,
                                          version=i.default_bible_version),
                           ])

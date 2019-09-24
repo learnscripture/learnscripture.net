@@ -9,8 +9,6 @@ from .test_bibleverses import RequireExampleVerseSetsMixin
 
 class ViewSetTestsBase(RequireExampleVerseSetsMixin):
 
-    fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
-
     def trigger_version_change(self):
         if self.is_full_browser_test:
             # Automatically triggered, just:

@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 from bibleverses.models import VerseSet, VerseSetType
 
-from .base import AccountTestMixin, TestBase
+from .base import AccountTestMixin, BibleVersesMixin, TestBase
 
 
-class VerseSetTests(AccountTestMixin, TestBase):
-
-    fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
+class VerseSetTests(BibleVersesMixin, AccountTestMixin, TestBase):
 
     def test_visibility(self):
         _, creator = self.create_account(username='creator')

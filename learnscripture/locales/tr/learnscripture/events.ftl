@@ -56,7 +56,10 @@ events-user-joined-group-html = { $username } “{ $group }” grubuna katıldı
 events-user-created-group-html = { $username } “{ $group }” grubunu oluşturdu.
 
 # Notice in news items when a user comments on an event
-events-comment-on-activity-html = { $username } { $other_user } adlı kullanıcının hareketlerine <a href="{ $comment_url }">yorum</a> yaptı.
+events-comment-on-activity-html = { $username } “{ $other_user }” adlı kullanıcının hareketlerine <a href="{ $comment_url }">yorum</a> yaptı.
+
+# Notice in news items when a user comments on their own event
+events-comment-on-own-activity-html = { $username } kendi hareketlerine <a href="{ $comment_url }">yorum</a> yaptı.
 
 # Notice in news items when a user comments on a group wall
 events-comment-on-group-wall-html = { $username } “{ $group }” grubun duvarına <a href="{ $comment_url }">yorum</a> yazdı.

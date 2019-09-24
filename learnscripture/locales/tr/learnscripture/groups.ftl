@@ -15,6 +15,10 @@ groups-open-group-help-text = İsteyen herkes bu gruba üye olabilir. Kapalı bi
 # Caption for the 'name' field of groups
 groups-name = İsim
 
+# Caption for the language field (primary language the group uses)
+groups-language = Dil
+    .help-text = Grubun kullandığı dil
+
 # Caption for the 'description' field of groups
 groups-description = Tanım
 

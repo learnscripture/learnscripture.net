@@ -42,18 +42,18 @@ def split_into_words(text, fix_punctuation_whitespace=True):
          .replace('--', ' -- ')
          .replace('\r\n', '\n')
          .strip(" "))
-    l = WORD_SPLITTER.split(t)
+    words = WORD_SPLITTER.split(t)
     # Eliminate spaces
-    l = [w for w in l if w not in [" ", ""]]
+    words = [w for w in words if w not in [" ", ""]]
     # Merge newlines
-    l = merge_items_left(l, is_newline)
+    words = merge_items_left(words, is_newline)
     if fix_punctuation_whitespace:
         # Merge punctuation-only-items with item to left.
-        l = merge_items_left(l, is_punctuation)
+        words = merge_items_left(words, is_punctuation)
         # Then to right e.g. leading quotation marks
-        l = merge_items_right(l, is_punctuation)
+        words = merge_items_right(words, is_punctuation)
 
-    return l
+    return words
 
 
 def merge_items_left(words, predicate):

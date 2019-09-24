@@ -1,0 +1,13 @@
+{# See also language_selector_inc.html #}
+{% load i18n %}
+{% load ftl %}
+
+<div id="id-language-chooser-list">
+  {# For now links are more convenient because they can see their own language name #}
+  {% get_available_languages as LANGUAGES %}
+  {% get_language_info_list for LANGUAGES as languages %}
+  {% for language in languages %}
+    <a data-set-lang="{{ language.code }}" href="?lang={{ language.code }}">{{ language.name_local }}</a>
+    {% if not forloop.last %} / {% endif %}
+  {% endfor %}
+</div>

@@ -495,6 +495,9 @@ def deploy():
     restart_all()
     delete_old_versions()
     push_to_central_vcs()  # push tags
+    # See also logic in settings.py for creating release name
+    release = "learnscripturenet@" + target.version
+    create_sentry_release(release, target.version)
 
 
 @task
@@ -574,6 +577,8 @@ def push_sources(target):
                ))
     with cd(target_src_root):
         run("hg update -r %s" % target.version)
+    # NB we also use hg at at runtime in settings file to set Sentry release,
+    # see settings.py
 
     # Also need to sync files that are not in main sources VCS repo.
     push_secrets(target)
@@ -1011,3 +1016,12 @@ def install_or_renew_ssl_certificate():
     # Cleanup letsencrypt
     run("rmdir {certbot_static_path}/.well-known/".format(
         certbot_static_path=certbot_static_path))
+
+
+@task
+def create_sentry_release(version, last_commit):
+    full_hash = local("hg log -l 1 --template '{{node}}' -r {commit}".format(commit=last_commit), capture=True)
+    local("sentry-cli releases --org learnscripturenet new -p production {version}".format(version=version))
+    local('sentry-cli releases --org learnscripturenet set-commits --commit "learnscripture/learnscripture.net@{commit}" {version}'
+          .format(version=version, commit=full_hash))
+    local("sentry-cli releases --org learnscripturenet finalize {version}".format(version=version))

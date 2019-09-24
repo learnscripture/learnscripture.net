@@ -90,17 +90,22 @@ site-footer-bible-versions = Kutsal Kitap çevirileri
 site-footer-referral-program = Tanıtım programı
 
 # Link in the footer to page for contacting learnscripture
-site-footer-contact-us = Bizimle irtiabat geçin
+site-footer-contact-us = Bizimle irtibata geçin
 
 site-footer-bible-texts-used = Kutsal Kitap ve ilmihal metinleri izin ile kullanıldı:
 
 site-footer-choose-language = Site arabirim dili:
 
+# Option that appears in filters that allow choosing languages, for choosing
+# any/all languages.
+site-languages-all =
+    Tümü
+
 # Caption for button that changes the language
 site-footer-choose-language-button = Seçiniz
 
 
-site-logout-confirm-prompt = Are you sure you want to log out?
+site-logout-confirm-prompt = Çıkış yapmak istediğinizden emin misiniz?
 
 # Caption on box that shows link for sharing the page URL
 site-share-link = Sayfayı paylaş:
@@ -136,3 +141,7 @@ site-forgot-password-button = Parolamı unuttum
 
 # Shown when the page or part of it is still loading
 site-loading-placeholder = Yükleniyor...
+
+site-wrong-or-missing-translation =
+    Çeviride sorun mu var? Düzeltmemize yardımcı olun!
+

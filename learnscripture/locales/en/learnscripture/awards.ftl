@@ -27,7 +27,7 @@ awards-social-media-default-message = I just earned a badge: { $award }
 # Page title
 awards-page-title = Badges
 
-awards-the-following-are-available = The following badges are available.
+awards-the-following-are-available = The following badges are available:
 
 
 # Caption in table header for award name/icon
@@ -106,7 +106,7 @@ awards-you-have-this-award-at-level = You have this badge, at level { $level }.
 awards-you-have-this-award = You have this badge.
 
 # Used when the user doesn't have the award
-awards-you-dont-have-this-badge = You don't have this badge yet.
+awards-you-dont-have-this-award = You don't have this badge yet.
 
 # Message used when trying to view some old awards
 awards-removed = The ‘{ $name }’ badge is an old badge that is no longer used
@@ -193,7 +193,7 @@ awards-ace-award-level-1-description = Achieved 100% in a test
 # Description for a specific level.
 # $count is the number of times in a row they got 100%,
 # will always be greater than 1.
-awards-ace-award-level-n-description = Achieved 100%% in a test { $count } times in a row
+awards-ace-award-level-n-description = Achieved 100% in a test { $count } times in a row
 
 
 ## 'Recruiter' award.
