@@ -7,8 +7,6 @@ from .base import WebTestBase
 
 class AccountDetailsTests(WebTestBase):
 
-    fixtures = ['test_bible_versions.json']
-
     def test_change_first_name(self):
         identity, account = self.create_account()
         self.login(account, shortcut=False)

@@ -75,7 +75,7 @@ def get_esv(localized_reference_list, batch_size=ESV_BATCH_SIZE):
                     # ask for e.g. asking for John 5:4 it sends us John 5:3-5
                     pass
                 else:
-                    l2 = re.sub('\[[\d:]*\]', '', l2).strip()
+                    l2 = re.sub(r'\[[\d:]*\]', '', l2).strip()
                     prev = sections[current_section] + '\n' if current_section in sections else ''
                     sections[current_section] = prev + l2
 

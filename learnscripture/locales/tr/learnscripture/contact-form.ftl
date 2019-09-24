@@ -10,9 +10,8 @@ contact-form-name = Adınız
 contact-form-email = e-Posta adresiniz
 
 # Help text for the 'message' when using the contact form
-contact-form-message-help-text =
-    Kullanımda bir sorun veya hata bildirmek istersiniz, durumu çok net bir şekilde tanımlayını.
-    Kullandığınız cihaz ve tarayıcıyı ve sürümlerini eklemeye unutmayınız.
+contact-form-message = Mesaj
+                     .help-text = Kullanımda bir sorun veya hata bildirmek istersiniz, durumu çok net bir şekilde tanımlayını. Kullandığınız cihaz ve tarayıcıyı ve sürümlerini eklemeye unutmayınız.
 
 # Button to send the message.
 contact-form-send-button = Gönder

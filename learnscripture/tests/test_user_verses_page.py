@@ -11,8 +11,6 @@ from .test_bibleverses import RequireExampleVerseSetsMixin
 
 class UserVersesPageTests(RequireExampleVerseSetsMixin, FullBrowserTest):
 
-    fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
-
     def test_practice_button(self):
         identity, account = self.create_account()
 

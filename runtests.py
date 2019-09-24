@@ -4,6 +4,10 @@ import os
 import random
 import subprocess
 import sys
+import warnings
+
+warnings.filterwarnings("always", category=DeprecationWarning)
+warnings.filterwarnings("always", category=PendingDeprecationWarning)
 
 parser = argparse.ArgumentParser(description="Run the test suite, or some tests")
 parser.add_argument('--coverage', "-c", action='store_true',

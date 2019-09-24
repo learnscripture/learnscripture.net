@@ -212,8 +212,9 @@ class ContactForm(forms.Form):
         label=t_lazy('contact-form-email'),
         help_text=t_lazy('forms-field-optional'), required=False)
     message = forms.CharField(
+        label=t_lazy('contact-form-message'),
         max_length=10000, required=True,
-        help_text=t_lazy('contact-form-message-help-text'),
+        help_text=t_lazy('contact-form-message.help-text'),
         widget=widgets.Textarea(attrs={'rows': '10'}))
 
 

@@ -472,10 +472,15 @@ def context_for_quick_find(request):
 
 
 def default_bible_version_for_request(request):
+    version = None
     if has_preferences(request):
-        return request.identity.default_bible_version
-    else:
-        return get_default_bible_version()
+        version = request.identity.default_bible_version
+    if version is None:
+        if request.LANGUAGE_CODE != settings.LANGUAGE_CODE:
+            version = TextVersion.objects.filter(language_code=request.LANGUAGE_CODE).order_by('id').first()
+    if version is not None:
+        return version
+    return get_default_bible_version()
 
 
 # No 'require_preferences' or 'require_identity' so that bots can browse this
@@ -528,9 +533,8 @@ def choose(request):
                 return learn_set(request, [identity.add_verse_choice(ref, version=version)],
                                  session.LearningType.LEARNING)
 
-    # Searching for verse sets is done via this view.
-    # But looking up individual verses is done by AJAX,
-    # so is missing here.
+    # Searching for verse sets is done via this view. But looking up individual
+    # verses is done by AJAX, so is missing here.
 
     active_section = None
     verseset_search_form = VerseSetSearchForm.from_request_data(
@@ -675,8 +679,8 @@ def verse_options(request):
 
 
 def _reduce_uvs_set_for_verse(uvss):
-    # Filters out multiple instances of non-
-    l = []
+    # Filters out multiple instances of non-passage UVSs
+    retval = []
     non_passage_seen = False
     for uvs in uvss:
         if not uvs.is_in_passage():
@@ -684,8 +688,8 @@ def _reduce_uvs_set_for_verse(uvss):
                 continue
             else:
                 non_passage_seen = True
-        l.append(uvs)
-    return l
+        retval.append(uvs)
+    return retval
 
 
 def get_default_bible_version():
@@ -736,10 +740,7 @@ def view_verse_set(request, slug):
         pass
 
     if version is None:
-        if hasattr(request, 'identity') and request.identity.default_bible_version is not None:
-            version = request.identity.default_bible_version
-        else:
-            version = get_default_bible_version()
+        version = default_bible_version_for_request(request)
 
     verse_list = get_verse_set_verse_list(version, verse_set)
     all_localized_references = [v.localized_reference for v in verse_list]
@@ -1740,8 +1741,10 @@ def set_language(request):
     """
     Save the given language in the sesison, and in the user's preferences if logged in.
     """
-    next_url = request.POST.get('next', '/')
-    if not is_safe_url(next_url):
+    next_url = request.headers.get('Referer', '/')
+    next_url = furl.furl(next_url).set(host=None, port=None, scheme=None).url
+
+    if not is_safe_url(next_url, settings.ALLOWED_HOSTS):
         next_url = '/'
     response = HttpResponseRedirect(next_url)
 
@@ -1763,6 +1766,8 @@ def celery_debug(request):
 
 
 def debug(request):
+    if 'crash' in request.GET:
+        raise AssertionError("Crash!")
     return TemplateResponse(request, "learnscripture/debug.html", {})
 
 

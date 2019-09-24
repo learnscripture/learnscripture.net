@@ -1285,7 +1285,7 @@ class Identity(models.Model):
 
     @property
     def i18n_options_enabled(self):
-        return self.account_id is not None and self.account.is_tester
+        return True
 
     def get_dashboard_events(self, now=None):
         from events.models import Event

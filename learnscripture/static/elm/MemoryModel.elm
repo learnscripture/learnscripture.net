@@ -86,11 +86,10 @@ strengthEstimate oldStrength testAccuracy timeElapsedM =
                         strength t2
 
                     deltaSmax =
-                        s2 - s1
+                        min (s2 - s1) deltaSIdeal
 
                     deltaSactual =
-                        min (deltaSmax * (testStrength - oldStrength) / (1.0 - oldStrength))
-                            deltaSIdeal
+                        deltaSmax * (testStrength - oldStrength) / (1.0 - oldStrength)
 
                     newStrength =
                         oldStrength + deltaSactual

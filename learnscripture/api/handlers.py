@@ -146,7 +146,7 @@ class ApiView(View):
 
 class VersesToLearnHandler(ApiView):
     @require_identity_method
-    def get(sef, request):
+    def get(self, request):
         batch = session.get_verse_statuses_batch(request)
         verse_status_info = make_serializable(
             batch.verse_statuses,

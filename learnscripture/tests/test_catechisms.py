@@ -2,12 +2,10 @@ import time
 
 from events.models import Event, EventType
 
-from .base import FullBrowserTest
+from .base import CatechismsMixin, FullBrowserTest
 
 
-class CatechismTests(FullBrowserTest):
-
-    fixtures = ['test_bible_versions.json', 'test_catechisms.json']
+class CatechismTests(CatechismsMixin, FullBrowserTest):
 
     def test_list(self):
         self.get_url('catechisms')

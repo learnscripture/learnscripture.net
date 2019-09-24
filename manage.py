@@ -17,6 +17,7 @@ if __name__ == "__main__":
     logging.config.dictConfig(settings.LOGGING)
     logger = logging.getLogger("manage.py")
 
+    import learnscripture.checks_monkeypatch  # noqa
     try:
         execute_from_command_line(sys.argv)
     except Exception:

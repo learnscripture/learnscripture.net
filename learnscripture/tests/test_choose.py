@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.urls import reverse
+from django_functest import FuncBaseMixin
 
 from accounts.models import Identity
 from awards.models import AwardType, TrendSetterAward
@@ -7,23 +8,24 @@ from bibleverses.models import VerseSet
 from events.models import Event, EventType
 from learnscripture.forms import VERSE_SET_ORDER_AGE, VERSE_SET_ORDER_POPULARITY, VERSE_SET_TYPE_ALL, VerseSetSearchForm
 
-from .base import FullBrowserTest, TestBase
+from .base import FullBrowserTest, TestBase, WebTestBase
 from .test_bibleverses import RequireExampleVerseSetsMixin
 from .test_search import SearchTestsMixin
 
 
-class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTest):
-
-    fixtures = ['test_bible_versions.json', 'test_bible_verses.json']
-
+class ChooseTestsBase(RequireExampleVerseSetsMixin, SearchTestsMixin, FuncBaseMixin):
     def _get_current_identity(self):
         return Identity.objects.order_by('-date_created')[0]
 
+    def make_section_visible(self, section_id):
+        if self.is_full_browser_test:
+            self.click(section_id + " .accordion-heading")
+
     def test_search(self):
         self.get_url('choose')
-        self.click("#id-choose-verseset .accordion-heading")
+        self.make_section_visible("#id-choose-verseset")
         self.fill({"#id_query": "gospel"})
-        self.click("#id-search-btn")
+        self.submit("#id-search-btn", wait_for_reload=False)
 
         self.assertTextPresent("Basic Gospel")
         self.assertTextAbsent("Bible 101")
@@ -32,19 +34,27 @@ class ChooseTests(RequireExampleVerseSetsMixin, SearchTestsMixin, FullBrowserTes
         identity, account = self.create_account()
         self.login(account)
         self.get_url('choose')
-        self.click("#id-choose-verseset .accordion-heading")
+        self.make_section_visible("#id-choose-verseset")
         self.fill({'[name="set_type"]': "PASSAGE"})
         self.fill({"#id_query": "Eph 2"})
-        self.click("#id-search-btn")
+        self.submit("#id-search-btn", wait_for_reload=False)
 
         self.assertTextPresent("You could")
         self.assertTextPresent("create a passage set for Ephesians 2")
         self.follow_link("a[data-create-passage-set]")
         self.assertUrlsEqual(reverse('create_passage_set') + "?ref=BOOK48+2")
-        # Should have already loaded the verses into the page:
-        self.assertTextPresent('Ephesians 2:8')
-        self.assertTextPresent('Ephesians 2:9')
-        self.assertTextPresent('For by grace are ye saved')
+        if self.is_full_browser_test:
+            # Should have already loaded the verses into the page:
+            self.assertTextPresent('Ephesians 2:8')
+            self.assertTextPresent('Ephesians 2:9')
+            self.assertTextPresent('For by grace are ye saved')
+
+
+class ChooseTestsWT(ChooseTestsBase, WebTestBase):
+    pass
+
+
+class ChooseTestsFB(ChooseTestsBase, FullBrowserTest):
 
     def test_verse_set_popularity_tracking(self):
         # Frig a quantity to make test easier

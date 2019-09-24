@@ -7,13 +7,13 @@ import accounts.memorymodel
 from accounts.models import Identity
 from bibleverses.models import MemoryStage, StageType, TextVersion, VerseSet
 
-from .base import FullBrowserTest, WebTestBase
+from .base import CatechismsMixin, FullBrowserTest, WebTestBase
 from .test_bibleverses import RequireExampleVerseSetsMixin
 
 
-class DashboardTestsBase(RequireExampleVerseSetsMixin):
+class DashboardTestsBase(RequireExampleVerseSetsMixin, CatechismsMixin):
 
-    fixtures = ['test_bible_versions.json', 'test_bible_verses.json', 'test_catechisms.json']
+    databases = {'default', 'wordsuggestions'}
 
     def test_redirect(self):
         self.get_url('dashboard')

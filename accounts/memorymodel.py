@@ -176,7 +176,14 @@ class MemoryModel(object):
         # Giving:
         delta_s_max = s2 - s1
 
-        # However, we have to adjust for the fact that test_strength may be < 1
+        # Treat tests done after the ideal time as if they were done at the
+        # ideal time, so that people always do at least VERSE_TESTS.
+        # We do this limiting here, and not a few lines later, so
+        # that if someone takes a long break and gets a low score,
+        # they should advance quickly.
+        delta_s_max = min(self.DELTA_S_IDEAL, delta_s_max)
+
+        # Now we adjust for the fact that test_strength may be < 1
         #
         # Long term, if test_strength hits a ceiling, then s should tend to
         # test_strength, and not to 1. This implies:
@@ -190,12 +197,6 @@ class MemoryModel(object):
         # Linear interpolation between these two constraints gives:
 
         delta_s_actual = delta_s_max * (test_strength - old_strength) / (1.0 - old_strength)
-
-        # Limit jumps to DELTA_S_IDEAL to avoid people progressing too quickly
-        # if they are not doing tests. This line means that people will still
-        # end up doing (approx) at least VERSE_TESTS tests even if they take a
-        # break and ace the tests.
-        delta_s_actual = min(self.DELTA_S_IDEAL, delta_s_actual)
 
         new_strength = old_strength + delta_s_actual
 

@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 # Django settings for learnscripture project.
-
 import glob
 import json
 import os
 import socket
 import subprocess
 import sys
+
+import sentry_sdk
+from sentry_sdk.integrations.celery import CeleryIntegration
+from sentry_sdk.integrations.django import DjangoIntegration
 
 hostname = socket.gethostname()
 CHECK_DEPLOY = 'manage.py check --deploy' in ' '.join(sys.argv)
@@ -72,7 +75,7 @@ if LIVEBOX:
     }
     SECRET_KEY = secrets["PRODUCTION_SECRET_KEY"]
     SENTRY_DSN = secrets["PRODUCTION_SENTRY_DSN"]
-    EMAIL_BACKEND = "anymail.backends.mailgun.MailgunBackend"
+    EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
     ANYMAIL = {
         "MAILGUN_API_KEY": MAILGUN_API_KEY,
     }
@@ -284,7 +287,6 @@ INSTALLED_APPS = [
     'mptt',
     'compressor',  # for cms
     'easy_thumbnails',
-    'raven.contrib.django.raven_compat',
     'spurl',
     'paypal.standard.ipn',
     'app_metrics',
@@ -311,35 +313,13 @@ if DEBUG:
 
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': True,
-    'root': {
-        'level': 'WARNING',
-        'handlers': ['sentry'],
-    },
+    'disable_existing_loggers': False,
     'formatters': {
-        'django.server': {
-            '()': 'django.utils.log.ServerFormatter',
-            'format': '[%(server_time)s] %(message)s',
-        },
         'verbose': {
             'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
         },
     },
     'handlers': {
-        'django.server': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-            'formatter': 'django.server',
-        },
-        'sentry': {
-            'level': 'WARNING',
-            'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
-        },
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose'
-        },
         'bibleservices': {
             'level': 'INFO',
             'class': 'concurrent_log_handler.ConcurrentRotatingFileHandler',
@@ -356,22 +336,16 @@ LOGGING = {
             'maxBytes': 1024 * 1024,
             'backupCount': 10,
         },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
     },
     'loggers': {
-        'django.server': {
-            'handlers': ['django.server'],
+        'django': {
+            'handlers': ['console'],
             'level': 'INFO',
-            'propagate': False,
-        },
-        'raven': {
-            'level': 'DEBUG',
-            'handlers': ['console'],
-            'propagate': False,
-        },
-        'sentry.errors': {
-            'level': 'DEBUG',
-            'handlers': ['console'],
-            'propagate': False,
         },
         'celery': {
             'level': 'DEBUG',
@@ -391,36 +365,27 @@ LOGGING = {
     },
 }
 
+
 if (DEBUG or TESTING or any(a in sys.argv for a in ['setup_bibleverse_suggestions',
                                                     'run_suggestions_analyzers'])):
-    LOGGING['root']['handlers'] = ['console']
-    LOGGING['loggers']['django.server'] = {
-        'level': 'INFO',
+    LOGGING['root'] = {
+        'level': 'WARNING',
         'handlers': ['console'],
-        'propagate': False,
-    }
-    LOGGING['loggers']['celery']['handlers'] = ['console']
-    LOGGING['loggers']['bibleverses.suggestions'] = {
-        'level': 'INFO',
-        'handlers': ['console'],
-        'propagate': False,
-    }
-    LOGGING['loggers']['bibleverses.services'] = {
-        'level': 'INFO',
-        'handlers': ['console'],
-        'propagate': False,
     }
     LOGGING['loggers']['django_ftl.message_errors'] = {
         'level': 'INFO',
         'handlers': ['console'],
         'propagate': False,
     }
-    LOGGING['loggers']['django_ftl.autoreload'] = {
-        'level': 'DEBUG',
-        'handlers': ['console'],
-        'propagate': False,
-    }
-
+else:
+    if SENTRY_DSN:
+        version = subprocess.check_output(['hg', '--cwd', SRC_ROOT, 'id', '-i']).strip().decode('utf-8')
+        release = "learnscripturenet@" + version
+        sentry_sdk.init(
+            dsn=SENTRY_DSN,
+            integrations=[DjangoIntegration(), CeleryIntegration()],
+            release=release,
+        )
 
 if TESTING:
     LOGGING['handlers']['console']['level'] = 'ERROR'
@@ -490,18 +455,6 @@ CAMPAIGN_CONTEXT_PROCESSORS = [
 ]
 
 
-# Raven
-
-if DEBUG:
-    RAVEN_CONFIG = {}
-    SENTRY_DSN = None
-    SENTRY_KEY = None
-else:
-    RAVEN_CONFIG = {
-        'dsn': SENTRY_DSN,
-    }
-
-
 # Celery
 
 CELERY_BROKER_URL = 'amqp://{0}:{1}@localhost:5672/learnscripture'.format(secrets['RABBITMQ_USERNAME'],
@@ -541,7 +494,7 @@ WEBPACK_LOADER = {
         'STATS_FILE': os.path.join(SRC_ROOT, WEBPACK_STATS_FILE),
         'POLL_INTERVAL': 0.1,
         'TIMEOUT': None,
-        'IGNORE': ['.+\.hot-update.js', '.+\.map']
+        'IGNORE': [r'.+\.hot-update.js', r'.+\.map']
     }
 }
 

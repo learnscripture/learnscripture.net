@@ -1,3 +1,4 @@
+{# See also language_selector_inc_home.html #}
 {% load i18n %}
 {% load ftl %}
 
@@ -14,7 +15,11 @@
         </option>
       {% endfor %}
     </select>
-    <input name="next" type="hidden" value="{{ request.get_full_path }}" />
     <button type="submit" class="btn">{% ftlmsg 'site-footer-choose-language-button' %}</button>
   </form>
+  {% if request.LANGUAGE_CODE != 'en' %}
+    <div id="id-wrong-translation">
+      <a href="/translation/">{% ftlmsg 'site-wrong-or-missing-translation' %}</a>
+    </div>
+  {% endif %}
 </div>

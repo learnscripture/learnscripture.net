@@ -310,11 +310,16 @@ class NewCommentEvent(EventLogic):
     def get_message_html(cls, event, language_code):
         comment_id = event.event_data['comment_id']
         if 'parent_event_id' in event.event_data:
+            other_username = event.event_data['parent_event_account_username']
+            if event.account.username == other_username:
+                return t('events-comment-on-own-activity-html',
+                         dict(username=account_link(event.account),
+                              comment_url=get_absolute_url_for_event_comment(event, comment_id)))
             return t('events-comment-on-activity-html',
                      dict(username=account_link(event.account),
                           comment_url=get_absolute_url_for_event_comment(event, comment_id),
-                          other_user=link(reverse('user_stats', args=(event.event_data['parent_event_account_username'],)),
-                                          event.event_data['parent_event_account_username'])))
+                          other_user=link(reverse('user_stats', args=(other_username,)),
+                                          other_username)))
 
         elif 'group_id' in event.event_data:
             group_slug = event.event_data['group_slug']

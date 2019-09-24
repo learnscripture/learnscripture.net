@@ -35,8 +35,6 @@ def good_payment_ipn(account, amount, **kwargs):
 
 class PaymentTests(AccountTestMixin, TestBase):
 
-    fixtures = ['test_bible_versions.json']
-
     def setUp(self):
         super(PaymentTests, self).setUp()
         self.identity, self.account = self.create_account()
@@ -94,8 +92,6 @@ class PaymentTests(AccountTestMixin, TestBase):
 
 
 class DonationDriveTests(AccountTestMixin, TestBase):
-
-    fixtures = ['test_bible_versions.json']
 
     def setUp(self):
         super(DonationDriveTests, self).setUp()

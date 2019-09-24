@@ -203,7 +203,7 @@ def start_identity(request):
             referrer = Account.objects.get(username=referrer_username)
         except Account.DoesNotExist:
             pass
-    identity = Identity.objects.create(referred_by=referrer)
+    identity = Identity.objects.create(referred_by=referrer, interface_language=request.LANGUAGE_CODE)
     set_identity(request.session, identity)
     metric('new_identity')
     return identity

@@ -59,7 +59,7 @@ class PageWrapper:
                     block_name=block_name,
                     right_language=True,
                 ))
-            except:
+            except KeyError:
                 retval.append(ContentWrapper(
                     content_dict[ci.id, settings.LANGUAGE_CODE],
                     block_name=block_name,
