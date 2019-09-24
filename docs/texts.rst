@@ -18,22 +18,24 @@ A further constraint is the need to generate 'suggestions' for any text
 analysis of the text, among other things, and requires the whole text to be
 available first.
 
-The Markov chain analysis and other methods are almost certainly only appropriate
-for English language texts - in fact these methods use an English thesaurus and a few
-sets of hard-coded English tables (e.g. for pronouns) as part of this process.
-This presents a challenge if other languages are wanted. In particular, the methods
-are likely to work badly for languages with a lot of grammatical inflections
-on words (which English does not have). For these languages, generating word
-plausible word suggestions for the on-screen testing method would be a bigger
-challenge.
-
+The Markov chain analysis and other methods are almost certainly only
+appropriate for English language texts - in fact these methods use an English
+thesaurus and a few sets of hard-coded English tables (e.g. for pronouns) as
+part of this process. This presents a challenge if other languages are wanted.
+In particular, the methods are likely to work badly for languages with a lot of
+grammatical inflections on words (which English does not have). For these
+languages, generating plausible word suggestions for the on-screen testing
+method would be a bigger challenge. Agglutinative languages such as Turkish
+present particular problems for Markov chain analysis, due the 'sparsity
+problem'. For this reason the word suggestion method of testing is only
+available for English texts currently.
 
 New texts and catechisms
 ========================
 
 * First, ascertain copyright and usage constraints, obviously. The
   ``TextVersion.url`` field can be used for linking back to a website, but note
-  that this is only displayed on some page. It may be helpful to cover
+  that this is only displayed on some pages. It may be helpful to cover
   ourselves by adding a link in the footer.
 
 * The text needs to be prepared and loaded into the database in the development
@@ -51,13 +53,13 @@ New texts and catechisms
 
   * For catechisms, QAPairs for each question.
 
-    Create JSON file with a list of [number, question, answer]
+    Create JSON file with an array of [integer number, string question, string answer] arrays.
 
     run: ``./manage.py load_catechism <slug> <json_filename>``
 
 * First ``./manage.py run_suggestions_analyzers`` then
   ``./manage.py setup_bibleverse_suggestions`` needs to be run, passing the version
-  slug as an argument in both cases.
+  slug as an argument in both cases. (English texts only)
 
 * Test locally, ensure it works as expected.
 
