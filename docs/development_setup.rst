@@ -11,17 +11,19 @@ installed.
 
 1. Create a directory 'learnscripture.net' and cd into it.
 
-2. Checkout the sources from bitbucket into a folder called 'src'.
+2. Checkout the sources from gitlab into a folder called 'src'.
 
-   First, it is probably best to fork the project on bitbucket - https://bitbucket.org/learnscripture/learnscripture.net/fork
+   First, it is probably best to fork the project on gitlab
 
-   Then clone your fork locally::
+   Then clone your fork locally. You can use git, or mercurial using hg-git.::
 
-     hg clone ssh://hg@bitbucket.org/yourusename/learnscripture.net src
+     git clone git@gitlab.com:learnscripture/learnscripture.net.git src
+     hg clone git+ssh://git@gitlab.com:learnscripture/learnscripture.net.git src
 
    You will also need a copy of the text sources, checked out in 'texts' in a sibling directory to 'src'::
 
-     hg clone ssh://hg@bitbucket.org/learnscripture/learnscripture-texts texts
+     git clone git@gitlab.com:learnscripture/learnscripture-texts.git texts
+     hg clone git+ssh://git@gitlab.com:learnscripture/learnscripture-texts.git texts
 
 3. Create a virtualenv for the project e.g.::
 

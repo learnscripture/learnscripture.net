@@ -525,10 +525,10 @@ def check_branch():
 
 def push_to_central_vcs():
     # This task is designed to fail if it would create multiple heads on
-    # BitBucket i.e. if BitBucket has code on the master branch that hasn't been
+    # Gitlab i.e. if Gitlab has code on the master branch that hasn't been
     # merged locally. This prevents deploys overwriting a previous deploy
     # unknowingly due to failure to merge changes.
-    local("hg push -B master bitbucket; test $? -ne 255")
+    local("hg push -B master gitlab; test $? -ne 255")
 
 
 @task

@@ -11,7 +11,7 @@ This could be fixed by:
 
 2. Deploy using hg/VCS instead of rsync
 3. As part of the deploy procedure, first do a push to a central repo (e.g.
-   BitBucket). If this fails (due to conflict on the main branch, or creating
+   Gitlab). If this fails (due to conflict on the main branch, or creating
    new heads), then there are commits that the developer must merge first.
 
 Also, a method for syncing secrets.json (not in VCS) between developers would
