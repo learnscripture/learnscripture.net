@@ -362,6 +362,11 @@ LOGGING = {
             'handlers': ['bibleservices'],
             'propagate': True,
         },
+        'bibleverses.suggestions': {
+            'level': 'INFO',
+            'handlers': ['console'],
+            'propagate': False,
+        },
     },
 }
 
