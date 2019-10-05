@@ -1,5 +1,6 @@
 from django.contrib import admin
-from accounts.models import notify_all_identities, notify_all_accounts
+
+from accounts.models import notify_all_accounts, notify_all_identities
 
 from .models import SiteNotice
 
