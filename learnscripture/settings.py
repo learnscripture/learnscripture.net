@@ -346,6 +346,7 @@ LOGGING = {
         'django': {
             'handlers': ['console'],
             'level': 'INFO',
+            'propagate': False,
         },
         'celery': {
             'level': 'DEBUG',
