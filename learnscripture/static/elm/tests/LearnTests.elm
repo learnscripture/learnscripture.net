@@ -14,6 +14,9 @@ suite =
             [ test "removes outer punctuation" <|
                 \_ ->
                     Expect.equal "hello" (stripOuterPunctuation "—--“hello!”")
+            , test "removes leading plus" <|
+                \_ ->
+                    Expect.equal "Therefore" (stripOuterPunctuation "+‘Therefore")
             , test "doesn't remove inner punctuation" <|
                 \_ ->
                     Expect.equal "some-thing" (stripOuterPunctuation "…some-thing?")
