@@ -4834,7 +4834,7 @@ normalizeWordForSuggestion =
 
 punctuationRegex : String
 punctuationRegex =
-    "[\"'\\.,;!?:\\/#!$%\\^&\\*{}=\\-_`~()\\[\\]“”‘’—–…<>]"
+    "[\"'\\.,;!?:\\/#!$%\\^&\\*{}=\\-_`~()\\[\\]“”‘’—–…<>\\+]"
 
 
 stripPunctuation : String -> String

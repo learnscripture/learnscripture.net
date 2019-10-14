@@ -2,7 +2,7 @@ import re
 
 from bibleverses.textutils import is_punctuation, split_into_words
 
-PUNCTUATION = "!?,.<>()[];:\"'-–"
+PUNCTUATION = "!?,.<>()[];:\"'-–+"
 PUNCTUATION_OR_WHITESPACE = PUNCTUATION + " \n\r\t"
 IN_WORD_PUNCTUATION = "'-"
 
