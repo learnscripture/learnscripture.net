@@ -11,19 +11,20 @@ installed.
 
 1. Create a directory 'learnscripture.net' and cd into it.
 
-2. Checkout the sources from gitlab into a folder called 'src'.
+2. Checkout the sources from central VCS into a folder called 'src'.
+   Currently central VCS is held on learnscripture.net SSH account
+   while we look for a host that supports both Mercurial and issue tracking
+   and is cheap etc.::
 
-   First, it is probably best to fork the project on gitlab
+     hg clone ssh://learnscripure@learnscripture.net/repos/learnscripture.net src
 
-   Then clone your fork locally. You can use git, or mercurial using hg-git.::
-
-     git clone git@gitlab.com:learnscripture/learnscripture.net.git src
-     hg clone git+ssh://git@gitlab.com:learnscripture/learnscripture.net.git src
+   Edit your ``.hg/hgrc`` to have a ``central`` alias pointing to the same place,
+   this is needed for deploying.
 
    You will also need a copy of the text sources, checked out in 'texts' in a sibling directory to 'src'::
 
-     git clone git@gitlab.com:learnscripture/learnscripture-texts.git texts
-     hg clone git+ssh://git@gitlab.com:learnscripture/learnscripture-texts.git texts
+     hg clone ssh://learnscripure@learnscripture.net/repos/learnscripture-texts texts
+
 
 3. Create a virtualenv for the project e.g.::
 
