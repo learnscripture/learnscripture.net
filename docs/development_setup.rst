@@ -63,9 +63,11 @@ installed.
      cd tests
      elm-install
 
-   Install ``sentry-cli`` into $VIRTUAL_ENV/bin:
+   For deployment, install ``sentry-cli`` into $VIRTUAL_ENV/bin:
 
       https://github.com/getsentry/sentry-cli/releases/
+
+   and set up a ~/.sentryclirc
 
 5. Create postgres databases matching the development ones in
    ``learnscripture/settings.py``, both for ``learnscripture`` and
