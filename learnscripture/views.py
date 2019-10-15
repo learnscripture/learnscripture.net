@@ -28,7 +28,7 @@ from accounts.forms import AccountDetailsForm, PreferencesForm
 from accounts.models import Account, HeatmapStatsType, Identity
 from awards.models import AnyLevel, Award, AwardType
 from bibleverses.books import BIBLE_BOOK_COUNT, get_bible_book_name
-from bibleverses.forms import VerseSetForm, VerseSetFormAutoLanguage
+from bibleverses.forms import VerseSetForm
 from bibleverses.languages import LANGUAGE_CODE_INTERNAL, LANGUAGES
 from bibleverses.models import (MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, TextType, TextVersion, VerseSet,
                                 VerseSetType, get_passage_sections, is_continuous_set)
@@ -552,11 +552,7 @@ def choose(request):
     verse_sets = verse_sets.order_by('name').prefetch_related('verse_choices')
 
     query = verseset_search_form.cleaned_data['query'].strip()
-    if request.i18n_options_enabled:
-        language_code = verseset_search_form.cleaned_data['language_code']
-    else:
-        # Since they don't have UI to select anything, allow them to see everything.
-        language_code = FILTER_LANGUAGES_ALL
+    language_code = verseset_search_form.cleaned_data['language_code']
 
     if query:
         query_language_codes = settings.LANGUAGE_CODES if language_code == FILTER_LANGUAGES_ALL else [language_code]
@@ -815,10 +811,7 @@ def edit_set(request, slug=None):
 
 @require_account_with_redirect
 def create_or_edit_set(request, set_type=None, slug=None):
-    if request.i18n_options_enabled:
-        form_class = VerseSetForm
-    else:
-        form_class = VerseSetFormAutoLanguage
+    form_class = VerseSetForm
 
     version = request.identity.default_bible_version
     language_code = version.language_code
@@ -895,8 +888,6 @@ def create_or_edit_set(request, set_type=None, slug=None):
             verse_set.set_type = set_type
             if verse_set.created_by_id is None:
                 verse_set.created_by = request.identity.account
-                if form_class is VerseSetFormAutoLanguage:
-                    verse_set.language_code = version.language_code
             verse_set.breaks = breaks
 
             if orig_verse_set_public:

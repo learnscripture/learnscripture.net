@@ -104,13 +104,6 @@ def pwa_tracker_middleware(get_response):
     return middleware
 
 
-def feature_flipper_middleware(get_response):
-    def middleware(request):
-        request.i18n_options_enabled = True
-        return get_response(request)
-    return middleware
-
-
 def debug_middleware(get_response):
     from learnscripture import session
     from accounts.models import Account

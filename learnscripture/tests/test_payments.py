@@ -132,7 +132,6 @@ class DonationDriveTests(AccountTestMixin, TestBase):
                          True)
 
         # Change language:
-        self.account.is_tester = True  # For i18n_options_enabled
         self.account.identity.interface_language = "tr"
         self.assertEqual(d2.active_for_account(self.account),
                          False)

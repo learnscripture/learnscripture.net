@@ -139,9 +139,7 @@
           {% endif %}
         {% endblock %}
 
-        {% if request.i18n_options_enabled %}
-          {% include "learnscripture/language_selector_inc.html" %}
-        {% endif %}
+        {% include "learnscripture/language_selector_inc.html" %}
 
         <p><a href="/help/">{% ftlmsg 'site-footer-help' %}</a> |
           <a href="/about/">{% ftlmsg 'site-footer-about' %}</a> |

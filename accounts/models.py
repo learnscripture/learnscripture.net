@@ -483,13 +483,7 @@ class Identity(models.Model):
 
     @property
     def default_language_code(self):
-        if self.i18n_options_enabled:
-            return self.interface_language
-        # Legacy - guess based on default_bible_version
-        if self.default_bible_version is None:
-            return DEFAULT_LANGUAGE.code
-        else:
-            return self.default_bible_version.language_code
+        return self.interface_language
 
     def add_verse_set(self, verse_set, version=None):
         """
@@ -1282,10 +1276,6 @@ class Identity(models.Model):
             if self.account.is_tester:
                 return TextVersion.objects.bibles()
         return TextVersion.objects.bibles().filter(public=True)
-
-    @property
-    def i18n_options_enabled(self):
-        return True
 
     def get_dashboard_events(self, now=None):
         from events.models import Event

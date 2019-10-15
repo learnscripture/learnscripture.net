@@ -17,14 +17,7 @@ class VerseSetForm(forms.ModelForm):
         return name
 
 
-class VerseSetFormAutoLanguage(VerseSetForm):
-    class Meta:
-        model = VerseSet
-        fields = ['name', 'description', 'additional_info', 'public']
-
-
 for n in ['description', 'additional_info']:
-    for form in [VerseSetForm, VerseSetFormAutoLanguage]:
-        f = form.base_fields[n].widget.attrs
-        del f['cols']
-        f['rows'] = 3
+    f = VerseSetForm.base_fields[n].widget.attrs
+    del f['cols']
+    f['rows'] = 3

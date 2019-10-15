@@ -220,7 +220,6 @@ MIDDLEWARE = [
         (DEBUG, 'learnscripture.middleware.paypal_debug_middleware'),
         (True, 'learnscripture.middleware.identity_middleware'),
         (True, 'learnscripture.middleware.activate_language_from_request'),
-        (True, 'learnscripture.middleware.feature_flipper_middleware'),
     ]
     if b
 ]
