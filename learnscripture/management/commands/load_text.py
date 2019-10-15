@@ -48,6 +48,7 @@ class Command(BaseCommand):
                     raise AssertionError("Unnown text type {!r}".format(version.text_type))
 
                 with gzip.open(os.path.join(input_dir, items_file), "rb") as f2:
+                    version.verse_set.all().delete()
                     for i, obj in enumerate(serializers.deserialize(format, f2, **common_options)):
                         obj.save()
                         if (i + 1) % 100 == 0:
