@@ -30,6 +30,10 @@ installed.
 
      mkvirtualenv learnscripture --python=`which python3.5` -a `pwd`
 
+   Add project path to the venv::
+
+     pwd > $VIRTUAL_ENV/lib/python3.5/site-packages/project.pth
+
 4. Install dependencies.
 
    System dependencies:
