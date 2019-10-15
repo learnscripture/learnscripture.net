@@ -546,7 +546,7 @@ def choose(request):
 
     c = {
         'title': t('choose-page-title'),
-        'verseset_search_form': verseset_search_form
+        'verseset_search_form': verseset_search_form,
     }
 
     verse_sets = verse_sets.order_by('name').prefetch_related('verse_choices')
@@ -560,6 +560,9 @@ def choose(request):
 
     if language_code != FILTER_LANGUAGES_ALL:
         verse_sets = verse_sets.filter(language_code=language_code)
+        c['verseset_language_code'] = language_code
+    else:
+        c['verseset_language_code'] = default_bible_version.language_code
 
     set_type = verseset_search_form.cleaned_data['set_type']
     if set_type != VERSE_SET_TYPE_ALL:
