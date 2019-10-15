@@ -18,7 +18,6 @@ from fluent.runtime import types as fluent_types
 from accounts import memorymodel
 from accounts.signals import (catechism_started, points_increase, scored_100_percent, verse_finished, verse_started,
                               verse_tested)
-from bibleverses.languages import DEFAULT_LANGUAGE
 from bibleverses.models import (InvalidVerseReference, MemoryStage, StageType, TextType, TextVersion, UserVerseStatus,
                                 VerseSet, VerseSetType, get_passage_sections, normalized_verse_list_ref)
 from bibleverses.signals import verse_set_chosen
