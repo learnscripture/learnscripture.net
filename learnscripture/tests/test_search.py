@@ -170,6 +170,46 @@ class SearchTests(SearchTestsMixin, TestBase):
                                                  "Psalm 23:1-3", default_language_code='tr')
         self.assertEqual(set(results1), set([vs1]))
 
+    def test_search_no_query(self):
+        # Any language
+        vs1 = VerseSet.objects.create(name="Psalm 23:1-2",
+                                      slug="psalm-23",
+                                      public=True,
+                                      language_code='en',
+                                      set_type=VerseSetType.PASSAGE,
+                                      created_by=self.account)
+        vs1.set_verse_choices([
+            "BOOK18 23:1",
+            "BOOK18 23:2",
+        ])
+
+        # Turkish
+        vs2 = VerseSet.objects.create(name="Sevdiğim",
+                                      slug="servdigim",
+                                      public=True,
+                                      language_code='tr',
+                                      set_type=VerseSetType.SELECTION,
+                                      created_by=self.account)
+        vs2.set_verse_choices([
+            "BOOK18 23:1",
+        ])
+
+        # English
+        vs3 = VerseSet.objects.create(name="Faves",
+                                      slug="faves",
+                                      public=True,
+                                      language_code='en',
+                                      set_type=VerseSetType.SELECTION,
+                                      created_by=self.account)
+        vs3.set_verse_choices([
+            "BOOK18 23:1",
+        ])
+
+        # Search in Turkish:
+        results = VerseSet.objects.all().search([LANGUAGE_CODE_TR],
+                                                "", default_language_code='tr')
+        self.assertEqual(set(results), set([vs1, vs2]))
+
 
 class QuickFindTests(SearchTestsMixin, TestBase):
     """

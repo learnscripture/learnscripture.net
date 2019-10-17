@@ -554,9 +554,8 @@ def choose(request):
     query = verseset_search_form.cleaned_data['query'].strip()
     language_code = verseset_search_form.cleaned_data['language_code']
 
-    if query:
-        query_language_codes = settings.LANGUAGE_CODES if language_code == FILTER_LANGUAGES_ALL else [language_code]
-        verse_sets = verse_sets.search(query_language_codes, query)
+    query_language_codes = settings.LANGUAGE_CODES if language_code == FILTER_LANGUAGES_ALL else [language_code]
+    verse_sets = verse_sets.search(query_language_codes, query)
 
     if language_code != FILTER_LANGUAGES_ALL:
         c['verseset_language_code'] = language_code

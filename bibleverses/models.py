@@ -546,6 +546,9 @@ class VerseSetQuerySet(models.QuerySet):
         return self.filter(public=True)
 
     def search(self, language_codes, query, default_language_code=None):
+        if not query:
+            return self.filter(language_code__in=language_codes) | self.filter(any_language=True)
+
         result_queries = []
         # If we are searching multiple languages, but using a verse ref, we will
         # need to parse the verse ref in the language that matches e.g.
