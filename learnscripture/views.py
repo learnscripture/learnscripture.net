@@ -554,7 +554,13 @@ def choose(request):
     query = verseset_search_form.cleaned_data['query'].strip()
     language_code = verseset_search_form.cleaned_data['language_code']
 
-    query_language_codes = settings.LANGUAGE_CODES if language_code == FILTER_LANGUAGES_ALL else [language_code]
+    query_language_codes = settings.LANGUAGE_CODES if language_code == FILTER_LANGUAGES_ALL else list(set(
+        # People will typically type in 'interface langauge' (request.LANGUAGE_CODES),
+        # and if that doesn't find anything, they may just switch the language filter
+        # to another language, perhaps English. They will expect what they typed
+        # before to be still valid.
+        [language_code, request.LANGUAGE_CODE]
+    ))
     verse_sets = verse_sets.search(query_language_codes, query)
 
     if language_code != FILTER_LANGUAGES_ALL:
