@@ -65,7 +65,7 @@ class SearchTests(SearchTestsMixin, TestBase):
         self.assertEqual(list(results), [vs1])
 
     def test_multi_language_search(self):
-        vs1 = VerseSet.objects.create(name="Psalm 23",
+        vs1 = VerseSet.objects.create(name="Psalm 23 - my favorite",
                                       slug="psalm-23",
                                       public=True,
                                       language_code='en',
@@ -80,7 +80,7 @@ class SearchTests(SearchTestsMixin, TestBase):
             "BOOK18 23:6",
         ])
 
-        vs2 = VerseSet.objects.create(name="Mezmur 23",
+        vs2 = VerseSet.objects.create(name="Mezmur 23 - en sevdiğim",
                                       slug="mezmur-23",
                                       public=True,
                                       language_code='tr',
@@ -119,6 +119,40 @@ class SearchTests(SearchTestsMixin, TestBase):
         results5 = VerseSet.objects.all().search([LANGUAGE_CODE_EN, LANGUAGE_CODE_TR],
                                                  "Mz 23", default_language_code='en')
         self.assertEqual(set(results5), set([vs1, vs2]))
+
+    def test_any_language(self):
+        # This should be treated as 'any language' because the name is translatable
+        vs = VerseSet.objects.create(name="Psalm 23",
+                                     slug="psalm-23",
+                                     public=True,
+                                     language_code='en',
+                                     set_type=VerseSetType.PASSAGE,
+                                     created_by=self.account)
+        vs.set_verse_choices([
+            "BOOK18 23:1",
+            "BOOK18 23:2",
+            "BOOK18 23:3",
+            "BOOK18 23:4",
+            "BOOK18 23:5",
+            "BOOK18 23:6",
+        ])
+
+        # and therefore found in a turkish only search:
+        results = VerseSet.objects.all().search([LANGUAGE_CODE_TR],
+                                                "Mezmur 23")
+        self.assertEqual(list(results), [vs])
+
+        # But now only as English:
+        vs.name = "Psalm 23 - my favourite"
+        vs.save()
+
+        results2 = VerseSet.objects.all().search([LANGUAGE_CODE_TR],
+                                                 "Mezmur 23")
+        self.assertEqual(list(results2), [])
+
+        results3 = VerseSet.objects.all().search([LANGUAGE_CODE_EN],
+                                                 "Psalm 23")
+        self.assertEqual(list(results3), [vs])
 
     def test_search_full_passage(self):
         vs1 = VerseSet.objects.create(name="The Lord is my shepherd",

@@ -326,13 +326,13 @@ def parse_passage_title_partial_loose(language_code, title):
     """
     If possible, parse the initial part of a title as a bible reference,
     returning (parsed_ref,
-               boolean that is True for a complete parse with no remainder)
+               boolean that is True for a complete parse with no remainder, False otherwise)
     or        (None, False)
     """
     title_norm = normalize_reference_input(language_code, title)
     try:
         parsed_ref, remainder = bible_reference_parser_for_lang(language_code, False).parse_partial(title_norm)
-    except ParseError:
+    except (ParseError, InvalidVerseReference):
         return None, False
 
     # We expect the remainder to be empty or to start with punctuation i.e. non

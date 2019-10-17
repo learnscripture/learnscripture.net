@@ -559,7 +559,6 @@ def choose(request):
         verse_sets = verse_sets.search(query_language_codes, query)
 
     if language_code != FILTER_LANGUAGES_ALL:
-        verse_sets = verse_sets.filter(language_code=language_code)
         c['verseset_language_code'] = language_code
     else:
         c['verseset_language_code'] = default_bible_version.language_code
@@ -752,7 +751,6 @@ def view_verse_set(request, slug):
                 if 'convert_to_passage_set' in request.POST:
                     verse_set.set_type = VerseSetType.PASSAGE
                     verse_set.save()
-                    verse_set.update_passage_id()
                     messages.info(request, t('versesets-converted-to-passage'))
                     c['show_convert_to_passage'] = False
 

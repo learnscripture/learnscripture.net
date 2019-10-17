@@ -90,3 +90,15 @@ class VerseSetTests(BibleVersesMixin, AccountTestMixin, TestBase):
                        set_type=VerseSetType.PASSAGE)
         self.assertEqual(vs1.smart_name('en'), 'Marked')
         self.assertEqual(vs1.smart_name('tr'), 'Marked')
+
+    def test_any_language(self):
+        vs = VerseSet(name="Psalm 37: 1 - 40",
+                      language_code='en',
+                      created_by=self.create_account(username='creator')[1],
+                      set_type=VerseSetType.PASSAGE)
+        vs.save()
+        self.assertTrue(vs.any_language)
+
+        vs.description = "This is a description"
+        vs.save()
+        self.assertFalse(vs.any_language)

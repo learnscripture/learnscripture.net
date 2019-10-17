@@ -546,7 +546,7 @@ class VerseSetQuerySet(models.QuerySet):
         return self.filter(public=True)
 
     def search(self, language_codes, query, default_language_code=None):
-        results = []
+        result_queries = []
         # If we are searching multiple languages, but using a verse ref, we will
         # need to parse the verse ref in the language that matches e.g.
         # "Yarat 1:1" should parse to 'BOOK0 1:1', and we then search all
@@ -580,7 +580,7 @@ class VerseSetQuerySet(models.QuerySet):
                 fallback_parsed_ref = list(parsed_refs.values())[0]
 
         for language_code in language_codes:
-            initial_verse_sets = self.filter(language_code=language_code)
+            initial_verse_sets = self.filter(language_code=language_code) | self.filter(any_language=True)
             parsed_ref = parsed_refs.get(language_code, fallback_parsed_ref)
             if parsed_ref is not None:
                 if parsed_ref.start_verse is None:
@@ -589,14 +589,14 @@ class VerseSetQuerySet(models.QuerySet):
                     # But limit to only passage types, otherwise we'll get false
                     # positives for selection sets that contain other verses
                     # from that chapter.
-                    results.append(initial_verse_sets.filter(
+                    result_queries.append(initial_verse_sets.filter(
                         set_type=VerseSetType.PASSAGE,
                         verse_choices__internal_reference=search_parsed_ref.to_internal().canonical_form())
                     )
                 else:
                     if parsed_ref.get_start() != parsed_ref.get_end():
                         # Looks like passage ref:
-                        results.append(initial_verse_sets.filter(
+                        result_queries.append(initial_verse_sets.filter(
                             set_type=VerseSetType.PASSAGE,
                             passage_id=make_verse_set_passage_id(
                                 parsed_ref.get_start().to_internal(),
@@ -604,7 +604,7 @@ class VerseSetQuerySet(models.QuerySet):
                             )
                         ))
                     else:
-                        results.append(initial_verse_sets.filter(
+                        result_queries.append(initial_verse_sets.filter(
                             set_type__in=[
                                 VerseSetType.SELECTION,
                                 VerseSetType.PASSAGE
@@ -612,9 +612,9 @@ class VerseSetQuerySet(models.QuerySet):
                             verse_choices__internal_reference=parsed_ref.to_internal().canonical_form())
                         )
             else:
-                results.append(initial_verse_sets.filter(name__icontains=query))
-        if results:
-            return reduce(operator.or_, results)
+                result_queries.append(initial_verse_sets.filter(name__icontains=query))
+        if result_queries:
+            return reduce(operator.or_, result_queries)
         else:
             return self.none()
 
@@ -661,11 +661,19 @@ class VerseSet(models.Model):
                                      max_length=2, blank=False,
                                      help_text=t_lazy('versesets-language.help-text'),
                                      choices=LANGUAGE_CHOICES)
+    # A verse set is 'any_language' if it title/description can be automatically
+    # translated (i.e. contains only bible references)
+    any_language = models.BooleanField(default=False)
 
     objects = VerseSetManager()
 
     def __str__(self):
         return self.name
+
+    def save(self, **kwargs):
+        self._update_passage_id()
+        self._update_any_language()
+        super().save(**kwargs)
 
     def get_absolute_url(self):
         return reverse('view_verse_set', kwargs=dict(slug=self.slug))
@@ -707,15 +715,32 @@ class VerseSet(models.Model):
         for vc in old_vcs:
             vc.delete()
 
-        self.update_passage_id()
+        self.save()  # to run update_passage_id and save
 
-    def update_passage_id(self):
+    def _update_passage_id(self):
         if self.is_passage:
             verse_choices = list(self.verse_choices.all())
+            if len(verse_choices) == 0:
+                self.passage_id = ''
+                return
             self.passage_id = make_verse_set_passage_id(
                 verse_choices[0].internal_reference,
                 verse_choices[-1].internal_reference)
-            self.save()
+        else:
+            self.passage_id = ''
+
+    def _update_any_language(self):
+        # If a verse set is for a passage, and the name can be fully translated,
+        # with no other text to translate, we can treat the verse set as 'any language'.
+        any_language = False
+        if self.is_passage and self.description.strip() == '':
+            parsed_ref, complete_parse = parse_passage_title_partial_loose(
+                self.language_code,
+                self.name
+            )
+            if parsed_ref is not None and complete_parse:
+                any_language = True
+        self.any_language = any_language
 
     def smart_name(self, required_language_code):
         """
