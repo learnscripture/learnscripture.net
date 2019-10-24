@@ -1,3 +1,4 @@
+// Also in bible_book_info.py
 export const BIBLE_BOOK_INFO =
 {
     "BOOK44": {

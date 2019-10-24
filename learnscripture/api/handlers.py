@@ -482,6 +482,7 @@ class VerseFind(ApiView):
             'html': render_to_string_ftl(template_name, context, request=request),
             'parsed_reference': parsed_reference.__dict__ if parsed_reference is not None else None,
             'canonical_reference': parsed_reference.canonical_form() if parsed_reference is not None else None,
+            'canonical_internal_reference': parsed_reference.to_internal().canonical_form() if parsed_reference is not None else None,
             'duplicate_check_html': duplicate_check_html,
         }
 

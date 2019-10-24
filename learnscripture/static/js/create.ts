@@ -43,6 +43,7 @@ var addPassage = function(results) {
         $('#id_language_code').val(parsedRef.language_code);
     }
     previousPassageRef = simplifiedRef;
+    $('#id-internal-reference').val(results.canonical_internal_reference)
 };
 
 var deleteButtonClick = function(ev) {
@@ -64,17 +65,14 @@ var selectionSaveBtnClick = function(ev) {
 var passageSaveBtnClick = function(ev) {
     ev.preventDefault();
     // Create hidden fields with all internal_references
-    var refs = [];
     var breaks = [];
     $('#id-verse-list tbody tr[data-internal-reference]').each(function(idx, elem) {
         var $row = $(elem);
         var ref = $row.attr('data-internal-reference');
-        refs.push(ref);
         if ($row.find('input').prop('checked')) {
             breaks.push(ref);
         }
     });
-    $('#id-internal-reference-list').val(refs.join('|'));
     $('#id-break-list').val(breaks.join(','));
     $('#id-verse-set-form').submit();
 };

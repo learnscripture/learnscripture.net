@@ -1020,8 +1020,7 @@ class UserVerseStatus(models.Model):
         Returns the UVS list for the passage section the current UVS is a part of,
         given an ordered UVS list for the whole passage.
         """
-        sections = get_passage_sections(self.version.language_code,
-                                        passage_uvs_list,
+        sections = get_passage_sections(passage_uvs_list,
                                         self.verse_set.breaks)
         for section in sections:
             if self in section:
@@ -1059,6 +1058,7 @@ class UserVerseStatus(models.Model):
 #   - Combo verses (e.g. when a user chooses to learn several verses
 #     together as single verse e.g. Ephesians 2:8-9)
 #   - Passages - we want to retrieve all of "John 1:1-15", to be displayed in a list
+#     (but we display each verse individually)
 #   - Merged verses - where the underlying Bible translation has put several
 #     verses together e.g. TCL02 Romalılar 3:25-26.
 #   - Missing verses - where the translation doesn't have a certain verse.
@@ -1320,7 +1320,7 @@ def is_continuous_set(verse_list):
             [v.localized_reference for v in combined])
 
 
-def get_passage_sections(language_code, verse_list, breaks):
+def get_passage_sections(verse_list, breaks):
     """
     Given a list of objects with either a correct 'localized_reference' or
     'internal_reference' attribute, and a break list (a comma separated list of
@@ -1343,7 +1343,7 @@ def get_passage_sections(language_code, verse_list, breaks):
             parsed_ref = parse_validated_internal_reference(v.internal_reference)
         else:
             parsed_ref = parse_validated_localized_reference(
-                language_code, v.localized_reference).to_internal()
+                v.version.language_code, v.localized_reference).to_internal()
         start_ref = parsed_ref.get_start()
         if start_ref in break_ref_list and len(current_section) > 0:
             # Start new section
@@ -1386,7 +1386,7 @@ def quick_find(query, version, max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
         verse_list = fetch_parsed_reference(version, parsed_ref,
                                             max_length=max_length)
         result_ref = normalized_verse_list_ref(version.language_code, verse_list)
-        # parsed_ref might be difference from final_ref, due to merged verses
+        # parsed_ref might be difference from result_ref, due to merged verses
         parsed_result_ref = parse_validated_localized_reference(version.language_code,
                                                                 result_ref)
         return ([VerseSearchResult(result_ref, verse_list,

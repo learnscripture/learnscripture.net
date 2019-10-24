@@ -30,9 +30,9 @@ from awards.models import AnyLevel, Award, AwardType
 from bibleverses.books import BIBLE_BOOK_COUNT, get_bible_book_name
 from bibleverses.forms import VerseSetForm
 from bibleverses.languages import LANGUAGE_CODE_INTERNAL, LANGUAGES
-from bibleverses.models import (MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, TextType, TextVersion, VerseSet,
-                                VerseSetType, get_passage_sections, is_continuous_set)
-from bibleverses.parsing import (internalize_localized_reference, localize_internal_reference, parse_break_list,
+from bibleverses.models import (MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, TextType, TextVersion, VerseChoice,
+                                VerseSet, VerseSetType, get_passage_sections, is_continuous_set)
+from bibleverses.parsing import (parse_validated_localized_reference, localize_internal_reference, parse_break_list,
                                  parse_unvalidated_localized_reference, parse_validated_internal_reference)
 from bibleverses.signals import public_verse_set_created
 from events.models import Event
@@ -716,7 +716,7 @@ def get_verse_set_verse_list(version, verse_set):
     verses = version.get_verses_by_localized_reference_bulk(all_localized_references)
 
     verse_list = sorted(verses.values(), key=lambda v: v.bible_verse_number)
-    verse_list = add_passage_breaks(language_code, verse_list, verse_set.breaks)
+    verse_list = add_passage_breaks(verse_list, verse_set.breaks)
 
     retval = []
     added_verse_refs = set()
@@ -789,9 +789,12 @@ def view_verse_set(request, slug):
     return TemplateResponse(request, 'learnscripture/single_verse_set.html', c)
 
 
-def add_passage_breaks(language_code, verse_list, breaks):
+def add_passage_breaks(verse_list, breaks):
+    """
+    Decorates verse list (UserVerseStatus or VerseChoice) with `break_here` attributes.
+    """
     retval = []
-    sections = get_passage_sections(language_code, verse_list, breaks)
+    sections = get_passage_sections(verse_list, breaks)
     for i, section in enumerate(sections):
         for j, v in enumerate(section):
             # need break at beginning of every section except first
@@ -849,29 +852,54 @@ def create_or_edit_set(request, set_type=None, slug=None):
         orig_verse_set_public = False if verse_set is None else verse_set.public
 
         form = form_class(request.POST, instance=verse_set)
-        internal_reference_list_raw = [
-            i for i in request.POST.get('internal_reference_list', '').split('|')
-            if i
-        ]
-        localized_reference_list_raw = [localize_internal_reference(language_code, r)
-                                        for r in internal_reference_list_raw]
-        verse_dict = version.get_verses_by_localized_reference_bulk(localized_reference_list_raw)
+        if set_type == VerseSetType.SELECTION:
+            internal_reference_list_raw = [
+                i for i in request.POST.get('internal_reference_list', '').split('|')
+                if i
+            ]
+            localized_reference_list_raw = [localize_internal_reference(version.language_code, r)
+                                            for r in internal_reference_list_raw]
+            verse_dict = version.get_verses_by_localized_reference_bulk(localized_reference_list_raw)
 
-        # Dedupe localized_reference_list, and ensure correct references, while preserving order:
-        localized_reference_list = []
-        for ref in localized_reference_list_raw:
-            if ref in verse_dict and ref not in localized_reference_list:
-                localized_reference_list.append(ref)
+            # Dedupe localized_reference_list, and ensure correct references, while preserving order:
+            internal_reference_list = []
+            for ref in localized_reference_list_raw:
+                internal_ref = parse_validated_localized_reference(version.language_code, ref).to_internal()
+                if ref in verse_dict and internal_ref not in internal_reference_list:
+                    internal_reference_list.append(internal_ref)
+            localized_reference_list = [
+                r.translate_to(version.language_code).canonical_form()
+                for r in internal_reference_list
+            ]
+            breaks = ''
+        else:
+            internal_reference = request.POST['internal_reference']
+            try:
+                internal_reference_list = parse_validated_internal_reference(internal_reference).to_list()
+            except InvalidVerseReference:
+                internal_reference_list = []
+            breaks = normalize_break_list(request.POST.get('break_list', ''))
+            # If all have a 'break' applied, (excluding first, which never has
+            # one) then the user clearly doesn't understand the concept of
+            # section breaks:
+            tmp_verse_list = add_passage_breaks(
+                [VerseChoice(internal_reference=r.canonical_form()) for r in internal_reference_list],
+                breaks)
+            if all(v.break_here for v in tmp_verse_list[1:]):
+                breaks = ''
+            localized_reference_list = [
+                r.translate_to(version.language_code).canonical_form()
+                for r in internal_reference_list
+            ]
+            verse_dict = version.get_verses_by_localized_reference_bulk(localized_reference_list)
 
-        # Need to build an internal list that doesn't have merged verses.
-        internal_reference_list = []
-        for ref in localized_reference_list:
-            verse = verse_dict[ref]
-            sub_verses = verse.get_unmerged_parts()
-            for v in sub_verses:
-                internal_reference_list.append(internalize_localized_reference(version.language_code, v.localized_reference))
-
-        breaks = normalize_break_list(request.POST.get('break_list', ''))
+        # # Need to build an internal list that doesn't have merged verses.
+        # internal_reference_list = []
+        # for ref in localized_reference_list:
+        #     verse = verse_dict[ref]
+        #     sub_verses = verse.get_unmerged_parts()
+        #     for v in sub_verses:
+        #         internal_reference_list.append(internalize_localized_reference(version.language_code, v.localized_reference))
 
         form_is_valid = form.is_valid()
         if len(verse_dict) == 0:
@@ -879,17 +907,6 @@ def create_or_edit_set(request, set_type=None, slug=None):
             form_is_valid = False
 
         if form_is_valid:
-            # If all have a 'break' applied, (excluding first, which never has
-            # one) then the user clearly doesn't understand the concept of
-            # section breaks:
-            tmp_verse_list = add_passage_breaks(
-                language_code,
-                mk_verse_list(localized_reference_list,
-                              verse_dict),
-                breaks)
-            if all(v.break_here for v in tmp_verse_list[1:]):
-                breaks = ""
-
             verse_set = form.save(commit=False)
             verse_set.set_type = set_type
             if verse_set.created_by_id is None:
@@ -900,7 +917,7 @@ def create_or_edit_set(request, set_type=None, slug=None):
                 # Can't undo:
                 verse_set.public = True
             verse_set.save()
-            verse_set.set_verse_choices(internal_reference_list)
+            verse_set.set_verse_choices([ref.canonical_form() for ref in internal_reference_list])
 
             # if user just made it public or it is a new public verse set
             if (verse_set.public and (not orig_verse_set_public or
@@ -937,9 +954,10 @@ def create_or_edit_set(request, set_type=None, slug=None):
 
     verse_list = mk_verse_list(localized_reference_list, verse_dict)
     if set_type == VerseSetType.PASSAGE:
-        verse_list = add_passage_breaks(language_code, verse_list, breaks)
+        verse_list = add_passage_breaks(verse_list, breaks)
 
     c['verses'] = verse_list
+    c['verse_set'] = verse_set
     c['new_verse_set'] = verse_set is None
     c['verse_set_form'] = form
     c['title'] = title

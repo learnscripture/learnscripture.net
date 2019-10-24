@@ -1056,6 +1056,7 @@ class Identity(models.Model):
         # So it makes sense to return them together.
         statuses = (self.verse_statuses
                     .active()
+                    .select_related('version')
                     .filter(verse_set__set_type=VerseSetType.PASSAGE))
 
         # If any of them need reviewing, we want to know about it:
@@ -1175,9 +1176,8 @@ class Identity(models.Model):
             return uvs_list
 
         uvs_list.sort(key=lambda u: u.text_order)
-        language_code = uvs_list[0].version.language_code
         # First split into sections according to the specified breaks
-        sections = get_passage_sections(language_code, uvs_list, verse_set.breaks)
+        sections = get_passage_sections(uvs_list, verse_set.breaks)
 
         # Aim: get the section containing the least recently tested verse
         # that needs to be tested.
@@ -1229,9 +1229,8 @@ class Identity(models.Model):
             return uvs_list
 
         uvs_list.sort(key=lambda u: u.text_order)
-        language_code = uvs_list[0].version.language_code
         # First split into sections according to the specified breaks
-        sections = get_passage_sections(language_code, uvs_list, verse_set.breaks)
+        sections = get_passage_sections(uvs_list, verse_set.breaks)
 
         to_test = []
         tested_sections = set()

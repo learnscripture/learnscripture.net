@@ -602,10 +602,35 @@ class ParsingTests(unittest2.TestCase):
         self.assertEqual(normalize_reference_input_turkish('  ÂâİIiıÇçŞşÖöÜüĞğ  '),
                          'aaiiiiccssoouugg')
 
+    def test_to_list(self):
+        def assertListEqual(ref, ref_list):
+            parsed_ref = self.pv('en', ref)
+            self.assertEqual(parsed_ref.to_list(),
+                             [self.pv('en', r) for r in ref_list])
 
-class MockUVS(object):
-    def __init__(self, localized_reference):
+        assertListEqual('Genesis 1:1', ['Genesis 1:1'])
+        assertListEqual('Genesis 1:1-2', ['Genesis 1:1', 'Genesis 1:2'])
+        assertListEqual('Genesis 1:30-2:2', [
+            'Genesis 1:30',
+            'Genesis 1:31',
+            'Genesis 2:1',
+            'Genesis 2:2',
+        ])
+        assertListEqual('Genesis 1:30-31', [
+            'Genesis 1:30',
+            'Genesis 1:31',
+        ])
+
+
+class MockVersion:
+    def __init__(self, language_code):
+        self.language_code = language_code
+
+
+class MockUVS:
+    def __init__(self, localized_reference, language_code=LANGUAGE_CODE_EN):
         self.localized_reference = localized_reference
+        self.version = MockVersion(language_code=language_code)
 
 
 class GetPassageSectionsTests(unittest2.TestCase):
@@ -613,7 +638,7 @@ class GetPassageSectionsTests(unittest2.TestCase):
     def test_empty(self):
         uvs_list = [MockUVS('Genesis 1:1'),
                     MockUVS('Genesis 1:2')]
-        sections = get_passage_sections(LANGUAGE_CODE_EN, uvs_list, '')
+        sections = get_passage_sections(uvs_list, '')
         self.assertEqual([[uvs.localized_reference for uvs in section]
                           for section in sections],
                          [["Genesis 1:1", "Genesis 1:2"]])
@@ -625,7 +650,7 @@ class GetPassageSectionsTests(unittest2.TestCase):
                     MockUVS('Genesis 1:4'),
                     MockUVS('Genesis 1:5')]
 
-        sections = get_passage_sections(LANGUAGE_CODE_EN, uvs_list, 'BOOK0 1:1,BOOK0 1:4')
+        sections = get_passage_sections(uvs_list, 'BOOK0 1:1,BOOK0 1:4')
         self.assertEqual([[uvs.localized_reference for uvs in section]
                           for section in sections],
                          [["Genesis 1:1", "Genesis 1:2", "Genesis 1:3"],
@@ -638,7 +663,7 @@ class GetPassageSectionsTests(unittest2.TestCase):
                     MockUVS('Genesis 1:4'),
                     MockUVS('Genesis 1:5')]
 
-        sections = get_passage_sections(LANGUAGE_CODE_EN, uvs_list, 'BOOK0 1:4')
+        sections = get_passage_sections(uvs_list, 'BOOK0 1:4')
         self.assertEqual([[uvs.localized_reference for uvs in section]
                           for section in sections],
                          [["Genesis 1:1", "Genesis 1:2", "Genesis 1:3"],
@@ -654,7 +679,7 @@ class GetPassageSectionsTests(unittest2.TestCase):
                     MockUVS('Genesis 2:4'),
                     MockUVS('Genesis 2:5')]
 
-        sections = get_passage_sections(LANGUAGE_CODE_EN, uvs_list, 'BOOK0 1:13,BOOK0 2:2,BOOK0 2:4')
+        sections = get_passage_sections(uvs_list, 'BOOK0 1:13,BOOK0 2:2,BOOK0 2:4')
         self.assertEqual([[uvs.localized_reference for uvs in section]
                           for section in sections],
                          [["Genesis 1:11", "Genesis 1:12"],
@@ -672,7 +697,7 @@ class GetPassageSectionsTests(unittest2.TestCase):
                     MockUVS('Genesis 1:3-4'),
                     MockUVS('Genesis 1:5')]
 
-        sections = get_passage_sections(LANGUAGE_CODE_EN, uvs_list, 'BOOK0 1:3')
+        sections = get_passage_sections(uvs_list, 'BOOK0 1:3')
         self.assertEqual([[uvs.localized_reference for uvs in section]
                           for section in sections],
                          [["Genesis 1:1", "Genesis 1:2"],
@@ -684,7 +709,7 @@ class GetPassageSectionsTests(unittest2.TestCase):
                     MockUVS('Genesis 1:3-4'),
                     MockUVS('Genesis 1:5')]
 
-        sections = get_passage_sections(LANGUAGE_CODE_EN, uvs_list, 'BOOK0 1:4')
+        sections = get_passage_sections(uvs_list, 'BOOK0 1:4')
         # For this case we make an arbitrary decision to ignore breaks
         # that occur in the middle of a merged/combo verse. In reality
         # this is just a corner case that is very unlikely to ever occur.

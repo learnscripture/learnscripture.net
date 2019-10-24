@@ -6,6 +6,7 @@ from parsy import ParseError, char_from, generate, regex, string, string_from, w
 from learnscripture.ftl_bundles import t
 from learnscripture.utils.cache import memoize_function
 
+from .constants import BIBLE_BOOK_INFO
 from .books import (get_bible_book_abbreviation_map, get_bible_book_name, get_bible_book_number, get_bible_books,
                     is_single_chapter_book)
 from .languages import LANGUAGE_CODE_INTERNAL, normalize_reference_input
@@ -110,6 +111,43 @@ class ParsedReference(object):
         else:
             return self._clone(start_chapter=self.end_chapter,
                                start_verse=self.end_verse)
+
+    def to_list(self):
+        """
+        From a ParsedReference that may span more than one verse,
+        return a list of all ParsedReference in the range.
+        """
+        start_ref = self.get_start()
+        end_ref = self.get_end()
+        assert start_ref.book_number == end_ref.book_number
+        book_info = BIBLE_BOOK_INFO[self.to_internal().book_name]
+        assert start_ref.start_chapter <= end_ref.start_chapter
+        if start_ref.start_chapter == end_ref.start_chapter:
+            assert start_ref.start_verse <= end_ref.start_verse
+
+        results = []
+        current_ref = start_ref
+        while True:
+            results.append(current_ref)
+            # Next verse
+            next_ref = current_ref
+            verse_num = next_ref.start_verse + 1
+            next_ref = attr.evolve(next_ref, start_verse=verse_num, end_verse=verse_num)
+            verses_in_chapter = book_info['verse_counts'][next_ref.start_chapter]
+            if next_ref.start_verse > verses_in_chapter:
+                chapter_num = next_ref.start_chapter + 1
+                verse_num = 1
+                next_ref = attr.evolve(next_ref,
+                                       start_chapter=chapter_num,
+                                       end_chapter=chapter_num,
+                                       start_verse=verse_num,
+                                       end_verse=verse_num)
+            if next_ref.start_chapter > end_ref.start_chapter:
+                break
+            if next_ref.start_chapter == end_ref.start_chapter and next_ref.start_verse > end_ref.start_verse:
+                break
+            current_ref = next_ref
+        return results
 
 
 class InvalidVerseReference(ValueError):

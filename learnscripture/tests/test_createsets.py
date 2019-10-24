@@ -205,38 +205,64 @@ class CreateSetTests(BibleVersesMixin, FullBrowserTest):
         self.assertEqual(vs.language_code, 'en')
 
     def test_create_passage_set_merged(self):
-        # Tests for creating with a version that has merged verses
-        self._identity.default_bible_version = TextVersion.objects.get(slug='TCL02')
-        self._identity.save()
-        self.login(self._account)
-        self.get_url('create_passage_set')
+        refs = {
+            'NET': 'Romans 3:24-27',
+            'TCL02': 'Romalılar 3:24-27',
+        }
+        verses = {
+            'NET': [
+                ("Romans 3:24", "But they are justified freely"),
+                ("Romans 3:25", "God publicly displayed him"),
+                ("Romans 3:26", "This was also to demonstrate his righteousness"),
+                ("Romans 3:27", "Where, then, is boasting?"),
+            ],
+            'TCL02': [
+                ("Romalılar 3:24", "İnsanlar İsa Mesih'te olan kurtuluşla"),
+                ("Romalılar 3:25-26", "Tanrı Mesih'i, kanıyla günahları bağışlatan"),
+                ("Romalılar 3:27", "Öyleyse neyle övünebiliriz?"),
+            ]
+        }
+        titles = refs
 
-        self.fill({"#id_quick_find": "Romalılar 3:24-27"})
-        self.click("#id_lookup")
-        self.wait_until_loaded('#id-verse-list tbody tr td')
+        # Tests for creating with a version that has merged verses.
+        for default_version in ('NET', 'TCL02'):
+            with self.subTest(default_version=default_version):
+                for display_version in ('NET', 'TCL02'):
+                    with self.subTest(display_version=display_version):
+                        VerseSet.objects.all().delete()
+                        self._identity.default_bible_version = TextVersion.objects.get(slug=default_version)
+                        self._identity.save()
+                        self.login(self._account)
+                        self.get_url('create_passage_set')
 
-        # Displayed verses will have to shown merged verses:
-        self.assertTextPresent("Romalılar 3:24")
-        self.assertTextPresent("İnsanlar İsa Mesih'te olan kurtuluşla")
-        self.assertTextPresent("Romalılar 3:25-26")
-        self.assertTextPresent("Tanrı Mesih'i, kanıyla günahları bağışlatan")
-        self.assertTextPresent("Romalılar 3:27")
-        self.assertTextPresent("Öyleyse neyle övünebiliriz?")
+                        self.fill({"#id-version-select": display_version})
+                        self.fill({"#id_quick_find": refs[display_version]})
+                        self.click("#id_lookup")
+                        self.wait_until_loaded('#id-verse-list tbody tr td')
 
-        # Check boxes for Rom 3:25-26
-        self.click('#id-verse-list tbody tr:nth-child(2) input')
+                        for verse_ref, verse_text in verses[display_version]:
+                            self.assertTextPresent(verse_ref)
+                            self.assertTextPresent(verse_text)
 
-        self.submit("#id-save-btn")
+                        # Check box for Romalılar 3:25-26 or Romans 3:25
+                        self.click('#id-verse-list tbody tr:nth-child(2) input')
 
-        self.assertTrue(self.get_page_title().startswith("Verse set: Romalılar 3:24-27"))
+                        self.submit("#id-save-btn")
 
-        # VerseSet will be as neutral as possible, so has unmerged verses.
-        vs = VerseSet.objects.get(name='Romalılar 3:24-27',
-                                  set_type=VerseSetType.PASSAGE)
-        self.assertEqual([vc.internal_reference for vc in vs.verse_choices.all()],
-                         ['BOOK44 3:24', 'BOOK44 3:25', 'BOOK44 3:26', 'BOOK44 3:27'])
-        self.assertEqual(vs.breaks, "BOOK44 3:25")
-        self.assertEqual(vs.passage_id, 'BOOK44 3:24-27')
+                        # We should have saved something:
+                        vs = VerseSet.objects.get(name=titles[display_version],
+                                                  set_type=VerseSetType.PASSAGE)
+
+                        # We're on the view page:
+                        self.assertTrue(self.get_page_title().startswith("Verse set: " + titles[default_version]))
+
+                        # VerseSet will be as neutral as possible, so has unmerged verses.
+                        self.assertEqual([vc.internal_reference for vc in vs.verse_choices.all()],
+                                         ['BOOK44 3:24', 'BOOK44 3:25', 'BOOK44 3:26', 'BOOK44 3:27'])
+                        self.assertEqual(vs.breaks, "BOOK44 3:25")
+                        self.assertEqual(vs.passage_id, 'BOOK44 3:24-27')
+
+    # TODO - tests for when there are missing verses.
 
     def test_create_duplicate_passage_set(self):
         self.test_create_passage_set()
