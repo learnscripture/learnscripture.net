@@ -893,14 +893,6 @@ def create_or_edit_set(request, set_type=None, slug=None):
             ]
             verse_dict = version.get_verses_by_localized_reference_bulk(localized_reference_list)
 
-        # # Need to build an internal list that doesn't have merged verses.
-        # internal_reference_list = []
-        # for ref in localized_reference_list:
-        #     verse = verse_dict[ref]
-        #     sub_verses = verse.get_unmerged_parts()
-        #     for v in sub_verses:
-        #         internal_reference_list.append(internalize_localized_reference(version.language_code, v.localized_reference))
-
         form_is_valid = form.is_valid()
         if len(verse_dict) == 0:
             form.errors.setdefault('__all__', form.error_class()).append(t('versesets-no-verses-error'))

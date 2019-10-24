@@ -243,9 +243,6 @@ class ComboVerse(object):
         # objects if necessary.
         return ' '.join(v.text for v in self.verses)
 
-    def get_unmerged_parts(self):
-        return [self]
-
     @property
     def version(self):
         return self.verses[0].version
@@ -405,16 +402,6 @@ class Verse(models.Model):
     @cached_property
     def internal_reference(self):
         return internalize_localized_reference(self.version.language_code, self.localized_reference)
-
-    def get_unmerged_parts(self):
-        """
-        Returns a list of Verse objects that this Verse is a merged combination of.
-        If it is not a merged verse, just returns [self]
-        """
-        if self.last_verse_number == self.first_verse_number:
-            return [self]
-        else:
-            return list(self.merged_from.all().order_by('bible_verse_number'))
 
 
 SUGGESTION_COUNT = 10
