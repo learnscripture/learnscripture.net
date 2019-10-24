@@ -278,6 +278,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.click("#id-verse-options-menu-btn")
         self.click_and_confirm("#id-reset-progress-btn", wait_for_reload=False)
 
+        time.sleep(0.2)
         # Should reset strength to zero
         self.assertEqual(identity.verse_statuses.get(localized_reference='John 3:16').strength,
                          0)

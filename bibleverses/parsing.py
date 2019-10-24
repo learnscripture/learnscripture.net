@@ -98,6 +98,18 @@ class ParsedReference(object):
                 self.end_chapter == self.start_chapter and
                 self.end_verse == self.start_verse)
 
+    def is_in_bounds(self):
+        book_info = BIBLE_BOOK_INFO['BOOK' + str(self.book_number)]
+        chapter_count = book_info['chapter_count']
+        if self.start_chapter > chapter_count or self.end_chapter > chapter_count:
+            return False
+        for chapter, verse in [(self.start_chapter, self.start_verse),
+                               (self.end_chapter, self.end_verse)]:
+            verse_count = book_info['verse_counts'][chapter]
+            if verse > verse_count:
+                return False
+        return True
+
     def get_start(self):
         if self.is_single_verse():
             return self

@@ -102,3 +102,23 @@ class VerseSetTests(BibleVersesMixin, AccountTestMixin, TestBase):
         vs.description = "This is a description"
         vs.save()
         self.assertFalse(vs.any_language)
+
+    def test_set_verse_choices_sanitizes(self):
+        vs = VerseSet(name='Selection',
+                      language_code='en',
+                      created_by=self.create_account(username='creator')[1],
+                      set_type=VerseSetType.SELECTION)
+        vs.save()
+        vs.set_verse_choices([
+            "BOOK0 1:1",
+            "BOOK0 1:1",  # dupe
+            "garbage",
+            "BOOK1234 1:1",  # bad book
+            "BOOK0 123:1",  # bad chapter
+            "BOOK0 1:123",  # bad verse
+            "BOOK1 2:1",
+        ])
+        self.assertEqual(
+            [vc.internal_reference for vc in vs.verse_choices.all()],
+            ["BOOK0 1:1", "BOOK1 2:1"]
+        )

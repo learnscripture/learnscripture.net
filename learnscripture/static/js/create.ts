@@ -43,7 +43,7 @@ var addPassage = function(results) {
         $('#id_language_code').val(parsedRef.language_code);
     }
     previousPassageRef = simplifiedRef;
-    $('#id-internal-reference').val(results.canonical_internal_reference)
+    $('#id-passage-id').val(results.passage_id)
 };
 
 var deleteButtonClick = function(ev) {

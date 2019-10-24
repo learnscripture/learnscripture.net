@@ -31,9 +31,10 @@ from bibleverses.books import BIBLE_BOOK_COUNT, get_bible_book_name
 from bibleverses.forms import VerseSetForm
 from bibleverses.languages import LANGUAGE_CODE_INTERNAL, LANGUAGES
 from bibleverses.models import (MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseReference, TextType, TextVersion, VerseChoice,
-                                VerseSet, VerseSetType, get_passage_sections, is_continuous_set)
-from bibleverses.parsing import (parse_validated_localized_reference, localize_internal_reference, parse_break_list,
-                                 parse_unvalidated_localized_reference, parse_validated_internal_reference)
+                                VerseSet, VerseSetType, get_passage_sections, is_continuous_set,
+                                verse_set_passage_id_to_parsed_ref)
+from bibleverses.parsing import (localize_internal_reference, parse_break_list, parse_unvalidated_localized_reference,
+                                 parse_validated_internal_reference, parse_validated_localized_reference)
 from bibleverses.signals import public_verse_set_created
 from events.models import Event
 from groups.forms import EditGroupForm
@@ -839,62 +840,35 @@ def create_or_edit_set(request, set_type=None, slug=None):
 
     c = {}
 
-    def mk_verse_list(localized_reference_list, verse_dict):
-        verses = []
-        for ref in localized_reference_list:  # preserve order
-            if ref in verse_dict:
-                verses.append(verse_dict[ref])
-        return verses
-
-    c['set_type'] = VerseSetType.name_for_value[set_type]
-
     if request.method == 'POST':
         orig_verse_set_public = False if verse_set is None else verse_set.public
 
         form = form_class(request.POST, instance=verse_set)
         if set_type == VerseSetType.SELECTION:
-            internal_reference_list_raw = [
-                i for i in request.POST.get('internal_reference_list', '').split('|')
+            internal_parsed_reference_list = [
+                parse_validated_internal_reference(i)
+                for i in request.POST.get('internal_reference_list', '').split('|')
                 if i
-            ]
-            localized_reference_list_raw = [localize_internal_reference(version.language_code, r)
-                                            for r in internal_reference_list_raw]
-            verse_dict = version.get_verses_by_localized_reference_bulk(localized_reference_list_raw)
-
-            # Dedupe localized_reference_list, and ensure correct references, while preserving order:
-            internal_reference_list = []
-            for ref in localized_reference_list_raw:
-                internal_ref = parse_validated_localized_reference(version.language_code, ref).to_internal()
-                if ref in verse_dict and internal_ref not in internal_reference_list:
-                    internal_reference_list.append(internal_ref)
-            localized_reference_list = [
-                r.translate_to(version.language_code).canonical_form()
-                for r in internal_reference_list
             ]
             breaks = ''
         else:
-            internal_reference = request.POST['internal_reference']
+            passage_id = request.POST.get('passage_id', '')
             try:
-                internal_reference_list = parse_validated_internal_reference(internal_reference).to_list()
+                internal_parsed_reference_list = verse_set_passage_id_to_parsed_ref(passage_id).to_list()
             except InvalidVerseReference:
-                internal_reference_list = []
+                internal_parsed_reference_list = []
             breaks = normalize_break_list(request.POST.get('break_list', ''))
             # If all have a 'break' applied, (excluding first, which never has
             # one) then the user clearly doesn't understand the concept of
             # section breaks:
             tmp_verse_list = add_passage_breaks(
-                [VerseChoice(internal_reference=r.canonical_form()) for r in internal_reference_list],
+                [VerseChoice(internal_reference=r.canonical_form()) for r in internal_parsed_reference_list],
                 breaks)
             if all(v.break_here for v in tmp_verse_list[1:]):
                 breaks = ''
-            localized_reference_list = [
-                r.translate_to(version.language_code).canonical_form()
-                for r in internal_reference_list
-            ]
-            verse_dict = version.get_verses_by_localized_reference_bulk(localized_reference_list)
 
         form_is_valid = form.is_valid()
-        if len(verse_dict) == 0:
+        if len(internal_parsed_reference_list) == 0:
             form.errors.setdefault('__all__', form.error_class()).append(t('versesets-no-verses-error'))
             form_is_valid = False
 
@@ -909,7 +883,7 @@ def create_or_edit_set(request, set_type=None, slug=None):
                 # Can't undo:
                 verse_set.public = True
             verse_set.save()
-            verse_set.set_verse_choices([ref.canonical_form() for ref in internal_reference_list])
+            verse_set.set_verse_choices([ref.canonical_form() for ref in internal_parsed_reference_list])
 
             # if user just made it public or it is a new public verse set
             if (verse_set.public and (not orig_verse_set_public or
@@ -921,39 +895,50 @@ def create_or_edit_set(request, set_type=None, slug=None):
             return HttpResponseRedirect(reverse('view_verse_set', kwargs=dict(slug=verse_set.slug)))
 
     else:
+        # GET request - initial view
         initial = {}
-        if mode == 'create' and set_type == VerseSetType.PASSAGE and 'ref' in request.GET:
-            try:
-                parsed_ref = parse_validated_internal_reference(request.GET['ref'])
-            except InvalidVerseReference:
-                parsed_ref = None
-            if parsed_ref is not None:
-                localized_reference = parsed_ref.translate_to(language_code).canonical_form()
-                initial['name'] = localized_reference
-                c['initial_localized_reference'] = localized_reference
-        if verse_set is None:
+        breaks = ''
+        internal_parsed_reference_list = []
+        if verse_set is not None:
+            breaks = verse_set.breaks
+            internal_parsed_reference_list = [
+                parse_validated_internal_reference(vc.internal_reference)
+                for vc in verse_set.verse_choices.all()
+            ]
+        else:
+            if set_type == VerseSetType.PASSAGE and 'ref' in request.GET:
+                # Shortcut link for creating a passage verse set
+                try:
+                    parsed_ref = parse_validated_internal_reference(request.GET['ref'])
+                except InvalidVerseReference:
+                    parsed_ref = None
+                if parsed_ref is not None:
+                    localized_reference = parsed_ref.translate_to(language_code).canonical_form()
+                    initial['name'] = localized_reference
+                    c['initial_localized_reference'] = localized_reference
             if form_class is VerseSetForm:
                 initial['language_code'] = language_code
 
         form = form_class(instance=verse_set, initial=initial)
-        if verse_set is not None:
-            localized_reference_list = [vc.get_localized_reference(language_code)
-                                        for vc in verse_set.verse_choices.all()]
-            verse_dict = version.get_verses_by_localized_reference_bulk(localized_reference_list)
-            breaks = verse_set.breaks
-        else:
-            localized_reference_list, verse_dict, breaks = [], {}, ''
 
-    verse_list = mk_verse_list(localized_reference_list, verse_dict)
+    # Fetch verses to be displayed:
+    localized_references = [
+        ref.translate_to(version.language_code).canonical_form()
+        for ref in internal_parsed_reference_list
+    ]
+    verse_list = version.get_verse_list_by_localized_reference_bulk(localized_references)
     if set_type == VerseSetType.PASSAGE:
         verse_list = add_passage_breaks(verse_list, breaks)
 
-    c['verses'] = verse_list
-    c['verse_set'] = verse_set
-    c['new_verse_set'] = verse_set is None
-    c['verse_set_form'] = form
-    c['title'] = title
-
+    c.update({
+        'verses': verse_list,
+        'breaks': breaks,
+        'verse_set': verse_set,
+        'new_verse_set': verse_set is None,
+        'verse_set_form': form,
+        'title': title,
+        'set_type': VerseSetType.name_for_value[set_type]
+    })
     c.update(context_for_quick_find(request))
 
     return TemplateResponse(request, 'learnscripture/create_set.html', c)

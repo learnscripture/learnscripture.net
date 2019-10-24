@@ -122,7 +122,7 @@
         {{ verse_set_form|render_form }}
 
         <div class="actions">
-          <input type="hidden" value="{{ verse_set.passage_id }}" id="id-internal-reference"  name="internal_reference">
+          <input type="hidden" value="{{ verse_set.passage_id }}" id="id-passage-id"  name="passage_id">
           <input type="hidden" value="" id="id-break-list"  name="break_list">
           <button name="save" type="submit" class="btn primary" id="id-save-btn">{% ftlmsg 'versesets-save-verseset-button' %}</button>
         </div>

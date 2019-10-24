@@ -150,6 +150,24 @@ class TextVersion(models.Model):
             self, self.language_code, localized_reference_list,
             fetch_text=fetch_text)
 
+    def get_verse_list_by_localized_reference_bulk(self, localized_reference_list, fetch_text=True):
+        # Similar to get_verses_by_localized_reference_bulk, but returns a list, in the
+        # same order as original list.
+        verse_dict = self.get_verses_by_localized_reference_bulk(localized_reference_list, fetch_text=fetch_text)
+        verse_list = []
+        seen_actual_refs = set()
+        # We cope with the fact that some things in localized_reference_list might be missing,
+        # renamed or duplicated due to merged verses etc.
+        for ref in localized_reference_list:
+            if ref not in verse_dict:
+                continue
+            verse = verse_dict[ref]
+            if verse.localized_reference in seen_actual_refs:
+                continue
+            seen_actual_refs.add(verse.localized_reference)
+            verse_list.append(verse)
+        return verse_list
+
     def get_qapairs_by_localized_reference_bulk(self, localized_reference_list):
         if not self.is_catechism:
             return {}
@@ -685,7 +703,19 @@ class VerseSet(models.Model):
         existing_vcs = self.verse_choices.all()
         existing_vcs_dict = dict((vc.internal_reference, vc) for vc in existing_vcs)
         old_vcs = set(existing_vcs)
+        seen = set()
         for i, ref in enumerate(internal_reference_list):  # preserve order
+            if ref in seen:
+                # dedupe
+                continue
+            seen.add(ref)
+            # Sanitise:
+            try:
+                parsed_ref = parse_validated_internal_reference(ref)
+            except InvalidVerseReference:
+                continue
+            if not parsed_ref.is_in_bounds():
+                continue
             dirty = False
             if ref in existing_vcs_dict:
                 vc = existing_vcs_dict[ref]
@@ -777,6 +807,10 @@ def make_verse_set_passage_id(start_internal_reference, end_internal_reference):
         parsed_start_ref,
         parsed_end_ref,
     ).canonical_form()
+
+
+def verse_set_passage_id_to_parsed_ref(passage_id):
+    return parse_validated_internal_reference(passage_id)
 
 
 class VerseChoiceManager(models.Manager):

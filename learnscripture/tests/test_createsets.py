@@ -205,6 +205,8 @@ class CreateSetTests(BibleVersesMixin, FullBrowserTest):
         self.assertEqual(vs.language_code, 'en')
 
     def test_create_passage_set_merged(self):
+        # This tests a whole bunch of problems regarding creating/editing
+        # passage verse sets in different versions due to merged verses.
         refs = {
             'NET': 'Romans 3:24-27',
             'TCL02': 'Romalılar 3:24-27',
@@ -262,7 +264,11 @@ class CreateSetTests(BibleVersesMixin, FullBrowserTest):
                         self.assertEqual(vs.breaks, "BOOK44 3:25")
                         self.assertEqual(vs.passage_id, 'BOOK44 3:24-27')
 
-    # TODO - tests for when there are missing verses.
+                        # We should be able to edit again:
+                        self.get_url('edit_set', slug=vs.slug)
+                        for verse_ref, verse_text in verses[default_version]:
+                            self.assertTextPresent(verse_ref)
+                            self.assertTextPresent(verse_text)
 
     def test_create_duplicate_passage_set(self):
         self.test_create_passage_set()
