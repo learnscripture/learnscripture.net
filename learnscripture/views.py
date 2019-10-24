@@ -710,27 +710,15 @@ def verse_sets_visible_for_request(request):
 def get_verse_set_verse_list(version, verse_set):
     language_code = version.language_code
 
-    verse_choices = list(verse_set.verse_choices.all())
+    verse_choices = list(verse_set.verse_choices.all().order_by('set_order'))
     all_localized_references = [localize_internal_reference(language_code,
                                                             vc.internal_reference)
                                 for vc in verse_choices]
-    verses = version.get_verses_by_localized_reference_bulk(all_localized_references)
+    verse_list = version.get_verse_list_by_localized_reference_bulk(all_localized_references)
+    if verse_set.is_passage:
+        verse_list = add_passage_breaks(verse_list, verse_set.breaks)
 
-    verse_list = sorted(verses.values(), key=lambda v: v.bible_verse_number)
-    verse_list = add_passage_breaks(verse_list, verse_set.breaks)
-
-    retval = []
-    added_verse_refs = set()
-    for vc in verse_choices:
-        localized_ref = localize_internal_reference(language_code, vc.internal_reference)
-        if localized_ref in verses:
-            v = verses[localized_ref]
-            # Don't add a merged verse to the list multiple times
-            if v.localized_reference not in added_verse_refs:
-                retval.append(v)
-                added_verse_refs.add(v.localized_reference)
-
-    return retval
+    return verse_list
 
 
 def view_verse_set(request, slug):
