@@ -78,7 +78,7 @@ pathtools==0.1.2          # via watchdog
 pbr==5.4.2                # via mock
 pexpect==4.7.0            # via ipython
 pickleshare==0.7.5        # via ipython
-pillow==6.1.0             # via easy-thumbnails
+pillow==6.2.1             # via easy-thumbnails
 pip-tools==4.0.0
 prompt-toolkit==1.0.16    # via ipython
 psycopg2-binary==2.8.3
