@@ -6,9 +6,9 @@ from parsy import ParseError, char_from, generate, regex, string, string_from, w
 from learnscripture.ftl_bundles import t
 from learnscripture.utils.cache import memoize_function
 
-from .constants import BIBLE_BOOK_INFO
 from .books import (get_bible_book_abbreviation_map, get_bible_book_name, get_bible_book_number, get_bible_books,
                     is_single_chapter_book)
+from .constants import BIBLE_BOOK_INFO
 from .languages import LANGUAGE_CODE_INTERNAL, normalize_reference_input
 
 
