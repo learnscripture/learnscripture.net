@@ -34,7 +34,7 @@ from bibleverses.models import (MAX_VERSES_FOR_SINGLE_CHOICE, InvalidVerseRefere
                                 VerseSet, VerseSetType, get_passage_sections, is_continuous_set,
                                 verse_set_passage_id_to_parsed_ref)
 from bibleverses.parsing import (localize_internal_reference, parse_break_list, parse_unvalidated_localized_reference,
-                                 parse_validated_internal_reference, parse_validated_localized_reference)
+                                 parse_validated_internal_reference)
 from bibleverses.signals import public_verse_set_created
 from events.models import Event
 from groups.forms import EditGroupForm
