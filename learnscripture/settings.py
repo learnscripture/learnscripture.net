@@ -13,6 +13,7 @@ from sentry_sdk.integrations.django import DjangoIntegration
 
 hostname = socket.gethostname()
 CHECK_DEPLOY = 'manage.py check --deploy' in ' '.join(sys.argv)
+RUNNING_MIGRATIONS = 'migrate' in sys.argv
 if CHECK_DEPLOY:
     LIVEBOX = True
     DEVBOX = False
@@ -21,7 +22,7 @@ else:
     LIVEBOX = not DEVBOX
 
 
-DEBUG = DEVBOX
+DEBUG = DEVBOX and not RUNNING_MIGRATIONS
 
 # A kitten gets killed every time you use this:
 TESTING = 'manage.py test' in ' '.join(sys.argv)

@@ -18,3 +18,40 @@ def intersperse(iterable, delimiter):
     for x in it:
         yield delimiter
         yield x
+
+
+def chunked_queryset(qs, batch_size, index='id'):
+    """
+    Yields a QuerySet split into batches of exact size 'batch_size'
+    (apart from the last batch which can be smaller) as using equal sizes
+    of batches decreases a number of db hits and allows better control
+    of the memory usage.
+    Allows for arbitrary ordering of queryset.
+
+    This requires a non-nullable column `index` (default 'id') that can be used
+    with the `BETWEEN` operator to be present, and the result is only efficient
+    if there is a DB index on that column.
+
+    This method is more correct than doing
+    wolfproject.utils.iterators.chunks(qs, batch_size) because successive slices
+    of a QuerySet are not guaranteed to return all items, or return all items
+    only once (due to items being deleted or inserted in between queries, or the
+    QuerySet not being ordered).
+
+    In addition, it can be more efficient, because the QuerySet doesn't need to
+    be ordered, and the database can spend a significant amount of time ordering
+    a query.
+    """
+
+    ids = qs.order_by().prefetch_related(None).select_related(None).values_list(index, flat=True)
+    if not ids:
+        return
+    for i in range(0, len(ids), batch_size):
+        filter_args = {'{0}__in'.format(index): ids[i:i + batch_size]}
+        yield qs.filter(**filter_args)
+
+
+def iter_chunked_queryset(queryset, batch_size, index='id'):
+    for qs in chunked_queryset(queryset, batch_size, index=index):
+        for item in qs:
+            yield item
