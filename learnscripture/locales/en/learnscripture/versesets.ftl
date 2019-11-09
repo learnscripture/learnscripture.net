@@ -67,7 +67,7 @@ versesets-view-set-how-to-opt-out = When learning a set, you can opt out of any 
 
 # Note about verse set being public
 versesets-view-set-learning-is-public = Learning a verse set is a public action
-        (unless the set is private !and remains private)
+        (unless the set is private and remains private)
 
 # Prompt to change a verse set to a 'passage set'
 versesets-view-set-change-to-passage-set = This looks like a continuous set of verses. These are much better learnt
