@@ -96,11 +96,12 @@ server {
         uwsgi_pass unix:/tmp/hgweb.sock;
         include uwsgi_params;
         uwsgi_param HTTPS $https if_not_empty;
-
+        uwsgi_param SERVER_ADDR $server_addr;
+        uwsgi_modifier1 30;
+        uwsgi_param SCRIPT_NAME /hg;
         send_timeout 180;
         uwsgi_send_timeout 180;
         uwsgi_read_timeout 180;
-
     }
 
     # Finally, send all non-media requests to the Django server.

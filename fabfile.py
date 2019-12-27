@@ -359,13 +359,13 @@ TEMPLATES = {
         "system": False,
         "local_path": "config/hgweb.wsgi",
         "remote_path": "/home/%(proj_name)s/repos/hgweb.wsgi",
-        "reload_command": "supervisorctl restart hgweb",
+        # reload command needs to be run as root, won't work here
     },
     "hgweb.config": {
         "system": False,
         "local_path": "config/hgweb.config",
         "remote_path": "/home/%(proj_name)s/repos/hgweb.config",
-        "reload_command": "supervisorctl restart hgweb",
+        # reload command needs to be run as root, won't work here
     },
 }
 
@@ -500,6 +500,7 @@ def deploy():
     create_venv(target)
     install_requirements(target)
     collect_static(target)
+    upload_project_templates(target)
     update_database(target)
     make_target_current(target)
     tag_deploy()  # Once 'current' symlink is switched
@@ -719,6 +720,12 @@ def collect_static(target):
 
     # Permissions
     run("chmod -R ugo+r %s" % target.STATIC_ROOT)
+
+
+def upload_project_templates(target):
+    target = Version.current()
+    for name in get_project_templates():
+        upload_template_and_reload(name, target)
 
 
 def update_database(target):
