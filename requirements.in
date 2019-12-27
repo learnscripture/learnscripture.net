@@ -38,3 +38,4 @@ easy-thumbnails==2.6
 django-compressor==2.3
 django-sql-utils==0.2.2
 sentry-sdk==0.10.2
+mercurial==5.2.1

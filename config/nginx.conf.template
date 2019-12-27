@@ -92,6 +92,17 @@ server {
         access_log      off;
     }
 
+    location /hg {
+        uwsgi_pass unix:/tmp/hgweb.sock;
+        include uwsgi_params;
+        uwsgi_param HTTPS $https if_not_empty;
+
+        send_timeout 180;
+        uwsgi_send_timeout 180;
+        uwsgi_read_timeout 180;
+
+    }
+
     # Finally, send all non-media requests to the Django server.
     location / {
 
