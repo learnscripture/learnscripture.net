@@ -263,16 +263,18 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         i.add_verse_set(vs1)
         i.record_verse_action('John 3:16', 'NET', StageType.TEST, 1.0)
 
-        # It should be set for reviewing yet
+        # It shouldn't be set for reviewing yet
         self.assertEqual([], list(i.bible_verse_statuses_for_reviewing()))
 
         # It is confusing if it is ever ready within an hour, so we special case
-        # that.
-
-        # Fix data:
-        i.verse_statuses.all().update(last_tested=timezone.now() - timedelta(0.99 / 24))
-
+        # that:
+        self.move_clock_on(timedelta(hours=0.99))
         self.assertEqual([], list(i.bible_verse_statuses_for_reviewing()))
+
+        # After 1 hour we expect it to be due
+        self.move_clock_on(timedelta(hours=0.1))
+        self.assertEqual(['John 3:16'],
+                         [uvs.localized_reference for uvs in i.bible_verse_statuses_for_reviewing()])
 
     def test_passages_for_learning(self):
         i = self.create_identity(version_slug='NET')
