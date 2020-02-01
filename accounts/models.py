@@ -822,7 +822,7 @@ class Identity(models.Model):
               .exclude(verse_set__set_type=VerseSetType.PASSAGE)
               .order_by('next_test_due', 'added')
               )
-        return self._dedupe_uvs_set(qs)
+        return sorted(self._dedupe_uvs_set(qs), key=uvs_urgency, reverse=True)
 
     def bible_verse_statuses_for_learning_qs(self):
         qs = (self.verse_statuses
@@ -1286,6 +1286,23 @@ class Identity(models.Model):
         if self.account_id is None:
             return False
         return self.account.can_edit_verse_set(verse_set)
+
+
+def uvs_urgency(uvs):
+    # Sort key for sorting UserVerseStatus by urgency - higher is more urgent.
+    #
+    # When a verse is first being learnt, it is much more likely to go out of
+    # the memory than when it is quite well established. So a verse that was
+    # scheduled for a gap of 2 months, one week over due isn't much, but if it
+    # was scheduled for 1 hour, then 2 days is a lot. So we sort by the fraction
+    # overdue, instead of amount overdue.
+
+    # We have to guess the scheduled gap for this verse based on current verse
+    # and our ideal curve.
+    old_strength = max(uvs.strength - memorymodel.MM.DELTA_S_IDEAL, 0)
+    gap_length = (memorymodel.MM.t(uvs.strength) - memorymodel.MM.t(old_strength))
+    amount_overdue = (timezone.now() - uvs.next_test_due).seconds
+    return amount_overdue / gap_length
 
 
 class Notice(models.Model):

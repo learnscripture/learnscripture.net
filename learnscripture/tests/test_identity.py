@@ -276,6 +276,26 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         self.assertEqual(['John 3:16'],
                          [uvs.localized_reference for uvs in i.bible_verse_statuses_for_reviewing()])
 
+    def test_bible_verse_statuses_for_reviewing_urgency(self):
+        i = self.create_identity(version_slug='NET')
+        vs1 = VerseSet.objects.get(name='Bible 101')
+        i.add_verse_set(vs1)
+        # Day 1 - start on John 3:16
+        i.record_verse_action('John 3:16', 'NET', StageType.TEST, 1.0)
+        # Day 2 - revise
+        self.move_clock_on(timedelta(days=1))
+        i.record_verse_action('John 3:16', 'NET', StageType.TEST, 1.0)
+        # Day 7 - start on Eph 2:8-9
+        self.move_clock_on(timedelta(days=5))
+        i.record_verse_action('Ephesians 2:8-9', 'NET', StageType.TEST, 1.0)
+        # Day 8:
+        self.move_clock_on(timedelta(days=1))
+        # John 3:16 is now overdue by several days, more in absolute terms than
+        # Ephesians 2:8-9. However, the latter is more urgent, because it is
+        # very new. So should come first:
+        self.assertEqual(['Ephesians 2:8-9', 'John 3:16'],
+                         [uvs.localized_reference for uvs in i.bible_verse_statuses_for_reviewing()])
+
     def test_passages_for_learning(self):
         i = self.create_identity(version_slug='NET')
 
