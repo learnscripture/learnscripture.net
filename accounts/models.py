@@ -961,42 +961,41 @@ class Identity(models.Model):
         """
         Retrieves a list of ChosenVerseSet objects of 'passage' type that need
         more initial learning.
-        If 'extra_stats==True', they are decorated with 'untested_total' and 'tested_total' attributes.
+        Objects are decorated with 'untested_total' and 'tested_total' attributes,
+        and sorted according to urgency (unless `extra_stats=False` is passed)
         """
         statuses = (self.verse_statuses
                     .active()
                     .filter(verse_set__set_type=VerseSetType.PASSAGE,
                             memory_stage__lt=MemoryStage.TESTED)
                     .select_related('verse_set', 'version'))
-        chosen_verse_sets = {}
 
-        # We already have info needed for untested_total
-        for s in statuses:
-            cvs = ChosenVerseSet(version=s.version,
-                                 verse_set=s.verse_set)
-            cvs_id = cvs.id
-            if cvs_id not in chosen_verse_sets:
-                chosen_verse_sets[cvs_id] = cvs
-                if extra_stats:
-                    cvs.untested_total = 0
-            else:
-                cvs = chosen_verse_sets[cvs_id]
-            if extra_stats:
-                cvs.untested_total += 1
+        chosen_verse_sets = set(
+            ChosenVerseSet(version=uvs.version,
+                           verse_set=uvs.verse_set)
+            for uvs in statuses
+        )
+        if not extra_stats:
+            return list(chosen_verse_sets)
 
-        if extra_stats:
-            now = timezone.now()
+        # Attach all the UVSs to get other stats, including maximum_urgency
+        # which is needed for sorting
+        all_statuses = (self.verse_statuses
+                        .active()
+                        .filter(verse_set__set_type=VerseSetType.PASSAGE,
+                                verse_set__in=[cvs.verse_set for cvs in chosen_verse_sets]))
 
-            # We need two additional queries per ChosenVerseSet for tested_total
-            # and needs_review_total.
-            for cvs in chosen_verse_sets.values():
-                stats_qs = self.verse_statuses.filter(verse_set=cvs.verse_set,
-                                                      version=cvs.version)
+        now = timezone.now()
 
-                cvs.tested_total = stats_qs.tested().count()
-                cvs.needs_review_total = stats_qs.needs_reviewing(now).count()
+        for cvs in chosen_verse_sets:
+            uvss = [uvs for uvs in all_statuses
+                    if uvs.verse_set_id == cvs.verse_set.id and uvs.version_id == cvs.version.id]
+            cvs.maximum_urgency = max(map(uvs_urgency, uvss)) if uvss else 0
+            cvs.tested_total = len([uvs for uvs in uvss if uvs.is_tested()])
+            cvs.untested_total = len(uvss) - cvs.tested_total
+            cvs.needs_review_total = len([uvs for uvs in uvss if uvs.needs_reviewing(now)])
 
-        return sorted(list(chosen_verse_sets.values()), key=lambda c: c.sort_key)
+        return sorted(list(chosen_verse_sets), key=lambda c: (-c.maximum_urgency, c.sort_key))
 
     def verse_sets_chosen(self):
         """
@@ -1102,6 +1101,7 @@ class Identity(models.Model):
             cvs.needs_testing_count = 0
             cvs.group_testing = True
             cvs.total_verse_count = len(uvss)
+            cvs.maximum_urgency = max(uvs_urgency(uvs) for uvs in uvss) if uvss else 0
 
             for uvs in uvss:
                 if uvs.needs_testing:
@@ -1112,11 +1112,10 @@ class Identity(models.Model):
 
             cvs.splittable = cvs.verse_set.breaks != "" and cvs.group_testing
 
-        reviewing_sets = sorted(list(chosen_verse_set_list), key=lambda c: c.sort_key)
+        reviewing_sets = sorted(list(chosen_verse_set_list), key=lambda c: (-c.maximum_urgency, c.sort_key))
         return (reviewing_sets, learning_sets)
 
     def next_verse_due(self):
-
         exclude_ids = []
         cvss = self.passages_for_learning(extra_stats=False)
         if cvss:
@@ -1299,8 +1298,13 @@ def uvs_urgency(uvs):
 
     # We have to guess the scheduled gap for this verse based on current verse
     # and our ideal curve.
+    if uvs.next_test_due is None:
+        return 0
     old_strength = max(uvs.strength - memorymodel.MM.DELTA_S_IDEAL, 0)
-    gap_length = (memorymodel.MM.t(uvs.strength) - memorymodel.MM.t(old_strength))
+    gap_length = memorymodel.MM.t(uvs.strength) - memorymodel.MM.t(old_strength)
+    # avoid division by zero:
+    if gap_length <= 1:
+        gap_length = 1
     amount_overdue = (timezone.now() - uvs.next_test_due).seconds
     return amount_overdue / gap_length
 

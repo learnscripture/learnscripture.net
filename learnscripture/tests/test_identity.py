@@ -305,31 +305,31 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         vs1 = VerseSet.objects.get(name='Psalm 23')
         i.add_verse_set(vs1)
 
-        with self.assertNumQueries(3):  # 1 base query, 2 for each passage
+        with self.assertNumQueries(2):
             i.passages_for_learning()
 
         i.add_verse_set(vs1, self.KJV)
 
         i.record_verse_action('Psalm 23:1', 'NET', StageType.TEST, 1.0)
-        with self.assertNumQueries(5):
+        with self.assertNumQueries(2):
             cvss = i.passages_for_learning()
         self.assertEqual(cvss[0].verse_set.id, vs1.id)
-        self.assertEqual(cvss[0].version.short_name, 'KJV')
-        self.assertEqual(cvss[0].tested_total, 0)
-        self.assertEqual(cvss[0].untested_total, 6)
+        self.assertEqual(cvss[0].version.short_name, 'NET')
+        self.assertEqual(cvss[0].tested_total, 1)
+        self.assertEqual(cvss[0].untested_total, 5)
         self.assertEqual(cvss[0].needs_review_total, 0)
 
         self.assertEqual(cvss[1].verse_set.id, vs1.id)
-        self.assertEqual(cvss[1].version.short_name, 'NET')
-        self.assertEqual(cvss[1].tested_total, 1)
-        self.assertEqual(cvss[1].untested_total, 5)
+        self.assertEqual(cvss[1].version.short_name, 'KJV')
+        self.assertEqual(cvss[1].tested_total, 0)
+        self.assertEqual(cvss[1].untested_total, 6)
         self.assertEqual(cvss[1].needs_review_total, 0)
 
         # Put time back so that they ought to be up for review:
         i.verse_statuses.update(last_tested=timezone.now() - timedelta(10),
                                 next_test_due=timezone.now() - timedelta(1))
 
-        with self.assertNumQueries(5):
+        with self.assertNumQueries(2):
             cvss = i.passages_for_learning()
         self.assertEqual(cvss[0].verse_set.id, vs1.id)
         self.assertEqual(cvss[0].version.short_name, 'KJV')

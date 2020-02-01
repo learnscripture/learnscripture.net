@@ -853,16 +853,19 @@ class VerseChoice(models.Model):
 class UserVerseStatusQuerySet(models.QuerySet):
 
     def active(self):
+        # See also UserVerseStatus.is_active
         return self.filter(
             ignored=False
         )
 
     def tested(self):
+        # See also UserVerseStatus.is_tested
         return self.active().filter(
             memory_stage=MemoryStage.TESTED,
         )
 
     def reviewable(self):
+        # See also UserVerseStatus.is_reviewable
         return (self
                 .active()
                 .tested()
@@ -872,6 +875,7 @@ class UserVerseStatusQuerySet(models.QuerySet):
                 ))
 
     def needs_reviewing(self, now):
+        # See also UserVerseStatus.needs_reviewing
         return self.reviewable().filter(next_test_due__lte=now)
 
     def needs_reviewing_in_future(self, now):
@@ -993,6 +997,29 @@ class UserVerseStatus(models.Model):
 
     def is_in_passage(self):
         return self.verse_set is not None and self.verse_set.is_passage
+
+    def is_active(self):
+        # Seel also UserVerseStatusQuerySet.active
+        return not self.ignored
+
+    def is_tested(self):
+        # Seel also UserVerseStatusQuerySet.tested
+        return self.is_active() and self.memory_stage == MemoryStage.TESTED
+
+    def is_reviewable(self):
+        # See also UserVerseStatusQuerySet.reviewable()
+        return (
+            self.is_active() and
+            self.is_tested() and
+            (
+                (self.strength < memorymodel.LEARNT or self.early_review_requested) and
+                self.next_test_due is not None
+            )
+        )
+
+    def needs_reviewing(self, now):
+        # See also UserVerseStatusQuerySet.needs_reviewing()
+        return self.is_reviewable() and self.next_test_due <= now
 
     def scaled_strength(self):
         # See also Learn.elm scaledStrength. Anything more than LEARNT is
