@@ -176,6 +176,11 @@ def adjust_stored_esv():
 def highlight_search_words(verse, words):
     text = verse.text
     for word in words.split(' '):
+        if len(word) < 2:
+            # Easily get memory exhaustion if we don't skip '', and in general
+            # looks bad for short words of length 1 (because our highlighting
+            # scheme is very simplistic)
+            continue
         text = text.replace(word, '**%s**' % word)
     verse.text_saved = text
     return verse

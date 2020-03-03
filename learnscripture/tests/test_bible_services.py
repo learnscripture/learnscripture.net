@@ -32,3 +32,7 @@ class TestEsvSearch(SetupEsvMixin, TestBase):
         v = l[0]
         self.assertEqual(v.localized_reference, "John 3:16")
         self.assertEqual(more_results, False)
+        self.assertIn(
+            '“For **God** so **loved** the **world**, that he **gave** his only Son, that whoever believes in him should',
+            v.verses[0].text_saved,
+        )
