@@ -2202,7 +2202,14 @@ buttonsForStage model verse verseStore preferences =
                 TestFinished { accuracy } ->
                     let
                         defaultMorePractice =
-                            accuracy < accuracyDefaultMorePracticeLevel
+                            (accuracy < accuracyDefaultMorePracticeLevel)
+                                || (case verse.recordedTestScore of
+                                        Nothing ->
+                                            False
+
+                                        Just recordedTest ->
+                                            recordedTest.scaledStrengthDelta <= 0
+                                   )
                     in
                     [ Just
                         { caption = practiceButtonCaption
