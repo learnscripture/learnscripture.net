@@ -32,7 +32,7 @@ home-proven-system-explanation = Charlotte Mason Kutsal Kitap Ezber Sisteminin p
        verimli bir ezber metodunu sunmaktayız.
 
 # Heading 4 describing feature of learnscripture
-home-phones-heading = Mobil cihaza uyumulu
+home-phones-heading = Mobil cihaza uyumlu
 
 home-phones-explanation = Arabirim özellikle küçük ekranlar için tasarlandı. Böylece web
         sitemizi bilgisayar, mobil cihaz fark etmeksizin herhangi bir cihazda
@@ -42,7 +42,7 @@ home-phones-explanation = Arabirim özellikle küçük ekranlar için tasarland�
 home-child-friendly-heading = Çocuklara uygun
 
 home-child-friendly-explanation = Hoş arabirim temalarımız ve her yaşa uygun olan bir ezber metodunu
-        sunarak çocukların bile sitemizi kolayca kullanmasını sağlıyoruz. (Ebeveynlerin hesapları
+        sunarak, çocukların bile sitemizi kolayca kullanmasını sağlıyoruz. (Ebeveynlerin hesapları
         oluşturmaları kaydıyla, tabii.)
 
 # Heading 6 describing feature of learnscripture
@@ -51,16 +51,16 @@ home-social-heading = Sosyal bağlantı
 home-social-explanation = Gruplar, lider tahtaları, yorumlar, puan sistemi ve rozet kazanma
         özellikleri ezberinizi hevesle devam ettirmenizi sağlar. Kendi kendinize
         hazırladığınız ayet dizinlerini de ekleyip paylaşabilirsiniz. Kilise grubunuz veya
-        arkadaşlarınızla aynı bölümleri ezberleyebilimek için harika bir yöntemdir bu.
+        arkadaşlarınızla aynı bölümleri ezberleyebilmek için harika bir yöntemdir bu.
 
 # Heading 7 describing feature of learnscripture
 home-free-heading = Ücretsiz!
 
 home-free-explanation = Bu sitenin tamamını ücretsiz olarak kullanabilirsiniz. Sitemizde reklam
-        sunmayacağız. Sitenin işlem giderlerin hepsi kullanıcılarımız bağışları aracılığıyla
+        sunmayacağız. Sitenin işlem giderlerinin hepsi kullanıcılarımızın bağışları aracılığıyla
         karşılanmakatadır.
 
 # Last heading
 home-interested-heading = Bunlar size hitap etti mi?
 
-home-interested-explanation-html = <a href="/about/">Daha bilgi edinebilir</a> veya <a href="/choose/">hemen başlayabilirsiniz.</a>
+home-interested-explanation-html = <a href="/about/">Daha fazla bilgi edinebilir</a> veya <a href="/choose/">hemen başlayabilirsiniz.</a>

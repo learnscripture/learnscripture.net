@@ -5,7 +5,7 @@ referrals-page-title = Tanıtım programı
 
 # First paragraph on referrals program page
 referrals-intro = LearnScripture.net’i beğendiğseniz, başkalarına anlatınız. Ayrıca
-    tanıtım programını kullanarak bunu yaparsanız, rozet kullanabilirsiniz!
+    tanıtım programını kullanarak bunu yaparsanız, rozet kazanabilirsiniz!
 
 # Title for section explanation how it works
 referrals-how-it-works-title = Program nasıl işliyor

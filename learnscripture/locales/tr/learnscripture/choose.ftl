@@ -80,7 +80,7 @@ choose-catechisms-heading = İlmihal Çalışmak
 choose-catechism-intro =
          İlmihal Kutsal Kitap’taki öğretileri soru-cevap yöntemini
          kullanarak öğrenmek içindir. Kutsal Kitap’ın kendisini çalışmak kadar
-         değerli olmasalar da, bu öğretileri sistematik bir şekildekavramak için
+         değerli olmasalar da, bu öğretileri sistematik bir şekilde kavramak için
          çok değerli bir yöntem olduğunu düşünüp LearnScripture altyapısına
          ekledik.
 

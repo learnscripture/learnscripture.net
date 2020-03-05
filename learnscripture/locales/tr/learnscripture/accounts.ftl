@@ -136,9 +136,9 @@ accounts-signup-title = Hesap oluştur
 accounts-already-logged-in-html =  <b>{ $username }</b> kullancı ismiyle zaten giriş yaptınız. Yeni bir hesap oluşturmak için <a href="#" class="logout-link">Çıkış</a> yapınız.
 
 accounts-signup-agree-to-terms-of-service-html =
-        Bir hesabı oluştrduğunuzda
+        Bir hesabı oluşturduğunuzda
         <a href="/terms-of-service/" target="_blank">kullanıcı koşullarına</a> ve
-        <a href="/privacy-policy/" target="_blank">gizlilk politikasına</a>
+        <a href="/privacy-policy/" target="_blank">gizlilik politikasına</a>
         tabi olmaya kabul ediyorsunuz.
         13 yaşından küçük çocuklar hesap oluşturamaz. Ebeveynleri onlar için
         hesap oluşturabilir, ancak küçük yaşı belirten kutucuğu işaretlemeliler.

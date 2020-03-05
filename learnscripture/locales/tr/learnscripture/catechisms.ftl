@@ -5,9 +5,9 @@ catechisms-page-title = İlmihal
 
 # Introduction to catechisms on the catechism page
 catechisms-page-intro =
-    İlmhal Hristiyanlığın temel öğretilerini soru-cevap halinde sunan bir edebi tarzdır
+    İlmihal: Hristiyanlığın temel öğretilerini soru-cevap halinde sunan bir edebi tarzdır.
 
-    Protestan reform döneminde, din bilginleri Kutsal Kitap'ın temel gerçeklerini açıklamak için eski çağlardan kalma bir yöntemi kullanarak ilmihalleri oluşturdular. Bunlar günümüze dek yagın kullanımda bulunmaktadır.
+    Protestan reform döneminde, din bilginleri Kutsal Kitap'ın temel gerçeklerini açıklamak için eski çağlardan kalma bir yöntemi kullanarak ilmihalleri oluşturdular. Bunlar günümüze dek yaygın kullanımda bulunmaktadır.
 
 catechisms-choose-a-catechism-html =
     Çalışmak istediğiniz ilmihali seçiniz. Eklememizi istediğiniz bir ilmihal
