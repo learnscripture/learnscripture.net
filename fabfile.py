@@ -1039,8 +1039,8 @@ def install_or_renew_ssl_certificate():
 
 @task
 def create_sentry_release(version, last_commit):
-    full_hash = local("hg log -l 1 --template '{{node}}' -r {commit}".format(commit=last_commit), capture=True)
+    # full_hash = local("hg log -l 1 --template '{{node}}' -r {commit}".format(commit=last_commit), capture=True)
     local("sentry-cli releases --org learnscripturenet new -p production {version}".format(version=version))
-    local('sentry-cli releases --org learnscripturenet set-commits --commit "learnscripture/learnscripture.net@{commit}" {version}'
-          .format(version=version, commit=full_hash))
+    # Commits not currently publically available
+    # local('sentry-cli releases --org learnscripturenet set-commits --commit "learnscripture/learnscripture.net@{commit}" {version}'.format(version=version, commit=full_hash))
     local("sentry-cli releases --org learnscripturenet finalize {version}".format(version=version))
