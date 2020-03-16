@@ -41,29 +41,37 @@ if __name__ == '__main__':
                    ('QUESTION', 'shield_question.svg'),
                    ]
 
+    single_level_awards = ['ADDICT']
     for name, award_file in award_types:
-        for level in ['any', 1, 2, 3, 4, 5, 6, 7, 8, 9]:
+        if name in ['QUESTION']:
+            levels = ['any']
+        elif name in single_level_awards:
+            levels = ['any', 1]
+        else:
+            levels = ['any'] + list(range(1, 10))
+        for level in levels:
             for size in [50, 100]:
-                svgs = [os.path.join(updir, 'resources', award_file)]
+                svgs = [award_file]
                 if level != 'any':
-                    if name in ['QUESTION']:
-                        continue
+                    number_file = None
+                    # Overlay number
                     if name in ['RECRUITER', 'ORGANIZER']:
+                        # Smaller number icons
                         number_file = 'shield_level_%s_t2.svg'
+                    elif name in single_level_awards:
+                        number_file = None
                     else:
-                        # Single level awards
-                        if name in ['ADDICT']:
-                            if level > 1:
-                                continue
-                            else:
-                                number_file = None
-                        else:
-                            number_file = 'shield_level_%s.svg'
+                        number_file = 'shield_level_%s.svg'
 
                     if number_file is not None:
-                        svgs.append(os.path.join(updir, 'resources', number_file % level))
+                        svgs.append(number_file % level)
+
+                    # Overlay number highlight for top level
+                    if level == levels[-1] and name not in single_level_awards:
+                        svgs.append((number_file % (str(level) + '_highlight')))
+
                 fname = os.path.join(updir, 'learnscripture', 'static', 'img', 'awards',
                                      'award_%s_level_%s_%d.png' %
                                      (name, level, size))
 
-                combine(svgs, fname, size)
+                combine([os.path.join(updir, 'resources', f) for f in svgs], fname, size)
