@@ -3,16 +3,25 @@
 import os.path
 
 import cairo
-import rsvg
 
+import gi
+gi.require_version('Rsvg', '2.0')
+
+from gi.repository import Rsvg  # noqa:E402  isort:skip
+
+
+# Running this script requires some additional dependencies:
+#
+# sudo apt install gir1.2-rsvg-2.0 python3-cairo python3-gi
 
 def combine(svg_files, out_file, size):
     img = cairo.ImageSurface(cairo.FORMAT_ARGB32, size, size)
     ctx = cairo.Context(img)
     ctx.scale(size / 500.0, size / 500.0)
     for f in svg_files:
-        handler = rsvg.Handle(f)
-        handler.render_cairo(ctx)
+        handle = Rsvg.Handle()
+        svg = handle.new_from_file(f)
+        svg.render_cairo(ctx)
     img.write_to_png(out_file)
 
 
