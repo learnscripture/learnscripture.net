@@ -47,6 +47,8 @@ if __name__ == '__main__':
             levels = ['any']
         elif name in single_level_awards:
             levels = ['any', 1]
+        elif name == 'CONSISTENT_LEARNER':
+            levels = ['any'] + list(range(1, 11))
         else:
             levels = ['any'] + list(range(1, 10))
         for level in levels:

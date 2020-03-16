@@ -270,7 +270,7 @@ awards-consistent-learner-award-name =
 
 # General description
 awards-consistent-learner-award-general-description =
-    Belirli bir zaman içinde ara vermeden her gün yeni bir ayet ezberleyene verilen ödül. Ayetlerin sayılması için çalışılan ayetlerin yeni olması gerekir. Günler UTC zaman dilimine göre sayılır. Dokuz seviyeden oluşur. İlk seviye bir hafta için verilir, dokuzuncu ise iki yıl için.
+    Belirli bir zaman içinde ara vermeden her gün yeni bir ayet ezberleyene verilen ödül. Ayetlerin sayılması için çalışılan ayetlerin yeni olması gerekir. Günler UTC zaman dilimine göre sayılır. Dokuz seviyeden oluşur. İlk seviye bir hafta için verilir, onuncu ise üç yıl için.
 
 # Specific description for level 1
 awards-consistent-learner-award-level-1-description =
@@ -299,6 +299,9 @@ awards-consistent-learner-award-level-8-description =
 
 awards-consistent-learner-award-level-9-description =
     İki yıl boyunca her gün yeni bir ayet çalışıldı
+
+awards-consistent-learner-award-level-10-description =
+    Üç yıl boyunca her gün yeni bir ayet çalışıldı
 
 # Title for award at a specific level.
 # $name is award name,

@@ -243,7 +243,7 @@ awards-organizer-award-level-n-description = Created groups that are used by at 
 awards-consistent-learner-award-name = Consistent learner
 
 # General description
-awards-consistent-learner-award-general-description = Awarded for starting to learn a new verse every day without gaps, over a period of time. Note that you have to keep learning the verses for them to be counted. Days are defined by the UTC time zone. Level 1 is for 1 week, level 9 is for 2 years.
+awards-consistent-learner-award-general-description = Awarded for starting to learn a new verse every day without gaps, over a period of time. Note that you have to keep learning the verses for them to be counted. Days are defined by the UTC time zone. Level 1 is for 1 week, level 10 is for 3 years.
 
 # Specific description for level 1
 awards-consistent-learner-award-level-1-description = Started learning a new verse every day for 1 week
@@ -255,6 +255,7 @@ awards-consistent-learner-award-level-6-description = Started learning a new ver
 awards-consistent-learner-award-level-7-description = Started learning a new verse every day for 1 year
 awards-consistent-learner-award-level-8-description = Started learning a new verse every day for 18 months
 awards-consistent-learner-award-level-9-description = Started learning a new verse every day for 2 years
+awards-consistent-learner-award-level-10-description = Started learning a new verse every day for 3 years
 
 # Title for award at a specific level.
 # $name is award name,

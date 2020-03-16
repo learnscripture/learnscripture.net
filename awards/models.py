@@ -327,9 +327,6 @@ class TimeBasedAward(MultiLevelPointsMixin, AwardLogic):
     """
     Subclasses must define:
     DAYS: dictionary mapping level to number of days
-
-    Also useful:
-    FRIENDLY_DAYS: dictionary mapping level to string indicating number of days.
     """
 
     has_levels = True
@@ -404,18 +401,7 @@ class ConsistentLearnerAward(TimeBasedAward):
         7: 365,
         8: 547,
         9: 730,
-    }
-
-    FRIENDLY_DAYS = {
-        1: '1 week',
-        2: '2 weeks',
-        3: '1 month',
-        4: '3 months',
-        5: '6 months',
-        6: '9 months',
-        7: '1 year',
-        8: '18 months',
-        9: '2 years'
+        10: 1095,
     }
 
     def full_description(self):
