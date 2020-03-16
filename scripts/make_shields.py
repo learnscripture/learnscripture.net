@@ -3,8 +3,8 @@
 import os.path
 
 import cairo
-
 import gi
+
 gi.require_version('Rsvg', '2.0')
 
 from gi.repository import Rsvg  # noqa:E402  isort:skip
