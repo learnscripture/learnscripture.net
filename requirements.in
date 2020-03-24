@@ -1,11 +1,11 @@
 -e git://github.com/riccardoscalco/Pykov.git@16cda2f2c0ed8143ddcfa25dac34d3dadc982380#egg=pykov
 -e git://github.com/spookylukey/django-app-metrics.git@29408c43cc4e8241bb3a14c818154513cab0a93b#egg=django_app_metrics
 aldjemy==0.9.1
--e git+https://github.com/django-ftl/python-fluent@django-ftl-0.11#egg=fluent.runtime&subdirectory=fluent.runtime
--e git+https://github.com/django-ftl/django-ftl@283c314f2f9c7c08a0dd52defa9562a07c82c8d5#egg=django-ftl
+fluent-compiler==0.1.1
+django-ftl==0.11
 SQLAlchemy==1.1.10
 amqp==2.5.0
-attrs==19.1.0
+attrs==19.3.0
 billiard==3.5.0.2
 celery==4.2.1
 certifi==2018.11.29

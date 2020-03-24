@@ -6,7 +6,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django_ftl import override
-from fluent.runtime import types as fluent_types
+from fluent_compiler import types as fluent_types
 from paypal.standard.ipn.models import PayPalIPN
 
 from accounts.models import Account
