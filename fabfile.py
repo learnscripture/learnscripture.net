@@ -714,7 +714,7 @@ def collect_static(target):
         run("./manage.py collectstatic -v 0 --noinput")
 
     # This is needed for certbot/letsencrypt:
-    run("mkdir {0}/root".format(target.STATIC_ROOT))
+    run("mkdir -p {0}/root".format(target.STATIC_ROOT))
 
     # Permissions
     run("chmod -R ugo+r %s" % target.STATIC_ROOT)
