@@ -18,8 +18,8 @@ if CHECK_DEPLOY:
     LIVEBOX = True
     DEVBOX = False
 else:
-    DEVBOX = ('learnscripture' not in hostname)
-    LIVEBOX = not DEVBOX
+    LIVEBOX = hostname.startswith('learnscripture')
+    DEVBOX = not LIVEBOX
 
 
 DEBUG = DEVBOX and not RUNNING_MIGRATIONS

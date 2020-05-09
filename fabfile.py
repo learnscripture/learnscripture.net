@@ -1,7 +1,7 @@
-
 """
 fabfile for deploying and managing LearnScripture.net
 """
+
 import glob
 import json
 import os
@@ -21,7 +21,8 @@ join = os.path.join
 rel = lambda *x: os.path.normpath(join(os.path.abspath(os.path.dirname(__file__)), *x))
 
 env.user = 'learnscripture'
-env.hosts = ['learnscripture.net']
+if not env.hosts:
+    env.hosts = ['learnscripture.net']
 
 env.proj_name = "learnscripture"
 env.proj_app = "learnscripture"  # Python module for project
@@ -35,7 +36,7 @@ env.locale = "en_US.UTF-8"
 env.num_workers = "3"
 
 # Python version
-PYTHON_BIN = "python3.5"
+PYTHON_BIN = "python3.7"
 PYTHON_PREFIX = ""  # e.g. /usr/local  Use "" for automatic
 PYTHON_FULL_PATH = "%s/bin/%s" % (PYTHON_PREFIX, PYTHON_BIN) if PYTHON_PREFIX else PYTHON_BIN
 
@@ -53,10 +54,8 @@ REQS = [
 
     # Command line tools which are used non interactively
     'debian-goodies',  # checkrestart
-    'python-software-properties',  # apt-add-repository
-    'software-properties-common',  # "
+    'software-properties-common',
     'unattended-upgrades',
-    'cron-apt',
 
     'rsync',
     'git',
@@ -69,20 +68,19 @@ REQS = [
     'nmap',
     'silversearcher-ag',
     'git-core',
-    'wajig',
+    'aptitude',
     'ncdu',
 
     # Databases/servers
-    'postgresql-9.5',
-    'postgresql-contrib-9.5',
+    'postgresql',  # without version numbers, uses the supported version, which is usually fine
+    'postgresql-client',
+    'postgresql-contrib',
     'memcached',
     'rabbitmq-server',
 
     # Daemons
     'supervisor',  # For running uwsgi and php-cgi daemons
-    'pgbouncer',  # For pooling and providing a central point of control of db connections
     'nginx',
-    'postfix',  # to receive error messages from cron jobs, 'Local only' setup
 
     # Non-Python stuff
     'postgresql-client-9.5',
@@ -107,8 +105,7 @@ REQS = [
     'libturbojpeg',
     'libjpeg8',
     'libjpeg8-dev',
-    'libpng12-0',
-    'libpng12-dev',
+    'libpng-dev',
     'libfreetype6',
     'libfreetype6-dev',
     'zlib1g',
@@ -117,9 +114,16 @@ REQS = [
     # Soft uwsgi requirement (for harakiri alerts)
     'libpcre3-dev',
 
+    # Other
+    'letsencrypt',
 ]
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'learnscripture.settings'  # noqa
+
+
+@task
+def print_hostname():
+    run('hostname')
 
 
 # Utilities
@@ -211,8 +215,8 @@ def secure(new_user=env.user):
     Installs system updates, creates new user for future
     usage, and disables password root login via SSH.
     """
-    run("apt-get update -q")
-    run("apt-get upgrade -y -q")
+    run("apt update -q")
+    run("apt upgrade -y -q")
     if not fabtools.user.exists(new_user):
         ssh_keys = [os.path.expandvars("$HOME/.ssh/id_rsa.pub")]
         ssh_keys = list(filter(os.path.exists, ssh_keys))
@@ -330,7 +334,7 @@ def apt(packages):
     """
     Installs one or more system packages via apt.
     """
-    return run("apt-get install -y -q " + packages)
+    return run("apt install -y -q " + packages)
 
 
 # Templates
@@ -618,7 +622,7 @@ def create_venv(target):
     if exists(venv_root):
         return
 
-    run("virtualenv --no-site-packages --python=%s %s" % (PYTHON_BIN, venv_root))
+    run("virtualenv --python=%s %s" % (PYTHON_BIN, venv_root))
     run("echo %s > %s/lib/%s/site-packages/projectsource.pth" %
         (target.SRC_ROOT, target.VENV_ROOT, PYTHON_BIN))
 
@@ -854,8 +858,8 @@ def manage_py_command(*commands):
 
 @as_rootuser
 def update_upgrade():
-    fabtools.deb.update_index(quiet=False)
-    fabtools.deb.upgrade(safe=True)
+    run("apt update")
+    run("apt upgrade")
 
 
 # DB snapshots
@@ -905,7 +909,7 @@ def make_django_db_filename(target):
 def dump_db(target):
     filename = make_django_db_filename(target)
     db = target.DBS[DB_LABEL_DEFAULT]
-    run("pg_dump -Fc -U %s -O -o -f %s %s" % (db['USER'], filename, db['NAME']))
+    run("pg_dump -Fc -U %s -O -f %s %s" % (db['USER'], filename, db['NAME']))
     return filename
 
 
@@ -1010,12 +1014,6 @@ def skip_code_quality_checks():
     env.skip_code_quality_checks = True
 
 
-# This is for Ubuntu 16.04 with nginx
-@task
-@as_rootuser
-def setup_certbot():
-    run("apt-get install letsencrypt")
-
 
 @task
 @as_rootuser
@@ -1032,9 +1030,16 @@ def install_or_renew_ssl_certificate():
             domain=env.domains[0],
         ))
     run("service nginx restart")
-    # Cleanup letsencrypt
-    run("rmdir {certbot_static_path}/.well-known/".format(
-        certbot_static_path=certbot_static_path))
+
+
+@task
+def download_letsencrypt_conf():
+    local("rsync -r -l root@%s:/etc/letsencrypt/ config/letsencrypt/" % env.hosts[0])
+
+
+@task
+def upload_letsencrypt_conf():
+    local("rsync -r -l config/letsencrypt/ root@%s:/etc/letsencrypt/" % env.hosts[0])
 
 
 @task
