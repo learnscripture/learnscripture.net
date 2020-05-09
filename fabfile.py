@@ -809,7 +809,11 @@ def restart_webserver():
     """
     Gracefully restarts the webserver that is running the Django instance
     """
-    run("kill -HUP `cat /tmp/%s_uwsgi.pid`" % (env.proj_name))
+    pidfile = '/tmp/{proj_name}_uwsgi.pid'.format(proj_name=env.proj_name)
+    if exists(pidfile):
+        run("kill -HUP `cat {pidfile}`".format(pidfile=pidfile))
+    else:
+        start_webserver()
 
 
 @task
