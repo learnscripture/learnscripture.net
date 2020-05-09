@@ -22,7 +22,7 @@ rel = lambda *x: os.path.normpath(join(os.path.abspath(os.path.dirname(__file__)
 
 env.user = 'learnscripture'
 if not env.hosts:
-    #env.hosts = ['learnscripture.net']
+    # env.hosts = ['learnscripture.net']
     env.hosts = ['learnscripture2.digitalocean.com']
 
 env.proj_name = "learnscripture"
@@ -1006,7 +1006,6 @@ def migrate_upload_db(local_filename):
 @task
 def skip_code_quality_checks():
     env.skip_code_quality_checks = True
-
 
 
 @task
