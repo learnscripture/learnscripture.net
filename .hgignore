@@ -3,7 +3,7 @@ syntax:glob
 *~
 *.orig
 secrets.json
-config/letscencrypt
+config/letsencrypt
 settings_priv.py
 TODO
 TODO.org

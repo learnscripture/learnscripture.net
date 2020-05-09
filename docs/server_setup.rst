@@ -73,7 +73,7 @@ steps will need to be changed.
 
   Then::
 
-    $ fab upload_letscencrypt_config
+    $ fab upload_letsencrypt_conf
     $ fab create_project
     $ fab deploy
 

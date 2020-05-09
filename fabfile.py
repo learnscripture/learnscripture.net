@@ -290,7 +290,7 @@ def _install_locales():
 def _configure_services():
     for l in ["#------- Added for LearnScripture -----",
               "synchronous_commit = off"]:
-        append("/etc/postgresql/9.5/main/postgresql.conf", l)
+        append("/etc/postgresql/12/main/postgresql.conf", l)
     run("service postgresql restart")
 
     _configure_rabbitmq()
