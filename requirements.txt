@@ -6,8 +6,8 @@
 #
 -e git+git://github.com/spookylukey/django-app-metrics.git@29408c43cc4e8241bb3a14c818154513cab0a93b#egg=django_app_metrics  # via -r requirements.in
 -e git+git://github.com/riccardoscalco/Pykov.git@16cda2f2c0ed8143ddcfa25dac34d3dadc982380#egg=pykov  # via -r requirements.in
-aldjemy==0.9.1            # via -r requirements.in
-amqp==2.5.0               # via -r requirements.in, kombu
+aldjemy==0.10.1           # via -r requirements.in
+amqp==2.5.2               # via -r requirements.in, kombu
 appdirs==1.4.3            # via fs
 argh==0.26.2              # via watchdog
 argparse==1.4.0           # via unittest2
@@ -16,34 +16,35 @@ attrs==19.3.0             # via -r requirements.in, elm-fluent, fluent-compiler
 babel==2.8.0              # via fluent-compiler
 bcrypt==3.1.7             # via paramiko
 beautifulsoup4==4.8.0     # via elm-fluent, webtest
-billiard==3.5.0.2         # via -r requirements.in, celery
-celery==4.2.1             # via -r requirements.in, django-app-metrics
-certifi==2018.11.29       # via -r requirements.in, sentry-sdk
+billiard==3.6.3.0         # via celery
+celery==4.4.2             # via -r requirements.in, django-app-metrics
+certifi==2020.4.5.1       # via -r requirements.in, requests, sentry-sdk
 cffi==1.12.3              # via bcrypt, cryptography, pynacl
+chardet==3.0.4            # via requests
 click==7.0                # via elm-fluent, pip-tools
 compare-locales==7.2.5    # via -r requirements-dev.in
-concurrent-log-handler==0.9.7  # via -r requirements.in
+concurrent-log-handler==0.9.16  # via -r requirements.in
 coverage==4.4.1           # via -r requirements-dev.in
 cryptography==2.7         # via paramiko
 cssselect==1.0.3          # via pyquery
 decorator==4.4.0          # via ipython, traitlets
-django-anymail==6.1.0     # via -r requirements.in
+django-anymail==7.1.0     # via -r requirements.in
 django-appconf==1.0.3     # via django-compressor
-django-autocomplete-light==3.4.1  # via -r requirements.in
-django-autoslug==1.9.6    # via -r requirements.in
+django-autocomplete-light==3.5.1  # via -r requirements.in
+django-autoslug==1.9.7    # via -r requirements.in
 django-capture-tag==1.0   # via -r requirements.in
-django-compressor==2.3    # via -r requirements.in
+django-compressor==2.4    # via -r requirements.in
 django-debug-toolbar==2.0  # via -r requirements-dev.in
 django-extensions==2.2.1  # via -r requirements-dev.in
-django-ftl==0.11          # via -r requirements.in
+django-ftl==0.12.1        # via -r requirements.in
 django-functest==1.0.4    # via -r requirements-dev.in
 django-js-asset==1.2.2    # via django-mptt
 django-markup==1.4.1      # via -r requirements.in
-django-mptt==0.10.0       # via -r requirements.in
+django-mptt==0.11.0       # via -r requirements.in
 django-paypal==1.0        # via -r requirements.in
 django-pjax==1.4          # via -r requirements.in
 django-spurl==0.6.6       # via -r requirements.in
-django-sql-utils==0.2.2   # via -r requirements.in
+django-sql-utils==0.5.0   # via -r requirements.in
 django-webpack-loader==0.5.0  # via -r requirements.in
 django-webtest==1.9.7     # via django-functest
 django==2.2.4             # via -r requirements.in, django-anymail, django-appconf, django-debug-toolbar, django-ftl, django-functest, django-markup, django-mptt, django-paypal, django-pjax, django-sql-utils, easy-thumbnails
@@ -56,14 +57,15 @@ entrypoints==0.3          # via flake8
 fabric3==1.13.1.post1     # via -r requirements-dev.in, fabtools3
 fabtools3==0.19.0         # via -r requirements-dev.in
 flake8==3.7.8             # via -r requirements-dev.in
-fluent-compiler==0.1.1    # via -r requirements.in, django-ftl
+fluent-compiler==0.2      # via django-ftl
 fluent.syntax==0.15.1     # via compare-locales, elm-fluent, fluent-compiler
 fs==2.4.10                # via elm-fluent
-furl==2.0.0               # via -r requirements.in, django-functest
+furl==2.1.0               # via -r requirements.in, django-functest
+idna==2.9                 # via requests
 ipython-genutils==0.2.0   # via traitlets
 ipython==5.3.0            # via -r requirements-dev.in
 isort==4.3.21             # via -r requirements-dev.in
-kombu==4.2.1              # via -r requirements.in, celery
+kombu==4.6.8              # via -r requirements.in, celery
 language-tags==0.4.6      # via elm-fluent
 linecache2==1.0.0         # via traceback2
 lxml==4.5.0               # via -r requirements.in, elm-fluent, pyquery
@@ -79,7 +81,8 @@ pbr==5.4.2                # via mock
 pexpect==4.7.0            # via ipython
 pickleshare==0.7.5        # via ipython
 pillow==6.2.1             # via easy-thumbnails
-pip-tools==5.0.0          # via -r requirements-dev.in
+pip-tools==5.1.2          # via -r requirements-dev.in
+portalocker==1.7.0        # via concurrent-log-handler
 prompt-toolkit==1.0.16    # via ipython
 psycopg2-binary==2.8.5    # via -r requirements.in
 ptyprocess==0.6.0         # via pexpect
@@ -89,36 +92,35 @@ pyflakes==2.1.1           # via flake8
 pygments==2.4.2           # via ipython
 pyinotify==0.9.6          # via -r requirements-dev.in
 pynacl==1.3.0             # via paramiko
-pyquery==1.4.0            # via -r requirements.in, django-functest
-python-memcached==1.58    # via -r requirements.in
+pyquery==1.4.1            # via -r requirements.in, django-functest
+python-memcached==1.59    # via -r requirements.in
 pytoml==0.1.21            # via compare-locales
-pytz==2019.2              # via -r requirements.in, babel, celery, django, django-paypal, fluent-compiler, fs
+pytz==2020.1              # via -r requirements.in, babel, celery, django, django-paypal, fluent-compiler, fs
 pyvirtualdisplay==0.2.1   # via -r requirements-dev.in, django-functest
 pyyaml==5.1.2             # via watchdog
 rcssmin==1.0.6            # via django-compressor
-requests==2.6.0           # via -r requirements.in, django-anymail, django-paypal
+requests==2.23.0          # via -r requirements.in, django-anymail, django-paypal
 rjsmin==1.1.0             # via django-compressor
 scipy==1.4.1              # via pykov
 selenium==3.12.0          # via -r requirements-dev.in, django-functest
 sentry-sdk==0.10.2        # via -r requirements.in
 simplegeneric==0.8.1      # via ipython
-six==1.12.0               # via bcrypt, compare-locales, cryptography, django-anymail, django-appconf, django-extensions, django-functest, django-markup, django-paypal, django-spurl, fabric3, fluent-compiler, fs, furl, language-tags, mock, orderedmultidict, pip-tools, prompt-toolkit, pykov, pynacl, python-memcached, traitlets, unittest2, webtest
+six==1.14.0               # via bcrypt, compare-locales, cryptography, django-anymail, django-appconf, django-autocomplete-light, django-compressor, django-extensions, django-functest, django-markup, django-paypal, django-spurl, fabric3, fluent-compiler, fs, furl, language-tags, mock, orderedmultidict, pip-tools, prompt-toolkit, pykov, pynacl, python-memcached, traitlets, unittest2, webtest
 soupsieve==1.9.2          # via beautifulsoup4
-sqlalchemy==1.1.10        # via -r requirements.in, aldjemy
-sqlparse==0.3.0           # via django, django-debug-toolbar
+sqlalchemy==1.3.16        # via -r requirements.in, aldjemy
+sqlparse==0.3.0           # via django, django-debug-toolbar, django-sql-utils
 traceback2==1.4.0         # via unittest2
 traitlets==4.3.2          # via ipython
-typing==3.7.4             # via fs
 unittest2==1.1.0          # via -r requirements-dev.in
-urllib3==1.25.3           # via sentry-sdk
+urllib3==1.25.3           # via requests, sentry-sdk
 urlobject==2.4.3          # via django-spurl
 uwsgi==2.0.18             # via -r requirements.in
-vine==1.3.0               # via amqp
+vine==1.3.0               # via amqp, celery
 waitress==1.3.0           # via webtest
 watchdog==0.9.0           # via elm-fluent
 wcwidth==0.1.7            # via prompt-toolkit
 webob==1.8.5              # via webtest
-webtest==2.0.33           # via django-webtest
+webtest==2.0.35           # via django-webtest
 werkzeug==0.14.1          # via -r requirements-dev.in
 
 # The following packages are considered to be unsafe in a requirements file:
