@@ -28,7 +28,7 @@ installed.
 
 3. Create a virtualenv for the project e.g.::
 
-     mkvirtualenv learnscripture --python=`which python3.7` -a `pwd`
+     mkvirtualenv learnscripture --python=`which python3.8` -a `pwd`
 
    Add project path to the venv::
 

@@ -1,117 +1,150 @@
-==============
- Server setup
-==============
+Server provisioning/upgrade
+---------------------------
 
-Most of the server setup was automated. Full steps used to set up the current
-DigitalOcean machine are below:
-
-(Completed 2016-11-30)
-
-These commands were done using my development machine (after setting up as per
-development_setup.rst). Where the prompts below indicate ``...@learnscripture>``
-it means the commands were run in an SSH session on the learnscripture
-production machine, either as user ``root`` or ``learnscripture``.
+To upgrade to a major new version of the OS, it is usually better to start a new
+VM, test it is all working, then transfer. Here is the process, assuming that we
+are staying with the same provider (DigitalOcean). If moving to a new hosts some
+steps will need to be changed.
 
 
-* Created account on DigitalOcean for webmaster@learnscripture.net
+1. Change the TTL on all learnscripture.net domains down to 1 hour (3600 seconds), so
+   that the downtime caused by a new IP later on will be much quicker. This
+   needs to be done at least X seconds before the actual switch over is planned,
+   where X is the previous TTL, to give time for DNS propagation. So, if
+   previous TTL is 86400 (1 day), this step needs to be done at least 1 day
+   before go live of new server.
 
-* Created droplet
+   Later on, at least 1 hour before switch over, we'll reduce it further to 5
+   minutes.
 
-  On: https://cloud.digitalocean.com/droplets
-  Created droplet:
+2. Fetch old SSL certificates::
 
-  Ubuntu 16.04.1 x64
-  $5/month (512 Gb mem, 20 bB SSD, 1000 Gb transfer)
+     fab download_letscencrypt_config
 
-  Additional option: backups
-  Location: New York
+3. Create new VM:
 
-  Added my id_rsa.pub under name "luke@calvin"
+   On DigitalOcean, last time (2020-05-09) this process was:
 
-  Droplet name: learnscripture
+   From https://cloud.digitalocean.com/
 
-* Tested::
+   Create new droplet.
 
-  $ ssh root@[ip address]
+   Choose:
 
-* Added the following entry to my /etc/hosts::
+   - Latest Ubuntu LTS (last time - 20.04 (LTS) x64)
+   - Starter plan
+   - Smallest box (last time - $5/month, 1 Gb mem, 25 Gb disk, 1000 Gb transfer)
+   - Any US datacenter (most users are in US)
+   - IPv6 enabled
+   - SSH authentication
+     - luke@calvin SSH key selected (will need to upload one if there isn't one configured)
 
-    104.236.55.8 learnscripture.digitalocean.com
+   - 1 droplet
+   - Hostname: 'learnscripture' plus an incrementing number (last time: learnscripture2)
 
-* In fabfile.py, set env.hosts ['learnscripture.digitalocean.com']
+     Use incrementing numbers for each new VM, to ensure you don't confuse with
+     previous one. This is not the same as the public domain name. Substitute
+     this name wherever ``learnscripture2`` appears below.
 
-* Ran initial deployment::
+   - Enable backups
+
+4. Add new VM to /etc/hosts so that it can be accessed easily, using the IP address given
+   e.g.::
+
+   178.62.115.97 learnscripture2.digitalocean.com
+
+   Check you can login with ``ssh root@learnscripture2.digitalocean.com``
+
+5. Change ``env.hosts`` in fabfile to point to new VM. Remember that from now
+   on it will use the new VM by default, unless ``-H`` flag is passed.
+
+6. Upgrade versions of things, preferably to defaults for new distribution
+
+   * Python version - see ``PYTHON_BIN`` in fabfile.py
+   * Postgresql version - fabfile.py
+
+6. Provision VM::
 
     $ fab secure
     $ fab provision
+
+  If this fails update any dependencies, searching for new packages using
+  ``apt search``.
+
+  Then::
+
+    $ fab upload_letscencrypt_config
     $ fab create_project
     $ fab deploy
 
 
-* Ran a few tweaks manually to make working on the box a bit easier::
-
-    root@learnscripture> apt-get install joe
-    root@learnscripture> chsh -s /bin/bash learnscripture
-
-  Plus tweaks to ~/.inputrc
-
-  Also configured unattended upgrades::
-
-    root@learnscripture> dpkg-reconfigure unattended-upgrades
-
-* Copied DB from old system.
-
-  There are two databases - learnscripture and learnscripture_wordsuggestions.
-  The first contains all the user data, and the bible texts etc.
-  The second contains a large amount of generated data for supplying
-  alternative words that users have to pick between when being tested.
-
-  This second database was rebuilt, rather than being copied from the previous
-  machine.
-
-  Copied database to dev machine::
-
-    $ fab get_db_dump_from_webfaction
-
-  Noted filename, then::
-
-    $ fab migrate_upload_db:../db_backups/[filename]
-
-* Populated the word suggestion DB.
-
-  This was done in a screen session to allow it to continue if SSH connection
-  dropped::
-
-    $ ssh learnscripture@learnscripture.digitalocean.com
-    learnscripture@learnscripture> screen
-    learnscripture@learnscripture> cd ~/webapps/learnscripture/versions/current/src/; . ../venv/bin/activate
-    learnscripture@learnscripture> ./manage.py setup_bibleverse_suggestions
-
-  Use Ctrl-a Ctrl-d to detach from screen, ``screen -r -d`` to reattach.
-
-  (This took about a day to complete).
-
-* Got the site working. Easiest way to test is to put an entry for
-  'learnscripture.net' in /etc/hosts pointing to the new machine.
-
-* Got previous hosts to change TTL to a few minutes, for a fast domain switch.
-
-* After 48 hours, did the move for real:
-
-  * stopped the old site, putting up "down for maintenance" sign
-  * got a database dump with most recent data and uploaded to new machine, as above.
-  * checked everything working on the new box.
-  * got old provider to point DNS to new machine.
-  * set up DNS records on DigitalOcean
-  * switched DNS nameservers to DigitalOcean (previously WebFaction)
-
-See also DNS_setup.rst
+The next steps are a 'dry-run', that we will do before the real thing, to check
+the process works.
 
 
-Later, SSL was set up::
+7. Download DB from old server. Note use of ``-H`` flag to point to old
+   server temporarily::
 
-  $ fab setup_certbot
+     fab -H learnscripture1.digitalocean.com get_live_db
 
-  $ fab install_or_renew_ssl_certificate
+   Note that this downloads only the primary database ``learnscripture``. In
+   addition, there is ``learnscripture_wordsuggestions`` which consists of
+   essentially static data. It is several Gb, so it can often be easier to
+   rebuild this on the new server than to upload, and this ensures rebuilding is
+   still working.
 
-Email: webmaster@learnscripture.net
+8. Upload DB to new server - make sure -H is correct, and change
+   ``[filename]`` to the file downloaded in step 7::
+
+     fab -H learnscripture2.digitalocean.com migrate_upload_db:[filename]
+
+   This may return some errors, while still being successful. Restart webserver::
+
+     fab -H learnscripture2.digitalocean.com start_webserver
+
+9. Rebuild the wordsuggestion DB:
+
+   This can be in a screen session to allow it to continue if SSH connection
+   dropped::
+
+     $ ssh learnscripture@learnscripture2.digitalocean.com
+     learnscripture2> screen
+     learnscripture2> cd ~/webapps/learnscripture/versions/current/src/; . ../venv/bin/activate
+     learnscripture2> ./manage.py setup_bibleverse_suggestions
+
+   Use Ctrl-a Ctrl-d to detach from screen, ``screen -r -d`` to reattach.
+
+   (May take about a day to complete)
+
+10. Use your local /etc/hosts to point learnscripture.net to the new server, and test
+    the new site works as expected.
+
+11. If everything works, prepare to do it for real
+
+    - set the TTL to 5 minutes
+    - wait for an hour for DNS to propagate
+
+
+Now we'll repeat some steps, with changes:
+
+12. Stop the old server
+
+13. Repeat step 7 - download DB from old server
+
+14. Repeat step 8 - upload DB to new server.
+    (step 9 does not need to be repeated, it is static data)
+
+15. Repeat step 10 - check everything works
+
+16. Switch DNS to the new server in the DigitalOcean control panel. Put DNS TTL
+    back up to 86400
+
+17. Make sure letsencrypt is working::
+
+      fab install_or_renew_ssl_certificate
+
+
+Done!
+
+Ensure you remove entries from your local /etc/hosts so that you are seeing what
+everyone else sees.

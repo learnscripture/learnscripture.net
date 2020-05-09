@@ -22,7 +22,8 @@ rel = lambda *x: os.path.normpath(join(os.path.abspath(os.path.dirname(__file__)
 
 env.user = 'learnscripture'
 if not env.hosts:
-    env.hosts = ['learnscripture.net']
+    #env.hosts = ['learnscripture.net']
+    env.hosts = ['learnscripture2.digitalocean.com']
 
 env.proj_name = "learnscripture"
 env.proj_app = "learnscripture"  # Python module for project
@@ -36,7 +37,7 @@ env.locale = "en_US.UTF-8"
 env.num_workers = "3"
 
 # Python version
-PYTHON_BIN = "python3.7"
+PYTHON_BIN = "python3.8"
 PYTHON_PREFIX = ""  # e.g. /usr/local  Use "" for automatic
 PYTHON_FULL_PATH = "%s/bin/%s" % (PYTHON_PREFIX, PYTHON_BIN) if PYTHON_PREFIX else PYTHON_BIN
 
@@ -82,19 +83,16 @@ REQS = [
     'supervisor',  # For running uwsgi and php-cgi daemons
     'nginx',
 
-    # Non-Python stuff
-    'postgresql-client-9.5',
-
     # Python stuff
-    'python',
-    'python-pip',
-    'python-virtualenv',
-    'python-setuptools',
+    'python3',
+    'python3-pip',
+    'python3-wheel',
+    'python3-virtualenv',
+    'python3-virtualenvwrapper',
+    'python3-setuptools',
 
     # For building Python extensions
     'build-essential',
-    'python-dev',
-    'python3',
     'python3-dev',
     'libpq-dev',  # For psycopg2
     'libxml2-dev',  # For lxml/uwsgi
@@ -116,6 +114,7 @@ REQS = [
 
     # Other
     'letsencrypt',
+    'joe',
 ]
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'learnscripture.settings'  # noqa
@@ -245,7 +244,6 @@ def _install_system():
     update_upgrade()
     apt(" ".join(REQS))
     _add_swap()
-    _install_python_minimum()
     _ssl_dhparam()
 
 
@@ -275,10 +273,6 @@ def _ssl_dhparam():
         if not exists(d):
             run("mkdir -p {0}".format(d))
         run("openssl dhparam -out {0} 2048".format(dhparams))
-
-
-def _install_python_minimum():
-    run("pip install --progress-bar off -U pip virtualenv wheel virtualenvwrapper mercurial")
 
 
 @as_rootuser
