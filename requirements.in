@@ -31,11 +31,10 @@ pyquery==1.4.0
 python-memcached==1.58
 pytz==2019.2
 requests==2.6.0
-uwsgi==2.0.15
+uwsgi==2.0.18
 django-capture-tag==1.0
 django-mptt==0.10.0
 easy-thumbnails==2.6
 django-compressor==2.3
 django-sql-utils==0.2.2
 sentry-sdk==0.10.2
-mercurial==5.2.1
