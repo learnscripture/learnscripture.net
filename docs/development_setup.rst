@@ -32,7 +32,7 @@ installed.
 
    Add project path to the venv::
 
-     pwd > $VIRTUAL_ENV/lib/python3.5/site-packages/project.pth
+     pwd > $VIRTUAL_ENV/lib/python3.8/site-packages/project.pth
 
 4. Install dependencies.
 
@@ -155,6 +155,7 @@ These should be done at some point, but don't need to be done immediately.
     in a separate database, and not downloaded as part of the text itself. To
     generate it, do::
 
+      ./manage.py run_suggestions_analyzers NET
       ./manage.py setup_bibleverse_suggestions NET
 
     (Other version names can be added at the end of that line)

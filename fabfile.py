@@ -917,7 +917,15 @@ def pg_restore_cmds(db, filename, clean=False):
 def db_create_user_commands(db):
     return [
         (True,
-         """psql -U postgres -d template1 -c "CREATE USER %s WITH PASSWORD '%s';" """ % (db['USER'], db['PASSWORD'])),
+         """psql -U postgres -d template1 -c "
+             DO \\$\\$
+             BEGIN
+               CREATE USER %s WITH PASSWORD '%s';
+               EXCEPTION WHEN DUPLICATE_OBJECT THEN
+               RAISE NOTICE 'not creating role, it already exists';
+             END
+             \\$\\$;
+          " """ % (db['USER'], db['PASSWORD'])),
     ]
 
 
@@ -957,7 +965,6 @@ def db_drop_database_commands(db):
     return [
         (True,
          """psql -U postgres -d template1 -c "DROP DATABASE IF EXISTS %s;" """ % db['NAME']),
-
     ]
 
 

@@ -110,11 +110,28 @@ the process works.
      $ ssh learnscripture@learnscripture2.digitalocean.com
      learnscripture2> screen
      learnscripture2> cd ~/webapps/learnscripture/versions/current/src/; . ../venv/bin/activate
+     learnscripture2> ./manage.py run_suggestions_analyzers
      learnscripture2> ./manage.py setup_bibleverse_suggestions
 
    Use Ctrl-a Ctrl-d to detach from screen, ``screen -r -d`` to reattach.
 
+   This process is currently problematic for some Bible versions for which we
+   are not allowed to have the whole Bible text stored in our DB. For these
+   (ESV), the workaround is to copy the analysis files from the previous
+   machine - see below.
+
    (May take about a day to complete)
+
+   ALTERNATIVE STEP 9:
+
+   To avoid doing ``run_suggestions_analyzers``, files from
+   /home/learnscripture/webapps/learnscripture/data on old machine can be copied
+   over.
+
+   To avoid both ``run_suggestions_analyzers`` and ``setup_bibleverse_suggestions``,
+   dump the wordsuggestions DB on old server, transfer
+   directly to new server using rsync (needs SSH keys adding on old server).
+   This avoids bandwidth problems, and the other problems above.
 
 10. Use your local /etc/hosts to point learnscripture.net to the new server, and test
     the new site works as expected.
