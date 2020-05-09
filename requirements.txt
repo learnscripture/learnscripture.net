@@ -66,7 +66,7 @@ isort==4.3.21             # via -r requirements-dev.in
 kombu==4.2.1              # via -r requirements.in, celery
 language-tags==0.4.6      # via elm-fluent
 linecache2==1.0.0         # via traceback2
-lxml==4.4.0               # via -r requirements.in, elm-fluent, pyquery
+lxml==4.5.0               # via -r requirements.in, elm-fluent, pyquery
 mccabe==0.6.1             # via flake8
 mercurial==5.2.1          # via -r requirements.in
 mock==2.0.0               # via -r requirements-dev.in
