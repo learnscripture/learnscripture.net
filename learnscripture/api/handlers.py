@@ -5,7 +5,6 @@ Handlers for AJAX requests.
 This isn't really a REST API in the normal sense, and would probably need a lot
 of cleaning up if clients other than the web app were to use it.
 """
-import collections
 import csv
 import datetime
 import json
@@ -99,7 +98,7 @@ def validation_error_response(errors):
 
 def get_instance_attr(instance, attr_name):
     retval = getattr(instance, attr_name)
-    if isinstance(retval, collections.Callable):
+    if callable(retval):
         retval = retval()
     return retval
 
