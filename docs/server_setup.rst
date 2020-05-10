@@ -102,9 +102,32 @@ the process works.
 
      fab -H learnscripture2.digitalocean.com start_webserver
 
-9. Rebuild the wordsuggestion DB:
+9. Copy wordsuggestions DB from old to new server
 
-   This can be in a screen session to allow it to continue if SSH connection
+   This is basically static data. There may be a lot of it, so can be
+   transferred directly to avoid bandwidth issues:
+
+   On old server::
+
+     $ pg_dump -Fc -U learnscripture -O -f wordsuggestions.db learnscripture_wordsuggestions -v
+
+   Then transfer to new - easiest it to upload the required ``id_rsa`` SSH key
+   to the old server, then copy::
+
+     $ rsync wordsuggestions.db learnscripture@<new_server_ip_address>
+
+   Also, the related analysis data in ~/webapps/learnscripture/data should be copied over
+   in case it needs to be used.
+
+   On the new server::
+
+     $ pg_restore -O -U learnscripture -c -d learnscripture_wordsuggestions wordsuggestions.db
+
+   ALTERNATIVE:
+
+   Alternatively we can rebuild the wordsuggestions DB from source data.
+
+   This can be done in a screen session to allow it to continue if SSH connection
    dropped::
 
      $ ssh learnscripture@learnscripture2.digitalocean.com
@@ -115,23 +138,13 @@ the process works.
 
    Use Ctrl-a Ctrl-d to detach from screen, ``screen -r -d`` to reattach.
 
-   This process is currently problematic for some Bible versions for which we
-   are not allowed to have the whole Bible text stored in our DB. For these
-   (ESV), the workaround is to copy the analysis files from the previous
-   machine - see below.
-
-   (May take about a day to complete)
-
-   ALTERNATIVE STEP 9:
-
    To avoid doing ``run_suggestions_analyzers``, files from
    /home/learnscripture/webapps/learnscripture/data on old machine can be copied
    over.
 
-   To avoid both ``run_suggestions_analyzers`` and ``setup_bibleverse_suggestions``,
-   dump the wordsuggestions DB on old server, transfer
-   directly to new server using rsync (needs SSH keys adding on old server).
-   This avoids bandwidth problems, and the other problems above.
+   HOWEVER: this process is currently problematic for some Bible versions for
+   which we are not allowed to have the whole Bible text stored in our DB (ESV),
+   and will fail for those.
 
 10. Use your local /etc/hosts to point learnscripture.net to the new server, and test
     the new site works as expected.
@@ -141,10 +154,16 @@ the process works.
     - set the TTL to 5 minutes
     - wait for an hour for DNS to propagate
 
+    - add a site notice
 
 Now we'll repeat some steps, with changes:
 
-12. Stop the old server
+12. Stop the old server::
+
+      fab -H learnscripture1.digitalocean.com stop_webserver
+
+    (This deliberately leaves the site returning an error, which is important
+    for API calls - the /learn/ page will store up failed calls to later.)
 
 13. Repeat step 7 - download DB from old server
 
