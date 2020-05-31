@@ -8,7 +8,7 @@ from functools import reduce
 
 import attr
 from autoslug import AutoSlugField
-from django.contrib.postgres.fields import JSONField
+from django.contrib.postgres.fields import ArrayField, JSONField
 from django.db import models
 from django.db.models import F, Func, Q, Value
 from django.urls import reverse
@@ -882,21 +882,8 @@ class UserVerseStatusQuerySet(models.QuerySet):
         return self.reviewable().filter(next_test_due__gt=now)
 
     def search_by_parsed_ref(self, parsed_ref):
-        # We could use the parsed_ref to find bible_verse_number ranges. But
-        # that would require knowing the Bible version, and we could be
-        # referring to any Bible version. So we use this method based on string
-        # matching.
-        query_ref = parsed_ref.canonical_form()
-        # Some slightly hacky stuff here, could break with
-        # other reference styles.
-        if parsed_ref.start_chapter is None:
-            return self.filter(localized_reference__startswith=query_ref + " ")
-        elif parsed_ref.start_verse is None:
-            # Hack - by adding ':' we can stop
-            #  "Genesis 1" matching "Genesis 10" etc.
-            return self.filter(localized_reference__startswith=query_ref + ":")
-        else:
-            return self.filter(localized_reference=query_ref)
+        refs = [ref.canonical_form() for ref in parsed_ref.to_internal().to_list()]
+        return self.filter(internal_reference_list__overlap=refs)
 
 
 class UserVerseStatus(models.Model):
@@ -923,6 +910,7 @@ class UserVerseStatus(models.Model):
     for_identity = models.ForeignKey('accounts.Identity', on_delete=models.CASCADE,
                                      related_name='verse_statuses')
     localized_reference = models.CharField(max_length=100)
+    internal_reference_list = ArrayField(models.CharField(max_length=100), default=list)
     verse_set = models.ForeignKey(VerseSet, null=True, blank=True,
                                   on_delete=models.SET_NULL)
     text_order = models.PositiveSmallIntegerField()  # order of this item within associated TextVersion

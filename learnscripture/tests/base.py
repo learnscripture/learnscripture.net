@@ -2,6 +2,7 @@
 import contextlib
 import os
 import time
+import typing
 import unittest
 from functools import wraps
 from unittest.case import _UnexpectedSuccess
@@ -45,7 +46,7 @@ def create_account(version_slug='KJV',
                    username="tëst1",
                    seen_help_tour=True,
                    is_tester=False,
-                   is_active=True):
+                   is_active=True) -> typing.Tuple[Identity, Account]:
     """
     Creates an account, returning (identity, account) tuple
     """

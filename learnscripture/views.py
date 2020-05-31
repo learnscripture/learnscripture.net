@@ -1008,7 +1008,10 @@ def user_verses(request):
                 # your default language.
                 parsed_ref = parse_unvalidated_localized_reference(
                     request.identity.default_language_code,
-                    query)
+                    query,
+                    allow_whole_book=False,
+                    allow_whole_chapter=True,
+                )
             except InvalidVerseReference:
                 invalid = True
 
@@ -1018,6 +1021,7 @@ def user_verses(request):
             else:
                 verses = verses.search_by_parsed_ref(parsed_ref)
         else:
+            # TextType.CATECHISM
             verses = verses.filter(localized_reference__iexact=query)
 
     PAGE_SIZE = 20

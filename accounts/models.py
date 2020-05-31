@@ -19,7 +19,8 @@ from accounts import memorymodel
 from accounts.signals import (catechism_started, points_increase, scored_100_percent, verse_finished, verse_started,
                               verse_tested)
 from bibleverses.models import (InvalidVerseReference, MemoryStage, StageType, TextType, TextVersion, UserVerseStatus,
-                                VerseSet, VerseSetType, get_passage_sections, normalized_verse_list_ref)
+                                VerseSet, VerseSetType, get_passage_sections, normalized_verse_list_ref,
+                                parse_validated_localized_reference)
 from bibleverses.signals import verse_set_chosen
 from bibleverses.textutils import count_words
 from learnscripture.datastructures import make_choices
@@ -690,17 +691,25 @@ class Identity(models.Model):
         # localized_reference is. Also need to cope with Combo verses.
         localized_reference = normalized_verse_list_ref(version.language_code,
                                                         verse_list)
-
+        parsed_ref = parse_validated_localized_reference(version.language_code,
+                                                         localized_reference)
+        internal_reference_list = [
+            r.canonical_form()
+            for r in parsed_ref.to_internal().to_list()
+        ]
         # NB: we are exploiting the fact that multiple calls to
         # create_verse_status will get slightly increasing values of 'added',
         # allowing us to preserve order.
-        uvs, new = self.verse_statuses.get_or_create(verse_set=verse_set,
-                                                     localized_reference=localized_reference,
-                                                     version=version,
-                                                     defaults=dict(text_order=text_order,
-                                                                   added=timezone.now()
-                                                                   )
-                                                     )
+        uvs, new = self.verse_statuses.get_or_create(
+            verse_set=verse_set,
+            localized_reference=localized_reference,
+            version=version,
+            defaults=dict(
+                text_order=text_order,
+                added=timezone.now(),
+                internal_reference_list=internal_reference_list,
+            )
+        )
 
         dirty = False
         # See if we already have data for this verse + version, for the

@@ -31,16 +31,6 @@ def chunked_queryset(qs, batch_size, index='id'):
     This requires a non-nullable column `index` (default 'id') that can be used
     with the `BETWEEN` operator to be present, and the result is only efficient
     if there is a DB index on that column.
-
-    This method is more correct than doing
-    wolfproject.utils.iterators.chunks(qs, batch_size) because successive slices
-    of a QuerySet are not guaranteed to return all items, or return all items
-    only once (due to items being deleted or inserted in between queries, or the
-    QuerySet not being ordered).
-
-    In addition, it can be more efficient, because the QuerySet doesn't need to
-    be ordered, and the database can spend a significant amount of time ordering
-    a query.
     """
 
     ids = qs.order_by().prefetch_related(None).select_related(None).values_list(index, flat=True)

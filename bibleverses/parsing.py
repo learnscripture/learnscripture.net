@@ -27,8 +27,9 @@ class ParsedReference(object):
 
         # Normalize to a form where every ParsedReference is potentially a
         # range. This means we can treat ranges and single verses uniformly.
-        if is_single_chapter_book(self.book_number):
+        if self.start_chapter is None and is_single_chapter_book(self.book_number):
             self.start_chapter = 1
+            self.end_chapter = 1
         if self.end_chapter is None:
             self.end_chapter = self.start_chapter
         if self.end_verse is None:
@@ -135,7 +136,14 @@ class ParsedReference(object):
         book_info = BIBLE_BOOK_INFO[self.to_internal().book_name]
         assert start_ref.start_chapter <= end_ref.start_chapter
         if start_ref.start_chapter == end_ref.start_chapter:
-            assert start_ref.start_verse <= end_ref.start_verse
+            if start_ref.start_verse is not None and end_ref.start_verse is not None:
+                assert start_ref.start_verse <= end_ref.start_verse
+        if start_ref.start_verse is None:
+            start_ref.start_verse = 1
+            start_ref.end_verse = start_ref.start_verse
+        if end_ref.end_verse is None:
+            end_ref.start_verse = book_info['verse_counts'][end_ref.start_chapter]
+            end_ref.end_verse = end_ref.start_verse
 
         results = []
         current_ref = start_ref

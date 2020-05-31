@@ -607,6 +607,17 @@ class ParsingTests(unittest2.TestCase):
             'Genesis 1:30',
             'Genesis 1:31',
         ])
+        assertListEqual('Psalm 23', [
+            'Psalm 23:1',
+            'Psalm 23:2',
+            'Psalm 23:3',
+            'Psalm 23:4',
+            'Psalm 23:5',
+            'Psalm 23:6',
+        ])
+        assertListEqual('Jude 1:25', [
+            'Jude 1:25',
+        ])
 
 
 class MockVersion:
@@ -779,6 +790,77 @@ class UserVerseStatusTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestB
         self.assertEqual(uvs.passage_localized_reference, 'Romalılar 3:24-26')
 
         # Other tests for the underlying functionality are in GetPassageSectionsTests
+
+    def test_search_by_parsed_ref_single(self):
+        identity, account = self.create_account()
+        identity.add_verse_set(VerseSet.objects.get(name="Psalm 23"))
+
+        self.assertEqual(
+            len(identity.verse_statuses.search_by_parsed_ref(
+                parse_validated_localized_reference("en", "Psalm 23:1"))),
+            1)
+
+    def test_search_by_parsed_ref_range(self):
+        identity, account = self.create_account()
+        identity.add_verse_set(VerseSet.objects.get(name="Psalm 23"))
+
+        self.assertEqual(
+            len(identity.verse_statuses.search_by_parsed_ref(
+                parse_validated_localized_reference("en", "Psalm 23:1-3"))),
+            3)
+
+    def test_search_by_parsed_ref_chapter(self):
+        identity, account = self.create_account()
+        identity.add_verse_set(VerseSet.objects.get(name="Psalm 23"))
+
+        self.assertEqual(
+            len(identity.verse_statuses.search_by_parsed_ref(
+                parse_validated_localized_reference("en", "Psalm 23"))),
+            6)
+
+    def test_search_by_parsed_ref_combo(self):
+        identity, account = self.create_account()
+        identity.add_verse_choice('Psalm 23:1-2')
+
+        self.assertEqual(
+            len(identity.verse_statuses.search_by_parsed_ref(
+                parse_validated_localized_reference("en", "Psalm 23:1"))),
+            1)
+
+        self.assertEqual(
+            len(identity.verse_statuses.search_by_parsed_ref(
+                parse_validated_localized_reference("en", "Psalm 23:1-2"))),
+            1)
+
+        self.assertEqual(
+            len(identity.verse_statuses.search_by_parsed_ref(
+                parse_validated_localized_reference("en", "Psalm 23:1-3"))),
+            1)
+
+        self.assertEqual(
+            len(identity.verse_statuses.search_by_parsed_ref(
+                parse_unvalidated_localized_reference("en", "Psalm 23:2-3"))),
+            1)
+
+        self.assertEqual(
+            len(identity.verse_statuses.search_by_parsed_ref(
+                parse_unvalidated_localized_reference("en", "Psalm 23:3-4"))),
+            0)
+
+    def test_search_by_parsed_ref_different_language(self):
+        identity, account = self.create_account()
+        identity.add_verse_choice('Psalm 23:1')
+        identity.add_verse_choice('Psalm 23:2')
+
+        self.assertEqual(
+            len(identity.verse_statuses.search_by_parsed_ref(
+                parse_validated_localized_reference("tr", "Mezmur 23:1"))),
+            1)
+
+        self.assertEqual(
+            len(identity.verse_statuses.search_by_parsed_ref(
+                parse_validated_localized_reference("tr", "Mezmur 23"))),
+            2)
 
 
 class VerseUtilsTests(unittest2.TestCase):
