@@ -175,12 +175,26 @@ Now we'll repeat some steps, with changes:
 16. Switch DNS to the new server in the DigitalOcean control panel. Put DNS TTL
     back up to 86400
 
-17. Make sure letsencrypt is working::
-
-      fab install_or_renew_ssl_certificate
-
 
 Done!
 
 Ensure you remove entries from your local /etc/hosts so that you are seeing what
 everyone else sees.
+
+Post-migrate steps:
+
+* Make sure letsencrypt is working::
+
+      fab install_or_renew_ssl_certificate
+
+* Upload the Mercurial VCS server to the new box::
+
+    ssh learnscripture@learnscripture2.digitalocean.com
+    mkdir ~/repos/learnscripture.net
+    hg init ~/repos/learnscripture.net
+
+  On dev box::
+
+    hg push central
+
+ 
