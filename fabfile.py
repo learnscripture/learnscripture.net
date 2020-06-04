@@ -22,8 +22,7 @@ rel = lambda *x: os.path.normpath(join(os.path.abspath(os.path.dirname(__file__)
 
 env.user = 'learnscripture'
 if not env.hosts:
-    # env.hosts = ['learnscripture.net']
-    env.hosts = ['learnscripture2.digitalocean.com']
+    env.hosts = ['learnscripture.net']
 
 env.proj_name = "learnscripture"
 env.proj_app = "learnscripture"  # Python module for project
