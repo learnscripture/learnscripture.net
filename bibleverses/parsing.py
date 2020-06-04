@@ -184,14 +184,6 @@ def dict_map(d):
     return string_from(*d.keys()).map(lambda v: d[v])
 
 
-def optional(parser):
-    """
-    Returns a parser that optionally matches the passed in parser, or returns
-    None if no match.
-    """
-    return parser.times(0, 1).map(lambda v: v[0] if v else None)
-
-
 # Specific parsing components
 
 @memoize_function
@@ -223,12 +215,12 @@ chapter_verse_sep_loose = char_from(":v.").result(":")
 # bible_reference_loose, we create as much as possible at this scope where we
 # can reuse it. We also put `memoize_function` on some functions above.
 
-optional_whitespace = optional(whitespace)
-optional_space = optional(string(" "))
-optional_chapter_verse_sep = optional(chapter_verse_sep)
-optional_verse_range_sep = optional(verse_range_sep)
-optional_chapter_verse_sep_loose = optional(chapter_verse_sep_loose)
-optional_chapter = optional(chapter)
+optional_whitespace = whitespace.optional()
+optional_space = string(" ").optional()
+optional_chapter_verse_sep = chapter_verse_sep.optional()
+optional_verse_range_sep = verse_range_sep.optional()
+optional_chapter_verse_sep_loose = chapter_verse_sep_loose.optional()
+optional_chapter = chapter.optional()
 verse_or_chapter = verse | chapter
 
 
