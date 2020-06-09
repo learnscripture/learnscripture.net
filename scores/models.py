@@ -242,11 +242,12 @@ def get_verses_started_counts(identity_ids, started_since=None):
     from sqlalchemy.sql import select, and_
     from sqlalchemy import func
 
-    # The important point about this complex query is that
-    # it groups 'duplicate' UserVerseStatus rows i.e. ones
-    # for the same localized_reference and text.
-
-    # It returns results for all identities, because this is used sometimes.
+    # The important points about this complex query are:
+    #
+    # * grouping 'duplicate' UserVerseStatus rows i.e. ones for the same
+    #   localized_reference and text.
+    # * use of `internal_reference_list` to count combo/merged verse
+    #   for their full value.
 
     if len(identity_ids) == 0:
         return {}
@@ -260,7 +261,7 @@ def get_verses_started_counts(identity_ids, started_since=None):
                         if started_since is not None else []))
                  )
           .group_by(uvs.c.for_identity_id,
-                    uvs.c.localized_reference,
+                    func.unnest(uvs.c.internal_reference_list),
                     uvs.c.version_id)
           ).alias()
     q2 = (select([q1.c.for_identity_id, func.count()])
@@ -285,7 +286,7 @@ def get_verses_started_per_day(identity_id):
                  from_obj=bibleverses_userversestatus
                  )
           .group_by(day_col,
-                    bibleverses_userversestatus.c.localized_reference,
+                    func.unnest(bibleverses_userversestatus.c.internal_reference_list),
                     bibleverses_userversestatus.c.version_id)
           ).alias()
 
@@ -321,36 +322,44 @@ def get_verses_tested_per_day(account_id):
     return _add_zeros(vals)
 
 
-def get_verses_finished_count(identity_id, account_id, finished_since=None):
+def get_verses_finished_count(identity_id, finished_since=None):
     from accounts.memorymodel import MM
     from bibleverses.models import MemoryStage
-    from learnscripture.utils.sqla import bibleverses_userversestatus, default_engine, scores_actionlog
+    from learnscripture.utils.sqla import accounts_identity, bibleverses_userversestatus, default_engine, scores_actionlog
     from sqlalchemy.sql import select, and_
     from sqlalchemy import func
 
-    if finished_since is None:
-        uvs = bibleverses_userversestatus
-        q1 = (select([uvs.c.localized_reference, uvs.c.version_id],
-                     and_(uvs.c.ignored == False,  # noqa
-                          uvs.c.memory_stage >= MemoryStage.TESTED,
-                          uvs.c.strength >= MM.LEARNT,
-                          uvs.c.for_identity_id == identity_id,
-                          ),
-                     from_obj=uvs
-                     )
-              .group_by(uvs.c.localized_reference,
-                        uvs.c.version_id)
-              ).alias()
-        q2 = (select([func.count()],
-                     from_obj=q1))
-
-        return default_engine.execute(q2).fetchall()[0][0]
-    else:
-        # Using ActionLog is less accurate, but the only reasonably accurate way
-        # we have to track the verses fully learnt since in a given time period,
-        # as UserVerseStatus doesn't have that info.
-        q = (select([func.count()],
-                    and_(scores_actionlog.c.account_id == account_id,
-                         scores_actionlog.c.reason == ScoreReason.VERSE_LEARNT,
-                         scores_actionlog.c.created > finished_since)))
-        return default_engine.execute(q).fetchall()[0][0]
+    uvs = bibleverses_userversestatus
+    from_table = uvs
+    filters = and_(
+        uvs.c.ignored == False,  # noqa
+        uvs.c.memory_stage >= MemoryStage.TESTED,
+        uvs.c.strength >= MM.LEARNT,
+        uvs.c.for_identity_id == identity_id,
+    )
+    if finished_since is not None:
+        # Don't have needed info in UVS (should really fix this), have to join
+        # to scores_actionlog
+        from_table = from_table.join(
+            accounts_identity,
+            uvs.c.for_identity_id == accounts_identity.c.id
+        ).join(
+            scores_actionlog,
+            and_(scores_actionlog.c.account_id == accounts_identity.c.account_id,
+                 scores_actionlog.c.localized_reference == uvs.c.localized_reference)
+        )
+        filters = and_(
+            filters,
+            scores_actionlog.c.reason == ScoreReason.VERSE_LEARNT,
+            scores_actionlog.c.created > finished_since
+        )
+    q1 = (select([func.unnest(uvs.c.internal_reference_list), uvs.c.version_id],
+                 filters,
+                 from_obj=from_table
+                 )
+          .group_by(func.unnest(uvs.c.internal_reference_list),
+                    uvs.c.version_id)
+          ).alias()
+    q2 = (select([func.count()],
+                 from_obj=q1))
+    return default_engine.execute(q2).fetchall()[0][0]

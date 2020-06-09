@@ -254,6 +254,7 @@ class ActionCompleteHandler(ApiView):
 
         # TODO: ideally store StageComplete
 
+        # TODO: combine record_verse_action and award_action_points
         action_change = identity.record_verse_action(uvs.localized_reference, uvs.version.slug,
                                                      stage, accuracy)
 

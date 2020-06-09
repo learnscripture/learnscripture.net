@@ -818,7 +818,7 @@ class Identity(models.Model):
 
     def verses_finished_count(self, finished_since=None):
         from scores.models import get_verses_finished_count
-        return get_verses_finished_count(self.id, self.account_id, finished_since=finished_since)
+        return get_verses_finished_count(self.id, finished_since=finished_since)
 
     def bible_verse_statuses_for_reviewing(self):
         """
