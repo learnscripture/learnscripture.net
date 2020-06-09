@@ -147,14 +147,8 @@ class CatechismsMixin(Fixtures):
 
 class AccountTestMixin(TextVersionsMixin):
 
-    def create_identity(self, **kwargs):
-        return create_identity(**kwargs)
-
-    def create_account(self, **kwargs):
-        """
-        Creates an account, returning (identity, account) tuple
-        """
-        return create_account(**kwargs)
+    create_identity = staticmethod(create_identity)
+    create_account = staticmethod(create_account)
 
     def create_account_interactive(self,
                                    email="test2@test.com",
