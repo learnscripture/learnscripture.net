@@ -5,7 +5,7 @@ from django.urls import reverse
 
 from accounts.memorymodel import MM
 from accounts.models import Account, Identity
-from bibleverses.models import StageType, VerseSet, VerseSetType, Verse, MemoryStage, TextVersion
+from bibleverses.models import MemoryStage, StageType, TextVersion, VerseSet, VerseSetType
 from groups.models import Group
 from learnscripture.tests.base import TestBase
 from scores.models import ScoreReason, get_verses_finished_count, get_verses_started_counts, get_verses_started_per_day
@@ -163,7 +163,6 @@ class VerseCountTests(BibleVersesMixin, CatechismsMixin, AccountTestMixin, TestB
                                      accuracy=1.0)
 
         self._do_assert_stats(identity, 2)
-
 
     def test_verse_stats_combos_2(self):
         identity, account = self.create_account()
