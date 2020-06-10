@@ -8,7 +8,6 @@ def forwards(app_configs, schema_editor):
     from learnscripture.utils.iterators import chunked_queryset
     UserVerseStatus = app_configs.get_model('bibleverses', 'UserVerseStatus')
 
-    # Copied logic from Identity.create_verse_status
     uvs_query = (UserVerseStatus
                  .objects
                  .filter(version__text_type=TextType.CATECHISM)
