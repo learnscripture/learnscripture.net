@@ -1,7 +1,11 @@
+# -*- coding: utf-8 -*-
+from datetime import timedelta
+
 from django.urls import reverse
 
+from accounts.memorymodel import MM
 from accounts.models import Account, Identity
-from bibleverses.models import StageType, VerseSet, VerseSetType, TextVersion
+from bibleverses.models import StageType, VerseSet, VerseSetType, Verse, MemoryStage, TextVersion
 from groups.models import Group
 from learnscripture.tests.base import TestBase
 from scores.models import ScoreReason, get_verses_finished_count, get_verses_started_counts, get_verses_started_per_day
@@ -73,44 +77,107 @@ class VerseCountTests(BibleVersesMixin, CatechismsMixin, AccountTestMixin, TestB
 
         return vs1, vs2
 
-    def test_verses_started_dedupe(self):
+    def test_verse_stats_dedupe(self):
         """
         Test that counts for verses started deduplicate verses that have the
         same localized_reference.
         """
-        i, account = self.create_account()
-        version = i.default_bible_version
+        identity, account = self.create_account()
         vs1, vs2 = self._create_overlapping_verse_sets(account)
 
-        i.add_verse_set(vs1)
-        i.add_verse_set(vs2)
+        identity.add_verse_set(vs1)
+        identity.add_verse_set(vs2)
 
-        i.record_verse_action("Psalm 23:1", version.slug, StageType.TEST,
-                              accuracy=1.0)
-        dt = i.verse_statuses.filter(localized_reference="Psalm 23:1")[0].last_tested.date()
-
-        self.assertEqual(get_verses_started_counts([i.id])[i.id], 1)
-
-        self.assertEqual(get_verses_started_per_day(i.id),
-                         [(dt, 1)])
-
-    def test_verses_finished_dedupe(self):
-        """
-        Test that counts for verses finished deduplicate verses that have the
-        same localized_reference.
-        """
-        i, account = self.create_account()
-        version = i.default_bible_version
-        vs1, vs2 = self._create_overlapping_verse_sets(account)
-
-        i.add_verse_set(vs1)
-        i.add_verse_set(vs2)
-
-        i.record_verse_action("Psalm 23:1", version.slug, StageType.TEST,
-                              accuracy=1.0)
         # Sanity check the test
-        self.assertEqual(i.verse_statuses.filter(localized_reference="Psalm 23:1").count(),
+        self.assertEqual(identity.verse_statuses.filter(localized_reference="Psalm 23:1").count(),
                          2)
-        i.verse_statuses.filter(localized_reference="Psalm 23:1").update(strength=0.9999)
 
-        self.assertEqual(get_verses_finished_count(i.id, account.id), 1)
+        self._do_assert_stats(identity, 1, refs=['Psalm 23:1'])
+
+    def _do_assert_stats(self, identity: Identity, count, refs=None):
+        if refs is None:
+            ref_pairs = [(r.localized_reference, r.version) for r in identity.verse_statuses.all()]
+            refs = [r for r, v in ref_pairs]
+        else:
+            ref_pairs = [(r.localized_reference, r.version)
+                         for r in identity.verse_statuses.filter(localized_reference__in=refs)]
+
+        for ref, version in ref_pairs:
+            identity.record_verse_action(ref, version.slug, StageType.TEST,
+                                         accuracy=1.0)
+
+        # Started
+        self.assertEqual(get_verses_started_counts([identity.id])[identity.id], count)
+
+        # Started per day
+        dt = identity.verse_statuses.filter(localized_reference__in=refs).first().last_tested.date()
+        self.assertEqual(get_verses_started_per_day(identity.id),
+                         [(dt, count)])
+
+        # Move on enough so that next hit gets past learnt threshold.
+        identity.verse_statuses.update(strength=MM.LEARNT - 0.01)
+        self.move_clock_on(timedelta(days=400))
+
+        for ref, version in ref_pairs:
+            action_change = identity.record_verse_action(ref, version.slug, StageType.TEST, accuracy=1)
+            identity.award_action_points(ref,
+                                         version.language_code,
+                                         version.get_text_by_localized_reference(ref),
+                                         MemoryStage.TESTED,
+                                         action_change,
+                                         StageType.TEST,
+                                         1)
+
+        # Finished
+        self.assertEqual(get_verses_finished_count(identity.id), count)
+
+        # Finished since
+        last_tested = identity.verse_statuses.filter(localized_reference__in=refs).first().last_tested
+        self.assertEqual(get_verses_finished_count(
+            identity.id,
+            finished_since=last_tested + timedelta(seconds=10)
+        ), 0)
+
+        self.assertEqual(get_verses_finished_count(
+            identity.id,
+            finished_since=last_tested - timedelta(seconds=10)
+        ), count)
+
+    def test_verse_stats_merged(self):
+        identity, account = self.create_account(version_slug='TCL02')
+        version = identity.default_bible_version
+        # Merged verse. We count as multiple for parity with
+        # translations that don't have merged verses.
+        identity.add_verse_choice('Romalılar 3:25-26', version)
+        identity.record_verse_action('Romalılar 3:25-26', version.slug, StageType.TEST,
+                                     accuracy=1.0)
+
+        self._do_assert_stats(identity, 2)
+
+    def test_verse_stats_combos(self):
+        identity, account = self.create_account()
+        version = identity.default_bible_version
+        # Combo verse.
+        identity.add_verse_choice('Psalm 23:1-2', version)
+        identity.record_verse_action('Psalm 23:1-2', version.slug, StageType.TEST,
+                                     accuracy=1.0)
+
+        self._do_assert_stats(identity, 2)
+
+
+    def test_verse_stats_combos_2(self):
+        identity, account = self.create_account()
+        version = identity.default_bible_version
+        # Combo verse.
+        identity.add_verse_choice('Psalm 23:1-2', version)
+        identity.record_verse_action('Psalm 23:1-2', version.slug, StageType.TEST,
+                                     accuracy=1.0)
+        # Adding the same ones individually doesn't change anything
+        identity.add_verse_choice('Psalm 23:1', version)
+        identity.add_verse_choice('Psalm 23:2', version)
+        identity.record_verse_action('Psalm 23:1', version.slug, StageType.TEST,
+                                     accuracy=1.0)
+        identity.record_verse_action('Psalm 23:2', version.slug, StageType.TEST,
+                                     accuracy=1.0)
+
+        self._do_assert_stats(identity, 2)
