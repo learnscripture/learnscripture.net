@@ -56,9 +56,7 @@ class VerseCountTests(BibleVersesMixin, CatechismsMixin, AccountTestMixin, TestB
         identity, account = self.create_account()
         c = TextVersion.objects.get(slug='WSC')
         identity.add_catechism(c)
-        identity.record_verse_action('Q1', 'WSC', StageType.TEST, 1.0)
-        identity.record_verse_action('Q2', 'WSC', StageType.TEST, 1.0)
-        self.assertEqual(get_verses_started_counts([identity.id])[identity.id], 2)
+        self._do_assert_stats(identity, 2, refs=['Q1', 'Q2'])
 
     def _create_overlapping_verse_sets(self, account):
         vs1 = VerseSet.objects.create(name="Psalm 23:1-3",
@@ -114,15 +112,17 @@ class VerseCountTests(BibleVersesMixin, CatechismsMixin, AccountTestMixin, TestB
         self.assertEqual(get_verses_started_per_day(identity.id),
                          [(dt, count)])
 
-        # Move on enough so that next hit gets past learnt threshold.
+        # Move time on enough so that next hit gets past learnt threshold.
         identity.verse_statuses.update(strength=MM.LEARNT - 0.01)
         self.move_clock_on(timedelta(days=400))
 
         for ref, version in ref_pairs:
+            # Simulate enough to get to 'learnt' state.
             action_change = identity.record_verse_action(ref, version.slug, StageType.TEST, accuracy=1)
+            uvs = identity.verse_statuses.filter(localized_reference=ref, version=version).first()
             identity.award_action_points(ref,
                                          version.language_code,
-                                         version.get_text_by_localized_reference(ref),
+                                         uvs.scoring_text,
                                          MemoryStage.TESTED,
                                          action_change,
                                          StageType.TEST,

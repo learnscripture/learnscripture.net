@@ -548,6 +548,7 @@ class Identity(models.Model):
             UserVerseStatus(
                 for_identity=self,
                 localized_reference=qapair.localized_reference,
+                internal_reference_list=[qapair.localized_reference],
                 text_order=qapair.order,
                 version=catechism,
                 added=timezone.now()
