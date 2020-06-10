@@ -1,12 +1,12 @@
 from django.urls import reverse
 
 from accounts.models import Account, Identity
-from bibleverses.models import StageType, VerseSet, VerseSetType
+from bibleverses.models import StageType, VerseSet, VerseSetType, TextVersion
 from groups.models import Group
 from learnscripture.tests.base import TestBase
 from scores.models import ScoreReason, get_verses_finished_count, get_verses_started_counts, get_verses_started_per_day
 
-from .base import AccountTestMixin, BibleVersesMixin
+from .base import AccountTestMixin, BibleVersesMixin, CatechismsMixin
 
 
 class LeaderboardTests(TestBase):
@@ -46,7 +46,15 @@ class LeaderboardTests(TestBase):
         self.assertNotContains(resp, self.a2.username)
 
 
-class VerseCountTests(BibleVersesMixin, AccountTestMixin, TestBase):
+class VerseCountTests(BibleVersesMixin, CatechismsMixin, AccountTestMixin, TestBase):
+
+    def test_catechisms(self):
+        identity, account = self.create_account()
+        c = TextVersion.objects.get(slug='WSC')
+        identity.add_catechism(c)
+        identity.record_verse_action('Q1', 'WSC', StageType.TEST, 1.0)
+        identity.record_verse_action('Q2', 'WSC', StageType.TEST, 1.0)
+        self.assertEqual(get_verses_started_counts([identity.id])[identity.id], 2)
 
     def _create_overlapping_verse_sets(self, account):
         vs1 = VerseSet.objects.create(name="Psalm 23:1-3",
