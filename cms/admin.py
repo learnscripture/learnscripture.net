@@ -62,7 +62,7 @@ class PageAdmin(MPTTModelAdmin):
     inlines = [PageTitleInline, PageContentItemInline]
     list_display = ('url', 'view_on_site_link', 'redirect_page', 'is_public', 'action_links')
     list_per_page = 1000
-    search_fields = ('url', 'redirect_page__title')
+    search_fields = ('url', 'redirect_page__titles__title')
 
     def view_on_site_link(self, page):
         absolute_url = page.get_absolute_url()
