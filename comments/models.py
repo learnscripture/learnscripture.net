@@ -29,7 +29,7 @@ class Comment(models.Model):
         return format_comment_message(self.message)
 
     def __str__(self):
-        return "%s: %s" % (self.id, self.message)
+        return f"{self.id}: {self.message}"
 
     def get_absolute_url(self):
         if self.event is not None:

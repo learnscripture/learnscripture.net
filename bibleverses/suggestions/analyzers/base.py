@@ -31,4 +31,4 @@ class Analyzer(object):
         and for using by final strategies.
         """
         # This could be a simple as a dictionary
-        raise NotImplementedError("{0} needs to implement 'analyze' method".format(self.__class__))
+        raise NotImplementedError(f"{self.__class__} needs to implement 'analyze' method")

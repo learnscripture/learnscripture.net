@@ -1239,7 +1239,7 @@ def natural_list(l):
         return ''
     if len(l) == 1:
         return l[0]
-    return "%s and %s" % (", ".join(l[0:-1]), l[-1])
+    return f"{', '.join(l[0:-1])} and {l[-1]}"
 
 
 def donation_paypal_dict(account, url_start):
@@ -1248,9 +1248,9 @@ def donation_paypal_dict(account, url_start):
         "item_name": t('donations-paypal-title'),
         "invoice": "account-%s-%s" % (account.id,
                                       timezone.now()),  # We don't need this, but must be unique
-        "notify_url": "%s%s" % (url_start, reverse('paypal-ipn')),
-        "return_url": "%s%s" % (url_start, reverse('pay_done')),
-        "cancel_return": "%s%s" % (url_start, reverse('pay_cancelled')),
+        "notify_url": f"{url_start}{reverse('paypal-ipn')}",
+        "return_url": f"{url_start}{reverse('pay_done')}",
+        "cancel_return": f"{url_start}{reverse('pay_cancelled')}",
         "custom": sign_payment_info(dict(account=account.id)),
         "currency_code": "GBP",
         "no_note": "1",
@@ -1268,7 +1268,7 @@ def paypal_url_start_for_request(request):
         # but needs Site object updated. Stop here, or payment testing won't work.
         assert domain.startswith('staging.')
     protocol = 'https' if request.is_secure() else 'http'
-    return "%s://%s" % (protocol, domain)
+    return f"{protocol}://{domain}"
 
 
 def donate(request):
@@ -1303,7 +1303,7 @@ def pay_cancelled(request):
 def referral_program(request):
     account = account_from_request(request)
     if account is not None:
-        referral_link = account.make_referral_link('https://%s/' % Site.objects.get_current().domain)
+        referral_link = account.make_referral_link(f'https://{Site.objects.get_current().domain}/')
     else:
         referral_link = None
 
@@ -1746,7 +1746,7 @@ def set_language(request):
 def celery_debug(request):
     message = request.GET.get('message', '[no message]')
     learnscripture.tasks.message.apply_async([message])
-    return HttpResponse("Task queued with message: {0}".format(message))
+    return HttpResponse(f"Task queued with message: {message}")
 
 
 def debug(request):

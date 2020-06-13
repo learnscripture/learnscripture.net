@@ -29,7 +29,7 @@ class Command(BaseCommand):
         )
         format = 'json'
         for version_slug in options['version_slug']:
-            print("Loading {0}".format(version_slug))
+            print(f"Loading {version_slug}")
             with transaction.atomic():
                 text_file = TEXTVERSION_TEMPLATE.format(version_slug)
                 with gzip.open(os.path.join(input_dir, text_file), "rb") as f1:
@@ -45,14 +45,14 @@ class Command(BaseCommand):
                 elif version.text_type == TextType.BIBLE:
                     items_file = BIBLE_ITEM_TEMPLATE.format(version_slug)
                 else:
-                    raise AssertionError("Unnown text type {!r}".format(version.text_type))
+                    raise AssertionError(f"Unnown text type {version.text_type!r}")
 
                 with gzip.open(os.path.join(input_dir, items_file), "rb") as f2:
                     version.verse_set.all().delete()
                     for i, obj in enumerate(serializers.deserialize(format, f2, **common_options)):
                         obj.save()
                         if (i + 1) % 100 == 0:
-                            print("Item {0} loaded.".format(i + 1))
+                            print(f"Item {i + 1} loaded.")
 
                 if version.text_type == TextType.BIBLE:
                     print("Generating search index...")

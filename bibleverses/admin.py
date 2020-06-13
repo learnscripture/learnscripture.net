@@ -18,7 +18,7 @@ class VerseChoiceAdminForm(forms.ModelForm):
         try:
             parse_validated_internal_reference(ref)
         except InvalidVerseReference:
-            raise forms.ValidationError("'%s' is not a valid internal verse reference." % ref)
+            raise forms.ValidationError(f"'{ref}' is not a valid internal verse reference.")
         return ref
 
     class Meta:

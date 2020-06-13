@@ -30,7 +30,7 @@ def make_choices(type_name, choice_list):
         @classmethod
         def check_value(cls, value):
             if value not in cls.values:
-                raise ValueError("{0} is not a recognised {1}".format(value, type_name))
+                raise ValueError(f"{value} is not a recognised {type_name}")
             return value
 
     Choices.__name__ = type_name

@@ -64,7 +64,7 @@ class FileList(CmsListCreateAPIView):
 
         sort_order = self.request.query_params.get('sortorder', 'asc')
 
-        qs = qs.order_by('%s%s' % ('-' if sort_order != 'asc' else '', order_by))
+        qs = qs.order_by(f"{'-' if sort_order != 'asc' else ''}{order_by}")
 
         return qs
 
@@ -81,16 +81,12 @@ class FileDetail(generics.RetrieveUpdateDestroyAPIView):
         delete_response = ''
 
         if not request.user.has_perm('cms.delete_image'):
-            delete_response = "You don't have permission to delete %(file_name)s." % {
-                'file_name': file_name
-            }
+            delete_response = f"You don't have permission to delete {file_name}."
             return Response(delete_response, status=403)
 
         try:
             obj.delete()
-            delete_response = "Successfully deleted %(file_name)s." % {
-                'file_name': file_name
-            }
+            delete_response = f"Successfully deleted {file_name}."
         except ProtectedError:
             delete_response = "%(file_name)s is not deleted, because that would require deleting protected related objects." % {
                 'file_name': file_name
@@ -128,7 +124,7 @@ class ImageList(CmsListCreateAPIView):
 
         sort_order = self.request.query_params.get('sortorder', 'asc')
 
-        qs = qs.order_by('%s%s' % ('-' if sort_order != 'asc' else '', order_by))
+        qs = qs.order_by(f"{'-' if sort_order != 'asc' else ''}{order_by}")
 
         return qs
 
@@ -145,16 +141,12 @@ class ImageDetail(generics.RetrieveUpdateDestroyAPIView):
         delete_response = ''
 
         if not request.user.has_perm('cms.delete_image'):
-            delete_response = "You don't have permission to delete %(file_name)s." % {
-                'file_name': file_name
-            }
+            delete_response = f"You don't have permission to delete {file_name}."
             return Response(delete_response, status=403)
 
         try:
             obj.delete()
-            delete_response = "Successfully deleted %(file_name)s." % {
-                'file_name': file_name
-            }
+            delete_response = f"Successfully deleted {file_name}."
         except ProtectedError:
             delete_response = "%(file_name)s is not deleted, because that would require deleting protected related objects." % {
                 'file_name': file_name

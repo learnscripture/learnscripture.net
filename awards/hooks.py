@@ -23,10 +23,7 @@ def notify_about_new_award(sender, **kwargs):
 
 
 def new_award_msg_html(award, account, points=None):
-    img_html = '<img src="{0}{1}">'.format(
-        settings.STATIC_URL,
-        award.image_small(),
-    )
+    img_html = f'<img src="{settings.STATIC_URL}{award.image_small()}">'
     award_url = reverse('user_stats', args=(account.username,))
     award_link = link(award_url, award.short_description())
 
@@ -37,7 +34,7 @@ def new_award_msg_html(award, account, points=None):
 
     if points is not None and points > 0:
         points_msg = t('awards-points-bonus', dict(points=points))
-        msg = format_html("{0} {1}".format(msg, points_msg))
+        msg = format_html(f"{msg} {points_msg}")
 
     # Facebook: this notice could be displayed on any page, and we want the
     # 'redirect_uri' parameter to take them back to where they were.  So we
@@ -71,7 +68,7 @@ def new_award_msg_html(award, account, points=None):
         caption,
         tell_people_link
     )
-    return format_html('{0} {1} {2}'.format(img_html, msg, tell_people_wrapper))
+    return format_html(f'{img_html} {msg} {tell_people_wrapper}')
 
 
 @receiver(verse_set_chosen)

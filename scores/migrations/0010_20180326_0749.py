@@ -25,7 +25,7 @@ def forwards(apps, schema_editor):
                        if a.award_detail.points() == log.points and
                        a not in used_awards]
         if len(candidates2) == 0:
-            print("Log {0}: Couldn't find award".format(log.id))
+            print(f"Log {log.id}: Couldn't find award")
             failed.add(log)
             continue
         elif len(candidates2) > 1:
@@ -49,16 +49,16 @@ def forwards(apps, schema_editor):
                        a not in used_awards]
         if len(candidates2) == 1:
             award = candidates2[0]
-            print("Found match for ActionLog {0} {1}".format(log, log.__dict__))
-            print("Award: {0} {1}".format(award.id, award.__dict__))
+            print(f"Found match for ActionLog {log} {log.__dict__}")
+            print(f"Award: {award.id} {award.__dict__}")
             log.award = award
             used_awards.add(award)
             log.save()
             corrected += 1
             failed.remove(log)
 
-    print("Corrected: {0}".format(corrected))
-    print("Failed: {0}".format(len(failed)))
+    print(f"Corrected: {corrected}")
+    print(f"Failed: {len(failed)}")
 
     # We've investigated these ones and it's OK to delete:
     deletable = [261578, 259923]

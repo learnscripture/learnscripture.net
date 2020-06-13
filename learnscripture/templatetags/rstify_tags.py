@@ -31,11 +31,11 @@ class TextutilsHTMLTranslator(html4css1.HTMLTranslator):
         self.body.append('</p>\n')
 
     def visit_label(self, node):
-        self.body.append(self.starttag(node, 'strong', '[%s' % self.context.pop(),
+        self.body.append(self.starttag(node, 'strong', f'[{self.context.pop()}',
                                        CLASS='label'))
 
     def depart_label(self, node):
-        self.body.append('</a>]</strong> %s' % self.context.pop())
+        self.body.append(f'</a>]</strong> {self.context.pop()}')
 
 
 def rstify(text,

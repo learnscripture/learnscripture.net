@@ -46,9 +46,7 @@ def cache_results_with_pickle(filename_suffix):
                 level = ""
             fname = os.path.join(settings.DATA_ROOT,
                                  "wordsuggestions",
-                                 "%s%s.%s.data" % (filename_key,
-                                                   level,
-                                                   filename_suffix))
+                                 f"{filename_key}{level}.{filename_suffix}.data")
             if os.path.exists(fname):
                 logger.info("Loading %s", fname)
                 new_data = pickle.load(open(fname, "rb"))

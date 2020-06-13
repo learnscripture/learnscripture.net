@@ -56,7 +56,7 @@ def create_route(description, expression, actions, priority=None):
 def update_route(id, description, expression, actions, priority=None):
     if priority is None:
         priority = 0
-    return api_request('/routes/{0}'.format(id),
+    return api_request(f'/routes/{id}',
                        method='put',
                        data=dict(description=description,
                                  expression=expression,
@@ -65,12 +65,12 @@ def update_route(id, description, expression, actions, priority=None):
 
 
 def update_webhook(name, url):
-    return api_request('/domains/{0}/webhooks/{1}'.format(settings.MAILGUN_DOMAIN, name),
+    return api_request(f'/domains/{settings.MAILGUN_DOMAIN}/webhooks/{name}',
                        method='put',
                        data=dict(url=url))
 
 
 def create_webhook(name, url):
-    return api_request('/domains/{0}/webhooks'.format(settings.MAILGUN_DOMAIN),
+    return api_request(f'/domains/{settings.MAILGUN_DOMAIN}/webhooks',
                        data=dict(id=name,
                                  url=url))

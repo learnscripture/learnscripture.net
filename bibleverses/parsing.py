@@ -48,14 +48,14 @@ class ParsedReference(object):
         # Reverse of bible_reference_strict
         retval = self.book_name
         if self.start_chapter is not None:
-            retval += " {0}".format(self.start_chapter)
+            retval += f" {self.start_chapter}"
             if self.start_verse is not None:
-                retval += ":{0}".format(self.start_verse)
+                retval += f":{self.start_verse}"
                 if self.end_chapter != self.start_chapter:
                     assert self.end_verse is not None
-                    retval += "-{0}:{1}".format(self.end_chapter, self.end_verse)
+                    retval += f"-{self.end_chapter}:{self.end_verse}"
                 elif self.end_verse != self.start_verse:
-                    retval += "-{0}".format(self.end_verse)
+                    retval += f"-{self.end_verse}"
         return retval
 
     def _clone(self, **kwargs):
@@ -200,7 +200,7 @@ def book_loose(language_code):
     Returns a parser for a Bible book, loose mode.
     """
     return (dict_map(get_bible_book_abbreviation_map(language_code))
-            .desc("Expected Bible book in {0}".format(language_code)))
+            .desc(f"Expected Bible book in {language_code}"))
 
 
 number = regex(r'[0-9]+').map(int)
@@ -330,9 +330,7 @@ def parse_validated_localized_reference(language_code, localized_reference):
         return bible_reference_parser_for_lang(language_code, True).parse(localized_reference)
     except ParseError as e:
         raise InvalidVerseReference(
-            "Could not parse '{0}' as bible reference - {1}".format(
-                localized_reference,
-                str(e)))
+            f"Could not parse '{localized_reference}' as bible reference - {str(e)}")
 
 
 def parse_validated_internal_reference(internal_reference):
@@ -418,5 +416,4 @@ def parse_break_list(breaks):
                 .sep_by(string(","))).parse(breaks)
 
     except ParseError:
-        raise ValueError("'{0}' is not a valid list of internal Bible references"
-                         .format(breaks))
+        raise ValueError(f"'{breaks}' is not a valid list of internal Bible references")

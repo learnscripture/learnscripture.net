@@ -35,7 +35,7 @@ def has_preferences(request):
 
 
 def redirect_via_prefs(request):
-    return HttpResponseRedirect(reverse('preferences') + "?next=%s" % urlquote(request.get_full_path()))
+    return HttpResponseRedirect(reverse('preferences') + f"?next={urlquote(request.get_full_path())}")
 
 
 def require_preferences(view_func):

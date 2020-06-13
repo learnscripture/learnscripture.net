@@ -40,7 +40,7 @@ class Content(models.Model):
     content_html = CmsHTMLField(verbose_name='Content')
 
     def __str__(self):
-        return '{0}: {1}'.format(self.language_code.upper(), str(self.content_item))
+        return f'{self.language_code.upper()}: {str(self.content_item)}'
 
     class Meta:
         unique_together = [
@@ -122,7 +122,7 @@ class PageTitle(models.Model):
     title = models.CharField(max_length=255)
 
     def __str__(self):
-        return '{0}: {1}'.format(self.language_code.upper(), self.title)
+        return f'{self.language_code.upper()}: {self.title}'
 
     class Meta:
         unique_together = [

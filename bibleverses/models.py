@@ -108,7 +108,7 @@ class TextVersion(models.Model):
         ordering = ['short_name']
 
     def __str__(self):
-        return "%s (%s)" % (self.short_name, self.full_name)
+        return f"{self.short_name} ({self.full_name})"
 
     def natural_key(self):
         return (self.slug,)
@@ -374,7 +374,7 @@ class Verse(models.Model):
         if self.last_verse_number == self.first_verse_number:
             return str(self.first_verse_number)
         else:
-            return "{0}-{1}".format(self.first_verse_number, self.last_verse_number)
+            return f"{self.first_verse_number}-{self.last_verse_number}"
 
     @property
     def book_name(self):
@@ -384,10 +384,10 @@ class Verse(models.Model):
         return (self.version.slug, self.localized_reference)
 
     def __str__(self):
-        return "%s (%s)" % (self.localized_reference, self.version.short_name)
+        return f"{self.localized_reference} ({self.version.short_name})"
 
     def __repr__(self):
-        return '<Verse %s>' % self
+        return f'<Verse {self}>'
 
     class Meta:
         unique_together = [
@@ -484,7 +484,7 @@ class WordSuggestionData(models.Model):
         ]
 
     def __repr__(self):
-        return "<WordSuggestionData %s %s>" % (self.version_slug, self.localized_reference)
+        return f"<WordSuggestionData {self.version_slug} {self.localized_reference}>"
 
 
 class QAPairManager(models.Manager):
@@ -839,7 +839,7 @@ class VerseChoice(models.Model):
         return self.internal_reference
 
     def __repr__(self):
-        return '<VerseChoice %s>' % self
+        return f'<VerseChoice {self}>'
 
     def get_localized_reference(self, language_code):
         return localize_internal_reference(language_code, self.internal_reference)
@@ -1068,10 +1068,10 @@ class UserVerseStatus(models.Model):
         return self.version.get_suggestions_by_localized_reference(self.localized_reference)
 
     def __str__(self):
-        return "%s, %s" % (self.localized_reference, self.version.slug)
+        return f"{self.localized_reference}, {self.version.slug}"
 
     def __repr__(self):
-        return '<UserVerseStatus %s>' % self
+        return f'<UserVerseStatus {self}>'
 
     class Meta:
         unique_together = [('for_identity', 'verse_set', 'localized_reference', 'version')]
@@ -1161,14 +1161,14 @@ def fetch_parsed_reference(version, parsed_ref, max_length=MAX_VERSE_QUERY_SIZE)
         try:
             verse_start = [v for v in vs if v.localized_reference == ref_start][0]
         except IndexError:
-            raise InvalidVerseReference("Can't find  '%s'" % ref_start)
+            raise InvalidVerseReference(f"Can't find  '{ref_start}'")
         try:
             verse_end = [v for v in vs if v.localized_reference == ref_end][0]
         except IndexError:
-            raise InvalidVerseReference("Can't find  '%s'" % ref_end)
+            raise InvalidVerseReference(f"Can't find  '{ref_end}'")
 
         if verse_end.bible_verse_number < verse_start.bible_verse_number:
-            raise InvalidVerseReference("%s and %s are not in ascending order." % (ref_start, ref_end))
+            raise InvalidVerseReference(f"{ref_start} and {ref_end} are not in ascending order.")
 
         items = (version.verse_set
                  .filter(bible_verse_number__gte=verse_start.bible_verse_number,

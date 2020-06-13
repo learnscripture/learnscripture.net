@@ -229,7 +229,7 @@ class PasswordResetTestsBase:
 
         for attr, x, y in zip(fields, urlparse(url), urlparse(expected)):
             if x and y and x != y:
-                self.fail("%r != %r (%s doesn't match)" % (url, expected, attr))
+                self.fail(f"{url!r} != {expected!r} ({attr} doesn't match)")
 
     def test_email_not_found(self):
         # If the provided email is not registered, don't raise any error but

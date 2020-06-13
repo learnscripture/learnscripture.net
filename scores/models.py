@@ -79,7 +79,7 @@ class ActionLog(models.Model):
         ordering = ('-created',)
 
     def __str__(self):
-        return "<ActionLog {0}>".format(self.id)
+        return f"<ActionLog {self.id}>"
 
     def __repr__(self):
         return "<ActionLog account=%s points=%s reason=%s localized_reference=%s award=%s created=%s>" % (
@@ -93,7 +93,7 @@ class TotalScore(models.Model):
     visible = models.BooleanField(default=True)
 
     def __str__(self):
-        return "<TotalScore {0}>".format(self.points)
+        return f"<TotalScore {self.points}>"
 
 
 def active_user_query(q, hellbanned_mode):

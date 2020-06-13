@@ -33,7 +33,7 @@ class Payment(models.Model):
         base_manager_name = 'objects'
 
     def __str__(self):
-        return "Payment: %s from %s" % (self.amount, self.account)
+        return f"Payment: {self.amount} from {self.account}"
 
 
 class DonationDriveManager(models.Manager):

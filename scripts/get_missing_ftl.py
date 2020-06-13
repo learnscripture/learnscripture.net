@@ -38,7 +38,7 @@ def main(language):
     files = data['details'][directory]
     output = []
     for filename, problems in sorted(files.items()):
-        output.append("\n### File: {}\n".format(filename))
+        output.append(f"\n### File: {filename}\n")
         missing = set()
         for item in problems:
             if 'missingEntity' in item:

@@ -88,7 +88,7 @@ class AnalysisStorage(object):
     def _serializer_for_analyzer(self, analyzer):
         name = analyzer.name
         if name is NotImplemented:
-            raise NotImplementedError("Need to add 'name' to {0}".format(analyzer))
+            raise NotImplementedError(f"Need to add 'name' to {analyzer}")
         return self._serializer_for_analyzer_name(name)
 
     def _serializer_for_analyzer_name(self, name):

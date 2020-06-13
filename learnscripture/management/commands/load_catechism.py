@@ -25,7 +25,7 @@ class Command(BaseCommand):
 
         # Need to be able to handle things like question "2a"
         for item_num, (number, question, answer) in enumerate(json_data):
-            version.qapairs.create(localized_reference="Q{0}".format(number),
+            version.qapairs.create(localized_reference=f"Q{number}",
                                    question=question,
                                    answer=answer,
                                    order=item_num)

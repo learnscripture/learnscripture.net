@@ -1354,7 +1354,7 @@ def make_bible_book_special_cases():
 def checks():
     for lang, books in _BIBLE_BOOKS_FOR_LANG.items():
         if len(books) != BIBLE_BOOK_COUNT:
-            raise AssertionError("Language {0} doesn't have the expected number of Bible books defined!".format(lang))
+            raise AssertionError(f"Language {lang} doesn't have the expected number of Bible books defined!")
 
 
 make_bible_book_abbreviations()

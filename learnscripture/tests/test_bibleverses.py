@@ -584,7 +584,7 @@ class ParsingTests(unittest2.TestCase):
         for ref, output in tests:
             self.assertEqual(self.pu(LANGUAGE_CODE_TR, ref).canonical_form(),
                              output,
-                             "Failure parsing '{0}'".format(ref))
+                             f"Failure parsing '{ref}'")
 
         self.assertEqual(normalize_reference_input_turkish('  ÂâİIiıÇçŞşÖöÜüĞğ  '),
                          'aaiiiiccssoouugg')

@@ -123,7 +123,7 @@ class Group(models.Model):
 
     def add_comment(self, author=None, message=None):
         if not self.accepts_comments_from(author):
-            raise ValueError("{0} not allowed to post to {1}".format(author.username, self.name))
+            raise ValueError(f"{author.username} not allowed to post to {self.name}")
 
         return self.comments.create(author=author,
                                     message=message)
@@ -144,7 +144,7 @@ class Membership(models.Model):
     created = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return 'Membership of %s by %s' % (self.group, self.account)
+        return f'Membership of {self.group} by {self.account}'
 
 
 class InvitationManager(models.Manager):
@@ -163,7 +163,7 @@ class Invitation(models.Model):
     objects = InvitationManager()
 
     def __str__(self):
-        return 'Invitation to %s for %s from %s' % (self.group, self.account, self.created_by)
+        return f'Invitation to {self.group} for {self.account} from {self.created_by}'
 
 
 def combined_membership_count_for_creator(account_id):

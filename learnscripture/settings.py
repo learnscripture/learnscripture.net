@@ -37,7 +37,7 @@ if LIVEBOX:
 else:
     LOG_ROOT = os.path.join(PROJECT_ROOT, 'logs')
 if not os.path.exists(LOG_ROOT):
-    os.system("mkdir -p %s" % LOG_ROOT)
+    os.system(f"mkdir -p {LOG_ROOT}")
 
 secrets = json.load(open(os.path.join(SRC_ROOT, "config", "secrets.json")))
 
@@ -430,7 +430,7 @@ DEBUG_TOOLBAR_CONFIG = {
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': 'unix:%s/learnscripture_memcached.sock' % HOME_DIR,
+        'LOCATION': f'unix:{HOME_DIR}/learnscripture_memcached.sock',
         'KEY_PREFIX': 'learnscripture.net',
     }
 } if LIVEBOX else {

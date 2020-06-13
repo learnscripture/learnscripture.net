@@ -43,8 +43,8 @@ def get_esv(localized_reference_list, batch_size=ESV_BATCH_SIZE):
         if not first_time:
             time.sleep(1)  # Don't hammer the API.
 
-        params = ['key=%s' % settings.ESV_API_KEY,
-                  'passage=%s' % urllib.parse.quote(";".join(batch)),
+        params = [f'key={settings.ESV_API_KEY}',
+                  f"passage={urllib.parse.quote(';'.join(batch))}",
                   'include-short-copyright=0',
                   # Starting with plain text is easier than messing around
                   # with massaging HTML, even if it means we have to parse
@@ -101,8 +101,8 @@ def search_esv(version, words, page, page_size):
     from django.conf import settings
     from bibleverses.models import VerseSearchResult
 
-    params = ['key=%s' % settings.ESV_API_KEY,
-              'words=%s' % words,
+    params = [f'key={settings.ESV_API_KEY}',
+              f'words={words}',
               'include-short-copyright=0',
               'include-passage-horizontal-lines=0',
               'include-heading-horizontal-lines=0',
@@ -181,7 +181,7 @@ def highlight_search_words(verse, words):
             # looks bad for short words of length 1 (because our highlighting
             # scheme is very simplistic)
             continue
-        text = text.replace(word, '**%s**' % word)
+        text = text.replace(word, f'**{word}**')
     verse.text_saved = text
     return verse
 

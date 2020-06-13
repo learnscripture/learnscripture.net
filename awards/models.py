@@ -84,11 +84,11 @@ class AwardLogic(object):
 
     def image_small(self):
         n = AwardType.name_for_value[self.award_type]
-        return 'img/awards/award_%s_level_%s_50.png' % (n, self.level)
+        return f'img/awards/award_{n}_level_{self.level}_50.png'
 
     def image_medium(self):
         n = AwardType.name_for_value[self.award_type]
-        return 'img/awards/award_%s_level_%s_100.png' % (n, self.level)
+        return f'img/awards/award_{n}_level_{self.level}_100.png'
 
     def give_to(self, account):
         if self.level == 0:
@@ -409,7 +409,7 @@ class ConsistentLearnerAward(TimeBasedAward):
             return t('awards-consistent-learner-award-general-description')
         else:
             # awards-consistent-learner-award-level-1-description etc
-            return t('awards-consistent-learner-award-level-{0}-description'.format(self.level))
+            return t(f'awards-consistent-learner-award-level-{self.level}-description')
 
 
 AwardType = make_class_enum(

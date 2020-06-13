@@ -31,7 +31,7 @@ class DashboardTestsBase(RequireExampleVerseSetsMixin, CatechismsMixin):
 
     def click_clear_learning_queue_btn(self, verse_set_id):
         if verse_set_id:
-            self.click_and_confirm('#id-learning-queue-verse-set-%s [name=clearbiblequeue]' % verse_set_id)
+            self.click_and_confirm(f'#id-learning-queue-verse-set-{verse_set_id} [name=clearbiblequeue]')
         else:
             self.click_and_confirm('#id-learning-queue-non-verse-set [name=clearbiblequeue]')
 
@@ -61,7 +61,7 @@ class DashboardTestsBase(RequireExampleVerseSetsMixin, CatechismsMixin):
 
         # Test click 'Start learning' for 'Bible 101' verse set
         self.assertTextPresent('Bible 101')
-        self.submit('#id-learning-queue-verse-set-%s [name=learnbiblequeue]' % vs.id)
+        self.submit(f'#id-learning-queue-verse-set-{vs.id} [name=learnbiblequeue]')
         self.assert_learning_localized_reference("John 3:16")
 
         # Learn one verse (otherwise we are back to dashboard redirecting us)
@@ -175,7 +175,7 @@ class DashboardTestsBase(RequireExampleVerseSetsMixin, CatechismsMixin):
     def test_home_dashboard_routing(self):
         Identity.objects.all().delete()
         self.get_url('home')
-        self.follow_link('a.btn.large[href="{0}"]'.format(reverse('choose')))
+        self.follow_link(f"a.btn.large[href=\"{reverse('choose')}\"]")
         self.assertUrlsEqual(reverse('choose'))
         # Getting this far shouldn't create an Identity
         self.assertEqual(Identity.objects.count(), 0)

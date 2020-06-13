@@ -54,9 +54,9 @@ def setup_mailgun_routes():
                          priority=priority)
 
     for email, destination_emails in EMAIL_ADDRESSES:
-        pattern = '^{0}$'.format(re.escape(email))
-        expression = """match_recipient('{0}')""".format(pattern)
-        actions = ["""forward("{0}")""".format(d) for d in destination_emails] + ["stop()"]
+        pattern = f'^{re.escape(email)}$'
+        expression = f"""match_recipient('{pattern}')"""
+        actions = [f"""forward("{d}")""" for d in destination_emails] + ["stop()"]
         update_or_create(email.split('@')[0], expression, actions, priority=5)
 
 

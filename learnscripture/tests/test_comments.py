@@ -109,4 +109,4 @@ class CommentTests(AccountTestMixin, TestBase):
             group=group)
 
         self.assertEqual(comment.get_absolute_url(),
-                         "/groups/my-group/wall/?comment=%s" % comment.id)
+                         f"/groups/my-group/wall/?comment={comment.id}")

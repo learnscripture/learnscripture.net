@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 def account_link(account):
     return link(reverse('user_stats', args=(account.username,)),
                 account.username,
-                title="{0} {1}".format(account.first_name, account.last_name))
+                title=f"{account.first_name} {account.last_name}")
 
 
 register.filter('group_link', group_link)

@@ -27,8 +27,7 @@ class EventTests(AccountTestMixin, TestBase):
         )
         event = Event.objects.get(event_type=EventType.NEW_COMMENT)
         self.assertEqual(event.get_absolute_url(),
-                         '/activity/%s/#comment-%s' % (orig_event.id,
-                                                       comment.id))
+                         f'/activity/{orig_event.id}/#comment-{comment.id}')
 
         self.assertFalse(event.accepts_comments())
 

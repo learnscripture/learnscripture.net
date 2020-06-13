@@ -121,7 +121,7 @@ def cms_page(request):
     page = Page.objects.get_by_url(url)
     if page is None:
         if not url.endswith('/') and settings.APPEND_SLASH:
-            return HttpResponsePermanentRedirect('%s/' % url)
+            return HttpResponsePermanentRedirect(f'{url}/')
         else:
             raise Http404
 

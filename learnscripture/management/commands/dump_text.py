@@ -30,7 +30,7 @@ class Command(BaseCommand):
         )
         format = 'json'
         for version_slug in options['version_slug']:
-            print("Dumping {0}".format(version_slug))
+            print(f"Dumping {version_slug}")
             version = TextVersion.objects.get(slug=version_slug)
             text_file = TEXTVERSION_TEMPLATE.format(version_slug)
             with gzip.open(os.path.join(output_dir, text_file), "wb") as f1:

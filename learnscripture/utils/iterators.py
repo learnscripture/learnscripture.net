@@ -37,7 +37,7 @@ def chunked_queryset(qs, batch_size, index='id'):
     if not ids:
         return
     for i in range(0, len(ids), batch_size):
-        filter_args = {'{0}__in'.format(index): ids[i:i + batch_size]}
+        filter_args = {f'{index}__in': ids[i:i + batch_size]}
         yield qs.filter(**filter_args)
 
 

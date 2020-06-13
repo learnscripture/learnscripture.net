@@ -463,7 +463,7 @@ class Event(models.Model):
     objects = EventManager()
 
     def __repr__(self):
-        return "<Event id=%s type=%s>" % (self.id, self.event_type)
+        return f"<Event id={self.id} type={self.event_type}>"
 
     def __str__(self):
         return "Event %d" % self.id
@@ -574,8 +574,8 @@ class Event(models.Model):
 
 
 def get_absolute_url_for_event_comment(event, comment_id):
-    return event.get_absolute_url() + "#comment-%s" % comment_id
+    return event.get_absolute_url() + f"#comment-{comment_id}"
 
 
 def get_absolute_url_for_group_comment(event, comment_id, group_slug):
-    return reverse('group_wall', args=(group_slug,)) + "?comment=%s" % comment_id
+    return reverse('group_wall', args=(group_slug,)) + f"?comment={comment_id}"

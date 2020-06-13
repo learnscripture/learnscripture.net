@@ -466,9 +466,9 @@ class Identity(models.Model):
 
     def __str__(self):
         if self.account_id is None:
-            return '<Identity %s>' % self.id
+            return f'<Identity {self.id}>'
         else:
-            return '<Identity %s: %s>' % (self.id, self.account)
+            return f'<Identity {self.id}: {self.account}>'
 
     def __repr__(self):
         return str(self)
@@ -1349,7 +1349,7 @@ class ChosenVerseSet(object):
 
     @property
     def id(self):
-        return "{0}-{1}".format(self.verse_set.id, self.version.id)
+        return f"{self.verse_set.id}-{self.version.id}"
 
 
 def get_verse_started_running_streaks():

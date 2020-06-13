@@ -66,7 +66,7 @@ class BibleTrainingTexts(TrainingTexts):
         if self.disallow_loading:
             raise LoadingNotAllowed(key)
         version_slug, book = key
-        logger.info("Retrieving {0}: {1}".format(self.text_slug, book))
+        logger.info(f"Retrieving {self.text_slug}: {book}")
         from bibleverses.models import get_whole_book
         return get_whole_book(book, self.text).text
 
@@ -79,6 +79,6 @@ class CatechismTrainingTexts(TrainingTexts):
     def lookup(self, key):
         if self.disallow_loading:
             raise LoadingNotAllowed(key)
-        logger.info("Retrieving {0}".format(self.text.slug))
+        logger.info(f"Retrieving {self.text.slug}")
         items = list(self.text.qapairs.all())
         return ' '.join(p.question + " " + p.answer for p in items)

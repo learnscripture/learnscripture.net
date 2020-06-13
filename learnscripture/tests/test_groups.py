@@ -53,7 +53,7 @@ class GroupPageTestsBase(RequireExampleVerseSetsMixin):
 
         self.assertTextPresent("Another group")
         self.assertTextAbsent("My group")
-        self.follow_link('a[href="{0}"]'.format(reverse('group', args=('another-group',))))
+        self.follow_link(f"a[href=\"{reverse('group', args=('another-group',))}\"]")
 
         self.assertUrlsEqual(reverse('group', args=('another-group',)))
 
