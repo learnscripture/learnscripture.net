@@ -1152,9 +1152,6 @@ viewCurrentVerse session model =
         verseScaledStrength =
             scaledStrength (currentVerseStrength currentVerse)
 
-        verseStrengthPercent =
-            floor (verseScaledStrength * 100)
-
         -- Clip width for the overlayed 'star' icon, rescaled to make it look as
         -- expected (trial and error)
         progressStarWidth =
@@ -1194,7 +1191,7 @@ viewCurrentVerse session model =
                 [ A.id "id-verse-strength-value"
                 , A.title (T.learnMemoryProgressCaption locale ())
                 ]
-                [ H.text (toString verseStrengthPercent ++ "%") ]
+                [ H.text (asPercentString locale verseScaledStrength) ]
             , viewVerseOptionsMenuButton verseOptionsMenuOpen verseOptionsMenuPinned locale
             ]
          , if verseOptionsMenuVisible then
@@ -7636,7 +7633,7 @@ testTypeDecoder =
 
 
 
-{- General utils -}
+{- General HTML utils -}
 
 
 onClickSimply : msg -> H.Attribute msg
@@ -7654,6 +7651,10 @@ onClickSimply msg =
 isScreenLargeEnoughForSidePanels : { width : Int, height : Int } -> Bool
 isScreenLargeEnoughForSidePanels windowSize =
     windowSize.width >= 385 + 860
+
+
+
+{- General utils -}
 
 
 dedupeBy : (a -> comparable) -> List a -> List a
@@ -7746,6 +7747,19 @@ translate fromStr toStr target =
             makeMapper allPairs
     in
     String.map mapper target
+
+
+asPercentString : Locale -> number -> String
+asPercentString locale number =
+    NumberFormat.format
+        (NumberFormat.fromOptions
+            { defaultNumberFormatting
+                | locale = locale
+                , style = NumberFormat.PercentStyle
+                , maximumFractionDigits = Just 0
+            }
+        )
+        number
 
 
 
