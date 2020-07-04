@@ -47,7 +47,7 @@ django-spurl==0.6.6       # via -r requirements.in
 django-sql-utils==0.5.0   # via -r requirements.in
 django-webpack-loader==0.5.0  # via -r requirements.in
 django-webtest==1.9.7     # via django-functest
-django==2.2.4             # via -r requirements.in, django-anymail, django-appconf, django-debug-toolbar, django-ftl, django-functest, django-markup, django-mptt, django-paypal, django-pjax, django-sql-utils, easy-thumbnails
+django==2.2.14            # via -r requirements.in, django-anymail, django-appconf, django-debug-toolbar, django-ftl, django-functest, django-markup, django-mptt, django-paypal, django-pjax, django-sql-utils, easy-thumbnails
 djangorestframework==3.10.2  # via -r requirements.in
 docutils==0.15.2          # via -r requirements.in
 easy-thumbnails==2.6      # via -r requirements.in
