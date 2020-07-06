@@ -881,11 +881,8 @@ def get_live_db():
 @task
 def local_restore_from_dump(filename):
     db = {}
-    db['NAME'] = 'learnscripture'
-    db['USER'] = 'learnscripture'
-    db['PASSWORD'] = 'foo'
-    db['HOST'] = '127.0.0.1'
-    db['PORT'] = '5432'
+    from django.conf import settings
+    db = settings.DATABASES[DB_LABEL_DEFAULT]
 
     filename = os.path.abspath(filename)
     with shell_env(**pg_environ(db)):
@@ -906,35 +903,34 @@ def make_django_db_filename(target):
 def dump_db(target):
     filename = make_django_db_filename(target)
     db = target.DBS[DB_LABEL_DEFAULT]
-    run("pg_dump -Fc -U %s -O -f %s %s" % (db['USER'], filename, db['NAME']))
+    run(f"pg_dump -Fc -U {db['USER']} -O -f {filename} {db['NAME']}")
     return filename
 
 
 def pg_restore_cmds(db, filename, clean=False):
     return [
         (False,
-         "pg_restore -h localhost -O -U %s %s -d %s %s" % (db['USER'], " -c " if clean else "", db['NAME'], filename)),
+         f"""pg_restore -p {db['PORT']} -h localhost -O -U {db['USER']} {" -c " if clean else ""} -d {db['NAME']} {filename}"""),
     ]
 
 
 def db_create_user_commands(db):
     return [
         (True,
-         """psql -U postgres -d template1 -c "
+         f"""psql -p {db['PORT']} -U postgres -d template1 -c "
              DO \\$\\$
              BEGIN
-               CREATE USER %s WITH PASSWORD '%s';
+               CREATE USER {db['USER']} WITH PASSWORD '{db['PASSWORD']}';
                EXCEPTION WHEN DUPLICATE_OBJECT THEN
                RAISE NOTICE 'not creating role, it already exists';
              END
              \\$\\$;
-          " """ % (db['USER'], db['PASSWORD'])),
+          " """),
     ]
 
 
 def db_check_user_exists_command(db):
-    return ("""psql -U postgres -d postgres -t -c "SELECT COUNT(*) FROM pg_user WHERE usename='%s';" """
-            % db['USER'])
+    return (f"""psql -p {db['PORT']} -U postgres -d postgres -t -c "SELECT COUNT(*) FROM pg_user WHERE usename='{db["USER"]}';" """)
 
 
 def db_check_user_exists_local(db):
@@ -950,16 +946,16 @@ def db_check_user_exists_remote(db):
 def db_create_commands(db):
     return [
         (True,
-         """ psql -U postgres -d template1 -c " """
-         """ CREATE DATABASE %s """
-         """ TEMPLATE = template0 ENCODING = 'UTF8' LC_CTYPE = '%s' LC_COLLATE = '%s';"""
-         """ " """ % (db['NAME'], env.locale, env.locale)),
+         f""" psql -p {db['PORT']} -U postgres -d template1 -c " """
+         f""" CREATE DATABASE {db['NAME']} """
+         f""" TEMPLATE = template0 ENCODING = 'UTF8' LC_CTYPE = '{env.locale}' LC_COLLATE = '{env.locale}';"""
+         f""" " """),
 
         (True,
-         """psql -U postgres -d template1 -c "GRANT ALL ON DATABASE %s TO %s;" """ % (db['NAME'], db['USER'])),
+         f"""psql -p {db['PORT']} -U postgres -d template1 -c "GRANT ALL ON DATABASE {db['NAME']} TO {db['USER']};" """),
 
         (True,
-         """psql -U postgres -d template1 -c "ALTER USER %s CREATEDB;" """ % db['USER']),
+         f"""psql -p {db['PORT']} -U postgres -d template1 -c "ALTER USER {db['USER']} CREATEDB;" """),
 
     ]
 
@@ -967,7 +963,7 @@ def db_create_commands(db):
 def db_drop_database_commands(db):
     return [
         (True,
-         """psql -U postgres -d template1 -c "DROP DATABASE IF EXISTS %s;" """ % db['NAME']),
+         f"""psql -p {db['PORT']} -U postgres -d template1 -c "DROP DATABASE IF EXISTS {db['NAME']};" """),
     ]
 
 

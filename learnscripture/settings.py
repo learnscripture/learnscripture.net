@@ -88,25 +88,30 @@ else:
     # test environment, especially related to the non-default DB it seems,
     # probably a Django bug, so we workaround:
     conn_max_age = 0 if TESTING else 120
+    try:
+        from .settings_local import DB_USER, DB_PORT
+    except ImportError:
+        DB_USER = 'learnscripture'
+        DB_PORT = 5432
 
     DATABASES = {
         DB_LABEL_DEFAULT: {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': 'learnscripture',
-            'USER': 'learnscripture',
+            'USER': DB_USER,
             'PASSWORD': 'foo',
             'HOST': 'localhost',
-            'PORT': '5432',
+            'PORT': DB_PORT,
             'ATOMIC_REQUESTS': True,
             'CONN_MAX_AGE': conn_max_age,
         },
         DB_LABEL_WORDSUGGESTIONS: {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': 'learnscripture_wordsuggestions',
-            'USER': 'learnscripture',
+            'USER': DB_USER,
             'PASSWORD': 'foo',
             'HOST': 'localhost',
-            'PORT': '5432',
+            'PORT': DB_PORT,
             'ATOMIC_REQUESTS': False,
             'CONN_MAX_AGE': conn_max_age,
         }
