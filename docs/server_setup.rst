@@ -146,6 +146,9 @@ the process works.
    which we are not allowed to have the whole Bible text stored in our DB (ESV),
    and will fail for those.
 
+
+# TODO copy usermedia from old to new. This is for CMS images
+
 10. Use your local /etc/hosts to point learnscripture.net to the new server, and test
     the new site works as expected.
 
