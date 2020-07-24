@@ -1,16 +1,7 @@
-import os
-os.environ['DJANGO_SETTINGS_MODULE'] = 'learnscripture.settings'
-
+import attr
 import django
-django.setup()
-
 from django.db import transaction
 from django.db.models import F
-
-import attr
-from bibleverses.models import TextVersion, Verse
-from bibleverses.parsing import parse_validated_localized_reference
-from bibleverses.suggestions.modelapi import generate_suggestions
 
 MISSING_VERSE_REFS = {
     'en': '3 John 1:15',
@@ -24,7 +15,17 @@ MISSING_VERSE_TEXTS = {
 }
 
 
+def setup():
+    import os
+    os.environ['DJANGO_SETTINGS_MODULE'] = 'learnscripture.settings'
+    django.setup()
+
+
 def fix_missing_verse():
+    from bibleverses.models import TextVersion, Verse
+    from bibleverses.parsing import parse_validated_localized_reference
+    from bibleverses.suggestions.modelapi import generate_suggestions
+
     fixed = []
     for version in TextVersion.objects.bibles():
         print(version.slug)
@@ -102,8 +103,9 @@ def fix_missing_verse():
             if version.language_code != 'tr':
                 generate_suggestions(version, localized_reference=ref)
             fixed.append(new_verse)
-            version.update_text_search(verse_id=new_verse.id)
+            version.update_text_search(Verse.objects.filter(id=new_verse.id))
 
 
 if __name__ == '__main__':
+    setup()
     fix_missing_verse()
