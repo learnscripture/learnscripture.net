@@ -147,7 +147,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='verse',
-            unique_together=set([('bible_verse_number', 'version'), ('reference', 'version')]),
+            unique_together=set([('version', 'bible_verse_number'), ('version', 'reference')]),
         ),
         migrations.AddField(
             model_name='userversestatus',

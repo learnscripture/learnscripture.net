@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterUniqueTogether(
             name='verse',
-            unique_together=set([('bible_verse_number', 'version'), ('gapless_bible_verse_number', 'version'), ('localized_reference', 'version')]),
+            unique_together=set([('version', 'bible_verse_number'), ('gapless_bible_verse_number', 'version'), ('version', 'localized_reference')]),
         ),
     ]
