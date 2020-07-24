@@ -1,4 +1,4 @@
-// Also in bible_book_info.py
+// Also in constants.py
 export const BIBLE_BOOK_INFO =
 {
     "BOOK44": {
@@ -130,7 +130,7 @@ export const BIBLE_BOOK_INFO =
     },
     "BOOK63": {
         "verse_counts": {
-            "1": 14
+            "1": 15
         },
         "chapter_count": 1
     },

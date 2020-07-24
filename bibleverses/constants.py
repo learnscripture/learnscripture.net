@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+
+# See also bible_book_info.ts
 from collections import defaultdict
 
 from .languages import LANGUAGE_CODE_EN, LANGUAGE_CODE_INTERNAL, LANGUAGE_CODE_TR, normalize_reference_input
@@ -1202,7 +1204,7 @@ BIBLE_BOOK_INFO = dict(
      ('BOOK61',
       {'chapter_count': 5, 'verse_counts': {1: 10, 2: 29, 3: 24, 4: 21, 5: 21}}),
      ('BOOK62', {'chapter_count': 1, 'verse_counts': {1: 13}}),
-     ('BOOK63', {'chapter_count': 1, 'verse_counts': {1: 14}}),
+     ('BOOK63', {'chapter_count': 1, 'verse_counts': {1: 15}}),
      ('BOOK64', {'chapter_count': 1, 'verse_counts': {1: 25}}),
      ('BOOK65',
       {'chapter_count': 22,

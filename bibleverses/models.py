@@ -391,9 +391,9 @@ class Verse(models.Model):
 
     class Meta:
         unique_together = [
-            ('bible_verse_number', 'version'),
-            ('gapless_bible_verse_number', 'version'),
-            ('localized_reference', 'version'),
+            # ('version', 'bible_verse_number'),
+            # ('version', 'gapless_bible_verse_number'),
+            ('version', 'localized_reference'),
         ]
         ordering = ('bible_verse_number',)
 
