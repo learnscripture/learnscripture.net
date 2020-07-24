@@ -34,7 +34,7 @@ django-autocomplete-light==3.5.1  # via -r requirements.in
 django-autoslug==1.9.7    # via -r requirements.in
 django-capture-tag==1.0   # via -r requirements.in
 django-compressor==2.4    # via -r requirements.in
-django-debug-toolbar==2.0  # via -r requirements-dev.in
+django-debug-toolbar==2.2  # via -r requirements-dev.in
 django-extensions==2.2.1  # via -r requirements-dev.in
 django-ftl==0.12.1        # via -r requirements.in
 django-functest==1.0.4    # via -r requirements-dev.in

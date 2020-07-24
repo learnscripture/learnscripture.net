@@ -1,6 +1,6 @@
+import six
 from django.db.models import Q
 from django.db.models.deletion import ProtectedError
-from django.utils import six
 from django.utils.encoding import smart_text
 from rest_framework import generics, permissions, renderers, status
 from rest_framework.decorators import api_view, permission_classes, renderer_classes

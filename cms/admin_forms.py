@@ -1,6 +1,6 @@
 from django import forms
-from django.utils.six import unichr
 from mptt.forms import TreeNodeChoiceField
+from six import unichr
 
 from cms.models import Page, PageTitle
 
