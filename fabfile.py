@@ -114,6 +114,7 @@ REQS = [
     # Other
     'letsencrypt',
     'joe',
+    'goaccess',  # web analytics. Actually we need v1.4 or later
 ]
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'learnscripture.settings'  # noqa
@@ -1048,3 +1049,20 @@ def create_sentry_release(version, last_commit):
     # Commits not currently publically available
     # local('sentry-cli releases --org learnscripturenet set-commits --commit "learnscripture/learnscripture.net@{commit}" {version}'.format(version=version, commit=full_hash))
     local("sentry-cli releases --org learnscripturenet finalize {version}".format(version=version))
+
+
+
+# TODO - conf for goaccess
+#
+# initial setup steps taken:
+# - installation
+# - then:
+#
+# cd /var/log/nginx
+# zcat access.log.*.gz | goaccess --persist --log-format=COMBINED access.log access.log.1 -
+
+# For terminal display do:
+# goaccess --restore --persist --log-format=COMBINED /var/log/nginx/access.log
+
+# Live HTML report:
+# goaccess --restore --persist --log-format=COMBINED /var/log/nginx/access.log -o /home/learnscripture/webapps/learnscripture/versions/current/static/_stats.html --real-time-html
