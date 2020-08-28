@@ -1051,7 +1051,6 @@ def create_sentry_release(version, last_commit):
     local("sentry-cli releases --org learnscripturenet finalize {version}".format(version=version))
 
 
-
 # TODO - conf for goaccess
 #
 # initial setup steps taken:
