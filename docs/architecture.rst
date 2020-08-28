@@ -31,10 +31,6 @@ The following integrations are used:
 
     fab manage_py_command:setup_mailgun
 
-* Google Analytics for statistics. There are also some stats of our own which
-  can be viewed at https://learnscripture.net/stats/?requests&full_accounts
-  although this hasn't always been working.
-
 * ESV API for getting ESV text. We obey the ESV license which requires
   us to cache only a limited number of verses in the local database.
   The presence of the whole text, however, is needed for the word

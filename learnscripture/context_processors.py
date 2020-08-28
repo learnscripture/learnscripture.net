@@ -132,7 +132,6 @@ def themes(request):
 
 def settings_processor(request):
     return {'settings': {'SENTRY_DSN': settings.SENTRY_DSN,
-                         'GOOGLE_ANALYTICS_ACCOUNT': settings.GOOGLE_ANALYTICS_ACCOUNT,
                          }}
 
 

@@ -519,12 +519,6 @@ REQUIRE_SUBSCRIPTION = False
 
 ESV_API_KEY = secrets['ESV_API_KEY']
 
-if LIVEBOX:
-    GOOGLE_ANALYTICS_ACCOUNT = "UA-29644888-1"
-else:
-    GOOGLE_ANALYTICS_ACCOUNT = None
-
-
 if TESTING:
     import faulthandler
     import signal
