@@ -19,4 +19,4 @@ LS_MANAGE=%(SRC_ROOT)s/manage.py
 42         4    * * *  root          find /home/%(proj_user)s/logs/ -name '*_uwsgi.log.*' -mtime +7 -exec rm {} \;
 
 
-30         23   * * *  root          goaccess --restore --persist --log-format=COMBINED /var/log/nginx/access.log /var/log/nginx/access.log.1 -o /var/log/goaccess/"report-`date '+%Y-%m-%d'`.html"
+30         23   * * *  root          goaccess --restore --persist --log-format=COMBINED /var/log/nginx/access.log /var/log/nginx/access.log.1 -o /var/log/goaccess/"report-`date '+%%Y-%%m-%%d'`.html"
