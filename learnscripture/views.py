@@ -1005,7 +1005,7 @@ def user_verses(request):
                 parsed_ref = parse_unvalidated_localized_reference(
                     request.identity.default_language_code,
                     query,
-                    allow_whole_book=False,
+                    allow_whole_book=True,
                     allow_whole_chapter=True,
                 )
             except InvalidVerseReference:
@@ -1719,7 +1719,7 @@ def activity_item(request, event_id):
 
 def set_language(request):
     """
-    Save the given language in the sesison, and in the user's preferences if logged in.
+    Save the given language in the session, and in the user's preferences if logged in.
     """
     next_url = request.headers.get('Referer', '/')
     next_url = furl.furl(next_url).set(host=None, port=None, scheme=None).url
