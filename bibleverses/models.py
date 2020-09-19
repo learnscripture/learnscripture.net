@@ -320,14 +320,19 @@ class VerseManager(models.Manager):
 
 
 class Verse(models.Model):
+    """
+    Stores a Bible verse contents and metadata
+    """
     version = models.ForeignKey(TextVersion, on_delete=models.CASCADE)
-    # Reference in the language of the text versions e.g. "John 3:16"
+    # Reference in the language of the text version e.g. "John 3:16"
     localized_reference = models.CharField(max_length=100)
     # 'text_saved' is for data stored, as opposed to 'text' which might retrieve
     # from a service. Also, 'text_saved' is sometimes set without saving to the
     # DB, just so that 'text' can find it.
     text_saved = models.TextField(blank=True)
+    # For text searching:
     text_tsv = VectorField()
+    # For versions where we have fetched the text from a service
     text_fetched_at = models.DateTimeField(null=True, blank=True)
 
     # De-normalized fields - these can be derived from localized_reference
@@ -344,17 +349,22 @@ class Verse(models.Model):
 
     # gapless_bible_verse_number differs from bible_verse_number in that when
     # missing and merged verses are removed, it has no gaps,
-    # while bible_verse_number does. 0 indexed.
+    # while bible_verse_number does. In other words, if you step through
+    # gapless_bible_verse_number, incrementing by one, you will always
+    # get to another verse with content, until the very last verse.
+    # 0 indexed.
     gapless_bible_verse_number = models.PositiveIntegerField(null=True)
 
     # This field is to cope with versions where a specific verse is entirely
     # empty e.g. John 5:4 in NET/ESV
     missing = models.BooleanField(default=False)
 
-    # For versions that do merged verses, we have dummy Verse objects
-    # for the unmerged references. e.g. in TCL02, there is 'Yuhanna 1:19-20'.
-    # For 'Yuhanna 1:19' we have a Verse object that has no text
-    # but 'merged_into' points to 'Yuhanna 1:19-20'
+    # For versions that do merged verses, we have dummy Verse objects for the
+    # unmerged references. e.g. in TCL02, there is 'Yuhanna 1:19-20'. For
+    # 'Yuhanna 1:19' and 'Yuhanna 1:20', we have Verse objects that have
+    # text_saved == '' (and gapless_bible_verse_number == NULL), but
+    # 'merged_into' points to 'Yuhanna 1:19-20' (which has content in text_saved
+    # and a non-NULL gapless_bible_verse_number).
     merged_into = models.ForeignKey("self", on_delete=models.CASCADE,
                                     related_name='merged_from',
                                     blank=True, null=True)
