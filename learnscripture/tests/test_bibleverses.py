@@ -619,6 +619,23 @@ class ParsingTests(unittest2.TestCase):
             'Jude 1:25',
         ])
 
+    def test_get_start_and_get_end(self):
+        self.assertEqual(self.pv('en', 'Genesis 1:1-2').get_start().canonical_form(), 'Genesis 1:1')
+        self.assertEqual(self.pv('en', 'Genesis 1:1-2').get_end().canonical_form(), 'Genesis 1:2')
+
+        self.assertEqual(self.pv('en', 'Genesis 1').get_start().canonical_form(), 'Genesis 1:1')
+        self.assertEqual(self.pv('en', 'Genesis 1').get_end().canonical_form(), 'Genesis 1:31')
+
+        self.assertEqual(self.pv('en', 'Genesis 1:5-3:10').get_start().canonical_form(), 'Genesis 1:5')
+        self.assertEqual(self.pv('en', 'Genesis 1:5-3:10').get_end().canonical_form(), 'Genesis 3:10')
+
+    def test_to_list_whole_book(self):
+        parsed_ref = self.pv('en', 'Genesis')
+        refs = [item.canonical_form() for item in parsed_ref.to_list()]
+        self.assertEqual(refs[0], 'Genesis 1:1')
+        self.assertEqual(refs[1], 'Genesis 1:2')
+        self.assertEqual(refs[-1], 'Genesis 50:26')
+
 
 class MockVersion:
     def __init__(self, language_code):
@@ -770,7 +787,7 @@ class UserVerseStatusTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestB
 
         uvs = identity.verse_statuses.get(localized_reference='Psalm 23:2')
 
-        self.assertEqual(uvs.passage_localized_reference, 'Psalm 23:1-6')
+        self.assertEqual(uvs.passage_localized_reference, 'Psalm 23')
         self.assertEqual(uvs.section_localized_reference, 'Psalm 23:1-3')
 
     def test_passage_and_section_localized_reference_merged(self):

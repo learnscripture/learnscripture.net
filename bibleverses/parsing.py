@@ -58,6 +58,12 @@ class ParsedReference(object):
                     retval += f"-{self.end_verse}"
         return retval
 
+    def normalize(self):
+        if (self.start_chapter == self.end_chapter and
+                self.start_verse == 1 and self.end_verse == self.book_info['verse_counts'][self.start_chapter]):
+            return self._clone(start_verse=None, end_verse=None)
+        return self
+
     def _clone(self, **kwargs):
         return attr.evolve(self, **kwargs)
 
@@ -84,7 +90,7 @@ class ParsedReference(object):
                    start_chapter=start_parsed_ref.start_chapter,
                    start_verse=start_parsed_ref.start_verse,
                    end_chapter=end_parsed_ref.end_chapter,
-                   end_verse=end_parsed_ref.end_verse)
+                   end_verse=end_parsed_ref.end_verse).normalize()
 
     def is_whole_book(self):
         return (self.start_chapter is None or
@@ -100,7 +106,7 @@ class ParsedReference(object):
                 self.end_verse == self.start_verse)
 
     def is_in_bounds(self):
-        book_info = BIBLE_BOOK_INFO['BOOK' + str(self.book_number)]
+        book_info = self.book_info
         chapter_count = book_info['chapter_count']
         if self.start_chapter > chapter_count or self.end_chapter > chapter_count:
             return False
@@ -115,15 +121,39 @@ class ParsedReference(object):
         if self.is_single_verse():
             return self
         else:
-            return self._clone(end_chapter=self.start_chapter,
-                               end_verse=self.start_verse)
+            start_chapter = self.start_chapter
+            if start_chapter is None:
+                start_chapter = 1
+            start_verse = self.start_verse
+            if start_verse is None:
+                start_verse = 1
+            return self._clone(
+                start_chapter=start_chapter,
+                start_verse=start_verse,
+                end_chapter=start_chapter,
+                end_verse=start_verse
+            )
 
     def get_end(self):
         if self.is_single_verse():
             return self
         else:
-            return self._clone(start_chapter=self.end_chapter,
-                               start_verse=self.end_verse)
+            end_chapter = self.end_chapter
+            if end_chapter is None:
+                end_chapter = self.book_info['chapter_count']
+            end_verse = self.end_verse
+            if end_verse is None:
+                end_verse = self.book_info['verse_counts'][end_chapter]
+            return self._clone(
+                start_chapter=end_chapter,
+                start_verse=end_verse,
+                end_chapter=end_chapter,
+                end_verse=end_verse
+            )
+
+    @property
+    def book_info(self):
+        return BIBLE_BOOK_INFO['BOOK' + str(self.book_number)]
 
     def to_list(self):
         """
@@ -133,17 +163,10 @@ class ParsedReference(object):
         start_ref = self.get_start()
         end_ref = self.get_end()
         assert start_ref.book_number == end_ref.book_number
-        book_info = BIBLE_BOOK_INFO[self.to_internal().book_name]
+        book_info = self.book_info
         assert start_ref.start_chapter <= end_ref.start_chapter
         if start_ref.start_chapter == end_ref.start_chapter:
-            if start_ref.start_verse is not None and end_ref.start_verse is not None:
-                assert start_ref.start_verse <= end_ref.start_verse
-        if start_ref.start_verse is None:
-            start_ref.start_verse = 1
-            start_ref.end_verse = start_ref.start_verse
-        if end_ref.end_verse is None:
-            end_ref.start_verse = book_info['verse_counts'][end_ref.start_chapter]
-            end_ref.end_verse = end_ref.start_verse
+            assert start_ref.start_verse <= end_ref.start_verse
 
         results = []
         current_ref = start_ref
