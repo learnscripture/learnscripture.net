@@ -73,7 +73,7 @@ class VerseSetTests(BibleVersesMixin, AccountTestMixin, TestBase):
                        language_code='en',
                        set_type=VerseSetType.PASSAGE)
         self.assertEqual(vs5.smart_name('en'), 'Psalm 37: 1 - 40')
-        self.assertEqual(vs5.smart_name('tr'), 'Mezmur 37:1-40')
+        self.assertEqual(vs5.smart_name('tr'), 'Mezmur 37')
 
     def test_smart_name_no_abbreviations(self):
         # 'Promises' starts with 'pro' == abbreviation for proverbs. We should

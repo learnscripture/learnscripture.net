@@ -43,6 +43,12 @@ class ParsedReference(object):
                     if self.end_verse < self.start_verse:
                         raise InvalidVerseReference(t('bibleverses-invalid-reference-end-verse-before-start-verse',
                                                       dict(end=self.end_verse, start=self.start_verse)))
+        if (self.start_chapter is not None and self.start_chapter == self.end_chapter):
+            if (self.start_verse == 1 and
+                    self.start_chapter in self.book_info['verse_counts'] and
+                    self.end_verse == self.book_info['verse_counts'][self.start_chapter]):
+                self.start_verse = None
+                self.end_verse = None
 
     def canonical_form(self):
         # Reverse of bible_reference_strict
@@ -57,12 +63,6 @@ class ParsedReference(object):
                 elif self.end_verse != self.start_verse:
                     retval += f"-{self.end_verse}"
         return retval
-
-    def normalize(self):
-        if (self.start_chapter == self.end_chapter and
-                self.start_verse == 1 and self.end_verse == self.book_info['verse_counts'][self.start_chapter]):
-            return self._clone(start_verse=None, end_verse=None)
-        return self
 
     def _clone(self, **kwargs):
         return attr.evolve(self, **kwargs)
@@ -90,7 +90,7 @@ class ParsedReference(object):
                    start_chapter=start_parsed_ref.start_chapter,
                    start_verse=start_parsed_ref.start_verse,
                    end_chapter=end_parsed_ref.end_chapter,
-                   end_verse=end_parsed_ref.end_verse).normalize()
+                   end_verse=end_parsed_ref.end_verse)
 
     def is_whole_book(self):
         return (self.start_chapter is None or
@@ -153,7 +153,7 @@ class ParsedReference(object):
 
     @property
     def book_info(self):
-        return BIBLE_BOOK_INFO['BOOK' + str(self.book_number)]
+        return BIBLE_BOOK_INFO[self.internal_book_name]
 
     def to_list(self):
         """
@@ -365,7 +365,8 @@ def parse_unvalidated_localized_reference(language_code, localized_reference,
     """
     Parse user input as a Bible reference, returning a ParsedReference
     Returns None if it doesn't look like a reference (doesn't parse),
-    or raises InvalidVerseReference if it does but isn't correct.
+    or raises InvalidVerseReference if it does but isn't correct
+    (for example, if the chapter/verse numbers are out of valid range)
 
     If allow_whole_chapter==False, will return None for
     references that are whole chapters.
