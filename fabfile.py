@@ -1051,14 +1051,16 @@ def create_sentry_release(version, last_commit):
     local("sentry-cli releases --org learnscripturenet finalize {version}".format(version=version))
 
 
-# TODO - conf for goaccess
+# TODO:
 #
-# initial setup steps taken:
-# - installation
-# - then:
+# We should automate the process of installing and configuring goaccess.
+# - installation - https://goaccess.io/ - "Official GoAccess' Debian/Ubuntu Repository" method
+# - then the following was done
 #
-# cd /var/log/nginx
-# zcat access.log.*.gz | goaccess --persist --log-format=COMBINED access.log access.log.1 -
+#   zcat /var/log/nginx/access.log.*.gz | goaccess --restore --persist --log-format=COMBINED -o "/var/log/goaccess/report-$(date '+%Y-%m-%d').html" --keep-last=32 /var/log/nginx/access.log /var/log/nginx/access.log.1 -
+#
+# - daily reports are now done via crontab
+#   - TODO - clean up all daily reports except first of the month
 
 # For terminal display do:
 # goaccess --restore --persist --log-format=COMBINED /var/log/nginx/access.log
