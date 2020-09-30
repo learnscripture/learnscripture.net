@@ -45,7 +45,7 @@ command=%(VENV_ROOT)s/bin/uwsgi
     --buffer-size 16384
     --ignore-sigpipe --ignore-write-errors --disable-write-exception
     --pidfile=/tmp/hgweb.pid
-directory=/home/%(proj_user)s
+directory=/home/%(proj_user)s/repos
 user=%(proj_user)s
 autostart=true
 stdout_logfile = /home/%(proj_user)s/logs/hgweb.stdout
