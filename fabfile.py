@@ -1057,6 +1057,7 @@ def create_sentry_release(version, last_commit):
 # - installation - https://goaccess.io/ - "Official GoAccess' Debian/Ubuntu Repository" method
 # - then the following was done
 #
+#   mkdir /var/log/goaccess
 #   zcat /var/log/nginx/access.log.*.gz | goaccess --restore --persist --log-format=COMBINED -o "/var/log/goaccess/report-$(date '+%Y-%m-%d').html" --keep-last=32 /var/log/nginx/access.log /var/log/nginx/access.log.1 -
 #
 # - daily reports are now done via crontab

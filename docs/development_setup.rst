@@ -67,7 +67,8 @@ installed.
      cd tests
      elm-install
 
-   For deployment, install ``sentry-cli`` into $VIRTUAL_ENV/bin:
+   For Sentry release integration after deployment, install ``sentry-cli`` into
+   $VIRTUAL_ENV/bin:
 
       https://github.com/getsentry/sentry-cli/releases/
 

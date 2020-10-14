@@ -15,12 +15,12 @@ asn1crypto==0.24.0        # via cryptography
 attrs==19.3.0             # via -r requirements.in, elm-fluent, fluent-compiler
 babel==2.8.0              # via fluent-compiler
 backcall==0.2.0           # via ipython
-bcrypt==3.1.7             # via paramiko
+bcrypt==3.2.0             # via paramiko
 beautifulsoup4==4.8.0     # via elm-fluent, webtest
 billiard==3.6.3.0         # via celery
 celery==4.4.2             # via -r requirements.in, django-app-metrics
 certifi==2020.4.5.1       # via -r requirements.in, requests, sentry-sdk
-cffi==1.12.3              # via bcrypt, cryptography, pynacl
+cffi==1.14.3              # via bcrypt, cryptography, pynacl
 chardet==3.0.4            # via requests
 click==7.0                # via elm-fluent, pip-tools
 compare-locales==7.2.5    # via -r requirements-dev.in
