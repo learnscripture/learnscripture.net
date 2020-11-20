@@ -68,15 +68,23 @@ TextType = make_choices('TextType',
                          ])
 
 
-class TextVersionManager(models.Manager):
+class TextVersionQuerySet(models.QuerySet):
     def get_by_natural_key(self, slug):
         return self.get(slug=slug)
 
     def bibles(self):
-        return self.get_queryset().filter(text_type=TextType.BIBLE)
+        return self.filter(text_type=TextType.BIBLE)
 
     def catechisms(self):
-        return self.get_queryset().filter(text_type=TextType.CATECHISM)
+        return self.filter(text_type=TextType.CATECHISM)
+
+    def public(self):
+        return self.filter(public=True)
+
+    def visible_for_identity(self, identity):
+        if identity.account_id is not None and identity.account.is_tester:
+            return self
+        return self.public()
 
 
 class TextVersion(models.Model):
@@ -94,7 +102,7 @@ class TextVersion(models.Model):
 
     public = models.BooleanField(default=True)
 
-    objects = TextVersionManager()
+    objects = TextVersionQuerySet.as_manager()
 
     @property
     def is_bible(self):

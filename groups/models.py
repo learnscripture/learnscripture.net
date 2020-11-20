@@ -8,7 +8,10 @@ from accounts.models import Account, clear_friendship_weight_cache
 from learnscripture.ftl_bundles import t_lazy
 
 
-class GroupManager(models.Manager):
+class GroupQuerySet(models.QuerySet):
+
+    def public(self):
+        return self.filter(public=True)
 
     def visible_for_account(self, account):
         groups = self.all()
@@ -17,7 +20,7 @@ class GroupManager(models.Manager):
         # 'groups', because we want people to be able to see groups they are
         # members of, even if created by a hell-banned user.
 
-        public_groups = groups.filter(public=True)
+        public_groups = groups.public()
         if account is None or not account.is_hellbanned:
             public_groups = public_groups.exclude(created_by__is_hellbanned=True)
 
@@ -42,6 +45,12 @@ class GroupManager(models.Manager):
             return self.none()
         return self.filter(created_by=account)
 
+    def search(self, query):
+        return (
+            self.filter(name__icontains=query) |
+            self.filter(description__icontains=query)
+        )
+
 
 class Group(models.Model):
     name = models.CharField(t_lazy('groups-name'), max_length=255)
@@ -62,7 +71,7 @@ class Group(models.Model):
         choices=settings.LANGUAGES,
         default=settings.LANGUAGE_CODE)
 
-    objects = GroupManager()
+    objects = GroupQuerySet.as_manager()
 
     class Meta:
         ordering = ['name']

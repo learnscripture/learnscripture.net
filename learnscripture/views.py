@@ -189,7 +189,7 @@ def signup(request):
 def bible_versions_for_request(request):
     if hasattr(request, 'identity'):
         return request.identity.available_bible_versions()
-    return TextVersion.objects.bibles().filter(public=True)
+    return TextVersion.objects.bibles().public()
 
 
 @require_preferences
@@ -971,7 +971,7 @@ def user_stats(request, username):
     if current_account is not None and current_account == account:
         account_groups = account.groups.order_by('name')
     else:
-        account_groups = account.groups.filter(public=True).order_by('name')
+        account_groups = account.groups.public().order_by('name')
     viewer_visible_groups = Group.objects.visible_for_account(viewer)
     c['groups'] = viewer_visible_groups.filter(id__in=[g.id for g in account_groups])
     return TemplateResponse(request, 'learnscripture/user_stats.html', c)
@@ -1389,9 +1389,7 @@ def groups(request):
     )
     query = filter_form.cleaned_data['query'].strip()
     if query:
-        groups = (groups.filter(name__icontains=query) |
-                  groups.filter(description__icontains=query)
-                  )
+        groups = groups.search(query)
     else:
         groups = groups.none()
     language_code = filter_form.cleaned_data['language_code']
