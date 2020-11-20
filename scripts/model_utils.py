@@ -44,26 +44,30 @@ def django_to_vd_type(field):
 
 
 class QuerySetSheet(visidata.Sheet):
+    rowtype = 'rows'  # rowdef: model instance
+
     @visidata.asyncthread
     def reload(self):
         self.rows = []
-        self.columns = [
-            visidata.ColumnAttr(name, type=t)
-            for name, t in meta_to_col_list(self.source.model._meta)
-        ]
+        self.columns = []
+        for name, t in meta_to_col_list(self.source.model._meta):
+            self.addColumn(visidata.ColumnAttr(name, type=t))
         for item in visidata.Progress(self.source.iterator(), total=self.source.count()):
-            self.rows.append(item)
+            self.addRow(item)
 
 
-class AutoSheet(visidata.Sheet):
+class AutoSheet(visidata.TableSheet):
+    rowtype = 'rows'  # rowdef: attrs instance
+
+    @visidata.asyncthread
     def reload(self):
-        self.rows = self.source
-        if len(self.rows) == 0:
-            self.columns = []
-        else:
-            self.columns = [visidata.ColumnAttr(name, type=t)
-                            for name, t in get_main_attrs(self.rows[0])
-                            ]
+        self.columns = []
+        if len(self.source) == 0:
+            return
+        for name, t in get_main_attrs(self.source[0]):
+            self.addColumn(visidata.ColumnAttr(name, type=t))
+        for row in self.source:
+            self.addRow(row)
 
 
 def vd(objects):
