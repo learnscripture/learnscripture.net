@@ -2,6 +2,8 @@
 import urllib.parse
 from datetime import timedelta
 
+from typing import List, Optional
+import attr
 import djpjax
 import furl
 from django.conf import settings
@@ -1537,10 +1539,10 @@ def group_leaderboard(request, slug):
         # We can't use get_paged_results for 'results' because it doesn't use a
         # normal queryset. Could possibly fix this by rewriting leaderboard
         # queries with Window functions introduced in Django 2.0?
-        'results': dict(
+        'results': Page(
             items=accounts,
+            from_item=from_item,
             shown_count=shown_count,
-            empty=len(accounts) == 0 and from_item == 0,
             more=len(accounts) == PAGE_SIZE,  # There *might* be more in this case, otherwise definitely not
             more_link=(furl.furl(request.get_full_path())
                        .remove(query=['from_item'])
@@ -1749,6 +1751,20 @@ def debug(request):
     return TemplateResponse(request, "learnscripture/debug.html", {})
 
 
+@attr.s(auto_attribs=True)
+class Page:
+    items: List[object]
+    from_item: int
+    shown_count: int
+    more: bool
+    more_link: str
+    total: Optional[int] = None
+
+    @property
+    def empty(self):
+        return len(self.items) == 0 and self.from_item == 0
+
+
 def get_paged_results(queryset, request, page_size):
     total = queryset.count()
     from_item = get_request_from_item(request)
@@ -1759,7 +1775,7 @@ def get_paged_results(queryset, request, page_size):
     # Then trim result_page to correct size
     result_page = result_page[0:page_size]
     shown_count = from_item + len(result_page)
-    return dict(
+    return Page(
         items=result_page,
         from_item=from_item,
         shown_count=shown_count,
