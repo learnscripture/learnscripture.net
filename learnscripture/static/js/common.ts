@@ -135,6 +135,26 @@ $(document).ready(function() {
         $('#id_enable_vibration').closest('ul').parent().hide();
     }
 
+    // HTMX
+    document.querySelectorAll('form[hx-target]').forEach((form, idx) => {
+        form.querySelectorAll('input, select').forEach((input, idx) => {
+            console.log("adding to", input);
+            input.addEventListener("change", (ev) => {
+                (<HTMLFormElement>form).submit();
+            }, true);
+        });
+    });
+
+
+    // $('form[hx-target]').each(function(idx, elem) {
+    //     var $form = $(elem);
+    //     console.log('fixing ', $form);
+    //     $form.find("input,select").on('change', function(ev) {
+    //         console.log('submitting ', $form);
+    //         $form.submit();
+    //     })
+    // });
+
     // PJAX
     $('form[data-pjax-results-container]').each(function(idx, elem) {
 

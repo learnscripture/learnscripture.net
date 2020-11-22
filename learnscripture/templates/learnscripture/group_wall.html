@@ -10,10 +10,12 @@
   <h2>{% ftlmsg 'comments-comment-list-title' %}</h2>
 
   <form action="." method="GET"
-        data-pjax-results-container="#id-group-wall-comments"
-        data-pjax-more-results-container=".more-results-container"
+        id="testx"
+        hx-target="#id-group-wall-comments"
+        hx-get="."
         >
     {{ filter_form|render_form }}
+    <button class="btn" type="submit" onclick='document.getElementById("testx").submit()'>Change</button>
   </form>
 
   <div id="id-group-wall-comments">

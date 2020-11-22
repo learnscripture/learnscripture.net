@@ -54,7 +54,7 @@ from payments.sign import sign_payment_info
 from scores.models import get_all_time_leaderboard, get_leaderboard_since, get_verses_started_counts
 
 from .decorators import (has_preferences, redirect_via_prefs, require_account, require_account_with_redirect,
-                         require_identity, require_preferences)
+                         require_identity, require_preferences, htmx)
 
 #
 # === Notes ===
@@ -1447,9 +1447,9 @@ def group(request, slug):
     })
 
 
-@djpjax.pjax(additional_templates={
-    "#id-group-wall-comments": "learnscripture/group_wall_comments_inc.html",
-    ".more-results-container": "learnscripture/group_wall_comments_results_inc.html",
+@htmx({
+    "id-group-wall-comments": "learnscripture/group_wall_comments_inc.html",
+    "id-more-results-container": "learnscripture/group_wall_comments_results_inc.html",
 })
 def group_wall(request, slug):
     account = account_from_request(request)

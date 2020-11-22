@@ -75,3 +75,22 @@ def require_account_with_redirect(view_func):
             return response
         return view_func(request, *args, **kwargs)
     return view
+
+
+def htmx(additional_templates):
+    """
+    If request is from htmx, then render a partial page,
+    using the 'hx-target' header to dispatch to the appropriate template.
+    """
+    def decorator(view):
+        @wraps(view)
+        def _view(request, *args, **kwargs):
+            resp = view(request, *args, **kwargs)
+            if request.META.get('HTTP_HX_REQUEST', False):
+                container = request.META.get('HTTP_HX_TARGET', None)
+                if container is not None and container in additional_templates:
+                    template = additional_templates[container]
+                    resp.template_name = template
+            return resp
+        return _view
+    return decorator
