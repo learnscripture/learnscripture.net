@@ -525,7 +525,7 @@ def push_to_central_vcs():
     # central VCS i.e. if central has code on the master branch that hasn't been
     # merged locally. This prevents deploys overwriting a previous deploy
     # unknowingly due to failure to merge changes.
-    local("git push master central")
+    local("git push central master")
 
 
 @task
