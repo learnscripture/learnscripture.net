@@ -1667,8 +1667,8 @@ Message:
     ).send()
 
 
-@djpjax.pjax(additional_templates={
-    ".more-results-container": "learnscripture/activity_stream_results_inc.html",
+@htmx({
+    "id-more-results-container": "learnscripture/activity_stream_results_inc.html",
 })
 def activity_stream(request):
     viewer = account_from_request(request)
