@@ -190,14 +190,3 @@ Post-migrate steps:
 
       fab install_or_renew_ssl_certificate
 
-* Upload the Mercurial VCS server to the new box::
-
-    ssh learnscripture@learnscripture2.digitalocean.com
-    mkdir ~/repos/learnscripture.net
-    hg init ~/repos/learnscripture.net
-
-  On dev box::
-
-    hg push central
-
- 

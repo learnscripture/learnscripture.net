@@ -353,18 +353,6 @@ TEMPLATES = {
         "owner": "root",
         "mode": "600",
     },
-    "hgweb.wsgi": {
-        "system": False,
-        "local_path": "config/hgweb.wsgi",
-        "remote_path": "/home/%(proj_name)s/repos/hgweb.wsgi",
-        # reload command needs to be run as root, won't work here
-    },
-    "hgweb.config": {
-        "system": False,
-        "local_path": "config/hgweb.config",
-        "remote_path": "/home/%(proj_name)s/repos/hgweb.config",
-        # reload command needs to be run as root, won't work here
-    },
 }
 
 
@@ -528,10 +516,8 @@ def code_quality_checks():
 
 
 def check_branch():
-    if local("hg id -b", capture=True) != "default":
-        raise AssertionError("Branch must be 'default' for deploying")
-    if "master" not in local("hg id -B", capture=True).split(" "):
-        raise AssertionError("Bookmark must be 'master' for deploying")
+    if local("git rev-parse --abbrev-ref HEAD", capture=True) != "master":
+        raise AssertionError("Branch must be 'master' for deploying")
 
 
 def push_to_central_vcs():
@@ -539,7 +525,7 @@ def push_to_central_vcs():
     # central VCS i.e. if central has code on the master branch that hasn't been
     # merged locally. This prevents deploys overwriting a previous deploy
     # unknowingly due to failure to merge changes.
-    local("hg push -B master central; test $? -ne 255")
+    local("git push master central")
 
 
 @task
@@ -551,7 +537,7 @@ def no_tag():
 
 
 def create_target():
-    commit_ref = get_current_hg_ref()
+    commit_ref = get_current_git_ref()
     target = Version(commit_ref)
     target.make_dirs()
     return target
@@ -568,27 +554,26 @@ def push_sources(target):
     target_src_root = target.SRC_ROOT
     previous_src_root = previous_target.SRC_ROOT
 
-    if not exists(os.path.join(target_src_root, '.hg')):
+    if not exists(os.path.join(target_src_root, '.git')):
         previous_target = get_target_current_version(target)
         previous_src_root = previous_target.SRC_ROOT
-        if exists(previous_src_root) and exists(os.path.join(previous_src_root, '.hg')):
+        if exists(previous_src_root) and exists(os.path.join(previous_src_root, '.git')):
             # For speed, clone the 'current' repo which will be very similar to
-            # what we are pushing. This will also be fast due to 'hg clone'
-            # using hard links
-            run("hg clone %s %s" % (previous_src_root,
-                                    target_src_root))
+            # what we are pushing.
+            run("git clone %s %s" % (previous_src_root,
+                                     target_src_root))
         else:
             with cd(target_src_root):
-                run("hg init")
+                run("git init")
 
-    local("hg push -B . -f ssh://%(user)s@%(host)s/%(path)s || true" %
+    local("git push ssh://%(user)s@%(host)s/%(path)s || true" %
           dict(host=env.host,
                user=env.user,
                path=target_src_root,
                ))
     with cd(target_src_root):
-        run("hg update -r %s" % target.version)
-    # NB we also use hg at at runtime in settings file to set Sentry release,
+        run("git checkout -r %s" % target.version)
+    # NB we also use git at runtime in settings file to set Sentry release,
     # see settings.py
 
     # Also need to sync files that are not in main sources VCS repo.
@@ -598,7 +583,7 @@ def push_sources(target):
 def tag_deploy():
     if getattr(env, 'no_tag', False):
         return
-    local("hg tag -f deploy-production-$(date --utc --iso-8601=seconds | tr ':' '-' | cut -f 1 -d '+')")
+    local("git tag deploy-production-$(date --utc --iso-8601=seconds | tr ':' '-' | cut -f 1 -d '+')")
 
 
 def ensure_src_dir(target):
@@ -751,12 +736,8 @@ def make_target_current(target):
          current_target.PROJECT_ROOT))
 
 
-def get_current_hg_ref():
-    ref = local("hg id -i", capture=True).strip()
-    # assert not ref.endswith('+'), "Uncommitted changes in working dir"
-    # Or - add extra timestamp for this case
-    ref = ref.rstrip('+')
-    return ref
+def get_current_git_ref():
+    return local("git rev-parse HEAD", capture=True).strip()
 
 
 @task
@@ -1044,7 +1025,6 @@ def upload_letsencrypt_conf():
 
 @task
 def create_sentry_release(version, last_commit):
-    # full_hash = local("hg log -l 1 --template '{{node}}' -r {commit}".format(commit=last_commit), capture=True)
     local("sentry-cli releases --org learnscripturenet new -p production {version}".format(version=version))
     # Commits not currently publically available
     # local('sentry-cli releases --org learnscripturenet set-commits --commit "learnscripture/learnscripture.net@{commit}" {version}'.format(version=version, commit=full_hash))

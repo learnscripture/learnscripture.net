@@ -26,33 +26,6 @@ autorestart=true
 redirect_stderr=true
 environment=LANG="%(locale)s",LC_ALL="%(locale)s",LC_LANG="%(locale)s"
 
-[program:hgweb]
-command=%(VENV_ROOT)s/bin/uwsgi
-    --home %(VENV_ROOT)s
-    --env PATH=%(VENV_ROOT)s/bin:%%(ENV_PATH)s
-    --env HOME=/home/%(proj_user)s
-    --env LANG=%(locale)s --env LC_ALL=%(locale)s --env LC_LANG=%(locale)s
-    -s /tmp/hgweb.sock
-    --chdir /home/%(proj_user)s/repos
-    --wsgi-file hgweb.wsgi
-    --route-run="fixpathinfo:"
-    --master
-    --process 2
-    --harakiri 30 --http-timeout 180 --reload-on-rss 300
-    -C
-    -M
-    --logger file:logfile=/home/%(proj_user)s/logs/hgweb.log,maxsize=200000
-    --buffer-size 16384
-    --ignore-sigpipe --ignore-write-errors --disable-write-exception
-    --pidfile=/tmp/hgweb.pid
-directory=/home/%(proj_user)s/repos
-user=%(proj_user)s
-autostart=true
-stdout_logfile = /home/%(proj_user)s/logs/hgweb.stdout
-autorestart=true
-redirect_stderr=true
-environment=LANG="%(locale)s",LC_ALL="%(locale)s",LC_LANG="%(locale)s"
-
 
 [program:%(proj_name)s_memcached]
 command=/usr/bin/memcached -m 24 -s /home/%(proj_user)s/%(proj_name)s_memcached.sock

@@ -16,16 +16,14 @@ installed.
    while we look for a host that supports both Mercurial and issue tracking
    and is cheap etc.::
 
-     TODO git
+     git clone git@gitlab.com:learnscripture/learnscripture.net.git src
 
-     hg clone ssh://learnscripure@learnscripture.net/repos/learnscripture.net src
-
-   Edit your ``.hg/hgrc`` to have a ``central`` alias pointing to the same place,
+   Edit your ``.git/config`` to have a ``central`` alias pointing to the same place,
    this is needed for deploying.
 
    You will also need a copy of the text sources, checked out in 'texts' in a sibling directory to 'src'::
 
-     hg clone ssh://learnscripure@learnscripture.net/repos/learnscripture-texts texts
+     git clone git@gitlab.com:learnscripture/learnscripture-texts.git texts
 
 
 3. Create a virtualenv for the project e.g.::

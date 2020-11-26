@@ -390,7 +390,7 @@ if (DEBUG or TESTING or any(a in sys.argv for a in ['setup_bibleverse_suggestion
     }
 else:
     if SENTRY_DSN:
-        version = subprocess.check_output(['hg', '--cwd', SRC_ROOT, 'id', '-i']).strip().decode('utf-8')
+        version = subprocess.check_output(['git', '-C', SRC_ROOT, 'rev-parse', 'HEAD']).strip().decode('utf-8')
         release = "learnscripturenet@" + version
         sentry_sdk.init(
             dsn=SENTRY_DSN,
