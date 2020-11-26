@@ -1691,8 +1691,8 @@ def _user_events(for_account, viewer):
             )
 
 
-@djpjax.pjax(additional_templates={
-    ".more-results-container": "learnscripture/activity_stream_results_inc.html",
+@htmx({
+    "id-more-results-container": "learnscripture/activity_stream_results_inc.html",
 })
 def user_activity_stream(request, username):
     account = get_object_or_404(Account.objects.visible_for_account(account_from_request(request)),
