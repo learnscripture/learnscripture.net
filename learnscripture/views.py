@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import urllib.parse
 from datetime import timedelta
-
 from typing import List, Optional
+
 import attr
 import djpjax
 import furl

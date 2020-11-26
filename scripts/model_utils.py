@@ -1,8 +1,7 @@
 from datetime import date
 
-from django.db.models import QuerySet
-
 import visidata
+from django.db.models import QuerySet
 
 
 def get_main_attrs(instance):
