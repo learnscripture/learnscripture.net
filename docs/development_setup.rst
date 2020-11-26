@@ -16,6 +16,8 @@ installed.
    while we look for a host that supports both Mercurial and issue tracking
    and is cheap etc.::
 
+     TODO git
+
      hg clone ssh://learnscripure@learnscripture.net/repos/learnscripture.net src
 
    Edit your ``.hg/hgrc`` to have a ``central`` alias pointing to the same place,
