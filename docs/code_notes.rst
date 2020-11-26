@@ -47,7 +47,8 @@ a verse reference for a given ``TextVersion``.
 Client-side/server-side
 =======================
 
-We use jQuery for client-side code where it is relatively simple stuff.
+We use jQuery for client-side code where it is relatively simple stuff, and
+preferably HTMX where possible.
 
 We use Elm for the 'learn' page.
 
@@ -61,5 +62,3 @@ everywhere. This has significant advantages over a library like JsRender:
 
 This has the result that some of our API calls return rendered HTML instead of
 the more usual JSON data that might be manipulated client-side.
-
-We use PJAX for inline updates to pages.

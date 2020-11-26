@@ -30,7 +30,7 @@ class LanguageTestsFB(LanguageTestsBase, BibleVersesMixin, FullBrowserTest):
     def test_change_language_redirect(self):
         self.get_url('choose')
         self.click("#id-choose-verseset .accordion-heading")
-        # This change the URL via PJAX without a page submit:
+        # This change the URL via HTMX without a page submit:
         self.click('#id_set_type_2')
         url = self.current_url
         self.fill({'#id-language-chooser-form select': 'tr'})

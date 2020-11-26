@@ -8,7 +8,6 @@
 import 'expose-loader?jQuery!jquery';
 import "jquery-ui/ui/widgets/sortable";
 import 'autosize';
-import 'jquery-pjax';
 import 'htmx.org';
 
 

@@ -4,7 +4,6 @@ from datetime import timedelta
 from typing import List, Optional
 
 import attr
-import djpjax
 import furl
 from django.conf import settings
 from django.contrib import messages
