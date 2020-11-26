@@ -572,7 +572,7 @@ def push_sources(target):
                path=target_src_root,
                ))
     with cd(target_src_root):
-        run("git checkout -r %s" % target.version)
+        run("git checkout %s" % target.version)
     # NB we also use git at runtime in settings file to set Sentry release,
     # see settings.py
 
