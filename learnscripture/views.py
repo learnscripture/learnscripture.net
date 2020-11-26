@@ -491,7 +491,7 @@ def default_bible_version_for_request(request):
 
 @htmx({
     "id-choose-verseset-results": "learnscripture/choose_verseset_inc.html",
-    "id-more-results-container": "learnscripture/choose_verseset_more_results_inc.html",
+    "id-more-results-container": "learnscripture/choose_verseset_results_inc.html",
 })
 def choose(request):
     """
