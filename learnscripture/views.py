@@ -489,9 +489,9 @@ def default_bible_version_for_request(request):
 # No 'require_preferences' or 'require_identity' so that bots can browse this
 # page and the linked pages unhindered, for SEO.
 
-@djpjax.pjax(additional_templates={
-    "#id-choose-verseset-results": "learnscripture/choose_verseset_inc.html",
-    ".more-results-container": "learnscripture/choose_verseset_more_results_inc.html",
+@htmx({
+    "id-choose-verseset-results": "learnscripture/choose_verseset_inc.html",
+    "id-more-results-container": "learnscripture/choose_verseset_more_results_inc.html",
 })
 def choose(request):
     """
