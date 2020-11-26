@@ -1490,9 +1490,9 @@ def get_request_from_item(request):
         return 0
 
 
-@djpjax.pjax(additional_templates={
-    "#id-leaderboard-results-table-body": "learnscripture/leaderboard_results_table_body_inc.html",
-    ".more-results-container": "learnscripture/leaderboard_results_table_body_inc.html",
+@htmx({
+    "id-leaderboard-results-table-body": "learnscripture/leaderboard_results_table_body_inc.html",
+    "id-more-results-container": "learnscripture/leaderboard_results_table_body_inc.html",
 })
 def group_leaderboard(request, slug):
     PAGE_SIZE = 30
