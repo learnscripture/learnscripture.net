@@ -302,9 +302,30 @@ footer .referral-link-section {
     }
 }
 
-// PJAX animation
+// PJAX animation (deprecated, use HTMX instead)
 
 .waiting-pjax {
+    opacity: 0.5;
+    transition: 0.1s all;
+    position: relative;
+
+    &:before {
+        content: @fa-var-spinner;
+        display: block;
+        animation: spin 2s infinite linear;
+        .icon-FontAwesome();
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 2em;
+    }
+}
+
+
+// HTMX animation
+
+.htmx-request {
     opacity: 0.5;
     transition: 0.1s all;
     position: relative;

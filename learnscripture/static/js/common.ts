@@ -1,5 +1,6 @@
 // Common functionality and requirements.
 import 'jquery-pjax';
+import htmx = require('htmx.org');
 
 
 // Django CSRF requirements
@@ -138,22 +139,11 @@ $(document).ready(function() {
     // HTMX
     document.querySelectorAll('form[hx-target]').forEach((form, idx) => {
         form.querySelectorAll('input, select').forEach((input, idx) => {
-            console.log("adding to", input);
             input.addEventListener("change", (ev) => {
-                (<HTMLFormElement>form).submit();
+                htmx.trigger(form, 'submit');
             }, true);
         });
     });
-
-
-    // $('form[hx-target]').each(function(idx, elem) {
-    //     var $form = $(elem);
-    //     console.log('fixing ', $form);
-    //     $form.find("input,select").on('change', function(ev) {
-    //         console.log('submitting ', $form);
-    //         $form.submit();
-    //     })
-    // });
 
     // PJAX
     $('form[data-pjax-results-container]').each(function(idx, elem) {
