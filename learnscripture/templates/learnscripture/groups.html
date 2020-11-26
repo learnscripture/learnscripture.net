@@ -9,8 +9,9 @@
   <br>
 
   <form action="." method="GET"
-        data-pjax-results-container="#id-groups-results"
-        data-pjax-more-results-container=".more-results-container"
+        hx-get="."
+        hx-target="#id-groups-results"
+        hx-indicator="#id-groups-results"
         >
     <div class="form-row">
       <label for="id_query">{% ftlmsg 'groups-search-label' %}</label>

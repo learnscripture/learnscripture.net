@@ -1378,9 +1378,9 @@ def groups_editable_for_request(request):
     return Group.objects.editable_for_account(account_from_request(request))
 
 
-@djpjax.pjax(additional_templates={
-    "#id-groups-results": "learnscripture/groups_inc.html",
-    ".more-results-container": "learnscripture/groups_results_inc.html",
+@htmx({
+    "id-groups-results": "learnscripture/groups_inc.html",
+    "id-more-results-container": "learnscripture/groups_results_inc.html",
 })
 def groups(request):
     account = account_from_request(request)
