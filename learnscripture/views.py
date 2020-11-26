@@ -980,9 +980,9 @@ def user_stats(request, username):
 
 
 @require_identity
-@djpjax.pjax(additional_templates={
-    "#id-user-verses-results": "learnscripture/user_verses_inc.html",
-    ".more-results-container": "learnscripture/user_verses_table_body_inc.html",
+@htmx({
+    "id-user-verses-results": "learnscripture/user_verses_inc.html",
+    "id-more-results-container": "learnscripture/user_verses_table_body_inc.html",
 })
 def user_verses(request):
     identity = request.identity

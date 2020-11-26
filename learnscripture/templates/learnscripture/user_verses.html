@@ -7,8 +7,9 @@
 
 {% block content %}
   <form action="." method="GET"
-        data-pjax-results-container="#id-user-verses-results"
-        data-pjax-more-results-container=".more-results-container"
+        hx-get="."
+        hx-target="#id-user-verses-results"
+        hx-indicator="#id-user-verses-results"
         >
     <div class="form-row">
       <label for="id_query">{% ftlmsg 'user-verses-search-label' %}</label>
