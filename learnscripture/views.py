@@ -20,6 +20,7 @@ from django.utils.http import is_safe_url, urlsafe_base64_decode
 from django.views import i18n as i18n_views
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 from django.views.decorators.debug import sensitive_post_parameters
 from django.views.defaults import server_error
 from paypal.standard.forms import PayPalPaymentsForm
@@ -499,42 +500,6 @@ def choose(request):
     default_bible_version = default_bible_version_for_request(request)
     verse_sets = verse_sets_visible_for_request(request)
 
-    if request.method == "POST":
-        if not has_preferences(request):
-            # Shouldn't get here if UI preferences javascript is working right.
-            return redirect_via_prefs(request)
-
-        identity = request.identity
-        version = None
-        try:
-            version = TextVersion.objects.get(slug=request.POST['version_slug'])
-        except (KeyError, TextVersion.DoesNotExist):
-            version = default_bible_version
-
-        # Handle choose set
-        vs_id = request.POST.get('verseset_id', None)
-        if vs_id is not None:
-            try:
-                vs = verse_sets.prefetch_related('verse_choices').get(id=vs_id)
-            except VerseSet.DoesNotExist:
-                # Shouldn't be possible by clicking on buttons.
-                vs = None
-            if vs is not None:
-                return learn_set(request, identity.add_verse_set(vs, version=version),
-                                 session.LearningType.LEARNING)
-
-        # Handle choose individual verse
-        ref = request.POST.get('localized_reference', None)
-        if ref is not None:
-            # First ensure it is valid
-            try:
-                version.get_verse_list(ref, max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
-            except InvalidVerseReference:
-                pass  # Ignore the post.
-            else:
-                return learn_set(request, [identity.add_verse_choice(ref, version=version)],
-                                 session.LearningType.LEARNING)
-
     # Searching for verse sets is done via this view. But looking up individual
     # verses is done by AJAX, so is missing here.
 
@@ -611,6 +576,51 @@ def choose(request):
     c.update(context_for_quick_find(request))
 
     return TemplateResponse(request, 'learnscripture/choose.html', c)
+
+
+@require_preferences
+@require_POST
+def handle_choose_set(request):
+    identity = request.identity
+    default_bible_version = default_bible_version_for_request(request)
+    verse_sets = verse_sets_visible_for_request(request)
+    version = None
+    try:
+        version = TextVersion.objects.get(slug=request.POST['version_slug'])
+    except (KeyError, TextVersion.DoesNotExist):
+        version = default_bible_version
+
+    try:
+        vs_id = int(request.POST['verseset_id'])
+        vs = verse_sets.prefetch_related('verse_choices').get(id=vs_id)
+    except (KeyError, ValueError, VerseSet.DoesNotExist):
+        return HttpResponseRedirect(reverse('choose'))
+    return learn_set(request, identity.add_verse_set(vs, version=version),
+                     session.LearningType.LEARNING)
+
+
+@require_preferences
+@require_POST
+def handle_choose_verse(request):
+    identity = request.identity
+    default_bible_version = default_bible_version_for_request(request)
+    try:
+        version = TextVersion.objects.get(slug=request.POST['version_slug'])
+    except (KeyError, TextVersion.DoesNotExist):
+        version = default_bible_version
+
+    try:
+        ref = request.POST['localized_reference']
+    except KeyError:
+        return HttpResponseRedirect(reverse('choose'))
+
+    try:
+        version.get_verse_list(ref, max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
+    except InvalidVerseReference:
+        # Ignore
+        return HttpResponseRedirect(reverse('choose'))
+    return learn_set(request, [identity.add_verse_choice(ref, version=version)],
+                     session.LearningType.LEARNING)
 
 
 def view_catechism_list(request):

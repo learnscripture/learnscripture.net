@@ -87,7 +87,7 @@
 
   {% endif %}
 
-  <form action="{% url 'choose' %}" method="POST">
+  <form action="{% url 'handle_choose_set' %}" method="POST">
     {% csrf_token %}
     <input type="hidden" name="verseset_id" value="{{ verse_set.id }}">
     <input type="hidden" name="version_slug" value="{{ version.slug }}">

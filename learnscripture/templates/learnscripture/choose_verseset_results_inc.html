@@ -5,7 +5,7 @@
 
 {% for vs in results.items %}
   <div class="verseset">
-    <form action="" method="POST">
+    <form action="{% url 'handle_choose_set' %}" method="POST">
       {% csrf_token %}
       <input type="hidden" name="verseset_id" value="{{ vs.id }}">
       <i class="icon-public" title="{% ftlmsg 'choose-learn-verset-public-notice' %}"></i>

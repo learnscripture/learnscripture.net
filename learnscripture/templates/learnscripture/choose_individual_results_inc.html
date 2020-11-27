@@ -4,7 +4,7 @@
 {% if results %}
   {% for result in results %}
     <div class="actionset">
-      <form class="individual-choose" action="" method="POST">
+      <form class="individual-choose" action="{% url 'handle_choose_verse' %}" method="POST">
         {% csrf_token %}
         <input type="hidden" name="localized_reference" value="{{ result.localized_reference }}">
         <input type="hidden" name="version_slug" value="{{ version_slug }}">
