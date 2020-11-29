@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 import urllib.parse
 from datetime import timedelta
-from typing import List, Optional
 
-import attr
 import furl
 from django.conf import settings
 from django.contrib import messages
@@ -20,8 +18,8 @@ from django.utils.http import is_safe_url, urlsafe_base64_decode
 from django.views import i18n as i18n_views
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
 from django.views.decorators.debug import sensitive_post_parameters
+from django.views.decorators.http import require_POST
 from django.views.defaults import server_error
 from paypal.standard.forms import PayPalPaymentsForm
 
@@ -53,8 +51,9 @@ from learnscripture.ftl_bundles import t
 from payments.sign import sign_payment_info
 from scores.models import get_all_time_leaderboard, get_leaderboard_since, get_verses_started_counts
 
-from .decorators import (has_preferences, redirect_via_prefs, require_account, require_account_with_redirect,
-                         require_identity, require_preferences, htmx)
+from .decorators import (has_preferences, htmx, redirect_via_prefs, require_account, require_account_with_redirect,
+                         require_identity, require_preferences)
+from .utils.paging import Page, get_paged_results, get_request_from_item
 
 #
 # === Notes ===
@@ -1492,13 +1491,6 @@ def group_wall(request, slug):
     return TemplateResponse(request, 'learnscripture/group_wall.html', c)
 
 
-def get_request_from_item(request):
-    try:
-        return int(request.GET.get('from_item', '0'))
-    except ValueError:
-        return 0
-
-
 @htmx({
     "id-leaderboard-results-table-body": "learnscripture/leaderboard_results_table_body_inc.html",
     "id-more-results-container": "learnscripture/leaderboard_results_table_body_inc.html",
@@ -1758,39 +1750,3 @@ def debug(request):
     if 'crash' in request.GET:
         raise AssertionError("Crash!")
     return TemplateResponse(request, "learnscripture/debug.html", {})
-
-
-@attr.s(auto_attribs=True)
-class Page:
-    items: List[object]
-    from_item: int
-    shown_count: int
-    more: bool
-    more_link: str
-    total: Optional[int] = None
-
-    @property
-    def empty(self):
-        return len(self.items) == 0 and self.from_item == 0
-
-
-def get_paged_results(queryset, request, page_size):
-    total = queryset.count()
-    from_item = get_request_from_item(request)
-    last_item = from_item + page_size
-    # Get one extra to see if there is more
-    result_page = list(queryset[from_item:last_item + 1])
-    more = len(result_page) > page_size
-    # Then trim result_page to correct size
-    result_page = result_page[0:page_size]
-    shown_count = from_item + len(result_page)
-    return Page(
-        items=result_page,
-        from_item=from_item,
-        shown_count=shown_count,
-        total=total,
-        more=more,
-        more_link=(furl.furl(request.get_full_path())
-                   .remove(query=['from_item'])
-                   .add(query_params={'from_item': last_item})),
-    )
