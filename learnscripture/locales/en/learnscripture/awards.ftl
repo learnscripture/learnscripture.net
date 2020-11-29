@@ -160,7 +160,7 @@ awards-sharer-award-general-description =
 
 # Description for a specific level
 awards-sharer-award-level-n-description = { $count ->
-      [one]    Created a public selection verse sets
+      [one]    Created a public selection verse set
      *[other]  Created { $count } public selection verse sets
   }
 
