@@ -12,16 +12,15 @@ installed.
 1. Create a directory 'learnscripture.net' and cd into it.
 
 2. Checkout the sources from central VCS into a folder called 'src'.
-   Currently central VCS is held on learnscripture.net SSH account
-   while we look for a host that supports both Mercurial and issue tracking
-   and is cheap etc.::
+   Currently central VCS is held on gitlab.com::
 
      git clone git@gitlab.com:learnscripture/learnscripture.net.git src
 
-   Edit your ``.git/config`` to have a ``central`` alias pointing to the same place,
-   this is needed for deploying.
+   Edit your ``.git/config`` and ensure the gitlab remote is called ``origin``
+   - this is needed for deploying.
 
-   You will also need a copy of the text sources, checked out in 'texts' in a sibling directory to 'src'::
+   You will also need a copy of the text sources, checked out in 'texts' in a
+   sibling directory to 'src'::
 
      git clone git@gitlab.com:learnscripture/learnscripture-texts.git texts
 
