@@ -565,8 +565,8 @@ def push_sources(target):
         else:
             with cd(target_src_root):
                 run("git init")
-                run("echo '[receive]' >> .git/config")
-                run("echo 'denyCurrentBranch = ignore' >> .git/config")
+        run("echo '[receive]' >> .git/config")
+        run("echo 'denyCurrentBranch = ignore' >> .git/config")
 
     local("git push ssh://%(user)s@%(host)s/%(path)s" %
           dict(host=env.host,
@@ -574,7 +574,7 @@ def push_sources(target):
                path=target_src_root,
                ))
     with cd(target_src_root):
-        run("git checkout %s" % target.version)
+        run("git reset --hard {target.version}")
     # NB we also use git at runtime in settings file to set Sentry release,
     # see settings.py
 
