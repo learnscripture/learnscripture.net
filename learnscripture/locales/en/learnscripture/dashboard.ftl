@@ -10,21 +10,6 @@ dashboard-remember-to-create-an-account-html =
     statistics pages. As a guest, your data will expire on { DATETIME($expires) }.
 
 
-## Add to home screen section.
-# Sub title
-dashboard-add-to-home-screen-title = Add to home screen
-
-# Button for adding
-dashboard-add-to-home-screen-button = Add
-
-# Explanation
-dashboard-add-to-home-screen-explanation = You can add this app to your home screen for a better app experience.
-
-# Instructions for adding to homescreen on browsers that use a menu bar icon for this.
-# Text is followed by an image
-dashboard-add-to-home-screen-menu-bar-instructions = Use the homescreen icon in the menu bar that looks like this:
-
-
 ## Unfinished session section.
 
 # Sub title

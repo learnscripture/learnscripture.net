@@ -1,7 +1,6 @@
 import CalHeatMap = require('cal-heatmap');
 import 'cal-heatmap/cal-heatmap.css';
 
-import { UAParser } from 'ua-parser-js';
 import { getSavedCalls } from './offlineutils';
 
 var calHeatMapData: null | any[] = null;
@@ -193,12 +192,6 @@ var setupDashboardControls = function() {
     if (getSavedCalls(accountName).length > 0) {
         $("#id-unfinished-session-warning").show();
         $("#id-unfinished-session-unsaved-data-warning").show();
-    }
-
-    var parser = new UAParser();
-    if (parser.getOS().name == "Android" && parser.getBrowser().name == "Firefox") {
-        // NB not 'show()' below, we need the CSS query for 'standalone' to work.
-        $('#id-firefox-homescreen-install-prompt').removeClass("hide");
     }
 };
 

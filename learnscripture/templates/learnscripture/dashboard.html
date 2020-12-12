@@ -17,16 +17,6 @@
     </div>
   {% endif %}
 
-  <div id="id-homescreen-install-prompt" class="actionset">
-    <h2>{% ftlmsg 'dashboard-add-to-home-screen-title' %}</h2>
-    <div class="actionset">
-      <form>
-        <button type="button" class="btn">{% ftlmsg 'dashboard-add-to-home-screen-button' %}</button>
-      </form>
-      <p>{% ftlmsg 'dashboard-add-to-home-screen-explanation' %}</p>
-    </div>
-  </div>
-
   {% if request.identity.scoring_enabled %}
     <h2>{% ftlmsg 'dashboard-learning-events' %}
       <a href="#"
@@ -345,15 +335,6 @@
     {% url 'choose' as choose_url %}
     <p>{% ftlmsg 'dashboard-choose-link-html' url=choose_url %}</p>
 
-  </div>
-
-  <div id="id-firefox-homescreen-install-prompt" class="hide">
-    <h2>{% ftlmsg 'dashboard-add-to-home-screen-title' %}</h2>
-    <div id="id-firefox-homescreen-install-prompt" class="borderedbox">
-      <p>{% ftlmsg 'dashboard-add-to-home-screen-explanation' %}.<br>
-        {% ftlmsg 'dashboard-add-to-home-screen-menu-bar-instructions' %} <img src="{{ STATIC_URL }}img/firefox_add_to_home_screen.png" />
-      </p>
-    </div>
   </div>
 
 {% endblock %}

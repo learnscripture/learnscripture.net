@@ -11,21 +11,6 @@ dashboard-remember-to-create-an-account-html =
     sayfaları. Misafir verileriniz { DATETIME($expires) } tarihinde silinecektir.
 
 
-## Add to home screen section.
-# Sub title
-dashboard-add-to-home-screen-title = Ana ekrana ekle
-
-# Button for adding
-dashboard-add-to-home-screen-button = Ekle
-
-# Explanation
-dashboard-add-to-home-screen-explanation = Daha iyi bir deneyim için bu uygulamayı cihazınızın ana ekranına ekleyebilirsiniz.
-
-# Instructions for adding to homescreen on browsers that use a menu bar icon for this.
-# Text is followed by an image
-dashboard-add-to-home-screen-menu-bar-instructions = Sayfayı eklemek için menü çubuğunda şu imgeyi tıklayın:
-
-
 ## Unfinished session section.
 
 # Sub title
