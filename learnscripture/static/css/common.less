@@ -334,20 +334,17 @@ footer .referral-link-section {
     display: none; // Don't reproduce browser functionality
 }
 
-@media all and (display-mode: standalone) {
+#id-unloader {
+    display: none;
+}
+
+@media all and (display-mode: standalone),
+       all and (display-mode: fullscreen) {
     .reload-icon {
         font-size: 80%;
         float: right;
         display: inline-block;
     }
-}
-
-#id-unloader {
-    display: none;
-}
-
-
-@media all and (display-mode: standalone) {
     // In standalone there is no chrome to show that something
     // is happening, we add our own.
     #id-unloader {
