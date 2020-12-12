@@ -565,8 +565,9 @@ def push_sources(target):
         else:
             with cd(target_src_root):
                 run("git init")
-        run("echo '[receive]' >> .git/config")
-        run("echo 'denyCurrentBranch = ignore' >> .git/config")
+        with cd(target_src_root):
+            run("echo '[receive]' >> .git/config")
+            run("echo 'denyCurrentBranch = ignore' >> .git/config")
 
     local("git push ssh://%(user)s@%(host)s/%(path)s" %
           dict(host=env.host,
