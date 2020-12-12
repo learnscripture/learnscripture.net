@@ -13,7 +13,6 @@ django-autoslug==1.9.7
 django-autocomplete-light==3.5.1
 django-markup==1.4.1
 django-paypal==1.0
-django-pjax==1.4
 django-spurl==0.6.6
 django-webpack-loader==0.5.0
 django==2.2.14

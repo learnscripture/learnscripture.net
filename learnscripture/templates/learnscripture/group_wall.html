@@ -10,8 +10,9 @@
   <h2>{% ftlmsg 'comments-comment-list-title' %}</h2>
 
   <form action="." method="GET"
-        data-pjax-results-container="#id-group-wall-comments"
-        data-pjax-more-results-container=".more-results-container"
+        hx-get="."
+        hx-target="#id-group-wall-comments"
+        hx-indicator="#id-group-wall-comments"
         >
     {{ filter_form|render_form }}
   </form>

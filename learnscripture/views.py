@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 import urllib.parse
 from datetime import timedelta
-from typing import List, Optional
 
-import attr
-import djpjax
 import furl
 from django.conf import settings
 from django.contrib import messages
@@ -22,6 +19,7 @@ from django.views import i18n as i18n_views
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.debug import sensitive_post_parameters
+from django.views.decorators.http import require_POST
 from django.views.defaults import server_error
 from paypal.standard.forms import PayPalPaymentsForm
 
@@ -53,8 +51,9 @@ from learnscripture.ftl_bundles import t
 from payments.sign import sign_payment_info
 from scores.models import get_all_time_leaderboard, get_leaderboard_since, get_verses_started_counts
 
-from .decorators import (has_preferences, redirect_via_prefs, require_account, require_account_with_redirect,
+from .decorators import (has_preferences, htmx, redirect_via_prefs, require_account, require_account_with_redirect,
                          require_identity, require_preferences)
+from .utils.paging import Page, get_paged_results, get_request_from_item
 
 #
 # === Notes ===
@@ -489,9 +488,9 @@ def default_bible_version_for_request(request):
 # No 'require_preferences' or 'require_identity' so that bots can browse this
 # page and the linked pages unhindered, for SEO.
 
-@djpjax.pjax(additional_templates={
-    "#id-choose-verseset-results": "learnscripture/choose_verseset_inc.html",
-    ".more-results-container": "learnscripture/choose_verseset_more_results_inc.html",
+@htmx({
+    "id-choose-verseset-results": "learnscripture/choose_verseset_inc.html",
+    "id-more-results-container": "learnscripture/choose_verseset_results_inc.html",
 })
 def choose(request):
     """
@@ -499,42 +498,6 @@ def choose(request):
     """
     default_bible_version = default_bible_version_for_request(request)
     verse_sets = verse_sets_visible_for_request(request)
-
-    if request.method == "POST":
-        if not has_preferences(request):
-            # Shouldn't get here if UI preferences javascript is working right.
-            return redirect_via_prefs(request)
-
-        identity = request.identity
-        version = None
-        try:
-            version = TextVersion.objects.get(slug=request.POST['version_slug'])
-        except (KeyError, TextVersion.DoesNotExist):
-            version = default_bible_version
-
-        # Handle choose set
-        vs_id = request.POST.get('verseset_id', None)
-        if vs_id is not None:
-            try:
-                vs = verse_sets.prefetch_related('verse_choices').get(id=vs_id)
-            except VerseSet.DoesNotExist:
-                # Shouldn't be possible by clicking on buttons.
-                vs = None
-            if vs is not None:
-                return learn_set(request, identity.add_verse_set(vs, version=version),
-                                 session.LearningType.LEARNING)
-
-        # Handle choose individual verse
-        ref = request.POST.get('localized_reference', None)
-        if ref is not None:
-            # First ensure it is valid
-            try:
-                version.get_verse_list(ref, max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
-            except InvalidVerseReference:
-                pass  # Ignore the post.
-            else:
-                return learn_set(request, [identity.add_verse_choice(ref, version=version)],
-                                 session.LearningType.LEARNING)
 
     # Searching for verse sets is done via this view. But looking up individual
     # verses is done by AJAX, so is missing here.
@@ -612,6 +575,51 @@ def choose(request):
     c.update(context_for_quick_find(request))
 
     return TemplateResponse(request, 'learnscripture/choose.html', c)
+
+
+@require_preferences
+@require_POST
+def handle_choose_set(request):
+    identity = request.identity
+    default_bible_version = default_bible_version_for_request(request)
+    verse_sets = verse_sets_visible_for_request(request)
+    version = None
+    try:
+        version = TextVersion.objects.get(slug=request.POST['version_slug'])
+    except (KeyError, TextVersion.DoesNotExist):
+        version = default_bible_version
+
+    try:
+        vs_id = int(request.POST['verseset_id'])
+        vs = verse_sets.prefetch_related('verse_choices').get(id=vs_id)
+    except (KeyError, ValueError, VerseSet.DoesNotExist):
+        return HttpResponseRedirect(reverse('choose'))
+    return learn_set(request, identity.add_verse_set(vs, version=version),
+                     session.LearningType.LEARNING)
+
+
+@require_preferences
+@require_POST
+def handle_choose_verse(request):
+    identity = request.identity
+    default_bible_version = default_bible_version_for_request(request)
+    try:
+        version = TextVersion.objects.get(slug=request.POST['version_slug'])
+    except (KeyError, TextVersion.DoesNotExist):
+        version = default_bible_version
+
+    try:
+        ref = request.POST['localized_reference']
+    except KeyError:
+        return HttpResponseRedirect(reverse('choose'))
+
+    try:
+        version.get_verse_list(ref, max_length=MAX_VERSES_FOR_SINGLE_CHOICE)
+    except InvalidVerseReference:
+        # Ignore
+        return HttpResponseRedirect(reverse('choose'))
+    return learn_set(request, [identity.add_verse_choice(ref, version=version)],
+                     session.LearningType.LEARNING)
 
 
 def view_catechism_list(request):
@@ -980,9 +988,9 @@ def user_stats(request, username):
 
 
 @require_identity
-@djpjax.pjax(additional_templates={
-    "#id-user-verses-results": "learnscripture/user_verses_inc.html",
-    ".more-results-container": "learnscripture/user_verses_table_body_inc.html",
+@htmx({
+    "id-user-verses-results": "learnscripture/user_verses_inc.html",
+    "id-more-results-container": "learnscripture/user_verses_table_body_inc.html",
 })
 def user_verses(request):
     identity = request.identity
@@ -1378,9 +1386,9 @@ def groups_editable_for_request(request):
     return Group.objects.editable_for_account(account_from_request(request))
 
 
-@djpjax.pjax(additional_templates={
-    "#id-groups-results": "learnscripture/groups_inc.html",
-    ".more-results-container": "learnscripture/groups_results_inc.html",
+@htmx({
+    "id-groups-results": "learnscripture/groups_inc.html",
+    "id-more-results-container": "learnscripture/groups_results_inc.html",
 })
 def groups(request):
     account = account_from_request(request)
@@ -1447,9 +1455,9 @@ def group(request, slug):
     })
 
 
-@djpjax.pjax(additional_templates={
-    "#id-group-wall-comments": "learnscripture/group_wall_comments_inc.html",
-    ".more-results-container": "learnscripture/group_wall_comments_results_inc.html",
+@htmx({
+    "id-group-wall-comments": "learnscripture/group_wall_comments_inc.html",
+    "id-more-results-container": "learnscripture/group_wall_comments_results_inc.html",
 })
 def group_wall(request, slug):
     account = account_from_request(request)
@@ -1483,16 +1491,9 @@ def group_wall(request, slug):
     return TemplateResponse(request, 'learnscripture/group_wall.html', c)
 
 
-def get_request_from_item(request):
-    try:
-        return int(request.GET.get('from_item', '0'))
-    except ValueError:
-        return 0
-
-
-@djpjax.pjax(additional_templates={
-    "#id-leaderboard-results-table-body": "learnscripture/leaderboard_results_table_body_inc.html",
-    ".more-results-container": "learnscripture/leaderboard_results_table_body_inc.html",
+@htmx({
+    "id-leaderboard-results-table-body": "learnscripture/leaderboard_results_table_body_inc.html",
+    "id-more-results-container": "learnscripture/leaderboard_results_table_body_inc.html",
 })
 def group_leaderboard(request, slug):
     PAGE_SIZE = 30
@@ -1667,8 +1668,8 @@ Message:
     ).send()
 
 
-@djpjax.pjax(additional_templates={
-    ".more-results-container": "learnscripture/activity_stream_results_inc.html",
+@htmx({
+    "id-more-results-container": "learnscripture/activity_stream_results_inc.html",
 })
 def activity_stream(request):
     viewer = account_from_request(request)
@@ -1691,8 +1692,8 @@ def _user_events(for_account, viewer):
             )
 
 
-@djpjax.pjax(additional_templates={
-    ".more-results-container": "learnscripture/activity_stream_results_inc.html",
+@htmx({
+    "id-more-results-container": "learnscripture/activity_stream_results_inc.html",
 })
 def user_activity_stream(request, username):
     account = get_object_or_404(Account.objects.visible_for_account(account_from_request(request)),
@@ -1749,39 +1750,3 @@ def debug(request):
     if 'crash' in request.GET:
         raise AssertionError("Crash!")
     return TemplateResponse(request, "learnscripture/debug.html", {})
-
-
-@attr.s(auto_attribs=True)
-class Page:
-    items: List[object]
-    from_item: int
-    shown_count: int
-    more: bool
-    more_link: str
-    total: Optional[int] = None
-
-    @property
-    def empty(self):
-        return len(self.items) == 0 and self.from_item == 0
-
-
-def get_paged_results(queryset, request, page_size):
-    total = queryset.count()
-    from_item = get_request_from_item(request)
-    last_item = from_item + page_size
-    # Get one extra to see if there is more
-    result_page = list(queryset[from_item:last_item + 1])
-    more = len(result_page) > page_size
-    # Then trim result_page to correct size
-    result_page = result_page[0:page_size]
-    shown_count = from_item + len(result_page)
-    return Page(
-        items=result_page,
-        from_item=from_item,
-        shown_count=shown_count,
-        total=total,
-        more=more,
-        more_link=(furl.furl(request.get_full_path())
-                   .remove(query=['from_item'])
-                   .add(query_params={'from_item': last_item})),
-    )

@@ -9,8 +9,9 @@
   <p><a href="{% url 'group' group.slug %}">{% ftlmsg 'groups-details-group-info-subtitle' %}</a></p>
 
   <form action="." method="GET"
-        data-pjax-results-container="#id-leaderboard-results-table-body"
-        data-pjax-more-results-container=".more-results-container"
+        hx-get="."
+        hx-target="#id-leaderboard-results-table-body"
+        hx-indicator="#id-leaderboard-results-table-body"
         >
     {{ leaderboard_filter_form|render_form }}
   </form>

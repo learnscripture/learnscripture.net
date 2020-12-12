@@ -15,5 +15,18 @@
     <td colspan="4">{% ftlmsg 'leaderboards-no-users-found' %}</td>
   </tr>
 {% else %}
-  {% include "learnscripture/leaderboard_results_show_more_inc.html" %}
+  <tr id="id-more-results-container">
+    <td colspan="4">
+      {% if results.more %}
+        <div class="paging">
+          <span class="paging-part">{% ftlmsg 'leaderboards-showing-user-count' user_count=results.shown_count %}</span>
+          <span class="paging-part"><a href="{{ results.more_link }}"
+                                       hx-get="{{ results.more_link }}"
+                                       hx-target="#id-more-results-container"
+                                       hx-indicator="#id-more-results-container .paging"
+                                       hx-swap="outerHTML">{% ftlmsg 'pagination-show-more' %}</a></span>
+        </div>
+      {% endif %}
+    </td>
+  </tr>
 {% endif %}

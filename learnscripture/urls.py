@@ -23,6 +23,8 @@ urlpatterns = [
     # Main views, different for each user
     url(r'^dashboard/$', learnscripture.views.dashboard, name='dashboard'),
     url(r'^choose/$', learnscripture.views.choose, name='choose'),
+    url(r'^choose-set/$', learnscripture.views.handle_choose_set, name='handle_choose_set'),
+    url(r'^choose-verse/$', learnscripture.views.handle_choose_verse, name='handle_choose_verse'),
     url(r'^catechisms/$', learnscripture.views.view_catechism_list, name='catechisms'),
     url(r'^catechisms/(?P<slug>[^/]+)/$', learnscripture.views.view_catechism, name='view_catechism'),
     url(r'^learn-legacy/$', RedirectView.as_view(pattern_name='learn')),

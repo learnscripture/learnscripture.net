@@ -5,7 +5,7 @@
 
 {% for vs in results.items %}
   <div class="verseset">
-    <form action="" method="POST">
+    <form action="{% url 'handle_choose_set' %}" method="POST">
       {% csrf_token %}
       <input type="hidden" name="verseset_id" value="{{ vs.id }}">
       <i class="icon-public" title="{% ftlmsg 'choose-learn-verset-public-notice' %}"></i>
@@ -29,3 +29,21 @@
   </div>
 {% endfor %}
 
+{% if results.items %}
+  <div id="id-more-results-container">
+    <div class="paging">
+      <span class="paging-part">
+       {% ftlmsg 'pagination-showing-shown-of-total' shown=results.shown_count total=results.total %}
+      </span>
+      {% if results.more %}
+        <span class="paging-part"><a href="{{ results.more_link }}"
+                                     hx-get="{{ results.more_link }}"
+                                     hx-target="#id-more-results-container"
+                                     hx-indicator="#id-more-results-container"
+                                     hx-swap="outerHTML"
+                                     >{% ftlmsg 'pagination-show-more' %}</a></span>
+      {% endif %}
+      <span class="paging-part"><a href="#id-choose-verseset">{% ftlmsg 'pagination-jump-to-top' %}</a></span>
+    </div>
+  </div>
+{% endif %}

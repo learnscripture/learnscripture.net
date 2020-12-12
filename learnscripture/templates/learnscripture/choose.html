@@ -13,9 +13,10 @@
       <button type="button" class="accordion-heading">{% ftlmsg 'choose-choose-a-verse-set-heading' %}</button>
       <div class="accordion-body">
         <form action="." method="GET"
+              hx-get="."
+              hx-target="#id-choose-verseset-results"
+              hx-indicator="#id-choose-verseset-results"
               id="id-choose-verseset-form"
-              data-pjax-results-container="#id-choose-verseset-results"
-              data-pjax-more-results-container=".more-results-container"
           >
           <div class="form-row">
             <label for="id_query">{% ftlmsg 'choose-search-input' %}</label>
@@ -45,7 +46,11 @@
         {% url 'create_passage_set' as create_passage_set_url %}
         <p>{% ftlmsg 'choose-choose-verse-explanation-html' create_passage_set_url=create_passage_set_url %}</p>
 
-        {% include "learnscripture/quick_find_controls.html" %}
+        <form action="" method="GET" class="quickfind always-adjust-size" id="id-quick-find-form">
+          {% include "learnscripture/quick_find_controls.html" %}
+        </form>
+        <div class="quickfind_search_results">
+        </div>
 
         {# See also "learnscripture/choose_individual_results_inc.html" which is rendered via VerseFind API call #}
       </div>

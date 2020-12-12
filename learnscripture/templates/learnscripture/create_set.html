@@ -55,7 +55,11 @@
 
       <h3>{% ftlmsg 'versesets-add-verses-subtitle' %}</h3>
 
-      {% include "learnscripture/quick_find_controls.html" %}
+      <form action="" method="GET" class="quickfind always-adjust-size" id="id-quick-find-form">
+        {% include "learnscripture/quick_find_controls.html" %}
+      </form>
+      <div class="quickfind_search_results">
+      </div>
 
       {# See also "learnscripture/create_selection_results_inc.html" which is rendered by VerseFind API call #}
 
@@ -76,7 +80,11 @@
       <h3>{% ftlmsg 'versesets-choose-passage' %}</h3>
 
       {% with quick_find_mode='PASSAGE' %}
-        {% include "learnscripture/quick_find_controls.html" %}
+        <form action="" method="GET" class="quickfind always-adjust-size" id="id-quick-find-form">
+          {% include "learnscripture/quick_find_controls.html" %}
+        </form>
+        <div class="quickfind_search_results">
+        </div>
       {% endwith %}
 
       <div id="id-duplicate-warning"></div>
