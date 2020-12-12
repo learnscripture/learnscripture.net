@@ -575,7 +575,7 @@ def push_sources(target):
                path=target_src_root,
                ))
     with cd(target_src_root):
-        run("git reset --hard {target.version}")
+        run(f"git reset --hard {target.version}")
     # NB we also use git at runtime in settings file to set Sentry release,
     # see settings.py
 
