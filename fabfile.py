@@ -562,6 +562,8 @@ def push_sources(target):
             # what we are pushing.
             run("git clone %s %s" % (previous_src_root,
                                      target_src_root))
+            with cd(target_src_root):
+                run("git checkout master")
         else:
             with cd(target_src_root):
                 run("git init")
