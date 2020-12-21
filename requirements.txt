@@ -11,7 +11,6 @@ amqp==2.5.2               # via -r requirements.in, kombu
 appdirs==1.4.3            # via fs
 argh==0.26.2              # via watchdog
 argparse==1.4.0           # via unittest2
-asn1crypto==0.24.0        # via cryptography
 attrs==19.3.0             # via -r requirements.in, elm-fluent, fluent-compiler
 babel==2.8.0              # via fluent-compiler
 backcall==0.2.0           # via ipython
@@ -26,7 +25,7 @@ click==7.0                # via elm-fluent, pip-tools
 compare-locales==7.2.5    # via -r requirements-dev.in
 concurrent-log-handler==0.9.16  # via -r requirements.in
 coverage==4.4.1           # via -r requirements-dev.in
-cryptography==2.7         # via paramiko
+cryptography==3.3.1       # via paramiko
 cssselect==1.0.3          # via pyquery
 decorator==4.4.0          # via ipython, traitlets
 django-anymail==7.1.0     # via -r requirements.in
@@ -54,7 +53,7 @@ easy-thumbnails==2.6      # via -r requirements.in
 easyprocess==0.2.7        # via pyvirtualdisplay
 elm-fluent==0.6.0         # via -r requirements-dev.in
 entrypoints==0.3          # via flake8
-fabric3==1.13.1.post1     # via -r requirements-dev.in, fabtools3
+fabric3==1.14.post1       # via -r requirements-dev.in, fabtools3
 fabtools3==0.19.0         # via -r requirements-dev.in
 flake8==3.7.8             # via -r requirements-dev.in
 fluent-compiler==0.2      # via django-ftl
@@ -76,7 +75,7 @@ mock==2.0.0               # via -r requirements-dev.in
 nodeenv==1.3.3            # via -r requirements-dev.in
 numpy==1.18.2             # via -r requirements.in, pykov, scipy
 orderedmultidict==1.0.1   # via furl
-paramiko==2.6.0           # via fabric3
+paramiko==2.7.2           # via fabric3
 parso==0.7.1              # via jedi
 parsy==1.3.0              # via -r requirements.in
 pathtools==0.1.2          # via watchdog
