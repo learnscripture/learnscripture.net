@@ -754,7 +754,7 @@ def fake_migrations():
 def delete_old_versions():
     fix_perms(Version.VERSIONS_ROOT, env.proj_user)
     with cd(Version.VERSIONS_ROOT):
-        commitref_glob = "?" * 12
+        commitref_glob = "?" * 40
         run("ls -dtr %s | head -n -3 | xargs rm -rf" % commitref_glob)
 
 
