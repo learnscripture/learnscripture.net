@@ -66,12 +66,6 @@ installed.
      cd tests
      elm-install
 
-   For Sentry release integration after deployment, install ``sentry-cli`` into
-   $VIRTUAL_ENV/bin:
-
-      https://github.com/getsentry/sentry-cli/releases/
-
-   and set up a ~/.sentryclirc
 
 5. Create postgres databases matching the development ones in
    ``learnscripture/settings.py``, both for ``learnscripture`` and
@@ -179,3 +173,21 @@ resulting in missing pages and bits of text when browsing the development site.
 
 We need to fix this in a way that doesn't require downloading real user data to
 the developers' machines.
+
+
+Deployment
+~~~~~~~~~~
+To be able to deploy, you need the following:
+
+* Get secrets.json from the production server
+
+* For Sentry release integration after deployment, install ``sentry-cli`` into
+  $VIRTUAL_ENV/bin, or elsewhere, as per `installation docs
+  <https://docs.sentry.io/product/cli/installation/>`_.
+
+  As described in the `auth docs
+  <https://docs.sentry.io/product/cli/configuration/>`_, get a token from
+  sentry.io, and put into ~/.sentryclirc, or into an environment variable.
+
+  If you have more than one thing using sentry-cli, environment variables are
+  better. They can be put into ``postactivate`` script of the virtualenv.
