@@ -64,3 +64,7 @@ Run the tests::
 To see more options::
 
     ./runtests.py --help
+
+* put "fsync = off" and "synchronous_commit = off" in your postgresql.conf
+  for large speedups when running tests.
+
