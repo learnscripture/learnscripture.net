@@ -16,10 +16,9 @@ awards-points-bonus =  Bonus puanlar: { $points }.
 # Appears next to notification about new award, as shortcuts for
 # telling other people about the award.
 # $twitter is a link to Twitter.
-# $facebook is a link to Facebook.
-awards-tell-people-html = Arkadaşlarınızı bilgilendirin: { $facebook } { $twitter }
+awards-tell-people-html = Arkadaşlarınızı bilgilendirin: { $twitter }
 
-# Default message that is used for sharing about awards on twitter/facebook
+# Default message that is used for sharing about awards on social media
 # $award is the award name/description
 awards-social-media-default-message = Ben bir rozet kazandım: { $award }
 

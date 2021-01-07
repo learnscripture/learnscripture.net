@@ -31,7 +31,7 @@ referrals-please-dont-send-bulk-emails = Arkadaşlarınıza bu site hakkında to
 # Sub-title for list of things you should/can do
 referrals-please-do-title = Şunları lütfen yapınız:
 
-referrals-please-do-share-on-social-media = Linki Facebook, Twitter veya Pintrest gibi sitelerde yayımlayın (ama insanları caydıracak kadar fazla değil!)
+referrals-please-do-share-on-social-media = Linki Twitter veya Pintrest gibi sitelerde yayımlayın (ama insanları caydıracak kadar fazla değil!)
 
 referrals-please-do-include-personal-comments = LearnScripture.net’i neden beğendiğinizi ve size nasıl yardımcı olduğunu açıklayan kişisel bir yazıyı ekleyin.
 

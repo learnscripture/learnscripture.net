@@ -32,7 +32,7 @@ referrals-please-dont-send-bulk-emails = Send bulk emails to friends about this.
 # Sub-title for list of things you should/can do
 referrals-please-do-title = Please do:
 
-referrals-please-do-share-on-social-media = Post this link to social sites like Facebook, Twitter or Pinterest (as long as you don't post it repeatedly and annoy people!)
+referrals-please-do-share-on-social-media = Post this link to social sites like Twitter or Pinterest (as long as you don't post it repeatedly and annoy people!)
 
 referrals-please-do-include-personal-comments = Include some personal comment about why you like LearnScripture.net or how it has helped you.
 

@@ -29,19 +29,11 @@ var setupNoticesControls = function() {
         var d = $elem.data();
         var loc = document.location;
         var urlStart = loc.protocol + '//' + loc.host;
-        var redirectUri = loc.toString();
         var link = urlStart + d['link'];
         link += ((link.indexOf('?') == -1) ? "?" : "&");
         link += "from=" + d['accountUsername'];
 
         var caption = d['caption'];
-
-        // Facebook
-        var fbUrl = 'https://www.facebook.com/dialog/feed?app_id=175882602545382' +
-            '&link=' + encodeURIComponent(link) +
-            '&redirect_uri=' + encodeURIComponent(redirectUri) +
-            '&caption=' + encodeURIComponent(caption) +
-            '&picture=' + encodeURIComponent(urlStart + d['picture']);
 
         // Twitter
         var twUrl = 'https://twitter.com/share' +
@@ -49,7 +41,6 @@ var setupNoticesControls = function() {
             '&text=' + encodeURIComponent(caption) +
             '&hashtags=LearnScripture';
 
-        $elem.find('a[data-facebook-link]').attr('href', fbUrl);
         $elem.find('a[data-twitter-link]').attr('href', twUrl);
     });
 

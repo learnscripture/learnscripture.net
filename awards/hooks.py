@@ -40,13 +40,8 @@ def new_award_msg_html(award, account, points=None):
         points_msg = t('awards-points-bonus', dict(points=points))
         msg = format_html("{0} {1}", msg, points_msg)
 
-    # Facebook: this notice could be displayed on any page, and we want the
-    # 'redirect_uri' parameter to take them back to where they were.  So we
-    # render the link to facebook using javascript, embedding necessary data
-    # using data attributes.
     tell_people_link = t('awards-tell-people-html',
-                         dict(facebook=format_html('<a data-facebook-link><i class="icon-facebook"></i> Facebook</a>'),
-                              twitter=format_html('<a data-twitter-link><i class="icon-twitter"></i> Twitter</a>'),
+                         dict(twitter=format_html('<a data-twitter-link><i class="icon-twitter"></i> Twitter</a>'),
                               ))
 
     caption = t('awards-social-media-default-message',
