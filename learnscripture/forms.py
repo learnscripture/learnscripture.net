@@ -102,7 +102,7 @@ class SignUpForm(forms.ModelForm):
 
 SignUpForm.base_fields['email'].help_text = t_lazy('accounts-email-help-text')
 SignUpForm.base_fields['username'].help_text = t_lazy('forms-field-public')
-SignUpForm.base_fields['first_name'].help_text = t_lazy('forms-field-optional')
+SignUpForm.base_fields['first_name'].help_text = t_lazy('forms-field-public-optional')
 SignUpForm.base_fields['last_name'].help_text = t_lazy('forms-field-public-optional')
 
 

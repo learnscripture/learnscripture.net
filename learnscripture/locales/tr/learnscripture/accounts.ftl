@@ -161,7 +161,7 @@ accounts-password-length-validation = Parola en az { $length } karakter uzunluğ
 accounts-username-already-taken = Bu kullanıcı adı zaten bir hesap için kullanılmıştır
 
 # Help text for email field when signing up
-accounts-email-help-text = Özel tutulur. Bildirimler ve parola değişimi için gereklidir
+accounts-email-help-text = Özel tutulur. Parola değişimi için gereklidir
 
 # Notification when a user signs up
 accounts-signup-welcome-notice = Hesabınız oluşturuldu, { $username }. Hoş geldiniz!

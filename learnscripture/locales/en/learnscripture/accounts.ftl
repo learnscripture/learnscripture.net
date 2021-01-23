@@ -162,7 +162,7 @@ accounts-password-length-validation = The password must be at least { $length } 
 accounts-username-already-taken = Account with this username already exists
 
 # Help text for email field when signing up
-accounts-email-help-text = Private. Needed for notifications and password reset
+accounts-email-help-text = Private. Needed for password reset.
 
 # Notification when a user signs up
 accounts-signup-welcome-notice = Account created - welcome { $username }!
