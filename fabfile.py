@@ -245,6 +245,7 @@ def _install_system():
     apt(" ".join(REQS))
     _add_swap()
     _ssl_dhparam()
+    run("apt remove snapd")
 
 
 @as_rootuser
