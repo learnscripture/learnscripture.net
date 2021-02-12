@@ -138,6 +138,10 @@ installed.
    See also :doc:`project_structure.rst` for more info on running tests.
 
 
+10. Install pre-commit::
+
+      pre-commit install
+
 Additional tasks
 ~~~~~~~~~~~~~~~~
 
