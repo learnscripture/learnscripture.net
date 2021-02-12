@@ -85,8 +85,9 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         return math.floor(Scores.points_per_word(LANGUAGE_CODE_EN) * points_word_count * actual_accuracy)
 
     def test_save_strength(self):
+        identity, account = self.create_account()
+        self.login(account)
         verse_set = self.choose_verse_set('Bible 101')
-        identity = self._get_current_identity()
 
         # Preconditions - should have been set up by choose_verse_set
         self.assertEqual(verse_set.verse_choices.count(), identity.verse_statuses.count())
@@ -104,6 +105,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self._type_john_3_16_kjv()
 
         self.wait_for_ajax()
+        self.wait_until_loaded("li.action-log-item")
 
         # Check the strength
         uvs = identity.verse_statuses.get(localized_reference='John 3:16')
@@ -131,6 +133,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
 
         time.sleep(0.2)
         self.wait_for_ajax()
+        self.wait_until_loaded("li.action-log-item")
         # Check the strength
         uvs = identity.verse_statuses.get(localized_reference='Psalm 23:1-2')
         self.assertEqual(uvs.strength, MM.INITIAL_STRENGTH_FACTOR)
