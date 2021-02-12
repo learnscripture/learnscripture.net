@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import re
 
 import attr
@@ -230,7 +231,7 @@ number = regex(r'[0-9]+').map(int)
 chapter = number.desc("chapter number [0-9]+")
 verse = number.desc("verse number [0-9]+")
 
-verse_range_sep = string("-")
+verse_range_sep = string("-") | string("–")  # '\u2013'
 chapter_verse_sep = string(":")
 chapter_verse_sep_loose = char_from(":v.").result(":")
 

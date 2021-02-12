@@ -441,6 +441,9 @@ class ParsingTests(unittest.TestCase):
                          "gen 1 v 1 - 2")
         self._test_verse_range(parsed)
 
+        parsed = self.pu(LANGUAGE_CODE_EN, "Gen 1:1\u20132")
+        self._test_verse_range(parsed)
+
     def _test_verse_range(self, parsed):
         self.assertEqual(parsed.book_number, 0)
         self.assertEqual(parsed.book_name, "Genesis")
