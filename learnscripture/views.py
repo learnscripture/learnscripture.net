@@ -1330,8 +1330,8 @@ def awards(request):
     })
 
 
-def award(request, award_slug):
-    award_name = award_slug.replace('-', '_').upper()
+def award(request, slug):
+    award_name = slug.replace('-', '_').upper()
     award_type = AwardType.get_value_for_name(award_name)
     if award_type is None:
         raise Http404

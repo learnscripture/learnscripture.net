@@ -1,4 +1,4 @@
-from django.conf.urls import url
+from django.urls import path
 
 from learnscripture.api import handlers
 
@@ -8,25 +8,25 @@ from learnscripture.api import handlers
 # browser, and then only remove the old one when you are sure no javascript will
 # try to use it.
 urlpatterns = [
-    url(r'^versestolearn2/$', handlers.VersesToLearnHandler.as_view(), name='learnscripture.api.versestolearn2'),
-    url(r'^versestolearn/$', handlers.VersesToLearnHandler.as_view(), name='learnscripture.api.versestolearn'),
-    url(r'^actioncomplete/$', handlers.ActionCompleteHandler.as_view(), name='learnscripture.api.actioncomplete'),
-    url(r'^logout/$', handlers.LogOutHandler.as_view(), name='learnscripture.api.logout'),
-    url(r'^setpreferences/$', handlers.SetPreferences.as_view(), name='learnscripture.api.setpreferences'),
-    url(r'^sessionstats/$', handlers.SessionStats.as_view(), name='learnscripture.api.sessionstats'),
-    url(r'^skipverse/$', handlers.SkipVerseHandler.as_view(), name='learnscripture.api.skipverse'),
-    url(r'^cancellearningverse/$', handlers.CancelLearningVerseHandler.as_view(), name='learnscripture.api.cancellearningverse'),
-    url(r'^cancellearningpassage/$', handlers.CancelLearningPassageHandler.as_view(), name='learnscripture.api.cancellearningpassage'),
-    url(r'^resetprogress/$', handlers.ResetProgressHandler.as_view(), name='learnscripture.api.resetprogress'),
-    url(r'^reviewsooner/$', handlers.ReviewSoonerHandler.as_view(), name='learnscripture.api.reviewsooner'),
-    url(r'^actionlogs/$', handlers.ActionLogs.as_view(), name='learnscripture.api.actionlogs'),
-    url(r'^versefind/$', handlers.VerseFind.as_view(), name='learnscripture.api.versefind'),
-    url(r'^addversetoqueue/$', handlers.AddVerseToQueue.as_view(), name='learnscripture.api.addversetoqueue'),
-    url(r'^deletenotice/$', handlers.DeleteNotice.as_view(), name='learnscripture.api.deletenotice'),
-    url(r'^addcomment/$', handlers.AddComment.as_view(), name='learnscripture.api.addcomment'),
-    url(r'^hidecomment/$', handlers.HideComment.as_view(), name='learnscripture.api.hidecomment'),
-    url(r'^follow/$', handlers.Follow.as_view(), name='learnscripture.api.follow'),
-    url(r'^unfollow/$', handlers.UnFollow.as_view(), name='learnscripture.api.unfollow'),
-    url(r'^savemiscpreferences/$', handlers.SaveMiscPreferences.as_view(), name='learnscripture.api.savemiscpreferences'),
-    url(r'^usertimelinestats/$', handlers.UserTimelineStats.as_view(), name='learnscripture.api.usertimelinestats'),
+    path('versestolearn2/', handlers.VersesToLearnHandler.as_view(), name='learnscripture.api.versestolearn2'),
+    path('versestolearn/', handlers.VersesToLearnHandler.as_view(), name='learnscripture.api.versestolearn'),
+    path('actioncomplete/', handlers.ActionCompleteHandler.as_view(), name='learnscripture.api.actioncomplete'),
+    path('logout/', handlers.LogOutHandler.as_view(), name='learnscripture.api.logout'),
+    path('setpreferences/', handlers.SetPreferences.as_view(), name='learnscripture.api.setpreferences'),
+    path('sessionstats/', handlers.SessionStats.as_view(), name='learnscripture.api.sessionstats'),
+    path('skipverse/', handlers.SkipVerseHandler.as_view(), name='learnscripture.api.skipverse'),
+    path('cancellearningverse/', handlers.CancelLearningVerseHandler.as_view(), name='learnscripture.api.cancellearningverse'),
+    path('cancellearningpassage/', handlers.CancelLearningPassageHandler.as_view(), name='learnscripture.api.cancellearningpassage'),
+    path('resetprogress/', handlers.ResetProgressHandler.as_view(), name='learnscripture.api.resetprogress'),
+    path('reviewsooner/', handlers.ReviewSoonerHandler.as_view(), name='learnscripture.api.reviewsooner'),
+    path('actionlogs/', handlers.ActionLogs.as_view(), name='learnscripture.api.actionlogs'),
+    path('versefind/', handlers.VerseFind.as_view(), name='learnscripture.api.versefind'),
+    path('addversetoqueue/', handlers.AddVerseToQueue.as_view(), name='learnscripture.api.addversetoqueue'),
+    path('deletenotice/', handlers.DeleteNotice.as_view(), name='learnscripture.api.deletenotice'),
+    path('addcomment/', handlers.AddComment.as_view(), name='learnscripture.api.addcomment'),
+    path('hidecomment/', handlers.HideComment.as_view(), name='learnscripture.api.hidecomment'),
+    path('follow/', handlers.Follow.as_view(), name='learnscripture.api.follow'),
+    path('unfollow/', handlers.UnFollow.as_view(), name='learnscripture.api.unfollow'),
+    path('savemiscpreferences/', handlers.SaveMiscPreferences.as_view(), name='learnscripture.api.savemiscpreferences'),
+    path('usertimelinestats/', handlers.UserTimelineStats.as_view(), name='learnscripture.api.usertimelinestats'),
 ]

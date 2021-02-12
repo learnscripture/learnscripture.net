@@ -4,7 +4,7 @@ import django.contrib.staticfiles.views
 import django.views.i18n
 import django.views.static
 from django.conf import settings
-from django.conf.urls import include, url
+from django.urls import include, path, re_path
 from django.contrib import admin
 from django.views.generic import RedirectView
 
@@ -18,122 +18,124 @@ admin.autodiscover()
 
 urlpatterns = [
     # Home page
-    url(r'^$', learnscripture.views.home, name='home'),
+    path('', learnscripture.views.home, name='home'),
 
     # Main views, different for each user
-    url(r'^dashboard/$', learnscripture.views.dashboard, name='dashboard'),
-    url(r'^choose/$', learnscripture.views.choose, name='choose'),
-    url(r'^choose-set/$', learnscripture.views.handle_choose_set, name='handle_choose_set'),
-    url(r'^choose-verse/$', learnscripture.views.handle_choose_verse, name='handle_choose_verse'),
-    url(r'^catechisms/$', learnscripture.views.view_catechism_list, name='catechisms'),
-    url(r'^catechisms/(?P<slug>[^/]+)/$', learnscripture.views.view_catechism, name='view_catechism'),
-    url(r'^learn-legacy/$', RedirectView.as_view(pattern_name='learn')),
-    url(r'^learn/$', learnscripture.views.learn, name='learn'),
-    url(r'^preferences/$', learnscripture.views.preferences, name='preferences'),
-    url(r'^progress/$', learnscripture.views.user_verses, name='user_verses'),
-    url(r'^my-verse-sets/$', learnscripture.views.user_verse_sets, name='user_verse_sets'),
-    url(r'^verse-options/$', learnscripture.views.verse_options, name='verse_options'),
+    path('dashboard/', learnscripture.views.dashboard, name='dashboard'),
+    path('choose/', learnscripture.views.choose, name='choose'),
+    path('choose-set/', learnscripture.views.handle_choose_set, name='handle_choose_set'),
+    path('choose-verse/', learnscripture.views.handle_choose_verse, name='handle_choose_verse'),
+    path('catechisms/', learnscripture.views.view_catechism_list, name='catechisms'),
+    path('catechisms/<slug:slug>/', learnscripture.views.view_catechism, name='view_catechism'),
+    path('learn-legacy/', RedirectView.as_view(pattern_name='learn')),
+    path('learn/', learnscripture.views.learn, name='learn'),
+    path('preferences/', learnscripture.views.preferences, name='preferences'),
+    path('progress/', learnscripture.views.user_verses, name='user_verses'),
+    path('my-verse-sets/', learnscripture.views.user_verse_sets, name='user_verse_sets'),
+    path('verse-options/', learnscripture.views.verse_options, name='verse_options'),
 
     # Payment
-    url(r'^donate/$', learnscripture.views.donate, name='donate'),
-    url(r'^donation-complete/$', learnscripture.views.pay_done, name='pay_done'),
-    url(r'^donation-cancelled/$', learnscripture.views.pay_cancelled, name='pay_cancelled'),
+    path('donate/', learnscripture.views.donate, name='donate'),
+    path('donation-complete/', learnscripture.views.pay_done, name='pay_done'),
+    path('donation-cancelled/', learnscripture.views.pay_cancelled, name='pay_cancelled'),
 
     # Account management
-    url(r'^login/$', learnscripture.views.login, name='login'),
-    url(r'^signup/$', learnscripture.views.signup, name='signup'),
-    url(r'^account/$', learnscripture.views.account_details, name='account_details'),
-    url(r'^password-reset/$', learnscripture.views.password_reset_done, name='password_reset_done'),
-    url(r'^change-password/$', learnscripture.views.password_change, name='learnscripture_password_change'),
-    url(r'^change-password/done/$', learnscripture.views.password_change_done, name='learnscripture_password_change_done'),
-    url(r'^reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>.+)/$', learnscripture.views.password_reset_confirm, name='password_reset_confirm'),
-    url(r'^reset/complete/$', learnscripture.views.password_reset_complete, name='password_reset_complete'),
-    url(r'^login/$', learnscripture.views.login, name='admin_password_reset'),
-    url(r'^set-language/$', learnscripture.views.set_language, name='learnscripture_set_language'),
+    path('login/', learnscripture.views.login, name='login'),
+    path('signup/', learnscripture.views.signup, name='signup'),
+    path('account/', learnscripture.views.account_details, name='account_details'),
+    path('password-reset/', learnscripture.views.password_reset_done, name='password_reset_done'),
+    path('change-password/', learnscripture.views.password_change, name='learnscripture_password_change'),
+    path('change-password/done/', learnscripture.views.password_change_done, name='learnscripture_password_change_done'),
+    path('reset/<str:uidb64>/<str:token>/', learnscripture.views.password_reset_confirm, name='password_reset_confirm'),
+    path('reset/complete/', learnscripture.views.password_reset_complete, name='password_reset_complete'),
+    path('login/', learnscripture.views.login, name='admin_password_reset'),
+    path('set-language/', learnscripture.views.set_language, name='learnscripture_set_language'),
 
     # Verse sets
-    url(r'^verse-set/(?P<slug>[^/]+)/$', learnscripture.views.view_verse_set, name='view_verse_set'),
-    url(r'^create-selection-set/$', learnscripture.views.create_selection_set, name='create_selection_set'),
-    url(r'^create-passage-set/$', learnscripture.views.create_passage_set, name='create_passage_set'),
-    url(r'^edit-verse-set/(?P<slug>[^/]+)/$', learnscripture.views.edit_set, name='edit_set'),
+    path('verse-set/<slug:slug>/', learnscripture.views.view_verse_set, name='view_verse_set'),
+    path('create-selection-set/', learnscripture.views.create_selection_set, name='create_selection_set'),
+    path('create-passage-set/', learnscripture.views.create_passage_set, name='create_passage_set'),
+    path('edit-verse-set/<slug:slug>/', learnscripture.views.edit_set, name='edit_set'),
 
     # User stats
-    url(r'^user/([^/]*)/$', learnscripture.views.user_stats, name='user_stats'),
+    path('user/<str:username>/', learnscripture.views.user_stats, name='user_stats'),
 
     # Activity
-    url(r'^activity/$', learnscripture.views.activity_stream, name='activity_stream'),
-    url(r'^activity/(\d+)/$', learnscripture.views.activity_item, name='activity_item'),
-    url(r'^user/([^/]*)/activity/$', learnscripture.views.user_activity_stream, name='user_activity_stream'),
+    path('activity/', learnscripture.views.activity_stream, name='activity_stream'),
+    path('activity/<int:event_id>/', learnscripture.views.activity_item, name='activity_item'),
+    path('user/<str:username>/activity/', learnscripture.views.user_activity_stream, name='user_activity_stream'),
 
     # Badges
-    url(r'^badges/$', learnscripture.views.awards, name='awards'),
-    url(r'^badges/(.*)/$', learnscripture.views.award, name='award'),
+    path('badges/', learnscripture.views.awards, name='awards'),
+    path('badges/<slug:slug>/', learnscripture.views.award, name='award'),
 
     # Groups
-    url(r'^groups/$', learnscripture.views.groups, name='groups'),
-    url(r'^groups/([^/]*)/$', learnscripture.views.group, name='group'),
-    url(r'^groups/([^/]*)/wall/$', learnscripture.views.group_wall, name='group_wall'),
-    url(r'^groups/([^/]*)/leaderboard/$', learnscripture.views.group_leaderboard, name='group_leaderboard'),
-    url(r'^create-group/$', learnscripture.views.create_group, name='create_group'),
-    url(r'^edit-group/(.*)/$', learnscripture.views.edit_group, name='edit_group'),
-    url(r'^group-select-list/$', learnscripture.views.group_select_list, name='group_select_list'),
-    url(r'^account-autocomplete/$', accounts.lookups.AccountAutocomplete.as_view(), name='account_autocomplete'),
+    path('groups/', learnscripture.views.groups, name='groups'),
+    path('groups/<slug:slug>/', include([
+        path('', learnscripture.views.group, name='group'),
+        path('wall/', learnscripture.views.group_wall, name='group_wall'),
+        path('leaderboard/', learnscripture.views.group_leaderboard, name='group_leaderboard'),
+    ])),
+    path('create-group/', learnscripture.views.create_group, name='create_group'),
+    path('edit-group/<slug:slug>/', learnscripture.views.edit_group, name='edit_group'),
+    path('group-select-list/', learnscripture.views.group_select_list, name='group_select_list'),
+    path('account-autocomplete/', accounts.lookups.AccountAutocomplete.as_view(), name='account_autocomplete'),
 
     # CMS
-    url(r'^api/cms/', include('cms.rest_api.urls')),
+    path('api/cms/', include('cms.rest_api.urls')),
 
     # Other
-    url(r'^contact/$', learnscripture.views.contact, name='contact'),
-    url(r'^terms-of-service/$', learnscripture.views.terms_of_service, name='terms_of_service'),
-    url(r'^referral-program/$', learnscripture.views.referral_program, name='referral_program'),
+    path('contact/', learnscripture.views.contact, name='contact'),
+    path('terms-of-service/', learnscripture.views.terms_of_service, name='terms_of_service'),
+    path('referral-program/', learnscripture.views.referral_program, name='referral_program'),
 
 
-    url(r'^stats/$', learnscripture.views.stats, name='stats'),
-    url(r'^celery-debug/$', learnscripture.views.celery_debug, name='celery_debug'),
-    url(r'^debug/$', learnscripture.views.debug, name='user_debug'),
+    path('stats/', learnscripture.views.stats, name='stats'),
+    path('celery-debug/', learnscripture.views.celery_debug, name='celery_debug'),
+    path('debug/', learnscripture.views.debug, name='user_debug'),
 
     # JSON/AJAX views
-    url(r'^api/learnscripture/v1/', include('learnscripture.api.urls')),
+    path('api/learnscripture/v1/', include('learnscripture.api.urls')),
 
     # Dependencies
-    url(r'^admin/cms/', include('cms.admin_urls')),
-    url(r'^admin/', admin.site.urls),
-    url(r'^i18n/', include('django.conf.urls.i18n')),
+    path('admin/cms/', include('cms.admin_urls')),
+    path('admin/', admin.site.urls),
+    path('i18n/', include('django.conf.urls.i18n')),
 
-    url(r'^paypal/ipn/', include('paypal.standard.ipn.urls')),
+    path('paypal/ipn/', include('paypal.standard.ipn.urls')),
 
-    url(r'^mailgun-bounce-notification/$', learnscripture.mail.views.mailgun_bounce_notification,
-        name='mailgun-bounce-notification'),
+    path('mailgun-bounce-notification/', learnscripture.mail.views.mailgun_bounce_notification,
+         name='mailgun-bounce-notification'),
 
     # Errors
 
-    url(r'^offline/$', learnscripture.views.offline, name='offline'),
+    path('offline/', learnscripture.views.offline, name='offline'),
     # Also 404.html template and CSRF_FAILURE_VIEW
 ]
 
 
 if settings.DEVBOX:
     urlpatterns += [
-        url(r'^test-404/(?P<message>.*)$', learnscripture.views.missing),
-        url(r'^test-500/$', learnscripture.views.test_500),
-        url(r'^test-500-real/$', learnscripture.views.test_500_real),
+        path('test-404/<str:message>', learnscripture.views.missing),
+        path('test-500/', learnscripture.views.test_500),
+        path('test-500-real/', learnscripture.views.test_500_real),
     ]
 
 if settings.DEVBOX:
     urlpatterns += [
-        url(r'^usermedia/(?P<path>.*)$', django.views.static.serve,
-            {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}),
+        path('usermedia/<path:path>', django.views.static.serve,
+             {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}),
     ]
 if settings.DEBUG:
     import debug_toolbar
     urlpatterns = [
-        url(r'^__debug__/', include(debug_toolbar.urls)),
+        path('__debug__/', include(debug_toolbar.urls)),
     ] + urlpatterns
 
 
 if settings.TESTING:
     urlpatterns += [
-        url(r'^django_functest/', include('django_functest.urls'))
+        path('django_functest/', include('django_functest.urls'))
     ]
 
 
@@ -141,18 +143,18 @@ if settings.DEVBOX:
     # Static files - these are handled by nginx in production, need to add there
     # as well.
     urlpatterns += [
-        url(r'^robots\.txt/?$', RedirectView.as_view(url='/static/robots.txt')),
-        url(r'^favicon\.ico/?$', RedirectView.as_view(url='/static/img/favicon.png')),
-        url(r'^manifest\.webmanifest/?$', RedirectView.as_view(url='/static/manifest.webmanifest')),
+        path('robots.txt', RedirectView.as_view(url='/static/robots.txt')),
+        path('favicon.ico', RedirectView.as_view(url='/static/img/favicon.png')),
+        path('manifest.webmanifest', RedirectView.as_view(url='/static/manifest.webmanifest')),
         # Browsers refuse to handle service-worker.js if it is returned via a
         # redirect, need to serve directly:
-        url(r'^service-worker.js$', lambda request: django.contrib.staticfiles.views.serve(request, 'js/service-worker.js')),
+        path('service-worker.js', lambda request: django.contrib.staticfiles.views.serve(request, 'js/service-worker.js')),
     ]
 
 
 # Finally, fallback to cms views
 urlpatterns += [
-    url('', cms.views.cms_page),
+    re_path('', cms.views.cms_page),
 ]
 
 if os.environ.get('TEST_TRACEBACK_PAGES', '') == 'TRUE':
