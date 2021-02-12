@@ -9,11 +9,11 @@ class PreferencesForm(forms.ModelForm):
     desktop_testing_method = forms.ChoiceField(label=t_lazy('accounts-testing-method'),
                                                widget=forms.RadioSelect,
                                                initial=TestingMethod.FULL_WORDS,
-                                               choices=TestingMethod.choice_list)
+                                               choices=TestingMethod.choices)
     touchscreen_testing_method = forms.ChoiceField(label=t_lazy('accounts-testing-method'),
                                                    widget=forms.RadioSelect,
                                                    initial=TestingMethod.ON_SCREEN,
-                                                   choices=TestingMethod.choice_list)
+                                                   choices=TestingMethod.choices)
 
     def __init__(self, *args, **kwargs):
         super(PreferencesForm, self).__init__(*args, **kwargs)

@@ -26,7 +26,7 @@ from paypal.standard.forms import PayPalPaymentsForm
 import learnscripture.tasks
 from accounts.forms import AccountDetailsForm, PreferencesForm
 from accounts.models import Account, HeatmapStatsType, Identity
-from awards.models import AnyLevel, Award, AwardType
+from awards.models import AWARD_LOGIC_CLASSES, AnyLevel, Award, AwardType
 from bibleverses.books import BIBLE_BOOK_COUNT, get_bible_book_name
 from bibleverses.forms import VerseSetForm
 from bibleverses.languages import LANGUAGE_CODE_INTERNAL, LANGUAGES
@@ -437,7 +437,7 @@ def dashboard(request):
          'groups': groups,
          'more_groups': more_groups,
          'url_after_logout': '/',
-         'heatmap_stats_types': HeatmapStatsType.choice_list,
+         'heatmap_stats_types': HeatmapStatsType.choices,
          'unfinished_session_first_uvs': session.unfinished_session_first_uvs(request),
          'use_dashboard_nav': True,
          }
@@ -931,7 +931,7 @@ def create_or_edit_set(request, set_type=None, slug=None):
         'new_verse_set': verse_set is None,
         'verse_set_form': form,
         'title': title,
-        'set_type': VerseSetType.name_for_value[set_type]
+        'set_type': set_type,
     })
     c.update(context_for_quick_find(request))
 
@@ -1321,7 +1321,7 @@ def referral_program(request):
 
 
 def awards(request):
-    award_classes = [AwardType.classes[t] for t in AwardType.values]
+    award_classes = [AWARD_LOGIC_CLASSES[t] for t in AwardType.values]
     awards = [cls(level=AnyLevel) for cls in award_classes if not cls.removed]
 
     return TemplateResponse(request, 'learnscripture/awards.html', {
@@ -1332,12 +1332,13 @@ def awards(request):
 
 def award(request, slug):
     award_name = slug.replace('-', '_').upper()
-    award_type = AwardType.get_value_for_name(award_name)
-    if award_type is None:
+    try:
+        award_type = AwardType(award_name)
+    except ValueError:
         raise Http404
     if not Award.objects.filter(award_type=award_type).exists():
         raise Http404
-    award_class = AwardType.classes[award_type]
+    award_class = AWARD_LOGIC_CLASSES[award_type]
     if award_class.removed:
         return missing(request, t('awards-removed', dict(name=award_class.title)), status_code=410)
     award = award_class(level=AnyLevel)

@@ -231,7 +231,11 @@ class ActionCompleteHandler(ApiView):
             return rc.BAD_REQUEST("uvs_id, uvs_needs_testing required")
 
         practice = request.POST.get('practice', 'false') == 'true'
-        stage = StageType.check_value(request.POST['stage'])
+        try:
+            stage = StageType(request.POST['stage'])
+        except ValueError:
+            return rc.BAD_REQUEST("Invalid value for stage")
+
         if stage == StageType.TEST:
             accuracy = float(request.POST['accuracy'])
         else:

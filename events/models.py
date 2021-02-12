@@ -10,9 +10,10 @@ from accounts.models import Account
 from bibleverses.models import verse_set_smart_name
 from common.utils.html import link
 from groups.models import Group
-from learnscripture.datastructures import lazy_dict_like, make_class_enum
+from learnscripture.datastructures import lazy_dict_like
 from learnscripture.ftl_bundles import t
 from learnscripture.templatetags.account_utils import account_link
+from learnscripture.utils.introspection import all_subclasses
 
 EVENTSTREAM_CUTOFF_DAYS = 3  # just 3 days of events
 EVENTSTREAM_CUTOFF_NUMBER = 8
@@ -32,6 +33,21 @@ EVENTSTREAM_MAX_EXTRA_AFFINITY_FOR_FRIEND = 2.0
 # more quickly, so we avoid such extreme factors.
 
 
+class EventType(models.TextChoices):
+    NEW_ACCOUNT = 'NEW_ACCOUNT', 'New account'
+    AWARD_RECEIVED = 'AWARD_RECEIVED', 'Award received'
+    POINTS_MILESTONE = 'POINTS_MILESTONE', 'Points milestone'
+    VERSES_STARTED_MILESTONE = 'VERSES_STARTED_MILESTONE', 'Verses started milestone'
+    VERSES_FINISHED_MILESTONE = 'VERSES_FINISHED_MILESTONE', 'Verses finished milestone'
+    VERSE_SET_CREATED = 'VERSE_SET_CREATED', 'Verse set created'
+    STARTED_LEARNING_VERSE_SET = 'STARTED_LEARNING_VERSE_SET', 'Started learning a verse set'
+    AWARD_LOST = 'AWARD_LOST', 'Award lost'
+    GROUP_JOINED = 'GROUP_JOINED', 'Group joined'
+    GROUP_CREATED = 'GROUP_CREATED', 'Group created'
+    STARTED_LEARNING_CATECHISM = 'STARTED_LEARNING_CATECHISM', 'Started learning catechism'
+    NEW_COMMENT = 'NEW_COMMENT', 'New comment'
+
+
 class EventLogic(object):
     """
     Encapsulates logic about different types of events.
@@ -41,9 +57,7 @@ class EventLogic(object):
     """
     weight = 10
 
-    @property
-    def event_type(self):
-        return self.enum_val
+    event_type = NotImplemented
 
     def __init__(self, **kwargs):
         """
@@ -86,6 +100,8 @@ class EventLogic(object):
 
 
 class NewAccountEvent(EventLogic):
+    event_type = EventType.NEW_ACCOUNT
+
     @classmethod
     def get_message_html(cls, event, language_code):
         return t('events-new-user-signed-up-html',
@@ -93,6 +109,7 @@ class NewAccountEvent(EventLogic):
 
 
 class AwardReceivedEvent(EventLogic):
+    event_type = EventType.AWARD_RECEIVED
 
     # Awards are quite interesting
     weight = 12
@@ -107,10 +124,10 @@ class AwardReceivedEvent(EventLogic):
 
     @classmethod
     def get_message_html(cls, event, language_code):
-        from awards.models import AwardType
+        from awards.models import AWARD_LOGIC_CLASSES
         award_type = event.event_data['award_type']
         award_level = event.event_data['award_level']
-        award_class = AwardType.classes[award_type]
+        award_class = AWARD_LOGIC_CLASSES[award_type]
         award_detail = award_class(level=award_level)
         return t('evemts-award-received-html',
                  dict(username=account_link(event.account),
@@ -119,6 +136,7 @@ class AwardReceivedEvent(EventLogic):
 
 
 class AwardLostEvent(EventLogic):
+    event_type = EventType.AWARD_LOST
 
     weight = AwardReceivedEvent.weight
 
@@ -129,10 +147,10 @@ class AwardLostEvent(EventLogic):
 
     @classmethod
     def get_message_html(cls, event, language_code):
-        from awards.models import AwardType
+        from awards.models import AWARD_LOGIC_CLASSES
         award_type = event.event_data['award_type']
         award_level = event.event_data['award_level']
-        award_class = AwardType.classes[award_type]
+        award_class = AWARD_LOGIC_CLASSES[award_type]
         award_detail = award_class(level=award_level)
         return t('events-award-lost-html',
                  dict(username=account_link(event.account),
@@ -141,6 +159,7 @@ class AwardLostEvent(EventLogic):
 
 
 class VerseSetCreatedEvent(EventLogic):
+    event_type = EventType.VERSE_SET_CREATED
 
     def __init__(self, verse_set=None):
         super(VerseSetCreatedEvent, self).__init__(verse_set_id=verse_set.id,
@@ -162,6 +181,7 @@ class VerseSetCreatedEvent(EventLogic):
 
 
 class StartedLearningVerseSetEvent(EventLogic):
+    event_type = EventType.STARTED_LEARNING_VERSE_SET
 
     weight = 13
 
@@ -184,6 +204,8 @@ class StartedLearningVerseSetEvent(EventLogic):
 
 
 class PointsMilestoneEvent(EventLogic):
+    event_type = EventType.POINTS_MILESTONE
+
     def __init__(self, account=None, points=None):
         super(PointsMilestoneEvent, self).__init__(account=account,
                                                    points=points)
@@ -196,6 +218,8 @@ class PointsMilestoneEvent(EventLogic):
 
 
 class VersesStartedMilestoneEvent(EventLogic):
+    event_type = EventType.VERSES_STARTED_MILESTONE
+
     def __init__(self, account=None, verses_started=None):
         super(VersesStartedMilestoneEvent, self).__init__(account=account,
                                                           verses_started=verses_started)
@@ -208,6 +232,7 @@ class VersesStartedMilestoneEvent(EventLogic):
 
 
 class GroupJoinedEvent(EventLogic):
+    event_type = EventType.GROUP_JOINED
 
     weight = 11
 
@@ -227,6 +252,7 @@ class GroupJoinedEvent(EventLogic):
 
 
 class GroupCreatedEvent(EventLogic):
+    event_type = EventType.GROUP_CREATED
 
     def __init__(self, account=None, group=None):
         super(GroupCreatedEvent, self).__init__(account=account,
@@ -244,6 +270,8 @@ class GroupCreatedEvent(EventLogic):
 
 
 class VersesFinishedMilestoneEvent(EventLogic):
+    event_type = EventType.VERSES_FINISHED_MILESTONE
+
     def __init__(self, account, verses_finished=None):
         super(VersesFinishedMilestoneEvent, self).__init__(account=account,
                                                            verses_finished=verses_finished)
@@ -256,6 +284,7 @@ class VersesFinishedMilestoneEvent(EventLogic):
 
 
 class StartedLearningCatechismEvent(EventLogic):
+    event_type = EventType.STARTED_LEARNING_CATECHISM
 
     def __init__(self, account=None, catechism=None):
         super(StartedLearningCatechismEvent, self).__init__(account=account,
@@ -273,6 +302,7 @@ class StartedLearningCatechismEvent(EventLogic):
 
 
 class NewCommentEvent(EventLogic):
+    event_type = EventType.NEW_COMMENT
 
     weight = 11
 
@@ -331,23 +361,6 @@ class NewCommentEvent(EventLogic):
         else:
             raise AssertionError("Expected one of parent_event_id or group_id for event {0}"
                                  .format(event.id))
-
-
-EventType = make_class_enum(
-    'EventType',
-    [('NEW_ACCOUNT', 'New account', NewAccountEvent),
-     ('AWARD_RECEIVED', 'Award received', AwardReceivedEvent),
-     ('POINTS_MILESTONE', 'Points milestone', PointsMilestoneEvent),
-     ('VERSES_STARTED_MILESTONE', 'Verses started milestone', VersesStartedMilestoneEvent),
-     ('VERSES_FINISHED_MILESTONE', 'Verses finished milestone', VersesFinishedMilestoneEvent),
-     ('VERSE_SET_CREATED', 'Verse set created', VerseSetCreatedEvent),
-     ('STARTED_LEARNING_VERSE_SET', 'Started learning a verse set', StartedLearningVerseSetEvent),
-     ('AWARD_LOST', 'Award lost', AwardLostEvent),
-     ('GROUP_JOINED', 'Group joined', GroupJoinedEvent),
-     ('GROUP_CREATED', 'Group created', GroupCreatedEvent),
-     ('STARTED_LEARNING_CATECHISM', 'Started learning catechism', StartedLearningCatechismEvent),
-     ('NEW_COMMENT', 'New comment', NewCommentEvent),
-     ])
 
 
 def dedupe_iterable(iterable, keyfunc):
@@ -442,8 +455,15 @@ class EventManager(models.Manager):
         return qs
 
 
+EVENT_LOGIC_CLASSES = {
+    cls.event_type: cls
+    for cls in all_subclasses(EventLogic)
+    if getattr(cls, 'event_type') != NotImplemented
+}
+
+
 class Event(models.Model):
-    event_type = models.CharField(max_length=40, choices=EventType.choice_list)
+    event_type = models.CharField(max_length=40, choices=EventType.choices)
     weight = models.PositiveSmallIntegerField(default=10)
     event_data = models.JSONField(default=dict, blank=True)
     created = models.DateTimeField(default=timezone.now, db_index=True)
@@ -534,7 +554,7 @@ class Event(models.Model):
         """
         Returns the EventLogic subclass for this event.
         """
-        return EventType.classes[self.event_type]
+        return EVENT_LOGIC_CLASSES[self.event_type]
 
     def get_absolute_url(self):
         if not self.url:

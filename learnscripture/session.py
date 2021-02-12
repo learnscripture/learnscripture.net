@@ -2,20 +2,21 @@ from datetime import datetime
 
 import attr
 from app_metrics.utils import metric
+from django.db.models import TextChoices
 from django.urls import reverse
 from django.utils import timezone
 from django.views import i18n as i18n_views
 
 from accounts.models import Account, Identity, UserVerseStatus
 from bibleverses.models import MemoryStage
-from learnscripture.datastructures import make_choices
 
-# Also defined in Learn.elm
-LearningType = make_choices('LearningType',
-                            [('REVISION', 'Revision'),
-                             ('LEARNING', 'Learning'),
-                             ('PRACTICE', 'Practice'),
-                             ])
+
+# Also defined in Learn.elm learningTypeDecoder
+class LearningType(TextChoices):
+    REVISION = 'REVISION', 'Revision'
+    LEARNING = 'LEARNING', 'Learning'
+    PRACTICE = 'PRACTICE', 'Practice'
+
 
 # In the session we store a list of verses to look at.
 #

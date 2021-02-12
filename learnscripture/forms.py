@@ -293,7 +293,7 @@ USER_VERSES_ORDER_TEXT_ORDER = "textorder"
 class UserVersesFilterForm(FilterFormMixin, forms.Form):
     query = forms.CharField(label=t_lazy('user-verses-filter-query'), required=False,
                             widget=forms.TextInput(attrs={'placeholder': t_lazy('user-verses-filter-query.placeholder')}))
-    text_type = forms.ChoiceField(choices=TextType.choice_list,
+    text_type = forms.ChoiceField(choices=TextType.choices,
                                   initial=TextType.BIBLE,
                                   label=t_lazy('user-verses-filter-text-type'),
                                   required=False,

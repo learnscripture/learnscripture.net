@@ -16,7 +16,7 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 
 from accounts import memorymodel
-from learnscripture.datastructures import lazy_dict_like, make_choices
+from learnscripture.datastructures import lazy_dict_like
 from learnscripture.ftl_bundles import t, t_lazy
 from learnscripture.utils.iterators import intersperse
 
@@ -38,34 +38,32 @@ MAX_VERSE_QUERY_SIZE = 200
 MAX_VERSES_FOR_SINGLE_CHOICE = 4  # See also choose.js
 
 
-# Also defined in Learn.elm
-VerseSetType = make_choices('VerseSetType',
-                            [('SELECTION', 'Selection'),
-                             ('PASSAGE', 'Passage'),
-                             ])
+# Also defined in Learn.elm verseSetTypeDecoder
+class VerseSetType(models.TextChoices):
+    SELECTION = 'SELECTION', 'Selection'
+    PASSAGE = 'PASSAGE', 'Passage'
 
-# Also defined in Learn.elm
-StageType = make_choices('StageType',
-                         [('READ', 'read'),
-                          ('RECALL_INITIAL', 'recall from initials'),
-                          ('RECALL_MISSING', 'recall when missing'),
-                          ('TEST', 'test'),
-                          ])
+
+# Also defined in Learn.elm stageType* functions
+class StageType(models.TextChoices):
+    READ = 'READ', 'read'
+    RECALL_INITIAL = 'RECALL_INITIAL', 'recall from initials'
+    RECALL_MISSING = 'RECALL_MISSING', 'recall when missing'
+    TEST = 'TEST', 'test'
 
 
 # Various queries make use of the ordering in this enum, e.g. select everything
 # less than 'TESTED'. Therefore it is import to be based on an integer.
-MemoryStage = make_choices('MemoryStage',
-                           [(1, 'ZERO', 'nothing'),
-                            (2, 'SEEN', 'seen'),
-                            (3, 'TESTED', 'tested'),
-                            ])
+class MemoryStage(models.IntegerChoices):
+    ZERO = 1, 'nothing'
+    SEEN = 2, 'seen'
+    TESTED = 3, 'tested'
 
-# Also defined in Learn.elm
-TextType = make_choices('TextType',
-                        [('BIBLE', t_lazy('bibleverses-text-type-bible')),
-                         ('CATECHISM', t_lazy('bibleverses-text-type-catechism')),
-                         ])
+
+# Also defined in Learn.elm textTypeDecoder
+class TextType(models.TextChoices):
+    BIBLE = 'BIBLE', t_lazy('bibleverses-text-type-bible')
+    CATECHISM = 'CATECHISM', t_lazy('bibleverses-text-type-catechism')
 
 
 class TextVersionQuerySet(models.QuerySet):
@@ -93,7 +91,7 @@ class TextVersion(models.Model):
     full_name = models.CharField(max_length=255, unique=True)
     url = models.URLField(default="", blank=True)
     text_type = models.CharField(max_length=20,
-                                 choices=TextType.choice_list,
+                                 choices=TextType.choices,
                                  default=TextType.BIBLE)
     language_code = models.CharField(max_length=2, blank=False,
                                      choices=LANGUAGE_CHOICES,
@@ -667,7 +665,7 @@ class VerseSet(models.Model):
     description = models.TextField(t_lazy('versesets-description'), blank=True)
     additional_info = models.TextField(t_lazy('versesets-additional-info'), blank=True)
     set_type = models.CharField(max_length=20,
-                                choices=VerseSetType.choice_list)
+                                choices=VerseSetType.choices)
 
     public = models.BooleanField(t_lazy('versesets-public'), default=False)
     breaks = models.TextField(default='', blank=True)
@@ -936,7 +934,7 @@ class UserVerseStatus(models.Model):
 
     # The following fields vary over time and care should be taken in things
     # like create_verse_status to copy these attributes if there are duplicates.
-    memory_stage = models.PositiveSmallIntegerField(choices=MemoryStage.choice_list,
+    memory_stage = models.PositiveSmallIntegerField(choices=MemoryStage.choices,
                                                     default=MemoryStage.ZERO)
     strength = models.FloatField(default=0.00)
     added = models.DateTimeField()

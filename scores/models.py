@@ -13,17 +13,16 @@ from django.db.models import F
 from django.utils import timezone
 
 from bibleverses import languages
-from learnscripture.datastructures import make_choices
+
 
 # See also Learn.elm which copies definition
-ScoreReason = make_choices('ScoreReason',
-                           [(0, 'VERSE_TESTED', 'Verse tested'),
-                            (1, 'VERSE_REVIEWED', 'Verse reviewed'),
-                            (2, 'REVISION_COMPLETED', 'Review completed'),  # No longer used
-                            (3, 'PERFECT_TEST_BONUS', 'Perfect!'),
-                            (4, 'VERSE_LEARNT', 'Verse fully learnt'),
-                            (5, 'EARNED_AWARD', 'Earned award'),
-                            ])
+class ScoreReason(models.TextChoices):
+    VERSE_TESTED = 0, 'Verse tested'
+    VERSE_REVIEWED = 1, 'Verse reviewed'
+    REVISION_COMPLETED = 2, 'Review completed'  # No longer used
+    PERFECT_TEST_BONUS = 3, 'Perfect!'
+    VERSE_LEARNT = 4, 'Verse fully learnt'
+    EARNED_AWARD = 5, 'Earned award'
 
 
 class Scores(object):
@@ -53,7 +52,7 @@ class ActionLog(models.Model):
     account = models.ForeignKey('accounts.Account', on_delete=models.CASCADE,
                                 related_name='action_logs')
     points = models.PositiveIntegerField()
-    reason = models.PositiveSmallIntegerField(choices=ScoreReason.choice_list)
+    reason = models.PositiveSmallIntegerField(choices=ScoreReason.choices)
     localized_reference = models.CharField(max_length=255, blank=True)
     accuracy = models.FloatField(null=True, blank=True)
     created = models.DateTimeField()

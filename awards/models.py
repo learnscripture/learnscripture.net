@@ -5,16 +5,15 @@ from django.utils.functional import cached_property
 
 from accounts.models import Account
 from awards.signals import new_award
-from learnscripture.datastructures import make_class_enum
 from learnscripture.ftl_bundles import t, t_lazy
+from learnscripture.utils.introspection import all_subclasses
 from scores.models import ScoreReason
 
 # In this module we have:
 #
 # = AwardType =
 #
-# Class storing enumeration of the different award types,
-# including a mapping of enumeration value to an AwardLogic subclass
+# Class storing enumeration of the different award types
 #
 # = AwardLogic and subclasses =
 #
@@ -46,9 +45,25 @@ class classproperty(property):
         return self.fget.__get__(None, owner)()
 
 
+class AwardType(models.TextChoices):
+    STUDENT = 'STUDENT', t_lazy('awards-student-award-name')
+    MASTER = 'MASTER', t_lazy('awards-master-award-name')
+    SHARER = 'SHARER', t_lazy('awards-sharer-award-name')
+    TREND_SETTER = 'TREND_SETTER', t_lazy('awards-trend-setter-award-name')
+    ACE = 'ACE', t_lazy('awards-ace-award-name')
+    RECRUITER = 'RECRUITER', t_lazy('awards-recruiter-award-name')
+    WEEKLY_CHAMPION = 'WEEKLY_CHAMPION', 'Weekly champion'  # Removed
+    REIGNING_WEEKLY_CHAMPION = 'REIGNING_WEEKLY_CHAMPION', 'Reigning weekly champion'  # Removed
+    ADDICT = 'ADDICT', t_lazy('awards-addict-award-name')
+    ORGANIZER = 'ORGANIZER', t_lazy('awards-organizer-award-name')
+    CONSISTENT_LEARNER = 'CONSISTENT_LEARNER', t_lazy('awards-consistent-learner-award-name')
+
+
 class AwardLogic(object):
     # Abstract base class for all classes that define behaviour for the types of
     # awards listed in AwardType
+
+    # Subclasses must defined award_type
 
     # All subclasses need to define an __init__ that takes at least a 'level'
     # keyword argument.
@@ -56,21 +71,17 @@ class AwardLogic(object):
     # Subclasses must also define 'has_levels' class attribute and 'max_level'
     # attribute
 
+    award_type = NotImplemented
     removed = False
-
-    @classproperty
-    @classmethod
-    def award_type(cls):
-        return cls.enum_val  # set by make_class_enum
 
     @classmethod
     def slug(cls):
-        return AwardType.name_for_value[cls.award_type].lower().replace('_', '-')
+        return cls.award_type.value.lower().replace('_', '-')
 
     @classproperty
     @classmethod
     def title(cls):
-        return AwardType.titles[cls.award_type]
+        return cls.award_type.label
 
     def short_description(self):
         if self.level is AnyLevel:
@@ -83,11 +94,11 @@ class AwardLogic(object):
                 return str(self.title)
 
     def image_small(self):
-        n = AwardType.name_for_value[self.award_type]
+        n = self.award_type.name
         return f'img/awards/award_{n}_level_{self.level}_50.png'
 
     def image_medium(self):
-        n = AwardType.name_for_value[self.award_type]
+        n = self.award_type.name
         return f'img/awards/award_{n}_level_{self.level}_100.png'
 
     def give_to(self, account):
@@ -216,6 +227,7 @@ class LearningAward(CountBasedAward):
 
 
 class StudentAward(LearningAward):
+    award_type = AwardType.STUDENT
     POINTS = {1: 1000,
               2: 4000,
               3: 8000,
@@ -236,6 +248,7 @@ class StudentAward(LearningAward):
 
 
 class MasterAward(LearningAward):
+    award_type = AwardType.MASTER
     POINTS = dict((k, v * 10) for k, v in StudentAward.POINTS.items())
 
     def full_description(self):
@@ -247,6 +260,7 @@ class MasterAward(LearningAward):
 
 
 class SharerAward(CountBasedAward):
+    award_type = AwardType.SHARER
     COUNTS = {1: 1,
               2: 2,
               3: 5,
@@ -263,6 +277,7 @@ class SharerAward(CountBasedAward):
 
 
 class TrendSetterAward(CountBasedAward):
+    award_type = AwardType.TREND_SETTER
     COUNTS = {1: 5,
               2: 10,
               3: 30,
@@ -281,6 +296,7 @@ class TrendSetterAward(CountBasedAward):
 
 
 class AceAward(CountBasedAward):
+    award_type = AwardType.ACE
     COUNTS = {k: 2 ** (k - 1) for k in range(1, 10)}
 
     POINTS = {k: v * 1000 for k, v in COUNTS.items()}
@@ -297,6 +313,7 @@ class AceAward(CountBasedAward):
 
 
 class RecruiterAward(CountBasedAward):
+    award_type = AwardType.RECRUITER
     COUNTS = {1: 1,
               2: 2,
               3: 3,
@@ -319,6 +336,7 @@ class RecruiterAward(CountBasedAward):
 
 
 class ReigningWeeklyChampion(SingleLevelAward):
+    award_type = AwardType.REIGNING_WEEKLY_CHAMPION
     removed = True
     POINTS = 0
 
@@ -353,6 +371,7 @@ class TimeBasedAward(MultiLevelPointsMixin, AwardLogic):
 
 
 class WeeklyChampion(AwardLogic):
+    award_type = AwardType.WEEKLY_CHAMPION
     removed = True
     has_levels = True
 
@@ -361,6 +380,7 @@ class WeeklyChampion(AwardLogic):
 
 
 class AddictAward(SingleLevelAward):
+    award_type = AwardType.ADDICT
     POINTS = 10000
 
     def full_description(self):
@@ -371,6 +391,7 @@ class AddictAward(SingleLevelAward):
 
 
 class OrganizerAward(CountBasedAward):
+    award_type = AwardType.ORGANIZER
     COUNTS = {1: 5,
               2: 10,
               3: 20,
@@ -388,7 +409,7 @@ class OrganizerAward(CountBasedAward):
 
 
 class ConsistentLearnerAward(TimeBasedAward):
-
+    award_type = AwardType.CONSISTENT_LEARNER
     POINTS = dict((level, points * 4) for level, points in StudentAward.POINTS.items())
 
     DAYS = {
@@ -412,24 +433,15 @@ class ConsistentLearnerAward(TimeBasedAward):
             return t(f'awards-consistent-learner-award-level-{self.level}-description')
 
 
-AwardType = make_class_enum(
-    'AwardType',
-    [('STUDENT', t_lazy('awards-student-award-name'), StudentAward),
-     ('MASTER', t_lazy('awards-master-award-name'), MasterAward),
-     ('SHARER', t_lazy('awards-sharer-award-name'), SharerAward),
-     ('TREND_SETTER', t_lazy('awards-trend-setter-award-name'), TrendSetterAward),
-     ('ACE', t_lazy('awards-ace-award-name'), AceAward),
-     ('RECRUITER', t_lazy('awards-recruiter-award-name'), RecruiterAward),
-     ('WEEKLY_CHAMPION', 'Weekly champion', WeeklyChampion),  # Removed
-     ('REIGNING_WEEKLY_CHAMPION', 'Reigning weekly champion', ReigningWeeklyChampion),  # Removed
-     ('ADDICT', t_lazy('awards-addict-award-name'), AddictAward),
-     ('ORGANIZER', t_lazy('awards-organizer-award-name'), OrganizerAward),
-     ('CONSISTENT_LEARNER', t_lazy('awards-consistent-learner-award-name'), ConsistentLearnerAward),
-     ])
+AWARD_LOGIC_CLASSES = {
+    cls.award_type: cls
+    for cls in all_subclasses(AwardLogic)
+    if getattr(cls, 'award_type') != NotImplemented
+}
 
 
 class Award(models.Model):
-    award_type = models.CharField(max_length=40, choices=AwardType.choice_list)
+    award_type = models.CharField(max_length=40, choices=AwardType.choices)
     level = models.PositiveSmallIntegerField()
     account = models.ForeignKey(Account, on_delete=models.CASCADE,
                                 related_name='awards')
@@ -443,7 +455,7 @@ class Award(models.Model):
 
     @property
     def award_class(self):
-        return AwardType.classes[self.award_type]
+        return AWARD_LOGIC_CLASSES[self.award_type]
 
     @cached_property
     def award_detail(self):

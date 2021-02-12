@@ -23,17 +23,17 @@ from bibleverses.models import (InvalidVerseReference, MemoryStage, StageType, T
                                 parse_validated_localized_reference)
 from bibleverses.signals import verse_set_chosen
 from bibleverses.textutils import count_words
-from learnscripture.datastructures import make_choices
 from learnscripture.ftl_bundles import t, t_lazy
 from learnscripture.utils.cache import cache_results, clear_cache_results
 from learnscripture.utils.templates import render_to_string_ftl
 from scores.models import ScoreReason, Scores, TotalScore
 
-TestingMethod = make_choices('TestingMethod',
-                             [('FULL_WORDS', 'FULL_WORDS', t_lazy('accounts-type-whole-word-testing-method')),
-                              ('FIRST_LETTER', 'FIRST_LETTER', t_lazy('accounts-type-first-letter-testing-method')),
-                              ('ON_SCREEN', 'ON_SCREEN', t_lazy('accounts-choose-from-list-testing-method')),
-                              ])
+
+class TestingMethod(models.TextChoices):
+    FULL_WORDS = 'FULL_WORDS', t_lazy('accounts-type-whole-word-testing-method')
+    FIRST_LETTER = 'FIRST_LETTER', t_lazy('accounts-type-first-letter-testing-method')
+    ON_SCREEN = 'ON_SCREEN', t_lazy('accounts-choose-from-list-testing-method')
+
 
 THEMES = [('calm', t_lazy('accounts-slate-theme')),
           ('bubblegum', t_lazy('accounts-bubblegum-pink-theme')),
@@ -50,11 +50,11 @@ DEFAULT_THEME = 'calm'
 
 DONT_NAG_NEW_USERS_FOR_MONEY_DAYS = 30
 
-HeatmapStatsType = make_choices('HeatmapStatsType',
-                                [('VERSES_STARTED', t_lazy('heatmap-items-started-stat')),
-                                 ('VERSES_TESTED', t_lazy('heatmap-items-tested-stat')),
-                                 ('COMBINED', t_lazy('heatmap-combined-stat')),
-                                 ])
+
+class HeatmapStatsType(models.TextChoices):
+    VERSES_STARTED = 'VERSES_STARTED', t_lazy('heatmap-items-started-stat')
+    VERSES_TESTED = 'VERSES_TESTED', t_lazy('heatmap-items-tested-stat')
+    COMBINED = 'COMBINED', t_lazy('heatmap-combined-stat')
 
 
 # Account is separate from Identity to allow guest users to use the site fully
@@ -418,11 +418,11 @@ class Identity(models.Model):
                                               null=True, blank=True)
     desktop_testing_method = models.CharField(max_length=20,
                                               verbose_name=t_lazy('accounts-desktop-testing-method'),
-                                              choices=TestingMethod.choice_list,
+                                              choices=TestingMethod.choices,
                                               default=TestingMethod.FULL_WORDS)
     touchscreen_testing_method = models.CharField(max_length=20,
                                                   verbose_name=t_lazy('accounts-touchscreen-testing-method'),
-                                                  choices=TestingMethod.choice_list,
+                                                  choices=TestingMethod.choices,
                                                   default=TestingMethod.ON_SCREEN)
     enable_animations = models.BooleanField(t_lazy('accounts-enable-animations'),
                                             blank=True, default=True)
@@ -442,7 +442,7 @@ class Identity(models.Model):
                                     blank=True,
                                     related_name='referrals')
     heatmap_default_stats_type = models.CharField(max_length=20,
-                                                  choices=HeatmapStatsType.choice_list,
+                                                  choices=HeatmapStatsType.choices,
                                                   default=HeatmapStatsType.COMBINED)
     heatmap_default_show = models.BooleanField(default=True)
 
