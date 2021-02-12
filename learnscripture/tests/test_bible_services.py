@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import unittest2
+import unittest
 
 from bibleverses.services import get_esv, search_esv
 
@@ -7,7 +7,7 @@ from .base import TestBase
 from .test_bibleverses import SetupEsvMixin
 
 
-class TestEsvService(unittest2.TestCase):
+class TestEsvService(unittest.TestCase):
 
     def test_get_esv_single(self):
         d = list(get_esv(['John 3:16']))

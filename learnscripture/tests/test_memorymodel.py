@@ -1,12 +1,12 @@
 import json
 import os.path
 
-import unittest2
+import unittest
 
 from accounts.memorymodel import MM, strength_estimate
 
 
-class StrengthEstimate(unittest2.TestCase):
+class StrengthEstimate(unittest.TestCase):
 
     def test_strength_estimate_repeat(self):
         # If we test N times after interval I at a certain score, it should

@@ -6,7 +6,7 @@ Since there has only ever been one developer on the project to date, these
 instructions may not work completely, but they should be a start.
 
 These instructions assume you are working in a Linux or Unix like environment
-(Mac should work, or a Ubuntu 16.04 virtual machine), with Python 3.5 and Mercurial
+(Mac should work, or a Ubuntu 16.04 virtual machine), with Python 3.8 and Git
 installed.
 
 1. Create a directory 'learnscripture.net' and cd into it.
@@ -37,7 +37,7 @@ installed.
 
    System dependencies:
 
-   * postgresql 9.4 or later
+   * postgresql 12 or later
    * memcached
    * rabbitmq-server
    * nodejs

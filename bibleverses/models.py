@@ -8,7 +8,7 @@ from functools import reduce
 
 import attr
 from autoslug import AutoSlugField
-from django.contrib.postgres.fields import ArrayField, JSONField
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import F, Func, Q, Value
 from django.urls import reverse
@@ -458,7 +458,7 @@ class WordSuggestionData(models.Model):
     # consists of a list of words in decreasing order of fitness.
     # So we have
     # [[suggestion_1_for_word_1, s_2_for_w_1,...],[s_1_for_w_2, s_2_for_w_2]]
-    suggestions = JSONField(default=list)
+    suggestions = models.JSONField(default=list)
 
     def get_suggestions(self):
         if not self.suggestions:

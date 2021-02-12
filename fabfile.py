@@ -59,7 +59,6 @@ REQS = [
 
     'rsync',
     'git',
-    'mercurial',
 
     # Tools for interactive use only
     'htop',

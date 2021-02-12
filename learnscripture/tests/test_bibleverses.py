@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-import unittest2
+import unittest
 from django_ftl import override
 
 from accounts.models import Identity
@@ -353,7 +353,7 @@ class VersionTests(BibleVersesMixin, TestBase):
         self.assertTrue(item_suggestions_need_updating(v2))
 
 
-class ParsingTests(unittest2.TestCase):
+class ParsingTests(unittest.TestCase):
     def pv(self, lang, ref):
         """
         parse_validated_localized_reference, with extra checks.
@@ -648,7 +648,7 @@ class MockUVS:
         self.version = MockVersion(language_code=language_code)
 
 
-class GetPassageSectionsTests(unittest2.TestCase):
+class GetPassageSectionsTests(unittest.TestCase):
 
     def test_empty(self):
         uvs_list = [MockUVS('Genesis 1:1'),
@@ -880,7 +880,7 @@ class UserVerseStatusTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestB
             2)
 
 
-class VerseUtilsTests(unittest2.TestCase):
+class VerseUtilsTests(unittest.TestCase):
 
     def test_split_into_words(self):
         self.assertEqual(split_into_words("""and live forever--"'"""),
