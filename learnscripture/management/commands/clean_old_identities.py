@@ -9,11 +9,13 @@ logger = logging.getLogger(__name__)
 class Command(BaseCommand):
     def handle(self, *args, **options):
         try:
-            from accounts.models import Identity
-            from django.utils import timezone
             from datetime import timedelta
-            from django.db.models import Count
+
             from django.conf import settings
+            from django.db.models import Count
+            from django.utils import timezone
+
+            from accounts.models import Identity
 
             # For now, we keep old Identity objects that have some
             # verse_statuses, because this might be useful for stats. Identity

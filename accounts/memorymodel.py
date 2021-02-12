@@ -311,6 +311,7 @@ def test_run_passage(passage_length, days):
     # testing schedule
 
     import random
+
     # We learn 1 verse a day in passage.
     learnt = {}
     verses_learnt = 0

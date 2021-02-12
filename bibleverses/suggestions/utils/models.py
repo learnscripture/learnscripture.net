@@ -10,8 +10,8 @@ from .iterators import get_in_batches
 
 
 def get_all_version_words(version, disallow_text_loading=False):
-    from ..trainingtexts import BibleTrainingTexts, CatechismTrainingTexts
     from ..analyzers.wordcounts import get_text_word_counts
+    from ..trainingtexts import BibleTrainingTexts, CatechismTrainingTexts
 
     if version.text_type == TextType.BIBLE:
         training_texts = BibleTrainingTexts(text=version,

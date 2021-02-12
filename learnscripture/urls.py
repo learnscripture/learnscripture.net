@@ -4,8 +4,8 @@ import django.contrib.staticfiles.views
 import django.views.i18n
 import django.views.static
 from django.conf import settings
-from django.urls import include, path, re_path
 from django.contrib import admin
+from django.urls import include, path, re_path
 from django.views.generic import RedirectView
 
 import accounts.lookups

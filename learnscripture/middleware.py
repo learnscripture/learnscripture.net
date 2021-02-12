@@ -105,8 +105,8 @@ def pwa_tracker_middleware(get_response):
 
 
 def debug_middleware(get_response):
-    from learnscripture import session
     from accounts.models import Account
+    from learnscripture import session
 
     def middleware(request):
         if 'sleep' in request.GET:

@@ -285,6 +285,7 @@ class Account(AbstractBaseUser):
 
     def get_ordered_groups(self):
         from groups.models import Group
+
         # use Group directly so that we can do the annotation/ordering we need
         return (Group.objects
                 .annotate(num_members=models.Count('members'))

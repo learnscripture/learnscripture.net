@@ -163,6 +163,7 @@ class DonationDrive(models.Model):
 
 def send_donation_drive_target_reached_emails(donation_drive):
     from django.conf import settings
+
     from learnscripture.utils.templates import render_to_string_ftl
 
     payments = donation_drive.get_contributions()

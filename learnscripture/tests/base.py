@@ -433,6 +433,7 @@ def show_server_error(request):
     Useful in testing, if you can't set DEBUG=True.
     """
     import sys
+
     from django import http
     from django.views.debug import ExceptionReporter
     exc_type, exc_value, exc_traceback = sys.exc_info()

@@ -158,6 +158,7 @@ class AccountPasswordResetForm(PasswordResetForm):
     def send_mail(self, subject_template_name, email_template_name,
                   context, from_email, to_email, html_email_template_name=None):
         from learnscripture.context_processors import ftl
+
         # We add 'reset_url' to context, which is easier to do in Python than in
         # the template.
         path = reverse('password_reset_confirm', kwargs={'uidb64': context['uid'],

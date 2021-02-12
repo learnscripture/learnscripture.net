@@ -19,7 +19,7 @@ class Command(BaseCommand):
         parser.add_argument('version_slug', nargs='+')
 
     def handle(self, *args, **options):
-        from bibleverses.models import TextVersion, TextType
+        from bibleverses.models import TextType, TextVersion
         from bibleverses.services import partial_data_available
 
         output_dir = options['output_dir']

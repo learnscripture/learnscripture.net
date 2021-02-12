@@ -13,8 +13,8 @@ class Command(BaseCommand):
                             help="If supplied, suggestions will be created even if already existing")
 
     def handle(self, *args, **options):
-        from bibleverses.suggestions.modelapi import generate_suggestions
         from bibleverses.models import TextVersion
+        from bibleverses.suggestions.modelapi import generate_suggestions
 
         settings.LOADING_WORD_SUGGESTIONS = True
 

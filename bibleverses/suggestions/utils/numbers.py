@@ -6,6 +6,7 @@ from functools import reduce
 
 def sum_matrices(matrices):
     import pykov
+
     # Do our own matrix sum to avoid n^2 behaviour
     retval = pykov.Matrix()
     keys = []

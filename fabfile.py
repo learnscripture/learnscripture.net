@@ -641,6 +641,7 @@ def check_ftl():
     import django
     django.setup()
     from django.conf import settings
+
     from learnscripture.ftl_bundles import main
     errors = main.check_all([code for code, _ in settings.LANGUAGES])
     if errors:

@@ -99,6 +99,7 @@ def fix_esv_bugs(items, needed_localized_references):
 
 def search_esv(version, words, page, page_size):
     from django.conf import settings
+
     from bibleverses.models import VerseSearchResult
 
     params = [f'key={settings.ESV_API_KEY}',
@@ -149,8 +150,8 @@ ESV_MAX_STORED_CONSECUTIVE_VERSES = 500
 
 def adjust_stored_esv():
     # See terms of usage at http://www.esvapi.org/
-    from bibleverses.models import TextVersion
     from bibleverses.books import get_bible_books
+    from bibleverses.models import TextVersion
     esv = TextVersion.objects.get(slug='ESV')
     for book_num, book_name in enumerate(get_bible_books(esv.language_code)):
         book_verses = esv.verse_set.filter(book_number=book_num,

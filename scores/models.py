@@ -123,10 +123,11 @@ def leaderboard_group_filter(q, hellbanned_mode, group):
 def get_all_time_leaderboard(hellbanned_mode, from_item, page_size, group=None):
     # page is zero indexed
 
-    from learnscripture.utils.sqla import default_engine, accounts_account, scores_totalscore
+    from sqlalchemy.schema import Sequence
     from sqlalchemy.sql import select
     from sqlalchemy.sql.functions import next_value
-    from sqlalchemy.schema import Sequence
+
+    from learnscripture.utils.sqla import accounts_account, default_engine, scores_totalscore
 
     account = accounts_account
     totalscore = scores_totalscore
@@ -166,11 +167,11 @@ def get_leaderboard_since(since, hellbanned_mode, from_item, page_size, group=No
 
     # This uses a completely different strategy to get_all_time_leaderboard,
     # relying on ActionLog
-    from learnscripture.utils.sqla import default_engine, accounts_account, scores_actionlog
-    from sqlalchemy.sql import select
-    from sqlalchemy.sql.functions import next_value
     from sqlalchemy.schema import Sequence
-    from sqlalchemy.sql import func
+    from sqlalchemy.sql import func, select
+    from sqlalchemy.sql.functions import next_value
+
+    from learnscripture.utils.sqla import accounts_account, default_engine, scores_actionlog
 
     account = accounts_account
     actionlog = scores_actionlog
@@ -209,9 +210,10 @@ def get_leaderboard_since(since, hellbanned_mode, from_item, page_size, group=No
 
 
 def get_number_of_distinct_hours_for_account_id(account_id):
-    from learnscripture.utils.sqla import scores_actionlog, default_engine
-    from sqlalchemy.sql import select, distinct, extract
     from sqlalchemy import func
+    from sqlalchemy.sql import distinct, extract, select
+
+    from learnscripture.utils.sqla import default_engine, scores_actionlog
 
     sq1 = select(
         [distinct(extract('hour', scores_actionlog.c.created)).label('hours')],
@@ -237,10 +239,11 @@ def _add_zeros(vals):
 
 
 def get_verses_started_counts(identity_ids, started_since=None):
+    from sqlalchemy import func
+    from sqlalchemy.sql import and_, select
+
     from bibleverses.models import MemoryStage
     from learnscripture.utils.sqla import bibleverses_userversestatus, default_engine
-    from sqlalchemy.sql import select, and_
-    from sqlalchemy import func
 
     # The important points about this complex query are:
     #
@@ -272,9 +275,10 @@ def get_verses_started_counts(identity_ids, started_since=None):
 
 
 def get_verses_started_per_day(identity_id):
-    from learnscripture.utils.sqla import bibleverses_userversestatus, default_engine
-    from sqlalchemy.sql import select, and_
     from sqlalchemy import func
+    from sqlalchemy.sql import and_, select
+
+    from learnscripture.utils.sqla import bibleverses_userversestatus, default_engine
 
     day_col = func.date_trunc('day', bibleverses_userversestatus.c.first_seen).label('day')
 
@@ -302,9 +306,10 @@ def get_verses_started_per_day(identity_id):
 
 
 def get_verses_tested_per_day(account_id):
-    from learnscripture.utils.sqla import scores_actionlog, default_engine
-    from sqlalchemy.sql import select, and_
     from sqlalchemy import func
+    from sqlalchemy.sql import and_, select
+
+    from learnscripture.utils.sqla import default_engine, scores_actionlog
 
     day_col = func.date_trunc('day', scores_actionlog.c.created).label('day')
     q1 = (select([day_col,
@@ -323,11 +328,13 @@ def get_verses_tested_per_day(account_id):
 
 
 def get_verses_finished_count(identity_id, finished_since=None):
+    from sqlalchemy import func
+    from sqlalchemy.sql import and_, select
+
     from accounts.memorymodel import MM
     from bibleverses.models import MemoryStage
-    from learnscripture.utils.sqla import accounts_identity, bibleverses_userversestatus, default_engine, scores_actionlog
-    from sqlalchemy.sql import select, and_
-    from sqlalchemy import func
+    from learnscripture.utils.sqla import (accounts_identity, bibleverses_userversestatus, default_engine,
+                                           scores_actionlog)
 
     uvs = bibleverses_userversestatus
     from_table = uvs

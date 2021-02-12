@@ -89,7 +89,7 @@ else:
     # probably a Django bug, so we workaround:
     conn_max_age = 0 if TESTING else 120
     try:
-        from .settings_local import DB_USER, DB_PORT
+        from .settings_local import DB_PORT, DB_USER
     except ImportError:
         DB_USER = 'learnscripture'
         DB_PORT = 5432

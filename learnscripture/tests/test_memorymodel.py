@@ -1,6 +1,5 @@
 import json
 import os.path
-
 import unittest
 
 from accounts.memorymodel import MM, strength_estimate

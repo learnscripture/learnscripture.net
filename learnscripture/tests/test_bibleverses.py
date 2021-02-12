@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 import unittest
+
 from django_ftl import override
 
 from accounts.models import Identity
