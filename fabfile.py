@@ -195,9 +195,9 @@ class Version(object):
                 run("mkdir -p %s" % d)
         links = [(self.MEDIA_ROOT, self.MEDIA_ROOT_SHARED),
                  (self.DATA_ROOT, self.DATA_ROOT_SHARED)]
-        for l, dest in links:
-            if not exists(l):
-                run("ln -s %s %s" % (dest, l))
+        for link, dest in links:
+            if not exists(link):
+                run("ln -s %s %s" % (dest, link))
 
 
 def secrets():
@@ -288,9 +288,9 @@ def _install_locales():
 
 @as_rootuser
 def _configure_services():
-    for l in ["#------- Added for LearnScripture -----",
-              "synchronous_commit = off"]:
-        append("/etc/postgresql/12/main/postgresql.conf", l)
+    for line in ["#------- Added for LearnScripture -----",
+                 "synchronous_commit = off"]:
+        append("/etc/postgresql/12/main/postgresql.conf", line)
     run("service postgresql restart")
 
     _configure_rabbitmq()

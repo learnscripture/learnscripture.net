@@ -70,7 +70,7 @@ def fix_missing_verse():
             # The verse should be missing. We need to create a new
             # Verse object with missing=True. We have to shift
             # bible_verse_number down, but not gapless_bible_verse_number
-            print(f'Creating empty verse')
+            print('Creating empty verse')
             text = ''
 
             def shift():

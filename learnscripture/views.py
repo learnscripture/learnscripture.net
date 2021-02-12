@@ -457,7 +457,7 @@ def context_for_quick_find(request):
     Returns the context data needed to render a quick find box
     """
     version = default_bible_version_for_request(request)
-    language_codes = [l.code for l in LANGUAGES] + [LANGUAGE_CODE_INTERNAL]
+    language_codes = [lang.code for lang in LANGUAGES] + [LANGUAGE_CODE_INTERNAL]
 
     bible_books = [
         {lc: get_bible_book_name(lc, i)
@@ -1240,12 +1240,12 @@ def stats(request):
     })
 
 
-def natural_list(l):
-    if len(l) == 0:
+def natural_list(lang):
+    if len(lang) == 0:
         return ''
-    if len(l) == 1:
-        return l[0]
-    return f"{', '.join(l[0:-1])} and {l[-1]}"
+    if len(lang) == 1:
+        return lang[0]
+    return f"{', '.join(lang[0:-1])} and {lang[-1]}"
 
 
 def donation_paypal_dict(account, url_start):
@@ -1650,22 +1650,23 @@ def send_contact_email(contact_form, account):
     # Doesn't need i18n, only goes to admins
     mail.EmailMessage(subject="LearnScripture feedback",
                       body="""
-From: %(name)s
-Email: %(email)s
-Account: %(account)s
+From: {name}
+Email: {email}
+Account: {account}
 Message:
 
-%(message)s
-""" % {
-    'name': contact_form.cleaned_data['name'],  # noqa
-    'email': email,
-    'account': account.username if account is not None else '',
-    'message': contact_form.cleaned_data['message'],
-},
+{message}
+"""
+                      .format(
+                          name=contact_form.cleaned_data['name'],
+                          email=email,
+                          account=account.username if account is not None else '',
+                          message=contact_form.cleaned_data['message'],
+                      ),
                       from_email=settings.SERVER_EMAIL,
                       to=[settings.CONTACT_EMAIL],
                       headers={'Reply-To': email} if email else {},
-    ).send()
+                      ).send()
 
 
 @htmx({

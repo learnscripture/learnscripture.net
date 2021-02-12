@@ -2,11 +2,11 @@
 from __future__ import generator_stop
 
 
-def chunks(l, n):
-    """ Yield successive n-sized chunks from l.
+def chunks(sliceable, n):
+    """ Yield successive n-sized chunks from list or other sliceable
     """
-    for i in range(0, len(l), n):
-        yield l[i:i + n]
+    for i in range(0, len(sliceable), n):
+        yield sliceable[i:i + n]
 
 
 def intersperse(iterable, delimiter):

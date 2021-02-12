@@ -389,7 +389,7 @@ class OrganizerAward(CountBasedAward):
 
 class ConsistentLearnerAward(TimeBasedAward):
 
-    POINTS = dict((l, v * 4) for l, v in StudentAward.POINTS.items())
+    POINTS = dict((level, points * 4) for level, points in StudentAward.POINTS.items())
 
     DAYS = {
         1: 7,

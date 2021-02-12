@@ -55,5 +55,5 @@ def split_into_sentences(text):
 
 
 def sentence_first_words(text):
-    return [split_into_words_for_suggestions(l)[0]
-            for l in split_into_sentences(text)]
+    return [split_into_words_for_suggestions(sentence)[0]
+            for sentence in split_into_sentences(text)]

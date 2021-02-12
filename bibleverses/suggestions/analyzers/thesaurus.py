@@ -24,7 +24,7 @@ PRONOUN_THESAURUS = dict(
 def english_thesaurus():
     fname = os.path.join(settings.SRC_ROOT, 'resources', 'mobythes.aur')
     f = open(fname, "rb").read().decode('utf8')
-    return dict((l.split(',')[0], l.split(',')[1:]) for l in f.split('\r'))
+    return dict((line.split(',')[0], line.split(',')[1:]) for line in f.split('\r'))
 
 
 class ThesaurusAnalyzer(Analyzer):

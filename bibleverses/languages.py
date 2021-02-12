@@ -28,12 +28,12 @@ LANGUAGES = [
 ]
 
 LANGUAGES_LOOKUP = {
-    l.code: l for l in LANGUAGES
+    lang.code: lang for lang in LANGUAGES
 }
 
 # Value for Django 'choices'
 LANGUAGE_CHOICES = [
-    (l.code, l.display_name) for l in LANGUAGES
+    (lang.code, lang.display_name) for lang in LANGUAGES
 ]
 
 
