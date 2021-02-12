@@ -84,7 +84,7 @@ installed.
 
        {"RABBITMQ_USERNAME": "learnscripture",
         "RABBITMQ_PASSWORD": "foo",
-        "ESV_API_KEY": "IP"
+        "ESV_V2_API_KEY": "IP"
        }
 
    (proper contents are, well, secret).

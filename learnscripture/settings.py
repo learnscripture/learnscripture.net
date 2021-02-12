@@ -517,7 +517,7 @@ MINIMUM_PASSWORD_LENGTH = 6
 
 REQUIRE_SUBSCRIPTION = False
 
-ESV_API_KEY = secrets['ESV_API_KEY']
+ESV_V2_API_KEY = secrets['ESV_V2_API_KEY']
 
 if TESTING:
     import faulthandler

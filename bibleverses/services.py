@@ -18,23 +18,23 @@ from learnscripture.utils.iterators import chunks
 logger = logging.getLogger(__name__)
 
 
-# ----- ESV service -----
+# ----- ESV v2 API service -----
 
-ESV_BASE_URL = "http://www.esvapi.org/v2/rest/"
+ESV_V2_BASE_URL = "http://www.esvapi.org/v2/rest/"
 
 # For batch size, found in practice that above 140 with long references (e.g. "1
 # Chronicles"), we can get 'Connection reset' errors, probably related to the
 # excessively long query string that is generated. We play safe here:
-ESV_BATCH_SIZE = 80
+ESV_V2_BATCH_SIZE = 80
 
 
-def do_esv_api(method, params):
-    url = ESV_BASE_URL + method + "?" + "&".join(params)
-    logger.info("ESV query %s", url)
+def do_esv_v2_api(method, params):
+    url = ESV_V2_BASE_URL + method + "?" + "&".join(params)
+    logger.info("ESV v2 query %s", url)
     return requests.get(url).content.decode('utf-8')
 
 
-def get_esv(localized_reference_list, batch_size=ESV_BATCH_SIZE):
+def get_esv_v2(localized_reference_list, batch_size=ESV_V2_BATCH_SIZE):
     from django.conf import settings
 
     first_time = True
@@ -43,7 +43,7 @@ def get_esv(localized_reference_list, batch_size=ESV_BATCH_SIZE):
         if not first_time:
             time.sleep(1)  # Don't hammer the API.
 
-        params = [f'key={settings.ESV_API_KEY}',
+        params = [f'key={settings.ESV_V2_API_KEY}',
                   f"passage={urllib.parse.quote(';'.join(batch))}",
                   'include-short-copyright=0',
                   # Starting with plain text is easier than messing around
@@ -58,7 +58,7 @@ def get_esv(localized_reference_list, batch_size=ESV_BATCH_SIZE):
                   'line-length=0',
                   ]
 
-        text = do_esv_api("passageQuery", params)
+        text = do_esv_v2_api("passageQuery", params)
         first_time = False
 
         # Split into passages
@@ -79,30 +79,30 @@ def get_esv(localized_reference_list, batch_size=ESV_BATCH_SIZE):
                     prev = sections[current_section] + '\n' if current_section in sections else ''
                     sections[current_section] = prev + l2
 
-    fix_esv_bugs(sections, localized_reference_list)
+    fix_esv_v2_bugs(sections, localized_reference_list)
 
     return sorted(sections.items())
 
 
 # The ESV API incorrectly returns nothing for these items
 # (seems to only apply with output-format=plain-text)
-MISSING_ESV = {
+MISSING_ESV_V2 = {
     'John 8:1': 'but Jesus went to the Mount of Olives.',
 }
 
 
-def fix_esv_bugs(items, needed_localized_references):
-    for ref in MISSING_ESV.keys():
+def fix_esv_v2_bugs(items, needed_localized_references):
+    for ref in MISSING_ESV_V2.keys():
         if ref in needed_localized_references:
-            items[ref] = MISSING_ESV[ref]
+            items[ref] = MISSING_ESV_V2[ref]
 
 
-def search_esv(version, words, page, page_size):
+def search_esv_v2(version, words, page, page_size):
     from django.conf import settings
 
     from bibleverses.models import VerseSearchResult
 
-    params = [f'key={settings.ESV_API_KEY}',
+    params = [f'key={settings.ESV_V2_API_KEY}',
               f'words={words}',
               'include-short-copyright=0',
               'include-passage-horizontal-lines=0',
@@ -114,7 +114,7 @@ def search_esv(version, words, page, page_size):
               'results-per-page=%d' % page_size,
               ]
 
-    result_text = do_esv_api("query", params)
+    result_text = do_esv_v2_api("query", params)
     # Split into results
     pq = PyQuery(result_text)
     results = []
@@ -148,11 +148,11 @@ def search_esv(version, words, page, page_size):
 ESV_MAX_STORED_CONSECUTIVE_VERSES = 500
 
 
-def adjust_stored_esv():
-    # See terms of usage at http://www.esvapi.org/
+def adjust_stored_esv(version_slug):
+    # V2 API: See terms of usage at http://www.esvapi.org/
     from bibleverses.books import get_bible_books
     from bibleverses.models import TextVersion
-    esv = TextVersion.objects.get(slug='ESV')
+    esv = TextVersion.objects.get(slug=version_slug)
     for book_num, book_name in enumerate(get_bible_books(esv.language_code)):
         book_verses = esv.verse_set.filter(book_number=book_num,
                                            missing=False)
@@ -188,11 +188,11 @@ def highlight_search_words(verse, words):
 
 
 _FETCH_SERVICES = {
-    'ESV': get_esv,
+    'ESV': get_esv_v2,
 }
 
 _SEARCH_SERVICES = {
-    'ESV': search_esv,
+    'ESV': search_esv_v2,
 }
 
 # Versions where we are only allowed to store partial data locally:

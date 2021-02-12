@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from bibleverses.services import get_esv, search_esv
+from bibleverses.services import get_esv_v2, search_esv_v2
 
 from .base import TestBase
 from .test_bibleverses import SetupEsvMixin
@@ -9,13 +9,13 @@ from .test_bibleverses import SetupEsvMixin
 
 class TestEsvService(unittest.TestCase):
 
-    def test_get_esv_single(self):
-        d = list(get_esv(['John 3:16']))
+    def test_get_esv_v2_single(self):
+        d = list(get_esv_v2(['John 3:16']))
         self.assertEqual(d, [('John 3:16', '"For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life.')])
 
-    def test_get_esv_multi(self):
+    def test_get_esv_v2_multi(self):
         self.maxDiff = None
-        d = list(get_esv(['Psalm 126:1', 'Psalm 126:2']))
+        d = list(get_esv_v2(['Psalm 126:1', 'Psalm 126:2']))
         self.assertEqual(d, [('Psalm 126:1', '''When the LORD restored the fortunes of Zion,
 we were like those who dream.'''),
                              ('Psalm 126:2', '''Then our mouth was filled with laughter,
@@ -27,7 +27,7 @@ then they said among the nations,
 class TestEsvSearch(SetupEsvMixin, TestBase):
 
     def test_search(self):
-        l, more_results = search_esv(self.esv, "God loved world gave", 0, 10)
+        l, more_results = search_esv_v2(self.esv, "God loved world gave", 0, 10)
         self.assertEqual(len(l), 1)
         v = l[0]
         self.assertEqual(v.localized_reference, "John 3:16")
