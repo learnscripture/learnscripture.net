@@ -45,6 +45,14 @@ def create_started_catechism_event(account_id, catechism_id):
 
 
 def crosses_milestone(previous_points, current_points):
+    """
+    Checks if going from previous_points to current_points
+    crosses a 'milestone'. If so, returns (True, milestone:int),
+    otherwise (False, None)
+    """
+    # milestones are things like 1000, 2000 etc.  We can find these by
+    # converting to strings and measuring different lengths or initial
+    # characters.
     c_s = str(current_points)
     p_s = str(previous_points)
 
@@ -60,9 +68,6 @@ def crosses_milestone(previous_points, current_points):
 def create_points_milestone_event(account_id, previous_points, additional_points):
     account = Account.objects.get(id=account_id)
 
-    # milestones are things like 1000, 2000 etc.  We can find these by
-    # converting to strings and measuring different lengths or initial
-    # characters.
     current_points = previous_points + additional_points
     if current_points < 1000:
         return
