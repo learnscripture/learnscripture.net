@@ -59,12 +59,17 @@ most business logic runs off Identity.
 
 Run the tests::
 
-    ./runtests.py
+  pytest
+
+Exclude slow and flaky Selenium tests like this::
+
+  pytest -m 'not selenium'
 
 To see more options::
 
-    ./runtests.py --help
+  pytest --help
+
+Also `pytest docs <https://docs.pytest.org/en/latest/>`_ for more info.
 
 * put "fsync = off" and "synchronous_commit = off" in your postgresql.conf
   for large speedups when running tests.
-

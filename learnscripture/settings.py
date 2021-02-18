@@ -25,7 +25,7 @@ else:
 DEBUG = DEVBOX and not RUNNING_MIGRATIONS
 
 # A kitten gets killed every time you use this:
-TESTING = 'manage.py test' in ' '.join(sys.argv)
+TESTS_RUNNING = False
 
 
 SRC_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # ../
@@ -87,7 +87,7 @@ else:
     # We have problems with wordsuggestions DB connections not being closed in
     # test environment, especially related to the non-default DB it seems,
     # probably a Django bug, so we workaround:
-    conn_max_age = 0 if TESTING else 120
+    conn_max_age = 120
     try:
         from .settings_local import DB_PORT, DB_USER
     except ImportError:
@@ -377,8 +377,8 @@ LOGGING = {
 }
 
 
-if (DEBUG or TESTING or any(a in sys.argv for a in ['setup_bibleverse_suggestions',
-                                                    'run_suggestions_analyzers'])):
+if (DEBUG or any(a in sys.argv for a in ['setup_bibleverse_suggestions',
+                                         'run_suggestions_analyzers'])):
     LOGGING['root'] = {
         'level': 'WARNING',
         'handlers': ['console'],
@@ -388,6 +388,7 @@ if (DEBUG or TESTING or any(a in sys.argv for a in ['setup_bibleverse_suggestion
         'handlers': ['console'],
         'propagate': False,
     }
+    LOGGING['handlers']['console']['level'] = 'INFO'
 else:
     if SENTRY_DSN:
         version = subprocess.check_output(['git', '-C', SRC_ROOT, 'rev-parse', 'HEAD']).strip().decode('utf-8')
@@ -398,8 +399,6 @@ else:
             release=release,
         )
 
-if TESTING:
-    LOGGING['handlers']['console']['level'] = 'ERROR'
 
 SILENCED_SYSTEM_CHECKS = [
     "1_6.W001",
@@ -442,10 +441,6 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
     }
-} if TESTING else {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-    }
 }
 
 RESTRUCTUREDTEXT_FILTER_SETTINGS = {
@@ -473,7 +468,7 @@ CELERY_BROKER_URL = 'amqp://{0}:{1}@localhost:5672/learnscripture'.format(secret
 
 # For easier debugging, we run Celery tasks in main process
 # when in development.
-if TESTING or DEVBOX:
+if DEVBOX:
     CELERY_TASK_ALWAYS_EAGER = True
     CELERY_TASK_EAGER_PROPAGATES = True
 else:
@@ -491,16 +486,13 @@ CELERY_WORKER_HIJACK_ROOT_LOGGER = False
 # Webpack
 
 if DEVBOX:
-    if TESTING:
-        WEBPACK_STATS_FILE = 'webpack-stats.tests.json'
-    else:
-        WEBPACK_STATS_FILE = 'webpack-stats.dev.json'
+    WEBPACK_STATS_FILE = 'webpack-stats.dev.json'
 else:
     WEBPACK_STATS_FILE = 'webpack-stats.deploy.json'
 
 WEBPACK_LOADER = {
     'DEFAULT': {
-        'CACHE': not DEBUG or TESTING,
+        'CACHE': not DEBUG,
         'BUNDLE_DIR_NAME': 'webpack_bundles/',
         'STATS_FILE': os.path.join(SRC_ROOT, WEBPACK_STATS_FILE),
         'POLL_INTERVAL': 0.1,
@@ -518,15 +510,6 @@ MINIMUM_PASSWORD_LENGTH = 6
 REQUIRE_SUBSCRIPTION = False
 
 ESV_V2_API_KEY = secrets['ESV_V2_API_KEY']
-
-if TESTING:
-    import faulthandler
-    import signal
-    faulthandler.enable()
-
-    # If the process receives signal SIGUSR1, dump a traceback
-    faulthandler.register(signal.SIGUSR1)
-
 
 if DEBUG:
     try:
@@ -579,23 +562,3 @@ if DEBUG:
                     reverse=True,
                     key=os.path.getctime)[20:]:
         os.unlink(f)
-
-if TESTING:
-    # Monkey patch WebpackLoader to call `webpack` just in time.
-    # This means that tests that don't need to run webpack
-    # don't have that overhead.
-    from webpack_loader.loader import WebpackLoader
-
-    original_get_assets = WebpackLoader.get_assets
-
-    _loaded = []
-
-    def get_assets(self):
-        if not _loaded:
-            for f in glob.glob("./learnscripture/static/webpack_bundles/*.tests.*"):
-                os.unlink(f)
-            subprocess.check_call(["./node_modules/.bin/webpack", "--config", "webpack.config.tests.js"])
-            _loaded.append(True)
-        return original_get_assets(self)
-
-    WebpackLoader.get_assets = get_assets

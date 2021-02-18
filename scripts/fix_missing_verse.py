@@ -17,7 +17,7 @@ MISSING_VERSE_TEXTS = {
 
 def setup():
     import os
-    os.environ['DJANGO_SETTINGS_MODULE'] = 'learnscripture.settings'
+    os.environ['DJANGO_SETTINGS_MODULE'] = 'learnscripture.settings_local'
     django.setup()
 
 

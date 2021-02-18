@@ -133,7 +133,7 @@ if settings.DEBUG:
     ] + urlpatterns
 
 
-if settings.TESTING:
+if settings.TESTS_RUNNING:
     urlpatterns += [
         path('django_functest/', include('django_functest.urls'))
     ]

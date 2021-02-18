@@ -3,10 +3,10 @@ import contextlib
 import os
 import time
 import typing
-import unittest
 from functools import wraps
 from unittest.case import _UnexpectedSuccess
 
+import pytest
 import selenium
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.core.management import call_command
@@ -225,7 +225,7 @@ class TimeUtilsMixin(object):
         Event.objects.update(created=F('created') - delta)
 
 
-@unittest.skipIf(os.environ.get('SKIP_SELENIUM_TESTS'), "Skipping Selenium tests")
+@pytest.mark.selenium
 class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaCleanup, TimeUtilsMixin, StaticLiveServerTestCase):
 
     display = TESTS_SHOW_BROWSER

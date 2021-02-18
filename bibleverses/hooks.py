@@ -8,7 +8,7 @@ from bibleverses.tasks import fix_item_suggestions, verse_set_increase_popularit
 
 
 def should_update_word_suggestions_on_save():
-    return not (settings.TESTING or
+    return not (settings.TESTS_RUNNING or
                 getattr(settings, 'LOADING_VERSES', False) or
                 getattr(settings, 'LOADING_WORD_SUGGESTIONS', False))
 

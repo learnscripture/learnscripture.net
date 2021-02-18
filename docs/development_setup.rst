@@ -67,8 +67,10 @@ installed.
      elm-install
 
 
-5. Create postgres databases matching the development ones in
-   ``learnscripture/settings.py``, both for ``learnscripture`` and
+5. Create ``learnscripture/settings_local.py`` from ``learnscripture/settings_local_example.py``
+   You can leave ``DATABASES`` as it is, or change as required.
+
+   Then create postgres databases to match the settings, both for ``learnscripture`` and
    ``learnscripture_wordsuggestions``.
 
    Similarly set up RabbitMQ::
@@ -133,7 +135,7 @@ installed.
 
 9. Then, try to run the tests::
 
-     ./runtests.py
+     pytest
 
    See also :doc:`project_structure.rst` for more info on running tests.
 

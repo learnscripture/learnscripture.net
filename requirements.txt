@@ -14,6 +14,8 @@ amqp==5.0.5
     # via
     #   kombu
     #   librabbitmq
+apipkg==1.5
+    # via execnet
 appdirs==1.4.4
     # via
     #   fs
@@ -25,6 +27,7 @@ attrs==20.3.0
     #   -r requirements.in
     #   elm-fluent
     #   fluent-compiler
+    #   pytest
 babel==2.9.0
     # via fluent-compiler
 backcall==0.2.0
@@ -143,6 +146,8 @@ easyprocess==0.3
     # via pyvirtualdisplay
 elm-fluent==0.6.0
     # via -r requirements-dev.in
+execnet==1.8.0
+    # via pytest-xdist
 fabric3==1.14.post1
     # via
     #   -r requirements-dev.in
@@ -170,6 +175,8 @@ identify==1.5.13
     # via pre-commit
 idna==2.10
     # via requests
+iniconfig==1.1.1
+    # via pytest
 ipython-genutils==0.2.0
     # via traitlets
 ipython==7.16.1
@@ -204,6 +211,8 @@ numpy==1.20.1
     #   scipy
 orderedmultidict==1.0.1
     # via furl
+packaging==20.9
+    # via pytest
 paramiko==2.7.2
     # via fabric3
 parso==0.8.1
@@ -220,6 +229,8 @@ pillow==8.1.0
     # via easy-thumbnails
 pip-tools==5.5.0
     # via -r requirements-dev.in
+pluggy==0.13.1
+    # via pytest
 portalocker==2.2.1
     # via concurrent-log-handler
 pre-commit==2.10.1
@@ -228,10 +239,16 @@ prompt-toolkit==3.0.16
     # via
     #   click-repl
     #   ipython
+psutil==5.8.0
+    # via pytest-xdist
 psycopg2-binary==2.8.6
     # via -r requirements.in
 ptyprocess==0.7.0
     # via pexpect
+py==1.10.0
+    # via
+    #   pytest
+    #   pytest-forked
 pycodestyle==2.6.0
     # via flake8
 pycparser==2.20
@@ -244,10 +261,24 @@ pyinotify==0.9.6
     # via -r requirements-dev.in
 pynacl==1.4.0
     # via paramiko
+pyparsing==2.4.7
+    # via packaging
 pyquery==1.4.1
     # via
     #   -r requirements.in
     #   django-functest
+pytest-django==4.1.0
+    # via -r requirements-dev.in
+pytest-forked==1.3.0
+    # via pytest-xdist
+pytest-xdist[psutil]==2.2.1
+    # via -r requirements-dev.in
+pytest==6.2.2
+    # via
+    #   -r requirements-dev.in
+    #   pytest-django
+    #   pytest-forked
+    #   pytest-xdist
 python-memcached==1.59
     # via -r requirements.in
 pytoml==0.1.21
@@ -319,7 +350,9 @@ sqlparse==0.4.1
     #   django-debug-toolbar
     #   django-sql-utils
 toml==0.10.2
-    # via pre-commit
+    # via
+    #   pre-commit
+    #   pytest
 traitlets==5.0.5
     # via ipython
 urllib3==1.25.11

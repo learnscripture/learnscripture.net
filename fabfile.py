@@ -116,7 +116,7 @@ REQS = [
     'goaccess',  # web analytics. Actually we need v1.4 or later
 ]
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'learnscripture.settings'  # noqa
+os.environ['DJANGO_SETTINGS_MODULE'] = 'learnscripture.settings_local'  # noqa
 
 
 @task
@@ -512,7 +512,7 @@ def code_quality_checks():
     run_ftl2elm()
     with lcd("learnscripture/static/elm"):
         local("elm-test --skip-install")
-    local("./runtests.py -f --nokeepdb")
+    local("pytest -m 'not selenium'")
 
 
 def check_branch():
@@ -583,6 +583,10 @@ def push_sources(target):
 
     # Also need to sync files that are not in main sources VCS repo.
     push_secrets(target)
+
+    # Need settings file
+    with cd(target_src_root):
+        run('cp learnscripture/settings_local_example.py learnscripture/settings_local.py')
 
 
 def tag_deploy():
