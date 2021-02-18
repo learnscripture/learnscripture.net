@@ -789,6 +789,10 @@ class VerseSet(models.Model):
 
 
 def verse_set_smart_name(verse_set_name, verse_set_language_code, required_language_code):
+    """
+    Given a verse set name which might be a passage ref, try to intelligently translate
+    from the given language to required language
+    """
     if required_language_code == verse_set_language_code:
         return verse_set_name
 

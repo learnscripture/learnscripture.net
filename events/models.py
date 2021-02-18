@@ -41,7 +41,7 @@ class EventType(models.TextChoices):
     VERSES_FINISHED_MILESTONE = 'VERSES_FINISHED_MILESTONE', 'Verses finished milestone'
     VERSE_SET_CREATED = 'VERSE_SET_CREATED', 'Verse set created'
     STARTED_LEARNING_VERSE_SET = 'STARTED_LEARNING_VERSE_SET', 'Started learning a verse set'
-    AWARD_LOST = 'AWARD_LOST', 'Award lost'
+    AWARD_LOST = 'AWARD_LOST', 'Award lost'  # See notes on AwardLostEvent
     GROUP_JOINED = 'GROUP_JOINED', 'Group joined'
     GROUP_CREATED = 'GROUP_CREATED', 'Group created'
     STARTED_LEARNING_CATECHISM = 'STARTED_LEARNING_CATECHISM', 'Started learning catechism'
@@ -135,6 +135,11 @@ class AwardReceivedEvent(EventLogic):
                                  award_detail.short_description())))
 
 
+# This event is no longer created, since it only applies to temporary awards
+# (like reigning weekly champion) which could be lost. However, there are still
+# `Event` instances in the database that use EventType.AWARD_LOST, which means
+# the `get_message_html` code below for displaying these events can still be
+# needed.
 class AwardLostEvent(EventLogic):
     event_type = EventType.AWARD_LOST
 
