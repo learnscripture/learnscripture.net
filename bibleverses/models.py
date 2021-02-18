@@ -47,8 +47,6 @@ class VerseSetType(models.TextChoices):
 # Also defined in Learn.elm stageType* functions
 class StageType(models.TextChoices):
     READ = 'READ', 'read'
-    RECALL_INITIAL = 'RECALL_INITIAL', 'recall from initials'
-    RECALL_MISSING = 'RECALL_MISSING', 'recall when missing'
     TEST = 'TEST', 'test'
 
 
