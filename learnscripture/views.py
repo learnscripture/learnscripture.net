@@ -249,24 +249,10 @@ def get_next(request, default_url):
 
 
 def todays_stats(identity):
-    stats = {}
-    today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
-
-    stats['total_verses_tested'] = (
-        identity.verse_statuses
-        .active()
-        .filter(last_tested__gte=today_start)
-        .values('version_id', 'localized_reference')
-        .distinct().count()
-    )
-    stats['new_verses_started'] = (
-        identity.verse_statuses
-        .active()
-        .filter(first_seen__gte=today_start)
-        .values('version_id', 'localized_reference')
-        .distinct().count()
-    )
-    return stats
+    return {
+        'total_verses_tested': identity.verse_statuses.total_tested_today_count(),
+        'new_verses_started': identity.verse_statuses.started_today_count(),
+    }
 
 
 def learn_set(request, uvs_list, learning_type):

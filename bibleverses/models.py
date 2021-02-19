@@ -903,6 +903,22 @@ class UserVerseStatusQuerySet(models.QuerySet):
         refs = [ref.canonical_form() for ref in parsed_ref.to_internal().to_list()]
         return self.filter(internal_reference_list__overlap=refs)
 
+    def total_tested_today_count(self):
+        today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        return (self
+                .active()
+                .filter(last_tested__gte=today_start)
+                .values('version_id', 'localized_reference')
+                .distinct().count())
+
+    def started_today_count(self):
+        today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        return (self
+                .active()
+                .filter(first_seen__gte=today_start)
+                .values('version_id', 'localized_reference')
+                .distinct().count())
+
 
 class UserVerseStatus(models.Model):
     """
