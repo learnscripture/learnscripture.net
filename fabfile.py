@@ -507,7 +507,7 @@ def code_quality_checks():
     if getattr(env, 'skip_code_quality_checks', False):
         return
     local("flake8 .")
-    local("isort -c")
+    local("isort -c .")
     check_ftl()
     run_ftl2elm()
     with lcd("learnscripture/static/elm"):
