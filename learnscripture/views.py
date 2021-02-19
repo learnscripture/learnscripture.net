@@ -154,9 +154,9 @@ password_reset = _PasswordResetView.as_view()
 def signup(request):
     from accounts.signals import new_account
 
-    c = {}
+    ctx = {}
     if account_from_request(request) is not None:
-        c['already_signed_up'] = True
+        ctx['already_signed_up'] = True
 
     if request.method == 'POST':
         form = SignUpForm(request.POST, prefix="signup")
@@ -181,10 +181,10 @@ def signup(request):
     else:
         form = SignUpForm(prefix="signup")
 
-    c['title'] = t('accounts-signup-title')
-    c['signup_form'] = form
+    ctx['title'] = t('accounts-signup-title')
+    ctx['signup_form'] = form
 
-    return TemplateResponse(request, "learnscripture/signup.html", c)
+    return TemplateResponse(request, "learnscripture/signup.html", ctx)
 
 
 def bible_versions_for_request(request):
@@ -218,10 +218,12 @@ def preferences(request):
             return get_next(request, reverse('dashboard'))
     else:
         form = PreferencesForm(instance=identity)
-    c = {'form': form,
-         'title': t('accounts-preferences-title'),
-         'hide_preferences_popup': True}
-    return TemplateResponse(request, 'learnscripture/preferences.html', c)
+    ctx = {
+        'form': form,
+        'title': t('accounts-preferences-title'),
+        'hide_preferences_popup': True,
+    }
+    return TemplateResponse(request, 'learnscripture/preferences.html', ctx)
 
 
 def account_from_request(request):
@@ -409,26 +411,26 @@ def dashboard(request):
     # and ones that have more to review above them.
     passages_for_learning.sort(key=lambda cvs: (cvs.tested_total == 0, - cvs.needs_review_total))
 
-    c = {'learn_verses_queues': identity.bible_verse_statuses_for_learning_grouped(),
-         'review_verses_queue': identity.bible_verse_statuses_for_reviewing(),
-         'passages_for_learning': passages_for_learning,
-         'passages_for_reviewing': passages_for_reviewing,
-         'catechisms_for_learning': identity.catechisms_for_learning(),
-         'catechisms_for_reviewing': identity.catechisms_for_reviewing(),
-         'next_verse_due': identity.next_verse_due(),
-         'title': t('dashboard-page-title'),
-         'events': identity.get_dashboard_events(),
-         'create_account_warning':
-             identity.account is None,
-         'groups': groups,
-         'more_groups': more_groups,
-         'url_after_logout': '/',
-         'heatmap_stats_types': HeatmapStatsType.choices,
-         'unfinished_session_first_uvs': session.unfinished_session_first_uvs(request),
-         'use_dashboard_nav': True,
-         }
-    c.update(todays_stats(identity))
-    return TemplateResponse(request, 'learnscripture/dashboard.html', c)
+    ctx = {
+        'learn_verses_queues': identity.bible_verse_statuses_for_learning_grouped(),
+        'review_verses_queue': identity.bible_verse_statuses_for_reviewing(),
+        'passages_for_learning': passages_for_learning,
+        'passages_for_reviewing': passages_for_reviewing,
+        'catechisms_for_learning': identity.catechisms_for_learning(),
+        'catechisms_for_reviewing': identity.catechisms_for_reviewing(),
+        'next_verse_due': identity.next_verse_due(),
+        'title': t('dashboard-page-title'),
+        'events': identity.get_dashboard_events(),
+        'create_account_warning': identity.account is None,
+        'groups': groups,
+        'more_groups': more_groups,
+        'url_after_logout': '/',
+        'heatmap_stats_types': HeatmapStatsType.choices,
+        'unfinished_session_first_uvs': session.unfinished_session_first_uvs(request),
+        'use_dashboard_nav': True,
+    }
+    ctx.update(todays_stats(identity))
+    return TemplateResponse(request, 'learnscripture/dashboard.html', ctx)
 
 
 def context_for_version_select(request):
@@ -496,7 +498,7 @@ def choose(request):
     if 'from_item' in request.GET:
         active_section = "verseset"
 
-    c = {
+    ctx = {
         'title': t('choose-page-title'),
         'verseset_search_form': verseset_search_form,
     }
@@ -516,9 +518,9 @@ def choose(request):
     verse_sets = verse_sets.search(query_language_codes, query)
 
     if language_code != FILTER_LANGUAGES_ALL:
-        c['verseset_language_code'] = language_code
+        ctx['verseset_language_code'] = language_code
     else:
-        c['verseset_language_code'] = default_bible_version.language_code
+        ctx['verseset_language_code'] = default_bible_version.language_code
 
     set_type = verseset_search_form.cleaned_data['set_type']
     if set_type != VERSE_SET_TYPE_ALL:
@@ -545,7 +547,7 @@ def choose(request):
             # TODO It would also be nice to detect the case where
             # is no complete match for the searched passage.
             if len(verse_sets) == 0:
-                c['create_passage_set_prompt'] = {
+                ctx['create_passage_set_prompt'] = {
                     'internal_reference': parsed_ref.to_internal().canonical_form(),
                     'localized_reference': parsed_ref.canonical_form(),
                 }
@@ -553,14 +555,14 @@ def choose(request):
     PAGE_SIZE = 10
 
     if active_section:
-        c['active_section'] = active_section
+        ctx['active_section'] = active_section
 
-    c['results'] = get_paged_results(verse_sets, request, PAGE_SIZE)
-    c['default_bible_version'] = default_bible_version
+    ctx['results'] = get_paged_results(verse_sets, request, PAGE_SIZE)
+    ctx['default_bible_version'] = default_bible_version
 
-    c.update(context_for_quick_find(request))
+    ctx.update(context_for_quick_find(request))
 
-    return TemplateResponse(request, 'learnscripture/choose.html', c)
+    return TemplateResponse(request, 'learnscripture/choose.html', ctx)
 
 
 @require_preferences
@@ -621,10 +623,11 @@ def view_catechism_list(request):
                          request.identity.add_catechism(catechism),
                          session.LearningType.LEARNING)
 
-    c = {'catechisms': TextVersion.objects.catechisms(),
-         'title': t('catechisms-page-title'),
-         }
-    return TemplateResponse(request, 'learnscripture/catechisms.html', c)
+    ctx = {
+        'catechisms': TextVersion.objects.catechisms(),
+        'title': t('catechisms-page-title'),
+    }
+    return TemplateResponse(request, 'learnscripture/catechisms.html', ctx)
 
 
 def view_catechism(request, slug):
@@ -633,14 +636,15 @@ def view_catechism(request, slug):
     except TextVersion.DoesNotExist:
         raise Http404
 
-    c = {'title': catechism.full_name,
-         'catechism': catechism,
-         'questions': catechism.qapairs.order_by('order'),
-         'learners': catechism.get_learners(),
-         'include_referral_links': True,
-         }
+    ctx = {
+        'title': catechism.full_name,
+        'catechism': catechism,
+        'questions': catechism.qapairs.order_by('order'),
+        'learners': catechism.get_learners(),
+        'include_referral_links': True,
+    }
 
-    return TemplateResponse(request, 'learnscripture/view_catechism.html', c)
+    return TemplateResponse(request, 'learnscripture/view_catechism.html', ctx)
 
 
 def verse_options(request):
@@ -719,7 +723,7 @@ def get_verse_set_verse_list(version, verse_set):
 
 def view_verse_set(request, slug):
     verse_set = get_object_or_404(verse_sets_visible_for_request(request), slug=slug)
-    c = {'include_referral_links': verse_set.public}
+    ctx = {'include_referral_links': verse_set.public}
 
     try:
         version = bible_versions_for_request(request).get(slug=request.GET['version'])
@@ -731,14 +735,14 @@ def view_verse_set(request, slug):
 
     if hasattr(request, 'identity') and request.identity.can_edit_verse_set(verse_set):
         if (verse_set.is_selection and is_continuous_set(verse_list)):
-            c['show_convert_to_passage'] = True
+            ctx['show_convert_to_passage'] = True
 
             if request.method == 'POST':
                 if 'convert_to_passage_set' in request.POST:
                     verse_set.set_type = VerseSetType.PASSAGE
                     verse_set.save()
                     messages.info(request, t('versesets-converted-to-passage'))
-                    c['show_convert_to_passage'] = False
+                    ctx['show_convert_to_passage'] = False
 
     if request.method == 'POST':
         if "drop" in request.POST and hasattr(request, 'identity'):
@@ -747,27 +751,27 @@ def view_verse_set(request, slug):
             messages.info(request, t('versesets-dropped-verses', dict(count=len(refs_to_drop))))
 
     if hasattr(request, 'identity'):
-        c['can_edit'] = request.identity.can_edit_verse_set(verse_set)
+        ctx['can_edit'] = request.identity.can_edit_verse_set(verse_set)
         verses_started = request.identity.which_verses_started(all_localized_references, version)
-        c['started_count'] = len(verses_started)
+        ctx['started_count'] = len(verses_started)
 
         if verse_set.is_selection:
-            c['in_queue'] = len(request.identity.which_in_learning_queue(all_localized_references, version))
+            ctx['in_queue'] = len(request.identity.which_in_learning_queue(all_localized_references, version))
         else:
-            c['in_queue'] = 0
+            ctx['in_queue'] = 0
     else:
-        c['can_edit'] = False
-        c['started_count'] = 0
-        c['in_queue'] = 0
+        ctx['can_edit'] = False
+        ctx['started_count'] = 0
+        ctx['in_queue'] = 0
 
-    c['verse_set'] = verse_set
-    c['verse_list'] = verse_list
-    c['version'] = version
-    c['title'] = t('versesets-view-set-page-title', dict(name=verse_set.smart_name(version.language_code)))
-    c['include_referral_links'] = True
+    ctx['verse_set'] = verse_set
+    ctx['verse_list'] = verse_list
+    ctx['version'] = version
+    ctx['title'] = t('versesets-view-set-page-title', dict(name=verse_set.smart_name(version.language_code)))
+    ctx['include_referral_links'] = True
 
-    c.update(context_for_version_select(request))
-    return TemplateResponse(request, 'learnscripture/single_verse_set.html', c)
+    ctx.update(context_for_version_select(request))
+    return TemplateResponse(request, 'learnscripture/single_verse_set.html', ctx)
 
 
 def add_passage_breaks(verse_list, breaks):
@@ -818,7 +822,7 @@ def create_or_edit_set(request, set_type=None, slug=None):
              else t('versesets-create-selection-page-title') if set_type == VerseSetType.SELECTION
              else t('versesets-create-passage-page-title'))
 
-    c = {}
+    ctx = {}
 
     if request.method == 'POST':
         orig_verse_set_public = False if verse_set is None else verse_set.public
@@ -895,7 +899,7 @@ def create_or_edit_set(request, set_type=None, slug=None):
                 if parsed_ref is not None:
                     localized_reference = parsed_ref.translate_to(language_code).canonical_form()
                     initial['name'] = localized_reference
-                    c['initial_localized_reference'] = localized_reference
+                    ctx['initial_localized_reference'] = localized_reference
             if form_class is VerseSetForm:
                 initial['language_code'] = language_code
 
@@ -910,7 +914,7 @@ def create_or_edit_set(request, set_type=None, slug=None):
     if set_type == VerseSetType.PASSAGE:
         verse_list = add_passage_breaks(verse_list, breaks)
 
-    c.update({
+    ctx.update({
         'verses': verse_list,
         'breaks': breaks,
         'verse_set': verse_set,
@@ -919,9 +923,9 @@ def create_or_edit_set(request, set_type=None, slug=None):
         'title': title,
         'set_type': set_type,
     })
-    c.update(context_for_quick_find(request))
+    ctx.update(context_for_quick_find(request))
 
-    return TemplateResponse(request, 'learnscripture/create_set.html', c)
+    return TemplateResponse(request, 'learnscripture/create_set.html', ctx)
 
 
 def normalize_break_list(breaks):
@@ -945,32 +949,33 @@ def user_stats(request, username):
     account = get_object_or_404(Account.objects.visible_for_account(viewer)
                                 .select_related('total_score', 'identity'),
                                 username=username)
-    c = {'account': account,
-         'title': account.username,
-         'awards': account.visible_awards(),
-         'include_referral_links': True,
-         'events': _user_events(account, viewer)[:USER_EVENTS_SHORT_CUTOFF]
-         }
+    ctx = {
+        'account': account,
+        'title': account.username,
+        'awards': account.visible_awards(),
+        'include_referral_links': True,
+        'events': _user_events(account, viewer)[:USER_EVENTS_SHORT_CUTOFF]
+    }
 
     if viewer is not None:
-        c['viewer_is_following'] = viewer.is_following(account)
+        ctx['viewer_is_following'] = viewer.is_following(account)
 
     one_week_ago = timezone.now() - timedelta(7)
 
-    c['verses_started_all_time'] = account.identity.verses_started_count()
-    c['verses_started_this_week'] = account.identity.verses_started_count(started_since=one_week_ago)
-    c['verses_finished_all_time'] = account.identity.verses_finished_count()
-    c['verses_finished_this_week'] = account.identity.verses_finished_count(finished_since=one_week_ago)
-    c['verse_sets_created_all_time'] = account.verse_sets_created.count()
-    c['verse_sets_created_this_week'] = account.verse_sets_created.filter(date_added__gte=one_week_ago).count()
+    ctx['verses_started_all_time'] = account.identity.verses_started_count()
+    ctx['verses_started_this_week'] = account.identity.verses_started_count(started_since=one_week_ago)
+    ctx['verses_finished_all_time'] = account.identity.verses_finished_count()
+    ctx['verses_finished_this_week'] = account.identity.verses_finished_count(finished_since=one_week_ago)
+    ctx['verse_sets_created_all_time'] = account.verse_sets_created.count()
+    ctx['verse_sets_created_this_week'] = account.verse_sets_created.filter(date_added__gte=one_week_ago).count()
     current_account = account_from_request(request)
     if current_account is not None and current_account == account:
         account_groups = account.groups.order_by('name')
     else:
         account_groups = account.groups.public().order_by('name')
     viewer_visible_groups = Group.objects.visible_for_account(viewer)
-    c['groups'] = viewer_visible_groups.filter(id__in=[g.id for g in account_groups])
-    return TemplateResponse(request, 'learnscripture/user_stats.html', c)
+    ctx['groups'] = viewer_visible_groups.filter(id__in=[g.id for g in account_groups])
+    return TemplateResponse(request, 'learnscripture/user_stats.html', ctx)
 
 
 @require_identity
@@ -1030,7 +1035,7 @@ def user_verses(request):
         else:
             verses = verses.order_by('text_order', 'version__slug')
 
-    c = {
+    ctx = {
         'title': t('user-verses-page-title'),
         'filter_form': filter_form,
         'results': get_paged_results(verses, request, PAGE_SIZE),
@@ -1038,19 +1043,20 @@ def user_verses(request):
         'catechism': text_type == TextType.CATECHISM
     }
 
-    return TemplateResponse(request, 'learnscripture/user_verses.html', c)
+    return TemplateResponse(request, 'learnscripture/user_verses.html', ctx)
 
 
 @require_identity
 def user_verse_sets(request):
     identity = request.identity
-    c = {'title': t('user-verse-sets-page-title'),
-         'chosen_verse_sets': identity.verse_sets_chosen(),
-         }
+    ctx = {
+        'title': t('user-verse-sets-page-title'),
+        'chosen_verse_sets': identity.verse_sets_chosen(),
+    }
     if identity.account is not None:
-        c['verse_sets_created'] = identity.account.verse_sets_created.all().order_by('name')
+        ctx['verse_sets_created'] = identity.account.verse_sets_created.all().order_by('name')
 
-    return TemplateResponse(request, 'learnscripture/user_verse_sets.html', c)
+    return TemplateResponse(request, 'learnscripture/user_verse_sets.html', ctx)
 
 
 # Password reset for Accounts:
@@ -1102,12 +1108,12 @@ def password_reset_confirm(request, uidb64=None, token=None):
     else:
         validlink = False
         form = None
-    context = {
+    ctx = {
         'form': form,
         'validlink': validlink,
         'title': t('accounts-password-reset-page-title'),
     }
-    return TemplateResponse(request, 'learnscripture/password_reset_confirm.html', context)
+    return TemplateResponse(request, 'learnscripture/password_reset_confirm.html', ctx)
 
 
 @require_account
@@ -1123,12 +1129,12 @@ def password_change(request):
             return HttpResponseRedirect(reverse('learnscripture_password_change_done'))
     else:
         form = password_change_form(user=account)
-    context = {
+    ctx = {
         'form': form,
         'title': t('accounts-password-change-page-title'),
     }
 
-    return TemplateResponse(request, template_name, context)
+    return TemplateResponse(request, template_name, ctx)
 
 
 def password_change_done(request):
@@ -1264,17 +1270,17 @@ def paypal_url_start_for_request(request):
 
 
 def donate(request):
-    c = {'title': t('donations-page-title')}
+    ctx = {'title': t('donations-page-title')}
 
     account = account_from_request(request)
     if account is not None:
         url_start = paypal_url_start_for_request(request)
         paypal_dict = donation_paypal_dict(account, url_start)
         form = PayPalPaymentsForm(initial=paypal_dict)
-        c['LIVEBOX'] = settings.LIVEBOX
-        c['paypal_form'] = form
+        ctx['LIVEBOX'] = settings.LIVEBOX
+        ctx['paypal_form'] = form
 
-    return TemplateResponse(request, 'learnscripture/donate.html', c)
+    return TemplateResponse(request, 'learnscripture/donate.html', ctx)
 
 
 @csrf_exempt
@@ -1467,7 +1473,7 @@ def group_wall(request, slug):
 
     results = get_paged_results(comments, request, GROUP_COMMENTS_PAGINATE_BY)
 
-    c = {
+    ctx = {
         'title': t('groups-wall-page-title', dict(name=group.name)),
         'filter_form': filter_form,
         'group': group,
@@ -1475,7 +1481,7 @@ def group_wall(request, slug):
         'sort_order': sort_order,
         'selected_comment_id': selected_comment_id,
     }
-    return TemplateResponse(request, 'learnscripture/group_wall.html', c)
+    return TemplateResponse(request, 'learnscripture/group_wall.html', ctx)
 
 
 @htmx({
@@ -1521,7 +1527,7 @@ def group_leaderboard(request, slug):
     last_item = from_item + PAGE_SIZE
     shown_count = min(last_item, from_item + len(accounts))
 
-    c = {
+    ctx = {
         'include_referral_links': True,
         'thisweek': thisweek,
         # We can't use get_paged_results for 'results' because it doesn't use a
@@ -1541,7 +1547,7 @@ def group_leaderboard(request, slug):
         'title': t('groups-leaderboard-page-title', dict(name=group.name)),
         'leaderboard_filter_form': leaderboard_filter_form,
     }
-    return TemplateResponse(request, 'learnscripture/leaderboard.html', c)
+    return TemplateResponse(request, 'learnscripture/leaderboard.html', ctx)
 
 
 def create_group(request):
