@@ -281,7 +281,7 @@ class VerseSearchResult(ComboVerse):
         self.parsed_ref = parsed_ref
 
 
-SEARCH_OPERATORS = set(["&", "|", "@@", "@@@", "||", "&&", "!!", "@>", "<@", ":", "\\"])
+SEARCH_OPERATORS = set(["&", "|", "@@", "@@@", "||", "&&", "!!", "@>", "<@", ":", "\\", "("])
 SEARCH_CHARS = set("".join(list(SEARCH_OPERATORS)))
 
 

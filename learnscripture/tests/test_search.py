@@ -292,3 +292,8 @@ class QuickFindTests(SearchTestsMixin, TestBase):
                 # front end
                 self.assertEqual(v.parsed_ref.start_verse, start_verse, "For ref " + ref)
                 self.assertEqual(v.parsed_ref.end_verse, end_verse, "For ref " + ref)
+
+    def test_quick_find_special_symbols(self):
+        # Testing for crashers due to syntax issues
+        quick_find("x (", self.NET)
+        quick_find("x &", self.NET)
