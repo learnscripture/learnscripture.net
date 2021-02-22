@@ -287,7 +287,6 @@ INSTALLED_APPS = [
     'easy_thumbnails',
     'spurl',
     'paypal.standard.ipn',
-    'app_metrics',
     'django_markup',
     'anymail',
     'aldjemy',

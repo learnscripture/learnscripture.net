@@ -4,14 +4,10 @@
 #
 #    pip-compile --output-file=requirements.txt requirements-dev.in requirements.in
 #
--e git+git://github.com/spookylukey/django-app-metrics.git@86257f5795c8c249cc6999adf1adf1eb5e477e47#egg=django_app_metrics
-    # via -r requirements.in
 -e git+git://github.com/riccardoscalco/Pykov.git@16cda2f2c0ed8143ddcfa25dac34d3dadc982380#egg=pykov
     # via -r requirements.in
 aldjemy==1.0.0
     # via -r requirements.in
-amqp==5.0.5
-    # via kombu
 apipkg==1.5
     # via execnet
 appdirs==1.4.4
@@ -38,12 +34,8 @@ beautifulsoup4==4.9.3
     # via
     #   elm-fluent
     #   webtest
-billiard==3.6.3.0
-    # via celery
 blessed==1.17.12
     # via django-q
-celery==5.0.5
-    # via django-app-metrics
 certifi==2020.12.5
     # via
     #   -r requirements.in
@@ -58,18 +50,8 @@ cfgv==3.2.0
     # via pre-commit
 chardet==3.0.4
     # via requests
-click-didyoumean==0.0.3
-    # via celery
-click-plugins==1.1.1
-    # via celery
-click-repl==0.1.6
-    # via celery
 click==7.1.2
     # via
-    #   celery
-    #   click-didyoumean
-    #   click-plugins
-    #   click-repl
     #   elm-fluent
     #   pip-tools
 compare-locales==8.1.0
@@ -193,8 +175,6 @@ isort==5.7.0
     # via -r requirements-dev.in
 jedi==0.18.0
     # via ipython
-kombu==5.0.2
-    # via celery
 language-tags==1.0.0
     # via elm-fluent
 lxml==4.6.2
@@ -242,9 +222,7 @@ portalocker==2.2.1
 pre-commit==2.10.1
     # via -r requirements-dev.in
 prompt-toolkit==3.0.16
-    # via
-    #   click-repl
-    #   ipython
+    # via ipython
 psutil==5.8.0
     # via pytest-xdist
 psycopg2-binary==2.8.6
@@ -295,7 +273,6 @@ pytz==2020.1
     # via
     #   -r requirements.in
     #   babel
-    #   celery
     #   django
     #   django-paypal
     #   fluent-compiler
@@ -329,7 +306,6 @@ six==1.15.0
     # via
     #   bcrypt
     #   blessed
-    #   click-repl
     #   compare-locales
     #   django-autocomplete-light
     #   django-compressor
@@ -375,10 +351,6 @@ urlobject==2.4.3
     # via django-spurl
 uwsgi==2.0.19.1
     # via -r requirements.in
-vine==5.0.0
-    # via
-    #   amqp
-    #   celery
 virtualenv==20.4.2
     # via pre-commit
 waitress==1.4.4

@@ -1,7 +1,6 @@
 from datetime import datetime
 
 import attr
-from app_metrics.utils import metric
 from django.db.models import TextChoices
 from django.urls import reverse
 from django.utils import timezone
@@ -206,7 +205,6 @@ def start_identity(request):
             pass
     identity = Identity.objects.create(referred_by=referrer, interface_language=request.LANGUAGE_CODE)
     set_identity(request.session, identity)
-    metric('new_identity')
     return identity
 
 
@@ -216,7 +214,6 @@ def start_identity(request):
 # we may want to revisit this and unify things.
 def login(request, identity):
     set_identity(request.session, identity)
-    metric('login')
 
 
 def set_identity(session, identity):

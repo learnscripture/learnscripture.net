@@ -1,7 +1,6 @@
 LS_PYTHON=%(VENV_ROOT)s/bin/python
 LS_MANAGE=%(SRC_ROOT)s/manage.py
 
-0          2,14 * * *  %(proj_user)s $LS_PYTHON $LS_MANAGE metrics_aggregate
 20         3    * * *  %(proj_user)s $LS_PYTHON $LS_MANAGE create_awards_daily
 20         4    * * *  %(proj_user)s $LS_PYTHON $LS_MANAGE clearsessions
 20         5    * * *  %(proj_user)s $LS_PYTHON $LS_MANAGE clean_old_identities
