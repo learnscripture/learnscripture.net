@@ -17,7 +17,7 @@ from bibleverses import languages
 
 # See also Learn.elm which copies definition
 class ScoreReason(models.IntegerChoices):
-    VERSE_TESTED = 0, 'Verse tested'
+    VERSE_FIRST_TESTED = 0, 'Verse first tested'
     VERSE_REVIEWED = 1, 'Verse reviewed'
     REVISION_COMPLETED = 2, 'Review completed'  # No longer used
     PERFECT_TEST_BONUS = 3, 'Perfect!'
@@ -55,7 +55,7 @@ class ActionLog(models.Model):
     reason = models.PositiveSmallIntegerField(choices=ScoreReason.choices)
     localized_reference = models.CharField(max_length=255, blank=True)
     accuracy = models.FloatField(null=True, blank=True)
-    created = models.DateTimeField()
+    created = models.DateTimeField(db_index=True)
     award = models.OneToOneField('awards.Award', null=True, blank=True, on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):
@@ -314,7 +314,7 @@ def get_verses_tested_per_day(account_id):
     q1 = (select([day_col,
                   func.count(day_col)],
                  and_(scores_actionlog.c.account_id == account_id,
-                      scores_actionlog.c.reason.in_([ScoreReason.VERSE_TESTED,
+                      scores_actionlog.c.reason.in_([ScoreReason.VERSE_FIRST_TESTED,
                                                     ScoreReason.VERSE_REVIEWED])
                       )
                  )

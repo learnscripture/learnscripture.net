@@ -51,7 +51,7 @@ def give_ace_awards(account_id):
         return
     account = Account.objects.get(id=account_id)
 
-    test_reasons = [ScoreReason.VERSE_TESTED, ScoreReason.VERSE_REVIEWED]
+    test_reasons = [ScoreReason.VERSE_FIRST_TESTED, ScoreReason.VERSE_REVIEWED]
     actions = account.action_logs.filter(reason__in=test_reasons).order_by('-created')
 
     try:

@@ -21,7 +21,7 @@ from django.views.decorators.cache import never_cache
 from django.views.generic.base import View
 
 from accounts.forms import PreferencesForm
-from accounts.models import Account, HeatmapStatsType
+from accounts.models import Account, HeatmapStatsType, Identity
 from bibleverses.models import (MAX_VERSE_QUERY_SIZE, MAX_VERSES_FOR_SINGLE_CHOICE, QUICK_FIND_SEARCH_LIMIT,
                                 InvalidVerseReference, StageType, TextVersion, UserVerseStatus, VerseSetType,
                                 make_verse_set_passage_id, quick_find)
@@ -222,7 +222,7 @@ class ActionCompleteHandler(ApiView):
 
     @require_preexisting_identity_m
     def post(self, request):
-        identity = request.identity
+        identity: Identity = request.identity
 
         try:
             uvs_id = int(request.POST['uvs_id'])

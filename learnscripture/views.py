@@ -25,7 +25,7 @@ from paypal.standard.forms import PayPalPaymentsForm
 
 import learnscripture.tasks
 from accounts.forms import AccountDetailsForm, PreferencesForm
-from accounts.models import Account, HeatmapStatsType, Identity
+from accounts.models import Account, HeatmapStatsType, Identity, get_account_stats
 from awards.models import AWARD_LOGIC_CLASSES, AnyLevel, Award, AwardType
 from bibleverses.books import BIBLE_BOOK_COUNT, get_bible_book_name
 from bibleverses.forms import VerseSetForm
@@ -509,7 +509,7 @@ def choose(request):
     language_code = verseset_search_form.cleaned_data['language_code']
 
     query_language_codes = settings.LANGUAGE_CODES if language_code == FILTER_LANGUAGES_ALL else list(set(
-        # People will typically type in 'interface langauge' (request.LANGUAGE_CODES),
+        # People will typically type in 'interface language' (request.LANGUAGE_CODES),
         # and if that doesn't find anything, they may just switch the language filter
         # to another language, perhaps English. They will expect what they typed
         # before to be still valid.
@@ -1183,52 +1183,22 @@ def date_to_js_ts(d):
 
 
 def stats(request):
-    from app_metrics.models import MetricDay
     now = timezone.now()
     period = int(request.GET.get('period', 180))
     start = now - timedelta(days=period)
 
-    def build_data(metric_slugs):
-        metrics = (MetricDay.objects
-                   .filter(metric__slug__in=metric_slugs)
-                   .filter(created__gte=start)
-                   .select_related('metric'))
+    stats_raw = get_account_stats(start, now)
 
-        # Missing metrics => zero. However, if we omit a value for a day, then the
-        # plotting library interpolates, when we want it to say zero.  So we have to
-        # build a dictionary of all values and loop through by day.
-
-        min_date = None
-        max_date = now.date()
-
-        grouped = {}
-        for m in metrics:
-            if min_date is None or m.created < min_date:
-                min_date = m.created
-            grouped[(m.metric.slug, m.created)] = m.num
-
-        output_rows = dict((s, []) for s in metric_slugs)
-        if min_date is None:
-            min_date = start.date()
-        cur_date = min_date
-        while cur_date <= max_date:
-            for s in metric_slugs:
-                val = grouped.get((s, cur_date), 0)
-                ts = date_to_js_ts(cur_date)
-                output_rows[s].append((ts, val))
-            cur_date += timedelta(1)
-        return output_rows
-
-    verses_data = build_data(['verse_started', 'verse_tested'])
-    account_data = build_data(['new_account'] +
-                              (['accounts_active',
-                                'identities_active',
-                                ] if 'full_accounts' in request.GET else []))
+    # Build the stats dict template is expecting (see stats.html)
+    stats_dict = {}
+    for stat in ['new_accounts', 'active_accounts', 'verses_started', 'verses_tested']:
+        stats_dict[stat] = []
+        for account_stat in stats_raw:
+            stats_dict[stat].append((date_to_js_ts(account_stat.date), getattr(account_stat, stat)))
 
     return TemplateResponse(request, 'learnscripture/stats.html', {
         'title': 'Stats',
-        'verses_data': verses_data,
-        'account_data': account_data,
+        'stats': stats_dict,
     })
 
 

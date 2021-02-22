@@ -25,9 +25,9 @@
      $.plot("#id-verses-tested-graph",
             [
               {label: "Started",
-               data: {{ verses_data.verse_started|jsonify }} },
+               data: {{ stats.verses_started|jsonify }} },
               {label: "Tested",
-               data: {{ verses_data.verse_tested|jsonify }} }
+               data: {{ stats.verses_tested|jsonify }} }
             ],
             { xaxis: { mode: "time",
                        ticks: 10 },
@@ -42,21 +42,13 @@
      $.plot("#id-accounts-graph",
             [
               {label: "New accounts",
-               data: {{ account_data.new_account|jsonify }},
+               data: {{ stats.new_accounts|jsonify }},
                yaxis: 1
-              }
-
-              {% if 'full_accounts' in request.GET %}
-   ,
+              },
               {label: "Active accounts",
-               data: {{ account_data.accounts_active|jsonify }},
+               data: {{ stats.active_accounts|jsonify }},
                yaxis: 2
               },
-              {label: "Active identities",
-               data: {{ account_data.identities_active|jsonify }},
-               yaxis: 2
-              }
-              {% endif %}
             ],
             { xaxis: { mode: "time",
                        ticks: 10 },

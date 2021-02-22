@@ -1,9 +1,10 @@
 import itertools
 import math
 import operator
-from collections import OrderedDict, defaultdict
+from collections import OrderedDict, defaultdict, namedtuple
 from datetime import timedelta
 from functools import reduce
+from typing import List
 
 import attr
 import django_ftl
@@ -14,6 +15,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.functional import cached_property
 from fluent_compiler import types as fluent_types
+from sqlalchemy import text as sqla_text
 
 from accounts import memorymodel
 from accounts.signals import (catechism_started, points_increase, scored_100_percent, verse_finished, verse_started,
@@ -182,7 +184,7 @@ class Account(AbstractBaseUser):
         if old_memory_stage >= MemoryStage.TESTED:
             reason = ScoreReason.VERSE_REVIEWED
         else:
-            reason = ScoreReason.VERSE_TESTED
+            reason = ScoreReason.VERSE_FIRST_TESTED
         points = max_points * accuracy
         action_logs.append(self.add_points(points, reason, accuracy=accuracy, localized_reference=localized_reference))
 
@@ -1412,31 +1414,62 @@ WHERE t2.d2 IS NULL;
     return dict((i, max(intervals) + 1) for i, intervals in interval_dict.items())
 
 
-def get_active_account_count(since_when, until_when):
-    """
-    Returns the number of accounts that have used the site in the time period.
-    """
-    # This isn't accurate if until_when is not now(), since
-    # UserVerseStatus.last_tested is overwritten every time a verse is tested.
-    # However, it doesn't matter too much, since we run this daily and only had
-    # a small backlog of initial data to cope with.
-    from bibleverses.models import UserVerseStatus
-    return (UserVerseStatus.objects.
-            filter(for_identity__account__isnull=False,
-                   last_tested__lte=until_when,
-                   last_tested__gt=since_when)
-            .values('for_identity_id').distinct().count()
-            )
+AccountStat = namedtuple('AccountStat', 'date new_accounts active_accounts verses_started verses_tested')
 
 
-def get_active_identity_count(since_when, until_when):
-    # As above, but for all identities, not just those with accounts.
-    from bibleverses.models import UserVerseStatus
-    return (UserVerseStatus.objects.
-            filter(last_tested__lte=until_when,
-                   last_tested__gt=since_when)
-            .values('for_identity_id').distinct().count()
-            )
+def get_account_stats(start_datetime, end_datetime) -> List[AccountStat]:
+    from learnscripture.utils.sqla import default_engine
+
+    active_account_span_size = 14
+    start_date = start_datetime.date()
+    end_date = end_datetime.date()
+    # We trim the query to be within (query_start, query_end), in multiple
+    # places, to reduce the work load. However, to get the 'active_accounts'
+    # correct at the beginning, we have to adjust the beginning date to further
+    # back than we need
+    query_start = start_date - timedelta(days=active_account_span_size)
+    query_end = end_date + timedelta(days=1)  # end of day = beginning of next day
+
+    sql = sqla_text("""
+    SELECT gs.dte,
+        COALESCE(acc.new_accounts, 0),
+        COALESCE(al1.active_accounts, 0),
+        COALESCE(al2.verses_started, 0),
+        COALESCE(al2.verses_tested, 0)
+      FROM generate_series(:query_start, :query_end, interval '1 day') gs(dte)
+      LEFT JOIN LATERAL (
+        SELECT date_trunc('day', date_joined) AS joined_trunc,
+          count(id) AS new_accounts
+        FROM accounts_account WHERE date_joined >= :query_start AND date_joined < :query_end
+        GROUP BY date_trunc('day', date_joined)
+        ) acc ON gs.dte = acc.joined_trunc
+      LEFT JOIN LATERAL (
+         SELECT count(distinct al.account_id) as active_accounts FROM scores_actionlog al
+           WHERE al.created >= gs.dte - (:active_account_span_size - 1) * interval '1 day'
+             AND al.created < gs.dte + interval '1 day'
+      ) al1 ON 1=1
+      LEFT JOIN LATERAL (
+         SELECT
+           date_trunc('day', created) AS created_trunc,
+           count(id) FILTER (WHERE reason = :reason_started) as verses_started,
+           count(id) FILTER (WHERE reason = :reason_tested) as verses_tested
+         FROM scores_actionlog WHERE created >= :query_start AND created < :query_end
+         GROUP BY date_trunc('day', created)
+      ) al2 ON gs.dte = al2.created_trunc
+      ORDER BY gs.dte;
+    """)
+    rows = default_engine.execute(sql, {
+        'query_start': query_start,
+        'query_end': query_end,
+        'active_account_span_size': active_account_span_size,
+        'reason_started': ScoreReason.VERSE_FIRST_TESTED,
+        'reason_tested': ScoreReason.VERSE_REVIEWED,
+    }).fetchall()
+    return [
+        AccountStat(*row) for row in rows
+        # Need to filter out the extra padding at the beginning:
+        if row[0].date() >= start_date
+    ]
 
 
 def notify_all_accounts(language_code, html_message):
