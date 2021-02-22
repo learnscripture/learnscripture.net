@@ -16,7 +16,7 @@ from bibleverses import languages
 
 
 # See also Learn.elm which copies definition
-class ScoreReason(models.TextChoices):
+class ScoreReason(models.IntegerChoices):
     VERSE_TESTED = 0, 'Verse tested'
     VERSE_REVIEWED = 1, 'Verse reviewed'
     REVISION_COMPLETED = 2, 'Review completed'  # No longer used
