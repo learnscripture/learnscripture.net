@@ -3,18 +3,15 @@ import django.core.management.base
 from django.conf import settings
 from django_ftl import override
 
-# Development only: Monkey patch `run_checks` to activate a locale, otherwise
-# our django-ftl bundle throws exceptions (presumably due to checks
-# forcing labels etc. to be evaluated).
+# We pass `require_activate=True` to our django-ftl Bundle, as per:
+# https://django-ftl.readthedocs.io/en/latest/usage.html#lazy-translations
 
-# We monkey patch the version in django.core.management.base. This is run
-# as part of:
-#  - runserver
-#  - test setup
-#
-# We don't want to just to `activate`, because then any real issues
-# could be silenced.
+# This gives us problems with `run_checks`, which apparently forces
+# evaluation of lazy translation strings.
 
+# So we monkey patch `run_checks` to activate a locale. We don't want to just to
+# `activate`, because then any real issues could be silenced, so instead use
+# `override` so that after checks has run we are back to having no locale active
 
 run_checks = django.core.management.base.checks.run_checks
 
