@@ -14,7 +14,7 @@ from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.http import is_safe_url, urlsafe_base64_decode
+from django.utils.http import url_has_allowed_host_and_scheme, urlsafe_base64_decode
 from django.views import i18n as i18n_views
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
@@ -1689,7 +1689,7 @@ def set_language(request):
     next_url = request.headers.get('Referer', '/')
     next_url = furl.furl(next_url).set(host=None, port=None, scheme=None).url
 
-    if not is_safe_url(next_url, settings.ALLOWED_HOSTS):
+    if not url_has_allowed_host_and_scheme(next_url, settings.ALLOWED_HOSTS):
         next_url = '/'
     response = HttpResponseRedirect(next_url)
 
