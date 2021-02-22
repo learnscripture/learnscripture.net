@@ -25,5 +25,4 @@ def invitation_created_receiver(sender, **kwargs):
 @receiver(new_comment)
 def new_comment_receiver(sender, **kwargs):
     comment = sender
-    accounts.tasks.notify_account_about_comment.apply_async([comment.id],
-                                                            countdown=5)
+    accounts.tasks.notify_account_about_comment.apply_async([comment.id])

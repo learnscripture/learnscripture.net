@@ -1734,7 +1734,7 @@ def set_language(request):
     return response
 
 
-def celery_debug(request):
+def task_queue_debug(request):
     message = request.GET.get('message', '[no message]')
     learnscripture.tasks.message.apply_async([message])
     return HttpResponse(f"Task queued with message: {message}")

@@ -99,9 +99,9 @@ def fix_item(version_slug, localized_reference, text_saved):
     if getattr(item, 'missing', False):
         return  # Doesn't need fixing
 
-    # 'text_saved' is passed through, to ensure that this process (Celery) sees
-    # the same value that was being saved in the Django process. We can also
-    # avoid generating a warning in ensure_text this way.
+    # 'text_saved' is passed through, to ensure that this process (task queue
+    # worker) sees the same value that was being saved in the Django process. We
+    # can also avoid generating a warning in ensure_text this way.
     if text_saved is not None:
         item.text_saved = text_saved
 

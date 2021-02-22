@@ -21,7 +21,7 @@ def should_update_text_search_on_save():
 @receiver(verse_set_chosen)
 def verse_set_chosen_receiver(sender, **kwargs):
     verse_set = sender
-    verse_set_increase_popularity.delay(verse_set.id)
+    verse_set_increase_popularity.apply_async([verse_set.id])
 
 
 @receiver(post_save, sender=Verse)
@@ -40,8 +40,7 @@ def verse_saved_update_word_suggestions(sender, **kwargs):
     if not item_suggestions_need_updating(verse):
         return
 
-    fix_item_suggestions.apply_async([verse.version.slug, verse.localized_reference, verse.text_saved],
-                                     countdown=5)
+    fix_item_suggestions.apply_async([verse.version.slug, verse.localized_reference, verse.text_saved])
 
 
 @receiver(post_save, sender=Verse)
@@ -63,5 +62,4 @@ def qapair_saved(sender, **kwargs):
         from bibleverses.suggestions.modelapi import item_suggestions_need_updating
         if not item_suggestions_need_updating(qapair):
             return
-        fix_item_suggestions.apply_async([qapair.catechism.slug, qapair.localized_reference, None],
-                                         countdown=5)
+        fix_item_suggestions.apply_async([qapair.catechism.slug, qapair.localized_reference, None])

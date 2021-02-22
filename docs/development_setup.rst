@@ -39,7 +39,6 @@ installed.
 
    * postgresql 12 or later
    * memcached
-   * rabbitmq-server
    * nodejs
    * npm
 
@@ -73,20 +72,12 @@ installed.
    Then create postgres databases to match the settings, both for ``learnscripture`` and
    ``learnscripture_wordsuggestions``.
 
-   Similarly set up RabbitMQ::
-
-     $ rabbitmqctl add_user learnscripture foo
-     $ rabbitmqctl add_vhost learnscripture
-     $ rabbitmqctl set_permissions -p learnscripture learnscripture ".*" ".*" ".*"
-
    You will also need to add 'learnscripture.local' as
    aliases for 127.0.0.1 in /etc/hosts
 
 6. Create a file ``config/secrets.json`` containing at least the following:
 
-       {"RABBITMQ_USERNAME": "learnscripture",
-        "RABBITMQ_PASSWORD": "foo",
-        "ESV_V2_API_KEY": "IP"
+       {"ESV_V2_API_KEY": "IP"
        }
 
    (proper contents are, well, secret).

@@ -73,7 +73,7 @@ def new_award_msg_html(award, account, points=None):
 @receiver(verse_set_chosen)
 def verse_set_chosen_receiver(sender, **kwargs):
     verse_set = sender
-    awards.tasks.give_verse_set_used_awards.delay(verse_set.created_by_id)
+    awards.tasks.give_verse_set_used_awards.apply_async([verse_set.created_by_id])
 
 
 @receiver(new_account)
@@ -81,33 +81,28 @@ def new_account_receiver(sender, **kwargs):
     account = sender
     referrer_id = account.identity.referred_by_id
     if referrer_id is not None:
-        awards.tasks.give_recruiter_award.apply_async([referrer_id], countdown=5)
+        awards.tasks.give_recruiter_award.apply_async([referrer_id])
 
 
 @receiver(verse_tested)
 def verse_tested_receiver(sender, **kwargs):
     identity = sender
-    # Delay to allow this request's transaction to finish count to be updated.
-    awards.tasks.give_learning_awards.apply_async([identity.account_id],
-                                                  countdown=2)
+    awards.tasks.give_learning_awards.apply_async([identity.account_id])
 
 
 @receiver(public_verse_set_created)
 def public_verse_set_created_receiver(sender, **kwargs):
     verse_set = sender
-    awards.tasks.give_sharer_awards.apply_async([verse_set.created_by_id],
-                                                countdown=2)
+    awards.tasks.give_sharer_awards.apply_async([verse_set.created_by_id])
 
 
 @receiver(scored_100_percent)
 def scored_100_percent_receiver(sender, **kwargs):
     account = sender
-    awards.tasks.give_ace_awards.apply_async([account.id],
-                                             countdown=2)
+    awards.tasks.give_ace_awards.apply_async([account.id])
 
 
 @receiver(group_joined)
 def group_joined_receiver(sender, **kwargs):
     group = sender
-    awards.tasks.give_organizer_awards.apply_async([group.created_by_id],
-                                                   countdown=2)
+    awards.tasks.give_organizer_awards.apply_async([group.created_by_id])

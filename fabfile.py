@@ -75,7 +75,6 @@ REQS = [
     'postgresql-client',
     'postgresql-contrib',
     'memcached',
-    'rabbitmq-server',
 
     # Daemons
     'supervisor',  # For running uwsgi and php-cgi daemons
@@ -292,21 +291,6 @@ def _configure_services():
                  "synchronous_commit = off"]:
         append("/etc/postgresql/12/main/postgresql.conf", line)
     run("service postgresql restart")
-
-    _configure_rabbitmq()
-
-
-def _configure_rabbitmq():
-    s = secrets()
-    rabbitmq_username = s['RABBITMQ_USERNAME']
-    rabbitmq_password = s['RABBITMQ_PASSWORD']
-    users = run("rabbitmqctl list_users")
-    users = [u.split('\t')[0] for u in users.split("\n")]
-    if rabbitmq_username not in users:
-        run("rabbitmqctl add_user {rabbitmq_username} {rabbitmq_password}".format(**locals()))
-        run("rabbitmqctl add_vhost learnscripture")
-        run("rabbitmqctl set_user_tags {rabbitmq_username} mytag".format(**locals()))
-        run('rabbitmqctl set_permissions -p learnscripture {rabbitmq_username} ".*" ".*" ".*"'.format(**locals()))
 
 
 @as_rootuser
@@ -808,28 +792,28 @@ def restart_webserver():
 
 
 @task
-def stop_celeryd():
-    supervisorctl("stop %s_celeryd" % env.proj_name)
+def stop_task_queue():
+    supervisorctl("stop %s_django_q" % env.proj_name)
 
 
 @task
-def restart_celeryd():
+def restart_task_queue():
     """
-    Restarts the Celery workers
+    Restarts the task queue workers
     """
-    supervisorctl("restart %s_celeryd" % env.proj_name)
+    supervisorctl("restart %s_django_q" % env.proj_name)
 
 
 @task
 def restart_all():
     restart_webserver()
-    restart_celeryd()
+    restart_task_queue()
 
 
 @task
 def stop_all():
     stop_webserver()
-    stop_celeryd()
+    stop_task_queue()
 
 
 @task

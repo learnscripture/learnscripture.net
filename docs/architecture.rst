@@ -7,10 +7,9 @@ This is a fairly standard Django app:
 * nginx as front end web server, serves static files and delegates the rest to uwsgi
 * uwsgi for running the Django app
 * postgres as database.
-* celeryd for background tasks
-* rabbitmq for task queue
+* django-q for background tasks
 * memcached for caching
-* supervisord for managing app services (uwsgi, memcached, celeryd)
+* supervisord for managing app services (uwsgi, memcached, django-q)
 
 Server config
 =============

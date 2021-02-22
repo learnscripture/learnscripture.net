@@ -6,25 +6,25 @@ from events.models import (AwardReceivedEvent, GroupCreatedEvent, GroupJoinedEve
                            PointsMilestoneEvent, StartedLearningCatechismEvent, StartedLearningVerseSetEvent,
                            VerseSetCreatedEvent, VersesFinishedMilestoneEvent, VersesStartedMilestoneEvent)
 from groups.models import Group
-from learnscripture.celery import app
+from learnscripture.utils.tasks import task
 
 
-@app.task(ignore_result=True)
+@task
 def create_new_account_event(account_id):
     NewAccountEvent(account=Account.objects.get(id=account_id)).save()
 
 
-@app.task(ignore_result=True)
+@task
 def create_award_received_event(award_id):
     AwardReceivedEvent(award=Award.objects.get(id=award_id)).save()
 
 
-@app.task(ignore_result=True)
+@task
 def create_new_verse_set_event(verse_set_id):
     VerseSetCreatedEvent(verse_set=VerseSet.objects.get(id=verse_set_id)).save()
 
 
-@app.task(ignore_result=True)
+@task
 def create_started_verse_set_event(verse_set_id, chosen_by_id):
     if chosen_by_id is None:
         # Not very interesting, don't bother with an event
@@ -36,7 +36,7 @@ def create_started_verse_set_event(verse_set_id, chosen_by_id):
                                  chosen_by=Account.objects.get(id=chosen_by_id)).save()
 
 
-@app.task(ignore_result=True)
+@task
 def create_started_catechism_event(account_id, catechism_id):
     account = Account.objects.get(id=account_id)
     catechism = TextVersion.objects.get(id=catechism_id)
@@ -64,7 +64,7 @@ def crosses_milestone(previous_points, current_points):
         return False, None
 
 
-@app.task(ignore_result=True)
+@task
 def create_points_milestone_event(account_id, previous_points, additional_points):
     account = Account.objects.get(id=account_id)
 
@@ -82,7 +82,7 @@ def is_milestone(c):
     return c_s.count('0') == len(c_s) - 1
 
 
-@app.task(ignore_result=True)
+@task
 def create_verses_started_milestone_event(account_id):
     account = Account.objects.get(id=account_id)
 
@@ -95,7 +95,7 @@ def create_verses_started_milestone_event(account_id):
         VersesStartedMilestoneEvent(account=account, verses_started=c).save()
 
 
-@app.task(ignore_result=True)
+@task
 def create_verses_finished_milestone_event(account_id):
     account = Account.objects.get(id=account_id)
     c = account.identity.verses_finished_count()
@@ -103,7 +103,7 @@ def create_verses_finished_milestone_event(account_id):
         VersesFinishedMilestoneEvent(account=account, verses_finished=c).save()
 
 
-@app.task(ignore_result=True)
+@task
 def create_group_joined_event(group_id, account_id):
     account = Account.objects.get(id=account_id)
     group = Group.objects.get(id=group_id)
@@ -114,7 +114,7 @@ def create_group_joined_event(group_id, account_id):
     GroupJoinedEvent(account=account, group=group).save()
 
 
-@app.task(ignore_result=True)
+@task
 def create_group_created_event(group_id):
     group = Group.objects.get(id=group_id)
     account = group.created_by
@@ -125,7 +125,7 @@ def create_group_created_event(group_id):
     GroupCreatedEvent(account=account, group=group).save()
 
 
-@app.task(ignore_result=True)
+@task
 def create_new_comment_event(comment_id):
     comment = Comment.objects.get(id=comment_id)
     account = comment.author

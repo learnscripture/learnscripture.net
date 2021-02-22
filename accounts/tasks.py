@@ -1,10 +1,10 @@
 import django_ftl
 
-from learnscripture.celery import app
 from learnscripture.ftl_bundles import t
+from learnscripture.utils.tasks import task
 
 
-@app.task(ignore_result=True)
+@task
 def notify_account_about_comment(comment_id):
     from comments.models import Comment
     comment = Comment.objects.get(id=comment_id)

@@ -32,8 +32,7 @@ CACHES = {
     }
 }
 
-CELERY_TASK_ALWAYS_EAGER = True
-CELERY_TASK_EAGER_PROPAGATES = True
+TASKS_EAGER = True
 
 
 WEBPACK_STATS_FILE = 'webpack-stats.tests.json'

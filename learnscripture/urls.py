@@ -91,7 +91,7 @@ urlpatterns = [
 
 
     path('stats/', learnscripture.views.stats, name='stats'),
-    path('celery-debug/', learnscripture.views.celery_debug, name='celery_debug'),
+    path('task-queue-debug/', learnscripture.views.task_queue_debug, name='task_queue_debug'),
     path('debug/', learnscripture.views.debug, name='user_debug'),
 
     # JSON/AJAX views

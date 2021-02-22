@@ -1,11 +1,11 @@
 import logging
 
-from learnscripture.celery import app
+from learnscripture.utils.tasks import task
 
-logger = logging.getLogger('celerydebug')
+logger = logging.getLogger('task_queue_debug')
 
 
-@app.task()
+@task
 def message(message):
     logger.debug("Message %s", message)
     if message == 'crash':

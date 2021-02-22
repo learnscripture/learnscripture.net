@@ -8,11 +8,11 @@ import subprocess
 import sys
 
 import sentry_sdk
-from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.django import DjangoIntegration
 
 hostname = socket.gethostname()
 CHECK_DEPLOY = 'manage.py check --deploy' in ' '.join(sys.argv)
+RUNNING_QCLUSTER = 'manage.py qcluster' in ' '.join(sys.argv)
 RUNNING_MIGRATIONS = 'migrate' in sys.argv
 if CHECK_DEPLOY:
     LIVEBOX = True
@@ -60,7 +60,7 @@ if LIVEBOX:
             'PASSWORD': secrets["PRODUCTION_DB_PASSWORD"],
             'HOST': 'localhost',
             'PORT': secrets["PRODUCTION_DB_PORT"],
-            'ATOMIC_REQUESTS': True,
+            'ATOMIC_REQUESTS': False,
             'CONN_MAX_AGE': 120,
         },
         DB_LABEL_WORDSUGGESTIONS: {
@@ -84,36 +84,26 @@ if LIVEBOX:
 else:
     # Development settings:
 
-    # We have problems with wordsuggestions DB connections not being closed in
-    # test environment, especially related to the non-default DB it seems,
-    # probably a Django bug, so we workaround:
-    conn_max_age = 120
-    try:
-        from .settings_local import DB_PORT, DB_USER
-    except ImportError:
-        DB_USER = 'learnscripture'
-        DB_PORT = 5432
-
     DATABASES = {
         DB_LABEL_DEFAULT: {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': 'learnscripture',
-            'USER': DB_USER,
+            'USER': 'learnscripture',
             'PASSWORD': 'foo',
             'HOST': 'localhost',
-            'PORT': DB_PORT,
-            'ATOMIC_REQUESTS': True,
-            'CONN_MAX_AGE': conn_max_age,
+            'PORT': 5432,
+            'ATOMIC_REQUESTS': False,
+            'CONN_MAX_AGE': 120,
         },
         DB_LABEL_WORDSUGGESTIONS: {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': 'learnscripture_wordsuggestions',
-            'USER': DB_USER,
+            'USER': 'learnscripture',
             'PASSWORD': 'foo',
             'HOST': 'localhost',
-            'PORT': DB_PORT,
+            'PORT': 5432,
             'ATOMIC_REQUESTS': False,
-            'CONN_MAX_AGE': conn_max_age,
+            'CONN_MAX_AGE': 120,
         }
     }
 
@@ -122,6 +112,9 @@ else:
 
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
+# https://github.com/Koed00/django-q/issues/484
+if RUNNING_QCLUSTER:
+    del DATABASES['default']['CONN_MAX_AGE']
 
 DATABASE_ROUTERS = ['learnscripture.router.LearnScriptureRouter']
 
@@ -301,6 +294,7 @@ INSTALLED_APPS = [
     'webpack_loader',
     'django_ftl',
     'capture_tag',
+    'django_q'
 ]
 
 ALLOWED_HOSTS = ["learnscripture.net"]
@@ -333,11 +327,11 @@ LOGGING = {
             'maxBytes': 1024 * 1024,
             'backupCount': 10,
         },
-        'celerydebug': {
+        'task_queue_debug': {
             'level': 'DEBUG',
             'class': 'concurrent_log_handler.ConcurrentRotatingFileHandler',
             'formatter': 'verbose',
-            'filename': os.path.join(LOG_ROOT, 'celery_debug.log'),
+            'filename': os.path.join(LOG_ROOT, 'task_queue_debug.log'),
             'maxBytes': 1024 * 1024,
             'backupCount': 10,
         },
@@ -353,14 +347,14 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
-        'celery': {
+        'django_q': {
             'level': 'DEBUG',
-            'handlers': ['celerydebug'],
+            'handlers': ['task_queue_debug'],
             'propagate': True,
         },
-        'celerydebug': {
+        'task_queue_debug': {
             'level': 'DEBUG',
-            'handlers': ['celerydebug'],
+            'handlers': ['task_queue_debug'],
             'propagate': True,
         },
         'bibleverses.services': {
@@ -395,7 +389,7 @@ else:
         release = "learnscripturenet@" + version
         sentry_sdk.init(
             dsn=SENTRY_DSN,
-            integrations=[DjangoIntegration(), CeleryIntegration()],
+            integrations=[DjangoIntegration()],
             release=release,
         )
 
@@ -461,27 +455,34 @@ CAMPAIGN_CONTEXT_PROCESSORS = [
 ]
 
 
-# Celery
+# django-q
 
-CELERY_BROKER_URL = 'amqp://{0}:{1}@localhost:5672/learnscripture'.format(secrets['RABBITMQ_USERNAME'],
-                                                                          secrets['RABBITMQ_PASSWORD'])
+Q_CLUSTER = {
+    'name': 'DjangORM',
+    'workers': 4,
+    'timeout': 90,
+    'retry': 120,
+    'queue_limit': 50,
+    'bulk': 10,
+    'orm': 'default',
+    'save_limit': -1,
+}
 
-# For easier debugging, we run Celery tasks in main process
+if SENTRY_DSN:
+    Q_CLUSTER['error_reporter'] = {
+        'sentry': {
+            'dsn': SENTRY_DSN
+        }
+    }
+
+
+# For easier debugging, we run tasks in main process
 # when in development.
 if DEVBOX:
-    CELERY_TASK_ALWAYS_EAGER = True
-    CELERY_TASK_EAGER_PROPAGATES = True
+    TASKS_EAGER = True
 else:
-    CELERY_TASK_ALWAYS_EAGER = False
-    CELERY_TASK_EAGER_PROPAGATES = False
+    TASKS_EAGER = False
 
-CELERY_WORKER_CONCURRENCY = 2
-CELERY_WORKER_PREFETCH_MULTIPLIER = 64
-
-CELERY_RESULT_BACKEND = 'disabled'
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_TASK_IGNORE_RESULT = True
-CELERY_WORKER_HIJACK_ROOT_LOGGER = False
 
 # Webpack
 

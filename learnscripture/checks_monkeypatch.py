@@ -11,7 +11,6 @@ from django_ftl import override
 # as part of:
 #  - runserver
 #  - test setup
-#  - celery fixups
 #
 # We don't want to just to `activate`, because then any real issues
 # could be silenced.
@@ -28,5 +27,5 @@ def new_run_checks(*args, **kwargs):
 # Used by runserver and test setup:
 django.core.management.base.checks.run_checks = new_run_checks
 
-# Used by celery
-django.core.checks.run_checks = new_run_checks
+# Used by django-q
+django.core.checks.registry.run_checks = new_run_checks

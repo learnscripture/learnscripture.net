@@ -35,10 +35,10 @@ autorestart=true
 redirect_stderr=true
 priority=990
 
-[program:%(proj_name)s_celeryd]
+[program:%(proj_name)s_django_q]
 environment=PATH="%(VENV_ROOT)s/bin:%%(ENV_PATH)s",HOME="/home/%(proj_user)s"
-command=%(VENV_ROOT)s/bin/celery -A learnscripture worker --loglevel=warn --logfile=/home/%(proj_user)s/logs/%(proj_name)s_celeryd.log --maxtasksperchild=500
-stdout_logfile = /home/%(proj_user)s/logs/%(proj_name)s_celeryd.stdout
+command=%(VENV_ROOT)s/bin/python %(SRC_ROOT)s/manage.py qcluster
+stdout_logfile = /home/%(proj_user)s/logs/%(proj_name)s_django_q.stdout
 user=%(proj_user)s
 autostart=true
 autorestart=true
