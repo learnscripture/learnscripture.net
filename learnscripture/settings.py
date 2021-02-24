@@ -449,11 +449,6 @@ MARKUP_SETTINGS = {
     }
 }
 
-CAMPAIGN_CONTEXT_PROCESSORS = [
-    'learnscripture.context_processors.campaign_context_processor'
-]
-
-
 # django-q
 
 Q_CLUSTER = {

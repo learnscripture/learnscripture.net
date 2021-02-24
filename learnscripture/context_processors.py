@@ -117,10 +117,6 @@ def request_account(request):
     }
 
 
-def campaign_context_processor(account):
-    return {'account': account}
-
-
 def themes(request):
     current_theme = DEFAULT_THEME
     if hasattr(request, 'identity'):
