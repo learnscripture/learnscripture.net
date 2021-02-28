@@ -410,7 +410,19 @@ class OrganizerAward(CountBasedAward):
 
 class ConsistentLearnerAward(TimeBasedAward):
     award_type = AwardType.CONSISTENT_LEARNER
-    POINTS = dict((level, points * 4) for level, points in StudentAward.POINTS.items())
+    # Like StudentAward
+    POINTS = {
+        1: 1000 * 4,
+        2: 4000 * 4,
+        3: 8000 * 4,
+        4: 16000 * 4,
+        5: 32000 * 4,
+        6: 64000 * 4,
+        7: 125000 * 4,
+        8: 250000 * 4,
+        9: 500000 * 4,
+        10: 1000000 * 4
+    }
 
     DAYS = {
         1: 7,
