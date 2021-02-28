@@ -410,7 +410,7 @@ class OrganizerAward(CountBasedAward):
 
 class ConsistentLearnerAward(TimeBasedAward):
     award_type = AwardType.CONSISTENT_LEARNER
-    # Like StudentAward
+    # 4 x StudentAward points
     POINTS = {
         1: 1000 * 4,
         2: 4000 * 4,
