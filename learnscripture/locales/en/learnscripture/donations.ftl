@@ -22,6 +22,8 @@ donations-page-top-html =
   <p>You can donate as much or as little as you like! If a significant fraction
   of users gave $5.00 or £5.00 every 3 years, that would go a long way!</p>
 
+  <p><b>Due to an issue with our PayPal account, we are not currently accepting donations.</b></p>
+
 # Message displayed on donations page if user is not logged in
 donations-login-or-signup-to-donate-html = Please <a href="{ $login_and_redirect_url }">log in</a>
       (or <a href="{ $signup_and_redirect_url }">create an account</a>) to donate, so that we track your donation.

@@ -23,6 +23,8 @@ donations-page-top-html =
   <p>İstediğiniz kadar az veya çok verebilirsiniz. Kullanıcılarımızın birkaçı
   3 yılda bir $5,00 Dolar veya £5,00 Sterlin bağışlasa, sitenin gelişimine çok yardımcı olurdu.</p>
 
+  <p><b>PayPal hesabımızla bir sorun olduğu için, şimdilik bağış kabul etmiyoruz.</b></p>
+
 # Message displayed on donations page if user is not logged in
 donations-login-or-signup-to-donate-html = Bağış yapmak için <a href="{ $login_and_redirect_url }">giriş yapınız</a>
        (<a href="{ $signup_and_redirect_url }">veya bir heasap oluşturunuz</a>). Böylece bağışlarınızı takip edebileceğiz.

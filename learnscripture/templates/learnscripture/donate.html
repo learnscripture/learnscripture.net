@@ -14,11 +14,13 @@
 
   {% if request_account %}
 
+    {% comment %}
     {% if LIVEBOX %}
       {{ paypal_form.render }}
     {% else %}
       {{ paypal_form.sandbox }}
     {% endif %}
+    {% endcomment %}
 
   {% else %}
     {% capture as login_and_redirect_url silent %}{% url 'login' %}?next={{ request.get_full_path|urlencode }}{% endcapture %}
