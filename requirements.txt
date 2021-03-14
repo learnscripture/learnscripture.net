@@ -92,9 +92,9 @@ django-js-asset==1.2.2
     # via django-mptt
 django-markup==1.5
     # via -r requirements.in
-django-mptt==0.11.0
+django-mptt==0.12.0
     # via -r requirements.in
-django-paypal==1.0
+django-paypal==1.1
     # via -r requirements.in
 django-picklefield==3.0.1
     # via django-q

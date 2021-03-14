@@ -10,7 +10,7 @@ django-anymail==8.2
 django-autoslug==1.9.8
 django-autocomplete-light==3.8.1
 django-markup==1.5
-django-paypal==1.0
+django-paypal==1.1
 django-spurl==0.6.7
 django-webpack-loader==0.7.0
 django==3.1.6
@@ -27,7 +27,7 @@ pytz==2020.1
 requests==2.23.0
 uwsgi==2.0.19.1
 django-capture-tag==1.0
-django-mptt==0.11.0
+django-mptt==0.12.0
 easy-thumbnails==2.7.1
 django-compressor==2.4
 django-sql-utils==0.5.0
