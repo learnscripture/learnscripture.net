@@ -21,7 +21,7 @@ class PaymentManager(models.Manager):
 
 class Payment(models.Model):
     amount = models.DecimalField(decimal_places=2, max_digits=10)
-    account = models.ForeignKey(Account, on_delete=models.CASCADE,
+    account = models.ForeignKey(Account, on_delete=models.PROTECT,
                                 related_name='payments')
     paypal_ipn = models.ForeignKey(PayPalIPN, on_delete=models.CASCADE,
                                    related_name='payments')

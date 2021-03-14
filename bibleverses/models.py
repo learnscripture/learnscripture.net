@@ -670,7 +670,7 @@ class VerseSet(models.Model):
 
     popularity = models.PositiveIntegerField(default=0)
     date_added = models.DateTimeField(default=timezone.now)
-    created_by = models.ForeignKey('accounts.Account', on_delete=models.CASCADE,
+    created_by = models.ForeignKey('accounts.Account', on_delete=models.PROTECT,
                                    related_name='verse_sets_created')
 
     # Essentially denormalized field, to make it quick to check for duplicate
@@ -841,7 +841,7 @@ class VerseChoiceManager(models.Manager):
 # to be independent of Bible version.
 class VerseChoice(models.Model):
     internal_reference = models.CharField(max_length=100)
-    verse_set = models.ForeignKey(VerseSet, on_delete=models.CASCADE,
+    verse_set = models.ForeignKey(VerseSet, on_delete=models.PROTECT,
                                   related_name='verse_choices')
     set_order = models.PositiveSmallIntegerField(default=0)
 
@@ -948,7 +948,7 @@ class UserVerseStatus(models.Model):
     verse_set = models.ForeignKey(VerseSet, null=True, blank=True,
                                   on_delete=models.SET_NULL)
     text_order = models.PositiveSmallIntegerField()  # order of this item within associated TextVersion
-    version = models.ForeignKey(TextVersion, on_delete=models.CASCADE)
+    version = models.ForeignKey(TextVersion, on_delete=models.PROTECT)
 
     # The following fields vary over time and care should be taken in things
     # like create_verse_status to copy these attributes if there are duplicates.

@@ -472,13 +472,13 @@ class Event(models.Model):
     weight = models.PositiveSmallIntegerField(default=10)
     event_data = models.JSONField(default=dict, blank=True)
     created = models.DateTimeField(default=timezone.now, db_index=True)
-    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    account = models.ForeignKey(Account, on_delete=models.PROTECT)
     # If the event relates to something in a Group, this should be set
     group = models.ForeignKey(Group, null=True, blank=True, on_delete=models.CASCADE)
 
     # Events like NewCommentEvent have a parent event (the event the comment is
     # attached to).
-    parent_event = models.ForeignKey('self', on_delete=models.CASCADE,
+    parent_event = models.ForeignKey('self', on_delete=models.PROTECT,
                                      null=True, blank=True)
 
     # Denormalized value

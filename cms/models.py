@@ -51,7 +51,7 @@ class Content(models.Model):
 class Page(MPTTModel):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    parent = models.ForeignKey('self', null=True, blank=True, related_name='subpages', verbose_name='parent', on_delete=models.CASCADE)
+    parent = models.ForeignKey('self', null=True, blank=True, related_name='subpages', verbose_name='parent', on_delete=models.SET_NULL)
     url = models.CharField(max_length=1000, blank=True)
     redirect_page = models.ForeignKey('self', null=True, blank=True, related_name='redirected_pages', on_delete=models.SET_NULL)
     template_name = models.CharField(blank=True, max_length=70, choices=settings.CMS_TEMPLATE_CHOICES)

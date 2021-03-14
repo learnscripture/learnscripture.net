@@ -415,7 +415,7 @@ class Identity(models.Model):
     date_created = models.DateTimeField(t_lazy('accounts-date-created'), default=timezone.now)
 
     # Preferences
-    default_bible_version = models.ForeignKey(TextVersion, on_delete=models.CASCADE,
+    default_bible_version = models.ForeignKey(TextVersion, on_delete=models.PROTECT,
                                               verbose_name=t_lazy('accounts-default-bible-version'),
                                               null=True, blank=True)
     desktop_testing_method = models.CharField(max_length=20,
@@ -439,7 +439,7 @@ class Identity(models.Model):
                                           default=settings.LANGUAGE_CODE)
 
     # Managed invisibly:
-    referred_by = models.ForeignKey(Account, on_delete=models.CASCADE,
+    referred_by = models.ForeignKey(Account, on_delete=models.SET_NULL,
                                     null=True, default=None,
                                     blank=True,
                                     related_name='referrals')

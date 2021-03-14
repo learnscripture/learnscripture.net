@@ -57,7 +57,7 @@ class Group(models.Model):
     slug = AutoSlugField(populate_from='name', unique=True)
     description = models.TextField(t_lazy('groups-description'), blank=True)
     created = models.DateTimeField(default=timezone.now)
-    created_by = models.ForeignKey(Account, on_delete=models.CASCADE,
+    created_by = models.ForeignKey(Account, on_delete=models.PROTECT,
                                    related_name='groups_created')
     public = models.BooleanField(t_lazy('groups-public-group'), default=False)
     open = models.BooleanField(t_lazy('groups-open-group'), default=False)
@@ -166,7 +166,7 @@ class Invitation(models.Model):
                                 related_name='invitations')
     group = models.ForeignKey(Group, on_delete=models.CASCADE,
                               related_name='invitations')
-    created_by = models.ForeignKey(Account, on_delete=models.CASCADE,
+    created_by = models.ForeignKey(Account, on_delete=models.PROTECT,
                                    related_name='invitations_created')
 
     objects = InvitationManager()
