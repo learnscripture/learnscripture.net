@@ -1678,7 +1678,7 @@ def activity_item(request, event_id):
 
     return TemplateResponse(request, 'learnscripture/activity_item.html', {
         'event': event,
-        'title': t('activity-item-page-title', dict(username=event.account.username)),
+        'title': t('activity-item-page-title', dict(username=event.account.public_username)),
     })
 
 

@@ -200,7 +200,7 @@ def start_identity(request):
     referrer_username = request.session.get('referrer_username', None)
     if referrer_username is not None:
         try:
-            referrer = Account.objects.get(username=referrer_username)
+            referrer = Account.objects.active().get(username=referrer_username)
         except Account.DoesNotExist:
             pass
     identity = Identity.objects.create(referred_by=referrer, interface_language=request.LANGUAGE_CODE)

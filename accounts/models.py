@@ -11,7 +11,7 @@ import django_ftl
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, UserManager
 from django.core import mail
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 from django.utils.functional import cached_property
 from fluent_compiler import types as fluent_types
@@ -68,6 +68,10 @@ class HeatmapStatsType(models.TextChoices):
 # and so sometimes they just delegate to Account methods.
 
 
+DELETED_PREFIX = '[deleted_'
+DELETED_SUFFIX = ']'
+
+
 class AccountManager(UserManager):
     def visible_for_account(self, account):
         qs = self.active()
@@ -77,7 +81,7 @@ class AccountManager(UserManager):
         return qs
 
     def active(self):
-        return self.get_queryset().filter(is_active=True)
+        return self.get_queryset().filter(is_active=True).exclude(username__startswith=DELETED_PREFIX)
 
 
 class Account(AbstractBaseUser):
@@ -137,6 +141,40 @@ class Account(AbstractBaseUser):
         else:
             return super(Account, self).save(**kwargs)
 
+    @transaction.atomic
+    def erase(self):
+        # User 'deletion'. We keep records around to avoid damaging
+        # database integrity, but anonymize and erase what we can.
+        self.username = DELETED_PREFIX + timezone.now().strftime('%s') + DELETED_SUFFIX
+        self.first_name = ''
+        self.last_name = ''
+        self.email = ''
+        self.password = ''
+        self.is_active = False
+        self.save()
+
+        # Relationships:
+        self.identity.verse_statuses.all().delete()
+        self.total_score.delete()
+        self.action_logs.all().delete()
+        self.memberships.all().delete()
+        self.invitations.all().delete()
+        self.invitations_created.all().delete()
+        # Preserve the comment object so that conversations still make some
+        # sense:
+        self.comments.all().update(message='[deleted]')
+        self.referrals.all().update(referred_by=None)
+
+        # TODO - other places where username might get stored
+        # e.g. Event.event_data['parent_event_account_username']
+
+        # TODO - other places which might reference username and reveal the
+        # internal name
+
+    @property
+    def is_erased(self):
+        return self.username.startswith(DELETED_PREFIX)
+
     @property
     def default_language_code(self):
         return self.identity.default_language_code
@@ -163,6 +201,10 @@ class Account(AbstractBaseUser):
     @property
     def personal_name(self):
         return (self.first_name.strip() + ' ' + self.last_name.strip()).strip()
+
+    @property
+    def public_username(self):
+        return '[deleted]' if self.is_erased else self.username
 
     @property
     def recruited_by(self):
