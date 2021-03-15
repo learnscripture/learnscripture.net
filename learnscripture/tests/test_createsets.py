@@ -3,7 +3,7 @@ import time
 
 from awards.models import AwardType
 from bibleverses.languages import LANGUAGE_CODE_EN
-from bibleverses.models import StageType, TextVersion, VerseSet, VerseSetType
+from bibleverses.models import StageType, TextVersion, VerseChoice, VerseSet, VerseSetType
 from events.models import Event, EventType
 
 from .base import BibleVersesMixin, FullBrowserTest
@@ -231,6 +231,7 @@ class CreateSetTests(BibleVersesMixin, FullBrowserTest):
             with self.subTest(default_version=default_version):
                 for display_version in ('NET', 'TCL02'):
                     with self.subTest(display_version=display_version):
+                        VerseChoice.objects.all().delete()
                         VerseSet.objects.all().delete()
                         self._identity.default_bible_version = TextVersion.objects.get(slug=default_version)
                         self._identity.save()
