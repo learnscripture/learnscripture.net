@@ -5,7 +5,7 @@ import subprocess
 from webpack_loader.loader import WebpackLoader
 
 from .settings_local import *  # noqa
-from .settings_local import DATABASES, INSTALLED_APPS, LOGGING, MIDDLEWARE, WEBPACK_LOADER
+from .settings_local import DATABASES, INSTALLED_APPS, LOGGING, MIDDLEWARE, SRC_ROOT, WEBPACK_LOADER
 
 TESTS_RUNNING = True
 
@@ -36,9 +36,8 @@ TASKS_EAGER = True
 
 
 WEBPACK_STATS_FILE = 'webpack-stats.tests.json'
-
-
 WEBPACK_LOADER['DEFAULT']['CACHE'] = True
+WEBPACK_LOADER['DEFAULT']['STATS_FILE'] = os.path.join(SRC_ROOT, WEBPACK_STATS_FILE)
 
 
 # Monkey patch WebpackLoader to call `webpack` just in time.
