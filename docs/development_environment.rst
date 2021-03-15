@@ -30,7 +30,7 @@ process. This makes it easier to spot bugs that are introduced in background
 tasks, because they don't happen in the background. No worker process is needed
 to run the tasks.
 
-If you want to run a real worker process, set ``TASKS_EAGER = True`` in
+If you want to run a real worker process, set ``TASKS_EAGER = False`` in
 ``settings_local.py`` and run the django-q process like::
 
 
