@@ -7,9 +7,6 @@ import socket
 import subprocess
 import sys
 
-import sentry_sdk
-from sentry_sdk.integrations.django import DjangoIntegration
-
 hostname = socket.gethostname()
 CHECK_DEPLOY = 'manage.py check --deploy' in ' '.join(sys.argv)
 RUNNING_QCLUSTER = 'manage.py qcluster' in ' '.join(sys.argv)
@@ -108,7 +105,7 @@ else:
     }
 
     SECRET_KEY = secrets.get('DEVELOPMENT_SECRET_KEY', "abc123")
-    SENTRY_DSN = secrets.get('DEVELOPMENT_SENTRY_DSN', None)
+    SENTRY_DSN = None
 
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
@@ -384,6 +381,9 @@ if (DEBUG or any(a in sys.argv for a in ['setup_bibleverse_suggestions',
     LOGGING['handlers']['console']['level'] = 'INFO'
 else:
     if SENTRY_DSN:
+        import sentry_sdk
+        from sentry_sdk.integrations.django import DjangoIntegration
+
         version = subprocess.check_output(['git', '-C', SRC_ROOT, 'rev-parse', 'HEAD']).strip().decode('utf-8')
         release = "learnscripturenet@" + version
         sentry_sdk.init(
