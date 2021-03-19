@@ -9,11 +9,14 @@
     <p>{{ request.session.items }}</p>
     <h1>Local storage:</h1>
     <script>
+     function escapeHTML(str){
+       return new Option(str).innerHTML;
+     }
+
       for (var i = 0; i < window.localStorage.length; i++) {
           var key = localStorage.key(i);
-          document.write("<p>" + key + ": " + localStorage.getItem(key) + "</p>");
+          document.write("<p>" + key + ": " + escapeHTML(localStorage.getItem(key)) + "</p>");
       }
     </script>
   </body>
 </html>
-
