@@ -453,9 +453,10 @@ MARKUP_SETTINGS = {
 
 Q_CLUSTER = {
     'name': 'DjangORM',
-    'workers': 4,
+    'workers': 2,
     'timeout': 90,
-    'retry': 120,
+    'max_attempts': 10,
+    'retry': 60,
     'queue_limit': 50,
     'bulk': 10,
     'orm': 'default',
