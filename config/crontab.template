@@ -4,7 +4,8 @@ LS_MANAGE=%(SRC_ROOT)s/manage.py
 20         3    * * *  %(proj_user)s $LS_PYTHON $LS_MANAGE create_awards_daily
 20         4    * * *  %(proj_user)s $LS_PYTHON $LS_MANAGE clearsessions
 20         5    * * *  %(proj_user)s $LS_PYTHON $LS_MANAGE clean_old_identities
-*/5        *    * * *  %(proj_user)s $LS_PYTHON $LS_MANAGE adjust_stored_texts
+# Temporarily disabled
+#*/5        *    * * *  %(proj_user)s $LS_PYTHON $LS_MANAGE adjust_stored_texts
 
 51         3    * * *  root          letsencrypt renew --agree-tos
 # nginx won't pick up the new certificate created above until we restart it:
