@@ -20,7 +20,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         from bibleverses.models import TextType, TextVersion
-        from bibleverses.services import partial_data_available
 
         output_dir = options['output_dir']
         common_options = dict(
@@ -42,8 +41,8 @@ class Command(BaseCommand):
             elif version.text_type == TextType.BIBLE:
                 items_file = BIBLE_ITEM_TEMPLATE.format(version_slug)
                 items = version.verse_set.all()
-                if partial_data_available(version_slug):
-                    items = blank_text_saved(items)
+                for item in items:
+                    item.text_fetched_at = None
 
             with gzip.open(os.path.join(output_dir, items_file), "wb") as f2:
                 serializers.serialize(format, items, stream=str_to_bytes(f2), **common_options)
@@ -55,10 +54,3 @@ def str_to_bytes(writer):
             return super().write(data.encode('utf-8'))
     writer.__class__ = BytesWriter  # Slightly hacky *ahem*
     return writer
-
-
-def blank_text_saved(items):
-    for item in items:
-        item.text_saved = ''
-        item.text_fetched_at = None
-        yield item
