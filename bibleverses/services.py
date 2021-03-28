@@ -188,15 +188,18 @@ def highlight_search_words(verse, words):
 
 
 _FETCH_SERVICES = {
-    'ESV': get_esv_v2,
+    # Temporarily disable
+    # 'ESV': get_esv_v2,
 }
 
 _SEARCH_SERVICES = {
-    'ESV': search_esv_v2,
+    # 'ESV': search_esv_v2,
 }
 
 # Versions where we are only allowed to store partial data locally:
-_PARTIAL_DATA_VERSIONS = {'ESV'}
+_PARTIAL_DATA_VERSIONS = {
+    # 'ESV'
+}
 
 
 def get_fetch_service(version_slug):
