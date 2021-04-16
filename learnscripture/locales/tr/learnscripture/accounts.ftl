@@ -145,7 +145,7 @@ accounts-signup-agree-to-terms-of-service-html =
 
 accounts-signup-parents-notice = Çocukların internet aracılığıyla başkalarıyla irtibat kurmasını
         istemeyen ebeveynler yukarıdan yorumları devredışı
-        birakabilir.
+        bırakabilir.
 
 # Button to create account after filling in form
 accounts-signup-create-account-button = Hesabı oluştur
