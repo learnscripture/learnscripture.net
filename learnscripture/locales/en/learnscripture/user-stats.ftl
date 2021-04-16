@@ -71,8 +71,8 @@ user-stats-points-title = Points
 # Heading for column showing the statistic for 'all time' (since the beginning)
 user-stats-points-all-time = All time
 
-# Heading for column showing the statistic for just this week
-user-stats-points-this-week = This week
+# Heading for column showing the statistic for just last 7 days
+user-stats-points-this-week = Last 7 days
 
 # Caption for stats row showing the points the user has earned.
 user-stats-points = Points
@@ -106,6 +106,3 @@ user-stats-no-groups = No groups.
 
 # Link to groups page (for case when user has no groups so far)
 user-stats-find-groups = Find groups to join
-
-
-

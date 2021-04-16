@@ -71,8 +71,8 @@ user-stats-points-title = Puan
 # Heading for column showing the statistic for 'all time' (since the beginning)
 user-stats-points-all-time = Tamamı
 
-# Heading for column showing the statistic for just this week
-user-stats-points-this-week = Bu hafta
+# Heading for column showing the statistic for just past 7 days
+user-stats-points-this-week = Son 7 gün
 
 # Caption for stats row showing the points the user has earned.
 user-stats-points = Puan

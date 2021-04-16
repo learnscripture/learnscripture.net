@@ -8,8 +8,8 @@ leaderboards-leaderboard = Lider Tahtası
 # Caption for filter that does an "all time" leaderboard
 leaderboards-filter-all-time = Tüm zamanların liderleri
 
-# Caption for filter that limits the leaderboard to the past week (7 days)
-leaderboards-filter-this-week = Bu haftanın liderleri
+# Caption for filter that limits the leaderboard to the past 7 days
+leaderboards-filter-this-week = Son 7 gün için liderler
 
 # Caption for the 'when' filter (this week/all time)
 leaderboards-filter-when = Zaman aşaması

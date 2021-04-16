@@ -9,8 +9,8 @@ leaderboards-leaderboard = Leaderboard
 # Caption for filter that does an "all time" leaderboard
 leaderboards-filter-all-time = All time
 
-# Caption for filter that limits the leaderboard to the past week (7 days)
-leaderboards-filter-this-week = This week
+# Caption for filter that limits the leaderboard to the past 7 days
+leaderboards-filter-this-week = Last 7 days
 
 # Caption for the 'when' filter (this week/all time)
 leaderboards-filter-when = When
@@ -38,4 +38,3 @@ leaderboards-showing-user-count = Showing { $user_count } users
 
 # Displayed when the leaderboard is empty
 leaderboards-no-users-found = No users found.
-
