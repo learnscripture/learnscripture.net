@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 import unittest
 
+import pytest
+
 from bibleverses.services import get_esv_v2, search_esv_v2
 
 from .base import TestBase
 from .test_bibleverses import SetupEsvMixin
 
 
+@pytest.mark.skip(reason='ESV v2 is discontinued')
 class TestEsvService(unittest.TestCase):
 
     def test_get_esv_v2_single(self):
@@ -24,6 +27,7 @@ then they said among the nations,
 "The LORD has done great things for them."''')])
 
 
+@pytest.mark.skip(reason='ESV v2 is discontinued')
 class TestEsvSearch(SetupEsvMixin, TestBase):
 
     def test_search(self):
