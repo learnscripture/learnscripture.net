@@ -24,12 +24,12 @@ def identity_middleware(get_response):
         identity = session.get_identity(request)
         if identity is not None:
             request.identity = identity
-            set_user({'id', identity.id})
-            set_user({'identity_id', identity.id})
+            set_user({'id': identity.id})
+            set_user({'identity_id': identity.id})
             if request.identity.account is not None:
-                set_user({'account_id', identity.account.id})
-                set_user({'email', identity.account.email})
-                set_user({'username', identity.account.username})
+                set_user({'account_id': identity.account.id})
+                set_user({'email': identity.account.email})
+                set_user({'username': identity.account.username})
 
         session.save_referrer(request)
         return get_response(request)
