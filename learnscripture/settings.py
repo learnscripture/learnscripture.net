@@ -379,20 +379,20 @@ if (DEBUG or any(a in sys.argv for a in ['setup_bibleverse_suggestions',
         'propagate': False,
     }
     LOGGING['handlers']['console']['level'] = 'INFO'
-else:
-    if SENTRY_DSN:
-        import sentry_sdk
-        from sentry_sdk.integrations.django import DjangoIntegration
 
-        version = subprocess.check_output(['git', '-C', SRC_ROOT, 'rev-parse', 'HEAD']).strip().decode('utf-8')
-        release = "learnscripturenet@" + version
-        sentry_sdk.init(
-            dsn=SENTRY_DSN,
-            integrations=[DjangoIntegration()],
-            release=release,
-            traces_sample_rate=0.05,
-            send_default_pii=True,
-        )
+if SENTRY_DSN:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+
+    version = subprocess.check_output(['git', '-C', SRC_ROOT, 'rev-parse', 'HEAD']).strip().decode('utf-8')
+    release = "learnscripturenet@" + version
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        release=release,
+        traces_sample_rate=0.05,
+        send_default_pii=True,
+    )
 
 
 SILENCED_SYSTEM_CHECKS = [
