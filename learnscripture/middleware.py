@@ -11,6 +11,7 @@ from django.utils import translation as gettext_translation
 from django.utils.http import urlencode
 from django.utils.translation import LANGUAGE_SESSION_KEY
 from django_ftl import override
+from sentry_sdk import set_user
 
 LANGUAGE_KEY = 'lang'
 
@@ -23,6 +24,12 @@ def identity_middleware(get_response):
         identity = session.get_identity(request)
         if identity is not None:
             request.identity = identity
+            set_user({'id', identity.id})
+            set_user({'identity_id', identity.id})
+            if request.identity.account is not None:
+                set_user({'account_id', identity.account.id})
+                set_user({'email', identity.account.email})
+                set_user({'username', identity.account.username})
 
         session.save_referrer(request)
         return get_response(request)
