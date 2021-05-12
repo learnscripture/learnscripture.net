@@ -22,10 +22,10 @@ class ContentInline(admin.StackedInline):
 
 
 class ContentItemAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'used')
+    list_display = ['id', 'name', 'used']
     list_display_links = ['id', 'name']
     date_hierarchy = 'updated'
-    search_fields = ('name', 'content_html')
+    search_fields = ['name', 'content_set__content_html']
     inlines = [ContentInline]
 
     def get_queryset(self, request):
