@@ -8,11 +8,11 @@ from .models import Account, Identity, TestingMethod
 class PreferencesForm(forms.ModelForm):
     desktop_testing_method = forms.ChoiceField(label=t_lazy('accounts-testing-method'),
                                                widget=forms.RadioSelect,
-                                               initial=TestingMethod.FULL_WORDS,
+                                               initial=TestingMethod.FIRST_LETTER,
                                                choices=TestingMethod.choices)
     touchscreen_testing_method = forms.ChoiceField(label=t_lazy('accounts-testing-method'),
                                                    widget=forms.RadioSelect,
-                                                   initial=TestingMethod.ON_SCREEN,
+                                                   initial=TestingMethod.FIRST_LETTER,
                                                    choices=TestingMethod.choices)
 
     def __init__(self, *args, **kwargs):

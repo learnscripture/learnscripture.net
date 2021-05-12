@@ -463,11 +463,11 @@ class Identity(models.Model):
     desktop_testing_method = models.CharField(max_length=20,
                                               verbose_name=t_lazy('accounts-desktop-testing-method'),
                                               choices=TestingMethod.choices,
-                                              default=TestingMethod.FULL_WORDS)
+                                              default=TestingMethod.FIRST_LETTER)
     touchscreen_testing_method = models.CharField(max_length=20,
                                                   verbose_name=t_lazy('accounts-touchscreen-testing-method'),
                                                   choices=TestingMethod.choices,
-                                                  default=TestingMethod.ON_SCREEN)
+                                                  default=TestingMethod.FIRST_LETTER)
     enable_animations = models.BooleanField(t_lazy('accounts-enable-animations'),
                                             blank=True, default=True)
     enable_sounds = models.BooleanField(t_lazy('accounts-enable-sounds'),

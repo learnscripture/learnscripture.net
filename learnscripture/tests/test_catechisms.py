@@ -1,5 +1,6 @@
 import time
 
+from accounts.models import TestingMethod
 from events.models import Event, EventType
 
 from .base import CatechismsMixin, FullBrowserTest
@@ -13,7 +14,7 @@ class CatechismTests(CatechismsMixin, FullBrowserTest):
         self.assertTextPresent("4 question/answer pairs")
 
     def test_learn(self):
-        identity, account = self.create_account()
+        identity, account = self.create_account(testing_method=TestingMethod.FULL_WORDS)
         self.login(account)
         self.get_url('catechisms')
         self.click(".btn.primary[type=submit]")

@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from accounts.memorymodel import MM
-from accounts.models import Account, Identity
+from accounts.models import Account, Identity, TestingMethod
 from awards.models import AceAward, AwardType, StudentAward
 from bibleverses.languages import LANGUAGE_CODE_EN
 from bibleverses.models import MemoryStage, StageType, VerseSet
@@ -85,7 +85,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         return math.floor(Scores.points_per_word(LANGUAGE_CODE_EN) * points_word_count * actual_accuracy)
 
     def test_save_strength(self):
-        identity, account = self.create_account()
+        identity, account = self.create_account(testing_method=TestingMethod.FULL_WORDS)
         self.login(account)
         verse_set = self.choose_verse_set('Bible 101')
 
@@ -112,7 +112,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.assertEqual(uvs.strength, MM.INITIAL_STRENGTH_FACTOR)
 
     def test_typing_verse_combo(self):
-        identity, account = self.create_account()
+        identity, account = self.create_account(testing_method=TestingMethod.FULL_WORDS)
         self.login(account)
 
         identity.add_verse_choice('Psalm 23:1-2')
@@ -153,7 +153,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
                          )
 
     def test_points_and_awards(self):
-        identity, account = self.create_account()
+        identity, account = self.create_account(testing_method=TestingMethod.FULL_WORDS)
         self.login(account)
         self.choose_verse_set('Bible 101')
 
@@ -193,7 +193,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
     def test_review_passage_mixed(self):
         # Test reviewing a passage when some verses are to be tested and others
         # are just being read.
-        identity, account = self.create_account()
+        identity, account = self.create_account(testing_method=TestingMethod.FULL_WORDS)
         self.login(account)
 
         self.add_verse_set('Psalm 23')
@@ -301,7 +301,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
     def test_more_practice(self):
         # tests that the 'more practice' button appears, and works
 
-        identity, account = self.create_account()
+        identity, account = self.create_account(testing_method=TestingMethod.FULL_WORDS)
         self.login(account)
         self.add_verse_set('Bible 101')
 
@@ -337,7 +337,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.assertEqual(account.action_logs.count(), 2)
 
     def test_hint_button(self):
-        identity, account = self.create_account()
+        identity, account = self.create_account(testing_method=TestingMethod.FULL_WORDS)
         self.login(account)
         self.add_verse_set('Bible 101')
 

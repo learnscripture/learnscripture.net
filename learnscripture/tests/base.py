@@ -45,6 +45,7 @@ def create_account(version_slug='KJV',
                    email="test1@test.com",
                    username="tëst1",
                    seen_help_tour=True,
+                   testing_method=None,
                    is_tester=False,
                    is_active=True) -> typing.Tuple[Identity, Account]:
     """
@@ -58,20 +59,38 @@ def create_account(version_slug='KJV',
                                      )
     account.set_password('password')
     account.save()
-    identity = create_identity(version_slug=version_slug,
-                               seen_help_tour=seen_help_tour,
-                               account=account)
+    identity_kwargs = dict(version_slug=version_slug,
+                           seen_help_tour=seen_help_tour,
+                           account=account)
+    if testing_method is not None:
+        identity_kwargs['desktop_testing_method'] = testing_method
+        identity_kwargs['touchscreen_testing_method'] = testing_method
+        # Otherwise we get defaults, which is important for this method matching
+        # what you get from interactive paths for creating account/identity
+
+    identity = create_identity(**identity_kwargs)
     return (identity, account)
 
 
-def create_identity(version_slug='KJV', account=None, seen_help_tour=True):
+def create_identity(
+        version_slug='KJV',
+        account=None, seen_help_tour=True,
+        desktop_testing_method=None,
+        touchscreen_testing_method=None,
+):
     version = TextVersion.objects.get(slug=version_slug)
-    return Identity.objects.create(default_bible_version=version,
-                                   enable_animations=False,
-                                   enable_sounds=False,
-                                   account=account,
-                                   seen_help_tour=True,
-                                   )
+    identity_kwargs = dict(
+        default_bible_version=version,
+        enable_animations=False,
+        enable_sounds=False,
+        account=account,
+        seen_help_tour=True,
+    )
+    if desktop_testing_method is not None:
+        identity_kwargs['desktop_testing_method'] = desktop_testing_method
+    if touchscreen_testing_method is not None:
+        identity_kwargs['touchscreen_testing_method'] = touchscreen_testing_method
+    return Identity.objects.create(**identity_kwargs)
 
 
 def get_or_create_any_account(**kwargs):
