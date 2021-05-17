@@ -1202,14 +1202,6 @@ def stats(request):
     })
 
 
-def natural_list(lang):
-    if len(lang) == 0:
-        return ''
-    if len(lang) == 1:
-        return lang[0]
-    return f"{', '.join(lang[0:-1])} and {lang[-1]}"
-
-
 def donation_paypal_dict(account, url_start):
     return {
         "business": settings.PAYPAL_RECEIVER_EMAIL,
