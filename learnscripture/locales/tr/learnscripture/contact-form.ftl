@@ -46,3 +46,7 @@ contact-form-page-bottom-html =
     <li>e-Posta: <a href="mailto:contact@learnscripture.net">contact@learnscripture.net</a></li>
     <li>Twitter: <a class="twitter-mention-button" data-related="learnscripture" href="https://twitter.com/intent/tweet?screen_name=learnscripture">@learnscripture</a></li>
   </ul>
+
+contact-thanks-page-title = Teşekkürler
+
+contact-thanks-for-your-message = Mesajınız için teşekkür ederiz!

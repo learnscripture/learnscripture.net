@@ -1599,12 +1599,18 @@ def contact(request):
         form = ContactForm(request.POST, initial=initial)
         if form.is_valid():
             send_contact_email(form, account)
-            return HttpResponseRedirect('/contact/thanks/')
+            return HttpResponseRedirect(reverse('contact_thanks'))
     else:
         form = ContactForm(initial=initial)
     return TemplateResponse(request, 'learnscripture/contact.html', {
         'title': t('contact-form-page-title'),
         'form': form,
+    })
+
+
+def contact_thanks(request):
+    return TemplateResponse(request, 'learnscripture/contact_thanks.html', {
+        'title': t('contact-thanks-page-title'),
     })
 
 

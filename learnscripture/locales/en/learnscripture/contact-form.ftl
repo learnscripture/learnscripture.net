@@ -48,3 +48,8 @@ contact-form-page-bottom-html =
     <li>Email us: <a href="mailto:contact@learnscripture.net">contact@learnscripture.net</a></li>
     <li>Tweet us: <a class="twitter-mention-button" data-related="learnscripture" href="https://twitter.com/intent/tweet?screen_name=learnscripture">Tweet to @learnscripture</a></li>
   </ul>
+
+
+contact-thanks-page-title = Thanks!
+
+contact-thanks-for-your-message = Thanks for your message, we'll deal with it as soon as we can.
