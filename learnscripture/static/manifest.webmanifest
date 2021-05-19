@@ -7,11 +7,11 @@
   "description": "A social, online Bible memorization app.",
   "lang": "en-US",
   "icons": [{
-    "src": "/static/img/logo-512x512.svg",
+    "src": "/static/img/logo-512x512.png",
     "sizes": "512x512",
     "type": "image/png"
   }, {
-    "src": "/static/img/logo-192x192.svg",
+    "src": "/static/img/logo-192x192.png",
     "sizes": "192x192",
     "type": "image/png"
   }, {
