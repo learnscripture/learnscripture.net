@@ -390,7 +390,7 @@ if SENTRY_DSN:
         dsn=SENTRY_DSN,
         integrations=[DjangoIntegration()],
         release=release,
-        traces_sample_rate=0.05,
+        traces_sample_rate=0.2,
         send_default_pii=True,
     )
 
