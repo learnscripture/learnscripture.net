@@ -14,7 +14,7 @@ appdirs==1.4.4
     # via
     #   fs
     #   virtualenv
-arrow==1.0.3
+arrow==1.1.1
     # via django-q
 asgiref==3.3.1
     # via django
@@ -98,9 +98,7 @@ django-paypal==1.1
     # via -r requirements.in
 django-picklefield==3.0.1
     # via django-q
-django-q-sentry==0.1.5
-    # via django-q
-django-q[sentry]==1.3.5
+django-q==1.3.9
     # via -r requirements.in
 django-spurl==0.6.7
     # via -r requirements.in
@@ -285,6 +283,8 @@ pyyaml==5.4.1
     # via pre-commit
 rcssmin==1.0.6
     # via django-compressor
+redis==3.5.3
+    # via django-q
 requests==2.25.1
     # via
     #   -r requirements.in
@@ -299,9 +299,7 @@ selenium==3.141.0
     #   -r requirements-dev.in
     #   django-functest
 sentry-sdk==1.3.1
-    # via
-    #   -r requirements.in
-    #   django-q-sentry
+    # via -r requirements.in
 six==1.15.0
     # via
     #   bcrypt

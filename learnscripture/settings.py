@@ -465,7 +465,9 @@ Q_CLUSTER = {
     'save_limit': -1,
 }
 
-if SENTRY_DSN and False:  # Temporary disable, debugging issue
+# django-q-sentry seems to make things worse not better
+# https://github.com/danielwelch/django-q-sentry/issues/12
+if SENTRY_DSN and False:
     Q_CLUSTER['error_reporter'] = {
         'sentry': {
             'dsn': SENTRY_DSN
