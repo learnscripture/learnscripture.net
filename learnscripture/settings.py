@@ -465,7 +465,7 @@ Q_CLUSTER = {
     'save_limit': -1,
 }
 
-if SENTRY_DSN:
+if SENTRY_DSN and False:  # Temporary disable, debugging issue
     Q_CLUSTER['error_reporter'] = {
         'sentry': {
             'dsn': SENTRY_DSN
