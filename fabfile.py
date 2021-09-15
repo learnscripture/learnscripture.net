@@ -829,6 +829,16 @@ def manage_py_command(*commands):
         run("./manage.py %s" % ' '.join(commands))
 
 
+@task
+def erase_user(username):
+    """
+    Erase/delete user on production site
+    """
+    target = Version.current()
+    with django_project(target):
+        run(f"./manage.py erase_user {username}")
+
+
 @as_rootuser
 def update_upgrade():
     run("apt update")
