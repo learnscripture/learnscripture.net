@@ -1014,7 +1014,7 @@ def install_or_renew_ssl_certificate():
             certbot_static_path=certbot_static_path,
             domain=env.domains[0],
         ))
-    run("service nginx restart")
+    run("service nginx reload")
 
 
 @task
