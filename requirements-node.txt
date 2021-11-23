@@ -1,4 +1,4 @@
-elm@0.18.0
+elm@latest-0.18.0
 elm-github-install@1.6.1
-rtfeldman/node-test-runner#b671657b00cf2eae6771078a6133753caa15b17b
+rtfeldman/node-test-runner#9dbfa1c7b42fdc5c3641e0594560a1ab3a4d684f
 elm-format@0.7.0-exp

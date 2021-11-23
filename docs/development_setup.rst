@@ -49,7 +49,7 @@ installed.
 
    npm/javascript dependencies. First do::
 
-     nodeenv --node=system --python-virtualenv
+     nodeenv --node=10.24.1 --python-virtualenv
 
    Deactivate and re-activate the virtualenv for changes to take effect.
 
