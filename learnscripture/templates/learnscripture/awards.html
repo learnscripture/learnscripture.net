@@ -11,26 +11,26 @@
       <tr>
         <th>{% ftlmsg 'awards-icon' %}</th>
         <th>{% ftlmsg 'awards-description' %}</th>
-    </thead>
-    <tbody>
-      {% for award in awards %}
-        <tr>
-          <td>
-            <a href="{% url 'award' award.slug %}">
-              <img src="{{ STATIC_URL }}{{ award.image_medium }}">
-            </a>
-          </td>
-          <td>
-            <h3>{{ award.short_description }}</h3>
-            <p>{{ award.full_description }}</p>
-            {% if award.has_levels and award.highest_level_achieved < award.max_level %}
-              <p>{% ftlmsg 'award-highest-level-achieved-html' level=award.highest_level_achieved %}</p>
-            {% endif %}
-            <p><a href="{% url 'award' award.slug %}">{% ftlmsg 'award-people-with-award' name=award.short_description %}</a></p>
-          </td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {% for award in awards %}
+          <tr>
+            <td>
+              <a href="{% url 'award' award.slug %}">
+                <img src="{{ STATIC_URL }}{{ award.image_medium }}">
+              </a>
+            </td>
+            <td>
+              <h3>{{ award.short_description }}</h3>
+              <p>{{ award.full_description }}</p>
+              {% if award.has_levels and award.highest_level_achieved < award.max_level %}
+                <p>{% ftlmsg 'award-highest-level-achieved-html' level=award.highest_level_achieved %}</p>
+              {% endif %}
+              <p><a href="{% url 'award' award.slug %}">{% ftlmsg 'award-people-with-award' name=award.short_description %}</a></p>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
 
 {% endblock %}

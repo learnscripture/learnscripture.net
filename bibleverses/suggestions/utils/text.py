@@ -8,7 +8,9 @@ IN_WORD_PUNCTUATION = "'-"
 
 # regexp for words with punctuation in the middle.
 # We ignore digits, because things like 100,000 are allowed.
-BAD_WORD_PUNCTUATION_RE = re.compile('[A-Za-z](' + "|".join(re.escape(p) for p in PUNCTUATION if p not in IN_WORD_PUNCTUATION) + ")[A-Za-z]")
+BAD_WORD_PUNCTUATION_RE = re.compile(
+    "[A-Za-z](" + "|".join(re.escape(p) for p in PUNCTUATION if p not in IN_WORD_PUNCTUATION) + ")[A-Za-z]"
+)
 
 
 # This is used for checking text before doing stats and finding suggestions
@@ -17,6 +19,7 @@ BAD_WORD_PUNCTUATION_RE = re.compile('[A-Za-z](' + "|".join(re.escape(p) for p i
 #   But if we say, 'From people - '" (they feared the crowd, for they all considered John to be truly a prophet).
 #
 # but the default way of calling split_into_words will fix this.
+
 
 def bad_punctuation(text):
     words = split_into_words(text, fix_punctuation_whitespace=False)
@@ -50,10 +53,8 @@ def split_into_words_for_suggestions(text):
 
 
 def split_into_sentences(text):
-    return [s for s in [s.strip(PUNCTUATION_OR_WHITESPACE) for s in text.split('.')]
-            if s]
+    return [s for s in [s.strip(PUNCTUATION_OR_WHITESPACE) for s in text.split(".")] if s]
 
 
 def sentence_first_words(text):
-    return [split_into_words_for_suggestions(sentence)[0]
-            for sentence in split_into_sentences(text)]
+    return [split_into_words_for_suggestions(sentence)[0] for sentence in split_into_sentences(text)]

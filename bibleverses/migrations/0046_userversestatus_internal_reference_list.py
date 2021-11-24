@@ -7,13 +7,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bibleverses', '0045_correct_for_missing_verse_choices'),
+        ("bibleverses", "0045_correct_for_missing_verse_choices"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='userversestatus',
-            name='internal_reference_list',
-            field=django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=100), default=list, size=None),
+            model_name="userversestatus",
+            name="internal_reference_list",
+            field=django.contrib.postgres.fields.ArrayField(
+                base_field=models.CharField(max_length=100), default=list, size=None
+            ),
         ),
     ]

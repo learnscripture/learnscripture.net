@@ -12,9 +12,9 @@ from bibleverses.models import MemoryStage
 
 # Also defined in Learn.elm learningTypeDecoder
 class LearningType(TextChoices):
-    REVISION = 'REVISION', 'Revision'
-    LEARNING = 'LEARNING', 'Learning'
-    PRACTICE = 'PRACTICE', 'Practice'
+    REVISION = "REVISION", "Revision"
+    LEARNING = "LEARNING", "Learning"
+    PRACTICE = "PRACTICE", "Practice"
 
 
 # In the session we store a list of verses to look at.
@@ -42,8 +42,8 @@ class VerseStatusBatch:
 
 
 def get_verse_statuses_batch(request):
-    learning_type = request.session.get('learning_type', None)
-    untested_order_vals = request.session.get('untested_order_vals', [])
+    learning_type = request.session.get("learning_type", None)
+    untested_order_vals = request.session.get("untested_order_vals", [])
 
     id_data = _get_verse_status_ids(request)
 
@@ -53,10 +53,10 @@ def get_verse_statuses_batch(request):
         max_order_val = None
 
     # Filtering:
-    seen = request.GET.get('seen', '').strip()
+    seen = request.GET.get("seen", "").strip()
     if seen:
         # Don't send them things they already have
-        seen_ids = set([int(x) for x in seen.split(',')])
+        seen_ids = {int(x) for x in seen.split(",")}
     else:
         seen_ids = set()
 
@@ -65,11 +65,10 @@ def get_verse_statuses_batch(request):
     # Batching:
     id_batch = id_batch[:VERSE_STATUS_BATCH_SIZE]
 
-    bulk_ids = [uvs_id
-                for order, uvs_id, needs_testing_override in id_batch]
+    bulk_ids = [uvs_id for order, uvs_id, needs_testing_override in id_batch]
     uvs_dict = request.identity.get_verse_statuses_bulk(bulk_ids)
     retval = []
-    return_to = request.session.get('return_to', reverse('dashboard'))
+    return_to = request.session.get("return_to", reverse("dashboard"))
     for order, uvs_id, needs_testing_override in id_batch:
         try:
             uvs = uvs_dict[uvs_id]
@@ -91,24 +90,23 @@ def get_verse_statuses_batch(request):
 
 
 def _get_verse_status_ids(request):
-    return request.session.get('verses_to_learn', [])
+    return request.session.get("verses_to_learn", [])
 
 
 def _save_verse_status_data(request, data):
-    request.session['verses_to_learn'] = data
+    request.session["verses_to_learn"] = data
 
 
 def _set_learning_session_start(request, dt):
-    request.session['learning_start'] = dt.strftime("%s")
+    request.session["learning_start"] = dt.strftime("%s")
 
 
 def get_learning_session_start(request):
-    learning_start = request.session.get('learning_start', None)
+    learning_start = request.session.get("learning_start", None)
     if learning_start is None:
         return None
     else:
-        return (datetime.utcfromtimestamp(int(learning_start))
-                .replace(tzinfo=timezone.utc))
+        return datetime.utcfromtimestamp(int(learning_start)).replace(tzinfo=timezone.utc)
 
 
 def _set_verse_statuses(request, user_verse_statuses):
@@ -118,37 +116,35 @@ def _set_verse_statuses(request, user_verse_statuses):
     # stored in the session.
 
     # Assign order and save:
-    data = [(order, uvs.id, getattr(uvs, 'needs_testing_override', None))
-            for order, uvs in enumerate(user_verse_statuses)]
+    data = [
+        (order, uvs.id, getattr(uvs, "needs_testing_override", None)) for order, uvs in enumerate(user_verse_statuses)
+    ]
     _save_verse_status_data(request, data)
 
     # To get the 'review mode' progress bar correct in the front end, we need to
     # know which items are not up for review and should be excluded.
     # Since the front end may have partial data and uses the learning order
     # val to progress, we use the order as an ID.
-    order_vals = {uvs_id: order for (order, uvs_id, needs_testing_override)
-                  in data}
-    untested_order_vals = [order_vals[uvs.id]
-                           for uvs in user_verse_statuses
-                           if uvs.memory_stage < MemoryStage.TESTED]
-    request.session['untested_order_vals'] = untested_order_vals
+    order_vals = {uvs_id: order for (order, uvs_id, needs_testing_override) in data}
+    untested_order_vals = [order_vals[uvs.id] for uvs in user_verse_statuses if uvs.memory_stage < MemoryStage.TESTED]
+    request.session["untested_order_vals"] = untested_order_vals
 
 
 def start_learning_session(request, user_verse_statuses, learning_type, return_to):
     _set_verse_statuses(request, user_verse_statuses)
     _set_learning_session_start(request, timezone.now())
-    request.session['learning_type'] = learning_type
-    request.session['action_logs'] = []
-    request.session['return_to'] = return_to
+    request.session["learning_type"] = learning_type
+    request.session["action_logs"] = []
+    request.session["return_to"] = return_to
 
 
 def verse_status_finished(request, uvs_id, new_action_logs):
     _remove_user_verse_status(request, uvs_id)
 
-    if (new_action_logs and request.session.get('learning_type', LearningType.PRACTICE) == LearningType.REVISION):
-        action_log_ids = list(request.session['action_logs'])
+    if new_action_logs and request.session.get("learning_type", LearningType.PRACTICE) == LearningType.REVISION:
+        action_log_ids = list(request.session["action_logs"])
         action_log_ids.extend([sl.id for sl in new_action_logs])
-        request.session['action_logs'] = action_log_ids
+        request.session["action_logs"] = action_log_ids
 
 
 def verse_status_skipped(request, uvs_id):
@@ -181,7 +177,7 @@ def _remove_user_verse_status(request, u_id):
 
 def get_identity(request):
     identity = None
-    identity_id = request.session.get('identity_id', None)
+    identity_id = request.session.get("identity_id", None)
     if identity_id is not None:
         try:
             identity = Identity.objects.get(id=identity_id)
@@ -197,7 +193,7 @@ def get_identity(request):
 
 def start_identity(request):
     referrer = None
-    referrer_username = request.session.get('referrer_username', None)
+    referrer_username = request.session.get("referrer_username", None)
     if referrer_username is not None:
         try:
             referrer = Account.objects.active().get(username=referrer_username)
@@ -217,15 +213,15 @@ def login(request, identity):
 
 
 def set_identity(session, identity):
-    session['identity_id'] = identity.id
+    session["identity_id"] = identity.id
 
 
 def save_referrer(request):
     """
     Save referrer username from request (if any) to sesssion.
     """
-    if 'from' in request.GET:
-        request.session['referrer_username'] = request.GET['from']
+    if "from" in request.GET:
+        request.session["referrer_username"] = request.GET["from"]
 
 
 def unfinished_session_first_uvs(request):
@@ -236,8 +232,7 @@ def unfinished_session_first_uvs(request):
     # We might have a stale session due to verses already being
     # tested in another session.
     ids = [uvs_id for (order, uvs_id, needs_testing_override) in uvs_data]
-    if request.identity.verse_statuses.needs_reviewing(timezone.now()).filter(
-            id__in=ids).count() == 0:
+    if request.identity.verse_statuses.needs_reviewing(timezone.now()).filter(id__in=ids).count() == 0:
         # Stale session, or a session including only new verses.
         # We want to ignore these on the dashboard (at least the first),
         # so we return False here.
@@ -250,5 +245,5 @@ def unfinished_session_first_uvs(request):
 
 
 def set_interface_language(request, lang_code):
-    if hasattr(request, 'session'):
+    if hasattr(request, "session"):
         request.session[i18n_views.LANGUAGE_SESSION_KEY] = lang_code

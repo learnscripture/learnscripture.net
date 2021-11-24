@@ -9,13 +9,15 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('payments', '0005_donationdrive_language_code'),
+        ("payments", "0005_donationdrive_language_code"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='payment',
-            name='account',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='payments', to=settings.AUTH_USER_MODEL),
+            model_name="payment",
+            name="account",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT, related_name="payments", to=settings.AUTH_USER_MODEL
+            ),
         ),
     ]

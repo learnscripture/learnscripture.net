@@ -6,52 +6,54 @@ from .models import Account, Identity, TestingMethod
 
 
 class PreferencesForm(forms.ModelForm):
-    desktop_testing_method = forms.ChoiceField(label=t_lazy('accounts-testing-method'),
-                                               widget=forms.RadioSelect,
-                                               initial=TestingMethod.FIRST_LETTER,
-                                               choices=TestingMethod.choices)
-    touchscreen_testing_method = forms.ChoiceField(label=t_lazy('accounts-testing-method'),
-                                                   widget=forms.RadioSelect,
-                                                   initial=TestingMethod.FIRST_LETTER,
-                                                   choices=TestingMethod.choices)
+    desktop_testing_method = forms.ChoiceField(
+        label=t_lazy("accounts-testing-method"),
+        widget=forms.RadioSelect,
+        initial=TestingMethod.FIRST_LETTER,
+        choices=TestingMethod.choices,
+    )
+    touchscreen_testing_method = forms.ChoiceField(
+        label=t_lazy("accounts-testing-method"),
+        widget=forms.RadioSelect,
+        initial=TestingMethod.FIRST_LETTER,
+        choices=TestingMethod.choices,
+    )
 
     def __init__(self, *args, **kwargs):
-        super(PreferencesForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         from bibleverses.models import TextVersion
+
         available_bible_versions = TextVersion.objects.bibles().public()
-        if 'instance' in kwargs:
-            identity = kwargs['instance']
+        if "instance" in kwargs:
+            identity = kwargs["instance"]
         else:
             identity = None
 
         if identity is not None:
             available_bible_versions = identity.available_bible_versions()
 
-        self.fields['default_bible_version'].queryset = available_bible_versions
+        self.fields["default_bible_version"].queryset = available_bible_versions
 
     class Meta:
         model = Identity
-        fields = ['default_bible_version',
-                  'desktop_testing_method',
-                  'touchscreen_testing_method',
-                  'enable_sounds',
-                  'enable_vibration',
-                  'interface_theme',
-                  ]
+        fields = [
+            "default_bible_version",
+            "desktop_testing_method",
+            "touchscreen_testing_method",
+            "enable_sounds",
+            "enable_vibration",
+            "interface_theme",
+        ]
 
 
-PreferencesForm.base_fields['default_bible_version'].required = True
+PreferencesForm.base_fields["default_bible_version"].required = True
 
 
 class AccountDetailsForm(forms.ModelForm):
-
     class Meta:
         model = Account
-        fields = ["first_name",
-                  "last_name",
-                  "email",
-                  "is_under_13"]
+        fields = ["first_name", "last_name", "email", "is_under_13"]
 
     def save(self, *args, **kwargs):
         if self.instance.id is not None:
@@ -59,7 +61,7 @@ class AccountDetailsForm(forms.ModelForm):
         else:
             old_email = None
 
-        super(AccountDetailsForm, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
         if old_email is not None and self.instance.email != old_email:
             self.instance.email_bounced = None
             self.instance.save()

@@ -19,12 +19,12 @@ from .test_bibleverses import RequireExampleVerseSetsMixin
 
 
 def prepare_identity(sender, **kwargs):
-    identity = kwargs['instance']
+    identity = kwargs["instance"]
     identity.seen_help_tour = True
 
 
 class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
-    databases = {'default', 'wordsuggestions'}
+    databases = {"default", "wordsuggestions"}
 
     kjv_john_3_16 = "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life. John 3 16"
 
@@ -39,20 +39,20 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         super().tearDown()
 
     def _get_current_identity(self):
-        return Identity.objects.order_by('-date_created')[0]
+        return Identity.objects.order_by("-date_created")[0]
 
     def choose_verse_set(self, name):
         verse_set = VerseSet.objects.get(name=name)
-        self.get_url('choose')
+        self.get_url("choose")
         self.click("#id-choose-verseset .accordion-heading")
         self.click("#id-learn-verseset-btn-%d" % verse_set.id)
         self.set_preferences(wait_for_reload=True)
-        self.assertUrlsEqual(reverse('learn'))
+        self.assertUrlsEqual(reverse("learn"))
         return verse_set
 
     def add_verse_set(self, name):
         verse_set = VerseSet.objects.get(name=name)
-        self.get_url('preferences')  # ensure we have an Identity
+        self.get_url("preferences")  # ensure we have an Identity
         self.set_preferences()
         identity = self._get_current_identity()
         identity.add_verse_set(verse_set, identity.default_bible_version)
@@ -87,14 +87,16 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
     def test_save_strength(self):
         identity, account = self.create_account(testing_method=TestingMethod.FULL_WORDS)
         self.login(account)
-        verse_set = self.choose_verse_set('Bible 101')
+        verse_set = self.choose_verse_set("Bible 101")
 
         # Preconditions - should have been set up by choose_verse_set
         self.assertEqual(verse_set.verse_choices.count(), identity.verse_statuses.count())
-        self.assertTrue(all(uvs.strength == Decimal('0.0') and
-                            uvs.last_tested is None and
-                            uvs.memory_stage == MemoryStage.ZERO
-                            for uvs in identity.verse_statuses.all()))
+        self.assertTrue(
+            all(
+                uvs.strength == Decimal("0.0") and uvs.last_tested is None and uvs.memory_stage == MemoryStage.ZERO
+                for uvs in identity.verse_statuses.all()
+            )
+        )
 
         self.assertEqual("John 3:16", self.get_element_text("#id-verse-header h2"))
         # Do the reading:
@@ -108,16 +110,16 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.wait_until_loaded("li.action-log-item")
 
         # Check the strength
-        uvs = identity.verse_statuses.get(localized_reference='John 3:16')
+        uvs = identity.verse_statuses.get(localized_reference="John 3:16")
         self.assertEqual(uvs.strength, MM.INITIAL_STRENGTH_FACTOR)
 
     def test_typing_verse_combo(self):
         identity, account = self.create_account(testing_method=TestingMethod.FULL_WORDS)
         self.login(account)
 
-        identity.add_verse_choice('Psalm 23:1-2')
-        self.get_url('dashboard')
-        self.submit('[name=learnbiblequeue]')
+        identity.add_verse_choice("Psalm 23:1-2")
+        self.get_url("dashboard")
+        self.submit("[name=learnbiblequeue]")
         self.assertEqual("Psalm 23:1-2", self.get_element_text("#id-verse-header h2"))
 
         # Do the reading:
@@ -135,27 +137,27 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.wait_for_ajax()
         self.wait_until_loaded("li.action-log-item")
         # Check the strength
-        uvs = identity.verse_statuses.get(localized_reference='Psalm 23:1-2')
+        uvs = identity.verse_statuses.get(localized_reference="Psalm 23:1-2")
         self.assertEqual(uvs.strength, MM.INITIAL_STRENGTH_FACTOR)
 
         # Check the score
-        points_for_verse = (
-            Scores.points_per_word(LANGUAGE_CODE_EN) *
-            (len(self.psalm_23_1_2.strip().split()) -
-             4))  # don't count reference
+        points_for_verse = Scores.points_per_word(LANGUAGE_CODE_EN) * (
+            len(self.psalm_23_1_2.strip().split()) - 4
+        )  # don't count reference
 
         account = Account.objects.get(id=account.id)
-        self.assertEqual(account.total_score.points,
-                         points_for_verse +
-                         points_for_verse * Scores.PERFECT_BONUS_FACTOR +
-                         StudentAward(count=1).points() +
-                         AceAward(count=1).points()
-                         )
+        self.assertEqual(
+            account.total_score.points,
+            points_for_verse
+            + points_for_verse * Scores.PERFECT_BONUS_FACTOR
+            + StudentAward(count=1).points()
+            + AceAward(count=1).points(),
+        )
 
     def test_points_and_awards(self):
         identity, account = self.create_account(testing_method=TestingMethod.FULL_WORDS)
         self.login(account)
-        self.choose_verse_set('Bible 101')
+        self.choose_verse_set("Bible 101")
 
         # Do the reading:
         for i in range(0, 9):
@@ -168,26 +170,23 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         time.sleep(0.5)
         j316_score = self._score_for_j316()
         account = Account.objects.get(id=account.id)
-        self.assertEqual(account.total_score.points,
-                         j316_score +
-                         (j316_score * Scores.PERFECT_BONUS_FACTOR) +
-                         StudentAward(count=1).points() +
-                         AceAward(count=1).points()
-                         )
+        self.assertEqual(
+            account.total_score.points,
+            j316_score
+            + (j316_score * Scores.PERFECT_BONUS_FACTOR)
+            + StudentAward(count=1).points()
+            + AceAward(count=1).points(),
+        )
         self.assertEqual(account.action_logs.count(), 4)
 
         # Check awards
-        self.assertEqual(account.awards.filter(award_type=AwardType.ACE,
-                                               level=1).count(), 1)
-        self.assertEqual(account.awards.filter(award_type=AwardType.STUDENT,
-                                               level=1).count(), 1)
-        self.assertEqual(account.action_logs.filter(award__award_type=AwardType.ACE).count(),
-                         1)
-        self.assertEqual(account.action_logs.filter(award__award_type=AwardType.STUDENT).count(),
-                         1)
+        self.assertEqual(account.awards.filter(award_type=AwardType.ACE, level=1).count(), 1)
+        self.assertEqual(account.awards.filter(award_type=AwardType.STUDENT, level=1).count(), 1)
+        self.assertEqual(account.action_logs.filter(award__award_type=AwardType.ACE).count(), 1)
+        self.assertEqual(account.action_logs.filter(award__award_type=AwardType.STUDENT).count(), 1)
 
         # Go back to dashboard, and should see message
-        self.get_url('dashboard')
+        self.get_url("dashboard")
         self.assertTextPresent("You've earned a new badge")
 
     def test_review_passage_mixed(self):
@@ -196,34 +195,32 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         identity, account = self.create_account(testing_method=TestingMethod.FULL_WORDS)
         self.login(account)
 
-        self.add_verse_set('Psalm 23')
+        self.add_verse_set("Psalm 23")
 
         for i in range(1, 7):
-            identity.record_verse_action('Psalm 23:%d' % i, 'KJV', StageType.TEST,
-                                         1.0)
+            identity.record_verse_action("Psalm 23:%d" % i, "KJV", StageType.TEST, 1.0)
 
-        self._make_verses_due_for_testing(identity.verse_statuses.filter(localized_reference='Psalm 23:1'))
+        self._make_verses_due_for_testing(identity.verse_statuses.filter(localized_reference="Psalm 23:1"))
 
-        self.get_url('dashboard')
-        self.submit('[name=reviewpassage]')
+        self.get_url("dashboard")
+        self.submit("[name=reviewpassage]")
 
-        self.wait_until_loaded('#id-typing')
+        self.wait_until_loaded("#id-typing")
         for word in "The LORD is my shepherd, I shall not want.".split():
             self.fill({"#id-typing": word + " "})
 
         # Test focussed button
         time.sleep(0.2)
-        self.press_enter('button.primary')
+        self.press_enter("button.primary")
         time.sleep(0.1)
-        self.assertIn("He maketh me to lie down in green pastures",
-                      self.get_element_text('.current-verse'))
+        self.assertIn("He maketh me to lie down in green pastures", self.get_element_text(".current-verse"))
 
         for i in range(0, 5):
             self.click("#id-next-btn")
-        self.assertUrlsEqual(reverse('dashboard'))
+        self.assertUrlsEqual(reverse("dashboard"))
 
     def test_skip_verse(self):
-        self.choose_verse_set('Bible 101')
+        self.choose_verse_set("Bible 101")
 
         self.assertEqual("John 3:16", self.get_element_text("#id-verse-header h2"))
 
@@ -233,22 +230,22 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.assertEqual("John 14:6", self.get_element_text("#id-verse-header h2"))
 
         # Should be removed from session too
-        self.get_url('learn')
+        self.get_url("learn")
 
         self.assertEqual("John 14:6", self.get_element_text("#id-verse-header h2"))
 
     def test_cancel_learning(self):
-        self.add_verse_set('Bible 101')
+        self.add_verse_set("Bible 101")
 
         identity = self._get_current_identity()
         # Ensure that we have seen some verses
-        identity.record_verse_action('John 3:16', 'KJV', StageType.TEST, 1.0)
-        identity.record_verse_action('John 14:6', 'KJV', StageType.TEST, 1.0)
+        identity.record_verse_action("John 3:16", "KJV", StageType.TEST, 1.0)
+        identity.record_verse_action("John 14:6", "KJV", StageType.TEST, 1.0)
 
         self._make_verses_due_for_testing(identity.verse_statuses)
 
         # Go to dashboard
-        self.get_url('dashboard')
+        self.get_url("dashboard")
         self.choose_review_bible()
 
         self.assertEqual("John 3:16", self.get_element_text("#id-verse-header h2"))
@@ -261,19 +258,19 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
 
         # If we go back to dashboard and choose again, it should not appear
         # Go to dashboard
-        self.get_url('dashboard')
+        self.get_url("dashboard")
         self.choose_review_bible()
 
         self.assertEqual("John 14:6", self.get_element_text("#id-verse-header h2"))
 
     def test_reset_progress(self):
-        self.add_verse_set('Bible 101')
+        self.add_verse_set("Bible 101")
         identity = self._get_current_identity()
         # Ensure that we have seen some verses
-        identity.record_verse_action('John 3:16', 'KJV', StageType.TEST, 1.0)
+        identity.record_verse_action("John 3:16", "KJV", StageType.TEST, 1.0)
         self._make_verses_due_for_testing(identity.verse_statuses)
 
-        self.get_url('dashboard')
+        self.get_url("dashboard")
         self.choose_review_bible()
 
         self.assertEqual("John 3:16", self.get_element_text("#id-verse-header h2"))
@@ -283,10 +280,9 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
 
         time.sleep(0.2)
         # Should reset strength to zero
-        self.assertEqual(identity.verse_statuses.get(localized_reference='John 3:16').strength,
-                         0)
+        self.assertEqual(identity.verse_statuses.get(localized_reference="John 3:16").strength, 0)
         # Should revert to initial read mode
-        self.assertIn("READ", self.get_element_text('#id-instructions'))
+        self.assertIn("READ", self.get_element_text("#id-instructions"))
 
     def choose_review_bible(self):
         self.submit("[name='reviewbiblequeue']")
@@ -303,26 +299,25 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
 
         identity, account = self.create_account(testing_method=TestingMethod.FULL_WORDS)
         self.login(account)
-        self.add_verse_set('Bible 101')
+        self.add_verse_set("Bible 101")
 
         # Learn one
-        identity.record_verse_action('John 3:16', 'KJV', StageType.TEST, 1.0)
+        identity.record_verse_action("John 3:16", "KJV", StageType.TEST, 1.0)
 
         self._make_verses_due_for_testing(identity.verse_statuses.filter(memory_stage=MemoryStage.TESTED))
 
-        self.get_url('dashboard')
+        self.get_url("dashboard")
         self.choose_review_bible()
 
         self._type_john_3_16_kjv(accuracy=0.8)
 
         # Now the 'more practice' button will appear, and be primary
-        self.assertIn('primary', self.get_element_attribute("#id-more-practice-btn", 'class').split())
+        self.assertIn("primary", self.get_element_attribute("#id-more-practice-btn", "class").split())
         self.click("#id-more-practice-btn")
 
         # Now go through 4 stages:
         for i in range(0, 4):
-            self.assertEqual(self.get_element_attribute("#id-next-btn", "disabled"),
-                             None)
+            self.assertEqual(self.get_element_attribute("#id-next-btn", "disabled"), None)
             self.click("#id-next-btn")
 
         self._type_john_3_16_kjv(accuracy=0.95)
@@ -330,30 +325,25 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         # We should get points for first time reviewed (and award)
         j316_score_1 = self._score_for_j316(accuracy=0.8)
         account = Account.objects.get(id=account.id)  # refresh
-        self.assertEqual(account.total_score.points,
-                         j316_score_1 +
-                         StudentAward(count=1).points()
-                         )
+        self.assertEqual(account.total_score.points, j316_score_1 + StudentAward(count=1).points())
         self.assertEqual(account.action_logs.count(), 2)
 
     def test_hint_button(self):
         identity, account = self.create_account(testing_method=TestingMethod.FULL_WORDS)
         self.login(account)
-        self.add_verse_set('Bible 101')
+        self.add_verse_set("Bible 101")
 
         # Learn one
-        identity.record_verse_action('John 3:16', 'KJV', StageType.TEST, 1.0)
+        identity.record_verse_action("John 3:16", "KJV", StageType.TEST, 1.0)
 
         self._make_verses_due_for_testing(identity.verse_statuses.filter(memory_stage=MemoryStage.TESTED))
 
-        self.get_url('dashboard')
+        self.get_url("dashboard")
         self.choose_review_bible()
         for i in range(0, 4):
-            self.assertEqual(self.get_element_attribute("#id-hint-btn", "disabled"),
-                             None)
+            self.assertEqual(self.get_element_attribute("#id-hint-btn", "disabled"), None)
 
             self.click("#id-hint-btn")
 
         # Hint button should be disabled after 3 clicks
-        self.assertEqual(self.get_element_attribute("#id-hint-btn", "disabled"),
-                         'true')
+        self.assertEqual(self.get_element_attribute("#id-hint-btn", "disabled"), "true")

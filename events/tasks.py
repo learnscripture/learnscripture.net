@@ -2,9 +2,19 @@ from accounts.models import Account
 from awards.models import Award
 from bibleverses.models import TextVersion, VerseSet
 from comments.models import Comment
-from events.models import (AwardReceivedEvent, GroupCreatedEvent, GroupJoinedEvent, NewAccountEvent, NewCommentEvent,
-                           PointsMilestoneEvent, StartedLearningCatechismEvent, StartedLearningVerseSetEvent,
-                           VerseSetCreatedEvent, VersesFinishedMilestoneEvent, VersesStartedMilestoneEvent)
+from events.models import (
+    AwardReceivedEvent,
+    GroupCreatedEvent,
+    GroupJoinedEvent,
+    NewAccountEvent,
+    NewCommentEvent,
+    PointsMilestoneEvent,
+    StartedLearningCatechismEvent,
+    StartedLearningVerseSetEvent,
+    VerseSetCreatedEvent,
+    VersesFinishedMilestoneEvent,
+    VersesStartedMilestoneEvent,
+)
 from groups.models import Group
 from learnscripture.utils.tasks import task
 
@@ -32,16 +42,14 @@ def create_started_verse_set_event(verse_set_id, chosen_by_id):
     verse_set = VerseSet.objects.get(id=verse_set_id)
     if not verse_set.public:
         return
-    StartedLearningVerseSetEvent(verse_set=verse_set,
-                                 chosen_by=Account.objects.get(id=chosen_by_id)).save()
+    StartedLearningVerseSetEvent(verse_set=verse_set, chosen_by=Account.objects.get(id=chosen_by_id)).save()
 
 
 @task
 def create_started_catechism_event(account_id, catechism_id):
     account = Account.objects.get(id=account_id)
     catechism = TextVersion.objects.get(id=catechism_id)
-    StartedLearningCatechismEvent(account=account,
-                                  catechism=catechism).save()
+    StartedLearningCatechismEvent(account=account, catechism=catechism).save()
 
 
 def crosses_milestone(previous_points, current_points):
@@ -56,7 +64,7 @@ def crosses_milestone(previous_points, current_points):
     c_s = str(current_points)
     p_s = str(previous_points)
 
-    if (len(p_s) < len(c_s) or p_s[0] != c_s[0]):
+    if len(p_s) < len(c_s) or p_s[0] != c_s[0]:
         # find most recent milestone crossed:
         points = int(c_s[0]) * 10 ** (len(c_s) - 1)
         return True, points
@@ -79,7 +87,7 @@ def create_points_milestone_event(account_id, previous_points, additional_points
 
 def is_milestone(c):
     c_s = str(c)
-    return c_s.count('0') == len(c_s) - 1
+    return c_s.count("0") == len(c_s) - 1
 
 
 @task

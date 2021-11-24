@@ -3,10 +3,9 @@
 </div>
 
 {% for field in form.hidden_fields %}
-    {{ field }}
+  {{ field }}
 {% endfor %}
 
 {% for field in form.visible_fields %}
-    {% include "learnscripture/form_rendering/field.html" %}
+  {% include "learnscripture/form_rendering/field.html" %}
 {% endfor %}
-

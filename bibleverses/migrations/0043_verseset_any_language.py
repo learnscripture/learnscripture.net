@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bibleverses', '0042_auto_20190713_1034'),
+        ("bibleverses", "0042_auto_20190713_1034"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='verseset',
-            name='any_language',
+            model_name="verseset",
+            name="any_language",
             field=models.BooleanField(default=False),
         ),
     ]

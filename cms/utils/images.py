@@ -1,8 +1,8 @@
 from easy_thumbnails.exceptions import InvalidImageFormatError
 from easy_thumbnails.files import get_thumbnailer
 
-DETAIL_THUMBNAIL_OPTIONS = {'size': (228, 228)}
-LIST_THUMBNAIL_OPTIONS = {'size': (111, 111)}
+DETAIL_THUMBNAIL_OPTIONS = {"size": (228, 228)}
+LIST_THUMBNAIL_OPTIONS = {"size": (111, 111)}
 
 
 class ThumbnailException(Exception):
@@ -16,7 +16,7 @@ def get_thumbnail(image, thumbnail_options):
         return thumbnail
     except InvalidImageFormatError as e:
         raise ThumbnailException(str(e))
-    except IOError as e:
+    except OSError as e:
         raise ThumbnailException(str(e))
 
 

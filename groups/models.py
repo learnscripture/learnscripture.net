@@ -9,7 +9,6 @@ from learnscripture.ftl_bundles import t_lazy
 
 
 class GroupQuerySet(models.QuerySet):
-
     def public(self):
         return self.filter(public=True)
 
@@ -46,35 +45,31 @@ class GroupQuerySet(models.QuerySet):
         return self.filter(created_by=account)
 
     def search(self, query):
-        return (
-            self.filter(name__icontains=query) |
-            self.filter(description__icontains=query)
-        )
+        return self.filter(name__icontains=query) | self.filter(description__icontains=query)
 
 
 class Group(models.Model):
-    name = models.CharField(t_lazy('groups-name'), max_length=255)
-    slug = AutoSlugField(populate_from='name', unique=True)
-    description = models.TextField(t_lazy('groups-description'), blank=True)
+    name = models.CharField(t_lazy("groups-name"), max_length=255)
+    slug = AutoSlugField(populate_from="name", unique=True)
+    description = models.TextField(t_lazy("groups-description"), blank=True)
     created = models.DateTimeField(default=timezone.now)
-    created_by = models.ForeignKey(Account, on_delete=models.PROTECT,
-                                   related_name='groups_created')
-    public = models.BooleanField(t_lazy('groups-public-group'), default=False)
-    open = models.BooleanField(t_lazy('groups-open-group'), default=False)
+    created_by = models.ForeignKey(Account, on_delete=models.PROTECT, related_name="groups_created")
+    public = models.BooleanField(t_lazy("groups-public-group"), default=False)
+    open = models.BooleanField(t_lazy("groups-open-group"), default=False)
     count_for_friendships = models.BooleanField(default=True)
-    members = models.ManyToManyField(Account, through='Membership',
-                                     related_name='groups')
+    members = models.ManyToManyField(Account, through="Membership", related_name="groups")
     language_code = models.CharField(
-        t_lazy('groups-language'),
-        help_text=t_lazy('groups-language.help-text'),
+        t_lazy("groups-language"),
+        help_text=t_lazy("groups-language.help-text"),
         max_length=10,
         choices=settings.LANGUAGES,
-        default=settings.LANGUAGE_CODE)
+        default=settings.LANGUAGE_CODE,
+    )
 
     objects = GroupQuerySet.as_manager()
 
     class Meta:
-        ordering = ['name']
+        ordering = ["name"]
 
     def can_join(self, account):
         if self.open:
@@ -101,7 +96,7 @@ class Group(models.Model):
             clear_friendship_weight_cache(acc.id)
 
     def invited_users(self):
-        return [i.account for i in self.invitations.select_related('account')]
+        return [i.account for i in self.invitations.select_related("account")]
 
     @property
     def active_members(self):
@@ -121,8 +116,7 @@ class Group(models.Model):
             if not self.created_by.is_hellbanned or u.is_hellbanned:
                 # hellbanned users can't send invitations, except to
                 # other hellbanned users.
-                self.invitations.create(account=u,
-                                        created_by=self.created_by)
+                self.invitations.create(account=u, created_by=self.created_by)
 
     def accepts_comments_from(self, user):
         if self.public:
@@ -134,53 +128,48 @@ class Group(models.Model):
         if not self.accepts_comments_from(author):
             raise ValueError(f"{author.username} not allowed to post to {self.name}")
 
-        return self.comments.create(author=author,
-                                    message=message)
+        return self.comments.create(author=author, message=message)
 
     def comments_visible_for_account(self, account):
-        qs = self.comments.exclude(hidden=True).select_related('author')
+        qs = self.comments.exclude(hidden=True).select_related("author")
         if account is None or not account.is_hellbanned:
             qs = qs.exclude(author__is_hellbanned=True)
         return qs
 
 
 class Membership(models.Model):
-    account = models.ForeignKey(Account, on_delete=models.CASCADE,
-                                related_name='memberships')
-    group = models.ForeignKey(Group, on_delete=models.CASCADE,
-                              related_name='memberships')
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="memberships")
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="memberships")
 
     created = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f'Membership of {self.group} by {self.account}'
+        return f"Membership of {self.group} by {self.account}"
 
 
 class InvitationManager(models.Manager):
     def get_queryset(self):
-        return super(InvitationManager, self).get_queryset().select_related('account', 'group', 'created_by')
+        return super().get_queryset().select_related("account", "group", "created_by")
 
 
 class Invitation(models.Model):
-    account = models.ForeignKey(Account, on_delete=models.CASCADE,
-                                related_name='invitations')
-    group = models.ForeignKey(Group, on_delete=models.CASCADE,
-                              related_name='invitations')
-    created_by = models.ForeignKey(Account, on_delete=models.PROTECT,
-                                   related_name='invitations_created')
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="invitations")
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="invitations")
+    created_by = models.ForeignKey(Account, on_delete=models.PROTECT, related_name="invitations_created")
 
     objects = InvitationManager()
 
     def __str__(self):
-        return f'Invitation to {self.group} for {self.account} from {self.created_by}'
+        return f"Invitation to {self.group} for {self.account} from {self.created_by}"
 
 
 def combined_membership_count_for_creator(account_id):
-    val = Group.objects.filter(created_by=account_id).aggregate(Count('memberships'))['memberships__count']
+    val = Group.objects.filter(created_by=account_id).aggregate(Count("memberships"))["memberships__count"]
     val = val if not None else 0
 
     # Need to subtract all the places where a user has joined their own group
-    own_groups = Membership.objects.filter(group__created_by=account_id,
-                                           account=account_id).aggregate(Count('id'))['id__count']
+    own_groups = Membership.objects.filter(group__created_by=account_id, account=account_id).aggregate(Count("id"))[
+        "id__count"
+    ]
     own_groups = own_groups if not None else 0
     return val - own_groups

@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('groups', '0002_group_count_for_friendships'),
+        ("groups", "0002_group_count_for_friendships"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='group',
-            name='description',
-            field=models.TextField(blank=True, verbose_name='Description'),
+            model_name="group",
+            name="description",
+            field=models.TextField(blank=True, verbose_name="Description"),
         ),
         migrations.AlterField(
-            model_name='group',
-            name='name',
-            field=models.CharField(max_length=255, verbose_name='Name'),
+            model_name="group",
+            name="name",
+            field=models.CharField(max_length=255, verbose_name="Name"),
         ),
     ]

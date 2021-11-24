@@ -3,7 +3,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class Analyzer(object):
+class Analyzer:
     name = NotImplemented
 
     def __init__(self, storage):
@@ -15,15 +15,11 @@ class Analyzer(object):
         training text), and saves the result to disk.
         """
         if not self.storage.saved_analysis_exists(self, keys):
-            logger.info("Running analysis %s for keys %s",
-                        self.__class__.__name__,
-                        keys)
+            logger.info("Running analysis %s for keys %s", self.__class__.__name__, keys)
             data = self.analyze(training_texts, keys)
             self.storage.save_analysis(data, self, keys)
         else:
-            logger.info("Skipping already created analysis %s for keys %s",
-                        self.__class__.__name__,
-                        keys)
+            logger.info("Skipping already created analysis %s for keys %s", self.__class__.__name__, keys)
 
     def analyze(self, training_texts, keys):
         """

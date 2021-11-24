@@ -4,14 +4,10 @@ from django.db import migrations
 
 
 def forwards(apps, schema_editor):
-    ContentItem = apps.get_model('cms', 'ContentItem')
-    Content = apps.get_model('cms', 'Content')
+    ContentItem = apps.get_model("cms", "ContentItem")
+    Content = apps.get_model("cms", "Content")
     for c in ContentItem.objects.all():
-        Content.objects.create(
-            content_item=c,
-            content_html=c.content_html,
-            language_code='en'
-        )
+        Content.objects.create(content_item=c, content_html=c.content_html, language_code="en")
 
 
 def backwards(apps, schema_editor):
@@ -21,7 +17,7 @@ def backwards(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cms', '0018_auto_20190630_1240'),
+        ("cms", "0018_auto_20190630_1240"),
     ]
 
     operations = [

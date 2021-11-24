@@ -32,21 +32,18 @@ def cache_results_with_pickle(filename_suffix):
     # and 'key'. This means they can avoid looking up the specific training text
     # if the result is already cached.
     def decorator(func):
-
         @wraps(func)
         def wrapper(training_texts, key, *args):
             # For sanity checking, both the pickled data and the filename
             # we save to include the key
-            filename_key = '_'.join(key)
+            filename_key = "_".join(key)
             full_lookup_key = (key,) + tuple(args)
 
             if args:
                 level = "__level" + "_".join(str(a) for a in args)
             else:
                 level = ""
-            fname = os.path.join(settings.DATA_ROOT,
-                                 "wordsuggestions",
-                                 f"{filename_key}{level}.{filename_suffix}.data")
+            fname = os.path.join(settings.DATA_ROOT, "wordsuggestions", f"{filename_key}{level}.{filename_suffix}.data")
             if os.path.exists(fname):
                 logger.info("Loading %s", fname)
                 new_data = pickle.load(open(fname, "rb"))
@@ -61,5 +58,7 @@ def cache_results_with_pickle(filename_suffix):
                     pickle.dump(new_data, f)
 
                 return retval
+
         return wrapper
+
     return decorator

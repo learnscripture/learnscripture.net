@@ -1,16 +1,70 @@
 # -- Bible handling
 
-TORAH = ['Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy']
+TORAH = ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy"]
 
-HISTORY = ['Joshua', 'Judges', 'Ruth', '1 Samuel', '2 Samuel', '1 Kings', '2 Kings', '1 Chronicles', '2 Chronicles', 'Ezra', 'Nehemiah', 'Esther']
+HISTORY = [
+    "Joshua",
+    "Judges",
+    "Ruth",
+    "1 Samuel",
+    "2 Samuel",
+    "1 Kings",
+    "2 Kings",
+    "1 Chronicles",
+    "2 Chronicles",
+    "Ezra",
+    "Nehemiah",
+    "Esther",
+]
 
-WISDOM = ['Job', 'Psalm', 'Proverbs', 'Ecclesiastes', 'Song of Solomon']
+WISDOM = ["Job", "Psalm", "Proverbs", "Ecclesiastes", "Song of Solomon"]
 
-PROPHETS = ['Isaiah', 'Jeremiah', 'Lamentations', 'Ezekiel', 'Daniel', 'Hosea', 'Joel', 'Amos', 'Obadiah', 'Jonah', 'Micah', 'Nahum', 'Habakkuk', 'Zephaniah', 'Haggai', 'Zechariah', 'Malachi']
+PROPHETS = [
+    "Isaiah",
+    "Jeremiah",
+    "Lamentations",
+    "Ezekiel",
+    "Daniel",
+    "Hosea",
+    "Joel",
+    "Amos",
+    "Obadiah",
+    "Jonah",
+    "Micah",
+    "Nahum",
+    "Habakkuk",
+    "Zephaniah",
+    "Haggai",
+    "Zechariah",
+    "Malachi",
+]
 
 NT_HISTORY = ["Matthew", "Mark", "Luke", "John", "Acts"]
 
-EPISTLES = ['Romans', '1 Corinthians', '2 Corinthians', 'Galatians', 'Ephesians', 'Philippians', 'Colossians', '1 Thessalonians', '2 Thessalonians', '1 Timothy', '2 Timothy', 'Titus', 'Philemon', 'Hebrews', 'James', '1 Peter', '2 Peter', '1 John', '2 John', '3 John', 'Jude', 'Revelation']
+EPISTLES = [
+    "Romans",
+    "1 Corinthians",
+    "2 Corinthians",
+    "Galatians",
+    "Ephesians",
+    "Philippians",
+    "Colossians",
+    "1 Thessalonians",
+    "2 Thessalonians",
+    "1 Timothy",
+    "2 Timothy",
+    "Titus",
+    "Philemon",
+    "Hebrews",
+    "James",
+    "1 Peter",
+    "2 Peter",
+    "1 John",
+    "2 John",
+    "3 John",
+    "Jude",
+    "Revelation",
+]
 
 BIBLE_BOOK_GROUPS = [TORAH, HISTORY, WISDOM, PROPHETS, NT_HISTORY, EPISTLES]
 
@@ -44,10 +98,8 @@ MARKOV_3_ANALYSIS = "MARKOV_3_ANALYSIS"
 
 
 def markov_analysis_for_size(size):
-    return {1: MARKOV_1_ANALYSIS,
-            2: MARKOV_2_ANALYSIS,
-            3: MARKOV_3_ANALYSIS}[size]
+    return {1: MARKOV_1_ANALYSIS, 2: MARKOV_2_ANALYSIS, 3: MARKOV_3_ANALYSIS}[size]
 
 
 # Key to indicate the whole of a text is to be used
-ALL_TEXT = 'all'
+ALL_TEXT = "all"

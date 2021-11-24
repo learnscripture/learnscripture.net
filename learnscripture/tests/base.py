@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 import contextlib
 import os
 import time
-import typing
 from functools import wraps
+from typing import Tuple
 from unittest.case import _UnexpectedSuccess
 
 import pytest
@@ -23,13 +22,13 @@ from bibleverses.models import TextVersion, UserVerseStatus
 from events.models import Event
 from payments.models import Payment
 
-TESTS_SHOW_BROWSER = os.environ.get('TESTS_SHOW_BROWSER', '')
-SELENIUM_SCREENSHOT_ON_FAILURE = os.environ.get('SELENIUM_SCREENSHOT_ON_FAILURE', '')
+TESTS_SHOW_BROWSER = os.environ.get("TESTS_SHOW_BROWSER", "")
+SELENIUM_SCREENSHOT_ON_FAILURE = os.environ.get("SELENIUM_SCREENSHOT_ON_FAILURE", "")
 
 
 class FuzzyInt(int):
     def __new__(cls, lowest, highest):
-        obj = super(FuzzyInt, cls).__new__(cls, highest)
+        obj = super().__new__(cls, highest)
         obj.lowest = lowest
         obj.highest = highest
         return obj
@@ -41,30 +40,31 @@ class FuzzyInt(int):
         return "[%d..%d]" % (self.lowest, self.highest)
 
 
-def create_account(version_slug='KJV',
-                   email="test1@test.com",
-                   username="tëst1",
-                   seen_help_tour=True,
-                   testing_method=None,
-                   is_tester=False,
-                   is_active=True) -> typing.Tuple[Identity, Account]:
+def create_account(
+    version_slug="KJV",
+    email="test1@test.com",
+    username="tëst1",
+    seen_help_tour=True,
+    testing_method=None,
+    is_tester=False,
+    is_active=True,
+) -> Tuple[Identity, Account]:
     """
     Creates an account, returning (identity, account) tuple
     """
-    account = Account.objects.create(email=email,
-                                     username=username,
-                                     last_login=timezone.now(),
-                                     is_active=is_active,
-                                     is_tester=is_tester,
-                                     )
-    account.set_password('password')
+    account = Account.objects.create(
+        email=email,
+        username=username,
+        last_login=timezone.now(),
+        is_active=is_active,
+        is_tester=is_tester,
+    )
+    account.set_password("password")
     account.save()
-    identity_kwargs = dict(version_slug=version_slug,
-                           seen_help_tour=seen_help_tour,
-                           account=account)
+    identity_kwargs = dict(version_slug=version_slug, seen_help_tour=seen_help_tour, account=account)
     if testing_method is not None:
-        identity_kwargs['desktop_testing_method'] = testing_method
-        identity_kwargs['touchscreen_testing_method'] = testing_method
+        identity_kwargs["desktop_testing_method"] = testing_method
+        identity_kwargs["touchscreen_testing_method"] = testing_method
         # Otherwise we get defaults, which is important for this method matching
         # what you get from interactive paths for creating account/identity
 
@@ -73,10 +73,11 @@ def create_account(version_slug='KJV',
 
 
 def create_identity(
-        version_slug='KJV',
-        account=None, seen_help_tour=True,
-        desktop_testing_method=None,
-        touchscreen_testing_method=None,
+    version_slug="KJV",
+    account=None,
+    seen_help_tour=True,
+    desktop_testing_method=None,
+    touchscreen_testing_method=None,
 ):
     version = TextVersion.objects.get(slug=version_slug)
     identity_kwargs = dict(
@@ -87,14 +88,14 @@ def create_identity(
         seen_help_tour=True,
     )
     if desktop_testing_method is not None:
-        identity_kwargs['desktop_testing_method'] = desktop_testing_method
+        identity_kwargs["desktop_testing_method"] = desktop_testing_method
     if touchscreen_testing_method is not None:
-        identity_kwargs['touchscreen_testing_method'] = touchscreen_testing_method
+        identity_kwargs["touchscreen_testing_method"] = touchscreen_testing_method
     return Identity.objects.create(**identity_kwargs)
 
 
 def get_or_create_any_account(**kwargs):
-    account = Account.objects.order_by('id').first()
+    account = Account.objects.order_by("id").first()
     if account is None:
         identity, account = create_account(**kwargs)
     return account
@@ -104,16 +105,17 @@ def get_or_create_any_account(**kwargs):
 # us, because Django tries to load fixtures into all DBs if we have `databases
 # == '__all__'` set (which is needed for some tests)
 
+
 class Fixtures:
     # setUpTestData only works for TestCase subclasses. So we add a setUp to
     # cover TransactionTestCase
     @classmethod
     def setUpTestData(cls):
-        super(Fixtures, cls).setUpTestData()
+        super().setUpTestData()
         cls.setUpFixtures()
 
     def setUp(self):
-        super(Fixtures, self).setUp()
+        super().setUp()
         if not isinstance(self, TestCase):
             self.setUpFixtures()
 
@@ -125,7 +127,7 @@ class Fixtures:
 class TextVersionsMixin(Fixtures):
     @classmethod
     def setUpFixtures(cls):
-        super(TextVersionsMixin, cls).setUpFixtures()
+        super().setUpFixtures()
         cls.KJV = TextVersion.objects.create(
             full_name="King James Version",
             slug="KJV",
@@ -141,27 +143,24 @@ class TextVersionsMixin(Fixtures):
         )
 
         cls.TCL02 = TextVersion.objects.create(
-            full_name="Kutsal Kitap Yeni Çeviri",
-            slug="TCL02",
-            short_name="TCL02",
-            language_code="tr"
+            full_name="Kutsal Kitap Yeni Çeviri", slug="TCL02", short_name="TCL02", language_code="tr"
         )
 
 
 class BibleVersesMixin(TextVersionsMixin):
     @classmethod
     def setUpFixtures(cls):
-        super(BibleVersesMixin, cls).setUpFixtures()
-        call_command('loaddata', 'test_bible_verses.json', verbosity=0)
+        super().setUpFixtures()
+        call_command("loaddata", "test_bible_verses.json", verbosity=0)
 
 
 class CatechismsMixin(Fixtures):
     @classmethod
     def setUpFixtures(cls):
-        super(CatechismsMixin, cls).setUpFixtures()
+        super().setUpFixtures()
         # This works, where `fixtures` attribute does not, because Django tries
         # to load fixtures into all DBs.
-        call_command('loaddata', 'test_catechisms.json', verbosity=0)
+        call_command("loaddata", "test_catechisms.json", verbosity=0)
 
 
 class AccountTestMixin(TextVersionsMixin):
@@ -169,62 +168,51 @@ class AccountTestMixin(TextVersionsMixin):
     create_identity = staticmethod(create_identity)
     create_account = staticmethod(create_account)
 
-    def create_account_interactive(self,
-                                   email="test2@test.com",
-                                   username="tëst2",
-                                   password="testpassword2"):
-        self.get_url('signup')
+    def create_account_interactive(self, email="test2@test.com", username="tëst2", password="testpassword2"):
+        self.get_url("signup")
         self.fill_in_account_form(email=email, username=username, password=password)
 
-    def fill_in_account_form(self,
-                             email="test2@test.com",
-                             username="tëst2",
-                             password="testpassword2"):
-        self.fill({"#id_signup-email": email,
-                   "#id_signup-username": username,
-                   "#id_signup-password": password})
-        self.submit('[name=signup]')
+    def fill_in_account_form(self, email="test2@test.com", username="tëst2", password="testpassword2"):
+        self.fill({"#id_signup-email": email, "#id_signup-username": username, "#id_signup-password": password})
+        self.submit("[name=signup]")
 
 
 def sqla_tear_down():
     from learnscripture.utils import sqla
+
     sqla.default_engine.pool.dispose()
 
 
-class SqlaCleanup(object):
-
+class SqlaCleanup:
     def tearDown(self):
         sqla_tear_down()
-        super(SqlaCleanup, self).tearDown()
+        super().tearDown()
 
 
-class LoginMixin(object):
-
+class LoginMixin:
     def fill_in_login_form(self, account):
-        self.fill({"#id_login-email": account.email,
-                   "#id_login-password": "password"})
+        self.fill({"#id_login-email": account.email, "#id_login-password": "password"})
         self.submit("[name=signin]")
 
     def login(self, account, shortcut=True):
         if shortcut:
             self.setup_identity(identity=account.identity)
         else:
-            self.get_url('login')
+            self.get_url("login")
             self.fill_in_login_form(account)
 
     def setup_identity(self, identity=None):
         if identity is None:
             Identity.objects.all().delete()
             identity = Identity.objects.create(seen_help_tour=True)
-            identity.default_bible_version = TextVersion.objects.get(slug='NET')
+            identity.default_bible_version = TextVersion.objects.get(slug="NET")
             identity.save()
 
-        self.set_session_data({'identity_id': identity.id})
+        self.set_session_data({"identity_id": identity.id})
         return identity
 
 
-class TimeUtilsMixin(object):
-
+class TimeUtilsMixin:
     def move_clock_on(self, delta):
         """
         Move the 'clock' of the entire system forwards,
@@ -233,19 +221,21 @@ class TimeUtilsMixin(object):
         """
         # TODO - the rest of the models, or something that looks through all the
         # models and finds DateTimeFields. This is enough for now.
-        Notice.objects.update(seen=F('seen') - delta)
-        Payment.objects.update(created=F('created') - delta)
+        Notice.objects.update(seen=F("seen") - delta)
+        Payment.objects.update(created=F("created") - delta)
         UserVerseStatus.objects.update(
-            added=F('added') - delta,
-            first_seen=F('first_seen') - delta,
-            last_tested=F('last_tested') - delta,
-            next_test_due=F('next_test_due') - delta,
+            added=F("added") - delta,
+            first_seen=F("first_seen") - delta,
+            last_tested=F("last_tested") - delta,
+            next_test_due=F("next_test_due") - delta,
         )
-        Event.objects.update(created=F('created') - delta)
+        Event.objects.update(created=F("created") - delta)
 
 
 @pytest.mark.selenium
-class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaCleanup, TimeUtilsMixin, StaticLiveServerTestCase):
+class FullBrowserTest(
+    AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaCleanup, TimeUtilsMixin, StaticLiveServerTestCase
+):
 
     display = TESTS_SHOW_BROWSER
     default_timeout = 20
@@ -254,11 +244,12 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
     @classmethod
     def get_webdriver_options(cls):
         kwargs = {}
-        if cls.driver_name == 'Firefox':
-            firefox_binary = os.environ.get('TEST_SELENIUM_FIREFOX_BINARY', None)
+        if cls.driver_name == "Firefox":
+            firefox_binary = os.environ.get("TEST_SELENIUM_FIREFOX_BINARY", None)
             if firefox_binary is not None:
                 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
-                kwargs['firefox_binary'] = FirefoxBinary(firefox_path=firefox_binary)
+
+                kwargs["firefox_binary"] = FirefoxBinary(firefox_path=firefox_binary)
         return kwargs
 
     # Overridden:
@@ -270,29 +261,29 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
             # Wrap all test methods in a decorator. Should really do this in a
             # metaclass, but this works.
             for name in dir(cls):
-                if name.startswith('test_'):
+                if name.startswith("test_"):
                     method = getattr(cls, name)
                     if callable(method):
                         setattr(cls, name, do_screenshot_on_failure(method))
 
-        super(FullBrowserTest, cls).setUpClass()
+        super().setUpClass()
 
     def setUp(self):
         super().setUp()
         if not self._have_visited_page():
-            self.get_url('django_functest.emptypage')
+            self.get_url("django_functest.emptypage")
         self.execute_script("return window.localStorage.clear();")
 
     def click(self, *args, **kwargs):
-        super(FullBrowserTest, self).click(*args, **kwargs)
+        super().click(*args, **kwargs)
         self.wait_for_ajax()
 
     def submit(self, *args, **kwargs):
-        super(FullBrowserTest, self).submit(*args, **kwargs)
+        super().submit(*args, **kwargs)
         self.wait_for_ajax()
 
     def get_literal_url(self, *args, **kwargs):
-        super(FullBrowserTest, self).get_literal_url(*args, **kwargs)
+        super().get_literal_url(*args, **kwargs)
         self.wait_for_ajax()
 
     # Utilities:
@@ -329,10 +320,7 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
     # Selenium specific utilities:
 
     def drag_and_drop(self, from_css_selector, to_css_selector):
-        ActionChains(self._driver).drag_and_drop(
-            self._find(from_css_selector),
-            self._find(to_css_selector)
-        ).perform()
+        ActionChains(self._driver).drag_and_drop(self._find(from_css_selector), self._find(to_css_selector)).perform()
 
     def get_page_title(self):
         return self._driver.title
@@ -342,7 +330,9 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
 
     def wait_for_ajax(self):
         time.sleep(0.1)
-        self.wait_until(lambda driver: driver.execute_script('return (typeof(jQuery) == "undefined" || jQuery.active == 0)'))
+        self.wait_until(
+            lambda driver: driver.execute_script('return (typeof(jQuery) == "undefined" || jQuery.active == 0)')
+        )
 
     @contextlib.contextmanager
     def wait_for_reload(self, ignore_exceptions=None):
@@ -372,8 +362,9 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
         """
         Fill in preferences if preferences form is visible.
         """
-        if (not self.is_element_displayed("#id-preferences-form") and
-                not self.is_element_displayed("#id_default_bible_version")):
+        if not self.is_element_displayed("#id-preferences-form") and not self.is_element_displayed(
+            "#id_default_bible_version"
+        ):
             return
 
         if wait_for_reload:
@@ -384,7 +375,7 @@ class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaClean
         with context:
             self.fill_by_text({"#id_default_bible_version": bible_version})
 
-            if self.is_element_present('#id-preferences-save-btn'):
+            if self.is_element_present("#id-preferences-save-btn"):
                 # side panel
                 self.click("#id-preferences-save-btn")
             else:
@@ -396,7 +387,7 @@ def do_screenshot_on_failure(method):
     """
     Wraps a method in one that calls `save_screenshot` if any exception occurs.
     """
-    if getattr(method, '_screenshot_wrapping_done', False):
+    if getattr(method, "_screenshot_wrapping_done", False):
         return method
 
     @wraps(method)
@@ -409,6 +400,7 @@ def do_screenshot_on_failure(method):
         except Exception:
             self.save_screenshot()
             raise
+
     wrapper._screenshot_wrapping_done = True
     return wrapper
 
@@ -419,11 +411,11 @@ def null_context():
 
 
 class WebTestBase(AccountTestMixin, LoginMixin, FuncWebTestMixin, TimeUtilsMixin, TestCase):
-
     def get_url(self, *args, **kwargs):
         response = super().get_url(*args, **kwargs)
-        if b'???' in response.content:
+        if b"???" in response.content:
             raise AssertionError(f"Some kind of FTL error in response:\n {response.content.decode('utf-8')}")
+
     # Utilities:
 
     # WebTest/Selenium utilities
@@ -455,6 +447,7 @@ def show_server_error(request):
 
     from django import http
     from django.views.debug import ExceptionReporter
+
     exc_type, exc_value, exc_traceback = sys.exc_info()
     error = ExceptionReporter(request, exc_type, exc_value, exc_traceback)
     return http.HttpResponseServerError(error.get_traceback_html())

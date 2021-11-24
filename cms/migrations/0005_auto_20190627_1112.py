@@ -4,8 +4,8 @@ from django.db import migrations
 
 
 def forwards(apps, schema_editor):
-    Page = apps.get_model('cms', 'Page')
-    Page.objects.filter(template_name='fiber_singlecol.html').update(template_name='cms_singlecol.html')
+    Page = apps.get_model("cms", "Page")
+    Page.objects.filter(template_name="fiber_singlecol.html").update(template_name="cms_singlecol.html")
 
 
 def backwards(apps, schema_editor):
@@ -15,7 +15,7 @@ def backwards(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cms', '0004_auto_20190627_1037'),
+        ("cms", "0004_auto_20190627_1037"),
     ]
 
     operations = [

@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bibleverses', '0039_auto_20190312_1832'),
+        ("bibleverses", "0039_auto_20190312_1832"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='verseset',
-            name='language_code',
-            field=models.CharField(choices=[('en', 'English'), ('tr', 'Türkçe')], max_length=2, verbose_name='Language'),
+            model_name="verseset",
+            name="language_code",
+            field=models.CharField(
+                choices=[("en", "English"), ("tr", "Türkçe")], max_length=2, verbose_name="Language"
+            ),
         ),
     ]

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import json
 import math
 import os.path
@@ -9,7 +8,7 @@ from datetime import timedelta
 # must be synced with that code
 
 
-class MemoryModel(object):
+class MemoryModel:
     # == Memory model ==
 
     # We try to fit the progress of a memory to a idealised exponential curve:
@@ -38,7 +37,7 @@ class MemoryModel(object):
     # We will also need the inverse:
 
     def t(self, s):
-        return (- math.log(1 - s) / self.ALPHA) ** (1.0 / self.EXPONENT)
+        return (-math.log(1 - s) / self.ALPHA) ** (1.0 / self.EXPONENT)
 
     # These increasing intervals on the time axis can correspond to even size
     # intervals on the strength axis since we have an exponential as above.
@@ -112,7 +111,7 @@ class MemoryModel(object):
 
         # Rearranging:
         # ALPHA = - ln(1 - LEARNT) / (ONE_YEAR^n)
-        self.ALPHA = - math.log(1.0 - self.LEARNT) / (ONE_YEAR ** EXPONENT)
+        self.ALPHA = -math.log(1.0 - self.LEARNT) / (ONE_YEAR ** EXPONENT)
 
         # For the initial test, we don't have a previous strength recorded, so
         # we need an arbitrary number. It would be nice if each test, including
@@ -255,6 +254,7 @@ def test_run(exponent, accuracy, interval_gap=1):
 
 def test_run_using_next_test_due_after(exponent, accuracy, interval_gap=1):
     from datetime import datetime
+
     m = MemoryModel(exponent)
     interval = 0
     s = 0
@@ -282,6 +282,7 @@ def test_run_using_next_test_due_after(exponent, accuracy, interval_gap=1):
 
 def test_run_exact_intervals(exponent, accuracy):
     from datetime import datetime
+
     m = MemoryModel(exponent)
     s = 0
     start = datetime.now()
@@ -302,7 +303,10 @@ def test_run_exact_intervals(exponent, accuracy):
         total_elapsed += interval
         test += 1
         time_elapsed_hours = 0 if time_elapsed is None else time_elapsed / 3600
-        print("Day %d, test %d, interval %s h, strength %s" % (math.floor(total_elapsed / day), test, time_elapsed_hours, s))
+        print(
+            "Day %d, test %d, interval %s h, strength %s"
+            % (math.floor(total_elapsed / day), test, time_elapsed_hours, s)
+        )
 
 
 def test_run_passage(passage_length, days):
@@ -358,8 +362,7 @@ def test_run_passage(passage_length, days):
                 else:
                     needs_testing = MM.needs_testing(s, time_elapsed)
 
-                print("%02d: %6f %s" % (j + 1, s,
-                                        "Test" if needs_testing else "No test"))
+                print("%02d: %6f %s" % (j + 1, s, "Test" if needs_testing else "No test"))
 
                 if needs_testing:
                     acc = 0.95 + (random.random() / 20.0)
@@ -393,10 +396,8 @@ def generate_test_file():
             for t in time_elapsed:
                 output.append([s, a, t, strength_estimate(s, a, t)])
 
-    with open(os.path.join(os.path.dirname(__file__),
-                           "../learnscripture/tests/memorymodel_test_data.json"), "w") as fp:
-        json.dump({'strengthEstimateTestData': output}, fp,
-                  indent=4)
+    with open(os.path.join(os.path.dirname(__file__), "../learnscripture/tests/memorymodel_test_data.json"), "w") as fp:
+        json.dump({"strengthEstimateTestData": output}, fp, indent=4)
 
 
 # Trial and error with test_run, with the aim of getting

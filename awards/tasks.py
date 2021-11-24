@@ -1,8 +1,17 @@
 from datetime import timedelta
 
 from accounts.models import Account, Identity, get_verse_started_running_streaks
-from awards.models import (AceAward, AddictAward, ConsistentLearnerAward, MasterAward, OrganizerAward, RecruiterAward,
-                           SharerAward, StudentAward, TrendSetterAward)
+from awards.models import (
+    AceAward,
+    AddictAward,
+    ConsistentLearnerAward,
+    MasterAward,
+    OrganizerAward,
+    RecruiterAward,
+    SharerAward,
+    StudentAward,
+    TrendSetterAward,
+)
 from bibleverses.models import VerseSet, VerseSetType
 from groups.models import combined_membership_count_for_creator
 from learnscripture.utils.tasks import task
@@ -18,8 +27,7 @@ def give_learning_awards(account_id):
     started_c = account.identity.verses_started_count()
     finished_c = account.identity.verses_finished_count()
 
-    for cls, count in [(StudentAward, started_c),
-                       (MasterAward, finished_c)]:
+    for cls, count in [(StudentAward, started_c), (MasterAward, finished_c)]:
 
         cls(count=count).give_to(account)
 
@@ -39,7 +47,7 @@ def give_verse_set_used_awards(account_id):
         return
     account = Account.objects.get(id=account_id)
 
-    verse_set_ids = list(account.verse_sets_created.public().values_list('id', flat=True))
+    verse_set_ids = list(account.verse_sets_created.public().values_list("id", flat=True))
 
     c = VerseSet.objects.popularity_for_sets(verse_set_ids, [account_id])
     TrendSetterAward(count=c).give_to(account)
@@ -52,7 +60,7 @@ def give_ace_awards(account_id):
     account = Account.objects.get(id=account_id)
 
     test_reasons = [ScoreReason.VERSE_FIRST_TESTED, ScoreReason.VERSE_REVIEWED]
-    actions = account.action_logs.filter(reason__in=test_reasons).order_by('-created')
+    actions = account.action_logs.filter(reason__in=test_reasons).order_by("-created")
 
     try:
         last_action = actions.all()[0]
@@ -83,8 +91,7 @@ def give_recruiter_award(account_id):
         return
     account = Account.objects.get(id=account_id)
 
-    count = Identity.objects.filter(account__isnull=False,
-                                    referred_by=account).count()
+    count = Identity.objects.filter(account__isnull=False, referred_by=account).count()
     RecruiterAward(count=count).give_to(account)
 
 

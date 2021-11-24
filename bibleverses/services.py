@@ -31,7 +31,7 @@ ESV_V2_BATCH_SIZE = 80
 def do_esv_v2_api(method, params):
     url = ESV_V2_BASE_URL + method + "?" + "&".join(params)
     logger.info("ESV v2 query %s", url)
-    return requests.get(url).content.decode('utf-8')
+    return requests.get(url).content.decode("utf-8")
 
 
 def get_esv_v2(localized_reference_list, batch_size=ESV_V2_BATCH_SIZE):
@@ -43,20 +43,21 @@ def get_esv_v2(localized_reference_list, batch_size=ESV_V2_BATCH_SIZE):
         if not first_time:
             time.sleep(1)  # Don't hammer the API.
 
-        params = [f'key={settings.ESV_V2_API_KEY}',
-                  f"passage={urllib.parse.quote(';'.join(batch))}",
-                  'include-short-copyright=0',
-                  # Starting with plain text is easier than messing around
-                  # with massaging HTML, even if it means we have to parse
-                  # the output in a slightly adhoc way.
-                  'output-format=plain-text',
-                  'include-passage-horizontal-lines=0',
-                  'include-heading-horizontal-lines=0',
-                  'include-footnotes=0',
-                  'include-subheadings=0',
-                  'include-headings=0',
-                  'line-length=0',
-                  ]
+        params = [
+            f"key={settings.ESV_V2_API_KEY}",
+            f"passage={urllib.parse.quote(';'.join(batch))}",
+            "include-short-copyright=0",
+            # Starting with plain text is easier than messing around
+            # with massaging HTML, even if it means we have to parse
+            # the output in a slightly adhoc way.
+            "output-format=plain-text",
+            "include-passage-horizontal-lines=0",
+            "include-heading-horizontal-lines=0",
+            "include-footnotes=0",
+            "include-subheadings=0",
+            "include-headings=0",
+            "line-length=0",
+        ]
 
         text = do_esv_v2_api("passageQuery", params)
         first_time = False
@@ -67,7 +68,7 @@ def get_esv_v2(localized_reference_list, batch_size=ESV_V2_BATCH_SIZE):
             l2 = line.strip()
             if l2 == "":
                 continue
-            if line[0] != ' ' and l2 in localized_reference_list:
+            if line[0] != " " and l2 in localized_reference_list:
                 current_section = l2
             else:
                 if current_section is None:
@@ -75,8 +76,8 @@ def get_esv_v2(localized_reference_list, batch_size=ESV_V2_BATCH_SIZE):
                     # ask for e.g. asking for John 5:4 it sends us John 5:3-5
                     pass
                 else:
-                    l2 = re.sub(r'\[[\d:]*\]', '', l2).strip()
-                    prev = sections[current_section] + '\n' if current_section in sections else ''
+                    l2 = re.sub(r"\[[\d:]*\]", "", l2).strip()
+                    prev = sections[current_section] + "\n" if current_section in sections else ""
                     sections[current_section] = prev + l2
 
     fix_esv_v2_bugs(sections, localized_reference_list)
@@ -87,7 +88,7 @@ def get_esv_v2(localized_reference_list, batch_size=ESV_V2_BATCH_SIZE):
 # The ESV API incorrectly returns nothing for these items
 # (seems to only apply with output-format=plain-text)
 MISSING_ESV_V2 = {
-    'John 8:1': 'but Jesus went to the Mount of Olives.',
+    "John 8:1": "but Jesus went to the Mount of Olives.",
 }
 
 
@@ -102,35 +103,36 @@ def search_esv_v2(version, words, page, page_size):
 
     from bibleverses.models import VerseSearchResult
 
-    params = [f'key={settings.ESV_V2_API_KEY}',
-              f'words={words}',
-              'include-short-copyright=0',
-              'include-passage-horizontal-lines=0',
-              'include-heading-horizontal-lines=0',
-              'include-footnotes=0',
-              'include-subheadings=0',
-              'include-headings=0',
-              'page=%d' % (page + 1),
-              'results-per-page=%d' % page_size,
-              ]
+    params = [
+        f"key={settings.ESV_V2_API_KEY}",
+        f"words={words}",
+        "include-short-copyright=0",
+        "include-passage-horizontal-lines=0",
+        "include-heading-horizontal-lines=0",
+        "include-footnotes=0",
+        "include-subheadings=0",
+        "include-headings=0",
+        "page=%d" % (page + 1),
+        "results-per-page=%d" % page_size,
+    ]
 
     result_text = do_esv_v2_api("query", params)
     # Split into results
     pq = PyQuery(result_text)
     results = []
-    for elem in pq.find('p.search-result'):
+    for elem in pq.find("p.search-result"):
         pq2 = PyQuery(elem)
-        ref = pq2.find('.search-result-head a')[0].text_content()
+        ref = pq2.find(".search-result-head a")[0].text_content()
         for item in elem.getchildren():
-            if (item.tag == 'span' and
-                    item.attrib.get('class', '') in ['search-result-head',
-                                                     'search-result-text-heading']):
+            if item.tag == "span" and item.attrib.get("class", "") in [
+                "search-result-head",
+                "search-result-text-heading",
+            ]:
                 item.drop_tree()
         text = elem.text_content()
         results.append((ref, text))
 
-    verses = version.get_verses_by_localized_reference_bulk([r for r, t in results],
-                                                            fetch_text=False)
+    verses = version.get_verses_by_localized_reference_bulk([r for r, t in results], fetch_text=False)
     verse_list = []
     for ref, text in results:
         verse = verses[ref]
@@ -152,14 +154,13 @@ def adjust_stored_esv(version_slug):
     # V2 API: See terms of usage at http://www.esvapi.org/
     from bibleverses.books import get_bible_books
     from bibleverses.models import TextVersion
+
     esv = TextVersion.objects.get(slug=version_slug)
     for book_num, book_name in enumerate(get_bible_books(esv.language_code)):
-        book_verses = esv.verse_set.filter(book_number=book_num,
-                                           missing=False)
+        book_verses = esv.verse_set.filter(book_number=book_num, missing=False)
         # Work out what half a book is.
-        d = book_verses.aggregate(start=models.Min('bible_verse_number'),
-                                  end=models.Max('bible_verse_number'))
-        book_size = d['end'] - d['start'] + 1
+        d = book_verses.aggregate(start=models.Min("bible_verse_number"), end=models.Max("bible_verse_number"))
+        book_size = d["end"] - d["start"] + 1
         max_allowed = min(ESV_MAX_STORED_CONSECUTIVE_VERSES, book_size // 2)
         found = book_verses.filter(text_fetched_at__isnull=False)
         found_count = found.count()
@@ -167,22 +168,23 @@ def adjust_stored_esv(version_slug):
             to_blank = found_count - max_allowed
             # For now, do a simple FIFO, rather than attempting to evict
             # according to popularity.
-            to_blank_ids = found.order_by('text_fetched_at')[:to_blank].values_list('id', flat=True)
+            to_blank_ids = found.order_by("text_fetched_at")[:to_blank].values_list("id", flat=True)
             logger.info("Blanking %s verses from ESV %s", len(to_blank_ids), book_name)
-            found.filter(id__in=to_blank_ids).update(text_saved='', text_fetched_at=None)
+            found.filter(id__in=to_blank_ids).update(text_saved="", text_fetched_at=None)
 
 
 # ----- All services -----
 
+
 def highlight_search_words(verse, words):
     text = verse.text
-    for word in words.split(' '):
+    for word in words.split(" "):
         if len(word) < 2:
             # Easily get memory exhaustion if we don't skip '', and in general
             # looks bad for short words of length 1 (because our highlighting
             # scheme is very simplistic)
             continue
-        text = text.replace(word, f'**{word}**')
+        text = text.replace(word, f"**{word}**")
     verse.text_saved = text
     return verse
 

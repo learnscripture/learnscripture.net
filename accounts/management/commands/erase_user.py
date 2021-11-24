@@ -10,4 +10,4 @@ class Command(BaseCommand):
     def handle(self, username, **options):
         account = Account.objects.get(username=username)
         account.erase()
-        self.stdout.write(f'User {username} erased to {account.username}\n')
+        self.stdout.write(f"User {username} erased to {account.username}\n")

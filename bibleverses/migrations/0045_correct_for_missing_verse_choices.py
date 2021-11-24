@@ -9,7 +9,7 @@ from django.db import migrations, models
 # due to some Bible versions having missing verses.
 
 # Affected books are:
-BOOKS = {'BOOK39', 'BOOK40', 'BOOK41', 'BOOK42', 'BOOK43', 'BOOK44', 'BOOK46'}
+BOOKS = {"BOOK39", "BOOK40", "BOOK41", "BOOK42", "BOOK43", "BOOK44", "BOOK46"}
 
 
 def forwards(apps, schema_editor):
@@ -18,16 +18,22 @@ def forwards(apps, schema_editor):
     from bibleverses.parsing import parse_validated_internal_reference
     from learnscripture.utils.iterators import iter_chunked_queryset
 
-    verse_sets = VerseSet.objects.filter(
-        set_type=VerseSetType.PASSAGE,
-    ).filter(
-        functools.reduce(operator.or_, [models.Q(passage_id__startswith=b + ' ') for b in BOOKS]),
-    ).prefetch_related('verse_choices')
+    verse_sets = (
+        VerseSet.objects.filter(
+            set_type=VerseSetType.PASSAGE,
+        )
+        .filter(
+            functools.reduce(operator.or_, [models.Q(passage_id__startswith=b + " ") for b in BOOKS]),
+        )
+        .prefetch_related("verse_choices")
+    )
     for vs in iter_chunked_queryset(verse_sets, 30):
         refs = parse_validated_internal_reference(vs.passage_id).to_list()
         if len(refs) != len(vs.verse_choices.all()):
             print("Fixing " + repr(vs))
-            internal_reference_list = [ref.canonical_form() for ref in parse_validated_internal_reference(vs.passage_id).to_list()]
+            internal_reference_list = [
+                ref.canonical_form() for ref in parse_validated_internal_reference(vs.passage_id).to_list()
+            ]
             vs.set_verse_choices(internal_reference_list)
 
 
@@ -38,7 +44,7 @@ def backwards(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bibleverses', '0044_populate_any_language'),
+        ("bibleverses", "0044_populate_any_language"),
     ]
 
     operations = [

@@ -1,7 +1,7 @@
 import re
 
-ALPHANUMERIC_RE = re.compile(r'\w')
-WORD_SPLITTER = re.compile(r'( |\n)')
+ALPHANUMERIC_RE = re.compile(r"\w")
+WORD_SPLITTER = re.compile(r"( |\n)")
 
 
 def is_punctuation(text):
@@ -38,10 +38,7 @@ def split_into_words(text, fix_punctuation_whitespace=True):
     # and when -- appears with punctuation on one side, we don't
     # want this to end up on its own. Also, text with a single
     # hyphen surrounding by whitespace needs to be handled too.
-    t = (text
-         .replace('--', ' -- ')
-         .replace('\r\n', '\n')
-         .strip(" "))
+    t = text.replace("--", " -- ").replace("\r\n", "\n").strip(" ")
     words = WORD_SPLITTER.split(t)
     # Eliminate spaces
     words = [w for w in words if w not in [" ", ""]]

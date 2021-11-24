@@ -15,6 +15,7 @@ def task(func):
     # expects to pickle/unpickle function objects.
 
     if settings.TASKS_EAGER:
+
         def apply_async(args):
             # Run tasks synchronously, in the same process,
             # and without any error catching - errors propagate
@@ -29,7 +30,9 @@ def task(func):
             # Simulate not having django_ftl.activate()
             with django_ftl.override(None):
                 func(*args)
+
     else:
+
         def apply_async(args):
             async_task(func, *args)
 

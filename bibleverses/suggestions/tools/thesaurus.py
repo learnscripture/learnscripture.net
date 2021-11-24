@@ -7,6 +7,7 @@ class Thesaurus(PicklerMixin):
     """
     Thesaurus object used by strategies
     """
+
     # Dictionary like interface for strategies to use:
     def __getitem__(self, key):
         return self.data[key]

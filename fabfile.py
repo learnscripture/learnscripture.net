@@ -20,9 +20,9 @@ from fabric.operations import get, put
 join = os.path.join
 rel = lambda *x: os.path.normpath(join(os.path.abspath(os.path.dirname(__file__)), *x))
 
-env.user = 'learnscripture'
+env.user = "learnscripture"
 if not env.hosts:
-    env.hosts = ['learnscripture.net']
+    env.hosts = ["learnscripture.net"]
 
 env.proj_name = "learnscripture"
 env.proj_app = "learnscripture"  # Python module for project
@@ -38,98 +38,88 @@ env.num_workers = "3"
 # Python version
 PYTHON_BIN = "python3.8"
 PYTHON_PREFIX = ""  # e.g. /usr/local  Use "" for automatic
-PYTHON_FULL_PATH = "%s/bin/%s" % (PYTHON_PREFIX, PYTHON_BIN) if PYTHON_PREFIX else PYTHON_BIN
+PYTHON_FULL_PATH = f"{PYTHON_PREFIX}/bin/{PYTHON_BIN}" if PYTHON_PREFIX else PYTHON_BIN
 
 LOCAL_DB_BACKUPS = rel("..", "db_backups")
 
-DB_LABEL_DEFAULT = 'default'
-DB_LABEL_WORDSUGGESTIONS = 'wordsuggestions'
+DB_LABEL_DEFAULT = "default"
+DB_LABEL_WORDSUGGESTIONS = "wordsuggestions"
 
 
-CURRENT_VERSION = 'current'
+CURRENT_VERSION = "current"
 
 REQS = [
     # Daemons
-    'ufw',
-
+    "ufw",
     # Command line tools which are used non interactively
-    'debian-goodies',  # checkrestart
-    'software-properties-common',
-    'unattended-upgrades',
-
-    'rsync',
-    'git',
-
+    "debian-goodies",  # checkrestart
+    "software-properties-common",
+    "unattended-upgrades",
+    "rsync",
+    "git",
     # Tools for interactive use only
-    'htop',
-    'mosh',
-    'net-tools',
-    'nmap',
-    'silversearcher-ag',
-    'git-core',
-    'aptitude',
-    'ncdu',
-
+    "htop",
+    "mosh",
+    "net-tools",
+    "nmap",
+    "silversearcher-ag",
+    "git-core",
+    "aptitude",
+    "ncdu",
     # Databases/servers
-    'postgresql',  # without version numbers, uses the supported version, which is usually fine
-    'postgresql-client',
-    'postgresql-contrib',
-    'memcached',
-
+    "postgresql",  # without version numbers, uses the supported version, which is usually fine
+    "postgresql-client",
+    "postgresql-contrib",
+    "memcached",
     # Daemons
-    'supervisor',  # For running uwsgi and php-cgi daemons
-    'nginx',
-
+    "supervisor",  # For running uwsgi and php-cgi daemons
+    "nginx",
     # Python stuff
-    'python3',
-    'python3-pip',
-    'python3-wheel',
-    'python3-virtualenv',
-    'python3-virtualenvwrapper',
-    'python3-setuptools',
-
+    "python3",
+    "python3-pip",
+    "python3-wheel",
+    "python3-virtualenv",
+    "python3-virtualenvwrapper",
+    "python3-setuptools",
     # For building Python extensions
-    'build-essential',
-    'python3-dev',
-    'libpq-dev',  # For psycopg2
-    'libxml2-dev',  # For lxml/uwsgi
-    'libxslt-dev',  # For lxml/uwsgi
-    'libffi-dev',  # For cffi
-
+    "build-essential",
+    "python3-dev",
+    "libpq-dev",  # For psycopg2
+    "libxml2-dev",  # For lxml/uwsgi
+    "libxslt-dev",  # For lxml/uwsgi
+    "libffi-dev",  # For cffi
     # Soft PIL + jpegtran-cffi dependencies
-    'libturbojpeg',
-    'libjpeg8',
-    'libjpeg8-dev',
-    'libpng-dev',
-    'libfreetype6',
-    'libfreetype6-dev',
-    'zlib1g',
-    'zlib1g-dev',
-
+    "libturbojpeg",
+    "libjpeg8",
+    "libjpeg8-dev",
+    "libpng-dev",
+    "libfreetype6",
+    "libfreetype6-dev",
+    "zlib1g",
+    "zlib1g-dev",
     # Soft uwsgi requirement (for harakiri alerts)
-    'libpcre3-dev',
-
+    "libpcre3-dev",
     # Other
-    'letsencrypt',
-    'joe',
-    'goaccess',  # web analytics. Actually we need v1.4 or later
+    "letsencrypt",
+    "joe",
+    "goaccess",  # web analytics. Actually we need v1.4 or later
 ]
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'learnscripture.settings_local'  # noqa
+os.environ["DJANGO_SETTINGS_MODULE"] = "learnscripture.settings_local"  # noqa
 
 
 @task
 def print_hostname():
-    run('hostname')
+    run("hostname")
 
 
 # Utilities
 
-as_rootuser = with_settings(user='root')
+as_rootuser = with_settings(user="root")
 
 
 def virtualenv(venv):
-    return prefix('source %s/bin/activate' % venv)
+    return prefix(f"source {venv}/bin/activate")
 
 
 @contextmanager
@@ -145,9 +135,10 @@ def django_project(target):
 # directory for virtualenv and sources, and after we are done setting it up, we
 # switch the 'current' link to the new version.
 
-class Version(object):
-    PROJECT_ROOT_BASE = "/home/%s/webapps/%s" % (env.proj_user, env.proj_name)
-    VERSIONS_ROOT = os.path.join(PROJECT_ROOT_BASE, 'versions')
+
+class Version:
+    PROJECT_ROOT_BASE = f"/home/{env.proj_user}/webapps/{env.proj_name}"
+    VERSIONS_ROOT = os.path.join(PROJECT_ROOT_BASE, "versions")
     MEDIA_ROOT_SHARED = PROJECT_ROOT_BASE + "/media"
     DATA_ROOT_SHARED = PROJECT_ROOT_BASE + "/data"
 
@@ -158,12 +149,12 @@ class Version(object):
     def __init__(self, version):
         self.version = version
         self.PROJECT_ROOT = os.path.join(self.VERSIONS_ROOT, version)
-        self.SRC_ROOT = os.path.join(self.PROJECT_ROOT, 'src')
-        self.VENV_ROOT = os.path.join(self.PROJECT_ROOT, 'venv')
+        self.SRC_ROOT = os.path.join(self.PROJECT_ROOT, "src")
+        self.VENV_ROOT = os.path.join(self.PROJECT_ROOT, "venv")
         # MEDIA_ROOT/STATIC_ROOT/DATA_ROOT -  sync with settings
-        self.STATIC_ROOT = os.path.join(self.PROJECT_ROOT, 'static')
-        self.MEDIA_ROOT = os.path.join(self.PROJECT_ROOT, 'usermedia')
-        self.DATA_ROOT = os.path.join(self.PROJECT_ROOT, 'data')
+        self.STATIC_ROOT = os.path.join(self.PROJECT_ROOT, "static")
+        self.MEDIA_ROOT = os.path.join(self.PROJECT_ROOT, "usermedia")
+        self.DATA_ROOT = os.path.join(self.PROJECT_ROOT, "data")
 
         CONF = secrets()
 
@@ -173,30 +164,27 @@ class Version(object):
 
         self.DBS = {
             DB_LABEL_DEFAULT: {
-                'NAME': CONF["PRODUCTION_DB_NAME"],
-                'USER': db_user,
-                'PASSWORD': db_password,
-                'PORT': db_port,
+                "NAME": CONF["PRODUCTION_DB_NAME"],
+                "USER": db_user,
+                "PASSWORD": db_password,
+                "PORT": db_port,
             },
             DB_LABEL_WORDSUGGESTIONS: {
-                'NAME': CONF["PRODUCTION_DB_NAME_WS"],
-                'USER': db_user,
-                'PASSWORD': db_password,
-                'PORT': db_port,
-            }
+                "NAME": CONF["PRODUCTION_DB_NAME_WS"],
+                "USER": db_user,
+                "PASSWORD": db_password,
+                "PORT": db_port,
+            },
         }
 
     def make_dirs(self):
-        for d in [self.PROJECT_ROOT,
-                  self.MEDIA_ROOT_SHARED,
-                  self.DATA_ROOT_SHARED]:
+        for d in [self.PROJECT_ROOT, self.MEDIA_ROOT_SHARED, self.DATA_ROOT_SHARED]:
             if not exists(d):
-                run("mkdir -p %s" % d)
-        links = [(self.MEDIA_ROOT, self.MEDIA_ROOT_SHARED),
-                 (self.DATA_ROOT, self.DATA_ROOT_SHARED)]
+                run(f"mkdir -p {d}")
+        links = [(self.MEDIA_ROOT, self.MEDIA_ROOT_SHARED), (self.DATA_ROOT, self.DATA_ROOT_SHARED)]
         for link, dest in links:
             if not exists(link):
-                run("ln -s %s %s" % (dest, link))
+                run(f"ln -s {dest} {link}")
 
 
 def secrets():
@@ -220,8 +208,7 @@ def secure(new_user=env.user):
         fabtools.user.create(new_user, group=new_user, ssh_public_keys=ssh_keys)
     run("sed -i 's:RootLogin yes:RootLogin without-password:' /etc/ssh/sshd_config")
     run("service ssh restart")
-    print("Security steps completed. Log in to the server as '%s' from "
-          "now on." % new_user)
+    print(f"Security steps completed. Log in to the server as '{new_user}' from now on.")
 
 
 @task
@@ -233,7 +220,7 @@ def provision():
     _install_locales()
     _configure_services()
     _fix_startup_services()
-    run("mkdir -p /home/%s/logs" % env.proj_user)
+    run(f"mkdir -p /home/{env.proj_user}/logs")
 
 
 @as_rootuser
@@ -255,13 +242,11 @@ def _add_swap():
         run("chmod 600 /swapfile")
         run("mkswap /swapfile")
         run("swapon /swapfile")
-        append("/etc/fstab",
-               "/swapfile   none    swap    sw    0   0\n")
+        append("/etc/fstab", "/swapfile   none    swap    sw    0   0\n")
 
     # Change swappiness
     run("sysctl vm.swappiness=10")
-    append("/etc/sysctl.conf",
-           "vm.swappiness=10\n")
+    append("/etc/sysctl.conf", "vm.swappiness=10\n")
 
 
 @as_rootuser
@@ -270,8 +255,8 @@ def _ssl_dhparam():
     if not exists(dhparams):
         d = os.path.dirname(dhparams)
         if not exists(d):
-            run("mkdir -p {0}".format(d))
-        run("openssl dhparam -out {0} 2048".format(dhparams))
+            run(f"mkdir -p {d}")
+        run(f"openssl dhparam -out {dhparams} 2048")
 
 
 @as_rootuser
@@ -280,31 +265,32 @@ def _install_locales():
     locale = env.locale.replace("UTF-8", "utf8")
     with hide("stdout"):
         if locale not in run("locale -a"):
-            run("locale-gen %s" % env.locale)
-            run("update-locale %s" % env.locale)
+            run(f"locale-gen {env.locale}")
+            run(f"update-locale {env.locale}")
             run("service postgresql restart")
 
 
 @as_rootuser
 def _configure_services():
-    for line in ["#------- Added for LearnScripture -----",
-                 "synchronous_commit = off"]:
+    for line in ["#------- Added for LearnScripture -----", "synchronous_commit = off"]:
         append("/etc/postgresql/12/main/postgresql.conf", line)
     run("service postgresql restart")
 
 
 @as_rootuser
 def _fix_startup_services():
-    for service in ["supervisor",
-                    "postgresql",
-                    ]:
-        run("update-rc.d %s defaults" % service)
-        run("service %s start" % service)
+    for service in [
+        "supervisor",
+        "postgresql",
+    ]:
+        run(f"update-rc.d {service} defaults")
+        run(f"service {service} start")
 
-    for service in ['memcached',  # We use our own instance
-                    ]:
-        run("update-rc.d %s disable" % service)
-        run("service %s stop" % service)
+    for service in [
+        "memcached",  # We use our own instance
+    ]:
+        run(f"update-rc.d {service} disable")
+        run(f"service {service} stop")
 
 
 @as_rootuser
@@ -341,8 +327,7 @@ TEMPLATES = {
 
 
 def inject_template(data):
-    return dict([(k, v % env if isinstance(v, str) else v)
-                 for k, v in data.items()])
+    return {k: v % env if isinstance(v, str) else v for k, v in data.items()}
 
 
 def get_templates(filter_func=None):
@@ -357,11 +342,11 @@ def get_templates(filter_func=None):
 
 
 def get_system_templates():
-    return get_templates(lambda data: data['system'])
+    return get_templates(lambda data: data["system"])
 
 
 def get_project_templates():
-    return get_templates(lambda data: not data['system'])
+    return get_templates(lambda data: not data["system"])
 
 
 def upload_template_and_reload(name, target):
@@ -381,10 +366,10 @@ def upload_template_and_reload(name, target):
     remote_data = ""
     if exists(remote_path):
         with hide("stdout"):
-            remote_data = run("cat %s" % remote_path)
+            remote_data = run(f"cat {remote_path}")
     env_data = env.copy()
     env_data.update(target.__dict__)
-    with open(local_path, "r") as f:
+    with open(local_path) as f:
         local_data = f.read()
         local_data %= env_data
     clean = lambda s: s.replace("\n", "").replace("\r", "").strip()
@@ -392,14 +377,15 @@ def upload_template_and_reload(name, target):
         return
     upload_template(local_path, remote_path, env_data, backup=False)
     if owner:
-        run("chown %s %s" % (owner, remote_path))
+        run(f"chown {owner} {remote_path}")
     if mode:
-        run("chmod %s %s" % (mode, remote_path))
+        run(f"chmod {mode} {remote_path}")
     if reload_command:
         run(reload_command)
 
 
 # Deploying project - user level
+
 
 @task
 def create_project():
@@ -427,7 +413,7 @@ def create_databases():
 def pg_run(cmd, run_as_postgres):
     with cd("/"):  # suppress "could not change directory" warnings
         if run_as_postgres:
-            return run("sudo -u postgres %s" % cmd)
+            return run(f"sudo -u postgres {cmd}")
         else:
             return run(cmd)
 
@@ -435,7 +421,7 @@ def pg_run(cmd, run_as_postgres):
 def pg_local(cmd, run_as_postgres, capture=False):
     with lcd("/"):  # suppress "could not change directory" warnings
         if run_as_postgres:
-            retval = local("sudo -u postgres %s" % cmd, capture=capture)
+            retval = local(f"sudo -u postgres {cmd}", capture=capture)
         else:
             retval = local(cmd, capture=capture)
     if capture:
@@ -488,7 +474,7 @@ def code_quality_checks():
     """
     Run code quality checks, including tests.
     """
-    if getattr(env, 'skip_code_quality_checks', False):
+    if getattr(env, "skip_code_quality_checks", False):
         return
     local("flake8 .")
     local("isort -c .")
@@ -538,14 +524,13 @@ def push_sources(target):
     target_src_root = target.SRC_ROOT
     previous_src_root = previous_target.SRC_ROOT
 
-    if not exists(os.path.join(target_src_root, '.git')):
+    if not exists(os.path.join(target_src_root, ".git")):
         previous_target = get_target_current_version(target)
         previous_src_root = previous_target.SRC_ROOT
-        if exists(previous_src_root) and exists(os.path.join(previous_src_root, '.git')):
+        if exists(previous_src_root) and exists(os.path.join(previous_src_root, ".git")):
             # For speed, clone the 'current' repo which will be very similar to
             # what we are pushing.
-            run("git clone %s %s" % (previous_src_root,
-                                     target_src_root))
+            run(f"git clone {previous_src_root} {target_src_root}")
             with cd(target_src_root):
                 run("git checkout master || git checkout -b master")
         else:
@@ -555,11 +540,14 @@ def push_sources(target):
             run("echo '[receive]' >> .git/config")
             run("echo 'denyCurrentBranch = ignore' >> .git/config")
 
-    local("git push ssh://%(user)s@%(host)s/%(path)s" %
-          dict(host=env.host,
-               user=env.user,
-               path=target_src_root,
-               ))
+    local(
+        "git push ssh://%(user)s@%(host)s/%(path)s"
+        % dict(
+            host=env.host,
+            user=env.user,
+            path=target_src_root,
+        )
+    )
     with cd(target_src_root):
         run(f"git reset --hard {target.version}")
     # NB we also use git at runtime in settings file to set Sentry release,
@@ -570,23 +558,22 @@ def push_sources(target):
 
     # Need settings file
     with cd(target_src_root):
-        run('cp learnscripture/settings_local_example.py learnscripture/settings_local.py')
+        run("cp learnscripture/settings_local_example.py learnscripture/settings_local.py")
 
 
 def tag_deploy():
-    if getattr(env, 'no_tag', False):
+    if getattr(env, "no_tag", False):
         return
     local("git tag deploy-production-$(date --utc --iso-8601=seconds | tr ':' '-' | cut -f 1 -d '+')")
 
 
 def ensure_src_dir(target):
     if not exists(target.SRC_ROOT):
-        run("mkdir -p %s" % target.SRC_ROOT)
+        run(f"mkdir -p {target.SRC_ROOT}")
 
 
 def push_secrets(target):
-    put(rel(".", "config", "secrets.json"),
-        os.path.join(target.SRC_ROOT, "config/secrets.json"))
+    put(rel(".", "config", "secrets.json"), os.path.join(target.SRC_ROOT, "config/secrets.json"))
 
 
 def create_venv(target):
@@ -594,13 +581,12 @@ def create_venv(target):
     if exists(venv_root):
         return
 
-    run("virtualenv --python=%s %s" % (PYTHON_BIN, venv_root))
-    run("echo %s > %s/lib/%s/site-packages/projectsource.pth" %
-        (target.SRC_ROOT, target.VENV_ROOT, PYTHON_BIN))
+    run(f"virtualenv --python={PYTHON_BIN} {venv_root}")
+    run(f"echo {target.SRC_ROOT} > {target.VENV_ROOT}/lib/{PYTHON_BIN}/site-packages/projectsource.pth")
 
 
 def install_requirements(target):
-    if getattr(env, 'no_installs', False):
+    if getattr(env, "no_installs", False):
         return
 
     # For speed and to avoid over-dependence on the network, we copy 'src'
@@ -608,12 +594,10 @@ def install_requirements(target):
     # (no .egg-link files), but it makes VCS checkout installs much faster.
     # Other installs are kept fast due to the pip wheel cache.
     previous_target = get_target_current_version(target)
-    target_venv_vcs_root = os.path.join(target.VENV_ROOT, 'src')
-    previous_venv_vcs_root = os.path.join(previous_target.VENV_ROOT, 'src')
+    target_venv_vcs_root = os.path.join(target.VENV_ROOT, "src")
+    previous_venv_vcs_root = os.path.join(previous_target.VENV_ROOT, "src")
     if exists(previous_venv_vcs_root):
-        run("rsync -a '--exclude=*.pyc' %s/ %s" %
-            (previous_venv_vcs_root,
-             target_venv_vcs_root))
+        run(f"rsync -a '--exclude=*.pyc' {previous_venv_vcs_root}/ {target_venv_vcs_root}")
 
     with django_project(target):
         run("pip install --progress-bar off --upgrade setuptools pip wheel six")
@@ -627,14 +611,16 @@ webpack_stats_file = "./webpack-stats.deploy.json"
 @task
 def check_ftl():
     import django
+
     django.setup()
     from django.conf import settings
 
     from learnscripture.ftl_bundles import main
+
     errors = main.check_all([code for code, _ in settings.LANGUAGES])
     if errors:
         print("Errors in FTL files:")
-        print(''.join(str(e) for e in errors))
+        print("".join(str(e) for e in errors))
         sys.exit(1)
 
 
@@ -654,26 +640,22 @@ def build_static():
         os.unlink(webpack_stats_file)
     local("./node_modules/.bin/webpack --config webpack.config.deploy.js")
     webpack_data = json.load(open(webpack_stats_file))
-    assert webpack_data['status'] == 'done'
+    assert webpack_data["status"] == "done"
 
 
 def push_static(target):
     webpack_data = json.load(open(webpack_stats_file))
-    assert webpack_data['status'] == 'done'
+    assert webpack_data["status"] == "done"
     deploy_files = [os.path.abspath(f) for f in glob.glob(webpack_deploy_files_pattern)]
-    deploy_files_2 = [part['path']
-                      for chunk in webpack_data['chunks'].values()
-                      for part in chunk]
+    deploy_files_2 = [part["path"] for chunk in webpack_data["chunks"].values() for part in chunk]
     s1 = set(deploy_files)
     s2 = set(deploy_files_2)
-    assert s1 == s2, "Expected {0} == {1}".format(s1, s2)
+    assert s1 == s2, f"Expected {s1} == {s2}"
 
     # Now rewrite stats file to use server paths
-    for name, chunk in webpack_data['chunks'].items():
+    for name, chunk in webpack_data["chunks"].items():
         for part in chunk:
-            part['path'] = os.path.join(target.SRC_ROOT,
-                                        "learnscripture/static/webpack_bundles",
-                                        part['name'])
+            part["path"] = os.path.join(target.SRC_ROOT, "learnscripture/static/webpack_bundles", part["name"])
     with open(webpack_stats_file, "w") as f:
         json.dump(webpack_data, f)
 
@@ -682,21 +664,21 @@ def push_static(target):
         remote_f = os.path.join(target.SRC_ROOT, rel_f)
         d = os.path.dirname(remote_f)
         if not exists(d):
-            run("mkdir -p %s" % d)
+            run(f"mkdir -p {d}")
 
         put(f, remote_f)
 
 
 def collect_static(target):
-    assert target.STATIC_ROOT.strip() != '' and target.STATIC_ROOT.strip() != '/'
+    assert target.STATIC_ROOT.strip() != "" and target.STATIC_ROOT.strip() != "/"
     with django_project(target):
         run("./manage.py collectstatic -v 0 --noinput")
 
     # This is needed for certbot/letsencrypt:
-    run("mkdir -p {0}/root".format(target.STATIC_ROOT))
+    run(f"mkdir -p {target.STATIC_ROOT}/root")
 
     # Permissions
-    run("chmod -R ugo+r %s" % target.STATIC_ROOT)
+    run(f"chmod -R ugo+r {target.STATIC_ROOT}")
 
 
 def upload_project_templates(target):
@@ -706,16 +688,15 @@ def upload_project_templates(target):
 
 
 def update_database(target):
-    if getattr(env, 'no_db', False):
+    if getattr(env, "no_db", False):
         return
     with django_project(target):
-        if getattr(env, 'fake_migrations', False):
+        if getattr(env, "fake_migrations", False):
             args = "--fake"
         else:
             args = "--fake-initial"
         for db in [DB_LABEL_DEFAULT, DB_LABEL_WORDSUGGESTIONS]:
-            run("./manage.py migrate --database %s --noinput %s" %
-                (db, args))
+            run(f"./manage.py migrate --database {db} --noinput {args}")
 
 
 def get_target_current_version(target):
@@ -725,9 +706,7 @@ def get_target_current_version(target):
 def make_target_current(target):
     # Switches synlink for 'current' to point to 'target.PROJECT_ROOT'
     current_target = get_target_current_version(target)
-    run("ln -snf %s %s" %
-        (target.PROJECT_ROOT,
-         current_target.PROJECT_ROOT))
+    run(f"ln -snf {target.PROJECT_ROOT} {current_target.PROJECT_ROOT}")
 
 
 def get_current_git_ref():
@@ -744,7 +723,7 @@ def delete_old_versions():
     fix_perms(Version.VERSIONS_ROOT, env.proj_user)
     with cd(Version.VERSIONS_ROOT):
         commitref_glob = "?" * 40
-        run("ls -dtr %s | head -n -3 | xargs rm -rf" % commitref_glob)
+        run(f"ls -dtr {commitref_glob} | head -n -3 | xargs rm -rf")
 
 
 @as_rootuser
@@ -759,6 +738,7 @@ def run_word_suggestions_analyzers():
     with django_project(target):
         run("./manage.py run_suggestions_analyzers")
 
+
 # Managing running system
 
 
@@ -767,7 +747,7 @@ def stop_webserver():
     """
     Stop the webserver that is running the Django instance
     """
-    supervisorctl("stop %s_uwsgi" % env.proj_name)
+    supervisorctl(f"stop {env.proj_name}_uwsgi")
 
 
 @task
@@ -775,7 +755,7 @@ def start_webserver():
     """
     Starts the webserver that is running the Django instance
     """
-    supervisorctl("start %s_uwsgi" % env.proj_name)
+    supervisorctl(f"start {env.proj_name}_uwsgi")
 
 
 @task
@@ -784,16 +764,16 @@ def restart_webserver():
     """
     Gracefully restarts the webserver that is running the Django instance
     """
-    pidfile = '/tmp/{proj_name}_uwsgi.pid'.format(proj_name=env.proj_name)
+    pidfile = f"/tmp/{env.proj_name}_uwsgi.pid"
     if exists(pidfile):
-        run("kill -HUP `cat {pidfile}`".format(pidfile=pidfile))
+        run(f"kill -HUP `cat {pidfile}`")
     else:
         start_webserver()
 
 
 @task
 def stop_task_queue():
-    supervisorctl("stop %s_django_q" % env.proj_name)
+    supervisorctl(f"stop {env.proj_name}_django_q")
 
 
 @task
@@ -801,7 +781,7 @@ def restart_task_queue():
     """
     Restarts the task queue workers
     """
-    supervisorctl("restart %s_django_q" % env.proj_name)
+    supervisorctl(f"restart {env.proj_name}_django_q")
 
 
 @task
@@ -819,14 +799,14 @@ def stop_all():
 @task
 @as_rootuser
 def supervisorctl(*commands):
-    run("supervisorctl %s" % " ".join(commands))
+    run(f"supervisorctl {' '.join(commands)}")
 
 
 @task
 def manage_py_command(*commands):
     target = Version.current()
     with django_project(target):
-        run("./manage.py %s" % ' '.join(commands))
+        run(f"./manage.py {' '.join(commands)}")
 
 
 @task
@@ -860,7 +840,7 @@ def get_and_load_production_db():
 @task
 def get_live_db():
     filename = dump_db(Version.current())
-    local("mkdir -p %s" % LOCAL_DB_BACKUPS)
+    local(f"mkdir -p {LOCAL_DB_BACKUPS}")
     return list(get(filename, local_path=LOCAL_DB_BACKUPS + "/%(basename)s"))[0]
 
 
@@ -868,6 +848,7 @@ def get_live_db():
 def local_restore_from_dump(filename):
     db = {}
     from django.conf import settings
+
     db = settings.DATABASES[DB_LABEL_DEFAULT]
 
     filename = os.path.abspath(filename)
@@ -876,14 +857,18 @@ def local_restore_from_dump(filename):
             for run_as_postgres, cmd in db_create_user_commands(db):
                 pg_local(cmd, run_as_postgres)
 
-        for run_as_postgres, cmd in (db_drop_database_commands(db) +
-                                     db_create_commands(db) +
-                                     pg_restore_cmds(db, filename)):
+        for run_as_postgres, cmd in (
+            db_drop_database_commands(db) + db_create_commands(db) + pg_restore_cmds(db, filename)
+        ):
             pg_local(cmd, run_as_postgres)
 
 
 def make_django_db_filename(target):
-    return "/home/%s/db-%s.django.%s.pgdump" % (env.user, target.DBS[DB_LABEL_DEFAULT]['NAME'], datetime.now().strftime("%Y-%m-%d_%H.%M.%S"))
+    return "/home/{}/db-{}.django.{}.pgdump".format(
+        env.user,
+        target.DBS[DB_LABEL_DEFAULT]["NAME"],
+        datetime.now().strftime("%Y-%m-%d_%H.%M.%S"),
+    )
 
 
 def dump_db(target):
@@ -895,15 +880,18 @@ def dump_db(target):
 
 def pg_restore_cmds(db, filename, clean=False):
     return [
-        (False,
-         f"""pg_restore -p {db['PORT']} -h localhost -O -U {db['USER']} {" -c " if clean else ""} -d {db['NAME']} {filename}"""),
+        (
+            False,
+            f"""pg_restore -p {db['PORT']} -h localhost -O -U {db['USER']} {" -c " if clean else ""} -d {db['NAME']} {filename}""",
+        ),
     ]
 
 
 def db_create_user_commands(db):
     return [
-        (True,
-         f"""psql -p {db['PORT']} -U postgres -d template1 -c "
+        (
+            True,
+            f"""psql -p {db['PORT']} -U postgres -d template1 -c "
              DO \\$\\$
              BEGIN
                CREATE USER {db['USER']} WITH PASSWORD '{db['PASSWORD']}';
@@ -911,12 +899,13 @@ def db_create_user_commands(db):
                RAISE NOTICE 'not creating role, it already exists';
              END
              \\$\\$;
-          " """),
+          " """,
+        ),
     ]
 
 
 def db_check_user_exists_command(db):
-    return (f"""psql -p {db['PORT']} -U postgres -d postgres -t -c "SELECT COUNT(*) FROM pg_user WHERE usename='{db["USER"]}';" """)
+    return f"""psql -p {db['PORT']} -U postgres -d postgres -t -c "SELECT COUNT(*) FROM pg_user WHERE usename='{db["USER"]}';" """
 
 
 def db_check_user_exists_local(db):
@@ -931,41 +920,42 @@ def db_check_user_exists_remote(db):
 
 def db_create_commands(db):
     return [
-        (True,
-         f""" psql -p {db['PORT']} -U postgres -d template1 -c " """
-         f""" CREATE DATABASE {db['NAME']} """
-         f""" TEMPLATE = template0 ENCODING = 'UTF8' LC_CTYPE = '{env.locale}' LC_COLLATE = '{env.locale}';"""
-         f""" " """),
-
-        (True,
-         f"""psql -p {db['PORT']} -U postgres -d template1 -c "GRANT ALL ON DATABASE {db['NAME']} TO {db['USER']};" """),
-
-        (True,
-         f"""psql -p {db['PORT']} -U postgres -d template1 -c "ALTER USER {db['USER']} CREATEDB;" """),
-
+        (
+            True,
+            f""" psql -p {db['PORT']} -U postgres -d template1 -c " """
+            f""" CREATE DATABASE {db['NAME']} """
+            f""" TEMPLATE = template0 ENCODING = 'UTF8' LC_CTYPE = '{env.locale}' LC_COLLATE = '{env.locale}';"""
+            f""" " """,
+        ),
+        (
+            True,
+            f"""psql -p {db['PORT']} -U postgres -d template1 -c "GRANT ALL ON DATABASE {db['NAME']} TO {db['USER']};" """,
+        ),
+        (True, f"""psql -p {db['PORT']} -U postgres -d template1 -c "ALTER USER {db['USER']} CREATEDB;" """),
     ]
 
 
 def db_drop_database_commands(db):
     return [
-        (True,
-         f"""psql -p {db['PORT']} -U postgres -d template1 -c "DROP DATABASE IF EXISTS {db['NAME']};" """),
+        (True, f"""psql -p {db['PORT']} -U postgres -d template1 -c "DROP DATABASE IF EXISTS {db['NAME']};" """),
     ]
 
 
 def db_restore_commands(db, filename):
-    return (db_drop_database_commands(db) +
-            db_create_user_commands(db) +
-            db_create_commands(db) +
-            pg_restore_cmds(db, filename))
+    return (
+        db_drop_database_commands(db)
+        + db_create_user_commands(db)
+        + db_create_commands(db)
+        + pg_restore_cmds(db, filename)
+    )
 
 
 PG_ENVIRON_MAP = {
-    'NAME': 'PGDATABASE',
-    'HOST': 'PGHOST',
-    'PORT': 'PGPORT',
-    'USER': 'PGUSER',
-    'PASSWORD': 'PGPASSWORD',
+    "NAME": "PGDATABASE",
+    "HOST": "PGHOST",
+    "PORT": "PGPORT",
+    "USER": "PGUSER",
+    "PASSWORD": "PGPASSWORD",
 }
 
 
@@ -988,11 +978,10 @@ def db_restore(db, filename):
 def migrate_upload_db(local_filename):
     stop_all()
     local_filename = os.path.normpath(os.path.abspath(local_filename))
-    remote_filename = "/home/%s/%s" % (env.proj_user, os.path.basename(local_filename))
+    remote_filename = f"/home/{env.proj_user}/{os.path.basename(local_filename)}"
     put(local_filename, remote_filename)
     target = Version.current()
-    db_restore(target.DBS[DB_LABEL_DEFAULT],
-               remote_filename)
+    db_restore(target.DBS[DB_LABEL_DEFAULT], remote_filename)
 
 
 @task
@@ -1005,34 +994,28 @@ def skip_code_quality_checks():
 def install_or_renew_ssl_certificate():
     version = Version.current()
     certbot_static_path = version.STATIC_ROOT + "/root"
-    run("test -d {certbot_static_path} || mkdir {certbot_static_path}".format(
-        certbot_static_path=certbot_static_path))
+    run("test -d {certbot_static_path} || mkdir {certbot_static_path}".format(certbot_static_path=certbot_static_path))
 
-    run("letsencrypt certonly --webroot"
-        " -w {certbot_static_path}"
-        " -d {domain}".format(
-            certbot_static_path=certbot_static_path,
-            domain=env.domains[0],
-        ))
+    run(f"letsencrypt certonly --webroot -w {certbot_static_path} -d {env.domains[0]}")
     run("service nginx reload")
 
 
 @task
 def download_letsencrypt_conf():
-    local("rsync -r -l root@%s:/etc/letsencrypt/ config/letsencrypt/" % env.hosts[0])
+    local(f"rsync -r -l root@{env.hosts[0]}:/etc/letsencrypt/ config/letsencrypt/")
 
 
 @task
 def upload_letsencrypt_conf():
-    local("rsync -r -l config/letsencrypt/ root@%s:/etc/letsencrypt/" % env.hosts[0])
+    local(f"rsync -r -l config/letsencrypt/ root@{env.hosts[0]}:/etc/letsencrypt/")
 
 
 @task
 def create_sentry_release(version, last_commit):
-    local("sentry-cli releases --org learnscripturenet new -p production {version}".format(version=version))
+    local(f"sentry-cli releases --org learnscripturenet new -p production {version}")
     # Commits not currently publically available
     # local('sentry-cli releases --org learnscripturenet set-commits --commit "learnscripture/learnscripture.net@{commit}" {version}'.format(version=version, commit=full_hash))
-    local("sentry-cli releases --org learnscripturenet finalize {version}".format(version=version))
+    local(f"sentry-cli releases --org learnscripturenet finalize {version}")
 
 
 # TODO:

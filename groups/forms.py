@@ -9,39 +9,33 @@ from learnscripture.ftl_bundles import t, t_lazy
 class EditGroupForm(forms.ModelForm):
 
     invited_users = forms.ModelMultipleChoiceField(
-        label=t_lazy('groups-invited-users'),
+        label=t_lazy("groups-invited-users"),
         required=False,
         queryset=Account.objects.all(),
         widget=autocomplete.ModelSelect2Multiple(
-            url='account_autocomplete',
+            url="account_autocomplete",
             attrs={
-                'data-placeholder': t_lazy('accounts-username'),
-                'data-minimum-input-length': 2,
-            }),
+                "data-placeholder": t_lazy("accounts-username"),
+                "data-minimum-input-length": 2,
+            },
+        ),
     )
 
     class Meta:
         model = Group
-        fields = [
-            'name',
-            'description',
-            'language_code',
-            'public',
-            'open',
-            'invited_users'
-        ]
+        fields = ["name", "description", "language_code", "public", "open", "invited_users"]
 
     def clean_name(self):
-        name = self.cleaned_data['name']
+        name = self.cleaned_data["name"]
         name = name.strip()
-        if name == '':
-            raise forms.ValidationError(t('forms-field-required'))
+        if name == "":
+            raise forms.ValidationError(t("forms-field-required"))
         return name
 
 
-f = EditGroupForm.base_fields['description'].widget.attrs
-del f['cols']
-f['rows'] = 3
+f = EditGroupForm.base_fields["description"].widget.attrs
+del f["cols"]
+f["rows"] = 3
 
-EditGroupForm.base_fields['public'].help_text = t_lazy('groups-public-group-help-text')
-EditGroupForm.base_fields['open'].help_text = t_lazy('groups-open-group-help-text')
+EditGroupForm.base_fields["public"].help_text = t_lazy("groups-public-group-help-text")
+EditGroupForm.base_fields["open"].help_text = t_lazy("groups-open-group-help-text")

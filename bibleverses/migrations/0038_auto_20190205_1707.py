@@ -6,11 +6,13 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bibleverses', '0037_auto_20190205_1706'),
+        ("bibleverses", "0037_auto_20190205_1706"),
     ]
 
     operations = [
         migrations.RunSQL(
             "ALTER TABLE bibleverses_wordsuggestiondata ALTER COLUMN suggestions TYPE jsonb USING suggestions::text::jsonb;"
-            "", hints={'target_dbs': ['wordsuggestions']})
+            "",
+            hints={"target_dbs": ["wordsuggestions"]},
+        )
     ]

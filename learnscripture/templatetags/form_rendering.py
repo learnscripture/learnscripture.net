@@ -6,12 +6,12 @@ register = template.Library()
 
 @register.filter
 def render_form(element):
-    return get_template("learnscripture/form_rendering/form.html").render({'form': element})
+    return get_template("learnscripture/form_rendering/form.html").render({"form": element})
 
 
 @register.filter
 def render_field(element):
-    return get_template("learnscripture/form_rendering/field.html").render({'field': element})
+    return get_template("learnscripture/form_rendering/field.html").render({"field": element})
 
 
 @register.filter

@@ -102,6 +102,10 @@ Content-Transfer-Encoding: 7bit
 --eb663d73ae0a4d6c9153cc0aec8b7520--
 
 --f723ccea-a5e9-497a-806e-7088c837e9e0--
-""".replace("\n", "\r\n")
+""".replace(
+    "\n", "\r\n"
+)
 
-MAILGUN_EXAMPLE_POST_DATA_FOR_BOUNCE_ENDPOINT_CONTENT_TYPE = "multipart/form-data; boundary=f723ccea-a5e9-497a-806e-7088c837e9e0"
+MAILGUN_EXAMPLE_POST_DATA_FOR_BOUNCE_ENDPOINT_CONTENT_TYPE = (
+    "multipart/form-data; boundary=f723ccea-a5e9-497a-806e-7088c837e9e0"
+)

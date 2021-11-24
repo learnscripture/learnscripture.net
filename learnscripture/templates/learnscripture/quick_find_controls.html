@@ -3,89 +3,89 @@
 {% load ftl %}
 
 <div class="quick-find-controls">
-<form action="" method="GET" class="quickfind always-adjust-size" id="id-quick-find-form">
-  <div class="form-row">
-    <label for="id_quick_find">{% ftlmsg 'bibleverses-quick-find-label' %}</label>
-    <div class="input">
-      <input id="id_quick_find" type="text" value="" name="quick_find">
-      <br/>
-      <div id="id_quick_find_help">
-        {# Need all the languages, because the example text is changed #}
-        {# dynamically according to chosen Bible translation language, not normal interface language #}
-        {% get_available_languages as LANGUAGES %}
-        {% for language_code, language_name in LANGUAGES %}
-          {% withftl language=language_code %}
-            <div data-lang-specific lang="{{ language_code }}">
-              {% if quick_find_mode == 'PASSAGE' %}
-                {% ftlmsg 'bibleverses-quick-find-example-passage-mode-html' %}
-              {% else %}
-                {% ftlmsg 'bibleverses-quick-find-example-general-mode-html' %}
-              {% endif %}
-            </div>
-          {% endwithftl %}
-        {% endfor %}
+  <form action="" method="GET" class="quickfind always-adjust-size" id="id-quick-find-form">
+    <div class="form-row">
+      <label for="id_quick_find">{% ftlmsg 'bibleverses-quick-find-label' %}</label>
+      <div class="input">
+        <input id="id_quick_find" type="text" value="" name="quick_find">
+        <br/>
+        <div id="id_quick_find_help">
+          {# Need all the languages, because the example text is changed #}
+          {# dynamically according to chosen Bible translation language, not normal interface language #}
+          {% get_available_languages as LANGUAGES %}
+          {% for language_code, language_name in LANGUAGES %}
+            {% withftl language=language_code %}
+              <div data-lang-specific lang="{{ language_code }}">
+                {% if quick_find_mode == 'PASSAGE' %}
+                  {% ftlmsg 'bibleverses-quick-find-example-passage-mode-html' %}
+                {% else %}
+                  {% ftlmsg 'bibleverses-quick-find-example-general-mode-html' %}
+                {% endif %}
+              </div>
+            {% endwithftl %}
+          {% endfor %}
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="form-row">
-    <label for="id_book">{% ftlmsg 'bibleverses-select-passage-label' %}</label>
-    <div class="input">
-      <select name="book" id="id_book">
-        <option value="">----</option>
-        {% for b in bible_books %}
-          <option value="{{ b|lookup:"internal" }}"
-                  {% for l in language_codes %}
-                  data-lang-{{ l }}="{{ b|lookup:l }}"
-                  {% endfor %}
-                  >{{ b|lookup:current_language_code }}</option>
-        {% endfor %}
-      </select>
+    <div class="form-row">
+      <label for="id_book">{% ftlmsg 'bibleverses-select-passage-label' %}</label>
+      <div class="input">
+        <select name="book" id="id_book">
+          <option value="">----</option>
+          {% for b in bible_books %}
+            <option value="{{ b|lookup:"internal" }}"
+              {% for l in language_codes %}
+                data-lang-{{ l }}="{{ b|lookup:l }}"
+              {% endfor %}
+            >{{ b|lookup:current_language_code }}</option>
+          {% endfor %}
+        </select>
 
-      <nobr>
-        <select name="chapter_start">
-        </select>
-        :
-        <select name="verse_start">
-        </select>
-        —
-        <select name="chapter_end">
-        </select>
-        :
-        <select name="verse_end">
-        </select>
-      </nobr>
+        <nobr>
+          <select name="chapter_start">
+          </select>
+          :
+          <select name="verse_start">
+          </select>
+          —
+          <select name="chapter_end">
+          </select>
+          :
+          <select name="verse_end">
+          </select>
+        </nobr>
+      </div>
     </div>
-  </div>
 
-  <div class="form-row">
-    <label for="id-version-select">{% ftlmsg 'bibleverses-select-version-label' %}</label>
-    <div class="input">
-      <select id="id-version-select" name="version">
-        {% for v in bible_versions %}
-          <option value="{{ v.slug }}"
-                  lang="{{ v.language_code }}"
-                  {% if v.slug == default_bible_version.slug %}selected{% endif %}
-                  >{{ v.short_name }} ({{ v.full_name }})</option>
-        {% endfor %}
-      </select>
+    <div class="form-row">
+      <label for="id-version-select">{% ftlmsg 'bibleverses-select-version-label' %}</label>
+      <div class="input">
+        <select id="id-version-select" name="version">
+          {% for v in bible_versions %}
+            <option value="{{ v.slug }}"
+              lang="{{ v.language_code }}"
+              {% if v.slug == default_bible_version.slug %}selected{% endif %}
+            >{{ v.short_name }} ({{ v.full_name }})</option>
+          {% endfor %}
+        </select>
+      </div>
     </div>
-  </div>
 
-  <div class="actions">
-    {% spaceless %}
-      <button id="id_lookup" type="submit" name="lookup" class="btn primary">
-        {% if quick_find_mode == 'PASSAGE' %}
-          {% ftlmsg 'bibleverses-quick-find-lookup-passage-button' %}
-        {% else %}
-          {% ftlmsg 'bibleverses-quick-find-lookup-verse-button' %}
-        {% endif %}
-      </button>
-    {% endspaceless %}
-  </div>
+    <div class="actions">
+      {% spaceless %}
+        <button id="id_lookup" type="submit" name="lookup" class="btn primary">
+          {% if quick_find_mode == 'PASSAGE' %}
+            {% ftlmsg 'bibleverses-quick-find-lookup-passage-button' %}
+          {% else %}
+            {% ftlmsg 'bibleverses-quick-find-lookup-verse-button' %}
+          {% endif %}
+        </button>
+      {% endspaceless %}
+    </div>
 
-  <div class="non-field-errors">
-    <p id="id_form_all_errors" class="form-all-errors"></p>
-  </div>
+    <div class="non-field-errors">
+      <p id="id_form_all_errors" class="form-all-errors"></p>
+    </div>
 
-</div>
+  </div>

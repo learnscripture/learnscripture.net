@@ -16,7 +16,7 @@ def backwards(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cms', '0001_initial'),
+        ("cms", "0001_initial"),
     ]
 
     operations = [

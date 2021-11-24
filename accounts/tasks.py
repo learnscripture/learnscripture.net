@@ -7,6 +7,7 @@ from learnscripture.utils.tasks import task
 @task
 def notify_account_about_comment(comment_id):
     from comments.models import Comment
+
     comment = Comment.objects.get(id=comment_id)
 
     event = comment.event
@@ -33,19 +34,21 @@ def notify_about_comment(event, comment, account):
 
     # And not if they already have a notice about it.
     if account.identity.notices.filter(
-            related_event=event,
+        related_event=event,
     ).exists():
         return
 
     with django_ftl.override(account.default_language_code):
         if account == event.account:
-            msg = t('events-you-have-new-comments-notification-html',
-                    dict(event_url=event.get_absolute_url(),
-                         event=event.render_html(account.default_language_code)))
+            msg = t(
+                "events-you-have-new-comments-notification-html",
+                dict(event_url=event.get_absolute_url(), event=event.render_html(account.default_language_code)),
+            )
         else:
-            msg = t('events-new-comments-notification-html',
-                    dict(event_url=event.get_absolute_url(),
-                         event=event.render_html(account.default_language_code)))
+            msg = t(
+                "events-new-comments-notification-html",
+                dict(event_url=event.get_absolute_url(), event=event.render_html(account.default_language_code)),
+            )
 
     notice = account.add_html_notice(msg)
     notice.related_event = event

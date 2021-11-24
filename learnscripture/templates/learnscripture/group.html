@@ -17,8 +17,8 @@
 
   <div class="groupcomments" data-group-id="{{ group.id }}">
     <div class="commentblock"
-         data-new-comments-position="top"
-         >
+      data-new-comments-position="top"
+    >
       {% include "learnscripture/group_wall_add_comment_inc.html" %}
       {% for comment in comments %}
         {% with show_as_related_comment=comment.event %}

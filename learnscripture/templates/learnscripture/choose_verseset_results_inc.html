@@ -33,15 +33,15 @@
   <div id="id-more-results-container">
     <div class="paging">
       <span class="paging-part">
-       {% ftlmsg 'pagination-showing-shown-of-total' shown=results.shown_count total=results.total %}
+        {% ftlmsg 'pagination-showing-shown-of-total' shown=results.shown_count total=results.total %}
       </span>
       {% if results.more %}
         <span class="paging-part"><a href="{{ results.more_link }}"
-                                     hx-get="{{ results.more_link }}"
-                                     hx-target="#id-more-results-container"
-                                     hx-indicator="#id-more-results-container"
-                                     hx-swap="outerHTML"
-                                     >{% ftlmsg 'pagination-show-more' %}</a></span>
+          hx-get="{{ results.more_link }}"
+          hx-target="#id-more-results-container"
+          hx-indicator="#id-more-results-container"
+          hx-swap="outerHTML"
+        >{% ftlmsg 'pagination-show-more' %}</a></span>
       {% endif %}
       <span class="paging-part"><a href="#id-choose-verseset">{% ftlmsg 'pagination-jump-to-top' %}</a></span>
     </div>

@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bibleverses', '0048_populate_userversestatus_internal_reference_list_catechisms'),
+        ("bibleverses", "0048_populate_userversestatus_internal_reference_list_catechisms"),
     ]
 
     operations = [
         migrations.AlterUniqueTogether(
-            name='verse',
-            unique_together={('version', 'localized_reference')},
+            name="verse",
+            unique_together={("version", "localized_reference")},
         ),
     ]

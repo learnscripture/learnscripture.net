@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from datetime import timedelta
 from decimal import Decimal
 
@@ -17,26 +15,26 @@ from payments.signals import donation_drive_contributed_to, target_reached
 from .base import AccountTestMixin, TestBase, WebTestBase
 
 
-class IpnMock(object):
-    payment_status = 'Completed'
+class IpnMock:
+    payment_status = "Completed"
 
 
 def good_payment_ipn(account, amount, **kwargs):
-    obj_args = dict(mc_gross=amount,
-                    mc_currency="GBP",
-                    custom=sign_payment_info(dict(account=account.id)),
-                    ipaddress="127.0.0.1",
-                    payment_status='Completed',
-                    receiver_email=settings.PAYPAL_RECEIVER_EMAIL,
-                    )
+    obj_args = dict(
+        mc_gross=amount,
+        mc_currency="GBP",
+        custom=sign_payment_info(dict(account=account.id)),
+        ipaddress="127.0.0.1",
+        payment_status="Completed",
+        receiver_email=settings.PAYPAL_RECEIVER_EMAIL,
+    )
     obj_args.update(kwargs)
     return PayPalIPN.objects.create(**obj_args)
 
 
 class PaymentTests(AccountTestMixin, TestBase):
-
     def setUp(self):
-        super(PaymentTests, self).setUp()
+        super().setUp()
         self.identity, self.account = self.create_account()
 
     def test_send_bad_payment_1(self):
@@ -52,7 +50,7 @@ class PaymentTests(AccountTestMixin, TestBase):
         self.assertEqual(len(mail.outbox), 0)
         paypal_payment_received(ipn_1)
         self.assertEqual(len(mail.outbox), 1)
-        self.assertTrue('/admin/ipn/paypal' in mail.outbox[0].body)
+        self.assertTrue("/admin/ipn/paypal" in mail.outbox[0].body)
 
     def test_send_bad_payment_2(self):
         """
@@ -67,7 +65,7 @@ class PaymentTests(AccountTestMixin, TestBase):
         self.assertEqual(len(mail.outbox), 0)
         paypal_payment_received(ipn_1)
         self.assertEqual(len(mail.outbox), 1)
-        self.assertTrue('/admin/ipn/paypal' in mail.outbox[0].body)
+        self.assertTrue("/admin/ipn/paypal" in mail.outbox[0].body)
 
     def test_send_good_payment(self):
         ipn_1 = good_payment_ipn(self.account, Decimal("10.00"))
@@ -77,24 +75,22 @@ class PaymentTests(AccountTestMixin, TestBase):
         self.assertEqual(self.account.payments.count(), 1)
 
         self.assertEqual(len(mail.outbox), 1)
-        self.assertIn('Thank you for your donation', mail.outbox[0].body)
-        self.assertIn('£10', mail.outbox[0].body)
+        self.assertIn("Thank you for your donation", mail.outbox[0].body)
+        self.assertIn("£10", mail.outbox[0].body)
 
     def test_USD_payment(self):
-        ipn_1 = good_payment_ipn(self.account, Decimal("10.00"),
-                                 mc_currency='USD',
-                                 settle_currency='GBP',
-                                 settle_amount=Decimal('6.50'))
+        ipn_1 = good_payment_ipn(
+            self.account, Decimal("10.00"), mc_currency="USD", settle_currency="GBP", settle_amount=Decimal("6.50")
+        )
         paypal_payment_received(ipn_1)
         self.account = Account.objects.get(id=self.account.id)
         self.assertEqual(self.account.payments.count(), 1)
-        self.assertEqual(self.account.payments.all()[0].amount, Decimal('6.50'))
+        self.assertEqual(self.account.payments.all()[0].amount, Decimal("6.50"))
 
 
 class DonationDriveTests(AccountTestMixin, TestBase):
-
     def setUp(self):
-        super(DonationDriveTests, self).setUp()
+        super().setUp()
         self.identity, self.account = self.create_account()
 
     def test_donation_drive_active_for_account(self):
@@ -109,32 +105,27 @@ class DonationDriveTests(AccountTestMixin, TestBase):
 
         d2 = DonationDrive.objects.current("en")[0]
         self.assertEqual(d2, d)
-        self.assertEqual(d2.active_for_account(self.account),
-                         False)  # because it is a recently created account
+        self.assertEqual(d2.active_for_account(self.account), False)  # because it is a recently created account
 
         self.account.date_joined -= timedelta(days=100)
         self.account.save()
-        self.assertEqual(d2.active_for_account(self.account),
-                         True)
+        self.assertEqual(d2.active_for_account(self.account), True)
 
         # Now make payment
         ipn_1 = good_payment_ipn(self.account, Decimal("1.00"))
         paypal_payment_received(ipn_1)
 
         # No longer active
-        self.assertEqual(d2.active_for_account(self.account),
-                         False)
+        self.assertEqual(d2.active_for_account(self.account), False)
 
         self.move_clock_on(timedelta(days=5))
 
         # Should be active again
-        self.assertEqual(d2.active_for_account(self.account),
-                         True)
+        self.assertEqual(d2.active_for_account(self.account), True)
 
         # Change language:
         self.account.identity.interface_language = "tr"
-        self.assertEqual(d2.active_for_account(self.account),
-                         False)
+        self.assertEqual(d2.active_for_account(self.account), False)
 
     def test_target(self):
         DonationDrive.objects.create(
@@ -144,7 +135,7 @@ class DonationDriveTests(AccountTestMixin, TestBase):
             message_html="Please donate!",
             language_code="en",
             hide_if_donated_days=4,
-            target=Decimal("100")
+            target=Decimal("100"),
         )
         current1 = DonationDrive.objects.current("en")
         self.assertEqual(len(current1), 1)
@@ -158,7 +149,7 @@ class DonationDriveTests(AccountTestMixin, TestBase):
 
         current2 = DonationDrive.objects.current("en")
         d2 = current2[0]
-        self.assertEqual(d2.fraction_raised, Decimal('0.2'))
+        self.assertEqual(d2.fraction_raised, Decimal("0.2"))
 
         # Another payment, taking beyond target
         ipn_2 = good_payment_ipn(self.account, Decimal("90.00"))
@@ -177,7 +168,7 @@ class DonationDriveTests(AccountTestMixin, TestBase):
             active=True,
             message_html="Please donate!",
             hide_if_donated_days=4,
-            target=Decimal("20")
+            target=Decimal("20"),
         )
 
         self.donation_drive_contributed_to_called = 0
@@ -224,7 +215,7 @@ class DonationDriveTests(AccountTestMixin, TestBase):
             active=True,
             message_html="Please donate!",
             hide_if_donated_days=4,
-            target=Decimal("20")
+            target=Decimal("20"),
         )
         ipn_1 = good_payment_ipn(self.account, Decimal("10.00"))
         paypal_payment_received(ipn_1)
@@ -234,9 +225,11 @@ class DonationDriveTests(AccountTestMixin, TestBase):
         ipn_2 = good_payment_ipn(account2, Decimal("10.00"))
         paypal_payment_received(ipn_2)
 
-        mails = [m for m in mail.outbox
-                 if m.subject == "LearnScripture.net - donation target reached!" and
-                 m.to != [e for n, e in settings.ADMINS]]
+        mails = [
+            m
+            for m in mail.outbox
+            if m.subject == "LearnScripture.net - donation target reached!" and m.to != [e for n, e in settings.ADMINS]
+        ]
 
         self.assertEqual(len(mails), 2)
         self.assertIn("Our target of £20.00 was reached", mails[0].body)
@@ -245,7 +238,7 @@ class DonationDriveTests(AccountTestMixin, TestBase):
 
 class ViewDonationDriveTests(WebTestBase):
     def setUp(self):
-        super(ViewDonationDriveTests, self).setUp()
+        super().setUp()
         self.donation_drive = DonationDrive.objects.create(
             start=timezone.now() - timedelta(days=10),
             finish=timezone.now() + timedelta(days=10),
@@ -253,7 +246,7 @@ class ViewDonationDriveTests(WebTestBase):
             message_html="Please donate!",
             language_code="en",
             hide_if_donated_days=4,
-            target=Decimal("20")
+            target=Decimal("20"),
         )
         self.identity, self.account = self.create_account()
         self.account.date_joined -= timedelta(days=100)

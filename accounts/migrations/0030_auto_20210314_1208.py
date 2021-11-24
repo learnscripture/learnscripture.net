@@ -8,19 +8,32 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bibleverses', '0052_auto_20210314_1208'),
-        ('accounts', '0029_auto_20190801_1952'),
+        ("bibleverses", "0052_auto_20210314_1208"),
+        ("accounts", "0029_auto_20190801_1952"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='identity',
-            name='default_bible_version',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='bibleverses.textversion', verbose_name='Default bible version'),
+            model_name="identity",
+            name="default_bible_version",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                to="bibleverses.textversion",
+                verbose_name="Default bible version",
+            ),
         ),
         migrations.AlterField(
-            model_name='identity',
-            name='referred_by',
-            field=models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='referrals', to=settings.AUTH_USER_MODEL),
+            model_name="identity",
+            name="referred_by",
+            field=models.ForeignKey(
+                blank=True,
+                default=None,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="referrals",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

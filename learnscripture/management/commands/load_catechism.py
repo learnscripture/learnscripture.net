@@ -9,13 +9,14 @@ logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        parser.add_argument('version_slug')
-        parser.add_argument('json_filename')
+        parser.add_argument("version_slug")
+        parser.add_argument("json_filename")
 
     def handle(self, *args, **options):
         from bibleverses.models import TextVersion, WordSuggestionData
-        version_slug = options['version_slug']
-        json_filename = options['json_filename']
+
+        version_slug = options["version_slug"]
+        json_filename = options["json_filename"]
         version = TextVersion.objects.get(slug=version_slug)
         json_data = json.load(open(json_filename))
 
@@ -25,7 +26,4 @@ class Command(BaseCommand):
 
         # Need to be able to handle things like question "2a"
         for item_num, (number, question, answer) in enumerate(json_data):
-            version.qapairs.create(localized_reference=f"Q{number}",
-                                   question=question,
-                                   answer=answer,
-                                   order=item_num)
+            version.qapairs.create(localized_reference=f"Q{number}", question=question, answer=answer, order=item_num)

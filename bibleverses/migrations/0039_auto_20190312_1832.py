@@ -6,28 +6,28 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bibleverses', '0038_auto_20190205_1707'),
+        ("bibleverses", "0038_auto_20190205_1707"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='verseset',
-            name='additional_info',
-            field=models.TextField(blank=True, verbose_name='Additional info'),
+            model_name="verseset",
+            name="additional_info",
+            field=models.TextField(blank=True, verbose_name="Additional info"),
         ),
         migrations.AlterField(
-            model_name='verseset',
-            name='description',
-            field=models.TextField(blank=True, verbose_name='Description'),
+            model_name="verseset",
+            name="description",
+            field=models.TextField(blank=True, verbose_name="Description"),
         ),
         migrations.AlterField(
-            model_name='verseset',
-            name='name',
-            field=models.CharField(max_length=255, verbose_name='Name'),
+            model_name="verseset",
+            name="name",
+            field=models.CharField(max_length=255, verbose_name="Name"),
         ),
         migrations.AlterField(
-            model_name='verseset',
-            name='public',
+            model_name="verseset",
+            name="public",
             field=models.BooleanField(default=False, verbose_name="Make public (can't be undone)"),
         ),
     ]

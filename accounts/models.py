@@ -18,11 +18,27 @@ from fluent_compiler import types as fluent_types
 from sqlalchemy import text as sqla_text
 
 from accounts import memorymodel
-from accounts.signals import (catechism_started, points_increase, scored_100_percent, verse_finished, verse_started,
-                              verse_tested)
-from bibleverses.models import (InvalidVerseReference, MemoryStage, StageType, TextType, TextVersion, UserVerseStatus,
-                                VerseSet, VerseSetType, get_passage_sections, normalized_verse_list_ref,
-                                parse_validated_localized_reference)
+from accounts.signals import (
+    catechism_started,
+    points_increase,
+    scored_100_percent,
+    verse_finished,
+    verse_started,
+    verse_tested,
+)
+from bibleverses.models import (
+    InvalidVerseReference,
+    MemoryStage,
+    StageType,
+    TextType,
+    TextVersion,
+    UserVerseStatus,
+    VerseSet,
+    VerseSetType,
+    get_passage_sections,
+    normalized_verse_list_ref,
+    parse_validated_localized_reference,
+)
 from bibleverses.signals import verse_set_chosen
 from bibleverses.textutils import count_words
 from learnscripture.ftl_bundles import t, t_lazy
@@ -32,31 +48,32 @@ from scores.models import ScoreReason, Scores, TotalScore
 
 
 class TestingMethod(models.TextChoices):
-    FULL_WORDS = 'FULL_WORDS', t_lazy('accounts-type-whole-word-testing-method')
-    FIRST_LETTER = 'FIRST_LETTER', t_lazy('accounts-type-first-letter-testing-method')
-    ON_SCREEN = 'ON_SCREEN', t_lazy('accounts-choose-from-list-testing-method')
+    FULL_WORDS = "FULL_WORDS", t_lazy("accounts-type-whole-word-testing-method")
+    FIRST_LETTER = "FIRST_LETTER", t_lazy("accounts-type-first-letter-testing-method")
+    ON_SCREEN = "ON_SCREEN", t_lazy("accounts-choose-from-list-testing-method")
 
 
-THEMES = [('calm', t_lazy('accounts-slate-theme')),
-          ('bubblegum', t_lazy('accounts-bubblegum-pink-theme')),
-          ('bubblegum2', t_lazy('accounts-bubblegum-green-theme')),
-          ('space', t_lazy('accounts-space-theme')),
-          ]
-THEME_FONTS = [
-    ('calm', ['https://fonts.googleapis.com/css?family=Cuprum&subset=latin-ext']),
-    ('bubblegum', ['https://fonts.googleapis.com/css?family=Short+Stack']),
-    ('bubblegum2', ['https://fonts.googleapis.com/css?family=Short+Stack']),
-    ('space', ['https://fonts.googleapis.com/css?family=Prosto+One']),
+THEMES = [
+    ("calm", t_lazy("accounts-slate-theme")),
+    ("bubblegum", t_lazy("accounts-bubblegum-pink-theme")),
+    ("bubblegum2", t_lazy("accounts-bubblegum-green-theme")),
+    ("space", t_lazy("accounts-space-theme")),
 ]
-DEFAULT_THEME = 'calm'
+THEME_FONTS = [
+    ("calm", ["https://fonts.googleapis.com/css?family=Cuprum&subset=latin-ext"]),
+    ("bubblegum", ["https://fonts.googleapis.com/css?family=Short+Stack"]),
+    ("bubblegum2", ["https://fonts.googleapis.com/css?family=Short+Stack"]),
+    ("space", ["https://fonts.googleapis.com/css?family=Prosto+One"]),
+]
+DEFAULT_THEME = "calm"
 
 DONT_NAG_NEW_USERS_FOR_MONEY_DAYS = 30
 
 
 class HeatmapStatsType(models.TextChoices):
-    VERSES_STARTED = 'VERSES_STARTED', t_lazy('heatmap-items-started-stat')
-    VERSES_TESTED = 'VERSES_TESTED', t_lazy('heatmap-items-tested-stat')
-    COMBINED = 'COMBINED', t_lazy('heatmap-combined-stat')
+    VERSES_STARTED = "VERSES_STARTED", t_lazy("heatmap-items-started-stat")
+    VERSES_TESTED = "VERSES_TESTED", t_lazy("heatmap-items-tested-stat")
+    COMBINED = "COMBINED", t_lazy("heatmap-combined-stat")
 
 
 # Account is separate from Identity to allow guest users to use the site fully
@@ -68,8 +85,8 @@ class HeatmapStatsType(models.TextChoices):
 # and so sometimes they just delegate to Account methods.
 
 
-DELETED_PREFIX = '[deleted_'
-DELETED_SUFFIX = ']'
+DELETED_PREFIX = "[deleted_"
+DELETED_SUFFIX = "]"
 
 
 class AccountManager(UserManager):
@@ -85,21 +102,19 @@ class AccountManager(UserManager):
 
 
 class Account(AbstractBaseUser):
-    username = models.CharField(t_lazy('accounts-username'), max_length=100, blank=False, unique=True)
-    first_name = models.CharField(t_lazy('accounts-first-name'), max_length=100, blank=True)
-    last_name = models.CharField(t_lazy('accounts-last-name'), max_length=100, blank=True)
-    email = models.EmailField(t_lazy('accounts-email'))
+    username = models.CharField(t_lazy("accounts-username"), max_length=100, blank=False, unique=True)
+    first_name = models.CharField(t_lazy("accounts-first-name"), max_length=100, blank=True)
+    last_name = models.CharField(t_lazy("accounts-last-name"), max_length=100, blank=True)
+    email = models.EmailField(t_lazy("accounts-email"))
     # Override AbstractBaseUser.password to provide our own caption
-    password = models.CharField(t_lazy('accounts-password'), max_length=128)
+    password = models.CharField(t_lazy("accounts-password"), max_length=128)
 
-    date_joined = models.DateTimeField(t_lazy('accounts-date-joined'), default=timezone.now)
+    date_joined = models.DateTimeField(t_lazy("accounts-date-joined"), default=timezone.now)
     is_tester = models.BooleanField(default=False, blank=True)
     is_moderator = models.BooleanField(default=False, blank=True)
-    is_under_13 = models.BooleanField(t_lazy('accounts-under-13'),
-                                      default=False, blank=True)
+    is_under_13 = models.BooleanField(t_lazy("accounts-under-13"), default=False, blank=True)
     is_active = models.BooleanField(default=True)
-    enable_commenting = models.BooleanField(t_lazy('accounts-enable-commenting'),
-                                            default=True, blank=True)
+    enable_commenting = models.BooleanField(t_lazy("accounts-enable-commenting"), default=True, blank=True)
 
     # Used internally only, not directly settable by users, therefore
     # i18n not needed:
@@ -117,39 +132,36 @@ class Account(AbstractBaseUser):
     is_superuser = models.BooleanField(default=False)
 
     # Following:
-    following = models.ManyToManyField('self',
-                                       symmetrical=False,
-                                       blank=True,
-                                       related_name='followers')
+    following = models.ManyToManyField("self", symmetrical=False, blank=True, related_name="followers")
 
     # Managers and meta
     objects = AccountManager()
 
-    USERNAME_FIELD = 'username'
+    USERNAME_FIELD = "username"
 
-    REQUIRED_FIELDS = ['email']
+    REQUIRED_FIELDS = ["email"]
 
     class Meta:
-        ordering = ['username']
+        ordering = ["username"]
 
     def save(self, **kwargs):
         # We need to ensure that there is a TotalScore object
         if self.id is None:
-            retval = super(Account, self).save(**kwargs)
+            retval = super().save(**kwargs)
             TotalScore.objects.create(account=self)
             return retval
         else:
-            return super(Account, self).save(**kwargs)
+            return super().save(**kwargs)
 
     @transaction.atomic
     def erase(self):
         # User 'deletion'. We keep records around to avoid damaging
         # database integrity, but anonymize and erase what we can.
-        self.username = DELETED_PREFIX + timezone.now().strftime('%s') + DELETED_SUFFIX
-        self.first_name = ''
-        self.last_name = ''
-        self.email = ''
-        self.password = ''
+        self.username = DELETED_PREFIX + timezone.now().strftime("%s") + DELETED_SUFFIX
+        self.first_name = ""
+        self.last_name = ""
+        self.email = ""
+        self.password = ""
         self.is_active = False
         self.save()
 
@@ -162,7 +174,7 @@ class Account(AbstractBaseUser):
         self.invitations_created.all().delete()
         # Preserve the comment object so that conversations still make some
         # sense:
-        self.comments.all().update(message='[deleted]')
+        self.comments.all().update(message="[deleted]")
         self.referrals.all().update(referred_by=None)
 
         # TODO - other places where username might get stored
@@ -200,11 +212,11 @@ class Account(AbstractBaseUser):
 
     @property
     def personal_name(self):
-        return (self.first_name.strip() + ' ' + self.last_name.strip()).strip()
+        return (self.first_name.strip() + " " + self.last_name.strip()).strip()
 
     @property
     def public_username(self):
-        return '[deleted]' if self.is_erased else self.username
+        return "[deleted]" if self.is_erased else self.username
 
     @property
     def recruited_by(self):
@@ -214,9 +226,9 @@ class Account(AbstractBaseUser):
         return self.username
 
     # Main business logic
-    def award_action_points(self, localized_reference, language_code, text,
-                            old_memory_stage, action_change,
-                            action_stage, accuracy):
+    def award_action_points(
+        self, localized_reference, language_code, text, old_memory_stage, action_change, action_stage, accuracy
+    ):
         if action_stage != StageType.TEST:
             return []
 
@@ -231,21 +243,28 @@ class Account(AbstractBaseUser):
         action_logs.append(self.add_points(points, reason, accuracy=accuracy, localized_reference=localized_reference))
 
         if accuracy == 1:
-            action_logs.append(self.add_points(points * Scores.PERFECT_BONUS_FACTOR,
-                                               ScoreReason.PERFECT_TEST_BONUS,
-                                               localized_reference=localized_reference,
-                                               accuracy=accuracy))
+            action_logs.append(
+                self.add_points(
+                    points * Scores.PERFECT_BONUS_FACTOR,
+                    ScoreReason.PERFECT_TEST_BONUS,
+                    localized_reference=localized_reference,
+                    accuracy=accuracy,
+                )
+            )
             # At least one subscriber to scored_100_percent relies on action_logs
             # to be created in order to do job. In context of tests, this means
             # we have to send this signal after creating ActionLog
             scored_100_percent.send(sender=self)
 
-        if (action_change.old_strength < memorymodel.LEARNT <= action_change.new_strength):
-            action_logs.append(self.add_points(word_count * Scores.points_per_word(language_code) *
-                                               Scores.VERSE_LEARNT_BONUS,
-                                               ScoreReason.VERSE_LEARNT,
-                                               localized_reference=localized_reference,
-                                               accuracy=accuracy))
+        if action_change.old_strength < memorymodel.LEARNT <= action_change.new_strength:
+            action_logs.append(
+                self.add_points(
+                    word_count * Scores.points_per_word(language_code) * Scores.VERSE_LEARNT_BONUS,
+                    ScoreReason.VERSE_LEARNT,
+                    localized_reference=localized_reference,
+                    accuracy=accuracy,
+                )
+            )
             verse_finished.send(sender=self)
 
         if action_stage == StageType.TEST and old_memory_stage < MemoryStage.TESTED:
@@ -257,26 +276,21 @@ class Account(AbstractBaseUser):
         # Need to refresh 'total_score' each time
         points = math.floor(points)
         current_points = TotalScore.objects.get(account_id=self.id).points
-        action_log = self.action_logs.create(points=points,
-                                             reason=reason,
-                                             localized_reference=localized_reference,
-                                             accuracy=accuracy,
-                                             award=award,
-                                             )
+        action_log = self.action_logs.create(
+            points=points,
+            reason=reason,
+            localized_reference=localized_reference,
+            accuracy=accuracy,
+            award=award,
+        )
         # Change cached object to reflect DB, which has been
         # updated via a SQL UPDATE for max correctness.
         self.total_score.points = current_points + points
-        points_increase.send(sender=self,
-                             previous_points=current_points,
-                             points_added=action_log.points)
+        points_increase.send(sender=self, previous_points=current_points, points_added=action_log.points)
         return action_log
 
     def get_action_logs(self, from_datetime, highest_id_seen=0):
-        return (self.action_logs
-                .filter(created__gte=from_datetime,
-                        id__gt=highest_id_seen)
-                .order_by('created')
-                )
+        return self.action_logs.filter(created__gte=from_datetime, id__gt=highest_id_seen).order_by("created")
 
     @cached_property
     def points_all_time(self):
@@ -285,8 +299,7 @@ class Account(AbstractBaseUser):
     @cached_property
     def points_this_week(self):
         n = timezone.now()
-        val = self.action_logs.filter(created__gt=n - timedelta(7))\
-            .aggregate(models.Sum('points'))['points__sum']
+        val = self.action_logs.filter(created__gt=n - timedelta(7)).aggregate(models.Sum("points"))["points__sum"]
         return val if val is not None else 0
 
     def receive_payment(self, ipn_obj):
@@ -296,26 +309,24 @@ class Account(AbstractBaseUser):
             amount = ipn_obj.settle_amount
         else:
             raise ValueError("Unrecognized currency")
-        self.payments.create(amount=amount,
-                             paypal_ipn=ipn_obj,
-                             created=timezone.now())
+        self.payments.create(amount=amount, paypal_ipn=ipn_obj, created=timezone.now())
         send_payment_received_email(self, ipn_obj)
 
     def make_referral_link(self, url):
-        if '?from=' in url or '&from=' in url:
+        if "?from=" in url or "&from=" in url:
             return url
-        if '?' in url:
-            url = url + '&'
+        if "?" in url:
+            url = url + "&"
         else:
-            url = url + '?'
-        url = url + 'from=' + self.username
+            url = url + "?"
+        url = url + "from=" + self.username
         return url
 
     def referred_identities_count(self):
         return self.referrals.count()
 
     def visible_awards(self):
-        all_awards = self.awards.order_by('award_type', 'level')
+        all_awards = self.awards.order_by("award_type", "level")
         visible = OrderedDict()
         # Ignore all but the highest
         for a in all_awards:
@@ -331,11 +342,7 @@ class Account(AbstractBaseUser):
         from groups.models import Group
 
         # use Group directly so that we can do the annotation/ordering we need
-        return (Group.objects
-                .annotate(num_members=models.Count('members'))
-                .order_by('-num_members')
-                .filter(members=self)
-                )
+        return Group.objects.annotate(num_members=models.Count("members")).order_by("-num_members").filter(members=self)
 
     def get_friendship_weights(self):
         """
@@ -345,8 +352,7 @@ class Account(AbstractBaseUser):
         return account_get_friendship_weights(self.id)
 
     def donations_disabled(self):
-        return (self.is_under_13 or
-                ((timezone.now() - self.date_joined).days < DONT_NAG_NEW_USERS_FOR_MONEY_DAYS))
+        return self.is_under_13 or ((timezone.now() - self.date_joined).days < DONT_NAG_NEW_USERS_FOR_MONEY_DAYS)
 
     def is_following(self, account):
         return self.following.filter(pk=account.id).exists()
@@ -383,7 +389,7 @@ def account_get_friendship_weights(account_id):
     # We use groups to define possible friendships.
     account = Account.objects.get(id=account_id)
     weights = defaultdict(int)
-    for group in account.groups.filter(count_for_friendships=True).prefetch_related('members'):
+    for group in account.groups.filter(count_for_friendships=True).prefetch_related("members"):
         members = list(group.members.all())
         # Smaller groups are better evidence of friendship.
         w = 1.0 / len(members)
@@ -422,28 +428,31 @@ def clear_friendship_weight_cache(account_id):
 
 def send_payment_received_email(account, payment):
     from django.conf import settings
+
     c = {
-        'payment': payment,
-        'account': account,
-        'payment_amount': fluent_types.fluent_number(payment.mc_gross,
-                                                     currency=payment.mc_currency,
-                                                     style=fluent_types.FORMAT_STYLE_CURRENCY,
-                                                     currencyDisplay=fluent_types.CURRENCY_DISPLAY_SYMBOL)
+        "payment": payment,
+        "account": account,
+        "payment_amount": fluent_types.fluent_number(
+            payment.mc_gross,
+            currency=payment.mc_currency,
+            style=fluent_types.FORMAT_STYLE_CURRENCY,
+            currencyDisplay=fluent_types.CURRENCY_DISPLAY_SYMBOL,
+        ),
     }
     with django_ftl.override(account.default_language_code):
         body = render_to_string_ftl("learnscripture/payment_received_email.txt", c)
-        subject = t('donations-donation-received-subject')
+        subject = t("donations-donation-received-subject")
         mail.send_mail(subject, body, settings.SERVER_EMAIL, [account.email])
 
 
-class ActionChange(object):
+class ActionChange:
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
 
 
 class IdentityManager(models.Manager):
     def get_queryset(self):
-        return super(IdentityManager, self).get_queryset().select_related('default_bible_version', 'account')
+        return super().get_queryset().select_related("default_bible_version", "account")
 
 
 # Most of business logic regarding verses is tied to Identity, for the sake of
@@ -452,42 +461,53 @@ class IdentityManager(models.Manager):
 
 
 class Identity(models.Model):
-    account = models.OneToOneField(Account, verbose_name=t_lazy('accounts-account'),
-                                   on_delete=models.CASCADE, null=True, blank=True, default=None)
-    date_created = models.DateTimeField(t_lazy('accounts-date-created'), default=timezone.now)
+    account = models.OneToOneField(
+        Account, verbose_name=t_lazy("accounts-account"), on_delete=models.CASCADE, null=True, blank=True, default=None
+    )
+    date_created = models.DateTimeField(t_lazy("accounts-date-created"), default=timezone.now)
 
     # Preferences
-    default_bible_version = models.ForeignKey(TextVersion, on_delete=models.PROTECT,
-                                              verbose_name=t_lazy('accounts-default-bible-version'),
-                                              null=True, blank=True)
-    desktop_testing_method = models.CharField(max_length=20,
-                                              verbose_name=t_lazy('accounts-desktop-testing-method'),
-                                              choices=TestingMethod.choices,
-                                              default=TestingMethod.FIRST_LETTER)
-    touchscreen_testing_method = models.CharField(max_length=20,
-                                                  verbose_name=t_lazy('accounts-touchscreen-testing-method'),
-                                                  choices=TestingMethod.choices,
-                                                  default=TestingMethod.FIRST_LETTER)
-    enable_animations = models.BooleanField(t_lazy('accounts-enable-animations'),
-                                            blank=True, default=True)
-    enable_sounds = models.BooleanField(t_lazy('accounts-enable-sounds'),
-                                        blank=True, default=False)
-    enable_vibration = models.BooleanField(t_lazy('accounts-enable-vibration'), blank=True, default=True,
-                                           help_text=t_lazy('accounts-enable-vibration.help-text'))
-    interface_theme = models.CharField(t_lazy('accounts-interface-theme'), max_length=30, choices=THEMES,
-                                       default=DEFAULT_THEME)
-    interface_language = models.CharField(t_lazy('accounts-interface-language'), max_length=10,
-                                          choices=settings.LANGUAGES,
-                                          default=settings.LANGUAGE_CODE)
+    default_bible_version = models.ForeignKey(
+        TextVersion,
+        on_delete=models.PROTECT,
+        verbose_name=t_lazy("accounts-default-bible-version"),
+        null=True,
+        blank=True,
+    )
+    desktop_testing_method = models.CharField(
+        max_length=20,
+        verbose_name=t_lazy("accounts-desktop-testing-method"),
+        choices=TestingMethod.choices,
+        default=TestingMethod.FIRST_LETTER,
+    )
+    touchscreen_testing_method = models.CharField(
+        max_length=20,
+        verbose_name=t_lazy("accounts-touchscreen-testing-method"),
+        choices=TestingMethod.choices,
+        default=TestingMethod.FIRST_LETTER,
+    )
+    enable_animations = models.BooleanField(t_lazy("accounts-enable-animations"), blank=True, default=True)
+    enable_sounds = models.BooleanField(t_lazy("accounts-enable-sounds"), blank=True, default=False)
+    enable_vibration = models.BooleanField(
+        t_lazy("accounts-enable-vibration"),
+        blank=True,
+        default=True,
+        help_text=t_lazy("accounts-enable-vibration.help-text"),
+    )
+    interface_theme = models.CharField(
+        t_lazy("accounts-interface-theme"), max_length=30, choices=THEMES, default=DEFAULT_THEME
+    )
+    interface_language = models.CharField(
+        t_lazy("accounts-interface-language"), max_length=10, choices=settings.LANGUAGES, default=settings.LANGUAGE_CODE
+    )
 
     # Managed invisibly:
-    referred_by = models.ForeignKey(Account, on_delete=models.SET_NULL,
-                                    null=True, default=None,
-                                    blank=True,
-                                    related_name='referrals')
-    heatmap_default_stats_type = models.CharField(max_length=20,
-                                                  choices=HeatmapStatsType.choices,
-                                                  default=HeatmapStatsType.COMBINED)
+    referred_by = models.ForeignKey(
+        Account, on_delete=models.SET_NULL, null=True, default=None, blank=True, related_name="referrals"
+    )
+    heatmap_default_stats_type = models.CharField(
+        max_length=20, choices=HeatmapStatsType.choices, default=HeatmapStatsType.COMBINED
+    )
     heatmap_default_show = models.BooleanField(default=True)
 
     pin_action_log_menu_large_screen = models.BooleanField(default=False)
@@ -500,6 +520,7 @@ class Identity(models.Model):
     @property
     def expires_on(self):
         from django.conf import settings
+
         return self.date_created + timedelta(settings.IDENTITY_EXPIRES_DAYS)
 
     @property
@@ -507,13 +528,13 @@ class Identity(models.Model):
         return self.account_id is None and self.expires_on < timezone.now()
 
     class Meta:
-        verbose_name_plural = 'identities'
+        verbose_name_plural = "identities"
 
     def __str__(self):
         if self.account_id is None:
-            return f'<Identity {self.id}>'
+            return f"<Identity {self.id}>"
         else:
-            return f'<Identity {self.id}: {self.account}>'
+            return f"<Identity {self.id}: {self.account}>"
 
     def __repr__(self):
         return str(self)
@@ -542,12 +563,9 @@ class Identity(models.Model):
         out = []
 
         vc_list = verse_set.verse_choices.all()
-        existing_uvss = set(self.verse_statuses
-                            .active()
-                            .filter(verse_set=verse_set,
-                                    version=version))
+        existing_uvss = set(self.verse_statuses.active().filter(verse_set=verse_set, version=version))
 
-        uvss_dict = dict([(uvs.localized_reference, uvs) for uvs in existing_uvss])
+        uvss_dict = {uvs.localized_reference: uvs for uvs in existing_uvss}
 
         # Want to preserve order of verse_set, so iterate like this:
         for vc in vc_list:
@@ -567,10 +585,9 @@ class Identity(models.Model):
         if version is None:
             version = self.default_bible_version
 
-        existing = list(self.verse_statuses
-                        .active()
-                        .filter(localized_reference=localized_reference,
-                                verse_set__isnull=True))
+        existing = list(
+            self.verse_statuses.active().filter(localized_reference=localized_reference, verse_set__isnull=True)
+        )
         if existing:
             return existing[0]
         else:
@@ -582,12 +599,12 @@ class Identity(models.Model):
         """
         base_uvs_query = self.verse_statuses.filter(version=catechism)
         existing_uvss = base_uvs_query
-        existing_refs = set(uvs.localized_reference for uvs in existing_uvss)
+        existing_refs = {uvs.localized_reference for uvs in existing_uvss}
         # Some might be set to 'ignored'. Need to fix that.
         if any(uvs.ignored for uvs in existing_uvss):
             base_uvs_query.update(ignored=False)
 
-        qapairs = catechism.qapairs.all().order_by('order')
+        qapairs = catechism.qapairs.all().order_by("order")
 
         new_uvss = [
             UserVerseStatus(
@@ -596,11 +613,13 @@ class Identity(models.Model):
                 internal_reference_list=[qapair.localized_reference],
                 text_order=qapair.order,
                 version=catechism,
-                added=timezone.now()
+                added=timezone.now(),
             )
-            for qapair in qapairs if qapair.localized_reference not in existing_refs]
+            for qapair in qapairs
+            if qapair.localized_reference not in existing_refs
+        ]
         UserVerseStatus.objects.bulk_create(new_uvss)
-        return base_uvs_query.all().order_by('text_order')  # fresh QuerySet
+        return base_uvs_query.all().order_by("text_order")  # fresh QuerySet
 
     def record_verse_action(self, localized_reference, version_slug, stage_type, accuracy=None):
         """
@@ -610,8 +629,9 @@ class Identity(models.Model):
         # We keep this separate from award_action_points because it needs
         # different info, and it is easier to test with its current API.
 
-        s = self.verse_statuses.filter(localized_reference=localized_reference,
-                                       version__slug=version_slug).select_related('version')
+        s = self.verse_statuses.filter(
+            localized_reference=localized_reference, version__slug=version_slug
+        ).select_related("version")
 
         if len(s) == 0:
             # Shouldn't be possible via UI. The client must be trying to record
@@ -640,19 +660,14 @@ class Identity(models.Model):
                 time_elapsed = (now - s0.last_tested).total_seconds()
             new_strength = memorymodel.strength_estimate(old_strength, accuracy, time_elapsed)
             next_due = now + timedelta(seconds=memorymodel.next_test_due_after(new_strength))
-            s.update(strength=new_strength,
-                     last_tested=now,
-                     next_test_due=next_due,
-                     early_review_requested=False)
+            s.update(strength=new_strength, last_tested=now, next_test_due=next_due, early_review_requested=False)
 
             # Sometimes we get to here with 'first_seen' still null,
             # so we fix it to keep our data making sense.
             s.filter(strength__gt=0, first_seen__isnull=True).update(first_seen=now)
 
             verse_tested.send(sender=self, verse=s0)
-            if (s0.version.is_catechism and s0.text_order == 1 and
-                    old_strength == 0.0 and
-                    self.account_id is not None):
+            if s0.version.is_catechism and s0.text_order == 1 and old_strength == 0.0 and self.account_id is not None:
                 catechism_started.send(self.account, catechism=s0.version)
 
             return ActionChange(old_strength=old_strength, new_strength=new_strength)
@@ -661,15 +676,15 @@ class Identity(models.Model):
             s.filter(first_seen__isnull=True).update(first_seen=now)
             return ActionChange()
 
-    def award_action_points(self, localized_reference, language_code,
-                            text, old_memory_stage, action_change,
-                            action_stage, accuracy):
+    def award_action_points(
+        self, localized_reference, language_code, text, old_memory_stage, action_change, action_stage, accuracy
+    ):
         if self.account_id is None:
             return []
 
-        return self.account.award_action_points(localized_reference, language_code,
-                                                text, old_memory_stage, action_change,
-                                                action_stage, accuracy)
+        return self.account.award_action_points(
+            localized_reference, language_code, text, old_memory_stage, action_change, action_stage, accuracy
+        )
 
     def get_verse_statuses_bulk(self, ids):
         # ids is a list of UserVerseStatus.id values
@@ -678,10 +693,9 @@ class Identity(models.Model):
         # 'text', 'question', and 'answer' attributes retrieved efficiently,
         # as appropriate
 
-        retval = {uvs.id: uvs for uvs in (self.verse_statuses
-                                          .filter(id__in=ids)
-                                          .select_related('version', 'verse_set'))
-                  }
+        retval = {
+            uvs.id: uvs for uvs in (self.verse_statuses.filter(id__in=ids).select_related("version", "verse_set"))
+        }
 
         # We need to get 'text' efficiently too. Group into versions:
         by_version = {}
@@ -735,14 +749,9 @@ class Identity(models.Model):
 
         # Merged verses: verse_list might have a different idea about what
         # localized_reference is. Also need to cope with Combo verses.
-        localized_reference = normalized_verse_list_ref(version.language_code,
-                                                        verse_list)
-        parsed_ref = parse_validated_localized_reference(version.language_code,
-                                                         localized_reference)
-        internal_reference_list = [
-            r.canonical_form()
-            for r in parsed_ref.to_internal().to_list()
-        ]
+        localized_reference = normalized_verse_list_ref(version.language_code, verse_list)
+        parsed_ref = parse_validated_localized_reference(version.language_code, localized_reference)
+        internal_reference_list = [r.canonical_form() for r in parsed_ref.to_internal().to_list()]
         # NB: we are exploiting the fact that multiple calls to
         # create_verse_status will get slightly increasing values of 'added',
         # allowing us to preserve order.
@@ -754,15 +763,16 @@ class Identity(models.Model):
                 text_order=text_order,
                 added=timezone.now(),
                 internal_reference_list=internal_reference_list,
-            )
+            ),
         )
 
         dirty = False
         # See if we already have data for this verse + version, for the
         # case where the user started learning the verse standalone, not
         # as part of a verse set, or in a different verse set.
-        same_verses = self.verse_statuses.filter(localized_reference=localized_reference,
-                                                 version=version).exclude(id=uvs.id)
+        same_verses = self.verse_statuses.filter(localized_reference=localized_reference, version=version).exclude(
+            id=uvs.id
+        )
 
         if same_verses and new:
             # Use existing data:
@@ -796,29 +806,28 @@ class Identity(models.Model):
         Ignores VerseChoices that belong to passage sets.
         """
         # Not used for passages verse sets.
-        qs = self.verse_statuses.filter(localized_reference__in=localized_references,
-                                        version__slug=version_slug)
+        qs = self.verse_statuses.filter(localized_reference__in=localized_references, version__slug=version_slug)
         qs = qs.exclude(verse_set__set_type=VerseSetType.PASSAGE)
         qs.update(ignored=True)
 
     def reset_progress(self, localized_reference, version_slug):
         # Sync with Learn.elm verseStatusResetProgress
-        qs = self.verse_statuses.filter(localized_reference=localized_reference,
-                                        version__slug=version_slug)
+        qs = self.verse_statuses.filter(localized_reference=localized_reference, version__slug=version_slug)
 
         # NB - we don't change 'first_seen', because this could destroy
         # someone's learning streak.
-        qs.update(strength=0,
-                  last_tested=None,
-                  next_test_due=None,
-                  memory_stage=MemoryStage.ZERO,
-                  early_review_requested=False)
+        qs.update(
+            strength=0,
+            last_tested=None,
+            next_test_due=None,
+            memory_stage=MemoryStage.ZERO,
+            early_review_requested=False,
+        )
 
     def review_sooner(self, localized_reference, version_slug, review_after_seconds):
         # Could in theory do this with an update, but it is easier in Python and
         # the queryset likely only has one item in it.
-        qs = self.verse_statuses.filter(localized_reference=localized_reference,
-                                        version__slug=version_slug)
+        qs = self.verse_statuses.filter(localized_reference=localized_reference, version__slug=version_slug)
         for uvs in qs:
             last_tested = uvs.last_tested
             if last_tested is None:
@@ -851,42 +860,37 @@ class Identity(models.Model):
         return retval
 
     def verse_statuses_started(self):
-        return (self.verse_statuses
-                .active()
-                .filter(strength__gt=0,
-                        last_tested__isnull=False))
+        return self.verse_statuses.active().filter(strength__gt=0, last_tested__isnull=False)
 
     def verses_started_count(self, started_since=None):
         from scores.models import get_verses_started_counts
-        return get_verses_started_counts([self.id],
-                                         started_since=started_since
-                                         )[self.id]
+
+        return get_verses_started_counts([self.id], started_since=started_since)[self.id]
 
     def verses_finished_count(self, finished_since=None):
         from scores.models import get_verses_finished_count
+
         return get_verses_finished_count(self.id, finished_since=finished_since)
 
     def bible_verse_statuses_for_reviewing(self):
         """
         Returns a list of UserVerseStatuses that need reviewing.
         """
-        qs = (self.verse_statuses
-              .filter(version__text_type=TextType.BIBLE)
-              .needs_reviewing(timezone.now())
-              # Don't include passages - we do those separately:
-              .exclude(verse_set__set_type=VerseSetType.PASSAGE)
-              .order_by('next_test_due', 'added')
-              )
+        qs = (
+            self.verse_statuses.filter(version__text_type=TextType.BIBLE)
+            .needs_reviewing(timezone.now())
+            # Don't include passages - we do those separately:
+            .exclude(verse_set__set_type=VerseSetType.PASSAGE)
+            .order_by("next_test_due", "added")
+        )
         return sorted(self._dedupe_uvs_set(qs), key=uvs_urgency, reverse=True)
 
     def bible_verse_statuses_for_learning_qs(self):
-        qs = (self.verse_statuses
-              .active()
-              .filter(version__text_type=TextType.BIBLE,
-                      memory_stage__lt=MemoryStage.TESTED)
-              # Don't include passages - we do those separately:
-              .exclude(verse_set__set_type=VerseSetType.PASSAGE)
-              )
+        qs = (
+            self.verse_statuses.active().filter(version__text_type=TextType.BIBLE, memory_stage__lt=MemoryStage.TESTED)
+            # Don't include passages - we do those separately:
+            .exclude(verse_set__set_type=VerseSetType.PASSAGE)
+        )
         return qs
 
     def bible_verse_statuses_for_learning(self, verse_set_id):
@@ -904,7 +908,7 @@ class Identity(models.Model):
 
         # 'added' should have enough precision to distinguish, otherwise 'id'
         # should be according to order of creation.
-        qs = qs.order_by('added', 'id')
+        qs = qs.order_by("added", "id")
         return self._dedupe_uvs_set(qs)
 
     def bible_verse_statuses_for_learning_grouped(self):
@@ -913,13 +917,12 @@ class Identity(models.Model):
         # group this way in the UI.  Use prefetch_related instead of
         # select_related because we are likely to have many UserVerseStatus
         # objects and very few VerseSet objects.
-        qs = qs.order_by('verse_set', 'added', 'id').prefetch_related('verse_set')
+        qs = qs.order_by("verse_set", "added", "id").prefetch_related("verse_set")
 
         # We don't fully dedupe, because we want to distinguish
         # between UVSes with verse_set == None and verse_set != None
         uvs_list = self._dedupe_uvs_set_distinguishing_verse_set(qs)
-        return [(a, list(b)) for a, b in
-                itertools.groupby(uvs_list, lambda uvs: uvs.verse_set)]
+        return [(a, list(b)) for a, b in itertools.groupby(uvs_list, lambda uvs: uvs.verse_set)]
 
     def clear_bible_learning_queue(self, verse_set_id):
         qs = self.bible_verse_statuses_for_learning_qs()
@@ -930,19 +933,17 @@ class Identity(models.Model):
         qs.delete()
 
     def _catechism_qas_base_qs(self, catechism_id):
-        qs = (self.verse_statuses
-              .active()
-              .filter(version__text_type=TextType.CATECHISM)
-              )
+        qs = self.verse_statuses.active().filter(version__text_type=TextType.CATECHISM)
         if catechism_id is not None:
             qs = qs.filter(version=catechism_id)
         return qs
 
     def catechism_qas_for_learning_qs(self, catechism_id):
-        return (self._catechism_qas_base_qs(catechism_id)
-                .filter(memory_stage__lt=MemoryStage.TESTED)
-                .order_by('added', 'id')
-                )
+        return (
+            self._catechism_qas_base_qs(catechism_id)
+            .filter(memory_stage__lt=MemoryStage.TESTED)
+            .order_by("added", "id")
+        )
 
     def catechism_qas_for_learning(self, catechism_id):
         """
@@ -954,14 +955,13 @@ class Identity(models.Model):
         """
         Returns catechism QAs that are due for reviewing
         """
-        return (self._catechism_qas_base_qs(catechism_id)
-                .needs_reviewing(timezone.now()))
+        return self._catechism_qas_base_qs(catechism_id).needs_reviewing(timezone.now())
 
     def catechisms_for_learning(self):
         """
         Return catechism objects decorated with tested_total and untested_total
         """
-        statuses = self.catechism_qas_for_learning(None).select_related('version')
+        statuses = self.catechism_qas_for_learning(None).select_related("version")
 
         # Already have enough info for untested_total
         catechisms = {}
@@ -984,7 +984,7 @@ class Identity(models.Model):
         """
         Returns catechisms that need reviewing, decorated with needs_reviewing_total
         """
-        statuses = self.catechism_qas_for_reviewing(None).select_related('version')
+        statuses = self.catechism_qas_for_reviewing(None).select_related("version")
         catechisms = {}
         for s in statuses:
             catechism_id = s.version_id
@@ -1002,15 +1002,14 @@ class Identity(models.Model):
         self.catechism_qas_for_learning_qs(catechism_id).delete()
 
     def get_all_tested_catechism_qas(self, catechism_id):
-        return (self._catechism_qas_base_qs(catechism_id)
-                .filter(memory_stage__gte=MemoryStage.TESTED)
-                .order_by('text_order'))
+        return (
+            self._catechism_qas_base_qs(catechism_id)
+            .filter(memory_stage__gte=MemoryStage.TESTED)
+            .order_by("text_order")
+        )
 
     def verse_statuses_for_ref_and_version(self, localized_reference, version_slug):
-        return (self.verse_statuses
-                .active()
-                .filter(localized_reference=localized_reference,
-                        version__slug=version_slug))
+        return self.verse_statuses.active().filter(localized_reference=localized_reference, version__slug=version_slug)
 
     def passages_for_learning(self, extra_stats=True):
         """
@@ -1019,32 +1018,28 @@ class Identity(models.Model):
         Objects are decorated with 'untested_total' and 'tested_total' attributes,
         and sorted according to urgency (unless `extra_stats=False` is passed)
         """
-        statuses = (self.verse_statuses
-                    .active()
-                    .filter(verse_set__set_type=VerseSetType.PASSAGE,
-                            memory_stage__lt=MemoryStage.TESTED)
-                    .select_related('verse_set', 'version'))
-
-        chosen_verse_sets = set(
-            ChosenVerseSet(version=uvs.version,
-                           verse_set=uvs.verse_set)
-            for uvs in statuses
+        statuses = (
+            self.verse_statuses.active()
+            .filter(verse_set__set_type=VerseSetType.PASSAGE, memory_stage__lt=MemoryStage.TESTED)
+            .select_related("verse_set", "version")
         )
+
+        chosen_verse_sets = {ChosenVerseSet(version=uvs.version, verse_set=uvs.verse_set) for uvs in statuses}
         if not extra_stats:
             return list(chosen_verse_sets)
 
         # Attach all the UVSs to get other stats, including maximum_urgency
         # which is needed for sorting
-        all_statuses = (self.verse_statuses
-                        .active()
-                        .filter(verse_set__set_type=VerseSetType.PASSAGE,
-                                verse_set__in=[cvs.verse_set for cvs in chosen_verse_sets]))
+        all_statuses = self.verse_statuses.active().filter(
+            verse_set__set_type=VerseSetType.PASSAGE, verse_set__in=[cvs.verse_set for cvs in chosen_verse_sets]
+        )
 
         now = timezone.now()
 
         for cvs in chosen_verse_sets:
-            uvss = [uvs for uvs in all_statuses
-                    if uvs.verse_set_id == cvs.verse_set.id and uvs.version_id == cvs.version.id]
+            uvss = [
+                uvs for uvs in all_statuses if uvs.verse_set_id == cvs.verse_set.id and uvs.version_id == cvs.version.id
+            ]
             cvs.maximum_urgency = max(map(uvs_urgency, uvss)) if uvss else 0
             cvs.tested_total = len([uvs for uvs in uvss if uvs.is_tested()])
             cvs.untested_total = len(uvss) - cvs.tested_total
@@ -1056,21 +1051,18 @@ class Identity(models.Model):
         """
         Returns a list of ChosenVerseSets that have been/are being learnt
         """
-        pairs = (self.verse_statuses
-                 .active()
-                 .filter(verse_set__isnull=False)
-                 .values_list('verse_set_id', 'version_id')
-                 .distinct())
+        pairs = (
+            self.verse_statuses.active()
+            .filter(verse_set__isnull=False)
+            .values_list("verse_set_id", "version_id")
+            .distinct()
+        )
         if len(pairs) == 0:
             return []
         vs_ids, tv_ids = list(zip(*pairs))
-        versions = {tv.id: tv
-                    for tv in TextVersion.objects.filter(id__in=tv_ids)}
-        verse_sets = {vs.id: vs
-                      for vs in VerseSet.objects.filter(id__in=vs_ids)}
-        retval = [ChosenVerseSet(version=versions[tv_id],
-                                 verse_set=verse_sets[vs_id])
-                  for vs_id, tv_id in pairs]
+        versions = {tv.id: tv for tv in TextVersion.objects.filter(id__in=tv_ids)}
+        verse_sets = {vs.id: vs for vs in VerseSet.objects.filter(id__in=vs_ids)}
+        retval = [ChosenVerseSet(version=versions[tv_id], verse_set=verse_sets[vs_id]) for vs_id, tv_id in pairs]
         retval.sort(key=lambda c: c.sort_key)
         return retval
 
@@ -1079,21 +1071,26 @@ class Identity(models.Model):
         Given a list of localized_references, returns the ones that the user has started
         to learn.
         """
-        return set(uvs.localized_reference
-                   for uvs in (self.verse_statuses
-                               .tested()
-                               .filter(localized_reference__in=localized_references,
-                                       version=version)))
+        return {
+            uvs.localized_reference
+            for uvs in (
+                self.verse_statuses.tested().filter(localized_reference__in=localized_references, version=version)
+            )
+        }
 
     def which_in_learning_queue(self, localized_references, version):
         """
         Given a list of localized references, returns the ones that are in the user's
         queue for learning.
         """
-        return set(uvs.localized_reference
-                   for uvs in (self.bible_verse_statuses_for_learning_qs()
-                               .filter(localized_reference__in=localized_references,
-                                       version=version)))
+        return {
+            uvs.localized_reference
+            for uvs in (
+                self.bible_verse_statuses_for_learning_qs().filter(
+                    localized_reference__in=localized_references, version=version
+                )
+            )
+        }
 
     def passages_for_reviewing_and_learning(self):
         """
@@ -1103,29 +1100,27 @@ class Identity(models.Model):
         Both have extra info needed by dashboard.
         """
         learning_sets = self.passages_for_learning()
-        learning_verse_set_ids = set(cvs.id for cvs in learning_sets)
+        learning_verse_set_ids = {cvs.id for cvs in learning_sets}
         # We need the 'learning' sets in order to calculate the 'reviewing'
         # sets correctly, because we exclude the former from the latter.
         # We also always use these two return values at the same time.
         # So it makes sense to return them together.
-        statuses = (self.verse_statuses
-                    .active()
-                    .select_related('version')
-                    .filter(verse_set__set_type=VerseSetType.PASSAGE))
+        statuses = (
+            self.verse_statuses.active().select_related("version").filter(verse_set__set_type=VerseSetType.PASSAGE)
+        )
 
         # If any of them need reviewing, we want to know about it:
-        statuses_for_review = (statuses
-                               .reviewable()
-                               .needs_reviewing(timezone.now())
-                               .select_related('verse_set', 'version'))
+        statuses_for_review = (
+            statuses.reviewable().needs_reviewing(timezone.now()).select_related("verse_set", "version")
+        )
 
         # We also want to exclude those which have any verses in the set still
         # untested, but this is easiest done as a second pass after retrieving.
 
         # Query 1
-        chosen_verse_sets = set(ChosenVerseSet(verse_set=uvs.verse_set,
-                                               version=uvs.version)
-                                for uvs in statuses_for_review)
+        chosen_verse_sets = {
+            ChosenVerseSet(verse_set=uvs.verse_set, version=uvs.version) for uvs in statuses_for_review
+        }
 
         # Decorate with various extra things we want to show in dashboard:
         #  - next_section_verse_count
@@ -1134,15 +1129,13 @@ class Identity(models.Model):
         #  - total_verse_count
 
         # Remove things that are still in initial learning phase
-        chosen_verse_set_list = [
-            cvs for cvs in chosen_verse_sets if cvs.id not in learning_verse_set_ids
-        ]
+        chosen_verse_set_list = [cvs for cvs in chosen_verse_sets if cvs.id not in learning_verse_set_ids]
 
         # We need the complete list of UVSs for each verse set to get
         # the rest of the info correct.
-        all_uvss = (statuses
-                    .filter(verse_set__in=[cvs.verse_set for cvs in chosen_verse_set_list])
-                    .order_by('text_order'))
+        all_uvss = statuses.filter(verse_set__in=[cvs.verse_set for cvs in chosen_verse_set_list]).order_by(
+            "text_order"
+        )
         uvss_for_cvs = defaultdict(list)
         for uvs in all_uvss:
             uvss_for_cvs[uvs.verse_set_id, uvs.version_id].append(uvs)
@@ -1177,31 +1170,29 @@ class Identity(models.Model):
             # We need to exlude verses that are part of passage sets that are
             # still being learnt, because those are pushed back from being
             # 'reviewed' while the rest of the passage is in initial learning.
-            exclude_ids = list(reduce(operator.or_,
-                                      [self.verse_statuses
-                                       .filter(verse_set=cvs.verse_set, version=cvs.version)
-                                       for cvs in cvss]).values_list('id', flat=True))
+            exclude_ids = list(
+                reduce(
+                    operator.or_,
+                    [self.verse_statuses.filter(verse_set=cvs.verse_set, version=cvs.version) for cvs in cvss],
+                ).values_list("id", flat=True)
+            )
 
-        return (self.verse_statuses
-                .reviewable()
-                .needs_reviewing_in_future(timezone.now())
-                .exclude(id__in=exclude_ids)
-                .order_by('next_test_due')
-                .first())
+        return (
+            self.verse_statuses.reviewable()
+            .needs_reviewing_in_future(timezone.now())
+            .exclude(id__in=exclude_ids)
+            .order_by("next_test_due")
+            .first()
+        )
 
     def first_overdue_verse(self, now):
-        return (self.verse_statuses
-                .needs_reviewing(now)
-                .order_by('next_test_due')
-                .first())
+        return self.verse_statuses.needs_reviewing(now).order_by("next_test_due").first()
 
     def verse_statuses_for_passage(self, verse_set_id, version_id):
         # Must be strictly in the bible order
-        uvs_list = list(self.verse_statuses
-                        .active()
-                        .filter(verse_set=verse_set_id,
-                                version=version_id)
-                        .order_by('text_order'))
+        uvs_list = list(
+            self.verse_statuses.active().filter(verse_set=verse_set_id, version=version_id).order_by("text_order")
+        )
         if len(uvs_list) == 0:
             return []
 
@@ -1226,7 +1217,7 @@ class Identity(models.Model):
         # since the user can give up at any point.  We therefore use heuristics
         # to work out which should be the next section.
 
-        if verse_set.breaks == '' or len(uvs_list) == 0:
+        if verse_set.breaks == "" or len(uvs_list) == 0:
             return uvs_list
 
         uvs_list.sort(key=lambda u: u.text_order)
@@ -1244,8 +1235,7 @@ class Identity(models.Model):
                 section_to_test = i
                 break
             else:
-                last_tested = [uvs.last_tested for uvs in section
-                               if uvs.needs_testing_individual]
+                last_tested = [uvs.last_tested for uvs in section if uvs.needs_testing_individual]
                 if last_tested:
                     last_tested_by_section[i] = min(last_tested)
 
@@ -1253,8 +1243,11 @@ class Identity(models.Model):
             all_last_tested = last_tested_by_section.values()
             if all_last_tested:
                 overall_min_last_tested = min(all_last_tested)
-                section_to_test = [i for i, min_last_tested in last_tested_by_section.items()
-                                   if min_last_tested == overall_min_last_tested][0]
+                section_to_test = [
+                    i
+                    for i, min_last_tested in last_tested_by_section.items()
+                    if min_last_tested == overall_min_last_tested
+                ][0]
             else:
                 # No section has a verse that needs testing.
                 # So we just choose 0 arbitrarily
@@ -1279,7 +1272,7 @@ class Identity(models.Model):
         down if not all verses need testing.
         """
 
-        if verse_set.breaks == '' or len(uvs_list) == 0:
+        if verse_set.breaks == "" or len(uvs_list) == 0:
             return uvs_list
 
         uvs_list.sort(key=lambda u: u.text_order)
@@ -1289,7 +1282,7 @@ class Identity(models.Model):
         to_test = []
         tested_sections = set()
         for i, section in enumerate(sections):
-            if (any(uvs.needs_testing for uvs in section)):
+            if any(uvs.needs_testing for uvs in section):
                 # Need this section.  If we didn't put last section in, and the
                 # first verse in this section needs testing, we add the last verse
                 # of the previous section (which by this logic does not need testing)
@@ -1306,16 +1299,13 @@ class Identity(models.Model):
         # For passages, the UserVerseStatuses may be already tested.
         # We don't want to lose that info, therefore set to 'ignored',
         # rather than delete() (unlike clear_bible_learning_queue)
-        self.verse_statuses.filter(verse_set=verse_set_id,
-                                   version_id=version_id,
-                                   ignored=False).update(ignored=True)
+        self.verse_statuses.filter(verse_set=verse_set_id, version_id=version_id, ignored=False).update(ignored=True)
 
     def get_action_logs(self, from_datetime, highest_id_seen=0):
         if self.account_id is None:
             return []
         else:
-            return self.account.get_action_logs(from_datetime,
-                                                highest_id_seen=highest_id_seen)
+            return self.account.get_action_logs(from_datetime, highest_id_seen=highest_id_seen)
 
     @property
     def scoring_enabled(self):
@@ -1328,6 +1318,7 @@ class Identity(models.Model):
 
     def get_dashboard_events(self, now=None):
         from events.models import Event
+
         return Event.objects.for_dashboard(self.default_language_code, now=now, account=self.account)
 
     def add_html_notice(self, notice):
@@ -1362,13 +1353,11 @@ def uvs_urgency(uvs):
 
 
 class Notice(models.Model):
-    for_identity = models.ForeignKey(Identity, on_delete=models.CASCADE,
-                                     related_name='notices')
+    for_identity = models.ForeignKey(Identity, on_delete=models.CASCADE, related_name="notices")
     message_html = models.TextField()
     created = models.DateTimeField(default=timezone.now)
     seen = models.DateTimeField(default=None, null=True, blank=True)
-    related_event = models.ForeignKey('events.Event', on_delete=models.CASCADE,
-                                      null=True, blank=True)
+    related_event = models.ForeignKey("events.Event", on_delete=models.CASCADE, null=True, blank=True)
 
     def is_old(self):
         return (timezone.now() - self.created).days >= 2
@@ -1378,7 +1367,7 @@ class Notice(models.Model):
 
 
 @attr.s(hash=False)
-class ChosenVerseSet(object):
+class ChosenVerseSet:
     verse_set = attr.ib()
     version = attr.ib()
 
@@ -1429,8 +1418,7 @@ WHERE t2.d2 IS NULL;
 """
 
     # Similarly, get end of running streaks like this:
-    sql2 = sql1.replace(" + interval '1 day'",
-                        " - interval '1 day'")
+    sql2 = sql1.replace(" + interval '1 day'", " - interval '1 day'")
 
     starts = default_engine.execute(sql1).fetchall()
     ends = default_engine.execute(sql2).fetchall()
@@ -1453,10 +1441,10 @@ WHERE t2.d2 IS NULL;
         for start, end in zip(start_dict[i], end_dict[i]):
             interval_dict[i].append((end - start).days)
 
-    return dict((i, max(intervals) + 1) for i, intervals in interval_dict.items())
+    return {i: max(intervals) + 1 for i, intervals in interval_dict.items()}
 
 
-AccountStat = namedtuple('AccountStat', 'date new_accounts active_accounts verses_started verses_tested')
+AccountStat = namedtuple("AccountStat", "date new_accounts active_accounts verses_started verses_tested")
 
 
 def get_account_stats(start_datetime, end_datetime) -> List[AccountStat]:
@@ -1472,7 +1460,8 @@ def get_account_stats(start_datetime, end_datetime) -> List[AccountStat]:
     query_start = start_date - timedelta(days=active_account_span_size)
     query_end = end_date + timedelta(days=1)  # end of day = beginning of next day
 
-    sql = sqla_text("""
+    sql = sqla_text(
+        """
     SELECT gs.dte,
         COALESCE(acc.new_accounts, 0),
         COALESCE(al1.active_accounts, 0),
@@ -1499,16 +1488,21 @@ def get_account_stats(start_datetime, end_datetime) -> List[AccountStat]:
          GROUP BY date_trunc('day', created)
       ) al2 ON gs.dte = al2.created_trunc
       ORDER BY gs.dte;
-    """)
-    rows = default_engine.execute(sql, {
-        'query_start': query_start,
-        'query_end': query_end,
-        'active_account_span_size': active_account_span_size,
-        'reason_started': ScoreReason.VERSE_FIRST_TESTED,
-        'reason_tested': ScoreReason.VERSE_REVIEWED,
-    }).fetchall()
+    """
+    )
+    rows = default_engine.execute(
+        sql,
+        {
+            "query_start": query_start,
+            "query_end": query_end,
+            "active_account_span_size": active_account_span_size,
+            "reason_started": ScoreReason.VERSE_FIRST_TESTED,
+            "reason_tested": ScoreReason.VERSE_REVIEWED,
+        },
+    ).fetchall()
     return [
-        AccountStat(*row) for row in rows
+        AccountStat(*row)
+        for row in rows
         # Need to filter out the extra padding at the beginning:
         if row[0].date() >= start_date
     ]
@@ -1516,25 +1510,32 @@ def get_account_stats(start_datetime, end_datetime) -> List[AccountStat]:
 
 def notify_all_accounts(language_code, html_message):
     return notify_identities(
-        [account.identity for account in Account.objects.active().filter(
-            identity__isnull=False,
-            identity__interface_language=language_code,
-        ).select_related('identity')],
-        html_message)
+        [
+            account.identity
+            for account in Account.objects.active()
+            .filter(
+                identity__isnull=False,
+                identity__interface_language=language_code,
+            )
+            .select_related("identity")
+        ],
+        html_message,
+    )
 
 
 def notify_all_identities(language_code, html_message):
     return notify_identities(
-        Identity.objects.all().filter(interface_language=language_code).select_related(None),
-        html_message
+        Identity.objects.all().filter(interface_language=language_code).select_related(None), html_message
     )
 
 
 def notify_identities(identities, html_message):
-    Notice.objects.bulk_create([
-        Notice(
-            for_identity=identity,
-            message_html=html_message,
-        )
-        for identity in identities
-    ])
+    Notice.objects.bulk_create(
+        [
+            Notice(
+                for_identity=identity,
+                message_html=html_message,
+            )
+            for identity in identities
+        ]
+    )

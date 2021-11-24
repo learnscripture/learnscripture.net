@@ -1,7 +1,19 @@
-from .constants import (_BIBLE_BOOK_ABBREVIATIONS_FOR_LANG, _BIBLE_BOOK_NUMBERS_FOR_LANG, _BIBLE_BOOKS_FOR_LANG,
-                        _SINGLE_CHAPTER_BOOK_NUMBERS, BIBLE_BOOK_COUNT)
+from .constants import (
+    _BIBLE_BOOK_ABBREVIATIONS_FOR_LANG,
+    _BIBLE_BOOK_NUMBERS_FOR_LANG,
+    _BIBLE_BOOKS_FOR_LANG,
+    _SINGLE_CHAPTER_BOOK_NUMBERS,
+    BIBLE_BOOK_COUNT,
+)
 
-__all__ = ['get_bible_books', 'get_bible_book_abbreviation_map', 'get_bible_book_number', 'get_bible_book_name', 'is_single_chapter_book', 'BIBLE_BOOK_COUNT']
+__all__ = [
+    "get_bible_books",
+    "get_bible_book_abbreviation_map",
+    "get_bible_book_number",
+    "get_bible_book_name",
+    "is_single_chapter_book",
+    "BIBLE_BOOK_COUNT",
+]
 
 
 def get_bible_books(language_code):

@@ -11,9 +11,7 @@ register = Library()
 
 @register.filter
 def filter_comments(comments, viewer):
-    retval = [c for c in comments
-              if not c.hidden]
+    retval = [c for c in comments if not c.hidden]
     if viewer is None or not viewer.is_hellbanned:
-        retval = [c for c in retval
-                  if not c.author.is_hellbanned]
+        retval = [c for c in retval if not c.author.is_hellbanned]
     return retval

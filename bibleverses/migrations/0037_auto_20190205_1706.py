@@ -7,13 +7,13 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bibleverses', '0036_auto_20180222_0725'),
+        ("bibleverses", "0036_auto_20180222_0725"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='wordsuggestiondata',
-            name='suggestions',
+            model_name="wordsuggestiondata",
+            name="suggestions",
             field=django.contrib.postgres.fields.jsonb.JSONField(default=list),
         ),
     ]

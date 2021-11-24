@@ -14,11 +14,10 @@ def invitation_created_receiver(sender, **kwargs):
     invitation = sender
     receiver_account = invitation.account
     with django_ftl.override(receiver_account.default_language_code):
-        msg = t('accounts-invitation-received-html',
-                dict(
-                    user=account_link(invitation.created_by),
-                    group=group_link(invitation.group))
-                )
+        msg = t(
+            "accounts-invitation-received-html",
+            dict(user=account_link(invitation.created_by), group=group_link(invitation.group)),
+        )
         invitation.account.add_html_notice(msg)
 
 

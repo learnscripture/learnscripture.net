@@ -5,7 +5,7 @@ from django.core.cache import cache as _djcache
 
 
 def cache_results_key(f, args, kwargs):
-    return sha1((str(f.__module__) + str(f.__name__) + str(args) + str(kwargs)).encode('utf-8')).hexdigest()
+    return sha1((str(f.__module__) + str(f.__name__) + str(args) + str(kwargs)).encode("utf-8")).hexdigest()
 
 
 def cache_results(seconds=900):
@@ -23,6 +23,7 @@ def cache_results(seconds=900):
         return expensiveResult
 
     """
+
     def do_cache(f):
         def x(*args, **kwargs):
             key = cache_results_key(f, args, kwargs)
@@ -31,10 +32,12 @@ def cache_results(seconds=900):
                 result = f(*args, **kwargs)
                 _djcache.set(key, result, seconds)
             return result
+
         x.__name__ = f.__name__
         x.__doc__ = f.__doc__
         x.__module__ = f.__module__
         return x
+
     return do_cache
 
 

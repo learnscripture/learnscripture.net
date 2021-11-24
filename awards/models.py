@@ -32,9 +32,9 @@ from scores.models import ScoreReason
 
 # AnyLevel is used when displaying badges on the 'badges' page which describes
 # badges in generic terms.
-class AnyLevel(object):
+class AnyLevel:
     def __str__(self):
-        return 'any'
+        return "any"
 
 
 AnyLevel = AnyLevel()
@@ -46,20 +46,20 @@ class classproperty(property):
 
 
 class AwardType(models.TextChoices):
-    STUDENT = 'STUDENT', t_lazy('awards-student-award-name')
-    MASTER = 'MASTER', t_lazy('awards-master-award-name')
-    SHARER = 'SHARER', t_lazy('awards-sharer-award-name')
-    TREND_SETTER = 'TREND_SETTER', t_lazy('awards-trend-setter-award-name')
-    ACE = 'ACE', t_lazy('awards-ace-award-name')
-    RECRUITER = 'RECRUITER', t_lazy('awards-recruiter-award-name')
-    WEEKLY_CHAMPION = 'WEEKLY_CHAMPION', 'Weekly champion'  # Removed
-    REIGNING_WEEKLY_CHAMPION = 'REIGNING_WEEKLY_CHAMPION', 'Reigning weekly champion'  # Removed
-    ADDICT = 'ADDICT', t_lazy('awards-addict-award-name')
-    ORGANIZER = 'ORGANIZER', t_lazy('awards-organizer-award-name')
-    CONSISTENT_LEARNER = 'CONSISTENT_LEARNER', t_lazy('awards-consistent-learner-award-name')
+    STUDENT = "STUDENT", t_lazy("awards-student-award-name")
+    MASTER = "MASTER", t_lazy("awards-master-award-name")
+    SHARER = "SHARER", t_lazy("awards-sharer-award-name")
+    TREND_SETTER = "TREND_SETTER", t_lazy("awards-trend-setter-award-name")
+    ACE = "ACE", t_lazy("awards-ace-award-name")
+    RECRUITER = "RECRUITER", t_lazy("awards-recruiter-award-name")
+    WEEKLY_CHAMPION = "WEEKLY_CHAMPION", "Weekly champion"  # Removed
+    REIGNING_WEEKLY_CHAMPION = "REIGNING_WEEKLY_CHAMPION", "Reigning weekly champion"  # Removed
+    ADDICT = "ADDICT", t_lazy("awards-addict-award-name")
+    ORGANIZER = "ORGANIZER", t_lazy("awards-organizer-award-name")
+    CONSISTENT_LEARNER = "CONSISTENT_LEARNER", t_lazy("awards-consistent-learner-award-name")
 
 
-class AwardLogic(object):
+class AwardLogic:
     # Abstract base class for all classes that define behaviour for the types of
     # awards listed in AwardType
 
@@ -76,7 +76,7 @@ class AwardLogic(object):
 
     @classmethod
     def slug(cls):
-        return cls.award_type.value.lower().replace('_', '-')
+        return cls.award_type.value.lower().replace("_", "-")
 
     @classproperty
     @classmethod
@@ -88,18 +88,17 @@ class AwardLogic(object):
             return str(self.title)
         else:
             if self.has_levels:
-                return t('awards-level-title',
-                         dict(name=str(self.title), level=self.level))
+                return t("awards-level-title", dict(name=str(self.title), level=self.level))
             else:
                 return str(self.title)
 
     def image_small(self):
         n = self.award_type.name
-        return f'img/awards/award_{n}_level_{self.level}_50.png'
+        return f"img/awards/award_{n}_level_{self.level}_50.png"
 
     def image_medium(self):
         n = self.award_type.name
-        return f'img/awards/award_{n}_level_{self.level}_100.png'
+        return f"img/awards/award_{n}_level_{self.level}_100.png"
 
     def give_to(self, account):
         if self.level == 0:
@@ -108,17 +107,16 @@ class AwardLogic(object):
         # Create lower levels if they don't exist because a higher level always
         # implies a lower level.
 
-        existing_levels = (Award.objects.filter(account=account, award_type=self.award_type)
-                           .values_list('level', flat=True))
+        existing_levels = Award.objects.filter(account=account, award_type=self.award_type).values_list(
+            "level", flat=True
+        )
         if len(existing_levels) < self.level:
             # Missing at least one
             missing_levels = set(range(1, self.level + 1)) - set(existing_levels)
             # Do lower levels first so notices are in right order
             missing_levels = sorted(list(missing_levels))
             for lev in missing_levels:
-                award, new = Award.objects.get_or_create(account=account,
-                                                         award_type=self.award_type,
-                                                         level=lev)
+                award, new = Award.objects.get_or_create(account=account, award_type=self.award_type, level=lev)
                 if new:
                     # Use a fresh instance in order to get the points
                     # calculation correct.
@@ -135,16 +133,16 @@ class AwardLogic(object):
         """
         The highest level that has been achieved
         """
-        return Award.objects.filter(award_type=self.award_type,
-                                    account__is_active=True,
-                                    account__is_hellbanned=False,
-                                    )\
-            .aggregate(models.Max('level'))['level__max']
+        return Award.objects.filter(
+            award_type=self.award_type,
+            account__is_active=True,
+            account__is_hellbanned=False,
+        ).aggregate(models.Max("level"))["level__max"]
 
 
-class MultiLevelPointsMixin(object):
+class MultiLevelPointsMixin:
     def points(self):
-        if hasattr(self, 'POINTS'):
+        if hasattr(self, "POINTS"):
             return self.POINTS[self.level]
         else:
             return 0
@@ -155,6 +153,7 @@ class CountBasedAward(MultiLevelPointsMixin, AwardLogic):
     Base class for awards that have different levels that are based on
     a 'count' of some kind.
     """
+
     # Subclasses must define COUNTS and POINTS as class attributes, as
     # dictionaries mapping level to count and level to points respectively.
 
@@ -171,7 +170,7 @@ class CountBasedAward(MultiLevelPointsMixin, AwardLogic):
         """
         Must pass at least one of level or count
         """
-        self._LEVELS_DESC = sorted([(a, b) for b, a in self.COUNTS.items()], reverse=True)
+        self._LEVELS_DESC = sorted(((a, b) for b, a in self.COUNTS.items()), reverse=True)
         if count is None:
             if level is AnyLevel:
                 self.count = None
@@ -199,6 +198,7 @@ class SingleLevelAward(AwardLogic):
     """
     Base class for awards that do not have multiple levels
     """
+
     # Subclasses should define:
     #  POINTS (integer)
 
@@ -214,85 +214,89 @@ class SingleLevelAward(AwardLogic):
 
 
 class LearningAward(CountBasedAward):
-    COUNTS = {1: 1,
-              2: 10,
-              3: 30,
-              4: 100,
-              5: 300,
-              6: 1000,
-              7: 3000,
-              8: 10000,
-              9: 31102,  # every verse
-              }
+    COUNTS = {
+        1: 1,
+        2: 10,
+        3: 30,
+        4: 100,
+        5: 300,
+        6: 1000,
+        7: 3000,
+        8: 10000,
+        9: 31102,  # every verse
+    }
 
 
 class StudentAward(LearningAward):
     award_type = AwardType.STUDENT
-    POINTS = {1: 1000,
-              2: 4000,
-              3: 8000,
-              4: 16000,
-              5: 32000,
-              6: 64000,
-              7: 125000,
-              8: 250000,
-              9: 500000,
-              }
+    POINTS = {
+        1: 1000,
+        2: 4000,
+        3: 8000,
+        4: 16000,
+        5: 32000,
+        6: 64000,
+        7: 125000,
+        8: 250000,
+        9: 500000,
+    }
 
     def full_description(self):
         if self.level is AnyLevel:
-            return t('awards-student-award-general-description')
+            return t("awards-student-award-general-description")
         if self.level == 9:
-            return t('awards-student-award-level-9-description')
-        return t('awards-student-award-level-n-description', dict(verse_count=self.count))
+            return t("awards-student-award-level-9-description")
+        return t("awards-student-award-level-n-description", dict(verse_count=self.count))
 
 
 class MasterAward(LearningAward):
     award_type = AwardType.MASTER
-    POINTS = dict((k, v * 10) for k, v in StudentAward.POINTS.items())
+    POINTS = {k: v * 10 for k, v in StudentAward.POINTS.items()}
 
     def full_description(self):
         if self.level is AnyLevel:
-            return t('awards-master-award-general-description')
+            return t("awards-master-award-general-description")
         if self.level == 9:
-            return t('awards-master-award-level-9-description')
-        return t('awards-master-award-level-n-description', dict(verse_count=self.count))
+            return t("awards-master-award-level-9-description")
+        return t("awards-master-award-level-n-description", dict(verse_count=self.count))
 
 
 class SharerAward(CountBasedAward):
     award_type = AwardType.SHARER
-    COUNTS = {1: 1,
-              2: 2,
-              3: 5,
-              4: 10,
-              5: 20,
-              }
+    COUNTS = {
+        1: 1,
+        2: 2,
+        3: 5,
+        4: 10,
+        5: 20,
+    }
 
-    POINTS = dict((k, v * 500) for k, v in COUNTS.items())
+    POINTS = {k: v * 500 for k, v in COUNTS.items()}
 
     def full_description(self):
         if self.level is AnyLevel:
-            return t('awards-sharer-award-general-description')
-        return t('awards-sharer-award-level-n-description', dict(count=self.count))
+            return t("awards-sharer-award-general-description")
+        return t("awards-sharer-award-level-n-description", dict(count=self.count))
 
 
 class TrendSetterAward(CountBasedAward):
     award_type = AwardType.TREND_SETTER
-    COUNTS = {1: 5,
-              2: 10,
-              3: 30,
-              4: 100,
-              5: 300,
-              6: 1000,
-              }
+    COUNTS = {
+        1: 5,
+        2: 10,
+        3: 30,
+        4: 100,
+        5: 300,
+        6: 1000,
+    }
 
-    POINTS = dict((k, v * 500) for k, v in COUNTS.items())
+    POINTS = {k: v * 500 for k, v in COUNTS.items()}
 
     def full_description(self):
         if self.level is AnyLevel:
-            return t('awards-trend-setter-award-level-general-description')
+            return t("awards-trend-setter-award-level-general-description")
 
-        return t('awards-trend-setter-award-level-n-description', dict(count=self.count))
+        return t("awards-trend-setter-award-level-n-description", dict(count=self.count))
 
 
 class AceAward(CountBasedAward):
@@ -303,36 +307,34 @@ class AceAward(CountBasedAward):
 
     def full_description(self):
         if self.level is AnyLevel:
-            return t('awards-ace-award-general-description')
+            return t("awards-ace-award-general-description")
 
         if self.count == 1:
-            return t('awards-ace-award-level-1-description')
+            return t("awards-ace-award-level-1-description")
         else:
-            return t('awards-ace-award-level-n-description',
-                     dict(count=self.count))
+            return t("awards-ace-award-level-n-description", dict(count=self.count))
 
 
 class RecruiterAward(CountBasedAward):
     award_type = AwardType.RECRUITER
-    COUNTS = {1: 1,
-              2: 2,
-              3: 3,
-              4: 5,
-              5: 10,
-              6: 15,
-              7: 20,
-              8: 30,
-              9: 50,
-              }
-    POINTS = dict((k, v * 20000) for (k, v) in COUNTS.items())
+    COUNTS = {
+        1: 1,
+        2: 2,
+        3: 3,
+        4: 5,
+        5: 10,
+        6: 15,
+        7: 20,
+        8: 30,
+        9: 50,
+    }
+    POINTS = {k: v * 20000 for (k, v) in COUNTS.items()}
 
     def full_description(self):
-        url = reverse('referral_program')
+        url = reverse("referral_program")
         if self.level is AnyLevel:
-            return t('awards-recruiter-award-general-description-html',
-                     dict(url=url))
-        return t('awards-recruiter-award-level-n-description-html',
-                 dict(url=url, count=self.count))
+            return t("awards-recruiter-award-general-description-html", dict(url=url))
+        return t("awards-recruiter-award-level-n-description-html", dict(url=url, count=self.count))
 
 
 class ReigningWeeklyChampion(SingleLevelAward):
@@ -362,7 +364,7 @@ class TimeBasedAward(MultiLevelPointsMixin, AwardLogic):
 
     def level_for_time_period(self, time_period):
         # period is a timedelta object
-        _DAYS_DESC = sorted([(a, b) for b, a in self.DAYS.items()], reverse=True)
+        _DAYS_DESC = sorted(((a, b) for b, a in self.DAYS.items()), reverse=True)
 
         for d, level in _DAYS_DESC:
             if time_period.days >= d:
@@ -385,27 +387,28 @@ class AddictAward(SingleLevelAward):
 
     def full_description(self):
         if self.level is AnyLevel:
-            return t('awards-addict-award-general-description')
+            return t("awards-addict-award-general-description")
         else:
-            return t('awards-addict-award-level-all-description')
+            return t("awards-addict-award-level-all-description")
 
 
 class OrganizerAward(CountBasedAward):
     award_type = AwardType.ORGANIZER
-    COUNTS = {1: 5,
-              2: 10,
-              3: 20,
-              4: 50,
-              5: 100,
-              }
+    COUNTS = {
+        1: 5,
+        2: 10,
+        3: 20,
+        4: 50,
+        5: 100,
+    }
 
-    POINTS = dict((k, v * 500) for k, v in COUNTS.items())
+    POINTS = {k: v * 500 for k, v in COUNTS.items()}
 
     def full_description(self):
         if self.level is AnyLevel:
-            return t('awards-organizer-award-general-description')
+            return t("awards-organizer-award-general-description")
         else:
-            return t('awards-organizer-award-level-n-description', dict(count=self.count))
+            return t("awards-organizer-award-level-n-description", dict(count=self.count))
 
 
 class ConsistentLearnerAward(TimeBasedAward):
@@ -421,7 +424,7 @@ class ConsistentLearnerAward(TimeBasedAward):
         7: 125000 * 4,
         8: 250000 * 4,
         9: 500000 * 4,
-        10: 1000000 * 4
+        10: 1000000 * 4,
     }
 
     DAYS = {
@@ -439,31 +442,28 @@ class ConsistentLearnerAward(TimeBasedAward):
 
     def full_description(self):
         if self.level is AnyLevel:
-            return t('awards-consistent-learner-award-general-description')
+            return t("awards-consistent-learner-award-general-description")
         else:
             # awards-consistent-learner-award-level-1-description etc
-            return t(f'awards-consistent-learner-award-level-{self.level}-description')
+            return t(f"awards-consistent-learner-award-level-{self.level}-description")
 
 
 AWARD_LOGIC_CLASSES = {
-    cls.award_type: cls
-    for cls in all_subclasses(AwardLogic)
-    if getattr(cls, 'award_type') != NotImplemented
+    cls.award_type: cls for cls in all_subclasses(AwardLogic) if getattr(cls, "award_type") != NotImplemented
 }
 
 
 class Award(models.Model):
     award_type = models.CharField(max_length=40, choices=AwardType.choices)
     level = models.PositiveSmallIntegerField()
-    account = models.ForeignKey(Account, on_delete=models.CASCADE,
-                                related_name='awards')
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="awards")
     created = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return t('awards-level-awarded-for-user',
-                 dict(award_name=str(self.get_award_type_display()),
-                      award_level=self.level,
-                      username=self.account.username))
+        return t(
+            "awards-level-awarded-for-user",
+            dict(award_name=str(self.get_award_type_display()), award_level=self.level, username=self.account.username),
+        )
 
     @property
     def award_class(self):

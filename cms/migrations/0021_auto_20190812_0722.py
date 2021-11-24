@@ -6,23 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cms', '0020_remove_contentitem_content_html'),
+        ("cms", "0020_remove_contentitem_content_html"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='page',
-            name='level',
+            model_name="page",
+            name="level",
             field=models.PositiveIntegerField(editable=False),
         ),
         migrations.AlterField(
-            model_name='page',
-            name='lft',
+            model_name="page",
+            name="lft",
             field=models.PositiveIntegerField(editable=False),
         ),
         migrations.AlterField(
-            model_name='page',
-            name='rght',
+            model_name="page",
+            name="rght",
             field=models.PositiveIntegerField(editable=False),
         ),
     ]

@@ -4,14 +4,10 @@ from django.db import migrations
 
 
 def forwards(apps, schema_editor):
-    Page = apps.get_model('cms', 'Page')
-    PageTitle = apps.get_model('cms', 'PageTitle')
+    Page = apps.get_model("cms", "Page")
+    PageTitle = apps.get_model("cms", "PageTitle")
     for p in Page.objects.all():
-        PageTitle.objects.create(
-            page=p,
-            title=p.title,
-            language_code='en'
-        )
+        PageTitle.objects.create(page=p, title=p.title, language_code="en")
 
 
 def backwards(apps, schema_editor):
@@ -21,7 +17,7 @@ def backwards(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cms', '0014_pagetitle'),
+        ("cms", "0014_pagetitle"),
     ]
 
     operations = [

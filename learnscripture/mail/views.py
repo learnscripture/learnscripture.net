@@ -12,7 +12,7 @@ from .mailgun import verify_webhook
 
 
 def b(s):
-    return s.encode('ascii')
+    return s.encode("ascii")
 
 
 def ensure_from_mailgun(f):
@@ -20,10 +20,11 @@ def ensure_from_mailgun(f):
     def func(request, *args, **kwargs):
 
         if not verify_webhook(
-                b(settings.MAILGUN_API_KEY),
-                b(request.POST.get('token', '')),
-                b(request.POST.get('timestamp', '')),
-                b(request.POST.get('signature', ''))):
+            b(settings.MAILGUN_API_KEY),
+            b(request.POST.get("token", "")),
+            b(request.POST.get("timestamp", "")),
+            b(request.POST.get("signature", "")),
+        ):
             return HttpResponseForbidden("Not a real Mailgun request, ignoring.")
 
         # Prevent replay:
@@ -31,11 +32,12 @@ def ensure_from_mailgun(f):
             return HttpResponseForbidden("Old timestamp, ignoring.")
 
         return f(request, *args, **kwargs)
+
     return func
 
 
 def check_mailgun_timestamp(request):
-    timestamp_s = request.POST.get('timestamp', '')
+    timestamp_s = request.POST.get("timestamp", "")
     now = timezone.now()
     timestamp_datetime = datetime.fromtimestamp(int(timestamp_s))
     return (now.date() - timestamp_datetime.date()).days < 2  # < 2 days
@@ -44,10 +46,10 @@ def check_mailgun_timestamp(request):
 @csrf_exempt
 @ensure_from_mailgun
 def mailgun_bounce_notification(request):
-    recipient = request.POST['recipient']
-    bounced_date = timezone.make_aware(datetime.fromtimestamp(int(request.POST['timestamp'])))
+    recipient = request.POST["recipient"]
+    bounced_date = timezone.make_aware(datetime.fromtimestamp(int(request.POST["timestamp"])))
     mark_email_bounced(recipient, bounced_date)
-    return HttpResponse('OK!')
+    return HttpResponse("OK!")
 
 
 def mark_email_bounced(email_address, bounce_date):

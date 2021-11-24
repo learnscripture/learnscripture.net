@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('groups', '0006_auto_20190517_1120'),
+        ("groups", "0006_auto_20190517_1120"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='group',
-            name='open',
-            field=models.BooleanField(default=False, verbose_name='Open'),
+            model_name="group",
+            name="open",
+            field=models.BooleanField(default=False, verbose_name="Open"),
         ),
         migrations.AlterField(
-            model_name='group',
-            name='public',
-            field=models.BooleanField(default=False, verbose_name='Public'),
+            model_name="group",
+            name="public",
+            field=models.BooleanField(default=False, verbose_name="Public"),
         ),
     ]

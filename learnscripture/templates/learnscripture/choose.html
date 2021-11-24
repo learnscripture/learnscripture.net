@@ -13,11 +13,11 @@
       <button type="button" class="accordion-heading">{% ftlmsg 'choose-choose-a-verse-set-heading' %}</button>
       <div class="accordion-body">
         <form action="." method="GET"
-              hx-get="."
-              hx-target="#id-choose-verseset-results"
-              hx-indicator="#id-choose-verseset-results"
-              id="id-choose-verseset-form"
-          >
+          hx-get="."
+          hx-target="#id-choose-verseset-results"
+          hx-indicator="#id-choose-verseset-results"
+          id="id-choose-verseset-form"
+        >
           <div class="form-row">
             <label for="id_query">{% ftlmsg 'choose-search-input' %}</label>
             <div class="input input-line">
@@ -83,8 +83,8 @@
       <button type="button" class="accordion-heading">{% ftlmsg 'choose-catechisms-heading' %}</button>
       <div class="accordion-body">
         <p>{% ftlmsg 'choose-catechism-intro' %} <a href="{% url 'catechisms' %}">{% ftlmsg 'choose-catechisms-link' %}</a>.
-      </div>
-    </section>
-  </div>
+        </div>
+      </section>
+    </div>
 
 {% endblock %}

@@ -6,43 +6,48 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounts', '0028_remove_account_is_webmaster'),
+        ("accounts", "0028_remove_account_is_webmaster"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='account',
-            name='enable_commenting',
-            field=models.BooleanField(blank=True, default=True, verbose_name='Enable comment system'),
+            model_name="account",
+            name="enable_commenting",
+            field=models.BooleanField(blank=True, default=True, verbose_name="Enable comment system"),
         ),
         migrations.AlterField(
-            model_name='account',
-            name='is_moderator',
+            model_name="account",
+            name="is_moderator",
             field=models.BooleanField(blank=True, default=False),
         ),
         migrations.AlterField(
-            model_name='account',
-            name='is_tester',
+            model_name="account",
+            name="is_tester",
             field=models.BooleanField(blank=True, default=False),
         ),
         migrations.AlterField(
-            model_name='account',
-            name='is_under_13',
-            field=models.BooleanField(blank=True, default=False, verbose_name='Under 13 years old'),
+            model_name="account",
+            name="is_under_13",
+            field=models.BooleanField(blank=True, default=False, verbose_name="Under 13 years old"),
         ),
         migrations.AlterField(
-            model_name='identity',
-            name='enable_animations',
-            field=models.BooleanField(blank=True, default=True, verbose_name='Enable animations'),
+            model_name="identity",
+            name="enable_animations",
+            field=models.BooleanField(blank=True, default=True, verbose_name="Enable animations"),
         ),
         migrations.AlterField(
-            model_name='identity',
-            name='enable_sounds',
-            field=models.BooleanField(blank=True, default=False, verbose_name='Enable sounds'),
+            model_name="identity",
+            name="enable_sounds",
+            field=models.BooleanField(blank=True, default=False, verbose_name="Enable sounds"),
         ),
         migrations.AlterField(
-            model_name='identity',
-            name='enable_vibration',
-            field=models.BooleanField(blank=True, default=True, help_text='Depends on device capabilities.', verbose_name='Vibrate on mistakes'),
+            model_name="identity",
+            name="enable_vibration",
+            field=models.BooleanField(
+                blank=True,
+                default=True,
+                help_text="Depends on device capabilities.",
+                verbose_name="Vibrate on mistakes",
+            ),
         ),
     ]

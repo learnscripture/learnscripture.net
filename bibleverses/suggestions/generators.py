@@ -1,16 +1,24 @@
 import random
 from collections import Counter
 
-from .constants import (ALL_TEXT, FIRST_WORD_FREQUENCY_ANALYSIS, MAX_SUGGESTIONS, MIN_SUGGESTIONS, THESAURUS_ANALYSIS,
-                        WORD_COUNTS_ANALYSIS, markov_analysis_for_size)
+from .constants import (
+    ALL_TEXT,
+    FIRST_WORD_FREQUENCY_ANALYSIS,
+    MAX_SUGGESTIONS,
+    MIN_SUGGESTIONS,
+    THESAURUS_ANALYSIS,
+    WORD_COUNTS_ANALYSIS,
+    markov_analysis_for_size,
+)
 from .utils.numbers import merge_suggestions, scale_suggestions
 from .utils.text import split_into_sentences, split_into_words_for_suggestions
 
 
-class SuggestionStrategy(object):
+class SuggestionStrategy:
     """
     Suggestion strategy base class
     """
+
     # For convenience of use (in make_strategies) and to avoid repetitive init
     # methods, all strategies have the same constructor. If we want to set
     # other attributes, we use the `with_attributes` utility, which is enough
@@ -24,11 +32,13 @@ class SuggestionStrategy(object):
         Returns a constructor that additionally sets the passed in
         keyword arguments as attributes on the instance
         """
+
         def init(*args):
             instance = cls(*args)
             for k, v in kwargs.items():
                 setattr(instance, k, v)
             return instance
+
         return init
 
     def load(self, storage):
@@ -38,7 +48,6 @@ class SuggestionStrategy(object):
         """
         # Usually this method will set up attributes on self for
         # later use.
-        pass
 
     def use_for_word(self, word_idx):
         return True
@@ -48,12 +57,10 @@ class SuggestionStrategy(object):
 
 
 class ThesaurusSuggestions(SuggestionStrategy):
-
     def load(self, storage):
         # NB we always load thesaurus for complete text, ignoring
         # the keys in training_texts
-        self.thesaurus = storage.load_analysis(THESAURUS_ANALYSIS,
-                                               [(self.training_texts.text_slug, ALL_TEXT)])
+        self.thesaurus = storage.load_analysis(THESAURUS_ANALYSIS, [(self.training_texts.text_slug, ALL_TEXT)])
 
     def get_suggestions(self, words, i, count, suggestions_so_far):
         # Thesaurus strategy can be dumb, due to words that are e.g. both nouns
@@ -73,7 +80,6 @@ class ThesaurusSuggestions(SuggestionStrategy):
 
 
 class ThesaurusSuggestionsOther(SuggestionStrategy):
-
     def load(self, storage):
         thesaurus_strategy = ThesaurusSuggestions(self.training_texts)
         thesaurus_strategy.load(storage)
@@ -100,10 +106,10 @@ class ThesaurusSuggestionsOther(SuggestionStrategy):
 
 
 class FirstWordSuggestions(SuggestionStrategy):
-
     def load(self, storage):
-        self.first_word_frequencies = storage.load_analysis(FIRST_WORD_FREQUENCY_ANALYSIS,
-                                                            self.training_texts.keys()).items()
+        self.first_word_frequencies = storage.load_analysis(
+            FIRST_WORD_FREQUENCY_ANALYSIS, self.training_texts.keys()
+        ).items()
 
     def use_for_word(self, word_idx):
         return word_idx == 0
@@ -113,10 +119,8 @@ class FirstWordSuggestions(SuggestionStrategy):
 
 
 class MarkovSuggestions(SuggestionStrategy):
-
     def load(self, storage):
-        self.markov_chain = storage.load_analysis(markov_analysis_for_size(self.size),
-                                                  self.training_texts.keys())
+        self.markov_chain = storage.load_analysis(markov_analysis_for_size(self.size), self.training_texts.keys())
 
     def use_for_word(self, word_idx):
         return word_idx > self.size - 1
@@ -125,7 +129,7 @@ class MarkovSuggestions(SuggestionStrategy):
         if self.size == 1:
             start = words[i - 1]
         else:
-            start = tuple(words[i - self.size:i])
+            start = tuple(words[i - self.size : i])
         return self.markov_chain.get_next_word_options(start)
 
 
@@ -135,7 +139,7 @@ class RandomLocalSuggestions(SuggestionStrategy):
         # Emphasise the words that come after the current one,
         # exclude the one immediately before as that is very unlikely,
         FACTOR = 5
-        bag = words[i + 1:] * FACTOR + words[:max(0, i - 1)]
+        bag = words[i + 1 :] * FACTOR + words[: max(0, i - 1)]
         if len(bag) == 0:
             return []
         c = Counter()
@@ -147,7 +151,6 @@ class RandomLocalSuggestions(SuggestionStrategy):
 
 
 class RandomGlobalSuggestions(SuggestionStrategy):
-
     def load(self, storage):
         self.global_word_counts = storage.load_analysis(WORD_COUNTS_ANALYSIS, self.training_texts.keys())
 
@@ -160,7 +163,7 @@ class RandomGlobalSuggestions(SuggestionStrategy):
         return list(c.items())
 
 
-class SuggestionGenerator(object):
+class SuggestionGenerator:
     STRATEGIES = [
         FirstWordSuggestions,
         MarkovSuggestions.with_attributes(size=3),
@@ -178,10 +181,7 @@ class SuggestionGenerator(object):
     ]
 
     def __init__(self, training_texts):
-        self.strategies = [
-            mk_strategy(training_texts)
-            for mk_strategy in self.STRATEGIES
-        ]
+        self.strategies = [mk_strategy(training_texts) for mk_strategy in self.STRATEGIES]
 
     def load_data(self, storage):
         for s in self.strategies:
@@ -203,9 +203,9 @@ class SuggestionGenerator(object):
                 for strategy in self.strategies:
                     if strategy.use_for_word(i):
                         need = MIN_SUGGESTIONS - len(word_suggestions)  # Only random strategies really uses this
-                        new_suggestions = [(w, f) for (w, f) in
-                                           strategy.get_suggestions(words, i, need, word_suggestions)
-                                           if w != word]
+                        new_suggestions = [
+                            (w, f) for (w, f) in strategy.get_suggestions(words, i, need, word_suggestions) if w != word
+                        ]
                         new_suggestions = scale_suggestions(new_suggestions, relevance)
                         if len(new_suggestions) > 0:
                             word_suggestions = merge_suggestions(word_suggestions, new_suggestions)

@@ -7,32 +7,32 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cms', '0002_populate'),
+        ("cms", "0002_populate"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='contentitem',
-            name='template_name',
+            model_name="contentitem",
+            name="template_name",
         ),
         migrations.AlterField(
-            model_name='contentitem',
-            name='metadata',
+            model_name="contentitem",
+            name="metadata",
             field=django.contrib.postgres.fields.jsonb.JSONField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='contentitem',
-            name='used_on_pages_data',
-            field=django.contrib.postgres.fields.jsonb.JSONField(blank=True, null=True, verbose_name='used on pages'),
+            model_name="contentitem",
+            name="used_on_pages_data",
+            field=django.contrib.postgres.fields.jsonb.JSONField(blank=True, null=True, verbose_name="used on pages"),
         ),
         migrations.AlterField(
-            model_name='page',
-            name='metadata',
+            model_name="page",
+            name="metadata",
             field=django.contrib.postgres.fields.jsonb.JSONField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='page',
-            name='template_name',
-            field=models.CharField(blank=True, choices=[('cms_singlecol.html', 'Single column')], max_length=70),
+            model_name="page",
+            name="template_name",
+            field=models.CharField(blank=True, choices=[("cms_singlecol.html", "Single column")], max_length=70),
         ),
     ]

@@ -12,19 +12,35 @@ logger = logging.getLogger(__name__)
 
 # Thesaurus file tends to have unhelpful suggestions for pronouns, so we overwrite.
 # These are not synonyms, but likely alternatives
-OBJECTS = ['me', 'you', 'yourself', 'oneself', 'thee', 'him', 'her', 'himself', 'herself', 'it', 'itself', 'us', 'ourselves', 'yourselves', 'them', 'themselves']
-SUBJECTS = ['i', 'you', 'thou', 'he', 'she', 'it', 'we', 'they']
+OBJECTS = [
+    "me",
+    "you",
+    "yourself",
+    "oneself",
+    "thee",
+    "him",
+    "her",
+    "himself",
+    "herself",
+    "it",
+    "itself",
+    "us",
+    "ourselves",
+    "yourselves",
+    "them",
+    "themselves",
+]
+SUBJECTS = ["i", "you", "thou", "he", "she", "it", "we", "they"]
 
 PRONOUN_THESAURUS = dict(
-    [(k, [v for v in OBJECTS if v != k]) for k in OBJECTS] +
-    [(k, [v for v in SUBJECTS if v != k]) for k in SUBJECTS]
+    [(k, [v for v in OBJECTS if v != k]) for k in OBJECTS] + [(k, [v for v in SUBJECTS if v != k]) for k in SUBJECTS]
 )
 
 
 def english_thesaurus():
-    fname = os.path.join(settings.SRC_ROOT, 'resources', 'mobythes.aur')
-    f = open(fname, "rb").read().decode('utf8')
-    return dict((line.split(',')[0], line.split(',')[1:]) for line in f.split('\r'))
+    fname = os.path.join(settings.SRC_ROOT, "resources", "mobythes.aur")
+    f = open(fname, "rb").read().decode("utf8")
+    return {line.split(",")[0]: line.split(",")[1:] for line in f.split("\r")}
 
 
 class ThesaurusAnalyzer(Analyzer):
@@ -34,11 +50,10 @@ class ThesaurusAnalyzer(Analyzer):
         # For thesaurus, we always want to use the whole text, and have
         # a shared filename for the output, so override the key
         keys = [(training_texts.text_slug, ALL_TEXT)]
-        return super(ThesaurusAnalyzer, self).run(training_texts, keys)
+        return super().run(training_texts, keys)
 
     def analyze(self, training_texts, keys):
-        return make_thesaurus(training_texts.text,
-                              disallow_text_loading=training_texts.disallow_loading)
+        return make_thesaurus(training_texts.text, disallow_text_loading=training_texts.disallow_loading)
 
 
 def make_thesaurus(version, disallow_text_loading=False):
@@ -55,7 +70,7 @@ def make_thesaurus(version, disallow_text_loading=False):
             continue
 
         # Don't allow multi-word alternatives
-        alts = [a for a in alts if ' ' not in a]
+        alts = [a for a in alts if " " not in a]
         # Don't allow alternatives that don't appear in the text
         alts = [a for a in alts if a in words]
         # Normalize and exclude self

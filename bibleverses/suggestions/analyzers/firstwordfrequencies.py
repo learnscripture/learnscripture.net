@@ -13,12 +13,11 @@ class FirstWordFrequencyAnalyzer(Analyzer):
 
 
 def build_summed_scaled_first_word_counts(training_texts, keys):
-    counts = [build_first_word_counts(training_texts, key)
-              for key in keys]
+    counts = [build_first_word_counts(training_texts, key) for key in keys]
     return scale_suggestions(list(aggregate_word_counts(counts).items()))
 
 
-@cache_results_with_pickle('firstwordcounts')
+@cache_results_with_pickle("firstwordcounts")
 def build_first_word_counts(training_texts, key):
     text = training_texts[key]
     first_words = sentence_first_words(text)

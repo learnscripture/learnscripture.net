@@ -15,20 +15,20 @@ BIBLE_ITEM_TEMPLATE = "{0}.Verse.json.gz"
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        parser.add_argument('output_dir')
-        parser.add_argument('version_slug', nargs='+')
+        parser.add_argument("output_dir")
+        parser.add_argument("version_slug", nargs="+")
 
     def handle(self, *args, **options):
         from bibleverses.models import TextType, TextVersion
 
-        output_dir = options['output_dir']
+        output_dir = options["output_dir"]
         common_options = dict(
             use_natural_foreign_keys=True,
             use_natural_primary_keys=True,
             indent=4,
         )
-        format = 'json'
-        for version_slug in options['version_slug']:
+        format = "json"
+        for version_slug in options["version_slug"]:
             print(f"Dumping {version_slug}")
             version = TextVersion.objects.get(slug=version_slug)
             text_file = TEXTVERSION_TEMPLATE.format(version_slug)
@@ -51,6 +51,7 @@ class Command(BaseCommand):
 def str_to_bytes(writer):
     class BytesWriter(writer.__class__):
         def write(self, data):
-            return super().write(data.encode('utf-8'))
+            return super().write(data.encode("utf-8"))
+
     writer.__class__ = BytesWriter  # Slightly hacky *ahem*
     return writer

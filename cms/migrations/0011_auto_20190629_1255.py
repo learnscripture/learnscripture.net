@@ -6,16 +6,16 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cms', '0010_remove_page_doc_title'),
+        ("cms", "0010_remove_page_doc_title"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='contentitem',
-            name='protected',
+            model_name="contentitem",
+            name="protected",
         ),
         migrations.RemoveField(
-            model_name='page',
-            name='protected',
+            model_name="page",
+            name="protected",
         ),
     ]

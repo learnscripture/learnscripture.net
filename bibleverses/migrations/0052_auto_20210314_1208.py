@@ -9,23 +9,29 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('bibleverses', '0051_auto_20210212_0643'),
+        ("bibleverses", "0051_auto_20210212_0643"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='userversestatus',
-            name='version',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='bibleverses.textversion'),
+            model_name="userversestatus",
+            name="version",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="bibleverses.textversion"),
         ),
         migrations.AlterField(
-            model_name='versechoice',
-            name='verse_set',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='verse_choices', to='bibleverses.verseset'),
+            model_name="versechoice",
+            name="verse_set",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT, related_name="verse_choices", to="bibleverses.verseset"
+            ),
         ),
         migrations.AlterField(
-            model_name='verseset',
-            name='created_by',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='verse_sets_created', to=settings.AUTH_USER_MODEL),
+            model_name="verseset",
+            name="created_by",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="verse_sets_created",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

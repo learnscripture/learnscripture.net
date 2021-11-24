@@ -4,11 +4,11 @@
 {% load capture_tags %}
 
 <div class="comment
-            {% if show_as_related_comment %} relatedcomment{% endif %}
-            {% if comment.id == selected_comment_id %} selectedcomment{% endif %}
-            "
-     id="comment-{{ comment.id }}"
-     data-comment-id="{{ comment.id }}">
+  {% if show_as_related_comment %} relatedcomment{% endif %}
+  {% if comment.id == selected_comment_id %} selectedcomment{% endif %}
+  "
+  id="comment-{{ comment.id }}"
+  data-comment-id="{{ comment.id }}">
   <span class="commentauthor">
     {{ comment.author|account_link }}
   </span>

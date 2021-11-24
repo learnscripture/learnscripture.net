@@ -1,1 +1,1 @@
-default_app_config = 'scores.apps.ScoresConfig'
+default_app_config = "scores.apps.ScoresConfig"

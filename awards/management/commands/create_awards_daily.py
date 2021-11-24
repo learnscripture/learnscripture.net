@@ -10,6 +10,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         try:
             import awards.tasks
+
             awards.tasks.give_all_addict_awards()
             awards.tasks.give_all_consistent_learner_awards()
         except Exception:

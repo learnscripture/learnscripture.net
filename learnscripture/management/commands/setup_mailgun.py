@@ -4,7 +4,6 @@ from learnscripture.mail.setup import setup_mailgun_routes, setup_mailgun_webhoo
 
 
 class Command(BaseCommand):
-
     def handle(self, *args, **options):
         setup_mailgun_routes()
         setup_mailgun_webhooks()

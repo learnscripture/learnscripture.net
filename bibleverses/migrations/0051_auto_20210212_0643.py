@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bibleverses', '0050_auto_20200724_0545'),
+        ("bibleverses", "0050_auto_20200724_0545"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='wordsuggestiondata',
-            name='suggestions',
+            model_name="wordsuggestiondata",
+            name="suggestions",
             field=models.JSONField(default=list),
         ),
     ]

@@ -9,8 +9,8 @@ register = Library()
 
 def jsonify(object):
     if isinstance(object, QuerySet):
-        return serialize('json', object)
+        return serialize("json", object)
     return json.dumps(object)
 
 
-register.filter('jsonify', jsonify)
+register.filter("jsonify", jsonify)

@@ -5,7 +5,6 @@ from mptt.managers import TreeManager
 
 
 class ContentItemManager(models.Manager):
-
     def rename_url(self, old_url, new_url):
         """
         Change the urls in all content pages. Also changes the urls that begin with this url.
@@ -14,7 +13,7 @@ class ContentItemManager(models.Manager):
         def rename_html(html):
             return re.sub(
                 r"""(\s)href=(["'])%s""" % old_url,
-                r'\1href=\2%s' % new_url,
+                r"\1href=\2%s" % new_url,
                 html,
             )
 
@@ -29,7 +28,6 @@ class ContentItemManager(models.Manager):
 
 
 class PageManager(TreeManager):
-
     def get_by_url(self, url):
         """
         Retrieve a page that matches the given URL, or return None if none found

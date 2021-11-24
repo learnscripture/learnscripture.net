@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bibleverses', '0041_auto_20190522_2305'),
+        ("bibleverses", "0041_auto_20190522_2305"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='verseset',
-            name='passage_id',
-            field=models.CharField(blank=True, default='', max_length=203),
+            model_name="verseset",
+            name="passage_id",
+            field=models.CharField(blank=True, default="", max_length=203),
         ),
     ]

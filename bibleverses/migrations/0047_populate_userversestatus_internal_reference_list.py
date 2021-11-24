@@ -4,29 +4,22 @@ from django.db import migrations
 
 
 def forwards(app_configs, schema_editor):
-    from bibleverses.parsing import parse_validated_localized_reference
     from bibleverses.models import TextType
+    from bibleverses.parsing import parse_validated_localized_reference
     from learnscripture.utils.iterators import chunked_queryset
-    UserVerseStatus = app_configs.get_model('bibleverses', 'UserVerseStatus')
+
+    UserVerseStatus = app_configs.get_model("bibleverses", "UserVerseStatus")
 
     # Copied logic from Identity.create_verse_status
-    uvs_query = (UserVerseStatus
-                 .objects
-                 .filter(version__text_type=TextType.BIBLE)
-                 .select_related('version')
-                 )
+    uvs_query = UserVerseStatus.objects.filter(version__text_type=TextType.BIBLE).select_related("version")
     for i, batch in enumerate(chunked_queryset(uvs_query, 1000)):
-        print(f'{i * 1000} items done')
+        print(f"{i * 1000} items done")
         to_update = []
         for uvs in batch:
-            parsed_ref = parse_validated_localized_reference(uvs.version.language_code,
-                                                             uvs.localized_reference)
-            uvs.internal_reference_list = [
-                r.canonical_form()
-                for r in parsed_ref.to_internal().to_list()
-            ]
+            parsed_ref = parse_validated_localized_reference(uvs.version.language_code, uvs.localized_reference)
+            uvs.internal_reference_list = [r.canonical_form() for r in parsed_ref.to_internal().to_list()]
             to_update.append(uvs)
-        UserVerseStatus.objects.bulk_update(to_update, ['internal_reference_list'])
+        UserVerseStatus.objects.bulk_update(to_update, ["internal_reference_list"])
 
 
 def backwards(app_configs, schema_editor):
@@ -36,7 +29,7 @@ def backwards(app_configs, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bibleverses', '0046_userversestatus_internal_reference_list'),
+        ("bibleverses", "0046_userversestatus_internal_reference_list"),
     ]
 
     operations = [

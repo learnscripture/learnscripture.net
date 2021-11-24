@@ -101,8 +101,8 @@
           <input type="hidden" name="verse_status_localized_reference" value="{{ uvs.localized_reference }}" />
           <p>
             <button type="button" name="cancellearning" class="btn primary cancel-learning-verse-btn"
-                    data-confirm-prompt="{% ftlmsg 'user-verses-stop-learning-verse-prompt' reference=uvs.localized_reference version_name=uvs.version.short_name %}"
-              >
+              data-confirm-prompt="{% ftlmsg 'user-verses-stop-learning-verse-prompt' reference=uvs.localized_reference version_name=uvs.version.short_name %}"
+            >
               {% ftlmsg 'user-verses-stop-learning-verse-button' %}
             </button>
           </p>
@@ -113,8 +113,8 @@
           <input type="hidden" name="version_id" value="{{ uvs.version_id }}" />
           <p>
             <button type="submit" name="cancellearning" class="btn primary cancel-learning-passage-btn"
-                    data-confirm-prompt="{% ftlmsg 'user-verses-stop-learning-passage-prompt' passage_reference=uvs.passage_localized_reference version_name=uvs.version.short_name %}"
-                    >
+              data-confirm-prompt="{% ftlmsg 'user-verses-stop-learning-passage-prompt' passage_reference=uvs.passage_localized_reference version_name=uvs.version.short_name %}"
+            >
               {% ftlmsg 'user-verses-stop-learning-passage-button' %}<br>
               ({{ uvs.passage_localized_reference }})
             </button>

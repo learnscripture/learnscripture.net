@@ -15,26 +15,23 @@ from .utils.widgets import AdminImageWidgetWithPreview, CmsTextarea
 class ContentInline(admin.StackedInline):
     model = Content
     extra = 1
-    formfield_overrides = {
-        CmsHTMLField: {'widget': CmsTextarea}
-    }
+    formfield_overrides = {CmsHTMLField: {"widget": CmsTextarea}}
     min_num = 1
 
 
 class ContentItemAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'used']
-    list_display_links = ['id', 'name']
-    date_hierarchy = 'updated'
-    search_fields = ['name', 'content_set__content_html']
+    list_display = ["id", "name", "used"]
+    list_display_links = ["id", "name"]
+    date_hierarchy = "updated"
+    search_fields = ["name", "content_set__content_html"]
     inlines = [ContentInline]
 
     def get_queryset(self, request):
-        return super().get_queryset(request).annotate(
-            used=Exists('page_content_items')
-        )
+        return super().get_queryset(request).annotate(used=Exists("page_content_items"))
 
     def used(self, obj):
         return obj.used
+
     used.boolean = True
 
 
@@ -43,7 +40,7 @@ class PageContentItemInline(admin.TabularInline):
     extra = 1
 
     def get_queryset(self, request):
-        return super().get_queryset(request).order_by('sort')
+        return super().get_queryset(request).order_by("sort")
 
 
 class PageTitleInline(admin.TabularInline):
@@ -56,21 +53,38 @@ class PageAdmin(MPTTModelAdmin):
 
     form = forms.PageForm
     fieldsets = (
-        (None, {'fields': ('parent', 'url', 'redirect_page', 'template_name', 'is_public',)}),
+        (
+            None,
+            {
+                "fields": (
+                    "parent",
+                    "url",
+                    "redirect_page",
+                    "template_name",
+                    "is_public",
+                )
+            },
+        ),
     )
 
     inlines = [PageTitleInline, PageContentItemInline]
-    list_display = ('url', 'view_on_site_link', 'redirect_page', 'is_public', 'action_links')
+    list_display = ("url", "view_on_site_link", "redirect_page", "is_public", "action_links")
     list_per_page = 1000
-    search_fields = ('url', 'titles__title')
+    search_fields = ("url", "titles__title")
 
     def view_on_site_link(self, page):
         absolute_url = page.get_absolute_url()
         if not absolute_url:
-            return ''
-        return format_html('<a href="{0}" title="{1}" target="_blank"><img src="{2}cms/admin/images/world.gif" width="16" height="16" alt="{3}" /></a>', absolute_url, 'View on site', settings.STATIC_URL, 'View on site')
+            return ""
+        return format_html(
+            '<a href="{0}" title="{1}" target="_blank"><img src="{2}cms/admin/images/world.gif" width="16" height="16" alt="{3}" /></a>',
+            absolute_url,
+            "View on site",
+            settings.STATIC_URL,
+            "View on site",
+        )
 
-    view_on_site_link.short_description = ''
+    view_on_site_link.short_description = ""
     view_on_site_link.allow_tags = True
 
     def action_links(self, page):
@@ -78,48 +92,88 @@ class PageAdmin(MPTTModelAdmin):
 
         # first child cannot be moved up, last child cannot be moved down
         if not page.is_first_child():
-            actions.append(format_html('<a href="{0}/move_up/" title="{1}"><img src="{2}cms/admin/images/arrow_up.gif" width="16" height="16" alt="{3}" /></a> ', page.pk, 'Move up', settings.STATIC_URL, 'Move up'))
+            actions.append(
+                format_html(
+                    '<a href="{0}/move_up/" title="{1}"><img src="{2}cms/admin/images/arrow_up.gif" width="16" height="16" alt="{3}" /></a> ',
+                    page.pk,
+                    "Move up",
+                    settings.STATIC_URL,
+                    "Move up",
+                )
+            )
         else:
-            actions.append(format_html('<img src="{0}cms/admin/images/blank.gif" width="16" height="16" alt="" /> ', settings.STATIC_URL))
+            actions.append(
+                format_html(
+                    '<img src="{0}cms/admin/images/blank.gif" width="16" height="16" alt="" /> ', settings.STATIC_URL
+                )
+            )
 
         if not page.is_last_child():
-            actions.append(format_html('<a href="{0}/move_down/" title="{1}"><img src="{2}cms/admin/images/arrow_down.gif" width="16" height="16" alt="{3}" /></a> ', page.pk, 'Move down', settings.STATIC_URL, 'Move down'))
+            actions.append(
+                format_html(
+                    '<a href="{0}/move_down/" title="{1}"><img src="{2}cms/admin/images/arrow_down.gif" width="16" height="16" alt="{3}" /></a> ',
+                    page.pk,
+                    "Move down",
+                    settings.STATIC_URL,
+                    "Move down",
+                )
+            )
         else:
-            actions.append(format_html('<img src="{0}cms/admin/images/blank.gif" width="16" height="16" alt="" /> ', settings.STATIC_URL))
+            actions.append(
+                format_html(
+                    '<img src="{0}cms/admin/images/blank.gif" width="16" height="16" alt="" /> ', settings.STATIC_URL
+                )
+            )
 
         # add subpage
-        actions.append(format_html('<a href="add/?{0}={1}" title="{2}"><img src="{3}cms/admin/images/page_new.gif" width="16" height="16" alt="{4}" /></a> ', self.model._mptt_meta.parent_attr, page.pk, 'Add sub page', settings.STATIC_URL, 'Add sub page'))
+        actions.append(
+            format_html(
+                '<a href="add/?{0}={1}" title="{2}"><img src="{3}cms/admin/images/page_new.gif" width="16" height="16" alt="{4}" /></a> ',
+                self.model._mptt_meta.parent_attr,
+                page.pk,
+                "Add sub page",
+                settings.STATIC_URL,
+                "Add sub page",
+            )
+        )
 
-        return format_html('<span class="nobr">{0}</span>', format_html_join('', '{0}', ((a,) for a in actions)))
-    action_links.short_description = 'Actions'
+        return format_html('<span class="nobr">{0}</span>', format_html_join("", "{0}", ((a,) for a in actions)))
+
+    action_links.short_description = "Actions"
 
     def save_model(self, request, obj, form, change):
         """
         - Optionally positions a Page `obj` before or beneath another page, based on POST data.
         - Notifies the PERMISSION_CLASS that a Page was created by `user`.
         """
-        if 'before_page_id' in request.POST:
-            before_page = Page.objects.get(pk=int(request.POST['before_page_id']))
+        if "before_page_id" in request.POST:
+            before_page = Page.objects.get(pk=int(request.POST["before_page_id"]))
             obj.parent = before_page.parent
-            obj.insert_at(before_page, position='left', save=False)
-        elif 'below_page_id' in request.POST:
-            below_page = Page.objects.get(pk=int(request.POST['below_page_id']))
+            obj.insert_at(before_page, position="left", save=False)
+        elif "below_page_id" in request.POST:
+            below_page = Page.objects.get(pk=int(request.POST["below_page_id"]))
             obj.parent = below_page
-            obj.insert_at(below_page, position='last-child', save=False)
+            obj.insert_at(below_page, position="last-child", save=False)
 
-        super(PageAdmin, self).save_model(request, obj, form, change)
+        super().save_model(request, obj, form, change)
 
 
 class FileAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'title', 'updated',)
-    date_hierarchy = 'updated'
-    search_fields = ('title', )
-    actions = ['really_delete_selected']
+    list_display = (
+        "__str__",
+        "title",
+        "updated",
+    )
+    date_hierarchy = "updated"
+    search_fields = ("title",)
+    actions = ["really_delete_selected"]
 
     def get_actions(self, request):
-        actions = super(FileAdmin, self).get_actions(request)
-        if 'delete_selected' in actions:
-            del actions['delete_selected']  # the original delete selected action doesn't remove associated files, because .delete() is never called
+        actions = super().get_actions(request)
+        if "delete_selected" in actions:
+            del actions[
+                "delete_selected"
+            ]  # the original delete selected action doesn't remove associated files, because .delete() is never called
         return actions
 
     def really_delete_selected(self, request, queryset):
@@ -134,26 +188,52 @@ class FileAdmin(admin.ModelAdmin):
             deleted_count += 1
 
         if deleted_count:
-            messages.add_message(request, messages.INFO, "Successfully deleted %(count)d %(items)s." % {
-                "count": deleted_count, "items": model_ngettext(self.opts, deleted_count)
-            })
+            messages.add_message(
+                request,
+                messages.INFO,
+                "Successfully deleted %(count)d %(items)s."
+                % {"count": deleted_count, "items": model_ngettext(self.opts, deleted_count)},
+            )
 
-    really_delete_selected.short_description = 'Delete selected files'
+    really_delete_selected.short_description = "Delete selected files"
 
 
 class ImageAdmin(FileAdmin):
-    list_display = ('preview', '__str__', 'title', 'get_size', 'updated',)
+    list_display = (
+        "preview",
+        "__str__",
+        "title",
+        "get_size",
+        "updated",
+    )
     fieldsets = (
-        (None, {'fields': ('image', 'title',)}),
-        ('Size', {'classes': ('collapse',), 'fields': ('width', 'height',)}),
+        (
+            None,
+            {
+                "fields": (
+                    "image",
+                    "title",
+                )
+            },
+        ),
+        (
+            "Size",
+            {
+                "classes": ("collapse",),
+                "fields": (
+                    "width",
+                    "height",
+                ),
+            },
+        ),
     )
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        if db_field.name == 'image':
+        if db_field.name == "image":
             kwargs.pop("request", None)
-            kwargs['widget'] = AdminImageWidgetWithPreview
+            kwargs["widget"] = AdminImageWidgetWithPreview
             return db_field.formfield(**kwargs)
-        return super(ImageAdmin, self).formfield_for_dbfield(db_field, **kwargs)
+        return super().formfield_for_dbfield(db_field, **kwargs)
 
 
 admin.site.register(ContentItem, ContentItemAdmin)

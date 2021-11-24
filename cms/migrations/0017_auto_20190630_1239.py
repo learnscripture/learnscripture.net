@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cms', '0016_remove_page_title'),
+        ("cms", "0016_remove_page_title"),
     ]
 
     operations = [
         migrations.AlterUniqueTogether(
-            name='pagetitle',
-            unique_together={('page', 'language_code')},
+            name="pagetitle",
+            unique_together={("page", "language_code")},
         ),
     ]

@@ -14,14 +14,14 @@ def site_address_url_start():
     """
     Returns start of URL (protocol and domain) for this site (a guess)
     """
-    protocol = 'https' if settings.SESSION_COOKIE_SECURE else 'http'  # best guess
-    return protocol + '://' + get_current_site(None).domain
+    protocol = "https" if settings.SESSION_COOKIE_SECURE else "http"  # best guess
+    return protocol + "://" + get_current_site(None).domain
 
 
 def send_unrecognized_payment_email(ipn_obj):
     c = {
-        'url_start': site_address_url_start(),
-        'ipn_obj': ipn_obj,
+        "url_start": site_address_url_start(),
+        "ipn_obj": ipn_obj,
     }
 
     body = render_to_string_ftl("learnscripture/unrecognized_payment_email.txt", c)
@@ -40,7 +40,7 @@ def paypal_payment_received(sender, **kwargs):
         unrecognized_payment(ipn_obj)
         return
 
-    if ipn_obj.payment_status.lower().strip() != 'completed':
+    if ipn_obj.payment_status.lower().strip() != "completed":
         unrecognized_payment(ipn_obj)
         return
 
@@ -52,7 +52,7 @@ def paypal_payment_received(sender, **kwargs):
         unrecognized_payment(ipn_obj)
         return
 
-    if 'account' in info:
+    if "account" in info:
         paypal_account_payment_received(ipn_obj, info)
     else:
         unrecognized_payment(ipn_obj)
@@ -62,7 +62,7 @@ def paypal_payment_received(sender, **kwargs):
 
 def paypal_account_payment_received(ipn_obj, info):
     try:
-        account = Account.objects.get(id=info['account'])
+        account = Account.objects.get(id=info["account"])
         account.receive_payment(ipn_obj)
     except Account.DoesNotExist:
         unrecognized_payment(ipn_obj)

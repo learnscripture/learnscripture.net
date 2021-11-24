@@ -8,13 +8,20 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounts', '0030_auto_20210314_1208'),
+        ("accounts", "0030_auto_20210314_1208"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='identity',
-            name='referred_by',
-            field=models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='referrals', to=settings.AUTH_USER_MODEL),
+            model_name="identity",
+            name="referred_by",
+            field=models.ForeignKey(
+                blank=True,
+                default=None,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="referrals",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

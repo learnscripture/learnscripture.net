@@ -9,18 +9,24 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('groups', '0007_auto_20190629_1201'),
+        ("groups", "0007_auto_20190629_1201"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='group',
-            name='created_by',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='groups_created', to=settings.AUTH_USER_MODEL),
+            model_name="group",
+            name="created_by",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT, related_name="groups_created", to=settings.AUTH_USER_MODEL
+            ),
         ),
         migrations.AlterField(
-            model_name='invitation',
-            name='created_by',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='invitations_created', to=settings.AUTH_USER_MODEL),
+            model_name="invitation",
+            name="created_by",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="invitations_created",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

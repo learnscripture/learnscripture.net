@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cms', '0006_auto_20190629_1148'),
+        ("cms", "0006_auto_20190629_1148"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='contentitem',
-            name='used_on_pages_data',
+            model_name="contentitem",
+            name="used_on_pages_data",
         ),
     ]

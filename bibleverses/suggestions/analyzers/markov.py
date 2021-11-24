@@ -13,9 +13,7 @@ logger = logging.getLogger(__name__)
 
 class MarkovAnalyzerBase(Analyzer):
     def analyze(self, training_texts, keys):
-        return build_summed_markov_chains_for_texts(training_texts,
-                                                    keys,
-                                                    self.size)
+        return build_summed_markov_chains_for_texts(training_texts, keys, self.size)
 
 
 class Markov1Analyzer(MarkovAnalyzerBase):
@@ -34,11 +32,10 @@ class Markov3Analyzer(MarkovAnalyzerBase):
 
 
 def build_summed_markov_chains_for_texts(training_texts, keys, size):
-    return sum_matrices(build_markov_chains_for_text(training_texts, key, size)
-                        for key in keys)
+    return sum_matrices(build_markov_chains_for_text(training_texts, key, size) for key in keys)
 
 
-@cache_results_with_pickle('markov')
+@cache_results_with_pickle("markov")
 def build_markov_chains_for_text(training_texts, key, size):
     text = training_texts[key]
     sentences = text.split(".")
@@ -52,7 +49,7 @@ def build_markov_chains_for_text(training_texts, key, size):
         if size == 1:
             chain_input = words
         else:
-            chain_input = [tuple(words[i:i + size]) for i in range(0, len(words) - (size - 1))]
+            chain_input = [tuple(words[i : i + size]) for i in range(0, len(words) - (size - 1))]
         v, c = pykov.maximum_likelihood_probabilities(chain_input, lag_time=1)
         matrices.append(c)
 

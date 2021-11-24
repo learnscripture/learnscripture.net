@@ -49,8 +49,8 @@
           <select id="id-version-select" name="version">
             {% for v in bible_versions %}
               <option value="{{ v.slug }}"
-                      {% if v.slug == version.slug %}selected{% endif %}
-                      >{{ v.short_name }} ({{ v.full_name }})</option>
+                {% if v.slug == version.slug %}selected{% endif %}
+              >{{ v.short_name }} ({{ v.full_name }})</option>
             {% endfor %}
           </select>
           <noscript>
@@ -60,7 +60,7 @@
 
         </div>
       </form>
-    {% include "learnscripture/permission_link.html" with text=version %}
+      {% include "learnscripture/permission_link.html" with text=version %}
     </div>
 
     <h3>{% ftlmsg 'versesets-view-set-notes-title' %}</h3>

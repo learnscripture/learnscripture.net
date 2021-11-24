@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cms', '0008_remove_page_show_in_menu'),
+        ("cms", "0008_remove_page_show_in_menu"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='page',
-            name='mark_current_regexes',
+            model_name="page",
+            name="mark_current_regexes",
         ),
     ]

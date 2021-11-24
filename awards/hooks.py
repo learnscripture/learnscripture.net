@@ -18,7 +18,7 @@ def notify_about_new_award(sender, **kwargs):
     award = sender
     account = award.account
     with django_ftl.override(account.default_language_code):
-        msg_html = new_award_msg_html(award, account, points=kwargs.get('points', None))
+        msg_html = new_award_msg_html(award, account, points=kwargs.get("points", None))
         account.identity.add_html_notice(msg_html)
 
 
@@ -28,24 +28,26 @@ def new_award_msg_html(award, account, points=None):
         settings.STATIC_URL,
         award.image_small(),
     )
-    award_url = reverse('user_stats', args=(account.username,))
+    award_url = reverse("user_stats", args=(account.username,))
     award_link = link(award_url, award.short_description())
 
     if award.level > 1:
-        msg = t('awards-levelled-up-html', dict(award=award_link))
+        msg = t("awards-levelled-up-html", dict(award=award_link))
     else:
-        msg = t('awards-new-award-html', dict(award=award_link))
+        msg = t("awards-new-award-html", dict(award=award_link))
 
     if points is not None and points > 0:
-        points_msg = t('awards-points-bonus', dict(points=points))
+        points_msg = t("awards-points-bonus", dict(points=points))
         msg = format_html("{0} {1}", msg, points_msg)
 
-    tell_people_link = t('awards-tell-people-html',
-                         dict(twitter=format_html('<a data-twitter-link><i class="icon-twitter"></i> Twitter</a>'),
-                              ))
+    tell_people_link = t(
+        "awards-tell-people-html",
+        dict(
+            twitter=format_html('<a data-twitter-link><i class="icon-twitter"></i> Twitter</a>'),
+        ),
+    )
 
-    caption = t('awards-social-media-default-message',
-                dict(award=award.short_description()))
+    caption = t("awards-social-media-default-message", dict(award=award.short_description()))
 
     tell_people_wrapper = format_html(
         '<span class="broadcast"'
@@ -56,7 +58,7 @@ def new_award_msg_html(award, account, points=None):
         ' data-award-name="{5}"'
         ' data-account-username="{6}"'
         ' data-caption="{7}"'
-        '>{8}</span>',
+        ">{8}</span>",
         award_url,
         settings.STATIC_URL,
         award.image_medium(),
@@ -65,9 +67,9 @@ def new_award_msg_html(award, account, points=None):
         award.short_description(),
         account.username,
         caption,
-        tell_people_link
+        tell_people_link,
     )
-    return format_html('{0} {1} {2}', img_html, msg, tell_people_wrapper)
+    return format_html("{0} {1} {2}", img_html, msg, tell_people_wrapper)
 
 
 @receiver(verse_set_chosen)

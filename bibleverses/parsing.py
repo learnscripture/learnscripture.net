@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import re
 
 import attr
@@ -7,14 +6,19 @@ from parsy import ParseError, char_from, generate, regex, string, string_from, w
 from learnscripture.ftl_bundles import t
 from learnscripture.utils.cache import memoize_function
 
-from .books import (get_bible_book_abbreviation_map, get_bible_book_name, get_bible_book_number, get_bible_books,
-                    is_single_chapter_book)
+from .books import (
+    get_bible_book_abbreviation_map,
+    get_bible_book_name,
+    get_bible_book_number,
+    get_bible_books,
+    is_single_chapter_book,
+)
 from .constants import BIBLE_BOOK_INFO
 from .languages import LANGUAGE_CODE_INTERNAL, normalize_reference_input
 
 
 @attr.s
-class ParsedReference(object):
+class ParsedReference:
     language_code = attr.ib()
     book_name = attr.ib()  # Always canonical form
     start_chapter = attr.ib()
@@ -37,17 +41,27 @@ class ParsedReference(object):
             self.end_verse = self.start_verse
         if self.end_chapter is not None:
             if self.end_chapter < self.start_chapter:
-                raise InvalidVerseReference(t('bibleverses-invalid-reference-end-chapter-before-start-chapter',
-                                              dict(end=self.end_chapter, start=self.start_chapter)))
+                raise InvalidVerseReference(
+                    t(
+                        "bibleverses-invalid-reference-end-chapter-before-start-chapter",
+                        dict(end=self.end_chapter, start=self.start_chapter),
+                    )
+                )
             if self.end_chapter == self.start_chapter:
                 if self.end_verse is not None:
                     if self.end_verse < self.start_verse:
-                        raise InvalidVerseReference(t('bibleverses-invalid-reference-end-verse-before-start-verse',
-                                                      dict(end=self.end_verse, start=self.start_verse)))
-        if (self.start_chapter is not None and self.start_chapter == self.end_chapter):
-            if (self.start_verse == 1 and
-                    self.start_chapter in self.book_info['verse_counts'] and
-                    self.end_verse == self.book_info['verse_counts'][self.start_chapter]):
+                        raise InvalidVerseReference(
+                            t(
+                                "bibleverses-invalid-reference-end-verse-before-start-verse",
+                                dict(end=self.end_verse, start=self.start_verse),
+                            )
+                        )
+        if self.start_chapter is not None and self.start_chapter == self.end_chapter:
+            if (
+                self.start_verse == 1
+                and self.start_chapter in self.book_info["verse_counts"]
+                and self.end_verse == self.book_info["verse_counts"][self.start_chapter]
+            ):
                 self.start_verse = None
                 self.end_verse = None
 
@@ -80,40 +94,39 @@ class ParsedReference(object):
     @classmethod
     def from_start_and_end(cls, start_parsed_ref, end_parsed_ref):
         if start_parsed_ref.language_code != end_parsed_ref.language_code:
-            raise InvalidVerseReference("Language {0} != {1}".format(start_parsed_ref.language_code,
-                                                                     end_parsed_ref.language_code))
+            raise InvalidVerseReference(f"Language {start_parsed_ref.language_code} != {end_parsed_ref.language_code}")
         if start_parsed_ref.book_name != end_parsed_ref.book_name:
-            raise InvalidVerseReference("Book {0} != {1}".format(start_parsed_ref.book_name,
-                                                                 end_parsed_ref.book_name))
+            raise InvalidVerseReference(f"Book {start_parsed_ref.book_name} != {end_parsed_ref.book_name}")
 
-        return cls(language_code=start_parsed_ref.language_code,
-                   book_name=start_parsed_ref.book_name,
-                   start_chapter=start_parsed_ref.start_chapter,
-                   start_verse=start_parsed_ref.start_verse,
-                   end_chapter=end_parsed_ref.end_chapter,
-                   end_verse=end_parsed_ref.end_verse)
+        return cls(
+            language_code=start_parsed_ref.language_code,
+            book_name=start_parsed_ref.book_name,
+            start_chapter=start_parsed_ref.start_chapter,
+            start_verse=start_parsed_ref.start_verse,
+            end_chapter=end_parsed_ref.end_chapter,
+            end_verse=end_parsed_ref.end_verse,
+        )
 
     def is_whole_book(self):
-        return (self.start_chapter is None or
-                (is_single_chapter_book(self.book_number) and
-                 self.start_verse is None))
+        return self.start_chapter is None or (is_single_chapter_book(self.book_number) and self.start_verse is None)
 
     def is_whole_chapter(self):
         return self.start_chapter is not None and self.start_verse is None
 
     def is_single_verse(self):
-        return (self.start_verse is not None and
-                self.end_chapter == self.start_chapter and
-                self.end_verse == self.start_verse)
+        return (
+            self.start_verse is not None
+            and self.end_chapter == self.start_chapter
+            and self.end_verse == self.start_verse
+        )
 
     def is_in_bounds(self):
         book_info = self.book_info
-        chapter_count = book_info['chapter_count']
+        chapter_count = book_info["chapter_count"]
         if self.start_chapter > chapter_count or self.end_chapter > chapter_count:
             return False
-        for chapter, verse in [(self.start_chapter, self.start_verse),
-                               (self.end_chapter, self.end_verse)]:
-            verse_count = book_info['verse_counts'][chapter]
+        for chapter, verse in [(self.start_chapter, self.start_verse), (self.end_chapter, self.end_verse)]:
+            verse_count = book_info["verse_counts"][chapter]
             if verse > verse_count:
                 return False
         return True
@@ -129,10 +142,7 @@ class ParsedReference(object):
             if start_verse is None:
                 start_verse = 1
             return self._clone(
-                start_chapter=start_chapter,
-                start_verse=start_verse,
-                end_chapter=start_chapter,
-                end_verse=start_verse
+                start_chapter=start_chapter, start_verse=start_verse, end_chapter=start_chapter, end_verse=start_verse
             )
 
     def get_end(self):
@@ -141,15 +151,12 @@ class ParsedReference(object):
         else:
             end_chapter = self.end_chapter
             if end_chapter is None:
-                end_chapter = self.book_info['chapter_count']
+                end_chapter = self.book_info["chapter_count"]
             end_verse = self.end_verse
             if end_verse is None:
-                end_verse = self.book_info['verse_counts'][end_chapter]
+                end_verse = self.book_info["verse_counts"][end_chapter]
             return self._clone(
-                start_chapter=end_chapter,
-                start_verse=end_verse,
-                end_chapter=end_chapter,
-                end_verse=end_verse
+                start_chapter=end_chapter, start_verse=end_verse, end_chapter=end_chapter, end_verse=end_verse
             )
 
     @property
@@ -177,15 +184,17 @@ class ParsedReference(object):
             next_ref = current_ref
             verse_num = next_ref.start_verse + 1
             next_ref = attr.evolve(next_ref, start_verse=verse_num, end_verse=verse_num)
-            verses_in_chapter = book_info['verse_counts'][next_ref.start_chapter]
+            verses_in_chapter = book_info["verse_counts"][next_ref.start_chapter]
             if next_ref.start_verse > verses_in_chapter:
                 chapter_num = next_ref.start_chapter + 1
                 verse_num = 1
-                next_ref = attr.evolve(next_ref,
-                                       start_chapter=chapter_num,
-                                       end_chapter=chapter_num,
-                                       start_verse=verse_num,
-                                       end_verse=verse_num)
+                next_ref = attr.evolve(
+                    next_ref,
+                    start_chapter=chapter_num,
+                    end_chapter=chapter_num,
+                    start_verse=verse_num,
+                    end_verse=verse_num,
+                )
             if next_ref.start_chapter > end_ref.start_chapter:
                 break
             if next_ref.start_chapter == end_ref.start_chapter and next_ref.start_verse > end_ref.start_verse:
@@ -200,6 +209,7 @@ class InvalidVerseReference(ValueError):
 
 # Generic parsing utilities
 
+
 def dict_map(d):
     """
     Returns a parser that matches any key from the dict,
@@ -209,6 +219,7 @@ def dict_map(d):
 
 
 # Specific parsing components
+
 
 @memoize_function
 def book_strict(language_code):
@@ -223,11 +234,10 @@ def book_loose(language_code):
     """
     Returns a parser for a Bible book, loose mode.
     """
-    return (dict_map(get_bible_book_abbreviation_map(language_code))
-            .desc(f"Expected Bible book in {language_code}"))
+    return dict_map(get_bible_book_abbreviation_map(language_code)).desc(f"Expected Bible book in {language_code}")
 
 
-number = regex(r'[0-9]+').map(int)
+number = regex(r"[0-9]+").map(int)
 chapter = number.desc("chapter number [0-9]+")
 verse = number.desc("verse number [0-9]+")
 
@@ -267,6 +277,7 @@ def bible_reference_parser_for_lang(language_code, strict):
     # This currently holds true for the languages we support, just with
     # different book names.
     if strict:
+
         @generate
         def bible_reference_strict():
             start_chapter, start_verse, end_chapter, end_verse = None, None, None, None
@@ -294,7 +305,8 @@ def bible_reference_parser_for_lang(language_code, strict):
                 start_chapter=start_chapter,
                 start_verse=start_verse,
                 end_chapter=end_chapter,
-                end_verse=end_verse)
+                end_verse=end_verse,
+            )
 
         return bible_reference_strict
     else:
@@ -336,7 +348,8 @@ def bible_reference_parser_for_lang(language_code, strict):
                 start_chapter=start_chapter,
                 start_verse=start_verse,
                 end_chapter=end_chapter,
-                end_verse=end_verse)
+                end_verse=end_verse,
+            )
 
         return bible_reference_loose
 
@@ -353,16 +366,16 @@ def parse_validated_localized_reference(language_code, localized_reference):
     try:
         return bible_reference_parser_for_lang(language_code, True).parse(localized_reference)
     except ParseError as e:
-        raise InvalidVerseReference(
-            f"Could not parse '{localized_reference}' as bible reference - {str(e)}")
+        raise InvalidVerseReference(f"Could not parse '{localized_reference}' as bible reference - {str(e)}")
 
 
 def parse_validated_internal_reference(internal_reference):
     return parse_validated_localized_reference(LANGUAGE_CODE_INTERNAL, internal_reference)
 
 
-def parse_unvalidated_localized_reference(language_code, localized_reference,
-                                          allow_whole_book=True, allow_whole_chapter=True):
+def parse_unvalidated_localized_reference(
+    language_code, localized_reference, allow_whole_book=True, allow_whole_chapter=True
+):
     """
     Parse user input as a Bible reference, returning a ParsedReference
     Returns None if it doesn't look like a reference (doesn't parse),
@@ -412,7 +425,7 @@ def parse_passage_title_partial_loose(language_code, title):
     # alphanumeric. Otherwise it is a mistake to think the first part was a
     # bible reference.
     if len(remainder) > 0:
-        if re.match(r'\w', remainder[0]):
+        if re.match(r"\w", remainder[0]):
             return None, False
 
     # For use cases of this function, we always want to allow whole books/chapters, so
@@ -437,8 +450,7 @@ def parse_break_list(breaks):
     """
     # breaks is a common separated list of internal references, created in create.js
     try:
-        return (bible_reference_parser_for_lang(LANGUAGE_CODE_INTERNAL, True)
-                .sep_by(string(","))).parse(breaks)
+        return (bible_reference_parser_for_lang(LANGUAGE_CODE_INTERNAL, True).sep_by(string(","))).parse(breaks)
 
     except ParseError:
         raise ValueError(f"'{breaks}' is not a valid list of internal Bible references")

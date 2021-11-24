@@ -10,9 +10,9 @@
       </h3>
     {% endifchanged %}
     <div class="activityitem
-                {% if event.account_id in following_ids %}following{% endif %}
-                "
-         data-event-id="{{ event.id }}">
+      {% if event.account_id in following_ids %}following{% endif %}
+      "
+      data-event-id="{{ event.id }}">
       {% if event.accepts_comments %}
         <span class="commentindicator">
           <a href="#" class="show-add-comment" title="{% ftlmsg 'comments-add-comment-link' %}"><i class="icon-comment"></i> <span class="commentcount">{{ comments|length }}</span></a>
@@ -32,8 +32,8 @@
         </div>
       {% endif %}
       <div class="commentblock{% if not comments %} hide{% endif %}"
-           data-new-comments-position="bottom"
-           >
+        data-new-comments-position="bottom"
+      >
         {% for comment in comments %}
           {% include "learnscripture/comment_inc.html" %}
         {% endfor %}

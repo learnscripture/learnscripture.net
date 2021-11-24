@@ -6,13 +6,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('scores', '0011_auto_20210222_1704'),
+        ("scores", "0011_auto_20210222_1704"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='actionlog',
-            name='reason',
-            field=models.PositiveSmallIntegerField(choices=[(0, 'Verse first tested'), (1, 'Verse reviewed'), (2, 'Review completed'), (3, 'Perfect!'), (4, 'Verse fully learnt'), (5, 'Earned award')]),
+            model_name="actionlog",
+            name="reason",
+            field=models.PositiveSmallIntegerField(
+                choices=[
+                    (0, "Verse first tested"),
+                    (1, "Verse reviewed"),
+                    (2, "Review completed"),
+                    (3, "Perfect!"),
+                    (4, "Verse fully learnt"),
+                    (5, "Earned award"),
+                ]
+            ),
         ),
     ]

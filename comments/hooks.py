@@ -5,11 +5,11 @@ from .signals import new_comment
 
 
 def comment_post_save_handler(sender, **kwargs):
-    if kwargs.get('raw', False):
+    if kwargs.get("raw", False):
         return
 
-    comment = kwargs['instance']
-    if kwargs['created']:
+    comment = kwargs["instance"]
+    if kwargs["created"]:
         new_comment.send(sender=comment)
 
 

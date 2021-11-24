@@ -11,8 +11,8 @@ from . import managers
 from .utils.fields import CmsHTMLField
 from .utils.images import LIST_THUMBNAIL_OPTIONS, ThumbnailException, get_thumbnail, get_thumbnail_url
 
-IMAGES_DIR = 'uploads/images'
-FILES_DIR = 'uploads/files'
+IMAGES_DIR = "uploads/images"
+FILES_DIR = "uploads/files"
 
 
 class ContentItem(models.Model):
@@ -23,48 +23,52 @@ class ContentItem(models.Model):
     objects = managers.ContentItemManager()
 
     class Meta:
-        verbose_name = 'content item'
-        verbose_name_plural = 'content items'
+        verbose_name = "content item"
+        verbose_name_plural = "content items"
 
     def __str__(self):
-        return self.name or '[ UNNAMED ]'
+        return self.name or "[ UNNAMED ]"
 
 
 class Content(models.Model):
-    content_item = models.ForeignKey(ContentItem, related_name='content_set', on_delete=models.CASCADE)
+    content_item = models.ForeignKey(ContentItem, related_name="content_set", on_delete=models.CASCADE)
     language_code = models.CharField(
         max_length=10,
         choices=settings.LANGUAGES,
         default=settings.LANGUAGE_CODE,
     )
-    content_html = CmsHTMLField(verbose_name='Content')
+    content_html = CmsHTMLField(verbose_name="Content")
 
     def __str__(self):
-        return f'{self.language_code.upper()}: {str(self.content_item)}'
+        return f"{self.language_code.upper()}: {str(self.content_item)}"
 
     class Meta:
         unique_together = [
-            ('content_item', 'language_code'),
+            ("content_item", "language_code"),
         ]
 
 
 class Page(MPTTModel):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    parent = models.ForeignKey('self', null=True, blank=True, related_name='subpages', verbose_name='parent', on_delete=models.SET_NULL)
+    parent = models.ForeignKey(
+        "self", null=True, blank=True, related_name="subpages", verbose_name="parent", on_delete=models.SET_NULL
+    )
     url = models.CharField(max_length=1000, blank=True)
-    redirect_page = models.ForeignKey('self', null=True, blank=True, related_name='redirected_pages', on_delete=models.SET_NULL)
+    redirect_page = models.ForeignKey(
+        "self", null=True, blank=True, related_name="redirected_pages", on_delete=models.SET_NULL
+    )
     template_name = models.CharField(blank=True, max_length=70, choices=settings.CMS_TEMPLATE_CHOICES)
     is_public = models.BooleanField(default=True)
-    content_items = models.ManyToManyField(ContentItem, through='PageContentItem')
+    content_items = models.ManyToManyField(ContentItem, through="PageContentItem")
 
     objects = managers.PageManager()
     tree = TreeManager()
 
     class Meta:
-        verbose_name = 'page'
-        verbose_name_plural = 'pages'
-        ordering = ('tree_id', 'lft')
+        verbose_name = "page"
+        verbose_name_plural = "pages"
+        ordering = ("tree_id", "lft")
 
     def __str__(self):
         return self.url
@@ -73,9 +77,9 @@ class Page(MPTTModel):
         if self.id:
             old_url = Page.objects.get(id=self.id).get_absolute_url()
         else:
-            old_url = ''
+            old_url = ""
 
-        super(Page, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
         if old_url:
             new_url = self.get_absolute_url()
@@ -96,7 +100,7 @@ class Page(MPTTModel):
         return self.parent and (self.rght + 1 == self.parent.rght)
 
     def get_ancestors(self, *args, **kwargs):
-        if getattr(self, '_ancestors_retrieved', False):
+        if getattr(self, "_ancestors_retrieved", False):
             # We have already retrieved the chain of parent objects, so can skip
             # a DB query for this.
             ancestors = []
@@ -106,14 +110,14 @@ class Page(MPTTModel):
                 node = node.parent
             return ancestors
         else:
-            return super(Page, self).get_ancestors(*args, **kwargs)
+            return super().get_ancestors(*args, **kwargs)
 
     def is_public_for_user(self, user):
         return user.is_staff or self.is_public
 
 
 class PageTitle(models.Model):
-    page = models.ForeignKey(Page, related_name='titles', on_delete=models.CASCADE)
+    page = models.ForeignKey(Page, related_name="titles", on_delete=models.CASCADE)
     language_code = models.CharField(
         max_length=10,
         choices=settings.LANGUAGES,
@@ -122,17 +126,17 @@ class PageTitle(models.Model):
     title = models.CharField(max_length=255)
 
     def __str__(self):
-        return f'{self.language_code.upper()}: {self.title}'
+        return f"{self.language_code.upper()}: {self.title}"
 
     class Meta:
         unique_together = [
-            ('page', 'language_code'),
+            ("page", "language_code"),
         ]
 
 
 class PageContentItem(models.Model):
-    content_item = models.ForeignKey(ContentItem, related_name='page_content_items', on_delete=models.CASCADE)
-    page = models.ForeignKey(Page, related_name='page_content_items', on_delete=models.CASCADE)
+    content_item = models.ForeignKey(ContentItem, related_name="page_content_items", on_delete=models.CASCADE)
+    page = models.ForeignKey(Page, related_name="page_content_items", on_delete=models.CASCADE)
     block_name = models.CharField(max_length=255)
     sort = models.IntegerField(blank=True, null=True)
 
@@ -150,9 +154,9 @@ class Image(models.Model):
     height = models.IntegerField(blank=True, null=True)
 
     class Meta:
-        verbose_name = 'image'
-        verbose_name_plural = 'images'
-        ordering = ('-updated', )
+        verbose_name = "image"
+        verbose_name_plural = "images"
+        ordering = ("-updated",)
 
     def __str__(self):
         return self.image.name
@@ -164,10 +168,10 @@ class Image(models.Model):
             existing_image.delete()
 
         self.get_image_information()
-        super(Image, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        super(Image, self).delete(*args, **kwargs)
+        super().delete(*args, **kwargs)
         self.image.storage.delete(self.image.name)
 
     def get_image_information(self):
@@ -177,8 +181,9 @@ class Image(models.Model):
         return os.path.basename(self.image.name)
 
     def get_size(self):
-        return '%s x %d' % (self.width, self.height)
-    get_size.short_description = 'Size'
+        return "%s x %d" % (self.width, self.height)
+
+    get_size.short_description = "Size"
 
     def thumbnail(self):
         return get_thumbnail(self.image, thumbnail_options=LIST_THUMBNAIL_OPTIONS)
@@ -190,10 +195,13 @@ class Image(models.Model):
         try:
             thumbnail = get_thumbnail(self.image, thumbnail_options=LIST_THUMBNAIL_OPTIONS)
             if thumbnail:
-                return format_html('<img src="{0}" width="{1}" height="{2}" />', thumbnail.url, thumbnail.width, thumbnail.height)
+                return format_html(
+                    '<img src="{0}" width="{1}" height="{2}" />', thumbnail.url, thumbnail.width, thumbnail.height
+                )
         except ThumbnailException as e:
             return str(e)
-    preview.short_description = 'Preview'
+
+    preview.short_description = "Preview"
 
 
 def files_directory(instance, filename):
@@ -207,9 +215,9 @@ class File(models.Model):
     title = models.CharField(max_length=255)
 
     class Meta:
-        verbose_name = 'file'
-        verbose_name_plural = 'files'
-        ordering = ('-updated', )
+        verbose_name = "file"
+        verbose_name_plural = "files"
+        ordering = ("-updated",)
 
     def __str__(self):
         return self.file.name
@@ -220,10 +228,10 @@ class File(models.Model):
         for existing_file in existing_files:
             existing_file.delete()
 
-        super(File, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        super(File, self).delete(*args, **kwargs)
+        super().delete(*args, **kwargs)
         self.file.storage.delete(self.file.name)
 
     def get_filename(self):

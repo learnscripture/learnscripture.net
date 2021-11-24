@@ -34,27 +34,28 @@ EVENTSTREAM_MAX_EXTRA_AFFINITY_FOR_FRIEND = 2.0
 
 
 class EventType(models.TextChoices):
-    NEW_ACCOUNT = 'NEW_ACCOUNT', 'New account'
-    AWARD_RECEIVED = 'AWARD_RECEIVED', 'Award received'
-    POINTS_MILESTONE = 'POINTS_MILESTONE', 'Points milestone'
-    VERSES_STARTED_MILESTONE = 'VERSES_STARTED_MILESTONE', 'Verses started milestone'
-    VERSES_FINISHED_MILESTONE = 'VERSES_FINISHED_MILESTONE', 'Verses finished milestone'
-    VERSE_SET_CREATED = 'VERSE_SET_CREATED', 'Verse set created'
-    STARTED_LEARNING_VERSE_SET = 'STARTED_LEARNING_VERSE_SET', 'Started learning a verse set'
-    AWARD_LOST = 'AWARD_LOST', 'Award lost'  # See notes on AwardLostEvent
-    GROUP_JOINED = 'GROUP_JOINED', 'Group joined'
-    GROUP_CREATED = 'GROUP_CREATED', 'Group created'
-    STARTED_LEARNING_CATECHISM = 'STARTED_LEARNING_CATECHISM', 'Started learning catechism'
-    NEW_COMMENT = 'NEW_COMMENT', 'New comment'
+    NEW_ACCOUNT = "NEW_ACCOUNT", "New account"
+    AWARD_RECEIVED = "AWARD_RECEIVED", "Award received"
+    POINTS_MILESTONE = "POINTS_MILESTONE", "Points milestone"
+    VERSES_STARTED_MILESTONE = "VERSES_STARTED_MILESTONE", "Verses started milestone"
+    VERSES_FINISHED_MILESTONE = "VERSES_FINISHED_MILESTONE", "Verses finished milestone"
+    VERSE_SET_CREATED = "VERSE_SET_CREATED", "Verse set created"
+    STARTED_LEARNING_VERSE_SET = "STARTED_LEARNING_VERSE_SET", "Started learning a verse set"
+    AWARD_LOST = "AWARD_LOST", "Award lost"  # See notes on AwardLostEvent
+    GROUP_JOINED = "GROUP_JOINED", "Group joined"
+    GROUP_CREATED = "GROUP_CREATED", "Group created"
+    STARTED_LEARNING_CATECHISM = "STARTED_LEARNING_CATECHISM", "Started learning catechism"
+    NEW_COMMENT = "NEW_COMMENT", "New comment"
 
 
-class EventLogic(object):
+class EventLogic:
     """
     Encapsulates logic about different types of events.
 
     Event stores data, and all polymorphic behaviour is defined in EventLogic.
 
     """
+
     weight = 10
 
     event_type = NotImplemented
@@ -72,11 +73,9 @@ class EventLogic(object):
         pass everything needed by their get_message_html()
         method into Event.event_data, via a super().__init__() calls.
         """
-        account = kwargs.pop('account', None)
+        account = kwargs.pop("account", None)
         self.event_data = kwargs
-        self.event = Event(weight=self.weight,
-                           event_type=self.event_type,
-                           account=account)
+        self.event = Event(weight=self.weight, event_type=self.event_type, account=account)
 
     def save(self):
         self.event.event_data = self.event_data
@@ -92,7 +91,7 @@ class EventLogic(object):
 
     @classmethod
     def get_absolute_url(cls, event):
-        return reverse('activity_item', args=(event.id,))
+        return reverse("activity_item", args=(event.id,))
 
     @classmethod
     def accepts_comments(cls, event):
@@ -104,8 +103,7 @@ class NewAccountEvent(EventLogic):
 
     @classmethod
     def get_message_html(cls, event, language_code):
-        return t('events-new-user-signed-up-html',
-                 dict(username=account_link(event.account)))
+        return t("events-new-user-signed-up-html", dict(username=account_link(event.account)))
 
 
 class AwardReceivedEvent(EventLogic):
@@ -116,23 +114,30 @@ class AwardReceivedEvent(EventLogic):
 
     def __init__(self, award=None):
         from awards.models import AwardType
-        super(AwardReceivedEvent, self).__init__(award_id=award.id,
-                                                 award_type=award.award_type,
-                                                 award_level=award.level,
-                                                 temporary_award=award.award_type in [AwardType.REIGNING_WEEKLY_CHAMPION],
-                                                 account=award.account)
+
+        super().__init__(
+            award_id=award.id,
+            award_type=award.award_type,
+            award_level=award.level,
+            temporary_award=award.award_type in [AwardType.REIGNING_WEEKLY_CHAMPION],
+            account=award.account,
+        )
 
     @classmethod
     def get_message_html(cls, event, language_code):
         from awards.models import AWARD_LOGIC_CLASSES
-        award_type = event.event_data['award_type']
-        award_level = event.event_data['award_level']
+
+        award_type = event.event_data["award_type"]
+        award_level = event.event_data["award_level"]
         award_class = AWARD_LOGIC_CLASSES[award_type]
         award_detail = award_class(level=award_level)
-        return t('evemts-award-received-html',
-                 dict(username=account_link(event.account),
-                      award=link(reverse('award', args=(award_class.slug(),)),
-                                 award_detail.short_description())))
+        return t(
+            "evemts-award-received-html",
+            dict(
+                username=account_link(event.account),
+                award=link(reverse("award", args=(award_class.slug(),)), award_detail.short_description()),
+            ),
+        )
 
 
 # This event is no longer created, since it only applies to temporary awards
@@ -146,43 +151,51 @@ class AwardLostEvent(EventLogic):
     weight = AwardReceivedEvent.weight
 
     def __init__(self, award=None):
-        super(AwardLostEvent, self).__init__(award_id=award.id,
-                                             award_type=award.award_type,
-                                             account=award.account)
+        super().__init__(award_id=award.id, award_type=award.award_type, account=award.account)
 
     @classmethod
     def get_message_html(cls, event, language_code):
         from awards.models import AWARD_LOGIC_CLASSES
-        award_type = event.event_data['award_type']
-        award_level = event.event_data['award_level']
+
+        award_type = event.event_data["award_type"]
+        award_level = event.event_data["award_level"]
         award_class = AWARD_LOGIC_CLASSES[award_type]
         award_detail = award_class(level=award_level)
-        return t('events-award-lost-html',
-                 dict(username=account_link(event.account),
-                      award=link(reverse('award', args=(award_class.slug(),)),
-                                 award_detail.short_description())))
+        return t(
+            "events-award-lost-html",
+            dict(
+                username=account_link(event.account),
+                award=link(reverse("award", args=(award_class.slug(),)), award_detail.short_description()),
+            ),
+        )
 
 
 class VerseSetCreatedEvent(EventLogic):
     event_type = EventType.VERSE_SET_CREATED
 
     def __init__(self, verse_set=None):
-        super(VerseSetCreatedEvent, self).__init__(verse_set_id=verse_set.id,
-                                                   verse_set_slug=verse_set.slug,
-                                                   verse_set_name=verse_set.name,
-                                                   verse_set_language_code=verse_set.language_code,
-                                                   account=verse_set.created_by)
+        super().__init__(
+            verse_set_id=verse_set.id,
+            verse_set_slug=verse_set.slug,
+            verse_set_name=verse_set.name,
+            verse_set_language_code=verse_set.language_code,
+            account=verse_set.created_by,
+        )
 
     @classmethod
     def get_message_html(cls, event, language_code):
-        return t('events-verse-set-created-html',
-                 dict(username=account_link(event.account),
-                      verseset=link(
-                          reverse('view_verse_set', args=(event.event_data['verse_set_slug'],)),
-                          verse_set_smart_name(
-                              event.event_data['verse_set_name'],
-                              event.event_data['verse_set_language_code'],
-                              language_code))))
+        return t(
+            "events-verse-set-created-html",
+            dict(
+                username=account_link(event.account),
+                verseset=link(
+                    reverse("view_verse_set", args=(event.event_data["verse_set_slug"],)),
+                    verse_set_smart_name(
+                        event.event_data["verse_set_name"], event.event_data["verse_set_language_code"], language_code
+                    ),
+                ),
+            ),
+        )
 
 
 class StartedLearningVerseSetEvent(EventLogic):
@@ -191,49 +204,56 @@ class StartedLearningVerseSetEvent(EventLogic):
     weight = 13
 
     def __init__(self, verse_set=None, chosen_by=None):
-        super(StartedLearningVerseSetEvent, self).__init__(verse_set_id=verse_set.id,
-                                                           verse_set_slug=verse_set.slug,
-                                                           verse_set_name=verse_set.name,
-                                                           verse_set_language_code=verse_set.language_code,
-                                                           account=chosen_by)
+        super().__init__(
+            verse_set_id=verse_set.id,
+            verse_set_slug=verse_set.slug,
+            verse_set_name=verse_set.name,
+            verse_set_language_code=verse_set.language_code,
+            account=chosen_by,
+        )
 
     @classmethod
     def get_message_html(cls, event, language_code):
-        return t('events-started-learning-verse-set-html',
-                 dict(username=account_link(event.account),
-                      verseset=link(reverse('view_verse_set', args=(event.event_data['verse_set_slug'],)),
-                                    verse_set_smart_name(
-                                        event.event_data['verse_set_name'],
-                                        event.event_data['verse_set_language_code'],
-                                        language_code))))
+        return t(
+            "events-started-learning-verse-set-html",
+            dict(
+                username=account_link(event.account),
+                verseset=link(
+                    reverse("view_verse_set", args=(event.event_data["verse_set_slug"],)),
+                    verse_set_smart_name(
+                        event.event_data["verse_set_name"], event.event_data["verse_set_language_code"], language_code
+                    ),
+                ),
+            ),
+        )
 
 
 class PointsMilestoneEvent(EventLogic):
     event_type = EventType.POINTS_MILESTONE
 
     def __init__(self, account=None, points=None):
-        super(PointsMilestoneEvent, self).__init__(account=account,
-                                                   points=points)
+        super().__init__(account=account, points=points)
 
     @classmethod
     def get_message_html(cls, event, language_code):
-        return t('events-points-milestone-reached-html',
-                 dict(username=account_link(event.account),
-                      points=event.event_data['points']))
+        return t(
+            "events-points-milestone-reached-html",
+            dict(username=account_link(event.account), points=event.event_data["points"]),
+        )
 
 
 class VersesStartedMilestoneEvent(EventLogic):
     event_type = EventType.VERSES_STARTED_MILESTONE
 
     def __init__(self, account=None, verses_started=None):
-        super(VersesStartedMilestoneEvent, self).__init__(account=account,
-                                                          verses_started=verses_started)
+        super().__init__(account=account, verses_started=verses_started)
 
     @classmethod
     def get_message_html(cls, event, language_code):
-        return t('events-verses-started-milestone-reached-html',
-                 dict(username=account_link(event.account),
-                      verses=event.event_data['verses_started']))
+        return t(
+            "events-verses-started-milestone-reached-html",
+            dict(username=account_link(event.account), verses=event.event_data["verses_started"]),
+        )
 
 
 class GroupJoinedEvent(EventLogic):
@@ -242,68 +262,75 @@ class GroupJoinedEvent(EventLogic):
     weight = 11
 
     def __init__(self, account=None, group=None):
-        super(GroupJoinedEvent, self).__init__(account=account,
-                                               group_name=group.name,
-                                               group_slug=group.slug,
-                                               group_id=group.id)
+        super().__init__(account=account, group_name=group.name, group_slug=group.slug, group_id=group.id)
         self.event.group = group
 
     @classmethod
     def get_message_html(cls, event, language_code):
-        return t('events-user-joined-group-html',
-                 dict(username=account_link(event.account),
-                      group=link(reverse('group', args=(event.event_data['group_slug'],)),
-                                 event.event_data['group_name'])))
+        return t(
+            "events-user-joined-group-html",
+            dict(
+                username=account_link(event.account),
+                group=link(reverse("group", args=(event.event_data["group_slug"],)), event.event_data["group_name"]),
+            ),
+        )
 
 
 class GroupCreatedEvent(EventLogic):
     event_type = EventType.GROUP_CREATED
 
     def __init__(self, account=None, group=None):
-        super(GroupCreatedEvent, self).__init__(account=account,
-                                                group_name=group.name,
-                                                group_slug=group.slug,
-                                                group_id=group.id)
+        super().__init__(account=account, group_name=group.name, group_slug=group.slug, group_id=group.id)
         self.event.group = group
 
     @classmethod
     def get_message_html(cls, event, language_code):
-        return t('events-user-created-group-html',
-                 dict(username=account_link(event.account),
-                      group=link(reverse('group', args=(event.event_data['group_slug'],)),
-                                 event.event_data['group_name'])))
+        return t(
+            "events-user-created-group-html",
+            dict(
+                username=account_link(event.account),
+                group=link(reverse("group", args=(event.event_data["group_slug"],)), event.event_data["group_name"]),
+            ),
+        )
 
 
 class VersesFinishedMilestoneEvent(EventLogic):
     event_type = EventType.VERSES_FINISHED_MILESTONE
 
     def __init__(self, account, verses_finished=None):
-        super(VersesFinishedMilestoneEvent, self).__init__(account=account,
-                                                           verses_finished=verses_finished)
+        super().__init__(account=account, verses_finished=verses_finished)
 
     @classmethod
     def get_message_html(cls, event, language_code):
-        return t('events-verses-finished-milestone-reached-html',
-                 dict(username=account_link(event.account),
-                      verses=event.event_data['verses_finished']))
+        return t(
+            "events-verses-finished-milestone-reached-html",
+            dict(username=account_link(event.account), verses=event.event_data["verses_finished"]),
+        )
 
 
 class StartedLearningCatechismEvent(EventLogic):
     event_type = EventType.STARTED_LEARNING_CATECHISM
 
     def __init__(self, account=None, catechism=None):
-        super(StartedLearningCatechismEvent, self).__init__(account=account,
-                                                            catechism_slug=catechism.slug,
-                                                            catechism_name=catechism.full_name,
-                                                            catechism_id=catechism.id)
+        super().__init__(
+            account=account,
+            catechism_slug=catechism.slug,
+            catechism_name=catechism.full_name,
+            catechism_id=catechism.id,
+        )
 
     @classmethod
     def get_message_html(cls, event, language_code):
-        return t('events-started-learning-catechism-html',
-                 dict(username=account_link(event.account),
-                      catechism=link(
-                          reverse('view_catechism', args=(event.event_data['catechism_slug'],)),
-                          event.event_data['catechism_name'])))
+        return t(
+            "events-started-learning-catechism-html",
+            dict(
+                username=account_link(event.account),
+                catechism=link(
+                    reverse("view_catechism", args=(event.event_data["catechism_slug"],)),
+                    event.event_data["catechism_name"],
+                ),
+            ),
+        )
 
 
 class NewCommentEvent(EventLogic):
@@ -315,17 +342,16 @@ class NewCommentEvent(EventLogic):
     group_wall_weight = 20
 
     def __init__(self, account=None, comment=None, parent_event=None):
-        kwargs = dict(account=account,
-                      comment_id=comment.id)
+        kwargs = dict(account=account, comment_id=comment.id)
         if comment.group_id is not None:
-            kwargs['group_id'] = comment.group_id
-            kwargs['group_slug'] = comment.group.slug
-            kwargs['group_name'] = comment.group.name
+            kwargs["group_id"] = comment.group_id
+            kwargs["group_slug"] = comment.group.slug
+            kwargs["group_name"] = comment.group.name
         if comment.event_id is not None:
-            kwargs['parent_event_id'] = comment.event.id
-            kwargs['parent_event_account_id'] = comment.event.account.id
-            kwargs['parent_event_account_username'] = comment.event.account.username
-        super(NewCommentEvent, self).__init__(**kwargs)
+            kwargs["parent_event_id"] = comment.event.id
+            kwargs["parent_event_account_id"] = comment.event.account.id
+            kwargs["parent_event_account_username"] = comment.event.account.username
+        super().__init__(**kwargs)
         self.event.parent_event = comment.event
         self.event.group = comment.group
 
@@ -334,7 +360,8 @@ class NewCommentEvent(EventLogic):
         # NewCommentEvent cannot collect comments themselves.
         # So URL for new comment event is the comment's URL.
         from comments.models import Comment
-        return Comment.objects.get(id=event.event_data['comment_id']).get_absolute_url()
+
+        return Comment.objects.get(id=event.event_data["comment_id"]).get_absolute_url()
 
     @classmethod
     def accepts_comments(cls, event):
@@ -342,30 +369,39 @@ class NewCommentEvent(EventLogic):
 
     @classmethod
     def get_message_html(cls, event, language_code):
-        comment_id = event.event_data['comment_id']
-        if 'parent_event_id' in event.event_data:
-            other_username = event.event_data['parent_event_account_username']
+        comment_id = event.event_data["comment_id"]
+        if "parent_event_id" in event.event_data:
+            other_username = event.event_data["parent_event_account_username"]
             if event.account.username == other_username:
-                return t('events-comment-on-own-activity-html',
-                         dict(username=account_link(event.account),
-                              comment_url=get_absolute_url_for_event_comment(event, comment_id)))
-            return t('events-comment-on-activity-html',
-                     dict(username=account_link(event.account),
-                          comment_url=get_absolute_url_for_event_comment(event, comment_id),
-                          other_user=link(reverse('user_stats', args=(other_username,)),
-                                          other_username)))
+                return t(
+                    "events-comment-on-own-activity-html",
+                    dict(
+                        username=account_link(event.account),
+                        comment_url=get_absolute_url_for_event_comment(event, comment_id),
+                    ),
+                )
+            return t(
+                "events-comment-on-activity-html",
+                dict(
+                    username=account_link(event.account),
+                    comment_url=get_absolute_url_for_event_comment(event, comment_id),
+                    other_user=link(reverse("user_stats", args=(other_username,)), other_username),
+                ),
+            )
 
-        elif 'group_id' in event.event_data:
-            group_slug = event.event_data['group_slug']
-            return t('events-comment-on-group-wall-html',
-                     dict(username=account_link(event.account),
-                          comment_url=get_absolute_url_for_group_comment(event, comment_id, group_slug),
-                          group=link(reverse('group', args=(group_slug,)),
-                                     event.event_data['group_name'])))
+        elif "group_id" in event.event_data:
+            group_slug = event.event_data["group_slug"]
+            return t(
+                "events-comment-on-group-wall-html",
+                dict(
+                    username=account_link(event.account),
+                    comment_url=get_absolute_url_for_group_comment(event, comment_id, group_slug),
+                    group=link(reverse("group", args=(group_slug,)), event.event_data["group_name"]),
+                ),
+            )
 
         else:
-            raise AssertionError("Expected one of parent_event_id or group_id for event {0}"
-                                 .format(event.id))
+            raise AssertionError(f"Expected one of parent_event_id or group_id for event {event.id}")
 
 
 def dedupe_iterable(iterable, keyfunc):
@@ -387,36 +423,35 @@ class EventManager(models.Manager):
             now = timezone.now()
 
         start = now - timedelta(EVENTSTREAM_CUTOFF_DAYS)
-        events = (self
-                  .for_viewer(account)
-                  .filter(created__gte=start)
-                  .select_related('account')
-                  .exclude(event_type=EventType.NEW_COMMENT,
-                           account=account)
-                  .annotate(comment_count=models.Count('comments'))
-                  )
+        events = (
+            self.for_viewer(account)
+            .filter(created__gte=start)
+            .select_related("account")
+            .exclude(event_type=EventType.NEW_COMMENT, account=account)
+            .annotate(comment_count=models.Count("comments"))
+        )
         if account is None or not account.is_hellbanned:
             events = events.exclude(account__is_hellbanned=True)
         events = list(events)
         # Avoid repeated messages. Events with the same event type, account id
         # and data will produce the same message.
-        events = list(dedupe_iterable(events,
-                                      lambda e: (e.account_id,
-                                                 e.event_type,
-                                                 tuple(sorted(e.event_data.items())))))
+        events = list(
+            dedupe_iterable(events, lambda e: (e.account_id, e.event_type, tuple(sorted(e.event_data.items()))))
+        )
 
         if account is not None:
             friendship_weights = account.get_friendship_weights()
-            group_ids = list(account.groups.values_list('id', flat=True))
+            group_ids = list(account.groups.values_list("id", flat=True))
         else:
             friendship_weights = None
             group_ids = []
 
-        events.sort(key=lambda e: e.get_rank(viewer=account,
-                                             friendship_weights=friendship_weights,
-                                             group_ids=group_ids,
-                                             now=now),
-                    reverse=True)
+        events.sort(
+            key=lambda e: e.get_rank(
+                viewer=account, friendship_weights=friendship_weights, group_ids=group_ids, now=now
+            ),
+            reverse=True,
+        )
 
         # Limit
         events = events[:EVENTSTREAM_CUTOFF_NUMBER]
@@ -425,22 +460,16 @@ class EventManager(models.Manager):
         return events
 
     def for_viewer(self, viewer):
-        qs_base = (Event.objects
-                   .order_by('-created')
-                   .select_related('account')
-                   .exclude(account__is_active=False)
-                   )
+        qs_base = Event.objects.order_by("-created").select_related("account").exclude(account__is_active=False)
         if viewer is None or not viewer.is_hellbanned:
             qs_base = qs_base.exclude(account__is_hellbanned=True)
 
         # Exclude all comments from private groups
-        qs_1 = qs_base.exclude(group__isnull=False,
-                               group__public=False)
+        qs_1 = qs_base.exclude(group__isnull=False, group__public=False)
 
         if viewer is not None:
             # Re-add events from groups
-            qs_2 = qs_base.filter(group__isnull=False,
-                                  group__in=viewer.groups.all())
+            qs_2 = qs_base.filter(group__isnull=False, group__in=viewer.groups.all())
             qs = qs_1 | qs_2
         else:
             qs = qs_1
@@ -453,17 +482,14 @@ class EventManager(models.Manager):
             # On the main activity stream, comments on parent events are
             # included on that parent event, so don't show them separately as
             # well.
-            qs = qs.exclude(event_type=EventType.NEW_COMMENT,
-                            parent_event__isnull=False)
+            qs = qs.exclude(event_type=EventType.NEW_COMMENT, parent_event__isnull=False)
         if event_by is not None:
             qs = qs.filter(account=event_by)
         return qs
 
 
 EVENT_LOGIC_CLASSES = {
-    cls.event_type: cls
-    for cls in all_subclasses(EventLogic)
-    if getattr(cls, 'event_type') != NotImplemented
+    cls.event_type: cls for cls in all_subclasses(EventLogic) if getattr(cls, "event_type") != NotImplemented
 }
 
 
@@ -478,8 +504,7 @@ class Event(models.Model):
 
     # Events like NewCommentEvent have a parent event (the event the comment is
     # attached to).
-    parent_event = models.ForeignKey('self', on_delete=models.PROTECT,
-                                     null=True, blank=True)
+    parent_event = models.ForeignKey("self", on_delete=models.PROTECT, null=True, blank=True)
 
     # Denormalized value
     url = models.CharField(max_length=255, blank=True)
@@ -492,15 +517,12 @@ class Event(models.Model):
     def __str__(self):
         return "Event %d" % self.id
 
-    def get_rank(self, viewer=None, friendship_weights=None,
-                 group_ids=None, now=None):
+    def get_rank(self, viewer=None, friendship_weights=None, group_ids=None, now=None):
         """
         Returns the overall weighting for this event, given the viewing account.
         """
         # Don't ever want to see 'new comment' events from myself.
-        if (viewer is not None and
-            self.event_type == EventType.NEW_COMMENT and
-                self.account_id == viewer.id):
+        if viewer is not None and self.event_type == EventType.NEW_COMMENT and self.account_id == viewer.id:
             return 0
 
         if group_ids is None:
@@ -537,15 +559,15 @@ class Event(models.Model):
         diff = now - self.created
         seconds = float(diff.total_seconds())
         if seconds < 60:
-            return t('events-time-since-just-now')
+            return t("events-time-since-just-now")
         minutes = math.floor(seconds / 60)
         if minutes < 60:
-            return t('events-time-since-minutes', dict(minutes=minutes))
+            return t("events-time-since-minutes", dict(minutes=minutes))
         hours = math.floor(minutes / 60)
         if hours < 24:
-            return t('events-time-since-hours', dict(hours=hours))
+            return t("events-time-since-hours", dict(hours=hours))
         days = math.floor(hours / 24)
-        return t('events-time-since-days', dict(days=days))
+        return t("events-time-since-days", dict(days=days))
 
     def render_html(self, language_code):
         return self.event_logic.get_message_html(self, language_code)
@@ -574,9 +596,7 @@ class Event(models.Model):
 
     def add_comment(self, author=None, message=None):
         assert self.accepts_comments()
-        return self.comments.create(author=author,
-                                    message=message,
-                                    group=self.group)
+        return self.comments.create(author=author, message=message, group=self.group)
 
     @property
     def is_new_comment(self):
@@ -584,17 +604,17 @@ class Event(models.Model):
 
     def get_comment(self):
         from comments.models import Comment
+
         try:
-            return Comment.objects.get(id=int(self.event_data['comment_id']))
+            return Comment.objects.get(id=int(self.event_data["comment_id"]))
         except (KeyError, Comment.DoesNotExist):
             return None
 
     def ordered_comments(self):
-        if hasattr(self, '_prefetched_objects_cache'):
-            if 'comments' in self._prefetched_objects_cache:
-                return sorted(self._prefetched_objects_cache['comments'],
-                              key=lambda c: c.created)
-        return self.comments.all().order_by('created').select_related('author')
+        if hasattr(self, "_prefetched_objects_cache"):
+            if "comments" in self._prefetched_objects_cache:
+                return sorted(self._prefetched_objects_cache["comments"], key=lambda c: c.created)
+        return self.comments.all().order_by("created").select_related("author")
 
 
 def get_absolute_url_for_event_comment(event, comment_id):
@@ -602,4 +622,4 @@ def get_absolute_url_for_event_comment(event, comment_id):
 
 
 def get_absolute_url_for_group_comment(event, comment_id, group_slug):
-    return reverse('group_wall', args=(group_slug,)) + f"?comment={comment_id}"
+    return reverse("group_wall", args=(group_slug,)) + f"?comment={comment_id}"

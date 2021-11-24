@@ -7,7 +7,7 @@ from .exceptions import LoadingNotAllowed
 logger = logging.getLogger(__name__)
 
 
-class TrainingTexts(object):
+class TrainingTexts:
     """
     Dictionary like storage object that represents training texts
     and returns them (lazily) if needed.
@@ -20,10 +20,8 @@ class TrainingTexts(object):
     and the text slug, to identify a set of training text that is used
     by an analysis.
     """
-    def __init__(self,
-                 text=None,
-                 text_slug=None,
-                 disallow_loading=False):
+
+    def __init__(self, text=None, text_slug=None, disallow_loading=False):
         self._keys = []
         self._values = {}
         self.text = text
@@ -54,7 +52,7 @@ class TrainingTexts(object):
 
 class BibleTrainingTexts(TrainingTexts):
     def __init__(self, books=None, **kwargs):
-        super(BibleTrainingTexts, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         all_books = []
         for book in books:
             for b in similar_books(book):
@@ -68,12 +66,13 @@ class BibleTrainingTexts(TrainingTexts):
         version_slug, book = key
         logger.info(f"Retrieving {self.text_slug}: {book}")
         from bibleverses.models import get_whole_book
+
         return get_whole_book(book, self.text).text
 
 
 class CatechismTrainingTexts(TrainingTexts):
     def __init__(self, **kwargs):
-        super(CatechismTrainingTexts, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self._keys = [(self.text_slug, ALL_TEXT)]
 
     def lookup(self, key):
@@ -81,4 +80,4 @@ class CatechismTrainingTexts(TrainingTexts):
             raise LoadingNotAllowed(key)
         logger.info(f"Retrieving {self.text.slug}")
         items = list(self.text.qapairs.all())
-        return ' '.join(p.question + " " + p.answer for p in items)
+        return " ".join(p.question + " " + p.answer for p in items)

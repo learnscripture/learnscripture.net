@@ -8,9 +8,11 @@ from bibleverses.tasks import fix_item_suggestions, verse_set_increase_popularit
 
 
 def should_update_word_suggestions_on_save():
-    return not (settings.TESTS_RUNNING or
-                getattr(settings, 'LOADING_VERSES', False) or
-                getattr(settings, 'LOADING_WORD_SUGGESTIONS', False))
+    return not (
+        settings.TESTS_RUNNING
+        or getattr(settings, "LOADING_VERSES", False)
+        or getattr(settings, "LOADING_WORD_SUGGESTIONS", False)
+    )
 
 
 def should_update_text_search_on_save():
@@ -27,7 +29,8 @@ def verse_set_chosen_receiver(sender, **kwargs):
 @receiver(post_save, sender=Verse)
 def verse_saved_update_word_suggestions(sender, **kwargs):
     from bibleverses.suggestions.modelapi import item_suggestions_need_updating
-    verse = kwargs['instance']
+
+    verse = kwargs["instance"]
     if not should_update_word_suggestions_on_save():
         return
 
@@ -45,7 +48,7 @@ def verse_saved_update_word_suggestions(sender, **kwargs):
 
 @receiver(post_save, sender=Verse)
 def verse_saved_update_text_search(sender, **kwargs):
-    verse = kwargs['instance']
+    verse = kwargs["instance"]
     if not should_update_text_search_on_save():
         return
 
@@ -57,9 +60,10 @@ def verse_saved_update_text_search(sender, **kwargs):
 
 @receiver(post_save, sender=QAPair)
 def qapair_saved(sender, **kwargs):
-    qapair = kwargs['instance']
+    qapair = kwargs["instance"]
     if should_update_word_suggestions_on_save():
         from bibleverses.suggestions.modelapi import item_suggestions_need_updating
+
         if not item_suggestions_need_updating(qapair):
             return
         fix_item_suggestions.apply_async([qapair.catechism.slug, qapair.localized_reference, None])

@@ -15,10 +15,10 @@
       </span>
       {% if results.more %}
         <span class="paging-part"><a href="{{ results.more_link }}"
-                                     hx-get="{{ results.more_link }}"
-                                     hx-target="#id-more-results-container"
-                                     hx-indicator="#id-more-results-container"
-                                     hx-swap="outerHTML">{% ftlmsg 'pagination-show-more' %}</a></span>
+          hx-get="{{ results.more_link }}"
+          hx-target="#id-more-results-container"
+          hx-indicator="#id-more-results-container"
+          hx-swap="outerHTML">{% ftlmsg 'pagination-show-more' %}</a></span>
       {% endif %}
       <span class="paging-part"><a href="#id-page-top">{% ftlmsg 'pagination-jump-to-top' %}</a></span>
     </div>

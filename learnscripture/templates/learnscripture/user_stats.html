@@ -8,62 +8,62 @@
   {{ block.super }}
   <script type="text/javascript" src="{{ STATIC_URL }}lib/dygraph-combined.js"></script>
   <script type="text/javascript"
-          id="id-script-user-stats-chart"
-          data-verses-started-caption="{% ftlmsg 'user-stats-verses-started' %}"
-          data-verses-tested-caption="{% ftlmsg 'user-stats-verses-tested' %}"
-          >
-   $(document).ready(function () {
-     $.ajax({
-       url: '/api/learnscripture/v1/usertimelinestats/?format=json',
-       dataType: 'json',
-       type: 'GET',
-       data: {
-         username: $("#id-user-stats-script-data").attr('data-user-timeline-stats-user')
-       },
-       success: function(data) {
-         var dataRows = data['stats'].replace(/\r/, '').trim().split(/\n/).slice(1).map(function(r) {
-           var cols = r.split(/,/);
-           return [new Date(cols[0]), parseInt(cols[1], 10), parseInt(cols[2], 0)];
-         })
-         if (dataRows.length == 0) {
-             return;
-         }
+    id="id-script-user-stats-chart"
+    data-verses-started-caption="{% ftlmsg 'user-stats-verses-started' %}"
+    data-verses-tested-caption="{% ftlmsg 'user-stats-verses-tested' %}"
+  >
+    $(document).ready(function () {
+      $.ajax({
+        url: '/api/learnscripture/v1/usertimelinestats/?format=json',
+        dataType: 'json',
+        type: 'GET',
+        data: {
+          username: $("#id-user-stats-script-data").attr('data-user-timeline-stats-user')
+        },
+        success: function(data) {
+          var dataRows = data['stats'].replace(/\r/, '').trim().split(/\n/).slice(1).map(function(r) {
+            var cols = r.split(/,/);
+            return [new Date(cols[0]), parseInt(cols[1], 10), parseInt(cols[2], 0)];
+          })
+          if (dataRows.length == 0) {
+            return;
+          }
 
-         var $captionData = $("#id-script-user-stats-chart");
-         var now = new Date().getTime();
-         var g = new Dygraph(
-           document.getElementById("id-user-stats-graph"),
-           dataRows,
-           {
-             labels: [
-               "Date",
-               $captionData.attr("data-verses-started-caption"),
-               $captionData.attr("data-verses-tested-caption"),
-             ],
-             includeZero: true,
-             axisLineWidth: 1,
-             strokeWidth: 2,
-             drawCallback: function(dygraph, isInitial) {
-               if (isInitial) {
-                 dygraph.updateOptions({ dateWindow:
-                                         [Math.max(
-                                           now - 1000 * 60 * 60 * 24 * 30 * 6, // six months ago
-                                           dygraph.xAxisExtremes()[0] // earliest piece of data,
-                                         ),
-                                          now]});
-               }
-             }
-           }
-         );
+          var $captionData = $("#id-script-user-stats-chart");
+          var now = new Date().getTime();
+          var g = new Dygraph(
+            document.getElementById("id-user-stats-graph"),
+            dataRows,
+            {
+              labels: [
+                "Date",
+                $captionData.attr("data-verses-started-caption"),
+                $captionData.attr("data-verses-tested-caption"),
+              ],
+              includeZero: true,
+              axisLineWidth: 1,
+              strokeWidth: 2,
+              drawCallback: function(dygraph, isInitial) {
+                if (isInitial) {
+                  dygraph.updateOptions({ dateWindow:
+                    [Math.max(
+                      now - 1000 * 60 * 60 * 24 * 30 * 6, // six months ago
+                      dygraph.xAxisExtremes()[0] // earliest piece of data,
+                    ),
+                      now]});
+                }
+              }
+            }
+          );
 
-         var rollCb = $('#id-user-stats-graph-rolling');
-         rollCb.bind('change', function (ev) {
-           g.updateOptions({rollPeriod: (rollCb.prop("checked")) ? 7 : 1})
-         });
+          var rollCb = $('#id-user-stats-graph-rolling');
+          rollCb.bind('change', function (ev) {
+            g.updateOptions({rollPeriod: (rollCb.prop("checked")) ? 7 : 1})
+          });
 
-       }
-     });
-   });
+        }
+      });
+    });
   </script>
 {% endblock %}
 
@@ -73,9 +73,9 @@
 
 {% block page_title %}
   {{ title }}
-    {% if account.is_superuser %}
-      <span class="official-user-info">{% ftlmsg 'user-stats-is-webmaster' %}</span>
-    {% endif %}
+  {% if account.is_superuser %}
+    <span class="official-user-info">{% ftlmsg 'user-stats-is-webmaster' %}</span>
+  {% endif %}
 {% endblock %}
 
 {% block content %}
@@ -108,12 +108,12 @@
 
     <div>
       <div class="is-following
-                  {% if not viewer_is_following %}hide{% endif %}">
+        {% if not viewer_is_following %}hide{% endif %}">
         <button type="submit" id="id-unfollow-btn" class="btn primary" data-account-id="{{ account.id }}">{% ftlmsg 'user-stats-unfollow-button' %}</button>
         {% ftlmsg 'user-stats-you-are-following' username=account.username %}
       </div>
       <div class="is-not-following
-                  {% if viewer_is_following %}hide{% endif %}">
+        {% if viewer_is_following %}hide{% endif %}">
         <button type="submit" id="id-follow-btn" class="btn primary" data-account-id="{{ account.id }}">{% ftlmsg 'user-stats-follow-button' %}</button>
 
         {% ftlmsg 'user-stats-you-are-not-following' username=account.username %}
@@ -262,7 +262,7 @@
   {% endif %}
 
   <div id="id-user-stats-script-data"
-       data-user-timeline-stats-user="{{ account.username }}">
+    data-user-timeline-stats-user="{{ account.username }}">
   </div>
 
 {% endblock %}

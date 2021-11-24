@@ -13,13 +13,11 @@ def format_comment_message(message):
 
 
 class Comment(models.Model):
-    author = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="comments")
     # NB - this is the event the comment is attached to, if any,
     # not the 'NEW_COMMENT' event which is generated *about* this comment
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='comments',
-                              null=True, blank=True)
-    group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True, blank=True,
-                              related_name='comments')
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="comments", null=True, blank=True)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True, blank=True, related_name="comments")
     created = models.DateTimeField(default=timezone.now)
     message = models.TextField()
     hidden = models.BooleanField(default=False, blank=True)

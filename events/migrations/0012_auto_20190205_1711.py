@@ -6,11 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('events', '0011_auto_20180125_1202'),
+        ("events", "0011_auto_20180125_1202"),
     ]
 
     operations = [
         migrations.RunSQL(
-            "ALTER TABLE events_event ALTER COLUMN event_data TYPE jsonb USING event_data::text::jsonb;"
-            "", hints={'target_dbs': ['default']})
+            "ALTER TABLE events_event ALTER COLUMN event_data TYPE jsonb USING event_data::text::jsonb;" "",
+            hints={"target_dbs": ["default"]},
+        )
     ]

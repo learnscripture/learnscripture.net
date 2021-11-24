@@ -9,6 +9,7 @@ class WordCounts(PicklerMixin):
 
     def weighted_random_choice_numpy(self):
         import numpy.random
+
         return numpy.random.choice(self._words, p=self._frequencies)
 
     def weighted_random_choice_python(self):

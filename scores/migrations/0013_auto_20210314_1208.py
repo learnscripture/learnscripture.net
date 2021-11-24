@@ -7,14 +7,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('awards', '0004_auto_20180326_0843'),
-        ('scores', '0012_auto_20210222_1706'),
+        ("awards", "0004_auto_20180326_0843"),
+        ("scores", "0012_auto_20210222_1706"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='actionlog',
-            name='award',
-            field=models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='awards.award'),
+            model_name="actionlog",
+            name="award",
+            field=models.OneToOneField(
+                blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to="awards.award"
+            ),
         ),
     ]

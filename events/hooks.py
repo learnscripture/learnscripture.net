@@ -42,16 +42,14 @@ def verse_finished_receiver(sender, **kwargs):
 @receiver(catechism_started)
 def catechism_started_receiver(sender, **kwargs):
     account = sender
-    catechism = kwargs['catechism']
+    catechism = kwargs["catechism"]
     events.tasks.create_started_catechism_event.apply_async([account.id, catechism.id])
 
 
 @receiver(points_increase)
 def points_increase_receiver(sender=None, previous_points=None, points_added=None, **kwargs):
     account = sender
-    events.tasks.create_points_milestone_event.apply_async([account.id,
-                                                           previous_points,
-                                                           points_added])
+    events.tasks.create_points_milestone_event.apply_async([account.id, previous_points, points_added])
 
 
 @receiver(public_verse_set_created)

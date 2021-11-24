@@ -14,21 +14,21 @@ logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        parser.add_argument('input_dir')
-        parser.add_argument('version_slug', nargs='+')
+        parser.add_argument("input_dir")
+        parser.add_argument("version_slug", nargs="+")
 
     def handle(self, *args, **options):
         from bibleverses.models import TextType
 
         settings.LOADING_VERSES = True
 
-        input_dir = options['input_dir']
+        input_dir = options["input_dir"]
         common_options = dict(
             use_natural_foreign_keys=True,
             use_natural_primary_keys=True,
         )
-        format = 'json'
-        for version_slug in options['version_slug']:
+        format = "json"
+        for version_slug in options["version_slug"]:
             print(f"Loading {version_slug}")
             with transaction.atomic():
                 text_file = TEXTVERSION_TEMPLATE.format(version_slug)

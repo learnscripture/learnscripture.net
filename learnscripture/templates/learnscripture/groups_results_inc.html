@@ -13,10 +13,10 @@
     <div class="paging">
       <span class="paging-part">{% ftlmsg 'pagination-showing-shown-of-total' shown=results.shown_count total=results.total %}</span>
       <span class="paging-part"><a href="{{ results.more_link }}"
-                                   hx-get="{{ results.more_link }}"
-                                   hx-target="#id-more-results-container"
-                                   hx-indicator="#id-more-results-container"
-                                   hx-swap="outerHTML">{% ftlmsg 'pagination-show-more' %}</a></span>
+        hx-get="{{ results.more_link }}"
+        hx-target="#id-more-results-container"
+        hx-indicator="#id-more-results-container"
+        hx-swap="outerHTML">{% ftlmsg 'pagination-show-more' %}</a></span>
       <span class="paging-part"><a href="#id-page-top">{% ftlmsg 'pagination-jump-to-top' %}</a></span>
     </div>
   </div>

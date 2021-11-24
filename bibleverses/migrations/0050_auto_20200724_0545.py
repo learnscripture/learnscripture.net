@@ -6,12 +6,16 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bibleverses', '0049_auto_20200724_0333'),
+        ("bibleverses", "0049_auto_20200724_0333"),
     ]
 
     operations = [
         migrations.AlterUniqueTogether(
-            name='verse',
-            unique_together={('version', 'bible_verse_number'), ('version', 'localized_reference'), ('version', 'gapless_bible_verse_number')},
+            name="verse",
+            unique_together={
+                ("version", "bible_verse_number"),
+                ("version", "localized_reference"),
+                ("version", "gapless_bible_verse_number"),
+            },
         ),
     ]

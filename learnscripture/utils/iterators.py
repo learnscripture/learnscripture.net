@@ -1,12 +1,7 @@
-# -*- coding: utf-8 -*-
-from __future__ import generator_stop
-
-
 def chunks(sliceable, n):
-    """ Yield successive n-sized chunks from list or other sliceable
-    """
+    """Yield successive n-sized chunks from list or other sliceable"""
     for i in range(0, len(sliceable), n):
-        yield sliceable[i:i + n]
+        yield sliceable[i : i + n]
 
 
 def intersperse(iterable, delimiter):
@@ -20,7 +15,7 @@ def intersperse(iterable, delimiter):
         yield x
 
 
-def chunked_queryset(qs, batch_size, index='id'):
+def chunked_queryset(qs, batch_size, index="id"):
     """
     Yields a QuerySet split into batches of exact size 'batch_size'
     (apart from the last batch which can be smaller) as using equal sizes
@@ -37,11 +32,10 @@ def chunked_queryset(qs, batch_size, index='id'):
     if not ids:
         return
     for i in range(0, len(ids), batch_size):
-        filter_args = {f'{index}__in': ids[i:i + batch_size]}
+        filter_args = {f"{index}__in": ids[i : i + batch_size]}
         yield qs.filter(**filter_args)
 
 
-def iter_chunked_queryset(queryset, batch_size, index='id'):
+def iter_chunked_queryset(queryset, batch_size, index="id"):
     for qs in chunked_queryset(queryset, batch_size, index=index):
-        for item in qs:
-            yield item
+        yield from qs

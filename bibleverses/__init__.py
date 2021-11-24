@@ -1,1 +1,1 @@
-default_app_config = 'bibleverses.apps.BibleversesConfig'
+default_app_config = "bibleverses.apps.BibleversesConfig"

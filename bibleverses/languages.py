@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import unicodedata
 
 import attr
@@ -8,7 +7,7 @@ import attr
 
 
 @attr.s
-class Language(object):
+class Language:
     # 2 leter ISO 639-1 code
     code = attr.ib()
     display_name = attr.ib()
@@ -16,32 +15,28 @@ class Language(object):
 
 # These must correspond with the HTML lang attribute values. i.e. 2 letter, ISO
 # 639-1 codes in most cases.
-LANGUAGE_CODE_EN = 'en'
-LANGUAGE_CODE_TR = 'tr'
+LANGUAGE_CODE_EN = "en"
+LANGUAGE_CODE_TR = "tr"
 
 # Code for language agnostic name
-LANGUAGE_CODE_INTERNAL = 'internal'
+LANGUAGE_CODE_INTERNAL = "internal"
 
 LANGUAGES = [
-    Language(code=LANGUAGE_CODE_EN, display_name='English'),
-    Language(code=LANGUAGE_CODE_TR, display_name='Türkçe'),
+    Language(code=LANGUAGE_CODE_EN, display_name="English"),
+    Language(code=LANGUAGE_CODE_TR, display_name="Türkçe"),
 ]
 
-LANGUAGES_LOOKUP = {
-    lang.code: lang for lang in LANGUAGES
-}
+LANGUAGES_LOOKUP = {lang.code: lang for lang in LANGUAGES}
 
 # Value for Django 'choices'
-LANGUAGE_CHOICES = [
-    (lang.code, lang.display_name) for lang in LANGUAGES
-]
+LANGUAGE_CHOICES = [(lang.code, lang.display_name) for lang in LANGUAGES]
 
 
 def get_language(code):
     return LANGUAGES_LOOKUP[code]
 
 
-DEFAULT_LANGUAGE = get_language('en')
+DEFAULT_LANGUAGE = get_language("en")
 
 
 def normalize_reference_input_english(query):
@@ -57,9 +52,9 @@ def normalize_reference_input_turkish(query):
     #  - replace ı with i
     #  - throw everything else that is not ascii away.
 
-    query = unicodedata.normalize('NFKD', query)
-    query = query.replace('ı', 'i')
-    query = query.encode('ascii', 'ignore').decode('ascii')
+    query = unicodedata.normalize("NFKD", query)
+    query = query.replace("ı", "i")
+    query = query.encode("ascii", "ignore").decode("ascii")
     query = query.lower()
     return query
 

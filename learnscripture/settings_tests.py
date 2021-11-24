@@ -9,35 +9,35 @@ from .settings_local import DATABASES, INSTALLED_APPS, LOGGING, MIDDLEWARE, SRC_
 
 TESTS_RUNNING = True
 
-INSTALLED_APPS = [app for app in INSTALLED_APPS if app not in ['debug_toolbar', 'django_extensions']]
-MIDDLEWARE = [m for m in MIDDLEWARE if m not in ['debug_toolbar.middleware.DebugToolbarMiddleware']]
+INSTALLED_APPS = [app for app in INSTALLED_APPS if app not in ["debug_toolbar", "django_extensions"]]
+MIDDLEWARE = [m for m in MIDDLEWARE if m not in ["debug_toolbar.middleware.DebugToolbarMiddleware"]]
 
 
-DATABASES['default']['CONN_MAX_AGE'] = 0  # fix some deadlocks with DB flushing
+DATABASES["default"]["CONN_MAX_AGE"] = 0  # fix some deadlocks with DB flushing
 
-LOGGING['root'] = {
-    'level': 'WARNING',
-    'handlers': ['console'],
+LOGGING["root"] = {
+    "level": "WARNING",
+    "handlers": ["console"],
 }
-LOGGING['loggers']['django_ftl.message_errors'] = {
-    'level': 'INFO',
-    'handlers': ['console'],
-    'propagate': False,
+LOGGING["loggers"]["django_ftl.message_errors"] = {
+    "level": "INFO",
+    "handlers": ["console"],
+    "propagate": False,
 }
-LOGGING['handlers']['console']['level'] = 'ERROR'
+LOGGING["handlers"]["console"]["level"] = "ERROR"
 
 CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
     }
 }
 
 TASKS_EAGER = True
 
 
-WEBPACK_STATS_FILE = 'webpack-stats.tests.json'
-WEBPACK_LOADER['DEFAULT']['CACHE'] = True
-WEBPACK_LOADER['DEFAULT']['STATS_FILE'] = os.path.join(SRC_ROOT, WEBPACK_STATS_FILE)
+WEBPACK_STATS_FILE = "webpack-stats.tests.json"
+WEBPACK_LOADER["DEFAULT"]["CACHE"] = True
+WEBPACK_LOADER["DEFAULT"]["STATS_FILE"] = os.path.join(SRC_ROOT, WEBPACK_STATS_FILE)
 
 
 # Monkey patch WebpackLoader to call `webpack` just in time.

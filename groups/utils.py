@@ -4,7 +4,7 @@ from common.utils.html import link
 
 
 def group_url(group):
-    return reverse('group', args=(group.slug,))
+    return reverse("group", args=(group.slug,))
 
 
 def group_link(group):

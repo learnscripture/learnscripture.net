@@ -1,1 +1,1 @@
-default_app_config = 'comments.apps.CommentsConfig'
+default_app_config = "comments.apps.CommentsConfig"

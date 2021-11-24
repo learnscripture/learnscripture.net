@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('learnscripture', '0001_initial'),
+        ("learnscripture", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='sitenotice',
-            name='language_code',
-            field=models.CharField(choices=[('en', 'English'), ('tr', 'Turkçe')], default='en', max_length=10),
+            model_name="sitenotice",
+            name="language_code",
+            field=models.CharField(choices=[("en", "English"), ("tr", "Turkçe")], default="en", max_length=10),
         ),
     ]

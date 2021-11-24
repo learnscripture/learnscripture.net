@@ -20,48 +20,48 @@
   <script type="text/javascript" src="{{ STATIC_URL }}lib/jquery.flot.min.js"></script>
   <script type="text/javascript" src="{{ STATIC_URL }}lib/jquery.flot.stack.min.js"></script>
   <script type="text/javascript">
-   $(function() {
+    $(function() {
 
-     $.plot("#id-verses-tested-graph",
-            [
-              {label: "Started",
-               data: {{ stats.verses_started|jsonify }} },
-              {label: "Tested",
-               data: {{ stats.verses_tested|jsonify }} }
-            ],
-            { xaxis: { mode: "time",
-                       ticks: 10 },
-              yaxis: { min: 0 },
-              legend: { position: "nw" },
-              series: {
-                lines: { show: true, fill: false },
-              }
+      $.plot("#id-verses-tested-graph",
+        [
+          {label: "Started",
+            data: {{ stats.verses_started|jsonify }} },
+          {label: "Tested",
+            data: {{ stats.verses_tested|jsonify }} }
+        ],
+        { xaxis: { mode: "time",
+          ticks: 10 },
+          yaxis: { min: 0 },
+          legend: { position: "nw" },
+          series: {
+            lines: { show: true, fill: false },
+          }
 
-            });
+        });
 
-     $.plot("#id-accounts-graph",
-            [
-              {label: "New accounts",
-               data: {{ stats.new_accounts|jsonify }},
-               yaxis: 1
-              },
-              {label: "Active accounts",
-               data: {{ stats.active_accounts|jsonify }},
-               yaxis: 2
-              },
-            ],
-            { xaxis: { mode: "time",
-                       ticks: 10 },
-              yaxes: [{ min: 0,
-                        position: 'left'},
-                      { min: 0,
-                        position: 'right'}],
-              legend: { position: "nw" },
-              series: {
-                lines: { show: true, fill: false },
-              }
-            });
+      $.plot("#id-accounts-graph",
+        [
+          {label: "New accounts",
+            data: {{ stats.new_accounts|jsonify }},
+            yaxis: 1
+          },
+          {label: "Active accounts",
+            data: {{ stats.active_accounts|jsonify }},
+            yaxis: 2
+          },
+        ],
+        { xaxis: { mode: "time",
+          ticks: 10 },
+          yaxes: [{ min: 0,
+            position: 'left'},
+            { min: 0,
+              position: 'right'}],
+          legend: { position: "nw" },
+          series: {
+            lines: { show: true, fill: false },
+          }
+        });
 
-   });
+    });
   </script>
 {% endblock %}

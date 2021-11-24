@@ -1,4 +1,3 @@
-
 class LazyDict:
     def __init__(self, source):
         self.source = source
@@ -17,6 +16,7 @@ class lazy_dict_like:
     combination with 'lookup' template filter.
 
     """
+
     def __init__(self, method):
         self.method = method
 

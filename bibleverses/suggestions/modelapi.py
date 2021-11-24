@@ -1,4 +1,3 @@
-# -*- coding: utf8 -*-
 """
 Word suggestion API for Django model layer code
 """
@@ -30,25 +29,19 @@ logger = logging.getLogger(__name__)
 
 # -- Create - for tests only --
 def create_word_suggestion_data(
-        version=None,
-        version_slug=None,
-        localized_reference=None,
-        hash=None,
-        text=None,
-        suggestions=None,
-        **kwargs):
+    version=None, version_slug=None, localized_reference=None, hash=None, text=None, suggestions=None, **kwargs
+):
     if version_slug is None:
         version_slug = version.slug
     if hash is None:
         hash = hash_text(text)
     return WordSuggestionData.objects.create(
-        version_slug=version_slug,
-        localized_reference=localized_reference,
-        hash=hash,
-        suggestions=suggestions)
+        version_slug=version_slug, localized_reference=localized_reference, hash=hash, suggestions=suggestions
+    )
 
 
 # -- Fetch --
+
 
 def word_suggestion_data_qs_for_version(version):
     return WordSuggestionData.objects.filter(version_slug=version.slug)
@@ -65,8 +58,10 @@ def get_word_suggestions_by_localized_reference(version, localized_reference):
 
 def get_word_suggestions_by_localized_reference_bulk(version, localized_reference_list):
     # Do simple ones in bulk:
-    simple_wsds = list(word_suggestion_data_qs_for_version(version).filter(localized_reference__in=localized_reference_list))
-    s_dict = dict((w.localized_reference, w.get_suggestions()) for w in simple_wsds)
+    simple_wsds = list(
+        word_suggestion_data_qs_for_version(version).filter(localized_reference__in=localized_reference_list)
+    )
+    s_dict = {w.localized_reference: w.get_suggestions() for w in simple_wsds}
     # Others: (i.e. multi-verse references that span multiple database records
     # in WordSuggestionData). This does O(n) DB queries but hopefully n is small
     # in any given batch.
@@ -96,7 +91,7 @@ def _get_ordered_word_suggestion_data(version, localized_reference):
 def fix_item(version_slug, localized_reference, text_saved):
     version = TextVersion.objects.get(slug=version_slug)
     item = version.get_item_by_localized_reference(localized_reference)
-    if getattr(item, 'missing', False):
+    if getattr(item, "missing", False):
         return  # Doesn't need fixing
 
     # 'text_saved' is passed through, to ensure that this process (task queue
@@ -109,8 +104,7 @@ def fix_item(version_slug, localized_reference, text_saved):
     # important for versions where we only partially store locally and have to
     # fetch the data again (triggering a save and this function being called)
     if not item_suggestions_need_updating(item):
-        logger.info("Skipping creation of word suggestions for unchanged %s %s",
-                    version_slug, localized_reference)
+        logger.info("Skipping creation of word suggestions for unchanged %s %s", version_slug, localized_reference)
         return
 
     # To avoid loading large amounts of data over the API,
@@ -119,20 +113,29 @@ def fix_item(version_slug, localized_reference, text_saved):
     # current algo assumes access to the whole text. So just log a warning
     disallow_loading = partial_data_available(version_slug)
     try:
-        generate_suggestions(version, missing_only=False, localized_reference=localized_reference, disallow_loading=disallow_loading,
-                             text_saved=text_saved)
+        generate_suggestions(
+            version,
+            missing_only=False,
+            localized_reference=localized_reference,
+            disallow_loading=disallow_loading,
+            text_saved=text_saved,
+        )
     except AnalysisMissing as e:
         logger.warning("%r", e.args[0])
-        logger.warning("Need to create word suggestions for %s %s but can't because text is not available and saved analysis is not complete",
-                       version_slug, localized_reference)
+        logger.warning(
+            "Need to create word suggestions for %s %s but can't because text is not available and saved analysis is not complete",
+            version_slug,
+            localized_reference,
+        )
         return
 
 
 def item_suggestions_need_updating(item):
     version_slug = item.text_version.slug
     localized_reference = item.localized_reference
-    suggestion_data = WordSuggestionData.objects.filter(version_slug=version_slug,
-                                                        localized_reference=localized_reference).first()
+    suggestion_data = WordSuggestionData.objects.filter(
+        version_slug=version_slug, localized_reference=localized_reference
+    ).first()
 
     if suggestion_data is None:
         return True
@@ -142,9 +145,7 @@ def item_suggestions_need_updating(item):
         return saved_hash != current_hash
 
 
-def generate_suggestions(version, localized_reference=None, missing_only=True,
-                         disallow_loading=False,
-                         text_saved=None):
+def generate_suggestions(version, localized_reference=None, missing_only=True, disallow_loading=False, text_saved=None):
     analysis_storage = AnalysisStorage()
     language_code = version.language_code
     if version.text_type == TextType.BIBLE:
@@ -154,13 +155,16 @@ def generate_suggestions(version, localized_reference=None, missing_only=True,
                 v.text_saved = text_saved
             book = get_bible_book_name(language_code, v.book_number)
             items = [v]
-            training_texts = BibleTrainingTexts(text=version, books=[book],
-                                                disallow_loading=disallow_loading)
+            training_texts = BibleTrainingTexts(text=version, books=[book], disallow_loading=disallow_loading)
             logger.info("Generating for %s", localized_reference)
             generate_suggestions_for_items(
                 analysis_storage,
-                version, items,
-                training_texts, localized_reference=localized_reference, missing_only=missing_only)
+                version,
+                items,
+                training_texts,
+                localized_reference=localized_reference,
+                missing_only=missing_only,
+            )
         else:
             for book in get_bible_books(language_code):
                 generate_suggestions_for_book(analysis_storage, version, book, missing_only=missing_only)
@@ -173,8 +177,12 @@ def generate_suggestions(version, localized_reference=None, missing_only=True,
 
         generate_suggestions_for_items(
             analysis_storage,
-            version, items, training_texts,
-            localized_reference=localized_reference, missing_only=missing_only)
+            version,
+            items,
+            training_texts,
+            localized_reference=localized_reference,
+            missing_only=missing_only,
+        )
 
 
 def generate_suggestions_for_book(analysis_storage, version, book, missing_only=True):
@@ -183,14 +191,18 @@ def generate_suggestions_for_book(analysis_storage, version, book, missing_only=
     if items_all_done(version, items, missing_only=missing_only):
         return
     training_texts = BibleTrainingTexts(text=version, books=[book])
-    generate_suggestions_for_items(
-        analysis_storage,
-        version, items,
-        training_texts, missing_only=missing_only)
+    generate_suggestions_for_items(analysis_storage, version, items, training_texts, missing_only=missing_only)
 
 
-def generate_suggestions_for_items(analysis_storage, version, items, training_texts, localized_reference=None,
-                                   missing_only=True, skip_missing_text=True):
+def generate_suggestions_for_items(
+    analysis_storage,
+    version,
+    items,
+    training_texts,
+    localized_reference=None,
+    missing_only=True,
+    skip_missing_text=True,
+):
     generator = SuggestionGenerator(training_texts)
     generator.load_data(analysis_storage)
 
@@ -201,9 +213,10 @@ def generate_suggestions_for_items(analysis_storage, version, items, training_te
         to_delete = []
         if missing_only:
             existing_refs = set(
-                version.word_suggestion_data
-                .filter(localized_reference__in=[i.localized_reference for i in batch])
-                .values_list('localized_reference', flat=True))
+                version.word_suggestion_data.filter(
+                    localized_reference__in=[i.localized_reference for i in batch]
+                ).values_list("localized_reference", flat=True)
+            )
         else:
             existing_refs = None
 
@@ -211,14 +224,17 @@ def generate_suggestions_for_items(analysis_storage, version, items, training_te
             if isinstance(batch[0], Verse):
                 ensure_text(batch)
         for item in batch:
-            generate_suggestions_single_item(version, item,
-                                             generator,
-                                             localized_reference=localized_reference,
-                                             missing_only=missing_only,
-                                             existing_refs=existing_refs,
-                                             skip_missing_text=skip_missing_text,
-                                             to_create=to_create,
-                                             to_delete=to_delete)
+            generate_suggestions_single_item(
+                version,
+                item,
+                generator,
+                localized_reference=localized_reference,
+                missing_only=missing_only,
+                existing_refs=existing_refs,
+                skip_missing_text=skip_missing_text,
+                to_create=to_create,
+                to_delete=to_delete,
+            )
         with transaction.atomic():
             if to_delete:
                 logger.info("Deleting %s old items", len(to_delete))
@@ -229,19 +245,21 @@ def generate_suggestions_for_items(analysis_storage, version, items, training_te
         gc.collect()
 
 
-def generate_suggestions_single_item(version, item,
-                                     generator,
-                                     localized_reference=None,
-                                     missing_only=True,
-                                     skip_missing_text=True,
-                                     existing_refs=None,
-                                     to_create=None,
-                                     to_delete=None):
+def generate_suggestions_single_item(
+    version,
+    item,
+    generator,
+    localized_reference=None,
+    missing_only=True,
+    skip_missing_text=True,
+    existing_refs=None,
+    to_create=None,
+    to_delete=None,
+):
     if localized_reference is not None and item.localized_reference != localized_reference:
         return
 
-    if (skip_missing_text and isinstance(item, Verse) and
-            item.text_saved == ""):
+    if skip_missing_text and isinstance(item, Verse) and item.text_saved == "":
         logger.info("Skipping %s %s which has no saved text", version.slug, item.localized_reference)
         return
 
@@ -258,11 +276,14 @@ def generate_suggestions_single_item(version, item,
     logger.info("Generating suggestions for %s %s", version.slug, item.localized_reference)
 
     item_suggestions = generator.suggestions_for_text(text)
-    to_create.append(WordSuggestionData(version_slug=version.slug,
-                                        localized_reference=item.localized_reference,
-                                        suggestions=item_suggestions,
-                                        hash=hash_text(text),
-                                        ))
+    to_create.append(
+        WordSuggestionData(
+            version_slug=version.slug,
+            localized_reference=item.localized_reference,
+            suggestions=item_suggestions,
+            hash=hash_text(text),
+        )
+    )
 
 
 def items_all_done(version, items, localized_reference=None, missing_only=True):
@@ -270,12 +291,14 @@ def items_all_done(version, items, localized_reference=None, missing_only=True):
         localized_references = [item.localized_reference for item in items]
         if localized_reference is not None and localized_reference not in localized_references:
             return True
-        if version.word_suggestion_data.filter(localized_reference__in=localized_references).count() == len(localized_references):
+        if version.word_suggestion_data.filter(localized_reference__in=localized_references).count() == len(
+            localized_references
+        ):
             # All done
-            logger.info("Skipping %s %s\n", version.slug, ' '.join(localized_references))
+            logger.info("Skipping %s %s\n", version.slug, " ".join(localized_references))
             return True
     return False
 
 
 def hash_text(text):
-    return hashlib.sha1(text.encode('utf-8')).hexdigest()
+    return hashlib.sha1(text.encode("utf-8")).hexdigest()

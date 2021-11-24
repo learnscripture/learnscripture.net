@@ -23,7 +23,7 @@
           {% for radio_widget in field %}
             <li>
               {{ radio_widget.tag }}<label for="{{ radio_widget.id_for_label }}">
-              {{ radio_widget.choice_label }}
+                {{ radio_widget.choice_label }}
               </label>
             </li>
           {% endfor %}
@@ -43,5 +43,3 @@
     {% endif %}
   </div>
 {% endwith %}
-
-

@@ -35,13 +35,11 @@ def analyze_all(version_slugs=None, disallow_text_loading=False):
 def run_all_analyses_for_text(storage, text, disallow_text_loading=False):
     if text.text_type == TextType.BIBLE:
         for g in BIBLE_BOOK_GROUPS:
-            training_texts = BibleTrainingTexts(text=text, books=g,
-                                                disallow_loading=disallow_text_loading)
+            training_texts = BibleTrainingTexts(text=text, books=g, disallow_loading=disallow_text_loading)
             run_analyzers(storage, training_texts, training_texts.keys())
 
     elif text.text_type == TextType.CATECHISM:
-        training_texts = CatechismTrainingTexts(text=text,
-                                                disallow_loading=disallow_text_loading)
+        training_texts = CatechismTrainingTexts(text=text, disallow_loading=disallow_text_loading)
         run_analyzers(storage, training_texts, training_texts.keys())
 
 

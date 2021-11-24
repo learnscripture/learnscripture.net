@@ -5,6 +5,7 @@ from django.db import migrations
 
 def forwards(apps, schema_editor):
     from bibleverses.models import VerseSet, VerseSetType
+
     for vs in VerseSet.objects.filter(set_type=VerseSetType.PASSAGE):
         vs.save()
 
@@ -16,7 +17,7 @@ def backwards(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bibleverses', '0043_verseset_any_language'),
+        ("bibleverses", "0043_verseset_any_language"),
     ]
 
     operations = [
