@@ -1,10 +1,11 @@
+from urllib.parse import quote
+
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.cache import add_never_cache_headers
 from django.utils.decorators import method_decorator
 from django.utils.functional import wraps
-from django.utils.http import urlquote
 
 from learnscripture import session
 from learnscripture.ftl_bundles import t
@@ -37,7 +38,7 @@ def has_preferences(request):
 
 
 def redirect_via_prefs(request):
-    return HttpResponseRedirect(reverse("preferences") + f"?next={urlquote(request.get_full_path())}")
+    return HttpResponseRedirect(reverse("preferences") + f"?next={quote(request.get_full_path())}")
 
 
 def require_preferences(view_func):
@@ -97,8 +98,8 @@ def htmx(additional_templates):
         @wraps(view)
         def _view(request, *args, **kwargs):
             resp = view(request, *args, **kwargs)
-            if request.META.get("HTTP_HX_REQUEST", False):
-                container = request.META.get("HTTP_HX_TARGET", None)
+            if request.headers.get("Hx-Request", False):
+                container = request.headers.get("Hx-Target", None)
                 if container is not None and container in additional_templates:
                     template = additional_templates[container]
                     resp.template_name = template

@@ -51,6 +51,8 @@ installed.
 
      nodeenv --node=10.24.1 --python-virtualenv
 
+   (Later node versions give us problems with installing Elm 0.18 it seems, need to check)
+
    Deactivate and re-activate the virtualenv for changes to take effect.
 
    Now we also need our node and Javascript deps::

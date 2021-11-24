@@ -1,6 +1,6 @@
 from django.db.models import Q
 from django.db.models.deletion import ProtectedError
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from rest_framework import generics, permissions, renderers, status
 from rest_framework.decorators import api_view, permission_classes, renderer_classes
 from rest_framework.response import Response
@@ -28,7 +28,7 @@ class PlainText(renderers.BaseRenderer):
     def render(self, data, media_type=None, renderer_context=None):
         if isinstance(data, str):
             return data
-        return smart_text(data)
+        return smart_str(data)
 
 
 class CmsListCreateAPIView(generics.ListCreateAPIView):

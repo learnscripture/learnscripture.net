@@ -298,7 +298,7 @@ def learn_set(request, uvs_list, learning_type):
     uvs_list = [u for u in uvs_list if u is not None]
     # Save where we should return to after learning:
     return_to = reverse("dashboard")  # by default, the dashboard
-    referer = request.META.get("HTTP_REFERER")
+    referer = request.headers.get("Referer")
     if referer is not None:
         url = urllib.parse.urlparse(referer)
         allowed_return_to = [reverse("user_verses")]  # places it is useful to return to
