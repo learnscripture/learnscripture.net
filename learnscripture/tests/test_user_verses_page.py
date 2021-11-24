@@ -57,7 +57,7 @@ class UserVersesPageTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         # Type the verse:
         words = "The LORD is my shepherd I shall not want"
         for word in words.split():
-            self.fill({"#id-typing": word + " "})
+            self.fill({"#id-typing": word[0]})
 
         # Click next
         self.click("#id-next-btn")
