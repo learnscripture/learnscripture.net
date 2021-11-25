@@ -36,7 +36,7 @@ env.locale = "en_US.UTF-8"
 env.num_workers = "3"
 
 # Python version
-PYTHON_BIN = "python3.8"
+PYTHON_BIN = "python3.9"
 PYTHON_PREFIX = ""  # e.g. /usr/local  Use "" for automatic
 PYTHON_FULL_PATH = f"{PYTHON_PREFIX}/bin/{PYTHON_BIN}" if PYTHON_PREFIX else PYTHON_BIN
 
@@ -79,6 +79,9 @@ REQS = [
     "python3-pip",
     "python3-wheel",
     "python3-virtualenv",
+    "python3.9",
+    "python3.9-full",
+    "python3.9-venv",
     "python3-virtualenvwrapper",
     "python3-setuptools",
     # For building Python extensions

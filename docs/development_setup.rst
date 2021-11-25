@@ -27,11 +27,11 @@ installed.
 
 3. Create a virtualenv for the project e.g.::
 
-     mkvirtualenv learnscripture --python=`which python3.8` -a `pwd`
+     mkvirtualenv learnscripture --python=`which python3.9` -a `pwd`
 
    Add project path to the venv::
 
-     pwd > $VIRTUAL_ENV/lib/python3.8/site-packages/project.pth
+     pwd > $VIRTUAL_ENV/lib/python3.9/site-packages/project.pth
 
 4. Install dependencies.
 

@@ -4,7 +4,6 @@ import operator
 from collections import OrderedDict, defaultdict, namedtuple
 from datetime import timedelta
 from functools import reduce
-from typing import List
 
 import attr
 import django_ftl
@@ -1448,7 +1447,7 @@ WHERE t2.d2 IS NULL;
 AccountStat = namedtuple("AccountStat", "date new_accounts active_accounts verses_started verses_tested")
 
 
-def get_account_stats(start_datetime, end_datetime) -> List[AccountStat]:
+def get_account_stats(start_datetime, end_datetime) -> list[AccountStat]:
     from learnscripture.utils.sqla import default_engine
 
     active_account_span_size = 14

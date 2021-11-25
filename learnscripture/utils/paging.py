@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 import attr
 import furl
@@ -6,7 +6,7 @@ import furl
 
 @attr.s(auto_attribs=True)
 class Page:
-    items: List[object]
+    items: list[object]
     from_item: int
     shown_count: int
     more: bool
