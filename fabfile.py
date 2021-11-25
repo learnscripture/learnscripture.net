@@ -80,6 +80,7 @@ REQS = [
     "python3-wheel",
     "python3-virtualenv",
     "python3.9",
+    "python3.9-dev",
     "python3.9-full",
     "python3.9-venv",
     "python3-virtualenvwrapper",
