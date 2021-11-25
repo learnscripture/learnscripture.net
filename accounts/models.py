@@ -48,6 +48,7 @@ from scores.models import ScoreReason, Scores, TotalScore
 
 
 class TestingMethod(models.TextChoices):
+    __test__ = False  # pytest
     FULL_WORDS = "FULL_WORDS", t_lazy("accounts-type-whole-word-testing-method")
     FIRST_LETTER = "FIRST_LETTER", t_lazy("accounts-type-first-letter-testing-method")
     ON_SCREEN = "ON_SCREEN", t_lazy("accounts-choose-from-list-testing-method")
