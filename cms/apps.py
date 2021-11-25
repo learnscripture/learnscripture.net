@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class ScoresConfig(AppConfig):
-    name = "scores"
+class CmsConfig(AppConfig):
+    name = "cms"
     default_auto_field = "django.db.models.BigAutoField"
