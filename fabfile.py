@@ -219,15 +219,16 @@ def provision():
     """
     Installs the base system and Python requirements for the entire server.
     """
-    _install_system()
+    install_system()
     _install_locales()
     _configure_services()
     _fix_startup_services()
     run(f"mkdir -p /home/{env.proj_user}/logs")
 
 
+@task
 @as_rootuser
-def _install_system():
+def install_system():
     # Install system requirements
     update_upgrade()
     apt(" ".join(REQS))
