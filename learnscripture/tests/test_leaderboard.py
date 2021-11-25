@@ -35,7 +35,7 @@ class LeaderboardTests(TestBase):
         self.assertNotContains(resp, self.a2.username)
 
     def test_get_thisweek(self):
-        resp = self.client.get(reverse("group_leaderboard", args=(self.group.slug,)), {"thisweek": "1"})
+        resp = self.client.get(reverse("group_leaderboard", args=(self.group.slug,)), {"when": "thisweek"})
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, self.a1.username)
         self.assertNotContains(resp, self.a2.username)

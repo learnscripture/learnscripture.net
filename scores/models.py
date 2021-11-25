@@ -175,7 +175,7 @@ def get_leaderboard_since(since, hellbanned_mode, from_item, page_size, group=No
     subq1 = (
         active_user_query(
             select(
-                [actionlog.c.account_id, func.sum(actionlog.c.points).label("sum_points")],
+                [actionlog.c.account_id, sum_points := func.sum(actionlog.c.points).label("sum_points")],
                 from_obj=actionlog.join(account),
             ),
             hellbanned_mode,
@@ -186,7 +186,7 @@ def get_leaderboard_since(since, hellbanned_mode, from_item, page_size, group=No
 
     subq1 = leaderboard_group_filter(subq1, hellbanned_mode, group)
 
-    subq1 = subq1.order_by(subq1.c.sum_points.desc())
+    subq1 = subq1.order_by(sum_points.desc())
     subq1 = subq1.alias()
 
     q1 = (
