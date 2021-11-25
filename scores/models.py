@@ -6,6 +6,7 @@ streaks and awards.
 TotalScore is a summary used for all time scores.
 
 """
+import uuid
 from datetime import timedelta
 
 from django.db import models
@@ -131,7 +132,8 @@ def get_all_time_leaderboard(hellbanned_mode, from_item, page_size, group=None):
     account = accounts_account
     totalscore = scores_totalscore
 
-    sq = Sequence("rank_seq")
+    sequence_name = f"rank_seq_{uuid.uuid4().hex}"
+    sq = Sequence(sequence_name)
 
     subq1 = (
         active_user_query(
@@ -150,9 +152,9 @@ def get_all_time_leaderboard(hellbanned_mode, from_item, page_size, group=None):
         .offset(from_item)
     )
 
-    default_engine.execute("CREATE TEMPORARY SEQUENCE rank_seq;")
+    default_engine.execute(f"CREATE TEMPORARY SEQUENCE {sequence_name};")
     results = default_engine.execute(q1).fetchall()
-    default_engine.execute("DROP SEQUENCE rank_seq;")
+    default_engine.execute(f"DROP SEQUENCE {sequence_name};")
     return [{"account_id": r[0], "points": r[1], "rank": r[2]} for r in results]
 
 
@@ -170,7 +172,8 @@ def get_leaderboard_since(since, hellbanned_mode, from_item, page_size, group=No
     account = accounts_account
     actionlog = scores_actionlog
 
-    sq = Sequence("rank_seq")
+    sequence_name = f"rank_seq_{uuid.uuid4().hex}"
+    sq = Sequence(sequence_name)
 
     subq1 = (
         active_user_query(
@@ -202,9 +205,9 @@ def get_leaderboard_since(since, hellbanned_mode, from_item, page_size, group=No
         .offset(from_item)
     )
 
-    default_engine.execute("CREATE TEMPORARY SEQUENCE rank_seq;")
+    default_engine.execute(f"CREATE TEMPORARY SEQUENCE {sequence_name};")
     results = default_engine.execute(q1).fetchall()
-    default_engine.execute("DROP SEQUENCE rank_seq;")
+    default_engine.execute(f"DROP SEQUENCE {sequence_name};")
     return [{"account_id": r[0], "points": r[1], "rank": r[2]} for r in results]
 
 
