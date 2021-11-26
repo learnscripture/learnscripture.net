@@ -91,7 +91,8 @@ def require_account_with_redirect(view_func):
 def htmx(additional_templates):
     """
     If request is from htmx, then render a partial page,
-    using the 'hx-target' header to dispatch to the appropriate template.
+    using the 'hx-target' header to dispatch to the appropriate template
+    by looking up in the supplied dictionary of {hx-target: template}
     """
 
     def decorator(view):
