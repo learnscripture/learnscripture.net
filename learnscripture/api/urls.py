@@ -33,8 +33,6 @@ urlpatterns = [
     path("deletenotice/", handlers.DeleteNotice.as_view(), name="learnscripture.api.deletenotice"),
     path("addcomment/", handlers.AddComment.as_view(), name="learnscripture.api.addcomment"),
     path("hidecomment/", handlers.HideComment.as_view(), name="learnscripture.api.hidecomment"),
-    path("follow/", handlers.Follow.as_view(), name="learnscripture.api.follow"),
-    path("unfollow/", handlers.UnFollow.as_view(), name="learnscripture.api.unfollow"),
     path("savemiscpreferences/", handlers.SaveMiscPreferences.as_view(), name="learnscripture.api.savemiscpreferences"),
     path("usertimelinestats/", handlers.UserTimelineStats.as_view(), name="learnscripture.api.usertimelinestats"),
 ]

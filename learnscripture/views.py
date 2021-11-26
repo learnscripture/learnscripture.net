@@ -996,11 +996,19 @@ def get_hellbanned_mode(request):
         return account.is_hellbanned
 
 
+@htmx({"id-follow-form": "learnscripture/follow_form_inc.html"})
 def user_stats(request, username):
     viewer = account_from_request(request)
     account = get_object_or_404(
         Account.objects.visible_for_account(viewer).select_related("total_score", "identity"), username=username
     )
+
+    if request.method == "POST" and viewer is not None:
+        if "follow" in request.POST:
+            viewer.follow_user(account)
+        if "unfollow" in request.POST:
+            viewer.unfollow_user(account)
+
     ctx = {
         "account": account,
         "title": account.username,

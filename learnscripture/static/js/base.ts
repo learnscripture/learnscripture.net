@@ -33,7 +33,6 @@ import './dashboard';
 import './versepopup';
 import './groups';
 import './comment';
-import './follow';
 import './sw_setup';
 import './learn_setup';
 
