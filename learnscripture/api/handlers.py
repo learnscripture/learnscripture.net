@@ -589,22 +589,6 @@ class HideComment(ApiView):
         return {}
 
 
-class Follow(ApiView):
-    @require_preexisting_account_m
-    def post(self, request):
-        account = Account.objects.get(id=int(request.POST["account_id"]))
-        request.identity.account.follow_user(account)
-        return {}
-
-
-class UnFollow(ApiView):
-    @require_preexisting_account_m
-    def post(self, request):
-        account = Account.objects.get(id=int(request.POST["account_id"]))
-        request.identity.account.unfollow_user(account)
-        return {}
-
-
 class SaveMiscPreferences(ApiView):
     @require_preexisting_identity_m
     def post(self, request):
