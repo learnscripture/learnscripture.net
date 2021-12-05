@@ -335,7 +335,7 @@ class Verse(models.Model):
     """
 
     version = models.ForeignKey(TextVersion, on_delete=models.CASCADE)
-    # Reference in the language of the text version e.g. "John 3:16"
+    # Reference in the language of the text version e.g. "John 3:16" or "Yuhanna 3:16"
     localized_reference = models.CharField(max_length=100)
     # 'text_saved' is for data stored, as opposed to 'text' which might retrieve
     # from a service. Also, 'text_saved' is sometimes set without saving to the
@@ -383,6 +383,10 @@ class Verse(models.Model):
     @property
     def text(self):
         if self.text_saved == "" and not self.missing:
+            # We should not reach this, verses with empty `text_saved` should be
+            # populated from a service **in bulk** for efficiency using things
+            # like get_verses_by_localized_reference_bulk. But in case we do we
+            # warn rather than error.
             logger.warning(
                 "Reached ensure_text call from Verse.text, for %s %s", self.version.slug, self.localized_reference
             )
