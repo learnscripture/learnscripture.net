@@ -84,7 +84,7 @@ class TextVersionQuerySet(models.QuerySet):
         return self.filter(public=True)
 
     def visible_for_identity(self, identity):
-        if identity.account_id is not None and identity.account.is_tester:
+        if identity is not None and identity.account_id is not None and identity.account.is_tester:
             return self
         return self.public()
 

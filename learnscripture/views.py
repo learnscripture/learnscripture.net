@@ -226,9 +226,7 @@ def signup(request):
 
 
 def bible_versions_for_request(request):
-    if hasattr(request, "identity"):
-        return request.identity.available_bible_versions()
-    return TextVersion.objects.bibles().public()
+    return TextVersion.objects.bibles().visible_for_identity(getattr(request, "identity", None))
 
 
 @require_preferences

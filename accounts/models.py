@@ -1313,9 +1313,6 @@ class Identity(models.Model):
             return False
         return True
 
-    def available_bible_versions(self):
-        return TextVersion.objects.bibles().visible_for_identity(self)
-
     def get_dashboard_events(self, now=None):
         from events.models import Event
 

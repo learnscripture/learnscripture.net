@@ -24,12 +24,7 @@ class PreferencesForm(forms.ModelForm):
 
         from bibleverses.models import TextVersion
 
-        if "instance" in kwargs:
-            identity = kwargs["instance"]
-            available_bible_versions = identity.available_bible_versions()
-        else:
-            available_bible_versions = TextVersion.objects.bibles().public()
-
+        available_bible_versions = TextVersion.objects.bibles().visible_for_identity(kwargs.get("instance", None))
         self.fields["default_bible_version"].queryset = available_bible_versions
 
     class Meta:
