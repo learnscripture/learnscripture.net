@@ -24,14 +24,11 @@ class PreferencesForm(forms.ModelForm):
 
         from bibleverses.models import TextVersion
 
-        available_bible_versions = TextVersion.objects.bibles().public()
         if "instance" in kwargs:
             identity = kwargs["instance"]
-        else:
-            identity = None
-
-        if identity is not None:
             available_bible_versions = identity.available_bible_versions()
+        else:
+            available_bible_versions = TextVersion.objects.bibles().public()
 
         self.fields["default_bible_version"].queryset = available_bible_versions
 
