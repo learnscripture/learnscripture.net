@@ -639,6 +639,20 @@ class ParsingTests(unittest.TestCase):
         self.assertEqual(refs[1], "Genesis 1:2")
         self.assertEqual(refs[-1], "Genesis 50:26")
 
+    def test_is_in_bounds(self):
+        good_ref = self.pu(LANGUAGE_CODE_EN, "Gen 1:1")
+        assert good_ref.is_in_bounds()
+
+        bad_ref_1 = self.pu(LANGUAGE_CODE_EN, "Gen 100:1")
+        assert not bad_ref_1.is_in_bounds()
+
+        bad_ref_2 = self.pu(LANGUAGE_CODE_EN, "Gen 1:100")
+        assert not bad_ref_2.is_in_bounds()
+
+    def test_is_in_bounds_whole_chapter(self):
+        good_ref = self.pu(LANGUAGE_CODE_EN, "Psalm 117")
+        assert good_ref.is_in_bounds()
+
 
 class MockVersion:
     def __init__(self, language_code):

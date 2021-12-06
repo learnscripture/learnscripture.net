@@ -127,6 +127,9 @@ class ParsedReference:
             return False
         for chapter, verse in [(self.start_chapter, self.start_verse), (self.end_chapter, self.end_verse)]:
             verse_count = book_info["verse_counts"][chapter]
+            if verse is None:
+                # implies beginning/end of chapter, in bounds by definitions
+                continue
             if verse > verse_count:
                 return False
         return True
