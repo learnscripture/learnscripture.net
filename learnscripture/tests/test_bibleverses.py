@@ -653,6 +653,11 @@ class ParsingTests(unittest.TestCase):
         good_ref = self.pu(LANGUAGE_CODE_EN, "Psalm 117")
         assert good_ref.is_in_bounds()
 
+    def test_is_in_bounds_chapter_zero(self):
+        assert not self.pu(LANGUAGE_CODE_EN, "1 Corinthians 0").is_in_bounds()
+        assert not self.pu(LANGUAGE_CODE_EN, "1 Corinthians 0:1").is_in_bounds()
+        assert not self.pu(LANGUAGE_CODE_EN, "1 Corinthians 0:1-0:2").is_in_bounds()
+
 
 class MockVersion:
     def __init__(self, language_code):
