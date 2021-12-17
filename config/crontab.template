@@ -19,3 +19,4 @@ LS_MANAGE=%(SRC_ROOT)s/manage.py
 
 # GoAccess analytics
 30         23   * * *  root          goaccess --restore --persist --log-format=COMBINED /var/log/nginx/access.log /var/log/nginx/access.log.1 -o "/var/log/goaccess/report-$(date '+\%%Y-\%%m-\%%d').html" --keep-last=32
+5          1    * * *  root          find /var/log/goaccess/ -name 'report-20??-??-??.html' -mtime +30 | sort | egrep '20..-..-(02|03|04|05|06|07|08|09|1.|2.|3.)' | xargs rm
