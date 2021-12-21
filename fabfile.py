@@ -1023,6 +1023,12 @@ def create_sentry_release(version, last_commit):
     local(f"sentry-cli releases --org learnscripturenet finalize {version}")
 
 
+@task
+def get_goaccess_logs():
+    local("mkdir -p ../logs/")
+    local("rsync -a --progress root@learnscripture.net:/var/log/goaccess ../logs/")
+
+
 # TODO:
 #
 # We should automate the process of installing and configuring goaccess.
