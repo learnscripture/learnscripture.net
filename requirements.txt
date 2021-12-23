@@ -418,7 +418,7 @@ webtest==3.0.0
     # via django-webtest
 werkzeug==2.0.2
     # via -r requirements-dev.in
-wheel==0.37.0
+wheel==0.37.1
     # via pip-tools
 wsproto==1.0.0
     # via trio-websocket
