@@ -3,6 +3,11 @@
     <title>Learnscripture debug</title>
   </head>
   <body>
+    <h1>Request</h1>
+    <code>request.is_secure(): {{ request.is_secure }}</code>
+
+    <p>Headers:</p>
+    <p>{{ request.headers }}</p>
     <h1>Session ID:</h1>
     <p>{{ request.session.session_key }}</p>
     <h1>Session data:</h1>
