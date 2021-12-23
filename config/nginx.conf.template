@@ -104,8 +104,6 @@ server {
             uwsgi_pass unix:/tmp/%(proj_name)s_uwsgi.sock;
         }
 
-        add_header X-Frame-Options "SAMEORIGIN";
-
         include uwsgi_params;
         uwsgi_param HTTPS $https if_not_empty;
 
