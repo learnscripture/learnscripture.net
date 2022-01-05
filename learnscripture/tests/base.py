@@ -220,6 +220,9 @@ class TimeUtilsMixin:
         """
         # TODO - the rest of the models, or something that looks through all the
         # models and finds DateTimeFields. This is enough for now.
+
+        # TODO - we should replace all of this with timemachine.travel
+        # https://gitlab.com/learnscripture/learnscripture.net/-/issues/119
         Notice.objects.update(seen=F("seen") - delta)
         Payment.objects.update(created=F("created") - delta)
         UserVerseStatus.objects.update(
