@@ -26,8 +26,7 @@ donations-page-top-html =
   <p><b>PayPal hesabımızla bir sorun olduğu için, şimdilik bağış kabul etmiyoruz.</b></p>
 
 # Message displayed on donations page if user is not logged in
-donations-login-or-signup-to-donate-html = Bağış yapmak için <a href="{ $login_and_redirect_url }">giriş yapınız</a>
-       (<a href="{ $signup_and_redirect_url }">veya bir heasap oluşturunuz</a>). Böylece bağışlarınızı takip edebileceğiz.
+donations-login-to-donate-html = Bağış yapmak için <a href="{ $login_and_redirect_url }">giriş yapınız</a>. Böylece bağışlarınızı takip edebileceğiz.
 
 
 ## Donation complete page.

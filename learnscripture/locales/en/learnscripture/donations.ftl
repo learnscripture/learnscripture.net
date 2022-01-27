@@ -25,8 +25,7 @@ donations-page-top-html =
   <p><b>Due to an issue with our PayPal account, we are not currently accepting donations.</b></p>
 
 # Message displayed on donations page if user is not logged in
-donations-login-or-signup-to-donate-html = Please <a href="{ $login_and_redirect_url }">log in</a>
-      (or <a href="{ $signup_and_redirect_url }">create an account</a>) to donate, so that we track your donation.
+donations-login-to-donate-html = Please <a href="{ $login_and_redirect_url }">log in</a> to donate, so that we track your donation.
 
 
 

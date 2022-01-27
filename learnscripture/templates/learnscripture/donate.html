@@ -24,8 +24,7 @@
 
   {% else %}
     {% capture as login_and_redirect_url silent %}{% url 'login' %}?next={{ request.get_full_path|urlencode }}{% endcapture %}
-    {% capture as signup_and_redirect_url silent %} {% url 'signup' %}?next={{ request.get_full_path|urlencode }}{% endcapture %}
-    <p>{% ftlmsg 'donations-login-or-signup-to-donate-html' login_and_redirect_url=login_and_redirect_url signup_and_redirect_url=signup_and_redirect_url %}</p>
+    <p>{% ftlmsg 'donations-login-to-donate-html' login_and_redirect_url=login_and_redirect_url %}</p>
 
   {% endif %}
 
