@@ -88,6 +88,7 @@ from .decorators import (
     require_preferences,
 )
 from .utils.paging import Page, get_paged_results, get_request_from_item
+from .utils.urls import build_signup_url
 
 #
 # === Notes ===
@@ -1468,7 +1469,7 @@ def group(request, slug):
 
     if request.method == "POST":
         if account is None:
-            return HttpResponseRedirect(reverse("signup") + "?next=" + urllib.parse.quote(request.get_full_path()))
+            return HttpResponseRedirect(build_signup_url(request))
 
         if "leave" in request.POST:
             group.remove_user(account)

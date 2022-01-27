@@ -1,14 +1,13 @@
-from urllib.parse import quote
-
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.urls import reverse
 from django.utils.cache import add_never_cache_headers
 from django.utils.decorators import method_decorator
 from django.utils.functional import wraps
 
 from learnscripture import session
 from learnscripture.ftl_bundles import t
+
+from .utils.urls import build_preferences_url
 
 
 def require_identity(view_func):
@@ -38,7 +37,7 @@ def has_preferences(request):
 
 
 def redirect_via_prefs(request):
-    return HttpResponseRedirect(reverse("preferences") + f"?next={quote(request.get_full_path())}")
+    return HttpResponseRedirect(build_preferences_url(request))
 
 
 def require_preferences(view_func):

@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 {% load capture_tags %}
 {% load ftl %}
+{% load account_utils %}
 
 {% block content %}
-  {% capture as login_url silent %}{% url 'login' %}?next={{ request.get_full_path|urlencode }}{% endcapture %}
-  {% capture as signup_url silent %}{% url 'signup' %}?next={{ request.get_full_path|urlencode }}{% endcapture %}
+  {% capture as login_url silent %}{% make_login_url %}{% endcapture %}
+  {% capture as signup_url silent %}{% make_signup_url %}{% endcapture %}
   <p>{% ftlmsg 'site-you-need-to-login-html' login_url=login_url signup_url=signup_url %}</p>
 
 {% endblock %}

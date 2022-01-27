@@ -1,6 +1,7 @@
 {# Hidden stuff #}
 {% load ftl %}
 {% load capture_tags %}
+{% load account_utils %}
 
 <div id="id-add-comment" class="hide">
   <div class="comment-box-wrapper">
@@ -21,7 +22,7 @@
         </div>
       {% endif %}
     {% else %}
-      {% capture as login_and_redirect_url silent %}{% url "login" %}?next={{ request.get_full_path|urlencode }}{% endcapture %}
+      {% capture as login_and_redirect_url silent %}{% make_login_url %}{% endcapture %}
       <div>{% ftlmsg 'comments-login-to-add-comments-html' login_url=login_and_redirect_url %}</div>
     {% endif %}
   </div>

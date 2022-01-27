@@ -1,5 +1,6 @@
 {% load render_bundle from webpack_loader %}
 {% load ftl %}
+{% load account_utils %}
 
 <!DOCTYPE html>
 <html lang="{{ request.LANGUAGE_CODE }}">
@@ -42,10 +43,10 @@
             </div>
             <ul class="nav-dropdown-menu">
               {% if not request_account %}
-                <li><a href="{% url 'login' %}"><i class="icon-fw icon-login"></i> {% ftlmsg 'site-sign-in' %}</a></li>
-                <li><a href="{% url 'signup' %}?next={{ request.get_full_path|urlencode }}"><i class="icon-fw icon-account"></i> {% ftlmsg 'site-create-account' %}</a></li>
+                <li><a href="{% make_login_url %}"><i class="icon-fw icon-login"></i> {% ftlmsg 'site-sign-in' %}</a></li>
+                <li><a href="{% make_signup_url %}"><i class="icon-fw icon-account"></i> {% ftlmsg 'site-create-account' %}</a></li>
               {% endif %}
-              <li><a href="{% url 'preferences' %}?next={{ request.path_info }}" class="preferences-link"><i class="icon-fw icon-preferences"></i> {% ftlmsg 'site-user-preferences-link' %}</a></li>
+              <li><a href="{% make_preferences_url %}" class="preferences-link"><i class="icon-fw icon-preferences"></i> {% ftlmsg 'site-user-preferences-link' %}</a></li>
               {% if request_account %}
                 <li><a href="{% url 'account_details' %}"><i class="icon-fw icon-account"></i> {% ftlmsg 'site-account-details-link' %}</a></li>
                 <li><a href="{% url 'user_verses' %}"><i class="icon-fw icon-progress"></i> {% ftlmsg 'site-verse-progress-link' %}</a></li>
