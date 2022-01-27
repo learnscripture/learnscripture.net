@@ -12,7 +12,7 @@ from io import StringIO
 
 import furl
 from django.core.serializers.json import DjangoJSONEncoder
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.utils.functional import wraps
@@ -612,7 +612,10 @@ class SaveMiscPreferences(ApiView):
 
 class UserTimelineStats(ApiView):
     def get(self, request):
-        username = request.GET["username"]
+        try:
+            username = request.GET["username"]
+        except KeyError:
+            raise Http404
         account = get_object_or_404(Account.objects.active().filter(username=username))
         identity = account.identity
         started = get_verses_started_per_day(identity.id)
