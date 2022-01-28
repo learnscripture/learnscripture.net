@@ -841,6 +841,13 @@ class UserVerseStatusTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestB
             3,
         )
 
+    def test_search_by_parsed_ref_out_of_bounds(self):
+        identity, account = self.create_account()
+        self.assertEqual(
+            len(identity.verse_statuses.search_by_parsed_ref(parse_validated_localized_reference("en", "Psalm 2000"))),
+            0,
+        )
+
     def test_search_by_parsed_ref_chapter(self):
         identity, account = self.create_account()
         identity.add_verse_set(VerseSet.objects.get(name="Psalm 23"))

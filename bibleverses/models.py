@@ -893,6 +893,8 @@ class UserVerseStatusQuerySet(models.QuerySet):
         return self.reviewable().filter(next_test_due__gt=now)
 
     def search_by_parsed_ref(self, parsed_ref):
+        if not parsed_ref.is_in_bounds():
+            return self.none()
         refs = [ref.canonical_form() for ref in parsed_ref.to_internal().to_list()]
         return self.filter(internal_reference_list__overlap=refs)
 
