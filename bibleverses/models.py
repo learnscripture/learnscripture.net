@@ -895,6 +895,11 @@ class UserVerseStatusQuerySet(models.QuerySet):
     def search_by_parsed_ref(self, parsed_ref):
         if not parsed_ref.is_in_bounds():
             return self.none()
+        if parsed_ref.is_whole_book():
+            # To avoid large number of parameters involved in doing 'to_list()'
+            # on a whole book, do this.
+            # This is a bit hacky...
+            return self.filter(internal_reference_list__0__startswith=parsed_ref.to_internal().canonical_form() + " ")
         refs = [ref.canonical_form() for ref in parsed_ref.to_internal().to_list()]
         return self.filter(internal_reference_list__overlap=refs)
 

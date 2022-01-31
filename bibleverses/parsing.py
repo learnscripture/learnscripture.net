@@ -123,6 +123,8 @@ class ParsedReference:
     def is_in_bounds(self):
         book_info = self.book_info
         chapter_count = book_info["chapter_count"]
+        if self.is_whole_book():
+            return True
         if self.start_chapter < 1:
             return False
         if self.start_chapter > chapter_count or self.end_chapter > chapter_count:

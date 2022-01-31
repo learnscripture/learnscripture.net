@@ -897,6 +897,20 @@ class UserVerseStatusTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestB
             0,
         )
 
+    def test_search_by_parsed_ref_whole_book(self):
+        identity, account = self.create_account()
+        identity.add_verse_set(VerseSet.objects.get(name="Psalm 23"))
+        identity.add_verse_choice("John 3:16")
+
+        self.assertEqual(
+            len(identity.verse_statuses.search_by_parsed_ref(parse_validated_localized_reference("en", "Psalm"))),
+            VerseSet.objects.get(name="Psalm 23").verse_choices.count(),
+        )
+        self.assertEqual(
+            len(identity.verse_statuses.search_by_parsed_ref(parse_validated_localized_reference("en", "John"))),
+            1,
+        )
+
     def test_search_by_parsed_ref_different_language(self):
         identity, account = self.create_account()
         identity.add_verse_choice("Psalm 23:1")
