@@ -11,6 +11,27 @@ This is a fairly standard Django app:
 * memcached for caching
 * supervisord for managing app services (uwsgi, memcached, django-q)
 
+
+Server-side vs client-side code
+===============================
+
+Most pages on the site use classic web architecture:
+
+* server-side rendered HTML
+* small amounts of javascript where needed to improve the experience.
+
+In the past, javascript was mostly jQuery based. Now, we are using `htmx
+<htmx.org>`_, and `trying to move more things to use that pattern
+<https://gitlab.com/learnscripture/learnscripture.net/-/issues/182>`_.
+
+Just one page uses SPA-style — the “Learn” page. But:
+- it is the page where users spend most of their time
+- it is very complex and demanding in terms of user interface.
+
+It is currently implemented in Elm, but `we are looking to replace it
+<https://gitlab.com/learnscripture/learnscripture.net/-/issues/181>`_.
+
+
 Server config
 =============
 

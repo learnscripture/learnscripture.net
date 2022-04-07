@@ -41,24 +41,3 @@ Some models will use ``internal_reference`` as an ID. Other models will use
 ``localized_reference``, usually in conjunction with ``version_id`` - since each
 ``TextVersion`` has a single language, there is just one correct way to localize
 a verse reference for a given ``TextVersion``.
-
-
-
-Client-side/server-side
-=======================
-
-We use jQuery for client-side code where it is relatively simple stuff, and
-preferably HTMX where possible.
-
-We use Elm for the 'learn' page.
-
-Apart from the Elm code, for rendering HTML we use server side Django templates
-everywhere. This has significant advantages over a library like JsRender:
-
-* Only one template system used, and a very capable one.
-* No duplication of essentially the same template server side and client side.
-* All localized strings are in server side code, so we don't need a client side
-  i18n solution (apart from Elm code, which is handled well by elm-fluent)
-
-This has the result that some of our API calls return rendered HTML instead of
-the more usual JSON data that might be manipulated client-side.
