@@ -1,4 +1,4 @@
-LearnScripture.net is web site created using the Python programming language,
+LearnScripture.net is a web site created using the Python programming language,
 the `Django <https://www.djangoproject.com/>`_ web framework, and various other technologies.
 
 If you are familiar with these or are willing to learn, we'd love to have your help
@@ -10,26 +10,26 @@ Docs you will need to read:
 
   - `<development_setup.rst>`_
 
-* Understand the project
+* Understand the project:
 
-  - `<architecture.rst>`_
+  - `<architecture.rst>`_ - read this first if you want to know if your skills match.
   - `<project_structure.rst>`_
   - `<development_principles.rst>`_
   - `<development_environment.rst>`_
   - `<organisation_structure.rst>`_
 
-* Detailed coding issues
+* Detailed coding issues:
 
   - `<coding_standards.rst>`_
   - `<code_notes.rst>`_
 
-* Understand deployment
+* Understand deployment:
 
   - `<deployment.rst>`_
   - `<server_setup.rst>`_
   - `<DNS_setups.rst>`_
 
-* Other things
+* Other things:
 
   - `<android_app.rst>`_
   - `<todo.rst>`_
