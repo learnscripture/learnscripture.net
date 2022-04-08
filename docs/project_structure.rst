@@ -36,9 +36,7 @@ This is where each app defines the signals that it sends. No logic for actually
 sending this signal is contained here.
 
 Often these signals can be simplified signals from other apps e.g. django's
-post_save signals might be used to create a 'group_joined' signal which
-abstracts over the fact that a group being joined corresponds to a Membership
-object being created.
+post_save signals might be used to create a 'group_joined' signal.
 
 
 Tests

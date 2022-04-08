@@ -11,5 +11,4 @@ If multiple people are working on the project, a method for syncing secrets.json
 
 See other commands in fabfile.py for more options.
 
-See architecture.rst and server_setup.rst for more info.
-
+See `<architecture.rst>`_ and `<server_setup.rst>`_ for more info.

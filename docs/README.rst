@@ -8,28 +8,28 @@ Docs you will need to read:
 
 * Get set up:
 
-  - development_setup.rst
+  - `<development_setup.rst>`_
 
 * Understand the project
 
-  - architecture.rst
-  - project_structure.rst
-  - development_principles.rst
-  - development_environment.rst
-  - organisation_structure.rst
+  - `<architecture.rst>`_
+  - `<project_structure.rst>`_
+  - `<development_principles.rst>`_
+  - `<development_environment.rst>`_
+  - `<organisation_structure.rst>`_
 
 * Detailed coding issues
 
-  - coding_standards.rst
-  - code_notes.rst
+  - `<coding_standards.rst>`_
+  - `<code_notes.rst>`_
 
 * Understand deployment
 
-  - deployment.rst
-  - server_setup.rst
-  - DNS_setups.rst
+  - `<deployment.rst>`_
+  - `<server_setup.rst>`_
+  - `<DNS_setups.rst>`_
 
 * Other things
 
-  - android_app.rst
-  - todo.rst
+  - `<android_app.rst>`_
+  - `<todo.rst>`_

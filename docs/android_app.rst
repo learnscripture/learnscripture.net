@@ -24,11 +24,7 @@ In practice, the Android app was a pain:
   a pain - the Android Studio tools update themselves, and break or require
   changes.
 
-Now, the app no longer works. The app used the URL http://learnscripture.net but
-we now redirect all http to https, with the effect that when you open the app
-you just get redirected to the site in your normal Android browser (e.g.
-Firefox, Chrome) - which is ideal behaviour in fact. These browsers are kept up
-to date, making development much much easier.
+Now, the app no longer works and has been pulled from the app store.
 
 The source code for the app is here:
 

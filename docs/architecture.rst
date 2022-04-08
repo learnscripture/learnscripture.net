@@ -2,7 +2,7 @@
  System services and architecture
 ==================================
 
-This is a fairly standard Django app:
+This is a fairly standard `Django <https://www.djangoproject.com/>`_ app:
 
 * nginx as front end web server, serves static files and delegates the rest to uwsgi
 * uwsgi for running the Django app
@@ -18,9 +18,9 @@ Server-side vs client-side code
 Most pages on the site use classic web architecture:
 
 * server-side rendered HTML
-* small amounts of javascript where needed to improve the experience.
+* small amounts of Javascript where needed to improve the experience.
 
-In the past, javascript was mostly jQuery based. Now, we are using `htmx
+In the past, Javascript was mostly jQuery based. Now, we are using `htmx
 <htmx.org>`_, and `trying to move more things to use that pattern
 <https://gitlab.com/learnscripture/learnscripture.net/-/issues/182>`_.
 
@@ -28,7 +28,7 @@ Just one page uses SPA-style — the “Learn” page. But:
 - it is the page where users spend most of their time
 - it is very complex and demanding in terms of user interface.
 
-It is currently implemented in Elm, but `we are looking to replace it
+It is currently implemented in Elm, but `we are looking to replace that
 <https://gitlab.com/learnscripture/learnscripture.net/-/issues/181>`_.
 
 

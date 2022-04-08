@@ -5,8 +5,8 @@ How Bible verses are referred to is a key issue in the project.
 
 There are a number of constraints and requirements:
 
-1. We need ``UserVerseStatus`` to be able to cope with catechisms and Bible verses,
-   so a direct FK from ``UserVerseStatus`` to ``Verse`` isn't possible.
+1. We need ``UserVerseStatus`` to be able to cope with both catechisms and Bible
+   verses, so a direct FK from ``UserVerseStatus`` to ``Verse`` isn't possible.
 
 2. We also cope with people learning multi-verse references which span multiple
    ``Verse`` records (e.g. "Ephesians 2:8-9") as a single item which also means
@@ -15,8 +15,8 @@ There are a number of constraints and requirements:
 3. In some Bible versions, verse divisions are different, for example in Turkish
    TCL02, there is no Matthew 1:1 and 1:2 - they are combined into "Matta 1:1-2"
 
-4. When displaying references, we always use the reference of the text,
-   regardless of any other language preference there might be.
+4. When displaying references, we always use the reference in the language of
+   the text, regardless of any other language preference there might be.
 
 5. Sometimes we want to be able to use a 'language neutral' reference. Verse
    sets are not specific to the version or language used, so if someone is

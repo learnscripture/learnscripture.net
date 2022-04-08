@@ -6,7 +6,7 @@ Since there has only ever been one developer on the project to date, these
 instructions may not work completely, but they should be a start.
 
 These instructions assume you are working in a Linux or Unix like environment
-(Mac should work, or a Ubuntu 16.04 virtual machine), with Python 3.8 and Git
+(Mac should work, or a Ubuntu 20.04 virtual machine), with Python 3.9 and Git
 installed.
 
 1. Create a directory 'learnscripture.net' and cd into it.
@@ -124,13 +124,13 @@ installed.
      npm run watch
 
    (These are long running processes that re-run themselves when files change)
-   Browse the site on http://learnscripture.local:8001/
+   Browse the site on http://learnscripture.local:8000/
 
 9. Then, try to run the tests::
 
      pytest
 
-   See also :doc:`project_structure.rst` for more info on running tests.
+   See also `<project_structure.rst>`_ for more info on running tests.
 
 
 10. Install pre-commit::
@@ -142,7 +142,7 @@ Additional tasks
 
 These should be done at some point, but don't need to be done immediately.
 
-10. For the 'on screen buttons' testing mode, you will need to set up the
+11. For the 'on screen buttons' testing mode, you will need to set up the
     contents of the word suggestions database. Since this is a large amount of
     data, all of which is derived from the texts and other static content, it is
     in a separate database, and not downloaded as part of the text itself. To

@@ -3,7 +3,7 @@
 ========================
 
 The usual things for developing a Django app apply. Test driven development is
-very helpful for many things - see project_structure.rst for more.
+very helpful for many things - see `<project_structure.rst>`_ for more.
 
 Additionally, more specifically to LearnScripture.net:
 
@@ -21,4 +21,3 @@ Additionally, more specifically to LearnScripture.net:
 
 * We've aimed to add motivational features that promote long-term Bible
   memorisation habits.
-

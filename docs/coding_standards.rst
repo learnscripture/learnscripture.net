@@ -5,7 +5,7 @@
 Coding style
 ------------
 
-* `PEP8`_ for Python
+* Black for Python
 * 4 space indents for Javascript
 * 2 space indents for HTML
 * 4 space indents for CSS/LESS
@@ -27,7 +27,8 @@ Imports should be sorted as per the isort command. See
 https://github.com/timothycrosley/isort/wiki/isort-Plugins for editor plugins
 for isort.
 
-.. _PEP8: https://www.python.org/dev/peps/pep-0008/
+Using `pre-commit <https://pre-commit.com/>`_ will allow you to automate these
+checks before checking in to git.
 
 Identifiers
 -----------

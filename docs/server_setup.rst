@@ -1,6 +1,11 @@
 Server provisioning/upgrade
 ---------------------------
 
+In the future we might automate more of this, or move to containers for
+deployment, but for now we are using a somewhat manual process. It only needs to
+be done once every few years (basically depending on `Ubuntu LTS schedule
+<https://ubuntu.com/about/release-cycle>`_).
+
 To upgrade to a major new version of the OS, it is usually better to start a new
 VM, test it is all working, then transfer. Here is the process, assuming that we
 are staying with the same provider (DigitalOcean). If moving to a new hosts some
@@ -157,7 +162,10 @@ the process works.
     - set the TTL to 5 minutes
     - wait for an hour for DNS to propagate
 
-    - add a site notice
+    - add a site notice about the downtime, preferably one in each language,
+      but English is most important:
+
+      https://learnscripture.net/admin/learnscripture/sitenotice/
 
 Now we'll repeat some steps, with changes:
 
@@ -189,4 +197,3 @@ Post-migrate steps:
 * Make sure letsencrypt is working::
 
       fab install_or_renew_ssl_certificate
-
