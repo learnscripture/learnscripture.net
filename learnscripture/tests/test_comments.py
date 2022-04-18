@@ -102,3 +102,14 @@ class CommentTests(AccountTestMixin, TestBase):
         comment = Comment.objects.create(author=account, message="Hello", group=group)
 
         self.assertEqual(comment.get_absolute_url(), f"/groups/my-group/wall/?comment={comment.id}")
+
+    def test_delete_wall_comment(self):
+        _, account = self.create_account()
+        group = create_group()
+        comment = Comment.objects.create(author=account, message="Hello", group=group)
+        related_events = [e for e in Event.objects.all() if e.get_comment() == comment]
+        assert len(related_events) == 1
+
+        comment.delete()
+        related_events_2 = Event.objects.filter(id__in=[e.id for e in related_events])
+        assert len(related_events_2) == 0
