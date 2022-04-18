@@ -12,12 +12,14 @@ from .base import AccountTestMixin, FullBrowserTest, TestBase, WebTestBase, get_
 from .test_bibleverses import RequireExampleVerseSetsMixin
 
 
-def create_group(**fields):
-    defaults = dict(slug="my-group")
-    defaults.update(fields)
-    if "created_by" not in fields:
-        defaults["created_by"] = get_or_create_any_account()
-    return Group.objects.create(**defaults)
+def create_group(slug="my-group", created_by=None, public=False):
+    if created_by is None:
+        created_by = get_or_create_any_account()
+    return Group.objects.create(
+        slug=slug,
+        created_by=created_by,
+        public=public,
+    )
 
 
 class GroupPageTestsBase(RequireExampleVerseSetsMixin):

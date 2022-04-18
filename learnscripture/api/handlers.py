@@ -33,7 +33,7 @@ from bibleverses.models import (
     make_verse_set_passage_id,
     quick_find,
 )
-from comments.models import Comment
+from comments.models import hide_comment
 from events.models import Event
 from groups.models import Group
 from learnscripture import session
@@ -585,7 +585,7 @@ class HideComment(ApiView):
     def post(self, request):
         if not request.identity.account.is_moderator:
             return rc.FORBIDDEN("Moderator account required")
-        Comment.objects.filter(id=int(request.POST["comment_id"])).update(hidden=True)
+        hide_comment(int(request.POST["comment_id"]))
         return {}
 
 

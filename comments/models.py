@@ -34,3 +34,18 @@ class Comment(models.Model):
             return get_absolute_url_for_event_comment(self.event, self.id)
         else:
             return get_absolute_url_for_group_comment(self.event, self.id, self.group.slug)
+
+
+def hide_comment(comment_id):
+    Comment.objects.filter(id=comment_id).update(hidden=True)
+    # This deletion is less than ideal, but it is currently the easiest way to
+    # get "group wall" comments (in contrast to event comments) to disappear
+    # from the activity stream.
+    # This moderation function is rarely needed in reality, and it's not a huge
+    # issue if it is used inappropriately.
+
+    delete_event_generated_for_comment(comment_id)
+
+
+def delete_event_generated_for_comment(comment_id):
+    Event.objects.filter(event_data__comment_id=comment_id).delete()

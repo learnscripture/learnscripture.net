@@ -1,6 +1,6 @@
 import time
 
-from comments.models import Comment
+from comments.models import Comment, hide_comment
 from events.models import Event, EventType, PointsMilestoneEvent
 
 from .base import AccountTestMixin, FullBrowserTest, TestBase
@@ -113,3 +113,18 @@ class CommentTests(AccountTestMixin, TestBase):
         comment.delete()
         related_events_2 = Event.objects.filter(id__in=[e.id for e in related_events])
         assert len(related_events_2) == 0
+
+    def test_moderate_wall_comment(self):
+        _, group_creator = self.create_account(username="group_creator")
+        group = create_group(created_by=group_creator)
+
+        _, account = self.create_account()
+        comment = Comment.objects.create(author=account, message="Hello", group=group)
+
+        events = [e for e in Event.objects.all() if e.get_comment() == comment]
+        assert len(events) == 1
+        (event,) = events
+
+        hide_comment(comment.id)
+
+        assert len([e for e in Event.objects.all() if e.get_comment() == comment]) == 0

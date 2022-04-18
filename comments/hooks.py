@@ -1,6 +1,6 @@
 from django.db.models.signals import post_delete, post_save
 
-from .models import Comment
+from .models import Comment, delete_event_generated_for_comment
 from .signals import new_comment
 
 
@@ -14,11 +14,9 @@ def comment_post_save_handler(sender, **kwargs):
 
 
 def comment_post_delete_handler(sender, **kwargs):
-    from events.models import Event
-
     comment = kwargs["instance"]
     assert comment.id is not None
-    Event.objects.filter(event_data__comment_id=comment.id).delete()
+    delete_event_generated_for_comment(comment.id)
 
 
 post_save.connect(comment_post_save_handler, sender=Comment)
