@@ -19,7 +19,7 @@ class Comment(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="comments", null=True, blank=True)
     group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True, blank=True, related_name="comments")
     created = models.DateTimeField(default=timezone.now)
-    message = models.TextField()
+    message = models.CharField(max_length=10000)
     hidden = models.BooleanField(default=False, blank=True)
 
     @property
