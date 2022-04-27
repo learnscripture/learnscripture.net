@@ -1,6 +1,8 @@
 from datetime import timedelta
 
 import django_ftl
+from django.utils import timezone
+from time_machine import travel
 
 from comments.models import Comment
 from events.models import Event, EventType, GroupJoinedEvent, PointsMilestoneEvent
@@ -99,18 +101,18 @@ class EventTests(AccountTestMixin, TestBase):
             _, event_account = self.create_account()
             event = PointsMilestoneEvent(account=event_account, points=1000).save()
             assert event.created_display() == "Just now"
-            self.move_clock_on(timedelta(seconds=5 * 60 + 5))
-            event.refresh_from_db()
-            assert event.created_display() == "5 minutes ago"
-            self.move_clock_on(timedelta(seconds=60 * 60))
-            event.refresh_from_db()
-            assert event.created_display() == "1 hour ago"
-            self.move_clock_on(timedelta(seconds=9 * 60 * 60))
-            event.refresh_from_db()
-            assert event.created_display() == "10 hours ago"
-            self.move_clock_on(timedelta(seconds=24 * 60 * 60))
-            event.refresh_from_db()
-            assert event.created_display() == "1 day ago"
-            self.move_clock_on(timedelta(seconds=24 * 60 * 60))
-            event.refresh_from_db()
-            assert event.created_display() == "2 days ago"
+            with travel(timezone.now() + timedelta(seconds=5 * 60 + 5)) as tm:
+                event.refresh_from_db()
+                assert event.created_display() == "5 minutes ago"
+                tm.shift(timedelta(seconds=60 * 60))
+                event.refresh_from_db()
+                assert event.created_display() == "1 hour ago"
+                tm.shift(timedelta(seconds=9 * 60 * 60))
+                event.refresh_from_db()
+                assert event.created_display() == "10 hours ago"
+                tm.shift(timedelta(seconds=24 * 60 * 60))
+                event.refresh_from_db()
+                assert event.created_display() == "1 day ago"
+                tm.shift(timedelta(seconds=24 * 60 * 60))
+                event.refresh_from_db()
+                assert event.created_display() == "2 days ago"

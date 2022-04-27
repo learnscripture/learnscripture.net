@@ -2,6 +2,7 @@ from datetime import timedelta
 
 from django.urls import reverse
 from django.utils import timezone
+from time_machine import travel
 
 import accounts.memorymodel
 from accounts.models import Identity
@@ -196,10 +197,9 @@ class DashboardTestsBase(RequireExampleVerseSetsMixin, CatechismsMixin):
 
         assert identity.notices.all()[0].seen is not None
 
-        self.move_clock_on(timedelta(days=10))
-
-        self.get_url("dashboard")
-        self.assertTextAbsent("Hello you crazy guy!")
+        with travel(timezone.now() + timedelta(days=10)):
+            self.get_url("dashboard")
+            self.assertTextAbsent("Hello you crazy guy!")
 
 
 class DashboardTestsFB(DashboardTestsBase, FullBrowserTest):

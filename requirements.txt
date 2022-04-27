@@ -291,7 +291,9 @@ pytest-forked==1.3.0
 pytest-xdist[psutil]==2.4.0
     # via -r requirements-dev.in
 python-dateutil==2.8.2
-    # via arrow
+    # via
+    #   arrow
+    #   time-machine
 python-memcached==1.59
     # via -r requirements.in
 pytoml==0.1.21
@@ -368,6 +370,8 @@ sqlparse==0.4.2
     #   django-sql-utils
 svglib==1.1.0
     # via easy-thumbnails
+time-machine==2.6.0
+    # via -r requirements-dev.in
 tinycss2==1.1.1
     # via
     #   cssselect2

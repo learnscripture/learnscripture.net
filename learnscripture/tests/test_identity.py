@@ -3,6 +3,7 @@ from datetime import timedelta
 from django.db.models import F
 from django.utils import timezone
 from django_ftl import override
+from time_machine import travel
 
 import accounts.memorymodel
 from accounts.models import ChosenVerseSet
@@ -115,17 +116,17 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         )
 
         i.record_verse_action("John 3:16", "NET", StageType.READ, 1)
-        self.move_clock_on(timedelta(seconds=10))
+        with travel(timezone.now() + timedelta(seconds=10)):
 
-        uvs = i.verse_statuses.get(localized_reference="John 3:16", version__slug="NET")
-        assert uvs.memory_stage == MemoryStage.SEEN
-        assert uvs.first_seen is not None
+            uvs = i.verse_statuses.get(localized_reference="John 3:16", version__slug="NET")
+            assert uvs.memory_stage == MemoryStage.SEEN
+            assert uvs.first_seen is not None
 
-        first_seen = uvs.first_seen
-        i.record_verse_action("John 3:16", "NET", StageType.READ, 1)
-        uvs = i.verse_statuses.get(localized_reference="John 3:16", version__slug="NET")
-        # first_seen field should not have changed
-        assert uvs.first_seen == first_seen
+            first_seen = uvs.first_seen
+            i.record_verse_action("John 3:16", "NET", StageType.READ, 1)
+            uvs = i.verse_statuses.get(localized_reference="John 3:16", version__slug="NET")
+            # first_seen field should not have changed
+            assert uvs.first_seen == first_seen
 
     def test_add_verse_set_progress_and_choose_again(self):
         """
@@ -195,38 +196,38 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
 
         assert i.next_verse_due() == uvs
 
-        self.move_clock_on(gap + timedelta(seconds=100))
+        with travel(timezone.now() + gap + timedelta(seconds=100)) as tm:
 
-        uvs.refresh_from_db()
-        assert uvs.needs_testing_individual
+            uvs.refresh_from_db()
+            assert uvs.needs_testing_individual
 
-        assert i.first_overdue_verse(timezone.now()) == uvs
+            assert i.first_overdue_verse(timezone.now()) == uvs
 
-        # Something manually selected for review sooner should be
-        # reviewed even if strength is 'fully learnt'
-        i.verse_statuses.update(strength=accounts.memorymodel.LEARNT)
-        uvs.refresh_from_db()
-        assert i.first_overdue_verse(timezone.now()) == uvs
-        assert uvs.needs_testing_individual
-        assert uvs.needs_testing
+            # Something manually selected for review sooner should be
+            # reviewed even if strength is 'fully learnt'
+            i.verse_statuses.update(strength=accounts.memorymodel.LEARNT)
+            uvs.refresh_from_db()
+            assert i.first_overdue_verse(timezone.now()) == uvs
+            assert uvs.needs_testing_individual
+            assert uvs.needs_testing
 
-        # If we record a test again, 'early_review_requested' should be reset,
-        # so that the overrides of 'review_sooner' no longer take effect. (The
-        # user has to keep on requeted 'see sooner' if they want to that verse
-        # to keep on being seen after being learnt.
-        i.record_verse_action("John 3:16", "NET", StageType.TEST, 1)
-        uvs.refresh_from_db()
-        now = timezone.now()
-        assert uvs.next_test_due > now
+            # If we record a test again, 'early_review_requested' should be reset,
+            # so that the overrides of 'review_sooner' no longer take effect. (The
+            # user has to keep on requeted 'see sooner' if they want to that verse
+            # to keep on being seen after being learnt.
+            i.record_verse_action("John 3:16", "NET", StageType.TEST, 1)
+            uvs.refresh_from_db()
+            now = timezone.now()
+            assert uvs.next_test_due > now
 
-        # Verse should not be due in the future
-        assert i.next_verse_due() is None
+            # Verse should not be due in the future
+            assert i.next_verse_due() is None
 
-        gap2 = uvs.next_test_due - now
-        self.move_clock_on(gap2 + timedelta(seconds=100))
+            gap2 = uvs.next_test_due - now
+            tm.shift(gap2 + timedelta(seconds=100))
 
-        # Verse should not become overdue
-        assert i.first_overdue_verse(timezone.now()) is None
+            # Verse should not become overdue
+            assert i.first_overdue_verse(timezone.now()) is None
 
     def test_record_creates_awards(self):
         i, account = self.create_account(version_slug="NET")
@@ -255,12 +256,12 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
 
         # It is confusing if it is ever ready within an hour, so we special case
         # that:
-        self.move_clock_on(timedelta(hours=0.99))
-        assert [] == list(i.bible_verse_statuses_for_reviewing())
+        with travel(timezone.now() + timedelta(hours=0.99)) as tm:
+            assert [] == list(i.bible_verse_statuses_for_reviewing())
 
-        # After 1 hour we expect it to be due
-        self.move_clock_on(timedelta(hours=0.1))
-        assert ["John 3:16"] == [uvs.localized_reference for uvs in i.bible_verse_statuses_for_reviewing()]
+            # After 1 hour we expect it to be due
+            tm.shift(timedelta(hours=0.1))
+            assert ["John 3:16"] == [uvs.localized_reference for uvs in i.bible_verse_statuses_for_reviewing()]
 
     def test_bible_verse_statuses_for_reviewing_urgency(self):
         i = self.create_identity(version_slug="NET")
@@ -269,19 +270,19 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         # Day 1 - start on John 3:16
         i.record_verse_action("John 3:16", "NET", StageType.TEST, 1.0)
         # Day 2 - revise
-        self.move_clock_on(timedelta(days=1))
-        i.record_verse_action("John 3:16", "NET", StageType.TEST, 1.0)
-        # Day 7 - start on Eph 2:8-9
-        self.move_clock_on(timedelta(days=5))
-        i.record_verse_action("Ephesians 2:8-9", "NET", StageType.TEST, 1.0)
-        # Day 8:
-        self.move_clock_on(timedelta(days=1))
-        # John 3:16 is now overdue by several days, more in absolute terms than
-        # Ephesians 2:8-9. However, the latter is more urgent, because it is
-        # very new. So should come first:
-        assert ["Ephesians 2:8-9", "John 3:16"] == [
-            uvs.localized_reference for uvs in i.bible_verse_statuses_for_reviewing()
-        ]
+        with travel(timezone.now() + timedelta(days=1)) as tm:
+            i.record_verse_action("John 3:16", "NET", StageType.TEST, 1.0)
+            # Day 7 - start on Eph 2:8-9
+            tm.shift(timedelta(days=5))
+            i.record_verse_action("Ephesians 2:8-9", "NET", StageType.TEST, 1.0)
+            # Day 8:
+            tm.shift(timedelta(days=1))
+            # John 3:16 is now overdue by several days, more in absolute terms than
+            # Ephesians 2:8-9. However, the latter is more urgent, because it is
+            # very new. So should come first:
+            assert ["Ephesians 2:8-9", "John 3:16"] == [
+                uvs.localized_reference for uvs in i.bible_verse_statuses_for_reviewing()
+            ]
 
     def test_passages_for_learning(self):
         i = self.create_identity(version_slug="NET")
@@ -337,93 +338,92 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
 
         i.add_verse_set(vs1)
 
-        for vn in range(1, 7):
-            ref = "Psalm 23:%d" % vn
-            with self.subTest(ref=ref):
-                i.record_verse_action(ref, "NET", StageType.TEST, 1.0)
-                self.move_clock_on(timedelta(days=1))
-
-                # Now test again, for all but one verse, which means we will only
-                # have one verse that is due for review, but the whole
-                # passage should be considered as needing review.
-                if vn != 1:
+        with travel(timezone.now()) as tm:
+            for vn in range(1, 7):
+                ref = "Psalm 23:%d" % vn
+                with self.subTest(ref=ref):
                     i.record_verse_action(ref, "NET", StageType.TEST, 1.0)
+                    tm.shift(timedelta(days=1))
 
-                with self.assertNumQueries(FuzzyInt(3, 4)):
-                    # 1 for passages_for_learning, 2 for review passages,
-                    # or 3 for passages_for_learning, 1 for review passage
-                    cvss_review, cvss_learn = i.passages_for_reviewing_and_learning()
+                    # Now test again, for all but one verse, which means we will only
+                    # have one verse that is due for review, but the whole
+                    # passage should be considered as needing review.
+                    if vn != 1:
+                        i.record_verse_action(ref, "NET", StageType.TEST, 1.0)
 
-                if vn < 6:
-                    # Nothing to review, because one item still remains
-                    # to be initially learnt.
-                    assert cvss_review == []
-                    assert cvss_learn[0].verse_set.id == vs1.id
+                    with self.assertNumQueries(FuzzyInt(3, 4)):
+                        # 1 for passages_for_learning, 2 for review passages,
+                        # or 3 for passages_for_learning, 1 for review passage
+                        cvss_review, cvss_learn = i.passages_for_reviewing_and_learning()
+
+                    if vn < 6:
+                        # Nothing to review, because one item still remains
+                        # to be initially learnt.
+                        assert cvss_review == []
+                        assert cvss_learn[0].verse_set.id == vs1.id
+                    else:
+                        assert cvss_learn == []
+                        cvs = cvss_review[0]
+                        assert cvs.verse_set.id == vs1.id
+                        assert not cvs.group_testing
+                        assert cvs.needs_testing_count == 5
+                        assert cvs.total_verse_count == 6
+
+                    # Shouldn't be in general revision queue
+                    assert [] == list(i.bible_verse_statuses_for_reviewing())
+
+            # Now test all verses
+            for vn in range(1, 7):
+                ref = "Psalm 23:%d" % vn
+                i.record_verse_action(ref, "NET", StageType.TEST, 1.0)
+
+            # Should have nothing left to review now.
+            cvss_review, cvss_learn = i.passages_for_reviewing_and_learning()
+            assert cvss_review == []
+            assert cvss_learn == []
+
+            # Time passes:
+            tm.move_to(i.verse_statuses.order_by("next_test_due").first().next_test_due + timedelta(days=1))
+            # and strengths advance a lot: First past group testing limit
+            i.verse_statuses.update(strength=accounts.memorymodel.STRENGTH_FOR_GROUP_TESTING + 0.01)
+            # Then some but not all past fully learnt:
+            i.verse_statuses.exclude(localized_reference__in=["Psalm 23:3", "Psalm 23:6"]).update(
+                strength=accounts.memorymodel.LEARNT + 0.01
+            )
+
+            cvss_review, cvss_learn = i.passages_for_reviewing_and_learning()
+            assert cvss_learn == []
+            cvs = cvss_review[0]
+
+            assert cvs.group_testing
+            # Fully learnt verses should not be counted in this total
+            assert cvs.needs_testing_count == 2
+            assert cvs.total_verse_count == 6
+
+            # We should skip the fully learnt first section, and choose the second.
+            assert cvs.next_section_verse_count == 3
+
+            passage_uvss = i.verse_statuses_for_passage(cvs.verse_set.id, cvs.version.id)
+            section_uvss = i.get_next_section(passage_uvss, cvs.verse_set, add_buffer=False)
+            assert [uvs.localized_reference for uvs in section_uvss] == ["Psalm 23:3", "Psalm 23:4", "Psalm 23:5"]
+
+            # Now we actually test the verses in that section that we need to
+            for uvs in section_uvss:
+                if uvs.localized_reference in ["Psalm 23:3"]:
+                    assert uvs.needs_testing
+                    i.record_verse_action(uvs.localized_reference, "NET", StageType.TEST, 1.0)
                 else:
-                    assert cvss_learn == []
-                    cvs = cvss_review[0]
-                    assert cvs.verse_set.id == vs1.id
-                    assert not cvs.group_testing
-                    assert cvs.needs_testing_count == 5
-                    assert cvs.total_verse_count == 6
+                    assert not uvs.needs_testing
 
-                # Shouldn't be in general revision queue
-                assert [] == list(i.bible_verse_statuses_for_reviewing())
-
-        # Now test all verses
-        for vn in range(1, 7):
-            ref = "Psalm 23:%d" % vn
-            i.record_verse_action(ref, "NET", StageType.TEST, 1.0)
-
-        # Should have nothing left to review now.
-        cvss_review, cvss_learn = i.passages_for_reviewing_and_learning()
-        assert cvss_review == []
-        assert cvss_learn == []
-
-        # Time passes:
-        self.move_clock_on(
-            i.verse_statuses.order_by("next_test_due").first().next_test_due - timezone.now() + timedelta(days=1)
-        )
-        # and strengths advance a lot: First past group testing limit
-        i.verse_statuses.update(strength=accounts.memorymodel.STRENGTH_FOR_GROUP_TESTING + 0.01)
-        # Then some but not all past fully learnt:
-        i.verse_statuses.exclude(localized_reference__in=["Psalm 23:3", "Psalm 23:6"]).update(
-            strength=accounts.memorymodel.LEARNT + 0.01
-        )
-
-        cvss_review, cvss_learn = i.passages_for_reviewing_and_learning()
-        assert cvss_learn == []
-        cvs = cvss_review[0]
-
-        assert cvs.group_testing
-        # Fully learnt verses should not be counted in this total
-        assert cvs.needs_testing_count == 2
-        assert cvs.total_verse_count == 6
-
-        # We should skip the fully learnt first section, and choose the second.
-        assert cvs.next_section_verse_count == 3
-
-        passage_uvss = i.verse_statuses_for_passage(cvs.verse_set.id, cvs.version.id)
-        section_uvss = i.get_next_section(passage_uvss, cvs.verse_set, add_buffer=False)
-        assert [uvs.localized_reference for uvs in section_uvss] == ["Psalm 23:3", "Psalm 23:4", "Psalm 23:5"]
-
-        # Now we actually test the verses in that section that we need to
-        for uvs in section_uvss:
-            if uvs.localized_reference in ["Psalm 23:3"]:
-                assert uvs.needs_testing
-                i.record_verse_action(uvs.localized_reference, "NET", StageType.TEST, 1.0)
-            else:
-                assert not uvs.needs_testing
-
-        # Check again.
-        cvss_review, cvss_learn = i.passages_for_reviewing_and_learning()
-        cvs = cvss_review[0]
-        assert cvs.group_testing
-        # We still have 2 that need testing, due to group testing mode.
-        assert cvs.needs_testing_count == 2
-        assert cvs.total_verse_count == 6
-        # But now the next section is the last section, verse 6
-        assert cvs.next_section_verse_count == 1
+            # Check again.
+            cvss_review, cvss_learn = i.passages_for_reviewing_and_learning()
+            cvs = cvss_review[0]
+            assert cvs.group_testing
+            # We still have 2 that need testing, due to group testing mode.
+            assert cvs.needs_testing_count == 2
+            assert cvs.total_verse_count == 6
+            # But now the next section is the last section, verse 6
+            assert cvs.next_section_verse_count == 1
 
     def test_passages_for_reviewing_and_learning_multiple_versions(self):
         i = self.create_identity(version_slug="NET")
@@ -632,29 +632,29 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         assert [False, True, True] == [uvs.needs_testing for uvs in uvss2]
 
         # A quick gap
-        self.move_clock_on(timedelta(seconds=10))
+        with travel(timezone.now() + timedelta(seconds=10)) as tm:
 
-        # Learn next two.
+            # Learn next two.
 
-        for uvs in uvss2:
-            i.record_verse_action(uvs.localized_reference, "NET", StageType.TEST, 0.95)
+            for uvs in uvss2:
+                i.record_verse_action(uvs.localized_reference, "NET", StageType.TEST, 0.95)
 
-        uvss3 = i.verse_statuses_for_passage(vs1.id, self.NET.id)
-        uvss3 = i.get_next_section(uvss3, vs1)
+            uvss3 = i.verse_statuses_for_passage(vs1.id, self.NET.id)
+            uvss3 = i.get_next_section(uvss3, vs1)
 
-        assert ["Psalm 23:4", "Psalm 23:5", "Psalm 23:6"] == [uvs.localized_reference for uvs in uvss3]
-        assert [False, True, True] == [uvs.needs_testing for uvs in uvss3]
+            assert ["Psalm 23:4", "Psalm 23:5", "Psalm 23:6"] == [uvs.localized_reference for uvs in uvss3]
+            assert [False, True, True] == [uvs.needs_testing for uvs in uvss3]
 
-        # Learn next two.
-        self.move_clock_on(timedelta(seconds=10))
-        for uvs in uvss3:
-            i.record_verse_action(uvs.localized_reference, "NET", StageType.TEST, 0.95)
+            # Learn next two.
+            tm.shift(timedelta(seconds=10))
+            for uvs in uvss3:
+                i.record_verse_action(uvs.localized_reference, "NET", StageType.TEST, 0.95)
 
-        # Should wrap around now:
-        uvss4 = i.verse_statuses_for_passage(vs1.id, self.NET.id)
-        uvss4 = i.get_next_section(uvss4, vs1)
+            # Should wrap around now:
+            uvss4 = i.verse_statuses_for_passage(vs1.id, self.NET.id)
+            uvss4 = i.get_next_section(uvss4, vs1)
 
-        assert ["Psalm 23:1", "Psalm 23:2"] == [uvs.localized_reference for uvs in uvss4]
+            assert ["Psalm 23:1", "Psalm 23:2"] == [uvs.localized_reference for uvs in uvss4]
 
     def test_slim_passage_for_reviewing(self):
         i = self.create_identity(version_slug="NET")

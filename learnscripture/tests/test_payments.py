@@ -5,6 +5,7 @@ from django.conf import settings
 from django.core import mail
 from django.utils import timezone
 from paypal.standard.ipn.models import PayPalIPN
+from time_machine import travel
 
 from accounts.models import Account
 from payments.hooks import paypal_payment_received
@@ -118,14 +119,14 @@ class DonationDriveTests(AccountTestMixin, TestBase):
         # No longer active
         assert not d2.active_for_account(self.account)
 
-        self.move_clock_on(timedelta(days=5))
+        with travel(timezone.now() + timedelta(days=5)):
 
-        # Should be active again
-        assert d2.active_for_account(self.account)
+            # Should be active again
+            assert d2.active_for_account(self.account)
 
-        # Change language:
-        self.account.identity.interface_language = "tr"
-        assert not d2.active_for_account(self.account)
+            # Change language:
+            self.account.identity.interface_language = "tr"
+            assert not d2.active_for_account(self.account)
 
     def test_target(self):
         DonationDrive.objects.create(

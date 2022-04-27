@@ -1,6 +1,8 @@
 from datetime import timedelta
 
 from django.urls import reverse
+from django.utils import timezone
+from time_machine import travel
 
 from accounts.memorymodel import MM
 from accounts.models import Account, Identity
@@ -97,24 +99,24 @@ class VerseCountTests(BibleVersesMixin, CatechismsMixin, AccountTestMixin, TestB
 
         # Move time on enough so that next hit gets past learnt threshold.
         identity.verse_statuses.update(strength=MM.LEARNT - 0.01)
-        self.move_clock_on(timedelta(days=400))
+        with travel(timezone.now() + timedelta(days=400)):
 
-        for ref, version in ref_pairs:
-            # Simulate enough to get to 'learnt' state.
-            action_change = identity.record_verse_action(ref, version.slug, StageType.TEST, accuracy=1)
-            uvs = identity.verse_statuses.filter(localized_reference=ref, version=version).first()
-            identity.award_action_points(
-                ref, version.language_code, uvs.scoring_text, MemoryStage.TESTED, action_change, StageType.TEST, 1
-            )
+            for ref, version in ref_pairs:
+                # Simulate enough to get to 'learnt' state.
+                action_change = identity.record_verse_action(ref, version.slug, StageType.TEST, accuracy=1)
+                uvs = identity.verse_statuses.filter(localized_reference=ref, version=version).first()
+                identity.award_action_points(
+                    ref, version.language_code, uvs.scoring_text, MemoryStage.TESTED, action_change, StageType.TEST, 1
+                )
 
-        # Finished
-        assert get_verses_finished_count(identity.id) == count
+            # Finished
+            assert get_verses_finished_count(identity.id) == count
 
-        # Finished since
-        last_tested = identity.verse_statuses.filter(localized_reference__in=refs).first().last_tested
-        assert get_verses_finished_count(identity.id, finished_since=last_tested + timedelta(seconds=10)) == 0
+            # Finished since
+            last_tested = identity.verse_statuses.filter(localized_reference__in=refs).first().last_tested
+            assert get_verses_finished_count(identity.id, finished_since=last_tested + timedelta(seconds=10)) == 0
 
-        assert get_verses_finished_count(identity.id, finished_since=last_tested - timedelta(seconds=10)) == count
+            assert get_verses_finished_count(identity.id, finished_since=last_tested - timedelta(seconds=10)) == count
 
     def test_verse_stats_merged(self):
         identity, account = self.create_account(version_slug="TCL02")

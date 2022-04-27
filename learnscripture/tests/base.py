@@ -8,7 +8,6 @@ import pytest
 import selenium
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.core.management import call_command
-from django.db.models import F
 from django.test import TestCase
 from django.utils import timezone
 from django_functest import FuncSeleniumMixin, FuncWebTestMixin
@@ -16,10 +15,8 @@ from selenium.common.exceptions import NoSuchWindowException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 
-from accounts.models import Account, Identity, Notice
-from bibleverses.models import TextVersion, UserVerseStatus
-from events.models import Event
-from payments.models import Payment
+from accounts.models import Account, Identity
+from bibleverses.models import TextVersion
 
 TESTS_SHOW_BROWSER = os.environ.get("TESTS_SHOW_BROWSER", "")
 SELENIUM_SCREENSHOT_ON_FAILURE = os.environ.get("SELENIUM_SCREENSHOT_ON_FAILURE", "")
@@ -211,33 +208,8 @@ class LoginMixin:
         return identity
 
 
-class TimeUtilsMixin:
-    def move_clock_on(self, delta):
-        """
-        Move the 'clock' of the entire system forwards,
-        (by moving all timestamps in the database backwards),
-        to simulate the passing of time.
-        """
-        # TODO - the rest of the models, or something that looks through all the
-        # models and finds DateTimeFields. This is enough for now.
-
-        # TODO - we should replace all of this with timemachine.travel
-        # https://gitlab.com/learnscripture/learnscripture.net/-/issues/119
-        Notice.objects.update(seen=F("seen") - delta)
-        Payment.objects.update(created=F("created") - delta)
-        UserVerseStatus.objects.update(
-            added=F("added") - delta,
-            first_seen=F("first_seen") - delta,
-            last_tested=F("last_tested") - delta,
-            next_test_due=F("next_test_due") - delta,
-        )
-        Event.objects.update(created=F("created") - delta)
-
-
 @pytest.mark.selenium
-class FullBrowserTest(
-    AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaCleanup, TimeUtilsMixin, StaticLiveServerTestCase
-):
+class FullBrowserTest(AccountTestMixin, LoginMixin, FuncSeleniumMixin, SqlaCleanup, StaticLiveServerTestCase):
 
     display = TESTS_SHOW_BROWSER
     default_timeout = 20
@@ -412,7 +384,7 @@ def null_context():
     yield
 
 
-class WebTestBase(AccountTestMixin, LoginMixin, FuncWebTestMixin, TimeUtilsMixin, TestCase):
+class WebTestBase(AccountTestMixin, LoginMixin, FuncWebTestMixin, TestCase):
     def get_url(self, *args, **kwargs):
         response = super().get_url(*args, **kwargs)
         if b"???" in response.content:
@@ -435,7 +407,7 @@ class WebTestBase(AccountTestMixin, LoginMixin, FuncWebTestMixin, TimeUtilsMixin
         return self._make_pq(self.last_response).find_(css_selector).attr(attribute_name)
 
 
-class TestBase(TimeUtilsMixin, TestCase):
+class TestBase(TestCase):
     pass
 
 

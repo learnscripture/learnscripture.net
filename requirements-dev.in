@@ -20,3 +20,4 @@ pytest-xdist[psutil]==2.4.0
 pytest==6.2.5
 selenium==4.1.3
 Werkzeug==2.0.2
+time-machine==2.6.0
