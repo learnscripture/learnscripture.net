@@ -595,8 +595,10 @@ class Event(models.Model):
         return self.event_logic.accepts_comments(self)
 
     def add_comment(self, author=None, message=None):
+        from comments.models import COMMENT_MAX_LENGTH
+
         assert self.accepts_comments()
-        return self.comments.create(author=author, message=message, group=self.group)
+        return self.comments.create(author=author, message=message[0:COMMENT_MAX_LENGTH], group=self.group)
 
     @property
     def is_new_comment(self):

@@ -12,6 +12,9 @@ def format_comment_message(message):
     return mark_safe(linebreaks(mark_safe(urlize(message.strip(), autoescape=True)), autoescape=False))
 
 
+COMMENT_MAX_LENGTH = 10000
+
+
 class Comment(models.Model):
     author = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="comments")
     # NB - this is the event the comment is attached to, if any,
@@ -19,7 +22,7 @@ class Comment(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="comments", null=True, blank=True)
     group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True, blank=True, related_name="comments")
     created = models.DateTimeField(default=timezone.now)
-    message = models.CharField(max_length=10000)
+    message = models.CharField(max_length=COMMENT_MAX_LENGTH)
     hidden = models.BooleanField(default=False, blank=True)
 
     @property

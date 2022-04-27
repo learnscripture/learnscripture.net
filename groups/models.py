@@ -125,10 +125,12 @@ class Group(models.Model):
             return self.active_members.filter(id=user.id).exists()
 
     def add_comment(self, author=None, message=None):
+        from comments.models import COMMENT_MAX_LENGTH
+
         if not self.accepts_comments_from(author):
             raise ValueError(f"{author.username} not allowed to post to {self.name}")
 
-        return self.comments.create(author=author, message=message)
+        return self.comments.create(author=author, message=message[0:COMMENT_MAX_LENGTH])
 
     def comments_visible_for_account(self, account):
         qs = self.comments.exclude(hidden=True).select_related("author")

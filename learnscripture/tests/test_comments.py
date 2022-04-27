@@ -1,6 +1,6 @@
 import time
 
-from comments.models import Comment, hide_comment
+from comments.models import COMMENT_MAX_LENGTH, Comment, hide_comment
 from events.models import Event, EventType, PointsMilestoneEvent
 
 from .base import AccountTestMixin, FullBrowserTest, TestBase
@@ -45,6 +45,17 @@ class CommentPageTests(FullBrowserTest):
 
         # Test notice created
         self.assertEqual(self.event_identity.notices.filter(related_event=self.event).count(), 1)
+
+    def test_long_comments_truncated(self):
+        self.login(self.account)
+        self.get_url("activity_stream")
+        self.click(".show-add-comment")
+        self.fill({".commentblock .comment-box": "0123456789" * 1001})
+        self.click(".commentblock .add-comment-btn")
+        self.wait_for_ajax()
+        c = Comment.objects.get()
+        self.assertEqual(c.author, self.account)
+        assert len(c.message) == COMMENT_MAX_LENGTH
 
     def test_no_event_from_hellbanned_users(self):
 
