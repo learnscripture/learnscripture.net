@@ -66,17 +66,17 @@ class ChooseTestsFB(ChooseTestsBase, FullBrowserTest):
         self.click("#id-choose-verseset .accordion-heading")
 
         vs_id = VerseSet.objects.get(name="Bible 101").id
-        self.assertEqual(VerseSet.objects.get(id=vs_id).popularity, 0)
+        assert VerseSet.objects.get(id=vs_id).popularity == 0
         self.click("#id-learn-verseset-btn-%d" % vs_id)
         self.set_preferences(wait_for_reload=True)
-        self.assertEqual(VerseSet.objects.get(id=vs_id).popularity, 1)
+        assert VerseSet.objects.get(id=vs_id).popularity == 1
 
         # Test awards
         vs = VerseSet.objects.get(id=vs_id)
-        self.assertEqual(vs.created_by.awards.filter(award_type=AwardType.TREND_SETTER).count(), 1)
+        assert vs.created_by.awards.filter(award_type=AwardType.TREND_SETTER).count() == 1
 
         # Test events
-        self.assertEqual(Event.objects.filter(event_type=EventType.STARTED_LEARNING_VERSE_SET).count(), 1)
+        assert Event.objects.filter(event_type=EventType.STARTED_LEARNING_VERSE_SET).count() == 1
 
     def test_choose_verse_set(self):
         self.get_url("choose")
@@ -89,7 +89,7 @@ class ChooseTestsFB(ChooseTestsBase, FullBrowserTest):
 
         identity = self._get_current_identity()
 
-        self.assertEqual(vs.verse_choices.count(), identity.verse_statuses.filter(ignored=False).count())
+        assert vs.verse_choices.count() == identity.verse_statuses.filter(ignored=False).count()
 
     def test_double_choose_verse_set(self):
         vs = VerseSet.objects.get(name="Psalm 23")
@@ -100,7 +100,7 @@ class ChooseTestsFB(ChooseTestsBase, FullBrowserTest):
         self.click("#id-learn-verseset-btn-%d" % vs.id)
 
         identity = self._get_current_identity()
-        self.assertEqual(vs.verse_choices.count(), identity.verse_statuses.filter(ignored=False).count())
+        assert vs.verse_choices.count() == identity.verse_statuses.filter(ignored=False).count()
 
     def test_choose_individual_verse(self):
         self.get_url("choose")
@@ -117,7 +117,7 @@ class ChooseTestsFB(ChooseTestsBase, FullBrowserTest):
         # Check we can actually click on 'Learn' and it works.
         self.click("#id-choose-individual [name=learn_now]")
         self.set_preferences(wait_for_reload=True)
-        self.assertEqual(self.get_element_text("#id-verse-header h2"), "John 3:16")
+        assert self.get_element_text("#id-verse-header h2") == "John 3:16"
 
     def test_choose_individual_verse_learn_later(self):
         identity, account = self.create_account()
@@ -129,7 +129,7 @@ class ChooseTestsFB(ChooseTestsBase, FullBrowserTest):
         self.click("[name=lookup]")
 
         self.click("#id-choose-individual [name=add_to_queue]")
-        self.assertEqual([uvs.localized_reference for uvs in identity.verse_statuses.all()], ["John 3:16"])
+        assert [uvs.localized_reference for uvs in identity.verse_statuses.all()] == ["John 3:16"]
 
     def test_choose_individual_verse_fuzzy(self):
         # Test entering into quick find, and being lazy
@@ -159,13 +159,13 @@ class ChooseTestsFB(ChooseTestsBase, FullBrowserTest):
         self.click("#id-choose-individual .accordion-heading")
 
         # Text is initially in the language of the default version
-        self.assertEqual(self.get_element_text("form.quickfind select[name=book] option[value=BOOK0]"), "Genesis")
+        assert self.get_element_text("form.quickfind select[name=book] option[value=BOOK0]") == "Genesis"
 
         # Select verse using drop downs.
         self.fill_by_text({"form.quickfind select[name=book]": "John"})
         self.fill_by_text({"form.quickfind select[name=chapter_start]": "3"})
         self.fill_by_text({"form.quickfind select[name=verse_start]": "16"})
-        self.assertEqual(self.get_element_attribute("form.quickfind input[name=quick_find]", "value"), "John 3:16")
+        assert self.get_element_attribute("form.quickfind input[name=quick_find]", "value") == "John 3:16"
         self.click("[name=lookup]")
 
         self.assertTextPresent("For this is the way God loved the world")
@@ -173,9 +173,9 @@ class ChooseTestsFB(ChooseTestsBase, FullBrowserTest):
         self.fill({"form.quickfind select[name=version]": "TCL02"})
 
         # Search box should change immediately
-        self.assertEqual(self.get_element_attribute("form.quickfind input[name=quick_find]", "value"), "Yuhanna 3:16")
+        assert self.get_element_attribute("form.quickfind input[name=quick_find]", "value") == "Yuhanna 3:16"
         # Drop-downs should change to Turkish
-        self.assertEqual(self.get_element_text("form.quickfind select[name=book] option[value=BOOK0]"), "Yaratılış")
+        assert self.get_element_text("form.quickfind select[name=book] option[value=BOOK0]") == "Yaratılış"
         self.click("[name=lookup]")
 
         self.assertTextPresent("Çünkü Tanrı dünyayı o kadar çok sevdi ki")
@@ -189,28 +189,20 @@ class ChooseTestsFB(ChooseTestsBase, FullBrowserTest):
         self.assertTextPresent("For this is the way God loved the world")
 
         # # Drop downs should be updated.
-        self.assertEqual(self.get_element_text("form.quickfind select[name=book] option:checked"), "John")
-        self.assertEqual(
-            self.get_element_attribute("form.quickfind select[name=chapter_start] option:checked", "value"), "3"
-        )
-        self.assertEqual(
-            self.get_element_attribute("form.quickfind select[name=verse_start] option:checked", "value"), "16"
-        )
-        self.assertEqual(
-            self.get_element_attribute("form.quickfind select[name=chapter_end] option:checked", "value"), "3"
-        )
-        self.assertEqual(
-            self.get_element_attribute("form.quickfind select[name=verse_end] option:checked", "value"), "16"
-        )
-        self.assertEqual(self.get_element_attribute("form.quickfind input[name=quick_find]", "value"), "John 3:16")
+        assert self.get_element_text("form.quickfind select[name=book] option:checked") == "John"
+        assert self.get_element_attribute("form.quickfind select[name=chapter_start] option:checked", "value") == "3"
+        assert self.get_element_attribute("form.quickfind select[name=verse_start] option:checked", "value") == "16"
+        assert self.get_element_attribute("form.quickfind select[name=chapter_end] option:checked", "value") == "3"
+        assert self.get_element_attribute("form.quickfind select[name=verse_end] option:checked", "value") == "16"
+        assert self.get_element_attribute("form.quickfind input[name=quick_find]", "value") == "John 3:16"
 
         # Now change language.
         self.fill({"form.quickfind select[name=version]": "TCL02"})
 
         # Search box should change immediately
-        self.assertEqual(self.get_element_attribute("form.quickfind input[name=quick_find]", "value"), "Yuhanna 3:16")
+        assert self.get_element_attribute("form.quickfind input[name=quick_find]", "value") == "Yuhanna 3:16"
         # And drop down
-        self.assertEqual(self.get_element_text("form.quickfind select[name=book] option:checked"), "Yuhanna")
+        assert self.get_element_text("form.quickfind select[name=book] option:checked") == "Yuhanna"
 
         self.click("[name=lookup]")
 
@@ -243,19 +235,19 @@ class ChooseTestsFB(ChooseTestsBase, FullBrowserTest):
 class VerseSetSearchFormTests(TestBase):
     def test_empty(self):
         f = VerseSetSearchForm.from_request_data({})
-        self.assertEqual(f.cleaned_data["query"], "")
-        self.assertEqual(f.cleaned_data["set_type"], VERSE_SET_TYPE_ALL)
-        self.assertEqual(f.cleaned_data["order"], VERSE_SET_ORDER_POPULARITY)
+        assert f.cleaned_data["query"] == ""
+        assert f.cleaned_data["set_type"] == VERSE_SET_TYPE_ALL
+        assert f.cleaned_data["order"] == VERSE_SET_ORDER_POPULARITY
 
     def test_partial(self):
         f = VerseSetSearchForm.from_request_data({"order": VERSE_SET_ORDER_AGE})
-        self.assertEqual(f.cleaned_data["query"], "")
-        self.assertEqual(f.cleaned_data["set_type"], VERSE_SET_TYPE_ALL)
-        self.assertEqual(f.cleaned_data["order"], VERSE_SET_ORDER_AGE)
+        assert f.cleaned_data["query"] == ""
+        assert f.cleaned_data["set_type"] == VERSE_SET_TYPE_ALL
+        assert f.cleaned_data["order"] == VERSE_SET_ORDER_AGE
 
     def test_invalid(self):
         # Invalid data should be ignored
         f = VerseSetSearchForm.from_request_data({"order": "rubbish", "query": "foo"})
-        self.assertEqual(f.cleaned_data["query"], "foo")
-        self.assertEqual(f.cleaned_data["set_type"], VERSE_SET_TYPE_ALL)
-        self.assertEqual(f.cleaned_data["order"], VERSE_SET_ORDER_POPULARITY)
+        assert f.cleaned_data["query"] == "foo"
+        assert f.cleaned_data["set_type"] == VERSE_SET_TYPE_ALL
+        assert f.cleaned_data["order"] == VERSE_SET_ORDER_POPULARITY

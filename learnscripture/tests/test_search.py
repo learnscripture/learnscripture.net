@@ -41,8 +41,8 @@ class SearchTests(SearchTestsMixin, TestBase):
         )
 
         results = VerseSet.objects.all().search([LANGUAGE_CODE_EN], "Stupid")
-        self.assertEqual(len(results), 1)
-        self.assertIn("For stupid people", (v.name for v in results))
+        assert len(results) == 1
+        assert "For stupid people" in (v.name for v in results)
 
     def test_search_verse_set_verses(self):
         vs1 = VerseSet.objects.create(
@@ -62,11 +62,11 @@ class SearchTests(SearchTestsMixin, TestBase):
         )
 
         results = VerseSet.objects.all().search([LANGUAGE_CODE_EN], "Gen 1:3")
-        self.assertEqual(len(results), 0)
+        assert len(results) == 0
 
         results = VerseSet.objects.all().search([LANGUAGE_CODE_EN], "Gen 1:1")
-        self.assertEqual(len(results), 1)
-        self.assertEqual(list(results), [vs1])
+        assert len(results) == 1
+        assert list(results) == [vs1]
 
     def test_multi_language_search(self):
         vs1 = VerseSet.objects.create(
@@ -109,27 +109,27 @@ class SearchTests(SearchTestsMixin, TestBase):
 
         # Search verse refs single language
         results = VerseSet.objects.all().search([LANGUAGE_CODE_EN], "Psalm 23")
-        self.assertEqual(list(results), [vs1])
+        assert list(results) == [vs1]
 
         results2 = VerseSet.objects.all().search([LANGUAGE_CODE_TR], "Mezmur 23")
-        self.assertEqual(list(results2), [vs2])
+        assert list(results2) == [vs2]
 
         # Search verse refs multiple languages
         results3 = VerseSet.objects.all().search([LANGUAGE_CODE_EN, LANGUAGE_CODE_TR], "Mz 23")
-        self.assertEqual(set(results3), {vs1, vs2})
+        assert set(results3) == {vs1, vs2}
 
         # ... with default_language_code that matches verse refs:
         results4 = VerseSet.objects.all().search(
             [LANGUAGE_CODE_EN, LANGUAGE_CODE_TR], "Mz 23", default_language_code="tr"
         )
-        self.assertEqual(set(results4), {vs1, vs2})
+        assert set(results4) == {vs1, vs2}
 
         # ... and one that doesn't. Here the logic should fall back to parsing
         # 'Mz 23' as Turkish, because 'Mz 23' doesn't parse as a bible ref in English.
         results5 = VerseSet.objects.all().search(
             [LANGUAGE_CODE_EN, LANGUAGE_CODE_TR], "Mz 23", default_language_code="en"
         )
-        self.assertEqual(set(results5), {vs1, vs2})
+        assert set(results5) == {vs1, vs2}
 
     def test_any_language(self):
         # This should be treated as 'any language' because the name is translatable
@@ -154,17 +154,17 @@ class SearchTests(SearchTestsMixin, TestBase):
 
         # and therefore found in a turkish only search:
         results = VerseSet.objects.all().search([LANGUAGE_CODE_TR], "Mezmur 23")
-        self.assertEqual(list(results), [vs])
+        assert list(results) == [vs]
 
         # But now only as English:
         vs.name = "Psalm 23 - my favourite"
         vs.save()
 
         results2 = VerseSet.objects.all().search([LANGUAGE_CODE_TR], "Mezmur 23")
-        self.assertEqual(list(results2), [])
+        assert list(results2) == []
 
         results3 = VerseSet.objects.all().search([LANGUAGE_CODE_EN], "Psalm 23")
-        self.assertEqual(list(results3), [vs])
+        assert list(results3) == [vs]
 
     def test_search_full_passage(self):
         vs1 = VerseSet.objects.create(
@@ -183,7 +183,7 @@ class SearchTests(SearchTestsMixin, TestBase):
             ]
         )
         results1 = VerseSet.objects.all().search([LANGUAGE_CODE_EN], "Psalm 23:1-3", default_language_code="tr")
-        self.assertEqual(set(results1), {vs1})
+        assert set(results1) == {vs1}
 
     def test_search_no_query(self):
         # Any language
@@ -234,7 +234,7 @@ class SearchTests(SearchTestsMixin, TestBase):
 
         # Search in Turkish:
         results = VerseSet.objects.all().search([LANGUAGE_CODE_TR], "", default_language_code="tr")
-        self.assertEqual(set(results), {vs1, vs2})
+        assert set(results) == {vs1, vs2}
 
 
 class QuickFindTests(SearchTestsMixin, TestBase):
@@ -245,7 +245,7 @@ class QuickFindTests(SearchTestsMixin, TestBase):
     def test_quick_find_text(self):
         version = self.KJV
         results, more = quick_find("beginning created", version=version)
-        self.assertEqual(results[0].verses[0].localized_reference, "Genesis 1:1")
+        assert results[0].verses[0].localized_reference == "Genesis 1:1"
 
     def test_quick_find_text_turkish(self):
         version = self.TCL02
@@ -253,39 +253,39 @@ class QuickFindTests(SearchTestsMixin, TestBase):
         # 'siniz' should be dropped, and word with 'iz' ending
         # should be found.
         results, more = quick_find("övünebilirsiniz", version=version)
-        self.assertEqual(results[0].verses[0].localized_reference, "Romalılar 3:27")
-        self.assertIn("övünebiliriz", results[0].text)
+        assert results[0].verses[0].localized_reference == "Romalılar 3:27"
+        assert "övünebiliriz" in results[0].text
 
     def test_quick_find_escape(self):
         version = self.KJV
         results, more = quick_find("beginning & | created", version=version)
-        self.assertEqual(results[0].verses[0].localized_reference, "Genesis 1:1")
+        assert results[0].verses[0].localized_reference == "Genesis 1:1"
         results, more = quick_find("Genesissss 1:1", version=version)
-        self.assertEqual(len(results), 0)
+        assert len(results) == 0
         results, more = quick_find("Hello!", version=version)
-        self.assertEqual(len(results), 0)
+        assert len(results) == 0
 
     def test_quick_find_song_of_solomon(self):
         version = self.KJV
         results, more = quick_find("Song of Solomon 1:1", version)
-        self.assertEqual(results[0].verses[0].localized_reference, "Song of Solomon 1:1")
+        assert results[0].verses[0].localized_reference == "Song of Solomon 1:1"
 
     def test_quick_find_numbered_book(self):
         version = self.KJV
         results, more = quick_find("1 Corinthians 1:3", version=version)
-        self.assertEqual(results[0].verses[0].localized_reference, "1 Corinthians 1:3")
+        assert results[0].verses[0].localized_reference == "1 Corinthians 1:3"
 
     def test_quick_find_book_names_as_searches(self):
         # Need to be able to find words that happen to be in the names of books.
         version = self.NET
         results, more = quick_find("James", version, allow_searches=True)
-        self.assertEqual(len(results), 1)
-        self.assertEqual(results[0].verses[0].localized_reference, "Matthew 4:21")
+        assert len(results) == 1
+        assert results[0].verses[0].localized_reference == "Matthew 4:21"
 
     def test_quick_find_passage_mode(self):
         version = self.KJV
         results, more = quick_find("Genesis 1:1-2:2", version, allow_searches=False, max_length=1000)
-        self.assertNotEqual(None, results)
+        assert results is not None
 
     def test_quick_find_merged_verse(self):
         version = self.TCL02
@@ -303,15 +303,15 @@ class QuickFindTests(SearchTestsMixin, TestBase):
                     results, more = quick_find(ref, version)
                 v = results[0]
                 # v is always a VerseSearchResult for quick_find results
-                self.assertEqual(v.localized_reference, corrected_ref, "For ref " + ref)
-                self.assertEqual(len(v.verses), length, "For ref " + ref)
+                assert v.localized_reference == corrected_ref, "For ref " + ref
+                assert len(v.verses) == length, "For ref " + ref
                 if length == 1:
-                    self.assertEqual(v.verses[0].localized_reference, corrected_ref, "For ref " + ref)
+                    assert v.verses[0].localized_reference == corrected_ref, "For ref " + ref
 
                 # Some tests for parsed_ref attribute that is used by
                 # front end
-                self.assertEqual(v.parsed_ref.start_verse, start_verse, "For ref " + ref)
-                self.assertEqual(v.parsed_ref.end_verse, end_verse, "For ref " + ref)
+                assert v.parsed_ref.start_verse == start_verse, "For ref " + ref
+                assert v.parsed_ref.end_verse == end_verse, "For ref " + ref
 
     def test_quick_find_special_symbols(self):
         # Testing for crashers due to syntax issues

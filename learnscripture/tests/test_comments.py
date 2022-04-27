@@ -32,19 +32,19 @@ class CommentPageTests(FullBrowserTest):
 
         # Test db
         c = Comment.objects.get()
-        self.assertEqual(c.author, self.account)
-        self.assertEqual(c.message, "This is my comment")
+        assert c.author == self.account
+        assert c.message == "This is my comment"
 
         # Test event created
-        self.assertEqual(
+        assert (
             Event.objects.filter(
                 parent_event=self.event, event_type=EventType.NEW_COMMENT, account=self.account
-            ).count(),
-            1,
+            ).count()
+            == 1
         )
 
         # Test notice created
-        self.assertEqual(self.event_identity.notices.filter(related_event=self.event).count(), 1)
+        assert self.event_identity.notices.filter(related_event=self.event).count() == 1
 
     def test_long_comments_truncated(self):
         self.login(self.account)
@@ -54,7 +54,7 @@ class CommentPageTests(FullBrowserTest):
         self.click(".commentblock .add-comment-btn")
         self.wait_for_ajax()
         c = Comment.objects.get()
-        self.assertEqual(c.author, self.account)
+        assert c.author == self.account
         assert len(c.message) == COMMENT_MAX_LENGTH
 
     def test_no_event_from_hellbanned_users(self):
@@ -71,15 +71,15 @@ class CommentPageTests(FullBrowserTest):
 
         # Test db - user should be able to see own message
         c = Comment.objects.get()
-        self.assertEqual(c.author, self.account)
-        self.assertEqual(c.message, "This is my comment")
+        assert c.author == self.account
+        assert c.message == "This is my comment"
 
         # Test event NOT created
-        self.assertEqual(
+        assert (
             Event.objects.filter(
                 parent_event=self.event, event_type=EventType.NEW_COMMENT, account=self.account
-            ).count(),
-            0,
+            ).count()
+            == 0
         )
 
     def test_moderate_comment(self):
@@ -103,7 +103,7 @@ class CommentPageTests(FullBrowserTest):
         self.assertTextAbsent("This is a naughty message")
 
         # Test DB
-        self.assertEqual(self.event.comments.get(id=c1.id).hidden, True)
+        assert self.event.comments.get(id=c1.id).hidden
 
 
 class CommentTests(AccountTestMixin, TestBase):
@@ -112,7 +112,7 @@ class CommentTests(AccountTestMixin, TestBase):
         group = create_group()
         comment = Comment.objects.create(author=account, message="Hello", group=group)
 
-        self.assertEqual(comment.get_absolute_url(), f"/groups/my-group/wall/?comment={comment.id}")
+        assert comment.get_absolute_url() == f"/groups/my-group/wall/?comment={comment.id}"
 
     def test_delete_wall_comment(self):
         _, account = self.create_account()

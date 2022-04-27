@@ -36,8 +36,8 @@ class GroupPageTestsBase(RequireExampleVerseSetsMixin):
             name="Another group", slug="another-group", created_by=creator_account, public=True, open=True
         )
 
-        self.assertEqual(private_group.can_join(account), False)
-        self.assertEqual(public_group.can_join(account), True)
+        assert not private_group.can_join(account)
+        assert public_group.can_join(account)
         self.get_url("groups")
         self.fill({"#id_query": "group"})
         if self.is_full_browser_test:
@@ -52,9 +52,9 @@ class GroupPageTestsBase(RequireExampleVerseSetsMixin):
         self.assertUrlsEqual(reverse("group", args=("another-group",)))
 
         self.submit('[name="join"]')
-        self.assertTrue(public_group.members.filter(id=account.id).exists())
+        assert public_group.members.filter(id=account.id).exists()
 
-        self.assertEqual(Event.objects.filter(event_type=EventType.GROUP_JOINED).count(), 1)
+        assert Event.objects.filter(event_type=EventType.GROUP_JOINED).count() == 1
 
     def test_join_from_no_account(self):
         _, creator_account = self.create_account(username="creator", email="c@example.com")
@@ -90,8 +90,8 @@ class GroupPageTestsFB(GroupPageTestsBase, FullBrowserTest):
         self.assertTextPresent(message)
         # Test db
         c = Comment.objects.get()
-        self.assertEqual(c.author, creator_account)
-        self.assertEqual(c.message, "Yay this is my comment!")
+        assert c.author == creator_account
+        assert c.message == "Yay this is my comment!"
 
 
 class GroupPageTestsWT(GroupPageTestsBase, WebTestBase):
@@ -107,8 +107,8 @@ class GroupTests(AccountTestMixin, TestBase):
         for i in range(1, 7):
             account = Account.objects.create(username="joiner%d" % i, email="j%d@example.com" % i)
             g.add_user(account)
-            self.assertEqual(
-                Award.objects.filter(account=creator_account, award_type=AwardType.ORGANIZER).count(), 0 if i < 5 else 1
+            assert Award.objects.filter(account=creator_account, award_type=AwardType.ORGANIZER).count() == (
+                0 if i < 5 else 1
             )
 
     def test_visibility(self):
@@ -122,24 +122,24 @@ class GroupTests(AccountTestMixin, TestBase):
 
         visible = lambda: Group.objects.visible_for_account(viewer_account)
 
-        self.assertEqual([g.name for g in visible()], ["My group"])
+        assert [g.name for g in visible()] == ["My group"]
 
         # Private groups should not be visible
         group.public = False
         group.save()
-        self.assertEqual(list(visible()), [])
+        assert list(visible()) == []
 
         # But should be visible if invited
         group.set_invitation_list([viewer_account])
-        self.assertEqual([g.name for g in visible()], ["My group"])
+        assert [g.name for g in visible()] == ["My group"]
 
         # (Reset)
         group.invitations.all().delete()
-        self.assertEqual(list(visible()), [])
+        assert list(visible()) == []
 
         # or if a member
         group.add_user(viewer_account)
-        self.assertEqual([g.name for g in visible()], ["My group"])
+        assert [g.name for g in visible()] == ["My group"]
 
         # Reset
         group.public = True
@@ -150,7 +150,7 @@ class GroupTests(AccountTestMixin, TestBase):
         creator_account.is_hellbanned = True
         creator_account.save()
         group.invitations.all().delete()
-        self.assertEqual(list(visible()), [])
+        assert list(visible()) == []
 
     def test_set_invitation_list(self):
         _, creator_account = self.create_account(username="creator", email="c@example.com")
@@ -163,25 +163,22 @@ class GroupTests(AccountTestMixin, TestBase):
 
         group.set_invitation_list([member1])
 
-        self.assertEqual([i.account.username for i in group.invitations.all()], ["member1"])
+        assert [i.account.username for i in group.invitations.all()] == ["member1"]
 
-        self.assertEqual([i.group.name for i in member1.invitations.all()], ["My group"])
+        assert [i.group.name for i in member1.invitations.all()] == ["My group"]
 
         group.set_invitation_list([member2])
 
-        self.assertEqual([i.account.username for i in group.invitations.all()], ["member2"])
+        assert [i.account.username for i in group.invitations.all()] == ["member2"]
 
-        self.assertEqual([i.group.name for i in member1.invitations.all()], [])
+        assert [i.group.name for i in member1.invitations.all()] == []
 
-        self.assertEqual([i.group.name for i in member2.invitations.all()], ["My group"])
+        assert [i.group.name for i in member2.invitations.all()] == ["My group"]
 
-        self.assertEqual(
-            [m.message_html for m in member1.identity.notices.all()],
-            [
-                '<a href="/user/creator/">creator</a> invited you to join the group '
-                '<a href="/groups/my-group/">My group</a>'
-            ],
-        )
+        assert [m.message_html for m in member1.identity.notices.all()] == [
+            '<a href="/user/creator/">creator</a> invited you to join the group '
+            '<a href="/groups/my-group/">My group</a>'
+        ]
 
         # hellbanned users are ignored when they invite others:
         creator_account.is_hellbanned = True
@@ -189,7 +186,7 @@ class GroupTests(AccountTestMixin, TestBase):
         group = Group.objects.get(id=group.id)
         group.set_invitation_list([member1])
 
-        self.assertEqual([i.group.name for i in member1.invitations.all()], [])
+        assert [i.group.name for i in member1.invitations.all()] == []
 
     def test_add_comment(self):
         i, creator_account = self.create_account(username="creator", email="c@example.com")
@@ -199,20 +196,20 @@ class GroupTests(AccountTestMixin, TestBase):
 
         i, other_account = self.create_account(username="a", email="a@example.com")
 
-        self.assertTrue(group.accepts_comments_from(other_account))
+        assert group.accepts_comments_from(other_account)
 
         group.public = False
         group.save()
 
-        self.assertFalse(group.accepts_comments_from(other_account))
+        assert not group.accepts_comments_from(other_account)
 
         group.add_user(other_account)
 
-        self.assertTrue(group.accepts_comments_from(other_account))
+        assert group.accepts_comments_from(other_account)
 
         group.add_comment(author=other_account, message="Hello")
 
-        self.assertEqual(["Hello"], [c.message for c in group.comments.all()])
+        assert ["Hello"] == [c.message for c in group.comments.all()]
 
 
 class GroupCreatePageTests(RequireExampleVerseSetsMixin, FullBrowserTest):
@@ -238,10 +235,10 @@ class GroupCreatePageTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.assertUrlsEqual(reverse("group", args=("my-group",)))
 
         g = Group.objects.get(slug="my-group")
-        self.assertEqual(list(g.invited_users()), [invited_account])
-        self.assertIn("invited you to join", invited_account.identity.notices.all()[0].message_html)
+        assert list(g.invited_users()) == [invited_account]
+        assert "invited you to join" in invited_account.identity.notices.all()[0].message_html
 
-        self.assertEqual(Event.objects.filter(event_type=EventType.GROUP_CREATED).count(), 1)
+        assert Event.objects.filter(event_type=EventType.GROUP_CREATED).count() == 1
 
 
 # Use Django client
@@ -252,6 +249,6 @@ class GroupPageTests2(AccountTestMixin, TestBase):
         event = GroupJoinedEvent(account=account, group=group).save()
         comment = Comment.objects.create(group=group, event=event, author=account, message="Hello there!")
         response = self.client.get(reverse("group", args=(group.slug,)))
-        self.assertEqual(response.status_code, 200)
+        assert response.status_code == 200
         self.assertContains(response, "Hello there!")
         self.assertContains(response, comment.get_absolute_url())

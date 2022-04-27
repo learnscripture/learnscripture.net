@@ -23,8 +23,8 @@ class AccountTests(AccountTestMixin, TestBase):
     def test_password(self):
         acc = Account()
         acc.set_password("mypassword")
-        self.assertTrue(acc.check_password("mypassword"))
-        self.assertFalse(acc.check_password("123"))
+        assert acc.check_password("mypassword")
+        assert not acc.check_password("123")
 
     def test_award_action_points_revision(self):
         a = Account.objects.create(username="test", email="test@test.com")
@@ -38,7 +38,7 @@ class AccountTests(AccountTestMixin, TestBase):
             StageType.TEST,
             0.75,
         )
-        self.assertEqual(a.total_score.points, (4 * Scores.points_per_word(LANGUAGE_CODE_EN) * 0.75))
+        assert a.total_score.points == (4 * Scores.points_per_word(LANGUAGE_CODE_EN) * 0.75)
 
     def test_points_events(self):
         _, a = self.create_account()
@@ -58,12 +58,12 @@ class AccountTests(AccountTestMixin, TestBase):
         # When we cross over 1000 (repetition 17) we should get an event
         for i in range(1, 20):
             score()
-            self.assertEqual(Event.objects.filter(event_type=EventType.POINTS_MILESTONE).count(), 0 if i < 17 else 1)
+            assert Event.objects.filter(event_type=EventType.POINTS_MILESTONE).count() == (0 if i < 17 else 1)
 
     def test_ace_awards(self):
         _, account = self.create_account()
 
-        self.assertEqual(account.awards.filter(award_type=AwardType.ACE).count(), 0)
+        assert account.awards.filter(award_type=AwardType.ACE).count() == 0
 
         def score(accuracy):
             account.award_action_points(
@@ -78,17 +78,17 @@ class AccountTests(AccountTestMixin, TestBase):
 
         score(0.75)
         # Check no 'ACE' award
-        self.assertEqual(account.awards.filter(award_type=AwardType.ACE).count(), 0)
+        assert account.awards.filter(award_type=AwardType.ACE).count() == 0
 
         score(1.0)
 
         # Check level 1
-        self.assertEqual(account.awards.filter(award_type=AwardType.ACE, level=1).count(), 1)
+        assert account.awards.filter(award_type=AwardType.ACE, level=1).count() == 1
 
         score(1.0)
 
         # Check level 2
-        self.assertEqual(account.awards.filter(award_type=AwardType.ACE, level=2).count(), 1)
+        assert account.awards.filter(award_type=AwardType.ACE, level=2).count() == 1
 
         # Negative check: record one at less than 100% to break streak
         score(0.9)
@@ -98,29 +98,26 @@ class AccountTests(AccountTestMixin, TestBase):
         score(1)
 
         # Negative check level 3
-        self.assertEqual(account.awards.filter(award_type=AwardType.ACE, level=3).count(), 0)
+        assert account.awards.filter(award_type=AwardType.ACE, level=3).count() == 0
         # 4th one:
         score(1)
-        self.assertEqual(account.awards.filter(award_type=AwardType.ACE, level=3).count(), 1)
+        assert account.awards.filter(award_type=AwardType.ACE, level=3).count() == 1
 
         # Check 'Event' created
-        self.assertTrue(Event.objects.filter(event_type=EventType.AWARD_RECEIVED).count() > 1)
+        assert Event.objects.filter(event_type=EventType.AWARD_RECEIVED).count() > 1
 
         # Check notices
-        self.assertEqual(
-            [m.message_html for m in account.identity.notices.order_by("created")],
-            [
-                '<img src="/static/img/awards/award_ACE_level_1_50.png"> You\'ve earned a new badge: <a href="/user/t%C3%ABst1/">Ace - level 1</a>. Points bonus: 1,000. <span class="broadcast" data-link="/user/t%C3%ABst1/" data-picture="/static/img/awards/award_ACE_level_1_100.png" data-award-id="{}" data-award-level="1" data-award-name="Ace - level 1" data-account-username="tëst1" data-caption="I just earned a badge: Ace - level 1">Tell people: <a data-twitter-link><i class="icon-twitter"></i> Twitter</a></span>'.format(
-                    account.awards.get(award_type=AwardType.ACE, level=1).id
-                ),
-                '<img src="/static/img/awards/award_ACE_level_2_50.png"> You\'ve levelled up on one of your badges: <a href="/user/t%C3%ABst1/">Ace - level 2</a>. Points bonus: 2,000. <span class="broadcast" data-link="/user/t%C3%ABst1/" data-picture="/static/img/awards/award_ACE_level_2_100.png" data-award-id="{}" data-award-level="2" data-award-name="Ace - level 2" data-account-username="tëst1" data-caption="I just earned a badge: Ace - level 2">Tell people: <a data-twitter-link><i class="icon-twitter"></i> Twitter</a></span>'.format(
-                    account.awards.get(award_type=AwardType.ACE, level=2).id
-                ),
-                '<img src="/static/img/awards/award_ACE_level_3_50.png"> You\'ve levelled up on one of your badges: <a href="/user/t%C3%ABst1/">Ace - level 3</a>. Points bonus: 4,000. <span class="broadcast" data-link="/user/t%C3%ABst1/" data-picture="/static/img/awards/award_ACE_level_3_100.png" data-award-id="{}" data-award-level="3" data-award-name="Ace - level 3" data-account-username="tëst1" data-caption="I just earned a badge: Ace - level 3">Tell people: <a data-twitter-link><i class="icon-twitter"></i> Twitter</a></span>'.format(
-                    account.awards.get(award_type=AwardType.ACE, level=3).id
-                ),
-            ],
-        )
+        assert [m.message_html for m in account.identity.notices.order_by("created")] == [
+            '<img src="/static/img/awards/award_ACE_level_1_50.png"> You\'ve earned a new badge: <a href="/user/t%C3%ABst1/">Ace - level 1</a>. Points bonus: 1,000. <span class="broadcast" data-link="/user/t%C3%ABst1/" data-picture="/static/img/awards/award_ACE_level_1_100.png" data-award-id="{}" data-award-level="1" data-award-name="Ace - level 1" data-account-username="tëst1" data-caption="I just earned a badge: Ace - level 1">Tell people: <a data-twitter-link><i class="icon-twitter"></i> Twitter</a></span>'.format(
+                account.awards.get(award_type=AwardType.ACE, level=1).id
+            ),
+            '<img src="/static/img/awards/award_ACE_level_2_50.png"> You\'ve levelled up on one of your badges: <a href="/user/t%C3%ABst1/">Ace - level 2</a>. Points bonus: 2,000. <span class="broadcast" data-link="/user/t%C3%ABst1/" data-picture="/static/img/awards/award_ACE_level_2_100.png" data-award-id="{}" data-award-level="2" data-award-name="Ace - level 2" data-account-username="tëst1" data-caption="I just earned a badge: Ace - level 2">Tell people: <a data-twitter-link><i class="icon-twitter"></i> Twitter</a></span>'.format(
+                account.awards.get(award_type=AwardType.ACE, level=2).id
+            ),
+            '<img src="/static/img/awards/award_ACE_level_3_50.png"> You\'ve levelled up on one of your badges: <a href="/user/t%C3%ABst1/">Ace - level 3</a>. Points bonus: 4,000. <span class="broadcast" data-link="/user/t%C3%ABst1/" data-picture="/static/img/awards/award_ACE_level_3_100.png" data-award-id="{}" data-award-level="3" data-award-name="Ace - level 3" data-account-username="tëst1" data-caption="I just earned a badge: Ace - level 3">Tell people: <a data-twitter-link><i class="icon-twitter"></i> Twitter</a></span>'.format(
+                account.awards.get(award_type=AwardType.ACE, level=3).id
+            ),
+        ]
 
     def test_award_action_points_fully_learnt(self):
         _, a = self.create_account()
@@ -134,10 +131,8 @@ class AccountTests(AccountTestMixin, TestBase):
             StageType.TEST,
             0.9,
         )
-        self.assertEqual(
-            a.total_score.points,
-            (4 * Scores.points_per_word(LANGUAGE_CODE_EN) * 0.9)
-            + (4 * Scores.points_per_word(LANGUAGE_CODE_EN) * Scores.VERSE_LEARNT_BONUS),
+        assert a.total_score.points == (4 * Scores.points_per_word(LANGUAGE_CODE_EN) * 0.9) + (
+            4 * Scores.points_per_word(LANGUAGE_CODE_EN) * Scores.VERSE_LEARNT_BONUS
         )
 
     def test_addict_award(self):
@@ -164,7 +159,7 @@ class AccountTests(AccountTestMixin, TestBase):
             # Simulate the cronjob that runs
             awards.tasks.give_all_addict_awards()
 
-            self.assertEqual(account.awards.filter(award_type=AwardType.ADDICT).count(), 0 if i < 23 else 1)
+            assert account.awards.filter(award_type=AwardType.ADDICT).count() == (0 if i < 23 else 1)
 
     def test_friendship_weights(self):
         from .test_groups import create_group
@@ -182,16 +177,13 @@ class AccountTests(AccountTestMixin, TestBase):
         group.add_user(account1)
         group.add_user(account2)
 
-        self.assertEqual(
-            account1.get_friendship_weights(),
-            {
-                account1.id: 0.3,  # defined this way
-                account2.id: 1.0,  # max
-                # account3.id should be missing
-            },
-        )
+        assert account1.get_friendship_weights() == {
+            account1.id: 0.3,  # defined this way
+            account2.id: 1.0,  # max
+            # account3.id should be missing
+        }
 
-        self.assertEqual(account3.get_friendship_weights(), {account3.id: 0.3})
+        assert account3.get_friendship_weights() == {account3.id: 0.3}
 
         group2.add_user(account2)
         group2.add_user(account3)
@@ -203,17 +195,17 @@ class AccountTests(AccountTestMixin, TestBase):
         w2_with_1 = account2.get_friendship_weights()[account1.id]
         w2_with_3 = account2.get_friendship_weights()[account3.id]
 
-        self.assertTrue(w2_with_1 > w2_with_3)
+        assert w2_with_1 > w2_with_3
 
         # But following has higher weight than groups.
 
         # Test some methods while we are here:
-        self.assertFalse(account2.is_following(account3))
+        assert not account2.is_following(account3)
 
         account2.follow_user(account3)
 
-        self.assertTrue(account2.is_following(account3))
-        self.assertFalse(account3.is_following(account2))
+        assert account2.is_following(account3)
+        assert not account3.is_following(account2)
 
         # get_friendship_weights is cached, but 'follow_user' clears it, because
         # it's nice for explicit actions to be reflected immediately on the
@@ -222,7 +214,7 @@ class AccountTests(AccountTestMixin, TestBase):
         w2_with_1 = account2.get_friendship_weights()[account1.id]
         w2_with_3 = account2.get_friendship_weights()[account3.id]
 
-        self.assertTrue(w2_with_3 > w2_with_1)
+        assert w2_with_3 > w2_with_1
 
 
 class PasswordResetTestsBase:
@@ -248,18 +240,18 @@ class PasswordResetTestsBase:
         self.get_url("login")
         self.fill({"#id_login-email": "not_a_real_email@email.com"})
         self.submit("[name=forgotpassword]")
-        self.assertEqual(len(mail.outbox), 0)
+        assert len(mail.outbox) == 0
 
     def _test_confirm_start(self):
         self.get_url("login")
         self.fill({"#id_login-email": self.account.email})
         self.submit("[name=forgotpassword]")
-        self.assertEqual(len(mail.outbox), 1)
+        assert len(mail.outbox) == 1
         return self._read_signup_email(mail.outbox[0])
 
     def _read_signup_email(self, email):
         urlmatch = re.search(r"https?://[^/]*(/.*reset/\S*)", email.body)
-        self.assertTrue(urlmatch is not None, "No URL found in sent email")
+        assert urlmatch is not None, "No URL found in sent email"
         return urlmatch.group(), urlmatch.groups()[0]
 
     def test_confirm_valid(self):
@@ -296,7 +288,7 @@ class PasswordResetTestsBase:
         )
         # Check the password has not been changed
         account = Account.objects.get(id=self.account.id)
-        self.assertTrue(not account.check_password("anewpassword"))
+        assert not account.check_password("anewpassword")
 
     def test_confirm_complete(self):
         url, path = self._test_confirm_start()
@@ -305,7 +297,7 @@ class PasswordResetTestsBase:
         self.submit(".maincontent [type=submit]")
         # Check the password has been changed
         account = Account.objects.get(id=self.account.id)
-        self.assertTrue(account.check_password("anewpassword"))
+        assert account.check_password("anewpassword")
 
         # Check we can't use the link again
         self.get_literal_url(path)
@@ -355,7 +347,7 @@ class PasswordChangeTestsBase:
 
         # password should actually be changed.
         account = Account.objects.get(id=self.account.id)
-        self.assertTrue(account.check_password("newpassword"))
+        assert account.check_password("newpassword")
 
 
 class PasswordChangeTestsWT(PasswordChangeTestsBase, WebTestBase):

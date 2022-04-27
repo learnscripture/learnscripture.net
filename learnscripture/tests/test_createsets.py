@@ -32,14 +32,14 @@ class CreateSetTests(BibleVersesMixin, FullBrowserTest):
 
         self.fill({"#id_public": True})
         self.submit("#id-save-btn")
-        self.assertTrue(self.get_page_title().startswith("Verse set: My set"))
+        assert self.get_page_title().startswith("Verse set: My set")
         self.assertTextPresent("And God called the light Day")
 
-        self.assertEqual(self._account.awards.filter(award_type=AwardType.SHARER).count(), 1)
-        self.assertEqual(Event.objects.filter(event_type=EventType.VERSE_SET_CREATED).count(), 1)
+        assert self._account.awards.filter(award_type=AwardType.SHARER).count() == 1
+        assert Event.objects.filter(event_type=EventType.VERSE_SET_CREATED).count() == 1
         vs = VerseSet.objects.get()
-        self.assertEqual(vs.name, "My set")
-        self.assertEqual(vs.language_code, "en")
+        assert vs.name == "My set"
+        assert vs.language_code == "en"
 
     def test_create_selection_set_combos(self):
         self.login(self._account)
@@ -50,7 +50,7 @@ class CreateSetTests(BibleVersesMixin, FullBrowserTest):
 
         self.fill({"#id_public": True})
         self.submit("#id-save-btn")
-        self.assertTrue(self.get_page_title().startswith("Verse set: My set"))
+        assert self.get_page_title().startswith("Verse set: My set")
         self.assertTextPresent("In the beginning")
 
         vs = VerseSet.objects.get()
@@ -59,7 +59,7 @@ class CreateSetTests(BibleVersesMixin, FullBrowserTest):
         self.submit("#id-save-btn")
 
         vs = VerseSet.objects.get()
-        self.assertEqual([vc.internal_reference for vc in vs.verse_choices.all()], ["BOOK0 1:1-2", "BOOK0 1:4"])
+        assert [vc.internal_reference for vc in vs.verse_choices.all()] == ["BOOK0 1:1-2", "BOOK0 1:4"]
 
     def test_dedupe_selection_sets(self):
         self.login(self._account)
@@ -72,7 +72,7 @@ class CreateSetTests(BibleVersesMixin, FullBrowserTest):
         self.submit("#id-save-btn")
 
         vs = VerseSet.objects.get(name="My set")
-        self.assertEqual(len(vs.verse_choices.all()), 1)
+        assert len(vs.verse_choices.all()) == 1
 
         current_localized_reference_list = [("Genesis 1:5", 0)]
 
@@ -88,9 +88,8 @@ class CreateSetTests(BibleVersesMixin, FullBrowserTest):
             if ref not in [r for r, i in current_localized_reference_list]:
                 current_localized_reference_list.append((ref, len(current_localized_reference_list)))
 
-            self.assertEqual(
-                current_localized_reference_list,
-                sorted((vc.get_localized_reference(LANGUAGE_CODE_EN), vc.set_order) for vc in vs.verse_choices.all()),
+            assert current_localized_reference_list == sorted(
+                (vc.get_localized_reference(LANGUAGE_CODE_EN), vc.set_order) for vc in vs.verse_choices.all()
             )
 
         # Caching could cause these to fail
@@ -112,7 +111,7 @@ class CreateSetTests(BibleVersesMixin, FullBrowserTest):
 
         self.submit("#id-save-btn")
 
-        self.assertTrue(self.get_page_title().startswith("Create selection set"))
+        assert self.get_page_title().startswith("Create selection set")
         self.assertTextPresent("This field is required")
         self.assertTextPresent("Genesis 1:5")
         self.assertTextPresent("Genesis 1:6")
@@ -131,9 +130,9 @@ class CreateSetTests(BibleVersesMixin, FullBrowserTest):
 
         vs = VerseSet.objects.get(id=vs.id)
         vcs = vs.verse_choices.all()
-        self.assertEqual(sorted(vc.id for vc in vcs), sorted([vc1.id, vc2.id, vc3.id]))
-        self.assertEqual(vs.verse_choices.get(internal_reference="BOOK0 1:1").set_order, 1)
-        self.assertEqual(vs.verse_choices.get(internal_reference="BOOK0 1:5").set_order, 0)
+        assert sorted(vc.id for vc in vcs) == sorted([vc1.id, vc2.id, vc3.id])
+        assert vs.verse_choices.get(internal_reference="BOOK0 1:1").set_order == 1
+        assert vs.verse_choices.get(internal_reference="BOOK0 1:5").set_order == 0
 
     def test_remove(self):
         self.login(self._account)
@@ -154,7 +153,7 @@ class CreateSetTests(BibleVersesMixin, FullBrowserTest):
 
         vs = VerseSet.objects.get(id=vs.id)
         vcs = vs.verse_choices.all()
-        self.assertEqual([vc.id for vc in vcs], [vc2.id])
+        assert [vc.id for vc in vcs] == [vc2.id]
 
         # Need to ensure that the UVS has not been deleted
         identity.verse_statuses.get(version__slug="KJV", localized_reference="Genesis 1:1")
@@ -182,14 +181,14 @@ class CreateSetTests(BibleVersesMixin, FullBrowserTest):
         self.click("#id-verse-list tbody tr:nth-child(9) input")
 
         self.submit("#id-save-btn")
-        self.assertTrue(self.get_page_title().startswith("Verse set: Genesis 1"))
+        assert self.get_page_title().startswith("Verse set: Genesis 1")
         self.assertTextPresent("And God called the light Day")
 
         vs = VerseSet.objects.get(name="Genesis 1:1-10", set_type=VerseSetType.PASSAGE)
-        self.assertTrue(len(vs.verse_choices.all()), 10)
-        self.assertEqual(vs.breaks, "BOOK0 1:3,BOOK0 1:9")
-        self.assertEqual(vs.passage_id, "BOOK0 1:1-10")
-        self.assertEqual(vs.language_code, "en")
+        assert len(vs.verse_choices.all()), 10
+        assert vs.breaks == "BOOK0 1:3,BOOK0 1:9"
+        assert vs.passage_id == "BOOK0 1:1-10"
+        assert vs.language_code == "en"
 
     def test_create_passage_set_merged(self):
         # This tests a whole bunch of problems regarding creating/editing
@@ -243,15 +242,17 @@ class CreateSetTests(BibleVersesMixin, FullBrowserTest):
                         vs = VerseSet.objects.get(name=titles[display_version], set_type=VerseSetType.PASSAGE)
 
                         # We're on the view page:
-                        self.assertTrue(self.get_page_title().startswith("Verse set: " + titles[default_version]))
+                        assert self.get_page_title().startswith("Verse set: " + titles[default_version])
 
                         # VerseSet will be as neutral as possible, so has unmerged verses.
-                        self.assertEqual(
-                            [vc.internal_reference for vc in vs.verse_choices.all()],
-                            ["BOOK44 3:24", "BOOK44 3:25", "BOOK44 3:26", "BOOK44 3:27"],
-                        )
-                        self.assertEqual(vs.breaks, "BOOK44 3:25")
-                        self.assertEqual(vs.passage_id, "BOOK44 3:24-27")
+                        assert [vc.internal_reference for vc in vs.verse_choices.all()] == [
+                            "BOOK44 3:24",
+                            "BOOK44 3:25",
+                            "BOOK44 3:26",
+                            "BOOK44 3:27",
+                        ]
+                        assert vs.breaks == "BOOK44 3:25"
+                        assert vs.passage_id == "BOOK44 3:24-27"
 
                         # We should be able to edit again:
                         self.get_url("edit_set", slug=vs.slug)
@@ -297,5 +298,5 @@ class CreateSetTests(BibleVersesMixin, FullBrowserTest):
 
         vs = VerseSet.objects.get(id=vs.id)
         vcs = vs.verse_choices.all().order_by("set_order")
-        self.assertEqual([vc.internal_reference for vc in vcs], internal_references)
-        self.assertEqual(vs.breaks, "BOOK18 23:5")
+        assert [vc.internal_reference for vc in vcs] == internal_references
+        assert vs.breaks == "BOOK18 23:5"

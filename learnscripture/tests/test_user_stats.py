@@ -10,7 +10,7 @@ class UserStatsTests(TestBase):
         Identity.objects.create(account=a1)
 
         resp = self.client.get(reverse("user_stats", args=(a1.username,)))
-        self.assertEqual(resp.status_code, 200)
+        assert resp.status_code == 200
         self.assertContains(resp, a1.username)
 
     def test_get_inactive(self):
@@ -18,4 +18,4 @@ class UserStatsTests(TestBase):
         Identity.objects.create(account=a1)
 
         resp = self.client.get(reverse("user_stats", args=(a1.username,)))
-        self.assertEqual(resp.status_code, 404)
+        assert resp.status_code == 404

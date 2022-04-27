@@ -12,12 +12,12 @@ class FollowTestsBase(FuncBaseMixin):
         self.get_url("user_stats", account1.username)
 
         self.submit("#id-follow-btn", wait_for_reload=False)
-        self.assertEqual(list(account2.following.all()), [account1])
-        self.assertEqual(list(account1.followers.all()), [account2])
+        assert list(account2.following.all()) == [account1]
+        assert list(account1.followers.all()) == [account2]
 
         self.submit("#id-unfollow-btn", wait_for_reload=False)
-        self.assertEqual(list(account2.following.all()), [])
-        self.assertEqual(list(account1.followers.all()), [])
+        assert list(account2.following.all()) == []
+        assert list(account1.followers.all()) == []
 
 
 class FollowTestsFB(FollowTestsBase, FullBrowserTest):

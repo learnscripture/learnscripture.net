@@ -22,12 +22,12 @@ class DashboardTestsBase(RequireExampleVerseSetsMixin, CatechismsMixin):
     def assert_learning_localized_reference(self, ref):
         self.assertUrlsEqual(reverse("learn"))
         if self.is_full_browser_test:
-            self.assertEqual(ref, self.get_element_text("#id-verse-header h2"))
+            assert ref == self.get_element_text("#id-verse-header h2")
         else:
             json = self.app.get(reverse("learnscripture.api.versestolearn")).json
             verse_statuses = json["verse_statuses"]
             verse_data = [d for d in verse_statuses if d["learn_order"] == 0][0]
-            self.assertEqual(ref, verse_data["title_text"])
+            assert ref == verse_data["title_text"]
 
     def click_clear_learning_queue_btn(self, verse_set_id):
         if verse_set_id:
@@ -181,7 +181,7 @@ class DashboardTestsBase(RequireExampleVerseSetsMixin, CatechismsMixin):
         self.follow_link(f"a.btn.large[href=\"{reverse('choose')}\"]")
         self.assertUrlsEqual(reverse("choose"))
         # Getting this far shouldn't create an Identity
-        self.assertEqual(Identity.objects.count(), 0)
+        assert Identity.objects.count() == 0
 
     def test_notices_expire(self):
         # This could be tested on any page, but this is an obvious example.
@@ -189,12 +189,12 @@ class DashboardTestsBase(RequireExampleVerseSetsMixin, CatechismsMixin):
         self.login(account)
         account.add_html_notice("Hello you crazy guy!")
 
-        self.assertEqual(identity.notices.all()[0].seen, None)
+        assert identity.notices.all()[0].seen is None
 
         self.get_url("dashboard")
         self.assertTextPresent("Hello you crazy guy!")
 
-        self.assertNotEqual(identity.notices.all()[0].seen, None)
+        assert identity.notices.all()[0].seen is not None
 
         self.move_clock_on(timedelta(days=10))
 

@@ -12,7 +12,7 @@ class AccountDetailsTests(WebTestBase):
         self.get_url("account_details")
         self.fill({"#id_first_name": "Fred"})
         self.submit("#id-save-btn")
-        self.assertEqual(Account.objects.get(id=account.id).first_name, "Fred")
+        assert Account.objects.get(id=account.id).first_name == "Fred"
 
     def test_reset_email_bounced(self):
         identity, account = self.create_account()
@@ -22,11 +22,11 @@ class AccountDetailsTests(WebTestBase):
         self.get_url("account_details")
         self.fill({"#id_first_name": "Fred"})
         self.submit("#id-save-btn")
-        self.assertEqual(Account.objects.get(id=account.id).first_name, "Fred")
-        self.assertNotEqual(Account.objects.get(id=account.id).email_bounced, None)
+        assert Account.objects.get(id=account.id).first_name == "Fred"
+        assert Account.objects.get(id=account.id).email_bounced is not None
 
         self.fill({"#id_email": "a_different_email@gmail.com"})
         self.submit("#id-save-btn")
 
-        self.assertEqual(Account.objects.get(id=account.id).email, "a_different_email@gmail.com")
-        self.assertEqual(Account.objects.get(id=account.id).email_bounced, None)
+        assert Account.objects.get(id=account.id).email == "a_different_email@gmail.com"
+        assert Account.objects.get(id=account.id).email_bounced is None

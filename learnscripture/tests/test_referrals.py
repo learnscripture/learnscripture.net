@@ -12,7 +12,7 @@ class ReferralsTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         # NB: these are are not the identity we are going to use.
         identity, account = self.create_account()
 
-        self.assertEqual(account.referred_identities_count(), 0)
+        assert account.referred_identities_count() == 0
 
         # Start at home page
         start_url = account.make_referral_link("/")
@@ -32,15 +32,15 @@ class ReferralsTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         # refresh account:
         account = Account.objects.get(id=account.id)
 
-        self.assertEqual(account.referred_identities_count(), 1)
+        assert account.referred_identities_count() == 1
 
         new_account_event_count_1 = Event.objects.filter(event_type=EventType.NEW_ACCOUNT).count()
 
         # If they create an account, referree gets a badge
         self.get_url("dashboard")
         self.create_account_interactive()
-        self.assertEqual(account.awards.filter(award_type=AwardType.RECRUITER).count(), 1)
+        assert account.awards.filter(award_type=AwardType.RECRUITER).count() == 1
 
         # Hack another test here - event should be recorded
         new_account_event_count_2 = Event.objects.filter(event_type=EventType.NEW_ACCOUNT).count()
-        self.assertEqual(new_account_event_count_2 - new_account_event_count_1, 1)
+        assert new_account_event_count_2 - new_account_event_count_1 == 1

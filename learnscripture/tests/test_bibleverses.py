@@ -81,19 +81,19 @@ class VerseTests(BibleVersesMixin, TestBase):
     def test_mark_missing(self):
         version = self.NET
         # Sanity check:
-        self.assertEqual(version.verse_set.get(localized_reference="John 3:16").missing, False)
+        assert not version.verse_set.get(localized_reference="John 3:16").missing
 
         i = Identity.objects.create()
         i.create_verse_status("John 3:16", None, version)
-        self.assertEqual(i.verse_statuses.filter(localized_reference="John 3:16", version=version).count(), 1)
+        assert i.verse_statuses.filter(localized_reference="John 3:16", version=version).count() == 1
 
         # Now remove the verse
         Verse.objects.get(localized_reference="John 3:16", version=version).mark_missing()
 
         # Should have change the Verse object
-        self.assertEqual(version.verse_set.get(localized_reference="John 3:16").missing, True)
+        assert version.verse_set.get(localized_reference="John 3:16").missing
         # ...and all UserVerseStatus objects
-        self.assertEqual(i.verse_statuses.filter(localized_reference="John 3:16", version=version).count(), 0)
+        assert i.verse_statuses.filter(localized_reference="John 3:16", version=version).count() == 0
 
 
 class VersionTests(BibleVersesMixin, TestBase):
@@ -126,41 +126,40 @@ class VersionTests(BibleVersesMixin, TestBase):
         )
 
     def test_no_chapter(self):
-        self.assertRaises(InvalidVerseReference, lambda: self.KJV.get_verse_list("Genesis"))
+        with pytest.raises(InvalidVerseReference):
+            self.KJV.get_verse_list("Genesis")
 
     def test_bad_chapter(self):
-        self.assertRaises(InvalidVerseReference, lambda: self.KJV.get_verse_list("Genesis x"))
+        with pytest.raises(InvalidVerseReference):
+            self.KJV.get_verse_list("Genesis x")
 
     def test_bad_book(self):
-        self.assertRaises(InvalidVerseReference, lambda: self.KJV.get_verse_list("Gospel of Barnabas"))
+        with pytest.raises(InvalidVerseReference):
+            self.KJV.get_verse_list("Gospel of Barnabas")
 
     def test_chapter(self):
-        self.assertEqual(
-            list(self.KJV.verse_set.filter(localized_reference__startswith="Genesis 1:")),
-            self.KJV.get_verse_list("Genesis 1"),
+        assert list(self.KJV.verse_set.filter(localized_reference__startswith="Genesis 1:")) == self.KJV.get_verse_list(
+            "Genesis 1"
         )
 
     def test_chapter_verse(self):
         version = TextVersion.objects.get(slug="KJV")
-        self.assertEqual(
-            [Verse.objects.get(localized_reference="Genesis 1:2", version=version)],
-            version.get_verse_list("Genesis 1:2"),
+        assert [Verse.objects.get(localized_reference="Genesis 1:2", version=version)] == version.get_verse_list(
+            "Genesis 1:2"
         )
 
     def test_verse_range(self):
         version = self.KJV
-        self.assertEqual(
-            [
-                version.verse_set.get(localized_reference="Genesis 1:2"),
-                version.verse_set.get(localized_reference="Genesis 1:3"),
-                version.verse_set.get(localized_reference="Genesis 1:4"),
-            ],
-            version.get_verse_list("Genesis 1:2-4"),
-        )
+        assert [
+            version.verse_set.get(localized_reference="Genesis 1:2"),
+            version.verse_set.get(localized_reference="Genesis 1:3"),
+            version.verse_set.get(localized_reference="Genesis 1:4"),
+        ] == version.get_verse_list("Genesis 1:2-4")
 
     def test_empty(self):
         with override("en"):
-            self.assertRaises(InvalidVerseReference, lambda: self.KJV.get_verse_list("Genesis 300:1"))
+            with pytest.raises(InvalidVerseReference):
+                self.KJV.get_verse_list("Genesis 300:1")
 
     def test_get_verses_by_localized_reference_bulk(self):
         version = self.KJV
@@ -173,26 +172,26 @@ class VersionTests(BibleVersesMixin, TestBase):
             # 2 for each combo
             l2 = version.get_verses_by_localized_reference_bulk(["Genesis 1:1", "Genesis 1:2-3"])
 
-        self.assertEqual(l1["Genesis 1:1"].text, "In the beginning God created the heaven and the earth. ")
+        assert l1["Genesis 1:1"].text == "In the beginning God created the heaven and the earth. "
 
-        self.assertEqual(l2["Genesis 1:2-3"].text, l1["Genesis 1:2"].text + " " + l1["Genesis 1:3"].text)
+        assert l2["Genesis 1:2-3"].text == l1["Genesis 1:2"].text + " " + l1["Genesis 1:3"].text
 
-        self.assertEqual(l2["Genesis 1:2-3"].chapter_number, l1["Genesis 1:2"].chapter_number)
+        assert l2["Genesis 1:2-3"].chapter_number == l1["Genesis 1:2"].chapter_number
 
     def test_turkish_get_verse_list(self):
         version = self.TCL02
 
         # Single verse
         v_1 = version.get_verse_list("Yuhanna 3:16")[0]
-        self.assertTrue(v_1.text.startswith("“Çünkü"))
+        assert v_1.text.startswith("“Çünkü")
 
         # Group of verses
         v_2 = version.get_verse_list("Mezmur 23:1-3")
-        self.assertEqual(len(v_2), 3)
+        assert len(v_2) == 3
 
         # Chapter
         v_3 = version.get_verse_list("Mezmur 23")
-        self.assertEqual(len(v_3), 6)
+        assert len(v_3) == 6
 
     def test_get_verse_list_merged(self):
         with self.assertNumQueries(2):
@@ -201,8 +200,8 @@ class VersionTests(BibleVersesMixin, TestBase):
             # verse route. Fixing this would end up increasing query counts
             # in other cases.
             vl = self.TCL02.get_verse_list("Romalılar 3:25-26")
-            self.assertEqual(len(vl), 1)
-            self.assertEqual(vl[0].localized_reference, "Romalılar 3:25-26")
+            assert len(vl) == 1
+            assert vl[0].localized_reference == "Romalılar 3:25-26"
 
     def test_get_verse_list_spanning_merged(self):
         # Here our range spans over the merged verses.
@@ -210,24 +209,24 @@ class VersionTests(BibleVersesMixin, TestBase):
         # just like other bible verses
         with self.assertNumQueries(2):
             vl = self.TCL02.get_verse_list("Romalılar 3:24-27")
-            self.assertEqual(len(vl), 3)
-            self.assertEqual(vl[0].localized_reference, "Romalılar 3:24")
-            self.assertEqual(vl[1].localized_reference, "Romalılar 3:25-26")
-            self.assertEqual(vl[2].localized_reference, "Romalılar 3:27")
+            assert len(vl) == 3
+            assert vl[0].localized_reference == "Romalılar 3:24"
+            assert vl[1].localized_reference == "Romalılar 3:25-26"
+            assert vl[2].localized_reference == "Romalılar 3:27"
 
     def test_get_verse_list_merged_edges(self):
         # Edge cases
         with self.assertNumQueries(2):
             v1 = self.TCL02.get_verse_list("Romalılar 3:24-25")
-            self.assertEqual(len(v1), 2)
-            self.assertEqual(v1[0].localized_reference, "Romalılar 3:24")
-            self.assertEqual(v1[1].localized_reference, "Romalılar 3:25-26")
+            assert len(v1) == 2
+            assert v1[0].localized_reference == "Romalılar 3:24"
+            assert v1[1].localized_reference == "Romalılar 3:25-26"
 
         with self.assertNumQueries(2):
             v2 = self.TCL02.get_verse_list("Romalılar 3:26-27")
-            self.assertEqual(len(v2), 2)
-            self.assertEqual(v2[0].localized_reference, "Romalılar 3:25-26")
-            self.assertEqual(v2[1].localized_reference, "Romalılar 3:27")
+            assert len(v2) == 2
+            assert v2[0].localized_reference == "Romalılar 3:25-26"
+            assert v2[1].localized_reference == "Romalılar 3:27"
 
     def test_get_verses_by_localized_reference_bulk_merged(self):
         version = self.TCL02
@@ -236,13 +235,13 @@ class VersionTests(BibleVersesMixin, TestBase):
             d1 = version.get_verses_by_localized_reference_bulk(
                 ["Romalılar 3:24", "Romalılar 3:25-26", "Romalılar 3:27"]
             )
-            self.assertEqual(
-                d1["Romalılar 3:24"].text,
-                "İnsanlar İsa Mesih'te olan kurtuluşla “Kurtuluşla”, Tanrı'nın lütfuyla, karşılıksız olarak aklanırlar.",
+            assert (
+                d1["Romalılar 3:24"].text
+                == "İnsanlar İsa Mesih'te olan kurtuluşla “Kurtuluşla”, Tanrı'nın lütfuyla, karşılıksız olarak aklanırlar."
             )
-            self.assertEqual(
-                d1["Romalılar 3:25-26"].text,
-                "Tanrı Mesih'i, kanıyla günahları bağışlatan ve imanla benimsenen kurban olarak sundu. Böylece adaletini gösterdi. Çünkü sabredip daha önce işlenmiş günahları cezasız bıraktı. Bunu, adil kalmak ve İsa'ya iman edeni aklamak için şimdiki zamanda kendi adaletini göstermek amacıyla yaptı.",
+            assert (
+                d1["Romalılar 3:25-26"].text
+                == "Tanrı Mesih'i, kanıyla günahları bağışlatan ve imanla benimsenen kurban olarak sundu. Böylece adaletini gösterdi. Çünkü sabredip daha önce işlenmiş günahları cezasız bıraktı. Bunu, adil kalmak ve İsa'ya iman edeni aklamak için şimdiki zamanda kendi adaletini göstermek amacıyla yaptı."
             )
 
     def test_get_verses_by_localized_reference_bulk_spanning_merge(self):
@@ -250,9 +249,9 @@ class VersionTests(BibleVersesMixin, TestBase):
         with self.assertNumQueries(3):
             # 1 for simple ones, 2 for the merged
             d1 = version.get_verses_by_localized_reference_bulk(["Romalılar 3:23", "Romalılar 3:24-27"])
-            self.assertEqual(
-                d1["Romalılar 3:24-27"].text,
-                "İnsanlar İsa Mesih'te olan kurtuluşla “Kurtuluşla”, Tanrı'nın lütfuyla, karşılıksız olarak aklanırlar. Tanrı Mesih'i, kanıyla günahları bağışlatan ve imanla benimsenen kurban olarak sundu. Böylece adaletini gösterdi. Çünkü sabredip daha önce işlenmiş günahları cezasız bıraktı. Bunu, adil kalmak ve İsa'ya iman edeni aklamak için şimdiki zamanda kendi adaletini göstermek amacıyla yaptı. Öyleyse neyle övünebiliriz? Hiçbir şeyle! Hangi ilkeye dayanarak? Yasa'yı yerine getirme ilkesine mi? Hayır, iman ilkesine.",
+            assert (
+                d1["Romalılar 3:24-27"].text
+                == "İnsanlar İsa Mesih'te olan kurtuluşla “Kurtuluşla”, Tanrı'nın lütfuyla, karşılıksız olarak aklanırlar. Tanrı Mesih'i, kanıyla günahları bağışlatan ve imanla benimsenen kurban olarak sundu. Böylece adaletini gösterdi. Çünkü sabredip daha önce işlenmiş günahları cezasız bıraktı. Bunu, adil kalmak ve İsa'ya iman edeni aklamak için şimdiki zamanda kendi adaletini göstermek amacıyla yaptı. Öyleyse neyle övünebiliriz? Hiçbir şeyle! Hangi ilkeye dayanarak? Yasa'yı yerine getirme ilkesine mi? Hayır, iman ilkesine."
             )
 
     def test_get_verses_by_localized_reference_bulk_merged_edges(self):
@@ -261,17 +260,17 @@ class VersionTests(BibleVersesMixin, TestBase):
             # 1 for simple ones, 2 for the merged
             d1 = version.get_verses_by_localized_reference_bulk(["Romalılar 3:24-25"])
             v = d1["Romalılar 3:24-25"]
-            self.assertEqual(v.localized_reference, "Romalılar 3:24-26")
-            self.assertEqual(
-                v.text,
-                "İnsanlar İsa Mesih'te olan kurtuluşla “Kurtuluşla”, Tanrı'nın lütfuyla, karşılıksız olarak aklanırlar. Tanrı Mesih'i, kanıyla günahları bağışlatan ve imanla benimsenen kurban olarak sundu. Böylece adaletini gösterdi. Çünkü sabredip daha önce işlenmiş günahları cezasız bıraktı. Bunu, adil kalmak ve İsa'ya iman edeni aklamak için şimdiki zamanda kendi adaletini göstermek amacıyla yaptı.",
+            assert v.localized_reference == "Romalılar 3:24-26"
+            assert (
+                v.text
+                == "İnsanlar İsa Mesih'te olan kurtuluşla “Kurtuluşla”, Tanrı'nın lütfuyla, karşılıksız olarak aklanırlar. Tanrı Mesih'i, kanıyla günahları bağışlatan ve imanla benimsenen kurban olarak sundu. Böylece adaletini gösterdi. Çünkü sabredip daha önce işlenmiş günahları cezasız bıraktı. Bunu, adil kalmak ve İsa'ya iman edeni aklamak için şimdiki zamanda kendi adaletini göstermek amacıyla yaptı."
             )
 
         with self.assertNumQueries(1):
             # 1 for simple ones, 2 for the merged
             d1 = version.get_verses_by_localized_reference_bulk(["Romalılar 3:25"])
             v = d1["Romalılar 3:25"]
-            self.assertEqual(v.localized_reference, "Romalılar 3:25-26")
+            assert v.localized_reference == "Romalılar 3:25-26"
 
     def _gen_1_1_suggestions(self):
         # in the beginning...
@@ -341,11 +340,11 @@ class VersionTests(BibleVersesMixin, TestBase):
     # present to the user. We therefore always end up using all the suggestions.
     def test_suggestions(self):
         version = TextVersion.objects.get(slug="KJV")
-        self.assertEqual(version.get_suggestions_by_localized_reference("Genesis 1:1")[1], ["a", "all", "his"])
+        assert version.get_suggestions_by_localized_reference("Genesis 1:1")[1] == ["a", "all", "his"]
 
     def test_suggestions_combo(self):
         version = TextVersion.objects.get(slug="KJV")
-        self.assertEqual(version.get_suggestions_by_localized_reference("Genesis 1:1-2")[10], ["and", "but", "thou"])
+        assert version.get_suggestions_by_localized_reference("Genesis 1:1-2")[10] == ["and", "but", "thou"]
 
     def test_suggestions_bulk(self):
         version = TextVersion.objects.get(slug="KJV")
@@ -358,21 +357,21 @@ class VersionTests(BibleVersesMixin, TestBase):
                 d = version.get_suggestions_by_localized_reference_bulk(
                     ["Genesis 1:1", "Genesis 1:2", "Genesis 1:3", "Genesis 1:2-3"]
                 )
-                self.assertEqual(len(d), 4)
+                assert len(d) == 4
 
     def test_item_suggestions_needs_updating(self):
         v = Verse.objects.get(version__slug="KJV", localized_reference="Genesis 1:1")
         # Already has suggestions set up
-        self.assertFalse(item_suggestions_need_updating(v))
+        assert not item_suggestions_need_updating(v)
 
         # But if we change the text:
         v.text_saved = v.text_saved + " blah blah."
         v.save()
-        self.assertTrue(item_suggestions_need_updating(v))
+        assert item_suggestions_need_updating(v)
 
         # No word suggestion set up:
         v2 = Verse.objects.get(version__slug="KJV", localized_reference="Psalm 23:1")
-        self.assertTrue(item_suggestions_need_updating(v2))
+        assert item_suggestions_need_updating(v2)
 
 
 class ParsingTests(unittest.TestCase):
@@ -381,7 +380,7 @@ class ParsingTests(unittest.TestCase):
         parse_validated_localized_reference, with extra checks.
         """
         retval = parse_validated_localized_reference(lang, ref)
-        self.assertEqual(retval.canonical_form(), ref)
+        assert retval.canonical_form() == ref
         return retval
 
     def pu(self, lang, query, **kwargs):
@@ -391,34 +390,40 @@ class ParsingTests(unittest.TestCase):
         return parse_unvalidated_localized_reference(lang, query, **kwargs)
 
     def test_unparsable_strict(self):
-        self.assertRaises(InvalidVerseReference, lambda: self.pv(LANGUAGE_CODE_EN, "Garbage"))
-        self.assertRaises(InvalidVerseReference, lambda: self.pv(LANGUAGE_CODE_EN, "Genesis 1:x"))
+        with pytest.raises(InvalidVerseReference):
+            self.pv(LANGUAGE_CODE_EN, "Garbage")
+        with pytest.raises(InvalidVerseReference):
+            self.pv(LANGUAGE_CODE_EN, "Genesis 1:x")
 
     def test_unparsable_loose(self):
-        self.assertEqual(self.pu(LANGUAGE_CODE_EN, "Garbage"), None)
-        self.assertEqual(self.pu(LANGUAGE_CODE_EN, "Genesis 1:x"), None)
+        assert self.pu(LANGUAGE_CODE_EN, "Garbage") is None
+        assert self.pu(LANGUAGE_CODE_EN, "Genesis 1:x") is None
 
     def test_bad_order_strict(self):
         with override("en"):
-            self.assertRaises(InvalidVerseReference, lambda: self.pv(LANGUAGE_CODE_EN, "Genesis 1:3-2"))
-            self.assertRaises(InvalidVerseReference, lambda: self.pv(LANGUAGE_CODE_EN, "Genesis 2:1-1:10"))
+            with pytest.raises(InvalidVerseReference):
+                self.pv(LANGUAGE_CODE_EN, "Genesis 1:3-2")
+            with pytest.raises(InvalidVerseReference):
+                self.pv(LANGUAGE_CODE_EN, "Genesis 2:1-1:10")
 
     def test_bad_order_loose(self):
         with override("en"):
-            self.assertRaises(InvalidVerseReference, lambda: self.pu(LANGUAGE_CODE_EN, "genesis 1:3-2"))
-            self.assertRaises(InvalidVerseReference, lambda: self.pu(LANGUAGE_CODE_EN, "genesis 2:1 - 1:10"))
+            with pytest.raises(InvalidVerseReference):
+                self.pu(LANGUAGE_CODE_EN, "genesis 1:3-2")
+            with pytest.raises(InvalidVerseReference):
+                self.pu(LANGUAGE_CODE_EN, "genesis 2:1 - 1:10")
 
     def test_book(self):
         parsed = self.pv(LANGUAGE_CODE_EN, "Genesis 1")
-        self.assertEqual(parsed.book_number, 0)
-        self.assertEqual(parsed.book_name, "Genesis")
-        self.assertEqual(parsed.start_chapter, 1)
-        self.assertEqual(parsed.end_chapter, 1)
-        self.assertEqual(parsed.start_verse, None)
-        self.assertEqual(parsed.end_verse, None)
-        self.assertEqual(parsed.is_single_verse(), False)
-        self.assertEqual(parsed.is_whole_book(), False)
-        self.assertEqual(parsed.is_whole_chapter(), True)
+        assert parsed.book_number == 0
+        assert parsed.book_name == "Genesis"
+        assert parsed.start_chapter == 1
+        assert parsed.end_chapter == 1
+        assert parsed.start_verse is None
+        assert parsed.end_verse is None
+        assert not parsed.is_single_verse()
+        assert not parsed.is_whole_book()
+        assert parsed.is_whole_chapter()
 
     def test_single_verse_strict(self):
         parsed = self.pv(LANGUAGE_CODE_EN, "Genesis 1:1")
@@ -429,17 +434,17 @@ class ParsingTests(unittest.TestCase):
         self._test_single_verse(parsed)
 
     def _test_single_verse(self, parsed):
-        self.assertEqual(parsed.book_number, 0)
-        self.assertEqual(parsed.book_name, "Genesis")
-        self.assertEqual(parsed.start_chapter, 1)
-        self.assertEqual(parsed.end_chapter, 1)
-        self.assertEqual(parsed.start_verse, 1)
-        self.assertEqual(parsed.end_verse, 1)
-        self.assertEqual(parsed.is_single_verse(), True)
-        self.assertEqual(parsed.is_whole_book(), False)
-        self.assertEqual(parsed.is_whole_chapter(), False)
-        self.assertEqual(parsed.get_start(), parsed)
-        self.assertEqual(parsed.get_end(), parsed)
+        assert parsed.book_number == 0
+        assert parsed.book_name == "Genesis"
+        assert parsed.start_chapter == 1
+        assert parsed.end_chapter == 1
+        assert parsed.start_verse == 1
+        assert parsed.end_verse == 1
+        assert parsed.is_single_verse()
+        assert not parsed.is_whole_book()
+        assert not parsed.is_whole_chapter()
+        assert parsed.get_start() == parsed
+        assert parsed.get_end() == parsed
 
     def test_verse_range_strict(self):
         parsed = self.pv(LANGUAGE_CODE_EN, "Genesis 1:1-2")
@@ -453,27 +458,27 @@ class ParsingTests(unittest.TestCase):
         self._test_verse_range(parsed)
 
     def _test_verse_range(self, parsed):
-        self.assertEqual(parsed.book_number, 0)
-        self.assertEqual(parsed.book_name, "Genesis")
-        self.assertEqual(parsed.start_chapter, 1)
-        self.assertEqual(parsed.end_chapter, 1)
-        self.assertEqual(parsed.start_verse, 1)
-        self.assertEqual(parsed.end_verse, 2)
-        self.assertEqual(parsed.is_single_verse(), False)
-        self.assertEqual(parsed.is_whole_book(), False)
-        self.assertEqual(parsed.is_whole_chapter(), False)
+        assert parsed.book_number == 0
+        assert parsed.book_name == "Genesis"
+        assert parsed.start_chapter == 1
+        assert parsed.end_chapter == 1
+        assert parsed.start_verse == 1
+        assert parsed.end_verse == 2
+        assert not parsed.is_single_verse()
+        assert not parsed.is_whole_book()
+        assert not parsed.is_whole_chapter()
 
         start = parsed.get_start()
-        self.assertEqual(start.start_chapter, 1)
-        self.assertEqual(start.end_chapter, 1)
-        self.assertEqual(start.start_verse, 1)
-        self.assertEqual(start.end_verse, 1)
+        assert start.start_chapter == 1
+        assert start.end_chapter == 1
+        assert start.start_verse == 1
+        assert start.end_verse == 1
 
         end = parsed.get_end()
-        self.assertEqual(end.start_chapter, 1)
-        self.assertEqual(end.end_chapter, 1)
-        self.assertEqual(end.start_verse, 2)
-        self.assertEqual(end.end_verse, 2)
+        assert end.start_chapter == 1
+        assert end.end_chapter == 1
+        assert end.start_verse == 2
+        assert end.end_verse == 2
 
     def test_verse_range_2_strict(self):
         parsed = self.pv(LANGUAGE_CODE_EN, "Genesis 1:2-3:4")
@@ -484,38 +489,38 @@ class ParsingTests(unittest.TestCase):
         self._test_verse_range_2(parsed)
 
     def _test_verse_range_2(self, parsed):
-        self.assertEqual(parsed.start_chapter, 1)
-        self.assertEqual(parsed.end_chapter, 3)
-        self.assertEqual(parsed.start_verse, 2)
-        self.assertEqual(parsed.end_verse, 4)
-        self.assertEqual(parsed.is_single_verse(), False)
-        self.assertEqual(parsed.is_whole_book(), False)
-        self.assertEqual(parsed.is_whole_chapter(), False)
+        assert parsed.start_chapter == 1
+        assert parsed.end_chapter == 3
+        assert parsed.start_verse == 2
+        assert parsed.end_verse == 4
+        assert not parsed.is_single_verse()
+        assert not parsed.is_whole_book()
+        assert not parsed.is_whole_chapter()
 
         start = parsed.get_start()
-        self.assertEqual(start.start_chapter, 1)
-        self.assertEqual(start.end_chapter, 1)
-        self.assertEqual(start.start_verse, 2)
-        self.assertEqual(start.end_verse, 2)
+        assert start.start_chapter == 1
+        assert start.end_chapter == 1
+        assert start.start_verse == 2
+        assert start.end_verse == 2
 
         end = parsed.get_end()
-        self.assertEqual(end.start_chapter, 3)
-        self.assertEqual(end.end_chapter, 3)
-        self.assertEqual(end.start_verse, 4)
-        self.assertEqual(end.end_verse, 4)
+        assert end.start_chapter == 3
+        assert end.end_chapter == 3
+        assert end.start_verse == 4
+        assert end.end_verse == 4
 
     def test_from_start_and_end(self):
         parsed = self.pv(LANGUAGE_CODE_EN, "Genesis 1:2-3:4")
         combined = ParsedReference.from_start_and_end(parsed.get_start(), parsed.get_end())
-        self.assertEqual(parsed, combined)
+        assert parsed == combined
 
         parsed2 = self.pv(LANGUAGE_CODE_EN, "Genesis 1:1")
         combined2 = ParsedReference.from_start_and_end(parsed2.get_start(), parsed2.get_end())
-        self.assertEqual(parsed2, combined2)
+        assert parsed2 == combined2
 
         parsed3 = self.pv(LANGUAGE_CODE_EN, "Genesis 1")
         combined3 = ParsedReference.from_start_and_end(parsed3.get_start(), parsed3.get_end())
-        self.assertEqual(parsed3, combined3)
+        assert parsed3 == combined3
 
     def test_parse_books(self):
         # Check that the book names parse back to themselves.
@@ -524,39 +529,41 @@ class ParsingTests(unittest.TestCase):
                 r = self.pu(lang.code, book, allow_whole_book=True).canonical_form()
                 book_number = get_bible_book_number(lang.code, book)
                 if is_single_chapter_book(book_number):
-                    self.assertEqual(r, book + " 1")
+                    assert r == book + " 1"
                 else:
-                    self.assertEqual(r, book)
+                    assert r == book
 
     def test_single_chapter_books(self):
         parsed = self.pu(LANGUAGE_CODE_EN, "Jude")
-        self.assertEqual(parsed.canonical_form(), "Jude 1")
-        self.assertEqual(parsed.is_whole_book(), True)
-        self.assertEqual(parsed.is_whole_chapter(), True)
+        assert parsed.canonical_form() == "Jude 1"
+        assert parsed.is_whole_book()
+        assert parsed.is_whole_chapter()
 
     def test_constraints(self):
-        self.assertEqual(
-            self.pu(LANGUAGE_CODE_EN, "Matt 1", allow_whole_book=False, allow_whole_chapter=True).canonical_form(),
-            "Matthew 1",
+        assert (
+            self.pu(LANGUAGE_CODE_EN, "Matt 1", allow_whole_book=False, allow_whole_chapter=True).canonical_form()
+            == "Matthew 1"
         )
-        self.assertEqual(self.pu(LANGUAGE_CODE_EN, "Matt 1", allow_whole_book=False, allow_whole_chapter=False), None)
-        self.assertEqual(
-            self.pu(LANGUAGE_CODE_EN, "Matt", allow_whole_book=True, allow_whole_chapter=True).canonical_form(),
-            "Matthew",
+        assert self.pu(LANGUAGE_CODE_EN, "Matt 1", allow_whole_book=False, allow_whole_chapter=False) is None
+        assert (
+            self.pu(LANGUAGE_CODE_EN, "Matt", allow_whole_book=True, allow_whole_chapter=True).canonical_form()
+            == "Matthew"
         )
-        self.assertEqual(self.pu(LANGUAGE_CODE_EN, "Matt", allow_whole_book=False, allow_whole_chapter=True), None)
-        self.assertEqual(
-            self.pu(LANGUAGE_CODE_EN, "Jude", allow_whole_book=False, allow_whole_chapter=True).canonical_form(),
-            "Jude 1",
+        assert self.pu(LANGUAGE_CODE_EN, "Matt", allow_whole_book=False, allow_whole_chapter=True) is None
+        assert (
+            self.pu(LANGUAGE_CODE_EN, "Jude", allow_whole_book=False, allow_whole_chapter=True).canonical_form()
+            == "Jude 1"
         )
 
     def test_invalid_references(self):
         with override("en"):
-            self.assertRaises(InvalidVerseReference, lambda: self.pv(LANGUAGE_CODE_EN, "Matthew 2:1-1:2"))
+            with pytest.raises(InvalidVerseReference):
+                self.pv(LANGUAGE_CODE_EN, "Matthew 2:1-1:2")
             # Even with loose parsing, we still propagage InvalidVerseReference, so
             # that the front end code (e.g. quick_find) can recognise that the user
             # tried to enter a verse reference.
-            self.assertRaises(InvalidVerseReference, lambda: self.pu(LANGUAGE_CODE_EN, "Matthew 2:1-1:2"))
+            with pytest.raises(InvalidVerseReference):
+                self.pu(LANGUAGE_CODE_EN, "Matthew 2:1-1:2")
 
     def test_turkish_reference_parsing(self):
         tests = [
@@ -577,14 +584,14 @@ class ParsingTests(unittest.TestCase):
             ("EYÜP 1", "Eyüp 1"),
         ]
         for ref, output in tests:
-            self.assertEqual(self.pu(LANGUAGE_CODE_TR, ref).canonical_form(), output, f"Failure parsing '{ref}'")
+            assert self.pu(LANGUAGE_CODE_TR, ref).canonical_form() == output, f"Failure parsing '{ref}'"
 
-        self.assertEqual(normalize_reference_input_turkish("  ÂâİIiıÇçŞşÖöÜüĞğ  "), "aaiiiiccssoouugg")
+        assert normalize_reference_input_turkish("  ÂâİIiıÇçŞşÖöÜüĞğ  ") == "aaiiiiccssoouugg"
 
     def test_to_list(self):
         def assertListEqual(ref, ref_list):
             parsed_ref = self.pv("en", ref)
-            self.assertEqual(parsed_ref.to_list(), [self.pv("en", r) for r in ref_list])
+            assert parsed_ref.to_list() == [self.pv("en", r) for r in ref_list]
 
         assertListEqual("Genesis 1:1", ["Genesis 1:1"])
         assertListEqual("Genesis 1:1-2", ["Genesis 1:1", "Genesis 1:2"])
@@ -623,21 +630,21 @@ class ParsingTests(unittest.TestCase):
         )
 
     def test_get_start_and_get_end(self):
-        self.assertEqual(self.pv("en", "Genesis 1:1-2").get_start().canonical_form(), "Genesis 1:1")
-        self.assertEqual(self.pv("en", "Genesis 1:1-2").get_end().canonical_form(), "Genesis 1:2")
+        assert self.pv("en", "Genesis 1:1-2").get_start().canonical_form() == "Genesis 1:1"
+        assert self.pv("en", "Genesis 1:1-2").get_end().canonical_form() == "Genesis 1:2"
 
-        self.assertEqual(self.pv("en", "Genesis 1").get_start().canonical_form(), "Genesis 1:1")
-        self.assertEqual(self.pv("en", "Genesis 1").get_end().canonical_form(), "Genesis 1:31")
+        assert self.pv("en", "Genesis 1").get_start().canonical_form() == "Genesis 1:1"
+        assert self.pv("en", "Genesis 1").get_end().canonical_form() == "Genesis 1:31"
 
-        self.assertEqual(self.pv("en", "Genesis 1:5-3:10").get_start().canonical_form(), "Genesis 1:5")
-        self.assertEqual(self.pv("en", "Genesis 1:5-3:10").get_end().canonical_form(), "Genesis 3:10")
+        assert self.pv("en", "Genesis 1:5-3:10").get_start().canonical_form() == "Genesis 1:5"
+        assert self.pv("en", "Genesis 1:5-3:10").get_end().canonical_form() == "Genesis 3:10"
 
     def test_to_list_whole_book(self):
         parsed_ref = self.pv("en", "Genesis")
         refs = [item.canonical_form() for item in parsed_ref.to_list()]
-        self.assertEqual(refs[0], "Genesis 1:1")
-        self.assertEqual(refs[1], "Genesis 1:2")
-        self.assertEqual(refs[-1], "Genesis 50:26")
+        assert refs[0] == "Genesis 1:1"
+        assert refs[1] == "Genesis 1:2"
+        assert refs[-1] == "Genesis 50:26"
 
     def test_is_in_bounds(self):
         good_ref = self.pu(LANGUAGE_CODE_EN, "Gen 1:1")
@@ -674,9 +681,9 @@ class GetPassageSectionsTests(unittest.TestCase):
     def test_empty(self):
         uvs_list = [MockUVS("Genesis 1:1"), MockUVS("Genesis 1:2")]
         sections = get_passage_sections(uvs_list, "")
-        self.assertEqual(
-            [[uvs.localized_reference for uvs in section] for section in sections], [["Genesis 1:1", "Genesis 1:2"]]
-        )
+        assert [[uvs.localized_reference for uvs in section] for section in sections] == [
+            ["Genesis 1:1", "Genesis 1:2"]
+        ]
 
     def test_simple_verse_list(self):
         uvs_list = [
@@ -688,10 +695,10 @@ class GetPassageSectionsTests(unittest.TestCase):
         ]
 
         sections = get_passage_sections(uvs_list, "BOOK0 1:1,BOOK0 1:4")
-        self.assertEqual(
-            [[uvs.localized_reference for uvs in section] for section in sections],
-            [["Genesis 1:1", "Genesis 1:2", "Genesis 1:3"], ["Genesis 1:4", "Genesis 1:5"]],
-        )
+        assert [[uvs.localized_reference for uvs in section] for section in sections] == [
+            ["Genesis 1:1", "Genesis 1:2", "Genesis 1:3"],
+            ["Genesis 1:4", "Genesis 1:5"],
+        ]
 
     def test_simple_verse_list_missing_first(self):
         uvs_list = [
@@ -703,10 +710,10 @@ class GetPassageSectionsTests(unittest.TestCase):
         ]
 
         sections = get_passage_sections(uvs_list, "BOOK0 1:4")
-        self.assertEqual(
-            [[uvs.localized_reference for uvs in section] for section in sections],
-            [["Genesis 1:1", "Genesis 1:2", "Genesis 1:3"], ["Genesis 1:4", "Genesis 1:5"]],
-        )
+        assert [[uvs.localized_reference for uvs in section] for section in sections] == [
+            ["Genesis 1:1", "Genesis 1:2", "Genesis 1:3"],
+            ["Genesis 1:4", "Genesis 1:5"],
+        ]
 
     def test_chapter_and_verse(self):
         uvs_list = [
@@ -721,15 +728,12 @@ class GetPassageSectionsTests(unittest.TestCase):
         ]
 
         sections = get_passage_sections(uvs_list, "BOOK0 1:13,BOOK0 2:2,BOOK0 2:4")
-        self.assertEqual(
-            [[uvs.localized_reference for uvs in section] for section in sections],
-            [
-                ["Genesis 1:11", "Genesis 1:12"],
-                ["Genesis 1:13", "Genesis 2:1"],
-                ["Genesis 2:2", "Genesis 2:3"],
-                ["Genesis 2:4", "Genesis 2:5"],
-            ],
-        )
+        assert [[uvs.localized_reference for uvs in section] for section in sections] == [
+            ["Genesis 1:11", "Genesis 1:12"],
+            ["Genesis 1:13", "Genesis 2:1"],
+            ["Genesis 2:2", "Genesis 2:3"],
+            ["Genesis 2:4", "Genesis 2:5"],
+        ]
 
     def test_combo_and_merged_verses_1(self):
         # For this API, combo verses and merged verses are the same
@@ -738,10 +742,10 @@ class GetPassageSectionsTests(unittest.TestCase):
         uvs_list = [MockUVS("Genesis 1:1"), MockUVS("Genesis 1:2"), MockUVS("Genesis 1:3-4"), MockUVS("Genesis 1:5")]
 
         sections = get_passage_sections(uvs_list, "BOOK0 1:3")
-        self.assertEqual(
-            [[uvs.localized_reference for uvs in section] for section in sections],
-            [["Genesis 1:1", "Genesis 1:2"], ["Genesis 1:3-4", "Genesis 1:5"]],
-        )
+        assert [[uvs.localized_reference for uvs in section] for section in sections] == [
+            ["Genesis 1:1", "Genesis 1:2"],
+            ["Genesis 1:3-4", "Genesis 1:5"],
+        ]
 
     def test_combo_and_merged_verses_2(self):
         uvs_list = [MockUVS("Genesis 1:1"), MockUVS("Genesis 1:2"), MockUVS("Genesis 1:3-4"), MockUVS("Genesis 1:5")]
@@ -750,10 +754,9 @@ class GetPassageSectionsTests(unittest.TestCase):
         # For this case we make an arbitrary decision to ignore breaks
         # that occur in the middle of a merged/combo verse. In reality
         # this is just a corner case that is very unlikely to ever occur.
-        self.assertEqual(
-            [[uvs.localized_reference for uvs in section] for section in sections],
-            [["Genesis 1:1", "Genesis 1:2", "Genesis 1:3-4", "Genesis 1:5"]],
-        )
+        assert [[uvs.localized_reference for uvs in section] for section in sections] == [
+            ["Genesis 1:1", "Genesis 1:2", "Genesis 1:3-4", "Genesis 1:5"]
+        ]
 
 
 class IsContinuousSetTests(BibleVersesMixin, TestBase):
@@ -763,7 +766,7 @@ class IsContinuousSetTests(BibleVersesMixin, TestBase):
                 "bible_verse_number"
             )
         )
-        self.assertTrue(is_continuous_set(verse_list))
+        assert is_continuous_set(verse_list)
 
     def test_is_continuous_set_2(self):
         verse_list = list(
@@ -771,7 +774,7 @@ class IsContinuousSetTests(BibleVersesMixin, TestBase):
                 "bible_verse_number"
             )
         )
-        self.assertFalse(is_continuous_set(verse_list))
+        assert not is_continuous_set(verse_list)
 
     def test_is_continuous_set_3(self):
         verse_list = list(
@@ -779,7 +782,7 @@ class IsContinuousSetTests(BibleVersesMixin, TestBase):
                 localized_reference__in=["Romalılar 3:24", "Romalılar 3:25-26", "Romalılar 3:27"]
             ).order_by("bible_verse_number")
         )
-        self.assertTrue(is_continuous_set(verse_list))
+        assert is_continuous_set(verse_list)
 
     def test_is_continuous_set_4(self):
         verse_list = list(
@@ -787,7 +790,7 @@ class IsContinuousSetTests(BibleVersesMixin, TestBase):
                 localized_reference__in=["Yuhanna 3:16", "Romalılar 3:24", "Romalılar 3:27"]
             ).order_by("bible_verse_number")
         )
-        self.assertFalse(is_continuous_set(verse_list))
+        assert not is_continuous_set(verse_list)
 
 
 class UserVerseStatusTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestBase):
@@ -803,8 +806,8 @@ class UserVerseStatusTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestB
 
         uvs = identity.verse_statuses.get(localized_reference="Psalm 23:2")
 
-        self.assertEqual(uvs.passage_localized_reference, "Psalm 23")
-        self.assertEqual(uvs.section_localized_reference, "Psalm 23:1-3")
+        assert uvs.passage_localized_reference == "Psalm 23"
+        assert uvs.section_localized_reference == "Psalm 23:1-3"
 
     def test_passage_and_section_localized_reference_merged(self):
         # Setup to create UVSs
@@ -816,8 +819,8 @@ class UserVerseStatusTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestB
         uvs = identity.verse_statuses.get(localized_reference="Romalılar 3:24")
 
         # Should be expanded to account for merged verse.
-        self.assertEqual(uvs.section_localized_reference, "Romalılar 3:24-26")
-        self.assertEqual(uvs.passage_localized_reference, "Romalılar 3:24-26")
+        assert uvs.section_localized_reference == "Romalılar 3:24-26"
+        assert uvs.passage_localized_reference == "Romalılar 3:24-26"
 
         # Other tests for the underlying functionality are in GetPassageSectionsTests
 
@@ -825,76 +828,71 @@ class UserVerseStatusTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestB
         identity, account = self.create_account()
         identity.add_verse_set(VerseSet.objects.get(name="Psalm 23"))
 
-        self.assertEqual(
-            len(identity.verse_statuses.search_by_parsed_ref(parse_validated_localized_reference("en", "Psalm 23:1"))),
-            1,
+        assert (
+            len(identity.verse_statuses.search_by_parsed_ref(parse_validated_localized_reference("en", "Psalm 23:1")))
+            == 1
         )
 
     def test_search_by_parsed_ref_range(self):
         identity, account = self.create_account()
         identity.add_verse_set(VerseSet.objects.get(name="Psalm 23"))
 
-        self.assertEqual(
-            len(
-                identity.verse_statuses.search_by_parsed_ref(parse_validated_localized_reference("en", "Psalm 23:1-3"))
-            ),
-            3,
+        assert (
+            len(identity.verse_statuses.search_by_parsed_ref(parse_validated_localized_reference("en", "Psalm 23:1-3")))
+            == 3
         )
 
     def test_search_by_parsed_ref_out_of_bounds(self):
         identity, account = self.create_account()
-        self.assertEqual(
-            len(identity.verse_statuses.search_by_parsed_ref(parse_validated_localized_reference("en", "Psalm 2000"))),
-            0,
+        assert (
+            len(identity.verse_statuses.search_by_parsed_ref(parse_validated_localized_reference("en", "Psalm 2000")))
+            == 0
         )
 
     def test_search_by_parsed_ref_chapter(self):
         identity, account = self.create_account()
         identity.add_verse_set(VerseSet.objects.get(name="Psalm 23"))
 
-        self.assertEqual(
-            len(identity.verse_statuses.search_by_parsed_ref(parse_validated_localized_reference("en", "Psalm 23"))), 6
+        assert (
+            len(identity.verse_statuses.search_by_parsed_ref(parse_validated_localized_reference("en", "Psalm 23")))
+            == 6
         )
 
     def test_search_by_parsed_ref_combo(self):
         identity, account = self.create_account()
         identity.add_verse_choice("Psalm 23:1-2")
 
-        self.assertEqual(
-            len(identity.verse_statuses.search_by_parsed_ref(parse_validated_localized_reference("en", "Psalm 23:1"))),
-            1,
+        assert (
+            len(identity.verse_statuses.search_by_parsed_ref(parse_validated_localized_reference("en", "Psalm 23:1")))
+            == 1
         )
 
-        self.assertEqual(
-            len(
-                identity.verse_statuses.search_by_parsed_ref(parse_validated_localized_reference("en", "Psalm 23:1-2"))
-            ),
-            1,
+        assert (
+            len(identity.verse_statuses.search_by_parsed_ref(parse_validated_localized_reference("en", "Psalm 23:1-2")))
+            == 1
         )
 
-        self.assertEqual(
-            len(
-                identity.verse_statuses.search_by_parsed_ref(parse_validated_localized_reference("en", "Psalm 23:1-3"))
-            ),
-            1,
+        assert (
+            len(identity.verse_statuses.search_by_parsed_ref(parse_validated_localized_reference("en", "Psalm 23:1-3")))
+            == 1
         )
 
-        self.assertEqual(
+        assert (
             len(
                 identity.verse_statuses.search_by_parsed_ref(
                     parse_unvalidated_localized_reference("en", "Psalm 23:2-3")
                 )
-            ),
-            1,
+            )
+            == 1
         )
 
-        self.assertEqual(
+        assert (
             len(
                 identity.verse_statuses.search_by_parsed_ref(
                     parse_unvalidated_localized_reference("en", "Psalm 23:3-4")
                 )
-            ),
-            0,
+            )
+            == 0
         )
 
     def test_search_by_parsed_ref_whole_book(self):
@@ -902,54 +900,65 @@ class UserVerseStatusTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestB
         identity.add_verse_set(VerseSet.objects.get(name="Psalm 23"))
         identity.add_verse_choice("John 3:16")
 
-        self.assertEqual(
-            len(identity.verse_statuses.search_by_parsed_ref(parse_validated_localized_reference("en", "Psalm"))),
-            VerseSet.objects.get(name="Psalm 23").verse_choices.count(),
+        assert (
+            len(identity.verse_statuses.search_by_parsed_ref(parse_validated_localized_reference("en", "Psalm")))
+            == VerseSet.objects.get(name="Psalm 23").verse_choices.count()
         )
-        self.assertEqual(
-            len(identity.verse_statuses.search_by_parsed_ref(parse_validated_localized_reference("en", "John"))),
-            1,
-        )
+        assert len(identity.verse_statuses.search_by_parsed_ref(parse_validated_localized_reference("en", "John"))) == 1
 
     def test_search_by_parsed_ref_different_language(self):
         identity, account = self.create_account()
         identity.add_verse_choice("Psalm 23:1")
         identity.add_verse_choice("Psalm 23:2")
 
-        self.assertEqual(
-            len(identity.verse_statuses.search_by_parsed_ref(parse_validated_localized_reference("tr", "Mezmur 23:1"))),
-            1,
+        assert (
+            len(identity.verse_statuses.search_by_parsed_ref(parse_validated_localized_reference("tr", "Mezmur 23:1")))
+            == 1
         )
 
-        self.assertEqual(
-            len(identity.verse_statuses.search_by_parsed_ref(parse_validated_localized_reference("tr", "Mezmur 23"))), 2
+        assert (
+            len(identity.verse_statuses.search_by_parsed_ref(parse_validated_localized_reference("tr", "Mezmur 23")))
+            == 2
         )
 
 
 class VerseUtilsTests(unittest.TestCase):
     def test_split_into_words(self):
-        self.assertEqual(split_into_words("""and live forever--"'"""), ["and", "live", "forever--\"'"])
+        assert split_into_words("""and live forever--"'""") == ["and", "live", "forever--\"'"]
 
-        self.assertEqual(
-            split_into_words("two great lights--the greater light"),
-            ["two", "great", "lights--", "the", "greater", "light"],
-        )
+        assert split_into_words("two great lights--the greater light") == [
+            "two",
+            "great",
+            "lights--",
+            "the",
+            "greater",
+            "light",
+        ]
 
-        self.assertEqual(split_into_words("--some text here"), ["--some", "text", "here"])
+        assert split_into_words("--some text here") == ["--some", "text", "here"]
 
     def test_split_into_words_newlines(self):
         text = 'and\r\n"A stone of stumbling,\r\nand a rock of offense.'
-        self.assertEqual(
-            split_into_words(text), ["and\n", '"A', "stone", "of", "stumbling,\n", "and", "a", "rock", "of", "offense."]
-        )
+        assert split_into_words(text) == [
+            "and\n",
+            '"A',
+            "stone",
+            "of",
+            "stumbling,\n",
+            "and",
+            "a",
+            "rock",
+            "of",
+            "offense.",
+        ]
 
     def test_split_into_words_trailing_newline(self):
         text = "RAB çobanımdır, \n Eksiğim olmaz. \n"
-        self.assertEqual(split_into_words(text), ["RAB", "çobanımdır,\n", "Eksiğim", "olmaz.\n"])
+        assert split_into_words(text) == ["RAB", "çobanımdır,\n", "Eksiğim", "olmaz.\n"]
 
     def test_split_into_words_turkish(self):
         text = "Düşmanı, öç alanı yok etmek için."
-        self.assertEqual(split_into_words(text), ["Düşmanı,", "öç", "alanı", "yok", "etmek", "için."])
+        assert split_into_words(text) == ["Düşmanı,", "öç", "alanı", "yok", "etmek", "için."]
 
 
 class SetupEsvMixin:
@@ -1001,22 +1010,22 @@ class ESVTests(SetupEsvMixin, TestBase):
     def test_get_verse_list(self):
         verses = self.esv.get_verse_list("John 3:16")
         text = self.JOHN_316_TEXT
-        self.assertEqual(verses[0].text, text)
+        assert verses[0].text == text
         self._assert_john316_correct()
 
     def test_combo_verses(self):
         d = self.esv.get_verses_by_localized_reference_bulk(["John 5:4", "John 3:16-17"])
-        self.assertEqual(d["John 5:4"].text, "")
-        self.assertEqual(d["John 3:16-17"].text, self.JOHN_316_TEXT + " " + self.JOHN_317_TEXT)
+        assert d["John 5:4"].text == ""
+        assert d["John 3:16-17"].text == self.JOHN_316_TEXT + " " + self.JOHN_317_TEXT
 
     def test_get_verse_list_missing(self):
         verses = self.esv.get_verse_list("John 5:4")
-        self.assertEqual(verses[0].text, "")
+        assert verses[0].text == ""
 
         # 'missing' should be set in the DB
         verse = self.esv.verse_set.get(localized_reference="John 5:4")
-        self.assertEqual(verse.text_saved, "")
-        self.assertEqual(verse.missing, True)
+        assert verse.text_saved == ""
+        assert verse.missing
 
     def _assert_john316_correct(self):
         self._assert_text_present_and_correct("John 3:16", self.JOHN_316_TEXT)
@@ -1026,5 +1035,5 @@ class ESVTests(SetupEsvMixin, TestBase):
 
     def _assert_text_present_and_correct(self, ref, text):
         verse = self.esv.verse_set.get(localized_reference=ref)
-        self.assertEqual(verse.text_saved, text)
-        self.assertEqual(verse.missing, False)
+        assert verse.text_saved == text
+        assert not verse.missing

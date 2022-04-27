@@ -35,9 +35,9 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         i.add_verse_set(vs1)
 
         uvss = i.verse_statuses.all()
-        self.assertEqual(len(uvss), len(vs1.verse_choices.all()))
+        assert len(uvss) == len(vs1.verse_choices.all())
 
-        self.assertEqual({u.localized_reference for u in uvss}, {"John 3:16", "John 14:6", "Ephesians 2:8-9"})
+        assert {u.localized_reference for u in uvss} == {"John 3:16", "John 14:6", "Ephesians 2:8-9"}
 
         vs1 = VerseSet.objects.get(name="Bible 101")  # fresh
         # Having already created the UserVerseStatuses, this should be an
@@ -64,7 +64,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         i.add_verse_set(vs1)
 
         # We should get a new one, because we want it to have a verse_set link
-        self.assertEqual(i.verse_statuses.filter(localized_reference="John 3:16").count(), 2)
+        assert i.verse_statuses.filter(localized_reference="John 3:16").count() == 2
 
         # The data for new John 3:16 should be copied from the old
         for uvs in i.verse_statuses.filter(localized_reference="John 3:16"):
@@ -79,7 +79,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
                 "early_review_requested",
             ]:
                 with self.subTest(attr=attr):
-                    self.assertEqual(getattr(uvs, attr), getattr(uvs_orig, attr))
+                    assert getattr(uvs, attr) == getattr(uvs_orig, attr)
 
     def test_add_verse_set_passage_with_merged(self):
         i = self.create_identity(version_slug="TCL02")
@@ -96,38 +96,36 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
             )
 
         created = i.add_verse_set(vs)
-        self.assertEqual(len(created), 3)
+        assert len(created) == 3
 
         uvss = i.verse_statuses.all().order_by("text_order")
-        self.assertEqual(len(uvss), 3)
+        assert len(uvss) == 3
 
-        self.assertEqual(
-            {u.localized_reference for u in uvss}, {"Romalılar 3:24", "Romalılar 3:25-26", "Romalılar 3:27"}
-        )
+        assert {u.localized_reference for u in uvss} == {"Romalılar 3:24", "Romalılar 3:25-26", "Romalılar 3:27"}
 
-        self.assertEqual([u.text_order for u in uvss], [27003, 27004, 27005])
+        assert [u.text_order for u in uvss] == [27003, 27004, 27005]
 
     def test_record_read(self):
         i = self.create_identity(version_slug="NET")
         vs1 = VerseSet.objects.get(name="Bible 101")
         i.add_verse_set(vs1)
 
-        self.assertEqual(
-            i.verse_statuses.get(localized_reference="John 3:16", version__slug="NET").memory_stage, MemoryStage.ZERO
+        assert (
+            i.verse_statuses.get(localized_reference="John 3:16", version__slug="NET").memory_stage == MemoryStage.ZERO
         )
 
         i.record_verse_action("John 3:16", "NET", StageType.READ, 1)
         self.move_clock_on(timedelta(seconds=10))
 
         uvs = i.verse_statuses.get(localized_reference="John 3:16", version__slug="NET")
-        self.assertEqual(uvs.memory_stage, MemoryStage.SEEN)
-        self.assertTrue(uvs.first_seen is not None)
+        assert uvs.memory_stage == MemoryStage.SEEN
+        assert uvs.first_seen is not None
 
         first_seen = uvs.first_seen
         i.record_verse_action("John 3:16", "NET", StageType.READ, 1)
         uvs = i.verse_statuses.get(localized_reference="John 3:16", version__slug="NET")
         # first_seen field should not have changed
-        self.assertEqual(uvs.first_seen, first_seen)
+        assert uvs.first_seen == first_seen
 
     def test_add_verse_set_progress_and_choose_again(self):
         """
@@ -143,9 +141,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         vs2 = VerseSet.objects.get(name="Basic Gospel")
         i.add_verse_set(vs2)
 
-        self.assertEqual(
-            i.verse_statuses.get(localized_reference="John 3:16", verse_set=vs2).memory_stage, MemoryStage.SEEN
-        )
+        assert i.verse_statuses.get(localized_reference="John 3:16", verse_set=vs2).memory_stage == MemoryStage.SEEN
 
     def test_record_doesnt_decrease_stage(self):
         i = self.create_identity(version_slug="NET")
@@ -153,8 +149,9 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         i.add_verse_set(vs1)
         i.record_verse_action("John 3:16", "NET", StageType.READ, 1)
         i.record_verse_action("John 3:16", "NET", StageType.TEST, 1)
-        self.assertEqual(
-            i.verse_statuses.get(localized_reference="John 3:16", version__slug="NET").memory_stage, MemoryStage.TESTED
+        assert (
+            i.verse_statuses.get(localized_reference="John 3:16", version__slug="NET").memory_stage
+            == MemoryStage.TESTED
         )
 
     def test_record_against_verse_in_multiple_sets(self):
@@ -165,16 +162,12 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         vs2 = VerseSet.objects.get(name="Basic Gospel")
         i.add_verse_set(vs2)
 
-        self.assertEqual(i.verse_statuses.filter(localized_reference="John 3:16").count(), 2)
+        assert i.verse_statuses.filter(localized_reference="John 3:16").count() == 2
         i.record_verse_action("John 3:16", "NET", StageType.READ, 1)
 
         # Test
-        self.assertEqual(
-            i.verse_statuses.get(localized_reference="John 3:16", verse_set=vs1).memory_stage, MemoryStage.SEEN
-        )
-        self.assertEqual(
-            i.verse_statuses.get(localized_reference="John 3:16", verse_set=vs2).memory_stage, MemoryStage.SEEN
-        )
+        assert i.verse_statuses.get(localized_reference="John 3:16", verse_set=vs1).memory_stage == MemoryStage.SEEN
+        assert i.verse_statuses.get(localized_reference="John 3:16", verse_set=vs2).memory_stage == MemoryStage.SEEN
 
     def test_record_test_sets_next_due(self):
         i = self.create_identity(version_slug="NET")
@@ -186,8 +179,8 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         # First test - should be set to minimum of 1 hour
         MM = accounts.memorymodel.MM
         now = timezone.now()
-        self.assertLess(now + timedelta(seconds=0.9 * MM.MIN_TIME_BETWEEN_TESTS), next_due)
-        self.assertLess(next_due, now + timedelta(seconds=1.1 * MM.MIN_TIME_BETWEEN_TESTS))
+        assert now + timedelta(seconds=0.9 * MM.MIN_TIME_BETWEEN_TESTS) < next_due
+        assert next_due < now + timedelta(seconds=1.1 * MM.MIN_TIME_BETWEEN_TESTS)
 
     def test_review_sooner(self):
         i = self.create_identity(version_slug="NET")
@@ -198,24 +191,24 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         gap = timedelta(seconds=1000)
         i.review_sooner("John 3:16", "NET", gap.seconds)
         uvs = i.verse_statuses.get(localized_reference="John 3:16", version__slug="NET")
-        self.assertEqual(uvs.next_test_due, uvs.last_tested + gap)
+        assert uvs.next_test_due == uvs.last_tested + gap
 
-        self.assertEqual(i.next_verse_due(), uvs)
+        assert i.next_verse_due() == uvs
 
         self.move_clock_on(gap + timedelta(seconds=100))
 
         uvs.refresh_from_db()
-        self.assertEqual(uvs.needs_testing_individual, True)
+        assert uvs.needs_testing_individual
 
-        self.assertEqual(i.first_overdue_verse(timezone.now()), uvs)
+        assert i.first_overdue_verse(timezone.now()) == uvs
 
         # Something manually selected for review sooner should be
         # reviewed even if strength is 'fully learnt'
         i.verse_statuses.update(strength=accounts.memorymodel.LEARNT)
         uvs.refresh_from_db()
-        self.assertEqual(i.first_overdue_verse(timezone.now()), uvs)
-        self.assertEqual(uvs.needs_testing_individual, True)
-        self.assertEqual(uvs.needs_testing, True)
+        assert i.first_overdue_verse(timezone.now()) == uvs
+        assert uvs.needs_testing_individual
+        assert uvs.needs_testing
 
         # If we record a test again, 'early_review_requested' should be reset,
         # so that the overrides of 'review_sooner' no longer take effect. (The
@@ -224,16 +217,16 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         i.record_verse_action("John 3:16", "NET", StageType.TEST, 1)
         uvs.refresh_from_db()
         now = timezone.now()
-        self.assertGreater(uvs.next_test_due, now)
+        assert uvs.next_test_due > now
 
         # Verse should not be due in the future
-        self.assertEqual(i.next_verse_due(), None)
+        assert i.next_verse_due() is None
 
         gap2 = uvs.next_test_due - now
         self.move_clock_on(gap2 + timedelta(seconds=100))
 
         # Verse should not become overdue
-        self.assertEqual(i.first_overdue_verse(timezone.now()), None)
+        assert i.first_overdue_verse(timezone.now()) is None
 
     def test_record_creates_awards(self):
         i, account = self.create_account(version_slug="NET")
@@ -241,7 +234,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         i.add_verse_set(vs1)
         i.record_verse_action("John 3:16", "NET", StageType.TEST, 1)
         # Check 'STUDENT'
-        self.assertEqual(account.awards.filter(award_type=AwardType.STUDENT, level=1).count(), 1)
+        assert account.awards.filter(award_type=AwardType.STUDENT, level=1).count() == 1
         # Check 'MASTER'
         # frig the data:
         i.verse_statuses.update(
@@ -249,7 +242,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         )
         # Now do test to move above LEARNT
         i.record_verse_action("John 3:16", "NET", StageType.TEST, 1)
-        self.assertEqual(account.awards.filter(award_type=AwardType.MASTER, level=1).count(), 1)
+        assert account.awards.filter(award_type=AwardType.MASTER, level=1).count() == 1
 
     def test_bible_verse_statuses_for_reviewing(self):
         i = self.create_identity(version_slug="NET")
@@ -258,16 +251,16 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         i.record_verse_action("John 3:16", "NET", StageType.TEST, 1.0)
 
         # It shouldn't be set for reviewing yet
-        self.assertEqual([], list(i.bible_verse_statuses_for_reviewing()))
+        assert [] == list(i.bible_verse_statuses_for_reviewing())
 
         # It is confusing if it is ever ready within an hour, so we special case
         # that:
         self.move_clock_on(timedelta(hours=0.99))
-        self.assertEqual([], list(i.bible_verse_statuses_for_reviewing()))
+        assert [] == list(i.bible_verse_statuses_for_reviewing())
 
         # After 1 hour we expect it to be due
         self.move_clock_on(timedelta(hours=0.1))
-        self.assertEqual(["John 3:16"], [uvs.localized_reference for uvs in i.bible_verse_statuses_for_reviewing()])
+        assert ["John 3:16"] == [uvs.localized_reference for uvs in i.bible_verse_statuses_for_reviewing()]
 
     def test_bible_verse_statuses_for_reviewing_urgency(self):
         i = self.create_identity(version_slug="NET")
@@ -286,10 +279,9 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         # John 3:16 is now overdue by several days, more in absolute terms than
         # Ephesians 2:8-9. However, the latter is more urgent, because it is
         # very new. So should come first:
-        self.assertEqual(
-            ["Ephesians 2:8-9", "John 3:16"],
-            [uvs.localized_reference for uvs in i.bible_verse_statuses_for_reviewing()],
-        )
+        assert ["Ephesians 2:8-9", "John 3:16"] == [
+            uvs.localized_reference for uvs in i.bible_verse_statuses_for_reviewing()
+        ]
 
     def test_passages_for_learning(self):
         i = self.create_identity(version_slug="NET")
@@ -308,34 +300,34 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         i.record_verse_action("Psalm 23:1", "NET", StageType.TEST, 1.0)
         with self.assertNumQueries(2):
             cvss = i.passages_for_learning()
-        self.assertEqual(cvss[0].verse_set.id, vs1.id)
-        self.assertEqual(cvss[0].version.short_name, "NET")
-        self.assertEqual(cvss[0].tested_total, 1)
-        self.assertEqual(cvss[0].untested_total, 5)
-        self.assertEqual(cvss[0].needs_review_total, 0)
+        assert cvss[0].verse_set.id == vs1.id
+        assert cvss[0].version.short_name == "NET"
+        assert cvss[0].tested_total == 1
+        assert cvss[0].untested_total == 5
+        assert cvss[0].needs_review_total == 0
 
-        self.assertEqual(cvss[1].verse_set.id, vs1.id)
-        self.assertEqual(cvss[1].version.short_name, "KJV")
-        self.assertEqual(cvss[1].tested_total, 0)
-        self.assertEqual(cvss[1].untested_total, 6)
-        self.assertEqual(cvss[1].needs_review_total, 0)
+        assert cvss[1].verse_set.id == vs1.id
+        assert cvss[1].version.short_name == "KJV"
+        assert cvss[1].tested_total == 0
+        assert cvss[1].untested_total == 6
+        assert cvss[1].needs_review_total == 0
 
         # Put time back so that they ought to be up for review:
         i.verse_statuses.update(last_tested=timezone.now() - timedelta(10), next_test_due=timezone.now() - timedelta(1))
 
         with self.assertNumQueries(2):
             cvss = i.passages_for_learning()
-        self.assertEqual(cvss[0].verse_set.id, vs1.id)
-        self.assertEqual(cvss[0].version.short_name, "KJV")
-        self.assertEqual(cvss[0].needs_review_total, 0)
+        assert cvss[0].verse_set.id == vs1.id
+        assert cvss[0].version.short_name == "KJV"
+        assert cvss[0].needs_review_total == 0
 
-        self.assertEqual(cvss[1].verse_set.id, vs1.id)
-        self.assertEqual(cvss[1].version.short_name, "NET")
-        self.assertEqual(cvss[1].needs_review_total, 1)  # Psalm 23:1
+        assert cvss[1].verse_set.id == vs1.id
+        assert cvss[1].version.short_name == "NET"
+        assert cvss[1].needs_review_total == 1  # Psalm 23:1
 
         # Shouldn't be in general revision queue -
         # sneak a test for bible_verse_statuses_for_reviewing() here
-        self.assertEqual([], list(i.bible_verse_statuses_for_reviewing()))
+        assert [] == list(i.bible_verse_statuses_for_reviewing())
 
     def test_passages_for_reviewing_and_learning(self):
         i = self.create_identity(version_slug="NET")
@@ -365,18 +357,18 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
                 if vn < 6:
                     # Nothing to review, because one item still remains
                     # to be initially learnt.
-                    self.assertEqual(cvss_review, [])
-                    self.assertEqual(cvss_learn[0].verse_set.id, vs1.id)
+                    assert cvss_review == []
+                    assert cvss_learn[0].verse_set.id == vs1.id
                 else:
-                    self.assertEqual(cvss_learn, [])
+                    assert cvss_learn == []
                     cvs = cvss_review[0]
-                    self.assertEqual(cvs.verse_set.id, vs1.id)
-                    self.assertEqual(cvs.group_testing, False)
-                    self.assertEqual(cvs.needs_testing_count, 5)
-                    self.assertEqual(cvs.total_verse_count, 6)
+                    assert cvs.verse_set.id == vs1.id
+                    assert not cvs.group_testing
+                    assert cvs.needs_testing_count == 5
+                    assert cvs.total_verse_count == 6
 
                 # Shouldn't be in general revision queue
-                self.assertEqual([], list(i.bible_verse_statuses_for_reviewing()))
+                assert [] == list(i.bible_verse_statuses_for_reviewing())
 
         # Now test all verses
         for vn in range(1, 7):
@@ -385,8 +377,8 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
 
         # Should have nothing left to review now.
         cvss_review, cvss_learn = i.passages_for_reviewing_and_learning()
-        self.assertEqual(cvss_review, [])
-        self.assertEqual(cvss_learn, [])
+        assert cvss_review == []
+        assert cvss_learn == []
 
         # Time passes:
         self.move_clock_on(
@@ -400,38 +392,38 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         )
 
         cvss_review, cvss_learn = i.passages_for_reviewing_and_learning()
-        self.assertEqual(cvss_learn, [])
+        assert cvss_learn == []
         cvs = cvss_review[0]
 
-        self.assertEqual(cvs.group_testing, True)
+        assert cvs.group_testing
         # Fully learnt verses should not be counted in this total
-        self.assertEqual(cvs.needs_testing_count, 2)
-        self.assertEqual(cvs.total_verse_count, 6)
+        assert cvs.needs_testing_count == 2
+        assert cvs.total_verse_count == 6
 
         # We should skip the fully learnt first section, and choose the second.
-        self.assertEqual(cvs.next_section_verse_count, 3)
+        assert cvs.next_section_verse_count == 3
 
         passage_uvss = i.verse_statuses_for_passage(cvs.verse_set.id, cvs.version.id)
         section_uvss = i.get_next_section(passage_uvss, cvs.verse_set, add_buffer=False)
-        self.assertEqual([uvs.localized_reference for uvs in section_uvss], ["Psalm 23:3", "Psalm 23:4", "Psalm 23:5"])
+        assert [uvs.localized_reference for uvs in section_uvss] == ["Psalm 23:3", "Psalm 23:4", "Psalm 23:5"]
 
         # Now we actually test the verses in that section that we need to
         for uvs in section_uvss:
             if uvs.localized_reference in ["Psalm 23:3"]:
-                self.assertEqual(uvs.needs_testing, True)
+                assert uvs.needs_testing
                 i.record_verse_action(uvs.localized_reference, "NET", StageType.TEST, 1.0)
             else:
-                self.assertEqual(uvs.needs_testing, False)
+                assert not uvs.needs_testing
 
         # Check again.
         cvss_review, cvss_learn = i.passages_for_reviewing_and_learning()
         cvs = cvss_review[0]
-        self.assertEqual(cvs.group_testing, True)
+        assert cvs.group_testing
         # We still have 2 that need testing, due to group testing mode.
-        self.assertEqual(cvs.needs_testing_count, 2)
-        self.assertEqual(cvs.total_verse_count, 6)
+        assert cvs.needs_testing_count == 2
+        assert cvs.total_verse_count == 6
         # But now the next section is the last section, verse 6
-        self.assertEqual(cvs.next_section_verse_count, 1)
+        assert cvs.next_section_verse_count == 1
 
     def test_passages_for_reviewing_and_learning_multiple_versions(self):
         i = self.create_identity(version_slug="NET")
@@ -439,11 +431,11 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         vss1 = i.add_verse_set(vs1, version=self.NET)
         vss2 = i.add_verse_set(vs1, version=self.TCL02)
 
-        self.assertEqual(len(vss1), 6)
-        self.assertEqual(len(vss2), 6)
+        assert len(vss1) == 6
+        assert len(vss2) == 6
 
         cvss_learn = i.passages_for_learning()
-        self.assertEqual(len(cvss_learn), 2)
+        assert len(cvss_learn) == 2
 
         for vn in range(1, 7):
             # NET only:
@@ -456,8 +448,8 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
             )
 
         cvss_review, cvss_learn = i.passages_for_reviewing_and_learning()
-        self.assertEqual(len(cvss_review), 1)
-        self.assertEqual(len(cvss_learn), 1)
+        assert len(cvss_review) == 1
+        assert len(cvss_learn) == 1
 
     def test_issue_138(self):
         # https://gitlab.com/learnscripture/learnscripture.net/issues/138
@@ -482,48 +474,48 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
 
         cvss_review, cvss_learn = i.passages_for_reviewing_and_learning()
         # Sanity:
-        self.assertEqual(cvss_learn, [])
-        self.assertEqual(len(cvss_review), 1)
+        assert cvss_learn == []
+        assert len(cvss_review) == 1
         cvs = cvss_review[0]
-        self.assertEqual(cvs.verse_set, vs1)
-        self.assertEqual(cvs.group_testing, True)
-        self.assertEqual(cvs.total_verse_count, 6)
-        self.assertEqual(cvs.needs_testing_count, 6)
+        assert cvs.verse_set == vs1
+        assert cvs.group_testing
+        assert cvs.total_verse_count == 6
+        assert cvs.needs_testing_count == 6
 
     def test_catechisms_for_learning(self):
         i = self.create_identity(version_slug="NET")
         c = TextVersion.objects.get(slug="WSC")
         i.add_catechism(c)
         cs = i.catechisms_for_learning()
-        self.assertEqual(len(cs), 1)
-        self.assertEqual(cs[0].untested_total, c.qapairs.count())
-        self.assertEqual(cs[0].tested_total, 0)
+        assert len(cs) == 1
+        assert cs[0].untested_total == c.qapairs.count()
+        assert cs[0].tested_total == 0
 
         # After one tested:
         i.record_verse_action("Q1", "WSC", StageType.TEST, 1.0)
         cs = i.catechisms_for_learning()
-        self.assertEqual(len(cs), 1)
-        self.assertEqual(cs[0].untested_total, c.qapairs.count() - 1)
-        self.assertEqual(cs[0].tested_total, 1)
+        assert len(cs) == 1
+        assert cs[0].untested_total == c.qapairs.count() - 1
+        assert cs[0].tested_total == 1
 
         # After all tested:
         for qapair in c.qapairs.all():
             i.record_verse_action(qapair.localized_reference, "WSC", StageType.TEST, 1.0)
         cs = i.catechisms_for_learning()
-        self.assertEqual(len(cs), 0)
+        assert len(cs) == 0
 
     def test_catechisms_for_reviewing(self):
         i = self.create_identity(version_slug="NET")
         c = TextVersion.objects.get(slug="WSC")
         i.add_catechism(c)
         cs = i.catechisms_for_reviewing()
-        self.assertEqual(len(cs), 0)
+        assert len(cs) == 0
 
         # After one tested:
         i.record_verse_action("Q1", "WSC", StageType.TEST, 1.0)
 
         cs = i.catechisms_for_reviewing()
-        self.assertEqual(len(cs), 0)
+        assert len(cs) == 0
 
         # Artifically age
         i.verse_statuses.filter(localized_reference="Q1").update(
@@ -531,14 +523,14 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         )
 
         cs = i.catechisms_for_reviewing()
-        self.assertEqual(len(cs), 1)
-        self.assertEqual(cs[0].needs_reviewing_total, 1)
+        assert len(cs) == 1
+        assert cs[0].needs_reviewing_total == 1
 
         # After all tested:
         for qapair in c.qapairs.all():
             i.record_verse_action(qapair.localized_reference, "WSC", StageType.TEST, 1.0)
         cs = i.catechisms_for_reviewing()
-        self.assertEqual(len(cs), 0)
+        assert len(cs) == 0
 
     def test_verse_statuses_for_passage(self):
         i = self.create_identity(version_slug="NET")
@@ -547,10 +539,14 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
 
         uvss = i.verse_statuses_for_passage(vs1.id, self.NET.id)
 
-        self.assertEqual(
-            [uvs.localized_reference for uvs in uvss],
-            ["Psalm 23:1", "Psalm 23:2", "Psalm 23:3", "Psalm 23:4", "Psalm 23:5", "Psalm 23:6"],
-        )
+        assert [uvs.localized_reference for uvs in uvss] == [
+            "Psalm 23:1",
+            "Psalm 23:2",
+            "Psalm 23:3",
+            "Psalm 23:4",
+            "Psalm 23:5",
+            "Psalm 23:6",
+        ]
 
         # Now test and age them:
         for uvs in uvss:
@@ -568,8 +564,8 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
 
         uvss = i.verse_statuses_for_passage(vs1.id, self.NET.id)
         for uvs in uvss:
-            self.assertEqual(uvs.needs_testing_individual, uvs.localized_reference == "Psalm 23:3")
-            self.assertEqual(uvs.needs_testing, True)
+            assert uvs.needs_testing_individual == (uvs.localized_reference == "Psalm 23:3")
+            assert uvs.needs_testing
 
     def test_get_next_section(self):
         i = self.create_identity(version_slug="NET")
@@ -588,11 +584,11 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
 
         # Shouldn't be splittable yet, since strength will be below threshold
         vss = i.passages_for_reviewing_and_learning()[0]
-        self.assertEqual(len(vss), 1)
-        self.assertEqual(vss[0].verse_set.name, "Psalm 23")
-        self.assertEqual(vss[0].splittable, False)
-        self.assertEqual(vss[0].needs_testing_count, 6)
-        self.assertEqual(vss[0].total_verse_count, 6)
+        assert len(vss) == 1
+        assert vss[0].verse_set.name == "Psalm 23"
+        assert not vss[0].splittable
+        assert vss[0].needs_testing_count == 6
+        assert vss[0].total_verse_count == 6
 
         for vn in range(1, 7):
             ref = "Psalm 23:%d" % vn
@@ -609,18 +605,18 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
                 uvs.save()
 
         vss = i.passages_for_reviewing_and_learning()[0]
-        self.assertEqual(len(vss), 1)
-        self.assertEqual(vss[0].verse_set.name, "Psalm 23")
-        self.assertEqual(vss[0].splittable, True)
-        self.assertEqual(vss[0].needs_testing_count, 6)
-        self.assertEqual(vss[0].next_section_verse_count, 2)
+        assert len(vss) == 1
+        assert vss[0].verse_set.name == "Psalm 23"
+        assert vss[0].splittable
+        assert vss[0].needs_testing_count == 6
+        assert vss[0].next_section_verse_count == 2
 
         # Now test verse_statuses_for_passage/get_next_section in this context:
         uvss1 = i.verse_statuses_for_passage(vs1.id, self.NET.id)
         uvss1 = i.get_next_section(uvss1, vs1)
 
         # uvss should be first two verses only:
-        self.assertEqual(["Psalm 23:1", "Psalm 23:2"], [uvs.localized_reference for uvs in uvss1])
+        assert ["Psalm 23:1", "Psalm 23:2"] == [uvs.localized_reference for uvs in uvss1]
 
         # Now if we learn these two...
         for uvs in uvss1:
@@ -632,8 +628,8 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         uvss2 = i.verse_statuses_for_passage(vs1.id, self.NET.id)
         uvss2 = i.get_next_section(uvss2, vs1)
 
-        self.assertEqual(["Psalm 23:2", "Psalm 23:3", "Psalm 23:4"], [uvs.localized_reference for uvs in uvss2])
-        self.assertEqual([False, True, True], [uvs.needs_testing for uvs in uvss2])
+        assert ["Psalm 23:2", "Psalm 23:3", "Psalm 23:4"] == [uvs.localized_reference for uvs in uvss2]
+        assert [False, True, True] == [uvs.needs_testing for uvs in uvss2]
 
         # A quick gap
         self.move_clock_on(timedelta(seconds=10))
@@ -646,8 +642,8 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         uvss3 = i.verse_statuses_for_passage(vs1.id, self.NET.id)
         uvss3 = i.get_next_section(uvss3, vs1)
 
-        self.assertEqual(["Psalm 23:4", "Psalm 23:5", "Psalm 23:6"], [uvs.localized_reference for uvs in uvss3])
-        self.assertEqual([False, True, True], [uvs.needs_testing for uvs in uvss3])
+        assert ["Psalm 23:4", "Psalm 23:5", "Psalm 23:6"] == [uvs.localized_reference for uvs in uvss3]
+        assert [False, True, True] == [uvs.needs_testing for uvs in uvss3]
 
         # Learn next two.
         self.move_clock_on(timedelta(seconds=10))
@@ -658,7 +654,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         uvss4 = i.verse_statuses_for_passage(vs1.id, self.NET.id)
         uvss4 = i.get_next_section(uvss4, vs1)
 
-        self.assertEqual(["Psalm 23:1", "Psalm 23:2"], [uvs.localized_reference for uvs in uvss4])
+        assert ["Psalm 23:1", "Psalm 23:2"] == [uvs.localized_reference for uvs in uvss4]
 
     def test_slim_passage_for_reviewing(self):
         i = self.create_identity(version_slug="NET")
@@ -675,10 +671,10 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         i.verse_statuses.filter(localized_reference="Psalm 23:5").update(next_test_due=timezone.now() - timedelta(1))
 
         uvss = i.verse_statuses_for_passage(vs1.id, self.NET.id)
-        self.assertEqual(len(uvss), 6)
+        assert len(uvss) == 6
 
         uvss = i.slim_passage_for_reviewing(uvss, vs1)
-        self.assertEqual([uvs.localized_reference for uvs in uvss], ["Psalm 23:4", "Psalm 23:5", "Psalm 23:6"])
+        assert [uvs.localized_reference for uvs in uvss] == ["Psalm 23:4", "Psalm 23:5", "Psalm 23:6"]
 
     def test_get_verse_statuses(self):
         i = self.create_identity()
@@ -693,44 +689,44 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         with self.assertNumQueries(2, using="default"):
             with self.assertNumQueries(1, using="wordsuggestions"):
                 d = i.get_verse_statuses_bulk([uvs.id for uvs in uvss])
-                self.assertEqual(d[uvss[1].id].localized_reference, uvss[1].localized_reference)
+                assert d[uvss[1].id].localized_reference == uvss[1].localized_reference
                 [uvs.scoring_text_words for uvs in d.values()]
 
     def test_add_verse_choice(self):
         i = self.create_identity()
         uvs1 = i.add_verse_choice("Psalm 23:1")
-        self.assertEqual(uvs1.localized_reference, "Psalm 23:1")
-        self.assertEqual([uvs.localized_reference for uvs in i.verse_statuses.all()], ["Psalm 23:1"])
+        assert uvs1.localized_reference == "Psalm 23:1"
+        assert [uvs.localized_reference for uvs in i.verse_statuses.all()] == ["Psalm 23:1"]
         # Second add:
         uvs2 = i.add_verse_choice("Psalm 23:1")
-        self.assertEqual(uvs1, uvs2)
+        assert uvs1 == uvs2
 
     def test_add_verse_choice_combo(self):
         i = self.create_identity()
         uvs1 = i.add_verse_choice("Psalm 23:1-2")
-        self.assertEqual(uvs1.localized_reference, "Psalm 23:1-2")
-        self.assertEqual([uvs.localized_reference for uvs in i.verse_statuses.all()], ["Psalm 23:1-2"])
+        assert uvs1.localized_reference == "Psalm 23:1-2"
+        assert [uvs.localized_reference for uvs in i.verse_statuses.all()] == ["Psalm 23:1-2"]
         # Second add:
         uvs2 = i.add_verse_choice("Psalm 23:1-2")
-        self.assertEqual(uvs1, uvs2)
+        assert uvs1 == uvs2
 
     def test_add_verse_choice_merged(self):
         i = self.create_identity(version_slug="TCL02")
         uvs1 = i.add_verse_choice("Romalılar 3:25")
-        self.assertEqual(uvs1.localized_reference, "Romalılar 3:25-26")
-        self.assertEqual([uvs.localized_reference for uvs in i.verse_statuses.all()], ["Romalılar 3:25-26"])
+        assert uvs1.localized_reference == "Romalılar 3:25-26"
+        assert [uvs.localized_reference for uvs in i.verse_statuses.all()] == ["Romalılar 3:25-26"]
         # Second add:
         uvs2 = i.add_verse_choice("Romalılar 3:25")
-        self.assertEqual(uvs1, uvs2)
+        assert uvs1 == uvs2
 
     def test_add_verse_choice_merged_and_combo(self):
         i = self.create_identity(version_slug="TCL02")
         uvs1 = i.add_verse_choice("Romalılar 3:24-25")
-        self.assertEqual(uvs1.localized_reference, "Romalılar 3:24-26")
-        self.assertEqual([uvs.localized_reference for uvs in i.verse_statuses.all()], ["Romalılar 3:24-26"])
+        assert uvs1.localized_reference == "Romalılar 3:24-26"
+        assert [uvs.localized_reference for uvs in i.verse_statuses.all()] == ["Romalılar 3:24-26"]
         # Second add:
         uvs2 = i.add_verse_choice("Romalılar 3:24-25")
-        self.assertEqual(uvs1, uvs2)
+        assert uvs1 == uvs2
 
     def test_add_verse_choice_copies_strength(self):
         i = self.create_identity(version_slug="NET")
@@ -738,16 +734,16 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         i.add_verse_set(vs1)
 
         i.record_verse_action("Psalm 23:1", "NET", StageType.TEST, 1)
-        self.assertNotEqual(i.verse_statuses.get(localized_reference="Psalm 23:1").strength, 0)
+        assert i.verse_statuses.get(localized_reference="Psalm 23:1").strength != 0
 
         # Now use add_verse_choice
         i.add_verse_choice("Psalm 23:1")
 
         # We need two UserVerseStatuses, because the user wants to learn this
         # verse outside the context of the passage.
-        self.assertEqual(i.verse_statuses.filter(localized_reference="Psalm 23:1").count(), 2)
+        assert i.verse_statuses.filter(localized_reference="Psalm 23:1").count() == 2
 
-        self.assertFalse(0.0 in [uvs.strength for uvs in i.verse_statuses.filter(localized_reference="Psalm 23:1")])
+        assert not (0.0 in [uvs.strength for uvs in i.verse_statuses.filter(localized_reference="Psalm 23:1")])
 
     def test_verses_started_milestone_event(self):
         # This reproduces a bit of the logic from ActionCompleteHandler in order
@@ -770,9 +766,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
                 1,
             )
 
-            self.assertEqual(
-                Event.objects.filter(event_type=EventType.VERSES_STARTED_MILESTONE).count(), 0 if j < 9 else 1
-            )
+            assert Event.objects.filter(event_type=EventType.VERSES_STARTED_MILESTONE).count() == (0 if j < 9 else 1)
 
     def test_verses_finished_milestone_event(self):
         i, account = self.create_account(version_slug="KJV")
@@ -797,9 +791,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
                 StageType.TEST,
                 1,
             )
-            self.assertEqual(
-                Event.objects.filter(event_type=EventType.VERSES_FINISHED_MILESTONE).count(), 0 if j < 9 else 1
-            )
+            assert Event.objects.filter(event_type=EventType.VERSES_FINISHED_MILESTONE).count() == (0 if j < 9 else 1)
 
     def test_order_after_cancelling_and_re_adding_verse(self):
         """
@@ -808,17 +800,18 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         """
         i = self.create_identity(version_slug="NET")
         i.add_verse_choice("John 14:6")
-        self.assertEqual([uvs.localized_reference for uvs in i.bible_verse_statuses_for_learning(None)], ["John 14:6"])
+        assert [uvs.localized_reference for uvs in i.bible_verse_statuses_for_learning(None)] == ["John 14:6"]
         i.record_verse_action("John 14:6", "NET", StageType.READ, 1)
         i.cancel_learning(["John 14:6"], "NET")
 
         vs1 = VerseSet.objects.get(name="Bible 101")
         i.add_verse_set(vs1)
 
-        self.assertEqual(
-            [uvs.localized_reference for uvs in i.bible_verse_statuses_for_learning(vs1.id)],
-            ["John 3:16", "John 14:6", "Ephesians 2:8-9"],
-        )
+        assert [uvs.localized_reference for uvs in i.bible_verse_statuses_for_learning(vs1.id)] == [
+            "John 3:16",
+            "John 14:6",
+            "Ephesians 2:8-9",
+        ]
 
     def test_issue_75(self):
         i = self.create_identity(version_slug="NET")
@@ -831,10 +824,13 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         i.add_verse_set(vs1)
 
         uvss = i.verse_statuses_for_passage(vs1.id, self.NET.id)
-        self.assertEqual(
-            [uvs.localized_reference for uvs in uvss],
-            ["Psalm 23:1", "Psalm 23:2", "Psalm 23:3", "Psalm 23:4", "Psalm 23:5"],
-        )
+        assert [uvs.localized_reference for uvs in uvss] == [
+            "Psalm 23:1",
+            "Psalm 23:2",
+            "Psalm 23:3",
+            "Psalm 23:4",
+            "Psalm 23:5",
+        ]
 
         # Now learn a standalone verse choice
         i.add_verse_choice("Psalm 23:6")
@@ -847,10 +843,14 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
 
         # Should have all verses this time
         uvss = i.verse_statuses_for_passage(vs1.id, self.NET.id)
-        self.assertEqual(
-            [uvs.localized_reference for uvs in uvss],
-            ["Psalm 23:1", "Psalm 23:2", "Psalm 23:3", "Psalm 23:4", "Psalm 23:5", "Psalm 23:6"],
-        )
+        assert [uvs.localized_reference for uvs in uvss] == [
+            "Psalm 23:1",
+            "Psalm 23:2",
+            "Psalm 23:3",
+            "Psalm 23:4",
+            "Psalm 23:5",
+            "Psalm 23:6",
+        ]
 
     def test_add_missing_verse(self):
         """
@@ -861,7 +861,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         version.verse_set.get(localized_reference="John 3:16").mark_missing()
         with override("en"):
             i.add_verse_choice("John 3:16")
-        self.assertEqual(i.verse_statuses.filter(localized_reference="John 3:16", version=version).count(), 0)
+        assert i.verse_statuses.filter(localized_reference="John 3:16", version=version).count() == 0
 
     def test_consistent_learner_award(self):
         import awards.tasks
@@ -880,60 +880,54 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
             # Simulate the cronjob that runs
             awards.tasks.give_all_consistent_learner_awards()
 
-            self.assertEqual(account.awards.filter(award_type=AwardType.CONSISTENT_LEARNER).count(), 0 if i < 7 else 1)
+            assert account.awards.filter(award_type=AwardType.CONSISTENT_LEARNER).count() == (0 if i < 7 else 1)
 
     def test_verse_sets_chosen(self):
         i = self.create_identity(version_slug="NET")
 
         with self.assertNumQueries(1):
-            self.assertEqual(i.verse_sets_chosen(), [])
+            assert i.verse_sets_chosen() == []
 
         vs1 = VerseSet.objects.get(name="Psalm 23")
         i.add_verse_set(vs1)
         with self.assertNumQueries(3):
             chosen_1 = i.verse_sets_chosen()
-        self.assertEqual(chosen_1, [ChosenVerseSet(verse_set=vs1, version=i.default_bible_version)])
+        assert chosen_1 == [ChosenVerseSet(verse_set=vs1, version=i.default_bible_version)]
 
         i.add_verse_set(vs1, version=self.KJV)
 
         with self.assertNumQueries(3):
             chosen_2 = i.verse_sets_chosen()
-        self.assertEqual(
-            chosen_2,
-            [
-                ChosenVerseSet(verse_set=vs1, version=self.KJV),
-                ChosenVerseSet(verse_set=vs1, version=i.default_bible_version),
-            ],
-        )
+        assert chosen_2 == [
+            ChosenVerseSet(verse_set=vs1, version=self.KJV),
+            ChosenVerseSet(verse_set=vs1, version=i.default_bible_version),
+        ]
 
         vs2 = VerseSet.objects.get(name="Bible 101")
         i.add_verse_set(vs2)
 
         with self.assertNumQueries(3):
             chosen_3 = i.verse_sets_chosen()
-        self.assertEqual(
-            chosen_3,
-            [
-                ChosenVerseSet(verse_set=vs2, version=i.default_bible_version),
-                ChosenVerseSet(verse_set=vs1, version=self.KJV),
-                ChosenVerseSet(verse_set=vs1, version=i.default_bible_version),
-            ],
-        )
+        assert chosen_3 == [
+            ChosenVerseSet(verse_set=vs2, version=i.default_bible_version),
+            ChosenVerseSet(verse_set=vs1, version=self.KJV),
+            ChosenVerseSet(verse_set=vs1, version=i.default_bible_version),
+        ]
 
     def test_next_verse_due(self):
         i = self.create_identity(version_slug="NET")
         vs1 = VerseSet.objects.get(name="Bible 101")
 
         # Initial
-        self.assertEqual(i.next_verse_due(), None)
+        assert i.next_verse_due() is None
 
         # Added a verse
         i.add_verse_set(vs1)
-        self.assertEqual(i.next_verse_due(), None)
+        assert i.next_verse_due() is None
 
         i.record_verse_action("John 3:16", "NET", StageType.TEST, 1)
         nv = i.next_verse_due()
-        self.assertEqual(nv.localized_reference, "John 3:16")
+        assert nv.localized_reference == "John 3:16"
 
     def test_next_verse_due_ignores_passages_in_initial_learning(self):
         i = self.create_identity(version_slug="NET")
@@ -941,7 +935,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
 
         # Added a verse
         i.add_verse_set(vs1)
-        self.assertEqual(i.next_verse_due(), None)
+        assert i.next_verse_due() is None
 
         i.record_verse_action("Psalm 23:1", "NET", StageType.TEST, 1)
-        self.assertEqual(i.next_verse_due(), None)
+        assert i.next_verse_due() is None

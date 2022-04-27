@@ -33,22 +33,22 @@ class ViewSetTestsBase(RequireExampleVerseSetsMixin):
         self.login(account)
         vs = VerseSet.objects.get(slug="bible-101")
 
-        self.assertEqual(identity.verse_statuses.all().count(), 0)
+        assert identity.verse_statuses.all().count() == 0
 
         self.get_literal_url(reverse("view_verse_set", kwargs=dict(slug=vs.slug)) + "?version=NET")
         self.submit("[name=learn]")
 
         # Can use 'all' here because this is the first time we've chosen anything
         verse_statuses = identity.verse_statuses.all()
-        self.assertTrue(len(verse_statuses) > 0)
-        self.assertTrue(all(uvs.version.slug == "NET" for uvs in verse_statuses))
+        assert len(verse_statuses) > 0
+        assert all(uvs.version.slug == "NET" for uvs in verse_statuses)
 
     def test_drop_from_queue(self):
         identity, account = self.create_account()
         self.login(account)
         vs = VerseSet.objects.get(slug="bible-101")
         identity.add_verse_set(vs)
-        self.assertEqual(len(identity.bible_verse_statuses_for_learning(vs.id)), vs.verse_choices.count())
+        assert len(identity.bible_verse_statuses_for_learning(vs.id)) == vs.verse_choices.count()
 
         self.get_url("view_verse_set", slug=vs.slug)
 
@@ -56,12 +56,12 @@ class ViewSetTestsBase(RequireExampleVerseSetsMixin):
 
         self.submit("[name='drop']")
 
-        self.assertEqual(len(identity.bible_verse_statuses_for_learning(vs.id)), 0)
+        assert len(identity.bible_verse_statuses_for_learning(vs.id)) == 0
 
     def test_view_without_identity(self):
         ids = list(Identity.objects.all())
         vs = VerseSet.objects.get(slug="bible-101")
-        self.assertEqual(Identity.objects.exclude(id__in=[i.id for i in ids]).all().count(), 0)
+        assert Identity.objects.exclude(id__in=[i.id for i in ids]).all().count() == 0
         self.get_url("view_verse_set", slug=vs.slug)
         # Default version is NET:
         self.assertTextPresent("Jesus replied")
@@ -69,7 +69,7 @@ class ViewSetTestsBase(RequireExampleVerseSetsMixin):
 
         # Shouldn't have created an Identity
 
-        self.assertEqual(Identity.objects.exclude(id__in=[i.id for i in ids]).all().count(), 0)
+        assert Identity.objects.exclude(id__in=[i.id for i in ids]).all().count() == 0
 
 
 class ViewSetTestsFB(ViewSetTestsBase, FullBrowserTest):

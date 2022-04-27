@@ -261,7 +261,7 @@ def get_verses_started_counts(identity_ids, started_since=None):
         select(
             [uvs.c.for_identity_id],
             and_(
-                uvs.c.ignored == False,  # noqa
+                uvs.c.ignored == False,  # noqa:E712
                 uvs.c.memory_stage >= MemoryStage.TESTED,
                 uvs.c.for_identity_id.in_(identity_ids),
                 *([uvs.c.first_seen > started_since] if started_since is not None else []),
@@ -287,8 +287,8 @@ def get_verses_started_per_day(identity_id):
             [day_col],
             and_(
                 bibleverses_userversestatus.c.for_identity_id == identity_id,
-                bibleverses_userversestatus.c.first_seen != None,  # noqa
-                bibleverses_userversestatus.c.ignored == False,  # noqa
+                bibleverses_userversestatus.c.first_seen != None,  # noqa:E711
+                bibleverses_userversestatus.c.ignored == False,  # noqa:E712
             ),
             from_obj=bibleverses_userversestatus,
         ).group_by(
@@ -344,7 +344,7 @@ def get_verses_finished_count(identity_id, finished_since=None):
     uvs = bibleverses_userversestatus
     from_table = uvs
     filters = and_(
-        uvs.c.ignored == False,  # noqa
+        uvs.c.ignored == False,  # noqa:E712
         uvs.c.memory_stage >= MemoryStage.TESTED,
         uvs.c.strength >= MM.LEARNT,
         uvs.c.for_identity_id == identity_id,

@@ -23,10 +23,10 @@ class StrengthEstimate(unittest.TestCase):
 
         after_seven_tests = repeat(lambda val: strength_estimate(val, score, two_days), init, 7)
 
-        self.assertTrue((after_seven_tests - after_one_test) > 0.0001)
+        assert (after_seven_tests - after_one_test) > 0.0001
 
     def test_strength_estimate_null_previous(self):
-        self.assertEqual(strength_estimate(0, 1.0, None), MM.INITIAL_STRENGTH_FACTOR)
+        assert strength_estimate(0, 1.0, None) == MM.INITIAL_STRENGTH_FACTOR
 
     def test_outputs(self):
         # Here we test against known good values. The main purpose here is to be
@@ -37,4 +37,4 @@ class StrengthEstimate(unittest.TestCase):
         ]
         for vals in data:
             with self.subTest(vals=vals):
-                self.assertEqual(vals[3], strength_estimate(vals[0], vals[1], vals[2]))
+                assert vals[3] == strength_estimate(vals[0], vals[1], vals[2])

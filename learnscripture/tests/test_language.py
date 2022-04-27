@@ -11,7 +11,7 @@ class LanguageTestsBase(AccountTestMixin, FuncBaseMixin):
         self.fill({"#id-language-chooser-form select": "tr"})
         self.submit('#id-language-chooser-form [type="submit"]')
         identity.refresh_from_db()
-        self.assertEqual(identity.interface_language, "tr")
+        assert identity.interface_language == "tr"
 
     def test_change_language_not_logged_in(self):
         self.get_url("choose")

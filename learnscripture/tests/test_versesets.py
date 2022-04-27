@@ -18,56 +18,56 @@ class VerseSetTests(BibleVersesMixin, AccountTestMixin, TestBase):
         )
 
         # Private groups are visible to creator
-        self.assertIn(vs, VerseSet.objects.visible_for_account(creator))
+        assert vs in VerseSet.objects.visible_for_account(creator)
 
         # But not to others.
-        self.assertNotIn(vs, VerseSet.objects.visible_for_account(viewer))
+        assert vs not in VerseSet.objects.visible_for_account(viewer)
 
         vs.public = True
         vs.save()
 
         # public sets are visible
-        self.assertIn(vs, VerseSet.objects.visible_for_account(viewer))
+        assert vs in VerseSet.objects.visible_for_account(viewer)
 
         # hellbanned users
         creator.is_hellbanned = True
         creator.save()
 
         # Shouldn't be visible to others
-        self.assertNotIn(vs, VerseSet.objects.visible_for_account(viewer))
+        assert vs not in VerseSet.objects.visible_for_account(viewer)
 
     def test_smart_name(self):
         vs1 = VerseSet(name="Psalm 23", language_code="en", set_type=VerseSetType.PASSAGE)
-        self.assertEqual(vs1.smart_name("en"), "Psalm 23")
-        self.assertEqual(vs1.smart_name("tr"), "Mezmur 23")
+        assert vs1.smart_name("en") == "Psalm 23"
+        assert vs1.smart_name("tr") == "Mezmur 23"
 
         vs2 = VerseSet(name="Hebrews 1:1-10", language_code="en", set_type=VerseSetType.PASSAGE)
-        self.assertEqual(vs2.smart_name("en"), "Hebrews 1:1-10")
-        self.assertEqual(vs2.smart_name("tr"), "İbraniler 1:1-10")
+        assert vs2.smart_name("en") == "Hebrews 1:1-10"
+        assert vs2.smart_name("tr") == "İbraniler 1:1-10"
 
         vs3 = VerseSet(name="Romans 8 - wonderful promises!", language_code="en", set_type=VerseSetType.PASSAGE)
-        self.assertEqual(vs3.smart_name("en"), "Romans 8 - wonderful promises!")
-        self.assertEqual(vs3.smart_name("tr"), "Romans 8 - wonderful promises! (Romalılar 8)")
+        assert vs3.smart_name("en") == "Romans 8 - wonderful promises!"
+        assert vs3.smart_name("tr") == "Romans 8 - wonderful promises! (Romalılar 8)"
 
         vs4 = VerseSet(name="Mark 01:01-09", language_code="en", set_type=VerseSetType.PASSAGE)
-        self.assertEqual(vs4.smart_name("en"), "Mark 01:01-09")
-        self.assertEqual(vs4.smart_name("tr"), "Markos 1:1-9")
+        assert vs4.smart_name("en") == "Mark 01:01-09"
+        assert vs4.smart_name("tr") == "Markos 1:1-9"
 
         vs5 = VerseSet(name="Psalm 37: 1 - 40", language_code="en", set_type=VerseSetType.PASSAGE)
-        self.assertEqual(vs5.smart_name("en"), "Psalm 37: 1 - 40")
-        self.assertEqual(vs5.smart_name("tr"), "Mezmur 37")
+        assert vs5.smart_name("en") == "Psalm 37: 1 - 40"
+        assert vs5.smart_name("tr") == "Mezmur 37"
 
     def test_smart_name_no_abbreviations(self):
         # 'Promises' starts with 'pro' == abbreviation for proverbs. We should
         # not treat this the same as 'Proverbs'
         vs1 = VerseSet(name="Promises!", language_code="en", set_type=VerseSetType.PASSAGE)
-        self.assertEqual(vs1.smart_name("en"), "Promises!")
-        self.assertEqual(vs1.smart_name("tr"), "Promises!")
+        assert vs1.smart_name("en") == "Promises!"
+        assert vs1.smart_name("tr") == "Promises!"
 
     def test_smart_name_remainder(self):
         vs1 = VerseSet(name="Marked", language_code="en", set_type=VerseSetType.PASSAGE)
-        self.assertEqual(vs1.smart_name("en"), "Marked")
-        self.assertEqual(vs1.smart_name("tr"), "Marked")
+        assert vs1.smart_name("en") == "Marked"
+        assert vs1.smart_name("tr") == "Marked"
 
     def test_any_language(self):
         vs = VerseSet(
@@ -77,11 +77,11 @@ class VerseSetTests(BibleVersesMixin, AccountTestMixin, TestBase):
             set_type=VerseSetType.PASSAGE,
         )
         vs.save()
-        self.assertTrue(vs.any_language)
+        assert vs.any_language
 
         vs.description = "This is a description"
         vs.save()
-        self.assertFalse(vs.any_language)
+        assert not vs.any_language
 
     def test_set_verse_choices_sanitizes(self):
         vs = VerseSet(
@@ -102,4 +102,4 @@ class VerseSetTests(BibleVersesMixin, AccountTestMixin, TestBase):
                 "BOOK1 2:1",
             ]
         )
-        self.assertEqual([vc.internal_reference for vc in vs.verse_choices.all()], ["BOOK0 1:1", "BOOK1 2:1"])
+        assert [vc.internal_reference for vc in vs.verse_choices.all()] == ["BOOK0 1:1", "BOOK1 2:1"]

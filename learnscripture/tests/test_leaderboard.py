@@ -30,13 +30,13 @@ class LeaderboardTests(TestBase):
 
     def test_get(self):
         resp = self.client.get(reverse("group_leaderboard", args=(self.group.slug,)))
-        self.assertEqual(resp.status_code, 200)
+        assert resp.status_code == 200
         self.assertContains(resp, self.a1.username)
         self.assertNotContains(resp, self.a2.username)
 
     def test_get_thisweek(self):
         resp = self.client.get(reverse("group_leaderboard", args=(self.group.slug,)), {"when": "thisweek"})
-        self.assertEqual(resp.status_code, 200)
+        assert resp.status_code == 200
         self.assertContains(resp, self.a1.username)
         self.assertNotContains(resp, self.a2.username)
 
@@ -72,7 +72,7 @@ class VerseCountTests(BibleVersesMixin, CatechismsMixin, AccountTestMixin, TestB
         identity.add_verse_set(vs2)
 
         # Sanity check the test
-        self.assertEqual(identity.verse_statuses.filter(localized_reference="Psalm 23:1").count(), 2)
+        assert identity.verse_statuses.filter(localized_reference="Psalm 23:1").count() == 2
 
         self._do_assert_stats(identity, 1, refs=["Psalm 23:1"])
 
@@ -89,11 +89,11 @@ class VerseCountTests(BibleVersesMixin, CatechismsMixin, AccountTestMixin, TestB
             identity.record_verse_action(ref, version.slug, StageType.TEST, accuracy=1.0)
 
         # Started
-        self.assertEqual(get_verses_started_counts([identity.id])[identity.id], count)
+        assert get_verses_started_counts([identity.id])[identity.id] == count
 
         # Started per day
         dt = identity.verse_statuses.filter(localized_reference__in=refs).first().last_tested.date()
-        self.assertEqual(get_verses_started_per_day(identity.id), [(dt, count)])
+        assert get_verses_started_per_day(identity.id) == [(dt, count)]
 
         # Move time on enough so that next hit gets past learnt threshold.
         identity.verse_statuses.update(strength=MM.LEARNT - 0.01)
@@ -108,15 +108,13 @@ class VerseCountTests(BibleVersesMixin, CatechismsMixin, AccountTestMixin, TestB
             )
 
         # Finished
-        self.assertEqual(get_verses_finished_count(identity.id), count)
+        assert get_verses_finished_count(identity.id) == count
 
         # Finished since
         last_tested = identity.verse_statuses.filter(localized_reference__in=refs).first().last_tested
-        self.assertEqual(get_verses_finished_count(identity.id, finished_since=last_tested + timedelta(seconds=10)), 0)
+        assert get_verses_finished_count(identity.id, finished_since=last_tested + timedelta(seconds=10)) == 0
 
-        self.assertEqual(
-            get_verses_finished_count(identity.id, finished_since=last_tested - timedelta(seconds=10)), count
-        )
+        assert get_verses_finished_count(identity.id, finished_since=last_tested - timedelta(seconds=10)) == count
 
     def test_verse_stats_merged(self):
         identity, account = self.create_account(version_slug="TCL02")

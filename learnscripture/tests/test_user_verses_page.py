@@ -36,15 +36,13 @@ class UserVersesPageTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.click('button[data-localized-reference="Psalm 23:2"]')
 
         # 'Practise verse' button
-        self.assertEqual(self.get_element_text('button[name="reviewverse"]'), "Practise Psalm 23:2")
+        assert self.get_element_text('button[name="reviewverse"]') == "Practise Psalm 23:2"
 
         # 'Practise section' button
-        self.assertEqual(
-            self.get_element_text('button[name="practisepassagesection"]'), "Practise section: Psalm 23:1-3"
-        )
+        assert self.get_element_text('button[name="practisepassagesection"]') == "Practise section: Psalm 23:1-3"
 
         # 'Practise passage' button
-        self.assertEqual(self.get_element_text('button[name="practisepassage"]'), "Practise passage: Psalm 23")
+        assert self.get_element_text('button[name="practisepassage"]') == "Practise passage: Psalm 23"
 
         self.submit('[name="practisepassagesection"]')
 
@@ -52,7 +50,7 @@ class UserVersesPageTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         self.assertTextPresent("Psalm 23:1")
 
         # Should be in 'practice' mode
-        self.assertIn("PRACTICE", self.get_element_text("#id-instructions"))
+        assert "PRACTICE" in self.get_element_text("#id-instructions")
 
         # Type the verse:
         words = "The LORD is my shepherd I shall not want"
