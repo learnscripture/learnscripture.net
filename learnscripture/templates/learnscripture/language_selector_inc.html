@@ -19,7 +19,7 @@
   </form>
   {% if request.LANGUAGE_CODE != 'en' %}
     <div id="id-wrong-translation">
-      <a href="/translation/">{% ftlmsg 'site-wrong-or-missing-translation' %}</a>
+      <a href="{% url 'contact' %}">{% ftlmsg 'site-wrong-or-missing-translation' %}</a>
     </div>
   {% endif %}
 </div>
