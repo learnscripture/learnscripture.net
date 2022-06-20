@@ -117,10 +117,7 @@ class ParsedReference:
         """
         Returns a prefix string that matches all the verses in the book
         """
-        if is_single_chapter_book(self.book_number):
-            return self.book_name + " 1:"
-        else:
-            return self.book_name + " "
+        return self.book_name + " "
 
     def is_single_verse(self):
         return (
