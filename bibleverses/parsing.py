@@ -113,6 +113,15 @@ class ParsedReference:
     def is_whole_chapter(self):
         return self.start_chapter is not None and self.start_verse is None
 
+    def whole_book_prefix(self):
+        """
+        Returns a prefix string that matches all the verses in the book
+        """
+        if is_single_chapter_book(self.book_number):
+            return self.book_name + " 1:"
+        else:
+            return self.book_name + " "
+
     def is_single_verse(self):
         return (
             self.start_verse is not None
