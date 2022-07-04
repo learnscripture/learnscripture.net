@@ -1123,7 +1123,7 @@ def user_verse_sets(request):
 # Password reset for Accounts:
 #
 # We can re-use a large amount of django.contrib.auth functionality due to same
-# interface between Account and User. Some things need customising/replacing.
+# interface between Account and User. Some things need customizing/replacing.
 #
 # Also, we do the main password_reset via AJAX, from the same form as the login
 # form.
@@ -1147,7 +1147,7 @@ def password_reset_complete(request):
     )
 
 
-# Large copy and paste from django.contrib.auth.views, followed by customisations.
+# Large copy and paste from django.contrib.auth.views, followed by customizations.
 @sensitive_post_parameters()
 @never_cache
 def password_reset_confirm(request, uidb64=None, token=None):

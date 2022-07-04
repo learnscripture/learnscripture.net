@@ -165,7 +165,7 @@ groups-details-status-not-member = You are not a member of this group.
 
 # Explanation of what happens when you join a group
 groups-details-join-explanation-html = By joining this group, you will join the <b>leaderboard</b> for the group, and the
-          <b>news stream</b> on your dashboard will be customised to prefer news from
+          <b>news stream</b> on your dashboard will be customized to prefer news from
           the people in this group.
 
 # Explanation of what privacy of joining group
@@ -188,4 +188,3 @@ groups-details-members-subtitle = Members
 
 # Shown when there are no members.
 groups-details-members-empty = No members in this group
-
