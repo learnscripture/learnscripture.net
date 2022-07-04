@@ -256,11 +256,11 @@ class Account(AbstractBaseUser):
             # we have to send this signal after creating ActionLog
             scored_100_percent.send(sender=self)
 
-        if action_change.old_strength < memorymodel.LEARNT <= action_change.new_strength:
+        if action_change.old_strength < memorymodel.LEARNED <= action_change.new_strength:
             action_logs.append(
                 self.add_points(
-                    word_count * Scores.points_per_word(language_code) * Scores.VERSE_LEARNT_BONUS,
-                    ScoreReason.VERSE_LEARNT,
+                    word_count * Scores.points_per_word(language_code) * Scores.VERSE_LEARNED_BONUS,
+                    ScoreReason.VERSE_LEARNED,
                     localized_reference=localized_reference,
                     accuracy=accuracy,
                 )
@@ -1049,7 +1049,7 @@ class Identity(models.Model):
 
     def verse_sets_chosen(self):
         """
-        Returns a list of ChosenVerseSets that have been/are being learnt
+        Returns a list of ChosenVerseSets that have been/are being learned
         """
         pairs = (
             self.verse_statuses.active()
@@ -1168,7 +1168,7 @@ class Identity(models.Model):
         cvss = self.passages_for_learning(extra_stats=False)
         if cvss:
             # We need to exlude verses that are part of passage sets that are
-            # still being learnt, because those are pushed back from being
+            # still being learned, because those are pushed back from being
             # 'reviewed' while the rest of the passage is in initial learning.
             exclude_ids = list(
                 reduce(
@@ -1205,7 +1205,7 @@ class Identity(models.Model):
         min_strength = min(uvs.strength for uvs in uvs_list)
         if min_strength > memorymodel.STRENGTH_FOR_GROUP_TESTING:
             for uvs in uvs_list:
-                if uvs.strength < memorymodel.LEARNT:
+                if uvs.strength < memorymodel.LEARNED:
                     uvs.needs_testing_override = True
 
     def get_next_section(self, uvs_list, verse_set, add_buffer=True):
@@ -1213,7 +1213,7 @@ class Identity(models.Model):
         Given a UVS list and a VerseSet, get the items in uvs_list
         which are the next section to review.
         """
-        # We don't track which was the last 'section' learnt, and we can't,
+        # We don't track which was the last 'section' learned, and we can't,
         # since the user can give up at any point.  We therefore use heuristics
         # to work out which should be the next section.
 
@@ -1330,7 +1330,7 @@ class Identity(models.Model):
 def uvs_urgency(uvs):
     # Sort key for sorting UserVerseStatus by urgency - higher is more urgent.
     #
-    # When a verse is first being learnt, it is much more likely to go out of
+    # When a verse is first being learned, it is much more likely to go out of
     # the memory than when it is quite well established. So a verse that was
     # scheduled for a gap of 2 months, one week over due isn't much, but if it
     # was scheduled for 1 hour, then 2 days is a lot. So we sort by the fraction

@@ -83,8 +83,8 @@ user-stats-verses-started = Çalışılmaya başlanan ayetler
 # Caption for stats showing the number of verses the user was tested on
 user-stats-verses-tested = Test edilen ayetler
 
-# Caption for stats showing the number of verses the user fully learnt
-user-stats-verses-fully-learnt = Tamamlanan ayetler
+# Caption for stats showing the number of verses the user fully learned
+user-stats-verses-fully-learned = Tamamlanan ayetler
 
 # Caption for stats showing the number of verse sets the user created
 user-stats-verse-sets-created = Oluşturulan ayet dizinleri

@@ -213,7 +213,7 @@ class TextVersion(models.Model):
 
     def get_learners(self):
         # This doesn't have to be 100% accurate, so do an easier query - find
-        # people who have learnt the first item
+        # people who have learned the first item
         return [
             uvs.for_identity.account
             for uvs in UserVerseStatus.objects.select_related("for_identity", "for_identity__account").filter(
@@ -880,7 +880,7 @@ class UserVerseStatusQuerySet(models.QuerySet):
             self.active()
             .tested()
             .filter(
-                Q(strength__lt=memorymodel.LEARNT) | Q(early_review_requested=True),
+                Q(strength__lt=memorymodel.LEARNED) | Q(early_review_requested=True),
                 next_test_due__isnull=False,
             )
         )
@@ -1015,7 +1015,7 @@ class UserVerseStatus(models.Model):
             return True
         if self.next_test_due is None:
             return True
-        if self.strength >= memorymodel.LEARNT and not self.early_review_requested:
+        if self.strength >= memorymodel.LEARNED and not self.early_review_requested:
             return False
         return timezone.now() >= self.next_test_due
 
@@ -1035,7 +1035,9 @@ class UserVerseStatus(models.Model):
         return (
             self.is_active()
             and self.is_tested()
-            and ((self.strength < memorymodel.LEARNT or self.early_review_requested) and self.next_test_due is not None)
+            and (
+                (self.strength < memorymodel.LEARNED or self.early_review_requested) and self.next_test_due is not None
+            )
         )
 
     def needs_reviewing(self, now):
@@ -1043,10 +1045,10 @@ class UserVerseStatus(models.Model):
         return self.is_reviewable() and self.next_test_due <= now
 
     def scaled_strength(self):
-        # See also Learn.elm scaledStrength. Anything more than LEARNT is
-        # counted as fully learnt, so we re-scaled according to that, only for
+        # See also Learn.elm scaledStrength. Anything more than LEARNED is
+        # counted as fully learned, so we re-scaled according to that, only for
         # the purposes of user presentation.
-        return min(self.strength / memorymodel.LEARNT, 1.0)
+        return min(self.strength / memorymodel.LEARNED, 1.0)
 
     def scaled_strength_percentage(self):
         return math.floor(self.scaled_strength() * 100)

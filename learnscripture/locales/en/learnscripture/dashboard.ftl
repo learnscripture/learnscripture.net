@@ -91,7 +91,7 @@ dashboard-learn-continue-learning-button = Continue learning
 # for learning (but that haven't started yet)
 dashboard-passage-queued = You've queued this passage for learning.
 
-# Message on a passage verse set indicating the number of items learnt
+# Message on a passage verse set indicating the number of items learned
 # and still not started.
 dashboard-passages-youve-seen-verses =
     You've seen { $tested_total ->
@@ -100,7 +100,7 @@ dashboard-passages-youve-seen-verses =
      } so far,
      with { $untested_total } still to start on.
 
-# Message on a passage verse set indicating the number of items learnt
+# Message on a passage verse set indicating the number of items learned
 # and still not started, inluding info about those that are due for review.
 dashboard-passages-youve-seen-verses-with-review-due-html =
     You've seen { $tested_total ->
@@ -130,7 +130,7 @@ dashboard-clear-queue-button = Clear
 dashboard-catechism-question-count = You've queued this catechism for learning, { $count } questions total.
 
 # Indicates the number of questions in a catechism that have been started, and how many remain.
-dashboard-catechism-learnt-and-remanining-count = You've seen
+dashboard-catechism-learned-and-remanining-count = You've seen
    { $started_count ->
        [one]     1 question
       *[other]   { $started_count } questions
@@ -184,5 +184,3 @@ dashboard-news-title = News
 
 # Link to the news page
 dashboard-more-news-link = See more news...
-
-

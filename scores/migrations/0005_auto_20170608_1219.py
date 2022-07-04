@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                     (1, "Verse revised"),
                     (2, "Review completed"),
                     (3, "Perfect!"),
-                    (4, "Verse fully learnt"),
+                    (4, "Verse fully learned"),
                     (5, "Earned award"),
                 ]
             ),

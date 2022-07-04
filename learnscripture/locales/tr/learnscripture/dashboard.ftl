@@ -88,12 +88,12 @@ dashboard-learn-continue-learning-button = Çalışmaya devam et
 # for learning (but that haven't started yet)
 dashboard-passage-queued = Çalışmanız için bu kısım sıralandı.
 
-# Message on a passage verse set indicating the number of items learnt
+# Message on a passage verse set indicating the number of items learned
 # and still not started.
 dashboard-passages-youve-seen-verses = { $tested_total } ayet çalışmış bulunyorsunuz.
      Çalışmanız gereken { $untested_total } ayet kaldı.
 
-# Message on a passage verse set indicating the number of items learnt
+# Message on a passage verse set indicating the number of items learned
 # and still not started, inluding info about those that are due for review.
 dashboard-passages-youve-seen-verses-with-review-due-html = { $tested_total } ayet görmüş bulunyorsunuz.
     <b>{ $needs_review_total } ayet tekrarlama için hazır</b>
@@ -119,7 +119,7 @@ dashboard-clear-queue-button = Sıfırla
 dashboard-catechism-question-count = Çalışmanız için bu ilmihalde { $count } soru sıralandı.
 
 # Indicates the number of questions in a catechism that have been started, and how many remain.
-dashboard-catechism-learnt-and-remanining-count = { $started_count } soru görmüş bulunyorsunuz.
+dashboard-catechism-learned-and-remanining-count = { $started_count } soru görmüş bulunyorsunuz.
    Kalan { $remaining_count } soru var.
 
 # Message displayed when there are no passages, verses or catechisms queued for learning

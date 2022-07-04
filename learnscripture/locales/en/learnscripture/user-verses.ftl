@@ -48,7 +48,7 @@ user-verses-version-heading = Version
 # Heading in table for Catechism name
 user-verses-catechism-heading = Catechism
 
-# Heading in table for column showing the level/strength to which a verse has been learnt
+# Heading in table for column showing the level/strength to which a verse has been learned
 user-verses-strength-heading = Strength
 
 # Button for reviewing a verse
@@ -91,4 +91,3 @@ user-verses-stop-learning-passage-button = Stop learning this passage
 
 # Confirmation prompt for stopping learning a passage
 user-verses-stop-learning-passage-prompt = Are you sure you want to stop learning { $passage_reference } in { $version_name }?
-

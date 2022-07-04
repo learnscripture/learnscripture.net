@@ -63,7 +63,7 @@ learn-initial-test = ilk test
 learn-review-test = tekrarlama testi
 learn-revision-completed = düzeltme tamam
 learn-perfect-score-bonus = tam puan için BONUS!
-learn-verse-fully-learnt-bonus = ayeti tamamen bildiğiniz için BONUS!
+learn-verse-fully-learned-bonus = ayeti tamamen bildiğiniz için BONUS!
 learn-award-bonus = bonus ödül
 
 ## Navbar:
@@ -160,8 +160,8 @@ learn-next-button-caption = Sonraki
 
 learn-back-button-caption = Önceki
 
-# Indicates a verse is fully learnt
-learn-verse-fully-learnt = Çalışma tamam
+# Indicates a verse is fully learned
+learn-verse-fully-learned = Çalışma tamam
 
 
 # Displayed under 'practice' button, to indicate it will happen right now.

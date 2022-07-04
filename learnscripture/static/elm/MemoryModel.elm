@@ -1,4 +1,4 @@
-module MemoryModel exposing (..)
+module MemoryModel exposing (alpha, bestStrength, deltaSIdeal, exponent, initialStrengthFactor, learned, minTimeBetweenTests, nextTestDueAfter, oneYear, strength, strengthEstimate, time, verseTests)
 
 -- See Python code accounts.memorymodel, and sync all changes
 -- Note that Python code works in seconds, and so does this.
@@ -19,8 +19,8 @@ verseTests =
     20
 
 
-learnt : Float
-learnt =
+learned : Float
+learned =
     0.8
 
 
@@ -41,12 +41,12 @@ oneYear =
 
 alpha : Float
 alpha =
-    -1.0 * logBase e (1.0 - learnt) / (oneYear ^ exponent)
+    -1.0 * logBase e (1.0 - learned) / (oneYear ^ exponent)
 
 
 deltaSIdeal : Float
 deltaSIdeal =
-    learnt / verseTests
+    learned / verseTests
 
 
 {-| Calculates a strength estimate,
@@ -69,8 +69,10 @@ strengthEstimate oldStrength testAccuracy timeElapsedM =
         Just timeElapsed ->
             if testStrength < oldStrength then
                 testStrength
+
             else if oldStrength == 1.0 then
                 bestStrength
+
             else
                 let
                     s1 =

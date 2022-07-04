@@ -70,7 +70,7 @@ versesets-view-set-learning-is-public = Learning a verse set is a public action
         (unless the set is private and remains private)
 
 # Prompt to change a verse set to a 'passage set'
-versesets-view-set-change-to-passage-set = This looks like a continuous set of verses. These are much better learnt
+versesets-view-set-change-to-passage-set = This looks like a continuous set of verses. These are much better learned
       using a 'passage' set, rather than a 'selection' set. You can convert using
       the button below:
 
@@ -208,4 +208,3 @@ versesets-you-are-learning-title = Verse sets you are learning
 
 # Sub-title for section showing the list of verse sets the user created
 versesets-you-created-title = Verse sets you created
-

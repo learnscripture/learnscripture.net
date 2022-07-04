@@ -95,7 +95,7 @@ def create_verses_started_milestone_event(account_id):
     account = Account.objects.get(id=account_id)
 
     # This could fail if the task gets delayed past the point where another
-    # verse has been learnt. But we don't mind that much if some Events get
+    # verse has been learned. But we don't mind that much if some Events get
     # missed.
     c = account.identity.verses_started_count()
 

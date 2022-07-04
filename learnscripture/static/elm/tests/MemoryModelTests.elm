@@ -1,4 +1,4 @@
-module MemoryModelTests exposing (..)
+module MemoryModelTests exposing (aMemoryStrength, aTestAccuracy, aTimeElapsed, almostEqual, anOldMemoryStrength, anUnlearnedMemoryStrength, epsilon, getAtUnsafe, strengthEstimateTestData, suite)
 
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, float, floatRange, int, list, maybe, string)
@@ -74,9 +74,9 @@ aMemoryStrength =
     floatRange 0 bestStrength
 
 
-anUnlearntMemoryStrength : Fuzzer Float
-anUnlearntMemoryStrength =
-    floatRange 0 learnt
+anUnlearnedMemoryStrength : Fuzzer Float
+anUnlearnedMemoryStrength =
+    floatRange 0 learned
 
 
 aTestAccuracy : Fuzzer Float
@@ -130,7 +130,7 @@ suite =
                     strengthEstimateTestData
             )
         , describe "nextTestDueAfter"
-            [ fuzz anUnlearntMemoryStrength "maximum gap for unlearnt memory" <|
+            [ fuzz anUnlearnedMemoryStrength "maximum gap for unlearned memory" <|
                 \s ->
                     nextTestDueAfter s
                         |> Expect.lessThan (365 * 24 * 60 * 60)

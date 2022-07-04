@@ -698,7 +698,7 @@ def verse_options(request):
     the verse in request.GET['ref']
     """
     # This view is called from the 'progress' page where the list of verses
-    # being learnt by a user is shown.
+    # being learned by a user is shown.
     if not hasattr(request, "identity"):
         return HttpResponse("Error: not logged in")
     identity = request.identity
@@ -1571,7 +1571,7 @@ def group_leaderboard(request, slug):
     identity_ids = [i.id for i in identities]
     identity_dict = {i.account_id: i for i in identities}
 
-    # Counts of verses learnt
+    # Counts of verses learned
     verse_counts = get_verses_started_counts(identity_ids, cutoff)
 
     for account_dict in accounts:

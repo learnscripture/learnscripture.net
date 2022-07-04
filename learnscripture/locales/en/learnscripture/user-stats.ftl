@@ -83,8 +83,8 @@ user-stats-verses-started = Verses started
 # Caption for stats showing the number of verses the user was tested on
 user-stats-verses-tested = Verses tested
 
-# Caption for stats showing the number of verses the user fully learnt
-user-stats-verses-fully-learnt = Verses fully learnt
+# Caption for stats showing the number of verses the user fully learned
+user-stats-verses-fully-learned = Verses fully learned
 
 # Caption for stats showing the number of verse sets the user created
 user-stats-verse-sets-created = Verse sets created

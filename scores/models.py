@@ -22,14 +22,14 @@ class ScoreReason(models.IntegerChoices):
     VERSE_REVIEWED = 1, "Verse reviewed"
     REVISION_COMPLETED = 2, "Review completed"  # No longer used
     PERFECT_TEST_BONUS = 3, "Perfect!"
-    VERSE_LEARNT = 4, "Verse fully learnt"
+    VERSE_LEARNED = 4, "Verse fully learned"
     EARNED_AWARD = 5, "Earned award"
 
 
 class Scores:
     # Constants for scores. Duplicated in learn.js
     PERFECT_BONUS_FACTOR = 0.5
-    VERSE_LEARNT_BONUS = 2
+    VERSE_LEARNED_BONUS = 2
 
     # This is based on a comparison of the number of words in a typical Bible
     # translation for each language:
@@ -346,7 +346,7 @@ def get_verses_finished_count(identity_id, finished_since=None):
     filters = and_(
         uvs.c.ignored == False,  # noqa:E712
         uvs.c.memory_stage >= MemoryStage.TESTED,
-        uvs.c.strength >= MM.LEARNT,
+        uvs.c.strength >= MM.LEARNED,
         uvs.c.for_identity_id == identity_id,
     )
     if finished_since is not None:
@@ -360,7 +360,7 @@ def get_verses_finished_count(identity_id, finished_since=None):
             ),
         )
         filters = and_(
-            filters, scores_actionlog.c.reason == ScoreReason.VERSE_LEARNT, scores_actionlog.c.created > finished_since
+            filters, scores_actionlog.c.reason == ScoreReason.VERSE_LEARNED, scores_actionlog.c.created > finished_since
         )
     q1 = (
         select([func.unnest(uvs.c.internal_reference_list), uvs.c.version_id], filters, from_obj=from_table).group_by(

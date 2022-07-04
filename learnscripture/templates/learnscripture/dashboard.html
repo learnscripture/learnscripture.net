@@ -311,7 +311,7 @@
           {% if catechism.tested_total == 0 %}
             <p>{% ftlmsg 'dashboard-catechism-question-count' count=catechism.untested_total %}</p>
           {% else %}
-            <p>{% ftlmsg 'dashboard-catechism-learnt-and-remanining-count' started_count=catechism.tested_total remaining_count=catechism.untested_total %}</p>
+            <p>{% ftlmsg 'dashboard-catechism-learned-and-remanining-count' started_count=catechism.tested_total remaining_count=catechism.untested_total %}</p>
           {% endif %}
         </div>
 

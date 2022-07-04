@@ -35,6 +35,7 @@ import Time
 import Window
 
 
+
 {- Ahem, yes, this could really do with being split up into separate modules,
    but I didn't yet work out a good way to do that makes sense for this page,
    especially with some of the things like the way `viewButton` has to work.
@@ -198,6 +199,7 @@ init flags =
     -- from the server will be out of date.
     if Dict.isEmpty currentHttpCalls then
         loadVerses True model1
+
     else
         let
             model2 =
@@ -219,6 +221,7 @@ setPinnedMenus prefs windowSize =
                )
       then
         Just ActionLogsInfo
+
       else
         Nothing
     , if
@@ -226,6 +229,7 @@ setPinnedMenus prefs windowSize =
             && isScreenLargeEnoughForSidePanels windowSize
       then
         Just VerseOptionsMenu
+
       else
         Nothing
     ]
@@ -555,7 +559,7 @@ type ScoreReason
     | VerseReviewed
     | RevisionCompleted
     | PerfectTestBonus
-    | VerseLearnt
+    | VerseLearned
     | EarnedAward
 
 
@@ -697,10 +701,12 @@ pinnedAttributes model =
     List.filterMap identity
         [ if menuIsPinned ActionLogsInfo model then
             Just (A.attribute "data-actionlogsinfo-pinned" "true")
+
           else
             Nothing
         , if menuIsPinned VerseOptionsMenu model then
             Just (A.attribute "data-verseoptionsmenu-pinned" "true")
+
           else
             Nothing
         ]
@@ -710,6 +716,7 @@ getReturnCaption : Url -> Locale -> String
 getReturnCaption url locale =
     if url == dashboardUrl then
         T.learnDashboardLink locale ()
+
     else
         T.learnDashboardLink locale ()
 
@@ -776,12 +783,14 @@ ajaxInfo model =
         retriesClass =
             if retryingAttempts then
                 Just "ajax-retries"
+
             else
                 Nothing
 
         failuresClass =
             if not <| List.isEmpty failedHttpCalls then
                 Just "ajax-failures"
+
             else
                 Nothing
 
@@ -794,6 +803,7 @@ ajaxInfo model =
         hiddenClass =
             if hideStatus then
                 Just "hidden"
+
             else
                 Nothing
 
@@ -808,8 +818,10 @@ ajaxInfo model =
         spinClass =
             if hideStatus then
                 ""
+
             else if httpCallsInProgress then
                 "icon-spin"
+
             else
                 ""
 
@@ -819,6 +831,7 @@ ajaxInfo model =
         openClass =
             if dropdownOpen && itemsToView then
                 "menu-open"
+
             else
                 ""
     in
@@ -831,6 +844,7 @@ ajaxInfo model =
             ]
         , if not itemsToView then
             emptyNode
+
           else
             H.ul
                 [ A.class ("nav-dropdown-menu " ++ openClass) ]
@@ -843,6 +857,7 @@ ajaxInfo model =
                             [ H.text (T.learnReconnectWithServer locale ()) ]
                         ]
                     ]
+
                   else
                     []
                  )
@@ -863,6 +878,7 @@ ajaxInfo model =
                                             ("ajax-attempt"
                                                 ++ (if attempts > 1 then
                                                         " ajax-retrying"
+
                                                     else
                                                         ""
                                                    )
@@ -871,6 +887,7 @@ ajaxInfo model =
                                         [ H.text <|
                                             if attempts == 0 then
                                                 T.learnDataInQueue locale { item = trackedHttpCallCaption call locale }
+
                                             else
                                                 T.learnDataBeingAttempted locale
                                                     { attempt = Fluent.number attempts
@@ -958,12 +975,14 @@ viewActionLogs model =
         openClass =
             if not menuPinned && (dropdownOpen && itemsToView) then
                 "menu-open"
+
             else
                 ""
 
         pinnedClass =
             if menuPinned then
                 "menu-pinned"
+
             else
                 ""
 
@@ -1037,6 +1056,7 @@ dropdownHeadingAttributes dropdown openable extraClasses =
                 , onEnter (ToggleDropdown dropdown)
                 , A.tabindex 0
                 ]
+
             else
                 [ A.tabindex -1 ]
            )
@@ -1057,8 +1077,8 @@ prettyReason reason locale =
         PerfectTestBonus ->
             T.learnPerfectScoreBonus locale ()
 
-        VerseLearnt ->
-            T.learnVerseFullyLearntBonus locale ()
+        VerseLearned ->
+            T.learnVerseFullyLearnedBonus locale ()
 
         EarnedAward ->
             T.learnAwardBonus locale ()
@@ -1073,6 +1093,7 @@ signedNumberToString : Int -> String
 signedNumberToString number =
     if number > 0 then
         "+" ++ toString number
+
     else
         toString number
 
@@ -1109,6 +1130,7 @@ viewCurrentVerse session model =
         previousVerse =
             if shouldShowPreviousVerse currentVerse.verseStatus then
                 getPreviousVerse session.verses currentVerse.verseStatus
+
             else
                 Nothing
 
@@ -1118,6 +1140,7 @@ viewCurrentVerse session model =
         titleTextAttrs =
             if isTestingReference currentVerse.currentStage then
                 [ A.class "blurry" ]
+
             else
                 []
 
@@ -1144,6 +1167,7 @@ viewCurrentVerse session model =
                             ""
                                 ++ (if shouldHideWordBoundaries then
                                         "hide-word-boundaries "
+
                                     else
                                         ""
                                    )
@@ -1198,6 +1222,7 @@ viewCurrentVerse session model =
             ]
          , if verseOptionsMenuVisible then
             viewVerseOptionsMenu model currentVerse
+
            else
             emptyNode
          , H.div [ A.id "id-verse-wrapper" ]
@@ -1211,6 +1236,7 @@ viewCurrentVerse session model =
                             ("previous-verse-wrapper"
                                 ++ (if not model.previousVerseVisible then
                                         " previous-verse-partial"
+
                                     else
                                         ""
                                    )
@@ -1232,6 +1258,7 @@ viewCurrentVerse session model =
                                 ("icon-show-previous-verse"
                                     ++ (if model.previousVerseVisible then
                                             " expanded"
+
                                         else
                                             ""
                                        )
@@ -1273,11 +1300,11 @@ viewCurrentVerse session model =
         )
 
 
-{-| see bibleverses/models.py scaled_strength
+{-| see bibleverses/models.py scaled\_strength
 -}
 scaledStrength : Float -> Float
 scaledStrength rawStrength =
-    min (rawStrength / MemoryModel.learnt) 1.0
+    min (rawStrength / MemoryModel.learned) 1.0
 
 
 shouldShowPreviousVerse : VerseStatus -> Bool
@@ -1307,8 +1334,10 @@ viewVerseOptionsMenuButton menuOpen menuPinned locale =
             True
             (if menuOpen then
                 [ "menu-open" ]
+
              else if menuPinned then
                 [ "menu-pinned" ]
+
              else
                 [ "menu-closed" ]
             )
@@ -1369,6 +1398,7 @@ viewVerseOptionsMenu model currentVerse =
                 [ Just skipButton
                 , if isPassageSet currentVerse then
                     Nothing
+
                   else
                     Just cancelLearningButton
                 , Just resetProgressButton
@@ -1380,6 +1410,7 @@ viewVerseOptionsMenu model currentVerse =
         pinnedClass =
             if menuPinned then
                 "menu-pinned"
+
             else
                 ""
     in
@@ -1412,6 +1443,7 @@ viewVerseOptionsMenu model currentVerse =
                                 ]
                             ]
                         ]
+
                     else
                         []
                    )
@@ -1492,6 +1524,7 @@ partsForVerse verse learningStageType testingMethod =
                        )
             then
                 [ Linebreak ] ++ referenceToParts verse.localizedReference
+
             else
                 []
            )
@@ -1536,6 +1569,7 @@ verseWordToParts w idx =
             }
         , Linebreak
         ]
+
     else
         [ WordPart
             { type_ = BodyWord
@@ -1566,6 +1600,7 @@ referenceToParts reference =
                     (\w ->
                         if R.contains initialPunctOrSpace w then
                             [ String.left 1 w, String.dropLeft 1 w ]
+
                         else
                             [ w ]
                     )
@@ -1575,8 +1610,10 @@ referenceToParts reference =
         (\idx w ->
             if String.trim w == "" then
                 Space
+
             else if R.contains initialPunctOrSpace w then
                 ReferencePunct w
+
             else
                 WordPart
                     { type_ = ReferenceWord
@@ -1599,6 +1636,7 @@ versePartsToHtml stage parts uvsId hideWordBoundaries =
                 Space ->
                     if hideWordBoundaries then
                         emptyNode
+
                     else
                         H.text " "
 
@@ -1652,11 +1690,13 @@ wordButton word stage uvsId =
          ]
             ++ (if id /= "" then
                     [ A.id id ]
+
                 else
                     []
                )
             ++ (if clickableButton then
                     [ onClickSimply <| WordButtonClicked <| getWordId word ]
+
                 else
                     []
                )
@@ -1713,6 +1753,7 @@ wordButtonClasses wd stage =
                                 CurrentWord cw ->
                                     if cw.word == wd then
                                         [ "current" ]
+
                                     else
                                         []
 
@@ -1738,15 +1779,20 @@ wordButtonClasses wd stage =
                                 in
                                 if allFailed then
                                     [ "incorrect" ]
+
                                 else if lastWasHint then
                                     if noneFailed then
                                         [ "hinted" ]
+
                                     else
                                         [ "partially-correct" ]
+
                                 else if noneFailed then
                                     [ "correct" ]
+
                                 else
                                     [ "partially-correct" ]
+
                             else
                                 []
 
@@ -1763,6 +1809,7 @@ wordButtonClasses wd stage =
                         Just attempt ->
                             if attempt.finished then
                                 []
+
                             else
                                 [ "hidden" ]
 
@@ -1811,6 +1858,7 @@ subWordParts word stage =
                             in
                             if manuallyShown then
                                 ( False, False )
+
                             else
                                 case def.hideType of
                                     HideWordEnd ->
@@ -1826,6 +1874,7 @@ subWordParts word stage =
                     class
                         ++ (if isHidden then
                                 " hidden"
+
                             else
                                 ""
                            )
@@ -1869,6 +1918,7 @@ copyrightNotice version =
         ]
         (if version.url == "" then
             [ H.text caption ]
+
          else
             [ H.a
                 [ A.href version.url
@@ -1959,6 +2009,7 @@ typingBox stage testingMethod =
             (classForTypingBox inUse
                 ++ (if incorrectInput then
                         " incorrect"
+
                     else
                         ""
                    )
@@ -1968,6 +2019,7 @@ typingBox stage testingMethod =
                     [ E.onInput TypingBoxInput
                     , onEnter TypingBoxEnter
                     ]
+
                 else
                     []
                )
@@ -1997,6 +2049,7 @@ classForTypingBox : Bool -> String
 classForTypingBox inUse =
     if inUse then
         "toshow"
+
     else
         "tohide"
 
@@ -2017,6 +2070,7 @@ actionButtons model verse verseStore preferences =
                     -- empty element to take the left hand position,
                     -- pushing the one button to the right
                     [ emptySpan ]
+
                   else
                     []
                  )
@@ -2027,6 +2081,7 @@ actionButtons model verse verseStore preferences =
                                         [ viewButton model b
                                         , if b.subCaption == "" then
                                             emptyNode
+
                                           else
                                             H.span [ A.class "btn-sub-caption" ]
                                                 [ H.text b.subCaption ]
@@ -2064,6 +2119,7 @@ hintButton model currentVerse testingMethod =
                             { enabled =
                                 if hintsRemaining > 0 then
                                     Enabled
+
                                 else
                                     Disabled
                             , default = NonDefault
@@ -2131,6 +2187,7 @@ buttonsForStage model verse verseStore preferences =
                 -- Clearer, and we will only have two buttons so will have more
                 -- room for a longer caption.
                 T.learnPracticeAgain locale ()
+
             else
                 T.learnPractice locale ()
 
@@ -2147,6 +2204,7 @@ buttonsForStage model verse verseStore preferences =
                         -- Don't trigger another verse load,
                         -- or a double 'next verse' message
                         Disabled
+
                     else
                         -- Pressing the button will trigger
                         -- the verse load.
@@ -2168,6 +2226,7 @@ buttonsForStage model verse verseStore preferences =
         morePracticeSubCaption =
             if nextVerseSubCaption == "" then
                 ""
+
             else
                 T.learnSeeAgainNow locale ()
 
@@ -2221,6 +2280,7 @@ buttonsForStage model verse verseStore preferences =
                         , default =
                             if defaultMorePractice then
                                 Default
+
                             else
                                 NonDefault
                         , id = "id-more-practice-btn"
@@ -2235,6 +2295,7 @@ buttonsForStage model verse verseStore preferences =
                         , default =
                             if defaultMorePractice then
                                 NonDefault
+
                             else
                                 Default
                         , id = "id-next-btn"
@@ -2260,12 +2321,14 @@ buttonsForStage model verse verseStore preferences =
             nextEnabled =
                 if isRemainingStage then
                     Enabled
+
                 else
                     Disabled
 
             previousEnabled =
                 if isPreviousStage then
                     Enabled
+
                 else
                     Disabled
         in
@@ -2291,6 +2354,7 @@ buttonsForStage model verse verseStore preferences =
                   , refocusTypingBox = True
                   }
                 ]
+
     else
         case verse.currentStage of
             Test _ tp ->
@@ -2312,6 +2376,7 @@ getTestingMethod : Model -> TestingMethod
 getTestingMethod model =
     if model.isTouchDevice then
         model.preferences.touchscreenTestingMethod
+
     else
         model.preferences.desktopTestingMethod
 
@@ -2327,6 +2392,7 @@ viewButton model button =
                 Enabled ->
                     if button.refocusTypingBox then
                         getTypingBoxFocusDataForMsg model button.msg True |> getFocusAttributes
+
                     else
                         []
 
@@ -2392,6 +2458,7 @@ getFocusAttributes focusData =
                 , A.attribute "data-focus-expectedClass" data.expectedClass
                 , A.attribute "data-focus-hardMode" (encodeBool data.hardMode)
                 ]
+
             else
                 -- We only need this mechanism if we need a focus action,
                 -- resizing and moving the box is handled by updateTypingBoxCommand
@@ -2404,7 +2471,7 @@ return the data for focussing/moving the typing box, otherwise Nothing.
 
 Pass True for refocus argument if we want to refocus, False otherwise.
 
-See learn_setup.js for why this is necessary.
+See learn\_setup.js for why this is necessary.
 
 -}
 getTypingBoxFocusDataForMsg : Model -> Msg -> Bool -> Maybe UpdateTypingBoxData
@@ -2426,6 +2493,7 @@ getTypingBoxFocusDataForMsg model msg refocus =
     in
     if typingBoxUsedAfterMsg then
         Just (getUpdateTypingBoxData nextState refocus)
+
     else
         Nothing
 
@@ -2494,6 +2562,7 @@ onEnter msg =
         isEnter code =
             if code == 13 then
                 JD.succeed msg
+
             else
                 JD.fail "not ENTER"
     in
@@ -2506,6 +2575,7 @@ onEscape msg =
         isEscape code =
             if code == 27 then
                 JD.succeed msg
+
             else
                 JD.fail "not ESC"
     in
@@ -2571,6 +2641,7 @@ instructions verse testingMethod helpVisible locale =
                             if isPracticeTest verse testType then
                                 [ H.br [] [] ]
                                     ++ T.learnPracticeTestNoteHtml locale () []
+
                             else
                                 [ emptyNode ]
                     in
@@ -2613,6 +2684,7 @@ instructions verse testingMethod helpVisible locale =
                                 []
                                 ++ (if isPracticeTest verse testType then
                                         []
+
                                     else
                                         case verse.recordedTestScore of
                                             Nothing ->
@@ -2623,11 +2695,12 @@ instructions verse testingMethod helpVisible locale =
                                                     newStrength =
                                                         calculateNewVerseStrength verse.verseStatus recordedTest
                                                 in
-                                                if newStrength >= MemoryModel.learnt && verse.verseStatus.strength < MemoryModel.learnt then
+                                                if newStrength >= MemoryModel.learned && verse.verseStatus.strength < MemoryModel.learned then
                                                     [ H.br [] []
                                                     , H.span [ A.class "item-complete-celebration" ]
                                                         (T.learnVerseProgressCompleteHtml locale () [])
                                                     ]
+
                                                 else
                                                     let
                                                         scaledStrengthDelta =
@@ -2645,6 +2718,7 @@ instructions verse testingMethod helpVisible locale =
                                                             , direction =
                                                                 if scaledStrengthDelta >= 0 then
                                                                     "forwards"
+
                                                                 else
                                                                     "backwards"
                                                             }
@@ -2671,6 +2745,7 @@ instructions verse testingMethod helpVisible locale =
                             ("icon-help-toggle"
                                 ++ (if helpVisible then
                                         " expanded"
+
                                     else
                                         ""
                                    )
@@ -2683,6 +2758,7 @@ instructions verse testingMethod helpVisible locale =
                             [ H.ul []
                                 (List.map (\i -> H.li [] i) help)
                             ]
+
                         else
                             []
                        )
@@ -2780,6 +2856,7 @@ helpTourButtons helpTour locale =
       , enabled =
             if Pivot.hasL helpTour.steps then
                 Enabled
+
             else
                 Disabled
       , default = NonDefault
@@ -2788,6 +2865,7 @@ helpTourButtons helpTour locale =
     , { caption =
             if Pivot.hasR helpTour.steps then
                 T.learnHelpTourNext locale ()
+
             else
                 T.learnHelpTourFinish locale ()
       , msg = NextHelpTourStep
@@ -3291,6 +3369,7 @@ attemptReturn { immediate, fromRetry } model =
             if model.attemptingReturn && not fromRetry then
                 -- Don't add another queue
                 noop
+
             else
                 ( { model
                     | attemptingReturn = True
@@ -3305,6 +3384,7 @@ attemptReturn { immediate, fromRetry } model =
         openAjaxDropdownCmd =
             if not <| dropdownIsOpen AjaxInfo model then
                 ToggleDropdown AjaxInfo
+
             else
                 Noop
 
@@ -3329,14 +3409,18 @@ attemptReturn { immediate, fromRetry } model =
     in
     if not callsInProgress && not failedCalls then
         doReturn
+
     else if callsInProgress then
         if immediate then
             doCallsInProgressPrompt
+
         else
             -- keep trying until done, don't prompt
             doRetry
+
     else if immediate || not fromRetry then
         doFailedCallsPrompt
+
     else
         ( setDropdownOpen AjaxInfo model
         , Cmd.none
@@ -3491,6 +3575,7 @@ stageOrVerseChangeCommands model changeFocus =
          ]
             ++ (if changeFocus then
                     [ focusDefaultButton model ]
+
                 else
                     []
                )
@@ -3568,6 +3653,7 @@ toggleDropdown dropdown model =
                     if d == dropdown then
                         -- close already open dropdown
                         Nothing
+
                     else
                         Just dropdown
 
@@ -3591,6 +3677,7 @@ closeDropdownIfOpen : Dropdown -> Model -> Model
 closeDropdownIfOpen dropdown model =
     if model.openDropdown == Just dropdown then
         { model | openDropdown = Nothing }
+
     else
         model
 
@@ -3610,6 +3697,7 @@ togglePinnableMenu dropdown model =
                     | pinnedMenus = Set.insert (toString dropdown) model.pinnedMenus
                 }
                     |> closeDropdownIfOpen dropdown
+
             else
                 { model
                     | pinnedMenus = Set.remove (toString dropdown) model.pinnedMenus
@@ -3624,17 +3712,21 @@ togglePinnableMenu dropdown model =
                     { oldPreferences
                         | pinActionLogMenuLargeScreen = isPinned
                     }
+
                 else
                     { oldPreferences
                         | pinActionLogMenuSmallScreen = isPinned
                     }
+
             else if dropdown == VerseOptionsMenu then
                 if isScreenLargeEnoughForSidePanels newModel1.windowSize then
                     { oldPreferences
                         | pinVerseOptionsMenuLargeScreen = isPinned
                     }
+
                 else
                     oldPreferences
+
             else
                 oldPreferences
 
@@ -3703,6 +3795,7 @@ togglePreferTestsToReading model =
                     -- initialise the test stage.
                     if newStageType /= learningStageTypeForStage currentVerse.currentStage then
                         setupCurrentVerse currentVerse.verseStatus learningType newModel1.testOrReadPreference
+
                     else
                         ( currentVerse, Cmd.none )
                 )
@@ -3930,6 +4023,7 @@ hideRandomWords verseStatus recallDef recallProgress =
             if neededWordCount >= unpassedWordCount then
                 -- We need all the unpassed ones, and possibly some more
                 hiddenWordsGenerator unpassedWordIds recallProgress.passedWordIds (neededWordCount - unpassedWordCount)
+
             else
                 -- pick from the the unpassed ones.
                 hiddenWordsGenerator Set.empty unpassedWordIds neededWordCount
@@ -4112,6 +4206,7 @@ getStages learningType testType verseStatus testOrReadPreference =
         getNonPracticeStages vs =
             if vs.needsTesting || testOrReadPreference == PreferTests then
                 getStagesByStrength vs.strength testType
+
             else
                 ( ReadForContextStage
                 , []
@@ -4174,6 +4269,7 @@ getStagesByStrength strength testType =
           , TestStage testType
           ]
         )
+
     else if strength < (MemoryModel.initialStrengthFactor * 0.7) then
         -- e.g. first test was low, this is second test
         ( ReadStage
@@ -4181,6 +4277,7 @@ getStagesByStrength strength testType =
           , TestStage testType
           ]
         )
+
     else
         ( TestStage testType
         , []
@@ -4238,6 +4335,7 @@ getSessionProgressData model =
                         Read ->
                             if totalStageCount == 1 then
                                 1
+
                             else
                                 0.5
 
@@ -4270,6 +4368,7 @@ getSessionProgressData model =
             in
             if isUntestedItem then
                 VerseProgress verseProgress
+
             else
                 let
                     -- Progress within batch.
@@ -4347,6 +4446,7 @@ moveToNextSubStage verseStatus stage =
             in
             if recallStageFinished verseStatus newRecallProgress then
                 Nothing
+
             else
                 Just <|
                     ( Recall def newRecallProgress
@@ -4448,6 +4548,7 @@ moveToNextVerse model =
                 VerseNotInStore ->
                     if not (verseLoadInProgress model) then
                         loadVerses False model
+
                     else
                         ( model
                         , Cmd.none
@@ -4477,6 +4578,7 @@ moveToNextVerse model =
                                     && (not <| verseLoadInProgress model)
                             then
                                 loadVerses False newModel1
+
                             else
                                 ( newModel1, Cmd.none )
 
@@ -4536,6 +4638,7 @@ getNextVerse verseStore verseStatus =
         Nothing ->
             if moreVersesToLearn verseStore verseStatus then
                 VerseNotInStore
+
             else
                 NoMoreVerses
 
@@ -4555,6 +4658,7 @@ getPreviousVerse verseStore verseStatus =
         Just previousVerseStatus ->
             if previousVerseStatus.textOrder == verseStatus.textOrder - 1 then
                 Just previousVerseStatus
+
             else
                 Nothing
 
@@ -4608,6 +4712,7 @@ handleResetProgress model verseStatus confirmed =
                         , recordResetProgress verseStatus
                         ]
                 )
+
     else
         ( model
         , confirm (T.learnConfirmResetProgress (getLocale model) ())
@@ -4617,7 +4722,7 @@ handleResetProgress model verseStatus confirmed =
 
 
 {-| Resets a VerseStatus to how it is at the very beginning, as per
-reset_progress server side
+reset\_progress server side
 -}
 verseStatusResetProgress : VerseStatus -> VerseStatus
 verseStatusResetProgress verseStatus =
@@ -4683,6 +4788,7 @@ handleTypedInput model input =
         ( newModel2, cmd ) =
             if shouldCheckTypedWord testingMethod oldTypedText input then
                 checkCurrentWordAndUpdate newModel1 input
+
             else
                 ( newModel1, Cmd.none )
     in
@@ -4709,6 +4815,7 @@ handleTypedEnter model =
                 ( newModel, cmd ) =
                     if shouldCheckTypedWord testingMethod oldTypedText currentTypedText then
                         checkCurrentWordAndUpdate model currentTypedText
+
                     else
                         ( model, Cmd.none )
             in
@@ -4791,6 +4898,7 @@ checkCurrentWordAndUpdate model input =
                         checkResult =
                             if correct then
                                 Success
+
                             else
                                 Failure input
                     in
@@ -4816,6 +4924,7 @@ checkWord word input testingMethod =
         FullWords ->
             if String.length wordN <= 2 then
                 wordN == inputN
+
             else
                 (String.left 1 wordN
                     == String.left 1 inputN
@@ -4911,6 +5020,7 @@ markWord checkResult word testProgress testType verse testingMethod preferences 
                     if singleLetterWord || previousHintCountForWord > 0 || firstLetterTestingMethod then
                         -- full word hint, move to next word
                         ( True, "" )
+
                     else
                         -- single letter hint
                         ( False, word.text |> stripPunctuation |> String.left 1 )
@@ -4923,6 +5033,7 @@ markWord checkResult word testProgress testType verse testingMethod preferences 
                     ( finalFailure
                     , if finalFailure then
                         ""
+
                       else
                         testProgress.currentTypedText
                     )
@@ -4946,6 +5057,7 @@ markWord checkResult word testProgress testType verse testingMethod preferences 
         nextCurrentWord =
             if shouldMoveOn then
                 getNextCurrentWord verse testType newTestProgress1 testingMethod
+
             else
                 currentWord
 
@@ -4984,6 +5096,7 @@ markWord checkResult word testProgress testType verse testingMethod preferences 
                                                 - (scaledStrength <| newCurrentVerse1.verseStatus.strength)
                                         }
                             }
+
                           else
                             newCurrentVerse1
                         , recordTestComplete newCurrentVerse1 accuracy testType
@@ -4993,6 +5106,7 @@ markWord checkResult word testProgress testType verse testingMethod preferences 
                         ( newCurrentVerse1
                         , Cmd.none
                         )
+
             else
                 ( newCurrentVerse1
                 , Cmd.none
@@ -5003,9 +5117,11 @@ markWord checkResult word testProgress testType verse testingMethod preferences 
                 if shouldMoveOn then
                     -- final failure
                     ( vibrateDevice 50, beep ( 290.0, 1 ) )
+
                 else
                     -- mistake only
                     ( vibrateDevice 25, beep ( 330.0, 1 ) )
+
             else
                 ( Cmd.none, Cmd.none )
     in
@@ -5014,10 +5130,12 @@ markWord checkResult word testProgress testType verse testingMethod preferences 
         [ actionCompleteCommand
         , if preferences.enableVibration then
             vibrateCommand
+
           else
             Cmd.none
         , if preferences.enableSounds then
             beepCommand
+
           else
             Cmd.none
         ]
@@ -5049,6 +5167,7 @@ getNextCurrentWord verse testType testProgress testingMethod =
                 Just nextWord ->
                     if isReference nextWord.type_ && not (shouldTestReferenceForTestingMethod testingMethod) then
                         makeTestFinished testProgress
+
                     else
                         CurrentWord
                             { word = nextWord
@@ -5246,6 +5365,7 @@ focusDefaultButton model =
 
                             Nothing ->
                                 False
+
                     else
                         False
 
@@ -5253,6 +5373,7 @@ focusDefaultButton model =
                     if shouldFocusTypingBox then
                         -- This will be done by updateTypingBox
                         Nothing
+
                     else
                         case defaultButtons of
                             [] ->
@@ -5289,6 +5410,7 @@ handleFocusResult : String -> Int -> (Result error value -> Msg)
 handleFocusResult id remainingAttempts =
     if remainingAttempts <= 0 then
         always Noop
+
     else
         \r ->
             let
@@ -5334,6 +5456,7 @@ startMorePractice model accuracy =
             if accuracy < 0.75 then
                 -- 0.75 is quite low, treat as if starting afresh
                 getStagesByStrength 0 testType
+
             else if accuracy < 0.9 then
                 ( ReadStage
                 , [ recallStage2
@@ -5341,6 +5464,7 @@ startMorePractice model accuracy =
                   , TestStage testType
                   ]
                 )
+
             else
                 ( recallStage2
                 , [ recallStage4
@@ -5401,8 +5525,9 @@ calculateNextTestDue currentVerse =
                 newStrength =
                     calculateNewVerseStrength verseStatus recordedTest
             in
-            if newStrength >= MemoryModel.learnt then
+            if newStrength >= MemoryModel.learned then
                 Just NeverDue
+
             else
                 -- MemoryModel works in seconds, we are in milliseconds, so
                 -- convert here:
@@ -5438,7 +5563,7 @@ friendlyTimeUntil : TestDueAfter -> Locale -> String
 friendlyTimeUntil testdue locale =
     case testdue of
         NeverDue ->
-            T.learnVerseFullyLearnt locale ()
+            T.learnVerseFullyLearned locale ()
 
         DueAfter time ->
             let
@@ -5471,15 +5596,19 @@ friendlyTimeUntil testdue locale =
             in
             if hours < 1 then
                 T.learnSeeAgainLessThanAnHour locale ()
+
             else if rHours < 24 then
                 T.learnSeeAgainHours locale
                     { hours = Fluent.number rHours }
+
             else if rDays < 7 then
                 T.learnSeeAgainDays locale
                     { days = Fluent.number rDays }
+
             else if rWeeks < 8 then
                 T.learnSeeAgainWeeks locale
                     { weeks = Fluent.number rWeeks }
+
             else
                 T.learnSeeAgainMonths locale
                     { months = Fluent.number rMonths }
@@ -5563,6 +5692,7 @@ trackedHttpCallCaption call locale =
         RecordTestComplete callData ->
             if callData.wasPracticeTest then
                 T.learnSaveDataItemDone locale { ref = callData.localizedReference }
+
             else
                 T.learnSaveDataSavingScore locale { ref = callData.localizedReference }
 
@@ -5639,6 +5769,7 @@ triggerQueuedCalls model =
         -- previous calls all succeed before we try subsequently ordered
         -- ones.
         noop
+
     else
         case getOrderedQueuedCalls model of
             [] ->
@@ -5793,6 +5924,7 @@ markCallFinished callId model =
                 -- surprises we stop the menu from "opening itself" when more
                 -- items are added to it.
                 closeDropdowns newModel1
+
             else
                 newModel1
 
@@ -5806,6 +5938,7 @@ markCallFinished callId model =
                         }
                 in
                 loadVerses True newModel3a
+
             else
                 ( newModel2, Cmd.none )
     in
@@ -5846,6 +5979,7 @@ markFailAndRetry model callId =
                 ( markPermanentFailCall model callId
                 , Cmd.none
                 )
+
             else
                 ( model
                 , delay
@@ -6016,6 +6150,7 @@ handleVersesToLearn verseBatchRaw model =
                 ( newModel3, loadMoreCommand ) =
                     if allVersesLoaded ns.verses || verseLoadInProgress newModel2 then
                         ( newModel2, Cmd.none )
+
                     else
                         case ns.currentVerse.verseStatus.verseSet of
                             Nothing ->
@@ -6033,6 +6168,7 @@ handleVersesToLearn verseBatchRaw model =
                                 -- than 90 verses (except Psalm 119)
                                 if vs.setType == Passage && ns.verses.maxOrderVal < 90 then
                                     loadVerses False newModel2
+
                                 else
                                     ( newModel2, Cmd.none )
             in
@@ -6040,19 +6176,23 @@ handleVersesToLearn verseBatchRaw model =
                 ! [ sessionCmd
                   , if previousSessionEmpty then
                         stageOrVerseChangeCommands newModel3 True
+
                     else
                         Cmd.none
                   , if previousSessionEmpty && actionLogs == Nothing then
                         loadActionLogs newModel3
+
                     else
                         Cmd.none
                   , if previousSessionEmpty && sessionStats == Nothing then
                         loadSessionStats
+
                     else
                         Cmd.none
                   , loadMoreCommand
                   , if previousSessionEmpty && not newModel3.autoSavedPreferences.seenHelpTour then
                         delay 500 StartHelpTour
+
                     else
                         Cmd.none
                   ]
@@ -6305,6 +6445,7 @@ loadActionLogs model =
                     |> Erl.toString
         in
         Http.send ActionLogsLoaded (myHttpGet url actionLogsDecoder)
+
     else
         Cmd.none
 
@@ -6357,6 +6498,7 @@ handleActionLogs model result =
                     ( newSessionData
                     , if Dict.isEmpty newToProcessLogs then
                         Cmd.none
+
                       else
                         sendMsg ProcessNewActionLogs
                     )
@@ -6682,6 +6824,7 @@ initialTourSteps model =
                         (T.learnHelpTourTotalPoints locale ()
                             ++ (if scoringEnabled model then
                                     ""
+
                                 else
                                     " " ++ T.learnHelpTourCreateAccount locale ()
                                )
@@ -6818,6 +6961,7 @@ doHelpTourStep model helpTourData focusDefault =
     , Cmd.batch
         [ if focusDefault then
             focusDefaultButton finalModel
+
           else
             Cmd.none
         , helpTourCommandForStep currentStep
@@ -7031,6 +7175,7 @@ adjustModelForHelpTour model =
                             ( combinedVerseStatus
                             , if Dict.size userActionLogStore.processed == 0 then
                                 exampleActionLogStore
+
                               else
                                 { exampleActionLogStore
                                     | processed = userActionLogStore.processed
@@ -7257,6 +7402,7 @@ subscriptions model =
             -- we never use the dummy '0' value
             (if ISO8601.toTime model.currentTime == 0 then
                 1 * Time.millisecond
+
              else
                 10 * Time.second
             )
@@ -7468,7 +7614,7 @@ scoreReasonDecoder =
         , ( 1, VerseReviewed )
         , ( 2, RevisionCompleted )
         , ( 3, PerfectTestBonus )
-        , ( 4, VerseLearnt )
+        , ( 4, VerseLearned )
         , ( 5, EarnedAward )
         ]
 
@@ -7675,6 +7821,7 @@ dedupeBy keyFunc list =
                         in
                         if Set.member key existing then
                             helper keyFunc rest existing
+
                         else
                             first :: helper keyFunc rest (Set.insert key existing)
     in
@@ -7700,6 +7847,7 @@ dropWhile func list =
         x :: xs ->
             if func x then
                 dropWhile func xs
+
             else
                 list
 
@@ -7742,6 +7890,7 @@ translate fromStr toStr target =
                         \c ->
                             if c == c1 then
                                 c2
+
                             else
                                 makeMapper rest c
 

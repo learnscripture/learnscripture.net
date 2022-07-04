@@ -69,26 +69,26 @@ class MemoryModel:
     #
     # delta_t_ideal corresponds to an interval delta_s_ideal from the current
     # strength.  We aim to fit delta_s_ideal to a constant that will produce a fixed
-    # number of tests to move the memory from strength zero to 'learnt'. In the
+    # number of tests to move the memory from strength zero to 'learned'. In the
     # Charlotte Mason system, a verse is tested about 15 - 20 times before being
     # retired, so we aim for that (with a bit of tuning)
 
     VERSE_TESTS = 20  # A nice round number
 
     # We want to avoid the number of verses needing testing increasing forever,
-    # and so put a hard limit, after which a verse is considered 'learnt'.
+    # and so put a hard limit, after which a verse is considered 'learned'.
 
     # We need a value that is attainable using reasonable test accuracy. Test
     # accuracy of 95 - 100% is achievable for most people, but scaling (see
     # below) means 95% accuracy goes to a strength of 0.9025, and we need to go
     # under that.
     #
-    # With a value of 0.8, it is possible to move a verse fully learnt with
+    # With a value of 0.8, it is possible to move a verse fully learned with
     # a test score of 90%, which should be achievable by all.
     #
     # Also, with a strength of just less than this, a verse will be due for
     # review in less than a year.
-    LEARNT = 0.80
+    LEARNED = 0.80
 
     # We want to reach this stage after 1 year on our idealised curve.
 
@@ -106,12 +106,12 @@ class MemoryModel:
         # ALPHA can be set using the above constants:
 
         # s  = 1 - exp(-alpha * t^n)
-        # LEARNT = 1 - exp(-alpha * ONE_YEAR^n)
+        # LEARNED = 1 - exp(-alpha * ONE_YEAR^n)
         ONE_YEAR = 365 * 24 * 3600 * 1.0
 
         # Rearranging:
-        # ALPHA = - ln(1 - LEARNT) / (ONE_YEAR^n)
-        self.ALPHA = -math.log(1.0 - self.LEARNT) / (ONE_YEAR ** EXPONENT)
+        # ALPHA = - ln(1 - LEARNED) / (ONE_YEAR^n)
+        self.ALPHA = -math.log(1.0 - self.LEARNED) / (ONE_YEAR ** EXPONENT)
 
         # For the initial test, we don't have a previous strength recorded, so
         # we need an arbitrary number. It would be nice if each test, including
@@ -123,9 +123,9 @@ class MemoryModel:
         # We also want to finish learning after N jumps of DELTA_S_IDEAL,
         # starting at zero.
         #
-        #  DELTA_S_IDEAL = LEARNT - VERSE_TESTS
+        #  DELTA_S_IDEAL = LEARNED - VERSE_TESTS
         #
-        self.DELTA_S_IDEAL = self.LEARNT / self.VERSE_TESTS
+        self.DELTA_S_IDEAL = self.LEARNED / self.VERSE_TESTS
         self.INITIAL_STRENGTH_FACTOR = self.DELTA_S_IDEAL
 
         # The result of these choices, and the constant chosen for VERSE_TESTS,
@@ -212,9 +212,9 @@ class MemoryModel:
             return True
         if time_elapsed < self.MIN_TIME_BETWEEN_TESTS:
             # It is confusing to have a verse up for revision within an hour of
-            # it being first learnt, so we special case that here.
+            # it being first learned, so we special case that here.
             return False
-        if strength > self.LEARNT:
+        if strength > self.LEARNED:
             return False
         t_0 = self.t(strength)
         # clip at BEST_STRENGTH here to stop log of a negative
@@ -267,7 +267,7 @@ def test_run_using_next_test_due_after(exponent, accuracy, interval_gap=1):
         current_time = start + timedelta(days=days_total)
         interval += interval_gap
         days_total += interval_gap
-        if next_test is None or (current_time > next_test and s < m.LEARNT):
+        if next_test is None or (current_time > next_test and s < m.LEARNED):
             if last_test is None:
                 time_elapsed = None
             else:
@@ -290,7 +290,7 @@ def test_run_exact_intervals(exponent, accuracy):
     test = 0
     total_elapsed = 0
     day = 24 * 60 * 60
-    while total_elapsed / (365 * day) < 10 and s < m.LEARNT:
+    while total_elapsed / (365 * day) < 10 and s < m.LEARNED:
         current_time = start + timedelta(seconds=total_elapsed)
         if last_test is None:
             time_elapsed = None
@@ -317,26 +317,26 @@ def test_run_passage(passage_length, days):
     import random
 
     # We learn 1 verse a day in passage.
-    learnt = {}
-    verses_learnt = 0
+    learned = {}
+    verses_learned = 0
     day = 24 * 3600
     accuracy = 0.95
     tests_for_verse = {}
     for i in range(0, days):
-        if verses_learnt < passage_length:
+        if verses_learned < passage_length:
             # Learn new:
-            learnt[verses_learnt] = (i * day, MM.strength_estimate(0, accuracy, None))
-            verses_learnt += 1
+            learned[verses_learned] = (i * day, MM.strength_estimate(0, accuracy, None))
+            verses_learned += 1
 
         need_testing = 0
-        for j in range(0, verses_learnt):
-            t, s = learnt[j]
+        for j in range(0, verses_learned):
+            t, s = learned[j]
             time_elapsed = i * day - t
             if MM.needs_testing(s, time_elapsed):
                 need_testing += 1
 
         number_tested = 0
-        if need_testing > 0 and verses_learnt == passage_length:
+        if need_testing > 0 and verses_learned == passage_length:
             # STRENGTH_FOR_GROUP_TESTING:
             # We want to do testing together.  The simplest way is just to do
             # testing if any verse requires testing. This doesn't actually result in
@@ -347,14 +347,14 @@ def test_run_passage(passage_length, days):
             # of treating the verses more individually.
 
             # From user testing, a sensible period seems to be when 3 days after all
-            # the verses have been learnt. This corresponds to a strength of 0.5.
+            # the verses have been learned. This corresponds to a strength of 0.5.
             test_all = False
-            min_strength = min(s for t, s in learnt.values())
+            min_strength = min(s for t, s in learned.values())
             if min_strength > STRENGTH_FOR_GROUP_TESTING:
                 test_all = True
 
-            for j in range(0, verses_learnt):
-                t, s = learnt[j]
+            for j in range(0, verses_learned):
+                t, s = learned[j]
                 time_elapsed = i * day - t
 
                 if test_all:
@@ -376,7 +376,7 @@ def test_run_passage(passage_length, days):
 
                     new_strength = MM.strength_estimate(s, acc, time_elapsed)
                     new_time_tested = i * day
-                    learnt[j] = new_time_tested, new_strength
+                    learned[j] = new_time_tested, new_strength
                     number_tested += 1
         if number_tested > 0:
             print()
@@ -412,5 +412,5 @@ MM = MemoryModel(EXPONENT)
 needs_testing = MM.needs_testing
 strength_estimate = MM.strength_estimate
 next_test_due_after = MM.next_test_due_after
-LEARNT = MM.LEARNT
+LEARNED = MM.LEARNED
 STRENGTH_FOR_GROUP_TESTING = 0.5

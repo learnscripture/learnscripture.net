@@ -204,8 +204,8 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
             assert i.first_overdue_verse(timezone.now()) == uvs
 
             # Something manually selected for review sooner should be
-            # reviewed even if strength is 'fully learnt'
-            i.verse_statuses.update(strength=accounts.memorymodel.LEARNT)
+            # reviewed even if strength is 'fully learned'
+            i.verse_statuses.update(strength=accounts.memorymodel.LEARNED)
             uvs.refresh_from_db()
             assert i.first_overdue_verse(timezone.now()) == uvs
             assert uvs.needs_testing_individual
@@ -214,7 +214,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
             # If we record a test again, 'early_review_requested' should be reset,
             # so that the overrides of 'review_sooner' no longer take effect. (The
             # user has to keep on requeted 'see sooner' if they want to that verse
-            # to keep on being seen after being learnt.
+            # to keep on being seen after being learned.
             i.record_verse_action("John 3:16", "NET", StageType.TEST, 1)
             uvs.refresh_from_db()
             now = timezone.now()
@@ -239,9 +239,9 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         # Check 'MASTER'
         # frig the data:
         i.verse_statuses.update(
-            strength=accounts.memorymodel.MM.LEARNT - 0.001, last_tested=timezone.now() - timedelta(100)
+            strength=accounts.memorymodel.MM.LEARNED - 0.001, last_tested=timezone.now() - timedelta(100)
         )
-        # Now do test to move above LEARNT
+        # Now do test to move above LEARNED
         i.record_verse_action("John 3:16", "NET", StageType.TEST, 1)
         assert account.awards.filter(award_type=AwardType.MASTER, level=1).count() == 1
 
@@ -287,7 +287,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
     def test_passages_for_learning(self):
         i = self.create_identity(version_slug="NET")
 
-        with self.assertNumQueries(1):  # Just 1 query when nothing being learnt
+        with self.assertNumQueries(1):  # Just 1 query when nothing being learned
             i.passages_for_learning()
 
         vs1 = VerseSet.objects.get(name="Psalm 23")
@@ -358,7 +358,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
 
                     if vn < 6:
                         # Nothing to review, because one item still remains
-                        # to be initially learnt.
+                        # to be initially learned.
                         assert cvss_review == []
                         assert cvss_learn[0].verse_set.id == vs1.id
                     else:
@@ -386,9 +386,9 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
             tm.move_to(i.verse_statuses.order_by("next_test_due").first().next_test_due + timedelta(days=1))
             # and strengths advance a lot: First past group testing limit
             i.verse_statuses.update(strength=accounts.memorymodel.STRENGTH_FOR_GROUP_TESTING + 0.01)
-            # Then some but not all past fully learnt:
+            # Then some but not all past fully learned:
             i.verse_statuses.exclude(localized_reference__in=["Psalm 23:3", "Psalm 23:6"]).update(
-                strength=accounts.memorymodel.LEARNT + 0.01
+                strength=accounts.memorymodel.LEARNED + 0.01
             )
 
             cvss_review, cvss_learn = i.passages_for_reviewing_and_learning()
@@ -396,11 +396,11 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
             cvs = cvss_review[0]
 
             assert cvs.group_testing
-            # Fully learnt verses should not be counted in this total
+            # Fully learned verses should not be counted in this total
             assert cvs.needs_testing_count == 2
             assert cvs.total_verse_count == 6
 
-            # We should skip the fully learnt first section, and choose the second.
+            # We should skip the fully learned first section, and choose the second.
             assert cvs.next_section_verse_count == 3
 
             passage_uvss = i.verse_statuses_for_passage(cvs.verse_set.id, cvs.version.id)
@@ -776,11 +776,11 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         for j, ref in enumerate(refs):
             i.add_verse_choice(ref)
             i.record_verse_action(ref, "KJV", StageType.TEST, 1)
-            # Move to nearly learnt:
+            # Move to nearly learned:
             i.verse_statuses.filter(localized_reference=ref).update(
-                strength=accounts.memorymodel.LEARNT - 0.001, last_tested=timezone.now() - timedelta(100)
+                strength=accounts.memorymodel.LEARNED - 0.001, last_tested=timezone.now() - timedelta(100)
             )
-            # Final test, moving to above LEARNT
+            # Final test, moving to above LEARNED
             action_change = i.record_verse_action(ref, "KJV", StageType.TEST, 1)
             i.award_action_points(
                 ref,

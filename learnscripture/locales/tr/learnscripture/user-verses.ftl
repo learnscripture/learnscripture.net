@@ -48,7 +48,7 @@ user-verses-version-heading = Çeviri
 # Heading in table for Catechism name
 user-verses-catechism-heading = İlmihal
 
-# Heading in table for column showing the level/strength to which a verse has been learnt
+# Heading in table for column showing the level/strength to which a verse has been learned
 user-verses-strength-heading = Ayet bilinirliği
 
 # Button for reviewing a verse

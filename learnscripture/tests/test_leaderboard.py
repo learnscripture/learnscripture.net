@@ -97,12 +97,12 @@ class VerseCountTests(BibleVersesMixin, CatechismsMixin, AccountTestMixin, TestB
         dt = identity.verse_statuses.filter(localized_reference__in=refs).first().last_tested.date()
         assert get_verses_started_per_day(identity.id) == [(dt, count)]
 
-        # Move time on enough so that next hit gets past learnt threshold.
-        identity.verse_statuses.update(strength=MM.LEARNT - 0.01)
+        # Move time on enough so that next hit gets past learned threshold.
+        identity.verse_statuses.update(strength=MM.LEARNED - 0.01)
         with travel(timezone.now() + timedelta(days=400)):
 
             for ref, version in ref_pairs:
-                # Simulate enough to get to 'learnt' state.
+                # Simulate enough to get to 'learned' state.
                 action_change = identity.record_verse_action(ref, version.slug, StageType.TEST, accuracy=1)
                 uvs = identity.verse_statuses.filter(localized_reference=ref, version=version).first()
                 identity.award_action_points(

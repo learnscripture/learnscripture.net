@@ -65,7 +65,7 @@ learn-initial-test = initial test
 learn-review-test = review test
 learn-revision-completed = revision completed
 learn-perfect-score-bonus = perfect score BONUS!
-learn-verse-fully-learnt-bonus = verse fully learnt BONUS!
+learn-verse-fully-learned-bonus = verse fully learned BONUS!
 learn-award-bonus = award bonus
 
 ## Navbar:
@@ -162,8 +162,8 @@ learn-next-button-caption = Next
 
 learn-back-button-caption = Back
 
-# Indicates a verse is fully learnt
-learn-verse-fully-learnt = Fully learnt
+# Indicates a verse is fully learned
+learn-verse-fully-learned = Fully learned
 
 
 # Displayed under 'practice' button, to indicate it will happen right now.
@@ -373,4 +373,3 @@ learn-loading-data = Loading items for learning...
 # $errorMessage gives a more specific error message.
 learn-items-could-not-be-loaded-error =
     The items to learn could not be loaded (error message: { $errorMessage }). Please check your internet connection!
-

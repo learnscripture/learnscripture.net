@@ -119,7 +119,7 @@ class AccountTests(AccountTestMixin, TestBase):
             ),
         ]
 
-    def test_award_action_points_fully_learnt(self):
+    def test_award_action_points_fully_learned(self):
         _, a = self.create_account()
 
         a.award_action_points(
@@ -132,7 +132,7 @@ class AccountTests(AccountTestMixin, TestBase):
             0.9,
         )
         assert a.total_score.points == (4 * Scores.points_per_word(LANGUAGE_CODE_EN) * 0.9) + (
-            4 * Scores.points_per_word(LANGUAGE_CODE_EN) * Scores.VERSE_LEARNT_BONUS
+            4 * Scores.points_per_word(LANGUAGE_CODE_EN) * Scores.VERSE_LEARNED_BONUS
         )
 
     def test_addict_award(self):
