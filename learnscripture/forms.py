@@ -210,22 +210,6 @@ class AccountPasswordChangeForm(PasswordChangeForm):
     )
 
 
-class ContactForm(forms.Form):
-    name = forms.CharField(
-        label=t_lazy("contact-form-name"), help_text=t_lazy("forms-field-optional"), max_length=255, required=False
-    )
-    email = forms.EmailField(
-        label=t_lazy("contact-form-email"), help_text=t_lazy("forms-field-optional"), required=False
-    )
-    message = forms.CharField(
-        label=t_lazy("contact-form-message"),
-        max_length=10000,
-        required=True,
-        help_text=t_lazy("contact-form-message.help-text"),
-        widget=widgets.Textarea(attrs={"rows": "10"}),
-    )
-
-
 VERSE_SET_ORDER_POPULARITY = "popularity"
 VERSE_SET_ORDER_AGE = "age"
 

@@ -7,7 +7,6 @@ from django.contrib import messages
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import PasswordResetView as AuthPasswordResetView
 from django.contrib.sites.models import Site
-from django.core import mail
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
@@ -65,7 +64,6 @@ from learnscripture.forms import (
     AccountPasswordChangeForm,
     AccountPasswordResetForm,
     AccountSetPasswordForm,
-    ContactForm,
     GroupFilterForm,
     GroupWallFilterForm,
     LeaderboardFilterForm,
@@ -1689,53 +1687,17 @@ def terms_of_service(request):
 def contact(request):
     account = account_from_request(request)
     if account is not None:
-        initial = {"name": account.first_name + " " + account.last_name, "email": account.email}
+        email_body = f"Account: {account.username} - {account.first_name} {account.last_name}\n\n\n"
     else:
-        initial = {}
-    if request.method == "POST":
-        form = ContactForm(request.POST, initial=initial)
-        if form.is_valid():
-            send_contact_email(form, account)
-            return HttpResponseRedirect(reverse("contact_thanks"))
-    else:
-        form = ContactForm(initial=initial)
+        email_body = ""
     return TemplateResponse(
         request,
         "learnscripture/contact.html",
         {
             "title": t("contact-form-page-title"),
-            "form": form,
+            "email_body": urllib.parse.quote(email_body),
         },
     )
-
-
-def contact_thanks(request):
-    return TemplateResponse(
-        request,
-        "learnscripture/contact_thanks.html",
-        {
-            "title": t("contact-thanks-page-title"),
-        },
-    )
-
-
-def send_contact_email(contact_form, account):
-    email = contact_form.cleaned_data["email"]
-    # Doesn't need i18n, only goes to admins
-    mail.EmailMessage(
-        subject="LearnScripture feedback",
-        body=f"""
-From: {contact_form.cleaned_data['name']}
-Email: {email}
-Account: {account.username if account is not None else ''}
-Message:
-
-{contact_form.cleaned_data['message']}
-""",
-        from_email=settings.SERVER_EMAIL,
-        to=[settings.CONTACT_EMAIL],
-        headers={"Reply-To": email} if email else {},
-    ).send()
 
 
 @htmx(

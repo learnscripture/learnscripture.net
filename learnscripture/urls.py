@@ -83,7 +83,6 @@ urlpatterns = [
     path("api/cms/", include("cms.rest_api.urls")),
     # Other
     path("contact/", learnscripture.views.contact, name="contact"),
-    path("contact-thanks/", learnscripture.views.contact_thanks, name="contact_thanks"),
     path("terms-of-service/", learnscripture.views.terms_of_service, name="terms_of_service"),
     path("referral-program/", learnscripture.views.referral_program, name="referral_program"),
     path("stats/", learnscripture.views.stats, name="stats"),

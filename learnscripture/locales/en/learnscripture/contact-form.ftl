@@ -4,23 +4,9 @@
 contact-form-page-title = Contact us
 
 
-
-# Caption for the user's name input box
-contact-form-name = Name
-
-# Caption for the user's email address input box
-contact-form-email = Email
-
-# Help text for the 'message' when using the contact form
-contact-form-message = Message
-                     .help-text = If you are reporting a problem, please include a full and specific description, and include what device/browser you are using, with version numbers.
-
-# Button to send the message.
-contact-form-send-button = Send
-
-# Displayed above the contact form
+# Displayed at the top of the contact us page
 contact-form-page-top-html =
-    <p>You can use the form below to contact us:</p>
+    <p>You can use the email address below to contact us:</p>
 
     <p>Before contacting us, please check whether your question is answered on any of these pages:</p>
 
@@ -40,16 +26,4 @@ contact-form-page-top-html =
     <b>the LearnScripture.net site is volunteer run</b>.
     Please don't be offended if your query does not receive a fast reply!</p>
 
-
-# Displayed above the contact form
-contact-form-page-bottom-html =
-  <p>Alternatively you can:</p>
-  <ul>
-    <li>Email us: <a href="mailto:contact@learnscripture.net">contact@learnscripture.net</a></li>
-    <li>Tweet us: <a class="twitter-mention-button" data-related="learnscripture" href="https://twitter.com/intent/tweet?screen_name=learnscripture">Tweet to @learnscripture</a></li>
-  </ul>
-
-
-contact-thanks-page-title = Thanks!
-
-contact-thanks-for-your-message = Thanks for your message, we'll deal with it as soon as we can.
+    <p>Email: <a href="mailto:contact@learnscripture.net?body={ $email_body }">contact@learnscripture.net</a></p>
