@@ -10,7 +10,6 @@ from django.views.generic import RedirectView
 
 import accounts.lookups
 import cms.views
-import learnscripture.mail.views
 import learnscripture.views
 
 admin.autodiscover()
@@ -95,11 +94,6 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("i18n/", include("django.conf.urls.i18n")),
     path("paypal/ipn/", include("paypal.standard.ipn.urls")),
-    path(
-        "mailgun-bounce-notification/",
-        learnscripture.mail.views.mailgun_bounce_notification,
-        name="mailgun-bounce-notification",
-    ),
     # Errors
     path("offline/", learnscripture.views.offline, name="offline"),
     # Also 404.html template and CSRF_FAILURE_VIEW

@@ -45,11 +45,25 @@ The following integrations are used:
 
 * Sentry for error reporting and tracking - https://sentry.io/learnscripturenet/production/
 
-* Mailgun for sending and receiving emails. Webhooks and routes (including
-  bounce handling) are set up with the management command ``setup_mailgun``.
-  This needs to be run whenever webhooks change::
+* Mailgun for sending emails. We send very little email — only for password reset.
+  We have set this up using Mailgun’s instructions, using the anymail package
+  which supports mailgun.
 
-    fab manage_py_command:setup_mailgun
+* We do not handle inbound email in the website at all.
+
+  To avoid the problems of a contact form that gets spammed, but has a “from”
+  website@learnscripture.net address (making it hard to deal with and giving us
+  a bad reputation), we don’t have a contact form, but instead require people to
+  email contact@learnscripture.net (or other addresses).
+
+  This email is received via fastmail.com on Luke’s personal email, following the
+  instructions on fastmail.com for setting up domains to attach to a personal
+  account.
+
+  This means spammers have to use their own email systems for sending spam to
+  @learnscripture.net addresses, which can be handled using normal spam controls.
+
+  It also means that we don’t have to handle bounces in the website code,
 
 * ESV API for getting ESV text. We obey the ESV license which requires
   us to cache only a limited number of verses in the local database.
