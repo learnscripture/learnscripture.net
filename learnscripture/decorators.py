@@ -89,11 +89,11 @@ def require_account_with_redirect(view_func):
     return view
 
 
-def for_htmx(*, target: Optional[str] = None, template: str):
+def for_htmx(*, if_target: Optional[str] = None, template: str):
     """
     If request is from htmx, then render a partial page.
 
-    If `target` is supplied, the hx-target header must match as well.
+    If `if_target` is supplied, the hx-target header must match the supplied value as well.
     """
 
     def decorator(view):
@@ -101,7 +101,7 @@ def for_htmx(*, target: Optional[str] = None, template: str):
         def _view(request, *args, **kwargs):
             resp = view(request, *args, **kwargs)
             if request.headers.get("Hx-Request", False):
-                if target is None or request.headers.get("Hx-Target", None) == target:
+                if if_target is None or request.headers.get("Hx-Target", None) == if_target:
                     resp.template_name = template
             return resp
 
