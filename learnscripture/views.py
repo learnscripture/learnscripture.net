@@ -77,8 +77,8 @@ from payments.sign import sign_payment_info
 from scores.models import get_all_time_leaderboard, get_leaderboard_since, get_verses_started_counts
 
 from .decorators import (
+    for_htmx,
     has_preferences,
-    htmx,
     redirect_via_prefs,
     require_account,
     require_account_with_redirect,
@@ -512,12 +512,8 @@ def default_bible_version_for_request(request):
 # page and the linked pages unhindered, for SEO.
 
 
-@htmx(
-    {
-        "id-choose-verseset-results": "learnscripture/choose_verseset_inc.html",
-        "id-more-results-container": "learnscripture/choose_verseset_results_inc.html",
-    }
-)
+@for_htmx(target="id-choose-verseset-results", template="learnscripture/choose_verseset_inc.html")
+@for_htmx(target="id-more-results-container", template="learnscripture/choose_verseset_results_inc.html")
 def choose(request):
     """
     Choose a verse or verse set
@@ -993,7 +989,7 @@ def get_hellbanned_mode(request):
         return account.is_hellbanned
 
 
-@htmx({"id-follow-form": "learnscripture/follow_form_inc.html"})
+@for_htmx(target="id-follow-form", template="learnscripture/follow_form_inc.html")
 def user_stats(request, username):
     viewer = account_from_request(request)
     account = get_object_or_404(
@@ -1036,12 +1032,8 @@ def user_stats(request, username):
 
 
 @require_identity
-@htmx(
-    {
-        "id-user-verses-results": "learnscripture/user_verses_inc.html",
-        "id-more-results-container": "learnscripture/user_verses_table_body_inc.html",
-    }
-)
+@for_htmx(target="id-user-verses-results", template="learnscripture/user_verses_inc.html")
+@for_htmx(target="id-more-results-container", template="learnscripture/user_verses_table_body_inc.html")
 def user_verses(request):
     identity = request.identity
 
@@ -1422,12 +1414,8 @@ def groups_editable_for_request(request):
     return Group.objects.editable_for_account(account_from_request(request))
 
 
-@htmx(
-    {
-        "id-groups-results": "learnscripture/groups_inc.html",
-        "id-more-results-container": "learnscripture/groups_results_inc.html",
-    }
-)
+@for_htmx(target="id-groups-results", template="learnscripture/groups_inc.html")
+@for_htmx(target="id-more-results-container", template="learnscripture/groups_results_inc.html")
 def groups(request):
     account = account_from_request(request)
     groups = Group.objects.visible_for_account(account).order_by("name")
@@ -1499,12 +1487,8 @@ def group(request, slug):
     )
 
 
-@htmx(
-    {
-        "id-group-wall-comments": "learnscripture/group_wall_comments_inc.html",
-        "id-more-results-container": "learnscripture/group_wall_comments_results_inc.html",
-    }
-)
+@for_htmx(target="id-group-wall-comments", template="learnscripture/group_wall_comments_inc.html")
+@for_htmx(target="id-more-results-container", template="learnscripture/group_wall_comments_results_inc.html")
 def group_wall(request, slug):
     account = account_from_request(request)
     group = group_by_slug(request, slug)
@@ -1537,12 +1521,8 @@ def group_wall(request, slug):
     return TemplateResponse(request, "learnscripture/group_wall.html", ctx)
 
 
-@htmx(
-    {
-        "id-leaderboard-results-table-body": "learnscripture/leaderboard_results_table_body_inc.html",
-        "id-more-results-container": "learnscripture/leaderboard_results_table_body_inc.html",
-    }
-)
+@for_htmx(target="id-leaderboard-results-table-body", template="learnscripture/leaderboard_results_table_body_inc.html")
+@for_htmx(target="id-more-results-container", template="learnscripture/leaderboard_results_table_body_inc.html")
 def group_leaderboard(request, slug):
     PAGE_SIZE = 30
     from_item = get_request_from_item(request)
@@ -1700,11 +1680,7 @@ def contact(request):
     )
 
 
-@htmx(
-    {
-        "id-more-results-container": "learnscripture/activity_stream_results_inc.html",
-    }
-)
+@for_htmx(template="learnscripture/activity_stream_results_inc.html")
 def activity_stream(request):
     viewer = account_from_request(request)
     events = Event.objects.for_activity_stream(viewer=viewer).prefetch_related("comments", "comments__author")
@@ -1726,11 +1702,7 @@ def _user_events(for_account, viewer):
     ).prefetch_related("comments", "comments__author")
 
 
-@htmx(
-    {
-        "id-more-results-container": "learnscripture/activity_stream_results_inc.html",
-    }
-)
+@for_htmx(template="learnscripture/activity_stream_results_inc.html")
 def user_activity_stream(request, username):
     account = get_object_or_404(Account.objects.visible_for_account(account_from_request(request)), username=username)
     events = _user_events(account, account_from_request(request))

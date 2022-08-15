@@ -1,3 +1,5 @@
+from typing import Optional
+
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.cache import add_never_cache_headers
@@ -87,11 +89,11 @@ def require_account_with_redirect(view_func):
     return view
 
 
-def htmx(additional_templates):
+def for_htmx(*, target: Optional[str] = None, template: str):
     """
-    If request is from htmx, then render a partial page,
-    using the 'hx-target' header to dispatch to the appropriate template
-    by looking up in the supplied dictionary of {hx-target: template}
+    If request is from htmx, then render a partial page.
+
+    If `target` is supplied, the hx-target header must match as well.
     """
 
     def decorator(view):
@@ -99,9 +101,7 @@ def htmx(additional_templates):
         def _view(request, *args, **kwargs):
             resp = view(request, *args, **kwargs)
             if request.headers.get("Hx-Request", False):
-                container = request.headers.get("Hx-Target", None)
-                if container is not None and container in additional_templates:
-                    template = additional_templates[container]
+                if target is None or request.headers.get("Hx-Target", None) == target:
                     resp.template_name = template
             return resp
 
