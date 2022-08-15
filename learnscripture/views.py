@@ -995,6 +995,11 @@ def user_stats(request, username):
     account = get_object_or_404(
         Account.objects.visible_for_account(viewer).select_related("total_score", "identity"), username=username
     )
+    if viewer is not None and viewer == account:
+        account_groups = account.groups.order_by("name")
+    else:
+        account_groups = account.groups.public().order_by("name")
+    viewer_visible_groups = Group.objects.visible_for_account(viewer).filter(id__in=[g.id for g in account_groups])
 
     if request.method == "POST" and viewer is not None:
         if "follow" in request.POST:
@@ -1002,32 +1007,25 @@ def user_stats(request, username):
         if "unfollow" in request.POST:
             viewer.unfollow_user(account)
 
+    one_week_ago = timezone.now() - timedelta(7)
     ctx = {
         "account": account,
         "title": account.username,
         "awards": account.visible_awards(),
         "include_referral_links": True,
         "events": _user_events(account, viewer)[:USER_EVENTS_SHORT_CUTOFF],
+        "verses_started_all_time": account.identity.verses_started_count(),
+        "verses_started_this_week": account.identity.verses_started_count(started_since=one_week_ago),
+        "verses_finished_all_time": account.identity.verses_finished_count(),
+        "verses_finished_this_week": account.identity.verses_finished_count(finished_since=one_week_ago),
+        "verse_sets_created_all_time": account.verse_sets_created.count(),
+        "verse_sets_created_this_week": account.verse_sets_created.filter(date_added__gte=one_week_ago).count(),
+        "groups": viewer_visible_groups,
     }
 
     if viewer is not None:
         ctx["viewer_is_following"] = viewer.is_following(account)
 
-    one_week_ago = timezone.now() - timedelta(7)
-
-    ctx["verses_started_all_time"] = account.identity.verses_started_count()
-    ctx["verses_started_this_week"] = account.identity.verses_started_count(started_since=one_week_ago)
-    ctx["verses_finished_all_time"] = account.identity.verses_finished_count()
-    ctx["verses_finished_this_week"] = account.identity.verses_finished_count(finished_since=one_week_ago)
-    ctx["verse_sets_created_all_time"] = account.verse_sets_created.count()
-    ctx["verse_sets_created_this_week"] = account.verse_sets_created.filter(date_added__gte=one_week_ago).count()
-    current_account = account_from_request(request)
-    if current_account is not None and current_account == account:
-        account_groups = account.groups.order_by("name")
-    else:
-        account_groups = account.groups.public().order_by("name")
-    viewer_visible_groups = Group.objects.visible_for_account(viewer)
-    ctx["groups"] = viewer_visible_groups.filter(id__in=[g.id for g in account_groups])
     return TemplateResponse(request, "learnscripture/user_stats.html", ctx)
 
 
