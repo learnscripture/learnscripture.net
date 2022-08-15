@@ -13,7 +13,7 @@ def forwards(apps, schema_editor):
 
     corrected = 0
     failed = 0
-    used_awards = {l.award for l in ActionLog.objects.filter(award__isnull=False)}
+    used_awards = {log.award for log in ActionLog.objects.filter(award__isnull=False)}
     failed = set()
     for log in ActionLog.objects.filter(reason=ScoreReason.EARNED_AWARD, award__isnull=True):
         candidates = log.account.awards.filter(

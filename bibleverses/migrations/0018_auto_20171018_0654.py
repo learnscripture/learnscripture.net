@@ -9,8 +9,7 @@ from bibleverses.parsing import parse_validated_localized_reference
 def forwards(apps, schema_editor):
     VerseChoice = apps.get_model("bibleverses.VerseChoice")
     i = 0
-    l = VerseChoice.objects.all()
-    for vc in l:
+    for vc in VerseChoice.objects.all():
         parsed_ref = parse_validated_localized_reference(LANGUAGE_CODE_EN, vc.localized_reference)
         vc.internal_reference = parsed_ref.to_internal().canonical_form()
         vc.save()
