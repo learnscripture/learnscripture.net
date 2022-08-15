@@ -10,6 +10,7 @@ from autoslug import AutoSlugField
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import F, Func, Q, Value
+from django.db.models.constraints import UniqueConstraint
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -1108,6 +1109,16 @@ class UserVerseStatus(models.Model):
 
     class Meta:
         unique_together = [("for_identity", "verse_set", "localized_reference", "version")]
+        # verse_set is nullable. We also want to enforce the constraint where
+        # verse_set is NULL, we should just has a single UVS for (for_identity,
+        # localized_reference, version):
+        constraints = [
+            UniqueConstraint(
+                fields=["for_identity", "localized_reference", "version"],
+                condition=Q(verse_set__isnull=True),
+                name="one_UVS_for_identity_ref_version_without_verseset",
+            )
+        ]
         verbose_name_plural = "User verse statuses"
 
 
