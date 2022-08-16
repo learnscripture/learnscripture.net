@@ -28,5 +28,3 @@ heatmap-items-tested-stat = Items tested
 
 # Caption for statistic that combines both the above
 heatmap-combined-stat = Combined
-
-

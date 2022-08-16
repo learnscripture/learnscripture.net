@@ -42,4 +42,3 @@ catechisms-all-catechism-link = All catechisms
 
 # Sub-title for list of people learning the catechism
 catechisms-people-learning-this-title = People learning this
-

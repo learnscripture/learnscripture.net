@@ -144,4 +144,3 @@ site-loading-placeholder = Yükleniyor...
 
 site-wrong-or-missing-translation =
     Çeviride sorun mu var? Düzeltmemize yardımcı olun!
-

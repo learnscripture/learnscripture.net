@@ -47,4 +47,3 @@ referrals-specific-pages-paragraph-1 = You can also get a referral link for spec
 referrals-paragraph-2-html = This can be especially useful to get a group of friends to start learning
     a <a href="{ $choose_url }">verse set</a>, or to join a
     <a href="{ $groups_url }">group</a>.
-

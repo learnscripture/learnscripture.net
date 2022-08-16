@@ -60,6 +60,3 @@ bibleverses-quick-find-lookup-passage-button = Lookup passage
 
 # Caption for the button that looks up a verse (search or reference)
 bibleverses-quick-find-lookup-verse-button = Lookup verse
-
-
-

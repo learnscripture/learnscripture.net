@@ -91,4 +91,3 @@ events-time-since-days = { $days ->
     [one]    1 day ago
    *[other]  { $days } days ago
  }
-

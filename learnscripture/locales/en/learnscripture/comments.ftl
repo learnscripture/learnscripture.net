@@ -38,4 +38,3 @@ comments-public-message-warning = This message will be public. Please do not inc
 # Displayed when the user is not logged in but tries to add a comment.
 # $login_url is the address for logging in.
 comments-login-to-add-comments-html = You must be <a href="{ $login_url }">signed in</a> to add comments.
-

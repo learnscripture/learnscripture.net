@@ -159,4 +159,3 @@ $(document).ready(function() {
         setupCreateVerseSetControls();
     }
 });
-

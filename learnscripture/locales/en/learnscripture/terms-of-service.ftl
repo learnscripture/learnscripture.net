@@ -2,5 +2,3 @@
 
 # Page title
 terms-of-service-page-title = Terms of service
-
-

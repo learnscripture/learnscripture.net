@@ -5,4 +5,3 @@ check it at:
 {{ url_start }}{% url 'admin:ipn_paypalipn_change' ipn_obj.id %}
 
 {% endautoescape %}
-

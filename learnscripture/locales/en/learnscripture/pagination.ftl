@@ -10,4 +10,3 @@ pagination-jump-to-top = Jump to top
 # $shown is the number of results shown so far,
 # $total is the total number of results.
 pagination-showing-shown-of-total = Showing { $shown } of { $total }
-

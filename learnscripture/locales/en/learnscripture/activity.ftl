@@ -23,4 +23,3 @@ activity-other-activity = Other recent activity
 
 # Link to page showing all of the user's recent site activity
 activity-user-recent-activity-link = Recent activity
-

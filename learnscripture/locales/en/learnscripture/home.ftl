@@ -63,4 +63,3 @@ home-free-explanation = All aspects of the site are free for everyone. Since we 
 home-interested-heading = Interested?
 
 home-interested-explanation-html = You can <a href="/about/">find out more</a> or just <a href="/choose/">jump in.</a>
-

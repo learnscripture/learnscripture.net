@@ -10,6 +10,3 @@ forms-field-public = Public
 
 # Displayed as help text under an input box indicating the information will be publicly visible, and is optional
 forms-field-public-optional = Public, optional
-
-
-

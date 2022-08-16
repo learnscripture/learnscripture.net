@@ -13,4 +13,3 @@ lists-item-remove = remove
 
 # Instructions about drag and drop
 lists-drag-drop-to-re-order = Drag/drop or use the arrows to re-order.
-

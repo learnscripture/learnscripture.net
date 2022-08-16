@@ -2,4 +2,3 @@
 
 # Page title
 user-verse-sets-page-title = Verse sets
-

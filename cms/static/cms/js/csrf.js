@@ -1,5 +1,5 @@
 // Django CSRF framework, https://docs.djangoproject.com/en/dev/ref/contrib/csrf/
-// This module ensures that all ajax non-safe methods send the X-CSRFToken along with 
+// This module ensures that all ajax non-safe methods send the X-CSRFToken along with
 // every request.
 function getCookie(name) {
     var cookieValue = null;
@@ -18,7 +18,7 @@ function getCookie(name) {
 }
 
 $(document).ajaxSend(function(event, xhr, settings) {
-    
+
     function sameOrigin(url) {
         // url could be relative or scheme relative or absolute
         var host = document.location.host; // host + port

@@ -97,4 +97,3 @@ choose-add-to-queue-button-added = Added!
 
 # Message when no verses were found when searching for a verse
 choose-verse-search-no-verses-found = No verses were found matching your search
-

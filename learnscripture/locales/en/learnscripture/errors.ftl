@@ -29,4 +29,3 @@ errors-csrf-cookie-problem = The problem appears to be that you do not have cook
 # Displayed if there is an error message. The text wrapped in <a... > and </a> becomes
 # a link to the contact page.
 errors-contact-us-html = Please <a href="{ $contact_url }">contact us</a> if this error persists.
-
