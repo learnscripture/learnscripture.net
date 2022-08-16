@@ -1135,7 +1135,7 @@ def password_reset_complete(request):
     )
 
 
-# Large copy and paste from django.contrib.auth.views, followed by customizations.
+# Copy and paste from django.contrib.auth.views, followed by customizations.
 @sensitive_post_parameters()
 @never_cache
 def password_reset_confirm(request, uidb64=None, token=None):
@@ -1246,7 +1246,6 @@ def stats(request):
     now = timezone.now()
     period = int(request.GET.get("period", 180))
     start = now - timedelta(days=period)
-
     stats_raw = get_account_stats(start, now)
 
     # Build the stats dict template is expecting (see stats.html)
@@ -1296,14 +1295,17 @@ def paypal_url_start_for_request(request):
 
 def donate(request):
     ctx = {"title": t("donations-page-title")}
-
     account = account_from_request(request)
     if account is not None:
         url_start = paypal_url_start_for_request(request)
         paypal_dict = donation_paypal_dict(account, url_start)
         form = PayPalPaymentsForm(initial=paypal_dict)
-        ctx["LIVEBOX"] = settings.LIVEBOX
-        ctx["paypal_form"] = form
+        ctx.update(
+            {
+                "LIVEBOX": settings.LIVEBOX,
+                "paypal_form": form,
+            }
+        )
 
     return TemplateResponse(request, "learnscripture/donate.html", ctx)
 
@@ -1331,7 +1333,6 @@ def referral_program(request):
         referral_link = account.make_referral_link(f"https://{Site.objects.get_current().domain}/")
     else:
         referral_link = None
-
     return TemplateResponse(
         request,
         "learnscripture/referral_program.html",
@@ -1346,7 +1347,6 @@ def referral_program(request):
 def awards(request):
     award_classes = [AWARD_LOGIC_CLASSES[t] for t in AwardType.values]
     awards = [cls(level=AnyLevel) for cls in award_classes if not cls.removed]
-
     return TemplateResponse(
         request,
         "learnscripture/awards.html",
@@ -1414,7 +1414,7 @@ def groups_editable_for_request(request):
 
 @for_htmx(if_target="id-groups-results", template="learnscripture/groups_inc.html")
 @for_htmx(if_target="id-more-results-container", template="learnscripture/groups_results_inc.html")
-def groups(request):
+def group_list(request):
     account = account_from_request(request)
     groups = Group.objects.visible_for_account(account).order_by("name")
     filter_form = GroupFilterForm.from_request_data(
@@ -1506,13 +1506,11 @@ def group_wall(request, slug):
     else:
         comments = comments.order_by("-created")
 
-    results = get_paged_results(comments, request, GROUP_COMMENTS_PAGINATE_BY)
-
     ctx = {
         "title": t("groups-wall-page-title", dict(name=group.name)),
         "filter_form": filter_form,
         "group": group,
-        "results": results,
+        "results": get_paged_results(comments, request, GROUP_COMMENTS_PAGINATE_BY),
         "sort_order": sort_order,
         "selected_comment_id": selected_comment_id,
     }
@@ -1584,24 +1582,23 @@ def group_leaderboard(request, slug):
     return TemplateResponse(request, "learnscripture/leaderboard.html", ctx)
 
 
+@require_account_with_redirect
 def create_group(request):
-    return create_or_edit_group(request)
-
-
-def edit_group(request, slug):
-    return create_or_edit_group(request, slug=slug)
+    return _create_or_edit_group(request)
 
 
 @require_account_with_redirect
-def create_or_edit_group(request, slug=None):
+def edit_group(request, slug):
+    group = get_object_or_404(groups_editable_for_request(request).filter(slug=slug))
+    return _create_or_edit_group(request, group=group)
+
+
+def _create_or_edit_group(request, group=None):
     account = account_from_request(request)
-    if slug is not None:
-        groups = groups_editable_for_request(request).filter(slug=slug)
-        group = get_object_or_404(groups)
+    if group is not None:
         title = t("groups-edit-page-title", dict(name=group.name))
         initial = {"invited_users": group.invited_users()}
     else:
-        group = None
         title = t("groups-create-page-title")
         initial = {"language_code": account.default_language_code}
 
@@ -1722,7 +1719,6 @@ def activity_item(request, event_id):
         Event.objects.for_activity_stream(viewer=account_from_request(request)).prefetch_related("comments__author"),
         id=int(event_id),
     )
-
     return TemplateResponse(
         request,
         "learnscripture/activity_item.html",

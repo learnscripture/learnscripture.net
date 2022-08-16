@@ -63,7 +63,7 @@ urlpatterns = [
     path("badges/", learnscripture.views.awards, name="awards"),
     path("badges/<slug:slug>/", learnscripture.views.award, name="award"),
     # Groups
-    path("groups/", learnscripture.views.groups, name="groups"),
+    path("groups/", learnscripture.views.group_list, name="groups"),
     path(
         "groups/<slug:slug>/",
         include(

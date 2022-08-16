@@ -26,6 +26,9 @@ def get_request_from_item(request):
 
 
 def get_paged_results(queryset, request, page_size):
+    """
+    Return a Page of the queryset, using standard paging mechanism and the page number from the request.
+    """
     total = queryset.count()
     from_item = get_request_from_item(request)
     last_item = from_item + page_size
