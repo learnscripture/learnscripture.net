@@ -1,6 +1,7 @@
 import urllib.parse
 from datetime import timedelta
 
+import django_ftl
 import furl
 from django.conf import settings
 from django.contrib import messages
@@ -128,6 +129,11 @@ def test_500_real(request):
 
 
 def handler500(request):
+    if django_ftl.activator.get_current_value() is None:
+        # Possible if the crash occurred before activate_language_from_request
+        # middleware had a chance to run
+        with django_ftl.override(settings.LANGUAGE_CODE):
+            return server_error(request)
     return server_error(request)
 
 
