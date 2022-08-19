@@ -32,7 +32,7 @@ class MemoryModel:
     # We need s:
 
     def s(self, t):
-        return 1 - math.exp(-self.ALPHA * t ** self.EXPONENT)
+        return 1 - math.exp(-self.ALPHA * t**self.EXPONENT)
 
     # We will also need the inverse:
 
@@ -111,7 +111,7 @@ class MemoryModel:
 
         # Rearranging:
         # ALPHA = - ln(1 - LEARNED) / (ONE_YEAR^n)
-        self.ALPHA = -math.log(1.0 - self.LEARNED) / (ONE_YEAR ** EXPONENT)
+        self.ALPHA = -math.log(1.0 - self.LEARNED) / (ONE_YEAR**EXPONENT)
 
         # For the initial test, we don't have a previous strength recorded, so
         # we need an arbitrary number. It would be nice if each test, including
@@ -146,7 +146,7 @@ class MemoryModel:
         # that has fixed points at zero and one, and reduces the score for
         # everything in between.
 
-        test_strength = test_accuracy ** 2
+        test_strength = test_accuracy**2
 
         if time_elapsed is None:
             return self.INITIAL_STRENGTH_FACTOR * test_strength
