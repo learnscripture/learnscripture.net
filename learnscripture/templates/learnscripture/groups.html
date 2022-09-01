@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load ftl %}
 {% load form_rendering %}
+{% load markup_tags %}
 
 {% block content %}
   {% url 'create_group' as create_group_url %}
@@ -24,6 +25,44 @@
   </form>
 
   <div id="id-groups-results">
-    {% include "learnscripture/groups_inc.html" %}
+    {% block id-groups-results %}
+
+      {% if 'query' in request.GET %}
+        {% if query == '' %}
+          <p>{% ftlmsg 'groups-search-enter-search-term' %}</p>
+        {% else %}
+          <h2>{% ftlmsg 'groups-search-results-subtitle' %}</h2>
+          {% if results.items %}
+            {% block id-more-results-container %}
+
+              {% for group in results.items %}
+                <div class="actionset">
+                  <h3><a href="{% url 'group' group.slug %}">{{ group.name }}</a></h3>
+                  {{ group.description|apply_markup:"restructuredtext" }}
+                </div>
+              {% endfor %}
+
+              {% if results.more %}
+                <div id="id-more-results-container">
+                  <div class="paging">
+                    <span class="paging-part">{% ftlmsg 'pagination-showing-shown-of-total' shown=results.shown_count total=results.total %}</span>
+                    <span class="paging-part"><a href="{{ results.more_link }}"
+                      hx-get="{{ results.more_link }}"
+                      hx-target="#id-more-results-container"
+                      hx-indicator="#id-more-results-container"
+                      hx-swap="outerHTML">{% ftlmsg 'pagination-show-more' %}</a></span>
+                    <span class="paging-part"><a href="#id-page-top">{% ftlmsg 'pagination-jump-to-top' %}</a></span>
+                  </div>
+                </div>
+              {% endif %}
+
+            {% endblock %}
+          {% else %}
+            <p>{% ftlmsg 'groups-search-no-results' %}</p>
+          {% endif %}
+        {% endif %}
+      {% endif %}
+
+    {% endblock %}
   </div>
 {% endblock %}

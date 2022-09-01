@@ -1036,8 +1036,8 @@ def user_stats(request, username):
 
 
 @require_identity
-@for_htmx(if_hx_target="id-user-verses-results", template="learnscripture/user_verses_inc.html")
-@for_htmx(if_hx_target="id-more-results-container", template="learnscripture/user_verses_table_body_inc.html")
+@for_htmx(if_hx_target="id-user-verses-results", block="id-user-verses-results")
+@for_htmx(if_hx_target="id-more-results-container", block="id-more-results-container")
 def user_verses(request):
     identity = request.identity
 
@@ -1418,8 +1418,8 @@ def groups_editable_for_request(request):
     return Group.objects.editable_for_account(account_from_request(request))
 
 
-@for_htmx(if_hx_target="id-groups-results", template="learnscripture/groups_inc.html")
-@for_htmx(if_hx_target="id-more-results-container", template="learnscripture/groups_results_inc.html")
+@for_htmx(if_hx_target="id-groups-results", block="id-groups-results")
+@for_htmx(if_hx_target="id-more-results-container", block="id-more-results-container")
 def group_list(request):
     account = account_from_request(request)
     groups = Group.objects.visible_for_account(account).order_by("name")
