@@ -518,8 +518,8 @@ def default_bible_version_for_request(request):
 # page and the linked pages unhindered, for SEO.
 
 
-@for_htmx(if_target="id-choose-verseset-results", template="learnscripture/choose_verseset_inc.html")
-@for_htmx(if_target="id-more-results-container", template="learnscripture/choose_verseset_results_inc.html")
+@for_htmx(if_hx_target="id-choose-verseset-results", template="learnscripture/choose_verseset_inc.html")
+@for_htmx(if_hx_target="id-more-results-container", template="learnscripture/choose_verseset_results_inc.html")
 def choose(request):
     """
     Choose a verse or verse set
@@ -995,7 +995,7 @@ def get_hellbanned_mode(request):
         return account.is_hellbanned
 
 
-@for_htmx(if_target="id-follow-form", template="learnscripture/follow_form_inc.html")
+@for_htmx(if_hx_target="id-follow-form", template="learnscripture/follow_form_inc.html")
 def user_stats(request, username):
     viewer = account_from_request(request)
     account = get_object_or_404(
@@ -1036,8 +1036,8 @@ def user_stats(request, username):
 
 
 @require_identity
-@for_htmx(if_target="id-user-verses-results", template="learnscripture/user_verses_inc.html")
-@for_htmx(if_target="id-more-results-container", template="learnscripture/user_verses_table_body_inc.html")
+@for_htmx(if_hx_target="id-user-verses-results", template="learnscripture/user_verses_inc.html")
+@for_htmx(if_hx_target="id-more-results-container", template="learnscripture/user_verses_table_body_inc.html")
 def user_verses(request):
     identity = request.identity
 
@@ -1418,8 +1418,8 @@ def groups_editable_for_request(request):
     return Group.objects.editable_for_account(account_from_request(request))
 
 
-@for_htmx(if_target="id-groups-results", template="learnscripture/groups_inc.html")
-@for_htmx(if_target="id-more-results-container", template="learnscripture/groups_results_inc.html")
+@for_htmx(if_hx_target="id-groups-results", template="learnscripture/groups_inc.html")
+@for_htmx(if_hx_target="id-more-results-container", template="learnscripture/groups_results_inc.html")
 def group_list(request):
     account = account_from_request(request)
     groups = Group.objects.visible_for_account(account).order_by("name")
@@ -1491,8 +1491,8 @@ def group(request, slug):
     )
 
 
-@for_htmx(if_target="id-group-wall-comments", template="learnscripture/group_wall_comments_inc.html")
-@for_htmx(if_target="id-more-results-container", template="learnscripture/group_wall_comments_results_inc.html")
+@for_htmx(if_hx_target="id-group-wall-comments", template="learnscripture/group_wall_comments_inc.html")
+@for_htmx(if_hx_target="id-more-results-container", template="learnscripture/group_wall_comments_results_inc.html")
 def group_wall(request, slug):
     account = account_from_request(request)
     group = group_by_slug(request, slug)
@@ -1524,9 +1524,9 @@ def group_wall(request, slug):
 
 
 @for_htmx(
-    if_target="id-leaderboard-results-table-body", template="learnscripture/leaderboard_results_table_body_inc.html"
+    if_hx_target="id-leaderboard-results-table-body", template="learnscripture/leaderboard_results_table_body_inc.html"
 )
-@for_htmx(if_target="id-more-results-container", template="learnscripture/leaderboard_results_table_body_inc.html")
+@for_htmx(if_hx_target="id-more-results-container", template="learnscripture/leaderboard_results_table_body_inc.html")
 def group_leaderboard(request, slug):
     PAGE_SIZE = 30
     from_item = get_request_from_item(request)
