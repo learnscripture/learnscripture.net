@@ -105,7 +105,23 @@
 
   {% if request_account and request_account != account %}
     <h2>{% ftlmsg 'user-stats-connections-title' %}</h2>
-    {% include "learnscripture/follow_form_inc.html" %}
+
+    {% block id-follow-form %}
+      <form action="." method="POST" hx-post="." hx-swap="outerHTML" id="id-follow-form">
+        {% csrf_token %}
+        {% if viewer_is_following %}
+          <div class="is-following">
+            <button type="submit" id="id-unfollow-btn" class="btn primary" name="unfollow">{% ftlmsg 'user-stats-unfollow-button' %}</button>
+            {% ftlmsg 'user-stats-you-are-following' username=account.username %}
+          </div>
+        {% else %}
+          <div class="is-not-following">
+            <button type="submit" id="id-follow-btn" class="btn primary" name="follow">{% ftlmsg 'user-stats-follow-button' %}</button>
+            {% ftlmsg 'user-stats-you-are-not-following' username=account.username %}
+          </div>
+        {% endif %}
+      </form>
+    {% endblock %}
     <p>{% ftlmsg 'user-stats-following-explanation' %}</p>
   {% endif %}
 

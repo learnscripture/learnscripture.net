@@ -995,7 +995,7 @@ def get_hellbanned_mode(request):
         return account.is_hellbanned
 
 
-@for_htmx(if_hx_target="id-follow-form", template="learnscripture/follow_form_inc.html")
+@for_htmx(if_hx_target="id-follow-form", block="id-follow-form")
 def user_stats(request, username):
     viewer = account_from_request(request)
     account = get_object_or_404(

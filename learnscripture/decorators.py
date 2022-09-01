@@ -1,10 +1,12 @@
 from typing import Optional
 
 from django.http import HttpResponseRedirect
+from django.http.response import HttpResponse
 from django.shortcuts import render
 from django.utils.cache import add_never_cache_headers
 from django.utils.decorators import method_decorator
 from django.utils.functional import wraps
+from render_block import render_block_to_string
 
 from learnscripture import session
 from learnscripture.ftl_bundles import t
@@ -89,7 +91,7 @@ def require_account_with_redirect(view_func):
     return view
 
 
-def for_htmx(*, if_hx_target: Optional[str] = None, template: str):
+def for_htmx(*, if_hx_target: Optional[str] = None, template: Optional[str] = None, block: Optional[str] = None):
     """
     If the request is from htmx, then render a partial page, using the supplied
     template name.
@@ -97,6 +99,10 @@ def for_htmx(*, if_hx_target: Optional[str] = None, template: str):
     If the optional `if_target` parameter is supplied, the
     hx-target header must match the supplied value as well.
     """
+    if block and template:
+        raise ValueError("Pass only one of 'template' and 'block'")
+    if not (block or template):
+        raise ValueError("You must pass one of 'template' and 'block'")
 
     def decorator(view):
         @wraps(view)
@@ -104,7 +110,20 @@ def for_htmx(*, if_hx_target: Optional[str] = None, template: str):
             resp = view(request, *args, **kwargs)
             if request.headers.get("Hx-Request", False):
                 if if_hx_target is None or request.headers.get("Hx-Target", None) == if_hx_target:
-                    resp.template_name = template
+                    if not hasattr(resp, "render"):
+                        raise ValueError("Cannot modify a response that isn't a TemplateResponse")
+                    if resp.is_rendered:
+                        raise ValueError("Cannot modify a response that has already been rendered")
+
+                    if template is not None:
+                        resp.template_name = template
+                    elif block is not None:
+                        rendered_block = render_block_to_string(
+                            resp.template_name, block, context=resp.context_data, request=request
+                        )
+                        # Create new simple HttpResponse as replacement
+                        resp = HttpResponse(content=rendered_block, status=resp.status_code, headers=resp.headers)
+
             return resp
 
         return _view
