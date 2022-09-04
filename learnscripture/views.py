@@ -518,8 +518,8 @@ def default_bible_version_for_request(request):
 # page and the linked pages unhindered, for SEO.
 
 
-@for_htmx(if_hx_target="id-choose-verseset-results", template="learnscripture/choose_verseset_inc.html")
-@for_htmx(if_hx_target="id-more-results-container", template="learnscripture/choose_verseset_results_inc.html")
+@for_htmx(if_hx_target="id-choose-verseset-results", use_template="learnscripture/choose_verseset_inc.html")
+@for_htmx(if_hx_target="id-more-results-container", use_template="learnscripture/choose_verseset_results_inc.html")
 def choose(request):
     """
     Choose a verse or verse set
@@ -995,7 +995,7 @@ def get_hellbanned_mode(request):
         return account.is_hellbanned
 
 
-@for_htmx(if_hx_target="id-follow-form", block="id-follow-form")
+@for_htmx(if_hx_target="id-follow-form", use_block="id-follow-form")
 def user_stats(request, username):
     viewer = account_from_request(request)
     account = get_object_or_404(
@@ -1036,8 +1036,8 @@ def user_stats(request, username):
 
 
 @require_identity
-@for_htmx(if_hx_target="id-user-verses-results", block="id-user-verses-results")
-@for_htmx(if_hx_target="id-more-results-container", block="id-more-results-container")
+@for_htmx(if_hx_target="id-user-verses-results", use_block="id-user-verses-results")
+@for_htmx(if_hx_target="id-more-results-container", use_block="id-more-results-container")
 def user_verses(request):
     identity = request.identity
 
@@ -1418,8 +1418,8 @@ def groups_editable_for_request(request):
     return Group.objects.editable_for_account(account_from_request(request))
 
 
-@for_htmx(if_hx_target="id-groups-results", block="id-groups-results")
-@for_htmx(if_hx_target="id-more-results-container", block="id-more-results-container")
+@for_htmx(if_hx_target="id-groups-results", use_block="id-groups-results")
+@for_htmx(if_hx_target="id-more-results-container", use_block="id-more-results-container")
 def group_list(request):
     account = account_from_request(request)
     groups = Group.objects.visible_for_account(account).order_by("name")
@@ -1491,8 +1491,8 @@ def group(request, slug):
     )
 
 
-@for_htmx(if_hx_target="id-group-wall-comments", template="learnscripture/group_wall_comments_inc.html")
-@for_htmx(if_hx_target="id-more-results-container", template="learnscripture/group_wall_comments_results_inc.html")
+@for_htmx(if_hx_target="id-group-wall-comments", use_template="learnscripture/group_wall_comments_inc.html")
+@for_htmx(if_hx_target="id-more-results-container", use_template="learnscripture/group_wall_comments_results_inc.html")
 def group_wall(request, slug):
     account = account_from_request(request)
     group = group_by_slug(request, slug)
@@ -1524,9 +1524,12 @@ def group_wall(request, slug):
 
 
 @for_htmx(
-    if_hx_target="id-leaderboard-results-table-body", template="learnscripture/leaderboard_results_table_body_inc.html"
+    if_hx_target="id-leaderboard-results-table-body",
+    use_template="learnscripture/leaderboard_results_table_body_inc.html",
 )
-@for_htmx(if_hx_target="id-more-results-container", template="learnscripture/leaderboard_results_table_body_inc.html")
+@for_htmx(
+    if_hx_target="id-more-results-container", use_template="learnscripture/leaderboard_results_table_body_inc.html"
+)
 def group_leaderboard(request, slug):
     PAGE_SIZE = 30
     from_item = get_request_from_item(request)
@@ -1683,7 +1686,7 @@ def contact(request):
     )
 
 
-@for_htmx(template="learnscripture/activity_stream_results_inc.html")
+@for_htmx(use_template="learnscripture/activity_stream_results_inc.html")
 def activity_stream(request):
     viewer = account_from_request(request)
     events = Event.objects.for_activity_stream(viewer=viewer).prefetch_related("comments", "comments__author")
@@ -1705,7 +1708,7 @@ def _user_events(for_account, viewer):
     ).prefetch_related("comments", "comments__author")
 
 
-@for_htmx(template="learnscripture/activity_stream_results_inc.html")
+@for_htmx(use_template="learnscripture/activity_stream_results_inc.html")
 def user_activity_stream(request, username):
     account = get_object_or_404(Account.objects.visible_for_account(account_from_request(request)), username=username)
     events = _user_events(account, account_from_request(request))

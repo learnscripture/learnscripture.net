@@ -91,17 +91,25 @@ def require_account_with_redirect(view_func):
     return view
 
 
-def for_htmx(*, if_hx_target: Optional[str] = None, template: Optional[str] = None, block: Optional[str] = None):
+def for_htmx(
+    *, if_hx_target: Optional[str] = None, use_template: Optional[str] = None, use_block: Optional[str] = None
+):
     """
     If the request is from htmx, then render a partial page, using the supplied
-    template name.
+    template name, or supplied block name
 
-    If the optional `if_target` parameter is supplied, the
+    If the optional `if_hx_target` parameter is supplied, the
     hx-target header must match the supplied value as well.
+
     """
-    if block and template:
+    # The names of parameters are chosen to make usage sound like a mini
+    # language e.g.
+    # for htmx, if hx-target = "my-id" then use block "foo"
+    # @for_hmtx(if_hx_target="my_id", use_block="foo")
+
+    if use_block and use_template:
         raise ValueError("Pass only one of 'template' and 'block'")
-    if not (block or template):
+    if not (use_block or use_template):
         raise ValueError("You must pass one of 'template' and 'block'")
 
     def decorator(view):
@@ -115,11 +123,11 @@ def for_htmx(*, if_hx_target: Optional[str] = None, template: Optional[str] = No
                     if resp.is_rendered:
                         raise ValueError("Cannot modify a response that has already been rendered")
 
-                    if template is not None:
-                        resp.template_name = template
-                    elif block is not None:
+                    if use_template is not None:
+                        resp.template_name = use_template
+                    elif use_block is not None:
                         rendered_block = render_block_to_string(
-                            resp.template_name, block, context=resp.context_data, request=request
+                            resp.template_name, use_block, context=resp.context_data, request=request
                         )
                         # Create new simple HttpResponse as replacement
                         resp = HttpResponse(content=rendered_block, status=resp.status_code, headers=resp.headers)
