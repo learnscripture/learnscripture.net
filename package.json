@@ -39,7 +39,7 @@
     "autosize": "^4.0.0",
     "cal-heatmap": "^3.6.2",
     "elm-webpack-loader": "git://github.com/CareerPlug/elm-webpack-loader.git#4.5.1",
-    "htmx.org": "^1.6.1",
+    "htmx.org": "^1.8.0",
     "jquery-ui": "^1.12.1",
     "n": "^2.1.12",
     "npm": "^5.6.0"

@@ -995,7 +995,7 @@ def get_hellbanned_mode(request):
         return account.is_hellbanned
 
 
-@for_htmx(if_hx_target="id-follow-form", use_block="id-follow-form")
+@for_htmx(use_block_from_params=True)
 def user_stats(request, username):
     viewer = account_from_request(request)
     account = get_object_or_404(
@@ -1036,8 +1036,7 @@ def user_stats(request, username):
 
 
 @require_identity
-@for_htmx(if_hx_target="id-user-verses-results", use_block="id-user-verses-results")
-@for_htmx(if_hx_target="id-more-results-container", use_block="id-more-results-container")
+@for_htmx(use_block_from_params=True)
 def user_verses(request):
     identity = request.identity
 
@@ -1418,8 +1417,7 @@ def groups_editable_for_request(request):
     return Group.objects.editable_for_account(account_from_request(request))
 
 
-@for_htmx(if_hx_target="id-groups-results", use_block="id-groups-results")
-@for_htmx(if_hx_target="id-more-results-container", use_block="id-more-results-container")
+@for_htmx(use_block_from_params=True)
 def group_list(request):
     account = account_from_request(request)
     groups = Group.objects.visible_for_account(account).order_by("name")

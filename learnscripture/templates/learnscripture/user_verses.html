@@ -11,6 +11,7 @@
     hx-get="."
     hx-target="#id-user-verses-results"
     hx-indicator="#id-user-verses-results"
+    hx-vals='{"use_block": "results"}'
   >
     <div class="form-row">
       <label for="id_query">{% ftlmsg 'user-verses-search-label' %}</label>
@@ -24,7 +25,7 @@
   </form>
 
   <div id="id-user-verses-results">
-    {% block id-user-verses-results %}
+    {% block results %}
       {% if not results.items %}
         {% if bible %}
           <p>{% ftlmsg 'user-verses-no-verses' %}</p>
@@ -44,7 +45,7 @@
               <th></th>
             </tr>
           </thead>
-          {% block id-more-results-container %}
+          {% block page-plus-paging %}
             {% for verse in results.items %}
               {% ifchanged verse.localized_reference verse.version.slug %}
                 <tbody {% if verse.verse_set_id %}
@@ -83,11 +84,13 @@
                   <td colspan="4">
                     <div class="paging">
                       <span class="paging-part">{% ftlmsg 'pagination-showing-shown-of-total' shown=results.shown_count total=results.total %}</span>
-                      <span class="paging-part"><a href="{{ results.more_link }}"
-                        hx-get="{{ results.more_link }}"
-                        hx-target="#id-more-results-container"
-                        hx-indicator="#id-more-results-container"
-                        hx-swap="outerHTML">{% ftlmsg 'pagination-show-more' %}</a></span>
+                      <span class="paging-part">
+                        <a href="{{ results.more_link }}"
+                          hx-get="{{ results.more_link }}"
+                          hx-target="#id-more-results-container"
+                          hx-vals='{"use_block": "page-plus-paging"}'
+                          hx-indicator="#id-more-results-container"
+                          hx-swap="outerHTML">{% ftlmsg 'pagination-show-more' %}</a></span>
                       <span class="paging-part"><a href="#id-page-top">{% ftlmsg 'pagination-jump-to-top' %}</a></span>
                     </div>
                   </td>

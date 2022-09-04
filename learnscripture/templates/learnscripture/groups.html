@@ -13,6 +13,7 @@
     hx-get="."
     hx-target="#id-groups-results"
     hx-indicator="#id-groups-results"
+    hx-vals='{"use_block": "results"}'
   >
     <div class="form-row">
       <label for="id_query">{% ftlmsg 'groups-search-label' %}</label>
@@ -25,7 +26,7 @@
   </form>
 
   <div id="id-groups-results">
-    {% block id-groups-results %}
+    {% block results %}
 
       {% if 'query' in request.GET %}
         {% if query == '' %}
@@ -33,7 +34,7 @@
         {% else %}
           <h2>{% ftlmsg 'groups-search-results-subtitle' %}</h2>
           {% if results.items %}
-            {% block id-more-results-container %}
+            {% block page-plus-paging %}
 
               {% for group in results.items %}
                 <div class="actionset">
@@ -49,6 +50,7 @@
                     <span class="paging-part"><a href="{{ results.more_link }}"
                       hx-get="{{ results.more_link }}"
                       hx-target="#id-more-results-container"
+                      hx-vals='{"use_block": "page-plus-paging"}'
                       hx-indicator="#id-more-results-container"
                       hx-swap="outerHTML">{% ftlmsg 'pagination-show-more' %}</a></span>
                     <span class="paging-part"><a href="#id-page-top">{% ftlmsg 'pagination-jump-to-top' %}</a></span>

@@ -106,8 +106,14 @@
   {% if request_account and request_account != account %}
     <h2>{% ftlmsg 'user-stats-connections-title' %}</h2>
 
-    {% block id-follow-form %}
-      <form action="." method="POST" hx-post="." hx-swap="outerHTML" id="id-follow-form">
+    {% block follow-form %}
+      <form
+        action="."
+        method="POST"
+        hx-post="."
+        hx-swap="outerHTML"
+        hx-vals='{"use_block": "follow-form"}'
+      >
         {% csrf_token %}
         {% if viewer_is_following %}
           <div class="is-following">
