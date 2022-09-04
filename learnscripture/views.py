@@ -1489,8 +1489,7 @@ def group(request, slug):
     )
 
 
-@for_htmx(if_hx_target="id-group-wall-comments", use_template="learnscripture/group_wall_comments_inc.html")
-@for_htmx(if_hx_target="id-more-results-container", use_template="learnscripture/group_wall_comments_results_inc.html")
+@for_htmx(use_block_from_params=True)
 def group_wall(request, slug):
     account = account_from_request(request)
     group = group_by_slug(request, slug)

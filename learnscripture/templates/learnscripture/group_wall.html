@@ -12,13 +12,57 @@
   <form action="." method="GET"
     hx-get="."
     hx-target="#id-group-wall-comments"
+    hx-vals='{"use_block": "results"}'
     hx-indicator="#id-group-wall-comments"
   >
     {{ filter_form|render_form }}
   </form>
 
   <div id="id-group-wall-comments">
-    {% include "learnscripture/group_wall_comments_inc.html" %}
+
+    {% block results %}
+      <div class="groupcomments" data-group-id="{{ group.id }}">
+        <div class="commentblock"
+          data-new-comments-position="{% if sort_order == 'newestfirst' %}top{% else %}bottom{% endif %}"
+        >
+
+          {% block page-and-paging %}
+            {% if results.from_item == 0 and sort_order == 'newestfirst' %}
+              {% include "learnscripture/group_wall_add_comment_inc.html" %}
+            {% endif %}
+            {% for comment in results.items %}
+              {% with show_as_related_comment=comment.event %}
+                {% include "learnscripture/comment_inc.html" %}
+              {% endwith %}
+            {% endfor %}
+            {% if results.more %}
+              <div id="id-more-results-container">
+                <div class="paging">
+                  <span class="paging-part">
+                    {% ftlmsg 'pagination-showing-shown-of-total' shown=results.shown_count total=results.total %}
+                  </span>
+                  {% if results.more %}
+                    <span class="paging-part"><a href="{{ results.more_link }}"
+                      hx-get="{{ results.more_link }}"
+                      hx-target="#id-more-results-container"
+                      hx-indicator="#id-more-results-container"
+                      hx-vals='{"use_block": "page-and-paging"}'
+                      hx-swap="outerHTML">{% ftlmsg 'pagination-show-more' %}</a></span>
+                  {% endif %}
+                  <span class="paging-part"><a href="#id-page-top">{% ftlmsg 'pagination-jump-to-top' %}</a></span>
+                </div>
+              </div>
+            {% endif %}
+            {% if not results.more and sort_order == 'oldestfirst' %}
+              {# We only include the 'add comment' box when the user can see the newest comment #}
+              {% include "learnscripture/group_wall_add_comment_inc.html" %}
+            {% endif %}
+          {% endblock %}
+
+        </div>
+      </div>
+    {% endblock %}
+
   </div>
 
   {% include "learnscripture/comment_common_inc.html" %}
