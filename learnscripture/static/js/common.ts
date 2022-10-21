@@ -139,7 +139,7 @@ $(document).ready(function() {
     document.querySelectorAll('form[hx-target]').forEach((form, idx) => {
         form.querySelectorAll('input, select').forEach((input, idx) => {
             input.addEventListener("change", (ev) => {
-                htmx.trigger(form, 'submit');
+                htmx.trigger(form, 'submit', null);
             }, true);
         });
     });
