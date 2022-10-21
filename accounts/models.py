@@ -60,10 +60,10 @@ THEMES = [
     ("space", t_lazy("accounts-space-theme")),
 ]
 THEME_FONTS = [
-    ("calm", ["https://fonts.googleapis.com/css?family=Cuprum&subset=latin-ext"]),
-    ("bubblegum", ["https://fonts.googleapis.com/css?family=Short+Stack"]),
-    ("bubblegum2", ["https://fonts.googleapis.com/css?family=Short+Stack"]),
-    ("space", ["https://fonts.googleapis.com/css?family=Prosto+One"]),
+    ("calm", ["https://fonts.googleapis.com/css?family=Cuprum&subset=latin-ext&display=swap"]),
+    ("bubblegum", ["https://fonts.googleapis.com/css?family=Short+Stack&display=swap"]),
+    ("bubblegum2", ["https://fonts.googleapis.com/css?family=Short+Stack&display=swap"]),
+    ("space", ["https://fonts.googleapis.com/css?family=Prosto+One&display=swap"]),
 ]
 DEFAULT_THEME = "calm"
 
