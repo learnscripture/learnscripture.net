@@ -271,7 +271,7 @@ optional_chapter = chapter.optional()
 verse_or_chapter = verse | chapter
 
 
-def bible_reference_parser_for_lang(language_code, strict):
+def bible_reference_parser_for_lang(language_code: str, strict: bool) -> ParsedReference:
     """
     Returns a Bible reference parser for the language.
 
