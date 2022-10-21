@@ -1,5 +1,6 @@
 # See also bible_book_info.ts
-from collections import defaultdict
+
+import parsy as P
 
 from .languages import LANGUAGE_CODE_EN, LANGUAGE_CODE_INTERNAL, LANGUAGE_CODE_TR, normalize_reference_input
 
@@ -157,10 +158,6 @@ _BIBLE_BOOK_NUMBERS_FOR_LANG = {
     lang: {n: i for (i, n) in enumerate(books)} for lang, books in _BIBLE_BOOKS_FOR_LANG.items()
 }
 
-
-# All possible bible book names, normalized (lower case plus other transformations),
-# matched to canonical name:
-_BIBLE_BOOK_ABBREVIATIONS_FOR_LANG = {}
 
 BIBLE_BOOK_INFO = dict(
     [
@@ -1510,125 +1507,1018 @@ BIBLE_BOOK_INFO = dict(
     ]
 )
 
+# All possible bible book names, normalized (lower case plus other transformations),
+# matched to canonical name:
+_BIBLE_BOOK_ABBREVIATIONS_FOR_LANG = {}
+
+# From https://www.logos.com/bible-book-abbreviations
+EN_EXTRA_BOOK_NAMES = """
+Genesis
+    Gen.
+    Ge.
+    Gn.
+
+Exodus
+    Ex.
+    Exod.
+    Exo.
+
+Leviticus
+    Lev.
+    Le.
+    Lv.
+
+Numbers
+    Num.
+    Nu.
+    Nm.
+    Nb.
+
+Deuteronomy
+    Deut.
+    De.
+    Dt.
+
+Joshua
+    Josh.
+    Jos.
+    Jsh.
+
+Judges
+    Judg.
+    Jdg.
+    Jg.
+    Jdgs.
+
+Ruth
+    Rth.
+    Ru.
+
+1 Samuel
+    1 Sam.
+    1 Sm.
+    1 Sa.
+    1 S.
+    I Sam.
+    I Sa.
+    1Sam.
+    1Sa.
+    1S.
+    1st Samuel
+    1st Sam.
+
+2 Samuel
+    2 Sam.
+    2 Sm.
+    2 Sa.
+    2 S.
+    II Sam.
+    II Sa.
+    2Sam.
+    2Sa.
+    2S.
+    2nd Samuel
+    2nd Sam.
+
+1 Kings
+    1 Kgs
+    1 Ki
+    1Kgs
+    1Kin
+    1Ki
+    1K
+    I Kgs
+    I Ki
+    1st Kings
+    1st Kgs
+
+2 Kings
+    2 Kgs.
+    2 Ki.
+    2Kgs.
+    2Kin.
+    2Ki.
+    2K.
+    II Kgs.
+    II Ki.
+    2nd Kings
+    2nd Kgs.
+
+1 Chronicles
+    1 Chron.
+    1 Chr.
+    1 Ch.
+    1Chron.
+    1Chr.
+    1Ch.
+    I Chron.
+    I Chr.
+    I Ch.
+    1st Chronicles
+    1st Chron.
+
+2 Chronicles
+    2 Chron.
+    2 Chr.
+    2 Ch.
+    2Chron.
+    2Chr.
+    2Ch.
+    II Chron.
+    II Chr.
+    II Ch.
+    2nd Chronicles
+    2nd Chron.
+
+Ezra
+    Ezra
+    Ezr.
+    Ez.
+
+Nehemiah
+    Neh.
+    Ne.
+
+Esther
+    Est.
+    Esth.
+    Es.
+
+Job
+    Job
+    Jb.
+
+Psalm
+    Ps.
+    Psalm
+    Pslm.
+    Psa.
+    Psm.
+    Pss.
+    Psalms
+
+Proverbs
+    Prov
+    Pro.
+    Prv.
+    Pr.
+
+Ecclesiastes
+    Eccles.
+    Eccle.
+    Ecc.
+    Ec.
+    Qoh.
+
+Song of Solomon
+    Song.
+    Song of Songs
+    Songs
+    Sg.
+    Sng.
+    SOS.
+    So.
+    Canticle of Canticles
+    Canticles
+    Cant.
+
+Isaiah
+    Isa.
+    Is.
+
+Jeremiah
+    Jer.
+    Je.
+    Jr.
+
+Lamentations
+    Lam.
+    La.
+
+Ezekiel
+    Ezek.
+    Eze.
+    Ezk.
+
+Daniel
+    Dan.
+    Da.
+    Dn.
+
+Hosea
+    Hos.
+    Ho.
+
+Joel
+    Jl.
+
+Amos
+    Am.
+
+Obadiah
+    Obad.
+    Ob.
+
+Jonah
+    Jonah
+    Jnh.
+    Jon.
+
+Micah
+    Mic.
+    Mc.
+
+Nahum
+    Nah.
+    Na.
+
+Habakkuk
+    Hab.
+    Hb.
+
+Zephaniah
+    Zeph.
+    Zep.
+    Zp.
+
+Haggai
+    Hag.
+    Hg.
+
+Zechariah
+    Zech.
+    Zec.
+    Zc.
+
+Malachi
+    Mal.
+    Ml.
+
+Matthew
+    Matt.
+    Mt.
+
+Mark
+    Mark
+    Mrk.
+    Mar.
+    Mk.
+    Mr.
+
+Luke
+    Luke
+    Luk.
+    Lk.
+
+John
+    John
+    Joh.
+    Jhn.
+    Jn.
+
+Acts
+    Acts
+    Act.
+    Ac.
+
+Romans
+    Rom.
+    Ro.
+    Rm.
+
+1 Corinthians
+    1 Cor.
+    1 Co.
+    I Cor.
+    I Co.
+    1Cor.
+    1Co.
+    I Corinthians
+    1Corinthians
+    1st Corinthians
+
+2 Corinthians
+    2 Cor.
+    2 Co.
+    II Cor.
+    II Co.
+    2Cor.
+    2Co.
+    II Corinthians
+    2Corinthians
+    2nd Corinthians
+
+Galatians
+    Gal.
+    Ga.
+
+Ephesians
+    Eph.
+    Ephes.
+
+Philippians
+    Phil.
+    Php.
+    Pp.
+
+Colossians
+    Col.
+    Co.
+
+1 Thessalonians
+    1 Thess.
+    1 Thes.
+    1 Th.
+    I Thessalonians
+    I Thess.
+    I Thes.
+    I Th.
+    1Thessalonians
+    1Thess.
+    1Thes.
+    1Th.
+    1st Thessalonians
+    1st Thess.
+
+2 Thessalonians
+    2 Thess.
+    2 Thes.
+    2 Th.
+    II Thessalonians
+    II Thess.
+    II Thes.
+    II Th.
+    2Thessalonians
+    2Thess.
+    2Thes.
+    2Th.
+    2nd Thessalonians
+    2nd Thess.
+
+1 Timothy
+    1 Tim.
+    1 Ti.
+    I Timothy
+    I Tim.
+    I Ti.
+    1Timothy
+    1Tim.
+    1Ti.
+    1st Timothy
+    1st Tim.
+
+2 Timothy
+    2 Tim.
+    2 Ti.
+    II Timothy
+    II Tim.
+    II Ti.
+    2Timothy
+    2Tim.
+    2Ti.
+    2nd Timothy
+    2nd Tim.
+
+Titus
+    Titus
+    Tit
+    ti
+
+Philemon
+    Philem.
+    Phm.
+    Pm.
+
+Hebrews
+    Heb.
+
+James
+    James
+    Jas
+    Jm
+
+1 Peter
+    1 Pet.
+    1 Pe.
+    1 Pt.
+    1 P.
+    I Pet.
+    I Pt.
+    I Pe.
+    1Peter
+    1Pet.
+    1Pe.
+    1Pt.
+    1P.
+    I Peter
+    1st Peter
+
+2 Peter
+    2 Pet.
+    2 Pe.
+    2 Pt.
+    2 P.
+    II Peter
+    II Pet.
+    II Pt.
+    II Pe.
+    2Peter
+    2Pet.
+    2Pe.
+    2Pt.
+    2P.
+    2nd Peter
+
+1 John
+    1 John
+    1 Jhn.
+    1 Jn.
+    1 J.
+    1John
+    1Jhn.
+    1Joh.
+    1Jn.
+    1Jo.
+    1J.
+    I John
+    I Jhn.
+    I Joh.
+    I Jn.
+    I Jo.
+    1st John
+
+2 John
+    2 John
+    2 Jhn.
+    2 Jn.
+    2 J.
+    2John
+    2Jhn.
+    2Joh.
+    2Jn.
+    2Jo.
+    2J.
+    II John
+    II Jhn.
+    II Joh.
+    II Jn.
+    II Jo.
+    2nd John
+
+3 John
+    3 John
+    3 Jhn.
+    3 Jn.
+    3 J.
+    3John
+    3Jhn.
+    3Joh.
+    3Jn.
+    3Jo.
+    3J.
+    III John
+    III Jhn.
+    III Joh.
+    III Jn.
+    III Jo.
+    3rd John
+
+Jude
+    Jude
+    Jud.
+    Jd.
+
+Revelation
+    Rev.
+"""
+
+TR_EXTRA_BOOK_NAMES = """
+Yaratılış
+    yar
+    yarat
+    tekvin
+
+Mısır'dan Çıkış
+    mis
+    misir
+    misirdan
+    cikis
+
+Levililer
+    lev
+    levi
+    levil
+
+Çölde Sayım
+    colde
+
+Yasa'nın Tekrarı
+    yasa
+    yasanin
+    tesniye
+
+Hâkimler
+    hak
+    hakim
+
+Rut
+    ru
+    rut
+
+1. Samuel
+    1sa
+    1sam
+    1samuel
+    1 sa
+    1 sam
+    1 samuel
+    1.sa
+    1.sam
+    1.samuel
+    1. sa
+    1. sam
+    1. samuel
+
+2. Samuel
+    2sa
+    2sam
+    2samuel
+    2 sa
+    2 sam
+    2 samuel
+    2.sa
+    2.sam
+    2.samuel
+    2. sa
+    2. sam
+    2. samuel
+
+1. Krallar
+    1kr
+    1kra
+    1kral
+    1 kr
+    1 kra
+    1 kral
+    1.kr
+    1.kra
+    1.kral
+    1. kr
+    1. kra
+    1. kral
+
+2. Krallar
+    2kr
+    2kra
+    2kral
+    2 kr
+    2 kra
+    2 kral
+    2.kr
+    2.kra
+    2.kral
+    2. kr
+    2. kra
+    2. kral
+
+1. Tarihler
+    1ta
+    1tar
+    1tarih
+    1 ta
+    1 tar
+    1 tarih
+    1.ta
+    1.tar
+    1.tarih
+    1. ta
+    1. tar
+    1. tarih
+
+2. Tarihler
+    2ta
+    2tar
+    2tarih
+    2 ta
+    2 tar
+    2 tarih
+    2.ta
+    2.tar
+    2.tarih
+    2. ta
+    2. tar
+    2. tarih
+
+Ezra
+    ezr
+    ezra
+
+Nehemya
+    ne
+    neh
+    nehe
+    nehem
+    nehemy
+    nehemya
+
+Ester
+    es
+    est
+
+Eyüp
+    ey
+
+Mezmur
+    mez
+    mezmur
+    mz
+    zabur
+
+Süleyman'ın Özdeyişleri
+    suleyman
+    suleymanin
+    oz
+    ozdeyis
+
+Ezgiler Ezgisi
+    ezgi
+    ezgiler
+    nesiderler
+    nesiderler nesidesi
+
+Yeşaya
+    yes
+    yesa
+    isaya
+
+Yeremya
+    yer
+    yerem
+    yeremya
+
+Ağıtlar
+    agit
+    agitlar
+    yeremyanin
+    yeremyanin mersiyeleri
+    mersiyeleri
+    mersiyeler
+
+Hezekiel
+    hez
+    hezek
+
+Daniel
+    dan
+
+Hoşea
+    ho
+    hos
+    hosea
+
+Yoel
+    yo
+    yoel
+
+Amos
+    am
+
+Ovadya
+    ov
+    ovad
+
+Yunus
+    yun
+
+Mika
+    mik
+
+Nahum
+    na
+    nah
+
+Habakkuk
+    hab
+    habak
+
+Sefanya
+    sef
+    sefan
+    tsefanya
+
+Hagay
+    hag
+
+Zekeriya
+    zek
+    zeker
+    zekar
+    zekarya
+
+Malaki
+    mal
+    malak
+
+Matta
+    mat
+    matta
+
+Markos
+    mar
+    mark
+
+Luka
+    lu
+    luk
+
+Yuhanna
+    yuh
+    yuhan
+    yhn
+
+Elçilerin İşleri
+    elci
+    elciler
+    elcilerin
+
+Romalılar
+    ro
+    rom
+    roma
+    romali
+
+1. Korintliler
+    1ko
+    1kor
+    1korintli
+    1 ko
+    1 kor
+    1 korintli
+    1.ko
+    1.kor
+    1.korintli
+    1. ko
+    1. kor
+    1. korintli
+
+2. Korintliler
+    2ko
+    2kor
+    2korintli
+    2 ko
+    2 kor
+    2 korintli
+    2.ko
+    2.kor
+    2.korintli
+    2. ko
+    2. kor
+    2. korintli
+
+Galatyalılar
+    gal
+    galat
+    galatya
+    galatyali
+
+Efesliler
+    ef
+    efes
+    efesli
+
+
+Filipililer
+    fil
+    filip
+    filipili
+
+Koloseliler
+    ko
+    kol
+    kolos
+    koloseli
+
+1. Selanikliler
+    1se
+    1sel
+    1selanik
+    1selanikli
+    1 se
+    1 sel
+    1 selanik
+    1 selanikli
+    1.se
+    1.sel
+    1.selanik
+    1.selanikli
+    1. se
+    1. sel
+    1. selanik
+    1. selanikli
+
+2. Selanikliler
+    2se
+    2sel
+    2selanik
+    2selanikli
+    2 se
+    2 sel
+    2 selanik
+    2 selanikli
+    2.se
+    2.sel
+    2.selanik
+    2.selanikli
+    2. se
+    2. sel
+    2. selanik
+    2. selanikli
+
+1. Timoteos
+    1ti
+    1tim
+    1timoteos
+    1 ti
+    1 tim
+    1 timoteos
+    1.ti
+    1.tim
+    1.timoteos
+    1. ti
+    1. tim
+    1. timoteos
+
+2. Timoteos
+    2ti
+    2tim
+    2timoteos
+    2 ti
+    2 tim
+    2 timoteos
+    2.ti
+    2.tim
+    2.timoteos
+    2. ti
+    2. tim
+    2. timoteos
+
+Titus
+    ti
+    tit
+
+Filimon
+    flm
+    filim
+    filimo
+    filimon
+
+İbraniler
+    ib
+    ibrani
+
+Yakup
+    yak
+
+1. Petrus
+    1pe
+    1pet
+    1petrus
+    1 pe
+    1 pet
+    1 petrus
+    1.pe
+    1.pet
+    1.petrus
+    1. pe
+    1. pet
+    1. petrus
+
+2. Petrus
+    2pe
+    2pet
+    2petrus
+    2 pe
+    2 pet
+    2 petrus
+    2.pe
+    2.pet
+    2.petrus
+    2. pe
+    2. pet
+    2. petrus
+
+1. Yuhanna
+    1yu
+    1yuh
+    1yhn
+    1yuhan
+    1yuhanna
+    1 yu
+    1 yuh
+    1 yhn
+    1 yuhan
+    1 yuhanna
+    1.yu
+    1.yuh
+    1.yhn
+    1.yuhan
+    1.yuhanna
+    1. yu
+    1. yuh
+    1. yhn
+    1. yuhan
+    1. yuhanna
+
+2. Yuhanna
+    2yu
+    2yuh
+    2yhn
+    2yuhan
+    2yuhanna
+    2 yu
+    2 yuh
+    2 yhn
+    2 yuhan
+    2 yuhanna
+    2.yu
+    2.yuh
+    2.yhn
+    2.yuhan
+    2.yuhanna
+    2. yu
+    2. yuh
+    2. yhn
+    2. yuhan
+    2. yuhanna
+
+3. Yuhanna
+    3yu
+    3yuh
+    3yhn
+    3yuhan
+    3yuhanna
+    3 yu
+    3 yuh
+    3 yhn
+    3 yuhan
+    3 yuhanna
+    3.yu
+    3.yuh
+    3.yhn
+    3.yuhan
+    3.yuhanna
+    3. yu
+    3. yuh
+    3. yhn
+    3. yuhan
+    3. yuhanna
+
+Yahuda
+    yah
+    yahud
+
+Vahiy
+    vah
+"""
+
+
+def parse_abbrev_def(abbrev_def):
+    # -- Parser for the above format:
+    book_name = P.regex(r"\S[^\n]+")
+    abbrev = P.regex(r" +([^\n]+)", group=1)
+    empty = P.regex(r"\s*")
+    NL = P.string("\n")
+    parser = (P.seq(book_name << NL, (abbrev << NL).many()) << empty).many()
+    return parser.parse(abbrev_def.lstrip())
+
 
 def make_bible_book_abbreviations():
-    for lang in _BIBLE_BOOKS_FOR_LANG:
-        make_bible_book_abbreviations_for_lang(lang)
-    make_bible_book_special_cases()
+    for code, abbrev_def in [
+        (LANGUAGE_CODE_EN, EN_EXTRA_BOOK_NAMES),
+        (LANGUAGE_CODE_TR, TR_EXTRA_BOOK_NAMES),
+    ]:
+        parsed = parse_abbrev_def(abbrev_def)
+        _BIBLE_BOOK_ABBREVIATIONS_FOR_LANG[code] = {}
+        for book_name in _BIBLE_BOOKS_FOR_LANG[code]:
+            _BIBLE_BOOK_ABBREVIATIONS_FOR_LANG[code][normalize_reference_input(code, book_name)] = book_name
 
-
-def make_bible_book_abbreviations_for_lang(language_code):
-    global _BIBLE_BOOK_ABBREVIATIONS_FOR_LANG
-    bible_books = _BIBLE_BOOKS_FOR_LANG[language_code]
-    abbreviations = {}
-    _BIBLE_BOOK_ABBREVIATIONS_FOR_LANG[language_code] = abbreviations
-
-    nums = {
-        LANGUAGE_CODE_EN: {"1 ": ["1", "I ", "I"], "2 ": ["2", "II ", "II"], "3 ": ["3", "III ", "III"]},
-        LANGUAGE_CODE_TR: {
-            "1. ": ["1", "1 ", "1."],
-            "2. ": ["2", "2 ", "2."],
-            "3. ": ["3", "3 ", "3."],
-        },
-        LANGUAGE_CODE_INTERNAL: {},
-    }
-
-    def get_abbrevs(book_name, min_length=2):
-        # Get alternatives like '1Peter', 'I Peter' etc.
-        # and '1 Pe', '1Pet' etc.
-        has_number_prefix = False
-        for k, v in nums[language_code].items():
-            if book_name.startswith(k):
-                has_number_prefix = True
-                for prefix in v + [k]:
-                    book_stem = book_name[len(k) :]
-                    for i in range(2, len(book_stem) + 1):
-                        yield prefix + book_stem[0:i]
-
-        # Or just alternatives like: 'Ro', 'Rom', .. 'Romans'
-        if not has_number_prefix:
-            # TODO - this generates silly things sometimes e.g "song o" and "song of
-            # s" which no-one would ever write, but they might write it when
-            # searching for contents
-            for i in range(min_length, len(book_name) + 1):
-                yield book_name[0:i]
-
-    # Get all abbreviations
-    d = {}
-    for b in bible_books:
-        d[b] = [normalize_reference_input(language_code, i) for i in get_abbrevs(b)]
-
-    # Now need to make unique. Create a reverse dictionary.
-    d2 = defaultdict(set)
-    for book_name, abbrev_list in d.items():
-        for abbrev in abbrev_list:
-            d2[abbrev].add(book_name)
-
-    # Now, if any value in d2 has more than one item,
-    # it is ambiguous and should be removed altogether,
-    # otherwise replaced with the single value.
-    d3 = {}
-    for abbrev, book_names in d2.items():
-        if len(book_names) == 1:
-            d3[abbrev] = book_names.pop()
-
-    abbreviations.update(d3)
-
-
-def make_bible_book_special_cases():
-    # Some special cases that don't fit above pattern
-    _BIBLE_BOOK_ABBREVIATIONS_FOR_LANG[LANGUAGE_CODE_EN].update(
-        {
-            "dt": "Deuteronomy",
-            "gn": "Genesis",
-            "hg": "Haggai",
-            "jas": "James",
-            "jb": "Job",
-            "jdg": "Judges",
-            "jgs": "Judges",
-            "jhn": "John",
-            "jl": "Joel",
-            "jm": "James",
-            "jn": "John",
-            "jnh": "Jonah",
-            "jsh": "Joshua",
-            "jud": "Jude",
-            "lev": "Leviticus",
-            "lk": "Luke",
-            "mk": "Mark",
-            "mrk": "Mark",
-            "mt": "Matthew",
-            "nm": "Numbers",
-            "phil": "Philippians",
-            "phm": "Philemon",
-            "php": "Philippians",
-            "prv": "Proverbs",
-            "psalms": "Psalm",
-            "rm": "Romans",
-            "sg": "Song of Solomon",
-            "sng": "Song of Solomon",
-        }
-    )
-
-    # TODO - anything else for Turkish?
-    _BIBLE_BOOK_ABBREVIATIONS_FOR_LANG[LANGUAGE_CODE_TR].update(
-        {
-            "mezmurlar": "Mezmur",
-            "mz": "Mezmur",
-            "cikis": "Mısır'dan Çıkış",
-            "tekvin": "Yaratılış",
-            "tesniye": "Yasa'nın Tekrarı",
-            "zabur": "Mezmur",
-            "nesiderler": "Ezgiler Ezgisi",
-            "nesiderler nesidesi": "Ezgiler Ezgisi",
-            "isaya": "Yeşaya",
-            "yeremyanin mersiyeleri": "Ağıtlar",
-            "mersiyeleri": "Ağıtlar",
-            "mersiyeler": "Ağıtlar",
-            "tsefanya": "Sefanya",
-            "zekarya": "Zekeriya",
-        }
-    )
+        for book_name, abbrevs in parsed:
+            if book_name not in _BIBLE_BOOKS_FOR_LANG[code]:
+                raise AssertionError(f"Book {book_name} not known")
+            adjusted_abbrevs = []
+            for abbrev in set(abbrevs):
+                abbrev = normalize_reference_input(code, abbrev.lower())
+                adjusted_abbrevs.append(abbrev)
+                if abbrev.endswith("."):
+                    adjusted_abbrevs.append(abbrev.rstrip("."))
+            for abbrev in adjusted_abbrevs:
+                if abbrev in _BIBLE_BOOK_ABBREVIATIONS_FOR_LANG[code]:
+                    if abbrev == normalize_reference_input(code, book_name.lower()):
+                        # ignore without complaining
+                        continue
+                    else:
+                        raise AssertionError(f"Duplicate for abbreviation {abbrev}")
+                _BIBLE_BOOK_ABBREVIATIONS_FOR_LANG[code][abbrev] = book_name
 
 
 def checks():
