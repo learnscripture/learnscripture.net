@@ -36,12 +36,14 @@ class Scores:
     #
     # - NET for English
     # - TCL02 for Turkish
+    # - SV-RJ for Dutch
     #
     # such that learning the same number of verses should get you the same
     # number of points (roughly).
     _LANGUAGE_POINTS_PER_WORD = {
         languages.LANG.EN: 20,
         languages.LANG.TR: 34,
+        languages.LANG.NL: 19,
     }
 
     @classmethod

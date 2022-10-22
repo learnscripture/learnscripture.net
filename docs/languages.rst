@@ -12,6 +12,7 @@ For adding a Bible in a new language
 - Add the Bible book names and variants in _BIBLE_BOOKS_FOR_LANG and
   _BIBLE_BOOK_ALTERNATIVES_FOR_LANG
 - Update POSTGRES_SEARCH_CONFIGURATIONS
+- Update Scores._LANGUAGE_POINTS_PER_WORD
 
 
 - Check how Bible reference parsing works in the language, and update
