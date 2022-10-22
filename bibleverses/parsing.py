@@ -84,7 +84,7 @@ class ParsedReference:
     def _clone(self, **kwargs):
         return dataclasses.replace(self, **kwargs)
 
-    def translate_to(self, language_code):
+    def translate_to(self, language_code: str):
         return self._clone(
             language_code=language_code,
             book_name=get_bible_book_name(language_code, self.book_number),
@@ -109,26 +109,26 @@ class ParsedReference:
             end_verse=end_parsed_ref.end_verse,
         )
 
-    def is_whole_book(self):
+    def is_whole_book(self) -> bool:
         return self.start_chapter is None or (is_single_chapter_book(self.book_number) and self.start_verse is None)
 
-    def is_whole_chapter(self):
+    def is_whole_chapter(self) -> bool:
         return self.start_chapter is not None and self.start_verse is None
 
-    def whole_book_prefix(self):
+    def whole_book_prefix(self) -> str:
         """
         Returns a prefix string that matches all the verses in the book
         """
         return self.book_name + " "
 
-    def is_single_verse(self):
+    def is_single_verse(self) -> bool:
         return (
             self.start_verse is not None
             and self.end_chapter == self.start_chapter
             and self.end_verse == self.start_verse
         )
 
-    def is_in_bounds(self):
+    def is_in_bounds(self) -> bool:
         book_info = self.book_info
         chapter_count = book_info["chapter_count"]
         if self.is_whole_book():
