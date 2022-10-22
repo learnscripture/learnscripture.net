@@ -78,6 +78,74 @@ _BIBLE_BOOKS_FOR_LANG = {
         "Jude",
         "Revelation",
     ],
+    LANG.NL: [
+        "Genesis",
+        "Exodus",
+        "Leviticus",
+        "Numeri",
+        "Deuteronomium",
+        "Jozua",
+        "Richteren",
+        "Ruth",
+        "1 Samuël",
+        "2 Samuël",
+        "1 Koningen",
+        "2 Koningen",
+        "1 Kronieken",
+        "2 Kronieken",
+        "Ezra",
+        "Nehemia",
+        "Esther",
+        "Job",
+        "Psalmen",
+        "Spreuken",
+        "Prediker",
+        "Hooglied",
+        "Jesaja",
+        "Jeremia",
+        "Klaagliederen",
+        "Ezechiël",
+        "Daniël",
+        "Hosea",
+        "Joël",
+        "Amos",
+        "Obadja",
+        "Jona",
+        "Micha",
+        "Nahum",
+        "Habakuk",
+        "Zefanja",
+        "Haggaï",
+        "Zacharia",
+        "Maleachi",
+        "Mattheüs",
+        "Markus",
+        "Lukas",
+        "Johannes",
+        "Handelingen",
+        "Romeinen",
+        "1 Korinthe",
+        "2 Korinthe",
+        "Galaten",
+        "Efeze",
+        "Filippenzen",
+        "Kolossenzen",
+        "1 Thessalonicenzen",
+        "2 Thessalonicenzen",
+        "1 Timotheüs",
+        "2 Timotheüs",
+        "Titus",
+        "Filemon",
+        "Hebreeën",
+        "Jakobus",
+        "1 Petrus",
+        "2 Petrus",
+        "1 Johannes",
+        "2 Johannes",
+        "3 Johannes",
+        "Judas",
+        "Openbaring",
+    ],
     LANG.TR: [
         "Yaratılış",
         "Mısır'dan Çıkış",
@@ -1992,6 +2060,272 @@ Revelation
     Rev.
 """
 
+NL_EXTRA_BOOK_NAMES = """
+Genesis
+    Gen.
+
+Exodus
+    Éxodus
+    Ex.
+
+Leviticus
+    Lev.
+
+Numeri
+    Num.
+
+Deuteronomium
+    Deut.
+
+Jozua
+    Joz.
+
+Richteren
+    Richt.
+    Ri.
+
+Ruth
+    Ruth
+
+1 Samuël
+    1 Samuel
+    1 Sam.
+
+2 Samuël
+    2 Samuel
+    2 Sam.
+
+1 Koningen
+    1 Kon.
+
+2 Koningen
+    2 Kon.
+
+1 Kronieken
+    1 Kron.
+    1 Kr.
+
+2 Kronieken
+    2 Kron.
+    2 Kr.
+
+Ezra
+    Ezra
+
+Nehemia
+    Nehémia
+    Neh.
+
+Esther
+    Ester
+    Est.
+
+Job
+    Job
+
+Psalmen
+    Ps.
+
+Spreuken
+    Spr.
+
+Prediker
+    Pre.
+    Pred.
+    Pr.
+
+Hooglied
+    Hoogl.
+
+Jesaja
+    Jes.
+
+Jeremia
+    Jer.
+
+Klaagliederen
+    Klaagl.
+
+Ezechiël
+    Ezechiel
+    Eze.
+    Ezech.
+
+Daniël
+    Daniel
+    Dan.
+
+Hosea
+    Hoséa
+    Hos.
+
+Joël
+    Joel
+    Joël
+
+Amos
+    Am.
+
+Obadja
+    Ob.
+
+Jona
+    Jona
+
+Micha
+    Mi.
+    Mich.
+
+Nahum
+    Nah.
+
+Habakuk
+    Hábakuk
+    Hab.
+
+Zefanja
+    Zefánja
+    Sefanja
+    Zef.
+    Sef.
+
+Haggaï
+    Haggai
+    Hag.
+
+Zacharia
+    Zacharía
+    Zach.
+
+Maleachi
+    Maleáchi
+    Mal.
+
+Mattheüs
+    Matthéüs
+    Mattheus
+    Matteüs
+    Matt.
+    Mat.
+    Mt.
+
+Markus
+    Marcus
+    Mar.
+    Mark.
+    Marc.
+
+Lukas
+    Lucas
+    Luk.
+    Luc.
+
+Johannes
+    Joh.
+
+Handelingen
+    Hand.
+
+Romeinen
+    Rom.
+
+1 Korinthe
+    1 Korinthiërs
+    1 Korintiërs
+    1 Kor.
+    1 Corinthiërs
+    1 Corintiërs
+    1 Cor.
+
+2 Korinthe
+    2 Korinthiërs
+    2 Korintiërs
+    2 Kor.
+    2 Corinthiërs
+    2 Corintiërs
+    2 Cor.
+
+Galaten
+    Gal.
+
+Efeze
+    Éfeze
+    Efeziërs
+    Ef.
+
+Filippenzen
+    Fil.
+
+Kolossenzen
+    Colossenzen
+    Kol.
+    Col.
+
+1 Thessalonicenzen
+    1 Tessalonicenzen
+    1 Thess.
+    1 Tess.
+
+2 Thessalonicenzen
+    2 Tessalonicenzen
+    2 Thess.
+    2 Tess.
+
+1 Timotheüs
+    1 Timótheüs
+    1 Timoteüs
+    1 Tim.
+
+2 Timotheüs
+    2 Timótheüs
+    2 Timoteüs
+    2 Tim.
+
+Titus
+    Tit.
+
+Filemon
+    Filémon
+    Filem.
+
+Hebreeën
+    Hebreeen
+    Heb.
+    Hebr.
+
+Jakobus
+    Jacobus
+    Jak.
+    Jac.
+
+1 Petrus
+    1 Petr.
+    1 Pet.
+
+2 Petrus
+    2 Petr.
+    2 Pet.
+
+1 Johannes
+    1 Joh.
+
+2 Johannes
+    2 Joh.
+
+3 Johannes
+    3 Joh.
+
+Judas
+    Jud.
+
+Openbaring
+    Openbaringen
+    Apokalyps
+    Openb.
+    Op.
+    Ope.
+"""
+
 TR_EXTRA_BOOK_NAMES = """
 Yaratılış
     yar
@@ -2495,6 +2829,7 @@ def make_bible_book_abbreviations():
     for code, abbrev_def in [
         (LANG.EN, EN_EXTRA_BOOK_NAMES),
         (LANG.TR, TR_EXTRA_BOOK_NAMES),
+        (LANG.NL, NL_EXTRA_BOOK_NAMES),
     ]:
         parsed = parse_abbrev_def(abbrev_def)
         _BIBLE_BOOK_ALTERNATIVES_FOR_LANG[code] = {}

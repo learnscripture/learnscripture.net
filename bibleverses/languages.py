@@ -22,8 +22,9 @@ class LANG:
 
     # These must correspond with the HTML lang attribute values. i.e. 2 letter, ISO
     # 639-1 codes in most cases.
-    EN = "en"
-    TR = "tr"
+    EN = "en"  # English
+    TR = "tr"  # Turkish
+    NL = "nl"  # Dutch
 
     # Code for language agnostic name
     INTERNAL = "internal"
@@ -31,6 +32,7 @@ class LANG:
 
 LANGUAGES = [
     Language(code=LANG.EN, display_name="English"),
+    Language(code=LANG.NL, display_name="Nederlands"),
     Language(code=LANG.TR, display_name="Türkçe"),
 ]
 
@@ -67,12 +69,25 @@ def normalize_reference_input_turkish(query):
     return query
 
 
+def normalize_reference_input_dutch(query: str) -> str:
+    query = query.strip().replace("'", "")
+    # Strategy:
+    #  - for codepoints that can be decomposed into accents,
+    #    remove the accents.
+    #  - throw everything else that is not ascii away.
+    query = unicodedata.normalize("NFKD", query)
+    query = query.encode("ascii", "ignore").decode("ascii")
+    query = query.lower()
+    return query
+
+
 _NORMALIZE_SEARCH_FUNCS = {
     LANG.EN: normalize_reference_input_english,
     LANG.TR: normalize_reference_input_turkish,
+    LANG.NL: normalize_reference_input_dutch,
     LANG.INTERNAL: lambda x: x,
 }
 
 
-def normalize_reference_input(language_code, query):
+def normalize_reference_input(language_code: str, query: str) -> str:
     return _NORMALIZE_SEARCH_FUNCS[language_code](query.strip())

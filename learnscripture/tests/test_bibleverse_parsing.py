@@ -239,6 +239,22 @@ def test_turkish_reference_parsing():
     assert normalize_reference_input_turkish("  ÂâİIiıÇçŞşÖöÜüĞğ  ") == "aaiiiiccssoouugg"
 
 
+def test_dutch_reference_parsing():
+    tests = [
+        # Different numbering styles for book names:
+        ("Openbaringen 1:1", "Openbaring 1:1"),
+        ("Openb. 1:1", "Openbaring 1:1"),
+        ("openb 1:1", "Openbaring 1:1"),
+        ("2 Timótheüs 1:3", "2 Timotheüs 1:3"),
+        ("2 Timoteüs 1:3", "2 Timotheüs 1:3"),
+        ("2 Timoteus 1:3", "2 Timotheüs 1:3"),
+    ]
+    for ref, output in tests:
+        assert pu(LANG.NL, ref).canonical_form() == output, f"Failure parsing '{ref}'"
+
+    assert normalize_reference_input_turkish("  ÉüéÜ  ") == "eueu"
+
+
 def test_to_list():
     def assertListEqual(ref, ref_list):
         parsed_ref = pv("en", ref)

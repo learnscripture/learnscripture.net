@@ -291,6 +291,7 @@ SEARCH_CHARS = set("".join(list(SEARCH_OPERATORS)))
 # See '\dF' command in psql for list of available builtin configurations.
 POSTGRES_SEARCH_CONFIGURATIONS = {
     LANG.EN: "english",
+    LANG.NL: "dutch",
     LANG.TR: "turkish",
 }
 
