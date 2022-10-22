@@ -176,10 +176,18 @@ case. It looks like this::
 
 Here ``$unread_emails`` will be a number that is compared to each of the options,
 which are called “keys” (``0``, ``one`` and ``other``). The keys can be numbers
-like ``0``, ``1`` etc. They can also be 6 special strings "``zero``", "``one``",
-"``two``", "``few``", "``many``" and "``other``". Not all of these apply to all
-languages - for example English only has "``one``" and "``other``",
-but other languages can have several different plural forms (e.g. `Slovenian
+like ``0``, ``1`` etc. They can also be 6 special strings:
+
+* ``zero``
+* ``one``
+* ``two``
+* ``few``
+* ``many``
+* ``other``
+
+Not all of these apply to all languages - for example English only has ``one``
+and ``other``, but other languages can have several different plural forms
+(e.g. `Slovenian
 <http://www.unicode.org/cldr/charts/30/supplemental/language_plural_rules.html#sl>`_).
 
 So, in this example, if ``$unread_emails = 0``, you get::
@@ -199,7 +207,9 @@ option if nothing else matches. It is required to always have a default like thi
 
 In some cases, a message that in English needs to use a selector can be written
 correctly without a selector in another language - and the other way around. It
-is up to you as the translator to decide if you need to use this.
+is up to you as the translator to decide if you need to use this. If you don’t
+need a selector, you may be able to simplify the message compared to the English
+version.
 
 The same feature can also be used for other kind of variants e.g. some
 statements might need different variants depending on the gender of the person
@@ -273,7 +283,7 @@ Messages that use HTML have a message ID that ends with "``-html``", like this::
 
 HTML formatting is done using tags with triangle brackets: **<** and **>**. Most
 tags come in pairs with an opening and closing tag that wraps a bit of text e.g.
-<b> and </b>. The most common mistake is forgetting to close the pair or
+``<b>`` and ``</b>``. The most common mistake is forgetting to close the pair or
 forgetting the forward slash **/** in the closing tag.
 
 Some of the most common tags you need to know are below:

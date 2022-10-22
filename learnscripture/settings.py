@@ -160,6 +160,9 @@ VALID_RECEIVE_CURRENCY = "GBP"
 
 TIME_ZONE = "UTC"
 LANGUAGE_CODE = "en"
+
+# These are languages supported by web site interface,
+# which may be different from those supported for Bible versions (see bibleverses.languages)
 LANGUAGES = [
     ("en", "English"),
     ("tr", "Turkçe"),

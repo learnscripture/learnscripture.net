@@ -1,3 +1,10 @@
+"""
+Definition of languages supported for Bible texts.
+"""
+# See also bibleverses.constants for Bible book names
+
+# For interface languages, see settings.py
+
 import unicodedata
 from dataclasses import dataclass
 
