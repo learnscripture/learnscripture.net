@@ -1,6 +1,6 @@
 from django_ftl import override
 
-from bibleverses.languages import LANGUAGE_CODE_EN, LANGUAGE_CODE_TR
+from bibleverses.languages import LANG
 from bibleverses.models import TextVersion, VerseSet, VerseSetType, quick_find
 
 from .base import BibleVersesMixin, TestBase, get_or_create_any_account
@@ -40,7 +40,7 @@ class SearchTests(SearchTestsMixin, TestBase):
             created_by=self.account,
         )
 
-        results = VerseSet.objects.all().search([LANGUAGE_CODE_EN], "Stupid")
+        results = VerseSet.objects.all().search([LANG.EN], "Stupid")
         assert len(results) == 1
         assert "For stupid people" in (v.name for v in results)
 
@@ -61,10 +61,10 @@ class SearchTests(SearchTestsMixin, TestBase):
             ]
         )
 
-        results = VerseSet.objects.all().search([LANGUAGE_CODE_EN], "Gen 1:3")
+        results = VerseSet.objects.all().search([LANG.EN], "Gen 1:3")
         assert len(results) == 0
 
-        results = VerseSet.objects.all().search([LANGUAGE_CODE_EN], "Gen 1:1")
+        results = VerseSet.objects.all().search([LANG.EN], "Gen 1:1")
         assert len(results) == 1
         assert list(results) == [vs1]
 
@@ -108,27 +108,23 @@ class SearchTests(SearchTestsMixin, TestBase):
         )
 
         # Search verse refs single language
-        results = VerseSet.objects.all().search([LANGUAGE_CODE_EN], "Psalm 23")
+        results = VerseSet.objects.all().search([LANG.EN], "Psalm 23")
         assert list(results) == [vs1]
 
-        results2 = VerseSet.objects.all().search([LANGUAGE_CODE_TR], "Mezmur 23")
+        results2 = VerseSet.objects.all().search([LANG.TR], "Mezmur 23")
         assert list(results2) == [vs2]
 
         # Search verse refs multiple languages
-        results3 = VerseSet.objects.all().search([LANGUAGE_CODE_EN, LANGUAGE_CODE_TR], "Mz 23")
+        results3 = VerseSet.objects.all().search([LANG.EN, LANG.TR], "Mz 23")
         assert set(results3) == {vs1, vs2}
 
         # ... with default_language_code that matches verse refs:
-        results4 = VerseSet.objects.all().search(
-            [LANGUAGE_CODE_EN, LANGUAGE_CODE_TR], "Mz 23", default_language_code="tr"
-        )
+        results4 = VerseSet.objects.all().search([LANG.EN, LANG.TR], "Mz 23", default_language_code="tr")
         assert set(results4) == {vs1, vs2}
 
         # ... and one that doesn't. Here the logic should fall back to parsing
         # 'Mz 23' as Turkish, because 'Mz 23' doesn't parse as a bible ref in English.
-        results5 = VerseSet.objects.all().search(
-            [LANGUAGE_CODE_EN, LANGUAGE_CODE_TR], "Mz 23", default_language_code="en"
-        )
+        results5 = VerseSet.objects.all().search([LANG.EN, LANG.TR], "Mz 23", default_language_code="en")
         assert set(results5) == {vs1, vs2}
 
     def test_any_language(self):
@@ -153,17 +149,17 @@ class SearchTests(SearchTestsMixin, TestBase):
         )
 
         # and therefore found in a turkish only search:
-        results = VerseSet.objects.all().search([LANGUAGE_CODE_TR], "Mezmur 23")
+        results = VerseSet.objects.all().search([LANG.TR], "Mezmur 23")
         assert list(results) == [vs]
 
         # But now only as English:
         vs.name = "Psalm 23 - my favourite"
         vs.save()
 
-        results2 = VerseSet.objects.all().search([LANGUAGE_CODE_TR], "Mezmur 23")
+        results2 = VerseSet.objects.all().search([LANG.TR], "Mezmur 23")
         assert list(results2) == []
 
-        results3 = VerseSet.objects.all().search([LANGUAGE_CODE_EN], "Psalm 23")
+        results3 = VerseSet.objects.all().search([LANG.EN], "Psalm 23")
         assert list(results3) == [vs]
 
     def test_search_full_passage(self):
@@ -182,7 +178,7 @@ class SearchTests(SearchTestsMixin, TestBase):
                 "BOOK18 23:3",
             ]
         )
-        results1 = VerseSet.objects.all().search([LANGUAGE_CODE_EN], "Psalm 23:1-3", default_language_code="tr")
+        results1 = VerseSet.objects.all().search([LANG.EN], "Psalm 23:1-3", default_language_code="tr")
         assert set(results1) == {vs1}
 
     def test_search_no_query(self):
@@ -233,7 +229,7 @@ class SearchTests(SearchTestsMixin, TestBase):
         )
 
         # Search in Turkish:
-        results = VerseSet.objects.all().search([LANGUAGE_CODE_TR], "", default_language_code="tr")
+        results = VerseSet.objects.all().search([LANG.TR], "", default_language_code="tr")
         assert set(results) == {vs1, vs2}
 
 

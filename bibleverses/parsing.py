@@ -14,7 +14,7 @@ from .books import (
     is_single_chapter_book,
 )
 from .constants import BIBLE_BOOK_INFO
-from .languages import LANGUAGE_CODE_INTERNAL, normalize_reference_input
+from .languages import LANG, normalize_reference_input
 
 
 @attr.s
@@ -28,7 +28,7 @@ class ParsedReference:
 
     def __attrs_post_init__(self):
         self.book_number = get_bible_book_number(self.language_code, self.book_name)
-        self.internal_book_name = get_bible_book_name(LANGUAGE_CODE_INTERNAL, self.book_number)
+        self.internal_book_name = get_bible_book_name(LANG.INTERNAL, self.book_number)
 
         # Normalize to a form where every ParsedReference is potentially a
         # range. This means we can treat ranges and single verses uniformly.
@@ -89,7 +89,7 @@ class ParsedReference:
         )
 
     def to_internal(self):
-        return self.translate_to(LANGUAGE_CODE_INTERNAL)
+        return self.translate_to(LANG.INTERNAL)
 
     @classmethod
     def from_start_and_end(cls, start_parsed_ref, end_parsed_ref):
@@ -383,7 +383,7 @@ def parse_validated_localized_reference(language_code, localized_reference):
 
 
 def parse_validated_internal_reference(internal_reference):
-    return parse_validated_localized_reference(LANGUAGE_CODE_INTERNAL, internal_reference)
+    return parse_validated_localized_reference(LANG.INTERNAL, internal_reference)
 
 
 def parse_unvalidated_localized_reference(
@@ -463,7 +463,7 @@ def parse_break_list(breaks):
     """
     # breaks is a common separated list of internal references, created in create.js
     try:
-        return (bible_reference_parser_for_lang(LANGUAGE_CODE_INTERNAL, True).sep_by(string(","))).parse(breaks)
+        return (bible_reference_parser_for_lang(LANG.INTERNAL, True).sep_by(string(","))).parse(breaks)
 
     except ParseError:
         raise ValueError(f"'{breaks}' is not a valid list of internal Bible references")

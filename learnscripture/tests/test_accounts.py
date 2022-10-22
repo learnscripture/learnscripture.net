@@ -8,7 +8,7 @@ from six.moves.urllib.parse import ParseResult, urlparse
 
 from accounts.models import Account, ActionChange
 from awards.models import AwardType
-from bibleverses.languages import LANGUAGE_CODE_EN
+from bibleverses.languages import LANG
 from bibleverses.models import MemoryStage, StageType
 from events.models import Event, EventType
 from learnscripture.forms import AccountSetPasswordForm
@@ -31,14 +31,14 @@ class AccountTests(AccountTestMixin, TestBase):
 
         a.award_action_points(
             "John 3:16",
-            LANGUAGE_CODE_EN,
+            LANG.EN,
             "This is John 3:16",
             MemoryStage.TESTED,
             ActionChange(old_strength=0.5, new_strength=0.6),
             StageType.TEST,
             0.75,
         )
-        assert a.total_score.points == (4 * Scores.points_per_word(LANGUAGE_CODE_EN) * 0.75)
+        assert a.total_score.points == (4 * Scores.points_per_word(LANG.EN) * 0.75)
 
     def test_points_events(self):
         _, a = self.create_account()
@@ -46,7 +46,7 @@ class AccountTests(AccountTestMixin, TestBase):
         def score():
             a.award_action_points(
                 "John 3:16",
-                LANGUAGE_CODE_EN,
+                LANG.EN,
                 "This is John 3:16",
                 MemoryStage.TESTED,
                 ActionChange(old_strength=0.5, new_strength=0.6),
@@ -68,7 +68,7 @@ class AccountTests(AccountTestMixin, TestBase):
         def score(accuracy):
             account.award_action_points(
                 "John 3:16",
-                LANGUAGE_CODE_EN,
+                LANG.EN,
                 "This is John 3:16",
                 MemoryStage.TESTED,
                 ActionChange(old_strength=0.5, new_strength=0.6),
@@ -124,15 +124,15 @@ class AccountTests(AccountTestMixin, TestBase):
 
         a.award_action_points(
             "John 3:16",
-            LANGUAGE_CODE_EN,
+            LANG.EN,
             "This is John 3:16",
             MemoryStage.TESTED,
             ActionChange(old_strength=0.7, new_strength=0.99),
             StageType.TEST,
             0.9,
         )
-        assert a.total_score.points == (4 * Scores.points_per_word(LANGUAGE_CODE_EN) * 0.9) + (
-            4 * Scores.points_per_word(LANGUAGE_CODE_EN) * Scores.VERSE_LEARNED_BONUS
+        assert a.total_score.points == (4 * Scores.points_per_word(LANG.EN) * 0.9) + (
+            4 * Scores.points_per_word(LANG.EN) * Scores.VERSE_LEARNED_BONUS
         )
 
     def test_addict_award(self):
@@ -145,7 +145,7 @@ class AccountTests(AccountTestMixin, TestBase):
             account.action_logs.update(created=F("created") - timedelta(hours=1))
             account.award_action_points(
                 "John 3:16",
-                LANGUAGE_CODE_EN,
+                LANG.EN,
                 "This is John 3:16",
                 MemoryStage.TESTED,
                 ActionChange(old_strength=0.5, new_strength=0.6),

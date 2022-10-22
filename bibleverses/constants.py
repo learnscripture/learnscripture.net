@@ -2,7 +2,7 @@
 
 import parsy as P
 
-from .languages import LANGUAGE_CODE_EN, LANGUAGE_CODE_INTERNAL, LANGUAGE_CODE_TR, normalize_reference_input
+from .languages import LANG, normalize_reference_input
 
 BIBLE_BOOK_COUNT = 66
 
@@ -10,7 +10,7 @@ BIBLE_BOOK_COUNT = 66
 # one other module i.e. books.py, and apart from that should be accessed through
 # the utility functions in books.py
 _BIBLE_BOOKS_FOR_LANG = {
-    LANGUAGE_CODE_EN: [
+    LANG.EN: [
         "Genesis",
         "Exodus",
         "Leviticus",
@@ -78,7 +78,7 @@ _BIBLE_BOOKS_FOR_LANG = {
         "Jude",
         "Revelation",
     ],
-    LANGUAGE_CODE_TR: [
+    LANG.TR: [
         "Yaratılış",
         "Mısır'dan Çıkış",
         "Levililer",
@@ -146,12 +146,12 @@ _BIBLE_BOOKS_FOR_LANG = {
         "Yahuda",
         "Vahiy",
     ],
-    LANGUAGE_CODE_INTERNAL: ["BOOK" + str(i) for i in range(0, BIBLE_BOOK_COUNT)],
+    LANG.INTERNAL: ["BOOK" + str(i) for i in range(0, BIBLE_BOOK_COUNT)],
 }
 
 # Book numbers of books that have a single chapter.
 _SINGLE_CHAPTER_BOOK_NUMBERS = [
-    _BIBLE_BOOKS_FOR_LANG[LANGUAGE_CODE_EN].index(b) for b in ["Obadiah", "Philemon", "2 John", "3 John", "Jude"]
+    _BIBLE_BOOKS_FOR_LANG[LANG.EN].index(b) for b in ["Obadiah", "Philemon", "2 John", "3 John", "Jude"]
 ]
 
 _BIBLE_BOOK_NUMBERS_FOR_LANG = {
@@ -1509,7 +1509,7 @@ BIBLE_BOOK_INFO = dict(
 
 # All possible bible book names, normalized (lower case plus other transformations),
 # matched to canonical name:
-_BIBLE_BOOK_ABBREVIATIONS_FOR_LANG = {}
+_BIBLE_BOOK_ALTERNATIVES_FOR_LANG = {}
 
 # From https://www.logos.com/bible-book-abbreviations
 EN_EXTRA_BOOK_NAMES = """
@@ -1999,10 +1999,10 @@ Yaratılış
     tekvin
 
 Mısır'dan Çıkış
-    mis
-    misir
-    misirdan
-    cikis
+    Mıs
+    Mısır
+    Mısırdan
+    Çıkış
 
 Levililer
     lev
@@ -2010,7 +2010,7 @@ Levililer
     levil
 
 Çölde Sayım
-    colde
+    Cölde
 
 Yasa'nın Tekrarı
     yasa
@@ -2135,10 +2135,10 @@ Mezmur
     zabur
 
 Süleyman'ın Özdeyişleri
-    suleyman
-    suleymanin
-    oz
-    ozdeyis
+    Süleyman
+    Süleymanin
+    Öz
+    Özdeyis
 
 Ezgiler Ezgisi
     ezgi
@@ -2147,8 +2147,8 @@ Ezgiler Ezgisi
     nesiderler nesidesi
 
 Yeşaya
-    yes
-    yesa
+    Yeş
+    Yeşa
     isaya
 
 Yeremya
@@ -2157,8 +2157,8 @@ Yeremya
     yeremya
 
 Ağıtlar
-    agit
-    agitlar
+    Ağıt
+    Ağıtlar
     yeremyanin
     yeremyanin mersiyeleri
     mersiyeleri
@@ -2172,9 +2172,8 @@ Daniel
     dan
 
 Hoşea
-    ho
-    hos
-    hosea
+    Ho
+    Hoş
 
 Yoel
     yo
@@ -2237,9 +2236,9 @@ Yuhanna
     yhn
 
 Elçilerin İşleri
-    elci
-    elciler
-    elcilerin
+    Elçi
+    Elçiler
+    Elçilerin
 
 Romalılar
     ro
@@ -2494,13 +2493,13 @@ def parse_abbrev_def(abbrev_def):
 
 def make_bible_book_abbreviations():
     for code, abbrev_def in [
-        (LANGUAGE_CODE_EN, EN_EXTRA_BOOK_NAMES),
-        (LANGUAGE_CODE_TR, TR_EXTRA_BOOK_NAMES),
+        (LANG.EN, EN_EXTRA_BOOK_NAMES),
+        (LANG.TR, TR_EXTRA_BOOK_NAMES),
     ]:
         parsed = parse_abbrev_def(abbrev_def)
-        _BIBLE_BOOK_ABBREVIATIONS_FOR_LANG[code] = {}
+        _BIBLE_BOOK_ALTERNATIVES_FOR_LANG[code] = {}
         for book_name in _BIBLE_BOOKS_FOR_LANG[code]:
-            _BIBLE_BOOK_ABBREVIATIONS_FOR_LANG[code][normalize_reference_input(code, book_name)] = book_name
+            _BIBLE_BOOK_ALTERNATIVES_FOR_LANG[code][normalize_reference_input(code, book_name)] = book_name
 
         for book_name, abbrevs in parsed:
             if book_name not in _BIBLE_BOOKS_FOR_LANG[code]:
@@ -2512,13 +2511,13 @@ def make_bible_book_abbreviations():
                 if abbrev.endswith("."):
                     adjusted_abbrevs.append(abbrev.rstrip("."))
             for abbrev in adjusted_abbrevs:
-                if abbrev in _BIBLE_BOOK_ABBREVIATIONS_FOR_LANG[code]:
+                if abbrev in _BIBLE_BOOK_ALTERNATIVES_FOR_LANG[code]:
                     if abbrev == normalize_reference_input(code, book_name.lower()):
                         # ignore without complaining
                         continue
                     else:
                         raise AssertionError(f"Duplicate for abbreviation {abbrev}")
-                _BIBLE_BOOK_ABBREVIATIONS_FOR_LANG[code][abbrev] = book_name
+                _BIBLE_BOOK_ALTERNATIVES_FOR_LANG[code][abbrev] = book_name
 
 
 def checks():

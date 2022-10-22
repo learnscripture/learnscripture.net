@@ -1,5 +1,5 @@
 from .constants import (
-    _BIBLE_BOOK_ABBREVIATIONS_FOR_LANG,
+    _BIBLE_BOOK_ALTERNATIVES_FOR_LANG,
     _BIBLE_BOOK_NUMBERS_FOR_LANG,
     _BIBLE_BOOKS_FOR_LANG,
     _SINGLE_CHAPTER_BOOK_NUMBERS,
@@ -28,7 +28,7 @@ def get_bible_book_abbreviation_map(language_code):
     For a given language code, returns the mapping
     of all acceptable book names to the canonical name
     """
-    return _BIBLE_BOOK_ABBREVIATIONS_FOR_LANG[language_code]
+    return _BIBLE_BOOK_ALTERNATIVES_FOR_LANG[language_code]
 
 
 def get_bible_book_number(language_code, book_name):

@@ -28,7 +28,7 @@ from accounts.models import Account, HeatmapStatsType, Identity, get_account_sta
 from awards.models import AWARD_LOGIC_CLASSES, AnyLevel, Award, AwardType
 from bibleverses.books import BIBLE_BOOK_COUNT, get_bible_book_name
 from bibleverses.forms import VerseSetForm
-from bibleverses.languages import LANGUAGE_CODE_INTERNAL, LANGUAGES
+from bibleverses.languages import LANG, LANGUAGES
 from bibleverses.models import (
     MAX_VERSES_FOR_SINGLE_CHOICE,
     InvalidVerseReference,
@@ -489,7 +489,7 @@ def context_for_quick_find(request):
     Returns the context data needed to render a quick find box
     """
     version = default_bible_version_for_request(request)
-    language_codes = [lang.code for lang in LANGUAGES] + [LANGUAGE_CODE_INTERNAL]
+    language_codes = [lang.code for lang in LANGUAGES] + [LANG.INTERNAL]
 
     bible_books = [{lc: get_bible_book_name(lc, i) for lc in language_codes} for i in range(0, BIBLE_BOOK_COUNT)]
     d = {

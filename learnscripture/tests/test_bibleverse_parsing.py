@@ -2,7 +2,7 @@ import pytest
 from django_ftl import override
 
 from bibleverses.books import get_bible_book_number, get_bible_books, is_single_chapter_book
-from bibleverses.languages import LANGUAGE_CODE_EN, LANGUAGE_CODE_TR, LANGUAGES, normalize_reference_input_turkish
+from bibleverses.languages import LANG, LANGUAGES, normalize_reference_input_turkish
 from bibleverses.models import InvalidVerseReference
 from bibleverses.parsing import (
     ParsedReference,
@@ -29,34 +29,34 @@ def pu(lang, query, **kwargs):
 
 def test_unparsable_strict():
     with pytest.raises(InvalidVerseReference):
-        pv(LANGUAGE_CODE_EN, "Garbage")
+        pv(LANG.EN, "Garbage")
     with pytest.raises(InvalidVerseReference):
-        pv(LANGUAGE_CODE_EN, "Genesis 1:x")
+        pv(LANG.EN, "Genesis 1:x")
 
 
 def test_unparsable_loose():
-    assert pu(LANGUAGE_CODE_EN, "Garbage") is None
-    assert pu(LANGUAGE_CODE_EN, "Genesis 1:x") is None
+    assert pu(LANG.EN, "Garbage") is None
+    assert pu(LANG.EN, "Genesis 1:x") is None
 
 
 def test_bad_order_strict():
     with override("en"):
         with pytest.raises(InvalidVerseReference):
-            pv(LANGUAGE_CODE_EN, "Genesis 1:3-2")
+            pv(LANG.EN, "Genesis 1:3-2")
         with pytest.raises(InvalidVerseReference):
-            pv(LANGUAGE_CODE_EN, "Genesis 2:1-1:10")
+            pv(LANG.EN, "Genesis 2:1-1:10")
 
 
 def test_bad_order_loose():
     with override("en"):
         with pytest.raises(InvalidVerseReference):
-            pu(LANGUAGE_CODE_EN, "genesis 1:3-2")
+            pu(LANG.EN, "genesis 1:3-2")
         with pytest.raises(InvalidVerseReference):
-            pu(LANGUAGE_CODE_EN, "genesis 2:1 - 1:10")
+            pu(LANG.EN, "genesis 2:1 - 1:10")
 
 
 def test_book():
-    parsed = pv(LANGUAGE_CODE_EN, "Genesis 1")
+    parsed = pv(LANG.EN, "Genesis 1")
     assert parsed.book_number == 0
     assert parsed.book_name == "Genesis"
     assert parsed.start_chapter == 1
@@ -69,12 +69,12 @@ def test_book():
 
 
 def test_single_verse_strict():
-    parsed = pv(LANGUAGE_CODE_EN, "Genesis 1:1")
+    parsed = pv(LANG.EN, "Genesis 1:1")
     _test_single_verse(parsed)
 
 
 def test_single_verse_loose():
-    parsed = pu(LANGUAGE_CODE_EN, "Gen 1 v 1")
+    parsed = pu(LANG.EN, "Gen 1 v 1")
     _test_single_verse(parsed)
 
 
@@ -93,15 +93,15 @@ def _test_single_verse(parsed):
 
 
 def test_verse_range_strict():
-    parsed = pv(LANGUAGE_CODE_EN, "Genesis 1:1-2")
+    parsed = pv(LANG.EN, "Genesis 1:1-2")
     _test_verse_range(parsed)
 
 
 def test_verse_range_loose():
-    parsed = pu(LANGUAGE_CODE_EN, "gen 1 v 1 - 2")
+    parsed = pu(LANG.EN, "gen 1 v 1 - 2")
     _test_verse_range(parsed)
 
-    parsed = pu(LANGUAGE_CODE_EN, "Gen 1:1\u20132")
+    parsed = pu(LANG.EN, "Gen 1:1\u20132")
     _test_verse_range(parsed)
 
 
@@ -130,12 +130,12 @@ def _test_verse_range(parsed):
 
 
 def test_verse_range_2_strict():
-    parsed = pv(LANGUAGE_CODE_EN, "Genesis 1:2-3:4")
+    parsed = pv(LANG.EN, "Genesis 1:2-3:4")
     _test_verse_range_2(parsed)
 
 
 def test_verse_range_2_loose():
-    parsed = pu(LANGUAGE_CODE_EN, "gen 1v2 - 3v4")
+    parsed = pu(LANG.EN, "gen 1v2 - 3v4")
     _test_verse_range_2(parsed)
 
 
@@ -162,15 +162,15 @@ def _test_verse_range_2(parsed):
 
 
 def test_from_start_and_end():
-    parsed = pv(LANGUAGE_CODE_EN, "Genesis 1:2-3:4")
+    parsed = pv(LANG.EN, "Genesis 1:2-3:4")
     combined = ParsedReference.from_start_and_end(parsed.get_start(), parsed.get_end())
     assert parsed == combined
 
-    parsed2 = pv(LANGUAGE_CODE_EN, "Genesis 1:1")
+    parsed2 = pv(LANG.EN, "Genesis 1:1")
     combined2 = ParsedReference.from_start_and_end(parsed2.get_start(), parsed2.get_end())
     assert parsed2 == combined2
 
-    parsed3 = pv(LANGUAGE_CODE_EN, "Genesis 1")
+    parsed3 = pv(LANG.EN, "Genesis 1")
     combined3 = ParsedReference.from_start_and_end(parsed3.get_start(), parsed3.get_end())
     assert parsed3 == combined3
 
@@ -190,31 +190,29 @@ def test_parse_books(lang, book):
 
 
 def test_single_chapter_books():
-    parsed = pu(LANGUAGE_CODE_EN, "Jude")
+    parsed = pu(LANG.EN, "Jude")
     assert parsed.canonical_form() == "Jude 1"
     assert parsed.is_whole_book()
     assert parsed.is_whole_chapter()
 
 
 def test_constraints():
-    assert (
-        pu(LANGUAGE_CODE_EN, "Matt 1", allow_whole_book=False, allow_whole_chapter=True).canonical_form() == "Matthew 1"
-    )
-    assert pu(LANGUAGE_CODE_EN, "Matt 1", allow_whole_book=False, allow_whole_chapter=False) is None
-    assert pu(LANGUAGE_CODE_EN, "Matt", allow_whole_book=True, allow_whole_chapter=True).canonical_form() == "Matthew"
-    assert pu(LANGUAGE_CODE_EN, "Matt", allow_whole_book=False, allow_whole_chapter=True) is None
-    assert pu(LANGUAGE_CODE_EN, "Jude", allow_whole_book=False, allow_whole_chapter=True).canonical_form() == "Jude 1"
+    assert pu(LANG.EN, "Matt 1", allow_whole_book=False, allow_whole_chapter=True).canonical_form() == "Matthew 1"
+    assert pu(LANG.EN, "Matt 1", allow_whole_book=False, allow_whole_chapter=False) is None
+    assert pu(LANG.EN, "Matt", allow_whole_book=True, allow_whole_chapter=True).canonical_form() == "Matthew"
+    assert pu(LANG.EN, "Matt", allow_whole_book=False, allow_whole_chapter=True) is None
+    assert pu(LANG.EN, "Jude", allow_whole_book=False, allow_whole_chapter=True).canonical_form() == "Jude 1"
 
 
 def test_invalid_references():
     with override("en"):
         with pytest.raises(InvalidVerseReference):
-            pv(LANGUAGE_CODE_EN, "Matthew 2:1-1:2")
+            pv(LANG.EN, "Matthew 2:1-1:2")
         # Even with loose parsing, we still propagage InvalidVerseReference, so
         # that the front end code (e.g. quick_find) can recognise that the user
         # tried to enter a verse reference.
         with pytest.raises(InvalidVerseReference):
-            pu(LANGUAGE_CODE_EN, "Matthew 2:1-1:2")
+            pu(LANG.EN, "Matthew 2:1-1:2")
 
 
 def test_turkish_reference_parsing():
@@ -236,7 +234,7 @@ def test_turkish_reference_parsing():
         ("EYÜP 1", "Eyüp 1"),
     ]
     for ref, output in tests:
-        assert pu(LANGUAGE_CODE_TR, ref).canonical_form() == output, f"Failure parsing '{ref}'"
+        assert pu(LANG.TR, ref).canonical_form() == output, f"Failure parsing '{ref}'"
 
     assert normalize_reference_input_turkish("  ÂâİIiıÇçŞşÖöÜüĞğ  ") == "aaiiiiccssoouugg"
 
@@ -303,22 +301,22 @@ def test_to_list_whole_book():
 
 
 def test_is_in_bounds():
-    good_ref = pu(LANGUAGE_CODE_EN, "Gen 1:1")
+    good_ref = pu(LANG.EN, "Gen 1:1")
     assert good_ref.is_in_bounds()
 
-    bad_ref_1 = pu(LANGUAGE_CODE_EN, "Gen 100:1")
+    bad_ref_1 = pu(LANG.EN, "Gen 100:1")
     assert not bad_ref_1.is_in_bounds()
 
-    bad_ref_2 = pu(LANGUAGE_CODE_EN, "Gen 1:100")
+    bad_ref_2 = pu(LANG.EN, "Gen 1:100")
     assert not bad_ref_2.is_in_bounds()
 
 
 def test_is_in_bounds_whole_chapter():
-    good_ref = pu(LANGUAGE_CODE_EN, "Psalm 117")
+    good_ref = pu(LANG.EN, "Psalm 117")
     assert good_ref.is_in_bounds()
 
 
 def test_is_in_bounds_chapter_zero():
-    assert not pu(LANGUAGE_CODE_EN, "1 Corinthians 0").is_in_bounds()
-    assert not pu(LANGUAGE_CODE_EN, "1 Corinthians 0:1").is_in_bounds()
-    assert not pu(LANGUAGE_CODE_EN, "1 Corinthians 0:1-0:2").is_in_bounds()
+    assert not pu(LANG.EN, "1 Corinthians 0").is_in_bounds()
+    assert not pu(LANG.EN, "1 Corinthians 0:1").is_in_bounds()
+    assert not pu(LANG.EN, "1 Corinthians 0:1-0:2").is_in_bounds()

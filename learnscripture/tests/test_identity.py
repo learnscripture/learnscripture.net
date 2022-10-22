@@ -8,7 +8,7 @@ from time_machine import travel
 import accounts.memorymodel
 from accounts.models import ChosenVerseSet
 from awards.models import AwardType
-from bibleverses.languages import LANGUAGE_CODE_EN
+from bibleverses.languages import LANG
 from bibleverses.models import (
     MemoryStage,
     StageType,
@@ -92,9 +92,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         )
         # Romans 3:25-26 is merged in TCL02
         for so, ref in enumerate(["Romans 3:24", "Romans 3:25", "Romans 3:26", "Romans 3:27"]):
-            vs.verse_choices.create(
-                internal_reference=internalize_localized_reference(LANGUAGE_CODE_EN, ref), set_order=so
-            )
+            vs.verse_choices.create(internal_reference=internalize_localized_reference(LANG.EN, ref), set_order=so)
 
         created = i.add_verse_set(vs)
         assert len(created) == 3
@@ -758,7 +756,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
             action_change = i.record_verse_action(ref, "KJV", StageType.TEST, 1)
             i.award_action_points(
                 ref,
-                LANGUAGE_CODE_EN,
+                LANG.EN,
                 Verse.objects.get(localized_reference=ref, version__slug="KJV").text,
                 MemoryStage.SEEN,
                 action_change,
@@ -784,7 +782,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
             action_change = i.record_verse_action(ref, "KJV", StageType.TEST, 1)
             i.award_action_points(
                 ref,
-                LANGUAGE_CODE_EN,
+                LANG.EN,
                 Verse.objects.get(localized_reference=ref, version__slug="KJV").text,
                 MemoryStage.TESTED,
                 action_change,

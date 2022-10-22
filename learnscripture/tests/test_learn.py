@@ -10,7 +10,7 @@ from django.utils import timezone
 from accounts.memorymodel import MM
 from accounts.models import Account, Identity, TestingMethod
 from awards.models import AceAward, AwardType, StudentAward
-from bibleverses.languages import LANGUAGE_CODE_EN
+from bibleverses.languages import LANG
 from bibleverses.models import MemoryStage, StageType, VerseSet
 from scores.models import Scores
 
@@ -82,7 +82,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         actual_accuracy = float(round(sum(word_accuracies) / float(len(word_accuracies)) * 1000)) / 1000
 
         points_word_count = word_count - 3  # Don't get points for the reference
-        return math.floor(Scores.points_per_word(LANGUAGE_CODE_EN) * points_word_count * actual_accuracy)
+        return math.floor(Scores.points_per_word(LANG.EN) * points_word_count * actual_accuracy)
 
     def test_save_strength(self):
         identity, account = self.create_account(testing_method=TestingMethod.FULL_WORDS)
@@ -139,7 +139,7 @@ class LearnTests(RequireExampleVerseSetsMixin, FullBrowserTest):
         assert uvs.strength == MM.INITIAL_STRENGTH_FACTOR
 
         # Check the score
-        points_for_verse = Scores.points_per_word(LANGUAGE_CODE_EN) * (
+        points_for_verse = Scores.points_per_word(LANG.EN) * (
             len(self.psalm_23_1_2.strip().split()) - 4
         )  # don't count reference
 

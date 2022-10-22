@@ -1,7 +1,7 @@
 import time
 
 from awards.models import AwardType
-from bibleverses.languages import LANGUAGE_CODE_EN
+from bibleverses.languages import LANG
 from bibleverses.models import StageType, TextVersion, VerseChoice, VerseSet, VerseSetType
 from events.models import Event, EventType
 
@@ -89,7 +89,7 @@ class CreateSetTests(BibleVersesMixin, FullBrowserTest):
                 current_localized_reference_list.append((ref, len(current_localized_reference_list)))
 
             assert current_localized_reference_list == sorted(
-                (vc.get_localized_reference(LANGUAGE_CODE_EN), vc.set_order) for vc in vs.verse_choices.all()
+                (vc.get_localized_reference(LANG.EN), vc.set_order) for vc in vs.verse_choices.all()
             )
 
         # Caching could cause these to fail

@@ -3,7 +3,7 @@
 from django.db import migrations
 from parsy import regex, string
 
-from bibleverses.languages import LANGUAGE_CODE_EN
+from bibleverses.languages import LANG
 from bibleverses.parsing import ParsedReference, parse_validated_localized_reference
 
 
@@ -41,7 +41,7 @@ def forwards(apps, schema_editor):
         verse_choices = vs.verse_choices.all().order_by("set_order")
         if len(verse_choices) == 0:
             continue
-        parsed_break_list = parse_break_list(LANGUAGE_CODE_EN, vs.breaks, verse_choices[0])
+        parsed_break_list = parse_break_list(LANG.EN, vs.breaks, verse_choices[0])
         new_breaks = ",".join(r.canonical_form() for r in parsed_break_list)
         vs.breaks = new_breaks
         vs.save()

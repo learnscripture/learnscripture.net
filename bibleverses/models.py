@@ -22,7 +22,7 @@ from learnscripture.utils.iterators import intersperse
 
 from .books import get_bible_book_name, get_bible_book_number
 from .fields import VectorField
-from .languages import DEFAULT_LANGUAGE, LANGUAGE_CHOICES, LANGUAGE_CODE_EN, LANGUAGE_CODE_TR, normalize_reference_input
+from .languages import DEFAULT_LANGUAGE, LANG, LANGUAGE_CHOICES, normalize_reference_input
 from .parsing import (
     InvalidVerseReference,
     ParsedReference,
@@ -290,8 +290,8 @@ SEARCH_CHARS = set("".join(list(SEARCH_OPERATORS)))
 
 # See '\dF' command in psql for list of available builtin configurations.
 POSTGRES_SEARCH_CONFIGURATIONS = {
-    LANGUAGE_CODE_EN: "english",
-    LANGUAGE_CODE_TR: "turkish",
+    LANG.EN: "english",
+    LANG.TR: "turkish",
 }
 
 

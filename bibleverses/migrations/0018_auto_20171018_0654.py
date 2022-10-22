@@ -2,7 +2,7 @@
 
 from django.db import migrations
 
-from bibleverses.languages import LANGUAGE_CODE_EN
+from bibleverses.languages import LANG
 from bibleverses.parsing import parse_validated_localized_reference
 
 
@@ -10,7 +10,7 @@ def forwards(apps, schema_editor):
     VerseChoice = apps.get_model("bibleverses.VerseChoice")
     i = 0
     for vc in VerseChoice.objects.all():
-        parsed_ref = parse_validated_localized_reference(LANGUAGE_CODE_EN, vc.localized_reference)
+        parsed_ref = parse_validated_localized_reference(LANG.EN, vc.localized_reference)
         vc.internal_reference = parsed_ref.to_internal().canonical_form()
         vc.save()
         i += 1

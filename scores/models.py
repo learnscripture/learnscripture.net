@@ -40,8 +40,8 @@ class Scores:
     # such that learning the same number of verses should get you the same
     # number of points (roughly).
     _LANGUAGE_POINTS_PER_WORD = {
-        languages.LANGUAGE_CODE_EN: 20,
-        languages.LANGUAGE_CODE_TR: 34,
+        languages.LANG.EN: 20,
+        languages.LANG.TR: 34,
     }
 
     @classmethod

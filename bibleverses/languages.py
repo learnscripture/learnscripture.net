@@ -1,29 +1,37 @@
 import unicodedata
-
-import attr
-
-# We make Language a static class rather than DB, because
-# supported languages always need code-level support.
+from dataclasses import dataclass
 
 
-@attr.s
+@dataclass
 class Language:
-    # 2 leter ISO 639-1 code
-    code = attr.ib()
-    display_name = attr.ib()
+    """
+    Metadata for a language
+    """
+
+    # We make Language a static class rather than DB, because
+    # supported languages always need code-level support.
+
+    code: str  # 2 leter ISO 639-1 code
+    display_name: str
 
 
-# These must correspond with the HTML lang attribute values. i.e. 2 letter, ISO
-# 639-1 codes in most cases.
-LANGUAGE_CODE_EN = "en"
-LANGUAGE_CODE_TR = "tr"
+class LANG:
+    """
+    Holder for language codes
+    """
 
-# Code for language agnostic name
-LANGUAGE_CODE_INTERNAL = "internal"
+    # These must correspond with the HTML lang attribute values. i.e. 2 letter, ISO
+    # 639-1 codes in most cases.
+    EN = "en"
+    TR = "tr"
+
+    # Code for language agnostic name
+    INTERNAL = "internal"
+
 
 LANGUAGES = [
-    Language(code=LANGUAGE_CODE_EN, display_name="English"),
-    Language(code=LANGUAGE_CODE_TR, display_name="Türkçe"),
+    Language(code=LANG.EN, display_name="English"),
+    Language(code=LANG.TR, display_name="Türkçe"),
 ]
 
 LANGUAGES_LOOKUP = {lang.code: lang for lang in LANGUAGES}
@@ -32,11 +40,11 @@ LANGUAGES_LOOKUP = {lang.code: lang for lang in LANGUAGES}
 LANGUAGE_CHOICES = [(lang.code, lang.display_name) for lang in LANGUAGES]
 
 
-def get_language(code):
+def get_language(code: str) -> Language:
     return LANGUAGES_LOOKUP[code]
 
 
-DEFAULT_LANGUAGE = get_language("en")
+DEFAULT_LANGUAGE: Language = get_language(LANG.EN)
 
 
 def normalize_reference_input_english(query):
@@ -60,9 +68,9 @@ def normalize_reference_input_turkish(query):
 
 
 _NORMALIZE_SEARCH_FUNCS = {
-    LANGUAGE_CODE_EN: normalize_reference_input_english,
-    LANGUAGE_CODE_TR: normalize_reference_input_turkish,
-    LANGUAGE_CODE_INTERNAL: lambda x: x,
+    LANG.EN: normalize_reference_input_english,
+    LANG.TR: normalize_reference_input_turkish,
+    LANG.INTERNAL: lambda x: x,
 }
 
 

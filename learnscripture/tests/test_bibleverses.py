@@ -4,7 +4,7 @@ import pytest
 from django_ftl import override
 
 from accounts.models import Identity
-from bibleverses.languages import LANGUAGE_CODE_EN
+from bibleverses.languages import LANG
 from bibleverses.models import (
     InvalidVerseReference,
     TextVersion,
@@ -70,7 +70,7 @@ class RequireExampleVerseSetsMixin(BibleVersesMixin):
         for i, ref in enumerate(en_ref_list):
             set_order = i + 1
             vs.verse_choices.create(
-                set_order=set_order, internal_reference=internalize_localized_reference(LANGUAGE_CODE_EN, ref)
+                set_order=set_order, internal_reference=internalize_localized_reference(LANG.EN, ref)
             )
         return vs
 
@@ -378,7 +378,7 @@ class MockVersion:
 
 
 class MockUVS:
-    def __init__(self, localized_reference, language_code=LANGUAGE_CODE_EN):
+    def __init__(self, localized_reference, language_code=LANG.EN):
         self.localized_reference = localized_reference
         self.version = MockVersion(language_code=language_code)
 
