@@ -1,6 +1,8 @@
+import dataclasses
 import re
+from dataclasses import dataclass
+from typing import Optional
 
-import attr
 from parsy import ParseError, char_from, generate, regex, string, string_from, whitespace
 
 from learnscripture.ftl_bundles import t
@@ -17,16 +19,16 @@ from .constants import BIBLE_BOOK_INFO
 from .languages import LANG, normalize_reference_input
 
 
-@attr.s
+@dataclass
 class ParsedReference:
-    language_code = attr.ib()
-    book_name = attr.ib()  # Always canonical form
-    start_chapter = attr.ib()
-    start_verse = attr.ib()
-    end_chapter = attr.ib(default=None)
-    end_verse = attr.ib(default=None)
+    language_code: str
+    book_name: str  # Always canonical form
+    start_chapter: int
+    start_verse: int
+    end_chapter: Optional[int] = None
+    end_verse: Optional[int] = None
 
-    def __attrs_post_init__(self):
+    def __post_init__(self):
         self.book_number = get_bible_book_number(self.language_code, self.book_name)
         self.internal_book_name = get_bible_book_name(LANG.INTERNAL, self.book_number)
 
@@ -80,7 +82,7 @@ class ParsedReference:
         return retval
 
     def _clone(self, **kwargs):
-        return attr.evolve(self, **kwargs)
+        return dataclasses.replace(self, **kwargs)
 
     def translate_to(self, language_code):
         return self._clone(
@@ -196,12 +198,12 @@ class ParsedReference:
             # Next verse
             next_ref = current_ref
             verse_num = next_ref.start_verse + 1
-            next_ref = attr.evolve(next_ref, start_verse=verse_num, end_verse=verse_num)
+            next_ref = dataclasses.replace(next_ref, start_verse=verse_num, end_verse=verse_num)
             verses_in_chapter = book_info["verse_counts"][next_ref.start_chapter]
             if next_ref.start_verse > verses_in_chapter:
                 chapter_num = next_ref.start_chapter + 1
                 verse_num = 1
-                next_ref = attr.evolve(
+                next_ref = dataclasses.replace(
                     next_ref,
                     start_chapter=chapter_num,
                     end_chapter=chapter_num,

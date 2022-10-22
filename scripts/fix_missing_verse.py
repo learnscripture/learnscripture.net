@@ -1,4 +1,5 @@
-import attr
+import dataclasses
+
 import django
 from django.db import transaction
 from django.db.models import F
@@ -38,7 +39,7 @@ def fix_missing_verse():
         parsed_ref = parse_validated_localized_reference(version.language_code, ref)
         # previous_ref:
         assert parsed_ref.start_verse > 1
-        previous_ref = attr.evolve(
+        previous_ref = dataclasses.replace(
             parsed_ref,
             start_verse=parsed_ref.start_verse - 1,
             end_verse=parsed_ref.start_verse - 1,

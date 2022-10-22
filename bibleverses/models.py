@@ -1,3 +1,4 @@
+import dataclasses
 import logging
 import math
 import operator
@@ -5,7 +6,6 @@ import random
 from collections import defaultdict
 from functools import reduce
 
-import attr
 from autoslug import AutoSlugField
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
@@ -612,7 +612,7 @@ class VerseSetQuerySet(models.QuerySet):
             if parsed_ref is not None:
                 if parsed_ref.start_verse is None:
                     # To find a whole chapter, look for sets containing first verse.
-                    search_parsed_ref = attr.evolve(parsed_ref, start_verse=1)
+                    search_parsed_ref = dataclasses.replace(parsed_ref, start_verse=1)
                     # But limit to only passage types, otherwise we'll get false
                     # positives for selection sets that contain other verses
                     # from that chapter.
