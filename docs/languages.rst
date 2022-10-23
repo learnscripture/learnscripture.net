@@ -13,7 +13,7 @@ For adding a Bible in a new language
   _BIBLE_BOOK_ALTERNATIVES_FOR_LANG
 - Update POSTGRES_SEARCH_CONFIGURATIONS
 - Update Scores._LANGUAGE_POINTS_PER_WORD
-
+- Update normalizeWordForText in Learn.elm as necessary to cope with accents
 
 - Check how Bible reference parsing works in the language, and update
 ``bible_reference_parser_for_lang`` as needed You will then need to import the
