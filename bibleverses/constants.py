@@ -97,7 +97,7 @@ _BIBLE_BOOKS_FOR_LANG = {
         "Nehemia",
         "Esther",
         "Job",
-        "Psalmen",
+        "Psalm",
         "Spreuken",
         "Prediker",
         "Hooglied",
@@ -2123,8 +2123,9 @@ Esther
 Job
     Job
 
-Psalmen
+Psalm
     Ps.
+    Psalmen
 
 Spreuken
     Spr.

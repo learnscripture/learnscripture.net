@@ -253,6 +253,9 @@ def test_turkish_reference_normalization():
         ("2 Timótheüs 1:3", "2 Timotheüs 1:3"),
         ("2 Timoteüs 1:3", "2 Timotheüs 1:3"),
         ("2 Timoteus 1:3", "2 Timotheüs 1:3"),
+        # Psalms
+        ("Psalmen 1", "Psalm 1"),
+        ("Psalmen 1:1", "Psalm 1:1"),
     ],
 )
 def test_dutch_reference_parsing(input_ref, output_ref):
