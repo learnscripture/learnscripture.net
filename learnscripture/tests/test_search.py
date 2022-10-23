@@ -1,7 +1,7 @@
 from django_ftl import override
 
-from bibleverses.languages import LANG
-from bibleverses.models import TextVersion, VerseSet, VerseSetType, quick_find
+from bibleverses.languages import LANG, LANGUAGES
+from bibleverses.models import POSTGRES_SEARCH_CONFIGURATIONS, TextVersion, VerseSet, VerseSetType, quick_find
 
 from .base import BibleVersesMixin, TestBase, get_or_create_any_account
 
@@ -313,3 +313,8 @@ class QuickFindTests(SearchTestsMixin, TestBase):
         # Testing for crashers due to syntax issues
         quick_find("x (", self.NET)
         quick_find("x &", self.NET)
+
+
+def test_search_conf():
+    for lang in LANGUAGES:
+        assert lang.code in POSTGRES_SEARCH_CONFIGURATIONS, f"{lang.code} needs POSTGRES_SEARCH_CONFIGURATIONS defining"
