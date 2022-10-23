@@ -215,8 +215,9 @@ def test_invalid_references():
             pu(LANG.EN, "Matthew 2:1-1:2")
 
 
-def test_turkish_reference_parsing():
-    tests = [
+@pytest.mark.parametrize(
+    "input_ref,output_ref",
+    [
         # Different numbering styles for book names:
         ("1. Timoteos 3:16", "1. Timoteos 3:16"),
         ("1 Timoteos 3:16", "1. Timoteos 3:16"),
@@ -232,15 +233,19 @@ def test_turkish_reference_parsing():
         ("yaratilis 2:3", "Yaratılış 2:3"),
         ("colde sayim 4:5", "Çölde Sayım 4:5"),
         ("EYÜP 1", "Eyüp 1"),
-    ]
-    for ref, output in tests:
-        assert pu(LANG.TR, ref).canonical_form() == output, f"Failure parsing '{ref}'"
+    ],
+)
+def test_turkish_reference_parsing(input_ref, output_ref):
+    assert pu(LANG.TR, input_ref).canonical_form() == output_ref, f"Failure parsing '{input_ref}'"
 
+
+def test_turkish_reference_normalization():
     assert normalize_reference_input_turkish("  ÂâİIiıÇçŞşÖöÜüĞğ  ") == "aaiiiiccssoouugg"
 
 
-def test_dutch_reference_parsing():
-    tests = [
+@pytest.mark.parametrize(
+    "input_ref,output_ref",
+    [
         # Different numbering styles for book names:
         ("Openbaringen 1:1", "Openbaring 1:1"),
         ("Openb. 1:1", "Openbaring 1:1"),
@@ -248,10 +253,13 @@ def test_dutch_reference_parsing():
         ("2 Timótheüs 1:3", "2 Timotheüs 1:3"),
         ("2 Timoteüs 1:3", "2 Timotheüs 1:3"),
         ("2 Timoteus 1:3", "2 Timotheüs 1:3"),
-    ]
-    for ref, output in tests:
-        assert pu(LANG.NL, ref).canonical_form() == output, f"Failure parsing '{ref}'"
+    ],
+)
+def test_dutch_reference_parsing(input_ref, output_ref):
+    assert pu(LANG.NL, input_ref).canonical_form() == output_ref, f"Failure parsing '{input_ref}'"
 
+
+def test_dutch_reference_normalization():
     assert normalize_reference_input_turkish("  ÉüéÜ  ") == "eueu"
 
 
