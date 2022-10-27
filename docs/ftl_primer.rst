@@ -28,7 +28,8 @@ introduction and describes the features we use in LearnScripture.net.
 A ‘Fluent Translation List’ file consists of 3 main things:
 
 * Comments - these start with ``#`` and are explanations for the benefit of the
-  translator. They do not need to be translated.
+  translator. They do not need to be translated, and you can add your own notes
+  here if it helps you.
 
 * Message IDs - these are words separated by hyphens and are used to identify
   a particular bit of text. They must not be changed.
