@@ -306,6 +306,8 @@ class VerseManager(models.Manager):
             query = query.replace(s, " ")
         words = query.split(" ")
         words = [w for w in words if (w and w not in SEARCH_OPERATORS)]
+        if not words:
+            return self.none()
         # Do an 'AND' on all terms.
         word_params = list(intersperse(words, " & "))
         search_clause = " || ".join(["%s"] * len(word_params))

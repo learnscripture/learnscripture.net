@@ -313,6 +313,7 @@ class QuickFindTests(SearchTestsMixin, TestBase):
         # Testing for crashers due to syntax issues
         quick_find("x (", self.NET)
         quick_find("x &", self.NET)
+        quick_find("!", self.NET)
 
 
 def test_search_conf():
