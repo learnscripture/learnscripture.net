@@ -411,6 +411,9 @@ def show_toolbar(request):
     if request.path.startswith("/learn"):
         return False
 
+    if request.headers.get("Hx-Request", False):
+        return False
+
     return bool(settings.DEBUG)
 
 
