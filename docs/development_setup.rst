@@ -12,17 +12,17 @@ installed.
 1. Create a directory 'learnscripture.net' and cd into it.
 
 2. Checkout the sources from central VCS into a folder called 'src'.
-   Currently central VCS is held on gitlab.com::
+   Currently central VCS is held on github.com::
 
-     git clone git@gitlab.com:learnscripture/learnscripture.net.git src
+     git clone git@github.com:learnscripture/learnscripture.net.git src
 
-   Edit your ``.git/config`` and ensure the gitlab remote is called ``origin``
+   Edit your ``.git/config`` and ensure the github remote is called ``origin``
    - this is needed for deploying.
 
    You will also need a copy of the text sources, checked out in 'texts' in a
    sibling directory to 'src'::
 
-     git clone git@gitlab.com:learnscripture/learnscripture-texts.git texts
+     git clone git@github.com:learnscripture/learnscripture-texts.git texts
 
 
 3. Create a virtualenv for the project e.g.::

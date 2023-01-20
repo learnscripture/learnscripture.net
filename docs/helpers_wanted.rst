@@ -6,7 +6,7 @@ This project is looking for new maintainers and helpers.
 The following are areas where contributions would be welcome:
 
 * Programming work - addressing known issues and feature requests -
-  https://gitlab.com/learnscripture/learnscripture.net/issues
+  https://github.com/learnscripture/learnscripture.net/issues
   and possibly more substantial new features or changes.
 
 * Replying to support requests from the contact form. This includes

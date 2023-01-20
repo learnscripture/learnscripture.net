@@ -450,7 +450,7 @@ class IdentityTests(RequireExampleVerseSetsMixin, AccountTestMixin, CatechismsMi
         assert len(cvss_learn) == 1
 
     def test_issue_138(self):
-        # https://gitlab.com/learnscripture/learnscripture.net/issues/138
+        # https://github.com/learnscripture/learnscripture.net/issues/138
         i = self.create_identity(version_slug="NET")
         vs1 = VerseSet.objects.get(name="Psalm 23")
         i.add_verse_set(vs1)

@@ -22,14 +22,14 @@ Most pages on the site use classic web architecture:
 
 In the past, Javascript was mostly jQuery based. Now, we are using `htmx
 <htmx.org>`_, and `trying to move more things to use that pattern
-<https://gitlab.com/learnscripture/learnscripture.net/-/issues/182>`_.
+<https://github.com/learnscripture/learnscripture.net/issues/182>`_.
 
 Just one page uses SPA-style — the “Learn” page. But:
 - it is the page where users spend most of their time
 - it is very complex and demanding in terms of user interface.
 
 It is currently implemented in Elm, but `we are looking to replace that
-<https://gitlab.com/learnscripture/learnscripture.net/-/issues/181>`_.
+<https://github.com/learnscripture/learnscripture.net/issues/181>`_.
 
 
 Server config
