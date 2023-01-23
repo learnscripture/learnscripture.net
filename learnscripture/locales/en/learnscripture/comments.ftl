@@ -33,7 +33,7 @@ comments-cancel-button = Cancel
 
 # Displayed next to post button when writing a comment
 comments-public-message-warning = This message will be public. Please do not include any sensitive information, like
-          your address, in this message.
+          your address, in this message, and do not ask others for personal information.
 
 # Displayed when the user is not logged in but tries to add a comment.
 # $login_url is the address for logging in.

@@ -30,7 +30,7 @@ comments-cancel-button = İptal
 
 # Displayed next to post button when writing a comment
 comments-public-message-warning = Bu ileti herkes tarafından görülebilir. Adresiniz gibi size özel bilgileri buraya
-          girmeyiniz.
+          girmeyiniz, ve başkalarından kişisel bilgi istemeyiniz.
 
 # Displayed when the user is not logged in but tries to add a comment.
 # $login_url is the address for logging in.
