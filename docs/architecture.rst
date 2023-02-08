@@ -25,6 +25,7 @@ In the past, Javascript was mostly jQuery based. Now, we are using `htmx
 <https://github.com/learnscripture/learnscripture.net/issues/182>`_.
 
 Just one page uses SPA-style — the “Learn” page. But:
+
 - it is the page where users spend most of their time
 - it is very complex and demanding in terms of user interface.
 
