@@ -89,8 +89,8 @@ class SearchTests(SearchTestsMixin, TestBase):
         )
 
         vs2 = VerseSet.objects.create(
-            name="Mezmur 23 - en sevdiğim",
-            slug="mezmur-23",
+            name="Mezmurlar 23 - en sevdiğim",
+            slug="mezmurlar-23",
             public=True,
             language_code="tr",
             set_type=VerseSetType.PASSAGE,
@@ -111,7 +111,7 @@ class SearchTests(SearchTestsMixin, TestBase):
         results = VerseSet.objects.all().search([LANG.EN], "Psalm 23")
         assert list(results) == [vs1]
 
-        results2 = VerseSet.objects.all().search([LANG.TR], "Mezmur 23")
+        results2 = VerseSet.objects.all().search([LANG.TR], "Mezmurlar 23")
         assert list(results2) == [vs2]
 
         # Search verse refs multiple languages
@@ -149,14 +149,14 @@ class SearchTests(SearchTestsMixin, TestBase):
         )
 
         # and therefore found in a turkish only search:
-        results = VerseSet.objects.all().search([LANG.TR], "Mezmur 23")
+        results = VerseSet.objects.all().search([LANG.TR], "Mezmurlar 23")
         assert list(results) == [vs]
 
         # But now only as English:
         vs.name = "Psalm 23 - my favourite"
         vs.save()
 
-        results2 = VerseSet.objects.all().search([LANG.TR], "Mezmur 23")
+        results2 = VerseSet.objects.all().search([LANG.TR], "Mezmurlar 23")
         assert list(results2) == []
 
         results3 = VerseSet.objects.all().search([LANG.EN], "Psalm 23")

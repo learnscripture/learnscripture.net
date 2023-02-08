@@ -39,7 +39,7 @@ class VerseSetTests(BibleVersesMixin, AccountTestMixin, TestBase):
     def test_smart_name(self):
         vs1 = VerseSet(name="Psalm 23", language_code="en", set_type=VerseSetType.PASSAGE)
         assert vs1.smart_name("en") == "Psalm 23"
-        assert vs1.smart_name("tr") == "Mezmur 23"
+        assert vs1.smart_name("tr") == "Mezmurlar 23"
 
         vs2 = VerseSet(name="Hebrews 1:1-10", language_code="en", set_type=VerseSetType.PASSAGE)
         assert vs2.smart_name("en") == "Hebrews 1:1-10"
@@ -55,7 +55,7 @@ class VerseSetTests(BibleVersesMixin, AccountTestMixin, TestBase):
 
         vs5 = VerseSet(name="Psalm 37: 1 - 40", language_code="en", set_type=VerseSetType.PASSAGE)
         assert vs5.smart_name("en") == "Psalm 37: 1 - 40"
-        assert vs5.smart_name("tr") == "Mezmur 37"
+        assert vs5.smart_name("tr") == "Mezmurlar 37"
 
     def test_smart_name_no_abbreviations(self):
         # 'Promises' starts with 'pro' == abbreviation for proverbs. We should

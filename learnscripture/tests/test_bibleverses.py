@@ -184,11 +184,11 @@ class VersionTests(BibleVersesMixin, TestBase):
         assert v_1.text.startswith("“Çünkü")
 
         # Group of verses
-        v_2 = version.get_verse_list("Mezmur 23:1-3")
+        v_2 = version.get_verse_list("Mezmurlar 23:1-3")
         assert len(v_2) == 3
 
         # Chapter
-        v_3 = version.get_verse_list("Mezmur 23")
+        v_3 = version.get_verse_list("Mezmurlar 23")
         assert len(v_3) == 6
 
     def test_get_verse_list_merged(self):
@@ -618,12 +618,16 @@ class UserVerseStatusTests(RequireExampleVerseSetsMixin, AccountTestMixin, TestB
         identity.add_verse_choice("Psalm 23:2")
 
         assert (
-            len(identity.verse_statuses.search_by_parsed_ref(parse_validated_localized_reference("tr", "Mezmur 23:1")))
+            len(
+                identity.verse_statuses.search_by_parsed_ref(
+                    parse_validated_localized_reference("tr", "Mezmurlar 23:1")
+                )
+            )
             == 1
         )
 
         assert (
-            len(identity.verse_statuses.search_by_parsed_ref(parse_validated_localized_reference("tr", "Mezmur 23")))
+            len(identity.verse_statuses.search_by_parsed_ref(parse_validated_localized_reference("tr", "Mezmurlar 23")))
             == 2
         )
 

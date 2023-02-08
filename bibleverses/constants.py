@@ -165,7 +165,7 @@ _BIBLE_BOOKS_FOR_LANG = {
         "Nehemya",
         "Ester",
         "Eyüp",
-        "Mezmur",
+        "Mezmurlar",
         "Süleyman'ın Özdeyişleri",
         "Vaiz",
         "Ezgiler Ezgisi",
@@ -2463,7 +2463,7 @@ Ester
 Eyüp
     ey
 
-Mezmur
+Mezmurlar
     mez
     mezmur
     mz

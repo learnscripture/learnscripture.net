@@ -41,7 +41,7 @@ class LanguageTestsFB(LanguageTestsBase, BibleVersesMixin, FullBrowserTest):
         self.click('a[data-set-lang="tr"]')
         self.click('.maincontent a[href="/choose/"]')
         self.click("#id-choose-individual > button")
-        self.fill({"#id_quick_find": "Mezmur 23:1"})
+        self.fill({"#id_quick_find": "Mezmurlar 23:1"})
         self.click("#id_lookup")
         self.click('[name="learn_now"]')
         self.set_preferences(bible_version="TCL02 (Kutsal Kitap Yeni Çeviri)")

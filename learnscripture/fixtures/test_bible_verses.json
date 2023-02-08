@@ -632,7 +632,7 @@
         "pk": null,
         "model": "bibleverses.verse",
         "fields": {
-            "localized_reference": "Mezmur 23:1",
+            "localized_reference": "Mezmurlar 23:1",
             "chapter_number": 23,
             "text_saved": "RAB \u00e7oban\u0131md\u0131r,\nEksi\u011fim olmaz",
             "book_number": 18,
@@ -649,7 +649,7 @@
         "pk": null,
         "model": "bibleverses.verse",
         "fields": {
-            "localized_reference": "Mezmur 23:2",
+            "localized_reference": "Mezmurlar 23:2",
             "chapter_number": 23,
             "text_saved": "Beni yemye\u015fil \u00e7ay\u0131rlarda yat\u0131r\u0131r,\nSakin sular\u0131n k\u0131y\u0131s\u0131na g\u00f6t\u00fcr\u00fcr.",
             "book_number": 18,
@@ -666,7 +666,7 @@
         "pk": null,
         "model": "bibleverses.verse",
         "fields": {
-            "localized_reference": "Mezmur 23:3",
+            "localized_reference": "Mezmurlar 23:3",
             "chapter_number": 23,
             "text_saved": "\u0130\u00e7imi tazeler,\nAd\u0131 u\u011fruna bana do\u011fru yollarda \u00f6nc\u00fcl\u00fck eder.",
             "book_number": 18,
@@ -683,7 +683,7 @@
         "pk": null,
         "model": "bibleverses.verse",
         "fields": {
-            "localized_reference": "Mezmur 23:4",
+            "localized_reference": "Mezmurlar 23:4",
             "chapter_number": 23,
             "text_saved": "Karanl\u0131k \u00f6l\u00fcm vadisinden ge\u00e7sem bile,\nK\u00f6t\u00fcl\u00fckten korkmam.\n\u00c7\u00fcnk\u00fc sen benimlesin.\n\u00c7oma\u011f\u0131n, de\u011fne\u011fin g\u00fcven verir bana.",
             "book_number": 18,
@@ -700,7 +700,7 @@
         "pk": null,
         "model": "bibleverses.verse",
         "fields": {
-            "localized_reference": "Mezmur 23:5",
+            "localized_reference": "Mezmurlar 23:5",
             "chapter_number": 23,
             "text_saved": "D\u00fc\u015fmanlar\u0131m\u0131n \u00f6n\u00fcnde bana sofra kurars\u0131n,\nBa\u015f\u0131ma ya\u011f s\u00fcrersin,\nK\u00e2sem ta\u015f\u0131yor.",
             "book_number": 18,
@@ -717,7 +717,7 @@
         "pk": null,
         "model": "bibleverses.verse",
         "fields": {
-            "localized_reference": "Mezmur 23:6",
+            "localized_reference": "Mezmurlar 23:6",
             "chapter_number": 23,
             "text_saved": "\u00d6mr\u00fcm boyunca yaln\u0131z iyilik ve sevgi izleyecek beni,\nHep RAB'bin evinde oturaca\u011f\u0131m.",
             "book_number": 18,
