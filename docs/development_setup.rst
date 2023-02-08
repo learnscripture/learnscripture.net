@@ -74,8 +74,7 @@ installed.
    Then create postgres databases to match the settings, both for ``learnscripture`` and
    ``learnscripture_wordsuggestions``.
 
-   You will also need to add 'learnscripture.local' as
-   aliases for 127.0.0.1 in /etc/hosts
+   You will also need to add 'learnscripture.local' as aliases for 127.0.0.1 in /etc/hosts
 
 6. Create a file ``config/secrets.json`` containing at least the following:
 
@@ -124,6 +123,7 @@ installed.
      npm run watch
 
    (These are long running processes that re-run themselves when files change)
+
    Browse the site on http://learnscripture.local:8000/
 
 9. Then, try to run the tests::
