@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file=requirements.txt requirements-dev.in requirements.in
 #
--e git+git://github.com/riccardoscalco/Pykov.git@16cda2f2c0ed8143ddcfa25dac34d3dadc982380#egg=pykov
+pykov @ https://github.com/riccardoscalco/Pykov/archive/16cda2f2c0ed8143ddcfa25dac34d3dadc982380.tar.gz
     # via -r requirements.in
 aldjemy==2.6
     # via -r requirements.in
