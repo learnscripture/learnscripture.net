@@ -280,7 +280,7 @@ _BIBLE_BOOKS_FOR_LANG = {
         "2 Juan",
         "3 Juan",
         "Judas",
-        "Apocalipsis"
+        "Apocalipsis",
     ],
     LANG.INTERNAL: ["BOOK" + str(i) for i in range(0, BIBLE_BOOK_COUNT)],
 }
@@ -3227,6 +3227,7 @@ Apocalipsis
     Apo
     Apoc
 """
+
 
 def parse_abbrev_def(abbrev_def):
     # -- Parser for the above format:
