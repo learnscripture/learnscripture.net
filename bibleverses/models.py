@@ -293,6 +293,7 @@ POSTGRES_SEARCH_CONFIGURATIONS = {
     LANG.EN: "english",
     LANG.NL: "dutch",
     LANG.TR: "turkish",
+    LANG.ES: "spanish",
 }
 
 
