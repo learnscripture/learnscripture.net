@@ -32,5 +32,6 @@ Docs you will need to read:
 * Other things:
 
   - `<languages.rst>`_
+  - `<texts.rst>`_
   - `<android_app.rst>`_
   - `<todo.rst>`_

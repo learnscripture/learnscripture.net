@@ -39,7 +39,7 @@ New texts and catechisms
   ourselves by adding a link in the footer.
 
 * The text needs to be prepared and loaded into the database in the development
-  environment. This involves creating a TextVersion record in the admin, and then adding:
+  environment. This involves creating a TextVersion record somehow, and then adding:
 
   * For Bibles, Verse instances corresponding to every Verse in the KJV
     (including missing verses, which should be marked with missing=True).
