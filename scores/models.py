@@ -34,16 +34,27 @@ class Scores:
     # This is based on a comparison of the number of words in a typical Bible
     # translation for each language:
     #
-    # - NET for English
-    # - TCL02 for Turkish
-    # - SV-RJ for Dutch
+    # - NET for English     751460
+    # - TCL02 for Turkish   448155
+    # - SV-RJ for Dutch     770099
+    # - RVG for Spanish     712554
     #
     # such that learning the same number of verses should get you the same
     # number of points (roughly).
+
+    # Number of words in a text can be found by doing:
+
+    # >>> from bibleverses.textutils import split_into_words
+    # >>> text = TextVersion.objects.get(short_name='...')
+    # >>> sum([len(split_into_words(v.text_saved)) for v in text.verse_set.filter(missing=False, merged_into__isnull=True)])
+
+    # Then do: 751460 / words_in_bible * 20
+
     _LANGUAGE_POINTS_PER_WORD = {
         languages.LANG.EN: 20,
         languages.LANG.TR: 34,
         languages.LANG.NL: 19,
+        languages.LANG.ES: 21,
     }
 
     @classmethod
