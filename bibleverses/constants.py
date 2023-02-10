@@ -251,7 +251,7 @@ _BIBLE_BOOKS_FOR_LANG = {
         "Nahúm",
         "Habacuc",
         "Sofonías",
-        "Ageo",
+        "Hageo",
         "Zacarías",
         "Malaquías",
         "Mateo",
@@ -2883,6 +2883,350 @@ Vahiy
     vah
 """
 
+# https://support.logos.com/hc/es/articles/360021229852-Abreviaciones-de-los-libros-de-la-Biblia
+ES_EXTRA_BOOK_NAMES = """
+Génesis
+    Ge
+    Gen
+    Gn
+
+Éxodo
+    Ex
+    Exo
+    Exod
+
+Levítico
+    Le
+    Lev
+    Lv
+
+Números
+    Nm
+    Nu
+    Num
+
+Deuteronomio
+    De
+    Deut
+    Dt
+
+Josué
+    Jos
+    Josu
+    Js
+
+Jueces
+    Ju
+    Jue
+
+Rut
+    Rt
+    Ru
+
+1 Samuel
+    1 Sa
+    1 Sam
+    1 Sm
+    1S
+    1Sa
+    1Sam
+
+2 Samuel
+    2 Sa
+    2 Sam
+    2 Sm
+    2S
+    2Sa
+    2Sam
+
+1 Reyes
+    1 Re
+    1Re
+
+2 Reyes
+    2 Re
+    2Re
+
+1 Crónicas
+    1 Cr
+    1 Crn
+    1 Cro
+    1 Cron
+    1Cr
+    1Crn
+    1Cro
+    1Cron
+
+2 Crónicas
+    2 Cr
+    2 Crn
+    2 Cro
+    2 Cron
+    2Cr
+    2Crn
+    2Cro
+    2Cron
+
+Esdras
+    Esd
+    Esdr
+
+Nehemías
+    Ne
+    Neh
+
+Ester
+    Est
+
+Job
+    Jb
+
+Salmos
+    Sa
+    Salm
+    Slm
+    Sls
+
+Proverbios
+    Pr
+    Pro
+    Prov
+    Prv
+
+Eclesiastés
+    Ec
+    Ecle
+    Ecles
+
+El Cantar de los Cantares
+    Cant
+    Cantar de los Cantares
+    Cantares
+    Cnt
+
+Isaías
+    Is
+    Isa
+
+Jeremías
+    Je
+    Jer
+    Jr
+
+Lamentaciones
+    La
+    Lam
+
+Ezequiel
+    Eze
+    Ezeq
+    Ezq
+
+Daniel
+    Da
+    Dan
+    Dn
+
+Oseas
+    Os
+    Oss
+
+Joel
+    Jl
+    Joe
+
+Amós
+    Am
+
+Abdías
+    Ab
+    Abdi
+
+Jonás
+    Jns
+    Jon
+
+Nahúm
+    Na
+    Nah
+
+Habacuc
+    Hab
+    Hab
+    Hb
+
+Sofonías
+    Sofo
+    Sof
+
+Hageo
+    Ageo
+    Ag
+    Hage
+    Hag
+    Hg
+
+Zacarías
+    Zac
+    Zc
+
+Malaquías
+    Mal
+    Mal
+    Ml
+
+Mateo
+    Mat
+    Mt
+
+Marcos
+    Mrc
+    Mar
+    Mc
+    Mr
+
+Lucas
+    Lc
+    Luc
+
+Juan
+    Jn
+    Jua
+
+Hechos
+    Hch
+    Hec
+    Hechos de los Apóstoles
+
+Romanos
+    Ro
+    Rom
+
+1 Corintios
+    1 Co
+    1 Cor
+    1Co
+    1Cor
+    1Corintios
+
+2 Corintios
+    2 Co
+    2 Cor
+    2Co
+    2Cor
+    2Corintios
+
+Gálatas
+    Ga
+    Gal
+
+Efesios
+    Ef
+    Efes
+
+Filipenses
+    Fi
+    Fil
+    Fili
+    Flp
+
+Colosenses
+    Co
+    Col
+
+1 Tesalonicenses
+    1 Tes
+    1 Ts
+    1Tes
+    1Tesalonicenses
+    1Ts
+
+2 Tesalonicenses
+    2 Tes
+    2 Ts
+    2Tes
+    2Tesalonicenses
+    2Ts
+
+1 Timoteo
+    1 Ti
+    1 Tim
+    1Ti
+    1Tim
+    1Timoteo
+
+2 Timoteo
+    2 Ti
+    2 Tim
+    2Ti
+    2Tim
+    2Timoteo
+
+Tito
+    Ti
+    Tit
+
+Filemón
+    Filem
+    Film
+    Flm
+
+Hebreos
+    Heb
+
+Santiago
+    Sant
+    Stg
+
+1 Pedro
+    1 P
+    1 Pd
+    1 Pe
+    1 Ped
+    1P
+    1Pd
+    1Pe
+    1Ped
+    1Pedro
+
+2 Pedro
+    2 P
+    2 Pd
+    2 Pe
+    2 Ped
+    2P
+    2Pd
+    2Pe
+    2Ped
+    2Pedro
+
+1 Juan
+    1 Jn
+    1J
+    1Jn
+    1Juan
+
+2 Juan
+    2 Jn
+    2J
+    2Jn
+    2Juan
+
+3 Juan
+    3 Jn
+    3J
+    3Jn
+    3Juan
+
+Judas
+    Jd
+    Jud
+
+Apocalipsis
+    Ap
+    Apo
+    Apoc
+"""
 
 def parse_abbrev_def(abbrev_def):
     # -- Parser for the above format:
@@ -2899,6 +3243,7 @@ def make_bible_book_abbreviations():
         (LANG.EN, EN_EXTRA_BOOK_NAMES),
         (LANG.TR, TR_EXTRA_BOOK_NAMES),
         (LANG.NL, NL_EXTRA_BOOK_NAMES),
+        (LANG.ES, ES_EXTRA_BOOK_NAMES),
     ]:
         parsed = parse_abbrev_def(abbrev_def)
         _BIBLE_BOOK_ALTERNATIVES_FOR_LANG[code] = {}
