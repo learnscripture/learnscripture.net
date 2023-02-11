@@ -4,8 +4,9 @@ Handles stored analysis
 import hashlib
 import logging
 import os.path
-
-import attr
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Callable
 
 from .constants import (
     FIRST_WORD_FREQUENCY_ANALYSIS,
@@ -34,7 +35,7 @@ rel = lambda *x: os.path.normpath(os.path.join(os.path.abspath(os.path.dirname(_
 DATA_ROOT = rel("..", "..", "..", "data")
 
 
-@attr.s
+@dataclass
 class Serializer:
     """
     Definition of something used to convert output of analysis (from Analyzer class)
@@ -42,17 +43,17 @@ class Serializer:
     """
 
     # Unique name, usually that of Analyzer class
-    name = attr.ib()
+    name: str
     # Callable that converts data as returned by an Analyzer to a format for
     # serializing, deserializing and using by a strategy.
-    from_analyzer = attr.ib()
+    from_analyzer: Callable
     # Callable that takes an object and file handle and serializes data to it.
-    dump = attr.ib()
+    dump: Callable
     # Callable that takes a file handle and deserializes data
-    load = attr.ib()
+    load: Callable
     # A format version. This can be bumped if the format changes, so that
     # a new analysis file is created.
-    format_version = attr.ib()
+    format_version: int
 
 
 SERIALIZERS = [
@@ -79,17 +80,16 @@ class AnalysisStorage:
     def __init__(self):
         self.loaded = {}
 
-    def saved_analysis_exists(self, analyzer, training_text_keys):
-        filename = self._storage_name_for_analysis(analyzer=analyzer, training_text_keys=training_text_keys)
-        return os.path.exists(filename)
+    def saved_analysis_file(self, analyzer, training_text_keys) -> Path:
+        return Path(self._storage_name_for_analysis(analyzer=analyzer, training_text_keys=training_text_keys))
 
     def save_analysis(self, data, analyzer, training_text_keys):
         serializer = self._serializer_for_analyzer(analyzer)
-        filename = self._storage_name_for_analysis(analyzer=analyzer, training_text_keys=training_text_keys)
+        filepath = self.saved_analysis_file(analyzer, training_text_keys)
         transformed_data = serializer.from_analyzer(data)
         logger.info("Saving analysis %s for keys %s\n", serializer.name, training_text_keys)
-        with open(filename, "wb") as f:
-            logger.info("..into file %s\n", filename)
+        with filepath.open("wb") as f:
+            logger.info("..into file %s\n", filepath)
             serializer.dump(transformed_data, f)
 
     def _serializer_for_analyzer(self, analyzer):

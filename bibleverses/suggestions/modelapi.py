@@ -7,8 +7,8 @@ import logging
 
 from django.db import transaction
 
-from bibleverses.books import get_bible_book_name, get_bible_books
-from bibleverses.models import TextType, TextVersion, Verse, WordSuggestionData, ensure_text, get_whole_book
+from bibleverses.books import get_bible_book_name, get_bible_book_number, get_bible_books
+from bibleverses.models import ComboVerse, TextType, TextVersion, Verse, WordSuggestionData, ensure_text
 from bibleverses.services import partial_data_available
 from learnscripture.utils.iterators import chunks
 
@@ -56,7 +56,7 @@ def get_word_suggestions_by_localized_reference(version, localized_reference):
     return retval
 
 
-def get_word_suggestions_by_localized_reference_bulk(version, localized_reference_list):
+def get_word_suggestions_by_localized_reference_bulk(version, localized_reference_list) -> dict[str, list[list[str]]]:
     # Do simple ones in bulk:
     simple_wsds = list(
         word_suggestion_data_qs_for_version(version).filter(localized_reference__in=localized_reference_list)
@@ -71,7 +71,7 @@ def get_word_suggestions_by_localized_reference_bulk(version, localized_referenc
     return s_dict
 
 
-def _get_ordered_word_suggestion_data(version, localized_reference):
+def _get_ordered_word_suggestion_data(version, localized_reference) -> list[WordSuggestionData]:
     """
     Returns a list of WordSuggestionData for a given localized reference
     (i.e. returning multiple items if the localized_reference is multi-verse)
@@ -155,7 +155,7 @@ def generate_suggestions(version, localized_reference=None, missing_only=True, d
                 v.text_saved = text_saved
             book = get_bible_book_name(language_code, v.book_number)
             items = [v]
-            training_texts = BibleTrainingTexts(text=version, books=[book], disallow_loading=disallow_loading)
+            training_texts = BibleTrainingTexts(text_version=version, books=[book], disallow_loading=disallow_loading)
             logger.info("Generating for %s", localized_reference)
             generate_suggestions_for_items(
                 analysis_storage,
@@ -170,7 +170,7 @@ def generate_suggestions(version, localized_reference=None, missing_only=True, d
                 generate_suggestions_for_book(analysis_storage, version, book, missing_only=missing_only)
 
     elif version.text_type == TextType.CATECHISM:
-        training_texts = CatechismTrainingTexts(text=version, disallow_loading=disallow_loading)
+        training_texts = CatechismTrainingTexts(text_version=version, disallow_loading=disallow_loading)
         items = list(version.qapairs.all())
         if items_all_done(version, items, localized_reference=localized_reference, missing_only=missing_only):
             return
@@ -185,12 +185,12 @@ def generate_suggestions(version, localized_reference=None, missing_only=True, d
         )
 
 
-def generate_suggestions_for_book(analysis_storage, version, book, missing_only=True):
-    logger.info("Generating for %s", book)
-    items = get_whole_book(book, version, ensure_text_present=False).verses
+def generate_suggestions_for_book(analysis_storage, version, localized_book_name: str, missing_only=True):
+    logger.info("Generating for %s", localized_book_name)
+    items = get_whole_book(localized_book_name, version, ensure_text_present=False).verses
     if items_all_done(version, items, missing_only=missing_only):
         return
-    training_texts = BibleTrainingTexts(text=version, books=[book])
+    training_texts = BibleTrainingTexts(text_version=version, books=[localized_book_name])
     generate_suggestions_for_items(analysis_storage, version, items, training_texts, missing_only=missing_only)
 
 
@@ -302,3 +302,17 @@ def items_all_done(version, items, localized_reference=None, missing_only=True):
 
 def hash_text(text):
     return hashlib.sha1(text.encode("utf-8")).hexdigest()
+
+
+def get_whole_book(localized_book_name: str, version, ensure_text_present=True) -> ComboVerse:
+    retval = ComboVerse(
+        localized_book_name,
+        list(
+            version.verse_set.filter(
+                book_number=get_bible_book_number(version.language_code, localized_book_name), missing=False
+            )
+        ),
+    )
+    if ensure_text_present:
+        ensure_text(retval.verses)
+    return retval

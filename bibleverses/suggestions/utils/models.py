@@ -15,10 +15,12 @@ def get_all_version_words(version, disallow_text_loading=False):
 
     if version.text_type == TextType.BIBLE:
         training_texts = BibleTrainingTexts(
-            text=version, books=get_bible_books(version.language_code), disallow_loading=disallow_text_loading
+            text_version=version,
+            books=get_bible_books(version.language_code),
+            disallow_loading=disallow_text_loading,
         )
     elif version.text_type == TextType.CATECHISM:
-        training_texts = CatechismTrainingTexts(text=version, disallow_loading=disallow_text_loading)
+        training_texts = CatechismTrainingTexts(text_version=version, disallow_loading=disallow_text_loading)
 
     return get_text_word_counts(training_texts, list(training_texts.keys()))
 

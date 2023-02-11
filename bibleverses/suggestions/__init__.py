@@ -60,3 +60,10 @@ Code for generating 'suggestions' for verses.
 #   we have a `.modelapi' module that handles everything transparently.
 #
 #   If necessary, it will handle talking to the socket server
+
+
+# The solution above doesn't work well for all languages we support. In
+# particular, for Turkish, Markov chains are far from adequate. Turkish is also
+# hard since it tends to have fewer words per verse, making the word suggestion
+# testing method even worse as an effective test. So for some languages we
+# disable this testing method altogether.

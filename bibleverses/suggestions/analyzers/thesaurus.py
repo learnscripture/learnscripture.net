@@ -1,7 +1,12 @@
 import logging
 import os.path
+from typing import Callable
 
 from django.conf import settings
+
+from bibleverses.languages import LANG
+from bibleverses.models import TextVersion
+from bibleverses.suggestions.trainingtexts import TrainingTexts
 
 from ..constants import ALL_TEXT, THESAURUS_ANALYSIS
 from ..utils.models import get_all_version_words
@@ -9,38 +14,49 @@ from .base import Analyzer
 
 logger = logging.getLogger(__name__)
 
-
-# Thesaurus file tends to have unhelpful suggestions for pronouns, so we overwrite.
-# These are not synonyms, but likely alternatives
-OBJECTS = [
-    "me",
-    "you",
-    "yourself",
-    "oneself",
-    "thee",
-    "him",
-    "her",
-    "himself",
-    "herself",
-    "it",
-    "itself",
-    "us",
-    "ourselves",
-    "yourselves",
-    "them",
-    "themselves",
-]
-SUBJECTS = ["i", "you", "thou", "he", "she", "it", "we", "they"]
-
-PRONOUN_THESAURUS = dict(
-    [(k, [v for v in OBJECTS if v != k]) for k in OBJECTS] + [(k, [v for v in SUBJECTS if v != k]) for k in SUBJECTS]
-)
+Thesaurus = dict[str, list[str]]
 
 
-def english_thesaurus():
-    fname = os.path.join(settings.SRC_ROOT, "resources", "mobythes.aur")
+def english_thesaurus() -> Thesaurus:
+    fname = os.path.join(settings.SRC_ROOT, "resources", "thesaurus", "en.txt")
     f = open(fname, "rb").read().decode("utf8")
-    return {line.split(",")[0]: line.split(",")[1:] for line in f.split("\r")}
+    thesaurus = {line.split(",")[0]: line.split(",")[1:] for line in f.split("\n")}
+
+    # Thesaurus file tends to have unhelpful suggestions for pronouns, so we overwrite.
+    # These are not synonyms, but likely alternatives
+    OBJECTS = [
+        "me",
+        "you",
+        "yourself",
+        "oneself",
+        "thee",
+        "him",
+        "her",
+        "himself",
+        "herself",
+        "it",
+        "itself",
+        "us",
+        "ourselves",
+        "yourselves",
+        "them",
+        "themselves",
+    ]
+    SUBJECTS = ["i", "you", "thou", "he", "she", "it", "we", "they"]
+
+    PRONOUN_THESAURUS = dict(
+        [(k, [v for v in OBJECTS if v != k]) for k in OBJECTS]
+        + [(k, [v for v in SUBJECTS if v != k]) for k in SUBJECTS]
+    )
+
+    thesaurus.update(PRONOUN_THESAURUS)
+    return thesaurus
+
+
+THESAURUSES: dict[str, Callable[[], Thesaurus]] = {
+    LANG.EN: english_thesaurus,
+    LANG.ES: lambda: {},  # Don't have Spanish thesaurus yet, and not sure how much it would help
+}
 
 
 class ThesaurusAnalyzer(Analyzer):
@@ -52,14 +68,12 @@ class ThesaurusAnalyzer(Analyzer):
         keys = [(training_texts.text_slug, ALL_TEXT)]
         return super().run(training_texts, keys)
 
-    def analyze(self, training_texts, keys):
-        return make_thesaurus(training_texts.text, disallow_text_loading=training_texts.disallow_loading)
+    def analyze(self, training_texts: TrainingTexts, keys):
+        return make_thesaurus(training_texts.text_version, disallow_text_loading=training_texts.disallow_loading)
 
 
-def make_thesaurus(version, disallow_text_loading=False):
-    base_thesaurus = english_thesaurus()
-    thesaurus = base_thesaurus.copy()
-    thesaurus.update(PRONOUN_THESAURUS)
+def make_thesaurus(version: TextVersion, disallow_text_loading=False):
+    thesaurus = THESAURUSES[version.language_code]()
 
     d = {}
     logger.info("Building thesaurus for %s\n", version.slug)

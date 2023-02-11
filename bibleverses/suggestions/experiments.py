@@ -9,7 +9,7 @@ from bibleverses.books import get_bible_books
 from bibleverses.languages import LANG
 
 from . import serverlogging  # noqa: F401
-from .constants import ALL_TEXT, BIBLE_BOOK_GROUPS, THESAURUS_ANALYSIS
+from .constants import ALL_TEXT, THESAURUS_ANALYSIS, get_bible_book_groups
 from .generators import SuggestionGenerator
 from .storage import AnalysisStorage
 from .trainingtexts import BibleTrainingTexts, CatechismTrainingTexts
@@ -61,13 +61,13 @@ def test_thesaurus_memory():
     print_object_usage("Thesaurus", thesaurus)
 
 
-def generators_for_bible_text(storage, text_slug):
+def generators_for_bible_text(storage, text_slug, language_code: str):
     """
     Returns a dictionary with keys (text_slug, book name)
     and values as a list of strategies
     """
     retval = {}
-    for book_group in BIBLE_BOOK_GROUPS:
+    for book_group in get_bible_book_groups(language_code):
         generator = SuggestionGenerator(BibleTrainingTexts(text_slug=text_slug, books=book_group))
         # This same generator can be used for each Bible book:
         for book in book_group:
@@ -88,7 +88,7 @@ def test_server_memory_usage():
     catechism_versions = ["WSC", "BC1695"]
     all_generators = {}
     for slug in bible_versions:
-        all_generators.update(generators_for_bible_text(storage, slug))
+        all_generators.update(generators_for_bible_text(storage, slug, LANG.EN))
     for slug in catechism_versions:
         all_generators.update(generators_for_catechism_text(storage, slug))
 
@@ -109,7 +109,7 @@ def test_server_memory_usage():
 
 def test_suggestion_speed():
     storage = AnalysisStorage()
-    generators = generators_for_bible_text(storage, "NET")
+    generators = generators_for_bible_text(storage, "NET", LANG.EN)
     for g in generators.values():
         g.load_data(storage)
 

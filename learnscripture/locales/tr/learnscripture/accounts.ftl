@@ -77,7 +77,7 @@ accounts-type-whole-word-testing-method = Tüm kelimeyi gir - en kapsamlı
 
 accounts-type-first-letter-testing-method = İlk harfi gir - daha hızlı
 
-accounts-choose-from-list-testing-method = Kelimeyi listeden seç - mobil cihazlar için önerilir. Yalnızca İngilizce çeviriler için geçerlidir.
+accounts-choose-from-list-testing-method = Kelimeyi listeden seç - mobil cihazlar için önerilir. Bütün çeviriler için geçerli değildir.
 
 accounts-desktop-testing-method = Klavye-fareli test usulü
 

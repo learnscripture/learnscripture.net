@@ -20,7 +20,7 @@ from learnscripture.datastructures import lazy_dict_like
 from learnscripture.ftl_bundles import t, t_lazy
 from learnscripture.utils.iterators import intersperse
 
-from .books import get_bible_book_name, get_bible_book_number
+from .books import get_bible_book_name
 from .fields import VectorField
 from .languages import DEFAULT_LANGUAGE, LANG, LANGUAGE_CHOICES, normalize_reference_input
 from .parsing import (
@@ -470,7 +470,7 @@ class WordSuggestionData(models.Model):
     # [[suggestion_1_for_word_1, s_2_for_w_1,...],[s_1_for_w_2, s_2_for_w_2]]
     suggestions = models.JSONField(default=list)
 
-    def get_suggestions(self):
+    def get_suggestions(self) -> list[list[str]]:
         if not self.suggestions:
             return []
         # We could do some of this client side, but we save on bandwidth by
@@ -1472,15 +1472,3 @@ def quick_find(
     results = list(Verse.objects.text_search(search_query, version, limit=page_size + 1, offset=page * page_size))
     more_results = len(results) > page_size
     return [VerseSearchResult(r.localized_reference, [r]) for r in results[0:page_size]], more_results
-
-
-def get_whole_book(book_name, version, ensure_text_present=True):
-    retval = ComboVerse(
-        book_name,
-        list(
-            version.verse_set.filter(book_number=get_bible_book_number(version.language_code, book_name), missing=False)
-        ),
-    )
-    if ensure_text_present:
-        ensure_text(retval.verses)
-    return retval

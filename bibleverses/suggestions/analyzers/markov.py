@@ -2,7 +2,7 @@ import logging
 
 import pykov
 
-from ..constants import markov_analysis_for_size
+from ..constants import markov_analysis_name_for_size
 from ..utils.numbers import sum_matrices
 from ..utils.pickling import cache_results_with_pickle
 from ..utils.text import split_into_words_for_suggestions
@@ -18,17 +18,17 @@ class MarkovAnalyzerBase(Analyzer):
 
 class Markov1Analyzer(MarkovAnalyzerBase):
     size = 1
-    name = markov_analysis_for_size(size)
+    name = markov_analysis_name_for_size(size)
 
 
 class Markov2Analyzer(MarkovAnalyzerBase):
     size = 2
-    name = markov_analysis_for_size(size)
+    name = markov_analysis_name_for_size(size)
 
 
 class Markov3Analyzer(MarkovAnalyzerBase):
     size = 3
-    name = markov_analysis_for_size(size)
+    name = markov_analysis_name_for_size(size)
 
 
 def build_summed_markov_chains_for_texts(training_texts, keys, size):

@@ -8,7 +8,7 @@ from .constants import (
     MIN_SUGGESTIONS,
     THESAURUS_ANALYSIS,
     WORD_COUNTS_ANALYSIS,
-    markov_analysis_for_size,
+    markov_analysis_name_for_size,
 )
 from .utils.numbers import merge_suggestions, scale_suggestions
 from .utils.text import split_into_sentences, split_into_words_for_suggestions
@@ -120,7 +120,7 @@ class FirstWordSuggestions(SuggestionStrategy):
 
 class MarkovSuggestions(SuggestionStrategy):
     def load(self, storage):
-        self.markov_chain = storage.load_analysis(markov_analysis_for_size(self.size), self.training_texts.keys())
+        self.markov_chain = storage.load_analysis(markov_analysis_name_for_size(self.size), self.training_texts.keys())
 
     def use_for_word(self, word_idx):
         return word_idx > self.size - 1

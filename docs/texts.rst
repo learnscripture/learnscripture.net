@@ -19,16 +19,15 @@ analysis of the text, among other things, and requires the whole text to be
 available first.
 
 The Markov chain analysis and other methods are almost certainly only
-appropriate for English language texts - in fact these methods use an English
-thesaurus and a few sets of hard-coded English tables (e.g. for pronouns) as
-part of this process. This presents a challenge if other languages are wanted.
-In particular, the methods are likely to work badly for languages with a lot of
-grammatical inflections on words (which English does not have). For these
+appropriate for some languages (Indo-european, English and probably some others,
+represented as English+ below). This presents a challenge if other languages are
+wanted. In particular, the methods are likely to work badly for languages with a
+lot of grammatical inflections on words (which English does not have). For these
 languages, generating plausible word suggestions for the on-screen testing
 method would be a bigger challenge. Agglutinative languages such as Turkish
 present particular problems for Markov chain analysis, due the 'sparsity
 problem'. For this reason the word suggestion method of testing is only
-available for English texts currently.
+available for some languages.
 
 New texts and catechisms
 ========================
@@ -57,9 +56,9 @@ New texts and catechisms
 
     run: ``./manage.py load_catechism <slug> <json_filename>``
 
-* (English texts only) First ``./manage.py run_suggestions_analyzers`` then
+* (English+ texts only) First ``./manage.py run_suggestions_analyzers`` then
   ``./manage.py setup_bibleverse_suggestions`` needs to be run, passing the version
-  slug as an argument in both cases. (English texts only)
+  slug as an argument in both cases. (English+ texts only)
 
 * Test locally, ensure it works as expected.
 

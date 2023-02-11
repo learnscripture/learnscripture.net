@@ -78,7 +78,7 @@ accounts-type-whole-word-testing-method = Type whole word - most thorough
 
 accounts-type-first-letter-testing-method = Type first letter - faster
 
-accounts-choose-from-list-testing-method = Choose from word list - recommended for  handheld devices. Only available for English translations
+accounts-choose-from-list-testing-method = Choose from word list - recommended for  handheld devices. Not available for all translations.
 
 accounts-desktop-testing-method = Desktop testing method
 
