@@ -12,8 +12,8 @@ For adding a Bible in a new language
 - Add the Bible book names and variants in _BIBLE_BOOKS_FOR_LANG and _BIBLE_BOOK_ALTERNATIVES_FOR_LANG
 - Update POSTGRES_SEARCH_CONFIGURATIONS
 - Update Scores._LANGUAGE_POINTS_PER_WORD
-- Update normalizeWordForText in Learn.elm as necessary to cope with accents
-
+- Update ``normalizeWordForText`` in Learn.elm as necessary to cope with accents, adding a ``simplifyXXX`` if needed
+- Update ``stripOuterPunctuation`` in Learn.elm as necessary to cope with punctuation, expanding the tests if needed.
 - Check how Bible reference parsing works in the language, and update ``bible_reference_parser_for_lang`` as needed
 
 You will then need to import the Bible text, which is a separate task - see `<texts.rst>`_

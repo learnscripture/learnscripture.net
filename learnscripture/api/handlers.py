@@ -167,7 +167,7 @@ class VersesToLearnHandler(ApiView):
                 "localized_reference",
                 "needs_testing",
                 "text_order",
-                "suggestions",
+                "prompt_list",
                 # added in get_verse_statuses:
                 "version_slug",
                 "scoring_text_words",

@@ -5,11 +5,13 @@ import gc
 import hashlib
 import logging
 
+import pyuca
 from django.db import transaction
 
 from bibleverses.books import get_bible_book_name, get_bible_book_number, get_bible_books
 from bibleverses.models import ComboVerse, TextType, TextVersion, Verse, WordSuggestionData, ensure_text
 from bibleverses.services import partial_data_available
+from bibleverses.suggestions.utils.text import split_into_words_for_suggestions
 from learnscripture.utils.iterators import chunks
 
 from .exceptions import AnalysisMissing
@@ -18,6 +20,9 @@ from .storage import AnalysisStorage
 from .trainingtexts import BibleTrainingTexts, CatechismTrainingTexts
 
 logger = logging.getLogger(__name__)
+
+
+COLLATER = pyuca.Collator()
 
 
 # Normally generate_suggestions is called only by management command, for
@@ -36,27 +41,31 @@ def create_word_suggestion_data(
     if hash is None:
         hash = hash_text(text)
     return WordSuggestionData.objects.create(
-        version_slug=version_slug, localized_reference=localized_reference, hash=hash, suggestions=suggestions
+        version_slug=version_slug,
+        language_code=version.language_code,
+        localized_reference=localized_reference,
+        hash=hash,
+        suggestions=suggestions,
     )
 
 
 # -- Fetch --
 
 
-def word_suggestion_data_qs_for_version(version):
+def word_suggestion_data_qs_for_version(version: TextVersion):
     return WordSuggestionData.objects.filter(version_slug=version.slug)
 
 
-def get_word_suggestions_by_localized_reference(version, localized_reference):
+def get_word_suggestions_by_localized_reference(version, localized_reference) -> list[set[str]]:
     wsds = _get_ordered_word_suggestion_data(version, localized_reference)
     # Now combine:
-    retval = []
+    retval: list[set[str]] = []
     for wsd in wsds:
         retval.extend(wsd.get_suggestions())
     return retval
 
 
-def get_word_suggestions_by_localized_reference_bulk(version, localized_reference_list) -> dict[str, list[list[str]]]:
+def get_word_suggestions_by_localized_reference_bulk(version, localized_reference_list) -> dict[str, list[set[str]]]:
     # Do simple ones in bulk:
     simple_wsds = list(
         word_suggestion_data_qs_for_version(version).filter(localized_reference__in=localized_reference_list)
@@ -279,6 +288,7 @@ def generate_suggestions_single_item(
     to_create.append(
         WordSuggestionData(
             version_slug=version.slug,
+            language_code=version.language_code,
             localized_reference=item.localized_reference,
             suggestions=item_suggestions,
             hash=hash_text(text),
@@ -316,3 +326,23 @@ def get_whole_book(localized_book_name: str, version, ensure_text_present=True) 
     if ensure_text_present:
         ensure_text(retval.verses)
     return retval
+
+
+def create_prompt_list(text: str, suggestion_list: list[set[str]]) -> list[list[str]]:
+    """
+    Given the text of a verse, and a set of suggestions for each word,
+    create a "prompt" list, which contains both the suggestions and the correct word.
+    """
+    # This could be done client side, but it is easy to get sorting correct here.
+
+    if not suggestion_list:
+        # We want to indicate that word suggestions are not available, rather than return
+        # a suggestion list with only one word (which would be the correct answer),
+        # so return empty list:
+        return []
+
+    correct_words = split_into_words_for_suggestions(text)
+    return [
+        sorted(list(suggestions) + [correct_word], key=COLLATER.sort_key)
+        for correct_word, suggestions in zip(correct_words, suggestion_list)
+    ]

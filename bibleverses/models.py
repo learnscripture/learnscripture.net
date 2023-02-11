@@ -46,6 +46,8 @@ MAX_VERSES_FOR_SINGLE_CHOICE = 4  # See also choose.js
 
 
 # Also defined in Learn.elm verseSetTypeDecoder
+
+
 class VerseSetType(models.TextChoices):
     SELECTION = "SELECTION", "Selection"
     PASSAGE = "PASSAGE", "Passage"
@@ -128,6 +130,7 @@ class TextVersion(models.Model):
         return fetch_localized_reference(self, self.language_code, localized_reference, max_length=max_length)
 
     def get_text_by_localized_reference(self, localized_reference):
+        assert self.is_bible
         return ComboVerse(localized_reference, self.get_verse_list(localized_reference)).text
 
     def get_text_by_localized_reference_bulk(self, localized_reference_list):
@@ -178,8 +181,7 @@ class TextVersion(models.Model):
         }
 
     def get_qapair_by_localized_reference(self, localized_reference):
-        if not self.is_catechism:
-            return None
+        assert self.is_catechism
         return self.qapairs.get(localized_reference=localized_reference)
 
     def get_item_by_localized_reference(self, localized_reference):
@@ -461,6 +463,7 @@ class WordSuggestionData(models.Model):
     # For practical reasons, this table is stored in a separate DB, so it has no
     # explicit FKs to the main DB.
     version_slug = models.CharField(max_length=20, default="")
+    language_code = models.CharField(max_length=2, blank=False, choices=LANGUAGE_CHOICES, default=DEFAULT_LANGUAGE.code)
     localized_reference = models.CharField(max_length=100)
     hash = models.CharField(max_length=40)  # SHA1 of text
 
@@ -470,7 +473,7 @@ class WordSuggestionData(models.Model):
     # [[suggestion_1_for_word_1, s_2_for_w_1,...],[s_1_for_w_2, s_2_for_w_2]]
     suggestions = models.JSONField(default=list)
 
-    def get_suggestions(self) -> list[list[str]]:
+    def get_suggestions(self) -> list[set[str]]:
         if not self.suggestions:
             return []
         # We could do some of this client side, but we save on bandwidth by
@@ -485,7 +488,7 @@ class WordSuggestionData(models.Model):
             pairs = [(word, 1.0 - i * 0.5 / len(word_suggestions)) for i, word in enumerate(word_suggestions)]
 
             # Make a random selection, weighted according to frequency
-            chosen = set()
+            chosen: set[str] = set()
             available = pairs[:]
             while len(chosen) < SUGGESTION_COUNT and len(available) > 0:
                 if len(available) == 1:
@@ -502,7 +505,7 @@ class WordSuggestionData(models.Model):
                 chosen.add(picked)
                 available = [(word, freq) for word, freq in available if word != picked]
 
-            retval.append(sorted(chosen))
+            retval.append(chosen)
         return retval
 
     class Meta:
@@ -995,6 +998,10 @@ class UserVerseStatus(models.Model):
     def scoring_text(self):
         return self.text if self.version.is_bible else self.answer
 
+    @cached_property
+    def suggestion_text(self):
+        return self.text if self.version.is_bible else self.answer
+
     @property
     def scoring_text_words(self):
         return split_into_words(self.scoring_text)
@@ -1104,6 +1111,8 @@ class UserVerseStatus(models.Model):
     @cached_property
     def suggestions(self):
         return self.version.get_suggestions_by_localized_reference(self.localized_reference)
+
+    prompt_list: list[set[str]]  # set by get_verse_statuses_bulk
 
     def __str__(self):
         return f"{self.localized_reference}, {self.version.slug}"

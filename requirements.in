@@ -1,4 +1,4 @@
--e git://github.com/riccardoscalco/Pykov.git@16cda2f2c0ed8143ddcfa25dac34d3dadc982380#egg=pykov
+pykov @ https://github.com/riccardoscalco/Pykov/archive/16cda2f2c0ed8143ddcfa25dac34d3dadc982380.tar.gz
 SQLAlchemy==1.4.27
 aldjemy==2.6
 attrs==21.2.0
@@ -36,3 +36,4 @@ requests==2.26.0
 sentry-sdk==1.5.0
 uwsgi==2.0.20
 django-render-block==0.9.1
+pyuca==1.2

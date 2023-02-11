@@ -1,4 +1,4 @@
-port module Learn exposing (AccountData, ActionCompleteType(..), ActionLog, ActionLogStore, Attempt, AttemptRecords, AutoSavedPreferences, Button, ButtonBase, ButtonDefault(..), ButtonEnabled(..), CallId, CheckResult(..), CurrentTestWord(..), CurrentVerse, CurrentWordData, Dropdown(..), Flags, HelpTour(..), HelpTourData, HelpTourStep, HideType(..), HttpConfig, IconName, LearnOrder, LearningSession(..), LearningStage(..), LearningStageType(..), LearningType(..), LinkIconAlign(..), Model, Msg(..), NextVerse(..), Part(..), Preferences, ProgressData(..), QueuedCall, RecallDef, RecallProgress, ReviewSoonerData, ScoreReason(..), SessionData, SessionStats, StageButton, TestCompleteData, TestDueAfter(..), TestOrReadPreference(..), TestProgress, TestType(..), TestingMethod(..), TextType(..), TrackedHttpCall(..), UpdateTypingBoxData, Url, User(..), UvsId, VerseApiCallData, VerseBatch, VerseBatchBase, VerseBatchRaw, VerseSet, VerseSetType(..), VerseStatus, VerseStatusBase, VerseStatusRaw, VerseStore, VerseSuggestions, Version, Word, WordId, WordIndex, WordSuggestion, WordSuggestions, WordType(..), WordTypeString, accuracyDefaultMorePracticeLevel, actionButtons, actionCompleteUrl, actionLogDecoder, actionLogListToDict, actionLogsDecoder, addOrderedTrackedCall, addTrackedCall, adjustModelForHelpTour, ajaxInfo, allVersesLoaded, allowTestInsteadOfRead, allowedHints, allowedMistakesForTestingMethod, andThen, andThenDo, asPercentString, attemptReturn, autoSavedPreferencesDecoder, beep, bold, buttonsForStage, calculateNewVerseStrength, calculateNextTestDue, callLoadVerses, callRecordCancelLearning, callRecordReadComplete, callRecordResetProgress, callRecordReviewSooner, callRecordSkipVerse, callRecordTestComplete, cancelLearningUrl, checkCurrentWordAndUpdate, checkWord, chooseN, classForTypingBox, clickableClass, closeDropdownIfOpen, closeDropdowns, confirm, confirmTask, copyrightNotice, currentSetType, currentVerseStrength, damerauLevenshteinDistance, dashboardUrl, decodeAutoSavedPreferences, decodePreferences, dedupeBy, defaultLocale, defaultNumberFormatting, delay, doHelpTourStep, dropEndWhile, dropWhile, dropdownHeadingAttributes, dropdownIsOpen, emptyDecoder, emptyNode, emptySpan, encodeBool, encodeFloat, encodeTestType, encodeTrackedCall, encodeTrackedCallsList, enumDecoder, errorMessage, finishHelpTour, finishStage, flashActionLogDuration, focusDefaultButton, formatNumber, friendlyTimeUntil, getAt, getCurrentTestProgress, getCurrentTestWordList, getCurrentVerse, getCurrentWordAttempt, getFocusAttributes, getFollowingVersesInStore, getHintsUsed, getLocale, getNextCurrentWord, getNextVerse, getOrderedQueuedCalls, getPreviousVerse, getPreviousVersesInStore, getReturnCaption, getReturnUrl, getSessionProgressData, getStages, getStagesByStrength, getTestResult, getTestingMethod, getTypingBoxFocusDataForMsg, getUpdateTypingBoxData, getUserName, getWordAttempt, getWordAttemptWithInitial, getWordId, getWordSuggestions, handleActionLogs, handleFocusResult, handleOnScreenButtonClick, handleRecordActionCompleteReturned, handleResetProgress, handleRetries, handleSessionStatsLoaded, handleTypedEnter, handleTypedInput, handleUseHint, handleVersesToLearn, handleWordButtonClicked, hardModeStrengthThreshold, helpTourButtons, helpTourCommandForStep, helpTourHighlightElement, hiddenWordsGenerator, hideRandomWords, hideTypingBoxData, hintButton, idForButton, idForLatestActionLogSpan, idPrefixForButton, init, initialRecallProgress, initialTestProgress, initialTourSteps, initializeStage, instructions, intEnumDecoder, isAttemptFailure, isAttemptHint, isLoadVersesCall, isPassageSet, isPracticeTest, isRecordCall, isReference, isScreenLargeEnoughForSidePanels, isTestingReference, isTestingStage, iso8601decoder, languageDecoder, learningStageTypeForStage, learningTypeDecoder, linebreak, listIndices, loadActionLogs, loadActionLogsUrl, loadSessionStats, loadSessionStatsUrl, loadVerses, loadingDiv, main, makeHttpCall, makeIcon, markCallFinished, markFailAndRetry, markPermanentFailCall, markWord, maxHttpRetries, menuIsPinned, mergeSession, moreVersesToLearn, moveToNextStage, moveToNextStageOrSubStage, moveToNextSubStage, moveToNextVerse, moveToPreviousStage, myHttpGet, myHttpPost, navLink, nextHelpTourStep, normalizeVerseBatch, normalizeVerseStatuses, normalizeWordForSuggestion, normalizeWordForTest, nullOr, onClickSimply, onEnter, onEscape, onScreenTestingButtons, oneHour, oneYear, partsForVerse, pinButton, pinnedAttributes, preferencesDecoder, preferencesLinkAttrs, prettyReason, previousHelpTourStep, processNewActionLogs, punctuationRegex, queueBlocked, readingWordClass, recallStage1, recallStage2, recallStage3, recallStage4, recallStageFinished, recallStageWordCount, recallStageWordsFinishedCount, recallWords, receivePreferences, recordCancelLearning, recordReadComplete, recordResetProgress, recordReviewSooner, recordSkipVerse, recordTestComplete, referenceToParts, regexRemoveAll, resetProgressUrl, resultComment, retryFailedCalls, reviewSoonerDecoder, reviewSoonerUrl, runConfirm, saveAutoSavedPreferences, saveCallsToLocalStorage, saveMiscPreferencesUrl, saveTrackedCallsToLocalStorage, scaledStrength, scoreReasonDecoder, scoringEnabled, sendMsg, sendStartTrackedCallMsg, sessionProgress, sessionStatsDecoder, setDropdownOpen, setHiddenWords, setPinnedMenus, setupCurrentVerse, shouldCheckTypedWord, shouldShowPreviousVerse, shouldShowReference, shouldTestReferenceForTestingMethod, shouldUseHardTestingMode, signedNumberToString, simplifyTurkish, skipVerseUrl, stageOrVerseChangeCommands, stageTypeRead, stageTypeTest, startHelpTour, startMorePractice, startTrackedCall, stringEnumDecoder, stripOuterPunctuation, stripPunctuation, subWordParts, subscriptions, syncingDiv, testCompleteDataDecoder, testMethodUsesTextBox, testTypeDecoder, testingMethodDecoder, textTypeDecoder, toggleDropdown, togglePinnableMenu, togglePreferTestsToReading, trackedCallDecoder, trackedCallQueueEmpty, trackedCallsListDecoder, trackedHttpCallCaption, translate, triggerQueuedCalls, typingBox, typingBoxContainerId, typingBoxId, typingBoxInUse, update, updateCurrentStage, updateCurrentVerse, updateCurrentVersePlus, updateHelpTour, updateMain, updateRecallProcess, updateSessionData, updateSessionDataPlus, updateTestProgress, updateTypingBox, updateTypingBoxCommand, updateWordAttempts, userDisplayName, verseApiCallDataDecoder, verseBatchRawCtr, verseBatchRawDecoder, verseBatchToSession, verseLoadFailed, verseLoadInProgress, versePartsToHtml, verseSetDecoder, verseSetLink, verseSetTypeDecoder, verseStatusRawCtr, verseStatusRawDecoder, verseStatusResetProgress, verseStatusToApiCallData, verseWordToParts, versesToLearnUrl, versionDecoder, vibrateDevice, view, viewActionLogs, viewButton, viewButtonSimple, viewButton_, viewCurrentVerse, viewHelpTour, viewMain, viewSessionStats, viewTopNav, viewVerseOptionsMenu, viewVerseOptionsMenuButton, withCurrentTestWord, withCurrentVerse, withSessionData, wordButton, wordButtonClass, wordButtonClasses, wordsForVerse, zip)
+port module Learn exposing (AccountData, ActionCompleteType(..), ActionLog, ActionLogStore, Attempt, AttemptRecords, AutoSavedPreferences, Button, ButtonBase, ButtonDefault(..), ButtonEnabled(..), CallId, CheckResult(..), CurrentTestWord(..), CurrentVerse, CurrentWordData, Dropdown(..), Flags, HelpTour(..), HelpTourData, HelpTourStep, HideType(..), HttpConfig, IconName, LearnOrder, LearningSession(..), LearningStage(..), LearningStageType(..), LearningType(..), LinkIconAlign(..), Model, Msg(..), NextVerse(..), Part(..), Preferences, ProgressData(..), QueuedCall, RecallDef, RecallProgress, ReviewSoonerData, ScoreReason(..), SessionData, SessionStats, StageButton, TestCompleteData, TestDueAfter(..), TestOrReadPreference(..), TestProgress, TestType(..), TestingMethod(..), TextType(..), TrackedHttpCall(..), UpdateTypingBoxData, Url, User(..), UvsId, VerseApiCallData, VerseBatch, VerseBatchBase, VerseBatchRaw, VersePromptList, VerseSet, VerseSetType(..), VerseStatus, VerseStatusBase, VerseStatusRaw, VerseStore, Version, Word, WordId, WordIndex, WordPrompt, WordPrompts, WordType(..), WordTypeString, accuracyDefaultMorePracticeLevel, actionButtons, actionCompleteUrl, actionLogDecoder, actionLogListToDict, actionLogsDecoder, addOrderedTrackedCall, addTrackedCall, adjustModelForHelpTour, ajaxInfo, allVersesLoaded, allowTestInsteadOfRead, allowedHints, allowedMistakesForTestingMethod, andThen, andThenDo, asPercentString, attemptReturn, autoSavedPreferencesDecoder, beep, bold, buttonsForStage, calculateNewVerseStrength, calculateNextTestDue, callLoadVerses, callRecordCancelLearning, callRecordReadComplete, callRecordResetProgress, callRecordReviewSooner, callRecordSkipVerse, callRecordTestComplete, cancelLearningUrl, checkCurrentWordAndUpdate, checkWord, chooseN, classForTypingBox, clickableClass, closeDropdownIfOpen, closeDropdowns, confirm, confirmTask, copyrightNotice, currentSetType, currentVerseStrength, damerauLevenshteinDistance, dashboardUrl, decodeAutoSavedPreferences, decodePreferences, dedupeBy, defaultLocale, defaultNumberFormatting, delay, doHelpTourStep, dropEndWhile, dropWhile, dropdownHeadingAttributes, dropdownIsOpen, emptyDecoder, emptyNode, emptySpan, encodeBool, encodeFloat, encodeTestType, encodeTrackedCall, encodeTrackedCallsList, enumDecoder, errorMessage, finishHelpTour, finishStage, flashActionLogDuration, focusDefaultButton, formatNumber, friendlyTimeUntil, getAt, getCurrentTestProgress, getCurrentTestWordList, getCurrentVerse, getCurrentWordAttempt, getFocusAttributes, getFollowingVersesInStore, getHintsUsed, getLocale, getNextCurrentWord, getNextVerse, getOrderedQueuedCalls, getPreviousVerse, getPreviousVersesInStore, getReturnCaption, getReturnUrl, getSessionProgressData, getStages, getStagesByStrength, getTestResult, getTestingMethod, getTypingBoxFocusDataForMsg, getUpdateTypingBoxData, getUserName, getWordAttempt, getWordAttemptWithInitial, getWordId, getWordPromptList, handleActionLogs, handleFocusResult, handleOnScreenButtonClick, handleRecordActionCompleteReturned, handleResetProgress, handleRetries, handleSessionStatsLoaded, handleTypedEnter, handleTypedInput, handleUseHint, handleVersesToLearn, handleWordButtonClicked, hardModeStrengthThreshold, helpTourButtons, helpTourCommandForStep, helpTourHighlightElement, hiddenWordsGenerator, hideRandomWords, hideTypingBoxData, hintButton, idForButton, idForLatestActionLogSpan, idPrefixForButton, init, initialRecallProgress, initialTestProgress, initialTourSteps, initializeStage, instructions, intEnumDecoder, isAttemptFailure, isAttemptHint, isLoadVersesCall, isPassageSet, isPracticeTest, isRecordCall, isReference, isScreenLargeEnoughForSidePanels, isTestingReference, isTestingStage, iso8601decoder, languageDecoder, learningStageTypeForStage, learningTypeDecoder, linebreak, listIndices, loadActionLogs, loadActionLogsUrl, loadSessionStats, loadSessionStatsUrl, loadVerses, loadingDiv, main, makeHttpCall, makeIcon, markCallFinished, markFailAndRetry, markPermanentFailCall, markWord, maxHttpRetries, menuIsPinned, mergeSession, moreVersesToLearn, moveToNextStage, moveToNextStageOrSubStage, moveToNextSubStage, moveToNextVerse, moveToPreviousStage, myHttpGet, myHttpPost, navLink, nextHelpTourStep, normalizeVerseBatch, normalizeVerseStatuses, normalizeWordForSuggestion, normalizeWordForTest, nullOr, onClickSimply, onEnter, onEscape, onScreenTestingButtons, oneHour, oneYear, partsForVerse, pinButton, pinnedAttributes, preferencesDecoder, preferencesLinkAttrs, prettyReason, previousHelpTourStep, processNewActionLogs, punctuationRegex, queueBlocked, readingWordClass, recallStage1, recallStage2, recallStage3, recallStage4, recallStageFinished, recallStageWordCount, recallStageWordsFinishedCount, recallWords, receivePreferences, recordCancelLearning, recordReadComplete, recordResetProgress, recordReviewSooner, recordSkipVerse, recordTestComplete, referenceToParts, regexRemoveAll, resetProgressUrl, resultComment, retryFailedCalls, reviewSoonerDecoder, reviewSoonerUrl, runConfirm, saveAutoSavedPreferences, saveCallsToLocalStorage, saveMiscPreferencesUrl, saveTrackedCallsToLocalStorage, scaledStrength, scoreReasonDecoder, scoringEnabled, sendMsg, sendStartTrackedCallMsg, sessionProgress, sessionStatsDecoder, setDropdownOpen, setHiddenWords, setPinnedMenus, setupCurrentVerse, shouldCheckTypedWord, shouldShowPreviousVerse, shouldShowReference, shouldTestReferenceForTestingMethod, shouldUseHardTestingMode, signedNumberToString, simplifyTurkish, skipVerseUrl, stageOrVerseChangeCommands, stageTypeRead, stageTypeTest, startHelpTour, startMorePractice, startTrackedCall, stringEnumDecoder, stripOuterPunctuation, stripPunctuation, subWordParts, subscriptions, syncingDiv, testCompleteDataDecoder, testMethodUsesTextBox, testTypeDecoder, testingMethodDecoder, textTypeDecoder, toggleDropdown, togglePinnableMenu, togglePreferTestsToReading, trackedCallDecoder, trackedCallQueueEmpty, trackedCallsListDecoder, trackedHttpCallCaption, translate, triggerQueuedCalls, typingBox, typingBoxContainerId, typingBoxId, typingBoxInUse, update, updateCurrentStage, updateCurrentVerse, updateCurrentVersePlus, updateHelpTour, updateMain, updateRecallProcess, updateSessionData, updateSessionDataPlus, updateTestProgress, updateTypingBox, updateTypingBoxCommand, updateWordAttempts, userDisplayName, verseApiCallDataDecoder, verseBatchRawCtr, verseBatchRawDecoder, verseBatchToSession, verseLoadFailed, verseLoadInProgress, versePartsToHtml, verseSetDecoder, verseSetLink, verseSetTypeDecoder, verseStatusRawCtr, verseStatusRawDecoder, verseStatusResetProgress, verseStatusToApiCallData, verseWordToParts, versesToLearnUrl, versionDecoder, vibrateDevice, view, viewActionLogs, viewButton, viewButtonSimple, viewButton_, viewCurrentVerse, viewHelpTour, viewMain, viewSessionStats, viewTopNav, viewVerseOptionsMenu, viewVerseOptionsMenuButton, withCurrentTestWord, withCurrentVerse, withSessionData, wordButton, wordButtonClass, wordButtonClasses, wordsForVerse, zip)
 
 import Dict
 import Dom
@@ -430,16 +430,16 @@ type alias VerseBatch =
         }
 
 
-type alias WordSuggestion =
+type alias WordPrompt =
     String
 
 
-type alias WordSuggestions =
+type alias WordPrompts =
     List String
 
 
-type alias VerseSuggestions =
-    List WordSuggestions
+type alias VersePromptList =
+    List WordPrompts
 
 
 type alias VerseStatusBase a =
@@ -450,7 +450,7 @@ type alias VerseStatusBase a =
         , localizedReference : String
         , needsTesting : Bool
         , textOrder : Int
-        , suggestions : VerseSuggestions
+        , promptList : VersePromptList
         , scoringTextWords : List String
         , titleText : String
         , learnOrder : LearnOrder
@@ -475,7 +475,7 @@ verseStatusRawCtr :
     -> String
     -> Bool
     -> Int
-    -> VerseSuggestions
+    -> VersePromptList
     -> List String
     -> String
     -> Int
@@ -489,7 +489,7 @@ verseStatusRawCtr i s lt lr n t s2 s3 t2 l2 v v2 =
     , localizedReference = lr
     , needsTesting = n
     , textOrder = t
-    , suggestions = s2
+    , promptList = s2
     , scoringTextWords = s3
     , titleText = t2
     , learnOrder = l2
@@ -2458,7 +2458,7 @@ onScreenTestingButtons currentVerse testingMethod locale =
                         CurrentWord currentWord ->
                             let
                                 words =
-                                    getWordSuggestions currentVerse.verseStatus currentWord.word
+                                    getWordPromptList currentVerse.verseStatus currentWord.word
                             in
                             H.div [ A.id "id-onscreen-test-container" ]
                                 (case words of
@@ -3373,7 +3373,7 @@ normalizeVerseStatuses vrb =
             , localizedReference = vs.localizedReference
             , needsTesting = vs.needsTesting
             , textOrder = vs.textOrder
-            , suggestions = vs.suggestions
+            , promptList = vs.promptList
             , scoringTextWords = vs.scoringTextWords
             , titleText = vs.titleText
             , learnOrder = vs.learnOrder
@@ -4833,7 +4833,7 @@ checkWord word input testingMethod =
 
 normalizeWordForTest : String -> String
 normalizeWordForTest =
-    String.trim >> stripPunctuation >> simplifyTurkish >> simplifyDutch >> String.toLower
+    String.trim >> stripPunctuation >> simplifyTurkish >> simplifyDutch >> simplifySpanish >> String.toLower
 
 
 normalizeWordForSuggestion : String -> String
@@ -4843,7 +4843,7 @@ normalizeWordForSuggestion =
 
 punctuationRegex : String
 punctuationRegex =
-    "[\"'\\.,;!?:\\/#!$%\\^&\\*{}=\\-_`~()\\[\\]“”‘’—–…<>\\+]"
+    "[\"'\\.,;¡!¿?:\\/#$%\\^&\\*{}=\\-_`~()\\[\\]“”‘’—–…<>\\+]"
 
 
 stripPunctuation : String -> String
@@ -4870,6 +4870,11 @@ simplifyTurkish =
 simplifyDutch : String -> String
 simplifyDutch =
     translate "ÁáËëÉéÈèÊêÓóÚú" "AaEeEeEeEeOoUu"
+
+
+simplifySpanish : String -> String
+simplifySpanish =
+    translate "áéíóúñüÁÉÍÓÚÑÜ" "aeiounuAEIOUNU"
 
 
 markWord : CheckResult -> Word -> TestProgress -> TestType -> CurrentVerse -> TestingMethod -> Preferences -> ISO8601.Time -> ( CurrentVerse, Cmd Msg )
@@ -5308,20 +5313,20 @@ handleFocusResult id remainingAttempts =
                     ReattemptFocus id (remainingAttempts - 1)
 
 
-getWordSuggestions : VerseStatus -> Word -> WordSuggestions
-getWordSuggestions verseStatus word =
+getWordPromptList : VerseStatus -> Word -> WordPrompts
+getWordPromptList verseStatus word =
     case word.type_ of
         BodyWord ->
             let
                 l =
-                    getAt verseStatus.suggestions word.index
+                    getAt verseStatus.promptList word.index
             in
             case l of
                 Nothing ->
                     []
 
                 Just l ->
-                    List.sort <| List.map normalizeWordForSuggestion (word.text :: l)
+                    l
 
         ReferenceWord ->
             []
@@ -6976,7 +6981,7 @@ adjustModelForHelpTour model =
                     , localizedReference = "John 3:16"
                     , needsTesting = True
                     , textOrder = 1
-                    , suggestions = []
+                    , promptList = []
                     , titleText = "John 3:16"
                     , scoringTextWords = [ "For", "this", "is", "the", "way", "God", "loved", "the", "world:", "He", "gave", "his", "one", "and", "only", "Son,", "so", "that", "everyone", "who", "believes", "in", "him", "will", "not", "perish", "but", "have", "eternal", "life." ]
                     , learnOrder = 0
@@ -7358,7 +7363,7 @@ verseStatusRawDecoder =
         |> JDP.required "localized_reference" JD.string
         |> JDP.required "needs_testing" JD.bool
         |> JDP.required "text_order" JD.int
-        |> JDP.required "suggestions" (JD.list (JD.list JD.string))
+        |> JDP.required "prompt_list" (JD.list (JD.list JD.string))
         |> JDP.required "scoring_text_words" (JD.list JD.string)
         |> JDP.required "title_text" JD.string
         |> JDP.required "learn_order" JD.int

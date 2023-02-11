@@ -20,7 +20,12 @@ from bibleverses.parsing import (
     parse_unvalidated_localized_reference,
     parse_validated_localized_reference,
 )
-from bibleverses.suggestions.modelapi import create_word_suggestion_data, item_suggestions_need_updating
+from bibleverses.suggestions.modelapi import (
+    create_prompt_list,
+    create_word_suggestion_data,
+    item_suggestions_need_updating,
+)
+from bibleverses.suggestions.utils.text import split_into_words_for_suggestions
 
 from .base import AccountTestMixin, BibleVersesMixin, TestBase, get_or_create_any_account
 
@@ -338,11 +343,11 @@ class VersionTests(BibleVersesMixin, TestBase):
     # present to the user. We therefore always end up using all the suggestions.
     def test_suggestions(self):
         version = TextVersion.objects.get(slug="KJV")
-        assert version.get_suggestions_by_localized_reference("Genesis 1:1")[1] == ["a", "all", "his"]
+        assert version.get_suggestions_by_localized_reference("Genesis 1:1")[1] == {"a", "all", "his"}
 
     def test_suggestions_combo(self):
         version = TextVersion.objects.get(slug="KJV")
-        assert version.get_suggestions_by_localized_reference("Genesis 1:1-2")[10] == ["and", "but", "thou"]
+        assert version.get_suggestions_by_localized_reference("Genesis 1:1-2")[10] == {"and", "but", "thou"}
 
     def test_suggestions_bulk(self):
         version = TextVersion.objects.get(slug="KJV")
@@ -356,6 +361,16 @@ class VersionTests(BibleVersesMixin, TestBase):
                     ["Genesis 1:1", "Genesis 1:2", "Genesis 1:3", "Genesis 1:2-3"]
                 )
                 assert len(d) == 4
+
+    def test_create_prompt_list(self):
+        # Check that we are adding the correct word, and ordering correctly.
+        assert create_prompt_list("Y Él", [{"por", "éstos"}, {"yo", "el"}]) == [
+            ["éstos", "por", "y"],
+            ["el", "él", "yo"],
+        ]
+
+    def test_create_prompt_list_empty(self):
+        assert create_prompt_list("Y Él", []) == []
 
     def test_item_suggestions_needs_updating(self):
         v = Verse.objects.get(version__slug="KJV", localized_reference="Genesis 1:1")
@@ -669,6 +684,62 @@ class VerseUtilsTests(unittest.TestCase):
     def test_split_into_words_turkish(self):
         text = "Düşmanı, öç alanı yok etmek için."
         assert split_into_words(text) == ["Düşmanı,", "öç", "alanı", "yok", "etmek", "için."]
+
+    def test_split_into_words_spanish(self):
+        text = "la cual dijo a la mujer: ¿Conque Dios os ha dicho: No comáis de todo árbol del huerto?"
+        assert split_into_words(text) == [
+            "la",
+            "cual",
+            "dijo",
+            "a",
+            "la",
+            "mujer:",
+            "¿Conque",
+            "Dios",
+            "os",
+            "ha",
+            "dicho:",
+            "No",
+            "comáis",
+            "de",
+            "todo",
+            "árbol",
+            "del",
+            "huerto?",
+        ]
+        assert split_into_words("¿No son pocos mis días?") == ["¿No", "son", "pocos", "mis", "días?"]
+
+    def test_split_into_words_for_suggestions_spanish(self):
+        assert split_into_words_for_suggestions("¿Conque Dios os ha dicho: No comáis de todo árbol del huerto?") == [
+            "conque",
+            "dios",
+            "os",
+            "ha",
+            "dicho",
+            "no",
+            "comáis",
+            "de",
+            "todo",
+            "árbol",
+            "del",
+            "huerto",
+        ]
+        assert split_into_words_for_suggestions(" Y tuvo miedo, y dijo: ¡Cuán terrible es este lugar!") == [
+            "y",
+            "tuvo",
+            "miedo",
+            "y",
+            "dijo",
+            "cuán",
+            "terrible",
+            "es",
+            "este",
+            "lugar",
+        ]
+
+        assert split_into_words_for_suggestions("Él") == [
+            "él",
+        ]
 
 
 class SetupEsvMixin:

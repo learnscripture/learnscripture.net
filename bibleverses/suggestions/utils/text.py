@@ -2,7 +2,7 @@ import re
 
 from bibleverses.textutils import is_punctuation, split_into_words
 
-PUNCTUATION = "!?,.<>()[];:\"'-–+"
+PUNCTUATION = "!¡?¿,.<>()[];:\"'-–+"
 PUNCTUATION_OR_WHITESPACE = PUNCTUATION + " \n\r\t"
 IN_WORD_PUNCTUATION = "'-"
 
@@ -44,7 +44,11 @@ def bad_punctuation(text):
 
 
 def normalize_word(word):
+    # see also normalizeWordForSuggestion in Learn.elm
     word = word.strip(PUNCTUATION_OR_WHITESPACE)
+    # This is broken for some locales, e.g. Turkish, where `.lower()` does not
+    # do the right thing. This code is not used by those locales though.
+    # Frontend code has same issue.
     return word.lower()
 
 

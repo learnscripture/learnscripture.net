@@ -14,6 +14,9 @@ suite =
             [ test "removes outer punctuation" <|
                 \_ ->
                     Expect.equal "hello" (stripOuterPunctuation "—--“hello!”")
+            , test "removes spanish outer punctuation" <|
+                \_ ->
+                    Expect.equal "hola" (stripOuterPunctuation "¡hola!")
             , test "removes leading plus" <|
                 \_ ->
                     Expect.equal "Therefore" (stripOuterPunctuation "+‘Therefore")
@@ -22,6 +25,14 @@ suite =
                     Expect.equal "some-thing" (stripOuterPunctuation "…some-thing?")
             , fuzz string "is idempotent" <|
                 \s -> Expect.equal (stripOuterPunctuation s) (stripOuterPunctuation (stripOuterPunctuation s))
+            ]
+        , describe "normalizeWordForSuggestion"
+            [ test "handles upper case accented characters" <|
+                \_ ->
+                    -- "Él" and "el" are different words, and may both be
+                    -- present in the prompt_list. So it's important the
+                    -- disctinction is preserved.
+                    Expect.equal "él" (normalizeWordForSuggestion "Él")
             ]
         , describe "checkWord"
             [ test "ignores whitespace" <|

@@ -4,8 +4,6 @@
 #
 #    pip-compile --output-file=requirements.txt requirements-dev.in requirements.in
 #
-pykov @ https://github.com/riccardoscalco/Pykov/archive/16cda2f2c0ed8143ddcfa25dac34d3dadc982380.tar.gz
-    # via -r requirements.in
 aldjemy==2.6
     # via -r requirements.in
 appdirs==1.4.4
@@ -269,6 +267,8 @@ pygments==2.10.0
     # via ipython
 pyinotify==0.9.6
     # via -r requirements-dev.in
+pykov @ https://github.com/riccardoscalco/Pykov/archive/16cda2f2c0ed8143ddcfa25dac34d3dadc982380.tar.gz
+    # via -r requirements.in
 pynacl==1.4.0
     # via paramiko
 pyopenssl==21.0.0
@@ -309,6 +309,8 @@ pytz==2021.3
     #   django-paypal
     #   fluent-compiler
     #   fs
+pyuca==1.2
+    # via -r requirements.in
 pyvirtualdisplay==2.2
     # via -r requirements-dev.in
 pyyaml==6.0

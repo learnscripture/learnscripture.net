@@ -47,7 +47,7 @@ def split_into_words(text, fix_punctuation_whitespace=True):
     if fix_punctuation_whitespace:
         # Merge punctuation-only-items with item to left.
         words = merge_items_left(words, is_punctuation)
-        # Then to right e.g. leading quotation marks
+        # Then to right e.g. leading quotation marks, leading ¡ and ¿
         words = merge_items_right(words, is_punctuation)
 
     return words

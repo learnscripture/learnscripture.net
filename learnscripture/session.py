@@ -1,6 +1,6 @@
+from dataclasses import dataclass
 from datetime import datetime
 
-import attr
 from django.db.models import TextChoices
 from django.urls import reverse
 from django.utils import timezone
@@ -32,13 +32,13 @@ class LearningType(TextChoices):
 VERSE_STATUS_BATCH_SIZE = 10
 
 
-@attr.s
+@dataclass
 class VerseStatusBatch:
-    verse_statuses = attr.ib()
-    max_order_val = attr.ib()
-    learning_type = attr.ib()
-    return_to = attr.ib()
-    untested_order_vals = attr.ib()
+    verse_statuses: list[UserVerseStatus]
+    max_order_val: int
+    learning_type: LearningType
+    return_to: str
+    untested_order_vals: list[int]
 
 
 def get_verse_statuses_batch(request):

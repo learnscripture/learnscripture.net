@@ -39,6 +39,7 @@ from bibleverses.models import (
     parse_validated_localized_reference,
 )
 from bibleverses.signals import verse_set_chosen
+from bibleverses.suggestions.modelapi import create_prompt_list
 from bibleverses.textutils import count_words
 from learnscripture.ftl_bundles import t, t_lazy
 from learnscripture.utils.cache import cache_results, clear_cache_results
@@ -686,11 +687,11 @@ class Identity(models.Model):
             localized_reference, language_code, text, old_memory_stage, action_change, action_stage, accuracy
         )
 
-    def get_verse_statuses_bulk(self, ids):
+    def get_verse_statuses_bulk(self, ids: list[int]) -> dict[int, UserVerseStatus]:
         # ids is a list of UserVerseStatus.id values
         # Returns a dictionary of {uvs.id: uvs}
         # The UVS objects have 'version', 'verse_set',
-        # 'text', 'question', and 'answer' attributes retrieved efficiently,
+        # 'text', 'question', 'answer', 'prompt_list' attributes retrieved efficiently,
         # as appropriate
 
         retval = {
@@ -698,14 +699,14 @@ class Identity(models.Model):
         }
 
         # We need to get 'text' efficiently too. Group into versions:
-        by_version = {}
+        by_version: dict[int, list[UserVerseStatus]] = {}
         for uvs in retval.values():
             by_version.setdefault(uvs.version_id, []).append(uvs)
 
         # Get the texts/QAPairs in bulk
         texts = {}
         qapairs = {}
-        suggestion_d = {}
+        suggestion_d: dict[tuple[int, str], list[set[str]]] = {}
         for version_id, uvs_list in by_version.items():
             version = uvs_list[0].version
             refs = [uvs.localized_reference for uvs in uvs_list]
@@ -724,6 +725,7 @@ class Identity(models.Model):
             text = texts.get((uvs.version_id, uvs.localized_reference), None)
             if text is not None:
                 # Bible
+                uvs.text = text
                 uvs.scoring_text = text
                 uvs.title_text = uvs.localized_reference
 
@@ -733,7 +735,9 @@ class Identity(models.Model):
                 question, answer = qapair.question, qapair.answer
                 uvs.scoring_text = answer
                 uvs.title_text = uvs.localized_reference + ". " + question
-            uvs.suggestions = suggestion_d.get((uvs.version_id, uvs.localized_reference), [])
+            uvs.prompt_list = create_prompt_list(
+                uvs.suggestion_text, suggestion_d.get((uvs.version_id, uvs.localized_reference), [])
+            )
 
         return retval
 
