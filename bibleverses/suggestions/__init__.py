@@ -7,29 +7,31 @@ Code for generating 'suggestions' for verses.
 # For each word of the verse, a list of buttons is presented with different
 # words, only one of which is correct, and the user must choose the right one.
 #
-# Simple enough! The complication is in selecting words to be shown at each point.
-# Random words are not good suggestions - most would make no sense in context,
-# semantically or grammatically.
+# The problem is this method is generally too easy. We're showing the user the
+# correct word, and in addition, many of the other words we might put there
+# might not make sense in context, semantically or grammatically, and so would
+# be obviously wrong.
 #
-# Instead we do a whole bunch of different strategies, some of which rely on
-# intensive textual analysis of the relevant text (i.e. version of the Bible),
-# such as Markov chains. Clearly this can't be done on the fly.
+# So, we need a method of selecting words that will be far more likely to fool
+# the user. To do this, we currently use a bunch of different strategies, some
+# of which rely on textual analysis of the relevant text (i.e. version of the
+# Bible), such as Markov chains. Since this code was written, there are more
+# advanced methods of doing this kind of natural language processing and
+# prediction, which we could move to if we have the time and there would be
+# clear benefits.
 #
-# As much as possible, we precompute:
+# For performance reasons, including keeping memory usage low, we pre-compute
+# as much as possible:
 #
-# - do textual analysis up front
-# - for each word in each verse, come up with suggestions
-#   and save to the DB.
-#
-# Things are further complicated by the fact that for some Bible versions
-# we are not given the whole text. So, we can't do textual analysis of the
-# text, nor apply the suggestion generation routines to each verse ahead of
-# time.
+# 1. do textual analysis up front
+# 2. for each word in each verse, come up with suggestions and save to the DB.
 
-# An additional issue is that some of the textual analysis methods normally use
-# up a lot of memory, and even just the final data from analysis (e.g. a Markov
-# chain) uses a lot of memory. We don't want to load this into each Django
-# process that serves requests.
+# Additionally, we anticipate the possibility that we may get access to some
+# Bible versions only via an API, where we don't have the whole text. In this
+# case, we can't so step 2 above, and we may want to have a service, perhaps
+# implemented as a separate server process, that generates word suggestions on
+# the fly. This is not implemented yet, but some of the structure of the code
+# has that need in mind.
 
 # So, the solution so far implemented:
 #
@@ -41,12 +43,11 @@ Code for generating 'suggestions' for verses.
 
 # * We serialize the results of analyses to disk - see `.storage`
 
-# * We create wrappers classes to the analysis results,
-#   that in some cases reduce the size of the data
-#   we actually need in memory.  see `.tools`
+# * We create wrappers classes to the analysis results, that in some cases
+#   reduce the size of the data we actually need in memory. see `.tools`
 
-# * We have a `.generators` module that loads that completed
-#   analysis and generates suggestions.
+# * We have a `.generators` module that loads that completed analysis and
+#   generates suggestions.
 #
 #   This module has as few dependencies as possible e.g. it doesn't
 #   load Django at all.
