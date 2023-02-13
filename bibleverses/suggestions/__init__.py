@@ -15,10 +15,10 @@ Code for generating 'suggestions' for verses.
 # So, we need a method of selecting words that will be far more likely to fool
 # the user. To do this, we currently use a bunch of different strategies, some
 # of which rely on textual analysis of the relevant text (i.e. version of the
-# Bible), such as Markov chains. Since this code was written, there are more
-# advanced methods of doing this kind of natural language processing and
-# prediction, which we could move to if we have the time and there would be
-# clear benefits.
+# Bible), such as Markov chains. Since this code was written there have been a
+# lot of advances in NLP, and there are newer methods we could move to if we
+# have the time and there would be clear benefits, see
+# https://github.com/learnscripture/learnscripture.net/issues/200
 #
 # For performance reasons, including keeping memory usage low, we pre-compute
 # as much as possible:
@@ -28,7 +28,7 @@ Code for generating 'suggestions' for verses.
 
 # Additionally, we anticipate the possibility that we may get access to some
 # Bible versions only via an API, where we don't have the whole text. In this
-# case, we can't so step 2 above, and we may want to have a service, perhaps
+# case, we can't do step 2 above, and we may want to have a service, perhaps
 # implemented as a separate server process, that generates word suggestions on
 # the fly. This is not implemented yet, but some of the structure of the code
 # has that need in mind.

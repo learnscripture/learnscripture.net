@@ -58,7 +58,7 @@ New texts and catechisms
 
 * (English+ texts only) First ``./manage.py run_suggestions_analyzers`` then
   ``./manage.py setup_bibleverse_suggestions`` needs to be run, passing the version
-  slug as an argument in both cases. (English+ texts only)
+  slug as an argument in both cases.
 
 * Test locally, ensure it works as expected.
 
@@ -82,7 +82,7 @@ New texts and catechisms
       $ . ../venv/bin/activate
       $ ./manage.py load_text ~/texts <slug>
 
-* (English texts only) Dump the word suggestions and transfer to the server, OR, generate them on the
+* (English+ texts only) Dump the word suggestions and transfer to the server, OR, generate them on the
   server.
 
   Generate on the server::
