@@ -42,7 +42,6 @@ def create_word_suggestion_data(
         hash = hash_text(text)
     return WordSuggestionData.objects.create(
         version_slug=version_slug,
-        language_code=version.language_code,
         localized_reference=localized_reference,
         hash=hash,
         suggestions=suggestions,

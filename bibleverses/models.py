@@ -463,7 +463,6 @@ class WordSuggestionData(models.Model):
     # For practical reasons, this table is stored in a separate DB, so it has no
     # explicit FKs to the main DB.
     version_slug = models.CharField(max_length=20, default="")
-    language_code = models.CharField(max_length=2, blank=False, choices=LANGUAGE_CHOICES, default=DEFAULT_LANGUAGE.code)
     localized_reference = models.CharField(max_length=100)
     hash = models.CharField(max_length=40)  # SHA1 of text
 
