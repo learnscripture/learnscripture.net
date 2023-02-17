@@ -1,3 +1,4 @@
+import gzip
 import logging
 import os.path
 from typing import Callable
@@ -18,8 +19,8 @@ Thesaurus = dict[str, list[str]]
 
 
 def english_thesaurus() -> Thesaurus:
-    fname = os.path.join(settings.SRC_ROOT, "resources", "thesaurus", "en.txt")
-    f = open(fname, "rb").read().decode("utf8")
+    fname = os.path.join(settings.SRC_ROOT, "resources", "thesaurus", "en.txt.gz")
+    f = gzip.open(fname, "rb").read().decode("utf8")
     thesaurus = {line.split(",")[0]: line.split(",")[1:] for line in f.split("\n")}
 
     # Thesaurus file tends to have unhelpful suggestions for pronouns, so we overwrite.
