@@ -1,45 +1,45 @@
-[program:%(proj_name)s_uwsgi]
+[program:%(PROJECT_NAME)s_uwsgi]
 command=%(VENV_ROOT)s/bin/uwsgi
     --home %(VENV_ROOT)s
     --env PATH=%(VENV_ROOT)s/bin:%%(ENV_PATH)s
     --env HOME=/home/%(proj_user)s
     --env LANG=%(locale)s --env LC_ALL=%(locale)s --env LC_LANG=%(locale)s
-    -s /tmp/%(proj_name)s_uwsgi.sock
-    -w %(proj_app)s.wsgi
+    -s /tmp/%(PROJECT_NAME)s_uwsgi.sock
+    -w %(PROJECT_PYTHON_MODULE)s.wsgi
     --master
-    --process %(num_workers)s
+    --process 3
     --harakiri 30 --http-timeout 180 --reload-on-rss 300
     -C
     -M
-    --logger file:logfile=/home/%(proj_user)s/logs/%(proj_name)s_uwsgi.log,maxsize=200000
+    --logger file:logfile=/home/%(PROJECT_USER)s/logs/%(PROJECT_NAME)s_uwsgi.log,maxsize=200000
     --buffer-size 16384
     --ignore-sigpipe --ignore-write-errors --disable-write-exception
-    --pidfile=/tmp/%(proj_name)s_uwsgi.pid
+    --pidfile=/tmp/%(PROJECT_NAME)s_uwsgi.pid
 # We are careful not to choose a directory within the 'current' symlink here,
 # otherwise uwsgi will not see the change to the symlink when it does a graceful
 # restart.
-directory=/home/%(proj_user)s
-user=%(proj_user)s
+directory=/home/%(PROJECT_USER)s
+user=%(PROJECT_USER)s
 autostart=true
-stdout_logfile = /home/%(proj_user)s/logs/%(proj_name)s_uwsgi.stdout
+stdout_logfile = /home/%(PROJECT_USER)s/logs/%(PROJECT_NAME)s_uwsgi.stdout
 autorestart=true
 redirect_stderr=true
 environment=LANG="%(locale)s",LC_ALL="%(locale)s",LC_LANG="%(locale)s"
 
 
-[program:%(proj_name)s_memcached]
-command=/usr/bin/memcached -m 24 -s /home/%(proj_user)s/%(proj_name)s_memcached.sock
-user=%(proj_user)s
+[program:%(PROJECT_NAME)s_memcached]
+command=/usr/bin/memcached -m 24 -s /home/%(PROJECT_USER)s/%(PROJECT_NAME)s_memcached.sock
+user=%(PROJECT_USER)s
 autostart=true
 autorestart=true
 redirect_stderr=true
 priority=990
 
-[program:%(proj_name)s_django_q]
-environment=PATH="%(VENV_ROOT)s/bin:%%(ENV_PATH)s",HOME="/home/%(proj_user)s"
+[program:%(PROJECT_NAME)s_django_q]
+environment=PATH="%(VENV_ROOT)s/bin:%%(ENV_PATH)s",HOME="/home/%(PROJECT_USER)s"
 command=%(VENV_ROOT)s/bin/python %(SRC_ROOT)s/manage.py qcluster
-stdout_logfile = /home/%(proj_user)s/logs/%(proj_name)s_django_q.stdout
-user=%(proj_user)s
+stdout_logfile = /home/%(PROJECT_USER)s/logs/%(PROJECT_NAME)s_django_q.stdout
+user=%(PROJECT_USER)s
 autostart=true
 autorestart=true
 redirect_stderr=true

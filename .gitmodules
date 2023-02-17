@@ -1,0 +1,3 @@
+[submodule "submodules/fabutils"]
+	path = submodules/fabutils
+	url = file:///home/luke/devel/fabutils

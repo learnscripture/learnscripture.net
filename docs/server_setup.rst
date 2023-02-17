@@ -60,8 +60,10 @@ steps will need to be changed.
 
    Check you can login with ``ssh root@learnscripture2.digitalocean.com``
 
-5. Change ``env.hosts`` in fabfile to point to new VM. Remember that from now
-   on it will use the new VM by default, unless ``-H`` flag is passed.
+5. Change ``DEFAULT_HOST`` in ``fabfile.py`` to point to the new VPS. Remember that
+   from now on it will use the new VPS by default, unless ``-H`` flag is passed.
+
+   Check this has worked by doing ``fab root-hostname``
 
 6. Upgrade versions of things, preferably to defaults for new distribution
 
@@ -70,7 +72,7 @@ steps will need to be changed.
 
 6. Provision VM::
 
-    $ fab secure
+    $ fab initial_secure
     $ fab provision
 
   If this fails update any dependencies, searching for new packages using
