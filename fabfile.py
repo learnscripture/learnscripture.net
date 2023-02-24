@@ -612,7 +612,7 @@ def delete_old_versions(c: Connection):
     fix_perms(c, Version.VERSIONS_ROOT, PROJECT_USER)
     with c.cd(Version.VERSIONS_ROOT):
         commitref_glob = "?" * 40
-        c.run(f"ls -dtr {commitref_glob} | head -n -3 | xargs rm -rf", echo=True)
+        c.run(f"ls -dtr {commitref_glob} | head -n -5 | xargs rm -rf", echo=True)
 
 
 @root_task()
