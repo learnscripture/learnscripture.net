@@ -1,11 +1,11 @@
 LS_PYTHON=%(VENV_ROOT)s/bin/python
 LS_MANAGE=%(SRC_ROOT)s/manage.py
 
-20         3    * * *  %(proj_user)s $LS_PYTHON $LS_MANAGE create_awards_daily
-20         4    * * *  %(proj_user)s $LS_PYTHON $LS_MANAGE clearsessions
-20         5    * * *  %(proj_user)s $LS_PYTHON $LS_MANAGE clean_old_identities
+20         3    * * *  %(PROJECT_USER)s $LS_PYTHON $LS_MANAGE create_awards_daily
+20         4    * * *  %(PROJECT_USER)s $LS_PYTHON $LS_MANAGE clearsessions
+20         5    * * *  %(PROJECT_USER)s $LS_PYTHON $LS_MANAGE clean_old_identities
 # Temporarily disabled
-#*/5        *    * * *  %(proj_user)s $LS_PYTHON $LS_MANAGE adjust_stored_texts
+#*/5        *    * * *  %(PROJECT_USER)s $LS_PYTHON $LS_MANAGE adjust_stored_texts
 
 51         3    * * *  root          letsencrypt renew --agree-tos
 # nginx won't pick up the new certificate created above until we restart it:
@@ -15,7 +15,7 @@ LS_MANAGE=%(SRC_ROOT)s/manage.py
 30         2    * * *  root          supervisorctl restart learnscripture_django_q
 
 # Clear out old uWSGI logs which don't rotate proplerly:
-42         4    * * *  root          find /home/%(proj_user)s/logs/ -name '*_uwsgi.log.*' -mtime +7 -exec rm {} \;
+42         4    * * *  root          find /home/%(PROJECT_USER)s/logs/ -name '*_uwsgi.log.*' -mtime +7 -exec rm {} \;
 
 # GoAccess analytics
 30         23   * * *  root          goaccess --restore --persist --log-format=COMBINED /var/log/nginx/access.log /var/log/nginx/access.log.1 -o "/var/log/goaccess/report-$(date '+\%%Y-\%%m-\%%d').html" --keep-last=32

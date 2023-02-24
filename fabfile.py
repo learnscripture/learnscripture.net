@@ -340,6 +340,15 @@ def deploy_system(c: Connection):
         upload_template_and_reload(c, template, context_data)
 
 
+def check_templates():
+    target = Version.current()
+    for template in TEMPLATES:
+        context_data = TEMPLATE_CONTEXT | target.__dict__
+        with open(template.local_path) as f:
+            local_data = f.read()
+            local_data %= context_data
+
+
 @task()
 def deploy(c: Connection, skip_checks=False, test_host=False):
     """
@@ -348,6 +357,7 @@ def deploy(c: Connection, skip_checks=False, test_host=False):
     if not test_host:
         check_branch(c)
     check_sentry_auth(c)
+    check_templates()
 
     build_static(c)
     if not skip_checks:

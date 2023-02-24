@@ -2,8 +2,8 @@
 command=%(VENV_ROOT)s/bin/uwsgi
     --home %(VENV_ROOT)s
     --env PATH=%(VENV_ROOT)s/bin:%%(ENV_PATH)s
-    --env HOME=/home/%(proj_user)s
-    --env LANG=%(locale)s --env LC_ALL=%(locale)s --env LC_LANG=%(locale)s
+    --env HOME=/home/%(PROJECT_USER)s
+    --env LANG=%(LOCALE)s --env LC_ALL=%(LOCALE)s --env LC_LANG=%(LOCALE)s
     -s /tmp/%(PROJECT_NAME)s_uwsgi.sock
     -w %(PROJECT_PYTHON_MODULE)s.wsgi
     --master
@@ -24,7 +24,7 @@ autostart=true
 stdout_logfile = /home/%(PROJECT_USER)s/logs/%(PROJECT_NAME)s_uwsgi.stdout
 autorestart=true
 redirect_stderr=true
-environment=LANG="%(locale)s",LC_ALL="%(locale)s",LC_LANG="%(locale)s"
+environment=LANG="%(LOCALE)s",LC_ALL="%(LOCALE)s",LC_LANG="%(LOCALE)s"
 
 
 [program:%(PROJECT_NAME)s_memcached]
