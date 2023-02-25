@@ -582,7 +582,7 @@ class Identity(models.Model):
         verse_set_chosen.send(sender=verse_set, chosen_by=self.account)
         return out
 
-    def add_verse_choice(self, localized_reference, version=None):
+    def add_verse_choice(self, localized_reference: str, version: TextVersion = None):
         if version is None:
             version = self.default_bible_version
 
@@ -622,7 +622,13 @@ class Identity(models.Model):
         UserVerseStatus.objects.bulk_create(new_uvss)
         return base_uvs_query.all().order_by("text_order")  # fresh QuerySet
 
-    def record_verse_action(self, localized_reference, version_slug, stage_type, accuracy=None):
+    def record_verse_action(
+        self,
+        localized_reference: str,
+        version_slug: str,
+        stage_type: StageType,
+        accuracy: float = None,
+    ):
         """
         Records an action such as 'READ' or 'TESTED' against a verse.
         Returns an ActionChange object.
@@ -650,6 +656,7 @@ class Identity(models.Model):
 
         now = timezone.now()
         if mem_stage == MemoryStage.TESTED:
+            assert accuracy is not None
             s0 = s[0]  # Any should do, they should be all the same
 
             # Learn.elm calculateNextTestDue uses the same logic as here to

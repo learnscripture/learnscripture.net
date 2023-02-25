@@ -285,6 +285,10 @@ class VerseSearchResult(ComboVerse):
         super().__init__(localized_reference, verse_list)
         self.parsed_ref = parsed_ref
 
+        # The following are added in bulk by quick_find, default to what an anonymous user sees:
+        self.already_added = False
+        self.already_learning = False
+
 
 SEARCH_OPERATORS = {"&", "|", "@@", "@@@", "||", "&&", "!!", "@>", "<@", ":", "\\", "("}
 SEARCH_CHARS = set("".join(list(SEARCH_OPERATORS)))
@@ -1435,13 +1439,14 @@ QUICK_FIND_SEARCH_LIMIT = 10
 
 
 def quick_find(
-    query,
-    version,
-    max_length=MAX_VERSES_FOR_SINGLE_CHOICE,
-    page=0,
-    page_size=QUICK_FIND_SEARCH_LIMIT,
-    allow_searches=True,
-):
+    query: str,
+    version: TextVersion,
+    max_length: int = MAX_VERSES_FOR_SINGLE_CHOICE,
+    page: int = 0,
+    page_size: int = QUICK_FIND_SEARCH_LIMIT,
+    allow_searches: bool = True,
+    identity=None,
+) -> tuple[list[VerseSearchResult], bool]:
     """
     Does a verse search based on reference or contents.
 
@@ -1467,16 +1472,33 @@ def quick_find(
         result_ref = normalized_verse_list_ref(version.language_code, verse_list)
         # parsed_ref might be difference from result_ref, due to merged verses
         parsed_result_ref = parse_validated_localized_reference(version.language_code, result_ref)
-        return ([VerseSearchResult(result_ref, verse_list, parsed_ref=parsed_result_ref)], False)
+        returned_results = [VerseSearchResult(result_ref, verse_list, parsed_ref=parsed_result_ref)]
+        more_results = False
+    else:
 
-    if not allow_searches:
-        raise InvalidVerseReference(t("bibleverses-verse-reference-not-recognized"))
+        if not allow_searches:
+            raise InvalidVerseReference(t("bibleverses-verse-reference-not-recognized"))
 
-    # Do a search:
-    searcher = get_search_service(version.slug)
-    if searcher:
-        return searcher(version, search_query, page, page_size)
+        # Do a search:
+        searcher = get_search_service(version.slug)
+        if searcher:
+            return searcher(version, search_query, page, page_size)
 
-    results = list(Verse.objects.text_search(search_query, version, limit=page_size + 1, offset=page * page_size))
-    more_results = len(results) > page_size
-    return [VerseSearchResult(r.localized_reference, [r]) for r in results[0:page_size]], more_results
+        results = list(Verse.objects.text_search(search_query, version, limit=page_size + 1, offset=page * page_size))
+        more_results = len(results) > page_size
+        returned_results = [VerseSearchResult(r.localized_reference, [r]) for r in results[0:page_size]]
+    if identity is not None:
+        # This doesn't handle "partial learning" situations well, but its good enough
+        relevant_uvss = {
+            uvs.localized_reference: uvs
+            for uvs in identity.verse_statuses.active().filter(
+                version=version, localized_reference__in=[r.localized_reference for r in returned_results]
+            )
+        }
+        for result in returned_results:
+            uvs = relevant_uvss.get(result.localized_reference, None)
+            if uvs is not None and uvs.is_active():
+                result.already_added = True
+                if uvs.is_tested():
+                    result.already_learning = True
+    return returned_results, more_results

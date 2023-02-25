@@ -1,9 +1,16 @@
 from django_ftl import override
 
 from bibleverses.languages import LANG, LANGUAGES
-from bibleverses.models import POSTGRES_SEARCH_CONFIGURATIONS, TextVersion, VerseSet, VerseSetType, quick_find
+from bibleverses.models import (
+    POSTGRES_SEARCH_CONFIGURATIONS,
+    StageType,
+    TextVersion,
+    VerseSet,
+    VerseSetType,
+    quick_find,
+)
 
-from .base import BibleVersesMixin, TestBase, get_or_create_any_account
+from .base import BibleVersesMixin, TestBase, create_identity, get_or_create_any_account
 
 
 class SearchTestsMixin(BibleVersesMixin):
@@ -314,6 +321,27 @@ class QuickFindTests(SearchTestsMixin, TestBase):
         quick_find("x (", self.NET)
         quick_find("x &", self.NET)
         quick_find("!", self.NET)
+
+    def test_quick_find_user_status(self):
+        # Test that user specific attributes are added when possible
+        i = create_identity(version_slug="KJV")
+        i.add_verse_choice("Genesis 1:1")
+        i.add_verse_choice("Genesis 1:2")
+        i.record_verse_action("Genesis 1:1", "KJV", StageType.READ)
+        i.record_verse_action("Genesis 1:1", "KJV", StageType.TEST, 1)
+        results, more_results = quick_find(
+            "God", i.default_bible_version, allow_searches=True, identity=i, page_size=1000
+        )
+        assert "Genesis 1:1" in [r.localized_reference for r in results]
+        for result in results:
+            if result.localized_reference in ["Genesis 1:1", "Genesis 1:2"]:
+                assert result.already_added
+            else:
+                assert not result.already_added
+            if result.localized_reference in ["Genesis 1:1"]:
+                assert result.already_learning
+            else:
+                assert not result.already_learning
 
 
 def test_search_conf():

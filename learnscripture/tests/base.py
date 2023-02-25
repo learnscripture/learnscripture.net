@@ -74,7 +74,7 @@ def create_identity(
     seen_help_tour=True,
     desktop_testing_method=None,
     touchscreen_testing_method=None,
-):
+) -> Identity:
     version = TextVersion.objects.get(slug=version_slug)
     identity_kwargs = dict(
         default_bible_version=version,
@@ -90,7 +90,7 @@ def create_identity(
     return Identity.objects.create(**identity_kwargs)
 
 
-def get_or_create_any_account(**kwargs):
+def get_or_create_any_account(**kwargs) -> Account:
     account = Account.objects.order_by("id").first()
     if account is None:
         identity, account = create_account(**kwargs)
