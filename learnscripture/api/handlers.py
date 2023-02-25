@@ -338,14 +338,6 @@ class AccountCommon:
     fields = ["id", "username", "email"]
 
 
-class LogOutHandler(ApiView):
-    def post(self, request):
-        import django.contrib.auth
-
-        django.contrib.auth.logout(request)
-        return {"username": "Guest"}
-
-
 class SetPreferences(ApiView):
     fields = [
         ("default_bible_version", ["slug"]),

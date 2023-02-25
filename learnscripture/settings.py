@@ -201,6 +201,7 @@ CSRF_FAILURE_VIEW = "learnscripture.views.csrf_failure"
 MIDDLEWARE = [
     m
     for b, m in [
+        (True, "learnscripture.middleware.htmx_middleware"),
         (True, "django.middleware.security.SecurityMiddleware"),
         (DEBUG, "debug_toolbar.middleware.DebugToolbarMiddleware"),
         (True, "django.contrib.sessions.middleware.SessionMiddleware"),

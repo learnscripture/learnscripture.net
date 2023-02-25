@@ -37,6 +37,7 @@ urlpatterns = [
     path("donation-cancelled/", learnscripture.views.pay_cancelled, name="pay_cancelled"),
     # Account management
     path("login/", learnscripture.views.login, name="login"),
+    path("logout/", learnscripture.views.logout, name="logout"),
     path("signup/", learnscripture.views.signup, name="signup"),
     path("account/", learnscripture.views.account_details, name="account_details"),
     path("password-reset/", learnscripture.views.password_reset_done, name="password_reset_done"),

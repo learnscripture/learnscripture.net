@@ -1,6 +1,7 @@
 import urllib.parse
 from datetime import timedelta
 
+import django.contrib.auth
 import django_ftl
 import furl
 from django.conf import settings
@@ -1767,3 +1768,11 @@ def debug(request):
     if "crash" in request.GET:
         raise AssertionError("Crash!")
     return TemplateResponse(request, "learnscripture/debug.html", {})
+
+
+@require_POST
+def logout(request):
+    django.contrib.auth.logout(request)
+    redirect_url = request.GET.get("url_after_logout", "") or request.headers.get("Referer", "") or "/"
+    p_url = urllib.parse.urlparse(redirect_url)
+    return HttpResponseRedirect(p_url.path + (("?" + p_url.query) if p_url.query else ""))

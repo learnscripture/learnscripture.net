@@ -18,7 +18,11 @@
     {% endblock %}
   </head>
 
-  <body class="base-page {% block body_extra_class %}{% endblock %}" data-theme="{{ current_theme }}">
+  <body
+    class="base-page {% block body_extra_class %}{% endblock %}"
+    data-theme="{{ current_theme }}"
+    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+  >
     <div class="topbar-wrapper">
       <div class="container">
         <nav class="topbar primary-nav">
@@ -52,7 +56,11 @@
                 <li><a href="{% url 'user_verses' %}"><i class="icon-fw icon-progress"></i> {% ftlmsg 'site-verse-progress-link' %}</a></li>
                 <li><a href="{% url 'user_verse_sets' %}"><i class="icon-fw icon-verse-sets"></i> {% ftlmsg 'site-verse-sets-link' %}</a></li>
                 <li><a href="{% url 'user_stats' request_account.username %}"><i class="icon-fw icon-stats"></i> {% ftlmsg 'site-user-stats-link' %}</a></li>
-                <li><a href="#" class="logout-link"><i class="icon-fw icon-logout"></i> {% ftlmsg 'site-log-out-link' %}</a></li>
+                <li><a href="#"
+                  hx-post="{% url 'logout' %}"
+                  hx-confirm="{% ftlmsg 'site-logout-confirm-prompt' %}"
+                  hx-params='{"url_after_logout": "{{ url_after_logout }}"}'
+                ><i class="icon-fw icon-logout"></i> {% ftlmsg 'site-log-out-link' %}</a></li>
               {% endif %}
             </ul>
           </div>

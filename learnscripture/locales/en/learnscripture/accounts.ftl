@@ -134,7 +134,7 @@ accounts-invitation-received-html = { $user } invited you to join the group { $g
 accounts-signup-title = Create account
 
 # Message displayed if the user goes to the sign up page but is already logged in.
-accounts-already-logged-in-html = You are already signed in as <b>{ $username }</b>. You should <a href="#" class="logout-link">logout</a> if you want to create a new account.
+accounts-already-logged-in-html = You are already signed in as <b>{ $username }</b>. You should logout if you want to create a new account.
 
 accounts-signup-agree-to-terms-of-service-html =
         By creating an account, you are agreeing to our

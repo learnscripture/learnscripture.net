@@ -1,5 +1,3 @@
-import { ajaxFailed } from './common';
-
 
 interface AccountData {
     username: string;
@@ -18,25 +16,6 @@ export const getAccountData = function() {
     return signedInAccountData;
 };
 
-var doLogout = function(ev: JQuery.Event) {
-    ev.preventDefault();
-    if (confirm($('#id-i18n-site-confirm-logout').text())) {
-        $.ajax({
-            url: '/api/learnscripture/v1/logout/?format=json',
-            dataType: 'json',
-            type: 'POST',
-            success: function(data) {
-                // Need to refresh page, unless page indicates differently
-                if ($('#url-after-logout').length > 0) {
-                    window.location.href = $('#url-after-logout').text();
-                } else {
-                    window.location.reload();
-                }
-            },
-            error: ajaxFailed
-        });
-    }
-};
 
 var needsAccountButtonClick = function(ev: JQuery.Event) {
     var account = getAccountData();
@@ -48,8 +27,6 @@ var needsAccountButtonClick = function(ev: JQuery.Event) {
 };
 
 var setupAccountControls = function() {
-
-    $('.logout-link').click(doLogout);
 
     // Attach this class to buttons that require an account, but might be
     // presented when the user isn't logged in. This functionality is used

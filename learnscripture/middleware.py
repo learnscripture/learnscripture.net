@@ -3,9 +3,12 @@ import time
 import urllib.parse
 from datetime import datetime
 from importlib import import_module
+from typing import Callable
 
 from django.conf import settings
 from django.http import HttpResponseRedirect
+from django.http.request import HttpRequest
+from django.http.response import HttpResponse
 from django.utils import timezone
 from django.utils import translation as gettext_translation
 from django.utils.http import urlencode
@@ -109,6 +112,17 @@ def pwa_tracker_middleware(get_response):
         if "fromhomescreen" in request.GET and "fromhomescreen" not in request.session:
             request.session["fromhomescreen"] = "1"
         return get_response(request)
+
+    return middleware
+
+
+def htmx_middleware(get_response: Callable[[HttpRequest], HttpResponse]):
+    def middleware(request: HttpRequest):
+        response: HttpResponse = get_response(request)
+        if request.headers.get("Hx-Request", False):
+            if str(response.status_code)[0] == "3":
+                return HttpResponse(headers={"HX-Redirect": response["Location"]})
+        return response
 
     return middleware
 

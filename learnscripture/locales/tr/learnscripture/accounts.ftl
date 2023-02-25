@@ -133,7 +133,7 @@ accounts-invitation-received-html = { $user } adlı kullanıcı sizi { $group } 
 accounts-signup-title = Hesap oluştur
 
 # Message displayed if the user goes to the sign up page but is already logged in.
-accounts-already-logged-in-html =  <b>{ $username }</b> kullancı ismiyle zaten giriş yaptınız. Yeni bir hesap oluşturmak için <a href="#" class="logout-link">Çıkış</a> yapınız.
+accounts-already-logged-in-html =  <b>{ $username }</b> kullancı ismiyle zaten giriş yaptınız. Yeni bir hesap oluşturmak için çıkış yapınız.
 
 accounts-signup-agree-to-terms-of-service-html =
         Bir hesabı oluşturduğunuzda

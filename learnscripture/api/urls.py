@@ -11,7 +11,6 @@ urlpatterns = [
     path("versestolearn2/", handlers.VersesToLearnHandler.as_view(), name="learnscripture.api.versestolearn2"),
     path("versestolearn/", handlers.VersesToLearnHandler.as_view(), name="learnscripture.api.versestolearn"),
     path("actioncomplete/", handlers.ActionCompleteHandler.as_view(), name="learnscripture.api.actioncomplete"),
-    path("logout/", handlers.LogOutHandler.as_view(), name="learnscripture.api.logout"),
     path("setpreferences/", handlers.SetPreferences.as_view(), name="learnscripture.api.setpreferences"),
     path("sessionstats/", handlers.SessionStats.as_view(), name="learnscripture.api.sessionstats"),
     path("skipverse/", handlers.SkipVerseHandler.as_view(), name="learnscripture.api.skipverse"),
